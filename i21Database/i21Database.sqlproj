@@ -779,11 +779,11 @@
     <Build Include="dbo\Tables\tblHDTicketEscalation.sql" />
     <Build Include="dbo\Tables\tblICUnitMeasureConversion.sql" />
     <Build Include="dbo\Tables\tblICLineOfBusiness.sql" />
-    <Build Include="dbo\Tables\tblICPackType.sql" />
-    <Build Include="dbo\Tables\tblICPackTypeDetail.sql" />
+    <Build Include="dbo\Tables\tblMFPackType.sql" />
+    <Build Include="dbo\Tables\tblMFPackTypeDetail.sql" />
     <Build Include="dbo\Tables\tblICStorageUnitType.sql" />
-    <Build Include="dbo\Tables\tblICManufacturingCell.sql" />
-    <Build Include="dbo\Tables\tblICManufacturingCellPackType.sql" />
+    <Build Include="dbo\Tables\tblMFManufacturingCell.sql" />
+    <Build Include="dbo\Tables\tblMFManufacturingCellPackType.sql" />
     <Build Include="dbo\Functions\fnGetItemsToUnpost.sql" />
     <Build Include="dbo\Functions\fnGetItemCostingOnUnpostErrors.sql" />
     <Build Include="dbo\Views\vyuAPRptVendorHistory.sql" />
@@ -1642,6 +1642,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGetActualItemByProduct.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetAttributeByManufacturingProcess.sql" />
     <Build Include="dbo\Stored Procedures\uspQMProductPropertyDetails_Save.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\CustomerListByRoute.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\CustomerListByRoute.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

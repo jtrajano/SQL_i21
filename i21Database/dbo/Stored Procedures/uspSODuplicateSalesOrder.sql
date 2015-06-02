@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspSODuplicateSalesOrder]
+﻿﻿CREATE PROCEDURE [dbo].[uspSODuplicateSalesOrder]
 	@SalesOrderId	INT = 0,
 	@UserId			INT = 0,
 	@NewSalesOrderId INT = NULL OUTPUT

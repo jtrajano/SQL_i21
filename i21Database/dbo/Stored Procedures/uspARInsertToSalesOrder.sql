@@ -21,6 +21,10 @@ BEGIN
 		,[intShipViaId]
 		,[strPONumber]
 		,[intTermId]
+		,[intOrderedById]
+		,[intSplitId]
+		,[intFreightTermId]
+		,[strBOLNumber]
 		,[dblSalesOrderSubtotal]
 		,[dblShipping]
 		,[dblTax]
@@ -61,6 +65,10 @@ BEGIN
 		,[intShipViaId]
 		,[strPONumber]
 		,[intTermId]
+		,[intOrderedById]
+		,[intSplitId]
+		,[intFreightTermId]
+		,[strBOLNumber]
 		,ROUND([dblSalesOrderSubtotal],2)
 		,ROUND([dblShipping],2)
 		,ROUND([dblTax],2)

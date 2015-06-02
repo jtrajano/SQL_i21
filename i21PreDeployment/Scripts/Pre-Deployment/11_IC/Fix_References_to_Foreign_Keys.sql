@@ -1,4 +1,4 @@
-﻿IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE name = 'intDimensionUOMId' AND object_id = object_id('tblICItem'))
+﻿﻿IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE name = 'intDimensionUOMId' AND object_id = object_id('tblICItem'))
 BEGIN
 	IF EXISTS(SELECT TOP 1 1 FROM sys.columns WHERE name = 'intUnitMeasureId' AND object_id = object_id('tblICUnitMeasure'))
 	BEGIN
