@@ -1655,6 +1655,7 @@
     <Build Include="dbo\Stored Procedures\uspICUnpostLotOutFromCustody.sql">
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="dbo\Stored Procedures\uspQMProductPropertyDetails_Save.sql" />	
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

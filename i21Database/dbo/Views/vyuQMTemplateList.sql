@@ -62,8 +62,8 @@ UNION ALL
 -- Receipt  
 SELECT DISTINCT P.intProductId
 	,PT.strProductTypeName 'strProductTypeName'
-	,PT1.strProductTypeName 'strProductValue'
-	,PT1.strDescription
+	,'' 'strProductValue' --PT1.strProductTypeName 'strProductValue'
+	,'' --PT1.strDescription
 	,P.intProductValueId
 	,(
 		Stuff((
@@ -83,7 +83,7 @@ FROM tblQMProduct P
 JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
 JOIN tblQMControlPoint CP ON CP.intControlPointId = PC.intControlPointId
 JOIN tblQMProductType PT ON PT.intProductTypeId = P.intProductTypeId
-JOIN tblQMProductType PT1 ON PT1.intProductTypeId = PT1.intProductTypeId
+JOIN tblQMProductType PT1 ON PT1.intProductTypeId = PT.intProductTypeId
 WHERE P.intProductTypeId = 3
 
 UNION ALL
@@ -91,8 +91,8 @@ UNION ALL
 -- Shipment  
 SELECT DISTINCT P.intProductId
 	,PT.strProductTypeName 'strProductTypeName'
-	,PT1.strProductTypeName 'strProductValue'
-	,PT1.strDescription
+	,'' 'strProductValue' --PT1.strProductTypeName 'strProductValue'
+	,'' --PT1.strDescription
 	,P.intProductValueId
 	,(
 		Stuff((
@@ -112,7 +112,7 @@ FROM tblQMProduct P
 JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
 JOIN tblQMControlPoint CP ON CP.intControlPointId = PC.intControlPointId
 JOIN tblQMProductType PT ON PT.intProductTypeId = P.intProductTypeId
-JOIN tblQMProductType PT1 ON PT1.intProductTypeId = PT1.intProductTypeId
+JOIN tblQMProductType PT1 ON PT1.intProductTypeId = PT.intProductTypeId
 WHERE P.intProductTypeId = 4
 
 UNION ALL
@@ -120,8 +120,8 @@ UNION ALL
 -- Transfer  
 SELECT DISTINCT P.intProductId
 	,PT.strProductTypeName 'strProductTypeName'
-	,PT1.strProductTypeName 'strProductValue'
-	,PT1.strDescription
+	,'' 'strProductValue' --PT1.strProductTypeName 'strProductValue'
+	,'' --PT1.strDescription
 	,P.intProductValueId
 	,(
 		Stuff((
@@ -141,5 +141,5 @@ FROM tblQMProduct P
 JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
 JOIN tblQMControlPoint CP ON CP.intControlPointId = PC.intControlPointId
 JOIN tblQMProductType PT ON PT.intProductTypeId = P.intProductTypeId
-JOIN tblQMProductType PT1 ON PT1.intProductTypeId = PT1.intProductTypeId
+JOIN tblQMProductType PT1 ON PT1.intProductTypeId = PT.intProductTypeId
 WHERE P.intProductTypeId = 5

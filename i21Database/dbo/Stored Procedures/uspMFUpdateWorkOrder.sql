@@ -146,16 +146,44 @@ BEGIN TRY
 		,intConcurrencyId=@intConcurrencyId
 	WHERE intWorkOrderId = @intWorkOrderId
 
-	UPDATE dbo.tblMFWorkOrderProductSpecification
-	SET strParameterName = x.strParameterName
-		,strParameterValue = x.strParameterValue
-		,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
+	INSERT INTO dbo.tblMFWorkOrderProductSpecification (
+		intWorkOrderId
+		,strParameterName
+		,strParameterValue
+		,intConcurrencyId
+		)
+	SELECT @intWorkOrderId
+		,strParameterName
+		,strParameterValue
+		,1
 	FROM OPENXML(@idoc, 'root/WorkOrderProductSpecifications/WorkOrderProductSpecification', 2) WITH (
 			intWorkOrderProductSpecificationId INT
 			,strParameterName NVARCHAR(50)
 			,strParameterValue NVARCHAR(MAX)
+			,strRowState nvarchar(50)
 			) x
-	WHERE tblMFWorkOrderProductSpecification.intWorkOrderProductSpecificationId = x.intWorkOrderProductSpecificationId
+	WHERE x.intWorkOrderProductSpecificationId = 0 and x.strRowState='ADDED'
+
+	Update tblMFWorkOrderProductSpecification
+	Set strParameterName=x.strParameterName
+		,strParameterValue=x.strParameterValue
+		,intConcurrencyId=Isnull(intConcurrencyId,0)+1
+	FROM OPENXML(@idoc, 'root/WorkOrderProductSpecifications/WorkOrderProductSpecification', 2) WITH (
+			intWorkOrderProductSpecificationId INT
+			,strParameterName NVARCHAR(50)
+			,strParameterValue NVARCHAR(MAX)
+			,strRowState nvarchar(50)
+			) x
+	WHERE x.intWorkOrderProductSpecificationId = tblMFWorkOrderProductSpecification.intWorkOrderProductSpecificationId and x.strRowState='MODIFIED'
+
+	DELETE
+	FROM dbo.tblMFWorkOrderProductSpecification
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND EXISTS (
+			SELECT *
+			FROM OPENXML(@idoc, 'root/WorkOrderProductSpecifications/WorkOrderProductSpecification', 2) WITH (intWorkOrderProductSpecificationId INT,strRowState nvarchar(50)) x
+			WHERE x.intWorkOrderProductSpecificationId = tblMFWorkOrderProductSpecification.intWorkOrderProductSpecificationId and x.strRowState='DELETE'
+			)
 
 	COMMIT TRANSACTION
 

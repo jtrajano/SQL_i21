@@ -23,7 +23,7 @@
 
 [intGenerateLoadId] INT NULL, 
     CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
-CONSTRAINT [UK_tblLGLoad_intLoadNumber] UNIQUE ([intLoadNumber]),
+CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([intLoadNumber],[intPurchaseSale]),
 CONSTRAINT [FK_tblLGLoad_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 CONSTRAINT [FK_tblLGLoad_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 CONSTRAINT [FK_tblLGLoad_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
