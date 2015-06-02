@@ -1642,6 +1642,7 @@
     <Build Include="dbo\Stored Procedures\uspARInsertToSalesOrder.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryTransferDetail.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\CustomerListByRoute.sql" />
+    <Build Include="Scripts\Post-Deployment\TM\Reports\Layout\CustomerListByRoute.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

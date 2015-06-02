@@ -67,6 +67,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\Reports\DataSource\ProductTotals.sql
 
 :r .\TM\Reports\DataSource\CustomerListByRoute.sql
+:r .\TM\Reports\Layout\CustomerListByRoute.sql
 
 
 -- Canned Panels
