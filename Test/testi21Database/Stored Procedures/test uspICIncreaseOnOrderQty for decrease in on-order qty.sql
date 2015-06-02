@@ -79,7 +79,25 @@ BEGIN
 		---------------------------------------------------
 		-- Setup the items to decrease the on-order qty
 		---------------------------------------------------
-		INSERT INTO @Items 
+		INSERT INTO @Items (
+				intItemId 
+				,intItemLocationId 
+				,intItemUOMId 
+				,dtmDate 
+				,dblQty 
+				,dblUOMQty 
+				,dblCost 
+				,dblValue 
+				,dblSalesPrice 
+				,intCurrencyId 
+				,dblExchangeRate 
+				,intTransactionId 
+				,strTransactionId 
+				,intTransactionTypeId 
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
+		)
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location
 				,intItemUOMId = @WetGrains_BushelUOMId

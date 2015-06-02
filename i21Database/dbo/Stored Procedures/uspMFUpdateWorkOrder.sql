@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspMFUpdateWorkOrder] (@strXML NVARCHAR(MAX))
+﻿CREATE PROCEDURE [dbo].[uspMFUpdateWorkOrder] (@strXML NVARCHAR(MAX),@intConcurrencyId Int Output)
 AS
 BEGIN TRY
 	DECLARE @idoc INT
@@ -44,6 +44,7 @@ BEGIN TRY
 		,@intItemId = intItemId
 		,@dblQuantity = dblQuantity
 		,@intItemUOMId = intItemUOMId
+		,@dtmExpectedDate=dtmExpectedDate
 		,@intExecutionOrder = intExecutionOrder
 		,@intUserId = intUserId
 		,@strLotNumber = strLotNumber
@@ -90,7 +91,7 @@ BEGIN TRY
 
 	BEGIN TRANSACTION
 
-	SELECT @intPrevExecutionOrder = intExecutionOrder
+	SELECT @intPrevExecutionOrder = intExecutionOrder,@intConcurrencyId=ISNULL(intConcurrencyId,0)+1
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -123,7 +124,6 @@ BEGIN TRY
 		,intItemId = @intItemId
 		,dblQuantity = @dblQuantity
 		,intItemUOMId = @intItemUOMId
-		,intStatusId = 1
 		,intManufacturingCellId = @intManufacturingCellId
 		,intStorageLocationId = @intStorageLocationId
 		,intSubLocationId = @intSubLocationId
@@ -140,9 +140,50 @@ BEGIN TRY
 		,intParentWorkOrderId = @intParentWorkOrderId
 		,intSalesRepresentativeId = @intSalesRepresentativeId
 		,intSupervisorId = @intSupervisorId
+		,intCustomerId = @intCustomerId
 		,dtmLastModified = GetDate()
 		,intLastModifiedUserId = @intUserId
+		,intConcurrencyId=@intConcurrencyId
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	INSERT INTO dbo.tblMFWorkOrderProductSpecification (
+		intWorkOrderId
+		,strParameterName
+		,strParameterValue
+		,intConcurrencyId
+		)
+	SELECT @intWorkOrderId
+		,strParameterName
+		,strParameterValue
+		,1
+	FROM OPENXML(@idoc, 'root/WorkOrderProductSpecifications/WorkOrderProductSpecification', 2) WITH (
+			intWorkOrderProductSpecificationId INT
+			,strParameterName NVARCHAR(50)
+			,strParameterValue NVARCHAR(MAX)
+			,strRowState nvarchar(50)
+			) x
+	WHERE x.intWorkOrderProductSpecificationId = 0 and x.strRowState='ADDED'
+
+	Update tblMFWorkOrderProductSpecification
+	Set strParameterName=x.strParameterName
+		,strParameterValue=x.strParameterValue
+		,intConcurrencyId=Isnull(intConcurrencyId,0)+1
+	FROM OPENXML(@idoc, 'root/WorkOrderProductSpecifications/WorkOrderProductSpecification', 2) WITH (
+			intWorkOrderProductSpecificationId INT
+			,strParameterName NVARCHAR(50)
+			,strParameterValue NVARCHAR(MAX)
+			,strRowState nvarchar(50)
+			) x
+	WHERE x.intWorkOrderProductSpecificationId = tblMFWorkOrderProductSpecification.intWorkOrderProductSpecificationId and x.strRowState='MODIFIED'
+
+	DELETE
+	FROM dbo.tblMFWorkOrderProductSpecification
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND EXISTS (
+			SELECT *
+			FROM OPENXML(@idoc, 'root/WorkOrderProductSpecifications/WorkOrderProductSpecification', 2) WITH (intWorkOrderProductSpecificationId INT,strRowState nvarchar(50)) x
+			WHERE x.intWorkOrderProductSpecificationId = tblMFWorkOrderProductSpecification.intWorkOrderProductSpecificationId and x.strRowState='DELETE'
+			)
 
 	COMMIT TRANSACTION
 

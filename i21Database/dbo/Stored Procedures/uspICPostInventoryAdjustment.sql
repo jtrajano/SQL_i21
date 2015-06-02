@@ -161,6 +161,7 @@ BEGIN
 				,intCurrencyId  
 				,dblExchangeRate  
 				,intTransactionId  
+				,intTransactionDetailId  
 				,strTransactionId  
 				,intTransactionTypeId  
 				,intLotId 
@@ -188,7 +189,8 @@ BEGIN
 				,dblSalesPrice  
 				,intCurrencyId  
 				,dblExchangeRate  
-				,intTransactionId  
+				,intTransactionId 
+				,intTransactionDetailId   
 				,strTransactionId  
 				,intTransactionTypeId  
 				,intLotId 
@@ -217,6 +219,7 @@ BEGIN
 				,intCurrencyId  
 				,dblExchangeRate  
 				,intTransactionId  
+				,intTransactionDetailId   
 				,strTransactionId  
 				,intTransactionTypeId  
 				,intLotId 
@@ -255,6 +258,7 @@ BEGIN
 				,intCurrencyId  
 				,dblExchangeRate  
 				,intTransactionId  
+				,intTransactionDetailId   
 				,strTransactionId  
 				,intTransactionTypeId  
 				,intLotId 

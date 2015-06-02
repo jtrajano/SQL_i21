@@ -14,6 +14,7 @@ SELECT TP.intTestId
 	,PR.strPropertyName
 	,D.intDataTypeId
 	,@intProductId AS intProductId
+	,PR.strIsMandatory
 FROM tblQMTestProperty TP
 JOIN tblQMTest T ON T.intTestId = TP.intTestId
 JOIN tblQMProperty PR ON PR.intPropertyId = TP.intPropertyId
@@ -28,6 +29,7 @@ SELECT TP.intTestId
 	,PR.strPropertyName
 	,D.intDataTypeId
 	,@intProductId AS intProductId
+	,PR.strIsMandatory
 FROM tblQMTestProperty TP
 JOIN tblQMTest T ON T.intTestId = TP.intTestId
 JOIN tblQMProperty PR ON PR.intPropertyId = TP.intFormulaID

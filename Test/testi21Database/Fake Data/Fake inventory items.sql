@@ -84,6 +84,9 @@ BEGIN
 			,@CornCommodity_NewHaven AS INT = 19
 			,@CornCommodity_BetterHaven AS INT = 20
 
+			,@ManualLotGrains_NewHaven AS INT = 21
+			,@SerializedLotGrains_NewHaven AS INT = 22
+
 	-- Declare the account ids
 	DECLARE @Inventory_Default AS INT = 1000
 	DECLARE @CostOfGoods_Default AS INT = 2000
@@ -142,7 +145,7 @@ BEGIN
 	DECLARE @AccountCategoryId_InventoryInTransit AS INT = 46
 
 	DECLARE @AccountCategoryName_InventoryAdjustment AS NVARCHAR(100) = 'Inventory Adjustment'
-	DECLARE @AccountCategoryId_InventoryAdjustment AS INT = 59
+	DECLARE @AccountCategoryId_InventoryAdjustment AS INT = 50
 
 	-- Declare the item categories
 	DECLARE @HotItems AS INT = 1
@@ -439,6 +442,11 @@ BEGIN
 		-- Add lot items for location 1 ('Default')
 		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@ManualLotGrains_DefaultLocation, @ManualLotGrains , @Default_Location, @AllowNegativeStock, @AverageCosting) -- Since item is a lot, ignore average costing 
 		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@SerializedLotGrains_DefaultLocation, @SerializedLotGrains, @Default_Location, @AllowNegativeStock, @FIFO) -- Since item is a lot, ignore FIFO costing
+
+		-- Add lot items for location 2 ('NEW HAVEN')
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@ManualLotGrains_NewHaven, @ManualLotGrains , @NewHaven, @AllowNegativeStock, @AverageCosting) -- Since item is a lot, ignore average costing 
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@SerializedLotGrains_NewHaven, @SerializedLotGrains, @NewHaven, @AllowNegativeStock, @FIFO) -- Since item is a lot, ignore FIFO costing
+
 	END 
 
 	-- Fake data for Item-Account

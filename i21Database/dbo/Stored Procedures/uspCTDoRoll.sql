@@ -34,7 +34,8 @@ BEGIN TRY
 			dtmEndDate				DATETIME,
 			dblFutures				DECIMAL(12,4),
 			dblBasis				DECIMAL(12,4),
-			intFutureMonthId		INT
+			intFutureMonthId		INT,
+			intFutureMarketId		INT
 	)  
 	
 	SELECT	@Count = COUNT(1) 
@@ -45,11 +46,12 @@ BEGIN TRY
 		RAISERROR('Some of the sequences are modified or deleted by other users.',16,1)
 		
 	UPDATE	CD
-	SET		CD.intConcurrencyId	=	CD.intConcurrencyId +1,	
-			CD.dtmEndDate		=	TD.dtmEndDate,
-			CD.dblFutures		=	CASE WHEN TD.dblFutures IS NULL THEN CD.dblFutures ELSE TD.dblFutures END,
-			CD.dblBasis			=	CASE WHEN TD.dblBasis IS NULL THEN CD.dblBasis ELSE TD.dblBasis END,
-			CD.intFutureMonthId	=	TD.intFutureMonthId
+	SET		CD.intConcurrencyId		=	CD.intConcurrencyId +1,	
+			CD.dtmEndDate			=	TD.dtmEndDate,
+			CD.dblFutures			=	CASE WHEN TD.dblFutures IS NULL THEN CD.dblFutures ELSE TD.dblFutures END,
+			CD.dblBasis				=	CASE WHEN TD.dblBasis IS NULL THEN CD.dblBasis ELSE TD.dblBasis END,
+			CD.intFutureMonthId		=	TD.intFutureMonthId,
+			CD.intFutureMarketId	=	TD.intFutureMarketId
 			
 	FROM	tblCTContractDetail		CD
 	JOIN	#tblCTContractDetail	TD ON TD.intContractDetailId = CD.intContractDetailId
