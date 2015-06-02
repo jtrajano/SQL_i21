@@ -1637,6 +1637,7 @@
     <Build Include="dbo\Tables\tblARCustomerRackQuoteCategory.sql" />
     <Build Include="dbo\Tables\tblARCustomerRackQuoteHeader.sql" />
     <Build Include="dbo\Tables\tblARCustomerRackQuoteItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreatePrepayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
