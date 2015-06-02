@@ -1174,7 +1174,8 @@ IF @recap = 0
 				UPDATE
 					tblHDTicketHoursWorked
 				SET
-					ysnBilled = 0
+					 ysnBilled = 0
+					,dtmBilled = NULL
 				WHERE
 					intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)			
 
@@ -1212,6 +1213,7 @@ IF @recap = 0
 					tblHDTicketHoursWorked
 				SET
 					ysnBilled = 1
+					,dtmBilled = GETDATE()
 				WHERE
 					intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
 				
