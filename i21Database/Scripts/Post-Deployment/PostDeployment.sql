@@ -75,6 +75,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\Reports\Layout\WithoutGasCheckSubReport.sql
 :r .\TM\Reports\Layout\WithoutLeakCheckSubReport.sql
 
+:r .\TM\Reports\DataSource\OpenCallEntries.sql
+
 
 -- Canned Panels
 :r .\DB\1_CannedPanels_Panel.sql
