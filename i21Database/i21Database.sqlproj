@@ -1647,6 +1647,7 @@
     <Build Include="dbo\Views\vyuRKGetOpenContract.sql" />
     <Build Include="dbo\Views\vyuARGetLostQuoteReasons.sql" />
     <Build Include="dbo\Views\vyuARGetLostQuoteCompetitors.sql" />
+    <Build Include="dbo\Tables\tblSMCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
