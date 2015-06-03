@@ -1641,22 +1641,6 @@
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertToSalesOrder.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryTransferDetail.sql" />
-    <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\CustomerListByRoute.sql" />
-    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\CustomerListByRoute.sql" />
-    <None Include="Scripts\Post-Deployment\AR\DefaultData\5_UpdateOrderStatus.sql" />
-    <Build Include="dbo\Views\vyuRKGetOpenContract.sql" />
-    <Build Include="dbo\Views\vyuARGetLostQuoteReasons.sql" />
-    <Build Include="dbo\Views\vyuARGetLostQuoteCompetitors.sql" />
-    <Build Include="dbo\Tables\tblSMCompanyPreference.sql" />
-    <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\GasCheckLeakcheck.sql" />
-    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WithGasCheckSubReport.sql" />
-    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WithoutGasCheckSubReport.sql" />
-    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WithLeakCheckSubReport.sql" />
-    <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WithoutLeakCheckSubReport.sql" />
-    <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\OpenCallEntries.sql" />
-    <Build Include="dbo\Tables\tblCTContractCertification.sql" />
-    <Build Include="dbo\Views\vyuRKGetOpenContract.sql" />
-    <Build Include="dbo\Views\vyuRKGetOpenContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
