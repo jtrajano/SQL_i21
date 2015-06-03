@@ -107,7 +107,7 @@ namespace iRely.Inventory.Model
             this.HasKey(t => t.intInventoryTransferDetailId);
 
             // Table & Column Mappings
-            this.ToTable("vyuICGetInventoryTransferDetailStock");
+            this.ToTable("vyuICGetInventoryTransferDetail");
             this.Property(t => t.intInventoryTransferDetailId).HasColumnName("intInventoryTransferDetailId");
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
             this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
