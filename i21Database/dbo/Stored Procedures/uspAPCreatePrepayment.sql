@@ -100,6 +100,7 @@ BEGIN
 		[dblAmountPaid],
 		[dblUnapplied],
 		[ysnPosted],
+		[ysnPrepay],
 		[dblWithheld],
 		[intEntityId],
 		[intConcurrencyId])
@@ -112,9 +113,10 @@ BEGIN
 		[strPaymentInfo]		= @paymentInfo,
 		[strNotes]				= @notes,
 		[dtmDatePaid]			= ISNULL(@datePaid, GETDATE()),
-		[dblAmountPaid]			= @payment,
+		[dblAmountPaid]			= @payment * (-1),
 		[dblUnapplied]			= 0,
 		[ysnPosted]				= @isPost,
+		[ysnPrepay]				= 1,
 		[dblWithheld]			= 0,
 		[intEntityId]			= @userId,
 		[intConcurrencyId]		= 0
@@ -136,12 +138,12 @@ BEGIN
 		[intPaymentId]	= @paymentId,
 		[intBillId]		= A.intBillId,
 		[intAccountId]	= A.intAccountId,
-		[dblDiscount]	= A.dblDiscount,
-		[dblWithheld]	= A.dblWithheld,
-		[dblAmountDue]	= A.dblAmountDue,
-		[dblPayment]	= A.dblTotal - A.dblDiscount,
+		[dblDiscount]	= 0,
+		[dblWithheld]	= 0,
+		[dblAmountDue]	= A.dblAmountDue * (-1),
+		[dblPayment]	= A.dblTotal * (-1),
 		[dblInterest]	= 0, --TODO
-		[dblTotal]		= A.dblTotal
+		[dblTotal]		= A.dblTotal * (-1)
 	FROM tblAPBill A
 	WHERE A.intBillId IN (SELECT [intID] FROM #tmpBillsId)
 	'
