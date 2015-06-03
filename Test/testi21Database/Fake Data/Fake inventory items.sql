@@ -247,7 +247,7 @@ BEGIN
 			,strClassification
 			,intNewLotBin
 			,intAuditBin
-			,strAddressKey
+			,strAddress
 			,intConcurrencyId
 		)
 		SELECT 
@@ -258,7 +258,7 @@ BEGIN
 			,strClassification				= ''
 			,intNewLotBin					= NULL 
 			,intAuditBin					= NULL 
-			,strAddressKey					= NULL 
+			,strAddress						= NULL 
 			,intConcurrencyId				= 1
 		UNION ALL 
 		SELECT 
@@ -269,7 +269,7 @@ BEGIN
 			,strClassification				= ''
 			,intNewLotBin					= NULL 
 			,intAuditBin					= NULL 
-			,strAddressKey					= NULL 
+			,strAddress						= NULL 
 			,intConcurrencyId				= 1
 		UNION ALL 
 		SELECT 
@@ -280,7 +280,7 @@ BEGIN
 			,strClassification				= ''
 			,intNewLotBin					= NULL 
 			,intAuditBin					= NULL 
-			,strAddressKey					= NULL 
+			,strAddress						= NULL 
 			,intConcurrencyId				= 1
 		UNION ALL 
 		SELECT 
@@ -291,7 +291,7 @@ BEGIN
 			,strClassification				= ''
 			,intNewLotBin					= NULL 
 			,intAuditBin					= NULL 
-			,strAddressKey					= NULL 
+			,strAddress						= NULL 
 			,intConcurrencyId				= 1
 		UNION ALL 
 		SELECT 
@@ -302,7 +302,7 @@ BEGIN
 			,strClassification				= ''
 			,intNewLotBin					= NULL 
 			,intAuditBin					= NULL 
-			,strAddressKey					= NULL 
+			,strAddress						= NULL 
 			,intConcurrencyId				= 1
 		UNION ALL 
 		SELECT 
@@ -313,7 +313,7 @@ BEGIN
 			,strClassification				= ''
 			,intNewLotBin					= NULL 
 			,intAuditBin					= NULL 
-			,strAddressKey					= NULL 
+			,strAddress						= NULL 
 			,intConcurrencyId				= 1
 	END 
 

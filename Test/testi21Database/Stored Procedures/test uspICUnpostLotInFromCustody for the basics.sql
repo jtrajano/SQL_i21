@@ -74,7 +74,7 @@ BEGIN
 	BEGIN 
 		EXEC tSQLt.ExpectException
 			@ExpectedMessage = 'Unable to unpost the transaction.'
-			,@ExpectedErrorNumber = 51130
+			,@ExpectedErrorNumber = 51135
 	END 
 	
 	-- Act

@@ -101,7 +101,7 @@ IF EXISTS (
 )
 BEGIN 
 	-- Unable to unpost the transaction.
-	RAISERROR(51130, 11, 1)
+	RAISERROR(51135, 11, 1)
 END 
 
 -- Update the lot cost bucket. 

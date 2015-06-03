@@ -491,3 +491,22 @@ BEGIN
 		,'Select strSecondaryStatus as ValueMember,strSecondaryStatus as DisplayMember from tblICLotStatus'
 END
 GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFAttribute
+		WHERE intAttributeId = 7
+		)
+BEGIN
+	INSERT INTO tblMFAttribute (
+		intAttributeId
+		,strAttributeName
+		,intAttributeDataTypeId
+		,strSQL
+		)
+	SELECT 7
+		,'Is Cycle Count Mandatory'
+		,5
+		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO

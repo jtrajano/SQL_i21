@@ -2,6 +2,7 @@
 	@intItemId INT
 	,@intStorageLocationId INT
 	,@intLocationId INT
+	,@intConsumptionMethodId int=1
 	)
 AS
 BEGIN
@@ -21,7 +22,7 @@ BEGIN
 		AND R.intLocationId = @intLocationId
 		AND R.ysnActive = 1
 		AND RI.intRecipeItemTypeId = 1
-		AND RI.intConsumptionMethodId = 1
+		AND RI.intConsumptionMethodId = (Case When @intConsumptionMethodId=0 Then RI.intConsumptionMethodId else @intConsumptionMethodId End)
 	LEFT JOIN dbo.tblMFRecipeSubstituteItem SI ON SI.intRecipeItemId = RI.intRecipeItemId
 		AND SI.intRecipeId = R.intRecipeId
 	JOIN dbo.tblICLot L ON (

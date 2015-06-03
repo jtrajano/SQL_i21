@@ -27,6 +27,7 @@ BEGIN
 			,@strLocationName AS strLocationName
 			,@CurrentDate AS dtmBusinessDate
 			,@intShiftId AS intRunningShift
+			,GetDate() as dtmCurrentDate
 	End
 	Else
 	Begin
@@ -37,6 +38,7 @@ BEGIN
 			,@strLocationName AS strLocationName
 			,@CurrentDate AS dtmBusinessDate
 			,@intShiftId AS intRunningShift
+			,GetDate() as dtmCurrentDate
 		FROM dbo.tblMFManufacturingProcess
 		WHERE strProcessName = @strProcessName
 	End

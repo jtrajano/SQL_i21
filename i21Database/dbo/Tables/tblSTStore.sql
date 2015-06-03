@@ -28,6 +28,8 @@
     [ysnUseLargePlu] BIT NULL, 
     [ysnUseCfn] BIT NULL, 
     [strCfnSiteId] NVARCHAR(6) COLLATE Latin1_General_CI_AS NULL, 
+	[strManagersName] NVARCHAR(12) COLLATE Latin1_General_CI_AS NULL, 
+	[strManagersPassword] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL, 
     [ysnInterfaceChecksToCheckbook] BIT NULL, 
     [strCheckbook] NVARCHAR(6) COLLATE Latin1_General_CI_AS NULL, 
     [strQuickbookInterfaceClass] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
