@@ -242,6 +242,8 @@ BEGIN TRY
 		FROM dbo.tblMFWorkOrder
 		WHERE dtmExpectedDate = @dtmPlannedDate
 
+		Select @dtmPlannedDate =DateAdd(mi,DateDiff(mi,GetUTCDATE(),GetDate()),@dtmPlannedDate)
+
 		INSERT INTO dbo.tblMFWorkOrder (
 			strWorkOrderNo
 			,intManufacturingProcessId
@@ -279,7 +281,7 @@ BEGIN TRY
 			,@dtmCurrentDate
 			,@intUserId
 			,@strVendorLotNo
-			,DateAdd(mi,DateDiff(mi,GetUTCDATE(),GetDate()),@dtmPlannedDate)
+			,@dtmPlannedDate
 			,@intPlannedShiftId
 			,@dtmPlannedDate
 			,ISNULL(@intExecutionOrder, 1)
