@@ -110,8 +110,8 @@ SELECT @InventoryReceiptId = SCOPE_IDENTITY()
 IF @InventoryReceiptId IS NULL 
 BEGIN 
 	-- Raise the error:
-	-- Unable to generate the Inventory Receipt. An error stopped the process from Purchase Order to Inventory Receipt.
-	RAISERROR(50031, 11, 1);
+	-- Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.
+	RAISERROR(50030, 11, 1);
 	RETURN;
 END
 

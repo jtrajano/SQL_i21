@@ -468,14 +468,7 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 0
 BEGIN 	
-	COMMIT TRAN @TransactionName
-	
 	EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 	
-	IF @@ERROR <> 0 
-	BEGIN		
-		ROLLBACK TRAN @TransactionName
-		GOTO Post_Exit
-	END
 
 	UPDATE	dbo.tblICInventoryTransfer  
 	SET		ysnPosted = @ysnPost
