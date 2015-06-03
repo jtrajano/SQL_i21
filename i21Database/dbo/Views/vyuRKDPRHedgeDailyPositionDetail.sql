@@ -91,8 +91,16 @@ SELECT intCommodityId,
     AS dblTotal
 FROM(            
 SELECT c.intCommodityId,            
-  sum(it.dblUnitOnHand) invQty,            
-  SUM(sr.dblQty) ReserveQty      
+		(SELECT sum(isnull(it1.dblUnitOnHand,0)) 		   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   and
+		i1.intCommodityId= c.intCommodityId) as invQty
+		,(SELECT SUM(isnull(sr1.dblQty,0))  	   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   
+		JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId   
+		WHERE 
+		i1.intCommodityId=c.intCommodityId ) as ReserveQty      
    ,(SELECT             
    isnull(Sum(CD.dblBalance),0) as Qty                 
    FROM tblCTContractDetail  CD                 
@@ -137,8 +145,16 @@ SELECT intCommodityId,(invQty)-isnull(ReserveQty,0) AS CompanyTitled,OpenPurchas
                
 FROM(            
 SELECT c.intCommodityId,            
-  sum(it.dblUnitOnHand) invQty,            
-  SUM(sr.dblQty) ReserveQty      
+  		(SELECT sum(isnull(it1.dblUnitOnHand,0)) 		   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   and
+		i1.intCommodityId= c.intCommodityId) as invQty
+		,(SELECT SUM(isnull(sr1.dblQty,0))  	   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   
+		JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId   
+		WHERE 
+		i1.intCommodityId=c.intCommodityId ) as ReserveQty        
        
     ,(SELECT               
    isnull(Sum(CD.dblBalance),0) as Qty                   
@@ -188,10 +204,18 @@ SELECT intCommodityId,(invQty)-isnull(ReserveQty,0) AS CompanyTitled,
 FROM(            
 SELECT c.intCommodityId,            
    
-  sum(it.dblUnitOnHand) invQty,            
-  SUM(sr.dblQty) ReserveQty      
+ 		(SELECT sum(isnull(it1.dblUnitOnHand,0)) 		   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   and
+		i1.intCommodityId= c.intCommodityId) as invQty
+		,(SELECT SUM(isnull(sr1.dblQty,0))  	   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   
+		JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId   
+		WHERE 
+		i1.intCommodityId=c.intCommodityId ) as ReserveQty       
          
-    ,(SELECT             
+ ,(SELECT             
    isnull(Sum(CD.dblBalance),0) as Qty                 
    FROM tblCTContractDetail  CD                 
    JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId              
@@ -202,16 +226,16 @@ SELECT c.intCommodityId,
    isnull(Sum(CD.dblBalance),0) as Qty                 
    FROM tblCTContractDetail  CD                 
    JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId              
-   JOIN tblCTContractHeader  CH ON CH.intContractHeaderId  = CD.intContractHeaderId  and CH.intContractTypeId=2               
+   JOIN tblCTContractHeader  CH ON CH.intContractHeaderId  = CD.intContractHeaderId  and CH.intContractTypeId=1               
    JOIN tblCTPricingType  PT ON PT.intPricingTypeId     = CD.intPricingTypeId and PT.intPricingTypeId in(1,2)             
-   JOIN tblCTContractType  TP ON TP.intContractTypeId     = CH.intContractTypeId where CH.intCommodityId=c.intCommodityId) as OpenPurchasesQty            
+   JOIN tblCTContractType  TP ON TP.intContractTypeId     = CH.intContractTypeId where CH.intCommodityId=c.intCommodityId) as OpenPurchasesQty  --req          
     ,(SELECT             
    isnull(Sum(CD.dblBalance),0) as Qty                 
    FROM tblCTContractDetail  CD                 
    JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId              
-   JOIN tblCTContractHeader  CH ON CH.intContractHeaderId  = CD.intContractHeaderId                
+   JOIN tblCTContractHeader  CH ON CH.intContractHeaderId  = CD.intContractHeaderId   and  CH.intContractTypeId= 2             
    JOIN tblCTPricingType  PT ON PT.intPricingTypeId     = CD.intPricingTypeId and PT.intPricingTypeId in(1,2)             
-   JOIN tblCTContractType  TP ON TP.intContractTypeId     = CH.intContractTypeId where CH.intCommodityId=c.intCommodityId) as OpenSalesQty            
+   JOIN tblCTContractType  TP ON TP.intContractTypeId     = CH.intContractTypeId where CH.intCommodityId=c.intCommodityId) as OpenSalesQty           
     
 FROM tblICCommodity c            
 LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId            
