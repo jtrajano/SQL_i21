@@ -1648,6 +1648,8 @@
     <Build Include="dbo\Stored Procedures\uspMFPostWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidatePostWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetStageDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetCarrierShipmentReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetCarrierShipmentSubReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
