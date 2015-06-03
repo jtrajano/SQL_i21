@@ -1656,13 +1656,7 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\OpenCallEntries.sql" />
     <Build Include="dbo\Tables\tblCTContractCertification.sql" />
     <Build Include="dbo\Views\vyuRKGetOpenContract.sql" />
-    <Build Include="dbo\Tables\tblICInventoryLotInCustody.sql" />
-    <Build Include="dbo\Tables\tblICInventoryLotInCustodyTransaction.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostLotInCustody.sql" />
-    <Build Include="dbo\Stored Procedures\uspICReduceStockInLotCustody.sql" />
-    <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLotCustody.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostInventoryLotInCustodyTransaction.sql" />
-	<Build Include="dbo\Views\vyuRKGetOpenContract.sql" />
+    <Build Include="dbo\Views\vyuRKGetOpenContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

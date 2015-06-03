@@ -3373,6 +3373,7 @@
     <Property Name="ParentElementName" Value="[dbo].[tblGRStorageType]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[UQ_tblGRStorageType_strStorageTypeCode]" />
+  </Operation>
   <Operation Name="Rename Refactor" Key="cc63a5b5-5175-4429-8f54-85f5caa7423e" ChangeDateTime="05/28/2015 12:47:36">
     <Property Name="ElementName" Value="[dbo].[tblRKMatchFuturesPSDetail].[dtmMatchDate]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />
