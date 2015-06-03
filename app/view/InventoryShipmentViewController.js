@@ -331,10 +331,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         var win = config.grid.up('window');
         var currentShipmentItem = win.viewModel.data.currentShipmentItem;
         var record = Ext.create('Inventory.model.ShipmentItemLot');
-        record.set('strUnitMeasure', currentShipmentItem.get('strUnitMeasure'));
         record.set('strWeightUOM', currentShipmentItem.get('strWeightUOM'));
         record.set('dblQuantityShipped', config.dummy.get('dblQuantityShipped'));
-
         action(record);
     },
 
@@ -410,14 +408,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
         else if (combo.itemId === 'cboUOM') {
             current.set('intItemUOMId', records[0].get('intItemUOMId'));
-
-            if (current.tblICInventoryShipmentItemLots()) {
-                Ext.Array.each(current.tblICInventoryShipmentItemLots().data.items, function(lot) {
-                    if (!lot.dummy) {
-                        lot.set('strUnitMeasure', records[0].get('strUnitMeasure'));
-                    }
-                });
-            }
         }
         else if (combo.itemId === 'cboWeightUOM') {
             current.set('intWeightUOMId', records[0].get('intItemUOMId'));
@@ -447,6 +437,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         {
             current.set('intLotId', records[0].get('intLotId'));
             current.set('dblAvailableQty', records[0].get('dblAvailableQty'));
+            current.set('strUnitMeasure', records[0].get('strItemUOM'));
         }
     },
 
