@@ -5,7 +5,7 @@
     [strScheduleDescription] NVARCHAR(30) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intStorageType] INT NOT NULL, 
     [intCommodity] INT NOT NULL, 
-    [intCompanyLocation] INT NOT NULL, 
+    [intCompanyLocation] INT NULL, 
     [intAllowanceDays] INT NOT NULL DEFAULT 0, 
     [dtmEffectiveDate] DATETIME NULL, 
     [dtmTerminationDate] DATETIME NULL, 
