@@ -1028,6 +1028,46 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         }
                                                                     },
                                                                     {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colWeightUOM',
+                                                                        width: 100,
+                                                                        dataIndex: 'strUOM',
+                                                                        text: 'Weight UOM',
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intItemUOMId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Unit Of Measure Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strUnitMeasure',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Unit Measure',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strUnitType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Unit Type',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    xtype: 'checkcolumn',
+                                                                                    dataIndex: 'ysnStockUnit',
+                                                                                    dataType: 'boolean',
+                                                                                    text: 'Stock Unit',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboWeightUOM',
+                                                                            displayField: 'strUnitMeasure',
+                                                                            valueField: 'strUnitMeasure'
+                                                                        }
+                                                                    },
+                                                                    {
                                                                         xtype: 'numbercolumn',
                                                                         dataType: 'numeric',
                                                                         itemId: 'colUnitPrice',
@@ -1152,7 +1192,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                     flex: 1
                                                                                 },
                                                                                 {
-                                                                                    dataIndex: 'dblQty',
+                                                                                    dataIndex: 'dblAvailableQty',
                                                                                     dataType: 'float',
                                                                                     text: 'Quantity',
                                                                                     flex: 1

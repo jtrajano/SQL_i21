@@ -50,7 +50,6 @@ Ext.define('Inventory.model.ShipmentItemLot', {
 
     validators: [
         {type: 'presence', field: 'strLotId'},
-        {type: 'presence', field: 'strUnitMeasure'},
         {type: 'presence', field: 'dblQuantityShipped'}
     ]
 });

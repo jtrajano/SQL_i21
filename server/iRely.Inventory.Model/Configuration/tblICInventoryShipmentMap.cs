@@ -69,6 +69,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
             this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(18, 6);
             this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
+            this.Property(t => t.intWeightUOMId).HasColumnName("intWeightUOMId");
             this.Property(t => t.dblUnitPrice).HasColumnName("dblUnitPrice").HasPrecision(18, 6);
             this.Property(t => t.intTaxCodeId).HasColumnName("intTaxCodeId");
             this.Property(t => t.intDockDoorId).HasColumnName("intDockDoorId");
@@ -87,6 +88,9 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblICItemUOM)
                 .WithMany(p => p.tblICInventoryShipmentItems)
                 .HasForeignKey(p => p.intItemUOMId);
+            this.HasOptional(p => p.WeightUOM)
+                .WithMany(p => p.ShipmentItemWeights)
+                .HasForeignKey(p => p.intWeightUOMId);
             this.HasOptional(p => p.tblSMCompanyLocationSubLocation)
                 .WithMany(p => p.tblICInventoryShipmentItems)
                 .HasForeignKey(p => p.intSubLocationId);

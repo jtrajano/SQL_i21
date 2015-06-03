@@ -20,7 +20,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         },
         binding: {
             bind: {
-                title: 'Inventory Shipment - {current.strBOLNumber}'
+                title: 'Inventory Shipment - {current.strShipmentNumber}'
             },
             btnSave: {
                 disabled: '{current.ysnPosted}'
@@ -163,7 +163,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colSubLocation: {
                     dataIndex: 'strSubLocationName',
                     editor: {
-                        store: '{subLocation}'
+                        store: '{subLocation}',
+                        defaultFilters: [{
+                            column: 'intCompanyLocationId',
+                            value: '{current.intShipFromLocationId}',
+                            conjunction: 'and'
+                        }]
                     }
                 },
                 colOrderQty: 'dblQtyOrdered',
@@ -173,6 +178,16 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     dataIndex: 'strUnitMeasure',
                     editor: {
                         store: '{itemUOM}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{grdInventoryShipment.selection.intItemId}'
+                        }]
+                    }
+                },
+                colWeightUOM: {
+                    dataIndex: 'strWeightUOM',
+                    editor: {
+                        store: '{weightUOM}',
                         defaultFilters: [{
                             column: 'intItemId',
                             value: '{grdInventoryShipment.selection.intItemId}'
@@ -208,29 +223,13 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         }]
                     }
                 },
-                colAvailableQty: 'dblLotQty',
+                colAvailableQty: 'dblAvailableQty',
                 colShipQty: 'dblQuantityShipped',
                 colLotUOM: {
-                    dataIndex: 'strUnitMeasure',
-                    editor: {
-                        store: '{lotUOM}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{currentShipmentItem.intItemId}',
-                            conjunction: 'and'
-                        }]
-                    }
+                    dataIndex: 'strUnitMeasure'
                 },
                 colLotWeightUOM: {
-                    dataIndex: 'strWeightUOM',
-                    editor: {
-                        store: '{lotWeightUOM}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{currentShipmentItem.intItemId}',
-                            conjunction: 'and'
-                        }]
-                    }
+                    dataIndex: 'strWeightUOM'
                 },
                 colGrossWeight: 'dblGrossWeight',
                 colTareWeight: 'dblTareWeight',
@@ -256,9 +255,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 'tblARCustomer, ' +
                 'ShipToLocation, ' +
                 'tblICInventoryShipmentItems.vyuICGetShipmentItemSource, ' +
+                'tblICInventoryShipmentItems.tblSMCompanyLocationSubLocation, ' +
                 'tblICInventoryShipmentItems.tblICInventoryShipmentItemLots.tblICLot, ' +
                 'tblICInventoryShipmentItems.tblICItem, ' +
-                'tblICInventoryShipmentItems.tblICItemUOM.tblICUnitMeasure',
+                'tblICInventoryShipmentItems.tblICItemUOM.tblICUnitMeasure, ' +
+                'tblICInventoryShipmentItems.WeightUOM.tblICUnitMeasure',
             createRecord: me.createRecord,
             binding: me.config.binding,
             attachment: Ext.create('iRely.attachment.Manager', {
@@ -277,7 +278,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             key: 'tblICInventoryShipmentItemLots',
                             component: Ext.create('iRely.grid.Manager', {
                                 grid: grdLotTracking,
-                                deleteButton: grdLotTracking.down('#btnRemoveLot')
+                                deleteButton: grdLotTracking.down('#btnRemoveLot'),
+                                createRecord: me.onLotCreateRecord
                             })
                         }
                     ]
@@ -322,6 +324,17 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             record.set('intShipFromLocationId', app.DefaultLocation);
         record.set('dtmShipDate', today);
         record.set('intOrderType', 2);
+        action(record);
+    },
+
+    onLotCreateRecord: function(config, action) {
+        var win = config.grid.up('window');
+        var currentShipmentItem = win.viewModel.data.currentShipmentItem;
+        var record = Ext.create('Inventory.model.ShipmentItemLot');
+        record.set('strUnitMeasure', currentShipmentItem.get('strUnitMeasure'));
+        record.set('strWeightUOM', currentShipmentItem.get('strWeightUOM'));
+        record.set('dblQuantityShipped', config.dummy.get('dblQuantityShipped'));
+
         action(record);
     },
 
@@ -397,6 +410,25 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
         else if (combo.itemId === 'cboUOM') {
             current.set('intItemUOMId', records[0].get('intItemUOMId'));
+
+            if (current.tblICInventoryShipmentItemLots()) {
+                Ext.Array.each(current.tblICInventoryShipmentItemLots().data.items, function(lot) {
+                    if (!lot.dummy) {
+                        lot.set('strUnitMeasure', records[0].get('strUnitMeasure'));
+                    }
+                });
+            }
+        }
+        else if (combo.itemId === 'cboWeightUOM') {
+            current.set('intWeightUOMId', records[0].get('intItemUOMId'));
+
+            if (current.tblICInventoryShipmentItemLots()) {
+                Ext.Array.each(current.tblICInventoryShipmentItemLots().data.items, function(lot) {
+                    if (!lot.dummy) {
+                        lot.set('strWeightUOM', records[0].get('strUnitMeasure'));
+                    }
+                });
+            }
         }
     },
 
@@ -414,15 +446,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         if (combo.itemId === 'cboLot')
         {
             current.set('intLotId', records[0].get('intLotId'));
-            current.set('dblLotQty', records[0].get('dblQty'));
-        }
-        else if (combo.itemId === 'cboLotUOM')
-        {
-            current.set('intItemUOMId', records[0].get('intItemUOMId'));
-        }
-        else if (combo.itemId === 'cboLotWeightUOM')
-        {
-            current.set('intWeightUOMId', records[0].get('intItemUOMId'));
+            current.set('dblAvailableQty', records[0].get('dblAvailableQty'));
         }
     },
 
@@ -599,16 +623,13 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             "#cboUOM": {
                 select: this.onOrderNumberSelect
             },
+            "#cboWeightUOM": {
+                select: this.onOrderNumberSelect
+            },
             "#grdInventoryShipment": {
                 selectionchange: this.onItemSelectionChange
             },
             "#cboLot": {
-                select: this.onLotSelect
-            },
-            "#cboLotUOM": {
-                select: this.onLotSelect
-            },
-            "#cboLotWeightUOM": {
                 select: this.onLotSelect
             },
             "#btnCustomer": {
