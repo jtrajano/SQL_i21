@@ -1642,6 +1642,7 @@
     <Build Include="dbo\Stored Procedures\uspARInsertToSalesOrder.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryTransferDetail.sql" />
     <Build Include="dbo\Tables\tblCTContractCertification.sql" />
+    <Build Include="dbo\Views\vyuRKGetOpenContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
