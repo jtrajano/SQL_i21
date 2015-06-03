@@ -101,13 +101,13 @@ AND ri.intConsumptionMethodId in (2,3)
 	JOIN dbo.tblICLotStatus LS on LS.intLotStatusId =L.intLotStatusId 
 	WHERE LS.strSecondaryStatus ='Active'
 		AND dtmExpiryDate >= Getdate()
-		--AND L.intStorageLocationId = (
-		--	CASE 
-		--		WHEN I.intStorageLocationId IS NULL
-		--			THEN L.intStorageLocationId
-		--		ELSE I.intStorageLocationId
-		--		END
-		--	)
+		AND L.intStorageLocationId = (
+			CASE 
+				WHEN I.intStorageLocationId IS NULL
+					THEN L.intStorageLocationId
+				ELSE I.intStorageLocationId
+				END
+			)
 	AND (L.dblWeight>0 or L.dblQty>0)
 	ORDER BY L.dtmDateCreated ASC
 
