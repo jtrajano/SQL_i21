@@ -472,8 +472,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_uom))
-                    if (tblICInventoryShipmentItem != null)
-                        return tblICInventoryShipmentItem.strUnitMeasure;
+                    if (tblICLot != null)
+                        return tblICLot.strItemUOM;
                     else
                         return null;
                 else
