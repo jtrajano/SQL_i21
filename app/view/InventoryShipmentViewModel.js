@@ -63,14 +63,11 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         itemUOM: {
             type: 'icbuffereditemunitmeasure'
         },
+        weightUOM: {
+            type: 'icbuffereditemweightuom'
+        },
         lot: {
             type: 'icbufferedlot'
-        },
-        lotUOM: {
-            type: 'icbuffereditemunitmeasure'
-        },
-        lotWeightUOM: {
-            type: 'icbuffereditemweightuom'
         }
     },
 

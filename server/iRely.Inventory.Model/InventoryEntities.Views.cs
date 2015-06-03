@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets43e623b033df7e4d771982bce8ae26b6cfe07a5c3946553c0a237ed5eabedc59))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets4678f9174668277d8e530b956598a47cd936bd6a6c96d52c067b33e0086eccc1))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets43e623b033df7e4d771982bce8ae26b6cfe07a5c3946553c0a237ed5eabedc59 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets4678f9174668277d8e530b956598a47cd936bd6a6c96d52c067b33e0086eccc1 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "43e623b033df7e4d771982bce8ae26b6cfe07a5c3946553c0a237ed5eabedc59"; }
+            get { return "4678f9174668277d8e530b956598a47cd936bd6a6c96d52c067b33e0086eccc1"; }
         }
 
         /// <summary>
@@ -2669,7 +2669,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryShipmentItem
-        [CodeFirstDatabaseSchema.tblICInventoryShipmentItem](T1.tblICInventoryShipmentItem_intInventoryShipmentItemId, T1.tblICInventoryShipmentItem_intInventoryShipmentId, T1.tblICInventoryShipmentItem_intSourceId, T1.tblICInventoryShipmentItem_intLineNo, T1.tblICInventoryShipmentItem_intItemId, T1.tblICInventoryShipmentItem_intSubLocationId, T1.tblICInventoryShipmentItem_dblQuantity, T1.tblICInventoryShipmentItem_intItemUOMId, T1.tblICInventoryShipmentItem_dblUnitPrice, T1.tblICInventoryShipmentItem_intTaxCodeId, T1.tblICInventoryShipmentItem_intDockDoorId, T1.tblICInventoryShipmentItem_strNotes, T1.tblICInventoryShipmentItem_intSort, T1.tblICInventoryShipmentItem_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryShipmentItem](T1.tblICInventoryShipmentItem_intInventoryShipmentItemId, T1.tblICInventoryShipmentItem_intInventoryShipmentId, T1.tblICInventoryShipmentItem_intSourceId, T1.tblICInventoryShipmentItem_intLineNo, T1.tblICInventoryShipmentItem_intItemId, T1.tblICInventoryShipmentItem_intSubLocationId, T1.tblICInventoryShipmentItem_dblQuantity, T1.tblICInventoryShipmentItem_intItemUOMId, T1.tblICInventoryShipmentItem_intWeightUOMId, T1.tblICInventoryShipmentItem_dblUnitPrice, T1.tblICInventoryShipmentItem_intTaxCodeId, T1.tblICInventoryShipmentItem_intDockDoorId, T1.tblICInventoryShipmentItem_strNotes, T1.tblICInventoryShipmentItem_intSort, T1.tblICInventoryShipmentItem_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryShipmentItemId AS tblICInventoryShipmentItem_intInventoryShipmentItemId, 
@@ -2680,6 +2680,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intSubLocationId AS tblICInventoryShipmentItem_intSubLocationId, 
             T.dblQuantity AS tblICInventoryShipmentItem_dblQuantity, 
             T.intItemUOMId AS tblICInventoryShipmentItem_intItemUOMId, 
+            T.intWeightUOMId AS tblICInventoryShipmentItem_intWeightUOMId, 
             T.dblUnitPrice AS tblICInventoryShipmentItem_dblUnitPrice, 
             T.intTaxCodeId AS tblICInventoryShipmentItem_intTaxCodeId, 
             T.intDockDoorId AS tblICInventoryShipmentItem_intDockDoorId, 
@@ -5467,7 +5468,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryShipmentItems
-        [iRely.Inventory.Model.tblICInventoryShipmentItem](T1.tblICInventoryShipmentItem_intInventoryShipmentItemId, T1.tblICInventoryShipmentItem_intInventoryShipmentId, T1.tblICInventoryShipmentItem_intSourceId, T1.tblICInventoryShipmentItem_intLineNo, T1.tblICInventoryShipmentItem_intItemId, T1.tblICInventoryShipmentItem_intSubLocationId, T1.tblICInventoryShipmentItem_dblQuantity, T1.tblICInventoryShipmentItem_intItemUOMId, T1.tblICInventoryShipmentItem_dblUnitPrice, T1.tblICInventoryShipmentItem_intTaxCodeId, T1.tblICInventoryShipmentItem_intDockDoorId, T1.tblICInventoryShipmentItem_strNotes, T1.tblICInventoryShipmentItem_intSort, T1.tblICInventoryShipmentItem_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryShipmentItem](T1.tblICInventoryShipmentItem_intInventoryShipmentItemId, T1.tblICInventoryShipmentItem_intInventoryShipmentId, T1.tblICInventoryShipmentItem_intSourceId, T1.tblICInventoryShipmentItem_intLineNo, T1.tblICInventoryShipmentItem_intItemId, T1.tblICInventoryShipmentItem_intSubLocationId, T1.tblICInventoryShipmentItem_dblQuantity, T1.tblICInventoryShipmentItem_intItemUOMId, T1.tblICInventoryShipmentItem_intWeightUOMId, T1.tblICInventoryShipmentItem_dblUnitPrice, T1.tblICInventoryShipmentItem_intTaxCodeId, T1.tblICInventoryShipmentItem_intDockDoorId, T1.tblICInventoryShipmentItem_strNotes, T1.tblICInventoryShipmentItem_intSort, T1.tblICInventoryShipmentItem_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryShipmentItemId AS tblICInventoryShipmentItem_intInventoryShipmentItemId, 
@@ -5478,6 +5479,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intSubLocationId AS tblICInventoryShipmentItem_intSubLocationId, 
             T.dblQuantity AS tblICInventoryShipmentItem_dblQuantity, 
             T.intItemUOMId AS tblICInventoryShipmentItem_intItemUOMId, 
+            T.intWeightUOMId AS tblICInventoryShipmentItem_intWeightUOMId, 
             T.dblUnitPrice AS tblICInventoryShipmentItem_dblUnitPrice, 
             T.intTaxCodeId AS tblICInventoryShipmentItem_intTaxCodeId, 
             T.intDockDoorId AS tblICInventoryShipmentItem_intDockDoorId, 
