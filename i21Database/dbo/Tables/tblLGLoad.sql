@@ -22,7 +22,9 @@
 [dtmDeliveredDate] DATETIME NULL,
 
 [intGenerateLoadId] INT NULL, 
-    CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
+[intGenerateSequence] INT NULL, 
+
+CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
 CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([intLoadNumber],[intPurchaseSale]),
 CONSTRAINT [FK_tblLGLoad_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 CONSTRAINT [FK_tblLGLoad_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
@@ -34,5 +36,5 @@ CONSTRAINT [FK_tblLGLoad_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([
 CONSTRAINT [FK_tblLGLoad_tblEntity_intHaulerEntityId] FOREIGN KEY ([intHaulerEntityId]) REFERENCES [tblEntity]([intEntityId]),
 
 CONSTRAINT [FK_tblLGLoad_tblSCTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [tblSCTicket]([intTicketId]), 
-    CONSTRAINT [FK_tblLGLoad_tblLGGenerateLoad_intGenerateLoadId] FOREIGN KEY ([intGenerateLoadId]) REFERENCES [tblLGGenerateLoad]([intGenerateLoadId]) ON DELETE CASCADE
+CONSTRAINT [FK_tblLGLoad_tblLGGenerateLoad_intGenerateLoadId] FOREIGN KEY ([intGenerateLoadId]) REFERENCES [tblLGGenerateLoad]([intGenerateLoadId]) ON DELETE CASCADE
 )
