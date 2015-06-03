@@ -20,6 +20,7 @@ Type the overview for the table here.
 		[intSubLocationId] INT NULL, 
 		[dblQuantity] NUMERIC(18, 6) NOT NULL DEFAULT ((0)), 
 		[intItemUOMId] INT NOT NULL, 
+		[intWeightUOMId] INT NULL,
 		[dblUnitPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intTaxCodeId] INT NULL,
 		[intDockDoorId] INT NULL, 
@@ -31,7 +32,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]), 
-		CONSTRAINT [FK_tblICInventoryShipmentItem_tblSMTaxCode] FOREIGN KEY ([intTaxCodeId]) REFERENCES [tblSMTaxCode]([intTaxCodeId])
+		CONSTRAINT [FK_tblICInventoryShipmentItem_tblSMTaxCode] FOREIGN KEY ([intTaxCodeId]) REFERENCES [tblSMTaxCode]([intTaxCodeId]), 
+    CONSTRAINT [FK_tblICInventoryShipmentItem_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])
 	)
 
 	GO
@@ -168,3 +170,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICInventoryShipmentItem',
     @level2type = N'COLUMN',
     @level2name = N'intLineNo'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Weight Unit of Measure Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryShipmentItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intWeightUOMId'
