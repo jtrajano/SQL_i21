@@ -14,10 +14,10 @@ BEGIN TRY
 		,@intStorageLocationId INT
 		,@intInputLotId INT
 		,@intInputItemId INT
-		,@dblQuantity NUMERIC(18, 6)
-		,@dblInputQuantity NUMERIC(18, 6)
+		,@dblWeight NUMERIC(18, 6)
+		,@dblInputWeight NUMERIC(18, 6)
 		,@dblReadingQuantity NUMERIC(18, 6)
-		,@intInputItemUOMId INT
+		,@intInputWeightUOMId INT
 		,@intUserId INT
 		,@ysnEmptyOut BIT
 		,@intContainerId INT
@@ -31,11 +31,17 @@ BEGIN TRY
 		,@intConsumptionMethodId INT
 		,@intConsumptionStorageLocationId INT
 		,@dblDefaultResidueQty NUMERIC(18, 6)
-		,@dblNewQuantity NUMERIC(18, 6)
+		,@dblNewWeight NUMERIC(18, 6)
 		,@intDestinationLotId int
 		,@strLotNumber nvarchar(50)
 		,@strLotTracking nvarchar(50)
 		,@intItemLocationId int
+		,@dtmCurrentDate datetime
+		,@dblAdjustByQuantity numeric(18,6)
+		,@intInventoryAdjustmentId int
+		,@intNewItemUOMId int
+
+	Select @dtmCurrentDate=GetDate()
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -51,9 +57,9 @@ BEGIN TRY
 		,@intStorageLocationId = intStorageLocationId
 		,@intInputLotId = intInputLotId
 		,@intInputItemId = intInputItemId
-		,@dblInputQuantity = dblInputQuantity
+		,@dblInputWeight = dblInputWeight
 		,@dblReadingQuantity = dblReadingQuantity
-		,@intInputItemUOMId = intInputItemUOMId
+		,@intInputWeightUOMId = intInputWeightUOMId
 		,@intUserId = intUserId
 		,@ysnEmptyOut = ysnEmptyOut
 		,@intContainerId = intContainerId
@@ -75,9 +81,9 @@ BEGIN TRY
 			,intStorageLocationId INT
 			,intInputLotId INT
 			,intInputItemId INT
-			,dblInputQuantity NUMERIC(18, 6)
+			,dblInputWeight NUMERIC(18, 6)
 			,dblReadingQuantity NUMERIC(18, 6)
-			,intInputItemUOMId INT
+			,intInputWeightUOMId INT
 			,intUserId INT
 			,ysnEmptyOut BIT
 			,intContainerId INT
@@ -100,7 +106,8 @@ BEGIN TRY
 	END
 
 	SELECT @intInputLotId = intLotId
-		,@dblQuantity = dblQty
+		,@dblWeight = dblWeight
+		,@intNewItemUOMId=intItemUOMId
 	FROM tblICLot
 	WHERE intLotId = @intInputLotId
 
@@ -141,7 +148,7 @@ BEGIN TRY
 		END
 	END
 
-	IF @dblQuantity <= 0
+	IF @dblWeight <= 0
 		AND @ysnNegativeQuantityAllowed = 0
 	BEGIN
 		RAISERROR (
@@ -194,14 +201,13 @@ BEGIN TRY
 
 	BEGIN TRANSACTION
 
-	INSERT INTO dbo.tblMFWorkOrderConsumedLot (
+	INSERT INTO dbo.tblMFWorkOrderInputLot (
 		intWorkOrderId
 		,intLotId
 		,dblQuantity
 		,intItemUOMId
 		,dblIssuedQuantity
 		,intItemIssuedUOMId
-		,intBatchId
 		,intSequenceNo
 		,intShiftId
 		,intStorageLocationId
@@ -209,7 +215,6 @@ BEGIN TRY
 		,ysnConsumptionReversed
 		,intContainerId
 		,strReferenceNo
-		,ysnFeedSent
 		,dtmActualInputDateTime
 		,dtmCreated
 		,intCreatedUserId
@@ -218,9 +223,9 @@ BEGIN TRY
 		)
 	SELECT @intWorkOrderId
 		,intLotId
-		,@dblInputQuantity
-		,intItemUOMId
-		,@dblInputQuantity / (
+		,@dblInputWeight
+		,intWeightUOMId
+		,@dblInputWeight / (
 			CASE 
 				WHEN dblWeightPerQty = 0
 					THEN 1
@@ -228,7 +233,6 @@ BEGIN TRY
 				END
 			)
 		,intItemUOMId
-		,0
 		,1
 		,@intShiftId
 		,@intStorageLocationId
@@ -236,7 +240,6 @@ BEGIN TRY
 		,0
 		,@intContainerId
 		,@strReferenceNo
-		,0
 		,@dtmActualInputDateTime
 		,GetDate()
 		,@intUserId
@@ -252,17 +255,17 @@ BEGIN TRY
 
 	IF @intConsumptionMethodId = 2
 	BEGIN
-		SET @dblNewQuantity = CASE 
+		SET @dblNewWeight = CASE 
 				WHEN @ysnEmptyOut = 0
 					THEN CASE 
-							WHEN @dblInputQuantity >= @dblQuantity
-								THEN @dblQuantity + @dblDefaultResidueQty
-							ELSE @dblQuantity
+							WHEN @dblInputWeight >= @dblWeight
+								THEN @dblWeight + @dblDefaultResidueQty
+							ELSE @dblWeight
 							END
-				ELSE @dblInputQuantity
+				ELSE @dblInputWeight
 				END
 
-		IF @dblNewQuantity <> @dblQuantity
+		IF @dblNewWeight <> @dblWeight
 		BEGIN
 			IF @ysnExcessConsumptionAllowed = 0
 			BEGIN
@@ -272,8 +275,33 @@ BEGIN TRY
 						,1
 						)
 			END
+			Select @dblAdjustByQuantity=@dblNewWeight-@dblWeight
 
-			PRINT 'Call Lot Adjust routine.'
+			EXEC [uspICInventoryAdjustment_CreatePostSplitLot]
+					-- Parameters for filtering:
+					@intItemId = @intItemId
+					,@dtmDate = @dtmCurrentDate
+					,@intLocationId = @intLocationId
+					,@intSubLocationId = @intSubLocationId
+					,@intStorageLocationId = @intStorageLocationId
+					,@strLotNumber = @strLotNumber
+					-- Parameters for the new values: 
+					,@intNewLocationId = @intLocationId
+					,@intNewSubLocationId = @intSubLocationId
+					,@intNewStorageLocationId = @intStorageLocationId
+					,@strNewLotNumber = @strLotNumber
+					,@dblAdjustByQuantity = @dblAdjustByQuantity
+					,@dblNewSplitLotQuantity = 0
+					,@dblNewWeight = @dblNewWeight
+					,@intNewItemUOMId = @intNewItemUOMId
+					,@intNewWeightUOMId = @intInputWeightUOMId
+					,@dblNewUnitCost = NULL
+					-- Parameters used for linking or FK (foreign key) relationships
+					,@intSourceId = NULL
+					,@intSourceTransactionTypeId = NULL
+					,@intUserId = @intUserId
+					,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+
 		END
 
 		SELECT TOP 1 @intDestinationLotId = intLotId
@@ -287,7 +315,7 @@ BEGIN TRY
 
 		IF @intDestinationLotId IS NULL --There is no lot in the destination location
 		BEGIN
-			IF @dblNewQuantity = @dblQuantity --It is a full qty staging.
+			IF @dblNewWeight = @dblWeight --It is a full qty staging.
 			BEGIN
 				IF @intStorageLocationId <> @intConsumptionStorageLocationId --Checking whether the lot is not in the staging location.
 				BEGIN
@@ -378,9 +406,9 @@ BEGIN TRY
 						,intSubLocationId = @intSubLocationId
 						,intStorageLocationId = @intStorageLocationId
 						,dblQty = 0
-						,intItemUOMId = @intInputItemUOMId
+						,intItemUOMId = @intInputWeightUOMId
 						,dblWeight = 0
-						,intWeightUOMId = @intInputItemUOMId
+						,intWeightUOMId = @intInputWeightUOMId
 						,dtmExpiryDate = @dtmExpiryDate
 						,dtmManufacturedDate = GetDate()
 						,intOriginId = NULL
