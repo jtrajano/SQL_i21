@@ -6,6 +6,7 @@
 	[intItemUOMId]       INT             NULL,
     [dblQtyOrdered]      NUMERIC (18, 6) NULL,
     [dblQtyShipped]      NUMERIC (18, 6) NULL,
+	[dblDiscount]        NUMERIC (18, 6) NULL,
     [dblPrice]           NUMERIC (18, 6) NULL,
 	[dblTotalTax]        NUMERIC (18, 6) NULL,
     [dblTotal]           NUMERIC (18, 6) NULL,
