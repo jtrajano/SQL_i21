@@ -17,6 +17,7 @@ BEGIN TRY
 		,@intLocationId INT
 		,@dtmPlannedDate DATETIME
 		,@intPlannedShiftId INT
+		,@intStatusId int
 		,@intManufacturingProcessId INT
 		,@intStorageLocationId INT
 		,@intContainerId INT
@@ -51,6 +52,7 @@ BEGIN TRY
 		,@intManufacturingProcessId = intManufacturingProcessId
 		,@dtmPlannedDate = dtmPlannedDate
 		,@intPlannedShiftId = intPlannedShiftId
+		,@intStatusId=intStatusId
 		,@intItemId = intItemId
 		,@dblProduceQty = dblProduceQty
 		,@intProduceUnitMeasureId = intProduceUnitMeasureId
@@ -87,6 +89,7 @@ BEGIN TRY
 			,intManufacturingProcessId INT
 			,dtmPlannedDate DATETIME
 			,intPlannedShiftId INT
+			,intStatusId int
 			,intItemId INT
 			,dblProduceQty NUMERIC(18, 6)
 			,intProduceUnitMeasureId INT
@@ -116,29 +119,29 @@ BEGIN TRY
 
 	BEGIN TRANSACTION
 
-	IF @intPhysicalItemUOMId IS NULL
-	BEGIN
-		SELECT @intPhysicalItemUOMId = intItemUOMId
-		FROM dbo.tblICItemUOM
-		WHERE intItemId = @intItemId
-			AND intUnitMeasureId IN (
-				SELECT intUnitMeasureId
-				FROM dbo.tblICUnitMeasure
-				WHERE strUnitMeasure LIKE '%bag%'
-				)
-	END
+	--IF @intPhysicalItemUOMId IS NULL
+	--BEGIN
+	--	SELECT @intPhysicalItemUOMId = intItemUOMId
+	--	FROM dbo.tblICItemUOM
+	--	WHERE intItemId = @intItemId
+	--		AND intUnitMeasureId IN (
+	--			SELECT intUnitMeasureId
+	--			FROM dbo.tblICUnitMeasure
+	--			WHERE strUnitMeasure LIKE '%bag%'
+	--			)
+	--END
 
-	UPDATE tblMFWorkOrder
-	SET intStatusId = 10
-	WHERE intWorkOrderId = @intWorkOrderId
+	--UPDATE tblMFWorkOrder
+	--SET intStatusId = 10
+	--WHERE intWorkOrderId = @intWorkOrderId
 
 	SELECT @dtmCurrentDate = GetDate()
 
-	IF @intSubLocationId IS NULL
-		OR @intSubLocationId = 0
-		SELECT @intSubLocationId = intSubLocationId
-		FROM dbo.tblICStorageLocation
-		WHERE intStorageLocationId = @intStorageLocationId
+	--IF @intSubLocationId IS NULL
+	--	OR @intSubLocationId = 0
+	--	SELECT @intSubLocationId = intSubLocationId
+	--	FROM dbo.tblICStorageLocation
+	--	WHERE intStorageLocationId = @intStorageLocationId
 
 	SELECT @strLotTracking = strLotTracking
 	FROM dbo.tblICItem
@@ -384,6 +387,7 @@ BEGIN TRY
 		,@strBatchId = @strRetBatchId
 		,@intShiftId=@intPlannedShiftId
 		,@strReferenceNo=@strReferenceNo
+		,@intStatusId=@intStatusId
 		,@intLotId = @intLotId OUTPUT
 
 	UPDATE dbo.tblICLot
