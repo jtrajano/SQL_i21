@@ -9,6 +9,7 @@ SELECT
 	,D.[intItemUOMId]
 	,D.[dblQtyOrdered]
 	,D.[dblQtyShipped]
+	,D.[dblDiscount] 
 	,D.[dblPrice]
 	,D.[dblTotal]
 	,D.[intAccountId]
