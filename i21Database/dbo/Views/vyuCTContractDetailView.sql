@@ -67,13 +67,13 @@ AS
 	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId		
 	JOIN	tblARMarketZone			MZ	ON	MZ.intMarketZoneId			=	CD.intMarketZoneId
 	JOIN	tblICItem				IM	ON	IM.intItemId				=	CD.intItemId
-	JOIN	tblICUnitMeasure		U1	ON	U1.intUnitMeasureId			=	CD.intUnitMeasureId
-	JOIN	tblSMFreightTerms		FT	ON	FT.intFreightTermId			=	CD.intFreightTermId
-	JOIN	tblCTPricingType		PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId
+	JOIN	tblICUnitMeasure		U1	ON	U1.intUnitMeasureId			=	CD.intUnitMeasureId			
+	JOIN	tblCTPricingType		PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId			LEFT
+	JOIN	tblSMFreightTerms		FT	ON	FT.intFreightTermId			=	CD.intFreightTermId			LEFT
 	JOIN	tblSMShipVia			SV	ON	SV.intShipViaID				=	CD.intShipViaId				LEFT
 	JOIN	tblCTContractOptHeader	OH  ON	OH.intContractOptHeaderId	=	CD.intContractOptHeaderId	LEFT
 	JOIN	tblCTFreightRate		FR	ON	FR.intFreightRateId			=	CD.intFreightRateId			LEFT
-	JOIN	tblCTRailGrade			RG	ON	RG.intRailGradeId			=	CD.intRailGradeId					LEFT
+	JOIN	tblCTRailGrade			RG	ON	RG.intRailGradeId			=	CD.intRailGradeId			LEFT
 	JOIN	tblRKFutureMarket		FM	ON	FM.intFutureMarketId		=	CD.intFutureMarketId		LEFT
 	JOIN	tblAPVendor				VR	ON	VR.[intEntityVendorId]		=	CD.intBillTo				LEFT
 	JOIN	tblRKFuturesMonth		MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId			LEFT
