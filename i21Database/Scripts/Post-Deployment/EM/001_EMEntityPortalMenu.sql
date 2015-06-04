@@ -109,3 +109,21 @@ ELSE
 BEGIN
 	EXEC(N'update tblEntityPortalMenu set strCommand = ''EntityManagement.controller.CustomerContactList'' where strPortalMenuName = ''Customer Contact List'' AND intPortalParentMenuId = 4')
 END 
+
+
+
+
+IF exists(select 1 from tblEntityPortalMenu where strPortalMenuName = 'Tickets' and strType = 'Screen' and strCommand = 'HelpDesk.controller.CPTickets')
+BEGIN
+	exec('update tblEntityPortalMenu set strCommand = ''HelpDesk.view.TicketList'' where strPortalMenuName = ''Tickets'' and strType = ''Screen'' and strCommand = ''HelpDesk.controller.CPTickets''')
+END
+
+IF exists(select 1 from tblEntityPortalMenu where strPortalMenuName = 'Open Tickets' and strType = 'Screen' and strCommand = 'HelpDesk.controller.CPOpenTicket')
+BEGIN
+	exec('update tblEntityPortalMenu set strCommand = ''HelpDesk.view.TicketList'' where strPortalMenuName = ''Open Tickets'' and strType = ''Screen'' and strCommand = ''HelpDesk.controller.CPOpenTicket''')
+END
+
+IF exists(select 1 from tblEntityPortalMenu where strPortalMenuName = 'Tickets Reported by Me' and strType = 'Screen' and strCommand = 'HelpDesk.controller.CPTicketsReported')
+BEGIN
+	exec('update tblEntityPortalMenu set strCommand = ''HelpDesk.view.TicketList'' where strPortalMenuName = ''Tickets Reported by Me'' and strType = ''Screen'' and strCommand = ''HelpDesk.controller.CPTicketsReported''')
+END
