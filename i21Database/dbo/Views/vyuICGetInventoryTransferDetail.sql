@@ -12,14 +12,14 @@ SELECT TransferDetail.intInventoryTransferDetailId
 	, strUnitMeasure = UOM.strUnitMeasure
 	, strWeightUOM = WeightUOM.strUnitMeasure
 	, TaxCode.strTaxCode
-	, strAvailableUOM = StockFrom.strUnitMeasure
+	, strAvailableUOM = CASE WHEN ISNULL(Lot.intLotId, '') = '' THEN StockFrom.strUnitMeasure ELSE Lot.strItemUOM END
 	, StockFrom.dblOnHand
 	, StockFrom.dblOnOrder
 	, StockFrom.dblReservedQty
-	, StockFrom.dblAvailableQty
+	, dblAvailableQty = CASE WHEN ISNULL(Lot.intLotId, '') = '' THEN StockFrom.dblAvailableQty ELSE Lot.dblQty END
 FROM tblICInventoryTransferDetail TransferDetail
 LEFT JOIN tblICItem Item ON Item.intItemId = TransferDetail.intItemId
-LEFT JOIN tblICLot Lot ON Lot.intLotId = TransferDetail.intLotId
+LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = TransferDetail.intLotId
 LEFT JOIN tblSMCompanyLocationSubLocation FromSubLocation ON FromSubLocation.intCompanyLocationSubLocationId = TransferDetail.intFromSubLocationId
 LEFT JOIN tblSMCompanyLocationSubLocation ToSubLocation ON ToSubLocation.intCompanyLocationSubLocationId = TransferDetail.intToSubLocationId
 LEFT JOIN tblICStorageLocation FromStorageLocation ON FromStorageLocation.intStorageLocationId = TransferDetail.intFromStorageLocationId
