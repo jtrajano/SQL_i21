@@ -34,7 +34,8 @@ namespace iRely.Inventory.BusinessLayer
                     strOrderType = (p.intOrderType == 1 ? "Sales Contract" : (p.intOrderType == 2 ? "Sales Order" : (p.intOrderType == 3 ? "Transfer Order" : ""))),
                     dtmShipDate = p.dtmShipDate,
                     strCustomerId = p.tblARCustomer.strCustomerNumber,
-                    strCustomerName = p.tblARCustomer.strCustomerName
+                    strCustomerName = p.tblARCustomer.strCustomerName,
+                    ysnPosted = p.ysnPosted
                 })
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intInventoryShipmentId").ToListAsync();
