@@ -1650,6 +1650,8 @@
     <Build Include="dbo\Stored Procedures\uspMFPostWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidatePostWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetStageDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateBillAmounts.sql" />
+    <Build Include="dbo\Views\vyuAPBillStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

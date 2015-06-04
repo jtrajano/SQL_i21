@@ -14,7 +14,6 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-
 BEGIN TRANSACTION
 
 DECLARE @GLEntries AS RecapTableType 
@@ -53,36 +52,13 @@ BEGIN
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
 		
-		--Unposting Process
-		UPDATE tblAPPaymentDetail
-		SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 THEN (B.dblDiscount + B.dblPayment - B.dblInterest) ELSE (B.dblAmountDue + B.dblPayment) END)
-		FROM tblAPPayment A
-			LEFT JOIN tblAPPaymentDetail B
-				ON A.intPaymentId = B.intPaymentId
-			LEFT JOIN tblAPBill C
-				ON B.intBillId = C.intBillId
-		WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-
-		--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
-		UPDATE tblAPBill
-			SET tblAPBill.dblAmountDue = B.dblAmountDue,
-				tblAPBill.ysnPaid = 0,
-				tblAPBill.dtmDatePaid = NULL,
-				tblAPBill.dblWithheld = 0
-		FROM tblAPPayment A
-					INNER JOIN tblAPPaymentDetail B 
-							ON A.intPaymentId = B.intPaymentId
-					INNER JOIN tblAPBill C
-							ON B.intBillId = C.intBillId
-					WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
-
 		UPDATE tblGLDetail
 			SET tblGLDetail.ysnIsUnposted = 1
 		FROM tblAPPayment A
 			INNER JOIN tblGLDetail B
 				ON A.intPaymentId = B.intTransactionId
 		WHERE B.[strTransactionId] IN (SELECT strPaymentRecordNum FROM tblAPPayment 
-							WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData))
+							WHERE intPaymentId IN (@prepaymentId))
 
 		-- Creating the temp table:
 		DECLARE @isSuccessful BIT
@@ -93,7 +69,7 @@ BEGIN
 
 		INSERT INTO #tmpCMBankTransaction
 		 SELECT strPaymentRecordNum FROM tblAPPayment A
-		 INNER JOIN #tmpPayablePostData B ON A.intPaymentId = B.intPaymentId
+		 WHERE A.intPaymentId = @prepaymentId
 
 		-- Calling the stored procedure
 		EXEC dbo.uspCMBankTransactionReversal @userId, DEFAULT, @isSuccessful OUTPUT
@@ -104,13 +80,13 @@ BEGIN
 		FROM tblAPPayment A 
 			INNER JOIN tblCMBankTransaction B
 				ON A.strPaymentRecordNum = B.strTransactionId
-		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		WHERE intPaymentId IN (@prepaymentId)
 
 		--update payment record
 		UPDATE tblAPPayment
 			SET ysnPosted= 0
 		FROM tblAPPayment A 
-		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		WHERE intPaymentId IN (@prepaymentId)
 
 		--Insert Successfully unposted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -121,7 +97,7 @@ BEGIN
 			@batchId,
 			A.intPaymentId
 		FROM tblAPPayment A
-		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		WHERE intPaymentId IN (@prepaymentId)
 
 		IF @@ERROR <> 0 OR @isSuccessful = 0 GOTO Post_Rollback;
 
@@ -295,8 +271,10 @@ ELSE
 Post_Commit:
 	COMMIT TRANSACTION
 	SET @success = 1
+	RETURN;
 
 Post_Rollback:
 	ROLLBACK TRANSACTION		            
 	SET @success = 0
+	RETURN;
 

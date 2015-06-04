@@ -59,6 +59,7 @@ FROM tblPOPurchase A
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
 	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.intShipViaID
 	LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
+	LEFT JOIN (tblCTContractHeader G1 INNER JOIN tblCTContractDetail G2 ON G1.intContractHeaderId = G2.intContractHeaderId) ON G2.intEntityId = D1.intEntityVendorId
 UNION ALL
 --Miscellaneous items
 SELECT
