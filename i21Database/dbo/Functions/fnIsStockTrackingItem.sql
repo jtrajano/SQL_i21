@@ -13,6 +13,7 @@ BEGIN
 						WHEN Item.strType = 'Manufacturing' THEN 1
 						WHEN Item.strType = 'Raw Material' THEN 1
 						WHEN Item.strType = 'Commodity' THEN 1
+						WHEN Item.strType = 'Finished Good' THEN 1
 						ELSE 0 
 				END 
 	FROM	dbo.tblICItem Item
