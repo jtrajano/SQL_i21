@@ -8,6 +8,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
         'GeneralLedger.store.BufAccountId',
         'GeneralLedger.store.BufAccountCategoryGroup',
         'Inventory.store.BufferedItemStockView',
+        'Inventory.store.BufferedStockTrackingItemView',
         'Inventory.store.BufferedStorageLocation',
         'Inventory.store.BufferedLot',
         'Inventory.store.BufferedPostedLot',
@@ -54,7 +55,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
         },
 
         item: {
-            type: 'icbuffereditemstockview'
+            type: 'icbufferedstocktrackingitemview'
         },
         subLocation: {
             type: 'smcompanylocationsublocationbuffered'

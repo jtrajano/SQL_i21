@@ -172,6 +172,42 @@ namespace iRely.Inventory.BusinessLayer
         }
 
         /// <summary>
+        /// Get Stock Tracking Items
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<SearchResult> GetStockTrackingItems(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetItemStock>()
+                .Where(
+                        p => p.strType == "Inventory" ||
+                        p.strType == "Assembly/Blend" || 
+                        p.strType == "Manufacturing" || 
+                        p.strType == "Raw Material" || 
+                        p.strType == "Commodity" ||
+                        p.strType == "Finished Good" 
+                    )
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+
+            //var query = _db.GetQuery<vyuICGetItemStock>().Filter(param, true);
+            //var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+
+            //return new SearchResult()
+            //{
+            //    data = data.AsQueryable(),
+            //    total = await query.CountAsync()
+            //};
+        }
+
+
+        /// <summary>
         /// Get Item Stock Details
         /// </summary>
         /// <param name="param"></param>

@@ -65,15 +65,18 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             },
             grdInventoryAdjustment: {
                 readOnly: '{current.ysnPosted}',
+
                 colItemNumber: {
                     dataIndex: 'strItemNo',
                     editor: {
                         store: '{item}',
-                        defaultFilters: [{
-                            column: 'intLocationId',
-                            value: '{current.intLocationId}',
-                            conjunction: 'and'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intLocationId}',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 },
 
