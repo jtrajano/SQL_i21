@@ -53,6 +53,23 @@ SELECT
 			ELSE NULL
 			END
 		),
+	dblUnitQty = 
+		(
+			CASE WHEN Receipt.strReceiptType = 'Contract'
+				THEN 0
+			WHEN Receipt.strReceiptType = 'Purchase Order'
+				THEN (SELECT tblICItemUOM.dblUnitQty FROM tblPOPurchaseDetail
+						LEFT JOIN tblICItemUOM ON tblPOPurchaseDetail.intUnitOfMeasureId = tblICItemUOM.intItemUOMId
+						WHERE intPurchaseId = ReceiptItem.intSourceId AND intPurchaseDetailId = ReceiptItem.intLineNo)
+			WHEN Receipt.strReceiptType = 'Transfer Receipt'
+				THEN 0
+			WHEN Receipt.strReceiptType = 'Direct Transfer'
+				THEN 0
+			WHEN Receipt.strReceiptType = 'Direct'
+				THEN NULL
+			ELSE NULL
+			END
+		),
 	dblOrdered = 
 		(
 			CASE WHEN Receipt.strReceiptType = 'Contract'

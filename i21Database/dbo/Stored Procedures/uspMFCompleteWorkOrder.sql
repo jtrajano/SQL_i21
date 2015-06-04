@@ -17,6 +17,7 @@ BEGIN TRY
 		,@intLocationId INT
 		,@dtmPlannedDate DATETIME
 		,@intPlannedShiftId INT
+		,@intStatusId int
 		,@intManufacturingProcessId INT
 		,@intStorageLocationId INT
 		,@intContainerId INT
@@ -42,6 +43,7 @@ BEGIN TRY
 		,@intMachineId int
 		,@ysnLotAlias bit
 		,@strLotAlias nvarchar(50)
+		,@strReferenceNo nvarchar(50)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -50,6 +52,7 @@ BEGIN TRY
 		,@intManufacturingProcessId = intManufacturingProcessId
 		,@dtmPlannedDate = dtmPlannedDate
 		,@intPlannedShiftId = intPlannedShiftId
+		,@intStatusId=intStatusId
 		,@intItemId = intItemId
 		,@dblProduceQty = dblProduceQty
 		,@intProduceUnitMeasureId = intProduceUnitMeasureId
@@ -80,11 +83,13 @@ BEGIN TRY
 		,@intMachineId =intMachineId
 		,@ysnLotAlias =ysnLotAlias
 		,@strLotAlias =strLotAlias
+		,@strReferenceNo=strReferenceNo
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intManufacturingProcessId INT
 			,dtmPlannedDate DATETIME
 			,intPlannedShiftId INT
+			,intStatusId int
 			,intItemId INT
 			,dblProduceQty NUMERIC(18, 6)
 			,intProduceUnitMeasureId INT
@@ -109,33 +114,34 @@ BEGIN TRY
 			,intMachineId int
 			,ysnLotAlias bit
 			,strLotAlias nvarchar(50)
+			,strReferenceNo nvarchar(50)
 			)
 
 	BEGIN TRANSACTION
 
-	IF @intPhysicalItemUOMId IS NULL
-	BEGIN
-		SELECT @intPhysicalItemUOMId = intItemUOMId
-		FROM dbo.tblICItemUOM
-		WHERE intItemId = @intItemId
-			AND intUnitMeasureId IN (
-				SELECT intUnitMeasureId
-				FROM dbo.tblICUnitMeasure
-				WHERE strUnitMeasure LIKE '%bag%'
-				)
-	END
+	--IF @intPhysicalItemUOMId IS NULL
+	--BEGIN
+	--	SELECT @intPhysicalItemUOMId = intItemUOMId
+	--	FROM dbo.tblICItemUOM
+	--	WHERE intItemId = @intItemId
+	--		AND intUnitMeasureId IN (
+	--			SELECT intUnitMeasureId
+	--			FROM dbo.tblICUnitMeasure
+	--			WHERE strUnitMeasure LIKE '%bag%'
+	--			)
+	--END
 
-	UPDATE tblMFWorkOrder
-	SET intStatusId = 10
-	WHERE intWorkOrderId = @intWorkOrderId
+	--UPDATE tblMFWorkOrder
+	--SET intStatusId = 10
+	--WHERE intWorkOrderId = @intWorkOrderId
 
 	SELECT @dtmCurrentDate = GetDate()
 
-	IF @intSubLocationId IS NULL
-		OR @intSubLocationId = 0
-		SELECT @intSubLocationId = intSubLocationId
-		FROM dbo.tblICStorageLocation
-		WHERE intStorageLocationId = @intStorageLocationId
+	--IF @intSubLocationId IS NULL
+	--	OR @intSubLocationId = 0
+	--	SELECT @intSubLocationId = intSubLocationId
+	--	FROM dbo.tblICStorageLocation
+	--	WHERE intStorageLocationId = @intStorageLocationId
 
 	SELECT @strLotTracking = strLotTracking
 	FROM dbo.tblICItem
@@ -379,6 +385,9 @@ BEGIN TRY
 		,@intPhysicalItemUOMId = @intPhysicalItemUOMId
 		,@intBatchId = @intBatchId
 		,@strBatchId = @strRetBatchId
+		,@intShiftId=@intPlannedShiftId
+		,@strReferenceNo=@strReferenceNo
+		,@intStatusId=@intStatusId
 		,@intLotId = @intLotId OUTPUT
 
 	UPDATE dbo.tblICLot

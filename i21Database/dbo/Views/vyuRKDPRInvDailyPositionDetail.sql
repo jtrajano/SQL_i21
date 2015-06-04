@@ -4,9 +4,17 @@
 SELECT intCommodityId,'In-House' as [strType],         
 	    ISNULL(invQty,0)-ISNULL(ReserveQty,0) AS dblTotal
 FROM(            
-SELECT  c.intCommodityId,
-		SUM(it.dblUnitOnHand) invQty,            
-		SUM(sr.dblQty) ReserveQty       
+SELECT  c.intCommodityId
+		,(SELECT sum(isnull(it1.dblUnitOnHand,0)) 		   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   and
+		i1.intCommodityId= c.intCommodityId) as invQty
+		,(SELECT SUM(isnull(sr1.dblQty,0))  	   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   
+		JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId   
+		WHERE 
+		i1.intCommodityId=c.intCommodityId ) as ReserveQty     
 FROM tblICCommodity c            
 LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId            
 LEFT JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId            
@@ -20,8 +28,16 @@ SELECT intCommodityId,'Off-Site' as [strType],
 	    ISNULL(invQty,0)-ISNULL(ReserveQty,0) AS dblTotal
 FROM(            
 SELECT   c.intCommodityId,
-		SUM(it.dblUnitOnHand) invQty,            
-		SUM(sr.dblQty) ReserveQty       
+		(SELECT sum(isnull(it1.dblUnitOnHand,0)) 		   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   and
+		i1.intCommodityId= c.intCommodityId) as invQty
+		,(SELECT SUM(isnull(sr1.dblQty,0))  	   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   
+		JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId   
+		WHERE 
+		i1.intCommodityId=c.intCommodityId ) as ReserveQty     
 FROM tblICCommodity c            
 LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId            
 LEFT JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId            
@@ -35,8 +51,16 @@ SELECT intCommodityId,'Purchase In-Transit' as [strType],
 	    ISNULL(ReserveQty,0) AS dblTotal
 FROM(            
 SELECT   c.intCommodityId,
-		SUM(it.dblUnitOnHand) invQty,            
-		SUM(sr.dblQty) ReserveQty       
+		(SELECT sum(isnull(it1.dblUnitOnHand,0)) 		   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   and
+		i1.intCommodityId= c.intCommodityId) as invQty
+		,(SELECT SUM(isnull(sr1.dblQty,0))  	   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   
+		JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId   
+		WHERE 
+		i1.intCommodityId=c.intCommodityId ) as ReserveQty     
 FROM tblICCommodity c            
 LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId            
 LEFT JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId            
@@ -50,8 +74,16 @@ SELECT intCommodityId,'Sales In-Transit' as [strType],
 	    ISNULL(ReserveQty,0) AS dblTotal
 FROM(            
 SELECT   c.intCommodityId,
-		SUM(it.dblUnitOnHand) invQty,            
-		SUM(sr.dblQty) ReserveQty       
+				(SELECT sum(isnull(it1.dblUnitOnHand,0)) 		   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   and
+		i1.intCommodityId= c.intCommodityId) as invQty
+		,(SELECT SUM(isnull(sr1.dblQty,0))  	   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   
+		JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId   
+		WHERE 
+		i1.intCommodityId=c.intCommodityId ) as ReserveQty        
 FROM tblICCommodity c            
 LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId            
 LEFT JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId            
@@ -65,8 +97,16 @@ SELECT intCommodityId,'Open Storage' as [strType],
 	    ISNULL(invQty,0)-ISNULL(ReserveQty,0) AS dblTotal
 FROM(            
 SELECT   c.intCommodityId,
-		SUM(it.dblUnitOnHand) invQty,            
-		SUM(sr.dblQty) ReserveQty       
+			(SELECT sum(isnull(it1.dblUnitOnHand,0)) 		   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   and
+		i1.intCommodityId= c.intCommodityId) as invQty
+		,(SELECT SUM(isnull(sr1.dblQty,0))  	   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   
+		JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId   
+		WHERE 
+		i1.intCommodityId=c.intCommodityId ) as ReserveQty       
 FROM tblICCommodity c            
 LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId            
 LEFT JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId            
@@ -80,8 +120,16 @@ SELECT intCommodityId,'Grain Bank' as [strType],
 	    ISNULL(invQty,0)-ISNULL(ReserveQty,0) AS dblTotal
 FROM(            
 SELECT   c.intCommodityId,
-		SUM(it.dblUnitOnHand) invQty,            
-		SUM(sr.dblQty) ReserveQty       
+				(SELECT sum(isnull(it1.dblUnitOnHand,0)) 		   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   and
+		i1.intCommodityId= c.intCommodityId) as invQty
+		,(SELECT SUM(isnull(sr1.dblQty,0))  	   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   
+		JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId   
+		WHERE 
+		i1.intCommodityId=c.intCommodityId ) as ReserveQty      
 FROM tblICCommodity c            
 LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId            
 LEFT JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId            
@@ -95,8 +143,16 @@ SELECT intCommodityId,'Condo Storage' as [strType],
 	    ISNULL(invQty,0)-ISNULL(ReserveQty,0) AS dblTotal
 FROM(            
 SELECT   c.intCommodityId,
-		SUM(it.dblUnitOnHand) invQty,            
-		SUM(sr.dblQty) ReserveQty       
+				(SELECT sum(isnull(it1.dblUnitOnHand,0)) 		   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   and
+		i1.intCommodityId= c.intCommodityId) as invQty
+		,(SELECT SUM(isnull(sr1.dblQty,0))  	   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   
+		JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId   
+		WHERE 
+		i1.intCommodityId=c.intCommodityId ) as ReserveQty     
 FROM tblICCommodity c            
 LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId            
 LEFT JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId            
@@ -110,8 +166,16 @@ SELECT intCommodityId,'Other Third Party Storage' as [strType],
 	    ISNULL(invQty,0)-ISNULL(ReserveQty,0) AS dblTotal
 FROM(            
 SELECT   c.intCommodityId,
-		SUM(it.dblUnitOnHand) invQty,            
-		SUM(sr.dblQty) ReserveQty       
+			(SELECT sum(isnull(it1.dblUnitOnHand,0)) 		   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   and
+		i1.intCommodityId= c.intCommodityId) as invQty
+		,(SELECT SUM(isnull(sr1.dblQty,0))  	   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   
+		JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId   
+		WHERE 
+		i1.intCommodityId=c.intCommodityId ) as ReserveQty      
 FROM tblICCommodity c            
 LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId            
 LEFT JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId            
@@ -125,8 +189,16 @@ SELECT intCommodityId,'dblTotal Non-Receipted' as [strType],
 	    ISNULL(invQty,0)-ISNULL(ReserveQty,0) AS dblTotal
 FROM(            
 SELECT   c.intCommodityId,
-		SUM(it.dblUnitOnHand) invQty,            
-		SUM(sr.dblQty) ReserveQty       
+				(SELECT sum(isnull(it1.dblUnitOnHand,0)) 		   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   and
+		i1.intCommodityId= c.intCommodityId) as invQty
+		,(SELECT SUM(isnull(sr1.dblQty,0))  	   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   
+		JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId   
+		WHERE 
+		i1.intCommodityId=c.intCommodityId ) as ReserveQty       
 FROM tblICCommodity c            
 LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId            
 LEFT JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId            
@@ -140,8 +212,16 @@ SELECT intCommodityId,'Collatral Receipts - Sales' as [strType],
 	    ISNULL(invQty,0)-ISNULL(ReserveQty,0) AS dblTotal
 FROM(            
 SELECT   c.intCommodityId,
-		SUM(it.dblUnitOnHand) invQty,            
-		SUM(sr.dblQty) ReserveQty       
+				(SELECT sum(isnull(it1.dblUnitOnHand,0)) 		   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   and
+		i1.intCommodityId= c.intCommodityId) as invQty
+		,(SELECT SUM(isnull(sr1.dblQty,0))  	   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   
+		JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId   
+		WHERE 
+		i1.intCommodityId=c.intCommodityId ) as ReserveQty     
 FROM tblICCommodity c            
 LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId            
 LEFT JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId            
@@ -155,8 +235,16 @@ SELECT intCommodityId,'Collatral Receipts - Purchases' as [strType],
 	    ISNULL(invQty,0)-ISNULL(ReserveQty,0) AS dblTotal
 FROM(            
 SELECT   c.intCommodityId,
-		SUM(it.dblUnitOnHand) invQty,            
-		SUM(sr.dblQty) ReserveQty       
+				(SELECT sum(isnull(it1.dblUnitOnHand,0)) 		   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   and
+		i1.intCommodityId= c.intCommodityId) as invQty
+		,(SELECT SUM(isnull(sr1.dblQty,0))  	   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   
+		JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId   
+		WHERE 
+		i1.intCommodityId=c.intCommodityId ) as ReserveQty     
 FROM tblICCommodity c            
 LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId            
 LEFT JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId            
@@ -170,8 +258,16 @@ SELECT intCommodityId,'Warehouse Receipts' as [strType],
 	    ISNULL(invQty,0)-ISNULL(ReserveQty,0) AS dblTotal
 FROM(            
 SELECT   c.intCommodityId,
-		SUM(it.dblUnitOnHand) invQty,            
-		SUM(sr.dblQty) ReserveQty       
+			(SELECT sum(isnull(it1.dblUnitOnHand,0)) 		   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   and
+		i1.intCommodityId= c.intCommodityId) as invQty
+		,(SELECT SUM(isnull(sr1.dblQty,0))  	   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   
+		JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId   
+		WHERE 
+		i1.intCommodityId=c.intCommodityId ) as ReserveQty      
 FROM tblICCommodity c            
 LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId            
 LEFT JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId            
@@ -185,8 +281,16 @@ SELECT intCommodityId,'DP' as [strType],
 	    ISNULL(invQty,0)-ISNULL(ReserveQty,0) AS dblTotal
 FROM(            
 SELECT   c.intCommodityId,
-		SUM(it.dblUnitOnHand) invQty,            
-		SUM(sr.dblQty) ReserveQty       
+				(SELECT sum(isnull(it1.dblUnitOnHand,0)) 		   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   and
+		i1.intCommodityId= c.intCommodityId) as invQty
+		,(SELECT SUM(isnull(sr1.dblQty,0))  	   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   
+		JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId   
+		WHERE 
+		i1.intCommodityId=c.intCommodityId ) as ReserveQty      
 FROM tblICCommodity c            
 LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId            
 LEFT JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId            
@@ -200,8 +304,16 @@ SELECT intCommodityId,'Purchase Basis Deliveries' as [strType],
 	    ISNULL(invQty,0)-ISNULL(ReserveQty,0) AS dblTotal
 FROM(            
 SELECT   c.intCommodityId,
-		SUM(it.dblUnitOnHand) invQty,            
-		SUM(sr.dblQty) ReserveQty       
+			(SELECT sum(isnull(it1.dblUnitOnHand,0)) 		   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   and
+		i1.intCommodityId= c.intCommodityId) as invQty
+		,(SELECT SUM(isnull(sr1.dblQty,0))  	   
+		FROM tblICItem i1 
+		JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   
+		JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId   
+		WHERE 
+		i1.intCommodityId=c.intCommodityId ) as ReserveQty      
 FROM tblICCommodity c            
 LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId            
 LEFT JOIN tblICUnitMeasure u on um.intUnitMeasureId=u.intUnitMeasureId            

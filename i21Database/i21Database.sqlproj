@@ -1652,6 +1652,10 @@
     <Build Include="dbo\Stored Procedures\uspMFGetStageDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillAmounts.sql" />
     <Build Include="dbo\Views\vyuAPBillStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetCarrierShipmentReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetCarrierShipmentSubReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetCycleCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLSummaryRecalculate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

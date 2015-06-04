@@ -26,6 +26,7 @@ BEGIN TRY
 		,@ysnSubstituteItem BIT
 		,@dblSubstituteRatio NUMERIC(18, 6)
 		,@dblMaxSubstituteRatio NUMERIC(18, 6)
+		,@intStorageLocationId int
 
 	BEGIN TRAN
 
@@ -185,6 +186,7 @@ BEGIN TRY
 
 		SELECT @intItemId = intItemId
 			,@dblReqQty = dblReqQty
+			,@intStorageLocationId=intStorageLocationId
 		FROM @tblItem
 		WHERE intItemRecordKey = @intItemRecordKey
 
@@ -253,13 +255,13 @@ BEGIN TRY
 			JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 			WHERE LS.strSecondaryStatus = 'Active'
 				AND dtmExpiryDate >= Getdate()
-				--AND L.intStorageLocationId = (
-				--	CASE 
-				--		WHEN I.intStorageLocationId IS NULL
-				--			THEN L.intStorageLocationId
-				--		ELSE I.intStorageLocationId
-				--		END
-				--	)
+				AND L.intStorageLocationId = (
+					CASE 
+						WHEN @intStorageLocationId IS NULL
+							THEN L.intStorageLocationId
+						ELSE @intStorageLocationId
+						END
+					)
 				AND (
 					L.dblWeight > 0
 					OR L.dblQty > 0
@@ -323,13 +325,13 @@ BEGIN TRY
 		JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 		WHERE LS.strSecondaryStatus = 'Active'
 			AND dtmExpiryDate >= Getdate()
-			--AND L.intStorageLocationId = (
-			--	CASE 
-			--		WHEN I.intStorageLocationId IS NULL
-			--			THEN L.intStorageLocationId
-			--		ELSE I.intStorageLocationId
-			--		END
-			--	)
+			AND L.intStorageLocationId = (
+				CASE 
+					WHEN @intStorageLocationId IS NULL
+						THEN L.intStorageLocationId
+					ELSE @intStorageLocationId
+					END
+				)
 			AND (
 				L.dblWeight > 0
 				OR L.dblQty > 0
