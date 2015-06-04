@@ -335,7 +335,7 @@ BEGIN TRY
 		WHERE intLotId = @intInputLotId
 	END
 
-	IF @ysnProductionOnly = 0
+	IF @ysnProductionOnly = 0--Consumption will happen during true up.
 	BEGIN
 		EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
 			,@dblProduceQty = @dblProduceQty
@@ -372,6 +372,7 @@ BEGIN TRY
 		,@intMachineId =@intMachineId
 		,@ysnLotAlias =@ysnLotAlias
 		,@strLotAlias =@strLotAlias
+		,@ysnProductionOnly=@ysnProductionOnly
 
 	EXEC dbo.uspMFProduceWorkOrder @intWorkOrderId = @intWorkOrderId
 		,@intItemId = @intItemId
