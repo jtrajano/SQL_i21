@@ -297,6 +297,7 @@ BEGIN TRY
 
 		INSERT INTO dbo.tblMFWorkOrderConsumedLot (
 			intWorkOrderId
+			,intItemId
 			,intLotId
 			,dblQuantity
 			,intItemUOMId
@@ -310,6 +311,7 @@ BEGIN TRY
 			,intLastModifiedUserId
 			)
 		SELECT @intWorkOrderId
+			,@intItemId
 			,intLotId
 			,CASE 
 				WHEN @dblInputWeight = 0
@@ -372,6 +374,7 @@ BEGIN TRY
 		,@strLotAlias =@strLotAlias
 
 	EXEC dbo.uspMFProduceWorkOrder @intWorkOrderId = @intWorkOrderId
+		,@intItemId = @intItemId
 		,@dblProduceQty = @dblProduceQty
 		,@intProduceUOMKey = @intProduceUnitMeasureId
 		,@strVesselNo = @strVesselNo

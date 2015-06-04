@@ -206,6 +206,7 @@ BEGIN TRY
 
 	INSERT INTO dbo.tblMFWorkOrderInputLot (
 		intWorkOrderId
+		,intItemId
 		,intLotId
 		,dblQuantity
 		,intItemUOMId
@@ -225,6 +226,7 @@ BEGIN TRY
 		,intLastModifiedUserId
 		)
 	SELECT @intWorkOrderId
+		,intItemId
 		,intLotId
 		,@dblInputWeight
 		,intWeightUOMId

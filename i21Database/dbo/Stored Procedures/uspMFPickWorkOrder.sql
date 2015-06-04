@@ -70,6 +70,7 @@ BEGIN TRY
 
 	INSERT INTO tblMFWorkOrderConsumedLot (
 		intWorkOrderId
+		,intItemId
 		,intLotId
 		,dblQuantity
 		,intItemUOMId
@@ -83,6 +84,7 @@ BEGIN TRY
 		,intLastModifiedUserId
 		)
 	SELECT WI.intWorkOrderId
+		,L.intItemId
 		,WI.intLotId
 		,WI.dblQuantity
 		,WI.intItemUOMId
@@ -384,6 +386,7 @@ BEGIN TRY
 			BEGIN
 				INSERT INTO tblMFWorkOrderConsumedLot (
 					intWorkOrderId
+					,intItemId
 					,intLotId
 					,dblQuantity
 					,intItemUOMId
@@ -397,6 +400,7 @@ BEGIN TRY
 					,intLastModifiedUserId
 					)
 				SELECT @intWorkOrderId
+					,@intItemId
 					,intLotId
 					,@dblReqQty
 					,intItemUOMId
@@ -436,6 +440,7 @@ BEGIN TRY
 			BEGIN
 				INSERT INTO tblMFWorkOrderConsumedLot (
 					intWorkOrderId
+					,intItemId
 					,intLotId
 					,dblQuantity
 					,intItemUOMId
@@ -449,6 +454,7 @@ BEGIN TRY
 					,intLastModifiedUserId
 					)
 				SELECT @intWorkOrderId
+					,@intItemId
 					,intLotId
 					,@dblQty
 					,intItemUOMId
