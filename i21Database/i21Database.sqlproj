@@ -1652,6 +1652,9 @@
     <Build Include="dbo\Stored Procedures\uspLGGetCarrierShipmentSubReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCycleCount.sql" />
     <Build Include="dbo\Stored Procedures\uspGLSummaryRecalculate.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCAddScaleTicketToItemShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGetScaleItemForItemShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessToInventoryShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
