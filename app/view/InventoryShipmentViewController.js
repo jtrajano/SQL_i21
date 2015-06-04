@@ -15,7 +15,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 {dataIndex: 'dtmShipDate', text: 'Ship Date', flex: 1,  dataType: 'date', xtype: 'datecolumn'},
                 {dataIndex: 'strOrderType',text: 'Order Type', flex: 1,  dataType: 'int'},
                 {dataIndex: 'strCustomerId',text: 'Customer', flex: 1,  dataType: 'string'},
-                {dataIndex: 'strCustomerName',text: 'Customer Name', flex: 1,  dataType: 'string'}
+                {dataIndex: 'strCustomerName',text: 'Customer Name', flex: 1,  dataType: 'string'},
+                {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn'}
             ]
         },
         binding: {
