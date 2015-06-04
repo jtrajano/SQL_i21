@@ -262,7 +262,7 @@ namespace iRely.Inventory.Model
             get
             {
                 if (vyuICGetInventoryTransferDetail != null)
-                    return vyuICGetInventoryTransferDetail.dblOnHand ?? 0;
+                    return vyuICGetInventoryTransferDetail.dblAvailableQty ?? 0;
                 else
                     return 0;
             }
