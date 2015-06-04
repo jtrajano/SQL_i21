@@ -9,7 +9,7 @@ BEGIN TRY
 			@ConcurrencyId			INT,
 			@StartDate				DATETIME,
 			@EndDate				DATETIME,
-			@Quantity				DECIMAL(12,4),
+			@dblQtyToPrice			DECIMAL(12,4),
 			@Futures				DECIMAL(12,4),
 			@Basis					DECIMAL(12,4),
 			@FutureMarketId			INT,
@@ -27,7 +27,7 @@ BEGIN TRY
 			@ConcurrencyId			=	intConcurrencyId,
 			@StartDate				=	dtmStartDate,
 			@EndDate				=	dtmEndDate,
-			@Quantity				=	dblQuantity,
+			@dblQtyToPrice			=	dblQtyToPrice,
 			@Futures				=	dblFutures,
 			@Basis					=	dblBasis,
 			@FutureMarketId			=	intFutureMarketId,
@@ -41,7 +41,7 @@ BEGIN TRY
 			intConcurrencyId		INT,
 			dtmStartDate			DATETIME,
 			dtmEndDate				DATETIME,
-			dblQuantity				DECIMAL(12,4),
+			dblQtyToPrice			DECIMAL(12,4),
 			dblFutures				DECIMAL(12,4),
 			dblBasis				DECIMAL(12,4),
 			intFutureMarketId		INT,
@@ -76,7 +76,7 @@ BEGIN TRY
 	ELSE IF	(@Basis IS NULL)
 		SET @intPricingType = 3
 
-	IF	@CurrentQty <> @Quantity
+	IF	@CurrentQty <> @dblQtyToPrice
 	BEGIN
 		INSERT	INTO tblCTContractDetail
 		(
@@ -95,7 +95,7 @@ BEGIN TRY
 		SELECT 
 				1,						intContractHeaderId,	@ContractSeq,			intCompanyLocationId,
 				dtmStartDate,			intItemId,				dtmEndDate,				intFreightTermId,
-				intShipViaId,			@CurrentQty-@Quantity,	intUnitMeasureId,		intPricingTypeId,
+				intShipViaId,			@CurrentQty-@dblQtyToPrice,	intUnitMeasureId,		intPricingTypeId,
 				dblFutures,				dblBasis,				intFutureMarketId,		intFutureMonthId,
 				dblCashPrice,			intCurrencyId,			dblRate,				strCurrencyReference,
 				intMarketZoneId,		intDiscountTypeId,		intDiscountId,			intContractOptHeaderId,
@@ -135,7 +135,7 @@ BEGIN TRY
 		WHERE	intContractDetailId = @ContractDetailId
 		
 		UPDATE	tblCTContractDetail
-		SET		dblQuantity				=	@Quantity,
+		SET		dblQuantity				=	@dblQtyToPrice,
 				dblFutures				=	@Futures,
 				dblBasis				=	@Basis,
 				dblCashPrice			=	@Futures + @Basis,
