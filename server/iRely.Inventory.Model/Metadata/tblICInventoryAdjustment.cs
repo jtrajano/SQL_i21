@@ -134,6 +134,7 @@ namespace iRely.Inventory.Model
                 _subLocation = value;
             }
         }
+
         // 2: Storage Location
         private string _storageLocation;
         [NotMapped]

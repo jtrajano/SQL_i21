@@ -176,7 +176,16 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
                 colUOM: {
                     dataIndex: 'strItemUOM',
-                    hidden: '{formulaHideColumn_colUOM}'
+                    hidden: '{formulaHideColumn_colUOM}',
+                    editor: {
+                        store: '{itemUOM}',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{grdInventoryAdjustment.selection.intItemId}',
+                            conjunction: 'and'
+                        }],
+                        readOnly: '{formulaShowItemUOMEditor}'
+                    }
                 },
 
                 colNewUOM: {
@@ -464,13 +473,16 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
         if (combo.itemId === 'cboItemNo')
         {
+
             // Populate the default data.
             current.set('intItemId', record.get('intItemId'));
             current.set('strItemDescription', record.get('strDescription'));
 
             // Check if selected item lot-tracking = NO.
             // Non Lot items will need to use stock UOM.
-            if (record.get('strLotTracking') == 'No'){
+            var strLotTracking = record.get('strLotTracking');
+
+            if (strLotTracking == 'No'){
                 current.set('dblQuantity', record.get('dblUnitOnHand'));
                 current.set('dblCost', record.get('dblLastCost'));
                 current.set('intItemUOMId', record.get('intStockUOMId'));
@@ -504,6 +516,21 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('dblWeightPerQty', null);
             current.set('dblNewWeightPerQty', null);
             current.set('dblLineTotal', 0.00);
+            current.set('strLotTracking', strLotTracking);
+
+            // Set the editor for Lot and UOM
+            var cboLotNumber = win.down('#cboLotNumber');
+            var cboUOM = win.down('#cboUOM');
+
+            if (strLotTracking == 'No'){
+                if (cboLotNumber) cboLotNumber.setReadOnly(true);
+                if (cboUOM) cboUOM.setReadOnly(false);
+            }
+            else {
+                if (cboLotNumber) cboLotNumber.setReadOnly(false);
+                if (cboUOM) cboUOM.setReadOnly(true);
+            }
+
         }
         else if (combo.itemId === 'cboSubLocation')
         {
@@ -605,6 +632,11 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         {
             current.set('intNewItemUOMId', record.get('intItemUOMId'));
         }
+        else if (combo.itemId === 'cboUOM')
+        {
+            current.set('intItemUOMId', record.get('intItemUOMId'));
+        }
+
         else if (combo.itemId === 'cboNewWeightUOM')
         {
             current.set('intNewWeightUOMId', record.get('intItemUOMId'));
@@ -965,6 +997,17 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         }
     },
 
+    onUOMChange: function(control, newUOM, oldValue, eOpts ){
+        var me = this;
+        var grid = control.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+        if (current && (newUOM === null || newUOM === '')){
+            current.set('intItemUOMId', null);
+        }
+    },
+
+
     onNewWeightUOMChange: function(control, newWeightUOM, oldValue, eOpts ){
         var me = this;
         var grid = control.up('grid');
@@ -1022,6 +1065,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             },
             "#cboSubLocation": {
                 select: this.onAdjustmentDetailSelect
+            },
+            "#cboUOM": {
+                select: this.onAdjustmentDetailSelect,
+                change: this.onUOMChange
             },
             "#cboNewUOM": {
                 select: this.onAdjustmentDetailSelect,

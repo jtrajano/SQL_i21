@@ -68,6 +68,9 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
         newLot: {
             type: 'icbufferedlot'
         },
+        itemUOM: {
+            type: 'icbuffereditemunitmeasure'
+        },
         newItemUOM: {
             type: 'icbuffereditemunitmeasure'
         },
@@ -108,24 +111,43 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
 
     formulas: {
         formulaShowLotNumberEditor: function(get){
-            var hide = true
-                ,show = false;
-
+            var me = this;
             var posted = get('current.ysnPosted');
             if (posted){
-                return hide;
+                return me.hide;
             }
             else {
                 var itemId = get('grdInventoryAdjustment.selection.intItemId');
                 if (!Ext.isNumeric(itemId))
-                    return hide;
+                    return me.hide;
 
                 var lotTracking = get('grdInventoryAdjustment.selection.strLotTracking');
                 if (lotTracking == 'No'){
-                    return hide;
+                    return me.hide;
                 }
                 else {
-                    return show;
+                    return me.show;
+                }
+            }
+        },
+
+        formulaShowItemUOMEditor: function(get){
+            var me = this;
+            var posted = get('current.ysnPosted');
+            if (posted){
+                return me.hide;
+            }
+            else {
+                var itemId = get('grdInventoryAdjustment.selection.intItemId');
+                if (!Ext.isNumeric(itemId))
+                    return me.hide;
+
+                var lotTracking = get('grdInventoryAdjustment.selection.strLotTracking');
+                if (lotTracking == 'No'){
+                    return me.show;
+                }
+                else {
+                    return me.hide;
                 }
             }
         },
