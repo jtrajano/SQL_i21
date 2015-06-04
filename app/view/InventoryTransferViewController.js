@@ -511,7 +511,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             var posted = win.viewModel.data.current.get('ysnPosted');
 
             var options = {
-                postURL             : '../Inventory/api/Transfer/Post',
+                postURL             : '../Inventory/api/InventoryTransfer/PostTransaction',
                 strTransactionId    : strTransferNo,
                 isPost              : !posted,
                 isRecap             : false,
@@ -545,7 +545,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
 
             // Call the buildRecapData to generate the recap data
             CashManagement.common.BusinessRules.buildRecapData({
-                postURL: '../Inventory/api/Transfer/Post',
+                postURL: '../Inventory/api/InventoryTransfer/PostTransaction',
                 strTransactionId: currentRecord.get('strTransferNo'),
                 ysnPosted: currentRecord.get('ysnPosted'),
                 scope: me,

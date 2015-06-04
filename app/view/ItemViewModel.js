@@ -5,7 +5,6 @@ Ext.define('Inventory.view.ItemViewModel', {
     requires: [
         'Inventory.store.BufferedCompactItem',
         'Inventory.store.BufferedManufacturer',
-        'Inventory.store.BufferedManufacturingCell',
         'Inventory.store.BufferedCategory',
         'Inventory.store.BufferedPatronageCategory',
         'Inventory.store.BufferedInventoryTag',
@@ -34,7 +33,8 @@ Ext.define('Inventory.view.ItemViewModel', {
         'i21.store.CountryBuffered',
         'i21.store.TaxGroupMasterBuffered',
         'GeneralLedger.store.BufAccountId',
-        'GeneralLedger.store.BufAccountCategoryGroup'
+        'GeneralLedger.store.BufAccountCategoryGroup',
+        'Manufacturing.store.BufferedManufacturingCell'
     ],
 
     stores: {
@@ -107,7 +107,21 @@ Ext.define('Inventory.view.ItemViewModel', {
             ]
         },
         itemCategory: {
-            type: 'icbufferedcategory'
+            type: 'icbufferedcategory',
+            proxy: {
+                extraParams: {
+                    include: 'tblICCategoryUOMs.tblICUnitMeasure, '
+                },
+                type: 'rest',
+                api: {
+                    read: '../Inventory/api/Category/Search'
+                },
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    messageProperty: 'message'
+                }
+            }
         },
         lotTracking: {
             autoLoad: true,
@@ -558,7 +572,18 @@ Ext.define('Inventory.view.ItemViewModel', {
 
 
         assemblyItem: {
-            type: 'icbufferedcompactitem'
+            type: 'icbufferedcompactitem',
+            proxy: {
+                type: 'rest',
+                api: {
+                    read: '../Inventory/api/Item/GetAssemblyComponents'
+                },
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    messageProperty: 'message'
+                }
+            }
         },
         assemblyUOM: {
             type: 'icbuffereditemunitmeasure'
@@ -605,7 +630,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             type: 'companylocationbuffered'
         },
         factoryManufacturingCell: {
-            type: 'icbufferedmanufacturingcell'
+            type: 'mfbufferedmanufacturingcell'
         },
         owner: {
             type: 'customerbuffered'

@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsf931630a6b8a9483126fdae9331b64268699e1411256fb33e0359f7d297eb682))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsb13fa2f6cc9cbcd1f67d948130fef00fdcabb30bfd4c030b1384eaf20b29cc3c))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsf931630a6b8a9483126fdae9331b64268699e1411256fb33e0359f7d297eb682 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsb13fa2f6cc9cbcd1f67d948130fef00fdcabb30bfd4c030b1384eaf20b29cc3c : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "f931630a6b8a9483126fdae9331b64268699e1411256fb33e0359f7d297eb682"; }
+            get { return "b13fa2f6cc9cbcd1f67d948130fef00fdcabb30bfd4c030b1384eaf20b29cc3c"; }
         }
 
         /// <summary>
@@ -2669,7 +2669,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryShipmentItem
-        [CodeFirstDatabaseSchema.tblICInventoryShipmentItem](T1.tblICInventoryShipmentItem_intInventoryShipmentItemId, T1.tblICInventoryShipmentItem_intInventoryShipmentId, T1.tblICInventoryShipmentItem_intSourceId, T1.tblICInventoryShipmentItem_intLineNo, T1.tblICInventoryShipmentItem_intItemId, T1.tblICInventoryShipmentItem_intSubLocationId, T1.tblICInventoryShipmentItem_dblQuantity, T1.tblICInventoryShipmentItem_intItemUOMId, T1.tblICInventoryShipmentItem_dblUnitPrice, T1.tblICInventoryShipmentItem_intTaxCodeId, T1.tblICInventoryShipmentItem_intDockDoorId, T1.tblICInventoryShipmentItem_strNotes, T1.tblICInventoryShipmentItem_intSort, T1.tblICInventoryShipmentItem_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICInventoryShipmentItem](T1.tblICInventoryShipmentItem_intInventoryShipmentItemId, T1.tblICInventoryShipmentItem_intInventoryShipmentId, T1.tblICInventoryShipmentItem_intSourceId, T1.tblICInventoryShipmentItem_intLineNo, T1.tblICInventoryShipmentItem_intItemId, T1.tblICInventoryShipmentItem_intSubLocationId, T1.tblICInventoryShipmentItem_dblQuantity, T1.tblICInventoryShipmentItem_intItemUOMId, T1.tblICInventoryShipmentItem_intWeightUOMId, T1.tblICInventoryShipmentItem_dblUnitPrice, T1.tblICInventoryShipmentItem_intTaxCodeId, T1.tblICInventoryShipmentItem_intDockDoorId, T1.tblICInventoryShipmentItem_strNotes, T1.tblICInventoryShipmentItem_intSort, T1.tblICInventoryShipmentItem_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryShipmentItemId AS tblICInventoryShipmentItem_intInventoryShipmentItemId, 
@@ -2680,6 +2680,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intSubLocationId AS tblICInventoryShipmentItem_intSubLocationId, 
             T.dblQuantity AS tblICInventoryShipmentItem_dblQuantity, 
             T.intItemUOMId AS tblICInventoryShipmentItem_intItemUOMId, 
+            T.intWeightUOMId AS tblICInventoryShipmentItem_intWeightUOMId, 
             T.dblUnitPrice AS tblICInventoryShipmentItem_dblUnitPrice, 
             T.intTaxCodeId AS tblICInventoryShipmentItem_intTaxCodeId, 
             T.intDockDoorId AS tblICInventoryShipmentItem_intDockDoorId, 
@@ -3673,7 +3674,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetReceiptItemSource
-        [CodeFirstDatabaseSchema.vyuICGetReceiptItemSource](T1.vyuICGetReceiptItemSource_intInventoryReceiptItemId, T1.vyuICGetReceiptItemSource_intSourceId, T1.vyuICGetReceiptItemSource_strReceiptType, T1.vyuICGetReceiptItemSource_strSourceId, T1.vyuICGetReceiptItemSource_dtmDate, T1.vyuICGetReceiptItemSource_strUnitMeasure, T1.vyuICGetReceiptItemSource_dblOrdered, T1.vyuICGetReceiptItemSource_dblReceived)
+        [CodeFirstDatabaseSchema.vyuICGetReceiptItemSource](T1.vyuICGetReceiptItemSource_intInventoryReceiptItemId, T1.vyuICGetReceiptItemSource_intSourceId, T1.vyuICGetReceiptItemSource_strReceiptType, T1.vyuICGetReceiptItemSource_strSourceId, T1.vyuICGetReceiptItemSource_dtmDate, T1.vyuICGetReceiptItemSource_strUnitMeasure, T1.vyuICGetReceiptItemSource_dblUnitQty, T1.vyuICGetReceiptItemSource_dblOrdered, T1.vyuICGetReceiptItemSource_dblReceived)
     FROM (
         SELECT 
             T.intInventoryReceiptItemId AS vyuICGetReceiptItemSource_intInventoryReceiptItemId, 
@@ -3682,6 +3683,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strSourceId AS vyuICGetReceiptItemSource_strSourceId, 
             T.dtmDate AS vyuICGetReceiptItemSource_dtmDate, 
             T.strUnitMeasure AS vyuICGetReceiptItemSource_strUnitMeasure, 
+            T.dblUnitQty AS vyuICGetReceiptItemSource_dblUnitQty, 
             T.dblOrdered AS vyuICGetReceiptItemSource_dblOrdered, 
             T.dblReceived AS vyuICGetReceiptItemSource_dblReceived, 
             True AS _from0
@@ -5467,7 +5469,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICInventoryShipmentItems
-        [iRely.Inventory.Model.tblICInventoryShipmentItem](T1.tblICInventoryShipmentItem_intInventoryShipmentItemId, T1.tblICInventoryShipmentItem_intInventoryShipmentId, T1.tblICInventoryShipmentItem_intSourceId, T1.tblICInventoryShipmentItem_intLineNo, T1.tblICInventoryShipmentItem_intItemId, T1.tblICInventoryShipmentItem_intSubLocationId, T1.tblICInventoryShipmentItem_dblQuantity, T1.tblICInventoryShipmentItem_intItemUOMId, T1.tblICInventoryShipmentItem_dblUnitPrice, T1.tblICInventoryShipmentItem_intTaxCodeId, T1.tblICInventoryShipmentItem_intDockDoorId, T1.tblICInventoryShipmentItem_strNotes, T1.tblICInventoryShipmentItem_intSort, T1.tblICInventoryShipmentItem_intConcurrencyId)
+        [iRely.Inventory.Model.tblICInventoryShipmentItem](T1.tblICInventoryShipmentItem_intInventoryShipmentItemId, T1.tblICInventoryShipmentItem_intInventoryShipmentId, T1.tblICInventoryShipmentItem_intSourceId, T1.tblICInventoryShipmentItem_intLineNo, T1.tblICInventoryShipmentItem_intItemId, T1.tblICInventoryShipmentItem_intSubLocationId, T1.tblICInventoryShipmentItem_dblQuantity, T1.tblICInventoryShipmentItem_intItemUOMId, T1.tblICInventoryShipmentItem_intWeightUOMId, T1.tblICInventoryShipmentItem_dblUnitPrice, T1.tblICInventoryShipmentItem_intTaxCodeId, T1.tblICInventoryShipmentItem_intDockDoorId, T1.tblICInventoryShipmentItem_strNotes, T1.tblICInventoryShipmentItem_intSort, T1.tblICInventoryShipmentItem_intConcurrencyId)
     FROM (
         SELECT 
             T.intInventoryShipmentItemId AS tblICInventoryShipmentItem_intInventoryShipmentItemId, 
@@ -5478,6 +5480,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intSubLocationId AS tblICInventoryShipmentItem_intSubLocationId, 
             T.dblQuantity AS tblICInventoryShipmentItem_dblQuantity, 
             T.intItemUOMId AS tblICInventoryShipmentItem_intItemUOMId, 
+            T.intWeightUOMId AS tblICInventoryShipmentItem_intWeightUOMId, 
             T.dblUnitPrice AS tblICInventoryShipmentItem_dblUnitPrice, 
             T.intTaxCodeId AS tblICInventoryShipmentItem_intTaxCodeId, 
             T.intDockDoorId AS tblICInventoryShipmentItem_intDockDoorId, 
@@ -6493,7 +6496,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetReceiptItemSources
-        [iRely.Inventory.Model.vyuICGetReceiptItemSource](T1.vyuICGetReceiptItemSource_intInventoryReceiptItemId, T1.vyuICGetReceiptItemSource_intSourceId, T1.vyuICGetReceiptItemSource_strReceiptType, T1.vyuICGetReceiptItemSource_strSourceId, T1.vyuICGetReceiptItemSource_dtmDate, T1.vyuICGetReceiptItemSource_strUnitMeasure, T1.vyuICGetReceiptItemSource_dblOrdered, T1.vyuICGetReceiptItemSource_dblReceived)
+        [iRely.Inventory.Model.vyuICGetReceiptItemSource](T1.vyuICGetReceiptItemSource_intInventoryReceiptItemId, T1.vyuICGetReceiptItemSource_intSourceId, T1.vyuICGetReceiptItemSource_strReceiptType, T1.vyuICGetReceiptItemSource_strSourceId, T1.vyuICGetReceiptItemSource_dtmDate, T1.vyuICGetReceiptItemSource_strUnitMeasure, T1.vyuICGetReceiptItemSource_dblUnitQty, T1.vyuICGetReceiptItemSource_dblOrdered, T1.vyuICGetReceiptItemSource_dblReceived)
     FROM (
         SELECT 
             T.intInventoryReceiptItemId AS vyuICGetReceiptItemSource_intInventoryReceiptItemId, 
@@ -6502,6 +6505,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strSourceId AS vyuICGetReceiptItemSource_strSourceId, 
             T.dtmDate AS vyuICGetReceiptItemSource_dtmDate, 
             T.strUnitMeasure AS vyuICGetReceiptItemSource_strUnitMeasure, 
+            T.dblUnitQty AS vyuICGetReceiptItemSource_dblUnitQty, 
             T.dblOrdered AS vyuICGetReceiptItemSource_dblOrdered, 
             T.dblReceived AS vyuICGetReceiptItemSource_dblReceived, 
             True AS _from0

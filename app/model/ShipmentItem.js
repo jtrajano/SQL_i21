@@ -42,7 +42,8 @@ Ext.define('Inventory.model.ShipmentItem', {
         { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'strItemNo', type: 'string'},
-        { name: 'strUnitMeasure', type: 'string'}
+        { name: 'strUnitMeasure', type: 'string'},
+        { name: 'strWeightUOM', type: 'string'}
     ],
 
     validators: [

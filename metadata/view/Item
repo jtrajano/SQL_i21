@@ -758,7 +758,11 @@
                                                                     "\t\tdataType: 'string',",
                                                                     "\t\ttext: 'Description',",
                                                                     "\t\tflex: 1",
-                                                                    "\t}",
+                                                                    "\t},",
+                                                                    "    {",
+                                                                    "        dataIndex: 'tblICCategoryUOMs',",
+                                                                    "        hidden: true",
+                                                                    "    }",
                                                                     "]"
                                                                 ],
                                                                 "designer|createAlias": "gridcombobox",
@@ -10276,6 +10280,22 @@
                                             ]
                                         },
                                         {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "string",
+                                                "flex": 2,
+                                                "itemId": "colAssemblyDescription",
+                                                "text": "Description"
+                                            },
+                                            "name": "MyColumn4",
+                                            "designerId": "20ba807d-cc89-4c31-9622-e03442ba8970"
+                                        },
+                                        {
                                             "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
@@ -10307,22 +10327,6 @@
                                                     "designerId": "3bfa0225-ce73-4f6a-b80d-95e8fd6f4f2b"
                                                 }
                                             ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
-                                                "flex": 2,
-                                                "itemId": "colAssemblyDescription",
-                                                "text": "Description"
-                                            },
-                                            "name": "MyColumn4",
-                                            "designerId": "20ba807d-cc89-4c31-9622-e03442ba8970"
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -10375,6 +10379,11 @@
                                                             "\t\tdataType: 'boolean',",
                                                             "\t\ttext: 'Stock Unit',",
                                                             "\t\tflex: 1",
+                                                            "\t},",
+                                                            "    {",
+                                                            "\t\tdataIndex: 'dblUnitQty',",
+                                                            "\t\tdataType: 'float',",
+                                                            "\t\thidden: true",
                                                             "\t}",
                                                             "]"
                                                         ],

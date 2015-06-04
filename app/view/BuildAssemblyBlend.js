@@ -321,6 +321,10 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                             dataType: 'string',
                                             text: 'Lot Tracking',
                                             hidden: true
+                                        },
+                                        {
+                                            dataIndex: 'tblICItemAssemblies',
+                                            hidden: true
                                         }
                                     ],
                                     itemId: 'cboItemNumber',
@@ -484,7 +488,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                         flex: 2
                                     },
                                     {
-                                        dataIndex: 'strStorageLocation',
+                                        dataIndex: 'strStorageLocationName',
                                         dataType: 'string',
                                         text: 'Storage Location',
                                         flex: 2

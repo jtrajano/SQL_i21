@@ -285,6 +285,22 @@ namespace iRely.Inventory.Model
                 _orderUOM = value;
             }
         }
+        private decimal _orderConvFactor;
+        [NotMapped]
+        public decimal dblOrderUOMConvFactor
+        {
+            get
+            {
+                if (vyuICGetReceiptItemSource != null)
+                    return vyuICGetReceiptItemSource.dblUnitQty ?? 0;
+                else
+                    return _orderConvFactor;
+            }
+            set
+            {
+                _orderConvFactor = value;
+            }
+        }
         private string _uom;
         [NotMapped]
         public string strUnitMeasure
@@ -370,7 +386,7 @@ namespace iRely.Inventory.Model
                 if (tblICItemUOM != null)
                     return tblICItemUOM.dblUnitQty ?? 0;
                 else
-                    return 0;
+                    return _itemConv;
             }
             set
             {
@@ -386,7 +402,7 @@ namespace iRely.Inventory.Model
                 if (WeightUOM != null)
                     return WeightUOM.dblUnitQty ?? 0;
                 else
-                    return 0;
+                    return _weightConv;
             }
             set
             {
@@ -431,6 +447,7 @@ namespace iRely.Inventory.Model
         public string strSourceId { get; set; }
         public DateTime? dtmDate { get; set; }
         public string strUnitMeasure { get; set; }
+        public decimal? dblUnitQty { get; set; }
         public decimal? dblOrdered { get; set; }
         public decimal? dblReceived { get; set; }
 

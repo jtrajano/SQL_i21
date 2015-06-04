@@ -219,7 +219,7 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
             var posted = win.viewModel.data.current.get('ysnPosted');
 
             var options = {
-                postURL             : '../Inventory/api/BuildAssembly/Post',
+                postURL             : '../Inventory/api/BuildAssembly/PostTransaction',
                 strTransactionId    : strBuildNo,
                 isPost              : !posted,
                 isRecap             : false,
@@ -253,7 +253,7 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
 
             // Call the buildRecapData to generate the recap data
             CashManagement.common.BusinessRules.buildRecapData({
-                postURL: '../Inventory/api/BuildAssembly/Post',
+                postURL: '../Inventory/api/BuildAssembly/PostTransaction',
                 strTransactionId: currentRecord.get('strBuildNo'),
                 ysnPosted: currentRecord.get('ysnPosted'),
                 scope: me,
@@ -377,6 +377,17 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
                     }
                 }
             }
+        }
+    },
+
+    onItemBeforeQuery: function(obj) {
+        if (obj.combo) {
+
+            var proxy = obj.combo.store.proxy;
+            proxy.setExtraParams({
+                include: 'tblICItemAssemblies.AssemblyItem',
+                columns: 'intItemId:strItemNo:strType:strDescription:strLotTracking:tblICItemAssemblies'
+            });
         }
     },
 

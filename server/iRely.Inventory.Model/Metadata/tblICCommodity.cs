@@ -270,4 +270,16 @@ namespace iRely.Inventory.Model
         public tblICUnitMeasure tblICUnitMeasure { get; set; }
     }
 
+    public class CommodityUOMVM
+    {
+        public int intCommodityUnitMeasureId { get; set; }
+        public int intCommodityId { get; set; }
+        public int? intUnitMeasureId { get; set; }
+        public decimal? dblUnitQty { get; set; }
+        public bool ysnStockUnit { get; set; }
+        public bool ysnDefault { get; set; }
+        public int? intSort { get; set; }
+        public string strUnitMeasure { get; set; }
+    }
+
 }
