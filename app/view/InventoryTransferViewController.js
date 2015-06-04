@@ -115,7 +115,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                         store: '{fromSubLocation}',
                         defaultFilters: [{
                             column: 'intItemId',
-                            value: '{currentDetailItem.intItemId}',
+                            value: '{grdInventoryTransfer.selection.intItemId}',
                             conjunction: 'and'
                         },{
                             column: 'intLocationId',
@@ -135,7 +135,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                         store: '{fromStorageLocation}',
                         defaultFilters: [{
                             column: 'intItemId',
-                            value: '{currentDetailItem.intItemId}',
+                            value: '{grdInventoryTransfer.selection.intItemId}',
                             conjunction: 'and'
                         },{
                             column: 'intLocationId',
@@ -143,7 +143,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                             conjunction: 'and'
                         },{
                             column: 'intSubLocationId',
-                            value: '{currentDetailItem.intFromSubLocationId}',
+                            value: '{grdInventoryTransfer.selection.intFromSubLocationId}',
                             conjunction: 'and'
                         },{
                             column: 'dblOnHand',
@@ -159,7 +159,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                         store: '{lot}',
                         defaultFilters: [{
                             column: 'intItemId',
-                            value: '{currentDetailItem.intItemId}',
+                            value: '{grdInventoryTransfer.selection.intItemId}',
                             conjunction: 'and'
                         },{
                             column: 'intLocationId',
@@ -167,11 +167,11 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                             conjunction: 'and'
                         },{
                             column: 'intSubLocationId',
-                            value: '{currentDetailItem.intFromSubLocationId}',
+                            value: '{grdInventoryTransfer.selection.intFromSubLocationId}',
                             conjunction: 'and'
                         },{
                             column: 'intStorageLocationId',
-                            value: '{currentDetailItem.intFromStorageLocationId}',
+                            value: '{grdInventoryTransfer.selection.intFromStorageLocationId}',
                             conjunction: 'and'
                         }]
                     }
@@ -204,7 +204,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                             },
                             {
                                 column: 'intSubLocationId',
-                                value: '{currentDetailItem.intToSubLocationId}',
+                                value: '{grdInventoryTransfer.selection.intToSubLocationId}',
                                 conjunction: 'and'
                             }
                         ]
