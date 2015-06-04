@@ -19,6 +19,63 @@ DECLARE @ItemsForQtyChange AS ItemCostingTableType
 -- TODO: Validate for non-negative split Qty. 
 
 --------------------------------------------------------------------------------
+-- Validate the UOM
+--------------------------------------------------------------------------------
+DECLARE @intItemId AS INT 
+DECLARE @strItemNo AS NVARCHAR(50)
+
+BEGIN 
+	SELECT TOP 1 
+			@intItemId = Detail.intItemId			
+	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+			LEFT JOIN dbo.tblICItemUOM ItemUOM
+				ON Detail.intItemUOMId = ItemUOM.intItemUOMId
+			LEFT JOIN dbo.tblICItemUOM WeightUOM
+				ON Detail.intWeightUOMId = WeightUOM.intItemUOMId
+	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+			AND ISNULL(WeightUOM.intItemUOMId, ItemUOM.intItemUOMId) IS NULL 
+	
+	IF @intItemId IS NOT NULL 
+	BEGIN
+		SELECT @strItemNo = strItemNo
+		FROM dbo.tblICItem Item 
+		WHERE intItemId = @intItemId		
+
+		-- 'The UOM is missing on {Item}.'
+		RAISERROR(51130, 11, 1, @strItemNo);
+		GOTO Exit_With_Errors
+	END
+
+END
+
+--------------------------------------------------------------------------------
+-- Validate the Adjust By Qty or New Quantity
+-------------------------------------------------------------------------------
+BEGIN 
+	SELECT	TOP 1 
+			@intItemId = Detail.intItemId
+	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
+				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
+	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+			AND (
+				Detail.dblNewQuantity IS NULL 
+				OR ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) = 0 
+			)
+	
+	IF @intItemId IS NOT NULL 
+	BEGIN
+		SELECT @strItemNo = strItemNo
+		FROM dbo.tblICItem Item 
+		WHERE intItemId = @intItemId		
+
+		-- 'Please specify the Adjust By Quantity or New Quantity on {Item}.'
+		RAISERROR(51131, 11, 1, @strItemNo);
+		GOTO Exit_With_Errors
+	END
+END 
+
+--------------------------------------------------------------------------------
 -- REDUCE THE SOURCE LOT NUMBER
 --------------------------------------------------------------------------------
 BEGIN 

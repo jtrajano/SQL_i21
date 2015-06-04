@@ -518,3 +518,11 @@ EXEC sp_addmessage 51128,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51129) EXEC sp_dropmessage 51129, 'us_english'	
 SET @strmessage = 'Internal Error. The new storage location is invalid.'
 EXEC sp_addmessage 51129,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51130) EXEC sp_dropmessage 51130, 'us_english'	
+SET @strmessage = 'The UOM is missing on %s.'
+EXEC sp_addmessage 51130,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51131) EXEC sp_dropmessage 51131, 'us_english'	
+SET @strmessage = 'Please specify the Adjust Qty By or New Quantity on %s.'
+EXEC sp_addmessage 51131,11,@strmessage,'us_english','False'
