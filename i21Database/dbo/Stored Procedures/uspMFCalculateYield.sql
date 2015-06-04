@@ -30,7 +30,7 @@ BEGIN TRY
 	DECLARE @tblMFProductionSummary TABLE (
 		intWorkOrderId INT NOT NULL
 		,intItemId INT NOT NULL
-		,intStorageLocationId INT NOT NULL
+		,intMachineId INT
 		,dblOpeningQuantity NUMERIC(18, 6)
 		,dblOpeningOutputQuantity NUMERIC(18, 6)
 		,dblOpeningConversionQuantity NUMERIC(18, 6)
@@ -49,7 +49,7 @@ BEGIN TRY
 		intProductionSummaryId INT identity(1, 1)
 		,intWorkOrderId INT NOT NULL
 		,intItemId INT NOT NULL
-		,intStorageLocationId INT NOT NULL
+		,intMachineId INT
 		,dblOpeningQuantity NUMERIC(18, 6)
 		,dblOpeningOutputQuantity NUMERIC(18, 6)
 		,dblOpeningConversionQuantity NUMERIC(18, 6)
@@ -262,7 +262,7 @@ BEGIN TRY
 	INSERT INTO @tblMFProductionSummary (
 		intWorkOrderId
 		,intItemId
-		,intStorageLocationId
+		,intMachineId
 		,dblOpeningQuantity
 		,dblOpeningOutputQuantity
 		,dblOpeningConversionQuantity
@@ -392,7 +392,7 @@ BEGIN TRY
 		,@dblNewQty NUMERIC(18, 6)
 		,@intItemUOMId INT
 
-	SELECT @intProductionSummaryId = MIn(intProductionSummaryId)
+	SELECT @intProductionSummaryId = Min(intProductionSummaryId)
 	FROM @tblMFProductionSummaryFinal F
 	JOIN @tblInputItem I ON I.intItemId = F.intItemId
 
@@ -473,6 +473,10 @@ BEGIN TRY
 				PRINT 'Call Adjust Qty procedure'
 			END
 		END
+		SELECT @intProductionSummaryId = Min(intProductionSummaryId)
+		FROM @tblMFProductionSummaryFinal F
+		JOIN @tblInputItem I ON I.intItemId = F.intItemId
+		Where intProductionSummaryId>@intProductionSummaryId
 	END
 
 	UPDATE dbo.tblMFWorkOrder
@@ -486,10 +490,10 @@ BEGIN TRY
 		,ysnCycleCountCompleted = 1
 	WHERE intWorkOrderId = @intWorkOrderId
 
-	INSERT INTO tblMFProductionSummaryFinal (
+	INSERT INTO tblMFProductionSummary (
 		intWorkOrderId
 		,intItemId
-		,intStorageLocationId
+		,intMachineId
 		,dblOpeningQuantity
 		,dblOpeningOutputQuantity
 		,dblOpeningConversionQuantity
@@ -503,10 +507,11 @@ BEGIN TRY
 		,dblCalculatedQuantity
 		,dblYieldQuantity
 		,dblYieldPercentage
+		,intCreatedUserId
 		)
 	SELECT intWorkOrderId
 		,intItemId
-		,intStorageLocationId
+		,intMachineId
 		,dblOpeningQuantity
 		,dblOpeningOutputQuantity
 		,dblOpeningConversionQuantity
@@ -520,6 +525,7 @@ BEGIN TRY
 		,dblCalculatedQuantity
 		,dblYieldQuantity
 		,dblYieldPercentage
+		,@intUserId 
 	FROM @tblMFProductionSummaryFinal
 END TRY
 
