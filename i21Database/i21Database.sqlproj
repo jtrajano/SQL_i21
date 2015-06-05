@@ -1670,6 +1670,7 @@
     <Build Include="dbo\Views\vyuTRRackItems.sql" />
     <Build Include="dbo\Views\vyuTRRackPriceEquation.sql" />
     <Build Include="dbo\Views\vyuTRTerminal.sql" />
+	<Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostQtyChange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
