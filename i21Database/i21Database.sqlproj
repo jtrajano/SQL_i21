@@ -1655,6 +1655,21 @@
     <Build Include="dbo\Stored Procedures\uspSCAddScaleTicketToItemShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetScaleItemForItemShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessToInventoryShipment.sql" />
+    <Build Include="dbo\Tables\tblTRDistributionDetail.sql" />
+    <Build Include="dbo\Tables\tblTRDistributionHeader.sql" />
+    <Build Include="dbo\Tables\tblTRQuotePriceAdjustmentDetail.sql" />
+    <Build Include="dbo\Tables\tblTRQuotePriceAdjustmentHeader.sql" />
+    <Build Include="dbo\Tables\tblTRRackPriceDetail.sql" />
+    <Build Include="dbo\Tables\tblTRRackPriceHeader.sql" />
+    <Build Include="dbo\Tables\tblTRSupplyPoint.sql" />
+    <Build Include="dbo\Tables\tblTRSupplyPointProductSearchDetail.sql" />
+    <Build Include="dbo\Tables\tblTRSupplyPointProductSearchHeader.sql" />
+    <Build Include="dbo\Tables\tblTRSupplyPointRackPriceEquation.sql" />
+    <Build Include="dbo\Tables\tblTRTransportLoad.sql" />
+    <Build Include="dbo\Tables\tblTRTransportReceipt.sql" />
+    <Build Include="dbo\Views\vyuTRRackItems.sql" />
+    <Build Include="dbo\Views\vyuTRRackPriceEquation.sql" />
+    <Build Include="dbo\Views\vyuTRTerminal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
