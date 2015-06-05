@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+﻿﻿<?xml version="1.0" encoding="utf-8"?>
 <Operations Version="1.0" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
   <Operation Name="Rename Refactor" Key="fb28a069-471d-401a-8b3e-ea44bc0c1ddb" ChangeDateTime="09/16/2014 06:14:04">
     <Property Name="ElementName" Value="[dbo].[tblICItem].[intItemTypeId]" />
@@ -3366,5 +3366,19 @@
     <Property Name="ParentElementName" Value="[dbo]" />
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="[tblMFPackType]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="cc28d2e4-2987-442f-bbf7-f10f634a9b9e" ChangeDateTime="06/01/2015 13:32:25">
+    <Property Name="ElementName" Value="[dbo].[AK_tblGRStorageType_Column]" />
+    <Property Name="ElementType" Value="SqlUniqueConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRStorageType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[UQ_tblGRStorageType_strStorageTypeCode]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="cc63a5b5-5175-4429-8f54-85f5caa7423e" ChangeDateTime="05/28/2015 12:47:36">
+    <Property Name="ElementName" Value="[dbo].[tblRKMatchFuturesPSDetail].[dtmMatchDate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKMatchFuturesPSDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dtmMatchedDate" />
   </Operation>
 </Operations>

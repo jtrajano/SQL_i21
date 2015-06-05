@@ -27,6 +27,7 @@
     [ysnPosted]            BIT             CONSTRAINT [DF_tblARInvoice_ysnPosted] DEFAULT ((0)) NOT NULL,
     [ysnPaid]              BIT             CONSTRAINT [DF_tblARInvoice_ysnPaid] DEFAULT ((0)) NOT NULL,
 	[intFreightTermId]	   INT				NULL, 
+	[strDeliverPickup]     NVARCHAR (100)   COLLATE Latin1_General_CI_AS NULL,
 	[intShipToLocationId]  INT             NULL,
 	[strShipToLocationName]     NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [strShipToAddress]     NVARCHAR (100)   COLLATE Latin1_General_CI_AS NULL,

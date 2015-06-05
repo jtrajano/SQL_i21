@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspSODuplicateSalesOrder]
+	@TransactionType NVARCHAR(20) = '',
 	@SalesOrderId	INT = 0,
 	@UserId			INT = 0,
 	@NewSalesOrderId INT = NULL OUTPUT
@@ -16,6 +17,10 @@ BEGIN
            ,[intShipViaId]
            ,[strPONumber]
            ,[intTermId]
+		   ,[intOrderedById]
+		   ,[intSplitId]
+		   ,[intFreightTermId]
+		   ,[strBOLNumber]
            ,[dblSalesOrderSubtotal]
            ,[dblShipping]
            ,[dblTax]
@@ -44,6 +49,11 @@ BEGIN
            ,[strBillToZipCode]
            ,[strBillToCountry]
            ,[intEntityId]
+		   ,[intQuoteTemplateId]
+		   ,[ysnPleminaryQuote]
+		   ,[strLostQuoteComment]
+		   ,[strLostQuoteCompetitor]
+		   ,[strLostQuoteReason]
         )
 	SELECT
 			[intEntityCustomerId]
@@ -55,6 +65,10 @@ BEGIN
            ,[intShipViaId]
            ,[strPONumber]
            ,[intTermId]
+		   ,[intOrderedById]
+		   ,[intSplitId]
+		   ,[intFreightTermId]
+		   ,[strBOLNumber]
            ,[dblSalesOrderSubtotal]
            ,[dblShipping]
            ,[dblTax]
@@ -63,7 +77,7 @@ BEGIN
            ,[dblAmountDue]
            ,[dblPayment]
            ,[strTransactionType]
-           ,'Pending'
+           ,'Open'
            ,[intAccountId]
            ,NULL --Processed Date
            ,0 --Processed
@@ -83,6 +97,11 @@ BEGIN
            ,[strBillToZipCode]
            ,[strBillToCountry]
            ,@UserId
+		   ,[intQuoteTemplateId]
+		   ,[ysnPleminaryQuote]
+		   ,[strLostQuoteComment]
+		   ,[strLostQuoteCompetitor]
+		   ,[strLostQuoteReason]
 	FROM
 	tblSOSalesOrder
 	WHERE intSalesOrderId = @SalesOrderId

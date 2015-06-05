@@ -35,8 +35,7 @@ SELECT	intLotId				= Lot.intLotId
 		,intLotStatusId			= Lot.intLotStatusId
 		,strLotStatus			= LotStatus.strSecondaryStatus
 		,strLotPrimaryStatus	= LotStatus.strPrimaryStatus
-FROM	dbo.tblICLot Lot 
-		LEFT JOIN tblICItem Item 
+FROM	dbo.tblICLot Lot INNER JOIN tblICItem Item 
 			ON Item.intItemId = Lot.intItemId
 		LEFT JOIN tblSMCompanyLocation Location 
 			ON Location.intCompanyLocationId = Lot.intLocationId

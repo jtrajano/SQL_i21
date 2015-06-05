@@ -17,6 +17,5 @@
     CONSTRAINT [FK_tblGRStorageScheduleRule_tblICCommodity] FOREIGN KEY ([intCommodity]) REFERENCES [tblICCommodity]([intCommodityId]), 
     CONSTRAINT [FK_tblGRStorageScheduleRule_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocation]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblGRStorageScheduleRule_tblGRStorageType] FOREIGN KEY ([intStorageType]) REFERENCES [tblGRStorageType]([intStorageScheduleTypeId]), 
-    CONSTRAINT [FK_tblGRStorageScheduleRule_tblSMCurrency] FOREIGN KEY ([intCurrencyID]) REFERENCES [tblSMCurrency]([intCurrencyID]), 
-    CONSTRAINT [UK_tblGRStorageScheduleRule_strScheduleId_intStorageType_intCommodity] UNIQUE ([strScheduleId],[intStorageType],[intCommodity]) 
+    CONSTRAINT [FK_tblGRStorageScheduleRule_tblSMCurrency] FOREIGN KEY ([intCurrencyID]) REFERENCES [tblSMCurrency]([intCurrencyID]) 
 )

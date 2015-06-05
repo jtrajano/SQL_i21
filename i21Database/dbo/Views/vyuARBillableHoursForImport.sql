@@ -14,7 +14,8 @@ SELECT
 	,HW.[intInvoiceId] 
 	,JC.[intJobCodeId]
 	,JC.[strJobCode]
-	,JC.[intCompanyLocationId]
+	,ISNULL(JC.[intCompanyLocationId], (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1))
+									AS "intCompanyLocationId"
 	,JC.[intItemId]
 	,IC.[strItemNo]
 	,HW.[intHours]

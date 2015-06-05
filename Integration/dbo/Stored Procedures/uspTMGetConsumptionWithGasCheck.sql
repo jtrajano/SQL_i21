@@ -66,7 +66,7 @@ BEGIN
 		  ,'' AS strTankType
 		  ,0 AS ysnHasLeakGasCheck
 		  ,0 AS intGrandTotalTanks
-		  ,0.0 AS dblTankSize
+		  ,0.0 AS dblTankCapacity
 		  ,0 AS intLocationTotalWithCheck
 		  ,0 AS intGrandTotalWithCheck
 		  ,0.0 AS dblGrandPercentWithCheck 
@@ -407,7 +407,7 @@ BEGIN
 	  ,'' AS strTankType
 	  ,0 AS ysnHasLeakGasCheck
 	  ,0 AS intGrandTotalTanks
-	  ,0.0 AS dblTankSize
+	  ,0.0 AS dblTankCapacity
 	  ,0 AS intLocationTotalWithCheck
 	  ,0 AS intGrandTotalWithCheck
 	  ,0.0 AS dblGrandPercentWithCheck 
@@ -488,7 +488,7 @@ FROM
 	, C.intSiteID
 	, C.intSiteNumber
 	, E.strSerialNumber
-	, E.dblTankSize
+	, E.dblTankCapacity
 	, E.strOwnership
 	, H.strTankType AS [strTankType]
 	, (Case C.ysnActive

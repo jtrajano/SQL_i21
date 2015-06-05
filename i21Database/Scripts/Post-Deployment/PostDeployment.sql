@@ -66,6 +66,17 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\Reports\Layout\ProductTotals.sql
 :r .\TM\Reports\DataSource\ProductTotals.sql
 
+:r .\TM\Reports\DataSource\CustomerListByRoute.sql
+:r .\TM\Reports\Layout\CustomerListByRoute.sql
+
+:r .\TM\Reports\DataSource\GasCheckLeakcheck.sql
+:r .\TM\Reports\Layout\WithGasCheckSubReport.sql
+:r .\TM\Reports\Layout\WithLeakCheckSubReport.sql
+:r .\TM\Reports\Layout\WithoutGasCheckSubReport.sql
+:r .\TM\Reports\Layout\WithoutLeakCheckSubReport.sql
+
+:r .\TM\Reports\DataSource\OpenCallEntries.sql
+
 
 -- Canned Panels
 :r .\DB\1_CannedPanels_Panel.sql
@@ -97,6 +108,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\AR\DefaultData\2_SalesOrderDetailDefault.sql
 :R .\AR\DefaultData\3_UpdateInvoiceOrderShipToAndBillTo.sql
 :r .\AR\DefaultData\4_UpdateInvoiceOrderShipVia.sql
+:r .\AR\DefaultData\5_UpdateOrderStatus.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
