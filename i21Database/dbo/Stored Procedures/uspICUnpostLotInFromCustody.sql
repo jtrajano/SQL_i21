@@ -103,7 +103,7 @@ IF NOT EXISTS (
 	WHERE	ISNULL(LotBucket_In_Custody.dblStockOut, 0) = 0
 )
 BEGIN 
-	-- Unable to unpost the transaction.
+	-- 'A consigned or custodial item is no longer available. Unable to continue and unpost the transaction.'
 	RAISERROR(51135, 11, 1)
 END 
 

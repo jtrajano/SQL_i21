@@ -345,7 +345,7 @@ BEGIN
 	-- Assert 
 	BEGIN 
 		EXEC tSQLt.ExpectException
-			@ExpectedMessage = 'Unable to unpost the transaction.'
+			@ExpectedMessage = 'A consigned or custodial item is no longer available. Unable to continue and unpost the transaction.'
 			,@ExpectedErrorNumber = 51135
 	END  
 

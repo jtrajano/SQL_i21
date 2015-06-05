@@ -540,7 +540,7 @@ SET @strmessage = 'No default consumption unit configured, cannot consume.'
 EXEC sp_addmessage 51134,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51135) EXEC sp_dropmessage 51135, 'us_english'	
-SET @strmessage = 'Unable to unpost the transaction.'
+SET @strmessage = 'A consigned or custodial item is no longer available. Unable to continue and unpost the transaction.'
 EXEC sp_addmessage 51135,11,@strmessage,'us_english','False'
 
 

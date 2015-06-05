@@ -362,7 +362,7 @@ BEGIN
 	-- Assert
 	BEGIN 
 
-		-- Get the date from the temporary table. 
+		-- Get actual data from the temp table. 
 		INSERT INTO actualTransactionToReverse (
 				intInventoryLotInCustodyTransactionId
 				,intTransactionId
@@ -379,7 +379,7 @@ BEGIN
 				,dblQty
 		FROM	#tmpInventoryTransactionStockToReverse
 				
-		-- Get the actual Lot data
+		-- Get actual Lot data
 		INSERT INTO actualLotInCustody (
 				strTransactionId
 				,intTransactionId

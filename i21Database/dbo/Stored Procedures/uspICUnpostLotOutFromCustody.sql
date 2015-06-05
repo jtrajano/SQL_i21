@@ -100,7 +100,7 @@ IF EXISTS (
 	WHERE	ISNULL(LotBucket_In_Custody.ysnIsUnposted, 0) = 1
 )
 BEGIN 
-	-- Unable to unpost the transaction.
+	-- 'A consigned or custodial item is no longer available. Unable to continue and unpost the transaction.'
 	RAISERROR(51135, 11, 1)
 END 
 
