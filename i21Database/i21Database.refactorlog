@@ -1,4 +1,4 @@
-﻿﻿<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Operations Version="1.0" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
   <Operation Name="Rename Refactor" Key="fb28a069-471d-401a-8b3e-ea44bc0c1ddb" ChangeDateTime="09/16/2014 06:14:04">
     <Property Name="ElementName" Value="[dbo].[tblICItem].[intItemTypeId]" />
