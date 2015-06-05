@@ -1652,6 +1652,8 @@
     <Build Include="dbo\Stored Procedures\uspLGGetCarrierShipmentSubReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCycleCount.sql" />
     <Build Include="dbo\Stored Procedures\uspGLSummaryRecalculate.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptItem.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryShipmentItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

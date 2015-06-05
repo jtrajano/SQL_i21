@@ -58,7 +58,7 @@ BEGIN
 			,ItemLocation.intItemLocationId
 			,Items.intUnitMeasureId
 			,PO.dtmDate
-			,intTransactionId = Items.intSourceId
+			,intTransactionId = Items.intOrderId
 			,strTransactionId = PO.strPurchaseOrderNumber			
 	FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem Items
 				ON Header.intInventoryReceiptId = Items.intInventoryReceiptId
@@ -66,10 +66,10 @@ BEGIN
 				ON ItemLocation.intItemId = Items.intItemId
 				AND ItemLocation.intLocationId = Header.intLocationId
 			INNER JOIN dbo.tblPOPurchase PO
-				ON PO.intPurchaseId = Items.intSourceId
+				ON PO.intPurchaseId = Items.intOrderId
 	WHERE	Header.intInventoryReceiptId = @intInventoryReceiptId
 			AND Header.strReceiptType = 'Purchase Order'
-			AND Items.intSourceId IS NOT NULL 
+			AND Items.intOrderId IS NOT NULL 
 
 	-- Remove duplicate records 
 	DELETE	POItems

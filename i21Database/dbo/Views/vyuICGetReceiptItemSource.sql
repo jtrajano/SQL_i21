@@ -3,14 +3,14 @@
 
 SELECT 
 	ReceiptItem.intInventoryReceiptItemId,
-	ReceiptItem.intSourceId,
+	ReceiptItem.intOrderId,
 	Receipt.strReceiptType,
-	strSourceId = 
+	strOrderNumber = 
 		(
 			CASE WHEN Receipt.strReceiptType = 'Contract'
 				THEN NULL
 			WHEN Receipt.strReceiptType = 'Purchase Order'
-				THEN (SELECT ISNULL(strPurchaseOrderNumber, 'PO Number not found!') FROM tblPOPurchase WHERE intPurchaseId = ReceiptItem.intSourceId)
+				THEN (SELECT ISNULL(strPurchaseOrderNumber, 'PO Number not found!') FROM tblPOPurchase WHERE intPurchaseId = ReceiptItem.intOrderId)
 			WHEN Receipt.strReceiptType = 'Transfer Receipt'
 				THEN NULL
 			WHEN Receipt.strReceiptType = 'Direct Transfer'
@@ -25,13 +25,22 @@ SELECT
 			CASE WHEN Receipt.strReceiptType = 'Contract'
 				THEN NULL
 			WHEN Receipt.strReceiptType = 'Purchase Order'
-				THEN (SELECT ISNULL(dtmDate, 'PO Number not found!') FROM tblPOPurchase WHERE intPurchaseId = ReceiptItem.intSourceId)
+				THEN (SELECT ISNULL(dtmDate, 'PO Number not found!') FROM tblPOPurchase WHERE intPurchaseId = ReceiptItem.intOrderId)
 			WHEN Receipt.strReceiptType = 'Transfer Receipt'
 				THEN NULL
 			WHEN Receipt.strReceiptType = 'Direct Transfer'
 				THEN NULL
 			WHEN Receipt.strReceiptType = 'Direct'
 				THEN NULL
+			ELSE NULL
+			END
+		),
+	strSourceNumber = 
+		(
+			CASE WHEN Receipt.intSourceType = 1 -- Scale
+				THEN (SELECT CAST(ISNULL(intTicketNumber, 'Ticket Number not found!')AS NVARCHAR(50)) FROM tblSCTicket WHERE intTicketId = ReceiptItem.intSourceId)
+			WHEN Receipt.intSourceType = 2 -- Inbound Shipment
+				THEN (SELECT CAST(ISNULL(intTrackingNumber, 'Inbound Shipment not found!')AS NVARCHAR(50)) FROM tblLGShipment WHERE intShipmentId = ReceiptItem.intSourceId)
 			ELSE NULL
 			END
 		),
@@ -43,7 +52,7 @@ SELECT
 				THEN (SELECT strUnitMeasure FROM tblPOPurchaseDetail
 						LEFT JOIN tblICItemUOM ON tblPOPurchaseDetail.intUnitOfMeasureId = tblICItemUOM.intItemUOMId
 						LEFT JOIN tblICUnitMeasure ON tblICUnitMeasure.intUnitMeasureId = tblICItemUOM.intUnitMeasureId
-						WHERE intPurchaseId = ReceiptItem.intSourceId AND intPurchaseDetailId = ReceiptItem.intLineNo)
+						WHERE intPurchaseId = ReceiptItem.intOrderId AND intPurchaseDetailId = ReceiptItem.intLineNo)
 			WHEN Receipt.strReceiptType = 'Transfer Receipt'
 				THEN NULL
 			WHEN Receipt.strReceiptType = 'Direct Transfer'
@@ -60,7 +69,7 @@ SELECT
 			WHEN Receipt.strReceiptType = 'Purchase Order'
 				THEN (SELECT tblICItemUOM.dblUnitQty FROM tblPOPurchaseDetail
 						LEFT JOIN tblICItemUOM ON tblPOPurchaseDetail.intUnitOfMeasureId = tblICItemUOM.intItemUOMId
-						WHERE intPurchaseId = ReceiptItem.intSourceId AND intPurchaseDetailId = ReceiptItem.intLineNo)
+						WHERE intPurchaseId = ReceiptItem.intOrderId AND intPurchaseDetailId = ReceiptItem.intLineNo)
 			WHEN Receipt.strReceiptType = 'Transfer Receipt'
 				THEN 0
 			WHEN Receipt.strReceiptType = 'Direct Transfer'
@@ -75,7 +84,7 @@ SELECT
 			CASE WHEN Receipt.strReceiptType = 'Contract'
 				THEN 0.00
 			WHEN Receipt.strReceiptType = 'Purchase Order'
-				THEN ISNULL((SELECT ISNULL(dblOrderQty, 0.00) FROM tblPOPurchaseDetail WHERE intPurchaseId = ReceiptItem.intSourceId AND intPurchaseDetailId = ReceiptItem.intLineNo), 0.00)
+				THEN ISNULL((SELECT ISNULL(dblOrderQty, 0.00) FROM tblPOPurchaseDetail WHERE intPurchaseId = ReceiptItem.intOrderId AND intPurchaseDetailId = ReceiptItem.intLineNo), 0.00)
 			WHEN Receipt.strReceiptType = 'Transfer Receipt'
 				THEN 0.00
 			WHEN Receipt.strReceiptType = 'Direct Transfer'
@@ -90,7 +99,7 @@ SELECT
 			CASE WHEN Receipt.strReceiptType = 'Contract'
 				THEN 0.00
 			WHEN Receipt.strReceiptType = 'Purchase Order'
-				THEN ISNULL((SELECT ISNULL(dblReceived, 0.00) FROM tblPOPurchaseDetail WHERE intPurchaseId = ReceiptItem.intSourceId AND intPurchaseDetailId = ReceiptItem.intLineNo), 0.00)
+				THEN ISNULL((SELECT ISNULL(dblReceived, 0.00) FROM tblPOPurchaseDetail WHERE intPurchaseId = ReceiptItem.intOrderId AND intPurchaseDetailId = ReceiptItem.intLineNo), 0.00)
 			WHEN Receipt.strReceiptType = 'Transfer Receipt'
 				THEN 0.00
 			WHEN Receipt.strReceiptType = 'Direct Transfer'

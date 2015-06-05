@@ -15,6 +15,7 @@ Type the overview for the table here.
 		[intInventoryReceiptItemId] INT NOT NULL IDENTITY, 
 		[intInventoryReceiptId] INT NOT NULL, 
 		[intLineNo] INT NOT NULL, 
+		[intOrderId] INT NOT NULL,
 		[intSourceId] INT NULL,
 		[intItemId] INT NOT NULL, 
 		[intSubLocationId] INT NULL,
@@ -177,3 +178,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICInventoryReceiptItem',
     @level2type = N'COLUMN',
     @level2name = N'dblUnitRetail'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Order Number',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryReceiptItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intOrderId'

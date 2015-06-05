@@ -2,6 +2,7 @@
 (
 	[intInventoryTransferDetailId] INT NOT NULL IDENTITY, 
     [intInventoryTransferId] INT NOT NULL, 
+	[intSourceId] INT NULL,
     [intItemId] INT NOT NULL, 
     [intLotId] INT NULL, 
     [intFromSubLocationId] INT NULL, 
@@ -230,3 +231,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICInventoryTransferDetail',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Source Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryTransferDetail',
+    @level2type = N'COLUMN',
+    @level2name = N'intSourceId'

@@ -105,7 +105,7 @@ END
 BEGIN 
 	INSERT INTO dbo.tblICInventoryShipmentItem (
 			intInventoryShipmentId
-			,intSourceId
+			,intOrderId
 			,intLineNo
 			,intItemId
 			,intSubLocationId
@@ -120,7 +120,7 @@ BEGIN
 	)
 	SELECT			
 			intInventoryShipmentId	= @InventoryShipmentId
-			,intSourceId			= SODetail.intSalesOrderId
+			,intOrderId				= SODetail.intSalesOrderId
 			,intLineNo				= SODetail.intSalesOrderDetailId
 			,intItemId				= SODetail.intItemId
 			,intSubLocationId		= NULL
