@@ -395,6 +395,30 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     dataType: 'string',
                                                                     text: 'Lot Tracking',
                                                                     hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intStockUOMId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Stock UOM Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strStockUOM',
+                                                                    dataType: 'string',
+                                                                    text: 'Stock UOM Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblUnitOnHand',
+                                                                    dataType: 'float',
+                                                                    text: 'Unit On Hand',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblLastCost',
+                                                                    dataType: 'float',
+                                                                    text: 'Last Cost',
+                                                                    hidden: true
                                                                 }
                                                             ],
                                                             itemId: 'cboItemNo',
@@ -567,8 +591,7 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     dataType: 'datetime',
                                                                     text: 'Expiry Date',
                                                                     hidden: true
-                                                                },
-                                                                
+                                                                }
                                                             ],
                                                             itemId: 'cboLotNumber',
                                                             displayField: 'strLotNumber',
@@ -592,7 +615,40 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                         itemId: 'colUOM',
                                                         width: 70,
                                                         dataIndex: 'strItemUOM',
-                                                        text: 'UOM'
+                                                        text: 'UOM',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intItemUOMId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Unit Of Measure Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Measure',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'checkcolumn',
+                                                                    dataIndex: 'ysnStockUnit',
+                                                                    dataType: 'boolean',
+                                                                    text: 'Stock Unit',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboUOM',
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'strUnitMeasure'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',

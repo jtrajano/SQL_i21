@@ -58,6 +58,13 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
+        [ActionName("GetStockTrackingItems")]
+        public async Task<HttpResponseMessage> GetStockTrackingItems(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetStockTrackingItems(param));
+        }
+        
+        [HttpGet]
         [ActionName("DuplicateItem")]
         public HttpResponseMessage DuplicateItem(int ItemId)
         {
