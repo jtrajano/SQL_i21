@@ -4,7 +4,7 @@
 			intId = cast(ROW_NUMBER() over (order by item.intItemId) as int),
 			item.intItemId, item.strItemNo, item.strDescription, item.strType, item.strStatus,
 			comLoc.intCompanyLocationId, comLoc.strLocationName, comLoc.strLocationNumber, comLoc.strLocationType,
-			uom.intUnitMeasureId, uom.strUnitMeasure, uom.strSymbol, uom.strUnitType
+			uom.intUnitMeasureId, uom.strUnitMeasure, uom.strSymbol, uom.strUnitType, itemUOM.intItemUOMId
 		from
 			tblICItem item
 			left outer join tblICItemLocation itemLoc on itemLoc.intItemId = item.intItemId
