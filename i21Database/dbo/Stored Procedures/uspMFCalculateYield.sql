@@ -14,6 +14,14 @@ BEGIN TRY
 		,@intManufacturingProcessId INT
 		,@intLocationId INT
 		,@ErrMsg NVARCHAR(MAX)
+		,@dtmCurrentDate datetime
+		,@dtmCurrentDateTime datetime
+		,@intDayOfYear int
+	
+	Select @dtmCurrentDateTime	=GETDATE()
+	Select @dtmCurrentDate		=CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
+	Select @intDayOfYear		=DATEPART(dy,@dtmCurrentDateTime)
+
 	DECLARE @tblInputItem TABLE (
 		intItemRecordKey INT Identity(1, 1)
 		,intItemId INT
@@ -72,7 +80,7 @@ BEGIN TRY
 
 	SELECT @intRecipeId = intRecipeId
 		,@intManufacturingProcessId = intManufacturingProcessId
-	FROM tblMFRecipe a
+	FROM dbo.tblMFRecipe a
 	WHERE a.intItemId = @intItemId
 		AND a.intLocationId = @intLocationId
 		AND ysnActive = 1
@@ -89,19 +97,19 @@ BEGIN TRY
 		,ri.ysnScaled
 		,ri.intStorageLocationId
 		,0
-	FROM tblMFRecipeItem ri
-	JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+	FROM dbo.tblMFRecipeItem ri
+	JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 	WHERE ri.intRecipeId = @intRecipeId
 		AND ri.intRecipeItemTypeId = 1
 		AND (
 			(
 				ri.ysnYearValidationRequired = 1
-				AND CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101)) BETWEEN ri.dtmValidFrom
+				AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
 					AND ri.dtmValidTo
 				)
 			OR (
 				ri.ysnYearValidationRequired = 0
-				AND DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, ri.dtmValidFrom)
+				AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
 					AND DATEPART(dy, ri.dtmValidTo)
 				)
 			)
@@ -122,19 +130,19 @@ BEGIN TRY
 		,ri.ysnScaled
 		,ri.intStorageLocationId
 		,1
-	FROM tblMFRecipeItem ri
-	JOIN tblMFRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
+	FROM dbo.tblMFRecipeItem ri
+	JOIN dbo.tblMFRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
 	WHERE ri.intRecipeId = @intRecipeId
 		AND ri.intRecipeItemTypeId = 1
 		AND (
 			(
 				ri.ysnYearValidationRequired = 1
-				AND CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101)) BETWEEN ri.dtmValidFrom
+				AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
 					AND ri.dtmValidTo
 				)
 			OR (
 				ri.ysnYearValidationRequired = 0
-				AND DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, ri.dtmValidFrom)
+				AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
 					AND DATEPART(dy, ri.dtmValidTo)
 				)
 			)
@@ -148,9 +156,9 @@ BEGIN TRY
 		,dblCalculatedQuantity
 		)
 	SELECT ri.intItemId
-		,ri.dblCalculatedQuantity
-	FROM tblMFRecipeItem ri
-	JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+		,r.dblQuantity--It is product standard qty.
+	FROM dbo.tblMFRecipeItem ri
+	JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 	WHERE ri.intRecipeId = @intRecipeId
 		AND ri.intRecipeItemTypeId = 2
 		AND ri.ysnConsumptionRequired = 1
@@ -177,7 +185,7 @@ BEGIN TRY
 		,0
 		,0
 		,0
-		,SUM(WC.dblQuantity)
+		,ISNULL(SUM(WC.dblQuantity),0)
 		,0
 		,0
 		,0
@@ -212,7 +220,7 @@ BEGIN TRY
 		,0
 		,0
 		,0
-		,SUM(WC.dblQuantity)
+		,ISNULL(SUM(WC.dblQuantity),0)
 		,0
 		,0
 		,0
@@ -247,7 +255,7 @@ BEGIN TRY
 		,0
 		,0
 		,0
-		,SUM(WC.dblQuantity)
+		,ISNULL(SUM(WC.dblQuantity),0)
 		,0
 		,0
 		,0
@@ -280,12 +288,12 @@ BEGIN TRY
 		,CC.intMachineId
 		,CASE 
 			WHEN I.intItemId IS NOT NULL
-				THEN CC.dblSystemQty
+				THEN ISNULL(CC.dblSystemQty,0)
 			ELSE 0
 			END
 		,CASE 
 			WHEN O.intItemId IS NOT NULL
-				THEN CC.dblSystemQty
+				THEN ISNULL(CC.dblSystemQty,0)
 			ELSE 0
 			END
 		,0
@@ -295,12 +303,12 @@ BEGIN TRY
 		,0
 		,CASE 
 			WHEN I.intItemId IS NOT NULL
-				THEN CC.dblQuantity
+				THEN ISNULL(CC.dblQuantity,0)
 			ELSE 0
 			END
 		,CASE 
 			WHEN O.intItemId IS NOT NULL
-				THEN CC.dblQuantity
+				THEN ISNULL(CC.dblQuantity,0)
 			ELSE 0
 			END
 		,0
@@ -308,28 +316,38 @@ BEGIN TRY
 	FROM dbo.tblMFProcessCycleCount AS CC
 	JOIN dbo.tblMFProcessCycleCountSession AS CS ON CS.intCycleCountSessionId = CC.intCycleCountSessionId
 	LEFT JOIN @tblInputItem AS I ON I.intItemId = CC.intItemId
-	LEFT JOIN @tblInputItem AS O ON O.intItemId = CC.intItemId
+	LEFT JOIN @tblOutputItem AS O ON O.intItemId = CC.intItemId
 	WHERE CS.intWorkOrderId = @intWorkOrderId
+
+	Select *from @tblMFProductionSummary
 
 	INSERT INTO @tblMFProductionSummaryFinal (
 		intWorkOrderId
 		,intItemId
 		,dblOpeningQuantity
 		,dblOpeningOutputQuantity
+		,dblOpeningConversionQuantity
 		,dblInputQuantity
+		,dblConsumedQuantity 
 		,dblOutputQuantity
+		,dblOutputConversionQuantity
 		,dblCountQuantity
 		,dblCountOutputQuantity
+		,dblCountConversionQuantity
 		,dblCalculatedQuantity
 		)
 	SELECT intWorkOrderId
 		,intItemId
-		,SUM(dblOpeningQuantity)
-		,SUM(dblOpeningOutputQuantity)
-		,SUM(dblInputQuantity)
-		,SUM(dblOutputQuantity)
-		,SUM(dblCountQuantity)
-		,SUM(dblCountOutputQuantity)
+		,ISNULL(SUM(dblOpeningQuantity),0)
+		,ISNULL(SUM(dblOpeningOutputQuantity),0)
+		,0
+		,ISNULL(SUM(dblInputQuantity),0)
+		,ISNULL(SUM(dblConsumedQuantity),0)
+		,ISNULL(SUM(dblOutputQuantity),0)
+		,0
+		,ISNULL(SUM(dblCountQuantity),0)
+		,ISNULL(SUM(dblCountOutputQuantity),0)
+		,0
 		,MIN(dblCalculatedQuantity)
 	FROM @tblMFProductionSummary
 	GROUP BY intWorkOrderId
@@ -339,33 +357,33 @@ BEGIN TRY
 	SET dblOpeningConversionQuantity = dblOpeningConversionQuantity + (
 			CASE 
 				WHEN I.ysnScaled = 1
-					THEN (
+					THEN ISNULL((
 							SELECT SUM(F.dblOpeningOutputQuantity / F.dblCalculatedQuantity)
 							FROM @tblMFProductionSummaryFinal F
 							WHERE F.dblOpeningOutputQuantity > 0
-							) * I.dblCalculatedQuantity
+							) * I.dblCalculatedQuantity,0)
 				ELSE I.dblCalculatedQuantity
 				END
 			)
 		,dblOutputConversionQuantity = dblOutputConversionQuantity + (
 			CASE 
 				WHEN I.ysnScaled = 1
-					THEN (
+					THEN ISNULL((
 							SELECT SUM(F.dblOutputQuantity / F.dblCalculatedQuantity)
 							FROM @tblMFProductionSummaryFinal F
 							WHERE F.dblOutputQuantity > 0
-							) * I.dblCalculatedQuantity
+							) * I.dblCalculatedQuantity,0)
 				ELSE I.dblCalculatedQuantity
 				END
 			)
 		,dblCountConversionQuantity = dblCountConversionQuantity + (
 			CASE 
 				WHEN I.ysnScaled = 1
-					THEN (
+					THEN ISNULL((
 							SELECT SUM(F.dblCountOutputQuantity / F.dblCalculatedQuantity)
 							FROM @tblMFProductionSummaryFinal F
 							WHERE F.dblCountOutputQuantity > 0
-							) * I.dblCalculatedQuantity
+							) * I.dblCalculatedQuantity,0)
 				ELSE I.dblCalculatedQuantity
 				END
 			)
@@ -408,11 +426,11 @@ BEGIN TRY
 		IF @dblYieldQuantity > 0
 			AND NOT EXISTS (
 				SELECT *
-				FROM tblICLot
+				FROM dbo.tblICLot
 				WHERE intStorageLocationId = @intStorageLocationId
 					AND intItemId = @intItemId
 					AND intLotStatusId = 1
-					AND dtmExpiryDate > GETDATE()
+					AND dtmExpiryDate > @dtmCurrentDateTime
 				)
 		BEGIN
 			PRINT 'CREATE STAGING LOT'
@@ -422,11 +440,11 @@ BEGIN TRY
 			,@intLotId = intLotId
 			,@dblQty = dblQty
 			,@intItemUOMId = intItemUOMId
-		FROM tblICLot
+		FROM dbo.tblICLot
 		WHERE intStorageLocationId = @intStorageLocationId
 			AND intItemId = @intItemId
 			AND intLotStatusId = 1
-			AND dtmExpiryDate > GETDATE()
+			AND dtmExpiryDate > @dtmCurrentDateTime
 			AND dblQty > 0
 		ORDER BY dtmDateCreated DESC
 
@@ -437,11 +455,11 @@ BEGIN TRY
 				,@intLotId = intLotId
 				,@dblQty = dblQty
 				,@intItemUOMId = intItemUOMId
-			FROM tblICLot
+			FROM dbo.tblICLot
 			WHERE intStorageLocationId = @intStorageLocationId
 				AND intItemId = @intItemId
 				AND intLotStatusId = 1
-				AND dtmExpiryDate > GETDATE()
+				AND dtmExpiryDate > @dtmCurrentDateTime
 			ORDER BY dtmDateCreated DESC
 		END
 
@@ -456,10 +474,10 @@ BEGIN TRY
 			IF @intManufacturingProcessId = 6
 				SET @dblQty = @dblYieldQuantity
 
-			UPDATE tblMFProcessCycleCount
+			UPDATE dbo.tblMFProcessCycleCount
 			SET intLotId = @intLotId
-			FROM tblMFProcessCycleCount CC
-			JOIN tblMFProcessCycleCountSession CS ON CS.intCycleCountSessionId = CC.intCycleCountSessionId
+			FROM dbo.tblMFProcessCycleCount CC
+			JOIN dbo.tblMFProcessCycleCountSession CS ON CS.intCycleCountSessionId = CC.intCycleCountSessionId
 			WHERE CS.intWorkOrderId = @intWorkOrderId
 				AND intItemId = @intItemId
 				AND (
@@ -479,18 +497,18 @@ BEGIN TRY
 		Where intProductionSummaryId>@intProductionSummaryId
 	END
 
-	UPDATE dbo.tblMFWorkOrder
-	SET intCountStatusId = 13
-		,dtmLastModified = GETDATE()
-		,intLastModifiedUserId = @intUserId
-	WHERE intWorkOrderId = @intWorkOrderId
+	--UPDATE dbo.tblMFWorkOrder
+	--SET intCountStatusId = 13
+	--	,dtmLastModified = GETDATE()
+	--	,intLastModifiedUserId = @intUserId
+	--WHERE intWorkOrderId = @intWorkOrderId
 
-	UPDATE tblMFProcessCycleCountSession
-	SET dtmSessionEndDateTime = GETDATE()
-		,ysnCycleCountCompleted = 1
-	WHERE intWorkOrderId = @intWorkOrderId
+	--UPDATE tblMFProcessCycleCountSession
+	--SET dtmSessionEndDateTime = GETDATE()
+	--	,ysnCycleCountCompleted = 1
+	--WHERE intWorkOrderId = @intWorkOrderId
 
-	INSERT INTO tblMFProductionSummary (
+	INSERT INTO dbo.tblMFProductionSummary (
 		intWorkOrderId
 		,intItemId
 		,intMachineId
