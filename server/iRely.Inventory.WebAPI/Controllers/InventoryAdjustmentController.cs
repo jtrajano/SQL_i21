@@ -47,6 +47,5 @@ namespace iRely.Inventory.WebApi
         {
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetPostedLots(param));
         }
-
     }
 }

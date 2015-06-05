@@ -113,3 +113,4 @@ app/view/Filter.js
 app/view/FilterViewController.js
 app/view/FilterViewModel.js
 test-results.xml
+server/iRely.Inventory.WebAPI/Properties/PublishProfiles/1520.pubxml
