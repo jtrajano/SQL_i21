@@ -1644,6 +1644,7 @@
     <Build Include="dbo\Views\vyuARCustomerInquiryReport.sql" />
     <Build Include="dbo\Views\vyuARCustomerStatementReport.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingReport.sql" />
+    <Build Include="dbo\Tables\tblEntityPreferences.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1682,6 +1683,7 @@
     <None Include="Scripts\Post-Deployment\EM\002_UpdateMenuuEntityType.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\3_UpdateInvoiceOrderShipToAndBillTo.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\UpdateEarningDeductionTaxId.sql" />
+    <None Include="Scripts\Post-Deployment\EM\003_FixVendorBadData.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
