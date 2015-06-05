@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPostPayment]
-	@batchId			AS NVARCHAR(20)		= NULL,
+	@batchId			AS NVARCHAR(40)		= NULL,
 	@post				AS BIT				= 0,
 	@recap				AS BIT				= 0,
 	@param				AS NVARCHAR(MAX)	= NULL,
@@ -12,7 +12,7 @@
 	@successfulCount	AS INT				= 0 OUTPUT,
 	@invalidCount		AS INT				= 0 OUTPUT,
 	@success			AS BIT				= 0 OUTPUT,
-	@batchIdUsed		AS NVARCHAR(20)		= NULL OUTPUT,
+	@batchIdUsed		AS NVARCHAR(40)		= NULL OUTPUT,
 	@recapId			AS NVARCHAR(250)	= NEWID OUTPUT,
 	@transType			AS NVARCHAR(25)		= 'all'
 	--OUTPUT Parameter for GUID

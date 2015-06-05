@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblGLDetailRecap] (
     [intGLDetailId]             INT              IDENTITY (1, 1) NOT NULL,
     [dtmDate]                   DATETIME         NOT NULL,
-    [strBatchId]                NVARCHAR (20)    COLLATE Latin1_General_CI_AS NULL,
+    [strBatchId]                NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
     [intAccountId]              INT              NULL,
     [dblDebit]                  NUMERIC (18, 6)  NULL,
     [dblCredit]                 NUMERIC (18, 6)  NULL,

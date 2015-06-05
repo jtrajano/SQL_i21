@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE uspAPPostPayment
-	@batchId			AS NVARCHAR(20)		= NULL,
+	@batchId			AS NVARCHAR(40)		= NULL,
 	@transactionType	AS NVARCHAR(30)		= NULL,
 	@post				AS BIT				= 0,
 	@recap				AS BIT				= 0,
@@ -14,7 +14,7 @@
 	@successfulCount	AS INT				= 0 OUTPUT,
 	@invalidCount		AS INT				= 0 OUTPUT,
 	@success			AS BIT				= 0 OUTPUT,
-	@batchIdUsed		AS NVARCHAR(20)		= NULL OUTPUT,
+	@batchIdUsed		AS NVARCHAR(40)		= NULL OUTPUT,
 	@recapId			AS NVARCHAR(250)	= NEWID OUTPUT
 	--OUTPUT Parameter for GUID
 	--Provision for Date Begin and Date End Parameter
