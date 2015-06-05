@@ -20,6 +20,7 @@
 	,@intMachineId int
 	,@ysnLotAlias bit=0
 	,@strLotAlias nvarchar(50)
+	,@ysnProductionOnly bit=0
 	)
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -496,7 +497,7 @@ BEGIN TRY
 			RETURN
 		END
 
-		IF EXISTS (
+		IF @ysnProductionOnly=0 and EXISTS (
 		SELECT *
 		FROM dbo.tblMFRecipeItem ri
 		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId

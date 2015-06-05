@@ -8,7 +8,11 @@ GO
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'EntityManagement.view.Entity') 
 		INSERT [dbo].[tblSMScreen] ([intScreenId], [strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId]) 
 		VALUES (6, N'Entity', N'Entity', N'EntityManagement.view.Entity', N'Entity Management', N'tblEntity', 0)
-	
+		
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMScreen WHERE strNamespace = 'Logistics.view.LoadSchedule')
+		INSERT [dbo].[tblSMScreen] ([intScreenId], [strScreenId], [strScreenName], [strNamespace], [strModule], [strTableName], [intConcurrencyId])
+		VALUES (7, N'LoadSchedule', N'Load Schedule', N'Logistics.view.LoadSchedule', N'Logistics', N'tblLGLoad', 0)
+		
 	SET IDENTITY_INSERT [dbo].[tblSMScreen] OFF
 GO
 	PRINT N'END INSERT DEFAULT SCREEN'

@@ -156,6 +156,7 @@ BEGIN TRY
 	LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
 	WHERE intItemId = @intItemId
 		AND intManufacturingProcessId = @intManufacturingProcessId
+		AND intStatusId<>13
 		AND (
 			CASE 
 				WHEN intPlannedShiftId IS NOT NULL

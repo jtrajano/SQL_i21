@@ -29,6 +29,10 @@
     [strWillCallStatus] NVARCHAR(10) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT ('Generated'), 
     [strPricingMethod] NVARCHAR(10) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT ('Regular'), 
     [strOrderNumber] NCHAR(15) COLLATE Latin1_General_CI_AS NULL, 
+    [dtmDeliveryDate] DATETIME NULL, 
+    [dblDeliveryQuantity] NUMERIC(18, 6) NULL, 
+    [dblDeliveryPrice] NUMERIC(18, 6) NULL, 
+    [dblDeliveryTotal] NUMERIC(18, 6) NULL, 
     CONSTRAINT [PK_tblTMDispatch] PRIMARY KEY CLUSTERED ([intDispatchID] ASC),
     CONSTRAINT [FK_tblTMDispatch_tblTMSite1] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID])
 );
@@ -304,3 +308,39 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDispatch',
     @level2type = N'COLUMN',
     @level2name = N'strOrderNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'ET Delivery Date Time',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDispatch',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmDeliveryDate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'ET Delivery Quantity',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDispatch',
+    @level2type = N'COLUMN',
+    @level2name = N'dblDeliveryQuantity'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'ET Delivery Price',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDispatch',
+    @level2type = N'COLUMN',
+    @level2name = N'dblDeliveryPrice'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'ET Delivery Total including Taxes',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDispatch',
+    @level2type = N'COLUMN',
+    @level2name = N'dblDeliveryTotal'

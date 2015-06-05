@@ -40,6 +40,7 @@ BEGIN TRY
 		,@dblAdjustByQuantity numeric(18,6)
 		,@intInventoryAdjustmentId int
 		,@intNewItemUOMId int
+		,@dblWeightPerQty numeric(18,6)
 
 	Select @dtmCurrentDate=GetDate()
 
@@ -109,6 +110,7 @@ BEGIN TRY
 		@intInputLotId = intLotId
 		,@dblWeight = dblWeight
 		,@intNewItemUOMId=intItemUOMId
+		,@dblWeightPerQty= (Case When dblWeightPerQty is null or dblWeightPerQty=0 Then 1 Else dblWeightPerQty End)
 	FROM tblICLot
 	WHERE intLotId = @intInputLotId
 
@@ -204,6 +206,7 @@ BEGIN TRY
 
 	INSERT INTO dbo.tblMFWorkOrderInputLot (
 		intWorkOrderId
+		,intItemId
 		,intLotId
 		,dblQuantity
 		,intItemUOMId
@@ -223,6 +226,7 @@ BEGIN TRY
 		,intLastModifiedUserId
 		)
 	SELECT @intWorkOrderId
+		,intItemId
 		,intLotId
 		,@dblInputWeight
 		,intWeightUOMId
@@ -276,7 +280,7 @@ BEGIN TRY
 						,1
 						)
 			END
-			Select @dblAdjustByQuantity=@dblNewWeight-@dblWeight
+			Select @dblAdjustByQuantity=(@dblNewWeight-@dblWeight)/@dblWeightPerQty
 			PRINT 'Call Lot Adjust routine.'
 			EXEC [uspICInventoryAdjustment_CreatePostSplitLot]
 					-- Parameters for filtering:
@@ -321,6 +325,9 @@ BEGIN TRY
 				IF @intStorageLocationId <> @intConsumptionStorageLocationId --Checking whether the lot is not in the staging location.
 				BEGIN
 					PRINT 'Call Lot Move routine.'
+
+					Select @dblAdjustByQuantity = -@dblNewWeight/@dblWeightPerQty
+
 					EXEC [uspICInventoryAdjustment_CreatePostSplitLot]
 					-- Parameters for filtering:
 					@intItemId = @intInputItemId
@@ -461,8 +468,8 @@ BEGIN TRY
 				--*****************************************************
 				--End of create staging lot
 				--*****************************************************
-				PRINT 'Call Lot Merge routine.'
-				Select @dblAdjustByQuantity = -@dblNewWeight
+				PRINT '1.Call Lot Merge routine.'
+				Select @dblAdjustByQuantity = -@dblNewWeight/@dblWeightPerQty
 				EXEC [uspICInventoryAdjustment_CreatePostSplitLot]
 					-- Parameters for filtering:
 					@intItemId = @intInputItemId
@@ -492,8 +499,8 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			PRINT 'Call Lot Merge routine.'
-			Select @dblAdjustByQuantity = -@dblNewWeight
+			PRINT '2.Call Lot Merge routine.'
+			Select @dblAdjustByQuantity = -@dblNewWeight/@dblWeightPerQty
 			EXEC [uspICInventoryAdjustment_CreatePostSplitLot]
 					-- Parameters for filtering:
 					@intItemId = @intInputItemId

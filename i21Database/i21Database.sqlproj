@@ -779,11 +779,11 @@
     <Build Include="dbo\Tables\tblHDTicketEscalation.sql" />
     <Build Include="dbo\Tables\tblICUnitMeasureConversion.sql" />
     <Build Include="dbo\Tables\tblICLineOfBusiness.sql" />
-    <Build Include="dbo\Tables\tblICPackType.sql" />
-    <Build Include="dbo\Tables\tblICPackTypeDetail.sql" />
+    <Build Include="dbo\Tables\tblMFPackType.sql" />
+    <Build Include="dbo\Tables\tblMFPackTypeDetail.sql" />
     <Build Include="dbo\Tables\tblICStorageUnitType.sql" />
-    <Build Include="dbo\Tables\tblICManufacturingCell.sql" />
-    <Build Include="dbo\Tables\tblICManufacturingCellPackType.sql" />
+    <Build Include="dbo\Tables\tblMFManufacturingCell.sql" />
+    <Build Include="dbo\Tables\tblMFManufacturingCellPackType.sql" />
     <Build Include="dbo\Functions\fnGetItemsToUnpost.sql" />
     <Build Include="dbo\Functions\fnGetItemCostingOnUnpostErrors.sql" />
     <Build Include="dbo\Views\vyuAPRptVendorHistory.sql" />
@@ -1651,6 +1651,27 @@
     <Build Include="dbo\Stored Procedures\uspLGGetCarrierShipmentReport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetCarrierShipmentSubReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCycleCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLSummaryRecalculate.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCAddScaleTicketToItemShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGetScaleItemForItemShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessToInventoryShipment.sql" />
+    <Build Include="dbo\Tables\tblTRDistributionDetail.sql" />
+    <Build Include="dbo\Tables\tblTRDistributionHeader.sql" />
+    <Build Include="dbo\Tables\tblTRQuotePriceAdjustmentDetail.sql" />
+    <Build Include="dbo\Tables\tblTRQuotePriceAdjustmentHeader.sql" />
+    <Build Include="dbo\Tables\tblTRRackPriceDetail.sql" />
+    <Build Include="dbo\Tables\tblTRRackPriceHeader.sql" />
+    <Build Include="dbo\Tables\tblTRSupplyPoint.sql" />
+    <Build Include="dbo\Tables\tblTRSupplyPointProductSearchDetail.sql" />
+    <Build Include="dbo\Tables\tblTRSupplyPointProductSearchHeader.sql" />
+    <Build Include="dbo\Tables\tblTRSupplyPointRackPriceEquation.sql" />
+    <Build Include="dbo\Tables\tblTRTransportLoad.sql" />
+    <Build Include="dbo\Tables\tblTRTransportReceipt.sql" />
+    <Build Include="dbo\Views\vyuTRRackItems.sql" />
+    <Build Include="dbo\Views\vyuTRRackPriceEquation.sql" />
+    <Build Include="dbo\Views\vyuTRTerminal.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostQtyChange.sql" />
+    <None Include="Scripts\Post-Deployment\MF\2_ProcessAttribute.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

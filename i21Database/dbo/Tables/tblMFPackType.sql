@@ -10,14 +10,18 @@ Type the overview for the table here.
 
 ## Source Code:
 */
-	CREATE TABLE [dbo].[tblICPackType]
+	CREATE TABLE [dbo].[tblMFPackType]
 	(
 		[intPackTypeId] INT NOT NULL IDENTITY, 
 		[strPackName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+		[intCreatedUserId] [int] NULL,
+		[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblMFPackType_dtmCreated] DEFAULT GetDate(),
+		[intLastModifiedUserId] [int] NULL,
+		[dtmLastModified] [datetime] NULL CONSTRAINT [DF_tblMFPackType_dtmLastModified] DEFAULT GetDate(),	
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
-		CONSTRAINT [PK_tblICPackType] PRIMARY KEY ([intPackTypeId]), 
-		CONSTRAINT [AK_tblICPackType_strPackName] UNIQUE ([strPackName]) 
+		CONSTRAINT [PK_tblMFPackType] PRIMARY KEY ([intPackTypeId]), 
+		CONSTRAINT [UQ_tblMFPackType_strPackName] UNIQUE ([strPackName]) 
 	)
 
 	GO
@@ -26,7 +30,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblICPackType',
+		@level1name = N'tblMFPackType',
 		@level2type = N'COLUMN',
 		@level2name = N'intPackTypeId'
 	GO
@@ -35,7 +39,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblICPackType',
+		@level1name = N'tblMFPackType',
 		@level2type = N'COLUMN',
 		@level2name = N'strPackName'
 	GO
@@ -44,7 +48,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblICPackType',
+		@level1name = N'tblMFPackType',
 		@level2type = N'COLUMN',
 		@level2name = N'strDescription'
 	GO
@@ -53,6 +57,6 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblICPackType',
+		@level1name = N'tblMFPackType',
 		@level2type = N'COLUMN',
 		@level2name = N'intConcurrencyId'
