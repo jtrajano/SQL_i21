@@ -146,3 +146,12 @@ GO
 		EXEC('UPDATE tblSMMasterMenu SET strMenuName = ''Notes Receivables'' WHERE strMenuName = ''Note Receivables'' AND strModuleName = ''Notes Receivable''')
 
 GO
+/*DELETE EXECESSIVE MENUS FROM GENERAL LEDGER - FCOM-508*/
+	IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.COLUMNS WHERE UPPER(TABLE_NAME) = 'TBLSMMASTERMENU')
+	BEGIN
+		EXEC('DELETE FROM tblSMMasterMenu WHERE strModuleName = ''General Ledger'' AND strDescription = ''Account Structure''
+			  DELETE FROM tblSMMasterMenu WHERE strModuleName = ''General Ledger'' AND strDescription = ''Account Groups''
+			  DELETE FROM tblSMMasterMenu WHERE strModuleName = ''General Ledger'' AND strDescription = ''Segment Accounts''
+			  DELETE FROM tblSMMasterMenu WHERE strModuleName = ''General Ledger'' AND strDescription = ''Build Accounts''')
+	END
+GO
