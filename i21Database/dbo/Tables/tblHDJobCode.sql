@@ -9,6 +9,7 @@
 	[intItemId] INT NULL, 
 	[intCompanyLocationId] INT NULL,
 	[intUnitMeasureId] INT NULL,
+	[intItemUOMId] INT NULL,
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
     CONSTRAINT [PK_tblHDJobCode] PRIMARY KEY CLUSTERED ([intJobCodeId] ASC),
