@@ -8,7 +8,7 @@ AS
 			L.strAddress,
 			E.intDefaultLocationId 
 	FROM	tblEntity			E
-	JOIN	tblEntityLocation	L	ON	E.intEntityId = L.intEntityId
+	JOIN	tblEntityLocation	L	ON	E.intEntityId = L.intEntityId AND L.ysnDefaultLocation = 1
 	JOIN	tblARCustomer		C	ON	C.[intEntityCustomerId] = E.intEntityId
 	
 	UNION ALL
@@ -20,7 +20,7 @@ AS
 			L.strAddress,
 			E.intDefaultLocationId
 	FROM	tblEntity			E
-	JOIN	tblEntityLocation	L	ON	E.intEntityId = L.intEntityId
+	JOIN	tblEntityLocation	L	ON	E.intEntityId = L.intEntityId AND L.ysnDefaultLocation = 1
 	JOIN	tblAPVendor			V	ON	V.[intEntityVendorId] = E.intEntityId
 	
 	UNION ALL
@@ -32,5 +32,5 @@ AS
 			L.strAddress,
 			E.intDefaultLocationId
 	FROM	tblEntity			E
-	JOIN	tblEntityLocation	L	ON	E.intEntityId = L.intEntityId
+	JOIN	tblEntityLocation	L	ON	E.intEntityId = L.intEntityId AND L.ysnDefaultLocation = 1
 	JOIN	tblLGShippingLine	S	ON	S.[intEntityId] = E.intEntityId
