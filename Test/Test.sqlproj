@@ -627,6 +627,9 @@
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for invalid storage location id.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for invalid sub location id.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for a successful post.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotInFromCustody for add-sell it-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotInFromCustody for add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotInFromCustody for the basics.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">
