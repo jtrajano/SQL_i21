@@ -779,11 +779,11 @@
     <Build Include="dbo\Tables\tblHDTicketEscalation.sql" />
     <Build Include="dbo\Tables\tblICUnitMeasureConversion.sql" />
     <Build Include="dbo\Tables\tblICLineOfBusiness.sql" />
-    <Build Include="dbo\Tables\tblICPackType.sql" />
-    <Build Include="dbo\Tables\tblICPackTypeDetail.sql" />
+    <Build Include="dbo\Tables\tblMFPackType.sql" />
+    <Build Include="dbo\Tables\tblMFPackTypeDetail.sql" />
     <Build Include="dbo\Tables\tblICStorageUnitType.sql" />
-    <Build Include="dbo\Tables\tblICManufacturingCell.sql" />
-    <Build Include="dbo\Tables\tblICManufacturingCellPackType.sql" />
+    <Build Include="dbo\Tables\tblMFManufacturingCell.sql" />
+    <Build Include="dbo\Tables\tblMFManufacturingCellPackType.sql" />
     <Build Include="dbo\Functions\fnGetItemsToUnpost.sql" />
     <Build Include="dbo\Functions\fnGetItemCostingOnUnpostErrors.sql" />
     <Build Include="dbo\Views\vyuAPRptVendorHistory.sql" />
@@ -1658,6 +1658,13 @@
     <Build Include="dbo\Stored Procedures\uspMFPostWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidatePostWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetStageDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetCarrierShipmentReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetCarrierShipmentSubReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetCycleCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLSummaryRecalculate.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCAddScaleTicketToItemShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGetScaleItemForItemShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessToInventoryShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

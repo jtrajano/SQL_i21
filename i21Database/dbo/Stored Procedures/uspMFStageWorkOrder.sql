@@ -40,6 +40,7 @@ BEGIN TRY
 		,@dblAdjustByQuantity numeric(18,6)
 		,@intInventoryAdjustmentId int
 		,@intNewItemUOMId int
+		,@dblWeightPerQty numeric(18,6)
 
 	Select @dtmCurrentDate=GetDate()
 
@@ -105,9 +106,11 @@ BEGIN TRY
 				)
 	END
 
-	SELECT @intInputLotId = intLotId
+	SELECT @strLotNumber=strLotNumber,
+		@intInputLotId = intLotId
 		,@dblWeight = dblWeight
 		,@intNewItemUOMId=intItemUOMId
+		,@dblWeightPerQty= (Case When dblWeightPerQty is null or dblWeightPerQty=0 Then 1 Else dblWeightPerQty End)
 	FROM tblICLot
 	WHERE intLotId = @intInputLotId
 
@@ -203,6 +206,7 @@ BEGIN TRY
 
 	INSERT INTO dbo.tblMFWorkOrderInputLot (
 		intWorkOrderId
+		,intItemId
 		,intLotId
 		,dblQuantity
 		,intItemUOMId
@@ -222,6 +226,7 @@ BEGIN TRY
 		,intLastModifiedUserId
 		)
 	SELECT @intWorkOrderId
+		,intItemId
 		,intLotId
 		,@dblInputWeight
 		,intWeightUOMId
@@ -260,12 +265,12 @@ BEGIN TRY
 					THEN CASE 
 							WHEN @dblInputWeight >= @dblWeight
 								THEN @dblWeight + @dblDefaultResidueQty
-							ELSE @dblWeight
+							ELSE @dblInputWeight
 							END
 				ELSE @dblInputWeight
 				END
 
-		IF @dblNewWeight <> @dblWeight
+		IF @dblNewWeight > @dblWeight
 		BEGIN
 			IF @ysnExcessConsumptionAllowed = 0
 			BEGIN
@@ -275,11 +280,11 @@ BEGIN TRY
 						,1
 						)
 			END
-			Select @dblAdjustByQuantity=@dblNewWeight-@dblWeight
-
+			Select @dblAdjustByQuantity=(@dblNewWeight-@dblWeight)/@dblWeightPerQty
+			PRINT 'Call Lot Adjust routine.'
 			EXEC [uspICInventoryAdjustment_CreatePostSplitLot]
 					-- Parameters for filtering:
-					@intItemId = @intItemId
+					@intItemId = @intInputItemId
 					,@dtmDate = @dtmCurrentDate
 					,@intLocationId = @intLocationId
 					,@intSubLocationId = @intSubLocationId
@@ -297,8 +302,8 @@ BEGIN TRY
 					,@intNewWeightUOMId = @intInputWeightUOMId
 					,@dblNewUnitCost = NULL
 					-- Parameters used for linking or FK (foreign key) relationships
-					,@intSourceId = NULL
-					,@intSourceTransactionTypeId = NULL
+					,@intSourceId = 1
+					,@intSourceTransactionTypeId = 8
 					,@intUserId = @intUserId
 					,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 
@@ -320,6 +325,34 @@ BEGIN TRY
 				IF @intStorageLocationId <> @intConsumptionStorageLocationId --Checking whether the lot is not in the staging location.
 				BEGIN
 					PRINT 'Call Lot Move routine.'
+
+					Select @dblAdjustByQuantity = -@dblNewWeight/@dblWeightPerQty
+
+					EXEC [uspICInventoryAdjustment_CreatePostSplitLot]
+					-- Parameters for filtering:
+					@intItemId = @intInputItemId
+					,@dtmDate = @dtmCurrentDate
+					,@intLocationId = @intLocationId
+					,@intSubLocationId = @intSubLocationId
+					,@intStorageLocationId = @intStorageLocationId
+					,@strLotNumber = @strLotNumber
+					-- Parameters for the new values: 
+					,@intNewLocationId = @intLocationId
+					,@intNewSubLocationId = @intSubLocationId
+					,@intNewStorageLocationId = @intConsumptionStorageLocationId
+					,@strNewLotNumber = @strLotNumber
+					,@dblAdjustByQuantity = 0
+					,@dblNewSplitLotQuantity = 0
+					,@dblNewWeight = @dblNewWeight
+					,@intNewItemUOMId = @intNewItemUOMId
+					,@intNewWeightUOMId = @intInputWeightUOMId
+					,@dblNewUnitCost = NULL
+					-- Parameters used for linking or FK (foreign key) relationships
+					,@intSourceId = 1
+					,@intSourceTransactionTypeId = 8
+					,@intUserId = @intUserId
+					,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+
 				END
 			END
 			ELSE
@@ -435,12 +468,63 @@ BEGIN TRY
 				--*****************************************************
 				--End of create staging lot
 				--*****************************************************
-				PRINT 'Call Lot Merge routine.'
+				PRINT '1.Call Lot Merge routine.'
+				Select @dblAdjustByQuantity = -@dblNewWeight/@dblWeightPerQty
+				EXEC [uspICInventoryAdjustment_CreatePostSplitLot]
+					-- Parameters for filtering:
+					@intItemId = @intInputItemId
+					,@dtmDate = @dtmCurrentDate
+					,@intLocationId = @intLocationId
+					,@intSubLocationId = @intSubLocationId
+					,@intStorageLocationId = @intStorageLocationId
+					,@strLotNumber = @strLotNumber
+					-- Parameters for the new values: 
+					,@intNewLocationId = @intLocationId
+					,@intNewSubLocationId = @intSubLocationId
+					,@intNewStorageLocationId = @intConsumptionStorageLocationId
+					,@strNewLotNumber = @intDestinationLotId
+					,@dblAdjustByQuantity = @dblAdjustByQuantity
+					,@dblNewSplitLotQuantity = 0
+					,@dblNewWeight = @dblNewWeight
+					,@intNewItemUOMId = @intNewItemUOMId
+					,@intNewWeightUOMId = @intInputWeightUOMId
+					,@dblNewUnitCost = NULL
+					-- Parameters used for linking or FK (foreign key) relationships
+					,@intSourceId = 1
+					,@intSourceTransactionTypeId = 8
+					,@intUserId = @intUserId
+					,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+
 			END
 		END
 		ELSE
 		BEGIN
-			PRINT 'Call Lot Merge routine.'
+			PRINT '2.Call Lot Merge routine.'
+			Select @dblAdjustByQuantity = -@dblNewWeight/@dblWeightPerQty
+			EXEC [uspICInventoryAdjustment_CreatePostSplitLot]
+					-- Parameters for filtering:
+					@intItemId = @intInputItemId
+					,@dtmDate = @dtmCurrentDate
+					,@intLocationId = @intLocationId
+					,@intSubLocationId = @intSubLocationId
+					,@intStorageLocationId = @intStorageLocationId
+					,@strLotNumber = @strLotNumber
+					-- Parameters for the new values: 
+					,@intNewLocationId = @intLocationId
+					,@intNewSubLocationId = @intSubLocationId
+					,@intNewStorageLocationId = @intConsumptionStorageLocationId
+					,@strNewLotNumber = @intDestinationLotId
+					,@dblAdjustByQuantity = @dblAdjustByQuantity
+					,@dblNewSplitLotQuantity = 0
+					,@dblNewWeight = @dblNewWeight
+					,@intNewItemUOMId = @intNewItemUOMId
+					,@intNewWeightUOMId = @intInputWeightUOMId
+					,@dblNewUnitCost = NULL
+					-- Parameters used for linking or FK (foreign key) relationships
+					,@intSourceId = 1
+					,@intSourceTransactionTypeId = 8
+					,@intUserId = @intUserId
+					,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 		END
 	END
 

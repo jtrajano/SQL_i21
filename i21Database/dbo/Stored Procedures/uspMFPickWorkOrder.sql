@@ -6,6 +6,7 @@
 	,@PickPreference NVARCHAR(50) = ''
 AS
 BEGIN TRY
+
 	SET QUOTED_IDENTIFIER OFF
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
@@ -26,6 +27,15 @@ BEGIN TRY
 		,@ysnSubstituteItem BIT
 		,@dblSubstituteRatio NUMERIC(18, 6)
 		,@dblMaxSubstituteRatio NUMERIC(18, 6)
+		,@intStorageLocationId int
+		,@dtmCurrentDate datetime
+		,@dtmCurrentDateTime datetime
+		,@intDayOfYear int
+		,@intConsumptionMethodId int
+
+	Select @dtmCurrentDateTime	=GETDATE()
+	Select @dtmCurrentDate		=CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
+	Select @intDayOfYear		=DATEPART(dy,@dtmCurrentDateTime)
 
 	BEGIN TRAN
 
@@ -34,7 +44,9 @@ BEGIN TRY
 		,intItemId INT
 		,dblReqQty NUMERIC(18, 6)
 		,intStorageLocationId INT
+		,intConsumptionMethodId int
 		)
+
 	DECLARE @tblSubstituteItem TABLE (
 		intItemRecordKey INT Identity(1, 1)
 		,intItemId INT
@@ -42,6 +54,7 @@ BEGIN TRY
 		,dblSubstituteRatio NUMERIC(18, 6)
 		,dblMaxSubstituteRatio NUMERIC(18, 6)
 		)
+
 	DECLARE @tblLot TABLE (
 		intLotRecordKey INT Identity(1, 1)
 		,intLotId INT
@@ -62,13 +75,14 @@ BEGIN TRY
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	SELECT @intRecipeId = intRecipeId
-	FROM tblMFRecipe a
+	FROM dbo.tblMFRecipe a
 	WHERE a.intItemId = @intItemId
 		AND a.intLocationId = @intLocationId
 		AND ysnActive = 1
 
-	INSERT INTO tblMFWorkOrderConsumedLot (
+	INSERT INTO dbo.tblMFWorkOrderConsumedLot (
 		intWorkOrderId
+		,intItemId
 		,intLotId
 		,dblQuantity
 		,intItemUOMId
@@ -82,6 +96,7 @@ BEGIN TRY
 		,intLastModifiedUserId
 		)
 	SELECT WI.intWorkOrderId
+		,WI.intItemId
 		,WI.intLotId
 		,WI.dblQuantity
 		,WI.intItemUOMId
@@ -93,20 +108,19 @@ BEGIN TRY
 		,WI.intCreatedUserId
 		,WI.dtmLastModified
 		,WI.intLastModifiedUserId
-	FROM tblMFWorkOrderInputLot WI
-	JOIN tblICLot L ON L.intLotId = WI.intLotId
-	JOIN tblMFRecipeItem ri ON ri.intItemId = L.intItemId
+	FROM dbo.tblMFWorkOrderInputLot WI
+	JOIN dbo.tblMFRecipeItem ri ON ri.intItemId = WI.intItemId
 	WHERE ri.intRecipeId = @intRecipeId
 		AND ri.intRecipeItemTypeId = 1
 		AND (
 			(
 				ri.ysnYearValidationRequired = 1
-				AND CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101)) BETWEEN ri.dtmValidFrom
+				AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
 					AND ri.dtmValidTo
 				)
 			OR (
 				ri.ysnYearValidationRequired = 0
-				AND DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, ri.dtmValidFrom)
+				AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
 					AND DATEPART(dy, ri.dtmValidTo)
 				)
 			)
@@ -117,23 +131,25 @@ BEGIN TRY
 		intItemId
 		,dblReqQty
 		,intStorageLocationId
+		,intConsumptionMethodId
 		)
 	SELECT ri.intItemId
 		,CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))) AS RequiredQty
 		,ri.intStorageLocationId
-	FROM tblMFRecipeItem ri
-	JOIN tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+		,ri.intConsumptionMethodId
+	FROM dbo.tblMFRecipeItem ri
+	JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 	WHERE ri.intRecipeId = @intRecipeId
 		AND ri.intRecipeItemTypeId = 1
 		AND (
 			(
 				ri.ysnYearValidationRequired = 1
-				AND CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101)) BETWEEN ri.dtmValidFrom
+				AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
 					AND ri.dtmValidTo
 				)
 			OR (
 				ri.ysnYearValidationRequired = 0
-				AND DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, ri.dtmValidFrom)
+				AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
 					AND DATEPART(dy, ri.dtmValidTo)
 				)
 			)
@@ -154,19 +170,19 @@ BEGIN TRY
 			,rs.intSubstituteItemId
 			,dblSubstituteRatio
 			,dblMaxSubstituteRatio
-		FROM tblMFRecipeItem ri
-		JOIN tblMFRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
+		FROM dbo.tblMFRecipeItem ri
+		JOIN dbo.tblMFRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
 		WHERE ri.intRecipeId = @intRecipeId
 			AND ri.intRecipeItemTypeId = 1
 			AND (
 				(
 					ri.ysnYearValidationRequired = 1
-					AND CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101)) BETWEEN ri.dtmValidFrom
+					AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
 						AND ri.dtmValidTo
 					)
 				OR (
 					ri.ysnYearValidationRequired = 0
-					AND DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, ri.dtmValidFrom)
+					AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
@@ -185,6 +201,8 @@ BEGIN TRY
 
 		SELECT @intItemId = intItemId
 			,@dblReqQty = dblReqQty
+			,@intStorageLocationId=intStorageLocationId
+			,@intConsumptionMethodId=intConsumptionMethodId
 		FROM @tblItem
 		WHERE intItemRecordKey = @intItemRecordKey
 
@@ -249,22 +267,20 @@ BEGIN TRY
 				,SI.dblSubstituteRatio
 				,SI.dblMaxSubstituteRatio
 			FROM dbo.tblICLot L
+			JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId =L.intStorageLocationId  and SL.ysnAllowConsume =1
 			JOIN @tblSubstituteItem SI ON L.intItemId = SI.intSubstituteItemId
-			JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
-			WHERE LS.strSecondaryStatus = 'Active'
-				AND dtmExpiryDate >= Getdate()
-				--AND L.intStorageLocationId = (
-				--	CASE 
-				--		WHEN I.intStorageLocationId IS NULL
-				--			THEN L.intStorageLocationId
-				--		ELSE I.intStorageLocationId
-				--		END
-				--	)
-				AND (
-					L.dblWeight > 0
-					OR L.dblQty > 0
+			WHERE SI.intItemId = @intItemId
+				AND L.intLocationId=@intLocationId 
+				and L.intLotStatusId=1
+				AND dtmExpiryDate >= @dtmCurrentDateTime
+				AND L.intStorageLocationId = (
+					CASE 
+						WHEN @intStorageLocationId IS NULL
+							THEN L.intStorageLocationId
+						ELSE (Case When @intConsumptionMethodId=2 Then @intStorageLocationId Else L.intStorageLocationId End)--By location, then apply location filter
+						END
 					)
-				AND SI.intItemId = @intItemId
+				AND L.dblWeight > 0
 			ORDER BY L.dtmDateCreated ASC
 		END
 
@@ -320,21 +336,19 @@ BEGIN TRY
 			,L.intItemUOMId
 			,0 AS ysnSubstituteItem
 		FROM dbo.tblICLot L
-		JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
-		WHERE LS.strSecondaryStatus = 'Active'
-			AND dtmExpiryDate >= Getdate()
-			--AND L.intStorageLocationId = (
-			--	CASE 
-			--		WHEN I.intStorageLocationId IS NULL
-			--			THEN L.intStorageLocationId
-			--		ELSE I.intStorageLocationId
-			--		END
-			--	)
-			AND (
-				L.dblWeight > 0
-				OR L.dblQty > 0
+		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId =L.intStorageLocationId  and SL.ysnAllowConsume =1
+		WHERE L.intItemId = @intItemId
+			AND L.intLocationId=@intLocationId
+			AND L.intLotStatusId=1
+			AND dtmExpiryDate >= @dtmCurrentDateTime
+			AND L.intStorageLocationId = (
+				CASE 
+					WHEN @intStorageLocationId IS NULL
+						THEN L.intStorageLocationId
+					ELSE (Case When @intConsumptionMethodId=2 Then @intStorageLocationId Else L.intStorageLocationId End)--By location, then apply location filter
+					END
 				)
-			AND L.intItemId = @intItemId
+			AND L.dblWeight > 0
 		ORDER BY L.dtmDateCreated ASC
 
 		SELECT @intLotRecordKey = Min(intLotRecordKey)
@@ -375,13 +389,14 @@ BEGIN TRY
 			END
 
 			SELECT @intSequenceNo = Max(intSequenceNo) + 1
-			FROM tblMFWorkOrderConsumedLot
+			FROM dbo.tblMFWorkOrderConsumedLot
 			WHERE intWorkOrderId = @intWorkOrderId
 
 			IF (@dblQty >= @dblReqQty)
 			BEGIN
-				INSERT INTO tblMFWorkOrderConsumedLot (
+				INSERT INTO dbo.tblMFWorkOrderConsumedLot (
 					intWorkOrderId
+					,intItemId
 					,intLotId
 					,dblQuantity
 					,intItemUOMId
@@ -395,6 +410,7 @@ BEGIN TRY
 					,intLastModifiedUserId
 					)
 				SELECT @intWorkOrderId
+					,@intItemId
 					,intLotId
 					,@dblReqQty
 					,intItemUOMId
@@ -409,9 +425,9 @@ BEGIN TRY
 					,intItemIssuedUOMId
 					,@intBatchId
 					,Isnull(@intSequenceNo, 1)
-					,GetDate()
+					,@dtmCurrentDateTime
 					,@intUserId
-					,GetDate()
+					,@dtmCurrentDateTime
 					,@intUserId
 				FROM @tblLot
 				WHERE intLotRecordKey = @intLotRecordKey
@@ -432,8 +448,9 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				INSERT INTO tblMFWorkOrderConsumedLot (
+				INSERT INTO dbo.tblMFWorkOrderConsumedLot (
 					intWorkOrderId
+					,intItemId
 					,intLotId
 					,dblQuantity
 					,intItemUOMId
@@ -447,6 +464,7 @@ BEGIN TRY
 					,intLastModifiedUserId
 					)
 				SELECT @intWorkOrderId
+					,@intItemId
 					,intLotId
 					,@dblQty
 					,intItemUOMId
@@ -461,9 +479,9 @@ BEGIN TRY
 					,intItemIssuedUOMId
 					,@intBatchId
 					,Isnull(@intSequenceNo, 1)
-					,GetDate()
+					,@dtmCurrentDateTime
 					,@intUserId
-					,GetDate()
+					,@dtmCurrentDateTime
 					,@intUserId
 				FROM @tblLot
 				WHERE intLotRecordKey = @intLotRecordKey
