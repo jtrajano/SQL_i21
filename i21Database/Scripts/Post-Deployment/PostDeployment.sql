@@ -160,6 +160,7 @@ print 'BEGIN POST DEPLOYMENT'
 -- Entity Management
 :r .\EM\001_EMEntityPortalMenu.sql
 :r .\EM\002_UpdateMenuuEntityType.sql
+:r .\EM\003_FixVendorBadData.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql
