@@ -620,20 +620,13 @@
     <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for allowing a missing Contra Account on Inventory Transfer.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryTransfer on getting the batch id.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryTransfer for the basics.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLotCustody for the basics.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLotCustody by not allowing negative stock.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLotCustody is successful with positive stock.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLotCustody for the basics.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLotCustody by not allowing negative stock.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLotCustody is successful with positive stock.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryLotInCustodyTransaction for the basics.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryLotInCustodyTransaction for inserting the supplied arguments.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICPostLotInCustody for the basics.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotInFromCustody for the basics.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotInFromCustody for add-unpost add.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotInFromCustody for add-sell it-unpost add.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotOutFromCustody for the basics.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotOutFromCustody for add-sell it-unpost sell.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for invalid company location id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for invalid lot id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for invalid source transaction type id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for invalid storage location id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for invalid sub location id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for a successful post.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

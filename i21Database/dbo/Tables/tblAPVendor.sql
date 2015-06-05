@@ -22,6 +22,7 @@
     [dtmLastModified]           DATETIME       NULL,
     [dtmCreated]                DATETIME       NULL,
     [strTaxState]               NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
+	[ysnTransportTerminal]		BIT				NULL	DEFAULT 0,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     [strTaxNumber] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
     [intBillToId] INT NULL, 
