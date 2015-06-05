@@ -360,7 +360,7 @@ BEGIN
 				,intNewItemUOMId			= NULL 
 				,intWeightUOMId				= @ManualGrains_PoundUOM
 				,intNewWeightUOMId			= NULL 
-				,dblWeight					= @25KgBagUnitQty * 1000.00
+				,dblWeight					= @25KgBagUnitQty * 250.00
 				,dblNewWeight				= NULL 
 				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
@@ -702,7 +702,7 @@ BEGIN
 				,intNewItemUOMId			= NULL 
 				,dblNewSplitLotQuantity		= NULL 
 				,intWeightUOMId				= @ManualGrains_PoundUOM 
-				,dblWeight					= @25KgBagUnitQty
+				,dblWeight					= @25KgBagUnitQty * 500
 				,intNewWeightUOMId			= NULL 
 				,dblNewWeight				= NULL 
 				,dblWeightPerQty			= 55.115500
@@ -779,7 +779,7 @@ BEGIN
 				,intNewItemUOMId			= NULL 
 				,dblNewSplitLotQuantity		= NULL 
 				,intWeightUOMId				= @ManualGrains_PoundUOM 
-				,dblWeight					= @25KgBagUnitQty
+				,dblWeight					= @25KgBagUnitQty * 500
 				,intNewWeightUOMId			= NULL 
 				,dblNewWeight				= NULL 
 				,dblWeightPerQty			= 55.115500
@@ -856,7 +856,7 @@ BEGIN
 				,intNewItemUOMId			= NULL 
 				,dblNewSplitLotQuantity		= NULL 
 				,intWeightUOMId				= @ManualGrains_PoundUOM 
-				,dblWeight					= @25KgBagUnitQty
+				,dblWeight					= @25KgBagUnitQty * 500
 				,intNewWeightUOMId			= NULL 
 				,dblNewWeight				= 27500.00
 				,dblWeightPerQty			= 55.115500
@@ -933,7 +933,7 @@ BEGIN
 				,intNewItemUOMId			= NULL 
 				,dblNewSplitLotQuantity		= 400
 				,intWeightUOMId				= @ManualGrains_PoundUOM 
-				,dblWeight					= @25KgBagUnitQty
+				,dblWeight					= @25KgBagUnitQty * 500
 				,intNewWeightUOMId			= NULL 
 				,dblNewWeight				= NULL
 				,dblWeightPerQty			= 55.115500
@@ -1010,7 +1010,7 @@ BEGIN
 				,intNewItemUOMId			= @ManualGrains_10LbBagUOM
 				,dblNewSplitLotQuantity		= NULL 
 				,intWeightUOMId				= @ManualGrains_PoundUOM 
-				,dblWeight					= @25KgBagUnitQty
+				,dblWeight					= @25KgBagUnitQty * 500
 				,intNewWeightUOMId			= NULL 
 				,dblNewWeight				= NULL
 				,dblWeightPerQty			= 55.115500
@@ -1087,7 +1087,7 @@ BEGIN
 				,intNewItemUOMId			= NULL 
 				,dblNewSplitLotQuantity		= NULL 
 				,intWeightUOMId				= @ManualGrains_PoundUOM 
-				,dblWeight					= @25KgBagUnitQty
+				,dblWeight					= @25KgBagUnitQty * 500
 				,intNewWeightUOMId			= @ManualGrains_KgUOM
 				,dblNewWeight				= NULL
 				,dblWeightPerQty			= 55.115500
@@ -1164,7 +1164,7 @@ BEGIN
 				,intNewItemUOMId			= NULL 
 				,dblNewSplitLotQuantity		= NULL 
 				,intWeightUOMId				= @ManualGrains_PoundUOM 
-				,dblWeight					= @25KgBagUnitQty
+				,dblWeight					= @25KgBagUnitQty * 500
 				,intNewWeightUOMId			= NULL
 				,dblNewWeight				= NULL
 				,dblWeightPerQty			= 55.115500
