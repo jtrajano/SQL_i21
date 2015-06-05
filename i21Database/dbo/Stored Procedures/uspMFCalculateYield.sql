@@ -319,8 +319,6 @@ BEGIN TRY
 	LEFT JOIN @tblOutputItem AS O ON O.intItemId = CC.intItemId
 	WHERE CS.intWorkOrderId = @intWorkOrderId
 
-	Select *from @tblMFProductionSummary
-
 	INSERT INTO @tblMFProductionSummaryFinal (
 		intWorkOrderId
 		,intItemId
@@ -393,12 +391,13 @@ BEGIN TRY
 	IF @intManufacturingProcessId = 6 --SD process
 	BEGIN
 		UPDATE @tblMFProductionSummaryFinal
-		SET dblYieldQuantity = dblCountQuantity
+		SET dblYieldQuantity = dblCountQuantity,dblYieldPercentage=100
 	END
 	ELSE
 	BEGIN
 		UPDATE @tblMFProductionSummaryFinal
 		SET dblYieldQuantity = (dblConsumedQuantity + dblCountQuantity + dblCountConversionQuantity) - (dblOpeningQuantity + dblOpeningConversionQuantity + dblInputQuantity)
+			,dblYieldPercentage=(Case When dblInputQuantity>0 Then Round((dblConsumedQuantity + dblCountQuantity + dblCountConversionQuantity) / (dblOpeningQuantity + dblOpeningConversionQuantity + dblInputQuantity)*100,2) else 100 End)
 	END
 
 	DECLARE @intProductionSummaryId INT
@@ -497,21 +496,20 @@ BEGIN TRY
 		Where intProductionSummaryId>@intProductionSummaryId
 	END
 
-	--UPDATE dbo.tblMFWorkOrder
-	--SET intCountStatusId = 13
-	--	,dtmLastModified = GETDATE()
-	--	,intLastModifiedUserId = @intUserId
-	--WHERE intWorkOrderId = @intWorkOrderId
+	UPDATE dbo.tblMFWorkOrder
+	SET intCountStatusId = 13
+		,dtmLastModified = GETDATE()
+		,intLastModifiedUserId = @intUserId
+	WHERE intWorkOrderId = @intWorkOrderId
 
-	--UPDATE tblMFProcessCycleCountSession
-	--SET dtmSessionEndDateTime = GETDATE()
-	--	,ysnCycleCountCompleted = 1
-	--WHERE intWorkOrderId = @intWorkOrderId
+	UPDATE tblMFProcessCycleCountSession
+	SET dtmSessionEndDateTime = GETDATE()
+		,ysnCycleCountCompleted = 1
+	WHERE intWorkOrderId = @intWorkOrderId
 
 	INSERT INTO dbo.tblMFProductionSummary (
 		intWorkOrderId
 		,intItemId
-		,intMachineId
 		,dblOpeningQuantity
 		,dblOpeningOutputQuantity
 		,dblOpeningConversionQuantity
@@ -529,7 +527,6 @@ BEGIN TRY
 		)
 	SELECT intWorkOrderId
 		,intItemId
-		,intMachineId
 		,dblOpeningQuantity
 		,dblOpeningOutputQuantity
 		,dblOpeningConversionQuantity

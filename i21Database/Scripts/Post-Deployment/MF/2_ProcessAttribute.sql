@@ -1,4 +1,6 @@
 ﻿
+GO
+
 IF NOT EXISTS (
 		SELECT *
 		FROM dbo.tblMFAttribute
@@ -131,6 +133,7 @@ BEGIN
 		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
 END
 GO
+
 IF NOT EXISTS (
 		SELECT *
 		FROM dbo.tblMFAttribute
@@ -149,6 +152,7 @@ BEGIN
 		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
 END
 GO
+
 IF NOT EXISTS (
 		SELECT *
 		FROM dbo.tblMFAttribute
@@ -167,3 +171,5 @@ BEGIN
 		,'Select ''Inventory'' as ValueMember,''Inventory'' as DisplayMember UNION Select ''Finished Good'' as ValueMember,''Finished Good'' as DisplayMember'
 END
 GO
+
+
