@@ -47,6 +47,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 store: '{orderTypes}',
                 readOnly: '{current.ysnPosted}'
             },
+            cboSourceType: {
+                value: '{current.strReceiptType}',
+                store: '{receiptTypes}',
+                readOnly: '{current.ysnPosted}'
+            },
             txtReferenceNumber: {
                 value: '{current.strReferenceNumber}',
                 readOnly: '{current.ysnPosted}'
@@ -255,12 +260,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             include: 'ShipFromLocation, ' +
                 'tblARCustomer, ' +
                 'ShipToLocation, ' +
-                'tblICInventoryShipmentItems.vyuICGetShipmentItemSource, ' +
-                'tblICInventoryShipmentItems.tblSMCompanyLocationSubLocation, ' +
-                'tblICInventoryShipmentItems.tblICInventoryShipmentItemLots.tblICLot, ' +
-                'tblICInventoryShipmentItems.tblICItem, ' +
-                'tblICInventoryShipmentItems.tblICItemUOM.tblICUnitMeasure, ' +
-                'tblICInventoryShipmentItems.WeightUOM.tblICUnitMeasure',
+                'tblICInventoryShipmentItems.vyuICGetInventoryShipmentItem',
             createRecord: me.createRecord,
             binding: me.config.binding,
             attachment: Ext.create('iRely.attachment.Manager', {

@@ -16,6 +16,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strShipmentNumber).HasColumnName("strShipmentNumber");
             this.Property(t => t.dtmShipDate).HasColumnName("dtmShipDate");
             this.Property(t => t.intOrderType).HasColumnName("intOrderType");
+            this.Property(t => t.intSourceType).HasColumnName("intSourceType");
             this.Property(t => t.strReferenceNumber).HasColumnName("strReferenceNumber");
             this.Property(t => t.dtmRequestedArrivalDate).HasColumnName("dtmRequestedArrivalDate");
             this.Property(t => t.intShipFromLocationId).HasColumnName("intShipFromLocationId");
@@ -63,6 +64,7 @@ namespace iRely.Inventory.Model
             this.ToTable("tblICInventoryShipmentItem");
             this.Property(t => t.intInventoryShipmentItemId).HasColumnName("intInventoryShipmentItemId");
             this.Property(t => t.intInventoryShipmentId).HasColumnName("intInventoryShipmentId");
+            this.Property(t => t.intOrderId).HasColumnName("intOrderId");
             this.Property(t => t.intSourceId).HasColumnName("intSourceId");
             this.Property(t => t.intLineNo).HasColumnName("intLineNo");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
@@ -80,20 +82,8 @@ namespace iRely.Inventory.Model
                 .WithRequired(p => p.tblICInventoryShipmentItem)
                 .HasForeignKey(p => p.intInventoryShipmentItemId);
 
-            this.HasOptional(p => p.vyuICGetShipmentItemSource)
+            this.HasOptional(p => p.vyuICGetInventoryShipmentItem)
                 .WithRequired(p => p.tblICInventoryShipmentItem);
-            this.HasOptional(p => p.tblICItem)
-                .WithMany(p => p.tblICInventoryShipmentItems)
-                .HasForeignKey(p => p.intItemId);
-            this.HasOptional(p => p.tblICItemUOM)
-                .WithMany(p => p.tblICInventoryShipmentItems)
-                .HasForeignKey(p => p.intItemUOMId);
-            this.HasOptional(p => p.WeightUOM)
-                .WithMany(p => p.ShipmentItemWeights)
-                .HasForeignKey(p => p.intWeightUOMId);
-            this.HasOptional(p => p.tblSMCompanyLocationSubLocation)
-                .WithMany(p => p.tblICInventoryShipmentItems)
-                .HasForeignKey(p => p.intSubLocationId);
         }
     }
 
@@ -129,19 +119,31 @@ namespace iRely.Inventory.Model
         }
     }
 
-    public class vyuICGetShipmentItemSourceMap : EntityTypeConfiguration<vyuICGetShipmentItemSource>
+    public class vyuICGetInventoryShipmentItemMap : EntityTypeConfiguration<vyuICGetInventoryShipmentItem>
     {
-        public vyuICGetShipmentItemSourceMap()
+        public vyuICGetInventoryShipmentItemMap()
         {
             // Primary Key
             this.HasKey(p => p.intInventoryShipmentItemId);
 
             // Table & Column Mappings
-            this.ToTable("vyuICGetShipmentItemSource");
+            this.ToTable("vyuICGetInventoryShipmentItem");
+            this.Property(t => t.intInventoryShipmentId).HasColumnName("intInventoryShipmentId");
             this.Property(t => t.intInventoryShipmentItemId).HasColumnName("intInventoryShipmentItemId");
+            this.Property(t => t.intLineNo).HasColumnName("intLineNo");
+            this.Property(t => t.intOrderId).HasColumnName("intOrderId");
+            this.Property(t => t.strOrderNumber).HasColumnName("strOrderNumber");
             this.Property(t => t.intSourceId).HasColumnName("intSourceId");
-            this.Property(t => t.strSourceId).HasColumnName("strSourceId");
+            this.Property(t => t.strSourceNumber).HasColumnName("strSourceNumber");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
+            this.Property(t => t.strLotTracking).HasColumnName("strLotTracking");
+            this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
+            this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
             this.Property(t => t.strOrderUOM).HasColumnName("strOrderUOM");
+            this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
+            this.Property(t => t.strUnitType).HasColumnName("strUnitType");
+            this.Property(t => t.strWeightUOM).HasColumnName("strWeightUOM");
             this.Property(t => t.dblQtyOrdered).HasColumnName("dblQtyOrdered").HasPrecision(18, 6);
             this.Property(t => t.dblQtyAllocated).HasColumnName("dblQtyAllocated").HasPrecision(18, 6);
             this.Property(t => t.dblUnitPrice).HasColumnName("dblUnitPrice").HasPrecision(18, 6);

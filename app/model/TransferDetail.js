@@ -28,6 +28,7 @@ Ext.define('Inventory.model.TransferDetail', {
                 }
             }
         },
+        { name: 'intSourceId', type: 'int', allowNull: true },
         { name: 'intItemId', type: 'int', allowNull: true },
         { name: 'intLotId', type: 'int', allowNull: true },
         { name: 'intFromSubLocationId', type: 'int', allowNull: true },
@@ -39,12 +40,9 @@ Ext.define('Inventory.model.TransferDetail', {
         { name: 'intItemWeightUOMId', type: 'int', allowNull: true },
         { name: 'dblGrossWeight', type: 'float' },
         { name: 'dblTareWeight', type: 'float' },
-        { name: 'dblNetWeight', type: 'float' },
         { name: 'intNewLotId', type: 'int', allowNull: true },
         { name: 'strNewLotId', type: 'string' },
         { name: 'dblCost', type: 'float' },
-        { name: 'intCreditAccountId', type: 'int', allowNull: true },
-        { name: 'intDebitAccountId', type: 'int', allowNull: true },
         { name: 'intTaxCodeId', type: 'int', allowNull: true },
         { name: 'dblFreightRate', type: 'float' },
         { name: 'dblFreightAmount', type: 'float' },

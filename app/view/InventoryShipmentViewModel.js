@@ -36,6 +36,23 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                 name: 'strOrderType'
             }
         },
+        sourceTypes: {
+            autoLoad: true,
+            data: [
+                {
+                    intSourceType: 1,
+                    strSourceType: 'Scale'
+                },
+                {
+                    intSourceType: 2,
+                    strSourceType: 'Inbound Shipment'
+                }
+            ],
+            fields: {
+                name: 'intSourceType',
+                name: 'strSourceType'
+            }
+        },
         freightTerm: {
             type: 'FreightTermsBuffered'
         },

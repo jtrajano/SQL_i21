@@ -20,6 +20,7 @@ namespace iRely.Inventory.Model
 
         public int intInventoryReceiptId { get; set; }
         public string strReceiptType { get; set; }
+        public int? intSourceType { get; set; }
         public int? intEntityVendorId { get; set; }
         public int? intTransferorId { get; set; }
         public int? intLocationId { get; set; }
@@ -52,7 +53,8 @@ namespace iRely.Inventory.Model
         public string strSealStatus { get; set; }
         public DateTime? dtmReceiveTime { get; set; }
         public decimal? dblActualTempReading { get; set; }
-        public bool ysnPosted { get; set; }
+        public int? intShipmentId { get; set; }
+        public bool? ysnPosted { get; set; }
         public int? intCreatedUserId { get; set; }
         public int? intEntityId { get; set; }
 
@@ -138,9 +140,8 @@ namespace iRely.Inventory.Model
         public tblSMCompanyLocation tblSMCompanyLocation { get; set; } 
     }
 
-    public class vyuReciepts : BaseEntity
+    public class RecieptVM
     {
-        [Key]
         public int intInventoryReceiptId { get; set; }
         public string strReceiptNumber { get; set; }
         public DateTime? dtmReceiptDate { get; set; }
@@ -161,10 +162,12 @@ namespace iRely.Inventory.Model
         public int intInventoryReceiptItemId { get; set; }
         public int intInventoryReceiptId { get; set; }
         public int? intLineNo { get; set; }
+        public int? intOrderId { get; set; }
         public int? intSourceId { get; set; }
         public int? intItemId { get; set; }
         public int? intSubLocationId { get; set; }
         public decimal? dblOrderQty { get; set; }
+        public decimal? dblBillQty { get; set; }
         public decimal? dblOpenReceive { get; set; }
         public decimal? dblReceived { get; set; }
         public int? intUnitMeasureId { get; set; }
@@ -174,39 +177,58 @@ namespace iRely.Inventory.Model
         public decimal? dblLineTotal { get; set; }
         public int? intSort { get; set; }
 
-        private string _sourceId;
+        private string _orderNumber;
         [NotMapped]
-        public string strSourceId
+        public string strOrderNumber
         {
             get
             {
-                if (string.IsNullOrEmpty(_sourceId))
-                    if (vyuICGetReceiptItemSource != null)
-                        return vyuICGetReceiptItemSource.strSourceId;
+                if (string.IsNullOrEmpty(_orderNumber))
+                    if (vyuICGetInventoryReceiptItem != null)
+                        return vyuICGetInventoryReceiptItem.strOrderNumber;
                     else
                         return null;
                 else
-                    return _sourceId;
+                    return _orderNumber;
             }
             set
             {
-                _sourceId = value;
+                _orderNumber = value;
             }
         }
-        private DateTime? _sourceDate = null;
+        private string _sourceNumber;
         [NotMapped]
-        public DateTime? dtmSourceDate
+        public string strSourceNumber
         {
             get
             {
-                if (vyuICGetReceiptItemSource != null)
-                    return vyuICGetReceiptItemSource.dtmDate;
+                if (string.IsNullOrEmpty(_sourceNumber))
+                    if (vyuICGetInventoryReceiptItem != null)
+                        return vyuICGetInventoryReceiptItem.strSourceNumber;
+                    else
+                        return null;
                 else
-                    return _sourceDate;
+                    return _sourceNumber;
             }
             set
             {
-                _sourceDate = value;
+                _sourceNumber = value;
+            }
+        }
+        private DateTime? _orderDate = null;
+        [NotMapped]
+        public DateTime? dtmOrderDate
+        {
+            get
+            {
+                if (vyuICGetInventoryReceiptItem != null)
+                    return vyuICGetInventoryReceiptItem.dtmDate;
+                else
+                    return _orderDate;
+            }
+            set
+            {
+                _orderDate = value;
             }
         }
         private string _itemNo;
@@ -216,8 +238,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_itemNo))
-                    if (tblICItem != null)
-                        return tblICItem.strItemNo;
+                    if (vyuICGetInventoryReceiptItem != null)
+                        return vyuICGetInventoryReceiptItem.strItemNo;
                     else
                         return null;
                 else
@@ -235,8 +257,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_itemDescription))
-                    if (tblICItem != null)
-                        return tblICItem.strDescription;
+                    if (vyuICGetInventoryReceiptItem != null)
+                        return vyuICGetInventoryReceiptItem.strItemDescription;
                     else
                         return null;
                 else
@@ -254,8 +276,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_lotTracking))
-                    if (tblICItem != null)
-                        return tblICItem.strLotTracking;
+                    if (vyuICGetInventoryReceiptItem != null)
+                        return vyuICGetInventoryReceiptItem.strLotTracking;
                     else
                         return null;
                 else
@@ -273,8 +295,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_orderUOM))
-                    if (vyuICGetReceiptItemSource != null)
-                        return vyuICGetReceiptItemSource.strUnitMeasure;
+                    if (vyuICGetInventoryReceiptItem != null)
+                        return vyuICGetInventoryReceiptItem.strUnitMeasure;
                     else
                         return null;
                 else
@@ -291,8 +313,8 @@ namespace iRely.Inventory.Model
         {
             get
             {
-                if (vyuICGetReceiptItemSource != null)
-                    return vyuICGetReceiptItemSource.dblUnitQty ?? 0;
+                if (vyuICGetInventoryReceiptItem != null)
+                    return vyuICGetInventoryReceiptItem.dblOrderUOMConvFactor ?? 0;
                 else
                     return _orderConvFactor;
             }
@@ -308,8 +330,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_uom))
-                    if (tblICItemUOM != null)
-                        return tblICItemUOM.strUnitMeasure;
+                    if (vyuICGetInventoryReceiptItem != null)
+                        return vyuICGetInventoryReceiptItem.strUnitMeasure;
                     else
                         return null;
                 else
@@ -327,8 +349,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_uomType))
-                    if (tblICItemUOM != null)
-                        return tblICItemUOM.strUnitType;
+                    if (vyuICGetInventoryReceiptItem != null)
+                        return vyuICGetInventoryReceiptItem.strUnitType;
                     else
                         return null;
                 else
@@ -346,8 +368,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_subLocationName))
-                    if (tblSMCompanyLocationSubLocation != null)
-                        return tblSMCompanyLocationSubLocation.strSubLocationName;
+                    if (vyuICGetInventoryReceiptItem != null)
+                        return vyuICGetInventoryReceiptItem.strSubLocationName;
                     else
                         return null;
                 else
@@ -365,8 +387,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_weigthUOM))
-                    if (WeightUOM != null)
-                        return WeightUOM.strUnitMeasure;
+                    if (vyuICGetInventoryReceiptItem != null)
+                        return vyuICGetInventoryReceiptItem.strUnitMeasure;
                     else
                         return null;
                 else
@@ -383,8 +405,8 @@ namespace iRely.Inventory.Model
         {
             get
             {
-                if (tblICItemUOM != null)
-                    return tblICItemUOM.dblUnitQty ?? 0;
+                if (vyuICGetInventoryReceiptItem != null)
+                    return vyuICGetInventoryReceiptItem.dblItemUOMConvFactor ?? 0;
                 else
                     return _itemConv;
             }
@@ -399,8 +421,8 @@ namespace iRely.Inventory.Model
         {
             get
             {
-                if (WeightUOM != null)
-                    return WeightUOM.dblUnitQty ?? 0;
+                if (vyuICGetInventoryReceiptItem != null)
+                    return vyuICGetInventoryReceiptItem.dblWeightUOMConvFactor ?? 0;
                 else
                     return _weightConv;
             }
@@ -415,10 +437,10 @@ namespace iRely.Inventory.Model
         {
             get
             {
-                var salesPrice = dblUnitRetail ?? 0;
-                if (salesPrice == 0) return 0;
-
-                return ((salesPrice - (dblUnitCost ?? 0)) / (salesPrice)) * 100;
+                if (vyuICGetInventoryReceiptItem != null)
+                    return vyuICGetInventoryReceiptItem.dblGrossMargin ?? 0;
+                else
+                    return _grossMargin;
             }
             set
             {
@@ -427,29 +449,39 @@ namespace iRely.Inventory.Model
         }
         
 
-        public tblICItemUOM WeightUOM { get; set; }
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
         public tblICItem tblICItem { get; set; }
-        public tblICItemUOM tblICItemUOM { get; set; }
-        public vyuICGetReceiptItemSource vyuICGetReceiptItemSource { get; set; }
         public tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation { get; set; }
-        
+
+        public vyuICGetInventoryReceiptItem vyuICGetInventoryReceiptItem { get; set; }
         public ICollection<tblICInventoryReceiptItemLot> tblICInventoryReceiptItemLots { get; set; }
         public ICollection<tblICInventoryReceiptItemTax> tblICInventoryReceiptItemTaxes { get; set; }
     }
 
-    public class vyuICGetReceiptItemSource
+    public class vyuICGetInventoryReceiptItem
     {
-        [Key]
+        public int intInventoryReceiptId { get; set; }
         public int intInventoryReceiptItemId { get; set; }
-        public int? intSourceId { get; set; }
-        public string strReceiptType { get; set; }
-        public string strSourceId { get; set; }
+        public int? intLineNo { get; set; }
+        public int? intOrderId { get; set; }
+        public string strOrderNumber { get; set; }
         public DateTime? dtmDate { get; set; }
+        public int? intSourceId { get; set; }
+        public string strSourceNumber { get; set; }
+        public int? intItemId { get; set; }
+        public string strItemNo { get; set; }
+        public string strItemDescription { get; set; }
+        public string strLotTracking { get; set; }
+        public int? intSubLocationId { get; set; }
+        public string strSubLocationName { get; set; }
+        public string strOrderUOM { get; set; }
+        public decimal? dblOrderUOMConvFactor { get; set; }
         public string strUnitMeasure { get; set; }
-        public decimal? dblUnitQty { get; set; }
-        public decimal? dblOrdered { get; set; }
-        public decimal? dblReceived { get; set; }
+        public string strUnitType { get; set; }
+        public string strWeightUOM { get; set; }
+        public decimal? dblItemUOMConvFactor { get; set; }
+        public decimal? dblWeightUOMConvFactor { get; set; }
+        public decimal? dblGrossMargin { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }

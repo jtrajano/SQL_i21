@@ -46,6 +46,23 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 name: 'strDescription'
             }
         },
+        sourceTypes: {
+            autoLoad: true,
+            data: [
+                {
+                    intSourceType: 1,
+                    strSourceType: 'Scale'
+                },
+                {
+                    intSourceType: 2,
+                    strSourceType: 'Inbound Shipment'
+                }
+            ],
+            fields: {
+                name: 'intSourceType',
+                name: 'strSourceType'
+            }
+        },
         allocateFreights: {
             autoLoad: true,
             data: [
@@ -104,6 +121,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
         },
 
+
         subLocation: {
             type: 'smcompanylocationsublocationbuffered'
         },
@@ -122,7 +140,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         location: {
             type: 'companylocationbuffered'
         },
-        poSource: {
+        orderNumbers: {
             type: 'purchaseorderdetail'
         },
         shipFrom: {
@@ -221,7 +239,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 return isDirect;
             }
         },
-        checkReadOnlyWithSource: function(get) {
+        checkReadOnlyWithOrder: function(get) {
             if (get('current.ysnPosted') === true){
                 return true
             }

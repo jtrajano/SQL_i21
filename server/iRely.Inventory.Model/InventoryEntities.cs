@@ -103,12 +103,12 @@ namespace iRely.Inventory.Model
         public DbSet<tblICUnitMeasureConversion> tblICUnitMeasureConversions { get; set; }
 
         public DbSet<vyuICGetInventoryTransferDetail> vyuICGetInventoryTransferDetails { get; set; }
+        public DbSet<vyuICGetInventoryReceiptItem> vyuICGetInventoryReceiptItems { get; set; }
+        public DbSet<vyuICGetInventoryShipmentItem> vyuICGetInventoryShipmentItems { get; set; }
         public DbSet<vyuICGetItemStock> vyuICGetItemStocks { get; set; }
         public DbSet<vyuICGetItemStockUOM> vyuICGetItemStockUOMs { get; set; }
         public DbSet<vyuICGetItemAccount> vyuICGetItemAccounts { get; set; }
         public DbSet<vyuICGetItemPricing> vyuICGetItemPricings { get; set; }
-        public DbSet<vyuICGetReceiptItemSource> vyuICGetReceiptItemSources { get; set; }
-        public DbSet<vyuICGetShipmentItemSource> vyuICGetShipmentItemSources { get; set; }
         public DbSet<vyuICGetPackedUOM> vyuICGetPackedUOMs { get; set; }
         public DbSet<vyuICGetUOMConversion> vyuICGetUOMConversions { get; set; }
         public DbSet<vyuICGetStorageLocation> vyuICGetStorageLocations { get; set; }
@@ -291,8 +291,8 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblMFQAPropertyMap());
 
             modelBuilder.Configurations.Add(new vyuSMGetLocationPricingLevelMap());
-            modelBuilder.Configurations.Add(new vyuICGetReceiptItemSourceMap());
-            modelBuilder.Configurations.Add(new vyuICGetShipmentItemSourceMap());
+            modelBuilder.Configurations.Add(new vyuICGetInventoryShipmentItemMap());
+            modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptItemMap());
             modelBuilder.Configurations.Add(new vyuICGetPackedUOMMap());
             modelBuilder.Configurations.Add(new vyuICGetUOMConversionMap());
             modelBuilder.Configurations.Add(new vyuICGetStorageLocationMap());
