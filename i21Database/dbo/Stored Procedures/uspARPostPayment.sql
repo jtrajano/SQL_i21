@@ -815,7 +815,7 @@ IF @post = 1
 				
 				
 		UNION ALL
-		--Discount
+		--DEBIT Discount
 		SELECT
 			 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
 			,strBatchID					= @batchId
@@ -855,6 +855,7 @@ IF @post = 1
 				ON A.intPaymentId = P.intPaymentId
 		WHERE
 			B.dblDiscount <> 0
+			AND B.dblPayment <> 0
 		GROUP BY
 			A.intPaymentId
 			,A.strRecordNumber
@@ -912,7 +913,56 @@ IF @post = 1
 			,B.intAccountId
 			,C.strCustomerNumber
 			,A.dtmDatePaid
-			,A.intCurrencyId							
+			,A.intCurrencyId	
+			
+		UNION ALL
+		
+		SELECT
+			 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
+			,strBatchID					= @batchId
+			,intAccountId				= @ARAccount
+			,dblDebit					= 0
+			,dblCredit					= SUM(B.dblDiscount) 
+			,dblDebitUnit				= 0
+			,dblCreditUnit				= 0				
+			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = @ARAccount) 
+			,strCode					= @CODE
+			,strReference				= C.strCustomerNumber
+			,intCurrencyId				= A.intCurrencyId  
+			,dblExchangeRate			= 1
+			,dtmDateEntered				= GETDATE()
+			,dtmTransactionDate			= A.dtmDatePaid
+			,strJournalLineDescription	= 'Posted ' + @SCREEN_NAME 
+			,intJournalLineNo			= A.intPaymentId
+			,ysnIsUnposted				= 0
+			,intUserId					= @userId
+			,intEntityId				= @UserEntityID				
+			,strTransactionId			= A.strRecordNumber
+			,intTransactionId			= A.intPaymentId
+			,strTransactionType			= @SCREEN_NAME
+			,strTransactionForm			= @SCREEN_NAME
+			,strModuleName				= @MODULE_NAME
+			,intConcurrencyId			= 1				 
+		FROM
+			tblARPayment A 
+		INNER JOIN
+			tblARPaymentDetail B
+				ON A.intPaymentId = B.intPaymentId
+		INNER JOIN
+			tblARCustomer C
+				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
+		INNER JOIN
+			@ARReceivablePostData P
+				ON A.intPaymentId = P.intPaymentId
+		WHERE
+			B.dblDiscount <> 0
+			AND B.dblPayment <> 0
+		GROUP BY
+			A.intPaymentId
+			,A.strRecordNumber
+			,C.strCustomerNumber
+			,A.dtmDatePaid
+			,A.intCurrencyId						
 					
 			
 	END   
