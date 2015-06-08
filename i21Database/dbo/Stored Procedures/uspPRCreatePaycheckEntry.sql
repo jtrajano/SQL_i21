@@ -1,278 +1,280 @@
 ﻿CREATE PROCEDURE [dbo].[uspPRCreatePaycheckEntry]
-	@strPaycheckId NVARCHAR(50)
-	,@intUserId INT
-	,@intEntityId INT
-	,@isSuccessful BIT = 0 OUTPUT
-	,@message_id INT = 0 OUTPUT
-
+	@intEmployeeId	INT
+	,@dtmBeginDate	DATETIME
+	,@dtmEndDate	DATETIME
+	,@dtmPayDate	DATETIME
+	,@intPaycheckId	INT = NULL OUTPUT
 AS
 BEGIN
 
-DECLARE @intPaycheckId INT
-		,@intTransactionId INT
-		,@intEmployeeId INT
-		,@strTransactionId NVARCHAR(50) = ''
-
 --[insert validations here]--
+DECLARE @intEmployee INT
+	   ,@dtmBegin DATETIME
+	   ,@dtmEnd DATETIME
+	   ,@dtmPay DATETIME
 
-/* Get Paycheck Details */
-SELECT @intPaycheckId = intPaycheckId
-	  ,@intEmployeeId = intEmployeeId
-	  ,@strTransactionId = strPaycheckId
-FROM tblPRPaycheck 
-WHERE strPaycheckId = @strPaycheckId
+/* Localize Parameters for Optimal Performance */
+SELECT @intEmployee	= @intEmployeeId
+	  ,@dtmBegin	= @dtmBeginDate
+	  ,@dtmEnd		= @dtmEndDate
+	  ,@dtmPay		= @dtmPayDate
 
-/* Insert Paycheck data into tblCMBankTransaction */
-INSERT INTO [dbo].[tblCMBankTransaction]
-	([strTransactionId]
-	,[intBankTransactionTypeId] 
-	,[intBankAccountId] 
-	,[intCurrencyId] 
-	,[dblExchangeRate]            
-	,[dtmDate] 
-	,[strPayee] 
-	,[intPayeeId] 
-	,[strAddress] 
-	,[strZipCode] 
-	,[strCity] 
-	,[strState] 
-	,[strCountry]               
-	,[dblAmount] 
-	,[strAmountInWords] 
-	,[strMemo] 
-	,[strReferenceNo] 
-	,[dtmCheckPrinted] 
-	,[ysnCheckToBePrinted]       
-	,[ysnCheckVoid] 
-	,[ysnPosted] 
-	,[strLink] 
-	,[ysnClr] 
-	,[dtmDateReconciled] 
-	,[intBankStatementImportId] 
-	,[intBankFileAuditId] 
-	,[strSourceSystem] 
-	,[intEntityId] 
-	,[intCreatedUserId] 
-	,[intCompanyLocationId]              
-	,[dtmCreated] 
-	,[intLastModifiedUserId] 
-	,[dtmLastModified] 
-	,[intConcurrencyId])
-SELECT		 
-	 [strTransactionId]			= PC.strPaycheckId
-	,[intBankTransactionTypeId] = 21
-	,[intBankAccountId]			= PC.intBankAccountId
-	,[intCurrencyId]			= BA.intCurrencyId
-	,[dblExchangeRate]			= (SELECT TOP 1 dblDailyRate FROM tblSMCurrency WHERE intCurrencyID = BA.intCurrencyId)
-	,[dtmDate]					= GETDATE()
-	,[strPayee]					= ''
-	,[intPayeeId]				= PC.intEmployeeId
-	,[strAddress]				= BA.strAddress
-	,[strZipCode]				= BA.strZipCode
-	,[strCity]					= BA.strCity
-	,[strState]					= BA.strState
-	,[strCountry]				= BA.strCountry             
-	,[dblAmount]				= PC.dblNetPayTotal * -1 --Insert as Credit
-	,[strAmountInWords]			= dbo.fnConvertNumberToWord(PC.dblNetPayTotal)
-	,[strMemo]					= ''
-	,[strReferenceNo]			= ''
-	,[dtmCheckPrinted]			= NULL
-	,[ysnCheckToBePrinted]		= 0
-	,[ysnCheckVoid]				= 0
-	,[ysnPosted]				= 0
-	,[strLink]					= ''
-	,[ysnClr]					= 0
-	,[dtmDateReconciled]		= NULL
-	,[intBankStatementImportId]	= 1
-	,[intBankFileAuditId]		= NULL
-	,[strSourceSystem]			= 'PR'
-	,[intEntityId]				= PC.intEmployeeId
-	,[intCreatedUserId]			= @intUserId
-	,[intCompanyLocationId]		= NULL
-	,[dtmCreated]				= GETDATE()
-	,[intLastModifiedUserId]	= @intUserId
-	,[dtmLastModified]			= GETDATE()
-	,[intConcurrencyId]			= 1
-FROM tblPRPaycheck PC LEFT JOIN tblCMBankAccount BA 
-	ON PC.intBankAccountId = BA.intBankAccountId
-WHERE PC.intPaycheckId = @intPaycheckId
+/* Get Paycheck Starting Number */
+DECLARE @strPaycheckId NVARCHAR(50)
+EXEC uspSMGetStartingNumber 32, @strPaycheckId OUT
 
-SELECT @intTransactionId = @@IDENTITY
-
-/* Insert Earnings into tblCMBankTransactionDetail */
-INSERT INTO [dbo].[tblCMBankTransactionDetail]
-	([intTransactionId]
-	,[dtmDate]
-	,[intGLAccountId]
-	,[strDescription]
-	,[dblDebit]
-	,[dblCredit]
-	,[intUndepositedFundId]
-	,[intEntityId]
-	,[intCreatedUserId]
+/* Create Paycheck Header */
+INSERT INTO [dbo].[tblPRPaycheck]
+	([strPaycheckId]
+	,[intEmployeeId]
+	,[dtmPayDate]
+	,[strPayPeriod]
+	,[dtmDateFrom]
+	,[dtmDateTo]
+	,[intBankAccountId]
+	,[strReferenceNo]
+	,[dblTotalHours]
+	,[dblGross]
+	,[dblAdjustedGross]
+	,[dblTaxTotal]
+	,[dblDeductionTotal]
+	,[dblNetPayTotal]
+	,[dblCompanyTaxTotal]
+	,[dtmPosted]
+	,[ysnPosted]
+	,[ysnPrinted]
+	,[ysnVoid]
+	,[ysnDirectDeposit]
 	,[dtmCreated]
-	,[intLastModifiedUserId]
-	,[dtmLastModified]
 	,[intConcurrencyId])
 SELECT
-	[intTransactionId]			= @intTransactionId
-	,[dtmDate]					= GETDATE()
-	,[intGLAccountId]			= E.intAccountId
-	,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = E.intAccountId)
-	,[dblDebit]					= E.dblTotal
-	,[dblCredit]				= 0
-	,[intUndepositedFundId]		= NULL
-	,[intEntityId]				= NULL
-	,[intCreatedUserId]			= @intUserId
-	,[dtmCreated]				= GETDATE()
-	,[intLastModifiedUserId]	= @intUserId
-	,[dtmLastModified]			= GETDATE()
-	,[intConcurrencyId]			= 1
-FROM tblPRPaycheckEarning E
-WHERE E.dblTotal > 0
-  AND E.intPaycheckId = @intPaycheckId
+	@strPaycheckId
+	,@intEmployee
+	,@dtmPay
+	,tblPREmployee.strPayPeriod
+	,@dtmBegin
+	,@dtmEnd
+	,(SELECT intBankAccountId FROM tblPRPayGroup WHERE intPayGroupId = tblPREmployee.intPayGroupId)
+	,''
+	,0
+	,0
+	,0
+	,0
+	,0
+	,0
+	,0
+	,NULL
+	,0
+	,0
+	,0
+	,[ysnDirectDeposit]
+	,GETDATE()
+	,1
+FROM [dbo].[tblPREmployee]
+WHERE [intEmployeeId] = @intEmployee
 
-/* Insert Earnings into tblCMBankTransactionDetail */
-INSERT INTO [dbo].[tblCMBankTransactionDetail]
-	([intTransactionId]
-	,[dtmDate]
-	,[intGLAccountId]
-	,[strDescription]
-	,[dblDebit]
-	,[dblCredit]
-	,[intUndepositedFundId]
-	,[intEntityId]
-	,[intCreatedUserId]
-	,[dtmCreated]
-	,[intLastModifiedUserId]
-	,[dtmLastModified]
+/* Get the Created Paycheck Id*/
+SELECT @intPaycheckId = @@IDENTITY
+
+/* Create Paycheck Taxes */
+INSERT INTO [dbo].[tblPRPaycheckTax]
+	([intPaycheckId]
+	,[intEmployeeTaxId]
+	,[intTypeTaxId]
+	,[strCalculationType]
+	,[strFilingStatus]
+	,[intTypeTaxStateId]
+	,[intTypeTaxLocalId]
+	,[dblAmount]
+	,[dblExtraWithholding]
+	,[dblLimit]
+	,[dblTotal]
+	,[intAccountId]
+	,[intExpenseAccountId]
+	,[intAllowance]
+	,[strPaidBy]
+	,[strVal1]
+	,[strVal2]
+	,[strVal3]
+	,[strVal4]
+	,[strVal5]
+	,[strVal6]
+	,[ysnSet]
+	,[intSort]
 	,[intConcurrencyId])
 SELECT
-	[intTransactionId]			= @intTransactionId
-	,[dtmDate]					= GETDATE()
-	,[intGLAccountId]			= D.intAccountId
-	,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = D.intAccountId)
-	,[dblDebit]					= 0
-	,[dblCredit]				= D.dblTotal
-	,[intUndepositedFundId]		= NULL
-	,[intEntityId]				= NULL
-	,[intCreatedUserId]			= @intUserId
-	,[dtmCreated]				= GETDATE()
-	,[intLastModifiedUserId]	= @intUserId
-	,[dtmLastModified]			= GETDATE()
-	,[intConcurrencyId]			= 1
-FROM tblPRPaycheckDeduction D
-WHERE D.dblTotal > 0 
-  AND D.intPaycheckId = @intPaycheckId
+	@intPaycheckId
+	,[intEmployeeTaxId]
+	,[intTypeTaxId]
+	,[strCalculationType]
+	,[strFilingStatus]
+	,[intTypeTaxStateId]
+	,[intTypeTaxLocalId]
+	,[dblAmount]
+	,[dblExtraWithholding]
+	,[dblLimit]
+	,0
+	,[intAccountId]
+	,[intExpenseAccountId]
+	,[intAllowance]
+	,[strPaidBy]
+	,[strVal1]
+	,[strVal2]
+	,[strVal3]
+	,[strVal4]
+	,[strVal5]
+	,[strVal6]
+	,0
+	,[intSort]
+	,1
+FROM [dbo].[tblPREmployeeTax]
+WHERE [intEmployeeId] = @intEmployee
+  AND [ysnDefault] = 1
 
-/* Insert Employee Taxes into tblCMBankTransactionDetail */
-INSERT INTO [dbo].[tblCMBankTransactionDetail]
-	([intTransactionId]
-	,[dtmDate]
-	,[intGLAccountId]
-	,[strDescription]
-	,[dblDebit]
-	,[dblCredit]
-	,[intUndepositedFundId]
-	,[intEntityId]
-	,[intCreatedUserId]
-	,[dtmCreated]
-	,[intLastModifiedUserId]
-	,[dtmLastModified]
-	,[intConcurrencyId])
-SELECT
-	[intTransactionId]			= @intTransactionId
-	,[dtmDate]					= GETDATE()
-	,[intGLAccountId]			= T.intAccountId
-	,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = T.intAccountId)
-	,[dblDebit]					= 0
-	,[dblCredit]				= T.dblTotal
-	,[intUndepositedFundId]		= NULL
-	,[intEntityId]				= NULL
-	,[intCreatedUserId]			= @intUserId
-	,[dtmCreated]				= GETDATE()
-	,[intLastModifiedUserId]	= @intUserId
-	,[dtmLastModified]			= GETDATE()
-	,[intConcurrencyId]			= 1
-FROM tblPRPaycheckTax T
-WHERE T.strPaidBy = 'Employee'
-  AND T.dblTotal > 0
-  AND T.intPaycheckId = @intPaycheckId
+/* Create Paycheck Earnings and Taxes*/
+DECLARE @intPaycheckEarningId INT
+DECLARE @intEmployeeEarningId INT
 
-/* Insert Company Taxes into tblCMBankTransactionDetail */
-INSERT INTO [dbo].[tblCMBankTransactionDetail]
-	([intTransactionId]
-	,[dtmDate]
-	,[intGLAccountId]
-	,[strDescription]
-	,[dblDebit]
-	,[dblCredit]
-	,[intUndepositedFundId]
-	,[intEntityId]
-	,[intCreatedUserId]
-	,[dtmCreated]
-	,[intLastModifiedUserId]
-	,[dtmLastModified]
-	,[intConcurrencyId])
-SELECT
-	[intTransactionId]			= @intTransactionId
-	,[dtmDate]					= GETDATE()
-	,[intGLAccountId]			= T.intAccountId
-	,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = T.intAccountId)
-	,[dblDebit]					= 0
-	,[dblCredit]				= T.dblTotal
-	,[intUndepositedFundId]		= NULL
-	,[intEntityId]				= NULL
-	,[intCreatedUserId]			= @intUserId
-	,[dtmCreated]				= GETDATE()
-	,[intLastModifiedUserId]	= @intUserId
-	,[dtmLastModified]			= GETDATE()
-	,[intConcurrencyId]			= 1
-FROM tblPRPaycheckTax T
-WHERE T.strPaidBy = 'Company'
-  AND T.dblTotal > 0
-  AND intPaycheckId = @intPaycheckId
-UNION ALL
-SELECT
-	[intTransactionId]			= @intTransactionId
-	,[dtmDate]					= GETDATE()
-	,[intGLAccountId]			= T.intExpenseAccountId
-	,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = T.intExpenseAccountId)
-	,[dblDebit]					= T.dblTotal
-	,[dblCredit]				= 0
-	,[intUndepositedFundId]		= NULL
-	,[intEntityId]				= NULL
-	,[intCreatedUserId]			= @intUserId
-	,[dtmCreated]				= GETDATE()
-	,[intLastModifiedUserId]	= @intUserId
-	,[dtmLastModified]			= GETDATE()
-	,[intConcurrencyId]			= 1
-FROM tblPRPaycheckTax T
-WHERE T.strPaidBy = 'Company'
-  AND T.dblTotal > 0
-  AND T.intPaycheckId = @intPaycheckId
+/* Insert Earnings to Temp Table for iteration */
+SELECT tblPREmployeeEarning.intEmployeeEarningId 
+INTO #tmpEarnings FROM tblPREmployeeEarning 
+WHERE intEmployeeId = @intEmployee 
 
-DECLARE @ysnPost BIT = 1
-		,@ysnRecap BIT = 0
-
-/* Execute Bank Transaction Post Procedure */
-EXEC dbo.uspCMPostBankTransaction @ysnPost, @ysnRecap, @strTransactionId, @intUserId, @intEntityId, @isSuccessful OUTPUT, @message_id OUTPUT
-
-IF (@isSuccessful <> 0)
+/* Add Each Earning to Paycheck */
+WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 	BEGIN
-		/* If Posting succeeds, mark transaction as posted */
-		UPDATE tblPRPaycheck SET 
-			ysnPosted = 1
-			,dtmPosted = (SELECT TOP 1 dtmDate FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId) 
-		WHERE strPaycheckId = @strTransactionId
-		SET @isSuccessful = 1
+
+		/* Select Employee Earning to Add */
+		SELECT TOP 1 @intEmployeeEarningId = intEmployeeEarningId FROM #tmpEarnings
+	
+		/* Insert Paycheck Earning */
+		INSERT INTO tblPRPaycheckEarning
+			([intPaycheckId]
+			,[intEmployeeEarningId]
+			,[intTypeEarningId]
+			,[strCalculationType]
+			,[dblHours]
+			,[dblAmount]
+			,[dblTotal]
+			,[strW2Code]
+			,[intEmployeeTimeOffId]
+			,[intAccountId]
+			,[intSort]
+			,[intConcurrencyId])
+		SELECT
+			@intPaycheckId
+			,@intEmployeeEarningId
+			,[intTypeEarningId]
+			,[strCalculationType]
+			,[dblDefaultHours]
+			,[dblAmount]
+			,0
+			,[strW2Code]
+			,[intEmployeeTimeOffId]
+			,[intAccountId]
+			,[intSort]
+			,1
+		FROM tblPREmployeeEarning
+		WHERE intEmployeeId = @intEmployee
+		  AND intEmployeeEarningId = @intEmployeeEarningId
+		  AND ysnDefault = 1
+
+		/* Get the Created Paycheck Earning Id*/
+		SELECT @intPaycheckEarningId = @@IDENTITY
+
+		IF EXISTS(SELECT TOP 1 1 FROM tblPREmployeeEarning WHERE intEmployeeEarningId = @intEmployeeEarningId AND ysnDefault = 1)
+			BEGIN
+				/* Insert Paycheck Earning Taxes */
+				INSERT INTO tblPRPaycheckEarningTax
+					(intPaycheckEarningId
+					,intTypeTaxId
+					,intEmployeeTaxId
+					,intConcurrencyId)
+				SELECT 
+					@intPaycheckEarningId
+					,intTypeTaxId
+					,intEmployeeTaxId
+					,1
+				FROM tblPREmployeeEarningTax
+				WHERE intEmployeeEarningId = @intEmployeeEarningId
+			END
+
+		DELETE FROM #tmpEarnings WHERE intEmployeeEarningId = @intEmployeeEarningId
 	END
-ELSE
+
+/* Create Paycheck Deductions and Taxes*/
+DECLARE @intPaycheckDeductionId INT
+DECLARE @intEmployeeDeductionId INT
+
+/* Insert Deductions to Temp Table for iteration */
+SELECT tblPREmployeeDeduction.intEmployeeDeductionId 
+INTO #tmpDeductions FROM tblPREmployeeDeduction 
+WHERE intEmployeeId = @intEmployee 
+
+/* Add Each Deduction to Paycheck */
+WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 	BEGIN
-		/* If Posting fails, delete the created bank transaction */
-		DELETE FROM tblCMBankTransactionDetail WHERE intTransactionId = @intTransactionId
-		DELETE FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId
-		SET @isSuccessful = 0
+
+		/* Select Employee Deduction to Add */
+		SELECT TOP 1 @intEmployeeDeductionId = intEmployeeDeductionId, @intPaycheckDeductionId = NULL FROM #tmpDeductions
+	
+		/* Insert Paycheck Deduction */
+		INSERT INTO tblPRPaycheckDeduction
+			([intPaycheckId]
+			,[intEmployeeDeductionId]
+			,[intTypeDeductionId]
+			,[strDeductFrom]
+			,[strCalculationType]
+			,[dblAmount]
+			,[dblLimit]
+			,[dblTotal]
+			,[dtmBeginDate]
+			,[dtmEndDate]
+			,[intAccountId]
+			,[strPaidBy]
+			,[intSort]
+			,[intConcurrencyId])
+		SELECT
+			@intPaycheckId
+			,@intEmployeeDeductionId
+			,[intTypeDeductionId]
+			,[strDeductFrom]
+			,[strCalculationType]
+			,[dblAmount]
+			,[dblLimit]
+			,0
+			,[dtmBeginDate]
+			,[dtmEndDate]
+			,[intAccountId]
+			,[strPaidBy]
+			,[intSort]
+			,1
+		FROM tblPREmployeeDeduction
+		WHERE intEmployeeId = @intEmployee
+		  AND intEmployeeDeductionId = @intEmployeeDeductionId
+		  AND ysnDefault = 1
+
+		/* Get the Created Paycheck Deduction Id*/
+		SELECT @intPaycheckDeductionId = @@IDENTITY
+
+		IF EXISTS(SELECT TOP 1 1 FROM tblPREmployeeDeduction WHERE intEmployeeDeductionId = @intEmployeeDeductionId AND ysnDefault = 1)
+			BEGIN
+				/* Insert Paycheck Deduction Taxes */
+				INSERT INTO tblPRPaycheckDeductionTax
+					(intPaycheckDeductionId
+					,intTypeTaxId
+					,intEmployeeTaxId
+					,intConcurrencyId)
+				SELECT 
+					@intPaycheckDeductionId
+					,intTypeTaxId
+					,intEmployeeTaxId
+					,1
+				FROM tblPREmployeeDeductionTax
+				WHERE intEmployeeDeductionId = @intEmployeeDeductionId
+			END
+
+		DELETE FROM #tmpDeductions WHERE intEmployeeDeductionId = @intEmployeeDeductionId
 	END
 
 END
