@@ -16,7 +16,7 @@ Type the overview for the table here.
 		[strShipmentNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 		[dtmShipDate] DATETIME NOT NULL DEFAULT (getdate()), 
 		[intOrderType] INT NOT NULL, 
-		[intSourceType] INT NULL,
+		[intSourceType] INT NOT NULL DEFAULT ((0)),
 		[strReferenceNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[dtmRequestedArrivalDate] DATETIME NULL, 
 		[intShipFromLocationId] INT NOT NULL, 

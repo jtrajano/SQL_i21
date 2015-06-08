@@ -14,7 +14,7 @@ Type the overview for the table here.
 	(
 		[intInventoryReceiptId] [int] IDENTITY NOT NULL,
 		[strReceiptType] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
-		[intSourceType] INT NULL,
+		[intSourceType] INT NOT NULL DEFAULT ((0)),
 		[intEntityVendorId] [int] NULL,
 		[intTransferorId] [int] NULL,
 		[intLocationId] [int] NULL,
