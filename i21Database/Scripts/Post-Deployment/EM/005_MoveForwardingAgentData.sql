@@ -28,14 +28,13 @@ BEGIN
 		SET @intFAEntityLocationId = null
 
 				
-		INSERT INTO tblEntity(strName, strContactNumber, strEmail, strPhone, strPhone2, strFax, strWebsite, strNotes, ysnActive)	
+		INSERT INTO tblEntity(strName, strContactNumber, strEmail, strPhone, strPhone2, strFax, strNotes, ysnActive)	
 		SELECT ISNULL(strName,''), 
 				ISNULL(strContactName,''),
 				ISNULL(strEmail,''), 
 				ISNULL(strPhone,''), 
 				ISNULL(strAltPhone,''), 
-				ISNULL(strFax,''),
-				ISNULL(strWebsite,''),
+				ISNULL(strFax,''),				
 				ISNULL(strNotes,''),
 				ysnActive
 			FROM tblLGForwardingAgent 
