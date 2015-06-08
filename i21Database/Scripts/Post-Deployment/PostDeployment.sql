@@ -152,6 +152,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\003_FixVendorBadData.sql
 :r .\EM\004_MoveFuturesBrokerData.sql
 :r .\EM\005_MoveForwardingAgentData.sql
+:r .\EM\006_MoveTerminalData.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql

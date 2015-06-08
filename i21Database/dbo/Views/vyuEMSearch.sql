@@ -14,7 +14,8 @@ SELECT
 		Salesperson,
 		[User],
 		FuturesBroker,
-		ForwardingAgent
+		ForwardingAgent,
+		Terminal
 	FROM 		
 			(SELECT	intEntityId, Name,		
 								CASE WHEN [Customer] IS NOT NULL THEN 1 ELSE 0 END Customer, 		
@@ -23,7 +24,8 @@ SELECT
 								CASE WHEN [Salesperson] IS NOT NULL THEN 1 ELSE 0 END Salesperson, 		
 								CASE WHEN [User] IS NOT NULL THEN 1 ELSE 0 END AS  [User],
 								CASE WHEN [Futures Broker] IS NOT NULL THEN 1 ELSE 0 END AS  FuturesBroker,
-								CASE WHEN [Forwarding Agent] IS NOT NULL THEN 1 ELSE 0 END AS  ForwardingAgent
+								CASE WHEN [Forwarding Agent] IS NOT NULL THEN 1 ELSE 0 END AS  ForwardingAgent,
+								CASE WHEN [Terminal] IS NOT NULL THEN 1 ELSE 0 END AS  Terminal
 			FROM
 			(
 				select A.intEntityId,  A.strName Name, strType 
@@ -41,7 +43,8 @@ SELECT
 						[Salesperson],
 						[User],
 						[Futures Broker],
-						[Forwarding Agent]
+						[Forwarding Agent],
+						Terminal
 					)
 			) AS PivotTable
 		) a
