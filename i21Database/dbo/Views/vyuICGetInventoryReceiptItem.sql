@@ -6,6 +6,7 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, ReceiptItem.intLineNo
 	, ReceiptItemSource.intOrderId
 	, ReceiptItemSource.strOrderNumber
+	, ReceiptItemSource.dtmDate
 	, ReceiptItem.intSourceId
 	, ReceiptItemSource.strSourceNumber
 	, ReceiptItem.intItemId
