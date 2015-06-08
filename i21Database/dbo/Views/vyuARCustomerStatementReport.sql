@@ -1,36 +1,21 @@
 ﻿CREATE VIEW [dbo].[vyuARCustomerStatementReport]
 AS
-SELECT I.[intInvoiceId]
-	 , I.[strInvoiceNumber]
-	 , I.[strTransactionType] 
-	 , I.[dtmDate]
-	 , I.[dtmDueDate]
-	 , DATEDIFF(DAY, I.[dtmDueDate], GETDATE()) AS [intDaysDue]
-	 , I.[dblInvoiceTotal] * 
-	  	(CASE WHEN I.[strTransactionType] <> 'Invoice' THEN -1 ELSE 1 END) AS dblTotalAmount
-	 , I.[dblPayment] * 
-	  	(CASE WHEN I.[strTransactionType] <> 'Invoice' THEN -1 ELSE 1 END) AS dblAppliedAmount	
-	 , I.[dblAmountDue] * 
-	  	(CASE WHEN I.[strTransactionType] <> 'Invoice' THEN -1 ELSE 1 END) AS dblAmountOpen
-	 , I.[dblInvoiceTotal]
-	 , I.[dblPayment] 
-	 , I.[dblAmountDue]
-	 , I.[dblTax]
-	 , I.dblDiscount
-	 , C.[strCustomerNumber] 
-	 , C.[strName]
-	 , I.[strBillToLocationName] 
-	 , I.[strBillToAddress]
-	 , I.[strBillToCountry]
-	 , I.[strBillToState] 
-	 , I.[strBillToCity]
-	 , strFullAddress = ISNULL(I.[strBillToLocationName] + CHAR(13) + char(10), '')
-						+ ISNULL(I.[strBillToAddress] + CHAR(13) + char(10), '')
-						+ ISNULL(I.[strBillToCity] + CHAR(13) + char(10), '')
-						+ ISNULL(I.[strBillToState]     + ' ',    '')
-						+ ISNULL(I.[strBillToCountry] + ' ',    '')
+SELECT I.strInvoiceNumber AS strReferenceNumber
+	 , I.strTransactionType
+	 , I.dtmDueDate
+	 , intDaysDue = DATEDIFF(DAY, I.[dtmDueDate], GETDATE())
+	 , dblTotalAmount = CASE WHEN I.strTransactionType = 'Credit Memo' THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
+	 , dblAmountPaid = CASE WHEN I.strTransactionType = 'Credit Memo' THEN ISNULL(I.dblPayment, 0) * -1 ELSE ISNULL(I.dblPayment, 0) END
+	 , dblAmountDue = CASE WHEN I.strTransactionType = 'Credit Memo' THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END
+	 , C.strCustomerNumber
+	 , C.strName
+	 , strFullAddress = ISNULL(RTRIM(C.strBillToLocationName) + CHAR(13) + char(10), '')
+						+ ISNULL(RTRIM(C.strBillToAddress) + CHAR(13) + char(10), '')
+						+ ISNULL(RTRIM(C.strBillToCity), '')
+						+ ISNULL(', ' + RTRIM(C.strBillToState), '')
+						+ ISNULL(', ' + RTRIM(C.strZipCode), '')
+						+ ISNULL(', ' + RTRIM(C.strBillToCountry), '')
 FROM tblARInvoice I
-INNER JOIN vyuARCustomer C ON I.[intEntityCustomerId] = C.[intEntityCustomerId] 
-WHERE
-	I.[ysnPosted] = 1
-	AND I.[ysnPaid] = 0
+	INNER JOIN vyuARCustomer C ON I.intEntityCustomerId = C.intEntityCustomerId
+WHERE I.ysnPosted = 1
+  AND I.ysnPaid = 0
