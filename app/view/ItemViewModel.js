@@ -110,7 +110,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             type: 'icbufferedcategory',
             proxy: {
                 extraParams: {
-                    include: 'tblICCategoryUOMs.tblICUnitMeasure, '
+                    include: 'tblICCategoryUOMs.tblICUnitMeasure'
                 },
                 type: 'rest',
                 api: {
