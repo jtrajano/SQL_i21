@@ -553,6 +553,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var today = new Date();
         var record = Ext.create('Inventory.model.Receipt');
         record.set('strReceiptType', 'Purchase Order');
+        record.set('intSourceType', 0);
         if (app.DefaultLocation > 0)
             record.set('intLocationId', app.DefaultLocation);
         if (app.UserId > 0)

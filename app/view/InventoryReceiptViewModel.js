@@ -50,6 +50,10 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             autoLoad: true,
             data: [
                 {
+                    intSourceType: 0,
+                    strSourceType: 'None'
+                },
+                {
                     intSourceType: 1,
                     strSourceType: 'Scale'
                 },
