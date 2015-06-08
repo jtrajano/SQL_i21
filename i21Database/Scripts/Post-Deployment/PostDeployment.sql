@@ -138,6 +138,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql
+:R .\MF\2_ProcessAttribute.sql
 
 -- Payroll
 :r .\PR\DefaultData\1_TaxStatesAndLocalities.sql
@@ -148,6 +149,8 @@ print 'BEGIN POST DEPLOYMENT'
 -- Entity Management
 :r .\EM\001_EMEntityPortalMenu.sql
 :r .\EM\002_UpdateMenuuEntityType.sql
+:r .\EM\003_FixVendorBadData.sql
+:r .\EM\004_MoveFuturesBrokerData.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql

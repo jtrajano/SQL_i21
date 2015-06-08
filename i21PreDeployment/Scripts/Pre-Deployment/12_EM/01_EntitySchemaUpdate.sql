@@ -627,14 +627,23 @@ END
 							on a.intSalespersonId = b.intSalespersonId	')
 	END
 
+	-- Create the new intEntityVendorId column in tblICInventoryReceipt
+	IF	EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICInventoryReceipt') 
+		AND NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICInventoryReceipt' AND [COLUMN_NAME] = 'intEntityVendorId') 
+	BEGIN 
+		EXEC ('ALTER TABLE tblICInventoryReceipt ADD intEntityVendorId INT NULL')
+	END
+
 	print 'Update Linking of tblICInventoryReceipt intVendorId from intVendorId to entityid '
-	 IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICInventoryReceipt' AND [COLUMN_NAME] = 'intVendorId') 
-	 BEGIN
-		  exec(N' UPDATE a set a.intVendorId = b.intEntityId
-					 from tblICInventoryReceipt a 
-						  join tblAPVendor b 
-							on a.intVendorId = b.intVendorId')
-	 END
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICInventoryReceipt' AND [COLUMN_NAME] = 'intVendorId') 
+	BEGIN
+		
+
+	exec(N' UPDATE a set a.intEntityVendorId = b.intEntityId
+				from tblICInventoryReceipt a 
+					join tblAPVendor b 
+					on a.intVendorId = b.intVendorId')
+	END
 
 	 print 'Update Linking of tblAPPayment intVendorId from intVendorId to entityid '
 	 IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPPayment' AND [COLUMN_NAME] = 'intVendorId') 
@@ -779,14 +788,14 @@ END
 						on a.intVendorId =  b.intVendorId ')
 	END
 
-	print 'Update Linking of tblICInventoryReceipt from vendor id to entity id'
-	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICInventoryReceipt' AND [COLUMN_NAME] = 'intVendorId') 
-	BEGIN
-		exec(N' update a set a.intVendorId = b.intEntityId
-				from tblICInventoryReceipt a
-					join tblAPVendor b
-						on a.intVendorId =  b.intVendorId ')
-	END
+	--print 'Update Linking of tblICInventoryReceipt from vendor id to entity id'
+	--IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICInventoryReceipt' AND [COLUMN_NAME] = 'intVendorId') 
+	--BEGIN
+	--	exec(N' update a set a.intVendorId = b.intEntityId
+	--			from tblICInventoryReceipt a
+	--				join tblAPVendor b
+	--					on a.intVendorId =  b.intVendorId ')
+	--END
 
 	print 'Update Linking of tblICLot from vendor id to entity id'
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblICLot' AND [COLUMN_NAME] = 'intVendorId') 

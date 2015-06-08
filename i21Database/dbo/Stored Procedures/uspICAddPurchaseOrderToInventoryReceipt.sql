@@ -17,16 +17,16 @@ DECLARE @ReceiptType_PurchaseOrder AS NVARCHAR(100) = 'Purchase Order'
 DECLARE @ReceiptType_TransferOrder AS NVARCHAR(100) = 'Transfer Order'
 DECLARE @ReceiptType_Direct AS NVARCHAR(100) = 'Direct'
 
+IF @PurchaseOrderId IS NULL 
+BEGIN 
+    -- Raise the error:
+    -- Unable to generate the Inventory Receipt. An error stopped the process from Purchase Order to Inventory Receipt.
+    RAISERROR(50031, 11, 1);
+    GOTO _Exit
+END
+
 -- Get the transaction id 
 EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryReceipt, @ReceiptNumber OUTPUT 
-
-IF @ReceiptNumber IS NULL 
-BEGIN 
-	-- Raise the error:
-	-- Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.
-	RAISERROR(50030, 11, 1);
-	RETURN;
-END 
 
 -- Insert the Inventory Receipt header 
 INSERT INTO dbo.tblICInventoryReceipt (
@@ -107,13 +107,13 @@ WHERE	PO.intPurchaseId = @PurchaseOrderId
 -- Get the identity value from tblICInventoryReceipt
 SELECT @InventoryReceiptId = SCOPE_IDENTITY()
 
-IF @InventoryReceiptId IS NULL 
-BEGIN 
-	-- Raise the error:
-	-- Unable to generate the Inventory Receipt. An error stopped the process from Purchase Order to Inventory Receipt.
-	RAISERROR(50031, 11, 1);
-	RETURN;
-END
+--IF @InventoryReceiptId IS NULL 
+--BEGIN 
+--	-- Raise the error:
+--	-- Unable to generate the Inventory Receipt. An error stopped the process from Purchase Order to Inventory Receipt.
+--	RAISERROR(50031, 11, 1);
+--	GOTO _Exit
+--END
 
 INSERT INTO dbo.tblICInventoryReceiptItem (
 	intInventoryReceiptId
@@ -171,3 +171,5 @@ SET		dblInvoiceAmount = (
 		)
 FROM	dbo.tblICInventoryReceipt Receipt 
 WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
+
+_Exit: 

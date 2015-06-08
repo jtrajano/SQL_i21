@@ -29,7 +29,7 @@
 	intContainerId INT,
 	intStorageLocationId INT,
 	intShiftId INT,
-	ysnProductionReversed BIT,
+	ysnProductionReversed BIT CONSTRAINT [DF_tblMFWorkOrderProducedLot_ysnProductionReversed] DEFAULT 0,
 	strReferenceNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	CONSTRAINT [PK_tblMFWorkOrderProducedLot_intWorkOrderProducedLotId] PRIMARY KEY ([intWorkOrderProducedLotId]),
 	CONSTRAINT [FK_tblMFWorkOrderProducedLot_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE,

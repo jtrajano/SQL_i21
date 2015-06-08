@@ -297,6 +297,7 @@ BEGIN TRY
 
 		INSERT INTO dbo.tblMFWorkOrderConsumedLot (
 			intWorkOrderId
+			,intItemId
 			,intLotId
 			,dblQuantity
 			,intItemUOMId
@@ -310,6 +311,7 @@ BEGIN TRY
 			,intLastModifiedUserId
 			)
 		SELECT @intWorkOrderId
+			,@intItemId
 			,intLotId
 			,CASE 
 				WHEN @dblInputWeight = 0
@@ -333,7 +335,7 @@ BEGIN TRY
 		WHERE intLotId = @intInputLotId
 	END
 
-	IF @ysnProductionOnly = 0
+	IF @ysnProductionOnly = 0--Consumption will happen during true up.
 	BEGIN
 		EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
 			,@dblProduceQty = @dblProduceQty
@@ -370,8 +372,10 @@ BEGIN TRY
 		,@intMachineId =@intMachineId
 		,@ysnLotAlias =@ysnLotAlias
 		,@strLotAlias =@strLotAlias
+		,@ysnProductionOnly=@ysnProductionOnly
 
 	EXEC dbo.uspMFProduceWorkOrder @intWorkOrderId = @intWorkOrderId
+		,@intItemId = @intItemId
 		,@dblProduceQty = @dblProduceQty
 		,@intProduceUOMKey = @intProduceUnitMeasureId
 		,@strVesselNo = @strVesselNo

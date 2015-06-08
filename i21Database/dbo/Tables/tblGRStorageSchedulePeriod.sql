@@ -3,14 +3,15 @@
 	[intStorageSchedulePeriodId] INT NOT NULL IDENTITY, 
     [intConcurrencyId] INT NOT NULL, 
     [intStorageScheduleRule] INT NOT NULL, 
-    [intUseDateDays] INT NOT NULL, 
+    [strPeriodType] NVARCHAR(30) COLLATE Latin1_General_CI_AS NOT NULL, 
     [dtmEffectiveDate] DATETIME NULL, 
     [dtmEndingDate] DATETIME NULL, 
-    [intNumberOfDays] INT NOT NULL DEFAULT 0, 
-    [intStorageRate] INT NOT NULL DEFAULT 0, 
-    [strFeeDescription] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
-    [intFeeRate] INT NOT NULL, 
-    [intFeeType] INT NOT NULL, 
+    [intNumberOfDays] INT NULL , 
+    [dblStorageRate] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+    [strFeeDescription] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
+    [dblFeeRate] NUMERIC(18, 6) NULL, 
+    [strFeeType] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
+    [intSort] INT NULL DEFAULT 0, 
     CONSTRAINT [PK_tblGRStorageSchedulePeriod_intStorageSchedulePeriodId] PRIMARY KEY ([intStorageSchedulePeriodId]), 
-    CONSTRAINT [FK_tblGRStorageSchedulePeriod_tblGRStorageScheduleRule] FOREIGN KEY ([intStorageScheduleRule]) REFERENCES [tblGRStorageScheduleRule]([intStorageScheduleRuleId]) 
+    CONSTRAINT [FK_tblGRStorageSchedulePeriod_tblGRStorageScheduleRule] FOREIGN KEY ([intStorageScheduleRule]) REFERENCES [tblGRStorageScheduleRule]([intStorageScheduleRuleId]) ON DELETE CASCADE
 )
