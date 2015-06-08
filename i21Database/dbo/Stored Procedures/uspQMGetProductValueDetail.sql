@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE uspQMGetProductValueDetail
 	@intProductTypeId INT
+	,@intProductValueId INT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -13,6 +14,13 @@ BEGIN
 		,strCategoryCode AS strProductValue
 		,strDescription
 	FROM tblICCategory
+	WHERE intCategoryId = (
+			CASE 
+				WHEN @intProductValueId > 0
+					THEN @intProductValueId
+				ELSE intCategoryId
+				END
+			)
 	ORDER BY strCategoryCode
 END
 ELSE IF @intProductTypeId = 2
@@ -22,5 +30,12 @@ BEGIN
 		,strDescription
 	FROM tblICItem
 	WHERE strStatus = 'Active'
+		AND intItemId = (
+			CASE 
+				WHEN @intProductValueId > 0
+					THEN @intProductValueId
+				ELSE intItemId
+				END
+			)
 	ORDER BY strItemNo
 END
