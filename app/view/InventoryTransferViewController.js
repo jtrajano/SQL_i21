@@ -49,6 +49,11 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 store: '{transferTypes}',
                 readOnly: '{current.ysnPosted}'
             },
+            cboSourceType: {
+                value: '{current.intSourceType}',
+                store: '{sourceTypes}',
+                readOnly: '{current.ysnPosted}'
+            },
             cboTransferredBy: {
                 value: '{current.intTransferredById}',
                 store: '{userList}'
@@ -95,6 +100,9 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
 
             grdInventoryTransfer: {
                 readOnly: '{current.ysnPosted}',
+                colSourceNumber: {
+                    dataIndex: 'strSourceNumber'
+                },
                 colItemNumber: {
                     dataIndex: 'strItemNo',
                     editor: {
@@ -340,6 +348,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         var today = new Date();
         var record = Ext.create('Inventory.model.Transfer');
         record.set('strTransferType', 'Location to Location');
+        record.set('intSourceType', 0);
         if (app.DefaultLocation > 0){
             record.set('intFromLocationId', app.DefaultLocation);
             record.set('intToLocationId', app.DefaultLocation);

@@ -256,6 +256,29 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 xtype: 'gridcombobox',
                                                                 columns: [
                                                                     {
+                                                                        dataIndex: 'intSourceType',
+                                                                        dataType: 'numeric',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strSourceType',
+                                                                        dataType: 'string',
+                                                                        text: 'Source Type',
+                                                                        flex: 1
+                                                                    }
+                                                                ],
+                                                                flex: 1,
+                                                                itemId: 'cboSourceType',
+                                                                fieldLabel: 'Source Type',
+                                                                labelWidth: 90,
+                                                                displayField: 'strSourceType',
+                                                                queryMode: 'local',
+                                                                valueField: 'intSourceType'
+                                                            },
+                                                            {
+                                                                xtype: 'gridcombobox',
+                                                                columns: [
+                                                                    {
                                                                         dataIndex: 'intEntityId',
                                                                         dataType: 'numeric',
                                                                         text: 'Entity Id',
@@ -287,12 +310,6 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 readOnly: true,
                                                                 displayField: 'strUserName',
                                                                 valueField: 'intEntityId'
-                                                            },
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtDescription',
-                                                                fieldLabel: 'Description',
-                                                                labelWidth: 90
                                                             }
                                                         ]
                                                     },
@@ -388,6 +405,12 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                                 labelWidth: 110,
                                                                 displayField: 'strStatus',
                                                                 valueField: 'intStatusId'
+                                                            },
+                                                            {
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtDescription',
+                                                                fieldLabel: 'Description',
+                                                                labelWidth: 110
                                                             }
                                                         ]
                                                     },
@@ -538,6 +561,57 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                     selType: 'checkboxmodel'
                                                 }),
                                                 columns: [
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colSourceNumber',
+                                                        width: 100,
+                                                        dataIndex: 'strItemNumber',
+                                                        text: 'Source No.',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intItemId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intLocationId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strItemNo',
+                                                                    dataType: 'string',
+                                                                    text: 'Item Number',
+                                                                    width: 100
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strType',
+                                                                    dataType: 'string',
+                                                                    text: 'Item Type',
+                                                                    width: 100
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
+                                                                    width: 120
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strLotTracking',
+                                                                    dataType: 'string',
+                                                                    text: 'Lot Tracking',
+                                                                    hidden: true
+                                                                }
+                                                            ],
+                                                            itemId: 'cboSourceNumber',
+                                                            displayField: 'strItemNo',
+                                                            valueField: 'strItemNo'
+                                                        }
+                                                    },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colItemNumber',

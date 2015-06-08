@@ -110,7 +110,10 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("vyuICGetInventoryTransferDetail");
+            this.Property(t => t.intInventoryTransferId).HasColumnName("intInventoryTransferId");
             this.Property(t => t.intInventoryTransferDetailId).HasColumnName("intInventoryTransferDetailId");
+            this.Property(t => t.intSourceId).HasColumnName("intSourceId");
+            this.Property(t => t.strSourceNumber).HasColumnName("strSourceNumber");
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
             this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
             this.Property(t => t.strLotNumber).HasColumnName("strLotNumber");
