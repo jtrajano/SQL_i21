@@ -4,7 +4,7 @@
     [strTransferNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [dtmTransferDate] DATETIME NULL DEFAULT (getdate()), 
     [strTransferType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
-	[intSourceType] INT NULL,
+	[intSourceType] INT NOT NULL DEFAULT ((0)),
     [intTransferredById] INT NULL, 
     [strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [intFromLocationId] INT NULL, 
