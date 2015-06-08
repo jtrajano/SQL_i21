@@ -19,6 +19,7 @@ Type the overview for the table here.
 		[intSourceId] INT NULL,
 		[intItemId] INT NOT NULL, 
 		[intSubLocationId] INT NULL,
+		[intOwnershipType] INT NOT NULL DEFAULT ((1)),
 		[dblOrderQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblBillQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblOpenReceive] NUMERIC(18, 6) NULL DEFAULT ((0)), 

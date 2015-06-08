@@ -3444,4 +3444,18 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="[tblMFPackType]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="3e509aa6-8dbe-4b08-b280-2629eb8e8ce4" ChangeDateTime="06/08/2015 06:02:29">
+    <Property Name="ElementName" Value="[dbo].[tblICInventorySourceType].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventorySourceType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInventorySourceTypeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="cb5beb6f-81a9-47f1-a39c-481748bb66ef" ChangeDateTime="06/08/2015 06:05:41">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryOwnershipType].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryOwnershipType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInventoryOwnershipTypeId" />
+  </Operation>
 </Operations>

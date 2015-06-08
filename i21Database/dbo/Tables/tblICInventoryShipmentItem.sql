@@ -19,6 +19,7 @@ Type the overview for the table here.
 		[intLineNo] INT NULL,
 		[intItemId] INT NOT NULL, 
 		[intSubLocationId] INT NULL, 
+		[intOwnershipType] INT NOT NULL DEFAULT ((1)),
 		[dblQuantity] NUMERIC(18, 6) NOT NULL DEFAULT ((0)), 
 		[intItemUOMId] INT NOT NULL, 
 		[intWeightUOMId] INT NULL,
