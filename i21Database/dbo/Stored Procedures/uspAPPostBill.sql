@@ -201,6 +201,22 @@ BEGIN
 				ysnPaid = 0
 		FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 
+		--UPDATE amount due of vendor prepayment, debit memo once payment has been applied to bill
+		UPDATE A
+			SET dblAmountDue = A.dblAmountDue + AppliedPayments.dblAmountApplied
+			,dblPayment = dblPayment - AppliedPayments.dblAmountApplied
+		FROM tblAPBill A
+		CROSS APPLY
+		(
+			SELECT 
+				SUM(B.dblAmountApplied) AS dblAmountApplied
+			FROM tblAPAppliedPrepaidAndDebit B
+				INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
+			WHERE A.intBillId = B.intTransactionId
+			AND B.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+			GROUP BY B.intTransactionId
+		) AppliedPayments
+
 		UPDATE tblGLDetail
 			SET ysnIsUnposted = 1
 		WHERE tblGLDetail.[strTransactionId] IN (SELECT strBillId FROM tblAPBill WHERE intBillId IN 
@@ -231,6 +247,23 @@ BEGIN
 		UPDATE tblAPBill
 			SET ysnPosted = 1
 		WHERE tblAPBill.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+
+		--UPDATE amount due of vendor prepayment, debit memo once payment has been applied to bill
+		UPDATE A
+			SET dblAmountDue = A.dblAmountDue - AppliedPayments.dblAmountApplied
+			,dblPayment = dblPayment + AppliedPayments.dblAmountApplied
+		FROM tblAPBill A
+		CROSS APPLY
+		(
+			SELECT 
+				SUM(B.dblAmountApplied) AS dblAmountApplied
+			FROM tblAPAppliedPrepaidAndDebit B
+				INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
+			WHERE A.intBillId = B.intTransactionId
+			AND B.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+			GROUP BY B.intTransactionId
+		) AppliedPayments
+		
 
 		--Update Inventory Item Receipt
 		UPDATE A
