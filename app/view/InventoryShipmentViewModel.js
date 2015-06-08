@@ -40,6 +40,10 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             autoLoad: true,
             data: [
                 {
+                    intSourceType: 0,
+                    strSourceType: 'None'
+                },
+                {
                     intSourceType: 1,
                     strSourceType: 'Scale'
                 },

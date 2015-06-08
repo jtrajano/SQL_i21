@@ -171,6 +171,25 @@ namespace iRely.Inventory.Model
         public string strNotes { get; set; }
         public int? intSort { get; set; }
 
+        private string _orderNumber;
+        [NotMapped]
+        public string strOrderNumber
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_orderNumber))
+                    if (vyuICGetInventoryShipmentItem != null)
+                        return vyuICGetInventoryShipmentItem.strOrderNumber;
+                    else
+                        return null;
+                else
+                    return _orderNumber;
+            }
+            set
+            {
+                _orderNumber = value;
+            }
+        }
         private string _sourceNumber;
         [NotMapped]
         public string strSourceNumber
@@ -432,7 +451,6 @@ namespace iRely.Inventory.Model
         public vyuICGetInventoryShipmentItem vyuICGetInventoryShipmentItem { get; set; }
         public ICollection<tblICInventoryShipmentItemLot> tblICInventoryShipmentItemLots { get; set; }
         public tblICInventoryShipment tblICInventoryShipment { get; set; }
-        public tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation { get; set; }
         
     }
 

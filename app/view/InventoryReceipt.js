@@ -759,7 +759,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         itemId: 'colOrderNumber',
                                                                         width: 100,
                                                                         dataIndex: 'strSourceNumber',
-                                                                        text: 'Order Number',
+                                                                        text: 'Order No.',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
@@ -871,7 +871,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         itemId: 'colSourceNumber',
                                                                         width: 100,
                                                                         dataIndex: 'strSourceNumber',
-                                                                        text: 'Source Number',
+                                                                        text: 'Source No.',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [

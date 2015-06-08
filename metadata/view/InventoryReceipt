@@ -1575,7 +1575,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "strSourceNumber",
                                                                 "itemId": "colOrderNumber",
-                                                                "text": "Order Number",
+                                                                "text": "Order No.",
                                                                 "width": 100
                                                             },
                                                             "name": "MyColumn9",
@@ -1720,7 +1720,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "strSourceNumber",
                                                                 "itemId": "colSourceNumber",
-                                                                "text": "Source Number",
+                                                                "text": "Source No.",
                                                                 "width": 100
                                                             },
                                                             "name": "MyColumn51",

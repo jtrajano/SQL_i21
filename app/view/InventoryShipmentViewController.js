@@ -48,8 +48,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 readOnly: '{current.ysnPosted}'
             },
             cboSourceType: {
-                value: '{current.strReceiptType}',
-                store: '{receiptTypes}',
+                value: '{current.intSourceType}',
+                store: '{sourceTypes}',
                 readOnly: '{current.ysnPosted}'
             },
             txtReferenceNumber: {
@@ -149,7 +149,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             grdInventoryShipment: {
                 readOnly: '{current.ysnPosted}',
                 colOrderNumber: {
-                    dataIndex: 'strSourceId',
+                    dataIndex: 'strOrderNumber',
                     editor: {
                         store: '{soDetails}',
                         defaultFilters: [{
@@ -158,6 +158,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             conjunction: 'and'
                         }]
                     }
+                },
+                colSourceNumber: {
+                    dataIndex: 'strSourceNumber'
                 },
                 colItemNumber: {
                     dataIndex: 'strItemNo',
@@ -331,6 +334,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             record.set('intShipFromLocationId', app.DefaultLocation);
         record.set('dtmShipDate', today);
         record.set('intOrderType', 2);
+        record.set('intSourceType', 0);
         action(record);
     },
 
@@ -387,7 +391,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
         if (combo.itemId === 'cboOrderNumber')
         {
-            current.set('intSourceId', records[0].get('intSalesOrderId'));
+            current.set('intOrderId', records[0].get('intSalesOrderId'));
             current.set('intLineNo', records[0].get('intSalesOrderDetailId'));
             current.set('intItemId', records[0].get('intItemId'));
             current.set('strItemNo', records[0].get('strItemNo'));
