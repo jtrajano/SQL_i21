@@ -668,10 +668,10 @@ SAVE TRAN @TransactionName
 --------------------------------------------------------------------------------------------  
 IF @post = 1  
 	BEGIN
-		-- Delete zero payment temporarily
-		DELETE FROM A
-		FROM @ARReceivablePostData A
-		WHERE EXISTS(SELECT * FROM @ZeroPayment B WHERE A.intPaymentId = B.intPaymentId)
+		---- Delete zero payment temporarily
+		--DELETE FROM A
+		--FROM @ARReceivablePostData A
+		--WHERE EXISTS(SELECT * FROM @ZeroPayment B WHERE A.intPaymentId = B.intPaymentId)
 			  		 
 		INSERT INTO @GLEntries (
 			[dtmDate] 
