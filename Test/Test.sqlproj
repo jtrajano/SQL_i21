@@ -632,6 +632,8 @@
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotInFromCustody for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotOutFromCustody for add-sell it-unpost sell.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotOutFromCustody for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCustody for the basics.sql" />
+    <Build Include="testi21Database\Fake Data\Fake transactions for item custody.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">
