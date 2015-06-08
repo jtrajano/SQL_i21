@@ -45,6 +45,7 @@ BEGIN
 			,[intItemLocationId]
 			,[intItemUOMId]
 			,[intLotId]
+			,[dtmDate]
 			,[dblStockIn]
 			,[dblStockOut]
 			,[dblCost]
@@ -56,6 +57,7 @@ BEGIN
 				,[intItemLocationId] = @Default_Location
 				,[intItemUOMId] = @WetGrains_BushelUOMId
 				,[intLotId] = @LotId
+				,[dtmDate] = 'January 14, 2015'
 				,[dblStockIn] = 60
 				,[dblStockOut] = 0
 				,[dblCost] = 15.00
@@ -69,6 +71,7 @@ BEGIN
 			,[intItemLocationId] INT 
 			,[intItemUOMId] INT 
 			,[intLotId] INT
+			,[dtmDate] DATETIME 
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
 			,[dblCost] NUMERIC(18,6)
@@ -81,6 +84,7 @@ BEGIN
 			,[intItemLocationId] INT 
 			,[intItemUOMId] INT 
 			,[intLotId] INT
+			,[dtmDate] DATETIME 
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
 			,[dblCost] NUMERIC(18,6)
@@ -93,6 +97,7 @@ BEGIN
 				,@intItemLocationId AS INT			= @Default_Location
 				,@intItemUOMId AS INT				= @WetGrains_BushelUOMId
 				,@intLotId AS INT					= @LotId
+				,@dtmDate AS DATETIME				= 'January 15, 2015'
 				,@intSubLocationId AS INT
 				,@intStorageLocationId AS INT
 				,@dblQty NUMERIC(18,6)				= 10
@@ -111,6 +116,7 @@ BEGIN
 				,[intItemLocationId] 
 				,[intItemUOMId] 
 				,[intLotId] 
+				,[dtmDate]
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
@@ -121,6 +127,7 @@ BEGIN
 				,[intItemLocationId]	= @Default_Location
 				,[intItemUOMId]			= @WetGrains_BushelUOMId 
 				,[intLotId]				= @LotId
+				,[dtmDate]				= 'January 14, 2015'
 				,[dblStockIn]			= 60
 				,[dblStockOut]			= 0
 				,[dblCost]				= 15.00
@@ -131,6 +138,7 @@ BEGIN
 				,[intItemLocationId]	= @Default_Location
 				,[intItemUOMId]			= @WetGrains_BushelUOMId 
 				,[intLotId]				= @LotId
+				,[dtmDate]				= 'January 15, 2015'
 				,[dblStockIn]			= 10
 				,[dblStockOut]			= 0
 				,[dblCost]				= 33.19
@@ -162,6 +170,7 @@ BEGIN
 			,@intLotId
 			,@intSubLocationId
 			,@intStorageLocationId
+			,@dtmDate
 			,@dblQty
 			,@dblCost
 			,@strTransactionId
@@ -174,6 +183,7 @@ BEGIN
 				,[intItemLocationId] 
 				,[intItemUOMId] 
 				,[intLotId] 
+				,[dtmDate]
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 
@@ -185,6 +195,7 @@ BEGIN
 				,[intItemLocationId] 
 				,[intItemUOMId] 
 				,[intLotId] 
+				,[dtmDate]
 				,[dblStockIn] 
 				,[dblStockOut]
 				,[dblCost] 

@@ -137,24 +137,25 @@ BEGIN
 	IF (@CostingMethod = @LOTCOST)
 	BEGIN 
 		EXEC dbo.uspICPostLotInCustody
-				@intItemId 
-				,@intItemLocationId 
-				,@intItemUOMId 
-				,@intSubLocationId 
-				,@intStorageLocationId 
-				,@dtmDate 
+				@intItemId
+				,@intItemLocationId
+				,@intItemUOMId
+				,@intSubLocationId
+				,@intStorageLocationId
+				,@dtmDate
 				,@intLotId
-				,@dblQty 
-				,@dblUOMQty 
-				,@dblCost 
-				,@dblSalesPrice 
-				,@intCurrencyId 
-				,@dblExchangeRate 
-				,@intTransactionId 
-				,@strTransactionId 
-				,@strBatchId 
-				,@intTransactionTypeId 
-				,@intUserId 
+				,@dblQty
+				,@dblUOMQty
+				,@dblCost
+				,@dblSalesPrice
+				,@intCurrencyId
+				,@dblExchangeRate
+				,@intTransactionId
+				,@intTransactionDetailId
+				,@strTransactionId
+				,@strBatchId
+				,@intTransactionTypeId
+				,@intUserId
 	END
 
 	-----------------------------------

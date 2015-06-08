@@ -122,11 +122,12 @@ BEGIN
 			,@intLotId
 			,@intSubLocationId
 			,@intStorageLocationId
+			,@dtmDate
 			,@dblAddQty
 			,@dblCost
-			,@intUserId
 			,@strTransactionId
 			,@intTransactionId
+			,@intUserId
 			,@NewInventoryLotInCustodyId OUTPUT 
 		IF @@ERROR <> 0 GOTO _Exit
 

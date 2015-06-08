@@ -12,6 +12,7 @@ BEGIN
 			[intItemLocationId] INT,
 			[intItemUOMId] INT,
 			[intLotId] INT, 
+			[dtmDate] DATETIME,
 			[intSubLocationId] INT,
 			[intStorageLocationId] INT,
 			[dblStockIn] NUMERIC(18, 6), 
@@ -31,6 +32,7 @@ BEGIN
 			[intItemLocationId] INT,
 			[intItemUOMId] INT,
 			[intLotId] INT, 
+			[dtmDate] DATETIME,
 			[intSubLocationId] INT,
 			[intStorageLocationId] INT,
 			[dblStockIn] NUMERIC(18, 6), 
@@ -51,6 +53,7 @@ BEGIN
 				,@intLotId AS INT
 				,@intSubLocationId AS INT
 				,@intStorageLocationId AS INT
+				,@dtmDate AS DATETIME 
 				,@dblQty NUMERIC(18,6) 
 				,@dblCost AS NUMERIC(18,6)
 				,@strTransactionId AS NVARCHAR(40)
@@ -70,6 +73,7 @@ BEGIN
 			,@intLotId
 			,@intSubLocationId
 			,@intStorageLocationId
+			,@dtmDate
 			,@dblQty
 			,@dblCost
 			,@strTransactionId
@@ -82,6 +86,7 @@ BEGIN
 				,[intItemLocationId]
 				,[intItemUOMId]
 				,[intLotId]
+				,[dtmDate]
 				,[intSubLocationId]
 				,[intStorageLocationId]
 				,[dblStockIn]
@@ -99,6 +104,7 @@ BEGIN
 				,[intItemLocationId]
 				,[intItemUOMId]
 				,[intLotId]
+				,[dtmDate]
 				,[intSubLocationId]
 				,[intStorageLocationId]
 				,[dblStockIn]

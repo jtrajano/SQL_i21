@@ -209,6 +209,7 @@ BEGIN
 				, intItemLocationId
 				, intItemUOMId
 				, intLotId
+				, dtmDate
 				, dblStockIn
 				, dblStockOut
 				, dblCost
@@ -217,6 +218,7 @@ BEGIN
 				, intItemLocationId = @WetGrains_DefaultLocation
 				, intItemUOMId = @WetGrains_PoundUOM
 				, intLotId = @Lot_1
+				, dtmDate = 'January 1, 2015'
 				, dblStockIn = 110 
 				, dblStockOut = 0 
 				, dblCost = 11.00
@@ -225,6 +227,7 @@ BEGIN
 				, intItemLocationId = @StickyGrains_DefaultLocation
 				, intItemUOMId = @StickyGrains_PoundUOM
 				, intLotId = @Lot_2
+				, dtmDate = 'February 1, 2015'
 				, dblStockIn = 220
 				, dblStockOut = 0 
 				, dblCost = 22.00
@@ -233,6 +236,7 @@ BEGIN
 				, intItemLocationId = @PremiumGrains_DefaultLocation
 				, intItemUOMId = @PremiumGrains_PoundUOM
 				, intLotId = @Lot_3
+				, dtmDate = 'March 1, 2015'
 				, dblStockIn = 330
 				, dblStockOut = 0 
 				, dblCost = 33.00
@@ -241,6 +245,7 @@ BEGIN
 				, intItemLocationId = @ColdGrains_DefaultLocation
 				, intItemUOMId = @ColdGrains_PoundUOM
 				, intLotId = @Lot_4
+				, dtmDate = 'April 1, 2015'
 				, dblStockIn = 440
 				, dblStockOut = 0 
 				, dblCost = 44.00
@@ -249,6 +254,7 @@ BEGIN
 				, intItemLocationId = @HotGrains_DefaultLocation
 				, intItemUOMId = @HotGrains_PoundUOM
 				, intLotId = @Lot_5
+				, dtmDate = 'May 1, 2015'
 				, dblStockIn = 550
 				, dblStockOut = 0 
 				, dblCost = 55.00

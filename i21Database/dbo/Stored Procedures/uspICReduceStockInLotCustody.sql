@@ -47,9 +47,9 @@ WHERE	Lot_Custody.intItemId = @intItemId
 		AND Lot_Custody.intLotId = @intLotId
 		AND ISNULL(Lot_Custody.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 		AND ISNULL(Lot_Custody.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
-		AND (Lot_Custody.dblStockIn - Lot_Custody.dblStockOut) < 0 
+		AND ISNULL(Lot_Custody.dblStockIn, 0) - ISNULL(Lot_Custody.dblStockOut, 0) - ISNULL(@dblQty, 0) > 0
 
-IF @intInventoryLotInCustodyId IS NOT NULL 
+IF @intInventoryLotInCustodyId IS NULL 
 BEGIN 
 	-- Negative stock quantity is not allowed.
 	RAISERROR(50029, 11, 1) 
