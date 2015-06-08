@@ -40,12 +40,31 @@ BEGIN
 		INNER JOIN tblAPVendor C
 			ON A.[intEntityVendorId] = C.[intEntityVendorId]
 
+	IF EXISTS(SELECT 1 FROM tblAPPayment A INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+				INNER JOIN tblCMBankTransaction D ON A.strPaymentRecordNum = D.strTransactionId
+					WHERE C.intBillId IN (SELECT [intID] FROM #tmpBillsId) AND A.ysnPosted = 1 AND D.ysnCheckVoid = 0)
+	BEGIN
+		RAISERROR('Prepay already have payment.', 16, 1);
+		RETURN;
+	END
+
 	--VALIDATION
 	--Make sure there is user to use
 	IF @userId IS NULL
 	BEGIN
 		RAISERROR('User is required.', 16, 1);
 		RETURN;
+	END
+
+	--Make sure there is payment method to user
+	IF @paymentMethodId IS NULL
+	BEGIN
+		SELECT TOP 1 @paymentMethodId = intPaymentMethodID FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = 'check'
+		IF @paymentMethodId IS NULL
+		BEGIN
+			RAISERROR('There is no check payment method setup.', 16, 1);
+			RETURN;
+		END
 	END
 
 	--Make sure there is bank account to use
@@ -113,7 +132,7 @@ BEGIN
 		[strPaymentInfo]		= @paymentInfo,
 		[strNotes]				= @notes,
 		[dtmDatePaid]			= ISNULL(@datePaid, GETDATE()),
-		[dblAmountPaid]			= @payment * (-1),
+		[dblAmountPaid]			= @payment,
 		[dblUnapplied]			= 0,
 		[ysnPosted]				= @isPost,
 		[ysnPrepay]				= 1,
@@ -140,10 +159,10 @@ BEGIN
 		[intAccountId]	= A.intAccountId,
 		[dblDiscount]	= 0,
 		[dblWithheld]	= 0,
-		[dblAmountDue]	= A.dblAmountDue * (-1),
-		[dblPayment]	= A.dblTotal * (-1),
+		[dblAmountDue]	= CASE WHEN (A.dblAmountDue < 0) THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END,
+		[dblPayment]	= CASE WHEN (A.dblTotal < 0) THEN A.dblTotal * -1 ELSE A.dblTotal END,
 		[dblInterest]	= 0, --TODO
-		[dblTotal]		= A.dblTotal * (-1)
+		[dblTotal]		= CASE WHEN (A.dblTotal < 0) THEN A.dblTotal * -1 ELSE A.dblTotal END 
 	FROM tblAPBill A
 	WHERE A.intBillId IN (SELECT [intID] FROM #tmpBillsId)
 	'

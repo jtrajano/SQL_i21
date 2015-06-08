@@ -1656,6 +1656,8 @@
     <Build Include="dbo\Stored Procedures\uspLGGetCarrierShipmentSubReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCycleCount.sql" />
     <Build Include="dbo\Stored Procedures\uspGLSummaryRecalculate.sql" />
+    <Build Include="dbo\Tables\tblAPAppliedPrepaidAndDebit.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPPrepaidAndDebit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
