@@ -1654,6 +1654,7 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\CustomerListByRoute.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\GasCheckLeakcheck.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\OpenCallEntries.sql" />
+    <Build Include="Scripts\Post-Deployment\TM\Reports\DefaultCriteria\CustomerListByRoute.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
