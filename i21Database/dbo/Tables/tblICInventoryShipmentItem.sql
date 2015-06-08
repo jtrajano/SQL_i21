@@ -14,7 +14,7 @@ Type the overview for the table here.
 	(
 		[intInventoryShipmentItemId] INT NOT NULL IDENTITY, 
 		[intInventoryShipmentId] INT NOT NULL, 
-		[intOrderId] INT NOT NULL,
+		[intOrderId] INT NULL,
 		[intSourceId] INT NULL,
 		[intLineNo] INT NULL,
 		[intItemId] INT NOT NULL, 

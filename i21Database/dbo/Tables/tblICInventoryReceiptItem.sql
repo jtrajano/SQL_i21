@@ -15,7 +15,7 @@ Type the overview for the table here.
 		[intInventoryReceiptItemId] INT NOT NULL IDENTITY, 
 		[intInventoryReceiptId] INT NOT NULL, 
 		[intLineNo] INT NOT NULL, 
-		[intOrderId] INT NOT NULL,
+		[intOrderId] INT NULL,
 		[intSourceId] INT NULL,
 		[intItemId] INT NOT NULL, 
 		[intSubLocationId] INT NULL,
