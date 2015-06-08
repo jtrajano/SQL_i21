@@ -1655,6 +1655,10 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\GasCheckLeakcheck.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\OpenCallEntries.sql" />
     <Build Include="Scripts\Post-Deployment\TM\Reports\DefaultCriteria\CustomerListByRoute.sql" />
+    <Build Include="dbo\Views\vyuARCustomerPaymentHistoryReport.sql" />
+    <Build Include="dbo\Views\vyuARTaxReport.sql" />
+    <Build Include="dbo\Views\vyuARGetLostQuoteReasons.sql" />
+    <Build Include="dbo\Views\vyuARGetLostQuoteCompetitors.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
