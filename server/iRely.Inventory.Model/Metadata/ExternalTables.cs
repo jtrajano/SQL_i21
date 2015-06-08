@@ -225,7 +225,7 @@ namespace iRely.Inventory.Model
         public string strClassification { get; set; }
         public int? intNewLotBin { get; set; }
         public int? intAuditBin { get; set; }
-        public string strAddressKey { get; set; }
+        public string strAddress { get; set; }
 
         public ICollection<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
         public ICollection<tblICInventoryShipmentItem> tblICInventoryShipmentItems { get; set; }
