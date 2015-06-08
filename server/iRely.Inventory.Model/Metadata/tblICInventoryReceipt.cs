@@ -166,6 +166,7 @@ namespace iRely.Inventory.Model
         public int? intSourceId { get; set; }
         public int? intItemId { get; set; }
         public int? intSubLocationId { get; set; }
+        public int? intOwnershipType { get; set; }
         public decimal? dblOrderQty { get; set; }
         public decimal? dblBillQty { get; set; }
         public decimal? dblOpenReceive { get; set; }
@@ -378,6 +379,31 @@ namespace iRely.Inventory.Model
             set
             {
                 _subLocationName = value;
+            }
+        }
+        private string _ownershipType;
+        [NotMapped]
+        public string strOwnershipType
+        {
+            get
+            {
+                switch (intOwnershipType)
+                {
+                    case 1:
+                        return "Own";
+                    case 2:
+                        return "Storage";
+                    case 3:
+                        return "Consigned Purchase";
+                    case 4:
+                        return "Consigned Sale";
+                    default:
+                        return "Own";
+                }
+            }
+            set
+            {
+                _ownershipType = value;
             }
         }
         string _weigthUOM;

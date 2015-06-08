@@ -177,6 +177,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         }]
                     }
                 },
+                colOwnershipType: {
+                    dataIndex: 'strOwnershipType',
+                    editor: {
+                        store: '{ownershipTypes}'
+                    }
+                },
                 colOrderQty: 'dblQtyOrdered',
                 colOrderUOM: 'strOrderUOM',
                 colQuantity: 'dblQuantity',
@@ -421,6 +427,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 });
             }
         }
+        else if (combo.itemId === 'cboOwnershipType') {
+            current.set('intOwnershipType', records[0].get('intOwnershipType'));
+        }
     },
 
     onLotSelect: function(combo, records, eOpts) {
@@ -610,6 +619,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 select: this.onOrderNumberSelect
             },
             "#cboSubLocation": {
+                select: this.onOrderNumberSelect
+            },
+            "#cboOwnershipType": {
                 select: this.onOrderNumberSelect
             },
             "#cboUOM": {

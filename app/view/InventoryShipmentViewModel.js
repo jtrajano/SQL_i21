@@ -53,6 +53,31 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                 name: 'strSourceType'
             }
         },
+        ownershipTypes: {
+            autoLoad: true,
+            data: [
+                {
+                    intOwnershipType: 1,
+                    strOwnershipType: 'Own'
+                },
+                {
+                    intOwnershipType: 2,
+                    strOwnershipType: 'Storage'
+                },
+                {
+                    intOwnershipType: 3,
+                    strOwnershipType: 'Consigned Purchase'
+                },
+                {
+                    intOwnershipType: 4,
+                    strOwnershipType: 'Consigned Sale'
+                }
+            ],
+            fields: {
+                name: 'intOwnershipType',
+                name: 'strOwnershipType'
+            }
+        },
         freightTerm: {
             type: 'FreightTermsBuffered'
         },

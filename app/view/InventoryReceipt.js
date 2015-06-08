@@ -237,7 +237,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 items: [
                                                     {
                                                         xtype: 'gridcombobox',
-                                                        flex: 1,
                                                         columns: [
                                                             {
                                                                 dataIndex: 'strDescription',
@@ -246,6 +245,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 flex: 1
                                                             }
                                                         ],
+                                                        flex: 1,
                                                         itemId: 'cboReceiptType',
                                                         margin: '0 5 0 0',
                                                         fieldLabel: 'Receipt Type',
@@ -1280,6 +1280,32 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             itemId: 'cboSubLocation',
                                                                             displayField: 'strSubLocationName',
                                                                             valueField: 'strSubLocationName'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colOwnershipType',
+                                                                        width: 110,
+                                                                        dataIndex: 'strDescription',
+                                                                        text: 'Ownership Type',
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intOwnershipType',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strOwnershipType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Ownership Type',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboOwnershipType',
+                                                                            displayField: 'strOwnershipType',
+                                                                            valueField: 'strOwnershipType'
                                                                         }
                                                                     },
                                                                     {

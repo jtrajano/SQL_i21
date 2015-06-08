@@ -2484,6 +2484,65 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "dataIndex": "strDescription",
+                                                                "itemId": "colOwnershipType",
+                                                                "text": "Ownership Type",
+                                                                "width": 110
+                                                            },
+                                                            "name": "MyColumn56",
+                                                            "designerId": "21534a08-9f5d-4189-bda7-e99471ed81bf",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intOwnershipType',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strOwnershipType',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Ownership Type',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t}",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strOwnershipType",
+                                                                        "itemId": "cboOwnershipType",
+                                                                        "valueField": "strOwnershipType"
+                                                                    },
+                                                                    "name": "MyComboBox4",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "fd6b357a-8a88-4689-8ce5-f8cebef87ccf",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "strDescription",
                                                                 "itemId": "colLotTracking",
                                                                 "text": "Lot Tracking",
                                                                 "width": 100

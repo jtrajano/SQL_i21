@@ -222,6 +222,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         ]
                     }
                 },
+                colOwnershipType: {
+                    dataIndex: 'strOwnershipType',
+                    editor: {
+                        store: '{ownershipTypes}'
+                    }
+                },
                 colLotTracking: 'strLotTracking',
                 colOrderUOM: 'strOrderUOM',
                 colQtyOrdered: 'dblOrderQty',
@@ -800,6 +806,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 });
             }
+        }
+        else if (combo.itemId === 'cboOwnershipType')
+        {
+            current.set('intOwnershipType', records[0].get('intOwnershipType'));
         }
         this.calculateGrossWeight(current);
     },
@@ -2202,6 +2212,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboSubLocation": {
                 select: this.onSubLocationSelect
+            },
+            "#cboOwnershipType": {
+                select: this.onReceiptItemSelect
             },
             "#cboStorageLocation": {
                 select: this.onStorageLocationSelect

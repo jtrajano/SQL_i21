@@ -958,6 +958,32 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         }
                                                                     },
                                                                     {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colOwnershipType',
+                                                                        width: 110,
+                                                                        dataIndex: 'strSubLocation',
+                                                                        text: 'Ownership Type',
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intOwnershipType',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strOwnershipType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Ownership Type',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboOwnershipType',
+                                                                            displayField: 'strOwnershipType',
+                                                                            valueField: 'strOwnershipType'
+                                                                        }
+                                                                    },
+                                                                    {
                                                                         xtype: 'numbercolumn',
                                                                         dataType: 'numeric',
                                                                         itemId: 'colOrderQty',
