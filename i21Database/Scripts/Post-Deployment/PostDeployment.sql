@@ -151,6 +151,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\002_UpdateMenuuEntityType.sql
 :r .\EM\003_FixVendorBadData.sql
 :r .\EM\004_MoveFuturesBrokerData.sql
+:r .\EM\005_MoveForwardingAgentData.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql
