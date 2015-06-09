@@ -154,6 +154,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\005_MoveForwardingAgentData.sql
 :r .\EM\006_MoveTerminalData.sql
 :r .\EM\007_MoveShippingLineData.sql
+:r .\EM\008_MoveTruckerData.sql
 
 -- Quality Module
 :r .\QM\1_MasterTables.sql

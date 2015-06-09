@@ -28,7 +28,7 @@ BEGIN
 		SET @intShippingLineEntityLocationId = null
 
 				
-		INSERT INTO tblEntity(strName, strContactNumber, strEmail, strPhone, strPhone2, strFax, strNotes, ysnActive)	
+		INSERT INTO tblEntity(strName, strContactNumber, strEmail, strPhone, strPhone2, strFax, strNotes, strEmail2, ysnActive)	
 		SELECT ISNULL(strName,''), 
 				ISNULL(strContactName,''),
 				ISNULL(strEmail,''), 
@@ -36,6 +36,7 @@ BEGIN
 				ISNULL(strAltPhone,''), 
 				ISNULL(strFax,''),
 				ISNULL(strNotes,''),
+				ISNULL(strAltEmail,''),
 				ysnActive
 			FROM tblLGShippingLine 
 				WHERE intEntityId = @intShippingLineEntityId
