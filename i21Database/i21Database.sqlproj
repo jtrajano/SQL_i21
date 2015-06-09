@@ -1660,6 +1660,8 @@
     <Build Include="dbo\Views\vyuARGetLostQuoteReasons.sql" />
     <Build Include="dbo\Views\vyuARGetLostQuoteCompetitors.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateSegmentCategory.sql" />
+    <Build Include="dbo\Views\vyuARUnappliedCreditsRegister.sql" />
+    <Build Include="dbo\Views\vyuARSAByItemClass.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

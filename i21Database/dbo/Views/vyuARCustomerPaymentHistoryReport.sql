@@ -7,8 +7,9 @@ SELECT DISTINCT C.strName
 	 , dblInvoiceTotal = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
 	 , P.intPaymentId
 	 , P.strRecordNumber
-	 , dblAmountPaid = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(PD.dblPayment, 0) * -1 ELSE ISNULL(PD.dblPayment, 0) END
-	 , P.dtmDatePaid
+	 , PD.dblPayment AS dblAmountPaidDetail
+	 , P.dblAmountPaid AS dblAmountPaid
+	 , P.dtmDatePaid	 
 	 , dblAmountDue = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(PD.dblAmountDue, 0) * -1 ELSE ISNULL(PD.dblAmountDue, 0) END
 	 , PD.intTermId
 	 , T.strTerm

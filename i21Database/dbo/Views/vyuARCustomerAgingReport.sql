@@ -18,8 +18,8 @@ FROM
 (SELECT I.dtmDate AS dtmDate
 	 , I.strInvoiceNumber
 	 , 0 AS dblAmountPaid   
-     , dblInvoiceTotal = CASE WHEN I.strTransactionType = 'Credit Memo' THEN ISNULL(I.dblInvoiceTotal,0) * -1 ELSE ISNULL(I.dblInvoiceTotal,0) END
-	 , dblAmountDue = CASE WHEN I.strTransactionType = 'Credit Memo' THEN ISNULL(I.dblAmountDue,0) * -1 ELSE ISNULL(I.dblAmountDue,0) END   
+     , dblInvoiceTotal = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblInvoiceTotal,0) * -1 ELSE ISNULL(I.dblInvoiceTotal,0) END
+	 , dblAmountDue = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblAmountDue,0) * -1 ELSE ISNULL(I.dblAmountDue,0) END   
 	 , dblDiscount = 0    
 	 , I.strTransactionType    
 	 , I.intEntityCustomerId
@@ -80,7 +80,7 @@ UNION ALL
       
 SELECT I.dtmPostDate      
      , I.strInvoiceNumber
-	 , dblAmountPaid = CASE WHEN strTransactionType = 'Credit Memo' THEN ISNULL(I.dblPayment,0) * -1 ELSE ISNULL(I.dblPayment,0) END
+	 , dblAmountPaid = CASE WHEN strTransactionType <> 'Invoice' THEN ISNULL(I.dblPayment,0) * -1 ELSE ISNULL(I.dblPayment,0) END
      , dblInvoiceTotal = 0    
 	 , I.dblAmountDue     
 	 , ISNULL(I.dblDiscount, 0) AS dblDiscount    
@@ -130,7 +130,7 @@ LEFT JOIN
 FROM
 (SELECT I.strInvoiceNumber
       , 0 AS dblAmountPaid
-      , dblInvoiceTotal = CASE WHEN strTransactionType = 'Credit Memo' THEN ISNULL(dblInvoiceTotal,0) * -1 ELSE ISNULL(dblInvoiceTotal,0) END
+      , dblInvoiceTotal = CASE WHEN strTransactionType <> 'Invoice' THEN ISNULL(dblInvoiceTotal,0) * -1 ELSE ISNULL(dblInvoiceTotal,0) END
 	  , dblAmountDue = 0    
 	  , dblDiscount = 0    
 	  , I.dtmDueDate    
@@ -166,7 +166,7 @@ UNION ALL
       
 SELECT DISTINCT 
 	I.strInvoiceNumber
-  , dblAmountPaid = CASE WHEN strTransactionType = 'Credit Memo' THEN ISNULL(I.dblPayment,0) * -1 ELSE ISNULL(I.dblPayment,0) END
+  , dblAmountPaid = CASE WHEN strTransactionType <> 'Invoice' THEN ISNULL(I.dblPayment,0) * -1 ELSE ISNULL(I.dblPayment,0) END
   , dblInvoiceTotal = 0
   , dblAmountDue = 0
   , ISNULL(I.dblDiscount, 0) AS dblDiscount
