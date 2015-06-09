@@ -128,7 +128,15 @@ BEGIN
 		intSeasonId,
 		intClassVarietyId,
 		intProductLineId,
-		strMarketValuation)
+		strMarketValuation,
+		ysnInventoryCost,
+		ysnAccrue,
+		ysnMTM,
+		ysnPrice,
+		strCostMethod,
+		intOnCostTypeId,
+		dblAmount,
+		intCostUOMId)
 	SELECT @NewItemNo,
 		strType,
 		strDescription,
@@ -226,7 +234,15 @@ BEGIN
 		intSeasonId,
 		intClassVarietyId,
 		intProductLineId,
-		strMarketValuation
+		strMarketValuation,
+		ysnInventoryCost,
+		ysnAccrue,
+		ysnMTM,
+		ysnPrice,
+		strCostMethod,
+		intOnCostTypeId,
+		dblAmount,
+		intCostUOMId
 	FROM tblICItem
 	WHERE intItemId = @ItemId
 	------------------------------------------
