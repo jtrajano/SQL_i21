@@ -209,6 +209,7 @@ BEGIN
 		UPDATE tblAPBill
 			SET tblAPBill.dblAmountDue = B.dblAmountDue,
 				tblAPBill.ysnPaid = 0,
+				tblAPBill.dblPayment = (C.dblPayment - B.dblPayment),
 				tblAPBill.dtmDatePaid = NULL,
 				tblAPBill.dblWithheld = 0
 		FROM tblAPPayment A
@@ -295,7 +296,10 @@ BEGIN
 			SET tblAPBill.dblAmountDue = B.dblAmountDue,
 				tblAPBill.ysnPaid = (CASE WHEN (B.dblAmountDue) = 0 THEN 1 ELSE 0 END),
 				tblAPBill.dtmDatePaid = (CASE WHEN (B.dblAmountDue) = 0 THEN A.dtmDatePaid ELSE NULL END),
-				tblAPBill.dblWithheld = B.dblWithheld
+				tblAPBill.dblWithheld = B.dblWithheld,
+				tblAPBill.dblDiscount = (CASE WHEN B.dblAmountDue = 0 THEN B.dblDiscount ELSE 0 END),
+				tblAPBill.dblInterest = (CASE WHEN B.dblAmountDue = 0 THEN B.dblInterest ELSE 0 END),
+				tblAPBill.dblPayment = (C.dblPayment + B.dblPayment)
 		FROM tblAPPayment A
 					INNER JOIN tblAPPaymentDetail B 
 							ON A.intPaymentId = B.intPaymentId

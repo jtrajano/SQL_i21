@@ -19,6 +19,7 @@
     [ysnOrigin] BIT NOT NULL DEFAULT 0,
     [ysnVoid] BIT NOT NULL DEFAULT 0, 
     [ysnPrinted] BIT NOT NULL DEFAULT 0, 
+	[ysnPrepay] BIT NOT NULL DEFAULT 0, 
 	[ysnDeleted] BIT NULL DEFAULT 0,
 	[dtmDateDeleted] DATETIME NULL,
     [dtmDateCreated] DATETIME NULL DEFAULT GETDATE(), 

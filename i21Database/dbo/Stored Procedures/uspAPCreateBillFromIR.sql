@@ -119,7 +119,7 @@ BEGIn
 	(
 		SELECT 
 			C.intTermsId
-		FROM tblAPVendor B INNER JOIN tblEntityLocation C ON B.intEntityVendorId = C.intEntityId AND B.intDefaultLocationId = C.intEntityLocationId
+		FROM tblAPVendor B INNER JOIN tblEntityLocation C ON B.intEntityVendorId = C.intEntityId
 		WHERE B.intEntityVendorId = A.intEntityVendorId
 	) Terms
 	WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1
@@ -136,6 +136,8 @@ BEGIn
 		[intAccountId],
 		[dblTotal],
 		[dblCost],
+		[intContractDetailId],
+		[intContractHeaderId],
 		[intLineNo]
 	)
 	SELECT
@@ -148,6 +150,8 @@ BEGIn
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
 		[dblTotal]					=	(B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost,
 		[dblCost]					=	B.dblUnitCost,
+		[intContractDetailId]		=	E1.intContractDetailId,
+		[intContractHeaderId]		=	E.intContractHeaderId,
 		[intLineNo]					=	B.intSort
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
@@ -156,6 +160,7 @@ BEGIn
 		ON B.intItemId = C.intItemId
 	INNER JOIN tblICItemLocation D
 		ON A.intLocationId = D.intLocationId AND B.intItemId = D.intItemId
+	LEFT JOIN (tblCTContractHeader E INNER JOIN tblCTContractDetail E1 ON E.intContractHeaderId = E1.intContractHeaderId) ON E.intEntityId = A.intEntityVendorId
 	WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1
 
 	UPDATE A

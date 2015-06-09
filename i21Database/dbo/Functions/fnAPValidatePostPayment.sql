@@ -179,7 +179,10 @@ BEGIN
 		FROM tblAPPayment A
 		WHERE A.dblAmountPaid < 0 
 		AND (SELECT TOP 1 strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) != 'Refund'
+		AND (NOT EXISTS(SELECT 1 FROM tblAPPaymentDetail B INNER JOIN tblAPBill C ON B.intBillId = C.intBillId WHERE C.intTransactionType = 2 AND B.intPaymentId IN (SELECT [intPaymentId] FROM @tmpPayments))
+				AND (SELECT COUNT(*) FROM tblAPPaymentDetail WHERE intPaymentId IN (SELECT [intPaymentId] FROM @tmpPayments)) = 1)
 		AND A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		
 			
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
