@@ -2235,9 +2235,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Terminals' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Terminals', N'Logistics', @LogisticsParentMenuId, N'Terminals', N'Maintenance', N'Screen', N'Logistics.view.Terminal', N'small-menu-maintenance', 0, 0, 0, 1, 5, 1)
+	VALUES (N'Terminals', N'Logistics', @LogisticsParentMenuId, N'Terminals', N'Maintenance', N'Screen', N'EntityManagement.view.Entity:searchEntityTerminal', N'small-menu-maintenance', 0, 0, 0, 1, 5, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Logistics.view.Terminal' WHERE strMenuName = 'Terminals' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'EntityManagement.view.Entity:searchEntityTerminal' WHERE strMenuName = 'Terminals' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsParentMenuId
 
 /* CARD FUELING */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Card Fueling' AND strModuleName = 'Card Fueling' AND intParentMenuID = 0)
