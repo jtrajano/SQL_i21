@@ -29,12 +29,14 @@ Ext.define('Inventory.model.ShipmentItem', {
                 }
             }
         },
+        { name: 'intOrderId', type: 'int', allowNull: true },
         { name: 'intSourceId', type: 'int', allowNull: true },
         { name: 'intLineNo', type: 'int', allowNull: true },
         { name: 'intItemId', type: 'int', allowNull: true },
         { name: 'intSubLocationId', type: 'int', allowNull: true },
         { name: 'dblQuantity', type: 'float' },
         { name: 'intItemUOMId', type: 'int', allowNull: true },
+        { name: 'intWeightUOMId', type: 'int', allowNull: true },
         { name: 'dblUnitPrice', type: 'float' },
         { name: 'intTaxCodeId', type: 'int', allowNull: true },
         { name: 'intDockDoorId', type: 'int', allowNull: true },

@@ -16,6 +16,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strTransferNo).HasColumnName("strTransferNo");
             this.Property(t => t.dtmTransferDate).HasColumnName("dtmTransferDate");
             this.Property(t => t.strTransferType).HasColumnName("strTransferType");
+            this.Property(t => t.intSourceType).HasColumnName("intSourceType");
             this.Property(t => t.intTransferredById).HasColumnName("intTransferredById");
             this.Property(t => t.strDescription).HasColumnName("strDescription");
             this.Property(t => t.intFromLocationId).HasColumnName("intFromLocationId");
@@ -25,8 +26,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intShipViaId).HasColumnName("intShipViaId");
             this.Property(t => t.intFreightUOMId).HasColumnName("intFreightUOMId");
             this.Property(t => t.ysnPosted).HasColumnName("ysnPosted");
-            this.Property(t => t.intEntityId).HasColumnName("intEntityId");
             this.Property(t => t.intCreatedUserId).HasColumnName("intCreatedUserId");
+            this.Property(t => t.intEntityId).HasColumnName("intEntityId");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasRequired(p => p.tblICStatus)
@@ -58,6 +59,7 @@ namespace iRely.Inventory.Model
             this.ToTable("tblICInventoryTransferDetail");
             this.Property(t => t.intInventoryTransferDetailId).HasColumnName("intInventoryTransferDetailId");
             this.Property(t => t.intInventoryTransferId).HasColumnName("intInventoryTransferId");
+            this.Property(t => t.intSourceId).HasColumnName("intSourceId");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intLotId).HasColumnName("intLotId");
             this.Property(t => t.intFromSubLocationId).HasColumnName("intFromSubLocationId");
@@ -108,7 +110,10 @@ namespace iRely.Inventory.Model
 
             // Table & Column Mappings
             this.ToTable("vyuICGetInventoryTransferDetail");
+            this.Property(t => t.intInventoryTransferId).HasColumnName("intInventoryTransferId");
             this.Property(t => t.intInventoryTransferDetailId).HasColumnName("intInventoryTransferDetailId");
+            this.Property(t => t.intSourceId).HasColumnName("intSourceId");
+            this.Property(t => t.strSourceNumber).HasColumnName("strSourceNumber");
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
             this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
             this.Property(t => t.strLotNumber).HasColumnName("strLotNumber");

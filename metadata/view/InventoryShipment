@@ -18,7 +18,7 @@
         "layout": "fit",
         "maximizable": true,
         "minHeight": 510,
-        "minWidth": 860,
+        "minWidth": 1100,
         "minimizable": null,
         "mixins": null,
         "title": "Inventory Shipment",
@@ -447,7 +447,22 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "designer|createAlias": null,
+                                                        "columns": [
+                                                            "[",
+                                                            "    {",
+                                                            "        dataIndex: 'intOrderType',",
+                                                            "        dataType: 'numeric',",
+                                                            "        hidden: true",
+                                                            "    },",
+                                                            "\t{",
+                                                            "        dataIndex: 'strOrderType',",
+                                                            "        dataType: 'string',",
+                                                            "        text: 'Order Type',",
+                                                            "        flex: 1",
+                                                            "    }",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
                                                         "displayField": "strOrderType",
                                                         "fieldLabel": "Order Type",
                                                         "itemId": "cboOrderType",
@@ -458,11 +473,69 @@
                                                         "margin": "0 5 0 0",
                                                         "name": null,
                                                         "readOnly": null,
-                                                        "valueField": "intOrderType",
-                                                        "width": null
+                                                        "valueField": "intOrderType"
                                                     },
                                                     "name": "MyComboBox72",
-                                                    "designerId": "d9f975dc-6232-4bd5-bfc4-d4b94a2f14d5"
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "d9f975dc-6232-4bd5-bfc4-d4b94a2f14d5",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "    {",
+                                                            "        dataIndex: 'intSourceType',",
+                                                            "        dataType: 'numeric',",
+                                                            "        hidden: true",
+                                                            "    },",
+                                                            "\t{",
+                                                            "        dataIndex: 'strSourceType',",
+                                                            "        dataType: 'string',",
+                                                            "        text: 'Source Type',",
+                                                            "        flex: 1",
+                                                            "    }",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strSourceType",
+                                                        "fieldLabel": "Source Type",
+                                                        "itemId": "cboSourceType",
+                                                        "labelAlign": "top",
+                                                        "labelWidth": 110,
+                                                        "layout|flex": 1.3,
+                                                        "layout|margins": null,
+                                                        "margin": "0 5 0 0",
+                                                        "name": null,
+                                                        "readOnly": null,
+                                                        "valueField": "intSourceType"
+                                                    },
+                                                    "name": "MyComboBox81",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "4a8f0cb5-ea5b-41cf-b141-9d1674d98ce1",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 },
                                                 {
                                                     "type": "Ext.form.field.Date",
@@ -476,13 +549,11 @@
                                                         "itemId": "dtmShipDate",
                                                         "labelAlign": "top",
                                                         "labelWidth": 110,
-                                                        "layout|flex": null,
+                                                        "layout|flex": 1,
                                                         "layout|margins": null,
                                                         "margin": "0 5 0 0",
-                                                        "maxWidth": 100,
                                                         "name": null,
-                                                        "readOnly": null,
-                                                        "width": null
+                                                        "readOnly": null
                                                     },
                                                     "name": "MyDateField3",
                                                     "designerId": "b7490c97-8d85-4e1c-83fd-3e17859eb8c9"
@@ -499,13 +570,12 @@
                                                         "fieldLabel": "Reference Number",
                                                         "itemId": "txtReferenceNumber",
                                                         "labelAlign": "top",
-                                                        "labelWidth": 110,
-                                                        "layout|flex": 1,
+                                                        "labelWidth": 150,
+                                                        "layout|flex": 1.3,
                                                         "layout|margins": null,
                                                         "margin": "0 5 0 0",
                                                         "name": null,
-                                                        "readOnly": null,
-                                                        "width": null
+                                                        "readOnly": null
                                                     },
                                                     "name": "MyTextField26",
                                                     "designerId": "1b52d777-d384-4861-9b95-6b3f03b8f3c7"
@@ -521,14 +591,11 @@
                                                         "fieldLabel": "Requested Arrival",
                                                         "itemId": "dtmRequestedArrival",
                                                         "labelAlign": "top",
-                                                        "labelWidth": 110,
-                                                        "layout|flex": null,
+                                                        "layout|flex": 1,
                                                         "layout|margins": null,
                                                         "margin": "0 5 0 0",
-                                                        "maxWidth": 115,
                                                         "name": null,
-                                                        "readOnly": null,
-                                                        "width": null
+                                                        "readOnly": null
                                                     },
                                                     "name": "MyDateField9",
                                                     "designerId": "3b57a957-2365-4ab2-a4ad-66b93fcdfd08"
@@ -569,13 +636,12 @@
                                                         "itemId": "cboCustomer",
                                                         "labelAlign": "top",
                                                         "labelWidth": 60,
-                                                        "layout|flex": null,
+                                                        "layout|flex": 1,
                                                         "layout|margins": null,
                                                         "margin": "0 5 0 0",
                                                         "name": null,
                                                         "readOnly": null,
-                                                        "valueField": "intEntityCustomerId",
-                                                        "width": null
+                                                        "valueField": "intEntityCustomerId"
                                                     },
                                                     "name": "MyComboBox71",
                                                     "configAlternates": {
@@ -605,12 +671,11 @@
                                                         "itemId": "txtCustomerName",
                                                         "labelAlign": "top",
                                                         "labelWidth": 110,
-                                                        "layout|flex": 1.5,
+                                                        "layout|flex": 1.3,
                                                         "layout|margins": null,
                                                         "margin": "0 5 0 0",
                                                         "name": null,
-                                                        "readOnly": true,
-                                                        "width": null
+                                                        "readOnly": true
                                                     },
                                                     "name": "MyTextField47",
                                                     "designerId": "e4c3846b-e661-4271-941f-3bf77da2c41b"
@@ -662,8 +727,7 @@
                                                         "margin": "0 5 0 0",
                                                         "name": null,
                                                         "readOnly": null,
-                                                        "valueField": "intFreightTermId",
-                                                        "width": null
+                                                        "valueField": "intFreightTermId"
                                                     },
                                                     "name": "MyComboBox73",
                                                     "configAlternates": {
@@ -695,8 +759,7 @@
                                                         "layout|flex": 1,
                                                         "layout|margins": null,
                                                         "name": null,
-                                                        "readOnly": true,
-                                                        "width": null
+                                                        "readOnly": true
                                                     },
                                                     "name": "MyTextField24",
                                                     "designerId": "7c423f41-ae7b-4826-b951-aceebb24c919"
@@ -1666,7 +1729,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter15",
+                                                                    "name": "filter130",
                                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -1802,6 +1865,141 @@
                                                                         "pickerWidth": "number"
                                                                     },
                                                                     "designerId": "34b1186d-b414-4217-a29f-3f0ca9db5572",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        },
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "pickerWidth",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "strOrderNumber",
+                                                                "itemId": "colSourceNumber",
+                                                                "text": "Source No.",
+                                                                "width": 90
+                                                            },
+                                                            "name": "MyColumn59",
+                                                            "designerId": "1b5fc675-f21a-4b87-b4bc-f0cf2e76a574",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intSalesOrderId',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\ttext: 'Sales Order Id',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intSalesOrderDetailId',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\ttext: 'Sales Order Detail Id',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intCompanyLocationId',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Location Id',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intItemId',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Item Id',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "    {",
+                                                                            "\t\tdataIndex: 'intItemUOMId',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Item UOM Id',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "    {",
+                                                                            "\t\tdataIndex: 'strSalesOrderNumber',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Sales Order',",
+                                                                            "        width: 100",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strItemNo',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Item No',",
+                                                                            "        width: 100",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strItemDescription',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Description',",
+                                                                            "        width: 120",
+                                                                            "\t},",
+                                                                            "    {",
+                                                                            "\t\tdataIndex: 'strLotTracking',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Lot Tracking',",
+                                                                            "        width: 100",
+                                                                            "\t},",
+                                                                            "    {",
+                                                                            "\t\tdataIndex: 'strUnitMeasure',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Item UOM Id',",
+                                                                            "        width: 100",
+                                                                            "\t},",
+                                                                            "    {",
+                                                                            "\t\tdataIndex: 'dblQtyOrdered',",
+                                                                            "\t\tdataType: 'float',",
+                                                                            "\t\ttext: 'Qty Ordered',",
+                                                                            "        width: 100",
+                                                                            "\t},",
+                                                                            "    {",
+                                                                            "\t\tdataIndex: 'dblPrice',",
+                                                                            "\t\tdataType: 'float',",
+                                                                            "\t\ttext: 'Unit Price',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strStorageLocation',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Storage Location',",
+                                                                            "\t\thidden: true",
+                                                                            "\t}",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strSalesOrderNumber",
+                                                                        "itemId": "cboSourceNumber",
+                                                                        "matchFieldWidth": false,
+                                                                        "pickerWidth": 625,
+                                                                        "valueField": "strSalesOrderNumber",
+                                                                        "width": 500
+                                                                    },
+                                                                    "name": "MyComboBox",
+                                                                    "configAlternates": {
+                                                                        "columns": "array",
+                                                                        "pickerWidth": "number"
+                                                                    },
+                                                                    "designerId": "2ad86bb1-da94-4c14-9073-aaad451aa92b",
                                                                     "customConfigs": [
                                                                         {
                                                                             "group": "(Custom Properties)",
@@ -1973,6 +2171,65 @@
                                                                         "columns": "array"
                                                                     },
                                                                     "designerId": "f994717f-f947-4bb0-8421-9854d2a921db",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "strSubLocation",
+                                                                "itemId": "colOwnershipType",
+                                                                "text": "Ownership Type",
+                                                                "width": 110
+                                                            },
+                                                            "name": "MyColumn58",
+                                                            "designerId": "9e3ccc9e-dabf-42b7-9c81-9444a9a39bb7",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intOwnershipType',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strOwnershipType',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Ownership Type',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t}",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strOwnershipType",
+                                                                        "itemId": "cboOwnershipType",
+                                                                        "valueField": "strOwnershipType"
+                                                                    },
+                                                                    "name": "MyComboBox2",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "3856e225-b076-43c0-8aab-88883af6eb60",
                                                                     "customConfigs": [
                                                                         {
                                                                             "group": "(Custom Properties)",
@@ -2433,7 +2690,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter16",
+                                                                    "name": "filter131",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2896,7 +3153,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter17",
+                                                                    "name": "filter132",
                                                                     "designerId": "86706668-0ec9-4541-b78b-d162dd783738",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3150,7 +3407,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter18",
+                                                    "name": "filter133",
                                                     "designerId": "b4c3f458-33e0-4b9e-972f-6281744af6d7",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3327,7 +3584,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging12",
                     "designerId": "50e4b10d-d851-464f-867c-a04204dccf1e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

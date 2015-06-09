@@ -236,7 +236,15 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 },
                                                 items: [
                                                     {
-                                                        xtype: 'combobox',
+                                                        xtype: 'gridcombobox',
+                                                        columns: [
+                                                            {
+                                                                dataIndex: 'strDescription',
+                                                                dataType: 'string',
+                                                                text: 'Receipt Type',
+                                                                flex: 1
+                                                            }
+                                                        ],
                                                         flex: 1,
                                                         itemId: 'cboReceiptType',
                                                         margin: '0 5 0 0',
@@ -434,6 +442,27 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 },
                                                                 items: [
                                                                     {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intSourceType',
+                                                                                dataType: 'numeric',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strSourceType',
+                                                                                dataType: 'string',
+                                                                                text: 'Source',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboSourceType',
+                                                                        fieldLabel: 'Source Type',
+                                                                        labelWidth: 110,
+                                                                        displayField: 'strSourceType',
+                                                                        valueField: 'intSourceType'
+                                                                    },
+                                                                    {
                                                                         xtype: 'numberfield',
                                                                         itemId: 'txtBlanketReleaseNumber',
                                                                         fieldLabel: 'Blanket Release No',
@@ -445,12 +474,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         xtype: 'textfield',
                                                                         itemId: 'txtVendorRefNumber',
                                                                         fieldLabel: 'Vendor Ref No',
-                                                                        labelWidth: 110
-                                                                    },
-                                                                    {
-                                                                        xtype: 'textfield',
-                                                                        itemId: 'txtBillOfLadingNumber',
-                                                                        fieldLabel: 'Bill of Lading No',
                                                                         labelWidth: 110
                                                                     }
                                                                 ]
@@ -464,6 +487,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     align: 'stretch'
                                                                 },
                                                                 items: [
+                                                                    {
+                                                                        xtype: 'textfield',
+                                                                        itemId: 'txtBillOfLadingNumber',
+                                                                        fieldLabel: 'Bill of Lading No',
+                                                                        labelWidth: 95
+                                                                    },
                                                                     {
                                                                         xtype: 'gridcombobox',
                                                                         columns: [
@@ -489,7 +518,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         itemId: 'cboShipFrom',
                                                                         width: 200,
                                                                         fieldLabel: 'Ship From',
-                                                                        labelWidth: 75,
+                                                                        labelWidth: 95,
                                                                         displayField: 'strLocationName',
                                                                         valueField: 'intEntityLocationId'
                                                                     },
@@ -518,10 +547,21 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         itemId: 'cboShipVia',
                                                                         width: 200,
                                                                         fieldLabel: 'Ship Via',
-                                                                        labelWidth: 75,
+                                                                        labelWidth: 95,
                                                                         displayField: 'strShipVia',
                                                                         valueField: 'intShipViaID'
-                                                                    },
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                xtype: 'container',
+                                                                flex: 1,
+                                                                margin: '0 5 0 0',
+                                                                layout: {
+                                                                    type: 'vbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
                                                                     {
                                                                         xtype: 'gridcombobox',
                                                                         columns: [
@@ -546,26 +586,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         ],
                                                                         itemId: 'cboReceiver',
                                                                         fieldLabel: 'Receiver',
-                                                                        labelWidth: 75,
+                                                                        labelWidth: 85,
                                                                         displayField: 'strUserName',
                                                                         valueField: 'intUserSecurityID'
-                                                                    }
-                                                                ]
-                                                            },
-                                                            {
-                                                                xtype: 'container',
-                                                                flex: 1,
-                                                                margin: '0 5 0 0',
-                                                                layout: {
-                                                                    type: 'vbox',
-                                                                    align: 'stretch'
-                                                                },
-                                                                items: [
-                                                                    {
-                                                                        xtype: 'textfield',
-                                                                        itemId: 'txtVessel',
-                                                                        fieldLabel: 'Vessel',
-                                                                        labelWidth: 85
                                                                     },
                                                                     {
                                                                         xtype: 'gridcombobox',
@@ -615,7 +638,21 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'combobox',
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtVessel',
+                                                                fieldLabel: 'Vessel',
+                                                                labelWidth: 95
+                                                            },
+                                                            {
+                                                                xtype: 'gridcombobox',
+                                                                columns: [
+                                                                    {
+                                                                        dataIndex: 'strDescription',
+                                                                        dataType: 'string',
+                                                                        text: 'Allocate Freight',
+                                                                        flex: 1
+                                                                    }
+                                                                ],
                                                                 itemId: 'cboAllocateFreight',
                                                                 fieldLabel: 'Allocate Freight',
                                                                 labelWidth: 95,
@@ -719,10 +756,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 columns: [
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        itemId: 'colSourceNumber',
+                                                                        itemId: 'colOrderNumber',
                                                                         width: 100,
                                                                         dataIndex: 'strSourceNumber',
-                                                                        text: 'Order Number',
+                                                                        text: 'Order No.',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
@@ -823,7 +860,119 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     hidden: true
                                                                                 }
                                                                             ],
-                                                                            itemId: 'cboSource',
+                                                                            itemId: 'cboOrderNumber',
+                                                                            displayField: 'strPurchaseOrderNumber',
+                                                                            multiSelect: true,
+                                                                            valueField: 'strPurchaseOrderNumber'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colSourceNumber',
+                                                                        width: 100,
+                                                                        dataIndex: 'strSourceNumber',
+                                                                        text: 'Source No.',
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'strPurchaseOrderNumber',
+                                                                                    dataType: 'string',
+                                                                                    text: 'PO Number',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strItemNo',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Item No',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strDescription',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Description',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'dblQtyOrdered',
+                                                                                    dataType: 'float',
+                                                                                    text: 'Ordered Qty',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'dblCost',
+                                                                                    dataType: 'float',
+                                                                                    text: 'Cost',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'dblTotal',
+                                                                                    dataType: 'float',
+                                                                                    text: 'Line Total',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intPurchaseDetailId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Purchase Detail Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intPurchaseId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Purchase Detail Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intItemId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Purchase Detail Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intUnitOfMeasureId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Purchase Detail Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strUOM',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Unit of Measure',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'dblUnitQty',
+                                                                                    dataType: 'float',
+                                                                                    text: 'Unit Qty',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intStockUOM',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Stock UOM Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strStockUOM',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Stock UOM',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strStockUOMType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Stock UOM Type',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'dblStockUOMCF',
+                                                                                    dataType: 'float',
+                                                                                    text: 'Stock UOM Conversion Factor',
+                                                                                    hidden: true
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboSourceNumber',
                                                                             displayField: 'strPurchaseOrderNumber',
                                                                             multiSelect: true,
                                                                             valueField: 'strPurchaseOrderNumber'
@@ -1131,6 +1280,32 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             itemId: 'cboSubLocation',
                                                                             displayField: 'strSubLocationName',
                                                                             valueField: 'strSubLocationName'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colOwnershipType',
+                                                                        width: 110,
+                                                                        dataIndex: 'strDescription',
+                                                                        text: 'Ownership Type',
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intOwnershipType',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strOwnershipType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Ownership Type',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboOwnershipType',
+                                                                            displayField: 'strOwnershipType',
+                                                                            valueField: 'strOwnershipType'
                                                                         }
                                                                     },
                                                                     {

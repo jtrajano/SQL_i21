@@ -39,12 +39,17 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             cboReceiptType: {
                 value: '{current.strReceiptType}',
                 store: '{receiptTypes}',
-                readOnly: '{checkReadOnlyWithSource}'
+                readOnly: '{checkReadOnlyWithOrder}'
+            },
+            cboSourceType: {
+                value: '{current.intSourceType}',
+                store: '{sourceTypes}',
+                readOnly: '{current.ysnPosted}'
             },
             cboVendor: {
                 value: '{current.intEntityVendorId}',
                 store: '{vendor}',
-                readOnly: '{checkReadOnlyWithSource}',
+                readOnly: '{checkReadOnlyWithOrder}',
                 hidden: '{checkHiddenInTransferReceipt}'
             },
             txtVendorName: {
@@ -156,10 +161,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             grdInventoryReceipt: {
                 readOnly: '{current.ysnPosted}',
-                colSourceNumber: {
-                    dataIndex: 'strSourceId',
+                colOrderNumber: {
+                    hidden: '{checkHideOrderNo}',
+                    dataIndex: 'strOrderNumber',
                     editor: {
-                        store: '{poSource}',
+                        store: '{orderNumbers}',
                         defaultFilters: [
                             {
                                 column: 'ysnCompleted',
@@ -173,6 +179,25 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             }
                         ]
                     }
+                },
+                colSourceNumber: {
+                    hidden: '{checkHideSourceNo}',
+                    dataIndex: 'strSourceNumber'
+//                    editor: {
+//                        store: '{orderNumbers}',
+//                        defaultFilters: [
+//                            {
+//                                column: 'ysnCompleted',
+//                                value: 'false',
+//                                conjunction: 'and'
+//                            },
+//                            {
+//                                column: 'intEntityVendorId',
+//                                value: '{current.intEntityVendorId}',
+//                                conjunction: 'and'
+//                            }
+//                        ]
+//                    }
                 },
                 colItemNo: {
                     dataIndex: 'strItemNo',
@@ -197,6 +222,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 conjunction: 'and'
                             }
                         ]
+                    }
+                },
+                colOwnershipType: {
+                    dataIndex: 'strOwnershipType',
+                    editor: {
+                        store: '{ownershipTypes}'
                     }
                 },
                 colLotTracking: 'strLotTracking',
@@ -427,15 +458,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 'vyuAPVendor,' +
                 'tblSMFreightTerm,' +
                 'tblSMCompanyLocation,' +
-                'tblICInventoryReceiptItems.tblICItem,' +
-                'tblICInventoryReceiptItems.tblICItemUOM.tblICUnitMeasure,' +
-                'tblICInventoryReceiptItems.vyuICGetReceiptItemSource,' +
-                'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.tblICLot,' +
-                'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.tblICItemUOM.tblICUnitMeasure,' +
-                'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.tblICStorageLocation,' +
-                'tblICInventoryReceiptItems.WeightUOM.tblICUnitMeasure,' +
-                'tblICInventoryReceiptItems.tblICInventoryReceiptItemTaxes,' +
-                'tblICInventoryReceiptItems.tblSMCompanyLocationSubLocation',
+                'tblICInventoryReceiptItems.vyuICGetInventoryReceiptItem',
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Receipt',
                 window: win
@@ -538,6 +561,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var today = new Date();
         var record = Ext.create('Inventory.model.Receipt');
         record.set('strReceiptType', 'Purchase Order');
+        record.set('intSourceType', 0);
         if (app.DefaultLocation > 0)
             record.set('intLocationId', app.DefaultLocation);
         if (app.UserId > 0)
@@ -597,8 +621,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         var receiptItems = current.tblICInventoryReceiptItems().data.items;
                         Ext.Array.each(receiptItems, function(item) {
                             if (item.dtmDate !== null) {
-                                if (current.get('dtmReceiptDate') < item.get('dtmSourceDate')) {
-                                    iRely.Functions.showErrorDialog('The Purchase Order Date of ' + item.get('strSourceId') + ' must not be later than the Receipt Date');
+                                if (current.get('dtmReceiptDate') < item.get('dtmOrderDate')) {
+                                    iRely.Functions.showErrorDialog('The Purchase Order Date of ' + item.get('strOrderNumber') + ' must not be later than the Receipt Date');
                                     action(false);
                                 }
                             }
@@ -784,6 +808,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 });
             }
+        }
+        else if (combo.itemId === 'cboOwnershipType')
+        {
+            current.set('intOwnershipType', records[0].get('intOwnershipType'));
         }
         this.calculateGrossWeight(current);
     },
@@ -1170,7 +1198,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 store.remoteSort = true;
             }
 
-            if (obj.combo.itemId === 'cboSource') {
+            if (obj.combo.itemId === 'cboOrderNumber') {
                 var proxy = obj.combo.store.proxy;
                 proxy.setExtraParams({search:true, include:'item'});
             }
@@ -1204,7 +1232,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (current) current.set('intShipViaId', records[0].get('intShipViaId'));
     },
 
-    onSourceSelect: function(combo, records) {
+    onOrderNumberSelect: function(combo, records) {
         if (records.length <= 0)
             return;
 
@@ -1216,7 +1244,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var po = records[0];
 
         current.set('intLineNo', po.get('intPurchaseDetailId'));
-        current.set('intSourceId', po.get('intPurchaseId'));
+        current.set('intOrderId', po.get('intPurchaseId'));
         current.set('dblOrderQty', po.get('dblQtyOrdered'));
         current.set('dblReceived', po.get('dblQtyReceived'));
         current.set('dblOpenReceive', po.get('dblQtyOrdered') - po.get('dblQtyReceived'));
@@ -1276,10 +1304,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
             switch (receiptType) {
                 case 'Purchase Order' :
-                    if (iRely.Functions.isEmpty(record.get('strSourceId')))
+                    if (iRely.Functions.isEmpty(record.get('strOrderNumber')))
                     {
                         switch (columnId) {
-                            case 'colSourceNumber' :
+                            case 'colOrderNumber' :
                                 return Ext.create('Ext.grid.CellEditor', {
                                     field: Ext.widget({
                                         xtype: 'gridcombobox',
@@ -1418,10 +1446,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                 hidden: true
                                             }
                                         ],
-                                        itemId: 'cboSource',
+                                        itemId: 'cboOrderNumber',
                                         displayField: 'strPurchaseOrderNumber',
                                         valueField: 'strPurchaseOrderNumber',
-                                        store: win.viewModel.storeInfo.poSource,
+                                        store: win.viewModel.storeInfo.orderNumbers,
                                         defaultFilters: [{
                                             column: 'ysnCompleted',
                                             value: 'false',
@@ -1611,7 +1639,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                     else {
                         switch (columnId) {
-                            case 'colSourceNumber' :
+                            case 'colOrderNumber' :
                             case 'colItemNo' :
                             case 'colUOM' :
                                 return false;
@@ -1677,7 +1705,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     break;
                 case 'Direct' :
                     switch (columnId) {
-                        case 'colSourceNumber' :
+                        case 'colOrderNumber' :
                             return false;
                             break;
                         case 'colItemNo' :
@@ -2155,11 +2183,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 beforequery: this.onShipFromBeforeQuery,
                 select: this.onShipFromSelect
             },
-            "#cboSource": {
+            "#cboOrderNumber": {
                 beforequery: this.onShipFromBeforeQuery,
-                select: this.onSourceSelect
+                select: this.onOrderNumberSelect
             },
-            "#colSourceNumber": {
+            "#colOrderNumber": {
                 beforerender: this.onItemGridColumnBeforeRender
             },
             "#colItemNo": {
@@ -2186,6 +2214,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboSubLocation": {
                 select: this.onSubLocationSelect
+            },
+            "#cboOwnershipType": {
+                select: this.onReceiptItemSelect
             },
             "#cboStorageLocation": {
                 select: this.onStorageLocationSelect

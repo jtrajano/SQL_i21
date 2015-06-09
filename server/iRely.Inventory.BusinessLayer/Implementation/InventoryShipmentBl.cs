@@ -26,7 +26,7 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<tblICInventoryShipment>()
                 .Include(p => p.tblARCustomer)
-                .Select(p => new InventoryShipmentView
+                .Select(p => new ShipmentVM
                 {
                     intInventoryShipmentId = p.intInventoryShipmentId,
                     strShipmentNumber = p.strShipmentNumber,

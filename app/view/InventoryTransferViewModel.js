@@ -34,6 +34,27 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
                 }
             ]
         },
+        sourceTypes: {
+            autoLoad: true,
+            data: [
+                {
+                    intSourceType: 0,
+                    strSourceType: 'None'
+                },
+                {
+                    intSourceType: 1,
+                    strSourceType: 'Scale'
+                },
+                {
+                    intSourceType: 2,
+                    strSourceType: 'Inbound Shipment'
+                }
+            ],
+            fields: {
+                name: 'intSourceType',
+                name: 'strSourceType'
+            }
+        },
         userList: {
             type: 'userlistbuffered'
         },
@@ -121,6 +142,14 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
             }
             else {
                 return 'large-post';
+            }
+        },
+        checkHideSourceNo: function(get) {
+            if (get('current.intSourceType') === 0) {
+                return true;
+            }
+            else {
+                return false;
             }
         }
     }

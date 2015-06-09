@@ -47,6 +47,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 store: '{orderTypes}',
                 readOnly: '{current.ysnPosted}'
             },
+            cboSourceType: {
+                value: '{current.intSourceType}',
+                store: '{sourceTypes}',
+                readOnly: '{current.ysnPosted}'
+            },
             txtReferenceNumber: {
                 value: '{current.strReferenceNumber}',
                 readOnly: '{current.ysnPosted}'
@@ -144,7 +149,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             grdInventoryShipment: {
                 readOnly: '{current.ysnPosted}',
                 colOrderNumber: {
-                    dataIndex: 'strSourceId',
+                    hidden: '{checkHideOrderNo}',
+                    dataIndex: 'strOrderNumber',
                     editor: {
                         store: '{soDetails}',
                         defaultFilters: [{
@@ -153,6 +159,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             conjunction: 'and'
                         }]
                     }
+                },
+                colSourceNumber: {
+                    hidden: '{checkHideSourceNo}',
+                    dataIndex: 'strSourceNumber'
                 },
                 colItemNumber: {
                     dataIndex: 'strItemNo',
@@ -170,6 +180,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             value: '{current.intShipFromLocationId}',
                             conjunction: 'and'
                         }]
+                    }
+                },
+                colOwnershipType: {
+                    dataIndex: 'strOwnershipType',
+                    editor: {
+                        store: '{ownershipTypes}'
                     }
                 },
                 colOrderQty: 'dblQtyOrdered',
@@ -255,12 +271,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             include: 'ShipFromLocation, ' +
                 'tblARCustomer, ' +
                 'ShipToLocation, ' +
-                'tblICInventoryShipmentItems.vyuICGetShipmentItemSource, ' +
-                'tblICInventoryShipmentItems.tblSMCompanyLocationSubLocation, ' +
-                'tblICInventoryShipmentItems.tblICInventoryShipmentItemLots.tblICLot, ' +
-                'tblICInventoryShipmentItems.tblICItem, ' +
-                'tblICInventoryShipmentItems.tblICItemUOM.tblICUnitMeasure, ' +
-                'tblICInventoryShipmentItems.WeightUOM.tblICUnitMeasure',
+                'tblICInventoryShipmentItems.vyuICGetInventoryShipmentItem',
             createRecord: me.createRecord,
             binding: me.config.binding,
             attachment: Ext.create('iRely.attachment.Manager', {
@@ -325,6 +336,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             record.set('intShipFromLocationId', app.DefaultLocation);
         record.set('dtmShipDate', today);
         record.set('intOrderType', 2);
+        record.set('intSourceType', 0);
         action(record);
     },
 
@@ -381,7 +393,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
         if (combo.itemId === 'cboOrderNumber')
         {
-            current.set('intSourceId', records[0].get('intSalesOrderId'));
+            current.set('intOrderId', records[0].get('intSalesOrderId'));
             current.set('intLineNo', records[0].get('intSalesOrderDetailId'));
             current.set('intItemId', records[0].get('intItemId'));
             current.set('strItemNo', records[0].get('strItemNo'));
@@ -420,6 +432,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     }
                 });
             }
+        }
+        else if (combo.itemId === 'cboOwnershipType') {
+            current.set('intOwnershipType', records[0].get('intOwnershipType'));
         }
     },
 
@@ -610,6 +625,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 select: this.onOrderNumberSelect
             },
             "#cboSubLocation": {
+                select: this.onOrderNumberSelect
+            },
+            "#cboOwnershipType": {
                 select: this.onOrderNumberSelect
             },
             "#cboUOM": {

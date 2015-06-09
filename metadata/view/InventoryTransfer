@@ -525,6 +525,63 @@
                                                         "columns": [
                                                             "[",
                                                             "\t{",
+                                                            "\t\tdataIndex: 'intSourceType',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "    {",
+                                                            "\t\tdataIndex: 'strSourceType',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Source Type',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strSourceType",
+                                                        "fieldLabel": "Source Type",
+                                                        "hidden": null,
+                                                        "hideTrigger": null,
+                                                        "itemId": "cboSourceType",
+                                                        "labelWidth": 90,
+                                                        "layout|flex": 1,
+                                                        "layout|margins": null,
+                                                        "name": null,
+                                                        "queryMode": "local",
+                                                        "valueField": "intSourceType",
+                                                        "width": null
+                                                    },
+                                                    "name": "MyComboBox82",
+                                                    "configAlternates": {
+                                                        "alwaysDisplayDecimals": "boolean",
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "1c558754-8352-4101-add2-4dda8f187d3d",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "alwaysDisplayDecimals",
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "alwaysDisplayDecimals": null,
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
                                                             "\t\tdataIndex: 'intEntityId',",
                                                             "\t\tdataType: 'numeric',",
                                                             "\t\ttext: 'Entity Id',",
@@ -582,22 +639,6 @@
                                                             "type": "string"
                                                         }
                                                     ]
-                                                },
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldLabel": "Description",
-                                                        "itemId": "txtDescription",
-                                                        "labelWidth": 90,
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MyTextField22",
-                                                    "designerId": "41b9c35c-73f3-4c0e-a119-2f601680bc73"
                                                 }
                                             ]
                                         },
@@ -818,6 +859,22 @@
                                                             "type": "string"
                                                         }
                                                     ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Description",
+                                                        "itemId": "txtDescription",
+                                                        "labelWidth": 110,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyTextField22",
+                                                    "designerId": "41b9c35c-73f3-4c0e-a119-2f601680bc73"
                                                 }
                                             ]
                                         },
@@ -1151,7 +1208,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter131",
+                                                    "name": "filter134",
                                                     "designerId": "4657730f-09d8-419c-b5af-f59d820ad534",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1166,6 +1223,91 @@
                                             "codeClass": "Ext.selection.CheckboxModel",
                                             "name": "MyCheckboxSelectionModel2",
                                             "designerId": "caf482c9-99d0-4378-b1ec-9a16e50348b4"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strItemNumber",
+                                                "itemId": "colSourceNumber",
+                                                "text": "Source No.",
+                                                "width": 100
+                                            },
+                                            "name": "MyColumn62",
+                                            "designerId": "304cdd97-aa21-4a3b-b39a-dc5d5b534792",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "{",
+                                                            "dataIndex: 'intItemId',",
+                                                            "dataType: 'numeric',",
+                                                            "text: 'Item Id',",
+                                                            "hidden: true",
+                                                            "},",
+                                                            "{",
+                                                            "dataIndex: 'intLocationId',",
+                                                            "dataType: 'numeric',",
+                                                            "text: 'Location Id',",
+                                                            "hidden: true",
+                                                            "},",
+                                                            "{",
+                                                            "dataIndex: 'strItemNo',",
+                                                            "dataType: 'string',",
+                                                            "text: 'Item Number',",
+                                                            "width: 100",
+                                                            "},",
+                                                            "{",
+                                                            "dataIndex: 'strType',",
+                                                            "dataType: 'string',",
+                                                            "text: 'Item Type',",
+                                                            "width: 100",
+                                                            "},",
+                                                            "{",
+                                                            "dataIndex: 'strDescription',",
+                                                            "dataType: 'string',",
+                                                            "text: 'Description',",
+                                                            "width: 120",
+                                                            "},",
+                                                            "{",
+                                                            "dataIndex: 'strLotTracking',",
+                                                            "dataType: 'string',",
+                                                            "text: 'Lot Tracking',",
+                                                            "hidden: true",
+                                                            "}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strItemNo",
+                                                        "itemId": "cboSourceNumber",
+                                                        "valueField": "strItemNo"
+                                                    },
+                                                    "name": "MyComboBox1",
+                                                    "configAlternates": {
+                                                        "columns": "array",
+                                                        "pickerWidth": "number"
+                                                    },
+                                                    "designerId": "2bd0c244-b14d-4343-9b50-e7f02de677c0",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -2428,7 +2570,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter132",
+                                                    "name": "filter135",
                                                     "designerId": "dc8288c0-74ca-4def-b42c-feb73cdf1f4d",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }

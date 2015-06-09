@@ -46,6 +46,27 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 name: 'strDescription'
             }
         },
+        sourceTypes: {
+            autoLoad: true,
+            data: [
+                {
+                    intSourceType: 0,
+                    strSourceType: 'None'
+                },
+                {
+                    intSourceType: 1,
+                    strSourceType: 'Scale'
+                },
+                {
+                    intSourceType: 2,
+                    strSourceType: 'Inbound Shipment'
+                }
+            ],
+            fields: {
+                name: 'intSourceType',
+                name: 'strSourceType'
+            }
+        },
         allocateFreights: {
             autoLoad: true,
             data: [
@@ -104,8 +125,34 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
         },
 
+
         subLocation: {
             type: 'smcompanylocationsublocationbuffered'
+        },
+        ownershipTypes: {
+            autoLoad: true,
+            data: [
+                {
+                    intOwnershipType: 1,
+                    strOwnershipType: 'Own'
+                },
+                {
+                    intOwnershipType: 2,
+                    strOwnershipType: 'Storage'
+                },
+                {
+                    intOwnershipType: 3,
+                    strOwnershipType: 'Consigned Purchase'
+                },
+                {
+                    intOwnershipType: 4,
+                    strOwnershipType: 'Consigned Sale'
+                }
+            ],
+            fields: {
+                name: 'intOwnershipType',
+                name: 'strOwnershipType'
+            }
         },
         items: {
             type: 'icbuffereditemstockdetailview'
@@ -122,7 +169,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         location: {
             type: 'companylocationbuffered'
         },
-        poSource: {
+        orderNumbers: {
             type: 'purchaseorderdetail'
         },
         shipFrom: {
@@ -221,7 +268,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 return isDirect;
             }
         },
-        checkReadOnlyWithSource: function(get) {
+        checkReadOnlyWithOrder: function(get) {
             if (get('current.ysnPosted') === true){
                 return true
             }
@@ -245,6 +292,22 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
             else {
                 return 'Receive';
+            }
+        },
+        checkHideOrderNo: function(get) {
+            if (get('current.strReceiptType') === 'Direct') {
+                return true;
+            }
+            else {
+                return false;
+            }
+        },
+        checkHideSourceNo: function(get) {
+            if (get('current.intSourceType') === 0) {
+                return true;
+            }
+            else {
+                return false;
             }
         }
     }

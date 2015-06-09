@@ -27,7 +27,7 @@ namespace iRely.Inventory.BusinessLayer
             var query = _db.GetQuery<tblICInventoryReceipt>()
                 .Include(p => p.vyuAPVendor)
                 .Include(p => p.tblSMCompanyLocation)
-                .Select(p => new vyuReciepts
+                .Select(p => new RecieptVM
                 {
                     intInventoryReceiptId = p.intInventoryReceiptId,
                     strReceiptNumber = p.strReceiptNumber,
@@ -35,7 +35,7 @@ namespace iRely.Inventory.BusinessLayer
                     strVendorName = p.vyuAPVendor.strName,
                     strLocationName = p.tblSMCompanyLocation.strLocationName,
                     dtmReceiptDate = p.dtmReceiptDate,
-                    ysnPosted = p.ysnPosted
+                    ysnPosted = p.ysnPosted ?? false
                 })
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intInventoryReceiptId").ToListAsync();

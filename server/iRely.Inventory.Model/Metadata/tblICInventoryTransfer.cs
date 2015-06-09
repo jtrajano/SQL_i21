@@ -21,6 +21,7 @@ namespace iRely.Inventory.Model
         public string strTransferNo { get; set; }
         public DateTime? dtmTransferDate { get; set; }
         public string strTransferType { get; set; }
+        public int? intSourceType { get; set; }
         public int? intTransferredById { get; set; }
         public string strDescription { get; set; }
         public int? intFromLocationId { get; set; }
@@ -30,8 +31,8 @@ namespace iRely.Inventory.Model
         public int? intShipViaId { get; set; }
         public int? intFreightUOMId { get; set; }
         public bool? ysnPosted { get; set; }
-        public int? intEntityId { get; set; }
         public int? intCreatedUserId { get; set; }
+        public int? intEntityId { get; set; }
         public int? intSort { get; set; }
 
         public tblSMCompanyLocation FromLocation { get; set; }
@@ -45,6 +46,7 @@ namespace iRely.Inventory.Model
     {
         public int intInventoryTransferDetailId { get; set; }
         public int intInventoryTransferId { get; set; }
+        public int? intSourceId { get; set; }
         public int? intItemId { get; set; }
         public int? intLotId { get; set; }
         public int? intFromSubLocationId { get; set; }
@@ -64,6 +66,25 @@ namespace iRely.Inventory.Model
         public decimal? dblFreightAmount { get; set; }
         public int? intSort { get; set; }
 
+        private string _sourceNo;
+        [NotMapped]
+        public string strSourceNumber
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_sourceNo))
+                    if (vyuICGetInventoryTransferDetail != null)
+                        return vyuICGetInventoryTransferDetail.strSourceNumber;
+                    else
+                        return null;
+                else
+                    return _sourceNo;
+            }
+            set
+            {
+                _sourceNo = value;
+            }
+        }
         private string _itemNo;
         [NotMapped]
         public string strItemNo
@@ -304,7 +325,10 @@ namespace iRely.Inventory.Model
 
     public class vyuICGetInventoryTransferDetail
     {
-        public int? intInventoryTransferDetailId { get; set; }
+        public int intInventoryTransferId { get; set; }
+        public int intInventoryTransferDetailId { get; set; }
+        public int? intSourceId { get; set; }
+        public string strSourceNumber { get; set; }
         public string strItemNo { get; set; }
         public string strItemDescription { get; set; }
         public string strLotNumber { get; set; }

@@ -36,6 +36,52 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                 name: 'strOrderType'
             }
         },
+        sourceTypes: {
+            autoLoad: true,
+            data: [
+                {
+                    intSourceType: 0,
+                    strSourceType: 'None'
+                },
+                {
+                    intSourceType: 1,
+                    strSourceType: 'Scale'
+                },
+                {
+                    intSourceType: 2,
+                    strSourceType: 'Inbound Shipment'
+                }
+            ],
+            fields: {
+                name: 'intSourceType',
+                name: 'strSourceType'
+            }
+        },
+        ownershipTypes: {
+            autoLoad: true,
+            data: [
+                {
+                    intOwnershipType: 1,
+                    strOwnershipType: 'Own'
+                },
+                {
+                    intOwnershipType: 2,
+                    strOwnershipType: 'Storage'
+                },
+                {
+                    intOwnershipType: 3,
+                    strOwnershipType: 'Consigned Purchase'
+                },
+                {
+                    intOwnershipType: 4,
+                    strOwnershipType: 'Consigned Sale'
+                }
+            ],
+            fields: {
+                name: 'intOwnershipType',
+                name: 'strOwnershipType'
+            }
+        },
         freightTerm: {
             type: 'FreightTermsBuffered'
         },
@@ -86,6 +132,22 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             }
             else {
                 return 'large-ship-via';
+            }
+        },
+        checkHideOrderNo: function(get) {
+            if (get('current.strReceiptType') === 'Direct') {
+                return true;
+            }
+            else {
+                return false;
+            }
+        },
+        checkHideSourceNo: function(get) {
+            if (get('current.intSourceType') === 0) {
+                return true;
+            }
+            else {
+                return false;
             }
         }
     }
