@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets38fda6b98e6c67a3caae9fbfd01679a54854be2889d7bfbfc7eea1b1191f16e0))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets649c48d4a165ad5112c7f376274d238079e74f084db1fe3a1faf7dcb703167ce))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets38fda6b98e6c67a3caae9fbfd01679a54854be2889d7bfbfc7eea1b1191f16e0 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets649c48d4a165ad5112c7f376274d238079e74f084db1fe3a1faf7dcb703167ce : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "38fda6b98e6c67a3caae9fbfd01679a54854be2889d7bfbfc7eea1b1191f16e0"; }
+            get { return "649c48d4a165ad5112c7f376274d238079e74f084db1fe3a1faf7dcb703167ce"; }
         }
 
         /// <summary>
@@ -2847,7 +2847,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSMCompanyLocationSubLocation
-        [CodeFirstDatabaseSchema.tblSMCompanyLocationSubLocation](T1.tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId, T1.tblSMCompanyLocationSubLocation_intCompanyLocationId, T1.tblSMCompanyLocationSubLocation_strSubLocationName, T1.tblSMCompanyLocationSubLocation_strSubLocationDescription, T1.tblSMCompanyLocationSubLocation_strClassification, T1.tblSMCompanyLocationSubLocation_intNewLotBin, T1.tblSMCompanyLocationSubLocation_intAuditBin, T1.tblSMCompanyLocationSubLocation_strAddressKey, T1.tblSMCompanyLocationSubLocation_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblSMCompanyLocationSubLocation](T1.tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId, T1.tblSMCompanyLocationSubLocation_intCompanyLocationId, T1.tblSMCompanyLocationSubLocation_strSubLocationName, T1.tblSMCompanyLocationSubLocation_strSubLocationDescription, T1.tblSMCompanyLocationSubLocation_strClassification, T1.tblSMCompanyLocationSubLocation_intNewLotBin, T1.tblSMCompanyLocationSubLocation_intAuditBin, T1.tblSMCompanyLocationSubLocation_strAddress, T1.tblSMCompanyLocationSubLocation_intConcurrencyId)
     FROM (
         SELECT 
             T.intCompanyLocationSubLocationId AS tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId, 
@@ -2857,7 +2857,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strClassification AS tblSMCompanyLocationSubLocation_strClassification, 
             T.intNewLotBin AS tblSMCompanyLocationSubLocation_intNewLotBin, 
             T.intAuditBin AS tblSMCompanyLocationSubLocation_intAuditBin, 
-            T.strAddressKey AS tblSMCompanyLocationSubLocation_strAddressKey, 
+            T.strAddress AS tblSMCompanyLocationSubLocation_strAddress, 
             T.intConcurrencyId AS tblSMCompanyLocationSubLocation_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblSMCompanyLocationSubLocations AS T
@@ -5716,7 +5716,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblSMCompanyLocationSubLocations
-        [iRely.Inventory.Model.tblSMCompanyLocationSubLocation](T1.tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId, T1.tblSMCompanyLocationSubLocation_intCompanyLocationId, T1.tblSMCompanyLocationSubLocation_strSubLocationName, T1.tblSMCompanyLocationSubLocation_strSubLocationDescription, T1.tblSMCompanyLocationSubLocation_strClassification, T1.tblSMCompanyLocationSubLocation_intNewLotBin, T1.tblSMCompanyLocationSubLocation_intAuditBin, T1.tblSMCompanyLocationSubLocation_strAddressKey, T1.tblSMCompanyLocationSubLocation_intConcurrencyId)
+        [iRely.Inventory.Model.tblSMCompanyLocationSubLocation](T1.tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId, T1.tblSMCompanyLocationSubLocation_intCompanyLocationId, T1.tblSMCompanyLocationSubLocation_strSubLocationName, T1.tblSMCompanyLocationSubLocation_strSubLocationDescription, T1.tblSMCompanyLocationSubLocation_strClassification, T1.tblSMCompanyLocationSubLocation_intNewLotBin, T1.tblSMCompanyLocationSubLocation_intAuditBin, T1.tblSMCompanyLocationSubLocation_strAddress, T1.tblSMCompanyLocationSubLocation_intConcurrencyId)
     FROM (
         SELECT 
             T.intCompanyLocationSubLocationId AS tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId, 
@@ -5726,7 +5726,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strClassification AS tblSMCompanyLocationSubLocation_strClassification, 
             T.intNewLotBin AS tblSMCompanyLocationSubLocation_intNewLotBin, 
             T.intAuditBin AS tblSMCompanyLocationSubLocation_intAuditBin, 
-            T.strAddressKey AS tblSMCompanyLocationSubLocation_strAddressKey, 
+            T.strAddress AS tblSMCompanyLocationSubLocation_strAddress, 
             T.intConcurrencyId AS tblSMCompanyLocationSubLocation_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblSMCompanyLocationSubLocation AS T
