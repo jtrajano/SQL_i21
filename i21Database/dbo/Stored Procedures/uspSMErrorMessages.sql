@@ -546,3 +546,15 @@ EXEC sp_addmessage 51130,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51131) EXEC sp_dropmessage 51131, 'us_english'	
 SET @strmessage = 'Please specify the Adjust Qty By or New Quantity on %s.'
 EXEC sp_addmessage 51131,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51132) EXEC sp_dropmessage 51132, 'us_english'	
+SET @strmessage = 'This lot is already released. You can''t undo.'
+EXEC sp_addmessage 51132,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51133) EXEC sp_dropmessage 51133, 'us_english'	
+SET @strmessage = 'This lot is already reversed. You can''t undo.'
+EXEC sp_addmessage 51133,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51134) EXEC sp_dropmessage 51134, 'us_english'	
+SET @strmessage = 'Pallet Lot has been marked as a ghost and cannot be Undone.'
+EXEC sp_addmessage 51134,11,@strmessage,'us_english','False'
