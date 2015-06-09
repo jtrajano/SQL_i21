@@ -16,7 +16,8 @@ SELECT
 		FuturesBroker,
 		ForwardingAgent,
 		Terminal,
-		ShippingLine
+		ShippingLine,
+		Trucker
 	FROM 		
 			(SELECT	intEntityId, Name,		
 								CASE WHEN [Customer] IS NOT NULL THEN 1 ELSE 0 END Customer, 		
@@ -27,7 +28,8 @@ SELECT
 								CASE WHEN [Futures Broker] IS NOT NULL THEN 1 ELSE 0 END AS  FuturesBroker,
 								CASE WHEN [Forwarding Agent] IS NOT NULL THEN 1 ELSE 0 END AS  ForwardingAgent,
 								CASE WHEN [Terminal] IS NOT NULL THEN 1 ELSE 0 END AS  Terminal,
-								CASE WHEN [Shipping Line] IS NOT NULL THEN 1 ELSE 0 END AS  ShippingLine
+								CASE WHEN [Shipping Line] IS NOT NULL THEN 1 ELSE 0 END AS  ShippingLine,
+								CASE WHEN [Trucker] IS NOT NULL THEN 1 ELSE 0 END AS  Trucker
 			FROM
 			(
 				select A.intEntityId,  A.strName Name, strType 
@@ -46,8 +48,9 @@ SELECT
 						[User],
 						[Futures Broker],
 						[Forwarding Agent],
-						Terminal,
-						[Shipping Line]
+						[Terminal],
+						[Shipping Line],
+						[Trucker]
 					)
 			) AS PivotTable
 		) a
