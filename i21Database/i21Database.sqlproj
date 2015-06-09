@@ -1690,6 +1690,7 @@
     <Build Include="dbo\Tables\tblEntityPreferences.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItem.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryShipmentItem.sql" />
+	<Build Include="dbo\Views\vyuEMEntity.sql" />
     <Build Include="dbo\Views\vyuARCustomerInquiryReport.sql" />
     <Build Include="dbo\Views\vyuARCustomerStatementReport.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingReport.sql" />	
