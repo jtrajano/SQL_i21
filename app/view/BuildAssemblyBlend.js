@@ -486,18 +486,6 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                                         dataType: 'string',
                                         text: 'Sub Location',
                                         flex: 2
-                                    },
-                                    {
-                                        dataIndex: 'strStorageLocationName',
-                                        dataType: 'string',
-                                        text: 'Storage Location',
-                                        flex: 2
-                                    },
-                                    {
-                                        dataIndex: 'dblOnHand',
-                                        dataType: 'float',
-                                        text: 'On Hand',
-                                        flex: 1
                                     }
                                 ],
                                 itemId: 'cboItemSubLocation',

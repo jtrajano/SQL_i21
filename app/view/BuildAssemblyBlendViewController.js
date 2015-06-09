@@ -95,18 +95,10 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
                 colSubLocation: {
                     dataIndex: 'strSubLocationName',
                     editor: {
-                        store: '{stockUOM}',
+                        store: '{itemSubLocation}',
                         defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{grdBuildAssemblyBlend.selection.intItemId}',
-                            conjunction: 'and'
-                        },{
-                            column: 'intLocationId',
+                            column: 'intCompanyLocationId',
                             value: '{current.intLocationId}',
-                            conjunction: 'and'
-                        },{
-                            column: 'intItemUOMId',
-                            value: '{grdBuildAssemblyBlend.selection.intItemUOMId}',
                             conjunction: 'and'
                         }]
                     }
@@ -145,9 +137,6 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
                 }
             ]
         });
-
-        var colStock = grdBuildAssemblyBlend.columns[3];
-        colStock.renderer = this.AvailableStockRenderer;
 
         return win.context;
     },
@@ -344,36 +333,33 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
             return;
 
         var grid = combo.up('grid');
+        var win = grid.up('window');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
 
         if (current) {
-            current.set('intSubLocationId', records[0].get('intSubLocationId'));
-            current.set('dblStock', records[0].get('dblOnHand'));
-        }
-    },
+            current.set('intSubLocationId', records[0].get('intCompanyLocationSubLocationId'));
 
-    AvailableStockRenderer: function (value, metadata, record) {
-        if (!metadata) return;
-        var grid = metadata.column.up('grid');
-        var win = grid.up('window');
-        var items = win.viewModel.storeInfo.stockUOMList;
-        var currentMaster = win.viewModel.data.current;
+            var items = win.viewModel.storeInfo.stockUOMList;
+            var currentMaster = win.viewModel.data.current;
 
-        if (currentMaster) {
-            if (record) {
+            if (currentMaster) {
                 if (items) {
                     var index = items.data.findIndexBy(function (row) {
-                        if (row.get('intItemId') === record.get('intItemId') &&
+                        if (row.get('intItemId') === current.get('intItemId') &&
                             row.get('intLocationId') === currentMaster.get('intLocationId') &&
-                            row.get('intItemUOMId') === record.get('intItemUOMId') &&
-                            row.get('intSubLocationId') === record.get('intSubLocationId')) {
+                            row.get('intItemUOMId') === current.get('intItemUOMId') &&
+                            row.get('intSubLocationId') === current.get('intSubLocationId')) {
                             return true;
                         }
                     });
                     if (index >= 0) {
                         var stockUOM = items.getAt(index);
-                        return stockUOM.get('dblOnHand');
+                        current.set('dblStock', stockUOM.get('dblOnHand'));
+                    }
+                    else
+                    {
+                        current.set('dblStock', 0.00);
                     }
                 }
             }
