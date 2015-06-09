@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets649c48d4a165ad5112c7f376274d238079e74f084db1fe3a1faf7dcb703167ce))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsf7cca3ec28dc80e1c5c0c2af07bc57fd86d9e7aa13e5adcfc4834cda25746edf))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets649c48d4a165ad5112c7f376274d238079e74f084db1fe3a1faf7dcb703167ce : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsf7cca3ec28dc80e1c5c0c2af07bc57fd86d9e7aa13e5adcfc4834cda25746edf : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "649c48d4a165ad5112c7f376274d238079e74f084db1fe3a1faf7dcb703167ce"; }
+            get { return "f7cca3ec28dc80e1c5c0c2af07bc57fd86d9e7aa13e5adcfc4834cda25746edf"; }
         }
 
         /// <summary>
@@ -1362,7 +1362,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItem
-        [CodeFirstDatabaseSchema.tblICItem](T1.tblICItem_intItemId, T1.tblICItem_strItemNo, T1.tblICItem_strType, T1.tblICItem_strDescription, T1.tblICItem_intManufacturerId, T1.tblICItem_intBrandId, T1.tblICItem_intCategoryId, T1.tblICItem_strStatus, T1.tblICItem_strModelNo, T1.tblICItem_strInventoryTracking, T1.tblICItem_strLotTracking, T1.tblICItem_ysnRequireCustomerApproval, T1.tblICItem_intRecipeId, T1.tblICItem_ysnSanitationRequired, T1.tblICItem_intLifeTime, T1.tblICItem_strLifeTimeType, T1.tblICItem_intReceiveLife, T1.tblICItem_strGTIN, T1.tblICItem_strRotationType, T1.tblICItem_intNMFCId, T1.tblICItem_ysnStrictFIFO, T1.tblICItem_intDimensionUOMId, T1.tblICItem_dblHeight, T1.tblICItem_dblWidth, T1.tblICItem_dblDepth, T1.tblICItem_intWeightUOMId, T1.tblICItem_dblWeight, T1.tblICItem_intMaterialPackTypeId, T1.tblICItem_strMaterialSizeCode, T1.tblICItem_intInnerUnits, T1.tblICItem_intLayerPerPallet, T1.tblICItem_intUnitPerLayer, T1.tblICItem_dblStandardPalletRatio, T1.tblICItem_strMask1, T1.tblICItem_strMask2, T1.tblICItem_strMask3, T1.tblICItem_intPatronageCategoryId, T1.tblICItem_intFuelTaxClassId, T1.tblICItem_intTaxGroupId, T1.tblICItem_ysnStockedItem, T1.tblICItem_ysnDyedFuel, T1.tblICItem_strBarcodePrint, T1.tblICItem_ysnMSDSRequired, T1.tblICItem_strEPANumber, T1.tblICItem_ysnInboundTax, T1.tblICItem_ysnOutboundTax, T1.tblICItem_ysnRestrictedChemical, T1.tblICItem_ysnTankRequired, T1.tblICItem_ysnAvailableTM, T1.tblICItem_dblDefaultFull, T1.tblICItem_strFuelInspectFee, T1.tblICItem_strRINRequired, T1.tblICItem_intRINFuelTypeId, T1.tblICItem_dblDenaturantPercent, T1.tblICItem_ysnTonnageTax, T1.tblICItem_ysnLoadTracking, T1.tblICItem_dblMixOrder, T1.tblICItem_ysnHandAddIngredient, T1.tblICItem_intMedicationTag, T1.tblICItem_intIngredientTag, T1.tblICItem_strVolumeRebateGroup, T1.tblICItem_intPhysicalItem, T1.tblICItem_ysnExtendPickTicket, T1.tblICItem_ysnExportEDI, T1.tblICItem_ysnHazardMaterial, T1.tblICItem_ysnMaterialFee, T1.tblICItem_ysnAutoBlend, T1.tblICItem_dblUserGroupFee, T1.tblICItem_strNACSCategory, T1.tblICItem_strWICCode, T1.tblICItem_intAGCategory, T1.tblICItem_ysnReceiptCommentRequired, T1.tblICItem_strCountCode, T1.tblICItem_ysnLandedCost, T1.tblICItem_strLeadTime, T1.tblICItem_ysnTaxable, T1.tblICItem_strKeywords, T1.tblICItem_dblCaseQty, T1.tblICItem_dtmDateShip, T1.tblICItem_dblTaxExempt, T1.tblICItem_ysnDropShip, T1.tblICItem_ysnCommisionable, T1.tblICItem_ysnSpecialCommission, T1.tblICItem_intCommodityId, T1.tblICItem_intCommodityHierarchyId, T1.tblICItem_dblGAShrinkFactor, T1.tblICItem_intOriginId, T1.tblICItem_intProductTypeId, T1.tblICItem_intRegionId, T1.tblICItem_intSeasonId, T1.tblICItem_intClassVarietyId, T1.tblICItem_intProductLineId, T1.tblICItem_strMarketValuation, T1.tblICItem_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICItem](T1.tblICItem_intItemId, T1.tblICItem_strItemNo, T1.tblICItem_strType, T1.tblICItem_strDescription, T1.tblICItem_intManufacturerId, T1.tblICItem_intBrandId, T1.tblICItem_intCategoryId, T1.tblICItem_strStatus, T1.tblICItem_strModelNo, T1.tblICItem_strInventoryTracking, T1.tblICItem_strLotTracking, T1.tblICItem_ysnRequireCustomerApproval, T1.tblICItem_intRecipeId, T1.tblICItem_ysnSanitationRequired, T1.tblICItem_intLifeTime, T1.tblICItem_strLifeTimeType, T1.tblICItem_intReceiveLife, T1.tblICItem_strGTIN, T1.tblICItem_strRotationType, T1.tblICItem_intNMFCId, T1.tblICItem_ysnStrictFIFO, T1.tblICItem_intDimensionUOMId, T1.tblICItem_dblHeight, T1.tblICItem_dblWidth, T1.tblICItem_dblDepth, T1.tblICItem_intWeightUOMId, T1.tblICItem_dblWeight, T1.tblICItem_intMaterialPackTypeId, T1.tblICItem_strMaterialSizeCode, T1.tblICItem_intInnerUnits, T1.tblICItem_intLayerPerPallet, T1.tblICItem_intUnitPerLayer, T1.tblICItem_dblStandardPalletRatio, T1.tblICItem_strMask1, T1.tblICItem_strMask2, T1.tblICItem_strMask3, T1.tblICItem_intPatronageCategoryId, T1.tblICItem_intFuelTaxClassId, T1.tblICItem_intSalesTaxGroupId, T1.tblICItem_intPurchaseTaxGroupId, T1.tblICItem_ysnStockedItem, T1.tblICItem_ysnDyedFuel, T1.tblICItem_strBarcodePrint, T1.tblICItem_ysnMSDSRequired, T1.tblICItem_strEPANumber, T1.tblICItem_ysnInboundTax, T1.tblICItem_ysnOutboundTax, T1.tblICItem_ysnRestrictedChemical, T1.tblICItem_ysnFuelItem, T1.tblICItem_ysnTankRequired, T1.tblICItem_ysnAvailableTM, T1.tblICItem_dblDefaultFull, T1.tblICItem_strFuelInspectFee, T1.tblICItem_strRINRequired, T1.tblICItem_intRINFuelTypeId, T1.tblICItem_dblDenaturantPercent, T1.tblICItem_ysnTonnageTax, T1.tblICItem_ysnLoadTracking, T1.tblICItem_dblMixOrder, T1.tblICItem_ysnHandAddIngredient, T1.tblICItem_intMedicationTag, T1.tblICItem_intIngredientTag, T1.tblICItem_strVolumeRebateGroup, T1.tblICItem_intPhysicalItem, T1.tblICItem_ysnExtendPickTicket, T1.tblICItem_ysnExportEDI, T1.tblICItem_ysnHazardMaterial, T1.tblICItem_ysnMaterialFee, T1.tblICItem_ysnAutoBlend, T1.tblICItem_dblUserGroupFee, T1.tblICItem_dblWeightTolerance, T1.tblICItem_dblOverReceiveTolerance, T1.tblICItem_strMaintenanceCalculationMethod, T1.tblICItem_dblMaintenanceRate, T1.tblICItem_strNACSCategory, T1.tblICItem_strWICCode, T1.tblICItem_intAGCategory, T1.tblICItem_ysnReceiptCommentRequired, T1.tblICItem_strCountCode, T1.tblICItem_ysnLandedCost, T1.tblICItem_strLeadTime, T1.tblICItem_ysnTaxable, T1.tblICItem_strKeywords, T1.tblICItem_dblCaseQty, T1.tblICItem_dtmDateShip, T1.tblICItem_dblTaxExempt, T1.tblICItem_ysnDropShip, T1.tblICItem_ysnCommisionable, T1.tblICItem_ysnSpecialCommission, T1.tblICItem_intCommodityId, T1.tblICItem_intCommodityHierarchyId, T1.tblICItem_dblGAShrinkFactor, T1.tblICItem_intOriginId, T1.tblICItem_intProductTypeId, T1.tblICItem_intRegionId, T1.tblICItem_intSeasonId, T1.tblICItem_intClassVarietyId, T1.tblICItem_intProductLineId, T1.tblICItem_strMarketValuation, T1.tblICItem_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemId AS tblICItem_intItemId, 
@@ -1403,7 +1403,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.strMask3 AS tblICItem_strMask3, 
             T.intPatronageCategoryId AS tblICItem_intPatronageCategoryId, 
             T.intFuelTaxClassId AS tblICItem_intFuelTaxClassId, 
-            T.intTaxGroupId AS tblICItem_intTaxGroupId, 
+            T.intSalesTaxGroupId AS tblICItem_intSalesTaxGroupId, 
+            T.intPurchaseTaxGroupId AS tblICItem_intPurchaseTaxGroupId, 
             T.ysnStockedItem AS tblICItem_ysnStockedItem, 
             T.ysnDyedFuel AS tblICItem_ysnDyedFuel, 
             T.strBarcodePrint AS tblICItem_strBarcodePrint, 
@@ -1412,6 +1413,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnInboundTax AS tblICItem_ysnInboundTax, 
             T.ysnOutboundTax AS tblICItem_ysnOutboundTax, 
             T.ysnRestrictedChemical AS tblICItem_ysnRestrictedChemical, 
+            T.ysnFuelItem AS tblICItem_ysnFuelItem, 
             T.ysnTankRequired AS tblICItem_ysnTankRequired, 
             T.ysnAvailableTM AS tblICItem_ysnAvailableTM, 
             T.dblDefaultFull AS tblICItem_dblDefaultFull, 
@@ -1433,6 +1435,10 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnMaterialFee AS tblICItem_ysnMaterialFee, 
             T.ysnAutoBlend AS tblICItem_ysnAutoBlend, 
             T.dblUserGroupFee AS tblICItem_dblUserGroupFee, 
+            T.dblWeightTolerance AS tblICItem_dblWeightTolerance, 
+            T.dblOverReceiveTolerance AS tblICItem_dblOverReceiveTolerance, 
+            T.strMaintenanceCalculationMethod AS tblICItem_strMaintenanceCalculationMethod, 
+            T.dblMaintenanceRate AS tblICItem_dblMaintenanceRate, 
             T.strNACSCategory AS tblICItem_strNACSCategory, 
             T.strWICCode AS tblICItem_strWICCode, 
             T.intAGCategory AS tblICItem_intAGCategory, 
@@ -2872,7 +2878,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemLocation
-        [CodeFirstDatabaseSchema.tblICItemLocation](T1.tblICItemLocation_intItemLocationId, T1.tblICItemLocation_intItemId, T1.tblICItemLocation_intLocationId, T1.tblICItemLocation_intVendorId, T1.tblICItemLocation_strDescription, T1.tblICItemLocation_intCostingMethod, T1.tblICItemLocation_intAllowNegativeInventory, T1.tblICItemLocation_intSubLocationId, T1.tblICItemLocation_intStorageLocationId, T1.tblICItemLocation_intIssueUOMId, T1.tblICItemLocation_intReceiveUOMId, T1.tblICItemLocation_intFamilyId, T1.tblICItemLocation_intClassId, T1.tblICItemLocation_intProductCodeId, T1.tblICItemLocation_intFuelTankId, T1.tblICItemLocation_strPassportFuelId1, T1.tblICItemLocation_strPassportFuelId2, T1.tblICItemLocation_strPassportFuelId3, T1.tblICItemLocation_ysnTaxFlag1, T1.tblICItemLocation_ysnTaxFlag2, T1.tblICItemLocation_ysnTaxFlag3, T1.tblICItemLocation_ysnTaxFlag4, T1.tblICItemLocation_ysnPromotionalItem, T1.tblICItemLocation_intMixMatchId, T1.tblICItemLocation_ysnDepositRequired, T1.tblICItemLocation_intBottleDepositNo, T1.tblICItemLocation_ysnSaleable, T1.tblICItemLocation_ysnQuantityRequired, T1.tblICItemLocation_ysnScaleItem, T1.tblICItemLocation_ysnFoodStampable, T1.tblICItemLocation_ysnReturnable, T1.tblICItemLocation_ysnPrePriced, T1.tblICItemLocation_ysnOpenPricePLU, T1.tblICItemLocation_ysnLinkedItem, T1.tblICItemLocation_strVendorCategory, T1.tblICItemLocation_ysnCountBySINo, T1.tblICItemLocation_strSerialNoBegin, T1.tblICItemLocation_strSerialNoEnd, T1.tblICItemLocation_ysnIdRequiredLiquor, T1.tblICItemLocation_ysnIdRequiredCigarette, T1.tblICItemLocation_intMinimumAge, T1.tblICItemLocation_ysnApplyBlueLaw1, T1.tblICItemLocation_ysnApplyBlueLaw2, T1.tblICItemLocation_intItemTypeCode, T1.tblICItemLocation_intItemTypeSubCode, T1.tblICItemLocation_ysnAutoCalculateFreight, T1.tblICItemLocation_intFreightMethodId, T1.tblICItemLocation_dblFreightRate, T1.tblICItemLocation_intShipViaId, T1.tblICItemLocation_intNegativeInventory, T1.tblICItemLocation_dblReorderPoint, T1.tblICItemLocation_dblMinOrder, T1.tblICItemLocation_dblSuggestedQty, T1.tblICItemLocation_dblLeadTime, T1.tblICItemLocation_strCounted, T1.tblICItemLocation_intCountGroupId, T1.tblICItemLocation_ysnCountedDaily, T1.tblICItemLocation_intSort, T1.tblICItemLocation_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICItemLocation](T1.tblICItemLocation_intItemLocationId, T1.tblICItemLocation_intItemId, T1.tblICItemLocation_intLocationId, T1.tblICItemLocation_intVendorId, T1.tblICItemLocation_strDescription, T1.tblICItemLocation_intCostingMethod, T1.tblICItemLocation_intAllowNegativeInventory, T1.tblICItemLocation_intSubLocationId, T1.tblICItemLocation_intStorageLocationId, T1.tblICItemLocation_intIssueUOMId, T1.tblICItemLocation_intReceiveUOMId, T1.tblICItemLocation_intFamilyId, T1.tblICItemLocation_intClassId, T1.tblICItemLocation_intProductCodeId, T1.tblICItemLocation_intFuelTankId, T1.tblICItemLocation_strPassportFuelId1, T1.tblICItemLocation_strPassportFuelId2, T1.tblICItemLocation_strPassportFuelId3, T1.tblICItemLocation_ysnTaxFlag1, T1.tblICItemLocation_ysnTaxFlag2, T1.tblICItemLocation_ysnTaxFlag3, T1.tblICItemLocation_ysnTaxFlag4, T1.tblICItemLocation_ysnPromotionalItem, T1.tblICItemLocation_intMixMatchId, T1.tblICItemLocation_ysnDepositRequired, T1.tblICItemLocation_intDepositPLUId, T1.tblICItemLocation_intBottleDepositNo, T1.tblICItemLocation_ysnSaleable, T1.tblICItemLocation_ysnQuantityRequired, T1.tblICItemLocation_ysnScaleItem, T1.tblICItemLocation_ysnFoodStampable, T1.tblICItemLocation_ysnReturnable, T1.tblICItemLocation_ysnPrePriced, T1.tblICItemLocation_ysnOpenPricePLU, T1.tblICItemLocation_ysnLinkedItem, T1.tblICItemLocation_strVendorCategory, T1.tblICItemLocation_ysnCountBySINo, T1.tblICItemLocation_strSerialNoBegin, T1.tblICItemLocation_strSerialNoEnd, T1.tblICItemLocation_ysnIdRequiredLiquor, T1.tblICItemLocation_ysnIdRequiredCigarette, T1.tblICItemLocation_intMinimumAge, T1.tblICItemLocation_ysnApplyBlueLaw1, T1.tblICItemLocation_ysnApplyBlueLaw2, T1.tblICItemLocation_ysnCarWash, T1.tblICItemLocation_intItemTypeCode, T1.tblICItemLocation_intItemTypeSubCode, T1.tblICItemLocation_ysnAutoCalculateFreight, T1.tblICItemLocation_intFreightMethodId, T1.tblICItemLocation_dblFreightRate, T1.tblICItemLocation_intShipViaId, T1.tblICItemLocation_intNegativeInventory, T1.tblICItemLocation_dblReorderPoint, T1.tblICItemLocation_dblMinOrder, T1.tblICItemLocation_dblSuggestedQty, T1.tblICItemLocation_dblLeadTime, T1.tblICItemLocation_strCounted, T1.tblICItemLocation_intCountGroupId, T1.tblICItemLocation_ysnCountedDaily, T1.tblICItemLocation_intSort, T1.tblICItemLocation_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemLocationId AS tblICItemLocation_intItemLocationId, 
@@ -2900,6 +2906,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnPromotionalItem AS tblICItemLocation_ysnPromotionalItem, 
             T.intMixMatchId AS tblICItemLocation_intMixMatchId, 
             T.ysnDepositRequired AS tblICItemLocation_ysnDepositRequired, 
+            T.intDepositPLUId AS tblICItemLocation_intDepositPLUId, 
             T.intBottleDepositNo AS tblICItemLocation_intBottleDepositNo, 
             T.ysnSaleable AS tblICItemLocation_ysnSaleable, 
             T.ysnQuantityRequired AS tblICItemLocation_ysnQuantityRequired, 
@@ -2918,6 +2925,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intMinimumAge AS tblICItemLocation_intMinimumAge, 
             T.ysnApplyBlueLaw1 AS tblICItemLocation_ysnApplyBlueLaw1, 
             T.ysnApplyBlueLaw2 AS tblICItemLocation_ysnApplyBlueLaw2, 
+            T.ysnCarWash AS tblICItemLocation_ysnCarWash, 
             T.intItemTypeCode AS tblICItemLocation_intItemTypeCode, 
             T.intItemTypeSubCode AS tblICItemLocation_intItemTypeSubCode, 
             T.ysnAutoCalculateFreight AS tblICItemLocation_ysnAutoCalculateFreight, 
@@ -4209,7 +4217,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItems
-        [iRely.Inventory.Model.tblICItem](T1.tblICItem_intItemId, T1.tblICItem_strItemNo, T1.tblICItem_strType, T1.tblICItem_strDescription, T1.tblICItem_intManufacturerId, T1.tblICItem_intBrandId, T1.tblICItem_intCategoryId, T1.tblICItem_strStatus, T1.tblICItem_strModelNo, T1.tblICItem_strInventoryTracking, T1.tblICItem_strLotTracking, T1.tblICItem_ysnRequireCustomerApproval, T1.tblICItem_intRecipeId, T1.tblICItem_ysnSanitationRequired, T1.tblICItem_intLifeTime, T1.tblICItem_strLifeTimeType, T1.tblICItem_intReceiveLife, T1.tblICItem_strGTIN, T1.tblICItem_strRotationType, T1.tblICItem_intNMFCId, T1.tblICItem_ysnStrictFIFO, T1.tblICItem_intDimensionUOMId, T1.tblICItem_dblHeight, T1.tblICItem_dblWidth, T1.tblICItem_dblDepth, T1.tblICItem_intWeightUOMId, T1.tblICItem_dblWeight, T1.tblICItem_intMaterialPackTypeId, T1.tblICItem_strMaterialSizeCode, T1.tblICItem_intInnerUnits, T1.tblICItem_intLayerPerPallet, T1.tblICItem_intUnitPerLayer, T1.tblICItem_dblStandardPalletRatio, T1.tblICItem_strMask1, T1.tblICItem_strMask2, T1.tblICItem_strMask3, T1.tblICItem_intPatronageCategoryId, T1.tblICItem_intFuelTaxClassId, T1.tblICItem_intTaxGroupId, T1.tblICItem_ysnStockedItem, T1.tblICItem_ysnDyedFuel, T1.tblICItem_strBarcodePrint, T1.tblICItem_ysnMSDSRequired, T1.tblICItem_strEPANumber, T1.tblICItem_ysnInboundTax, T1.tblICItem_ysnOutboundTax, T1.tblICItem_ysnRestrictedChemical, T1.tblICItem_ysnTankRequired, T1.tblICItem_ysnAvailableTM, T1.tblICItem_dblDefaultFull, T1.tblICItem_strFuelInspectFee, T1.tblICItem_strRINRequired, T1.tblICItem_intRINFuelTypeId, T1.tblICItem_dblDenaturantPercent, T1.tblICItem_ysnTonnageTax, T1.tblICItem_ysnLoadTracking, T1.tblICItem_dblMixOrder, T1.tblICItem_ysnHandAddIngredient, T1.tblICItem_intMedicationTag, T1.tblICItem_intIngredientTag, T1.tblICItem_strVolumeRebateGroup, T1.tblICItem_intPhysicalItem, T1.tblICItem_ysnExtendPickTicket, T1.tblICItem_ysnExportEDI, T1.tblICItem_ysnHazardMaterial, T1.tblICItem_ysnMaterialFee, T1.tblICItem_ysnAutoBlend, T1.tblICItem_dblUserGroupFee, T1.tblICItem_strNACSCategory, T1.tblICItem_strWICCode, T1.tblICItem_intAGCategory, T1.tblICItem_ysnReceiptCommentRequired, T1.tblICItem_strCountCode, T1.tblICItem_ysnLandedCost, T1.tblICItem_strLeadTime, T1.tblICItem_ysnTaxable, T1.tblICItem_strKeywords, T1.tblICItem_dblCaseQty, T1.tblICItem_dtmDateShip, T1.tblICItem_dblTaxExempt, T1.tblICItem_ysnDropShip, T1.tblICItem_ysnCommisionable, T1.tblICItem_ysnSpecialCommission, T1.tblICItem_intCommodityId, T1.tblICItem_intCommodityHierarchyId, T1.tblICItem_dblGAShrinkFactor, T1.tblICItem_intOriginId, T1.tblICItem_intProductTypeId, T1.tblICItem_intRegionId, T1.tblICItem_intSeasonId, T1.tblICItem_intClassVarietyId, T1.tblICItem_intProductLineId, T1.tblICItem_strMarketValuation, T1.tblICItem_intConcurrencyId)
+        [iRely.Inventory.Model.tblICItem](T1.tblICItem_intItemId, T1.tblICItem_strItemNo, T1.tblICItem_strType, T1.tblICItem_strDescription, T1.tblICItem_intManufacturerId, T1.tblICItem_intBrandId, T1.tblICItem_intCategoryId, T1.tblICItem_strStatus, T1.tblICItem_strModelNo, T1.tblICItem_strInventoryTracking, T1.tblICItem_strLotTracking, T1.tblICItem_ysnRequireCustomerApproval, T1.tblICItem_intRecipeId, T1.tblICItem_ysnSanitationRequired, T1.tblICItem_intLifeTime, T1.tblICItem_strLifeTimeType, T1.tblICItem_intReceiveLife, T1.tblICItem_strGTIN, T1.tblICItem_strRotationType, T1.tblICItem_intNMFCId, T1.tblICItem_ysnStrictFIFO, T1.tblICItem_intDimensionUOMId, T1.tblICItem_dblHeight, T1.tblICItem_dblWidth, T1.tblICItem_dblDepth, T1.tblICItem_intWeightUOMId, T1.tblICItem_dblWeight, T1.tblICItem_intMaterialPackTypeId, T1.tblICItem_strMaterialSizeCode, T1.tblICItem_intInnerUnits, T1.tblICItem_intLayerPerPallet, T1.tblICItem_intUnitPerLayer, T1.tblICItem_dblStandardPalletRatio, T1.tblICItem_strMask1, T1.tblICItem_strMask2, T1.tblICItem_strMask3, T1.tblICItem_intPatronageCategoryId, T1.tblICItem_intFuelTaxClassId, T1.tblICItem_intSalesTaxGroupId, T1.tblICItem_intPurchaseTaxGroupId, T1.tblICItem_ysnStockedItem, T1.tblICItem_ysnDyedFuel, T1.tblICItem_strBarcodePrint, T1.tblICItem_ysnMSDSRequired, T1.tblICItem_strEPANumber, T1.tblICItem_ysnInboundTax, T1.tblICItem_ysnOutboundTax, T1.tblICItem_ysnRestrictedChemical, T1.tblICItem_ysnFuelItem, T1.tblICItem_ysnTankRequired, T1.tblICItem_ysnAvailableTM, T1.tblICItem_dblDefaultFull, T1.tblICItem_strFuelInspectFee, T1.tblICItem_strRINRequired, T1.tblICItem_intRINFuelTypeId, T1.tblICItem_dblDenaturantPercent, T1.tblICItem_ysnTonnageTax, T1.tblICItem_ysnLoadTracking, T1.tblICItem_dblMixOrder, T1.tblICItem_ysnHandAddIngredient, T1.tblICItem_intMedicationTag, T1.tblICItem_intIngredientTag, T1.tblICItem_strVolumeRebateGroup, T1.tblICItem_intPhysicalItem, T1.tblICItem_ysnExtendPickTicket, T1.tblICItem_ysnExportEDI, T1.tblICItem_ysnHazardMaterial, T1.tblICItem_ysnMaterialFee, T1.tblICItem_ysnAutoBlend, T1.tblICItem_dblUserGroupFee, T1.tblICItem_dblWeightTolerance, T1.tblICItem_dblOverReceiveTolerance, T1.tblICItem_strMaintenanceCalculationMethod, T1.tblICItem_dblMaintenanceRate, T1.tblICItem_strNACSCategory, T1.tblICItem_strWICCode, T1.tblICItem_intAGCategory, T1.tblICItem_ysnReceiptCommentRequired, T1.tblICItem_strCountCode, T1.tblICItem_ysnLandedCost, T1.tblICItem_strLeadTime, T1.tblICItem_ysnTaxable, T1.tblICItem_strKeywords, T1.tblICItem_dblCaseQty, T1.tblICItem_dtmDateShip, T1.tblICItem_dblTaxExempt, T1.tblICItem_ysnDropShip, T1.tblICItem_ysnCommisionable, T1.tblICItem_ysnSpecialCommission, T1.tblICItem_intCommodityId, T1.tblICItem_intCommodityHierarchyId, T1.tblICItem_dblGAShrinkFactor, T1.tblICItem_intOriginId, T1.tblICItem_intProductTypeId, T1.tblICItem_intRegionId, T1.tblICItem_intSeasonId, T1.tblICItem_intClassVarietyId, T1.tblICItem_intProductLineId, T1.tblICItem_strMarketValuation, T1.tblICItem_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemId AS tblICItem_intItemId, 
@@ -4250,7 +4258,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.strMask3 AS tblICItem_strMask3, 
             T.intPatronageCategoryId AS tblICItem_intPatronageCategoryId, 
             T.intFuelTaxClassId AS tblICItem_intFuelTaxClassId, 
-            T.intTaxGroupId AS tblICItem_intTaxGroupId, 
+            T.intSalesTaxGroupId AS tblICItem_intSalesTaxGroupId, 
+            T.intPurchaseTaxGroupId AS tblICItem_intPurchaseTaxGroupId, 
             T.ysnStockedItem AS tblICItem_ysnStockedItem, 
             T.ysnDyedFuel AS tblICItem_ysnDyedFuel, 
             T.strBarcodePrint AS tblICItem_strBarcodePrint, 
@@ -4259,6 +4268,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnInboundTax AS tblICItem_ysnInboundTax, 
             T.ysnOutboundTax AS tblICItem_ysnOutboundTax, 
             T.ysnRestrictedChemical AS tblICItem_ysnRestrictedChemical, 
+            T.ysnFuelItem AS tblICItem_ysnFuelItem, 
             T.ysnTankRequired AS tblICItem_ysnTankRequired, 
             T.ysnAvailableTM AS tblICItem_ysnAvailableTM, 
             T.dblDefaultFull AS tblICItem_dblDefaultFull, 
@@ -4280,6 +4290,10 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnMaterialFee AS tblICItem_ysnMaterialFee, 
             T.ysnAutoBlend AS tblICItem_ysnAutoBlend, 
             T.dblUserGroupFee AS tblICItem_dblUserGroupFee, 
+            T.dblWeightTolerance AS tblICItem_dblWeightTolerance, 
+            T.dblOverReceiveTolerance AS tblICItem_dblOverReceiveTolerance, 
+            T.strMaintenanceCalculationMethod AS tblICItem_strMaintenanceCalculationMethod, 
+            T.dblMaintenanceRate AS tblICItem_dblMaintenanceRate, 
             T.strNACSCategory AS tblICItem_strNACSCategory, 
             T.strWICCode AS tblICItem_strWICCode, 
             T.intAGCategory AS tblICItem_intAGCategory, 
@@ -5741,7 +5755,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemLocations
-        [iRely.Inventory.Model.tblICItemLocation](T1.tblICItemLocation_intItemLocationId, T1.tblICItemLocation_intItemId, T1.tblICItemLocation_intLocationId, T1.tblICItemLocation_intVendorId, T1.tblICItemLocation_strDescription, T1.tblICItemLocation_intCostingMethod, T1.tblICItemLocation_intAllowNegativeInventory, T1.tblICItemLocation_intSubLocationId, T1.tblICItemLocation_intStorageLocationId, T1.tblICItemLocation_intIssueUOMId, T1.tblICItemLocation_intReceiveUOMId, T1.tblICItemLocation_intFamilyId, T1.tblICItemLocation_intClassId, T1.tblICItemLocation_intProductCodeId, T1.tblICItemLocation_intFuelTankId, T1.tblICItemLocation_strPassportFuelId1, T1.tblICItemLocation_strPassportFuelId2, T1.tblICItemLocation_strPassportFuelId3, T1.tblICItemLocation_ysnTaxFlag1, T1.tblICItemLocation_ysnTaxFlag2, T1.tblICItemLocation_ysnTaxFlag3, T1.tblICItemLocation_ysnTaxFlag4, T1.tblICItemLocation_ysnPromotionalItem, T1.tblICItemLocation_intMixMatchId, T1.tblICItemLocation_ysnDepositRequired, T1.tblICItemLocation_intBottleDepositNo, T1.tblICItemLocation_ysnSaleable, T1.tblICItemLocation_ysnQuantityRequired, T1.tblICItemLocation_ysnScaleItem, T1.tblICItemLocation_ysnFoodStampable, T1.tblICItemLocation_ysnReturnable, T1.tblICItemLocation_ysnPrePriced, T1.tblICItemLocation_ysnOpenPricePLU, T1.tblICItemLocation_ysnLinkedItem, T1.tblICItemLocation_strVendorCategory, T1.tblICItemLocation_ysnCountBySINo, T1.tblICItemLocation_strSerialNoBegin, T1.tblICItemLocation_strSerialNoEnd, T1.tblICItemLocation_ysnIdRequiredLiquor, T1.tblICItemLocation_ysnIdRequiredCigarette, T1.tblICItemLocation_intMinimumAge, T1.tblICItemLocation_ysnApplyBlueLaw1, T1.tblICItemLocation_ysnApplyBlueLaw2, T1.tblICItemLocation_intItemTypeCode, T1.tblICItemLocation_intItemTypeSubCode, T1.tblICItemLocation_ysnAutoCalculateFreight, T1.tblICItemLocation_intFreightMethodId, T1.tblICItemLocation_dblFreightRate, T1.tblICItemLocation_intShipViaId, T1.tblICItemLocation_intNegativeInventory, T1.tblICItemLocation_dblReorderPoint, T1.tblICItemLocation_dblMinOrder, T1.tblICItemLocation_dblSuggestedQty, T1.tblICItemLocation_dblLeadTime, T1.tblICItemLocation_strCounted, T1.tblICItemLocation_intCountGroupId, T1.tblICItemLocation_ysnCountedDaily, T1.tblICItemLocation_intSort, T1.tblICItemLocation_intConcurrencyId)
+        [iRely.Inventory.Model.tblICItemLocation](T1.tblICItemLocation_intItemLocationId, T1.tblICItemLocation_intItemId, T1.tblICItemLocation_intLocationId, T1.tblICItemLocation_intVendorId, T1.tblICItemLocation_strDescription, T1.tblICItemLocation_intCostingMethod, T1.tblICItemLocation_intAllowNegativeInventory, T1.tblICItemLocation_intSubLocationId, T1.tblICItemLocation_intStorageLocationId, T1.tblICItemLocation_intIssueUOMId, T1.tblICItemLocation_intReceiveUOMId, T1.tblICItemLocation_intFamilyId, T1.tblICItemLocation_intClassId, T1.tblICItemLocation_intProductCodeId, T1.tblICItemLocation_intFuelTankId, T1.tblICItemLocation_strPassportFuelId1, T1.tblICItemLocation_strPassportFuelId2, T1.tblICItemLocation_strPassportFuelId3, T1.tblICItemLocation_ysnTaxFlag1, T1.tblICItemLocation_ysnTaxFlag2, T1.tblICItemLocation_ysnTaxFlag3, T1.tblICItemLocation_ysnTaxFlag4, T1.tblICItemLocation_ysnPromotionalItem, T1.tblICItemLocation_intMixMatchId, T1.tblICItemLocation_ysnDepositRequired, T1.tblICItemLocation_intDepositPLUId, T1.tblICItemLocation_intBottleDepositNo, T1.tblICItemLocation_ysnSaleable, T1.tblICItemLocation_ysnQuantityRequired, T1.tblICItemLocation_ysnScaleItem, T1.tblICItemLocation_ysnFoodStampable, T1.tblICItemLocation_ysnReturnable, T1.tblICItemLocation_ysnPrePriced, T1.tblICItemLocation_ysnOpenPricePLU, T1.tblICItemLocation_ysnLinkedItem, T1.tblICItemLocation_strVendorCategory, T1.tblICItemLocation_ysnCountBySINo, T1.tblICItemLocation_strSerialNoBegin, T1.tblICItemLocation_strSerialNoEnd, T1.tblICItemLocation_ysnIdRequiredLiquor, T1.tblICItemLocation_ysnIdRequiredCigarette, T1.tblICItemLocation_intMinimumAge, T1.tblICItemLocation_ysnApplyBlueLaw1, T1.tblICItemLocation_ysnApplyBlueLaw2, T1.tblICItemLocation_ysnCarWash, T1.tblICItemLocation_intItemTypeCode, T1.tblICItemLocation_intItemTypeSubCode, T1.tblICItemLocation_ysnAutoCalculateFreight, T1.tblICItemLocation_intFreightMethodId, T1.tblICItemLocation_dblFreightRate, T1.tblICItemLocation_intShipViaId, T1.tblICItemLocation_intNegativeInventory, T1.tblICItemLocation_dblReorderPoint, T1.tblICItemLocation_dblMinOrder, T1.tblICItemLocation_dblSuggestedQty, T1.tblICItemLocation_dblLeadTime, T1.tblICItemLocation_strCounted, T1.tblICItemLocation_intCountGroupId, T1.tblICItemLocation_ysnCountedDaily, T1.tblICItemLocation_intSort, T1.tblICItemLocation_intConcurrencyId)
     FROM (
         SELECT 
             T.intItemLocationId AS tblICItemLocation_intItemLocationId, 
@@ -5769,6 +5783,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.ysnPromotionalItem AS tblICItemLocation_ysnPromotionalItem, 
             T.intMixMatchId AS tblICItemLocation_intMixMatchId, 
             T.ysnDepositRequired AS tblICItemLocation_ysnDepositRequired, 
+            T.intDepositPLUId AS tblICItemLocation_intDepositPLUId, 
             T.intBottleDepositNo AS tblICItemLocation_intBottleDepositNo, 
             T.ysnSaleable AS tblICItemLocation_ysnSaleable, 
             T.ysnQuantityRequired AS tblICItemLocation_ysnQuantityRequired, 
@@ -5787,6 +5802,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intMinimumAge AS tblICItemLocation_intMinimumAge, 
             T.ysnApplyBlueLaw1 AS tblICItemLocation_ysnApplyBlueLaw1, 
             T.ysnApplyBlueLaw2 AS tblICItemLocation_ysnApplyBlueLaw2, 
+            T.ysnCarWash AS tblICItemLocation_ysnCarWash, 
             T.intItemTypeCode AS tblICItemLocation_intItemTypeCode, 
             T.intItemTypeSubCode AS tblICItemLocation_intItemTypeSubCode, 
             T.ysnAutoCalculateFreight AS tblICItemLocation_ysnAutoCalculateFreight, 

@@ -10,14 +10,14 @@
         "defaultFocus": null,
         "designer|userAlias": "icitemlocation",
         "designer|userClassName": "ItemLocation",
-        "height": 680,
+        "height": 700,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "layout": "fit",
-        "maxHeight": 680,
+        "maxHeight": 700,
         "maximizable": null,
-        "minHeight": 680,
+        "minHeight": 700,
         "minWidth": 995,
         "minimizable": null,
         "reference": null,
@@ -1140,6 +1140,63 @@
                                                     "designerId": "aa7c26ae-2eac-44f7-8066-d9470320b776"
                                                 },
                                                 {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intPromoSalesListId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Promo Sales Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intPromoCode',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Promo Code',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strPromoType',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Promo Type',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strDescription',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Description',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "intPromoCode",
+                                                        "fieldLabel": "Deposit PLU",
+                                                        "itemId": "cboDepositPLU",
+                                                        "labelWidth": 105,
+                                                        "layout|flex": null,
+                                                        "valueField": "intPromoSalesListId"
+                                                    },
+                                                    "name": "MyComboBox72",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "29a655fa-c929-4d95-be6e-035c07f4ab81",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
                                                     "type": "Ext.form.field.Text",
                                                     "reference": {
                                                         "name": "items",
@@ -1412,6 +1469,23 @@
                                                     },
                                                     "name": "MyCheckbox38",
                                                     "designerId": "591898f4-38c0-4662-8c7b-3317a5240044"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Car Wash",
+                                                        "itemId": "chkCarWash",
+                                                        "labelWidth": 140,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyCheckbox43",
+                                                    "designerId": "4ea42d24-f48f-4e96-a44d-8509f465e6b8"
                                                 },
                                                 {
                                                     "type": "Ext.form.field.ComboBox",
@@ -1910,7 +1984,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging118",
+                    "name": "statusbarpaging12",
                     "designerId": "3812557b-eaf0-4f41-b444-7da5890f9c89",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

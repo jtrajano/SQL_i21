@@ -104,6 +104,7 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                 store: '{mixMatchCode}'
             },
             chkDepositRequired: '{current.ysnDepositRequired}',
+            cboDepositPLU: '{current.intDepositPLUId}',
             txtBottleDepositNo: '{current.intBottleDepositNo}',
             chkSaleable: '{current.ysnSaleable}',
             chkQuantityRequired: '{current.ysnQuantityRequired}',
@@ -122,6 +123,7 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             txtMinimumAge: '{current.intMinimumAge}',
             chkApplyBlueLaw1: '{current.ysnApplyBlueLaw1}',
             chkApplyBlueLaw2: '{current.ysnApplyBlueLaw2}',
+            chkCarWash: '{current.ysnCarWash}',
 //            cboItemTypeCode: '{current.intItemTypeCode}',
 //            txtItemTypeSubcode: '{current.intItemTypeSubCode}',
             chkAutoCalculateFreight: '{current.ysnAutoCalculateFreight}',

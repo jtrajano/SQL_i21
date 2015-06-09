@@ -11,13 +11,13 @@
         "designer|initialView": true,
         "designer|userAlias": "icitem",
         "designer|userClassName": "Item",
-        "height": 650,
+        "height": 700,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "layout": "fit",
         "maximizable": true,
-        "minHeight": 650,
+        "minHeight": 700,
         "minWidth": 950,
         "minimizable": null,
         "mixins": null,
@@ -2388,8 +2388,8 @@
                                                                 ],
                                                                 "designer|createAlias": "gridcombobox",
                                                                 "displayField": "strTaxGroupMaster",
-                                                                "fieldLabel": "Tax Group",
-                                                                "itemId": "cboTaxGroup",
+                                                                "fieldLabel": "Sales Tax Group",
+                                                                "itemId": "cboSalesTaxGroup",
                                                                 "labelWidth": 116,
                                                                 "layout|flex": null,
                                                                 "valueField": "intTaxGroupMasterId"
@@ -2399,6 +2399,64 @@
                                                                 "columns": "array"
                                                             },
                                                             "designerId": "1db1e69f-e866-437e-acaa-e0f128a801cb",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intTaxGroupMasterId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Tax Group Master Id',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strTaxGroupMaster',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Tax Group Master',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strDescription',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Description',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\txtype: 'checkcolumn',",
+                                                                    "\t\tdataIndex: 'ysnSeparateOnInvoice',",
+                                                                    "\t\tdataType: 'boolean',",
+                                                                    "\t\ttext: 'Separate on Invoice',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strTaxGroupMaster",
+                                                                "fieldLabel": "Purchase Tax Group",
+                                                                "itemId": "cboPurchaseTaxGroup",
+                                                                "labelWidth": 116,
+                                                                "layout|flex": null,
+                                                                "valueField": "intTaxGroupMasterId"
+                                                            },
+                                                            "name": "MyComboBox27",
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "dbd59a20-eaa6-4289-98e0-5370fc938ce4",
                                                             "customConfigs": [
                                                                 {
                                                                     "group": "(Custom Properties)",
@@ -2544,6 +2602,23 @@
                                                             "designerId": "768ad6ad-271d-43d8-8e6a-7e3f9b9c3738"
                                                         },
                                                         {
+                                                            "type": "Ext.form.field.Checkbox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "boxLabel": null,
+                                                                "fieldLabel": "Fuel Item",
+                                                                "itemId": "chkFuelItem",
+                                                                "labelWidth": 116,
+                                                                "layout|flex": null
+                                                            },
+                                                            "name": "MyCheckbox32",
+                                                            "designerId": "e2e85845-40af-4f98-a5c0-86a444f2a9f1"
+                                                        },
+                                                        {
                                                             "type": "Ext.panel.Panel",
                                                             "reference": {
                                                                 "name": "items",
@@ -2596,13 +2671,14 @@
                                                                     "designerId": "0258b273-bd2c-4db7-8869-9da3d1cf826d"
                                                                 },
                                                                 {
-                                                                    "type": "Ext.form.field.Text",
+                                                                    "type": "Ext.form.field.Number",
                                                                     "reference": {
                                                                         "name": "items",
                                                                         "type": "array"
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
+                                                                        "designer|createAlias": "numericfield",
                                                                         "fieldLabel": "Default % Full",
                                                                         "fieldStyle": "text-align:right",
                                                                         "hideTrigger": true,
@@ -2610,7 +2686,7 @@
                                                                         "labelWidth": 110,
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "MyTextField3",
+                                                                    "name": "MyNumberField12",
                                                                     "designerId": "b256e5c4-0313-42e2-9da1-160a1c127369"
                                                                 }
                                                             ]
@@ -2741,13 +2817,14 @@
                                                                     ]
                                                                 },
                                                                 {
-                                                                    "type": "Ext.form.field.Text",
+                                                                    "type": "Ext.form.field.Number",
                                                                     "reference": {
                                                                         "name": "items",
                                                                         "type": "array"
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
+                                                                        "designer|createAlias": "numericfield",
                                                                         "fieldLabel": "% Denaturant",
                                                                         "fieldStyle": "text-align:right",
                                                                         "hideTrigger": true,
@@ -2755,7 +2832,7 @@
                                                                         "labelWidth": 125,
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "MyTextField4",
+                                                                    "name": "MyNumberField13",
                                                                     "designerId": "8b01a6c8-6079-4fbc-b1f0-53bbd5886971"
                                                                 }
                                                             ]
@@ -3137,7 +3214,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "designer|createAlias": "numeric",
+                                                                "designer|createAlias": "numericfield",
                                                                 "fieldLabel": "User Group Fee %",
                                                                 "itemId": "txtUserGroupFee",
                                                                 "labelWidth": 125,
@@ -3145,6 +3222,96 @@
                                                             },
                                                             "name": "MyNumberField59",
                                                             "designerId": "35d9d7bb-6bfe-475b-afff-0ad27420f0c8"
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.Number",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "designer|createAlias": "numericfield",
+                                                                "fieldLabel": "Wgt Tolerance %",
+                                                                "itemId": "txtWgtTolerance",
+                                                                "labelWidth": 125,
+                                                                "layout|flex": null
+                                                            },
+                                                            "name": "MyNumberField38",
+                                                            "designerId": "f9ebae81-0f10-4c8b-9d88-7083f213248a"
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.Number",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "designer|createAlias": "numericfield",
+                                                                "fieldLabel": "Over Receive Tolerance %",
+                                                                "itemId": "txtOverReceiveTolerance",
+                                                                "labelWidth": 125,
+                                                                "layout|flex": null
+                                                            },
+                                                            "name": "MyNumberField39",
+                                                            "designerId": "1db40b78-08ea-4ec3-8e11-b48a823450fc"
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "    {",
+                                                                    "        dataIndex: 'strDescription',",
+                                                                    "        dataType: 'string',",
+                                                                    "        text: 'Calculation Method',",
+                                                                    "        flex: 1",
+                                                                    "    }",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strDescription",
+                                                                "fieldLabel": "Maintenance Calculation Method",
+                                                                "itemId": "txtMaintenanceCalculationMethod",
+                                                                "labelWidth": 125,
+                                                                "layout|flex": null,
+                                                                "valueField": "strDescription"
+                                                            },
+                                                            "name": "MyComboBox71",
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "c3c5d9c4-dd0b-4fc4-ba1a-44828c39cf26",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.Number",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "designer|createAlias": "numericfield",
+                                                                "fieldLabel": "Rate",
+                                                                "itemId": "txtMaintenanceRate",
+                                                                "labelWidth": 125,
+                                                                "layout|flex": null
+                                                            },
+                                                            "name": "MyNumberField50",
+                                                            "designerId": "e4449984-1f15-41d6-a681-aa8cea1da768"
                                                         }
                                                     ]
                                                 }

@@ -220,9 +220,13 @@ Ext.define('Inventory.view.ItemViewController', {
                 value: '{current.intFuelTaxClassId}',
                 store: '{taxClass}'
             },
-            cboTaxGroup: {
-                value: '{current.intTaxGroupId}',
-                store: '{taxGroup}'
+            cboSalesTaxGroup: {
+                value: '{current.intSalesTaxGroupId}',
+                store: '{salesTaxGroup}'
+            },
+            cboPurchaseTaxGroup: {
+                value: '{current.intPurchaseTaxGroupId}',
+                store: '{purchaseTaxGroup}'
             },
             chkStockedItem: '{current.ysnStockedItem}',
             chkDyedFuel: '{current.ysnDyedFuel}',
@@ -235,6 +239,7 @@ Ext.define('Inventory.view.ItemViewController', {
             chkInboundTax: '{current.ysnInboundTax}',
             chkOutboundTax: '{current.ysnOutboundTax}',
             chkRestrictedChemical: '{current.ysnRestrictedChemical}',
+            chkFuelItem: '{current.ysnFuelItem}',
             chkTankRequired: '{current.ysnTankRequired}',
             chkAvailableForTm: '{current.ysnAvailableTM}',
             txtDefaultPercentFull: '{current.dblDefaultFull}',
@@ -274,6 +279,13 @@ Ext.define('Inventory.view.ItemViewController', {
             chkMaterialFee: '{current.ysnMaterialFee}',
             chkAutoBlend: '{current.ysnAutoBlend}',
             txtUserGroupFee: '{current.dblUserGroupFee}',
+            txtWgtTolerance: '{current.dblWeightTolerance}',
+            txtOverReceiveTolerance: '{current.dblOverReceiveTolerance}',
+            txtMaintenanceCalculationMethod: {
+                value: '{current.strMaintenanceCalculationMethod}',
+                store: '{maintenancaCalculationMethods}'
+            },
+            txtMaintenanceRate: '{current.dblMaintenanceRate}',
 
             //-------//
             //POS Tab//

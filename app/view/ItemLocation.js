@@ -28,10 +28,10 @@ Ext.define('Inventory.view.ItemLocation', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 680,
+    height: 700,
     hidden: false,
-    maxHeight: 680,
-    minHeight: 680,
+    maxHeight: 700,
+    minHeight: 700,
     minWidth: 995,
     width: 995,
     layout: 'fit',
@@ -631,6 +631,40 @@ Ext.define('Inventory.view.ItemLocation', {
                                                     labelWidth: 105
                                                 },
                                                 {
+                                                    xtype: 'gridcombobox',
+                                                    columns: [
+                                                        {
+                                                            dataIndex: 'intPromoSalesListId',
+                                                            dataType: 'numeric',
+                                                            text: 'Promo Sales Id',
+                                                            hidden: true
+                                                        },
+                                                        {
+                                                            dataIndex: 'intPromoCode',
+                                                            dataType: 'numeric',
+                                                            text: 'Promo Code',
+                                                            flex: 1
+                                                        },
+                                                        {
+                                                            dataIndex: 'strPromoType',
+                                                            dataType: 'string',
+                                                            text: 'Promo Type',
+                                                            flex: 1
+                                                        },
+                                                        {
+                                                            dataIndex: 'strDescription',
+                                                            dataType: 'string',
+                                                            text: 'Description',
+                                                            flex: 1
+                                                        }
+                                                    ],
+                                                    itemId: 'cboDepositPLU',
+                                                    fieldLabel: 'Deposit PLU',
+                                                    labelWidth: 105,
+                                                    displayField: 'intPromoCode',
+                                                    valueField: 'intPromoSalesListId'
+                                                },
+                                                {
                                                     xtype: 'textfield',
                                                     itemId: 'txtBottleDepositNo',
                                                     fieldLabel: 'Bottle Deposit No',
@@ -731,6 +765,12 @@ Ext.define('Inventory.view.ItemLocation', {
                                                     xtype: 'checkboxfield',
                                                     itemId: 'chkApplyBlueLaw2',
                                                     fieldLabel: 'Apply Blue Law 2',
+                                                    labelWidth: 140
+                                                },
+                                                {
+                                                    xtype: 'checkboxfield',
+                                                    itemId: 'chkCarWash',
+                                                    fieldLabel: 'Car Wash',
                                                     labelWidth: 140
                                                 },
                                                 {

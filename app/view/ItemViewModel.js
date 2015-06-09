@@ -190,7 +190,10 @@ Ext.define('Inventory.view.ItemViewModel', {
         taxClass: {
             type: 'icbufferedfueltaxclass'
         },
-        taxGroup: {
+        salesTaxGroup: {
+            type: 'smtaxgroupmasterbuffered'
+        },
+        purchaseTaxGroup: {
             type: 'smtaxgroupmasterbuffered'
         },
         barcodePrints: {
@@ -261,6 +264,22 @@ Ext.define('Inventory.view.ItemViewModel', {
         },
         physicalItem: {
             type: 'icbufferedcompactitem'
+        },
+        maintenancaCalculationMethods: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Percentage'
+                },
+                {
+                    strDescription: 'Fixed'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
         },
 
 

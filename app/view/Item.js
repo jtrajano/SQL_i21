@@ -39,9 +39,9 @@ Ext.define('Inventory.view.Item', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 650,
+    height: 700,
     hidden: false,
-    minHeight: 650,
+    minHeight: 700,
     minWidth: 950,
     width: 950,
     layout: 'fit',
@@ -1159,8 +1159,43 @@ Ext.define('Inventory.view.Item', {
                                                                                 flex: 1
                                                                             }
                                                                         ],
-                                                                        itemId: 'cboTaxGroup',
-                                                                        fieldLabel: 'Tax Group',
+                                                                        itemId: 'cboSalesTaxGroup',
+                                                                        fieldLabel: 'Sales Tax Group',
+                                                                        labelWidth: 116,
+                                                                        displayField: 'strTaxGroupMaster',
+                                                                        valueField: 'intTaxGroupMasterId'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intTaxGroupMasterId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Tax Group Master Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strTaxGroupMaster',
+                                                                                dataType: 'string',
+                                                                                text: 'Tax Group Master',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                xtype: 'checkcolumn',
+                                                                                dataIndex: 'ysnSeparateOnInvoice',
+                                                                                dataType: 'boolean',
+                                                                                text: 'Separate on Invoice',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboPurchaseTaxGroup',
+                                                                        fieldLabel: 'Purchase Tax Group',
                                                                         labelWidth: 116,
                                                                         displayField: 'strTaxGroupMaster',
                                                                         valueField: 'intTaxGroupMasterId'
@@ -1216,6 +1251,12 @@ Ext.define('Inventory.view.Item', {
                                                                         labelWidth: 116
                                                                     },
                                                                     {
+                                                                        xtype: 'checkboxfield',
+                                                                        itemId: 'chkFuelItem',
+                                                                        fieldLabel: 'Fuel Item',
+                                                                        labelWidth: 116
+                                                                    },
+                                                                    {
                                                                         xtype: 'panel',
                                                                         flex: 1,
                                                                         itemId: 'pnlTankManagment',
@@ -1239,7 +1280,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 labelWidth: 110
                                                                             },
                                                                             {
-                                                                                xtype: 'textfield',
+                                                                                xtype: 'numericfield',
                                                                                 itemId: 'txtDefaultPercentFull',
                                                                                 fieldLabel: 'Default % Full',
                                                                                 labelWidth: 110,
@@ -1314,7 +1355,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 valueField: 'intRinFuelCategoryId'
                                                                             },
                                                                             {
-                                                                                xtype: 'textfield',
+                                                                                xtype: 'numericfield',
                                                                                 itemId: 'txtPercentDenaturant',
                                                                                 fieldLabel: '% Denaturant',
                                                                                 labelWidth: 125,
@@ -1500,9 +1541,43 @@ Ext.define('Inventory.view.Item', {
                                                                         labelWidth: 125
                                                                     },
                                                                     {
-                                                                        xtype: 'numeric',
+                                                                        xtype: 'numericfield',
                                                                         itemId: 'txtUserGroupFee',
                                                                         fieldLabel: 'User Group Fee %',
+                                                                        labelWidth: 125
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numericfield',
+                                                                        itemId: 'txtWgtTolerance',
+                                                                        fieldLabel: 'Wgt Tolerance %',
+                                                                        labelWidth: 125
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numericfield',
+                                                                        itemId: 'txtOverReceiveTolerance',
+                                                                        fieldLabel: 'Over Receive Tolerance %',
+                                                                        labelWidth: 125
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Calculation Method',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'txtMaintenanceCalculationMethod',
+                                                                        fieldLabel: 'Maintenance Calculation Method',
+                                                                        labelWidth: 125,
+                                                                        displayField: 'strDescription',
+                                                                        valueField: 'strDescription'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numericfield',
+                                                                        itemId: 'txtMaintenanceRate',
+                                                                        fieldLabel: 'Rate',
                                                                         labelWidth: 125
                                                                     }
                                                                 ]

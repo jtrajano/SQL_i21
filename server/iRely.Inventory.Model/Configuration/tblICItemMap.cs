@@ -50,6 +50,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strMask3).HasColumnName("strMask3");
             this.Property(t => t.intPatronageCategoryId).HasColumnName("intPatronageCategoryId");
             this.Property(t => t.intFuelTaxClassId).HasColumnName("intFuelTaxClassId");
+            this.Property(t => t.intSalesTaxGroupId).HasColumnName("intSalesTaxGroupId");
+            this.Property(t => t.intPurchaseTaxGroupId).HasColumnName("intPurchaseTaxGroupId");
             this.Property(t => t.ysnStockedItem).HasColumnName("ysnStockedItem");
             this.Property(t => t.ysnDyedFuel).HasColumnName("ysnDyedFuel");
             this.Property(t => t.strBarcodePrint).HasColumnName("strBarcodePrint");
@@ -58,6 +60,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnInboundTax).HasColumnName("ysnInboundTax");
             this.Property(t => t.ysnOutboundTax).HasColumnName("ysnOutboundTax");
             this.Property(t => t.ysnRestrictedChemical).HasColumnName("ysnRestrictedChemical");
+            this.Property(t => t.ysnFuelItem).HasColumnName("ysnFuelItem");
             this.Property(t => t.ysnTankRequired).HasColumnName("ysnTankRequired");
             this.Property(t => t.ysnAvailableTM).HasColumnName("ysnAvailableTM");
             this.Property(t => t.dblDefaultFull).HasColumnName("dblDefaultFull").HasPrecision(18, 6);
@@ -78,7 +81,11 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnHazardMaterial).HasColumnName("ysnHazardMaterial");
             this.Property(t => t.ysnMaterialFee).HasColumnName("ysnMaterialFee");
             this.Property(t => t.ysnAutoBlend).HasColumnName("ysnAutoBlend");
-            this.Property(t => t.dblUserGroupFee).HasColumnName("dblUserGroupFee");
+            this.Property(t => t.dblUserGroupFee).HasColumnName("dblUserGroupFee").HasPrecision(18, 6);
+            this.Property(t => t.dblWeightTolerance).HasColumnName("dblWeightTolerance").HasPrecision(18, 6);
+            this.Property(t => t.dblOverReceiveTolerance).HasColumnName("dblOverReceiveTolerance").HasPrecision(18, 6);
+            this.Property(t => t.strMaintenanceCalculationMethod).HasColumnName("strMaintenanceCalculationMethod");
+            this.Property(t => t.dblMaintenanceRate).HasColumnName("dblMaintenanceRate").HasPrecision(18, 6);
             this.Property(t => t.strNACSCategory).HasColumnName("strNACSCategory");
             this.Property(t => t.strWICCode).HasColumnName("strWICCode");
             this.Property(t => t.intAGCategory).HasColumnName("intAGCategory");
