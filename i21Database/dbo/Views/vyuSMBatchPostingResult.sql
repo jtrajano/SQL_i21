@@ -13,5 +13,11 @@ FROM
 (
 	SELECT intResult as intResultId, strBatchId, intTransactionId, strTransactionId, strDescription, dtmDate, strTransactionType, intEntityId
 	FROM tblGLPostResult
+	UNION ALL
+	SELECT intId as intResultId, strBatchNumber, intTransactionId, strTransactionId, strMessage, NULL, strTransactionType, NULL
+	FROM tblAPPostResult
+	UNION ALL
+	SELECT intId as intResultId, strBatchNumber, intTransactionId, strTransactionId, strMessage, NULL, strTransactionType, NULL
+	FROM tblARPostResult
 ) BatchPostingResult
 WHERE strDescription IS NOT NULL

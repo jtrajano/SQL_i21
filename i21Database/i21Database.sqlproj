@@ -1633,8 +1633,8 @@
     <Build Include="dbo\Tables\tblARCustomerRackQuoteCategory.sql" />
     <Build Include="dbo\Tables\tblARCustomerRackQuoteHeader.sql" />
     <Build Include="dbo\Tables\tblARCustomerRackQuoteItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreatePrepayment.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessScaleTransfer.sql" />
-    <Build Include="dbo\Stored Procedures\uspARCustomerAgingReport.sql" />
     <Build Include="dbo\Views\vyuRKGetOpenContract.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertToSalesOrder.sql" />
     <Build Include="dbo\Tables\tblICInventoryLotInCustody.sql" />
@@ -1651,17 +1651,22 @@
     <Build Include="dbo\Stored Procedures\uspICUnpostCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostLotInFromCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostLotOutFromCustody.sql" />
-    <Build Include="dbo\Stored Procedures\uspQMProductPropertyDetails_Save.sql" />	
-    <Build Include="dbo\Tables\tblCTContractCertification.sql" />
+	<Build Include="dbo\Stored Procedures\uspQMProductPropertyDetails_Save.sql" />	
+    <Build Include="dbo\Stored Procedures\uspAPPostPrepayment.sql" />
+	<Build Include="dbo\Tables\tblCTContractCertification.sql" />
     <Build Include="dbo\Tables\tblMFItemMachine.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCalculateYield.sql" />
     <Build Include="dbo\Stored Procedures\uspMFPostWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidatePostWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetStageDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateBillAmounts.sql" />
+    <Build Include="dbo\Views\vyuAPBillStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetCarrierShipmentReport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetCarrierShipmentSubReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCycleCount.sql" />
     <Build Include="dbo\Stored Procedures\uspGLSummaryRecalculate.sql" />
+    <Build Include="dbo\Tables\tblAPAppliedPrepaidAndDebit.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPPrepaidAndDebit.sql" />
     <Build Include="dbo\Stored Procedures\uspSCAddScaleTicketToItemShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetScaleItemForItemShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessToInventoryShipment.sql" />
@@ -1682,6 +1687,12 @@
     <Build Include="dbo\Views\vyuTRTerminal.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostQtyChange.sql" />
     <None Include="Scripts\Post-Deployment\MF\2_ProcessAttribute.sql" />
+    <Build Include="dbo\Tables\tblEntityPreferences.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptItem.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryShipmentItem.sql" />
+    <Build Include="dbo\Views\vyuARCustomerInquiryReport.sql" />
+    <Build Include="dbo\Views\vyuARCustomerStatementReport.sql" />
+    <Build Include="dbo\Views\vyuARCustomerAgingReport.sql" />	
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1720,6 +1731,13 @@
     <None Include="Scripts\Post-Deployment\EM\002_UpdateMenuuEntityType.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\3_UpdateInvoiceOrderShipToAndBillTo.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\UpdateEarningDeductionTaxId.sql" />
+    <None Include="dbo\Functions\fnAPCreatePrepaymentGLEntries.sql" />
+    <None Include="Scripts\Post-Deployment\EM\003_FixVendorBadData.sql" />
+    <None Include="Scripts\Post-Deployment\EM\004_MoveFuturesBrokerData.sql" />
+    <None Include="Scripts\Post-Deployment\EM\005_MoveForwardingAgentData.sql" />
+    <None Include="Scripts\Post-Deployment\EM\006_MoveTerminalData.sql" />
+    <None Include="Scripts\Post-Deployment\EM\007_MoveShippingLineData.sql" />
+    <None Include="Scripts\Post-Deployment\EM\008_MoveTruckerData.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

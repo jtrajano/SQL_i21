@@ -8,7 +8,8 @@
 	@datePaid DATETIME = NULL,
 	@isPost BIT = 0,
 	@post BIT = 0,
-	@billId NVARCHAR(MAX)
+	@billId NVARCHAR(MAX),
+	@createdPaymentId INT = NULL OUTPUT
 AS
 BEGIN
 
@@ -138,7 +139,7 @@ BEGIN
 		[dblDiscount]	= A.dblDiscount,
 		[dblWithheld]	= A.dblWithheld,
 		[dblAmountDue]	= A.dblAmountDue,
-		[dblPayment]	= A.dblTotal - A.dblDiscount,
+		[dblPayment]	= A.dblTotal - A.dblDiscount - A.dblPayment,
 		[dblInterest]	= 0, --TODO
 		[dblTotal]		= A.dblTotal
 	FROM tblAPBill A
@@ -175,4 +176,5 @@ BEGIN
 	N'@paymentId INT',
 	 @paymentId = @paymentId;
 	 
+	 SET @createdPaymentId = @paymentId
 END

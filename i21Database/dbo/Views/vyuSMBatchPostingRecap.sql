@@ -32,4 +32,7 @@ FROM
 (
 	SELECT [intGLDetailId], [dtmDate], [strBatchId], [intAccountId], [strAccountId], [strAccountGroup], [dblDebit], [dblCredit], [dblDebitUnit], [dblCreditUnit], [strDescription], [strCode], [strReference], [intCurrencyId], [dblExchangeRate], [dtmDateEntered], [dtmTransactionDate], [strJournalLineDescription], [intJournalLineNo], [ysnIsUnposted], [intUserId], [intEntityId], [strTransactionId], [intTransactionId], [strTransactionType], [strTransactionForm], [strModuleName]
 	FROM tblGLPostRecap
+	UNION ALL
+	SELECT [intGLDetailId], [dtmDate], [strBatchId], [intAccountId], [strTransactionId], '' AS [strAccountGroup], [dblDebit], [dblCredit], [dblDebitUnit], [dblCreditUnit], [strDescription], [strCode], [strReference], [intCurrencyId], [dblExchangeRate], [dtmDateEntered], [dtmTransactionDate], [strJournalLineDescription], [intJournalLineNo], [ysnIsUnposted], [intUserId], [intEntityId], [strTransactionId], [intTransactionId], [strTransactionType], [strTransactionForm], [strModuleName]
+	FROM tblGLDetailRecap
 ) BatchPostingRecap

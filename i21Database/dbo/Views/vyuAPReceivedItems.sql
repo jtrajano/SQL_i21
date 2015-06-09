@@ -23,6 +23,8 @@ A.[intEntityVendorId]
 ,D1.strVendorId
 ,E.strShipVia
 ,F.strTerm
+,G1.intContractNumber
+,G1.intContractHeaderId
 FROM tblPOPurchase A
 	INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	CROSS APPLY 
@@ -59,6 +61,7 @@ FROM tblPOPurchase A
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
 	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.intShipViaID
 	LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
+	LEFT JOIN (tblCTContractHeader G1 INNER JOIN tblCTContractDetail G2 ON G1.intContractHeaderId = G2.intContractHeaderId) ON G1.intEntityId = D1.intEntityVendorId
 UNION ALL
 --Miscellaneous items
 SELECT
@@ -83,6 +86,8 @@ A.[intEntityVendorId]
 ,D1.strVendorId
 ,E.strShipVia
 ,F.strTerm
+,NULL
+,NULL
 FROM tblPOPurchase A
 	INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -115,6 +120,8 @@ A.intEntityVendorId
 ,D2.strName
 ,D1.strVendorId
 ,E.strShipVia
+,NULL
+,NULL
 ,NULL
 FROM tblICInventoryReceipt A
 INNER JOIN tblICInventoryReceiptItem B

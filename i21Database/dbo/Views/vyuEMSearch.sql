@@ -1,45 +1,62 @@
 ﻿CREATE VIEW [dbo].[vyuEMSearch]
 as 
-/*select * from (
-	select a.intEntityId,
-		b.strType,
-		a.strName,
-		1 as bitval
-	from tblEntity a
-		left join tblEntityType b 
-			on a.intEntityId = b.intEntityId
-		where b.strType not in ('User')
-) d
-pivot
-(
-	min(bitval)
-	for strType in (Vendor,Customer)
-)piv
-*/
-SELECT   
-	a.intEntityId,    
-	a.strName,  
-	g.strPhone,  
-	e.strAddress,  
-	e.strCity,  
-	e.strState,  
-	e.strZipCode,  
-	case when b.intEntityVendorId is null then 0 else 1 end Vendor,    
-	case when c.intEntityCustomerId is null then 0 else 1 end Customer ,    
-	case when d.intEntitySalespersonId is null then 0 else 1 end Salesperson   
-   
-FROM tblEntity a    
-	left join tblAPVendor b    
-		on a.intEntityId = b.intEntityVendorId --and b.ysnPymtCtrlActive = 1
-	left join tblARCustomer c    
-		on a.intEntityId = c.intEntityCustomerId --and c.ysnActive = 1
-	LEFT JOIN tblARSalesperson d  
-		on a.intEntityId = d.intEntitySalespersonId --and d.ysnActive = 1
-	left join tblEntityLocation e  
-		on ( ysnDefaultLocation = 1 )AND a.intEntityId = e.intEntityId
-	left join tblEntityToContact f  
-		on f.intEntityId = a.intEntityId and f.ysnDefaultContact = 1  
-	left join tblEntity g  
-		on f.intEntityContactId = g.intEntityId  
-   
- where (isnull(b.intEntityVendorId,0) + isnull(c.intEntityCustomerId,0) +  isnull(d.intEntitySalespersonId,0)) > 1  
+SELECT 
+		a.intEntityId,    
+		a.Name as strName,  
+		g.strPhone,  
+		e.strAddress,  
+		e.strCity,  
+		e.strState,  
+		e.strZipCode,
+		Customer,
+		Vendor,
+		Employee,
+		Salesperson,
+		[User],
+		FuturesBroker,
+		ForwardingAgent,
+		Terminal,
+		ShippingLine,
+		Trucker
+	FROM 		
+			(SELECT	intEntityId, Name,		
+								CASE WHEN [Customer] IS NOT NULL THEN 1 ELSE 0 END Customer, 		
+								CASE WHEN [Vendor] IS NOT NULL THEN 1 ELSE 0 END Vendor, 		
+								CASE WHEN [Employee] IS NOT NULL THEN 1 ELSE 0 END Employee, 		
+								CASE WHEN [Salesperson] IS NOT NULL THEN 1 ELSE 0 END Salesperson, 		
+								CASE WHEN [User] IS NOT NULL THEN 1 ELSE 0 END AS  [User],
+								CASE WHEN [Futures Broker] IS NOT NULL THEN 1 ELSE 0 END AS  FuturesBroker,
+								CASE WHEN [Forwarding Agent] IS NOT NULL THEN 1 ELSE 0 END AS  ForwardingAgent,
+								CASE WHEN [Terminal] IS NOT NULL THEN 1 ELSE 0 END AS  Terminal,
+								CASE WHEN [Shipping Line] IS NOT NULL THEN 1 ELSE 0 END AS  ShippingLine,
+								CASE WHEN [Trucker] IS NOT NULL THEN 1 ELSE 0 END AS  Trucker
+			FROM
+			(
+				select A.intEntityId,  A.strName Name, strType 
+					from tblEntity A
+						JOIN tblEntityType B
+							on A.intEntityId = B.intEntityId		
+			) SourceTable
+			PIVOT
+			(
+				max(strType)
+				FOR strType  IN (
+						[Customer], 
+						[Vendor], 
+						[Employee], 
+						[Salesperson],
+						[User],
+						[Futures Broker],
+						[Forwarding Agent],
+						[Terminal],
+						[Shipping Line],
+						[Trucker]
+					)
+			) AS PivotTable
+		) a
+		left join tblEntityLocation e  
+			on ( ysnDefaultLocation = 1 )AND a.intEntityId = e.intEntityId
+		left join tblEntityToContact f  
+			on f.intEntityId = a.intEntityId and f.ysnDefaultContact = 1  
+		left join tblEntity g  
+			on f.intEntityContactId = g.intEntityId  

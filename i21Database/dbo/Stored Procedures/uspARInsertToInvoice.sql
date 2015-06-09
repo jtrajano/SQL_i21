@@ -192,7 +192,7 @@ BEGIN
 		END
 			
 	
-	UPDATE tblSOSalesOrder SET strOrderStatus = 'Complete', ysnProcessed = 1 WHERE intSalesOrderId = @SalesOrderId
+	UPDATE tblSOSalesOrder SET strOrderStatus = 'Closed', ysnProcessed = 1 WHERE intSalesOrderId = @SalesOrderId
 	
 	
 	SET @InvoiceId  = @NewInvoiceId

@@ -61,6 +61,13 @@ BEGIN
 				,@InventoryLotInCustodyId AS INT
 	END 
 	
+	-- Assert
+	BEGIN
+		EXEC tSQLt.ExpectException
+				@ExpectedMessage = 'Negative stock quantity is not allowed.',
+				@ExpectedErrorNumber = 50029			
+	END 
+
 	-- Act
 	BEGIN 
 		EXEC [dbo].[uspICReduceStockInLotCustody]
@@ -117,11 +124,6 @@ BEGIN
 				AND intItemLocationId = @intItemLocationId
 				AND intLotId = @intLotId
 	END 
-
-	-- Assert
-	BEGIN 
-		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
-	END
 
 	-- Clean-up: remove the tables used in the unit test
 	IF OBJECT_ID('actual') IS NOT NULL 

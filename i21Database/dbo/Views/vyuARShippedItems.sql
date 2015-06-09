@@ -24,6 +24,7 @@ SELECT
 	,SHP.[dblShipped]					AS [dblShipmentQtyShippedTotal]
 	,SOD.[dblQtyOrdered] 
 		- SOD.[dblQtyShipped]			AS [dblQtyRemaining]
+	,SOD.[dblDiscount] 
 	,SOD.[dblPrice]
 	,SHP.[dblUnitPrice]					AS [dblShipmentUnitPrice]
 	,SOD.[dblTotalTax]
@@ -80,7 +81,7 @@ CROSS APPLY
 	WHERE
 		ISH.[ysnPosted] = 1
 		AND ISI.[intLineNo] = SOD.[intSalesOrderDetailId]
-		AND SO.[strOrderStatus]	<> 'Complete'
+		AND SO.[strOrderStatus]	<> 'Closed'
 	GROUP BY
 		 ISI.[intInventoryShipmentItemId]
 		,ISI.[intLineNo]
@@ -117,6 +118,7 @@ SELECT
 	,SOD.[dblQtyShipped]				AS [dblShipmentQtyShippedTotal]
 	,SOD.[dblQtyOrdered] 
 		- SOD.[dblQtyShipped]			AS [dblQtyRemaining]
+	,SOD.[dblDiscount] 
 	,SOD.[dblPrice]
 	,SOD.[dblPrice]						AS [dblShipmentUnitPrice] 			
 	,SOD.[dblTotalTax]
@@ -156,4 +158,4 @@ LEFT OUTER JOIN
 	tblICStorageLocation SL
 		ON SOD.[intStorageLocationId] = SL.[intStorageLocationId] 		
 WHERE
-	SO.[strOrderStatus] <> 'Complete'
+	SO.[strOrderStatus] <> 'Closed'

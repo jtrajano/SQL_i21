@@ -14,7 +14,8 @@ AS
 			CH.dtmContractDate,
 			CD.intCompanyLocationId,
 			CH.intCommodityId,
-			CH.intPositionId
+			CH.intPositionId,
+			CD.intItemUOMId
 	FROM 	tblCTContractDetail 		CD
 	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
 	JOIN	tblICItem				IM	ON	IM.intItemId				=	CD.intItemId

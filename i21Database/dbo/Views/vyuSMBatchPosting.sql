@@ -15,8 +15,15 @@ FROM
 	WHERE strJournalType IN ('Adjusted Origin Journal', 'General Journal', 'Audit Adjustment', 'Imported Journal', 'Origin Journal', 'Recurring Journal') 
 	AND strTransactionType <> 'Template'
 	AND ysnPosted = 0
-	--UNION ALL
-	--SELECT 'Bill', intBillId, strBillId, intEntityId, dtmDate, NULL as strReference FROM tblAPBill WHERE ysnPosted = 0
+	UNION ALL
+	SELECT 'Bill', intBillId, strBillId, intEntityId, dtmDate, strComment as strReference FROM tblAPBill WHERE ysnPosted = 0
+	UNION ALL
+	SELECT 'Payable', intPaymentId, strPaymentRecordNum, intEntityId, dtmDatePaid, strNotes as strReference FROM tblAPPayment WHERE ysnPosted = 0
+	UNION ALL
+	SELECT strTransactionType, intInvoiceId, strInvoiceNumber, intEntityId, dtmDate, strComments FROM tblARInvoice WHERE strTransactionType IN ('Invoice', 'Credit Memo')
+	AND ysnPosted = 0
+	UNION ALL
+	SELECT 'Payment', intPaymentId, strRecordNumber, intEntityId, dtmDatePaid, strNotes FROM tblARPayment WHERE ysnPosted = 0
 ) BatchPosting
 INNER JOIN tblSMUserSecurity UserSecurity ON BatchPosting.intEntityId = UserSecurity.intEntityId
 GO

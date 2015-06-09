@@ -118,7 +118,7 @@ SELECT @InventoryReceiptId = SCOPE_IDENTITY()
 INSERT INTO dbo.tblICInventoryReceiptItem (
 	intInventoryReceiptId
     ,intLineNo
-	,intSourceId
+	,intOrderId
     ,intItemId
 	,intSubLocationId
 	,dblOrderQty
@@ -133,7 +133,7 @@ INSERT INTO dbo.tblICInventoryReceiptItem (
 )
 SELECT	intInventoryReceiptId	= @InventoryReceiptId
 		,intLineNo				= PODetail.intPurchaseDetailId
-		,intSourceId			= @PurchaseOrderId
+		,intOrderId				= @PurchaseOrderId
 		,intItemId				= PODetail.intItemId
 		,intSubLocationId		= PODetail.intSubLocationId
 		,dblOrderQty			= ISNULL(PODetail.dblQtyOrdered, 0)

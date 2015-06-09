@@ -68,12 +68,14 @@ INSERT INTO
 		,[dtmPostDate]
 		,[ysnPosted]
 		,[ysnPaid]
+		,[intShipToLocationId] 
 		,[strShipToLocationName]
 		,[strShipToAddress]
 		,[strShipToCity]
 		,[strShipToState]
 		,[strShipToZipCode]
 		,[strShipToCountry]
+		,[intBillToLocationId]
 		,[strBillToLocationName]
 		,[strBillToAddress]
 		,[strBillToCity]
@@ -88,7 +90,7 @@ SELECT
 	,V.[dtmBilled]				--[dtmDate]
 	,dbo.fnGetDueDateBasedOnTerm(V.[dtmBilled], ISNULL(EL.[intTermsId],0))	--[dtmDueDate]
 	,ISNULL(C.[intCurrencyId], @Currency)									--[intCurrencyId]
-	,V.[intCompanyLocationId]	--[intCompanyLocationId]
+	,ISNULL(V.[intCompanyLocationId], (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1))	--[intCompanyLocationId]
 	,ISNULL(C.[intSalespersonId],V.[intAgentEntityId])		--[intEntitySalespersonId]
 	,V.[dtmBilled]				--[dtmShipDate]
 	,ISNULL(EL.[intShipViaId], 0)											--[intShipViaId]
@@ -108,12 +110,14 @@ SELECT
 	,[dtmBilled]						--[dtmPostDate]
 	,0							--[ysnPosted]
 	,0							--[ysnPaid]
+	,ISNULL(C.[intShipToId], (SELECT TOP 1 [intEntityLocationId] FROM tblEntityLocation WHERE [intEntityId] = C.[intEntityCustomerId] AND ysnDefaultLocation = 1 ))			--[intShipToLocationId] 
 	,SL.[strLocationName]		--[strShipToLocationName]
 	,SL.[strAddress]			--[strShipToAddress]
 	,SL.[strCity]				--[strShipToCity]
 	,SL.[strState]				--[strShipToState]
 	,SL.[strZipCode]			--[strShipToZipCode]
 	,SL.[strCountry]			--[strShipToCountry]
+	,ISNULL(C.[intBillToId], (SELECT TOP 1 [intEntityLocationId] FROM tblEntityLocation WHERE [intEntityId] = C.[intEntityCustomerId] AND ysnDefaultLocation = 1 ))			--[intBillToLocationId] 
 	,BL.[strLocationName]		--[strBillToLocationName]
 	,BL.[strAddress]			--[strBillToAddress]
 	,BL.[strCity]				--[strBillToCity]
@@ -161,7 +165,7 @@ INSERT INTO [tblARInvoiceDetail]
 SELECT
 	I.[intInvoiceId]											--[intInvoiceId]
 	,V.[intItemId]												--[intItemId]
-	,V.[strTicketNumber] + ' - ' + V.[strJobCode]				--strItemDescription]
+	,IC.[strDescription]										--strItemDescription] 
 	,NULL														--[intItemUOMId]
 	,V.[intHours]												--[dblQtyOrdered]
 	,V.[intHours]												--[dblQtyShipped]
@@ -180,6 +184,9 @@ INNER JOIN
 INNER JOIN
 	@TicketHoursWorked HW
 		ON V.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]
+INNER JOIN
+	tblICItem IC
+		ON V.[intItemId] = IC.[intItemId] 
 LEFT OUTER JOIN
 	vyuARGetItemAccount Acct
 		ON V.[intItemId] = Acct.[intItemId]
@@ -201,6 +208,7 @@ INNER JOIN
 INNER JOIN
 	@TicketHoursWorked HW
 		ON V.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]
+
 	          
            
 IF @Post = 1
@@ -220,7 +228,25 @@ IF @Post = 1
 				ON RTRIM(I.[strComments]) = RTRIM(CONVERT(nvarchar(250),V.[intTicketHoursWorkedId]))
 		INNER JOIN
 			@TicketHoursWorked HW
-				ON V.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]				
+				ON V.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]		
+				
+		UPDATE
+			[tblARInvoice]
+		SET
+			[tblARInvoice].[strComments] = T.[strTicketNumber] + ' - ' + JC.[strJobCode] 
+		FROM
+			 tblHDTicketHoursWorked H
+		INNER JOIN
+			tblHDJobCode JC
+				ON H.[intJobCodeId] = JC.[intJobCodeId] 
+		INNER JOIN
+			@TicketHoursWorked HW
+				ON H.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]
+		INNER JOIN
+			tblHDTicket T
+				ON H.[intTicketId] = T.[intTicketId] 
+		WHERE
+			[tblARInvoice].[strComments] = RTRIM(CONVERT(nvarchar(250),H.[intTicketHoursWorkedId])) 						
 				
 
 		EXEC	@return_value = [dbo].[uspARPostInvoice]
@@ -242,24 +268,26 @@ IF @Post = 1
 				@transType = N'Invoice'
 	END 
 	
-	
-UPDATE
-	[tblARInvoice]
-SET
-	[tblARInvoice].[strComments] = T.[strTicketNumber] + ' - ' + JC.[strJobCode] 
-FROM
-	 tblHDTicketHoursWorked H
-INNER JOIN
-	tblHDJobCode JC
-		ON H.[intJobCodeId] = JC.[intJobCodeId] 
-INNER JOIN
-	@TicketHoursWorked HW
-		ON H.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]
-INNER JOIN
-	tblHDTicket T
-		ON H.[intTicketId] = T.[intTicketId] 
-WHERE
-	[tblARInvoice].[strComments] = RTRIM(CONVERT(nvarchar(250),H.[intTicketHoursWorkedId])) 	  
+IF @Post = 0
+BEGIN
+		UPDATE
+			[tblARInvoice]
+		SET
+			[tblARInvoice].[strComments] = T.[strTicketNumber] + ' - ' + JC.[strJobCode] 
+		FROM
+			 tblHDTicketHoursWorked H
+		INNER JOIN
+			tblHDJobCode JC
+				ON H.[intJobCodeId] = JC.[intJobCodeId] 
+		INNER JOIN
+			@TicketHoursWorked HW
+				ON H.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]
+		INNER JOIN
+			tblHDTicket T
+				ON H.[intTicketId] = T.[intTicketId] 
+		WHERE
+			[tblARInvoice].[strComments] = RTRIM(CONVERT(nvarchar(250),H.[intTicketHoursWorkedId])) 	
+END			 
 	
 	        
 SET @IsSuccess = 1           

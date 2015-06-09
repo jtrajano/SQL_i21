@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuRKDPRInvDailyPositionDetail]
 	AS 
-
+	
 SELECT intCommodityId,'In-House' as [strType],         
 	    ISNULL(invQty,0)-ISNULL(ReserveQty,0) AS dblTotal
 FROM(            

@@ -138,6 +138,7 @@ END
 INSERT INTO dbo.tblICInventoryReceiptItem (
 	intInventoryReceiptId
     ,intLineNo
+	,intOrderId
 	,intSourceId
     ,intItemId
 	,intSubLocationId
@@ -153,6 +154,7 @@ INSERT INTO dbo.tblICInventoryReceiptItem (
 )
 SELECT	intInventoryReceiptId	= @InventoryReceiptId
 		,intLineNo				= 1
+		,intOrderId				= NULL
 		,intSourceId			= @intTicketId
 		,intItemId				= SC.intItemId
 		,intSubLocationId		= NULL

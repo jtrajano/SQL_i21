@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE uspAPPostBill
-	@batchId			AS NVARCHAR(20)		= NULL,
-	@billBatchId		AS NVARCHAR(20)		= NULL,
+	@batchId			AS NVARCHAR(40)		= NULL,
+	@billBatchId		AS NVARCHAR(40)		= NULL,
 	@transactionType	AS NVARCHAR(30)		= NULL,
 	@post				AS BIT				= 0,
 	@recap				AS BIT				= 0,
@@ -15,7 +15,7 @@
 	@successfulCount	AS INT				= 0 OUTPUT,
 	@invalidCount		AS INT				= 0 OUTPUT,
 	@success			AS BIT				= 0 OUTPUT,
-	@batchIdUsed		AS NVARCHAR(20)		= NULL OUTPUT,
+	@batchIdUsed		AS NVARCHAR(40)		= NULL OUTPUT,
 	@recapId			AS NVARCHAR(250)	= NEWID OUTPUT
 AS
 
@@ -201,6 +201,22 @@ BEGIN
 				ysnPaid = 0
 		FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 
+		--UPDATE amount due of vendor prepayment, debit memo once payment has been applied to bill
+		UPDATE A
+			SET dblAmountDue = A.dblAmountDue + AppliedPayments.dblAmountApplied
+			,dblPayment = dblPayment - AppliedPayments.dblAmountApplied
+		FROM tblAPBill A
+		CROSS APPLY
+		(
+			SELECT 
+				SUM(B.dblAmountApplied) AS dblAmountApplied
+			FROM tblAPAppliedPrepaidAndDebit B
+				INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
+			WHERE A.intBillId = B.intTransactionId
+			AND B.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+			GROUP BY B.intTransactionId
+		) AppliedPayments
+
 		UPDATE tblGLDetail
 			SET ysnIsUnposted = 1
 		WHERE tblGLDetail.[strTransactionId] IN (SELECT strBillId FROM tblAPBill WHERE intBillId IN 
@@ -231,6 +247,23 @@ BEGIN
 		UPDATE tblAPBill
 			SET ysnPosted = 1
 		WHERE tblAPBill.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+
+		--UPDATE amount due of vendor prepayment, debit memo once payment has been applied to bill
+		UPDATE A
+			SET dblAmountDue = A.dblAmountDue - AppliedPayments.dblAmountApplied
+			,dblPayment = dblPayment + AppliedPayments.dblAmountApplied
+		FROM tblAPBill A
+		CROSS APPLY
+		(
+			SELECT 
+				SUM(B.dblAmountApplied) AS dblAmountApplied
+			FROM tblAPAppliedPrepaidAndDebit B
+				INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
+			WHERE A.intBillId = B.intTransactionId
+			AND B.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+			GROUP BY B.intTransactionId
+		) AppliedPayments
+		
 
 		--Update Inventory Item Receipt
 		UPDATE A

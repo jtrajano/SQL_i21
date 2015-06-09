@@ -543,4 +543,10 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51135) EXEC sp_dropmessa
 SET @strmessage = 'A consigned or custodial item is no longer available. Unable to continue and unpost the transaction.'
 EXEC sp_addmessage 51135,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51136) EXEC sp_dropmessage 51136, 'us_english'	
+SET @strmessage = 'The UOM is missing on %s.'
+EXEC sp_addmessage 51136,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51137) EXEC sp_dropmessage 51137, 'us_english'	
+SET @strmessage = 'Please specify the Adjust Qty By or New Quantity on %s.'
+EXEC sp_addmessage 51137,11,@strmessage,'us_english','False'

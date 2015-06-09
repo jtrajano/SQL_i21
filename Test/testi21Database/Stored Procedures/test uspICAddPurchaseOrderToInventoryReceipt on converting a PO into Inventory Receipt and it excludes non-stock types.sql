@@ -139,7 +139,7 @@ BEGIN
 		SELECT	intInventoryReceiptId
 				,intLineNo
 				,intItemId
-				,intSourceId
+				,intOrderId
 				,dblOrderQty
 				,dblOpenReceive
 				,dblReceived
@@ -184,7 +184,7 @@ BEGIN
 		SELECT	intInventoryReceiptId = 1
 				,intLineNo = 1
 				,intItemId = @WetGrains
-				,intSourceId = 1
+				,intOrderId = 1
 				,dblOrderQty = 10
 				,dblOpenReceive = (10 - 0)
 				,dblReceived = 0
@@ -197,7 +197,7 @@ BEGIN
 		SELECT	intInventoryReceiptId = 1
 				,intLineNo = 2
 				,intItemId = @PremiumGrains
-				,intSourceId = 1
+				,intOrderId = 1
 				,dblOrderQty = 5
 				,dblOpenReceive = (5-0)
 				,dblReceived = 0
@@ -241,7 +241,7 @@ BEGIN
 		SELECT	intInventoryReceiptId
 				,intLineNo
 				,intItemId
-				,intSourceId
+				,intOrderId
 				,dblOrderQty
 				,dblOpenReceive
 				,dblReceived

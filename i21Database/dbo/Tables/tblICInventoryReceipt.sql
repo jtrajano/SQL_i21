@@ -14,6 +14,7 @@ Type the overview for the table here.
 	(
 		[intInventoryReceiptId] [int] IDENTITY NOT NULL,
 		[strReceiptType] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
+		[intSourceType] INT NOT NULL DEFAULT ((0)),
 		[intEntityVendorId] [int] NULL,
 		[intTransferorId] [int] NULL,
 		[intLocationId] [int] NULL,
@@ -369,3 +370,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICInventoryReceipt',
     @level2type = N'COLUMN',
     @level2name = N'intShipmentId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Source Type',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryReceipt',
+    @level2type = N'COLUMN',
+    @level2name = N'intSourceType'
