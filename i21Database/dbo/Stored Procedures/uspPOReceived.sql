@@ -16,7 +16,7 @@ BEGIN
 	DECLARE @count INT = 0;
 	DECLARE @receivedNum DECIMAL(18,6);
 
-	SELECT	B.intSourceId
+	SELECT	B.intOrderId
 			,B.intLineNo
 			,B.dblOpenReceive
 			,B.intItemId
@@ -34,7 +34,7 @@ BEGIN
 	SELECT	TOP 1 
 			@purchaseOrderNumber = strPurchaseOrderNumber
 	FROM	#tmpReceivedPOItems A OUTER APPLY  (
-				SELECT strPurchaseOrderNumber FROM tblPOPurchase B WHERE A.intSourceId = B.intPurchaseId
+				SELECT strPurchaseOrderNumber FROM tblPOPurchase B WHERE A.intOrderId = B.intPurchaseId
 			) PurchaseOrders
 	WHERE	PurchaseOrders.strPurchaseOrderNumber IS NULL
 
@@ -50,7 +50,7 @@ BEGIN
 	FROM	#tmpReceivedPOItems A OUTER APPLY (
 				SELECT	intItemId 
 				FROM	tblPOPurchaseDetail B 
-				WHERE	A.intSourceId = B.intPurchaseId
+				WHERE	A.intOrderId = B.intPurchaseId
 						AND A.intItemId = B.intItemId 
 						AND A.intLineNo = B.intPurchaseDetailId
 			) PurchaseOrderDetails
@@ -67,7 +67,7 @@ BEGIN
 	UPDATE	POItems
 	SET		CalculatedOpenReceive = dbo.fnCalculateQtyBetweenUOM(POItems.intUnitMeasureId, PODetail.intUnitOfMeasureId, POItems.dblOpenReceive)
 	FROM	#tmpReceivedPOItems POItems INNER JOIN dbo.tblPOPurchaseDetail PODetail
-				ON POItems.intSourceId = PODetail.intPurchaseId
+				ON POItems.intOrderId = PODetail.intPurchaseId
 				AND POItems.intLineNo = PODetail.intPurchaseDetailId
 
 
@@ -103,7 +103,7 @@ BEGIN
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 				INNER JOIN dbo.tblPOPurchaseDetail PODetail
-					ON ReceiptItem.intSourceId = PODetail.intPurchaseId
+					ON ReceiptItem.intOrderId = PODetail.intPurchaseId
 					AND ReceiptItem.intLineNo = PODetail.intPurchaseDetailId
 				INNER JOIN dbo.tblICItemLocation ItemLocation
 					ON ItemLocation.intItemId = ReceiptItem.intItemId
@@ -111,7 +111,7 @@ BEGIN
 				INNER JOIN dbo.tblICItemUOM	ItemUOM
 					ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
 		WHERE	Receipt.intInventoryReceiptId = @receiptItemId
-				AND ReceiptItem.intSourceId IS NOT NULL 
+				AND ReceiptItem.intOrderId IS NOT NULL 
 
 		-- Call the stored procedure that updates the on order qty. 
 		EXEC dbo.uspICIncreaseOnOrderQty @ItemToUpdateOnOrderQty
@@ -124,19 +124,19 @@ BEGIN
 	FROM	tblPOPurchaseDetail A INNER JOIN #tmpReceivedPOItems B 
 				ON A.intItemId = B.intItemId 
 				AND A.intPurchaseDetailId = B.intLineNo
-				AND intPurchaseId = B.intSourceId
+				AND intPurchaseId = B.intOrderId
 				--AND intPurchaseDetailId IN (SELECT intLineNo FROM #tmpReceivedPOItems)
 
-	SELECT DISTINCT intSourceId INTO #poIds FROM #tmpReceivedPOItems
+	SELECT DISTINCT intOrderId INTO #poIds FROM #tmpReceivedPOItems
 	DECLARE @countPoIds INT = (SELECT COUNT(*) FROM #poIds)
 	DECLARE @counter INT = 0;
 
 	WHILE @counter != @countPoIds
 	BEGIN
 		SET @counter = @counter + 1;
-		SET @purchaseId = (SELECT TOP(1) intSourceId FROM #poIds)
+		SET @purchaseId = (SELECT TOP(1) intOrderId FROM #poIds)
 		EXEC uspPOUpdateStatus @purchaseId, DEFAULT
-		DELETE FROM #poIds WHERE intSourceId = @purchaseId
+		DELETE FROM #poIds WHERE intOrderId = @purchaseId
 	END
 
 END

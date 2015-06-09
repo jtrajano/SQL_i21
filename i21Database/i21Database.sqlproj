@@ -1673,6 +1673,8 @@
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostQtyChange.sql" />
     <None Include="Scripts\Post-Deployment\MF\2_ProcessAttribute.sql" />
     <Build Include="dbo\Tables\tblEntityPreferences.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptItem.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryShipmentItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

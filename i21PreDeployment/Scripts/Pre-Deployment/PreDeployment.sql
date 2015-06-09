@@ -75,6 +75,7 @@
 :r .\11_IC\Account_Category_Change_14_4.sql
 :r .\11_IC\1510_to_1512.sql
 :r .\11_IC\StatusImplementation.sql
+:r .\11_IC\SourceType_Implementations.sql
 
 --:r :.\11_IC\Drop_References_to_ItemCostingTableType.sql
 --:r :.\11_IC\Drop_References_to_RecapTableType.sql

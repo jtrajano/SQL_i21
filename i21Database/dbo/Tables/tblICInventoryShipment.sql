@@ -16,6 +16,7 @@ Type the overview for the table here.
 		[strShipmentNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 		[dtmShipDate] DATETIME NOT NULL DEFAULT (getdate()), 
 		[intOrderType] INT NOT NULL, 
+		[intSourceType] INT NOT NULL DEFAULT ((0)),
 		[strReferenceNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[dtmRequestedArrivalDate] DATETIME NULL, 
 		[intShipFromLocationId] INT NOT NULL, 
@@ -304,3 +305,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICInventoryShipment',
     @level2type = N'COLUMN',
     @level2name = N'intCreatedUserId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Source Type',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryShipment',
+    @level2type = N'COLUMN',
+    @level2name = N'intSourceType'

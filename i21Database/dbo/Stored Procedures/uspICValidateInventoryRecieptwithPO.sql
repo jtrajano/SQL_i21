@@ -30,7 +30,7 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN tblICInventoryReceiptItem Rece
 			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 		LEFT JOIN dbo.tblPOPurchaseDetail PODetail
 			ON ReceiptItem.intLineNo = PODetail.intPurchaseDetailId
-			AND ReceiptItem.intSourceId = PODetail.intPurchaseId
+			AND ReceiptItem.intOrderId = PODetail.intPurchaseId
 WHERE	Receipt.strReceiptNumber = @strTransactionId
 		AND ReceiptItem.intUnitMeasureId <> PODetail.intUnitOfMeasureId
 

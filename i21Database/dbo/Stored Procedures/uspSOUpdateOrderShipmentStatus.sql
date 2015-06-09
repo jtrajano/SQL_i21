@@ -10,7 +10,7 @@ BEGIN
 	FROM
 		(
 			SELECT
-				 ISD.[intSourceId]
+				 ISD.[intOrderId]
 				,ISD.[intLineNo]
 				,SUM(ISNULL(ISD.[dblQuantity], 0.00))	[dblQuantity]
 			FROM
@@ -20,13 +20,13 @@ BEGIN
 					ON ISD.[intInventoryShipmentId] = ISH.[intInventoryShipmentId]
 					AND ISH.[ysnPosted]  = 1
 			WHERE
-				ISD.[intSourceId] = @SalesOrderId
+				ISD.[intOrderId] = @SalesOrderId
 			GROUP BY
-				ISD.[intSourceId]			
+				ISD.[intOrderId]			
 				,ISD.[intLineNo]
 		) SHP
 	WHERE
-		[intSalesOrderId] = SHP.[intSourceId]
+		[intSalesOrderId] = SHP.[intOrderId]
 		
 		
 
