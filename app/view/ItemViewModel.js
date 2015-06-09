@@ -281,6 +281,25 @@ Ext.define('Inventory.view.ItemViewModel', {
                 }
             ]
         },
+        costMethods: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Per Unit'
+                },
+                {
+                    strDescription: 'Percentage'
+                },
+                {
+                    strDescription: 'Amount'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
 
 
         posUom: {
@@ -1019,6 +1038,31 @@ Ext.define('Inventory.view.ItemViewModel', {
                     break;
 
                 case 'Software':
+                    return true
+                    break;
+            }
+        },
+        pgeCostHide: function(get) {
+            switch(get('current.strType')) {
+                case 'Other Charge':
+                    return false;
+                    break;
+
+                case 'Assembly':
+                case 'Assembly/Blend':
+                case 'Assembly/Formula/Blend':
+                case 'Bundle':
+                case 'Inventory Item':
+                case 'Inventory':
+                case 'Kit':
+                case 'Manufacturing Item':
+                case 'Manufacturing':
+                case 'Finished Good' :
+                case 'Non-Inventory':
+                case 'Software':
+                case 'Service':
+                case 'Commodity':
+                case 'Raw Material':
                     return true
                     break;
             }

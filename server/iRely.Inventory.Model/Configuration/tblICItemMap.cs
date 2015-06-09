@@ -111,6 +111,14 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intClassVarietyId).HasColumnName("intClassVarietyId");
             this.Property(t => t.intProductLineId).HasColumnName("intProductLineId");
             this.Property(t => t.strMarketValuation).HasColumnName("strMarketValuation");
+            this.Property(t => t.ysnInventoryCost).HasColumnName("ysnInventoryCost");
+            this.Property(t => t.ysnAccrue).HasColumnName("ysnAccrue");
+            this.Property(t => t.ysnMTM).HasColumnName("ysnMTM");
+            this.Property(t => t.ysnPrice).HasColumnName("ysnPrice");
+            this.Property(t => t.strCostMethod).HasColumnName("strCostMethod");
+            this.Property(t => t.intOnCostTypeId).HasColumnName("intOnCostTypeId");
+            this.Property(t => t.dblAmount).HasColumnName("dblAmount").HasPrecision(18, 6);
+            this.Property(t => t.intCostUOMId).HasColumnName("intCostUOMId");
 
             this.HasOptional(p => p.tblICBrand)
                 .WithMany(p => p.tblICItems)

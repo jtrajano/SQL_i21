@@ -130,7 +130,15 @@ Ext.define('Inventory.model.Item', {
         { name: 'intSeasonId', type: 'int', allowNull: true },
         { name: 'intClassVarietyId', type: 'int', allowNull: true },
         { name: 'intProductLineId', type: 'int', allowNull: true },
-        { name: 'strMarketValuation', type: 'string' }
+        { name: 'strMarketValuation', type: 'string' },
+        { name: 'ysnInventoryCost', type: 'boolean' },
+        { name: 'ysnAccrue', type: 'boolean' },
+        { name: 'ysnMTM', type: 'boolean' },
+        { name: 'ysnPrice', type: 'boolean' },
+        { name: 'strCostMethod', type: 'string' },
+        { name: 'intOnCostTypeId', type: 'int', allowNull: true },
+        { name: 'dblAmount', type: 'float' },
+        { name: 'intCostUOMId', type: 'int', allowNull: true }
     ],
 
     validators: [

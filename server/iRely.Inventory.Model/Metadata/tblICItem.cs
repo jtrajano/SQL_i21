@@ -111,6 +111,14 @@ namespace iRely.Inventory.Model
         public int? intClassVarietyId { get; set; }
         public int? intProductLineId { get; set; }
         public string strMarketValuation { get; set; }
+        public bool? ysnInventoryCost { get; set; }
+        public bool? ysnAccrue { get; set; }
+        public bool? ysnMTM { get; set; }
+        public bool? ysnPrice { get; set; }
+        public string strCostMethod { get; set; }
+        public int? intOnCostTypeId { get; set; }
+        public decimal? dblAmount { get; set; }
+        public int? intCostUOMId { get; set; }
 
         private string _manufacturer;
         [NotMapped]

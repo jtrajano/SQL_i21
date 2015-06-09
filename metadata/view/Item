@@ -7179,6 +7179,9 @@
                                                         "type": "object"
                                                     },
                                                     "codeClass": null,
+                                                    "userConfig": {
+                                                        "itemId": "cfgCost"
+                                                    },
                                                     "name": "TabConfig12",
                                                     "designerId": "0ce92bec-cb0d-4bd2-948d-589ddb3a75d2"
                                                 },
@@ -7198,22 +7201,6 @@
                                                     "name": "MyContainer27",
                                                     "designerId": "0f79a587-00a5-408e-adf7-8223def7a76f",
                                                     "cn": [
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "fieldLabel": "Freight Terms",
-                                                                "itemId": "cboFreightTerms",
-                                                                "labelWidth": 105,
-                                                                "layout|flex": null
-                                                            },
-                                                            "name": "MyComboBox22",
-                                                            "designerId": "55724f9c-0c24-4914-afe5-b63084012745"
-                                                        },
                                                         {
                                                             "type": "Ext.form.field.Checkbox",
                                                             "reference": {
@@ -7290,13 +7277,36 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "        dataIndex: 'strDescription',",
+                                                                    "        dataType: 'string',",
+                                                                    "        text: 'Cost Method',",
+                                                                    "        flex: 1",
+                                                                    "    }",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strDescription",
                                                                 "fieldLabel": "Cost Method",
                                                                 "itemId": "cboCostMethod",
                                                                 "labelWidth": 105,
-                                                                "layout|flex": null
+                                                                "layout|flex": null,
+                                                                "valueField": "strDescription"
                                                             },
                                                             "name": "MyComboBox73",
-                                                            "designerId": "53f0848c-564e-4545-a0df-f95230809d4e"
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "53f0848c-564e-4545-a0df-f95230809d4e",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         },
                                                         {
                                                             "type": "Ext.form.field.ComboBox",
@@ -7322,6 +7332,7 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "designer|createAlias": "numericfield",
                                                                 "fieldLabel": "Amount",
                                                                 "hideTrigger": true,
                                                                 "itemId": "txtAmount",
@@ -7340,7 +7351,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "fieldLabel": "UOM",
-                                                                "itemId": "cboUOM",
+                                                                "itemId": "cboCostUOM",
                                                                 "labelWidth": 105,
                                                                 "layout|flex": null
                                                             },

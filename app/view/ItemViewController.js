@@ -106,6 +106,9 @@ Ext.define('Inventory.view.ItemViewController', {
             cfgXref: {
                 hidden: '{pgeXrefHide}'
             },
+            cfgCost: {
+                hidden: '{pgeCostHide}'
+            },
 
             grdUnitOfMeasure: {
                 colDetailUnitMeasure: {
@@ -422,6 +425,29 @@ Ext.define('Inventory.view.ItemViewController', {
                         store: '{vendorXrefUom}'
                     }
                 }
+            },
+
+            //--------//
+            //Cost Tab//
+            //--------//
+            chkInventoryCost: '{current.ysnInventoryCost}',
+            chkAccrue: '{current.ysnAccrue}',
+            chkMTM: '{current.ysnMTM}',
+            chkPrice: '{current.ysnPrice}',
+            cboCostMethod: {
+                value: '{current.strCostMethod}',
+                store: '{costMethods}'
+            },
+            cboOnCostType: {
+                value: '{current.intOnCostTypeId}'
+//                ,
+//                store: '{}'
+            },
+            txtAmount: '{current.dblAmount}',
+            cboCostUOM: {
+                value: '{current.intCostUOMId}'
+//                ,
+//                store: '{}'
             },
 
             //-----------------//
