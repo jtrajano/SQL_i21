@@ -37,6 +37,7 @@ Type the overview for the table here.
 		[ysnPromotionalItem] BIT NULL, 
 		[intMixMatchId] INT NULL, 
 		[ysnDepositRequired] BIT NULL, 
+		[intDepositPLUId] INT NULL,
 		[intBottleDepositNo] INT NULL, 
 		[ysnSaleable] BIT NULL, 
 		[ysnQuantityRequired] BIT NULL, 
@@ -55,6 +56,7 @@ Type the overview for the table here.
 		[intMinimumAge] INT NULL, 
 		[ysnApplyBlueLaw1] BIT NULL, 
 		[ysnApplyBlueLaw2] BIT NULL, 
+		[ysnCarWash] BIT NULL,
 		[intItemTypeCode] INT NULL, 
 		[intItemTypeSubCode] INT NULL, 
 		[ysnAutoCalculateFreight] BIT NULL, 
@@ -626,3 +628,13 @@ Type the overview for the table here.
 		@level2type = N'COLUMN',
 		@level2name = N'intShipViaId'
 
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Deposit PLU Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'intDepositPLUId'

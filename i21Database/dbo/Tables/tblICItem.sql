@@ -49,7 +49,8 @@ Type the overview for the table here.
 		[strMask3] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intPatronageCategoryId] INT NULL, 
 		[intFuelTaxClassId] INT NULL, 
-		[intTaxGroupId] INT NULL,
+		[intSalesTaxGroupId] INT NULL,
+		[intPurchaseTaxGroupId] INT NULL,
 		[ysnStockedItem] BIT NULL DEFAULT ((0)), 
 		[ysnDyedFuel] BIT NULL DEFAULT ((0)), 
 		[strBarcodePrint] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -58,6 +59,7 @@ Type the overview for the table here.
 		[ysnInboundTax] BIT NULL DEFAULT ((0)), 
 		[ysnOutboundTax] BIT NULL DEFAULT ((0)), 
 		[ysnRestrictedChemical] BIT NULL DEFAULT ((0)), 
+		[ysnFuelItem] BIT NULL DEFAULT ((0)),
 		[ysnTankRequired] BIT NULL DEFAULT ((0)), 
 		[ysnAvailableTM] BIT NULL DEFAULT ((0)), 
 		[dblDefaultFull] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -79,6 +81,10 @@ Type the overview for the table here.
 		[ysnMaterialFee] BIT NULL DEFAULT ((0)), 
 		[ysnAutoBlend] BIT NULL DEFAULT ((0)),
 		[dblUserGroupFee] NUMERIC(18, 6) NULL DEFAULT ((0)),
+		[dblWeightTolerance] NUMERIC(18, 6) NULL DEFAULT ((0)),
+		[dblOverReceiveTolerance] NUMERIC(18, 6) NULL DEFAULT ((0)),
+		[strMaintenanceCalculationMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+		[dblMaintenanceRate] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[strNACSCategory] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strWICCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intAGCategory] INT NULL, 
@@ -119,7 +125,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItem_IngredientTag] FOREIGN KEY ([intIngredientTag]) REFERENCES [tblICTag]([intTagId]), 
 		CONSTRAINT [FK_tblICItem_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]), 
 		CONSTRAINT [FK_tblICItem_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]), 
-		CONSTRAINT [FK_tblICItem_tblSMTaxGroupMaster] FOREIGN KEY ([intTaxGroupId]) REFERENCES [tblSMTaxGroupMaster]([intTaxGroupMasterId]),
+		CONSTRAINT [FK_tblICItem_SalesTaxGroup] FOREIGN KEY ([intSalesTaxGroupId]) REFERENCES [tblSMTaxGroupMaster]([intTaxGroupMasterId]),
+		CONSTRAINT [FK_tblICItem_PurchaseTaxGroup] FOREIGN KEY ([intSalesTaxGroupId]) REFERENCES [tblSMTaxGroupMaster]([intTaxGroupMasterId]),
 		CONSTRAINT [FK_tblICItem_tblSMCountry] FOREIGN KEY ([intOriginId]) REFERENCES [tblSMCountry]([intCountryID])  
 	);
 	GO
@@ -910,10 +917,37 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intFuelTaxClassId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Tax Group Id',
+    @value = N'Identity Field',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblICItem',
     @level2type = N'COLUMN',
-    @level2name = N'intTaxGroupId'
+    @level2name = N'intItemId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Sales Tax Group Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intSalesTaxGroupId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Purchase Tax Group Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intPurchaseTaxGroupId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Fuel Item',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItem',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnFuelItem'
