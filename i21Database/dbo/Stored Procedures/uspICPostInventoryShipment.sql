@@ -166,7 +166,7 @@ BEGIN
 	FROM tblICInventoryShipmentItem Detail
 	INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Detail.intItemUOMId
 	LEFT JOIN tblICInventoryShipmentItemLot DetailLot ON DetailLot.intInventoryShipmentItemId = Detail.intInventoryShipmentItemId
-	INNER JOIN tblICLot Lot ON Lot.intLotId = DetailLot.intLotId
+	LEFT JOIN tblICLot Lot ON Lot.intLotId = DetailLot.intLotId
 	INNER JOIN tblICInventoryShipment Header ON Header.intInventoryShipmentId = Detail.intInventoryShipmentId
 	INNER JOIN vyuICGetShipmentItemSource ItemSource ON ItemSource.intInventoryShipmentItemId = Detail.intInventoryShipmentItemId
 	WHERE Detail.intInventoryShipmentId = @intTransactionId

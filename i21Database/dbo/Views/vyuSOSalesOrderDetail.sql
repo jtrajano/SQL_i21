@@ -1,7 +1,7 @@
 ﻿CREATE VIEW dbo.vyuSOSalesOrderDetail
 AS
 SELECT 
-	 D.[intSalesOrderDetailId]
+     D.[intSalesOrderDetailId]
     ,D.[intSalesOrderId]
     ,H.[strSalesOrderNumber]  
     ,H.[intCompanyLocationId]
@@ -11,6 +11,7 @@ SELECT
     ,D.[strItemDescription]
     ,IC.[strLotTracking]
     ,D.[intItemUOMId]
+    ,ISNULL(IU.[dblUnitQty], 0) AS dblUOMConversion
     ,U.[strUnitMeasure] 
     ,D.[dblQtyOrdered]
     ,D.[dblQtyAllocated]

@@ -538,3 +538,11 @@ EXEC sp_addmessage 51133,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51134) EXEC sp_dropmessage 51134, 'us_english'	
 SET @strmessage = 'No default consumption unit configured, cannot consume.'
 EXEC sp_addmessage 51134,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51130) EXEC sp_dropmessage 51130, 'us_english'	
+SET @strmessage = 'The UOM is missing on %s.'
+EXEC sp_addmessage 51130,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51131) EXEC sp_dropmessage 51131, 'us_english'	
+SET @strmessage = 'Please specify the Adjust Qty By or New Quantity on %s.'
+EXEC sp_addmessage 51131,11,@strmessage,'us_english','False'

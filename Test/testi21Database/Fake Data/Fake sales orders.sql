@@ -277,7 +277,7 @@ BEGIN
 				,dblAmountDue				= 0.00 
 				,dblPayment					= 0.00 
 				,strTransactionType			= 'Sales Order'
-				,strOrderStatus				= 'Pending'
+				,strOrderStatus				= 'Open'
 				,intAccountId				= @AccountReceivable_Default
 				,dtmProcessDate				= NULL 
 				,ysnProcessed				= 0 
