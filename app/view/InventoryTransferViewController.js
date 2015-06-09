@@ -101,7 +101,8 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             grdInventoryTransfer: {
                 readOnly: '{current.ysnPosted}',
                 colSourceNumber: {
-                    dataIndex: 'strSourceNumber'
+                    dataIndex: 'strSourceNumber',
+                    hidden: '{checkHideSourceNo}'
                 },
                 colItemNumber: {
                     dataIndex: 'strItemNo',

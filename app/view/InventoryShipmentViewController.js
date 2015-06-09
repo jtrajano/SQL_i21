@@ -149,6 +149,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             grdInventoryShipment: {
                 readOnly: '{current.ysnPosted}',
                 colOrderNumber: {
+                    hidden: '{checkHideOrderNo}',
                     dataIndex: 'strOrderNumber',
                     editor: {
                         store: '{soDetails}',
@@ -160,6 +161,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     }
                 },
                 colSourceNumber: {
+                    hidden: '{checkHideSourceNo}',
                     dataIndex: 'strSourceNumber'
                 },
                 colItemNumber: {

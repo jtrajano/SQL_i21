@@ -266,7 +266,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             },
                                                             {
                                                                 xtype: 'gridcombobox',
-                                                                flex: 1,
+                                                                flex: 1.3,
                                                                 columns: [
                                                                     {
                                                                         dataIndex: 'intSourceType',

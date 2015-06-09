@@ -133,6 +133,22 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             else {
                 return 'large-ship-via';
             }
+        },
+        checkHideOrderNo: function(get) {
+            if (get('current.strReceiptType') === 'Direct') {
+                return true;
+            }
+            else {
+                return false;
+            }
+        },
+        checkHideSourceNo: function(get) {
+            if (get('current.intSourceType') === 0) {
+                return true;
+            }
+            else {
+                return false;
+            }
         }
     }
 

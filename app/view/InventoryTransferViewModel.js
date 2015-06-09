@@ -143,6 +143,14 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
             else {
                 return 'large-post';
             }
+        },
+        checkHideSourceNo: function(get) {
+            if (get('current.intSourceType') === 0) {
+                return true;
+            }
+            else {
+                return false;
+            }
         }
     }
 

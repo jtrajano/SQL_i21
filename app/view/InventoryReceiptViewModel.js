@@ -293,6 +293,22 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             else {
                 return 'Receive';
             }
+        },
+        checkHideOrderNo: function(get) {
+            if (get('current.strReceiptType') === 'Direct') {
+                return true;
+            }
+            else {
+                return false;
+            }
+        },
+        checkHideSourceNo: function(get) {
+            if (get('current.intSourceType') === 0) {
+                return true;
+            }
+            else {
+                return false;
+            }
         }
     }
 
