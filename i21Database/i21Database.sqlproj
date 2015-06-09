@@ -1686,6 +1686,8 @@
     <Build Include="dbo\Views\vyuARCustomerStatementReport.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingReport.sql" />
     <Build Include="dbo\Tables\tblEntityPreferences.sql" />
+    <Build Include="dbo\Views\vyuCTContractHeaderView.sql" />
+    <Build Include="dbo\Views\vyuCTContractSearchView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
