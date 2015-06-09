@@ -43,11 +43,25 @@ SELECT
 	[intPrepayType]			=	B.intPrepayTypeId,
 	[dblTotal]				=	B.dblTotal,
 	[dblBillAmount]			=	CurrentBill.dblTotal,
-	[dblBalance]			=	B.dblTotal - (CASE B.intPrepayTypeId
-									WHEN 2 THEN B.dblCost * CurrentBill.dblQtyReceived
+	[dblBalance]			=	B.dblTotal - (CASE B.intPrepayTypeId 
+									WHEN 2 THEN 
+										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
+											THEN B.dblCost * B.dblQtyReceived
+											ELSE B.dblCost * CurrentBill.dblQtyReceived END
+									WHEN 3 THEN
+										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
+											THEN B.dblTotal
+											ELSE ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) END
 									ELSE 0 END),
-	[dblAmountApplied]		=	CASE B.intPrepayTypeId
-									WHEN 2 THEN B.dblCost * CurrentBill.dblQtyReceived
+	[dblAmountApplied]		=	CASE B.intPrepayTypeId 
+									WHEN 2 THEN 
+										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
+											THEN B.dblCost * B.dblQtyReceived
+											ELSE B.dblCost * CurrentBill.dblQtyReceived END
+									WHEN 3 THEN
+										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
+											THEN B.dblTotal
+											ELSE ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) END
 									ELSE 0 END,
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
