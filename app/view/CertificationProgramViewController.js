@@ -130,15 +130,15 @@ Ext.define('Inventory.view.CertificationProgramViewController', {
         var plugin = grid.getPlugin('cepCommodity');
         var current = plugin.getActiveRecord();
 
-        if (combo.column.itemId === 'colCommodity')
+        if (combo.itemId === 'cboCommodity')
         {
             current.set('intCommodityId', records[0].get('intCommodityId'));
         }
-        else if (combo.column.itemId === 'colCurrency')
+        else if (combo.itemId === 'cboCurrency')
         {
             current.set('intCurrencyId', records[0].get('intCurrencyID'));
         }
-        else if (combo.column.itemId === 'colPerUOM')
+        else if (combo.itemId === 'cboPerUnitMeasure')
         {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
         }
@@ -152,7 +152,7 @@ Ext.define('Inventory.view.CertificationProgramViewController', {
             "#cboCurrency": {
                 select: this.onCommoditySelect
             },
-            "#colPerUOM": {
+            "#cboPerUnitMeasure": {
                 select: this.onCommoditySelect
             }
         });
