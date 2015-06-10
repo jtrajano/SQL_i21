@@ -21,5 +21,5 @@ BEGIN
 		,SL.strName
 		,SL.intSubLocationId 
 	FROM dbo.tblICStorageLocation SL
-	WHERE intLocationId = @intLocationId
+	WHERE intLocationId = @intLocationId and SL.ysnAllowConsume =1
 END
