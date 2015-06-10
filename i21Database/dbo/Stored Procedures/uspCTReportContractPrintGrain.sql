@@ -74,7 +74,7 @@ BEGIN TRY
 			ISNULL(LTRIM(RTRIM(EL.strCity)),'') + 
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EL.strState)) = '' THEN NULL ELSE LTRIM(RTRIM(strState)) END,'') + 
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EL.strZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(strZipCode)) END,'') + 
-			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EL.strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(strCountry)) END,'')
+			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EL.strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EL.strCountry)) END,'')
 			AS	strB,
 			CH.dtmContractDate,
 			CH.intContractNumber,
@@ -102,11 +102,15 @@ BEGIN TRY
 					WHEN	CH.intContractTypeId  =	2
 					THEN	'BUYER'
 			END		AS	strD,
-			TX.strText
-	FROM	tblCTContractHeader CH
-	JOIN	vyuCTEntity			EY	ON	EY.intEntityId	=	CH.intEntityId
-	JOIN	tblEntityLocation	EL	ON	EL.intEntityId	=	EY.intEntityId	LEFT
-	JOIN	tblCTContractText	TX	ON	TX.intContractTextId	=	CH.intContractTextId
+			TX.strText,
+			CH.strContractBasis,
+			CH.strWeight,
+			CH.strGrade
+
+	FROM	vyuCTContractHeaderView CH
+	JOIN	vyuCTEntity				EY	ON	EY.intEntityId	=	CH.intEntityId
+	JOIN	tblEntityLocation		EL	ON	EL.intEntityId	=	EY.intEntityId	LEFT
+	JOIN	tblCTContractText		TX	ON	TX.intContractTextId	=	CH.intContractTextId
 	WHERE	intContractHeaderId	=	@intContractHeaderId
 	
 	UPDATE tblCTContractHeader SET ysnPrinted = 1 WHERE intContractHeaderId	= @intContractHeaderId
