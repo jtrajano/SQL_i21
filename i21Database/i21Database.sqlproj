@@ -1662,6 +1662,8 @@
     <Build Include="dbo\Stored Procedures\uspGLUpdateSegmentCategory.sql" />
     <Build Include="dbo\Views\vyuARUnappliedCreditsRegister.sql" />
     <Build Include="dbo\Views\vyuARSAByItemClass.sql" />
+    <Build Include="dbo\Stored Procedures\uspARReComputeInvoiceTaxes.sql" />
+    <Build Include="dbo\Stored Procedures\uspARReComputeInvoiceAmounts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

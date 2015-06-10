@@ -208,8 +208,28 @@ INNER JOIN
 INNER JOIN
 	@TicketHoursWorked HW
 		ON V.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]
-
-	          
+		
+DECLARE @Invoices AS TABLE(intInvoiceID INT)
+INSERT INTO @Invoices 
+SELECT DISTINCT
+	I.[intInvoiceId]
+FROM 
+	[tblARInvoice] I
+INNER JOIN
+	tblHDTicketHoursWorked V
+		ON RTRIM(I.[strComments]) = RTRIM(CONVERT(nvarchar(250),V.[intTicketHoursWorkedId]))
+INNER JOIN
+	@TicketHoursWorked HW
+		ON V.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]
+		
+WHILE EXISTS(SELECT NULL FROM @Invoices)
+BEGIN
+	DECLARE @InvoiceID AS INT
+	SELECT TOP 1 @InvoiceID = [intInvoiceID] FROM @Invoices
+	EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceID
+	DELETE FROM @Invoices WHERE [intInvoiceID] = @InvoiceID
+END
+          
            
 IF @Post = 1
 	BEGIN
