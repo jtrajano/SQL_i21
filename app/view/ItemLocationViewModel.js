@@ -29,7 +29,8 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
         'Inventory.store.Family',
         'Inventory.store.PromotionSalesList',
         'Inventory.store.BufferedCountGroup',
-        'Inventory.store.BufferedStorageLocation'
+        'Inventory.store.BufferedStorageLocation',
+        'Inventory.store.BufferedItemUPC'
     ],
 
     stores: {
@@ -89,7 +90,9 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
         mixMatchCode: {
             type: 'storepromotionsaleslist'
         },
-
+        itemUPC: {
+            type: 'icbuffereditemupc'
+        },
 
         freightTerm: {
             type: 'FreightTermsBuffered'

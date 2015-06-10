@@ -3364,10 +3364,32 @@ Ext.define('Inventory.view.Item', {
                                                                         valueField: 'strDescription'
                                                                     },
                                                                     {
-                                                                        xtype: 'combobox',
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intItemId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Item Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strItemNo',
+                                                                                dataType: 'string',
+                                                                                text: 'Item Number',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
                                                                         itemId: 'cboOnCostType',
                                                                         fieldLabel: 'On Cost Type',
-                                                                        labelWidth: 105
+                                                                        labelWidth: 105,
+                                                                        displayField: 'strItemNo',
+                                                                        valueField: 'intItemId'
                                                                     },
                                                                     {
                                                                         xtype: 'numericfield',
@@ -3377,10 +3399,39 @@ Ext.define('Inventory.view.Item', {
                                                                         hideTrigger: true
                                                                     },
                                                                     {
-                                                                        xtype: 'combobox',
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intItemUOMId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Unit Of Measure Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strUnitMeasure',
+                                                                                dataType: 'string',
+                                                                                text: 'Unit Measure',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strUnitType',
+                                                                                dataType: 'string',
+                                                                                text: 'Unit Type',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                xtype: 'checkcolumn',
+                                                                                dataIndex: 'ysnStockUnit',
+                                                                                dataType: 'boolean',
+                                                                                text: 'Stock Unit',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
                                                                         itemId: 'cboCostUOM',
                                                                         fieldLabel: 'UOM',
-                                                                        labelWidth: 105
+                                                                        labelWidth: 105,
+                                                                        displayField: 'strUnitMeasure',
+                                                                        valueField: 'intItemUOMId'
                                                                     }
                                                                 ]
                                                             },

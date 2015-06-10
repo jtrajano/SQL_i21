@@ -1,9 +1,9 @@
 /**
  * Created by LZabala on 4/17/2015.
  */
-Ext.define('Inventory.store.BufferedAssemblyItem', {
+Ext.define('Inventory.store.BufferedOtherCharges', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.icbufferedassemblyitem',
+    alias: 'store.icbufferedothercharges',
 
     requires: [
         'Inventory.model.CompactItem'
@@ -14,7 +14,7 @@ Ext.define('Inventory.store.BufferedAssemblyItem', {
         cfg = cfg || {};
         me.callParent([Ext.apply({
             model: 'Inventory.model.CompactItem',
-            storeId: 'BufferedAssemblyItem',
+            storeId: 'BufferedOtherCharges',
             pageSize: 50,
             batchActions: true,
             remoteFilter: true,
@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedAssemblyItem', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Item/GetAssemblyItems'
+                    read: '../Inventory/api/Item/GetOtherCharges'
                 },
                 reader: {
                     type: 'json',

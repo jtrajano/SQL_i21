@@ -9,6 +9,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         'Inventory.store.BufferedPatronageCategory',
         'Inventory.store.BufferedInventoryTag',
         'Inventory.store.BufferedItemUnitMeasure',
+        'Inventory.store.BufferedOtherCharges',
         'Inventory.store.BufferedItemLocation',
         'Inventory.store.BufferedUnitMeasure',
         'Inventory.store.BufferedPricingLevel',
@@ -299,6 +300,12 @@ Ext.define('Inventory.view.ItemViewModel', {
                     name: 'strDescription'
                 }
             ]
+        },
+        otherCharges: {
+            type: 'icbufferedothercharges'
+        },
+        costUOM: {
+            type: 'icbuffereditemunitmeasure'
         },
 
 
@@ -767,6 +774,14 @@ Ext.define('Inventory.view.ItemViewModel', {
         checkNotCommodityType: function (get) {
             if (get('current.strType') !== 'Commodity')
                 return true;
+            else
+                return false;
+        },
+        checkPerUnitCostMethod: function(get) {
+            if (get('current.strCostMethod') !== 'Per Unit') {
+                this.data.current.set('intCostUOMId', null);
+                return true;
+            }
             else
                 return false;
         },

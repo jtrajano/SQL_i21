@@ -104,7 +104,10 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                 store: '{mixMatchCode}'
             },
             chkDepositRequired: '{current.ysnDepositRequired}',
-            cboDepositPLU: '{current.intDepositPLUId}',
+            cboDepositPLU: {
+                value: '{current.intDepositPLUId}',
+                store: '{itemUPC}'
+            },
             txtBottleDepositNo: '{current.intBottleDepositNo}',
             chkSaleable: '{current.ysnSaleable}',
             chkQuantityRequired: '{current.ysnQuantityRequired}',

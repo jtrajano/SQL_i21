@@ -439,15 +439,25 @@ Ext.define('Inventory.view.ItemViewController', {
                 store: '{costMethods}'
             },
             cboOnCostType: {
-                value: '{current.intOnCostTypeId}'
-//                ,
-//                store: '{}'
+                value: '{current.intOnCostTypeId}',
+                store: '{otherCharges}',
+                defaultFilters: [{
+                    column: 'intItemId',
+                    value: '{current.intItemId}',
+                    condition: 'noteq',
+                    conjunction: 'and'
+                }]
             },
             txtAmount: '{current.dblAmount}',
             cboCostUOM: {
-                value: '{current.intCostUOMId}'
-//                ,
-//                store: '{}'
+                readOnly: '{checkPerUnitCostMethod}',
+                value: '{current.intCostUOMId}',
+                store: '{costUOM}',
+                defaultFilters: [{
+                    column: 'intItemId',
+                    value: '{current.intItemId}',
+                    conjunction: 'and'
+                }]
             },
 
             //-----------------//

@@ -7316,13 +7316,49 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intItemId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Item Id',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strItemNo',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Item Number',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strDescription',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Description',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strItemNo",
                                                                 "fieldLabel": "On Cost Type",
                                                                 "itemId": "cboOnCostType",
                                                                 "labelWidth": 105,
-                                                                "layout|flex": null
+                                                                "layout|flex": null,
+                                                                "valueField": "intItemId"
                                                             },
                                                             "name": "MyComboBox78",
-                                                            "designerId": "556f6b6c-cff1-430f-b69a-ba6e618d42db"
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "556f6b6c-cff1-430f-b69a-ba6e618d42db",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         },
                                                         {
                                                             "type": "Ext.form.field.Number",
@@ -7350,13 +7386,55 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intItemUOMId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Unit Of Measure Id',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strUnitMeasure',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Unit Measure',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strUnitType',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Unit Type',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\txtype: 'checkcolumn',",
+                                                                    "\t\tdataIndex: 'ysnStockUnit',",
+                                                                    "\t\tdataType: 'boolean',",
+                                                                    "\t\ttext: 'Stock Unit',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strUnitMeasure",
                                                                 "fieldLabel": "UOM",
                                                                 "itemId": "cboCostUOM",
                                                                 "labelWidth": 105,
-                                                                "layout|flex": null
+                                                                "layout|flex": null,
+                                                                "valueField": "intItemUOMId"
                                                             },
                                                             "name": "MyComboBox80",
-                                                            "designerId": "76616d76-df30-44d4-aeff-727b2a09994a"
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "76616d76-df30-44d4-aeff-727b2a09994a",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         }
                                                     ]
                                                 },

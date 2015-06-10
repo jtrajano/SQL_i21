@@ -235,8 +235,47 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<tblICItem>()
                     .Where(p => p.strType == "Assembly/Blend" && p.strLotTracking == "No")
-                .Filter(param, true);
+                    .Filter(param, true);
             var data = await query.Execute(param, "intItemId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+
+        /// <summary>
+        /// Get Assembly Items
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<SearchResult> GetOtherCharges(GetParameter param)
+        {
+            var query = _db.GetQuery<tblICItem>()
+                    .Where(p => p.strType == "Other Charge")
+                    .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+
+        /// <summary>
+        /// Get Item UPC Codes
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<SearchResult> GetItemUPCs(GetParameter param)
+        {
+            var query = _db.GetQuery<tblICItemUOM>()
+                    .Include(p => p.tblICUnitMeasure)
+                    .Where(p => string.IsNullOrEmpty(p.strUpcCode) == false)
+                    .Filter(param, true);
+            var data = await query.Execute(param, "intItemUOMId").ToListAsync();
 
             return new SearchResult()
             {

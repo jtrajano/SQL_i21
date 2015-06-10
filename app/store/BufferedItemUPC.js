@@ -1,20 +1,20 @@
 /**
- * Created by LZabala on 4/17/2015.
+ * Created by LZabala on 11/14/2014.
  */
-Ext.define('Inventory.store.BufferedAssemblyItem', {
+Ext.define('Inventory.store.BufferedItemUPC', {
     extend: 'Ext.data.BufferedStore',
-    alias: 'store.icbufferedassemblyitem',
+    alias: 'store.icbuffereditemupc',
 
     requires: [
-        'Inventory.model.CompactItem'
+        'Inventory.model.ItemUOM'
     ],
 
     constructor: function(cfg) {
         var me = this;
         cfg = cfg || {};
         me.callParent([Ext.apply({
-            model: 'Inventory.model.CompactItem',
-            storeId: 'BufferedAssemblyItem',
+            model: 'Inventory.model.ItemUOM',
+            storeId: 'BufferedItemUPC',
             pageSize: 50,
             batchActions: true,
             remoteFilter: true,
@@ -22,7 +22,7 @@ Ext.define('Inventory.store.BufferedAssemblyItem', {
             proxy: {
                 type: 'rest',
                 api: {
-                    read: '../Inventory/api/Item/GetAssemblyItems'
+                    read: '../Inventory/api/Item/GetItemUPCs'
                 },
                 reader: {
                     type: 'json',

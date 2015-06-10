@@ -634,35 +634,28 @@ Ext.define('Inventory.view.ItemLocation', {
                                                     xtype: 'gridcombobox',
                                                     columns: [
                                                         {
-                                                            dataIndex: 'intPromoSalesListId',
+                                                            dataIndex: 'intItemUOMId',
                                                             dataType: 'numeric',
-                                                            text: 'Promo Sales Id',
                                                             hidden: true
                                                         },
                                                         {
-                                                            dataIndex: 'intPromoCode',
+                                                            dataIndex: 'strUpcCode',
                                                             dataType: 'numeric',
-                                                            text: 'Promo Code',
+                                                            text: 'UPC Code',
                                                             flex: 1
                                                         },
                                                         {
-                                                            dataIndex: 'strPromoType',
+                                                            dataIndex: 'strUnitMeasure',
                                                             dataType: 'string',
-                                                            text: 'Promo Type',
-                                                            flex: 1
-                                                        },
-                                                        {
-                                                            dataIndex: 'strDescription',
-                                                            dataType: 'string',
-                                                            text: 'Description',
+                                                            text: 'UOM',
                                                             flex: 1
                                                         }
                                                     ],
                                                     itemId: 'cboDepositPLU',
                                                     fieldLabel: 'Deposit PLU',
                                                     labelWidth: 105,
-                                                    displayField: 'intPromoCode',
-                                                    valueField: 'intPromoSalesListId'
+                                                    displayField: 'strUpcCode',
+                                                    valueField: 'intItemUOMId'
                                                 },
                                                 {
                                                     xtype: 'textfield',
