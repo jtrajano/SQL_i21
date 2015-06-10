@@ -221,13 +221,6 @@ Ext.define('Inventory.view.Category', {
                                                             },
                                                             {
                                                                 xtype: 'combobox',
-                                                                disabled: true,
-                                                                itemId: 'cboCatalogGroup',
-                                                                fieldLabel: 'Catalog Group',
-                                                                labelWidth: 130
-                                                            },
-                                                            {
-                                                                xtype: 'combobox',
                                                                 itemId: 'cboCostingMethod',
                                                                 fieldLabel: 'Costing Method',
                                                                 labelWidth: 130,
@@ -1173,64 +1166,6 @@ Ext.define('Inventory.view.Category', {
                                                         clicksToEdit: 1
                                                     }
                                                 ]
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        xtype: 'panel',
-                                        hidden: true,
-                                        layout: 'fit',
-                                        title: 'Catalog',
-                                        items: [
-                                            {
-                                                xtype: 'advancefiltergrid',
-                                                itemId: 'grdCatalog',
-                                                margin: -1,
-                                                dockedItems: [
-                                                    {
-                                                        xtype: 'toolbar',
-                                                        dock: 'top',
-                                                        itemId: 'tlbGridOptions',
-                                                        layout: {
-                                                            type: 'hbox',
-                                                            padding: '0 0 0 1'
-                                                        },
-                                                        items: [
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnDeleteCatalog',
-                                                                iconCls: 'small-delete',
-                                                                text: 'Delete'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
-                                                            },
-                                                            {
-                                                                xtype: 'filter1'
-                                                            }
-                                                        ]
-                                                    }
-                                                ],
-                                                columns: [
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
-                                                        text: 'Level'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        dataIndex: 'string',
-                                                        text: 'Catalog Group',
-                                                        flex: 1
-                                                    }
-                                                ],
-                                                viewConfig: {
-                                                    itemId: 'grvCatalog'
-                                                },
-                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                    selType: 'checkboxmodel'
-                                                })
                                             }
                                         ]
                                     },

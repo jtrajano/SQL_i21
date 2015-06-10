@@ -24,7 +24,6 @@ namespace iRely.Inventory.Model
         public string strCategoryCode { get; set; }
         public string strDescription { get; set; }
         public int? intLineOfBusinessId { get; set; }
-        public int? intCatalogGroupId { get; set; }
         public int? intCostingMethod { get; set; }
         public string strInventoryTracking { get; set; }
         public decimal? dblStandardQty { get; set; }

@@ -19,7 +19,6 @@ Ext.define('Inventory.model.Category', {
         { name: 'strCategoryCode', type: 'string' },
         { name: 'strDescription', type: 'string' },
         { name: 'intLineOfBusinessId', type: 'int', allowNull: true },
-        { name: 'intCatalogGroupId', type: 'int', allowNull: true },
         { name: 'intCostingMethod', type: 'int', allowNull: true },
         { name: 'strInventoryTracking', type: 'string' },
         { name: 'dblStandardQty', type: 'float' },

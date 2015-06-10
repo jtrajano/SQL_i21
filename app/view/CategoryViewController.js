@@ -25,7 +25,6 @@ Ext.define('Inventory.view.CategoryViewController', {
                 value: '{current.intLineOfBusinessId}',
                 store: '{linesOfBusiness}'
             },
-            cboCatalogGroup: '{current.intCatalogGroupId}',
             cboCostingMethod: {
                 value: '{current.intCostingMethod}',
                 store: '{costingMethods}'
