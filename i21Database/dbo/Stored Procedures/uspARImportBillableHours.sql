@@ -236,7 +236,10 @@ IF @Post = 1
 		DECLARE	@return_value int,
 				@success bit,
 				@minId int,
-				@maxId int
+				@maxId int,
+				@batchId NVARCHAR(20),
+				@SuccessCount INT,
+				@InvCount INT
 				
 		SELECT
 			 @minId = MIN(I.[intInvoiceId])
@@ -280,12 +283,16 @@ IF @Post = 1
 				@beginTransaction = @minId,
 				@endTransaction = @maxId,
 				@exclude = NULL,
-				@successfulCount = @SuccessfulCount OUTPUT,
-				@invalidCount = @InvalidCount OUTPUT,
+				@successfulCount = @SuccessCount OUTPUT,
+				@invalidCount = @InvCount OUTPUT,
 				@success = @IsSuccess OUTPUT,
-				@batchIdUsed = @BatchIdUsed OUTPUT,
+				@batchIdUsed = @batchId OUTPUT,
 				@recapId = NULL,
 				@transType = N'Invoice'
+				
+		SET @BatchIdUsed = @batchId
+		SET @SuccessfulCount = @SuccessCount
+		SET @InvalidCount = @InvCount
 	END 
 	
 IF @Post = 0

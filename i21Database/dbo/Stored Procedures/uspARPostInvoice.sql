@@ -115,6 +115,27 @@ IF(@exclude IS NOT NULL)
 		FROM @PostInvoiceData A
 		WHERE EXISTS(SELECT * FROM @InvoicesExclude B WHERE A.intInvoiceId = B.intInvoiceId)
 	END
+	
+-- Get the next batch number
+IF(@batchId IS NULL AND @param IS NOT NULL AND @param <> 'all')
+	BEGIN
+		SELECT TOP 1
+			@batchId = GL.strBatchId
+		FROM
+			tblGLDetailRecap GL
+		INNER JOIN 
+			@PostInvoiceData I
+				ON GL.intTransactionId = I.intInvoiceId 
+				AND GL.strTransactionId = I.strTransactionId
+		WHERE
+			GL.strTransactionType IN ('Credit Memo', 'Invoice', 'Overpayment', 'Prepayment')
+			AND	GL.strModuleName = @MODULE_NAME
+	END
+
+IF(@batchId IS NULL)
+	EXEC uspSMGetStartingNumber 3, @batchId OUT
+
+SET @batchIdUsed = @batchId
 
 --------------------------------------------------------------------------------------------  
 -- Validations  
@@ -462,7 +483,7 @@ IF @recap = 0
 		IF(@totalInvalid >= 1)  
 			BEGIN			
 				DECLARE @ErrorMessage NVARCHAR(100)				
-				SELECT TOP 1 @ErrorMessage = strError FROM @InvalidInvoiceData
+				SELECT TOP 1 @ErrorMessage = @batchIdUsed + ' : ' + strError FROM @InvalidInvoiceData
 				RAISERROR(@ErrorMessage, 11, 1) 
 				SET @success = 0 
 				GOTO Post_Exit
@@ -475,27 +496,6 @@ IF @recap = 0
 			END		
 
 	END
-
--- Get the next batch number
-IF(@batchId IS NULL AND @param IS NOT NULL AND @param <> 'all')
-	BEGIN
-		SELECT TOP 1
-			@batchId = GL.strBatchId
-		FROM
-			tblGLDetailRecap GL
-		INNER JOIN 
-			@PostInvoiceData I
-				ON GL.intTransactionId = I.intInvoiceId 
-				AND GL.strTransactionId = I.strTransactionId
-		WHERE
-			GL.strTransactionType IN ('Credit Memo', 'Invoice', 'Overpayment', 'Prepayment')
-			AND	GL.strModuleName = @MODULE_NAME
-	END
-
-IF(@batchId IS NULL)
-	EXEC uspSMGetStartingNumber 3, @batchId OUT
-
-SET @batchIdUsed = @batchId
 
 
 --------------------------------------------------------------------------------------------  
