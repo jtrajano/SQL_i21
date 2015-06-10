@@ -16,7 +16,6 @@ Type the overview for the table here.
 		[strCategoryCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intLineOfBusinessId] INT NULL, 
-		[intCatalogGroupId] INT NULL, 
 		[intCostingMethod] INT NOT NULL DEFAULT 1,
 		[strInventoryTracking] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[dblStandardQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -51,7 +50,6 @@ Type the overview for the table here.
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICCategory] PRIMARY KEY ([intCategoryId]), 
 		CONSTRAINT [AK_tblICCategory_strCategoryCode] UNIQUE ([strCategoryCode]), 
-		CONSTRAINT [FK_tblICCategory_tblICCatalog] FOREIGN KEY ([intCatalogGroupId]) REFERENCES [tblICCatalog]([intCatalogId]),
 		CONSTRAINT [FK_tblICCategory_tblICUnitMeasure] FOREIGN KEY ([intUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 		CONSTRAINT [FK_tblICCategory_tblICLineOfBusiness] FOREIGN KEY ([intLineOfBusinessId]) REFERENCES [tblICLineOfBusiness]([intLineOfBusinessId])	
 	)
@@ -86,14 +84,7 @@ Type the overview for the table here.
 	GO
 
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Catalog Group Id',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICCategory',
-		@level2type = N'COLUMN',
-		@level2name = N'intCatalogGroupId'
+	
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Costing Method',
