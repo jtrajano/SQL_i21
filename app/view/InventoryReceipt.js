@@ -1193,6 +1193,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     flex: 1
                                                                                 }
                                                                             ],
+                                                                            allowEmpty: true,
                                                                             itemId: 'cboWeightUOM',
                                                                             displayField: 'strUnitMeasure',
                                                                             valueField: 'strUnitMeasure'

@@ -256,6 +256,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colWeightUOM: {
                     dataIndex: 'strWeightUOM',
                     editor: {
+                        allowEmpty: true,
                         store: '{weightUOM}',
                         defaultFilters: [
                             {
@@ -2097,10 +2098,22 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     onWeightUOMChange: function(combo, newValue, oldValue, eOpts) {
-        if (iRely.Functions.isEmpty(oldValue)) return false;
-
-        if (newValue === '') {
-
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+        if (current && (newValue === null || newValue === '')){
+            current.set('intWeightUOMId', null);
+            current.set('dblWeightUOMConvFactor', null);
+            if (current.tblICInventoryReceiptItemLots()) {
+                Ext.Array.each(current.tblICInventoryReceiptItemLots().data.items, function(lot) {
+                    if (!lot.dummy) {
+                        lot.set('strWeightUOM', null);
+                        lot.set('dblGrossWeight', 0);
+                        lot.set('dblTareWeight', 0);
+                        lot.set('dblNetWeight', 0);
+                    }
+                });
+            }
         }
     },
 

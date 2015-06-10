@@ -2203,6 +2203,7 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
+                                                                        "allowEmpty": true,
                                                                         "columns": [
                                                                             "[",
                                                                             "\t{",
@@ -2238,13 +2239,19 @@
                                                                     },
                                                                     "name": "MyComboBox71",
                                                                     "configAlternates": {
-                                                                        "columns": "array"
+                                                                        "columns": "array",
+                                                                        "allowEmpty": "boolean"
                                                                     },
                                                                     "designerId": "340c1094-1554-4f84-8b19-c0fa44dd185b",
                                                                     "customConfigs": [
                                                                         {
                                                                             "group": "(Custom Properties)",
                                                                             "name": "columns",
+                                                                            "type": "string"
+                                                                        },
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "allowEmpty",
                                                                             "type": "string"
                                                                         }
                                                                     ]
