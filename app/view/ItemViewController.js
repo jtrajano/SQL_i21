@@ -54,13 +54,11 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             cboCategory: {
                 value: '{current.intCategoryId}',
-                store: '{itemCategory}',
-                readOnly: '{checkCommodityType}'
+                store: '{itemCategory}'
             },
             cboCommodity: {
                 value: '{current.intCommodityId}',
-                store: '{commodity}',
-                readOnly: '{checkNotCommodityType}'
+                store: '{commodity}'
             },
             cboLotTracking: {
                 value: '{current.strLotTracking}',

@@ -159,7 +159,6 @@ Ext.define('Inventory.model.Item', {
                 'Raw Material',
                 'Other Charge',
                 'Service',
-                'Commodity',
                 'Software'
             ],
             message: 'Invalid Type! Please select an Item Type from the list.'

@@ -49,9 +49,6 @@ Ext.define('Inventory.view.ItemViewModel', {
                     strType: 'Bundle'
                 },
                 {
-                    strType: 'Commodity'
-                },
-                {
                     strType: 'Inventory'
                 },
                 {
@@ -751,9 +748,6 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Service':
                     isNotStockTracked = true;
                     break;
-                case 'Commodity':
-                    isNotStockTracked = false;
-                    break;
                 case 'Raw Material':
                     isNotStockTracked = false;
                     break;
@@ -764,18 +758,6 @@ Ext.define('Inventory.view.ItemViewModel', {
             }
 
             return isNotStockTracked;
-        },
-        checkCommodityType: function (get) {
-            if (get('current.strType') === 'Commodity')
-                return true;
-            else
-                return false;
-        },
-        checkNotCommodityType: function (get) {
-            if (get('current.strType') !== 'Commodity')
-                return true;
-            else
-                return false;
         },
         checkPerUnitCostMethod: function(get) {
             if (get('current.strCostMethod') !== 'Per Unit') {
@@ -795,7 +777,6 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Manufacturing Item':
                 case 'Manufacturing':
                 case 'Finished Good' :
-                case 'Commodity':
                 case 'Raw Material':
                     return false;
                     break;
@@ -811,28 +792,11 @@ Ext.define('Inventory.view.ItemViewModel', {
             }
         },
         pgeCommodityHide: function(get) {
-            switch(get('current.strType')) {
-                case 'Assembly':
-                case 'Assembly/Blend':
-                case 'Assembly/Formula/Blend':
-                case 'Bundle':
-                case 'Inventory Item':
-                case 'Inventory':
-                case 'Kit':
-                case 'Manufacturing Item':
-                case 'Manufacturing':
-                case 'Finished Good' :
-                case 'Software':
-                case 'Non-Inventory':
-                case 'Other Charge':
-                case 'Service':
-                case 'Raw Material':
-                    return true;
-                    break;
-
-                case 'Commodity':
-                    return false
-                    break;
+            if (get('current.intCommodityId')) {
+                return false;
+            }
+            else {
+                return true;
             }
         },
         pgeAssemblyHide: function(get) {
@@ -854,7 +818,6 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Non-Inventory':
                 case 'Other Charge':
                 case 'Service':
-                case 'Commodity':
                 case 'Raw Material':
                     return true;
                     break;
@@ -879,7 +842,6 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Non-Inventory':
                 case 'Other Charge':
                 case 'Service':
-                case 'Commodity':
                 case 'Raw Material':
                     return true;
                     break;
@@ -904,7 +866,6 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Non-Inventory':
                 case 'Other Charge':
                 case 'Service':
-                case 'Commodity':
                 case 'Raw Material':
                     return true;
                     break;
@@ -930,7 +891,6 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Non-Inventory':
                 case 'Other Charge':
                 case 'Service':
-                case 'Commodity':
                     return true;
                     break;
             }
@@ -955,7 +915,6 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Non-Inventory':
                 case 'Other Charge':
                 case 'Service':
-                case 'Commodity':
                     return true;
                     break;
             }
@@ -979,7 +938,6 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Non-Inventory':
                 case 'Other Charge':
                 case 'Service':
-                case 'Commodity':
                 case 'Raw Material':
                     return true;
                     break;
@@ -1005,7 +963,6 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Non-Inventory':
                 case 'Other Charge':
                 case 'Service':
-                case 'Commodity':
                     return true;
                     break;
             }
@@ -1026,7 +983,6 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Non-Inventory':
                 case 'Other Charge':
                 case 'Service':
-                case 'Commodity':
                 case 'Raw Material':
                     return true;
                     break;
@@ -1047,7 +1003,6 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Non-Inventory':
                 case 'Other Charge':
                 case 'Service':
-                case 'Commodity':
                 case 'Raw Material':
                     return false;
                     break;
@@ -1076,7 +1031,6 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Non-Inventory':
                 case 'Software':
                 case 'Service':
-                case 'Commodity':
                 case 'Raw Material':
                     return true
                     break;
