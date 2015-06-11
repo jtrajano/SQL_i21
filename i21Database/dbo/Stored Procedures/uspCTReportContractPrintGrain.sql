@@ -70,11 +70,11 @@ BEGIN TRY
 			ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')
 			AS	strA,
 			LTRIM(RTRIM(EY.strName)) + ', ' + CHAR(13)+CHAR(10) +
-			ISNULL(LTRIM(RTRIM(EL.strAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
-			ISNULL(LTRIM(RTRIM(EL.strCity)),'') + 
-			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EL.strState)) = '' THEN NULL ELSE LTRIM(RTRIM(strState)) END,'') + 
-			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EL.strZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(strZipCode)) END,'') + 
-			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EL.strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EL.strCountry)) END,'')
+			ISNULL(LTRIM(RTRIM(EY.strAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
+			ISNULL(LTRIM(RTRIM(EY.strCity)),'') + 
+			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strState)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strState)) END,'') + 
+			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strZipCode)) END,'') + 
+			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strCountry)) END,'')
 			AS	strB,
 			CH.dtmContractDate,
 			CH.intContractNumber,
@@ -108,8 +108,7 @@ BEGIN TRY
 			CH.strGrade
 
 	FROM	vyuCTContractHeaderView CH
-	JOIN	vyuCTEntity				EY	ON	EY.intEntityId	=	CH.intEntityId
-	JOIN	tblEntityLocation		EL	ON	EL.intEntityId	=	EY.intEntityId	LEFT
+	JOIN	vyuCTEntity				EY	ON	EY.intEntityId	=	CH.intEntityId	LEFT
 	JOIN	tblCTContractText		TX	ON	TX.intContractTextId	=	CH.intContractTextId
 	WHERE	intContractHeaderId	=	@intContractHeaderId
 	
