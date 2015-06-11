@@ -15,7 +15,7 @@ Type the overview for the table here.
 		[intItemUOMId] INT NOT NULL IDENTITY , 
 		[intItemId] INT NOT NULL,
 		[intUnitMeasureId] INT NOT NULL, 
-		[dblUnitQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblUnitQty] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 		[dblWeight] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[intWeightUOMId] INT NULL,
 		[strUpcCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
