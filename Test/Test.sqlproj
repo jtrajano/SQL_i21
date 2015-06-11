@@ -644,6 +644,7 @@
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLotCustody for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLotCustody is successful with positive stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostCustody on outgoing stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCustody for the basics.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">
