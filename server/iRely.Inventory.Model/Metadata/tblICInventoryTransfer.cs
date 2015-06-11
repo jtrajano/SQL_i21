@@ -276,7 +276,7 @@ namespace iRely.Inventory.Model
             }
         }
 
-
+        private decimal _availQty;
         [NotMapped]
         public decimal dblAvailableQty
         {
@@ -285,7 +285,11 @@ namespace iRely.Inventory.Model
                 if (vyuICGetInventoryTransferDetail != null)
                     return vyuICGetInventoryTransferDetail.dblAvailableQty ?? 0;
                 else
-                    return 0;
+                    return _availQty;
+            }
+            set
+            {
+                _availQty = value;
             }
         }
         private string _availableUOM;
