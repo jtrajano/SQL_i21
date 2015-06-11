@@ -126,7 +126,7 @@ BEGIN TRY
 			)
 		AND ri.intConsumptionMethodId = 1
 		AND intWorkOrderId = @intWorkOrderId
-
+		AND WI.ysnConsumptionReversed=0
 	INSERT INTO @tblItem (
 		intItemId
 		,dblReqQty

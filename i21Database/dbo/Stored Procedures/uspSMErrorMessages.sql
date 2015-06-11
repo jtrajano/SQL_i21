@@ -566,3 +566,7 @@ EXEC sp_addmessage 51140,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51141) EXEC sp_dropmessage 51141, 'us_english'	
 SET @strmessage = 'Work order contains quarantined lot, you need to either release the lot or mark the pallet as ghost to close the work order.'
 EXEC sp_addmessage 51141,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51142) EXEC sp_dropmessage 51142, 'us_english'	
+SET @strmessage = 'Lot Id already exists. It should be unique'
+EXEC sp_addmessage 51142,11,@strmessage,'us_english','False'
