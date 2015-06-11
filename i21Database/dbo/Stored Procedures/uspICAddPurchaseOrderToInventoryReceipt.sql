@@ -46,10 +46,6 @@ INSERT INTO dbo.tblICInventoryReceipt (
 		,intFreightTermId
 		,strAllocateFreight
 		,intShiftNumber
-		,strCalculationBasis
-		,dblUnitWeightMile
-		,dblFreightRate
-		,dblFuelSurcharge
 		,dblInvoiceAmount
 		,ysnInvoicePaid
 		,intCheckNo
@@ -82,10 +78,6 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,intFreightTermId		= PO.intFreightTermId
 		,strAllocateFreight		= 'No' -- Default is No
 		,intShiftNumber			= NULL 
-		,strCalculationBasis	= NULL 
-		,dblUnitWeightMile		= 0 -- TODO Not sure where to get this from PO
-		,dblFreightRate			= PO.dblShipping -- TODO I assume dblShipping is the Freight Rate. 
-		,dblFuelSurcharge		= 0 
 		,dblInvoiceAmount		= PO.dblTotal
 		,ysnInvoicePaid			= 0 
 		,intCheckNo				= NULL 

@@ -3472,4 +3472,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="dtmMatchedDate" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="d206db2d-dc09-435f-b1e1-a91c540b49ba" ChangeDateTime="06/10/2015 06:27:44">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryReceiptCharge].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryReceiptCharge]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInventoryReceiptChargeId" />
+  </Operation>
 </Operations>

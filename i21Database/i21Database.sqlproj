@@ -1688,6 +1688,9 @@
     <Build Include="dbo\Tables\tblEntityPreferences.sql" />
     <Build Include="dbo\Views\vyuCTContractHeaderView.sql" />
     <Build Include="dbo\Views\vyuCTContractSearchView.sql" />
+    <Build Include="dbo\Tables\tblICInventoryReceiptCharge.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptCharge.sql" />
+    <Build Include="dbo\Views\vyuICGetOtherCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
