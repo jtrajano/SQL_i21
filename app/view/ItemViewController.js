@@ -98,7 +98,7 @@ Ext.define('Inventory.view.ItemViewController', {
             cfgManufacturing: {
                 hidden: '{pgeManufacturingHide}'
             },
-            cfgContractHide: {
+            cfgContract: {
                 hidden: '{pgeContractHide}'
             },
             cfgXref: {

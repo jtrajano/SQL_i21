@@ -969,6 +969,14 @@ Ext.define('Inventory.view.ItemViewModel', {
         },
         pgeContractHide: function(get) {
             switch(get('current.strType')) {
+                case 'Software':
+                case 'Non-Inventory':
+                case 'Other Charge':
+                case 'Service':
+
+                    return true;
+                    break;
+
                 case 'Assembly':
                 case 'Assembly/Blend':
                 case 'Assembly/Formula/Blend':
@@ -979,12 +987,8 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Manufacturing Item':
                 case 'Manufacturing':
                 case 'Finished Good' :
-                case 'Software':
-                case 'Non-Inventory':
-                case 'Other Charge':
-                case 'Service':
                 case 'Raw Material':
-                    return true;
+                    return false;
                     break;
             }
         },
