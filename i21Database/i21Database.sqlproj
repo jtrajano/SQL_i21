@@ -1729,7 +1729,7 @@
     <None Include="Scripts\Post-Deployment\EM\002_UpdateMenuuEntityType.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\3_UpdateInvoiceOrderShipToAndBillTo.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\UpdateEarningDeductionTaxId.sql" />
-    <None Include="dbo\Functions\fnAPCreatePrepaymentGLEntries.sql" />
+    <Build Include="dbo\Functions\fnAPCreatePrepaymentGLEntries.sql" />
     <None Include="Scripts\Post-Deployment\EM\003_FixVendorBadData.sql" />
     <None Include="Scripts\Post-Deployment\EM\004_MoveFuturesBrokerData.sql" />
     <None Include="Scripts\Post-Deployment\EM\005_MoveForwardingAgentData.sql" />

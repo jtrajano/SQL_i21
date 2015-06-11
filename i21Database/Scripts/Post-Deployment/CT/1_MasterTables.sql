@@ -127,6 +127,14 @@ BEGIN
 END
 GO
 
+GO
+IF NOT EXISTS(SELECT * FROM tblCTPricingType WHERE intPricingTypeId = 6)
+BEGIN
+	INSERT INTO tblCTPricingType
+	SELECT 6,'Cash',1	
+END
+GO
+
 --tblCTPutCall
 GO
 IF NOT EXISTS(SELECT * FROM tblCTPutCall WHERE intPutCallId = 1)
