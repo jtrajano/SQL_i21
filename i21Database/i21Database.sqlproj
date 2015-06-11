@@ -1736,6 +1736,7 @@
     <None Include="Scripts\Post-Deployment\EM\006_MoveTerminalData.sql" />
     <None Include="Scripts\Post-Deployment\EM\007_MoveShippingLineData.sql" />
     <None Include="Scripts\Post-Deployment\EM\008_MoveTruckerData.sql" />
+    <None Include="Scripts\Post-Deployment\IC\10_RemoveCommodityItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
