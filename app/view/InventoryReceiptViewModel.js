@@ -12,6 +12,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'Inventory.store.BufferedPackedUOM',
         'Inventory.store.BufferedUnitMeasure',
         'Inventory.store.BufferedLot',
+        'Inventory.store.BufferedOtherCharges',
         'Inventory.store.BufferedStorageLocation',
         'EntityManagement.store.VendorBuffered',
         'AccountsPayable.store.PurchaseOrderDetail',
@@ -190,6 +191,78 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         freightTerm: {
             type: 'FreightTermsBuffered'
         },
+
+        otherCharges: {
+            type: 'icbufferedothercharges'
+        },
+        costMethod: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Per Unit'
+                },
+                {
+                    strDescription: 'Percentage'
+                },
+                {
+                    strDescription: 'Amount'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        costUOM: {
+            type: 'icbuffereditemunitmeasure'
+        },
+        vendor: {
+            type: 'emvendorbuffered'
+        },
+        allocateBy: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Unit'
+                },
+                {
+                    strDescription: 'Stock Unit'
+                },
+                {
+                    strDescription: 'Cost'
+                },
+                {
+                    strDescription: ''
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        billedBy: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Vendor'
+                },
+                {
+                    strDescription: 'Third Party'
+                },
+                {
+                    strDescription: 'None'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+
+
         equipmentLength: {
             type: 'icbufferedequipmentlength'
         },
@@ -309,6 +382,13 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             else {
                 return false;
             }
+        },
+        checkInventoryCost: function(get){
+            if (get('grdCharges.selection.ysnInventoryCost')) {
+                return false;
+            }
+            else
+                return true;
         }
     }
 

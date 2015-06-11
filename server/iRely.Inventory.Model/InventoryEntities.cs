@@ -240,6 +240,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblICInventoryReceiptInspectionMap());
             modelBuilder.Configurations.Add(new tblICInventoryReceiptItemLotMap());
             modelBuilder.Configurations.Add(new tblICInventoryReceiptItemMap());
+            modelBuilder.Configurations.Add(new tblICInventoryReceiptChargeMap());
             modelBuilder.Configurations.Add(new tblICInventoryReceiptItemTaxMap());
 
             modelBuilder.Configurations.Add(new tblICInventoryShipmentMap());
@@ -290,9 +291,11 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new tblSMFreightTermMap());
             modelBuilder.Configurations.Add(new tblMFQAPropertyMap());
 
+            modelBuilder.Configurations.Add(new vyuICGetOtherChargesMap());
             modelBuilder.Configurations.Add(new vyuSMGetLocationPricingLevelMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryShipmentItemMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptItemMap());
+            modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptChargeMap());
             modelBuilder.Configurations.Add(new vyuICGetPackedUOMMap());
             modelBuilder.Configurations.Add(new vyuICGetUOMConversionMap());
             modelBuilder.Configurations.Add(new vyuICGetStorageLocationMap());

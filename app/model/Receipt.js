@@ -6,6 +6,7 @@ Ext.define('Inventory.model.Receipt', {
 
     requires: [
         'Inventory.model.ReceiptItem',
+        'Inventory.model.ReceiptCharge',
         'Inventory.model.ReceiptInspection',
         'Ext.data.Field'
     ],

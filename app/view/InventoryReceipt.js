@@ -1880,18 +1880,19 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                         xtype: 'panel',
                                         itemId: 'pgeFreightInvoice',
                                         bodyPadding: 5,
-                                        title: 'Freight & Invoice',
+                                        title: 'Charges & Invoice',
                                         layout: {
                                             type: 'hbox',
                                             align: 'stretch'
                                         },
                                         items: [
                                             {
-                                                xtype: 'gridpanel',
+                                                xtype: 'advancefiltergrid',
                                                 flex: 2.5,
-                                                itemId: 'grdCost',
+                                                reference: 'grdCharges',
+                                                itemId: 'grdCharges',
                                                 margin: '0 5 0 0',
-                                                title: 'Costs',
+                                                title: 'Charges',
                                                 dockedItems: [
                                                     {
                                                         xtype: 'toolbar',
@@ -1905,14 +1906,14 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnInsert',
+                                                                itemId: 'btnInsertCharge',
                                                                 iconCls: 'small-add',
                                                                 text: 'Insert'
                                                             },
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnRemove',
+                                                                itemId: 'btnRemoveCharge',
                                                                 iconCls: 'small-delete',
                                                                 text: 'Remove'
                                                             },
@@ -1928,44 +1929,203 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        text: 'Cost Type'
+                                                        itemId: 'colOtherCharge',
+                                                        text: 'Other Charges',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intItemId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strItemNo',
+                                                                    dataType: 'string',
+                                                                    text: 'Item Number',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboOtherCharge',
+                                                            displayField: 'strItemNo',
+                                                            valueField: 'strItemNo'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        itemId: 'colInventoryCost',
+                                                        text: 'Inventory Cost',
+                                                        editor: {
+                                                            xtype: 'checkboxfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        width: 88,
-                                                        text: 'Inventory Cost'
+                                                        itemId: 'colCostMethod',
+                                                        text: 'Cost Method',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'strDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Cost Method',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboCostMethod',
+                                                            displayField: 'strDescription',
+                                                            valueField: 'strDescription'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colRate',
+                                                        text: 'Rate',
+                                                        editor: {
+                                                            xtype: 'numericfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        text: 'Cost Method'
+                                                        itemId: 'colCostUOM',
+                                                        text: 'UOM',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intItemUOMId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Unit Of Measure Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitMeasure',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Measure',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strUnitType',
+                                                                    dataType: 'string',
+                                                                    text: 'Unit Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    xtype: 'checkcolumn',
+                                                                    dataIndex: 'ysnStockUnit',
+                                                                    dataType: 'boolean',
+                                                                    text: 'Stock Unit',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboCostUOM',
+                                                            displayField: 'strUnitMeasure',
+                                                            valueField: 'strUnitMeasure'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        width: 76,
-                                                        text: 'Rate'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        width: 78,
-                                                        text: 'UOM'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colOnCostType',
                                                         text: 'On Cost Type'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colCostVendor',
                                                         text: 'Vendor',
-                                                        flex: 1
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intVendorId',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Vendor Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strVendorId',
+                                                                    dataType: 'string',
+                                                                    text: 'Vendor No',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strName',
+                                                                    dataType: 'string',
+                                                                    text: 'Vendor Name',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboCostVendor',
+                                                            displayField: 'strVendorId',
+                                                            valueField: 'strVendorId'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colChargeAmount',
+                                                        text: 'Amount',
+                                                        editor: {
+                                                            xtype: 'numericfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        width: 90,
-                                                        text: 'Amount'
+                                                        itemId: 'colAllocateCostBy',
+                                                        text: 'Allocate Cost By',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'strDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Allocate By',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboAllocateCostBy',
+                                                            displayField: 'strDescription',
+                                                            valueField: 'strDescription'
+                                                        }
+                                                    },
+                                                    {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colCostBilledBy',
+                                                        text: 'Cost Billed By',
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'strDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Billed By',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboCostBilledBy',
+                                                            displayField: 'strDescription',
+                                                            valueField: 'strDescription'
+                                                        }
                                                     }
                                                 ],
                                                 viewConfig: {
-                                                    itemId: 'grvCost'
+                                                    itemId: 'grvCharges'
+                                                },
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'cepCharges',
+                                                        clicksToEdit: 1
+                                                    }
+                                                ],
+                                                selModel: {
+                                                    selType: 'checkboxmodel'
                                                 }
                                             },
                                             {

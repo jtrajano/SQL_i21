@@ -252,10 +252,9 @@ namespace iRely.Inventory.BusinessLayer
         /// <returns></returns>
         public async Task<SearchResult> GetOtherCharges(GetParameter param)
         {
-            var query = _db.GetQuery<tblICItem>()
-                    .Where(p => p.strType == "Other Charge")
+            var query = _db.GetQuery<vyuICGetOtherCharges>()
                     .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+            var data = await query.Execute(param, "intItemId").ToListAsync();
 
             return new SearchResult()
             {

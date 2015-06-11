@@ -360,25 +360,58 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colQualityPropertyName: 'strPropertyName'
             },
 
-            // ---- Freight and Invoice Tab
-            cboCalculationBasis: {
-                value: '{current.strCalculationBasis}',
-                store: '{calculationBasis}',
-                readOnly: '{current.ysnPosted}'
+            // ---- Charge and Invoice Tab
+            grdCharges: {
+                readOnly: '{current.ysnPosted}',
+                colOtherCharge: {
+                    dataIndex: 'strItemNo',
+                    editor: {
+                        store: '{otherCharges}'
+                    }
+                },
+                colInventoryCost: 'ysnInventoryCost',
+                colCostMethod: {
+                    dataIndex: 'strCostMethod',
+                    editor: {
+                        store: '{costMethod}'
+                    }
+                },
+                colRate: 'dblRate',
+                colCostUOM: {
+                    dataIndex: 'strCostUOM',
+                    editor: {
+                        store: '{costUOM}',
+                        defaultFilters: [
+                            {
+                                column: 'intItemId',
+                                value: '{grdCharges.selection.intChargeId}',
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
+                },
+                colOnCostType: 'strOnCostType',
+                colCostVendor: {
+                    dataIndex: 'strVendorId',
+                    editor: {
+                        store: '{vendor}'
+                    }
+                },
+                colChargeAmount: 'dblAmount',
+                colAllocateCostBy: {
+                    dataIndex: 'strAllocateCostBy',
+                    editor: {
+                        readOnly: '{checkInventoryCost}',
+                        store: '{allocateBy}'
+                    }
+                },
+                colCostBilledBy: {
+                    dataIndex: 'strCostBilledBy',
+                    editor: {
+                        store: '{billedBy}'
+                    }
+                }
             },
-            txtUnitsWeightMiles: {
-                value: '{current.dblUnitWeightMile}',
-                readOnly: '{current.ysnPosted}'
-            },
-            txtFreightRate: {
-                value: '{current.dblFreightRate}',
-                readOnly: '{current.ysnPosted}'
-            },
-            txtFuelSurcharge: {
-                value: '{current.dblFuelSurcharge}',
-                readOnly: '{current.ysnPosted}'
-            },
-//            txtCalculatedFreight: '{getCalculatedFreight}',
 
 //            txtCalculatedAmount: '{current.strMessage}',
             txtInvoiceAmount: {
@@ -447,7 +480,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         var grdInventoryReceipt = win.down('#grdInventoryReceipt'),
             grdIncomingInspection = win.down('#grdIncomingInspection'),
-            grdLotTracking = win.down('#grdLotTracking');
+            grdLotTracking = win.down('#grdLotTracking'),
+            grdCharges = win.down('#grdCharges');
 
         win.context = Ext.create('iRely.mvvm.Engine', {
             window : win,
@@ -459,7 +493,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 'vyuAPVendor,' +
                 'tblSMFreightTerm,' +
                 'tblSMCompanyLocation,' +
-                'tblICInventoryReceiptItems.vyuICGetInventoryReceiptItem',
+                'tblICInventoryReceiptItems.vyuICGetInventoryReceiptItem,' +
+                'tblICInventoryReceiptCharges.vyuICGetInventoryReceiptCharge',
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Receipt',
                 window: win
@@ -481,6 +516,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             })
                         }
                     ]
+                },
+                {
+                    key: 'tblICInventoryReceiptCharges',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdCharges,
+                        deleteButton : grdCharges.down('#btnRemoveCharge')
+                    })
                 },
                 {
                     key: 'tblICInventoryReceiptInspections',
@@ -2147,6 +2189,32 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onChargeSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var record = records[0];
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepCharges');
+        var current = plugin.getActiveRecord();
+
+        if (combo.itemId === 'cboOtherCharge') {
+            current.set('intChargeId', record.get('intItemId'));
+            current.set('ysnInventoryCost', record.get('ysnInventoryCost'));
+            current.set('dblRate', record.get('dblAmount'));
+            current.set('intCostUOMId', record.get('intCostUOMId'));
+            current.set('strCostMethod', record.get('strCostMethod'));
+            current.set('strCostUOM', record.get('strCostUOM'));
+            current.set('strOnCostType', record.get('strOnCostType'));
+        }
+        else if (combo.itemId === 'cboCostUOM') {
+            current.set('intCostUOMId', record.get('intItemUOMId'));
+        }
+        else if (combo.itemId === 'cboCostVendor') {
+            current.set('intEntityVendorId', record.get('intEntityVendorId'));
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboVendor": {
@@ -2233,6 +2301,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboStorageLocation": {
                 select: this.onStorageLocationSelect
+            },
+            "#cboOtherCharge": {
+                select: this.onChargeSelect
+            },
+            "#cboCostUOM": {
+                select: this.onChargeSelect
+            },
+            "#cboCostVendor": {
+                select: this.onChargeSelect
             }
         })
     }

@@ -16,6 +16,7 @@ namespace iRely.Inventory.Model
         {
             this.tblICInventoryReceiptInspections = new List<tblICInventoryReceiptInspection>();
             this.tblICInventoryReceiptItems = new List<tblICInventoryReceiptItem>();
+            this.tblICInventoryReceiptCharges = new List<tblICInventoryReceiptCharge>();
         }
 
         public int intInventoryReceiptId { get; set; }
@@ -37,10 +38,6 @@ namespace iRely.Inventory.Model
         public int? intFreightTermId { get; set; }
         public string strAllocateFreight { get; set; }
         public int? intShiftNumber { get; set; }
-        public string strCalculationBasis { get; set; }
-        public decimal? dblUnitWeightMile { get; set; }
-        public decimal? dblFreightRate { get; set; }
-        public decimal? dblFuelSurcharge { get; set; }
         public decimal? dblInvoiceAmount { get; set; }
         public bool? ysnPrepaid { get; set; }
         public bool? ysnInvoicePaid { get; set; }
@@ -134,6 +131,7 @@ namespace iRely.Inventory.Model
 
         public ICollection<tblICInventoryReceiptInspection> tblICInventoryReceiptInspections { get; set; }
         public ICollection<tblICInventoryReceiptItem> tblICInventoryReceiptItems { get; set; }
+        public ICollection<tblICInventoryReceiptCharge> tblICInventoryReceiptCharges { get; set; }
 
         public vyuAPVendor vyuAPVendor { get; set; }
         public tblSMFreightTerm tblSMFreightTerm { get; set; }
@@ -510,6 +508,161 @@ namespace iRely.Inventory.Model
         public decimal? dblGrossMargin { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
+    }
+
+    public class tblICInventoryReceiptCharge : BaseEntity
+    {
+        public int intInventoryReceiptChargeId { get; set; }
+        public int intInventoryReceiptId { get; set; }
+        public int? intChargeId { get; set; }
+        public bool? ysnInventoryCost { get; set; }
+        public string strCostMethod { get; set; }
+        public decimal? dblRate { get; set; }
+        public int? intCostUOMId { get; set; }
+        public int? intEntityVendorId { get; set; }
+        public decimal? dblAmount { get; set; }
+        public string strAllocateCostBy { get; set; }
+        public string strCostBilledBy { get; set; }
+        public int? intSort { get; set; }
+
+        private string _itemNo;
+        [NotMapped]
+        public string strItemNo
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_itemNo))
+                    if (vyuICGetInventoryReceiptCharge != null)
+                        return vyuICGetInventoryReceiptCharge.strItemNo;
+                    else
+                        return null;
+                else
+                    return _itemNo;
+            }
+            set
+            {
+                _itemNo = value;
+            }
+        }
+        private string _itemDesc;
+        [NotMapped]
+        public string strItemDescription
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_itemDesc))
+                    if (vyuICGetInventoryReceiptCharge != null)
+                        return vyuICGetInventoryReceiptCharge.strItemDescription;
+                    else
+                        return null;
+                else
+                    return _itemDesc;
+            }
+            set
+            {
+                _itemDesc = value;
+            }
+        }
+        private string _uom;
+        [NotMapped]
+        public string strCostUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_uom))
+                    if (vyuICGetInventoryReceiptCharge != null)
+                        return vyuICGetInventoryReceiptCharge.strCostUOM;
+                    else
+                        return null;
+                else
+                    return _uom;
+            }
+            set
+            {
+                _uom = value;
+            }
+        }
+        private string _uomType;
+        [NotMapped]
+        public string strUnitType
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_uomType))
+                    if (vyuICGetInventoryReceiptCharge != null)
+                        return vyuICGetInventoryReceiptCharge.strUnitType;
+                    else
+                        return null;
+                else
+                    return _uomType;
+            }
+            set
+            {
+                _uomType = value;
+            }
+        }
+        private string _onCostType;
+        [NotMapped]
+        public string strOnCostType
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_onCostType))
+                    if (vyuICGetInventoryReceiptCharge != null)
+                        return vyuICGetInventoryReceiptCharge.strOnCostType;
+                    else
+                        return null;
+                else
+                    return _onCostType;
+            }
+            set
+            {
+                _onCostType = value;
+            }
+        }
+        private string _vendorId;
+        [NotMapped]
+        public string strVendorId
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_vendorId))
+                    if (vyuICGetInventoryReceiptCharge != null)
+                        return vyuICGetInventoryReceiptCharge.strVendorId;
+                    else
+                        return null;
+                else
+                    return _vendorId;
+            }
+            set
+            {
+                _vendorId = value;
+            }
+        }
+
+        public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
+        public vyuICGetInventoryReceiptCharge vyuICGetInventoryReceiptCharge { get; set; }
+    }
+
+    public class vyuICGetInventoryReceiptCharge
+    {
+        public int intInventoryReceiptChargeId { get; set; }
+        public int intInventoryReceiptId { get; set; }
+        public string strItemNo { get; set; }
+        public string strItemDescription { get; set; }
+        public bool? ysnInventoryCost { get; set; }
+        public string strCostMethod { get; set; }
+        public decimal? dblRate { get; set; }
+        public string strCostUOM { get; set; }
+        public string strUnitType { get; set; }
+        public int? intOnCostTypeId { get; set; }
+        public string strOnCostType { get; set; }
+        public string strVendorId { get; set; }
+        public decimal? dblAmount { get; set; }
+        public string strAllocateCostBy { get; set; }
+        public string strCostBilledBy { get; set; }
+
+        public tblICInventoryReceiptCharge tblICInventoryReceiptCharge { get; set; }
     }
 
     public class tblICInventoryReceiptItemLot : BaseEntity
