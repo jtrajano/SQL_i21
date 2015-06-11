@@ -5,7 +5,10 @@ WITH SCHEMABINDING
 SELECT 
    
 	A.intEntityVendorId,	
-	A.strVendorId,	
+     case when A.strVendorId is null then C.strEntityNo 	   	
+	     when A.strVendorId = '          ' then C.strEntityNo
+	     when A.strVendorId is not null then A.strVendorId 
+		 end strVendorId,
 	C.strName 
 
 FROM

@@ -645,6 +645,8 @@
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLotCustody is successful with positive stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostCustody on outgoing stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostCustody for the basics.sql" />
+    <Build Include="testi21Database\Fake Data\Fake data for item uom table, bushel scenario.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for converting Bushel to LB.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

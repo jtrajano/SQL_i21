@@ -121,7 +121,7 @@ AS
 	IF @TaxGroupMasterId IS NULL OR @TaxGroupMasterId = 0
 		BEGIN				
 			SELECT
-				@TaxGroupMasterId = [intTaxGroupId]
+				@TaxGroupMasterId = [intSalesTaxGroupId]
 			FROM
 				tblICItem
 			WHERE

@@ -31,10 +31,6 @@ Type the overview for the table here.
 		[intFreightTermId] [int] NULL,
 		[strAllocateFreight] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 		[intShiftNumber] [int] NULL,
-		[strCalculationBasis] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
-		[dblUnitWeightMile] [numeric](18, 6) NULL DEFAULT ((0)),
-		[dblFreightRate] [numeric](18, 6) NULL DEFAULT ((0)),
-		[dblFuelSurcharge] [numeric](18, 6) NULL DEFAULT ((0)),
 		[dblInvoiceAmount] [numeric](18, 6) NULL DEFAULT ((0)),
 		[ysnPrepaid] [bit] NULL DEFAULT ((0)),
 		[ysnInvoicePaid] [bit] NULL DEFAULT ((0)),
@@ -227,41 +223,13 @@ Type the overview for the table here.
 		@level2type = N'COLUMN',
 		@level2name = N'intConcurrencyId'
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Calculation Basis',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICInventoryReceipt',
-		@level2type = N'COLUMN',
-		@level2name = N'strCalculationBasis'
+	
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Units / Weight / Miles',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICInventoryReceipt',
-		@level2type = N'COLUMN',
-		@level2name = N'dblUnitWeightMile'
+	
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Freight Rate',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICInventoryReceipt',
-		@level2type = N'COLUMN',
-		@level2name = N'dblFreightRate'
+	
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Fuel Surcharge Percentage',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICInventoryReceipt',
-		@level2type = N'COLUMN',
-		@level2name = N'dblFuelSurcharge'
+	
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Invoice Amount',

@@ -25,6 +25,7 @@ AS
 			CH.intContractTypeId intPurchaseSale,
 			CH.intEntityId,
 			EN.strName,
+			EN.intDefaultLocationId as intEntityLocationId,
 			CH.intContractNumber,
 			CH.dtmContractDate,
 			CH.intCommodityId,
@@ -36,7 +37,7 @@ AS
 	JOIN	tblICUnitMeasure		UM	ON	UM.intUnitMeasureId			=	CD.intUnitMeasureId
 	LEFT JOIN	tblCTContractBasis		CB	ON	CB.intContractBasisId		=	CH.intContractBasisId
 	LEFT JOIN	tblSMCurrency			CU	ON	CU.intCurrencyID		=	CD.intCurrencyId
-	JOIN	tblEntity				EN	ON	EN.intEntityId				=	CH.intEntityId
+	LEFT JOIN	tblEntity				EN	ON	EN.intEntityId				=	CH.intEntityId
 	WHERE CD.dblQuantity - IsNull((SELECT SUM (AD.dblPAllocatedQty) from tblLGAllocationDetail AD Group By AD.intPContractDetailId Having CD.intContractDetailId = AD.intPContractDetailId), 0) > 0
 	AND
 	CD.dblQuantity - IsNull((SELECT SUM (R.dblReservedQuantity) from tblLGReservation R Group By R.intContractDetailId, R.intPurchaseSale Having CD.intContractDetailId = R.intContractDetailId AND R.intPurchaseSale = 1), 0) > 0

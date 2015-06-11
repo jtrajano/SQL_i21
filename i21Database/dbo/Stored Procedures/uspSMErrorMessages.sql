@@ -548,5 +548,25 @@ SET @strmessage = 'The UOM is missing on %s.'
 EXEC sp_addmessage 51136,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51137) EXEC sp_dropmessage 51137, 'us_english'	
-SET @strmessage = 'Please specify the Adjust Qty By or New Quantity on %s.'
+SET @strmessage = 'This lot is already released. You can''t undo.'
 EXEC sp_addmessage 51137,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51138) EXEC sp_dropmessage 51138, 'us_english'	
+SET @strmessage = 'This lot is already reversed. You can''t undo.'
+EXEC sp_addmessage 51138,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51139) EXEC sp_dropmessage 51139, 'us_english'	
+SET @strmessage = 'Pallet Lot has been marked as a ghost and cannot be Undone.'
+EXEC sp_addmessage 51139,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51140) EXEC sp_dropmessage 51140, 'us_english'	
+SET @strmessage = 'The work order that you clicked on no longer exists. This is quite possible, if a packaging operator has deleted the work order and your iMake client is yet to refresh the screen.'
+EXEC sp_addmessage 51140,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51141) EXEC sp_dropmessage 51141, 'us_english'	
+SET @strmessage = 'Work order contains quarantined lot, you need to either release the lot or mark the pallet as ghost to close the work order.'
+EXEC sp_addmessage 51141,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51142) EXEC sp_dropmessage 51142, 'us_english'	
+SET @strmessage = 'Please specify the Adjust Qty By or New Quantity on %s.'
+EXEC sp_addmessage 51142,11,@strmessage,'us_english','False'

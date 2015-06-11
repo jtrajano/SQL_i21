@@ -248,7 +248,7 @@ BEGIN TRY
 		FROM dbo.tblMFWorkOrder
 		WHERE dtmExpectedDate = @dtmPlannedDate
 
-		Select @dtmPlannedDate =DateAdd(mi,DateDiff(mi,GetUTCDATE(),GetDate()),@dtmPlannedDate)
+		--Select @dtmPlannedDate =DateAdd(mi,DateDiff(mi,GetUTCDATE(),GetDate()),@dtmPlannedDate)
 
 		INSERT INTO dbo.tblMFWorkOrder (
 			strWorkOrderNo

@@ -17,7 +17,8 @@ BEGIN TRY
 			@strInOutFlag		NVARCHAR(4),
 			@dblQuantity		NUMERIC(12,4),
 			@strAdjustmentNo	NVARCHAR(50),
-			@dblCost			NUMERIC(9,4)
+			@dblCost			NUMERIC(9,4),
+			@ApplyScaleToBasis	BIT
 
 	DECLARE @Processed TABLE
 	(
@@ -43,7 +44,9 @@ BEGIN TRY
 	FROM	tblSCTicket
 	WHERE	intTicketId = @intTicketId
 	
-	
+	SELECT	@ApplyScaleToBasis = CAST(strValue AS BIT) FROM tblSMPreferences WHERE strPreference = 'ApplyScaleToBasis'
+	SELECT	@ApplyScaleToBasis = ISNULL(@ApplyScaleToBasis,0)
+
 	IF	ISNULL(@intContractId,0) = 0
 	BEGIN
 		SELECT	TOP	1	@intContractId	=	intContractDetailId
@@ -65,7 +68,7 @@ BEGIN TRY
 		WHERE	CH.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
 		AND		CH.intEntityId		=	@intEntityId
 		AND		CD.intItemId		=	@intItemId
-		AND		CD.intPricingTypeId	=	2
+		AND	   (CD.intPricingTypeId	=	1 OR CD.intPricingTypeId = CASE WHEN @ApplyScaleToBasis = 0 THEN 1 ELSE 2 END)
 		AND		CD.dblBalance		>	0
 		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
 	END
@@ -137,7 +140,7 @@ BEGIN TRY
 			WHERE	CH.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
 			AND		CH.intEntityId		=	@intEntityId
 			AND		CD.intItemId		=	@intItemId
-			AND		CD.intPricingTypeId	=	2
+			AND	   (CD.intPricingTypeId	=	1 OR CD.intPricingTypeId = CASE WHEN @ApplyScaleToBasis = 0 THEN 1 ELSE 2 END)
 			AND		CD.dblBalance		>	0
 			AND		CD.intContractDetailId NOT IN (SELECT intContractDetailId FROM @Processed)
 			ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC

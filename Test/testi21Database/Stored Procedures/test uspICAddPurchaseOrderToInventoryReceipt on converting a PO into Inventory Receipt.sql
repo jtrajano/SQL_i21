@@ -118,9 +118,6 @@ BEGIN
 				,intCurrencyId
 				,intFreightTermId
 				,strAllocateFreight
-				,dblUnitWeightMile
-				,dblFreightRate
-				,dblFuelSurcharge
 				,dblInvoiceAmount
 				,ysnInvoicePaid
 				,intConcurrencyId
@@ -162,9 +159,6 @@ BEGIN
 				,intCurrencyId = @Currency_USD
 				,intFreightTermId = @FreightTerm
 				,strAllocateFreight = N'No'
-				,dblUnitWeightMile = 0
-				,dblFreightRate = 100.00
-				,dblFuelSurcharge = 0 
 				,dblInvoiceAmount = ((10 - 0) * 50.00)
 									+ ((5-0) * 100.00)
 									+ ((2-0) * 200.00)
@@ -250,9 +244,6 @@ BEGIN
 				,intCurrencyId
 				,intFreightTermId
 				,strAllocateFreight
-				,dblUnitWeightMile
-				,dblFreightRate
-				,dblFuelSurcharge
 				,dblInvoiceAmount
 				,ysnInvoicePaid
 				,intConcurrencyId

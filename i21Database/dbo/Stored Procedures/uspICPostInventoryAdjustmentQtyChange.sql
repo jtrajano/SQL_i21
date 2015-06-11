@@ -78,7 +78,7 @@ BEGIN
 		WHERE intItemId = @intItemId		
 
 		-- 'Please specify the Adjust By Quantity or New Quantity on {Item}.'
-		RAISERROR(51137, 11, 1, @strItemNo);
+		RAISERROR(51142, 11, 1, @strItemNo);
 		GOTO _Exit
 	END
 END 

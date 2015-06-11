@@ -22,13 +22,13 @@ CREATE FUNCTION [dbo].[fnCalculateQtyBetweenUOM](
 	,@intItemUOMIdTo INT 
 	,@dblQty NUMERIC(18,6)
 )
-RETURNS NUMERIC(18,6)
+RETURNS NUMERIC(38,20)
 AS 
 BEGIN 
-	DECLARE	@result AS NUMERIC(18,6)
+	DECLARE	@result AS NUMERIC(38,20)
 
-	DECLARE @dblUnitQtyFrom AS NUMERIC(18,6)
-			,@dblUnitQtyTo AS NUMERIC(18,6)
+	DECLARE @dblUnitQtyFrom AS NUMERIC(38,20)
+			,@dblUnitQtyTo AS NUMERIC(38,20)
 
 	SELECT	@dblUnitQtyFrom = ItemUOM.dblUnitQty
 	FROM	dbo.tblICItemUOM ItemUOM 
@@ -56,7 +56,7 @@ BEGIN
 						@dblQty
 
 					WHEN @dblUnitQtyFrom = 1 THEN 
-						CASE	WHEN FLOOR(@dblUnitQtyTo) = 0 THEN 
+						CASE	WHEN FLOOR(@dblUnitQtyTo) = 0 AND @dblUnitQtyTo > 0.1 THEN 
 									@dblQty * @dblUnitQtyTo
 								ELSE 
 									@dblQty / @dblUnitQtyTo
