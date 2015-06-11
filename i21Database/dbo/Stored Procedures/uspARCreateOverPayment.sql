@@ -108,8 +108,23 @@ INNER JOIN
 	[tblARCustomer] C
 		ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
 INNER JOIN
-	[tblEntityLocation] EL
-		ON C.[intDefaultLocationId] = EL.[intEntityLocationId] 
+	(	SELECT
+			[intEntityLocationId]
+			,[intEntityId]
+			,[strLocationName]
+			,[strAddress]
+			,[strCity]
+			,[strState]
+			,[strZipCode]
+			,[strCountry]
+			,[intShipViaId]
+			,[intTermsId]
+		FROM 
+			tblEntityLocation
+		WHERE
+			ysnDefaultLocation = 1
+	) EL
+		ON C.[intEntityCustomerId] = EL.[intEntityId] 
 LEFT OUTER JOIN
 	[tblEntityLocation] SL
 		ON C.[intShipToId] = SL.[intEntityLocationId]  	

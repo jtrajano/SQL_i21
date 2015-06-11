@@ -68,6 +68,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 :r .\TM\Reports\DataSource\CustomerListByRoute.sql
 :r .\TM\Reports\Layout\CustomerListByRoute.sql
+:r .\TM\Reports\DefaultCriteria\CustomerListByRoute.sql
 
 :r .\TM\Reports\DataSource\GasCheckLeakcheck.sql
 :r .\TM\Reports\Layout\WithGasCheckSubReport.sql
@@ -76,6 +77,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\Reports\Layout\WithoutLeakCheckSubReport.sql
 
 :r .\TM\Reports\DataSource\OpenCallEntries.sql
+
 
 
 -- Canned Panels

@@ -324,4 +324,6 @@ BEGIN -- GROUP CATEGORY MAPPING
 END
 
 EXEC dbo.[uspGLConvertAccountGroupToCategory]
-
+GO
+EXEC dbo.[uspGLUpdateSegmentCategory]
+GO

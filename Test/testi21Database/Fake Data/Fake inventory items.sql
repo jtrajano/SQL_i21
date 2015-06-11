@@ -124,28 +124,61 @@ BEGIN
 
 	-- Declare Account Categories
 	DECLARE @AccountCategoryName_Inventory AS NVARCHAR(100) = 'Inventory'
-	DECLARE @AccountCategoryId_Inventory AS INT = 27
+	DECLARE @AccountCategoryId_Inventory AS INT -- = 27
+
+	SELECT @AccountCategoryId_Inventory = intAccountCategoryId
+	FROM dbo.tblGLAccountCategory
+	WHERE strAccountCategory = @AccountCategoryName_Inventory
 
 	DECLARE @AccountCategoryName_CostOfGoods AS NVARCHAR(100) = 'Cost of Goods'
-	DECLARE @AccountCategoryId_CostOfGoods AS INT = 10
+	DECLARE @AccountCategoryId_CostOfGoods AS INT -- = 10
+
+	SELECT @AccountCategoryId_CostOfGoods = intAccountCategoryId
+	FROM dbo.tblGLAccountCategory
+	WHERE strAccountCategory = @AccountCategoryName_CostOfGoods
 
 	DECLARE @AccountCategoryName_APClearing AS NVARCHAR(100) = 'AP Clearing'
-	DECLARE @AccountCategoryId_APClearing AS INT = 45
+	DECLARE @AccountCategoryId_APClearing AS INT --= 45
+
+	SELECT @AccountCategoryId_APClearing = intAccountCategoryId
+	FROM dbo.tblGLAccountCategory
+	WHERE strAccountCategory = @AccountCategoryName_APClearing
 	
 	DECLARE @AccountCategoryName_WriteOffSold AS NVARCHAR(100) = 'Write-Off Sold'
-	DECLARE @AccountCategoryId_WriteOffSold AS INT = 42
+	DECLARE @AccountCategoryId_WriteOffSold AS INT -- = 42
+
+	SELECT @AccountCategoryId_WriteOffSold = intAccountCategoryId
+	FROM dbo.tblGLAccountCategory
+	WHERE strAccountCategory = @AccountCategoryName_WriteOffSold
 
 	DECLARE @AccountCategoryName_RevalueSold AS NVARCHAR(100) = 'Revalue Sold'
-	DECLARE @AccountCategoryId_RevalueSold AS INT = 43
+	DECLARE @AccountCategoryId_RevalueSold AS INT -- = 43
+
+	SELECT @AccountCategoryId_RevalueSold = intAccountCategoryId
+	FROM dbo.tblGLAccountCategory
+	WHERE strAccountCategory = @AccountCategoryName_RevalueSold
 
 	DECLARE @AccountCategoryName_AutoNegative AS NVARCHAR(100) = 'Auto Negative'
-	DECLARE @AccountCategoryId_AutoNegative AS INT = 44
+	DECLARE @AccountCategoryId_AutoNegative AS INT -- = 44
+
+	SELECT @AccountCategoryId_AutoNegative = intAccountCategoryId
+	FROM dbo.tblGLAccountCategory
+	WHERE strAccountCategory = @AccountCategoryName_AutoNegative
 
 	DECLARE @AccountCategoryName_InventoryInTransit AS NVARCHAR(100) = 'Inventory In Transit'
-	DECLARE @AccountCategoryId_InventoryInTransit AS INT = 46
+	DECLARE @AccountCategoryId_InventoryInTransit AS INT -- = 46
+
+	SELECT @AccountCategoryId_InventoryInTransit = intAccountCategoryId
+	FROM dbo.tblGLAccountCategory
+	WHERE strAccountCategory = @AccountCategoryName_InventoryInTransit
 
 	DECLARE @AccountCategoryName_InventoryAdjustment AS NVARCHAR(100) = 'Inventory Adjustment'
-	DECLARE @AccountCategoryId_InventoryAdjustment AS INT = 50
+	DECLARE @AccountCategoryId_InventoryAdjustment AS INT -- = 50
+
+	SELECT @AccountCategoryId_InventoryAdjustment = intAccountCategoryId
+	FROM dbo.tblGLAccountCategory
+	WHERE strAccountCategory = @AccountCategoryName_InventoryAdjustment
+
 
 	-- Declare the item categories
 	DECLARE @HotItems AS INT = 1

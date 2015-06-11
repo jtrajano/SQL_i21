@@ -620,6 +620,15 @@
     <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for allowing a missing Contra Account on Inventory Transfer.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryTransfer on getting the batch id.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryTransfer for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for invalid company location id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for invalid lot id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for invalid source transaction type id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for invalid storage location id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for invalid sub location id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for a successful post.sql" />
+    <Build Include="testi21Database\Fake Data\Fake data for item uom table, bushel scenario.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for converting Bushel to LB.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

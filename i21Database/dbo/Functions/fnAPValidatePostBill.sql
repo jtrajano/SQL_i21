@@ -136,19 +136,7 @@ BEGIN
 				ON B.intBillId = C.intBillId
 		WHERE  C.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
 
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
-		SELECT
-			A.strPaymentRecordNum + ' payment was already made on this bill.',
-			'Bill',
-			C.strBillId,
-			C.intBillId
-		FROM tblAPPayment A
-			INNER JOIN tblAPPaymentDetail B 
-				ON A.intPaymentId = B.intPaymentId
-			INNER JOIN tblAPBill C
-				ON B.intBillId = C.intBillId
-		WHERE  C.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) AND A.ysnPosted = 1
-
+		--NO FISCAL PERIOD
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
 			'Unable to find an open fiscal year period to match the transaction date.',
