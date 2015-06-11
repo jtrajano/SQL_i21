@@ -333,22 +333,8 @@ BEGIN
 				,dblStockOut = 20
 				,dblCost = 3.00
 				,intLotId = 12345
-		UNION ALL 
-		SELECT	strTransactionId = 'InvRcpt-0000002'
-				,intTransactionId = 7
-				,dblStockIn = 100
-				,dblStockOut = 0
-				,dblCost = 2.75
-				,intLotId = 12345
 	END 
 	
-	-- Assert 
-	BEGIN 
-		EXEC tSQLt.ExpectException
-			@ExpectedMessage = 'A consigned or custodial item is no longer available. Unable to continue and unpost the transaction.'
-			,@ExpectedErrorNumber = 51135
-	END  
-
 	-- Act
 	BEGIN 
 		-- Call the uspICUnpostLotOut
@@ -357,6 +343,30 @@ BEGIN
 		
 		EXEC dbo.uspICUnpostLotInFromCustody @strTransactionId, @intTransactionId
 	END 
+
+	-- Assert 
+	BEGIN 
+		-- Get the actual Lot data
+		INSERT INTO actualLotInCustody (
+				strTransactionId
+				,intTransactionId
+				,dblStockIn
+				,dblStockOut
+				,dblCost
+				,intLotId
+		)
+		SELECT	strTransactionId
+				,intTransactionId
+				,dblStockIn
+				,dblStockOut		
+				,dblCost
+				,intLotId
+		FROM	dbo.tblICInventoryLotInCustody
+		WHERE	intTransactionId = @intTransactionId
+				AND strTransactionId = @strTransactionId
+
+		EXEC tSQLt.AssertEqualsTable 'expectedLotInCustody', 'actualLotInCustody';
+	END  
 
 	-- Clean-up: remove the tables used in the unit test
 	IF OBJECT_ID('actualLotInCustody') IS NOT NULL 

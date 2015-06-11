@@ -168,7 +168,7 @@ BEGIN
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotInCustody', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotInCustodyTransaction', @Identity = 1;	
 
-		-- Mark all item sa lot items
+		-- Mark all item as lot items
 		UPDATE dbo.tblICItem
 		SET strLotTracking = 'Yes - Manual'
 

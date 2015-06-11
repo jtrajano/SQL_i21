@@ -647,6 +647,8 @@
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostCustody for the basics.sql" />
     <Build Include="testi21Database\Fake Data\Fake data for item uom table, bushel scenario.sql" />
     <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for converting Bushel to LB.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCustody for a successful unpost.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCustody for an unsuccessful unpost.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

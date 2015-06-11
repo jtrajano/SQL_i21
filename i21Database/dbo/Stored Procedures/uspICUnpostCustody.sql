@@ -14,15 +14,17 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
--- Create the temp table 
-CREATE TABLE #tmpInventoryTransactionStockToReverse (
-	intInventoryLotInCustodyTransactionId INT NOT NULL 
-	,intTransactionId INT NULL 
-	,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
-	,intTransactionTypeId INT NOT NULL 
-	,intInventoryLotInCustodyId INT 
-	,dblQty NUMERIC(38,20)
-)
+IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStockToReverse')) 
+BEGIN 
+	CREATE TABLE #tmpInventoryTransactionStockToReverse (
+		intInventoryLotInCustodyTransactionId INT NOT NULL 
+		,intTransactionId INT NULL 
+		,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+		,intTransactionTypeId INT NOT NULL 
+		,intInventoryLotInCustodyId INT 
+		,dblQty NUMERIC(38,20)
+	)
+END 
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @AUTO_NEGATIVE AS INT = 1
@@ -96,7 +98,18 @@ BEGIN
 		,@intTransactionId
 END
 
-IF EXISTS (SELECT TOP 1 1 FROM #tmpInventoryTransactionStockToReverse) 
+-- Validate if there is something to reverse. 
+IF NOT EXISTS (
+	SELECT	TOP 1 1 
+	FROM	#tmpInventoryTransactionStockToReverse 
+)
+BEGIN 
+	-- 'A consigned or custodial item is no longer available. Unable to continue and unpost the transaction.'
+	RAISERROR(51135, 11, 1)
+	GOTO _Exit
+END 
+
+-- Create the reversal 
 BEGIN 
 	-------------------------------------------------
 	-- Create reversal of the inventory transactions
@@ -157,5 +170,8 @@ BEGIN
 
 END
 
+_Exit: 
+
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStockToReverse')) 
 	DROP TABLE #tmpInventoryTransactionStockToReverse
+

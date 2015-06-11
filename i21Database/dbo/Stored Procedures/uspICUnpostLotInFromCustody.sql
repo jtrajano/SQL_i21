@@ -94,19 +94,6 @@ FROM	(
 WHERE	Changes.Action = 'UPDATE'
 ;
 
-IF NOT EXISTS (
-	SELECT	TOP 1 1
-	FROM	dbo.tblICInventoryLotInCustody LotBucket_In_Custody INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
-			ON LotBucket_In_Custody.intTransactionId = Reversal.intTransactionId
-			AND LotBucket_In_Custody.strTransactionId = Reversal.strTransactionId
-			AND LotBucket_In_Custody.intInventoryLotInCustodyId = Reversal.intInventoryLotInCustodyId
-	WHERE	ISNULL(LotBucket_In_Custody.dblStockOut, 0) = 0
-)
-BEGIN 
-	-- 'A consigned or custodial item is no longer available. Unable to continue and unpost the transaction.'
-	RAISERROR(51135, 11, 1)
-END 
-
 -- Update the lot cost bucket. 
 UPDATE	LotBucket_In_Custody
 SET		dblStockOut = dblStockIn
@@ -115,4 +102,5 @@ FROM	dbo.tblICInventoryLotInCustody LotBucket_In_Custody INNER JOIN #tmpInventor
 			ON LotBucket_In_Custody.intTransactionId = Reversal.intTransactionId
 			AND LotBucket_In_Custody.strTransactionId = Reversal.strTransactionId
 			AND LotBucket_In_Custody.intInventoryLotInCustodyId = Reversal.intInventoryLotInCustodyId
+WHERE	ISNULL(LotBucket_In_Custody.dblStockOut, 0) = 0
 ;

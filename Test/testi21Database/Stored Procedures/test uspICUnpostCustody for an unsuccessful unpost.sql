@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostCustody for the basics]
+﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostCustody for an unsuccessful unpost]
 AS
 BEGIN
 	-- Arrange 
@@ -34,9 +34,9 @@ BEGIN
 	-- Try to use the SP with NULL arguments on all parameters
 	BEGIN 
 		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-000001'
-				,@intTransactionId AS INT 
-				,@strTransactionId AS NVARCHAR(40)
-				,@intUserId AS INT 
+				,@intTransactionId AS INT = 329393 -- non-existing id. 
+				,@strTransactionId AS NVARCHAR(40) = 'gibberish' -- gibberish value. 
+				,@intUserId AS INT = 1
 
 		EXEC dbo.uspICUnpostCustody
 			@intTransactionId
