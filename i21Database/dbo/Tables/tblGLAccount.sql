@@ -11,6 +11,7 @@
     [strComments]       NVARCHAR (255)  COLLATE Latin1_General_CI_AS NULL,
     [ysnActive]         BIT             NULL,
     [ysnSystem]         BIT             NULL,
+	[ysnRevalue]		BIT				NULL,
     [strCashFlow]       NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [intAccountCategoryId] INT NULL, 
     [intEntityIdLastModified] INT NULL, 

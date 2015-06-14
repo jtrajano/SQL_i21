@@ -1692,6 +1692,7 @@
     <Build Include="dbo\Views\vyuICGetInventoryReceiptCharge.sql" />
     <Build Include="dbo\Views\vyuICGetOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGenerateDynamicXML.sql" />
+    <Build Include="dbo\Views\vwGLChartOfAccounts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
