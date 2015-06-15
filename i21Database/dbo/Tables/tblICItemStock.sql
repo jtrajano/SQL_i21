@@ -59,6 +59,7 @@ This table holds stock information like quantity on hand and etc.
 		[intItemLocationId] INT NOT NULL, 
 		[intSubLocationId] INT NULL, -- IMPORTANT NOTE: This field is transferred to tblICItemStockUOM. DO NOT USE this field. 
 		[dblUnitOnHand] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblUnitInCustody] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblOrderCommitted] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblOnOrder] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblBackOrder] NUMERIC(18, 6) NULL DEFAULT ((0)), 

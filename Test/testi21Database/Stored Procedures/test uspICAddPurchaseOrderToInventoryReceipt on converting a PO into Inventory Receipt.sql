@@ -118,9 +118,6 @@ BEGIN
 				,intCurrencyId
 				,intFreightTermId
 				,strAllocateFreight
-				,dblUnitWeightMile
-				,dblFreightRate
-				,dblFuelSurcharge
 				,dblInvoiceAmount
 				,ysnInvoicePaid
 				,intConcurrencyId
@@ -133,7 +130,7 @@ BEGIN
 		SELECT	intInventoryReceiptId
 				,intLineNo
 				,intItemId
-				,intSourceId
+				,intOrderId
 				,dblOrderQty
 				,dblOpenReceive
 				,dblReceived
@@ -162,9 +159,6 @@ BEGIN
 				,intCurrencyId = @Currency_USD
 				,intFreightTermId = @FreightTerm
 				,strAllocateFreight = N'No'
-				,dblUnitWeightMile = 0
-				,dblFreightRate = 100.00
-				,dblFuelSurcharge = 0 
 				,dblInvoiceAmount = ((10 - 0) * 50.00)
 									+ ((5-0) * 100.00)
 									+ ((2-0) * 200.00)
@@ -181,7 +175,7 @@ BEGIN
 		SELECT	intInventoryReceiptId = 1
 				,intLineNo = 1
 				,intItemId = @WetGrains
-				,intSourceId = 1
+				,intOrderId = 1
 				,dblOrderQty = 10
 				,dblOpenReceive = (10 - 0)
 				,dblReceived = 0
@@ -194,7 +188,7 @@ BEGIN
 		SELECT	intInventoryReceiptId = 1
 				,intLineNo = 2
 				,intItemId = @PremiumGrains
-				,intSourceId = 1
+				,intOrderId = 1
 				,dblOrderQty = 5
 				,dblOpenReceive = (5-0)
 				,dblReceived = 0
@@ -207,7 +201,7 @@ BEGIN
 		SELECT	intInventoryReceiptId = 1
 				,intLineNo = 3
 				,intItemId = @HotGrains
-				,intSourceId = 1
+				,intOrderId = 1
 				,dblOrderQty = 2
 				,dblOpenReceive = (2-0)
 				,dblReceived = 0
@@ -220,7 +214,7 @@ BEGIN
 		SELECT	intInventoryReceiptId = 1
 				,intLineNo = 4
 				,intItemId = @ColdGrains
-				,intSourceId = 1
+				,intOrderId = 1
 				,dblOrderQty = 4
 				,dblOpenReceive = (4-0)
 				,dblReceived = 0
@@ -250,9 +244,6 @@ BEGIN
 				,intCurrencyId
 				,intFreightTermId
 				,strAllocateFreight
-				,dblUnitWeightMile
-				,dblFreightRate
-				,dblFuelSurcharge
 				,dblInvoiceAmount
 				,ysnInvoicePaid
 				,intConcurrencyId
@@ -264,7 +255,7 @@ BEGIN
 		SELECT	intInventoryReceiptId
 				,intLineNo
 				,intItemId
-				,intSourceId
+				,intOrderId
 				,dblOrderQty
 				,dblOpenReceive
 				,dblReceived

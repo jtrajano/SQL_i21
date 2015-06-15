@@ -20,6 +20,7 @@ CREATE TYPE [dbo].[ItemCostingTableType] AS TABLE
 	,[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL -- The string id of the source transaction. 
 	,[intTransactionTypeId] INT NOT NULL					-- The transaction type. Source table for the types are found in tblICInventoryTransactionType
 	,[intLotId] INT NULL									-- Place holder field for lot numbers
-	,[intSubLocationId] INT NULL							-- Place holder field for the sub location Id
-	,[intStorageLocationId] INT NULL						-- Place holder field for the storage location Id	
+	,[intSubLocationId] INT NULL							-- Place holder field for lot numbers
+	,[intStorageLocationId] INT NULL						-- Place holder field for lot numbers
+	,[ysnIsCustody] BIT NULL								-- If Yes (value is 1), then the item is not owned by the company. The company is only the custodian of the item (like a consignor). Add or remove stock from Inventory-Lot-In-Custody table. 
 )

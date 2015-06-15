@@ -263,7 +263,7 @@ BEGIN
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 			END
 			
-			-- Insert the record the the Lot-out table
+			-- Insert the record to the Lot-out table
 			INSERT INTO dbo.tblICInventoryLotOut (
 					intInventoryTransactionId
 					,intInventoryLotId

@@ -72,7 +72,7 @@ BEGIN
 		CREATE TABLE expected_tblICInventoryShipmentItem (
 			intInventoryShipmentItemId INT NULL 
 			,intInventoryShipmentId INT NULL
-			,intSourceId INT NULL
+			,intOrderId INT NULL
 			,intLineNo INT NULL
 			,intItemId INT NULL 
 			,intSubLocationId INT NULL 
@@ -89,7 +89,7 @@ BEGIN
 		CREATE TABLE actual_tblICInventoryShipmentItem (
 			intInventoryShipmentItemId INT NULL 
 			,intInventoryShipmentId INT NULL
-			,intSourceId INT NULL
+			,intOrderId INT NULL
 			,intLineNo INT NULL
 			,intItemId INT NULL 
 			,intSubLocationId INT NULL 

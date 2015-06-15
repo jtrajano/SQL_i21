@@ -79,19 +79,19 @@ BEGIN
 		INSERT INTO dbo.tblICInventoryReceiptItem (
 			intInventoryReceiptId
 			,intItemId
-			,intSourceId
+			,intOrderId
 			,intUnitMeasureId
 		)
 		SELECT 
 			intInventoryReceiptId = @intInventoryReceiptId
 			,intItemId = @WetGrains
-			,intSourceId = @intPurchaseId
+			,intOrderId = @intPurchaseId
 			,intUnitMeasureId = @WetGrains_BushelUOMId
 		UNION ALL 
 		SELECT 
 			intInventoryReceiptId = @intInventoryReceiptId
 			,intItemId = @PremiumGrains
-			,intSourceId = @intPurchaseId
+			,intOrderId = @intPurchaseId
 			,intUnitMeasureId = @PremiumGrains_BushelUOMId
 
 		-- Setup the expected and actual tables. 

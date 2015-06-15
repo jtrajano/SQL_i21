@@ -627,8 +627,29 @@
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for invalid storage location id.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for invalid sub location id.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for a successful post.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotInFromCustody for add-sell it-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotInFromCustody for add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotInFromCustody for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotOutFromCustody for add-sell it-unpost sell.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotOutFromCustody for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCustody for the basics.sql" />
+    <Build Include="testi21Database\Fake Data\Fake transactions for item custody.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCustody for one incoming stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLotCustody by not allowing negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLotCustody for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLotCustody is successful with positive stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCustody for two incoming stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCustody on outgoing stock and it does not allow negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLotCustody by not allowing negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLotCustody for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLotCustody is successful with positive stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCustody on outgoing stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCustody for the basics.sql" />
     <Build Include="testi21Database\Fake Data\Fake data for item uom table, bushel scenario.sql" />
     <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for converting Bushel to LB.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCustody for a successful unpost.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCustody for an unsuccessful unpost.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for a successful post with positive qty.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

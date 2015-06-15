@@ -508,7 +508,7 @@ SET @strmessage = 'Internal Error. The new expiry date is invalid.'
 EXEC sp_addmessage 51126,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51127) EXEC sp_dropmessage 51127, 'us_english'	
-SET @strmessage = 'Internal Error. The Adjust By Quantity is required to be a negative value.'
+SET @strmessage = 'Internal Error. The Adjust By Quantity is required.'
 EXEC sp_addmessage 51127,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51128) EXEC sp_dropmessage 51128, 'us_english'	
@@ -539,13 +539,13 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51134) EXEC sp_dropmessa
 SET @strmessage = 'No default consumption unit configured, cannot consume.'
 EXEC sp_addmessage 51134,11,@strmessage,'us_english','False'
 
-IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51130) EXEC sp_dropmessage 51130, 'us_english'	
-SET @strmessage = 'The UOM is missing on %s.'
-EXEC sp_addmessage 51130,11,@strmessage,'us_english','False'
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51135) EXEC sp_dropmessage 51135, 'us_english'	
+SET @strmessage = 'A consigned or custodial item is no longer available. Unable to continue and unpost the transaction.'
+EXEC sp_addmessage 51135,11,@strmessage,'us_english','False'
 
-IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51131) EXEC sp_dropmessage 51131, 'us_english'	
-SET @strmessage = 'Please specify the Adjust Qty By or New Quantity on %s.'
-EXEC sp_addmessage 51131,11,@strmessage,'us_english','False'
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51136) EXEC sp_dropmessage 51136, 'us_english'	
+SET @strmessage = 'The UOM is missing on %s.'
+EXEC sp_addmessage 51136,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51137) EXEC sp_dropmessage 51137, 'us_english'	
 SET @strmessage = 'This lot is already released. You can''t undo.'
@@ -570,3 +570,7 @@ EXEC sp_addmessage 51141,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51142) EXEC sp_dropmessage 51142, 'us_english'	
 SET @strmessage = 'Lot Id already exists. It should be unique'
 EXEC sp_addmessage 51142,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51143) EXEC sp_dropmessage 51143, 'us_english'	
+SET @strmessage = 'Please specify the Adjust Qty By or New Quantity on %s.'
+EXEC sp_addmessage 51143,11,@strmessage,'us_english','False'

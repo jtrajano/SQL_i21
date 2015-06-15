@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspPOUpdateOnOrder]
+﻿
+CREATE PROCEDURE [dbo].[uspPOUpdateOnOrder]
 	@poId INT,
 	@negate BIT
 AS
@@ -12,7 +13,26 @@ BEGIN
 
 	DECLARE @items ItemCostingTableType
 
-	INSERT INTO @items
+	INSERT INTO @items (
+		[intItemId]				
+		,[intItemLocationId]	
+		,[intItemUOMId]			
+		,[dtmDate]				
+		,[dblQty]				
+		,[dblUOMQty]			
+		,[dblCost]				
+		,[dblValue]				
+		,[dblSalesPrice]		
+		,[intCurrencyId]		
+		,[dblExchangeRate]		
+		,[intTransactionId]	
+		,[intTransactionDetailId]	
+		,[strTransactionId]		
+		,[intTransactionTypeId]	
+		,[intLotId]				
+		,[intSubLocationId]		
+		,[intStorageLocationId]		
+	)
 	SELECT
 		[intItemId]					=	B.intItemId
 		,[intItemLocationId]		=	ItemLocation.intItemLocationId
