@@ -16,6 +16,7 @@ Type the overview for the table here.
 		[strCommodityCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[ysnExchangeTraded] BIT NULL DEFAULT ((0)), 
+		[intFutureMarketId] INT NULL,
 		[intDecimalDPR] INT NULL DEFAULT ((2)), 
 		[dblConsolidateFactor] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[ysnFXExposure] BIT NULL, 
@@ -47,7 +48,8 @@ Type the overview for the table here.
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICCommodity] PRIMARY KEY ([intCommodityId]), 
 		CONSTRAINT [FK_tblICCommodity_tblICPatronageCategory] FOREIGN KEY ([intPatronageCategoryId]) REFERENCES [tblICPatronageCategory]([intPatronageCategoryId]),
-		CONSTRAINT [FK_tblICCommodity_tblICPatronageCategoryDirect] FOREIGN KEY ([intPatronageCategoryDirectId]) REFERENCES [tblICPatronageCategory]([intPatronageCategoryId]) 
+		CONSTRAINT [FK_tblICCommodity_tblICPatronageCategoryDirect] FOREIGN KEY ([intPatronageCategoryDirectId]) REFERENCES [tblICPatronageCategory]([intPatronageCategoryId]), 
+		CONSTRAINT [FK_tblICCommodity_tblRKFutureMarket] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]) 
 	)
 
 	GO
@@ -329,3 +331,12 @@ Type the overview for the table here.
 		@level1name = N'tblICCommodity',
 		@level2type = N'COLUMN',
 		@level2name = N'ysnExchangeTraded'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Default Futures Market',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICCommodity',
+    @level2type = N'COLUMN',
+    @level2name = N'intFutureMarketId'
