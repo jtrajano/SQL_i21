@@ -21,11 +21,16 @@ DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Shipment Transaction' + CA
 -- Constants  
 DECLARE @INVENTORY_SHIPMENT_TYPE AS INT = 5
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3  
-DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory In-Transit'
+DECLARE	@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory In-Transit'
+		,@OWNERSHIP_TYPE_OWN AS INT = 1
+		,@OWNERSHIP_TYPE_STORAGE AS INT = 2
+		,@OWNERSHIP_TYPE_CONSIGNED_PURCHASE AS INT = 3
+		,@OWNERSHIP_TYPE_CONSIGNED_SALE AS INT = 4
 
 -- Get the Inventory Shipment batch number
 DECLARE @strBatchId AS NVARCHAR(40) 
-DECLARE @strItemNo AS NVARCHAR(50)
+		,@strItemNo AS NVARCHAR(50)
+		,@ysnAllowBlankGLEntries AS BIT = 1
 
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType 
@@ -127,86 +132,160 @@ IF @ysnPost = 1
 BEGIN  
 	-- Get the items to post  
 	DECLARE @ItemsForPost AS ItemCostingTableType  
-	INSERT INTO @ItemsForPost (  
-			intItemId  
-			,intItemLocationId 
-			,intItemUOMId  
-			,dtmDate  
-			,dblQty  
-			,dblUOMQty  
-			,dblCost  
-			,dblSalesPrice  
-			,intCurrencyId  
-			,dblExchangeRate  
-			,intTransactionId  
-			,intTransactionDetailId 
-			,strTransactionId  
-			,intTransactionTypeId  
-			,intLotId 
-			,intSubLocationId
-			,intStorageLocationId
-	) 
-	SELECT Detail.intItemId  
-			,dbo.fnICGetItemLocation(Detail.intItemId, Header.intShipFromLocationId)
-			,Detail.intItemUOMId  
-			,Header.dtmShipDate
-			,Detail.dblQuantity * -1
-			,ItemUOM.dblUnitQty
-			,Lot.dblLastCost
-			,ItemSource.dblUnitPrice
-			,NULL
-			,1.00
-			,@intTransactionId
-			,Detail.intInventoryShipmentItemId
-			,@strTransactionId
-			,@INVENTORY_SHIPMENT_TYPE
-			,DetailLot.intLotId 
-			,Lot.intSubLocationId
-			,Lot.intStorageLocationId
-	FROM tblICInventoryShipmentItem Detail
-	INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Detail.intItemUOMId
-	LEFT JOIN tblICInventoryShipmentItemLot DetailLot ON DetailLot.intInventoryShipmentItemId = Detail.intInventoryShipmentItemId
-	LEFT JOIN tblICLot Lot ON Lot.intLotId = DetailLot.intLotId
-	INNER JOIN tblICInventoryShipment Header ON Header.intInventoryShipmentId = Detail.intInventoryShipmentId
-	INNER JOIN vyuICGetShipmentItemSource ItemSource ON ItemSource.intInventoryShipmentItemId = Detail.intInventoryShipmentItemId
-	WHERE Detail.intInventoryShipmentId = @intTransactionId
-  
-	-- Call the post routine 
-	BEGIN 
+	DECLARE @CustodyItemsForPost AS ItemCostingTableType  
+
+	-- Get company owned items to post. 
+	BEGIN
+		INSERT INTO @ItemsForPost (  
+				intItemId  
+				,intItemLocationId 
+				,intItemUOMId  
+				,dtmDate  
+				,dblQty  
+				,dblUOMQty  
+				,dblCost  
+				,dblSalesPrice  
+				,intCurrencyId  
+				,dblExchangeRate  
+				,intTransactionId  
+				,intTransactionDetailId 
+				,strTransactionId  
+				,intTransactionTypeId  
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
+		) 
+		SELECT   intItemId                  = DetailItem.intItemId
+				,intItemLocationId          = dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId)
+				,intItemUOMId               = DetailItem.intItemUOMId
+				,dtmDate					= dbo.fnRemoveTimeOnDate(Header.dtmShipDate)
+				,dblQty                     = -1 * ABS(ISNULL(DetailItem.dblQuantity, 0)) 
+				,dblUOMQty                  = ItemUOM.dblUnitQty
+				,dblCost                    = 0.00 -- Zero cost. The system will use the cost from the cost-bucket. 
+				,dblSalesPrice              = 0.00
+				,intCurrencyId              = NULL 
+				,dblExchangeRate            = 1
+				,intTransactionId           = Header.intInventoryShipmentId
+				,intTransactionDetailId     = DetailItem.intInventoryShipmentItemId
+				,strTransactionId           = Header.strShipmentNumber
+				,intTransactionTypeId       = @INVENTORY_SHIPMENT_TYPE
+				,intLotId                   = Lot.intLotId
+				,intSubLocationId           = Lot.intSubLocationId
+				,intStorageLocationId       = Lot.intStorageLocationId
+		FROM    tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem DetailItem 
+					ON Header.intInventoryShipmentId = DetailItem.intInventoryShipmentId    
+				INNER JOIN tblICItemUOM ItemUOM 
+					ON ItemUOM.intItemUOMId = DetailItem.intItemUOMId
+				LEFT JOIN tblICInventoryShipmentItemLot DetailLot 
+					ON DetailLot.intInventoryShipmentItemId = DetailItem.intInventoryShipmentItemId
+				LEFT JOIN tblICLot Lot 
+					ON Lot.intLotId = DetailLot.intLotId            
+				INNER JOIN vyuICGetShipmentItemSource ItemSource 
+					ON ItemSource.intInventoryShipmentItemId = DetailItem.intInventoryShipmentItemId
+		WHERE   Header.intInventoryShipmentId = @intTransactionId
+				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_OWN) = @OWNERSHIP_TYPE_OWN
+
 		-- Call the post routine 
-		INSERT INTO @GLEntries (
-				[dtmDate] 
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-		)
-		EXEC	dbo.uspICPostCosting  
-				@ItemsForPost  
-				,@strBatchId  
-				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-				,@intUserId
-	END
+		IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
+		BEGIN 
+			SET @ysnAllowBlankGLEntries = 0
+
+			-- Call the post routine 
+			INSERT INTO @GLEntries (
+					[dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+			)
+			EXEC	dbo.uspICPostCosting  
+					@ItemsForPost  
+					,@strBatchId  
+					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+					,@intUserId
+		END
+	END 
+
+	-- Process custody items
+	BEGIN 
+		INSERT INTO @CustodyItemsForPost (  
+				intItemId  
+				,intItemLocationId 
+				,intItemUOMId  
+				,dtmDate  
+				,dblQty  
+				,dblUOMQty  
+				,dblCost  
+				,dblSalesPrice  
+				,intCurrencyId  
+				,dblExchangeRate  
+				,intTransactionId  
+				,intTransactionDetailId 
+				,strTransactionId  
+				,intTransactionTypeId  
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
+		) 
+		SELECT   intItemId                  = DetailItem.intItemId
+				,intItemLocationId          = dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId)
+				,intItemUOMId               = DetailItem.intItemUOMId
+				,dtmDate					= dbo.fnRemoveTimeOnDate(Header.dtmShipDate)
+				,dblQty                     = -1 * ABS(ISNULL(DetailItem.dblQuantity, 0)) 
+				,dblUOMQty                  = ItemUOM.dblUnitQty
+				,dblCost                    = 0.00 -- Zero cost. The system will use the cost from the cost-bucket. 
+				,dblSalesPrice              = 0.00
+				,intCurrencyId              = NULL 
+				,dblExchangeRate            = 1
+				,intTransactionId           = Header.intInventoryShipmentId
+				,intTransactionDetailId     = DetailItem.intInventoryShipmentItemId
+				,strTransactionId           = Header.strShipmentNumber
+				,intTransactionTypeId       = @INVENTORY_SHIPMENT_TYPE
+				,intLotId                   = Lot.intLotId
+				,intSubLocationId           = Lot.intSubLocationId
+				,intStorageLocationId       = Lot.intStorageLocationId
+		FROM    tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem DetailItem 
+					ON Header.intInventoryShipmentId = DetailItem.intInventoryShipmentId    
+				INNER JOIN tblICItemUOM ItemUOM 
+					ON ItemUOM.intItemUOMId = DetailItem.intItemUOMId
+				LEFT JOIN tblICInventoryShipmentItemLot DetailLot 
+					ON DetailLot.intInventoryShipmentItemId = DetailItem.intInventoryShipmentItemId
+				LEFT JOIN tblICLot Lot 
+					ON Lot.intLotId = DetailLot.intLotId            
+				INNER JOIN vyuICGetShipmentItemSource ItemSource 
+					ON ItemSource.intInventoryShipmentItemId = DetailItem.intInventoryShipmentItemId
+		WHERE   Header.intInventoryShipmentId = @intTransactionId
+				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_OWN) <> @OWNERSHIP_TYPE_OWN
+
+		-- Call the post routine 
+		IF EXISTS (SELECT TOP 1 1 FROM @CustodyItemsForPost) 
+		BEGIN 
+			EXEC	dbo.uspICPostCustody
+					@CustodyItemsForPost  
+					,@strBatchId  
+					,@intUserId
+		END
+	END 
 END   
 
 --------------------------------------------------------------------------------------------  
@@ -275,7 +354,10 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 0
 BEGIN 
-	EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
+	IF @ysnAllowBlankGLEntries = 0 
+	BEGIN 
+		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
+	END
 
 	UPDATE	dbo.tblICInventoryShipment
 	SET		ysnPosted = @ysnPost

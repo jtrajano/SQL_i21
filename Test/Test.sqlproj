@@ -653,6 +653,9 @@
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostSplitLot for a successful post with new weight.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostCustody for non-supported costing method.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for calling uspICPostCustody.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryShipment for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryShipment for calling uspICPostCustody.sql" />
+    <Build Include="testi21Database\Fake Data\Fake data for inventory shipment table.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">
