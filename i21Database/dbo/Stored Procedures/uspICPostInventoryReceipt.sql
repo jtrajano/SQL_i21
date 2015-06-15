@@ -20,12 +20,18 @@ DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Receipt Transaction' + CAS
 
 -- Constants  
 DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 4
-DECLARE @STARTING_NUMBER_BATCH AS INT = 3  
-DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'AP Clearing'
+		,@STARTING_NUMBER_BATCH AS INT = 3  
+		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'AP Clearing'
+		
+		,@OWNERSHIP_TYPE_OWN AS INT = 1
+		,@OWNERSHIP_TYPE_STORAGE AS INT = 2
+		,@OWNERSHIP_TYPE_CONSIGNED_PURCHASE AS INT = 3
+		,@OWNERSHIP_TYPE_CONSIGNED_SALE AS INT = 4
 
--- Get the Inventory Receipt batch number
+-- Posting variables
 DECLARE @strBatchId AS NVARCHAR(40) 
-DECLARE @strItemNo AS NVARCHAR(50)
+		,@strItemNo AS NVARCHAR(50)
+		,@ysnAllowBlankGLEntries AS BIT = 1
 
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType 
@@ -161,146 +167,273 @@ IF @ysnPost = 1
 BEGIN  
 	-- Get the items to post  
 	DECLARE @ItemsForPost AS ItemCostingTableType  
-	INSERT INTO @ItemsForPost (  
-			intItemId  
-			,intItemLocationId 
-			,intItemUOMId  
-			,dtmDate  
-			,dblQty  
-			,dblUOMQty  
-			,dblCost  
-			,dblSalesPrice  
-			,intCurrencyId  
-			,dblExchangeRate  
-			,intTransactionId  
-			,intTransactionDetailId   
-			,strTransactionId  
-			,intTransactionTypeId  
-			,intLotId 
-			,intSubLocationId
-			,intStorageLocationId
-	)  
-	SELECT	intItemId = DetailItem.intItemId  
-			,intItemLocationId = ItemLocation.intItemLocationId
-			,intItemUOMId = 
-						-- Use weight UOM id if it is present. Otherwise, use the qty UOM. 
-						CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN DetailItem.intWeightUOMId 
-								ELSE DetailItem.intUnitMeasureId 
-						END
-			,dtmDate = Header.dtmReceiptDate  
-			,dblQty =						
-						-- Check if it is processing a lot item or not. 
-						-- If it is a lot, 
-						--		If there is no weight UOM, convert the Item-Lot-Qty to the UOM of the Detail-Item.
-						--		If there is a weight UOM, receive the qty in weights. 
-						-- Otherwise
-						--		Receive the qty from the detail item. 
-						CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0  THEN 
-									CASE	-- The item has no weight UOM. Receive it by converting the Qty to the Detail-Item UOM. 
-											WHEN ISNULL(DetailItem.intWeightUOMId, 0) = 0  THEN 												
-												dbo.fnCalculateQtyBetweenUOM(ISNULL(DetailItemLot.intItemUnitMeasureId, DetailItem.intUnitMeasureId), DetailItem.intUnitMeasureId, DetailItemLot.dblQuantity)
-											
-											-- The item has a weight UOM. 
-											ELSE 
-												-- If there is weight value (non-zero), use it. 
-												-- Otherwise, convert the Qty from Detail-Item-Lot-UOM to the Detail-Item-Weight-UOM. 
-												CASE	WHEN  ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0) = 0 THEN 
-															dbo.fnCalculateQtyBetweenUOM(DetailItemLot.intItemUnitMeasureId, DetailItem.intWeightUOMId, DetailItemLot.dblQuantity)
-														ELSE 
-															ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
-												END
-									END 									
-								ELSE	
-									DetailItem.dblOpenReceive
-						END 				
-			,dblUOMQty = 
-						-- Get the unit qy of the Weight UOM (if used) or from the DetailItem.intUnitMeasureId
-						CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN 
-									(
-										SELECT	TOP 1 
-												dblUnitQty
-										FROM	dbo.tblICItemUOM
-										WHERE	intItemUOMId = DetailItem.intWeightUOMId									
-									)
-								ELSE 
-									(
-										SELECT	TOP 1 
-												dblUnitQty
-										FROM	dbo.tblICItemUOM
-										WHERE	intItemUOMId = DetailItem.intUnitMeasureId
-									)
-						END 
+	DECLARE @CustodyItemsForPost AS ItemCostingTableType  
 
-			,dblCost =	-- If Weight is used, use the Cost per Weight. Otherwise, use the cost per qty. 
-						CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN 
-									dbo.fnCalculateCostPerWeight (
-										dbo.fnCalculateCostPerLot ( 
-											DetailItem.intUnitMeasureId
-											,DetailItem.intWeightUOMId
-											,DetailItemLot.intItemUnitMeasureId
-											,DetailItem.dblUnitCost
-										) * DetailItemLot.dblQuantity
-										,ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
-									) 
-
-								ELSE 
-									DetailItem.dblUnitCost  
-						END 
-
-			,dblSalesPrice = 0  
-			,intCurrencyId = Header.intCurrencyId  
-			,dblExchangeRate = 1  
-			,intTransactionId = Header.intInventoryReceiptId  
-			,intTransactionDetailId  = DetailItem.intInventoryReceiptItemId
-			,strTransactionId = Header.strReceiptNumber  
-			,intTransactionTypeId = @INVENTORY_RECEIPT_TYPE  
-			,intLotId = DetailItemLot.intLotId 
-			,intSubLocationId = DetailItem.intSubLocationId
-			,intStorageLocationId = DetailItemLot.intStorageLocationId
-	FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICItemLocation ItemLocation
-				ON Header.intLocationId = ItemLocation.intLocationId
-			INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
-				ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
-				AND ItemLocation.intItemId = DetailItem.intItemId
-			LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
-				ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
-	WHERE	Header.intInventoryReceiptId = @intTransactionId   
-  
-	-- Call the post routine 
+	-- Get company owned items to post. 
 	BEGIN 
+		INSERT INTO @ItemsForPost (  
+				intItemId  
+				,intItemLocationId 
+				,intItemUOMId  
+				,dtmDate  
+				,dblQty  
+				,dblUOMQty  
+				,dblCost  
+				,dblSalesPrice  
+				,intCurrencyId  
+				,dblExchangeRate  
+				,intTransactionId  
+				,intTransactionDetailId   
+				,strTransactionId  
+				,intTransactionTypeId  
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
+		)  
+		SELECT	intItemId = DetailItem.intItemId  
+				,intItemLocationId = ItemLocation.intItemLocationId
+				,intItemUOMId = 
+							-- Use weight UOM id if it is present. Otherwise, use the qty UOM. 
+							CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN DetailItem.intWeightUOMId 
+									ELSE DetailItem.intUnitMeasureId 
+							END
+				,dtmDate = Header.dtmReceiptDate  
+				,dblQty =						
+							-- Check if it is processing a lot item or not. 
+							-- If it is a lot, 
+							--		If there is no weight UOM, convert the Item-Lot-Qty to the UOM of the Detail-Item.
+							--		If there is a weight UOM, receive the qty in weights. 
+							-- Otherwise
+							--		Receive the qty from the detail item. 
+							CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0  THEN 
+										CASE	-- The item has no weight UOM. Receive it by converting the Qty to the Detail-Item UOM. 
+												WHEN ISNULL(DetailItem.intWeightUOMId, 0) = 0  THEN 												
+													dbo.fnCalculateQtyBetweenUOM(ISNULL(DetailItemLot.intItemUnitMeasureId, DetailItem.intUnitMeasureId), DetailItem.intUnitMeasureId, DetailItemLot.dblQuantity)
+											
+												-- The item has a weight UOM. 
+												ELSE 
+													-- If there is weight value (non-zero), use it. 
+													-- Otherwise, convert the Qty from Detail-Item-Lot-UOM to the Detail-Item-Weight-UOM. 
+													CASE	WHEN  ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0) = 0 THEN 
+																dbo.fnCalculateQtyBetweenUOM(DetailItemLot.intItemUnitMeasureId, DetailItem.intWeightUOMId, DetailItemLot.dblQuantity)
+															ELSE 
+																ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
+													END
+										END 									
+									ELSE	
+										DetailItem.dblOpenReceive
+							END 				
+				,dblUOMQty = 
+							-- Get the unit qy of the Weight UOM (if used) or from the DetailItem.intUnitMeasureId
+							CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN 
+										(
+											SELECT	TOP 1 
+													dblUnitQty
+											FROM	dbo.tblICItemUOM
+											WHERE	intItemUOMId = DetailItem.intWeightUOMId									
+										)
+									ELSE 
+										(
+											SELECT	TOP 1 
+													dblUnitQty
+											FROM	dbo.tblICItemUOM
+											WHERE	intItemUOMId = DetailItem.intUnitMeasureId
+										)
+							END 
+
+				,dblCost =	-- If Weight is used, use the Cost per Weight. Otherwise, use the cost per qty. 
+							CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN 
+										dbo.fnCalculateCostPerWeight (
+											dbo.fnCalculateCostPerLot ( 
+												DetailItem.intUnitMeasureId
+												,DetailItem.intWeightUOMId
+												,DetailItemLot.intItemUnitMeasureId
+												,DetailItem.dblUnitCost
+											) * DetailItemLot.dblQuantity
+											,ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
+										) 
+
+									ELSE 
+										DetailItem.dblUnitCost  
+							END 
+
+				,dblSalesPrice = 0  
+				,intCurrencyId = Header.intCurrencyId  
+				,dblExchangeRate = 1  
+				,intTransactionId = Header.intInventoryReceiptId  
+				,intTransactionDetailId  = DetailItem.intInventoryReceiptItemId
+				,strTransactionId = Header.strReceiptNumber  
+				,intTransactionTypeId = @INVENTORY_RECEIPT_TYPE  
+				,intLotId = DetailItemLot.intLotId 
+				,intSubLocationId = DetailItem.intSubLocationId
+				,intStorageLocationId = DetailItemLot.intStorageLocationId
+		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICItemLocation ItemLocation
+					ON Header.intLocationId = ItemLocation.intLocationId
+				INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
+					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
+					AND ItemLocation.intItemId = DetailItem.intItemId
+				LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
+					ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
+		WHERE	Header.intInventoryReceiptId = @intTransactionId   
+				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_OWN) = @OWNERSHIP_TYPE_OWN
+  
 		-- Call the post routine 
-		INSERT INTO @GLEntries (
-				[dtmDate] 
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-		)
-		EXEC	dbo.uspICPostCosting  
-				@ItemsForPost  
-				,@strBatchId  
-				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-				,@intUserId
+		IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
+		BEGIN 
+			SET @ysnAllowBlankGLEntries = 0
+
+			-- Call the post routine 
+			INSERT INTO @GLEntries (
+					[dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+			)
+			EXEC	dbo.uspICPostCosting  
+					@ItemsForPost  
+					,@strBatchId  
+					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+					,@intUserId
+		END
+	END 
+
+	-- Process custody items 
+	BEGIN 
+		INSERT INTO @CustodyItemsForPost (  
+				intItemId  
+				,intItemLocationId 
+				,intItemUOMId  
+				,dtmDate  
+				,dblQty  
+				,dblUOMQty  
+				,dblCost  
+				,dblSalesPrice  
+				,intCurrencyId  
+				,dblExchangeRate  
+				,intTransactionId  
+				,intTransactionDetailId   
+				,strTransactionId  
+				,intTransactionTypeId  
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
+		)  
+		SELECT	intItemId = DetailItem.intItemId  
+				,intItemLocationId = ItemLocation.intItemLocationId
+				,intItemUOMId = 
+							-- Use weight UOM id if it is present. Otherwise, use the qty UOM. 
+							CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN DetailItem.intWeightUOMId 
+									ELSE DetailItem.intUnitMeasureId 
+							END
+				,dtmDate = Header.dtmReceiptDate  
+				,dblQty =						
+							-- Check if it is processing a lot item or not. 
+							-- If it is a lot, 
+							--		If there is no weight UOM, convert the Item-Lot-Qty to the UOM of the Detail-Item.
+							--		If there is a weight UOM, receive the qty in weights. 
+							-- Otherwise
+							--		Receive the qty from the detail item. 
+							CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0  THEN 
+										CASE	-- The item has no weight UOM. Receive it by converting the Qty to the Detail-Item UOM. 
+												WHEN ISNULL(DetailItem.intWeightUOMId, 0) = 0  THEN 												
+													dbo.fnCalculateQtyBetweenUOM(ISNULL(DetailItemLot.intItemUnitMeasureId, DetailItem.intUnitMeasureId), DetailItem.intUnitMeasureId, DetailItemLot.dblQuantity)
+											
+												-- The item has a weight UOM. 
+												ELSE 
+													-- If there is weight value (non-zero), use it. 
+													-- Otherwise, convert the Qty from Detail-Item-Lot-UOM to the Detail-Item-Weight-UOM. 
+													CASE	WHEN  ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0) = 0 THEN 
+																dbo.fnCalculateQtyBetweenUOM(DetailItemLot.intItemUnitMeasureId, DetailItem.intWeightUOMId, DetailItemLot.dblQuantity)
+															ELSE 
+																ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
+													END
+										END 									
+									ELSE	
+										DetailItem.dblOpenReceive
+							END 				
+				,dblUOMQty = 
+							-- Get the unit qy of the Weight UOM (if used) or from the DetailItem.intUnitMeasureId
+							CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN 
+										(
+											SELECT	TOP 1 
+													dblUnitQty
+											FROM	dbo.tblICItemUOM
+											WHERE	intItemUOMId = DetailItem.intWeightUOMId									
+										)
+									ELSE 
+										(
+											SELECT	TOP 1 
+													dblUnitQty
+											FROM	dbo.tblICItemUOM
+											WHERE	intItemUOMId = DetailItem.intUnitMeasureId
+										)
+							END 
+
+				,dblCost =	-- If Weight is used, use the Cost per Weight. Otherwise, use the cost per qty. 
+							CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN 
+										dbo.fnCalculateCostPerWeight (
+											dbo.fnCalculateCostPerLot ( 
+												DetailItem.intUnitMeasureId
+												,DetailItem.intWeightUOMId
+												,DetailItemLot.intItemUnitMeasureId
+												,DetailItem.dblUnitCost
+											) * DetailItemLot.dblQuantity
+											,ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
+										) 
+
+									ELSE 
+										DetailItem.dblUnitCost  
+							END 
+
+				,dblSalesPrice = 0  
+				,intCurrencyId = Header.intCurrencyId  
+				,dblExchangeRate = 1  
+				,intTransactionId = Header.intInventoryReceiptId  
+				,intTransactionDetailId  = DetailItem.intInventoryReceiptItemId
+				,strTransactionId = Header.strReceiptNumber  
+				,intTransactionTypeId = @INVENTORY_RECEIPT_TYPE  
+				,intLotId = DetailItemLot.intLotId 
+				,intSubLocationId = DetailItem.intSubLocationId
+				,intStorageLocationId = DetailItemLot.intStorageLocationId
+		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICItemLocation ItemLocation
+					ON Header.intLocationId = ItemLocation.intLocationId
+				INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
+					ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
+					AND ItemLocation.intItemId = DetailItem.intItemId
+				LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
+					ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
+		WHERE	Header.intInventoryReceiptId = @intTransactionId   
+				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_OWN) <> @OWNERSHIP_TYPE_OWN
+  
+		-- Call the post routine 
+		IF EXISTS (SELECT TOP 1 1 FROM @CustodyItemsForPost) 
+		BEGIN 
+			EXEC	dbo.uspICPostCustody
+					@CustodyItemsForPost  
+					,@strBatchId  
+					,@intUserId
+		END
 	END
 END   
 
@@ -370,8 +503,11 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 0
 BEGIN 
-	EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
-
+	IF @ysnAllowBlankGLEntries = 0 
+	BEGIN 
+		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
+	END 
+	
 	UPDATE	dbo.tblICInventoryReceipt  
 	SET		ysnPosted = @ysnPost
 			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1

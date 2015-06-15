@@ -58,6 +58,9 @@ Records must be maintained in this table even if the costing method for an item 
 	Flags if the cost bucket has been unposted. 
 	Maps: None
 
+*	[ysnInCustody] BIT NOT NULL DEFAULT 0
+	Flags if the Lot is owned by someone else like the customer. Lot is under the company's custody. 
+	Maps: None
 
 *	[intCreatedUserId] INT NULL
 	Internal field used to track the user id who created the cost bucket. 
@@ -87,6 +90,7 @@ Records must be maintained in this table even if the costing method for an item 
 		[intTransactionId] INT NOT NULL,
 		[dtmCreated] DATETIME NULL, 
 		[ysnIsUnposted] BIT NOT NULL DEFAULT 0, 
+		[ysnInCustody] BIT NOT NULL DEFAULT 0, 
 		[intCreatedUserId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
 		CONSTRAINT [PK_tblICInventoryLot] PRIMARY KEY NONCLUSTERED ([intInventoryLotId]),

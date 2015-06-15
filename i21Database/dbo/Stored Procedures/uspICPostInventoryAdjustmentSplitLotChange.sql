@@ -43,7 +43,7 @@ BEGIN
 		WHERE intItemId = @intItemId		
 
 		-- 'The UOM is missing on {Item}.'
-		RAISERROR(51130, 11, 1, @strItemNo);
+		RAISERROR(51136, 11, 1, @strItemNo);
 		GOTO Exit_With_Errors
 	END
 
@@ -70,7 +70,7 @@ BEGIN
 		WHERE intItemId = @intItemId		
 
 		-- 'Please specify the Adjust By Quantity or New Quantity on {Item}.'
-		RAISERROR(51131, 11, 1, @strItemNo);
+		RAISERROR(51143, 11, 1, @strItemNo);
 		GOTO Exit_With_Errors
 	END
 END 

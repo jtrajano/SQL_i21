@@ -246,7 +246,7 @@ BEGIN
 		-- Get the actual shipment detail record(s)
 		INSERT INTO actual_tblICInventoryShipmentItem (
 				intInventoryShipmentId
-				,intSourceId
+				,intOrderId
 				,intLineNo
 				,intItemId
 				,intSubLocationId
@@ -261,7 +261,7 @@ BEGIN
 		)
 		SELECT 
 				intInventoryShipmentId	
-				,intSourceId			
+				,intOrderId			
 				,intLineNo				
 				,intItemId				
 				,intSubLocationId		

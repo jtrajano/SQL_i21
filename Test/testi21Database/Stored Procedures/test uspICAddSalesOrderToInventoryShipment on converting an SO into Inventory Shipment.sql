@@ -161,7 +161,7 @@ BEGIN
 
 		INSERT INTO expected_tblICInventoryShipmentItem (
 			intInventoryShipmentId
-			,intSourceId
+			,intOrderId
 			,intLineNo
 			,intItemId
 			,intSubLocationId
@@ -176,7 +176,7 @@ BEGIN
 		)
 		SELECT 
 			intInventoryShipmentId	= @Expected_Shipment_Id
-			,intSourceId			= @INT_SO_10001
+			,intOrderId			= @INT_SO_10001
 			,intLineNo				= @INT_SO_10001_DETAIL_1
 			,intItemId				= @WetGrains
 			,intSubLocationId		= NULL 
@@ -271,7 +271,7 @@ BEGIN
 		-- Get the actual shipment detail record(s)
 		INSERT INTO actual_tblICInventoryShipmentItem (
 				intInventoryShipmentId
-				,intSourceId
+				,intOrderId
 				,intLineNo
 				,intItemId
 				,intSubLocationId
@@ -286,7 +286,7 @@ BEGIN
 		)
 		SELECT 
 				intInventoryShipmentId	
-				,intSourceId			
+				,intOrderId			
 				,intLineNo				
 				,intItemId				
 				,intSubLocationId		

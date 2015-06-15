@@ -114,7 +114,7 @@ Type the overview for the table here.
 		[ysnAccrue] BIT NULL DEFAULT ((1)),
 		[ysnMTM] BIT NULL DEFAULT ((1)),
 		[ysnPrice] BIT NULL DEFAULT ((1)),
-		[strCostMethod] NVARCHAR(50) NULL DEFAULT ('Per Unit'),
+		[strCostMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT ('Per Unit'),
 		[intOnCostTypeId] INT NULL,
 		[dblAmount] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[intCostUOMId] INT NULL,
