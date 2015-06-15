@@ -568,5 +568,9 @@ SET @strmessage = 'Work order contains quarantined lot, you need to either relea
 EXEC sp_addmessage 51141,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51142) EXEC sp_dropmessage 51142, 'us_english'	
-SET @strmessage = 'Please specify the Adjust Qty By or New Quantity on %s.'
+SET @strmessage = 'Lot Id already exists. It should be unique'
 EXEC sp_addmessage 51142,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51143) EXEC sp_dropmessage 51143, 'us_english'	
+SET @strmessage = 'Please specify the Adjust Qty By or New Quantity on %s.'
+EXEC sp_addmessage 51143,11,@strmessage,'us_english','False'

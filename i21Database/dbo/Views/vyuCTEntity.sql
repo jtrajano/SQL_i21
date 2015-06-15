@@ -6,6 +6,11 @@ AS
 			'Customer' AS strEntity,
 			C.strCustomerNumber strNumber,
 			L.strAddress,
+			L.strCity,
+			L.strState,
+			L.strZipCode,
+			L.strCountry,
+			L.strPhone,
 			E.intDefaultLocationId 
 	FROM	tblEntity			E
 	JOIN	tblEntityLocation	L	ON	E.intEntityId = L.intEntityId AND L.ysnDefaultLocation = 1
@@ -18,6 +23,11 @@ AS
 			'Vendor' AS strEntity,
 			V.strVendorId ,
 			L.strAddress,
+			L.strCity,
+			L.strState,
+			L.strZipCode,
+			L.strCountry,
+			L.strPhone,
 			E.intDefaultLocationId
 	FROM	tblEntity			E
 	JOIN	tblEntityLocation	L	ON	E.intEntityId = L.intEntityId AND L.ysnDefaultLocation = 1
@@ -30,6 +40,11 @@ AS
 			'ShippingLine' AS strEntity,
 			NULL ,
 			L.strAddress,
+			L.strCity,
+			L.strState,
+			L.strZipCode,
+			L.strCountry,
+			L.strPhone,
 			E.intDefaultLocationId
 	FROM	tblEntity			E
 	JOIN	tblEntityLocation	L	ON	E.intEntityId = L.intEntityId AND L.ysnDefaultLocation = 1

@@ -36,13 +36,14 @@ BEGIN TRY
 		,@strLotNumber nvarchar(50)
 		,@strLotTracking nvarchar(50)
 		,@intItemLocationId int
-		,@dtmCurrentDate datetime
+		,@dtmCurrentDateTime datetime
 		,@dblAdjustByQuantity numeric(18,6)
 		,@intInventoryAdjustmentId int
 		,@intNewItemUOMId int
 		,@dblWeightPerQty numeric(18,6)
+		,@strDestinationLotNumber nvarchar(50)
 
-	Select @dtmCurrentDate=GetDate()
+	Select @dtmCurrentDateTime=GetDate()
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -246,9 +247,9 @@ BEGIN TRY
 		,@intContainerId
 		,@strReferenceNo
 		,@dtmActualInputDateTime
-		,GetDate()
+		,@dtmCurrentDateTime
 		,@intUserId
-		,GetDate()
+		,@dtmCurrentDateTime
 		,@intUserId
 	FROM dbo.tblICLot
 	WHERE intLotId = @intInputLotId
@@ -281,40 +282,33 @@ BEGIN TRY
 						)
 			END
 			Select @dblAdjustByQuantity=(@dblNewWeight-@dblWeight)/@dblWeightPerQty
-			PRINT 'Call Lot Adjust routine.'
-			EXEC [uspICInventoryAdjustment_CreatePostSplitLot]
+
+			EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
 					-- Parameters for filtering:
 					@intItemId = @intInputItemId
-					,@dtmDate = @dtmCurrentDate
+					,@dtmDate = @dtmCurrentDateTime
 					,@intLocationId = @intLocationId
 					,@intSubLocationId = @intSubLocationId
 					,@intStorageLocationId = @intStorageLocationId
-					,@strLotNumber = @strLotNumber
+					,@strLotNumber = @strLotNumber	
 					-- Parameters for the new values: 
-					,@intNewLocationId = @intLocationId
-					,@intNewSubLocationId = @intSubLocationId
-					,@intNewStorageLocationId = @intStorageLocationId
-					,@strNewLotNumber = @strLotNumber
-					,@dblAdjustByQuantity = @dblAdjustByQuantity
-					,@dblNewSplitLotQuantity = 0
-					,@dblNewWeight = @dblNewWeight
-					,@intNewItemUOMId = @intNewItemUOMId
-					,@intNewWeightUOMId = @intInputWeightUOMId
-					,@dblNewUnitCost = NULL
+					,@dblAdjustByQuantity =@dblAdjustByQuantity
+					,@dblNewUnitCost =NULL
 					-- Parameters used for linking or FK (foreign key) relationships
 					,@intSourceId = 1
 					,@intSourceTransactionTypeId = 8
 					,@intUserId = @intUserId
 					,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 
+			PRINT 'Call Lot Adjust routine.'
 		END
 
-		SELECT TOP 1 @intDestinationLotId = intLotId
+		SELECT TOP 1 @intDestinationLotId = intLotId,@strDestinationLotNumber=strLotNumber
 		FROM dbo.tblICLot
 		WHERE intStorageLocationId = @intConsumptionStorageLocationId
 			AND intItemId = @intInputItemId
 			AND intLotId <> @intInputLotId
-			AND dtmExpiryDate > GETDATE()
+			AND dtmExpiryDate > @dtmCurrentDateTime
 			AND intLotStatusId = 1
 		ORDER BY dtmDateCreated DESC
 
@@ -329,29 +323,29 @@ BEGIN TRY
 					Select @dblAdjustByQuantity = -@dblNewWeight/@dblWeightPerQty
 
 					EXEC [uspICInventoryAdjustment_CreatePostSplitLot]
-					-- Parameters for filtering:
-					@intItemId = @intInputItemId
-					,@dtmDate = @dtmCurrentDate
-					,@intLocationId = @intLocationId
-					,@intSubLocationId = @intSubLocationId
-					,@intStorageLocationId = @intStorageLocationId
-					,@strLotNumber = @strLotNumber
-					-- Parameters for the new values: 
-					,@intNewLocationId = @intLocationId
-					,@intNewSubLocationId = @intSubLocationId
-					,@intNewStorageLocationId = @intConsumptionStorageLocationId
-					,@strNewLotNumber = @strLotNumber
-					,@dblAdjustByQuantity = 0
-					,@dblNewSplitLotQuantity = 0
-					,@dblNewWeight = @dblNewWeight
-					,@intNewItemUOMId = @intNewItemUOMId
-					,@intNewWeightUOMId = @intInputWeightUOMId
-					,@dblNewUnitCost = NULL
-					-- Parameters used for linking or FK (foreign key) relationships
-					,@intSourceId = 1
-					,@intSourceTransactionTypeId = 8
-					,@intUserId = @intUserId
-					,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+						-- Parameters for filtering:
+						@intItemId = @intInputItemId
+						,@dtmDate = @dtmCurrentDateTime
+						,@intLocationId = @intLocationId
+						,@intSubLocationId = @intSubLocationId
+						,@intStorageLocationId = @intStorageLocationId
+						,@strLotNumber = @strLotNumber
+						-- Parameters for the new values: 
+						,@intNewLocationId = @intLocationId
+						,@intNewSubLocationId = @intSubLocationId
+						,@intNewStorageLocationId = @intConsumptionStorageLocationId
+						,@strNewLotNumber = @strLotNumber
+						,@dblAdjustByQuantity = @dblAdjustByQuantity
+						,@dblNewSplitLotQuantity = 0
+						,@dblNewWeight = @dblNewWeight
+						,@intNewItemUOMId = @intNewItemUOMId
+						,@intNewWeightUOMId = @intInputWeightUOMId
+						,@dblNewUnitCost = NULL
+						-- Parameters used for linking or FK (foreign key) relationships
+						,@intSourceId = 1
+						,@intSourceTransactionTypeId = 8
+						,@intUserId = @intUserId
+						,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 
 				END
 			END
@@ -381,17 +375,17 @@ BEGIN TRY
 					WHERE intItemId = @intInputItemId
 
 					IF @strLifeTimeType = 'Years'
-						SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, GetDate())
+						SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, @dtmCurrentDateTime)
 					ELSE IF @strLifeTimeType = 'Months'
-						SET @dtmExpiryDate = DateAdd(mm, @intLifeTime, GetDate())
+						SET @dtmExpiryDate = DateAdd(mm, @intLifeTime, @dtmCurrentDateTime)
 					ELSE IF @strLifeTimeType = 'Days'
-						SET @dtmExpiryDate = DateAdd(dd, @intLifeTime, GetDate())
+						SET @dtmExpiryDate = DateAdd(dd, @intLifeTime, @dtmCurrentDateTime)
 					ELSE IF @strLifeTimeType = 'Hours'
-						SET @dtmExpiryDate = DateAdd(hh, @intLifeTime, GetDate())
+						SET @dtmExpiryDate = DateAdd(hh, @intLifeTime,@dtmCurrentDateTime)
 					ELSE IF @strLifeTimeType = 'Minutes'
-						SET @dtmExpiryDate = DateAdd(mi, @intLifeTime, GetDate())
+						SET @dtmExpiryDate = DateAdd(mi, @intLifeTime, @dtmCurrentDateTime)
 					ELSE
-						SET @dtmExpiryDate = DateAdd(yy, 1, GetDate())
+						SET @dtmExpiryDate = DateAdd(yy, 1, @dtmCurrentDateTime)
 					
 		
 					SELECT @intItemLocationId = intItemLocationId
@@ -401,7 +395,7 @@ BEGIN TRY
 					IF  @strLotTracking <> 'Yes - Serial Number'
 					BEGIN
 						EXEC dbo.uspSMGetStartingNumber 24
-							,@strLotNumber OUTPUT
+							,@strDestinationLotNumber OUTPUT
 					END
 
 					INSERT INTO @ItemsThatNeedLotId (
@@ -432,7 +426,7 @@ BEGIN TRY
 						,ysnProduced
 						)
 					SELECT intLotId = NULL
-						,strLotNumber = @strLotNumber
+						,strLotNumber = @strDestinationLotNumber
 						,strLotAlias = NULL
 						,intItemId = @intInputItemId
 						,intItemLocationId = @intItemLocationId
@@ -443,7 +437,7 @@ BEGIN TRY
 						,dblWeight = 0
 						,intWeightUOMId = @intInputWeightUOMId
 						,dtmExpiryDate = @dtmExpiryDate
-						,dtmManufacturedDate = GetDate()
+						,dtmManufacturedDate = @dtmCurrentDateTime
 						,intOriginId = NULL
 						,strBOLNo = NULL
 						,strVessel = NULL
@@ -460,7 +454,8 @@ BEGIN TRY
 					EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 						,@intUserId
 
-					SELECT TOP 1 @intDestinationLotId = intLotId
+					SELECT TOP 1 @intDestinationLotId = intLotId,
+								@strDestinationLotNumber=strLotNumber
 					FROM #GeneratedLotItems
 					WHERE intDetailId = @intWorkOrderId
 				END
@@ -473,7 +468,7 @@ BEGIN TRY
 				EXEC [uspICInventoryAdjustment_CreatePostSplitLot]
 					-- Parameters for filtering:
 					@intItemId = @intInputItemId
-					,@dtmDate = @dtmCurrentDate
+					,@dtmDate = @dtmCurrentDateTime
 					,@intLocationId = @intLocationId
 					,@intSubLocationId = @intSubLocationId
 					,@intStorageLocationId = @intStorageLocationId
@@ -482,7 +477,7 @@ BEGIN TRY
 					,@intNewLocationId = @intLocationId
 					,@intNewSubLocationId = @intSubLocationId
 					,@intNewStorageLocationId = @intConsumptionStorageLocationId
-					,@strNewLotNumber = @intDestinationLotId
+					,@strNewLotNumber = @strDestinationLotNumber
 					,@dblAdjustByQuantity = @dblAdjustByQuantity
 					,@dblNewSplitLotQuantity = 0
 					,@dblNewWeight = @dblNewWeight
@@ -504,7 +499,7 @@ BEGIN TRY
 			EXEC [uspICInventoryAdjustment_CreatePostSplitLot]
 					-- Parameters for filtering:
 					@intItemId = @intInputItemId
-					,@dtmDate = @dtmCurrentDate
+					,@dtmDate = @dtmCurrentDateTime
 					,@intLocationId = @intLocationId
 					,@intSubLocationId = @intSubLocationId
 					,@intStorageLocationId = @intStorageLocationId
@@ -513,7 +508,7 @@ BEGIN TRY
 					,@intNewLocationId = @intLocationId
 					,@intNewSubLocationId = @intSubLocationId
 					,@intNewStorageLocationId = @intConsumptionStorageLocationId
-					,@strNewLotNumber = @intDestinationLotId
+					,@strNewLotNumber = @strDestinationLotNumber
 					,@dblAdjustByQuantity = @dblAdjustByQuantity
 					,@dblNewSplitLotQuantity = 0
 					,@dblNewWeight = @dblNewWeight

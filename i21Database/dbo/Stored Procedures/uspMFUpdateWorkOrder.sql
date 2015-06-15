@@ -89,6 +89,19 @@ BEGIN TRY
 			,intSupervisorId INT
 			)
 
+	IF EXISTS (
+		SELECT *
+		FROM tblMFWorkOrder
+		WHERE strLotNumber = @strLotNumber and intWorkOrderId <>@intWorkOrderId
+	)
+	BEGIN
+		RAISERROR (
+				51142
+				,11
+				,1
+				)
+	END
+
 	BEGIN TRANSACTION
 
 	SELECT @intPrevExecutionOrder = intExecutionOrder,@intConcurrencyId=ISNULL(intConcurrencyId,0)+1
