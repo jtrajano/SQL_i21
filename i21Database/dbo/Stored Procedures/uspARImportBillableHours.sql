@@ -208,15 +208,38 @@ INNER JOIN
 INNER JOIN
 	@TicketHoursWorked HW
 		ON V.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]
-
-	          
+		
+DECLARE @Invoices AS TABLE(intInvoiceID INT)
+INSERT INTO @Invoices 
+SELECT DISTINCT
+	I.[intInvoiceId]
+FROM 
+	[tblARInvoice] I
+INNER JOIN
+	tblHDTicketHoursWorked V
+		ON RTRIM(I.[strComments]) = RTRIM(CONVERT(nvarchar(250),V.[intTicketHoursWorkedId]))
+INNER JOIN
+	@TicketHoursWorked HW
+		ON V.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]
+		
+WHILE EXISTS(SELECT NULL FROM @Invoices)
+BEGIN
+	DECLARE @InvoiceID AS INT
+	SELECT TOP 1 @InvoiceID = [intInvoiceID] FROM @Invoices
+	EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceID
+	DELETE FROM @Invoices WHERE [intInvoiceID] = @InvoiceID
+END
+          
            
 IF @Post = 1
 	BEGIN
 		DECLARE	@return_value int,
 				@success bit,
 				@minId int,
-				@maxId int
+				@maxId int,
+				@batchId NVARCHAR(20),
+				@SuccessCount INT,
+				@InvCount INT
 				
 		SELECT
 			 @minId = MIN(I.[intInvoiceId])
@@ -260,12 +283,16 @@ IF @Post = 1
 				@beginTransaction = @minId,
 				@endTransaction = @maxId,
 				@exclude = NULL,
-				@successfulCount = @SuccessfulCount OUTPUT,
-				@invalidCount = @InvalidCount OUTPUT,
+				@successfulCount = @SuccessCount OUTPUT,
+				@invalidCount = @InvCount OUTPUT,
 				@success = @IsSuccess OUTPUT,
-				@batchIdUsed = @BatchIdUsed OUTPUT,
+				@batchIdUsed = @batchId OUTPUT,
 				@recapId = NULL,
 				@transType = N'Invoice'
+				
+		SET @BatchIdUsed = @batchId
+		SET @SuccessfulCount = @SuccessCount
+		SET @InvalidCount = @InvCount
 	END 
 	
 IF @Post = 0

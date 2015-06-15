@@ -28,7 +28,7 @@ SELECT A.strCustomerName
 	 , dblUnappliedCredits = SUM(B.dblAvailableCredit)
 	 , dblPrepaids = 0
 	 , dblFuture = 0
-	 , dblPendingPayment = (SELECT ISNULL(SUM(CASE WHEN strTransactionType = 'Credit Memo' THEN ISNULL(dblInvoiceTotal,0) * -1 ELSE ISNULL(dblInvoiceTotal,0) END), 0) FROM tblARInvoice WHERE intEntityCustomerId = A.intEntityCustomerId AND ysnPosted = 0)
+	 , dblPendingPayment = (SELECT ISNULL(SUM(CASE WHEN strTransactionType <> 'Invoice' THEN ISNULL(dblInvoiceTotal,0) * -1 ELSE ISNULL(dblInvoiceTotal,0) END), 0) FROM tblARInvoice WHERE intEntityCustomerId = A.intEntityCustomerId AND ysnPosted = 0)
 	 , dblCreditLimit = (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
 	 , strContact = (SELECT strFullAddress = ISNULL(RTRIM(C.strPhone) + CHAR(13) + char(10), '')
 										   + ISNULL(RTRIM(E.strEmail) + CHAR(13) + char(10), '')
@@ -42,8 +42,8 @@ FROM
 (SELECT I.dtmDate AS dtmDate
 	  , I.strInvoiceNumber
 	  , 0 AS dblAmountPaid
-      , dblInvoiceTotal = CASE WHEN I.strTransactionType = 'Credit Memo' THEN ISNULL(I.dblInvoiceTotal,0) * -1 ELSE ISNULL(I.dblInvoiceTotal,0) END
-	  , dblAmountDue = CASE WHEN I.strTransactionType = 'Credit Memo' THEN ISNULL(I.dblAmountDue,0) * -1 ELSE ISNULL(I.dblAmountDue,0) END
+      , dblInvoiceTotal = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblInvoiceTotal,0) * -1 ELSE ISNULL(I.dblInvoiceTotal,0) END
+	  , dblAmountDue = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblAmountDue,0) * -1 ELSE ISNULL(I.dblAmountDue,0) END
 	  , dblDiscount = 0    
 	  , I.strTransactionType    
 	  , I.intEntityCustomerId
@@ -89,7 +89,7 @@ SELECT I.dtmDate AS dtmDate
 				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())>60 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=90 THEN '61 - 90 Days'    
 				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())>90 THEN 'Over 90' END 
 	 , I.ysnPosted
-	 , dblYTDSales = CASE WHEN I.strTransactionType = 'Credit Memo' THEN ISNULL(I.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(I.dblInvoiceSubtotal, 0) END
+	 , dblYTDSales = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(I.dblInvoiceSubtotal, 0) END
 	 , dblLastYearSales = 0
 	 , dblAvailableCredit = 0
 FROM tblARInvoice I
@@ -123,7 +123,7 @@ SELECT I.dtmDate AS dtmDate
 				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())>90 THEN 'Over 90' END 
 	 , I.ysnPosted
 	 , dblYTDSales = 0
-	 , dblLastYearSales = CASE WHEN I.strTransactionType = 'Credit Memo' THEN ISNULL(I.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(I.dblInvoiceSubtotal, 0) END
+	 , dblLastYearSales = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(I.dblInvoiceSubtotal, 0) END
 	 , dblAvailableCredit = 0
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
@@ -173,7 +173,7 @@ UNION ALL
 
 SELECT I.dtmPostDate
      , I.strInvoiceNumber
-	 , dblAmountPaid = CASE WHEN strTransactionType = 'Credit Memo' THEN ISNULL(I.dblPayment,0) * -1 ELSE ISNULL(I.dblPayment,0) END 
+	 , dblAmountPaid = CASE WHEN strTransactionType <> 'Invoice' THEN ISNULL(I.dblPayment,0) * -1 ELSE ISNULL(I.dblPayment,0) END 
      , dblInvoiceTotal = 0    
 	 , I.dblAmountDue     
 	 , ISNULL(I.dblDiscount, 0) AS dblDiscount    
@@ -225,7 +225,7 @@ LEFT JOIN
 FROM
 (SELECT I.strInvoiceNumber
       , 0 AS dblAmountPaid
-      , dblInvoiceTotal = CASE WHEN I.strTransactionType = 'Credit Memo' THEN ISNULL(I.dblInvoiceTotal,0) * -1 ELSE ISNULL(I.dblInvoiceTotal,0) END
+      , dblInvoiceTotal = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblInvoiceTotal,0) * -1 ELSE ISNULL(I.dblInvoiceTotal,0) END
 	  , dblAmountDue = 0    
 	  , dblDiscount = 0    
 	  , I.dtmDueDate    
@@ -249,7 +249,7 @@ SELECT I.strInvoiceNumber
 	  , dblDiscount = 0    
 	  , I.dtmDueDate    
 	  , I.intEntityCustomerId
-	  , dblYTDSales = CASE WHEN I.strTransactionType = 'Credit Memo' THEN ISNULL(I.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(I.dblInvoiceSubtotal, 0) END
+	  , dblYTDSales = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(I.dblInvoiceSubtotal, 0) END
 	  , dblLastYearSales = 0
 	  , dblAvailableCredit = 0
 FROM tblARInvoice I
@@ -270,7 +270,7 @@ SELECT I.strInvoiceNumber
 	  , I.dtmDueDate    
 	  , I.intEntityCustomerId
 	  , dblYTDSales = 0
-	  , dblLastYearSales = CASE WHEN I.strTransactionType = 'Credit Memo' THEN ISNULL(I.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(I.dblInvoiceSubtotal, 0) END	  
+	  , dblLastYearSales = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(I.dblInvoiceSubtotal, 0) END	  
 	  , dblAvailableCredit = 0
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
@@ -305,7 +305,7 @@ UNION ALL
       
 SELECT DISTINCT 
 	I.strInvoiceNumber
-  , dblAmountPaid = CASE WHEN strTransactionType = 'Credit Memo' THEN ISNULL(I.dblPayment,0) * -1 ELSE ISNULL(I.dblPayment,0) END
+  , dblAmountPaid = CASE WHEN strTransactionType <> 'Invoice' THEN ISNULL(I.dblPayment,0) * -1 ELSE ISNULL(I.dblPayment,0) END
   , dblInvoiceTotal = 0
   , dblAmountDue = 0
   , ISNULL(I.dblDiscount, 0) AS dblDiscount

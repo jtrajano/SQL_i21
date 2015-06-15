@@ -4,9 +4,9 @@ SELECT I.strInvoiceNumber AS strReferenceNumber
 	 , I.strTransactionType
 	 , I.dtmDueDate
 	 , intDaysDue = DATEDIFF(DAY, I.[dtmDueDate], GETDATE())
-	 , dblTotalAmount = CASE WHEN I.strTransactionType = 'Credit Memo' THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
-	 , dblAmountPaid = CASE WHEN I.strTransactionType = 'Credit Memo' THEN ISNULL(I.dblPayment, 0) * -1 ELSE ISNULL(I.dblPayment, 0) END
-	 , dblAmountDue = CASE WHEN I.strTransactionType = 'Credit Memo' THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END
+	 , dblTotalAmount = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
+	 , dblAmountPaid = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblPayment, 0) * -1 ELSE ISNULL(I.dblPayment, 0) END
+	 , dblAmountDue = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblAmountDue, 0) * -1 ELSE ISNULL(I.dblAmountDue, 0) END
 	 , C.strCustomerNumber
 	 , C.strName
 	 , strFullAddress = ISNULL(RTRIM(C.strBillToLocationName) + CHAR(13) + char(10), '')

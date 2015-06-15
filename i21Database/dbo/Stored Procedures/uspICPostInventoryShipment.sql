@@ -126,7 +126,8 @@ SAVE TRAN @TransactionName
 IF @ysnPost = 1  
 BEGIN  
 	-- Get the items to post  
-	DECLARE @ItemsForPost AS ItemCostingTableType  
+	DECLARE @ItemsForPost AS ItemCostingTableType
+
 	INSERT INTO @ItemsForPost (  
 			intItemId  
 			,intItemLocationId 
@@ -146,30 +147,34 @@ BEGIN
 			,intSubLocationId
 			,intStorageLocationId
 	) 
-	SELECT Detail.intItemId  
-			,dbo.fnICGetItemLocation(Detail.intItemId, Header.intShipFromLocationId)
-			,Detail.intItemUOMId  
-			,Header.dtmShipDate
-			,Detail.dblQuantity * -1
-			,ItemUOM.dblUnitQty
-			,Lot.dblLastCost
-			,ItemSource.dblUnitPrice
-			,NULL
-			,1.00
-			,@intTransactionId
-			,Detail.intInventoryShipmentItemId
-			,@strTransactionId
-			,@INVENTORY_SHIPMENT_TYPE
-			,DetailLot.intLotId 
-			,Lot.intSubLocationId
-			,Lot.intStorageLocationId
-	FROM tblICInventoryShipmentItem Detail
-	INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Detail.intItemUOMId
-	LEFT JOIN tblICInventoryShipmentItemLot DetailLot ON DetailLot.intInventoryShipmentItemId = Detail.intInventoryShipmentItemId
-	LEFT JOIN tblICLot Lot ON Lot.intLotId = DetailLot.intLotId
-	INNER JOIN tblICInventoryShipment Header ON Header.intInventoryShipmentId = Detail.intInventoryShipmentId
-	INNER JOIN vyuICGetShipmentItemSource ItemSource ON ItemSource.intInventoryShipmentItemId = Detail.intInventoryShipmentItemId
-	WHERE Detail.intInventoryShipmentId = @intTransactionId
+	SELECT	intItemId					= Detail.intItemId
+			,intItemLocationId			= dbo.fnICGetItemLocation(Detail.intItemId, Header.intShipFromLocationId)
+			,intItemUOMId				= Detail.intItemUOMId
+			,dtmDate					= dbo.fnRemoveTimeOnDate(Header.dtmShipDate)
+			,dblQty						= -1 * ABS(ISNULL(Detail.dblQuantity, 0)) 
+			,dblUOMQty					= ItemUOM.dblUnitQty
+			,dblCost					= 0.00 -- Zero cost. The system will use the cost from the cost-bucket. 
+			,dblSalesPrice				= 0.00
+			,intCurrencyId				= NULL 
+			,dblExchangeRate			= 1
+			,intTransactionId			= Header.intInventoryShipmentId
+			,intTransactionDetailId		= Detail.intInventoryShipmentItemId
+			,strTransactionId			= Header.strShipmentNumber
+			,intTransactionTypeId		= @INVENTORY_SHIPMENT_TYPE
+			,intLotId					= Lot.intLotId
+			,intSubLocationId			= Lot.intSubLocationId
+			,intStorageLocationId		= Lot.intStorageLocationId
+	FROM	tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem Detail 
+				ON Header.intInventoryShipmentId = Detail.intInventoryShipmentId	
+			INNER JOIN tblICItemUOM ItemUOM 
+				ON ItemUOM.intItemUOMId = Detail.intItemUOMId
+			LEFT JOIN tblICInventoryShipmentItemLot DetailLot 
+				ON DetailLot.intInventoryShipmentItemId = Detail.intInventoryShipmentItemId
+			LEFT JOIN tblICLot Lot 
+				ON Lot.intLotId = DetailLot.intLotId			
+			INNER JOIN vyuICGetShipmentItemSource ItemSource 
+				ON ItemSource.intInventoryShipmentItemId = Detail.intInventoryShipmentItemId
+	WHERE	Header.intInventoryShipmentId = @intTransactionId
   
 	-- Call the post routine 
 	BEGIN 
