@@ -1701,6 +1701,9 @@
     <Build Include="dbo\Views\vyuICGetOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGenerateDynamicXML.sql" />
     <Build Include="dbo\Views\vwGLChartOfAccounts.sql" />
+    <Build Include="dbo\Tables\tblMFBlendRequirementRule.sql" />
+    <Build Include="dbo\Tables\tblMFBlendSheetRuleValue.sql" />
+    <Build Include="dbo\Tables\tblMFBlendSheetRule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
