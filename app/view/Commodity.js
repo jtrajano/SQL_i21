@@ -227,6 +227,28 @@ Ext.define('Inventory.view.Commodity', {
                                                                 ]
                                                             },
                                                             {
+                                                                xtype: 'gridcombobox',
+                                                                flex: 1,
+                                                                columns: [
+                                                                    {
+                                                                        dataIndex: 'intFutureMarketId',
+                                                                        dataType: 'numeric',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strFutMarketName',
+                                                                        dataType: 'string',
+                                                                        text: 'Future Market',
+                                                                        flex: 1
+                                                                    }
+                                                                ],
+                                                                itemId: 'cboFutureMarket',
+                                                                fieldLabel: 'Default Future Market',
+                                                                labelWidth: 140,
+                                                                displayField: 'strFutMarketName',
+                                                                valueField: 'intFutureMarketId'
+                                                            },
+                                                            {
                                                                 xtype: 'container',
                                                                 margin: '0 0 5 0',
                                                                 layout: {
@@ -334,7 +356,18 @@ Ext.define('Inventory.view.Commodity', {
                                                                         valueField: 'strState'
                                                                     }
                                                                 ]
-                                                            },
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'container',
+                                                        flex: 1,
+                                                        margin: '0 1 0 10',
+                                                        layout: {
+                                                            type: 'vbox',
+                                                            align: 'stretch'
+                                                        },
+                                                        items: [
                                                             {
                                                                 xtype: 'container',
                                                                 margin: '0 0 5 0',
@@ -359,18 +392,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                         labelWidth: 60
                                                                     }
                                                                 ]
-                                                            }
-                                                        ]
-                                                    },
-                                                    {
-                                                        xtype: 'container',
-                                                        flex: 1,
-                                                        margin: '0 1 0 10',
-                                                        layout: {
-                                                            type: 'vbox',
-                                                            align: 'stretch'
-                                                        },
-                                                        items: [
+                                                            },
                                                             {
                                                                 xtype: 'textfield',
                                                                 itemId: 'txtEdiCode',
@@ -441,40 +463,52 @@ Ext.define('Inventory.view.Commodity', {
                                                                 ]
                                                             },
                                                             {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtAgItemNumber',
-                                                                width: 280,
-                                                                fieldLabel: 'AG Item Number',
-                                                                labelWidth: 140
-                                                            },
-                                                            {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
+                                                                xtype: 'container',
+                                                                margin: '0 0 5 0',
+                                                                layout: {
+                                                                    type: 'hbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
                                                                     {
-                                                                        dataIndex: 'intStorageTypeId',
-                                                                        dataType: 'numeric',
-                                                                        text: 'Storage Type Id',
-                                                                        hidden: true
+                                                                        xtype: 'textfield',
+                                                                        flex: 1,
+                                                                        itemId: 'txtAgItemNumber',
+                                                                        width: 280,
+                                                                        fieldLabel: 'AG Item Number',
+                                                                        labelWidth: 140
                                                                     },
                                                                     {
-                                                                        dataIndex: 'strStorageType',
-                                                                        dataType: 'string',
-                                                                        text: 'Storage Type',
-                                                                        flex: 1
-                                                                    },
-                                                                    {
-                                                                        dataIndex: 'strDescription',
-                                                                        dataType: 'string',
-                                                                        text: 'Description',
-                                                                        flex: 1
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intStorageTypeId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Storage Type Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strStorageType',
+                                                                                dataType: 'string',
+                                                                                text: 'Storage Type',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        flex: 1.2,
+                                                                        itemId: 'cboScaleAutoDistDefault',
+                                                                        padding: '0 0 0 5',
+                                                                        fieldLabel: 'Scale Auto Dist Default',
+                                                                        labelWidth: 130,
+                                                                        displayField: 'strStorageType',
+                                                                        valueField: 'intStorageTypeId'
                                                                     }
-                                                                ],
-                                                                flex: 1,
-                                                                itemId: 'cboScaleAutoDistDefault',
-                                                                fieldLabel: 'Scale Auto Dist Default',
-                                                                labelWidth: 140,
-                                                                displayField: 'strStorageType',
-                                                                valueField: 'intStorageTypeId'
+                                                                ]
                                                             },
                                                             {
                                                                 xtype: 'container',

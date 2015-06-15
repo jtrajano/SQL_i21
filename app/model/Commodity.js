@@ -24,6 +24,7 @@ Ext.define('Inventory.model.Commodity', {
         { name: 'strCommodityCode', type: 'string'},
         { name: 'strDescription', type: 'string'},
         { name: 'ysnExchangeTraded', type: 'boolean'},
+        { name: 'intFutureMarketId', type: 'int', allowNull: true},
         { name: 'intDecimalDPR', type: 'int'},
         { name: 'dblConsolidateFactor', type: 'float'},
         { name: 'ysnFXExposure', type: 'boolean'},

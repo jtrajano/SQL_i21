@@ -37,6 +37,11 @@ Ext.define('Inventory.view.CommodityViewController', {
             txtCommodityCode: '{current.strCommodityCode}',
             txtDescription: '{current.strDescription}',
             chkExchangeTraded: '{current.ysnExchangeTraded}',
+            cboFutureMarket: {
+                value: '{current.intFutureMarketId}',
+                store: '{futureMarket}',
+                readOnly: '{!current.ysnExchangeTraded}'
+            },
             txtDecimalsOnDpr: '{current.intDecimalDPR}',
             txtConsolidateFactor: '{current.dblConsolidateFactor}',
             chkFxExposure: '{current.ysnFXExposure}',

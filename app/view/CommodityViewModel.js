@@ -23,7 +23,8 @@ Ext.define('Inventory.view.CommodityViewModel', {
         'Inventory.store.BufferedStorageType',
         'GeneralLedger.store.BufAccountId',
         'GeneralLedger.store.BufAccountCategoryGroup',
-        'i21.store.CompanyLocationBuffered'
+        'i21.store.CompanyLocationBuffered',
+        'RiskManagement.store.FutureMarketBuffered'
     ],
 
     stores: {
@@ -89,6 +90,9 @@ Ext.define('Inventory.view.CommodityViewModel', {
                     name: 'strCode'
                 }
             ]
+        },
+        futureMarket: {
+            type: 'rkfuturemarketbuffered'
         },
         accountCategory: {
             type: 'glbufaccountcategorygroup'

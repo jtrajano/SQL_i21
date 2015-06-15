@@ -30,6 +30,7 @@ namespace iRely.Inventory.Model
         public string strCommodityCode { get; set; }
         public string strDescription { get; set; }
         public bool ysnExchangeTraded { get; set; }
+        public int? intFutureMarketId { get; set; }
         public int intDecimalDPR { get; set; }
         public decimal? dblConsolidateFactor { get; set; }
         public bool ysnFXExposure { get; set; }
