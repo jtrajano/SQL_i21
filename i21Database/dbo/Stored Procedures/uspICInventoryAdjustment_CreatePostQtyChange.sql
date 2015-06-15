@@ -84,9 +84,9 @@ BEGIN
 END 
 
 -- Raise an error if Adjust By Quantity is invalid
-IF ISNULL(@dblAdjustByQuantity, 0) > 0 
+IF ISNULL(@dblAdjustByQuantity, 0) = 0 
 BEGIN 
-	-- 'Internal Error. The Adjust By Quantity is required to be a negative value.'
+	-- 'Internal Error. The Adjust By Quantity is required.'
 	RAISERROR(51127, 11, 1)  
 	GOTO _Exit
 END 
@@ -202,5 +202,4 @@ BEGIN
 		,@intEntityId = @intEntityId
 END 
 
-_Exit: 
-
+_Exit:

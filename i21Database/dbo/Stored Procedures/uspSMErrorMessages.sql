@@ -508,7 +508,7 @@ SET @strmessage = 'Internal Error. The new expiry date is invalid.'
 EXEC sp_addmessage 51126,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51127) EXEC sp_dropmessage 51127, 'us_english'	
-SET @strmessage = 'Internal Error. The Adjust By Quantity is required to be a negative value.'
+SET @strmessage = 'Internal Error. The Adjust By Quantity is required.'
 EXEC sp_addmessage 51127,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51128) EXEC sp_dropmessage 51128, 'us_english'	

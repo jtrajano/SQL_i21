@@ -649,6 +649,7 @@
     <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for converting Bushel to LB.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostCustody for a successful unpost.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostCustody for an unsuccessful unpost.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for a successful post with positive qty.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">
