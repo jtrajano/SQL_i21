@@ -1651,9 +1651,9 @@
     <Build Include="dbo\Stored Procedures\uspICUnpostCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostLotInFromCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostLotOutFromCustody.sql" />
-	<Build Include="dbo\Stored Procedures\uspQMProductPropertyDetails_Save.sql" />	
+    <Build Include="dbo\Stored Procedures\uspQMProductPropertyDetails_Save.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostPrepayment.sql" />
-	<Build Include="dbo\Tables\tblCTContractCertification.sql" />
+    <Build Include="dbo\Tables\tblCTContractCertification.sql" />
     <Build Include="dbo\Tables\tblMFItemMachine.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCalculateYield.sql" />
     <Build Include="dbo\Stored Procedures\uspMFPostWorkOrder.sql" />
@@ -1690,10 +1690,10 @@
     <Build Include="dbo\Tables\tblEntityPreferences.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItem.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryShipmentItem.sql" />
-	<Build Include="dbo\Views\vyuEMEntity.sql" />
+    <Build Include="dbo\Views\vyuEMEntity.sql" />
     <Build Include="dbo\Views\vyuARCustomerInquiryReport.sql" />
     <Build Include="dbo\Views\vyuARCustomerStatementReport.sql" />
-    <Build Include="dbo\Views\vyuARCustomerAgingReport.sql" />	
+    <Build Include="dbo\Views\vyuARCustomerAgingReport.sql" />
     <Build Include="dbo\Views\vyuCTContractHeaderView.sql" />
     <Build Include="dbo\Views\vyuCTContractSearchView.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptCharge.sql" />
@@ -1701,6 +1701,7 @@
     <Build Include="dbo\Views\vyuICGetOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGenerateDynamicXML.sql" />
     <Build Include="dbo\Views\vwGLChartOfAccounts.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddTransferOrderToInventoryReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1747,6 +1748,7 @@
     <None Include="Scripts\Post-Deployment\EM\007_MoveShippingLineData.sql" />
     <None Include="Scripts\Post-Deployment\EM\008_MoveTruckerData.sql" />
     <None Include="Scripts\Post-Deployment\IC\10_RemoveCommodityItems.sql" />
+    <None Include="dbo\Stored Procedures\uspCTAddPurchaseContractToInventoryReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

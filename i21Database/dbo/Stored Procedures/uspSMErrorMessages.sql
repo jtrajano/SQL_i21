@@ -574,3 +574,11 @@ EXEC sp_addmessage 51142,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51143) EXEC sp_dropmessage 51143, 'us_english'	
 SET @strmessage = 'Please specify the Adjust Qty By or New Quantity on %s.'
 EXEC sp_addmessage 51143,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51144) EXEC sp_dropmessage 51144, 'us_english'	
+SET @strmessage = 'Unable to generate the Inventory Receipt. An error stopped the process from Purchase Contract to Inventory Receipt.'
+EXEC sp_addmessage 51144,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51145) EXEC sp_dropmessage 51145, 'us_english'	
+SET @strmessage = 'Unable to generate the Inventory Receipt. An error stopped the process from Transfer Order to Inventory Receipt.'
+EXEC sp_addmessage 51145,11,@strmessage,'us_english','False'
