@@ -651,6 +651,8 @@
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostCustody for an unsuccessful unpost.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for a successful post with positive qty.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostSplitLot for a successful post with new weight.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCustody for non-supported costing method.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for calling uspICPostCustody.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

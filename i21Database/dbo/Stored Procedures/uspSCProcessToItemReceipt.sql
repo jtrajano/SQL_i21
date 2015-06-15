@@ -98,6 +98,7 @@ BEGIN TRY
 		,@intContractId
 		,@strDistributionOption
 		,@LineItems
+
 	-- Validate the items to receive 
 	EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 
 
