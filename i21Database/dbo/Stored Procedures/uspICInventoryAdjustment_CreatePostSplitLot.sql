@@ -214,6 +214,7 @@ BEGIN
 			,dblWeight
 			,dblNewWeight
 			,dblWeightPerQty
+			,dblNewWeightPerQty
 			,dblCost
 			,dblNewCost
 			,intNewLocationId
@@ -239,6 +240,9 @@ BEGIN
 			,dblWeight					= Lot.dblWeight
 			,dblNewWeight				= @dblNewWeight
 			,dblWeightPerQty			= Lot.dblWeightPerQty
+			,dblNewWeightPerQty			= CASE	WHEN ABS(ISNULL(@dblAdjustByQuantity, 0)) = 0 THEN 0
+												ELSE ISNULL(@dblNewWeight, 0) / ABS(ISNULL(@dblAdjustByQuantity, 0))
+										  END 											
 			,dblCost					= Lot.dblLastCost
 			,dblNewCost					= @dblNewUnitCost
 			,intNewLocationId			= @intNewLocationId
@@ -264,4 +268,3 @@ BEGIN
 END 
 
 _Exit: 
-

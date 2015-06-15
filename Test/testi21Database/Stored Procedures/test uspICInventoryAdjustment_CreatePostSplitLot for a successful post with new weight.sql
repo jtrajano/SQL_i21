@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICInventoryAdjustment_CreatePostSplitLot for a successful post]
+﻿CREATE PROCEDURE [testi21Database].[test uspICInventoryAdjustment_CreatePostSplitLot for a successful post with new weight]
 AS
 BEGIN 
 	-- Variables from Fake items
@@ -165,7 +165,7 @@ BEGIN
 			,@strNewLotNumber				= 'NEW-LOT-100001' 
 			,@dblAdjustByQuantity			= -2
 			,@dblNewSplitLotQuantity		= NULL 
-			,@dblNewWeight					= NULL 
+			,@dblNewWeight					= 2000 
 			,@intNewItemUOMId				= NULL 
 			,@intNewWeightUOMId				= NULL 
 			,@dblNewUnitCost				= NULL 
@@ -250,9 +250,9 @@ BEGIN
 				,intWeightUOMId					= @ManualGrains_PoundUOM
 				,intNewWeightUOMId				= NULL 
 				,dblWeight						= 55.1155 * 1000
-				,dblNewWeight					= NULL 
+				,dblNewWeight					= 2000 
 				,dblWeightPerQty				= 55.1155
-				,dblNewWeightPerQty				= 0.00 
+				,dblNewWeightPerQty				= 2000 / 2
 				,dblCost						= 2.50
 				,dblNewCost						= NULL 
 				,intConcurrencyId				= 1
