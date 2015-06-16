@@ -82,6 +82,7 @@ CROSS APPLY
 		ISH.[ysnPosted] = 1
 		AND ISI.[intLineNo] = SOD.[intSalesOrderDetailId]
 		AND SO.[strOrderStatus]	<> 'Closed'
+		AND SO.[strTransactionType] <> 'Quote'
 	GROUP BY
 		 ISI.[intInventoryShipmentItemId]
 		,ISI.[intLineNo]
@@ -159,3 +160,4 @@ LEFT OUTER JOIN
 		ON SOD.[intStorageLocationId] = SL.[intStorageLocationId] 		
 WHERE
 	SO.[strOrderStatus] <> 'Closed'
+AND SO.[strTransactionType] <> 'Quote'
