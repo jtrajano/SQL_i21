@@ -50,3 +50,17 @@ UPDATE tblGLDetail SET strDescription = X.strDescription
 
 	PRINT N'END Normalize tblGLDetail Fields'
 GO
+
+--=====================================================================================================================================
+-- 	Update Transaction Type to Recurring if strTransactionType is equal to Template  GL-1769
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO	
+	PRINT N'BEGIN Update Transaction Type to Recurring if strTransactionType is equal to Template '
+GO
+
+UPDATE tblGLJournal SET strTransactionType = 'Recurring' WHERE strTransactionType ='Template'
+
+GO	
+	PRINT N'END BEGIN Update Transaction Type to Recurring if strTransactionType is equal to Template '
+GO
