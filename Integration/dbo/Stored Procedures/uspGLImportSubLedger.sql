@@ -24,7 +24,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     	BEGIN
     		IF @importLogId = 0
     			EXEC dbo.uspGLCreateImportLogHeader ''Failed Transaction'',@intUserId,@version ,@importLogId OUTPUT
-    		UPDATE tblGLCOAImportLog SET strEvent = ''Unable to Post because there is no cross reference between iRelySuite and Origin.'' WHERE intImportLogId = @importLogId
+    		UPDATE tblGLCOAImportLog SET strEvent = ''Unable to Post because there is no cross reference between i21 and Origin.'' WHERE intImportLogId = @importLogId
     		SELECT @isCOAPresent = 0
     	END
     	ELSE
@@ -321,9 +321,9 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     				SELECT @totalCredit += @credit, @totalDebit +=@debit
 
     				INSERT INTO tblGLJournalDetail (intAccountId,strDescription,dtmDate,intJournalId,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,
-    				dblDebitUnitsInLBS,dblUnitsInLBS,strComments,strReference,strCheckBookNo,strCorrecting,strSourcePgm,strWorkArea,intLineNo,strDocument)
+    				dblDebitUnitsInLBS,dblUnitsInLBS,strComments,strReference,strCheckBookNo,strCorrecting,strSourcePgm,strWorkArea,intLineNo,strDocument,strSourceKey)
     				SELECT @intAccountId1,@strDescription1,@dtmDate,@intJournalId,@debit,@credit,@debitUnit,@creditUnit,
-    				@debitUnitInLBS,@creditUnitInLBS,glije_comments,glije_ref,glije_cbk_no,glije_correcting,glije_source_pgm,glije_work_area,glije_line_no,glije_doc
+    				@debitUnitInLBS,@creditUnitInLBS,glije_comments,glije_ref,glije_cbk_no,glije_correcting,glije_source_pgm,glije_work_area,glije_line_no,glije_doc,A4GLIdentity
     				 FROM tblGLIjemst WHERE glije_id=@id
 
     				IF @glije_error_desc IS NOT NULL
