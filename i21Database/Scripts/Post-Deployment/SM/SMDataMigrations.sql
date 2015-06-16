@@ -57,3 +57,6 @@ GO
 	EXEC uspSMSortOriginMenus
 
 GO
+	-- UPDATE tblSMRecurringTransaction
+	EXEC uspSMMigrateRecurringTransaction
+GO
