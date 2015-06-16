@@ -258,5 +258,7 @@
     <None Include="dbo\Views\vyuTMtrprcmst.sql" />
     <None Include="dbo\Views\vyustpbkmst.sql" />
     <None Include="dbo\Views\vyuTMLeaseCode.sql" />
+    <None Include="dbo\Stored Procedures\uspFRDImportOriginDesign.sql" />
+    <None Include="dbo\Stored Procedures\uspFRDProcessOriginImport.sql" />
   </ItemGroup>
 </Project>

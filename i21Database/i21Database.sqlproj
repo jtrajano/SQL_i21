@@ -1707,6 +1707,8 @@
     <Build Include="dbo\Stored Procedures\uspICPostFIFOInCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInFIFOCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInFIFOCustody.sql" />
+    <Build Include="dbo\Tables\tblFRImportLog.sql" />
+    <Build Include="dbo\Tables\tblFRImportFile.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
