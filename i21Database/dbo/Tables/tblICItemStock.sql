@@ -60,6 +60,7 @@ This table holds stock information like quantity on hand and etc.
 		[intSubLocationId] INT NULL, -- IMPORTANT NOTE: This field is transferred to tblICItemStockUOM. DO NOT USE this field. 
 		[dblUnitOnHand] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblUnitInCustody] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblUnitInConsigned] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[dblOrderCommitted] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblOnOrder] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblBackOrder] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -177,3 +178,22 @@ This table holds stock information like quantity on hand and etc.
 		@level1name = N'tblICItemStock',
 		@level2type = N'COLUMN',
 		@level2name = N'dblBackOrder'
+
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Units in Consigned',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemStock',
+    @level2type = N'COLUMN',
+    @level2name = N'dblUnitInConsigned'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Units in Custody',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemStock',
+    @level2type = N'COLUMN',
+    @level2name = N'dblUnitInCustody'
