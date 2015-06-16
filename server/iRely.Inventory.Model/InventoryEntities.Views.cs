@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets77de50245317446ca3262c41cddaf243f273a9a517f3f902b747dda70276669e))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsaa75d5fb25663d86e2b0fa452338808b4905cb394e0ebd9766d40f5061d86c03))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets77de50245317446ca3262c41cddaf243f273a9a517f3f902b747dda70276669e : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsaa75d5fb25663d86e2b0fa452338808b4905cb394e0ebd9766d40f5061d86c03 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "77de50245317446ca3262c41cddaf243f273a9a517f3f902b747dda70276669e"; }
+            get { return "aa75d5fb25663d86e2b0fa452338808b4905cb394e0ebd9766d40f5061d86c03"; }
         }
 
         /// <summary>
@@ -3301,9 +3301,9 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemStock
-        [CodeFirstDatabaseSchema.tblICItemStock](T3.tblICItemStock_intItemStockId, T3.tblICItemStock_intItemId, T3.tblICItemStock_intItemLocationId, T3.tblICItemStock_intSubLocationId, T3.tblICItemStock_dblUnitOnHand, T3.tblICItemStock_dblOrderCommitted, T3.tblICItemStock_dblOnOrder, T3.tblICItemStock_dblBackOrder, T3.tblICItemStock_dblLastCountRetail, T3.tblICItemStock_intSort, T3.tblICItemStock_intConcurrencyId, T3.[tblICItemStock.tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId])
+        [CodeFirstDatabaseSchema.tblICItemStock](T3.tblICItemStock_intItemStockId, T3.tblICItemStock_intItemId, T3.tblICItemStock_intItemLocationId, T3.tblICItemStock_intSubLocationId, T3.tblICItemStock_dblUnitOnHand, T3.tblICItemStock_dblUnitInCustody, T3.tblICItemStock_dblUnitInConsigned, T3.tblICItemStock_dblOrderCommitted, T3.tblICItemStock_dblOnOrder, T3.tblICItemStock_dblBackOrder, T3.tblICItemStock_dblLastCountRetail, T3.tblICItemStock_intSort, T3.tblICItemStock_intConcurrencyId, T3.[tblICItemStock.tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId])
     FROM (
-        SELECT T1.tblICItemStock_intItemStockId, T1.tblICItemStock_intItemId, T1.tblICItemStock_intItemLocationId, T1.tblICItemStock_intSubLocationId, T1.tblICItemStock_dblUnitOnHand, T1.tblICItemStock_dblOrderCommitted, T1.tblICItemStock_dblOnOrder, T1.tblICItemStock_dblBackOrder, T1.tblICItemStock_dblLastCountRetail, T1.tblICItemStock_intSort, T1.tblICItemStock_intConcurrencyId, T2.[tblICItemStock.tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId], T1._from0, (T2._from1 AND T2._from1 IS NOT NULL) AS _from1
+        SELECT T1.tblICItemStock_intItemStockId, T1.tblICItemStock_intItemId, T1.tblICItemStock_intItemLocationId, T1.tblICItemStock_intSubLocationId, T1.tblICItemStock_dblUnitOnHand, T1.tblICItemStock_dblUnitInCustody, T1.tblICItemStock_dblUnitInConsigned, T1.tblICItemStock_dblOrderCommitted, T1.tblICItemStock_dblOnOrder, T1.tblICItemStock_dblBackOrder, T1.tblICItemStock_dblLastCountRetail, T1.tblICItemStock_intSort, T1.tblICItemStock_intConcurrencyId, T2.[tblICItemStock.tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId], T1._from0, (T2._from1 AND T2._from1 IS NOT NULL) AS _from1
         FROM  (
             SELECT 
                 T.intItemStockId AS tblICItemStock_intItemStockId, 
@@ -3311,6 +3311,8 @@ namespace Edm_EntityMappingGeneratedViews
                 T.intItemLocationId AS tblICItemStock_intItemLocationId, 
                 T.intSubLocationId AS tblICItemStock_intSubLocationId, 
                 T.dblUnitOnHand AS tblICItemStock_dblUnitOnHand, 
+                T.dblUnitInCustody AS tblICItemStock_dblUnitInCustody, 
+                T.dblUnitInConsigned AS tblICItemStock_dblUnitInConsigned, 
                 T.dblOrderCommitted AS tblICItemStock_dblOrderCommitted, 
                 T.dblOnOrder AS tblICItemStock_dblOnOrder, 
                 T.dblBackOrder AS tblICItemStock_dblBackOrder, 
@@ -6242,7 +6244,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICItemStocks
-        [iRely.Inventory.Model.tblICItemStock](T1.tblICItemStock_intItemStockId, T1.tblICItemStock_intItemId, T1.tblICItemStock_intItemLocationId, T1.tblICItemStock_intSubLocationId, T1.tblICItemStock_dblUnitOnHand, T1.tblICItemStock_dblOrderCommitted, T1.tblICItemStock_dblOnOrder, T1.tblICItemStock_dblBackOrder, T1.tblICItemStock_dblLastCountRetail, T1.tblICItemStock_intSort, T1.tblICItemStock_intConcurrencyId) WITH 
+        [iRely.Inventory.Model.tblICItemStock](T1.tblICItemStock_intItemStockId, T1.tblICItemStock_intItemId, T1.tblICItemStock_intItemLocationId, T1.tblICItemStock_intSubLocationId, T1.tblICItemStock_dblUnitOnHand, T1.tblICItemStock_dblUnitInCustody, T1.tblICItemStock_dblUnitInConsigned, T1.tblICItemStock_dblOrderCommitted, T1.tblICItemStock_dblOnOrder, T1.tblICItemStock_dblBackOrder, T1.tblICItemStock_dblLastCountRetail, T1.tblICItemStock_intSort, T1.tblICItemStock_intConcurrencyId) WITH 
         RELATIONSHIP(CREATEREF(InventoryEntities.tblSMCompanyLocationSubLocations, ROW(T1.[tblICItemStock_tblSMCompanyLocationSubLocation.tblICItemStock_tblSMCompanyLocationSubLocation_Target.intCompanyLocationSubLocationId]),[iRely.Inventory.Model.tblSMCompanyLocationSubLocation]),[iRely.Inventory.Model.tblICItemStock_tblSMCompanyLocationSubLocation],tblICItemStock_tblSMCompanyLocationSubLocation_Source,tblICItemStock_tblSMCompanyLocationSubLocation_Target) 
     FROM (
         SELECT 
@@ -6251,6 +6253,8 @@ namespace Edm_EntityMappingGeneratedViews
             T.intItemLocationId AS tblICItemStock_intItemLocationId, 
             T.intSubLocationId AS tblICItemStock_intSubLocationId, 
             T.dblUnitOnHand AS tblICItemStock_dblUnitOnHand, 
+            T.dblUnitInCustody AS tblICItemStock_dblUnitInCustody, 
+            T.dblUnitInConsigned AS tblICItemStock_dblUnitInConsigned, 
             T.dblOrderCommitted AS tblICItemStock_dblOrderCommitted, 
             T.dblOnOrder AS tblICItemStock_dblOnOrder, 
             T.dblBackOrder AS tblICItemStock_dblBackOrder, 

@@ -4278,6 +4278,20 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colStockOnStorage',
+                                                        width: 100,
+                                                        align: 'right',
+                                                        text: 'On Storage'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colStockOnConsigned',
+                                                        width: 100,
+                                                        align: 'right',
+                                                        text: 'On Consigned'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
                                                         itemId: 'colStockCommitted',
                                                         width: 100,
                                                         align: 'right',

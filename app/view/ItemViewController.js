@@ -642,6 +642,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colStockSubLocation: 'strWarehouse',
                 colStockUOM: 'strUnitMeasure',
                 colStockOnHand: 'dblUnitOnHand',
+                colStockOnStorage: 'dblUnitInCustody',
+                colStockOnConsigned: 'dblUnitInConsigned',
                 colStockCommitted: 'dblOrderCommitted',
                 colStockOnOrder: 'dblOnOrder',
                 colStockBackOrder: 'dblBackOrder'

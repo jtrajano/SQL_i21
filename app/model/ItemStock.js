@@ -43,6 +43,8 @@ Ext.define('Inventory.model.ItemStock', {
         { name: 'intItemLocationId', type: 'int', allowNull: true },
         { name: 'intSubLocationId', type: 'int', allowNull: true },
         { name: 'dblUnitOnHand', type: 'float' },
+        { name: 'dblUnitInCustody', type: 'float' },
+        { name: 'dblUnitInConsigned', type: 'float' },
         { name: 'dblOrderCommitted', type: 'float' },
         { name: 'dblOnOrder', type: 'float' },
         { name: 'dblBackOrder', type: 'float' },
