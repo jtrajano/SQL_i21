@@ -44,6 +44,7 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'dblUnitCost', type: 'float' },
         { name: 'dblUnitRetail', type: 'float' },
         { name: 'dblLineTotal', type: 'float' },
+        { name: 'dblGrossMargin', type: 'float' },
         { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'strItemNo', type: 'string'},

@@ -32,6 +32,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Ext.grid.column.Action',
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.View',
+        'Ext.grid.feature.Summary',
         'Ext.form.Label',
         'Ext.grid.column.Date',
         'Ext.grid.column.Check',
@@ -1220,6 +1221,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
+                                                                        summaryType: 'sum',
                                                                         itemId: 'colLineTotal',
                                                                         width: 85,
                                                                         dataIndex: 'dblLineTotal',
@@ -1239,9 +1241,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
+                                                                        summaryType: 'sum',
+                                                                        dataIndex: 'dblGrossMargin',
                                                                         itemId: 'colGrossMargin',
                                                                         width: 100,
-                                                                        dataIndex: 'dblGrossMargin',
                                                                         text: 'Gross Margin'
                                                                     },
                                                                     {
@@ -1340,7 +1343,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 ],
                                                                 viewConfig: {
                                                                     itemId: 'grvInventoryReceipt'
-                                                                }
+                                                                },
+                                                                features: [
+                                                                    {
+                                                                        ftype: 'summary',
+                                                                        dock: 'bottom'
+                                                                    }
+                                                                ]
                                                             },
                                                             {
                                                                 xtype: 'container',

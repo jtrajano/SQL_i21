@@ -2215,6 +2215,24 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onColumnBeforeRender: function(column) {
+        "use strict";
+
+        if (column.itemId === 'colUnitCost') {
+            column.summaryRenderer = function(val) {
+                return '<div style="text-align:right;">Total:</div>';
+            }
+        }
+        else {
+            column.summaryRenderer = function(val){
+                var value = (!Ext.isNumber(val) ? 0.00 : val).toFixed(2).replace(/./g, function(c, i, a) {
+                    return i && c !== "." && ((a.length - i) % 3 === 0) ? ',' + c : c;
+                });;
+                return value;
+            };
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboVendor": {
@@ -2310,6 +2328,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboCostVendor": {
                 select: this.onChargeSelect
+            },
+            "#colLineTotal": {
+                beforerender: this.onColumnBeforeRender
+            },
+            "#colGrossMargin": {
+                beforerender: this.onColumnBeforeRender
+            },
+            "#colUnitCost": {
+                beforerender: this.onColumnBeforeRender
             }
         })
     }
