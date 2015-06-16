@@ -74,7 +74,10 @@ DECLARE
 	,@ysnReleasedToWarehouse	AS BIT
 	,@ysnProduced				AS BIT 
 	,@intDetailId				AS INT 
+	,@intOwnershipType			AS INT
 
+
+DECLARE @OwnerShipType_Own AS INT = 1
 
 ---- Check for UNIQUE errors. 
 --BEGIN
@@ -155,6 +158,7 @@ SELECT  intId
 		,ysnReleasedToWarehouse
 		,ysnProduced
 		,intDetailId
+		,intOwnershipType
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -189,6 +193,7 @@ FETCH NEXT FROM loopLotItems INTO
 		,@ysnReleasedToWarehouse
 		,@ysnProduced
 		,@intDetailId
+		,@intOwnershipType
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Start of the loop
@@ -414,6 +419,7 @@ BEGIN
 												AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
 											) THEN ISNULL(LotMaster.intConcurrencyId, 0) + 1 ELSE ISNULL(LotMaster.intConcurrencyId, 0)
 											END 
+				,intOwnershipType		=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN ISNULL(@intOwnershipType, @OwnerShipType_Own) ELSE LotMaster.intOwnershipType END
 
 				-- The following field are returned from the lot master if:
 				-- 1. It is editing from the source transaction id
@@ -437,6 +443,7 @@ BEGIN
 													) THEN LotMaster.intLotId 
 													ELSE 0 
 											END
+
 
 		-- If none found, insert a new lot record. 
 		WHEN NOT MATCHED THEN 
@@ -472,6 +479,7 @@ BEGIN
 				,dtmDateCreated
 				,intCreatedUserId
 				,intConcurrencyId
+				,intOwnershipType
 			) VALUES (
 				@intItemId
 				,@intLocationId
@@ -504,6 +512,7 @@ BEGIN
 				,GETDATE()
 				,@intUserId
 				,1
+				,@intOwnershipType
 			)
 		;
 	
@@ -631,7 +640,8 @@ BEGIN
 		,@strContractNo
 		,@ysnReleasedToWarehouse
 		,@ysnProduced
-		,@intDetailId;
+		,@intDetailId
+		,@intOwnershipType;
 END
 
 CLOSE loopLotItems;
