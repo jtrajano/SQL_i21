@@ -288,12 +288,15 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= 'GJ'			
+			,[strCode]				= CASE	WHEN B.[strJournalType] in ('Origin Journal','Adjusted Origin Journal') THEN B.[strSourceType]
+											ELSE 'GJ' END 
+								
 			,[strJournalLineDescription] = A.[strDescription]
 			,[intJournalLineNo]		= A.[intJournalDetailId]			
 			,[strTransactionType]	= B.[strJournalType]
 			,[strTransactionForm]	= B.[strTransactionType]
 			,[strModuleName]		= 'General Ledger'
+		
 
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
 			ON A.[intJournalId] = B.[intJournalId]
@@ -368,10 +371,13 @@ ELSE
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= 'GJ'
+			,[strCode]				= CASE	WHEN B.[strJournalType] in ('Origin Journal','Adjusted Origin Journal') THEN B.[strSourceType]
+											ELSE 'GJ' END 
+			
 			,[strTransactionType]	= B.[strJournalType]
 			,[strTransactionForm]	= B.[strTransactionType]
-			,[strModuleName]		= 'General Ledger'			
+			,[strModuleName]		= 'General Ledger' 
+			
 		FROM [dbo].tblGLJournalDetail A INNER JOIN [dbo].tblGLJournal B 
 			ON A.[intJournalId] = B.[intJournalId]
 		WHERE B.[intJournalId] IN (SELECT [intJournalId] FROM #tmpValidJournals)
