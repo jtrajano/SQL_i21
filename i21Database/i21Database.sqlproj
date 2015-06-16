@@ -1701,6 +1701,7 @@
     <Build Include="dbo\Views\vyuICGetOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGenerateDynamicXML.sql" />
     <Build Include="dbo\Views\vwGLChartOfAccounts.sql" />
+    <Build Include="dbo\Views\vyuEMEntityTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
