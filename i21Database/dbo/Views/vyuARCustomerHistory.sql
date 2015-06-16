@@ -10,6 +10,7 @@ SELECT
 	,C.[intEntityCustomerId]					AS [intEntityCustomerId]
 	,C.[strCustomerNumber]						AS [strCustomerNumber]
 	,E.[strName]								AS [strCustomerName] 
+	,0                                          AS [ysnPaid]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -30,7 +31,8 @@ SELECT
 	,ISNULL(I.[dblAmountDue], 0.00)				AS [dblAmountDue]
 	,C.[intEntityCustomerId]					AS [intEntityCustomerId]
 	,C.[strCustomerNumber]						AS [strCustomerNumber]  
-	,E.[strName]								AS [strCustomerName]	
+	,E.[strName]								AS [strCustomerName]
+	,I.[ysnPaid]                                AS [ysnPaid]	
 FROM
 	tblARInvoice I
 INNER JOIN
@@ -53,6 +55,7 @@ SELECT
 	,C.[intEntityCustomerId]					AS [intEntityCustomerId]
 	,C.[strCustomerNumber]						AS [strCustomerNumber]
 	,E.[strName]								AS [strCustomerName]
+	,0                                          AS [ysnPaid]
 FROM
 	tblARPayment P
 LEFT OUTER JOIN
