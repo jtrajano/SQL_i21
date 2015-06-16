@@ -29,17 +29,17 @@ BEGIN
 		IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStockToReverse')) 
 		BEGIN 
 			CREATE TABLE #tmpInventoryTransactionStockToReverse (
-				intInventoryLotInCustodyTransactionId INT NOT NULL 
+				intInventoryTransactionInCustodyId INT NOT NULL 
 				,intTransactionId INT NULL 
 				,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 				,intTransactionTypeId INT NOT NULL 
-				,intInventoryLotInCustodyId INT 
+				,intInventoryCostBucketInCustodyId INT 
 				,dblQty NUMERIC(38,20)
 			)
 		END 
 
 		CREATE TABLE expected (
-			intInventoryLotInCustodyTransactionId INT NOT NULL 
+			intInventoryLotTransactionInCustodyId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 			,intTransactionTypeId INT NOT NULL 
@@ -47,7 +47,7 @@ BEGIN
 		)
 
 		CREATE TABLE actual (
-			intInventoryLotInCustodyTransactionId INT NOT NULL 
+			intInventoryLotTransactionInCustodyId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 			,intTransactionTypeId INT NOT NULL 
@@ -77,19 +77,19 @@ BEGIN
 		WHERE strName = 'Inventory Receipt'
 
 		INSERT INTO expected (
-				intInventoryLotInCustodyTransactionId 
+				intInventoryLotTransactionInCustodyId 
 				,intTransactionId 
 				,strTransactionId 
 				,intTransactionTypeId 
 				,dblQty 
 		)
-		SELECT	intInventoryLotInCustodyTransactionId	= 1
+		SELECT	intInventoryLotTransactionInCustodyId	= 1
 				,intTransactionId						= 1
 				,strTransactionId						= 'INVRCT-00001'
 				,intTransactionTypeId					= @intTransactionTypeId
 				,dblQty									= 110
 		UNION ALL
-		SELECT	intInventoryLotInCustodyTransactionId	= 6
+		SELECT	intInventoryLotTransactionInCustodyId	= 6
 				,intTransactionId						= 1
 				,strTransactionId						= 'INVRCT-00001'
 				,intTransactionTypeId					= @intTransactionTypeId
@@ -97,19 +97,19 @@ BEGIN
 
 		-- Get the actual data
 		INSERT INTO actual (
-				intInventoryLotInCustodyTransactionId 
+				intInventoryLotTransactionInCustodyId 
 				,intTransactionId 
 				,strTransactionId 
 				,intTransactionTypeId 
 				,dblQty 		
 		)
 		SELECT
-				intInventoryLotInCustodyTransactionId 
+				intInventoryLotTransactionInCustodyId 
 				,intTransactionId 
 				,strTransactionId 
 				,intTransactionTypeId 
 				,dblQty 	
-		FROM	tblICInventoryLotInCustodyTransaction
+		FROM	tblICInventoryLotTransactionInCustody
 		WHERE	intTransactionId						= 1
 				AND strTransactionId					= 'INVRCT-00001'
 				AND intTransactionTypeId				= @intTransactionTypeId

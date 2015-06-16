@@ -17,11 +17,11 @@ SET ANSI_WARNINGS OFF
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStockToReverse')) 
 BEGIN 
 	CREATE TABLE #tmpInventoryTransactionStockToReverse (
-		intInventoryLotInCustodyTransactionId INT NOT NULL 
+		intInventoryTransactionInCustodyId INT NOT NULL 
 		,intTransactionId INT NULL 
 		,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 		,intTransactionTypeId INT NOT NULL 
-		,intInventoryLotInCustodyId INT 
+		,intInventoryCostBucketInCustodyId INT 
 		,dblQty NUMERIC(38,20)
 	)
 END 
@@ -57,7 +57,7 @@ BEGIN
 			,SUM(ISNULL(ItemTrans.dblQty, 0) * -1)			
 			,intSubLocationId
 			,intStorageLocationId
-	FROM	dbo.tblICInventoryLotInCustodyTransaction ItemTrans
+	FROM	dbo.tblICInventoryTransactionInCustody ItemTrans
 	WHERE	intTransactionId = @intTransactionId
 			AND strTransactionId = @strTransactionId
 			AND ISNULL(ysnIsUnposted, 0) = 0
@@ -114,12 +114,13 @@ BEGIN
 	-------------------------------------------------
 	-- Create reversal of the inventory transactions
 	-------------------------------------------------
-	INSERT INTO dbo.tblICInventoryLotInCustodyTransaction (
+	INSERT INTO dbo.tblICInventoryTransactionInCustody (
 			[intItemId]
-			,[intItemLocationId]
+			,[intItemLocationId] 
 			,[intItemUOMId]
 			,[intSubLocationId]
 			,[intStorageLocationId]
+			,[intLotId]
 			,[dtmDate]
 			,[dblQty]
 			,[dblUOMQty]
@@ -129,45 +130,100 @@ BEGIN
 			,[intCurrencyId]
 			,[dblExchangeRate]
 			,[intTransactionId]
-			,[strTransactionId]
-			,[strBatchId]
-			,[intTransactionTypeId]
-			,[intLotId]
-			,[ysnIsUnposted]
-			,[strTransactionForm]
-			,[dtmCreated]
-			,[intCreatedUserId]
-			,[intConcurrencyId]
-			,[intInventoryLotInCustodyId]
-	)			
-	SELECT	
+			,[intTransactionDetailId]
+			,[strTransactionId] 
+			,[intInventoryCostBucketInCustodyId] 
+			,[strBatchId] 
+			,[intTransactionTypeId] 
+			,[ysnIsUnposted] 
+			,[strTransactionForm] 
+			,[dtmCreated] 
+			,[intCreatedUserId] 
+			,[intConcurrencyId] 
+	)		
+	SELECT 
 			[intItemId]								= ActualTransaction.intItemId
 			,[intItemLocationId]					= ActualTransaction.intItemLocationId
 			,[intItemUOMId]							= ActualTransaction.intItemUOMId
 			,[intSubLocationId]						= ActualTransaction.intSubLocationId
 			,[intStorageLocationId]					= ActualTransaction.intStorageLocationId
+			,[intLotId]								= ActualTransaction.intLotId
 			,[dtmDate]								= ActualTransaction.dtmDate
 			,[dblQty]								= ActualTransaction.dblQty * -1
 			,[dblUOMQty]							= ActualTransaction.dblUOMQty
 			,[dblCost]								= ActualTransaction.dblCost
-			,[dblValue]								= ActualTransaction.dblValue * -1
+			,[dblValue]								= ActualTransaction.dblValue
 			,[dblSalesPrice]						= ActualTransaction.dblSalesPrice
 			,[intCurrencyId]						= ActualTransaction.intCurrencyId
 			,[dblExchangeRate]						= ActualTransaction.dblExchangeRate
 			,[intTransactionId]						= ActualTransaction.intTransactionId
+			,[intTransactionDetailId]				= ActualTransaction.intTransactionDetailId
 			,[strTransactionId]						= ActualTransaction.strTransactionId
+			,[intInventoryCostBucketInCustodyId]	= ActualTransaction.intInventoryCostBucketInCustodyId
 			,[strBatchId]							= @strBatchId
 			,[intTransactionTypeId]					= ActualTransaction.intTransactionTypeId
-			,[intLotId]								= ActualTransaction.intLotId
 			,[ysnIsUnposted]						= 1
 			,[strTransactionForm]					= ActualTransaction.strTransactionForm
 			,[dtmCreated]							= GETDATE()
 			,[intCreatedUserId]						= @intUserId
 			,[intConcurrencyId]						= 1
-			,[intInventoryLotInCustodyId]			= ActualTransaction.intInventoryLotInCustodyId
-	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryLotInCustodyTransaction ActualTransaction
-				ON ItemTransactionsToReverse.intInventoryLotInCustodyTransactionId = ActualTransaction.intInventoryLotInCustodyTransactionId	
+	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransactionInCustody ActualTransaction
+				ON ItemTransactionsToReverse.intInventoryTransactionInCustodyId = ActualTransaction.intInventoryTransactionInCustodyId	
 
+	------------------------------------------------------
+	-- Create reversal of the inventory LOT transactions
+	------------------------------------------------------
+	DECLARE @ActiveLotStatus AS INT = 1
+	INSERT INTO dbo.tblICInventoryLotTransactionInCustody (
+			[intItemId]
+			,[intLotId]
+			,[intLocationId]
+			,[intItemLocationId]
+			,[intSubLocationId]
+			,[intStorageLocationId]
+			,[dtmDate]
+			,[dblQty]
+			,[intItemUOMId]
+			,[dblCost]
+			,[intTransactionId]
+			,[strTransactionId]
+			,[intTransactionTypeId]
+			,[strBatchId]
+			,[intLotStatusId]
+			,[strTransactionForm]
+			,[ysnIsUnposted]
+			,[intInventoryCostBucketInCustodyId] 
+			,[dtmCreated] 
+			,[intCreatedUserId] 
+			,[intConcurrencyId] 
+	)
+	SELECT 	[intItemId]								= ActualTransaction.intItemId
+			,[intLotId]								= ActualTransaction.intLotId
+			,[intLocationId]						= ItemLocation.intLocationId
+			,[intItemLocationId]					= ActualTransaction.intItemLocationId
+			,[intSubLocationId]						= ActualTransaction.intSubLocationId
+			,[intStorageLocationId]					= ActualTransaction.intStorageLocationId
+			,[dtmDate]								= ActualTransaction.dtmDate
+			,[dblQty]								= ActualTransaction.dblQty * -1
+			,[intItemUOMId]							= ActualTransaction.intItemUOMId
+			,[dblCost]								= ActualTransaction.dblCost
+			,[intTransactionId]						= ActualTransaction.intTransactionId
+			,[strTransactionId]						= ActualTransaction.strTransactionId
+			,[intTransactionTypeId]					= ActualTransaction.intTransactionTypeId
+			,[strBatchId]							= @strBatchId
+			,[intLotStatusId]						= @ActiveLotStatus
+			,[strTransactionForm]					= ActualTransaction.strTransactionForm
+			,[ysnIsUnposted]						= 1
+			,[intInventoryCostBucketInCustodyId]	= ActualTransaction.intInventoryCostBucketInCustodyId
+			,[dtmCreated]							= GETDATE()
+			,[intCreatedUserId]						= @intUserId
+			,[intConcurrencyId]						= 1
+	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransactionInCustody ActualTransaction
+				ON ItemTransactionsToReverse.intInventoryTransactionInCustodyId = ActualTransaction.intInventoryTransactionInCustodyId	
+				AND ActualTransaction.intLotId IS NOT NULL 
+				AND ActualTransaction.intItemUOMId IS NOT NULL
+			INNER JOIN tblICItemLocation ItemLocation
+				ON ActualTransaction.intItemLocationId = ItemLocation.intItemLocationId
 END
 
 _Exit: 

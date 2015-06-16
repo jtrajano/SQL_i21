@@ -656,6 +656,8 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryShipment for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryShipment for calling uspICPostCustody.sql" />
     <Build Include="testi21Database\Fake Data\Fake data for inventory shipment table.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryLotTransactionInCustody for inserting the supplied arguments.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryLotTransactionInCustody for the basics.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

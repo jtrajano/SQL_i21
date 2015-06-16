@@ -1638,11 +1638,11 @@
     <Build Include="dbo\Views\vyuRKGetOpenContract.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertToSalesOrder.sql" />
     <Build Include="dbo\Tables\tblICInventoryLotInCustody.sql" />
-    <Build Include="dbo\Tables\tblICInventoryLotInCustodyTransaction.sql" />
+    <Build Include="dbo\Tables\tblICInventoryTransactionInCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostLotInCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInLotCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLotCustody.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostInventoryLotInCustodyTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryLotTransactionInCustody.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryTransferDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetContainerByContainerType.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetActualItemByProduct.sql" />
@@ -1707,6 +1707,10 @@
     <Build Include="dbo\Stored Procedures\uspICPostFIFOInCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInFIFOCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInFIFOCustody.sql" />
+    <Build Include="dbo\Tables\tblICInventoryTransactionInCustody.sql" />
+    <Build Include="dbo\Tables\tblICInventoryFIFOInCustody.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryTransactionInCustody.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLotTransactionInCustody.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -1,5 +1,5 @@
 ﻿/*
-	This stored procedure will post a Lot item under the company's custody. 
+	This stored procedure will post stocks that is not owned by the company. 
 */
 
 CREATE PROCEDURE [dbo].[uspICPostFIFOInCustody]
@@ -35,9 +35,9 @@ DECLARE @dblReduceQty AS NUMERIC(18,6);
 DECLARE @dblAddQty AS NUMERIC(18,6);
 DECLARE @CostUsed AS NUMERIC(18,6);
 
-DECLARE @NewInventoryLotInCustodyId AS INT
-DECLARE @UpdatedInventoryLotInCustodyId AS INT 
-DECLARE @NewInventoryLotInCustodyTransactionId AS INT
+DECLARE @NewInventoryCostBucketCustodyId AS INT
+DECLARE @UpdatedCostBucketInCustodyId AS INT 
+DECLARE @NewInventoryTransactionInCustodyId AS INT
 
 -- Initialize the transaction name. Use this as the transaction form name
 DECLARE @TransactionTypeName AS NVARCHAR(200) 
@@ -62,8 +62,6 @@ BEGIN
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
-				,@intSubLocationId
-				,@intStorageLocationId
 				,@dblReduceQty
 				,@dblCost
 				,@strTransactionId
@@ -71,14 +69,14 @@ BEGIN
 				,@intUserId
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT 
-				,@UpdatedInventoryLotInCustodyId OUTPUT
+				,@UpdatedCostBucketInCustodyId OUTPUT
 			IF @@ERROR <> 0 GOTO _Exit
 
 			-- Insert the inventory transaction record
 			DECLARE @dblComputedReduceQty AS NUMERIC(18,6) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
 			DECLARE @dblCostToUse AS NUMERIC(18,6) = ISNULL(@CostUsed, @dblCost)
 
-			EXEC [dbo].[uspICPostInventoryLotInCustodyTransaction]
+			EXEC [dbo].[uspICPostInventoryInCustodyTransaction]
 					@intItemId = @intItemId
 					,@intItemLocationId = @intItemLocationId
 					,@intItemUOMId = @intItemUOMId
@@ -100,8 +98,8 @@ BEGIN
 					,@intLotId = NULL 
 					,@strTransactionForm = @TransactionTypeName
 					,@intUserId = @intUserId
-					,@SourceInventoryLotInCustodyId = @UpdatedInventoryLotInCustodyId
-					,@InventoryLotInCustodyTransactionId = @NewInventoryLotInCustodyTransactionId OUTPUT			
+					,@SourceCostBucketInCustodyId = @UpdatedCostBucketInCustodyId
+					,@InventoryTransactionIdInCustodyId = @NewInventoryTransactionInCustodyId OUTPUT			
 			
 			-- Reduce the remaining qty
 			SET @dblReduceQty = @RemainingQty;
@@ -117,18 +115,16 @@ BEGIN
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
-			,@intSubLocationId
-			,@intStorageLocationId
 			,@dtmDate
 			,@dblAddQty
 			,@dblCost
 			,@strTransactionId
 			,@intTransactionId
 			,@intUserId
-			,@NewInventoryLotInCustodyId OUTPUT 
+			,@NewInventoryCostBucketCustodyId OUTPUT 
 		IF @@ERROR <> 0 GOTO _Exit
 
-		EXEC [dbo].[uspICPostInventoryLotInCustodyTransaction]
+		EXEC [dbo].[uspICPostInventoryInCustodyTransaction]
 			@intItemId = @intItemId
 			,@intItemLocationId = @intItemLocationId
 			,@intItemUOMId = @intItemUOMId
@@ -150,8 +146,8 @@ BEGIN
 			,@intLotId = NULL  
 			,@strTransactionForm = @TransactionTypeName
 			,@intUserId = @intUserId
-			,@SourceInventoryLotInCustodyId = @NewInventoryLotInCustodyId 
-			,@InventoryLotInCustodyTransactionId = @NewInventoryLotInCustodyTransactionId OUTPUT			
+			,@SourceCostBucketInCustodyId = @NewInventoryCostBucketCustodyId
+			,@InventoryTransactionIdInCustodyId = @NewInventoryTransactionInCustodyId OUTPUT						
 	END 
 END 
 

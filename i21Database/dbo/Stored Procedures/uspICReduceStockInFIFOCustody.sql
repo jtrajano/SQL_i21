@@ -16,8 +16,7 @@ CREATE PROCEDURE [dbo].[uspICReduceStockInFIFOCustody]
 	,@intUserId AS INT
 	,@RemainingQty AS NUMERIC(18,6) OUTPUT
 	,@CostUsed AS NUMERIC(18,6) OUTPUT 
-	,@QtyOffset AS NUMERIC(18,6) OUTPUT 
-	,@FifoId AS INT OUTPUT
+	,@SourceInventoryFIFOInCustodyId AS INT OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -29,84 +28,56 @@ SET ANSI_WARNINGS OFF
 -- Ensure the qty is a positive number
 SET @dblQty = ABS(@dblQty)
 
--- Initialize the remaining qty, cost used, fifo id to NULL
+-- Initialize the remaining qty, cost used, Lot id to NULL
 SET @RemainingQty = NULL;
 SET @CostUsed = NULL;
-SET @QtyOffset = NULL;
-SET @FifoId = NULL;
+SET @SourceInventoryFIFOInCustodyId = NULL;
 
--- Upsert (update or insert) a record in the cost bucket.
-MERGE	TOP(1)
-INTO	dbo.tblICInventoryFIFO 
-WITH	(HOLDLOCK) 
-AS		fifo_bucket	
-USING (
-	SELECT	intItemId = @intItemId
-			,intItemLocationId = @intItemLocationId
-			,intItemUOMId = @intItemUOMId
-) AS Source_Query  
-	ON fifo_bucket.intItemId = Source_Query.intItemId
-	AND fifo_bucket.intItemLocationId = Source_Query.intItemLocationId
-	AND fifo_bucket.intItemUOMId = Source_Query.intItemUOMId
-	AND (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) > 0 
-	AND dbo.fnDateGreaterThanEquals(@dtmDate, fifo_bucket.dtmDate) = 1
+DECLARE @intInventoryFIFOInCustodyId AS INT 
 
--- Update an existing cost bucket
-WHEN MATCHED THEN 
-	UPDATE 
-	SET	fifo_bucket.dblStockOut = ISNULL(fifo_bucket.dblStockOut, 0) 
-					+ CASE	WHEN (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) >= @dblQty THEN @dblQty
-							ELSE (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) 
+-- Validate for negative stock 
+SELECT TOP  1 
+		@intInventoryFIFOInCustodyId = intInventoryFIFOInCustodyId
+FROM	dbo.tblICInventoryFIFOInCustody FIFO_Custody
+WHERE	FIFO_Custody.intItemId = @intItemId
+		AND FIFO_Custody.intItemLocationId = @intItemLocationId
+		AND FIFO_Custody.intItemUOMId = @intItemUOMId
+		AND ISNULL(FIFO_Custody.dblStockIn, 0) - ISNULL(FIFO_Custody.dblStockOut, 0) - ISNULL(@dblQty, 0) > 0
+
+IF @intInventoryFIFOInCustodyId IS NULL 
+BEGIN 
+	-- Negative stock quantity is not allowed.
+	RAISERROR(50029, 11, 1) 
+	GOTO _Exit;
+END 
+
+-- Get the available stock in custody. 
+SELECT TOP  1 
+		@intInventoryFIFOInCustodyId = intInventoryFIFOInCustodyId
+FROM	dbo.tblICInventoryFIFOInCustody FIFO_Custody
+WHERE	FIFO_Custody.intItemId = @intItemId
+		AND FIFO_Custody.intItemLocationId = @intItemLocationId
+		AND FIFO_Custody.intItemUOMId = @intItemUOMId
+		AND (FIFO_Custody.dblStockIn - FIFO_Custody.dblStockOut) > 0 
+
+UPDATE	FIFO_Custody
+SET		FIFO_Custody.dblStockOut = ISNULL(FIFO_Custody.dblStockOut, 0) 
+					+ CASE	WHEN (FIFO_Custody.dblStockIn - FIFO_Custody.dblStockOut) >= @dblQty THEN @dblQty
+							ELSE (FIFO_Custody.dblStockIn - FIFO_Custody.dblStockOut) 
 					END 
-
-		,fifo_bucket.intConcurrencyId = ISNULL(fifo_bucket.intConcurrencyId, 0) + 1
+		,FIFO_Custody.intConcurrencyId = ISNULL(FIFO_Custody.intConcurrencyId, 0) + 1
 
 		-- update the remaining qty
 		,@RemainingQty = 
-					CASE	WHEN (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) >= @dblQty THEN 0
-							ELSE (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) - @dblQty
+					CASE	WHEN (FIFO_Custody.dblStockIn - FIFO_Custody.dblStockOut) >= @dblQty THEN 0
+							ELSE (FIFO_Custody.dblStockIn - FIFO_Custody.dblStockOut) - @dblQty
 					END
 
-		-- retrieve the cost from the fifo bucket. 
-		,@CostUsed = fifo_bucket.dblCost
+		-- retrieve the cost from the Lot bucket. 
+		,@CostUsed = FIFO_Custody.dblCost
+FROM	dbo.tblICInventoryFIFOInCustody FIFO_Custody
+WHERE	intInventoryFIFOInCustodyId = @intInventoryFIFOInCustodyId;
 
-		-- retrieve the	qty reduced from a fifo bucket 
-		,@QtyOffset = 
-					CASE	WHEN (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) >= @dblQty THEN @dblQty
-							ELSE (fifo_bucket.dblStockIn - fifo_bucket.dblStockOut) 
-					END
+SET @SourceInventoryFIFOInCustodyId = @intInventoryFIFOInCustodyId; 
 
-		-- retrieve the id of the matching fifo bucket 
-		,@FifoId = fifo_bucket.intInventoryFIFOId
-
--- Insert a new fifo bucket
-WHEN NOT MATCHED THEN
-	INSERT (
-		[intItemId]
-		,[intItemLocationId]
-		,[intItemUOMId]
-		,[dtmDate]
-		,[dblStockIn]
-		,[dblStockOut]
-		,[dblCost]
-		,[strTransactionId]
-		,[intTransactionId]
-		,[dtmCreated]
-		,[intCreatedUserId]
-		,[intConcurrencyId]
-	)
-	VALUES (
-		@intItemId
-		,@intItemLocationId
-		,@intItemUOMId
-		,@dtmDate
-		,0
-		,@dblQty
-		,@dblCost
-		,@strTransactionId
-		,@intTransactionId
-		,GETDATE()
-		,@intUserId
-		,1
-	)
-;
+_Exit: 

@@ -1,36 +1,30 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryLotInCustodyTransaction for the basics]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryLotTransactionInCustody for the basics]
 AS
 BEGIN
 	-- Arrange 
 	BEGIN 
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotInCustodyTransaction', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransactionInCustody', @Identity = 1;
 
-		DECLARE 
-			@intInventoryLotInCustodyTransactionId AS INT
-			,@intItemId AS INT 
-			,@intItemLocationId AS INT 
-			,@intItemUOMId AS INT 
-			,@intSubLocationId AS INT 
-			,@intStorageLocationId AS INT 
-			,@intLotId AS INT 
-			,@dtmDate AS DATETIME 
-			,@dblQty AS NUMERIC(18, 6) 
-			,@dblUOMQty AS NUMERIC(18, 6) 
-			,@dblCost AS NUMERIC(18, 6) 
-			,@dblValue AS NUMERIC(18, 6) 
-			,@dblSalesPrice AS NUMERIC(18, 6) 
-			,@intCurrencyId AS INT 
-			,@dblExchangeRate AS DECIMAL (38, 20) 
-			,@intTransactionId AS INT 
-			,@intTransactionDetailId AS INT 
-			,@strTransactionId AS NVARCHAR(40) 
-			,@strBatchId AS NVARCHAR(20) 
-			,@intTransactionTypeId AS INT 
-			,@strTransactionForm AS NVARCHAR (255) 
-			,@intCreatedUserId AS INT
-			,@intUserId AS INT 
-			,@intInventoryLotInCustodyId AS INT
-			,@InventoryLotInCustodyTransactionId AS INT
+		DECLARE @intItemId INT
+				,@intLotId INT
+				,@intItemLocationId INT				
+				,@intItemUOMId INT 
+				,@intSubLocationId INT
+				,@intStorageLocationId INT
+				,@dtmDate DATETIME
+				,@dblQty NUMERIC(18, 6)
+				,@dblCost NUMERIC(18, 6)
+				,@intTransactionId INT
+				,@intTransactionDetailId INT 
+				,@strTransactionId NVARCHAR(40)
+				,@strBatchId NVARCHAR(20)
+				,@intLotStatusId INT 
+				,@intTransactionTypeId INT	
+				,@strTransactionForm NVARCHAR (255)
+				,@intUserId INT
+				,@SourceInventoryLotInCustodyId INT 
+				,@InventoryLotTransactionInCustodyId INT  
+				,@intLocationId INT 
 
 		-- Declare the variables for the Item UOM Ids
 		DECLARE @WetGrains_BushelUOMId AS INT = 1
@@ -101,36 +95,32 @@ BEGIN
 	-- Act 
 	-- Try to use the SP with NULL arguments on all parameters
 	BEGIN 
-		EXEC dbo.uspICPostInventoryLotInCustodyTransaction		
+		EXEC dbo.uspICPostInventoryLotTransactionInCustody		
 			@intItemId 
+			,@intLotId 
 			,@intItemLocationId 
 			,@intItemUOMId 
 			,@intSubLocationId 
 			,@intStorageLocationId 
 			,@dtmDate 
 			,@dblQty 
-			,@dblUOMQty 
 			,@dblCost 
-			,@dblValue 
-			,@dblSalesPrice 
-			,@intCurrencyId 
-			,@dblExchangeRate 
-			,@intTransactionId
+			,@intTransactionId 
 			,@intTransactionDetailId 
 			,@strTransactionId 
 			,@strBatchId 
+			,@intLotStatusId 
 			,@intTransactionTypeId 
-			,@intLotId 
 			,@strTransactionForm 
 			,@intUserId 
-			,@intInventoryLotInCustodyId 
-			,@InventoryLotInCustodyTransactionId OUTPUT 
+			,@SourceInventoryLotInCustodyId  
+			,@InventoryLotTransactionInCustodyId OUTPUT 
 	END 
 
 	-- Assert
 	BEGIN
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
-		EXEC tSQLt.AssertEmptyTable 'tblICInventoryLotInCustodyTransaction';
+		EXEC tSQLt.AssertEmptyTable 'tblICInventoryTransactionInCustody';
 	END 
 
 	-- Clean-up: remove the tables used in the unit test

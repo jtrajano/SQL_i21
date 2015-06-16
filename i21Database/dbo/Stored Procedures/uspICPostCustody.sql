@@ -150,6 +150,31 @@ BEGIN
 				,@intTransactionTypeId
 				,@intUserId
 	END
+	ELSE IF (@CostingMethod = @FIFO)
+	BEGIN 
+		EXEC dbo.uspICPostFIFOInCustody
+				@intItemId
+				,@intItemLocationId
+				,@intItemUOMId
+				,@intSubLocationId
+				,@intStorageLocationId
+				,@dtmDate
+				,@intLotId
+				,@dblQty
+				,@dblUOMQty
+				,@dblCost
+				,@dblSalesPrice
+				,@intCurrencyId
+				,@dblExchangeRate
+				,@intTransactionId
+				,@intTransactionDetailId
+				,@strTransactionId
+				,@strBatchId
+				,@intTransactionTypeId
+				,@intUserId
+	END 
+
+
 	ELSE 
 	BEGIN 
 		DECLARE @strItemNo AS NVARCHAR(50)

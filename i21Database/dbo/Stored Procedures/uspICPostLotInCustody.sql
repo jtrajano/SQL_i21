@@ -79,31 +79,31 @@ BEGIN
 			-- Insert the inventory transaction record
 			DECLARE @dblComputedReduceQty AS NUMERIC(18,6) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
 			DECLARE @dblCostToUse AS NUMERIC(18,6) = ISNULL(@CostUsed, @dblCost)
-
-			EXEC [dbo].[uspICPostInventoryLotInCustodyTransaction]
-					@intItemId = @intItemId
-					,@intItemLocationId = @intItemLocationId
-					,@intItemUOMId = @intItemUOMId
-					,@intSubLocationId = @intSubLocationId
-					,@intStorageLocationId = @intStorageLocationId					 
-					,@dtmDate = @dtmDate
-					,@dblQty = @dblComputedReduceQty
-					,@dblUOMQty = @dblUOMQty
-					,@dblCost = @dblCostToUse
-					,@dblValue = NULL
-					,@dblSalesPrice = @dblSalesPrice
-					,@intCurrencyId = @intCurrencyId
-					,@dblExchangeRate = @dblExchangeRate
-					,@intTransactionId = @intTransactionId
-					,@intTransactionDetailId = @intTransactionDetailId
-					,@strTransactionId = @strTransactionId
-					,@strBatchId = @strBatchId
-					,@intTransactionTypeId = @intTransactionTypeId
-					,@intLotId = @intLotId 
-					,@strTransactionForm = @TransactionTypeName
-					,@intUserId = @intUserId
-					,@SourceInventoryLotInCustodyId = @UpdatedInventoryLotInCustodyId
-					,@InventoryLotInCustodyTransactionId = @NewInventoryLotInCustodyTransactionId OUTPUT			
+					
+			EXEC [dbo].[uspICPostInventoryTransactionInCustody]
+					@intItemId								= @intItemId
+					,@intItemLocationId						= @intItemLocationId
+					,@intItemUOMId							= @intItemUOMId
+					,@intSubLocationId						= @intSubLocationId
+					,@intStorageLocationId					= @intStorageLocationId
+					,@dtmDate								= @dtmDate
+					,@dblQty								= @dblComputedReduceQty
+					,@dblUOMQty								= @dblUOMQty
+					,@dblCost								= @dblCostToUse
+					,@dblValue								= NULL
+					,@dblSalesPrice							= @dblSalesPrice
+					,@intCurrencyId							= @intCurrencyId
+					,@dblExchangeRate						= @dblExchangeRate
+					,@intTransactionId						= @intTransactionId
+					,@intTransactionDetailId				= @intTransactionDetailId
+					,@strTransactionId						= @strTransactionId
+					,@strBatchId							= @strBatchId
+					,@intTransactionTypeId					= @intTransactionTypeId
+					,@intLotId								= @intLotId
+					,@strTransactionForm					= @TransactionTypeName
+					,@intUserId								= @intUserId
+					,@SourceCostBucketInCustodyId			= @UpdatedInventoryLotInCustodyId
+					,@InventoryTransactionIdInCustodyId		= @NewInventoryLotInCustodyTransactionId OUTPUT 
 			
 			-- Reduce the remaining qty
 			SET @dblReduceQty = @RemainingQty;
@@ -130,31 +130,31 @@ BEGIN
 			,@intUserId
 			,@NewInventoryLotInCustodyId OUTPUT 
 		IF @@ERROR <> 0 GOTO _Exit
-
-		EXEC [dbo].[uspICPostInventoryLotInCustodyTransaction]
-			@intItemId = @intItemId
-			,@intItemLocationId = @intItemLocationId
-			,@intItemUOMId = @intItemUOMId
-			,@intSubLocationId = @intSubLocationId
-			,@intStorageLocationId = @intStorageLocationId					 
-			,@dtmDate = @dtmDate
-			,@dblQty = @dblAddQty
-			,@dblUOMQty = @dblUOMQty
-			,@dblCost = @dblCost
-			,@dblValue = NULL
-			,@dblSalesPrice = @dblSalesPrice
-			,@intCurrencyId = @intCurrencyId
-			,@dblExchangeRate = @dblExchangeRate
-			,@intTransactionId = @intTransactionId
-			,@intTransactionDetailId = @intTransactionDetailId
-			,@strTransactionId = @strTransactionId
-			,@strBatchId = @strBatchId
-			,@intTransactionTypeId = @intTransactionTypeId
-			,@intLotId = @intLotId 
-			,@strTransactionForm = @TransactionTypeName
-			,@intUserId = @intUserId
-			,@SourceInventoryLotInCustodyId = @NewInventoryLotInCustodyId 
-			,@InventoryLotInCustodyTransactionId = @NewInventoryLotInCustodyTransactionId OUTPUT			
+			
+		EXEC [dbo].[uspICPostInventoryTransactionInCustody]
+				@intItemId								= @intItemId
+				,@intItemLocationId						= @intItemLocationId
+				,@intItemUOMId							= @intItemUOMId
+				,@intSubLocationId						= @intSubLocationId
+				,@intStorageLocationId					= @intStorageLocationId
+				,@dtmDate								= @dtmDate
+				,@dblQty								= @dblAddQty
+				,@dblUOMQty								= @dblUOMQty
+				,@dblCost								= @dblCost
+				,@dblValue								= NULL
+				,@dblSalesPrice							= @dblSalesPrice
+				,@intCurrencyId							= @intCurrencyId
+				,@dblExchangeRate						= @dblExchangeRate
+				,@intTransactionId						= @intTransactionId
+				,@intTransactionDetailId				= @intTransactionDetailId
+				,@strTransactionId						= @strTransactionId
+				,@strBatchId							= @strBatchId
+				,@intTransactionTypeId					= @intTransactionTypeId
+				,@intLotId								= @intLotId
+				,@strTransactionForm					= @TransactionTypeName
+				,@intUserId								= @intUserId
+				,@SourceCostBucketInCustodyId			= @NewInventoryLotInCustodyId
+				,@InventoryTransactionIdInCustodyId		= @NewInventoryLotInCustodyTransactionId OUTPUT 						
 	END 
 END 
 
