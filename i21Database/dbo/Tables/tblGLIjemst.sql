@@ -23,6 +23,7 @@
     [glije_postdate] DATE NULL, 
     [glije_id] INT NOT NULL IDENTITY, 
     [glije_dte] DATETIME NULL, 
-    [glije_error_desc] NVARCHAR(300) NULL 
+    [glije_error_desc] NVARCHAR(300) NULL, 
+    [strSourceKey]  NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
 );
 
