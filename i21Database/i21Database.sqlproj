@@ -1709,6 +1709,7 @@
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInFIFOCustody.sql" />
     <Build Include="dbo\Tables\tblFRImportLog.sql" />
     <Build Include="dbo\Tables\tblFRImportFile.sql" />
+    <Build Include="dbo\Tables\tblARCustomerTaxingTaxException.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
