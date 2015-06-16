@@ -1710,6 +1710,7 @@
     <Build Include="dbo\Tables\tblFRImportLog.sql" />
     <Build Include="dbo\Tables\tblFRImportFile.sql" />
     <Build Include="dbo\Tables\tblARCustomerTaxingTaxException.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLRegenerateAccountNames.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
