@@ -5,9 +5,8 @@ AS
 	SELECT	CH.intContractHeaderId,
 			CH.intConcurrencyId					AS	intHeaderConcurrencyId,			
 			CH.intContractTypeId,			
-				TP.strContractType,
-			CH.intEntityId,					
-				EY.strName						AS	strCustomerVendor,
+				TP.strContractType,				
+			EY.*,
 			CH.intCommodityId,				
 				CY.strCommodityCode,		
 				CY.strDescription				AS	strCommodityDescription,
@@ -62,7 +61,7 @@ AS
 			
 	FROM	tblCTContractHeader		CH	
 
-	JOIN	tblEntity				EY	ON	EY.intEntityId				=	CH.intEntityId
+	JOIN	vyuCTEntity				EY	ON	EY.intEntityId				=	CH.intEntityId
 	JOIN	tblICCommodity			CY	ON	CY.intCommodityId			=	CH.intCommodityId
 	JOIN	tblCTContractType		TP	ON	TP.intContractTypeId		=	CH.intContractTypeId
 	JOIN	tblICUnitMeasure		U2	ON	U2.intUnitMeasureId			=	CH.intCommodityUnitMeasureId
