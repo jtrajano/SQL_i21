@@ -9,6 +9,7 @@ A.[intEntityVendorId]
 ,A.strPurchaseOrderNumber
 ,B.intPurchaseDetailId
 ,B.intItemId
+,B.strMiscDescription
 ,C.strItemNo
 ,C.strDescription
 ,tblReceived.dblOrderQty
@@ -72,6 +73,7 @@ A.[intEntityVendorId]
 ,A.strPurchaseOrderNumber
 ,B.intPurchaseDetailId
 ,B.intItemId
+,B.strMiscDescription
 ,C.strItemNo
 ,C.strDescription
 ,B.dblQtyOrdered
@@ -107,6 +109,7 @@ A.intEntityVendorId
 ,A.strReceiptNumber
 ,B.intInventoryReceiptItemId
 ,B.intItemId
+,C.strDescription
 ,C.strItemNo
 ,C.strDescription
 ,B.dblOpenReceive
