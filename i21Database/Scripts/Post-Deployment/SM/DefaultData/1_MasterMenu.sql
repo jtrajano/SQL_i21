@@ -2426,6 +2426,33 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Patch' AN
 INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 VALUES (N'Patch', N'Patch Update', @PatchUpdateParentMenuId, N'Patch', N'Maintenance', N'Screen', N'PatchUpdate.view.Patch', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
 
+/*
+	start of rename
+	From Patch Update to Service Pack
+*/
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Patch Update' AND strModuleName = 'Patch Update' AND intParentMenuID = 0)
+BEGIN
+	DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Patch Update' AND strModuleName = 'Patch Update' AND intParentMenuID = 0
+END
+
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Patch' AND strModuleName = 'Patch Update' AND intParentMenuID = @PatchUpdateParentMenuId)
+BEGIN
+	DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Patch' AND strModuleName = 'Patch Update' AND intParentMenuID = @PatchUpdateParentMenuId
+END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Service Pack' AND strModuleName = 'Service Pack' AND intParentMenuID = 0)
+INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+VALUES (N'Service Pack', N'Service Pack', 0, N'Service Pack', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 23, 0)
+
+DECLARE @ServicePackParentMenuId INT
+SELECT @ServicePackParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Service Pack' AND strModuleName = 'Service Pack' AND intParentMenuID = 0
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Patch' AND strModuleName = 'Service Pack' AND intParentMenuID = @ServicePackParentMenuId)
+INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+VALUES (N'Patch', N'Service Pack', @ServicePackParentMenuId, N'Patch', N'Maintenance', N'Screen', N'ServicePack.view.Patch', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
+
+/*end of rename*/
+
 /* TRANSPORTS */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Transports' AND strModuleName = 'Transports' AND intParentMenuID = 0)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
