@@ -41,7 +41,7 @@ Type the overview for the table here.
 		[dblResidualUnit] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICStorageLocation] PRIMARY KEY ([intStorageLocationId]), 
-		CONSTRAINT [AK_tblICStorageLocation_strName] UNIQUE ([strName]), 
+		CONSTRAINT [AK_tblICStorageLocation_strName] UNIQUE ([strName], [intSubLocationId]), 
 		CONSTRAINT [FK_tblICStorageLocation_tblICStorageUnitType] FOREIGN KEY ([intStorageUnitTypeId]) REFERENCES [tblICStorageUnitType]([intStorageUnitTypeId]), 
 		CONSTRAINT [FK_tblICStorageLocation_tblICRestriction] FOREIGN KEY ([intRestrictionId]) REFERENCES [tblICRestriction]([intRestrictionId]), 
 		CONSTRAINT [FK_tblICStorageLocation_tblICCommodity] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]), 
