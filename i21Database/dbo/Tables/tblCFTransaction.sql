@@ -200,6 +200,8 @@
     [dblPriceProfileRate]          NUMERIC (18, 6) NULL,
     [dblSitePriceAdjustmentRate]   NUMERIC (18, 6) NULL,
     [strISONumber]                 NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [strTransactionType]           NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+    [dblTransferCost]              NUMERIC (18, 6) NULL,
     [ysnCASite]                    BIT             NULL,
     [intConcurrencyId]             INT             CONSTRAINT [DF_tblCFTransaction_intConcurrencyId] DEFAULT ((1)) NULL
 );
