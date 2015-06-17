@@ -578,3 +578,7 @@ EXEC sp_addmessage 51143,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51144) EXEC sp_dropmessage 51144, 'us_english'	
 SET @strmessage = 'Custody or storage for %s is not yet supported. It is currently limited to lot-tracked items.'
 EXEC sp_addmessage 51144,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51145) EXEC sp_dropmessage 51145, 'us_english'	
+SET @strmessage = 'Cannot have the same item and weight UOM. Please remove the weight UOM for %s with lot number %s.'
+EXEC sp_addmessage 51145,11,@strmessage,'us_english','False'
