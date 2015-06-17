@@ -151,6 +151,14 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
             else {
                 return false;
             }
+        },
+        checkLotExists: function(get) {
+            if (iRely.Functions.isEmpty(get('grdInventoryTransfer.selection.intLotId'))) {
+                return false;
+            }
+            else {
+                return true;
+            }
         }
     }
 

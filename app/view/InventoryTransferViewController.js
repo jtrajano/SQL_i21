@@ -223,6 +223,7 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 colTransferUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
+                        readOnly: '{checkLotExists}',
                         store: '{itemUOM}',
                         defaultFilters: [{
                             column: 'intItemId',
@@ -231,20 +232,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                         }]
                     }
                 },
-                colWeightUOM: {
-                    dataIndex: 'strWeightUOM',
-                    editor: {
-                        store: '{weightUOM}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{grdInventoryTransfer.selection.intItemId}',
-                            conjunction: 'and'
-                        }]
-                    }
-                },
-                colGross: 'dblGrossWeight',
-                colTare: 'dblTareWeight',
-                colNet: 'dblNetWeight',
                 colNewLotID: {
                     dataIndex: 'strNewLotId'
                 },
