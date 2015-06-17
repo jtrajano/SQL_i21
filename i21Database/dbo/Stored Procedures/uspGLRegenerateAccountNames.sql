@@ -9,7 +9,7 @@ BEGIN
 	AS(
 	SELECT A1.intAccountId,
 	   STUFF(( 
-	   SELECT  @strDelimiter +  RTRIM(S.strDescription)
+	   SELECT  ' ' + @strDelimiter + ' ' +  RTRIM(S.strDescription)
 		FROM         dbo.tblGLAccountSegment S INNER JOIN
 						  dbo.tblGLAccountSegmentMapping M ON S.intAccountSegmentId = M.intAccountSegmentId 
 						  RIGHT OUTER JOIN
