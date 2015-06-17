@@ -159,7 +159,7 @@ namespace iRely.Inventory.Model
 
         public int intInventoryReceiptItemId { get; set; }
         public int intInventoryReceiptId { get; set; }
-        public int? intLineNo { get; set; }
+        public int intLineNo { get; set; }
         public int? intOrderId { get; set; }
         public int? intSourceId { get; set; }
         public int? intItemId { get; set; }

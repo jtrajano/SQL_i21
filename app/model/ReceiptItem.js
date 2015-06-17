@@ -30,11 +30,12 @@ Ext.define('Inventory.model.ReceiptItem', {
                 }
             }
         },
-        { name: 'intLineNo', type: 'int', allowNull: true },
+        { name: 'intLineNo', type: 'int' },
         { name: 'intOrderId', type: 'int', allowNull: true },
         { name: 'intSourceId', type: 'int', allowNull: true },
         { name: 'intItemId', type: 'int', allowNull: true },
         { name: 'intSubLocationId', type: 'int', allowNull: true },
+        { name: 'intOwnershipType', type: 'int', allowNull: true },
         { name: 'dblOrderQty', type: 'float' },
         { name: 'dblBillQty', type: 'float' },
         { name: 'dblOpenReceive', type: 'float' },
@@ -44,7 +45,6 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'dblUnitCost', type: 'float' },
         { name: 'dblUnitRetail', type: 'float' },
         { name: 'dblLineTotal', type: 'float' },
-        { name: 'dblGrossMargin', type: 'float' },
         { name: 'intSort', type: 'int', allowNull: true },
 
         { name: 'strItemNo', type: 'string'},
@@ -54,7 +54,8 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'strUnitMeasure', type: 'string'},
         { name: 'strWeightUOM', type: 'string'},
         { name: 'strSubLocationName', type: 'string'},
-        { name: 'strUnitType', type: 'string'}
+        { name: 'strUnitType', type: 'string'},
+        { name: 'dblGrossMargin', type: 'float' }
     ],
 
     validators: [

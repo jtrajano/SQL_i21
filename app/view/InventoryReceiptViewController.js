@@ -494,6 +494,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 'tblSMFreightTerm,' +
                 'tblSMCompanyLocation,' +
                 'tblICInventoryReceiptItems.vyuICGetInventoryReceiptItem,' +
+                'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots,' +
                 'tblICInventoryReceiptCharges.vyuICGetInventoryReceiptCharge',
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Receipt',
