@@ -204,6 +204,44 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class vyuICGetItemCommodityMap : EntityTypeConfiguration<vyuICGetItemCommodity>
+    {
+        public vyuICGetItemCommodityMap()
+        {
+            // Primary Key
+            this.HasKey(p => p.intItemId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetItemCommodity");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.strType).HasColumnName("strType");
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.strStatus).HasColumnName("strStatus");
+            this.Property(t => t.strModelNo).HasColumnName("strModelNo");
+            this.Property(t => t.strLotTracking).HasColumnName("strLotTracking");
+            this.Property(t => t.intBrandId).HasColumnName("intBrandId");
+            this.Property(t => t.strBrand).HasColumnName("strBrand");
+            this.Property(t => t.intManufacturerId).HasColumnName("intManufacturerId");
+            this.Property(t => t.strManufacturer).HasColumnName("strManufacturer");
+            this.Property(t => t.strTracking).HasColumnName("strTracking");
+            this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");
+            this.Property(t => t.strCommodityCode).HasColumnName("strCommodityCode");
+            this.Property(t => t.intOriginId).HasColumnName("intOriginId");
+            this.Property(t => t.strOrigin).HasColumnName("strOrigin");
+            this.Property(t => t.intProductTypeId).HasColumnName("intProductTypeId");
+            this.Property(t => t.strProductType).HasColumnName("strProductType");
+            this.Property(t => t.intRegionId).HasColumnName("intRegionId");
+            this.Property(t => t.strRegion).HasColumnName("strRegion");
+            this.Property(t => t.intSeasonId).HasColumnName("intSeasonId");
+            this.Property(t => t.strSeason).HasColumnName("strSeason");
+            this.Property(t => t.intClassVarietyId).HasColumnName("intClassVarietyId");
+            this.Property(t => t.strClassVariety).HasColumnName("strClassVariety");
+            this.Property(t => t.intProductLineId).HasColumnName("intProductLineId");
+            this.Property(t => t.strProductLine).HasColumnName("strProductLine");
+        }
+    }
+
     public class vyuICGetOtherChargesMap : EntityTypeConfiguration<vyuICGetOtherCharges>
     {
         public vyuICGetOtherChargesMap()

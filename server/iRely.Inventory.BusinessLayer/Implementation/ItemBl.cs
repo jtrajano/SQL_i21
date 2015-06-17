@@ -264,6 +264,24 @@ namespace iRely.Inventory.BusinessLayer
         }
 
         /// <summary>
+        /// Get Item Commodities
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<SearchResult> GetItemCommodities(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetItemCommodity>()
+                    .Filter(param, true);
+            var data = await query.Execute(param, "intItemId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+
+        /// <summary>
         /// Get Item UPC Codes
         /// </summary>
         /// <param name="param"></param>

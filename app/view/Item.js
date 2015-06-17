@@ -4385,12 +4385,6 @@ Ext.define('Inventory.view.Item', {
                                                                                 dataType: 'string',
                                                                                 text: 'Attribute',
                                                                                 flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strType',
-                                                                                dataType: 'string',
-                                                                                text: 'Attribute Type',
-                                                                                hidden: true
                                                                             }
                                                                         ],
                                                                         itemId: 'cboOrigin',
@@ -4418,12 +4412,6 @@ Ext.define('Inventory.view.Item', {
                                                                                 dataType: 'string',
                                                                                 text: 'Attribute',
                                                                                 flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strType',
-                                                                                dataType: 'string',
-                                                                                text: 'Attribute Type',
-                                                                                hidden: true
                                                                             }
                                                                         ],
                                                                         itemId: 'cboProductType',
@@ -4451,12 +4439,6 @@ Ext.define('Inventory.view.Item', {
                                                                                 dataType: 'string',
                                                                                 text: 'Attribute',
                                                                                 flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strType',
-                                                                                dataType: 'string',
-                                                                                text: 'Attribute Type',
-                                                                                hidden: true
                                                                             }
                                                                         ],
                                                                         itemId: 'cboRegion',
@@ -4484,12 +4466,6 @@ Ext.define('Inventory.view.Item', {
                                                                                 dataType: 'string',
                                                                                 text: 'Attribute',
                                                                                 flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strType',
-                                                                                dataType: 'string',
-                                                                                text: 'Attribute Type',
-                                                                                hidden: true
                                                                             }
                                                                         ],
                                                                         itemId: 'cboSeason',
@@ -4517,12 +4493,6 @@ Ext.define('Inventory.view.Item', {
                                                                                 dataType: 'string',
                                                                                 text: 'Attribute',
                                                                                 flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strType',
-                                                                                dataType: 'string',
-                                                                                text: 'Attribute Type',
-                                                                                hidden: true
                                                                             }
                                                                         ],
                                                                         itemId: 'cboClass',
@@ -4550,12 +4520,6 @@ Ext.define('Inventory.view.Item', {
                                                                                 dataType: 'string',
                                                                                 text: 'Attribute',
                                                                                 flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strType',
-                                                                                dataType: 'string',
-                                                                                text: 'Attribute Type',
-                                                                                hidden: true
                                                                             }
                                                                         ],
                                                                         itemId: 'cboProductLine',
