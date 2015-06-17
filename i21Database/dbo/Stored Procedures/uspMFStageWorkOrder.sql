@@ -327,7 +327,7 @@ BEGIN TRY
 
 					Select @dblAdjustByQuantity = -@dblNewWeight/@dblWeightPerQty
 
-					EXEC [uspICInventoryAdjustment_CreatePostSplitLot]
+					EXEC uspICInventoryAdjustment_CreatePostLotMove
 						-- Parameters for filtering:
 						@intItemId = @intInputItemId
 						,@dtmDate = @dtmCurrentDateTime
@@ -470,7 +470,7 @@ BEGIN TRY
 				--*****************************************************
 				PRINT '1.Call Lot Merge routine.'
 				Select @dblAdjustByQuantity = -@dblNewWeight/@dblWeightPerQty
-				EXEC [uspICInventoryAdjustment_CreatePostSplitLot]
+				EXEC uspICInventoryAdjustment_CreatePostLotMerge
 					-- Parameters for filtering:
 					@intItemId = @intInputItemId
 					,@dtmDate = @dtmCurrentDateTime
@@ -501,7 +501,7 @@ BEGIN TRY
 		BEGIN
 			PRINT '2.Call Lot Merge routine.'
 			Select @dblAdjustByQuantity = -@dblNewWeight/@dblWeightPerQty
-			EXEC [uspICInventoryAdjustment_CreatePostSplitLot]
+			EXEC uspICInventoryAdjustment_CreatePostLotMerge
 					-- Parameters for filtering:
 					@intItemId = @intInputItemId
 					,@dtmDate = @dtmCurrentDateTime
