@@ -183,21 +183,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colSourceNumber: {
                     hidden: '{checkHideSourceNo}',
                     dataIndex: 'strSourceNumber'
-//                    editor: {
-//                        store: '{orderNumbers}',
-//                        defaultFilters: [
-//                            {
-//                                column: 'ysnCompleted',
-//                                value: 'false',
-//                                conjunction: 'and'
-//                            },
-//                            {
-//                                column: 'intEntityVendorId',
-//                                value: '{current.intEntityVendorId}',
-//                                conjunction: 'and'
-//                            }
-//                        ]
-//                    }
                 },
                 colItemNo: {
                     dataIndex: 'strItemNo',
@@ -231,10 +216,19 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colLotTracking: 'strLotTracking',
-                colOrderUOM: 'strOrderUOM',
-                colQtyOrdered: 'dblOrderQty',
+                colOrderUOM: {
+                    hidden: '{checkHideOrderNo}',
+                    dataIndex: 'strOrderUOM'
+                },
+                colQtyOrdered: {
+                    hidden: '{checkHideOrderNo}',
+                    dataIndex: 'dblOrderQty'
+                },
+                colReceived: {
+                    hidden: '{checkHideOrderNo}',
+                    dataIndex: 'dblReceived'
+                },
                 colQtyToReceive: 'dblOpenReceive',
-                colReceived: 'dblReceived',
                 colUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
