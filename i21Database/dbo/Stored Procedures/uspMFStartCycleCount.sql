@@ -1,6 +1,13 @@
 ﻿CREATE PROCEDURE [dbo].uspMFStartCycleCount (@strXML NVARCHAR(MAX))
 AS
 BEGIN TRY
+
+	SET QUOTED_IDENTIFIER OFF
+	SET ANSI_NULLS ON
+	SET NOCOUNT ON
+	SET XACT_ABORT ON
+	SET ANSI_WARNINGS OFF
+
 	DECLARE @idoc INT
 		,@ErrMsg NVARCHAR(MAX)
 		,@intLocationId INT
@@ -13,6 +20,17 @@ BEGIN TRY
 		,@intCycleCountSessionId INT
 		,@ysnIncludeOutputItem bit
 		,@strExcludeItemType nvarchar(MAX)
+		,@strWorkOrderNo nvarchar(MAX)
+		,@dtmCurrentDate datetime
+		,@dtmCurrentDateTime datetime
+		,@intDayOfYear int
+		,@TRANCOUNT int
+
+	Select @TRANCOUNT			=@@TRANCOUNT
+	
+	Select @dtmCurrentDateTime	=GETDATE()
+	Select @dtmCurrentDate		=CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
+	Select @intDayOfYear		=DATEPART(dy,@dtmCurrentDateTime)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -98,7 +116,7 @@ BEGIN TRY
 	LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
 	WHERE intWorkOrderId = @intWorkOrderId
 
-	IF @dtmPlannedDateTime > GETDATE()
+	IF @dtmPlannedDateTime > @dtmCurrentDateTime
 	BEGIN
 		RAISERROR (
 				51102
@@ -133,12 +151,12 @@ BEGIN TRY
 				AND (
 					(
 						ri.ysnYearValidationRequired = 1
-						AND CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101)) BETWEEN ri.dtmValidFrom
+						AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
 							AND ri.dtmValidTo
 						)
 					OR (
 						ri.ysnYearValidationRequired = 0
-						AND DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, ri.dtmValidFrom)
+						AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
 							AND DATEPART(dy, ri.dtmValidTo)
 						)
 					)
@@ -199,19 +217,20 @@ BEGIN TRY
 				AND (
 					(
 						ri.ysnYearValidationRequired = 1
-						AND CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101)) BETWEEN ri.dtmValidFrom
+						AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
 							AND ri.dtmValidTo
 						)
 					OR (
 						ri.ysnYearValidationRequired = 0
-						AND DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, ri.dtmValidFrom)
+						AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
 							AND DATEPART(dy, ri.dtmValidTo)
 						)
 					)
 				AND intCountStatusId <> 13
 			)
 	BEGIN
-		SELECT TOP 1 @strProductItem = Product.strItemNo + ' - ' + Product.strDescription
+		SELECT TOP 1 @strWorkOrderNo=strWorkOrderNo
+			,@strProductItem = Product.strItemNo + ' - ' + Product.strDescription
 			,@strInputItem = Input.strItemNo + ' - ' + Input.strDescription
 			,@strPlannedDate = ltrim(W.dtmPlannedDate) + (
 				CASE 
@@ -235,12 +254,12 @@ BEGIN TRY
 			AND (
 				(
 					ri.ysnYearValidationRequired = 1
-					AND CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101)) BETWEEN ri.dtmValidFrom
+					AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
 						AND ri.dtmValidTo
 					)
 				OR (
 					ri.ysnYearValidationRequired = 0
-					AND DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, ri.dtmValidFrom)
+					AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
@@ -253,6 +272,7 @@ BEGIN TRY
 				,11
 				,1
 				,@strInputItem
+				,@strWorkOrderNo
 				,@strPlannedDate
 				,@strProductItem
 				)
@@ -273,12 +293,12 @@ BEGIN TRY
 				AND (
 					(
 						ri.ysnYearValidationRequired = 1
-						AND CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101)) BETWEEN ri.dtmValidFrom
+						AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
 							AND ri.dtmValidTo
 						)
 					OR (
 						ri.ysnYearValidationRequired = 0
-						AND DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, ri.dtmValidFrom)
+						AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
 							AND DATEPART(dy, ri.dtmValidTo)
 						)
 					)
@@ -317,12 +337,12 @@ BEGIN TRY
 			AND (
 				(
 					ri.ysnYearValidationRequired = 1
-					AND CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101)) BETWEEN ri.dtmValidFrom
+					AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
 						AND ri.dtmValidTo
 					)
 				OR (
 					ri.ysnYearValidationRequired = 0
-					AND DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, ri.dtmValidFrom)
+					AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)
@@ -358,12 +378,12 @@ BEGIN TRY
 		AND (
 			(
 				ri.ysnYearValidationRequired = 1
-				AND CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101)) BETWEEN ri.dtmValidFrom
+				AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
 					AND ri.dtmValidTo
 				)
 			OR (
 				ri.ysnYearValidationRequired = 0
-				AND DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, ri.dtmValidFrom)
+				AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
 					AND DATEPART(dy, ri.dtmValidTo)
 				)
 			)
@@ -397,8 +417,8 @@ BEGIN TRY
 	FROM @tblICItem tempItem 
 	JOIN tblICItem I on I.intItemId=tempItem.intItemId
 	Where I.strType in (Select Item COLLATE Latin1_General_CI_AS from dbo.fnSplitString(@strExcludeItemType,','))
-
-	BEGIN TRANSACTION
+	
+	--BEGIN TRANSACTION
 
 	INSERT INTO dbo.tblMFProcessCycleCountSession (
 		intSubLocationId
@@ -410,7 +430,7 @@ BEGIN TRY
 		)
 	SELECT @intSubLocationId
 		,@intUserId
-		,GetDate()
+		,@dtmCurrentDateTime
 		,NULL
 		,0
 		,@intWorkOrderId
@@ -447,9 +467,9 @@ BEGIN TRY
 				,CC.dtmLastModified DESC
 			)
 		,@intUserId
-		,GetDate()
+		,@dtmCurrentDateTime
 		,@intUserId
-		,GetDate()
+		,@dtmCurrentDateTime
 		,1
 	FROM dbo.tblMFManufacturingProcessMachine MP
 	CROSS JOIN @tblICItem I
@@ -457,11 +477,11 @@ BEGIN TRY
 
 	UPDATE dbo.tblMFWorkOrder
 	SET intCountStatusId  = 10
-		,dtmLastModified = GetDate()
+		,dtmLastModified = @dtmCurrentDateTime
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderId = @intWorkOrderId
-
-	COMMIT TRANSACTION
+	
+	--COMMIT TRANSACTION
 
 	EXEC sp_xml_removedocument @idoc
 END TRY
@@ -469,8 +489,8 @@ END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 
-	IF XACT_STATE() != 0
-		ROLLBACK TRANSACTION
+	--IF XACT_STATE() != 0 
+		--ROLLBACK TRANSACTION
 
 	IF @idoc <> 0
 		EXEC sp_xml_removedocument @idoc

@@ -424,7 +424,7 @@ SET @strmessage = 'The run prior to the current run has no cycle count entries. 
 EXEC sp_addmessage 51105,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51106) EXEC sp_dropmessage 51106, 'us_english'	
-SET @strmessage = 'A cycle count for the item ''%s'' is already started on %s for the target item ''%s''. Please complete the prior cycle count to continue.'
+SET @strmessage = 'A cycle count for the item ''%s'' is already started for work order %s on %s for the target item ''%s''. Please complete the prior cycle count to continue.'
 EXEC sp_addmessage 51106,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51107) EXEC sp_dropmessage 51107, 'us_english'	
