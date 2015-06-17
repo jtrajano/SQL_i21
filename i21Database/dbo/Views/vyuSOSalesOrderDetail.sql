@@ -26,6 +26,11 @@ SELECT
     ,D.[intInventoryAccountId]
     ,D.[intStorageLocationId]
     ,ST.[strName] AS strStorageLocation
+	,D.strMaintenanceType
+	,D.strFrequency
+	,D.dtmMaintenanceDate
+	,D.dblMaintenanceAmount
+	,D.dblLicenseAmount	
 FROM         
     [tblSOSalesOrderDetail] D
 LEFT JOIN    

@@ -24,7 +24,7 @@ CompLoc.strLocationName,
 0.000000 AS dblPaymentAmount,
 SO.intQuoteTemplateId,
 QT.strTemplateName,
-SO.ysnPleminaryQuote,
+SO.ysnPreliminaryQuote,
 SO.intOrderedById,
 OE.strName AS strOrderedByName,
 SO.intSplitId,
@@ -33,7 +33,8 @@ SO.intEntitySalespersonId,
 CASE WHEN SP.strSalespersonId = '' THEN NTT.strEntityNo ELSE SP.strSalespersonId END AS strSalespersonId,
 SO.strLostQuoteCompetitor,
 SO.strLostQuoteReason,
-SO.strLostQuoteComment
+SO.strLostQuoteComment,
+SO.strOrderType
 FROM         
 dbo.tblSOSalesOrder AS SO INNER JOIN
 dbo.tblARCustomer AS Cus ON SO.[intEntityCustomerId] = Cus.[intEntityCustomerId] INNER JOIN

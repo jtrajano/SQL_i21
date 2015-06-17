@@ -50,10 +50,11 @@ BEGIN
            ,[strBillToCountry]
            ,[intEntityId]
 		   ,[intQuoteTemplateId]
-		   ,[ysnPleminaryQuote]
+		   ,[ysnPreliminaryQuote]
 		   ,[strLostQuoteComment]
 		   ,[strLostQuoteCompetitor]
 		   ,[strLostQuoteReason]
+		   ,[strOrderType]
         )
 	SELECT
 			[intEntityCustomerId]
@@ -98,10 +99,11 @@ BEGIN
            ,[strBillToCountry]
            ,@UserId
 		   ,[intQuoteTemplateId]
-		   ,[ysnPleminaryQuote]
+		   ,[ysnPreliminaryQuote]
 		   ,[strLostQuoteComment]
 		   ,[strLostQuoteCompetitor]
 		   ,[strLostQuoteReason]
+		   ,[strOrderType]
 	FROM
 	tblSOSalesOrder
 	WHERE intSalesOrderId = @SalesOrderId
@@ -146,6 +148,11 @@ BEGIN
 				   ,[intSalesAccountId]
 				   ,[intInventoryAccountId]
 				   ,[intStorageLocationId]
+				   ,[strMaintenanceType]
+				   ,[strFrequency]
+	               ,[dtmMaintenanceDate]
+	               ,[dblMaintenanceAmount]
+	               ,[dblLicenseAmount]	
 				)
 			SELECT 
 					@NewSalesOrderId
@@ -165,6 +172,11 @@ BEGIN
 				   ,[intSalesAccountId]
 				   ,[intInventoryAccountId]
 				   ,[intStorageLocationId]
+				   ,[strMaintenanceType]
+				   ,[strFrequency]
+	               ,[dtmMaintenanceDate]
+	               ,[dblMaintenanceAmount]
+	               ,[dblLicenseAmount]	
 			FROM
 				[tblSOSalesOrderDetail]
 			WHERE
