@@ -42,6 +42,7 @@ BEGIN TRY
 		,@intNewItemUOMId int
 		,@dblWeightPerQty numeric(18,6)
 		,@strDestinationLotNumber nvarchar(50)
+		,@intConsumptionSubLocationId int
 
 	Select @dtmCurrentDateTime=GetDate()
 
@@ -172,6 +173,10 @@ BEGIN TRY
 		AND R.intLocationId = @intLocationId
 		AND RI.intRecipeItemTypeId = 1
 		AND RI.intItemId = @intInputItemId
+
+	Select @intConsumptionSubLocationId=intSubLocationId 
+	From dbo.tblICStorageLocation 
+	Where intStorageLocationId=@intConsumptionStorageLocationId
 
 	IF @intInputItemId IS NULL
 		OR @intInputItemId = 0
@@ -332,7 +337,7 @@ BEGIN TRY
 						,@strLotNumber = @strLotNumber
 						-- Parameters for the new values: 
 						,@intNewLocationId = @intLocationId
-						,@intNewSubLocationId = @intSubLocationId
+						,@intNewSubLocationId = @intConsumptionSubLocationId
 						,@intNewStorageLocationId = @intConsumptionStorageLocationId
 						,@strNewLotNumber = @strLotNumber
 						,@dblAdjustByQuantity = @dblAdjustByQuantity
@@ -354,111 +359,111 @@ BEGIN TRY
 				--*****************************************************
 				--Create staging lot
 				--*****************************************************
-				DECLARE @ItemsThatNeedLotId AS dbo.ItemLotTableType
+				--DECLARE @ItemsThatNeedLotId AS dbo.ItemLotTableType
 
-				CREATE TABLE #GeneratedLotItems (
-					intLotId INT
-					,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-					,intDetailId INT
-					)
+				--CREATE TABLE #GeneratedLotItems (
+				--	intLotId INT
+				--	,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+				--	,intDetailId INT
+				--	)
 
-				-- Create and validate the lot numbers
-				BEGIN
-					DECLARE @strLifeTimeType NVARCHAR(50)
-						,@intLifeTime INT
-						,@dtmExpiryDate DATETIME
+				---- Create and validate the lot numbers
+				--BEGIN
+					--DECLARE @strLifeTimeType NVARCHAR(50)
+					--	,@intLifeTime INT
+					--	,@dtmExpiryDate DATETIME
 
-					SELECT @strLifeTimeType = strLifeTimeType
-						,@intLifeTime = intLifeTime
-						,@strLotTracking = strLotTracking
-					FROM dbo.tblICItem
-					WHERE intItemId = @intInputItemId
+					--SELECT @strLifeTimeType = strLifeTimeType
+					--	,@intLifeTime = intLifeTime
+					--	,@strLotTracking = strLotTracking
+					--FROM dbo.tblICItem
+					--WHERE intItemId = @intInputItemId
 
-					IF @strLifeTimeType = 'Years'
-						SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, @dtmCurrentDateTime)
-					ELSE IF @strLifeTimeType = 'Months'
-						SET @dtmExpiryDate = DateAdd(mm, @intLifeTime, @dtmCurrentDateTime)
-					ELSE IF @strLifeTimeType = 'Days'
-						SET @dtmExpiryDate = DateAdd(dd, @intLifeTime, @dtmCurrentDateTime)
-					ELSE IF @strLifeTimeType = 'Hours'
-						SET @dtmExpiryDate = DateAdd(hh, @intLifeTime,@dtmCurrentDateTime)
-					ELSE IF @strLifeTimeType = 'Minutes'
-						SET @dtmExpiryDate = DateAdd(mi, @intLifeTime, @dtmCurrentDateTime)
-					ELSE
-						SET @dtmExpiryDate = DateAdd(yy, 1, @dtmCurrentDateTime)
+					--IF @strLifeTimeType = 'Years'
+					--	SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, @dtmCurrentDateTime)
+					--ELSE IF @strLifeTimeType = 'Months'
+					--	SET @dtmExpiryDate = DateAdd(mm, @intLifeTime, @dtmCurrentDateTime)
+					--ELSE IF @strLifeTimeType = 'Days'
+					--	SET @dtmExpiryDate = DateAdd(dd, @intLifeTime, @dtmCurrentDateTime)
+					--ELSE IF @strLifeTimeType = 'Hours'
+					--	SET @dtmExpiryDate = DateAdd(hh, @intLifeTime,@dtmCurrentDateTime)
+					--ELSE IF @strLifeTimeType = 'Minutes'
+					--	SET @dtmExpiryDate = DateAdd(mi, @intLifeTime, @dtmCurrentDateTime)
+					--ELSE
+					--	SET @dtmExpiryDate = DateAdd(yy, 1, @dtmCurrentDateTime)
 					
 		
-					SELECT @intItemLocationId = intItemLocationId
-					FROM dbo.tblICItemLocation
-					WHERE intItemId = @intInputItemId
+					--SELECT @intItemLocationId = intItemLocationId
+					--FROM dbo.tblICItemLocation
+					--WHERE intItemId = @intInputItemId
 
-					IF  @strLotTracking <> 'Yes - Serial Number'
-					BEGIN
-						EXEC dbo.uspSMGetStartingNumber 24
+					--IF  @strLotTracking <> 'Yes - Serial Number'
+					--BEGIN
+						EXEC dbo.uspSMGetStartingNumber 55
 							,@strDestinationLotNumber OUTPUT
-					END
+					--END
 
-					INSERT INTO @ItemsThatNeedLotId (
-						intLotId
-						,strLotNumber
-						,strLotAlias
-						,intItemId
-						,intItemLocationId
-						,intSubLocationId
-						,intStorageLocationId
-						,dblQty
-						,intItemUOMId
-						,dblWeight
-						,intWeightUOMId
-						,dtmExpiryDate
-						,dtmManufacturedDate
-						,intOriginId
-						,strBOLNo
-						,strVessel
-						,strReceiptNumber
-						,strMarkings
-						,strNotes
-						,intEntityVendorId
-						,strVendorLotNo
-						,intVendorLocationId
-						,strVendorLocation
-						,intDetailId
-						,ysnProduced
-						)
-					SELECT intLotId = NULL
-						,strLotNumber = @strDestinationLotNumber
-						,strLotAlias = NULL
-						,intItemId = @intInputItemId
-						,intItemLocationId = @intItemLocationId
-						,intSubLocationId = @intSubLocationId
-						,intStorageLocationId = @intStorageLocationId
-						,dblQty = 0
-						,intItemUOMId = @intInputWeightUOMId
-						,dblWeight = 0
-						,intWeightUOMId = @intInputWeightUOMId
-						,dtmExpiryDate = @dtmExpiryDate
-						,dtmManufacturedDate = @dtmCurrentDateTime
-						,intOriginId = NULL
-						,strBOLNo = NULL
-						,strVessel = NULL
-						,strReceiptNumber = NULL
-						,strMarkings = NULL
-						,strNotes = NULL
-						,intEntityVendorId = NULL
-						,strVendorLotNo = NULL
-						,intVendorLocationId = NULL
-						,strVendorLocation = NULL
-						,intDetailId = @intWorkOrderId
-						,ysnProduced = 1
+				--	INSERT INTO @ItemsThatNeedLotId (
+				--		intLotId
+				--		,strLotNumber
+				--		,strLotAlias
+				--		,intItemId
+				--		,intItemLocationId
+				--		,intSubLocationId
+				--		,intStorageLocationId
+				--		,dblQty
+				--		,intItemUOMId
+				--		,dblWeight
+				--		,intWeightUOMId
+				--		,dtmExpiryDate
+				--		,dtmManufacturedDate
+				--		,intOriginId
+				--		,strBOLNo
+				--		,strVessel
+				--		,strReceiptNumber
+				--		,strMarkings
+				--		,strNotes
+				--		,intEntityVendorId
+				--		,strVendorLotNo
+				--		,intVendorLocationId
+				--		,strVendorLocation
+				--		,intDetailId
+				--		,ysnProduced
+				--		)
+				--	SELECT intLotId = NULL
+				--		,strLotNumber = @strDestinationLotNumber
+				--		,strLotAlias = NULL
+				--		,intItemId = @intInputItemId
+				--		,intItemLocationId = @intItemLocationId
+				--		,intSubLocationId = @intSubLocationId
+				--		,intStorageLocationId = @intStorageLocationId
+				--		,dblQty = 0
+				--		,intItemUOMId = @intInputWeightUOMId
+				--		,dblWeight = 0
+				--		,intWeightUOMId = @intInputWeightUOMId
+				--		,dtmExpiryDate = @dtmExpiryDate
+				--		,dtmManufacturedDate = @dtmCurrentDateTime
+				--		,intOriginId = NULL
+				--		,strBOLNo = NULL
+				--		,strVessel = NULL
+				--		,strReceiptNumber = NULL
+				--		,strMarkings = NULL
+				--		,strNotes = NULL
+				--		,intEntityVendorId = NULL
+				--		,strVendorLotNo = NULL
+				--		,intVendorLocationId = NULL
+				--		,strVendorLocation = NULL
+				--		,intDetailId = @intWorkOrderId
+				--		,ysnProduced = 1
 
-					EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
-						,@intUserId
+				--	EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
+				--		,@intUserId
 
-					SELECT TOP 1 @intDestinationLotId = intLotId,
-								@strDestinationLotNumber=strLotNumber
-					FROM #GeneratedLotItems
-					WHERE intDetailId = @intWorkOrderId
-				END
+				--	SELECT TOP 1 @intDestinationLotId = intLotId,
+				--				@strDestinationLotNumber=strLotNumber
+				--	FROM #GeneratedLotItems
+				--	WHERE intDetailId = @intWorkOrderId
+				--END
 
 				--*****************************************************
 				--End of create staging lot
@@ -475,7 +480,7 @@ BEGIN TRY
 					,@strLotNumber = @strLotNumber
 					-- Parameters for the new values: 
 					,@intNewLocationId = @intLocationId
-					,@intNewSubLocationId = @intSubLocationId
+					,@intNewSubLocationId = @intConsumptionSubLocationId
 					,@intNewStorageLocationId = @intConsumptionStorageLocationId
 					,@strNewLotNumber = @strDestinationLotNumber
 					,@dblAdjustByQuantity = @dblAdjustByQuantity
@@ -506,7 +511,7 @@ BEGIN TRY
 					,@strLotNumber = @strLotNumber
 					-- Parameters for the new values: 
 					,@intNewLocationId = @intLocationId
-					,@intNewSubLocationId = @intSubLocationId
+					,@intNewSubLocationId = @intConsumptionSubLocationId
 					,@intNewStorageLocationId = @intConsumptionStorageLocationId
 					,@strNewLotNumber = @strDestinationLotNumber
 					,@dblAdjustByQuantity = @dblAdjustByQuantity

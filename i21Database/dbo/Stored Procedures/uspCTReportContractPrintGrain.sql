@@ -69,24 +69,24 @@ BEGIN TRY
 			ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +
 			ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')
 			AS	strA,
-			LTRIM(RTRIM(EY.strName)) + ', ' + CHAR(13)+CHAR(10) +
-			ISNULL(LTRIM(RTRIM(EY.strAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
-			ISNULL(LTRIM(RTRIM(EY.strCity)),'') + 
-			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strState)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strState)) END,'') + 
-			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strZipCode)) END,'') + 
-			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strCountry)) END,'')
+			LTRIM(RTRIM(CH.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
+			ISNULL(LTRIM(RTRIM(CH.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
+			ISNULL(LTRIM(RTRIM(CH.strEntityCity)),'') + 
+			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityState)) END,'') + 
+			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityZipCode)) END,'') + 
+			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityCountry)) END,'')
 			AS	strB,
 			CH.dtmContractDate,
 			CH.intContractNumber,
 			CH.intContractHeaderId,
-			EY.strNumber,
+			CH.strEntityNumber strNumber,
 			CASE	WHEN	CH.intContractTypeId  =	1	
 					THEN	'We confirm PURCHASE from you as follows :'
 					WHEN	CH.intContractTypeId  =	2
 					THEN	'We confirm SALES to you as follows :'
 			END		AS	strConfirm,
 			@strCompanyName AS	strE,
-			EY.strName		AS	strF,
+			CH.strEntityName		AS	strF,
 			CASE	WHEN	CH.intContractTypeId  =	1	
 					THEN	'PURCHASE CONTRACT CONFIRMATION'
 					WHEN	CH.intContractTypeId  =	2
@@ -108,7 +108,7 @@ BEGIN TRY
 			CH.strGrade
 
 	FROM	vyuCTContractHeaderView CH
-	JOIN	vyuCTEntity				EY	ON	EY.intEntityId	=	CH.intEntityId	LEFT
+	LEFT
 	JOIN	tblCTContractText		TX	ON	TX.intContractTextId	=	CH.intContractTextId
 	WHERE	intContractHeaderId	=	@intContractHeaderId
 	

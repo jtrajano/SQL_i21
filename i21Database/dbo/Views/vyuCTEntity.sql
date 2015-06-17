@@ -2,15 +2,15 @@
 AS
 
 	SELECT	E.intEntityId,
-			E.strName,
-			'Customer' AS strEntity,
-			C.strCustomerNumber strNumber,
-			L.strAddress,
-			L.strCity,
-			L.strState,
-			L.strZipCode,
-			L.strCountry,
-			L.strPhone,
+			E.strName			AS strEntityName,
+			'Customer'			AS strEntityType,
+			C.strCustomerNumber AS strEntityNumber,
+			L.strAddress		AS strEntityAddress,
+			L.strCity			AS strEntityCity,
+			L.strState			AS strEntityState,
+			L.strZipCode		AS strEntityZipCode,
+			L.strCountry		AS strEntityCountry,
+			L.strPhone			AS strEntityPhone,
 			E.intDefaultLocationId 
 	FROM	tblEntity			E
 	JOIN	tblEntityLocation	L	ON	E.intEntityId = L.intEntityId AND L.ysnDefaultLocation = 1
