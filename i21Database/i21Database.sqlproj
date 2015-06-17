@@ -1715,6 +1715,8 @@
     <Build Include="dbo\Tables\tblFRImportFile.sql" />
     <Build Include="dbo\Tables\tblARCustomerTaxingTaxException.sql" />
     <Build Include="dbo\Stored Procedures\uspGLRegenerateAccountNames.sql" />
+    <Build Include="dbo\Tables\tblARCustomerApplicatorLicense.sql" />
+    <Build Include="dbo\Views\vyuEMCustomerApplicator.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

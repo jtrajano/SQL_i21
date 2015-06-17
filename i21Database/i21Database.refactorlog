@@ -3479,4 +3479,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intInventoryReceiptChargeId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="3d1ce7ec-206a-4f7c-8f0d-a736b928913e" ChangeDateTime="06/17/2015 01:57:24">
+    <Property Name="ElementName" Value="[dbo].[tblARCustomerApplicatorLicense].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARCustomerApplicatorLicense]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCustomerApplicatorLicenseId" />
+  </Operation>
 </Operations>
