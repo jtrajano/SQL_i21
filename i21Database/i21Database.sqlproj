@@ -1720,7 +1720,8 @@
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentLotMerge.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentLotMove.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostLotMerge.sql" />
-    <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostLotMove.sql" />	
+    <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostLotMove.sql" />
+    <Build Include="dbo\Views\vyuICGetItemCommodity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
