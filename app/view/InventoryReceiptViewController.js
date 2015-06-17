@@ -759,6 +759,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('dblUnitRetail', records[0].get('dblLastCost'));
             current.set('dblItemUOMConvFactor', records[0].get('dblReceiveUOMConvFactor'));
             current.set('strUnitType', records[0].get('strReceiveUOMType'));
+            current.set('intOwnershipType', 1);
+            current.set('strOwnershipType', 'Own');
 
             var intUOM = null;
             var strUOM = '';
@@ -1300,6 +1302,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         current.set('dblUnitCost', po.get('dblCost'));
         current.set('dblLineTotal', po.get('dblTotal'));
         current.set('strLotTracking', po.get('strLotTracking'));
+        current.set('intOwnershipType', 1);
+        current.set('strOwnershipType', 'Own');
         current.set('intSubLocationId', po.get('intSubLocationId'));
         current.set('intStorageLocationId', po.get('intStorageLocationId'));
         current.set('strSubLocationName', po.get('strSubLocationName'));

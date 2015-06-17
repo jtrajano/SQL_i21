@@ -1202,9 +1202,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
+                                                                        dataIndex: 'dblUnitCost',
                                                                         itemId: 'colUnitCost',
                                                                         width: 85,
-                                                                        dataIndex: 'dblUnitCost',
                                                                         text: 'Unit Cost',
                                                                         editor: {
                                                                             xtype: 'numberfield',

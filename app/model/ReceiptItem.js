@@ -49,6 +49,7 @@ Ext.define('Inventory.model.ReceiptItem', {
 
         { name: 'strItemNo', type: 'string'},
         { name: 'strItemDescription', type: 'string'},
+        { name: 'strOwnershipType', type: 'string'},
         { name: 'strLotTracking', type: 'string'},
         { name: 'strUnitMeasure', type: 'string'},
         { name: 'strWeightUOM', type: 'string'},
@@ -58,6 +59,7 @@ Ext.define('Inventory.model.ReceiptItem', {
 
     validators: [
         {type: 'presence', field: 'strItemNo'},
+        {type: 'presence', field: 'strOwnershipType'},
         {type: 'presence', field: 'strUnitMeasure'},
         {type: 'presence', field: 'dblOpenReceive'}
     ],

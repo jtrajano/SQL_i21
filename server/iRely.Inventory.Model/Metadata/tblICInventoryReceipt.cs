@@ -164,7 +164,7 @@ namespace iRely.Inventory.Model
         public int? intSourceId { get; set; }
         public int? intItemId { get; set; }
         public int? intSubLocationId { get; set; }
-        public int? intOwnershipType { get; set; }
+        public int intOwnershipType { get; set; }
         public decimal? dblOrderQty { get; set; }
         public decimal? dblBillQty { get; set; }
         public decimal? dblOpenReceive { get; set; }
@@ -475,7 +475,6 @@ namespace iRely.Inventory.Model
 
         public tblICInventoryReceipt tblICInventoryReceipt { get; set; }
         public tblICItem tblICItem { get; set; }
-        public tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation { get; set; }
 
         public vyuICGetInventoryReceiptItem vyuICGetInventoryReceiptItem { get; set; }
         public ICollection<tblICInventoryReceiptItemLot> tblICInventoryReceiptItemLots { get; set; }
