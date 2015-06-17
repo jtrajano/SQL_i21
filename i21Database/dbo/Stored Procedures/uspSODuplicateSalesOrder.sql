@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSODuplicateSalesOrder]
 	@TransactionType NVARCHAR(20) = '',
 	@SalesOrderId	INT = 0,
+	@OrderStatus NVARCHAR(20) = '',
 	@UserId			INT = 0,
 	@NewSalesOrderId INT = NULL OUTPUT
 
@@ -78,7 +79,7 @@ BEGIN
            ,[dblAmountDue]
            ,[dblPayment]
            ,[strTransactionType]
-           ,'Open'
+           ,@OrderStatus
            ,[intAccountId]
            ,NULL --Processed Date
            ,0 --Processed
@@ -150,7 +151,7 @@ BEGIN
 				   ,[intStorageLocationId]
 				   ,[strMaintenanceType]
 				   ,[strFrequency]
-	               ,[dtmMaintenanceDate]
+	               ,[dtmMaintenanceDate]				   
 	               ,[dblMaintenanceAmount]
 	               ,[dblLicenseAmount]	
 				)
