@@ -3,7 +3,6 @@ AS
 SELECT DISTINCT 
        C.strCustomerNumber
      , RTRIM(C.strCustomerNumber) + ' - ' + C.strName AS strName
-	 , P.strPaymentInfo AS strFarmCheck
 	 , P.strRecordNumber
 	 , L.strLocationName
 	 , P.dtmDatePaid
@@ -11,7 +10,6 @@ SELECT DISTINCT
 	 , strTransactionType
 	 , P.dblUnappliedAmount AS dblUsed
 	 , P.dblAmountPaid - P.dblUnappliedAmount AS dblRemaining
-	 , P.strNotes
 	 , strContact = ISNULL(RTRIM(E.strPhone) + CHAR(13) + char(10), '')
 				  + ISNULL(RTRIM(E.strEmail) + CHAR(13) + char(10), '')
 				  + ISNULL(RTRIM(C.strBillToLocationName) + CHAR(13) + char(10), '')

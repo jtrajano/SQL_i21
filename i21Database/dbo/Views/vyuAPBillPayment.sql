@@ -5,6 +5,9 @@ A.intBillId
 ,A.strBillId
 ,A.dblTotal
 ,Payments.dblPayment AS dblPayment
+,Payments.dblDiscount AS dblDiscount
+,Payments.dblInterest AS dblInterest
+,Payments.dblWithheld AS dblWithheld
 ,A.[intEntityVendorId]
 ,Payments.[intEntityVendorId] AS intPaymentVendor
 ,A.ysnPosted
@@ -16,7 +19,10 @@ FROM tblAPBill A
 		SELECT 
 			B.[intEntityVendorId]
 			,C.intBillId
-			,SUM(dblPayment) + SUM(dblDiscount) dblPayment
+			,SUM(dblPayment) dblPayment
+			,SUM(dblDiscount) dblDiscount
+			,SUM(dblInterest) dblInterest
+			,SUM(C.dblWithheld) dblWithheld
 		FROM tblAPPayment B 
 			LEFT JOIN tblAPPaymentDetail C 
 		ON B.intPaymentId = C.intPaymentId

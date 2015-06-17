@@ -208,11 +208,11 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
 
     			EXEC  dbo.uspGLGetNewID 2, @strJournalId  OUTPUT
 
-    			INSERT INTO tblGLJournal(strJournalId,dtmDate,strDescription,dtmPosted,intCurrencyId,intEntityId,strJournalType,strTransactionType,ysnPosted,
+				INSERT INTO tblGLJournal(strJournalId,dtmDate,strDescription,dtmPosted,intCurrencyId,intEntityId,strJournalType,strTransactionType,ysnPosted,
     			strSourceId, strSourceType)
-    			SELECT @strJournalId,@postdate, ''Imported from SubLedger'' ,GETDATE(), @intCurrencyId,@intUserId, ''Origin Journal'',''General Journal'',0,
-    				@glije_src_no,@glije_src_sys
-
+    			SELECT @strJournalId,@postdate
+    				,''Imported from '' + REPLACE(@glije_src_sys,'' '','''') +  '' '' + REPLACE(@glije_src_no,'' '' ,'''') + '' on '' + CONVERT (varchar(10), GETDATE(), 101) 
+    				,GETDATE(), @intCurrencyId,@intUserId, ''Origin Journal'',''General Journal'',0,@glije_src_no,@glije_src_sys
 
     			SELECT @intJournalId = @@IDENTITY
     			SET @journalCount = @journalCount +1

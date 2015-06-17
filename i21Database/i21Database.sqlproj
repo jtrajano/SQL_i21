@@ -1661,9 +1661,14 @@
     <Build Include="dbo\Views\vyuARGetLostQuoteCompetitors.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateSegmentCategory.sql" />
     <Build Include="dbo\Views\vyuARUnappliedCreditsRegister.sql" />
-    <Build Include="dbo\Views\vyuARSAByItemClass.sql" />
     <Build Include="dbo\Stored Procedures\uspARReComputeInvoiceTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspARReComputeInvoiceAmounts.sql" />
+    <Build Include="dbo\Functions\fnAPCreatePrepaymentGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreatePrepayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPPostPrepayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateBillAmounts.sql" />
+    <Build Include="dbo\Views\vyuAPBillStatus.sql" />
+    <Build Include="dbo\Views\vyuARSalesAnalysisReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

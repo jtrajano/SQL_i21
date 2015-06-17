@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblARCustomerFarm] (
     [intFarmFieldId]      INT            IDENTITY (1, 1) NOT NULL,
-    [intCustomerId]         INT            NOT NULL,
+    [intEntityCustomerId]         INT            NOT NULL,
     [strFarmNumber]           NVARCHAR (10)  COLLATE Latin1_General_CI_AS NULL,
     [strFarmDescription]  NVARCHAR (30)  COLLATE Latin1_General_CI_AS NULL,
     [strFieldNumber]          NVARCHAR (10)  COLLATE Latin1_General_CI_AS NULL,
@@ -21,6 +21,7 @@
     [intConcurrencyId]    INT            NOT NULL,
     CONSTRAINT [PK_tblARCustomerFarm] PRIMARY KEY CLUSTERED ([intFarmFieldId] ASC),
 	CONSTRAINT [UKstrFarmNumber] UNIQUE NONCLUSTERED ([strFarmNumber] ASC),
-	CONSTRAINT [UKstrFieldNumber] UNIQUE NONCLUSTERED ([strFieldNumber] ASC)
+	CONSTRAINT [UKstrFieldNumber] UNIQUE NONCLUSTERED ([strFieldNumber] ASC),
+	CONSTRAINT [FK_tblARCustomerFarm_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId])
 );
 

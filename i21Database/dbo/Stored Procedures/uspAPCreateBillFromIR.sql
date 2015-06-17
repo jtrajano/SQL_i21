@@ -27,6 +27,7 @@ CREATE TABLE #tmpReceiptBillIds (
 	UNIQUE ([intBillId])
 );
 
+
 BEGIN TRANSACTION
 
 INSERT INTO #tmpReceiptIds(intInventoryReceiptId) SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@receiptIds)
@@ -48,7 +49,16 @@ IF @APAccount IS NULL
 IF @APAccount IS NULL
 BEGIN
 	RAISERROR('Please setup default AP Account', 16, 1);
-	RETURN;
+	GOTO DONE
+END
+
+--Make sure all items were not yet billed.
+IF NOT EXISTS(SELECT 1 FROM vyuAPReceivedItems 
+				WHERE intInventoryReceiptItemId IN (SELECT intInventoryReceiptItemId FROM tblICInventoryReceiptItem 
+														WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM #tmpReceiptIds)))
+BEGIN
+	RAISERROR('All of the item in the receipt was fully billed.', 16, 1);
+	GOTO DONE
 END
 
 --removed first the constraint
@@ -119,7 +129,7 @@ BEGIn
 	(
 		SELECT 
 			C.intTermsId
-		FROM tblAPVendor B INNER JOIN tblEntityLocation C ON B.intEntityVendorId = C.intEntityId AND B.intDefaultLocationId = C.intEntityLocationId
+		FROM tblAPVendor B INNER JOIN tblEntityLocation C ON B.intEntityVendorId = C.intEntityId
 		WHERE B.intEntityVendorId = A.intEntityVendorId
 	) Terms
 	WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1
@@ -169,6 +179,7 @@ END
 ALTER TABLE tblAPBill
 	ADD CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId);
 
+DONE:
 IF @@ERROR != 0
 BEGIN
 	ROLLBACK TRANSACTION
