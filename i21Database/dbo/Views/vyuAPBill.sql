@@ -17,7 +17,10 @@ SELECT
 	C.strAccountId,
 	Payment.strPaymentInfo,
 	Payment.strBankAccountNo,
-	F.strUserName AS strUserId
+	F.strUserName AS strUserId,
+	Payment.ysnPrinted,
+	Payment.ysnVoid,
+	Payment.intPaymentId
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 
@@ -29,12 +32,13 @@ FROM
 	(
 		SELECT TOP 1
 			D.intBillId
-			,E.strPaymentInfo
-			,G.strBankAccountNo
-		FROM dbo.tblAPPaymentDetail D
-			INNER JOIN dbo.tblAPPayment E ON D.intPaymentId = E.intPaymentId
-			INNER JOIN dbo.tblCMBankAccount G ON E.intAccountId = G.intGLAccountId
-		WHERE E.ysnPosted = 1 AND A.intBillId = D.intBillId
-		ORDER BY intBillId, E.dtmDatePaid DESC --get only the latest payment
+			,D.intPaymentId
+			,D.strPaymentInfo
+			,D.strBankAccountNo
+			,D.ysnPrinted
+			,D.ysnVoid
+		FROM dbo.vyuAPBillPayment D
+		WHERE A.intBillId = D.intBillId
+		ORDER BY D.intBillId, D.dtmDatePaid DESC --get only the latest payment
 	) Payment
 	LEFT JOIN dbo.tblEntityCredential F ON A.intEntityId = F.intEntityId

@@ -1062,7 +1062,6 @@
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\Views\vyuICGetReceiptItemSource.sql" />
-    <Build Include="dbo\Views\vyuAPBillLatestPayment.sql" />
     <Build Include="dbo\Tables\tblHDAnnouncementType.sql" />
     <Build Include="dbo\Tables\tblHDAnnouncement.sql" />
     <Build Include="dbo\Tables\tblHDProject.sql" />
