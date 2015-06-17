@@ -222,6 +222,7 @@ Ext.define('Inventory.view.ItemLocationViewController', {
         if (app.DefaultLocation > 0)
             record.set('intLocationId', app.DefaultLocation);
         record.set('intCostingMethod', 1);
+        record.set('intNegativeInventory', 3);
         action(record);
     }
 

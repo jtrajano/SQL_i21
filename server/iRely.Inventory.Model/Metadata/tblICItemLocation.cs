@@ -17,7 +17,7 @@ namespace iRely.Inventory.Model
         public int? intVendorId { get; set; }
         public string strDescription { get; set; }
         public int? intCostingMethod { get; set; }
-        public int? intAllowNegativeInventory { get; set; }
+        public int intAllowNegativeInventory { get; set; }
         public int? intSubLocationId { get; set; }
         public int? intStorageLocationId { get; set; }
         public int? intIssueUOMId { get; set; }

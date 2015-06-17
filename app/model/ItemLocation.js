@@ -107,5 +107,16 @@ Ext.define('Inventory.model.ItemLocation', {
 
     validators: [
         {type: 'presence', field: 'intLocationId'}
-    ]
+    ],
+
+    validate: function(options){
+        var errors = this.callParent(arguments);
+        if (iRely.Functions.isEmpty(this.get('intAllowNegativeInventory'))) {
+            errors.add({
+                field: 'intAllowNegativeInventory',
+                message: 'Please select a valid Allow Negative Inventory option from the selection.'
+            })
+        }
+        return errors;
+    }
 });
