@@ -699,6 +699,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var LotStatusChange = 4;
         var SplitLot = 5;
         var ExpiryDateChange = 6;
+        var LotMerge = 7;
+        var LotMove = 8;
 
         var data = record.getData();
         var adjustmentTypeId;
@@ -710,6 +712,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 case LotStatusChange:
                 case ExpiryDateChange:
                 case SplitLot:
+                case LotMerge:
+                case LotMove:
                     break;
                 default:
                     var msgBox = iRely.Functions;
