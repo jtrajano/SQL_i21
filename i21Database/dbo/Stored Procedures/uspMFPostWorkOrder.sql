@@ -150,6 +150,7 @@ BEGIN TRY
 		,@intUserId = @intUserId
 		,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
 		,@strRetBatchId = @strRetBatchId OUTPUT
+		,@ysnPostConsumption=1
 
 	EXEC dbo.uspMFCalculateYield @intWorkOrderId = @intWorkOrderId
 		,@ysnYieldAdjustmentAllowed = @ysnNegativeQtyAllowed

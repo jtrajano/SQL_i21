@@ -30,6 +30,7 @@ BEGIN TRY
 		,@intPrevExecutionOrder INT
 		,@dtmOrderDate DATETIME
 		,@dtmExpectedDate DATETIME
+		,@ysnIngredientAvailable bit
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -60,6 +61,7 @@ BEGIN TRY
 		,@intCustomerId = intCustomerId
 		,@strSalesOrderNo = strSalesOrderNo
 		,@intSupervisorId = intSupervisorId
+		,@ysnIngredientAvailable=ysnIngredientAvailable
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,strWorkOrderNo NVARCHAR(50)
@@ -87,13 +89,14 @@ BEGIN TRY
 			,intCustomerId INT
 			,strSalesOrderNo NVARCHAR(50)
 			,intSupervisorId INT
+			,ysnIngredientAvailable bit
 			)
 
 	IF EXISTS (
 		SELECT *
 		FROM tblMFWorkOrder
-		WHERE strLotNumber = @strLotNumber and intWorkOrderId <>@intWorkOrderId
-	)
+		WHERE strLotNumber = @strLotNumber and intWorkOrderId <>@intWorkOrderId 
+	) and @strLotNumber<>''
 	BEGIN
 		RAISERROR (
 				51142
@@ -154,6 +157,7 @@ BEGIN TRY
 		,intSalesRepresentativeId = @intSalesRepresentativeId
 		,intSupervisorId = @intSupervisorId
 		,intCustomerId = @intCustomerId
+		,ysnIngredientAvailable=@ysnIngredientAvailable
 		,dtmLastModified = GetDate()
 		,intLastModifiedUserId = @intUserId
 		,intConcurrencyId=@intConcurrencyId
