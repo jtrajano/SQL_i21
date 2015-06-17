@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryAdjustmentSplitLotChange for generating the items to post, new item qty]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryAdjustmentLotMerge for generating the items to post, new item UOM]
 AS
 BEGIN
 	-- Item Ids
@@ -143,7 +143,7 @@ BEGIN
 		EXEC testi21Database.[Fake open fiscal year and accounting periods];
 		EXEC testi21Database.[Fake data for inventory adjustment table];
 
-		DECLARE @intTransactionId AS INT = 10
+		DECLARE @intTransactionId AS INT = 11
 		DECLARE @intUserId AS INT = 1
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
@@ -163,6 +163,11 @@ BEGIN
 		INTO expected
 		FROM @TestItemToPost
 
+		-- Change the all split lot into lot merge type
+		UPDATE dbo.tblICInventoryAdjustment
+		SET intAdjustmentType = @ADJUSTMENT_TYPE_LotMerge
+		WHERE intAdjustmentType = @ADJUSTMENT_TYPE_SplitLot	
+
 		INSERT INTO expected (
 				intItemId			
 				,intItemLocationId	
@@ -176,7 +181,7 @@ BEGIN
 				,intCurrencyId  
 				,dblExchangeRate  
 				,intTransactionId  
-				,intTransactionDetailId 
+				,intTransactionDetailId	
 				,strTransactionId  
 				,intTransactionTypeId  
 				,intLotId 
@@ -186,18 +191,18 @@ BEGIN
 		SELECT 	intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
 				,intItemUOMId			= @ManualGrains_PoundUOM
-				,dtmDate				= '05/20/2015'
-				,dblQty					= -500.000000 * 55.115500	-- Convert 500 25KgBagUOM to Pound
-				,dblUOMQty				= 1							-- Unit qty of @ManualGrains_PoundUOM
+				,dtmDate				= '05/21/2015'
+				,dblQty					= -500.000000 * 55.1155	-- Convert 500 25KgBag to Pound
+				,dblUOMQty				= 1						-- Unit qty of @ManualGrains_PoundUOM
 				,dblCost				= 2.500000
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 
 				,dblExchangeRate		= 1
-				,intTransactionId		= 10
-				,intTransactionDetailId = 9
-				,strTransactionId		= 'ADJ-10'
-				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_SplitLot
+				,intTransactionId		= 11
+				,intTransactionDetailId	= 10
+				,strTransactionId		= 'ADJ-11'
+				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_LotMerge
 				,intLotId				= @ManualLotGrains_Lot_100001
 				,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
 				,intStorageLocationId	= @StorageSilo_RM_DL
@@ -206,18 +211,18 @@ BEGIN
 				intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
 				,intItemUOMId			= @ManualGrains_PoundUOM
-				,dtmDate				= '05/20/2015'
-				,dblQty					= 500.000000 * 55.115500	-- Since weight does not change, use the same weight as the Qty. 
-				,dblUOMQty				= 1							-- Unit qty of @ManualGrains_PoundUOM
-				,dblCost				= 2.50						-- Since weight remains the same, the cost will remain the same. 
+				,dtmDate				= '05/21/2015'
+				,dblQty					= 500 * 55.1155			-- Since we are receiving it by weight (POUND), then use the same values from 25KgBag
+				,dblUOMQty				= 1						-- Use unit qty of @ManualGrains_PoundUOM
+				,dblCost				= 2.50
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 
 				,dblExchangeRate		= 1
-				,intTransactionId		= 10
-				,intTransactionDetailId = 9
-				,strTransactionId		= 'ADJ-10'
-				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_SplitLot
+				,intTransactionId		= 11
+				,intTransactionDetailId	= 10
+				,strTransactionId		= 'ADJ-11'
+				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_LotMerge
 				,intLotId				= 4
 				,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
 				,intStorageLocationId	= @StorageSilo_RM_DL
@@ -245,7 +250,7 @@ BEGIN
 			,intSubLocationId
 			,intStorageLocationId
 		) 
-		EXEC dbo.uspICPostInventoryAdjustmentSplitLotChange
+		EXEC dbo.uspICPostInventoryAdjustmentLotMerge
 			@intTransactionId
 	 		,@intUserId
 	END 

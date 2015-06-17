@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICInventoryAdjustment_CreatePostSplitLot]
+﻿CREATE PROCEDURE [dbo].[uspICInventoryAdjustment_CreatePostLotMove]
 	-- Parameters for filtering:
 	@intItemId AS INT
 	,@dtmDate AS DATETIME 
@@ -188,7 +188,7 @@ BEGIN
 	)
 	SELECT	intLocationId				= @intLocationId
 			,dtmAdjustmentDate			= dbo.fnRemoveTimeOnDate(@dtmDate) 
-			,intAdjustmentType			= @ADJUSTMENT_TYPE_SplitLot
+			,intAdjustmentType			= @ADJUSTMENT_TYPE_LotMove
 			,strAdjustmentNo			= @strAdjustmentNo
 			,strDescription				= ''
 			,intSort					= 1

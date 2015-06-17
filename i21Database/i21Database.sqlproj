@@ -1717,6 +1717,10 @@
     <Build Include="dbo\Stored Procedures\uspGLRegenerateAccountNames.sql" />
     <Build Include="dbo\Tables\tblARCustomerApplicatorLicense.sql" />
     <Build Include="dbo\Views\vyuEMCustomerApplicator.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentLotMerge.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentLotMove.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostLotMerge.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostLotMove.sql" />	
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

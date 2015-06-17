@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryAdjustmentSplitLotChange for generating the items to post, new item qty]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryAdjustmentLotMerge for generating the items to post, new split qty]
 AS
 BEGIN
 	-- Item Ids
@@ -130,13 +130,13 @@ BEGIN
 			,@ADJUSTMENT_TYPE_LotMove AS INT = 8
 
 	DECLARE @INVENTORY_ADJUSTMENT_QuantityChange AS INT = 10
-			,@INVENTORY_ADJUSTMENT_UOMChange AS INT = 14
-			,@INVENTORY_ADJUSTMENT_ItemChange AS INT = 15
-			,@INVENTORY_ADJUSTMENT_LotStatusChange AS INT = 16
-			,@INVENTORY_ADJUSTMENT_SplitLot AS INT = 17
-			,@INVENTORY_ADJUSTMENT_ExpiryDateChange AS INT = 18
-			,@INVENTORY_ADJUSTMENT_LotMerge AS INT = 19
-			,@INVENTORY_ADJUSTMENT_LotMove AS INT = 20
+		,@INVENTORY_ADJUSTMENT_UOMChange AS INT = 14
+		,@INVENTORY_ADJUSTMENT_ItemChange AS INT = 15
+		,@INVENTORY_ADJUSTMENT_LotStatusChange AS INT = 16
+		,@INVENTORY_ADJUSTMENT_SplitLot AS INT = 17
+		,@INVENTORY_ADJUSTMENT_ExpiryDateChange AS INT = 18
+		,@INVENTORY_ADJUSTMENT_LotMerge AS INT = 19
+		,@INVENTORY_ADJUSTMENT_LotMove AS INT = 20
 
 	-- Arrange 
 	BEGIN 
@@ -163,6 +163,11 @@ BEGIN
 		INTO expected
 		FROM @TestItemToPost
 
+		-- Change the all split lot into lot merge type
+		UPDATE dbo.tblICInventoryAdjustment
+		SET intAdjustmentType = @ADJUSTMENT_TYPE_LotMerge
+		WHERE intAdjustmentType = @ADJUSTMENT_TYPE_SplitLot	
+
 		INSERT INTO expected (
 				intItemId			
 				,intItemLocationId	
@@ -176,7 +181,7 @@ BEGIN
 				,intCurrencyId  
 				,dblExchangeRate  
 				,intTransactionId  
-				,intTransactionDetailId 
+				,intTransactionDetailId  
 				,strTransactionId  
 				,intTransactionTypeId  
 				,intLotId 
@@ -187,8 +192,8 @@ BEGIN
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
 				,intItemUOMId			= @ManualGrains_PoundUOM
 				,dtmDate				= '05/20/2015'
-				,dblQty					= -500.000000 * 55.115500	-- Convert 500 25KgBagUOM to Pound
-				,dblUOMQty				= 1							-- Unit qty of @ManualGrains_PoundUOM
+				,dblQty					= -500.000000 * 55.115500		-- Convert 25KgBagUOM to Pound
+				,dblUOMQty				= 1								-- Unit qty of @ManualGrains_PoundUOM
 				,dblCost				= 2.500000
 				,dblValue				= 0
 				,dblSalesPrice			= 0
@@ -197,7 +202,7 @@ BEGIN
 				,intTransactionId		= 10
 				,intTransactionDetailId = 9
 				,strTransactionId		= 'ADJ-10'
-				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_SplitLot
+				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_LotMerge
 				,intLotId				= @ManualLotGrains_Lot_100001
 				,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
 				,intStorageLocationId	= @StorageSilo_RM_DL
@@ -207,9 +212,9 @@ BEGIN
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
 				,intItemUOMId			= @ManualGrains_PoundUOM
 				,dtmDate				= '05/20/2015'
-				,dblQty					= 500.000000 * 55.115500	-- Since weight does not change, use the same weight as the Qty. 
-				,dblUOMQty				= 1							-- Unit qty of @ManualGrains_PoundUOM
-				,dblCost				= 2.50						-- Since weight remains the same, the cost will remain the same. 
+				,dblQty					= 500.000000 * 55.115500		-- Since weight remains the same, use the same weight as the qty. 
+				,dblUOMQty				= 1								-- Unit qty of @ManualGrains_PoundUOM
+				,dblCost				= 2.50							-- Since weight remains the same, use the same cost. 
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 
@@ -217,7 +222,7 @@ BEGIN
 				,intTransactionId		= 10
 				,intTransactionDetailId = 9
 				,strTransactionId		= 'ADJ-10'
-				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_SplitLot
+				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_LotMerge
 				,intLotId				= 4
 				,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
 				,intStorageLocationId	= @StorageSilo_RM_DL
@@ -238,14 +243,14 @@ BEGIN
 			,intCurrencyId  
 			,dblExchangeRate  
 			,intTransactionId  
-			,intTransactionDetailId 
+			,intTransactionDetailId  
 			,strTransactionId  
 			,intTransactionTypeId  
 			,intLotId 
 			,intSubLocationId
 			,intStorageLocationId
 		) 
-		EXEC dbo.uspICPostInventoryAdjustmentSplitLotChange
+		EXEC dbo.uspICPostInventoryAdjustmentLotMerge
 			@intTransactionId
 	 		,@intUserId
 	END 

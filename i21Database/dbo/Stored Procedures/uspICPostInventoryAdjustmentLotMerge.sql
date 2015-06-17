@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspICPostInventoryAdjustmentSplitLotChange  
+﻿CREATE PROCEDURE uspICPostInventoryAdjustmentLotMerge  
 	@intTransactionId INT = NULL
 	,@intUserId INT
 AS  
@@ -144,7 +144,7 @@ BEGIN
 			,intTransactionId		= Header.intInventoryAdjustmentId
 			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
 			,strTransactionId		= Header.strAdjustmentNo
-			,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_SplitLot
+			,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_LotMerge
 			,intLotId				= Detail.intLotId
 			,intSubLocationId		= Detail.intSubLocationId
 			,intStorageLocationId	= Detail.intStorageLocationId
@@ -288,7 +288,7 @@ BEGIN
 			,intTransactionId		= Header.intInventoryAdjustmentId
 			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
 			,strTransactionId		= Header.strAdjustmentNo
-			,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_SplitLot
+			,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_LotMerge
 			,intLotId				= Detail.intNewLotId
 			,intSubLocationId		= Detail.intSubLocationId
 			,intStorageLocationId	= Detail.intStorageLocationId

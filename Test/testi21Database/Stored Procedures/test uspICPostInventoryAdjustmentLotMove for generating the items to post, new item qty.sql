@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryAdjustmentSplitLotChange for generating the items to post, new item qty]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryAdjustmentLotMove for generating the items to post, new item qty]
 AS
 BEGIN
 	-- Item Ids
@@ -130,13 +130,13 @@ BEGIN
 			,@ADJUSTMENT_TYPE_LotMove AS INT = 8
 
 	DECLARE @INVENTORY_ADJUSTMENT_QuantityChange AS INT = 10
-			,@INVENTORY_ADJUSTMENT_UOMChange AS INT = 14
-			,@INVENTORY_ADJUSTMENT_ItemChange AS INT = 15
-			,@INVENTORY_ADJUSTMENT_LotStatusChange AS INT = 16
-			,@INVENTORY_ADJUSTMENT_SplitLot AS INT = 17
-			,@INVENTORY_ADJUSTMENT_ExpiryDateChange AS INT = 18
-			,@INVENTORY_ADJUSTMENT_LotMerge AS INT = 19
-			,@INVENTORY_ADJUSTMENT_LotMove AS INT = 20
+		,@INVENTORY_ADJUSTMENT_UOMChange AS INT = 14
+		,@INVENTORY_ADJUSTMENT_ItemChange AS INT = 15
+		,@INVENTORY_ADJUSTMENT_LotStatusChange AS INT = 16
+		,@INVENTORY_ADJUSTMENT_SplitLot AS INT = 17
+		,@INVENTORY_ADJUSTMENT_ExpiryDateChange AS INT = 18
+		,@INVENTORY_ADJUSTMENT_LotMerge AS INT = 19
+		,@INVENTORY_ADJUSTMENT_LotMove AS INT = 20
 
 	-- Arrange 
 	BEGIN 
@@ -162,6 +162,11 @@ BEGIN
 		SELECT * 
 		INTO expected
 		FROM @TestItemToPost
+
+		-- Change the all split lot into lot merge type
+		UPDATE dbo.tblICInventoryAdjustment
+		SET intAdjustmentType = @ADJUSTMENT_TYPE_LotMove
+		WHERE intAdjustmentType = @ADJUSTMENT_TYPE_SplitLot	
 
 		INSERT INTO expected (
 				intItemId			
@@ -197,7 +202,7 @@ BEGIN
 				,intTransactionId		= 10
 				,intTransactionDetailId = 9
 				,strTransactionId		= 'ADJ-10'
-				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_SplitLot
+				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_LotMove
 				,intLotId				= @ManualLotGrains_Lot_100001
 				,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
 				,intStorageLocationId	= @StorageSilo_RM_DL
@@ -217,7 +222,7 @@ BEGIN
 				,intTransactionId		= 10
 				,intTransactionDetailId = 9
 				,strTransactionId		= 'ADJ-10'
-				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_SplitLot
+				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_LotMove
 				,intLotId				= 4
 				,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
 				,intStorageLocationId	= @StorageSilo_RM_DL
@@ -245,7 +250,7 @@ BEGIN
 			,intSubLocationId
 			,intStorageLocationId
 		) 
-		EXEC dbo.uspICPostInventoryAdjustmentSplitLotChange
+		EXEC dbo.uspICPostInventoryAdjustmentLotMove
 			@intTransactionId
 	 		,@intUserId
 	END 

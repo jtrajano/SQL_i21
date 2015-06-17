@@ -39,7 +39,7 @@ USING	(
 				,name = 'Produce'
 		UNION ALL 
 		SELECT	id = 10
-				,name = 'Inventory Adjustment'
+				,name = 'Inventory Adjustment - Quantity Change'
 		UNION ALL 
 		SELECT	id = 11
 				,name = 'Build Assembly'
@@ -49,6 +49,29 @@ USING	(
 		UNION ALL 
 		SELECT	id = 13
 				,name = 'Inventory Transfer with Shipment'
+		UNION ALL 
+		SELECT	id = 14
+				,name = 'Inventory Adjustment - UOM Change'
+		UNION ALL 
+		SELECT	id = 15
+				,name = 'Inventory Adjustment - Item Change'
+		UNION ALL 
+		SELECT	id = 16
+				,name = 'Inventory Adjustment - Lot Status Change'
+		UNION ALL 
+		SELECT	id = 17
+				,name = 'Inventory Adjustment - Split Lot'
+		UNION ALL 
+		SELECT	id = 18
+				,name = 'Inventory Adjustment - Expiry Date Change'
+		UNION ALL 
+		SELECT	id = 19
+				,name = 'Inventory Adjustment - Lot Merge'
+		UNION ALL 
+		SELECT	id = 20
+				,name = 'Inventory Adjustment - Lot Move'
+
+
 
 ) AS InventoryTransactionTypeHardValues
 	ON  InventoryTransactionTypes.intTransactionTypeId = InventoryTransactionTypeHardValues.id
