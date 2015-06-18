@@ -647,7 +647,7 @@
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostCustody for the basics.sql" />
     <Build Include="testi21Database\Fake Data\Fake data for item uom table, bushel scenario.sql" />
     <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for converting Bushel to LB.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCustody for a successful unpost.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCustody on Lot Costing for a successful unpost.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostCustody for an unsuccessful unpost.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostQtyChange for a successful post with positive qty.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICInventoryAdjustment_CreatePostSplitLot for a successful post with new weight.sql" />
@@ -695,6 +695,12 @@
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInFIFOCustody from positive to positive.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryTransactionInCustody for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryTransactionInCustody for inserting the supplied arguments.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCustody on FIFO Costing for a successful unpost.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOInFromCustody for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOInFromCustody for add-sell-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOInFromCustody for add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOutFromCustody for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostFIFOOutFromCustody for add-sell-unpost sell.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

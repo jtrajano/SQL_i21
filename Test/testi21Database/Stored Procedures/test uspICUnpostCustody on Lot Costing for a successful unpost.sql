@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostCustody for a successful unpost]
+﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostCustody on Lot Costing for a successful unpost]
 AS
 BEGIN
 	-- Arrange 

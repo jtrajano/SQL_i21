@@ -108,9 +108,7 @@ WHERE	Changes.Action = 'UPDATE'
 UPDATE	fifoBucket
 SET		fifoBucket.dblStockOut = ISNULL(fifoBucket.dblStockOut, 0) - Reversal.dblQty
 FROM	dbo.tblICInventoryFIFOInCustody fifoBucket INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
-			ON fifoBucket.intTransactionId = Reversal.intTransactionId
-			AND fifoBucket.strTransactionId = Reversal.strTransactionId
-			AND fifoBucket.intInventoryFIFOInCustodyId = Reversal.intInventoryCostBucketInCustodyId
+			ON fifoBucket.intInventoryFIFOInCustodyId = Reversal.intInventoryCostBucketInCustodyId
 WHERE	ISNULL(fifoBucket.ysnIsUnposted, 0) = 0
 ;
 

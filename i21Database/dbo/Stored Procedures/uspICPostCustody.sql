@@ -150,7 +150,7 @@ BEGIN
 				,@intTransactionTypeId
 				,@intUserId
 	END
-	ELSE IF (@CostingMethod = @FIFO)
+	ELSE IF @CostingMethod IN (@FIFO, @AVERAGECOST)
 	BEGIN 
 		EXEC dbo.uspICPostFIFOInCustody
 				@intItemId
@@ -174,7 +174,8 @@ BEGIN
 				,@intUserId
 	END 
 
-
+	-- TODO: LIFO
+	
 	ELSE 
 	BEGIN 
 		DECLARE @strItemNo AS NVARCHAR(50)
