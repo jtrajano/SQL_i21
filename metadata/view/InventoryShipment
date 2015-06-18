@@ -1729,7 +1729,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter130",
+                                                                    "name": "filter125",
                                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -1826,15 +1826,15 @@
                                                                             "        width: 100",
                                                                             "\t},",
                                                                             "    {",
-                                                                            "\t\tdataIndex: 'strUnitMeasure',",
-                                                                            "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Item UOM Id',",
+                                                                            "\t\tdataIndex: 'dblQtyOrdered',",
+                                                                            "\t\tdataType: 'float',",
+                                                                            "\t\ttext: 'Order Qty',",
                                                                             "        width: 100",
                                                                             "\t},",
                                                                             "    {",
-                                                                            "\t\tdataIndex: 'dblQtyOrdered',",
-                                                                            "\t\tdataType: 'float',",
-                                                                            "\t\ttext: 'Qty Ordered',",
+                                                                            "\t\tdataIndex: 'strUnitMeasure',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Order UOM',",
                                                                             "        width: 100",
                                                                             "\t},",
                                                                             "    {",
@@ -2110,6 +2110,48 @@
                                                             "designerId": "d6202670-4ed7-44d4-9d08-528bdb1a0289"
                                                         },
                                                         {
+                                                            "type": "Ext.grid.column.Number",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "align": "right",
+                                                                "dataIndex": "dblQuantity",
+                                                                "dataType": "numeric",
+                                                                "format": "0,000.##",
+                                                                "itemId": "colOrderQty",
+                                                                "text": "Order Qty",
+                                                                "width": 80
+                                                            },
+                                                            "name": "MyNumberColumn",
+                                                            "designerId": "9c007814-decb-48ce-a077-237ccfcff662",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "dataType",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "strDescription",
+                                                                "itemId": "colOrderUOM",
+                                                                "text": "Order UOM",
+                                                                "width": 100
+                                                            },
+                                                            "name": "MyColumn45",
+                                                            "designerId": "db9b69ee-90bd-41f9-9909-1e1cdd5e07ee"
+                                                        },
+                                                        {
                                                             "type": "Ext.grid.column.Column",
                                                             "reference": {
                                                                 "name": "columns",
@@ -2239,48 +2281,6 @@
                                                                     ]
                                                                 }
                                                             ]
-                                                        },
-                                                        {
-                                                            "type": "Ext.grid.column.Number",
-                                                            "reference": {
-                                                                "name": "columns",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "align": "right",
-                                                                "dataIndex": "dblQuantity",
-                                                                "dataType": "numeric",
-                                                                "format": "0,000.##",
-                                                                "itemId": "colOrderQty",
-                                                                "text": "Order Qty",
-                                                                "width": 80
-                                                            },
-                                                            "name": "MyNumberColumn",
-                                                            "designerId": "9c007814-decb-48ce-a077-237ccfcff662",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "dataType",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            "type": "Ext.grid.column.Column",
-                                                            "reference": {
-                                                                "name": "columns",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "dataIndex": "strDescription",
-                                                                "itemId": "colOrderUOM",
-                                                                "text": "Order UOM",
-                                                                "width": 100
-                                                            },
-                                                            "name": "MyColumn45",
-                                                            "designerId": "db9b69ee-90bd-41f9-9909-1e1cdd5e07ee"
                                                         },
                                                         {
                                                             "type": "Ext.grid.column.Number",
@@ -2690,7 +2690,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter131",
+                                                                    "name": "filter126",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2717,7 +2717,7 @@
                                                                 "dataIndex": "strLotID",
                                                                 "flex": null,
                                                                 "itemId": "colLotID",
-                                                                "text": "Lot ID",
+                                                                "text": "Lot Number",
                                                                 "width": 110
                                                             },
                                                             "name": "MyColumn1",
@@ -2863,7 +2863,7 @@
                                                             "userConfig": {
                                                                 "dataIndex": "strUOM",
                                                                 "itemId": "colLotUOM",
-                                                                "text": "UOM",
+                                                                "text": "Lot UOM",
                                                                 "width": 100
                                                             },
                                                             "name": "MyColumn5",
@@ -2880,7 +2880,7 @@
                                                                 "dataIndex": "strWeightUOM",
                                                                 "flex": null,
                                                                 "itemId": "colLotWeightUOM",
-                                                                "text": "Weight UOM",
+                                                                "text": "Lot Wgt UOM",
                                                                 "width": 100
                                                             },
                                                             "name": "MyColumn11",
@@ -2899,7 +2899,7 @@
                                                                 "dataType": "numeric",
                                                                 "format": "0,000",
                                                                 "itemId": "colGrossWeight",
-                                                                "text": "Gross Wgt",
+                                                                "text": "Gross",
                                                                 "width": 100
                                                             },
                                                             "name": "MyNumberColumn5",
@@ -2940,7 +2940,7 @@
                                                                 "dataType": "numeric",
                                                                 "format": "0,000",
                                                                 "itemId": "colTareWeight",
-                                                                "text": "Tare Wgt",
+                                                                "text": "Tare",
                                                                 "width": 100
                                                             },
                                                             "name": "MyNumberColumn13",
@@ -2981,7 +2981,7 @@
                                                                 "dataType": "numeric",
                                                                 "format": "0,000",
                                                                 "itemId": "colNetWeight",
-                                                                "text": "Net Wgt",
+                                                                "text": "Net",
                                                                 "width": 100
                                                             },
                                                             "name": "MyNumberColumn14",
@@ -3153,7 +3153,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter132",
+                                                                    "name": "filter127",
                                                                     "designerId": "86706668-0ec9-4541-b78b-d162dd783738",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3407,7 +3407,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter133",
+                                                    "name": "filter128",
                                                     "designerId": "b4c3f458-33e0-4b9e-972f-6281744af6d7",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3584,7 +3584,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging11",
                     "designerId": "50e4b10d-d851-464f-867c-a04204dccf1e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

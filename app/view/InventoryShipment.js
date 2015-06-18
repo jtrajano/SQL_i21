@@ -242,7 +242,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         items: [
                                                             {
                                                                 xtype: 'gridcombobox',
-                                                                flex: 1,
                                                                 columns: [
                                                                     {
                                                                         dataIndex: 'intOrderType',
@@ -256,6 +255,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         flex: 1
                                                                     }
                                                                 ],
+                                                                flex: 1,
                                                                 itemId: 'cboOrderType',
                                                                 margin: '0 5 0 0',
                                                                 fieldLabel: 'Order Type',
@@ -266,7 +266,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             },
                                                             {
                                                                 xtype: 'gridcombobox',
-                                                                flex: 1.3,
                                                                 columns: [
                                                                     {
                                                                         dataIndex: 'intSourceType',
@@ -280,6 +279,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         flex: 1
                                                                     }
                                                                 ],
+                                                                flex: 1.3,
                                                                 itemId: 'cboSourceType',
                                                                 margin: '0 5 0 0',
                                                                 fieldLabel: 'Source Type',
@@ -871,15 +871,15 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                     width: 100
                                                                                 },
                                                                                 {
-                                                                                    dataIndex: 'strUnitMeasure',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Item UOM Id',
+                                                                                    dataIndex: 'dblQtyOrdered',
+                                                                                    dataType: 'float',
+                                                                                    text: 'Order Qty',
                                                                                     width: 100
                                                                                 },
                                                                                 {
-                                                                                    dataIndex: 'dblQtyOrdered',
-                                                                                    dataType: 'float',
-                                                                                    text: 'Qty Ordered',
+                                                                                    dataIndex: 'strUnitMeasure',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Order UOM',
                                                                                     width: 100
                                                                                 },
                                                                                 {
@@ -1052,6 +1052,23 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         text: 'Description'
                                                                     },
                                                                     {
+                                                                        xtype: 'numbercolumn',
+                                                                        dataType: 'numeric',
+                                                                        itemId: 'colOrderQty',
+                                                                        width: 80,
+                                                                        align: 'right',
+                                                                        dataIndex: 'dblQuantity',
+                                                                        text: 'Order Qty',
+                                                                        format: '0,000.##'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colOrderUOM',
+                                                                        width: 100,
+                                                                        dataIndex: 'strDescription',
+                                                                        text: 'Order UOM'
+                                                                    },
+                                                                    {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colSubLocation',
                                                                         width: 100,
@@ -1115,23 +1132,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                             displayField: 'strOwnershipType',
                                                                             valueField: 'strOwnershipType'
                                                                         }
-                                                                    },
-                                                                    {
-                                                                        xtype: 'numbercolumn',
-                                                                        dataType: 'numeric',
-                                                                        itemId: 'colOrderQty',
-                                                                        width: 80,
-                                                                        align: 'right',
-                                                                        dataIndex: 'dblQuantity',
-                                                                        text: 'Order Qty',
-                                                                        format: '0,000.##'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colOrderUOM',
-                                                                        width: 100,
-                                                                        dataIndex: 'strDescription',
-                                                                        text: 'Order UOM'
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
@@ -1323,7 +1323,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         itemId: 'colLotID',
                                                                         width: 110,
                                                                         dataIndex: 'strLotID',
-                                                                        text: 'Lot ID',
+                                                                        text: 'Lot Number',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
@@ -1390,14 +1390,14 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         itemId: 'colLotUOM',
                                                                         width: 100,
                                                                         dataIndex: 'strUOM',
-                                                                        text: 'UOM'
+                                                                        text: 'Lot UOM'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colLotWeightUOM',
                                                                         width: 100,
                                                                         dataIndex: 'strWeightUOM',
-                                                                        text: 'Weight UOM'
+                                                                        text: 'Lot Wgt UOM'
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
@@ -1406,7 +1406,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         width: 100,
                                                                         align: 'right',
                                                                         dataIndex: 'dblGrossWeight',
-                                                                        text: 'Gross Wgt',
+                                                                        text: 'Gross',
                                                                         format: '0,000',
                                                                         editor: {
                                                                             xtype: 'numeric'
@@ -1419,7 +1419,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         width: 100,
                                                                         align: 'right',
                                                                         dataIndex: 'dblTareWeight',
-                                                                        text: 'Tare Wgt',
+                                                                        text: 'Tare',
                                                                         format: '0,000',
                                                                         editor: {
                                                                             xtype: 'numeric'
@@ -1432,7 +1432,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         width: 100,
                                                                         align: 'right',
                                                                         dataIndex: 'dblNetWeight',
-                                                                        text: 'Net Wgt',
+                                                                        text: 'Net',
                                                                         format: '0,000'
                                                                     },
                                                                     {
