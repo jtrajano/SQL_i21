@@ -28,18 +28,24 @@ BEGIN
 			,@CurrentDate AS dtmBusinessDate
 			,@intShiftId AS intRunningShift
 			,GetDate() as dtmCurrentDate
+			,0 as intMachineId
+			,'' as strMachineName
 	End
 	Else
 	Begin
-		SELECT intManufacturingProcessId
-			,strProcessName
-			,strDescription
+		SELECT P.intManufacturingProcessId
+			,P.strProcessName
+			,P.strDescription
 			,@intCompanyLocationId AS intCompanyLocationId
 			,@strLocationName AS strLocationName
 			,@CurrentDate AS dtmBusinessDate
 			,@intShiftId AS intRunningShift
 			,GetDate() as dtmCurrentDate
-		FROM dbo.tblMFManufacturingProcess
+			,M.intMachineId 
+			,M.strName as strMachineName
+		FROM dbo.tblMFManufacturingProcess P
+		Left JOIN tblMFManufacturingProcessMachine PM on P.intManufacturingProcessId=PM.intManufacturingProcessId and PM.ysnDefault=1
+		Left JOIN tblMFMachine M on M.intMachineId=PM.intMachineId
 		WHERE strProcessName = @strProcessName
 	End
 END
