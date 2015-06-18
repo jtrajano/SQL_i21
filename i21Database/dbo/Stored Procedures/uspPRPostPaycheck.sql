@@ -276,6 +276,14 @@ IF (@isSuccessful <> 0)
 					,dtmPosted = (SELECT TOP 1 dtmDate FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId) 
 				WHERE strPaycheckId = @strTransactionId
 				SET @isSuccessful = 1
+
+				/* Update the Employee Time Off Hours */
+				UPDATE tblPREmployeeTimeOff
+					SET	dblHoursUsed = dblHoursUsed + A.dblHours
+					FROM tblPRPaycheckEarning A
+					WHERE tblPREmployeeTimeOff.intEmployeeTimeOffId = A.intEmployeeTimeOffId
+						AND tblPREmployeeTimeOff.intEmployeeId = @intEmployeeId
+						AND A.intPaycheckId = @intPaycheckId
 			END
 		ELSE
 			BEGIN 
@@ -284,6 +292,14 @@ IF (@isSuccessful <> 0)
 					ysnPosted = 0
 					,dtmPosted = NULL 
 				WHERE strPaycheckId = @strTransactionId
+
+				/* Update the Employee Time Off Hours */
+				UPDATE tblPREmployeeTimeOff
+					SET	dblHoursUsed = dblHoursUsed - A.dblHours
+					FROM tblPRPaycheckEarning A
+					WHERE tblPREmployeeTimeOff.intEmployeeTimeOffId = A.intEmployeeTimeOffId
+						AND tblPREmployeeTimeOff.intEmployeeId = @intEmployeeId
+						AND A.intPaycheckId = @intPaycheckId
 
 				SELECT @intTransactionId = intTransactionId FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId
 				DELETE FROM tblCMBankTransactionDetail WHERE intTransactionId = @intTransactionId
