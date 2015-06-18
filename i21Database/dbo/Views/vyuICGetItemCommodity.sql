@@ -12,7 +12,11 @@ SELECT Item.intItemId
 , strBrand = Brand.strBrandCode
 , Item.intManufacturerId
 , strManufacturer = Manufacturer.strManufacturer
-, strTracking = strInventoryTracking
+, Item.intCategoryId
+, strCategory = Category.strCategoryCode
+, ItemLocation.intItemLocationId
+, ItemLocation.intLocationId
+, strTracking = Item.strInventoryTracking
 , Item.intCommodityId
 , Commodity.strCommodityCode
 , Item.intOriginId
@@ -30,7 +34,9 @@ SELECT Item.intItemId
 FROM tblICItem Item
 	LEFT JOIN tblICBrand Brand ON Brand.intBrandId = Item.intBrandId
 	LEFT JOIN tblICManufacturer Manufacturer ON Manufacturer.intManufacturerId = Item.intManufacturerId
+	LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
 	INNER JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
+	LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId
 	LEFT JOIN tblICCommodityAttribute Origin ON Origin.intCommodityAttributeId = Item.intOriginId
 	LEFT JOIN tblICCommodityAttribute ProductType ON ProductType.intCommodityAttributeId = Item.intProductTypeId
 	LEFT JOIN tblICCommodityAttribute Region ON Region.intCommodityAttributeId = Item.intRegionId
