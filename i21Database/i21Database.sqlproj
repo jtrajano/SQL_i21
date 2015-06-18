@@ -1725,6 +1725,7 @@
     <Build Include="dbo\Tables\tblARCustomerFailedImport.sql" />
     <Build Include="dbo\Tables\tblCTContractPlan.sql" />
     <Build Include="dbo\Tables\tblCTContractPlanDetail.sql" />
+    <Build Include="dbo\Tables\tblSMCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
