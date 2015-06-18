@@ -2518,7 +2518,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sample Ty
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Sample Type', N'Quality', @QualityParentMenuId, N'Sample Type', N'Activity', N'Screen', N'Quality.view.SampleType', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Quality.view.SampleType' WHERE strMenuName = 'Attribute' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'Quality.view.SampleType' WHERE strMenuName = 'Sample Type' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'List' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
