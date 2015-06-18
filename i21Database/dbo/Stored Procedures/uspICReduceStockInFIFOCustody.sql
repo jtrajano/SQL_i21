@@ -1,7 +1,8 @@
 ﻿/*
-	This stored procedure either inserts or updates a fifo cost bucket. 
+	This stored procedure updates a fifo cost bucket for custody items. 
 	When new stock is coming OUT, it will try to determine if any postive stock it can update and decrease. 
-	Otherwise, it will insert a negative cost bucket. 
+
+	Negative stock is not allowed for custody items. 
 */
 
 CREATE PROCEDURE [dbo].[uspICReduceStockInFIFOCustody]
@@ -18,7 +19,6 @@ CREATE PROCEDURE [dbo].[uspICReduceStockInFIFOCustody]
 	,@CostUsed AS NUMERIC(18,6) OUTPUT 
 	,@SourceInventoryFIFOInCustodyId AS INT OUTPUT
 AS
-
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
@@ -28,56 +28,44 @@ SET ANSI_WARNINGS OFF
 -- Ensure the qty is a positive number
 SET @dblQty = ABS(@dblQty)
 
--- Initialize the remaining qty, cost used, Lot id to NULL
+-- Initialize the remaining qty, cost used, fifo id to NULL
 SET @RemainingQty = NULL;
 SET @CostUsed = NULL;
 SET @SourceInventoryFIFOInCustodyId = NULL;
 
-DECLARE @intInventoryFIFOInCustodyId AS INT 
+-- Update the TOP top record of the cost bucket. 
+UPDATE  TOP(1) fifo_bucket_custody		
+SET		fifo_bucket_custody.dblStockOut = ISNULL(fifo_bucket_custody.dblStockOut, 0) 
+					+ CASE	WHEN (fifo_bucket_custody.dblStockIn - fifo_bucket_custody.dblStockOut) >= @dblQty THEN @dblQty
+							ELSE (fifo_bucket_custody.dblStockIn - fifo_bucket_custody.dblStockOut) 
+					END 
 
--- Validate for negative stock 
-SELECT TOP  1 
-		@intInventoryFIFOInCustodyId = intInventoryFIFOInCustodyId
-FROM	dbo.tblICInventoryFIFOInCustody FIFO_Custody
-WHERE	FIFO_Custody.intItemId = @intItemId
-		AND FIFO_Custody.intItemLocationId = @intItemLocationId
-		AND FIFO_Custody.intItemUOMId = @intItemUOMId
-		AND ISNULL(FIFO_Custody.dblStockIn, 0) - ISNULL(FIFO_Custody.dblStockOut, 0) - ISNULL(@dblQty, 0) > 0
+		,fifo_bucket_custody.intConcurrencyId = ISNULL(fifo_bucket_custody.intConcurrencyId, 0) + 1
 
-IF @intInventoryFIFOInCustodyId IS NULL 
+		-- update the remaining qty
+		,@RemainingQty = 
+					CASE	WHEN (fifo_bucket_custody.dblStockIn - fifo_bucket_custody.dblStockOut) >= @dblQty THEN 0
+							ELSE (fifo_bucket_custody.dblStockIn - fifo_bucket_custody.dblStockOut) - @dblQty
+					END
+
+		-- retrieve the cost from the fifo bucket. 
+		,@CostUsed = fifo_bucket_custody.dblCost
+
+		-- retrieve the id of the matching fifo bucket 
+		,@SourceInventoryFIFOInCustodyId = fifo_bucket_custody.intInventoryFIFOInCustodyId
+
+FROM	dbo.tblICInventoryFIFOInCustody fifo_bucket_custody
+WHERE	fifo_bucket_custody.intItemId = @intItemId
+		AND fifo_bucket_custody.intItemLocationId = @intItemLocationId
+		AND fifo_bucket_custody.intItemUOMId = @intItemUOMId
+		AND (fifo_bucket_custody.dblStockIn - fifo_bucket_custody.dblStockOut) > 0 
+		AND dbo.fnDateGreaterThanEquals(@dtmDate, fifo_bucket_custody.dtmDate) = 1
+
+IF @SourceInventoryFIFOInCustodyId IS NULL 
 BEGIN 
 	-- Negative stock quantity is not allowed.
 	RAISERROR(50029, 11, 1) 
 	GOTO _Exit;
 END 
-
--- Get the available stock in custody. 
-SELECT TOP  1 
-		@intInventoryFIFOInCustodyId = intInventoryFIFOInCustodyId
-FROM	dbo.tblICInventoryFIFOInCustody FIFO_Custody
-WHERE	FIFO_Custody.intItemId = @intItemId
-		AND FIFO_Custody.intItemLocationId = @intItemLocationId
-		AND FIFO_Custody.intItemUOMId = @intItemUOMId
-		AND (FIFO_Custody.dblStockIn - FIFO_Custody.dblStockOut) > 0 
-
-UPDATE	FIFO_Custody
-SET		FIFO_Custody.dblStockOut = ISNULL(FIFO_Custody.dblStockOut, 0) 
-					+ CASE	WHEN (FIFO_Custody.dblStockIn - FIFO_Custody.dblStockOut) >= @dblQty THEN @dblQty
-							ELSE (FIFO_Custody.dblStockIn - FIFO_Custody.dblStockOut) 
-					END 
-		,FIFO_Custody.intConcurrencyId = ISNULL(FIFO_Custody.intConcurrencyId, 0) + 1
-
-		-- update the remaining qty
-		,@RemainingQty = 
-					CASE	WHEN (FIFO_Custody.dblStockIn - FIFO_Custody.dblStockOut) >= @dblQty THEN 0
-							ELSE (FIFO_Custody.dblStockIn - FIFO_Custody.dblStockOut) - @dblQty
-					END
-
-		-- retrieve the cost from the Lot bucket. 
-		,@CostUsed = FIFO_Custody.dblCost
-FROM	dbo.tblICInventoryFIFOInCustody FIFO_Custody
-WHERE	intInventoryFIFOInCustodyId = @intInventoryFIFOInCustodyId;
-
-SET @SourceInventoryFIFOInCustodyId = @intInventoryFIFOInCustodyId; 
 
 _Exit: 

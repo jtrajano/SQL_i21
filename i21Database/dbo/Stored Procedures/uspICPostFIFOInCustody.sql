@@ -76,7 +76,7 @@ BEGIN
 			DECLARE @dblComputedReduceQty AS NUMERIC(18,6) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
 			DECLARE @dblCostToUse AS NUMERIC(18,6) = ISNULL(@CostUsed, @dblCost)
 
-			EXEC [dbo].[uspICPostInventoryInCustodyTransaction]
+			EXEC [dbo].[uspICPostInventoryTransactionInCustody]
 					@intItemId = @intItemId
 					,@intItemLocationId = @intItemLocationId
 					,@intItemUOMId = @intItemUOMId
@@ -124,7 +124,7 @@ BEGIN
 			,@NewInventoryCostBucketCustodyId OUTPUT 
 		IF @@ERROR <> 0 GOTO _Exit
 
-		EXEC [dbo].[uspICPostInventoryInCustodyTransaction]
+		EXEC [dbo].[uspICPostInventoryTransactionInCustody]
 			@intItemId = @intItemId
 			,@intItemLocationId = @intItemLocationId
 			,@intItemUOMId = @intItemUOMId
