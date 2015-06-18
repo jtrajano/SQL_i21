@@ -90,19 +90,19 @@ FROM	(
 WHERE	Changes.Action = 'UPDATE'
 ;
 
-IF NOT EXISTS (
-	SELECT TOP 1 1 
-	FROM	dbo.tblICInventoryFIFOInCustody fifoBucket INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
-				ON fifoBucket.intTransactionId = Reversal.intTransactionId
-				AND fifoBucket.strTransactionId = Reversal.strTransactionId
-				AND fifoBucket.intInventoryFIFOInCustodyId = Reversal.intInventoryCostBucketInCustodyId
-	WHERE	ISNULL(FIFOBucket.ysnIsUnposted, 0) = 0
-)
-BEGIN 
-	-- Negative stock quantity is not allowed.
-	RAISERROR(50029, 11, 1) 
-	GOTO _Exit;
-END 
+--IF NOT EXISTS (
+--	SELECT TOP 1 1 
+--	FROM	dbo.tblICInventoryFIFOInCustody fifoBucket INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
+--				ON fifoBucket.intTransactionId = Reversal.intTransactionId
+--				AND fifoBucket.strTransactionId = Reversal.strTransactionId
+--				AND fifoBucket.intInventoryFIFOInCustodyId = Reversal.intInventoryCostBucketInCustodyId
+--	WHERE	ISNULL(FIFOBucket.ysnIsUnposted, 0) = 0
+--)
+--BEGIN 
+--	-- Negative stock quantity is not allowed.
+--	RAISERROR(50029, 11, 1) 
+--	GOTO _Exit;
+--END 
 
 -- If there are fifo out records, update the costing bucket. Return the out-qty back to the bucket where it came from. 
 UPDATE	fifoBucket
@@ -111,7 +111,7 @@ FROM	dbo.tblICInventoryFIFOInCustody fifoBucket INNER JOIN #tmpInventoryTransact
 			ON fifoBucket.intTransactionId = Reversal.intTransactionId
 			AND fifoBucket.strTransactionId = Reversal.strTransactionId
 			AND fifoBucket.intInventoryFIFOInCustodyId = Reversal.intInventoryCostBucketInCustodyId
-WHERE	ISNULL(FIFOBucket.ysnIsUnposted, 0) = 0
+WHERE	ISNULL(fifoBucket.ysnIsUnposted, 0) = 0
 ;
 
 _Exit:

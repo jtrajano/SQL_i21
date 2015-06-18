@@ -78,9 +78,17 @@ BEGIN
 END 
 
 -----------------------------------------------------------------------------------------------------------------------------
--- TODO: Call the FIFO unpost stored procedures. This is also used in Average Costing.
+-- Call the FIFO unpost stored procedures. This is also used in Average Costing.
 -----------------------------------------------------------------------------------------------------------------------------
+BEGIN 
+	EXEC dbo.uspICUnpostFIFOInFromCustody
+		@strTransactionId
+		,@intTransactionId
 
+	EXEC dbo.uspICUnpostFIFOOutFromCustody
+		@strTransactionId
+		,@intTransactionId
+END
 -----------------------------------------------------------------------------------------------------------------------------
 -- TODO: Call the LIFO unpost stored procedures 
 -----------------------------------------------------------------------------------------------------------------------------

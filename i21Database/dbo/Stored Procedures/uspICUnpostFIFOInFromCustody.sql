@@ -86,19 +86,19 @@ FROM	(
 WHERE	Changes.Action = 'UPDATE'
 ;
 
-IF NOT EXISTS (
-	SELECT TOP 1 1 
-	FROM	dbo.tblICInventoryFIFOInCustody fifoBucket INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
-				ON fifoBucket.intTransactionId = Reversal.intTransactionId
-				AND fifoBucket.strTransactionId = Reversal.strTransactionId
-				AND fifoBucket.intInventoryFIFOInCustodyId = Reversal.intInventoryCostBucketInCustodyId
-	WHERE	ISNULL(fifoBucket.dblStockOut, 0) = 0
-)
-BEGIN 
-	-- Negative stock quantity is not allowed.
-	RAISERROR(50029, 11, 1) 
-	GOTO _Exit;
-END 
+--IF NOT EXISTS (
+--	SELECT TOP 1 1 
+--	FROM	dbo.tblICInventoryFIFOInCustody fifoBucket INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
+--				ON fifoBucket.intTransactionId = Reversal.intTransactionId
+--				AND fifoBucket.strTransactionId = Reversal.strTransactionId
+--				AND fifoBucket.intInventoryFIFOInCustodyId = Reversal.intInventoryCostBucketInCustodyId
+--	WHERE	ISNULL(fifoBucket.dblStockOut, 0) = 0
+--)
+--BEGIN 
+--	-- Negative stock quantity is not allowed.
+--	RAISERROR(50029, 11, 1) 
+--	GOTO _Exit;
+--END 
 
 -- Plug the Out-qty so that it can't be used for future out-transactions. 
 -- Mark the record as unposted too. 
