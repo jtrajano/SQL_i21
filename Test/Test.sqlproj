@@ -690,6 +690,9 @@
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFOCustody is successful with positive stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFOCustody is successful up to zero stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFOCustody to failed for negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInFIFOCustody for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInFIFOCustody from zero to positive.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInFIFOCustody from positive to positive.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

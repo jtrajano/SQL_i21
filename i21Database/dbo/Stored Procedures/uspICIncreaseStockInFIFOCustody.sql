@@ -1,8 +1,6 @@
 ﻿/*
-	This stored procedure will add a cost bucket to the non-company owned stocks. 
+	This stored procedure will add a cost bucket for custody items. 
 	It does not accept or process negative stocks. Non-company owned stocks does not accept negative stocks. 
-	
-	Parameters: 
 
 */
 CREATE PROCEDURE dbo.uspICIncreaseStockInFIFOCustody

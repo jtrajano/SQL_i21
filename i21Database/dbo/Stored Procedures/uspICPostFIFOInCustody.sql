@@ -47,7 +47,7 @@ FROM	dbo.tblICInventoryTransactionType
 WHERE	intTransactionTypeId = @intTransactionTypeId
 
 -------------------------------------------------
--- 1. Process the Lot Cost buckets
+-- 1. Process the FIFO Cost buckets
 -------------------------------------------------
 BEGIN 
 	-- Reduce stock 
