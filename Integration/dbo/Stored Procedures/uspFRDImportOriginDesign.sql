@@ -691,6 +691,7 @@ BEGIN
 			UPDATE tblFRRowDesign SET strBalanceSide = '''' WHERE strBalanceSide IS NULL
 			UPDATE tblFRRowDesign SET strRelatedRows = '''' WHERE strRelatedRows IS NULL
 			UPDATE tblFRRowDesign SET strAccountsUsed = '''' WHERE strAccountsUsed IS NULL
+			UPDATE tblFRRowDesign SET strBalanceSide = '''' WHERE strRowType = ''Row Calculation''
  
 			SELECT * INTO #TempRowDesign FROM tblFRRowDesign where intRowId = @introwiddet order by intRefNo
  

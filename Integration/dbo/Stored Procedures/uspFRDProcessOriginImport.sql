@@ -36,7 +36,7 @@ BEGIN
 			DELETE #TempOrigin WHERE glfsf_no = @ID
 		END
 		
-		SELECT @GUID
+		SELECT @result = @GUID
 
 	')
 
