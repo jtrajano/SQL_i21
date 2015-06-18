@@ -1717,6 +1717,7 @@
     <Build Include="dbo\Stored Procedures\uspGLRegenerateAccountNames.sql" />
     <Build Include="dbo\Tables\tblARCustomerApplicatorLicense.sql" />
     <Build Include="dbo\Views\vyuEMCustomerApplicator.sql" />
+    <Build Include="dbo\Tables\tblARCustomerFailedImport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
