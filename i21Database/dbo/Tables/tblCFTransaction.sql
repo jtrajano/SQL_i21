@@ -1,5 +1,5 @@
 ﻿CREATE TABLE [dbo].[tblCFTransaction] (
-    [intTransactionId]             INT             NULL,
+    [intTransactionId]             INT             IDENTITY (1, 1) NOT NULL,
     [intNetworkId]                 INT             NULL,
     [dtmTransactionDate]           DATETIME        NULL,
     [intTransTime]                 INT             NULL,
@@ -203,6 +203,7 @@
     [strTransactionType]           NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [dblTransferCost]              NUMERIC (18, 6) NULL,
     [ysnCASite]                    BIT             NULL,
-    [intConcurrencyId]             INT             CONSTRAINT [DF_tblCFTransaction_intConcurrencyId] DEFAULT ((1)) NULL
+    [intConcurrencyId]             INT             CONSTRAINT [DF_tblCFTransaction_intConcurrencyId] DEFAULT ((1)) NOT NULL,
+    CONSTRAINT [PK_tblCFTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC)
 );
 
