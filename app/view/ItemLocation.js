@@ -38,6 +38,7 @@ Ext.define('Inventory.view.ItemLocation', {
     collapsible: true,
     iconCls: 'small-icon-i21',
     title: 'Item Location',
+    modal: true,
 
     items: [
         {
