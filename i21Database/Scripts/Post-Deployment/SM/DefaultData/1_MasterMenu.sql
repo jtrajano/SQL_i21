@@ -2510,43 +2510,43 @@ SELECT @QualityParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName =
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Attribute' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Attribute', N'Quality', @QualityParentMenuId, N'Attribute', N'Activity', N'Screen', N'Quality.view.Attribute', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Attribute', N'Quality', @QualityParentMenuId, N'Attribute', N'Activity', N'Screen', N'Quality.view.Attribute', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Quality.view.Attribute' WHERE strMenuName = 'Attribute' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sample Type' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Sample Type', N'Quality', @QualityParentMenuId, N'Sample Type', N'Activity', N'Screen', N'Quality.view.SampleType', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Sample Type', N'Quality', @QualityParentMenuId, N'Sample Type', N'Activity', N'Screen', N'Quality.view.SampleType', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Quality.view.SampleType' WHERE strMenuName = 'Sample Type' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'List' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'List', N'Quality', @QualityParentMenuId, N'List', N'Activity', N'Screen', N'Quality.view.List', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+	VALUES (N'List', N'Quality', @QualityParentMenuId, N'List', N'Activity', N'Screen', N'Quality.view.List', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Quality.view.List' WHERE strMenuName = 'List' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Property' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Property', N'Quality', @QualityParentMenuId, N'Property', N'Activity', N'Screen', N'Quality.view.Property', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Property', N'Quality', @QualityParentMenuId, N'Property', N'Activity', N'Screen', N'Quality.view.Property', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Quality.view.Property' WHERE strMenuName = 'Property' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Test' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Test', N'Quality', @QualityParentMenuId, N'Test', N'Activity', N'Screen', N'Quality.view.Test', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Test', N'Quality', @QualityParentMenuId, N'Test', N'Activity', N'Screen', N'Quality.view.Test', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Quality.view.Test' WHERE strMenuName = 'Test' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quality Template' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Quality Template', N'Quality', @QualityParentMenuId, N'Quality Template', N'Activity', N'Screen', N'Quality.view.QualityTemplate', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Quality Template', N'Quality', @QualityParentMenuId, N'Quality Template', N'Activity', N'Screen', N'Quality.view.QualityTemplate', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Quality.view.QualityTemplate' WHERE strMenuName = 'Quality Template' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quality Sample' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Quality Sample', N'Quality', @QualityParentMenuId, N'Quality Sample', N'Maintenance', N'Screen', N'Quality.view.QualitySample', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Quality Sample', N'Quality', @QualityParentMenuId, N'Quality Sample', N'Maintenance', N'Screen', N'Quality.view.QualitySample', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Quality.view.QualitySample' WHERE strMenuName = 'Quality Sample' AND strModuleName = 'Quality' AND intParentMenuID = @QualityParentMenuId
 
