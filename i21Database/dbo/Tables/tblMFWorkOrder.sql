@@ -60,6 +60,7 @@
 	intSubLocationId INT,
 	ysnIngredientAvailable bit CONSTRAINT [DF_tblMFWorkOrder_ysnIngredientAvailable] DEFAULT 1,
 	intCountStatusId INT NULL, 
+	intDepartmentId int,
 	CONSTRAINT [PK_tblMFWorkOrder_intWorkOrderId] PRIMARY KEY (intWorkOrderId),
 	CONSTRAINT [UQ_tblMFWorkOrder_strWorkOrderNo] UNIQUE ([strWorkOrderNo]),
 	CONSTRAINT [FK_tblMFWorkOrder_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
@@ -72,4 +73,5 @@
 	CONSTRAINT [FK_tblMFWorkOrder_tblMFManufacturingProcess_intManufacturingProcessId] FOREIGN KEY([intManufacturingProcessId]) REFERENCES dbo.tblMFManufacturingProcess (intManufacturingProcessId),
 	CONSTRAINT FK_tblMFWorkOrder_tblSMCompanyLocationSubLocation_intSubLocationId FOREIGN KEY(intSubLocationId) REFERENCES dbo.tblSMCompanyLocationSubLocation (intCompanyLocationSubLocationId),
 	CONSTRAINT [FK_tblMFWorkOrder_intCountStatusId_tblMFWorkOrderStatus_intStatusId] FOREIGN KEY ([intCountStatusId]) REFERENCES [tblMFWorkOrderStatus]([intStatusId]), 
+	CONSTRAINT [FK_tblMFWorkOrder_tblMFDepartment_intDepartmentId] FOREIGN KEY ([intDepartmentId]) REFERENCES [tblMFDepartment]([intDepartmentId])
 )
