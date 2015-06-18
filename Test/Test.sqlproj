@@ -693,6 +693,8 @@
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInFIFOCustody for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInFIFOCustody from zero to positive.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInFIFOCustody from positive to positive.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryTransactionInCustody for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryTransactionInCustody for inserting the supplied arguments.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">
