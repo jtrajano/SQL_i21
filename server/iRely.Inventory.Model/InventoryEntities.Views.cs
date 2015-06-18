@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets5e9d0ac3d051a1958de8b8579eb83c490af2b5f4ec1f58b58be43bf980b01f50))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsec6dbe593df1d088975c09eba87f306098525e43822bb07cba05511bd5da4cc8))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets5e9d0ac3d051a1958de8b8579eb83c490af2b5f4ec1f58b58be43bf980b01f50 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsec6dbe593df1d088975c09eba87f306098525e43822bb07cba05511bd5da4cc8 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "5e9d0ac3d051a1958de8b8579eb83c490af2b5f4ec1f58b58be43bf980b01f50"; }
+            get { return "ec6dbe593df1d088975c09eba87f306098525e43822bb07cba05511bd5da4cc8"; }
         }
 
         /// <summary>
@@ -8909,7 +8909,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemCommodity
-        [CodeFirstDatabaseSchema.vyuICGetItemCommodity](T1.vyuICGetItemCommodity_intItemId, T1.vyuICGetItemCommodity_strItemNo, T1.vyuICGetItemCommodity_strType, T1.vyuICGetItemCommodity_strDescription, T1.vyuICGetItemCommodity_strStatus, T1.vyuICGetItemCommodity_strModelNo, T1.vyuICGetItemCommodity_strLotTracking, T1.vyuICGetItemCommodity_intBrandId, T1.vyuICGetItemCommodity_strBrand, T1.vyuICGetItemCommodity_intManufacturerId, T1.vyuICGetItemCommodity_strManufacturer, T1.vyuICGetItemCommodity_strTracking, T1.vyuICGetItemCommodity_intCommodityId, T1.vyuICGetItemCommodity_strCommodityCode, T1.vyuICGetItemCommodity_intOriginId, T1.vyuICGetItemCommodity_strOrigin, T1.vyuICGetItemCommodity_intProductTypeId, T1.vyuICGetItemCommodity_strProductType, T1.vyuICGetItemCommodity_intRegionId, T1.vyuICGetItemCommodity_strRegion, T1.vyuICGetItemCommodity_intSeasonId, T1.vyuICGetItemCommodity_strSeason, T1.vyuICGetItemCommodity_intClassVarietyId, T1.vyuICGetItemCommodity_strClassVariety, T1.vyuICGetItemCommodity_intProductLineId, T1.vyuICGetItemCommodity_strProductLine)
+        [CodeFirstDatabaseSchema.vyuICGetItemCommodity](T1.vyuICGetItemCommodity_intItemId, T1.vyuICGetItemCommodity_strItemNo, T1.vyuICGetItemCommodity_strType, T1.vyuICGetItemCommodity_strDescription, T1.vyuICGetItemCommodity_strStatus, T1.vyuICGetItemCommodity_strModelNo, T1.vyuICGetItemCommodity_strLotTracking, T1.vyuICGetItemCommodity_intBrandId, T1.vyuICGetItemCommodity_strBrand, T1.vyuICGetItemCommodity_intManufacturerId, T1.vyuICGetItemCommodity_strManufacturer, T1.vyuICGetItemCommodity_intCategoryId, T1.vyuICGetItemCommodity_strCategory, T1.vyuICGetItemCommodity_intItemLocationId, T1.vyuICGetItemCommodity_intLocationId, T1.vyuICGetItemCommodity_strTracking, T1.vyuICGetItemCommodity_intCommodityId, T1.vyuICGetItemCommodity_strCommodityCode, T1.vyuICGetItemCommodity_intOriginId, T1.vyuICGetItemCommodity_strOrigin, T1.vyuICGetItemCommodity_intProductTypeId, T1.vyuICGetItemCommodity_strProductType, T1.vyuICGetItemCommodity_intRegionId, T1.vyuICGetItemCommodity_strRegion, T1.vyuICGetItemCommodity_intSeasonId, T1.vyuICGetItemCommodity_strSeason, T1.vyuICGetItemCommodity_intClassVarietyId, T1.vyuICGetItemCommodity_strClassVariety, T1.vyuICGetItemCommodity_intProductLineId, T1.vyuICGetItemCommodity_strProductLine)
     FROM (
         SELECT 
             T.intItemId AS vyuICGetItemCommodity_intItemId, 
@@ -8923,6 +8923,10 @@ namespace Edm_EntityMappingGeneratedViews
             T.strBrand AS vyuICGetItemCommodity_strBrand, 
             T.intManufacturerId AS vyuICGetItemCommodity_intManufacturerId, 
             T.strManufacturer AS vyuICGetItemCommodity_strManufacturer, 
+            T.intCategoryId AS vyuICGetItemCommodity_intCategoryId, 
+            T.strCategory AS vyuICGetItemCommodity_strCategory, 
+            T.intItemLocationId AS vyuICGetItemCommodity_intItemLocationId, 
+            T.intLocationId AS vyuICGetItemCommodity_intLocationId, 
             T.strTracking AS vyuICGetItemCommodity_strTracking, 
             T.intCommodityId AS vyuICGetItemCommodity_intCommodityId, 
             T.strCommodityCode AS vyuICGetItemCommodity_strCommodityCode, 
@@ -8951,7 +8955,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemCommodities
-        [iRely.Inventory.Model.vyuICGetItemCommodity](T1.vyuICGetItemCommodity_intItemId, T1.vyuICGetItemCommodity_strItemNo, T1.vyuICGetItemCommodity_strType, T1.vyuICGetItemCommodity_strDescription, T1.vyuICGetItemCommodity_strStatus, T1.vyuICGetItemCommodity_strModelNo, T1.vyuICGetItemCommodity_strLotTracking, T1.vyuICGetItemCommodity_intBrandId, T1.vyuICGetItemCommodity_strBrand, T1.vyuICGetItemCommodity_intManufacturerId, T1.vyuICGetItemCommodity_strManufacturer, T1.vyuICGetItemCommodity_strTracking, T1.vyuICGetItemCommodity_intCommodityId, T1.vyuICGetItemCommodity_strCommodityCode, T1.vyuICGetItemCommodity_intOriginId, T1.vyuICGetItemCommodity_strOrigin, T1.vyuICGetItemCommodity_intProductTypeId, T1.vyuICGetItemCommodity_strProductType, T1.vyuICGetItemCommodity_intRegionId, T1.vyuICGetItemCommodity_strRegion, T1.vyuICGetItemCommodity_intSeasonId, T1.vyuICGetItemCommodity_strSeason, T1.vyuICGetItemCommodity_intClassVarietyId, T1.vyuICGetItemCommodity_strClassVariety, T1.vyuICGetItemCommodity_intProductLineId, T1.vyuICGetItemCommodity_strProductLine)
+        [iRely.Inventory.Model.vyuICGetItemCommodity](T1.vyuICGetItemCommodity_intItemId, T1.vyuICGetItemCommodity_strItemNo, T1.vyuICGetItemCommodity_strType, T1.vyuICGetItemCommodity_strDescription, T1.vyuICGetItemCommodity_strStatus, T1.vyuICGetItemCommodity_strModelNo, T1.vyuICGetItemCommodity_strLotTracking, T1.vyuICGetItemCommodity_intBrandId, T1.vyuICGetItemCommodity_strBrand, T1.vyuICGetItemCommodity_intManufacturerId, T1.vyuICGetItemCommodity_strManufacturer, T1.vyuICGetItemCommodity_intCategoryId, T1.vyuICGetItemCommodity_strCategory, T1.vyuICGetItemCommodity_intItemLocationId, T1.vyuICGetItemCommodity_intLocationId, T1.vyuICGetItemCommodity_strTracking, T1.vyuICGetItemCommodity_intCommodityId, T1.vyuICGetItemCommodity_strCommodityCode, T1.vyuICGetItemCommodity_intOriginId, T1.vyuICGetItemCommodity_strOrigin, T1.vyuICGetItemCommodity_intProductTypeId, T1.vyuICGetItemCommodity_strProductType, T1.vyuICGetItemCommodity_intRegionId, T1.vyuICGetItemCommodity_strRegion, T1.vyuICGetItemCommodity_intSeasonId, T1.vyuICGetItemCommodity_strSeason, T1.vyuICGetItemCommodity_intClassVarietyId, T1.vyuICGetItemCommodity_strClassVariety, T1.vyuICGetItemCommodity_intProductLineId, T1.vyuICGetItemCommodity_strProductLine)
     FROM (
         SELECT 
             T.intItemId AS vyuICGetItemCommodity_intItemId, 
@@ -8965,6 +8969,10 @@ namespace Edm_EntityMappingGeneratedViews
             T.strBrand AS vyuICGetItemCommodity_strBrand, 
             T.intManufacturerId AS vyuICGetItemCommodity_intManufacturerId, 
             T.strManufacturer AS vyuICGetItemCommodity_strManufacturer, 
+            T.intCategoryId AS vyuICGetItemCommodity_intCategoryId, 
+            T.strCategory AS vyuICGetItemCommodity_strCategory, 
+            T.intItemLocationId AS vyuICGetItemCommodity_intItemLocationId, 
+            T.intLocationId AS vyuICGetItemCommodity_intLocationId, 
             T.strTracking AS vyuICGetItemCommodity_strTracking, 
             T.intCommodityId AS vyuICGetItemCommodity_intCommodityId, 
             T.strCommodityCode AS vyuICGetItemCommodity_strCommodityCode, 

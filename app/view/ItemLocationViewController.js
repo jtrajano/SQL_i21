@@ -140,7 +140,7 @@ Ext.define('Inventory.view.ItemLocationViewController', {
                 store: '{shipVia}'
             },
             cboNegativeInventory: {
-                value: '{current.intNegativeInventory}',
+                value: '{current.intAllowNegativeInventory}',
                 store: '{negativeInventory}'
             },
             txtReorderPoint: '{current.dblReorderPoint}',
@@ -222,7 +222,7 @@ Ext.define('Inventory.view.ItemLocationViewController', {
         if (app.DefaultLocation > 0)
             record.set('intLocationId', app.DefaultLocation);
         record.set('intCostingMethod', 1);
-        record.set('intNegativeInventory', 3);
+        record.set('intAllowNegativeInventory', 3);
         action(record);
     }
 

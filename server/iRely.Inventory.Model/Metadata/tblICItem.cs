@@ -247,6 +247,10 @@ namespace iRely.Inventory.Model
         public string strBrand { get; set; }
         public int? intManufacturerId { get; set; }
         public string strManufacturer { get; set; }
+        public int? intCategoryId { get; set; }
+        public string strCategory { get; set; }
+        public int? intItemLocationId { get; set; }
+        public int? intLocationId { get; set; }
         public string strTracking { get; set; }
         public int? intCommodityId { get; set; }
         public string strCommodityCode { get; set; }
