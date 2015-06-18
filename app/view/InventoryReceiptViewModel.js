@@ -389,6 +389,18 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
             else
                 return true;
+        },
+        hasItemSelection: function(get){
+            if (get('grdInventoryReceipt.selection')) {
+                if (get('grdInventoryReceipt.selection').dummy === true) {
+                    return true
+                }
+                else {
+                    return false;
+                }
+            }
+            else
+                return true;
         }
     }
 

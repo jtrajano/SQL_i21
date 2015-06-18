@@ -752,6 +752,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 ],
                                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                                     selType: 'checkboxmodel',
+                                                                    allowDeselect: true,
                                                                     mode: 'SINGLE'
                                                                 }),
                                                                 columns: [
@@ -1202,9 +1203,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
-                                                                        dataIndex: 'dblUnitCost',
                                                                         itemId: 'colUnitCost',
                                                                         width: 85,
+                                                                        dataIndex: 'dblUnitCost',
                                                                         text: 'Unit Cost',
                                                                         editor: {
                                                                             xtype: 'numberfield',
@@ -1242,9 +1243,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     {
                                                                         xtype: 'numbercolumn',
                                                                         summaryType: 'sum',
-                                                                        dataIndex: 'dblGrossMargin',
                                                                         itemId: 'colGrossMargin',
                                                                         width: 100,
+                                                                        dataIndex: 'dblGrossMargin',
                                                                         text: 'Gross Margin'
                                                                     },
                                                                     {

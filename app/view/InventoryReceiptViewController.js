@@ -267,6 +267,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colGrossMargin: 'dblGrossMargin'
             },
 
+            pnlLotTracking: {
+                hidden: '{hasItemSelection}'
+            },
             grdLotTracking: {
                 readOnly: '{current.ysnPosted}',
                 colLotId: {
@@ -488,7 +491,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 'tblSMFreightTerm,' +
                 'tblSMCompanyLocation,' +
                 'tblICInventoryReceiptItems.vyuICGetInventoryReceiptItem,' +
-                'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots,' +
+                'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.tblICLot,' +
+                'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.tblICItemUOM.tblICUnitMeasure,' +
+                'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.tblICStorageLocation,' +
                 'tblICInventoryReceiptCharges.vyuICGetInventoryReceiptCharge',
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Receipt',
@@ -737,7 +742,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             return;
 
         var win = combo.up('window');
-        var pnlLotTracking = win.down('#pnlLotTracking');
         var grid = combo.up('grid');
         var grdLotTracking = win.down('#grdLotTracking');
         var plugin = grid.getPlugin('cepItem');
@@ -796,7 +800,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             switch (records[0].get('strLotTracking')){
                 case 'Yes - Serial Number':
                 case 'Yes - Manual':
-                    pnlLotTracking.setHidden(false);
                     var newLot = Ext.create('Inventory.model.ReceiptItemLot', {
                         intInventoryReceiptItemId: current.get('intInventoryReceiptItemId') || current.get('strClientId'),
                         strLotId: '',
@@ -813,10 +816,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         dblStatedTarePerUnit: ''
                     });
                     current.tblICInventoryReceiptItemLots().add(newLot);
-                    break;
-
-                default :
-                    pnlLotTracking.setHidden(true);
                     break;
             }
         }
@@ -1077,7 +1076,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (success === true) {
             var me = this;
             var win = me.view;
-            win.context.data.load();
+            var paging = win.down('ipagingstatusbar');
+            var grd = win.down('#grdInventoryReceipt');
+
+            grd.getSelectionModel().deselectAll();
+            paging.doRefresh();
         }
         else {
             iRely.Functions.showCustomDialog(iRely.Functions.dialogType.ERROR, iRely.Functions.dialogButtonType.OK, message);
@@ -1278,7 +1281,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
         var win = combo.up('window');
         var grid = combo.up('grid');
-        var pnlLotTracking = win.down('#pnlLotTracking');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
         var po = records[0];
@@ -1313,16 +1315,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
 
         win.viewModel.data.currentReceiptItem = current;
-
-        switch(po.get('strLotTracking')) {
-            case 'Yes - Serial Number':
-            case 'Yes - Manual':
-                pnlLotTracking.setHidden(false);
-                break;
-            default:
-                pnlLotTracking.setHidden(true);
-                break;
-        }
     },
 
     onItemGridColumnBeforeRender: function(column) {
@@ -2092,8 +2084,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (selModel) {
             var win = selModel.view.grid.up('window');
             var vm = win.viewModel;
-            var pnlLotTracking = win.down('#pnlLotTracking');
-            var grdLotTracking = win.down('#grdLotTracking');
 
             if (selected.length > 0) {
                 var current = selected[0];
@@ -2110,13 +2100,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             else {
                 vm.data.currentReceiptItem = null;
             }
-            if (vm.data.currentReceiptItem !== null){
-                pnlLotTracking.setHidden(false);
-            }
-            else {
-                pnlLotTracking.setHidden(true);
-            }
-
         }
     },
 

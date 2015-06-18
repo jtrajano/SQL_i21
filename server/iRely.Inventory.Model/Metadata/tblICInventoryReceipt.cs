@@ -744,16 +744,16 @@ namespace iRely.Inventory.Model
                 _weightUOM = value;
             }
         }
-        private decimal? _lotConv;
+        private decimal _lotConv;
         [NotMapped]
-        public decimal? dblLotUOMConvFactor
+        public decimal dblLotUOMConvFactor
         {
             get
             {
                 if (tblICItemUOM != null)
-                    return tblICItemUOM.dblUnitQty;
+                    return tblICItemUOM.dblUnitQty ?? 0;
                 else
-                    return null;
+                    return _lotConv;
             }
             set
             {
