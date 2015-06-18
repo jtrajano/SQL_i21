@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARGetItemTaxes]
 	@ItemId				INT
 	,@LocationId		INT	
-	,@CustomerId		INT		
+	,@CustomerId		INT
+	,@TransactionDate	DATETIME		
 AS
 
 --DECLARE 	
@@ -273,8 +274,8 @@ AS
 				,TC.[intTaxCodeId]
 				,TC.[intTaxClassId]				
 				,TC.[strTaxableByOtherTaxes]
-				,TC.[strCalculationMethod] 
-				,TC.[numRate]
+				,ISNULL(TCR.[strCalculationMethod], 'Unit') AS [strCalculationMethod]
+				,ISNULL(TCR.[numRate], 0.00)				AS [numRate]
 				,0.00 AS [dblTax]
 				,0.00 AS [dblAdjustedTax]				
 				,TC.[intSalesTaxAccountId]								
@@ -283,6 +284,21 @@ AS
 				,TC.[strTaxCode] 				
 			FROM
 				tblSMTaxCode TC
+			LEFT OUTER JOIN
+				(
+					SELECT TOP 1
+						 [intTaxCodeId]
+						,[numRate]
+						,[strCalculationMethod]
+					FROM
+						tblSMTaxCodeRate
+					WHERE
+						CAST([dtmEffectiveDate] AS DATE) <= CAST(@TransactionDate AS DATE)
+					ORDER BY
+						 [dtmEffectiveDate]	ASC
+						,[numRate]			DESC
+				) TCR
+					ON TC.[intTaxCodeId] = TCR.[intTaxCodeId]
 			INNER JOIN
 				tblSMTaxGroupCode TGC
 					ON TC.[intTaxCodeId] = TGC.[intTaxCodeId] 

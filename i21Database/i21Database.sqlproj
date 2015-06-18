@@ -1645,6 +1645,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetContainerByContainerType.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetActualItemByProduct.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetAttributeByManufacturingProcess.sql" />
+    <Build Include="dbo\Tables\tblSMTaxCodeRate.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostLotInFromCustody.sql" />
