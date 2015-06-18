@@ -514,6 +514,7 @@ namespace iRely.Inventory.Model
                 _lotId = value;
             }
         }
+        private decimal _lotQty;
         [NotMapped]
         public decimal dblLotQty
         {
@@ -522,9 +523,14 @@ namespace iRely.Inventory.Model
                 if (tblICLot != null)
                     return tblICLot.dblQty ?? 0;
                 else
-                    return 0;
+                    return _lotQty;
+            }
+            set
+            {
+                _lotQty = value;
             }
         }
+        private decimal _lotUOMConv;
         [NotMapped]
         public decimal dblLotItemUOMConv
         {
@@ -533,7 +539,11 @@ namespace iRely.Inventory.Model
                 if (tblICLot != null)
                     return tblICLot.dblItemUOMConv ?? 0;
                 else
-                    return 0;
+                    return _lotUOMConv;
+            }
+            set
+            {
+                _lotUOMConv = value;
             }
         }
         private string _uom;
@@ -555,6 +565,7 @@ namespace iRely.Inventory.Model
                 _uom = value;
             }
         }
+        private decimal _itemUOMConv;
         [NotMapped]
         public decimal dblItemUOMConv
         {
@@ -563,7 +574,11 @@ namespace iRely.Inventory.Model
                 if (tblICItemUOM != null)
                     return tblICItemUOM.dblUnitQty ?? 0;
                 else
-                    return 0;
+                    return _itemUOMConv;
+            }
+            set
+            {
+                _itemUOMConv = value;
             }
         }
         private string _weightUOM;
@@ -585,6 +600,7 @@ namespace iRely.Inventory.Model
                 _weightUOM = value;
             }
         }
+        private decimal _weightConv;
         [NotMapped]
         public decimal dblWeightItemUOMConv
         {
@@ -593,9 +609,14 @@ namespace iRely.Inventory.Model
                 if (WeightUOM != null)
                     return WeightUOM.dblUnitQty ?? 0;
                 else
-                    return 0;
+                    return _weightConv;
+            }
+            set
+            {
+                _weightConv = value;
             }
         }
+        private decimal _availableQty;
         [NotMapped]
         public decimal dblAvailableQty
         {
@@ -604,7 +625,11 @@ namespace iRely.Inventory.Model
                 if (tblICLot != null)
                     return tblICLot.dblAvailableQty ?? 0;
                 else
-                    return 0;
+                    return _availableQty;
+            }
+            set
+            {
+                _availableQty = value;
             }
         }
 
