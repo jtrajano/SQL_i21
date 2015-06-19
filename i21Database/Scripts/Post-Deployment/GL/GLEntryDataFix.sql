@@ -1,16 +1,18 @@
 ﻿
 --=====================================================================================================================================
 -- 	Normalize ysnSystem (default = false | 0)
+--  Default Cash Flow to 'NONE'
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 GO	
-	PRINT N'BEGIN Normalize ysnSystem'
+	PRINT N'BEGIN Normalize ysnSystem and strCashFlow'
 GO
 
 UPDATE tblGLAccount SET ysnSystem = 0 WHERE ysnSystem is NULL
+UPDATE tblGLAccount SET strCashFlow = 'NONE' WHERE strCashFlow IS NULL
 
 GO	
-	PRINT N'END Normalize ysnSystem'
+	PRINT N'END Normalize ysnSystem and strCashFlow'
 GO
 
 --=====================================================================================================================================

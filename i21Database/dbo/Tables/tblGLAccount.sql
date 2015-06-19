@@ -25,6 +25,9 @@
 	CONSTRAINT [FK_tblGLAccount_tblSMCurrencyExchangeRateType] FOREIGN KEY([intCurrencyExchangeRateTypeId])REFERENCES [dbo].[tblSMCurrencyExchangeRateType] ([intCurrencyExchangeRateTypeId])
 );
 GO
+ALTER TABLE [dbo].[tblGLAccount] ADD  CONSTRAINT [DF_tblGLAccount_strCashFlow]  DEFAULT (N'NONE') FOR [strCashFlow]
+GO
+
 CREATE NONCLUSTERED INDEX [IX_tblGLAccount_strAccountId]
     ON [dbo].[tblGLAccount]([strAccountId] ASC);
 GO
