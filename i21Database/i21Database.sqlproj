@@ -1737,6 +1737,9 @@
     <Build Include="dbo\Tables\tblFRArchive.sql" />
     <Build Include="dbo\Tables\tblCFTransactionTax.sql" />
     <Build Include="dbo\Views\vyuCFTaxes.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGShipmentUpdatePurchaseContractReceivedQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionCertificateReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
