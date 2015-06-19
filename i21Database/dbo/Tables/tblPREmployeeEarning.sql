@@ -8,6 +8,7 @@
     [intAccountId]         INT             NULL,
     [strW2Code]            NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [intEmployeeTimeOffId] INT             NULL,
+	[intPayGroupId]        INT             NULL,
     [ysnDefault]           BIT             DEFAULT ((1)) NOT NULL,
     [intSort]              INT             NULL,
     [intConcurrencyId]     INT             DEFAULT ((1)) NULL,
@@ -132,3 +133,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPREmployeeEarning',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Pay Group Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPREmployeeEarning',
+    @level2type = N'COLUMN',
+    @level2name = N'intPayGroupId'
