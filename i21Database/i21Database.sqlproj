@@ -1734,6 +1734,7 @@
     <Build Include="dbo\Views\vyuARGetLostQuoteReasons.sql" />
     <Build Include="dbo\Views\vyuARTaxReport.sql" />
     <Build Include="dbo\Views\vyuEMEntityTransaction.sql" />
+    <Build Include="dbo\Tables\tblFRArchive.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
