@@ -12,14 +12,7 @@ SELECT DISTINCT
 	 , P.dblUnappliedAmount AS dblUsed
 	 , P.dblAmountPaid - P.dblUnappliedAmount AS dblRemaining
 	 , P.strNotes
-	 , strContact = ISNULL(RTRIM(E.strPhone) + CHAR(13) + char(10), '')
-				  + ISNULL(RTRIM(E.strEmail) + CHAR(13) + char(10), '')
-				  + ISNULL(RTRIM(C.strBillToLocationName) + CHAR(13) + char(10), '')
-				  + ISNULL(RTRIM(C.strBillToAddress) + CHAR(13) + char(10), '')
-				  + ISNULL(RTRIM(C.strBillToCity), '')
-				  + ISNULL(', ' + RTRIM(C.strBillToState), '')
-				  + ISNULL(', ' + RTRIM(C.strZipCode), '')
-				  + ISNULL(', ' + RTRIM(C.strBillToCountry), '')
+	 , strContact = [dbo].fnARFormatCustomerAddress(E.strPhone, E.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry)
 FROM tblARPayment P
 	INNER JOIN (vyuARCustomer C INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId) ON P.intEntityCustomerId = C.intEntityCustomerId
 	INNER JOIN (tblARInvoice I INNER JOIN tblSMCompanyLocation L ON I.intCompanyLocationId = L.intCompanyLocationId) ON P.intEntityCustomerId = I.intEntityCustomerId

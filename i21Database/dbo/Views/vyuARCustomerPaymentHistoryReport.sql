@@ -2,14 +2,7 @@
 AS 
 SELECT DISTINCT 
 	  C.strName
-	, strContact = ISNULL(RTRIM(C.strPhone) + CHAR(13) + char(10), '')
-				  + ISNULL(RTRIM(E.strEmail) + CHAR(13) + char(10), '')
-				  + ISNULL(RTRIM(C.strBillToLocationName) + CHAR(13) + char(10), '')
-				  + ISNULL(RTRIM(C.strBillToAddress) + CHAR(13) + char(10), '')
-				  + ISNULL(RTRIM(C.strBillToCity), '')
-				  + ISNULL(', ' + RTRIM(C.strBillToState), '')
-				  + ISNULL(', ' + RTRIM(C.strZipCode), '')
-				  + ISNULL(', ' + RTRIM(C.strBillToCountry), '')
+	, strContact = [dbo].fnARFormatCustomerAddress(C.strPhone, E.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry)
 	 , P.strRecordNumber
 	 , I.strInvoiceNumber
 	 , P.dtmDatePaid

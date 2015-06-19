@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspLGGetShippingInstructionPurchaseInfoReport]
+﻿CREATE PROCEDURE [dbo].[uspLGGetShippingInstructionSalesInfoReport]
 		@xmlParam NVARCHAR(MAX) = NULL  
 AS
 BEGIN

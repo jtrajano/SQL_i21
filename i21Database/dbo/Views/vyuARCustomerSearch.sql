@@ -31,6 +31,7 @@ SELECT
 ,Cus.intShipToId
 ,Cus.intBillToId
 ,Loc.intFreightTermId
+,strSalespersonId =  case when ISNULL(S.strSalespersonId,'') = '' then T.strEntityNo else S.strSalespersonId end
 FROM tblEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityCustomerId]
 LEFT JOIN tblEntityToContact as CusToCon ON Cus.intEntityCustomerId = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1
@@ -39,3 +40,5 @@ LEFT JOIN tblEntity as Con ON CusToCon.[intEntityContactId] = Con.[intEntityId]
 LEFT JOIN tblEntityLocation as Loc ON Cus.intEntityCustomerId = Loc.intEntityId AND Loc.ysnDefaultLocation = 1
 LEFT JOIN tblEntityLocation as ShipToLoc ON Cus.intShipToId = ShipToLoc.intEntityLocationId
 LEFT JOIN tblEntityLocation as BillToLoc ON Cus.intBillToId = BillToLoc.intEntityLocationId
+LEFT JOIN tblARSalesperson S ON Cus.intSalespersonId = S.intEntitySalespersonId
+LEFT JOIN tblEntity T on S.intEntitySalespersonId = T.intEntityId
