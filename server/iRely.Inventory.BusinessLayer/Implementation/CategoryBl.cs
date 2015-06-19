@@ -42,7 +42,11 @@ namespace iRely.Inventory.BusinessLayer
 
             if (result.HasError)
             {
-                if (result.BaseException.Message.Contains("Cannot insert the value NULL into column 'intCostingMethod'"))
+                if (result.BaseException.Message.Contains("Violation of UNIQUE KEY constraint 'AK_tblICCategory_strCategoryCode'"))
+                {
+                    msg = "Category must be unique.";
+                }
+                else if (result.BaseException.Message.Contains("Cannot insert the value NULL into column 'intCostingMethod'"))
                 {
                     msg = "Please specify a valid Costing Method.";
                 }

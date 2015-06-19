@@ -7,6 +7,7 @@ Ext.define('Inventory.view.CategoryViewModel', {
         'Inventory.store.BufferedCompactItem',
         'Inventory.store.BufferedLineOfBusiness',
         'Inventory.store.BufferedCategoryLocation',
+        'Inventory.store.BufferedCategoryUOM',
         'GeneralLedger.store.BufAccountId',
         'EntityManagement.store.VendorBuffered',
         'i21.store.CompanyLocationBuffered',
@@ -79,6 +80,9 @@ Ext.define('Inventory.view.CategoryViewModel', {
                     name: 'strDescription'
                 }
             ]
+        },
+        standardUOM: {
+            type: 'icbufferedcategoryuom'
         },
         uomUnitMeasure:{
             type: 'icbuffereduom'

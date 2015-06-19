@@ -33,6 +33,17 @@ Ext.define('Inventory.view.CategoryViewController', {
                 value: '{current.strInventoryTracking}',
                 store: '{inventoryTrackings}'
             },
+            txtStandardQty: '{current.dblStandardQty}',
+            cboStandardUOM: {
+                value: '{current.intUOMId}',
+                store: '{standardUOM}',
+                defaultFilters: [{
+                    column: 'intCategoryId',
+                    value: '{current.intCategoryId}',
+                    conjunction: 'and'
+                }]
+            },
+
             txtGlDivisionNumber: '{current.strGLDivisionNumber}',
             chkSalesAnalysisByTon: '{current.ysnSalesAnalysisByTon}',
             cboMaterialFee: {

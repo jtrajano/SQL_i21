@@ -385,6 +385,35 @@ namespace iRely.Inventory.Model
         public tblICUnitMeasure VolumeUOM { get; set; }
     }
 
+    public class CategoryUOMVM
+    {
+        public int intCategoryUOMId { get; set; }
+        public int intCategoryId { get; set; }
+        public int? intUnitMeasureId { get; set; }
+        public decimal? dblUnitQty { get; set; }
+        public decimal? dblSellQty { get; set; }
+        public decimal? dblWeight { get; set; }
+        public int? intWeightUOMId { get; set; }
+        public string strDescription { get; set; }
+        public string strUpcCode { get; set; }
+        public bool ysnStockUnit { get; set; }
+        public bool ysnAllowPurchase { get; set; }
+        public bool ysnAllowSale { get; set; }
+        public decimal? dblLength { get; set; }
+        public decimal? dblWidth { get; set; }
+        public decimal? dblHeight { get; set; }
+        public int? intDimensionUOMId { get; set; }
+        public decimal? dblVolume { get; set; }
+        public int? intVolumeUOMId { get; set; }
+        public decimal? dblMaxQty { get; set; }
+        public int? intSort { get; set; }
+        public string strUnitMeasure { get; set; }
+        public string strUnitType { get; set; }
+        public string strWeightUOM { get; set; }
+        public string strDimensionUOM { get; set; }
+        public string strVolumeUOM { get; set; }
+    }
+
     public class tblICCategoryVendor : BaseEntity
     {
         public int intCategoryVendorId { get; set; }
