@@ -17,10 +17,12 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @ZeroDecimal decimal(18,6)
 		,@DateOnly DATETIME
+		,@ARAccountId INT
 
 SET @ZeroDecimal = 0.000000
 		
 SELECT @DateOnly = CAST(GETDATE() as date)
+SET @ARAccountId = ISNULL((SELECT strValue FROM tblSMPreferences WHERE strPreference = 'DefaultARAccount'),0)
 
 INSERT INTO [tblARInvoice]
 	([strInvoiceOriginId]
@@ -84,7 +86,7 @@ SELECT
 	,[strTransactionType]	= 'Overpayment'
 	,[intPaymentMethodId]	= ISNULL(A.[intPaymentMethodId], 0)
 	,[strComments]			= A.strRecordNumber 
-	,[intAccountId]			= ISNULL(CL.[intARAccount], 0) 
+	,[intAccountId]			= @ARAccountId 
 	,[dtmPostDate]			= NULL
 	,[ysnPosted]			= 1
 	,[ysnPaid]				= 0
@@ -108,17 +110,29 @@ INNER JOIN
 	[tblARCustomer] C
 		ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
 INNER JOIN
-	[tblEntityLocation] EL
-		ON C.[intDefaultLocationId] = EL.[intEntityLocationId] 
+	(	SELECT
+			[intEntityLocationId]
+			,[intEntityId]
+			,[strLocationName]
+			,[strAddress]
+			,[strCity]
+			,[strState]
+			,[strZipCode]
+			,[strCountry]
+			,[intShipViaId]
+			,[intTermsId]
+		FROM 
+			tblEntityLocation
+		WHERE
+			ysnDefaultLocation = 1
+	) EL
+		ON C.[intEntityCustomerId] = EL.[intEntityId] 
 LEFT OUTER JOIN
 	[tblEntityLocation] SL
 		ON C.[intShipToId] = SL.[intEntityLocationId]  	
 LEFT OUTER JOIN
 	[tblEntityLocation] BL
 		ON C.[intBillToId] = BL.[intEntityLocationId]  			
-LEFT OUTER JOIN
-	[tblSMCompanyLocation] CL
-		ON A.[intLocationId] = CL.[intCompanyLocationId] 
 WHERE 
 	A.[intPaymentId] = @PaymentId 
 	
@@ -150,7 +164,7 @@ SELECT
 	,dblQtyShipped			= 1
 	,dblPrice				= A.[dblOverpayment]
 	,dblTotal				= A.[dblOverpayment]
-	,intAccountId			= ISNULL(CL.[intServiceCharges], 0)
+	,intAccountId			= NULL
 	,intCOGSAccountId		= NULL
 	,intSalesAccountId		= NULL
 	,intInventoryAccountId	= NULL
@@ -160,9 +174,6 @@ FROM
 INNER JOIN
 	[tblARCustomer] C
 		ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
-INNER JOIN
-	[tblSMCompanyLocation] CL
-		ON A.[intLocationId] = CL.[intCompanyLocationId] 
 WHERE 
 	A.[intPaymentId] = @PaymentId 
            
