@@ -16,7 +16,7 @@ BEGIN
 						  dbo.tblGLAccount A2 ON M.intAccountId = A2.intAccountId 
 						  WHERE A2.intAccountId = A1.intAccountId
 			FOR XML PATH('') )  
-		, 1, 1, '' ) AS strDescription
+		, 1, 2, '' ) AS strDescription
     FROM tblGLAccount A1  
 	GROUP BY intAccountId)
 	UPDATE A SET A.strDescription = CTE.strDescription  FROM tblGLAccount A INNER JOIN CTE ON A.intAccountId = CTE.intAccountId
