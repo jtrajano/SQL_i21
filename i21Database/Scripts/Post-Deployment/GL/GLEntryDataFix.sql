@@ -9,7 +9,7 @@ GO
 GO
 
 UPDATE tblGLAccount SET ysnSystem = 0 WHERE ysnSystem is NULL
-UPDATE tblGLAccount SET strCashFlow = 'NONE' WHERE strCashFlow IS NULL
+UPDATE tblGLAccount SET strCashFlow = 'None' WHERE strCashFlow IS NULL
 
 GO	
 	PRINT N'END Normalize ysnSystem and strCashFlow'
