@@ -227,6 +227,7 @@ BEGIN TRY
 						)
 					)
 				AND intCountStatusId <> 13
+				AND intStatusId<>13
 			)
 	BEGIN
 		SELECT TOP 1 @strWorkOrderNo=strWorkOrderNo
@@ -264,6 +265,7 @@ BEGIN TRY
 					)
 				)
 			AND intCountStatusId <> 13
+			AND intStatusId<>13
 		ORDER BY W.dtmPlannedDate DESC
 			,W.intPlannedShiftId DESC
 
@@ -303,6 +305,7 @@ BEGIN TRY
 						)
 					)
 				AND intCountStatusId <> 13
+				AND intStatusId<>13
 				AND (
 					CASE 
 						WHEN intPlannedShiftId IS NOT NULL
@@ -347,6 +350,7 @@ BEGIN TRY
 					)
 				)
 			AND intCountStatusId <> 13
+			AND intStatusId<>13
 			AND (
 				CASE 
 					WHEN intPlannedShiftId IS NOT NULL
