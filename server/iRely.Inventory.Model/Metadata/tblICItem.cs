@@ -299,11 +299,11 @@ namespace iRely.Inventory.Model
         public string strStatus { get; set; }
         public int? intLocationId { get; set; }
         public int? intItemLocationId { get; set; }
-        public int? intCategoryId { get; set; }
-        public int? intCommodityId { get; set; }
-        public string strCategoryCode { get; set; }
-        public string strCommodityCode { get; set; }
         public int? intSubLocationId { get; set; }
+        public int? intCategoryId { get; set; }
+        public string strCategoryCode { get; set; }
+        public int? intCommodityId { get; set; }
+        public string strCommodityCode { get; set; }
         public string strStorageLocationName { get; set; }
         public string strSubLocationName { get; set; }
         public int? intStorageLocationId { get; set; }
@@ -321,6 +321,7 @@ namespace iRely.Inventory.Model
         public string strReceiveUOMType { get; set; }
         public string strIssueUOMType { get; set; }
         public string strReceiveUOM { get; set; }
+        public string strReceiveUPC { get; set; }
         public decimal? dblReceiveSalePrice { get; set; }
         public decimal? dblReceiveMSRPPrice { get; set; }
         public decimal? dblReceiveLastCost { get; set; }
@@ -328,6 +329,7 @@ namespace iRely.Inventory.Model
         public decimal? dblReceiveAverageCost { get; set; }
         public decimal? dblReceiveEndMonthCost { get; set; }
         public string strIssueUOM { get; set; }
+        public string strIssueUPC { get; set; }
         public decimal? dblIssueSalePrice { get; set; }
         public decimal? dblIssueMSRPPrice { get; set; }
         public decimal? dblIssueLastCost { get; set; }

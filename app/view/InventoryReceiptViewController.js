@@ -1545,6 +1545,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                                 hidden: true
                                             },
                                             {
+                                                dataIndex: 'strReceiveUPC',
+                                                dataType: 'string',
+                                                text: 'UPC',
+                                                flex: 1
+                                            },
+                                            {
                                                 dataIndex: 'strReceiveUOM',
                                                 dataType: 'string',
                                                 text: 'Receive UOM',
@@ -1791,6 +1797,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                             hidden: true
                                         },
                                         {
+                                            dataIndex: 'strReceiveUPC',
+                                            dataType: 'string',
+                                            text: 'UPC',
+                                            flex: 1
+                                        },
+                                        {
                                             dataIndex: 'strReceiveUOM',
                                             dataType: 'string',
                                             text: 'Receive UOM',
@@ -1915,54 +1927,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 });
                             }
                             break;
-//                        case 'colUOM' :
-//                            return Ext.create('Ext.grid.CellEditor', {
-//                                field: Ext.widget({
-//                                    xtype: 'gridcombobox',
-//                                    matchFieldWidth: false,
-//                                    columns: [
-//                                        {
-//                                            dataIndex: 'intItemUOMId',
-//                                            dataType: 'numeric',
-//                                            text: 'Unit Of Measure Id',
-//                                            hidden: true
-//                                        },
-//                                        {
-//                                            dataIndex: 'strUnitMeasure',
-//                                            dataType: 'string',
-//                                            text: 'Unit Measure',
-//                                            flex: 1
-//                                        },
-//                                        {
-//                                            dataIndex: 'strUnitType',
-//                                            dataType: 'string',
-//                                            text: 'Unit Type',
-//                                            flex: 1
-//                                        },
-//                                        {
-//                                            xtype: 'checkcolumn',
-//                                            dataIndex: 'ysnStockUnit',
-//                                            dataType: 'boolean',
-//                                            text: 'Stock Unit',
-//                                            flex: 1
-//                                        }
-//                                    ],
-//                                    itemId: 'cboItemUOM',
-//                                    displayField: 'strUnitMeasure',
-//                                    valueField: 'strUnitMeasure',
-//                                    store: win.viewModel.storeInfo.itemUOM,
-//                                    defaultFilters: [{
-//                                        column: 'intItemId',
-//                                        value: record.get('intItemId'),
-//                                        conjunction: 'and'
-//                                    },{
-//                                        column: 'intLocationId',
-//                                        value: current.get('intLocationId'),
-//                                        conjunction: 'and'
-//                                    }]
-//                                })
-//                            });
-//                            break;
                     };
                     break;
             };
