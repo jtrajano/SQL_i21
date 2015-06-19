@@ -1735,6 +1735,8 @@
     <Build Include="dbo\Views\vyuARTaxReport.sql" />
     <Build Include="dbo\Views\vyuEMEntityTransaction.sql" />
     <Build Include="dbo\Tables\tblFRArchive.sql" />
+    <Build Include="dbo\Tables\tblCFTransactionTax.sql" />
+    <Build Include="dbo\Views\vyuCFTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
