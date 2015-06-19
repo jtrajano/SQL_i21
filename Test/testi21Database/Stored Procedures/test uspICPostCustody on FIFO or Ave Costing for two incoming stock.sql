@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostCustody for two incoming stock]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostCustody on FIFO or Ave Costing for two incoming stock]
 AS
 
 -- Fake data Variables
@@ -229,8 +229,8 @@ BEGIN
 				,intStorageLocationId
 				,ysnIsCustody 	
 		)
-		SELECT	intItemId				= @ManualLotGrains
-				,intItemLocationId		= @ManualLotGrains_DefaultLocation
+		SELECT	intItemId				= @WetGrains
+				,intItemLocationId		= @WetGrains_DefaultLocation
 				,intItemUOMId			= @ManualGrains_BushelUOM
 				,dtmDate				= 'January 21, 2015'
 				,dblQty					= 10
@@ -244,13 +244,13 @@ BEGIN
 				,intTransactionDetailId	= 22
 				,strTransactionId		= 'INVRCT-10001'
 				,intTransactionTypeId	= @intTransactionTypeId
-				,intLotId				= @intNewLotId_1
+				,intLotId				= NULL 
 				,intSubLocationId		= NULL 
 				,intStorageLocationId 	= NULL 
 				,ysnIsCustody			= 1
 		UNION ALL
-		SELECT	intItemId				= @ManualLotGrains
-				,intItemLocationId		= @ManualLotGrains_DefaultLocation
+		SELECT	intItemId				= @WetGrains
+				,intItemLocationId		= @WetGrains_DefaultLocation
 				,intItemUOMId			= @ManualGrains_BushelUOM
 				,dtmDate				= 'January 23, 2015'
 				,dblQty					= 75
@@ -264,7 +264,7 @@ BEGIN
 				,intTransactionDetailId	= 23
 				,strTransactionId		= 'INVRCT-10002'
 				,intTransactionTypeId	= @intTransactionTypeId
-				,intLotId				= @intNewLotId_2
+				,intLotId				= NULL
 				,intSubLocationId		= NULL 
 				,intStorageLocationId 	= NULL 
 				,ysnIsCustody			= 1
@@ -291,16 +291,16 @@ BEGIN
 				,dblStockOut
 				,dblCost
 		)
-		SELECT	intItemId = @ManualLotGrains
-				,intItemLocationId = @ManualLotGrains_DefaultLocation
+		SELECT	intItemId = @WetGrains
+				,intItemLocationId = @WetGrains_DefaultLocation
 				,intItemUOMId = @ManualGrains_BushelUOM
 				,dtmDate = 'January 21, 2015'
 				,dblStockIn = 10
 				,dblStockOut = 0
 				,dblCost = 12.00
 		UNION ALL
-		SELECT	intItemId = @ManualLotGrains
-				,intItemLocationId = @ManualLotGrains_DefaultLocation
+		SELECT	intItemId = @WetGrains
+				,intItemLocationId = @WetGrains_DefaultLocation
 				,intItemUOMId = @ManualGrains_BushelUOM
 				,dtmDate = 'January 23, 2015'
 				,dblStockIn = 75
@@ -324,9 +324,9 @@ BEGIN
 				,dblStockIn
 				,dblStockOut
 				,dblCost
-		FROM	dbo.tblICInventoryLotInCustody
-		WHERE	intItemId = @ManualLotGrains
-				AND intItemLocationId = @ManualLotGrains_DefaultLocation
+		FROM	dbo.tblICInventoryFIFOInCustody
+		WHERE	intItemId = @WetGrains
+				AND intItemLocationId = @WetGrains_DefaultLocation
 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual'
 	END 

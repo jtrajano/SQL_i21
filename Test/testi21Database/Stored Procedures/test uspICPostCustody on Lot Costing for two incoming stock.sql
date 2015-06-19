@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostCustody on outgoing stock]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostCustody on Lot Costing for two incoming stock]
 AS
 
 -- Fake data Variables
@@ -182,13 +182,6 @@ BEGIN
 
 		DECLARE @Corn_BushelUOM AS INT = 43,			@Corn_PoundUOM AS INT = 44,				@Corn_KgUOM AS INT = 45, 
 				@Corn_25KgBagUOM AS INT = 46,			@Corn_10LbBagUOM AS INT = 47,			@Corn_TonUOM AS INT = 48
-
-	-- Declare fake lot ids
-	DECLARE @Lot_1 AS INT = 1
-			,@Lot_2 AS INT = 2
-			,@Lot_3 AS INT = 3
-			,@Lot_4 AS INT = 4
-			,@Lot_5 AS INT = 5
 END 
 
 BEGIN
@@ -196,10 +189,6 @@ BEGIN
 	BEGIN 
 		-- Create the fake data
 		EXEC [testi21Database].[Fake transactions for item custody]
-
-		-- Manually change the items to lot-tracked.
-		UPDATE dbo.tblICItem
-		SET strLotTracking = 'Yes - Manual'
 
 		-- Create the expected and actual tables. 
 		SELECT intItemId, intItemLocationId, intItemUOMId, dtmDate, dblStockIn, dblStockOut, dblCost INTO expected FROM dbo.tblICInventoryLotInCustody WHERE 1 = 0		
@@ -210,12 +199,13 @@ BEGIN
 		DECLARE @strBatchId AS NVARCHAR(20);
 		DECLARE @intUserId AS INT = 1;
 		DECLARE @intTransactionTypeId AS INT 
-		DECLARE @intNewLotId AS INT = 1999
+		DECLARE @intNewLotId_1 AS INT = 1999
+				,@intNewLotId_2 AS INT = 2999
 
 		SELECT	TOP  1
 				@intTransactionTypeId = intTransactionTypeId
 		FROM	dbo.tblICInventoryTransactionType
-		WHERE	strName = 'Inventory Shipment'
+		WHERE	strName = 'Inventory Receipt'
 
 		-- Setup the items to post
 		INSERT INTO @ItemsToPost (
@@ -239,27 +229,47 @@ BEGIN
 				,intStorageLocationId
 				,ysnIsCustody 	
 		)
-		SELECT	intItemId				= @WetGrains
-				,intItemLocationId		= @WetGrains_DefaultLocation
-				,intItemUOMId			= @WetGrains_PoundUOM
-				,dtmDate				= 'January 25, 2015'
-				,dblQty					= -10
-				,dblUOMQty				= @PoundUnitQty
+		SELECT	intItemId				= @ManualLotGrains
+				,intItemLocationId		= @ManualLotGrains_DefaultLocation
+				,intItemUOMId			= @ManualGrains_BushelUOM
+				,dtmDate				= 'January 21, 2015'
+				,dblQty					= 10
+				,dblUOMQty				= @BushelUnitQty
 				,dblCost				= 12.00
 				,dblSalesPrice			= 90.00
 				,dblValue				= 0.00
 				,intCurrencyId			= NULL 
 				,dblExchangeRate		= 1
-				,intTransactionId		= 985
-				,intTransactionDetailId	= 41
-				,strTransactionId		= 'INVSHIP-10001'
+				,intTransactionId		= 800
+				,intTransactionDetailId	= 22
+				,strTransactionId		= 'INVRCT-10001'
 				,intTransactionTypeId	= @intTransactionTypeId
-				,intLotId				= @Lot_1 
+				,intLotId				= @intNewLotId_1
+				,intSubLocationId		= NULL 
+				,intStorageLocationId 	= NULL 
+				,ysnIsCustody			= 1
+		UNION ALL
+		SELECT	intItemId				= @ManualLotGrains
+				,intItemLocationId		= @ManualLotGrains_DefaultLocation
+				,intItemUOMId			= @ManualGrains_BushelUOM
+				,dtmDate				= 'January 23, 2015'
+				,dblQty					= 75
+				,dblUOMQty				= @BushelUnitQty
+				,dblCost				= 0.00 
+				,dblSalesPrice			= 90.00
+				,dblValue				= 0.00
+				,intCurrencyId			= NULL 
+				,dblExchangeRate		= 1
+				,intTransactionId		= 800
+				,intTransactionDetailId	= 23
+				,strTransactionId		= 'INVRCT-10002'
+				,intTransactionTypeId	= @intTransactionTypeId
+				,intLotId				= @intNewLotId_2
 				,intSubLocationId		= NULL 
 				,intStorageLocationId 	= NULL 
 				,ysnIsCustody			= 1
 	END 
-		
+
 	-- Act
 	BEGIN 	
 		-- Call uspICPostCustody to process stocks for custody. 
@@ -281,13 +291,21 @@ BEGIN
 				,dblStockOut
 				,dblCost
 		)
-		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @WetGrains_DefaultLocation
-				,intItemUOMId = @WetGrains_PoundUOM
-				,dtmDate = 'January 1, 2015'
-				,dblStockIn = 110
-				,dblStockOut = 10
-				,dblCost = 11.00
+		SELECT	intItemId = @ManualLotGrains
+				,intItemLocationId = @ManualLotGrains_DefaultLocation
+				,intItemUOMId = @ManualGrains_BushelUOM
+				,dtmDate = 'January 21, 2015'
+				,dblStockIn = 10
+				,dblStockOut = 0
+				,dblCost = 12.00
+		UNION ALL
+		SELECT	intItemId = @ManualLotGrains
+				,intItemLocationId = @ManualLotGrains_DefaultLocation
+				,intItemUOMId = @ManualGrains_BushelUOM
+				,dtmDate = 'January 23, 2015'
+				,dblStockIn = 75
+				,dblStockOut = 0
+				,dblCost = 0.00
 
 		-- Get the actual data. 
 		INSERT INTO actual (
@@ -307,11 +325,12 @@ BEGIN
 				,dblStockOut
 				,dblCost
 		FROM	dbo.tblICInventoryLotInCustody
-		WHERE	intItemId = @WetGrains
-				AND intItemLocationId = @WetGrains_DefaultLocation
+		WHERE	intItemId = @ManualLotGrains
+				AND intItemLocationId = @ManualLotGrains_DefaultLocation
 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual'
 	END 
+
 END 
 
 -- Clean-up: remove the tables used in the unit test

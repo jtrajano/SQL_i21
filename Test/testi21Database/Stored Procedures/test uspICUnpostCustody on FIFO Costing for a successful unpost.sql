@@ -5,10 +5,6 @@ BEGIN
 	BEGIN 
 		EXEC [testi21Database].[Fake transactions for item custody];
 		
-		-- Mark all item as lot items
-		UPDATE dbo.tblICItem
-		SET strLotTracking = 'Yes - Manual'			
-
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
 				,@StickyGrains AS INT = 2
@@ -39,7 +35,7 @@ BEGIN
 		END 
 
 		CREATE TABLE expected (
-			intInventoryLotTransactionInCustodyId INT NOT NULL 
+			intInventoryTransactionInCustodyId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 			,intTransactionTypeId INT NOT NULL 
@@ -47,7 +43,7 @@ BEGIN
 		)
 
 		CREATE TABLE actual (
-			intInventoryLotTransactionInCustodyId INT NOT NULL 
+			intInventoryTransactionInCustodyId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 			,intTransactionTypeId INT NOT NULL 
@@ -58,9 +54,9 @@ BEGIN
 	-- Act 
 	-- Try to use the SP with NULL arguments on all parameters
 	BEGIN 
-		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-000001'
-				,@intTransactionId AS INT = 1
-				,@strTransactionId AS NVARCHAR(40) = 'INVRCT-00001'
+		DECLARE @strBatchId AS NVARCHAR(20) = 'BATCH-100001'
+				,@intTransactionId AS INT = 6
+				,@strTransactionId AS NVARCHAR(40) = 'INVRCT-00006'
 				,@intUserId AS INT = 1
 
 		EXEC dbo.uspICUnpostCustody
@@ -77,41 +73,41 @@ BEGIN
 		WHERE strName = 'Inventory Receipt'
 
 		INSERT INTO expected (
-				intInventoryLotTransactionInCustodyId 
+				intInventoryTransactionInCustodyId 
 				,intTransactionId 
 				,strTransactionId 
 				,intTransactionTypeId 
 				,dblQty 
 		)
-		SELECT	intInventoryLotTransactionInCustodyId	= 1
-				,intTransactionId						= 1
-				,strTransactionId						= 'INVRCT-00001'
+		SELECT	intInventoryTransactionInCustodyId		= 6
+				,intTransactionId						= 6
+				,strTransactionId						= 'INVRCT-00006'
 				,intTransactionTypeId					= @intTransactionTypeId
 				,dblQty									= 110
 		UNION ALL
-		SELECT	intInventoryLotTransactionInCustodyId	= 6
-				,intTransactionId						= 1
-				,strTransactionId						= 'INVRCT-00001'
+		SELECT	intInventoryTransactionInCustodyId		= 11
+				,intTransactionId						= 6
+				,strTransactionId						= 'INVRCT-00006'
 				,intTransactionTypeId					= @intTransactionTypeId
 				,dblQty									= -110
 
 		-- Get the actual data
 		INSERT INTO actual (
-				intInventoryLotTransactionInCustodyId 
+				intInventoryTransactionInCustodyId 
 				,intTransactionId 
 				,strTransactionId 
 				,intTransactionTypeId 
 				,dblQty 		
 		)
 		SELECT
-				intInventoryLotTransactionInCustodyId 
+				intInventoryTransactionInCustodyId 
 				,intTransactionId 
 				,strTransactionId 
 				,intTransactionTypeId 
 				,dblQty 	
-		FROM	tblICInventoryLotTransactionInCustody
-		WHERE	intTransactionId						= 1
-				AND strTransactionId					= 'INVRCT-00001'
+		FROM	tblICInventoryTransactionInCustody
+		WHERE	intTransactionId						= 6
+				AND strTransactionId					= 'INVRCT-00006'
 				AND intTransactionTypeId				= @intTransactionTypeId
 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual'

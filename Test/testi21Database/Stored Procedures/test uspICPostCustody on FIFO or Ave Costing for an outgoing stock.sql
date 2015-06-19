@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostCustody on outgoing stock and it does not allow negative stock]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostCustody on FIFO or Ave Costing for an outgoing stock]
 AS
 
 -- Fake data Variables
@@ -182,6 +182,13 @@ BEGIN
 
 		DECLARE @Corn_BushelUOM AS INT = 43,			@Corn_PoundUOM AS INT = 44,				@Corn_KgUOM AS INT = 45, 
 				@Corn_25KgBagUOM AS INT = 46,			@Corn_10LbBagUOM AS INT = 47,			@Corn_TonUOM AS INT = 48
+
+	-- Declare fake lot ids
+	DECLARE @Lot_1 AS INT = 1
+			,@Lot_2 AS INT = 2
+			,@Lot_3 AS INT = 3
+			,@Lot_4 AS INT = 4
+			,@Lot_5 AS INT = 5
 END 
 
 BEGIN
@@ -204,7 +211,7 @@ BEGIN
 		SELECT	TOP  1
 				@intTransactionTypeId = intTransactionTypeId
 		FROM	dbo.tblICInventoryTransactionType
-		WHERE	strName = 'Inventory Receipt'
+		WHERE	strName = 'Inventory Shipment'
 
 		-- Setup the items to post
 		INSERT INTO @ItemsToPost (
@@ -228,32 +235,45 @@ BEGIN
 				,intStorageLocationId
 				,ysnIsCustody 	
 		)
-		SELECT	intItemId				= @ManualLotGrains
-				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_BushelUOM
-				,dtmDate				= 'January 21, 2015'
+		SELECT	intItemId				= @WetGrains
+				,intItemLocationId		= @WetGrains_NewHaven
+				,intItemUOMId			= @WetGrains_PoundUOM
+				,dtmDate				= 'January 25, 2015'
 				,dblQty					= -10
-				,dblUOMQty				= @BushelUnitQty
+				,dblUOMQty				= @PoundUnitQty
 				,dblCost				= 12.00
 				,dblSalesPrice			= 90.00
 				,dblValue				= 0.00
 				,intCurrencyId			= NULL 
 				,dblExchangeRate		= 1
-				,intTransactionId		= 800
-				,intTransactionDetailId	= 22
-				,strTransactionId		= 'INVRCT-10001'
+				,intTransactionId		= 985
+				,intTransactionDetailId	= 41
+				,strTransactionId		= 'INVSHIP-10001'
 				,intTransactionTypeId	= @intTransactionTypeId
-				,intLotId				= @intNewLotId
+				,intLotId				= NULL  
 				,intSubLocationId		= NULL 
 				,intStorageLocationId 	= NULL 
 				,ysnIsCustody			= 1
-	END 
-
-	-- Assert
-	BEGIN 
-		EXEC tSQLt.ExpectException
-			@ExpectedMessage = 'Negative stock quantity is not allowed.'
-			,@ExpectedErrorNumber = 50029
+		UNION ALL 
+		SELECT	intItemId				= @WetGrains
+				,intItemLocationId		= @WetGrains_NewHaven
+				,intItemUOMId			= @WetGrains_PoundUOM
+				,dtmDate				= 'January 25, 2015'
+				,dblQty					= -10
+				,dblUOMQty				= @PoundUnitQty
+				,dblCost				= 12.00
+				,dblSalesPrice			= 90.00
+				,dblValue				= 0.00
+				,intCurrencyId			= NULL 
+				,dblExchangeRate		= 1
+				,intTransactionId		= 986
+				,intTransactionDetailId	= 42
+				,strTransactionId		= 'INVSHIP-10002'
+				,intTransactionTypeId	= @intTransactionTypeId
+				,intLotId				= NULL  
+				,intSubLocationId		= NULL 
+				,intStorageLocationId 	= NULL 
+				,ysnIsCustody			= 1
 	END 
 
 	-- Act
@@ -263,6 +283,50 @@ BEGIN
 			@ItemsToPost
 			,@strBatchId 
 			,@intUserId
+	END 
+
+	-- Assert
+	BEGIN 
+		-- Setup the expected data. 
+		INSERT INTO expected (
+				intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,dtmDate
+				,dblStockIn
+				,dblStockOut
+				,dblCost
+		)
+		SELECT	intItemId = @WetGrains
+				,intItemLocationId = @WetGrains_NewHaven
+				,intItemUOMId = @WetGrains_PoundUOM
+				,dtmDate = 'January 2, 2015'
+				,dblStockIn = 660
+				,dblStockOut = 20
+				,dblCost = 11.00
+
+		-- Get the actual data. 
+		INSERT INTO actual (
+				intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,dtmDate
+				,dblStockIn
+				,dblStockOut
+				,dblCost
+		)
+		SELECT	intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,dtmDate
+				,dblStockIn
+				,dblStockOut
+				,dblCost
+		FROM	dbo.tblICInventoryFIFOInCustody
+		WHERE	intItemId = @WetGrains
+				AND intItemLocationId = @WetGrains_NewHaven
+
+		EXEC tSQLt.AssertEqualsTable 'expected', 'actual'
 	END 
 END 
 

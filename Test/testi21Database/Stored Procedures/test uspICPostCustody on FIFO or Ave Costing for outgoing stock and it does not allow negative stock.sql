@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostCustody for one incoming stock]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostCustody on FIFO or Ave Costing for outgoing stock and it does not allow negative stock]
 AS
 
 -- Fake data Variables
@@ -204,7 +204,7 @@ BEGIN
 		SELECT	TOP  1
 				@intTransactionTypeId = intTransactionTypeId
 		FROM	dbo.tblICInventoryTransactionType
-		WHERE	strName = 'Inventory Receipt'
+		WHERE	strName = 'Inventory Shipment'
 
 		-- Setup the items to post
 		INSERT INTO @ItemsToPost (
@@ -228,11 +228,11 @@ BEGIN
 				,intStorageLocationId
 				,ysnIsCustody 	
 		)
-		SELECT	intItemId				= @ManualLotGrains
-				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_BushelUOM
+		SELECT	intItemId				= @WetGrains
+				,intItemLocationId		= @WetGrains_NewHaven
+				,intItemUOMId			= @WetGrains_BushelUOM
 				,dtmDate				= 'January 21, 2015'
-				,dblQty					= 10
+				,dblQty					= -10
 				,dblUOMQty				= @BushelUnitQty
 				,dblCost				= 12.00
 				,dblSalesPrice			= 90.00
@@ -241,12 +241,19 @@ BEGIN
 				,dblExchangeRate		= 1
 				,intTransactionId		= 800
 				,intTransactionDetailId	= 22
-				,strTransactionId		= 'INVRCT-10001'
+				,strTransactionId		= 'INVSHIP-10001'
 				,intTransactionTypeId	= @intTransactionTypeId
-				,intLotId				= @intNewLotId
+				,intLotId				= NULL 
 				,intSubLocationId		= NULL 
 				,intStorageLocationId 	= NULL 
 				,ysnIsCustody			= 1
+	END 
+
+	-- Assert
+	BEGIN 
+		EXEC tSQLt.ExpectException
+			@ExpectedMessage = 'Negative stock quantity is not allowed.'
+			,@ExpectedErrorNumber = 50029
 	END 
 
 	-- Act
@@ -257,51 +264,6 @@ BEGIN
 			,@strBatchId 
 			,@intUserId
 	END 
-
-	-- Assert
-	BEGIN 
-		-- Setup the expected data. 
-		INSERT INTO expected (
-				intItemId
-				,intItemLocationId
-				,intItemUOMId
-				,dtmDate
-				,dblStockIn
-				,dblStockOut
-				,dblCost
-		)
-		SELECT	intItemId = @ManualLotGrains
-				,intItemLocationId = @ManualLotGrains_DefaultLocation
-				,intItemUOMId = @ManualGrains_BushelUOM
-				,dtmDate = 'January 21, 2015'
-				,dblStockIn = 10
-				,dblStockOut = 0
-				,dblCost = 12.00
-
-		-- Get the actual data. 
-		INSERT INTO actual (
-				intItemId
-				,intItemLocationId
-				,intItemUOMId
-				,dtmDate
-				,dblStockIn
-				,dblStockOut
-				,dblCost
-		)
-		SELECT	intItemId
-				,intItemLocationId
-				,intItemUOMId
-				,dtmDate
-				,dblStockIn
-				,dblStockOut
-				,dblCost
-		FROM	dbo.tblICInventoryLotInCustody
-		WHERE	intItemId = @ManualLotGrains
-				AND intItemLocationId = @ManualLotGrains_DefaultLocation
-
-		EXEC tSQLt.AssertEqualsTable 'expected', 'actual'
-	END 
-
 END 
 
 -- Clean-up: remove the tables used in the unit test
