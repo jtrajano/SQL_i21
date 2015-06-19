@@ -30,6 +30,7 @@ SELECT A.strCustomerName
 	 , dblFuture = 0
 	 , dblPendingPayment = (SELECT ISNULL(SUM(CASE WHEN strTransactionType <> 'Invoice' THEN ISNULL(dblInvoiceTotal,0) * -1 ELSE ISNULL(dblInvoiceTotal,0) END), 0) FROM tblARInvoice WHERE intEntityCustomerId = A.intEntityCustomerId AND ysnPosted = 0)
 	 , dblCreditLimit = (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
+	 , strTerm
 	 , strContact = (SELECT strFullAddress = ISNULL(RTRIM(C.strPhone) + CHAR(13) + char(10), '')
 										   + ISNULL(RTRIM(E.strEmail) + CHAR(13) + char(10), '')
 										   + ISNULL(RTRIM(C.strBillToLocationName) + CHAR(13) + char(10), '')
@@ -49,6 +50,7 @@ FROM
 	  , I.intEntityCustomerId
 	  , I.dtmDueDate    
 	  , I.intTermId
+	  , T.strTerm
 	  , T.intBalanceDue    
       , E.strName AS strCustomerName
 	  , strAge = CASE WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=30 THEN '0 - 10 Days'
@@ -81,6 +83,7 @@ SELECT I.dtmDate AS dtmDate
 	 , I.intEntityCustomerId
 	 , I.dtmDueDate
 	 , I.intTermId
+	 , T.strTerm
 	 , T.intBalanceDue
 	 , E.strName AS strCustomerName
 	 , strAge = CASE WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=30 THEN '0 - 10 Days'
@@ -114,6 +117,7 @@ SELECT I.dtmDate AS dtmDate
 	 , I.intEntityCustomerId
 	 , I.dtmDueDate
 	 , I.intTermId
+	 , T.strTerm
 	 , T.intBalanceDue
 	 , E.strName AS strCustomerName
 	 , strAge = CASE WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=30 THEN '0 - 10 Days'
@@ -147,6 +151,7 @@ SELECT I.dtmDate AS dtmDate
 	 , I.intEntityCustomerId
 	 , I.dtmDueDate
 	 , I.intTermId
+	 , T.strTerm
 	 , T.intBalanceDue
 	 , E.strName AS strCustomerName
 	 , strAge = CASE WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=30 THEN '0 - 10 Days'
@@ -181,6 +186,7 @@ SELECT I.dtmPostDate
 	 , ISNULL(I.intEntityCustomerId, '')    
 	 , ISNULL(I.dtmDueDate, GETDATE())    
 	 , ISNULL(T.intTermID, '')
+	 , T.strTerm
      , ISNULL(T.intBalanceDue, 0)    
      , ISNULL(E.strName, '') AS strCustomerName
      , strAge = CASE WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=30 THEN '0 - 10 Days'
@@ -333,3 +339,4 @@ AND A.dblLastYearSales = A.dblLastYearSales
 
 GROUP BY A.strCustomerName
 	   , A.intEntityCustomerId
+	   , A.strTerm
