@@ -29,25 +29,27 @@ SELECT
 	strStockUOM = (SELECT TOP 1 strUnitMeasure FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemId = Item.intItemId AND ItemUOM.ysnStockUnit = 1),
 	strStockUOMType = (SELECT TOP 1 strUnitType FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemId = Item.intItemId AND ItemUOM.ysnStockUnit = 1),
 	ItemLocation.intReceiveUOMId,
-	dblReceiveUOMConvFactor = ISNULL((SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM WHERE ItemUOM.intItemUOMId = ItemLocation.intReceiveUOMId), 0),
+	dblReceiveUOMConvFactor = ISNULL(ReceiveUOM.dblUnitQty, 0),
 	ItemLocation.intIssueUOMId,
-	dblIssueUOMConvFactor = ISNULL((SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM WHERE ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId), 0),
-	strReceiveUOMType = (SELECT TOP 1 strUnitType FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intReceiveUOMId),
-	strIssueUOMType = (SELECT TOP 1 strUnitType FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId),
-	strReceiveUOM = (SELECT TOP 1 strUnitMeasure FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intReceiveUOMId),
-	dblReceiveSalePrice = ISNULL(ItemPricing.dblSalePrice * (SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intReceiveUOMId), 0),
-	dblReceiveMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice * (SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intReceiveUOMId), 0),
-	dblReceiveLastCost = ISNULL(ItemPricing.dblLastCost * (SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intReceiveUOMId), 0),
-	dblReceiveStandardCost = ISNULL(ItemPricing.dblStandardCost * (SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intReceiveUOMId), 0),
-	dblReceiveAverageCost = ISNULL(ItemPricing.dblAverageCost * (SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intReceiveUOMId), 0),
-	dblReceiveEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost * (SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intReceiveUOMId), 0),
-	strIssueUOM = (SELECT TOP 1 strUnitMeasure FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId),
-	dblIssueSalePrice = ItemPricing.dblSalePrice * (SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId),
-	dblIssueMSRPPrice = ItemPricing.dblMSRPPrice * (SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId),
-	dblIssueLastCost = ItemPricing.dblLastCost * (SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId),
-	dblIssueStandardCost = ItemPricing.dblStandardCost * (SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId),
-	dblIssueAverageCost = ItemPricing.dblAverageCost * (SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId),
-	dblIssueEndMonthCost = ItemPricing.dblEndMonthCost * (SELECT TOP 1 ISNULL(dblUnitQty, 0) FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemUOMId = ItemLocation.intIssueUOMId),
+	dblIssueUOMConvFactor = ISNULL(IssueUOM.dblUnitQty, 0),
+	strReceiveUOMType = rUOM.strUnitType,
+	strIssueUOMType = iUOM.strUnitType,
+	strReceiveUOM = rUOM.strUnitMeasure,
+	strReceiveUPC = ISNULL(ReceiveUOM.strUpcCode, ''),
+	dblReceiveSalePrice = ISNULL(ItemPricing.dblSalePrice * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
+	dblReceiveMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
+	dblReceiveLastCost = ISNULL(ItemPricing.dblLastCost * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
+	dblReceiveStandardCost = ISNULL(ItemPricing.dblStandardCost * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
+	dblReceiveAverageCost = ISNULL(ItemPricing.dblAverageCost * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
+	dblReceiveEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
+	strIssueUOM = iUOM.strUnitMeasure,
+	strIssueUPC = ISNULL(IssueUOM.strUpcCode, ''),
+	dblIssueSalePrice = ISNULL(ItemPricing.dblSalePrice * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
+	dblIssueMSRPPrice = ISNULL(ItemPricing.dblMSRPPrice * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
+	dblIssueLastCost = ISNULL(ItemPricing.dblLastCost * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
+	dblIssueStandardCost = ISNULL(ItemPricing.dblStandardCost * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
+	dblIssueAverageCost = ISNULL(ItemPricing.dblAverageCost * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
+	dblIssueEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost * ISNULL(ReceiveUOM.dblUnitQty, 0), 0),
 	dblMinOrder = ISNULL(ItemLocation.dblMinOrder, 0),
 	dblReorderPoint = ISNULL(ItemLocation.dblReorderPoint, 0),
 	ItemLocation.intAllowNegativeInventory,
@@ -73,6 +75,10 @@ SELECT
 	
 FROM tblICItem Item
 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId
+LEFT JOIN tblICItemUOM ReceiveUOM ON ReceiveUOM.intItemUOMId = ItemLocation.intReceiveUOMId
+LEFT JOIN tblICUnitMeasure rUOM ON rUOM.intUnitMeasureId = ReceiveUOM.intUnitMeasureId
+LEFT JOIN tblICItemUOM IssueUOM ON IssueUOM.intItemUOMId = ItemLocation.intIssueUOMId
+LEFT JOIN tblICUnitMeasure iUOM ON iUOM.intUnitMeasureId = IssueUOM.intUnitMeasureId
 LEFT JOIN tblICItemPricing ItemPricing ON ItemLocation.intItemId = ItemPricing.intItemId AND ItemLocation.intItemLocationId = ItemPricing.intItemLocationId
 LEFT JOIN tblICStorageLocation StorageLocation ON ItemLocation.intStorageLocationId = StorageLocation.intStorageLocationId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
