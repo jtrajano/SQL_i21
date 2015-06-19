@@ -74,7 +74,7 @@ END
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	EXEC dbo.uspICValidateCostingOnUnpost @ItemsToUnpost
+	EXEC dbo.uspICValidateCostingOnUnpostInCustody @ItemsToUnpost
 END 
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -89,9 +89,19 @@ BEGIN
 		@strTransactionId
 		,@intTransactionId
 END
+
 -----------------------------------------------------------------------------------------------------------------------------
--- TODO: Call the LIFO unpost stored procedures 
+-- Call the LIFO unpost stored procedures 
 -----------------------------------------------------------------------------------------------------------------------------
+BEGIN 
+	EXEC dbo.uspICUnpostLIFOInFromCustody
+		@strTransactionId
+		,@intTransactionId
+
+	EXEC dbo.uspICUnpostLIFOOutFromCustody
+		@strTransactionId
+		,@intTransactionId
+END 
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Call the LOT unpost stored procedures 

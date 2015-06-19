@@ -187,6 +187,7 @@ BEGIN
 END 
 
 BEGIN	
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLIFOInCustody', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOInCustody', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotInCustody', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransactionInCustody', @Identity = 1;
@@ -321,6 +322,61 @@ BEGIN
 				, dblCost = 55.00				
 	END 
 
+	-- Fake data for tblICInventoryLIFOInCustody (the cost bucket for custody items)
+	BEGIN 
+		INSERT INTO dbo.tblICInventoryLIFOInCustody (
+				intItemId
+				, intItemLocationId
+				, intItemUOMId
+				, dtmDate
+				, dblStockIn
+				, dblStockOut
+				, dblCost
+		) 
+		--------------------------------------------------------------
+		-- LIFO 
+		--------------------------------------------------------------
+		SELECT	intItemId = @WetGrains
+				, intItemLocationId = @WetGrains_BetterHaven
+				, intItemUOMId = @WetGrains_PoundUOM
+				, dtmDate = 'January 3, 2015'
+				, dblStockIn = 1200 
+				, dblStockOut = 0 
+				, dblCost = 11.00
+		UNION ALL 
+		SELECT	intItemId = @StickyGrains
+				, intItemLocationId = @StickyGrains_BetterHaven
+				, intItemUOMId = @StickyGrains_PoundUOM
+				, dtmDate = 'February 3, 2015'
+				, dblStockIn = 1300
+				, dblStockOut = 0 
+				, dblCost = 22.00
+		UNION ALL 
+		SELECT	intItemId = @PremiumGrains
+				, intItemLocationId = @PremiumGrains_BetterHaven
+				, intItemUOMId = @PremiumGrains_PoundUOM
+				, dtmDate = 'March 3, 2015'
+				, dblStockIn = 1400
+				, dblStockOut = 0 
+				, dblCost = 33.00
+		UNION ALL 
+		SELECT	intItemId = @ColdGrains
+				, intItemLocationId = @ColdGrains_BetterHaven
+				, intItemUOMId = @ColdGrains_PoundUOM
+				, dtmDate = 'April 3, 2015'
+				, dblStockIn = 1500
+				, dblStockOut = 0 
+				, dblCost = 44.00
+		UNION ALL 
+		SELECT	intItemId = @HotGrains
+				, intItemLocationId = @HotGrains_BetterHaven
+				, intItemUOMId = @HotGrains_PoundUOM
+				, dtmDate = 'May 3, 2015'
+				, dblStockIn = 1600
+				, dblStockOut = 0 
+				, dblCost = 55.00				
+	END 
+
 	-- Fake data for item stock table
 	BEGIN 
 		-- Add stock information for items under location 1 ('Default')
@@ -375,23 +431,23 @@ BEGIN
 		UNION ALL 
 		SELECT	intItemId			= @WetGrains
 				, intItemLocationId	= @WetGrains_BetterHaven
-				, dblUnitInCustody	= 0
+				, dblUnitInCustody	= 1200
 		UNION ALL 
 		SELECT	intItemId			= @StickyGrains
 				, intItemLocationId	= @StickyGrains_BetterHaven
-				, dblUnitInCustody	= 0
+				, dblUnitInCustody	= 1300
 		UNION ALL 
 		SELECT	intItemId			= @PremiumGrains
 				, intItemLocationId	= @PremiumGrains_BetterHaven
-				, dblUnitInCustody	= 0
+				, dblUnitInCustody	= 1400
 		UNION ALL 
 		SELECT	intItemId			= @ColdGrains
 				, intItemLocationId	= @ColdGrains_BetterHaven
-				, dblUnitInCustody	= 0
+				, dblUnitInCustody	= 1500
 		UNION ALL 
 		SELECT	intItemId			= @HotGrains
 				, intItemLocationId	= @HotGrains_BetterHaven
-				, dblUnitInCustody	= 0
+				, dblUnitInCustody	= 1600
 	END
 
 	-- Fake data for item stock UOM table
@@ -460,27 +516,27 @@ BEGIN
 		SELECT	intItemId			= @WetGrains
 				, intItemLocationId	= @WetGrains_BetterHaven
 				, intItemUOMId		= @WetGrains_PoundUOM
-				, dblInCustody		= 0
+				, dblInCustody		= 1200
 		UNION ALL 
 		SELECT	intItemId			= @StickyGrains
 				, intItemLocationId	= @StickyGrains_BetterHaven
 				, intItemUOMId		= @StickyGrains_PoundUOM
-				, dblInCustody		= 0
+				, dblInCustody		= 1300
 		UNION ALL 
 		SELECT	intItemId			= @PremiumGrains
 				, intItemLocationId	= @PremiumGrains_BetterHaven
 				, intItemUOMId		= @PremiumGrains_PoundUOM
-				, dblInCustody		= 0
+				, dblInCustody		= 1400
 		UNION ALL 
 		SELECT	intItemId			= @ColdGrains
 				, intItemLocationId	= @ColdGrains_BetterHaven
 				, intItemUOMId		= @ColdGrains_PoundUOM
-				, dblInCustody		= 0
+				, dblInCustody		= 1500
 		UNION ALL 
 		SELECT	intItemId			= @HotGrains
 				, intItemLocationId	= @HotGrains_BetterHaven
 				, intItemUOMId		= @HotGrains_PoundUOM
-				, dblInCustody		= 0
+				, dblInCustody		= 1600
 	END
 
 	-- Fake data for tblICInventoryTransactionInCustody
@@ -692,6 +748,99 @@ BEGIN
 				, intTransactionId		= 10
 				, strTransactionId		= 'INVRCT-00010'
 				, strBatchId			= 'BATCH-00010'
+				, intTransactionTypeId	= @intTransactionTypeId
+				, intLotId				= NULL
+				, intConcurrencyId		= 1				
+		---------------------------------------------------------------
+		-- LIFO Costing transactions
+		---------------------------------------------------------------		
+		UNION ALL 
+		SELECT	intItemId				= @WetGrains
+				, intItemLocationId		= @WetGrains_BetterHaven
+				, intItemUOMId			= @WetGrains_PoundUOM
+				, dtmDate				= 'January 3, 2015'
+				, dblQty				= 1200
+				, dblUOMQty				= @PoundUnitQty
+				, dblCost				= 11.00
+				, dblValue				= 0 
+				, dblSalesPrice			= 0.00
+				, intCurrencyId			= NULL 
+				, dblExchangeRate		= 1
+				, intTransactionId		= 11
+				, strTransactionId		= 'INVRCT-00011'
+				, strBatchId			= 'BATCH-00011'
+				, intTransactionTypeId	= @intTransactionTypeId
+				, intLotId				= NULL
+				, intConcurrencyId		= 1
+		UNION ALL 		
+		SELECT	intItemId				= @StickyGrains
+				, intItemLocationId		= @StickyGrains_BetterHaven
+				, intItemUOMId			= @StickyGrains_PoundUOM
+				, dtmDate				= 'February 3, 2015'
+				, dblQty				= 1300
+				, dblUOMQty				= @PoundUnitQty
+				, dblCost				= 22.00
+				, dblValue				= 0 
+				, dblSalesPrice			= 0.00
+				, intCurrencyId			= NULL 
+				, dblExchangeRate		= 1
+				, intTransactionId		= 12
+				, strTransactionId		= 'INVRCT-00012'
+				, strBatchId			= 'BATCH-00012'
+				, intTransactionTypeId	= @intTransactionTypeId
+				, intLotId				= NULL
+				, intConcurrencyId		= 1		
+		UNION ALL 		
+		SELECT	intItemId				= @PremiumGrains
+				, intItemLocationId		= @PremiumGrains_BetterHaven
+				, intItemUOMId			= @PremiumGrains_PoundUOM
+				, dtmDate				= 'March 3, 2015'
+				, dblQty				= 1400
+				, dblUOMQty				= @PoundUnitQty
+				, dblCost				= 33.00
+				, dblValue				= 0 
+				, dblSalesPrice			= 0.00
+				, intCurrencyId			= NULL 
+				, dblExchangeRate		= 1
+				, intTransactionId		= 13
+				, strTransactionId		= 'INVRCT-00013'
+				, strBatchId			= 'BATCH-00013'
+				, intTransactionTypeId	= @intTransactionTypeId
+				, intLotId				= NULL
+				, intConcurrencyId		= 1				
+		UNION ALL 		
+		SELECT	intItemId				= @ColdGrains
+				, intItemLocationId		= @ColdGrains_BetterHaven
+				, intItemUOMId			= @ColdGrains_PoundUOM
+				, dtmDate				= 'April 3, 2015'
+				, dblQty				= 1500
+				, dblUOMQty				= @PoundUnitQty
+				, dblCost				= 44.00
+				, dblValue				= 0 
+				, dblSalesPrice			= 0.00
+				, intCurrencyId			= NULL 
+				, dblExchangeRate		= 1
+				, intTransactionId		= 14
+				, strTransactionId		= 'INVRCT-00014'
+				, strBatchId			= 'BATCH-00014'
+				, intTransactionTypeId	= @intTransactionTypeId
+				, intLotId				= NULL
+				, intConcurrencyId		= 1		
+		UNION ALL 		
+		SELECT	intItemId				= @HotGrains
+				, intItemLocationId		= @HotGrains_BetterHaven
+				, intItemUOMId			= @HotGrains_PoundUOM
+				, dtmDate				= 'May 3, 2015'
+				, dblQty				= 1600
+				, dblUOMQty				= @PoundUnitQty
+				, dblCost				= 55.00
+				, dblValue				= 0 
+				, dblSalesPrice			= 0.00
+				, intCurrencyId			= NULL 
+				, dblExchangeRate		= 1
+				, intTransactionId		= 15
+				, strTransactionId		= 'INVRCT-00015'
+				, strBatchId			= 'BATCH-00015'
 				, intTransactionTypeId	= @intTransactionTypeId
 				, intLotId				= NULL
 				, intConcurrencyId		= 1								

@@ -707,6 +707,20 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostCustody on FIFO or Ave Costing for two incoming stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostCustody for calling uspICPostFIFOInCustody.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostCustody for calling uspICPostLotInCustody.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFOCustody for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFOCustody is successful up to zero stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFOCustody is successful with positive stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInLIFOCustody to failed for negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLIFOCustody for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLIFOCustody from positive to positive.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLIFOCustody from zero to positive.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCustody for calling uspICPostLIFOInCustody.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOInFromCustody for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOInFromCustody for add-sell-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOInFromCustody for add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOOutFromCustody for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOOutFromCustody for add-sell-unpost sell.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCustody on LIFO Costing for a successful unpost.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

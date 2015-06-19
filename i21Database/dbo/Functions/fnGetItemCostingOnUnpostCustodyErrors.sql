@@ -7,7 +7,7 @@
 *	FROM	tblICItemLocation A CROSS APPLY dbo.fnGetItemCostingOnUnpostErrors(A.intItemId, A.intItemLocationId, A.intItemUOMId, A.dblQty) B
 * 
 */
-CREATE FUNCTION fnGetItemCostingOnUnpostErrors (@intItemId AS INT, @intItemLocationId AS INT, @intItemUOMId AS INT, @intSubLocationId AS INT, @intStorageLocationId AS INT, @dblQty AS NUMERIC(18,6) = 0, @intLotId AS INT)
+CREATE FUNCTION fnGetItemCostingOnUnpostCustodyErrors (@intItemId AS INT, @intItemLocationId AS INT, @intItemUOMId AS INT, @intSubLocationId AS INT, @intStorageLocationId AS INT, @dblQty AS NUMERIC(18,6) = 0, @intLotId AS INT)
 RETURNS TABLE 
 AS
 RETURN (
@@ -28,7 +28,7 @@ RETURN (
 								AND StockUOM.intItemLocationId = Location.intItemLocationId
 								AND ISNULL(StockUOM.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 								AND ISNULL(StockUOM.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
-					WHERE	ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0)  < 0
+					WHERE	ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblInCustody, 0)  < 0
 							AND Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 						
 				)
 

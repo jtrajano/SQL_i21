@@ -172,20 +172,40 @@ BEGIN
 				,@intTransactionTypeId 
 				,@intUserId 
 	END 
-
-	-- TODO: LIFO
-	
-	ELSE 
+	ELSE IF @CostingMethod IN (@LIFO)
 	BEGIN 
-		DECLARE @strItemNo AS NVARCHAR(50)
+		EXEC dbo.uspICPostLIFOInCustody
+				@intItemId
+				,@intItemLocationId 
+				,@intItemUOMId 
+				,@intSubLocationId 
+				,@intStorageLocationId 
+				,@dtmDate 
+				,@dblQty 
+				,@dblUOMQty 
+				,@dblCost 
+				,@dblSalesPrice 
+				,@intCurrencyId 
+				,@dblExchangeRate 
+				,@intTransactionId 
+				,@intTransactionDetailId 
+				,@strTransactionId 
+				,@strBatchId 
+				,@intTransactionTypeId 
+				,@intUserId 
+	END
+	
+	--ELSE 
+	--BEGIN 
+	--	DECLARE @strItemNo AS NVARCHAR(50)
 
-		SELECT	@strItemNo = strItemNo
-		FROM	dbo.tblICItem
-		WHERE	intItemId = @intItemId
+	--	SELECT	@strItemNo = strItemNo
+	--	FROM	dbo.tblICItem
+	--	WHERE	intItemId = @intItemId
 
-		-- Custody or storage for %s is not yet supported. It is currently limited to lot-tracked items.
-		RAISERROR(51144, 11, 1, @strItemNo)  
-	END 
+	--	-- Custody or storage for %s is not yet supported. It is currently limited to lot-tracked items.
+	--	RAISERROR(51144, 11, 1, @strItemNo)  
+	--END 
 
 	-----------------------------------
 	-- Update the Item Stock table

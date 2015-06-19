@@ -1,9 +1,9 @@
 ﻿/*
 ## Overview
-Tracks all stocks in a FIFO manner. Records are physically arranged in a FIFO manner using a CLUSTERED index. 
+Tracks all non-company owned stocks in a LIFO manner. Records are physically arranged in a LIFO manner using a CLUSTERED index. 
 
 ## Fields, description, and mapping. 
-*	[intInventoryFIFOId] INT NOT NULL IDENTITY
+*	[intInventoryLIFOInCustodyId] INT NOT NULL IDENTITY
 	Primay key. 
 	Maps: None 
 
@@ -70,9 +70,9 @@ Tracks all stocks in a FIFO manner. Records are physically arranged in a FIFO ma
 
 ## Source Code:
 */
-	CREATE TABLE [dbo].[tblICInventoryFIFO]
+	CREATE TABLE [dbo].[tblICInventoryLIFOInCustody]
 	(
-		[intInventoryFIFOId] INT NOT NULL IDENTITY, 
+		[intInventoryLIFOInCustodyId] INT NOT NULL IDENTITY, 
 		[intItemId] INT NOT NULL, 
 		[intItemLocationId] INT NOT NULL,
 		[intItemUOMId] INT NOT NULL,
@@ -86,15 +86,15 @@ Tracks all stocks in a FIFO manner. Records are physically arranged in a FIFO ma
 		[dtmCreated] DATETIME NULL, 
 		[intCreatedUserId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
-		CONSTRAINT [PK_tblICInventoryFIFO] PRIMARY KEY NONCLUSTERED ([intInventoryFIFOId]) 
+		CONSTRAINT [PK_tblICInventoryLIFOInCustody] PRIMARY KEY NONCLUSTERED ([intInventoryLIFOInCustodyId]) 
 	)
 	GO
 
-	CREATE CLUSTERED INDEX [IDX_tblICInventoryFIFO]
-		ON [dbo].[tblICInventoryFIFO]([dtmDate] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intInventoryFIFOId] ASC);
+	CREATE CLUSTERED INDEX [IDX_tblICInventoryLIFOInCustody]
+		ON [dbo].[tblICInventoryLIFOInCustody]([dtmDate] DESC, [intItemId] ASC, [intItemLocationId] ASC, [intInventoryLIFOInCustodyId] DESC);
 	GO
 
-	CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFO_intItemId_intLocationId]
-		ON [dbo].[tblICInventoryFIFO]([intItemId] ASC, [intItemLocationId] ASC)
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFOInCustody_intItemId_intLocationId]
+		ON [dbo].[tblICInventoryLIFOInCustody]([intItemId] ASC, [intItemLocationId] ASC)
 		INCLUDE (dtmDate, dblStockIn, dblStockOut, dblCost);
 	GO

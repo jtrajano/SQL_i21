@@ -1729,6 +1729,14 @@
     <Build Include="dbo\Tables\tblCTContractPlanDetail.sql" />
     <Build Include="dbo\Tables\tblSMCompanyPreference.sql" />
     <Build Include="dbo\Tables\tblMFDepartment.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLIFOInCustody.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReduceStockInLIFOCustody.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLIFOCustody.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostLIFOInCustody.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostLIFOInFromCustody.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostLIFOOutFromCustody.sql" />
+    <Build Include="dbo\Functions\fnGetItemCostingOnUnpostCustodyErrors.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateCostingOnUnpostInCustody.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
