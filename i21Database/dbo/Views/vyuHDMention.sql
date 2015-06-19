@@ -7,6 +7,7 @@
 		,intEntityContactId = con.intEntityId
 		,con.strName
 		,con.strEmail
+		,con.imgPhoto
 	from
 		tblARCustomer cu
 		--left outer join tblARCustomerToContact cc on cc.intEntityCustomerId = cu.intEntityCustomerId
@@ -21,6 +22,7 @@
 		,intEntityContactId = con.intEntityId
 		,con.strName
 		,con.strEmail
+		,con.imgPhoto
 	from
 		tblSMUserSecurity us
 		left outer join tblEntity con on con.intEntityId = us.intEntityId

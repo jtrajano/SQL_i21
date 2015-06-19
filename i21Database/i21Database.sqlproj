@@ -1740,6 +1740,9 @@
     <Build Include="dbo\Stored Procedures\uspLGShipmentUpdatePurchaseContractReceivedQty.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionCertificateReport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionReport.sql" />
+    <Build Include="dbo\Functions\fnARFormatCustomerAddress.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceReport.sql" />
+    <Build Include="dbo\Views\vyuARSalesOrderReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
