@@ -1747,6 +1747,12 @@
     <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionPurchaseInfoReport.sql" />
     <Build Include="dbo\Views\vyuCTContractDetailItemStockView.sql" />
     <Build Include="dbo\Views\vyuLGShipmentPurchaseContracts.sql" />
+    <Build Include="dbo\Tables\tblRKOptionsMatchPnS.sql" />
+    <Build Include="dbo\Tables\tblRKOptionsMatchPnSHeader.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSavePnsOptionsMatched.sql" />
+    <Build Include="dbo\Views\vyuRKLOptionPSTransaction.sql" />
+    <Build Include="dbo\Views\vyuRKSOptionPSTransaction.sql" />
+    <Build Include="dbo\Views\vyuRKSOptionMatchedTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
