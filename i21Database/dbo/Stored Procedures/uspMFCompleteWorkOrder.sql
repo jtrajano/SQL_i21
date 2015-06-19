@@ -45,7 +45,8 @@ BEGIN TRY
 		,@strLotAlias nvarchar(50)
 		,@strReferenceNo nvarchar(50)
 		,@ysnPostProduction bit
-
+		,@STARTING_NUMBER_BATCH AS INT = 3
+		 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
 
@@ -355,6 +356,12 @@ BEGIN TRY
 			,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
 			,@strRetBatchId = @strRetBatchId OUTPUT
 	END
+
+	If @strRetBatchId is null
+	Begin
+		-- Get the next batch number
+		EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strRetBatchId OUTPUT  
+	End
 
 	EXEC dbo.uspMFValidateCreateLot @strLotNumber = @strOutputLotNumber
 		,@dtmCreated = @dtmPlannedDate
