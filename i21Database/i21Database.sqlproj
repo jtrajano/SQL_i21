@@ -1727,6 +1727,12 @@
     <Build Include="dbo\Tables\tblCTContractPlanDetail.sql" />
     <Build Include="dbo\Tables\tblSMCompanyPreference.sql" />
     <Build Include="dbo\Tables\tblMFDepartment.sql" />
+    <Build Include="dbo\Views\vyuARCustomerPaymentHistoryReport.sql" />
+    <Build Include="dbo\Views\vyuARSalesAnalysisReport.sql" />
+    <Build Include="dbo\Views\vyuARUnappliedCreditsRegister.sql" />
+    <Build Include="dbo\Views\vyuARGetLostQuoteCompetitors.sql" />
+    <Build Include="dbo\Views\vyuARGetLostQuoteReasons.sql" />
+    <Build Include="dbo\Views\vyuARTaxReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
