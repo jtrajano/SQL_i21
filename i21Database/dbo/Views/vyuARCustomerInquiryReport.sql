@@ -31,14 +31,8 @@ SELECT A.strCustomerName
 	 , dblPendingPayment = (SELECT ISNULL(SUM(CASE WHEN strTransactionType <> 'Invoice' THEN ISNULL(dblInvoiceTotal,0) * -1 ELSE ISNULL(dblInvoiceTotal,0) END), 0) FROM tblARInvoice WHERE intEntityCustomerId = A.intEntityCustomerId AND ysnPosted = 0)
 	 , dblCreditLimit = (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
 	 , strTerm
-	 , strContact = (SELECT strFullAddress = ISNULL(RTRIM(C.strPhone) + CHAR(13) + char(10), '')
-										   + ISNULL(RTRIM(E.strEmail) + CHAR(13) + char(10), '')
-										   + ISNULL(RTRIM(C.strBillToLocationName) + CHAR(13) + char(10), '')
-										   + ISNULL(RTRIM(C.strBillToAddress) + CHAR(13) + char(10), '')
-										   + ISNULL(RTRIM(C.strBillToCity), '')
-										   + ISNULL(', ' + RTRIM(C.strBillToState), '')
-										   + ISNULL(', ' + RTRIM(C.strZipCode), '')
-										   + ISNULL(', ' + RTRIM(C.strBillToCountry), '') FROM vyuARCustomer C INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId  WHERE intEntityCustomerId = A.intEntityCustomerId)	 
+	 , strContact = (SELECT strFullAddress = [dbo].fnARFormatCustomerAddress(C.strPhone, E.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry)
+					 FROM vyuARCustomer C INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId  WHERE intEntityCustomerId = A.intEntityCustomerId)	 
 FROM
 (SELECT I.dtmDate AS dtmDate
 	  , I.strInvoiceNumber

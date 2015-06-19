@@ -1737,6 +1737,9 @@
     <Build Include="dbo\Tables\tblFRArchive.sql" />
     <Build Include="dbo\Tables\tblCFTransactionTax.sql" />
     <Build Include="dbo\Views\vyuCFTaxes.sql" />
+    <Build Include="dbo\Functions\fnARFormatCustomerAddress.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceReport.sql" />
+    <Build Include="dbo\Views\vyuARSalesOrderReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

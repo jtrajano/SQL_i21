@@ -25,22 +25,8 @@ SELECT strRecordNumber
 	 , CAT.strDescription AS strCategoryName
      , E.strName AS strCustomerName
 	 , ESP.strName AS strSalespersonName	 
-	 , strBillTo =  ISNULL(RTRIM(E.strPhone) + CHAR(13) + char(10), '')
-				  + ISNULL(RTRIM(E.strEmail) + CHAR(13) + char(10), '')
-				  + ISNULL(RTRIM(A.strBillToLocationName) + CHAR(13) + char(10), '')
-				  + ISNULL(RTRIM(A.strBillToAddress) + CHAR(13) + char(10), '')
-				  + ISNULL(RTRIM(A.strBillToCity), '')
-				  + ISNULL(', ' + RTRIM(A.strBillToState), '')
-				  + ISNULL(', ' + RTRIM(A.strBillToZipCode), '')
-				  + ISNULL(', ' + RTRIM(A.strBillToCountry), '')
-	 , strShipTo =  ISNULL(RTRIM(E.strPhone) + CHAR(13) + char(10), '')
-				  + ISNULL(RTRIM(E.strEmail) + CHAR(13) + char(10), '')
-				  + ISNULL(RTRIM(A.strShipToLocationName) + CHAR(13) + char(10), '')
-				  + ISNULL(RTRIM(A.strShipToAddress) + CHAR(13) + char(10), '')
-				  + ISNULL(RTRIM(A.strShipToCity), '')
-				  + ISNULL(', ' + RTRIM(A.strShipToState), '')
-				  + ISNULL(', ' + RTRIM(A.strShipToZipCode), '')
-				  + ISNULL(', ' + RTRIM(A.strShipToCountry), '')
+	 , strBillTo = [dbo].fnARFormatCustomerAddress(E.strPhone, E.strEmail, A.strBillToLocationName, A.strBillToAddress, A.strBillToCity, A.strBillToState, A.strBillToZipCode, A.strBillToCountry)
+	 , strShipTo = [dbo].fnARFormatCustomerAddress(E.strPhone, E.strEmail, A.strShipToLocationName, A.strShipToAddress, A.strShipToCity, A.strShipToState, A.strShipToZipCode, A.strShipToCountry)
 FROM
 (SELECT I.strInvoiceNumber AS strRecordNumber
 	  , I.intInvoiceId AS intTransactionId
