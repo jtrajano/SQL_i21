@@ -118,7 +118,7 @@ BEGIN TRY
 		AND dtmPlannedDate = @dtmPlannedDate
 		AND intStatusId <>13
 
-		if @intExecutionOrder>@intMaxExecutionOrder
+		if @intExecutionOrder>@intMaxExecutionOrder or 0>@intExecutionOrder
 		Begin
 			RAISERROR (
 				51146
