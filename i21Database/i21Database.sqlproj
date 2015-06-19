@@ -1737,6 +1737,8 @@
     <Build Include="dbo\Stored Procedures\uspICUnpostLIFOOutFromCustody.sql" />
     <Build Include="dbo\Functions\fnGetItemCostingOnUnpostCustodyErrors.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateCostingOnUnpostInCustody.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateCostingOnPostInCustody.sql" />
+    <Build Include="dbo\Functions\fnGetItemCostingOnPostCustodyErrors.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

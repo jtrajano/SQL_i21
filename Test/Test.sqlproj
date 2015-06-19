@@ -721,6 +721,10 @@
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOOutFromCustody for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostLIFOOutFromCustody for add-sell-unpost sell.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostCustody on LIFO Costing for a successful unpost.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCustody on LIFO Costing for two incoming stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCustody on LIFO Costing for an outgoing stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCustody on LIFO Costing for one incoming stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCustody on LIFO Costing for outgoing stock and it does not allow negative stock.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

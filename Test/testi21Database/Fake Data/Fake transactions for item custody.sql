@@ -194,16 +194,22 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransactionInCustody', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;
 
+	-- Recreate the clustered indexes
+	CREATE CLUSTERED INDEX [IDX_tblICInventoryLIFOInCustody_Unit_Test]
+		ON [dbo].[tblICInventoryLIFOInCustody]([dtmDate] DESC, [intItemId] ASC, [intItemLocationId] ASC, [intInventoryLIFOInCustodyId] DESC);
+
+	CREATE CLUSTERED INDEX [IDX_tblICInventoryFIFOInCustody_Unit_Test]
+		ON [dbo].[tblICInventoryFIFOInCustody]([dtmDate] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intInventoryFIFOInCustodyId] ASC);
+
+	CREATE CLUSTERED INDEX [IDX_tblICInventoryLotInCustody_Unit_Test]
+		ON [dbo].[tblICInventoryLotInCustody]([intInventoryLotInCustodyId] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intLotId] ASC, [intItemUOMId] ASC);
+
 	-- Declare fake lot ids
 	DECLARE @Lot_1 AS INT = 1
 			,@Lot_2 AS INT = 2
 			,@Lot_3 AS INT = 3
 			,@Lot_4 AS INT = 4
 			,@Lot_5 AS INT = 5
-
-	-- Re-create the index
-	CREATE CLUSTERED INDEX [Fake_IDX_tblICInventoryLotInCustody]
-		ON [dbo].[tblICInventoryLotInCustody]([intInventoryLotInCustodyId] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intLotId] ASC, [intItemUOMId] ASC);
 
 	-- Fake data for tblICInventoryLotInCustody (the cost bucket for custody items)
 	BEGIN
@@ -374,7 +380,8 @@ BEGIN
 				, dtmDate = 'May 3, 2015'
 				, dblStockIn = 1600
 				, dblStockOut = 0 
-				, dblCost = 55.00				
+				, dblCost = 55.00	
+
 	END 
 
 	-- Fake data for item stock table

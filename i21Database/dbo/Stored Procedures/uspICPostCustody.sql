@@ -59,7 +59,7 @@ DECLARE @AVERAGECOST AS INT = 1
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	EXEC dbo.uspICValidateCostingOnPost
+	EXEC dbo.uspICValidateCostingOnPostInCustody
 		@ItemsToValidate = @ItemsInCustody
 END
 
