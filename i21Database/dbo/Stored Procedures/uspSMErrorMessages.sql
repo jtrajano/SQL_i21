@@ -582,3 +582,7 @@ EXEC sp_addmessage 51144,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51145) EXEC sp_dropmessage 51145, 'us_english'	
 SET @strmessage = 'Cannot have the same item and weight UOM. Please remove the weight UOM for %s with lot number %s.'
 EXEC sp_addmessage 51145,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51146) EXEC sp_dropmessage 51146, 'us_english'	
+SET @strmessage = 'Execution order entered is out of range.'
+EXEC sp_addmessage 51146,11,@strmessage,'us_english','False'
