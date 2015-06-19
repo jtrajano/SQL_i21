@@ -1753,6 +1753,7 @@
     <Build Include="dbo\Views\vyuRKLOptionPSTransaction.sql" />
     <Build Include="dbo\Views\vyuRKSOptionPSTransaction.sql" />
     <Build Include="dbo\Views\vyuRKSOptionMatchedTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCloseWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
