@@ -3,17 +3,17 @@ PRINT 'BEGIN UPDATE CONTACT MENU'
 IF EXISTS (SELECT TOP 1 1 FROM tblEntityPortalMenu)
 BEGIN
 	EXEC('
-	update tblEntityPortalMenu set strEntityType = ''Customer'' where intEntityPortalMenuId = 1 and strPortalMenuName = ''Help Desk''
+	update tblEntityPortalMenu set strEntityType = '''' where intEntityPortalMenuId = 1 and strPortalMenuName = ''Help Desk''
 update tblEntityPortalMenu set strEntityType = ''Customer'' where intEntityPortalMenuId = 2 and strPortalMenuName = ''Billing Account''
 update tblEntityPortalMenu set strEntityType = ''Customer'' where intEntityPortalMenuId = 3 and strPortalMenuName = ''Grain Account''
 update tblEntityPortalMenu set strEntityType = ''Customer'' where intEntityPortalMenuId = 4 and strPortalMenuName = ''Contact''
 update tblEntityPortalMenu set strEntityType = ''Vendor'' where intEntityPortalMenuId = 5 and strPortalMenuName = ''Vendor''
 update tblEntityPortalMenu set strEntityType = ''Customer'' where intEntityPortalMenuId = 6 and strPortalMenuName = ''Payment Request''
 update tblEntityPortalMenu set strEntityType = ''Vendor'' where intEntityPortalMenuId = 7 and strPortalMenuName = ''Approver''
-update tblEntityPortalMenu set strEntityType = ''Customer'' where intEntityPortalMenuId = 8 and strPortalMenuName = ''Create Ticket''
-update tblEntityPortalMenu set strEntityType = ''Customer'' where intEntityPortalMenuId = 9 and strPortalMenuName = ''Tickets''
-update tblEntityPortalMenu set strEntityType = ''Customer'' where intEntityPortalMenuId = 10 and strPortalMenuName = ''Open Tickets''
-update tblEntityPortalMenu set strEntityType = ''Customer'' where intEntityPortalMenuId = 11 and strPortalMenuName = ''Tickets Reported by Me''
+update tblEntityPortalMenu set strEntityType = '''' where intEntityPortalMenuId = 8 and strPortalMenuName = ''Create Ticket''
+update tblEntityPortalMenu set strEntityType = '''' where intEntityPortalMenuId = 9 and strPortalMenuName = ''Tickets''
+update tblEntityPortalMenu set strEntityType = '''' where intEntityPortalMenuId = 10 and strPortalMenuName = ''Open Tickets''
+update tblEntityPortalMenu set strEntityType = '''' where intEntityPortalMenuId = 11 and strPortalMenuName = ''Tickets Reported by Me''
 update tblEntityPortalMenu set strEntityType = ''Customer'' where intEntityPortalMenuId = 12 and strPortalMenuName = ''Invoice Credits''
 update tblEntityPortalMenu set strEntityType = ''Customer'' where intEntityPortalMenuId = 13 and strPortalMenuName = ''Payments''
 update tblEntityPortalMenu set strEntityType = ''Customer'' where intEntityPortalMenuId = 14 and strPortalMenuName = ''Purchases''
@@ -30,7 +30,7 @@ update tblEntityPortalMenu set strEntityType = ''Customer'' where intEntityPorta
 update tblEntityPortalMenu set strEntityType = ''Customer'' where intEntityPortalMenuId = 25 and strPortalMenuName = ''Customer Contact List''
 update tblEntityPortalMenu set strEntityType = ''Vendor'' where intEntityPortalMenuId = 26 and strPortalMenuName = ''Vendor''
 update tblEntityPortalMenu set strEntityType = ''Vendor'' where intEntityPortalMenuId = 27 and strPortalMenuName = ''Bill''
-update tblEntityPortalMenu set strEntityType = ''Customer'' where intEntityPortalMenuId = 28 and strPortalMenuName = ''Project Lists''
+update tblEntityPortalMenu set strEntityType = '''' where intEntityPortalMenuId = 28 and strPortalMenuName = ''Project Lists''
 	')
 END
 
