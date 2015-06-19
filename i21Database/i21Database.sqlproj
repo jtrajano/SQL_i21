@@ -1745,6 +1745,7 @@
     <Build Include="dbo\Views\vyuARSalesOrderReport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionSalesInfoReport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionPurchaseInfoReport.sql" />
+    <Build Include="dbo\Views\vyuCTContractDetailItemStockView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
