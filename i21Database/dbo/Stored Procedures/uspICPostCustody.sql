@@ -154,24 +154,23 @@ BEGIN
 	BEGIN 
 		EXEC dbo.uspICPostFIFOInCustody
 				@intItemId
-				,@intItemLocationId
-				,@intItemUOMId
-				,@intSubLocationId
-				,@intStorageLocationId
-				,@dtmDate
-				,@intLotId
-				,@dblQty
-				,@dblUOMQty
-				,@dblCost
-				,@dblSalesPrice
-				,@intCurrencyId
-				,@dblExchangeRate
-				,@intTransactionId
-				,@intTransactionDetailId
-				,@strTransactionId
-				,@strBatchId
-				,@intTransactionTypeId
-				,@intUserId
+				,@intItemLocationId 
+				,@intItemUOMId 
+				,@intSubLocationId 
+				,@intStorageLocationId 
+				,@dtmDate 
+				,@dblQty 
+				,@dblUOMQty 
+				,@dblCost 
+				,@dblSalesPrice 
+				,@intCurrencyId 
+				,@dblExchangeRate 
+				,@intTransactionId 
+				,@intTransactionDetailId 
+				,@strTransactionId 
+				,@strBatchId 
+				,@intTransactionTypeId 
+				,@intUserId 
 	END 
 
 	-- TODO: LIFO

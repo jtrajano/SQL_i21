@@ -62,14 +62,16 @@ BEGIN
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
-				,@dblReduceQty
+				,@dtmDate
+				,@dblQty
 				,@dblCost
 				,@strTransactionId
 				,@intTransactionId
 				,@intUserId
 				,@RemainingQty OUTPUT
-				,@CostUsed OUTPUT 
+				,@CostUsed OUTPUT
 				,@UpdatedCostBucketInCustodyId OUTPUT
+
 			IF @@ERROR <> 0 GOTO _Exit
 
 			-- Insert the inventory transaction record
@@ -116,12 +118,14 @@ BEGIN
 			,@intItemLocationId
 			,@intItemUOMId
 			,@dtmDate
-			,@dblAddQty
+			,@dblQty
 			,@dblCost
+			,@intUserId
 			,@strTransactionId
 			,@intTransactionId
-			,@intUserId
 			,@NewInventoryCostBucketCustodyId OUTPUT 
+
+
 		IF @@ERROR <> 0 GOTO _Exit
 
 		EXEC [dbo].[uspICPostInventoryTransactionInCustody]

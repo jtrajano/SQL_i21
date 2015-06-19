@@ -206,7 +206,7 @@ BEGIN
 				CONVERT(varchar(8),RTRIM(glfsf_grp_end1_8)),		--1 to 8 end for ranges
 				CASE												--9-16 end 
 					WHEN glfsf_grp_sub9_16 LIKE ''%*%'' THEN CONVERT(VARCHAR(8),''99999999'')
-					ELSE CONVERT(varchar(8),RTRIM(glfsf_grp_sub9_16))
+					ELSE CONVERT(varchar(8),ISNULL(RTRIM(glfsf_grp_sub9_16),''0''))
 					END
 				FROM glfsfmst 
 					INNER JOIN tblFRRow on tblFRRow.strDescription = CONVERT(VARCHAR(12),glfsfmst.glfsf_no)
@@ -220,15 +220,17 @@ BEGIN
 			SELECT @1_8size = (SELECT MAX(LEN(glact_acct1_8)) FROM glactmst)		--SELECT * FROM glactmst
 			SELECT @9_16size = (SELECT MAX(LEN(glact_acct9_16)) FROM glactmst)		--SELECT * FROM glactmst
 			SELECT @SQL = ''update #irelyloadFRRowDesign set full_account=right('' + '''''''' + ''00000000'' + '''''''' + ''+acct1_8,'' + @1_8size + '')+'' + '''''''' + ''-'' + '''''''' + ''+right('' + '''''''' + ''00000000'' + '''''''' + ''+acct9_16,'' + @9_16size + '')''
+			
+			--SELECT @SQL --debug
 			EXEC (@SQL)
 
-			--SELECT @SQL --debug
 			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + '' [ID] = '' + '''''''' + ''+'' +
-							+ '''''''' + '''''''' + '''''''' + '''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8) +'' + '''''''' + ''-'' + '''''''' + ''+ convert (varchar('' + @9_16size + ''),acct9_16)'' + ''+'' + '''''''' + '''''''' + '''''''' + '''''''' + 
+							+ '''''''' + '''''''' + '''''''' + '''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8) +'' + '''''''' + ''-'' + '''''''' + ''+ CASE WHEN LEN(acct9_16) = 1 THEN replicate(''''0'''',('' + @9_16size + '')-1)+acct9_16 ELSE convert (varchar('' + @9_16size + ''),acct9_16) END '' + ''+'' + '''''''' + '''''''' + '''''''' + '''''''' + 
 							''WHERE glfsf_action_type in ('' +
 							'''''''' + ''ACP'' + '''''''' + '','' +
 							'''''''' + ''GRA'' + '''''''' + '','' +
 							'''''''' + ''ACA'' + '''''''' + '')''
+			
 			--SELECT @SQL --debug
 			EXEC (@SQL)
 
@@ -236,6 +238,8 @@ BEGIN
 							+ '''''''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''''''''''' + '' AND ''
 							+ '''''''''''''''' + ''+ convert (varchar('' + @1_8size + ''),acct1_8end)'' + '' + ''''''''''''''''''
 							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRP'' + ''''''''
+			
+			--SELECT @SQL --debug
 			EXEC (@SQL)
 
 			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + '' [Primary Account] = '' 
@@ -650,8 +654,8 @@ BEGIN
 								intRefNo,'' +
 								'''''''' + ''Primary Account'' + '''''''' + '','' +
 								'''''''' + ''Between'' + '''''''' + '',
-								substring(strAccountsUsed,31,'' + @1_8size + ''),
-								substring(strAccountsUsed,'' + CONVERT(VARCHAR(2),36 + CONVERT(INT,(@1_8size))) + '','' + @1_8size + ''),''
+								substring(strAccountsUsed,28,'' + @1_8size + ''),
+								substring(strAccountsUsed,'' + CONVERT(VARCHAR(2),35 + CONVERT(INT,(@1_8size))) + '','' + @1_8size + ''),''
 								+ '''''''' + '''''''' + '' ,
 								intRowDetailId
 							FROM tblFRRowDesign
@@ -687,6 +691,7 @@ BEGIN
 			UPDATE tblFRRowDesign SET strBalanceSide = '''' WHERE strBalanceSide IS NULL
 			UPDATE tblFRRowDesign SET strRelatedRows = '''' WHERE strRelatedRows IS NULL
 			UPDATE tblFRRowDesign SET strAccountsUsed = '''' WHERE strAccountsUsed IS NULL
+			UPDATE tblFRRowDesign SET strBalanceSide = '''' WHERE strRowType = ''Row Calculation''
  
 			SELECT * INTO #TempRowDesign FROM tblFRRowDesign where intRowId = @introwiddet order by intRefNo
  

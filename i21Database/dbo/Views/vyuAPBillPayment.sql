@@ -1,4 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuAPBillPayment]
+WITH SCHEMABINDING
 AS
 SELECT 
 A.intBillId
@@ -13,20 +14,33 @@ A.intBillId
 ,A.ysnPosted
 ,A.ysnPaid
 ,A.ysnOrigin
-FROM tblAPBill A
+,Payments.ysnPrinted
+,Payments.ysnVoid
+,Payments.strPaymentInfo
+,Payments.strBankAccountNo
+,Payments.intPaymentId
+,Payments.dtmDatePaid
+FROM dbo.tblAPBill A
 	LEFT JOIN 
 	(
 		SELECT 
 			B.[intEntityVendorId]
+			,B.intPaymentId
 			,C.intBillId
 			,SUM(dblPayment) dblPayment
 			,SUM(dblDiscount) dblDiscount
 			,SUM(dblInterest) dblInterest
 			,SUM(C.dblWithheld) dblWithheld
-		FROM tblAPPayment B 
-			LEFT JOIN tblAPPaymentDetail C 
-		ON B.intPaymentId = C.intPaymentId
+			,B.strPaymentInfo
+			,G.strBankAccountNo
+			,CAST(CASE WHEN H.dtmCheckPrinted IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS ysnPrinted
+			,ISNULL(H.ysnCheckVoid,0) AS ysnVoid
+			,B.dtmDatePaid
+		FROM dbo.tblAPPayment B 
+			LEFT JOIN dbo.tblAPPaymentDetail C ON B.intPaymentId = C.intPaymentId
+		INNER JOIN dbo.tblCMBankAccount G ON B.intAccountId = G.intGLAccountId
+		INNER JOIN dbo.tblCMBankTransaction H ON B.strPaymentRecordNum = H.strTransactionId
 		WHERE B.ysnPosted = 1
-		GROUP BY [intEntityVendorId], intBillId
+		GROUP BY [intEntityVendorId], intBillId, H.dtmCheckPrinted, H.ysnCheckVoid, G.strBankAccountNo, B.strPaymentInfo, B.intPaymentId, B.dtmDatePaid
 	) Payments
 	ON A.intBillId = Payments.intBillId

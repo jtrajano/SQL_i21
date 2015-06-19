@@ -6,6 +6,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[intCommodityId] [int] NOT NULL,
 	[dblQuantity] [numeric](24, 4) NOT NULL,
 	[intCommodityUnitMeasureId] [int] NOT NULL,
+	[intCommodityUOMId] INT NULL, 
 	[intContractNumber] [int] NOT NULL,
 	[dtmContractDate] [datetime] NOT NULL,
 	[strCustomerContract] [nvarchar](30) COLLATE Latin1_General_CI_AS NULL,
@@ -38,6 +39,12 @@ CREATE TABLE [dbo].[tblCTContractHeader](
     [intINCOLocationTypeId] INT NULL, 
     [intCountryId] INT NULL, 
     [intCompanyLocationPricingLevelId] INT NULL, 
+    [ysnProvisional] BIT NULL, 
+    [ysnLoad] BIT NULL, 
+    [intNoOfLoad] INT NULL, 
+    [dblQuantityPerLoad] NUMERIC(18, 4) NULL, 
+    [intLoadUnitMeasureId] INT NULL, 
+    [intLoadUOMId] INT NULL, 
     CONSTRAINT [PK_tblCTContractHeader_intContractHeaderId] PRIMARY KEY CLUSTERED ([intContractHeaderId] ASC), 	
 	CONSTRAINT [UQ_tblCTContractHeader_intContractTypeId_intContractNumber] UNIQUE ([intContractTypeId], [intContractNumber]), 
 	CONSTRAINT [FK_tblCTContractHeader_tblCTAssociation_intAssociationId] FOREIGN KEY ([intAssociationId]) REFERENCES [tblCTAssociation]([intAssociationId]),
@@ -49,7 +56,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	CONSTRAINT [FK_tblCTContractHeader_tblCTWeightGrade_intWeightGradeId_intGradeId] FOREIGN KEY([intGradeId])REFERENCES [tblCTWeightGrade] ([intWeightGradeId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblCTWeightGrade_intWeightGradeId_intWeightId] FOREIGN KEY([intWeightId])REFERENCES [tblCTWeightGrade] ([intWeightGradeId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblICCommodity_intCommodityId] FOREIGN KEY([intCommodityId])REFERENCES [tblICCommodity] ([intCommodityId]),
-	CONSTRAINT [FK_tblCTContractHeader_tblICCommodityUnitMeasure_intCommodityUnitMeasureId] FOREIGN KEY([intCommodityUnitMeasureId])REFERENCES [tblICUnitMeasure] ([intUnitMeasureId]),
+	
 	CONSTRAINT [FK_tblCTContractHeader_tblCTPricingType_intPricingTypeId] FOREIGN KEY ([intPricingTypeId]) REFERENCES [tblCTPricingType]([intPricingTypeId]),
 
 	CONSTRAINT [FK_tblCTContractHeader_tblCTApprovalBasis_intApprovalBasisId] FOREIGN KEY ([intApprovalBasisId]) REFERENCES [tblCTApprovalBasis]([intApprovalBasisId]),
@@ -58,7 +65,12 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	CONSTRAINT [FK_tblCTContractHeader_tblCTInsuranceBy_intInsuranceById] FOREIGN KEY ([intInsuranceById]) REFERENCES [tblCTInsuranceBy]([intInsuranceById]),
 	CONSTRAINT [FK_tblCTContractHeader_tblCTInvoiceType_intInvoiceTypeId] FOREIGN KEY ([intInvoiceTypeId]) REFERENCES [tblCTInvoiceType]([intInvoiceTypeId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblCTContractType_intContractTypeId] FOREIGN KEY ([intContractTypeId]) REFERENCES [tblCTContractType]([intContractTypeId]),
-	CONSTRAINT [FK_tblCTContractHeader_tblSMCompanyLocationPricingLevel_intCompanyLocationPricingLevelId] FOREIGN KEY ([intCompanyLocationPricingLevelId]) REFERENCES [tblSMCompanyLocationPricingLevel]([intCompanyLocationPricingLevelId])
+	CONSTRAINT [FK_tblCTContractHeader_tblSMCompanyLocationPricingLevel_intCompanyLocationPricingLevelId] FOREIGN KEY ([intCompanyLocationPricingLevelId]) REFERENCES [tblSMCompanyLocationPricingLevel]([intCompanyLocationPricingLevelId]),
+
+	CONSTRAINT [FK_tblCTContractHeader_tblICUnitMeasure_intCommodityUnitMeasureId_intUnitMeasureId] FOREIGN KEY([intCommodityUnitMeasureId])REFERENCES [tblICUnitMeasure] ([intUnitMeasureId]),
+	CONSTRAINT [FK_tblCTContractHeader_tblICCommodityUnitMeasure_intCommodityUOMId_intCommodityUnitMeasureId] FOREIGN KEY([intCommodityUOMId])REFERENCES [tblICCommodityUnitMeasure] ([intCommodityUnitMeasureId]),
+	CONSTRAINT [FK_tblCTContractHeader_tblICUnitMeasure_intLoadUnitMeasureId_intUnitMeasureId] FOREIGN KEY([intLoadUnitMeasureId])REFERENCES [tblICUnitMeasure] ([intUnitMeasureId]),
+	CONSTRAINT [FK_tblCTContractHeader_tblICCommodityUnitMeasure_intLoadUOMId_intCommodityUnitMeasureId] FOREIGN KEY([intLoadUOMId])REFERENCES [tblICCommodityUnitMeasure] ([intCommodityUnitMeasureId]),
 )
 
 

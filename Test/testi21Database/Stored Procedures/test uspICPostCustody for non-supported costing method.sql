@@ -206,6 +206,10 @@ BEGIN
 		FROM	dbo.tblICInventoryTransactionType
 		WHERE	strName = 'Inventory Receipt'
 
+		-- Manually change the costing method to LIFO 
+		UPDATE	dbo.tblICItemLocation
+		SET		intCostingMethod = @LIFO
+
 		-- Setup the items to post
 		INSERT INTO @ItemsToPost (
 				intItemId 

@@ -1062,7 +1062,6 @@
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\Views\vyuICGetReceiptItemSource.sql" />
-    <Build Include="dbo\Views\vyuAPBillLatestPayment.sql" />
     <Build Include="dbo\Tables\tblHDAnnouncementType.sql" />
     <Build Include="dbo\Tables\tblHDAnnouncement.sql" />
     <Build Include="dbo\Tables\tblHDProject.sql" />
@@ -1106,7 +1105,6 @@
     <Build Include="dbo\Stored Procedures\uspICCreatePOInventoryTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICLogItemStockPath.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryTransaction.sql" />
-    <Build Include="dbo\Views\vyuAPBillLatestPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspARCreateOverPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspARDeleteOverPayment.sql" />
     <Build Include="dbo\Tables\tblSMTaxClass.sql" />
@@ -1647,6 +1645,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetContainerByContainerType.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetActualItemByProduct.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetAttributeByManufacturingProcess.sql" />
+    <Build Include="dbo\Tables\tblSMTaxCodeRate.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostLotInFromCustody.sql" />
@@ -1700,7 +1699,7 @@
     <Build Include="dbo\Views\vyuICGetInventoryReceiptCharge.sql" />
     <Build Include="dbo\Views\vyuICGetOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGenerateDynamicXML.sql" />
-    <Build Include="dbo\Views\vwGLChartOfAccounts.sql" />
+    <Build Include="dbo\Views\vyuGLChartOfAccounts.sql" />
     <Build Include="dbo\Tables\tblMFBlendRequirementRule.sql" />
     <Build Include="dbo\Tables\tblMFBlendSheetRuleValue.sql" />
     <Build Include="dbo\Tables\tblMFBlendSheetRule.sql" />
@@ -1723,12 +1722,13 @@
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostLotMove.sql" />
     <Build Include="dbo\Views\vyuICGetItemCommodity.sql" />
     <Build Include="dbo\Tables\tblCFImportLog.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostFIFOInFromCustody.sql">
-      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
-    </Build>
-    <Build Include="dbo\Stored Procedures\uspICUnpostFIFOOutFromCustody.sql">
-      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
-    </Build>
+    <Build Include="dbo\Stored Procedures\uspICUnpostFIFOInFromCustody.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostFIFOOutFromCustody.sql" />
+    <Build Include="dbo\Tables\tblARCustomerFailedImport.sql" />
+    <Build Include="dbo\Tables\tblCTContractPlan.sql" />
+    <Build Include="dbo\Tables\tblCTContractPlanDetail.sql" />
+    <Build Include="dbo\Tables\tblSMCompanyPreference.sql" />
+    <Build Include="dbo\Tables\tblMFDepartment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
