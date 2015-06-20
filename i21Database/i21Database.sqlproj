@@ -1754,6 +1754,8 @@
     <Build Include="dbo\Views\vyuRKSOptionPSTransaction.sql" />
     <Build Include="dbo\Views\vyuRKSOptionMatchedTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCloseWorkOrder.sql" />
+    <Build Include="dbo\Views\vyuLGShipmentContainerPurchaseContracts.sql" />
+    <Build Include="dbo\Views\vyuLGShipmentContainerReceiptContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
