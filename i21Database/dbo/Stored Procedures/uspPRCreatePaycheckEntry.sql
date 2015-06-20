@@ -3,6 +3,7 @@
 	,@dtmBeginDate	DATETIME
 	,@dtmEndDate	DATETIME
 	,@dtmPayDate	DATETIME
+	,@intPayGroupId	INT = NULL
 	,@intPaycheckId	INT = NULL OUTPUT
 AS
 BEGIN
@@ -12,12 +13,14 @@ DECLARE @intEmployee INT
 	   ,@dtmBegin DATETIME
 	   ,@dtmEnd DATETIME
 	   ,@dtmPay DATETIME
+	   ,@intPayGroup INT
 
 /* Localize Parameters for Optimal Performance */
 SELECT @intEmployee	= @intEmployeeId
 	  ,@dtmBegin	= @dtmBeginDate
 	  ,@dtmEnd		= @dtmEndDate
 	  ,@dtmPay		= @dtmPayDate
+	  ,@intPayGroup = @intPayGroupId
 
 /* Get Paycheck Starting Number */
 DECLARE @strPaycheckId NVARCHAR(50)
@@ -177,12 +180,15 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 		FROM tblPREmployeeEarning
 		WHERE intEmployeeId = @intEmployee
 		  AND intEmployeeEarningId = @intEmployeeEarningId
-		  AND ysnDefault = 1
+		  AND ysnDefault = CASE WHEN @intPayGroup IS NULL THEN 1 ELSE ysnDefault END
+		  AND intPayGroupId = CASE WHEN @intPayGroup IS NULL THEN intPayGroupId ELSE @intPayGroup END
 
 		/* Get the Created Paycheck Earning Id*/
 		SELECT @intPaycheckEarningId = @@IDENTITY
 
-		IF EXISTS(SELECT TOP 1 1 FROM tblPREmployeeEarning WHERE intEmployeeEarningId = @intEmployeeEarningId AND ysnDefault = 1)
+		IF EXISTS(SELECT TOP 1 1 FROM tblPREmployeeEarning WHERE intEmployeeEarningId = @intEmployeeEarningId 
+			AND ysnDefault = CASE WHEN @intPayGroup IS NULL THEN 1 ELSE ysnDefault END
+			AND intPayGroupId = CASE WHEN @intPayGroup IS NULL THEN intPayGroupId ELSE @intPayGroup END)
 			BEGIN
 				/* Insert Paycheck Earning Taxes */
 				INSERT INTO tblPRPaycheckEarningTax
