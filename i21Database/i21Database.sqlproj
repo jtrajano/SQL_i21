@@ -1758,6 +1758,7 @@
     <Build Include="dbo\Views\vyuLGShipmentContainerReceiptContracts.sql" />
     <Build Include="dbo\Tables\tblRKOptionsPnSExpired.sql" />
     <Build Include="dbo\Views\vyuRKSOptionExpiredTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGShipmentUpdateContainerReceivedQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
