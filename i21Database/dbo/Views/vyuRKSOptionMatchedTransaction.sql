@@ -20,7 +20,8 @@ Join tblRKBrokerageAccount b on b.intBrokerageAccountId=t.intBrokerageAccountId
 Join tblRKFutureMarket fm on fm.intFutureMarketId = t.intFutureMarketId
 JOIN tblRKOptionsMonth om on om.intOptionMonthId=t.intOptionMonthId
 join tblICCommodity ic on ic.intCommodityId=t.intCommodityId
-JOIN tblCTBook cb on cb.intBookId= t.intBookId
-join tblCTSubBook csb on csb.intSubBookId=t.intSubBookId
 JOIN tblSMCompanyLocation scl on scl.intCompanyLocationId=t.intLocationId
+LEFT JOIN tblCTBook cb on cb.intBookId= t.intBookId
+LEFT join tblCTSubBook csb on csb.intSubBookId=t.intSubBookId
+
 

@@ -1756,6 +1756,8 @@
     <Build Include="dbo\Stored Procedures\uspMFCloseWorkOrder.sql" />
     <Build Include="dbo\Views\vyuLGShipmentContainerPurchaseContracts.sql" />
     <Build Include="dbo\Views\vyuLGShipmentContainerReceiptContracts.sql" />
+    <Build Include="dbo\Tables\tblRKOptionsPnSExpired.sql" />
+    <Build Include="dbo\Views\vyuRKSOptionExpiredTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

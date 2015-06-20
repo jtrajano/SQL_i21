@@ -10,7 +10,7 @@ SELECT strInternalTradeNo,dtmTransactionDate,dtmFilledDate,strFutMarketName,strO
  dblOpenLots*dblDelta*dblContractSize AS dblDeltaHedge,intFutOptTransactionId,
  strHedgeUOM,strBuySell
   FROM (
-SELECT intTotalLot-dblSelectedLot1 AS dblOpenLots,'' as dblSelectedLot,
+SELECT (intTotalLot-dblSelectedLot1)-intExpiredLots AS dblOpenLots,'' as dblSelectedLot,
 		-(intTotalLot-dblSelectedLot1)*dblContractSize*dblPremium  as dblPremiumValue,
 		-dblOptCommission*(intTotalLot-dblSelectedLot1) AS dblCommission,* from  (
 SELECT DISTINCT
@@ -22,7 +22,7 @@ SELECT DISTINCT
       ,e.strName as strName
       ,ba.strAccountNumber
       ,ot.intNoOfContract as intTotalLot
-      ,IsNull((SELECT SUM (AD.intMatchQty) from tblRKOptionsMatchPnS AD Group By AD.intLFutOptTransactionId 
+      ,IsNull((SELECT SUM(AD.intMatchQty) from tblRKOptionsMatchPnS AD Group By AD.intLFutOptTransactionId 
                   Having ot.intFutOptTransactionId = AD.intLFutOptTransactionId), 0) as dblSelectedLot1
       ,ot.strOptionType
       ,ot.dblStrike
@@ -46,9 +46,10 @@ SELECT DISTINCT
 	   ),0) as dblDelta
 	  ,'' as DeltaHedge
 	  ,um.strUnitMeasure as strHedgeUOM
-	  ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End strBuySell,intFutOptTransactionId   
+	  ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End strBuySell,intFutOptTransactionId 
+	  ,isnull((Select SUM(intLots) From tblRKOptionsPnSExpired ope where  ope.intFutOptTransactionId= ot.intFutOptTransactionId),0) intExpiredLots 
 FROM tblRKFutOptTransaction ot
-JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId and ot.intInstrumentTypeId=2 --and ot.strStatus='Filled' 
+JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId and ot.intInstrumentTypeId=2  
 join tblICUnitMeasure um on fm.intUnitMeasureId=um.intUnitMeasureId
 JOIN tblICCommodity ic on ic.intCommodityId=ot.intCommodityId
 JOIN tblSMCompanyLocation cl on cl.intCompanyLocationId=ot.intLocationId
@@ -59,4 +60,4 @@ JOIN tblRKBrokerageAccount ba on ot.intBrokerageAccountId=ba.intBrokerageAccount
 JOIN tblEntity e on e.intEntityId=ba.intEntityId  
 LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId
 LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId
- )t)t1  where dblOpenLots > 0 and strBuySell='B'
+ )t)t1  where dblOpenLots > 0 and strBuySell='B' 

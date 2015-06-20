@@ -16,7 +16,8 @@ Declare @strTranNo nVarchar(50)
 Declare @dtmMatchDate  datetime  
 Declare @intMatchQty int  
 Declare @intLFutOptTransactionId int  
-Declare @intSFutOptTransactionId int  
+Declare @intSFutOptTransactionId int 
+Declare @strExpiredTranNo nVarchar(50)   
 Declare @ErrMsg nvarchar(Max)
 
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml    
@@ -65,6 +66,32 @@ SELECT @strTranNo=isnull(max(strTranNo),0) from tblRKOptionsMatchPnS
 	[intSFutOptTransactionId] INT
  )   
    
+ SELECT @strExpiredTranNo=isnull(max(strTranNo),0) from tblRKOptionsPnSExpired   
+ 
+   INSERT INTO tblRKOptionsPnSExpired
+		(	
+		intOptionsMatchPnSHeaderId,
+		strTranNo,	
+		dtmExpiredDate,
+		intLots,
+		intFutOptTransactionId,
+		intConcurrencyId		
+		)  
+ SELECT  
+	@intOptionsMatchPnSHeaderId as intOptionsMatchPnSHeaderId,
+	@strExpiredTranNo + ROW_NUMBER()over(order by intFutOptTransactionId)strTranNo,
+	dtmExpiredDate,
+	intLots,
+	intFutOptTransactionId,	
+	1 as intConcurrencyId		
+  FROM OPENXML(@idoc,'root/Expired', 2)      
+ WITH    
+ ( 
+	[dtmExpiredDate]  DATETIME  , 
+    [intLots] int , 
+	[intFutOptTransactionId] INT
+ )   
+   
 Commit Tran  
   
 EXEC sp_xml_removedocument @idoc   
@@ -78,3 +105,4 @@ BEGIN CATCH
  RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')    
     
 END CATCH
+

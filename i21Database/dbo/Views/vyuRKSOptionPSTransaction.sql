@@ -10,7 +10,7 @@ SELECT strInternalTradeNo,dtmTransactionDate,dtmFilledDate,strFutMarketName,strO
  dblOpenLots*dblDelta*dblContractSize AS dblDeltaHedge,
  strHedgeUOM,strBuySell
   FROM (
-SELECT intTotalLot-dblSelectedLot1 AS dblOpenLots,'' as dblSelectedLot,
+SELECT (intTotalLot-dblSelectedLot1)-intExpiredLots AS dblOpenLots,'' as dblSelectedLot,
 		-(intTotalLot-dblSelectedLot1)*dblContractSize*dblPremium  as dblPremiumValue,
 		-dblOptCommission*(intTotalLot-dblSelectedLot1) AS dblCommission,* from  (
 SELECT DISTINCT
@@ -46,7 +46,8 @@ SELECT DISTINCT
 	   ),0) as dblDelta
 	  ,'' as DeltaHedge
 	  ,um.strUnitMeasure as strHedgeUOM
-	  ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End strBuySell,intFutOptTransactionId   
+	  ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End strBuySell,intFutOptTransactionId,
+	   isnull((Select SUM(intLots) From tblRKOptionsPnSExpired ope where  ope.intFutOptTransactionId= ot.intFutOptTransactionId),0) intExpiredLots    
 FROM tblRKFutOptTransaction ot
 JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId and ot.intInstrumentTypeId=2 --and ot.strStatus='Filled' 
 join tblICUnitMeasure um on fm.intUnitMeasureId=um.intUnitMeasureId
