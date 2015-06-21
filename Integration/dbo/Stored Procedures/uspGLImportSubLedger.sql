@@ -196,7 +196,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
     				@glije_date VARCHAR(20),@intAccountId INT,@intAccountId1 INT, @strDescription VARCHAR(50),@strDescription1 VARCHAR(50),@dtmDate DATE,
     				@glije_amt DECIMAL(12,2) ,@glije_units DECIMAL(16,4),@glije_dr_cr_ind CHAR(1),@glije_correcting CHAR(1),@debit DECIMAL(12,2),@credit DECIMAL(12,2),
     				@creditUnit DECIMAL(12,2),@debitUnit DECIMAL(12,2),@debitUnitInLBS DECIMAL(12,2),@creditUnitInLBS DECIMAL(12,2),@totalDebit DECIMAL(18,2),@totalCredit DECIMAL(18,2),
-    				@glije_error_desc VARCHAR(100),@glije_src_sys CHAR(3),@glije_src_no CHAR(5),@isValid BIT,@journalCount INT = 0,@orig_glije_dr_cr_ind CHAR(1)
+    				@glije_error_desc VARCHAR(100),@glije_src_sys CHAR(3),@glije_src_no CHAR(5),@isValid BIT,@journalCount INT = 0
 
     		-- INSERTS INTO THE tblGLJournal GROUPED BY glije_postdate COLUMN in tblGLIjemst
     		DECLARE cursor_postdate CURSOR LOCAL FOR  SELECT glije_postdate,glije_src_sys,glije_src_no FROM tblGLIjemst WHERE glije_uid =@uid
@@ -287,31 +287,21 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
 
     				SELECT @dtmDate =CONVERT(DATE, SUBSTRING(@glije_date,1,4) + ''/'' + SUBSTRING(@glije_date,5,2) + ''/'' + SUBSTRING(@glije_date,7,2))
     				
-					SET @orig_glije_dr_cr_ind =@glije_dr_cr_ind
-
 					IF @glije_correcting = ''Y''
     				BEGIN
     					SELECT @glije_amt *= -1
     					SELECT @glije_dr_cr_ind = CASE WHEN @glije_dr_cr_ind = ''D'' THEN ''C'' ELSE ''D'' END
     				END
 
-					
-
     				IF @glije_amt < 0
     				BEGIN
     					SELECT @glije_amt *= -1
     					SELECT @glije_dr_cr_ind = CASE WHEN @glije_dr_cr_ind = ''D'' THEN ''C'' ELSE ''D'' END
     				END
-    				--IF @glije_amt >= 0
+    				
     				IF @glije_dr_cr_ind = ''D'' SELECT @debit += @glije_amt ELSE SELECT @credit += @glije_amt
 
-					SET @glije_dr_cr_ind =@orig_glije_dr_cr_ind
-
-    				IF @glije_units < 0
-    				BEGIN
-    					SELECT @glije_units *= -1
-    					SELECT @glije_dr_cr_ind = CASE WHEN @glije_dr_cr_ind = ''D'' THEN ''C'' ELSE ''D'' END
-    				END
+					IF @glije_units < 0 SELECT @glije_units *= -1
 
     				IF @glije_dr_cr_ind = ''D''
     					SELECT @debitUnit +=@glije_units,@debitUnitInLBS += @glije_units,@creditUnit = 0,@creditUnitInLBS = 0
