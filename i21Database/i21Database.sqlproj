@@ -1772,6 +1772,7 @@
     <Build Include="dbo\Views\vyuRKSOptionExpiredTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspLGShipmentUpdateContainerReceivedQty.sql" />
     <Build Include="dbo\Views\vyuLGShippingInstructions.sql" />
+    <None Include="Scripts\Post-Deployment\GL\ReportDataFix.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
