@@ -92,6 +92,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\AccountTemplate.sql
 :r .\GL\DefaultData\AccountSegmentTemplate.sql
 :r .\GL\GLEntryDataFix.sql
+:r .\GL\ReportDataFix.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql

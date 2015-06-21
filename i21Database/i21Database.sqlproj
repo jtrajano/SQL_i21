@@ -1669,6 +1669,7 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillAmounts.sql" />
     <Build Include="dbo\Views\vyuAPBillStatus.sql" />
     <Build Include="dbo\Views\vyuARSalesAnalysisReport.sql" />
+    <None Include="Scripts\Post-Deployment\GL\ReportDataFix.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
