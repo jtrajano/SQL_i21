@@ -11,6 +11,7 @@
 [dblTareWt] NUMERIC(18, 6) NOT NULL,
 [dblNetWt] NUMERIC(18, 6) NOT NULL,
 [intWeightUnitMeasureId] INT NOT NULL,
+[dblReceivedQty] NUMERIC(18, 6) NULL,
 
 CONSTRAINT [PK_tblLGShipmentContractQty] PRIMARY KEY ([intShipmentContractQtyId]), 
 CONSTRAINT [FK_tblLGShipmentContractQty_tblLGShipment_intShipmentId] FOREIGN KEY ([intShipmentId]) REFERENCES [tblLGShipment]([intShipmentId]) ON DELETE CASCADE,

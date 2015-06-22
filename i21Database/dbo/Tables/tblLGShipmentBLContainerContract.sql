@@ -8,6 +8,7 @@
 [intShipmentContractQtyId] INT NOT NULL,
 [dblQuantity] NUMERIC(18, 6) NOT NULL,
 [intUnitMeasureId] INT NOT NULL,
+[dblReceivedQty] NUMERIC(18, 6) NULL,
 
 CONSTRAINT [PK_tblLGShipmentBLContainerContract_intShipmentBLContainerContractId] PRIMARY KEY ([intShipmentBLContainerContractId]), 
 CONSTRAINT [FK_tblLGShipmentBLContainerContract_tblLGShipment_intShipmentId] FOREIGN KEY ([intShipmentId]) REFERENCES [tblLGShipment]([intShipmentId]) ON DELETE CASCADE,

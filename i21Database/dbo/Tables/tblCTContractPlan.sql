@@ -1,8 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblCTContractPlan]
 (
 	[intContractPlanId] INT IDENTITY(1,1) NOT NULL, 
-    [strContractPlan] NVARCHAR(50) NOT NULL, 
-    [strDescription] NVARCHAR(50) NULL, 
+    [strContractPlan] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [dtmStartDate] DATETIME NULL, 
     [dtmEndDate] DATETIME NULL, 
     [ysnMaxPrice] BIT NULL, 

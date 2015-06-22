@@ -31,6 +31,7 @@ BEGIN TRY
 		,@dtmOrderDate DATETIME
 		,@dtmExpectedDate DATETIME
 		,@ysnIngredientAvailable bit
+		,@intMaxExecutionOrder int
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -105,12 +106,32 @@ BEGIN TRY
 				)
 	END
 
-	BEGIN TRANSACTION
-
 	SELECT @intPrevExecutionOrder = intExecutionOrder,@intConcurrencyId=ISNULL(intConcurrencyId,0)+1
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
+	IF @intPrevExecutionOrder <> @intExecutionOrder
+	BEGIN
+		SELECT @intMaxExecutionOrder=Count(*)
+		FROM dbo.tblMFWorkOrder
+		WHERE intManufacturingCellId = @intManufacturingCellId
+		AND dtmPlannedDate = @dtmPlannedDate
+		AND intStatusId <>13
+
+		if @intExecutionOrder>@intMaxExecutionOrder or 0>@intExecutionOrder
+		Begin
+			RAISERROR (
+				51146
+				,11
+				,1
+				)
+		End
+			
+	END
+
+	BEGIN TRANSACTION
+
+	
 	IF @intPrevExecutionOrder <> @intExecutionOrder
 	BEGIN
 		IF @intPrevExecutionOrder > @intExecutionOrder --Move upward
@@ -121,6 +142,7 @@ BEGIN TRY
 				AND dtmPlannedDate = @dtmPlannedDate
 				AND intExecutionOrder BETWEEN @intExecutionOrder
 					AND @intPrevExecutionOrder
+					AND intStatusId <>13
 		END
 		ELSE
 		BEGIN --Move downward
@@ -130,6 +152,7 @@ BEGIN TRY
 				AND dtmPlannedDate = @dtmPlannedDate
 				AND intExecutionOrder BETWEEN @intPrevExecutionOrder
 					AND @intExecutionOrder
+					AND intStatusId <>13
 		END
 	END
 
