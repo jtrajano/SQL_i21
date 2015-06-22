@@ -50,8 +50,8 @@ BEGIN
 			,@intEndOffset as intEndOffset
 			,@dtmShiftEndTime as dtmShiftEndTime
 			,@dtmCurrentDate as dtmCurrentDate
-			,M.intMachineId 
-			,M.strName as strMachineName
+			,ISNULL(M.intMachineId,0) as intMachineId
+			,ISNULL(M.strName,'') as strMachineName
 		FROM dbo.tblMFManufacturingProcess P
 		Left JOIN tblMFManufacturingProcessMachine PM on P.intManufacturingProcessId=PM.intManufacturingProcessId and PM.ysnDefault=1
 		Left JOIN tblMFMachine M on M.intMachineId=PM.intMachineId
