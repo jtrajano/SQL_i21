@@ -1775,6 +1775,7 @@
     <None Include="Scripts\Post-Deployment\GL\ReportDataFix.sql" />
     <Build Include="dbo\Tables\tblRKOptionsPnSExercisedAssigned.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetContainerType.sql" />
+    <Build Include="dbo\Tables\tblMFAttributeType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
