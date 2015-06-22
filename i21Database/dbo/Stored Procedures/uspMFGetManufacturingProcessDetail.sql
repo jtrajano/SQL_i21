@@ -3,20 +3,25 @@ AS
 BEGIN
 	DECLARE @intCompanyLocationId INT
 		,@strLocationName NVARCHAR(50)
-		,@CurrentDate DATETIME
+		,@dtmBusinessDate DATETIME
 		,@intShiftId INT
+		,@dtmCurrentDate DateTime
+		,@intEndOffset int
+		,@dtmShiftEndTime DateTime
+
+	Select @dtmCurrentDate=Getdate()
 
 	SELECT TOP 1 @intCompanyLocationId = intCompanyLocationId
 		,@strLocationName = strLocationName
 	FROM dbo.tblSMCompanyLocation
 
-	SELECT @CurrentDate = dbo.fnGetBusinessDate(Getdate(),@intCompanyLocationId) 
+	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDate,@intCompanyLocationId) 
 
-	SELECT @intShiftId = intShiftId
+	SELECT @intShiftId = intShiftId,@intEndOffset=intEndOffset,@dtmShiftEndTime=dtmShiftEndTime
 	FROM dbo.tblMFShift
 	WHERE intLocationId = @intCompanyLocationId
-		AND Getdate() BETWEEN @CurrentDate+dtmShiftStartTime+intStartOffset
-					AND @CurrentDate+dtmShiftEndTime + intEndOffset
+		AND @dtmCurrentDate BETWEEN @dtmBusinessDate+dtmShiftStartTime+intStartOffset
+					AND @dtmBusinessDate+dtmShiftEndTime + intEndOffset
 
 	If @strProcessName=''
 	Begin
@@ -25,9 +30,11 @@ BEGIN
 			,'' strDescription
 			,@intCompanyLocationId AS intCompanyLocationId
 			,@strLocationName AS strLocationName
-			,@CurrentDate AS dtmBusinessDate
+			,@dtmBusinessDate AS dtmBusinessDate
 			,@intShiftId AS intRunningShift
-			,GetDate() as dtmCurrentDate
+			,@intEndOffset as intEndOffset
+			,@dtmShiftEndTime as dtmShiftEndTime
+			,@dtmCurrentDate as dtmCurrentDate
 			,0 as intMachineId
 			,'' as strMachineName
 	End
@@ -38,9 +45,11 @@ BEGIN
 			,P.strDescription
 			,@intCompanyLocationId AS intCompanyLocationId
 			,@strLocationName AS strLocationName
-			,@CurrentDate AS dtmBusinessDate
+			,@dtmBusinessDate AS dtmBusinessDate
 			,@intShiftId AS intRunningShift
-			,GetDate() as dtmCurrentDate
+			,@intEndOffset as intEndOffset
+			,@dtmShiftEndTime as dtmShiftEndTime
+			,@dtmCurrentDate as dtmCurrentDate
 			,M.intMachineId 
 			,M.strName as strMachineName
 		FROM dbo.tblMFManufacturingProcess P
