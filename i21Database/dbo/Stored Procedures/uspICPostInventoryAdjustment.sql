@@ -48,11 +48,12 @@ DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
 -- Read the transaction info   
 BEGIN   
 	DECLARE @dtmDate AS DATETIME   
-	DECLARE @intTransactionId AS INT  
-	DECLARE @intCreatedEntityId AS INT  
-	DECLARE @ysnAllowUserSelfPost AS BIT   
-	DECLARE @ysnTransactionPostedFlag AS BIT
-	DECLARE @adjustmentType AS INT
+			,@intTransactionId AS INT  
+			,@intCreatedEntityId AS INT  
+			,@ysnAllowUserSelfPost AS BIT   
+			,@ysnTransactionPostedFlag AS BIT
+			,@strAdjustmentDescription AS NVARCHAR(255) 
+			,@adjustmentType AS INT
 
   
 	SELECT TOP 1   
@@ -61,6 +62,7 @@ BEGIN
 			,@dtmDate = dtmAdjustmentDate
 			,@intCreatedEntityId = intEntityId
 			,@adjustmentType = intAdjustmentType
+			,@strAdjustmentDescription = strDescription
 	FROM	dbo.tblICInventoryAdjustment
 	WHERE	strAdjustmentNo = @strTransactionId  
 END  
@@ -316,7 +318,8 @@ BEGIN
 				@ItemsForAdjust  
 				,@strBatchId  
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-				,@intUserId		
+				,@intUserId
+				,@strAdjustmentDescription		
 	END 
 END   
 
