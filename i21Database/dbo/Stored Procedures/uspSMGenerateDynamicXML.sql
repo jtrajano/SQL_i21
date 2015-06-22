@@ -1,8 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspSMGenerateDynamicXML]
-	@intImportFileHeaderId Int,
+@intImportFileHeaderId Int,
 	@strWhereClause nvarchar(max),
 	@blnLayoutPreview bit, 
-	@strGeneratedXML XML OUTPUT
+	@strGeneratedXML nvarchar(max) OUTPUT -- XML OUTPUT
 AS
 BEGIN
 
@@ -103,7 +103,7 @@ BEGIN
 
 	SELECT @PKColumnCondition = LEFT(@Txt1,LEN(@Txt1)-3) 
 
-	--SELECT @PKColumnCondition
+--SELECT @PKColumnCondition
 
 	DECLARE @tblXML TABLE (intImportFileColumnDetailId int, intLevel int, intLength int, intPosition int, strXMLTag nvarchar(200), strTable nvarchar(200), strColumnName nvarchar(200), strDefaultValue nvarchar(200))
 	DECLARE @intParent Int, @intRootChild Int
@@ -160,14 +160,16 @@ BEGIN
 			SET @strParentTag = REPLACE(@strParentTag, '-', '')
 						
 			-- ===========> Form attributes format <================
-			IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId)
+			IF EXISTS(SELECT * FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId)
 			BEGIN
-				DECLARE @intMinTagPosition Int, @intMaxTagPosition Int
+				DECLARE @intMinTagPosition Int, @intMaxTagPosition Int, @strTagTable nvarchar(100), @strTagColumnName nvarchar(200)
 				SELECT @intMinTagPosition = MIN(intSequence), @intMaxTagPosition = MAX(intSequence) FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId
+
 				SET @strTagAttribute = ''
 				WHILE (@intMinTagPosition <= @intMaxTagPosition)
 				BEGIN
-					IF (ISNULL(@strTable, '') = '' AND ISNULL(@strColumnName, '') = '')
+					SELECT @strTagTable = strTable, @strTagColumnName = strColumnName FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence = @intMinTagPosition
+					IF (ISNULL(@strTagTable, '') = '' AND ISNULL(@strTagColumnName, '') = '')
 					BEGIN
 						SET @strTagAttribute =  (SELECT @strTagAttribute + ' ''''' + strDefaultValue + ''''' [' + strTagAttribute + '],' FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId AND intSequence = @intMinTagPosition)
 					END
@@ -187,8 +189,6 @@ BEGIN
 				
 				SET @strTagAttribute = SUBSTRING(@strTagAttribute, 0, LEN(@strTagAttribute))
 			END
-			
-	--SELECT @strXMLTag '@strXMLTag', @strTable, @intLevel	
 		
 			--===========> Start forming xml <================
 			IF (ISNULL(@strTable, '') = '' AND ISNULL(@strColumnName, '') = '')
@@ -256,8 +256,6 @@ BEGIN
 					
 				IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE	intImportFileHeaderId = @intImportFileHeaderId AND intLength = @intLevel)
 				BEGIN -- ===============> has child nodes <==========
-
-	--SELECT @strXMLTag '@strXMLTag', @strTable, @intLevel
 					
 					DECLARE @intMinPos Int, @intMaxPos Int, @strCurrentTag nvarchar(200)
 					SELECT @intMinPos = MIN(intPosition), @intMaxPos = MAX(intPosition) FROM dbo.tblSMImportFileColumnDetail WHERE intLength = @intLevel AND intImportFileHeaderId = @intImportFileHeaderId
@@ -341,7 +339,7 @@ BEGIN
 		BEGIN	
 			
 			DECLARE @intStart Int, @intEnd Int
-			SELECT @intLevel = intLevel, @strParentTag = strXMLTag, @strTable = strTable, @strDataType = strDataType FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND intLength = 1 AND intPosition = @intMinPosFin
+			SELECT @intLevel = intLevel, @strParentTag = strXMLTag, @strTable = strTable, @strDataType = strDataType, @strColumnName = strColumnName FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND intLength = 1 AND intPosition = @intMinPosFin
 			SELECT @intStart = MIN(intPosition), @intEnd = MAX(intPosition) FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND intLength = @intLevel 
 			
 			IF (CHARINDEX(':' ,@strParentTag) > 0	)		
@@ -353,30 +351,45 @@ BEGIN
 				SET @strMainSQL = @strMainSQL + ' SET @' + @strParentTag + ' =  '' SELECT ' + CASE WHEN ISNULL(@strDataType,'')='' THEN '' ELSE ' TOP 1 ' END + ' '' '
 			END		
 
-			WHILE (@intStart <= @intEnd)
-			BEGIN	
-				SET @strMainSQL = @strMainSQL + CASE WHEN @intStart = 0 THEN '' ELSE ' + ' END + ' @' + @strParentTag + CAST(@intStart as nvarchar(5)) + ' + '','' '
-				
-				SET @intStart = @intStart + 1
-				
-			END
-			SET @strMainSQL = LEFT(@strMainSQL,LEN(@strMainSQL)-6)
-	--SELECT @strParentTag '@strParentTag', @strTable	'@strTable'
-			
-			IF ISNULL(@strTable,'') = ''
+			IF (ISNULL(@intStart,0) = 0 AND ISNULL(@intEnd,0) = 0)
 			BEGIN
-				SET @strMainSQL = @strMainSQL + ' + '' FOR XML RAW (''''' + @strParentTag + ''''') '' '
-			END	
+				IF (ISNULL(@strTable,'') <> '' AND ISNULL(@strColumnName,'') <> '')
+				BEGIN
+					SET @strMainSQL = @strMainSQL + ' DECLARE  @' + @strParentTag +  ' nvarchar(max) SET @' + @strParentTag + ' = '''' '
+					SET @strMainSQL = @strMainSQL + ' SET @' + @strParentTag + ' =  '
+					SET @strMainSQL = @strMainSQL + ' '' SELECT CAST(CAST(''''<![CDATA['''' + CAST(' + @strColumnName + ' as nvarchar(200)) + '''']]>'''' as nvarchar(200))  as XML) 		
+					FROM [dbo].[' + @strTable + '] main ' + 
+							CASE WHEN ISNULL(@strWhereClause, '') = '' THEN '  ' ELSE ' WHERE ' + (SELECT REPLACE(strWhereCondition, '''', '''''') FROM @tblWhereClause WHERE LTRIM(RTRIM(strWhereTable)) = @strTable) +  '  ' END  
+							+ ' FOR XML RAW (''''' + @strParentTag + ''''') , ELEMENTS'' '
+				END
+			END
 			ELSE
-			BEGIN
-				SET @strMainSQL = @strMainSQL + ' + '' FROM [dbo].[' + @strTable + '] main ' + 
-						CASE WHEN ISNULL(@strWhereClause, '') = '' THEN '  ' ELSE ' WHERE ' + (SELECT REPLACE(strWhereCondition, '''', '''''') FROM @tblWhereClause WHERE LTRIM(RTRIM(strWhereTable)) = @strTable) +  '  ' END  
-						+ ' FOR XML RAW (''''' + @strParentTag + ''''') , ELEMENTS'' '
-				print @strTable
-				print SUBSTRING(@strMainSQL, (LEN(@strMainSQL)-100),100)
+			BEGIN			
+				WHILE (ISNULL(@intStart,0) <= ISNULL(@intEnd,0))
+				BEGIN	
+					SET @strMainSQL = @strMainSQL + CASE WHEN ISNULL(@intStart, 0) = 0 THEN ' ' ELSE ' + ' END + ' @' + @strParentTag + CAST(@intStart as nvarchar(5)) + ' + '','' '
+					
+					SET @intStart = @intStart + 1
+					
+				END
+				SET @strMainSQL = LEFT(@strMainSQL,LEN(@strMainSQL)-6)
+				
+				IF ISNULL(@strTable,'') = ''
+				BEGIN
+					SET @strMainSQL = @strMainSQL + ' + '' FOR XML RAW (''''' + @strParentTag + ''''') '' '
+				END	
+				ELSE
+				BEGIN
+					SET @strMainSQL = @strMainSQL + ' + '' FROM [dbo].[' + @strTable + '] main ' + 
+							CASE WHEN ISNULL(@strWhereClause, '') = '' THEN '  ' ELSE ' WHERE ' + (SELECT REPLACE(strWhereCondition, '''', '''''') FROM @tblWhereClause WHERE LTRIM(RTRIM(strWhereTable)) = @strTable) +  '  ' END  
+							+ ' FOR XML RAW (''''' + @strParentTag + ''''') , ELEMENTS'' '
+					print @strTable
+					print SUBSTRING(@strMainSQL, (LEN(@strMainSQL)-100),100)
+				END
+			
 			END
 			
-SET @strMainSQL  = @strMainSQL + ' SELECT @' + @strParentTag + ''
+--SET @strMainSQL  = @strMainSQL + ' SELECT @' + @strParentTag + ''
 			
 			SET @strMainSQL = @strMainSQL + '   SET @' + @strParentTag + ' = @' + @strParentTag + ' + ''
 								DECLARE @xmlSample XML
@@ -413,7 +426,7 @@ SET @strMainSQL  = @strMainSQL + ' SELECT @' + @strParentTag + ''
 		
 	END
 
-	--SELECT @strMainSQL '@strMainSQL'
+--SELECT @strMainSQL '@strMainSQL'
 
 	SET @strMainSQL = @strMainSQL + ' SELECT @xmlResult = @strResult'
 
@@ -422,7 +435,7 @@ SET @strMainSQL  = @strMainSQL + ' SELECT @' + @strParentTag + ''
 
 	EXEC sp_executesql @strMainSQL, N'@xmlResult nvarchar(max) out', @xmlResult out
 
-	DECLARE @Result xml
+	DECLARE @Result xml, @strXMLInitiater nvarchar(max)
 
 	SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId, @intLevel = intLevel, @strParentTag = strXMLTag FROM dbo.tblSMImportFileColumnDetail 
 		Where intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 1 
@@ -442,8 +455,11 @@ SET @strMainSQL  = @strMainSQL + ' SELECT @' + @strParentTag + ''
 
 	SET @xmlResult = '<' + @strParentTag + @strTagAttribute + '>' + @xmlResult + '</' + @strParentTag + '>'
 
-	SET @Result = CAST(@xmlResult as xml)
+	SELECT @strXMLInitiater = strXMLInitiater FROM dbo.tblSMImportFileHeader Where intImportFileHeaderId = @intImportFileHeaderId
 
-SELECT @strGeneratedXML = @Result  
+	SET @xmlResult = ISNULL(@strXMLInitiater, '') + @xmlResult
+	--SET @Result = CAST(@xmlResult as xml)
+
+SELECT @strGeneratedXML = @xmlResult --@Result  
 
 END
