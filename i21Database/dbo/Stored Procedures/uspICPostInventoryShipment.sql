@@ -222,8 +222,8 @@ BEGIN
 				,intSubLocationId
 				,intStorageLocationId
 		) 
-		SELECT	intItemId					= Detail.intItemId
-				,intItemLocationId			= dbo.fnICGetItemLocation(Detail.intItemId, Header.intShipFromLocationId)
+		SELECT	intItemId					= DetailItem.intItemId
+				,intItemLocationId			= dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId)
 				,intItemUOMId				=	CASE	WHEN Lot.intLotId IS NULL THEN 
 															ItemUOM.intItemUOMId
 														ELSE
@@ -233,7 +233,7 @@ BEGIN
 				,dtmDate					=	dbo.fnRemoveTimeOnDate(Header.dtmShipDate)
 				,dblQty						=	-1 *
 												CASE	WHEN  Lot.intLotId IS NULL THEN 
-															ISNULL(Detail.dblQuantity, 0) 
+															ISNULL(DetailItem.dblQuantity, 0) 
 														ELSE
 															ISNULL(DetailLot.dblQuantityShipped, 0)
 												END
@@ -262,6 +262,8 @@ BEGIN
 					ON DetailLot.intInventoryShipmentItemId = DetailItem.intInventoryShipmentItemId
 				LEFT JOIN tblICLot Lot 
 					ON Lot.intLotId = DetailLot.intLotId            
+				LEFT JOIN tblICItemUOM LotItemUOM
+					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId            
 				INNER JOIN vyuICGetShipmentItemSource ItemSource 
 					ON ItemSource.intInventoryShipmentItemId = DetailItem.intInventoryShipmentItemId
 		WHERE   Header.intInventoryShipmentId = @intTransactionId
@@ -329,8 +331,8 @@ BEGIN
 				,intSubLocationId
 				,intStorageLocationId
 		) 
-		SELECT	intItemId					= Detail.intItemId
-				,intItemLocationId			= dbo.fnICGetItemLocation(Detail.intItemId, Header.intShipFromLocationId)
+		SELECT	intItemId					= DetailItem.intItemId
+				,intItemLocationId			= dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId)
 				,intItemUOMId				=	CASE	WHEN Lot.intLotId IS NULL THEN 
 															ItemUOM.intItemUOMId
 														ELSE
@@ -340,7 +342,7 @@ BEGIN
 				,dtmDate					=	dbo.fnRemoveTimeOnDate(Header.dtmShipDate)
 				,dblQty						=	-1 *
 												CASE	WHEN  Lot.intLotId IS NULL THEN 
-															ISNULL(Detail.dblQuantity, 0) 
+															ISNULL(DetailItem.dblQuantity, 0) 
 														ELSE
 															ISNULL(DetailLot.dblQuantityShipped, 0)
 												END
@@ -368,7 +370,9 @@ BEGIN
 				LEFT JOIN tblICInventoryShipmentItemLot DetailLot 
 					ON DetailLot.intInventoryShipmentItemId = DetailItem.intInventoryShipmentItemId
 				LEFT JOIN tblICLot Lot 
-					ON Lot.intLotId = DetailLot.intLotId            
+					ON Lot.intLotId = DetailLot.intLotId
+				LEFT JOIN tblICItemUOM LotItemUOM
+					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId            
 				INNER JOIN vyuICGetShipmentItemSource ItemSource 
 					ON ItemSource.intInventoryShipmentItemId = DetailItem.intInventoryShipmentItemId
 		WHERE   Header.intInventoryShipmentId = @intTransactionId
