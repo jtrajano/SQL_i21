@@ -60,7 +60,9 @@ Ext.define('Inventory.model.AdjustmentDetail', {
         { name: 'intNewLocationId', type: 'int', allowNull: true },
         { name: 'intNewSubLocationId', type: 'int', allowNull: true },
         { name: 'intNewStorageLocationId', type: 'int', allowNull: true },
-        { name: 'strLotTracking', type: 'string', allowNull: true }
+        { name: 'strLotTracking', type: 'string', allowNull: true },
+        { name: 'dblItemUOMUnitQty', type: 'float', allowNull: true},
+        { name: 'dblNewItemUOMUnitQty', type: 'float', allowNull: true}
     ],
 
     validators: [

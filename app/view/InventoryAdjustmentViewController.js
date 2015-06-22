@@ -182,11 +182,19 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     hidden: '{formulaHideColumn_colUOM}',
                     editor: {
                         store: '{itemUOM}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{grdInventoryAdjustment.selection.intItemId}',
-                            conjunction: 'and'
-                        }],
+                        defaultFilters: [
+                            {
+                                column: 'intItemId',
+                                value: '{grdInventoryAdjustment.selection.intItemId}',
+                                conjunction: 'and'
+                            }
+                            //,
+                            //{
+                            //    column: 'intLocationId',
+                            //    value: '{current.intLocationId}',
+                            //    conjunction: 'and'
+                            //}
+                        ],
                         readOnly: '{formulaShowItemUOMEditor}'
                     }
                 },
@@ -196,11 +204,13 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     hidden: '{formulaHideColumn_colNewUOM}',
                     editor: {
                         store: '{newItemUOM}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{grdInventoryAdjustment.selection.intItemId}',
-                            conjunction: 'and'
-                        }]
+                        defaultFilters: [
+                            {
+                                column: 'intItemId',
+                                value: '{grdInventoryAdjustment.selection.intItemId}',
+                                conjunction: 'and'
+                            }
+                        ]
                     }
                 },
 
@@ -490,12 +500,14 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 current.set('dblCost', record.get('dblLastCost'));
                 current.set('intItemUOMId', record.get('intStockUOMId'));
                 current.set('strItemUOM', record.get('strStockUOM'));
+                current.set('dblItemUOMUnitQty', record.get('dblStockUnitQty'));
             }
             else {
                 current.set('dblQuantity', null);
                 current.set('dblCost', null);
                 current.set('intItemUOMId', null);
                 current.set('strItemUOM', null);
+                current.set('dblItemUOMUnitQty', null);
             }
 
             // Clear the values for the following fields:
@@ -509,6 +521,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('dblNewQuantity', null);
             current.set('dblNewCost', null);
             current.set('intNewItemUOMId', null);
+            current.set('dblNewItemUOMUnitQty', null);
             current.set('strNewItemUOM', null);
             current.set('dblWeight', null);
             current.set('dblNewWeight', null);
@@ -541,6 +554,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('dblQuantity', null);
             current.set('dblCost', null);
             current.set('intItemUOMId', null);
+            current.set('dblItemUOMUnitQty', null);
             current.set('strItemUOM', null);
             current.set('strStorageLocation', null);
             current.set('intStorageLocationId', null);
@@ -552,6 +566,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('dblNewQuantity', null);
             current.set('dblNewCost', null);
             current.set('intNewItemUOMId', null);
+            current.set('dblNewItemUOMUnitQty', null);
             current.set('strNewItemUOM', null);
             current.set('dblWeight', null);
             current.set('dblNewWeight', null);
@@ -569,6 +584,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('dblQuantity', null);
             current.set('dblCost', null);
             current.set('intItemUOMId', null);
+            current.set('dblItemUOMUnitQty', null);
             current.set('strItemUOM', null);
             current.set('intLotId', null);
             current.set('strLotNumber', null);
@@ -578,6 +594,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('dblNewQuantity', null);
             current.set('dblNewCost', null);
             current.set('intNewItemUOMId', null);
+            current.set('dblNewItemUOMUnitQty', null);
             current.set('strNewItemUOM', null);
             current.set('dblWeight', null);
             current.set('dblNewWeight', null);
@@ -603,6 +620,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('dblCost', record.get('dblCost'));
             current.set('dblWeightPerQty', record.get('dblWeightPerQty'));
             current.set('intItemUOMId', record.get('intItemUOMId'));
+            current.set('dblItemUOMUnitQty', record.get('dblItemUOMUnitQty'));
             current.set('strItemUOM', record.get('strItemUOM'));
             current.set('strWeightUOM', record.get('strWeightUOM'));
             current.set('intWeightUOMId', record.get('intWeightUOMId'));
@@ -618,6 +636,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('dblNewCost', null);
             current.set('dblNewWeightPerQty', null);
             current.set('intNewItemUOMId', null);
+            current.set('dblNewItemUOMUnitQty', null);
             current.set('strNewItemUOM', null);
             current.set('intNewWeightUOMId', null);
             current.set('strNewWeightUOM', null);
@@ -633,11 +652,41 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         }
         else if (combo.itemId === 'cboNewUOM')
         {
+            // Auto-calculate a new cost.
+            var unitCost = current.get('dblCost')
+                ,dblNewItemUOMUnitQty = record.get('dblUnitQty');
+
+            if (Ext.isNumeric(unitCost) && Ext.isNumeric(dblNewItemUOMUnitQty))
+            {
+                current.set('dblNewCost', unitCost * dblNewItemUOMUnitQty);
+            }
             current.set('intNewItemUOMId', record.get('intItemUOMId'));
+            current.set('dblNewItemUOMUnitQty', record.get('dblUnitQty'));
         }
         else if (combo.itemId === 'cboUOM')
         {
+            // Recalculate the unit cost
+            var currentUnitCost = current.get('dblCost')
+                ,currentItemUOMUnitQty = current.get('dblItemUOMUnitQty')
+                ,selectedItemUOMUnitQty = record.get('dblUnitQty')
+                ,newUnitCost;
+
+            if (Ext.isNumeric(currentUnitCost)
+                && Ext.isNumeric(selectedItemUOMUnitQty)
+                && Ext.isNumeric(currentItemUOMUnitQty)
+            )
+            {
+                if (currentItemUOMUnitQty == 1){
+                    newUnitCost = currentUnitCost * selectedItemUOMUnitQty;
+                }
+                else if (currentItemUOMUnitQty != 0) {
+                    newUnitCost = (currentUnitCost / currentItemUOMUnitQty) * selectedItemUOMUnitQty;
+                }
+            }
+
+            current.set('dblCost', newUnitCost);
             current.set('intItemUOMId', record.get('intItemUOMId'));
+            current.set('dblItemUOMUnitQty', selectedItemUOMUnitQty);
         }
 
         else if (combo.itemId === 'cboNewWeightUOM')

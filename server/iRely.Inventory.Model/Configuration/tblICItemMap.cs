@@ -306,6 +306,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intStockUOMId).HasColumnName("intStockUOMId");
             this.Property(t => t.strStockUOM).HasColumnName("strStockUOM");
             this.Property(t => t.strStockUOMType).HasColumnName("strStockUOMType");
+            this.Property(t => t.dblStockUnitQty).HasColumnName("dblStockUnitQty");
             this.Property(t => t.intReceiveUOMId).HasColumnName("intReceiveUOMId");
             this.Property(t => t.dblReceiveUOMConvFactor).HasColumnName("dblReceiveUOMConvFactor").HasPrecision(18, 6);
             this.Property(t => t.intIssueUOMId).HasColumnName("intIssueUOMId");
@@ -451,6 +452,48 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblOnOrder).HasColumnName("dblOnOrder").HasPrecision(18, 6);
             this.Property(t => t.dblReservedQty).HasColumnName("dblReservedQty").HasPrecision(18, 6);
             this.Property(t => t.dblAvailableQty).HasColumnName("dblAvailableQty").HasPrecision(18, 6);
+            this.Property(t => t.dblUnitQty).HasColumnName("dblUnitQty").HasPrecision(18, 6);
+            this.Property(t => t.ysnStockUnit).HasColumnName("ysnStockUnit");
+        }
+    }
+
+    public class vyuICGetItemStockUOMForAdjustmentMap : EntityTypeConfiguration<vyuICGetItemStockUOMForAdjustment>
+    {
+        public vyuICGetItemStockUOMForAdjustmentMap()
+        {
+            // Primary Key
+            // this.HasKey(p => p.intItemStockUOMId);
+            this.HasKey(p => new {                 
+                p.intItemId,
+                p.intItemUOMId,
+                p.intItemStockUOMId,
+                p.intItemLocationId,
+                p.intSubLocationId,
+                p.intStorageLocationId                
+            }); 
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetItemStockUOMForAdjustment");
+            this.Property(t => t.intItemStockUOMId).HasColumnName("intItemStockUOMId");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
+            this.Property(t => t.strType).HasColumnName("strType");
+            this.Property(t => t.strLotTracking).HasColumnName("strLotTracking");
+            this.Property(t => t.intLocationId).HasColumnName("intLocationId");
+            this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
+            this.Property(t => t.strLocationName).HasColumnName("strLocationName");
+            this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
+            this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
+            this.Property(t => t.strUnitType).HasColumnName("strUnitType");
+            this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
+            this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
+            this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
+            this.Property(t => t.strStorageLocationName).HasColumnName("strStorageLocationName");
+            this.Property(t => t.dblOnHand).HasColumnName("dblOnHand").HasPrecision(18, 6);
+            this.Property(t => t.dblOnOrder).HasColumnName("dblOnOrder").HasPrecision(18, 6);
+            this.Property(t => t.dblUnitQty).HasColumnName("dblUnitQty").HasPrecision(18, 6);
+            this.Property(t => t.ysnStockUnit).HasColumnName("ysnStockUnit");
         }
     }
 

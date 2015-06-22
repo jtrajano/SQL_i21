@@ -643,6 +643,19 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     dataType: 'boolean',
                                                                     text: 'Stock Unit',
                                                                     flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblOnHand',
+                                                                    dataType: 'float',
+                                                                    text: 'On Hand',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblUnitQty',
+                                                                    dataType: 'float',
+                                                                    text: 'Unit Qty',
+                                                                    flex: 1,
+                                                                    hidden: true
                                                                 }
                                                             ],
                                                             itemId: 'cboUOM',
@@ -721,6 +734,13 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     dataType: 'boolean',
                                                                     text: 'Stock Unit',
                                                                     flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblUnitQty',
+                                                                    dataType: 'float',
+                                                                    text: 'Unit Qty',
+                                                                    flex: 1,
+                                                                    hidden: true
                                                                 }
                                                             ],
                                                             itemId: 'cboNewUOM',

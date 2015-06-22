@@ -83,6 +83,7 @@ namespace iRely.Inventory.Model
         public int? intStorageLocationId { get; set; }
         public string strStorageLocationName { get; set; }
         public int? intItemUOMId { get; set; }
+        public decimal? dblItemUOMUnitQty { get; set; }
         public string strItemUOM { get; set; }
         public int? intWeightUOMId { get; set; }
         public string strWeightUOM { get; set; }

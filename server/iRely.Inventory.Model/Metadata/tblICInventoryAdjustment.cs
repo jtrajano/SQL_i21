@@ -450,6 +450,7 @@ namespace iRely.Inventory.Model
             }
         }
 
+        // 10. Lot tracking
         private string _strLotTracking;
         [NotMapped]
         public string strLotTracking
@@ -470,6 +471,8 @@ namespace iRely.Inventory.Model
             }
         }
 
+
+        // 11. New Location 
         private string _strNewLocation;
         [NotMapped]
         public string strNewLocation
@@ -490,6 +493,8 @@ namespace iRely.Inventory.Model
             }
         }
 
+
+        // 12. New Sub Location 
         private string _strNewSubLocation;
         [NotMapped]
         public string strNewSubLocation
@@ -510,6 +515,7 @@ namespace iRely.Inventory.Model
             }
         }
 
+        // 13. New Storage Location. 
         private string _strNewStorageLocation;
         [NotMapped]
         public string strNewStorageLocation
@@ -527,6 +533,46 @@ namespace iRely.Inventory.Model
             set
             {
                 _strNewStorageLocation = value;
+            }
+        }
+
+        // 14: Unit Qty for Item UOM and New Item UOM
+        private decimal? _itemUOMUnitQty;
+        [NotMapped]
+        public decimal? dblItemUOMUnitQty
+        {
+            get
+            {
+                if (_itemUOMUnitQty == null )
+                    if (ItemUOM != null)
+                        return ItemUOM.dblUnitQty;
+                    else
+                        return null;
+                else
+                    return _itemUOMUnitQty;
+            }
+            set
+            {
+                _itemUOMUnitQty = value;
+            }
+        }
+        private decimal? _newItemUOMUnitQty;
+        [NotMapped]
+        public decimal? dblNewItemUOMUnitQty
+        {
+            get
+            {
+                if (_newItemUOMUnitQty == null)
+                    if (NewItemUOM != null)
+                        return NewItemUOM.dblUnitQty;
+                    else
+                        return null;
+                else
+                    return _newItemUOMUnitQty;
+            }
+            set
+            {
+                _newItemUOMUnitQty = value;
             }
         }
 

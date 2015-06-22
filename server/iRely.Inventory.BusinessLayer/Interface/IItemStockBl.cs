@@ -12,5 +12,6 @@ namespace iRely.Inventory.BusinessLayer
     public interface IItemStockBl : IBusinessLayer<tblICItemStock>
     {
         Task<SearchResult> GetItemStockUOMView(GetParameter param);
+        Task<SearchResult> GetItemStockUOMForAdjustmentView(GetParameter param);
     }
 }

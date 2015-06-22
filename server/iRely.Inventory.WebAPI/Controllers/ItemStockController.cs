@@ -28,5 +28,10 @@ namespace iRely.Inventory.WebApi
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemStockUOMView(param));
         }
 
+        [HttpGet]
+        public async Task<HttpResponseMessage> GetItemStockUOMForAdjustment(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetItemStockUOMForAdjustmentView(param));
+        }
     }
 }

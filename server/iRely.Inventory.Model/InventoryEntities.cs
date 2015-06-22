@@ -107,6 +107,7 @@ namespace iRely.Inventory.Model
         public DbSet<vyuICGetInventoryShipmentItem> vyuICGetInventoryShipmentItems { get; set; }
         public DbSet<vyuICGetItemStock> vyuICGetItemStocks { get; set; }
         public DbSet<vyuICGetItemStockUOM> vyuICGetItemStockUOMs { get; set; }
+        public DbSet<vyuICGetItemStockUOMForAdjustment> vyuICGetItemStockUOMForAdjustment { get; set; }
         public DbSet<vyuICGetItemAccount> vyuICGetItemAccounts { get; set; }
         public DbSet<vyuICGetItemPricing> vyuICGetItemPricings { get; set; }
         public DbSet<vyuICGetPackedUOM> vyuICGetPackedUOMs { get; set; }
@@ -284,6 +285,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetInventoryTransferDetailMap());
             modelBuilder.Configurations.Add(new vyuICGetItemStockMap());
             modelBuilder.Configurations.Add(new vyuICGetItemStockUOMMap());
+            modelBuilder.Configurations.Add(new vyuICGetItemStockUOMForAdjustmentMap());
             modelBuilder.Configurations.Add(new vyuICGetItemAccountMap());
             modelBuilder.Configurations.Add(new vyuICGetItemPricingMap());
 

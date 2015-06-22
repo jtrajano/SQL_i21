@@ -33,5 +33,18 @@ namespace iRely.Inventory.BusinessLayer
                 total = await query.CountAsync()
             };
         }
+
+        public async Task<SearchResult> GetItemStockUOMForAdjustmentView(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetItemStockUOMForAdjustment>()
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
     }
 }
