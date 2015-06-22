@@ -5,10 +5,13 @@ Date Last Modified	: 6/22/2015
 Description			: Updates Report Options/Datasource/Drilldowns from GL Reports
 --------------------------------------------------------------------------------------
 */
+GO
 BEGIN -- General Ledger By Account Detail Report
 PRINT 'Begin updating General Ledger Report'
---UPDATE THE OPTIONS
-UPDATE o SET o.strSettings =
+DECLARE @GLReportId INT
+SELECT @GLReportId = intReportId FROM tblRMReport WHERE strName = 'General Ledger by Account ID Detail' and strGroup = 'General Ledger' 
+
+DECLARE @GLReportOptions NVARCHAR(MAX) = 
 'WITH Units 
 AS 
 (
@@ -143,15 +146,9 @@ SELECT
 	LEFT JOIN GLAccountDetails A ON B.intAccountId = A.intAccountId 
 	
 
---*CountEnd*--' from tblRMOption o join tblRMReport r on o.intReportId = r.intReportId
-where r.strName = 'General Ledger by Account ID Detail' and strGroup = 'General Ledger' and o.strName ='Include Audit Adjustment'
---UPDATE THE DRILL DOWN
-UPDATE o SET strSettings = '[{"Control":"labelEx1","DrillThroughType":1,"Name":"GeneralLedger.Global.GLGlobalDrillDown","DrillThroughFilterType":0,"Filters":null,"id":"Reports.model.DrillThrough-1","DrillThroughValue":"strTransactionId,intTransactionId,strModuleName,strTransactionForm,strTransactionType"}]' 
-from tblRMOption o join tblRMReport r on o.intReportId = r.intReportId
-where r.strName = 'General Ledger by Account ID Detail' and strGroup = 'General Ledger' and o.strName ='Drill Down'
---UPDATE THE DATASOURCE
-UPDATE d SET strQuery = 
-'WITH Units   AS   (   SELECT A.[dblLbsPerUnit], B.[intAccountId], A.[strUOMCode]    
+--*CountEnd*--'
+DECLARE @GLReportDrillDown NVARCHAR(MAX) =  '[{"Control":"labelEx1","DrillThroughType":1,"Name":"GeneralLedger.Global.GLGlobalDrillDown","DrillThroughFilterType":0,"Filters":null,"id":"Reports.model.DrillThrough-1","DrillThroughValue":"strTransactionId,intTransactionId,strModuleName,strTransactionForm,strTransactionType,intGLDetailId"}]' 
+DECLARE @GLReportDataSource NVARCHAR(MAX) = 'WITH Units   AS   (   SELECT A.[dblLbsPerUnit], B.[intAccountId], A.[strUOMCode]    
 FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]  ),   
 GLAccountDetails  AS  (    
 --*SC*--  
@@ -249,9 +246,28 @@ AS  (
   END       
   FROM GLAccountBalance B   
   LEFT JOIN GLAccountDetails A ON B.intAccountId = A.intAccountId        
-  --*CountEnd*-- ' 
+  --*CountEnd*-- '
+--UPDATE THE OPTIONS
+UPDATE o SET o.strSettings = @GLReportOptions
+ from tblRMOption o join tblRMReport r on o.intReportId = r.intReportId
+where r.intReportId = @GLReportId and o.strName ='Include Audit Adjustment'
+
+UPDATE o SET o.strSettings = @GLReportOptions
+ from tblRMDefaultOption o join tblRMReport r on o.intReportId = r.intReportId
+where r.intReportId = @GLReportId and o.strName ='Include Audit Adjustment'
+
+--UPDATE THE DRILL DOWN
+UPDATE o SET strSettings = @GLReportDrillDown
+from tblRMOption o INNER join tblRMReport r on o.intReportId = r.intReportId
+where r.intReportId = @GLReportId and o.strName ='Drill Down'
+
+UPDATE o SET strSettings = @GLReportDrillDown
+from tblRMDefaultOption o INNER join tblRMReport r on o.intReportId = r.intReportId
+where r.intReportId = @GLReportId and o.strName ='Drill Down'
+--UPDATE THE DATASOURCE
+UPDATE d SET strQuery = @GLReportDataSource
 from tblRMDatasource d join tblRMReport r on d.intReportId = r.intReportId
-where r.strName = 'General Ledger by Account ID Detail' and strGroup = 'General Ledger' 
+where r.intReportId = @GLReportId
 PRINT 'Finish updating General Ledger Report'
 END
 GO
