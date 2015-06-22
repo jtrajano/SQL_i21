@@ -1,14 +1,15 @@
-﻿CREATE VIEW vyuRKSOptionExpiredTransaction
+﻿
+CREATE View vyuRKSOptionExerciseAssignTransaction
 AS
-SELECT m.intOptionsPnSExpiredId,
+SELECT m.intOptionsPnSExercisedAssignedId,
 	   strTranNo,
-	   dtmExpiredDate,
-	   intLots,
-	   m.intFutOptTransactionId,
-	   0.0 as dblImpact,
-       fm.strFutMarketName,
-       om.strOptionMonth, 
-       t.dblStrike,
+	   dtmTranDate,
+	   t.strInternalTradeNo,
+	   t.dtmTransactionDate,
+	   t.strBuySell,
+	   m.intLots,
+	   om.strOptionMonth, 
+	   t.dblStrike,
        t.strOptionType,
        t.dblPrice AS dblPremiumRate,
        t.dblPrice*dblContractSize*intLots AS dblPremiumTotal,
@@ -18,7 +19,7 @@ SELECT m.intOptionsPnSExpiredId,
 	   scl.strLocationName,
 	   cb.strBook,
 	   csb.strSubBook
-FROM tblRKOptionsPnSExpired m
+FROM tblRKOptionsPnSExercisedAssigned m
 Join tblRKFutOptTransaction t on t.intFutOptTransactionId= m.intFutOptTransactionId
 Join tblRKFutureMarket fm on fm.intFutureMarketId = t.intFutureMarketId
 JOIN tblRKOptionsMonth om on om.intOptionMonthId=t.intOptionMonthId

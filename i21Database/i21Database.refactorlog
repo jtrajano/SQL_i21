@@ -3486,4 +3486,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intCustomerApplicatorLicenseId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="250c9f41-8e4f-4226-99f6-df669d80e761" ChangeDateTime="06/22/2015 13:45:36">
+    <Property Name="ElementName" Value="[dbo].[tblRKFutOptTransaction].[ysnCreatedByOptionLifecycle]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKFutOptTransaction]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnCreatedByOptions" />
+  </Operation>
 </Operations>

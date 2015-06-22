@@ -8,7 +8,7 @@ SELECT strInternalTradeNo,dtmTransactionDate,dtmFilledDate,strFutMarketName,strO
  0.0 as dblMTM,	
  dtmExpirationDate,strStatus,strCommodityCode,strLocationName,strBook,strSubBook,dblDelta,
  dblOpenLots*dblDelta*dblContractSize AS dblDeltaHedge,
- strHedgeUOM,strBuySell
+ strHedgeUOM,strBuySell,dblContractSize
   FROM (
 SELECT (intTotalLot-dblSelectedLot1)-intExpiredLots AS dblOpenLots,'' as dblSelectedLot,
 		-(intTotalLot-dblSelectedLot1)*dblContractSize*dblPremium  as dblPremiumValue,
