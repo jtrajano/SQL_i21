@@ -725,6 +725,10 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostCustody on LIFO Costing for an outgoing stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostCustody on LIFO Costing for one incoming stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostCustody on LIFO Costing for outgoing stock and it does not allow negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for a NULL GL description.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for a missing GL description parameter.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for a GL description.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for supplying the GL Description_.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">
