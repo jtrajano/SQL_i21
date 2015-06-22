@@ -26,6 +26,7 @@ CREATE PROCEDURE [dbo].[uspICPostCosting]
 	,@strBatchId AS NVARCHAR(20)
 	,@strAccountToCounterInventory AS NVARCHAR(255) = 'Cost of Goods'
 	,@intUserId AS INT
+	,@strGLDescription AS NVARCHAR(255) = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -437,3 +438,4 @@ EXEC dbo.uspICCreateGLEntries
 	@strBatchId
 	,@strAccountToCounterInventory
 	,@intUserId
+	,@strGLDescription
