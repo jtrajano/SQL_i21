@@ -22,8 +22,8 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intCurrencyId] [int] NULL,
 	[dblRate] [numeric](8, 4) NULL,
 	[strCurrencyReference] [nvarchar](30) COLLATE Latin1_General_CI_AS NULL,
-	[intMarketZoneId] [int] NOT NULL,
-	[intDiscountTypeId] [int] NOT NULL ,
+	[intMarketZoneId] [int] NULL,
+	[intDiscountTypeId] [int] NULL ,
 	[intDiscountId] [int] NULL,
 	[intContractOptHeaderId] [int] NULL,
 	[strBuyerSeller] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
@@ -73,6 +73,10 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[strFXRemarks] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[dblAssumedFX] [numeric](8, 4) NULL,
 	[strFixationBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[intNoOfLoad] INT NULL, 
+	[intBalanceNoOfLoad] INT NULL, 
+	[intCategoryId] INT NULL,
+	[intCategoryUOMId] INT NULL, 
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [FK_tblCTContractDetail_tblARMarketZone_intMarketZoneId] FOREIGN KEY ([intMarketZoneId]) REFERENCES [tblARMarketZone]([intMarketZoneId]),
@@ -111,4 +115,6 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrency_intInvoiceCurrencyId_intCurrencyId] FOREIGN KEY ([intInvoiceCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblCTContractDetail_tblLGContainerType_intContainerTypeId] FOREIGN KEY ([intContainerTypeId]) REFERENCES [tblLGContainerType]([intContainerTypeId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblICCategoryUOM_intCategoryUOMId] FOREIGN KEY([intCategoryUOMId])REFERENCES [tblICCategoryUOM] ([intCategoryUOMId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblICCategory_intCategoryId] FOREIGN KEY([intCategoryId])REFERENCES [tblICCategory] ([intCategoryId])
 ) 
