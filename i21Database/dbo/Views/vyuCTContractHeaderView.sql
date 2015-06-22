@@ -23,7 +23,7 @@ AS
 				CY.strCommodityCode,		
 				CY.strDescription				AS	strCommodityDescription,
 			CH.dblQuantity						AS	dblHeaderQuantity,
-			CH.intCommodityUnitMeasureId,	
+			CH.intCommodityUOMId				AS	intCommodityUnitMeasureId,	
 				U2.strUnitMeasure				AS	strHeaderUnitMeasure,
 			CH.intContractNumber,
 			CH.dtmContractDate,
@@ -73,19 +73,35 @@ AS
 			
 	FROM	tblCTContractHeader		CH	
 
-	JOIN	vyuCTEntity				EY	ON	EY.intEntityId				=	CH.intEntityId
-	JOIN	tblICCommodity			CY	ON	CY.intCommodityId			=	CH.intCommodityId
-	JOIN	tblCTContractType		TP	ON	TP.intContractTypeId		=	CH.intContractTypeId
-	JOIN	tblICUnitMeasure		U2	ON	U2.intUnitMeasureId			=	CH.intCommodityUnitMeasureId
-	JOIN	tblARSalesperson		SP	ON	SP.intEntitySalespersonId   =	CH.intSalespersonId
-	JOIN	tblCTWeightGrade		W1	ON	W1.intWeightGradeId			=	CH.intGradeId
-	JOIN	tblCTWeightGrade		W2	ON	W2.intWeightGradeId			=	CH.intWeightId
-	JOIN	tblSMTerm				TM	ON	TM.intTermID				=	CH.intTermId				LEFT
-	JOIN	tblCTAssociation		AN	ON	AN.intAssociationId			=	CH.intAssociationId			LEFT
-	JOIN	tblCTContractText		TX	ON	TX.intContractTextId		=	CH.intContractTextId		LEFT
-	JOIN	tblCTApprovalBasis		AB	ON	AB.intApprovalBasisId		=	CH.intApprovalBasisId		LEFT
-	JOIN	tblCTContractBasis		CB	ON	CB.intContractBasisId		=	CH.intContractBasisId		LEFT
-	JOIN	tblCTPosition			PO	ON	PO.intPositionId			=	CH.intPositionId			LEFT
-	JOIN	tblCTInsuranceBy		IB	ON	IB.intInsuranceById			=	CH.intInsuranceById			LEFT
-	JOIN	tblCTInvoiceType		IT	ON	IT.intInvoiceTypeId			=	CH.intInvoiceTypeId			LEFT
-	JOIN	tblSMCountry			CO	ON	CO.intCountryID				=	CH.intCountryId		
+	JOIN	vyuCTEntity					EY	ON	EY.intEntityId					=		CH.intEntityId
+	
+	JOIN	tblCTContractType			TP	ON	TP.intContractTypeId			=		CH.intContractTypeId
+	JOIN	tblARSalesperson			SP	ON	SP.intEntitySalespersonId		=		CH.intSalespersonId
+
+	JOIN	tblSMTerm					TM	ON	TM.intTermID					=		CH.intTermId		
+	LEFT
+	JOIN	tblICCommodity				CY	ON	CY.intCommodityId				=		CH.intCommodityId		
+	LEFT
+	JOIN	tblCTAssociation			AN	ON	AN.intAssociationId				=		CH.intAssociationId			
+	LEFT
+	JOIN	tblCTContractText			TX	ON	TX.intContractTextId			=		CH.intContractTextId		
+	LEFT
+	JOIN	tblCTApprovalBasis			AB	ON	AB.intApprovalBasisId			=		CH.intApprovalBasisId		
+	LEFT
+	JOIN	tblCTContractBasis			CB	ON	CB.intContractBasisId			=		CH.intContractBasisId		
+	LEFT
+	JOIN	tblCTPosition				PO	ON	PO.intPositionId				=		CH.intPositionId			
+	LEFT
+	JOIN	tblCTInsuranceBy			IB	ON	IB.intInsuranceById				=		CH.intInsuranceById			
+	LEFT
+	JOIN	tblCTInvoiceType			IT	ON	IT.intInvoiceTypeId				=		CH.intInvoiceTypeId			
+	LEFT
+	JOIN	tblSMCountry				CO	ON	CO.intCountryID					=		CH.intCountryId		
+	LEFT
+	JOIN	tblICCommodityUnitMeasure	CM	ON	CM.intCommodityUnitMeasureId	=		CH.intCommodityUOMId
+	LEFT
+	JOIN	tblICUnitMeasure			U2	ON	U2.intUnitMeasureId				=		CM.intUnitMeasureId
+	LEFT
+	JOIN	tblCTWeightGrade			W1	ON	W1.intWeightGradeId				=		CH.intGradeId
+	LEFT
+	JOIN	tblCTWeightGrade			W2	ON	W2.intWeightGradeId				=		CH.intWeightId

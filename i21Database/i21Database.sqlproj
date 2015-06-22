@@ -1774,6 +1774,7 @@
     <Build Include="dbo\Views\vyuLGShippingInstructions.sql" />
     <None Include="Scripts\Post-Deployment\GL\ReportDataFix.sql" />
     <Build Include="dbo\Tables\tblRKOptionsPnSExercisedAssigned.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetContainerType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

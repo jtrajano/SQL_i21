@@ -3,9 +3,8 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[intConcurrencyId] [int] NOT NULL,
 	[intContractTypeId] [int] NOT NULL,
 	[intEntityId] [int] NOT NULL,
-	[intCommodityId] [int] NOT NULL,
+	[intCommodityId] [int] NULL,
 	[dblQuantity] [numeric](24, 4) NOT NULL,
-	[intCommodityUnitMeasureId] [int] NOT NULL,
 	[intCommodityUOMId] INT NULL, 
 	[intContractNumber] [int] NOT NULL,
 	[dtmContractDate] [datetime] NOT NULL,
@@ -17,8 +16,8 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[ysnSigned] [bit] NOT NULL CONSTRAINT [DF_tblCTContractHeader_ysnSigned]  DEFAULT ((0)),
 	[ysnPrinted] [bit] NOT NULL CONSTRAINT [DF_tblCTContractHeader_ysnPrinted]  DEFAULT ((0)),
 	[intSalespersonId] [int] NOT NULL,
-	[intGradeId] [int] NOT NULL,
-	[intWeightId] [int] NOT NULL,
+	[intGradeId] [int] NULL,
+	[intWeightId] [int] NULL,
 	[intCropYearId] [int] NULL,
 	[strContractComments] [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
 	[intAssociationId] INT NULL, 
@@ -43,8 +42,9 @@ CREATE TABLE [dbo].[tblCTContractHeader](
     [ysnLoad] BIT NULL, 
     [intNoOfLoad] INT NULL, 
     [dblQuantityPerLoad] NUMERIC(18, 4) NULL, 
-    [intLoadUnitMeasureId] INT NULL, 
     [intLoadUOMId] INT NULL, 
+	[ysnCategory] BIT,
+
     CONSTRAINT [PK_tblCTContractHeader_intContractHeaderId] PRIMARY KEY CLUSTERED ([intContractHeaderId] ASC), 	
 	CONSTRAINT [UQ_tblCTContractHeader_intContractTypeId_intContractNumber] UNIQUE ([intContractTypeId], [intContractNumber]), 
 	CONSTRAINT [FK_tblCTContractHeader_tblCTAssociation_intAssociationId] FOREIGN KEY ([intAssociationId]) REFERENCES [tblCTAssociation]([intAssociationId]),
@@ -67,10 +67,9 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	CONSTRAINT [FK_tblCTContractHeader_tblCTContractType_intContractTypeId] FOREIGN KEY ([intContractTypeId]) REFERENCES [tblCTContractType]([intContractTypeId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblSMCompanyLocationPricingLevel_intCompanyLocationPricingLevelId] FOREIGN KEY ([intCompanyLocationPricingLevelId]) REFERENCES [tblSMCompanyLocationPricingLevel]([intCompanyLocationPricingLevelId]),
 
-	CONSTRAINT [FK_tblCTContractHeader_tblICUnitMeasure_intCommodityUnitMeasureId_intUnitMeasureId] FOREIGN KEY([intCommodityUnitMeasureId])REFERENCES [tblICUnitMeasure] ([intUnitMeasureId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblICCommodityUnitMeasure_intCommodityUOMId_intCommodityUnitMeasureId] FOREIGN KEY([intCommodityUOMId])REFERENCES [tblICCommodityUnitMeasure] ([intCommodityUnitMeasureId]),
-	CONSTRAINT [FK_tblCTContractHeader_tblICUnitMeasure_intLoadUnitMeasureId_intUnitMeasureId] FOREIGN KEY([intLoadUnitMeasureId])REFERENCES [tblICUnitMeasure] ([intUnitMeasureId]),
-	CONSTRAINT [FK_tblCTContractHeader_tblICCommodityUnitMeasure_intLoadUOMId_intCommodityUnitMeasureId] FOREIGN KEY([intLoadUOMId])REFERENCES [tblICCommodityUnitMeasure] ([intCommodityUnitMeasureId]),
+	CONSTRAINT [FK_tblCTContractHeader_tblICCommodityUnitMeasure_intLoadUOMId_intCommodityUnitMeasureId] FOREIGN KEY([intLoadUOMId])REFERENCES [tblICCommodityUnitMeasure] ([intCommodityUnitMeasureId])
+	
 )
 
 
