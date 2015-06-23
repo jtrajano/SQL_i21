@@ -259,5 +259,12 @@
     <None Include="dbo\Views\vyustpbkmst.sql" />
     <None Include="dbo\Views\vyuTMLeaseCode.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateCustomerView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateOriginOptionView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateCTLMSTView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateItemView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateInvoiceView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateLocaleTaxView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateLocationView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateTermsView.sql" />
   </ItemGroup>
 </Project>
