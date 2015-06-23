@@ -24,13 +24,12 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
         'i21.store.CompanyLocationSubLocationBuffered',
         'EntityManagement.store.VendorBuffered',
         'Inventory.store.BufferedItemUnitMeasure',
-        'Inventory.store.Product',
-        'Inventory.store.Class',
-        'Inventory.store.Family',
-        'Inventory.store.PromotionSalesList',
         'Inventory.store.BufferedCountGroup',
         'Inventory.store.BufferedStorageLocation',
-        'Inventory.store.BufferedItemUPC'
+        'Inventory.store.BufferedItemUPC',
+        'Store.store.SubCategoryBuffered',
+        'Store.store.SubcategoryRegProdBuffered',
+        'Store.store.PromotionSalesBuffered'
     ],
 
     stores: {
@@ -79,16 +78,16 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
             type: 'icbuffereditemunitmeasure'
         },
         family: {
-            type: 'storefamily'
+            type: 'stsubcategorybuffered'
         },
         class: {
-            type: 'storeclass'
+            type: 'stsubcategorybuffered'
         },
         productCode: {
-            type: 'storeproduct'
+            type: 'stsubcategoryregprodbuffered'
         },
         mixMatchCode: {
-            type: 'storepromotionsaleslist'
+            type: 'stpromotionsalesbuffered'
         },
         itemUPC: {
             type: 'icbuffereditemupc'
