@@ -2315,7 +2315,23 @@
                                                                 "width": 85
                                                             },
                                                             "name": "MyColumn8",
-                                                            "designerId": "ad1c1e37-dd14-4f4c-b1f5-b8f5fa23136e"
+                                                            "designerId": "ad1c1e37-dd14-4f4c-b1f5-b8f5fa23136e",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "itemId": "cboTax"
+                                                                    },
+                                                                    "name": "MyComboBox86",
+                                                                    "designerId": "0db11552-4faf-4fb5-a7ea-fd2d62a73199"
+                                                                }
+                                                            ]
                                                         },
                                                         {
                                                             "type": "Ext.grid.column.Number",

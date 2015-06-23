@@ -412,7 +412,7 @@ namespace iRely.Inventory.Model
             {
                 if (string.IsNullOrEmpty(_weigthUOM))
                     if (vyuICGetInventoryReceiptItem != null)
-                        return vyuICGetInventoryReceiptItem.strUnitMeasure;
+                        return vyuICGetInventoryReceiptItem.strWeightUOM;
                     else
                         return null;
                 else
