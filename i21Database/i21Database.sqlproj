@@ -1804,6 +1804,10 @@
     <Build Include="dbo\Tables\tblMFAttributeType.sql" />
     <Build Include="dbo\Views\vyuRKSOptionExerciseAssignTransaction.sql" />
     <Build Include="dbo\Tables\tblGLReallocationTemp.sql" />
+    <Build Include="dbo\Tables\tblRKElectronicPricingValue.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetElectronicPricingURL.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKInsertToElectronicPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetElectronicPricingValue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

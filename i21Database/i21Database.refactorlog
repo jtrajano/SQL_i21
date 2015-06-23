@@ -3500,4 +3500,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intEntityCustomerId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b2f01455-856f-4fcd-8f94-8d21172bed39" ChangeDateTime="06/23/2015 14:39:42">
+    <Property Name="ElementName" Value="[dbo].[tblRKElectronicPricingValue].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKElectronicPricingValue]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intElectronicPricingValueId" />
+  </Operation>
 </Operations>
