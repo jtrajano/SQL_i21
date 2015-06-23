@@ -90,13 +90,13 @@ AS
 
 
 	DECLARE @VendorId INT
-			,@ItemLocationyId INT
+			,@ItemLocationId INT
 			,@ItemCategoryId INT
 			,@ItemCategory NVARCHAR(100)
 
 	SELECT
 		@VendorId = VI.intVendorId
-		,@ItemLocationyId = intItemLocationId
+		,@ItemLocationId = intItemLocationId
 		,@ItemCategoryId = I.intCategoryId
 		,@ItemCategory = C.strCategoryCode
 	FROM
@@ -104,13 +104,16 @@ AS
 	INNER JOIN
 		vyuICGetItemStock VI
 			ON I.intItemId = VI.intItemId
-	INNER JOIN
+	LEFT OUTER JOIN
 		tblICCategory C
 			ON I.intCategoryId = C.intCategoryId
+	LEFT OUTER JOIN
+		tblICItemUOM UOM
+			ON I.intItemId = UOM.intItemId
 	WHERE
 		I.intItemId = @ItemId
 		AND VI.intLocationId = @LocationId 
-		AND (VI.intIssueUOMId = @ItemUOMId OR @ItemUOMId IS NULL)
+		AND (UOM.intItemUOMId = @ItemUOMId OR @ItemUOMId IS NULL)
 	
 
 	--Customer Special Pricing
@@ -231,11 +234,14 @@ AS
 			tblICItemPricingLevel PL
 				ON VI.intItemId = PL.intItemId
 					AND VI.intItemLocationId = PL.intItemLocationId
-					AND VI.intIssueUOMId = PL.intItemUnitMeasureId
+		LEFT OUTER JOIN
+			tblICItemUOM UOM
+				ON PL.intItemId = UOM.intItemId
+				AND PL.intItemUnitMeasureId = UOM.intItemUOMId
 		WHERE 
 			VI.intItemId = @ItemId
 			AND VI.intLocationId = @LocationId 
-			AND (@ItemUOMId IS NULL OR VI.intIssueUOMId = @ItemUOMId)
+			AND (@ItemUOMId IS NULL OR UOM.intItemUOMId = @ItemUOMId)
 
 		
 		DECLARE @SpecialPricing TABLE(
@@ -480,7 +486,7 @@ AS
 							tblICItemSpecialPricing 
 						WHERE
 							intItemId = @ItemId 
-							AND intItemLocationId = @ItemLocationyId 
+							AND intItemLocationId = @ItemLocationId 
 							AND (@ItemUOMId IS NULL OR intItemUnitMeasureId = @ItemUOMId)
 							AND @TransactionDate BETWEEN dtmBeginDate AND dtmEndDate
 							)
@@ -496,22 +502,6 @@ AS
 	DECLARE @PricingLevel NVARCHAR(100)
 	SET @Price =	( 
 							SELECT
-								--(CASE
-								--	WHEN PL.strPricingMethod = 'Fixed Dollar Amount'
-								--		THEN PL.dblUnitPrice
-								--	WHEN PL.strPricingMethod = 'Markup Standard Cost'
-								--		THEN VIS.dblStandardCost + (PL.dblUnitPrice * (PL.dblAmountRate/100.00))
-								--	WHEN PL.strPricingMethod = 'Percent of Margin'
-								--		THEN VIS.dblSalePrice / (1 - (PL.dblAmountRate/100.00))
-								--	WHEN PL.strPricingMethod = 'Discount Sales Price'
-								--		THEN VIS.dblSalePrice - (PL.dblUnitPrice * (PL.dblAmountRate/100.00))
-								--	WHEN PL.strPricingMethod = 'MSRP Discount'
-								--		THEN VIS.dblMSRPPrice - (PL.dblUnitPrice * (PL.dblAmountRate/100.00))
-								--	WHEN PL.strPricingMethod = 'Percent of Margin (MSRP)'
-								--		THEN VIS.dblMSRPPrice / (1 - (PL.dblAmountRate/100.00))
-								--	WHEN PL.strPricingMethod = 'None'
-								--		THEN NULL
-								--END)
 								PL.dblUnitPrice
 							FROM
 								tblICItemPricingLevel PL
@@ -520,14 +510,15 @@ AS
 									ON PL.strPriceLevel = CL.strPricingLevel
 							INNER JOIN
 								tblARCustomer C									
-									ON CL.intEntityId = C.intEntityCustomerId																
+									ON CL.intEntityId = C.intEntityCustomerId
+									AND CL.ysnDefaultLocation = 1															
 							INNER JOIN vyuICGetItemStock VIS
 									ON PL.intItemId = VIS.intItemId
 									AND PL.intItemLocationId = VIS.intItemLocationId															
 							WHERE
 								C.intEntityCustomerId = @CustomerId
 								AND PL.intItemId = @ItemId
-								AND PL.intItemLocationId = @ItemLocationyId
+								AND PL.intItemLocationId = @ItemLocationId
 								AND PL.intItemUnitMeasureId = @ItemUOMId
 								AND @Quantity BETWEEN PL.dblMin AND PL.dblMax
 							)
@@ -542,28 +533,12 @@ AS
 	--Item Standard Pricing
 	SET @Price =	( 
 							SELECT
-								--(CASE
-								--	WHEN P.strPricingMethod = 'Fixed Dollar Amount'
-								--		THEN P.dblSalePrice 
-								--	WHEN P.strPricingMethod = 'Markup Standard Cost'
-								--		THEN P.dblStandardCost + (P.dblSalePrice * (P.dblAmountPercent/100.00))
-								--	WHEN P.strPricingMethod = 'Percent of Margin'
-								--		THEN P.dblSalePrice / (1 - (P.dblAmountPercent/100.00))
-								--	WHEN P.strPricingMethod = 'Discount Sales Price'
-								--		THEN P.dblSalePrice - (P.dblSalePrice * (P.dblAmountPercent/100.00))
-								--	WHEN P.strPricingMethod = 'MSRP Discount'
-								--		THEN P.dblMSRPPrice - (P.dblSalePrice * (P.dblAmountPercent/100.00))
-								--	WHEN P.strPricingMethod = 'Percent of Margin (MSRP)'
-								--		THEN P.dblMSRPPrice / (1 - (P.dblAmountPercent/100.00))
-								--	WHEN P.strPricingMethod = 'None'
-								--		THEN NULL
-								--END)
 								P.dblSalePrice
 							FROM
 								tblICItemPricing P
 							WHERE
 								P.intItemId = @ItemId
-								AND P.intItemLocationId = @ItemLocationyId
+								AND P.intItemLocationId = @ItemLocationId
 							)
 	IF(@Price IS NOT NULL)
 		BEGIN

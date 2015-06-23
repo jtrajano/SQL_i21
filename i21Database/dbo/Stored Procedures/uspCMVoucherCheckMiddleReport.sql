@@ -150,8 +150,7 @@ FROM	dbo.tblCMBankTransaction CHK INNER JOIN dbo.tblCMCheckPrintJobSpool PRINTSP
 		LEFT JOIN tblEntity ENTITY
 			ON VENDOR.[intEntityVendorId] = ENTITY.intEntityId
 		LEFT JOIN tblEntityLocation LOCATION
-			ON VENDOR.intDefaultLocationId = LOCATION.intEntityLocationId
-			AND LOCATION.intEntityId = ENTITY.intEntityId
+			ON VENDOR.intEntityVendorId = LOCATION.intEntityId AND ysnDefaultLocation = 1 
 WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId = ISNULL(@strTransactionId, CHK.strTransactionId)
 		AND PRINTSPOOL.strBatchId = ISNULL(@strBatchId, PRINTSPOOL.strBatchId)

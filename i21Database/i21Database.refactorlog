@@ -3493,4 +3493,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="ysnCreatedByOptions" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b542c8a9-07ac-45c2-aaa5-60110dd8680c" ChangeDateTime="06/15/2015 08:26:02">
+    <Property Name="ElementName" Value="[dbo].[tblARCustomerFarm].[intCustomerId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARCustomerFarm]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityCustomerId]" />
+  </Operation>
 </Operations>

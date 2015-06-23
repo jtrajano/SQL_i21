@@ -184,7 +184,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 					JOIN tblGLAccountCategory C
 					ON B.intAccountCategoryId = C.intAccountCategoryId
 					WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)	
-					AND C.strAccountCategory <> 'General'  AND @strJournalType <> 'Origin Journal'
+					AND C.strAccountCategory <> 'General'  AND @strJournalType NOT IN('Origin Journal','Adjusted Origin Journal')
 					GROUP BY A.intJournalId	
 				--UNION 
 				--SELECT DISTINCT B.intJournalId,
