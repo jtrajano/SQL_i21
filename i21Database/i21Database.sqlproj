@@ -1803,6 +1803,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetContainerType.sql" />
     <Build Include="dbo\Tables\tblMFAttributeType.sql" />
     <Build Include="dbo\Views\vyuRKSOptionExerciseAssignTransaction.sql" />
+    <Build Include="dbo\Tables\tblGLReallocationTemp.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
