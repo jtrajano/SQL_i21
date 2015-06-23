@@ -15,7 +15,8 @@ Con.strDepartment,
 Loc.strAddress,
 Loc.strCity,
 Loc.strState,
-Loc.strZipCode
+Loc.strZipCode,
+Emp.ysnActive
 FROM dbo.tblPREmployee AS Emp
 INNER JOIN dbo.tblEntity AS Ent ON Ent.intEntityId = Emp.intEntityId
 LEFT JOIN dbo.tblEntity AS Con ON Con.[intEntityId] = Emp.intEntityId
