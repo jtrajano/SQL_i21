@@ -1808,6 +1808,8 @@
     <Build Include="dbo\Stored Procedures\uspRKGetElectronicPricingURL.sql" />
     <Build Include="dbo\Stored Procedures\uspRKInsertToElectronicPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetElectronicPricingValue.sql" />
+    <Build Include="dbo\Tables\tblLGWarehouseRateMatrixDetail.sql" />
+    <Build Include="dbo\Tables\tblLGWarehouseRateMatrixHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
