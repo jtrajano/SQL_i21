@@ -63,7 +63,7 @@ BEGIN TRY
 			strLocationName,
 			intContractHeaderId,
 			strRemark,
-			strDetailUnitMeasure
+			strItemUOM strDetailUnitMeasure
 	FROM	vyuCTContractDetailView DV
 	WHERE	intContractHeaderId	=	@intContractHeaderId
 	

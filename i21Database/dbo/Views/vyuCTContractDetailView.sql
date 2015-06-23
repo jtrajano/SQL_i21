@@ -5,7 +5,7 @@ AS
 	SELECT	CD.intContractDetailId,				CD.intContractSeq,				CD.intConcurrencyId				AS	intDetailConcurrencyId,
 			CD.intCompanyLocationId,			CD.dtmStartDate,				CD.intItemId,									
 			CD.dtmEndDate,						CD.intFreightTermId,			CD.intShipViaId,								
-			CD.intUnitMeasureId,				CD.intPricingTypeId,			CD.dblQuantity					AS	dblDetailQuantity,				
+			IU.intUnitMeasureId,				CD.intPricingTypeId,			CD.dblQuantity					AS	dblDetailQuantity,				
 			CD.dblFutures,						CD.dblBasis,					CD.intFutureMarketId,							
 			CD.intFutureMonthId,				CD.dblCashPrice,				CD.intCurrencyId,			
 			CD.dblRate,							CD.strCurrencyReference,		CD.intMarketZoneId,								
@@ -24,12 +24,14 @@ AS
 			CD.dtmUpdatedAvailabilityDate,		CD.intBookId,					CD.intSubBookId,
 			CD.intContainerTypeId,				CD.intNumberOfContainers,		CD.intInvoiceCurrencyId,
 			CD.dtmFXValidFrom,					CD.dtmFXValidTo,				CD.strFXRemarks,
-			CD.dblAssumedFX,					CD.strFixationBy,				CL.strLocationName,
+			CD.dblAssumedFX,					CD.strFixationBy,				CD.intItemUOMId,
+
 			IM.strItemNo,						FT.strFreightTerm,				IM.strDescription				AS	strItemDescription,
-			SV.strShipVia,						PT.strPricingType,				U1.strUnitMeasure				AS	strDetailUnitMeasure,
+			SV.strShipVia,						PT.strPricingType,				U1.strUnitMeasure				AS	strItemUOM,
 			FM.strFutMarketName,				MO.strFutureMonth,				CU.strCurrency,
 			MZ.strMarketZoneCode,				OH.strContractOptDesc,			VR.strVendorId,
-			RG.strRailGrade,													FR.strOrigin+' - '+FR.strDest	AS	strOriginDest,
+			RG.strRailGrade,					CL.strLocationName,				FR.strOrigin+' - '+FR.strDest	AS	strOriginDest,
+			SL.intStorageLocationId,											SL.strName						AS	strStorageLocationName,
 			
 			--Header Detail
 
@@ -61,8 +63,12 @@ AS
 	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
 	JOIN	vyuCTContractHeaderView		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId		
 	JOIN	tblICItem					IM	ON	IM.intItemId				=	CD.intItemId
-	JOIN	tblICUnitMeasure			U1	ON	U1.intUnitMeasureId			=	CD.intUnitMeasureId			
-	JOIN	tblCTPricingType			PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId			LEFT
+	JOIN	tblICItemUOM				IU	ON	IU.intItemUOMId				=	CD.intItemUOMId
+	JOIN	tblICUnitMeasure			U1	ON	U1.intUnitMeasureId			=	IU.intUnitMeasureId			
+	JOIN	tblCTPricingType			PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId			
+	JOIN	tblICItemLocation			IL	ON	IL.intItemId				=	IM.intItemId				AND
+												IL.intLocationId			=	CD.intCompanyLocationId		LEFT
+	JOIN	tblICStorageLocation		SL	ON	SL.intStorageLocationId		=	IL.intStorageLocationId		LEFT
 	JOIN	tblSMFreightTerms			FT	ON	FT.intFreightTermId			=	CD.intFreightTermId			LEFT
 	JOIN	tblSMShipVia				SV	ON	SV.intShipViaID				=	CD.intShipViaId				LEFT
 	JOIN	tblCTContractOptHeader		OH  ON	OH.intContractOptHeaderId	=	CD.intContractOptHeaderId	LEFT
