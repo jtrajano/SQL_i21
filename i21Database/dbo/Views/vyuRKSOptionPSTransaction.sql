@@ -11,7 +11,7 @@ SELECT strInternalTradeNo,dtmTransactionDate,dtmFilledDate,strFutMarketName,strO
  strHedgeUOM,strBuySell,dblContractSize
   FROM (
 SELECT (intTotalLot-dblSelectedLot1)-intExpiredLots AS dblOpenLots,'' as dblSelectedLot,
-		-(intTotalLot-dblSelectedLot1)*dblContractSize*dblPremium  as dblPremiumValue,
+		(intTotalLot-dblSelectedLot1)*dblContractSize*dblPremium  as dblPremiumValue,
 		(intTotalLot-dblSelectedLot1)*dblContractSize*dblMarketPremium  as dblMarketValue,
 		-dblOptCommission*(intTotalLot-dblSelectedLot1) AS dblCommission,* from  (
 SELECT DISTINCT
