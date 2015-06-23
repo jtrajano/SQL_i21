@@ -25,7 +25,89 @@ Declare @ErrMsg nvarchar(Max)
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml    
   
  BEGIN TRANSACTION		
-  ---------------Header Record Insert ----------------
+ 
+ ------------------------- Delete Matched ---------------------
+DECLARE @tblMatchedDelete table        
+		(   
+	    strTranNo nvarchar(max),
+		ysnDeleted Bit	
+		)  
+
+INSERT INTO @tblMatchedDelete
+SELECT  
+	strTranNo,
+	ysnDeleted
+  FROM OPENXML(@idoc,'root/DeleteMatched', 2)      
+ WITH    
+ ( 	
+	[strTranNo] INT,
+	[ysnDeleted] Bit
+ )
+
+IF EXISTS(select * from @tblMatchedDelete)
+BEGIN
+DELETE FROM tblRKOptionsMatchPnS
+		WHERE convert(int,strTranNo) in( SELECT convert(int,strTranNo) from @tblMatchedDelete)
+END
+  ------------------------- END Delete Matched ---------------------
+ 
+ ------------------------- Delete Matched ---------------------
+DECLARE @tblExpiredDelete table        
+		(   
+	    strTranNo nvarchar(max),
+		ysnDeleted Bit	
+		)  
+
+INSERT INTO @tblExpiredDelete
+SELECT  
+	strTranNo,
+	ysnDeleted
+  FROM OPENXML(@idoc,'root/DeleteExpired', 2)      
+ WITH    
+ ( 	
+	[strTranNo] INT,
+	[ysnDeleted] Bit
+ )
+
+IF EXISTS(select * from @tblExpiredDelete)
+BEGIN
+DELETE FROM tblRKOptionsPnSExpired
+		WHERE convert(int,strTranNo) in( SELECT convert(int,strTranNo) from @tblExpiredDelete)
+END
+ ------------------------- END Delete Matched ---------------------------
+ 
+ ------------------------- Delete ExercisedAssigned ---------------------
+DECLARE @tblExercisedAssignedDelete table        
+		(   
+	    strTranNo nvarchar(max),
+		ysnDeleted Bit	
+		)  
+
+INSERT INTO @tblExercisedAssignedDelete
+SELECT  
+	strTranNo,
+	ysnDeleted
+  FROM OPENXML(@idoc,'root/DeleteExercisedAssigned', 2)      
+ WITH    
+ ( 	
+	[strTranNo] INT,
+	[ysnDeleted] Bit
+ )
+
+IF EXISTS(select * from @tblExercisedAssignedDelete)
+BEGIN
+
+DELETE FROM tblRKFutOptTransaction 
+WHERE intFutOptTransactionId in(SELECT intFutTransactionId 
+								FROM tblRKOptionsPnSExercisedAssigned
+								WHERE convert(int,strTranNo) in( SELECT convert(int,strTranNo) from @tblExercisedAssignedDelete))
+
+DELETE FROM tblRKOptionsPnSExercisedAssigned
+		WHERE convert(int,strTranNo) in( SELECT convert(int,strTranNo) from @tblExercisedAssignedDelete)
+END
+  ------------------------- END Delete ExercisedAssigned ---------------------
+ 
+ ---------------Header Record Insert ----------------
  INSERT INTO tblRKOptionsMatchPnSHeader 
 		(
 			intConcurrencyId
@@ -178,12 +260,10 @@ SELECT @NewFutOptTransactionHeaderId,1,@dtmTranDate,
    
 SELECT @NewFutOptTransactionId = SCOPE_IDENTITY();  
 
-update tblRKOptionsPnSExercisedAssigned  set intFutTransactionId = @NewFutOptTransactionId Where intOptionsPnSExercisedAssignedId=@intOptionsPnSExercisedAssignedId
---UPDATE tblRKOptionsPnSExercisedAssigned intFut
-   
+	UPDATE tblRKOptionsPnSExercisedAssigned  set intFutTransactionId = @NewFutOptTransactionId Where intOptionsPnSExercisedAssignedId=@intOptionsPnSExercisedAssignedId
+  
 SELECT @mRowNumber=MIN(RowNumber) FROM @tblExercisedAssignedDetail WHERE RowNumber>@mRowNumber  
 END  
-
    
 COMMIT TRAN  
   
