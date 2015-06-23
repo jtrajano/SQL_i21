@@ -3,15 +3,16 @@ AS
 SELECT strInternalTradeNo,dtmTransactionDate,dtmFilledDate,strFutMarketName,strOptionMonth,strName,strAccountNumber,isnull(intTotalLot,0) intTotalLot,isnull(dblOpenLots,0) dblOpenLots,
 		strOptionType,dblStrike,dblPremium,dblPremiumValue,dblCommission,intFutOptTransactionId
  ,dblPremiumValue+dblCommission as dblNetPremium,
-  0.0 as dblMarketPremium,
- 0.0 as dblMarketValue,
- 0.0 as dblMTM,	
+ dblMarketPremium,
+ dblMarketValue,
+ dblPremiumValue - dblMarketValue as dblMTM,
  dtmExpirationDate,strStatus,strCommodityCode,strLocationName,strBook,strSubBook,dblDelta,
  dblOpenLots*dblDelta*dblContractSize AS dblDeltaHedge,
  strHedgeUOM,strBuySell,dblContractSize
   FROM (
 SELECT (intTotalLot-dblSelectedLot1)-intExpiredLots AS dblOpenLots,'' as dblSelectedLot,
 		-(intTotalLot-dblSelectedLot1)*dblContractSize*dblPremium  as dblPremiumValue,
+		(intTotalLot-dblSelectedLot1)*dblContractSize*dblMarketPremium  as dblMarketValue,
 		-dblOptCommission*(intTotalLot-dblSelectedLot1) AS dblCommission,* from  (
 SELECT DISTINCT
       strInternalTradeNo AS strInternalTradeNo
@@ -35,7 +36,9 @@ SELECT DISTINCT
       ,cl.strLocationName
       ,strBook 
       ,strSubBook 
-      ,'' as MarketPremium
+      ,(SELECT TOP 1 dblStrike  FROM tblRKFuturesSettlementPrice sp
+		JOIN tblRKOptSettlementPriceMarketMap spm ON sp.intFutureSettlementPriceId=spm.intFutureSettlementPriceId 
+		AND sp.intFutureMarketId=ot.intFutureMarketId AND spm.intOptionMonthId= ot.intOptionMonthId ORDER BY sp.dtmPriceDate desc) as dblMarketPremium
       ,'' as MarketValue
       ,''as MTM,ot.intOptionMonthId ,ot.intFutureMarketId
 	  ,ISNULL((SELECT top 1 dblDelta FROM tblRKFuturesSettlementPrice fs
