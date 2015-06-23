@@ -213,6 +213,7 @@ BEGIN
 		UPDATE A
 			SET dblAmountDue = A.dblAmountDue + AppliedPayments.dblAmountApplied
 			,dblPayment = dblPayment - AppliedPayments.dblAmountApplied
+			,ysnPaid = 0
 		FROM tblAPBill A
 		CROSS APPLY
 		(
@@ -260,6 +261,7 @@ BEGIN
 		UPDATE A
 			SET dblAmountDue = A.dblAmountDue - AppliedPayments.dblAmountApplied
 			,dblPayment = dblPayment + AppliedPayments.dblAmountApplied
+			,ysnPaid = CASE WHEN (A.dblAmountDue - AppliedPayments.dblAmountApplied) = 0 THEN 1 ELSE 0 END
 		FROM tblAPBill A
 		CROSS APPLY
 		(
