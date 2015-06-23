@@ -89,19 +89,28 @@
 :r ..\dbo\Views\vyuECCFCardTransaction.sql
 
 -- TANK MANAGEMENT
-:r ..\dbo\Views\vyuTMOriginOption.sql
-:r ..\dbo\Views\vwctlmst.sql
-:r ..\dbo\Views\vwitmmst.sql
-:r ..\dbo\Views\vwivcmst.sql
-:r ..\dbo\Views\vwlclmst.sql
-:r ..\dbo\Views\vwlocmst.sql
+
+--:r ..\dbo\Views\vyuTMOriginOption.sql
+:r "..\dbo\Stored Procedures\uspTMRecreateOriginOptionView.sql"
+--:r ..\dbo\Views\vwctlmst.sql
+:r "..\dbo\Stored Procedures\uspTMRecreateCTLMSTView.sql"
+--:r ..\dbo\Views\vwitmmst.sql
+:r "..\dbo\Stored Procedures\uspTMRecreateItemView.sql"
+--:r ..\dbo\Views\vwivcmst.sql
+:r "..\dbo\Stored Procedures\uspTMRecreateInvoiceView.sql"
+--:r ..\dbo\Views\vwlclmst.sql
+:r "..\dbo\Stored Procedures\uspTMRecreateLocaleTaxView.sql"
+--:r ..\dbo\Views\vwlocmst.sql
+:r "..\dbo\Stored Procedures\uspTMRecreateLocationView.sql"
 :r ..\dbo\Views\vwprcmst.sql
 :r ..\dbo\Views\vwpyemst.sql
 :r ..\dbo\Views\vwticmst.sql
-:r ..\dbo\Views\vwcusmst.sql
+--:r ..\dbo\Views\vwcusmst.sql
+:r "..\dbo\Stored Procedures\uspTMRecreateCustomerView.sql"
 :r ..\dbo\Views\vwslsmst.sql
 :r ..\dbo\Views\vwtaxmst.sql
-:r ..\dbo\Views\vwtrmmst.sql
+--:r ..\dbo\Views\vwtrmmst.sql
+:r "..\dbo\Stored Procedures\uspTMRecreateTermsView.sql"
 :r ..\dbo\Views\vwDispatch.sql
 :r ..\dbo\Views\vyuTMtrprcmst.sql
 :r ..\dbo\Views\vyuTMOriginAccountStatus.sql
