@@ -1776,6 +1776,8 @@
     <Build Include="dbo\Tables\tblRKOptionsPnSExercisedAssigned.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetContainerType.sql" />
     <Build Include="dbo\Tables\tblMFAttributeType.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMMigrateCompanyPreference.sql" />
+    <Build Include="dbo\Tables\tblCFCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
