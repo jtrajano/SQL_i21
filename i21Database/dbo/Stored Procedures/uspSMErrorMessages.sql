@@ -420,7 +420,7 @@ SET @strmessage = 'No valid input item is configured against the selected run, i
 EXEC sp_addmessage 51104,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51105) EXEC sp_dropmessage 51105, 'us_english'	
-SET @strmessage = 'The run prior to the current run has no cycle count entries. Please do cycle count and close the previous run before starting the cycle count for the current run.'
+SET @strmessage = 'The run ''%s'' prior to the current run has no cycle count entries. Please do cycle count and close the previous run before starting the cycle count for the current run.'
 EXEC sp_addmessage 51105,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51106) EXEC sp_dropmessage 51106, 'us_english'	
