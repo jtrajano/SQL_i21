@@ -142,7 +142,9 @@ BEGIN
 			,[strFrequency]
 	        ,[dtmMaintenanceDate]
 	        ,[dblMaintenanceAmount]
-	        ,[dblLicenseAmount])
+	        ,[dblLicenseAmount]
+			,[intContractHeaderId]
+			,[intContractDetailId])
 		SELECT 
 			@NewTransactionId
 			,[intItemId]
@@ -168,6 +170,8 @@ BEGIN
 	        ,[dtmMaintenanceDate]
 	        ,[dblMaintenanceAmount]
 	        ,[dblLicenseAmount]
+			,[intContractHeaderId]
+			,[intContractDetailId]
 		FROM tblSOSalesOrderDetail		
 		WHERE [intSalesOrderDetailId] = @SalesOrderDetailId
 
