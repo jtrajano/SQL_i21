@@ -30,7 +30,11 @@ SELECT
 	,D.strFrequency
 	,D.dtmMaintenanceDate
 	,D.dblMaintenanceAmount
-	,D.dblLicenseAmount	
+	,D.dblLicenseAmount
+	,D.intContractHeaderId
+	,D.intContractDetailId
+	,CH.intContractNumber
+	,CD.intContractSeq
 FROM         
     [tblSOSalesOrderDetail] D
 LEFT JOIN    
@@ -51,3 +55,10 @@ LEFT JOIN
 LEFT JOIN
     [tblICStorageLocation] ST
         ON D.[intStorageLocationId] = ST.[intStorageLocationId]
+LEFT JOIN
+	[tblCTContractHeader] CH
+		ON D.[intContractHeaderId] = CH.[intContractHeaderId]
+LEFT JOIN
+	[tblCTContractDetail] CD
+		ON D.[intContractDetailId] = CD.[intContractDetailId] 
+	  AND CH.[intContractHeaderId] = CD.[intContractHeaderId]

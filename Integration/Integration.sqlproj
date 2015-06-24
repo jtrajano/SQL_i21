@@ -141,6 +141,7 @@
     <None Include="Scripts\NR\uspNRGenerateEFTSchedule.sql" />
     <None Include="Scripts\NR\uspNRGetDetailsForInvoice.sql" />
     <None Include="Scripts\NR\uspNRGetPaymentType.sql" />
+    <None Include="dbo\Stored Procedures\uspGLImportOriginReallocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
@@ -260,5 +261,13 @@
     <None Include="dbo\Views\vyuTMLeaseCode.sql" />
     <None Include="dbo\Stored Procedures\uspFRDImportOriginDesign.sql" />
     <None Include="dbo\Stored Procedures\uspFRDProcessOriginImport.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateCustomerView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateOriginOptionView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateCTLMSTView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateItemView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateInvoiceView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateLocaleTaxView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateLocationView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateTermsView.sql" />
   </ItemGroup>
 </Project>

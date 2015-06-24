@@ -182,13 +182,27 @@ BEGIN
 				glfsf_tot_no,
 				'''',													--full account
 				glfsf_grp_printall_yn,
-				CASE												--FULL ACCOUNT END
-					WHEN glfsf_grp_sub9_16 LIKE ''%*%'' THEN CONVERT(VARCHAR(8), glfsf_grp_end1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),''99999999''),4)
-					ELSE CONVERT(VARCHAR(8),glfsf_grp_end1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_grp_sub9_16),4)
+				CASE											--FULL ACCOUNT END
+					WHEN glfsf_action_type=''GRA'' THEN 
+								CASE												
+									WHEN glfsf_gra_sub9_16 LIKE ''%*%'' THEN CONVERT(VARCHAR(8), glfsf_gra_end1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),''99999999''),4)
+									ELSE CONVERT(VARCHAR(8),glfsf_gra_end1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_gra_sub9_16),4)
+								END
+					WHEN glfsf_action_type=''GRP'' THEN 
+								CASE
+									WHEN glfsf_grp_sub9_16 LIKE ''%*%'' THEN CONVERT(VARCHAR(8), glfsf_grp_end1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),''99999999''),4)
+									ELSE CONVERT(VARCHAR(8),glfsf_grp_end1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_grp_sub9_16),4)
+								END
+					WHEN glfsf_action_type=''ACA'' THEN 
+								CONVERT(VARCHAR(8),glfsf_aca1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_aca9_16),4)
+					WHEN glfsf_action_type=''ACP'' THEN 
+								CONVERT(VARCHAR(8),glfsf_acp1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_acp9_16),4)
 					END,
 				CASE 
+					WHEN glfsf_gra_sub9_16 like ''%*%'' THEN ''YES''
 					WHEN glfsf_grp_sub9_16 like ''%*%'' THEN ''YES''
 					WHEN glfsf_aca9_16 like ''%*%'' THEN ''YES''
+					WHEN glfsf_acp9_16 like ''%*%'' THEN ''YES''
 					ELSE ''NO''
 					END,
 				ISNULL(RTRIM(''00000000'' + glfsf_grp_sub9_16),
@@ -203,11 +217,33 @@ BEGIN
 					ISNULL(RTRIM(''00000000'' + glfsf_grp_beg1_8),	--
 					ISNULL(RTRIM(''00000000'' + glfsf_aca1_8),
 					ISNULL(RTRIM(''00000000'' + glfsf_acp1_8),''00000000'')))),
-				CONVERT(varchar(8),RTRIM(glfsf_grp_end1_8)),		--1 to 8 end for ranges
-				CASE												--9-16 end 
-					WHEN glfsf_grp_sub9_16 LIKE ''%*%'' THEN CONVERT(VARCHAR(8),''99999999'')
-					ELSE CONVERT(varchar(8),ISNULL(RTRIM(glfsf_grp_sub9_16),''0''))
+				CASE												--1 to 8 end for ranges
+					WHEN glfsf_action_type=''GRA'' THEN
+						CONVERT(varchar(8),RTRIM(glfsf_gra_end1_8))
+					WHEN glfsf_action_type=''GRP'' THEN
+						CONVERT(varchar(8),RTRIM(glfsf_grp_end1_8))
+					WHEN glfsf_action_type=''ACA'' THEN
+						CONVERT(varchar(8),RTRIM(glfsf_aca1_8))
+					WHEN glfsf_action_type=''ACP'' THEN
+						CONVERT(varchar(8),RTRIM(glfsf_acp1_8))
+					END,
+				CASE												--9 to 16 end for ranges
+					WHEN glfsf_action_type=''GRA'' THEN
+						CASE
+							WHEN glfsf_gra_sub9_16 LIKE ''%*%'' THEN CONVERT(VARCHAR(8),''99999999'')
+							ELSE CONVERT(varchar(8),ISNULL(RTRIM(glfsf_gra_sub9_16),''0''))
+						END
+					WHEN glfsf_action_type=''GRP'' THEN
+						CASE
+							WHEN glfsf_grp_sub9_16 LIKE ''%*%'' THEN CONVERT(VARCHAR(8),''99999999'')
+							ELSE CONVERT(varchar(8),ISNULL(RTRIM(glfsf_grp_sub9_16),''0''))
+						END
+					WHEN glfsf_action_type=''ACA'' THEN
+						CONVERT(varchar(8),ISNULL(RTRIM(glfsf_aca9_16),''0''))
+					WHEN glfsf_action_type=''ACP'' THEN
+						CONVERT(varchar(8),ISNULL(RTRIM(glfsf_acp9_16),''0''))
 					END
+
 				FROM glfsfmst 
 					INNER JOIN tblFRRow on tblFRRow.strDescription = CONVERT(VARCHAR(12),glfsfmst.glfsf_no)
 						WHERE tblFRRow.intRowId NOT IN (SELECT intRowId FROM tblFRRowDesign)
@@ -260,9 +296,19 @@ BEGIN
 							+ ''+convert (varchar('' + @9_16size + ''),acct9_16) +'' + '''''''''''''''' + '' AND '' + '''''''''''''''' 
 							+ ''+convert (varchar('' + @1_8size + ''),acct1_8end)+'' + '''''''' + ''-'' + '''''''' 
 							+ ''+convert (varchar('' + @9_16size + ''),acct9_16) '' + '' + ''''''''''''''''''
-							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRA'' + '''''''' + '' AND acct9_16 like '' + '''''''' + ''%*%'' + ''''''''
+							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRA'' + '''''''' + '' AND acct9_16 not like '' + '''''''' + ''%*%'' + ''''''''
 			--SELECT @SQL --debug
 			exec (@SQL)
+
+
+			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + ''[Primary Account] Between '' 
+							+ '''''''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''''''''''' + '' AND ''
+							+ '''''''''''''''' + ''+ convert (varchar('' + @1_8size + ''),acct1_8end)'' + '' + ''''''''''''''''''
+							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRA'' + '''''''' + '' AND acct9_16 like '' + '''''''' + ''%*%'' + ''''''''
+			
+			--SELECT @SQL --debug
+			EXEC (@SQL)
+
 
 			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + ''[ID] Between '' + '''''''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''' + ''-'' + '''''''' 
 							+ ''+convert (varchar('' + @9_16size + ''),acct9_16) +'' + '''''''''''''''' + '' AND '' + '''''''''''''''' 
@@ -400,7 +446,7 @@ BEGIN
 					END
 			FROM #irelyloadFRRowDesign 
 				INNER JOIN tblGLAccountSegment
-					ON SUBSTRING(#irelyloadFRRowDesign.full_account,1,5) = tblGLAccountSegment.strCode COLLATE SQL_Latin1_General_CP1_CS_AS
+					ON SUBSTRING(#irelyloadFRRowDesign.full_account,1,CONVERT(INT,@1_8size)) = tblGLAccountSegment.strCode COLLATE SQL_Latin1_General_CP1_CS_AS
 				INNER JOIN tblGLAccountGroup 
 					ON tblGLAccountSegment.intAccountGroupId = tblGLAccountGroup.intAccountGroupId
 			WHERE #irelyloadFRRowDesign.strBalanceSide IS NULL
@@ -408,7 +454,6 @@ BEGIN
 			UPDATE #irelyloadFRRowDesign SET strDescription = ''none'' WHERE strDescription IS NULL AND strRowType IN (''Hidden'',''Row Calculation'',''Filter Accounts'')
 			UPDATE #irelyloadFRRowDesign SET strBalanceSide = ''Debit'' WHERE strBalanceSide = ''D''
 			UPDATE #irelyloadFRRowDesign SET strBalanceSide = ''Credit'' WHERE strBalanceSide = ''C''
-
 
 			--=====================================================================================================================================
 			-- 	BUILDING DETAILS 3
@@ -591,7 +636,7 @@ BEGIN
 								+ '''''''' + '','' +
 								'''''''' +
 								''='' + '''''''' +
-								'',substring(strAccountsUsed,10,'' + CONVERT(VARCHAR(2),(CONVERT(INT,@1_8size) + 1 + CONVERT(INT,@9_16size))) + ''),'' +
+								'',substring(LTRIM(strAccountsUsed),9,'' + CONVERT(VARCHAR(2),(CONVERT(INT,@1_8size) + 1 + CONVERT(INT,@9_16size))) + ''),'' +
 								'''''''' + '''''''' + '','' +
 								'''''''' + '''''''' + '','' + ''
 								intRowDetailId
@@ -623,8 +668,8 @@ BEGIN
 								''ID'' +
 								'''''''' + '','' + ''''''''
 								+ ''Between'' + '''''''' + '',''
-								+ ''substring(strAccountsUsed,16,'' + CONVERT(VARCHAR(10),(CONVERT(INT,@1_8size) + 3 + CONVERT(INT,@9_16size))) + ''),''
-								+ ''substring(strAccountsUsed,29,'' + CONVERT(VARCHAR(10),(CONVERT(INT,@1_8size) + 1 + CONVERT(INT,@9_16size))*2) + ''),''
+								+ ''substring(LTRIM(strAccountsUsed),15,'' + CONVERT(VARCHAR(10),(CONVERT(INT,@1_8size) + 1 + CONVERT(INT,@9_16size))) + ''),''
+								+ ''substring(LTRIM(strAccountsUsed),30,'' + CONVERT(VARCHAR(10),(CONVERT(INT,@1_8size) + 1 + CONVERT(INT,@9_16size))) + ''),''
 								+ '''''''' + '''''''' + '' ,
 								intRowDetailId
 							FROM tblFRRowDesign
@@ -654,8 +699,8 @@ BEGIN
 								intRefNo,'' +
 								'''''''' + ''Primary Account'' + '''''''' + '','' +
 								'''''''' + ''Between'' + '''''''' + '',
-								substring(strAccountsUsed,28,'' + @1_8size + ''),
-								substring(strAccountsUsed,'' + CONVERT(VARCHAR(2),35 + CONVERT(INT,(@1_8size))) + '','' + @1_8size + ''),''
+								substring(LTRIM(strAccountsUsed),28,'' + @1_8size + ''),
+								substring(LTRIM(strAccountsUsed),'' + CONVERT(VARCHAR(2),35 + CONVERT(INT,(@1_8size))) + '','' + @1_8size + ''),''
 								+ '''''''' + '''''''' + '' ,
 								intRowDetailId
 							FROM tblFRRowDesign

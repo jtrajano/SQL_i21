@@ -26,6 +26,7 @@ A.[intEntityVendorId]
 ,F.strTerm
 ,G1.intContractNumber
 ,G1.intContractHeaderId
+,G2.intContractDetailId
 FROM tblPOPurchase A
 	INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	CROSS APPLY 
@@ -90,6 +91,7 @@ A.[intEntityVendorId]
 ,F.strTerm
 ,NULL
 ,NULL
+,NULL
 FROM tblPOPurchase A
 	INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -123,6 +125,7 @@ A.intEntityVendorId
 ,D2.strName
 ,D1.strVendorId
 ,E.strShipVia
+,NULL
 ,NULL
 ,NULL
 ,NULL

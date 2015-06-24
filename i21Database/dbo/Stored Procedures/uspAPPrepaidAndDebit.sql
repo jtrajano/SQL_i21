@@ -52,7 +52,8 @@ SELECT
 										CASE WHEN B.dblTotal < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
 											THEN B.dblTotal
 											ELSE ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) END
-									ELSE 0 END),
+									ELSE 0 END)
+									- ISNULL(AppliedPrepaid.dblAmountApplied,0),
 	[dblAmountApplied]		=	CASE B.intPrepayTypeId 
 									WHEN 2 THEN 
 										CASE WHEN B.dblQtyReceived < CurrentBill.dblQtyReceived 
@@ -83,6 +84,15 @@ INNER JOIN
 	WHERE intBillId = @billId
 	AND C.intContractDetailId IS NOT NULL
 ) CurrentBill ON B.intItemId = CurrentBill.intItemId
+OUTER APPLY
+(
+	SELECT
+		SUM(dblAmountApplied) dblAmountApplied
+	FROM tblAPAppliedPrepaidAndDebit E
+	INNER JOIN tblAPBill F ON E.intBillId = F.intBillId
+	WHERE F.ysnPosted = 1 --Bill should be posted when getting the total applied for prepayment
+	AND E.intTransactionId = A.intBillId
+) AppliedPrepaid
 WHERE intTransactionType IN (2)
 AND intEntityVendorId = @vendorId
 AND A.dblAmountDue != 0

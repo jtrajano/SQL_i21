@@ -184,7 +184,15 @@ END
 IF ISNULL(@recap, 0) = 0
 BEGIN
 
+	--handel error here as we do not get the error here
+	BEGIN TRY
 	EXEC uspGLBookEntries @GLEntries, @post
+	END TRY
+	BEGIN CATCH
+		DECLARE @error NVARCHAR(200) = ERROR_MESSAGE()
+		RAISERROR(@error, 16, 1);
+		GOTO Post_Rollback
+	END CATCH
 
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
@@ -205,6 +213,7 @@ BEGIN
 		UPDATE A
 			SET dblAmountDue = A.dblAmountDue + AppliedPayments.dblAmountApplied
 			,dblPayment = dblPayment - AppliedPayments.dblAmountApplied
+			,ysnPaid = 0
 		FROM tblAPBill A
 		CROSS APPLY
 		(
@@ -252,6 +261,7 @@ BEGIN
 		UPDATE A
 			SET dblAmountDue = A.dblAmountDue - AppliedPayments.dblAmountApplied
 			,dblPayment = dblPayment + AppliedPayments.dblAmountApplied
+			,ysnPaid = CASE WHEN (A.dblAmountDue - AppliedPayments.dblAmountApplied) = 0 THEN 1 ELSE 0 END
 		FROM tblAPBill A
 		CROSS APPLY
 		(

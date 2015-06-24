@@ -8,3 +8,16 @@
 	END
 
 PRINT N'END Update all existing Item Locations and set Allow Negative Inventory to Yes'
+
+PRINT N'BEGIN Update all existing Category Standard UOM to reference Category UOM'
+
+	IF EXISTS(SELECT * FROM sys.columns WHERE name = 'intUOMId' AND object_id = OBJECT_ID('tblICCategory'))
+	BEGIN
+		EXEC ('
+			UPDATE tblICCategory
+			SET intUOMId = NULL
+			WHERE intUOMId NOT IN (SELECT intCategoryUOMId FROM tblICCategoryUOM WHERE intCategoryId = tblICCategory.intCategoryId)
+		')
+	END
+
+PRINT N'END Update all existing Category Standard UOM to reference Category UOM'
