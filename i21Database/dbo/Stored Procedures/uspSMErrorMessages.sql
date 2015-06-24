@@ -586,3 +586,7 @@ EXEC sp_addmessage 51145,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51146) EXEC sp_dropmessage 51146, 'us_english'	
 SET @strmessage = 'Execution order entered is out of range.'
 EXEC sp_addmessage 51146,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51147) EXEC sp_dropmessage 51147, 'us_english'	
+SET @strmessage = 'There is no active recipe found for item  %s Cannot proceed'
+EXEC sp_addmessage 51147,11,@strmessage,'us_english','False'
