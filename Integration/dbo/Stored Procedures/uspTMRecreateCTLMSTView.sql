@@ -87,6 +87,8 @@ BEGIN
 	ELSE
 	BEGIN
 		EXEC ('
+			CREATE VIEW [dbo].[vwctlmst]
+			AS
 			SELECT
 				A4GLIdentity		= 1
 				,vwctl_key			= 1

@@ -101,7 +101,27 @@ BEGIN
 	ELSE
 	BEGIN
 		EXEC ('
-				
+			CREATE VIEW [dbo].[vwlclmst]
+			AS
+			SELECT
+				vwlcl_tax_state	=	strState,
+				vwlcl_tax_auth_id1	=	strCounty,
+				vwlcl_tax_auth_id2	=	'''',
+				vwlcl_auth_id1_desc	=	'''',
+				vwlcl_auth_id2_desc	=	'''',
+				vwlcl_fet_ivc_desc	=	'''',  
+				vwlcl_set_ivc_desc	=	'''',
+				vwlcl_lc1_ivc_desc	=	'''',
+				vwlcl_lc2_ivc_desc	=	'''',
+				vwlcl_lc3_ivc_desc	=	'''',
+				vwlcl_lc4_ivc_desc	=	'''',
+				vwlcl_lc5_ivc_desc	=	''''
+				,vwlcl_lc6_ivc_desc	=	''''
+				,vwlcl_user_id	=	''''
+				,vwlcl_user_rev_dt	=	NULL
+				,A4GLIdentity	=	CAST(intTaxCodeId AS INT)
+				,intConcurrencyId = 0 
+			FROM tblSMTaxCode
 		')
 	END
 END
