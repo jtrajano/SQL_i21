@@ -1,7 +1,29 @@
 ﻿CREATE PROCEDURE [dbo].[uspSMMigrateCompanyPreference]
 AS
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMCompanyPreference)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblCFCompanyPreference)
 BEGIN
+
+	EXEC('INSERT INTO tblCFCompanyPreference
+		  (strCFServiceReminderMessage,
+		  ysnCFUseSpecialPrices,
+		  strCFUsePrice,
+		  ysnCFUseContracts,
+		  ysnCFSummarizeInvoice,
+		  strCFInvoiceSummarizationLocation,
+		  intConcurrencyId)
+		  SELECT strCFServiceReminderMessage,
+		  ysnCFUseSpecialPrices,
+		  strCFUsePrice,
+		  ysnCFUseContracts,
+		  ysnCFSummarizeInvoice,
+		  strCFInvoiceSummarizationLocation,
+		  intConcurrencyId
+		  FROM tblTEMPCompanyPreference')
+
+	EXEC('DROP TABLE tblTEMPCompanyPreference')
+
+	TRUNCATE TABLE tblSMCompanyPreference
+
 	INSERT INTO tblSMCompanyPreference(intDefaultCurrencyId, intDefaultReportingCurrencyId, intDefaultCountryId, ysnLegacyIntegration, 
 	strAccountingMethod, strSMTPHost, intSMTPPort, strSMTPUserName, strSMTPPassword, strSMTPFromEmail, strSMTPFromName, ysnSMTPAuthentication,
 	strSMTPSsl, intInterfaceSystemId, strQuotingSystemBatchUserID, strQuotingSystemBatchUserPassword, strInterfaceWebServicesURL, ysnAllowForContractPricing,

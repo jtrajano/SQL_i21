@@ -56,3 +56,42 @@ GO
 		END	
 	END
 GO
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMCompanyPreference')
+	BEGIN
+		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblCFompanyPreference')
+		BEGIN
+			PRINT N'CREATING tblTEMPCompanyPreference'
+
+			CREATE TABLE [dbo].[tblTEMPCompanyPreference] (
+				   [intCompanyPreferenceId]            INT            IDENTITY (1, 1) NOT NULL,
+				   [strCFServiceReminderMessage]       NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+				   [ysnCFUseSpecialPrices]             BIT            NULL,
+				   [strCFUsePrice]                     NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
+				   [ysnCFUseContracts]                 BIT            NULL,
+				   [ysnCFSummarizeInvoice]             BIT            NULL,
+				   [strCFInvoiceSummarizationLocation] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+				   [intConcurrencyId]                  INT            CONSTRAINT [DF_tblTEMPCompanyPreference_intConcurrencyId] DEFAULT ((1)) NULL,
+				   CONSTRAINT [PK_tblTEMPCompanyPreference] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC)
+				   );
+
+			PRINT N'INSERTING tblTEMPCompanyPreference from tblSMCompanyPreference'
+
+			EXEC ('INSERT INTO [dbo].[tblTEMPCompanyPreference]
+			       ([strCFServiceReminderMessage],
+				   [ysnCFUseSpecialPrices],
+				   [strCFUsePrice],
+				   [ysnCFUseContracts],
+				   [ysnCFSummarizeInvoice],
+				   [strCFInvoiceSummarizationLocation],
+				   [intConcurrencyId])
+				   SELECT [strCFServiceReminderMessage],
+				   [ysnCFUseSpecialPrices],
+				   [strCFUsePrice],
+				   [ysnCFUseContracts],
+				   [ysnCFSummarizeInvoice],
+				   [strCFInvoiceSummarizationLocation],
+				   [intConcurrencyId]
+				   FROM [dbo].[tblSMCompanyPreference]')
+		END	
+	END
+GO
