@@ -1819,6 +1819,8 @@
     <Build Include="dbo\Tables\tblWHContainerType.sql" />
     <Build Include="dbo\Tables\tblWHSKU.sql" />
     <Build Include="dbo\Tables\tblWHSKUStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMMigrateCompanyPreference.sql" />
+    <Build Include="dbo\Tables\tblCFCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
