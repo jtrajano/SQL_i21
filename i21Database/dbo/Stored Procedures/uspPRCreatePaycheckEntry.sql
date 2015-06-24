@@ -57,7 +57,7 @@ SELECT
 	,tblPREmployee.strPayPeriod
 	,@dtmBegin
 	,@dtmEnd
-	,(SELECT intBankAccountId FROM tblPRPayGroup WHERE intPayGroupId = tblPREmployee.intPayGroupId)
+	,(SELECT intBankAccountId FROM tblPRPayGroup WHERE intPayGroupId = @intPayGroup)
 	,''
 	,0
 	,0
@@ -141,7 +141,9 @@ DECLARE @intEmployeeEarningId INT
 /* Insert Earnings to Temp Table for iteration */
 SELECT tblPREmployeeEarning.intEmployeeEarningId 
 INTO #tmpEarnings FROM tblPREmployeeEarning 
-WHERE intEmployeeId = @intEmployee 
+WHERE intEmployeeId = @intEmployee
+  AND ysnDefault = CASE WHEN @intPayGroup IS NULL THEN 1 ELSE ysnDefault END
+  AND ISNULL(intPayGroupId, 0) = CASE WHEN @intPayGroup IS NULL THEN ISNULL(intPayGroupId, 0) ELSE @intPayGroup END
 
 /* Add Each Earning to Paycheck */
 WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
@@ -180,15 +182,11 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 		FROM tblPREmployeeEarning
 		WHERE intEmployeeId = @intEmployee
 		  AND intEmployeeEarningId = @intEmployeeEarningId
-		  AND ysnDefault = CASE WHEN @intPayGroup IS NULL THEN 1 ELSE ysnDefault END
-		  AND intPayGroupId = CASE WHEN @intPayGroup IS NULL THEN intPayGroupId ELSE @intPayGroup END
 
 		/* Get the Created Paycheck Earning Id*/
 		SELECT @intPaycheckEarningId = @@IDENTITY
 
-		IF EXISTS(SELECT TOP 1 1 FROM tblPREmployeeEarning WHERE intEmployeeEarningId = @intEmployeeEarningId 
-			AND ysnDefault = CASE WHEN @intPayGroup IS NULL THEN 1 ELSE ysnDefault END
-			AND intPayGroupId = CASE WHEN @intPayGroup IS NULL THEN intPayGroupId ELSE @intPayGroup END)
+		IF EXISTS(SELECT TOP 1 1 FROM tblPREmployeeEarning WHERE intEmployeeEarningId = @intEmployeeEarningId)
 			BEGIN
 				/* Insert Paycheck Earning Taxes */
 				INSERT INTO tblPRPaycheckEarningTax
