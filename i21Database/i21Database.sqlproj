@@ -1817,6 +1817,7 @@
     <Build Include="dbo\Tables\tblWMContainerType.sql" />
     <Build Include="dbo\Tables\tblWMSKU.sql" />
     <Build Include="dbo\Tables\tblWMSKUStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetPONumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
