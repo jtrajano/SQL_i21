@@ -36,7 +36,7 @@ BEGIN
 	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 	WHERE LS.strSecondaryStatus = 'Active'
 		AND L.dtmExpiryDate >= Getdate()
-		AND L.dblWeight>0
+		AND L.dblQty>0
 		AND I.strStatus='Active'
 	ORDER BY L.dtmDateCreated ASC
 END
