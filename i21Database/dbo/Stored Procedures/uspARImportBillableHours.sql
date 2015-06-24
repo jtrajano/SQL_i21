@@ -19,12 +19,21 @@ SET ANSI_WARNINGS OFF
 DECLARE @ZeroDecimal decimal(18,6)
 		,@DateOnly DATETIME
 		,@Currency int
+		,@ARAccountId int
 
 SET @ZeroDecimal = 0.000000
 	
 SELECT @DateOnly = CAST(GETDATE() as date)
 
 SET @Currency = ISNULL((SELECT strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency'),0)
+SET @ARAccountId = ISNULL((SELECT strValue FROM tblSMPreferences WHERE strPreference = 'DefaultARAccount'),0)
+
+
+IF(@ARAccountId IS NULL OR @ARAccountId = 0)  
+	BEGIN			
+		RAISERROR('There is no setup for AR Account in the Company Preference.', 11, 1) 
+		RETURN 0
+	END
 
 DECLARE @TicketHoursWorked TABLE(
 		intTicketHoursWorkedId INT)
@@ -106,18 +115,18 @@ SELECT
 	,'Invoice'					--[strTransactionType]
 	,0							--[intPaymentMethodId]
 	,V.[intTicketHoursWorkedId]	--[strComments] 
-	,CL.[intARAccount]			--[intAccountId]
-	,[dtmBilled]						--[dtmPostDate]
+	,@ARAccountId				--[intAccountId]
+	,[dtmBilled]				--[dtmPostDate]
 	,0							--[ysnPosted]
 	,0							--[ysnPaid]
-	,ISNULL(C.[intShipToId], (SELECT TOP 1 [intEntityLocationId] FROM tblEntityLocation WHERE [intEntityId] = C.[intEntityCustomerId] AND ysnDefaultLocation = 1 ))			--[intShipToLocationId] 
+	,ISNULL(C.[intShipToId], EL.[intEntityLocationId])			--[intShipToLocationId] 
 	,SL.[strLocationName]		--[strShipToLocationName]
 	,SL.[strAddress]			--[strShipToAddress]
 	,SL.[strCity]				--[strShipToCity]
 	,SL.[strState]				--[strShipToState]
 	,SL.[strZipCode]			--[strShipToZipCode]
 	,SL.[strCountry]			--[strShipToCountry]
-	,ISNULL(C.[intBillToId], (SELECT TOP 1 [intEntityLocationId] FROM tblEntityLocation WHERE [intEntityId] = C.[intEntityCustomerId] AND ysnDefaultLocation = 1 ))			--[intBillToLocationId] 
+	,ISNULL(C.[intBillToId], EL.[intEntityLocationId])			--[intBillToLocationId] 
 	,BL.[strLocationName]		--[strBillToLocationName]
 	,BL.[strAddress]			--[strBillToAddress]
 	,BL.[strCity]				--[strBillToCity]
@@ -134,12 +143,21 @@ INNER JOIN
 INNER JOIN
 	tblARCustomer C
 		ON V.[intEntityCustomerId] = C.[intEntityCustomerId]
-INNER JOIN
-	tblEntityLocation EL
-		ON C.[intEntityCustomerId] = EL.[intEntityId]
-INNER JOIN
-	tblSMCompanyLocation CL
-		ON V.[intCompanyLocationId] = CL.[intCompanyLocationId]
+LEFT OUTER JOIN
+				(	SELECT
+						[intEntityLocationId]
+						,[intEntityId] 
+						,[strCountry]
+						,[strState]
+						,[strCity]
+						,[intTermsId]
+						,[intShipViaId]
+					FROM 
+					tblEntityLocation
+					WHERE
+						ysnDefaultLocation = 1
+				) EL
+					ON C.[intEntityCustomerId] = EL.[intEntityId]
 LEFT OUTER JOIN
 	tblEntityLocation SL
 		ON C.intShipToId = SL.intEntityLocationId
@@ -171,10 +189,10 @@ SELECT
 	,V.[intHours]												--[dblQtyShipped]
 	,V.[dblPrice] 												--[dblPrice]
 	,V.[dblTotal]  												--[dblTotal]
-	,ISNULL(Acct.[intAccountId], CL.[intServiceCharges])		--[intAccountId]
-	,ISNULL(Acct.[intCOGSAccountId], CL.[intCostofGoodsSold])	--[intCOGSAccountId]
-	,ISNULL(Acct.[intSalesAccountId], CL.[intSalesAccount])		--[intSalesAccountId]
-	,ISNULL(Acct.[intInventoryAccountId], CL.[intInventory])	--[intInventoryAccountId]
+	,Acct.[intAccountId]										--[intAccountId]
+	,Acct.[intCOGSAccountId]									--[intCOGSAccountId]
+	,Acct.[intSalesAccountId]									--[intSalesAccountId]
+	,Acct.[intInventoryAccountId]								--[intInventoryAccountId]
 	,1															--[intConcurrencyId]
 FROM
 	[tblARInvoice] I
@@ -191,9 +209,6 @@ LEFT OUTER JOIN
 	vyuARGetItemAccount Acct
 		ON V.[intItemId] = Acct.[intItemId]
 			AND V.[intCompanyLocationId] = Acct.[intLocationId]
-LEFT OUTER JOIN
-	tblSMCompanyLocation CL
-		ON V.[intCompanyLocationId] = CL.[intCompanyLocationId]
 
 		
 UPDATE
@@ -208,15 +223,38 @@ INNER JOIN
 INNER JOIN
 	@TicketHoursWorked HW
 		ON V.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]
-
-	          
+		
+DECLARE @Invoices AS TABLE(intInvoiceID INT)
+INSERT INTO @Invoices 
+SELECT DISTINCT
+	I.[intInvoiceId]
+FROM 
+	[tblARInvoice] I
+INNER JOIN
+	tblHDTicketHoursWorked V
+		ON RTRIM(I.[strComments]) = RTRIM(CONVERT(nvarchar(250),V.[intTicketHoursWorkedId]))
+INNER JOIN
+	@TicketHoursWorked HW
+		ON V.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]
+		
+WHILE EXISTS(SELECT NULL FROM @Invoices)
+BEGIN
+	DECLARE @InvoiceID AS INT
+	SELECT TOP 1 @InvoiceID = [intInvoiceID] FROM @Invoices
+	EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceID
+	DELETE FROM @Invoices WHERE [intInvoiceID] = @InvoiceID
+END
+          
            
 IF @Post = 1
 	BEGIN
 		DECLARE	@return_value int,
 				@success bit,
 				@minId int,
-				@maxId int
+				@maxId int,
+				@batchId NVARCHAR(20),
+				@SuccessCount INT,
+				@InvCount INT
 				
 		SELECT
 			 @minId = MIN(I.[intInvoiceId])
@@ -260,12 +298,16 @@ IF @Post = 1
 				@beginTransaction = @minId,
 				@endTransaction = @maxId,
 				@exclude = NULL,
-				@successfulCount = @SuccessfulCount OUTPUT,
-				@invalidCount = @InvalidCount OUTPUT,
+				@successfulCount = @SuccessCount OUTPUT,
+				@invalidCount = @InvCount OUTPUT,
 				@success = @IsSuccess OUTPUT,
-				@batchIdUsed = @BatchIdUsed OUTPUT,
+				@batchIdUsed = @batchId OUTPUT,
 				@recapId = NULL,
 				@transType = N'Invoice'
+				
+		SET @BatchIdUsed = @batchId
+		SET @SuccessfulCount = @SuccessCount
+		SET @InvalidCount = @InvCount
 	END 
 	
 IF @Post = 0

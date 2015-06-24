@@ -9,7 +9,15 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF  
 
-DECLARE @INVENTORY_ADJUSTMENT_TYPE AS INT = 10
+DECLARE @INVENTORY_ADJUSTMENT_QuantityChange AS INT = 10
+		,@INVENTORY_ADJUSTMENT_UOMChange AS INT = 14
+		,@INVENTORY_ADJUSTMENT_ItemChange AS INT = 15
+		,@INVENTORY_ADJUSTMENT_LotStatusChange AS INT = 16
+		,@INVENTORY_ADJUSTMENT_SplitLot AS INT = 17
+		,@INVENTORY_ADJUSTMENT_ExpiryDateChange AS INT = 18
+		,@INVENTORY_ADJUSTMENT_LotMerge AS INT = 19
+		,@INVENTORY_ADJUSTMENT_LotMove AS INT = 20
+
 DECLARE @ItemsForQtyChange AS ItemCostingTableType
 
 --------------------------------------------------------------------------------
@@ -136,7 +144,7 @@ BEGIN
 			,intTransactionId		= Header.intInventoryAdjustmentId
 			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
 			,strTransactionId		= Header.strAdjustmentNo
-			,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_TYPE
+			,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_SplitLot
 			,intLotId				= Detail.intLotId
 			,intSubLocationId		= Detail.intSubLocationId
 			,intStorageLocationId	= Detail.intStorageLocationId
@@ -280,7 +288,7 @@ BEGIN
 			,intTransactionId		= Header.intInventoryAdjustmentId
 			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
 			,strTransactionId		= Header.strAdjustmentNo
-			,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_TYPE
+			,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_SplitLot
 			,intLotId				= Detail.intNewLotId
 			,intSubLocationId		= Detail.intSubLocationId
 			,intStorageLocationId	= Detail.intStorageLocationId

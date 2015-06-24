@@ -59,7 +59,7 @@ DECLARE @AVERAGECOST AS INT = 1
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	EXEC dbo.uspICValidateCostingOnPost
+	EXEC dbo.uspICValidateCostingOnPostInCustody
 		@ItemsToValidate = @ItemsInCustody
 END
 
@@ -126,13 +126,6 @@ BEGIN
 	SELECT	@CostingMethod = CostingMethod 
 	FROM	dbo.fnGetCostingMethodAsTable(@intItemId, @intItemLocationId)
 
-	--------------------------------------------------------------------------------
-	-- Call the SP that can process the item's costing method
-	--------------------------------------------------------------------------------
-	-- TODO: Average Cost
-	-- TODO: FIFO 
-	-- TODO: LIFO 
-
 	-- LOT 
 	IF (@CostingMethod = @LOTCOST)
 	BEGIN 
@@ -157,6 +150,62 @@ BEGIN
 				,@intTransactionTypeId
 				,@intUserId
 	END
+	ELSE IF @CostingMethod IN (@FIFO, @AVERAGECOST)
+	BEGIN 
+		EXEC dbo.uspICPostFIFOInCustody
+				@intItemId
+				,@intItemLocationId 
+				,@intItemUOMId 
+				,@intSubLocationId 
+				,@intStorageLocationId 
+				,@dtmDate 
+				,@dblQty 
+				,@dblUOMQty 
+				,@dblCost 
+				,@dblSalesPrice 
+				,@intCurrencyId 
+				,@dblExchangeRate 
+				,@intTransactionId 
+				,@intTransactionDetailId 
+				,@strTransactionId 
+				,@strBatchId 
+				,@intTransactionTypeId 
+				,@intUserId 
+	END 
+	ELSE IF @CostingMethod IN (@LIFO)
+	BEGIN 
+		EXEC dbo.uspICPostLIFOInCustody
+				@intItemId
+				,@intItemLocationId 
+				,@intItemUOMId 
+				,@intSubLocationId 
+				,@intStorageLocationId 
+				,@dtmDate 
+				,@dblQty 
+				,@dblUOMQty 
+				,@dblCost 
+				,@dblSalesPrice 
+				,@intCurrencyId 
+				,@dblExchangeRate 
+				,@intTransactionId 
+				,@intTransactionDetailId 
+				,@strTransactionId 
+				,@strBatchId 
+				,@intTransactionTypeId 
+				,@intUserId 
+	END
+	
+	--ELSE 
+	--BEGIN 
+	--	DECLARE @strItemNo AS NVARCHAR(50)
+
+	--	SELECT	@strItemNo = strItemNo
+	--	FROM	dbo.tblICItem
+	--	WHERE	intItemId = @intItemId
+
+	--	-- Custody or storage for %s is not yet supported. It is currently limited to lot-tracked items.
+	--	RAISERROR(51144, 11, 1, @strItemNo)  
+	--END 
 
 	-----------------------------------
 	-- Update the Item Stock table

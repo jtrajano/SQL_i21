@@ -50,8 +50,8 @@ Type the overview for the table here.
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICCategory] PRIMARY KEY ([intCategoryId]), 
 		CONSTRAINT [AK_tblICCategory_strCategoryCode] UNIQUE ([strCategoryCode]), 
-		CONSTRAINT [FK_tblICCategory_tblICUnitMeasure] FOREIGN KEY ([intUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
-		CONSTRAINT [FK_tblICCategory_tblICLineOfBusiness] FOREIGN KEY ([intLineOfBusinessId]) REFERENCES [tblICLineOfBusiness]([intLineOfBusinessId])	
+		CONSTRAINT [FK_tblICCategory_tblICLineOfBusiness] FOREIGN KEY ([intLineOfBusinessId]) REFERENCES [tblICLineOfBusiness]([intLineOfBusinessId]), 
+		CONSTRAINT [FK_tblICCategory_tblICCategoryUOM] FOREIGN KEY ([intUOMId]) REFERENCES [tblICCategoryUOM]([intCategoryUOMId])	
 	)
 
 	GO

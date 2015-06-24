@@ -21,7 +21,9 @@
     [ysnEnableLeaseBillingAboveMinUse] BIT             DEFAULT 0 NULL,
     [ysnOriginDataImported] BIT NOT NULL DEFAULT 1, 
     [dblDefaultBurnRate] NUMERIC(18, 6) NOT NULL DEFAULT 1, 
-    [strDispatchOption] NVARCHAR(10)  COLLATE Latin1_General_CI_AS NOT NULL DEFAULT 'Email', 
+    [ysnSendEmailOnDispatch] BIT NOT NULL DEFAULT 1, 
+    [strDispatchFile] NVARCHAR(5) COLLATE Latin1_General_CI_AS  NOT NULL DEFAULT 'XML', 
+    [ysnUseOriginIntegration] BIT NOT NULL DEFAULT 1, 
     CONSTRAINT [PK_tblTMPreferenceCompany] PRIMARY KEY CLUSTERED ([intPreferenceCompanyID] ASC)
 );
 
@@ -225,11 +227,31 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'ysnOriginDataImported'
 GO
+
+GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Option to send email or generate xml during Dispatch',
+    @value = N'Indicates if system will send email during dispatch',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblTMPreferenceCompany',
     @level2type = N'COLUMN',
-    @level2name = N'strDispatchOption'
+    @level2name = N'ysnSendEmailOnDispatch'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Indicates if what file will be generated during dispatch',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'strDispatchFile'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Indicates if TM is integrated to Origin system',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnUseOriginIntegration'

@@ -16,14 +16,14 @@ USING	(
 				,intLinkAllowedTransactionTypeId = LinkedTransaction.intTransactionTypeId
 		FROM	dbo.tblICInventoryTransactionType HostTransaction
 				,dbo.tblICInventoryTransactionType LinkedTransaction
-		WHERE	HostTransaction.strName = 'Inventory Adjustment'
+		WHERE	HostTransaction.strName like 'Inventory Adjustment%'
 				AND LinkedTransaction.strName = 'Consume'
 		UNION ALL 
 		SELECT	intTransactionTypeId = HostTransaction.intTransactionTypeId
 				,intLinkAllowedTransactionTypeId = LinkedTransaction.intTransactionTypeId
 		FROM	dbo.tblICInventoryTransactionType HostTransaction
 				,dbo.tblICInventoryTransactionType LinkedTransaction
-		WHERE	HostTransaction.strName = 'Inventory Adjustment'
+		WHERE	HostTransaction.strName like 'Inventory Adjustment%'
 				AND LinkedTransaction.strName = 'Produce'
 
 ) AS B

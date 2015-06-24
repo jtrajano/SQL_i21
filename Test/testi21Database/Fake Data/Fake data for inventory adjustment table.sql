@@ -251,12 +251,14 @@ BEGIN
 	-- 7. Change the value/cost of an existing stock. 
 
 	-- Constant for Adjustment Types
-	DECLARE @ADJUSTMENT_TYPE_QTY_CHANGE AS INT = 1
-			,@ADJUSTMENT_TYPE_UOM_CHANGE AS INT = 2
-			,@ADJUSTMENT_TYPE_ITEM_CHANGE AS INT = 3
-			,@ADJUSTMENT_TYPE_LOT_STATUS_CHANGE AS INT = 4
-			,@ADJUSTMENT_TYPE_SPLIT_LOT AS INT = 5
-			,@ADJUSTMENT_TYPE_EXPIRY_DATE_CHANGE AS INT = 6
+	DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
+			,@ADJUSTMENT_TYPE_UOMChange AS INT = 2
+			,@ADJUSTMENT_TYPE_ItemChange AS INT = 3
+			,@ADJUSTMENT_TYPE_LotStatusChange AS INT = 4
+			,@ADJUSTMENT_TYPE_SplitLot AS INT = 5
+			,@ADJUSTMENT_TYPE_ExpiryDateChange AS INT = 6
+			,@ADJUSTMENT_TYPE_LotMerge AS INT = 7
+			,@ADJUSTMENT_TYPE_LotMove AS INT = 8
 
 	DECLARE @intInventoryAdjustmentId AS INT 
 
@@ -280,7 +282,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @NewHaven
 				,dtmAdjustmentDate  = GETDATE()     
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_QTY_CHANGE 
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_QuantityChange 
 				,strAdjustmentNo    = 'ADJ-1'                              
 				,strDescription     = 'Header only record'                                                                          
 				,intSort			= 1
@@ -307,7 +309,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/14/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_QTY_CHANGE 
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_QuantityChange 
 				,strAdjustmentNo    = 'ADJ-2'                              
 				,strDescription     = 'With a lot item in the detail. Change Qty from 1,000 to 750.'
 				,intSort			= 1
@@ -393,7 +395,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/14/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_QTY_CHANGE 
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_QuantityChange 
 				,strAdjustmentNo    = 'ADJ-3'                              
 				,strDescription     = 'With a lot item in the detail that is purely in 25 kg bags, no weight UOM.'
 				,intSort			= 1
@@ -479,7 +481,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/14/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_LOT_STATUS_CHANGE
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_LotStatusChange
 				,strAdjustmentNo    = 'ADJ-4'                              
 				,strDescription     = 'Change lot status from Active to Quarantine.'
 				,intSort			= 1
@@ -524,7 +526,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/14/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_QTY_CHANGE 
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_QuantityChange 
 				,strAdjustmentNo    = 'ADJ-5'                              
 				,strDescription     = 'Qty Adjustment for Non lot items.'
 				,intSort			= 1
@@ -610,7 +612,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/14/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_EXPIRY_DATE_CHANGE
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_ExpiryDateChange
 				,strAdjustmentNo    = 'ADJ-6'                              
 				,strDescription     = 'Changes the expiry date of a lot item.'
 				,intSort			= 1
@@ -655,7 +657,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/17/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_SPLIT_LOT
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_SplitLot
 				,strAdjustmentNo    = 'ADJ-7'                              
 				,strDescription     = 'Split Lot. Split to the same Item UOM, Weight, and Cost.'
 				,intSort			= 1
@@ -732,7 +734,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/18/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_SPLIT_LOT
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_SplitLot
 				,strAdjustmentNo    = 'ADJ-8'
 				,strDescription     = 'Split Lot. Same Item UOM, Split Qty, and Weight. Different Cost.'
 				,intSort			= 1
@@ -809,7 +811,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/19/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_SPLIT_LOT
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_SplitLot
 				,strAdjustmentNo    = 'ADJ-9'
 				,strDescription     = 'Split Lot. Same Item UOM, Split Qty, and Cost. Different Weight.'
 				,intSort			= 1
@@ -886,7 +888,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/20/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_SPLIT_LOT
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_SplitLot
 				,strAdjustmentNo    = 'ADJ-10'
 				,strDescription     = 'Split Lot. Same Item UOM, Weight, and Cost. Different Split Qty.'
 				,intSort			= 1
@@ -963,7 +965,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/21/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_SPLIT_LOT
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_SplitLot
 				,strAdjustmentNo    = 'ADJ-11'
 				,strDescription     = 'Split Lot. Same Weight, Split Qty, and Cost. Different Item UOM.'
 				,intSort			= 1
@@ -1040,7 +1042,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/22/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_SPLIT_LOT
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_SplitLot
 				,strAdjustmentNo    = 'ADJ-12'
 				,strDescription     = 'Split Lot. Same Item UOM, Weight, Split Qty, and Cost. Different Weight UOM.'
 				,intSort			= 1
@@ -1117,7 +1119,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/22/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_SPLIT_LOT
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_SplitLot
 				,strAdjustmentNo    = 'ADJ-13'
 				,strDescription     = 'Split Lot. Reusing an existing lot for the split.'
 				,intSort			= 1

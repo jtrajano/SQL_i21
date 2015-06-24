@@ -18,6 +18,7 @@
     [strJournalType]     NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
     [strRecurringStatus] NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
     [strSourceType]      NVARCHAR (10)    COLLATE Latin1_General_CI_AS NULL,
-    CONSTRAINT [PK_tblGLJournal] PRIMARY KEY CLUSTERED ([intJournalId] ASC)
+    CONSTRAINT [PK_tblGLJournal] PRIMARY KEY CLUSTERED ([intJournalId] ASC),
+	CONSTRAINT [FK_tblGLJournal_tblSMCurrency] FOREIGN KEY([intCurrencyId]) REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID])
 );
 

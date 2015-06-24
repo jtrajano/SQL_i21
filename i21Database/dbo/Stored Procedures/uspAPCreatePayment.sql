@@ -24,8 +24,11 @@ BEGIN
 	DECLARE @paymentId INT
 	DECLARE @vendorId INT
 	DECLARE @amountPaid NUMERIC(18,6) = @payment;
+	DECLARE @withholdAmount NUMERIC(18,6)
+	DECLARE @withholdPercent NUMERIC(18,6)
 	DECLARE @paymentMethodId INT = @paymentMethod
 	DECLARE @intBankAccountId INT = @bankAccount;
+	DECLARE @vendorWithhold BIT = 0;
 	DECLARE @intGLBankAccountId INT;
 	
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillsId')) DROP TABLE #tmpBillsId
@@ -33,7 +36,9 @@ BEGIN
 	--TODO Allow Multi Vendor
 	SELECT [intID] INTO #tmpBillsId FROM [dbo].fnGetRowsFromDelimitedValues(@billId)
 
-	SELECT TOP 1 @vendorId = C.[intEntityVendorId] 
+	SELECT 
+		TOP 1 @vendorId = C.[intEntityVendorId] 
+		,@vendorWithhold = C.ysnWithholding
 		FROM tblAPBill A
 		INNER JOIN  #tmpBillsId B
 			ON A.intBillId = B.intID
@@ -86,6 +91,21 @@ BEGIN
 
 	--Compute Interest Here
 
+	--Compute Withheld Here
+	IF @vendorWithhold = 1
+	BEGIN
+		--Validate if there is a set up for withheld account.
+		IF (SELECT TOP 1 intWithholdAccountId FROM tblAPPreference) IS NULL
+		BEGIN
+			RAISERROR('This vendor enables withholding but there is no setup of withhold account.',16,1);
+			RETURN;
+		END
+
+		SET @withholdPercent = (SELECT TOP 1 dblWithholdPercent FROM tblAPPreference)
+		--SET @withholdAmount = @amountPaid * (@withholdPercent / 100)
+		--SET @amountPaid = @amountPaid - @withholdAmount
+	END
+
 
 	SET @queryPayment = '
 	INSERT INTO tblAPPayment(
@@ -137,7 +157,7 @@ BEGIN
 		[intBillId]		= A.intBillId,
 		[intAccountId]	= A.intAccountId,
 		[dblDiscount]	= A.dblDiscount,
-		[dblWithheld]	= A.dblWithheld,
+		[dblWithheld]	= CASE WHEN @withholdPercent > 0 THEN CAST(ROUND(A.dblTotal * (@withholdPercent / 100), 6) AS NUMERIC(18,6)) ELSE 0 END,
 		[dblAmountDue]	= A.dblAmountDue,
 		[dblPayment]	= A.dblTotal - A.dblDiscount - A.dblPayment,
 		[dblInterest]	= 0, --TODO
@@ -173,8 +193,21 @@ BEGIN
 	 @paymentId = @paymentId OUTPUT;
 
 	EXEC sp_executesql @queryPaymentDetail, 
-	N'@paymentId INT',
-	 @paymentId = @paymentId;
-	 
+	N'@paymentId INT,
+	@withholdPercent NUMERIC(18,6)',
+	 @paymentId = @paymentId,
+	 @withholdPercent = @withholdPercent;
+
+	 UPDATE A
+		SET A.dblWithheld = Withheld.dblWithheld
+		,A.dblAmountPaid = A.dblAmountPaid - Withheld.dblWithheld
+	 FROM tblAPPayment A
+	 CROSS APPLY 
+	 (
+		SELECT SUM(dblWithheld) dblWithheld FROM tblAPPaymentDetail B
+		WHERE B.intPaymentId = A.intPaymentId
+	 ) Withheld
+	WHERE A.intPaymentId = @paymentId
+		 
 	 SET @createdPaymentId = @paymentId
 END

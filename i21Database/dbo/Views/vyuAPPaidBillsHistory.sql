@@ -12,7 +12,8 @@ SELECT
 	,A.dblAmountPaid
 	,C.dtmDateReconciled
 	,C.ysnClr as ysnCleared
+	,CAST(CASE WHEN C.dtmCheckPrinted IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS ysnPrinted
 FROM tblAPPayment A
 	INNER JOIN (tblAPVendor B INNER JOIN tblEntity B1 ON B.[intEntityVendorId] = B1.intEntityId) ON A.[intEntityVendorId] = B.[intEntityVendorId]
-	INNER JOIN (tblCMBankTransaction C INNER JOIN tblCMBankAccount C1 ON C.intBankAccountId = C1.intBankAccountId) ON A.strPaymentRecordNum = C.strTransactionId
+	LEFT JOIN (tblCMBankTransaction C INNER JOIN tblCMBankAccount C1 ON C.intBankAccountId = C1.intBankAccountId) ON A.strPaymentRecordNum = C.strTransactionId
 WHERE A.ysnPosted = 1 AND C.ysnCheckVoid = 0

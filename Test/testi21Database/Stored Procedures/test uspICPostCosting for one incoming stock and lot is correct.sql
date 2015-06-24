@@ -64,6 +64,7 @@ BEGIN
 			[dtmDateCreated]			DATETIME,
 			[intCreatedUserId]			INT,
 			[intConcurrencyId]			INT,
+			[intOwnershipType]			INT 
 		)
 
 		SELECT * INTO actual FROM expected

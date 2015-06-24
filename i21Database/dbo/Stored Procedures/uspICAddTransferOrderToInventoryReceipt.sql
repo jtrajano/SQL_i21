@@ -19,7 +19,7 @@ IF @TransferOrderId IS NULL
 BEGIN 
     -- Raise the error:
     -- Unable to generate the Inventory Receipt. An error stopped the process from Transfer Order to Inventory Receipt.
-    RAISERROR(51145, 11, 1);
+    RAISERROR(51148, 11, 1);
     GOTO _Exit
 END
 
@@ -71,12 +71,12 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,intShipViaId			= Transfer.intShipViaId
 		,intShipFromId			= NULL
 		,intReceiverId			= @intUserId 
-		,intCurrencyId			= Transfer.intCurrencyId
+		,intCurrencyId			= NULL
 		,strVessel				= NULL
-		,intFreightTermId		= Transfer.intFreightTermId
+		,intFreightTermId		= NULL
 		,strAllocateFreight		= 'No' -- Default is No
 		,intShiftNumber			= NULL 
-		,dblInvoiceAmount		= Transfer.dblTotal
+		,dblInvoiceAmount		= 0
 		,ysnInvoicePaid			= 0 
 		,intCheckNo				= NULL 
 		,dteCheckDate			= NULL 

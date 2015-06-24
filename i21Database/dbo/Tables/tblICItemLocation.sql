@@ -18,7 +18,7 @@ Type the overview for the table here.
 		[intVendorId] INT NULL, 
 		[strDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[intCostingMethod] INT NULL, 
-		[intAllowNegativeInventory] INT DEFAULT 3,
+		[intAllowNegativeInventory] INT NOT NULL DEFAULT ((3)),
 		[intSubLocationId] INT NULL, 
 		[intStorageLocationId] INT NULL, 
 		[intIssueUOMId] INT NULL, 

@@ -4,7 +4,7 @@ BEGIN
 	-- Arrange 
 	BEGIN 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotInCustody', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotInCustodyTransaction', @Identity = 1;	
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransactionInCustody', @Identity = 1;	
 
 		CREATE TABLE expected (
 			[intInventoryLotInCustodyId] INT, 

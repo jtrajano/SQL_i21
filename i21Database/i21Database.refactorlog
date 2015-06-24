@@ -3479,4 +3479,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intInventoryReceiptChargeId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="3d1ce7ec-206a-4f7c-8f0d-a736b928913e" ChangeDateTime="06/17/2015 01:57:24">
+    <Property Name="ElementName" Value="[dbo].[tblARCustomerApplicatorLicense].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARCustomerApplicatorLicense]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCustomerApplicatorLicenseId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="250c9f41-8e4f-4226-99f6-df669d80e761" ChangeDateTime="06/22/2015 13:45:36">
+    <Property Name="ElementName" Value="[dbo].[tblRKFutOptTransaction].[ysnCreatedByOptionLifecycle]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKFutOptTransaction]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnCreatedByOptions" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b542c8a9-07ac-45c2-aaa5-60110dd8680c" ChangeDateTime="06/15/2015 08:26:02">
+    <Property Name="ElementName" Value="[dbo].[tblARCustomerFarm].[intCustomerId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblARCustomerFarm]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityCustomerId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b2f01455-856f-4fcd-8f94-8d21172bed39" ChangeDateTime="06/23/2015 14:39:42">
+    <Property Name="ElementName" Value="[dbo].[tblRKElectronicPricingValue].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKElectronicPricingValue]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intElectronicPricingValueId" />
+  </Operation>
 </Operations>

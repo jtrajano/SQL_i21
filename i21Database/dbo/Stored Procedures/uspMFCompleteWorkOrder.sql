@@ -44,7 +44,9 @@ BEGIN TRY
 		,@ysnLotAlias bit
 		,@strLotAlias nvarchar(50)
 		,@strReferenceNo nvarchar(50)
-
+		,@ysnPostProduction bit
+		,@STARTING_NUMBER_BATCH AS INT = 3
+		 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
 
@@ -84,6 +86,7 @@ BEGIN TRY
 		,@ysnLotAlias =ysnLotAlias
 		,@strLotAlias =strLotAlias
 		,@strReferenceNo=strReferenceNo
+		,@ysnPostProduction=ysnPostProduction
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intManufacturingProcessId INT
@@ -115,6 +118,7 @@ BEGIN TRY
 			,ysnLotAlias bit
 			,strLotAlias nvarchar(50)
 			,strReferenceNo nvarchar(50)
+			,ysnPostProduction bit
 			)
 
 	BEGIN TRANSACTION
@@ -353,6 +357,12 @@ BEGIN TRY
 			,@strRetBatchId = @strRetBatchId OUTPUT
 	END
 
+	If @strRetBatchId is null
+	Begin
+		-- Get the next batch number
+		EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strRetBatchId OUTPUT  
+	End
+
 	EXEC dbo.uspMFValidateCreateLot @strLotNumber = @strOutputLotNumber
 		,@dtmCreated = @dtmPlannedDate
 		,@intShiftId = @intPlannedShiftId
@@ -395,6 +405,7 @@ BEGIN TRY
 		,@strReferenceNo=@strReferenceNo
 		,@intStatusId=@intStatusId
 		,@intLotId = @intLotId OUTPUT
+		,@ysnPostProduction=@ysnPostProduction
 
 	UPDATE dbo.tblICLot
 	SET intLotStatusId = 3

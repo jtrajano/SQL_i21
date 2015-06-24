@@ -36,4 +36,7 @@ FROM tblEntityPortalMenu Menu
 		ON EntityToContact.[intEntityContactId] = Contact.[intEntityId]
 	JOIN tblEntityType EntType
 		ON EntType.intEntityId =  EntityToContact.intEntityId 
-			and EntType.strType = Menu.strEntityType
+			and (
+					EntType.strType = Menu.strEntityType
+					or Menu.strEntityType = ''
+				)

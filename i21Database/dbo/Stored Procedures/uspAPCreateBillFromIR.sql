@@ -129,7 +129,7 @@ BEGIn
 	(
 		SELECT 
 			C.intTermsId
-		FROM tblAPVendor B INNER JOIN tblEntityLocation C ON B.intEntityVendorId = C.intEntityId
+		FROM tblAPVendor B INNER JOIN tblEntityLocation C ON B.intEntityVendorId = C.intEntityId AND C.ysnDefaultLocation = 1
 		WHERE B.intEntityVendorId = A.intEntityVendorId
 	) Terms
 	WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1

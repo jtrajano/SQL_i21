@@ -11,6 +11,7 @@ SELECT CC.intCycleCountSessionId
 		,CC.intItemId
 		,I.strItemNo
 		,I.strDescription
+		,I.strType
 		,CC.dblQuantity
 		,CC.dblSystemQty
 		,CC.intCreatedUserId 

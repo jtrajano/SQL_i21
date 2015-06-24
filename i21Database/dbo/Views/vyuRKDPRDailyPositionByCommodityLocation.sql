@@ -75,17 +75,20 @@ SELECT distinct c.intCommodityId, strLocationName,
 	(SELECT SUM(psd.dblMatchQty) from tblRKMatchFuturesPSHeader psh          
 	JOIN tblRKMatchFuturesPSDetail psd on psd.intMatchFuturesPSHeaderId=psh.intMatchFuturesPSHeaderId          
 	and intCommodityId=c.intCommodityId and psh.intCompanyLocationId=cl.intCompanyLocationId   ) FutMatchedQty 
-,(	select sum(isnull(s.dblUnitOnHand,0)) from tblICItemStock s
-	join tblICItemLocation it on it.intItemLocationId=s.intItemLocationId
-	join tblICItem i on i.intItemId=it.intItemId
-	and i.intCommodityId= c.intCommodityId where it.intLocationId=cl.intCompanyLocationId ) as invQty
+,(SELECT sum(isnull(a.dblUnitOnHand,0)) 
+		from tblICItemStock a
+		JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId 
+		JOIN tblICItem i on a.intItemId=i.intItemId
+		JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=il.intLocationId
+	WHERE sl.intCompanyLocationId=cl.intCompanyLocationId and i.intCommodityId= c.intCommodityId) as invQty
 ,(SELECT SUM(isnull(sr1.dblQty,0))  	   
-	FROM tblICItem i1 
-	JOIN tblICItemLocation lo ON lo.intItemId = i1.intItemId and   lo.intLocationId = cl.intCompanyLocationId  
-	JOIN tblICItemStock it1 ON it1.intItemId = i1.intItemId   
-	JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId   
+	from tblICItemStock a
+		JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId 
+		JOIN tblICItem i on a.intItemId=i.intItemId
+		JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=il.intLocationId  
+	JOIN tblICStockReservation sr1 ON a.intItemId = sr1.intItemId   
 	WHERE 
-	i1.intCommodityId=c.intCommodityId ) as ReserveQty
+	sl.intCompanyLocationId=cl.intCompanyLocationId and i.intCommodityId= c.intCommodityId ) as ReserveQty
          
   FROM tblSMCompanyLocation cl
 JOIN tblICItemLocation lo ON lo.intLocationId = cl.intCompanyLocationId   

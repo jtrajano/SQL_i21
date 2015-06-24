@@ -152,7 +152,8 @@ BEGIN
 			,strVendorLotNo
 			,intVendorLocationId
 			,strVendorLocation
-			,intDetailId		
+			,intDetailId
+			,intOwnershipType		
 	)
 	SELECT	intLotId				= ItemLot.intLotId
 			,strLotNumber			= ItemLot.strLotNumber
@@ -178,6 +179,7 @@ BEGIN
 			,intVendorLocationId	= ItemLot.intVendorLocationId
 			,strVendorLocation		= ItemLot.strVendorLocation
 			,intDetailId			= ItemLot.intInventoryReceiptItemLotId
+			,intOwnershipType		= ReceiptItem.intOwnershipType
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item

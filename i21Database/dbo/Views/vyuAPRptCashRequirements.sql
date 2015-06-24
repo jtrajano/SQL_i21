@@ -2,6 +2,7 @@
 WITH SCHEMABINDING
 AS
 SELECT
+	dbo.tblAPVendor.intEntityVendorId,
 	dbo.tblAPVendor.strVendorId,
 	--dbo.tblAPPayment.dtmDatePaid,
 	dbo.tblAPBill.strBillId,

@@ -113,12 +113,12 @@ BEGIN TRY
 		INSERT INTO tblCTContractCost
 		(
 				intConcurrencyId,	intContractDetailId,	intCostTypeId,			intVendorId,	
-				intCostMethodId,		dblRate,				intUnitMeasureId,		intCurrencyId,	
+				intCostMethodId,	dblRate,				intUnitMeasureId,			
 				ysnAccrue,			ysnMTM,					ysnPrice
 		)
 		SELECT 
 				1,					@NewContractDetailId,	intCostTypeId,			intVendorId,	
-				intCostMethodId,		dblRate,				intUnitMeasureId,		intCurrencyId,	
+				intCostMethodId,	dblRate,				intUnitMeasureId,			
 				ysnAccrue,			ysnMTM,					ysnPrice				
 		FROM	tblCTContractCost 
 		WHERE	intContractDetailId = @ContractDetailId

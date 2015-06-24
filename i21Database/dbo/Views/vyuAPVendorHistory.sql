@@ -24,12 +24,12 @@ FROM dbo.tblAPBill A
 		 ON A.intBillId = B.intBillId
 		LEFT JOIN dbo.tblAPVendor
 			ON tblAPVendor.intEntityVendorId = A.[intEntityVendorId]
-WHERE 
-1 = CASE WHEN B1.intPaymentId IS NULL 
-		THEN 1
-		ELSE
-			(CASE WHEN B1.ysnPosted = 1 OR C.strTransactionId IS NOT NULL THEN 1 ELSE 0 END)
-		END 
+--WHERE 
+--1 = CASE WHEN B1.intPaymentId IS NULL 
+--		THEN 1
+--		ELSE
+--			(CASE WHEN B1.ysnPosted = 1 OR C.strTransactionId IS NOT NULL THEN 1 ELSE 0 END)
+--		END 
 GROUP BY A.intBillId,
 	A.dtmDate,
 	A.dblTotal,

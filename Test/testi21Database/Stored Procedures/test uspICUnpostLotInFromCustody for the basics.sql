@@ -58,16 +58,16 @@ BEGIN
 
 		-- Create the temp table 
 		CREATE TABLE #tmpInventoryTransactionStockToReverse (
-			intInventoryLotInCustodyTransactionId INT NOT NULL 
+			intInventoryTransactionInCustodyId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 			,intTransactionTypeId INT NOT NULL 
-			,intInventoryLotInCustodyId INT 
+			,intInventoryCostBucketInCustodyId INT 
 			,dblQty NUMERIC(38,20)
 		)
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotInCustody', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotInCustodyTransaction', @Identity = 1;		
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransactionInCustody', @Identity = 1;		
 	END 
 
 	-- Assert 

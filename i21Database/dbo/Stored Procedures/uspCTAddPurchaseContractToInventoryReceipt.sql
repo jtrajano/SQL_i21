@@ -19,7 +19,7 @@ IF @PurchaseContractId IS NULL
 BEGIN 
     -- Raise the error:
     -- Unable to generate the Inventory Receipt. An error stopped the process from Purchase Contract to Inventory Receipt.
-    RAISERROR(51144, 11, 1);
+    RAISERROR(51147, 11, 1);
     GOTO _Exit
 END
 

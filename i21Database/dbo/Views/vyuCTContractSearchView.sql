@@ -4,7 +4,7 @@ AS
 
 	SELECT	CH.intContractHeaderId,
 			CH.dtmContractDate,
-			CH.strCustomerVendor,
+			CH.strEntityName AS strCustomerVendor,
 			CH.strContractType,
 			CH.dblHeaderQuantity,
 			CH.intContractNumber,
@@ -18,7 +18,7 @@ AS
 	
 	BY		CH.intContractHeaderId,
 			CH.dtmContractDate,
-			CH.strCustomerVendor,
+			CH.strEntityName,
 			CH.strContractType,
 			CH.dblHeaderQuantity,
 			CH.intContractNumber,

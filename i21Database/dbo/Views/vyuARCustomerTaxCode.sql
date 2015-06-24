@@ -13,8 +13,8 @@ SELECT
 	,TC.intTaxCodeId
 	,TC.strTaxCode
 	,TC.intSalesTaxAccountId  
-	,TC.strCalculationMethod
-	,TC.numRate
+	--,TC.strCalculationMethod
+	--,TC.numRate
 FROM
 	tblEntityLocation L
 INNER JOIN

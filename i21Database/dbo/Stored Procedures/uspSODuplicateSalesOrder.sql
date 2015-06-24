@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSODuplicateSalesOrder]
 	@TransactionType NVARCHAR(20) = '',
 	@SalesOrderId	INT = 0,
+	@OrderStatus NVARCHAR(20) = '',
 	@UserId			INT = 0,
 	@NewSalesOrderId INT = NULL OUTPUT
 
@@ -50,10 +51,11 @@ BEGIN
            ,[strBillToCountry]
            ,[intEntityId]
 		   ,[intQuoteTemplateId]
-		   ,[ysnPleminaryQuote]
+		   ,[ysnPreliminaryQuote]
 		   ,[strLostQuoteComment]
 		   ,[strLostQuoteCompetitor]
 		   ,[strLostQuoteReason]
+		   ,[strOrderType]
         )
 	SELECT
 			[intEntityCustomerId]
@@ -77,7 +79,7 @@ BEGIN
            ,[dblAmountDue]
            ,[dblPayment]
            ,[strTransactionType]
-           ,'Open'
+           ,@OrderStatus
            ,[intAccountId]
            ,NULL --Processed Date
            ,0 --Processed
@@ -98,10 +100,11 @@ BEGIN
            ,[strBillToCountry]
            ,@UserId
 		   ,[intQuoteTemplateId]
-		   ,[ysnPleminaryQuote]
+		   ,[ysnPreliminaryQuote]
 		   ,[strLostQuoteComment]
 		   ,[strLostQuoteCompetitor]
 		   ,[strLostQuoteReason]
+		   ,[strOrderType]
 	FROM
 	tblSOSalesOrder
 	WHERE intSalesOrderId = @SalesOrderId
@@ -146,6 +149,13 @@ BEGIN
 				   ,[intSalesAccountId]
 				   ,[intInventoryAccountId]
 				   ,[intStorageLocationId]
+				   ,[strMaintenanceType]
+				   ,[strFrequency]
+	               ,[dtmMaintenanceDate]				   
+	               ,[dblMaintenanceAmount]
+	               ,[dblLicenseAmount]
+				   ,[intContractHeaderId]
+				   ,[intContractDetailId]	
 				)
 			SELECT 
 					@NewSalesOrderId
@@ -165,6 +175,13 @@ BEGIN
 				   ,[intSalesAccountId]
 				   ,[intInventoryAccountId]
 				   ,[intStorageLocationId]
+				   ,[strMaintenanceType]
+				   ,[strFrequency]
+	               ,[dtmMaintenanceDate]
+	               ,[dblMaintenanceAmount]
+	               ,[dblLicenseAmount]
+				   ,[intContractHeaderId]
+				   ,[intContractDetailId]	
 			FROM
 				[tblSOSalesOrderDetail]
 			WHERE

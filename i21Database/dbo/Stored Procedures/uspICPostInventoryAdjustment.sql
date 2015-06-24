@@ -19,7 +19,6 @@ SET ANSI_WARNINGS OFF
 DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Adjustment Transaction' + CAST(NEWID() AS NVARCHAR(100));
 
 -- Constants  
-DECLARE @INVENTORY_ADJUSTMENT_TYPE AS INT = 10
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3  
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory Adjustment'
 
@@ -37,22 +36,24 @@ SET @ysnPost = ISNULL(@ysnPost, 0)
 DECLARE @LotType_Manual AS INT = 1
 	,@LotType_Serial AS INT = 2
 
-
 DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
 		,@ADJUSTMENT_TYPE_UOMChange AS INT = 2
 		,@ADJUSTMENT_TYPE_ItemChange AS INT = 3
 		,@ADJUSTMENT_TYPE_LotStatusChange AS INT = 4
 		,@ADJUSTMENT_TYPE_SplitLot AS INT = 5
 		,@ADJUSTMENT_TYPE_ExpiryDateChange AS INT = 6
+		,@ADJUSTMENT_TYPE_LotMerge AS INT = 7
+		,@ADJUSTMENT_TYPE_LotMove AS INT = 8
 
 -- Read the transaction info   
 BEGIN   
 	DECLARE @dtmDate AS DATETIME   
-	DECLARE @intTransactionId AS INT  
-	DECLARE @intCreatedEntityId AS INT  
-	DECLARE @ysnAllowUserSelfPost AS BIT   
-	DECLARE @ysnTransactionPostedFlag AS BIT
-	DECLARE @adjustmentType AS INT
+			,@intTransactionId AS INT  
+			,@intCreatedEntityId AS INT  
+			,@ysnAllowUserSelfPost AS BIT   
+			,@ysnTransactionPostedFlag AS BIT
+			,@strAdjustmentDescription AS NVARCHAR(255) 
+			,@adjustmentType AS INT
 
   
 	SELECT TOP 1   
@@ -61,6 +62,7 @@ BEGIN
 			,@dtmDate = dtmAdjustmentDate
 			,@intCreatedEntityId = intEntityId
 			,@adjustmentType = intAdjustmentType
+			,@strAdjustmentDescription = strDescription
 	FROM	dbo.tblICInventoryAdjustment
 	WHERE	strAdjustmentNo = @strTransactionId  
 END  
@@ -271,6 +273,66 @@ BEGIN
 	END 
 
 	-----------------------------------
+	--  Call Lot Merge
+	-----------------------------------
+	IF @adjustmentType = @ADJUSTMENT_TYPE_LotMerge
+	BEGIN 
+		INSERT INTO @ItemsForAdjust (  
+				intItemId  
+				,intItemLocationId 
+				,intItemUOMId  
+				,dtmDate  
+				,dblQty  
+				,dblUOMQty  
+				,dblCost
+				,dblValue
+				,dblSalesPrice  
+				,intCurrencyId  
+				,dblExchangeRate  
+				,intTransactionId  
+				,intTransactionDetailId   
+				,strTransactionId  
+				,intTransactionTypeId  
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
+		)  	
+		EXEC dbo.uspICPostInventoryAdjustmentLotMerge 
+				@intTransactionId
+				,@intUserId
+	END 
+
+	-----------------------------------
+	--  Call Lot Move
+	-----------------------------------
+	IF @adjustmentType = @ADJUSTMENT_TYPE_LotMove
+	BEGIN 
+		INSERT INTO @ItemsForAdjust (  
+				intItemId  
+				,intItemLocationId 
+				,intItemUOMId  
+				,dtmDate  
+				,dblQty  
+				,dblUOMQty  
+				,dblCost
+				,dblValue
+				,dblSalesPrice  
+				,intCurrencyId  
+				,dblExchangeRate  
+				,intTransactionId  
+				,intTransactionDetailId   
+				,strTransactionId  
+				,intTransactionTypeId  
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
+		)  	
+		EXEC dbo.uspICPostInventoryAdjustmentLotMove
+				@intTransactionId
+				,@intUserId
+	END 
+
+	-----------------------------------
 	--  Call Expiry Lot Change
 	-----------------------------------
 	IF @adjustmentType = @ADJUSTMENT_TYPE_ExpiryDateChange
@@ -283,7 +345,12 @@ BEGIN
 	-----------------------------------
 	--  Call the costing routine 
 	-----------------------------------
-	IF @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange, @ADJUSTMENT_TYPE_SplitLot)
+	IF @adjustmentType IN (
+		@ADJUSTMENT_TYPE_QuantityChange
+		, @ADJUSTMENT_TYPE_SplitLot
+		, @ADJUSTMENT_TYPE_LotMerge
+		, @ADJUSTMENT_TYPE_LotMove
+	)
 	BEGIN 
 		INSERT INTO @GLEntries (
 				[dtmDate] 
@@ -316,7 +383,8 @@ BEGIN
 				@ItemsForAdjust  
 				,@strBatchId  
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-				,@intUserId		
+				,@intUserId
+				,@strAdjustmentDescription		
 	END 
 END   
 
@@ -326,7 +394,12 @@ END
 IF @ysnPost = 0   
 BEGIN   
 	-- Call the unpost routine 
-	IF @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange, @ADJUSTMENT_TYPE_SplitLot)
+	IF @adjustmentType IN (
+		@ADJUSTMENT_TYPE_QuantityChange
+		, @ADJUSTMENT_TYPE_SplitLot
+		, @ADJUSTMENT_TYPE_LotMerge
+		, @ADJUSTMENT_TYPE_LotMove
+	)
 	BEGIN 
 		-- Call the post routine 
 		INSERT INTO @GLEntries (
@@ -389,7 +462,12 @@ END
 --------------------------------------------------------------------------------------------  
 IF	@ysnRecap = 1	
 BEGIN 
-	IF @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange, @ADJUSTMENT_TYPE_SplitLot)
+	IF @adjustmentType IN (
+		@ADJUSTMENT_TYPE_QuantityChange
+		, @ADJUSTMENT_TYPE_SplitLot
+		, @ADJUSTMENT_TYPE_LotMerge
+		, @ADJUSTMENT_TYPE_LotMove
+	)
 	BEGIN 
 		ROLLBACK TRAN @TransactionName
 		EXEC dbo.uspCMPostRecap @GLEntries

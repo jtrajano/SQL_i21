@@ -377,3 +377,93 @@ IF NOT EXISTS (
 	SELECT 4
 		,'By Week'
 GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 1)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
+    VALUES(1,'Pick Order',1)
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 2)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
+    VALUES(2,'Is Cost Applicable?',2)
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRule WHERE intBlendSheetRuleId = 3)
+BEGIN
+    INSERT INTO tblMFBlendSheetRule(intBlendSheetRuleId,strName,intSequenceNo)
+    VALUES(3,'Is Quality Data Applicable?',3)
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 1 AND strValue='FIFO')
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(1,'FIFO','FIFO',1)
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 1 AND strValue='FEFO')
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(1,'FEFO','FEFO',0)
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 1 AND strValue='LIFO')
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(1,'LIFO','LIFO',0)
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 1 AND strValue='LEFO')
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(1,'LEFO','LEFO',0)
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 2 AND strValue='Yes')
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(2,'Yes','Yes',0)
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 2 AND strValue='No')
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(2,'No','No',1)
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 3 AND strValue='Yes')
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(3,'Yes','Yes',0)
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendSheetRuleValue WHERE intBlendSheetRuleId = 3 AND strValue='No')
+BEGIN
+    INSERT INTO tblMFBlendSheetRuleValue(intBlendSheetRuleId,strValue,strDescription,ysnDefault)
+    VALUES(3,'No','No',1)
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFAttributeType WHERE intAttributeTypeId = 1)
+BEGIN
+    INSERT INTO tblMFAttributeType(intAttributeTypeId,strAttributeTypeName)
+    VALUES(1,'Common')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFAttributeType WHERE intAttributeTypeId = 2)
+BEGIN
+    INSERT INTO tblMFAttributeType(intAttributeTypeId,strAttributeTypeName)
+    VALUES(2,'Blending')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFAttributeType WHERE intAttributeTypeId = 3)
+BEGIN
+    INSERT INTO tblMFAttributeType(intAttributeTypeId,strAttributeTypeName)
+    VALUES(3,'Packaging')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFAttributeType WHERE intAttributeTypeId = 4)
+BEGIN
+    INSERT INTO tblMFAttributeType(intAttributeTypeId,strAttributeTypeName)
+    VALUES(4,'Others')
+END
+GO

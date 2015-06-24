@@ -74,7 +74,10 @@ DECLARE
 	,@ysnReleasedToWarehouse	AS BIT
 	,@ysnProduced				AS BIT 
 	,@intDetailId				AS INT 
+	,@intOwnershipType			AS INT
 
+
+DECLARE @OwnerShipType_Own AS INT = 1
 
 ---- Check for UNIQUE errors. 
 --BEGIN
@@ -115,7 +118,7 @@ BEGIN
 	BEGIN 
 		-- 'Please check for duplicate lot numbers. The lot number {Lot Number} is used more than once in item {Item No} on {Transaction Id}.'
 		RAISERROR(51052, 11, 1, @strLotNumber, @strItemNo, @strReceiptNumber);
-		RETURN -9
+		RETURN -1
 	END
 END 
 
@@ -155,6 +158,7 @@ SELECT  intId
 		,ysnReleasedToWarehouse
 		,ysnProduced
 		,intDetailId
+		,intOwnershipType
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -189,6 +193,7 @@ FETCH NEXT FROM loopLotItems INTO
 		,@ysnReleasedToWarehouse
 		,@ysnProduced
 		,@intDetailId
+		,@intOwnershipType
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Start of the loop
@@ -212,7 +217,7 @@ BEGIN
 
 		--Please specify the lot numbers for {Item}.
 		RAISERROR(51037, 11, 1, @strItemNo);
-		RETURN -1;
+		RETURN -2;
 	END 	
 	
 	-- Generate the next lot number - if it is blank AND it is a serial lot item. 
@@ -230,7 +235,7 @@ BEGIN
 
 		--Unable to generate the serial lot number for {Item}.
 		RAISERROR(51042, 11, 1, @strItemNo);
-		RETURN -2;
+		RETURN -3;
 	END 	
 
 	-- If weight UOM is specified, make sure weight is not zero. 
@@ -247,7 +252,24 @@ BEGIN
 
 		-- '{Item} with lot number {Lot Number} needs to have a weight.'
 		RAISERROR(51048, 11, 1, @strItemNo, @strLotNumber)  
-		RETURN -3; 
+		RETURN -4; 
+	END 
+
+	-- Check if Item and Weight UOM are the same value. 
+	IF @intItemUOMId = @intWeightUOMId
+	BEGIN 
+		SELECT	@strItemNo = strItemNo
+		FROM	dbo.tblICItem Item
+		WHERE	Item.intItemId = @intItemId
+
+		IF @intLotTypeId = @LotType_Serial
+		BEGIN 
+			SET @strLotNumber = '(To be generated)'
+		END 
+
+		-- Cannot have the same item and weight UOM. Please remove the weight UOM for {Item} with lot number {Lot Number}.
+		RAISERROR(51145, 11, 1, @strItemNo, @strLotNumber)  
+		RETURN -5; 
 	END 
 
 	-- Upsert (update or insert) the record to the lot master table. 
@@ -414,6 +436,7 @@ BEGIN
 												AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
 											) THEN ISNULL(LotMaster.intConcurrencyId, 0) + 1 ELSE ISNULL(LotMaster.intConcurrencyId, 0)
 											END 
+				,intOwnershipType		=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN ISNULL(@intOwnershipType, @OwnerShipType_Own) ELSE LotMaster.intOwnershipType END
 
 				-- The following field are returned from the lot master if:
 				-- 1. It is editing from the source transaction id
@@ -437,6 +460,7 @@ BEGIN
 													) THEN LotMaster.intLotId 
 													ELSE 0 
 											END
+
 
 		-- If none found, insert a new lot record. 
 		WHEN NOT MATCHED THEN 
@@ -472,6 +496,7 @@ BEGIN
 				,dtmDateCreated
 				,intCreatedUserId
 				,intConcurrencyId
+				,intOwnershipType
 			) VALUES (
 				@intItemId
 				,@intLocationId
@@ -504,6 +529,7 @@ BEGIN
 				,GETDATE()
 				,@intUserId
 				,1
+				,@intOwnershipType
 			)
 		;
 	
@@ -545,7 +571,7 @@ BEGIN
 
 		--'The Quantity UOM for {Item} cannot be changed from {Item UOM} to {Item UOM} because a stock from it has been used from a different transaction.'
 		RAISERROR(51044, 11, 1, @strItemNo, @strUnitMeasureItemUOMFrom, @strUnitMeasureItemUOMTo);
-		RETURN -4;
+		RETURN -6;
 	END 
 
 	-- Validation check point 2 of 5
@@ -560,7 +586,7 @@ BEGIN
 
 		--'The Weight UOM for {Lot number} cannot be changed from {Weight UOM} to {Weight UOM} because a stock from it has been used from a different transaction.'
 		RAISERROR(51045, 11, 1, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo);
-		RETURN -5;
+		RETURN -7;
 	END 
 
 	-- Validation check point 3 of 5
@@ -573,7 +599,7 @@ BEGIN
 
 		--'The Sub-Location for {Lot number} cannot be changed from {Sub Location} to {Sub Location} because a stock from it has been used from a different transaction.'
 		RAISERROR(51046, 11, 1, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo);
-		RETURN -6;
+		RETURN -8;
 	END 
 
 	-- Validation check point 4 of 5
@@ -586,7 +612,7 @@ BEGIN
 
 		--'The Storage Location for {Lot number} cannot be changed from {Storage Location} to {StorageLocation} because a stock from it has been used from a different transaction.'
 		RAISERROR(51047, 11, 1, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo);
-		RETURN -7;
+		RETURN -9;
 	END
 
 	-- Validation check point 5 of 5
@@ -599,7 +625,7 @@ BEGIN
 
 		--Failed to process the lot number for {Item}. It may have been used on a different sub-location or storage location.'
 		RAISERROR(51043, 11, 1, @strItemNo);
-		RETURN -8;
+		RETURN -10;
 	END
 	
 	-- Fetch the next row from cursor. 
@@ -631,7 +657,8 @@ BEGIN
 		,@strContractNo
 		,@ysnReleasedToWarehouse
 		,@ysnProduced
-		,@intDetailId;
+		,@intDetailId
+		,@intOwnershipType;
 END
 
 CLOSE loopLotItems;

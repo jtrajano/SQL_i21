@@ -9,6 +9,7 @@ A.[intEntityVendorId]
 ,A.strPurchaseOrderNumber
 ,B.intPurchaseDetailId
 ,B.intItemId
+,B.strMiscDescription
 ,C.strItemNo
 ,C.strDescription
 ,tblReceived.dblOrderQty
@@ -25,6 +26,7 @@ A.[intEntityVendorId]
 ,F.strTerm
 ,G1.intContractNumber
 ,G1.intContractHeaderId
+,G2.intContractDetailId
 FROM tblPOPurchase A
 	INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	CROSS APPLY 
@@ -72,6 +74,7 @@ A.[intEntityVendorId]
 ,A.strPurchaseOrderNumber
 ,B.intPurchaseDetailId
 ,B.intItemId
+,B.strMiscDescription
 ,C.strItemNo
 ,C.strDescription
 ,B.dblQtyOrdered
@@ -86,6 +89,7 @@ A.[intEntityVendorId]
 ,D1.strVendorId
 ,E.strShipVia
 ,F.strTerm
+,NULL
 ,NULL
 ,NULL
 FROM tblPOPurchase A
@@ -107,6 +111,7 @@ A.intEntityVendorId
 ,A.strReceiptNumber
 ,B.intInventoryReceiptItemId
 ,B.intItemId
+,C.strDescription
 ,C.strItemNo
 ,C.strDescription
 ,B.dblOpenReceive
@@ -120,6 +125,7 @@ A.intEntityVendorId
 ,D2.strName
 ,D1.strVendorId
 ,E.strShipVia
+,NULL
 ,NULL
 ,NULL
 ,NULL
