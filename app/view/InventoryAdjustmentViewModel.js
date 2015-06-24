@@ -119,6 +119,8 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
 
     hide: true,
     show: false,
+    readOnly: true,
+    editable: false,
 
     formulas: {
         formulaShowLotNumberEditor: function(get){
@@ -668,8 +670,31 @@ Ext.define('Inventory.view.InventoryAdjustmentViewModel', {
                 default:
                     return me.show;
             }
-        }
+        },
 
+        formulaShowNewCostEditor: function(get){
+            var me = this;
+            var posted = get('current.ysnPosted');
+            if (posted){
+                return me.readOnly;
+            }
+            else {
+                var newQuantity = get('grdInventoryAdjustment.selection.dblNewQuantity')
+                    ,currentQuantity = get('grdInventoryAdjustment.selection.dblQuantity');
+
+                if (!Ext.isNumeric(newQuantity))
+                    return me.readOnly;
+
+                // Check if new quantity will increase the stock. If yes, allow edit.
+                currentQuantity = Ext.isNumeric(currentQuantity) ? currentQuantity : 0.00;
+                if (newQuantity > currentQuantity){
+                    return me.editable;
+                }
+                else {
+                    return me.readOnly;
+                }
+            }
+        }
 
     }
 

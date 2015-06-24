@@ -447,7 +447,6 @@ namespace iRely.Inventory.Model
         public string strItemNo { get; set; }
         public string strItemDescription { get; set; }
         public string strType { get; set; }
-        public string strLotTracking { get; set; }
         public int? intLocationId { get; set; }
         public int? intItemLocationId { get; set; }
         public string strLocationName { get; set; }
@@ -463,6 +462,4 @@ namespace iRely.Inventory.Model
         public decimal? dblUnitQty { get; set; }
         public bool? ysnStockUnit { get; set; }
     }
-
-
 }

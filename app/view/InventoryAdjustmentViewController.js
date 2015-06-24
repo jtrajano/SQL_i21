@@ -183,17 +183,23 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     editor: {
                         store: '{itemUOM}',
                         defaultFilters: [
+
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intLocationId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intLocationId',
+                                value: '',
+                                conjunction: 'or',
+                                condition: 'blk'
+                            },
                             {
                                 column: 'intItemId',
                                 value: '{grdInventoryAdjustment.selection.intItemId}',
                                 conjunction: 'and'
                             }
-                            //,
-                            //{
-                            //    column: 'intLocationId',
-                            //    value: '{current.intLocationId}',
-                            //    conjunction: 'and'
-                            //}
                         ],
                         readOnly: '{formulaShowItemUOMEditor}'
                     }
@@ -267,7 +273,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
 
                 colNewUnitCost: {
                     dataIndex: 'dblNewCost',
-                    hidden: '{formulaHideColumn_colNewUnitCost}'
+                    hidden: '{formulaHideColumn_colNewUnitCost}',
+                    editor: {
+                        readOnly: '{formulaShowNewCostEditor}'
+                    }
                 },
 
                 colNewItemNumber: {
@@ -654,9 +663,10 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         {
             // Auto-calculate a new cost.
             var unitCost = current.get('dblCost')
+                ,newUnitCost = current.get('dblNewCost')
                 ,dblNewItemUOMUnitQty = record.get('dblUnitQty');
 
-            if (Ext.isNumeric(unitCost) && Ext.isNumeric(dblNewItemUOMUnitQty))
+            if (Ext.isNumeric(newUnitCost) && Ext.isNumeric(unitCost) && Ext.isNumeric(dblNewItemUOMUnitQty))
             {
                 current.set('dblNewCost', unitCost * dblNewItemUOMUnitQty);
             }
@@ -669,24 +679,36 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             var currentUnitCost = current.get('dblCost')
                 ,currentItemUOMUnitQty = current.get('dblItemUOMUnitQty')
                 ,selectedItemUOMUnitQty = record.get('dblUnitQty')
+                ,selectedOnHandQty = record.get('dblOnHand')
                 ,newUnitCost;
 
             if (Ext.isNumeric(currentUnitCost)
                 && Ext.isNumeric(selectedItemUOMUnitQty)
-                && Ext.isNumeric(currentItemUOMUnitQty)
             )
             {
-                if (currentItemUOMUnitQty == 1){
-                    newUnitCost = currentUnitCost * selectedItemUOMUnitQty;
-                }
-                else if (currentItemUOMUnitQty != 0) {
+                if (Ext.isNumeric(currentItemUOMUnitQty) && currentItemUOMUnitQty != 0) {
                     newUnitCost = (currentUnitCost / currentItemUOMUnitQty) * selectedItemUOMUnitQty;
+                }
+                else {
+                    newUnitCost = currentUnitCost * selectedItemUOMUnitQty;
                 }
             }
 
             current.set('dblCost', newUnitCost);
+            current.set('dblQuantity', selectedOnHandQty);
             current.set('intItemUOMId', record.get('intItemUOMId'));
             current.set('dblItemUOMUnitQty', selectedItemUOMUnitQty);
+
+            // Recalculate the new quantity
+            var adjustByQuantity = current.get('dblAdjustByQuantity')
+                newQty = null;
+
+            if (Ext.isNumeric(selectedOnHandQty) && Ext.isNumeric(adjustByQuantity))
+            {
+                newQty = selectedOnHandQty + adjustByQuantity;
+            }
+
+            current.set('dblNewQuantity', newQty);
         }
 
         else if (combo.itemId === 'cboNewWeightUOM')
