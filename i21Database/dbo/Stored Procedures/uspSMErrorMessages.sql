@@ -428,7 +428,7 @@ SET @strmessage = 'A cycle count for the item ''%s'' is already started for work
 EXEC sp_addmessage 51106,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51107) EXEC sp_dropmessage 51107, 'us_english'	
-SET @strmessage = 'A run for ''%s'' already exists for %s which is using the same ingredient item ''%s''. Please complete the prior run to continue.'
+SET @strmessage = 'A run for ''%s'' already exists for work order %s on %s which is using the same ingredient item ''%s''. Please complete the prior run to continue.'
 EXEC sp_addmessage 51107,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51108) EXEC sp_dropmessage 51108, 'us_english'	

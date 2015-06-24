@@ -327,6 +327,7 @@ BEGIN TRY
 					ELSE ' - ' + S.strShiftName
 					END
 				)
+			,@strWorkOrderNo=strWorkOrderNo
 		FROM dbo.tblMFWorkOrder W
 		LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
 		JOIN dbo.tblMFRecipe P ON P.intItemId = W.intItemId
@@ -367,6 +368,7 @@ BEGIN TRY
 				,11
 				,1
 				,@strProductItem
+				,@strWorkOrderNo
 				,@strPlannedDate
 				,@strInputItem
 				)
