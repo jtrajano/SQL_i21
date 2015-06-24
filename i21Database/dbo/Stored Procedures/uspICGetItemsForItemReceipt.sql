@@ -78,7 +78,7 @@ BEGIN
 		INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ContractDetail.intItemUOMId
 		INNER JOIN vyuICGetItemPricing ItemPricing ON ItemPricing.intItemId = ContractDetail.intItemId AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId AND ItemPricing.intItemUnitMeasureId = ItemUOM.intItemUOMId
 END
-ELSE IF @strSourceType = ReceiptType_TransferOrder
+ELSE IF @strSourceType = @ReceiptType_TransferOrder
 BEGIN
 	SELECT intItemId = TransferDetail.intItemId
 		,intLocationId = ItemLocation.intItemLocationId
