@@ -8,7 +8,8 @@ GO
            [strQuery]  			=        N'SELECT * FROM tblSMRecurringTransaction WHERE strTransactionType = ''Invoice'' ' + 
 										  'AND GETDATE() >= dtmNextProcess ' + 
 										  'AND dtmNextProcess >= dtmStartDate ' + 
-										  'AND dtmNextProcess <= dtmEndDate',
+										  'AND dtmNextProcess <= dtmEndDate ' + 
+										  'AND ysnActive = 1',
            [strNamespace]       =        N'i21.view.RecurringTransaction', 
 		   [strParameter]		=		 NULL,
            [intSort]            =        1
@@ -19,7 +20,8 @@ GO
            [strQuery]  			=        N'SELECT * FROM tblSMRecurringTransaction WHERE strTransactionType = ''General Journal'' ' + 
 										  'AND GETDATE() >= dtmNextProcess ' + 
 										  'AND dtmNextProcess >= dtmStartDate ' + 
-										  'AND dtmNextProcess <= dtmEndDate',
+										  'AND dtmNextProcess <= dtmEndDate ' +
+										  'AND ysnActive = 1',
            [strNamespace]       =        N'i21.view.RecurringTransaction', 
 		   [strParameter]		=		 NULL,
            [intSort]            =        2
