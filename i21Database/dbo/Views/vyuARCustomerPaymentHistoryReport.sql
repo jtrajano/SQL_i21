@@ -6,7 +6,7 @@ SELECT DISTINCT
 	 , P.strRecordNumber
 	 , I.strInvoiceNumber
 	 , P.dtmDatePaid
-	 , dblAmountPaid = ISNULL(P.dblAmountPaid, 0)
+	 , dblAmountPaid = ISNULL(PD.dblPayment, 0)
 	 , dblAmountApplied = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblPayment, 0) * -1 ELSE ISNULL(I.dblPayment, 0) END	 
 	 , dblInvoiceTotal = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END	 
 	 , dblAmountDue = ISNULL(PD.dblAmountDue, 0)

@@ -1810,7 +1810,9 @@
     <Build Include="dbo\Stored Procedures\uspRKInsertToElectronicPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetElectronicPricingValue.sql" />
     <Build Include="dbo\Tables\tblLGWarehouseRateMatrixDetail.sql" />
-    <Build Include="dbo\Tables\tblLGWarehouseRateMatrixHeader.sql" />	
+	<Build Include="dbo\Tables\tblLGWarehouseRateMatrixHeader.sql" />	
+    <Build Include="dbo\Tables\tblCFTransactionPrice.sql" />
+    <Build Include="dbo\Views\vyuARCustomerStatementDetailReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
