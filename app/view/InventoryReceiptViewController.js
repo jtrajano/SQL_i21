@@ -250,7 +250,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colWeightUOM: {
                     dataIndex: 'strWeightUOM',
                     editor: {
-                        allowEmpty: true,
+                        origValueField: 'intItemUOMId',
+                        origUpdateField: 'intWeightUOMId',
                         store: '{weightUOM}',
                         defaultFilters: [
                             {
@@ -1628,6 +1629,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                         field: Ext.widget({
                                             xtype: 'gridcombobox',
                                             matchFieldWidth: false,
+                                            origValueField: 'intItemUOMId',
+                                            origUpdateField: 'intWeightUOMId',
                                             columns: [
                                                 {
                                                     dataIndex: 'intItemId',
@@ -1693,6 +1696,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                         field: Ext.widget({
                                             xtype: 'gridcombobox',
                                             matchFieldWidth: false,
+                                            origValueField: 'intItemUOMId',
+                                            origUpdateField: 'intWeightUOMId',
                                             columns: [
                                                 {
                                                     dataIndex: 'intItemId',
@@ -1880,6 +1885,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     field: Ext.widget({
                                         xtype: 'gridcombobox',
                                         matchFieldWidth: false,
+                                        origValueField: 'intItemUOMId',
+                                        origUpdateField: 'intWeightUOMId',
                                         columns: [
                                             {
                                                 dataIndex: 'intItemId',

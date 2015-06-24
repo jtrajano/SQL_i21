@@ -81,11 +81,21 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             },
             cboFamily: {
                 value: '{current.intFamilyId}',
-                store: '{family}'
+                store: '{family}',
+                defaultFilters: [{
+                    column: 'strSubcategoryType',
+                    value: 'F',
+                    conjunction: 'and'
+                }]
             },
             cboClass: {
                 value: '{current.intClassId}',
-                store: '{class}'
+                store: '{class}',
+                defaultFilters: [{
+                    column: 'strSubcategoryType',
+                    value: 'C',
+                    conjunction: 'and'
+                }]
             },
             cboProductCode: {
                 value: '{current.intProductCodeId}',

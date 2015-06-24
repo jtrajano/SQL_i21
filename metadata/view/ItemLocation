@@ -782,19 +782,18 @@
                                                                 "columns": [
                                                                     "[",
                                                                     "\t{",
-                                                                    "\t\tdataIndex: 'intFamilyId',",
+                                                                    "\t\tdataIndex: 'intSubcategoryId',",
                                                                     "\t\tdataType: 'numeric',",
-                                                                    "\t\ttext: 'Family Id',",
                                                                     "\t\thidden: true",
                                                                     "\t},",
                                                                     "\t{",
-                                                                    "\t\tdataIndex: 'strFamilyId',",
+                                                                    "\t\tdataIndex: 'strSubcategoryId',",
                                                                     "\t\tdataType: 'string',",
                                                                     "\t\ttext: 'Family',",
                                                                     "\t\tflex: 1",
                                                                     "\t},",
                                                                     "\t{",
-                                                                    "\t\tdataIndex: 'strFamilyDesc',",
+                                                                    "\t\tdataIndex: 'strSubcategoryDesc',",
                                                                     "\t\tdataType: 'string',",
                                                                     "\t\ttext: 'Description',",
                                                                     "\t\tflex: 1",
@@ -802,12 +801,12 @@
                                                                     "]"
                                                                 ],
                                                                 "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strFamilyId",
+                                                                "displayField": "strSubcategoryId",
                                                                 "fieldLabel": "Family",
                                                                 "itemId": "cboFamily",
                                                                 "labelWidth": 105,
                                                                 "layout|flex": null,
-                                                                "valueField": "intFamilyId"
+                                                                "valueField": "inSubcategoryId"
                                                             },
                                                             "name": "MyComboBox30",
                                                             "configAlternates": {
@@ -833,19 +832,18 @@
                                                                 "columns": [
                                                                     "[",
                                                                     "\t{",
-                                                                    "\t\tdataIndex: 'intClassId',",
+                                                                    "\t\tdataIndex: 'intSubcategoryId',",
                                                                     "\t\tdataType: 'numeric',",
-                                                                    "\t\ttext: 'Class Id',",
                                                                     "\t\thidden: true",
                                                                     "\t},",
                                                                     "\t{",
-                                                                    "\t\tdataIndex: 'strClassId',",
+                                                                    "\t\tdataIndex: 'strSubcategoryId',",
                                                                     "\t\tdataType: 'string',",
                                                                     "\t\ttext: 'Class',",
                                                                     "\t\tflex: 1",
                                                                     "\t},",
                                                                     "\t{",
-                                                                    "\t\tdataIndex: 'strClassDesc',",
+                                                                    "\t\tdataIndex: 'strSubcategoryDesc',",
                                                                     "\t\tdataType: 'string',",
                                                                     "\t\ttext: 'Description',",
                                                                     "\t\tflex: 1",
@@ -853,12 +851,12 @@
                                                                     "]"
                                                                 ],
                                                                 "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strClassId",
+                                                                "displayField": "strSubcategoryId",
                                                                 "fieldLabel": "Class",
                                                                 "itemId": "cboClass",
                                                                 "labelWidth": 105,
                                                                 "layout|flex": null,
-                                                                "valueField": "intClassId"
+                                                                "valueField": "intSubcategoryId"
                                                             },
                                                             "name": "MyComboBox31",
                                                             "configAlternates": {
@@ -1990,7 +1988,7 @@
                         "itemId": "pagingtoolbar",
                         "store": null
                     },
-                    "name": "statusbarpaging13",
+                    "name": "statusbarpaging15",
                     "designerId": "3812557b-eaf0-4f41-b444-7da5890f9c89",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
