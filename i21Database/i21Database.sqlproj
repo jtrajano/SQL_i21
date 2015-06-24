@@ -155,6 +155,7 @@
     <Folder Include="dbo\Triggers\" />
     <Folder Include="Scripts\Post-Deployment\TM\Reports\SubReportSettings" />
     <Folder Include="Scripts\Post-Deployment\PR\DataFixes" />
+    <Folder Include="Scripts\Post-Deployment\GL\ReportData" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -1718,7 +1719,6 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillAmounts.sql" />
     <Build Include="dbo\Views\vyuAPBillStatus.sql" />
     <Build Include="dbo\Views\vyuARSalesAnalysisReport.sql" />
-    <None Include="Scripts\Post-Deployment\GL\ReportDataFix.sql" />
     <Build Include="dbo\Views\vyuCTContractHeaderView.sql" />
     <Build Include="dbo\Views\vyuCTContractSearchView.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptCharge.sql" />
@@ -1832,6 +1832,11 @@
     <Build Include="dbo\Stored Procedures\uspMFStartWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspLGAddInboundShipmentToInventoryReceipt.sql" />
+    <None Include="Scripts\Post-Deployment\GL\ReportData\GeneralLedgerByAccountDetail.sql" />
+    <None Include="Scripts\Post-Deployment\GL\ReportData\IncomeStatementStandard.sql" />
+    <None Include="Scripts\Post-Deployment\GL\ReportData\TrialBalanceDetail.sql" />
+    <None Include="Scripts\Post-Deployment\GL\ReportData\TrialBalance.sql" />
+    <None Include="Scripts\Post-Deployment\GL\ReportData\BalanceSheetStandard.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
