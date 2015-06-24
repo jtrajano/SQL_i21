@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblWMSKU]
+﻿CREATE TABLE [dbo].[tblWHSKU]
 (
 	[intSKUId]	INT NOT NULL,
 	[intConcurrencyId] INT NOT NULL,
@@ -24,10 +24,10 @@
 	[ysnIsSanitized]	BIT,
 	[strBatchNo]	NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 
-    CONSTRAINT [PK_tblWMSKU_intSKUId]  PRIMARY KEY ([intSKUId]),	
-	CONSTRAINT [FK_tblWMSKU_tblWMContainer_intContainerId] FOREIGN KEY ([intContainerId]) REFERENCES [tblWMContainer]([intContainerId]), 
-	CONSTRAINT [FK_tblWMSKU_tblICLot_intLotId] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]), 
-	CONSTRAINT [FK_tblWMSKU_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
-	CONSTRAINT [FK_tblWMSKU_tblWMSKUStatus_intSKUStatusId] FOREIGN KEY ([intSKUStatusId]) REFERENCES [tblWMSKUStatus]([intSKUStatusId]), 
+    CONSTRAINT [PK_tblWHSKU_intSKUId]  PRIMARY KEY ([intSKUId]),	
+	CONSTRAINT [FK_tblWHSKU_tblWHContainer_intContainerId] FOREIGN KEY ([intContainerId]) REFERENCES [tblWHContainer]([intContainerId]), 
+	CONSTRAINT [FK_tblWHSKU_tblICLot_intLotId] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]), 
+	CONSTRAINT [FK_tblWHSKU_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
+	CONSTRAINT [FK_tblWHSKU_tblWHSKUStatus_intSKUStatusId] FOREIGN KEY ([intSKUStatusId]) REFERENCES [tblWHSKUStatus]([intSKUStatusId]), 
 
 )

@@ -1818,6 +1818,10 @@
     <Build Include="dbo\Tables\tblWMSKU.sql" />
     <Build Include="dbo\Tables\tblWMSKUStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetPONumber.sql" />
+    <Build Include="dbo\Tables\tblWHContainer.sql" />
+    <Build Include="dbo\Tables\tblWHContainerType.sql" />
+    <Build Include="dbo\Tables\tblWHSKU.sql" />
+    <Build Include="dbo\Tables\tblWHSKUStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

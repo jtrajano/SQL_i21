@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblWMContainerType]
+﻿CREATE TABLE [dbo].[tblWHContainerType]
 (
 		[intContainerTypeId]	INT	NOT NULL IDENTITY,
 		[strInternalCode]	NVARCHAR(32)	COLLATE Latin1_General_CI_AS NOT NULL, 
@@ -23,6 +23,6 @@
 		[intLastModifiedUserId] [int] NULL,
 		[dtmLastModified] [datetime] NULL DEFAULT GetDate(),
 
-CONSTRAINT [PK_tblWMContainerType_intContainerTypeId] PRIMARY KEY ([intContainerTypeId]), 
+CONSTRAINT [PK_tblWHContainerType_intContainerTypeId] PRIMARY KEY ([intContainerTypeId]), 
 
 )
