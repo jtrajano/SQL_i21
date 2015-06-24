@@ -31,8 +31,11 @@ AS
 			FM.strFutMarketName,				MO.strFutureMonth,				CU.strCurrency,
 			MZ.strMarketZoneCode,				OH.strContractOptDesc,			VR.strVendorId,
 			RG.strRailGrade,					CL.strLocationName,				FR.strOrigin+' - '+FR.strDest	AS	strOriginDest,
-			SL.intStorageLocationId,											SL.strName						AS	strStorageLocationName,
-			
+			SL.intStorageLocationId,			IM.strLotTracking,				SL.strName						AS	strStorageLocationName,
+			strStockUOM,						strStockUOMType,				ISNULL(IU.dblUnitQty,0)			AS	dblItemUOMCF,  
+			SB.intCompanyLocationSubLocationId,	SB.strSubLocationName,			ISNULL(intStockUOM,0)			AS intStockUOM,		
+																				ISNULL(dblStockUOMCF,0)			AS dblStockUOMCF,	
+
 			--Header Detail
 
 			CH.intContractHeaderId,				CH.intHeaderConcurrencyId,		CH.intContractTypeId,
@@ -58,24 +61,35 @@ AS
 			CH.ysnSubstituteItem,				CH.ysnUnlimitedQuantity,		CH.ysnMaxPrice,			
 			CH.intINCOLocationTypeId,			CH.intCountryId,				CH.strCountry
 			
-	FROM	tblCTContractDetail			CD
+	FROM	tblCTContractDetail				CD
 	
-	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
-	JOIN	vyuCTContractHeaderView		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId		
-	JOIN	tblICItem					IM	ON	IM.intItemId				=	CD.intItemId
-	JOIN	tblICItemUOM				IU	ON	IU.intItemUOMId				=	CD.intItemUOMId
-	JOIN	tblICUnitMeasure			U1	ON	U1.intUnitMeasureId			=	IU.intUnitMeasureId			
-	JOIN	tblCTPricingType			PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId			
-	JOIN	tblICItemLocation			IL	ON	IL.intItemId				=	IM.intItemId				AND
-												IL.intLocationId			=	CD.intCompanyLocationId		LEFT
-	JOIN	tblICStorageLocation		SL	ON	SL.intStorageLocationId		=	IL.intStorageLocationId		LEFT
-	JOIN	tblSMFreightTerms			FT	ON	FT.intFreightTermId			=	CD.intFreightTermId			LEFT
-	JOIN	tblSMShipVia				SV	ON	SV.intShipViaID				=	CD.intShipViaId				LEFT
-	JOIN	tblCTContractOptHeader		OH  ON	OH.intContractOptHeaderId	=	CD.intContractOptHeaderId	LEFT
-	JOIN	tblCTFreightRate			FR	ON	FR.intFreightRateId			=	CD.intFreightRateId			LEFT
-	JOIN	tblCTRailGrade				RG	ON	RG.intRailGradeId			=	CD.intRailGradeId			LEFT
-	JOIN	tblRKFutureMarket			FM	ON	FM.intFutureMarketId		=	CD.intFutureMarketId		LEFT
-	JOIN	tblAPVendor					VR	ON	VR.[intEntityVendorId]		=	CD.intBillTo				LEFT
-	JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId			LEFT
-	JOIN	tblSMCurrency				CU	ON	CU.intCurrencyID			=	CD.intCurrencyId			LEFT
-	JOIN	tblARMarketZone				MZ	ON	MZ.intMarketZoneId			=	CD.intMarketZoneId
+	JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
+	JOIN	vyuCTContractHeaderView			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId		
+	JOIN	tblICItem						IM	ON	IM.intItemId				=	CD.intItemId
+	JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId				=	CD.intItemUOMId
+	JOIN	tblICUnitMeasure				U1	ON	U1.intUnitMeasureId			=	IU.intUnitMeasureId			
+	JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId			
+	JOIN	tblICItemLocation				IL	ON	IL.intItemId				=	IM.intItemId				AND
+													IL.intLocationId			=	CD.intCompanyLocationId		LEFT
+	JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId		=	IL.intStorageLocationId		LEFT
+	JOIN	tblSMFreightTerms				FT	ON	FT.intFreightTermId			=	CD.intFreightTermId			LEFT
+	JOIN	tblSMShipVia					SV	ON	SV.intShipViaID				=	CD.intShipViaId				LEFT
+	JOIN	tblCTContractOptHeader			OH  ON	OH.intContractOptHeaderId	=	CD.intContractOptHeaderId	LEFT
+	JOIN	tblCTFreightRate				FR	ON	FR.intFreightRateId			=	CD.intFreightRateId			LEFT
+	JOIN	tblCTRailGrade					RG	ON	RG.intRailGradeId			=	CD.intRailGradeId			LEFT
+	JOIN	tblRKFutureMarket				FM	ON	FM.intFutureMarketId		=	CD.intFutureMarketId		LEFT
+	JOIN	tblAPVendor						VR	ON	VR.[intEntityVendorId]		=	CD.intBillTo				LEFT
+	JOIN	tblRKFuturesMonth				MO	ON	MO.intFutureMonthId			=	CD.intFutureMonthId			LEFT
+	JOIN	tblSMCurrency					CU	ON	CU.intCurrencyID			=	CD.intCurrencyId			LEFT
+	JOIN	tblARMarketZone					MZ	ON	MZ.intMarketZoneId			=	CD.intMarketZoneId			LEFT
+	JOIN(
+			SELECT  intItemUOMId AS intStockUOM,strUnitMeasure AS strStockUOM,strUnitType AS strStockUOMType,dblUnitQty AS dblStockUOMCF 
+			FROM	tblICItemUOM			IU	LEFT 
+			JOIN	tblICUnitMeasure		UM	ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId 
+			WHERE	ysnStockUnit = 1)		SU	ON	SU.intStockUOM				=	IU.intItemUOMId				LEFT
+	JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	=	CASE WHEN CH.strINCOLocationType = 'Warehouse' THEN CH.intINCOLocationTypeId ELSE 0 END
+
+	/*
+	JOIN	tblICItemPricing			IP	ON	IP.intItemId				=	IM.intItemId				AND
+												IP.intItemLocationId		=	IL.intItemLocationId		LEFT
+	*/
