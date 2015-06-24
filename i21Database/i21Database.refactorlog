@@ -3507,4 +3507,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intElectronicPricingValueId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="ae1397ec-926b-4bb5-b16f-969d74f36ada" ChangeDateTime="06/24/2015 13:51:29">
+    <Property Name="ElementName" Value="[dbo].[tblWMSKUStatus]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblWHSKUStatus]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="96ec8f9f-dc53-4f1a-9cab-c08c1b0fd970" ChangeDateTime="06/24/2015 13:52:15">
+    <Property Name="ElementName" Value="[dbo].[tblWMSKU]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblWHSKU]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7957ca8a-fda6-4322-bac5-481dc02f5d93" ChangeDateTime="06/24/2015 13:53:15">
+    <Property Name="ElementName" Value="[dbo].[tblWMContainer]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblWHContainer]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="bd3abeb3-758e-4196-9ac8-b3bdd5fe870f" ChangeDateTime="06/24/2015 13:54:52">
+    <Property Name="ElementName" Value="[dbo].[tblWMContainerType]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblWHContainerType]" />
+  </Operation>
 </Operations>

@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblWMSKUStatus]
+﻿CREATE TABLE [dbo].[tblWHSKUStatus]
 (
 		[intSKUStatusId]	INT	NOT NULL IDENTITY,
 		[intConcurrencyId] INT NOT NULL,
@@ -7,6 +7,6 @@
 		[ysnDefault]	BIT DEFAULT 0,
 		[ysnLocked]	BIT DEFAULT 1,
 
-		CONSTRAINT [PK_tblWMSKUStatus_intSKUStatusId] PRIMARY KEY ([intSKUStatusId])
+		CONSTRAINT [PK_tblWHSKUStatus_intSKUStatusId] PRIMARY KEY ([intSKUStatusId])
 
 )
