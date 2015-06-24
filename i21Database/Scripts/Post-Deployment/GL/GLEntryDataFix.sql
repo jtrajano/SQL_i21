@@ -9,8 +9,7 @@ GO
 GO
 
 UPDATE tblGLAccount SET ysnSystem = 0 WHERE ysnSystem is NULL
-UPDATE tblGLAccount SET strCashFlow = 'None' WHERE strCashFlow IS NULL OR RTRIM(strCashFlow) = ''
-
+UPDATE tblGLAccount SET strCashFlow = 'None' WHERE  RTRIM(strCashFlow) NOT IN ('Finance','Investments','Operations','None')
 GO	
 	PRINT N'END Normalize ysnSystem and strCashFlow'
 GO
