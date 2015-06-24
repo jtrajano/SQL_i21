@@ -1796,8 +1796,8 @@
     <Build Include="dbo\Views\vyuLGShipmentContainerReceiptContracts.sql" />
     <Build Include="dbo\Tables\tblRKOptionsPnSExpired.sql" />
     <Build Include="dbo\Views\vyuRKSOptionExpiredTransaction.sql" />
-    <Build Include="dbo\Stored Procedures\uspLGShipmentUpdateContainerReceivedQty.sql" />	
-	<Build Include="dbo\Views\vyuICGetItemStockUOMForAdjustment.sql" />	
+    <Build Include="dbo\Stored Procedures\uspLGShipmentUpdateContainerReceivedQty.sql" />
+    <Build Include="dbo\Views\vyuICGetItemStockUOMForAdjustment.sql" />
     <Build Include="dbo\Views\vyuLGShippingInstructions.sql" />
     <None Include="Scripts\Post-Deployment\GL\ReportDataFix.sql" />
     <Build Include="dbo\Tables\tblRKOptionsPnSExercisedAssigned.sql" />
@@ -1810,9 +1810,13 @@
     <Build Include="dbo\Stored Procedures\uspRKInsertToElectronicPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetElectronicPricingValue.sql" />
     <Build Include="dbo\Tables\tblLGWarehouseRateMatrixDetail.sql" />
-	<Build Include="dbo\Tables\tblLGWarehouseRateMatrixHeader.sql" />	
+    <Build Include="dbo\Tables\tblLGWarehouseRateMatrixHeader.sql" />
     <Build Include="dbo\Tables\tblCFTransactionPrice.sql" />
     <Build Include="dbo\Views\vyuARCustomerStatementDetailReport.sql" />
+    <Build Include="dbo\Tables\tblWMContainer.sql" />
+    <Build Include="dbo\Tables\tblWMContainerType.sql" />
+    <Build Include="dbo\Tables\tblWMSKU.sql" />
+    <Build Include="dbo\Tables\tblWMSKUStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
