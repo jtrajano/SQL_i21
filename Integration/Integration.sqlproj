@@ -269,5 +269,8 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateLocaleTaxView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateLocationView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateTermsView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateCommentsView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateSalesPersonView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateAccountStatusView.sql" />
   </ItemGroup>
 </Project>
