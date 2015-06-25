@@ -121,7 +121,7 @@ BEGIN
 			AS
 			SELECT  
 				vwitm_no = A.strItemNo 
-				,vwitm_loc_no = C.strLocationNumber 
+				,vwitm_loc_no = C.strLocationName
 				,vwitm_class = D.strCategoryCode
 				,vwitm_search = CAST(''''  AS CHAR(13))    
 				,vwitm_desc = A.strDescription
@@ -139,7 +139,7 @@ BEGIN
 				,A4GLIdentity  = A.intItemId
 				,vwitm_avail_tm = (CASE WHEN A.ysnAvailableTM = 1 THEN ''Y'' ELSE ''N'' END)
 				,vwitm_phys_inv_ynbo = ISNULL(B.strCounted,'''') 
-				,vwitm_deflt_percnt = A.dblDefaultFull
+				,vwitm_deflt_percnt = CAST(ISNULL(A.dblDefaultFull,0) AS INT)
 				,vwitm_slstax_rpt_ynha = ''N''  
 				,vwitm_last_un_cost = ISNULL(E.dblLastCost,0.0)  
 				,vwitm_avg_un_cost = ISNULL(E.dblAverageCost,0.0)  

@@ -20,7 +20,7 @@ BEGIN
 					ELSE     RTRIM(C.vwcus_last_name) + RTRIM(C.vwcus_name_suffix) + '', '' + RTRIM(C.vwcus_first_name) + RTRIM(C.vwcus_mid_init)    
 					END   
 				END
-				) AS strCustomerName
+				) COLLATE Latin1_General_CI_AS AS strCustomerName
 			,C.vwcus_phone AS strPhone
 			,A.intSiteID
 			,A.strSiteAddress
