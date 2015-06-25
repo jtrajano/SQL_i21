@@ -16,6 +16,7 @@ DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
 
 -- Constant variables for the source type
+DECLARE @SourceType_PurchaseContract AS NVARCHAR(100) = 'Purchase Contract'
 DECLARE @SourceType_PurchaseOrder AS NVARCHAR(100) = 'Purchase Order'
 DECLARE @SourceType_TransferOrder AS NVARCHAR(100) = 'Transfer Order'
 DECLARE @SourceType_Direct AS NVARCHAR(100) = 'Direct'
@@ -54,6 +55,14 @@ BEGIN TRY
 	IF @strSourceType = @SourceType_PurchaseOrder
 	BEGIN 
 		EXEC dbo.uspICAddPurchaseOrderToInventoryReceipt @intSourceTransactionId, @intUserId, @InventoryReceiptId OUTPUT; 
+	END
+	ELSE IF @strSourceType = @SourceType_PurchaseContract
+	BEGIN 
+		EXEC dbo.uspCTAddPurchaseContractToInventoryReceipt @intSourceTransactionId, @intUserId, @InventoryReceiptId OUTPUT; 
+	END
+	ELSE IF @strSourceType = @SourceType_TransferOrder
+	BEGIN 
+		EXEC dbo.uspICAddTransferOrderToInventoryReceipt @intSourceTransactionId, @intUserId, @InventoryReceiptId OUTPUT; 
 	END
 
 END TRY
