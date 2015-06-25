@@ -3,7 +3,7 @@
 	,@intStorageLocationId INT
 	,@intLocationId INT
 	,@intConsumptionMethodId int=1
-	,@strLotNumber nvarchar(MAX)='%%'
+	,@strLotNumber nvarchar(MAX)='%'
 	)
 AS
 BEGIN
@@ -39,6 +39,6 @@ BEGIN
 		AND L.dtmExpiryDate >= Getdate()
 		AND L.dblQty>0
 		AND I.strStatus='Active'
-		and L.strLotNumber Like @strLotNumber
+		and L.strLotNumber Like @strLotNumber +'%'
 	ORDER BY L.dtmDateCreated ASC
 END
