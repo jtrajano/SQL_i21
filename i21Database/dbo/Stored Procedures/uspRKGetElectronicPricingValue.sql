@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKGetElectronicPricingValue]
-
+	@StrURL Nvarchar(Max)
 AS
 BEGIN
 	SELECT TOP 1 
@@ -8,6 +8,6 @@ BEGIN
 		,dblLow AS  Low
 		,dblOpen AS [Open]
 		,dblLast AS [Last]
-	FROM tblRKElectronicPricingValue
+	FROM tblRKElectronicPricingValue Where strURL=@StrURL
 	ORDER BY intElectronicPricingValueId DESC
 END

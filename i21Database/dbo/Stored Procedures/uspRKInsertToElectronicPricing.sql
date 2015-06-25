@@ -3,6 +3,7 @@
 	,@open DECIMAL(24, 10)
 	,@low DECIMAL(24, 10)
 	,@last DECIMAL(24, 10)
+	,@url Nvarchar(Max)
 AS
 BEGIN
 	INSERT INTO tblRKElectronicPricingValue 
@@ -11,10 +12,12 @@ BEGIN
 		,dblLow
 		,dblOpen
 		,dblLast
+		,strURL
 	  )
 	SELECT 
 		 @high
 		,@low		
 		,@open
 		,@last
+		,@url
 END
