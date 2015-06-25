@@ -13,6 +13,10 @@ BEGIN TRY
 		,@RecordKey INT
 		,@dtmCurrentDate DATETIME
 		,@strLotNumber nvarchar(50)
+		,@intAttributeId int
+		,@intManufacturingProcessId int
+		,@intLocationId int
+		,@strAttributeValue nvarchar(50)
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -55,6 +59,26 @@ BEGIN TRY
 		RETURN
 	END
 
+	SELECT @intManufacturingProcessId=intManufacturingProcessId
+		,@intLocationId=intLocationId
+	FROM tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
+
+	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Is Cycle Count Mandatory'
+	
+	Select @strAttributeValue=strAttributeValue
+	From tblMFManufacturingProcessAttribute
+	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
+
+	If @strAttributeValue='True' and not exists(Select *from tblMFProcessCycleCountSession  Where intWorkOrderId=@intWorkOrderId)
+	Begin
+		RAISERROR (
+				51131
+				,11
+				,1
+				)
+	End
+	
 	DECLARE @Lot TABLE (
 		RecordKey INT identity(1, 1)
 		,intLotId INT
