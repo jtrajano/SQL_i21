@@ -60,3 +60,7 @@ GO
 	-- MIGRATE SM COMPANY PREFERENCES
 	EXEC uspSMMigrateCompanyPreference
 GO
+
+	-- MIGRATE AR COMPANY PREFERENCES
+	EXEC uspARMigrateCompanyPreference
+GO
