@@ -1032,6 +1032,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     hidden: true
                                                                                 },
                                                                                 {
+                                                                                    dataIndex: 'strReceiveUPC',
+                                                                                    dataType: 'string',
+                                                                                    text: 'UPC',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
                                                                                     dataIndex: 'strReceiveUOM',
                                                                                     dataType: 'string',
                                                                                     text: 'Receive UOM',
@@ -1193,6 +1199,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     dataType: 'string',
                                                                                     text: 'Unit Type',
                                                                                     flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'dblUnitQty',
+                                                                                    dataType: 'float',
+                                                                                    text: 'Unit Qty',
+                                                                                    hidden: true
                                                                                 }
                                                                             ],
                                                                             allowEmpty: true,

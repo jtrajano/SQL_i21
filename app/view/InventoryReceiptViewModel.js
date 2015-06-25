@@ -23,7 +23,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'i21.store.ShipViaBuffered',
         'i21.store.UserListBuffered',
         'i21.store.CompanyLocationSubLocationBuffered',
-        'i21.store.CountryBuffered'
+        'i21.store.CountryBuffered',
+        'ContractManagement.store.ContractDetailViewBuffered',
+        'Logistics.store.BufferedShipmentReceiptContracts'
     ],
 
     stores: {
@@ -49,6 +51,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         sourceTypes: {
             autoLoad: true,
+            autoFilter: true,
             data: [
                 {
                     intSourceType: 0,
@@ -63,6 +66,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     strSourceType: 'Inbound Shipment'
                 }
             ],
+            filters: '{filterSourceByType}',
             fields: {
                 name: 'intSourceType',
                 name: 'strSourceType'
@@ -172,6 +176,12 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         orderNumbers: {
             type: 'purchaseorderdetail'
+        },
+        purchaseContract: {
+            type: 'ctcontractdetailviewbuffered'
+        },
+        inboundShipment: {
+            type: 'lgbufferedshipmentreceiptcontracts'
         },
         shipFrom: {
             type: 'emlocationbuffered'
@@ -310,11 +320,11 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
     formulas: {
         checkHiddenInInvoicePaid: function (get) {
             var isEnabled = false;
-            if (get('current.ysnPosted')){
+            if (get('current.ysnPosted')) {
                 isEnabled = true;
             }
             else {
-                if (get('current.ysnInvoicePaid')){
+                if (get('current.ysnInvoicePaid')) {
                     isEnabled = true;
                 }
                 else {
@@ -333,7 +343,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             return isTransferReceipt;
         },
         checkReadOnlyIfDirect: function (get) {
-            if (get('current.ysnPosted') === true){
+            if (get('current.ysnPosted') === true) {
                 return true
             }
             else {
@@ -341,25 +351,31 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 return isDirect;
             }
         },
-        checkReadOnlyWithOrder: function(get) {
-            if (get('current.ysnPosted') === true){
+        checkReadOnlyWithOrder: function (get) {
+            if (get('current.ysnPosted') === true) {
                 return true
             }
             else {
                 if (get('current.strReceiptType') !== 'Direct') {
-                    if (get('current.tblICInventoryReceiptItems').data.items.length > 0){
+                    if (get('current.tblICInventoryReceiptItems').data.items.length > 0) {
                         var current = get('current.tblICInventoryReceiptItems').data.items[0];
-                        if (current.get('intSourceId') !== null) {
+                        if (current.get('intOrderId') !== null) {
                             return true;
                         }
-                        else { return false; }
+                        else {
+                            return false;
+                        }
                     }
-                    else { return false; }
+                    else {
+                        return false;
+                    }
                 }
-                else { return false; }
+                else {
+                    return false;
+                }
             }
         },
-        getReceiveButtonText: function(get) {
+        getReceiveButtonText: function (get) {
             if (get('current.ysnPosted')) {
                 return 'UnReceive';
             }
@@ -367,7 +383,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 return 'Receive';
             }
         },
-        checkHideOrderNo: function(get) {
+        checkHideOrderNo: function (get) {
             if (get('current.strReceiptType') === 'Direct') {
                 return true;
             }
@@ -375,7 +391,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 return false;
             }
         },
-        checkHideSourceNo: function(get) {
+        checkHideSourceNo: function (get) {
             if (get('current.intSourceType') === 0) {
                 return true;
             }
@@ -383,14 +399,14 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 return false;
             }
         },
-        checkInventoryCost: function(get){
+        checkInventoryCost: function (get) {
             if (get('grdCharges.selection.ysnInventoryCost')) {
                 return false;
             }
             else
                 return true;
         },
-        hasItemSelection: function(get){
+        hasItemSelection: function (get) {
             if (get('grdInventoryReceipt.selection')) {
                 if (get('grdInventoryReceipt.selection').dummy === true) {
                     return true
@@ -401,6 +417,69 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
             else
                 return true;
+        },
+        disableSourceType: function (get) {
+            if (get('current.ysnPosted') === true) {
+                return true;
+            }
+            else {
+                switch (get('current.strReceiptType')) {
+                    case 'Purchase Contract':
+                        return false;
+                        break;
+                    default:
+                        this.data.current.set('intSourceType', 0);
+                        return true;
+                        break;
+                }
+            }
+        },
+        filterSourceByType: function (get) {
+            switch (get('current.strReceiptType')) {
+                case 'Purchase Contract':
+                    return {
+                        property: 'intSourceType',
+                        value: '1',
+                        operator: '!='
+                    };
+                    break;
+                default:
+                    return {};
+                    break;
+            }
+        },
+        readOnlyItemDropdown: function (get) {
+            var receiptType = get('current.strReceiptType');
+            switch (receiptType) {
+                case 'Direct' :
+                    return false;
+                    break;
+                default:
+                    return true;
+                    break;
+            };
+        },
+        readOnlyWeightDropdown: function (get) {
+            if (get('grdInventoryReceipt.selection.strLotTracking') === 'No') {
+                return true;
+            }
+            else return false;
+        },
+        readOnlyOrderNumberDropdown: function (get) {
+            var receiptType = get('current.strReceiptType');
+            switch (receiptType) {
+                case 'Direct' :
+                    return true
+                    break;
+                default:
+                    if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strOrderNumber'))) {
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
+                    break;
+            };
         }
     }
 

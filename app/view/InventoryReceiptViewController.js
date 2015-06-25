@@ -44,7 +44,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             cboSourceType: {
                 value: '{current.intSourceType}',
                 store: '{sourceTypes}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{disableSourceType}'
             },
             cboVendor: {
                 value: '{current.intEntityVendorId}',
@@ -165,6 +165,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     hidden: '{checkHideOrderNo}',
                     dataIndex: 'strOrderNumber',
                     editor: {
+                        readOnly: '{readOnlyOrderNumberDropdown}',
                         store: '{orderNumbers}',
                         defaultFilters: [
                             {
@@ -187,6 +188,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colItemNo: {
                     dataIndex: 'strItemNo',
                     editor: {
+                        readOnly: '{readOnlyItemDropdown}',
                         store: '{items}'
                     }
                 },
@@ -250,6 +252,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colWeightUOM: {
                     dataIndex: 'strWeightUOM',
                     editor: {
+                        readOnly: '{readOnlyWeightDropdown}',
                         origValueField: 'intItemUOMId',
                         origUpdateField: 'intWeightUOMId',
                         store: '{weightUOM}',
@@ -1286,28 +1289,62 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var current = plugin.getActiveRecord();
         var po = records[0];
 
-        current.set('intLineNo', po.get('intPurchaseDetailId'));
-        current.set('intOrderId', po.get('intPurchaseId'));
-        current.set('dblOrderQty', po.get('dblQtyOrdered'));
-        current.set('dblReceived', po.get('dblQtyReceived'));
-        current.set('dblOpenReceive', po.get('dblQtyOrdered') - po.get('dblQtyReceived'));
-        current.set('strItemDescription', po.get('strDescription'));
-        current.set('intItemId', po.get('intItemId'));
-        current.set('strItemNo', po.get('strItemNo'));
-        current.set('intUnitMeasureId', po.get('intUnitOfMeasureId'));
-        current.set('strUnitMeasure', po.get('strUOM'));
-        current.set('strOrderUOM', po.get('strUOM'));
-        current.set('dblUnitCost', po.get('dblCost'));
-        current.set('dblLineTotal', po.get('dblTotal'));
-        current.set('strLotTracking', po.get('strLotTracking'));
-        current.set('intOwnershipType', 1);
-        current.set('strOwnershipType', 'Own');
-        current.set('intSubLocationId', po.get('intSubLocationId'));
-        current.set('intStorageLocationId', po.get('intStorageLocationId'));
-        current.set('strSubLocationName', po.get('strSubLocationName'));
-        current.set('strStorageLocationName', po.get('strStorageName'));
-        current.set('dblItemUOMConvFactor', po.get('dblItemUOMCF'));
-        current.set('strUnitType', po.get('strStockUOMType'));
+        switch (win.viewModel.data.current.get('strReceiptType')) {
+            case 'Purchase Order':
+                current.set('intLineNo', po.get('intPurchaseDetailId'));
+                current.set('intOrderId', po.get('intPurchaseId'));
+                current.set('dblOrderQty', po.get('dblQtyOrdered'));
+                current.set('dblReceived', po.get('dblQtyReceived'));
+                current.set('dblOpenReceive', po.get('dblQtyOrdered') - po.get('dblQtyReceived'));
+                current.set('strItemDescription', po.get('strDescription'));
+                current.set('intItemId', po.get('intItemId'));
+                current.set('strItemNo', po.get('strItemNo'));
+                current.set('intUnitMeasureId', po.get('intUnitOfMeasureId'));
+                current.set('strUnitMeasure', po.get('strUOM'));
+                current.set('strOrderUOM', po.get('strUOM'));
+                current.set('dblUnitCost', po.get('dblCost'));
+                current.set('dblLineTotal', po.get('dblTotal'));
+                current.set('strLotTracking', po.get('strLotTracking'));
+                current.set('intOwnershipType', 1);
+                current.set('strOwnershipType', 'Own');
+                current.set('intSubLocationId', po.get('intSubLocationId'));
+                current.set('intStorageLocationId', po.get('intStorageLocationId'));
+                current.set('strSubLocationName', po.get('strSubLocationName'));
+                current.set('strStorageLocationName', po.get('strStorageName'));
+                current.set('dblItemUOMConvFactor', po.get('dblItemUOMCF'));
+                current.set('strUnitType', po.get('strStockUOMType'));
+                break;
+
+            case 'Purchase Contract':
+                current.set('intLineNo', po.get('intContractDetailId'));
+                current.set('intOrderId', po.get('intContractHeaderId'));
+
+                if (win.viewModel.data.current) {
+                    if (win.viewModel.data.current.get('intSourceType') === 0) {
+                        current.set('dblOrderQty', po.get('dblDetailQuantity'));
+                        current.set('dblReceived', po.get('dblDetailQuantity') - po.get('dblBalance'));
+                        current.set('dblOpenReceive', po.get('dblBalance'));
+                        current.set('strItemDescription', po.get('strItemDescription'));
+                        current.set('intItemId', po.get('intItemId'));
+                        current.set('strItemNo', po.get('strItemNo'));
+                        current.set('intUnitMeasureId', po.get('intItemUOMId'));
+                        current.set('strUnitMeasure', po.get('strItemUOM'));
+                        current.set('strOrderUOM', po.get('strItemUOM'));
+                        current.set('dblUnitCost', po.get('dblCost'));
+                        current.set('dblLineTotal', po.get('dblTotal'));
+                        current.set('strLotTracking', po.get('strLotTracking'));
+                        current.set('intOwnershipType', 1);
+                        current.set('strOwnershipType', 'Own');
+//                current.set('intSubLocationId', po.get('intSubLocationId'));
+                        current.set('intStorageLocationId', po.get('intStorageLocationId'));
+//                current.set('strSubLocationName', po.get('strSubLocationName'));
+                        current.set('strStorageLocationName', po.get('strStorageLocationName'));
+                        current.set('dblItemUOMConvFactor', po.get('dblItemUOMCF'));
+                        current.set('strUnitType', po.get('strStockUOMType'));
+                    }
+                }
+                break;
+        }
 
         if (po.get('strStockUOMType') === 'Weight' && po.get('strLotTracking') !== 'No') {
             current.set('intWeightUOMId', po.get('intStockUOM'));
@@ -1318,11 +1355,636 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         win.viewModel.data.currentReceiptItem = current;
     },
 
+    onSourceNumberSelect: function(combo, records) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+        var po = records[0];
+
+        switch (win.viewModel.data.current.get('intSourceType')) {
+            case 2:
+                current.set('intSourceId', po.get('intShipmentContractQtyId'));
+                current.set('dblOrderQty', po.get('dblQuantity'));
+                current.set('dblReceived', po.get('dblReceivedQty'));
+                current.set('dblOpenReceive', po.get('dblQuantity') - po.get('dblReceivedQty'));
+                current.set('strItemDescription', po.get('strItemDescription'));
+                current.set('intItemId', po.get('intItemId'));
+                current.set('strItemNo', po.get('strItemNo'));
+                current.set('intUnitMeasureId', po.get('intItemUOMId'));
+                current.set('strUnitMeasure', po.get('strUnitMeasure'));
+                current.set('strOrderUOM', po.get('strUnitMeasure'));
+                current.set('dblUnitCost', po.get('dblCost'));
+                current.set('dblLineTotal', po.get('dblTotal'));
+                current.set('strLotTracking', po.get('strLotTracking'));
+                current.set('intOwnershipType', 1);
+                current.set('strOwnershipType', 'Own');
+                current.set('intSubLocationId', po.get('intSubLocationId'));
+                current.set('strSubLocationName', po.get('strSubLocationName'));
+                current.set('dblItemUOMConvFactor', po.get('dblItemUOMCF'));
+                current.set('strUnitType', po.get('strStockUOMType'));
+
+                break;
+
+            case 1:
+                break;
+        }
+        win.viewModel.data.currentReceiptItem = current;
+    },
+
+    purchaseOrderDropdown: function(win) {
+        return Ext.create('Ext.grid.CellEditor', {
+            field: Ext.widget({
+                xtype: 'gridcombobox',
+                matchFieldWidth: false,
+                columns: [
+                    {
+                        dataIndex: 'strPurchaseOrderNumber',
+                        dataType: 'string',
+                        text: 'PO Number',
+                        flex: 1
+                    },
+                    {
+                        dataIndex: 'strItemNo',
+                        dataType: 'string',
+                        text: 'Item No',
+                        flex: 1
+                    },
+                    {
+                        dataIndex: 'strDescription',
+                        dataType: 'string',
+                        text: 'Description',
+                        flex: 1
+                    },
+                    {
+                        dataIndex: 'dblQtyOrdered',
+                        dataType: 'float',
+                        text: 'Ordered Qty',
+                        flex: 1
+                    },
+                    {
+                        dataIndex: 'dblQtyReceived',
+                        dataType: 'float',
+                        text: 'Received Qty',
+                        flex: 1
+                    },
+                    {
+                        dataIndex: 'dblCost',
+                        dataType: 'float',
+                        text: 'Cost',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'dblTotal',
+                        dataType: 'float',
+                        text: 'Line Total',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intPurchaseDetailId',
+                        dataType: 'numeric',
+                        text: 'Purchase Detail Id',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intPurchaseId',
+                        dataType: 'numeric',
+                        text: 'Purchase Detail Id',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intItemId',
+                        dataType: 'numeric',
+                        text: 'Purchase Detail Id',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intUnitOfMeasureId',
+                        dataType: 'numeric',
+                        text: 'Purchase Detail Id',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'strUOM',
+                        dataType: 'string',
+                        text: 'Unit of Measure',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'strLotTracking',
+                        dataType: 'string',
+                        text: 'Lot Tracking',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intStorageLocationId',
+                        dataType: 'numeric',
+                        text: 'Storage Location Id',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intSubLocationId',
+                        dataType: 'numeric',
+                        text: 'Sub Location Id',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'strSubLocationName',
+                        dataType: 'string',
+                        text: 'Sub Location Name',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'strStorageName',
+                        dataType: 'string',
+                        text: 'Storage Location Name',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'dblItemUOMCF',
+                        dataType: 'float',
+                        text: 'Unit Qty',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intStockUOM',
+                        dataType: 'numeric',
+                        text: 'Stock UOM Id',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'strStockUOM',
+                        dataType: 'string',
+                        text: 'Stock UOM',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'strStockUOMType',
+                        dataType: 'string',
+                        text: 'Stock UOM Type',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'dblStockUOMCF',
+                        dataType: 'float',
+                        text: 'Stock UOM Conversion Factor',
+                        hidden: true
+                    }
+                ],
+                itemId: 'cboOrderNumber',
+                displayField: 'strPurchaseOrderNumber',
+                valueField: 'strPurchaseOrderNumber',
+                store: win.viewModel.storeInfo.orderNumbers,
+                defaultFilters: [{
+                    column: 'ysnCompleted',
+                    value: 'false',
+                    conjunction: 'and'
+                },{
+                    column: 'intEntityVendorId',
+                    value: win.viewModel.data.current.get('intEntityVendorId'),
+                    conjunction: 'and'
+                }]
+            })
+        });
+    },
+
+    purchaseContractDropdown: function(win) {
+        return Ext.create('Ext.grid.CellEditor', {
+            field: Ext.widget({
+                xtype: 'gridcombobox',
+                matchFieldWidth: false,
+                columns: [
+                    {
+                        dataIndex: 'intContractNumber',
+                        dataType: 'string',
+                        text: 'Contract Number',
+                        flex: 1
+                    },
+                    {
+                        dataIndex: 'strItemNo',
+                        dataType: 'string',
+                        text: 'Item No',
+                        flex: 1
+                    },
+                    {
+                        dataIndex: 'strItemDescription',
+                        dataType: 'string',
+                        text: 'Description',
+                        flex: 1
+                    },
+                    {
+                        dataIndex: 'dblDetailQuantity',
+                        dataType: 'float',
+                        text: 'Ordered Qty',
+                        flex: 1
+                    },
+                    {
+                        dataIndex: 'dblBalance',
+                        dataType: 'float',
+                        text: 'Balance Qty',
+                        flex: 1
+                    },
+//                    {
+//                        dataIndex: 'dblCost',
+//                        dataType: 'float',
+//                        text: 'Cost',
+//                        hidden: true
+//                    },
+//                    {
+//                        dataIndex: 'dblTotal',
+//                        dataType: 'float',
+//                        text: 'Line Total',
+//                        hidden: true
+//                    },
+                    {
+                        dataIndex: 'intContractDetailId',
+                        dataType: 'numeric',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intContractHeaderId',
+                        dataType: 'numeric',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intItemId',
+                        dataType: 'numeric',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intItemUOMId',
+                        dataType: 'numeric',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'strItemUOM',
+                        dataType: 'string',
+                        hidden: true
+                    },
+//                    {
+//                        dataIndex: 'strLotTracking',
+//                        dataType: 'string',
+//                        hidden: true
+//                    },
+                    {
+                        dataIndex: 'intStorageLocationId',
+                        dataType: 'numeric',
+                        hidden: true
+                    },
+//                    {
+//                        dataIndex: 'intSubLocationId',
+//                        dataType: 'numeric',
+//                        text: 'Sub Location Id',
+//                        hidden: true
+//                    },
+//                    {
+//                        dataIndex: 'strSubLocationName',
+//                        dataType: 'string',
+//                        text: 'Sub Location Name',
+//                        hidden: true
+//                    },
+                    {
+                        dataIndex: 'strStorageLocationName',
+                        dataType: 'string',
+                        hidden: true
+                    }
+//                    {
+//                        dataIndex: 'dblItemUOMCF',
+//                        dataType: 'float',
+//                        text: 'Unit Qty',
+//                        hidden: true
+//                    },
+//                    {
+//                        dataIndex: 'intStockUOM',
+//                        dataType: 'numeric',
+//                        text: 'Stock UOM Id',
+//                        hidden: true
+//                    },
+//                    {
+//                        dataIndex: 'strStockUOM',
+//                        dataType: 'string',
+//                        text: 'Stock UOM',
+//                        hidden: true
+//                    },
+//                    {
+//                        dataIndex: 'strStockUOMType',
+//                        dataType: 'string',
+//                        text: 'Stock UOM Type',
+//                        hidden: true
+//                    },
+//                    {
+//                        dataIndex: 'dblStockUOMCF',
+//                        dataType: 'float',
+//                        text: 'Stock UOM Conversion Factor',
+//                        hidden: true
+//                    }
+                ],
+                itemId: 'cboOrderNumber',
+                displayField: 'intContractNumber',
+                valueField: 'intContractNumber',
+                store: win.viewModel.storeInfo.purchaseContract,
+                defaultFilters: [{
+                    column: 'strContractType',
+                    value: 'Purchase',
+                    conjunction: 'and'
+                },{
+                    column: 'intEntityId',
+                    value: win.viewModel.data.current.get('intEntityVendorId'),
+                    conjunction: 'and'
+                }]
+            })
+        });
+    },
+
+    transferOrderDropdown: function(win) {
+        return Ext.create('Ext.grid.CellEditor', {
+            field: Ext.widget({
+                xtype: 'gridcombobox',
+                matchFieldWidth: false,
+                columns: [
+                    {
+                        dataIndex: 'strPurchaseOrderNumber',
+                        dataType: 'string',
+                        text: 'PO Number',
+                        flex: 1
+                    },
+                    {
+                        dataIndex: 'strItemNo',
+                        dataType: 'string',
+                        text: 'Item No',
+                        flex: 1
+                    },
+                    {
+                        dataIndex: 'strDescription',
+                        dataType: 'string',
+                        text: 'Description',
+                        flex: 1
+                    },
+                    {
+                        dataIndex: 'dblQtyOrdered',
+                        dataType: 'float',
+                        text: 'Ordered Qty',
+                        flex: 1
+                    },
+                    {
+                        dataIndex: 'dblQtyReceived',
+                        dataType: 'float',
+                        text: 'Received Qty',
+                        flex: 1
+                    },
+                    {
+                        dataIndex: 'dblCost',
+                        dataType: 'float',
+                        text: 'Cost',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'dblTotal',
+                        dataType: 'float',
+                        text: 'Line Total',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intPurchaseDetailId',
+                        dataType: 'numeric',
+                        text: 'Purchase Detail Id',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intPurchaseId',
+                        dataType: 'numeric',
+                        text: 'Purchase Detail Id',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intItemId',
+                        dataType: 'numeric',
+                        text: 'Purchase Detail Id',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intUnitOfMeasureId',
+                        dataType: 'numeric',
+                        text: 'Purchase Detail Id',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'strUOM',
+                        dataType: 'string',
+                        text: 'Unit of Measure',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'strLotTracking',
+                        dataType: 'string',
+                        text: 'Lot Tracking',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intStorageLocationId',
+                        dataType: 'numeric',
+                        text: 'Storage Location Id',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intSubLocationId',
+                        dataType: 'numeric',
+                        text: 'Sub Location Id',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'strSubLocationName',
+                        dataType: 'string',
+                        text: 'Sub Location Name',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'strStorageName',
+                        dataType: 'string',
+                        text: 'Storage Location Name',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'dblItemUOMCF',
+                        dataType: 'float',
+                        text: 'Unit Qty',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intStockUOM',
+                        dataType: 'numeric',
+                        text: 'Stock UOM Id',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'strStockUOM',
+                        dataType: 'string',
+                        text: 'Stock UOM',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'strStockUOMType',
+                        dataType: 'string',
+                        text: 'Stock UOM Type',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'dblStockUOMCF',
+                        dataType: 'float',
+                        text: 'Stock UOM Conversion Factor',
+                        hidden: true
+                    }
+                ],
+                itemId: 'cboOrderNumber',
+                displayField: 'strPurchaseOrderNumber',
+                valueField: 'strPurchaseOrderNumber',
+                store: win.viewModel.storeInfo.orderNumbers,
+                defaultFilters: [{
+                    column: 'ysnCompleted',
+                    value: 'false',
+                    conjunction: 'and'
+                },{
+                    column: 'intEntityVendorId',
+                    value: win.viewModel.data.current.get('intEntityVendorId'),
+                    conjunction: 'and'
+                }]
+            })
+        });
+    },
+
+    inboundShipmentDropdown: function(win, record) {
+        return Ext.create('Ext.grid.CellEditor', {
+            field: Ext.widget({
+                xtype: 'gridcombobox',
+                matchFieldWidth: false,
+                columns: [
+                    {
+                        dataIndex: 'intTrackingNumber',
+                        dataType: 'string',
+                        text: 'Tracking No',
+                        flex: 1
+                    },
+                    {
+                        dataIndex: 'strItemNo',
+                        dataType: 'string',
+                        text: 'Item No',
+                        flex: 1
+                    },
+                    {
+                        dataIndex: 'strItemDescription',
+                        dataType: 'string',
+                        text: 'Description',
+                        flex: 1
+                    },
+                    {
+                        dataIndex: 'dblQuantity',
+                        dataType: 'float',
+                        text: 'Ordered Qty',
+                        flex: 1
+                    },
+                    {
+                        dataIndex: 'dblReceivedQty',
+                        dataType: 'float',
+                        text: 'Received Qty',
+                        flex: 1
+                    },
+                    {
+                        dataIndex: 'dblCost',
+                        dataType: 'float',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intShipmentContractQtyId',
+                        dataType: 'numeric',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intShipmentId',
+                        dataType: 'numeric',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intItemId',
+                        dataType: 'numeric',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intItemUOMId',
+                        dataType: 'numeric',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'strUnitMeasure',
+                        dataType: 'string',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'strLotTracking',
+                        dataType: 'string',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intSubLocationId',
+                        dataType: 'numeric',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'strSubLocationName',
+                        dataType: 'string',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'dblItemUOMCF',
+                        dataType: 'float',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intStockUOM',
+                        dataType: 'numeric',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'strStockUOM',
+                        dataType: 'string',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'strStockUOMType',
+                        dataType: 'string',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'dblStockUOMCF',
+                        dataType: 'float',
+                        hidden: true
+                    }
+                ],
+                itemId: 'cboSourceNumber',
+                displayField: 'intTrackingNumber',
+                valueField: 'intTrackingNumber',
+                store: win.viewModel.storeInfo.inboundShipment,
+                defaultFilters: [{
+                    column: 'intShipmentBLContainerContractId',
+                    value: '-1',
+                    conjunction: 'and'
+                },{
+                    column: 'intContractDetailId',
+                    value: record.get('intLineNo'),
+                    conjunction: 'and'
+                }]
+            })
+        });
+    },
+
     onItemGridColumnBeforeRender: function(column) {
         "use strict";
 
         var me = this,
-            win = column.up('window');
+            win = column.up('window'),
+            controller = win.getController();
 
         // Show or hide the editor based on the selected Field type.
         column.getEditor = function(record){
@@ -1343,339 +2005,39 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     {
                         switch (columnId) {
                             case 'colOrderNumber' :
-                                return Ext.create('Ext.grid.CellEditor', {
-                                    field: Ext.widget({
-                                        xtype: 'gridcombobox',
-                                        matchFieldWidth: false,
-                                        columns: [
-                                            {
-                                                dataIndex: 'strPurchaseOrderNumber',
-                                                dataType: 'string',
-                                                text: 'PO Number',
-                                                flex: 1
-                                            },
-                                            {
-                                                dataIndex: 'strItemNo',
-                                                dataType: 'string',
-                                                text: 'Item No',
-                                                flex: 1
-                                            },
-                                            {
-                                                dataIndex: 'strDescription',
-                                                dataType: 'string',
-                                                text: 'Description',
-                                                flex: 1
-                                            },
-                                            {
-                                                dataIndex: 'dblQtyOrdered',
-                                                dataType: 'float',
-                                                text: 'Ordered Qty',
-                                                flex: 1
-                                            },
-                                            {
-                                                dataIndex: 'dblQtyReceived',
-                                                dataType: 'float',
-                                                text: 'Received Qty',
-                                                flex: 1
-                                            },
-                                            {
-                                                dataIndex: 'dblCost',
-                                                dataType: 'float',
-                                                text: 'Cost',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'dblTotal',
-                                                dataType: 'float',
-                                                text: 'Line Total',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'intPurchaseDetailId',
-                                                dataType: 'numeric',
-                                                text: 'Purchase Detail Id',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'intPurchaseId',
-                                                dataType: 'numeric',
-                                                text: 'Purchase Detail Id',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'intItemId',
-                                                dataType: 'numeric',
-                                                text: 'Purchase Detail Id',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'intUnitOfMeasureId',
-                                                dataType: 'numeric',
-                                                text: 'Purchase Detail Id',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'strUOM',
-                                                dataType: 'string',
-                                                text: 'Unit of Measure',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'strLotTracking',
-                                                dataType: 'string',
-                                                text: 'Lot Tracking',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'intStorageLocationId',
-                                                dataType: 'numeric',
-                                                text: 'Storage Location Id',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'intSubLocationId',
-                                                dataType: 'numeric',
-                                                text: 'Sub Location Id',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'strSubLocationName',
-                                                dataType: 'string',
-                                                text: 'Sub Location Name',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'strStorageName',
-                                                dataType: 'string',
-                                                text: 'Storage Location Name',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'dblItemUOMCF',
-                                                dataType: 'float',
-                                                text: 'Unit Qty',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'intStockUOM',
-                                                dataType: 'numeric',
-                                                text: 'Stock UOM Id',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'strStockUOM',
-                                                dataType: 'string',
-                                                text: 'Stock UOM',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'strStockUOMType',
-                                                dataType: 'string',
-                                                text: 'Stock UOM Type',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'dblStockUOMCF',
-                                                dataType: 'float',
-                                                text: 'Stock UOM Conversion Factor',
-                                                hidden: true
-                                            }
-                                        ],
-                                        itemId: 'cboOrderNumber',
-                                        displayField: 'strPurchaseOrderNumber',
-                                        valueField: 'strPurchaseOrderNumber',
-                                        store: win.viewModel.storeInfo.orderNumbers,
-                                        defaultFilters: [{
-                                            column: 'ysnCompleted',
-                                            value: 'false',
-                                            conjunction: 'and'
-                                        },{
-                                            column: 'intEntityVendorId',
-                                            value: current.get('intEntityVendorId'),
-                                            conjunction: 'and'
-                                        }]
-                                    })
-                                });
+                                return controller.purchaseOrderDropdown(win);
                                 break;
-                            case 'colItemNo' :
-                                return Ext.create('Ext.grid.CellEditor', {
-                                    field: Ext.widget({
-                                        xtype: 'gridcombobox',
-                                        matchFieldWidth: false,
-                                        columns: [
-                                            {
-                                                dataIndex: 'intItemId',
-                                                dataType: 'numeric',
-                                                text: 'Item Id',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'intLocationId',
-                                                dataType: 'numeric',
-                                                text: 'Location Id',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'strItemNo',
-                                                dataType: 'string',
-                                                text: 'Item Number',
-                                                flex: 1
-                                            },
-                                            {
-                                                dataIndex: 'strType',
-                                                dataType: 'string',
-                                                text: 'Item Type',
-                                                flex: 1
-                                            },
-                                            {
-                                                dataIndex: 'strDescription',
-                                                dataType: 'string',
-                                                text: 'Description',
-                                                flex: 1
-                                            },
-                                            {
-                                                dataIndex: 'strLotTracking',
-                                                dataType: 'string',
-                                                text: 'Lot Tracking',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'strReceiveUOMType',
-                                                dataType: 'string',
-                                                text: 'Receive UOM Type',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'strReceiveUPC',
-                                                dataType: 'string',
-                                                text: 'UPC',
-                                                flex: 1
-                                            },
-                                            {
-                                                dataIndex: 'strReceiveUOM',
-                                                dataType: 'string',
-                                                text: 'Receive UOM',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'strStockUOM',
-                                                dataType: 'string',
-                                                text: 'Stock UOM',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'dblLastCost',
-                                                dataType: 'float',
-                                                text: 'Last Cost',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'dblReceiveUOMConvFactor',
-                                                dataType: 'float',
-                                                text: 'Receive UOM Conversion Factor',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'intReceiveUOMId',
-                                                dataType: 'numeric',
-                                                text: 'Receive UOM Id',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'intStockUOMId',
-                                                dataType: 'numeric',
-                                                text: 'Stock UOM Id',
-                                                hidden: true
-                                            }
-                                        ],
-                                        itemId: 'cboItem',
-                                        displayField: 'strItemNo',
-                                        valueField: 'strItemNo',
-                                        store: win.viewModel.storeInfo.items,
-                                        defaultFilters: [
-                                            {
-                                                column: 'intLocationId',
-                                                value: current.get('intLocationId'),
-                                                conjunction: 'and'
-                                            },
-                                            {
-                                                column: 'strType',
-                                                value: 'Non-Inventory',
-                                                condition: 'noteq',
-                                                conjunction: 'and'
-                                            },
-                                            {
-                                                column: 'strType',
-                                                value: 'Other Charge',
-                                                condition: 'noteq',
-                                                conjunction: 'and'
-                                            },
-                                            {
-                                                column: 'strType',
-                                                value: 'Service',
-                                                condition: 'noteq',
-                                                conjunction: 'and'
-                                            }
-                                        ]
-                                    })
-                                });
+                            case 'colSourceNumber' :
+                                return false;
                                 break;
-                            case 'colWeightUOM':
-                                if (record.get('strLotTracking') === 'No'){
-                                    return false;
-                                }
-                                else {
-                                    return Ext.create('Ext.grid.CellEditor', {
-                                        field: Ext.widget({
-                                            xtype: 'gridcombobox',
-                                            matchFieldWidth: false,
-                                            origValueField: 'intItemUOMId',
-                                            origUpdateField: 'intWeightUOMId',
-                                            columns: [
-                                                {
-                                                    dataIndex: 'intItemId',
-                                                    dataType: 'numeric',
-                                                    text: 'Item Id',
-                                                    hidden: true
-                                                },
-                                                {
-                                                    dataIndex: 'intItemUOMId',
-                                                    dataType: 'numeric',
-                                                    text: 'Item UOM Id',
-                                                    hidden: true
-                                                },
-                                                {
-                                                    dataIndex: 'strUnitMeasure',
-                                                    dataType: 'string',
-                                                    text: 'UOM',
-                                                    flex: 1
-                                                },
-                                                {
-                                                    dataIndex: 'strUnitType',
-                                                    dataType: 'string',
-                                                    text: 'Unit Type',
-                                                    flex: 1
-                                                },
-                                                {
-                                                    dataIndex: 'dblUnitQty',
-                                                    dataType: 'float',
-                                                    text: 'Unit Qty',
-                                                    hidden: true
-                                                }
-                                            ],
-                                            itemId: 'cboWeightUOM',
-                                            displayField: 'strUnitMeasure',
-                                            valueField: 'strUnitMeasure',
-                                            store: win.viewModel.storeInfo.weightUOM,
-                                            defaultFilters: [
-                                                {
-                                                    column: 'intItemId',
-                                                    value: record.get('intItemId'),
-                                                    conjunction: 'and'
-                                                }
-                                            ]
-                                        })
-                                    });
+                        }
+                    }
+                    else {
+                        switch (columnId) {
+                            case 'colOrderNumber' :
+                                return false;
+                                break;
+                            case 'colSourceNumber' :
+                                return false;
+                                break;
+                        };
+                    }
+                    break;
+                case 'Purchase Contract' :
+                    if (iRely.Functions.isEmpty(record.get('strOrderNumber')))
+                    {
+                        switch (columnId) {
+                            case 'colOrderNumber' :
+                                return controller.purchaseContractDropdown(win);
+                                break;
+                            case 'colSourceNumber' :
+                                switch (current.get('intSourceType')) {
+                                    case 2:
+                                        return controller.inboundShipmentDropdown(win, record);
+                                        break;
+                                    default:
+                                        return false;
+                                        break;
                                 }
                                 break;
                         }
@@ -1683,258 +2045,43 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     else {
                         switch (columnId) {
                             case 'colOrderNumber' :
-                            case 'colItemNo' :
-                            case 'colUOM' :
                                 return false;
                                 break;
-                            case 'colWeightUOM':
-                                if (record.get('strLotTracking') === 'No'){
-                                    return false;
-                                }
-                                else {
-                                    return Ext.create('Ext.grid.CellEditor', {
-                                        field: Ext.widget({
-                                            xtype: 'gridcombobox',
-                                            matchFieldWidth: false,
-                                            origValueField: 'intItemUOMId',
-                                            origUpdateField: 'intWeightUOMId',
-                                            columns: [
-                                                {
-                                                    dataIndex: 'intItemId',
-                                                    dataType: 'numeric',
-                                                    text: 'Item Id',
-                                                    hidden: true
-                                                },
-                                                {
-                                                    dataIndex: 'intItemUOMId',
-                                                    dataType: 'numeric',
-                                                    text: 'Item UOM Id',
-                                                    hidden: true
-                                                },
-                                                {
-                                                    dataIndex: 'strUnitMeasure',
-                                                    dataType: 'string',
-                                                    text: 'UOM',
-                                                    flex: 1
-                                                },
-                                                {
-                                                    dataIndex: 'strUnitType',
-                                                    dataType: 'string',
-                                                    text: 'Unit Type',
-                                                    flex: 1
-                                                },
-                                                {
-                                                    dataIndex: 'dblUnitQty',
-                                                    dataType: 'float',
-                                                    text: 'Unit Qty',
-                                                    hidden: true
-                                                }
-                                            ],
-                                            itemId: 'cboWeightUOM',
-                                            displayField: 'strUnitMeasure',
-                                            valueField: 'strUnitMeasure',
-                                            store: win.viewModel.storeInfo.weightUOM,
-                                            defaultFilters: [
-                                                {
-                                                    column: 'intItemId',
-                                                    value: record.get('intItemId'),
-                                                    conjunction: 'and'
-                                                }
-                                            ]
-                                        })
-                                    });
+                            case 'colSourceNumber' :
+                                switch (current.get('intSourceType')) {
+                                    case 2:
+                                        return controller.inboundShipmentDropdown(win, record);
+                                        break;
+                                    default:
+                                        return false;
+                                        break;
                                 }
                                 break;
                         };
                     }
                     break;
-                case 'Direct' :
-                    switch (columnId) {
-                        case 'colOrderNumber' :
-                            return false;
-                            break;
-                        case 'colItemNo' :
-                            return Ext.create('Ext.grid.CellEditor', {
-                                field: Ext.widget({
-                                    xtype: 'gridcombobox',
-                                    matchFieldWidth: false,
-                                    columns: [
-                                        {
-                                            dataIndex: 'intItemId',
-                                            dataType: 'numeric',
-                                            text: 'Item Id',
-                                            hidden: true
-                                        },
-                                        {
-                                            dataIndex: 'intLocationId',
-                                            dataType: 'numeric',
-                                            text: 'Location Id',
-                                            hidden: true
-                                        },
-                                        {
-                                            dataIndex: 'strItemNo',
-                                            dataType: 'string',
-                                            text: 'Item Number',
-                                            flex: 1
-                                        },
-                                        {
-                                            dataIndex: 'strType',
-                                            dataType: 'string',
-                                            text: 'Item Type',
-                                            flex: 1
-                                        },
-                                        {
-                                            dataIndex: 'strDescription',
-                                            dataType: 'string',
-                                            text: 'Description',
-                                            flex: 1
-                                        },
-                                        {
-                                            dataIndex: 'strLotTracking',
-                                            dataType: 'string',
-                                            text: 'Lot Tracking',
-                                            hidden: true
-                                        },
-                                        {
-                                            dataIndex: 'strReceiveUOMType',
-                                            dataType: 'string',
-                                            text: 'Receive UOM Type',
-                                            hidden: true
-                                        },
-                                        {
-                                            dataIndex: 'strReceiveUPC',
-                                            dataType: 'string',
-                                            text: 'UPC',
-                                            flex: 1
-                                        },
-                                        {
-                                            dataIndex: 'strReceiveUOM',
-                                            dataType: 'string',
-                                            text: 'Receive UOM',
-                                            hidden: true
-                                        },
-                                        {
-                                            dataIndex: 'strStockUOM',
-                                            dataType: 'string',
-                                            text: 'Stock UOM',
-                                            hidden: true
-                                        },
-                                        {
-                                            dataIndex: 'dblLastCost',
-                                            dataType: 'float',
-                                            text: 'Last Cost',
-                                            hidden: true
-                                        },
-                                        {
-                                            dataIndex: 'dblReceiveUOMConvFactor',
-                                            dataType: 'float',
-                                            text: 'Receive UOM Conversion Factor',
-                                            hidden: true
-                                        },
-                                        {
-                                            dataIndex: 'intReceiveUOMId',
-                                            dataType: 'numeric',
-                                            text: 'Receive UOM Id',
-                                            hidden: true
-                                        },
-                                        {
-                                            dataIndex: 'intStockUOMId',
-                                            dataType: 'numeric',
-                                            text: 'Stock UOM Id',
-                                            hidden: true
-                                        }
-                                    ],
-                                    itemId: 'cboItem',
-                                    displayField: 'strItemNo',
-                                    valueField: 'strItemNo',
-                                    store: win.viewModel.storeInfo.items,
-                                    defaultFilters: [
-                                        {
-                                            column: 'intLocationId',
-                                            value: current.get('intLocationId'),
-                                            conjunction: 'and'
-                                        },
-                                        {
-                                            column: 'strType',
-                                            value: 'Non-Inventory',
-                                            condition: 'noteq',
-                                            conjunction: 'and'
-                                        },
-                                        {
-                                            column: 'strType',
-                                            value: 'Other Charge',
-                                            condition: 'noteq',
-                                            conjunction: 'and'
-                                        },
-                                        {
-                                            column: 'strType',
-                                            value: 'Service',
-                                            condition: 'noteq',
-                                            conjunction: 'and'
-                                        }
-                                    ]
-                                })
-                            });
-                            break;
-                        case 'colWeightUOM':
-                            if (record.get('strLotTracking') === 'No'){
+                case 'Transfer Order' :
+                    if (iRely.Functions.isEmpty(record.get('strOrderNumber')))
+                    {
+                        switch (columnId) {
+                            case 'colOrderNumber' :
+                                return controller.transferOrderDropdown(win);
+                                break;
+                            case 'colSourceNumber' :
                                 return false;
-                            }
-                            else {
-                                return Ext.create('Ext.grid.CellEditor', {
-                                    field: Ext.widget({
-                                        xtype: 'gridcombobox',
-                                        matchFieldWidth: false,
-                                        origValueField: 'intItemUOMId',
-                                        origUpdateField: 'intWeightUOMId',
-                                        columns: [
-                                            {
-                                                dataIndex: 'intItemId',
-                                                dataType: 'numeric',
-                                                text: 'Item Id',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'intItemUOMId',
-                                                dataType: 'numeric',
-                                                text: 'Item UOM Id',
-                                                hidden: true
-                                            },
-                                            {
-                                                dataIndex: 'strUnitMeasure',
-                                                dataType: 'string',
-                                                text: 'UOM',
-                                                flex: 1
-                                            },
-                                            {
-                                                dataIndex: 'strUnitType',
-                                                dataType: 'string',
-                                                text: 'Unit Type',
-                                                flex: 1
-                                            },
-                                            {
-                                                dataIndex: 'dblUnitQty',
-                                                dataType: 'float',
-                                                text: 'Unit Qty',
-                                                hidden: true
-                                            }
-                                        ],
-                                        itemId: 'cboWeightUOM',
-                                        displayField: 'strUnitMeasure',
-                                        valueField: 'strUnitMeasure',
-                                        store: win.viewModel.storeInfo.weightUOM,
-                                        defaultFilters: [
-                                            {
-                                                column: 'intItemId',
-                                                value: record.get('intItemId'),
-                                                conjunction: 'and'
-                                            }
-                                        ]
-                                    })
-                                });
-                            }
-                            break;
-                    };
+                                break;
+                        }
+                    }
+                    else {
+                        switch (columnId) {
+                            case 'colOrderNumber' :
+                                return false;
+                                break;
+                            case 'colSourceNumber' :
+                                return false;
+                                break;
+                        };
+                    }
                     break;
             };
         };
@@ -2239,18 +2386,20 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 beforequery: this.onShipFromBeforeQuery,
                 select: this.onOrderNumberSelect
             },
+            "#cboSourceNumber": {
+                select: this.onSourceNumberSelect
+            },
             "#colOrderNumber": {
                 beforerender: this.onItemGridColumnBeforeRender
             },
-            "#colItemNo": {
+            "#colSourceNumber": {
                 beforerender: this.onItemGridColumnBeforeRender
             },
             "#colLotUOM": {
                 beforerender: this.onLotGridColumnBeforeRender
             },
             "#colWeightUOM": {
-                change: this.onWeightUOMChange,
-                beforerender: this.onItemGridColumnBeforeRender
+                change: this.onWeightUOMChange
             },
             "#txtNotes": {
                 specialKey: this.onSpecialKeyTab
