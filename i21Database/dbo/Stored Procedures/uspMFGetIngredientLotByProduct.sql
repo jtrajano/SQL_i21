@@ -13,7 +13,7 @@ BEGIN
 		,I.strItemNo
 		,I.strDescription
 		,(CASE WHEN L.intWeightUOMId IS NOT NULL THEN L.dblWeight ELSE L.dblQty END) as dblWeight
-		,L.intWeightUOMId
+		,ISNULL(L.intWeightUOMId,L.intItemUOMId) as intWeightUOMId
 		,U.strUnitMeasure
 		,IU.intUnitMeasureId
 		,L.dtmDateCreated 
