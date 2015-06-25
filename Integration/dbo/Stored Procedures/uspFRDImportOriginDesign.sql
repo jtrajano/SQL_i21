@@ -136,6 +136,7 @@ BEGIN
 					WHEN glfsf_action_type=''DSC'' AND glfsf_action_crl =''L'' THEN ''Row Name - Left Align''
 					WHEN glfsf_action_type=''DSC'' AND glfsf_action_crl =''R'' THEN ''Row Name - Right Align''
 					WHEN glfsf_action_type=''ACA'' THEN ''Hidden''
+					WHEN glfsf_action_type=''NET'' THEN ''Hidden''
 					WHEN glfsf_action_type=''ACP'' AND glfsf_action_crl =''E'' THEN ''Filter Accounts''
 					WHEN glfsf_action_type=''GRP'' AND glfsf_action_crl =''E'' AND glfsf_grp_printall_yn=''N'' THEN ''Filter Accounts''
 					WHEN glfsf_action_type=''GRP'' AND glfsf_action_crl =''E'' AND glfsf_grp_printall_yn=''Y'' THEN ''Hidden''
@@ -154,16 +155,20 @@ BEGIN
 					WHEN glfsf_action_type=''BLN'' THEN ''None''
 					WHEN glfsf_action_type=''UL'' THEN ''Underscore''
 					ELSE NULL END AS strRowType,
-				ISNULL(glfsf_grp_dc,
-					ISNULL(glfsf_grp_var_dc,
-					ISNULL(glfsf_acp_dc,
-					ISNULL(glfsf_acp_var_dc,
-					ISNULL(glfsf_grp_dc,
-					ISNULL(glfsf_prnt_dcr,
-					ISNULL(glfsf_prnt_var_dc,
-					ISNULL(glfsf_accm_dc,
-					ISNULL(glfsf_tot_dc,
-					ISNULL(glfsf_tot_var_dc,NULL)))))))))) AS strBalanceSide,
+				CASE 
+					WHEN glfsf_action_type=''NET'' THEN ''Credit''
+					ELSE
+						ISNULL(glfsf_grp_dc,
+							ISNULL(glfsf_grp_var_dc,
+							ISNULL(glfsf_acp_dc,
+							ISNULL(glfsf_acp_var_dc,
+							ISNULL(glfsf_grp_dc,
+							ISNULL(glfsf_prnt_dcr,
+							ISNULL(glfsf_prnt_var_dc,
+							ISNULL(glfsf_accm_dc,
+							ISNULL(glfsf_tot_dc,
+							ISNULL(glfsf_tot_var_dc,NULL))))))))))
+					END AS strBalanceSide,
 				NULL AS strRelatedRows,
 				'''' AS strAccountsUsed,
 				0 AS ysnShowCredit,
@@ -258,7 +263,7 @@ BEGIN
 			SELECT @1_8size = (SELECT MAX(LEN(glact_acct1_8)) FROM glactmst)		--SELECT * FROM glactmst
 			SELECT @9_16size = (SELECT MAX(LEN(glact_acct9_16)) FROM glactmst)		--SELECT * FROM glactmst
 			SELECT @SQL = ''update #irelyloadFRRowDesign set full_account=right('' + '''''''' + ''00000000'' + '''''''' + ''+acct1_8,'' + @1_8size + '')+'' + '''''''' + ''-'' + '''''''' + ''+right('' + '''''''' + ''00000000'' + '''''''' + ''+acct9_16,'' + @9_16size + '')''
-			
+
 			--SELECT @SQL --debug
 			EXEC (@SQL)
 
@@ -268,7 +273,7 @@ BEGIN
 							'''''''' + ''ACP'' + '''''''' + '','' +
 							'''''''' + ''GRA'' + '''''''' + '','' +
 							'''''''' + ''ACA'' + '''''''' + '')''
-			
+
 			--SELECT @SQL --debug
 			EXEC (@SQL)
 
@@ -286,11 +291,23 @@ BEGIN
 			--SELECT @SQL --debug
 			EXEC (@SQL)
 
+			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + '' [Type] = '' + '''''''''''' + ''Revenue'' + '''''''''''' + '' Or [Type] = '' + '''''''''''' + ''Expense'' + ''''''''''''''''
+							+ '' WHERE glfsf_action_type='' + '''''''' + ''NET'' + ''''''''
+			--SELECT @SQL --debug
+			EXEC (@SQL)
+
 			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + '' [ID] Between '' + '''''''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''' + ''-'' + ''''''''
 							+ ''+convert (varchar('' + @9_16size + ''),acct9_16) +'' + '''''''''''''''' + '' AND '' + '''''''''''''''' 
 							+ ''+convert (varchar('' + @1_8size + ''),acct1_8end)+'' + '''''''' + ''-'' + ''''''''
 							+ ''+convert (varchar('' + @9_16size + ''),acct9_16) '' + '' + ''''''''''''''''''
 							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRP'' + '''''''' + '' AND acct9_16 like '' + '''''''' + ''%*%'' + ''''''''
+			--SELECT @SQL --debug
+			EXEC (@SQL)
+
+			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + ''[Primary Account] Between '' 
+							+ '''''''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''''''''''' + '' AND ''
+							+ '''''''''''''''' + ''+ convert (varchar('' + @1_8size + ''),acct1_8end)'' + '' + ''''''''''''''''''
+							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRP'' + '''''''' + '' AND glfsf_action_crl = '' + '''''''' + ''E'' + '''''''' + '' AND acct9_16 like '' + '''''''' + ''%*%'' + ''''''''			
 			--SELECT @SQL --debug
 			EXEC (@SQL)
 
@@ -305,11 +322,17 @@ BEGIN
 			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + ''[Primary Account] Between '' 
 							+ '''''''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''''''''''' + '' AND ''
 							+ '''''''''''''''' + ''+ convert (varchar('' + @1_8size + ''),acct1_8end)'' + '' + ''''''''''''''''''
-							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRA'' + '''''''' + '' AND acct9_16 like '' + '''''''' + ''%*%'' + ''''''''
 							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRA'' + '''''''' + '' AND glfsf_action_crl = '' + '''''''' + ''E'' + '''''''' + '' AND acct9_16 like '' + '''''''' + ''%*%'' + ''''''''			
 			--SELECT @SQL --debug
 			EXEC (@SQL)
 
+			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + ''[Primary Account] Between '' 
+							+ '''''''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''''''''''' + '' AND ''
+							+ '''''''''''''''' + ''+ convert (varchar('' + @1_8size + ''),acct1_8end)+ '' + '''''''''''''''' + '' Or [Location] = ''							
+							+ '''''''''''''''' + ''+ convert (varchar('' + @9_16size + ''),acct9_16) '' + '' + ''''''''''''''''''
+							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRA'' + '''''''' + '' AND glfsf_action_crl = '' + '''''''' + ''E'' + '''''''' + '' AND acct9_16 not like '' + '''''''' + ''%*%'' + ''''''''			
+			--SELECT @SQL --debug
+			EXEC (@SQL)  
 
 			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + ''[ID] Between '' + '''''''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''' + ''-'' + '''''''' 
 							+ ''+convert (varchar('' + @9_16size + ''),acct9_16) +'' + '''''''''''''''' + '' AND '' + '''''''''''''''' 
@@ -487,12 +510,12 @@ BEGIN
 			-- 	BUILDING DETAILS 4
 			---------------------------------------------------------------------------------------------------------------------------------------
 			DECLARE @net INT
-			WHILE EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE glfsf_action_type = ''NET'')
-			BEGIN
-				SELECT @net = MIN(intRowDetailId) FROM #irelyloadFRRowDesign WHERE glfsf_action_type = ''NET''
-				DELETE FROM #irelyloadFRRowDesign WHERE intRowDetailId = @net
-				DELETE FROM #irelyloadFRRowDesign WHERE intRowDetailId = (@net + 1)
-			END
+			--WHILE EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE glfsf_action_type = ''NET'')
+			--BEGIN
+			--	SELECT @net = MIN(intRowDetailId) FROM #irelyloadFRRowDesign WHERE glfsf_action_type = ''NET''
+			--	DELETE FROM #irelyloadFRRowDesign WHERE intRowDetailId = @net
+			--	DELETE FROM #irelyloadFRRowDesign WHERE intRowDetailId = (@net + 1)
+			--END
 	
 			--=====================================================================================================================================
 			-- 	BUILDING DETAILS 5
@@ -513,7 +536,7 @@ BEGIN
 				SELECT @curr = (@curr + 1)
 				SELECT @increment = 1
 
-				WHILE EXISTS(SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId = @change AND (glfsf_action_type = ''GRA'' OR glfsf_action_type = ''ACA''))
+				WHILE EXISTS(SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId = @change AND (glfsf_action_type = ''GRA'' OR glfsf_action_type = ''ACA'' OR glfsf_action_type = ''NET''))
 				BEGIN
 					SELECT @intrefno = intRefNo, @introwdetailidint = intRowDetailId FROM #irelyloadFRRowDesign WHERE intRowDetailId = @change
 					IF EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId = @min AND strRelatedRows IS NOT NULL)
@@ -615,6 +638,7 @@ BEGIN
 				ysnShowDebit, ysnShowOthers, ysnLinktoGL, dblHeight, strFontName, strFontStyle, strFontColor, intFontSize,
 				strOverrideFormatMask, ysnForceReversedExpense, intSort, intConcurrencyId
 			FROM #irelyloadFRRowDesign ORDER BY intRowId, intRefNo
+						
 
 			--=====================================================================================================================================
 			-- 	BUILDING DETAILS 7
@@ -713,6 +737,96 @@ BEGIN
 			--=====================================================================================================================================
 			-- 	BUILDING DETAILS 10
 			---------------------------------------------------------------------------------------------------------------------------------------
+			SELECT @SQL = ''INSERT dbo.tblFRRowDesignFilterAccount
+							(
+								intRowId,
+								intRefNoId,
+								strName,
+								strCondition,
+								strCriteria,
+								strCriteriaBetween,strJoin,
+								intRowDetailId
+							)
+							SELECT 
+								intRowId,
+								intRefNo,''
+								+ '''''''' +
+								''Location''
+								+ '''''''' + '','' +
+								'''''''' +
+								''='' + '''''''' +
+								'',REPLACE(SUBSTRING(LTRIM(strAccountsUsed),CHARINDEX(''''Or'''',LTRIM(strAccountsUsed)) + 16,100),'''''''''''''''',''''''''),'' +								
+								'''''''' + '''''''' + '','' +
+								'''''''' + '''''''' + '','' + ''
+								intRowDetailId
+							FROM tblFRRowDesign
+							WHERE intRowId = '' + CONVERT(VARCHAR(10),@introwiddet) + '' and strAccountsUsed like'' + '''''''' + ''%Primary%Betwee%Or%'' + ''''''''
+
+			--SELECT @SQL --debug
+			EXEC (@SQL)
+
+			--=====================================================================================================================================
+			-- 	BUILDING DETAILS 11 - NET
+			---------------------------------------------------------------------------------------------------------------------------------------
+			SELECT @SQL = ''INSERT dbo.tblFRRowDesignFilterAccount
+							(
+								intRowId,
+								intRefNoId,
+								strName,
+								strCondition,
+								strCriteria,
+								strCriteriaBetween,strJoin,
+								intRowDetailId
+							)
+							SELECT 
+								intRowId,
+								intRefNo,''
+								+ '''''''' +
+								''Type''
+								+ '''''''' + '','' +
+								'''''''' +
+								''='' + '''''''' +
+								'',''''Revenue'''','' +								
+								'''''''' + '''''''' + '','' +
+								'''''''' + '''''''' + '','' + ''
+								intRowDetailId
+							FROM tblFRRowDesign
+							WHERE strAccountsUsed like ''''%Type%Revenue%Type%Expense%''''''
+
+			--SELECT @SQL --debug
+			EXEC (@SQL)
+
+			SELECT @SQL = ''INSERT dbo.tblFRRowDesignFilterAccount
+							(
+								intRowId,
+								intRefNoId,
+								strName,
+								strCondition,
+								strCriteria,
+								strCriteriaBetween,strJoin,
+								intRowDetailId
+							)
+							SELECT 
+								intRowId,
+								intRefNo,''
+								+ '''''''' +
+								''Type''
+								+ '''''''' + '','' +
+								'''''''' +
+								''='' + '''''''' +
+								'',''''Expense'''','' +								
+								'''''''' + '''''''' + '','' +
+								'''''''' + '''''''' + '','' + ''
+								intRowDetailId
+							FROM tblFRRowDesign
+							WHERE strAccountsUsed like ''''%Type%Revenue%Type%Expense%''''''
+
+			--SELECT @SQL --debug
+			EXEC (@SQL)			
+
+			--=====================================================================================================================================
+			-- 	BUILDING DETAILS 12
+			---------------------------------------------------------------------------------------------------------------------------------------
 			INSERT tblFRRowDesignCalculation
 				SELECT tblFRRowDesign.intRowDetailId,
 						calc.intRowDetailId,
@@ -738,6 +852,7 @@ BEGIN
 			UPDATE tblFRRowDesign SET strRelatedRows = '''' WHERE strRelatedRows IS NULL
 			UPDATE tblFRRowDesign SET strAccountsUsed = '''' WHERE strAccountsUsed IS NULL
 			UPDATE tblFRRowDesign SET strBalanceSide = '''' WHERE strRowType = ''Row Calculation''
+			UPDATE tblFRRowDesignFilterAccount SET strJoin = ''Or'' WHERE strJoin = ''''
  
 			SELECT * INTO #TempRowDesign FROM tblFRRowDesign where intRowId = @introwiddet order by intRefNo
  
