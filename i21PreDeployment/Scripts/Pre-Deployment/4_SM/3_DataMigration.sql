@@ -58,11 +58,13 @@ GO
 GO
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMCompanyPreference')
 	BEGIN
-		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblCFompanyPreference')
+		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblCFCompanyPreference')
 		BEGIN
 			PRINT N'CREATING tblTEMPCompanyPreference'
 
-			CREATE TABLE [dbo].[tblTEMPCompanyPreference] (
+			IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblTEMPCompanyPreference')
+			BEGIN
+				   CREATE TABLE [dbo].[tblTEMPCompanyPreference] (
 				   [intCompanyPreferenceId]            INT            IDENTITY (1, 1) NOT NULL,
 				   [strCFServiceReminderMessage]       NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
 				   [ysnCFUseSpecialPrices]             BIT            NULL,
@@ -73,6 +75,7 @@ GO
 				   [intConcurrencyId]                  INT            CONSTRAINT [DF_tblTEMPCompanyPreference_intConcurrencyId] DEFAULT ((1)) NULL,
 				   CONSTRAINT [PK_tblTEMPCompanyPreference] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC)
 				   );
+			END
 
 			PRINT N'INSERTING tblTEMPCompanyPreference from tblSMCompanyPreference'
 
@@ -92,6 +95,15 @@ GO
 				   [strCFInvoiceSummarizationLocation],
 				   [intConcurrencyId]
 				   FROM [dbo].[tblSMCompanyPreference]')
-		END	
+		END
+		ELSE
+		BEGIN
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblCFCompanyPreference)
+			BEGIN
+				PRINT N'INSERTING tblCFCompanyPreference default data'
+				INSERT INTO tblCFCompanyPreference(strCFServiceReminderMessage, ysnCFUseSpecialPrices, strCFUsePrice, ysnCFUseContracts, ysnCFSummarizeInvoice, strCFInvoiceSummarizationLocation, intConcurrencyId)
+				VALUES(NULL, NULL, NULL, NULL, NULL, NULL, 1)
+			END
+		END
 	END
 GO

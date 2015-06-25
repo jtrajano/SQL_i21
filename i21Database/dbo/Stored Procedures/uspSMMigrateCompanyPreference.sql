@@ -2,28 +2,38 @@
 AS
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblCFCompanyPreference)
 BEGIN
+	
+	PRINT N'MIGRATING tblCFCompanyPreference from tblTEMPCompanyPreference'
+	EXEC
+	('
+		IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = ''tblTEMPCompanyPreference'')
+		BEGIN
+			INSERT INTO tblCFCompanyPreference
+			  (strCFServiceReminderMessage,
+			  ysnCFUseSpecialPrices,
+			  strCFUsePrice,
+			  ysnCFUseContracts,
+			  ysnCFSummarizeInvoice,
+			  strCFInvoiceSummarizationLocation,
+			  intConcurrencyId)
+			  SELECT strCFServiceReminderMessage,
+			  ysnCFUseSpecialPrices,
+			  strCFUsePrice,
+			  ysnCFUseContracts,
+			  ysnCFSummarizeInvoice,
+			  strCFInvoiceSummarizationLocation,
+			  intConcurrencyId
+			  FROM tblTEMPCompanyPreference
 
-	EXEC('INSERT INTO tblCFCompanyPreference
-		  (strCFServiceReminderMessage,
-		  ysnCFUseSpecialPrices,
-		  strCFUsePrice,
-		  ysnCFUseContracts,
-		  ysnCFSummarizeInvoice,
-		  strCFInvoiceSummarizationLocation,
-		  intConcurrencyId)
-		  SELECT strCFServiceReminderMessage,
-		  ysnCFUseSpecialPrices,
-		  strCFUsePrice,
-		  ysnCFUseContracts,
-		  ysnCFSummarizeInvoice,
-		  strCFInvoiceSummarizationLocation,
-		  intConcurrencyId
-		  FROM tblTEMPCompanyPreference')
-
-	EXEC('DROP TABLE tblTEMPCompanyPreference')
-
+		END
+		IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = ''tblTEMPCompanyPreference'')
+		DROP TABLE tblTEMPCompanyPreference
+	')
+	
+	PRINT N'TRUNCATING tblSMCompanyPreference'
 	TRUNCATE TABLE tblSMCompanyPreference
 
+	PRINT N'INSERTING tblSMCompanyPreference from tblSMPreferences'
 	INSERT INTO tblSMCompanyPreference(intDefaultCurrencyId, intDefaultReportingCurrencyId, intDefaultCountryId, ysnLegacyIntegration, 
 	strAccountingMethod, strSMTPHost, intSMTPPort, strSMTPUserName, strSMTPPassword, strSMTPFromEmail, strSMTPFromName, ysnSMTPAuthentication,
 	strSMTPSsl, intInterfaceSystemId, strQuotingSystemBatchUserID, strQuotingSystemBatchUserPassword, strInterfaceWebServicesURL, ysnAllowForContractPricing,
@@ -73,6 +83,7 @@ BEGIN
 							IntervalStartTime, IntervalEndTime, IntervalUpdatesMinutes, QuotesDecimalsShown)
 	) piv
 
+	PRINT N'DELETING tblSMCompanyPreference migrated data from tblSMPreferences'
 	DELETE FROM tblSMPreferences
 	WHERE strPreference 
 	IN ('defaultCountry', 'defaultReporting', 'defaultCurrency', 'isLegacyIntegration', 'AccountingMethod', 'SMTPHost', 'SMTPPort', 
