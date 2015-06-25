@@ -110,8 +110,8 @@ BEGIN TRY
 
 	SELECT @strLotNumber=strLotNumber,
 		@intInputLotId = intLotId
-		,@dblWeight = dblWeight
-		,@intNewItemUOMId=intItemUOMId
+		,@dblWeight = (CASE WHEN intWeightUOMId IS NOT NULL THEN dblWeight ELSE dblQty END)
+		,@intNewItemUOMId=(CASE WHEN intWeightUOMId IS NOT NULL THEN intWeightUOMId ELSE intItemUOMId END) 
 		,@dblWeightPerQty= (Case When dblWeightPerQty is null or dblWeightPerQty=0 Then 1 Else dblWeightPerQty End)
 	FROM tblICLot
 	WHERE intLotId = @intInputLotId
