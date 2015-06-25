@@ -201,7 +201,7 @@ BEGIN
 				,vwcus_cred_ga   = CAST(0 AS DECIMAL(18,6))    
 				,vwcus_co_per_ind_cp = CAST(ISNULL(A.ptcus_co_per_ind_cp,'''') AS CHAR(4))  
 				,vwcus_bus_loc_no  = ISNULL(A.ptcus_bus_loc_no,'''')   
-				,vwcus_cred_limit  = CAST(ISNULL(A.ptcus_credit_limit,0.0) AS DECIMAL(18,6)  
+				,vwcus_cred_limit  = CAST(ISNULL(A.ptcus_credit_limit,0.0) AS DECIMAL(18,6))
 				,vwcus_last_stmt_bal = ISNULL(A.ptcus_last_stmnt_bal,0.0)  
 				,vwcus_budget_amt_due = CAST(ISNULL(A.ptcus_budget_amt,0.0) AS DECIMAL(18,6)) 
 				,vwcus_cred_ppd   = ISNULL(A.ptcus_cred_ppd,0.0)  

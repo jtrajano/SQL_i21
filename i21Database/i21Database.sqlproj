@@ -1812,13 +1812,17 @@
     <Build Include="dbo\Tables\tblLGWarehouseRateMatrixDetail.sql" />
     <Build Include="dbo\Tables\tblLGWarehouseRateMatrixHeader.sql" />
     <Build Include="dbo\Tables\tblCFTransactionPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddTransferOrderToInventoryReceipt.sql" />
     <Build Include="dbo\Views\vyuARCustomerStatementDetailReport.sql" />
-    <Build Include="dbo\Tables\tblWMContainer.sql" />
-    <Build Include="dbo\Tables\tblWMContainerType.sql" />
-    <Build Include="dbo\Tables\tblWMSKU.sql" />
-    <Build Include="dbo\Tables\tblWMSKUStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetPONumber.sql" />
-    <Build Include="dbo\Tables\tblRKCollateral.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetMarketSymbolSuffix.sql" />
+    <Build Include="dbo\Tables\tblWHContainer.sql" />
+    <Build Include="dbo\Tables\tblWHContainerType.sql" />
+    <Build Include="dbo\Tables\tblWHSKU.sql" />
+    <Build Include="dbo\Tables\tblWHSKUStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMMigrateCompanyPreference.sql" />
+    <Build Include="dbo\Tables\tblCFCompanyPreference.sql" />
+    <Build Include="dbo\Views\vyuSMGetCompanyLocationSearchList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1865,6 +1869,7 @@
     <None Include="Scripts\Post-Deployment\EM\007_MoveShippingLineData.sql" />
     <None Include="Scripts\Post-Deployment\EM\008_MoveTruckerData.sql" />
     <None Include="Scripts\Post-Deployment\IC\10_RemoveCommodityItems.sql" />
+    <None Include="dbo\Stored Procedures\uspCTAddPurchaseContractToInventoryReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

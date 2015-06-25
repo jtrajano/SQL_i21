@@ -1,15 +1,13 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKGetElectronicPricingValue]
-(
-	@ConversionRate NUMERIC(18, 6)
-)
+	@StrURL Nvarchar(Max)
 AS
 BEGIN
 	SELECT TOP 1 
 		 intElectronicPricingValueId
-		,dblHigh * @ConversionRate AS High
-		,dblLow * @ConversionRate AS Low
-		,dblOpen * @ConversionRate AS [Open]
-		,dblLast * @ConversionRate AS [Last]
-	FROM tblRKElectronicPricingValue
+		,dblHigh AS High
+		,dblLow AS  Low
+		,dblOpen AS [Open]
+		,dblLast AS [Last]
+	FROM tblRKElectronicPricingValue Where strURL=@StrURL
 	ORDER BY intElectronicPricingValueId DESC
 END

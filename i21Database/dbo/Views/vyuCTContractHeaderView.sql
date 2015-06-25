@@ -24,11 +24,12 @@ AS
 			EY.strEntityCountry,		PO.strPosition,					IB.strDescription		AS	strInsuranceByDescription,
 			TP.strContractType,			IB.strInsuranceBy,				IT.strDescription		AS	strInvoiceTypeDescription,
 			IT.strInvoiceType,			CO.strCountry,					AB.strDescription		AS	strApprovalBasisDescription,
-			CY.strCommodityCode,		SP.strSalespersonId,
+			CY.strCommodityCode,		SP.strSalespersonId,			CB.strINCOLocationType,
 			AB.strApprovalBasis,		CB.strContractBasis				
 			
 	FROM	tblCTContractHeader			CH	
-	JOIN	vyuCTEntity					EY	ON	EY.intEntityId					=		CH.intEntityId
+	JOIN	vyuCTEntity					EY	ON	EY.intEntityId					=		CH.intEntityId			AND
+												EY.strEntityType				=		(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
 	JOIN	tblCTContractType			TP	ON	TP.intContractTypeId			=		CH.intContractTypeId
 	JOIN	tblARSalesperson			SP	ON	SP.intEntitySalespersonId		=		CH.intSalespersonId
 	JOIN	tblSMTerm					TM	ON	TM.intTermID					=		CH.intTermId			LEFT

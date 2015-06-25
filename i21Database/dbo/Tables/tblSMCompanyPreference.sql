@@ -1,12 +1,32 @@
-﻿CREATE TABLE [dbo].[tblSMCompanyPreference] (
-    [intCompanyPreferenceId]            INT            IDENTITY (1, 1) NOT NULL,
-    [strCFServiceReminderMessage]       NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
-    [ysnCFUseSpecialPrices]             BIT            NULL,
-    [strCFUsePrice]                     NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
-    [ysnCFUseContracts]                 BIT            NULL,
-    [ysnCFSummarizeInvoice]             BIT            NULL,
-    [strCFInvoiceSummarizationLocation] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
-    [intConcurrencyId]                  INT            CONSTRAINT [DF_tblSMCompanyPreference_intConcurrencyId] DEFAULT ((1)) NULL,
-    CONSTRAINT [PK_tblSMCompanyPreference] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC)
-);
-
+﻿CREATE TABLE [dbo].[tblSMCompanyPreference]
+(
+	[intCompanyPreferenceId] INT NOT NULL PRIMARY KEY IDENTITY, 
+    [intDefaultCurrencyId] INT NOT NULL, 
+    [intDefaultReportingCurrencyId] INT NOT NULL, 
+    [intDefaultCountryId] INT NOT NULL, 
+    [ysnLegacyIntegration] BIT NOT NULL, 
+    [strAccountingMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strSMTPHost] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [intSMTPPort] INT NOT NULL, 
+    [strSMTPUserName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strSMTPPassword] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strSMTPFromEmail] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strSMTPFromName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [ysnSMTPAuthentication] BIT NOT NULL, 
+    [strSMTPSsl] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [intInterfaceSystemId] INT NOT NULL, 
+    [strQuotingSystemBatchUserID] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strQuotingSystemBatchUserPassword] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strInterfaceWebServicesURL] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL, 
+    [ysnAllowForContractPricing] BIT NOT NULL, 
+	[ysnInterfaceToTargetOrders] BIT NOT NULL,
+    [ysnAllowUseForClosingPrices] BIT NOT NULL, 
+    [ysnAllowUseForEndOfMonth] BIT NOT NULL, 
+    [ysnInterfaceToScales] BIT NOT NULL, 
+    [intSaveHistoryEveryId] INT NOT NULL, 
+    [strIntervalStartTime] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strIntervalEndTime] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strIntervalUpdatesMinutes] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strQuotesDecimalsShown] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [intConcurrencyId] INT NOT NULL DEFAULT 1
+)
