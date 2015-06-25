@@ -1821,6 +1821,7 @@
     <Build Include="dbo\Tables\tblWHSKUStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspSMMigrateCompanyPreference.sql" />
     <Build Include="dbo\Tables\tblCFCompanyPreference.sql" />
+    <Build Include="dbo\Views\vyuSMGetCompanyLocationSearchList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
