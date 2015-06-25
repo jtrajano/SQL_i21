@@ -896,13 +896,17 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             me.calculateNewNetWeight((newQuantity === null ? false : newQuantity), null, current);
 
             var qty = current.get('dblQuantity'),
+                weightPerQty = current.get('dblWeightPerQty'),
+                newWeight = null,
                 adjustByQty  = null;
 
             if (Ext.isNumeric(qty) && Ext.isNumeric(newQuantity))
             {
                 adjustByQty = newQuantity - qty;
+                newWeight = Ext.isNumeric(weightPerQty) ? weightPerQty * Math.abs(newQuantity) : null;
             }
             current.set('dblAdjustByQuantity', adjustByQty);
+            current.set('dblWeight', newWeight);
         }
     },
 
@@ -912,14 +916,18 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
         var current = plugin.getActiveRecord();
         if (current){
             var qty = current.get('dblQuantity'),
+                weightPerQty = current.get('dblWeightPerQty'),
+                newWeight = null,
                 newQty = null;
 
             if (Ext.isNumeric(qty) && Ext.isNumeric(newAdjustByQty))
             {
                 newQty = qty + newAdjustByQty;
+                newWeight = Ext.isNumeric(weightPerQty) ? weightPerQty * Math.abs(newQty) : null;
             }
 
             current.set('dblNewQuantity', newQty);
+            current.set('dblWeight', newWeight);
         }
     },
 
