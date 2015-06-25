@@ -55,7 +55,7 @@ Ext.define('Inventory.model.TransferDetail', {
 
     validators: [
         { type: 'presence', field: 'strItemNo' },
-        { type: 'presence', field: 'dblQuantity' },
-        { type: 'presence', field: 'strUnitMeasure' }
+        { type: 'presence', field: 'dblQuantity' }
+        //{ type: 'presence', field: 'strUnitMeasure' }
     ]
 });

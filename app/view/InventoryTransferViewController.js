@@ -417,11 +417,13 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         if (combo.itemId === 'cboItem') {
             current.set('intItemId', records[0].get('intItemId'));
             current.set('strItemDescription', records[0].get('strDescription'));
+            current.set('intItemUOMId', records[0].get('intStockUOMId'));
         }
         else if (combo.itemId === 'cboLot') {
             current.set('intLotId', records[0].get('intLotId'));
             current.set('dblAvailableQty', records[0].get('dblQty'));
             current.set('strAvailableUOM', records[0].get('strItemUOM'));
+            current.set('intItemUOMId', records[0].get('intItemUOMId'));
         }
         else if (combo.itemId === 'cboFromSubLocation') {
             current.set('intFromSubLocationId', records[0].get('intSubLocationId'));
