@@ -54,6 +54,7 @@
     [intOrderById] INT NULL , 
     [intCurrencyId] INT NOT NULL DEFAULT 0,
 	[ysnApproved] BIT NOT NULL DEFAULT 0,
+	[ysnForApproval] BIT NOT NULL DEFAULT 0,
     [ysnOrigin] BIT NOT NULL DEFAULT 0,
 	[ysnDeleted] BIT NULL DEFAULT 0 ,
 	[dtmDateDeleted] DATETIME NULL,
