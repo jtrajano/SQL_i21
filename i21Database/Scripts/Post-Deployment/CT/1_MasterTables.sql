@@ -135,6 +135,14 @@ BEGIN
 END
 GO
 
+GO
+IF NOT EXISTS(SELECT * FROM tblCTPricingType WHERE intPricingTypeId = 7)
+BEGIN
+	INSERT INTO tblCTPricingType
+	SELECT 7,'Index',1	
+END
+GO
+
 --tblCTPutCall
 GO
 IF NOT EXISTS(SELECT * FROM tblCTPutCall WHERE intPutCallId = 1)
