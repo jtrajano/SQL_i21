@@ -64,7 +64,6 @@ SELECT
 		,A.intGLDetailId
 		,D.*
 		,A.ysnIsUnposted
-		,isUnposted = CASE WHEN A.intAccountId IS NULL THEN 0 ELSE A.ysnIsUnposted END
 		,(SELECT [strUOMCode] FROM Units WHERE [intAccountId] = A.[intAccountId]) as strUOMCode
 from tblGLDetail  A
 RIGHT join tblGLAccount B on B.intAccountId = A.intAccountId
@@ -106,7 +105,7 @@ AS
 		FROM tblGLAccount A
 		INNER JOIN tblGLTempCOASegment B ON B.intAccountId = A.intAccountId
 		INNER JOIN GLAccountDetails C on A.strAccountId = C.strAccountId
-		WHERE C.isUnposted =0
+		WHERE C.ysnIsUnposted =0 OR C.ysnIsUnposted IS NULL
 )
 
 --*CountStart*--
@@ -151,9 +150,12 @@ DECLARE @GLReportDrillDown NVARCHAR(MAX) =  '[{"Control":"labelEx1","DrillThroug
 DECLARE @GLReportDataSource NVARCHAR(MAX) = 
 'WITH Units   AS   ( SELECT A.[dblLbsPerUnit], B.[intAccountId], A.[strUOMCode]    
 FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]  ),   
-GLAccountDetails  AS  (   
---*SC*-- 
-SELECT
+GLAccountDetails
+AS
+(
+
+--*SC*--
+select 
 B.strDescription  as strAccountDescription-- account description    
 ,C.strAccountType    
 ,C.strAccountGroup    
@@ -192,7 +194,6 @@ B.strDescription  as strAccountDescription-- account description
 ,A.strCode    
 ,A.intGLDetailId    
 ,A.ysnIsUnposted    
-,isUnposted = CASE WHEN A.intAccountId IS NULL THEN 0 ELSE A.ysnIsUnposted END
 ,D.*    
 ,(SELECT [strUOMCode] FROM Units WHERE [intAccountId] = A.[intAccountId]) as strUOMCode  
 from tblGLDetail A   
@@ -218,7 +219,7 @@ AS  (
   ,B.[Location]         
   FROM tblGLAccount A    INNER JOIN tblGLTempCOASegment B ON B.intAccountId = A.intAccountId         
   INNER JOIN GLAccountDetails C on A.strAccountId = C.strAccountId
-   WHERE C.isUnposted =0
+   WHERE C.ysnIsUnposted =0 OR C.ysnIsUnposted IS NULL
  
   ) 
    --*CountStart*--  
