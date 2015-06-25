@@ -599,3 +599,7 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51149) EXEC sp_dropmessa
 SET @strmessage = 'Unable to generate the Inventory Receipt. An error stopped the process from Transfer Order to Inventory Receipt.'
 EXEC sp_addmessage 51149,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51150) EXEC sp_dropmessage 51150, 'us_english'	
+SET @strmessage = 'Recap is not applicable when doing an inventory transfer for the same location.'
+EXEC sp_addmessage 51150,11,@strmessage,'us_english','False' 
+
