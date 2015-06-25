@@ -591,11 +591,11 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51147) EXEC sp_dropmessa
 SET @strmessage = 'There is no active recipe found for item  %s Cannot proceed'
 EXEC sp_addmessage 51147,11,@strmessage,'us_english','False'
 
-IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51147) EXEC sp_dropmessage 51147, 'us_english'	
-SET @strmessage = 'Unable to generate the Inventory Receipt. An error stopped the process from Purchase Contract to Inventory Receipt.'
-EXEC sp_addmessage 51147,11,@strmessage,'us_english','False'
-
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51148) EXEC sp_dropmessage 51148, 'us_english'	
-SET @strmessage = 'Unable to generate the Inventory Receipt. An error stopped the process from Transfer Order to Inventory Receipt.'
+SET @strmessage = 'Unable to generate the Inventory Receipt. An error stopped the process from Purchase Contract to Inventory Receipt.'
 EXEC sp_addmessage 51148,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51149) EXEC sp_dropmessage 51149, 'us_english'	
+SET @strmessage = 'Unable to generate the Inventory Receipt. An error stopped the process from Transfer Order to Inventory Receipt.'
+EXEC sp_addmessage 51149,11,@strmessage,'us_english','False'
 
