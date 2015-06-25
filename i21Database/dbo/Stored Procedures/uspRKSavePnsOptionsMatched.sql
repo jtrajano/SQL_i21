@@ -28,7 +28,7 @@ EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml
  ------------------------- Delete Matched ---------------------  
 DECLARE @tblMatchedDelete table          
   (     
-     strTranNo nvarchar(max),  
+  strTranNo nvarchar(max),  
   ysnDeleted Bit   
   )    
   
@@ -92,6 +92,7 @@ SELECT
  [strTranNo] INT,  
  [ysnDeleted] Bit  
  )  
+ 
   
 IF EXISTS(select * from @tblExercisedAssignedDelete)  
 BEGIN  
@@ -100,7 +101,7 @@ DELETE FROM tblRKFutOptTransaction
 WHERE intFutOptTransactionId in(SELECT intFutTransactionId   
         FROM tblRKOptionsPnSExercisedAssigned  
         WHERE convert(int,strTranNo) in( SELECT convert(int,strTranNo) from @tblExercisedAssignedDelete))  
-  
+  select * from @tblExercisedAssignedDelete
 DELETE FROM tblRKOptionsPnSExercisedAssigned  
   WHERE convert(int,strTranNo) in( SELECT convert(int,strTranNo) from @tblExercisedAssignedDelete)  
 END  
@@ -235,11 +236,13 @@ BEGIN
   )    
  Values(@intOptionsMatchPnSHeaderId,@strExercisedAssignedNo,@dtmTranDate,@intLots,@intFutOptTransactionId,@ysnAssigned,1)  
  SELECT @intOptionsPnSExercisedAssignedId= Scope_Identity()   
+ 
  DECLARE @intTransactionId nvarchar(50)  
  set @strTranNo=''  
  select @strTranNo=strTranNo from tblRKOptionsPnSExercisedAssigned where intOptionsPnSExercisedAssignedId=@intOptionsPnSExercisedAssignedId  
    
 ----------------- Created Future Transaction Based on the Option Transaction ----------------------------------  
+
  SELECT @intInternalTradeNo=Max(replace(strInternalTradeNo,'O-','')+1)  from tblRKFutOptTransaction   
   
  INSERT INTO tblRKFutOptTransaction (intFutOptTransactionHeaderId,intConcurrencyId,  
@@ -261,7 +264,8 @@ SELECT @NewFutOptTransactionHeaderId,1,@dtmTranDate,
   FROM tblRKFutOptTransaction t  
   JOIN tblRKOptionsMonth om on t.intOptionMonthId=om.intOptionMonthId WHERE intFutOptTransactionId =@intFutOptTransactionId        
      
-SELECT @NewFutOptTransactionId = SCOPE_IDENTITY();    
+SELECT @NewFutOptTransactionId = SCOPE_IDENTITY();  
+  
 DECLARE @NewBuySell nvarchar(15)  
 SET @NewBuySell =''  
 SELECT @NewBuySell= CASE WHEN (strBuySell = 'Buy' AND strOptionType= 'Call') THEN 'Buy'   
@@ -271,7 +275,7 @@ SELECT @NewBuySell= CASE WHEN (strBuySell = 'Buy' AND strOptionType= 'Call') THE
        FROM tblRKFutOptTransaction Where intFutOptTransactionId=@NewFutOptTransactionId  
   
 UPDATE tblRKFutOptTransaction  set strBuySell=@NewBuySell,strOptionType=null,intOptionMonthId=null Where intFutOptTransactionId = @NewFutOptTransactionId   
-    
+UPDATE tblRKOptionsPnSExercisedAssigned set intFutTransactionId= @NewFutOptTransactionId Where intOptionsPnSExercisedAssignedId=@intOptionsPnSExercisedAssignedId
 SELECT @mRowNumber=MIN(RowNumber) FROM @tblExercisedAssignedDetail WHERE RowNumber>@mRowNumber    
 END    
      
