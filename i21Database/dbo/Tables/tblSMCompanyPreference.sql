@@ -17,7 +17,7 @@
     [intInterfaceSystemId] INT NOT NULL, 
     [strQuotingSystemBatchUserID] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strQuotingSystemBatchUserPassword] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [strInterfaceWebServicesURL] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strInterfaceWebServicesURL] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL, 
     [ysnAllowForContractPricing] BIT NOT NULL, 
 	[ysnInterfaceToTargetOrders] BIT NOT NULL,
     [ysnAllowUseForClosingPrices] BIT NOT NULL, 

@@ -227,9 +227,8 @@ BEGIN TRY
 	WHERE IntMonthNumber >= MONTH(Getdate()) AND IsTraded = 1
 	ORDER BY IntMonthNumber ASC
 
-	SELECT @URL = strValue
-	FROM tblSMPreferences
-	WHERE strPreference = 'InterfaceWebServicesURL'
+	SELECT @URL = strInterfaceWebServicesURL FROM tblSMCompanyPreference
+	
 
 	SELECT @strUserName = strValue
 	FROM tblSMPreferences a
@@ -256,9 +255,8 @@ BEGIN TRY
 	JOIN tblSMUserSecurity b ON b.intUserSecurityID = a.intUserID
 	WHERE a.strPreference = 'ProviderPassword' AND b.intUserSecurityID = @intUserId
 
-	SELECT @IntinterfaceSystem = strValue
-	FROM tblSMPreferences
-	WHERE strPreference = 'InterfaceSystem'
+	SELECT @IntinterfaceSystem = intInterfaceSystemId
+	FROM   tblSMCompanyPreference
 
 	
 	IF ISNULL(@StrTradedMonthSymbol, '') = ''
