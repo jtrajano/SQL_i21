@@ -1119,6 +1119,14 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Unapplied
 INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
 VALUES ( N'Unapplied Credits Register Report', N'Accounts Receivable', @AccountsReceivableParentMenuId, N'Unapplied Credits Register Report', N'Report', N'Report', N'Unapplied Credits Register Report', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Customer Statements Detail Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId)
+INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+VALUES ( N'Customer Statements Detail Report', N'Accounts Receivable', @AccountsReceivableParentMenuId, N'Customer Statements Detail Report', N'Report', N'Report', N'Customer Statements Detail Report', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Invoice History Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId)
+INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+VALUES ( N'Invoice History Report', N'Accounts Receivable', @AccountsReceivableParentMenuId, N'Invoice History Report', N'Report', N'Report', N'Invoice History Report', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
+
 /* HELP DESK */
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Help Desk' AND strModuleName = 'Help Desk' AND intParentMenuID = 0)
 UPDATE tblSMMasterMenu SET intSort = 22 WHERE strMenuName = 'Help Desk' AND strModuleName = 'Help Desk' AND intParentMenuID = 0
