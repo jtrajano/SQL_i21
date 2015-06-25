@@ -1797,6 +1797,7 @@
     <Build Include="dbo\Tables\tblRKOptionsPnSExpired.sql" />
     <Build Include="dbo\Views\vyuRKSOptionExpiredTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspLGShipmentUpdateContainerReceivedQty.sql" />
+    <Build Include="dbo\Views\vyuICGetItemStockUOMForAdjustment.sql" />
     <Build Include="dbo\Views\vyuLGShippingInstructions.sql" />
     <None Include="Scripts\Post-Deployment\GL\ReportDataFix.sql" />
     <Build Include="dbo\Tables\tblRKOptionsPnSExercisedAssigned.sql" />
@@ -1812,6 +1813,15 @@
     <Build Include="dbo\Tables\tblLGWarehouseRateMatrixHeader.sql" />
     <Build Include="dbo\Tables\tblCFTransactionPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddTransferOrderToInventoryReceipt.sql" />
+    <Build Include="dbo\Views\vyuARCustomerStatementDetailReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetPONumber.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetMarketSymbolSuffix.sql" />
+    <Build Include="dbo\Tables\tblWHContainer.sql" />
+    <Build Include="dbo\Tables\tblWHContainerType.sql" />
+    <Build Include="dbo\Tables\tblWHSKU.sql" />
+    <Build Include="dbo\Tables\tblWHSKUStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMMigrateCompanyPreference.sql" />
+    <Build Include="dbo\Tables\tblCFCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

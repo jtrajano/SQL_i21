@@ -1,5 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspRKGetElectronicPricingURL]
-
+﻿CREATE PROCEDURE [dbo].[uspRKGetElectronicPricingURL] 
 	 @FutureMarketId INT
 	,@intUserId INT
 AS
@@ -11,13 +10,19 @@ BEGIN TRY
 	DECLARE @strPassword NVARCHAR(100)
 	DECLARE @IntinterfaceSystem INT
 	DECLARE @StrQuoteProvider NVARCHAR(100)
-	DECLARE @StrTradedMonthSymbol NVARCHAR(2)
+	DECLARE @StrTradedMonthSymbol NVARCHAR(1000)
+	DECLARE @MarketExchangeCode NVARCHAR(10)
 	DECLARE @Commoditycode NVARCHAR(10)
 	DECLARE @URL NVARCHAR(1000)
-	
-	SELECT @Commoditycode=strFutSymbol FROM tblRKFutureMarket
+
+	SELECT @Commoditycode = strFutSymbol
+	FROM tblRKFutureMarket
 	WHERE intFutureMarketId = @FutureMarketId
-	
+
+	SELECT @MarketExchangeCode = E.strExchangeInterfaceCode
+	FROM tblRKMarketExchange E
+	JOIN tblRKFutureMarket M ON M.intMarketExchangeId = E.intMarketExchangeId AND M.intFutureMarketId = @FutureMarketId
+
 	DECLARE @FutureTradedMonths AS TABLE 
 	(
 		 IntMonthNumber INT
@@ -216,7 +221,6 @@ BEGIN TRY
 		,'Z'
 	FROM tblRKFutureMarket
 	WHERE intFutureMarketId = @FutureMarketId
-		
 
 	SELECT TOP 1 @StrTradedMonthSymbol = StrTradedMonthSymbol
 	FROM @FutureTradedMonths
@@ -256,18 +260,49 @@ BEGIN TRY
 	FROM tblSMPreferences
 	WHERE strPreference = 'InterfaceSystem'
 
+	
+	IF ISNULL(@StrTradedMonthSymbol, '') = ''
+	BEGIN
+			SET @StrTradedMonthSymbol = (
+											SELECT TOP 1 StrTradedMonthSymbol
+											FROM @FutureTradedMonths
+											WHERE IsTraded = 1
+											ORDER BY IntMonthNumber ASC
+										)
+			SET @StrTradedMonthSymbol = @StrTradedMonthSymbol + Convert(NVARCHAR, RIGHT(YEAR(GetDate()), 1) + 1)
+	END
+	ELSE
+	BEGIN
+		SET @StrTradedMonthSymbol = @StrTradedMonthSymbol + RIGHT(YEAR(GetDate()), 1)
+	END
+		
+	
+
 	IF @IntinterfaceSystem = 1
 	BEGIN
 		IF @strPassword = ''
 			SET @strPassword = '?&Type=F'
-
-		SELECT @URL = @URL + 'UserID=' + @strUserName + '&Password=' + @strPassword + '&Symbol=@' + @Commoditycode + @StrTradedMonthSymbol + RIGHT(YEAR(GetDate()), 1)
+			
+		IF ISNULL(@MarketExchangeCode,'')=''
+		BEGIN
+			SELECT @URL = @URL + 'UserID=' + @strUserName + '&Password=' + @strPassword + '&Symbol=@' + @Commoditycode + @StrTradedMonthSymbol
+		END
+		ELSE
+		BEGIN
+		SELECT @URL = @URL + 'UserID=' + @strUserName + '&Password=' + @strPassword +'&Market='+@MarketExchangeCode+'&Symbol=@' + @Commoditycode + @StrTradedMonthSymbol			
+		END
 		
 	END
 	ELSE IF @IntinterfaceSystem = 2
 	BEGIN
-	
-		SELECT @URL = @URL + 'username=' + @strUserName + '&password=' + @strPassword + '&symbols=Z' + @Commoditycode + @StrTradedMonthSymbol + RIGHT(YEAR(GetDate()), 1)
+		IF ISNULL(@MarketExchangeCode,'')=''
+		BEGIN
+			SELECT @URL = @URL + 'username=' + @strUserName + '&password=' + @strPassword + '&symbols=Z' + @Commoditycode + @StrTradedMonthSymbol
+		END
+		ELSE
+		BEGIN
+			SELECT @URL = @URL + 'username=' + @strUserName + '&password=' + @strPassword +'&Market='+@MarketExchangeCode+ '&symbols=Z' + @Commoditycode + @StrTradedMonthSymbol
+		END
 		
 	END
 

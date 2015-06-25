@@ -56,6 +56,7 @@ BEGIN
 			[intSort] [int] NULL,
 			[intConcurrencyId] [int] NOT NULL,
 			[glfsf_action_type] [varchar](50) NULL,
+			[glfsf_action_crl] [varchar](50) NULL,			
 			[glfsf_tot_no] [int] NULL,
 			[full_account] [varchar](50) NULL,
 			[glfsf_grp_printall_yn] [nchar](10) NULL,
@@ -109,7 +110,7 @@ BEGIN
 			(	
 				intRowId, intRefNo, strDescription, strRowType, strBalanceSide, strRelatedRows, strAccountsUsed, ysnShowCredit,
 				ysnShowDebit, ysnShowOthers, ysnLinktoGL, dblHeight, strFontName, strFontStyle, strFontColor, intFontSize,
-				strOverrideFormatMask, ysnForceReversedExpense, intSort, intConcurrencyId, glfsf_action_type, glfsf_tot_no, full_account, glfsf_grp_printall_yn,
+				strOverrideFormatMask, ysnForceReversedExpense, intSort, intConcurrencyId, glfsf_action_type, glfsf_action_crl, glfsf_tot_no, full_account, glfsf_grp_printall_yn,
 				full_account_end, isprimary, acct9_16, glfsf_no, glfsf_line_no, acct1_8, acct1_8end, acct9_16end
 			)
 			SELECT
@@ -179,6 +180,7 @@ BEGIN
 				1 AS intSort,
 				1 AS intConcurrencyId,
 				glfsf_action_type,
+				glfsf_action_crl,
 				glfsf_tot_no,
 				'''',													--full account
 				glfsf_grp_printall_yn,
@@ -296,16 +298,15 @@ BEGIN
 							+ ''+convert (varchar('' + @9_16size + ''),acct9_16) +'' + '''''''''''''''' + '' AND '' + '''''''''''''''' 
 							+ ''+convert (varchar('' + @1_8size + ''),acct1_8end)+'' + '''''''' + ''-'' + '''''''' 
 							+ ''+convert (varchar('' + @9_16size + ''),acct9_16) '' + '' + ''''''''''''''''''
-							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRA'' + '''''''' + '' AND acct9_16 not like '' + '''''''' + ''%*%'' + ''''''''
+							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRA'' + '''''''' + '' AND glfsf_action_crl != '' + '''''''' + ''E'' + '''''''' + '' AND acct9_16 like '' + '''''''' + ''%*%'' + ''''''''
 			--SELECT @SQL --debug
-			exec (@SQL)
-
+			exec (@SQL)			
 
 			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + ''[Primary Account] Between '' 
 							+ '''''''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''''''''''' + '' AND ''
 							+ '''''''''''''''' + ''+ convert (varchar('' + @1_8size + ''),acct1_8end)'' + '' + ''''''''''''''''''
 							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRA'' + '''''''' + '' AND acct9_16 like '' + '''''''' + ''%*%'' + ''''''''
-			
+							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRA'' + '''''''' + '' AND glfsf_action_crl = '' + '''''''' + ''E'' + '''''''' + '' AND acct9_16 like '' + '''''''' + ''%*%'' + ''''''''			
 			--SELECT @SQL --debug
 			EXEC (@SQL)
 

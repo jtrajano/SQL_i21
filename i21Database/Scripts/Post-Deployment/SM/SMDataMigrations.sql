@@ -57,3 +57,6 @@ GO
 	EXEC uspSMSortOriginMenus
 
 GO
+	-- MIGRATE SM COMPANY PREFERENCES
+	EXEC uspSMMigrateCompanyPreference
+GO

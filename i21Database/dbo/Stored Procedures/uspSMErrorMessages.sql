@@ -428,7 +428,7 @@ SET @strmessage = 'A cycle count for the item ''%s'' is already started for work
 EXEC sp_addmessage 51106,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51107) EXEC sp_dropmessage 51107, 'us_english'	
-SET @strmessage = 'A run for ''%s'' already exists for %s which is using the same ingredient item ''%s''. Please complete the prior run to continue.'
+SET @strmessage = 'A run for ''%s'' already exists for work order %s on %s which is using the same ingredient item ''%s''. Please complete the prior run to continue.'
 EXEC sp_addmessage 51107,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51108) EXEC sp_dropmessage 51108, 'us_english'	
@@ -588,9 +588,14 @@ SET @strmessage = 'Execution order entered is out of range.'
 EXEC sp_addmessage 51146,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51147) EXEC sp_dropmessage 51147, 'us_english'	
+SET @strmessage = 'There is no active recipe found for item  %s Cannot proceed'
+EXEC sp_addmessage 51147,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51147) EXEC sp_dropmessage 51147, 'us_english'	
 SET @strmessage = 'Unable to generate the Inventory Receipt. An error stopped the process from Purchase Contract to Inventory Receipt.'
 EXEC sp_addmessage 51147,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51148) EXEC sp_dropmessage 51148, 'us_english'	
 SET @strmessage = 'Unable to generate the Inventory Receipt. An error stopped the process from Transfer Order to Inventory Receipt.'
 EXEC sp_addmessage 51148,11,@strmessage,'us_english','False'
+

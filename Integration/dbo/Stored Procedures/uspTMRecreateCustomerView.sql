@@ -71,14 +71,14 @@ BEGIN
 				,vwcus_comments   = ISNULL(A.agcus_comments,'''')    
 				,vwcus_slsmn_id   = ISNULL(A.agcus_slsmn_id,'''')    
 				,vwcus_terms_cd   = CAST(ISNULL(A.agcus_terms_cd,'''') AS INT)    
-				,vwcus_prc_lvl   = ISNULL(A.agcus_prc_lvl,0)    
+				,vwcus_prc_lvl   = CAST(ISNULL(A.agcus_prc_lvl,0) AS INT)   
 				,vwcus_stmt_fmt   = ISNULL(A.agcus_stmt_fmt,'''')    
 				,vwcus_ytd_pur   = ISNULL(A.agcus_ytd_pur,0.0)    
 				,vwcus_ytd_sls   = ISNULL(A.agcus_ytd_sls,0.0)    
 				,vwcus_ytd_cgs   = ISNULL(A.agcus_ytd_cgs,0.0)    
 				,vwcus_budget_amt  = ISNULL(A.agcus_budget_amt,0.0)    
-				,vwcus_budget_beg_mm = ISNULL(A.agcus_budget_beg_mm,0)    
-				,vwcus_budget_end_mm = ISNULL(A.agcus_budget_end_mm,0)    
+				,vwcus_budget_beg_mm = CAST(ISNULL(A.agcus_budget_beg_mm,0) AS INT)   
+				,vwcus_budget_end_mm = CAST(ISNULL(A.agcus_budget_end_mm,0) AS INT)   
 				,vwcus_active_yn  = ISNULL(A.agcus_active_yn,'''')    
 				,vwcus_ar_future  = ISNULL(A.agcus_ar_future,0.0)    
 				,vwcus_ar_per1   = ISNULL(A.agcus_ar_per1,0.0)    
@@ -92,7 +92,7 @@ BEGIN
 				,vwcus_cred_ga   = ISNULL(A.agcus_cred_ga,0.0)    
 				,vwcus_co_per_ind_cp = CAST(ISNULL(A.agcus_co_per_ind_cp,'''') AS CHAR(4))  
 				,vwcus_bus_loc_no  = ISNULL(A.agcus_bus_loc_no,'''')   
-				,vwcus_cred_limit  = ISNULL(A.agcus_cred_limit,0.0)  
+				,vwcus_cred_limit  = CAST(ISNULL(A.agcus_cred_limit,0.0) AS DECIMAL(18,6)) 
 				,vwcus_last_stmt_bal = ISNULL(A.agcus_last_stmt_bal,0.0)  
 				,vwcus_budget_amt_due = CAST(ISNULL(A.agcus_budget_amt_due,0.0) AS DECIMAL(18,6))  
 				,vwcus_cred_ppd   = ISNULL(A.agcus_cred_ppd,0.0)  
@@ -102,8 +102,8 @@ BEGIN
 				,vwcus_last_ivc_rev_dt = ISNULL(A.agcus_last_ivc_rev_dt,0)  
 				,vwcus_high_cred  = ISNULL(A.agcus_high_cred,0.0)
 				,vwcus_high_past_due = ISNULL(A.agcus_ar_per2,0.0) +  ISNULL(A.agcus_ar_per3,0.0) + ISNULL(A.agcus_ar_per4,0.0)+ ISNULL(A.agcus_ar_per5,0.0)
-				,vwcus_avg_days_pay  = ISNULL(A.agcus_avg_days_pay,0)  
-				,vwcus_avg_days_no_ivcs = ISNULL(A.agcus_avg_days_no_ivcs,0)  
+				,vwcus_avg_days_pay  = CAST(ISNULL(A.agcus_avg_days_pay,0) AS INT) 
+				,vwcus_avg_days_no_ivcs = CAST(ISNULL(A.agcus_avg_days_no_ivcs,0) AS INT)
 				,vwcus_last_stmt_rev_dt = ISNULL(A.agcus_last_stmt_rev_dt,0)  
 				,vwcus_country   = ISNULL(A.agcus_country,'''')  
 				,vwcus_termdescription  = ISNULL((select top 1 agtrm_desc from agtrmmst where agtrm_key_n = A.agcus_terms_cd),'''')  
@@ -166,14 +166,14 @@ BEGIN
 				,vwcus_comments   = CAST(ISNULL(A.ptcus_comment,'''') AS CHAR(30))    
 				,vwcus_slsmn_id   = ISNULL(A.ptcus_slsmn_id,'''')    
 				,vwcus_terms_cd   = CAST(ISNULL(A.ptcus_terms_code,0) AS INT)
-				,vwcus_prc_lvl   = CAST(ISNULL(A.ptcus_prc_level,0) AS TINYINT)    
+				,vwcus_prc_lvl   = CAST(ISNULL(A.ptcus_prc_level,0) AS INT)    
 				,vwcus_stmt_fmt   = ISNULL(A.ptcus_stmt_fmt,'''')    
 				,vwcus_ytd_pur   = CAST(ISNULL(A.ptcus_purchs_ytd,0.0) AS INT)    
 				,vwcus_ytd_sls   = ISNULL(A.ptcus_ytd_sales,0.0)    
 				,vwcus_ytd_cgs   = ISNULL(A.ptcus_ytd_cgs,0.0)    
 				,vwcus_budget_amt  = CAST(ISNULL(A.ptcus_budget_amt,0.0) AS DECIMAL(18,6))    
-				,vwcus_budget_beg_mm = ISNULL(A.ptcus_budget_beg_mm,0)    
-				,vwcus_budget_end_mm = ISNULL(A.ptcus_budget_end_mm,0)    
+				,vwcus_budget_beg_mm = CAST(ISNULL(A.ptcus_budget_beg_mm,0) AS INT)   
+				,vwcus_budget_end_mm = CAST(ISNULL(A.ptcus_budget_end_mm,0) AS INT)   
 				,vwcus_active_yn  = ISNULL(A.ptcus_active_yn,'''')    
 				,vwcus_ar_future  = CAST(0 AS DECIMAL(18,6))
 				,vwcus_ar_per1   = ISNULL(A.ptcus_ar_curr,0.0)    
@@ -201,7 +201,7 @@ BEGIN
 				,vwcus_cred_ga   = CAST(0 AS DECIMAL(18,6))    
 				,vwcus_co_per_ind_cp = CAST(ISNULL(A.ptcus_co_per_ind_cp,'''') AS CHAR(4))  
 				,vwcus_bus_loc_no  = ISNULL(A.ptcus_bus_loc_no,'''')   
-				,vwcus_cred_limit  = CAST(ISNULL(A.ptcus_credit_limit,0.0) AS INT)  
+				,vwcus_cred_limit  = CAST(ISNULL(A.ptcus_credit_limit,0.0) AS DECIMAL(18,6))
 				,vwcus_last_stmt_bal = ISNULL(A.ptcus_last_stmnt_bal,0.0)  
 				,vwcus_budget_amt_due = CAST(ISNULL(A.ptcus_budget_amt,0.0) AS DECIMAL(18,6)) 
 				,vwcus_cred_ppd   = ISNULL(A.ptcus_cred_ppd,0.0)  
@@ -211,8 +211,8 @@ BEGIN
 				,vwcus_last_ivc_rev_dt = ISNULL(A.ptcus_last_ivc_rev_dt,0)  
 				,vwcus_high_cred  = CAST(ISNULL(A.ptcus_high_cred,0.0) AS DECIMAL(18,6))   
 				,vwcus_high_past_due = ISNULL(A.ptcus_ar_3160,0.0) + ISNULL(A.ptcus_ar_6190,0.0) + ISNULL(A.ptcus_ar_91120,0.0) + ISNULL(A.ptcus_ar_ov120,0.0)
-				,vwcus_avg_days_pay  = CAST(ISNULL(A.ptcus_avg_days_pay,0) AS SMALLINT) 
-				,vwcus_avg_days_no_ivcs = CAST(ISNULL(A.ptcus_avg_days_no_ivcs,0) AS SMALLINT)  
+				,vwcus_avg_days_pay  = CAST(ISNULL(A.ptcus_avg_days_pay,0) AS INT) 
+				,vwcus_avg_days_no_ivcs = CAST(ISNULL(A.ptcus_avg_days_no_ivcs,0) AS INT)  
 				,vwcus_last_stmt_rev_dt = ISNULL(A.ptcus_last_stmnt_rev_dt,0)  
 				,vwcus_country   = CAST('''' as char(3))  
 				,vwcus_termdescription  = ISNULL((select top 1 pttrm_desc from pttrmmst where pttrm_code = A.ptcus_terms_code),'''')
@@ -257,18 +257,18 @@ BEGIN
 				,vwcus_comments = SUBSTRING(Con.strInternalNotes,1,30) 
 				,vwcus_slsmn_id = (SELECT strSalespersonId FROM tblARSalesperson WHERE intEntitySalespersonId = Cus.intSalespersonId)
 				,vwcus_terms_cd = Loc.intTermsId
-				,vwcus_prc_lvl = 0
+				,vwcus_prc_lvl = CAST(0 AS INT)
 				,vwcus_stmt_fmt =	CASE WHEN Cus.strStatementFormat = ''Open Item'' THEN ''O''
 									 WHEN Cus.strStatementFormat = ''Balance Forward'' THEN ''B'' 
 									 WHEN Cus.strStatementFormat = ''Budget Reminder'' THEN ''R'' 
 									 WHEN Cus.strStatementFormat = ''None'' THEN ''N'' 
 									 WHEN Cus.strStatementFormat IS NULL THEN Null ELSE '''' END
-				,vwcus_ytd_pur = 0.0  
+				,vwcus_ytd_pur = 0  
 				,vwcus_ytd_sls = 0.0  
 				,vwcus_ytd_cgs = 0.0  
 				,vwcus_budget_amt = Cus.dblBudgetAmountForBudgetBilling
-				,vwcus_budget_beg_mm = SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2)
-				,vwcus_budget_end_mm = SUBSTRING(Cus.strBudgetBillingEndMonth,1,2)
+				,vwcus_budget_beg_mm = CAST(ISNULL(SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2),0) AS INT)
+				,vwcus_budget_end_mm = CAST(ISNULL(SUBSTRING(Cus.strBudgetBillingEndMonth,1,2),0) AS INT)
 				,vwcus_active_yn = CASE WHEN Cus.ysnActive = 1 THEN ''Y'' ELSE ''N'' END
 				,vwcus_ar_future = 0.0
 				,vwcus_ar_per1 = 0.0 
@@ -292,7 +292,7 @@ BEGIN
 				,vwcus_last_ivc_rev_dt = 0
 				,vwcus_high_cred = 0.0  
 				,vwcus_high_past_due = 0.0
-				,vwcus_avg_days_pay = 0.0 
+				,vwcus_avg_days_pay = 0
 				,vwcus_avg_days_no_ivcs = 0
 				,vwcus_last_stmt_rev_dt = 0
 				,vwcus_country = (CASE WHEN LEN(Loc.strCountry) = 3 THEN Loc.strCountry ELSE '''' END)  

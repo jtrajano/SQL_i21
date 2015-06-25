@@ -14,7 +14,7 @@ BEGIN
 	  )
 	SELECT 
 		 @high
+		,@low		
 		,@open
-		,@low
 		,@last
 END

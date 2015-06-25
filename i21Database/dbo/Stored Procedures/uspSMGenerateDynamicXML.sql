@@ -462,4 +462,19 @@ BEGIN
 
 SELECT @strGeneratedXML = @xmlResult --@Result  
 
+SELECT @strGeneratedXML = REPLACE(@strGeneratedXML, '<' + REPLACE(SUBSTRING(strXMLTag, CHARINDEX(':', strXMLTag), LEN(strXMLTag)), ':', '') + '>', '<' + strXMLTag + '>')
+FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND CHARINDEX(':', strXMLTag) > 0 AND intLevel > 1 
+
+
+SELECT @strGeneratedXML = REPLACE(@strGeneratedXML, '<' + REPLACE(SUBSTRING(strXMLTag, CHARINDEX(':', strXMLTag), LEN(strXMLTag)), ':', '') + ' ', '<' + strXMLTag + ' ')
+FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND CHARINDEX(':', strXMLTag) > 0 AND intLevel > 1 
+
+
+SELECT @strGeneratedXML = REPLACE(@strGeneratedXML, '</' + REPLACE(SUBSTRING(strXMLTag, CHARINDEX(':', strXMLTag), LEN(strXMLTag)), ':', '') + '>', '</' + strXMLTag + '>')
+FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND CHARINDEX(':', strXMLTag) > 0 AND intLevel > 1 
+
+
+SELECT @strGeneratedXML = REPLACE(@strGeneratedXML, '</' + REPLACE(SUBSTRING(strXMLTag, CHARINDEX(':', strXMLTag), LEN(strXMLTag)), ':', '') + ' ', '</' + strXMLTag + ' ')
+FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND CHARINDEX(':', strXMLTag) > 0 AND intLevel > 1 
+
 END

@@ -28,6 +28,7 @@ SELECT
 	intStockUOMId = (SELECT TOP 1 intItemUOMId FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemId = Item.intItemId AND ItemUOM.ysnStockUnit = 1),
 	strStockUOM = (SELECT TOP 1 strUnitMeasure FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemId = Item.intItemId AND ItemUOM.ysnStockUnit = 1),
 	strStockUOMType = (SELECT TOP 1 strUnitType FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemId = Item.intItemId AND ItemUOM.ysnStockUnit = 1),
+	dblStockUnitQty = (SELECT TOP 1 dblUnitQty FROM tblICItemUOM ItemUOM LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId WHERE ItemUOM.intItemId = Item.intItemId AND ItemUOM.ysnStockUnit = 1),
 	ItemLocation.intReceiveUOMId,
 	dblReceiveUOMConvFactor = ISNULL(ReceiveUOM.dblUnitQty, 0),
 	ItemLocation.intIssueUOMId,
