@@ -37,11 +37,17 @@ BEGIN
 		,dtmPostDate
 		,ysnPosted
 		,ysnPaid
+		,intFreightTermId
+		,strDeliverPickup 
+		,intShipToLocationId
+		,strShipToLocationName
 		,strShipToAddress
 		,strShipToCity
 		,strShipToState
 		,strShipToZipCode
 		,strShipToCountry
+		,intBillToLocationId
+		,strBillToLocationName 
 		,strBillToAddress
 		,strBillToCity
 		,strBillToState
@@ -65,7 +71,7 @@ BEGIN
 		,dblShipping
 		,dblTax
 		,dblInvoiceTotal
-		,0
+		,dblDiscount
 		,dblInvoiceTotal
 		,0
 		,strTransactionType
@@ -75,11 +81,17 @@ BEGIN
 		,@InvoiceDate
 		,0
 		,0
+		,intFreightTermId
+		,strDeliverPickup 
+		,intShipToLocationId
+		,strShipToLocationName
 		,strShipToAddress
 		,strShipToCity
 		,strShipToState
 		,strShipToZipCode
 		,strShipToCountry
+		,intBillToLocationId
+		,strBillToLocationName 
 		,strBillToAddress
 		,strBillToCity
 		,strBillToState
@@ -138,8 +150,8 @@ BEGIN
 				,[intItemId]				--[intItemId]
 				,[strItemDescription]		--[strItemDescription]
 				,[intItemUOMId]				--[intItemUOMId]
-				,[dblQtyOrdered]			--[dblQtyOrdered]
-				,[dblQtyOrdered]			--[dblQtyShipped]
+				,[dblQtyShipped]			--[dblQtyOrdered]
+				,[dblQtyShipped]			--[dblQtyShipped]
 				,[dblDiscount] 				--[[dblDiscount]]
 				,[dblPrice]					--[dblPrice]
 				,[dblTotalTax]				--[dblTotalTax]
