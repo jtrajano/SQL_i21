@@ -4,6 +4,8 @@ SELECT
 	intShipmentContractQtyId
 	,intShipmentBLContainerContractId = -1
 	,intShipmentId
+	,intShipmentBLId = -1
+	,intShipmentBLContainerId = -1
 	,intTrackingNumber
 	,ysnDirectShipment
 	,intContractDetailId
@@ -52,6 +54,8 @@ SELECT
 	intShipmentContractQtyId
 	,intShipmentBLContainerContractId
 	,intShipmentId
+	,intShipmentBLId
+	,intShipmentBLContainerId
 	,intTrackingNumber
 	,ysnDirectShipment
 	,intContractDetailId

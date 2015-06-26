@@ -4,6 +4,8 @@ SELECT
 	   SC.intShipmentBLContainerContractId,
 	   SC.intShipmentContractQtyId,
        SC.intShipmentId,
+	   SC.intShipmentBLId,
+	   SC.intShipmentBLContainerId,
        S.intTrackingNumber,
 	   S.ysnDirectShipment,
        SCQ.intContractDetailId,
