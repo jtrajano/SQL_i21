@@ -1841,6 +1841,7 @@
     <Build Include="dbo\Tables\tblMFBlendDemandStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetBlendDemandSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetBlendDemandDetail.sql" />
+    <Build Include="dbo\Tables\tblSMUserRoleCompanyLocationPermission.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
