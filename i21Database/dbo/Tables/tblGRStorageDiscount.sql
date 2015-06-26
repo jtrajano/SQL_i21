@@ -7,7 +7,7 @@
 	[dblGradeReading] DECIMAL(7, 3) NOT NULL, 
     [strCalcMethod] NVARCHAR COLLATE Latin1_General_CI_AS NULL, 
     [dblDiscountAmount] DECIMAL(9, 6) NOT NULL, 
-    [strShrinkWhat] NVARCHAR COLLATE Latin1_General_CI_AS NULL, 
+    [strShrinkWhat] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [dblShrinkPercent] DECIMAL(7, 3) NOT NULL,
 	[dblDiscountDue] DECIMAL(9, 6) NULL,
 	[dblDiscountPaid] DECIMAL(9, 6) NULL, 

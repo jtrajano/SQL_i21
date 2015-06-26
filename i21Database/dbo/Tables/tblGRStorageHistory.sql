@@ -9,8 +9,8 @@
     [intContractDetailId] INT NULL, 
     [dblUnits] NUMERIC(11, 3) NOT NULL, 
     [dtmHistoryDate] DATETIME NULL, 
-    [dblStoragePaid] NUMERIC(9, 6) NULL, 
-    [dblFeesPaid] NUMERIC(7, 2) NULL, 
+    [dblPaidAmount] NUMERIC(18, 6) NULL, 
+    [strPaidDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [dblCurrencyRate] NUMERIC(15, 8) NULL, 
     CONSTRAINT [PK_tblGRStorageHistory_intStorageHistoryId] PRIMARY KEY ([intStorageHistoryId]),
 	CONSTRAINT [FK_tblGRStorageHistory_tblGRCustomerStorage_intCustomerStorageId] FOREIGN KEY ([intCustomerStorageId]) REFERENCES [dbo].[tblGRCustomerStorage] ([intCustomerStorageId]) ON DELETE CASCADE,
@@ -91,24 +91,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblGRStorageHistory',
     @level2type = N'COLUMN',
     @level2name = N'dblCurrencyRate'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Fees Paid',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblGRStorageHistory',
-    @level2type = N'COLUMN',
-    @level2name = N'dblFeesPaid'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Storage Paid',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblGRStorageHistory',
-    @level2type = N'COLUMN',
-    @level2name = N'dblStoragePaid'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'History Date',
