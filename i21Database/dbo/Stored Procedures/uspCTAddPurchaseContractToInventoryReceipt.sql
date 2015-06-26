@@ -32,6 +32,7 @@ INSERT INTO dbo.tblICInventoryReceipt (
 		,dtmReceiptDate
 		,intEntityVendorId
 		,strReceiptType
+		,intSourceType
 		,intBlanketRelease
 		,intLocationId
 		,strVendorRefNo
@@ -64,6 +65,7 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(GETDATE())
 		,intEntityVendorId		= Contract.intEntityId
 		,strReceiptType			= @ReceiptType_PurchaseContract
+		,intSourceType			= 0
 		,intBlanketRelease		= NULL
 		,intLocationId			= NULL -- We need this populated
 		,strVendorRefNo			= NULL
@@ -162,5 +164,7 @@ SET		dblInvoiceAmount = (
 		)
 FROM	dbo.tblICInventoryReceipt Receipt 
 WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
+
+
 
 _Exit: 
