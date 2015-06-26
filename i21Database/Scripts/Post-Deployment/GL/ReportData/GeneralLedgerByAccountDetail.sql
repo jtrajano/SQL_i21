@@ -13,7 +13,7 @@ DECLARE @GLReportId INT
 SELECT @GLReportId = intReportId FROM tblRMReport WHERE strName = 'General Ledger by Account ID Detail' and strGroup = 'General Ledger' 
 
 DECLARE @GLReportOptions NVARCHAR(MAX) = 
- ';WITH Units 
+ 'WITH Units 
 AS 
 (
 	SELECT	A.[dblLbsPerUnit], B.[intAccountId], A.[strUOMCode] 
@@ -110,6 +110,7 @@ AS
 
 --*CountStart*--
 SELECT 
+''Account ID :'' + B.strAccountId + '' - '' + ISNULL(A.strAccountDescription,B.strAccountDescription) + '' - '' + ISNULL(A.strAccountType,B.strAccountType) as AccountHeader,
 (CASE WHEN A.strAccountDescription  is  NULL  then B.strAccountDescription else A.strAccountDescription END) as strAccountDescripion
 ,(CASE WHEN A.strAccountType  is  NULL  then B.strAccountType else A.strAccountType END) as strAccountType
 ,(CASE WHEN A.strAccountGroup  is  NULL  then B.strAccountGroup else A.strAccountGroup END) as strAccountGroup
@@ -224,6 +225,7 @@ AS  (
   ) 
    --*CountStart*--  
   SELECT   
+  ''Account ID :'' + B.strAccountId + '' - '' + ISNULL(A.strAccountDescription,B.strAccountDescription) + '' - '' + ISNULL(A.strAccountType,B.strAccountType) as AccountHeader,
   (CASE WHEN A.strAccountDescription  is  NULL  THEN B.strAccountDescription ELSE A.strAccountDescription END) as strAccountDescripion  
   ,(CASE WHEN A.strAccountType  is  NULL  THEN B.strAccountType ELSE A.strAccountType END) as strAccountType  
   ,(CASE WHEN A.strAccountGroup  is  NULL  THEN B.strAccountGroup ELSE A.strAccountGroup END) as strAccountGroup  ,A.dtmDate  
@@ -278,6 +280,8 @@ where r.intReportId = @GLReportId and o.strName ='Drill Down'
 UPDATE d SET strQuery = @GLReportDataSource
 from tblRMDatasource d join tblRMReport r on d.intReportId = r.intReportId
 where r.intReportId = @GLReportId
+
+
 PRINT 'Finish updating General Ledger Report'
 END
 GO
