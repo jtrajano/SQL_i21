@@ -334,6 +334,15 @@ BEGIN
 			--SELECT @SQL --debug
 			EXEC (@SQL)  
 
+			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + '' [ID] = '' + '''''''''''''''' + ''+'' + ''full_account+ '' + '''''''''''''''''''' + 
+							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRA'' + '''''''' + '' AND glfsf_action_crl = '' + '''''''' + ''E'' + '''''''' 
+							+ '' AND acct9_16 not like '' + '''''''' + ''%*%'' + '''''''' + '' AND '' +		
+							+ '''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''''''' + '' = ''
+							+ '''''''''''' + ''+ convert (varchar('' + @1_8size + ''),acct1_8end)+ '' +  ''''''''''''							
+
+			--SELECT @SQL --debug
+			EXEC (@SQL)  
+
 			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + ''[ID] Between '' + '''''''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''' + ''-'' + '''''''' 
 							+ ''+convert (varchar('' + @9_16size + ''),acct9_16) +'' + '''''''''''''''' + '' AND '' + '''''''''''''''' 
 							+ ''+convert (varchar('' + @1_8size + ''),acct1_8end)+'' + '''''''' + ''-'' + '''''''' 
