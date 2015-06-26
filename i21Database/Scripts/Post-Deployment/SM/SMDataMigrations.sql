@@ -64,3 +64,37 @@ GO
 	-- MIGRATE AR COMPANY PREFERENCES
 	EXEC uspARMigrateCompanyPreference
 GO
+	PRINT N'MIGRATING tblAPPreference to tblSMCompanyLocation'
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPPreference' AND [COLUMN_NAME] IN ('intDefaultAccountId', 'intWithholdAccountId', 'intDiscountAccountId', 'intInterestAccountId'))
+	BEGIN
+		EXEC
+		('
+			IF EXISTS(SELECT TOP 1 1 FROM tblAPPreference)
+			BEGIN		
+				DECLARE @intDefaultAccountId INT,
+						@intWithholdAccountId INT, 
+						@intDiscountAccountId INT, 
+						@intInterestAccountId INT, 
+						@dblWithholdPercent DECIMAL(18, 6)
+
+				SELECT TOP 1 @intDefaultAccountId = intDefaultAccountId, @intWithholdAccountId = intWithholdAccountId, @intDiscountAccountId = intDiscountAccountId, @intInterestAccountId = intInterestAccountId, @dblWithholdPercent = dblWithholdPercent
+				FROM tblAPPreference
+
+				PRINT N''UPDATING intWithholdAccountId, intDiscountAccountId, intInterestAccountId, dblWithholdPercent''
+				UPDATE tblSMCompanyLocation 
+				SET intWithholdAccountId = @intWithholdAccountId, 
+				intDiscountAccountId = @intDiscountAccountId, 
+				intInterestAccountId = @intInterestAccountId, 
+				dblWithholdPercent = @dblWithholdPercent
+
+				PRINT N''UPDATING intAPAccount Where intAPAccount is null''
+				UPDATE tblSMCompanyLocation 
+				SET intAPAccount = @intDefaultAccountId
+				WHERE intAPAccount IS NULL
+
+				PRINT N''TRUNCATING tblAPPreference''
+				TRUNCATE TABLE tblAPPreference
+			END
+		')
+	END
+GO
