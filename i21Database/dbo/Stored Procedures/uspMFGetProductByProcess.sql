@@ -18,4 +18,5 @@ BEGIN
 		AND R.ysnActive = 1
 		AND R.intManufacturingProcessId = @intManufacturingProcessId
 		AND IU.ysnStockUnit=1
+		AND I.strStatus='Active'
 END
