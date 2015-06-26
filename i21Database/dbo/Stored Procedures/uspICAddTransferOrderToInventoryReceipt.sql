@@ -31,7 +31,9 @@ INSERT INTO dbo.tblICInventoryReceipt (
 		strReceiptNumber
 		,dtmReceiptDate
 		,intEntityVendorId
+		,intTransferorId
 		,strReceiptType
+		,intSourceType
 		,intBlanketRelease
 		,intLocationId
 		,strVendorRefNo
@@ -63,7 +65,9 @@ INSERT INTO dbo.tblICInventoryReceipt (
 SELECT 	strReceiptNumber		= @ReceiptNumber
 		,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(GETDATE())
 		,intEntityVendorId		= NULL
+		,intTransferorId		= Transfer.intFromLocationId
 		,strReceiptType			= @ReceiptType_TransferOrder
+		,intSourceType			= 0
 		,intBlanketRelease		= NULL
 		,intLocationId			= Transfer.intToLocationId
 		,strVendorRefNo			= NULL
@@ -97,14 +101,6 @@ WHERE	Transfer.intInventoryTransferId = @TransferOrderId
 -- Get the identity value from tblICInventoryReceipt
 SELECT @InventoryReceiptId = SCOPE_IDENTITY()
 
---IF @InventoryReceiptId IS NULL 
---BEGIN 
---	-- Raise the error:
---	-- Unable to generate the Inventory Receipt. An error stopped the process from Purchase Order to Inventory Receipt.
---	RAISERROR(50031, 11, 1);
---	GOTO _Exit
---END
-
 INSERT INTO dbo.tblICInventoryReceiptItem (
 	intInventoryReceiptId
     ,intLineNo
@@ -122,35 +118,32 @@ INSERT INTO dbo.tblICInventoryReceiptItem (
     ,intConcurrencyId
 )
 SELECT	intInventoryReceiptId	= @InventoryReceiptId
-		,intLineNo				= PODetail.intPurchaseDetailId
+		,intLineNo				= TransferDetail.intInventoryTransferDetailId
 		,intOrderId				= @TransferOrderId
-		,intItemId				= PODetail.intItemId
-		,intSubLocationId		= PODetail.intSubLocationId
-		,dblOrderQty			= ISNULL(PODetail.dblQtyOrdered, 0)
-		,dblOpenReceive			= ISNULL(PODetail.dblQtyOrdered, 0) - ISNULL(PODetail.dblQtyReceived, 0)
-		,dblReceived			= ISNULL(PODetail.dblQtyReceived, 0)
-		,intUnitMeasureId		= ItemUOM.intItemUOMId
+		,intItemId				= TransferDetail.intItemId
+		,intSubLocationId		= TransferDetail.intToSubLocationId
+		,dblOrderQty			= TransferDetail.dblQuantity
+		,dblOpenReceive			= TransferDetail.dblQuantity
+		,dblReceived			= 0
+		,intUnitMeasureId		= TransferDetail.intItemUOMId
 		,intWeightUOMId			=	(
 										SELECT	TOP 1 
 												tblICItemUOM.intItemUOMId 
 										FROM	dbo.tblICItemUOM INNER JOIN dbo.tblICUnitMeasure
 													ON tblICItemUOM.intUnitMeasureId = tblICUnitMeasure.intUnitMeasureId
-										WHERE	tblICItemUOM.intItemId = PODetail.intItemId 
+										WHERE	tblICItemUOM.intItemId = TransferDetail.intItemId 
 												AND tblICItemUOM.ysnStockUnit = 1 
 												AND tblICUnitMeasure.strUnitType = 'Weight'
-												AND dbo.fnGetItemLotType(PODetail.intItemId) IN (1,2)
+												AND dbo.fnGetItemLotType(TransferDetail.intItemId) IN (1,2)
 									)
-		,dblUnitCost			= PODetail.dblCost
-		,dblLineTotal			= (ISNULL(PODetail.dblQtyOrdered, 0) - ISNULL(PODetail.dblQtyReceived, 0)) * PODetail.dblCost
-		,intSort				= PODetail.intLineNo
+		,dblUnitCost			= TransferDetail.dblCost
+		,dblLineTotal			= ISNULL(TransferDetail.dblQuantity, 0) * TransferDetail.dblCost
+		,intSort				= NULL
 		,intConcurrencyId		= 1
-FROM	dbo.tblPOPurchaseDetail PODetail INNER JOIN dbo.tblICItemUOM ItemUOM			
-			ON ItemUOM.intItemId = PODetail.intItemId
-			AND ItemUOM.intItemUOMId = PODetail.intUnitOfMeasureId
-		INNER JOIN dbo.tblICUnitMeasure UOM
-			ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
-WHERE	PODetail.intPurchaseId = @TransferOrderId
-		AND dbo.fnIsStockTrackingItem(PODetail.intItemId) = 1
+FROM	tblICInventoryTransferDetail TransferDetail
+		LEFT JOIN vyuICGetInventoryTransferDetail Detail ON Detail.intInventoryTransferDetailId = TransferDetail.intInventoryTransferDetailId
+WHERE	TransferDetail.intInventoryTransferId = @TransferOrderId
+		AND dbo.fnIsStockTrackingItem(TransferDetail.intItemId) = 1
 
 -- Re-update the total cost 
 UPDATE	Receipt
