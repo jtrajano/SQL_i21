@@ -2,7 +2,9 @@
 	@intSourceTransactionId AS INT
 	,@strSourceType AS NVARCHAR(100) 
 	,@intUserId AS INT 
-	,@InventoryReceiptId AS INT OUTPUT 
+	,@InventoryReceiptId AS INT OUTPUT
+	,@TransactionSourceType AS INT = 0
+	,@TransactionSourceId AS INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -20,33 +22,90 @@ DECLARE @SourceType_PurchaseContract AS NVARCHAR(100) = 'Purchase Contract'
 DECLARE @SourceType_PurchaseOrder AS NVARCHAR(100) = 'Purchase Order'
 DECLARE @SourceType_TransferOrder AS NVARCHAR(100) = 'Transfer Order'
 DECLARE @SourceType_Direct AS NVARCHAR(100) = 'Direct'
+DECLARE @TransactionSourceType_Scale AS NVARCHAR(100) = 'Scale'
+DECLARE @TransactionSourceType_InboundShipment AS NVARCHAR(100) = 'Inbound Shipment'
 
 DECLARE @ItemsForItemReceipt AS ItemCostingTableType 
 
 BEGIN TRY
-	-- Get the items to process
-	INSERT INTO @ItemsForItemReceipt (
-		intItemId
-		,intItemLocationId
-		,intItemUOMId
-		,dtmDate
-		,dblQty
-		,dblUOMQty
-		,dblCost
-		,dblSalesPrice
-		,intCurrencyId
-		,dblExchangeRate
-		,intTransactionId
-		,intTransactionDetailId
-		,strTransactionId
-		,intTransactionTypeId
-		,intLotId
-		,intSubLocationId
-		,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion. 
-	)
-	EXEC dbo.uspICGetItemsForItemReceipt 
-		@intSourceTransactionId
-		,@strSourceType
+	IF (@TransactionSourceType = 1)
+	BEGIN
+		-- Get the items to process
+		INSERT INTO @ItemsForItemReceipt (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,dtmDate
+			,dblQty
+			,dblUOMQty
+			,dblCost
+			,dblSalesPrice
+			,intCurrencyId
+			,dblExchangeRate
+			,intTransactionId
+			,intTransactionDetailId
+			,strTransactionId
+			,intTransactionTypeId
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
+		)
+		EXEC dbo.uspICGetItemsForItemReceipt 
+			@TransactionSourceId
+			,@TransactionSourceType_Scale
+	END
+	ELSE IF (@TransactionSourceType = 2)
+	BEGIN
+		-- Get the items to process
+		INSERT INTO @ItemsForItemReceipt (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,dtmDate
+			,dblQty
+			,dblUOMQty
+			,dblCost
+			,dblSalesPrice
+			,intCurrencyId
+			,dblExchangeRate
+			,intTransactionId
+			,intTransactionDetailId
+			,strTransactionId
+			,intTransactionTypeId
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
+		)
+		EXEC dbo.uspICGetItemsForItemReceipt 
+			@TransactionSourceId
+			,@TransactionSourceType_InboundShipment
+	END
+	ELSE
+	BEGIN
+		-- Get the items to process
+		INSERT INTO @ItemsForItemReceipt (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,dtmDate
+			,dblQty
+			,dblUOMQty
+			,dblCost
+			,dblSalesPrice
+			,intCurrencyId
+			,dblExchangeRate
+			,intTransactionId
+			,intTransactionDetailId
+			,strTransactionId
+			,intTransactionTypeId
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion. 
+		)
+		EXEC dbo.uspICGetItemsForItemReceipt 
+			@intSourceTransactionId
+			,@strSourceType
+	END
 
 	-- Validate the items to receive 
 	EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 
@@ -57,8 +116,19 @@ BEGIN TRY
 		EXEC dbo.uspICAddPurchaseOrderToInventoryReceipt @intSourceTransactionId, @intUserId, @InventoryReceiptId OUTPUT; 
 	END
 	ELSE IF @strSourceType = @SourceType_PurchaseContract
-	BEGIN 
-		EXEC dbo.uspCTAddPurchaseContractToInventoryReceipt @intSourceTransactionId, @intUserId, @InventoryReceiptId OUTPUT; 
+	BEGIN
+		IF (@TransactionSourceType = 0)
+		BEGIN
+			EXEC dbo.uspCTAddPurchaseContractToInventoryReceipt @intSourceTransactionId, @intUserId, @InventoryReceiptId OUTPUT; 
+		END
+		--ELSE IF (@TransactionSourceType = 1)
+		--BEGIN
+		--	EXEC dbo.uspCTAddPurchaseContractToInventoryReceipt @intSourceTransactionId, @intUserId, @InventoryReceiptId OUTPUT; 
+		--END
+		ELSE IF (@TransactionSourceType = 2)
+		BEGIN
+			EXEC dbo.uspLGAddInboundShipmentToInventoryReceipt @intSourceTransactionId, @intUserId, @InventoryReceiptId OUTPUT; 
+		END
 	END
 	ELSE IF @strSourceType = @SourceType_TransferOrder
 	BEGIN 
