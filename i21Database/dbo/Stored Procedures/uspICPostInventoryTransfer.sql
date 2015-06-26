@@ -353,6 +353,8 @@ BEGIN
 	-- Check if From and To locations are the same. If not, then generate the GL entries. 
 	IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryTransfer WHERE intInventoryTransferId = @intTransactionId AND intFromLocationId <> intToLocationId)
 	BEGIN 	
+		SET @ysnGLEntriesRequired = 1
+
 		-----------------------------------------
 		-- Generate a new set of g/l entries
 		-----------------------------------------
