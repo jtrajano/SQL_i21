@@ -11,7 +11,6 @@ GO
 UPDATE tblGLAccount SET ysnSystem = 0 WHERE ysnSystem is NULL
 UPDATE tblGLAccount SET strCashFlow = 'None' WHERE  ISNULL(strCashFlow,'') NOT IN ('Finance','Investments','Operations','None')
 
-PRINT 'Warning: No rows were updated';
 GO	
 	PRINT N'END Normalize ysnSystem and strCashFlow'
 GO
