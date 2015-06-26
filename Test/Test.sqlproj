@@ -729,6 +729,8 @@
     <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for a missing GL description parameter.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for a GL description.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for supplying the GL Description_.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for converting 60 KG BAG to LB.sql" />
+    <Build Include="testi21Database\Fake Data\Fake data for item uom table, kg scenario.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">
