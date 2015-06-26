@@ -1,13 +1,15 @@
-﻿CREATE TABLE [dbo].[tblPRDepartment]
-(
-	[intDepartmentId] INT NOT NULL IDENTITY, 
-    [strDepartment] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
-    [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [intProfitCenter] INT NULL , 
-    [intSort] INT NULL, 
-    [intConcurrencyId] INT NULL DEFAULT ((1)), 
-    CONSTRAINT [PK_tblPRDepartment] PRIMARY KEY ([intDepartmentId]), 
-)
+﻿CREATE TABLE [dbo].[tblPRDepartment] (
+    [intDepartmentId]  INT           IDENTITY (1, 1) NOT NULL,
+    [strDepartment]    NVARCHAR (50) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strDescription]   NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
+    [intProfitCenter]  INT           NULL,
+    [intSort]          INT           NULL,
+    [intConcurrencyId] INT           DEFAULT ((1)) NULL,
+    CONSTRAINT [PK_tblPRDepartment] PRIMARY KEY CLUSTERED ([intDepartmentId] ASC),
+    UNIQUE NONCLUSTERED ([strDepartment] ASC)
+);
+
+
 
 GO
 
