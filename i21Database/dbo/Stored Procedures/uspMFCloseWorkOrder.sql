@@ -76,7 +76,9 @@ BEGIN TRY
 	From tblMFManufacturingProcessAttribute
 	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
 
-	If @strAttributeValue='True' and not exists(Select *from tblMFProcessCycleCountSession  Where intWorkOrderId=@intWorkOrderId)
+	If @strAttributeValue='True' and not exists(Select *from tblMFProcessCycleCountSession  Where intWorkOrderId=@intWorkOrderId) and Exists(SELECT *
+			FROM dbo.tblMFWorkOrderProducedLot
+			WHERE intWorkOrderId = @intWorkOrderId)
 	Begin
 		RAISERROR (
 				51131
