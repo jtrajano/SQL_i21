@@ -129,6 +129,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\DateCreatedValueDefault.sql
 :r .\AP\DefaultData\InsertWriteOffPaymentMethod.sql
 :r .\AP\UpdatePOAddressInfo.sql
+:r .\AP\UpdateApprovalRecords.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 

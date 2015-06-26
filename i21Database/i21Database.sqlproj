@@ -1883,6 +1883,7 @@
     <None Include="Scripts\Post-Deployment\EM\008_MoveTruckerData.sql" />
     <None Include="Scripts\Post-Deployment\IC\10_RemoveCommodityItems.sql" />
     <None Include="dbo\Stored Procedures\uspCTAddPurchaseContractToInventoryReceipt.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateApprovalRecords.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
