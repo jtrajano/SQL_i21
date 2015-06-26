@@ -73,7 +73,7 @@ Return
 		,@intLotStatusId = intLotStatusId
 		,@strLotNumber = strLotNumber
 		,@intLocationId = intLocationId
-		,@dblOnHand = dblWeight
+		,@dblOnHand = (CASE WHEN intWeightUOMId IS NOT NULL THEN dblWeight ELSE dblQty END)
 		,@intItemId = intItemId
 	FROM dbo.tblICLot
 	WHERE intLotId = @intLotId

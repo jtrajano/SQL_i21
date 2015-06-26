@@ -150,6 +150,23 @@ SELECT
 				THEN 0.00
 			ELSE 0.00
 			END
+		),
+	strContainer = 
+		(
+			CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
+				THEN (
+					CASE WHEN Receipt.intSourceType = 0 -- None
+						THEN NULL
+					WHEN Receipt.intSourceType = 1 -- Scale
+						THEN NULL
+					WHEN Receipt.intSourceType = 2 -- Inbound Shipment
+						THEN (SELECT strContainerNumber FROM vyuLGShipmentContainerReceiptContracts
+						WHERE intShipmentContractQtyId = ReceiptItem.intSourceId
+						)
+					ELSE NULL
+					END
+				)
+			END
 		)
 FROM tblICInventoryReceiptItem ReceiptItem
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId

@@ -164,7 +164,7 @@ BEGIN TRY
 		FROM tblICLot
 		WHERE intStorageLocationId = @intStorageLocationId
 			AND intItemId = @intItemId
-			AND dblWeight > 0
+			AND dblQty > 0
 			AND intLotStatusId = 1
 			AND dtmExpiryDate > Getdate()
 
@@ -173,7 +173,7 @@ BEGIN TRY
 			SELECT *
 			FROM tblICLot
 			WHERE intStorageLocationId = @intStorageLocationId
-				AND dblWeight > 0
+				AND dblQty > 0
 			)
 		AND EXISTS (
 			SELECT *
@@ -321,13 +321,13 @@ BEGIN TRY
 			,intLotId
 			,CASE 
 				WHEN @dblInputWeight = 0
-					THEN dblWeight
+					THEN (CASE WHEN L.intWeightUOMId IS NOT NULL THEN L.dblWeight ELSE L.dblQty END)
 				ELSE @dblInputWeight
 				END
 			,intWeightUOMId
 			,CASE 
 				WHEN @dblInputWeight = 0
-					THEN dblWeight
+					THEN (CASE WHEN L.intWeightUOMId IS NOT NULL THEN L.dblWeight ELSE L.dblQty END)
 				ELSE @dblInputWeight
 				END
 			,intWeightUOMId
@@ -337,7 +337,7 @@ BEGIN TRY
 			,@intUserId
 			,@dtmCurrentDate
 			,@intUserId
-		FROM dbo.tblICLot
+		FROM dbo.tblICLot L
 		WHERE intLotId = @intInputLotId
 	END
 

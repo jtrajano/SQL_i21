@@ -5,7 +5,7 @@ SELECT strInternalTradeNo,dtmTransactionDate,dtmFilledDate,strFutMarketName,strO
  ,dblPremiumValue+dblCommission as dblNetPremium,
  dblMarketPremium,
  dblMarketValue,
- dblMarketValue - dblPremiumValue as dblMTM,
+ dblPremiumValue-dblMarketValue as dblMTM,
  dtmExpirationDate,strStatus,strCommodityCode,strLocationName,strBook,strSubBook,dblDelta,
  -(dblOpenLots*dblDelta*dblContractSize) AS dblDeltaHedge,
  strHedgeUOM,strBuySell,dblContractSize

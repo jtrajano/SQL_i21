@@ -1825,6 +1825,12 @@
     <Build Include="dbo\Views\vyuSMGetCompanyLocationSearchList.sql" />
     <Build Include="dbo\Tables\tblARCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspARMigrateCompanyPreference.sql" />
+    <Build Include="dbo\Tables\tblRKCollateral.sql" />
+    <Build Include="dbo\Tables\tblRKCollateralAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUpdateProductSpecification.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUndoPallet.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFStartWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFDeleteWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

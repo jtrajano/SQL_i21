@@ -1,8 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARGetPONumber]
-	 @ShipToID			INT
-	,@LocationId		INT
+	 @ShipToID			INT				= NULL
+	,@LocationId		INT				= NULL
 	,@TransactionDate	DATETIME
-	,@PONumber			NVARCHAR(200) = NULL OUTPUT
+	,@PONumber			NVARCHAR(200)	= NULL OUTPUT
 AS
 --DECLARE  @ShipToID INT
 --		,@LocationId INT

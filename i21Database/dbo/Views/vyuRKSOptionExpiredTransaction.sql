@@ -3,6 +3,7 @@ AS
 SELECT m.intOptionsPnSExpiredId,
 	   strTranNo,
 	   dtmExpiredDate,
+	   t.strInternalTradeNo,
 	   intLots,
 	   m.intFutOptTransactionId,
 	   case when t.strBuySell='Buy' THEN -isnull(t.dblPrice,0)* m.intLots * fm.dblContractSize else isnull(t.dblPrice,0)* m.intLots * fm.dblContractSize end as dblImpact,

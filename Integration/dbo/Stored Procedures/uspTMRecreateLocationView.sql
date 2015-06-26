@@ -78,9 +78,9 @@ BEGIN
 			CREATE VIEW [dbo].[vwlocmst]
 			AS
 			SELECT
-				ptloc_loc_no = strLocationNumber
-				,ptloc_name = strLocationName
-				,ptloc_addr	= strAddress
+				vwloc_loc_no = strLocationName
+				,vwloc_name = strLocationName
+				,vwloc_addr	= strAddress
 				,CAST(intCompanyLocationId AS INT) as A4GLIdentity	
 			FROM tblSMCompanyLocation
 			
