@@ -14,7 +14,7 @@ SELECT
        S.intSubLocationId,
        intLocationId = S.intCompanyLocationId,
        SCQ.dblQuantity,
-	   SCQ.dblReceivedQty,
+	   IsNull(SCQ.dblReceivedQty, 0) as dblReceivedQty,
        SCQ.dblGrossWt,
        SCQ.dblTareWt,
        SCQ.dblNetWt,

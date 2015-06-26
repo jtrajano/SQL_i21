@@ -17,7 +17,7 @@ SELECT
        S.intSubLocationId,
        intLocationId = S.intCompanyLocationId,
        SC.dblQuantity,
-	   SC.dblReceivedQty,
+	   IsNull(SC.dblReceivedQty, 0) as dblReceivedQty,
        dblGrossWt = (Container.dblGrossWt / Container.dblQuantity) * SC.dblQuantity,
        dblTareWt = (Container.dblTareWt / Container.dblQuantity) * SC.dblQuantity,
        dblNetWt = (Container.dblNetWt / Container.dblQuantity) * SC.dblQuantity,

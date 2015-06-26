@@ -18,6 +18,7 @@ SELECT
 	,intLocationId
 	,dblQuantity
 	,dblReceivedQty
+	,dblBalanceToReceive = dblQuantity - dblReceivedQty
 	,dblGrossWt
 	,dblTareWt
 	,dblNetWt
@@ -68,6 +69,7 @@ SELECT
 	,intLocationId
 	,dblQuantity
 	,dblReceivedQty
+	,dblBalanceToReceive = dblQuantity - dblReceivedQty
 	,dblGrossWt
 	,dblTareWt
 	,dblNetWt
