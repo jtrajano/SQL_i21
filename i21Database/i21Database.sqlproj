@@ -1901,4 +1901,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\12_ReminderList.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\14_CompanyPreference.sql" />
+  </ItemGroup>
 </Project>
