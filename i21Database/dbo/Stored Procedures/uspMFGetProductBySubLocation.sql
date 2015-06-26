@@ -16,4 +16,5 @@ BEGIN
 		AND C.intCompanyLocationSubLocationId = @intSubLocationId
 		AND R.ysnActive = 1
 		AND IU.ysnStockUnit = 1
+		AND I.strStatus='Active'
 END

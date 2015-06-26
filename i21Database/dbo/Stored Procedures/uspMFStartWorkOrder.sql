@@ -29,6 +29,25 @@ BEGIN TRY
 
 	IF NOT EXISTS (
 			SELECT *
+			FROM tblICItem
+			WHERE intItemId = @intItemId
+				AND strStatus  = 'Active'
+			)
+	BEGIN
+		SELECT @strItemNo = strItemNo
+		FROM dbo.tblICItem
+		WHERE intItemId = @intItemId
+
+		RAISERROR (
+				51152
+				,11
+				,1
+				,@strItemNo
+				)
+	END
+
+	IF NOT EXISTS (
+			SELECT *
 			FROM tblMFRecipe
 			WHERE intItemId = @intItemId
 				AND intLocationId = @intLocationId
