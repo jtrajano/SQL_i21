@@ -1390,6 +1390,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('strSubLocationName', po.get('strSubLocationName'));
                 current.set('dblItemUOMConvFactor', po.get('dblItemUOMCF'));
                 current.set('strUnitType', po.get('strStockUOMType'));
+                current.set('strContainer', po.get('strContainerNumber'));
+                current.set('intContainerId', po.get('intShipmentBLContainerId'));
 
                 break;
 
