@@ -154,6 +154,7 @@ BEGIN
 					WHEN glfsf_action_type=''DL'' THEN ''Double Underscore''
 					WHEN glfsf_action_type=''BLN'' THEN ''None''
 					WHEN glfsf_action_type=''UL'' THEN ''Underscore''
+					WHEN glfsf_action_type=''LGN'' THEN ''Column Name''
 					ELSE NULL END AS strRowType,
 				CASE 
 					WHEN glfsf_action_type=''NET'' THEN ''Credit''
@@ -634,7 +635,7 @@ BEGIN
 			END
 
 			DELETE FROM #irelyloadFRRowDesign WHERE intRefNo = 0
-			DELETE FROM #irelyloadFRRowDesign WHERE glfsf_action_type = ''LGN''
+			--DELETE FROM #irelyloadFRRowDesign WHERE glfsf_action_type = ''LGN''
 
 			INSERT tblFRRowDesign 
 			(
