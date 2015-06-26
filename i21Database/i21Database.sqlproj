@@ -1831,6 +1831,7 @@
     <Build Include="dbo\Stored Procedures\uspMFUndoPallet.sql" />
     <Build Include="dbo\Stored Procedures\uspMFStartWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGAddInboundShipmentToInventoryReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
