@@ -193,6 +193,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colDescription: 'strItemDescription',
+                colContainer: {
+                    hidden: '{hideContainerColumn}',
+                    dataIndex: 'strContainer'
+                },
                 colSubLocation: {
                     dataIndex: 'strSubLocationName',
                     editor: {
@@ -554,7 +558,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
         }
 
-        var colTaxDetails = grdInventoryReceipt.columns[15];
+        var colTaxDetails = grdInventoryReceipt.columns[19];
         var btnViewTaxDetail = colTaxDetails.items[0];
         if (btnViewTaxDetail){
             btnViewTaxDetail.handler = function(grid, rowIndex, colIndex) {
@@ -1967,10 +1971,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 valueField: 'intTrackingNumber',
                 store: win.viewModel.storeInfo.inboundShipment,
                 defaultFilters: [{
-                    column: 'intShipmentBLContainerContractId',
-                    value: '-1',
-                    conjunction: 'and'
-                },{
                     column: 'intContractDetailId',
                     value: record.get('intLineNo'),
                     conjunction: 'and'

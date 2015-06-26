@@ -34,6 +34,7 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'intOrderId', type: 'int', allowNull: true },
         { name: 'intSourceId', type: 'int', allowNull: true },
         { name: 'intItemId', type: 'int', allowNull: true },
+        { name: 'intContainerId', type: 'int', allowNull: true },
         { name: 'intSubLocationId', type: 'int', allowNull: true },
         { name: 'intOwnershipType', type: 'int', allowNull: true },
         { name: 'dblOrderQty', type: 'float' },
@@ -55,6 +56,7 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'strWeightUOM', type: 'string'},
         { name: 'strSubLocationName', type: 'string'},
         { name: 'strUnitType', type: 'string'},
+        { name: 'strContainer', type: 'string'},
         { name: 'dblGrossMargin', type: 'float' }
     ],
 

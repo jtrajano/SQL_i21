@@ -1266,6 +1266,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        dataIndex: 'strDescription',
+                                                                        itemId: 'colContainer',
+                                                                        width: 90,
+                                                                        text: 'Container'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
                                                                         itemId: 'colSubLocation',
                                                                         width: 90,
                                                                         dataIndex: 'strDescription',

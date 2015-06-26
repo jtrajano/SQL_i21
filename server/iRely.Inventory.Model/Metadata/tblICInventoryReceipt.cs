@@ -163,6 +163,7 @@ namespace iRely.Inventory.Model
         public int? intOrderId { get; set; }
         public int? intSourceId { get; set; }
         public int? intItemId { get; set; }
+        public int? intContainerId { get; set; }
         public int? intSubLocationId { get; set; }
         public int intOwnershipType { get; set; }
         public decimal? dblOrderQty { get; set; }
@@ -495,6 +496,8 @@ namespace iRely.Inventory.Model
         public string strItemNo { get; set; }
         public string strItemDescription { get; set; }
         public string strLotTracking { get; set; }
+        public int? intContainerId { get; set; }
+        public string strContainer { get; set; }
         public int? intSubLocationId { get; set; }
         public string strSubLocationName { get; set; }
         public string strOrderUOM { get; set; }

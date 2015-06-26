@@ -428,7 +428,6 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                         return false;
                         break;
                     default:
-                        this.data.current.set('intSourceType', 0);
                         return true;
                         break;
                 }
@@ -469,7 +468,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             var receiptType = get('current.strReceiptType');
             switch (receiptType) {
                 case 'Direct' :
-                    return true
+                    return true;
                     break;
                 default:
                     if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strOrderNumber'))) {
@@ -480,6 +479,17 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     }
                     break;
             };
+        },
+        hideContainerColumn: function(get) {
+            var sourceType = get('current.intSourceType');
+            switch (sourceType) {
+                case 2 :
+                    return false;
+                    break;
+                default:
+                    return true;
+                    break;
+            }
         }
     }
 

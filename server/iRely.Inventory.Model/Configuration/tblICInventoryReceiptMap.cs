@@ -82,6 +82,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intOrderId).HasColumnName("intOrderId");
             this.Property(t => t.intSourceId).HasColumnName("intSourceId");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.intContainerId).HasColumnName("intContainerId");
             this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
             this.Property(t => t.intOwnershipType).HasColumnName("intOwnershipType");
             this.Property(t => t.dblOrderQty).HasColumnName("dblOrderQty").HasPrecision(18, 6);
@@ -123,6 +124,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
             this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
             this.Property(t => t.strLotTracking).HasColumnName("strLotTracking");
+            this.Property(t => t.intContainerId).HasColumnName("intContainerId");
+            this.Property(t => t.strContainer).HasColumnName("strContainer");
             this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
             this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
             this.Property(t => t.strOrderUOM).HasColumnName("strOrderUOM");
