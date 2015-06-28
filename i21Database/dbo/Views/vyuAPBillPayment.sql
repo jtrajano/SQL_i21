@@ -40,7 +40,7 @@ FROM dbo.tblAPBill A
 			LEFT JOIN dbo.tblAPPaymentDetail C ON B.intPaymentId = C.intPaymentId
 		INNER JOIN dbo.tblCMBankAccount G ON B.intAccountId = G.intGLAccountId
 		INNER JOIN dbo.tblCMBankTransaction H ON B.strPaymentRecordNum = H.strTransactionId
-		WHERE B.ysnPosted = 1
+		--WHERE B.ysnPosted = 1
 		GROUP BY [intEntityVendorId], intBillId, H.dtmCheckPrinted, H.ysnCheckVoid, G.strBankAccountNo, B.strPaymentInfo, B.intPaymentId, B.dtmDatePaid
 	) Payments
 	ON A.intBillId = Payments.intBillId
