@@ -105,11 +105,10 @@ AS
 		FROM tblGLAccount A
 		INNER JOIN tblGLTempCOASegment B ON B.intAccountId = A.intAccountId
 		INNER JOIN GLAccountDetails C on A.strAccountId = C.strAccountId
-		WHERE C.ysnIsUnposted =0 OR C.ysnIsUnposted IS NULL
 )
 
 --*CountStart*--
-SELECT 
+SELECT DISTINCT
 ''Account ID :'' + B.strAccountId + '' - '' + ISNULL(A.strAccountDescription,B.strAccountDescription) + '' - '' + ISNULL(A.strAccountType,B.strAccountType) as AccountHeader,
 (CASE WHEN A.strAccountDescription  is  NULL  then B.strAccountDescription else A.strAccountDescription END) as strAccountDescripion
 ,(CASE WHEN A.strAccountType  is  NULL  then B.strAccountType else A.strAccountType END) as strAccountType
@@ -144,6 +143,7 @@ SELECT
 	
 	FROM GLAccountBalance B
 	LEFT JOIN GLAccountDetails A ON B.intAccountId = A.intAccountId
+	WHERE A.ysnIsUnposted = 0
 --*CountEnd*--'
 
 
@@ -206,25 +206,24 @@ INNER JOIN tblGLTempCOASegment D ON B.intAccountId = D.intAccountId and strCode 
 ),    
 GLAccountBalance  (  intAccountId  ,strAccountId  ,strAccountDescription  ,strAccountType  ,strAccountGroup  ,dblBeginBalance  ,dblBeginBalanceUnit  
 ,[Primary Account]  ,[Location]   )  
-AS  (    
+AS  
+(    
  
- SELECT    
-  A.intAccountId    
-  ,A.strAccountId    
-  ,A.strDescription as strAccountDescription    
-  ,(select strAccountType from tblGLAccountGroup where intAccountGroupId = A.intAccountGroupId) as strAccountType    
-  ,(select strAccountGroup from tblGLAccountGroup where intAccountGroupId = A.intAccountGroupId) as strAccountGroup      
-  ,dblBeginBalance = dbo.fnGetBeginBalance(A.strAccountId,(SELECT MIN(dtmDate) FROM GLAccountDetails),'''')    
-  ,dblBeginBalanceUnit =  dbo.fnGetBeginBalanceUnit(A.strAccountId,(SELECT MIN(dtmDate) FROM GLAccountDetails),'''')    
-  ,B.[Primary Account]    
-  ,B.[Location]         
-  FROM tblGLAccount A    INNER JOIN tblGLTempCOASegment B ON B.intAccountId = A.intAccountId         
-  INNER JOIN GLAccountDetails C on A.strAccountId = C.strAccountId
-   WHERE C.ysnIsUnposted =0 OR C.ysnIsUnposted IS NULL
- 
-  ) 
+	 SELECT    
+	  A.intAccountId    
+	  ,A.strAccountId    
+	  ,A.strDescription as strAccountDescription    
+	  ,(select strAccountType from tblGLAccountGroup where intAccountGroupId = A.intAccountGroupId) as strAccountType    
+	  ,(select strAccountGroup from tblGLAccountGroup where intAccountGroupId = A.intAccountGroupId) as strAccountGroup      
+	  ,dblBeginBalance = dbo.fnGetBeginBalance(A.strAccountId,(SELECT MIN(dtmDate) FROM GLAccountDetails),'''')    
+	  ,dblBeginBalanceUnit =  dbo.fnGetBeginBalanceUnit(A.strAccountId,(SELECT MIN(dtmDate) FROM GLAccountDetails),'''')    
+	  ,B.[Primary Account]    
+	  ,B.[Location]         
+	  FROM tblGLAccount A    INNER JOIN tblGLTempCOASegment B ON B.intAccountId = A.intAccountId         
+	  INNER JOIN GLAccountDetails C on A.strAccountId = C.strAccountId
+) 
    --*CountStart*--  
-  SELECT   
+  SELECT DISTINCT
   ''Account ID :'' + B.strAccountId + '' - '' + ISNULL(A.strAccountDescription,B.strAccountDescription) + '' - '' + ISNULL(A.strAccountType,B.strAccountType) as AccountHeader,
   (CASE WHEN A.strAccountDescription  is  NULL  THEN B.strAccountDescription ELSE A.strAccountDescription END) as strAccountDescripion  
   ,(CASE WHEN A.strAccountType  is  NULL  THEN B.strAccountType ELSE A.strAccountType END) as strAccountType  
@@ -257,6 +256,7 @@ AS  (
   END       
   FROM GLAccountBalance B   
   LEFT JOIN GLAccountDetails A ON B.intAccountId = A.intAccountId
+  WHERE A.ysnIsUnposted = 0
   --*CountEnd*--'
   
 --UPDATE THE OPTIONS
