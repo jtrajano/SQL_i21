@@ -64,6 +64,7 @@ SELECT
 		,A.intGLDetailId
 		,D.*
 		,A.ysnIsUnposted
+		,isUnposted = CASE WHEN A.intAccountId IS NULL THEN 0 ELSE A.ysnIsUnposted END
 		,(SELECT [strUOMCode] FROM Units WHERE [intAccountId] = A.[intAccountId]) as strUOMCode
 from tblGLDetail  A
 RIGHT join tblGLAccount B on B.intAccountId = A.intAccountId
@@ -143,7 +144,7 @@ SELECT DISTINCT
 	
 	FROM GLAccountBalance B
 	LEFT JOIN GLAccountDetails A ON B.intAccountId = A.intAccountId
-	WHERE A.ysnIsUnposted = 0
+	WHERE A.isUnposted = 0 or A.isUnposted IS NULL
 --*CountEnd*--'
 
 
@@ -195,6 +196,7 @@ B.strDescription  as strAccountDescription-- account description
 ,A.strCode    
 ,A.intGLDetailId    
 ,A.ysnIsUnposted    
+,isUnposted = CASE WHEN A.intAccountId IS NULL THEN 0 ELSE A.ysnIsUnposted END
 ,D.*    
 ,(SELECT [strUOMCode] FROM Units WHERE [intAccountId] = A.[intAccountId]) as strUOMCode  
 from tblGLDetail A   
@@ -256,7 +258,7 @@ AS
   END       
   FROM GLAccountBalance B   
   LEFT JOIN GLAccountDetails A ON B.intAccountId = A.intAccountId
-  WHERE A.ysnIsUnposted = 0
+  WHERE A.isUnposted = 0 OR A.isUnposted IS NULL
   --*CountEnd*--'
   
 --UPDATE THE OPTIONS
