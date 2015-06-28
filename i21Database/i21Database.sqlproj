@@ -1837,6 +1837,10 @@
     <None Include="Scripts\Post-Deployment\GL\ReportData\TrialBalance.sql" />
     <None Include="Scripts\Post-Deployment\GL\ReportData\BalanceSheetStandard.sql" />
     <Build Include="dbo\Stored Procedures\uspEMDeactivateEntity.sql" />
+    <Build Include="dbo\Tables\tblMFBlendDemand.sql" />
+    <Build Include="dbo\Tables\tblMFBlendDemandStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendDemandSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendDemandDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
