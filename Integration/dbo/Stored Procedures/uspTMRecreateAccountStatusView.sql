@@ -1,13 +1,13 @@
 ﻿GO
-	PRINT 'START OF CREATING [uspTMRecreateOriginOptionView] SP'
+	PRINT 'START OF CREATING [uspTMRecreateAccountStatusView] SP'
 GO
 
-IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspTMRecreateOriginOptionView]') AND type in (N'P', N'PC'))
-DROP PROCEDURE [dbo].uspTMRecreateOriginOptionView
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspTMRecreateAccountStatusView]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].uspTMRecreateAccountStatusView
 GO
 
 
-CREATE PROCEDURE uspTMRecreateOriginOptionView 
+CREATE PROCEDURE uspTMRecreateAccountStatusView 
 AS
 BEGIN
 	IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuTMOriginAccountStatus')
@@ -49,11 +49,11 @@ BEGIN
 	END
 END
 GO
-	PRINT 'END OF CREATING [uspTMRecreateOriginOptionView] SP'
+	PRINT 'END OF CREATING [uspTMRecreateAccountStatusView] SP'
 GO
-	PRINT 'START OF Execute [uspTMRecreateOriginOptionView] SP'
+	PRINT 'START OF Execute [uspTMRecreateAccountStatusView] SP'
 GO
-	EXEC ('uspTMRecreateOriginOptionView')
+	EXEC ('uspTMRecreateAccountStatusView')
 GO
-	PRINT 'END OF Execute [uspTMRecreateOriginOptionView] SP'
+	PRINT 'END OF Execute [uspTMRecreateAccountStatusView] SP'
 GO
