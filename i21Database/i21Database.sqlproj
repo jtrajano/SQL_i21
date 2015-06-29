@@ -1851,6 +1851,7 @@
     <Build Include="dbo\Stored Procedures\uspSMDuplicateUserRole.sql" />
     <Build Include="dbo\Tables\tblTRQuoteDetail.sql" />
     <Build Include="dbo\Tables\tblTRQuoteHeader.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetRecipeItemByProduct.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
