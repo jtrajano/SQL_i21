@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPDuplicateBill]
-	@BillIds NVARCHAR(MAX),
-	@userId INT
+	@billId INT,
+	@userId INT,
+	@billCreatedId INT OUTPUT
 AS
 BEGIN
 
@@ -10,12 +11,10 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-CREATE TABLE #tmpBillData (
-	[intBillId] [int] PRIMARY KEY,
-	UNIQUE ([intBillId])
-);
+BEGIN TRANSACTION
 
-INSERT INTO #tmpBillData SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@BillIds)
+DECLARE @generatedBillRecordId NVARCHAR(50);
+EXEC uspSMGetStartingNumber 9, @generatedBillRecordId OUT
 
 INSERT INTO tblAPBill(
 		[strVendorOrderNumber], 
@@ -52,7 +51,7 @@ INSERT INTO tblAPBill(
 		[intEntityId]
 	)
 	SELECT 
-		[strVendorOrderNumber], 
+		[strVendorOrderNumber] + '-2', 
 		[intTermsId],
 		[intTaxId],
 		[dtmDate],            
@@ -63,8 +62,8 @@ INSERT INTO tblAPBill(
 		[dblSubtotal],
 		0,
 		0,
-		[strBillId],
-		[dblAmountDue],
+		@generatedBillRecordId,
+		[dblTotal],
 		[dtmDatePaid],
 		[dtmDiscountDate],
 		[intUserId],
@@ -85,9 +84,11 @@ INSERT INTO tblAPBill(
 		[intOrderById],
 		ISNULL(@userId, intEntityId)
 	FROM tblAPBill
-	WHERE intBillId IN (SELECT [intBillId] FROM #tmpBillData)
+	WHERE intBillId = @billId
 
-	INSERT INTO tblAPBillDetail(
+SET @billCreatedId = SCOPE_IDENTITY();
+
+INSERT INTO tblAPBillDetail(
 		[intBillId],
 		[strMiscDescription],
 		[strComment], 
@@ -108,7 +109,7 @@ INSERT INTO tblAPBill(
 		[intLineNo]
 	)
 	SELECT
-		[intBillId],
+		@billCreatedId,
 		[strMiscDescription],
 		[strComment], 
 		[intAccountId],
@@ -127,6 +128,16 @@ INSERT INTO tblAPBill(
 		[intTaxId],
 		[intLineNo]
 	FROM tblAPBillDetail
-	WHERE intBillId IN (SELECT [intBillId] FROM #tmpBillData)
+	WHERE intBillId = @billId
 
 END
+
+GOTO DONE;
+
+DONE:
+COMMIT TRANSACTION;
+RETURN;
+
+UNDO:
+ROLLBACK TRANSACTION;
+RETURN;

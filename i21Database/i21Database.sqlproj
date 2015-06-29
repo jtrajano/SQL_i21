@@ -1842,6 +1842,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetBlendDemandSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetBlendDemandDetail.sql" />
     <Build Include="dbo\Tables\tblSMUserRoleCompanyLocationPermission.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPDuplicateBillBatch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
