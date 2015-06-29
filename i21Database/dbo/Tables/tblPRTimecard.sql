@@ -3,8 +3,13 @@
 	[intTimecardId] INT NOT NULL PRIMARY KEY IDENTITY, 
     [dtmDate] DATETIME NOT NULL, 
     [intEmployeeId] INT NOT NULL, 
+	[dtmDateIn] DATETIME NULL, 
     [dtmTimeIn] DATETIME NULL, 
+	[dtmDateOut] DATETIME NULL,
     [dtmTimeOut] DATETIME NULL, 
+	[dblHours] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+    [dblRegularHours] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+    [dblOvertimeHours] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [intEmployeeEarningId] INT NULL, 
 	[intEmployeeDepartmentId] INT NULL, 
     [intTimeEntryId] INT NULL, 
@@ -112,3 +117,48 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRTimecard',
     @level2type = N'COLUMN',
     @level2name = N'intEmployeeDepartmentId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Hours',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTimecard',
+    @level2type = N'COLUMN',
+    @level2name = N'dblHours'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Regular Hours',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTimecard',
+    @level2type = N'COLUMN',
+    @level2name = N'dblRegularHours'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Overtime Hours',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTimecard',
+    @level2type = N'COLUMN',
+    @level2name = N'dblOvertimeHours'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Date In',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTimecard',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmDateIn'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Date Out',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTimecard',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmDateOut'
