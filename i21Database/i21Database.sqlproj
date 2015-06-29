@@ -1714,7 +1714,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\3_UpdateInvoiceOrderShipToAndBillTo.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\UpdateEarningDeductionTaxId.sql" />
     <None Include="Scripts\Post-Deployment\EM\003_FixVendorBadData.sql" />
-    <None Include="dbo\Views\vyuPRPaycheckTax.sql" />
+    <Build Include="dbo\Views\vyuPRPaycheckTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
