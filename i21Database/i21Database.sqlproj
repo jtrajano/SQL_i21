@@ -1846,6 +1846,8 @@
     <Build Include="dbo\Stored Procedures\uspSTCopyPromotions.sql" />
     <Build Include="dbo\Tables\tblCTCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspCTMigrateCompanyPreference.sql" />
+    <Build Include="dbo\Tables\tblEntitySplit.sql" />
+    <Build Include="dbo\Tables\tblEntitySplitDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

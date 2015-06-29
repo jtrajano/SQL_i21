@@ -59,7 +59,8 @@
 	CONSTRAINT [FK_tblSOSalesOrder_tblARQuoteTemplate_intQuoteTemplateId] FOREIGN KEY ([intQuoteTemplateId]) REFERENCES [dbo].[tblARQuoteTemplate] ([intQuoteTemplateId]),
 	CONSTRAINT [FK_tblSOSalesOrder_tblSMFreightTerm] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]),
 	CONSTRAINT [FK_tblSOSalesOrder_tblEntity_intOrderedById] FOREIGN KEY ([intOrderedById]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
-	CONSTRAINT [FK_tblSOSalesOrder_tblARCustomerSplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [dbo].[tblARCustomerSplit] ([intSplitId])	
+	CONSTRAINT [FK_tblSOSalesOrder_tblARCustomerSplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [dbo].[tblARCustomerSplit] ([intSplitId]),
+	CONSTRAINT [FK_tblSOSalesOrder_tblSMTerm_intTermId] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID])
 );
 GO
 
