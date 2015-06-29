@@ -1849,6 +1849,8 @@
     <Build Include="dbo\Tables\tblEntitySplit.sql" />
     <Build Include="dbo\Tables\tblEntitySplitDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDuplicateUserRole.sql" />
+    <Build Include="dbo\Tables\tblTRQuoteDetail.sql" />
+    <Build Include="dbo\Tables\tblTRQuoteHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
