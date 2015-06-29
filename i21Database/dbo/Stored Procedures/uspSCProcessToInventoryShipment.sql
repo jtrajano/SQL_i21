@@ -88,6 +88,7 @@ BEGIN TRY
 		,intLotId
 		,intSubLocationId
 		,intStorageLocationId 
+		,ysnIsCustody
 	)
 	EXEC dbo.uspSCGetScaleItemForItemShipment
 		 @intTicketId
@@ -122,7 +123,7 @@ BEGIN TRY
 	WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
 	END
 
-	--EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId, @intEntityId;
+	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId, @intEntityId;
 
 END TRY
 BEGIN CATCH

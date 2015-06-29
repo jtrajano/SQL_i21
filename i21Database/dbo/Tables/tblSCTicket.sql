@@ -83,6 +83,7 @@
 	[intMatchTicketId] INT NULL,
 	[intSubLocationId] INT NULL,
 	[intStorageLocationId] INT NULL,
+	[intFarmFieldId] INT NULL,
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_intTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [intTicketNumber]),

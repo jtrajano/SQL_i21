@@ -467,3 +467,15 @@ BEGIN
     VALUES(4,'Others')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendDemandStatus WHERE intStatusId = 1)
+BEGIN
+    INSERT INTO tblMFBlendDemandStatus(intStatusId,strName)
+    VALUES(1,'New')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendDemandStatus WHERE intStatusId = 2)
+BEGIN
+    INSERT INTO tblMFBlendDemandStatus(intStatusId,strName)
+    VALUES(2,'Closed')
+END
+GO

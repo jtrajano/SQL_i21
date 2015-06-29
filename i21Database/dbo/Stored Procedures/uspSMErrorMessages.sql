@@ -606,3 +606,7 @@ EXEC sp_addmessage 51150,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51151) EXEC sp_dropmessage 51151, 'us_english'	
 SET @strmessage = 'Unable to generate the Inventory Receipt. An error stopped the process from Inbound Shipment to Inventory Receipt.'
 EXEC sp_addmessage 51151,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51152) EXEC sp_dropmessage 51152, 'us_english'	
+SET @strmessage = 'The target item %s is Phased out or Discontinued, cannot start the work order.'
+EXEC sp_addmessage 51152,11,@strmessage,'us_english','False'

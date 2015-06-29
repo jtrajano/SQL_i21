@@ -84,7 +84,7 @@
 :r .\12_EM\01_EntitySchemaUpdate.sql
 :r .\12_EM\02_UpdateGroupIdFromNonExistence.sql
 :r .\12_EM\03_EntityCustomerFarmRename_DataFix.sql
-
+:r .\12_EM\04_EntityLocationTaxCodeUpdate.sql
 
 --RK
 :r .\13_RK\01_DropTableScript.sql

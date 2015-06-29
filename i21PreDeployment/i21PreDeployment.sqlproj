@@ -104,6 +104,7 @@
     <None Include="Scripts\Pre-Deployment\11_IC\1520_to_1530.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\02_UpdateGroupIdFromNonExistence.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\03_EntityCustomerFarmRename_DataFix.sql" />
+    <None Include="Scripts\Pre-Deployment\12_EM\04_EntityLocationTaxCodeUpdate.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />

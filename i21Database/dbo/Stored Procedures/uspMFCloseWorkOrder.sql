@@ -42,7 +42,18 @@ BEGIN TRY
 				)
 	END
 
-	IF EXISTS (
+	SELECT @intManufacturingProcessId=intManufacturingProcessId
+		,@intLocationId=intLocationId
+	FROM tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
+
+	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Is Warehouse Release Mandatory'
+	
+	Select @strAttributeValue=strAttributeValue
+	From tblMFManufacturingProcessAttribute
+	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
+
+	IF @strAttributeValue='True' AND EXISTS (
 			SELECT *
 			FROM dbo.tblMFWorkOrderProducedLot
 			WHERE intWorkOrderId = @intWorkOrderId
@@ -59,18 +70,15 @@ BEGIN TRY
 		RETURN
 	END
 
-	SELECT @intManufacturingProcessId=intManufacturingProcessId
-		,@intLocationId=intLocationId
-	FROM tblMFWorkOrder
-	WHERE intWorkOrderId = @intWorkOrderId
-
 	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Is Cycle Count Mandatory'
 	
 	Select @strAttributeValue=strAttributeValue
 	From tblMFManufacturingProcessAttribute
 	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
 
-	If @strAttributeValue='True' and not exists(Select *from tblMFProcessCycleCountSession  Where intWorkOrderId=@intWorkOrderId)
+	If @strAttributeValue='True' and not exists(Select *from tblMFProcessCycleCountSession  Where intWorkOrderId=@intWorkOrderId) and Exists(SELECT *
+			FROM dbo.tblMFWorkOrderProducedLot
+			WHERE intWorkOrderId = @intWorkOrderId)
 	Begin
 		RAISERROR (
 				51131
@@ -78,7 +86,9 @@ BEGIN TRY
 				,1
 				)
 	End
-	
+
+	BEGIN TRANSACTION
+
 	DECLARE @Lot TABLE (
 		RecordKey INT identity(1, 1)
 		,intLotId INT
@@ -101,8 +111,6 @@ BEGIN TRY
 		SELECT @intLotId = intLotId,@strLotNumber=strLotNumber
 		FROM @Lot
 		WHERE RecordKey = @RecordKey
-
-		BEGIN TRANSACTION
 
 		DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 

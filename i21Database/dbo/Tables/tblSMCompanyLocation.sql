@@ -60,6 +60,9 @@
 	[intAutoNegativeSold] INT NULL,
 	[intAPClearing] INT NULL,
 	[intInventoryInTransit] INT NULL,
+	[intWithholdAccountId] INT NULL,
+    [intDiscountAccountId] INT NULL,
+	[intInterestAccountId] INT NULL,
 	[strInvoiceType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strDefaultInvoicePrinter] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strPickTicketType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
@@ -101,6 +104,7 @@
 	[strOverShortCustomer] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[strOverShortAccount] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[ysnAutomaticCashDepositEntries] BIT NULL DEFAULT (1), 
+    [dblWithholdPercent]   DECIMAL (18, 6) NULL ,
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [AK_tblSMCompanyLocation_strLocationName] UNIQUE ([strLocationName])
 )
@@ -599,6 +603,33 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblSMCompanyLocation',
     @level2type = N'COLUMN',
+    @level2name = N'intWithholdAccountId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Invoice Type',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCompanyLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'intDiscountAccountId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Invoice Type',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCompanyLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'intInterestAccountId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Invoice Type',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCompanyLocation',
+    @level2type = N'COLUMN',
     @level2name = N'strInvoiceType'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
@@ -960,6 +991,15 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSMCompanyLocation',
     @level2type = N'COLUMN',
     @level2name = N'ysnAutomaticCashDepositEntries'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Automatic Cash Deposit Entries',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMCompanyLocation',
+    @level2type = N'COLUMN',
+    @level2name = N'dblWithholdPercent'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Concurrency Check',

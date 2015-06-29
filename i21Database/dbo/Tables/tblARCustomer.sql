@@ -75,18 +75,18 @@
 	[ysnProspect]					  BIT             DEFAULT ((0)) NOT NULL,
 	[strJiraCustomer]				  NVARCHAR (100)   COLLATE Latin1_General_CI_AS NULL,	
     [intConcurrencyId]                INT             CONSTRAINT [DF_tblARCustomer_intConcurrencyId] DEFAULT ((0)) NOT NULL,
-    CONSTRAINT [PK_tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityCustomerId] ASC),
+    CONSTRAINT [PK_tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityCustomerId] ASC),	
     CONSTRAINT [FK_tblARCustomer_tblARAccountStatus] FOREIGN KEY ([intAccountStatusId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),
     CONSTRAINT [FK_tblARCustomer_tblARMarketZone] FOREIGN KEY ([intMarketZoneId]) REFERENCES [dbo].[tblARMarketZone] ([intMarketZoneId]),
     CONSTRAINT [FK_tblARCustomer_tblARSalesperson_intEntitySalespersonId] FOREIGN KEY ([intSalespersonId]) REFERENCES [dbo].[tblARSalesperson] ([intEntitySalespersonId]),
-    CONSTRAINT [FK_tblARCustomer_tblARServiceCharge] FOREIGN KEY ([intServiceChargeId]) REFERENCES [dbo].[tblARServiceCharge] ([intServiceChargeId]),
-    CONSTRAINT [FK_tblARCustomer_tblEntity] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
+    CONSTRAINT [FK_tblARCustomer_tblARServiceCharge] FOREIGN KEY ([intServiceChargeId]) REFERENCES [dbo].[tblARServiceCharge] ([intServiceChargeId]),    
     CONSTRAINT [FK_tblARCustomer_tblEntityLocation] FOREIGN KEY ([intDefaultLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]),
 	CONSTRAINT [FK_tblARCustomer_tblSMTaxCode] FOREIGN KEY([intTaxCodeId]) REFERENCES [dbo].[tblSMTaxCode] ([intTaxCodeId]),
     CONSTRAINT [UK_intCustomerId] UNIQUE NONCLUSTERED ([intEntityCustomerId] ASC),
 	CONSTRAINT [FK_tblARCustomer_tblARCustomerGroup_ContractGroup] FOREIGN KEY([intContractGroupId]) REFERENCES [dbo].[tblARCustomerGroup] ([intCustomerGroupId]),
 	CONSTRAINT [FK_tblARCustomer_tblARCustomerGroup_BuybackGroup] FOREIGN KEY([intBuybackGroupId]) REFERENCES [dbo].[tblARCustomerGroup] ([intCustomerGroupId]),
-	CONSTRAINT [FK_tblARCustomer_tblARCustomerGroup_PriceGroup] FOREIGN KEY([intPriceGroupId]) REFERENCES [dbo].[tblARCustomerGroup] ([intCustomerGroupId])
+	CONSTRAINT [FK_tblARCustomer_tblARCustomerGroup_PriceGroup] FOREIGN KEY([intPriceGroupId]) REFERENCES [dbo].[tblARCustomerGroup] ([intCustomerGroupId]),
+	CONSTRAINT [FK_tblARCustomer_tblEntity] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblEntity] ([intEntityId]) ON DELETE CASCADE
     --CONSTRAINT [UKstrCusomerNumber] UNIQUE NONCLUSTERED ([strCustomerNumber] ASC)
 );
 

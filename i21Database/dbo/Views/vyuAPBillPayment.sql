@@ -21,7 +21,7 @@ A.intBillId
 ,Payments.intPaymentId
 ,Payments.dtmDatePaid
 FROM dbo.tblAPBill A
-	LEFT JOIN 
+	INNER JOIN 
 	(
 		SELECT 
 			B.[intEntityVendorId]

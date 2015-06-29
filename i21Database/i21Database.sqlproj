@@ -155,6 +155,7 @@
     <Folder Include="dbo\Triggers\" />
     <Folder Include="Scripts\Post-Deployment\TM\Reports\SubReportSettings" />
     <Folder Include="Scripts\Post-Deployment\PR\DataFixes" />
+    <Folder Include="Scripts\Post-Deployment\GL\ReportData" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -1543,7 +1544,7 @@
     <Build Include="dbo\Functions\fnAPCreatePaymentBankTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateOrderShipmentStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryAdjustmentSplitLot.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCStorageUpdate.sql" />
+    <None Include="dbo\Stored Procedures\uspSCStorageUpdate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFStartCycleCount.sql" />
     <Build Include="dbo\Stored Procedures\uspPRPostPaycheck.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryShipment.sql" />
@@ -1718,7 +1719,6 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillAmounts.sql" />
     <Build Include="dbo\Views\vyuAPBillStatus.sql" />
     <Build Include="dbo\Views\vyuARSalesAnalysisReport.sql" />
-    <None Include="Scripts\Post-Deployment\GL\ReportDataFix.sql" />
     <Build Include="dbo\Views\vyuCTContractHeaderView.sql" />
     <Build Include="dbo\Views\vyuCTContractSearchView.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptCharge.sql" />
@@ -1799,7 +1799,6 @@
     <Build Include="dbo\Stored Procedures\uspLGShipmentUpdateContainerReceivedQty.sql" />
     <Build Include="dbo\Views\vyuICGetItemStockUOMForAdjustment.sql" />
     <Build Include="dbo\Views\vyuLGShippingInstructions.sql" />
-    <None Include="Scripts\Post-Deployment\GL\ReportDataFix.sql" />
     <Build Include="dbo\Tables\tblRKOptionsPnSExercisedAssigned.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetContainerType.sql" />
     <Build Include="dbo\Tables\tblMFAttributeType.sql" />
@@ -1832,6 +1831,16 @@
     <Build Include="dbo\Stored Procedures\uspMFStartWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspLGAddInboundShipmentToInventoryReceipt.sql" />
+    <None Include="Scripts\Post-Deployment\GL\ReportData\GeneralLedgerByAccountDetail.sql" />
+    <None Include="Scripts\Post-Deployment\GL\ReportData\IncomeStatementStandard.sql" />
+    <None Include="Scripts\Post-Deployment\GL\ReportData\TrialBalanceDetail.sql" />
+    <None Include="Scripts\Post-Deployment\GL\ReportData\TrialBalance.sql" />
+    <None Include="Scripts\Post-Deployment\GL\ReportData\BalanceSheetStandard.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMDeactivateEntity.sql" />
+    <Build Include="dbo\Tables\tblMFBlendDemand.sql" />
+    <Build Include="dbo\Tables\tblMFBlendDemandStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendDemandSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendDemandDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1879,6 +1888,7 @@
     <None Include="Scripts\Post-Deployment\EM\008_MoveTruckerData.sql" />
     <None Include="Scripts\Post-Deployment\IC\10_RemoveCommodityItems.sql" />
     <None Include="dbo\Stored Procedures\uspCTAddPurchaseContractToInventoryReceipt.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateApprovalRecords.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

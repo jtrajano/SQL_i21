@@ -89,7 +89,7 @@ BEGIN
 				,intFreightTermId			= 1 -- TODO
 				,strBOLNumber				= SC.intTicketNumber -- TODO
 				,intShipViaId				= NULL
-				,strVessel					= NULL -- TODO
+				,strVessel					= SC.strTruckName -- TODO
 				,strProNumber				= NULL 
 				,strDriverId				= SC.strDriverName
 				,strSealNumber				= NULL 
@@ -136,13 +136,14 @@ BEGIN
 			,strNotes
 			,intSort
 			,intConcurrencyId
+			,intOwnershipType
 	)
 	SELECT			
 			intInventoryShipmentId	= @InventoryShipmentId
 			,intSourceId			= @intTicketId
 			,intLineNo				= 1
 			,intItemId				= SC.intItemId
-			,intSubLocationId		= NULL
+			,intSubLocationId		= SC.intSubLocationId
 			,dblQuantity			= LI.dblQty
 			,intItemUOMId			= ItemUOM.intItemUOMId
 			,dblUnitPrice			= LI.dblCost
@@ -151,6 +152,12 @@ BEGIN
 			,strNotes				= SC.strTicketComment
 			,intSort				= 1
 			,intConcurrencyId		= 1
+			,intOwnershipType       = CASE
+									  WHEN LI.ysnIsCustody = 0
+									  THEN 1
+									  WHEN LI.ysnIsCustody = 1
+									  THEN 2
+									  END
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId INNER JOIN dbo.tblICItemUOM ItemUOM			
 			ON ItemUOM.intItemId = SC.intItemId
 			AND ItemUOM.intItemUOMId = @intTicketItemUOMId

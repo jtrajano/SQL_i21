@@ -324,13 +324,13 @@ BEGIN TRY
 					THEN (CASE WHEN L.intWeightUOMId IS NOT NULL THEN L.dblWeight ELSE L.dblQty END)
 				ELSE @dblInputWeight
 				END
-			,intWeightUOMId
+			,ISNULL(intWeightUOMId,intItemUOMId)
 			,CASE 
 				WHEN @dblInputWeight = 0
 					THEN (CASE WHEN L.intWeightUOMId IS NOT NULL THEN L.dblWeight ELSE L.dblQty END)
 				ELSE @dblInputWeight
 				END
-			,intWeightUOMId
+			,ISNULL(intWeightUOMId,intItemUOMId)
 			,@intBatchId
 			,1
 			,@dtmCurrentDate
