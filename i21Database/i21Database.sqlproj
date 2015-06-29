@@ -1844,6 +1844,8 @@
     <Build Include="dbo\Tables\tblSMUserRoleCompanyLocationPermission.sql" />
     <Build Include="dbo\Stored Procedures\uspAPDuplicateBillBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCopyPromotions.sql" />
+    <Build Include="dbo\Tables\tblCTCompanyPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTMigrateCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1892,6 +1894,7 @@
     <None Include="Scripts\Post-Deployment\IC\10_RemoveCommodityItems.sql" />
     <None Include="dbo\Stored Procedures\uspCTAddPurchaseContractToInventoryReceipt.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateApprovalRecords.sql" />
+    <None Include="Scripts\Post-Deployment\CT\2_DataMigration.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
