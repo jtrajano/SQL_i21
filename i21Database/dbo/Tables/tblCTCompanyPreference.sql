@@ -6,5 +6,6 @@
 	[ysnRequireDPContract] BIT NULL,
 	[ysnApplyScaleToBasis] BIT NULL,
 	[intPriceCalculationTypeId] INT NULL,
-	CONSTRAINT [PK_tblCTCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC), 
+	[intConcurrencyId] INT NOT NULL DEFAULT 1,
+	CONSTRAINT [PK_tblCTCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC)
 )
