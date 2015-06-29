@@ -39,6 +39,7 @@ SELECT
 	,T.[strTerm]
 	,S.[intShipViaID] 
 	,S.[strName]						AS [strShipVia]
+	,''									AS [strScaleTicketNumber]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -134,6 +135,7 @@ SELECT
 	,T.[strTerm]
 	,S.[intShipViaID] 
 	,S.[strName]						AS [strShipVia]
+	,''									AS [strScaleTicketNumber]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
