@@ -23,6 +23,7 @@
     [dblDefaultBurnRate] NUMERIC(18, 6) NOT NULL DEFAULT 1, 
     [ysnSendEmailOnDispatch] BIT NOT NULL DEFAULT 1, 
     [strDispatchFile] NVARCHAR(5) COLLATE Latin1_General_CI_AS  NOT NULL DEFAULT 'XML', 
+    [strCSVPath] NVARCHAR(500)  COLLATE Latin1_General_CI_AS NULL DEFAULT '', 
     CONSTRAINT [PK_tblTMPreferenceCompany] PRIMARY KEY CLUSTERED ([intPreferenceCompanyID] ASC)
 );
 
@@ -245,3 +246,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMPreferenceCompany',
     @level2type = N'COLUMN',
     @level2name = N'strDispatchFile'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'File Path for the generated CSV files during dispatch',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'strCSVPath'
