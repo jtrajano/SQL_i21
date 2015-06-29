@@ -11,12 +11,7 @@
 	,@intNewSubLocationId AS INT
 	,@intNewStorageLocationId AS INT
 	,@strNewLotNumber AS NVARCHAR(50)
-	,@dblAdjustByQuantity AS NUMERIC(18,6)
-	,@dblNewSplitLotQuantity AS NUMERIC(18,6)	
-	,@dblNewWeight AS NUMERIC(18,6)
-	,@intNewItemUOMId AS INT
-	,@intNewWeightUOMId AS INT
-	,@dblNewUnitCost AS NUMERIC(38, 20)
+	,@dblMoveQty AS NUMERIC(18,6)
 	-- Parameters used for linking or FK (foreign key) relationships
 	,@intSourceId AS INT
 	,@intSourceTransactionTypeId AS INT
@@ -115,12 +110,12 @@ BEGIN
 END 
 
 -- Raise an error if Adjust By Quantity is invalid
-IF ISNULL(@dblAdjustByQuantity, 0) > 0 
-BEGIN 
-	-- 'Internal Error. The Adjust By Quantity is required to be a negative value.'
-	RAISERROR(51127, 11, 1)  
-	GOTO _Exit
-END 
+--IF ISNULL(@dblMoveQty, 0) > 0 
+--BEGIN 
+--	-- 'Internal Error. The Adjust By Quantity is required to be a negative value.'
+--	RAISERROR(51127, 11, 1)  
+--	GOTO _Exit
+--END 
 
 -- Check if the new sub location is valid
 IF NOT EXISTS (
@@ -219,6 +214,7 @@ BEGIN
 			,intNewItemUOMId
 			,dblQuantity
 			,dblAdjustByQuantity
+			,dblNewSplitLotQuantity
 			,dblNewQuantity
 			,intWeightUOMId
 			,intNewWeightUOMId
@@ -240,22 +236,23 @@ BEGIN
 			,intStorageLocationId		= Lot.intStorageLocationId
 			,intItemId					= Lot.intItemId
 			,intLotId					= Lot.intLotId
-			,strNewLotNumber			= @strNewLotNumber	
+			,strNewLotNumber			= ISNULL(@strNewLotNumber, Lot.strLotNumber)
 			,intItemUOMId				= Lot.intItemUOMId
-			,intNewItemUOMId			= @intNewItemUOMId
+			,intNewItemUOMId			= Lot.intItemUOMId
 			,dblQuantity				= Lot.dblQty
-			,dblAdjustByQuantity		= @dblAdjustByQuantity
-			,dblNewQuantity				= Lot.dblQty + @dblAdjustByQuantity
+			,dblAdjustByQuantity		= -1 * @dblMoveQty
+			,dblNewSplitLotQuantity		= @dblMoveQty
+			,dblNewQuantity				= Lot.dblQty - @dblMoveQty
 			,intWeightUOMId				= Lot.intWeightUOMId
-			,intNewWeightUOMId			= @intNewWeightUOMId
+			,intNewWeightUOMId			= NULL 
 			,dblWeight					= Lot.dblWeight
-			,dblNewWeight				= @dblNewWeight
+			,dblNewWeight				= NULL 
 			,dblWeightPerQty			= Lot.dblWeightPerQty
-			,dblNewWeightPerQty			= CASE	WHEN ABS(ISNULL(@dblAdjustByQuantity, 0)) = 0 THEN 0
-												ELSE ISNULL(@dblNewWeight, 0) / ABS(ISNULL(@dblAdjustByQuantity, 0))
+			,dblNewWeightPerQty			= CASE	WHEN ABS(ISNULL(@dblMoveQty, 0)) = 0 THEN 0
+												ELSE ISNULL(Lot.dblWeight, 0) / ABS(ISNULL(@dblMoveQty, 0))
 										  END 											
 			,dblCost					= Lot.dblLastCost
-			,dblNewCost					= @dblNewUnitCost
+			,dblNewCost					= NULL 
 			,intNewLocationId			= @intNewLocationId
 			,intNewSubLocationId		= @intNewSubLocationId
 			,intNewStorageLocationId	= @intNewStorageLocationId
