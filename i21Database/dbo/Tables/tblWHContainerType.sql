@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblWHContainerType]
 (
 		[intContainerTypeId]	INT	NOT NULL IDENTITY,
+		[intConcurrencyId] INT NOT NULL,
 		[strInternalCode]	NVARCHAR(32)	COLLATE Latin1_General_CI_AS NOT NULL, 
 		[strContainerType]	NVARCHAR(32)	COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intDimensionUOMId]	INT	,
