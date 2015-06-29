@@ -154,8 +154,8 @@ BEGIN TRY
 				   ,[intContractDetailId]
 				   ,[dblUnits]
 				   ,[dtmHistoryDate]
-				   ,[dblStoragePaid]
-				   ,[dblFeesPaid]
+				   ,[dblPaidAmount]
+				   ,[strPaidDescription]
 				   ,[dblCurrencyRate])
 			   VALUES
 				   (1
@@ -167,7 +167,7 @@ BEGIN TRY
 				   ,@dblUnits
 				   ,dbo.fnRemoveTimeOnDate(GETDATE())
 				   ,0
-				   ,0
+				   ,NULL
 				   ,1)
 				INSERT INTO @ItemsForItemShipment (
 				 intItemId
@@ -235,8 +235,8 @@ BEGIN TRY
 				   ,[intContractDetailId]
 				   ,[dblUnits]
 				   ,[dtmHistoryDate]
-				   ,[dblStoragePaid]
-				   ,[dblFeesPaid]
+				   ,[dblPaidAmount]
+				   ,[strPaidDescription]
 				   ,[dblCurrencyRate])
 			   VALUES
 				   (1
@@ -248,7 +248,7 @@ BEGIN TRY
 				   ,@dblRunningBalance
 				   ,dbo.fnRemoveTimeOnDate(GETDATE())
 				   ,0
-				   ,0
+				   ,NULL
 				   ,1)
 				INSERT INTO @ItemsForItemShipment (
 				 intItemId
