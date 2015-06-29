@@ -45,6 +45,9 @@ SET @IsOpen = (	SELECT COUNT(1)
 						)										
 					)
 					
+IF(NOT EXISTS(SELECT NULL FROM tblICInventoryShipmentItem WHERE intOrderId = @SalesOrderId))
+	SET @IsOpen = 1
+					
 IF @IsOpen <> 0
 	BEGIN
 		SET @OrderStatus = 'Open'
