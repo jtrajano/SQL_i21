@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspMFGetProductByProcess (
 	@intManufacturingProcessId INT
 	,@intLocationID INT
+	,@strItemNo nvarchar(50)='%'
 	)
 AS
 BEGIN
@@ -19,4 +20,5 @@ BEGIN
 		AND R.intManufacturingProcessId = @intManufacturingProcessId
 		AND IU.ysnStockUnit=1
 		AND I.strStatus='Active'
+		AND I.strItemNo LIKE @strItemNo+'%' 
 END
