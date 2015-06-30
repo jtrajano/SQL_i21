@@ -72,8 +72,8 @@ DECLARE @CODE NVARCHAR(25) = 'AR'
 DECLARE @ARAccount NVARCHAR(250)
 		,@DiscountAccount NVARCHAR(250)
 		
-SELECT @ARAccount = strValue FROM tblSMPreferences WHERE strPreference = 'DefaultARAccount'
-SELECT @DiscountAccount = strValue FROM tblSMPreferences WHERE strPreference = 'DefaultARDiscountAccount'
+SET @ARAccount = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
+SET @DiscountAccount = ISNULL((SELECT TOP 1 intDiscountAccountId FROM tblARCompanyPreference WHERE intDiscountAccountId IS NOT NULL AND intDiscountAccountId <> 0),0)
 		
 
 DECLARE @UserEntityID int
