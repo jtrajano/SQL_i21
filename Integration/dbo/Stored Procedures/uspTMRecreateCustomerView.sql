@@ -95,7 +95,7 @@ BEGIN
 				,vwcus_cred_limit  = CAST(ISNULL(A.agcus_cred_limit,0.0) AS DECIMAL(18,6)) 
 				,vwcus_last_stmt_bal = ISNULL(A.agcus_last_stmt_bal,0.0)  
 				,vwcus_budget_amt_due = CAST(ISNULL(A.agcus_budget_amt_due,0.0) AS DECIMAL(18,6))  
-				,vwcus_cred_ppd   = ISNULL(A.agcus_cred_ppd,0.0)  
+				,vwcus_cred_ppd   = CAST(ISNULL(A.agcus_cred_ppd,0.0) AS NUMERIC(18,6)  
 				,vwcus_ytd_srvchr  = CAST(ISNULL(A.agcus_ytd_srvchr,0.0) AS DECIMAL(18,6))  
 				,vwcus_last_pymt  = ISNULL(A.agcus_last_pymt,0.0)  
 				,vwcus_last_pay_rev_dt = ISNULL(A.agcus_last_pay_rev_dt,0)  
@@ -240,7 +240,7 @@ BEGIN
 			CREATE VIEW [dbo].[vwcusmst]  
 			AS  
 			SELECT
-				vwcus_key = ISNULL(Cus.strCustomerNumber,'''')
+				vwcus_key = ISNULL(Ent.strEntityNo,'''')
 				,vwcus_last_name = ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,1,25) ELSE SUBSTRING(Ent.strName, 1, (CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  -1 ELSE 25 END)) END),'''')
 				,vwcus_first_name = ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,26,50) ELSE SUBSTRING(Ent.strName,(CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  + 2 ELSE 50 END),50) END),'''')
 				,vwcus_mid_init = ''''
@@ -264,37 +264,37 @@ BEGIN
 									 WHEN Cus.strStatementFormat = ''None'' THEN ''N'' 
 									 WHEN Cus.strStatementFormat IS NULL THEN Null ELSE '''' END
 				,vwcus_ytd_pur = 0  
-				,vwcus_ytd_sls = 0.0  
+				,vwcus_ytd_sls = ISNULL(CI.dblYTDSales, 0.0)
 				,vwcus_ytd_cgs = 0.0  
 				,vwcus_budget_amt = Cus.dblBudgetAmountForBudgetBilling
 				,vwcus_budget_beg_mm = CAST(ISNULL(SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2),0) AS INT)
 				,vwcus_budget_end_mm = CAST(ISNULL(SUBSTRING(Cus.strBudgetBillingEndMonth,1,2),0) AS INT)
 				,vwcus_active_yn = CASE WHEN Cus.ysnActive = 1 THEN ''Y'' ELSE ''N'' END
-				,vwcus_ar_future = 0.0
-				,vwcus_ar_per1 = 0.0 
-				,vwcus_ar_per2 = 0.0  
-				,vwcus_ar_per3 = 0.0 
-				,vwcus_ar_per4 = 0.0 
-				,vwcus_ar_per5 = 0.0 
-				,vwcus_pend_ivc = 0.0
-				,vwcus_cred_reg = 0.0
-				,vwcus_pend_pymt = 0.0
+				,vwcus_ar_future = CAST(ISNULL(CI.dblFuture,0.0) AS NUMERIC(18,6))
+				,vwcus_ar_per1 = ISNULL(CI.dbl10Days,0.0) 
+				,vwcus_ar_per2 = ISNULL(CI.dbl30Days,0.0)
+				,vwcus_ar_per3 = ISNULL(CI.dbl60Days,0.0)
+				,vwcus_ar_per4 = ISNULL(CI.dbl90Days,0.0)
+				,vwcus_ar_per5 = ISNULL(CI.dbl91Days,0.0)
+				,vwcus_pend_ivc = ISNULL(CI.dblInvoiceTotal,0.0)
+				,vwcus_cred_reg = ISNULL(CI.dblUnappliedCredits,0.0)
+				,vwcus_pend_pymt = ISNULL(CI.dblPendingPayment,0.0)
 				,vwcus_cred_ga = 0.0
 				,vwcus_co_per_ind_cp = CASE WHEN Cus.strType = ''Company'' THEN ''C'' ELSE ''P'' END
 				,vwcus_bus_loc_no = ''''
 				,vwcus_cred_limit = Cus.dblCreditLimit
-				,vwcus_last_stmt_bal = 0.0
-				,vwcus_budget_amt_due  = 0.0
-				,vwcus_cred_ppd  = 0.0 
+				,vwcus_last_stmt_bal = ISNULL(CI.dblLastStatement,0.0)
+				,vwcus_budget_amt_due  = ISNULL(CI.dblTotalDue,0.0)
+				,vwcus_cred_ppd  = CAST(ISNULL(CI.dblPrepaids,0.0) AS NUMERIC(18,6))
 				,vwcus_ytd_srvchr = 0.0 
-				,vwcus_last_pymt = 0.0 
-				,vwcus_last_pay_rev_dt = 0  
+				,vwcus_last_pymt = ISNULL(CI.dblLastPayment,0.0)
+				,vwcus_last_pay_rev_dt = ISNULL(CAST((SELECT CAST(YEAR(CI.dtmLastPaymentDate) AS NVARCHAR(4)) + CAST(MONTH(CI.dtmLastPaymentDate) AS NVARCHAR(2)) + CAST(DAY(CI.dtmLastPaymentDate) AS NVARCHAR(2))) AS INT),0)  
 				,vwcus_last_ivc_rev_dt = 0
 				,vwcus_high_cred = 0.0  
 				,vwcus_high_past_due = 0.0
 				,vwcus_avg_days_pay = 0
 				,vwcus_avg_days_no_ivcs = 0
-				,vwcus_last_stmt_rev_dt = 0
+				,vwcus_last_stmt_rev_dt = ISNULL(CAST((SELECT CAST(YEAR(CI.dtmLastStatementDate) AS NVARCHAR(4)) + CAST(MONTH(CI.dtmLastStatementDate) AS NVARCHAR(2)) + CAST(DAY(CI.dtmLastStatementDate) AS NVARCHAR(2))) AS INT),0) 
 				,vwcus_country = (CASE WHEN LEN(Loc.strCountry) = 3 THEN Loc.strCountry ELSE '''' END)  
 				,vwcus_termdescription = (SELECT strTermCode FROM tblSMTerm WHERE intTermID = Loc.intTermsId)
 				,vwcus_tax_ynp = CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN ''Y'' ELSE ''N'' END   
@@ -303,7 +303,7 @@ BEGIN
 				,vwcus_phone2 =  (CASE WHEN CHARINDEX(''x'', Con.strPhone2) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone2,1,15), 0, CHARINDEX(''x'',Con.strPhone2)) ELSE SUBSTRING(Con.strPhone2,1,15)END)
 				,vwcus_balance = 0.0
 				,vwcus_ptd_sls = 0.0 
-				,vwcus_lyr_sls = 0.0
+				,vwcus_lyr_sls = ISNULL(CI.dblLastYearSales,0.0)
 				,vwcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId)
 				,dblFutureCurrent = 0.0
 				,intConcurrencyId = 0
@@ -319,6 +319,8 @@ BEGIN
 			INNER JOIN tblEntityLocation Loc 
 				ON Ent.intEntityId = Loc.intEntityId 
 					and Loc.ysnDefaultLocation = 1
+			LEFT JOIN [vyuARCustomerInquiryReport] CI
+				ON Ent.strName = CI.strCustomerName
 		
 		')
 	END
