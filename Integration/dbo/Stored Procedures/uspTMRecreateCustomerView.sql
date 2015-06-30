@@ -95,7 +95,7 @@ BEGIN
 				,vwcus_cred_limit  = CAST(ISNULL(A.agcus_cred_limit,0.0) AS DECIMAL(18,6)) 
 				,vwcus_last_stmt_bal = ISNULL(A.agcus_last_stmt_bal,0.0)  
 				,vwcus_budget_amt_due = CAST(ISNULL(A.agcus_budget_amt_due,0.0) AS DECIMAL(18,6))  
-				,vwcus_cred_ppd   = CAST(ISNULL(A.agcus_cred_ppd,0.0) AS NUMERIC(18,6)  
+				,vwcus_cred_ppd   = CAST(ISNULL(A.agcus_cred_ppd,0.0) AS NUMERIC(18,6))  
 				,vwcus_ytd_srvchr  = CAST(ISNULL(A.agcus_ytd_srvchr,0.0) AS DECIMAL(18,6))  
 				,vwcus_last_pymt  = ISNULL(A.agcus_last_pymt,0.0)  
 				,vwcus_last_pay_rev_dt = ISNULL(A.agcus_last_pay_rev_dt,0)  
