@@ -77,3 +77,5 @@ GO
 GO
 	PRINT N'Begin updating fiscalyear/period id in tblGLJournal'
 GO
+	EXEC dbo.uspGLImportRecurring
+GO
