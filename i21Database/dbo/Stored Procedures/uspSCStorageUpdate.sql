@@ -430,7 +430,7 @@ BEGIN TRY
 							,intCurrencyId = ScaleTicket.intCurrencyId
 							,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
 							,intTransactionId = ScaleTicket.intTicketId
-							,intTransactionDetailId = ScaleTicket.intTicketId
+							,intTransactionDetailId = NULL
 							,strTransactionId = ScaleTicket.intTicketNumber
 							,intTransactionTypeId = @intDirectType 
 							,intLotId = NULL 
@@ -453,7 +453,7 @@ BEGIN TRY
 	
 		-- Add the items to the item receipt 
 		BEGIN 
-			EXEC dbo.uspSCAddScaleTicketToItemReceipt @intTicketId, @intUserId, @ItemsForItemReceipt, @intEntityId, @InventoryReceiptId OUTPUT; 
+			EXEC dbo.uspSCAddScaleTicketToItemReceipt @intTicketId, @intUserId, @ItemsForItemReceipt, @intEntityId, 'Direct' ,@InventoryReceiptId OUTPUT; 
 		END
 	
 		BEGIN 
@@ -463,7 +463,7 @@ BEGIN TRY
 		END
 	
 		EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;
-		EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
+		--EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
 	
 	-- Get the identity value from tblGRCustomerStorage
 	SELECT @intCustomerStorageId = SCOPE_IDENTITY()
