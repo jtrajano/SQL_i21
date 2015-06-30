@@ -73,7 +73,7 @@ IF NOT EXISTS (SELECT strTransactionId FROM tblCMBankTransaction WHERE strTransa
 			,[intCurrencyId]			= BA.intCurrencyId
 			,[dblExchangeRate]			= (SELECT TOP 1 dblDailyRate FROM tblSMCurrency WHERE intCurrencyID = BA.intCurrencyId)
 			,[dtmDate]					= @dtmPayDate
-			,[strPayee]					= ''
+			,[strPayee]					= (SELECT TOP 1 strName FROM tblEntity WHERE intEntityId = @intEmployeeId)
 			,[intPayeeId]				= PC.intEmployeeId
 			,[strAddress]				= BA.strAddress
 			,[strZipCode]				= BA.strZipCode
