@@ -1843,6 +1843,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGetBlendDemandDetail.sql" />
     <Build Include="dbo\Tables\tblSMUserRoleCompanyLocationPermission.sql" />
     <Build Include="dbo\Stored Procedures\uspAPDuplicateBillBatch.sql" />
+    <Build Include="dbo\Tables\tblDBUserPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspDBMigrateUserPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
