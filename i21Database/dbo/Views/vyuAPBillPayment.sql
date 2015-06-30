@@ -20,6 +20,7 @@ A.intBillId
 ,Payments.strBankAccountNo
 ,Payments.intPaymentId
 ,Payments.dtmDatePaid
+,Payments.ysnCleared
 FROM dbo.tblAPBill A
 	INNER JOIN 
 	(
@@ -35,12 +36,13 @@ FROM dbo.tblAPBill A
 			,G.strBankAccountNo
 			,CAST(CASE WHEN H.dtmCheckPrinted IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS ysnPrinted
 			,ISNULL(H.ysnCheckVoid,0) AS ysnVoid
+			,ISNULL(H.ysnClr,0) AS ysnCleared
 			,B.dtmDatePaid
 		FROM dbo.tblAPPayment B 
 			LEFT JOIN dbo.tblAPPaymentDetail C ON B.intPaymentId = C.intPaymentId
 		INNER JOIN dbo.tblCMBankAccount G ON B.intAccountId = G.intGLAccountId
 		INNER JOIN dbo.tblCMBankTransaction H ON B.strPaymentRecordNum = H.strTransactionId
 		--WHERE B.ysnPosted = 1
-		GROUP BY [intEntityVendorId], intBillId, H.dtmCheckPrinted, H.ysnCheckVoid, G.strBankAccountNo, B.strPaymentInfo, B.intPaymentId, B.dtmDatePaid
+		GROUP BY [intEntityVendorId], intBillId, H.dtmCheckPrinted, H.ysnCheckVoid, H.ysnClr, G.strBankAccountNo, B.strPaymentInfo, B.intPaymentId, B.dtmDatePaid
 	) Payments
 	ON A.intBillId = Payments.intBillId

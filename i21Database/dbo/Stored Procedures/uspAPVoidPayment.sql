@@ -31,9 +31,9 @@ BEGIN
 
 	IF EXISTS(SELECT 1 FROM tblAPPayment A
 				INNER JOIN tblCMBankTransaction B ON A.strPaymentRecordNum = B.strTransactionId
-				WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayables) AND A.ysnPosted = 1 AND (B.dtmCheckPrinted IS NULL OR B.ysnCheckVoid = 1))
+				WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayables) AND A.ysnPosted = 1 AND (B.dtmCheckPrinted IS NULL OR B.ysnCheckVoid = 1 OR B.ysnClr = 1))
 	BEGIN
-		RAISERROR('Void failed. Payment already void or not yet printed.', 16, 1);
+		RAISERROR('Void failed. Payment already void or not yet printed or it has been cleared.', 16, 1);
 	END
 
 	--DO NOT ALLOW TO VOID THE PREPAYMENT PAYMENT IF IT WAS APPLIED ON THE BILLS
