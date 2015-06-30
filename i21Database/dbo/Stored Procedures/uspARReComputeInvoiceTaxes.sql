@@ -15,13 +15,15 @@ DECLARE @ZeroDecimal	DECIMAL(18,6)
 
 SET @ZeroDecimal = 0.000000	
 
-DECLARE @CustomerId		INT
-		,@LocationId	INT
+DECLARE @CustomerId			INT
+		,@LocationId		INT
+		,@TransactionDate	DATETIME
 		
 		
 SELECT
-	@CustomerId		= [intEntityCustomerId]
-	,@LocationId	= [intCompanyLocationId]
+	@CustomerId			= [intEntityCustomerId]
+	,@LocationId		= [intCompanyLocationId]
+	,@TransactionDate	= [dtmDate]
 FROM
 	tblARInvoice
 WHERE
@@ -116,6 +118,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 					 @ItemId  
 					,@LocationId  
 					,@CustomerId
+					,@TransactionDate
 									
 			
 			-- Calculate Item Tax
