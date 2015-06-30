@@ -218,14 +218,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     }
                 },
                 colUnitPrice: 'dblUnitPrice',
-//                colTaxCode: '',
-//                colTaxAmount: '',
-//                colDockDoor: {
-//                    dataIndex: 'strDockDoor',
-//                    editor: {
-//                        store: '{itemPackType}'
-//                    }
-//                },
                 colNotes: 'strNotes'
             },
 
