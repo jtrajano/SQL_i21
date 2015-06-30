@@ -1851,6 +1851,7 @@
     <Build Include="dbo\Tables\tblARProductTypeDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspPOUpdateAddressInfo.sql" />
     <Build Include="dbo\Stored Procedures\uspAPBillUpdateAddressInfo.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLReverseJournalEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -104,6 +104,14 @@ IF ISNULL(@ysnPost, 0) = 0
 				IF(@intCount > 0)
 				BEGIN
 					UPDATE tblGLJournal SET ysnPosted = 0 WHERE intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)
+					
+					--GL REVERSAL
+					UPDATE t SET intFiscalYearId = NULL, intFiscalPeriodId = NULL FROM tblGLJournal t INNER JOIN
+					#tmpPostJournals p ON t.intJournalId = p.intJournalId
+					
+					UPDATE s SET ysnReversed = 0  FROM tblGLJournal t INNER JOIN
+					tblGLJournal s on s.intJournalId = t.intJournalIdToReverse
+					INNER JOIN #tmpPostJournals p ON t.intJournalId = p.intJournalId
 				END									
 			END
 		
@@ -540,6 +548,18 @@ UPDATE tblGLJournal
 SET [ysnPosted] = 1
 	,[dtmPosted] = GETDATE()
 WHERE [intJournalId] IN (SELECT [intJournalId] FROM #tmpValidJournals);
+
+UPDATE  b SET ysnReversed = 1 FROM tblGLJournal j
+	INNER JOIN #tmpValidJournals v on j.intJournalId = v.intJournalId
+	INNER  JOIN tblGLJournal b on j.intJournalIdToReverse = b.intJournalId
+
+
+UPDATE j SET intFiscalPeriodId = f.intGLFiscalYearPeriodId, intFiscalYearId = f.intFiscalYearId
+	FROM tblGLJournal j, tblGLFiscalYearPeriod f, #tmpValidJournals t
+	WHERE j.dtmDate >= f.dtmStartDate and j.dtmDate <= f.dtmEndDate
+	AND j.ysnPosted = 1
+	AND t.intJournalId = j.intJournalId
+
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
