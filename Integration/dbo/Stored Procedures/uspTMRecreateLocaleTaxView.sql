@@ -65,6 +65,7 @@ BEGIN
 						,vwlcl_user_rev_dt	=	aglcl_user_rev_dt
 						,A4GLIdentity	=	CAST(A4GLIdentity   AS INT)
 						,strTaxStateLocale = ISNULL(aglcl_tax_state,'''') + ''-'' + ISNULL(aglcl_tax_auth_id1,'''') + ''-'' + ISNULL(aglcl_tax_auth_id2,'''')
+						,strDescription = ''''
 						,intConcurrencyId = 0 
 					FROM aglclmst
 				
@@ -94,7 +95,9 @@ BEGIN
 						,vwlcl_user_rev_dt	=	NULL
 						,A4GLIdentity	=	CAST(A4GLIdentity   AS INT)
 						,strTaxStateLocale = ISNULL(ptlcl_state,'''') + ''-'' + ISNULL(ptlcl_local1_id,'''') + ''-'' + ISNULL(ptlcl_local2_id,'''')
+						,strDescription = ''''
 						,intConcurrencyId = 0 
+						
 					FROM ptlclmst
 				
 				')
@@ -106,8 +109,8 @@ BEGIN
 			CREATE VIEW [dbo].[vwlclmst]
 			AS
 			SELECT
-				vwlcl_tax_state	=	strState,
-				vwlcl_tax_auth_id1	=	strCounty,
+				vwlcl_tax_state	=	strTaxGroupMaster,
+				vwlcl_tax_auth_id1	=	'''',
 				vwlcl_tax_auth_id2	=	'''',
 				vwlcl_auth_id1_desc	=	'''',
 				vwlcl_auth_id2_desc	=	'''',
@@ -121,10 +124,11 @@ BEGIN
 				,vwlcl_lc6_ivc_desc	=	''''
 				,vwlcl_user_id	=	''''
 				,vwlcl_user_rev_dt	=	NULL
-				,A4GLIdentity	=	CAST(intTaxCodeId AS INT)
+				,A4GLIdentity	=	CAST(intTaxGroupMasterId AS INT)
 				,intConcurrencyId = 0 
-				,strTaxStateLocale = strState
-			FROM tblSMTaxCode
+				,strTaxStateLocale = strTaxGroupMaster
+				,strDescription = strDescription
+			FROM tblSMTaxGroupMaster
 		')
 	END
 END
