@@ -11,21 +11,25 @@ BEGIN TRY
 		,@strTransactionId NVARCHAR(50)
 		,@dblQuantity NUMERIC(18, 6)
 		,@intItemId int
+		,@intBatchId int
 		
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
 
 	SELECT @intWorkOrderId = intWorkOrderId
+		,@intBatchId=intBatchId
 		,@intLotId = intLotId
 		,@intUserId = intUserId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
+			,intBatchId int
 			,intLotId INT
 			,intUserId INT
 			)
 
-	SELECT @intTransactionId = intLotId
-		,@strTransactionId = strLotNumber
+	SELECT @intTransactionId=@intBatchId
+
+	SELECT @strTransactionId = strLotNumber
 		,@intItemId=intItemId
 	FROM tblICLot
 	WHERE intLotId = @intLotId

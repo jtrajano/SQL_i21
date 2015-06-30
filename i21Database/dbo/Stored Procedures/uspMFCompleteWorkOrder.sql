@@ -263,6 +263,7 @@ BEGIN TRY
 			,intStatusId
 			,intManufacturingCellId
 			,intStorageLocationId
+			,intSubLocationId
 			,intLocationId
 			,dtmCreated
 			,intCreatedUserId
@@ -285,13 +286,15 @@ BEGIN TRY
 			,10
 			,@intManufacturingCellId
 			,@intStorageLocationId
+			,@intSubLocationId
 			,@intLocationId
 			,@dtmCurrentDate
 			,@intUserId
 			,@dtmCurrentDate
 			,@intUserId
 			,@strVendorLotNo
-			,DateAdd(mi,DateDiff(mi,GetUTCDATE(),GetDate()),@dtmPlannedDate)
+			--,DateAdd(mi,DateDiff(mi,GetUTCDATE(),GetDate()),@dtmPlannedDate)
+			,@dtmPlannedDate
 			,@intPlannedShiftId
 			,@dtmPlannedDate
 			,ISNULL(@intExecutionOrder, 1)

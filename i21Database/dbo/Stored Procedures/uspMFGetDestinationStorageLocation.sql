@@ -23,5 +23,6 @@ BEGIN
 		,SL.intSubLocationId 
 	FROM dbo.tblICStorageLocation SL
 	WHERE intLocationId = @intLocationId
-		AND strName=@strName +'%'
+		AND strName LIKE @strName +'%'
+		Order by SL.strName
 END

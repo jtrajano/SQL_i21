@@ -24,4 +24,6 @@ BEGIN
 	FROM dbo.tblICStorageLocation SL
 	WHERE intLocationId = @intLocationId and SL.ysnAllowConsume =1
 	AND SL.strName LIKE @strName+'%'
+	Order by SL.strName
+
 END
