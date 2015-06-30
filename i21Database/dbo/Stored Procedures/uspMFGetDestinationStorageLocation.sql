@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspMFGetDestinationStorageLocation (
 	@intProcessId INT
 	,@intLocationId INT
+	,@strName nvarchar(50)='%'
 	)
 AS
 BEGIN
@@ -22,4 +23,5 @@ BEGIN
 		,SL.intSubLocationId 
 	FROM dbo.tblICStorageLocation SL
 	WHERE intLocationId = @intLocationId
+		AND strName=@strName +'%'
 END

@@ -126,7 +126,7 @@ FROM
 			tblARInvoice ISH
 				ON ISD.[intInvoiceId] = ISH.[intInvoiceId]
 		WHERE
-			(ISD.[intInventoryShipmentId] IS NULL OR ISD.[intInventoryShipmentId] = 0)			
+			(ISD.[intInventoryShipmentItemId] IS NULL OR ISD.[intInventoryShipmentItemId] = 0)			
 			AND (ISD.[intSalesOrderDetailId] IS NOT NULL OR ISD.[intSalesOrderDetailId] <> 0)			
 		GROUP BY
 			ISD.[intSalesOrderDetailId]

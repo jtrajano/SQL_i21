@@ -9,7 +9,6 @@
                SELECT * FROM [$(TableName)]					
 --------------------------------------------------------------------------------------
 */
-
 :r .\LoadModules.sql
 
 -- SYSTEM MANAGER
@@ -87,6 +86,8 @@
 
 -- TANK MANAGEMENT
 :r ..\dbo\Views\vwclsmst.sql
+--:r ..\dbo\Views\vyuTMOriginAccountStatus.sql
+:r "..\dbo\Stored Procedures\uspTMRecreateAccountStatusView.sql"
 --:r ..\dbo\Views\vwcmtmst.sql
 :r "..\dbo\Stored Procedures\uspTMRecreateCommentsView.sql"
 :r ..\dbo\Views\vwcntmst.sql
@@ -114,7 +115,7 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateTermsView.sql"
 :r ..\dbo\Views\vwDispatch.sql
 :r ..\dbo\Views\vyuTMtrprcmst.sql
-:r ..\dbo\Views\vyuTMOriginAccountStatus.sql
+
 :r "..\dbo\Stored Procedures\TwoPartDeliveryFillReport.sql"
 :r "..\dbo\Stored Procedures\uspTMGetConsumptionWithGasCheck.sql"
 :r "..\dbo\Stored Procedures\uspTMGetConsumptionWithLeakCheck.sql"
