@@ -1972,11 +1972,19 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 displayField: 'intTrackingNumber',
                 valueField: 'intTrackingNumber',
                 store: win.viewModel.storeInfo.inboundShipment,
-                defaultFilters: [{
-                    column: 'intContractDetailId',
-                    value: record.get('intLineNo'),
-                    conjunction: 'and'
-                }]
+                defaultFilters: [
+                    {
+                        column: 'dblBalanceToReceived',
+                        value: '0',
+                        conjunction: 'and',
+                        condition: 'gt'
+                    },
+                    {
+                        column: 'intContractDetailId',
+                        value: record.get('intLineNo'),
+                        conjunction: 'and'
+                    }
+                ]
             })
         });
     },
