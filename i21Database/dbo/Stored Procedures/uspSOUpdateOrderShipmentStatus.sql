@@ -17,7 +17,7 @@ SET @IsOpen = (	SELECT COUNT(1)
 												tblICInventoryShipmentItem
 											WHERE
 												intLineNo = tblSOSalesOrderDetail.[intSalesOrderDetailId]
-												AND intSourceId = @SalesOrderId
+												AND intOrderId = @SalesOrderId
 											)
 							AND
 							EXISTS(			SELECT NULL 
@@ -45,6 +45,9 @@ SET @IsOpen = (	SELECT COUNT(1)
 						)										
 					)
 					
+IF(NOT EXISTS(SELECT NULL FROM tblICInventoryShipmentItem WHERE intOrderId = @SalesOrderId))
+	SET @IsOpen = 1
+					
 IF @IsOpen <> 0
 	BEGIN
 		SET @OrderStatus = 'Open'
@@ -63,7 +66,7 @@ SET @HasShipment = (	SELECT COUNT(1)
 											tblICInventoryShipmentItem
 										WHERE
 											intLineNo = tblSOSalesOrderDetail.intSalesOrderDetailId
-											AND intSourceId = @SalesOrderId
+											AND intOrderId = @SalesOrderId
 										)
 						)					
 					
@@ -75,23 +78,22 @@ SET
 FROM
 	(
 		SELECT
-			 ISD.[intSourceId]
+			 ISD.[intOrderId]
 			,ISD.[intLineNo]
-			,SUM(ISNULL(ISD.[dblQuantity], 0.00))	[dblQuantity]
+			,SUM(ISNULL((CASE WHEN ISH.[ysnPosted] = 1 THEN ISD.[dblQuantity] ELSE 0.00 END), 0.00))	[dblQuantity]
 		FROM
 			tblICInventoryShipmentItem ISD
 		INNER JOIN
 			tblICInventoryShipment ISH
 				ON ISD.[intInventoryShipmentId] = ISH.[intInventoryShipmentId]
-				AND ISH.[ysnPosted]  = 1
 		WHERE
-			ISD.[intSourceId] = @SalesOrderId
+			ISD.[intOrderId] = @SalesOrderId
 		GROUP BY
-			ISD.[intSourceId]			
+			ISD.[intOrderId]			
 			,ISD.[intLineNo]
 	) SHP
 WHERE
-	[intSalesOrderId] = SHP.[intSourceId]
+	[intSalesOrderId] = SHP.[intOrderId]
 	AND [intSalesOrderDetailId] = SHP.[intLineNo] 
 
 
@@ -117,15 +119,14 @@ FROM
 	(
 		SELECT
 			 ISD.[intSalesOrderDetailId]
-			,SUM(ISNULL(ISD.[dblQtyShipped], 0.00))	[dblQuantity]
+			,SUM(ISNULL((CASE WHEN ISH.[ysnPosted] = 1 THEN ISD.[dblQtyShipped] ELSE 0.00 END), 0.00))	[dblQuantity]
 		FROM
 			tblARInvoiceDetail ISD
 		INNER JOIN
 			tblARInvoice ISH
 				ON ISD.[intInvoiceId] = ISH.[intInvoiceId]
-				AND ISH.[ysnPosted]  = 1
 		WHERE
-			(ISD.[intInventoryShipmentId] IS NULL OR ISD.[intInventoryShipmentId] = 0)			
+			(ISD.[intInventoryShipmentItemId] IS NULL OR ISD.[intInventoryShipmentItemId] = 0)			
 			AND (ISD.[intSalesOrderDetailId] IS NOT NULL OR ISD.[intSalesOrderDetailId] <> 0)			
 		GROUP BY
 			ISD.[intSalesOrderDetailId]
@@ -163,12 +164,13 @@ SET @PartialShipmentCount = (	SELECT COUNT(1)
 									AND ISNULL([dblQtyShipped],0.00) < ISNULL([dblQtyOrdered],0.00)
 									AND ISNULL([dblQtyShipped],0.00) <> ISNULL([dblQtyOrdered],0.00)
 									AND ISNULL([dblQtyOrdered],0.00) > 0
+									AND ISNULL([dblQtyShipped],0.00) > 0
 									--AND EXISTS(	SELECT NULL 
 									--			FROM
 									--				tblICInventoryShipmentItem
 									--			WHERE
 									--				intLineNo = tblSOSalesOrderDetail.intSalesOrderDetailId
-									--				AND intSourceId = @SalesOrderId
+									--				AND intOrderId = @SalesOrderId
 									--				)
 									)		
 
@@ -183,7 +185,7 @@ SET @CompletedShipmentCount = (	SELECT COUNT(1)
 									--				tblICInventoryShipmentItem
 									--			WHERE
 									--				intLineNo = tblSOSalesOrderDetail.intSalesOrderDetailId
-									--				AND intSourceId = @SalesOrderId
+									--				AND intOrderId = @SalesOrderId
 									--				)
 									)										
 		

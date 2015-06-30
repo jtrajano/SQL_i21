@@ -219,7 +219,7 @@ IF @recap = 0
 						AND A.intCompanyLocationId = IST.intLocationId 
 				WHERE 
 					(A.intFreightTermId IS NULL OR A.intFreightTermId = 0) 
-					AND (Detail.intInventoryShipmentId IS NULL OR Detail.intInventoryShipmentId = 0)
+					AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 					AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
 					AND (Detail.intItemId IS NOT NULL OR Detail.intItemId <> 0)
 					AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')
@@ -247,7 +247,7 @@ IF @recap = 0
 						AND A.intCompanyLocationId = IST.intLocationId 
 				WHERE 
 					(Detail.intItemUOMId IS NULL OR Detail.intItemUOMId = 0) 
-					AND (Detail.intInventoryShipmentId IS NULL OR Detail.intInventoryShipmentId = 0)
+					AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 					AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
 					AND (Detail.intItemId IS NOT NULL OR Detail.intItemId <> 0)
 					AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')					
@@ -563,7 +563,7 @@ IF @post = 1
 				ON Detail.intItemId = IST.intItemId 
 				AND Header.intCompanyLocationId = IST.intLocationId 
 		WHERE 
-			(Detail.intInventoryShipmentId IS NULL OR Detail.intInventoryShipmentId = 0)
+			(Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 			AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
 			AND (Detail.intItemId IS NOT NULL OR Detail.intItemId <> 0)
 			AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')
@@ -964,7 +964,7 @@ IF @post = 0
 					ON Detail.intItemId = IST.intItemId 
 					AND Header.intCompanyLocationId = IST.intLocationId 
 			WHERE 
-				(Detail.intInventoryShipmentId IS NULL OR Detail.intInventoryShipmentId = 0)
+				(Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 				AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
 				AND (Detail.intItemId IS NOT NULL OR Detail.intItemId <> 0)
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')

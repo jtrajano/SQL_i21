@@ -151,6 +151,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 --Contract Management
 :R .\CT\1_MasterTables.sql
+:R .\CT\2_DataMigration.sql
 
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql
@@ -177,7 +178,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\006_MoveTerminalData.sql
 :r .\EM\007_MoveShippingLineData.sql
 :r .\EM\008_MoveTruckerData.sql
-
+:r .\EM\009_UpdateEntityContactTypeData.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 

@@ -134,7 +134,12 @@ BEGIN
 				ON A.intPaymentId = B.intPaymentId
 			INNER JOIN tblAPBill C
 				ON B.intBillId = C.intBillId
+			LEFT JOIN tblCMBankTransaction D
+				ON A.strPaymentRecordNum = D.strTransactionId
 		WHERE  C.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
+		AND 1 = CASE WHEN D.intTransactionId IS NOT NULL
+					THEN CASE WHEN D.ysnCheckVoid = 0 THEN 1 ELSE 0 END
+				ELSE 1 END
 
 		--NO FISCAL PERIOD
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)

@@ -478,7 +478,6 @@
     <Build Include="dbo\Tables\tblEntityNote.sql" />
     <Build Include="dbo\Tables\tblEntityLocation.sql" />
     <Build Include="dbo\Tables\tblEntityEFTInformation.sql" />
-    <Build Include="dbo\Tables\tblEntityContact.sql" />
     <Build Include="dbo\Tables\tblEntity.sql" />
     <Build Include="dbo\Tables\tblSMUpload.sql" />
     <Build Include="dbo\Tables\tblSMCustomFieldValue.sql" />
@@ -520,7 +519,6 @@
     <Build Include="dbo\Tables\tblARCustomerSplit.sql" />
     <Build Include="dbo\Tables\tblARCustomerSpecialPrice.sql" />
     <Build Include="dbo\Tables\tblARCustomerQuote.sql" />
-    <Build Include="dbo\Tables\tblARCustomerPortalPermission.sql" />
     <Build Include="dbo\Tables\tblARCustomerPortalMenu.sql" />
     <Build Include="dbo\Tables\tblARCustomerMessage.sql" />
     <Build Include="dbo\Tables\tblARCustomerGroupDetail.sql" />
@@ -624,8 +622,6 @@
     <Build Include="dbo\Tables\tblHDTempEmail.sql" />
     <Build Include="dbo\Views\vyuAPPaymentDetail.sql" />
     <Build Include="dbo\Functions\fnHDDecodeComment.sql" />
-    <Build Include="dbo\Tables\tblARCustomerToContact.sql" />
-    <Build Include="dbo\Tables\tblAPVendorToContact.sql" />
     <Build Include="dbo\Tables\tblICItem.sql" />
     <Build Include="dbo\Tables\tblCMBankFileAudit.sql" />
     <Build Include="dbo\Views\vyuFRMColumnDescription.sql" />
@@ -639,7 +635,6 @@
     <None Include="Scripts\Post-Deployment\TM\DefaultData\1_PreferenceCompany.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\2_EventType.sql" />
     <None Include="Scripts\Post-Deployment\CM\3_PopulateSourceSystemData.sql" />
-    <Build Include="dbo\Views\vyuCPContactMenu.sql" />
     <Build Include="dbo\Views\vyuARCustomerContacts.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\1_CustomerPortalMenu.sql" />
     <None Include="Scripts\Post-Deployment\AP\RestoreVendorId.sql" />
@@ -1842,6 +1837,18 @@
     <Build Include="dbo\Stored Procedures\uspMFGetBlendDemandSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetBlendDemandDetail.sql" />
     <Build Include="dbo\Tables\tblSMUserRoleCompanyLocationPermission.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPDuplicateBillBatch.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCopyPromotions.sql" />
+    <Build Include="dbo\Tables\tblCTCompanyPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTMigrateCompanyPreference.sql" />
+    <Build Include="dbo\Tables\tblEntitySplit.sql" />
+    <Build Include="dbo\Tables\tblEntitySplitDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMDuplicateUserRole.sql" />
+    <Build Include="dbo\Tables\tblTRQuoteDetail.sql" />
+    <Build Include="dbo\Tables\tblTRQuoteHeader.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetRecipeItemByProduct.sql" />
+    <Build Include="dbo\Tables\tblARProductType.sql" />
+    <Build Include="dbo\Tables\tblARProductTypeDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1890,6 +1897,8 @@
     <None Include="Scripts\Post-Deployment\IC\10_RemoveCommodityItems.sql" />
     <None Include="dbo\Stored Procedures\uspCTAddPurchaseContractToInventoryReceipt.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdateApprovalRecords.sql" />
+    <None Include="Scripts\Post-Deployment\CT\2_DataMigration.sql" />
+    <None Include="Scripts\Post-Deployment\EM\009_UpdateEntityContactTypeData.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

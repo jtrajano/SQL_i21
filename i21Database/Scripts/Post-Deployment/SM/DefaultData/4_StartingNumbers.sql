@@ -515,6 +515,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Stage Lot Number')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 56
+			,[strTransactionType]	= N'Transport Quote'
+			,[strPrefix]			= N'TRQ-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Transports'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Transport Quote')
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'

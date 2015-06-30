@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspMFGetProductBySubLocation (@intSubLocationId INT)
+﻿CREATE PROCEDURE uspMFGetProductBySubLocation (@intSubLocationId INT,@strItemNo nvarchar(50)='%')
 AS
 BEGIN
 	SELECT I.intItemId
@@ -17,4 +17,5 @@ BEGIN
 		AND R.ysnActive = 1
 		AND IU.ysnStockUnit = 1
 		AND I.strStatus='Active'
+		AND I.strItemNo LIKE @strItemNo+'%'
 END
