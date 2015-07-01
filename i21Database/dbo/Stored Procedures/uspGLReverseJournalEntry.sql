@@ -28,7 +28,7 @@ END
 
 DECLARE @intUserId INT, @intNumber INT, @strPrefix NVARCHAR(10),@intStartingNumberId INT
 SELECT @intUserId =intUserSecurityID from tblSMUserSecurity WHERE intEntityId = @intEntityId
-SELECT @intStartingNumberId = intStartingNumberId, @strPrefix = strPrefix ,@intNumber = intNumber + 1 FROM tblSMStartingNumber WHERE strTransactionType = 'General Journal'
+SELECT @intStartingNumberId = intStartingNumberId, @strPrefix = strPrefix ,@intNumber = intNumber + 1 FROM tblSMStartingNumber WHERE strTransactionType = 'General Journal Reversal'
 INSERT INTO [tblGLJournal]
            ([dtmReverseDate]
            ,[strJournalId]
