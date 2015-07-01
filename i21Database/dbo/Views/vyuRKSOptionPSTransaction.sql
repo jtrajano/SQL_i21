@@ -3,15 +3,16 @@ AS
 SELECT strInternalTradeNo,dtmTransactionDate,dtmFilledDate,strFutMarketName,strOptionMonth,strName,strAccountNumber,isnull(intTotalLot,0) intTotalLot,isnull(dblOpenLots,0) dblOpenLots,
 		strOptionType,dblStrike,dblPremium,dblPremiumValue,dblCommission,intFutOptTransactionId
  ,dblPremiumValue+dblCommission as dblNetPremium,
-  0.0 as dblMarketPremium,
- 0.0 as dblMarketValue,
- 0.0 as dblMTM,	
+ dblMarketPremium,
+ dblMarketValue,
+ dblPremiumValue-dblMarketValue as dblMTM,
  dtmExpirationDate,strStatus,strCommodityCode,strLocationName,strBook,strSubBook,dblDelta,
- dblOpenLots*dblDelta*dblContractSize AS dblDeltaHedge,
- strHedgeUOM,strBuySell
+ -(dblOpenLots*dblDelta*dblContractSize) AS dblDeltaHedge,
+ strHedgeUOM,strBuySell,dblContractSize
   FROM (
-SELECT (intTotalLot-dblSelectedLot1)-intExpiredLots AS dblOpenLots,'' as dblSelectedLot,
-		-(intTotalLot-dblSelectedLot1)*dblContractSize*dblPremium  as dblPremiumValue,
+SELECT (intTotalLot-dblSelectedLot1-intExpiredLots-intAssignedLots) AS dblOpenLots,'' as dblSelectedLot,
+		(intTotalLot-dblSelectedLot1)*dblContractSize*dblPremium  as dblPremiumValue,
+		(intTotalLot-dblSelectedLot1)*dblContractSize*dblMarketPremium  as dblMarketValue,
 		-dblOptCommission*(intTotalLot-dblSelectedLot1) AS dblCommission,* from  (
 SELECT DISTINCT
       strInternalTradeNo AS strInternalTradeNo
@@ -35,19 +36,23 @@ SELECT DISTINCT
       ,cl.strLocationName
       ,strBook 
       ,strSubBook 
-      ,'' as MarketPremium
+        ,isnull((SELECT TOP 1 dblSettle  FROM tblRKFuturesSettlementPrice sp
+		JOIN tblRKOptSettlementPriceMarketMap spm ON sp.intFutureSettlementPriceId=spm.intFutureSettlementPriceId 
+		AND sp.intFutureMarketId=ot.intFutureMarketId AND spm.intOptionMonthId= ot.intOptionMonthId 
+		and ot.dblStrike=spm.dblStrike and spm.intTypeId= (case when ot.strOptionType='Put' then 1 else 2 end)
+		ORDER BY sp.dtmPriceDate desc),0) as dblMarketPremium
       ,'' as MarketValue
       ,''as MTM,ot.intOptionMonthId ,ot.intFutureMarketId
-	  ,ISNULL((SELECT top 1 dblDelta FROM tblRKFuturesSettlementPrice fs
-	   JOIN tblRKOptSettlementPriceMarketMap fm on fs.intFutureSettlementPriceId=fm.intFutureSettlementPriceId
-	   WHERE fs.intFutureMarketId=ot.intFutureMarketId and fs.dtmPriceDate=(SELECT MAX(dtmPriceDate) from tblRKFuturesSettlementPrice 
-																			WHERE intFutureMarketId=ot.intFutureMarketId) 
-	   AND intOptionMonthId=ot.intOptionMonthId order by 1 asc
-	   ),0) as dblDelta
+	  ,isnull((SELECT TOP 1 dblDelta  FROM tblRKFuturesSettlementPrice sp
+		JOIN tblRKOptSettlementPriceMarketMap spm ON sp.intFutureSettlementPriceId=spm.intFutureSettlementPriceId 
+		AND sp.intFutureMarketId=ot.intFutureMarketId AND spm.intOptionMonthId= ot.intOptionMonthId 
+		and ot.dblStrike=spm.dblStrike and spm.intTypeId= (case when ot.strOptionType='Put' then 1 else 2 end)
+		ORDER BY 1 desc),0) as dblDelta
 	  ,'' as DeltaHedge
 	  ,um.strUnitMeasure as strHedgeUOM
 	  ,CASE WHEN strBuySell ='Buy' Then 'B' else 'S' End strBuySell,intFutOptTransactionId,
-	   isnull((Select SUM(intLots) From tblRKOptionsPnSExpired ope where  ope.intFutOptTransactionId= ot.intFutOptTransactionId),0) intExpiredLots    
+	   isnull((Select SUM(intLots) From tblRKOptionsPnSExpired ope where  ope.intFutOptTransactionId= ot.intFutOptTransactionId),0) intExpiredLots,    
+	   isnull((Select SUM(intLots) FROM tblRKOptionsPnSExercisedAssigned opa where  opa.intFutOptTransactionId= ot.intFutOptTransactionId),0) intAssignedLots
 FROM tblRKFutOptTransaction ot
 JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId and ot.intInstrumentTypeId=2 --and ot.strStatus='Filled' 
 join tblICUnitMeasure um on fm.intUnitMeasureId=um.intUnitMeasureId

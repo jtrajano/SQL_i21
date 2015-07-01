@@ -18,7 +18,7 @@ This tables holds all inventory transactions for storage/custody items (not comp
 		[intItemUOMId] INT NOT NULL,
 		[intSubLocationId] INT NULL,
 		[intStorageLocationId] INT NULL,
-		[intLotId] INT NOT NULL, 
+		[intLotId] INT NULL, 
 		[dtmDate] DATETIME NOT NULL,	
 		[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 		[dblUOMQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 		

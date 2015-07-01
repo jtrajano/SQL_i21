@@ -22,7 +22,7 @@ DECLARE @ZeroDecimal decimal(18,6)
 SET @ZeroDecimal = 0.000000
 		
 SELECT @DateOnly = CAST(GETDATE() as date)
-SET @ARAccountId = ISNULL((SELECT strValue FROM tblSMPreferences WHERE strPreference = 'DefaultARAccount'),0)
+SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
 
 INSERT INTO [tblARInvoice]
 	([strInvoiceOriginId]

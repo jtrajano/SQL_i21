@@ -115,6 +115,27 @@ IF(@exclude IS NOT NULL)
 		FROM @PostInvoiceData A
 		WHERE EXISTS(SELECT * FROM @InvoicesExclude B WHERE A.intInvoiceId = B.intInvoiceId)
 	END
+	
+-- Get the next batch number
+IF(@batchId IS NULL AND @param IS NOT NULL AND @param <> 'all')
+	BEGIN
+		SELECT TOP 1
+			@batchId = GL.strBatchId
+		FROM
+			tblGLDetailRecap GL
+		INNER JOIN 
+			@PostInvoiceData I
+				ON GL.intTransactionId = I.intInvoiceId 
+				AND GL.strTransactionId = I.strTransactionId
+		WHERE
+			GL.strTransactionType IN ('Credit Memo', 'Invoice', 'Overpayment', 'Prepayment')
+			AND	GL.strModuleName = @MODULE_NAME
+	END
+
+IF(@batchId IS NULL)
+	EXEC uspSMGetStartingNumber 3, @batchId OUT
+
+SET @batchIdUsed = @batchId
 
 --------------------------------------------------------------------------------------------  
 -- Validations  
@@ -198,7 +219,7 @@ IF @recap = 0
 						AND A.intCompanyLocationId = IST.intLocationId 
 				WHERE 
 					(A.intFreightTermId IS NULL OR A.intFreightTermId = 0) 
-					AND (Detail.intInventoryShipmentId IS NULL OR Detail.intInventoryShipmentId = 0)
+					AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 					AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
 					AND (Detail.intItemId IS NOT NULL OR Detail.intItemId <> 0)
 					AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')
@@ -226,7 +247,7 @@ IF @recap = 0
 						AND A.intCompanyLocationId = IST.intLocationId 
 				WHERE 
 					(Detail.intItemUOMId IS NULL OR Detail.intItemUOMId = 0) 
-					AND (Detail.intInventoryShipmentId IS NULL OR Detail.intInventoryShipmentId = 0)
+					AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 					AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
 					AND (Detail.intItemId IS NOT NULL OR Detail.intItemId <> 0)
 					AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')					
@@ -262,7 +283,7 @@ IF @recap = 0
 					@PostInvoiceData B
 						ON A.intInvoiceId = B.intInvoiceId
 				WHERE  
-					ROUND(A.dblInvoiceTotal,2) <> ROUND(((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = A.intInvoiceId) + ISNULL(A.dblShipping,0.0) + ISNULL(A.dblTax,0.0)),2)
+					ROUND(A.dblInvoiceTotal,2) <> ROUND(((SELECT SUM(ROUND(dblTotal,2)) FROM tblARInvoiceDetail WHERE intInvoiceId = A.intInvoiceId) + ISNULL(ROUND(A.dblShipping,2),0.0) + ISNULL(ROUND(A.dblTax,2),0.0)),2)
 
 				--ALREADY POSTED
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -462,7 +483,7 @@ IF @recap = 0
 		IF(@totalInvalid >= 1)  
 			BEGIN			
 				DECLARE @ErrorMessage NVARCHAR(100)				
-				SELECT TOP 1 @ErrorMessage = strError FROM @InvalidInvoiceData
+				SELECT TOP 1 @ErrorMessage = @batchIdUsed + ' : ' + strError FROM @InvalidInvoiceData
 				RAISERROR(@ErrorMessage, 11, 1) 
 				SET @success = 0 
 				GOTO Post_Exit
@@ -475,27 +496,6 @@ IF @recap = 0
 			END		
 
 	END
-
--- Get the next batch number
-IF(@batchId IS NULL AND @param IS NOT NULL AND @param <> 'all')
-	BEGIN
-		SELECT TOP 1
-			@batchId = GL.strBatchId
-		FROM
-			tblGLDetailRecap GL
-		INNER JOIN 
-			@PostInvoiceData I
-				ON GL.intTransactionId = I.intInvoiceId 
-				AND GL.strTransactionId = I.strTransactionId
-		WHERE
-			GL.strTransactionType IN ('Credit Memo', 'Invoice', 'Overpayment', 'Prepayment')
-			AND	GL.strModuleName = @MODULE_NAME
-	END
-
-IF(@batchId IS NULL)
-	EXEC uspSMGetStartingNumber 3, @batchId OUT
-
-SET @batchIdUsed = @batchId
 
 
 --------------------------------------------------------------------------------------------  
@@ -563,7 +563,7 @@ IF @post = 1
 				ON Detail.intItemId = IST.intItemId 
 				AND Header.intCompanyLocationId = IST.intLocationId 
 		WHERE 
-			(Detail.intInventoryShipmentId IS NULL OR Detail.intInventoryShipmentId = 0)
+			(Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 			AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
 			AND (Detail.intItemId IS NOT NULL OR Detail.intItemId <> 0)
 			AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')
@@ -644,8 +644,8 @@ IF @post = 1
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
 				,intAccountId				= A.intAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  A.dblInvoiceTotal ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  0 ELSE A.dblInvoiceTotal END
+				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  ROUND(A.dblInvoiceTotal,2) ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  0 ELSE ROUND(A.dblInvoiceTotal,2) END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -688,8 +688,8 @@ IF @post = 1
 													ELSE
 														(CASE WHEN B.intAccountId IS NOT NULL AND B.intAccountId <> 0 THEN B.intAccountId ELSE CL.intServiceCharges END)
 												END)
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblTotal, 0.00)  END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(B.dblTotal, 0.00) ELSE 0  END
+				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(ROUND(B.dblTotal,2), 0.00)  END
+				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(ROUND(B.dblTotal,2), 0.00) ELSE 0  END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -734,8 +734,8 @@ IF @post = 1
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
 				,intAccountId				= B.intSalesAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblTotal, 0.00) END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(B.dblTotal, 0.00) ELSE  0 END
+				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(ROUND(B.dblTotal,2), 0.00) END
+				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(ROUND(B.dblTotal,2), 0.00) ELSE  0 END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -779,8 +779,8 @@ IF @post = 1
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
 				,intAccountId				= L.intFreightIncome
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE A.dblShipping END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN A.dblShipping ELSE 0  END
+				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ROUND(A.dblShipping,2) END
+				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ROUND(A.dblShipping,2) ELSE 0  END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -821,8 +821,8 @@ IF @post = 1
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
 				,intAccountId				= ISNULL(DT.intSalesTaxAccountId,TC.intSalesTaxAccountId)
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE DT.dblAdjustedTax END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN DT.dblAdjustedTax ELSE 0 END
+				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ROUND(DT.dblAdjustedTax,2) END
+				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ROUND(DT.dblAdjustedTax,2) ELSE 0 END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -964,7 +964,7 @@ IF @post = 0
 					ON Detail.intItemId = IST.intItemId 
 					AND Header.intCompanyLocationId = IST.intLocationId 
 			WHERE 
-				(Detail.intInventoryShipmentId IS NULL OR Detail.intInventoryShipmentId = 0)
+				(Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 				AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
 				AND (Detail.intItemId IS NOT NULL OR Detail.intItemId <> 0)
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')

@@ -27,7 +27,7 @@
     [strReserveForFix] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intBookId] INT NULL, 
     [intSubBookId] INT NULL, 
-    [ysnOffset] BIT NULL, 
+    [ysnOffset] BIT NULL
     CONSTRAINT [PK_tblRKFutOptTransaction_intFutOptTransactionId] PRIMARY KEY (intFutOptTransactionId),	
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblRKFutOptTransactionHeader_intFutOptTransactionHeaderId] FOREIGN KEY ([intFutOptTransactionHeaderId]) REFERENCES [tblRKFutOptTransactionHeader]([intFutOptTransactionHeaderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]),

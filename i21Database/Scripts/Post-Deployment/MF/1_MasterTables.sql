@@ -443,3 +443,39 @@ BEGIN
     VALUES(3,'No','No',1)
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblMFAttributeType WHERE intAttributeTypeId = 1)
+BEGIN
+    INSERT INTO tblMFAttributeType(intAttributeTypeId,strAttributeTypeName)
+    VALUES(1,'Common')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFAttributeType WHERE intAttributeTypeId = 2)
+BEGIN
+    INSERT INTO tblMFAttributeType(intAttributeTypeId,strAttributeTypeName)
+    VALUES(2,'Blending')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFAttributeType WHERE intAttributeTypeId = 3)
+BEGIN
+    INSERT INTO tblMFAttributeType(intAttributeTypeId,strAttributeTypeName)
+    VALUES(3,'Packaging')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFAttributeType WHERE intAttributeTypeId = 4)
+BEGIN
+    INSERT INTO tblMFAttributeType(intAttributeTypeId,strAttributeTypeName)
+    VALUES(4,'Others')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendDemandStatus WHERE intStatusId = 1)
+BEGIN
+    INSERT INTO tblMFBlendDemandStatus(intStatusId,strName)
+    VALUES(1,'New')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendDemandStatus WHERE intStatusId = 2)
+BEGIN
+    INSERT INTO tblMFBlendDemandStatus(intStatusId,strName)
+    VALUES(2,'Closed')
+END
+GO

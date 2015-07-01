@@ -13,8 +13,10 @@ A.[intEntityVendorId]
 ,C.strItemNo
 ,C.strDescription
 ,tblReceived.dblOrderQty
-,tblReceived.dblPOOpenReceive
+,tblReceived.dblPOOpenReceive --uom converted received quantity from po to IR
 ,tblReceived.dblOpenReceive
+,(tblReceived.dblPOOpenReceive - tblReceived.dblQuantityBilled) AS dblQuantityToBill
+,tblReceived.dblQuantityBilled
 ,tblReceived.intLineNo
 ,tblReceived.intInventoryReceiptItemId
 ,tblReceived.dblUnitCost
@@ -26,6 +28,7 @@ A.[intEntityVendorId]
 ,F.strTerm
 ,G1.intContractNumber
 ,G1.intContractHeaderId
+,G2.intContractDetailId
 FROM tblPOPurchase A
 	INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	CROSS APPLY 
@@ -41,6 +44,7 @@ FROM tblPOPurchase A
 			,SUM(ISNULL(B1.dblOpenReceive,0)) dblOpenReceive
 			,intAccountId = [dbo].[fnGetItemGLAccount](B1.intItemId, loc.intItemLocationId, 'AP Clearing')
 			,strAccountId = (SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B1.intItemId, loc.intItemLocationId, 'AP Clearing'))
+			,dblQuantityBilled = SUM(ISNULL(B1.dblBillQty, 0))
 		FROM tblICInventoryReceipt A1
 			INNER JOIN tblICInventoryReceiptItem B1 ON A1.intInventoryReceiptId = B1.intInventoryReceiptId
 			INNER JOIN tblICItemLocation loc ON B1.intItemId = loc.intItemId AND A1.intLocationId = loc.intLocationId
@@ -79,6 +83,8 @@ A.[intEntityVendorId]
 ,B.dblQtyOrdered
 ,B.dblQtyOrdered -B.dblQtyReceived
 ,B.dblQtyOrdered
+,B.dblQtyOrdered -B.dblQtyReceived
+,B.dblQtyReceived
 ,B.intPurchaseDetailId
 ,B.intPurchaseDetailId
 ,B.dblCost
@@ -88,6 +94,7 @@ A.[intEntityVendorId]
 ,D1.strVendorId
 ,E.strShipVia
 ,F.strTerm
+,NULL
 ,NULL
 ,NULL
 FROM tblPOPurchase A
@@ -115,6 +122,8 @@ A.intEntityVendorId
 ,B.dblOpenReceive
 ,B.dblReceived
 ,B.dblOpenReceive
+,(B.dblOpenReceive - B.dblBillQty)
+,B.dblBillQty
 ,B.intInventoryReceiptItemId
 ,B.intInventoryReceiptItemId
 ,B.dblUnitCost
@@ -123,6 +132,7 @@ A.intEntityVendorId
 ,D2.strName
 ,D1.strVendorId
 ,E.strShipVia
+,NULL
 ,NULL
 ,NULL
 ,NULL

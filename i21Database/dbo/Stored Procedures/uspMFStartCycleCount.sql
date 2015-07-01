@@ -59,6 +59,7 @@ BEGIN TRY
 		,@intStartOffset INT
 		,@strUserName NVARCHAR(50)
 		,@intPriorWorkOrderId INT
+		,@strPriorWorkOrderNo nvarchar(50)
 		,@strProductItem NVARCHAR(50)
 		,@strInputItem NVARCHAR(50)
 		,@strPlannedDate NVARCHAR(50)
@@ -169,7 +170,7 @@ BEGIN TRY
 				)
 	END
 
-	SELECT TOP 1 @intPriorWorkOrderId = intWorkOrderId
+	SELECT TOP 1 @intPriorWorkOrderId = intWorkOrderId,@strPriorWorkOrderNo =strWorkOrderNo 
 	FROM dbo.tblMFWorkOrder W
 	LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
 	WHERE intItemId = @intItemId
@@ -200,6 +201,7 @@ BEGIN TRY
 				51105
 				,11
 				,1
+				,@strPriorWorkOrderNo
 				)
 	END
 
@@ -325,6 +327,7 @@ BEGIN TRY
 					ELSE ' - ' + S.strShiftName
 					END
 				)
+			,@strWorkOrderNo=strWorkOrderNo
 		FROM dbo.tblMFWorkOrder W
 		LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
 		JOIN dbo.tblMFRecipe P ON P.intItemId = W.intItemId
@@ -365,6 +368,7 @@ BEGIN TRY
 				,11
 				,1
 				,@strProductItem
+				,@strWorkOrderNo
 				,@strPlannedDate
 				,@strInputItem
 				)

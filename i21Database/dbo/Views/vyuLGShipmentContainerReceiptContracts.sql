@@ -4,6 +4,8 @@ SELECT
 	intShipmentContractQtyId
 	,intShipmentBLContainerContractId = -1
 	,intShipmentId
+	,intShipmentBLId = -1
+	,intShipmentBLContainerId = -1
 	,intTrackingNumber
 	,ysnDirectShipment
 	,intContractDetailId
@@ -16,6 +18,7 @@ SELECT
 	,intLocationId
 	,dblQuantity
 	,dblReceivedQty
+	,dblBalanceToReceive = dblQuantity - dblReceivedQty
 	,dblGrossWt
 	,dblTareWt
 	,dblNetWt
@@ -52,6 +55,8 @@ SELECT
 	intShipmentContractQtyId
 	,intShipmentBLContainerContractId
 	,intShipmentId
+	,intShipmentBLId
+	,intShipmentBLContainerId
 	,intTrackingNumber
 	,ysnDirectShipment
 	,intContractDetailId
@@ -64,6 +69,7 @@ SELECT
 	,intLocationId
 	,dblQuantity
 	,dblReceivedQty
+	,dblBalanceToReceive = dblQuantity - dblReceivedQty
 	,dblGrossWt
 	,dblTareWt
 	,dblNetWt

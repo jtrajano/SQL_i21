@@ -154,28 +154,28 @@ BEGIN
 			,intDetailId		
 	)
 	SELECT	intLotId				= TransferItem.intNewLotId
-			,strLotNumber			= CASE WHEN ISNULL(TransferItem.strNewLotId, '') = '' THEN Lot.strLotNumber ELSE TransferItem.strNewLotId END 
-			,strLotAlias			= Lot.strLotAlias
+			,strLotNumber			= CASE WHEN ISNULL(TransferItem.strNewLotId, '') = '' THEN SourceLot.strLotNumber ELSE TransferItem.strNewLotId END 
+			,strLotAlias			= SourceLot.strLotAlias
 			,intItemId				= TransferItem.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intSubLocationId		= TransferItem.intToSubLocationId
 			,intStorageLocationId	= TransferItem.intToStorageLocationId
 			,dblQty					= TransferItem.dblQuantity * CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END 
 			,intItemUOMId			= ISNULL(TransferItem.intItemUOMId, TransferItem.intItemUOMId) 
-			,dblWeight				= ISNULL(TransferItem.dblGrossWeight, 0) - ISNULL(TransferItem.dblTareWeight, 0) * CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END
-			,intWeightUOMId			= TransferItem.intItemWeightUOMId
-			,dtmExpiryDate			= Lot.dtmExpiryDate
-			,dtmManufacturedDate	= Lot.dtmManufacturedDate
-			,intOriginId			= Lot.intOriginId
-			,strBOLNo				= Lot.strBOLNo
-			,strVessel				= Lot.strVessel
+			,dblWeight				= SourceLot.dblWeightPerQty * ABS(TransferItem.dblQuantity) 
+			,intWeightUOMId			= SourceLot.intWeightUOMId
+			,dtmExpiryDate			= SourceLot.dtmExpiryDate
+			,dtmManufacturedDate	= SourceLot.dtmManufacturedDate
+			,intOriginId			= SourceLot.intOriginId
+			,strBOLNo				= SourceLot.strBOLNo
+			,strVessel				= SourceLot.strVessel
 			,strTransferNumber		= Transfer.strTransferNo
-			,strMarkings			= Lot.strMarkings
-			,strNotes				= Lot.strNotes
-			,intEntityVendorId		= Lot.intEntityVendorId
-			,strVendorLotNo			= Lot.strVendorLotNo
-			,intVendorLocationId	= Lot.intVendorLocationId
-			,strVendorLocation		= Lot.strVendorLocation
+			,strMarkings			= SourceLot.strMarkings
+			,strNotes				= SourceLot.strNotes
+			,intEntityVendorId		= SourceLot.intEntityVendorId
+			,strVendorLotNo			= SourceLot.strVendorLotNo
+			,intVendorLocationId	= SourceLot.intVendorLocationId
+			,strVendorLocation		= SourceLot.strVendorLocation
 			,intDetailId			= TransferItem.intInventoryTransferDetailId
 	FROM	dbo.tblICInventoryTransfer Transfer INNER JOIN dbo.tblICInventoryTransferDetail TransferItem
 				ON Transfer.intInventoryTransferId = TransferItem.intInventoryTransferId
@@ -184,7 +184,8 @@ BEGIN
 			INNER JOIN dbo.tblICItemLocation ItemLocation
 				ON TransferItem.intItemId = ItemLocation.intItemId
 				AND Transfer.intToLocationId = ItemLocation.intLocationId	
-			INNER JOIN tblICLot Lot ON Lot.intLotId = TransferItem.intLotId
+			INNER JOIN tblICLot SourceLot 
+				ON SourceLot.intLotId = TransferItem.intLotId
 	WHERE	Transfer.strTransferNo = @strTransactionId
 
 END 

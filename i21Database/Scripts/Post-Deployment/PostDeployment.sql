@@ -66,6 +66,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\Reports\Layout\ProductTotals.sql
 :r .\TM\Reports\DataSource\ProductTotals.sql
 
+:r .\TM\Reports\DataSource\CustomerListByRoute.sql
+:r .\TM\Reports\Layout\CustomerListByRoute.sql
+:r .\TM\Reports\DefaultCriteria\CustomerListByRoute.sql
 
 :r .\TM\Reports\DataSource\GasCheckLeakcheck.sql
 :r .\TM\Reports\Layout\WithGasCheckSubReport.sql
@@ -74,6 +77,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\Reports\Layout\WithoutLeakCheckSubReport.sql
 
 :r .\TM\Reports\DataSource\OpenCallEntries.sql
+
 
 
 -- Canned Panels
@@ -88,7 +92,11 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\AccountTemplate.sql
 :r .\GL\DefaultData\AccountSegmentTemplate.sql
 :r .\GL\GLEntryDataFix.sql
-:r .\GL\ReportDataFix.sql
+:r .\GL\ReportData\GeneralLedgerByAccountDetail.sql
+:r .\GL\ReportData\IncomeStatementStandard.sql
+:r .\GL\ReportData\TrialBalance.sql
+:r .\GL\ReportData\TrialBalanceDetail.sql
+:r .\GL\ReportData\BalanceSheetStandard.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
@@ -121,6 +129,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\DateCreatedValueDefault.sql
 :r .\AP\DefaultData\InsertWriteOffPaymentMethod.sql
 :r .\AP\UpdatePOAddressInfo.sql
+:r .\AP\UpdateApprovalRecords.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
@@ -142,6 +151,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 --Contract Management
 :R .\CT\1_MasterTables.sql
+:R .\CT\2_DataMigration.sql
 
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql
@@ -168,7 +178,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\006_MoveTerminalData.sql
 :r .\EM\007_MoveShippingLineData.sql
 :r .\EM\008_MoveTruckerData.sql
-
+:r .\EM\009_UpdateEntityContactTypeData.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 

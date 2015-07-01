@@ -5,7 +5,7 @@ BEGIN
 	EXEC testi21Database.[Fake open fiscal year and accounting periods]
 		
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryAdjustment', @Identity = 1;	
-	EXEC tSQLt.FakeTable 'dbo.tblICInventoryAdjustmentDetail', @Identity = 1;	
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryAdjustmentDetail', @Identity = 1, @Defaults = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICLot', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;	

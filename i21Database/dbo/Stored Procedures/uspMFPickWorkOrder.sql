@@ -225,39 +225,24 @@ BEGIN TRY
 				)
 			SELECT L.intLotId
 				,L.intItemId
-				,CASE 
-					WHEN L.dblWeight = 0
-						OR L.dblWeight IS NULL
-						THEN L.dblQty
-					ELSE L.dblWeight
-					END
-				,CASE 
-					WHEN L.dblWeight = 0
-						OR L.dblWeight IS NULL
-						THEN L.dblQty
-					ELSE (
-							L.dblWeight / (
+				,(CASE WHEN intWeightUOMId IS NOT NULL THEN dblWeight ELSE dblQty END)
+				,(CASE WHEN intWeightUOMId IS NOT NULL THEN L.dblQty ELSE dblQty/(
 								CASE 
 									WHEN L.dblWeightPerQty = 0
 										OR L.dblWeightPerQty IS NULL
 										THEN 1
 									ELSE L.dblWeightPerQty
 									END
-								)
-							)
-					END
+								) END)
+				
 				,CASE 
-					WHEN L.dblWeight = 0
-						OR L.dblWeight IS NULL
-						OR L.dblWeightPerQty IS NULL
+					WHEN L.dblWeightPerQty IS NULL
 						OR L.dblWeightPerQty = 0
 						THEN 1
 					ELSE L.dblWeightPerQty
 					END
 				,CASE 
-					WHEN L.dblWeight = 0
-						OR L.dblWeight IS NULL
-						OR L.intWeightUOMId IS NULL
+					WHEN L.intWeightUOMId IS NULL
 						OR L.intWeightUOMId = 0
 						THEN L.intItemUOMId
 					ELSE L.intWeightUOMId
@@ -280,7 +265,7 @@ BEGIN TRY
 						ELSE (Case When @intConsumptionMethodId=2 Then @intStorageLocationId Else L.intStorageLocationId End)--By location, then apply location filter
 						END
 					)
-				AND L.dblWeight > 0
+				AND L.dblQty > 0
 			ORDER BY L.dtmDateCreated ASC
 		END
 
@@ -296,39 +281,24 @@ BEGIN TRY
 			)
 		SELECT L.intLotId
 			,L.intItemId
-			,CASE 
-				WHEN L.dblWeight = 0
-					OR L.dblWeight IS NULL
-					THEN L.dblQty
-				ELSE L.dblWeight
-				END
-			,CASE 
-				WHEN L.dblWeight = 0
-					OR L.dblWeight IS NULL
-					THEN L.dblQty
-				ELSE (
-						L.dblWeight / (
+			,(CASE WHEN intWeightUOMId IS NOT NULL THEN dblWeight ELSE dblQty END)
+			,(CASE WHEN intWeightUOMId IS NOT NULL THEN L.dblQty ELSE dblQty/(
 							CASE 
 								WHEN L.dblWeightPerQty = 0
 									OR L.dblWeightPerQty IS NULL
 									THEN 1
 								ELSE L.dblWeightPerQty
 								END
-							)
-						)
-				END
+							) END)
+				
 			,CASE 
-				WHEN L.dblWeight = 0
-					OR L.dblWeight IS NULL
-					OR L.dblWeightPerQty IS NULL
+				WHEN L.dblWeightPerQty IS NULL
 					OR L.dblWeightPerQty = 0
 					THEN 1
 				ELSE L.dblWeightPerQty
 				END
 			,CASE 
-				WHEN L.dblWeight = 0
-					OR L.dblWeight IS NULL
-					OR L.intWeightUOMId IS NULL
+				WHEN L.intWeightUOMId IS NULL
 					OR L.intWeightUOMId = 0
 					THEN L.intItemUOMId
 				ELSE L.intWeightUOMId
@@ -348,7 +318,7 @@ BEGIN TRY
 					ELSE (Case When @intConsumptionMethodId=2 Then @intStorageLocationId Else L.intStorageLocationId End)--By location, then apply location filter
 					END
 				)
-			AND L.dblWeight > 0
+			AND L.dblQty > 0
 		ORDER BY L.dtmDateCreated ASC
 
 		SELECT @intLotRecordKey = Min(intLotRecordKey)

@@ -3,6 +3,7 @@
 	,@intStorageLocationId INT
 	,@intLocationId INT
 	,@intConsumptionMethodId int=1
+	,@strLotNumber nvarchar(MAX)='%'
 	)
 AS
 BEGIN
@@ -11,8 +12,8 @@ BEGIN
 		,L.strLotNumber
 		,I.strItemNo
 		,I.strDescription
-		,L.dblWeight
-		,L.intWeightUOMId
+		,(CASE WHEN L.intWeightUOMId IS NOT NULL THEN L.dblWeight ELSE L.dblQty END) as dblWeight
+		,ISNULL(L.intWeightUOMId,L.intItemUOMId) as intWeightUOMId
 		,U.strUnitMeasure
 		,IU.intUnitMeasureId
 		,L.dtmDateCreated 
@@ -32,10 +33,12 @@ BEGIN
 		AND L.intStorageLocationId = @intStorageLocationId
 	JOIN dbo.tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
 	JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
-	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = L.intWeightUOMId
+	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId,L.intItemUOMId)
 	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 	WHERE LS.strSecondaryStatus = 'Active'
 		AND L.dtmExpiryDate >= Getdate()
-		AND L.dblWeight>0
+		AND L.dblQty>0
+		AND I.strStatus='Active'
+		and L.strLotNumber Like @strLotNumber +'%'
 	ORDER BY L.dtmDateCreated ASC
 END

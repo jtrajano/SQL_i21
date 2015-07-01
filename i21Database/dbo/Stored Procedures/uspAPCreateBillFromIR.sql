@@ -15,6 +15,7 @@ DECLARE @receiptId INT;
 DECLARE @generatedBillId INT;
 DECLARE @generatedBillRecordId NVARCHAR(50);
 DECLARE @APAccount INT;
+DECLARE @shipFrom INT, @shipTo INT;
 
 CREATE TABLE #tmpReceiptIds (
 	[intInventoryReceiptId] [INT] PRIMARY KEY,
@@ -66,7 +67,7 @@ ALTER TABLE tblAPBill
 	DROP CONSTRAINT [UK_dbo.tblAPBill_strBillId]
 
 WHILE @counter != @totalReceipts
-BEGIn
+BEGIN
 
 	SET @counter = @counter + 1;
 	SELECT TOP(1) @receiptId = intInventoryReceiptId FROM #tmpReceiptIds
@@ -129,7 +130,7 @@ BEGIn
 	(
 		SELECT 
 			C.intTermsId
-		FROM tblAPVendor B INNER JOIN tblEntityLocation C ON B.intEntityVendorId = C.intEntityId
+		FROM tblAPVendor B INNER JOIN tblEntityLocation C ON B.intEntityVendorId = C.intEntityId AND C.ysnDefaultLocation = 1
 		WHERE B.intEntityVendorId = A.intEntityVendorId
 	) Terms
 	WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1
@@ -177,6 +178,9 @@ BEGIn
 		SET A.dblTotal = (SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @generatedBillId)
 	FROM tblAPBill A
 	WHERE intBillId = @generatedBillId
+
+	SELECT @shipFrom = intShipFromId, @shipTo = intShipToId FROM tblAPBill
+	EXEC uspAPBillUpdateAddressInfo @generatedBillId, @shipFrom, @shipTo
 
 	DELETE FROM #tmpReceiptIds WHERE intInventoryReceiptId = @receiptId
 END

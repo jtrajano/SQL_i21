@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspMFGetContainerByContainerType (
 	@intLocationId INT
 	,@strContainerType NVARCHAR(MAX)
+	,@strContainerId NVARCHAR(50) = '%'
 	)
 AS
 BEGIN
@@ -14,4 +15,5 @@ BEGIN
 			SELECT Item Collate Latin1_General_CI_AS
 			FROM [dbo].[fnSplitString](@strContainerType, ',')
 			)
+		AND C.strContainerId LIKE @strContainerId + '%'
 END

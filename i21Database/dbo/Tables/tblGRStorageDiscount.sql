@@ -6,14 +6,14 @@
     [strDiscountCode] NVARCHAR(3) COLLATE Latin1_General_CI_AS NOT NULL,
 	[dblGradeReading] DECIMAL(7, 3) NOT NULL, 
     [strCalcMethod] NVARCHAR COLLATE Latin1_General_CI_AS NULL, 
-    [dblDiscountAmount] DECIMAL(9, 6) NOT NULL, 
-    [strShrinkWhat] NVARCHAR COLLATE Latin1_General_CI_AS NULL, 
+    [dblDiscountAmount] DECIMAL(9, 6) NULL, 
+    [strShrinkWhat] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [dblShrinkPercent] DECIMAL(7, 3) NOT NULL,
 	[dblDiscountDue] DECIMAL(9, 6) NULL,
 	[dblDiscountPaid] DECIMAL(9, 6) NULL, 
     [dtmDiscountPaidDate] DATETIME NULL, 
     CONSTRAINT [PK_tblGRStorageDiscount_intStorageDiscountId] PRIMARY KEY ([intStorageDiscountId]),
-	CONSTRAINT [FK_tblGRStorageDiscount_tblGRCustomerStorage_intCustomerStorageId] FOREIGN KEY ([intCustomerStorageId]) REFERENCES [dbo].[tblGRCustomerStorage] ([intCustomerStorageId]), 
+	CONSTRAINT [FK_tblGRStorageDiscount_tblGRCustomerStorage_intCustomerStorageId] FOREIGN KEY ([intCustomerStorageId]) REFERENCES [dbo].[tblGRCustomerStorage] ([intCustomerStorageId]) ON DELETE CASCADE, 
 )
 
 GO

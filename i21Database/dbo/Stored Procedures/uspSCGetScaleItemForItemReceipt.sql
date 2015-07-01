@@ -50,7 +50,7 @@ BEGIN TRY
 		END
 		IF @strDistributionOption = 'CNT'
 		BEGIN
-				IF @strSourceType = @ReceiptType_Direct
+				--IF @strSourceType = @ReceiptType_Direct
 			BEGIN 
 				SELECT	intItemId = ScaleTicket.intItemId
 						,intLocationId = ItemLocation.intItemLocationId 
@@ -63,12 +63,13 @@ BEGIN TRY
 						,intCurrencyId = ScaleTicket.intCurrencyId
 						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
 						,intTransactionId = ScaleTicket.intTicketId
-						,intTransactionDetailId = ScaleTicket.intTicketId
+						,intTransactionDetailId = LI.intContractDetailId
 						,strTransactionId = ScaleTicket.intTicketNumber
 						,intTransactionTypeId = @intDirectType 
 						,intLotId = NULL 
-						,intSubLocationId = NULL
-						,intStorageLocationId = NULL
+						,intSubLocationId = ScaleTicket.intSubLocationId
+						,intStorageLocationId = ScaleTicket.intStorageLocationId
+						,ysnIsCustody = 0
 				FROM	@LineItems LI 
 				JOIN dbo.tblSCTicket ScaleTicket On ScaleTicket.intTicketId = LI.intTicketId
 				JOIN dbo.tblICItemUOM ItemUOM	ON ScaleTicket.intItemId = ItemUOM.intItemId AND @intTicketItemUOMId = ItemUOM.intItemUOMId
@@ -83,7 +84,7 @@ BEGIN TRY
 		END
 		Else
 		BEGIN
-			IF @strSourceType = @ReceiptType_Direct
+			--IF @strSourceType = @ReceiptType_Direct
 			BEGIN 
 				SELECT	intItemId = ScaleTicket.intItemId
 						,intLocationId = ItemLocation.intItemLocationId 
@@ -96,12 +97,13 @@ BEGIN TRY
 						,intCurrencyId = ScaleTicket.intCurrencyId
 						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
 						,intTransactionId = ScaleTicket.intTicketId
-						,intTransactionDetailId = ScaleTicket.intTicketId
+						,intTransactionDetailId = NULL
 						,strTransactionId = ScaleTicket.intTicketNumber
 						,intTransactionTypeId = @intDirectType 
 						,intLotId = NULL 
-						,intSubLocationId = NULL
-						,intStorageLocationId = NULL
+						,intSubLocationId = ScaleTicket.intSubLocationId
+						,intStorageLocationId = ScaleTicket.intStorageLocationId
+						,ysnIsCustody = 0
 				FROM	dbo.tblSCTicket ScaleTicket
 						INNER JOIN dbo.tblICItemUOM ItemUOM
 							ON ScaleTicket.intItemId = ItemUOM.intItemId

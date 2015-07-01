@@ -30,10 +30,15 @@
     [strDiscountComment] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [dblDiscountsDue] NUMERIC(18, 6) NULL, 
     [dblDiscountsPaid] NUMERIC(18, 6) NULL, 
+    [strCustomerReference] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
+    [strStorageType] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL, 
     CONSTRAINT [PK_tblGRCustomerStorage_intCustomerStorageId] PRIMARY KEY ([intCustomerStorageId]),
 	CONSTRAINT [FK_tblGRCustomerStorage_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
 	CONSTRAINT [FK_tblGRCustomerStorage_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [dbo].[tblICCommodity] ([intCommodityId]),
-	CONSTRAINT [FK_tblGRCustomerStorage_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId])
+	CONSTRAINT [FK_tblGRCustomerStorage_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
+	CONSTRAINT [FK_tblGRCustomerStorage_tblGRStorageScheduleRule_intStorageScheduleId] FOREIGN KEY ([intStorageScheduleId]) REFERENCES [dbo].[tblGRStorageScheduleRule] ([intStorageScheduleRuleId]),
+	CONSTRAINT [FK_tblGRCustomerStorage_tblGRStorageType_intStorageTypeId] FOREIGN KEY ([intStorageTypeId]) REFERENCES [dbo].[tblGRStorageType] ([intStorageScheduleTypeId]),
+	CONSTRAINT [FK_tblGRCustomerStorage_tblSCTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [dbo].[tblSCTicket] ([intTicketId])
 )
 
 GO
@@ -279,3 +284,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblGRCustomerStorage',
     @level2type = N'COLUMN',
     @level2name = N'dblCurrencyRate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Storage Type Code',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblGRCustomerStorage',
+    @level2type = N'COLUMN',
+    @level2name = N'strStorageType'

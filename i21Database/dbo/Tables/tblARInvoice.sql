@@ -7,7 +7,7 @@
     [dtmDueDate]           DATETIME        NOT NULL,
     [intCurrencyId]        INT             NOT NULL,
     [intCompanyLocationId] INT             NULL,
-    [intEntitySalespersonId]     INT             NOT NULL,
+    [intEntitySalespersonId]     INT       NULL,
     [dtmShipDate]          DATETIME        NULL,
     [intShipViaId]         INT             NULL,
     [strPONumber]          NVARCHAR (25)    COLLATE Latin1_General_CI_AS NULL,
@@ -51,6 +51,7 @@
 	CONSTRAINT [FK_tblARInvoice_tblEntityLocation_intShipToLocationId] FOREIGN KEY ([intShipToLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]),
 	CONSTRAINT [FK_tblARInvoice_tblEntityLocation_intBillToLocationId] FOREIGN KEY ([intBillToLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]),
 	CONSTRAINT [FK_tblARInvoice_tblSMFreightTerm] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]),
+	CONSTRAINT [FK_tblARInvoice_tblSMTerm_intTermId] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID]),
 );
 
 

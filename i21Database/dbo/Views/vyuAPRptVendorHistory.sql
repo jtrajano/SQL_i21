@@ -4,7 +4,7 @@ AS
 SELECT 
 	strVendorId = tblAPVendor.strVendorId
 	,tblAPVendor.[intEntityVendorId]
-	--,tblAPVendor.[intEntityVendorId]
+	,ISNULL(tblAPVendor.strVendorId, '') + ' - ' + isnull(tblEntity.strName,'''') as strVendorIdName 
 	,A.dtmDate
 	,A.dtmBillDate
 	,intTransactionId = A.intBillId 
@@ -27,6 +27,8 @@ SELECT
 FROM dbo.tblAPBill A
 LEFT JOIN dbo.tblAPVendor
 	ON tblAPVendor.[intEntityVendorId] = A.[intEntityVendorId]
+LEFT JOIN dbo.tblEntity
+	ON dbo.tblEntity.intEntityId = dbo.tblAPVendor.intEntityVendorId
 OUTER APPLY
 (
 	SELECT

@@ -13,6 +13,8 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, Item.strItemNo
 	, strItemDescription = Item.strDescription
 	, Item.strLotTracking
+	, ReceiptItem.intContainerId
+	, ReceiptItemSource.strContainer
 	, ReceiptItem.intSubLocationId
 	, SubLocation.strSubLocationName
 	, strOrderUOM = ReceiptItemSource.strUnitMeasure

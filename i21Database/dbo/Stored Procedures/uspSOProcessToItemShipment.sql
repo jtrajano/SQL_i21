@@ -53,7 +53,14 @@ IF @@ERROR > 0
 
 
 EXEC dbo.uspSOUpdateOrderShipmentStatus @SalesOrderId
-	
+
+
+UPDATE
+	tblSOSalesOrder
+SET
+	dtmProcessDate = GETDATE()
+WHERE
+	intSalesOrderId = @SalesOrderId		
 
 SET @InventoryShipmentId = @ShipmentId;
 --SELECT @ShipmentNumber = strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = @ShipmentId

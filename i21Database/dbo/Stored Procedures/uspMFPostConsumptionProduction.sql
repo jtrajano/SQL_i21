@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFPostConsumptionProduction] @intWorkOrderId INT
+	,@intItemId int
 	,@strLotNumber NVARCHAR(50)
 	,@dblWeight NUMERIC(18, 6)
 	,@intWeightUOMId INT
@@ -6,6 +7,7 @@
 	,@dblQty NUMERIC(18, 6)
 	,@intItemUOMId INT
 	,@intUserId INT = NULL
+	,@intBatchId int
 	,@intLotId INT OUTPUT
 AS
 BEGIN
@@ -21,11 +23,8 @@ BEGIN
 		,@ItemsThatNeedLotId AS dbo.ItemLotTableType
 		,@ItemsForPost AS ItemCostingTableType
 		,@GLEntries AS RecapTableType
-		,@intTransactionId AS INT
-		,@strTransactionId NVARCHAR(50)
 		,@strBatchId NVARCHAR(40)
 		,@intItemLocationId INT
-		,@intItemId INT
 		,@strItemNo AS NVARCHAR(50)
 		,@intLocationId INT
 		,@intSubLocationId INT
@@ -37,10 +36,7 @@ BEGIN
 		,@dtmExpiryDate DATETIME
 		,@dtmPlannedDate datetime
 
-	SELECT TOP 1 @intTransactionId = intWorkOrderId
-		,@strTransactionId = strWorkOrderNo
-		,@intItemId = intItemId
-		,@intLocationId = intLocationId
+	SELECT TOP 1 @intLocationId = intLocationId
 		,@intSubLocationId = intSubLocationId
 		,@intStorageLocationId = intStorageLocationId
 		,@dtmPlannedDate=dtmPlannedDate
@@ -49,52 +45,6 @@ BEGIN
 
 	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
 		,@strBatchId OUTPUT
-
-	INSERT INTO @ItemsForPost (
-		intItemId
-		,intItemLocationId
-		,intItemUOMId
-		,dtmDate
-		,dblQty
-		,dblUOMQty
-		,dblCost
-		,dblSalesPrice
-		,intCurrencyId
-		,dblExchangeRate
-		,intTransactionId
-		,intTransactionDetailId
-		,strTransactionId
-		,intTransactionTypeId
-		,intLotId
-		,intSubLocationId
-		,intStorageLocationId
-		)
-	SELECT intItemId = l.intItemId
-		,intItemLocationId = l.intItemLocationId
-		,intItemUOMId = ISNULL(l.intWeightUOMId, l.intItemUOMId)
-		,dtmDate = @dtmPlannedDate
-		,dblQty = (- cl.dblQuantity)
-		,dblUOMQty = ItemUOM.dblUnitQty
-		,dblCost = l.dblLastCost
-		,dblSalesPrice = 0
-		,intCurrencyId = NULL
-		,dblExchangeRate = 1
-		,intTransactionId = @intTransactionId
-		,intTransactionDetailId = cl.intWorkOrderConsumedLotId
-		,strTransactionId = @strTransactionId
-		,intTransactionTypeId = @INVENTORY_CONSUME
-		,intLotId = l.intLotId
-		,intSubLocationId = l.intSubLocationId
-		,intStorageLocationId = l.intStorageLocationId
-	FROM tblMFWorkOrderConsumedLot cl
-	INNER JOIN tblICLot l ON cl.intLotId = l.intLotId
-	INNER JOIN dbo.tblICItemUOM ItemUOM ON cl.intItemUOMId = ItemUOM.intItemUOMId
-	WHERE cl.intWorkOrderId = @intTransactionId
-
-	EXEC dbo.uspICPostCosting @ItemsForPost
-		,@strBatchId
-		,NULL
-		,@intUserId
 
 	SELECT @intItemLocationId = intItemLocationId
 	FROM tblICItemLocation
@@ -190,6 +140,52 @@ BEGIN
 	FROM #GeneratedLotItems
 	WHERE intDetailId = @intWorkOrderId
 
+	INSERT INTO @ItemsForPost (
+		intItemId
+		,intItemLocationId
+		,intItemUOMId
+		,dtmDate
+		,dblQty
+		,dblUOMQty
+		,dblCost
+		,dblSalesPrice
+		,intCurrencyId
+		,dblExchangeRate
+		,intTransactionId
+		,intTransactionDetailId
+		,strTransactionId
+		,intTransactionTypeId
+		,intLotId
+		,intSubLocationId
+		,intStorageLocationId
+		)
+	SELECT intItemId = l.intItemId
+		,intItemLocationId = l.intItemLocationId
+		,intItemUOMId = ISNULL(l.intWeightUOMId, l.intItemUOMId)
+		,dtmDate = @dtmPlannedDate
+		,dblQty = (- cl.dblQuantity)
+		,dblUOMQty = (Case When l.intWeightUOMId is null then 0 else ItemUOM.dblUnitQty End)
+		,dblCost = l.dblLastCost
+		,dblSalesPrice = 0
+		,intCurrencyId = NULL
+		,dblExchangeRate = 1
+		,intTransactionId = @intBatchId
+		,intTransactionDetailId = cl.intWorkOrderConsumedLotId
+		,strTransactionId = @strLotNumber
+		,intTransactionTypeId = @INVENTORY_CONSUME
+		,intLotId = l.intLotId
+		,intSubLocationId = l.intSubLocationId
+		,intStorageLocationId = l.intStorageLocationId
+	FROM tblMFWorkOrderConsumedLot cl
+	INNER JOIN tblICLot l ON cl.intLotId = l.intLotId
+	INNER JOIN dbo.tblICItemUOM ItemUOM ON cl.intItemUOMId = ItemUOM.intItemUOMId
+	WHERE cl.intWorkOrderId = @intWorkOrderId
+
+	EXEC dbo.uspICPostCosting @ItemsForPost
+		,@strBatchId
+		,NULL
+		,@intUserId
+
 	DELETE
 	FROM @ItemsForPost
 
@@ -237,8 +233,8 @@ BEGIN
 		,dblSalesPrice = 0
 		,intCurrencyId = NULL
 		,dblExchangeRate = 1
-		,intTransactionId = @intTransactionId
-		,strTransactionId = @strTransactionId
+		,intTransactionId = @intBatchId
+		,strTransactionId = @strLotNumber
 		,intTransactionTypeId = @INVENTORY_PRODUCE
 		,intLotId = @intLotId
 		,intSubLocationId = @intSubLocationId

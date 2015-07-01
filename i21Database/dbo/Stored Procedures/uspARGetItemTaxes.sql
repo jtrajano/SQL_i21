@@ -1,8 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspARGetItemTaxes]
 	@ItemId				INT
 	,@LocationId		INT	
-	,@CustomerId		INT
-	,@TransactionDate	DATETIME		
+	,@CustomerId		INT			= NULL	
+	,@TransactionDate	DATETIME
+	,@TaxMasterId		INT			= NULL		
 AS
 
 --DECLARE 	
@@ -127,7 +128,10 @@ AS
 				tblICItem
 			WHERE
 				[intItemId] = @ItemId    
-		END		
+		END
+		
+	IF @TaxMasterId IS NOT NULL AND @TaxMasterId <> 0
+		SET	@TaxGroupMasterId = @TaxMasterId
 	
 	
 	IF @TaxGroupMasterId IS NOT NULL OR @TaxGroupMasterId <> 0
@@ -138,34 +142,50 @@ AS
 					,@City nvarchar(MAX)
 					,@State nvarchar(MAX)				
 					
-			SELECT
-				@Country = ISNULL(SL.[strCountry], EL.[strCountry])
-				,@State = ISNULL(SL.[strState], EL.[strState])
-				,@County = TC.[strCounty] 
-				,@City = ISNULL(SL.[strCity], EL.[strCity])
-			FROM
-				tblARCustomer C
-			LEFT OUTER JOIN
-				(	SELECT
-						[intEntityLocationId]
-						,[intEntityId] 
-						,[strCountry]
-						,[strState]
-						,[strCity]
-					FROM 
-					tblEntityLocation
+			IF @TaxMasterId IS NULL OR @TaxMasterId = 0
+				BEGIN
+					SELECT
+						@Country = ISNULL(SL.[strCountry], EL.[strCountry])
+						,@State = ISNULL(SL.[strState], EL.[strState])
+						,@County = TC.[strCounty] 
+						,@City = ISNULL(SL.[strCity], EL.[strCity])
+					FROM
+						tblARCustomer C
+					LEFT OUTER JOIN
+						(	SELECT
+								[intEntityLocationId]
+								,[intEntityId] 
+								,[strCountry]
+								,[strState]
+								,[strCity]
+							FROM 
+							tblEntityLocation
+							WHERE
+								ysnDefaultLocation = 1
+						) EL
+							ON C.[intEntityCustomerId] = EL.[intEntityId]
+					LEFT OUTER JOIN
+						tblEntityLocation SL
+							ON C.[intShipToId] = SL.[intEntityLocationId]
+					LEFT OUTER JOIN
+						tblSMTaxCode TC
+							ON C.[intTaxCodeId] = TC.[intTaxCodeId] 								
 					WHERE
-						ysnDefaultLocation = 1
-				) EL
-					ON C.[intEntityCustomerId] = EL.[intEntityId]
-			LEFT OUTER JOIN
-				tblEntityLocation SL
-					ON C.[intShipToId] = SL.[intEntityLocationId]
-			LEFT OUTER JOIN
-				tblSMTaxCode TC
-					ON C.[intTaxCodeId] = TC.[intTaxCodeId] 								
-			WHERE
-				C.[intEntityCustomerId] = @CustomerId
+						C.[intEntityCustomerId] = @CustomerId
+				END
+			ELSE
+				BEGIN
+					SELECT
+						@Country = ISNULL(CL.[strCountry], '')
+						,@State = ISNULL(CL.[strStateProvince], '')
+						,@County = '' 
+						,@City = ISNULL(CL.[strCity], '')
+					FROM
+						tblSMCompanyLocation CL													
+					WHERE
+						CL.[intCompanyLocationId] = @LocationId				
+				END
+			
 
 				
 			DECLARE @TaxGroups TABLE(intTaxGroupId INT)				
@@ -274,8 +294,8 @@ AS
 				,TC.[intTaxCodeId]
 				,TC.[intTaxClassId]				
 				,TC.[strTaxableByOtherTaxes]
-				,ISNULL(TCR.[strCalculationMethod], 'Unit') AS [strCalculationMethod]
-				,ISNULL(TCR.[numRate], 0.00)				AS [numRate]
+				,ISNULL((SELECT TOP 1 tblSMTaxCodeRate.[strCalculationMethod] FROM tblSMTaxCodeRate WHERE tblSMTaxCodeRate.[intTaxCodeId] = TC.[intTaxCodeId] AND  CAST(tblSMTaxCodeRate.[dtmEffectiveDate]  AS DATE) <= CAST(@TransactionDate AS DATE) ORDER BY tblSMTaxCodeRate.[dtmEffectiveDate]ASC ,tblSMTaxCodeRate.[numRate] DESC), 'Unit') AS [strCalculationMethod]
+				,ISNULL((SELECT TOP 1 tblSMTaxCodeRate.[numRate] FROM tblSMTaxCodeRate WHERE tblSMTaxCodeRate.[intTaxCodeId] = TC.[intTaxCodeId] AND  CAST(tblSMTaxCodeRate.[dtmEffectiveDate]  AS DATE) <= CAST(@TransactionDate AS DATE) ORDER BY tblSMTaxCodeRate.[dtmEffectiveDate]ASC ,tblSMTaxCodeRate.[numRate] DESC), 0.00) AS [numRate]
 				,0.00 AS [dblTax]
 				,0.00 AS [dblAdjustedTax]				
 				,TC.[intSalesTaxAccountId]								
@@ -284,21 +304,21 @@ AS
 				,TC.[strTaxCode] 				
 			FROM
 				tblSMTaxCode TC
-			LEFT OUTER JOIN
-				(
-					SELECT TOP 1
-						 [intTaxCodeId]
-						,[numRate]
-						,[strCalculationMethod]
-					FROM
-						tblSMTaxCodeRate
-					WHERE
-						CAST([dtmEffectiveDate] AS DATE) <= CAST(@TransactionDate AS DATE)
-					ORDER BY
-						 [dtmEffectiveDate]	ASC
-						,[numRate]			DESC
-				) TCR
-					ON TC.[intTaxCodeId] = TCR.[intTaxCodeId]
+			--LEFT OUTER JOIN
+			--	(
+			--		SELECT TOP 1
+			--			 [intTaxCodeId]
+			--			,[numRate]
+			--			,[strCalculationMethod]
+			--		FROM
+			--			tblSMTaxCodeRate
+			--		WHERE
+			--			CAST([dtmEffectiveDate] AS DATE) <= CAST(@TransactionDate AS DATE)
+			--		ORDER BY
+			--			 [dtmEffectiveDate]	ASC
+			--			,[numRate]			DESC
+			--	) TCR
+			--		ON TC.[intTaxCodeId] = TCR.[intTaxCodeId]
 			INNER JOIN
 				tblSMTaxGroupCode TGC
 					ON TC.[intTaxCodeId] = TGC.[intTaxCodeId] 
@@ -319,8 +339,11 @@ AS
 					ON TG.[intTaxGroupId] = FG.[intTaxGroupId]
 			WHERE
 				TGM.[intTaxGroupMasterId] = @TaxGroupMasterId
-				AND (TC.[intSalesTaxAccountId] IS NOT NULL
-					AND TC.[intSalesTaxAccountId] <> 0)
+				AND ((TC.[intSalesTaxAccountId] IS NOT NULL
+					AND TC.[intSalesTaxAccountId] <> 0) 
+					OR 
+					(@TaxMasterId IS NOT NULL
+					AND @TaxMasterId <> 0))
 				
 			RETURN 1											
 		END						

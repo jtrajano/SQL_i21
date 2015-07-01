@@ -3,6 +3,7 @@
 	,@intUserId AS INT
 	,@Items ItemCostingTableType READONLY
 	,@intEntityId AS INT
+	,@strReceiptType AS NVARCHAR(100)
 	,@InventoryReceiptId AS INT OUTPUT 
 AS
 
@@ -81,11 +82,12 @@ INSERT INTO dbo.tblICInventoryReceipt (
 		,intEntityId
 		,intCreatedUserId
 		,ysnPosted
+		,intSourceType
 )
 SELECT 	strReceiptNumber		= @ReceiptNumber
 		,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(GETDATE())
 		,intEntityVendorId		= @intEntityId
-		,strReceiptType			= @ReceiptType_Direct
+		,strReceiptType			= @strReceiptType
 		,intBlanketRelease		= NULL
 		,intLocationId			= SC.intProcessingLocationId
 		,strVendorRefNo			= SC.strCustomerReference
@@ -94,7 +96,7 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,intShipFromId			= NULL 
 		,intReceiverId			= @intUserId 
 		,intCurrencyId			= SC.intCurrencyId
-		,strVessel				= NULL
+		,strVessel				= SC.strTruckName
 		,intFreightTermId		= NULL
 		,strAllocateFreight		= 'No' -- Default is No
 		,intShiftNumber			= NULL 
@@ -113,6 +115,7 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,intEntityId			= (SELECT TOP 1 intEntityId FROM dbo.tblSMUserSecurity WHERE intUserSecurityID = @intUserId)
 		,intCreatedUserId		= @intUserId
 		,ysnPosted				= 0
+		,intSourceType          = 1
 FROM	dbo.tblSCTicket SC
 WHERE	SC.intTicketId = @intTicketId
 
@@ -143,13 +146,14 @@ INSERT INTO dbo.tblICInventoryReceiptItem (
 	,dblLineTotal
     ,intSort
     ,intConcurrencyId
+	,intOwnershipType
 )
 SELECT	intInventoryReceiptId	= @InventoryReceiptId
 		,intLineNo				= 1
-		,intOrderId				= NULL
+		,intOrderId				= LI.intTransactionDetailId
 		,intSourceId			= @intTicketId
 		,intItemId				= SC.intItemId
-		,intSubLocationId		= NULL
+		,intSubLocationId		= SC.intSubLocationId
 		,dblOrderQty			= LI.dblQty
 		,dblOpenReceive			= LI.dblQty
 		,dblReceived			= LI.dblQty
@@ -168,6 +172,12 @@ SELECT	intInventoryReceiptId	= @InventoryReceiptId
 		,dblLineTotal			= LI.dblQty * LI.dblCost
 		,intSort				= 1
 		,intConcurrencyId		= 1
+		,intOwnershipType       = CASE
+								  WHEN LI.ysnIsCustody = 0
+								  THEN 1
+								  WHEN LI.ysnIsCustody = 1
+								  THEN 2
+								  END
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId INNER JOIN dbo.tblICItemUOM ItemUOM			
 			ON ItemUOM.intItemId = SC.intItemId
 			AND ItemUOM.intItemUOMId = @intTicketItemUOMId

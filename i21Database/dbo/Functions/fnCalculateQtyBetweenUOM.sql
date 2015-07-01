@@ -20,7 +20,7 @@
 CREATE FUNCTION [dbo].[fnCalculateQtyBetweenUOM](
 	@intItemUOMIdFrom INT
 	,@intItemUOMIdTo INT 
-	,@dblQty NUMERIC(18,6)
+	,@dblQty NUMERIC(38,20)
 )
 RETURNS NUMERIC(38,20)
 AS 
@@ -29,6 +29,7 @@ BEGIN
 
 	DECLARE @dblUnitQtyFrom AS NUMERIC(38,20)
 			,@dblUnitQtyTo AS NUMERIC(38,20)
+			--,@StockUnitQty AS NUMERIC(38,20)
 
 	SELECT	@dblUnitQtyFrom = ItemUOM.dblUnitQty
 	FROM	dbo.tblICItemUOM ItemUOM 
@@ -52,31 +53,13 @@ BEGIN
 
 	-- Calculate the Unit Qty
 	SET @result = 
-			CASE	WHEN @dblUnitQtyFrom = @dblUnitQtyTo THEN 
-						@dblQty
-
-					WHEN @dblUnitQtyFrom = 1 THEN 
-						CASE	WHEN FLOOR(@dblUnitQtyTo) = 0 AND @dblUnitQtyTo > 0.1 THEN 
-									@dblQty * @dblUnitQtyTo
-								ELSE 
-									@dblQty / @dblUnitQtyTo
-						END
-
-					WHEN @dblUnitQtyTo = 1 THEN 
-						CASE	WHEN FLOOR(@dblUnitQtyFrom) = 0 AND @dblUnitQtyFrom > 0.1 THEN 
-									@dblQty / @dblUnitQtyFrom
-								ELSE
-									@dblQty * @dblUnitQtyFrom
-						END
-
-					WHEN @dblUnitQtyFrom <> 1 AND @dblUnitQtyTo <> 1 THEN
-						CASE	WHEN FLOOR(@dblUnitQtyFrom) > 0  AND FLOOR(@dblUnitQtyTo) = 0 THEN 
-									@dblQty * @dblUnitQtyFrom * @dblUnitQtyTo
-								ELSE 
-									@dblQty * @dblUnitQtyFrom / @dblUnitQtyTo
-						END 						
-					ELSE @dblQty
-			END 
+		CASE	WHEN @dblUnitQtyFrom = @dblUnitQtyTo THEN 
+					@dblQty
+				ELSE 
+					CASE	WHEN @dblUnitQtyTo <> 0 THEN (@dblQty * @dblUnitQtyFrom) / @dblUnitQtyTo							
+							ELSE NULL 
+					END
+		END 
 
 	RETURN @result;	
 END

@@ -105,7 +105,7 @@ BEGIN TRY
 					ELSE (Case When @intConsumptionMethodId=2 Then @intStorageLocationId Else L.intStorageLocationId End)--By location, then apply location filter
 					END
 				)
-			AND L.dblWeight > 0
+			AND L.dblQty > 0
 		ORDER BY L.dtmDateCreated ASC
 
 		Select @dblAdjustByQuantity = -@dblNewWeight/(Case When @dblWeightPerQty=0 Then 1 Else @dblWeightPerQty End)

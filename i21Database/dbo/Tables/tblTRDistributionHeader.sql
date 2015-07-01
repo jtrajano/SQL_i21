@@ -4,7 +4,7 @@
 	[intTransportReceiptId] INT NOT NULL,
 	[strDestination] nvarchar(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[intEntityCustomerId] INT NULL,	
-    [intCompanyLocationId] INT NULL,	
+    [intCompanyLocationId] INT NOT NULL,	
 	[intEntitySalespersonId] INT NOT NULL,	
 	[strPurchaseOrder] nvarchar(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strComments] nvarchar(max) COLLATE Latin1_General_CI_AS NOT NULL,
