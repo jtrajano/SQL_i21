@@ -92,7 +92,11 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\AccountTemplate.sql
 :r .\GL\DefaultData\AccountSegmentTemplate.sql
 :r .\GL\GLEntryDataFix.sql
-:r .\GL\ReportDataFix.sql
+:r .\GL\ReportData\GeneralLedgerByAccountDetail.sql
+:r .\GL\ReportData\IncomeStatementStandard.sql
+:r .\GL\ReportData\TrialBalance.sql
+:r .\GL\ReportData\TrialBalanceDetail.sql
+:r .\GL\ReportData\BalanceSheetStandard.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql

@@ -104,7 +104,7 @@ FROM	dbo.tblCMBankTransaction F
 WHERE	F.intBankAccountId = @intBankAccountId
 		AND F.strTransactionId = ISNULL(@strTransactionId, F.strTransactionId)
 		AND ISNULL(F.strLink, '') = ISNULL(@strBatchId, ISNULL(F.strLink, ''))
-		AND F.intBankTransactionTypeId IN (@MISC_CHECKS, @AP_PAYMENT)
+		AND F.intBankTransactionTypeId IN (@MISC_CHECKS, @AP_PAYMENT, @PAYCHECK)
 		AND F.ysnPosted = 1
 		AND F.ysnClr = 0
 		AND F.dblAmount <> 0

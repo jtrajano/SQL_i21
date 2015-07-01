@@ -100,7 +100,8 @@
     <None Include="Scripts\Pre-Deployment\14_CT\01_Make_Column_Null.sql" />
     <None Include="Scripts\Pre-Deployment\11_IC\StatusImplementation.sql" />
     <None Include="i21PreDeployment_1.publish.xml" />
-    <None Include="i21PreDeployment_2.publish.xml" />
+    
+    <None Include="Scripts\Pre-Deployment\12_EM\03_EntityCustomerFarmRename_DataFix.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />

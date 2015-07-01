@@ -155,6 +155,7 @@
     <Folder Include="dbo\Triggers\" />
     <Folder Include="Scripts\Post-Deployment\TM\Reports\SubReportSettings" />
     <Folder Include="Scripts\Post-Deployment\PR\DataFixes" />
+    <Folder Include="Scripts\Post-Deployment\GL\ReportData" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -1669,6 +1670,13 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillAmounts.sql" />
     <Build Include="dbo\Views\vyuAPBillStatus.sql" />
     <Build Include="dbo\Views\vyuARSalesAnalysisReport.sql" />
+    <None Include="Scripts\Post-Deployment\GL\ReportData\GeneralLedgerByAccountDetail.sql" />
+    <None Include="Scripts\Post-Deployment\GL\ReportData\IncomeStatementStandard.sql" />
+    <None Include="Scripts\Post-Deployment\GL\ReportData\TrialBalanceDetail.sql" />
+    <None Include="Scripts\Post-Deployment\GL\ReportData\TrialBalance.sql" />
+    <None Include="Scripts\Post-Deployment\GL\ReportData\BalanceSheetStandard.sql" />
+    <Build Include="dbo\Tables\tblPRCompanyReference.sql" />
+    <Build Include="dbo\Views\vyuPRPaycheckHistory.sql" />
     <None Include="Scripts\Post-Deployment\GL\ReportDataFix.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -1709,6 +1717,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\3_UpdateInvoiceOrderShipToAndBillTo.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\UpdateEarningDeductionTaxId.sql" />
     <None Include="Scripts\Post-Deployment\EM\003_FixVendorBadData.sql" />
+    <Build Include="dbo\Views\vyuPRPaycheckTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
