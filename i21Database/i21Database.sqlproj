@@ -1675,6 +1675,7 @@
     <None Include="Scripts\Post-Deployment\GL\ReportData\TrialBalanceDetail.sql" />
     <None Include="Scripts\Post-Deployment\GL\ReportData\TrialBalance.sql" />
     <None Include="Scripts\Post-Deployment\GL\ReportData\BalanceSheetStandard.sql" />
+    <Build Include="dbo\Tables\tblPRCompanyReference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
