@@ -158,7 +158,8 @@ SELECT
  CONVERT(VARCHAR(3),glarc_src_id) + CONVERT(VARCHAR(5),glarc_src_seq) + CONVERT(VARCHAR(6),(glarc_period)) AS glarc_jrnl_no,
  glarc_src_id,
  glarc_src_seq,
- GETDATE() as gooddate
+ GETDATE() as gooddate,
+ A4GLIdentity
  INTO #iRelyImptblGLJournalDetail
  FROM glarcmst
  INNER JOIN tblGLCOACrossReference ON
@@ -232,9 +233,9 @@ IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
  -- INSERT JOURNAL [DETAIL]
  --+++++++++++++++++++++++++++++++++
 INSERT tblGLJournalDetail (intLineNo,intJournalId,dtmDate,intAccountId,dblDebit,dblDebitRate,dblCredit,dblCreditRate,dblDebitUnit,dblCreditUnit,strDescription,intConcurrencyId,
- dblUnitsInLBS,strDocument,strComments,strReference,dblDebitUnitsInLBS,strCorrecting,strSourcePgm,strCheckBookNo,strWorkArea)
+ dblUnitsInLBS,strDocument,strComments,strReference,dblDebitUnitsInLBS,strCorrecting,strSourcePgm,strCheckBookNo,strWorkArea,strOriginTable,intOriginId)
  SELECT intLineNo,intJournalId,gooddate,intAccountId,Debit,DebitRate,Credit,CreditRate,DebitUnits,CreditUnits,strDescription,1,
- dblUnitsInlbs,strDocument,strComments,strReference,DebitUnitsInlbs,strCorrecting,strSourcePgm,strCheckbookNo,strWorkArea
+ dblUnitsInlbs,strDocument,strComments,strReference,DebitUnitsInlbs,strCorrecting,strSourcePgm,strCheckbookNo,strWorkArea,''glarcmst'',A4GLIdentity
  FROM #iRelyImptblGLJournalDetail
    
  IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
