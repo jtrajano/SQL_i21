@@ -261,7 +261,9 @@ COMMIT_INSERT:
    
 ROLLBACK_INSERT:
  ROLLBACK TRANSACTION
+ SELECT @result =  ''One Time Closed Year Conversion error :'' + ERROR_MESSAGE()
  GOTO IMPORT_EXIT
+
 IMPORT_EXIT:
  IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#iRelyImptblGLJournal'')) DROP TABLE #iRelyImptblGLJournal
  IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#iRelyImptblGLJournalDetail'')) DROP TABLE #iRelyImptblGLJournalDetail')

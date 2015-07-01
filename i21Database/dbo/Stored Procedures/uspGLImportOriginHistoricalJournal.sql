@@ -7,6 +7,10 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 
+
+EXECUTE [dbo].[uspGLImportOriginHistoricalJournalCLOSED] @intEntityId ,@result OUTPUT
+IF @result != '' AND  CHARINDEX('SUCCESS', @result,1)= 0 RETURN
+
 BEGIN TRANSACTION
 
 	--+++++++++++++++++++++++++++++++++
