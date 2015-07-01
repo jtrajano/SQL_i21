@@ -247,3 +247,17 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSMUserSecurity',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+
+CREATE TRIGGER [dbo].[Trigger_tblSMUserSecurity]
+    ON [dbo].[tblSMUserSecurity]
+    AFTER INSERT
+    AS
+    BEGIN
+        SET NoCount ON
+		DECLARE @intUserSecurityId INT
+
+		SELECT @intUserSecurityId = intUserSecurityID FROM INSERTED;
+
+		EXEC uspSMUpdateUserPreferenceEntry @intUserSecurityId
+    END

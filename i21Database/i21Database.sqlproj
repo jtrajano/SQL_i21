@@ -1863,6 +1863,11 @@
     <Build Include="dbo\User Defined Types\ItemReceiptItemTableType.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemsFromItemReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryReceiptIntegrations.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRMigrateUserPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMMigrateUserPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMUpdateUserPreferenceEntry.sql" />
+    <Build Include="dbo\Tables\tblGRUserPreference.sql" />
+    <Build Include="dbo\Tables\tblSMUserPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1938,5 +1943,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\14_CompanyPreference.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GR\GRDataMigrations.sql" />
   </ItemGroup>
 </Project>

@@ -98,7 +98,35 @@ GO
 		')
 	END
 GO
-
 	-- MIGRATE DB PREFERENCES
 	EXEC uspDBMigrateUserPreference
+GO
+	-- MIGRATE USER TYPE FROM tblSMPreferences to tblSMUserPreference
+	EXEC uspSMMigrateUserPreference
+GO
+
+-- Update User Preference
+DECLARE @currentRow INT
+DECLARE @totalRows INT
+
+SET @currentRow = 1
+SELECT @totalRows = Count(*) FROM [dbo].[tblSMUserSecurity]
+
+WHILE (@currentRow <= @totalRows)
+BEGIN
+
+Declare @userId INT
+SELECT @userId = intUserSecurityID FROM (  
+	SELECT ROW_NUMBER() OVER(ORDER BY intUserSecurityID ASC) AS 'ROWID', *
+	FROM [dbo].[tblSMUserSecurity]
+) a
+WHERE ROWID = @currentRow
+
+PRINT N'Executing uspSMUpdateUserPreferenceEntry'
+Exec uspSMUpdateUserPreferenceEntry @userId
+
+
+SET @currentRow = @currentRow + 1
+END
+
 GO

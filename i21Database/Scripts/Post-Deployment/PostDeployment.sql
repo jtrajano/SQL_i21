@@ -158,6 +158,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 --Grain
 :R .\GR\1_MasterTables.sql
+:R .\GR\GRDataMigrations.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql
