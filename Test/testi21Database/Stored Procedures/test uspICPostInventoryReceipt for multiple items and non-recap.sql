@@ -82,17 +82,21 @@ BEGIN
 			strReceiptNumber
 			,intLocationId
 			,dtmReceiptDate
+			,strReceiptType
+			,intSourceType
 		)
 		VALUES (
 			@strTransactionId
 			,@NewHaven
 			,@dtmDate	
+			,'Purchase Order'
+			,1
 		);	
 	
-		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblOpenReceive,dblUnitCost,intUnitMeasureId) VALUES (1, @WetGrains, 10, 10, 12.50, @WetGrains_BushelUOMId);
-		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblOpenReceive,dblUnitCost,intUnitMeasureId) VALUES (1, @StickyGrains, 20, 10, 13.50, @StickyGrains_BushelUOMId);
-		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblOpenReceive,dblUnitCost,intUnitMeasureId) VALUES (1, @PremiumGrains, 30, 10, 9.10, @PremiumGrains_BushelUOMId);
-		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblOpenReceive,dblUnitCost,intUnitMeasureId) VALUES (1, @WetGrains, 40, 10, 15.52, @WetGrains_BushelUOMId);
+		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblOpenReceive,dblUnitCost,intUnitMeasureId,intOwnershipType) VALUES (1, @WetGrains, 10, 10, 12.50, @WetGrains_BushelUOMId, 1);
+		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblOpenReceive,dblUnitCost,intUnitMeasureId,intOwnershipType) VALUES (1, @StickyGrains, 20, 10, 13.50, @StickyGrains_BushelUOMId, 1);
+		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblOpenReceive,dblUnitCost,intUnitMeasureId,intOwnershipType) VALUES (1, @PremiumGrains, 30, 10, 9.10, @PremiumGrains_BushelUOMId, 1);
+		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId,intItemId,dblOrderQty,dblOpenReceive,dblUnitCost,intUnitMeasureId,intOwnershipType) VALUES (1, @WetGrains, 40, 10, 15.52, @WetGrains_BushelUOMId, 1);
 		
 		CREATE TABLE actual (
 			dblDebit NUMERIC(18,6)

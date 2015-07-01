@@ -17,8 +17,6 @@ BEGIN
 	-- Act
 	SELECT @result = dbo.fnCalculateQtyBetweenUOM(@60KG_BAG, @LBS, @dblQty)
 
-	print @result
-
 	-- Assert 
 	EXEC tSQLt.AssertEquals @expected, @result;
 END

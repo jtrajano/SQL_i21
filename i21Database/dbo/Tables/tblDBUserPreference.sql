@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblDBUserPreference]
 (
 	[intUserPreferenceId] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [intUserId] INT NULL,
+    [intUserSecurityId] INT NULL,
     [ysnAutoPanelWidth] BIT NULL DEFAULT ((1)), 
     [ysnAutoRefresh] BIT NULL DEFAULT ((0)), 
     [intAutoRefreshMinute] INT NULL DEFAULT ((1)), 

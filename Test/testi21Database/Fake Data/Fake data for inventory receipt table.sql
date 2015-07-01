@@ -52,9 +52,23 @@ BEGIN
 	DECLARE @intEntityId AS INT = 1;
 	DECLARE @intUserId AS INT = 1;
 
-	DECLARE @ReceiptType_PurchaseOrder AS NVARCHAR(100) = 'Purchase Order'
-	DECLARE @ReceiptType_TransferOrder AS NVARCHAR(100) = 'Transfer Order'
-	DECLARE @ReceiptType_Direct AS NVARCHAR(100) = 'Direct'
+	DECLARE 
+			-- Receipt Types
+			@RECEIPT_TYPE_PURCHASE_CONTRACT AS NVARCHAR(50) = 'Purchase Contract'
+			,@RECEIPT_TYPE_PURCHASE_ORDER AS NVARCHAR(50) = 'Purchase Order'
+			,@RECEIPT_TYPE_TRANSFER_ORDER AS NVARCHAR(50) = 'Transfer Order'
+			,@RECEIPT_TYPE_DIRECT AS NVARCHAR(50) = 'Direct'
+
+			-- Source Types
+			,@SOURCE_TYPE_NONE AS INT = 1
+			,@SOURCE_TYPE_SCALE AS INT = 2
+			,@SOURCE_TYPE_INBOUND_SHIPMENT AS INT = 3
+
+			-- Ownership Types
+			,@OWNERSHIP_TYPE_OWN AS INT = 1
+			,@OWNERSHIP_TYPE_STORAGE AS INT = 2
+			,@OWNERSHIP_TYPE_CONSIGNED_PURCHASE AS INT = 3
+			,@OWNERSHIP_TYPE_CONSIGNED_SALE AS INT = 4
 
 	-- Create mock data for the starting number 
 	EXEC tSQLt.FakeTable 'dbo.tblSMStartingNumber';	
@@ -96,6 +110,7 @@ BEGIN
 				strReceiptNumber
 				,dtmReceiptDate
 				,strReceiptType
+				,intSourceType
 				,intLocationId
 				,intShipViaId
 				,intShipFromId
@@ -109,7 +124,8 @@ BEGIN
 		)
 		SELECT 	strReceiptNumber		= @strReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
-				,strReceiptType			= @ReceiptType_PurchaseOrder
+				,strReceiptType			= @RECEIPT_TYPE_PURCHASE_ORDER
+				,intSourceType			= @SOURCE_TYPE_NONE
 				,intLocationId			= @Default_Location
 				,intShipViaId			= @Default_Location
 				,intShipFromId			= @Default_Location
@@ -135,6 +151,7 @@ BEGIN
 			,dblLineTotal
 			,intSort
 			,intConcurrencyId
+			,intOwnershipType
 		)
 		-- intInventoryReceiptItemId: 1
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -149,6 +166,7 @@ BEGIN
 				,dblLineTotal			= 10.00
 				,intSort				= 1
 				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
 		-- intInventoryReceiptItemId: 2
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -163,6 +181,7 @@ BEGIN
 				,dblLineTotal			= 20.00
 				,intSort				= 2
 				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
 		-- intInventoryReceiptItemId: 3
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -177,6 +196,7 @@ BEGIN
 				,dblLineTotal			= 30.00
 				,intSort				= 3
 				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
 		-- intInventoryReceiptItemId: 4
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -191,6 +211,7 @@ BEGIN
 				,dblLineTotal			= 40.00
 				,intSort				= 4
 				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
 		-- intInventoryReceiptItemId: 5
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -205,6 +226,7 @@ BEGIN
 				,dblLineTotal			= 50.00
 				,intSort				= 5
 				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
 		-- intInventoryReceiptItemId: 6
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -219,6 +241,7 @@ BEGIN
 				,dblLineTotal			= 60.00
 				,intSort				= 6
 				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
 		-- intInventoryReceiptItemId: 7
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -233,6 +256,7 @@ BEGIN
 				,dblLineTotal			= 70.00
 				,intSort				= 7
 				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
@@ -283,6 +307,7 @@ BEGIN
 				strReceiptNumber
 				,dtmReceiptDate
 				,strReceiptType
+				,intSourceType
 				,intLocationId
 				,intShipViaId
 				,intShipFromId
@@ -296,7 +321,8 @@ BEGIN
 		)
 		SELECT 	strReceiptNumber		= @strReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
-				,strReceiptType			= @ReceiptType_PurchaseOrder
+				,strReceiptType			= @RECEIPT_TYPE_PURCHASE_ORDER
+				,intSourceType			= @SOURCE_TYPE_NONE
 				,intLocationId			= @Default_Location
 				,intShipViaId			= @Default_Location
 				,intShipFromId			= @Default_Location
@@ -322,6 +348,7 @@ BEGIN
 			,dblLineTotal
 			,intSort
 			,intConcurrencyId
+			,intOwnershipType
 		)
 		-- intInventoryReceiptItemId: 8
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -336,6 +363,7 @@ BEGIN
 				,dblLineTotal			= 10.00
 				,intSort				= 1
 				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
 		-- intInventoryReceiptItemId: 9
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -350,6 +378,7 @@ BEGIN
 				,dblLineTotal			= 20.00
 				,intSort				= 2
 				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
 		-- intInventoryReceiptItemId: 10
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -364,6 +393,7 @@ BEGIN
 				,dblLineTotal			= 30.00
 				,intSort				= 3
 				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
 		-- intInventoryReceiptItemId: 11
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -378,6 +408,7 @@ BEGIN
 				,dblLineTotal			= 40.00
 				,intSort				= 4
 				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
 		-- intInventoryReceiptItemId: 12
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -392,7 +423,7 @@ BEGIN
 				,dblLineTotal			= 50.00
 				,intSort				= 5
 				,intConcurrencyId		= 1
-	
+				,intOwnershipType		= @OWNERSHIP_TYPE_OWN	
 	END
 
 	--------------------------------------------------------
@@ -408,6 +439,7 @@ BEGIN
 				strReceiptNumber
 				,dtmReceiptDate
 				,strReceiptType
+				,intSourceType
 				,intLocationId
 				,intShipViaId
 				,intShipFromId
@@ -421,7 +453,8 @@ BEGIN
 		)
 		SELECT 	strReceiptNumber		= @strReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
-				,strReceiptType			= @ReceiptType_PurchaseOrder
+				,strReceiptType			= @RECEIPT_TYPE_PURCHASE_ORDER
+				,intSourceType			= @SOURCE_TYPE_NONE
 				,intLocationId			= @Default_Location
 				,intShipViaId			= @Default_Location
 				,intShipFromId			= @Default_Location
@@ -447,6 +480,7 @@ BEGIN
 			,dblLineTotal
 			,intSort
 			,intConcurrencyId
+			,intOwnershipType
 		)
 		-- intInventoryReceiptItemId: 13
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -461,6 +495,7 @@ BEGIN
 				,dblLineTotal			= 60.00
 				,intSort				= 6
 				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
 		-- intInventoryReceiptItemId: 14
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -475,6 +510,7 @@ BEGIN
 				,dblLineTotal			= 70.00
 				,intSort				= 7
 				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
@@ -525,6 +561,7 @@ BEGIN
 				strReceiptNumber
 				,dtmReceiptDate
 				,strReceiptType
+				,intSourceType
 				,intLocationId
 				,intShipViaId
 				,intShipFromId
@@ -538,7 +575,8 @@ BEGIN
 		)
 		SELECT 	strReceiptNumber		= @strReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
-				,strReceiptType			= @ReceiptType_PurchaseOrder
+				,strReceiptType			= @RECEIPT_TYPE_PURCHASE_ORDER
+				,intSourceType			= @SOURCE_TYPE_NONE
 				,intLocationId			= @Default_Location
 				,intShipViaId			= @Default_Location
 				,intShipFromId			= @Default_Location
@@ -565,6 +603,7 @@ BEGIN
 				strReceiptNumber
 				,dtmReceiptDate
 				,strReceiptType
+				,intSourceType
 				,intLocationId
 				,intShipViaId
 				,intShipFromId
@@ -578,7 +617,8 @@ BEGIN
 		)
 		SELECT 	strReceiptNumber		= @strReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
-				,strReceiptType			= @ReceiptType_PurchaseOrder
+				,strReceiptType			= @RECEIPT_TYPE_PURCHASE_ORDER
+				,intSourceType			= @SOURCE_TYPE_NONE
 				,intLocationId			= @Default_Location
 				,intShipViaId			= @Default_Location
 				,intShipFromId			= @Default_Location
@@ -604,6 +644,7 @@ BEGIN
 			,dblLineTotal
 			,intSort
 			,intConcurrencyId
+			,intOwnershipType
 		)
 		-- intInventoryReceiptItemId: 15
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -618,6 +659,7 @@ BEGIN
 				,dblLineTotal			= 60.00
 				,intSort				= 1
 				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
 		-- intInventoryReceiptItemId: 16
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -632,6 +674,7 @@ BEGIN
 				,dblLineTotal			= 70.00
 				,intSort				= 2
 				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
@@ -679,6 +722,7 @@ BEGIN
 				strReceiptNumber
 				,dtmReceiptDate
 				,strReceiptType
+				,intSourceType
 				,intLocationId
 				,intShipViaId
 				,intShipFromId
@@ -692,7 +736,8 @@ BEGIN
 		)
 		SELECT 	strReceiptNumber		= @strReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
-				,strReceiptType			= @ReceiptType_PurchaseOrder
+				,strReceiptType			= @RECEIPT_TYPE_PURCHASE_ORDER
+				,intSourceType			= @SOURCE_TYPE_NONE
 				,intLocationId			= @Default_Location
 				,intShipViaId			= @Default_Location
 				,intShipFromId			= @Default_Location
@@ -718,6 +763,7 @@ BEGIN
 			,dblLineTotal
 			,intSort
 			,intConcurrencyId
+			,intOwnershipType
 		)
 		-- intInventoryReceiptItemId: 17
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -732,6 +778,7 @@ BEGIN
 				,dblLineTotal			= 60.00
 				,intSort				= 1
 				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
 		-- intInventoryReceiptItemId: 18
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -746,6 +793,7 @@ BEGIN
 				,dblLineTotal			= 70.00
 				,intSort				= 2
 				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
@@ -792,6 +840,7 @@ BEGIN
 				strReceiptNumber
 				,dtmReceiptDate
 				,strReceiptType
+				,intSourceType
 				,intLocationId
 				,intShipViaId
 				,intShipFromId
@@ -805,7 +854,8 @@ BEGIN
 		)
 		SELECT 	strReceiptNumber		= @strReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
-				,strReceiptType			= @ReceiptType_PurchaseOrder
+				,strReceiptType			= @RECEIPT_TYPE_PURCHASE_ORDER
+				,intSourceType			= @SOURCE_TYPE_NONE
 				,intLocationId			= @Default_Location
 				,intShipViaId			= @Default_Location
 				,intShipFromId			= @Default_Location
@@ -831,6 +881,7 @@ BEGIN
 			,dblLineTotal
 			,intSort
 			,intConcurrencyId
+			,intOwnershipType
 		)
 		-- intInventoryReceiptItemId: 19
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -845,6 +896,7 @@ BEGIN
 				,dblLineTotal			= 60.00
 				,intSort				= 1
 				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
 		-- intInventoryReceiptItemId: 20
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -859,6 +911,7 @@ BEGIN
 				,dblLineTotal			= 70.00
 				,intSort				= 2
 				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId

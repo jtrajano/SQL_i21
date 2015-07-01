@@ -3535,4 +3535,11 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="[tblWHContainerType]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="bea09a61-420a-4e7e-ae5c-40ccc4a6d45f" ChangeDateTime="07/01/2015 03:19:00">
+    <Property Name="ElementName" Value="[dbo].[tblDBUserPreference].[intUserId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblDBUserPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intUserSecurityId" />
+  </Operation>
 </Operations>

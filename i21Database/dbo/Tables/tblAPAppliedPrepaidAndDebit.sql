@@ -19,3 +19,4 @@
     [ysnApplied] BIT NOT NULL DEFAULT 0,
 	[intConcurrencyId] INT NOT NULL DEFAULT 0
 )
+GO

@@ -31,9 +31,22 @@ BEGIN
 
 	IF EXISTS(SELECT 1 FROM tblAPPayment A
 				INNER JOIN tblCMBankTransaction B ON A.strPaymentRecordNum = B.strTransactionId
-				WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayables) AND A.ysnPosted = 1 AND (B.dtmCheckPrinted IS NULL OR B.ysnCheckVoid = 1))
+				WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayables) AND A.ysnPosted = 1 AND (B.dtmCheckPrinted IS NULL OR B.ysnCheckVoid = 1 OR B.ysnClr = 1))
 	BEGIN
-		RAISERROR('Void failed. Payment already void or not yet printed.', 16, 1);
+		RAISERROR('Void failed. Payment already void or not yet printed or it has been cleared.', 16, 1);
+	END
+
+	--DO NOT ALLOW TO VOID THE PREPAYMENT PAYMENT IF IT WAS APPLIED ON THE BILLS
+	IF(EXISTS(SELECT 1 FROM tblAPPayment A
+					INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+					INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+					INNER JOIN tblAPAppliedPrepaidAndDebit D ON C.intBillId = D.intTransactionId
+					INNER JOIN tblAPBill E ON D.intBillId = E.intBillId
+					WHERE A.intPaymentId IN (6258)
+					AND D.dblAmountApplied > 0
+					AND E.ysnPosted = 1))
+	BEGIN
+		RAISERROR('Void failed. There are bills that applied this payment. Please unpost that first.', 16, 1);
 	END
 
 	IF @@ERROR != 0

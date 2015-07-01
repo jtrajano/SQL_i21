@@ -79,3 +79,5 @@ GO
 GO
 	EXEC dbo.uspGLImportRecurring
 GO
+	UPDATE tblGLJournalDetail SET intOriginId = CONVERT(INT, strSourceKey) WHERE strSourceKey IS NOT NULL AND intOriginId IS NULL
+GO
