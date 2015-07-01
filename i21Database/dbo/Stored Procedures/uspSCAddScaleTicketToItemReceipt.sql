@@ -3,6 +3,7 @@
 	,@intUserId AS INT
 	,@Items ItemCostingTableType READONLY
 	,@intEntityId AS INT
+	,@strReceiptType AS NVARCHAR(100)
 	,@InventoryReceiptId AS INT OUTPUT 
 AS
 
@@ -81,11 +82,12 @@ INSERT INTO dbo.tblICInventoryReceipt (
 		,intEntityId
 		,intCreatedUserId
 		,ysnPosted
+		,intSourceType
 )
 SELECT 	strReceiptNumber		= @ReceiptNumber
 		,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(GETDATE())
 		,intEntityVendorId		= @intEntityId
-		,strReceiptType			= @ReceiptType_Direct
+		,strReceiptType			= @strReceiptType
 		,intBlanketRelease		= NULL
 		,intLocationId			= SC.intProcessingLocationId
 		,strVendorRefNo			= SC.strCustomerReference
@@ -113,6 +115,7 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,intEntityId			= (SELECT TOP 1 intEntityId FROM dbo.tblSMUserSecurity WHERE intUserSecurityID = @intUserId)
 		,intCreatedUserId		= @intUserId
 		,ysnPosted				= 0
+		,intSourceType          = 1
 FROM	dbo.tblSCTicket SC
 WHERE	SC.intTicketId = @intTicketId
 
@@ -147,7 +150,7 @@ INSERT INTO dbo.tblICInventoryReceiptItem (
 )
 SELECT	intInventoryReceiptId	= @InventoryReceiptId
 		,intLineNo				= 1
-		,intOrderId				= NULL
+		,intOrderId				= LI.intTransactionDetailId
 		,intSourceId			= @intTicketId
 		,intItemId				= SC.intItemId
 		,intSubLocationId		= SC.intSubLocationId

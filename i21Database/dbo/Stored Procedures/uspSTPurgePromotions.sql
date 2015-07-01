@@ -3,28 +3,20 @@
 	
 AS
 BEGIN TRY
-
-    SET QUOTED_IDENTIFIER OFF
-    SET ANSI_NULLS ON
-    SET NOCOUNT ON
-    SET XACT_ABORT ON
-    SET ANSI_WARNINGS OFF
-
 	DECLARE @ErrMsg				       NVARCHAR(MAX),
 	        @idoc					   INT,
-	    	@PromoLocation 		       NVARCHAR(MAX),
+	    	@PromoStore  		       NVARCHAR(MAX),
 			@PromoEndingPeriodDate     DATETIME,
 			@PromoPurgeAllRecordsysn   NVARCHAR(1),
 			@PromoMixMatchysn          NVARCHAR(1),
 			@PromoComboysn             NVARCHAR(1),
 			@PromoItemListysn          NVARCHAR(1)
 
-
 	                  
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
 	SELECT	
-			@PromoLocation		      =	Location,
+			@PromoStore		          =	Store,
 			@PromoEndingPeriodDate    = EndingPeriodDate,
 			@PromoPurgeAllRecordsysn  = PurgeAllRecordsysn,
 			@PromoMixMatchysn         = MixMatchysn,
@@ -35,7 +27,7 @@ BEGIN TRY
 	FROM	OPENXML(@idoc, 'root',2)
 	WITH
 	(
-			Location		        NVARCHAR(MAX),
+			Store    		        NVARCHAR(MAX),
 			EndingPeriodDate        DATETIME,
 			PurgeAllRecordsysn      NVARCHAR(1),
             MixMatchysn             NVARCHAR(1),
@@ -43,140 +35,97 @@ BEGIN TRY
 			ItemListysn             NVARCHAR(1)
 	
 	)  
-
-      DECLARE @SQL1 NVARCHAR(MAX)
+	
 	  DECLARE @MiXMatchCount INT 
 	  DECLARE @ComboCount INT
 	  DECLARE @ItemListCount INT
+	 
+	  set @MiXMatchCount = 0
+	  set @ComboCount = 0
+	  set @ItemListCount = 0
 
-	  select @MiXMatchCount = 0,  @ComboCount = 0, @ItemListCount = 0
+	   
+	  IF (@PromoPurgeAllRecordsysn = 'Y')
+	  BEGIN
 
-	  PRINT @PromoItemListysn
+		  IF (@PromoComboysn = 'Y')
+		  BEGIN
+		       SELECT @ComboCount = COUNT(*) from tblSTPromotionSalesList
+		       WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) and strPromoType = 'C'
 
+		       DELETE FROM tblSTPromotionSalesList 
+		       WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) and strPromoType = 'C'
+		  END
 
-	    if (@PromoItemListysn = 'Y')
-	      BEGIN
-			  
-			  PRINT @PromoEndingPeriodDate
+	      IF (@PromoMixMatchysn = 'Y')
+		  BEGIN
+                SELECT @MiXMatchCount = COUNT(*) from tblSTPromotionSalesList
+		        WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) and strPromoType = 'M' 
+  
+		        DELETE FROM tblSTPromotionSalesList 
+		        WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) and strPromoType = 'M'
+		  END
 
-              set @SQL1 = 'delete from stmixmst '
-		  
-		      set @SQL1 = @SQL1 + ' where 1=1 ' 
+		  IF (@PromoItemListysn = 'Y')
+		  BEGIN
 
- 	          if (@PromoLocation IS NOT NULL)
-		      BEGIN 
-		        set @SQL1 = @SQL1 +  ' and  stmix_store_name IN 
-		 	     (''' + replace((SELECT (CAST(@PromoLocation AS NVARCHAR(MAX)))),',',''',''') +''')'
-		      END
+		       SELECT @ItemListCount = COUNT (*) FROM tblSTPromotionItemList 
+		       WHERE  intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) AND intPromoItemListId 
+               NOT IN (SELECT intPromoItemListId FROM tblSTPromotionSalesListDetail)
 
-  	          if ((@PromoEndingPeriodDate IS NOT NULL)
-		      and (@PromoPurgeAllRecordsysn = 'N'))
-			      BEGIN
-				    set @SQL1 = @SQL1 +  ' and  stmix_end_date  <= ''' 
-			        + (SELECT CONVERT(NVARCHAR(12), CONVERT(DATETIME,@PromoEndingPeriodDate),112)) + ''''
-                  END  
+		       DELETE FROM tblSTPromotionItemList 
+		       WHERE  intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) AND intPromoItemListId 
+			   NOT IN (SELECT intPromoItemListId FROM tblSTPromotionSalesListDetail as adj1 INNER JOIN tblSTPromotionSalesList as adj2
+			   ON adj1.intPromoSalesListId = adj2.intPromoSalesListId and adj2.intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')))
+		  END
+	  END
 
-              exec (@SQL1)
+	  if (@PromoPurgeAllRecordsysn <> 'Y')
+	  BEGIN
+	      
+		  IF (@PromoComboysn = 'Y')
+		  BEGIN
+		       SELECT @ComboCount = COUNT(*) from tblSTPromotionSalesList
+		       WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) 
+			   and strPromoType = 'C' AND CONVERT(DATETIME,dtmPromoEndPeriod,101) 
+			   <= CONVERT(DATETIME,@PromoEndingPeriodDate,101)
+			  			  
+	           DELETE FROM tblSTPromotionSalesList 
+		       WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) 
+			   and strPromoType = 'C' AND CONVERT(DATETIME,dtmPromoEndPeriod,101) 
+			   <= CONVERT(DATETIME,@PromoEndingPeriodDate,101)
+		  END
+	      
+		  IF (@PromoMixMatchysn = 'Y')
+		  BEGIN
+                SELECT @MiXMatchCount = COUNT(*) from tblSTPromotionSalesList
+		        WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,','))
+				and strPromoType = 'M' AND CONVERT(DATETIME,dtmPromoEndPeriod,101) 
+			    <= CONVERT(DATETIME,@PromoEndingPeriodDate,101)
+ 
+		        DELETE FROM tblSTPromotionSalesList 
+		        WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) 
+				and strPromoType = 'M' AND CONVERT(DATETIME,dtmPromoEndPeriod,101) 
+			    <= CONVERT(DATETIME,@PromoEndingPeriodDate,101)
+		  END
 
-	          set @MiXMatchCount = (select (@@ROWCOUNT))
+		  IF (@PromoItemListysn = 'Y')
+		  BEGIN
+		       SELECT @ItemListCount = COUNT (*) FROM tblSTPromotionItemList 
+		       WHERE  intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) AND intPromoItemListId 
+               NOT IN (SELECT intPromoItemListId FROM tblSTPromotionSalesListDetail as adj1 INNER JOIN tblSTPromotionSalesList as adj2
+			   ON adj1.intPromoSalesListId = adj2.intPromoSalesListId and adj2.intStoreId 
+			   IN (Select Item from dbo.fnSplitString(@PromoStore,',')))
 
-			  set @SQL1 = 'delete from stcbomst '
-		  
-		      set @SQL1 = @SQL1 + ' where 1=1 ' 
+		       DELETE FROM tblSTPromotionItemList 
+		       WHERE  intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) AND intPromoItemListId 
+               NOT IN (SELECT intPromoItemListId FROM tblSTPromotionSalesListDetail as adj1 INNER JOIN tblSTPromotionSalesList as adj2
+			   ON adj1.intPromoSalesListId = adj2.intPromoSalesListId and adj2.intStoreId 
+			   IN (Select Item from dbo.fnSplitString(@PromoStore,',')))
+		  END
+	  END
 
- 	          if (@PromoLocation IS NOT NULL)
-		      BEGIN 
-		        set @SQL1 = @SQL1 +  ' and  stcbo_store_name IN 
-		 	     (''' + replace((SELECT (CAST(@PromoLocation AS NVARCHAR(MAX)))),',',''',''') +''')'
-		      END
-
-  	          if ((@PromoEndingPeriodDate IS NOT NULL)
-		      and (@PromoPurgeAllRecordsysn = 'N'))
-			      BEGIN
-				    set @SQL1 = @SQL1 +  ' and  stcbo_end_date  <= ''' 
-			        + (SELECT CONVERT(NVARCHAR(12), CONVERT(DATETIME,@PromoEndingPeriodDate),112)) + ''''
-                  END  
-
-              exec (@SQL1)
-
-		      set @ComboCount = (select (@@ROWCOUNT))
-
-			  set @SQL1 = 'delete from stitlmst '
-
-		      set @SQL1 = @SQL1 + ' where 1=1 ' 
-
-			  if (@PromoLocation IS NOT NULL)
-		      BEGIN 
-		          set @SQL1 = @SQL1 +  ' and  stitl_store_name IN 
-		 	       (''' + replace((SELECT (CAST(@PromoLocation AS NVARCHAR(MAX)))),',',''',''') +''')'
-              END
-		      set @SQL1 = @SQL1 + ' and stitl_xml_list_id NOT IN (' + ' 
-                  select stitl_xml_list_id from stitlmst a 
-                  join stmixmst b on a.stitl_xml_list_id=b.stmix_itemlist_id_1 
-                  or a.stitl_xml_list_id=b.stmix_itemlist_id_2 
-                  or a.stitl_xml_list_id=b.stmix_itemlist_id_3
-                  or a.stitl_xml_list_id=b.stmix_itemlist_id_4
-                  or a.stitl_xml_list_id=b.stmix_itemlist_id_5
-                  union
-                  select stitl_xml_list_id from stitlmst a 
-                  join stcbomst c on a.stitl_xml_list_id=c.stcbo_itemlist_id_1
-                  or a.stitl_xml_list_id=c.stcbo_itemlist_id_1
-                  or a.stitl_xml_list_id=c.stcbo_itemlist_id_2
-                  or a.stitl_xml_list_id=c.stcbo_itemlist_id_3
-                  or a.stitl_xml_list_id=c.stcbo_itemlist_id_4
-                  or a.stitl_xml_list_id=c.stcbo_itemlist_id_5 '
-				  + ')' 
-
-              exec (@SQL1)
-	          set @ItemListCount = (select (@@ROWCOUNT))
-	       END      
-
-
-	  if ((@PromoMixMatchysn = 'Y') and  (@PromoItemListysn = 'N'))
-	      BEGIN
-	          set @SQL1 = 'delete from stmixmst '
-		  
-		      set @SQL1 = @SQL1 + ' where 1=1 ' 
-
- 	          if (@PromoLocation IS NOT NULL)
-		      BEGIN 
-		        set @SQL1 = @SQL1 +  ' and  stmix_store_name IN 
-		 	     (''' + replace((SELECT (CAST(@PromoLocation AS NVARCHAR(MAX)))),',',''',''') +''')'
-		      END
-
-  	          if ((@PromoEndingPeriodDate IS NOT NULL)
-		      and (@PromoPurgeAllRecordsysn = 'N'))
-			      BEGIN
-				    set @SQL1 = @SQL1 +  ' and  stmix_end_date  <= ''' 
-			        + (SELECT CONVERT(NVARCHAR(12), CONVERT(DATETIME,@PromoEndingPeriodDate),112)) + ''''
-                  END  
-              exec (@SQL1)
-	          set @MiXMatchCount = (select (@@ROWCOUNT))
-	      END      
-
-       if ((@PromoComboysn = 'Y') and (@PromoItemListysn = 'N'))
-	      BEGIN
-	          set @SQL1 = 'delete from stcbomst '
-		  
-		      set @SQL1 = @SQL1 + ' where 1=1 ' 
-
- 	          if (@PromoLocation IS NOT NULL)
-		      BEGIN 
-		        set @SQL1 = @SQL1 +  ' and  stcbo_store_name IN 
-		 	     (''' + replace((SELECT (CAST(@PromoLocation AS NVARCHAR(MAX)))),',',''',''') +''')'
-		      END
-
-  	          if ((@PromoEndingPeriodDate IS NOT NULL)
-		      and (@PromoPurgeAllRecordsysn = 'N'))
-			      BEGIN
-				    set @SQL1 = @SQL1 +  ' and  stcbo_end_date  <= ''' 
-			        + (SELECT CONVERT(NVARCHAR(12), CONVERT(DATETIME,@PromoEndingPeriodDate),112)) + ''''
-                  END  
-              exec (@SQL1)
-		      set @ComboCount = (select (@@ROWCOUNT))
-	      END    
-		   
-     select @MiXMatchCount as MixMatchCount, @ComboCount as ComboCount, @ItemListCount as ItemListCount	
+      select @MiXMatchCount as MixMatchCount, @ComboCount as ComboCount, @ItemListCount as ItemListCount	
 		        
 
 END TRY

@@ -7,6 +7,7 @@
 	,@dblQty NUMERIC(18, 6)
 	,@intItemUOMId INT
 	,@intUserId INT = NULL
+	,@intBatchId int
 	,@intLotId INT OUTPUT
 AS
 BEGIN
@@ -163,12 +164,12 @@ BEGIN
 		,intItemUOMId = ISNULL(l.intWeightUOMId, l.intItemUOMId)
 		,dtmDate = @dtmPlannedDate
 		,dblQty = (- cl.dblQuantity)
-		,dblUOMQty = ItemUOM.dblUnitQty
+		,dblUOMQty = (Case When l.intWeightUOMId is null then 0 else ItemUOM.dblUnitQty End)
 		,dblCost = l.dblLastCost
 		,dblSalesPrice = 0
 		,intCurrencyId = NULL
 		,dblExchangeRate = 1
-		,intTransactionId = @intLotId
+		,intTransactionId = @intBatchId
 		,intTransactionDetailId = cl.intWorkOrderConsumedLotId
 		,strTransactionId = @strLotNumber
 		,intTransactionTypeId = @INVENTORY_CONSUME
@@ -232,7 +233,7 @@ BEGIN
 		,dblSalesPrice = 0
 		,intCurrencyId = NULL
 		,dblExchangeRate = 1
-		,intTransactionId = @intLotId
+		,intTransactionId = @intBatchId
 		,strTransactionId = @strLotNumber
 		,intTransactionTypeId = @INVENTORY_PRODUCE
 		,intLotId = @intLotId

@@ -22,6 +22,7 @@ BEGIN
 		,C.strContainerId
 		,S.intShiftId
 		,S.strShiftName
+		,W.intBatchId 
 	FROM dbo.tblMFWorkOrderProducedLot W
 	JOIN dbo.tblICLot L ON L.intLotId = W.intLotId
 	JOIN dbo.tblICItem I ON I.intItemId = L.intItemId

@@ -98,3 +98,7 @@ GO
 		')
 	END
 GO
+
+	-- MIGRATE DB PREFERENCES
+	EXEC uspDBMigrateUserPreference
+GO

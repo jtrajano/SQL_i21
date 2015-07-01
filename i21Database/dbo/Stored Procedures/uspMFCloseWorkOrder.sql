@@ -17,6 +17,9 @@ BEGIN TRY
 		,@intManufacturingProcessId int
 		,@intLocationId int
 		,@strAttributeValue nvarchar(50)
+		,@intExecutionOrder INT
+		,@intManufacturingCellId INT
+		,@dtmPlannedDate DATETIME
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -151,8 +154,8 @@ BEGIN TRY
 			,@strBatchId
 			,@intUserId
 
-		EXEC dbo.uspGLBookEntries @GLEntries
-			,0
+		--EXEC dbo.uspGLBookEntries @GLEntries
+			--,0
 
 		UPDATE dbo.tblMFWorkOrderProducedLot
 		SET ysnProductionReversed = 1
@@ -175,12 +178,26 @@ BEGIN TRY
 		WHERE RecordKey > @RecordKey
 	END
 
+	SELECT @intExecutionOrder = intExecutionOrder
+		,@intManufacturingCellId = intManufacturingCellId
+		,@dtmPlannedDate = dtmPlannedDate
+	FROM dbo.tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
+
 	UPDATE dbo.tblMFWorkOrder
 	SET intStatusId = 13
 		,dtmCompletedDate = @dtmCurrentDate
+		,intExecutionOrder=0
 		,dtmLastModified = @dtmCurrentDate
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	UPDATE dbo.tblMFWorkOrder
+	SET intExecutionOrder = intExecutionOrder - 1
+	WHERE intManufacturingCellId = @intManufacturingCellId
+		AND dtmPlannedDate = @dtmPlannedDate
+		AND intExecutionOrder > @intExecutionOrder
+
 
 	COMMIT TRANSACTION
 
