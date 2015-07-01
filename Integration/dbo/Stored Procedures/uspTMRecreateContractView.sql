@@ -76,7 +76,7 @@ BEGIN
 						,vwcnt_un_prc=agcnt_un_prc
 						,vwcnt_prc_lvl = agcnt_prc_lvl
 						,A4GLIdentity = CAST(A4GLIdentity   AS INT)
-
+						,intContractId = 0
 					FROM agcntmst
 				
 				')
@@ -116,6 +116,7 @@ BEGIN
 						,vwcnt_un_prc=CAST(ptcnt_un_prc AS DECIMAL(18,6))  
 						,vwcnt_prc_lvl = ptcnt_prc_lvl
 						,A4GLIdentity = CAST(A4GLIdentity   AS INT)
+						,intContractId = 0
 					FROM ptcntmst
 				
 				')
