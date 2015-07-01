@@ -21,7 +21,7 @@
     [dtmCompletedDate] DATETIME NULL, 
     [dtmOnHoldDate] DATETIME NULL, 
     [intProductionTypeId] INT NOT NULL,
-	[dblProducedQuantity] NUMERIC(18, 6) NULL, 
+	[dblProducedQuantity] NUMERIC(18, 6) NULL CONSTRAINT [DF_tblMFWorkOrder_dblProducedQuantity] DEFAULT 0, 
     [dtmActualProductionStartDate] DATETIME NULL, 
     [dtmActualProductionEndDate] DATETIME NULL,	
 	[ysnUseTemplate] BIT NOT NULL CONSTRAINT [DF_tblMFWorkOrder_ysnUseTemplate] DEFAULT 0, 
