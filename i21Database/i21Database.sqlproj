@@ -1858,6 +1858,7 @@
     <Build Include="dbo\Stored Procedures\uspGLImportRecurring.sql" />
     <Build Include="dbo\Stored Procedures\uspDBMigrateUserPreference.sql" />
     <Build Include="dbo\Tables\tblDBUserPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFGetItemPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
