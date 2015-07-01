@@ -4,6 +4,7 @@
 	[strTransactionType] NVARCHAR(100)	  COLLATE Latin1_General_CI_AS NULL, 
 	[strRecordNo]		 NVARCHAR(50)	  COLLATE Latin1_General_CI_AS NULL, 
 	[strDescription]	 NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL,
+	[strJsonData]		 NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL,
     [dtmDate]			 DATETIME         NOT NULL,
     [intEntityId]        INT              NULL,
     [intConcurrencyId]   INT              NOT NULL,
