@@ -1,0 +1,87 @@
+﻿CREATE PROCEDURE uspICPostInventoryReceiptIntegrations
+	@ysnPost BIT  = 0  
+	,@intTransactionId NVARCHAR(40) = NULL   
+	,@intUserId  INT  = NULL   
+	,@intEntityId INT  = NULL    
+AS  
+  
+SET QUOTED_IDENTIFIER OFF  
+SET ANSI_NULLS ON  
+SET NOCOUNT ON  
+SET XACT_ABORT ON  
+SET ANSI_WARNINGS OFF  
+
+-- Declare the constants 
+-- Receipt Types
+DECLARE @RECEIPT_TYPE_PURCHASE_CONTRACT AS NVARCHAR(50) = 'Purchase Contract'
+		,@RECEIPT_TYPE_PURCHASE_ORDER AS NVARCHAR(50) = 'Purchase Order'
+		,@RECEIPT_TYPE_TRANSFER_ORDER AS NVARCHAR(50) = 'Transfer Order'
+		,@RECEIPT_TYPE_DIRECT AS NVARCHAR(50) = 'Direct'
+
+-- Source Types
+		,@SOURCE_TYPE_NONE AS INT = 1
+		,@SOURCE_TYPE_SCALE AS INT = 2
+		,@SOURCE_TYPE_INBOUND_SHIPMENT AS INT = 3
+
+-- Get the details from the inventory receipt 
+BEGIN 
+	DECLARE @ItemsFromInventoryReceipt AS dbo.ItemReceiptItemTableType
+	INSERT INTO @ItemsFromInventoryReceipt (
+		-- Header
+		[intInventoryReceiptId] 
+		,[strInventoryReceiptId] 
+		,[strReceiptType] 
+		,[intSourceType] 
+		,[dtmDate] 
+		,[intCurrencyId] 
+		,[dblExchangeRate] 
+		-- Detail 
+		,[intInventoryReceiptDetailId] 
+		,[intItemId] 
+		,[intLotId] 
+		,[strLotNumber] 
+		,[intLocationId] 
+		,[intItemLocationId] 
+		,[intSubLocationId] 
+		,[intStorageLocationId] 
+		,[intItemUOMId] 
+		,[intWeightUOMId] 
+		,[dblQty] 
+		,[dblUOMQty] 
+		,[dblNetWeight] 
+		,[dblCost] 
+		,[intContainerId] 
+		,[intOwnershipType] 
+		,[intOrderId] 
+		,[intSourceId] 
+		,[intLineNo] 
+	)
+	EXEC dbo.uspICGetItemsFromItemReceipt
+		@intReceiptId = @intTransactionId
+
+	UPDATE @ItemsFromInventoryReceipt
+	SET dblQty = dblQty * CASE WHEN @ysnPost = 1 THEN 1 ELSE -1 END 
+END
+
+-- Get the receipt type and soruce type
+BEGIN 
+	DECLARE @ReceiptType AS NVARCHAR(50) 
+			,@SourceType AS INT 
+	
+	SELECT	@ReceiptType = strReceiptType
+			,@SourceType = intSourceType
+	FROM	tblICInventoryReceipt 
+	WHERE	intInventoryReceiptId = @intTransactionId 
+END 
+
+-- Update the received quantities from the Purchase Order
+IF @ReceiptType = @RECEIPT_TYPE_PURCHASE_ORDER AND ISNULL(@SourceType, 1) = @SOURCE_TYPE_NONE
+BEGIN 
+	EXEC dbo.[uspPOReceived] @ItemsFromInventoryReceipt
+	GOTO _Exit;
+END
+
+
+
+
+_Exit: 
