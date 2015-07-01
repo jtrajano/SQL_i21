@@ -90,7 +90,8 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateAccountStatusView.sql"
 --:r ..\dbo\Views\vwcmtmst.sql
 :r "..\dbo\Stored Procedures\uspTMRecreateCommentsView.sql"
-:r ..\dbo\Views\vwcntmst.sql
+--:r ..\dbo\Views\vwcntmst.sql
+:r "..\dbo\Stored Procedures\uspTMRecreateContractView.sql"
 --:r ..\dbo\Views\vyuTMOriginOption.sql
 :r "..\dbo\Stored Procedures\uspTMRecreateOriginOptionView.sql"
 --:r ..\dbo\Views\vwctlmst.sql
