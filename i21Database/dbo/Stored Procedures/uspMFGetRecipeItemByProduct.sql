@@ -59,6 +59,7 @@ BEGIN
 					AND DATEPART(dy, ri.dtmValidTo)
 				)
 			)
+	Order by ri.intRecipeItemId
 END
 GO
 

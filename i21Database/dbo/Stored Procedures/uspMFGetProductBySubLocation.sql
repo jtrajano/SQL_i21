@@ -18,4 +18,5 @@ BEGIN
 		AND IU.ysnStockUnit = 1
 		AND I.strStatus='Active'
 		AND I.strItemNo LIKE @strItemNo+'%'
+	ORDER BY I.strItemNo
 END

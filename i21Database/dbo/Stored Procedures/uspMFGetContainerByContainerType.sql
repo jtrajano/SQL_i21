@@ -16,4 +16,5 @@ BEGIN
 			FROM [dbo].[fnSplitString](@strContainerType, ',')
 			)
 		AND C.strContainerId LIKE @strContainerId + '%'
+	ORDER BY C.strContainerId
 END

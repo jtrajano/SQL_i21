@@ -32,6 +32,7 @@ BEGIN TRY
 		,@dtmExpectedDate DATETIME
 		,@ysnIngredientAvailable bit
 		,@intMaxExecutionOrder int
+		,@intDepartmentId int
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -63,6 +64,7 @@ BEGIN TRY
 		,@strSalesOrderNo = strSalesOrderNo
 		,@intSupervisorId = intSupervisorId
 		,@ysnIngredientAvailable=ysnIngredientAvailable
+		,@intDepartmentId=intDepartmentId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,strWorkOrderNo NVARCHAR(50)
@@ -91,6 +93,7 @@ BEGIN TRY
 			,strSalesOrderNo NVARCHAR(50)
 			,intSupervisorId INT
 			,ysnIngredientAvailable bit
+			,intDepartmentId int
 			)
 
 	IF EXISTS (
@@ -181,6 +184,7 @@ BEGIN TRY
 		,intSupervisorId = @intSupervisorId
 		,intCustomerId = @intCustomerId
 		,ysnIngredientAvailable=@ysnIngredientAvailable
+		,intDepartmentId=@intDepartmentId
 		,dtmLastModified = GetDate()
 		,intLastModifiedUserId = @intUserId
 		,intConcurrencyId=@intConcurrencyId

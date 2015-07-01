@@ -33,4 +33,5 @@ BEGIN
 	LEFT JOIN dbo.tblICContainer C ON C.intContainerId = W.intContainerId
 	LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intShiftId
 	WHERE intWorkOrderId = @intWorkOrderId
+	ORDER BY W.intWorkOrderProducedLotId
 END

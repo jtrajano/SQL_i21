@@ -12,4 +12,5 @@ BEGIN
 	WHERE C.intContainerTypeId = @intContainerTypeId
 		AND L.intLocationId = @intLocationId
 		AND C.strContainerId LIKE @strContainerId + '%'
+	ORDER BY C.strContainerId
 END
