@@ -56,11 +56,11 @@ BEGIN
 
 			
 		--Check if User already exist
-		IF NOT EXISTS (SELECT TOP 1 1 FROM [dbo].[tblDBUserPreference] WHERE intUserId = @intUserId)			
+		IF NOT EXISTS (SELECT TOP 1 1 FROM [dbo].[tblDBUserPreference] WHERE intUserSecurityId = @intUserId)			
 			BEGIN
 
 				INSERT INTO [dbo].[tblDBUserPreference] 
-					   ([intAutoRefreshMinute], [intColumns], [intColumnWidth1], [intColumnWidth2], [intColumnWidth3], [intColumnWidth4], [intDafaultTabId], [intUserId], [ysnAutoPanelWidth], [ysnAutoRefresh], [ysnColumnFiltering], [ysnColumnMoving], [ysnColumnResizing], [ysnColumnSorting], [ysnExportAll], [ysnPrintAll], [ysnRefreshTab], [ysnSaveGridLayout])
+					   ([intAutoRefreshMinute], [intColumns], [intColumnWidth1], [intColumnWidth2], [intColumnWidth3], [intColumnWidth4], [intDafaultTabId], [intUserSecurityId], [ysnAutoPanelWidth], [ysnAutoRefresh], [ysnColumnFiltering], [ysnColumnMoving], [ysnColumnResizing], [ysnColumnSorting], [ysnExportAll], [ysnPrintAll], [ysnRefreshTab], [ysnSaveGridLayout])
 				 VALUES (@AutoRefreshMinute, @Columns, @ColumnWidth1, @ColumnWidth2, @ColumnWidth3, @ColumnWidth4, @DefaultTabId, @intUserId, @AutoPanelWidth, @AutoRefresh, @ColumnFiltering, @ColumnMoving, @ColumnResizing, @ColumnSorting, @ExportAll, @PrintAll, @RefreshTab, @SaveGridLayout);
 			END 
 
