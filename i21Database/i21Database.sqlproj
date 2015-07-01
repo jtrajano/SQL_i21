@@ -1876,6 +1876,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetActualItemCountByProduct.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetDestinationStorageLocationCount.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetSourceStorageLocationCount.sql" />
+    <Build Include="dbo\Tables\tblCTIndex.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
