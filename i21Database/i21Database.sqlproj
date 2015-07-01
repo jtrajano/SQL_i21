@@ -1868,6 +1868,14 @@
     <Build Include="dbo\Stored Procedures\uspSMUpdateUserPreferenceEntry.sql" />
     <Build Include="dbo\Tables\tblGRUserPreference.sql" />
     <Build Include="dbo\Tables\tblSMUserPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetContainerCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetContainerCountByContainerType.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetIngredientLotCountByProduct.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetProductCountByProcess.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetProductCountBySubLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetActualItemCountByProduct.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetDestinationStorageLocationCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetSourceStorageLocationCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
