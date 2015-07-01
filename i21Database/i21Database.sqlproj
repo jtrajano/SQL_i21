@@ -1883,6 +1883,8 @@
     <Build Include="dbo\Tables\tblQMDocumentFile.sql" />
     <Build Include="dbo\Tables\tblQMSample.sql" />
     <Build Include="dbo\Views\vyuQMSampleList.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheet.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheetFIFO.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
