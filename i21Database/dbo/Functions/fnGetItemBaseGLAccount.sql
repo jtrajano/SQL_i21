@@ -40,7 +40,7 @@ BEGIN
 							ON CommodityAccounts.intAccountCategoryId = AccntCategory.intAccountCategoryId
 				WHERE	Item.intItemId = @intItemId
 						AND AccntCategory.strAccountCategory = @strAccountCategory
-						AND Item.strType = 'Commodity'
+						-- AND Item.strType = 'Commodity'
 			) AS CommodityLevel
 				ON 1 = 1
 			FULL JOIN (
