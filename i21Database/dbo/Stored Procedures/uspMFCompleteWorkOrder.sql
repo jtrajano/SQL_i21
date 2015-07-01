@@ -222,7 +222,7 @@ BEGIN TRY
 	IF @intWorkOrderId IS NULL
 		OR @intWorkOrderId = 0
 	BEGIN
-		EXEC dbo.uspSMGetStartingNumber 34
+		EXEC dbo.uspSMGetStartingNumber 59
 			,@strWorkOrderNo OUTPUT
 
 		SELECT @intManufacturingCellId = intManufacturingCellId
