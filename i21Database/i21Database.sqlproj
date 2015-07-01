@@ -1859,6 +1859,7 @@
     <Build Include="dbo\Stored Procedures\uspDBMigrateUserPreference.sql" />
     <Build Include="dbo\Tables\tblDBUserPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspCFGetItemPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournalCLOSED.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
