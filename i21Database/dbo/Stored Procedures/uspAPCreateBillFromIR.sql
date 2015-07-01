@@ -171,7 +171,8 @@ BEGIN
 		ON B.intItemId = C.intItemId
 	INNER JOIN tblICItemLocation D
 		ON A.intLocationId = D.intLocationId AND B.intItemId = D.intItemId
-	LEFT JOIN (tblCTContractHeader E INNER JOIN tblCTContractDetail E1 ON E.intContractHeaderId = E1.intContractHeaderId) ON E.intEntityId = A.intEntityVendorId
+	LEFT JOIN (tblCTContractHeader E INNER JOIN tblCTContractDetail E1 ON E.intContractHeaderId = E1.intContractHeaderId) 
+		ON E.intEntityId = A.intEntityVendorId AND E.intContractHeaderId = B.intOrderId AND E1.intContractDetailId = B.intLineNo
 	WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1
 
 	UPDATE A
