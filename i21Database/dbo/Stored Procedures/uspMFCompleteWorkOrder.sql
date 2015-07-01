@@ -409,6 +409,7 @@ BEGIN TRY
 		,@intStatusId=@intStatusId
 		,@intLotId = @intLotId OUTPUT
 		,@ysnPostProduction=@ysnPostProduction
+		,@strLotAlias=@strLotAlias
 
 	UPDATE dbo.tblICLot
 	SET intLotStatusId = 3

@@ -9,6 +9,7 @@
 	,@intUserId INT = NULL
 	,@intBatchId int
 	,@intLotId INT OUTPUT
+	,@strLotAlias nvarchar(50)
 AS
 BEGIN
 	SET QUOTED_IDENTIFIER OFF
@@ -109,7 +110,7 @@ BEGIN
 		)
 	SELECT intLotId = NULL
 		,strLotNumber = @strLotNumber
-		,strLotAlias = NULL
+		,strLotAlias = @strLotAlias
 		,intItemId = @intItemId
 		,intItemLocationId = @intItemLocationId
 		,intSubLocationId = @intSubLocationId
