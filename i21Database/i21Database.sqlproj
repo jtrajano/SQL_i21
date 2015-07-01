@@ -1794,10 +1794,8 @@
     <Build Include="dbo\Stored Procedures\uspLGShipmentUpdateContainerReceivedQty.sql" />
     <Build Include="dbo\Views\vyuICGetItemStockUOMForAdjustment.sql" />
     <Build Include="dbo\Views\vyuLGShippingInstructions.sql" />
-<<<<<<< HEAD
     <None Include="Scripts\Post-Deployment\GL\ReportDataFix.sql" />
     <Build Include="dbo\Tables\tblSMUserHistory.sql" />
-=======
     <Build Include="dbo\Tables\tblRKOptionsPnSExercisedAssigned.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetContainerType.sql" />
     <Build Include="dbo\Tables\tblMFAttributeType.sql" />
@@ -1862,7 +1860,6 @@
     <Build Include="dbo\Stored Procedures\uspGLImportRecurring.sql" />
     <Build Include="dbo\Stored Procedures\uspDBMigrateUserPreference.sql" />
     <Build Include="dbo\Tables\tblDBUserPreference.sql" />
->>>>>>> master
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
