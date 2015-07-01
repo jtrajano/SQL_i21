@@ -5,16 +5,15 @@
 	[strDocFile] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS, 
 	[strDocName] NVARCHAR(512) COLLATE Latin1_General_CI_AS, 
 	[strDocType] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
-	[dblDocSize] NUMERIC(18, 6) NULL,
+	[dblDocSize] NUMERIC(18, 6), 
 	[intEntityTypeId] INT, -- Foreign Key DocumentEntityTypes
 	[intEntityId] INT, -- Foreign Key 
-	[intDocumentId] INT, -- Foreign Key
+	[intDocumentId] INT, -- Foreign Key // Need to Check
 
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMDocumentFile_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NULL,
 	[dtmLastModified] [datetime] NULL CONSTRAINT [DF_tblQMDocumentFile_dtmLastModified] DEFAULT GetDate(),
-		
-	CONSTRAINT [PK_tblQMDocumentFile] PRIMARY KEY ([intDocumentFileId]), 
-	--CONSTRAINT [FK_tblQMDocumentFile_tblQMDataType] FOREIGN KEY ([intDataTypeId]) REFERENCES [tblQMDataType]([intDataTypeId]) 
+	
+	CONSTRAINT [PK_tblQMDocumentFile] PRIMARY KEY ([intDocumentFileId]) 
 )
