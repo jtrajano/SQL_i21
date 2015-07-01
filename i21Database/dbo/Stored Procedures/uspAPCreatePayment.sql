@@ -158,7 +158,7 @@ BEGIN
 		[intAccountId]	= A.intAccountId,
 		[dblDiscount]	= A.dblDiscount,
 		[dblWithheld]	= CASE WHEN @withholdPercent > 0 THEN CAST(ROUND(A.dblTotal * (@withholdPercent / 100), 6) AS NUMERIC(18,6)) ELSE 0 END,
-		[dblAmountDue]	= A.dblAmountDue,
+		[dblAmountDue]	= A.dblAmountDue, -- (A.dblTotal - A.dblDiscount - A.dblPayment),
 		[dblPayment]	= A.dblTotal - A.dblDiscount - A.dblPayment,
 		[dblInterest]	= 0, --TODO
 		[dblTotal]		= A.dblTotal
