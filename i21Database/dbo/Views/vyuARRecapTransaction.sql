@@ -21,7 +21,7 @@ A.dblCredit
 ,A.intUserId
 ,A.strBatchId
 ,A.strCode
-,A.strDescription
+,B.strDescription
 ,A.strJournalLineDescription
 ,A.strModuleName
 ,A.strReference
