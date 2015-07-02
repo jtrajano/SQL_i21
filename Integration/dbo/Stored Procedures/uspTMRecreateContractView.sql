@@ -76,7 +76,7 @@ BEGIN
 						,vwcnt_un_prc=agcnt_un_prc
 						,vwcnt_prc_lvl = agcnt_prc_lvl
 						,A4GLIdentity = CAST(A4GLIdentity   AS INT)
-						,intContractId = 0
+						,strItemDescription =  ''''
 					FROM agcntmst
 				
 				')
@@ -116,7 +116,7 @@ BEGIN
 						,vwcnt_un_prc=CAST(ptcnt_un_prc AS DECIMAL(18,6))  
 						,vwcnt_prc_lvl = ptcnt_prc_lvl
 						,A4GLIdentity = CAST(A4GLIdentity   AS INT)
-						,intContractId = 0
+						,strItemDescription =  ''''
 					FROM ptcntmst
 				
 				')
@@ -128,12 +128,12 @@ BEGIN
 			CREATE VIEW [dbo].[vwcntmst]
 			AS
 			SELECT
-				vwcnt_cus_no=C.strEntityNo
+				vwcnt_cus_no=C.strEntityNo 
 				,vwcnt_cnt_no= A.strContractNumber
 				,vwcnt_line_no= 0
 				,vwcnt_alt_cus= ''''
-				,vwcnt_itm_or_cls= E.strItemNo 
-				,vwcnt_loc_no= F.strLocationNumber
+				,vwcnt_itm_or_cls= ISNULL(E.strItemNo,'''') 
+				,vwcnt_loc_no= ISNULL(F.strLocationNumber,'''')
 				,vwcnt_alt_cnt_no=''''
 				,vwcnt_amt_orig= 0.0
 				,vwcnt_amt_bal= 0.0
@@ -153,21 +153,22 @@ BEGIN
 										ELSE ''D''
 									END)
 						  	
-				,vwcnt_un_prc= D.dblUnitPrice
+				,vwcnt_un_prc= ISNULL(D.dblUnitPrice,0.0)
 				,vwcnt_prc_lvl = A.strPriceLevel
-				,A4GLIdentity = CAST(D.intContractDetailId   AS INT)
-				,intContractId = A.intContractId
+				,A4GLIdentity = CAST(A.intContractId  AS INT)
+				,strItemDescription =  E.strDescription
 			FROM tblARCustomerContract A
 			INNER JOIN tblARCustomer B
 				ON A.intCustomerId = B.intEntityCustomerId
 			INNER JOIN tblEntity C
 				ON B.intEntityCustomerId = C.intEntityId
-			INNER JOIN tblARCustomerContractDetail D
+			LEFT JOIN tblARCustomerContractDetail D
 				ON A.intContractId = D.intContractId
-			INNER JOIN tblICItem E
+			LEFT JOIN tblICItem E
 				ON D.intItemId = E.intItemId	
-			INNER JOIN tblSMCompanyLocation F
+			LEFT JOIN tblSMCompanyLocation F
 				ON A.intLocationId = F.intCompanyLocationId
+				
 		')
 	END
 END
