@@ -46,7 +46,7 @@ INSERT INTO dbo.tblICInventoryReceipt (
 		,intCreatedUserId
 		,ysnPosted
 )
-SELECT 	strReceiptNumber		= dbo.fnGetStartingNumber(@StartingNumberId_InventoryReceipt) 
+SELECT 	 strReceiptNumber       = 1
 		,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(GETDATE())
 		,intEntityVendorId		= RE.intEntityVendorId
 		,strReceiptType			= min(RE.strReceiptType)
