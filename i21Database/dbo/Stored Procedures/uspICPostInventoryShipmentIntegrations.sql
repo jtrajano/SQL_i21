@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspICPostInventoryReceiptIntegrations
+﻿CREATE PROCEDURE uspICPostInventoryShipmentIntegrations
 	@ysnPost BIT  = 0  
 	,@intTransactionId NVARCHAR(40) = NULL   
 	,@intUserId  INT  = NULL   
@@ -12,55 +12,62 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF  
 
 -- Declare the constants 
-DECLARE	-- Receipt Types
-		@RECEIPT_TYPE_PURCHASE_CONTRACT AS NVARCHAR(50) = 'Purchase Contract'
-		,@RECEIPT_TYPE_PURCHASE_ORDER AS NVARCHAR(50) = 'Purchase Order'
-		,@RECEIPT_TYPE_TRANSFER_ORDER AS NVARCHAR(50) = 'Transfer Order'
-		,@RECEIPT_TYPE_DIRECT AS NVARCHAR(50) = 'Direct'
+DECLARE	-- Order Types
+		@STR_ORDER_TYPE_SALES_CONTRACT AS NVARCHAR(50) = 'Sales Contract'
+		,@STR_ORDER_TYPE_SALES_ORDER AS NVARCHAR(50) = 'Sales Order'
+		,@STR_ORDER_TYPE_TRANSFER_ORDER AS NVARCHAR(50) = 'Transfer Order'
+		,@INT_ORDER_TYPE_SALES_CONTRACT AS INT = 1
+		,@INT_ORDER_TYPE_SALES_ORDER AS INT = 2
+		,@INT_ORDER_TYPE_TRANSFER_ORDER AS INT = 3
+
 		-- Source Types
-		,@SOURCE_TYPE_NONE AS INT = 1
-		,@SOURCE_TYPE_SCALE AS INT = 2
-		,@SOURCE_TYPE_INBOUND_SHIPMENT AS INT = 3
-		,@SOURCE_TYPE_TRANSPORT AS INT = 4
+		,@STR_SOURCE_TYPE_NONE AS NVARCHAR(50) = 'None'
+		,@STR_SOURCE_TYPE_SCALE AS NVARCHAR(50) = 'Scale'
+		,@STR_SOURCE_TYPE_INBOUND_SHIPMENT AS NVARCHAR(50) = 'Inbound Shipment'
+
+		,@INT_SOURCE_TYPE_NONE AS INT = 0
+		,@INT_SOURCE_TYPE_SCALE AS INT = 1
+		,@INT_SOURCE_TYPE_INBOUND_SHIPMENT AS INT = 2
 
 -- Get the details from the inventory receipt 
 BEGIN 
-	DECLARE @ItemsFromInventoryReceipt AS dbo.ReceiptItemTableType
-	INSERT INTO @ItemsFromInventoryReceipt (
+	DECLARE @ItemsFromInventoryShipment AS dbo.ShipmentItemTableType
+	INSERT INTO @ItemsFromInventoryShipment (
 		-- Header
-		[intInventoryReceiptId] 
-		,[strInventoryReceiptId] 
-		,[strReceiptType] 
-		,[intSourceType] 
-		,[dtmDate] 
-		,[intCurrencyId] 
-		,[dblExchangeRate] 
+		[intShipmentId]
+		,[strShipmentId]
+		,[intOrderType]
+		,[intSourceType]
+		,[dtmDate]
+		,[intCurrencyId]
+		,[dblExchangeRate]
+
 		-- Detail 
-		,[intInventoryReceiptDetailId] 
-		,[intItemId] 
-		,[intLotId] 
-		,[strLotNumber] 
-		,[intLocationId] 
-		,[intItemLocationId] 
-		,[intSubLocationId] 
-		,[intStorageLocationId] 
-		,[intItemUOMId] 
-		,[intWeightUOMId] 
-		,[dblQty] 
-		,[dblUOMQty] 
-		,[dblNetWeight] 
-		,[dblCost] 
-		,[intContainerId] 
-		,[intOwnershipType] 
-		,[intOrderId] 
-		,[intSourceId] 
-		,[intLineNo] 
+		,[intInventoryShipmentItemId]
+		,[intItemId]
+		,[intLotId]
+		,[strLotNumber]
+		,[intLocationId]
+		,[intItemLocationId]
+		,[intSubLocationId]
+		,[intStorageLocationId]
+		,[intItemUOMId]
+		,[intWeightUOMId]
+		,[dblQty]
+		,[dblUOMQty]
+		,[dblNetWeight]
+		,[dblSalesPrice]
+		,[intDockDoorId]
+		,[intOwnershipType]
+		,[intOrderId]
+		,[intSourceId]
+		,[intLineNo]
 	)
 	EXEC dbo.uspICGetItemsFromItemReceipt
 		@intReceiptId = @intTransactionId
 
-	UPDATE @ItemsFromInventoryReceipt
-	SET dblQty = dblQty * CASE WHEN @ysnPost = 1 THEN 1 ELSE -1 END 
+	UPDATE @ItemsFromInventoryShipment
+	SET dblQty = dblQty * CASE WHEN @ysnPost = 1 THEN -1 ELSE 1 END 
 END
 
 -- Get the receipt-type and source-type from tblICInventoryReceipt

@@ -131,7 +131,7 @@ BEGIN
 	-- Arrange 
 	BEGIN 
 		DECLARE @intReceiptId AS INT = 1 -- INVRCPT-XXXXX1. It has all kinds of items on it. 
-		DECLARE @result AS ItemReceiptItemTableType
+		DECLARE @result AS ReceiptItemTableType
 		
 		-- Create the expected table. 
 		SELECT *
