@@ -4,6 +4,11 @@
     @dblQtyToProduce NUMERIC(18,6),                                  
     @strXML NVARCHAR(MAX)=NULL  
 AS
+	SET QUOTED_IDENTIFIER OFF
+	SET ANSI_NULLS ON
+	SET NOCOUNT ON
+	SET XACT_ABORT ON
+	SET ANSI_WARNINGS OFF
 
 IF(SELECT ISNULL(COUNT(1),0) FROM tblMFBlendRequirementRule WHERE intBlendRequirementId=@intBlendRequirementId) = 0  
 	RAISERROR('Unable to create auto blend sheet as business rules are not added to the blend requirement.',16,1)

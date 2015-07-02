@@ -156,7 +156,7 @@ BEGIN
 		-- intInventoryReceiptItemId: 1
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 1
-				,intSourceId			= ''
+				,intSourceId			= NULL 
 				,intItemId				= @WetGrains
 				,dblOrderQty			= 10
 				,dblOpenReceive			= 10
@@ -171,7 +171,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 2
-				,intSourceId			= ''
+				,intSourceId			= NULL
 				,intItemId				= @StickyGrains
 				,dblOrderQty			= 10
 				,dblOpenReceive			= 10
@@ -186,7 +186,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 3
-				,intSourceId			= ''
+				,intSourceId			= NULL
 				,intItemId				= @PremiumGrains
 				,dblOrderQty			= 10
 				,dblOpenReceive			= 10
@@ -201,7 +201,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 4
-				,intSourceId			= ''
+				,intSourceId			= NULL
 				,intItemId				= @ColdGrains
 				,dblOrderQty			= 10
 				,dblOpenReceive			= 10
@@ -216,7 +216,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 5
-				,intSourceId			= ''
+				,intSourceId			= NULL
 				,intItemId				= @HotGrains
 				,dblOrderQty			= 10
 				,dblOpenReceive			= 10
@@ -231,7 +231,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 6
-				,intSourceId			= ''
+				,intSourceId			= NULL
 				,intItemId				= @ManualLotGrains
 				,dblOrderQty			= 10
 				,dblOpenReceive			= 10
@@ -246,7 +246,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 7
-				,intSourceId			= ''
+				,intSourceId			= NULL
 				,intItemId				= @SerializedLotGrains
 				,dblOrderQty			= 10
 				,dblOpenReceive			= 10
@@ -353,7 +353,7 @@ BEGIN
 		-- intInventoryReceiptItemId: 8
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 1
-				,intSourceId			= ''
+				,intSourceId			= NULL
 				,intItemId				= @WetGrains
 				,dblOrderQty			= 10
 				,dblOpenReceive			= 10
@@ -368,7 +368,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 2
-				,intSourceId			= ''
+				,intSourceId			= NULL
 				,intItemId				= @StickyGrains
 				,dblOrderQty			= 10
 				,dblOpenReceive			= 10
@@ -383,7 +383,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 3
-				,intSourceId			= ''
+				,intSourceId			= NULL
 				,intItemId				= @PremiumGrains
 				,dblOrderQty			= 10
 				,dblOpenReceive			= 10
@@ -398,7 +398,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 4
-				,intSourceId			= ''
+				,intSourceId			= NULL
 				,intItemId				= @ColdGrains
 				,dblOrderQty			= 10
 				,dblOpenReceive			= 10
@@ -413,7 +413,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 5
-				,intSourceId			= ''
+				,intSourceId			= NULL
 				,intItemId				= @HotGrains
 				,dblOrderQty			= 10
 				,dblOpenReceive			= 10
@@ -485,7 +485,7 @@ BEGIN
 		-- intInventoryReceiptItemId: 13
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 6
-				,intSourceId			= ''
+				,intSourceId			= NULL
 				,intItemId				= @ManualLotGrains
 				,dblOrderQty			= 10
 				,dblOpenReceive			= 10
@@ -500,7 +500,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 7
-				,intSourceId			= ''
+				,intSourceId			= NULL
 				,intItemId				= @SerializedLotGrains
 				,dblOrderQty			= 10
 				,dblOpenReceive			= 10
@@ -649,7 +649,7 @@ BEGIN
 		-- intInventoryReceiptItemId: 15
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 1
-				,intSourceId			= ''
+				,intSourceId			= NULL
 				,intItemId				= @ManualLotGrains
 				,dblOrderQty			= 10
 				,dblOpenReceive			= 10
@@ -664,7 +664,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 2
-				,intSourceId			= ''
+				,intSourceId			= NULL
 				,intItemId				= @ManualLotGrains
 				,dblOrderQty			= 20
 				,dblOpenReceive			= 20
@@ -768,7 +768,7 @@ BEGIN
 		-- intInventoryReceiptItemId: 17
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 1
-				,intSourceId			= ''
+				,intSourceId			= NULL
 				,intItemId				= @SerializedLotGrains
 				,dblOrderQty			= 10
 				,dblOpenReceive			= 10
@@ -783,7 +783,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 2
-				,intSourceId			= ''
+				,intSourceId			= NULL
 				,intItemId				= @SerializedLotGrains
 				,dblOrderQty			= 20
 				,dblOpenReceive			= 20
@@ -886,7 +886,7 @@ BEGIN
 		-- intInventoryReceiptItemId: 19
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 1
-				,intSourceId			= ''
+				,intSourceId			= NULL
 				,intItemId				= @ManualLotGrains
 				,dblOrderQty			= 10
 				,dblOpenReceive			= 10
@@ -901,7 +901,7 @@ BEGIN
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 2
-				,intSourceId			= ''
+				,intSourceId			= NULL
 				,intItemId				= @ManualLotGrains
 				,dblOrderQty			= 20
 				,dblOpenReceive			= 20

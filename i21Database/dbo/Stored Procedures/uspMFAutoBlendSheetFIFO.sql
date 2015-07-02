@@ -5,8 +5,12 @@
     @strXML NVARCHAR(MAX)=NULL  
 AS
 BEGIN TRY      
-
-	 SET NOCOUNT ON 
+	SET QUOTED_IDENTIFIER OFF
+	SET ANSI_NULLS ON
+	SET NOCOUNT ON
+	SET XACT_ABORT ON
+	SET ANSI_WARNINGS OFF
+	SET NOCOUNT ON 
 	 
             DECLARE @ProductName NVARCHAR(50)
             DECLARE @InputItemName NVARCHAR(50)
@@ -68,7 +72,7 @@ BEGIN TRY
 
 			DECLARE @tblInputItem table      
             ( 
-                  Rownumber               INT IDENTITY(1,1),
+                  RowNumber               INT IDENTITY(1,1),
                   BOMKey                  INT,                
                   BOMItemKey              INT,
                   BOMItemDetailKey		  INT, 
@@ -207,7 +211,7 @@ BEGIN TRY
 
 						Create table #tblInputLot
 						( 
-						ParentLotID	NVARCHAR(50),
+						ParentLotID	NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 						MaterialKey	INT,
 						AvailableQty	NUMERIC(18,6),
 						UnitKey		INT,
@@ -220,9 +224,9 @@ BEGIN TRY
 						Create table #tblParentLot
 						( 
 						MainLotKey	INT,
-						ParentLotID	NVARCHAR(50),
+						ParentLotID	NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 						CreateDate	datetime,
-						CreatedBy	NVARCHAR(50),
+						CreatedBy	NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 						MaterialKey	INT,
 						QueuedQty	NUMERIC(18,6),
 						FactoryKey	INT,

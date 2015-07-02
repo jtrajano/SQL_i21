@@ -12,6 +12,8 @@
     [dblPaidAmount] NUMERIC(18, 6) NULL, 
     [strPaidDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [dblCurrencyRate] NUMERIC(15, 8) NULL, 
+    [strType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+    [strUserName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     CONSTRAINT [PK_tblGRStorageHistory_intStorageHistoryId] PRIMARY KEY ([intStorageHistoryId]),
 	CONSTRAINT [FK_tblGRStorageHistory_tblGRCustomerStorage_intCustomerStorageId] FOREIGN KEY ([intCustomerStorageId]) REFERENCES [dbo].[tblGRCustomerStorage] ([intCustomerStorageId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblGRStorageHistory_tblICInventoryReceipt_intInventoryReceiptId] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [dbo].[tblICInventoryReceipt] ([intInventoryReceiptId]),

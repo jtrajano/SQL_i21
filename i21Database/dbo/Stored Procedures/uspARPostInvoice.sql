@@ -28,6 +28,8 @@ SET ANSI_WARNINGS OFF
 --------------------------------------------------------------------------------------------   
 -- Create a unique transaction name. 
 DECLARE @TransactionName AS VARCHAR(500) = 'Invoice Transaction' + CAST(NEWID() AS NVARCHAR(100));
+DECLARE @totalRecords INT = 0
+DECLARE @totalInvalid INT = 0
  
 DECLARE @PostInvoiceData TABLE  (
 	intInvoiceId int PRIMARY KEY,
@@ -448,8 +450,7 @@ IF @recap = 0
 					ISNULL(dbo.isOpenAccountingDate(A.dtmDate), 0) = 0
 
 			END
-
-		DECLARE @totalInvalid INT = 0
+		
 		SELECT @totalInvalid = COUNT(*) FROM @InvalidInvoiceData
 
 		IF(@totalInvalid > 0)
@@ -476,22 +477,20 @@ IF @recap = 0
 
 			END
 
-
-		DECLARE @totalRecords INT
 		SELECT @totalRecords = COUNT(*) FROM @PostInvoiceData
 			
-		IF(@totalInvalid >= 1)  
+		IF(@totalInvalid = 1 AND @totalRecords = 0)  
 			BEGIN			
 				DECLARE @ErrorMessage NVARCHAR(100)				
 				SELECT TOP 1 @ErrorMessage = @batchIdUsed + ' : ' + strError FROM @InvalidInvoiceData
 				RAISERROR(@ErrorMessage, 11, 1) 
-				SET @success = 0 
+				SET @success = 0
 				GOTO Post_Exit
 			END
 			
-		IF(@totalRecords = 0)  
+		IF(@totalRecords = 0 AND @totalInvalid > 1)  
 			BEGIN			
-				SET @success = 0 
+				SET @success = 0
 				GOTO Post_Exit
 			END		
 
@@ -531,11 +530,11 @@ IF @post = 1
 		) 
 		SELECT 
 			Detail.intItemId  
-			,Header.intCompanyLocationId
+			,IST.intItemLocationId
 			,Detail.intItemUOMId  
 			,Header.dtmShipDate
 			,Detail.dblQtyShipped * -1
-			,Detail.dblPrice
+			,ItemUOM.dblUnitQty
 			,IST.dblLastCost
 			,Detail.dblPrice 
 			,Header.intCurrencyId
@@ -944,7 +943,7 @@ IF @post = 0
 			);
 			
 			INSERT INTO @UnPostInvoiceData(intInvoiceId, strTransactionId)
-			SELECT
+			SELECT DISTINCT
 				 P.intInvoiceId
 				,P.strTransactionId
 			FROM
@@ -1011,11 +1010,11 @@ IF @post = 0
 							,@batchId
 							,@UserEntityID
 							
-					IF(@@ERROR <> 0)  
-						BEGIN			
-							SET @success = 0 
-							GOTO Post_Exit
-						END	
+					--IF(@@ERROR <> 0)  
+					--	BEGIN			
+					--		SET @success = 0 
+					--		GOTO Post_Exit
+					--	END	
 			
 					DELETE FROM @UnPostInvoiceData WHERE intInvoiceId = @intTransactionId AND strTransactionId = @strTransactionId 
 												
@@ -1102,11 +1101,11 @@ IF @recap = 1
 	BEGIN 
 		ROLLBACK TRAN @TransactionName
 		EXEC dbo.uspCMPostRecap @GLEntries
-		IF(@@ERROR <> 0)  
-			BEGIN			
-				SET @success = 0 
-				GOTO Post_Exit
-			END	
+		--IF(@@ERROR <> 0)  
+		--	BEGIN			
+		--		SET @success = 0 
+		--		GOTO Post_Exit
+		--	END	
 		COMMIT TRAN @TransactionName
 	END 
 
@@ -1251,11 +1250,11 @@ IF @recap = 0
 
 					EXEC dbo.uspSOUpdateOrderShipmentStatus @intSalesOrderId
 							
-					IF(@@ERROR <> 0)  
-						BEGIN			
-							SET @success = 0 
-							GOTO Post_Exit
-						END	
+					--IF(@@ERROR <> 0)  
+					--	BEGIN			
+					--		SET @success = 0 
+					--		GOTO Post_Exit
+					--	END	
 			
 					DELETE FROM @OrderToUpdate WHERE intSalesOrderId = @intSalesOrderId AND intSalesOrderId = @intSalesOrderId 
 												
@@ -1268,5 +1267,7 @@ IF @recap = 0
 	    
 -- This is our immediate exit in case of exceptions controlled by this stored procedure
 Post_Exit:
+	SET @successfulCount = @totalRecords 
+	SET @invalidCount = @totalInvalid 
 	RETURN;
 	

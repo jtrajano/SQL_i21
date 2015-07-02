@@ -1,21 +1,21 @@
 ﻿/*
 	This is a user-defined table type for the inventory receipt. It is used as a common variable for the other modules to integrate with inventory receipt. 
 */
-CREATE TYPE [dbo].[ItemReceiptItemTableType] AS TABLE
+CREATE TYPE [dbo].[ShipmentItemTableType] AS TABLE
 (
 	[intId] INT IDENTITY PRIMARY KEY CLUSTERED
 	
 	-- Header
-    ,[intInventoryReceiptId] INT NOT NULL										-- The integer id of the source transaction (e.g. Sales Invoice, Inventory Adjustment id, etc. ). 
-	,[strInventoryReceiptId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL -- The string id of the source transaction. 
-	,[strReceiptType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-	,[intSourceType] INT NOT NULL DEFAULT ((0))
+    ,[intShipmentId] INT NOT NULL										-- The integer id of the source transaction. Required.
+	,[strShipmentId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL -- The string id of the source transaction. Required.
+	,[intOrderType] INT NOT NULL							-- The sales order type. Required.
+	,[intSourceType] INT NOT NULL DEFAULT ((0))				-- The source type id. Required.
 	,[dtmDate] DATETIME NOT NULL							-- The date of the transaction. Required. 
-	,[intCurrencyId] INT NULL								-- The currency id used in a tranaction. 
+	,[intCurrencyId] INT NULL								-- The currency id used in the transaction. 
 	,[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
 
 	-- Detail 
-	,[intInventoryReceiptDetailId] INT NULL					-- Link id to the receipt detail. 	
+	,[intInventoryShipmentItemId] INT NULL					-- Link id to the shipment detail. 	
 	,[intItemId] INT NOT NULL								-- The item id. Required. 
 	,[intLotId] INT NULL									-- Lot id of an item. Optional.
 	,[strLotNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- Lot id of an item. Optional.
@@ -28,8 +28,8 @@ CREATE TYPE [dbo].[ItemReceiptItemTableType] AS TABLE
     ,[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0				-- The quantity received in terms of intItemUOMId. Default to zero. Required.
 	,[dblUOMQty] NUMERIC(18, 6) NOT NULL DEFAULT 1			-- The unit qty in terms intItemUOMId. Required.
 	,[dblNetWeight] NUMERIC(18, 6) NULL						-- The net weight of an item. Optional.
-    ,[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0			-- The cost of the item received in terms of intItemUOMId. 
-	,[intContainerId] INT NULL								-- If item has a container id or not. 
+	,[dblSalesPrice] NUMERIC(18, 6) NOT NULL DEFAULT 0		-- The sales price of the item shipped in terms of intItemUOMId. 
+	,[intDockDoorId] INT NULL								-- If item has a dock door id or not. 
 	,[intOwnershipType] INT NOT NULL DEFAULT ((1))			-- Ownership type of the item. Required. Default to 1 (Own)
 	,[intOrderId] INT NULL									-- Link id to PO or Contract. Ex: if Receipt type is "Purchase Order", this field links to the PO table. Optional.
 	,[intSourceId] INT NULL									-- Link id to Scale. Optional.

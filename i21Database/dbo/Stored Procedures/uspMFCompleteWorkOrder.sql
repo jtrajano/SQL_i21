@@ -46,6 +46,7 @@ BEGIN TRY
 		,@strReferenceNo nvarchar(50)
 		,@ysnPostProduction bit
 		,@STARTING_NUMBER_BATCH AS INT = 3
+		,@intDepartmentId int
 		 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -87,6 +88,7 @@ BEGIN TRY
 		,@strLotAlias =strLotAlias
 		,@strReferenceNo=strReferenceNo
 		,@ysnPostProduction=ysnPostProduction
+		,@intDepartmentId=intDepartmentId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intManufacturingProcessId INT
@@ -119,6 +121,7 @@ BEGIN TRY
 			,strLotAlias nvarchar(50)
 			,strReferenceNo nvarchar(50)
 			,ysnPostProduction bit
+			,intDepartmentId int
 			)
 
 	BEGIN TRANSACTION
@@ -277,6 +280,7 @@ BEGIN TRY
 			,dtmActualProductionStartDate
 			,intProductionTypeId
 			,intBatchID
+			,intDepartmentId
 			)
 		SELECT @strWorkOrderNo
 			,@intManufacturingProcessId
@@ -301,6 +305,7 @@ BEGIN TRY
 			,@dtmCurrentDate
 			,1
 			,@intBatchId
+			,@intDepartmentId
 
 		SET @intWorkOrderId = SCOPE_IDENTITY()
 

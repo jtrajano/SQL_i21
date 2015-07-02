@@ -39,10 +39,6 @@ SET @totalReceipts = (SELECT COUNT(*) FROM #tmpReceiptIds)
 SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = 
 						(SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityId = @userId))
 
---try to get from AP preference
-IF @APAccount IS NULL
-	SET @APAccount = (SELECT intDefaultAccountId FROM tblAPPreference)
-
 --try to get from Gl Account
 IF @APAccount IS NULL
 	SET @APAccount = (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE intAccountCategoryId = 1)

@@ -49,8 +49,6 @@ CREATE TABLE #tmpPayableInvalidData (
 );
 
 --DECLARRE VARIABLES
-DECLARE @WithholdAccount INT = (SELECT intWithholdAccountId FROM tblAPPreference)
-DECLARE @DiscountAccount INT = (SELECT intDiscountAccountId FROM tblAPPreference)
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
@@ -130,7 +128,7 @@ BEGIN
 
 	--VALIDATIONS
 	INSERT INTO #tmpPayableInvalidData 
-	SELECT * FROM [fnAPValidatePostPayment](@paymentIds, @post)
+	SELECT * FROM [fnAPValidatePostPayment](@paymentIds, @post, @userId)
 
 	DECLARE @totalInvalid INT
 	SET @totalInvalid = (SELECT COUNT(*) FROM #tmpPayableInvalidData)

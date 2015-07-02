@@ -11,19 +11,42 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @StartingNumberId_InventoryReceipt AS INT = 23;
-DECLARE @ReceiptNumber AS NVARCHAR(20)
+DECLARE @total as INT;
+DECLARE @incval as INT;
+DECLARE @ReceiptNumber as nvarchar(50);
+DECLARE @temp TABLE
+    (
+	intId INT IDENTITY PRIMARY KEY CLUSTERED,
+    Vendor int,
+    BillOfLadding nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+    ReceiptNumber nvarchar(50) null
+    )
 
+insert into @temp(Vendor ,
+				  BillOfLadding,
+				  ReceiptNumber 
+				  )
+		select intEntityVendorId,strBillOfLadding,null from @ReceiptEntries RE
+				       group by RE.intEntityVendorId,RE.strBillOfLadding;
 
--- Get the transaction id 
-EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryReceipt, @ReceiptNumber OUTPUT 
+select @total = count(*) from @temp;
+set @incval = 1 
+WHILE @incval <=@total 
+BEGIN
+   EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryReceipt, @ReceiptNumber OUTPUT 
 
-IF @ReceiptNumber IS NULL 
-BEGIN 
+   IF @ReceiptNumber IS NULL 
+   BEGIN 
 	-- Raise the error:
 	-- Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.
-	RAISERROR(50030, 11, 1);
-	RETURN;
-END 
+	   RAISERROR(50030, 11, 1);
+	   RETURN;
+   END 
+   update @temp 
+       set ReceiptNumber = @ReceiptNumber
+         where intId = @incval 
+   SET @incval = @incval + 1;
+END;
 
 -- Insert the Inventory Receipt header 
 INSERT INTO dbo.tblICInventoryReceipt (
@@ -59,18 +82,18 @@ INSERT INTO dbo.tblICInventoryReceipt (
 		,intCreatedUserId
 		,ysnPosted
 )
-SELECT 	strReceiptNumber		= @ReceiptNumber
+SELECT 	 strReceiptNumber       = min(TE.ReceiptNumber)
 		,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(GETDATE())
 		,intEntityVendorId		= RE.intEntityVendorId
-		,strReceiptType			= RE.strReceiptType
+		,strReceiptType			= min(RE.strReceiptType)
 		,intBlanketRelease		= NULL
-		,intLocationId			= RE.intLocationId
+		,intLocationId			= min(RE.intLocationId)
 		,strVendorRefNo			= NULL
 		,strBillOfLading		= RE.strBillOfLadding
-		,intShipViaId			= RE.intShipViaId
-		,intShipFromId			= RE.intShipFromId 
+		,intShipViaId			= min(RE.intShipViaId)
+		,intShipFromId			= min(RE.intShipFromId) 
 		,intReceiverId			= @intUserId 
-		,intCurrencyId			= RE.intCurrencyId
+		,intCurrencyId			= min(RE.intCurrencyId)
 		,strVessel				= NULL
 		,intFreightTermId		= NULL
 		,strAllocateFreight		= 'No' -- Default is No
@@ -91,8 +114,10 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,intCreatedUserId		= @intUserId
 		,ysnPosted				= 0
 FROM	@ReceiptEntries RE
+        JOIN @temp TE on TE.Vendor = RE.intEntityVendorId and TE.BillOfLadding = RE.strBillOfLadding		           
+        group by  RE.intEntityVendorId,RE.strBillOfLadding
 
--- Get the identity value from tblICInventoryReceipt
+-- Get the identity value from tblICInventoryReceipt to check if the insert was with no errors 
 SELECT @InventoryReceiptId = SCOPE_IDENTITY()
 
 IF @InventoryReceiptId IS NULL 
@@ -121,7 +146,10 @@ INSERT INTO dbo.tblICInventoryReceiptItem (
     ,intConcurrencyId
 	,intOwnershipType
 )
-SELECT	intInventoryReceiptId	= @InventoryReceiptId
+SELECT	intInventoryReceiptId	= (select TOP 1 IR.intInventoryReceiptId from tblICInventoryReceipt IR 
+                                   where RE.intEntityVendorId = IR.intEntityVendorId 
+								     and RE.strBillOfLadding = IR.strBillOfLading
+								   )
 		,intLineNo				= RE.intSourceId
 		,intOrderId				= RE.intContractDetailId
 		,intSourceId			= RE.intSourceId
@@ -165,4 +193,7 @@ SET		dblInvoiceAmount = (
 			WHERE	ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
 		)
 FROM	dbo.tblICInventoryReceipt Receipt 
-WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
+        JOIN @ReceiptEntries RE 
+             ON RE.intEntityVendorId = Receipt.intEntityVendorId 
+			  and RE.strBillOfLadding = Receipt.strBillOfLading
+

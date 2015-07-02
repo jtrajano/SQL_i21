@@ -12,6 +12,7 @@
 	[dblDiscountDue] DECIMAL(9, 6) NULL,
 	[dblDiscountPaid] DECIMAL(9, 6) NULL, 
     [dtmDiscountPaidDate] DATETIME NULL, 
+    [intDiscountScheduleCodeId] INT NOT NULL, 
     CONSTRAINT [PK_tblGRStorageDiscount_intStorageDiscountId] PRIMARY KEY ([intStorageDiscountId]),
 	CONSTRAINT [FK_tblGRStorageDiscount_tblGRCustomerStorage_intCustomerStorageId] FOREIGN KEY ([intCustomerStorageId]) REFERENCES [dbo].[tblGRCustomerStorage] ([intCustomerStorageId]) ON DELETE CASCADE, 
 )
