@@ -28,6 +28,9 @@ SET ANSI_WARNINGS OFF
 --------------------------------------------------------------------------------------------   
 -- Create a unique transaction name. 
 DECLARE @TransactionName AS VARCHAR(500) = 'Invoice Transaction' + CAST(NEWID() AS NVARCHAR(100));
+
+DECLARE @totalInvalid INT = 0
+DECLARE @totalRecords INT = 0	
  
 DECLARE @PostInvoiceData TABLE  (
 	intInvoiceId int PRIMARY KEY,
@@ -58,7 +61,7 @@ DECLARE @CODE NVARCHAR(25) = 'AR'
 
 DECLARE @UserEntityID int
 		,@DiscountAccountId int
-		
+				
 		
 SET @UserEntityID = ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE intUserSecurityID = @userId),@userId)
 SET @DiscountAccountId = ISNULL((SELECT strValue FROM tblSMPreferences WHERE strPreference = 'DefaultARDiscountAccount'),'')
@@ -484,7 +487,6 @@ IF @recap = 0
 
 			END
 
-		DECLARE @totalInvalid INT = 0
 		SELECT @totalInvalid = COUNT(*) FROM @InvalidInvoiceData
 
 		IF(@totalInvalid > 0)
@@ -511,20 +513,21 @@ IF @recap = 0
 
 			END
 
-
-		DECLARE @totalRecords INT
+		
 		SELECT @totalRecords = COUNT(*) FROM @PostInvoiceData
 			
 		IF(@totalInvalid >= 1 AND @totalRecords < 1)  
 			BEGIN			
 				DECLARE @ErrorMessage NVARCHAR(100)				
 				SELECT TOP 1 @ErrorMessage = @batchIdUsed + ' : ' + strError FROM @InvalidInvoiceData
-				RAISERROR(@ErrorMessage, 11, 1) 
+				SET @successfulCount = @totalRecords 
+				SET @invalidCount = @totalInvalid 
 				SET @success = 0 
+				RAISERROR(@ErrorMessage, 11, 1) 				
 				GOTO Post_Exit
 			END
 			
-		IF(@totalRecords = 0)  
+		IF(@totalRecords = 0 AND @totalInvalid > 1)  
 			BEGIN			
 				SET @success = 0 
 				GOTO Post_Exit
@@ -566,11 +569,11 @@ IF @post = 1
 		) 
 		SELECT 
 			Detail.intItemId  
-			,Header.intCompanyLocationId
+			,IST.intItemLocationId
 			,Detail.intItemUOMId  
 			,Header.dtmShipDate
 			,Detail.dblQtyShipped * -1
-			,Detail.dblPrice
+			,ItemUOM.dblUnitQty
 			,IST.dblLastCost
 			,Detail.dblPrice 
 			,Header.intCurrencyId
@@ -639,11 +642,11 @@ IF @post = 1
 					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 					,@UserEntityID
 					
-			IF(@@ERROR <> 0)  
-			BEGIN			
-				SET @success = 0 
-				GOTO Post_Exit
-			END	
+			--IF(@@ERROR <> 0)  
+			--BEGIN			
+			--	SET @success = 0 
+			--	GOTO Post_Exit
+			--END	
 		END
 		
 		BEGIN 
@@ -723,8 +726,8 @@ IF @post = 1
 													ELSE
 														(CASE WHEN B.intAccountId IS NOT NULL AND B.intAccountId <> 0 THEN B.intAccountId ELSE CL.intServiceCharges END)
 												END)
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(ROUND(B.dblTotal,2), 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(ROUND(B.dblTotal,2), 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) ELSE 0  END
+				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) END
+				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) ELSE 0  END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -769,8 +772,8 @@ IF @post = 1
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
 				,intAccountId				= B.intSalesAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(ROUND(B.dblTotal,2), 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(ROUND(B.dblTotal,2), 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) ELSE  0 END
+				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) END
+				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) ELSE  0 END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -1095,11 +1098,11 @@ IF @post = 0
 							,@batchId
 							,@UserEntityID
 							
-					IF(@@ERROR <> 0)  
-						BEGIN			
-							SET @success = 0 
-							GOTO Post_Exit
-						END	
+					--IF(@@ERROR <> 0)  
+					--	BEGIN			
+					--		SET @success = 0 
+					--		GOTO Post_Exit
+					--	END	
 			
 					DELETE FROM @UnPostInvoiceData WHERE intInvoiceId = @intTransactionId AND strTransactionId = @strTransactionId 
 												
@@ -1186,11 +1189,11 @@ IF @recap = 1
 	BEGIN 
 		ROLLBACK TRAN @TransactionName
 		EXEC dbo.uspCMPostRecap @GLEntries
-		IF(@@ERROR <> 0)  
-			BEGIN			
-				SET @success = 0 
-				GOTO Post_Exit
-			END	
+		--IF(@@ERROR <> 0)  
+		--	BEGIN			
+		--		SET @success = 0 
+		--		GOTO Post_Exit
+		--	END	
 		COMMIT TRAN @TransactionName
 	END 
 
@@ -1203,11 +1206,11 @@ IF @recap = 1
 IF @recap = 0
 	BEGIN 
 		EXEC dbo.uspGLBookEntries @GLEntries, @post
-		IF(@@ERROR <> 0)  
-			BEGIN			
-				SET @success = 0 
-				GOTO Post_Exit
-			END
+		--IF(@@ERROR <> 0)  
+		--	BEGIN			
+		--		SET @success = 0 
+		--		GOTO Post_Exit
+		--	END
 		 
 		IF @post = 0
 			BEGIN
@@ -1335,11 +1338,11 @@ IF @recap = 0
 
 					EXEC dbo.uspSOUpdateOrderShipmentStatus @intSalesOrderId
 							
-					IF(@@ERROR <> 0)  
-						BEGIN			
-							SET @success = 0 
-							GOTO Post_Exit
-						END	
+					--IF(@@ERROR <> 0)  
+					--	BEGIN			
+					--		SET @success = 0 
+					--		GOTO Post_Exit
+					--	END	
 			
 					DELETE FROM @OrderToUpdate WHERE intSalesOrderId = @intSalesOrderId AND intSalesOrderId = @intSalesOrderId 
 												
@@ -1352,5 +1355,7 @@ IF @recap = 0
 	    
 -- This is our immediate exit in case of exceptions controlled by this stored procedure
 Post_Exit:
+	SET @successfulCount = @totalRecords 
+	SET @invalidCount = @totalInvalid 
 	RETURN;
 	
