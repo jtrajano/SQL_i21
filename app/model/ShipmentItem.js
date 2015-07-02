@@ -45,13 +45,33 @@ Ext.define('Inventory.model.ShipmentItem', {
 
         { name: 'strItemNo', type: 'string'},
         { name: 'strUnitMeasure', type: 'string'},
-        { name: 'strWeightUOM', type: 'string'}
+        { name: 'strWeightUOM', type: 'string'},
+
+        { name: 'dblLineTotal', type: 'float',
+            persist: false,
+            convert: function(value, record){
+                var qty = iRely.Functions.isEmpty(record.get('dblQuantity')) ? 0 : record.get('dblQuantity');
+                var price = iRely.Functions.isEmpty(record.get('dblUnitPrice')) ? 0 : record.get('dblUnitPrice');
+                return qty * price;
+            },
+            depends: ['dblQuantity', 'dblUnitPrice']
+        }
     ],
 
     validators: [
         {type: 'presence', field: 'strReferenceNumber'},
         {type: 'presence', field: 'strItemNo'},
-        {type: 'presence', field: 'dblQuantity'},
         {type: 'presence', field: 'strUnitMeasure'}
-    ]
+    ],
+
+    validate: function(options) {
+        var errors = this.callParent(arguments);
+        if (this.get('dblQuantity') <= 0) {
+            errors.add({
+                field: 'dblQuantity',
+                message: 'Quantity must be greater than zero(0).'
+            })
+        }
+        return errors;
+    }
 });

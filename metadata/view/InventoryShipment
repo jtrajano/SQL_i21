@@ -2044,7 +2044,11 @@
                                                                             "\t{",
                                                                             "\t\tdataIndex: 'intItemId',",
                                                                             "\t\tdataType: 'numeric',",
-                                                                            "\t\ttext: 'Item Id',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intLocationId',",
+                                                                            "\t\tdataType: 'numeric',",
                                                                             "\t\thidden: true",
                                                                             "\t},",
                                                                             "\t{",
@@ -2068,7 +2072,47 @@
                                                                             "\t{",
                                                                             "\t\tdataIndex: 'strLotTracking',",
                                                                             "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Lot Tracking',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strIssueUOMType',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strIssueUPC',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'UPC',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strIssueUOM',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strStockUOM',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'dblLastCost',",
+                                                                            "\t\tdataType: 'float',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'dblIssueUOMConvFactor',",
+                                                                            "\t\tdataType: 'float',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intIssueUOMId',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intStockUOMId',",
+                                                                            "\t\tdataType: 'numeric',",
                                                                             "\t\thidden: true",
                                                                             "\t}",
                                                                             "]"
@@ -2160,6 +2204,65 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "dataIndex": "strSubLocation",
+                                                                "itemId": "colOwnershipType",
+                                                                "text": "Ownership Type",
+                                                                "width": 110
+                                                            },
+                                                            "name": "MyColumn58",
+                                                            "designerId": "9e3ccc9e-dabf-42b7-9c81-9444a9a39bb7",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intOwnershipType',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strOwnershipType',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Ownership Type',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t}",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strOwnershipType",
+                                                                        "itemId": "cboOwnershipType",
+                                                                        "valueField": "strOwnershipType"
+                                                                    },
+                                                                    "name": "MyComboBox2",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "3856e225-b076-43c0-8aab-88883af6eb60",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "strSubLocation",
                                                                 "itemId": "colSubLocation",
                                                                 "text": "Sub Location",
                                                                 "width": 100
@@ -2213,65 +2316,6 @@
                                                                         "columns": "array"
                                                                     },
                                                                     "designerId": "f994717f-f947-4bb0-8421-9854d2a921db",
-                                                                    "customConfigs": [
-                                                                        {
-                                                                            "group": "(Custom Properties)",
-                                                                            "name": "columns",
-                                                                            "type": "string"
-                                                                        }
-                                                                    ]
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            "type": "Ext.grid.column.Column",
-                                                            "reference": {
-                                                                "name": "columns",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "dataIndex": "strSubLocation",
-                                                                "itemId": "colOwnershipType",
-                                                                "text": "Ownership Type",
-                                                                "width": 110
-                                                            },
-                                                            "name": "MyColumn58",
-                                                            "designerId": "9e3ccc9e-dabf-42b7-9c81-9444a9a39bb7",
-                                                            "cn": [
-                                                                {
-                                                                    "type": "Ext.form.field.ComboBox",
-                                                                    "reference": {
-                                                                        "name": "editor",
-                                                                        "type": "object"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "columns": [
-                                                                            "[",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'intOwnershipType',",
-                                                                            "\t\tdataType: 'numeric',",
-                                                                            "\t\thidden: true",
-                                                                            "\t},",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'strOwnershipType',",
-                                                                            "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Ownership Type',",
-                                                                            "\t\tflex: 1",
-                                                                            "\t}",
-                                                                            "]"
-                                                                        ],
-                                                                        "designer|createAlias": "gridcombobox",
-                                                                        "displayField": "strOwnershipType",
-                                                                        "itemId": "cboOwnershipType",
-                                                                        "valueField": "strOwnershipType"
-                                                                    },
-                                                                    "name": "MyComboBox2",
-                                                                    "configAlternates": {
-                                                                        "columns": "array"
-                                                                    },
-                                                                    "designerId": "3856e225-b076-43c0-8aab-88883af6eb60",
                                                                     "customConfigs": [
                                                                         {
                                                                             "group": "(Custom Properties)",
@@ -2507,6 +2551,32 @@
                                                                     },
                                                                     "name": "MyNumberField16",
                                                                     "designerId": "0d637b1d-a899-4b60-affc-e8d277d3f33a"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Number",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "align": "right",
+                                                                "dataIndex": "dblUnitPrice",
+                                                                "dataType": "numeric",
+                                                                "format": "0,000.##",
+                                                                "itemId": "colLineTotal",
+                                                                "text": "Line Total",
+                                                                "width": 81
+                                                            },
+                                                            "name": "MyNumberColumn7",
+                                                            "designerId": "c53a85ff-e4c1-4d8b-baa0-f307aacb903d",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "dataType",
+                                                                    "type": "string"
                                                                 }
                                                             ]
                                                         },

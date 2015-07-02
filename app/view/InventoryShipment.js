@@ -1011,7 +1011,11 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 {
                                                                                     dataIndex: 'intItemId',
                                                                                     dataType: 'numeric',
-                                                                                    text: 'Item Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intLocationId',
+                                                                                    dataType: 'numeric',
                                                                                     hidden: true
                                                                                 },
                                                                                 {
@@ -1035,7 +1039,47 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 {
                                                                                     dataIndex: 'strLotTracking',
                                                                                     dataType: 'string',
-                                                                                    text: 'Lot Tracking',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strIssueUOMType',
+                                                                                    dataType: 'string',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strIssueUPC',
+                                                                                    dataType: 'string',
+                                                                                    text: 'UPC',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strIssueUOM',
+                                                                                    dataType: 'string',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strStockUOM',
+                                                                                    dataType: 'string',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'dblLastCost',
+                                                                                    dataType: 'float',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'dblIssueUOMConvFactor',
+                                                                                    dataType: 'float',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intIssueUOMId',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intStockUOMId',
+                                                                                    dataType: 'numeric',
                                                                                     hidden: true
                                                                                 }
                                                                             ],
@@ -1067,6 +1111,32 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         width: 100,
                                                                         dataIndex: 'strDescription',
                                                                         text: 'Order UOM'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colOwnershipType',
+                                                                        width: 110,
+                                                                        dataIndex: 'strSubLocation',
+                                                                        text: 'Ownership Type',
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intOwnershipType',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strOwnershipType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Ownership Type',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboOwnershipType',
+                                                                            displayField: 'strOwnershipType',
+                                                                            valueField: 'strOwnershipType'
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
@@ -1105,32 +1175,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                             itemId: 'cboSubLocation',
                                                                             displayField: 'strSubLocationName',
                                                                             valueField: 'strSubLocationName'
-                                                                        }
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colOwnershipType',
-                                                                        width: 110,
-                                                                        dataIndex: 'strSubLocation',
-                                                                        text: 'Ownership Type',
-                                                                        editor: {
-                                                                            xtype: 'gridcombobox',
-                                                                            columns: [
-                                                                                {
-                                                                                    dataIndex: 'intOwnershipType',
-                                                                                    dataType: 'numeric',
-                                                                                    hidden: true
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strOwnershipType',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Ownership Type',
-                                                                                    flex: 1
-                                                                                }
-                                                                            ],
-                                                                            itemId: 'cboOwnershipType',
-                                                                            displayField: 'strOwnershipType',
-                                                                            valueField: 'strOwnershipType'
                                                                         }
                                                                     },
                                                                     {
@@ -1238,6 +1282,16 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         editor: {
                                                                             xtype: 'numeric'
                                                                         }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
+                                                                        dataType: 'numeric',
+                                                                        dataIndex: 'dblUnitPrice',
+                                                                        itemId: 'colLineTotal',
+                                                                        width: 81,
+                                                                        align: 'right',
+                                                                        text: 'Line Total',
+                                                                        format: '0,000.##'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',

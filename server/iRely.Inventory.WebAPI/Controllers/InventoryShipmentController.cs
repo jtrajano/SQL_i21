@@ -40,5 +40,25 @@ namespace iRely.Inventory.WebApi
             });
         }
 
+        [HttpPost]
+        [ActionName("ProcessInvoice")]
+        public HttpResponseMessage ProcessInvoice(int id)
+        {
+            int? newInvoice = null;
+            var result = _bl.ProcessInvoice(id, out newInvoice);
+
+            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            {
+                success = !result.HasError,
+                message = new
+                {
+                    InvoiceId = newInvoice,
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
+
     }
 }

@@ -3,7 +3,7 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
     alias: 'viewmodel.icinventoryshipment',
 
     requires: [
-        'Inventory.store.BufferedCompactItem',
+        'Inventory.store.BufferedItemStockDetailView',
         'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.BufferedItemWeightUOM',
         'Inventory.store.BufferedLot',
@@ -13,7 +13,8 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         'i21.store.ShipViaBuffered',
         'EntityManagement.store.CustomerBuffered',
         'EntityManagement.store.LocationBuffered',
-        'AccountsReceivable.store.SalesOrderDetailCompactBuffered'
+        'AccountsReceivable.store.SalesOrderDetailCompactBuffered',
+        'ContractManagement.store.ContractDetailViewBuffered'
     ],
 
     stores: {
@@ -29,6 +30,9 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                 },{
                     intOrderType: 3,
                     strOrderType: 'Transfer Order'
+                },{
+                    intOrderType: 4,
+                    strOrderType: 'Direct'
                 }
             ],
             fields: {
@@ -71,10 +75,6 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                 {
                     intOwnershipType: 3,
                     strOwnershipType: 'Consigned Purchase'
-                },
-                {
-                    intOwnershipType: 4,
-                    strOwnershipType: 'Consigned Sale'
                 }
             ],
             fields: {
@@ -100,8 +100,11 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         soDetails: {
             type: 'salesorderdetailcompactbuffered'
         },
+        salesContract: {
+            type: 'ctcontractdetailviewbuffered'
+        },
         items: {
-            type: 'icbufferedcompactitem'
+            type: 'icbuffereditemstockdetailview'
         },
         subLocation: {
             type: 'smcompanylocationsublocationbuffered'
@@ -135,11 +138,19 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             }
         },
         checkHideOrderNo: function(get) {
-            if (get('current.strReceiptType') === 'Direct') {
+            if (get('current.intOrderType') === 4) {
                 return true;
             }
             else {
                 return false;
+            }
+        },
+        checkHideOwnershipType: function(get) {
+            if (get('current.intOrderType') === 4) {
+                return false;
+            }
+            else {
+                return true;
             }
         },
         checkHideSourceNo: function(get) {
@@ -149,6 +160,17 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             else {
                 return false;
             }
+        },
+        readOnlyItemDropdown: function (get) {
+            var orderType = get('current.intOrderType');
+            switch (orderType) {
+                case 4:
+                    return false;
+                    break;
+                default:
+                    return true;
+                    break;
+            };
         }
     }
 
