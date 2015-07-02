@@ -12,16 +12,16 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF  
 
 -- Declare the constants 
--- Receipt Types
-DECLARE @RECEIPT_TYPE_PURCHASE_CONTRACT AS NVARCHAR(50) = 'Purchase Contract'
+DECLARE	-- Receipt Types
+		@RECEIPT_TYPE_PURCHASE_CONTRACT AS NVARCHAR(50) = 'Purchase Contract'
 		,@RECEIPT_TYPE_PURCHASE_ORDER AS NVARCHAR(50) = 'Purchase Order'
 		,@RECEIPT_TYPE_TRANSFER_ORDER AS NVARCHAR(50) = 'Transfer Order'
 		,@RECEIPT_TYPE_DIRECT AS NVARCHAR(50) = 'Direct'
-
--- Source Types
+		-- Source Types
 		,@SOURCE_TYPE_NONE AS INT = 1
 		,@SOURCE_TYPE_SCALE AS INT = 2
 		,@SOURCE_TYPE_INBOUND_SHIPMENT AS INT = 3
+		,@SOURCE_TYPE_TRANSPORT AS INT = 4
 
 -- Get the details from the inventory receipt 
 BEGIN 
@@ -63,7 +63,7 @@ BEGIN
 	SET dblQty = dblQty * CASE WHEN @ysnPost = 1 THEN 1 ELSE -1 END 
 END
 
--- Get the receipt type and soruce type
+-- Get the receipt-type and source-type from tblICInventoryReceipt
 BEGIN 
 	DECLARE @ReceiptType AS NVARCHAR(50) 
 			,@SourceType AS INT 
@@ -74,14 +74,33 @@ BEGIN
 	WHERE	intInventoryReceiptId = @intTransactionId 
 END 
 
--- Update the received quantities from the Purchase Order
-IF @ReceiptType = @RECEIPT_TYPE_PURCHASE_ORDER AND ISNULL(@SourceType, 1) = @SOURCE_TYPE_NONE
+-- Update the received quantities back to the Purchase Order
+IF	@ReceiptType = @RECEIPT_TYPE_PURCHASE_ORDER 
+	AND ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_NONE
 BEGIN 
 	EXEC dbo.[uspPOReceived] @ItemsFromInventoryReceipt
 	GOTO _Exit;
 END
 
+-- Update the received quantities back to Inbound Shipment 
+IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_INBOUND_SHIPMENT
+BEGIN 
+	EXEC dbo.uspLGReceived @ItemsFromInventoryReceipt
+	GOTO _Exit;
+END
 
+-- Update the received quantities back to a Scale Ticket
+IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_SCALE
+BEGIN 
+	EXEC dbo.uspSCReceived @ItemsFromInventoryReceipt
+	GOTO _Exit;
+END
 
+-- Update the received quantities back to Transport Order
+IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_TRANSPORT
+BEGIN 
+	EXEC dbo.uspTRReceived @ItemsFromInventoryReceipt
+	GOTO _Exit;
+END
 
 _Exit: 
