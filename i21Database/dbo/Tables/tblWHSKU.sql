@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblWHSKU]
 (
-	[intSKUId]	INT NOT NULL,
+	[intSKUId]	INT NOT NULL IDENTITY,
 	[intConcurrencyId] INT NOT NULL,
 	[strSKUNo]	NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[intSKUStatusId]	INT NOT NULL,
@@ -18,7 +18,7 @@
 	[intParentSKUId]	INT,
 	[strParentSKUNo]	NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[dblWeightPerUnit]	NUMERIC(18,6) NOT NULL,
-	[intWeightPerUnitUOMKey]	NUMERIC NOT NULL,
+	[intWeightPerUnitUOMId]	INT NOT NULL,
 	[intUnitsPerLayer]	INT NOT NULL,
 	[intLayersPerPallet]	INT NOT NULL,
 	[ysnIsSanitized]	BIT,
