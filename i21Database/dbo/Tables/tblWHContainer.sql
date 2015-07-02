@@ -11,6 +11,7 @@
 		[intLastModifiedUserId] [int] NULL,
 		[dtmLastModified] [datetime] NULL DEFAULT GetDate(),
 
+		CONSTRAINT [UQ_tblWHContainer_strContainerNo] UNIQUE ([strContainerNo]),
 		CONSTRAINT [PK_tblWHContainer_intContainerId] PRIMARY KEY ([intContainerId]), 
 		CONSTRAINT [FK_tblWHContainer_tblICStorageLocation_intStorageLocationId] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 
 		CONSTRAINT [FK_tblWHContainer_tblWHContainerType_intContainerTypeId] FOREIGN KEY ([intContainerTypeId]) REFERENCES [tblWHContainerType]([intContainerTypeId]),
