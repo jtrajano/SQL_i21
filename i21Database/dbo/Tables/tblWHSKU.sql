@@ -25,6 +25,7 @@
 	[strBatchNo]	NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 
     CONSTRAINT [PK_tblWHSKU_intSKUId]  PRIMARY KEY ([intSKUId]),	
+	CONSTRAINT [UQ_tblWHSKU_strSKUNo] UNIQUE ([strSKUNo]),
 	CONSTRAINT [FK_tblWHSKU_tblWHContainer_intContainerId] FOREIGN KEY ([intContainerId]) REFERENCES [tblWHContainer]([intContainerId]), 
 	CONSTRAINT [FK_tblWHSKU_tblICLot_intLotId] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]), 
 	CONSTRAINT [FK_tblWHSKU_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
