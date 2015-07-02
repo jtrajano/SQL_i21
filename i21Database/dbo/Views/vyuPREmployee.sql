@@ -16,9 +16,8 @@ Loc.strState,
 Loc.strZipCode,
 Loc.strCountry,
 Emp.ysnActive,
-Pay.strPayPeriod
+Emp.strPayPeriod
 FROM dbo.tblPREmployee AS Emp
 INNER JOIN dbo.tblEntity AS Ent ON Ent.intEntityId = Emp.intEntityId
 LEFT JOIN dbo.tblEntity AS Con ON Con.[intEntityId] = Emp.intEntityId
 LEFT JOIN dbo.tblEntityLocation AS Loc ON Loc.intEntityId = Emp.intEntityId
-LEFT JOIN dbo.tblPRPayGroup AS Pay ON Pay.intPayGroupId = Emp.intPayGroupId

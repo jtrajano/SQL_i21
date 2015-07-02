@@ -1,15 +1,15 @@
 ﻿CREATE VIEW [dbo].[vyuPRPaycheckHistory]
 AS
-SELECT      PC.intPaycheckId, 
-			PC.strPaycheckId, 
-			PC.intEmployeeId, 
-			PC.dtmPayDate, 
-			PC.intBankAccountId,  
-			CM.strBankAccountNo, 
-			PC.dblGross,
-			PC.dblNetPayTotal, 
-			PC.dblTaxTotal,
-			PC.dblDeductionTotal,
-			PC.ysnPosted
-FROM        dbo.tblPRPaycheck PC
-INNER JOIN	dbo.tblCMBankAccount CM  ON PC.intBankAccountId = CM.intBankAccountId
+SELECT DISTINCT	PC.intPaycheckId, 
+				PC.strPaycheckId, 
+				PC.intEmployeeId, 
+				PC.dtmPayDate,
+				CM.strReferenceNo, 
+				PC.dblGross,
+				PC.dblNetPayTotal, 
+				PC.dblTaxTotal,
+				PC.dblDeductionTotal,
+				PC.ysnPosted
+		   FROM dbo.tblPRPaycheck PC
+	 INNER JOIN	dbo.tblCMBankTransaction CM  
+			 ON PC.strReferenceNo = CM.strReferenceNo
