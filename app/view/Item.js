@@ -1926,7 +1926,7 @@ Ext.define('Inventory.view.Item', {
                                                         layout: {
                                                             type: 'hbox',
                                                             align: 'stretch',
-                                                            padding: 5
+                                                            padding: 3
                                                         },
                                                         tabConfig: {
                                                             xtype: 'tab',
@@ -1934,163 +1934,436 @@ Ext.define('Inventory.view.Item', {
                                                         },
                                                         items: [
                                                             {
-                                                                xtype: 'container',
+                                                                xtype: 'tabpanel',
                                                                 flex: 1,
-                                                                layout: {
-                                                                    type: 'vbox',
-                                                                    align: 'stretch'
-                                                                },
+                                                                itemId: 'tabManufacturing',
+                                                                activeTab: 0,
+                                                                plain: true,
                                                                 items: [
                                                                     {
                                                                         xtype: 'panel',
-                                                                        height: 120,
-                                                                        margin: '0 0 5 0',
-                                                                        bodyPadding: 7,
-                                                                        title: 'Material Detail',
+                                                                        bodyPadding: 5,
+                                                                        title: 'Manufacturing Settings',
                                                                         layout: {
-                                                                            type: 'vbox',
-                                                                            align: 'stretch'
-                                                                        },
-                                                                        items: [
-                                                                            {
-                                                                                xtype: 'checkboxfield',
-                                                                                itemId: 'chkRequireApproval',
-                                                                                fieldLabel: 'Require Approval',
-                                                                                labelWidth: 125
-                                                                            },
-                                                                            {
-                                                                                xtype: 'combobox',
-                                                                                disabled: true,
-                                                                                itemId: 'cboAssociatedRecipe',
-                                                                                fieldLabel: 'Associated Recipe',
-                                                                                labelWidth: 125,
-                                                                                readOnly: false
-                                                                            },
-                                                                            {
-                                                                                xtype: 'checkboxfield',
-                                                                                itemId: 'chkSanitizationRequired',
-                                                                                fieldLabel: 'Sanitization Required',
-                                                                                labelWidth: 125
-                                                                            }
-                                                                        ]
-                                                                    },
-                                                                    {
-                                                                        xtype: 'panel',
-                                                                        height: 91,
-                                                                        margin: '0 0 5 0',
-                                                                        bodyPadding: 7,
-                                                                        title: 'Life Time',
-                                                                        layout: {
-                                                                            type: 'vbox',
+                                                                            type: 'hbox',
                                                                             align: 'stretch'
                                                                         },
                                                                         items: [
                                                                             {
                                                                                 xtype: 'container',
-                                                                                margin: '0 0 5 0',
+                                                                                flex: 1,
                                                                                 layout: {
-                                                                                    type: 'hbox',
+                                                                                    type: 'vbox',
                                                                                     align: 'stretch'
                                                                                 },
                                                                                 items: [
                                                                                     {
-                                                                                        xtype: 'numeric',
-                                                                                        flex: 2,
-                                                                                        itemId: 'txtLifeTime',
-                                                                                        modelValidation: true,
-                                                                                        fieldLabel: 'Life Time',
-                                                                                        labelWidth: 125,
-                                                                                        hideTrigger: true
+                                                                                        xtype: 'panel',
+                                                                                        height: 120,
+                                                                                        margin: '0 0 5 0',
+                                                                                        bodyPadding: 7,
+                                                                                        title: 'Material Detail',
+                                                                                        layout: {
+                                                                                            type: 'vbox',
+                                                                                            align: 'stretch'
+                                                                                        },
+                                                                                        items: [
+                                                                                            {
+                                                                                                xtype: 'checkboxfield',
+                                                                                                itemId: 'chkRequireApproval',
+                                                                                                fieldLabel: 'Require Approval',
+                                                                                                labelWidth: 125
+                                                                                            },
+                                                                                            {
+                                                                                                xtype: 'combobox',
+                                                                                                disabled: true,
+                                                                                                itemId: 'cboAssociatedRecipe',
+                                                                                                fieldLabel: 'Associated Recipe',
+                                                                                                labelWidth: 125,
+                                                                                                readOnly: false
+                                                                                            },
+                                                                                            {
+                                                                                                xtype: 'checkboxfield',
+                                                                                                itemId: 'chkSanitizationRequired',
+                                                                                                fieldLabel: 'Sanitization Required',
+                                                                                                labelWidth: 125
+                                                                                            }
+                                                                                        ]
                                                                                     },
                                                                                     {
-                                                                                        xtype: 'combobox',
-                                                                                        flex: 1,
-                                                                                        itemId: 'cboLifetimeType',
-                                                                                        margin: '0 0 0 5',
-                                                                                        modelValidation: true,
-                                                                                        labelWidth: 125,
-                                                                                        displayField: 'strDescription',
-                                                                                        valueField: 'strDescription'
+                                                                                        xtype: 'panel',
+                                                                                        height: 91,
+                                                                                        margin: '0 0 5 0',
+                                                                                        bodyPadding: 7,
+                                                                                        title: 'Life Time',
+                                                                                        layout: {
+                                                                                            type: 'vbox',
+                                                                                            align: 'stretch'
+                                                                                        },
+                                                                                        items: [
+                                                                                            {
+                                                                                                xtype: 'container',
+                                                                                                margin: '0 0 5 0',
+                                                                                                layout: {
+                                                                                                    type: 'hbox',
+                                                                                                    align: 'stretch'
+                                                                                                },
+                                                                                                items: [
+                                                                                                    {
+                                                                                                        xtype: 'numeric',
+                                                                                                        flex: 2,
+                                                                                                        itemId: 'txtLifeTime',
+                                                                                                        modelValidation: true,
+                                                                                                        fieldLabel: 'Life Time',
+                                                                                                        labelWidth: 125,
+                                                                                                        hideTrigger: true
+                                                                                                    },
+                                                                                                    {
+                                                                                                        xtype: 'combobox',
+                                                                                                        flex: 1,
+                                                                                                        itemId: 'cboLifetimeType',
+                                                                                                        margin: '0 0 0 5',
+                                                                                                        modelValidation: true,
+                                                                                                        labelWidth: 125,
+                                                                                                        displayField: 'strDescription',
+                                                                                                        valueField: 'strDescription'
+                                                                                                    }
+                                                                                                ]
+                                                                                            },
+                                                                                            {
+                                                                                                xtype: 'numeric',
+                                                                                                itemId: 'txtReceiveLife',
+                                                                                                modelValidation: true,
+                                                                                                fieldLabel: 'Receive Life',
+                                                                                                labelWidth: 125
+                                                                                            }
+                                                                                        ]
                                                                                     }
                                                                                 ]
                                                                             },
                                                                             {
-                                                                                xtype: 'numeric',
-                                                                                itemId: 'txtReceiveLife',
-                                                                                modelValidation: true,
-                                                                                fieldLabel: 'Receive Life',
-                                                                                labelWidth: 125
+                                                                                xtype: 'container',
+                                                                                flex: 1,
+                                                                                margin: '0 0 0 5',
+                                                                                layout: {
+                                                                                    type: 'vbox',
+                                                                                    align: 'stretch'
+                                                                                },
+                                                                                items: [
+                                                                                    {
+                                                                                        xtype: 'container',
+                                                                                        flex: 1,
+                                                                                        margin: '0 0 0 5',
+                                                                                        layout: {
+                                                                                            type: 'vbox',
+                                                                                            align: 'stretch'
+                                                                                        },
+                                                                                        items: [
+                                                                                            {
+                                                                                                xtype: 'panel',
+                                                                                                flex: 1,
+                                                                                                height: 306,
+                                                                                                bodyPadding: 7,
+                                                                                                title: 'Warehouse Management',
+                                                                                                layout: {
+                                                                                                    type: 'vbox',
+                                                                                                    align: 'stretch'
+                                                                                                },
+                                                                                                items: [
+                                                                                                    {
+                                                                                                        xtype: 'textfield',
+                                                                                                        itemId: 'txtGTIN',
+                                                                                                        fieldLabel: 'GTIN',
+                                                                                                        labelWidth: 125
+                                                                                                    },
+                                                                                                    {
+                                                                                                        xtype: 'combobox',
+                                                                                                        itemId: 'cboRotationType',
+                                                                                                        fieldLabel: 'Rotation Type',
+                                                                                                        labelWidth: 125,
+                                                                                                        displayField: 'strDescription',
+                                                                                                        valueField: 'strDescription'
+                                                                                                    },
+                                                                                                    {
+                                                                                                        xtype: 'container',
+                                                                                                        margin: '0 0 5 0',
+                                                                                                        layout: {
+                                                                                                            type: 'hbox',
+                                                                                                            align: 'stretch'
+                                                                                                        },
+                                                                                                        items: [
+                                                                                                            {
+                                                                                                                xtype: 'gridcombobox',
+                                                                                                                columns: [
+                                                                                                                    {
+                                                                                                                        dataIndex: 'intMaterialNMFCId',
+                                                                                                                        dataType: 'numeric',
+                                                                                                                        text: 'Material Id',
+                                                                                                                        hidden: true
+                                                                                                                    },
+                                                                                                                    {
+                                                                                                                        dataIndex: 'strInternalCode',
+                                                                                                                        dataType: 'string',
+                                                                                                                        text: 'Internal Code'
+                                                                                                                    },
+                                                                                                                    {
+                                                                                                                        dataIndex: 'strDisplayMember',
+                                                                                                                        dataType: 'string',
+                                                                                                                        text: 'Display Member',
+                                                                                                                        flex: 2,
+                                                                                                                        minWidth: 500
+                                                                                                                    }
+                                                                                                                ],
+                                                                                                                flex: 1,
+                                                                                                                itemId: 'cboNFMC',
+                                                                                                                fieldLabel: 'NMFC',
+                                                                                                                labelWidth: 125,
+                                                                                                                displayField: 'strInternalCode',
+                                                                                                                valueField: 'intMaterialNMFCId'
+                                                                                                            },
+                                                                                                            {
+                                                                                                                xtype: 'checkboxfield',
+                                                                                                                itemId: 'chkStrictFIFO',
+                                                                                                                margin: '0 0 0 5',
+                                                                                                                fieldLabel: 'Strict FIFO',
+                                                                                                                labelWidth: 63
+                                                                                                            }
+                                                                                                        ]
+                                                                                                    },
+                                                                                                    {
+                                                                                                        xtype: 'container',
+                                                                                                        margin: '0 0 5 0',
+                                                                                                        layout: {
+                                                                                                            type: 'hbox',
+                                                                                                            align: 'stretch'
+                                                                                                        },
+                                                                                                        items: [
+                                                                                                            {
+                                                                                                                xtype: 'textfield',
+                                                                                                                flex: 1.9,
+                                                                                                                itemId: 'txtHeight',
+                                                                                                                fieldLabel: 'Height',
+                                                                                                                labelWidth: 125,
+                                                                                                                fieldStyle: 'text-align:right'
+                                                                                                            },
+                                                                                                            {
+                                                                                                                xtype: 'textfield',
+                                                                                                                flex: 1,
+                                                                                                                itemId: 'txtWidth',
+                                                                                                                margin: '0 5',
+                                                                                                                fieldLabel: 'Width',
+                                                                                                                labelWidth: 40,
+                                                                                                                fieldStyle: 'text-align:right'
+                                                                                                            },
+                                                                                                            {
+                                                                                                                xtype: 'textfield',
+                                                                                                                flex: 1,
+                                                                                                                itemId: 'txtDepth',
+                                                                                                                fieldLabel: 'Depth',
+                                                                                                                labelWidth: 40,
+                                                                                                                fieldStyle: 'text-align:right'
+                                                                                                            }
+                                                                                                        ]
+                                                                                                    },
+                                                                                                    {
+                                                                                                        xtype: 'container',
+                                                                                                        margin: '0 0 5 0',
+                                                                                                        layout: {
+                                                                                                            type: 'hbox',
+                                                                                                            align: 'stretch'
+                                                                                                        },
+                                                                                                        items: [
+                                                                                                            {
+                                                                                                                xtype: 'gridcombobox',
+                                                                                                                columns: [
+                                                                                                                    {
+                                                                                                                        dataIndex: 'intUnitMeasureId',
+                                                                                                                        dataType: 'numeric',
+                                                                                                                        text: 'Unit Of Measure ID',
+                                                                                                                        hidden: true
+                                                                                                                    },
+                                                                                                                    {
+                                                                                                                        dataIndex: 'strUnitMeasure',
+                                                                                                                        dataType: 'string',
+                                                                                                                        text: 'Unit Measure',
+                                                                                                                        flex: 1
+                                                                                                                    },
+                                                                                                                    {
+                                                                                                                        dataIndex: 'strUnitType',
+                                                                                                                        dataType: 'string',
+                                                                                                                        text: 'Unit Type',
+                                                                                                                        flex: 1
+                                                                                                                    }
+                                                                                                                ],
+                                                                                                                flex: 1.4,
+                                                                                                                itemId: 'cboDimensionUOM',
+                                                                                                                fieldLabel: 'Dimension UOM',
+                                                                                                                labelWidth: 125,
+                                                                                                                displayField: 'strUnitMeasure',
+                                                                                                                valueField: 'intUnitMeasureId'
+                                                                                                            },
+                                                                                                            {
+                                                                                                                xtype: 'gridcombobox',
+                                                                                                                columns: [
+                                                                                                                    {
+                                                                                                                        dataIndex: 'intUnitMeasureId',
+                                                                                                                        dataType: 'numeric',
+                                                                                                                        text: 'Unit Of Measure ID',
+                                                                                                                        hidden: true
+                                                                                                                    },
+                                                                                                                    {
+                                                                                                                        dataIndex: 'strUnitMeasure',
+                                                                                                                        dataType: 'string',
+                                                                                                                        text: 'Unit Measure',
+                                                                                                                        flex: 1
+                                                                                                                    },
+                                                                                                                    {
+                                                                                                                        dataIndex: 'strUnitType',
+                                                                                                                        dataType: 'string',
+                                                                                                                        text: 'Unit Type',
+                                                                                                                        flex: 1
+                                                                                                                    }
+                                                                                                                ],
+                                                                                                                flex: 1,
+                                                                                                                itemId: 'cboWeightUOM',
+                                                                                                                margin: '0 0 0 5',
+                                                                                                                fieldLabel: 'Weight UOM',
+                                                                                                                labelWidth: 87,
+                                                                                                                displayField: 'strUnitMeasure',
+                                                                                                                valueField: 'intUnitMeasureId'
+                                                                                                            }
+                                                                                                        ]
+                                                                                                    },
+                                                                                                    {
+                                                                                                        xtype: 'container',
+                                                                                                        margin: '0 0 5 0',
+                                                                                                        layout: {
+                                                                                                            type: 'hbox',
+                                                                                                            align: 'stretch'
+                                                                                                        },
+                                                                                                        items: [
+                                                                                                            {
+                                                                                                                xtype: 'numberfield',
+                                                                                                                flex: 1.4,
+                                                                                                                itemId: 'txtWeight',
+                                                                                                                fieldLabel: 'Weight',
+                                                                                                                labelWidth: 125,
+                                                                                                                fieldStyle: 'text-align:right',
+                                                                                                                hideTrigger: true
+                                                                                                            },
+                                                                                                            {
+                                                                                                                xtype: 'textfield',
+                                                                                                                flex: 1,
+                                                                                                                itemId: 'txtMaterialPack',
+                                                                                                                margin: '0 0 0 5',
+                                                                                                                fieldLabel: 'Material Pack',
+                                                                                                                labelWidth: 87
+                                                                                                            }
+                                                                                                        ]
+                                                                                                    },
+                                                                                                    {
+                                                                                                        xtype: 'container',
+                                                                                                        margin: '0 0 5 0',
+                                                                                                        layout: {
+                                                                                                            type: 'hbox',
+                                                                                                            align: 'stretch'
+                                                                                                        },
+                                                                                                        items: [
+                                                                                                            {
+                                                                                                                xtype: 'textfield',
+                                                                                                                flex: 1.4,
+                                                                                                                itemId: 'txtMaterialSizeCode',
+                                                                                                                fieldLabel: 'Material Size Code',
+                                                                                                                labelWidth: 125
+                                                                                                            },
+                                                                                                            {
+                                                                                                                xtype: 'numberfield',
+                                                                                                                flex: 1,
+                                                                                                                itemId: 'txtInnerUnits',
+                                                                                                                margin: '0 0 0 5',
+                                                                                                                fieldLabel: 'Inner Units',
+                                                                                                                labelWidth: 87,
+                                                                                                                fieldStyle: 'text-align:right',
+                                                                                                                hideTrigger: true
+                                                                                                            }
+                                                                                                        ]
+                                                                                                    },
+                                                                                                    {
+                                                                                                        xtype: 'container',
+                                                                                                        margin: '0 0 5 0',
+                                                                                                        layout: {
+                                                                                                            type: 'hbox',
+                                                                                                            align: 'stretch'
+                                                                                                        },
+                                                                                                        items: [
+                                                                                                            {
+                                                                                                                xtype: 'numberfield',
+                                                                                                                flex: 1.4,
+                                                                                                                itemId: 'txtLayersPerPallet',
+                                                                                                                fieldLabel: 'Layers per Pallet',
+                                                                                                                labelWidth: 125,
+                                                                                                                fieldStyle: 'text-align:right',
+                                                                                                                hideTrigger: true
+                                                                                                            },
+                                                                                                            {
+                                                                                                                xtype: 'numberfield',
+                                                                                                                flex: 1,
+                                                                                                                itemId: 'txtUnitsPerLayer',
+                                                                                                                margin: '0 0 0 5',
+                                                                                                                fieldLabel: 'Units per Layer',
+                                                                                                                labelWidth: 87,
+                                                                                                                fieldStyle: 'text-align:right',
+                                                                                                                hideTrigger: true
+                                                                                                            }
+                                                                                                        ]
+                                                                                                    },
+                                                                                                    {
+                                                                                                        xtype: 'numberfield',
+                                                                                                        itemId: 'txtStandardPalletRatio',
+                                                                                                        fieldLabel: 'Std. Pallet Ratio (%)',
+                                                                                                        labelWidth: 125,
+                                                                                                        fieldStyle: 'text-align:right',
+                                                                                                        hideTrigger: true
+                                                                                                    },
+                                                                                                    {
+                                                                                                        xtype: 'textfield',
+                                                                                                        itemId: 'txtMask1',
+                                                                                                        fieldLabel: 'Mask 1',
+                                                                                                        labelWidth: 125
+                                                                                                    },
+                                                                                                    {
+                                                                                                        xtype: 'textfield',
+                                                                                                        itemId: 'txtMask2',
+                                                                                                        fieldLabel: 'Mask 2',
+                                                                                                        labelWidth: 125
+                                                                                                    },
+                                                                                                    {
+                                                                                                        xtype: 'textfield',
+                                                                                                        itemId: 'txtMask3',
+                                                                                                        fieldLabel: 'Mask 3',
+                                                                                                        labelWidth: 125
+                                                                                                    }
+                                                                                                ]
+                                                                                            }
+                                                                                        ]
+                                                                                    }
+                                                                                ]
                                                                             }
                                                                         ]
                                                                     },
                                                                     {
                                                                         xtype: 'panel',
-                                                                        flex: 1,
-                                                                        hidden: true,
-                                                                        layout: 'fit',
-                                                                        title: 'BOM Dependencies',
-                                                                        items: [
-                                                                            {
-                                                                                xtype: 'advancefiltergrid',
-                                                                                itemId: 'grdBOM',
-                                                                                margin: -1,
-                                                                                dockedItems: [
-                                                                                    {
-                                                                                        xtype: 'toolbar',
-                                                                                        dock: 'top',
-                                                                                        itemId: 'tlbGridOptions',
-                                                                                        layout: {
-                                                                                            type: 'hbox',
-                                                                                            padding: '0 0 0 1'
-                                                                                        },
-                                                                                        items: [
-                                                                                            {
-                                                                                                xtype: 'filter1'
-                                                                                            }
-                                                                                        ]
-                                                                                    }
-                                                                                ],
-                                                                                columns: [
-                                                                                    {
-                                                                                        xtype: 'gridcolumn',
-                                                                                        itemId: 'colManufacturingUOM',
-                                                                                        dataIndex: 'string',
-                                                                                        text: 'Unit of Measure',
-                                                                                        flex: 1
-                                                                                    }
-                                                                                ],
-                                                                                viewConfig: {
-                                                                                    itemId: 'grvBOM'
-                                                                                }
-                                                                            }
-                                                                        ]
-                                                                    }
-                                                                ]
-                                                            },
-                                                            {
-                                                                xtype: 'container',
-                                                                flex: 1,
-                                                                margin: '0 0 0 5',
-                                                                layout: {
-                                                                    type: 'vbox',
-                                                                    align: 'stretch'
-                                                                },
-                                                                items: [
-                                                                    {
-                                                                        xtype: 'container',
-                                                                        flex: 1,
-                                                                        margin: '0 0 0 5',
+                                                                        bodyPadding: 5,
+                                                                        title: 'Additional Settings',
                                                                         layout: {
-                                                                            type: 'vbox',
+                                                                            type: 'hbox',
                                                                             align: 'stretch'
                                                                         },
                                                                         items: [
                                                                             {
-                                                                                xtype: 'panel',
+                                                                                xtype: 'container',
                                                                                 flex: 1,
-                                                                                height: 306,
-                                                                                bodyPadding: 7,
-                                                                                title: 'Warehouse Management',
+                                                                                margin: '0 5 0 0',
                                                                                 layout: {
                                                                                     type: 'vbox',
                                                                                     align: 'stretch'
@@ -2098,276 +2371,160 @@ Ext.define('Inventory.view.Item', {
                                                                                 items: [
                                                                                     {
                                                                                         xtype: 'textfield',
-                                                                                        itemId: 'txtGTIN',
-                                                                                        fieldLabel: 'GTIN',
+                                                                                        itemId: 'txtPackType',
+                                                                                        fieldLabel: 'Pack Type',
                                                                                         labelWidth: 125
                                                                                     },
                                                                                     {
-                                                                                        xtype: 'combobox',
-                                                                                        itemId: 'cboRotationType',
-                                                                                        fieldLabel: 'Rotation Type',
-                                                                                        labelWidth: 125,
-                                                                                        displayField: 'strDescription',
-                                                                                        valueField: 'strDescription'
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'container',
-                                                                                        margin: '0 0 5 0',
-                                                                                        layout: {
-                                                                                            type: 'hbox',
-                                                                                            align: 'stretch'
-                                                                                        },
-                                                                                        items: [
-                                                                                            {
-                                                                                                xtype: 'gridcombobox',
-                                                                                                columns: [
-                                                                                                    {
-                                                                                                        dataIndex: 'intMaterialNMFCId',
-                                                                                                        dataType: 'numeric',
-                                                                                                        text: 'Material Id',
-                                                                                                        hidden: true
-                                                                                                    },
-                                                                                                    {
-                                                                                                        dataIndex: 'strInternalCode',
-                                                                                                        dataType: 'string',
-                                                                                                        text: 'Internal Code'
-                                                                                                    },
-                                                                                                    {
-                                                                                                        dataIndex: 'strDisplayMember',
-                                                                                                        dataType: 'string',
-                                                                                                        text: 'Display Member',
-                                                                                                        flex: 2,
-                                                                                                        minWidth: 500
-                                                                                                    }
-                                                                                                ],
-                                                                                                flex: 1,
-                                                                                                itemId: 'cboNFMC',
-                                                                                                fieldLabel: 'NMFC',
-                                                                                                labelWidth: 125,
-                                                                                                displayField: 'strInternalCode',
-                                                                                                valueField: 'intMaterialNMFCId'
-                                                                                            },
-                                                                                            {
-                                                                                                xtype: 'checkboxfield',
-                                                                                                itemId: 'chkStrictFIFO',
-                                                                                                margin: '0 0 0 5',
-                                                                                                fieldLabel: 'Strict FIFO',
-                                                                                                labelWidth: 63
-                                                                                            }
-                                                                                        ]
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'container',
-                                                                                        margin: '0 0 5 0',
-                                                                                        layout: {
-                                                                                            type: 'hbox',
-                                                                                            align: 'stretch'
-                                                                                        },
-                                                                                        items: [
-                                                                                            {
-                                                                                                xtype: 'textfield',
-                                                                                                flex: 1.9,
-                                                                                                itemId: 'txtHeight',
-                                                                                                fieldLabel: 'Height',
-                                                                                                labelWidth: 125,
-                                                                                                fieldStyle: 'text-align:right'
-                                                                                            },
-                                                                                            {
-                                                                                                xtype: 'textfield',
-                                                                                                flex: 1,
-                                                                                                itemId: 'txtWidth',
-                                                                                                margin: '0 5',
-                                                                                                fieldLabel: 'Width',
-                                                                                                labelWidth: 40,
-                                                                                                fieldStyle: 'text-align:right'
-                                                                                            },
-                                                                                            {
-                                                                                                xtype: 'textfield',
-                                                                                                flex: 1,
-                                                                                                itemId: 'txtDepth',
-                                                                                                fieldLabel: 'Depth',
-                                                                                                labelWidth: 40,
-                                                                                                fieldStyle: 'text-align:right'
-                                                                                            }
-                                                                                        ]
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'container',
-                                                                                        margin: '0 0 5 0',
-                                                                                        layout: {
-                                                                                            type: 'hbox',
-                                                                                            align: 'stretch'
-                                                                                        },
-                                                                                        items: [
-                                                                                            {
-                                                                                                xtype: 'gridcombobox',
-                                                                                                columns: [
-                                                                                                    {
-                                                                                                        dataIndex: 'intUnitMeasureId',
-                                                                                                        dataType: 'numeric',
-                                                                                                        text: 'Unit Of Measure ID',
-                                                                                                        hidden: true
-                                                                                                    },
-                                                                                                    {
-                                                                                                        dataIndex: 'strUnitMeasure',
-                                                                                                        dataType: 'string',
-                                                                                                        text: 'Unit Measure',
-                                                                                                        flex: 1
-                                                                                                    },
-                                                                                                    {
-                                                                                                        dataIndex: 'strUnitType',
-                                                                                                        dataType: 'string',
-                                                                                                        text: 'Unit Type',
-                                                                                                        flex: 1
-                                                                                                    }
-                                                                                                ],
-                                                                                                flex: 1.4,
-                                                                                                itemId: 'cboDimensionUOM',
-                                                                                                fieldLabel: 'Dimension UOM',
-                                                                                                labelWidth: 125,
-                                                                                                displayField: 'strUnitMeasure',
-                                                                                                valueField: 'intUnitMeasureId'
-                                                                                            },
-                                                                                            {
-                                                                                                xtype: 'gridcombobox',
-                                                                                                columns: [
-                                                                                                    {
-                                                                                                        dataIndex: 'intUnitMeasureId',
-                                                                                                        dataType: 'numeric',
-                                                                                                        text: 'Unit Of Measure ID',
-                                                                                                        hidden: true
-                                                                                                    },
-                                                                                                    {
-                                                                                                        dataIndex: 'strUnitMeasure',
-                                                                                                        dataType: 'string',
-                                                                                                        text: 'Unit Measure',
-                                                                                                        flex: 1
-                                                                                                    },
-                                                                                                    {
-                                                                                                        dataIndex: 'strUnitType',
-                                                                                                        dataType: 'string',
-                                                                                                        text: 'Unit Type',
-                                                                                                        flex: 1
-                                                                                                    }
-                                                                                                ],
-                                                                                                flex: 1,
-                                                                                                itemId: 'cboWeightUOM',
-                                                                                                margin: '0 0 0 5',
-                                                                                                fieldLabel: 'Weight UOM',
-                                                                                                labelWidth: 87,
-                                                                                                displayField: 'strUnitMeasure',
-                                                                                                valueField: 'intUnitMeasureId'
-                                                                                            }
-                                                                                        ]
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'container',
-                                                                                        margin: '0 0 5 0',
-                                                                                        layout: {
-                                                                                            type: 'hbox',
-                                                                                            align: 'stretch'
-                                                                                        },
-                                                                                        items: [
-                                                                                            {
-                                                                                                xtype: 'numberfield',
-                                                                                                flex: 1.4,
-                                                                                                itemId: 'txtWeight',
-                                                                                                fieldLabel: 'Weight',
-                                                                                                labelWidth: 125,
-                                                                                                fieldStyle: 'text-align:right',
-                                                                                                hideTrigger: true
-                                                                                            },
-                                                                                            {
-                                                                                                xtype: 'textfield',
-                                                                                                flex: 1,
-                                                                                                itemId: 'txtMaterialPack',
-                                                                                                margin: '0 0 0 5',
-                                                                                                fieldLabel: 'Material Pack',
-                                                                                                labelWidth: 87
-                                                                                            }
-                                                                                        ]
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'container',
-                                                                                        margin: '0 0 5 0',
-                                                                                        layout: {
-                                                                                            type: 'hbox',
-                                                                                            align: 'stretch'
-                                                                                        },
-                                                                                        items: [
-                                                                                            {
-                                                                                                xtype: 'textfield',
-                                                                                                flex: 1.4,
-                                                                                                itemId: 'txtMaterialSizeCode',
-                                                                                                fieldLabel: 'Material Size Code',
-                                                                                                labelWidth: 125
-                                                                                            },
-                                                                                            {
-                                                                                                xtype: 'numberfield',
-                                                                                                flex: 1,
-                                                                                                itemId: 'txtInnerUnits',
-                                                                                                margin: '0 0 0 5',
-                                                                                                fieldLabel: 'Inner Units',
-                                                                                                labelWidth: 87,
-                                                                                                fieldStyle: 'text-align:right',
-                                                                                                hideTrigger: true
-                                                                                            }
-                                                                                        ]
-                                                                                    },
-                                                                                    {
-                                                                                        xtype: 'container',
-                                                                                        margin: '0 0 5 0',
-                                                                                        layout: {
-                                                                                            type: 'hbox',
-                                                                                            align: 'stretch'
-                                                                                        },
-                                                                                        items: [
-                                                                                            {
-                                                                                                xtype: 'numberfield',
-                                                                                                flex: 1.4,
-                                                                                                itemId: 'txtLayersPerPallet',
-                                                                                                fieldLabel: 'Layers per Pallet',
-                                                                                                labelWidth: 125,
-                                                                                                fieldStyle: 'text-align:right',
-                                                                                                hideTrigger: true
-                                                                                            },
-                                                                                            {
-                                                                                                xtype: 'numberfield',
-                                                                                                flex: 1,
-                                                                                                itemId: 'txtUnitsPerLayer',
-                                                                                                margin: '0 0 0 5',
-                                                                                                fieldLabel: 'Units per Layer',
-                                                                                                labelWidth: 87,
-                                                                                                fieldStyle: 'text-align:right',
-                                                                                                hideTrigger: true
-                                                                                            }
-                                                                                        ]
+                                                                                        xtype: 'textfield',
+                                                                                        itemId: 'txtWeightControlCode',
+                                                                                        fieldLabel: 'Weight Control Code',
+                                                                                        labelWidth: 125
                                                                                     },
                                                                                     {
                                                                                         xtype: 'numberfield',
-                                                                                        itemId: 'txtStandardPalletRatio',
-                                                                                        fieldLabel: 'Std. Pallet Ratio (%)',
+                                                                                        itemId: 'txtBlendWeight',
+                                                                                        fieldLabel: 'Blend Weight',
                                                                                         labelWidth: 125,
-                                                                                        fieldStyle: 'text-align:right',
+                                                                                        hideTrigger: true
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'numberfield',
+                                                                                        itemId: 'txtNetWeight',
+                                                                                        fieldLabel: 'Net Weight',
+                                                                                        labelWidth: 125,
+                                                                                        hideTrigger: true
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'numberfield',
+                                                                                        itemId: 'txtUnitsPerCase',
+                                                                                        fieldLabel: 'Units Per Case',
+                                                                                        labelWidth: 125,
+                                                                                        hideTrigger: true
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'numberfield',
+                                                                                        itemId: 'txtQuarantineDuration',
+                                                                                        fieldLabel: 'Quarantine Duration',
+                                                                                        labelWidth: 125,
                                                                                         hideTrigger: true
                                                                                     },
                                                                                     {
                                                                                         xtype: 'textfield',
-                                                                                        itemId: 'txtMask1',
-                                                                                        fieldLabel: 'Mask 1',
+                                                                                        itemId: 'txtOwner',
+                                                                                        fieldLabel: 'Owner',
                                                                                         labelWidth: 125
                                                                                     },
                                                                                     {
                                                                                         xtype: 'textfield',
-                                                                                        itemId: 'txtMask2',
-                                                                                        fieldLabel: 'Mask 2',
+                                                                                        itemId: 'txtCustomer',
+                                                                                        fieldLabel: 'Customer',
+                                                                                        labelWidth: 125
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'numberfield',
+                                                                                        itemId: 'txtCaseWeight',
+                                                                                        fieldLabel: 'Case Weight',
+                                                                                        labelWidth: 125,
+                                                                                        hideTrigger: true
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'textfield',
+                                                                                        itemId: 'txtWarehouseStatus',
+                                                                                        fieldLabel: 'Warehouse Status',
+                                                                                        labelWidth: 125
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'checkboxfield',
+                                                                                        itemId: 'chkKosherCertified',
+                                                                                        fieldLabel: 'Kosher Certified',
+                                                                                        labelWidth: 125
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'checkboxfield',
+                                                                                        itemId: 'chkFairTradeCompliant',
+                                                                                        fieldLabel: 'Fair Trade Compliant',
+                                                                                        labelWidth: 125
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'checkboxfield',
+                                                                                        itemId: 'chkOrganicItem',
+                                                                                        fieldLabel: 'Organic Item',
+                                                                                        labelWidth: 125
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'checkboxfield',
+                                                                                        itemId: 'chkRainForestCertified',
+                                                                                        fieldLabel: 'Rain Forest Certified',
+                                                                                        labelWidth: 125
+                                                                                    }
+                                                                                ]
+                                                                            },
+                                                                            {
+                                                                                xtype: 'container',
+                                                                                flex: 1,
+                                                                                layout: {
+                                                                                    type: 'vbox',
+                                                                                    align: 'stretch'
+                                                                                },
+                                                                                items: [
+                                                                                    {
+                                                                                        xtype: 'numberfield',
+                                                                                        itemId: 'txtRiskScore',
+                                                                                        fieldLabel: 'Risk Score',
+                                                                                        labelWidth: 125,
+                                                                                        hideTrigger: true
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'numberfield',
+                                                                                        itemId: 'txtDensity',
+                                                                                        fieldLabel: 'Density',
+                                                                                        labelWidth: 125,
+                                                                                        hideTrigger: true
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'datefield',
+                                                                                        itemId: 'dtmDateAvailable',
+                                                                                        fieldLabel: 'Date Available',
+                                                                                        labelWidth: 125
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'checkboxfield',
+                                                                                        itemId: 'chkMinorIngredient',
+                                                                                        fieldLabel: 'Minor Ingredient',
+                                                                                        labelWidth: 125
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'checkboxfield',
+                                                                                        itemId: 'chkExternalItem',
+                                                                                        fieldLabel: 'External Item',
                                                                                         labelWidth: 125
                                                                                     },
                                                                                     {
                                                                                         xtype: 'textfield',
-                                                                                        itemId: 'txtMask3',
-                                                                                        fieldLabel: 'Mask 3',
+                                                                                        itemId: 'txtExternalGroup',
+                                                                                        fieldLabel: 'External Group',
                                                                                         labelWidth: 125
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'checkboxfield',
+                                                                                        itemId: 'chkSellableItem',
+                                                                                        fieldLabel: 'Sellable Item',
+                                                                                        labelWidth: 125
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'numberfield',
+                                                                                        itemId: 'txtMinmumStockWeeks',
+                                                                                        fieldLabel: 'Minmum Stock Weeks',
+                                                                                        labelWidth: 125,
+                                                                                        hideTrigger: true
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'numberfield',
+                                                                                        itemId: 'txtFullContainerSize',
+                                                                                        fieldLabel: 'Full Container Size',
+                                                                                        labelWidth: 125,
+                                                                                        hideTrigger: true
                                                                                     }
                                                                                 ]
                                                                             }
