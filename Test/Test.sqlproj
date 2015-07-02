@@ -733,6 +733,11 @@
     <Build Include="testi21Database\Fake Data\Fake data for item uom table, kg scenario.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICGetItemsFromItemReceipt for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICGetItemsFromItemReceipt for getting data from the receipt.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptIntegrations for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptIntegrations for calling uspPOReceived.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptIntegrations for calling uspLGReceived.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptIntegrations for calling uspSCReceived.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptIntegrations for calling uspTRReceived.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

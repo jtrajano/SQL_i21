@@ -3,7 +3,7 @@ AS
 BEGIN
 	-- Arrange 
 	BEGIN 
-		DECLARE	@ysnPost BIT = 0
+		DECLARE	@ysnPost BIT = NULL 
 				,@intTransactionId NVARCHAR(40) = NULL 
 				,@intUserId  INT  = NULL 
 				,@intEntityId INT  = NULL
@@ -22,12 +22,6 @@ BEGIN
 				,@intUserId
 				,@intEntityId
 	END 
-
-	-- Assert
-	BEGIN 
-		EXEC tSQLt.AssertEqualsTable 'expectedLot', 'actualLot';
-		EXEC tSQLt.AssertEqualsTable 'expectedTransactionToReverse', 'actualTransactionToReverse';
-	END
 
 	-- Clean-up: remove the tables used in the unit test
 	IF OBJECT_ID('actual') IS NOT NULL 
