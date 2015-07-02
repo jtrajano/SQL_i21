@@ -1895,6 +1895,11 @@
     <Build Include="dbo\Functions\fnGetStartingNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryShipmentIntegrations.sql" />
     <Build Include="dbo\User Defined Types\ShipmentItemTableType.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetItemsFromItemShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspSOShipped.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGShipped.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCShipped.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRShipped.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

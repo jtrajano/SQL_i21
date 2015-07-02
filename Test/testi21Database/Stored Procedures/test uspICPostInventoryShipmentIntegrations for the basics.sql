@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryReceiptIntegrations for the basics]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryShipmentIntegrations for the basics]
 AS
 BEGIN
 	-- Arrange 
@@ -16,7 +16,7 @@ BEGIN
 		
 	-- Act
 	BEGIN 
-		EXEC dbo.uspICPostInventoryReceiptIntegrations 
+		EXEC dbo.uspICPostInventoryShipmentIntegrations 
 				@ysnPost
 				,@intTransactionId
 				,@intUserId

@@ -218,7 +218,31 @@ BEGIN
 END
 
 BEGIN
-	
+	-- Declare the constants 
+	DECLARE	-- Order Types
+			@STR_ORDER_TYPE_SALES_CONTRACT AS NVARCHAR(50) = 'Sales Contract'
+			,@STR_ORDER_TYPE_SALES_ORDER AS NVARCHAR(50) = 'Sales Order'
+			,@STR_ORDER_TYPE_TRANSFER_ORDER AS NVARCHAR(50) = 'Transfer Order'
+			,@INT_ORDER_TYPE_SALES_CONTRACT AS INT = 1
+			,@INT_ORDER_TYPE_SALES_ORDER AS INT = 2
+			,@INT_ORDER_TYPE_TRANSFER_ORDER AS INT = 3
+
+			-- Source Types
+			,@STR_SOURCE_TYPE_NONE AS NVARCHAR(50) = 'None'
+			,@STR_SOURCE_TYPE_SCALE AS NVARCHAR(50) = 'Scale'
+			,@STR_SOURCE_TYPE_INBOUND_SHIPMENT AS NVARCHAR(50) = 'Inbound Shipment'
+			,@STR_SOURCE_TYPE_TRANSPORT AS NVARCHAR(50) = 'Transport'
+
+			,@INT_SOURCE_TYPE_NONE AS INT = 0
+			,@INT_SOURCE_TYPE_SCALE AS INT = 1
+			,@INT_SOURCE_TYPE_INBOUND_SHIPMENT AS INT = 2
+			,@INT_SOURCE_TYPE_TRANSPORT AS INT = 2
+
+			-- Ownership Types
+			,@OWNERSHIP_TYPE_OWN AS INT = 1
+			,@OWNERSHIP_TYPE_STORAGE AS INT = 2
+			,@OWNERSHIP_TYPE_CONSIGNED_PURCHASE AS INT = 3
+			,@OWNERSHIP_TYPE_CONSIGNED_SALE AS INT = 4			
 
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryShipment', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryShipmentItem', @Identity = 1;	
@@ -236,18 +260,6 @@ BEGIN
 	DECLARE @intEntityId AS INT = 1;
 	DECLARE @intUserId AS INT = 1;
 
-	DECLARE @ShipmentType_SalesContract AS NVARCHAR(100) = 'Sales Contract'
-			,@ShipmentType_SalesOrder AS NVARCHAR(100) = 'Sales Order'
-			,@ShipmentType_TransferOrder AS NVARCHAR(100) = 'Transfer Order'
-
-	DECLARE @intShipmentType_SalesContract AS INT = 1
-			,@intShipmentType_SalesOrder AS INT = 2
-			,@intShipmentType_TransferOrder AS INT = 3
-
-	DECLARE @OwnershipType_Own AS INT = 1
-			,@OwnershipType_Storage AS INT = 2
-			,@OwnershipType_ConsignedPurchase AS INT = 3
-			,@OwnershipType_ConsignedSale AS INT = 4
 
 	-- Create mock data for the starting number 
 	EXEC tSQLt.FakeTable 'dbo.tblSMStartingNumber';	
@@ -278,7 +290,7 @@ BEGIN
 		
 	--------------------------------------------------------
 	-- Add INVSHIP-XXXXX1
-	-- It has no item in it. 
+	-- It has one item in it. 
 	--------------------------------------------------------
 	BEGIN
 		SET @strShipmentNumber = 'INVSHIP-XXXXX1'
@@ -289,7 +301,7 @@ BEGIN
 			strShipmentNumber
 			,dtmShipDate
 			,intOrderType
-			--,intSourceType
+			,intSourceType
 			,strReferenceNumber
 			,dtmRequestedArrivalDate
 			,intShipFromLocationId
@@ -318,8 +330,8 @@ BEGIN
 		SELECT 
 			strShipmentNumber			= @strShipmentNumber
 			,dtmShipDate				= dbo.fnRemoveTimeOnDate(@dtmDate)
-			,intOrderType				= @intShipmentType_SalesOrder
-			--,intSourceType				= 
+			,intOrderType				= @INT_ORDER_TYPE_SALES_ORDER
+			,intSourceType				= @INT_SOURCE_TYPE_NONE
 			,strReferenceNumber			= ''
 			,dtmRequestedArrivalDate	= NULL 
 			,intShipFromLocationId		= @Default_Location
@@ -344,7 +356,6 @@ BEGIN
 			,intEntityId				= 1
 			,intCreatedUserId			= 1
 			,intConcurrencyId			= 1
-
 
 		SET @intShipmentNumber = SCOPE_IDENTITY();
 
@@ -372,7 +383,7 @@ BEGIN
 				,intLineNo				= 1
 				,intItemId				= @WetGrains
 				,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
-				,intOwnershipType		= @OwnershipType_Own
+				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
 				,dblQuantity			= 1.00
 				,intItemUOMId			= @WetGrains_PoundUOM
 				,intWeightUOMId			= NULL 

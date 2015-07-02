@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE uspICPostInventoryShipmentIntegrations
-	@ysnPost BIT  = 0  
-	,@intTransactionId NVARCHAR(40) = NULL   
+	@ysnPost BIT = 0  
+	,@intTransactionId INT = NULL   
 	,@intUserId  INT  = NULL   
 	,@intEntityId INT  = NULL    
 AS  
@@ -24,10 +24,12 @@ DECLARE	-- Order Types
 		,@STR_SOURCE_TYPE_NONE AS NVARCHAR(50) = 'None'
 		,@STR_SOURCE_TYPE_SCALE AS NVARCHAR(50) = 'Scale'
 		,@STR_SOURCE_TYPE_INBOUND_SHIPMENT AS NVARCHAR(50) = 'Inbound Shipment'
+		,@STR_SOURCE_TYPE_TRANSPORT AS NVARCHAR(50) = 'Transport'
 
 		,@INT_SOURCE_TYPE_NONE AS INT = 0
 		,@INT_SOURCE_TYPE_SCALE AS INT = 1
 		,@INT_SOURCE_TYPE_INBOUND_SHIPMENT AS INT = 2
+		,@INT_SOURCE_TYPE_TRANSPORT AS INT = 3
 
 -- Get the details from the inventory receipt 
 BEGIN 
@@ -63,50 +65,51 @@ BEGIN
 		,[intSourceId]
 		,[intLineNo]
 	)
-	EXEC dbo.uspICGetItemsFromItemReceipt
-		@intReceiptId = @intTransactionId
+	EXEC dbo.uspICGetItemsFromItemShipment
+		@intShipmentId = @intTransactionId
 
+	-- Change quantity to negative if doing a post. Otherwise, it should be the same value if doing an unpost. 
 	UPDATE @ItemsFromInventoryShipment
 	SET dblQty = dblQty * CASE WHEN @ysnPost = 1 THEN -1 ELSE 1 END 
 END
 
--- Get the receipt-type and source-type from tblICInventoryReceipt
+-- Get the Order-type and Source-type from tblICInventoryShipment
 BEGIN 
-	DECLARE @ReceiptType AS NVARCHAR(50) 
+	DECLARE @OrderType AS INT 
 			,@SourceType AS INT 
 	
-	SELECT	@ReceiptType = strReceiptType
+	SELECT	@OrderType = intOrderType
 			,@SourceType = intSourceType
-	FROM	tblICInventoryReceipt 
-	WHERE	intInventoryReceiptId = @intTransactionId 
+	FROM	tblICInventoryShipment
+	WHERE	intInventoryShipmentId = @intTransactionId 
 END 
 
--- Update the received quantities back to the Purchase Order
-IF	@ReceiptType = @RECEIPT_TYPE_PURCHASE_ORDER 
-	AND ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_NONE
+-- Update the shipped quantities back to the Sales Order
+IF	@OrderType = @INT_ORDER_TYPE_SALES_ORDER 
+	AND ISNULL(@SourceType, @INT_SOURCE_TYPE_NONE) = @INT_SOURCE_TYPE_NONE
 BEGIN 
-	EXEC dbo.[uspPOReceived] @ItemsFromInventoryReceipt
+	EXEC dbo.uspSOShipped @ItemsFromInventoryShipment
 	GOTO _Exit;
 END
 
--- Update the received quantities back to Inbound Shipment 
-IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_INBOUND_SHIPMENT
+-- Update the shipped quantities back to Inbound Shipment 
+IF	ISNULL(@SourceType, @INT_SOURCE_TYPE_NONE) = @INT_SOURCE_TYPE_INBOUND_SHIPMENT
 BEGIN 
-	EXEC dbo.uspLGReceived @ItemsFromInventoryReceipt
+	EXEC dbo.uspLGShipped @ItemsFromInventoryShipment
 	GOTO _Exit;
 END
 
--- Update the received quantities back to a Scale Ticket
-IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_SCALE
+-- Update the shipped quantities back to a Scale Ticket
+IF	ISNULL(@SourceType, @INT_SOURCE_TYPE_NONE) = @INT_SOURCE_TYPE_SCALE
 BEGIN 
-	EXEC dbo.uspSCReceived @ItemsFromInventoryReceipt
+	EXEC dbo.uspSCShipped @ItemsFromInventoryShipment
 	GOTO _Exit;
 END
 
--- Update the received quantities back to Transport Order
-IF	ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_TRANSPORT
+-- Update the shipped quantities back to Transport
+IF	ISNULL(@SourceType, @INT_SOURCE_TYPE_NONE) = @INT_SOURCE_TYPE_TRANSPORT
 BEGIN 
-	EXEC dbo.uspTRReceived @ItemsFromInventoryReceipt
+	EXEC dbo.uspTRShipped @ItemsFromInventoryShipment
 	GOTO _Exit;
 END
 

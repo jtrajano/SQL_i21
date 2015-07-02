@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE uspICPostInventoryReceiptIntegrations
 	@ysnPost BIT  = 0  
-	,@intTransactionId NVARCHAR(40) = NULL   
+	,@intTransactionId INT = NULL   
 	,@intUserId  INT  = NULL   
 	,@intEntityId INT  = NULL    
 AS  

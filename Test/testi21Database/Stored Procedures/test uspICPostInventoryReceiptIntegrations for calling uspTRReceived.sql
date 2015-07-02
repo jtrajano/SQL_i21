@@ -34,7 +34,7 @@ BEGIN
 	-- Arrange 
 	BEGIN 
 		DECLARE	@ysnPost BIT = 1 
-				,@intTransactionId NVARCHAR(40) = 1
+				,@intTransactionId INT = 1
 				,@intUserId  INT  = 1
 				,@intEntityId INT  = 1
 	END 

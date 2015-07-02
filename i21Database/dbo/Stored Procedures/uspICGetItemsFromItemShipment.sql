@@ -37,7 +37,7 @@ SELECT
 		,[intOwnershipType]				= ShipmentItem.intOwnershipType
 		,[intOrderId]					= ShipmentItem.intOrderId
 		,[intSourceId]					= ShipmentItem.intSourceId
-		,[intLineNo]					= ShipmentItem.intLineNo
+		,[intLineNo]					= ISNULL(ShipmentItem.intLineNo, 0)
 FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem
 			ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 		INNER JOIN dbo.tblICItemLocation ItemLocation
