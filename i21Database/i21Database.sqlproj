@@ -1848,7 +1848,6 @@
     <Build Include="dbo\Stored Procedures\uspMFGetRecipeItemByProduct.sql" />
     <Build Include="dbo\Tables\tblARProductType.sql" />
     <Build Include="dbo\Tables\tblARProductTypeDetail.sql" />
-    <Build Include="dbo\Tables\tblEntityFarm.sql" />
     <Build Include="dbo\Stored Procedures\uspPOUpdateAddressInfo.sql" />
     <Build Include="dbo\Stored Procedures\uspAPBillUpdateAddressInfo.sql" />
     <Build Include="dbo\Stored Procedures\uspGLReverseJournalEntry.sql" />
@@ -1893,7 +1892,6 @@
     <Build Include="dbo\Stored Procedures\uspTRProcessToInventoryReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddItemReceipt.sql" />
     <Build Include="dbo\User Defined Types\ReceiptStagingTable.sql" />
-    <Build Include="dbo\Functions\fnGetStartingNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryShipmentIntegrations.sql" />
     <Build Include="dbo\User Defined Types\ShipmentItemTableType.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemsFromItemShipment.sql" />
@@ -1901,6 +1899,7 @@
     <Build Include="dbo\Stored Procedures\uspLGShipped.sql" />
     <Build Include="dbo\Stored Procedures\uspSCShipped.sql" />
     <Build Include="dbo\Stored Procedures\uspTRShipped.sql" />
+    <Build Include="dbo\Tables\tblEntityFarm.sql" />
     <Build Include="dbo\Views\vyuICGetCompactItem.sql" />
   </ItemGroup>
   <ItemGroup>

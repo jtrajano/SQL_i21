@@ -10,9 +10,9 @@ BEGIN TRY
 		,@intWorkOrderId INT
 		,@ysnNegativeQtyAllowed BIT
 		,@intUserId INT
-		,@dtmCurrentDateTime datetime
+		,@dtmCurrentDateTime DATETIME
 
-	Select @dtmCurrentDateTime=Getdate()
+	SELECT @dtmCurrentDateTime = Getdate()
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -38,28 +38,54 @@ BEGIN TRY
 		,@ysnYieldAdjustmentAllowed = @ysnNegativeQtyAllowed
 		,@intUserId = @intUserId
 
-	Declare @ConsumptionReversal table(RecordKey int identity(1,1),intWorkOrderInputLotId int)
+	DECLARE @ConsumptionReversal TABLE (
+		RecordKey INT identity(1, 1)
+		,intWorkOrderInputLotId INT
+		)
 
-	Insert into @ConsumptionReversal(intWorkOrderInputLotId)
-	Select IL.intWorkOrderInputLotId 
-	From dbo.tblMFWorkOrderInputLot IL
-	Where IL.intWorkOrderId=@intWorkOrderId AND ysnConsumptionReversed=1
+	INSERT INTO @ConsumptionReversal (intWorkOrderInputLotId)
+	SELECT IL.intWorkOrderInputLotId
+	FROM dbo.tblMFWorkOrderInputLot IL
+	WHERE IL.intWorkOrderId = @intWorkOrderId
+		AND ysnConsumptionReversed = 1
 
-	Declare @RecordKey int,@intWorkOrderInputLotId int,@intLotId int,@strNewLotNumber nvarchar(50),@intNewLocationId int,@intNewSubLocationId int,@intNewStorageLocationId int
-			,@dblNewWeight numeric(18,6),@intNewItemUOMId int,@dblWeightPerQty numeric(18,6),@dblAdjustByQuantity numeric(18,6),@intInventoryAdjustmentId int,@intItemId int
-			,@intLocationId int,@intRecipeId int,@intStorageLocationId int,@intInputItemId int,@strLotNumber nvarchar(50),@intSubLocationId int,@intConsumptionMethodId int
+	DECLARE @RecordKey INT
+		,@intWorkOrderInputLotId INT
+		,@intLotId INT
+		,@strNewLotNumber NVARCHAR(50)
+		,@intNewLocationId INT
+		,@intNewSubLocationId INT
+		,@intNewStorageLocationId INT
+		,@dblNewWeight NUMERIC(18, 6)
+		,@intNewItemUOMId INT
+		,@dblWeightPerQty NUMERIC(18, 6)
+		,@dblAdjustByQuantity NUMERIC(18, 6)
+		,@intInventoryAdjustmentId INT
+		,@intItemId INT
+		,@intLocationId INT
+		,@intRecipeId INT
+		,@intStorageLocationId INT
+		,@intInputItemId INT
+		,@strLotNumber NVARCHAR(50)
+		,@intSubLocationId INT
+		,@intConsumptionMethodId INT
+		,@intWeightUOMId INT
 
-	Select @RecordKey=MIN(RecordKey) from @ConsumptionReversal
-	While @RecordKey is not null
-	Begin
-		Select @intWorkOrderInputLotId=intWorkOrderInputLotId from @ConsumptionReversal Where RecordKey=@RecordKey
+	SELECT @RecordKey = MIN(RecordKey)
+	FROM @ConsumptionReversal
 
-		Select @intLotId=intLotId,
-			@intInputItemId=intItemId,
-			@dblNewWeight=dblQuantity,
-			@intNewItemUOMId=intItemUOMId
-		From tblMFWorkOrderInputLot
-		Where intWorkOrderInputLotId=@intWorkOrderInputLotId
+	WHILE @RecordKey IS NOT NULL
+	BEGIN
+		SELECT @intWorkOrderInputLotId = intWorkOrderInputLotId
+		FROM @ConsumptionReversal
+		WHERE RecordKey = @RecordKey
+
+		SELECT @intLotId = intLotId
+			,@intInputItemId = intItemId
+			,@dblNewWeight = dblQuantity
+			,@intNewItemUOMId = intItemUOMId
+		FROM tblMFWorkOrderInputLot
+		WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 
 		SELECT @intItemId = intItemId
 			,@intLocationId = intLocationId
@@ -69,48 +95,62 @@ BEGIN TRY
 		SELECT @intRecipeId = intRecipeId
 		FROM dbo.tblMFRecipe a
 		WHERE a.intItemId = @intItemId
-		AND a.intLocationId = @intLocationId
-		AND ysnActive = 1
+			AND a.intLocationId = @intLocationId
+			AND ysnActive = 1
 
-		SELECT @intStorageLocationId=ri.intStorageLocationId,
-				@intConsumptionMethodId=intConsumptionMethodId
+		SELECT @intStorageLocationId = ri.intStorageLocationId
+			,@intConsumptionMethodId = intConsumptionMethodId
 		FROM dbo.tblMFRecipeItem ri
 		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
-		WHERE ri.intRecipeId = @intRecipeId and ri.intItemId =@intInputItemId 
-		AND ri.intRecipeItemTypeId = 1
+		WHERE ri.intRecipeId = @intRecipeId
+			AND ri.intItemId = @intInputItemId
+			AND ri.intRecipeItemTypeId = 1
 
-		Select @strNewLotNumber=strLotNumber,
-			@intNewLocationId=intLocationId,
-			@intNewSubLocationId=intSubLocationId,
-			@intNewStorageLocationId=intStorageLocationId,
-			@dblWeightPerQty=dblWeightPerQty
-		From dbo.tblICLot 
-		Where intLotId=@intLotId
+		SELECT @strNewLotNumber = strLotNumber
+			,@intNewLocationId = intLocationId
+			,@intNewSubLocationId = intSubLocationId
+			,@intNewStorageLocationId = intStorageLocationId
+			,@dblWeightPerQty = dblWeightPerQty
+		FROM dbo.tblICLot
+		WHERE intLotId = @intLotId
 
-		Select 
-			@strLotNumber=L.strLotNumber,
-			@intLocationId=L.intLocationId,
-			@intSubLocationId=L.intSubLocationId,
-			@intStorageLocationId=L.intStorageLocationId
+		SELECT @strLotNumber = L.strLotNumber
+			,@intLocationId = L.intLocationId
+			,@intSubLocationId = L.intSubLocationId
+			,@intStorageLocationId = L.intStorageLocationId
+			,@intWeightUOMId = L.intWeightUOMId
 		FROM dbo.tblICLot L
-		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId =L.intStorageLocationId  and SL.ysnAllowConsume =1
+		JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
+			AND SL.ysnAllowConsume = 1
 		WHERE L.intItemId = @intInputItemId
-			AND L.intLocationId=@intLocationId
-			AND L.intLotStatusId=1
+			AND L.intLocationId = @intLocationId
+			AND L.intLotStatusId = 1
 			AND dtmExpiryDate >= @dtmCurrentDateTime
 			AND L.intStorageLocationId = (
 				CASE 
 					WHEN @intStorageLocationId IS NULL
 						THEN L.intStorageLocationId
-					ELSE (Case When @intConsumptionMethodId=2 Then @intStorageLocationId Else L.intStorageLocationId End)--By location, then apply location filter
+					ELSE (
+							CASE 
+								WHEN @intConsumptionMethodId = 2
+									THEN @intStorageLocationId
+								ELSE L.intStorageLocationId
+								END
+							) --By location, then apply location filter
 					END
 				)
 			AND L.dblQty > 0
 		ORDER BY L.dtmDateCreated ASC
 
-		Select @dblAdjustByQuantity = -@dblNewWeight/(Case When @dblWeightPerQty=0 Then 1 Else @dblWeightPerQty End)
+		SELECT @dblAdjustByQuantity = - @dblNewWeight / (
+				CASE 
+					WHEN @intWeightUOMId IS NULL
+						THEN 1
+					ELSE @dblWeightPerQty
+					END
+				)
 
-		EXEC [uspICInventoryAdjustment_CreatePostSplitLot]
+		EXEC uspICInventoryAdjustment_CreatePostLotMove
 			-- Parameters for filtering:
 			@intItemId = @intInputItemId
 			,@dtmDate = @dtmCurrentDateTime
@@ -123,20 +163,17 @@ BEGIN TRY
 			,@intNewSubLocationId = @intNewSubLocationId
 			,@intNewStorageLocationId = @intNewStorageLocationId
 			,@strNewLotNumber = @strNewLotNumber
-			,@dblAdjustByQuantity = @dblAdjustByQuantity
-			,@dblNewSplitLotQuantity = 0
-			,@dblNewWeight = @dblNewWeight
-			,@intNewItemUOMId = @intNewItemUOMId
-			,@intNewWeightUOMId = @intNewItemUOMId
-			,@dblNewUnitCost = NULL
+			,@dblMoveQty = @dblAdjustByQuantity
 			-- Parameters used for linking or FK (foreign key) relationships
 			,@intSourceId = 1
 			,@intSourceTransactionTypeId = 8
 			,@intUserId = @intUserId
 			,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 
-		Select @RecordKey=MIN(RecordKey) from @ConsumptionReversal Where RecordKey>@RecordKey
-	End	
+		SELECT @RecordKey = MIN(RecordKey)
+		FROM @ConsumptionReversal
+		WHERE RecordKey > @RecordKey
+	END
 
 	EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
 		,@dblProduceQty = @dblProduceQty
@@ -150,7 +187,7 @@ BEGIN TRY
 		,@intUserId = @intUserId
 		,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
 		,@strRetBatchId = @strRetBatchId OUTPUT
-		,@ysnPostConsumption=1
+		,@ysnPostConsumption = 1
 
 	EXEC dbo.uspMFCalculateYield @intWorkOrderId = @intWorkOrderId
 		,@ysnYieldAdjustmentAllowed = @ysnNegativeQtyAllowed
