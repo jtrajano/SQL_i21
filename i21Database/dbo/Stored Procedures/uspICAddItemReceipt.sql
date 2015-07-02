@@ -11,6 +11,42 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @StartingNumberId_InventoryReceipt AS INT = 23;
+DECLARE @total as INT;
+DECLARE @incval as INT;
+DECLARE @ReceiptNumber as nvarchar(50);
+DECLARE @temp TABLE
+    (
+	intId INT IDENTITY PRIMARY KEY CLUSTERED,
+    Vendor int,
+    BillOfLadding nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+    ReceiptNumber nvarchar(50) null
+    )
+
+insert into @temp(Vendor ,
+				  BillOfLadding,
+				  ReceiptNumber 
+				  )
+		select intEntityVendorId,strBillOfLadding,null from @ReceiptEntries RE
+				       group by RE.intEntityVendorId,RE.strBillOfLadding;
+
+select @total = count(*) from @temp;
+set @incval = 1 
+WHILE @incval <=@total 
+BEGIN
+   EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryReceipt, @ReceiptNumber OUTPUT 
+
+   IF @ReceiptNumber IS NULL 
+   BEGIN 
+	-- Raise the error:
+	-- Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.
+	   RAISERROR(50030, 11, 1);
+	   RETURN;
+   END 
+   update @temp 
+       set ReceiptNumber = @ReceiptNumber
+         where intId = @incval 
+   SET @incval = @incval + 1;
+END;
 
 -- Insert the Inventory Receipt header 
 INSERT INTO dbo.tblICInventoryReceipt (
@@ -46,7 +82,7 @@ INSERT INTO dbo.tblICInventoryReceipt (
 		,intCreatedUserId
 		,ysnPosted
 )
-SELECT 	 strReceiptNumber       = 1
+SELECT 	 strReceiptNumber       = min(TE.ReceiptNumber)
 		,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(GETDATE())
 		,intEntityVendorId		= RE.intEntityVendorId
 		,strReceiptType			= min(RE.strReceiptType)
@@ -78,6 +114,7 @@ SELECT 	 strReceiptNumber       = 1
 		,intCreatedUserId		= @intUserId
 		,ysnPosted				= 0
 FROM	@ReceiptEntries RE
+        JOIN @temp TE on TE.Vendor = RE.intEntityVendorId and TE.BillOfLadding = RE.strBillOfLadding		           
         group by  RE.intEntityVendorId,RE.strBillOfLadding
 
 -- Get the identity value from tblICInventoryReceipt to check if the insert was with no errors 
