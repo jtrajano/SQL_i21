@@ -18,7 +18,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 {dataIndex: 'strTracking', text: 'Inv Valuation', flex: 1, dataType: 'string', minWidth: 150},
                 {dataIndex: 'strLotTracking', text: 'Lot Tracking', flex: 1, dataType: 'string', minWidth: 150},
                 {dataIndex: 'strManufacturer', text: 'Manufacturer', flex: 1, dataType: 'string', minWidth: 150},
-                {dataIndex: 'strBrand', text: 'Brand', flex: 1, dataType: 'string', minWidth: 150},
+                {dataIndex: 'strBrandCode', text: 'Brand', flex: 1, dataType: 'string', minWidth: 150},
                 {dataIndex: 'strModelNo', text: 'Model No', flex: 1, dataType: 'string', minWidth: 150}
             ]
         },

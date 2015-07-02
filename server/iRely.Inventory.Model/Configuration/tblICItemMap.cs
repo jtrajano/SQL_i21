@@ -204,6 +204,43 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class vyuICGetCompactItemMap : EntityTypeConfiguration<vyuICGetCompactItem>
+    {
+        public vyuICGetCompactItemMap()
+        {
+            // Primary Key
+            this.HasKey(p => p.intItemId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetCompactItem");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.strType).HasColumnName("strType");
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.strManufacturer).HasColumnName("strManufacturer");
+            this.Property(t => t.strBrandCode).HasColumnName("strBrandCode");
+            this.Property(t => t.strBrandName).HasColumnName("strBrandName");
+            this.Property(t => t.strStatus).HasColumnName("strStatus");
+            this.Property(t => t.strModelNo).HasColumnName("strModelNo");
+            this.Property(t => t.strTracking).HasColumnName("strTracking");
+            this.Property(t => t.strLotTracking).HasColumnName("strLotTracking");
+            this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");
+            this.Property(t => t.strCommodity).HasColumnName("strCommodity");
+            this.Property(t => t.intCategoryId).HasColumnName("intCategoryId");
+            this.Property(t => t.strCategory).HasColumnName("strCategory");
+            this.Property(t => t.ysnInventoryCost).HasColumnName("ysnInventoryCost");
+            this.Property(t => t.ysnAccrue).HasColumnName("ysnAccrue");
+            this.Property(t => t.ysnMTM).HasColumnName("ysnMTM");
+            this.Property(t => t.ysnPrice).HasColumnName("ysnPrice");
+            this.Property(t => t.strCostMethod).HasColumnName("strCostMethod");
+            this.Property(t => t.intOnCostTypeId).HasColumnName("intOnCostTypeId");
+            this.Property(t => t.strOnCostType).HasColumnName("strOnCostType");
+            this.Property(t => t.dblAmount).HasColumnName("dblAmount").HasPrecision(18, 6);
+            this.Property(t => t.intCostUOMId).HasColumnName("intCostUOMId");
+            this.Property(t => t.strCostUOM).HasColumnName("strCostUOM");
+        }
+    }
+
     public class vyuICGetItemCommodityMap : EntityTypeConfiguration<vyuICGetItemCommodity>
     {
         public vyuICGetItemCommodityMap()

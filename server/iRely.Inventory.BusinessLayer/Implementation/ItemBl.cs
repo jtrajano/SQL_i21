@@ -61,22 +61,7 @@ namespace iRely.Inventory.BusinessLayer
 
         public override async Task<SearchResult> Search(GetParameter param)
         {
-            var query = _db.GetQuery<tblICItem>()
-               .Include(p => p.tblICBrand)
-               .Include(p => p.tblICManufacturer)
-               .Select(p => new ItemVM
-               {
-                   intItemId = p.intItemId,
-                   strItemNo = p.strItemNo,
-                   strType = p.strType,
-                   strDescription = p.strDescription,
-                   strStatus = p.strStatus,
-                   strModelNo = p.strModelNo,
-                   strLotTracking = p.strLotTracking,
-                   strBrand = p.tblICBrand.strBrandCode,
-                   strManufacturer = p.tblICManufacturer.strManufacturer,
-                   strTracking = p.strInventoryTracking
-               })
+            var query = _db.GetQuery<vyuICGetCompactItem>()
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
 
@@ -95,21 +80,7 @@ namespace iRely.Inventory.BusinessLayer
         /// <returns></returns>
         public async Task<SearchResult> GetCompactItems(GetParameter param)
         {
-            var query = _db.GetQuery<tblICItem>()
-                .Include(p => p.tblICBrand)
-                .Include(p => p.tblICManufacturer)
-                .Select(p => new ItemVM {
-                    intItemId = p.intItemId,
-                    strItemNo = p.strItemNo,
-                    strType = p.strType,
-                    strDescription = p.strDescription,
-                    strStatus = p.strStatus,
-                    strModelNo = p.strModelNo,
-                    strLotTracking = p.strLotTracking,
-                    strBrand = p.tblICBrand.strBrandCode,
-                    strManufacturer = p.tblICManufacturer.strManufacturer,
-                    strTracking = p.strInventoryTracking
-                })
+            var query = _db.GetQuery<vyuICGetCompactItem>()
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
 
@@ -127,22 +98,7 @@ namespace iRely.Inventory.BusinessLayer
         /// <returns></returns>
         public async Task<SearchResult> GetAssemblyComponents(GetParameter param)
         {
-            var query = _db.GetQuery<tblICItem>()
-                .Include(p => p.tblICBrand)
-                .Include(p => p.tblICManufacturer)
-                .Select(p => new ItemVM
-                {
-                    intItemId = p.intItemId,
-                    strItemNo = p.strItemNo,
-                    strType = p.strType,
-                    strDescription = p.strDescription,
-                    strStatus = p.strStatus,
-                    strModelNo = p.strModelNo,
-                    strLotTracking = p.strLotTracking,
-                    strBrand = p.tblICBrand.strBrandCode,
-                    strManufacturer = p.tblICManufacturer.strManufacturer,
-                    strTracking = p.strInventoryTracking
-                })
+            var query = _db.GetQuery<vyuICGetCompactItem>()
                 .Where(p => p.strType == "Inventory" || p.strType == "Raw Material" || p.strType == "Finished Good")
                 .Filter(param, true);
             var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
@@ -195,15 +151,6 @@ namespace iRely.Inventory.BusinessLayer
                 data = data.AsQueryable(),
                 total = await query.CountAsync()
             };
-
-            //var query = _db.GetQuery<vyuICGetItemStock>().Filter(param, true);
-            //var data = await query.ExecuteProjection(param, "intItemId").ToListAsync();
-
-            //return new SearchResult()
-            //{
-            //    data = data.AsQueryable(),
-            //    total = await query.CountAsync()
-            //};
         }
 
 

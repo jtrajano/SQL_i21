@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets0ec5efc1d6d34f8302e48503414c7245853cd57b36f6ec06aae7c95ccfac1d5a))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets689fbedca44f843a63370ab020a75ec84379ebe36423d0e499bf7e8514a7ce0e))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets0ec5efc1d6d34f8302e48503414c7245853cd57b36f6ec06aae7c95ccfac1d5a : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets689fbedca44f843a63370ab020a75ec84379ebe36423d0e499bf7e8514a7ce0e : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "0ec5efc1d6d34f8302e48503414c7245853cd57b36f6ec06aae7c95ccfac1d5a"; }
+            get { return "689fbedca44f843a63370ab020a75ec84379ebe36423d0e499bf7e8514a7ce0e"; }
         }
 
         /// <summary>
@@ -1332,24 +1332,34 @@ namespace Edm_EntityMappingGeneratedViews
                 return GetView256();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetItemCommodity")
+            if (extentName == "CodeFirstDatabase.vyuICGetCompactItem")
             {
                 return GetView257();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetItemCommodities")
+            if (extentName == "InventoryEntities.vyuICGetCompactItems")
             {
                 return GetView258();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetOtherCharges")
+            if (extentName == "CodeFirstDatabase.vyuICGetItemCommodity")
             {
                 return GetView259();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetOtherCharges")
+            if (extentName == "InventoryEntities.vyuICGetItemCommodities")
             {
                 return GetView260();
+            }
+
+            if (extentName == "CodeFirstDatabase.vyuICGetOtherCharges")
+            {
+                return GetView261();
+            }
+
+            if (extentName == "InventoryEntities.vyuICGetOtherCharges")
+            {
+                return GetView262();
             }
 
             return null;
@@ -9000,10 +9010,92 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for CodeFirstDatabase.vyuICGetItemCommodity.
+        /// Gets the view for CodeFirstDatabase.vyuICGetCompactItem.
         /// </summary>
         /// <returns>The mapping view.</returns>
         private static DbMappingView GetView257()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetCompactItem
+        [CodeFirstDatabaseSchema.vyuICGetCompactItem](T1.vyuICGetCompactItem_intItemId, T1.vyuICGetCompactItem_strItemNo, T1.vyuICGetCompactItem_strType, T1.vyuICGetCompactItem_strDescription, T1.vyuICGetCompactItem_strManufacturer, T1.vyuICGetCompactItem_strBrandCode, T1.vyuICGetCompactItem_strBrandName, T1.vyuICGetCompactItem_strStatus, T1.vyuICGetCompactItem_strModelNo, T1.vyuICGetCompactItem_strTracking, T1.vyuICGetCompactItem_strLotTracking, T1.vyuICGetCompactItem_intCommodityId, T1.vyuICGetCompactItem_strCommodity, T1.vyuICGetCompactItem_intCategoryId, T1.vyuICGetCompactItem_strCategory, T1.vyuICGetCompactItem_ysnInventoryCost, T1.vyuICGetCompactItem_ysnAccrue, T1.vyuICGetCompactItem_ysnMTM, T1.vyuICGetCompactItem_ysnPrice, T1.vyuICGetCompactItem_strCostMethod, T1.vyuICGetCompactItem_intOnCostTypeId, T1.vyuICGetCompactItem_strOnCostType, T1.vyuICGetCompactItem_dblAmount, T1.vyuICGetCompactItem_intCostUOMId, T1.vyuICGetCompactItem_strCostUOM)
+    FROM (
+        SELECT 
+            T.intItemId AS vyuICGetCompactItem_intItemId, 
+            T.strItemNo AS vyuICGetCompactItem_strItemNo, 
+            T.strType AS vyuICGetCompactItem_strType, 
+            T.strDescription AS vyuICGetCompactItem_strDescription, 
+            T.strManufacturer AS vyuICGetCompactItem_strManufacturer, 
+            T.strBrandCode AS vyuICGetCompactItem_strBrandCode, 
+            T.strBrandName AS vyuICGetCompactItem_strBrandName, 
+            T.strStatus AS vyuICGetCompactItem_strStatus, 
+            T.strModelNo AS vyuICGetCompactItem_strModelNo, 
+            T.strTracking AS vyuICGetCompactItem_strTracking, 
+            T.strLotTracking AS vyuICGetCompactItem_strLotTracking, 
+            T.intCommodityId AS vyuICGetCompactItem_intCommodityId, 
+            T.strCommodity AS vyuICGetCompactItem_strCommodity, 
+            T.intCategoryId AS vyuICGetCompactItem_intCategoryId, 
+            T.strCategory AS vyuICGetCompactItem_strCategory, 
+            T.ysnInventoryCost AS vyuICGetCompactItem_ysnInventoryCost, 
+            T.ysnAccrue AS vyuICGetCompactItem_ysnAccrue, 
+            T.ysnMTM AS vyuICGetCompactItem_ysnMTM, 
+            T.ysnPrice AS vyuICGetCompactItem_ysnPrice, 
+            T.strCostMethod AS vyuICGetCompactItem_strCostMethod, 
+            T.intOnCostTypeId AS vyuICGetCompactItem_intOnCostTypeId, 
+            T.strOnCostType AS vyuICGetCompactItem_strOnCostType, 
+            T.dblAmount AS vyuICGetCompactItem_dblAmount, 
+            T.intCostUOMId AS vyuICGetCompactItem_intCostUOMId, 
+            T.strCostUOM AS vyuICGetCompactItem_strCostUOM, 
+            True AS _from0
+        FROM InventoryEntities.vyuICGetCompactItems AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for InventoryEntities.vyuICGetCompactItems.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView258()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetCompactItems
+        [iRely.Inventory.Model.vyuICGetCompactItem](T1.vyuICGetCompactItem_intItemId, T1.vyuICGetCompactItem_strItemNo, T1.vyuICGetCompactItem_strType, T1.vyuICGetCompactItem_strDescription, T1.vyuICGetCompactItem_strManufacturer, T1.vyuICGetCompactItem_strBrandCode, T1.vyuICGetCompactItem_strBrandName, T1.vyuICGetCompactItem_strStatus, T1.vyuICGetCompactItem_strModelNo, T1.vyuICGetCompactItem_strTracking, T1.vyuICGetCompactItem_strLotTracking, T1.vyuICGetCompactItem_intCommodityId, T1.vyuICGetCompactItem_strCommodity, T1.vyuICGetCompactItem_intCategoryId, T1.vyuICGetCompactItem_strCategory, T1.vyuICGetCompactItem_ysnInventoryCost, T1.vyuICGetCompactItem_ysnAccrue, T1.vyuICGetCompactItem_ysnMTM, T1.vyuICGetCompactItem_ysnPrice, T1.vyuICGetCompactItem_strCostMethod, T1.vyuICGetCompactItem_intOnCostTypeId, T1.vyuICGetCompactItem_strOnCostType, T1.vyuICGetCompactItem_dblAmount, T1.vyuICGetCompactItem_intCostUOMId, T1.vyuICGetCompactItem_strCostUOM)
+    FROM (
+        SELECT 
+            T.intItemId AS vyuICGetCompactItem_intItemId, 
+            T.strItemNo AS vyuICGetCompactItem_strItemNo, 
+            T.strType AS vyuICGetCompactItem_strType, 
+            T.strDescription AS vyuICGetCompactItem_strDescription, 
+            T.strManufacturer AS vyuICGetCompactItem_strManufacturer, 
+            T.strBrandCode AS vyuICGetCompactItem_strBrandCode, 
+            T.strBrandName AS vyuICGetCompactItem_strBrandName, 
+            T.strStatus AS vyuICGetCompactItem_strStatus, 
+            T.strModelNo AS vyuICGetCompactItem_strModelNo, 
+            T.strTracking AS vyuICGetCompactItem_strTracking, 
+            T.strLotTracking AS vyuICGetCompactItem_strLotTracking, 
+            T.intCommodityId AS vyuICGetCompactItem_intCommodityId, 
+            T.strCommodity AS vyuICGetCompactItem_strCommodity, 
+            T.intCategoryId AS vyuICGetCompactItem_intCategoryId, 
+            T.strCategory AS vyuICGetCompactItem_strCategory, 
+            T.ysnInventoryCost AS vyuICGetCompactItem_ysnInventoryCost, 
+            T.ysnAccrue AS vyuICGetCompactItem_ysnAccrue, 
+            T.ysnMTM AS vyuICGetCompactItem_ysnMTM, 
+            T.ysnPrice AS vyuICGetCompactItem_ysnPrice, 
+            T.strCostMethod AS vyuICGetCompactItem_strCostMethod, 
+            T.intOnCostTypeId AS vyuICGetCompactItem_intOnCostTypeId, 
+            T.strOnCostType AS vyuICGetCompactItem_strOnCostType, 
+            T.dblAmount AS vyuICGetCompactItem_dblAmount, 
+            T.intCostUOMId AS vyuICGetCompactItem_intCostUOMId, 
+            T.strCostUOM AS vyuICGetCompactItem_strCostUOM, 
+            True AS _from0
+        FROM CodeFirstDatabase.vyuICGetCompactItem AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for CodeFirstDatabase.vyuICGetItemCommodity.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView259()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemCommodity
@@ -9049,7 +9141,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetItemCommodities.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView258()
+        private static DbMappingView GetView260()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemCommodities
@@ -9095,7 +9187,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetOtherCharges.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView259()
+        private static DbMappingView GetView261()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetOtherCharges
@@ -9125,7 +9217,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetOtherCharges.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView260()
+        private static DbMappingView GetView262()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetOtherCharges

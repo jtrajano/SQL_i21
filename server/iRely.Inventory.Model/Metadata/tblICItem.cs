@@ -217,21 +217,33 @@ namespace iRely.Inventory.Model
                 
     }
 
-    public class ItemVM : BaseEntity
+    public class vyuICGetCompactItem
     {
-        [Key]
         public int intItemId { get; set; }
         public string strItemNo { get; set; }
         public string strType { get; set; }
         public string strDescription { get; set; }
         public string strManufacturer { get; set; }
-        public string strBrand { get; set; }
+        public string strBrandCode { get; set; }
+        public string strBrandName { get; set; }
         public string strStatus { get; set; }
         public string strModelNo { get; set; }
         public string strTracking { get; set; }
         public string strLotTracking { get; set; }
         public int? intCommodityId { get; set; }
         public string strCommodity { get; set; }
+        public int? intCategoryId { get; set; }
+        public string strCategory { get; set; }
+        public bool? ysnInventoryCost { get; set; }
+        public bool? ysnAccrue { get; set; }
+        public bool? ysnMTM { get; set; }
+        public bool? ysnPrice { get; set; }
+        public string strCostMethod { get; set; }
+        public int? intOnCostTypeId { get; set; }
+        public string strOnCostType { get; set; }
+        public decimal? dblAmount { get; set; }
+        public int? intCostUOMId { get; set; }
+        public string strCostUOM { get; set; }
     }
 
     public class vyuICGetItemCommodity
