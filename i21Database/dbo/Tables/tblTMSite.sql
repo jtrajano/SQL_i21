@@ -78,6 +78,7 @@
     [intDeliveryTermID]           INT             NULL,
     [dblYTDSalesLastSeason]       NUMERIC (18, 6) NULL,
     [dblYTDSales2SeasonsAgo]      NUMERIC (18, 6) NULL,
+    [intLocationId] INT NULL, 
     CONSTRAINT [PK_tblTMSite] PRIMARY KEY CLUSTERED ([intSiteID] ASC),
     CONSTRAINT [FK_tblTMSite_tblTMClock] FOREIGN KEY ([intClockID]) REFERENCES [dbo].[tblTMClock] ([intClockID]),
     CONSTRAINT [FK_tblTMSite_tblTMCustomer] FOREIGN KEY ([intCustomerID]) REFERENCES [dbo].[tblTMCustomer] ([intCustomerID]),
@@ -801,3 +802,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMSite',
     @level2type = N'COLUMN',
     @level2name = N'dblYTDSales2SeasonsAgo'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Location Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMSite',
+    @level2type = N'COLUMN',
+    @level2name = N'intLocationId'
