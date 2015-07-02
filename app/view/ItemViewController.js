@@ -553,7 +553,7 @@ Ext.define('Inventory.view.ItemViewController', {
                         store: '{pricingLevel}',
                         defaultFilters: [{
                             column: 'intCompanyLocationId',
-                            value: '{grdPricingLevel.selection.intCompanyLocationId}'
+                            value: '{grdPricingLevel.selection.intLocationId}'
                         }]
                     }
                 },
@@ -1815,7 +1815,7 @@ Ext.define('Inventory.view.ItemViewController', {
 
         if (combo.column.itemId === 'colPricingLevelLocation'){
             current.set('intItemLocationId', records[0].get('intItemLocationId'));
-            current.set('intCompanyLocationId', records[0].get('intCompanyLocationId'));
+            current.set('intLocationId', records[0].get('intLocationId'));
         }
         else if (combo.column.itemId === 'colPricingLevelUOM') {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
@@ -1855,6 +1855,13 @@ Ext.define('Inventory.view.ItemViewController', {
             current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
             current.set('strUPC', records[0].get('strUpcCode'));
             current.set('dblUnit', records[0].get('dblUnitQty'));
+
+            if (grdPricing.store){
+                var record = grdPricing.store.findRecord('intItemLocationId', current.get('intItemLocationId'));
+                if (record){
+                    current.set('dblUnitAfterDiscount', (records[0].get('dblUnitQty') * record.get('dblSalePrice')));
+                }
+            }
         }
         else if (combo.column.itemId === 'colSpecialPricingDiscountBy') {
             if (records[0].get('strDescription') === 'Percent') {

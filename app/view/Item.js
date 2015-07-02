@@ -4007,6 +4007,11 @@ Ext.define('Inventory.view.Item', {
                                                                                     flex: 1
                                                                                 },
                                                                                 {
+                                                                                    dataIndex: 'dblUnitQty',
+                                                                                    dataType: 'string',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
                                                                                     xtype: 'checkcolumn',
                                                                                     dataIndex: 'ysnStockUnit',
                                                                                     dataType: 'boolean',
@@ -4032,7 +4037,7 @@ Ext.define('Inventory.view.Item', {
                                                                         width: 65,
                                                                         align: 'right',
                                                                         dataIndex: 'strFieldName',
-                                                                        text: 'Qty',
+                                                                        text: 'Unit Qty',
                                                                         editor: {
                                                                             xtype: 'numberfield',
                                                                             fieldStyle: 'text-align:right',

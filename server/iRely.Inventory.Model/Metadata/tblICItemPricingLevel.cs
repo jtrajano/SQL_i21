@@ -45,6 +45,25 @@ namespace iRely.Inventory.Model
                 _location = value;
             }
         }
+        private int? _locId;
+        [NotMapped]
+        public int? intLocationId
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_location))
+                    if (tblICItemLocation != null)
+                        return tblICItemLocation.intLocationId;
+                    else
+                        return null;
+                else
+                    return _locId;
+            }
+            set
+            {
+                _locId = value;
+            }
+        }
         private string _unitmeasure;
         [NotMapped]
         public string strUnitMeasure

@@ -8,6 +8,8 @@ Ext.define('Inventory.model.PricingLevel', {
         'Ext.data.Field'
     ],
 
+    idProperty: 'intKey',
+
     fields: [
         { name: 'intKey', type: 'int'},
         { name: 'intCompanyLocationId', type: 'int'},
