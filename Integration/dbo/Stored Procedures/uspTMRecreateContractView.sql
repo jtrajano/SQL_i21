@@ -129,16 +129,16 @@ BEGIN
 			AS
 			SELECT
 				vwcnt_cus_no=C.strEntityNo 
-				,vwcnt_cnt_no= A.strContractNumber
+				,vwcnt_cnt_no= A.strCustomerContract
 				,vwcnt_line_no= 0
 				,vwcnt_alt_cus= ''''
-				,vwcnt_itm_or_cls= ISNULL(E.strItemNo,'''') 
-				,vwcnt_loc_no= ISNULL(F.strLocationNumber,'''')
+				,vwcnt_itm_or_cls= E.strItemNo
+				,vwcnt_loc_no= F.strLocationNumber
 				,vwcnt_alt_cnt_no=''''
 				,vwcnt_amt_orig= 0.0
-				,vwcnt_amt_bal= 0.0
-				,vwcnt_due_rev_dt= A.dtmDateDue
-				,vwcnt_hdr_comments=A.strComments
+				,vwcnt_amt_bal= B.dblBalance
+				,vwcnt_due_rev_dt= B.dtmEndDate
+				,vwcnt_hdr_comments=A.strContractComments
 				,vwcnt_un_orig=0.0
 				,vwcnt_un_bal=0.0
 				,vwcnt_lc1_yn=''''
@@ -148,27 +148,26 @@ BEGIN
 				,vwcnt_lc5_yn =''''
 				,vwcnt_lc6_yn =''''
 				,vwcnt_ppd_yndm = (CASE 
-										WHEN A.strPrepaid = ''Yes'' THEN ''Y'' 
-										WHEN A.strPrepaid = ''No'' THEN ''N''
+										WHEN A.ysnPrepaid = 1 THEN ''Y'' 
+										WHEN A.ysnPrepaid  = 0 THEN ''N''
 										ELSE ''D''
 									END)
 						  	
-				,vwcnt_un_prc= ISNULL(D.dblUnitPrice,0.0)
-				,vwcnt_prc_lvl = A.strPriceLevel
-				,A4GLIdentity = CAST(A.intContractId  AS INT)
+				,vwcnt_un_prc= ISNULL(B.dblCashPrice,0.0)
+				,vwcnt_prc_lvl = ''''
+				,A4GLIdentity = CAST(B.intContractDetailId  AS INT)
 				,strItemDescription =  E.strDescription
-			FROM tblARCustomerContract A
-			INNER JOIN tblARCustomer B
-				ON A.intCustomerId = B.intEntityCustomerId
+				,strCustomerName = C.strName
+			FROM tblCTContractHeader A
+			INNER JOIN tblCTContractDetail B
+				ON A.intContractHeaderId = B.intContractHeaderId
 			INNER JOIN tblEntity C
-				ON B.intEntityCustomerId = C.intEntityId
-			LEFT JOIN tblARCustomerContractDetail D
-				ON A.intContractId = D.intContractId
+				ON A.intEntityId = C.intEntityId
 			LEFT JOIN tblICItem E
-				ON D.intItemId = E.intItemId	
+				ON B.intItemId = E.intItemId	
 			LEFT JOIN tblSMCompanyLocation F
-				ON A.intLocationId = F.intCompanyLocationId
-				
+				ON B.intCompanyLocationId = F.intCompanyLocationId
+	
 		')
 	END
 END
