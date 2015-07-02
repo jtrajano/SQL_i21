@@ -78,7 +78,7 @@ SELECT 	strReceiptNumber		= dbo.fnGetStartingNumber(@StartingNumberId_InventoryR
 		,intCreatedUserId		= @intUserId
 		,ysnPosted				= 0
 FROM	@ReceiptEntries RE
-        group by  intEntityVendorId,strBillOfLading
+        group by  RE.intEntityVendorId,RE.strBillOfLadding
 
 -- Get the identity value from tblICInventoryReceipt to check if the insert was with no errors 
 SELECT @InventoryReceiptId = SCOPE_IDENTITY()
@@ -157,6 +157,6 @@ SET		dblInvoiceAmount = (
 		)
 FROM	dbo.tblICInventoryReceipt Receipt 
         JOIN @ReceiptEntries RE 
-             ON RE.intEntityVendorId = IR.intEntityVendorId 
-			  and RE.strBillOfLadding = IR.strBillOfLading
+             ON RE.intEntityVendorId = Receipt.intEntityVendorId 
+			  and RE.strBillOfLadding = Receipt.strBillOfLading
 
