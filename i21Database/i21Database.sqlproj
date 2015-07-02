@@ -1885,6 +1885,7 @@
     <Build Include="dbo\Views\vyuQMSampleList.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheet.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheetFIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateSOStatusOnShipmentSave.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
