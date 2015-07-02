@@ -8,6 +8,8 @@
 	[intStorageLocationId] INT NULL,
 	[intSubLocationId] INT NULL,
 	[intLocationId] INT NOT NULL,
+	[intContractDetailId] INT NOT NULL,
+	[intContractHeaderId] INT NOT NULL,
 	[intTaxId] INT NOT NULL DEFAULT 0,
     [dblQtyOrdered] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 	[dblQtyContract] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
