@@ -103,10 +103,12 @@ IF EXISTS (SELECT TOP 1 1 FROM @ItemsFromInventoryReceipt WHERE intOrderId IS NO
 BEGIN 
 	DECLARE @intOrderId INT
 	
+	-- Trim down the list of Purchase Orders. 
 	SELECT	DISTINCT 
 			intOrderId 
 	INTO	#POIds 
 	FROM	@ItemsFromInventoryReceipt
+	WHERE	intOrderId IS NOT NULL 
 	
 	DECLARE loopReceiptPOs CURSOR LOCAL FAST_FORWARD
 	FOR 

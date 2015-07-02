@@ -7,13 +7,7 @@ BEGIN
 		DECLARE @testCountSMPreferences AS INT
 		DECLARE @testCountSMUserPreference AS INT
 
-		SELECT @testCountSMPreferences = COUNT(DISTINCT intUserID) FROM dbo.tblSMPreferences
-		SELECT @testCountSMUserPreference = COUNT(intUserSecurityId) FROM dbo.tblGRUserPreference
-
 		PRINT 'Start Insert'
-		PRINT CONCAT(@testCountSMPreferences, ' - tblSMPreferences')
-		PRINT CONCAT(@testCountSMUserPreference, ' - tblGRUserPreference')
-
 		INSERT INTO [dbo].[tblGRUserPreference]
 				   ([intUserSecurityId]
 				   ,[strQuoteProvider]
@@ -44,12 +38,7 @@ BEGIN
 		WHERE intUserID IN (SELECT intUserSecurityId from dbo.tblGRUserPreference)
 		AND strPreference IN ('DecimalDisplayOption', 'QuoteProvider', 'ProviderUserId', 'ProviderPassword', 'ProviderAccessType', 'DisplayOrder')
 
-		PRINT 'End Insert'
-		SELECT @testCountSMPreferences = COUNT(DISTINCT intUserID) FROM dbo.tblSMPreferences
-		SELECT @testCountSMUserPreference = COUNT(intUserSecurityId) FROM dbo.tblGRUserPreference
-
-		PRINT CONCAT(@testCountSMPreferences, ' - tblSMPreferences')
-		PRINT CONCAT(@testCountSMUserPreference, ' - tblGRUserPreference')	
+		PRINT 'End Insert'	
 	END
 
 END

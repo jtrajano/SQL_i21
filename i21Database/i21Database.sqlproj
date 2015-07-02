@@ -1885,6 +1885,11 @@
     <Build Include="dbo\Views\vyuQMSampleList.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheet.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheetFIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateSOStatusOnShipmentSave.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDCashFlowStatementDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGReceived.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCReceived.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRReceived.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

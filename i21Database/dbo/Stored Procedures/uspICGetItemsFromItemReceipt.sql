@@ -30,7 +30,7 @@ SELECT
 		,[intItemUOMId]					= ISNULL(ItemLot.intItemUnitMeasureId, ReceiptItem.intUnitMeasureId)
 		,[intWeightUOMId]				= ReceiptItem.intWeightUOMId		
 		,[dblQty]						= ISNULL(ItemLot.dblQuantity, ReceiptItem.dblOpenReceive)
-		,[dblUOMQty]					= ISNULL(LotItemtUOM.intItemUOMId, ReceiptItem.intUnitMeasureId)
+		,[dblUOMQty]					= ISNULL(LotItemtUOM.dblUnitQty, ItemUOM.dblUnitQty)
 		,[dblNetWeight]					= ISNULL(ItemLot.dblGrossWeight, 0) - ISNULL(ItemLot.dblTareWeight, 0)
 		,[dblCost]						= ReceiptItem.dblUnitCost
 		,[intContainerId]				= ReceiptItem.intContainerId
