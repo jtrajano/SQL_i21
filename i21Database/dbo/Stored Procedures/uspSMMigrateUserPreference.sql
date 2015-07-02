@@ -7,13 +7,7 @@ BEGIN
 		DECLARE @testCountSMPreferences AS INT
 		DECLARE @testCountSMUserPreference AS INT
 
-		SELECT @testCountSMPreferences = COUNT(DISTINCT intUserID) FROM dbo.tblSMPreferences
-		SELECT @testCountSMUserPreference = COUNT(intUserSecurityId) FROM dbo.tblSMUserPreference
-
 		PRINT 'Start Insert'
-		PRINT CONCAT(@testCountSMPreferences, ' - tblSMPreferences')
-		PRINT CONCAT(@testCountSMUserPreference, ' - tblSMUserPreference')
-
 		INSERT INTO [dbo].[tblSMUserPreference]
 				   ([intUserSecurityId]
 				   ,[intOriginScreensLimit]
@@ -43,11 +37,6 @@ BEGIN
 		AND strPreference IN ('OriginScreensLimit', 'AllowUserSelfPost', 'isShowReminderList')
 
 		PRINT 'End Insert'
-		SELECT @testCountSMPreferences = COUNT(DISTINCT intUserID) FROM dbo.tblSMPreferences
-		SELECT @testCountSMUserPreference = COUNT(intUserSecurityId) FROM dbo.tblSMUserPreference
-
-		PRINT CONCAT(@testCountSMPreferences, ' - tblSMPreferences')
-		PRINT CONCAT(@testCountSMUserPreference, ' - tblSMUserPreference')	
 	END
 
 END
