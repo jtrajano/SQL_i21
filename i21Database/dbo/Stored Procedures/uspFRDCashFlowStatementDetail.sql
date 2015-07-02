@@ -327,7 +327,7 @@ BEGIN
 	SET @strAccountType = ''
 
 	SELECT TOP 1 @strAccountType = CashFlowType, @BalanceSide = BalanceSide FROM #TempCashFlow ORDER BY cntID
-	SELECT * INTO #TempGLAccountCashFlow FROM vyuGLAccountView where strAccountType = @strAccountType ORDER BY strAccountId
+	SELECT * INTO #TempGLAccountCashFlow FROM vyuGLAccountView where intAccountId IN (SELECT intAccountId FROM tblGLAccount WHERE strCashFlow = @strAccountType) ORDER BY strAccountId
 	
 	IF(@strAccountType = 'Operations')
 	BEGIN
@@ -379,7 +379,7 @@ BEGIN
 			SET @BalanceSide = 'Debit'
 		END
 
-		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strRowDescription, 'Cash Flow Activity', @BalanceSide, 'Column', '', @strRowFilter, 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort
+		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strRowDescription, 'Cash Flow Activity', @BalanceSide, 'Column', '', @strRowFilter, 1, 1, 0, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort
 		
 		SET @intRowDetailId = (SELECT MAX(intRowDetailId) FROM tblFRRowDesign WHERE intRowId =  @intRowId)
 
