@@ -1853,7 +1853,7 @@
     <Build Include="dbo\Stored Procedures\uspGLReverseJournalEntry.sql" />
     <Build Include="dbo\Tables\tblARBundle.sql" />
     <Build Include="dbo\Tables\tblARBundleDetail.sql" />
-	<Build Include="dbo\Stored Procedures\uspARCreateInvoiceFromShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCreateInvoiceFromShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspGLImportRecurring.sql" />
     <Build Include="dbo\Stored Procedures\uspDBMigrateUserPreference.sql" />
     <Build Include="dbo\Tables\tblDBUserPreference.sql" />
@@ -1900,6 +1900,7 @@
     <Build Include="dbo\Stored Procedures\uspLGShipped.sql" />
     <Build Include="dbo\Stored Procedures\uspSCShipped.sql" />
     <Build Include="dbo\Stored Procedures\uspTRShipped.sql" />
+    <Build Include="dbo\Views\vyuICGetCompactItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
