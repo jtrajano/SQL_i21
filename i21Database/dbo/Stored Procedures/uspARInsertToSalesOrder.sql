@@ -50,7 +50,10 @@ BEGIN
 		,[strBillToCountry]
 		,[intConcurrencyId]
 		,[intEntityId]
-		,[strOrderType])
+		,[strOrderType]
+		,[intOrderedById]
+		,[strBOLNumber]
+		,[intSplitId])
 	SELECT 
 		 [strSalesOrderNumber]
 		,[intEntityCustomerId]
@@ -91,7 +94,10 @@ BEGIN
 		,[strBillToCountry]
 		,0
 		,@UserId
-		,[strOrderType]			
+		,[strOrderType]
+		,[intOrderedById]
+		,[strBOLNumber]
+		,[intSplitId]
 	FROM tblSOSalesOrder
 	WHERE intSalesOrderId = @SalesOrderId
 
