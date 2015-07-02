@@ -408,28 +408,61 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
         if (combo.itemId === 'cboOrderNumber')
         {
-            current.set('intOrderId', records[0].get('intSalesOrderId'));
-            current.set('intLineNo', records[0].get('intSalesOrderDetailId'));
-            current.set('intItemId', records[0].get('intItemId'));
-            current.set('strItemNo', records[0].get('strItemNo'));
-            current.set('strItemDescription', records[0].get('strItemDescription'));
-            current.set('strLotTracking', records[0].get('strLotTracking'));
-            current.set('intItemUOMId', records[0].get('intItemUOMId'));
-            current.set('strUnitMeasure', records[0].get('strUnitMeasure'));
-            current.set('dblQuantity', records[0].get('dblQtyOrdered'));
-            current.set('strOrderUOM', records[0].get('strUnitMeasure'));
-            current.set('dblQtyOrdered', records[0].get('dblQtyOrdered'));
-            current.set('dblUnitPrice', records[0].get('dblPrice'));
-            current.set('intOwnershipType', 1);
-            current.set('strOwnershipType', 'Own');
+            switch (win.viewModel.data.current.get('intOrderType')) {
+                case 1:
+                    current.set('intOrderId', records[0].get('intContractHeaderId'));
+                    current.set('intLineNo', records[0].get('intContractDetailId'));
+                    current.set('intItemId', records[0].get('intItemId'));
+                    current.set('strItemNo', records[0].get('strItemNo'));
+                    current.set('strItemDescription', records[0].get('strItemDescription'));
+                    current.set('strLotTracking', records[0].get('strLotTracking'));
+                    current.set('intItemUOMId', records[0].get('intItemUOMId'));
+                    current.set('strUnitMeasure', records[0].get('strItemUOM'));
+                    current.set('dblQuantity', records[0].get('dblBalance'));
+                    current.set('strOrderUOM', records[0].get('strItemUOM'));
+                    current.set('dblQtyOrdered', records[0].get('dblDetailQuantity'));
+                    current.set('dblUnitPrice', records[0].get('dblCost'));
+                    current.set('intOwnershipType', 1);
+                    current.set('strOwnershipType', 'Own');
 
-            switch(records[0].get('strLotTracking')) {
-                case 'Yes - Serial Number':
-                case 'Yes - Manual':
-                    grdLotTracking.setHidden(false);
+                    switch(records[0].get('strLotTracking')) {
+                        case 'Yes - Serial Number':
+                        case 'Yes - Manual':
+                            grdLotTracking.setHidden(false);
+                            break;
+                        default:
+                            grdLotTracking.setHidden(true);
+                            break;
+                    }
                     break;
-                default:
-                    grdLotTracking.setHidden(true);
+                case 2:
+                    current.set('intOrderId', records[0].get('intSalesOrderId'));
+                    current.set('intLineNo', records[0].get('intSalesOrderDetailId'));
+                    current.set('intItemId', records[0].get('intItemId'));
+                    current.set('strItemNo', records[0].get('strItemNo'));
+                    current.set('strItemDescription', records[0].get('strItemDescription'));
+                    current.set('strLotTracking', records[0].get('strLotTracking'));
+                    current.set('intItemUOMId', records[0].get('intItemUOMId'));
+                    current.set('strUnitMeasure', records[0].get('strUnitMeasure'));
+                    current.set('dblQuantity', records[0].get('dblQtyOrdered'));
+                    current.set('strOrderUOM', records[0].get('strUnitMeasure'));
+                    current.set('dblQtyOrdered', records[0].get('dblQtyOrdered'));
+                    current.set('dblUnitPrice', records[0].get('dblPrice'));
+                    current.set('intOwnershipType', 1);
+                    current.set('strOwnershipType', 'Own');
+
+                    switch(records[0].get('strLotTracking')) {
+                        case 'Yes - Serial Number':
+                        case 'Yes - Manual':
+                            grdLotTracking.setHidden(false);
+                            break;
+                        default:
+                            grdLotTracking.setHidden(true);
+                            break;
+                    }
+                    break;
+                case 3:
+
                     break;
             }
         }
