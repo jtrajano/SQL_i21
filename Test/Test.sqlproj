@@ -731,6 +731,8 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for supplying the GL Description_.sql" />
     <Build Include="testi21Database\Stored Procedures\test fnCalculateQtyBetweenUOM for converting 60 KG BAG to LB.sql" />
     <Build Include="testi21Database\Fake Data\Fake data for item uom table, kg scenario.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICGetItemsFromItemReceipt for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICGetItemsFromItemReceipt for getting data from the receipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">
