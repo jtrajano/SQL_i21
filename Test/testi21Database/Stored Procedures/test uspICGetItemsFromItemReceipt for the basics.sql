@@ -4,7 +4,7 @@ BEGIN
 	-- Arrange 
 	BEGIN 
 		DECLARE @intReceiptId AS INT
-		DECLARE @result AS ItemReceiptItemTableType
+		DECLARE @result AS ReceiptItemTableType
 		
 		-- Create the expected table. 
 		SELECT *

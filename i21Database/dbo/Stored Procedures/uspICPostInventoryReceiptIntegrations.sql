@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE uspICPostInventoryReceiptIntegrations
 	@ysnPost BIT  = 0  
-	,@intTransactionId NVARCHAR(40) = NULL   
+	,@intTransactionId INT = NULL   
 	,@intUserId  INT  = NULL   
 	,@intEntityId INT  = NULL    
 AS  
@@ -25,7 +25,7 @@ DECLARE	-- Receipt Types
 
 -- Get the details from the inventory receipt 
 BEGIN 
-	DECLARE @ItemsFromInventoryReceipt AS dbo.ItemReceiptItemTableType
+	DECLARE @ItemsFromInventoryReceipt AS dbo.ReceiptItemTableType
 	INSERT INTO @ItemsFromInventoryReceipt (
 		-- Header
 		[intInventoryReceiptId] 

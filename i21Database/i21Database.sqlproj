@@ -981,7 +981,6 @@
     <Build Include="dbo\User Defined Types\UnpostItemsTableType.sql" />
     <Build Include="dbo\Functions\fnRecalculateAverageCost.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReversalGLEntries.sql" />
-    <Build Include="dbo\Views\vyuSMGetLocationPricingLevel.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetNewID.sql" />
     <Build Include="dbo\Views\vyuTMCobolPrice.sql" />
     <Build Include="dbo\Functions\fnGeti21FiscalPeriodIdFromOriginPeriod.sql" />
@@ -1854,13 +1853,13 @@
     <Build Include="dbo\Stored Procedures\uspGLReverseJournalEntry.sql" />
     <Build Include="dbo\Tables\tblARBundle.sql" />
     <Build Include="dbo\Tables\tblARBundleDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspARCreateInvoiceFromShipment.sql" />
+	<Build Include="dbo\Stored Procedures\uspARCreateInvoiceFromShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspGLImportRecurring.sql" />
     <Build Include="dbo\Stored Procedures\uspDBMigrateUserPreference.sql" />
     <Build Include="dbo\Tables\tblDBUserPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspCFGetItemPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournalCLOSED.sql" />
-    <Build Include="dbo\User Defined Types\ItemReceiptItemTableType.sql" />
+    <Build Include="dbo\User Defined Types\ReceiptItemTableType.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemsFromItemReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryReceiptIntegrations.sql" />
     <Build Include="dbo\Stored Procedures\uspGRMigrateUserPreference.sql" />
@@ -1890,6 +1889,17 @@
     <Build Include="dbo\Stored Procedures\uspLGReceived.sql" />
     <Build Include="dbo\Stored Procedures\uspSCReceived.sql" />
     <Build Include="dbo\Stored Procedures\uspTRReceived.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRProcessToInventoryReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddItemReceipt.sql" />
+    <Build Include="dbo\User Defined Types\ReceiptStagingTable.sql" />
+    <Build Include="dbo\Functions\fnGetStartingNumber.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryShipmentIntegrations.sql" />
+    <Build Include="dbo\User Defined Types\ShipmentItemTableType.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetItemsFromItemShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspSOShipped.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGShipped.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCShipped.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRShipped.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1965,8 +1975,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\14_CompanyPreference.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Post-Deployment\GR\GRDataMigrations.sql" />
   </ItemGroup>
 </Project>

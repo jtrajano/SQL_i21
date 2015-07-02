@@ -349,7 +349,7 @@ END
 -- If RECAP is FALSE,
 -- 1. Book the G/L entries
 -- 2. Update the ysnPosted flag in the transaction. Increase the concurrency. 
--- 3. Update the PO (if it exists)
+-- 3. Call any stored procedure for the intergrations with the other modules. 
 -- 4. Commit the save point 
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 0
@@ -363,6 +363,12 @@ BEGIN
 	SET		ysnPosted = @ysnPost
 			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 	WHERE	strShipmentNumber = @strTransactionId  
+
+	EXEC dbo.uspICPostInventoryShipmentIntegrations
+			@ysnPost
+			,@intTransactionId 
+			,@intUserId 
+			,@intEntityId
 
 	COMMIT TRAN @TransactionName
 END 

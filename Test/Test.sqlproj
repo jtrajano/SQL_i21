@@ -738,6 +738,15 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptIntegrations for calling uspLGReceived.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptIntegrations for calling uspSCReceived.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptIntegrations for calling uspTRReceived.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICGetItemsFromItemShipment for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICGetItemsFromItemShipment for getting data from the shipment.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryShipmentIntegrations for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryShipmentIntegrations for calling uspLGShipped.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryShipmentIntegrations for calling uspSOShipped.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryShipmentIntegrations for calling uspSCShipped.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryShipmentIntegrations for calling uspTRShipped.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryShipment for calling uspICPostInventoryShipmentIntegrations.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for calling uspICPostInventoryReceiptIntegrations.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">
