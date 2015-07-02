@@ -207,7 +207,7 @@ BEGIN TRY
 
 						Create table #tblInputLot
 						( 
-						ParentLotID	NVARCHAR(50),
+						ParentLotID	NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 						MaterialKey	INT,
 						AvailableQty	NUMERIC(18,6),
 						UnitKey		INT,
@@ -220,9 +220,9 @@ BEGIN TRY
 						Create table #tblParentLot
 						( 
 						MainLotKey	INT,
-						ParentLotID	NVARCHAR(50),
+						ParentLotID	NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 						CreateDate	datetime,
-						CreatedBy	NVARCHAR(50),
+						CreatedBy	NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 						MaterialKey	INT,
 						QueuedQty	NUMERIC(18,6),
 						FactoryKey	INT,
