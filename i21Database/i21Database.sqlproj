@@ -1645,7 +1645,7 @@
     <Build Include="dbo\Views\vyuARCustomerInquiryReport.sql" />
     <Build Include="dbo\Views\vyuARCustomerStatementReport.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingReport.sql" />
-	<Build Include="dbo\Tables\tblEntityPreferences.sql" />
+    <Build Include="dbo\Tables\tblEntityPreferences.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostQtyChange.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WithGasCheckSubReport.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WithLeakCheckSubReport.sql" />
@@ -1678,6 +1678,7 @@
     <Build Include="dbo\Tables\tblPRCompanyReference.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckHistory.sql" />
     <None Include="Scripts\Post-Deployment\GL\ReportDataFix.sql" />
+    <Build Include="dbo\Functions\fnAPGetPaymentDetailPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
