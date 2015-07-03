@@ -3549,4 +3549,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intWeightPerUnitUOMId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b0bd1594-3e72-45b1-a757-504fd360d5ff" ChangeDateTime="07/03/2015 00:31:08">
+    <Property Name="ElementName" Value="[dbo].[tblICCompanyPreference].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCompanyPreferenceId" />
+  </Operation>
 </Operations>
