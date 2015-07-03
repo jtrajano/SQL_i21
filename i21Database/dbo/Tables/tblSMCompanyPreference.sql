@@ -28,5 +28,6 @@
     [strIntervalEndTime] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strIntervalUpdatesMinutes] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strQuotesDecimalsShown] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[strHelperUrlDomain] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1
 )
