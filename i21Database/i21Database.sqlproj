@@ -1906,6 +1906,8 @@
     <Build Include="dbo\Functions\fnAPGetPaymentDetailPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessTransferVoid.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateBatchWorkOrder.sql" />
+    <Build Include="dbo\Tables\tblLGStockSalesHeader.sql" />
+    <Build Include="dbo\Tables\tblLGStockSalesLotDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
