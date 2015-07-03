@@ -30,7 +30,7 @@ A.intCustomerID
 					   WHEN B.vwcus_prc_lvl = 7 THEN G.vwitm_un_prc7
 					   WHEN B.vwcus_prc_lvl = 8 THEN G.vwitm_un_prc8
 					   WHEN B.vwcus_prc_lvl = 9 THEN G.vwitm_un_prc9 END)
-	    )AS dblProductCost
+	    ) + ISNULL(C.dblPriceAdjustment,0.0) AS dblProductCost 
 , rtrim(ltrim(B.vwcus_last_name)) as agcus_last_name
 , rtrim(ltrim(B.vwcus_first_name)) as agcus_first_name
 ,(Case WHEN B.vwcus_first_name IS NULL OR B.vwcus_first_name = ''''  THEN
