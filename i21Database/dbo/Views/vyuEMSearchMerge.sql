@@ -2,7 +2,7 @@
 AS 	
 select 
 	A.intEntityId,
-	B.intEntityContactId,
+	AB.intEntityContactId,
 	strEntityNo = A.strEntityNo,
 	strEntityName = A.strName,
 	strEmail = B.strEmail,
@@ -12,10 +12,12 @@ select
 	strZipCode = C.strZipCode,
 	strEntityType = D.strType,
 	strEntityNoType = Replace(A.strEntityNo,' ','') + ' ' + D.strType 
-	from tblEntity A
-		JOIN vyuEMEntityContact B
-			ON A.intEntityId = B.intEntityId
-		JOIN tblEntityLocation C
-			ON A.intEntityId = C.intEntityId
-		JOIN tblEntityType D
-			ON D.intEntityId = A.intEntityId
+	from tblEntity A	
+	JOIN tblEntityToContact AB
+		ON A.intEntityId = AB.intEntityId and AB.ysnDefaultContact = 1
+	JOIN tblEntity B
+		ON AB.intEntityContactId = B.intEntityId
+	JOIN tblEntityLocation C
+		ON A.intEntityId = C.intEntityId and C.ysnDefaultLocation = 1
+	JOIN tblEntityType D
+		ON A.intEntityId = D.intEntityId
