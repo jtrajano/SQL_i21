@@ -13,6 +13,12 @@ SELECT Lot.intLotId
 	, strItemUOMType = UOM.strUnitType
 	, dblItemUOMConv = ItemUOM.dblUnitQty
 	, Lot.strLotNumber
+	, Lot.intOwnershipType
+	, strOwnershipType = (CASE WHEN Lot.intOwnershipType = 1 THEN 'Own'
+						WHEN Lot.intOwnershipType = 2 THEN 'Storage'
+						WHEN Lot.intOwnershipType = 3 THEN 'Consigned Purchase'
+						WHEN Lot.intOwnershipType = 4 THEN 'Consigned Sale'
+						END)
 	, Lot.intSubLocationId
 	, SubLocation.strSubLocationName
 	, Lot.intStorageLocationId
