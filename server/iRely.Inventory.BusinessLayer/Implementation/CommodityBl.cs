@@ -21,6 +21,19 @@ namespace iRely.Inventory.BusinessLayer
         }
         #endregion
 
+        public override async Task<SearchResult> Search(GetParameter param)
+        {
+            var query = _db.GetQuery<tblICCommodity>()
+                .Filter(param, true);
+            var data = await query.Execute(param, "intCommodityId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+
         /// <summary>
         /// Get Compact version of Commodity Details
         /// </summary>

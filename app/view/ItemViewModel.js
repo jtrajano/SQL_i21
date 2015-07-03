@@ -108,7 +108,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             type: 'icbufferedcategory',
             proxy: {
                 extraParams: {
-                    include: 'tblICCategoryUOMs.tblICUnitMeasure'
+                    include: 'tblICCategoryUOMs.tblICUnitMeasure, tblICCategoryAccounts.tblGLAccount, tblICCategoryAccounts.tblGLAccountCategory'
                 },
                 type: 'rest',
                 api: {
@@ -573,7 +573,21 @@ Ext.define('Inventory.view.ItemViewModel', {
 
 
         commodity: {
-            type: 'icbufferedcommodity'
+            type: 'icbufferedcommodity',
+            proxy: {
+                extraParams: {
+                    include: 'tblICCommodityUnitMeasures.tblICUnitMeasure, tblICCommodityAccounts.tblGLAccount, tblICCommodityAccounts.tblGLAccountCategory'
+                },
+                type: 'rest',
+                api: {
+                    read: '../Inventory/api/Commodity/Search'
+                },
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    messageProperty: 'message'
+                }
+            }
         },
         originAttribute: {
             type: 'icbufferedoriginattribute'

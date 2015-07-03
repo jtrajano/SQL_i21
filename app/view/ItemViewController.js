@@ -2048,6 +2048,9 @@ Ext.define('Inventory.view.ItemViewController', {
         if (records.length <= 0)
             return;
 
+        if (i21.ModuleMgr.Inventory.getCompanyPreference('intInheritSetup') !== 2)
+            return;
+
         var commodity = records[0];
         var intCommodityId = commodity.get('intCommodityId');
 
@@ -2095,6 +2098,28 @@ Ext.define('Inventory.view.ItemViewController', {
                     });
                     var grid = win.down('#grdUnitOfMeasure');
                     grid.gridMgr.newRow.add();
+                }
+            }
+
+            var accounts = records[0].get('tblICCommodityAccounts');
+            if (accounts) {
+                if (accounts.length > 0) {
+                    current.tblICItemAccounts().removeAll();
+                    accounts.forEach(function(acct){
+                        var newItemAccount = Ext.create('Inventory.model.ItemAccount', {
+                            intItemId : current.get('intItemId'),
+                            intAccountCategoryId: acct.intAccountCategoryId,
+                            intAccountId: acct.intAccountId,
+                            intSort: acct.intSort,
+                            strAccountId: acct.strAccountId,
+                            strDescription: acct.strAccountDescription,
+                            strAccountGroup: acct.strAccountGroup,
+                            strAccountCategory: acct.strAccountCategory
+                        });
+                        current.tblICItemAccounts().add(newItemAccount);
+                    });
+                    var grdGlAccounts = win.down('#grdGlAccounts');
+                    grdGlAccounts.gridMgr.newRow.add();
                 }
             }
         }
@@ -2317,6 +2342,9 @@ Ext.define('Inventory.view.ItemViewController', {
         if (records.length <= 0)
             return;
 
+        if (i21.ModuleMgr.Inventory.getCompanyPreference('intInheritSetup') !== 1)
+            return;
+
         var win = combo.up('window');
         var current = win.viewModel.data.current;
 
@@ -2351,8 +2379,30 @@ Ext.define('Inventory.view.ItemViewController', {
                         });
                         current.tblICItemUOMs().add(newItemUOM);
                     });
-                    var grid = win.down('#grdUnitOfMeasure');
-                    grid.gridMgr.newRow.add();
+                    var grdUnitOfMeasure = win.down('#grdUnitOfMeasure');
+                    grdUnitOfMeasure.gridMgr.newRow.add();
+                }
+            }
+
+            var accounts = records[0].tblICCategoryAccounts().data.items;
+            if (accounts) {
+                if (accounts.length > 0) {
+                    current.tblICItemAccounts().removeAll();
+                    accounts.forEach(function(acct){
+                        var newItemAccount = Ext.create('Inventory.model.ItemAccount', {
+                            intItemId : current.get('intItemId'),
+                            intAccountCategoryId: acct.get('intAccountCategoryId'),
+                            intAccountId: acct.get('intAccountId'),
+                            intSort: acct.get('intSort'),
+                            strAccountId: acct.get('strAccountId'),
+                            strDescription: acct.get('strDescription'),
+                            strAccountGroup: acct.get('strAccountGroup'),
+                            strAccountCategory: acct.get('strAccountCategory')
+                        });
+                        current.tblICItemAccounts().add(newItemAccount);
+                    });
+                    var grdGlAccounts = win.down('#grdGlAccounts');
+                    grdGlAccounts.gridMgr.newRow.add();
                 }
             }
         }

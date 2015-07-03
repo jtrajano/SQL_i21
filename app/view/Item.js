@@ -304,6 +304,14 @@ Ext.define('Inventory.view.Item', {
                                                                         dataType: 'string',
                                                                         text: 'Description',
                                                                         flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'tblICCommodityUnitMeasures',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'tblICCommodityAccounts',
+                                                                        hidden: true
                                                                     }
                                                                 ],
                                                                 itemId: 'cboCommodity',
@@ -416,6 +424,10 @@ Ext.define('Inventory.view.Item', {
                                                                         dataType: 'string',
                                                                         text: 'Description',
                                                                         flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'tblICCategoryAccounts',
+                                                                        hidden: true
                                                                     },
                                                                     {
                                                                         dataIndex: 'tblICCategoryUOMs',
