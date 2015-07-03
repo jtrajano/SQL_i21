@@ -1729,7 +1729,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter12",
+                                                                    "name": "filter124",
                                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2718,7 +2718,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter13",
+                                                                    "name": "filter125",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2761,35 +2761,39 @@
                                                                     "userConfig": {
                                                                         "columns": [
                                                                             "[",
-                                                                            "{",
-                                                                            "dataIndex: 'intLotId',",
-                                                                            "dataType: 'numeric',",
-                                                                            "text: 'Lot Id',",
-                                                                            "hidden: true",
-                                                                            "},",
-                                                                            "{",
-                                                                            "dataIndex: 'intSubLocationId',",
-                                                                            "dataType: 'numeric',",
-                                                                            "hidden: true",
-                                                                            "},",
-                                                                            "{",
-                                                                            "dataIndex: 'strLotNumber',",
-                                                                            "dataType: 'string',",
-                                                                            "text: 'Lot Number',",
-                                                                            "flex: 1",
-                                                                            "},",
-                                                                            "{",
-                                                                            "dataIndex: 'strItemUOM',",
-                                                                            "dataType: 'string',",
-                                                                            "text: 'Item UOM Id',",
-                                                                            "flex: 1",
-                                                                            "},",
-                                                                            "{",
-                                                                            "dataIndex: 'dblAvailableQty',",
-                                                                            "dataType: 'float',",
-                                                                            "text: 'Quantity',",
-                                                                            "flex: 1",
-                                                                            "}",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intLotId',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intSubLocationId',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intOwnershipType',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strLotNumber',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Lot Number',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strItemUOM',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Item UOM Id',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'dblAvailableQty',",
+                                                                            "\t\tdataType: 'float',",
+                                                                            "\t\ttext: 'Quantity',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t}",
                                                                             "]"
                                                                         ],
                                                                         "designer|createAlias": "gridcombobox",
@@ -3181,7 +3185,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter14",
+                                                                    "name": "filter126",
                                                                     "designerId": "86706668-0ec9-4541-b78b-d162dd783738",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3435,7 +3439,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter15",
+                                                    "name": "filter127",
                                                     "designerId": "b4c3f458-33e0-4b9e-972f-6281744af6d7",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }

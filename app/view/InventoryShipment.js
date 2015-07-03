@@ -1286,10 +1286,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     {
                                                                         xtype: 'numbercolumn',
                                                                         dataType: 'numeric',
-                                                                        dataIndex: 'dblUnitPrice',
                                                                         itemId: 'colLineTotal',
                                                                         width: 81,
                                                                         align: 'right',
+                                                                        dataIndex: 'dblUnitPrice',
                                                                         text: 'Line Total',
                                                                         format: '0,000.##'
                                                                     },
@@ -1367,11 +1367,15 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 {
                                                                                     dataIndex: 'intLotId',
                                                                                     dataType: 'numeric',
-                                                                                    text: 'Lot Id',
                                                                                     hidden: true
                                                                                 },
                                                                                 {
                                                                                     dataIndex: 'intSubLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intOwnershipType',
                                                                                     dataType: 'numeric',
                                                                                     hidden: true
                                                                                 },

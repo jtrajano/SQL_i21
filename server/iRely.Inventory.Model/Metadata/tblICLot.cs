@@ -23,6 +23,8 @@ namespace iRely.Inventory.Model
         public string strItemUOMType { get; set; }
         public decimal? dblItemUOMConv { get; set; }
         public string strLotNumber { get; set; }
+        public int? intOwnershipType { get; set; }
+        public string strOwnershipType { get; set; }
         public int? intSubLocationId { get; set; }
         public string strSubLocationName { get; set; }
         public int? intStorageLocationId { get; set; }

@@ -252,6 +252,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             column: 'intSubLocationId',
                             value: '{currentShipmentItem.intSubLocationId}',
                             conjunction: 'and'
+                        },{
+                            column: 'intOwnershipType',
+                            value: '{currentShipmentItem.intOwnershipType}',
+                            conjunction: 'and'
                         }]
                     }
                 },
