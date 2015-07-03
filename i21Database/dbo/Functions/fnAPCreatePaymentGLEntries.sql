@@ -199,9 +199,7 @@ BEGIN
 			[dtmDate]					=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
 			[strBatchId]				=	@batchId,
 			[intAccountId]				=	B.intAccountId,
-			[dblDebit]					=	SUM(CASE WHEN (B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest)) --add discount only if fully paid
-												THEN B.dblPayment + B.dblDiscount - B.dblInterest
-												ELSE B.dblPayment END),
+			[dblDebit]                  =    SUM(dbo.fnAPGetPaymentDetailPayment(B.intPaymentDetailId)),
 			[dblCredit]					=	0,
 			[dblDebitUnit]				=	0,
 			[dblCreditUnit]				=	0,
