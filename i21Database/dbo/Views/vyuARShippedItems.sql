@@ -160,4 +160,4 @@ LEFT OUTER JOIN
 		ON SOD.[intStorageLocationId] = SL.[intStorageLocationId] 		
 WHERE
 	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId WHERE tblARInvoice.[ysnPosted] = 1)
-	AND SO.[strTransactionType] <> 'Quote'
+	AND SO.[strTransactionType] = 'Order'

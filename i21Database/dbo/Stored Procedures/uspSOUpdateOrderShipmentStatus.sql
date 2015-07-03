@@ -108,7 +108,9 @@ SET @HasMiscItemInInvoice = (	SELECT COUNT(1)
 													tblARInvoiceDetail
 												WHERE
 													[intSalesOrderDetailId] = tblSOSalesOrderDetail.[intSalesOrderDetailId]
+													AND (intInventoryShipmentId IS NULL OR intInventoryShipmentId = 0)
 												)
+									AND NOT EXISTS(SELECT NULL FROM tblICInventoryShipmentItem WHERE intLineNo = tblSOSalesOrderDetail.[intSalesOrderDetailId])
 								)
 								
 UPDATE
@@ -133,30 +135,19 @@ FROM
 	) SHP
 WHERE
 	[intSalesOrderId] = @SalesOrderId
-	AND tblSOSalesOrderDetail.[intSalesOrderDetailId] = SHP.[intSalesOrderDetailId] 	
+	AND tblSOSalesOrderDetail.[intSalesOrderDetailId] = SHP.[intSalesOrderDetailId]
+	AND NOT EXISTS(SELECT NULL FROM tblICInventoryShipmentItem WHERE intLineNo = tblSOSalesOrderDetail.[intSalesOrderDetailId]) 	
 		
 		
 
-DECLARE	@QuantityShipped			NUMERIC(18,6)
-		,@QuantityOrdered			NUMERIC(18,6)
-		,@PartialShipmentCount		INT
+DECLARE	@PartialShipmentCount		INT
 		,@CompletedShipmentCount	INT
 	
-SELECT	@QuantityShipped			= 0.00
-		,@QuantityOrdered			= 0.00
-		,@PartialShipmentCount		= 0
+SELECT	@PartialShipmentCount		= 0
 		,@CompletedShipmentCount	= 0
 			
 
-SELECT 
-	 @QuantityShipped = SUM(ISNULL([dblQtyShipped],0.00))
-	,@QuantityOrdered = SUM(ISNULL([dblQtyOrdered],0.00))
-FROM
-	tblSOSalesOrderDetail
-WHERE
-	[intSalesOrderId] = @SalesOrderId
-
-SET @PartialShipmentCount = (	SELECT COUNT(1) 
+SET @PartialShipmentCount =	(	SELECT COUNT(1) 
 								FROM
 									tblSOSalesOrderDetail
 								WHERE
@@ -165,14 +156,7 @@ SET @PartialShipmentCount = (	SELECT COUNT(1)
 									AND ISNULL([dblQtyShipped],0.00) <> ISNULL([dblQtyOrdered],0.00)
 									AND ISNULL([dblQtyOrdered],0.00) > 0
 									AND ISNULL([dblQtyShipped],0.00) > 0
-									--AND EXISTS(	SELECT NULL 
-									--			FROM
-									--				tblICInventoryShipmentItem
-									--			WHERE
-									--				intLineNo = tblSOSalesOrderDetail.intSalesOrderDetailId
-									--				AND intSourceId = @SalesOrderId
-									--				)
-									)		
+								)		
 
 SET @CompletedShipmentCount = (	SELECT COUNT(1) 
 								FROM
@@ -180,14 +164,7 @@ SET @CompletedShipmentCount = (	SELECT COUNT(1)
 								WHERE
 									[intSalesOrderId] = @SalesOrderId 
 									AND ISNULL([dblQtyShipped],0.00) >= ISNULL([dblQtyOrdered],0.00)									
-									--AND EXISTS(	SELECT NULL 
-									--			FROM
-									--				tblICInventoryShipmentItem
-									--			WHERE
-									--				intLineNo = tblSOSalesOrderDetail.intSalesOrderDetailId
-									--				AND intSourceId = @SalesOrderId
-									--				)
-									)										
+								)										
 		
 IF ((@HasShipment <> 0 OR @HasMiscItemInInvoice <> 0) AND @PartialShipmentCount = 0 AND @CompletedShipmentCount = 0)
 	BEGIN
