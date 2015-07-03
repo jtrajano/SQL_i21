@@ -189,6 +189,7 @@
     <Compile Include="Controllers\CommodityAttributeController.cs" />
     <Compile Include="Controllers\CommodityController.cs" />
     <Compile Include="Controllers\CommodityUOMController.cs" />
+    <Compile Include="Controllers\CompanyPreferenceController.cs" />
     <Compile Include="Controllers\FeedStockController.cs" />
     <Compile Include="Controllers\FeedStockUOMController.cs" />
     <Compile Include="Controllers\FuelCategoryController.cs" />

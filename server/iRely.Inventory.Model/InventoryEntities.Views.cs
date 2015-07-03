@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets689fbedca44f843a63370ab020a75ec84379ebe36423d0e499bf7e8514a7ce0e))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsc43846abfdaab411e10ddb5ed95b3dc0a342caa6e7b462f54b25d21f8e25a8cd))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets689fbedca44f843a63370ab020a75ec84379ebe36423d0e499bf7e8514a7ce0e : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsc43846abfdaab411e10ddb5ed95b3dc0a342caa6e7b462f54b25d21f8e25a8cd : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "689fbedca44f843a63370ab020a75ec84379ebe36423d0e499bf7e8514a7ce0e"; }
+            get { return "c43846abfdaab411e10ddb5ed95b3dc0a342caa6e7b462f54b25d21f8e25a8cd"; }
         }
 
         /// <summary>
@@ -1332,34 +1332,44 @@ namespace Edm_EntityMappingGeneratedViews
                 return GetView256();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetCompactItem")
+            if (extentName == "CodeFirstDatabase.tblICCompanyPreference")
             {
                 return GetView257();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetCompactItems")
+            if (extentName == "InventoryEntities.tblICCompanyPreferences")
             {
                 return GetView258();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetItemCommodity")
+            if (extentName == "CodeFirstDatabase.vyuICGetCompactItem")
             {
                 return GetView259();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetItemCommodities")
+            if (extentName == "InventoryEntities.vyuICGetCompactItems")
             {
                 return GetView260();
             }
 
-            if (extentName == "CodeFirstDatabase.vyuICGetOtherCharges")
+            if (extentName == "CodeFirstDatabase.vyuICGetItemCommodity")
             {
                 return GetView261();
             }
 
-            if (extentName == "InventoryEntities.vyuICGetOtherCharges")
+            if (extentName == "InventoryEntities.vyuICGetItemCommodities")
             {
                 return GetView262();
+            }
+
+            if (extentName == "CodeFirstDatabase.vyuICGetOtherCharges")
+            {
+                return GetView263();
+            }
+
+            if (extentName == "InventoryEntities.vyuICGetOtherCharges")
+            {
+                return GetView264();
             }
 
             return null;
@@ -9010,10 +9020,50 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for CodeFirstDatabase.vyuICGetCompactItem.
+        /// Gets the view for CodeFirstDatabase.tblICCompanyPreference.
         /// </summary>
         /// <returns>The mapping view.</returns>
         private static DbMappingView GetView257()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing tblICCompanyPreference
+        [CodeFirstDatabaseSchema.tblICCompanyPreference](T1.tblICCompanyPreference_intCompanyPreferenceId, T1.tblICCompanyPreference_intInheritSetup, T1.tblICCompanyPreference_intSort, T1.tblICCompanyPreference_intConcurrencyId)
+    FROM (
+        SELECT 
+            T.intCompanyPreferenceId AS tblICCompanyPreference_intCompanyPreferenceId, 
+            T.intInheritSetup AS tblICCompanyPreference_intInheritSetup, 
+            T.intSort AS tblICCompanyPreference_intSort, 
+            T.intConcurrencyId AS tblICCompanyPreference_intConcurrencyId, 
+            True AS _from0
+        FROM InventoryEntities.tblICCompanyPreferences AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for InventoryEntities.tblICCompanyPreferences.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView258()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing tblICCompanyPreferences
+        [iRely.Inventory.Model.tblICCompanyPreference](T1.tblICCompanyPreference_intCompanyPreferenceId, T1.tblICCompanyPreference_intInheritSetup, T1.tblICCompanyPreference_intSort, T1.tblICCompanyPreference_intConcurrencyId)
+    FROM (
+        SELECT 
+            T.intCompanyPreferenceId AS tblICCompanyPreference_intCompanyPreferenceId, 
+            T.intInheritSetup AS tblICCompanyPreference_intInheritSetup, 
+            T.intSort AS tblICCompanyPreference_intSort, 
+            T.intConcurrencyId AS tblICCompanyPreference_intConcurrencyId, 
+            True AS _from0
+        FROM CodeFirstDatabase.tblICCompanyPreference AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for CodeFirstDatabase.vyuICGetCompactItem.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView259()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetCompactItem
@@ -9054,7 +9104,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetCompactItems.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView258()
+        private static DbMappingView GetView260()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetCompactItems
@@ -9095,7 +9145,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetItemCommodity.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView259()
+        private static DbMappingView GetView261()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemCommodity
@@ -9141,7 +9191,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetItemCommodities.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView260()
+        private static DbMappingView GetView262()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetItemCommodities
@@ -9187,7 +9237,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for CodeFirstDatabase.vyuICGetOtherCharges.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView261()
+        private static DbMappingView GetView263()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetOtherCharges
@@ -9217,7 +9267,7 @@ namespace Edm_EntityMappingGeneratedViews
         /// Gets the view for InventoryEntities.vyuICGetOtherCharges.
         /// </summary>
         /// <returns>The mapping view.</returns>
-        private static DbMappingView GetView262()
+        private static DbMappingView GetView264()
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetOtherCharges

@@ -52,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\tblICCompanyPreferenceMap.cs" />
     <Compile Include="Configuration\ExternalTablesMap.cs" />
     <Compile Include="Configuration\tblICBrandMap.cs" />
     <Compile Include="Configuration\tblICBuildAssemblyMap.cs" />
@@ -108,6 +109,7 @@
     <Compile Include="Configuration\tblICUnitMeasureMap.cs" />
     <Compile Include="InventoryEntities.cs" />
     <Compile Include="InventoryEntities.Views.cs" />
+    <Compile Include="Metadata\tblICCompanyPreference.cs" />
     <Compile Include="Metadata\ExternalTables.cs" />
     <Compile Include="Metadata\tblICBrand.cs" />
     <Compile Include="Metadata\tblICBuildAssembly.cs" />

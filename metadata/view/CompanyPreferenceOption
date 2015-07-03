@@ -1,0 +1,82 @@
+{
+    "type": "Ext.container.Container",
+    "reference": {
+        "name": "items",
+        "type": "array"
+    },
+    "codeClass": null,
+    "userConfig": {
+        "container|align": "stretch",
+        "designer|userAlias": "iccompanypreferenceoption",
+        "designer|userClassName": "CompanyPreferenceOption",
+        "height": 250,
+        "layout": "vbox",
+        "padding": 5,
+        "width": 400
+    },
+    "name": "MyContainer3",
+    "designerId": "9a6a2577-6d84-4750-a9b9-44a73818b4c2",
+    "viewControllerInstanceId": "c63a9a39-26bd-4c97-bb50-5af71683a279",
+    "viewModelInstanceId": "aac5fff7-afdf-4677-84fc-7a12b28e32b8",
+    "cn": [
+        {
+            "type": "Ext.container.Container",
+            "reference": {
+                "name": "items",
+                "type": "array"
+            },
+            "codeClass": null,
+            "userConfig": {
+                "container|align": "stretch",
+                "designer|displayName": "container",
+                "layout": "vbox"
+            },
+            "name": "MyContainer",
+            "designerId": "62633bca-0b2a-4af7-96df-9e0990d9941b",
+            "cn": [
+                {
+                    "type": "Ext.form.field.ComboBox",
+                    "reference": {
+                        "name": "items",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "columns": [
+                            "[",
+                            "    {",
+                            "\t\tdataIndex: 'strInheritSetup',",
+                            "\t\tdataType: 'string',",
+                            "\t\ttext: 'Inherit Setup',",
+                            "\t\tflex: 1",
+                            "\t},",
+                            "\t{",
+                            "\t\tdataIndex: 'intInheritSetup',",
+                            "\t\tdataType: 'numeric',",
+                            "\t\thidden: true",
+                            "\t}",
+                            "]"
+                        ],
+                        "designer|createAlias": "gridcombobox",
+                        "displayField": "strInheritSetup",
+                        "fieldLabel": "Inherit Setup",
+                        "itemId": "cboInheritSetup",
+                        "valueField": "intInheritSetup"
+                    },
+                    "name": "MyComboBox",
+                    "configAlternates": {
+                        "columns": "array"
+                    },
+                    "designerId": "dacde72c-4e3f-48ae-bc09-c38f011dc625",
+                    "customConfigs": [
+                        {
+                            "group": "(Custom Properties)",
+                            "name": "columns",
+                            "type": "string"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

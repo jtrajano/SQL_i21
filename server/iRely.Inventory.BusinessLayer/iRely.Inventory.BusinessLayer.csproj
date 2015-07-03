@@ -77,6 +77,7 @@
     <Compile Include="Implementation\CommodityAttributeBl.cs" />
     <Compile Include="Implementation\CommodityBl.cs" />
     <Compile Include="Implementation\CommodityUOMBl.cs" />
+    <Compile Include="Implementation\CompanyPreferenceBl.cs" />
     <Compile Include="Implementation\CountGroupBl.cs" />
     <Compile Include="Implementation\DocumentBl.cs" />
     <Compile Include="Implementation\FeedStockCodeBl.cs" />
@@ -102,6 +103,7 @@
     <Compile Include="Implementation\TagBl.cs" />
     <Compile Include="Implementation\UnitMeasureBl.cs" />
     <Compile Include="Interface\IBuildAssemblyBl.cs" />
+    <Compile Include="Interface\ICompanyPreferenceBl.cs" />
     <Compile Include="Interface\IFeedStockCodeBl.cs" />
     <Compile Include="Interface\IFeedStockUOMBl.cs" />
     <Compile Include="Interface\IFuelCategoryBl.cs" />

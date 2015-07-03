@@ -85,6 +85,16 @@ Ext.define('Inventory.controller.Inventory', {
             url: '../Inventory/api/Item/GetEmpty',
             method: 'GET'
         });
+
+        this.companyPreferenceStore = Ext.create('Inventory.store.CompanyPreference');
+        this.companyPreferenceStore.load();
+    },
+
+    getCompanyPreference: function(field) {
+        var me = this,
+            record = me.companyPreferenceStore.getAt(0);
+
+        return record.get(field);
     },
 
     createNumberFormat: function (precision) {
