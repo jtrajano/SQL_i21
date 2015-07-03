@@ -81,8 +81,8 @@ CROSS APPLY
 	WHERE
 		ISH.[ysnPosted] = 1
 		AND ISI.[intLineNo] = SOD.[intSalesOrderDetailId]
-		AND SO.[strOrderStatus]	<> 'Closed'
-		AND SO.[strTransactionType] <> 'Quote'
+		AND SO.[strTransactionType] = 'Order'
+		AND ISI.[intInventoryShipmentItemId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intInventoryShipmentId],0) FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.[intInvoiceId] = tblARInvoice.[intInvoiceId] WHERE tblARInvoice.[ysnPosted] = 1)
 	GROUP BY
 		 ISI.[intInventoryShipmentItemId]
 		,ISI.[intLineNo]
@@ -90,8 +90,8 @@ CROSS APPLY
 		,ISI.[dblQuantity]
 		,ISI.[intItemUOMId]
 		,ISI.[dblUnitPrice]		
-	HAVING
-		SUM(ISNULL(ISI.[dblQuantity],0)) != ISNULL(SOD.[dblQtyOrdered],0)
+	--HAVING
+	--	SUM(ISNULL(ISI.[dblQuantity],0)) != ISNULL(SOD.[dblQtyOrdered],0)
 	) SHP
 	
 UNION ALL
@@ -159,5 +159,5 @@ LEFT OUTER JOIN
 	tblICStorageLocation SL
 		ON SOD.[intStorageLocationId] = SL.[intStorageLocationId] 		
 WHERE
-	SO.[strOrderStatus] <> 'Closed'
-AND SO.[strTransactionType] <> 'Quote'
+	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId WHERE tblARInvoice.[ysnPosted] = 1)
+	AND SO.[strTransactionType] = 'Order'

@@ -45,6 +45,9 @@ SET @IsOpen = (	SELECT COUNT(1)
 						)										
 					)
 					
+IF(NOT EXISTS(SELECT NULL FROM tblICInventoryShipmentItem WHERE intSourceId = @SalesOrderId))
+	SET @IsOpen = 1					
+					
 IF @IsOpen <> 0
 	BEGIN
 		SET @OrderStatus = 'Open'
@@ -77,13 +80,12 @@ FROM
 		SELECT
 			 ISD.[intSourceId]
 			,ISD.[intLineNo]
-			,SUM(ISNULL(ISD.[dblQuantity], 0.00))	[dblQuantity]
+			,SUM(ISNULL((CASE WHEN ISH.[ysnPosted] = 1 THEN ISD.[dblQuantity] ELSE 0.00 END), 0.00))	[dblQuantity]
 		FROM
 			tblICInventoryShipmentItem ISD
 		INNER JOIN
 			tblICInventoryShipment ISH
 				ON ISD.[intInventoryShipmentId] = ISH.[intInventoryShipmentId]
-				AND ISH.[ysnPosted]  = 1
 		WHERE
 			ISD.[intSourceId] = @SalesOrderId
 		GROUP BY
@@ -106,7 +108,9 @@ SET @HasMiscItemInInvoice = (	SELECT COUNT(1)
 													tblARInvoiceDetail
 												WHERE
 													[intSalesOrderDetailId] = tblSOSalesOrderDetail.[intSalesOrderDetailId]
+													AND (intInventoryShipmentId IS NULL OR intInventoryShipmentId = 0)
 												)
+									AND NOT EXISTS(SELECT NULL FROM tblICInventoryShipmentItem WHERE intLineNo = tblSOSalesOrderDetail.[intSalesOrderDetailId])
 								)
 								
 UPDATE
@@ -117,13 +121,12 @@ FROM
 	(
 		SELECT
 			 ISD.[intSalesOrderDetailId]
-			,SUM(ISNULL(ISD.[dblQtyShipped], 0.00))	[dblQuantity]
+			,SUM(ISNULL((CASE WHEN ISH.[ysnPosted] = 1 THEN ISD.[dblQtyShipped] ELSE 0.00 END), 0.00))	[dblQuantity]
 		FROM
 			tblARInvoiceDetail ISD
 		INNER JOIN
 			tblARInvoice ISH
 				ON ISD.[intInvoiceId] = ISH.[intInvoiceId]
-				AND ISH.[ysnPosted]  = 1
 		WHERE
 			(ISD.[intInventoryShipmentId] IS NULL OR ISD.[intInventoryShipmentId] = 0)			
 			AND (ISD.[intSalesOrderDetailId] IS NOT NULL OR ISD.[intSalesOrderDetailId] <> 0)			
@@ -132,30 +135,19 @@ FROM
 	) SHP
 WHERE
 	[intSalesOrderId] = @SalesOrderId
-	AND tblSOSalesOrderDetail.[intSalesOrderDetailId] = SHP.[intSalesOrderDetailId] 	
+	AND tblSOSalesOrderDetail.[intSalesOrderDetailId] = SHP.[intSalesOrderDetailId]
+	AND NOT EXISTS(SELECT NULL FROM tblICInventoryShipmentItem WHERE intLineNo = tblSOSalesOrderDetail.[intSalesOrderDetailId]) 	
 		
 		
 
-DECLARE	@QuantityShipped			NUMERIC(18,6)
-		,@QuantityOrdered			NUMERIC(18,6)
-		,@PartialShipmentCount		INT
+DECLARE	@PartialShipmentCount		INT
 		,@CompletedShipmentCount	INT
 	
-SELECT	@QuantityShipped			= 0.00
-		,@QuantityOrdered			= 0.00
-		,@PartialShipmentCount		= 0
+SELECT	@PartialShipmentCount		= 0
 		,@CompletedShipmentCount	= 0
 			
 
-SELECT 
-	 @QuantityShipped = SUM(ISNULL([dblQtyShipped],0.00))
-	,@QuantityOrdered = SUM(ISNULL([dblQtyOrdered],0.00))
-FROM
-	tblSOSalesOrderDetail
-WHERE
-	[intSalesOrderId] = @SalesOrderId
-
-SET @PartialShipmentCount = (	SELECT COUNT(1) 
+SET @PartialShipmentCount =	(	SELECT COUNT(1) 
 								FROM
 									tblSOSalesOrderDetail
 								WHERE
@@ -163,14 +155,8 @@ SET @PartialShipmentCount = (	SELECT COUNT(1)
 									AND ISNULL([dblQtyShipped],0.00) < ISNULL([dblQtyOrdered],0.00)
 									AND ISNULL([dblQtyShipped],0.00) <> ISNULL([dblQtyOrdered],0.00)
 									AND ISNULL([dblQtyOrdered],0.00) > 0
-									--AND EXISTS(	SELECT NULL 
-									--			FROM
-									--				tblICInventoryShipmentItem
-									--			WHERE
-									--				intLineNo = tblSOSalesOrderDetail.intSalesOrderDetailId
-									--				AND intSourceId = @SalesOrderId
-									--				)
-									)		
+									AND ISNULL([dblQtyShipped],0.00) > 0
+								)		
 
 SET @CompletedShipmentCount = (	SELECT COUNT(1) 
 								FROM
@@ -178,14 +164,7 @@ SET @CompletedShipmentCount = (	SELECT COUNT(1)
 								WHERE
 									[intSalesOrderId] = @SalesOrderId 
 									AND ISNULL([dblQtyShipped],0.00) >= ISNULL([dblQtyOrdered],0.00)									
-									--AND EXISTS(	SELECT NULL 
-									--			FROM
-									--				tblICInventoryShipmentItem
-									--			WHERE
-									--				intLineNo = tblSOSalesOrderDetail.intSalesOrderDetailId
-									--				AND intSourceId = @SalesOrderId
-									--				)
-									)										
+								)										
 		
 IF ((@HasShipment <> 0 OR @HasMiscItemInInvoice <> 0) AND @PartialShipmentCount = 0 AND @CompletedShipmentCount = 0)
 	BEGIN
