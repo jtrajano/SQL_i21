@@ -26,6 +26,10 @@ DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory In-
 -- Get the Inventory Shipment batch number
 DECLARE @strBatchId AS NVARCHAR(40) 
 DECLARE @strItemNo AS NVARCHAR(50)
+DECLARE @intItemId AS INT
+
+DECLARE @LotType_Manual AS INT = 1
+		,@LotType_Serial AS INT = 2
 
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType 
@@ -110,6 +114,69 @@ BEGIN
 	END  
 END   
 
+-- Check if the Shipment quantity matches the total Quantity in the Lot
+BEGIN 
+	SET @strItemNo = NULL 
+	SET @intItemId = NULL 
+
+	DECLARE @dblQuantityShipped AS NUMERIC(18,6)
+			--,@LotQty AS NUMERIC(18,6)
+			,@LotQtyInItemUOM AS NUMERIC(18,6)
+			,@QuantityShippedInItemUOM AS NUMERIC(18,6)
+
+	DECLARE @FormattedReceivedQty AS NVARCHAR(50)
+	DECLARE @FormattedLotQty AS NVARCHAR(50)
+	DECLARE @FormattedDifference AS NVARCHAR(50)
+
+	SELECT	TOP 1 
+			@strItemNo					= Item.strItemNo
+			,@intItemId					= Item.intItemId
+			,@dblQuantityShipped		= Detail.dblQuantity
+			--,@LotQty					= ISNULL(ItemLot.TotalLotQty, 0)
+			,@LotQtyInItemUOM			= ISNULL(ItemLot.TotalLotQtyInDetailItemUOM, 0)
+	FROM	tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem Detail 
+				ON Header.intInventoryShipmentId = Detail.intInventoryShipmentId	
+			INNER JOIN dbo.tblICItem Item
+				ON Item.intItemId = Detail.intItemId
+			LEFT JOIN (
+				SELECT  AggregrateLot.intInventoryShipmentItemId
+						,TotalLotQtyInDetailItemUOM = SUM(
+							dbo.fnCalculateQtyBetweenUOM(
+								ISNULL(AggregrateLot.intItemUOMId, tblICInventoryShipmentItem.intItemUOMId)
+								,tblICInventoryShipmentItem.intItemUOMId
+								,AggregrateLot.dblQuantityShipped
+							)
+						)
+						--,TotalLotQty = SUM(ISNULL(AggregrateLot.dblQuantityShipped, 0))
+				FROM	dbo.tblICInventoryShipment INNER JOIN dbo.tblICInventoryShipmentItem 
+							ON tblICInventoryShipment.intInventoryShipmentId = tblICInventoryShipmentItem.intInventoryShipmentId
+						INNER JOIN dbo.tblICInventoryShipmentItemLot AggregrateLot
+							ON AggregrateLot.intInventoryShipmentItemId = tblICInventoryShipmentItem.intInventoryShipmentItemId
+				WHERE	tblICInventoryShipment.strShipmentNumber = @strTransactionId				
+				GROUP BY AggregrateLot.intInventoryShipmentItemId
+			) ItemLot
+				ON ItemLot.intInventoryShipmentItemId = Detail.intInventoryShipmentItemId	
+
+	WHERE	dbo.fnGetItemLotType(Detail.intItemId) IN (@LotType_Manual, @LotType_Serial)	
+			AND Header.strShipmentNumber = @strTransactionId
+			AND ROUND(ISNULL(ItemLot.TotalLotQtyInDetailItemUOM, 0), 2) <>
+				ROUND(Detail.dblQuantity, 2)
+
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		IF ISNULL(@strItemNo, '') = '' 
+			SET @strItemNo = 'Item with id ' + CAST(@intItemId AS NVARCHAR(50)) 
+
+		SET @FormattedReceivedQty =  CONVERT(NVARCHAR, CAST(@dblQuantityShipped AS MONEY), 1)
+		SET @FormattedLotQty =  CONVERT(NVARCHAR, CAST(@LotQtyInItemUOM AS MONEY), 1)
+		SET @FormattedDifference =  CAST(ABS(@dblQuantityShipped - @LotQtyInItemUOM) AS NVARCHAR(50))
+
+		-- 'The Qty to Ship for {Item} is {Ship Qty}. Total Lot Quantity is {Total Lot Qty}. The difference is {Calculated difference}.'
+		RAISERROR(51132, 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty, @FormattedDifference)  
+		RETURN -1; 
+	END 
+END
+
 -- Get the next batch number
 EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
 IF @@ERROR <> 0 GOTO Post_Exit    
@@ -149,11 +216,27 @@ BEGIN
 	) 
 	SELECT	intItemId					= Detail.intItemId
 			,intItemLocationId			= dbo.fnICGetItemLocation(Detail.intItemId, Header.intShipFromLocationId)
-			,intItemUOMId				= Detail.intItemUOMId
-			,dtmDate					= dbo.fnRemoveTimeOnDate(Header.dtmShipDate)
-			,dblQty						= -1 * ABS(ISNULL(Detail.dblQuantity, 0)) 
-			,dblUOMQty					= ItemUOM.dblUnitQty
-			,dblCost					= 0.00 -- Zero cost. The system will use the cost from the cost-bucket. 
+			,intItemUOMId				=	CASE	WHEN Lot.intLotId IS NULL THEN 
+														ItemUOM.intItemUOMId
+													ELSE
+														LotItemUOM.intItemUOMId
+			 								END
+
+			,dtmDate					=	dbo.fnRemoveTimeOnDate(Header.dtmShipDate)
+			,dblQty						=	-1 *
+											CASE	WHEN  Lot.intLotId IS NULL THEN 
+														ISNULL(Detail.dblQuantity, 0) 
+													ELSE
+														ISNULL(DetailLot.dblQuantityShipped, 0)
+											END
+
+			,dblUOMQty					=	CASE	WHEN  Lot.intLotId IS NULL THEN 
+														ItemUOM.dblUnitQty
+													ELSE
+														LotItemUOM.dblUnitQty
+											END
+
+			,dblCost					= Lot.dblLastCost -- (Last cost is used in case of negative stock).
 			,dblSalesPrice				= 0.00
 			,intCurrencyId				= NULL 
 			,dblExchangeRate			= 1
@@ -171,7 +254,11 @@ BEGIN
 			LEFT JOIN tblICInventoryShipmentItemLot DetailLot 
 				ON DetailLot.intInventoryShipmentItemId = Detail.intInventoryShipmentItemId
 			LEFT JOIN tblICLot Lot 
-				ON Lot.intLotId = DetailLot.intLotId			
+				ON Lot.intLotId = DetailLot.intLotId
+			LEFT JOIN tblICItemUOM LotItemUOM 
+				ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
+			LEFT JOIN tblICItemUOM WeightUOM 
+				ON WeightUOM.intItemUOMId = Lot.intWeightUOMId
 			INNER JOIN vyuICGetShipmentItemSource ItemSource 
 				ON ItemSource.intInventoryShipmentItemId = Detail.intInventoryShipmentItemId
 	WHERE	Header.intInventoryShipmentId = @intTransactionId

@@ -2,10 +2,10 @@
 	[intCompanyPreferenceId] [int] IDENTITY(1,1) NOT NULL,
 	[intBankAccountId] [int] NULL,
 	[strLiabilityAccount] [int] NULL,
-	[strExpenseAccount] [nvarchar](50) NULL,
+	[strExpenseAccount] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intTypeEarningId] [int] NULL,
 	[strAccountId] [int] NULL,
-	[strTimeOff] [NVARCHAR](50) NULL,
+	[strTimeOff] [NVARCHAR](50) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NULL,
  CONSTRAINT [PK_tblPRCompanyPreference1] PRIMARY KEY CLUSTERED 
 (
