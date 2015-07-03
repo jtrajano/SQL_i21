@@ -1679,6 +1679,7 @@
     <Build Include="dbo\Views\vyuPRPaycheckHistory.sql" />
     <None Include="Scripts\Post-Deployment\GL\ReportDataFix.sql" />
     <Build Include="dbo\Functions\fnAPGetPaymentDetailPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCreateInvoiceFromShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
