@@ -27,8 +27,9 @@
     CONSTRAINT [PK_tblWHSKU_intSKUId]  PRIMARY KEY ([intSKUId]),	
 	CONSTRAINT [UQ_tblWHSKU_strSKUNo] UNIQUE ([strSKUNo]),
 	CONSTRAINT [FK_tblWHSKU_tblWHContainer_intContainerId] FOREIGN KEY ([intContainerId]) REFERENCES [tblWHContainer]([intContainerId]), 
-	CONSTRAINT [FK_tblWHSKU_tblICLot_intLotId] FOREIGN KEY ([intLotId]) REFERENCES [tblICLot]([intLotId]), 
 	CONSTRAINT [FK_tblWHSKU_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
+	CONSTRAINT [FK_tblWHSKU_tblICUnitMeasure_intUOMId] FOREIGN KEY ([intItemId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
+	CONSTRAINT [FK_tblWHSKU_tblARCustomer_intOwnerId] FOREIGN KEY ([intItemId]) REFERENCES [tblARCustomer]([intEntityCustomerId]), 
 	CONSTRAINT [FK_tblWHSKU_tblWHSKUStatus_intSKUStatusId] FOREIGN KEY ([intSKUStatusId]) REFERENCES [tblWHSKUStatus]([intSKUStatusId]), 
 
 )
