@@ -92,14 +92,14 @@ AS
 	DECLARE @VendorId			INT
 			,@ItemLocationId	INT
 			,@ItemCategoryId	INT
-			,@ItemCategory		NVARCHAR(100)
+			,@ItemCategory	NVARCHAR(100)
 			,@UOMQuantity		NUMERIC(18,6)
 
 	SELECT
-		@VendorId			= VI.intVendorId
-		,@ItemLocationId	= intItemLocationId
-		,@ItemCategoryId	= I.intCategoryId
-		,@ItemCategory		= C.strCategoryCode
+		@VendorId = VI.intVendorId
+		,@ItemLocationId = intItemLocationId
+		,@ItemCategoryId = I.intCategoryId
+		,@ItemCategory = C.strCategoryCode
 		,@UOMQuantity		= ISNULL(UOM.dblUnitQty,1.00)
 	FROM
 		tblICItem I
@@ -477,7 +477,7 @@ AS
 
 	--Item Special Pricing
 	SET @Price = @UOMQuantity *	
-						(	SELECT 
+					(	SELECT 
 							--dblUnitAfterDiscount
 							(CASE
 								WHEN strDiscountBy = 'Amount'
