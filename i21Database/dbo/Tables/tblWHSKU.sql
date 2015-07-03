@@ -5,7 +5,7 @@
 	[strSKUNo]	NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[intSKUStatusId]	INT NOT NULL,
 	[strLotCode]	NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
-	[dlbQty]	NUMERIC(18,6) NOT NULL,
+	[dblQty]	NUMERIC(18,6) NOT NULL,
 	[dtmReceiveDate]	DATETIME,
 	[dtmProductionDate]	DATETIME,
 	[intItemId]	INT NOT NULL,
