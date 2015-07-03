@@ -1678,6 +1678,7 @@
     <Build Include="dbo\Tables\tblPRCompanyReference.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspARCreateInvoiceFromShipment.sql" />
+    <Build Include="dbo\Functions\fnGetPaymentDetailPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
