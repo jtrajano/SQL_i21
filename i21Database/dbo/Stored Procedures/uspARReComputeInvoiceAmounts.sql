@@ -55,7 +55,8 @@ WHERE
 UPDATE
 	tblARInvoiceDetail
 SET
-	[dblTotalTax] = T.[dblAdjustedTax]
+	 [dblTotalTax]	= T.[dblAdjustedTax]
+	,[dblTotal]		= ROUND(([dblPrice] * [dblQtyShipped]) - (([dblPrice] * [dblQtyShipped]) * (dblDiscount/100.00)),2)
 FROM
 	(
 		SELECT
@@ -75,13 +76,15 @@ WHERE
 UPDATE
 	tblARInvoice
 SET
-	 [dblTax]				= T.[dblTotalTax]
-	,[dblInvoiceSubtotal]	= T.[dblTotal]
+	 [dblTax]				= ROUND(T.[dblTotalTax],2)
+	,[dblInvoiceSubtotal]	= ROUND(T.[dblTotal],2)
+	,[dblDiscount]			= ROUND(T.[dblDiscount],2) 
 FROM
 	(
 		SELECT 
-			 SUM([dblTotalTax])		[dblTotalTax]
-			,SUM([dblTotal])		[dblTotal]
+			 SUM([dblTotalTax])		AS [dblTotalTax]
+			,SUM([dblTotal])		AS [dblTotal]
+			,SUM((([dblPrice] * [dblQtyShipped]) * (dblDiscount/100.00))) AS [dblDiscount]
 			,[intInvoiceId]
 		FROM
 			tblARInvoiceDetail
@@ -99,8 +102,8 @@ WHERE
 UPDATE
 	tblARInvoice
 SET
-	[dblInvoiceTotal]	= ([dblInvoiceSubtotal] + [dblTax] + [dblShipping]) - ([dblPayment] + [dblDiscount])
-	,[dblAmountDue]		= ([dblInvoiceSubtotal] + [dblTax] + [dblShipping]) - ([dblPayment] + [dblDiscount])
+	[dblInvoiceTotal]	= (ROUND([dblInvoiceSubtotal],2) + ROUND([dblTax],2) + ROUND([dblShipping],2)) - (ROUND([dblPayment],2) + ROUND([dblDiscount],2))
+	,[dblAmountDue]		= (ROUND([dblInvoiceSubtotal],2) + ROUND([dblTax],2) + ROUND([dblShipping],2)) - (ROUND([dblPayment],2) + ROUND([dblDiscount],2))
 WHERE
 	[intInvoiceId] = @InvoiceId
 

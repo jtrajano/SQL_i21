@@ -1677,6 +1677,7 @@
     <None Include="Scripts\Post-Deployment\GL\ReportData\BalanceSheetStandard.sql" />
     <Build Include="dbo\Tables\tblPRCompanyReference.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCreateInvoiceFromShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
