@@ -1905,6 +1905,7 @@
     <Build Include="dbo\Tables\tblICCompanyPreference.sql" />
     <Build Include="dbo\Functions\fnAPGetPaymentDetailPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessTransferVoid.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUpdateBatchWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
