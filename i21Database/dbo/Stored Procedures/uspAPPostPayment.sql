@@ -188,7 +188,6 @@ END
 IF (ISNULL(@recap, 0) = 0)
 BEGIN
 
-	--GROUP GL ENTRIES (NOTE: ASK THE DEVELOPER TO DO THIS ON uspGLBookEntries
 	EXEC uspGLBookEntries @GLEntries, @post
 
 	IF @@ERROR <> 0	GOTO Post_Rollback;
