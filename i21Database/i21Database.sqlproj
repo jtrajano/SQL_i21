@@ -1904,6 +1904,7 @@
     <Build Include="dbo\Views\vyuICGetCompactItem.sql" />
     <Build Include="dbo\Tables\tblICCompanyPreference.sql" />
     <Build Include="dbo\Functions\fnAPGetPaymentDetailPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessTransferVoid.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
