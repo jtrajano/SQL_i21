@@ -51,7 +51,7 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	A.intAccountId,
 		[dblDebit]						=	0,
-		[dblCredit]						=	CASE WHEN A.intTransactionType IN (2, 3) THEN A.dblTotal * -1 ELSE A.dblTotal END,
+		[dblCredit]						=	CASE WHEN A.intTransactionType IN (2, 3) AND A.dblTotal > 0 THEN A.dblTotal * -1 ELSE A.dblTotal END,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
 		[strDescription]				=	A.strReference,
@@ -92,7 +92,7 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	B.intAccountId,
-		[dblDebit]						=	CASE WHEN A.intTransactionType IN (2, 3) THEN B.dblTotal * (-1) ELSE B.dblTotal END, --Bill Detail
+		[dblDebit]						=	CASE WHEN A.intTransactionType IN (2, 3) AND A.dblTotal > 0 THEN B.dblTotal * (-1) ELSE B.dblTotal END, --Bill Detail
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
