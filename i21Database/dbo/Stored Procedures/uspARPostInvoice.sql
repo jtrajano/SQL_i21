@@ -28,9 +28,8 @@ SET ANSI_WARNINGS OFF
 --------------------------------------------------------------------------------------------   
 -- Create a unique transaction name. 
 DECLARE @TransactionName AS VARCHAR(500) = 'Invoice Transaction' + CAST(NEWID() AS NVARCHAR(100));
-
+DECLARE @totalRecords INT = 0
 DECLARE @totalInvalid INT = 0
-DECLARE @totalRecords INT = 0	
  
 DECLARE @PostInvoiceData TABLE  (
 	intInvoiceId int PRIMARY KEY,
@@ -57,16 +56,10 @@ DECLARE @SCREEN_NAME NVARCHAR(25) = 'Invoice'
 DECLARE @CODE NVARCHAR(25) = 'AR'
 
 
-
-
 DECLARE @UserEntityID int
 		,@DiscountAccountId int
-				
-		
 SET @UserEntityID = ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE intUserSecurityID = @userId),@userId)
-SET @DiscountAccountId = ISNULL((SELECT strValue FROM tblSMPreferences WHERE strPreference = 'DefaultARDiscountAccount'),'')
-IF @DiscountAccountId IS NULL OR RTRIM(LTRIM(@DiscountAccountId)) = ''
-	SET @DiscountAccountId = NULL
+SET @DiscountAccountId = (SELECT TOP 1 intDiscountAccountId FROM tblARCompanyPreference WHERE intDiscountAccountId IS NOT NULL AND intDiscountAccountId <> 0)
 
 SET @recapId = '1'
 SET @success = 1
@@ -230,7 +223,7 @@ IF @recap = 0
 						AND A.intCompanyLocationId = IST.intLocationId 
 				WHERE 
 					(A.intFreightTermId IS NULL OR A.intFreightTermId = 0) 
-					AND (Detail.intInventoryShipmentId IS NULL OR Detail.intInventoryShipmentId = 0)
+					AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 					AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
 					AND (Detail.intItemId IS NOT NULL OR Detail.intItemId <> 0)
 					AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')
@@ -258,7 +251,7 @@ IF @recap = 0
 						AND A.intCompanyLocationId = IST.intLocationId 
 				WHERE 
 					(Detail.intItemUOMId IS NULL OR Detail.intItemUOMId = 0) 
-					AND (Detail.intInventoryShipmentId IS NULL OR Detail.intInventoryShipmentId = 0)
+					AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 					AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
 					AND (Detail.intItemId IS NOT NULL OR Detail.intItemId <> 0)
 					AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')
@@ -486,7 +479,7 @@ IF @recap = 0
 					ISNULL(dbo.isOpenAccountingDate(A.dtmDate), 0) = 0
 
 			END
-
+		
 		SELECT @totalInvalid = COUNT(*) FROM @InvalidInvoiceData
 
 		IF(@totalInvalid > 0)
@@ -513,23 +506,20 @@ IF @recap = 0
 
 			END
 
-		
 		SELECT @totalRecords = COUNT(*) FROM @PostInvoiceData
 			
-		IF(@totalInvalid >= 1 AND @totalRecords < 1)  
+		IF(@totalInvalid = 1 AND @totalRecords = 0)  
 			BEGIN			
 				DECLARE @ErrorMessage NVARCHAR(100)				
 				SELECT TOP 1 @ErrorMessage = @batchIdUsed + ' : ' + strError FROM @InvalidInvoiceData
-				SET @successfulCount = @totalRecords 
-				SET @invalidCount = @totalInvalid 
-				SET @success = 0 
-				RAISERROR(@ErrorMessage, 11, 1) 				
+				RAISERROR(@ErrorMessage, 11, 1) 
+				SET @success = 0
 				GOTO Post_Exit
 			END
 			
 		IF(@totalRecords = 0 AND @totalInvalid > 1)  
 			BEGIN			
-				SET @success = 0 
+				SET @success = 0
 				GOTO Post_Exit
 			END		
 
@@ -589,7 +579,7 @@ IF @post = 1
 		INNER JOIN
 			tblARInvoice Header
 				ON Detail.intInvoiceId = Header.intInvoiceId
-				AND Header.strTransactionType IN ('Invoice', 'Credit Memo')
+				AND Header.strTransactionType  IN ('Invoice', 'Credit Memo')
 		INNER JOIN
 			@PostInvoiceData P
 				ON Header.intInvoiceId = P.intInvoiceId	
@@ -601,7 +591,7 @@ IF @post = 1
 				ON Detail.intItemId = IST.intItemId 
 				AND Header.intCompanyLocationId = IST.intLocationId 
 		WHERE 
-			(Detail.intInventoryShipmentId IS NULL OR Detail.intInventoryShipmentId = 0)
+			(Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 			AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
 			AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
 			AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')
@@ -642,11 +632,11 @@ IF @post = 1
 					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 					,@UserEntityID
 					
-			--IF(@@ERROR <> 0)  
-			--BEGIN			
-			--	SET @success = 0 
-			--	GOTO Post_Exit
-			--END	
+			IF(@@ERROR <> 0)  
+			BEGIN			
+				SET @success = 0 
+				GOTO Post_Exit
+			END	
 		END
 		
 		BEGIN 
@@ -727,7 +717,7 @@ IF @post = 1
 													ELSE
 														(CASE WHEN B.intAccountId IS NOT NULL AND B.intAccountId <> 0 THEN B.intAccountId ELSE CL.intServiceCharges END)
 												END)
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) END
+				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2)  END
 				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) ELSE 0  END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
@@ -814,7 +804,6 @@ IF @post = 1
 				AND I.strType NOT IN ('Non-Inventory','Service','Other Charge')
 
 			UNION ALL 
-			--CREDIT Shipping
 			SELECT
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
@@ -855,8 +844,8 @@ IF @post = 1
 			WHERE
 				A.dblShipping <> 0.0		
 				
-			UNION ALL 
-			--CREDIT Tax
+		UNION ALL 
+			
 			SELECT			
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
@@ -901,9 +890,8 @@ IF @post = 1
 				tblSMTaxCode TC
 					ON DT.intTaxCodeId = TC.intTaxCodeId	
 			WHERE
-				DT.dblAdjustedTax <> 0.0	
-
-
+				DT.dblAdjustedTax <> 0.0
+				
 			UNION ALL 
 			--DEBIT Discount
 			SELECT			
@@ -999,7 +987,7 @@ IF @post = 1
 					ON A.intInvoiceId = P.intInvoiceId				
 			INNER JOIN
 				tblICInventoryShipmentItem ISD
-					ON 	D.intInventoryShipmentId = ISD.intInventoryShipmentItemId
+					ON 	D.intInventoryShipmentItemId = ISD.intInventoryShipmentItemId
 			INNER JOIN
 				tblICInventoryShipment ISH
 					ON ISD.intInventoryShipmentId = ISH.intInventoryShipmentId
@@ -1009,7 +997,7 @@ IF @post = 1
 					AND ISH.intInventoryShipmentId = ICT.intTransactionId
 					AND ISH.strShipmentNumber = ICT.strTransactionId 
 			WHERE
-				D.intInventoryShipmentId IS NOT NULL AND D.intInventoryShipmentId <> 0
+				D.intInventoryShipmentItemId IS NOT NULL AND D.intInventoryShipmentItemId <> 0
 				AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')
@@ -1062,7 +1050,7 @@ IF @post = 1
 					ON A.intInvoiceId = P.intInvoiceId				
 			INNER JOIN
 				tblICInventoryShipmentItem ISD
-					ON 	D.intInventoryShipmentId = ISD.intInventoryShipmentItemId
+					ON 	D.intInventoryShipmentItemId = ISD.intInventoryShipmentItemId
 			INNER JOIN
 				tblICInventoryShipment ISH
 					ON ISD.intInventoryShipmentId = ISH.intInventoryShipmentId
@@ -1072,12 +1060,10 @@ IF @post = 1
 					AND ISH.intInventoryShipmentId = ICT.intTransactionId
 					AND ISH.strShipmentNumber = ICT.strTransactionId 
 			WHERE
-				D.intInventoryShipmentId IS NOT NULL AND D.intInventoryShipmentId <> 0
+				D.intInventoryShipmentItemId IS NOT NULL AND D.intInventoryShipmentItemId <> 0
 				AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
-				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')									
-		
-		
+				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')		
 		END
 	END   
 
@@ -1085,7 +1071,72 @@ IF @post = 1
 -- If UNPOST, call the Unpost routines  
 --------------------------------------------------------------------------------------------  
 IF @post = 0   
-	BEGIN   		
+	BEGIN   
+		-- Call the unpost routine 
+		--BEGIN			
+		--	DECLARE @intTransactionId INT
+		--			,@strTransactionId NVARCHAR(80);
+
+		--	DECLARE transaction_cursor CURSOR FAST_FORWARD FOR 
+		--	SELECT
+		--		 intInvoiceId 
+		--		,strTransactionId 
+		--	FROM
+		--		@PostInvoiceData 
+		--	ORDER BY
+		--		intInvoiceId 
+
+		--	OPEN transaction_cursor
+
+		--	FETCH NEXT FROM transaction_cursor 
+		--	INTO @intTransactionId, @strTransactionId
+
+		--	WHILE @@FETCH_STATUS = 0
+		--		BEGIN
+
+		--			-- Call the post routine 
+		--			INSERT INTO @GLEntries (
+		--				 dtmDate
+		--				,strBatchId
+		--				,intAccountId
+		--				,dblDebit
+		--				,dblCredit
+		--				,dblDebitUnit
+		--				,dblCreditUnit
+		--				,strDescription
+		--				,strCode
+		--				,strReference
+		--				,intCurrencyId
+		--				,dblExchangeRate
+		--				,dtmDateEntered
+		--				,dtmTransactionDate
+		--				,strJournalLineDescription
+		--				,intJournalLineNo
+		--				,ysnIsUnposted
+		--				,intUserId
+		--				,intEntityId
+		--				,strTransactionId
+		--				,intTransactionId
+		--				,strTransactionType
+		--				,strTransactionForm
+		--				,strModuleName
+		--				,intConcurrencyId
+		--			)
+		--			EXEC	dbo.uspICUnpostCosting
+		--					@intTransactionId
+		--					,@strTransactionId
+		--					,@batchId
+		--					,@UserEntityID
+							
+					
+
+		--		END 
+		--	CLOSE transaction_cursor;
+		--	DEALLOCATE transaction_cursor;
+			
+			
+										
+		--END
 		
 		BEGIN			
 			DECLARE @UnPostInvoiceData TABLE  (
@@ -1095,7 +1146,7 @@ IF @post = 0
 			);
 			
 			INSERT INTO @UnPostInvoiceData(intInvoiceId, strTransactionId)
-			SELECT
+			SELECT DISTINCT
 				 P.intInvoiceId
 				,P.strTransactionId
 			FROM
@@ -1103,7 +1154,7 @@ IF @post = 0
 			INNER JOIN
 				tblARInvoice Header
 					ON Detail.intInvoiceId = Header.intInvoiceId
-					AND Header.strTransactionType IN ('Invoice', 'Credit Memo')
+					AND Header.strTransactionType = 'Invoice'
 			INNER JOIN
 				@PostInvoiceData P
 					ON Header.intInvoiceId = P.intInvoiceId	
@@ -1115,7 +1166,7 @@ IF @post = 0
 					ON Detail.intItemId = IST.intItemId 
 					AND Header.intCompanyLocationId = IST.intLocationId 
 			WHERE 
-				(Detail.intInventoryShipmentId IS NULL OR Detail.intInventoryShipmentId = 0)
+				(Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 				AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
 				AND (Detail.intItemId IS NOT NULL OR Detail.intItemId <> 0)
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')
@@ -1270,11 +1321,11 @@ IF @recap = 1
 IF @recap = 0
 	BEGIN 
 		EXEC dbo.uspGLBookEntries @GLEntries, @post
-		--IF(@@ERROR <> 0)  
-		--	BEGIN			
-		--		SET @success = 0 
-		--		GOTO Post_Exit
-		--	END
+		IF(@@ERROR <> 0)  
+			BEGIN			
+				SET @success = 0 
+				GOTO Post_Exit
+			END
 		 
 		IF @post = 0
 			BEGIN
@@ -1384,7 +1435,7 @@ IF @recap = 0
 			INNER JOIN
 				tblARInvoice Header
 					ON Detail.intInvoiceId = Header.intInvoiceId
-					AND Header.strTransactionType IN ('Invoice', 'Credit Memo')
+					AND Header.strTransactionType = 'Invoice'
 			INNER JOIN
 				@PostInvoiceData P
 					ON Header.intInvoiceId = P.intInvoiceId	
