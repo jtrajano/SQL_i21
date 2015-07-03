@@ -17,7 +17,8 @@ AS
 	SELECT	A.[dblLbsPerUnit], B.[intAccountId], A.[strUOMCode] 
 	FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
 )
-select top 100 percent  
+--*SC*--
+select top 100 percent
 	Cast(Cast(tblGLDetail.dtmDate as Date)as DateTime )as dtmDate
     ,temp.*
     ,tblGLAccount.intAccountUnitId
@@ -86,6 +87,8 @@ ON ISNULL(tblStruct.strAccountId,tblGLDetail.intAccountId)=tblGLDetail.intAccoun
 where tblGLDetail.ysnIsUnposted = 0
 and (cast(floor(cast(dtmDate as float)) as datetime) <= ''12/31/2100'' and
 		1 = CASE WHEN strCode in (''CY'', ''RE'') and cast(floor(cast(dtmDate as float)) as datetime) = ''12/31/2100'' THEN 0 ELSE 1 END)
+--*SCSTART*--
+--Special Case--
 order by strAccountId'
 DECLARE @GLReportDrillDown NVARCHAR(MAX) =  '[{"Control":"lblAccountType","DrillThroughType":0,"Name":"General Ledger by Account ID Detail","DrillThroughFilterType":0,"Filters":null,"id":null},{"Control":"lblAccountGroup","DrillThroughType":0,"Name":"General Ledger by Account ID Detail","DrillThroughFilterType":0,"Filters":null,"id":null},{"Control":"lblAcctDesc","DrillThroughType":0,"Name":"General Ledger by Account ID Detail","DrillThroughFilterType":0,"Filters":null,"id":null}]' 
 DECLARE @GLReportDataSource NVARCHAR(MAX) = 
@@ -95,7 +98,8 @@ AS
 	SELECT	A.[dblLbsPerUnit], B.[intAccountId], A.[strUOMCode] 
 	FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]
 )
-select top 100 percent  
+--*SC*--
+select top 100 percent
 	Cast(Cast(tblGLDetail.dtmDate as Date)as DateTime )as dtmDate
     ,temp.*
     ,tblGLAccount.intAccountUnitId
@@ -164,6 +168,8 @@ ON ISNULL(tblStruct.strAccountId,tblGLDetail.intAccountId)=tblGLDetail.intAccoun
 where tblGLDetail.ysnIsUnposted = 0 and tblGLDetail.strCode != ''AA''
 and (cast(floor(cast(dtmDate as float)) as datetime) <= ''12/31/2100'' and
 		1 = CASE WHEN strCode in (''CY'', ''RE'') and cast(floor(cast(dtmDate as float)) as datetime) = ''12/31/2100'' THEN 0 ELSE 1 END)
+--*SCSTART*--
+--Special Case--
 order by strAccountId'
 --UPDATE THE OPTIONS
 UPDATE o SET o.strSettings = @GLReportOptions
