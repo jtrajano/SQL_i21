@@ -81,7 +81,7 @@ BEGIN TRY
 
 			 if (@RetailPrice IS NOT NULL)  
 	         BEGIN
-	             if (@RetailPrice IS NOT NULL)
+	             if (@StandardCost IS NOT NULL)
  	                 set @SQL1 = @SQL1 + ' , dblSalePrice = ''' + LTRIM(@RetailPrice) + ''''
                  else
 	                set @SQL1 = @SQL1 + ' dblSalePrice = ''' + LTRIM(@RetailPrice) + '''' 
