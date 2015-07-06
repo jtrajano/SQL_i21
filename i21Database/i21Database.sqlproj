@@ -1958,6 +1958,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateApprovalRecords.sql" />
     <None Include="Scripts\Post-Deployment\CT\2_DataMigration.sql" />
     <None Include="Scripts\Post-Deployment\EM\009_UpdateEntityContactTypeData.sql" />
+    <None Include="Scripts\Post-Deployment\EM\010_UpdateVendorAccountNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
