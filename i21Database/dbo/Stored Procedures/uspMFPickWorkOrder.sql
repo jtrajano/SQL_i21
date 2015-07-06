@@ -4,8 +4,11 @@
 	,@intUserId INT
 	,@intBatchId INT
 	,@PickPreference NVARCHAR(50) = ''
+	,@ysnExcessConsumptionAllowed bit=0
 AS
 BEGIN TRY
+
+	Select @ysnExcessConsumptionAllowed=1
 
 	SET QUOTED_IDENTIFIER OFF
 	SET ANSI_NULLS ON
@@ -32,6 +35,10 @@ BEGIN TRY
 		,@dtmCurrentDateTime datetime
 		,@intDayOfYear int
 		,@intConsumptionMethodId int
+		,@intWeightUOMId int
+		,@dblAdjustByQuantity numeric(18,6)
+		,@dblWeightPerQty numeric(18,6)
+		,@intInventoryAdjustmentId int
 
 	Select @dtmCurrentDateTime	=GETDATE()
 	Select @dtmCurrentDate		=CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
@@ -57,6 +64,7 @@ BEGIN TRY
 
 	DECLARE @tblLot TABLE (
 		intLotRecordKey INT Identity(1, 1)
+		,strLotNumber nvarchar(50)
 		,intLotId INT
 		,intItemId INT
 		,dblQty NUMERIC(18, 6)
@@ -212,7 +220,8 @@ BEGIN TRY
 		IF @PickPreference = 'Substitute Item'
 		BEGIN
 			INSERT INTO @tblLot (
-				intLotId
+				strLotNumber
+				,intLotId
 				,intItemId
 				,dblQty
 				,dblIssuedQuantity
@@ -223,7 +232,8 @@ BEGIN TRY
 				,dblSubstituteRatio
 				,dblMaxSubstituteRatio
 				)
-			SELECT L.intLotId
+			SELECT L.strLotNumber
+				,L.intLotId
 				,L.intItemId
 				,(CASE WHEN intWeightUOMId IS NOT NULL THEN dblWeight ELSE dblQty END)
 				,(CASE WHEN intWeightUOMId IS NOT NULL THEN L.dblQty ELSE dblQty/(
@@ -270,7 +280,8 @@ BEGIN TRY
 		END
 
 		INSERT INTO @tblLot (
-			intLotId
+			strLotNumber
+			,intLotId
 			,intItemId
 			,dblQty
 			,dblIssuedQuantity
@@ -279,7 +290,8 @@ BEGIN TRY
 			,intItemIssuedUOMId
 			,ysnSubstituteItem
 			)
-		SELECT L.intLotId
+		SELECT L.strLotNumber
+			,L.intLotId
 			,L.intItemId
 			,(CASE WHEN intWeightUOMId IS NOT NULL THEN dblWeight ELSE dblQty END)
 			,(CASE WHEN intWeightUOMId IS NOT NULL THEN L.dblQty ELSE dblQty/(
@@ -321,6 +333,189 @@ BEGIN TRY
 			AND L.dblQty > 0
 		ORDER BY L.dtmDateCreated ASC
 
+		If Not Exists(Select *from @tblLot) and @ysnExcessConsumptionAllowed=1
+		Begin
+				--*****************************************************
+				--Create staging lot
+				--*****************************************************
+				DECLARE @ItemsThatNeedLotId AS dbo.ItemLotTableType
+
+				CREATE TABLE #GeneratedLotItems (
+					intLotId INT
+					,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+					,intDetailId INT
+					)
+
+				-- Create and validate the lot numbers
+				BEGIN
+					DECLARE @strLifeTimeType NVARCHAR(50)
+						,@intLifeTime INT
+						,@dtmExpiryDate DATETIME
+						,@strLotTracking NVARCHAR(50)
+						,@intItemLocationId int
+						,@strLotNumber nvarchar(50)
+						,@intItemUOMId int
+						,@intSubLocationId int
+
+					SELECT @strLifeTimeType = strLifeTimeType
+						,@intLifeTime = intLifeTime
+						,@strLotTracking = strLotTracking
+					FROM dbo.tblICItem
+					WHERE intItemId = @intItemId
+
+					SELECT @intItemUOMId=intItemUOMId
+					FROM tblICItemUOM 
+					Where ysnStockUnit=1 and intItemId= @intItemId
+
+					IF @strLifeTimeType = 'Years'
+						SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, @dtmCurrentDateTime)
+					ELSE IF @strLifeTimeType = 'Months'
+						SET @dtmExpiryDate = DateAdd(mm, @intLifeTime, @dtmCurrentDateTime)
+					ELSE IF @strLifeTimeType = 'Days'
+						SET @dtmExpiryDate = DateAdd(dd, @intLifeTime, @dtmCurrentDateTime)
+					ELSE IF @strLifeTimeType = 'Hours'
+						SET @dtmExpiryDate = DateAdd(hh, @intLifeTime, @dtmCurrentDateTime)
+					ELSE IF @strLifeTimeType = 'Minutes'
+						SET @dtmExpiryDate = DateAdd(mi, @intLifeTime, @dtmCurrentDateTime)
+					ELSE
+						SET @dtmExpiryDate = DateAdd(yy, 1, @dtmCurrentDateTime)
+
+					SELECT @intItemLocationId = intItemLocationId
+					FROM dbo.tblICItemLocation
+					WHERE intItemId = @intItemId
+
+					IF @strLotTracking <> 'Yes - Serial Number'
+					BEGIN
+						EXEC dbo.uspSMGetStartingNumber 55
+							,@strLotNumber OUTPUT
+					END
+
+					IF @intConsumptionMethodId=2 
+					BEGIN
+						Select @intSubLocationId=intSubLocationId From tblICStorageLocation Where intStorageLocationId =@intStorageLocationId
+					END
+					ELSE
+					BEGIN
+						Select @intStorageLocationId=intNewLotBin from tblSMCompanyLocationSubLocation Where intCompanyLocationId=@intLocationId 
+						Select @intSubLocationId=intSubLocationId From tblICStorageLocation Where intStorageLocationId =@intStorageLocationId
+					END
+
+					INSERT INTO @ItemsThatNeedLotId (
+						intLotId
+						,strLotNumber
+						,strLotAlias
+						,intItemId
+						,intItemLocationId
+						,intSubLocationId
+						,intStorageLocationId
+						,dblQty
+						,intItemUOMId
+						,dblWeight
+						,intWeightUOMId
+						,dtmExpiryDate
+						,dtmManufacturedDate
+						,intOriginId
+						,strBOLNo
+						,strVessel
+						,strReceiptNumber
+						,strMarkings
+						,strNotes
+						,intEntityVendorId
+						,strVendorLotNo
+						,intVendorLocationId
+						,strVendorLocation
+						,intDetailId
+						,ysnProduced
+						)
+					SELECT intLotId = NULL
+						,strLotNumber = @strLotNumber
+						,strLotAlias = NULL
+						,intItemId = @intItemId
+						,intItemLocationId = @intItemLocationId
+						,intSubLocationId = @intSubLocationId
+						,intStorageLocationId = @intStorageLocationId
+						,dblQty = @dblReqQty
+						,intItemUOMId = @intItemUOMId
+						,dblWeight = NULL
+						,intWeightUOMId = NULL
+						,dtmExpiryDate = @dtmExpiryDate
+						,dtmManufacturedDate = @dtmCurrentDateTime
+						,intOriginId = NULL
+						,strBOLNo = NULL
+						,strVessel = NULL
+						,strReceiptNumber = NULL
+						,strMarkings = NULL
+						,strNotes = NULL
+						,intEntityVendorId = NULL
+						,strVendorLotNo = NULL
+						,intVendorLocationId = NULL
+						,strVendorLocation = NULL
+						,intDetailId = @intWorkOrderId
+						,ysnProduced = 1
+
+					EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
+						,@intUserId
+
+				END
+
+				--*****************************************************
+				--End of create staging lot
+				--*****************************************************
+				INSERT INTO @tblLot (
+					strLotNumber
+					,intLotId
+					,intItemId
+					,dblQty
+					,dblIssuedQuantity
+					,dblWeightPerUnit
+					,intItemUOMId
+					,intItemIssuedUOMId
+					,ysnSubstituteItem
+					)
+				SELECT L.strLotNumber
+					,L.intLotId
+					,L.intItemId
+					,(CASE WHEN intWeightUOMId IS NOT NULL THEN dblWeight ELSE dblQty END)
+					,(CASE WHEN intWeightUOMId IS NOT NULL THEN L.dblQty ELSE dblQty/(
+									CASE 
+										WHEN L.dblWeightPerQty = 0
+											OR L.dblWeightPerQty IS NULL
+											THEN 1
+										ELSE L.dblWeightPerQty
+										END
+									) END)
+				
+					,CASE 
+						WHEN L.dblWeightPerQty IS NULL
+							OR L.dblWeightPerQty = 0
+							THEN 1
+						ELSE L.dblWeightPerQty
+						END
+					,CASE 
+						WHEN L.intWeightUOMId IS NULL
+							OR L.intWeightUOMId = 0
+							THEN L.intItemUOMId
+						ELSE L.intWeightUOMId
+						END
+					,L.intItemUOMId
+					,0 AS ysnSubstituteItem
+				FROM dbo.tblICLot L
+				JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId =L.intStorageLocationId  and SL.ysnAllowConsume =1
+				WHERE L.intItemId = @intItemId
+					AND L.intLocationId=@intLocationId
+					AND L.intLotStatusId=1
+					AND dtmExpiryDate >= @dtmCurrentDateTime
+					AND L.intStorageLocationId = (
+						CASE 
+							WHEN @intStorageLocationId IS NULL
+								THEN L.intStorageLocationId
+							ELSE (Case When @intConsumptionMethodId=2 Then @intStorageLocationId Else L.intStorageLocationId End)--By location, then apply location filter
+							END
+						)
+					AND L.dblQty > 0
+				ORDER BY L.dtmDateCreated ASC
+		End
+
 		SELECT @intLotRecordKey = Min(intLotRecordKey)
 		FROM @tblLot
 		WHERE dblQty > 0
@@ -344,7 +539,7 @@ BEGIN TRY
 					SELECT SUM(dblQty)
 					FROM @tblLot
 					HAVING SUM(dblQty) < @dblReqQty
-					)
+					) and @ysnExcessConsumptionAllowed=0
 			BEGIN
 				SELECT @strItemNo = strItemNo
 				FROM dbo.tblICItem
@@ -356,6 +551,45 @@ BEGIN TRY
 						,1
 						,@strItemNo
 						)
+			END
+			ELSE
+			BEGIN
+				SELECT @dblAdjustByQuantity=@dblReqQty-SUM(dblQty)
+				FROM @tblLot
+
+				SELECT @strLotNumber=strLotNumber 
+					,@intWeightUOMId=intItemUOMId
+					,@dblWeightPerQty=dblWeightPerUnit
+				FROM @tblLot
+
+				IF @intConsumptionMethodId=2 
+				BEGIN
+					Select @intSubLocationId=intSubLocationId From tblICStorageLocation Where intStorageLocationId =@intStorageLocationId
+				END
+				ELSE
+				BEGIN
+					Select @intStorageLocationId=intNewLotBin from tblSMCompanyLocationSubLocation Where intCompanyLocationId=@intLocationId 
+					Select @intSubLocationId=intSubLocationId From tblICStorageLocation Where intStorageLocationId =@intStorageLocationId
+				END
+
+				Select @dblAdjustByQuantity=@dblAdjustByQuantity/(Case When @intWeightUOMId is null Then 1 Else @dblWeightPerQty End)
+
+				EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
+						-- Parameters for filtering:
+						@intItemId = @intItemId
+						,@dtmDate = @dtmCurrentDateTime
+						,@intLocationId = @intLocationId
+						,@intSubLocationId = @intSubLocationId
+						,@intStorageLocationId = @intStorageLocationId
+						,@strLotNumber = @strLotNumber	
+						-- Parameters for the new values: 
+						,@dblAdjustByQuantity =@dblAdjustByQuantity
+						,@dblNewUnitCost =NULL
+						-- Parameters used for linking or FK (foreign key) relationships
+						,@intSourceId = 1
+						,@intSourceTransactionTypeId = 8
+						,@intUserId = @intUserId
+						,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 			END
 
 			SELECT @intSequenceNo = Max(intSequenceNo) + 1
