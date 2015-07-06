@@ -1926,6 +1926,7 @@
     <Build Include="dbo\Stored Procedures\uspTRProcessTransportLoad.sql" />
     <Build Include="dbo\Stored Procedures\uspARAddInvoice.sql" />
     <Build Include="dbo\User Defined Types\InvoiceStagingTable.sql" />
+    <Build Include="dbo\Functions\fnCTConvertQuantityToTargetItemUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

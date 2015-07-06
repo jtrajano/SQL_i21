@@ -73,7 +73,7 @@ AS
 													IL.intLocationId			=	CD.intCompanyLocationId		LEFT
 	JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId		=	IL.intStorageLocationId		LEFT
 	JOIN	tblSMFreightTerms				FT	ON	FT.intFreightTermId			=	CD.intFreightTermId			LEFT
-	JOIN	tblSMShipVia					SV	ON	SV.[intEntityShipViaId]				=	CD.intShipViaId				LEFT
+	JOIN	tblSMShipVia					SV	ON	SV.[intEntityShipViaId]		=	CD.intShipViaId				LEFT
 	JOIN	tblCTContractOptHeader			OH  ON	OH.intContractOptHeaderId	=	CD.intContractOptHeaderId	LEFT
 	JOIN	tblCTFreightRate				FR	ON	FR.intFreightRateId			=	CD.intFreightRateId			LEFT
 	JOIN	tblCTRailGrade					RG	ON	RG.intRailGradeId			=	CD.intRailGradeId			LEFT
