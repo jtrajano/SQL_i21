@@ -79,22 +79,57 @@ BEGIN
 	--CREDIT SIDE
 	INSERT INTO @returntable
 	SELECT
+		[dtmDate]					=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
+		[strBatchId]				=	@batchId,
+		[intAccountId]				=	A.intAccountId,
+		[dblDebit]					=	0,
+		[dblCredit]					=	A.dblAmountPaid,
+		[dblDebitUnit]				=	0,
+		[dblCreditUnit]				=	0,
+		[strDescription]			=	A.strNotes,
+		[strCode]					=	'AP',
+		[strReference]				=	C.strVendorId,
+		[intCurrencyId]				=	A.intCurrencyId,
+		[dblExchangeRate]			=	1,
+		[dtmDateEntered]			=	GETDATE(),
+		[dtmTransactionDate]		=	NULL,
+		[strJournalLineDescription]	=	'Posted Payment',
+		[intJournalLineNo]			=	1,
+		[ysnIsUnposted]				=	0,
+		[intUserId]					=	@intUserId,
+		[intEntityId]				=	@intUserId,
+		[strTransactionId]			=	A.strPaymentRecordNum,
+		[intTransactionId]			=	A.intPaymentId,
+		[strTransactionType]		=	@SCREEN_NAME,
+		[strTransactionForm]		=	@SCREEN_NAME,
+		[strModuleName]				=	@MODULE_NAME,
+		[intConcurrencyId]			=	1
+	FROM	[dbo].tblAPPayment A 
+	INNER JOIN tblAPVendor C
+		ON A.intEntityVendorId = C.intEntityVendorId
+	WHERE	A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)
+
+	--Withheld
+	IF (@applyWithHold = 1 AND @WithholdAccount IS NOT NULL AND @WithholdAccount > 0)
+	BEGIN
+		INSERT INTO @returntable
+		SELECT
 			[dtmDate]					=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
 			[strBatchId]				=	@batchId,
-			[intAccountId]				=	A.intAccountId,
+			[intAccountId]				=	@WithholdAccount,
 			[dblDebit]					=	0,
-			[dblCredit]					=	A.dblAmountPaid,
+			[dblCredit]					=	A.dblWithheld,
 			[dblDebitUnit]				=	0,
 			[dblCreditUnit]				=	0,
-			[strDescription]			=	A.strNotes,
+			[strDescription]			=	'Posted Payment - Withheld',
 			[strCode]					=	'AP',
-			[strReference]				=	C.strVendorId,
-			[intCurrencyId]				=	A.intCurrencyId,
+			[strReference]				=	A.strNotes,
+			[intCurrencyId]				=	1,
 			[dblExchangeRate]			=	1,
 			[dtmDateEntered]			=	GETDATE(),
 			[dtmTransactionDate]		=	NULL,
-			[strJournalLineDescription]	=	'Posted Payment',
-			[intJournalLineNo]			=	1,
+			[strJournalLineDescription]	=	'Withheld',
+			[intJournalLineNo]			=	2,
 			[ysnIsUnposted]				=	0,
 			[intUserId]					=	@intUserId,
 			[intEntityId]				=	@intUserId,
@@ -104,114 +139,34 @@ BEGIN
 			[strTransactionForm]		=	@SCREEN_NAME,
 			[strModuleName]				=	@MODULE_NAME,
 			[intConcurrencyId]			=	1
-		FROM	[dbo].tblAPPayment A 
-		INNER JOIN tblAPVendor C
-			ON A.intEntityVendorId = C.intEntityVendorId
+			FROM [dbo].tblAPPayment A INNER JOIN [dbo].tblGLAccount GLAccnt
+					ON A.intAccountId = GLAccnt.intAccountId
+				INNER JOIN tblAPVendor B
+					ON A.intEntityVendorId = B.intEntityVendorId AND B.ysnWithholding = 1
 		WHERE	A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)
+	END
 
-
-		--Withheld
-		IF (@applyWithHold = 1 AND @WithholdAccount IS NOT NULL AND @WithholdAccount > 0)
-		BEGIN
-			INSERT INTO @returntable
-			SELECT
-				[dtmDate]					=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
-				[strBatchId]				=	@batchId,
-				[intAccountId]				=	@WithholdAccount,
-				[dblDebit]					=	0,
-				[dblCredit]					=	A.dblWithheld,
-				[dblDebitUnit]				=	0,
-				[dblCreditUnit]				=	0,
-				[strDescription]			=	'Posted Payment - Withheld',
-				[strCode]					=	'AP',
-				[strReference]				=	A.strNotes,
-				[intCurrencyId]				=	1,
-				[dblExchangeRate]			=	1,
-				[dtmDateEntered]			=	GETDATE(),
-				[dtmTransactionDate]		=	NULL,
-				[strJournalLineDescription]	=	'Withheld',
-				[intJournalLineNo]			=	2,
-				[ysnIsUnposted]				=	0,
-				[intUserId]					=	@intUserId,
-				[intEntityId]				=	@intUserId,
-				[strTransactionId]			=	A.strPaymentRecordNum,
-				[intTransactionId]			=	A.intPaymentId,
-				[strTransactionType]		=	@SCREEN_NAME,
-				[strTransactionForm]		=	@SCREEN_NAME,
-				[strModuleName]				=	@MODULE_NAME,
-				[intConcurrencyId]			=	1
-				FROM [dbo].tblAPPayment A INNER JOIN [dbo].tblGLAccount GLAccnt
-						ON A.intAccountId = GLAccnt.intAccountId
-					INNER JOIN tblAPVendor B
-						ON A.intEntityVendorId = B.intEntityVendorId AND B.ysnWithholding = 1
-			WHERE	A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)
-		END
-
-		--Discount
-		IF(@applyDiscount = 1 AND @DiscountAccount IS NOT NULL AND @DiscountAccount > 0)
-		BEGIN
-			INSERT INTO @returntable
-			SELECT
-				[dtmDate]					=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
-				[strBatchId]				=	@batchId,
-				[intAccountId]				=	@DiscountAccount,
-				[dblDebit]					=	0,
-				[dblCredit]					=	SUM(B.dblDiscount),
-				[dblDebitUnit]				=	0,
-				[dblCreditUnit]				=	0,
-				[strDescription]			=	'Posted Payment - Discount',
-				[strCode]					=	'AP',
-				[strReference]				=	A.strNotes,
-				[intCurrencyId]				=	A.intCurrencyId,
-				[dblExchangeRate]			=	1,
-				[dtmDateEntered]			=	GETDATE(),
-				[dtmTransactionDate]		=	NULL,
-				[strJournalLineDescription]	=	'Discount',
-				[intJournalLineNo]			=	3,
-				[ysnIsUnposted]				=	0,
-				[intUserId]					=	@intUserId,
-				[intEntityId]				=	@intUserId,
-				[strTransactionId]			=	A.strPaymentRecordNum,
-				[intTransactionId]			=	A.intPaymentId,
-				[strTransactionType]		=	@SCREEN_NAME,
-				[strTransactionForm]		=	@SCREEN_NAME,
-				[strModuleName]				=	@MODULE_NAME,
-				[intConcurrencyId]			=	1
-			FROM [dbo].tblAPPayment A 
-					INNER JOIN tblAPPaymentDetail B
-						ON A.intPaymentId = B.intPaymentId
-					INNER JOIN tblAPVendor C
-						ON A.intEntityVendorId = C.intEntityVendorId
-			WHERE	A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)
-			AND 1 = (CASE WHEN B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest) THEN 1 ELSE 0 END)
-			AND B.dblDiscount <> 0 AND B.dblPayment > 0
-			GROUP BY A.[strPaymentRecordNum],
-			A.intPaymentId,
-			C.strVendorId,
-			A.intCurrencyId,
-			A.strNotes,
-			A.dtmDatePaid
-		END
-		
-		---- DEBIT SIDE
+	--Discount
+	IF(@applyDiscount = 1 AND @DiscountAccount IS NOT NULL AND @DiscountAccount > 0)
+	BEGIN
 		INSERT INTO @returntable
-		SELECT	
+		SELECT
 			[dtmDate]					=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
 			[strBatchId]				=	@batchId,
-			[intAccountId]				=	B.intAccountId,
-			[dblDebit]                  =    SUM(dbo.fnAPGetPaymentDetailPayment(B.intPaymentDetailId)),
-			[dblCredit]					=	0,
+			[intAccountId]				=	@DiscountAccount,
+			[dblDebit]					=	0,
+			[dblCredit]					=	SUM(B.dblDiscount),
 			[dblDebitUnit]				=	0,
 			[dblCreditUnit]				=	0,
-			[strDescription]			=	'Posted Payment',
+			[strDescription]			=	'Posted Payment - Discount',
 			[strCode]					=	'AP',
 			[strReference]				=	A.strNotes,
 			[intCurrencyId]				=	A.intCurrencyId,
 			[dblExchangeRate]			=	1,
 			[dtmDateEntered]			=	GETDATE(),
 			[dtmTransactionDate]		=	NULL,
-			[strJournalLineDescription]	=	(SELECT strBillId FROM tblAPBill WHERE intBillId = B.intBillId),
-			[intJournalLineNo]			=	B.intPaymentDetailId,
+			[strJournalLineDescription]	=	'Discount',
+			[intJournalLineNo]			=	3,
 			[ysnIsUnposted]				=	0,
 			[intUserId]					=	@intUserId,
 			[intEntityId]				=	@intUserId,
@@ -221,67 +176,154 @@ BEGIN
 			[strTransactionForm]		=	@SCREEN_NAME,
 			[strModuleName]				=	@MODULE_NAME,
 			[intConcurrencyId]			=	1
-		FROM	[dbo].tblAPPayment A 
-				INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
-				INNER JOIN tblAPVendor D ON A.intEntityVendorId = D.intEntityVendorId 
+		FROM [dbo].tblAPPayment A 
+				INNER JOIN tblAPPaymentDetail B
+					ON A.intPaymentId = B.intPaymentId
+				INNER JOIN tblAPVendor C
+					ON A.intEntityVendorId = C.intEntityVendorId
 		WHERE	A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)
-		AND B.dblPayment <> 0
+		AND 1 = (CASE WHEN B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest) THEN 1 ELSE 0 END)
+		AND B.dblDiscount <> 0 AND B.dblPayment > 0
 		GROUP BY A.[strPaymentRecordNum],
 		A.intPaymentId,
-		B.intBillId,
-		D.strVendorId,
-		A.dtmDatePaid,
+		C.strVendorId,
 		A.intCurrencyId,
 		A.strNotes,
-		B.intPaymentDetailId,
-		A.dblAmountPaid,
-		B.intAccountId
+		A.dtmDatePaid
+	END
 		
-		--Interest
-		IF (@applyInterest = 1 AND @InterestAccount IS NOT NULL AND @InterestAccount > 0)
-		BEGIN
-			INSERT INTO @returntable
-			SELECT
-				[dtmDate]					=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
-				[strBatchId]				=	@batchId,
-				[intAccountId]				=	@InterestAccount,
-				[dblDebit]					=	SUM(B.dblInterest),
-				[dblCredit]					=	0,
-				[dblDebitUnit]				=	0,
-				[dblCreditUnit]				=	0,
-				[strDescription]			=	'Posted Payment - Interest',
-				[strCode]					=	'AP',
-				[strReference]				=	A.strNotes,
-				[intCurrencyId]				=	A.intCurrencyId,
-				[dblExchangeRate]			=	1,
-				[dtmDateEntered]			=	GETDATE(),
-				[dtmTransactionDate]		=	NULL,
-				[strJournalLineDescription]	=	'Interest',
-				[intJournalLineNo]			=	3,
-				[ysnIsUnposted]				=	0,
-				[intUserId]					=	@intUserId,
-				[intEntityId]				=	@intUserId,
-				[strTransactionId]			=	A.strPaymentRecordNum,
-				[intTransactionId]			=	A.intPaymentId,
-				[strTransactionType]		=	@SCREEN_NAME,
-				[strTransactionForm]		=	@SCREEN_NAME,
-				[strModuleName]				=	@MODULE_NAME,
-				[intConcurrencyId]			=	1
-			FROM [dbo].tblAPPayment A 
-					INNER JOIN tblAPPaymentDetail B
-						ON A.intPaymentId = B.intPaymentId
-					INNER JOIN tblAPVendor C
-						ON A.intEntityVendorId = C.intEntityVendorId
-			WHERE	A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)
-			AND 1 = (CASE WHEN B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest) THEN 1 ELSE 0 END)
-			AND B.dblInterest <> 0 AND B.dblPayment > 0
-			GROUP BY A.[strPaymentRecordNum],
-			A.intPaymentId,
-			C.strVendorId,
-			A.intCurrencyId,
-			A.strNotes,
-			A.dtmDatePaid;
-		END
+	---- DEBIT SIDE
+	INSERT INTO @returntable
+	SELECT	
+		[dtmDate]					=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
+		[strBatchId]				=	@batchId,
+		[intAccountId]				=	B.intAccountId,
+		[dblDebit]                  =    SUM(dbo.fnAPGetPaymentDetailPayment(B.intPaymentDetailId)),
+		[dblCredit]					=	0,
+		[dblDebitUnit]				=	0,
+		[dblCreditUnit]				=	0,
+		[strDescription]			=	'Posted Payment',
+		[strCode]					=	'AP',
+		[strReference]				=	A.strNotes,
+		[intCurrencyId]				=	A.intCurrencyId,
+		[dblExchangeRate]			=	1,
+		[dtmDateEntered]			=	GETDATE(),
+		[dtmTransactionDate]		=	NULL,
+		[strJournalLineDescription]	=	(SELECT strBillId FROM tblAPBill WHERE intBillId = B.intBillId),
+		[intJournalLineNo]			=	B.intPaymentDetailId,
+		[ysnIsUnposted]				=	0,
+		[intUserId]					=	@intUserId,
+		[intEntityId]				=	@intUserId,
+		[strTransactionId]			=	A.strPaymentRecordNum,
+		[intTransactionId]			=	A.intPaymentId,
+		[strTransactionType]		=	@SCREEN_NAME,
+		[strTransactionForm]		=	@SCREEN_NAME,
+		[strModuleName]				=	@MODULE_NAME,
+		[intConcurrencyId]			=	1
+	FROM	[dbo].tblAPPayment A 
+			INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+			INNER JOIN tblAPVendor D ON A.intEntityVendorId = D.intEntityVendorId 
+	WHERE	A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)
+	AND B.dblPayment <> 0
+	GROUP BY A.[strPaymentRecordNum],
+	A.intPaymentId,
+	B.intBillId,
+	D.strVendorId,
+	A.dtmDatePaid,
+	A.intCurrencyId,
+	A.strNotes,
+	B.intPaymentDetailId,
+	A.dblAmountPaid,
+	B.intAccountId
+		
+	--Interest
+	IF (@applyInterest = 1 AND @InterestAccount IS NOT NULL AND @InterestAccount > 0)
+	BEGIN
+		INSERT INTO @returntable
+		SELECT
+			[dtmDate]					=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
+			[strBatchId]				=	@batchId,
+			[intAccountId]				=	@InterestAccount,
+			[dblDebit]					=	SUM(B.dblInterest),
+			[dblCredit]					=	0,
+			[dblDebitUnit]				=	0,
+			[dblCreditUnit]				=	0,
+			[strDescription]			=	'Posted Payment - Interest',
+			[strCode]					=	'AP',
+			[strReference]				=	A.strNotes,
+			[intCurrencyId]				=	A.intCurrencyId,
+			[dblExchangeRate]			=	1,
+			[dtmDateEntered]			=	GETDATE(),
+			[dtmTransactionDate]		=	NULL,
+			[strJournalLineDescription]	=	'Interest',
+			[intJournalLineNo]			=	3,
+			[ysnIsUnposted]				=	0,
+			[intUserId]					=	@intUserId,
+			[intEntityId]				=	@intUserId,
+			[strTransactionId]			=	A.strPaymentRecordNum,
+			[intTransactionId]			=	A.intPaymentId,
+			[strTransactionType]		=	@SCREEN_NAME,
+			[strTransactionForm]		=	@SCREEN_NAME,
+			[strModuleName]				=	@MODULE_NAME,
+			[intConcurrencyId]			=	1
+		FROM [dbo].tblAPPayment A 
+				INNER JOIN tblAPPaymentDetail B
+					ON A.intPaymentId = B.intPaymentId
+				INNER JOIN tblAPVendor C
+					ON A.intEntityVendorId = C.intEntityVendorId
+		WHERE	A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)
+		AND 1 = (CASE WHEN B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest) THEN 1 ELSE 0 END)
+		AND B.dblInterest <> 0 AND B.dblPayment > 0
+		GROUP BY A.[strPaymentRecordNum],
+		A.intPaymentId,
+		C.strVendorId,
+		A.intCurrencyId,
+		A.strNotes,
+		A.dtmDatePaid;
+	END
+
+	--OVERPAYMENT
+	IF(EXISTS(SELECT 1 FROM tblAPPayment WHERE dblUnapplied > 0 AND intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)))
+	BEGIN
+		INSERT INTO @returntable
+		SELECT
+			[dtmDate]					=	DATEADD(dd, DATEDIFF(dd, 0, A.[dtmDatePaid]), 0),
+			[strBatchId]				=	@batchId,
+			[intAccountId]				=	(SELECT TOP 1 intAccountId FROM tblAPPaymentDetail WHERE intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)), --use the first AP account only
+			[dblDebit]					=	A.dblUnapplied,
+			[dblCredit]					=	0,
+			[dblDebitUnit]				=	0,
+			[dblCreditUnit]				=	0,
+			[strDescription]			=	'Posted Payment - Overpayment',
+			[strCode]					=	'AP',
+			[strReference]				=	A.strNotes,
+			[intCurrencyId]				=	A.intCurrencyId,
+			[dblExchangeRate]			=	1,
+			[dtmDateEntered]			=	GETDATE(),
+			[dtmTransactionDate]		=	NULL,
+			[strJournalLineDescription]	=	'Overpayment',
+			[intJournalLineNo]			=	3,
+			[ysnIsUnposted]				=	0,
+			[intUserId]					=	@intUserId,
+			[intEntityId]				=	@intUserId,
+			[strTransactionId]			=	A.strPaymentRecordNum,
+			[intTransactionId]			=	A.intPaymentId,
+			[strTransactionType]		=	@SCREEN_NAME,
+			[strTransactionForm]		=	@SCREEN_NAME,
+			[strModuleName]				=	@MODULE_NAME,
+			[intConcurrencyId]			=	1
+		FROM [dbo].tblAPPayment A 
+				INNER JOIN tblAPVendor B
+					ON A.intEntityVendorId = B.intEntityVendorId
+		WHERE	A.intPaymentId IN (SELECT intTransactionId FROM @tmpTransacions)
+		AND A.dblUnapplied > 0
+		GROUP BY A.[strPaymentRecordNum],
+		A.intPaymentId,
+		A.dblUnapplied,
+		A.intCurrencyId,
+		A.strNotes,
+		A.dtmDatePaid;
+	END
 
 	RETURN
 END

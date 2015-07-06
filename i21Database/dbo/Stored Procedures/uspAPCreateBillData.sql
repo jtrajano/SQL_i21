@@ -197,5 +197,5 @@ DECLARE @bill TABLE
 		@userId,
 		@currency
 
-	RETURN;
+	SELECT * FROM @bill
 END

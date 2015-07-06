@@ -267,6 +267,12 @@ BEGIN
 		FROM tblAPPayment A
 		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
 
+		--remove overpayment
+		DELETE A
+		FROM tblAPBill A INNER JOIN tblAPPayment B ON A.strReference = B.strPaymentRecordNum
+		WHERE B.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		AND A.intTransactionType = 8
+
 		IF @@ERROR <> 0 OR @isSuccessful = 0 GOTO Post_Rollback;
 
 	END
@@ -399,6 +405,18 @@ BEGIN
 			A.intPaymentId
 		FROM tblAPPayment A
 		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+
+		--Create overpayment
+		SELECT intPaymentId INTO #tmpPayableIds FROM #tmpPayablePostData
+		DECLARE @payId INT;
+		SELECT TOP 1 @payId = intPaymentId FROM #tmpPayableIds
+		WHILE (@payId IS NOT NULL)
+		BEGIN
+			EXEC uspAPCreateOverpayment @payId, @userId;
+			DELETE FROM #tmpPayableIds WHERE intPaymentId = @payId;
+			SET @payId = NULL;
+			SELECT TOP 1 @payId = intPaymentId FROM #tmpPayableIds
+		END
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
