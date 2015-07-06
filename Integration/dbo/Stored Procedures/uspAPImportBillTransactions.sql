@@ -435,6 +435,8 @@ BEGIN
 				DELETE FROM #tmpBillsPayment WHERE id = @paymentKey
 			END
 
+			EXEC uspAPCreateMissingPaymentOfBills
+
 			--backup data from aptrxmst on one time synchronization
 			INSERT INTO tblAPaptrxmst
 			SELECT

@@ -274,5 +274,6 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateSalesPersonView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateAccountStatusView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateContractView.sql" />
+    <None Include="dbo\Stored Procedures\uspAPCreateMissingPaymentOfBills.sql" />
   </ItemGroup>
 </Project>
