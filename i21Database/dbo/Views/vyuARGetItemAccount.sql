@@ -31,7 +31,7 @@ SELECT
 	END) AS intInventoryAccountId, 
 	(CASE WHEN ISNULL(dbo.fnGetItemGLAccount(I.intItemId, IL.intLocationId, N'Discount Receivable'),0) = 0
 		THEN 
-			(SELECT TOP 1 intDiscountAccountId FROM tblARCompanyPreference WHERE intDiscountAccountId IS NOT NULL AND intDiscountAccountId <> 0)
+			(CASE WHEN ((SELECT TOP 1 ISNULL(strValue,'') FROM tblSMPreferences WHERE strPreference = 'DefaultARDiscountAccount') = '0') OR ((SELECT TOP 1 ISNULL(strValue,'') FROM tblSMPreferences WHERE strPreference = 'DefaultARDiscountAccount') = '') THEN NULL ELSE (SELECT TOP 1 ISNULL(strValue,'') FROM tblSMPreferences WHERE strPreference = 'DefaultARDiscountAccount') END)
 		ELSE
 			dbo.fnGetItemGLAccount(I.intItemId, IL.intLocationId, N'Discount Receivable')				
 	END) AS intDiscountAccountId,
@@ -49,3 +49,5 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	dbo.tblSMCompanyLocation CL
 		ON IL.intLocationId = CL.intCompanyLocationId
+
+	
