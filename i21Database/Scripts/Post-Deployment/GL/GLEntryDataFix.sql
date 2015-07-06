@@ -45,11 +45,12 @@ UPDATE tblGLDetail SET strTransactionType = X.strJournalType,
 	WHERE X.strJournalId = tblGLDetail.strTransactionId AND (strTransactionType IS NULL OR intTransactionId IS NULL)
 	
 	
-UPDATE tblGLDetail SET strDescription = X.strDescription
-	FROM (SELECT strJournalType, intJournalId, strJournalId, strDescription FROM tblGLJournal) X 
-	WHERE X.strJournalId = tblGLDetail.strTransactionId
-	AND strModuleName = 'General Ledger'
-	AND (tblGLDetail.strDescription IS NULL OR tblGLDetail.strDescription = '')
+UPDATE A SET strDescription = B.strDescription
+	FROM tblGLDetail A INNER JOIN tblGLJournal B
+	ON A.strTransactionId = B.strJournalId
+	AND A.strModuleName = 'General Ledger'
+	AND (A.strDescription IS NULL OR A.strDescription = '')
+
 
 
 IF EXISTS(
