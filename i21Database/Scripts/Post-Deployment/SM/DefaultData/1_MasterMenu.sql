@@ -1089,6 +1089,18 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quote Tem
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 12, strCommand = N'AccountsReceivable.view.QuoteTemplate' WHERE strMenuName = 'Quote Template' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bundles' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Bundles', N'Accounts Receivable', @AccountsReceivableParentMenuId, N'Bundles', N'Maintenance', N'Screen', N'AccountsReceivable.view.Bundle', N'small-menu-maintenance', 1, 0, 0, 1, 13, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 13, strCommand = N'AccountsReceivable.view.Bundle' WHERE strMenuName = 'Bundles' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Product Types' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Product Types', N'Accounts Receivable', @AccountsReceivableParentMenuId, N'Product Types', N'Maintenance', N'Screen', N'AccountsReceivable.view.ProductType', N'small-menu-maintenance', 1, 0, 0, 1, 14, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 14, strCommand = N'AccountsReceivable.view.ProductType' WHERE strMenuName = 'Product Types' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tax Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableParentMenuId)	
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 		VALUES ( N'Tax Report', N'Accounts Receivable', @AccountsReceivableParentMenuId, N'Tax Report', N'Report', N'Report', N'Tax Report', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
