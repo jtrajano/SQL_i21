@@ -1909,6 +1909,7 @@
     <Build Include="dbo\Tables\tblLGStockSalesHeader.sql" />
     <Build Include="dbo\Tables\tblLGStockSalesLotDetail.sql" />
     <Build Include="dbo\Tables\tblPRCompanyReference.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTInsertINTOTableFromXML.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
