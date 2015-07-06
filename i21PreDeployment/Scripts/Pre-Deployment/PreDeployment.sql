@@ -86,7 +86,6 @@
 :r .\12_EM\03_EntityCustomerFarmRename_DataFix.sql
 :r .\12_EM\04_EntityLocationTaxCodeUpdate.sql
 :r .\12_EM\05_EntitySplitSchemaUpdate.sql
-:r .\12_EM\06_DeleteOldTables.sql
 :r .\12_EM\07_EntityFarmSchemaUpdate.sql
 --RK
 :r .\13_RK\01_DropTableScript.sql
