@@ -57,6 +57,7 @@ DECLARE @TRAN_TYPE NVARCHAR(25) = 'Payable'
 DECLARE @paymentIds NVARCHAR(MAX) = @param
 DECLARE @validPaymentIds NVARCHAR(MAX)
 DECLARE @GLEntries AS RecapTableType 
+DECLARE @count INT = 0;
 
 SET @recapId = '1'
 

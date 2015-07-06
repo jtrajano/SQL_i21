@@ -1910,6 +1910,10 @@
     <Build Include="dbo\Tables\tblLGStockSalesLotDetail.sql" />
     <Build Include="dbo\Tables\tblPRCompanyReference.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInsertINTOTableFromXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateOverpayment.sql" />
+    <Build Include="dbo\Functions\fnAPGetBillDefaultData.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateBillShipInformation.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateBillData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

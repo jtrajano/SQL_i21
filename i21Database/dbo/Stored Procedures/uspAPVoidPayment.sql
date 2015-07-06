@@ -42,11 +42,12 @@ BEGIN
 					INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
 					INNER JOIN tblAPAppliedPrepaidAndDebit D ON C.intBillId = D.intTransactionId
 					INNER JOIN tblAPBill E ON D.intBillId = E.intBillId
-					WHERE A.intPaymentId IN (6258)
+					WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
 					AND D.dblAmountApplied > 0
-					AND E.ysnPosted = 1))
+					AND E.ysnPosted = 1
+					AND A.ysnPrepay = 1))
 	BEGIN
-		RAISERROR('Void failed. There are bills that applied this payment. Please unpost that first.', 16, 1);
+		RAISERROR('Void failed. There are bills that applied this prepayment. Please unpost that first.', 16, 1);
 	END
 
 	IF @@ERROR != 0
