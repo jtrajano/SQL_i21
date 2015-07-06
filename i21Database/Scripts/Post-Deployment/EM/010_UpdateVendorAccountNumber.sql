@@ -1,5 +1,6 @@
 ﻿PRINT '*** Update Vendor Account Number***'
-IF NOT EXISTS (SELECT TOP 1 1 FROM tblEntityPreferences WHERE strPreference = 'Update Vendor Account Number' AND strValue = '1')
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'ssvndmst') 
+AND NOT EXISTS (SELECT TOP 1 1 FROM tblEntityPreferences WHERE strPreference = 'Update Vendor Account Number' AND strValue = '1')
 BEGIN
 	PRINT '***  Updating Vendor Account Number***'
 
