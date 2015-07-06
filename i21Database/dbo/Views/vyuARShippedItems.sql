@@ -38,7 +38,7 @@ SELECT
 	,SL.[strName]						AS [strStorageLocationName]
 	,T.[intTermID]
 	,T.[strTerm]
-	,S.[intShipViaID] 
+	,S.[intEntityShipViaId] 
 	,S.[strName]						AS [strShipVia]
 	,''									AS [strScaleTicketNumber]
 FROM
@@ -57,7 +57,7 @@ LEFT OUTER JOIN
 		ON SO.[intTermId] = T.[intTermID] 
 LEFT OUTER JOIN
 	tblSMShipVia S
-		ON SO.[intShipViaId] = S.[intShipViaID]
+		ON SO.[intShipViaId] = S.[intEntityShipViaId]
 INNER JOIN
 	tblICItem I
 		ON SOD.[intItemId] = I.[intItemId]
@@ -143,7 +143,7 @@ SELECT
 	,SL.[strName]						AS [strStorageLocationName]
 	,T.[intTermID]
 	,T.[strTerm]
-	,S.[intShipViaID] 
+	,S.[intEntityShipViaId] 
 	,S.[strName]						AS [strShipVia]
 	,''									AS [strScaleTicketNumber]
 FROM
@@ -166,7 +166,7 @@ LEFT OUTER JOIN
 		ON SO.[intTermId] = T.[intTermID] 
 LEFT OUTER JOIN
 	tblSMShipVia S
-		ON SO.[intShipViaId] = S.[intShipViaID] 
+		ON SO.[intShipViaId] = S.[intEntityShipViaId] 
 LEFT OUTER JOIN
 	tblICStorageLocation SL
 		ON SOD.[intStorageLocationId] = SL.[intStorageLocationId]

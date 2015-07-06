@@ -87,6 +87,8 @@
 :r .\12_EM\04_EntityLocationTaxCodeUpdate.sql
 :r .\12_EM\05_EntitySplitSchemaUpdate.sql
 :r .\12_EM\07_EntityFarmSchemaUpdate.sql
+:r .\12_EM\08_EntityShipViaSchemaUpdate.sql
+
 --RK
 :r .\13_RK\01_DropTableScript.sql
 
