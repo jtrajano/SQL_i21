@@ -166,18 +166,13 @@ DECLARE @bill TABLE
 		[intShipViaId]			,
 		[intContactId]			,
 		[intOrderById]			,
-		[intCurrencyId]			,
-		[ysnApproved]			,
-		[ysnForApproval]		,
-		[ysnOrigin]				,
-		[ysnDeleted]			,
-		[dtmDateDeleted]		,
-		[dtmDateCreated]		
+		[intCurrencyId]			
 	)
 	SELECT 
 		@term, 
 		ISNULL(dbo.fnGetDueDateBasedOnTerm(GETDATE(), @term), GETDATE()),
 		@apAccount,
+		@billRecordNumber,
 		@userId,
 		@vendorId,
 		1,
