@@ -77,7 +77,7 @@ GO
 GO
 	PRINT N'Begin updating fiscalyear/period id in tblGLJournal'
 GO
-	EXEC dbo.uspGLImportRecurring
+	--EXEC dbo.uspGLImportRecurring
 GO
 	UPDATE tblGLJournalDetail SET intOriginId = CONVERT(INT, strSourceKey) WHERE strSourceKey IS NOT NULL AND intOriginId IS NULL
 GO
