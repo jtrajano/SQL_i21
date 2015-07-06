@@ -27,6 +27,7 @@ BEGIN
 	DECLARE @amountPaid NUMERIC(18,6) = @payment;
 	DECLARE @withholdAmount NUMERIC(18,6)
 	DECLARE @withholdPercent NUMERIC(18,6)
+	DECLARE @discountAmount NUMERIC(18,6) = 0;
 	DECLARE @paymentMethodId INT = @paymentMethod
 	DECLARE @intBankAccountId INT = @bankAccount;
 	DECLARE @vendorWithhold BIT = 0;
@@ -85,14 +86,23 @@ BEGIN
 		END
 	END
 
+	--Compute Discount Here
+	UPDATE A
+		SET dblDiscount = dbo.fnGetDiscountBasedOnTerm(ISNULL(@datePaid, GETDATE()), A.dtmDate, A.intTermsId, A.dblTotal)
+	FROM tblAPBill A
+	WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId)
+	--Compute Interest Here
+	--UPDATE A
+	--	SET dblInterest = dbo.fnGetDiscountBasedOnTerm(ISNULL(@datePaid, GETDATE()), A.dtmDate, A.intTermsId, A.dblTotal)
+	--FROM tblAPBill A
+	--WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId)
+
+	
 	IF @amountPaid IS NULL
 	BEGIN
 		SET @amountPaid = (SELECT SUM(dblAmountDue) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
+		SET @amountPaid = @amountPaid - (SELECT SUM(dblDiscount) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
 	END
-
-	--Compute Discount Here
-
-	--Compute Interest Here
 
 	--Compute Withheld Here
 	IF @vendorWithhold = 1
