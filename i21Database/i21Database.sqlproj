@@ -1918,6 +1918,10 @@
     <Build Include="dbo\Stored Procedures\uspAPCreateOverpayment.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateBillData.sql" />
     <Build Include="dbo\Tables\tblHDOutOfOfficeReply.sql" />
+    <Build Include="dbo\Tables\tblWHTask.sql" />
+    <Build Include="dbo\Tables\tblWHTaskPriority.sql" />
+    <Build Include="dbo\Tables\tblWHTaskState.sql" />
+    <Build Include="dbo\Tables\tblWHTaskType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
