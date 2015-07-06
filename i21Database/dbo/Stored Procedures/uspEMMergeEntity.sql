@@ -106,7 +106,8 @@ BEGIN
 								from ' + @CurTableName + ' 
 									where ' + @CurTableKey + ' = ' +  @CurMergeId)
 			EXEC('delete from tblEntityType where intEntityId = ' + @CurMergeId + ' and strType = ''' + @CurMergeType + '''' )
-			
+			EXEC('update tblEntityLocation set ysnDefaultLocation = 0 where intEntityId = ' + @CurMergeId)
+			EXEC('update tblEntityToContact set ysnDefaultContact = 0 where intEntityId = ' + @CurMergeId)
 			--PRINT 'Execute relationships'
 			SET @CurStatement = ''
 			WHILE EXISTS(SELECT TOP 1 1 FROM  @RelationShips)
