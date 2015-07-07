@@ -3,9 +3,8 @@
 	[intBankAccountId] [int] NULL,
 	[intLiabilityAccount] [int] NULL,
 	[intExpenseAccount] [int] NULL,
-	[intTypeEarningId] [int] NULL,
-	[intAccountId] [int] NULL,
-	[intTimeOff] [int] NULL,
+	[intEarningAccountId] [int] NULL,
+	[intDeductionAccountId] [int] NULL,
 	[intConcurrencyId] [int] NULL,
  CONSTRAINT [PK_tblPRCompanyPreference] PRIMARY KEY CLUSTERED 
 (
