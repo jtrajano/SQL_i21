@@ -1934,6 +1934,7 @@
     <Build Include="dbo\Tables\tblCTPriceFixationDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSPAuditLogs.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePrepayAndDebitMemo.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendRequests.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
