@@ -246,15 +246,15 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         store: '{lot}',
                         defaultFilters: [{
                             column: 'intItemId',
-                            value: '{currentShipmentItem.intItemId}',
+                            value: '{grdInventoryShipment.selection.intItemId}',
                             conjunction: 'and'
                         },{
                             column: 'intSubLocationId',
-                            value: '{currentShipmentItem.intSubLocationId}',
+                            value: '{grdInventoryShipment.selection.intSubLocationId}',
                             conjunction: 'and'
                         },{
                             column: 'intOwnershipType',
-                            value: '{currentShipmentItem.intOwnershipType}',
+                            value: '{grdInventoryShipment.selection.intOwnershipType}',
                             conjunction: 'and'
                         }]
                     }

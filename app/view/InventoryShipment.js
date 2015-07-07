@@ -1370,6 +1370,11 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                     hidden: true
                                                                                 },
                                                                                 {
+                                                                                    dataIndex: 'intItemId',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
                                                                                     dataIndex: 'intSubLocationId',
                                                                                     dataType: 'numeric',
                                                                                     hidden: true
