@@ -243,7 +243,7 @@ BEGIN
 														ELSE
 															LotItemUOM.dblUnitQty
 												END
-				,dblCost                    = Lot.dblLastCost
+				,dblCost                    = ISNULL(Lot.dblLastCost, 0)
 				,dblSalesPrice              = 0.00
 				,intCurrencyId              = NULL 
 				,dblExchangeRate            = 1
@@ -352,7 +352,7 @@ BEGIN
 														ELSE
 															LotItemUOM.dblUnitQty
 												END
-				,dblCost                    = Lot.dblLastCost
+				,dblCost                    = ISNULL(Lot.dblLastCost, 0)
 				,dblSalesPrice              = 0.00
 				,intCurrencyId              = NULL 
 				,dblExchangeRate            = 1
