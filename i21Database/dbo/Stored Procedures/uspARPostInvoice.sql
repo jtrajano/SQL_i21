@@ -127,23 +127,23 @@ IF(@exclude IS NOT NULL)
 		WHERE EXISTS(SELECT * FROM @InvoicesExclude B WHERE A.intInvoiceId = B.intInvoiceId)
 	END
 	
----- Get the next batch number
---IF(@batchId IS NULL AND @param IS NOT NULL AND @param <> 'all')
---	BEGIN
---		SELECT TOP 1
---			@batchId = GL.strBatchId
---		FROM
---			tblGLDetailRecap GL
---		INNER JOIN 
---			@PostInvoiceData I
---				ON GL.intTransactionId = I.intInvoiceId 
---				AND GL.strTransactionId = I.strTransactionId
---		WHERE
---			GL.strTransactionType IN ('Credit Memo', 'Invoice', 'Overpayment', 'Prepayment')
---			AND	GL.strModuleName = @MODULE_NAME
---	END
+-- Get the next batch number
+IF(@batchId IS NULL AND @param IS NOT NULL AND @param <> 'all')
+	BEGIN
+		SELECT TOP 1
+			@batchId = GL.strBatchId
+		FROM
+			tblGLDetailRecap GL
+		INNER JOIN 
+			@PostInvoiceData I
+				ON GL.intTransactionId = I.intInvoiceId 
+				AND GL.strTransactionId = I.strTransactionId
+		WHERE
+			GL.strTransactionType IN ('Credit Memo', 'Invoice', 'Overpayment', 'Prepayment')
+			AND	GL.strModuleName = @MODULE_NAME
+	END
 
---IF(@batchId IS NULL)
+IF(@batchId IS NULL)
 	EXEC uspSMGetStartingNumber 3, @batchId OUT
 
 SET @batchIdUsed = @batchId
@@ -572,7 +572,7 @@ IF @post = 1
 			,IST.intItemLocationId
 			,Detail.intItemUOMId  
 			,Header.dtmShipDate
-			,(Detail.dblQtyShipped * ItemUOM.dblUnitQty) * (CASE WHEN Header.strTransactionType = 'Invoice' THEN -1 ELSE 1 END)
+			,Detail.dblQtyShipped * (CASE WHEN Header.strTransactionType = 'Invoice' THEN -1 ELSE 1 END)
 			,ItemUOM.dblUnitQty
 			,IST.dblLastCost
 			,Detail.dblPrice 
@@ -957,8 +957,8 @@ IF @post = 1
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intCOGSAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ROUND((ABS(ICT.dblQty) * ICT.dblCost),2) ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ROUND((ABS(ICT.dblQty) * ICT.dblCost),2) END
+				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ROUND((ISD.dblQuantity * ICT.dblCost),2) ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ROUND((ISD.dblQuantity * ICT.dblCost),2) END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -1021,8 +1021,8 @@ IF @post = 1
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intInventoryInTransitAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ROUND((ABS(ICT.dblQty) * ICT.dblCost),2) END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ROUND((ABS(ICT.dblQty) *  ICT.dblCost),2) ELSE 0 END
+				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ROUND((ISD.dblQuantity * ICT.dblCost),2) END
+				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ROUND((ISD.dblQuantity * ICT.dblCost),2) ELSE 0 END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -1176,506 +1176,72 @@ IF @post = 0
 																
 		END		
 		
-		--BEGIN 
-		--	INSERT INTO @GLEntries(
-		--		 dtmDate
-		--		,strBatchId
-		--		,intAccountId
-		--		,dblDebit
-		--		,dblCredit
-		--		,dblDebitUnit
-		--		,dblCreditUnit
-		--		,strDescription
-		--		,strCode
-		--		,strReference
-		--		,intCurrencyId
-		--		,dblExchangeRate
-		--		,dtmDateEntered
-		--		,dtmTransactionDate
-		--		,strJournalLineDescription
-		--		,intJournalLineNo
-		--		,ysnIsUnposted
-		--		,intUserId
-		--		,intEntityId
-		--		,strTransactionId
-		--		,intTransactionId
-		--		,strTransactionType
-		--		,strTransactionForm
-		--		,strModuleName
-		--		,intConcurrencyId
-		--	)
-		--	SELECT	
-		--		 GL.dtmDate
-		--		,@batchId
-		--		,GL.intAccountId
-		--		,dblDebit						= GL.dblCredit
-		--		,dblCredit						= GL.dblDebit
-		--		,dblDebitUnit					= GL.dblCreditUnit
-		--		,dblCreditUnit					= GL.dblDebitUnit
-		--		,GL.strDescription
-		--		,GL.strCode
-		--		,GL.strReference
-		--		,GL.intCurrencyId
-		--		,GL.dblExchangeRate
-		--		,dtmDateEntered					= GETDATE()
-		--		,GL.dtmTransactionDate
-		--		,GL.strJournalLineDescription
-		--		,GL.intJournalLineNo 
-		--		,ysnIsUnposted					= 1
-		--		,intUserId						= @userId
-		--		,intEntityId					= @UserEntityID
-		--		,GL.strTransactionId
-		--		,GL.intTransactionId
-		--		,GL.strTransactionType
-		--		,GL.strTransactionForm
-		--		,GL.strModuleName
-		--		,GL.intConcurrencyId
-		--	FROM
-		--		tblGLDetail GL
-		--	INNER JOIN
-		--		@PostInvoiceData P
-		--			ON GL.intTransactionId = P.intInvoiceId 
-		--			AND GL.strTransactionId = P.strTransactionId
-		--	WHERE
-		--		GL.ysnIsUnposted = 0
-		--	ORDER BY
-		--		GL.intGLDetailId		
-						
-		--END
-
 		BEGIN 
-			-- Call the post routine 
-			INSERT INTO @GLEntries (
-				[dtmDate] 
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
+			INSERT INTO @GLEntries(
+				 dtmDate
+				,strBatchId
+				,intAccountId
+				,dblDebit
+				,dblCredit
+				,dblDebitUnit
+				,dblCreditUnit
+				,strDescription
+				,strCode
+				,strReference
+				,intCurrencyId
+				,dblExchangeRate
+				,dtmDateEntered
+				,dtmTransactionDate
+				,strJournalLineDescription
+				,intJournalLineNo
+				,ysnIsUnposted
+				,intUserId
+				,intEntityId
+				,strTransactionId
+				,intTransactionId
+				,strTransactionType
+				,strTransactionForm
+				,strModuleName
+				,intConcurrencyId
 			)
-			--DEBIT Total
-			SELECT
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
-				,strBatchID					= @batchId
-				,intAccountId				= A.intAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  0 ELSE ROUND(A.dblInvoiceTotal,2) END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  ROUND(A.dblInvoiceTotal,2) ELSE 0 END
-				,dblDebitUnit				= 0
-				,dblCreditUnit				= 0				
-				,strDescription				= A.strComments
-				,strCode					= @CODE
-				,strReference				= C.strCustomerNumber
-				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
-				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-				,intJournalLineNo			= A.intInvoiceId
-				,ysnIsUnposted				= 0
-				,intUserId					= @userId
-				,intEntityId				= @UserEntityID				
-				,strTransactionId			= A.strInvoiceNumber
-				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= A.strTransactionType
-				,strTransactionForm			= @SCREEN_NAME
-				,strModuleName				= @MODULE_NAME
-				,intConcurrencyId			= 1				 
+			SELECT	
+				 GL.dtmDate
+				,@batchId
+				,GL.intAccountId
+				,dblDebit						= GL.dblCredit
+				,dblCredit						= GL.dblDebit
+				,dblDebitUnit					= GL.dblCreditUnit
+				,dblCreditUnit					= GL.dblDebitUnit
+				,GL.strDescription
+				,GL.strCode
+				,GL.strReference
+				,GL.intCurrencyId
+				,GL.dblExchangeRate
+				,dtmDateEntered					= GETDATE()
+				,GL.dtmTransactionDate
+				,GL.strJournalLineDescription
+				,GL.intJournalLineNo 
+				,ysnIsUnposted					= 1
+				,intUserId						= @userId
+				,intEntityId					= @UserEntityID
+				,GL.strTransactionId
+				,GL.intTransactionId
+				,GL.strTransactionType
+				,GL.strTransactionForm
+				,GL.strModuleName
+				,GL.intConcurrencyId
 			FROM
-				tblARInvoice A
-			LEFT JOIN 
-				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId 			
-			INNER JOIN 
-				@PostInvoiceData	P
-					ON A.intInvoiceId = P.intInvoiceId
-					
-			--CREDIT MISC
-			UNION ALL 
-			SELECT
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
-				,strBatchID					= @batchId
-				,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))) 
-													AND B.intSalesAccountId IS NOT NULL
-													AND B.intSalesAccountId <> 0
-													THEN
-														B.intSalesAccountId
-													ELSE
-														(CASE WHEN B.intAccountId IS NOT NULL AND B.intAccountId <> 0 THEN B.intAccountId ELSE CL.intServiceCharges END)
-												END)
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) ELSE 0  END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) END
-				,dblDebitUnit				= 0
-				,dblCreditUnit				= 0				
-				,strDescription				= A.strComments
-				,strCode					= @CODE
-				,strReference				= C.strCustomerNumber
-				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
-				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-				,intJournalLineNo			= A.intInvoiceId
-				,ysnIsUnposted				= 0
-				,intUserId					= @userId
-				,intEntityId				= @UserEntityID				
-				,strTransactionId			= A.strInvoiceNumber
-				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= A.strTransactionType
-				,strTransactionForm			= @SCREEN_NAME
-				,strModuleName				= @MODULE_NAME
-				,intConcurrencyId			= 1	
-			FROM
-				tblARInvoice A 
-			LEFT JOIN
-				tblARInvoiceDetail B
-					ON A.intInvoiceId = B.intInvoiceId
-			LEFT JOIN 
-				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId		
-			INNER JOIN 
-				@PostInvoiceData	P
-					ON A.intInvoiceId = P.intInvoiceId
-			LEFT OUTER JOIN
-				tblSMCompanyLocation CL
-					ON A.intCompanyLocationId = CL.intCompanyLocationId			
-			WHERE 
-				(B.intItemId IS NULL OR B.intItemId = 0)
-				OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge')))
-
-			--CREDIT SALES
-			UNION ALL 
-			SELECT			
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
-				,strBatchID					= @batchId
-				,intAccountId				= B.intSalesAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) ELSE  0 END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) END
-				,dblDebitUnit				= 0
-				,dblCreditUnit				= 0				
-				,strDescription				= A.strComments
-				,strCode					= @CODE
-				,strReference				= C.strCustomerNumber
-				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
-				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-				,intJournalLineNo			= A.intInvoiceId
-				,ysnIsUnposted				= 0
-				,intUserId					= @userId
-				,intEntityId				= @UserEntityID				
-				,strTransactionId			= A.strInvoiceNumber
-				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= A.strTransactionType
-				,strTransactionForm			= @SCREEN_NAME
-				,strModuleName				= @MODULE_NAME
-				,intConcurrencyId			= 1	
-			FROM
-				tblARInvoice A 
-			LEFT JOIN
-				tblARInvoiceDetail B
-					ON A.intInvoiceId = B.intInvoiceId
-			LEFT JOIN 
-				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId			
-			INNER JOIN 
-				@PostInvoiceData	P
-					ON A.intInvoiceId = P.intInvoiceId
+				tblGLDetail GL
 			INNER JOIN
-				tblICItem I
-					ON B.intItemId = I.intItemId 
-			WHERE 
-				(B.intItemId IS NOT NULL OR B.intItemId <> 0)
-				AND I.strType NOT IN ('Non-Inventory','Service','Other Charge')
-
-			UNION ALL 
-			--CREDIT Shipping
-			SELECT
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
-				,strBatchID					= @batchId
-				,intAccountId				= L.intFreightIncome
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ROUND(A.dblShipping,2) ELSE 0  END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ROUND(A.dblShipping,2) END
-				,dblDebitUnit				= 0
-				,dblCreditUnit				= 0				
-				,strDescription				= A.strComments
-				,strCode					= @CODE
-				,strReference				= C.strCustomerNumber
-				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
-				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-				,intJournalLineNo			= A.intInvoiceId
-				,ysnIsUnposted				= 0
-				,intUserId					= @userId
-				,intEntityId				= @UserEntityID				
-				,strTransactionId			= A.strInvoiceNumber
-				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= A.strTransactionType
-				,strTransactionForm			= @SCREEN_NAME
-				,strModuleName				= @MODULE_NAME
-				,intConcurrencyId			= 1
-			FROM
-				tblARInvoice A 
-			LEFT JOIN 
-				tblARCustomer C
-					ON A.[intEntityCustomerId] = C.intEntityCustomerId	
-			INNER JOIN
-				tblSMCompanyLocation L
-					ON A.intCompanyLocationId = L.intCompanyLocationId	
-			INNER JOIN 
-				@PostInvoiceData	P
-					ON A.intInvoiceId = P.intInvoiceId	
+				@PostInvoiceData P
+					ON GL.intTransactionId = P.intInvoiceId 
+					AND GL.strTransactionId = P.strTransactionId
 			WHERE
-				A.dblShipping <> 0.0		
-				
-			UNION ALL 
-			--CREDIT Tax
-			SELECT			
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
-				,strBatchID					= @batchId
-				,intAccountId				= ISNULL(DT.intSalesTaxAccountId,TC.intSalesTaxAccountId)
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ROUND(DT.dblAdjustedTax,2) ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ROUND(DT.dblAdjustedTax,2) END
-				,dblDebitUnit				= 0
-				,dblCreditUnit				= 0				
-				,strDescription				= A.strComments
-				,strCode					= @CODE
-				,strReference				= C.strCustomerNumber
-				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
-				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-				,intJournalLineNo			= A.intInvoiceId
-				,ysnIsUnposted				= 0
-				,intUserId					= @userId
-				,intEntityId				= @UserEntityID				
-				,strTransactionId			= A.strInvoiceNumber
-				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= A.strTransactionType
-				,strTransactionForm			= @SCREEN_NAME
-				,strModuleName				= @MODULE_NAME
-				,intConcurrencyId			= 1
-			FROM
-				tblARInvoiceDetailTax DT
-			INNER JOIN
-				tblARInvoiceDetail D
-					ON DT.intInvoiceDetailId = D.intInvoiceDetailId
-			INNER JOIN			
-				tblARInvoice A 
-					ON D.intInvoiceId = A.intInvoiceId
-			INNER JOIN
-				tblARCustomer C
-					ON A.intEntityCustomerId = C.intEntityCustomerId
-			INNER JOIN 
-				@PostInvoiceData	P
-					ON A.intInvoiceId = P.intInvoiceId				
-			LEFT OUTER JOIN
-				tblSMTaxCode TC
-					ON DT.intTaxCodeId = TC.intTaxCodeId	
-			WHERE
-				DT.dblAdjustedTax <> 0.0	
-
-
-			UNION ALL 
-			--DEBIT Discount
-			SELECT			
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
-				,strBatchID					= @batchId
-				,intAccountId				= ISNULL(IST.intDiscountAccountId, @DiscountAccountId)
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ROUND(((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)),2) END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ROUND(((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)),2) ELSE 0 END
-				,dblDebitUnit				= 0
-				,dblCreditUnit				= 0				
-				,strDescription				= A.strComments
-				,strCode					= @CODE
-				,strReference				= C.strCustomerNumber
-				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
-				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-				,intJournalLineNo			= A.intInvoiceId
-				,ysnIsUnposted				= 0
-				,intUserId					= @userId
-				,intEntityId				= @UserEntityID				
-				,strTransactionId			= A.strInvoiceNumber
-				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= A.strTransactionType
-				,strTransactionForm			= @SCREEN_NAME
-				,strModuleName				= @MODULE_NAME
-				,intConcurrencyId			= 1
-			FROM
-				tblARInvoiceDetail D
-			INNER JOIN			
-				tblARInvoice A 
-					ON D.intInvoiceId = A.intInvoiceId
-			LEFT OUTER JOIN
-				vyuARGetItemAccount IST
-					ON D.intItemId = IST.intItemId 
-					AND A.intCompanyLocationId = IST.intLocationId 
-			INNER JOIN
-				tblARCustomer C
-					ON A.intEntityCustomerId = C.intEntityCustomerId
-			INNER JOIN 
-				@PostInvoiceData	P
-					ON A.intInvoiceId = P.intInvoiceId					
-			WHERE
-				((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) <> 0.0
-
-
-			UNION ALL 
-			--DEBIT COGS - SHIPPED
-			SELECT			
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
-				,strBatchID					= @batchId
-				,intAccountId				= IST.intCOGSAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ROUND((ABS(ICT.dblQty) * ICT.dblCost),2) END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ROUND((ABS(ICT.dblQty) * ICT.dblCost),2) ELSE 0 END
-				,dblDebitUnit				= 0
-				,dblCreditUnit				= 0				
-				,strDescription				= A.strComments
-				,strCode					= @CODE
-				,strReference				= C.strCustomerNumber
-				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
-				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-				,intJournalLineNo			= A.intInvoiceId
-				,ysnIsUnposted				= 0
-				,intUserId					= @userId
-				,intEntityId				= @UserEntityID				
-				,strTransactionId			= A.strInvoiceNumber
-				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= A.strTransactionType
-				,strTransactionForm			= @SCREEN_NAME
-				,strModuleName				= @MODULE_NAME
-				,intConcurrencyId			= 1
-			FROM
-				tblARInvoiceDetail D
-			INNER JOIN			
-				tblARInvoice A 
-					ON D.intInvoiceId = A.intInvoiceId
-					INNER JOIN
-			tblICItemUOM ItemUOM 
-				ON ItemUOM.intItemUOMId = D.intItemUOMId
-			LEFT OUTER JOIN
-				vyuARGetItemAccount IST
-					ON D.intItemId = IST.intItemId 
-					AND A.intCompanyLocationId = IST.intLocationId 
-			INNER JOIN
-				tblARCustomer C
-					ON A.intEntityCustomerId = C.intEntityCustomerId					
-			INNER JOIN 
-				@PostInvoiceData	P
-					ON A.intInvoiceId = P.intInvoiceId				
-			INNER JOIN
-				tblICInventoryShipmentItem ISD
-					ON 	D.intInventoryShipmentId = ISD.intInventoryShipmentItemId
-			INNER JOIN
-				tblICInventoryShipment ISH
-					ON ISD.intInventoryShipmentId = ISH.intInventoryShipmentId
-			INNER JOIN
-				tblICInventoryTransaction ICT
-					ON ISD.intInventoryShipmentItemId = ICT.intTransactionDetailId 
-					AND ISH.intInventoryShipmentId = ICT.intTransactionId
-					AND ISH.strShipmentNumber = ICT.strTransactionId
-					AND ISNULL(ICT.ysnIsUnposted,0) = 0 
-			WHERE
-				D.intInventoryShipmentId IS NOT NULL AND D.intInventoryShipmentId <> 0
-				AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
-				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
-				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')
-				
-			UNION ALL 
-			--CREDIT Inventory In-Transit - SHIPPED
-			SELECT			
-				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
-				,strBatchID					= @batchId
-				,intAccountId				= IST.intInventoryInTransitAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ROUND((ABS(ICT.dblQty) * ICT.dblCost),2) ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ROUND((ABS(ICT.dblQty) * ICT.dblCost),2) END
-				,dblDebitUnit				= 0
-				,dblCreditUnit				= 0				
-				,strDescription				= A.strComments
-				,strCode					= @CODE
-				,strReference				= C.strCustomerNumber
-				,intCurrencyId				= A.intCurrencyId 
-				,dblExchangeRate			= 1
-				,dtmDateEntered				= GETDATE()
-				,dtmTransactionDate			= A.dtmDate
-				,strJournalLineDescription	= 'Posted ' + A.strTransactionType 
-				,intJournalLineNo			= A.intInvoiceId
-				,ysnIsUnposted				= 0
-				,intUserId					= @userId
-				,intEntityId				= @UserEntityID				
-				,strTransactionId			= A.strInvoiceNumber
-				,intTransactionId			= A.intInvoiceId
-				,strTransactionType			= A.strTransactionType
-				,strTransactionForm			= @SCREEN_NAME
-				,strModuleName				= @MODULE_NAME
-				,intConcurrencyId			= 1
-			FROM
-				tblARInvoiceDetail D
-			INNER JOIN			
-				tblARInvoice A 
-					ON D.intInvoiceId = A.intInvoiceId
-					INNER JOIN
-			tblICItemUOM ItemUOM 
-				ON ItemUOM.intItemUOMId = D.intItemUOMId
-			LEFT OUTER JOIN
-				vyuARGetItemAccount IST
-					ON D.intItemId = IST.intItemId 
-					AND A.intCompanyLocationId = IST.intLocationId 
-			INNER JOIN
-				tblARCustomer C
-					ON A.intEntityCustomerId = C.intEntityCustomerId					
-			INNER JOIN 
-				@PostInvoiceData	P
-					ON A.intInvoiceId = P.intInvoiceId				
-			INNER JOIN
-				tblICInventoryShipmentItem ISD
-					ON 	D.intInventoryShipmentId = ISD.intInventoryShipmentItemId
-			INNER JOIN
-				tblICInventoryShipment ISH
-					ON ISD.intInventoryShipmentId = ISH.intInventoryShipmentId
-			INNER JOIN
-				tblICInventoryTransaction ICT
-					ON ISD.intInventoryShipmentItemId = ICT.intTransactionDetailId 
-					AND ISH.intInventoryShipmentId = ICT.intTransactionId
-					AND ISH.strShipmentNumber = ICT.strTransactionId
-					AND ISNULL(ICT.ysnIsUnposted,0) = 0  
-			WHERE
-				D.intInventoryShipmentId IS NOT NULL AND D.intInventoryShipmentId <> 0
-				AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
-				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
-				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')									
-		
-		
+				GL.ysnIsUnposted = 0
+			ORDER BY
+				GL.intGLDetailId		
+						
 		END		
-				
 	END   
 
 --------------------------------------------------------------------------------------------  
