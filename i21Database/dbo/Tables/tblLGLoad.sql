@@ -30,6 +30,7 @@
 [strTrailerNo2] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [strTrailerNo3] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [intUserSecurityId] INT NULL, 	
+[strExternalLoadNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 
 CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
 CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([intLoadNumber],[intPurchaseSale]),
