@@ -1933,6 +1933,7 @@
     <Build Include="dbo\Tables\tblCTPriceFixation.sql" />
     <Build Include="dbo\Tables\tblCTPriceFixationDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSPAuditLogs.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdatePrepayAndDebitMemo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
