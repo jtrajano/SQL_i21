@@ -32,7 +32,7 @@ IF @ToOrigin = 1
 			strShipViaOriginKey = 
 				(CASE WHEN EXISTS(SELECT null FROM [sscarmst] WHERE [sscar_name] COLLATE Latin1_General_CI_AS = [strShipVia])
 					THEN (SELECT TOP 1 [sscar_key] FROM [sscarmst] WHERE [sscar_name] COLLATE Latin1_General_CI_AS = [strShipVia])
-					ELSE REPLICATE(''0'',10 - LEN(RTRIM(LTRIM(CAST(intShipViaID as nvarchar(20)))))) + CAST(intShipViaID as nvarchar(20))
+					ELSE REPLICATE(''0'',10 - LEN(RTRIM(LTRIM(CAST(intEntityShipViaId as nvarchar(20)))))) + CAST(intEntityShipViaId as nvarchar(20))
 				END)
 		WHERE 
 			strShipViaOriginKey IS NULL
@@ -56,7 +56,7 @@ ELSE
 			INSERT INTO @RecordsToProcess(strShipViaOriginKey)
 			SELECT SV.[strShipViaOriginKey]
 			FROM fnGetRowsFromDelimitedValues(@ShipViaIds) T
-			INNER JOIN tblSMShipVia SV ON T.[intID] = SV.[intShipViaID]
+			INNER JOIN tblSMShipVia SV ON T.[intID] = SV.[intEntityShipViaId]
 		ELSE
 			INSERT INTO @RecordsToProcess(strShipViaOriginKey)
 			SELECT SV.[sscar_key]

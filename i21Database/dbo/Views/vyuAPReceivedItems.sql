@@ -64,7 +64,7 @@ FROM tblPOPurchase A
 	--ON B.intPurchaseDetailId = tblReceived.intLineNo AND B.intItemId = tblReceived.intItemId
 	INNER JOIN tblICItem C ON B.intItemId = C.intItemId
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
-	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.intShipViaID
+	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.[intEntityShipViaId]
 	LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
 	LEFT JOIN (tblCTContractHeader G1 INNER JOIN tblCTContractDetail G2 ON G1.intContractHeaderId = G2.intContractHeaderId) ON G1.intEntityId = D1.intEntityVendorId
 UNION ALL
@@ -102,7 +102,7 @@ FROM tblPOPurchase A
 	INNER JOIN tblICItem C ON B.intItemId = C.intItemId
 	INNER JOIN tblICItemLocation loc ON C.intItemId = loc.intItemId AND loc.intLocationId = A.intShipToId
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
-	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.intShipViaID
+	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.[intEntityShipViaId]
 	LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
 WHERE C.strType IN ('Service','Software','Non-Inventory','Other Charge')
 AND B.dblQtyOrdered != B.dblQtyReceived
@@ -133,14 +133,15 @@ A.intEntityVendorId
 ,D1.strVendorId
 ,E.strShipVia
 ,NULL
-,NULL
-,NULL
-,NULL
+,F1.intContractNumber
+,F1.intContractHeaderId
+,CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
 FROM tblICInventoryReceipt A
 INNER JOIN tblICInventoryReceiptItem B
 	ON A.intInventoryReceiptId = B.intInventoryReceiptId
 INNER JOIN tblICItem C ON B.intItemId = C.intItemId
 	INNER JOIN tblICItemLocation loc ON C.intItemId = loc.intItemId AND loc.intLocationId = A.intLocationId
 INNER JOIN  (tblAPVendor D1 INNER JOIN tblEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
-LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.intShipViaID
-WHERE A.strReceiptType = 'Direct' AND A.ysnPosted = 1
+LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.[intEntityShipViaId]
+LEFT JOIN (tblCTContractHeader F1 INNER JOIN tblCTContractDetail F2 ON F1.intContractHeaderId = F2.intContractHeaderId) ON F1.intContractHeaderId = F2.intContractHeaderId
+WHERE A.strReceiptType IN ('Direct','Purchase Contract') AND A.ysnPosted = 1

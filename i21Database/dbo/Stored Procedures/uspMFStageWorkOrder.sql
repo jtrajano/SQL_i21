@@ -263,6 +263,17 @@ BEGIN TRY
 
 	IF @intConsumptionMethodId = 1 --By Lot consumption
 	BEGIN
+		IF @dblInputWeight > @dblWeight
+		BEGIN
+			IF @ysnExcessConsumptionAllowed = 0
+			BEGIN
+				RAISERROR (
+						51116
+						,14
+						,1
+						)
+			END
+		END
 		PRINT 'Call Lot reservation routine.'
 	END
 

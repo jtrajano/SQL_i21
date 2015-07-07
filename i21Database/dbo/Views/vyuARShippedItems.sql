@@ -17,6 +17,7 @@ SELECT
 	,SOD.[strItemDescription]
 	,SOD.[intItemUOMId]
 	,SHP.[intItemUOMId]					AS [intShipmentItemUOMId]
+	,SHP.[strUnitMeasure]				AS [strShipmentUnitMeasure]
 	,SOD.[dblQtyOrdered] 
 	,SHP.[dblQuantity]					AS [dblShipmentQuantity] 
 	,SOD.[dblQtyShipped]	
@@ -37,7 +38,7 @@ SELECT
 	,SL.[strName]						AS [strStorageLocationName]
 	,T.[intTermID]
 	,T.[strTerm]
-	,S.[intShipViaID] 
+	,S.[intEntityShipViaId] 
 	,S.[strName]						AS [strShipVia]
 	,''									AS [strScaleTicketNumber]
 FROM
@@ -56,7 +57,7 @@ LEFT OUTER JOIN
 		ON SO.[intTermId] = T.[intTermID] 
 LEFT OUTER JOIN
 	tblSMShipVia S
-		ON SO.[intShipViaId] = S.[intShipViaID]
+		ON SO.[intShipViaId] = S.[intEntityShipViaId]
 INNER JOIN
 	tblICItem I
 		ON SOD.[intItemId] = I.[intItemId]
@@ -71,6 +72,7 @@ CROSS APPLY
 		,ISI.[intItemId]
 		,ISI.[dblQuantity]
 		,ISI.[intItemUOMId]
+		,U.[strUnitMeasure]
 		,ISI.[dblUnitPrice]
 		,dbo.fnCalculateQtyBetweenUOM(ISI.[intItemUOMId], SOD.[intItemUOMId], SUM(ISNULL(ISI.[dblQuantity],0))) dblSOShipped
 		,SUM(ISNULL(ISI.dblQuantity,0)) dblShipped
@@ -79,6 +81,12 @@ CROSS APPLY
 	INNER JOIN
 		tblICInventoryShipment ISH
 			ON ISI.[intInventoryShipmentId] = ISH.[intInventoryShipmentId]
+	LEFT JOIN
+		[tblICItemUOM] IU
+			ON ISI.[intItemUOMId] = IU.[intItemUOMId]
+	LEFT JOIN
+		[tblICUnitMeasure] U
+			ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
 	WHERE
 		ISH.[ysnPosted] = 1
 		AND ISI.[intLineNo] = SOD.[intSalesOrderDetailId]
@@ -90,7 +98,8 @@ CROSS APPLY
 		,ISI.[intItemId]
 		,ISI.[dblQuantity]
 		,ISI.[intItemUOMId]
-		,ISI.[dblUnitPrice]		
+		,ISI.[dblUnitPrice]
+		,U.[strUnitMeasure]
 	--HAVING
 	--	SUM(ISNULL(ISI.[dblQuantity],0)) != ISNULL(SOD.[dblQtyOrdered],0)
 	) SHP
@@ -113,6 +122,7 @@ SELECT
 	,SOD.[strItemDescription]
 	,SOD.[intItemUOMId]
 	,SOD.[intItemUOMId]					AS [intShipmentItemUOMId]
+	,U.[strUnitMeasure]					AS [strShipmentUnitMeasure]
 	,SOD.[dblQtyOrdered] 
 	,SOD.[dblQtyOrdered]				AS [dblShipmentQuantity] 
 	,SOD.[dblQtyShipped]	
@@ -133,7 +143,7 @@ SELECT
 	,SL.[strName]						AS [strStorageLocationName]
 	,T.[intTermID]
 	,T.[strTerm]
-	,S.[intShipViaID] 
+	,S.[intEntityShipViaId] 
 	,S.[strName]						AS [strShipVia]
 	,''									AS [strScaleTicketNumber]
 FROM
@@ -156,10 +166,16 @@ LEFT OUTER JOIN
 		ON SO.[intTermId] = T.[intTermID] 
 LEFT OUTER JOIN
 	tblSMShipVia S
-		ON SO.[intShipViaId] = S.[intShipViaID] 
+		ON SO.[intShipViaId] = S.[intEntityShipViaId] 
 LEFT OUTER JOIN
 	tblICStorageLocation SL
-		ON SOD.[intStorageLocationId] = SL.[intStorageLocationId] 		
+		ON SOD.[intStorageLocationId] = SL.[intStorageLocationId]
+LEFT JOIN
+	tblICItemUOM IU
+		ON SOD.[intItemUOMId] = IU.[intItemUOMId]
+LEFT JOIN
+	tblICUnitMeasure U
+		ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
 WHERE
 	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId WHERE tblARInvoice.[ysnPosted] = 1)
 	AND SO.[strTransactionType] = 'Order'

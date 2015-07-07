@@ -90,20 +90,24 @@ BEGIN
 
 	')	
 	
-	print 'Moved customer permission to entity permission'
-	EXEC(N'insert into tblEntityPortalPermission
-			select f.intEntityToContactId,e.intEntityPortalMenuId,1 from tblARCustomerPortalMenu a 
-				join tblARCustomerPortalPermission b
-					on a.intCustomerPortalMenuId = b.intCustomerPortalMenuId
-				join tblARCustomerToContact c
-					on b.intARCustomerToContactId = c.intARCustomerToContactId
-				join tblEntityContact d
-					on c.intEntityContactId = d.intEntityContactId
-				join tblEntityPortalMenu e
-					on e.strPortalMenuName  = a.strCustomerPortalMenuName 
-						and e.strType = a.strType
-				join tblEntityToContact f
-					on f.intEntityContactId = c.intEntityContactId')
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerPortalPermission')
+		AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerToContact')
+	BEGIN
+		print 'Moved customer permission to entity permission'
+		EXEC(N'insert into tblEntityPortalPermission
+				select f.intEntityToContactId,e.intEntityPortalMenuId,1 from tblARCustomerPortalMenu a 
+					join tblARCustomerPortalPermission b
+						on a.intCustomerPortalMenuId = b.intCustomerPortalMenuId
+					join tblARCustomerToContact c
+						on b.intARCustomerToContactId = c.intARCustomerToContactId
+					join tblEntityContact d
+						on c.intEntityContactId = d.intEntityContactId
+					join tblEntityPortalMenu e
+						on e.strPortalMenuName  = a.strCustomerPortalMenuName 
+							and e.strType = a.strType
+					join tblEntityToContact f
+						on f.intEntityContactId = c.intEntityContactId')
+	END
 END
 ELSE
 BEGIN

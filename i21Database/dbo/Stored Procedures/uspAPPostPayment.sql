@@ -49,8 +49,6 @@ CREATE TABLE #tmpPayableInvalidData (
 );
 
 --DECLARRE VARIABLES
-DECLARE @WithholdAccount INT = (SELECT intWithholdAccountId FROM tblAPPreference)
-DECLARE @DiscountAccount INT = (SELECT intDiscountAccountId FROM tblAPPreference)
 DECLARE @PostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully posted.'
 DECLARE @UnpostSuccessfulMsg NVARCHAR(50) = 'Transaction successfully unposted.'
 DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Payable'
@@ -59,6 +57,7 @@ DECLARE @TRAN_TYPE NVARCHAR(25) = 'Payable'
 DECLARE @paymentIds NVARCHAR(MAX) = @param
 DECLARE @validPaymentIds NVARCHAR(MAX)
 DECLARE @GLEntries AS RecapTableType 
+DECLARE @count INT = 0;
 
 SET @recapId = '1'
 
@@ -130,7 +129,7 @@ BEGIN
 
 	--VALIDATIONS
 	INSERT INTO #tmpPayableInvalidData 
-	SELECT * FROM [fnAPValidatePostPayment](@paymentIds, @post)
+	SELECT * FROM [fnAPValidatePostPayment](@paymentIds, @post, @userId)
 
 	DECLARE @totalInvalid INT
 	SET @totalInvalid = (SELECT COUNT(*) FROM #tmpPayableInvalidData)
@@ -188,6 +187,7 @@ END
 IF (ISNULL(@recap, 0) = 0)
 BEGIN
 
+	--GROUP GL ENTRIES (NOTE: ASK THE DEVELOPER TO DO THIS ON uspGLBookEntries
 	EXEC uspGLBookEntries @GLEntries, @post
 
 	IF @@ERROR <> 0	GOTO Post_Rollback;
@@ -197,7 +197,9 @@ BEGIN
 		
 		--Unposting Process
 		UPDATE tblAPPaymentDetail
-		SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 THEN (B.dblDiscount + B.dblPayment - B.dblInterest) ELSE (B.dblAmountDue + B.dblPayment) END)
+		SET tblAPPaymentDetail.dblAmountDue = (CASE WHEN B.dblAmountDue = 0 
+													THEN (B.dblDiscount + B.dblPayment - B.dblInterest) 
+												ELSE (B.dblAmountDue + B.dblPayment) END)
 		FROM tblAPPayment A
 			LEFT JOIN tblAPPaymentDetail B
 				ON A.intPaymentId = B.intPaymentId
@@ -265,6 +267,12 @@ BEGIN
 			A.intPaymentId
 		FROM tblAPPayment A
 		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+
+		--remove overpayment
+		DELETE A
+		FROM tblAPBill A INNER JOIN tblAPPayment B ON A.strReference = B.strPaymentRecordNum
+		WHERE B.intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+		AND A.intTransactionType = 8
 
 		IF @@ERROR <> 0 OR @isSuccessful = 0 GOTO Post_Rollback;
 
@@ -398,6 +406,18 @@ BEGIN
 			A.intPaymentId
 		FROM tblAPPayment A
 		WHERE intPaymentId IN (SELECT intPaymentId FROM #tmpPayablePostData)
+
+		--Create overpayment
+		SELECT intPaymentId INTO #tmpPayableIds FROM #tmpPayablePostData
+		DECLARE @payId INT;
+		SELECT TOP 1 @payId = intPaymentId FROM #tmpPayableIds
+		WHILE (@payId IS NOT NULL)
+		BEGIN
+			EXEC uspAPCreateOverpayment @payId, @userId;
+			DELETE FROM #tmpPayableIds WHERE intPaymentId = @payId;
+			SET @payId = NULL;
+			SELECT TOP 1 @payId = intPaymentId FROM #tmpPayableIds
+		END
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END

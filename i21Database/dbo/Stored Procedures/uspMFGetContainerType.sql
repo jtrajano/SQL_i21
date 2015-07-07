@@ -16,5 +16,6 @@ BEGIN
 			SELECT Item Collate Latin1_General_CI_AS
 			FROM [dbo].[fnSplitString](@strContainerType, ',')
 			)
+	ORDER BY strDisplayMember
 END
 Go

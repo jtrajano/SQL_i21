@@ -226,4 +226,37 @@ GO
 
 GO
 	PRINT N'End updating tblHDTicket Customer Id.'
+	PRINT N'Start fixing Help Desk Settings.'
+GO
+
+	IF EXISTS(SELECT 1 FROM tblHDSetting)
+	BEGIN
+	
+		UPDATE tblHDSetting
+			SET tblHDSetting.strHelpDeskURL = 'http://fb.irely.com/iRelyi21/i21'
+	END
+	else
+	begin
+		INSERT INTO tblHDSetting
+           (strHelpDeskName
+           ,strHelpDeskURL
+           ,strJIRAURL
+           ,strTimeZone
+           ,intTicketStatusId
+           ,intTicketTypeId
+           ,intBillingIncrement
+           ,intConcurrencyId)
+		 VALUES
+			   ('i21 Help Desk'
+			   ,'http://fb.irely.com/iRelyi21/i21'
+			   ,'http://jira.irelyserver.com'
+			   ,null
+			   ,null
+			   ,null
+			   ,0
+			   ,1)
+	end
+
+GO
+	PRINT N'End fixing Help Desk Settings.'
 GO

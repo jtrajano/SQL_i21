@@ -149,8 +149,8 @@ INSERT INTO dbo.tblICInventoryReceiptItem (
 	,intOwnershipType
 )
 SELECT	intInventoryReceiptId	= @InventoryReceiptId
-		,intLineNo				= 1
-		,intOrderId				= LI.intTransactionDetailId
+		,intLineNo				= ISNULL (LI.intTransactionDetailId, 1)
+		,intOrderId				= CNT.intContractHeaderId
 		,intSourceId			= @intTicketId
 		,intItemId				= SC.intItemId
 		,intSubLocationId		= SC.intSubLocationId
@@ -183,6 +183,8 @@ FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransacti
 			AND ItemUOM.intItemUOMId = @intTicketItemUOMId
 		INNER JOIN dbo.tblICUnitMeasure UOM
 			ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+			LEFT JOIN dbo.tblCTContractDetail CNT
+			ON CNT.intContractDetailId = LI.intTransactionDetailId
 WHERE	SC.intTicketId = @intTicketId
 
 -- Re-update the total cost 

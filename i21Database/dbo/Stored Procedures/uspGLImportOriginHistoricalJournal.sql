@@ -7,6 +7,10 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 
+
+EXECUTE [dbo].[uspGLImportOriginHistoricalJournalCLOSED] @intEntityId ,@result OUTPUT
+IF @result != '' AND  CHARINDEX('SUCCESS', @result,1)= 0 RETURN
+
 BEGIN TRANSACTION
 
 	--+++++++++++++++++++++++++++++++++
@@ -129,7 +133,8 @@ BEGIN TRANSACTION
 		CONVERT(VARCHAR(3),glhst_src_id) + CONVERT(VARCHAR(5),glhst_src_seq) + CONVERT(VARCHAR(6),(glhst_period)) AS glhst_jrnl_no,
 		glhst_src_id,
 		glhst_src_seq,    
-		GETDATE() as gooddate
+		GETDATE() as gooddate,
+		A4GLIdentity
 	 INTO #iRelyImptblGLJournalDetail
 	 FROM  glhstmst 
 	 INNER JOIN tblGLCOACrossReference ON 
@@ -227,9 +232,9 @@ BEGIN TRANSACTION
 	--+++++++++++++++++++++++++++++++++
 
 	INSERT tblGLJournalDetail (intLineNo,intJournalId,dtmDate,intAccountId,dblDebit,dblDebitRate,dblCredit,dblCreditRate,dblDebitUnit,dblCreditUnit,strDescription,intConcurrencyId,
-								dblUnitsInLBS,strDocument,strComments,strReference,dblDebitUnitsInLBS,strCorrecting,strSourcePgm,strCheckBookNo,strWorkArea)
+								dblUnitsInLBS,strDocument,strComments,strReference,dblDebitUnitsInLBS,strCorrecting,strSourcePgm,strCheckBookNo,strWorkArea,intOriginId, strOriginTable)
 						SELECT intLineNo,intJournalId,gooddate,intAccountId,Debit,DebitRate,Credit,CreditRate,DebitUnits,CreditUnits,strDescription,1,
-								dblUnitsInlbs,strDocument,strComments,strReference,DebitUnitsInlbs,strCorrecting,strSourcePgm,strCheckbookNo,strWorkArea 
+								dblUnitsInlbs,strDocument,strComments,strReference,DebitUnitsInlbs,strCorrecting,strSourcePgm,strCheckbookNo,strWorkArea,A4GLIdentity,'glhstmst'
 						FROM  #iRelyImptblGLJournalDetail
 						
 	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT

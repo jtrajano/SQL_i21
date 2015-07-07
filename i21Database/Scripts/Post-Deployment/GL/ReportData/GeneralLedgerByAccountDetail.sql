@@ -64,6 +64,7 @@ SELECT
 		,A.intGLDetailId
 		,D.*
 		,A.ysnIsUnposted
+		,isUnposted = CASE WHEN A.intAccountId IS NULL THEN 0 ELSE A.ysnIsUnposted END
 		,(SELECT [strUOMCode] FROM Units WHERE [intAccountId] = A.[intAccountId]) as strUOMCode
 from tblGLDetail  A
 RIGHT join tblGLAccount B on B.intAccountId = A.intAccountId
@@ -105,11 +106,10 @@ AS
 		FROM tblGLAccount A
 		INNER JOIN tblGLTempCOASegment B ON B.intAccountId = A.intAccountId
 		INNER JOIN GLAccountDetails C on A.strAccountId = C.strAccountId
-		WHERE C.ysnIsUnposted =0 OR C.ysnIsUnposted IS NULL
 )
 
 --*CountStart*--
-SELECT 
+SELECT DISTINCT
 ''Account ID :'' + B.strAccountId + '' - '' + ISNULL(A.strAccountDescription,B.strAccountDescription) + '' - '' + ISNULL(A.strAccountType,B.strAccountType) as AccountHeader,
 (CASE WHEN A.strAccountDescription  is  NULL  then B.strAccountDescription else A.strAccountDescription END) as strAccountDescripion
 ,(CASE WHEN A.strAccountType  is  NULL  then B.strAccountType else A.strAccountType END) as strAccountType
@@ -144,6 +144,7 @@ SELECT
 	
 	FROM GLAccountBalance B
 	LEFT JOIN GLAccountDetails A ON B.intAccountId = A.intAccountId
+	WHERE A.isUnposted = 0 or A.isUnposted IS NULL
 --*CountEnd*--'
 
 
@@ -195,6 +196,7 @@ B.strDescription  as strAccountDescription-- account description
 ,A.strCode    
 ,A.intGLDetailId    
 ,A.ysnIsUnposted    
+,isUnposted = CASE WHEN A.intAccountId IS NULL THEN 0 ELSE A.ysnIsUnposted END
 ,D.*
 ,(SELECT [strUOMCode] FROM Units WHERE [intAccountId] = A.[intAccountId]) as strUOMCode
 from tblGLDetail A   
@@ -206,8 +208,9 @@ INNER JOIN tblGLTempCOASegment D ON B.intAccountId = D.intAccountId and strCode 
 ),
 GLAccountBalance  (  intAccountId  ,strAccountId  ,strAccountDescription  ,strAccountType  ,strAccountGroup  ,dblBeginBalance  ,dblBeginBalanceUnit  
 ,[Primary Account]  ,[Location]   )  
-AS  (    
- 
+AS
+(
+
  SELECT    
   A.intAccountId    
   ,A.strAccountId    
@@ -220,11 +223,9 @@ AS  (
   ,B.[Location]         
   FROM tblGLAccount A    INNER JOIN tblGLTempCOASegment B ON B.intAccountId = A.intAccountId         
   INNER JOIN GLAccountDetails C on A.strAccountId = C.strAccountId
-   WHERE C.ysnIsUnposted =0 OR C.ysnIsUnposted IS NULL
- 
-  ) 
+)
    --*CountStart*--  
-  SELECT
+  SELECT DISTINCT
   ''Account ID :'' + B.strAccountId + '' - '' + ISNULL(A.strAccountDescription,B.strAccountDescription) + '' - '' + ISNULL(A.strAccountType,B.strAccountType) as AccountHeader,
   (CASE WHEN A.strAccountDescription  is  NULL  THEN B.strAccountDescription ELSE A.strAccountDescription END) as strAccountDescripion
   ,(CASE WHEN A.strAccountType  is  NULL  THEN B.strAccountType ELSE A.strAccountType END) as strAccountType  
@@ -257,6 +258,7 @@ AS  (
   END       
   FROM GLAccountBalance B   
   LEFT JOIN GLAccountDetails A ON B.intAccountId = A.intAccountId
+  WHERE A.isUnposted = 0 OR A.isUnposted IS NULL
   --*CountEnd*--'
 
 --UPDATE THE OPTIONS

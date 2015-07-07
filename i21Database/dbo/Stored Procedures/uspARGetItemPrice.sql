@@ -89,16 +89,18 @@ AS
 		AND @TransactionDate BETWEEN SP.dtmBeginDate AND SP.dtmEndDate
 
 
-	DECLARE @VendorId INT
-			,@ItemLocationId INT
-			,@ItemCategoryId INT
-			,@ItemCategory NVARCHAR(100)
+	DECLARE @VendorId			INT
+			,@ItemLocationId	INT
+			,@ItemCategoryId	INT
+			,@ItemCategory	NVARCHAR(100)
+			,@UOMQuantity		NUMERIC(18,6)
 
 	SELECT
 		@VendorId = VI.intVendorId
 		,@ItemLocationId = intItemLocationId
 		,@ItemCategoryId = I.intCategoryId
 		,@ItemCategory = C.strCategoryCode
+		,@UOMQuantity		= ISNULL(UOM.dblUnitQty,1.00)
 	FROM
 		tblICItem I
 	INNER JOIN
@@ -337,7 +339,7 @@ AS
 					
 
 		--Customer Group - Vendor + Item
-		SET @Price =	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId AND intVendorId = @VendorId)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId AND intVendorId = @VendorId)
 		IF(@Price IS NOT NULL)
 			BEGIN
 				SET @Pricing = 'Customer Group - Vendor + Item'
@@ -346,7 +348,7 @@ AS
 			END
 
 		--Customer Group - Vendor + Item Class
-		SET @Price =	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId AND strClass = @ItemCategory)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId AND strClass = @ItemCategory)
 		IF(@Price IS NOT NULL)
 			BEGIN
 				SET @Pricing = 'Customer Group - Vendor + Item Class'
@@ -355,7 +357,7 @@ AS
 			END
 
 		--Customer Group - Vendor
-		SET @Price =	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intVendorId = @VendorId)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intVendorId = @VendorId)
 		IF(@Price IS NOT NULL)
 			BEGIN
 				SET @Pricing = 'Customer Group - Vendor'
@@ -364,7 +366,7 @@ AS
 			END		
 
 		--Customer Group - Item
-		SET @Price =	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId)
 		IF(@Price IS NOT NULL)
 			BEGIN
 				SET @Pricing = 'Customer Group - Item'
@@ -373,7 +375,7 @@ AS
 			END	
 				
 		--Customer Group - Item Class
-		SET @Price =	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE strClass = @ItemCategory)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE strClass = @ItemCategory)
 		IF(@Price IS NOT NULL)
 			BEGIN
 				SET @Pricing = 'Customer Group - Item Class'
@@ -424,7 +426,7 @@ AS
 
 
 		--Customer - Vendor + Item
-		SET @Price =	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId AND intVendorId = @VendorId)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId AND intVendorId = @VendorId)
 		IF(@Price IS NOT NULL)
 			BEGIN
 				SET @Pricing = 'Customer - Vendor + Item'
@@ -433,7 +435,7 @@ AS
 			END
 
 		--Customer - Vendor + Item Class
-		SET @Price =	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId AND strClass = @ItemCategory)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId AND strClass = @ItemCategory)
 		IF(@Price IS NOT NULL)
 			BEGIN
 				SET @Pricing = 'Customer - Vendor + Item Class'
@@ -442,7 +444,7 @@ AS
 			END
 
 		--Customer - Vendor
-		SET @Price =	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intVendorId = @VendorId)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intVendorId = @VendorId)
 		IF(@Price IS NOT NULL)
 			BEGIN
 				SET @Pricing = 'Customer - Vendor'
@@ -451,7 +453,7 @@ AS
 			END		
 
 		--Customer - Item
-		SET @Price =	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId)
 		IF(@Price IS NOT NULL)
 			BEGIN
 				SET @Pricing = 'Customer - Item'
@@ -460,7 +462,7 @@ AS
 			END	
 				
 		--Customer - Item Class
-		SET @Price =	(SELECT dblCustomerPrice FROM @CustomerSpecialPricing WHERE strClass = @ItemCategory)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @CustomerSpecialPricing WHERE strClass = @ItemCategory)
 		IF(@Price IS NOT NULL)
 			BEGIN
 				SET @Pricing = 'Customer - Item Class'
@@ -474,7 +476,8 @@ AS
 
 
 	--Item Special Pricing
-	SET @Price =	(	SELECT 
+	SET @Price = @UOMQuantity *	
+					(	SELECT 
 							--dblUnitAfterDiscount
 							(CASE
 								WHEN strDiscountBy = 'Amount'
@@ -500,7 +503,8 @@ AS
 
 	--Item Pricing Level
 	DECLARE @PricingLevel NVARCHAR(100)
-	SET @Price =	( 
+	SET @Price = @UOMQuantity *	
+						( 
 							SELECT
 								PL.dblUnitPrice
 							FROM
@@ -531,7 +535,8 @@ AS
 
 
 	--Item Standard Pricing
-	SET @Price =	( 
+	SET @Price = @UOMQuantity *	
+						( 
 							SELECT
 								P.dblSalePrice
 							FROM

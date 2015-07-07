@@ -37,6 +37,7 @@ BEGIN
 			,@dtmCurrentDate as dtmCurrentDate
 			,0 as intMachineId
 			,'' as strMachineName
+			,0 as intSubLocationId
 	End
 	Else
 	Begin
@@ -52,6 +53,7 @@ BEGIN
 			,@dtmCurrentDate as dtmCurrentDate
 			,ISNULL(M.intMachineId,0) as intMachineId
 			,ISNULL(M.strName,'') as strMachineName
+			,ISNULL(M.intSubLocationId,0) AS intSubLocationId
 		FROM dbo.tblMFManufacturingProcess P
 		Left JOIN tblMFManufacturingProcessMachine PM on P.intManufacturingProcessId=PM.intManufacturingProcessId and PM.ysnDefault=1
 		Left JOIN tblMFMachine M on M.intMachineId=PM.intMachineId

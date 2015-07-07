@@ -220,7 +220,7 @@ BEGIN
 			SELECT 
 				SUM(B.dblAmountApplied) AS dblAmountApplied
 			FROM tblAPAppliedPrepaidAndDebit B
-				INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
+				--INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
 			WHERE A.intBillId = B.intTransactionId
 			AND B.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 			GROUP BY B.intTransactionId
@@ -268,12 +268,12 @@ BEGIN
 			SELECT 
 				SUM(B.dblAmountApplied) AS dblAmountApplied
 			FROM tblAPAppliedPrepaidAndDebit B
-				INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
+				--INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
 			WHERE A.intBillId = B.intTransactionId
-			AND B.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+			AND B.intBillId IN (SELECT intBillId FROM #tmpPostBillData)	--make sure update only those prepayments of the current bills
 			GROUP BY B.intTransactionId
 		) AppliedPayments
-		
+			
 
 		--Update Inventory Item Receipt
 		UPDATE A

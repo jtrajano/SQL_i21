@@ -158,6 +158,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 --Grain
 :R .\GR\1_MasterTables.sql
+:R .\GR\GRDataMigrations.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql
@@ -179,6 +180,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\007_MoveShippingLineData.sql
 :r .\EM\008_MoveTruckerData.sql
 :r .\EM\009_UpdateEntityContactTypeData.sql
+:r .\EM\010_UpdateVendorAccountNumber.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 

@@ -3535,4 +3535,32 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="[tblWHContainerType]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="bea09a61-420a-4e7e-ae5c-40ccc4a6d45f" ChangeDateTime="07/01/2015 03:19:00">
+    <Property Name="ElementName" Value="[dbo].[tblDBUserPreference].[intUserId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblDBUserPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intUserSecurityId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="591e8f3a-3d4b-406e-a2ce-6ee962542f36" ChangeDateTime="06/30/2015 11:01:57">
+    <Property Name="ElementName" Value="[dbo].[tblWHSKU].[intWeightPerUnitUOMKey]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblWHSKU]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intWeightPerUnitUOMId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b0bd1594-3e72-45b1-a757-504fd360d5ff" ChangeDateTime="07/03/2015 00:31:08">
+    <Property Name="ElementName" Value="[dbo].[tblICCompanyPreference].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCompanyPreferenceId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="16e66f22-f174-40d7-9a39-291d584b6dd6" ChangeDateTime="07/06/2015 05:18:20">
+    <Property Name="ElementName" Value="[dbo].[tblSMShipVia].[intShipViaID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMShipVia]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityShipViaId]" />
+  </Operation>
 </Operations>

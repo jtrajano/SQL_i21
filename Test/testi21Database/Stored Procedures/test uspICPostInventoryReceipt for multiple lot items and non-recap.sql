@@ -46,15 +46,19 @@ BEGIN
 			strReceiptNumber
 			,intLocationId
 			,dtmReceiptDate
+			,strReceiptType
+			,intSourceType
 		)
 		VALUES (
 			@strTransactionId
 			,@Default_Location
 			,@dtmDate	
+			,'Purchase Order'
+			,1
 		);	
 	
-		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId, intItemId, dblOrderQty, dblOpenReceive, dblUnitCost, intUnitMeasureId) VALUES (1, @ManualLotGrains,		10,	10,	12.50, @ManualLotGrains_BushelUOMId);
-		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId, intItemId, dblOrderQty, dblOpenReceive, dblUnitCost, intUnitMeasureId) VALUES (1, @SerializedLotGrains,	30,	20,	13.50, @SerializedLotGrains_BushelUOMId);
+		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId, intItemId, dblOrderQty, dblOpenReceive, dblUnitCost, intUnitMeasureId, intOwnershipType) VALUES (1, @ManualLotGrains,		10,	10,	12.50, @ManualLotGrains_BushelUOMId, 1);
+		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId, intItemId, dblOrderQty, dblOpenReceive, dblUnitCost, intUnitMeasureId, intOwnershipType) VALUES (1, @SerializedLotGrains,	30,	20,	13.50, @SerializedLotGrains_BushelUOMId, 1);
 
 		-- @ManualLotGrains: 1
 		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intLotId, strLotNumber, dblQuantity) VALUES (1, 1, 'ManualLot-0001', 3)

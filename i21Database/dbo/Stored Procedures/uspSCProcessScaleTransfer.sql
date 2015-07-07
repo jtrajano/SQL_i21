@@ -126,9 +126,9 @@ BEGIN
 				,Ticket.intTicketId 
 				,Ticket.intTicketNumber
 				,@INVENTORY_TRANSFER_TYPE
+				,NULL
+				,Ticket.intSubLocationId
 				,Ticket.intStorageLocationId
-				,Ticket.intProcessingLocationId
-				,Ticket.intProcessingLocationId
 		FROM tblSCTicket Ticket
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = @intMatchTicketItemUOMId
 		WHERE intTicketId = @intMatchTicketId
@@ -203,9 +203,9 @@ BEGIN
 				,Ticket.intTicketId 
 				,Ticket.intTicketNumber
 				,@INVENTORY_TRANSFER_TYPE
+				,NULL
+				,Ticket.intSubLocationId
 				,Ticket.intStorageLocationId
-				,Ticket.intProcessingLocationId
-				,Ticket.intProcessingLocationId
 		FROM tblSCTicket Ticket
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = @intTicketItemUOMId
 		WHERE intTicketId = @intTicketId
@@ -281,9 +281,9 @@ BEGIN
 				,Ticket.intTicketId 
 				,Ticket.intTicketNumber
 				,@INVENTORY_TRANSFER_TYPE
+				,NULL
+				,Ticket.intSubLocationId
 				,Ticket.intStorageLocationId
-				,Ticket.intProcessingLocationId
-				,Ticket.intProcessingLocationId
 		FROM tblSCTicket Ticket
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = @intTicketItemUOMId
 		WHERE intTicketId = @intTicketId
@@ -359,9 +359,9 @@ BEGIN
 				,Ticket.intTicketId 
 				,Ticket.intTicketNumber
 				,@INVENTORY_TRANSFER_TYPE
+				,NULL
+				,Ticket.intSubLocationId
 				,Ticket.intStorageLocationId
-				,Ticket.intProcessingLocationId
-				,Ticket.intProcessingLocationId
 		FROM tblSCTicket Ticket
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = @intTicketItemUOMId
 		WHERE intTicketId = @intTicketId
@@ -441,9 +441,9 @@ BEGIN
 			,Ticket.intTicketId 
 			,Ticket.intTicketNumber
 			,@INVENTORY_TRANSFER_TYPE
-			,Ticket.intSubLocationId 
+			,NULL 
+			,Ticket.intSubLocationId
 			,Ticket.intStorageLocationId
-			,Ticket.intProcessingLocationId
 	FROM tblSCTicket Ticket
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = @intTicketItemUOMId
 	WHERE intTicketId = @intTicketId

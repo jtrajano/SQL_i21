@@ -464,7 +464,7 @@ SET @strmessage = 'No mapped staging location found, cannot stage.'
 EXEC sp_addmessage 51115,11,@strmessage,'us_english','False'   
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51116) EXEC sp_dropmessage 51116, 'us_english'	
-SET @strmessage = 'The quantity must not exceed the lot quantity.'
+SET @strmessage = 'The quantity to be consumed must not exceed the selected lot quantity.'
 EXEC sp_addmessage 51116,11,@strmessage,'us_english','False'   
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51117) EXEC sp_dropmessage 51117, 'us_english'	
@@ -610,3 +610,8 @@ EXEC sp_addmessage 51151,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51152) EXEC sp_dropmessage 51152, 'us_english'	
 SET @strmessage = 'The target item %s is Phased out or Discontinued, cannot start the work order.'
 EXEC sp_addmessage 51152,11,@strmessage,'us_english','False'
+EXEC sp_addmessage 51131,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51132) EXEC sp_dropmessage 51132, 'us_english'	
+SET @strmessage = 'The Qty to Ship for %s is %s. Total Lot Quantity is %s. The difference is %s.'
+EXEC sp_addmessage 51132,11,@strmessage,'us_english','False'

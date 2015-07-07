@@ -18,16 +18,13 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @ZeroDecimal decimal(18,6)
 		,@DateOnly DATETIME
-		,@Currency int
-		,@ARAccountId int
+		,@Currency INT
+		,@ARAccountId INT
 
-SET @ZeroDecimal = 0.000000
-	
+SET @ZeroDecimal = 0.000000	
 SELECT @DateOnly = CAST(GETDATE() as date)
-
 SET @Currency = ISNULL((SELECT strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency'),0)
 SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
-
 
 IF(@ARAccountId IS NULL OR @ARAccountId = 0)  
 	BEGIN			
@@ -36,19 +33,33 @@ IF(@ARAccountId IS NULL OR @ARAccountId = 0)
 	END
 
 DECLARE @TicketHoursWorked TABLE(
-		intTicketHoursWorkedId INT)
+		intTicketHoursWorkedId INT,
+		intEntityCustomerId INT)
 		
 IF (@HoursWorkedIDs IS NOT NULL) 
 BEGIN
 	IF(@HoursWorkedIDs = 'all')
 	BEGIN
-		INSERT INTO @TicketHoursWorked SELECT [intTicketHoursWorkedId] FROM vyuARBillableHoursForImport
+		INSERT INTO @TicketHoursWorked SELECT [intTicketHoursWorkedId], [intEntityCustomerId] FROM vyuARBillableHoursForImport
 	END
 	ELSE
 	BEGIN
-		INSERT INTO @TicketHoursWorked SELECT [intTicketHoursWorkedId] FROM vyuARBillableHoursForImport WHERE [intTicketHoursWorkedId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@HoursWorkedIDs))
+		INSERT INTO @TicketHoursWorked SELECT [intTicketHoursWorkedId], [intEntityCustomerId] FROM vyuARBillableHoursForImport WHERE [intTicketHoursWorkedId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@HoursWorkedIDs))
 	END
-END		
+END
+
+--VALIDATE NULL TERMS
+
+DECLARE @NullTermsTable TABLE(intEntityCustomerId INT)
+	INSERT INTO @NullTermsTable SELECT intEntityCustomerId FROM @TicketHoursWorked THW
+		INNER JOIN tblEntityLocation EL ON THW.intEntityCustomerId = EL.intEntityId AND EL.ysnDefaultLocation = 1		
+		WHERE EL.intTermsId IS NULL
+
+IF EXISTS(SELECT * FROM @NullTermsTable)
+BEGIN
+	RAISERROR('Some of the customers doesn''t have Terms setup.', 11, 1) 
+	RETURN 0
+END
 
 INSERT INTO 
 	[tblARInvoice]
@@ -184,7 +195,7 @@ SELECT
 	I.[intInvoiceId]											--[intInvoiceId]
 	,V.[intItemId]												--[intItemId]
 	,IC.[strDescription]										--strItemDescription] 
-	,NULL														--[intItemUOMId]
+	,IL.intIssueUOMId														--[intItemUOMId]
 	,V.[intHours]												--[dblQtyOrdered]
 	,V.[intHours]												--[dblQtyShipped]
 	,V.[dblPrice] 												--[dblPrice]
@@ -204,7 +215,10 @@ INNER JOIN
 		ON V.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]
 INNER JOIN
 	tblICItem IC
-		ON V.[intItemId] = IC.[intItemId] 
+		ON V.[intItemId] = IC.[intItemId]
+INNER JOIN
+	tblICItemLocation IL
+		ON V.intItemId = IL.intItemId
 LEFT OUTER JOIN
 	vyuARGetItemAccount Acct
 		ON V.[intItemId] = Acct.[intItemId]

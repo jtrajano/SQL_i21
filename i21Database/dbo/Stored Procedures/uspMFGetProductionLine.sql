@@ -13,5 +13,6 @@ BEGIN
 	JOIN dbo.[tblMFManufacturingCell] C ON C.intManufacturingCellId = MC.intManufacturingCellId
 	WHERE C.intLocationId = @intLocationId
 		AND I.intItemId = @intItemId
+		ORDER BY C.strCellName
 END
 

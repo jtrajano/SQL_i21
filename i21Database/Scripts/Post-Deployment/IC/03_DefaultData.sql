@@ -69,3 +69,9 @@ BEGIN
 	WHERE strType = ''Finished Goods''
 	')
 END
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblICCompanyPreference)
+BEGIN
+	INSERT INTO tblICCompanyPreference(intInheritSetup, intSort)
+	VALUES (1, 1)
+END

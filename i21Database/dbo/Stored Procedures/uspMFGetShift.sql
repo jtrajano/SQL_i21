@@ -15,4 +15,5 @@ BEGIN
 			END AS intRunningShift
 	FROM dbo.tblMFShift
 	WHERE intLocationId = @intLocationId
+	Order by intShiftId
 END

@@ -87,6 +87,8 @@ BEGIN TRY
 		IF(@dblRemainingUnits > 0)
 		BEGIN
 			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDummyDistributionOption
+			IF (@dblRemainingUnits = @dblNetUnits)
+			RETURN
 		END
 		UPDATE @LineItems set intTicketId = @intTicketId
 		DELETE FROM @ItemsForItemReceipt

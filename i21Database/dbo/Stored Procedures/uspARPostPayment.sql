@@ -1511,6 +1511,12 @@ IF @recap = 0
 			INSERT INTO @ARReceivablePostData
 			SELECT Z.intPaymentId, Z.strTransactionId FROM @ZeroPayment Z
 			WHERE NOT EXISTS(SELECT NULL FROM @ARReceivablePostData WHERE intPaymentId = Z.intPaymentId)						
+			
+			-- Delete Invoice with Zero Payment
+			DELETE FROM tblARPaymentDetail
+			WHERE
+				dblPayment = 0
+				AND intInvoiceId IN (SELECT intInvoiceId FROM @ARReceivablePostData)				
 
 			--Insert Successfully posted transactions.
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)

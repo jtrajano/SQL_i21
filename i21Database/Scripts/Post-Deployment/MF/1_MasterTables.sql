@@ -479,3 +479,15 @@ BEGIN
     VALUES(2,'Closed')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblMFMachineIssuedUOMType WHERE intIssuedUOMTypeId = 1)
+BEGIN
+    INSERT INTO tblMFMachineIssuedUOMType(intIssuedUOMTypeId,strName)
+    VALUES(1,'Weight')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFMachineIssuedUOMType WHERE intIssuedUOMTypeId = 2)
+BEGIN
+    INSERT INTO tblMFMachineIssuedUOMType(intIssuedUOMTypeId,strName)
+    VALUES(2,'Packed')
+END
+GO

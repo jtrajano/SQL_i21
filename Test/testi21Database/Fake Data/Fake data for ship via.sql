@@ -7,7 +7,7 @@ BEGIN
 			,@Ship_Via_Truck_Id AS INT = 1
 
 	INSERT INTO tblSMShipVia (
-		intShipViaID
+		[intEntityShipViaId]
 		,strShipViaOriginKey
 		,strShipVia
 		,strShippingService
