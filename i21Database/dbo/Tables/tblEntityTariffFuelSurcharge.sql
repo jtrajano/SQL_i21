@@ -2,7 +2,7 @@
 (
 	[intEntityTariffFuelSurchargeId]		INT IDENTITY(1,1) NOT NULL,
 	[intEntityTariffId]						INT,
-	[strFuelSurcharge]						NVARCHAR(50),
+	[dblFuelSurcharge]						NUMERIC(4, 1),
 	[dtmEffectiveDate]						DATETIME,
 	[intConcurrencyId]						INT            CONSTRAINT [DF_tblEntityTariffFuelSurcharge_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblEntityTariffFuelSurcharge] PRIMARY KEY CLUSTERED ([intEntityTariffFuelSurchargeId] ASC),     
