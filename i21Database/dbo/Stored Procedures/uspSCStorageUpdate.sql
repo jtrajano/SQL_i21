@@ -413,6 +413,16 @@ BEGIN TRY
 	FROM	dbo.tblSCTicket SC
 	WHERE	SC.intTicketId = @intTicketId
 
+		-- Get the identity value from tblGRCustomerStorage
+	SELECT @intCustomerStorageId = SCOPE_IDENTITY()
+	
+	IF @intCustomerStorageId IS NULL 
+	BEGIN 
+		-- Raise the error:
+		RAISERROR('Unable to get Identity value from Customer Storage', 16, 1);
+		RETURN;
+	END
+
 	INSERT INTO [dbo].[tblGRStorageHistory]
 		   ([intConcurrencyId]
 		   ,[intCustomerStorageId]
@@ -429,7 +439,7 @@ BEGIN TRY
 		   ,[strUserName])
 	VALUES
 		   (1
-		   ,@intGRStorageId
+		   ,@intCustomerStorageId
 		   ,@intTicketId
 		   ,NULL
 		   ,NULL
@@ -441,6 +451,43 @@ BEGIN TRY
 		   ,1
 		   ,'New'
 		   ,@strUserName)
+	
+	BEGIN
+		SET @intHoldCustomerStorageId = NULL
+		select @intHoldCustomerStorageId = SD.intCustomerStorageId from tblGRStorageDiscount SD 
+		where intCustomerStorageId = @intCustomerStorageId
+	END
+	
+	if @intHoldCustomerStorageId is NULL
+	BEGIN
+		INSERT INTO [dbo].[tblGRStorageDiscount]
+	           ([intConcurrencyId]
+	           ,[intCustomerStorageId]
+	           ,[strDiscountCode]
+	           ,[dblGradeReading]
+	           ,[strCalcMethod]
+	           ,[dblDiscountAmount]
+	           ,[strShrinkWhat]
+	           ,[dblShrinkPercent]
+	           ,[dblDiscountDue]
+	           ,[dblDiscountPaid]
+	           ,[dtmDiscountPaidDate]
+			   ,[intDiscountScheduleCodeId])
+		SELECT	 [intConcurrencyId]= 1
+			,[intCustomerStorageId]= @intCustomerStorageId
+			,[strDiscountCode]= SD.strDiscountCode
+			,[dblGradeReading]= SD.dblGradeReading
+			,[strCalcMethod]= SD.strCalcMethod
+			,[dblDiscountAmount]= SD.dblDiscountAmount
+			,[strShrinkWhat]= SD.strShrinkWhat
+			,[dblShrinkPercent]= SD.dblShrinkPercent
+			,[dblDiscountDue]= SD.dblDiscountAmount
+			,[dblDiscountPaid]=	0
+			,[dtmDiscountPaidDate] = NULL
+			,[intDiscountScheduleCodeId] = SD.intDiscountScheduleCodeId
+		FROM	dbo.tblSCTicketDiscount SD
+		WHERE	SD.intTicketId = @intTicketId
+	END
 	
 	INSERT INTO @ItemsForItemReceipt (
 				 intItemId
@@ -508,51 +555,6 @@ BEGIN TRY
 		EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;
 		--EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
 	
-	-- Get the identity value from tblGRCustomerStorage
-	SELECT @intCustomerStorageId = SCOPE_IDENTITY()
-	
-	IF @intCustomerStorageId IS NULL 
-	BEGIN 
-		-- Raise the error:
-		RAISERROR('Unable to get Identity value from Customer Storage', 16, 1);
-		RETURN;
-	END
-	
-	BEGIN
-		select @intHoldCustomerStorageId = SD.intCustomerStorageId from tblGRStorageDiscount SD 
-		where intCustomerStorageId = @intCustomerStorageId
-	END
-	
-	if @intHoldCustomerStorageId is NULL
-	BEGIN
-		INSERT INTO [dbo].[tblGRStorageDiscount]
-	           ([intConcurrencyId]
-	           ,[intCustomerStorageId]
-	           ,[strDiscountCode]
-	           ,[dblGradeReading]
-	           ,[strCalcMethod]
-	           ,[dblDiscountAmount]
-	           ,[strShrinkWhat]
-	           ,[dblShrinkPercent]
-	           ,[dblDiscountDue]
-	           ,[dblDiscountPaid]
-	           ,[dtmDiscountPaidDate]
-			   ,[intDiscountScheduleCodeId])
-		SELECT	 [intConcurrencyId]= 1
-			,[intCustomerStorageId]= @intCustomerStorageId
-			,[strDiscountCode]= SD.strDiscountCode
-			,[dblGradeReading]= SD.dblGradeReading
-			,[strCalcMethod]= SD.strCalcMethod
-			,[dblDiscountAmount]= SD.dblDiscountAmount
-			,[strShrinkWhat]= SD.strShrinkWhat
-			,[dblShrinkPercent]= SD.dblShrinkPercent
-			,[dblDiscountDue]= SD.dblDiscountAmount
-			,[dblDiscountPaid]=	0
-			,[dtmDiscountPaidDate] = NULL
-			,[intDiscountScheduleCodeId] = SD.intDiscountScheduleCodeId
-		FROM	dbo.tblSCTicketDiscount SD
-		WHERE	SD.intTicketId = @intTicketId
-	END
 	CONTINUEISH:
 
 	IF @PostShipment = 2
