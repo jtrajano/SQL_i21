@@ -1929,6 +1929,7 @@
     <Build Include="dbo\Functions\fnCTConvertQuantityToTargetItemUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspGLImportFiscalYearOrigin.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckHistory.sql" />
+    <Build Include="dbo\Functions\fnGetItemPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
