@@ -1,4 +1,4 @@
-﻿﻿PRINT '*** Update Customer Farm Id ***'
+﻿PRINT '*** Update Customer Farm Id ***'
 
 IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerFarm' AND [COLUMN_NAME] = 'intCustomerId') 
 	AND NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerFarm' AND [COLUMN_NAME] = 'intEntityCustomerId') 

@@ -1,4 +1,4 @@
-﻿﻿CREATE PROCEDURE [dbo].[uspARGetItemPrice]
+﻿CREATE PROCEDURE [dbo].[uspARGetItemPrice]
 	@ItemId				INT
 	,@CustomerId		INT	
 	,@LocationId		INT

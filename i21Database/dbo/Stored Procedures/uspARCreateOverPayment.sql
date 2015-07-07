@@ -1,4 +1,4 @@
-﻿﻿CREATE PROCEDURE [dbo].[uspARCreateOverPayment]
+﻿CREATE PROCEDURE [dbo].[uspARCreateOverPayment]
 	 @PaymentId		as int
 	,@Post			as bit			= 1
 	,@BatchId		as nvarchar(20)	= NULL

@@ -1,4 +1,4 @@
-﻿﻿CREATE PROCEDURE [dbo].[uspARImportBillableHours]
+﻿CREATE PROCEDURE [dbo].[uspARImportBillableHours]
 	 @HoursWorkedIDs	AS NVARCHAR(MAX)	= 'all'
 	,@Post				AS BIT				= 0	
 	,@UserId			AS INT				= 1

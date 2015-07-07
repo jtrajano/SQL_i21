@@ -1,4 +1,4 @@
-﻿﻿CREATE TABLE [dbo].[tblARInvoiceDetail] (
+﻿CREATE TABLE [dbo].[tblARInvoiceDetail] (
     [intInvoiceDetailId]			INT             IDENTITY (1, 1) NOT NULL,
     [intInvoiceId]					INT             NOT NULL,
     [intItemId]						INT             NULL,
