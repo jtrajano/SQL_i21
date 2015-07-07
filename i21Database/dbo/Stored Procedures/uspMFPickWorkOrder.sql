@@ -539,59 +539,61 @@ BEGIN TRY
 					SELECT SUM(dblQty)
 					FROM @tblLot
 					HAVING SUM(dblQty) < @dblReqQty
-					) and @ysnExcessConsumptionAllowed=0
+					) 
 			BEGIN
-				SELECT @strItemNo = strItemNo
-				FROM dbo.tblICItem
-				WHERE intItemId = @intItemId
+				If @ysnExcessConsumptionAllowed=0
+				Begin
+					SELECT @strItemNo = strItemNo
+					FROM dbo.tblICItem
+					WHERE intItemId = @intItemId
 
-				RAISERROR (
-						51096
-						,11
-						,1
-						,@strItemNo
-						)
-			END
-			ELSE
-			BEGIN
-				SELECT @dblAdjustByQuantity=@dblReqQty-SUM(dblQty)
-				FROM @tblLot
-
-				SELECT @strLotNumber=strLotNumber 
-					,@intWeightUOMId=intItemUOMId
-					,@dblWeightPerQty=dblWeightPerUnit
-				FROM @tblLot
-
-				IF @intConsumptionMethodId=2 
-				BEGIN
-					Select @intSubLocationId=intSubLocationId From tblICStorageLocation Where intStorageLocationId =@intStorageLocationId
+					RAISERROR (
+							51096
+							,11
+							,1
+							,@strItemNo
+							)
 				END
 				ELSE
 				BEGIN
-					Select @intStorageLocationId=intNewLotBin from tblSMCompanyLocationSubLocation Where intCompanyLocationId=@intLocationId 
-					Select @intSubLocationId=intSubLocationId From tblICStorageLocation Where intStorageLocationId =@intStorageLocationId
+					SELECT @dblAdjustByQuantity=@dblReqQty-SUM(dblQty)
+					FROM @tblLot
+
+					SELECT @strLotNumber=strLotNumber 
+						,@intWeightUOMId=intItemUOMId
+						,@dblWeightPerQty=dblWeightPerUnit
+					FROM @tblLot
+
+					IF @intConsumptionMethodId=2 
+					BEGIN
+						Select @intSubLocationId=intSubLocationId From tblICStorageLocation Where intStorageLocationId =@intStorageLocationId
+					END
+					ELSE
+					BEGIN
+						Select @intStorageLocationId=intNewLotBin from tblSMCompanyLocationSubLocation Where intCompanyLocationId=@intLocationId 
+						Select @intSubLocationId=intSubLocationId From tblICStorageLocation Where intStorageLocationId =@intStorageLocationId
+					END
+
+					Select @dblAdjustByQuantity=@dblAdjustByQuantity/(Case When @intWeightUOMId is null Then 1 Else @dblWeightPerQty End)
+
+					EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
+							-- Parameters for filtering:
+							@intItemId = @intItemId
+							,@dtmDate = @dtmCurrentDateTime
+							,@intLocationId = @intLocationId
+							,@intSubLocationId = @intSubLocationId
+							,@intStorageLocationId = @intStorageLocationId
+							,@strLotNumber = @strLotNumber	
+							-- Parameters for the new values: 
+							,@dblAdjustByQuantity =@dblAdjustByQuantity
+							,@dblNewUnitCost =NULL
+							-- Parameters used for linking or FK (foreign key) relationships
+							,@intSourceId = 1
+							,@intSourceTransactionTypeId = 8
+							,@intUserId = @intUserId
+							,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 				END
-
-				Select @dblAdjustByQuantity=@dblAdjustByQuantity/(Case When @intWeightUOMId is null Then 1 Else @dblWeightPerQty End)
-
-				EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
-						-- Parameters for filtering:
-						@intItemId = @intItemId
-						,@dtmDate = @dtmCurrentDateTime
-						,@intLocationId = @intLocationId
-						,@intSubLocationId = @intSubLocationId
-						,@intStorageLocationId = @intStorageLocationId
-						,@strLotNumber = @strLotNumber	
-						-- Parameters for the new values: 
-						,@dblAdjustByQuantity =@dblAdjustByQuantity
-						,@dblNewUnitCost =NULL
-						-- Parameters used for linking or FK (foreign key) relationships
-						,@intSourceId = 1
-						,@intSourceTransactionTypeId = 8
-						,@intUserId = @intUserId
-						,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 			END
-
 			SELECT @intSequenceNo = Max(intSequenceNo) + 1
 			FROM dbo.tblMFWorkOrderConsumedLot
 			WHERE intWorkOrderId = @intWorkOrderId
