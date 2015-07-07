@@ -173,7 +173,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 			,[strCalculationType]
 			,[dblDefaultHours]
 			,[dblAmount]
-			,CASE WHEN ([strCalculationType] = 'Hourly Rate') THEN [dblDefaultHours] * [dblAmount] ELSE [dblAmount] END
+			,CASE WHEN ([strCalculationType] IN ('Hourly Rate', 'Overtime')) THEN [dblDefaultHours] * [dblAmount] ELSE [dblAmount] END
 			,[strW2Code]
 			,[intEmployeeTimeOffId]
 			,[intAccountId]
