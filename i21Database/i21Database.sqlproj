@@ -1927,6 +1927,7 @@
     <Build Include="dbo\Stored Procedures\uspARAddInvoice.sql" />
     <Build Include="dbo\User Defined Types\InvoiceStagingTable.sql" />
     <Build Include="dbo\Functions\fnCTConvertQuantityToTargetItemUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLImportFiscalYearOrigin.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
