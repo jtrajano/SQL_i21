@@ -75,7 +75,7 @@ BEGIN TRY
 			SELECT *
 			FROM dbo.tblICLot
 			WHERE intLotId = @intLotId
-				AND intLotStatusId = 3
+				AND intLotStatusId = 2
 			) and @ysnForceUndo=0
 	BEGIN
 		RAISERROR (
