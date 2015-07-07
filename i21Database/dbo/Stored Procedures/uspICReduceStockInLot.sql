@@ -45,11 +45,11 @@ AS		Lot_bucket
 USING (
 	SELECT	intItemId = @intItemId
 			,intItemLocationId = @intItemLocationId
-			,intItemUOMId = @intItemUOMId
+			,intItemUOMId = @intItemUOMId							
 			,intLotId = @intLotId
 			,intSubLocationId = @intSubLocationId
 			,intStorageLocationId = @intStorageLocationId
-) AS Source_Query  
+) AS Source_Query 
 	ON Lot_bucket.intItemId = Source_Query.intItemId
 	AND Lot_bucket.intItemLocationId = Source_Query.intItemLocationId
 	AND Lot_bucket.intItemUOMId = Source_Query.intItemUOMId

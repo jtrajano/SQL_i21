@@ -1156,7 +1156,7 @@ BEGIN
 					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = 0
-					,[dblUOMQty] = 0
+					,[dblUOMQty] = @EACH
 					,[dblCost] = 0
 					,[dblValue] = (@dblQty * @dblUOMQty) * 20.916667
 					,[dblSalesPrice] = @dblSalesPrice
@@ -1181,7 +1181,7 @@ BEGIN
 					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = 0
-					,[dblUOMQty] = 0
+					,[dblUOMQty] = @EACH
 					,[dblCost] = 0
 					,[dblValue] = -(@dblQty * @dblUOMQty) * @dblCost
 					,[dblSalesPrice] = @dblSalesPrice
@@ -1229,7 +1229,7 @@ BEGIN
 					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = 0
-					,[dblUOMQty] = 0
+					,[dblUOMQty] = @EACH
 					,[dblCost] = 0
 					,[dblValue] = (-15 * @dblCost) - (SELECT CAST( SUM(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) AS NUMERIC(18,6)) FROM expected WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId) -- Expected value is 28.750025
 					,[dblSalesPrice] = @dblSalesPrice
@@ -1299,7 +1299,7 @@ BEGIN
 					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = 0
-					,[dblUOMQty] = 0
+					,[dblUOMQty] = @EACH
 					,[dblCost] = 0
 					,[dblValue] = (@dblQty * @dblUOMQty) * 20.916667 
 					,[dblSalesPrice] = @dblSalesPrice
@@ -1323,7 +1323,7 @@ BEGIN
 					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = 0
-					,[dblUOMQty] = 0
+					,[dblUOMQty] = @EACH
 					,[dblCost] = 0
 					,[dblValue] = -(@dblQty * @dblUOMQty) * @dblCost
 					,[dblSalesPrice] = @dblSalesPrice
@@ -1369,7 +1369,7 @@ BEGIN
 					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = 0
-					,[dblUOMQty] = 0
+					,[dblUOMQty] = @EACH
 					,[dblCost] = 0
 					,[dblValue] = (-15 * @dblCost) - (SELECT CAST( SUM(ISNULL(dblQty, 0) * ISNULL(dblCost, 0) + ISNULL(dblValue, 0)) AS NUMERIC(18,6)) FROM tblICInventoryTransaction WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId) -- Expected value is 28.750025
 					,[dblSalesPrice] = @dblSalesPrice
@@ -1544,7 +1544,7 @@ BEGIN
 					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = 0
-					,[dblUOMQty] = 0
+					,[dblUOMQty] = @EACH
 					,[dblCost] = 0
 					,[dblValue] = 15 * dbo.fnGetItemAverageCost(@intItemId, @intItemLocationId)
 					,[dblSalesPrice] = @dblSalesPrice
@@ -1569,7 +1569,7 @@ BEGIN
 					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = 0
-					,[dblUOMQty] = 0
+					,[dblUOMQty] = @EACH
 					,[dblCost] = 0
 					,[dblValue] = -(15) * @dblCost
 					,[dblSalesPrice] = @dblSalesPrice

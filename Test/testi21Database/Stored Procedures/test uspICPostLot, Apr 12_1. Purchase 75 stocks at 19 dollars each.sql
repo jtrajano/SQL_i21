@@ -1221,7 +1221,7 @@ BEGIN
 					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = 0
-					,[dblUOMQty] = 0
+					,[dblUOMQty] = @EACH
 					,[dblCost] = 0
 					,[dblValue] = 30 * 20.50
 					,[dblSalesPrice] = @dblSalesPrice
@@ -1245,7 +1245,7 @@ BEGIN
 					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = 0
-					,[dblUOMQty] = 0
+					,[dblUOMQty] = @EACH
 					,[dblCost] = 0
 					,[dblValue] = -30 * @dblCost
 					,[dblSalesPrice] = @dblSalesPrice
@@ -1269,7 +1269,7 @@ BEGIN
 					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = 0
-					,[dblUOMQty] = 0
+					,[dblUOMQty] = @EACH
 					,[dblCost] = 0
 					,[dblValue] = 45 * 20.50
 					,[dblSalesPrice] = @dblSalesPrice
@@ -1293,7 +1293,7 @@ BEGIN
 					,[intStorageLocationId] = @intStorageLocationId
 					,[dtmDate] = @dtmDate
 					,[dblQty] = 0
-					,[dblUOMQty] = 0
+					,[dblUOMQty] = @EACH
 					,[dblCost] = 0
 					,[dblValue] = -45 * @dblCost
 					,[dblSalesPrice] = @dblSalesPrice

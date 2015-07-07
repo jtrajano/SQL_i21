@@ -108,8 +108,9 @@ RETURN (
 								AND Location.intItemLocationId = @intItemLocationId
 							LEFT JOIN dbo.tblICLot Lot
 								ON Lot.intItemLocationId = Location.intItemLocationId 
-								AND ISNULL(Lot.intLotId, 0) = ISNULL(@intLotId, 0)	
+								AND ISNULL(Lot.intLotId, 0) = ISNULL(@intLotId, 0)								
 					WHERE	Item.intItemId = @intItemId
+							AND Lot.intLotId IS NOT NULL
 							AND Location.intItemLocationId = @intItemLocationId							
 							AND ISNULL(@dblQty, 0) + ISNULL(Lot.dblQty, 0) < 0
 							AND (							
