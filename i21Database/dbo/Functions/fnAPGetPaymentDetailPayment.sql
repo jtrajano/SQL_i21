@@ -1,4 +1,4 @@
-﻿﻿CREATE FUNCTION [dbo].[fnAPGetPaymentDetailPayment]
+﻿CREATE FUNCTION [dbo].[fnAPGetPaymentDetailPayment]
 (
     @paymentDetailId INT
 )
