@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspARCreateInvoiceFromShipment]
+﻿﻿CREATE PROCEDURE [dbo].[uspARCreateInvoiceFromShipment]
 	 @ShipmentId		AS INT
 	,@UserId			AS INT
 	,@NewInvoiceId		AS INT			= NULL OUTPUT			

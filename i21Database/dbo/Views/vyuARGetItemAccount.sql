@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuARGetItemAccount]
+﻿﻿CREATE VIEW [dbo].[vyuARGetItemAccount]
 AS
 SELECT     
 	I.intItemId, 

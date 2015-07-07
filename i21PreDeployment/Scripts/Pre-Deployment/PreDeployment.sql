@@ -89,6 +89,9 @@
 :r .\12_EM\07_EntityFarmSchemaUpdate.sql
 :r .\12_EM\08_EntityShipViaSchemaUpdate.sql
 
+:r .\12_EM\03_EntityCustomerFarmRename_DataFix.sql
+
+
 --RK
 :r .\13_RK\01_DropTableScript.sql
 

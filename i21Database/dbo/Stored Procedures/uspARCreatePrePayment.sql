@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspARCreatePrePayment]
+﻿﻿CREATE PROCEDURE [dbo].[uspARCreatePrePayment]
 	 @PaymentId		as int
 	,@Post			as bit			= 1
 	,@BatchId		as nvarchar(20)	= NULL

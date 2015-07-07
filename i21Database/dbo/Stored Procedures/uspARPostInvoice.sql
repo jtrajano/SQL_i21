@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspARPostInvoice]
+﻿﻿CREATE PROCEDURE [dbo].[uspARPostInvoice]
 	@batchId			AS NVARCHAR(20)		= NULL,
 	@post				AS BIT				= 0,
 	@recap				AS BIT				= 0,

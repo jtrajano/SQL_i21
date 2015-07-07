@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspSOUpdateOrderShipmentStatus]
+﻿﻿CREATE PROCEDURE [dbo].[uspSOUpdateOrderShipmentStatus]
 	@SalesOrderId			INT
 AS
 BEGIN

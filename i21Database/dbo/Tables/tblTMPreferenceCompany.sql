@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblTMPreferenceCompany] (
+﻿﻿CREATE TABLE [dbo].[tblTMPreferenceCompany] (
     [intConcurrencyId]                 INT             DEFAULT 1 NOT NULL,
     [strSummitIntegration]             NVARCHAR (10)   COLLATE Latin1_General_CI_AS DEFAULT (N'AG') NOT NULL,
     [intPreferenceCompanyID]           INT             IDENTITY (1, 1) NOT NULL,
