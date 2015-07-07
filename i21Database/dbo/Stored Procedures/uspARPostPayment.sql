@@ -1205,8 +1205,7 @@ IF @recap = 0
 			UPDATE 
 				tblARPaymentDetail
 			SET 
-				dblAmountDue = A.dblInvoiceTotal - (A.dblPayment + A.dblDiscount)
-				,dblPayment = 0.00
+				dblPayment = CASE WHEN (ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00)) < A.dblPayment THEN (ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00)) ELSE A.dblPayment END
 			FROM
 				tblARPaymentDetail A
 			INNER JOIN
@@ -1216,6 +1215,20 @@ IF @recap = 0
 			INNER JOIN 
 				tblARInvoice C
 					ON A.intInvoiceId = C.intInvoiceId
+					
+			UPDATE 
+				tblARPaymentDetail
+			SET 
+				dblAmountDue = (ISNULL(C.dblAmountDue, 0.00) - ISNULL(A.dblDiscount,0.00)) - A.dblPayment							
+			FROM
+				tblARPaymentDetail A
+			INNER JOIN
+				tblARPayment B
+					ON A.intPaymentId = B.intPaymentId
+					AND A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
+			INNER JOIN 
+				tblARInvoice C
+					ON A.intInvoiceId = C.intInvoiceId					
 					
 			UPDATE tblGLDetail
 				SET tblGLDetail.ysnIsUnposted = 1
@@ -1411,7 +1424,7 @@ IF @recap = 0
 			UPDATE 
 				tblARPaymentDetail
 			SET 
-				dblAmountDue = 0.00
+				dblAmountDue = ISNULL(C.dblAmountDue, 0.00) -- ISNULL(A.dblDiscount,0.00)) - A.dblPayment							
 			FROM
 				tblARPaymentDetail A
 			INNER JOIN
@@ -1420,7 +1433,7 @@ IF @recap = 0
 					AND A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
 			INNER JOIN 
 				tblARInvoice C
-					ON A.intInvoiceId = C.intInvoiceId
+					ON A.intInvoiceId = C.intInvoiceId					
 					
 			-- Delete zero payment temporarily
 			DELETE FROM A
@@ -1527,8 +1540,57 @@ IF @recap = 0
 				@batchId,
 				A.intPaymentId
 			FROM tblARPayment A
-			WHERE intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)				
+			WHERE intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
+							
 			END						
+
+		UPDATE 
+			tblARPaymentDetail
+		SET 
+			dblAmountDue = ISNULL(C.dblAmountDue, 0.00) -- ISNULL(A.dblDiscount,0.00)) - A.dblPayment							
+		FROM
+			tblARPaymentDetail A
+		INNER JOIN
+			tblARPayment B
+				ON A.intPaymentId = B.intPaymentId
+				AND A.intPaymentId NOT IN (SELECT intPaymentId FROM @ARReceivablePostData)
+		INNER JOIN 
+			tblARInvoice C
+				ON A.intInvoiceId = C.intInvoiceId
+		WHERE
+			B.ysnPosted = 1		
+						
+		UPDATE 
+			tblARPaymentDetail
+		SET 
+			dblPayment = CASE WHEN (ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00)) < A.dblPayment THEN (ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00)) ELSE A.dblPayment END
+		FROM
+			tblARPaymentDetail A
+		INNER JOIN
+			tblARPayment B
+				ON A.intPaymentId = B.intPaymentId
+				AND A.intPaymentId NOT IN (SELECT intPaymentId FROM @ARReceivablePostData)
+		INNER JOIN 
+			tblARInvoice C
+				ON A.intInvoiceId = C.intInvoiceId
+		WHERE
+			B.ysnPosted = 0
+				
+		UPDATE 
+			tblARPaymentDetail
+		SET 
+			dblAmountDue = (ISNULL(C.dblAmountDue, 0.00) - ISNULL(A.dblDiscount,0.00)) - A.dblPayment							
+		FROM
+			tblARPaymentDetail A
+		INNER JOIN
+			tblARPayment B
+				ON A.intPaymentId = B.intPaymentId
+				AND A.intPaymentId NOT IN (SELECT intPaymentId FROM @ARReceivablePostData)
+		INNER JOIN 
+			tblARInvoice C
+				ON A.intInvoiceId = C.intInvoiceId
+		WHERE
+			B.ysnPosted = 0		
 			
 		COMMIT TRAN @TransactionName
 	END
