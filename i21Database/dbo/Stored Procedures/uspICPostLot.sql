@@ -66,7 +66,26 @@ BEGIN
 	-- Reduce stock 
 	IF (ISNULL(@dblQty, 0) < 0)
 	BEGIN 
-		SET @dblReduceQty = ISNULL(@dblQty, 0) 
+		-- Retrieve the correct UOM (Lot UOM or Weight UOM)
+		-- and also compute the Qty if it has weights. 
+		SELECT	@dblReduceQty =	-- Calculate from Weight Per Qty, if weight UOM is specified. 
+									-- Don't calculate if is already in Weight UOM. 
+									CASE	WHEN Lot.intWeightUOMId IS NOT NULL AND Lot.intWeightUOMId <> @intItemUOMId THEN 
+												Lot.dblWeightPerQty * @dblQty
+											ELSE 
+												@dblQty
+									END 
+				,@intItemUOMId = -- Use weight UOM, if applicable. 
+								-- Ignore if is already in Weight UOM. 
+								CASE	WHEN Lot.intWeightUOMId IS NOT NULL THEN 
+											Lot.intWeightUOMId
+										ELSE 
+											@intItemUOMId
+								END 
+		FROM	dbo.tblICLot Lot
+		WHERE	Lot.intLotId = @intLotId
+
+		SET @dblReduceQty = ISNULL(@dblReduceQty, 0) 
 
 		-- Repeat call on uspICReduceStockInLot until @dblReduceQty is completely distributed to all available Lot buckets or added a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)

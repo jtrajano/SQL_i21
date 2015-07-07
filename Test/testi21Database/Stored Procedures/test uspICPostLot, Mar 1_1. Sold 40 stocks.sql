@@ -10,6 +10,7 @@ BEGIN
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLot', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotOut', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICLot';
 		
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -236,6 +237,19 @@ BEGIN
 					,[intLotId] = @intLotId 
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId]	= 1
+
+			-- Insert lot record
+			INSERT INTO tblICLot (
+				intLotId
+				,strLotNumber
+				,intItemUOMId
+				,dblQty
+			)
+			SELECT 
+				intLotId		= @intLotId
+				,strLotNumber	= '12345'
+				,intItemUOMId	= @WetGrains_BushelUOMId
+				,dblQty			= @dblQty
 			
 			-- Update expected data in tblICItemStock
 			UPDATE	tblICItemStock
@@ -383,6 +397,11 @@ BEGIN
 					,[intLotId] = @intLotId 
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId]	= 1
+
+			-- Update lot record
+			UPDATE tblICLot 
+			SET dblQty += @dblQty
+			WHERE intLotId = @intLotId
 			
 			-- Update expected data in tblICItemStock
 			UPDATE	tblICItemStock
@@ -530,6 +549,11 @@ BEGIN
 					,[intLotId] = @intLotId 
 					,[intCreatedUserId] = @intUserId
 					,[intConcurrencyId]	= 1
+
+			-- Update lot record
+			UPDATE tblICLot 
+			SET dblQty += @dblQty
+			WHERE intLotId = @intLotId
 			
 			-- Update expected data in tblICItemStock
 			UPDATE	tblICItemStock

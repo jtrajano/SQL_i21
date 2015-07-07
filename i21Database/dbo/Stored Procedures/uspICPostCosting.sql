@@ -135,6 +135,12 @@ BEGIN
 	SELECT	@CostingMethod = CostingMethod 
 	FROM	dbo.fnGetCostingMethodAsTable(@intItemId, @intItemLocationId)
 
+	-- Initialize the UOM Qty
+	SELECT	TOP 1
+			@dblUOMQty = ItemUOM.dblUnitQty
+	FROM	tblICItemUOM ItemUOM
+	WHERE	intItemUOMId = @intItemUOMId
+
 	--------------------------------------------------------------------------------
 	-- Call the SP that can process the item's costing method
 	--------------------------------------------------------------------------------
