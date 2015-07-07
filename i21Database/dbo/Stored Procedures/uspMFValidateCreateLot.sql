@@ -141,7 +141,7 @@ BEGIN TRY
 			SELECT *
 			FROM dbo.tblICItemUOM
 			WHERE intItemId = @intItemId
-				AND intItemUOMId = @intItemUOMId and ysnStockUnit=1
+				AND intItemUOMId in (@intItemUOMId,@intItemUnitCountUOMId) and ysnStockUnit=1
 			)
 	BEGIN
 
