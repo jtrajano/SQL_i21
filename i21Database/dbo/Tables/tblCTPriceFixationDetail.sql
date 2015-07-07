@@ -13,6 +13,8 @@
 	[intFutureMonthId] INT NOT NULL,
 	[dblFutures] NUMERIC(8, 4) NULL,
 	[dblBasis] NUMERIC(8, 4) NULL,
+	[dblPolRefPrice] NUMERIC(8, 4) NULL,
+	[dblPolPremium] NUMERIC(8, 4) NULL,
 	[dblCashPrice] NUMERIC(9, 4) NULL,
 	[intPriceItemUOMId] INT NOT NULL,
 	[ysnHedge] BIT,
@@ -22,7 +24,7 @@
 	[intBrokerageAccountId] INT
 
 	CONSTRAINT [PK_tblCTPriceFixationDetail_intPriceFixationDetailId] PRIMARY KEY CLUSTERED ([intPriceFixationDetailId] ASC),
-	CONSTRAINT [FK_tblCTPriceFixationDetail_tblCTPriceFixation_intPriceFixationId] FOREIGN KEY ([intPriceFixationId]) REFERENCES [tblCTPriceFixation]([intPriceFixationId]),
+	CONSTRAINT [FK_tblCTPriceFixationDetail_tblCTPriceFixation_intPriceFixationId] FOREIGN KEY ([intPriceFixationId]) REFERENCES [tblCTPriceFixation]([intPriceFixationId]) ON DELETE CASCADE,
 	
 	CONSTRAINT [FK_tblCTPriceFixationDetail_tblICItemUOM_intQtyItemUOMId_intItemUOMId] FOREIGN KEY ([intQtyItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblCTPriceFixationDetail_tblICItemUOM_intPriceItemUOMId_intItemUOMId] FOREIGN KEY ([intPriceItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),

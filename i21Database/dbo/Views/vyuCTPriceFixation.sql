@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuCTPriceContract
+﻿CREATE VIEW vyuCTPriceFixation
 
 AS
 
