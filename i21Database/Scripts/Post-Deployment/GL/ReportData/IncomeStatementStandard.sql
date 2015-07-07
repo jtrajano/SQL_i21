@@ -11,7 +11,7 @@ PRINT 'Begin updating Income Statement Standard Report'
 DECLARE @GLReportId INT
 SELECT @GLReportId = intReportId FROM tblRMReport WHERE strName = 'Income Statement Standard' and strGroup = 'General Ledger' 
 
-DECLARE @GLReportOptions NVARCHAR(MAX) = 
+DECLARE @GLReportOptions VARCHAR(MAX) = 
 'WITH Units 
 AS 
 (
@@ -89,8 +89,8 @@ where tblGLDetail.ysnIsUnposted = 0 and tblGLAccount.strAccountType in (''Revenu
 --Special Case--
 order by intSort'
 
-DECLARE @GLReportDrillDown NVARCHAR(MAX) =  '[{"id":"Reports.model.DrillThrough-23","Control":"lblAccountType","DrillThroughType":0,"DrillThroughValue":"lblAccountType value","Name":"General Ledger by Account ID Detail"},{"id":"Reports.model.DrillThrough-25","Control":"labelEx2","DrillThroughType":0,"DrillThroughValue":"labelEx2 value","Name":"General Ledger by Account ID Detail"},{"id":"Reports.model.DrillThrough-27","Control":"labelEx3","DrillThroughType":0,"DrillThroughValue":"labelEx3 value","Name":"General Ledger by Account ID Detail"}]' 
-DECLARE @GLReportDataSource NVARCHAR(MAX) = 
+DECLARE @GLReportDrillDown VARCHAR(MAX) =  '[{"id":"Reports.model.DrillThrough-23","Control":"lblAccountType","DrillThroughType":0,"DrillThroughValue":"lblAccountType value","Name":"General Ledger by Account ID Detail"},{"id":"Reports.model.DrillThrough-25","Control":"labelEx2","DrillThroughType":0,"DrillThroughValue":"labelEx2 value","Name":"General Ledger by Account ID Detail"},{"id":"Reports.model.DrillThrough-27","Control":"labelEx3","DrillThroughType":0,"DrillThroughValue":"labelEx3 value","Name":"General Ledger by Account ID Detail"}]' 
+DECLARE @GLReportDataSource VARCHAR(MAX) = 
 'WITH Units
 AS
 (

@@ -11,7 +11,7 @@ PRINT 'Begin updating Trial Balance Report'
 DECLARE @GLReportId INT
 SELECT @GLReportId = intReportId FROM tblRMReport WHERE strName = 'Trial Balance Detail' and strGroup = 'General Ledger' 
 
-DECLARE @GLReportOptions NVARCHAR(MAX) = 
+DECLARE @GLReportOptions VARCHAR(MAX) = 
 'WITH Units
 AS
 (
@@ -126,8 +126,8 @@ AS
 	,strAccountType
 	,strAccountGroup'
 
-DECLARE @GLReportDrillDown NVARCHAR(MAX) =  '[{"Control":"labelEx1","DrillThroughType":0,"Name":"General Ledger by Account ID Detail","DrillThroughFilterType":0,"Filters":null,"id":null},{"Control":"labelEx2","DrillThroughType":0,"Name":"General Ledger by Account ID Detail","DrillThroughFilterType":0,"Filters":null,"id":null}]' 
-DECLARE @GLReportDataSource NVARCHAR(MAX) = 
+DECLARE @GLReportDrillDown VARCHAR(MAX) =  '[{"Control":"labelEx1","DrillThroughType":0,"Name":"General Ledger by Account ID Detail","DrillThroughFilterType":0,"Filters":null,"id":null},{"Control":"labelEx2","DrillThroughType":0,"Name":"General Ledger by Account ID Detail","DrillThroughFilterType":0,"Filters":null,"id":null}]' 
+DECLARE @GLReportDataSource VARCHAR(MAX) = 
 'WITH Units
 AS
 (
