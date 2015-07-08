@@ -224,12 +224,12 @@ BEGIN TRY
 			FROM @FutureTradedMonths
 			WHERE IsTraded = 1
 			ORDER BY IntMonthNumber ASC
-	   )
-	   SELECT @StrTradedMonthSymbol+Convert(nvarchar,RIGHT(YEAR(GetDate()), 1)+1)
+	   )	   
+	   SELECT @StrTradedMonthSymbol+RIGHT(YEAR(GetDate())+1,1),@StrTradedMonthSymbol+SUBSTRING(CONVERT(Nvarchar,YEAR(GetDate())+1),3,2)  
 	END
 	ELSE
 	BEGIN
-		SELECT @StrTradedMonthSymbol+RIGHT(YEAR(GetDate()), 1)
+		SELECT @StrTradedMonthSymbol+RIGHT(YEAR(GetDate()), 1),@StrTradedMonthSymbol+SUBSTRING(CONVERT(nvarchar,YEAR(GetDate())),3,2)    
 	END	
 	
 END TRY
