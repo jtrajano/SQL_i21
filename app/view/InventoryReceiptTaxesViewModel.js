@@ -18,11 +18,13 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewModel', {
     alias: 'viewmodel.icinventoryreceipttaxes',
 
     requires: [
-
+        'i21.store.TaxGroupMasterBuffered'
     ],
 
     stores: {
-
+        taxGroupMaster: {
+            type: 'smtaxgroupmasterbuffered'
+        }
     }
 
 });

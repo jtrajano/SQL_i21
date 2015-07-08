@@ -39,30 +39,44 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
                             xtype: 'gridcombobox',
                             columns: [
                                 {
-                                    dataIndex: 'intManufacturerId',
+                                    dataIndex: 'intTaxGroupMasterId',
                                     dataType: 'numeric',
-                                    text: 'Manufacturer ID',
+                                    text: 'Tax Group Master Id',
                                     hidden: true
                                 },
                                 {
-                                    dataIndex: 'strManufacturer',
+                                    dataIndex: 'strTaxGroupMaster',
                                     dataType: 'string',
-                                    text: 'Manufacturer',
+                                    text: 'Tax Group Master',
+                                    flex: 1
+                                },
+                                {
+                                    dataIndex: 'strDescription',
+                                    dataType: 'string',
+                                    text: 'Description',
+                                    flex: 1
+                                },
+                                {
+                                    xtype: 'checkcolumn',
+                                    dataIndex: 'ysnSeparateOnInvoice',
+                                    dataType: 'boolean',
+                                    text: 'Separate on Invoice',
                                     flex: 1
                                 }
                             ],
-                            itemId: 'cboManufacturer',
-                            displayField: 'strManufacturer',
-                            valueField: 'strManufacturer'
-//                            bind: {
-//                                store: '{manufacturer}'
-//                            },
-//                            listeners: {
-//                                select: 'onCboManufacturerSelect'
-//                            }
+                            itemId: 'cboTaxGroupMaster',
+                            displayField: 'strTaxGroupMaster',
+                            valueField: 'strTaxGroupMaster',
+                            bind: {
+                                store: '{taxGroupMaster}'
+                            },
+                            listeners: {
+                                select: 'onTaxSelect'
+                            }
                         }
                     },
                     {
+                        xtype: 'numbercolumn',
                         itemId: 'colTaxRate',
                         dataIndex: 'dblTaxRate',
                         text: 'Tax Rate',
@@ -73,13 +87,11 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
                     }
                     ,
                     {
+                        xtype: 'numbercolumn',
                         itemId: 'colTaxAmount',
                         dataIndex: 'dblTaxAmount',
                         text: 'Tax Amount',
-                        flex: 1,
-                        editor: {
-                            xtype: 'numberfield'
-                        }
+                        flex: 1
                     }
                 ]
             })
@@ -109,19 +121,22 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
         var record = Ext.create('Inventory.model.ReceiptItemTax');
         record.set('intInventoryReceiptItemId', me.intInventoryReceiptItemId);
         action(record);
-    }
+    },
 
-//    onCboManufacturerSelect: function(combo, records, eOpts) {
-//        if (records.length <= 0)
-//            return;
-//
-//        var grid = combo.up('grid');
-//        var plugin = grid.plugins[0];
-//        var current = plugin.getActiveRecord();
-//
-//        if (combo.column.itemId === 'colManufacturer' && current) {
-//            current.set('intManufacturerId', records[0].get('intManufacturerId'));
-//        }
-//    }
+    onTaxSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var win = combo.up('window');
+        var plugin = grid.plugins[0];
+        var current = plugin.getActiveRecord();
+
+
+        if (combo.column.itemId === 'colTaxCode' && current) {
+            current.set('intTaxCodeId', records[0].get('intTaxGroupMasterId'));
+            current.set('intInventoryReceiptItemId', win.controller.intInventoryReceiptItemId);
+        }
+    }
 
 });
