@@ -25,7 +25,7 @@ SELECT
 							THEN (
 								CASE WHEN A.dtmApprovalDate IS NOT NULL AND A.ysnApproved = 1 THEN 'Approved'
 									WHEN A.dtmApprovalDate IS NOT NULL AND A.ysnApproved = 0 THEN 'Rejected'
-									ELSE 'Pending' END
+									ELSE 'Awaiting approval' END
 							)
 							ELSE NULL END,
 	strApprover = (SELECT TOP 1 strUserName FROM dbo.tblSMApprovalListUserSecurity WHERE B.intApprovalListId = intApprovalListId),
