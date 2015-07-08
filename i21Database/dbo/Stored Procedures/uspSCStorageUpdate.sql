@@ -570,6 +570,7 @@ BEGIN TRY
 				 ,@intUserId
 				 ,@ItemsForItemShipment
 				 ,@intEntityId
+				 ,4
 				 ,@InventoryShipmentId OUTPUT;
 		END
 		BEGIN 
