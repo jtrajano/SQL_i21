@@ -1,10 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[uspPRCreatePaycheckEntry]
-	@intEmployeeId	INT
-	,@dtmBeginDate	DATETIME
-	,@dtmEndDate	DATETIME
-	,@dtmPayDate	DATETIME
-	,@intPayGroupId	INT = NULL
-	,@intPaycheckId	INT = NULL OUTPUT
+	@intEmployeeId			INT
+	,@dtmBeginDate			DATETIME
+	,@dtmEndDate			DATETIME
+	,@dtmPayDate			DATETIME
+	,@intPayGroupId			INT = NULL
+	,@intDepartmentId		INT = NULL
+	,@ysnUseStandardHours	BIT = 1
+	,@intPaycheckId			INT = NULL OUTPUT
 AS
 BEGIN
 
@@ -14,13 +16,15 @@ DECLARE @intEmployee INT
 	   ,@dtmEnd DATETIME
 	   ,@dtmPay DATETIME
 	   ,@intPayGroup INT
+	   ,@ysnUseStandard BIT
 
 /* Localize Parameters for Optimal Performance */
-SELECT @intEmployee	= @intEmployeeId
-	  ,@dtmBegin	= @dtmBeginDate
-	  ,@dtmEnd		= @dtmEndDate
-	  ,@dtmPay		= @dtmPayDate
-	  ,@intPayGroup = @intPayGroupId
+SELECT @intEmployee		= @intEmployeeId
+	  ,@dtmBegin		= @dtmBeginDate
+	  ,@dtmEnd			= @dtmEndDate
+	  ,@dtmPay			= @dtmPayDate
+	  ,@intPayGroup		= @intPayGroupId
+	  ,@ysnUseStandard	= @ysnUseStandardHours
 
 /* Get Paycheck Starting Number */
 DECLARE @strPaycheckId NVARCHAR(50)
@@ -171,9 +175,40 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 			,@intEmployeeEarningId
 			,[intTypeEarningId]
 			,[strCalculationType]
-			,[dblDefaultHours]
+			,CASE 
+			    --If Use Standard Hours, get hours based on Default in Employee Setup
+				WHEN (@ysnUseStandard = 1) 
+					THEN [dblDefaultHours] 
+				--If not Use Standard Hours, get total approved hours from Timecard within the date range
+				ELSE 
+					(SELECT dblTotalHours = CASE WHEN ([strCalculationType] IN ('Overtime')) 
+												 THEN SUM(dblOvertimeHours) 
+												 ELSE SUM(dblRegularHours) 
+											END
+						FROM tblPRTimecard 
+						WHERE intEmployeeEarningId = @intEmployeeEarningId AND ysnApproved = 1
+						AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
+						AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
+					)
+				END
 			,[dblAmount]
-			,CASE WHEN ([strCalculationType] IN ('Hourly Rate', 'Overtime')) THEN [dblDefaultHours] * [dblAmount] ELSE [dblAmount] END
+			,CASE WHEN ([strCalculationType] IN ('Hourly Rate', 'Overtime')) THEN 
+				CASE 
+			    --If Use Standard Hours, get hours based on Default in Employee Setup
+				WHEN (@ysnUseStandard = 1) 
+					THEN [dblDefaultHours] 
+				--If not Use Standard Hours, get total approved hours from Timecard within the date range
+				ELSE 
+					(SELECT dblTotalHours = CASE WHEN ([strCalculationType] IN ('Overtime')) 
+												 THEN SUM(dblOvertimeHours) 
+												 ELSE SUM(dblRegularHours) 
+											END
+						FROM tblPRTimecard 
+						WHERE intEmployeeEarningId = @intEmployeeEarningId AND ysnApproved = 1
+						AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
+						AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
+					)
+				END * [dblAmount] ELSE [dblAmount] END
 			,[strW2Code]
 			,[intEmployeeTimeOffId]
 			,[intAccountId]
@@ -280,6 +315,14 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 
 		DELETE FROM #tmpDeductions WHERE intEmployeeDeductionId = @intEmployeeDeductionId
 	END
+
+	/* Associate Timecards to created Paycheck */
+	IF (@ysnUseStandardHours = 0)
+		UPDATE tblPRTimecard 
+		SET intPaycheckId = @intPaycheckId
+		WHERE ysnApproved = 1
+		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
+		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
 
 END
 GO

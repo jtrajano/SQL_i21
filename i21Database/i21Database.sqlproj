@@ -1446,7 +1446,6 @@
     <Build Include="dbo\Tables\tblARInvoiceDetailTax.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetItemTaxes.sql" />
     <Build Include="dbo\Tables\tblPRTimecard.sql" />
-    <Build Include="dbo\Tables\tblPRTimeEntry.sql" />
     <Build Include="dbo\Tables\tblGRStorageOption.sql" />
     <Build Include="dbo\Tables\tblGRStorageSchedulePeriod.sql" />
     <Build Include="dbo\Tables\tblGRStorageScheduleRule.sql" />
