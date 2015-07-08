@@ -1939,6 +1939,7 @@
     <Build Include="dbo\Tables\tblGRCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspEMMergeEntity.sql" />
     <Build Include="dbo\Views\vyuEMSearchMerge.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUndoStageWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
