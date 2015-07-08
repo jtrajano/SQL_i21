@@ -142,7 +142,7 @@ BEGIN
 				SELECT  AggregrateLot.intInventoryShipmentItemId
 						,TotalLotQtyInDetailItemUOM = SUM(
 							dbo.fnCalculateQtyBetweenUOM(
-								ISNULL(AggregrateLot.intItemUOMId, tblICInventoryShipmentItem.intItemUOMId)
+								ISNULL(Lot.intItemUOMId, tblICInventoryShipmentItem.intItemUOMId)
 								,tblICInventoryShipmentItem.intItemUOMId
 								,AggregrateLot.dblQuantityShipped
 							)
@@ -152,6 +152,8 @@ BEGIN
 							ON tblICInventoryShipment.intInventoryShipmentId = tblICInventoryShipmentItem.intInventoryShipmentId
 						INNER JOIN dbo.tblICInventoryShipmentItemLot AggregrateLot
 							ON AggregrateLot.intInventoryShipmentItemId = tblICInventoryShipmentItem.intInventoryShipmentItemId
+						INNER JOIN tblICLot Lot
+							ON Lot.intLotId = AggregrateLot.intLotId
 				WHERE	tblICInventoryShipment.strShipmentNumber = @strTransactionId				
 				GROUP BY AggregrateLot.intInventoryShipmentItemId
 			) ItemLot
