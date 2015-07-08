@@ -24,7 +24,7 @@ SELECT
       ,fm.dblContractSize
       ,case when bc.intFuturesRateType= 2 then 0 else  isnull(bc.dblFutCommission,0) end as dblFutCommission
 FROM tblRKFutOptTransaction ot
-JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId and ot.intInstrumentTypeId=1 
+JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId and ot.intInstrumentTypeId=1 and ot.strStatus='Filled'
 LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId 
 JOIN tblRKBrokerageAccount ba on ot.intBrokerageAccountId=ba.intBrokerageAccountId 
 	AND ba.intEntityId = ot.intEntityId  AND ot.intInstrumentTypeId IN(1,3) AND ba.intBrokerageAccountId=ot.intBrokerageAccountId 

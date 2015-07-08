@@ -1940,6 +1940,10 @@
     <Build Include="dbo\Stored Procedures\uspEMMergeEntity.sql" />
     <Build Include="dbo\Views\vyuEMSearchMerge.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUndoStageWorkOrder.sql" />
+    <Build Include="dbo\Views\vyuRKSummaryPnL.sql" />
+    <Build Include="dbo\Views\vyuRKUnrealizedPnL.sql" />
+    <Build Include="dbo\Views\vyuRKRealizedPnL.sql" />
+    <Build Include="dbo\Functions\fnRKGetLatestClosingPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
