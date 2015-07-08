@@ -34,6 +34,7 @@ BEGIN
 			,@ManualLotGrains AS INT = 6
 			,@SerializedLotGrains AS INT = 7
 			,@CornCommodity AS INT = 8
+			,@OtherCharges AS INT = 9
 			,@InvalidItem AS INT = -1
 
 	-- Declare the variables for location
@@ -418,6 +419,8 @@ BEGIN
 		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo, strLotTracking) VALUES (@ManualLotGrains, 'MANUAL LOT GRAINS DESCRIPTION', 'MANUAL LOT GRAINS', 'Yes - Manual')
 		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo, strLotTracking) VALUES (@SerializedLotGrains, 'SERIALIZED LOT GRAINS DESCRIPTION', 'SERIALIZED LOT GRAINS', 'Yes - Serial Number')
 		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo, strType, intCommodityId) VALUES (@CornCommodity, 'CORN - A COMMODITY ITEM', 'CORN', 'Commodity', @Commodity_Corn)
+
+		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo) VALUES (@OtherCharges, 'OTHER CHARGES', 'Other Charges')
 	END
 
 	-- Fake data for Item-Location
@@ -585,6 +588,8 @@ BEGIN
 		DECLARE @Corn_BushelUOM AS INT = 43,			@Corn_PoundUOM AS INT = 44,				@Corn_KgUOM AS INT = 45, 
 				@Corn_25KgBagUOM AS INT = 46,			@Corn_10LbBagUOM AS INT = 47,			@Corn_TonUOM AS INT = 48
 
+		DECLARE @OtherCharges_PoundUOM AS INT = 49
+
 		-- Unit of measure master table
 		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOM_Bushel, 'Bushel')
 		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOM_Pound, 'Pound')
@@ -647,5 +652,7 @@ BEGIN
 		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (@Corn_25KgBagUOM, @CornCommodity, @UOM_25KgBag, @25KgBagUnitQty)
 		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (@Corn_10LbBagUOM, @CornCommodity, @UOM_10LbBag, @10LbBagUnitQty)
 		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (@Corn_TonUOM, @CornCommodity, @UOM_Ton, @TonUnitQty)
+
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (@OtherCharges_PoundUOM, @OtherCharges, @UOM_Pound, @PoundUnitQty)
 	END 
 END

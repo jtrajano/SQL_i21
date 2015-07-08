@@ -1935,6 +1935,10 @@
     <Build Include="dbo\Stored Procedures\uspSPAuditLogs.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePrepayAndDebitMemo.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetBlendRequests.sql" />
+    <Build Include="dbo\Tables\tblICInventoryReceiptChargePerItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCalculateChargePerItem.sql" />
+    <Build Include="dbo\Functions\fnGetItemStockUOM.sql" />
+    <Build Include="dbo\Functions\fnGetMatchingItemUOMId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
