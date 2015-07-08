@@ -176,12 +176,15 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 			,[intTypeEarningId]
 			,[strCalculationType]
 			,CASE 
+				--If Earning Id is HOLIDAY, use the specified Pay Group Holiday Hours
+				WHEN (@intPayGroup IS NOT NULL AND ((SELECT TOP 1 LOWER(strEarning) FROM tblPRTypeEarning WHERE intTypeEarningId = tblPREmployeeEarning.intTypeEarningId) LIKE '%holiday%'))
+					THEN ISNULL((SELECT TOP 1 dblHolidayHours FROM tblPRPayGroup WHERE intPayGroupId = @intPayGroup), 0)
 			    --If Use Standard Hours, get hours based on Default in Employee Setup
 				WHEN (@ysnUseStandard = 1) 
 					THEN [dblDefaultHours] 
 				--If not Use Standard Hours, get total approved hours from Timecard within the date range
 				ELSE 
-					(SELECT dblTotalHours = CASE WHEN ([strCalculationType] IN ('Overtime')) 
+					ISNULL((SELECT dblTotalHours = CASE WHEN ([strCalculationType] IN ('Overtime')) 
 												 THEN SUM(dblOvertimeHours) 
 												 ELSE SUM(dblRegularHours) 
 											END
@@ -189,26 +192,30 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 						WHERE intEmployeeEarningId = @intEmployeeEarningId AND ysnApproved = 1
 						AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
 						AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
-					)
+					), 0)
 				END
 			,[dblAmount]
 			,CASE WHEN ([strCalculationType] IN ('Hourly Rate', 'Overtime')) THEN 
 				CASE 
-			    --If Use Standard Hours, get hours based on Default in Employee Setup
-				WHEN (@ysnUseStandard = 1) 
-					THEN [dblDefaultHours] 
-				--If not Use Standard Hours, get total approved hours from Timecard within the date range
-				ELSE 
-					(SELECT dblTotalHours = CASE WHEN ([strCalculationType] IN ('Overtime')) 
-												 THEN SUM(dblOvertimeHours) 
-												 ELSE SUM(dblRegularHours) 
-											END
-						FROM tblPRTimecard 
-						WHERE intEmployeeEarningId = @intEmployeeEarningId AND ysnApproved = 1
-						AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
-						AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
-					)
-				END * [dblAmount] ELSE [dblAmount] END
+					--If Earning Id is HOLIDAY, use the specified Pay Group Holiday Hours
+					WHEN (@intPayGroup IS NOT NULL AND ((SELECT TOP 1 LOWER(strEarning) FROM tblPRTypeEarning WHERE intTypeEarningId = tblPREmployeeEarning.intTypeEarningId) LIKE '%holiday%'))
+						THEN ISNULL((SELECT TOP 1 dblHolidayHours FROM tblPRPayGroup WHERE intPayGroupId = @intPayGroup), 0)
+					--If Use Standard Hours, get hours based on Default in Employee Setup
+					WHEN (@ysnUseStandard = 1) 
+						THEN [dblDefaultHours] 
+					--If not Use Standard Hours, get total approved hours from Timecard within the date range
+					ELSE 
+						ISNULL((SELECT dblTotalHours = CASE WHEN ([strCalculationType] IN ('Overtime')) 
+													 THEN SUM(dblOvertimeHours) 
+													 ELSE SUM(dblRegularHours) 
+												END
+							FROM tblPRTimecard 
+							WHERE intEmployeeEarningId = @intEmployeeEarningId AND ysnApproved = 1
+							AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
+							AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
+						), 0)
+					END 
+				* [dblAmount] ELSE [dblAmount] END
 			,[strW2Code]
 			,[intEmployeeTimeOffId]
 			,[intAccountId]
