@@ -21,7 +21,7 @@ UPDATE tblRMDatasource
 SET strQuery = '
 SELECT DISTINCT  
 A.intCustomerID
-,ISNULL(K.vwprc_factor,(CASE WHEN B.vwcus_prc_lvl = 1 THEN G.vwitm_un_prc1 
+,ISNULL(K.vwprc_factor,((CASE WHEN B.vwcus_prc_lvl = 1 THEN G.vwitm_un_prc1 
 					   WHEN B.vwcus_prc_lvl = 2 THEN G.vwitm_un_prc2
 					   WHEN B.vwcus_prc_lvl = 3 THEN G.vwitm_un_prc3
 					   WHEN B.vwcus_prc_lvl = 4 THEN G.vwitm_un_prc4
@@ -29,8 +29,7 @@ A.intCustomerID
 					   WHEN B.vwcus_prc_lvl = 6 THEN G.vwitm_un_prc6
 					   WHEN B.vwcus_prc_lvl = 7 THEN G.vwitm_un_prc7
 					   WHEN B.vwcus_prc_lvl = 8 THEN G.vwitm_un_prc8
-					   WHEN B.vwcus_prc_lvl = 9 THEN G.vwitm_un_prc9 END)
-	    )AS dblProductCost
+					   WHEN B.vwcus_prc_lvl = 9 THEN G.vwitm_un_prc9 END)+ ISNULL(C.dblPriceAdjustment,0.0)))  AS dblProductCost
 , rtrim(ltrim(B.vwcus_last_name)) as agcus_last_name
 , rtrim(ltrim(B.vwcus_first_name)) as agcus_first_name
 ,(Case WHEN B.vwcus_first_name IS NULL OR B.vwcus_first_name = ''''  THEN

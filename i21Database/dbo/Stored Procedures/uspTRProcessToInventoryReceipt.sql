@@ -16,8 +16,8 @@ DECLARE @ErrorState INT;
 DECLARE @InventoryReceiptId AS INT; 
 DECLARE @ErrMsg                    NVARCHAR(MAX);
 
-DECLARE @ReceiptStagingTable AS ReceiptStagingTable
-
+DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
+        @total as int;
 BEGIN TRY
 
 -- Insert Entries to Stagging table that needs to processed to Transport Load
@@ -86,16 +86,16 @@ BEGIN TRY
 	   from tblTRTransportLoad TL
             JOIN tblTRTransportReceipt TR on TR.intTransportLoadId = TL.intTransportLoadId
 			LEFT JOIN tblTRSupplyPoint SP on SP.intSupplyPointId = TR.intSupplyPointId
-            where TL.intTransportLoadId = @intTransportLoadId and TR.strOrigin = 'Terminal'
+            where TL.intTransportLoadId = @intTransportLoadId and TR.strOrigin = 'Terminal';
 
+    
+
+--No Records to process so exit
+    select @total = count(*) from @ReceiptStagingTable;
+    if (@total = 0)
+	   return;
 
     EXEC dbo.uspICAddItemReceipt @ReceiptStagingTable,@intUserId, @InventoryReceiptId;
-
---Update thr Transport Load as Posted
-	UPDATE	TransportLoad
-	      SET	TransportLoad.ysnPosted = 1
-		  FROM	dbo.tblTRTransportLoad TransportLoad 
-		  WHERE	TransportLoad.intTransportLoadId = @intTransportLoadId
 
 --	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;
 --	EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;

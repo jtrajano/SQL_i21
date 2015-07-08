@@ -49,6 +49,7 @@ AS
 	DECLARE @TaxGroupMasterId INT
 			,@VendorId INT
 			,@ItemCategoryId INT
+			,@TaxExempt BIT
 
 	SELECT
 		@VendorId = VI.intVendorId
@@ -63,7 +64,9 @@ AS
 			ON I.intCategoryId = C.intCategoryId
 	WHERE
 		I.intItemId = @ItemId
-		AND VI.[intLocationId]	 = @LocationId 
+		AND VI.[intLocationId]	 = @LocationId
+		
+	SET @TaxExempt = ISNULL((SELECT ysnTaxExempt FROM tblARCustomer WHERE intEntityCustomerId = @CustomerId AND @CustomerId IS NOT NULL),0)
 
 	--Customer Special Tax
 	IF(EXISTS(SELECT TOP 1 NULL FROM @CustomerSpecialTax))
@@ -301,7 +304,8 @@ AS
 				,TC.[intSalesTaxAccountId]								
 				,TGM.[ysnSeparateOnInvoice] 
 				,TC.[ysnCheckoffTax]
-				,TC.[strTaxCode] 				
+				,TC.[strTaxCode]
+				,@TaxExempt AS [ysnTaxExempt] 				
 			FROM
 				tblSMTaxCode TC
 			--LEFT OUTER JOIN

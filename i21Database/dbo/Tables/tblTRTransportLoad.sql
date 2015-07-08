@@ -12,8 +12,8 @@
 	[ysnPosted]  BIT  DEFAULT ((0)) NOT NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	CONSTRAINT [PK_tblTRTransportLoad] PRIMARY KEY ([intTransportLoadId]),
-	CONSTRAINT [FK_tblTRTransportLoad_tblSMShipVia_intShipViaId] FOREIGN KEY ([intShipViaId]) REFERENCES [dbo].[tblSMShipVia] ([intShipViaID]),
-	CONSTRAINT [FK_tblTRTransportLoad_tblSMShipVia_intSellerId] FOREIGN KEY ([intSellerId]) REFERENCES [dbo].[tblSMShipVia] ([intShipViaID]),
+	CONSTRAINT [FK_tblTRTransportLoad_tblSMShipVia_intShipViaId] FOREIGN KEY ([intShipViaId]) REFERENCES [dbo].[tblSMShipVia] ([intEntityShipViaId]),
+	CONSTRAINT [FK_tblTRTransportLoad_tblSMShipVia_intSellerId] FOREIGN KEY ([intSellerId]) REFERENCES [dbo].[tblSMShipVia] ([intEntityShipViaId]),
 	CONSTRAINT [FK_tblTRTransportLoad_tblARSalesperson_intDriverId] FOREIGN KEY ([intDriverId]) REFERENCES [dbo].[tblARSalesperson] ([intEntitySalespersonId]),
 	CONSTRAINT [FK_tblTRTransportLoad_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [dbo].[tblLGLoad] ([intLoadId])
 

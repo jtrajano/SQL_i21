@@ -99,22 +99,6 @@ IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCate
 	INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],  strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Purchase Tax Account', 'PurchaseTax',1)
 IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Undeposited Funds')
 	INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],  strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Undeposited Funds', 'Undeposited Funds',1)
-IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Cash in Bank')
-	INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Cash in Bank',  'Cash',1)
-IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Petty Cash')
-	INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Petty Cash','Cash', 1)
-IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Bad Debts')
-	INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Bad Debts', 'Expense',1)
-IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Pending AP')
-	INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Pending AP', 'Payables', 1)
-IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'NSF Checks')
-	INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],strAccountGroupFilter,  [intConcurrencyId]) VALUES (N'NSF Checks','Expense', 1)
-IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Customer Discounts')
-	INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],  strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Customer Discounts', 'Expense',1)
-IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Finance Charges')
-	INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],  strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Finance Charges', 'Expense',1)
-IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'AR Adjustments')
-	INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],  strAccountGroupFilter, [intConcurrencyId]) VALUES (N'AR Adjustments', 'Expense',1)
 IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Inventory Adjustment')
 	INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],  strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Inventory Adjustment', 'Expense',1)
 IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Work In Progress')
@@ -124,6 +108,37 @@ IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCate
 IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Customer Prepayments')
 	INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Customer Prepayments', 1)
 END
+IF EXISTS (SELECT TOP 1 1 FROM tblGLAccountCategory WHERE strAccountCategory IN ('AR Adjustments','Finance Charges','Customer Discounts','Bad Debts','NSF Checks','Cash in Bank','Petty Cash','Pending AP'))
+BEGIN -- Reverting GL-1499 
+	DECLARE @GenealCategoryId  INT,@CashCategoryId INT, @APClearing INT
+	SELECT  TOP 1 @GenealCategoryId =  intAccountCategoryId  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'General'
+	SELECT  TOP 1 @CashCategoryId =  intAccountCategoryId  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Cash Account'
+	SELECT  TOP 1 @APClearing =  intAccountCategoryId  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'AP Clearing'
+
+	UPDATE tblGLAccount SET intAccountCategoryId = @GenealCategoryId
+		WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory IN ('AR Adjustments','Finance Charges','Customer Discounts','Bad Debts','NSF Checks','Petty Cash'))
+	UPDATE tblGLAccountGroup SET intAccountCategoryId = @GenealCategoryId
+		WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory IN ('AR Adjustments','Finance Charges','Customer Discounts','Bad Debts','NSF Checks','Petty Cash'))
+	UPDATE tblGLCOATemplateDetail SET intAccountCategoryId = @GenealCategoryId
+		WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory IN ('AR Adjustments','Finance Charges','Customer Discounts','Bad Debts','NSF Checks','Petty Cash'))
+
+	UPDATE tblGLAccountGroup SET intAccountCategoryId = @CashCategoryId
+		WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory = 'Cash in Bank')
+	UPDATE tblGLCOATemplateDetail SET intAccountCategoryId = @CashCategoryId
+		WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory = 'Cash in Bank')
+	UPDATE tblGLAccount SET intAccountCategoryId = @CashCategoryId
+		WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory = 'Cash in Bank')
+
+	UPDATE tblGLAccountGroup SET intAccountCategoryId = @APClearing
+		WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory = 'Pending AP')
+	UPDATE tblGLCOATemplateDetail SET intAccountCategoryId = @APClearing
+		WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory = 'Pending AP')
+	UPDATE tblGLAccount SET intAccountCategoryId = @APClearing
+		WHERE intAccountCategoryId IN (SELECT intAccountCategoryId FROM tblGLAccountCategory where strAccountCategory = 'Pending AP')
+
+	DELETE FROM tblGLAccountCategory WHERE strAccountCategory IN ('AR Adjustments','Finance Charges','Customer Discounts','Bad Debts','NSF Checks','Cash in Bank','Petty Cash','Pending AP')
+END
+
 BEGIN -- INVENTORY ACCOUNT CATEGORY GROUPING
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG Left JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = 'Begin Inventory')
 BEGIN

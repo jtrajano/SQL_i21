@@ -1,14 +1,17 @@
-﻿CREATE TABLE [dbo].[tblPRWorkersCompensation]
-(
-	[intWorkersCompensationId] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [strWCCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
-    [strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
-    [intTypeTaxStateId] INT NULL, 
-    [intAccountId] INT NULL, 
-    [dblRate] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-    [strCalculationType] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL DEFAULT ('Amount'), 
-    [intConcurrencyId] INT NULL DEFAULT ((1))
-)
+﻿CREATE TABLE [dbo].[tblPRWorkersCompensation] (
+    [intWorkersCompensationId] INT             IDENTITY (1, 1) NOT NULL,
+    [strWCCode]                NVARCHAR (50)   COLLATE Latin1_General_CI_AS NOT NULL,
+    [strDescription]           NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
+    [intTypeTaxStateId]        INT             NULL,
+    [intAccountId]             INT             NULL,
+    [dblRate]                  NUMERIC (18, 6) DEFAULT ((0)) NULL,
+    [strCalculationType]       NVARCHAR (20)   COLLATE Latin1_General_CI_AS DEFAULT ('Amount') NULL,
+    [intConcurrencyId]         INT             DEFAULT ((1)) NULL,
+    PRIMARY KEY CLUSTERED ([intWorkersCompensationId] ASC),
+    UNIQUE NONCLUSTERED ([strWCCode] ASC)
+);
+
+
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',

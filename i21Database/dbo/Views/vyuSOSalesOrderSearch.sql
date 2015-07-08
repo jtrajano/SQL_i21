@@ -31,6 +31,7 @@ SO.intSplitId,
 ES.strSplitNumber,
 SO.intEntitySalespersonId,
 CASE WHEN SP.strSalespersonId = '' THEN NTT.strEntityNo ELSE SP.strSalespersonId END AS strSalespersonId,
+ESP.strName AS strSalespersonName,
 SO.strLostQuoteCompetitor,
 SO.strLostQuoteReason,
 SO.strLostQuoteComment,
@@ -44,4 +45,4 @@ dbo.tblSMCompanyLocation AS CompLoc ON SO.intCompanyLocationId  = CompLoc.intCom
 dbo.tblARQuoteTemplate AS QT ON SO.intQuoteTemplateId = QT.intQuoteTemplateId LEFT OUTER JOIN
 dbo.tblEntitySplit AS ES ON SO.intSplitId = ES.intSplitId LEFT OUTER JOIN
 dbo.tblEntity AS OE ON SO.intOrderedById = OE.intEntityId LEFT OUTER JOIN
-dbo.tblARSalesperson AS SP on SO.intEntitySalespersonId = SP.intEntitySalespersonId
+(dbo.tblARSalesperson AS SP INNER JOIN tblEntity ESP ON SP.intEntitySalespersonId = ESP.intEntityId) ON SO.intEntitySalespersonId = SP.intEntitySalespersonId

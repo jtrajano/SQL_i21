@@ -1030,7 +1030,7 @@
     <Build Include="dbo\Tables\tblGRDiscountCalculationOption.sql" />
     <Build Include="dbo\Tables\tblGRShrinkCalculationOption.sql" />
     <Build Include="dbo\Stored Procedures\uspPOReceived.sql" />
-    <Build Include="dbo\Views\vyuCTPriceContract.sql" />
+    <Build Include="dbo\Views\vyuCTPriceFixation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDoPrice.sql" />
     <Build Include="dbo\Tables\tblSTStoreGLAccount.sql" />
     <Build Include="dbo\Tables\tblSOSalesOrderDetail.sql" />
@@ -1908,11 +1908,34 @@
     <Build Include="dbo\Stored Procedures\uspMFUpdateBatchWorkOrder.sql" />
     <Build Include="dbo\Tables\tblLGStockSalesHeader.sql" />
     <Build Include="dbo\Tables\tblLGStockSalesLotDetail.sql" />
+    <Build Include="dbo\Tables\tblEntityTariff.sql" />
+    <Build Include="dbo\Tables\tblEntityTariffCategory.sql" />
+    <Build Include="dbo\Tables\tblEntityTariffFuelSurcharge.sql" />
+    <Build Include="dbo\Tables\tblEntityTariffMileage.sql" />
+    <Build Include="dbo\Views\vyuEMSearchShipVia.sql" />
     <Build Include="dbo\Tables\tblPRCompanyReference.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInsertINTOTableFromXML.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateOverpayment.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateBillData.sql" />
     <Build Include="dbo\Tables\tblHDOutOfOfficeReply.sql" />
+    <Build Include="dbo\Tables\tblWHTask.sql" />
+    <Build Include="dbo\Tables\tblWHTaskPriority.sql" />
+    <Build Include="dbo\Tables\tblWHTaskState.sql" />
+    <Build Include="dbo\Tables\tblWHTaskType.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRProcessToInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRProcessTransportLoad.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddInvoice.sql" />
+    <Build Include="dbo\User Defined Types\InvoiceStagingTable.sql" />
+    <Build Include="dbo\Functions\fnCTConvertQuantityToTargetItemUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLImportFiscalYearOrigin.sql" />
+    <Build Include="dbo\Views\vyuPRPaycheckHistory.sql" />
+    <Build Include="dbo\Functions\fnGetItemPricing.sql" />
+    <Build Include="dbo\Tables\tblCTPriceFixation.sql" />
+    <Build Include="dbo\Tables\tblCTPriceFixationDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspSPAuditLogs.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdatePrepayAndDebitMemo.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendRequests.sql" />
+    <Build Include="dbo\Tables\tblHDReminder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1964,6 +1987,8 @@
     <None Include="Scripts\Post-Deployment\CT\2_DataMigration.sql" />
     <None Include="Scripts\Post-Deployment\EM\009_UpdateEntityContactTypeData.sql" />
     <None Include="Scripts\Post-Deployment\EM\010_UpdateVendorAccountNumber.sql" />
+    <Build Include="dbo\Views\vyuPRPaycheckTax.sql" />
+    <Build Include="dbo\Views\vyuPRPaycheckYTD.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

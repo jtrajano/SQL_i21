@@ -169,7 +169,7 @@ BEGIN
 			,intOriginId			= SourceLot.intOriginId
 			,strBOLNo				= SourceLot.strBOLNo
 			,strVessel				= SourceLot.strVessel
-			,strTransferNumber		= Transfer.strTransferNo
+			,strReceiptNumber		= Transfer.strTransferNo
 			,strMarkings			= SourceLot.strMarkings
 			,strNotes				= SourceLot.strNotes
 			,intEntityVendorId		= SourceLot.intEntityVendorId

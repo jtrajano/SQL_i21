@@ -74,7 +74,7 @@ AS
 			ON I.intPaymentMethodId = P.intPaymentMethodID
 	LEFT OUTER JOIN
 		dbo.tblSMShipVia AS SV 
-			ON I.intShipViaId = SV.intShipViaID
+			ON I.intShipViaId = SV.[intEntityShipViaId]
 	LEFT OUTER JOIN
 		dbo.tblEntity AS SE 
 			ON I.[intEntitySalespersonId] = SE.intEntityId 

@@ -10,7 +10,7 @@ BEGIN -- Balance Sheet Standard
 PRINT 'Begin updating Balance Sheet Standard Report'
 DECLARE @GLReportId INT
 SELECT @GLReportId = intReportId FROM tblRMReport WHERE strName = 'Balance Sheet Standard' and strGroup = 'General Ledger' 
-DECLARE @GLReportOptions NVARCHAR(MAX) = 
+DECLARE @GLReportOptions VARCHAR(MAX) = 
 'WITH Units 
 AS 
 (
@@ -90,8 +90,8 @@ and (cast(floor(cast(dtmDate as float)) as datetime) <= ''12/31/2100'' and
 --*SCSTART*--
 --Special Case--
 order by strAccountId'
-DECLARE @GLReportDrillDown NVARCHAR(MAX) =  '[{"Control":"lblAccountType","DrillThroughType":0,"Name":"General Ledger by Account ID Detail","DrillThroughFilterType":0,"Filters":null,"id":null},{"Control":"lblAccountGroup","DrillThroughType":0,"Name":"General Ledger by Account ID Detail","DrillThroughFilterType":0,"Filters":null,"id":null},{"Control":"lblAcctDesc","DrillThroughType":0,"Name":"General Ledger by Account ID Detail","DrillThroughFilterType":0,"Filters":null,"id":null}]' 
-DECLARE @GLReportDataSource NVARCHAR(MAX) = 
+DECLARE @GLReportDrillDown VARCHAR(MAX) =  '[{"Control":"lblAccountType","DrillThroughType":0,"Name":"General Ledger by Account ID Detail","DrillThroughFilterType":0,"Filters":null,"id":null},{"Control":"lblAccountGroup","DrillThroughType":0,"Name":"General Ledger by Account ID Detail","DrillThroughFilterType":0,"Filters":null,"id":null},{"Control":"lblAcctDesc","DrillThroughType":0,"Name":"General Ledger by Account ID Detail","DrillThroughFilterType":0,"Filters":null,"id":null}]' 
+DECLARE @GLReportDataSource VARCHAR(MAX) = 
 'WITH Units 
 AS 
 (

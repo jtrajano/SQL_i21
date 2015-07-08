@@ -350,14 +350,14 @@ BEGIN
 			SET		
 				-- The following fields are updated if it is changed from the source transaction. 
 				dtmExpiryDate			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @dtmExpiryDate ELSE LotMaster.dtmExpiryDate END 
-				,strLotAlias			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strLotAlias ELSE LotMaster.strLotAlias END 				
+				,strLotAlias			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strLotAlias ELSE ISNULL(@strLotAlias, LotMaster.strLotAlias) END 				
 				,intOriginId			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intOriginId ELSE LotMaster.intOriginId END  
 				,strBOLNo				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strBOLNo ELSE LotMaster.strBOLNo END 
 				,strVessel				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strVessel ELSE LotMaster.strVessel END 
 				,strReceiptNumber		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strReceiptNumber ELSE LotMaster.strReceiptNumber END 
 				,strMarkings			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strMarkings ELSE LotMaster.strMarkings END 
 				,strNotes				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strNotes ELSE LotMaster.strNotes END 
-				,intEntityVendorId			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intEntityVendorId ELSE LotMaster.intEntityVendorId END 
+				,intEntityVendorId		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intEntityVendorId ELSE LotMaster.intEntityVendorId END 
 				,strVendorLotNo			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strVendorLotNo ELSE LotMaster.strVendorLotNo END 
 				,intVendorLocationId	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intVendorLocationId ELSE LotMaster.intVendorLocationId END
 				,strVendorLocation		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strVendorLocation ELSE LotMaster.strVendorLocation END 

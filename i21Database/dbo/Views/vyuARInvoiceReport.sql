@@ -45,6 +45,6 @@ INNER JOIN tblSMCompanyLocation L ON INV.intCompanyLocationId = L.intCompanyLoca
 LEFT JOIN tblSMCurrency CUR ON INV.intCurrencyId = CUR.intCurrencyID
 LEFT JOIN (tblARSalesperson SP 
 	INNER JOIN tblEntity ESP ON SP.intEntitySalespersonId = ESP.intEntityId) ON INV.intEntitySalespersonId = SP.intEntitySalespersonId
-LEFT JOIN tblSMShipVia SV ON INV.intShipViaId = SV.intShipViaID
+LEFT JOIN tblSMShipVia SV ON INV.intShipViaId = SV.[intEntityShipViaId]
 INNER JOIN tblSMTerm T ON INV.intTermId = T.intTermID
 LEFT JOIN tblSMFreightTerms FT ON INV.intFreightTermId = FT.intFreightTermId

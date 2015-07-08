@@ -3,7 +3,7 @@
 	[intPayGroupId] INT NOT NULL IDENTITY, 
     [strPayGroup] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-    [strPayPeriod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT ('Bi-Weekly'), 
+    [strPayPeriod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[intBankAccountId] INT NULL, 
 	[dtmBeginDate] [datetime] NULL,
 	[dtmEndDate] [datetime] NULL,

@@ -22,13 +22,10 @@ BEGIN TRANSACTION
 IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N''[dbo].[glarcmst]'') AND type IN (N''U''))
 	RETURN 0
 	
-DECLARE @periodTable TABLE(period NVARCHAR(10))
-INSERT INTO @periodTable (period)
-	SELECT DISTINCT glarc_period from glarcmst
-
-DELETE h FROM glhstmst h INNER JOIN @periodTable a
-	ON h.glhst_period = a.period
-	WHERE glhst_src_id = ''BBF''
+DELETE h FROM glhstmst h
+INNER JOIN (SELECT MAX(glarc_period) AS period FROM glarcmst GROUP BY SUBSTRING( CONVERT(VARCHAR(10), glarc_period),1,4)) g
+ON h.glhst_period = g.period
+WHERE glhst_src_id = ''BBF''
 
 
 --+++++++++++++++++++++++++++++++++

@@ -19,15 +19,25 @@ DECLARE @temp TABLE
 	intId INT IDENTITY PRIMARY KEY CLUSTERED,
     Vendor int,
     BillOfLadding nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
-    ReceiptNumber nvarchar(50) null
+	ReceiptType nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+	Location int,
+	ShipVia int,
+	ShipFrom int,
+	Currency int,
+    ReceiptNumber nvarchar(50) COLLATE Latin1_General_CI_AS NULL
     )
 
 insert into @temp(Vendor ,
 				  BillOfLadding,
+				  ReceiptType,
+				  Location,
+				  ShipVia,
+				  ShipFrom,
+				  Currency,
 				  ReceiptNumber 
 				  )
-		select intEntityVendorId,strBillOfLadding,null from @ReceiptEntries RE
-				       group by RE.intEntityVendorId,RE.strBillOfLadding;
+		select RE.intEntityVendorId,RE.strBillOfLadding,RE.strReceiptType,RE.intLocationId,RE.intShipViaId,RE.intShipFromId,RE.intCurrencyId,null from @ReceiptEntries RE
+				       group by RE.intEntityVendorId,RE.strBillOfLadding,RE.strReceiptType,RE.intLocationId,RE.intShipViaId,RE.intShipFromId,RE.intCurrencyId;
 
 select @total = count(*) from @temp;
 set @incval = 1 
@@ -82,18 +92,18 @@ INSERT INTO dbo.tblICInventoryReceipt (
 		,intCreatedUserId
 		,ysnPosted
 )
-SELECT 	 strReceiptNumber       = min(TE.ReceiptNumber)
+SELECT 	 strReceiptNumber       = TE.ReceiptNumber
 		,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(GETDATE())
 		,intEntityVendorId		= RE.intEntityVendorId
-		,strReceiptType			= min(RE.strReceiptType)
+		,strReceiptType			= RE.strReceiptType
 		,intBlanketRelease		= NULL
-		,intLocationId			= min(RE.intLocationId)
+		,intLocationId			= RE.intLocationId
 		,strVendorRefNo			= NULL
 		,strBillOfLading		= RE.strBillOfLadding
-		,intShipViaId			= min(RE.intShipViaId)
-		,intShipFromId			= min(RE.intShipFromId) 
+		,intShipViaId			= RE.intShipViaId
+		,intShipFromId			= RE.intShipFromId
 		,intReceiverId			= @intUserId 
-		,intCurrencyId			= min(RE.intCurrencyId)
+		,intCurrencyId			= RE.intCurrencyId
 		,strVessel				= NULL
 		,intFreightTermId		= NULL
 		,strAllocateFreight		= 'No' -- Default is No
@@ -115,7 +125,7 @@ SELECT 	 strReceiptNumber       = min(TE.ReceiptNumber)
 		,ysnPosted				= 0
 FROM	@ReceiptEntries RE
         JOIN @temp TE on TE.Vendor = RE.intEntityVendorId and TE.BillOfLadding = RE.strBillOfLadding		           
-        group by  RE.intEntityVendorId,RE.strBillOfLadding
+        group by  RE.intEntityVendorId,RE.strBillOfLadding,TE.ReceiptNumber,RE.strReceiptType,RE.intLocationId,RE.intShipViaId,RE.intShipFromId,RE.intCurrencyId
 
 -- Get the identity value from tblICInventoryReceipt to check if the insert was with no errors 
 SELECT @InventoryReceiptId = SCOPE_IDENTITY()

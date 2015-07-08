@@ -24,6 +24,10 @@ BEGIN
 	DECLARE @EntityId int
 	SET @EntityId = ISNULL((SELECT  intEntityId FROM tblSMUserSecurity WHERE intUserSecurityID = @UserId),@UserId)
 	
+	DECLARE @ARAccount VARCHAR(250)
+	--AR Account
+	SET @ARAccount = (SELECT strValue FROM tblSMPreferences WHERE strPreference = 'DefaultARAccount')
+	
 	IF(@Checking = 0) 
 	BEGIN
 		
@@ -112,7 +116,7 @@ BEGIN
 				 END),--[strTransactionType]
 				0, --agivc_pay_type [intPaymentMethodId]
 				agivc_comment, --[strComments]
-				0, --to do [intAccountId]
+				@ARAccount, --to do [intAccountId]
 				1, --"If Invoice exists in the agivcmst, that means it is posted" -Joe [ysnPosted]
 				(CASE WHEN agivc_bal_due = 0 THEN 1 ELSE 0 END),--"If the agivc-bal-due equals zero, then it is paid." -Joe [ysnPaid]
 				@EntityId,

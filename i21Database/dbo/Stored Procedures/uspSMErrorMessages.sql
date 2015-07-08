@@ -610,3 +610,7 @@ EXEC sp_addmessage 51151,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51152) EXEC sp_dropmessage 51152, 'us_english'	
 SET @strmessage = 'The target item %s is Phased out or Discontinued, cannot start the work order.'
 EXEC sp_addmessage 51152,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51153) EXEC sp_dropmessage 51153, 'us_english'	
+SET @strmessage = 'The Qty to Ship for %s is %s. Total Lot Quantity is %s. The difference is %s.'
+EXEC sp_addmessage 51153,11,@strmessage,'us_english','False'

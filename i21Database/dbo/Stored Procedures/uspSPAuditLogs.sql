@@ -4,7 +4,7 @@
 -- Create date: 04/01/2015
 -- Description:	Audit Script - generic script to check all changes from SSDT schema compare to ensure that the update will/will not fail.
 -- =============================================
-CREATE PROCEDURE [dbo].[usp_AuditLogs]
+CREATE PROCEDURE [dbo].[uspSPAuditLogs]
 	@Result NVARCHAR(MAX) OUTPUT, 
 	@FilePath NVARCHAR(256) = null
 AS

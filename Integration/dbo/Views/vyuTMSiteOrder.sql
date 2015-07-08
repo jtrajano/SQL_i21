@@ -49,6 +49,7 @@ BEGIN
 		,ISNULL(G.strWillCallStatus,'''') AS strWillCallStatus
 		,ISNULL(A.ysnTaxable,0) AS ysnTaxable
 		,RTRIM(ISNULL(F.vwitm_desc,'''')) AS strProductDescription
+		,dblPriceAdjustment = ISNULL(A.dblPriceAdjustment,0.0)
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID

@@ -562,7 +562,7 @@ IF @post = 1
 			,IST.intItemLocationId
 			,Detail.intItemUOMId  
 			,Header.dtmShipDate
-			,Detail.dblQtyShipped * -1
+			,Detail.dblQtyShipped * (CASE WHEN Header.strTransactionType = 'Invoice' THEN -1 ELSE 1 END)
 			,ItemUOM.dblUnitQty
 			,IST.dblLastCost
 			,Detail.dblPrice 
@@ -995,7 +995,8 @@ IF @post = 1
 				tblICInventoryTransaction ICT
 					ON ISD.intInventoryShipmentItemId = ICT.intTransactionDetailId 
 					AND ISH.intInventoryShipmentId = ICT.intTransactionId
-					AND ISH.strShipmentNumber = ICT.strTransactionId 
+					AND ISH.strShipmentNumber = ICT.strTransactionId
+					AND ISNULL(ICT.ysnIsUnposted,0) = 0
 			WHERE
 				D.intInventoryShipmentItemId IS NOT NULL AND D.intInventoryShipmentItemId <> 0
 				AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
@@ -1058,7 +1059,8 @@ IF @post = 1
 				tblICInventoryTransaction ICT
 					ON ISD.intInventoryShipmentItemId = ICT.intTransactionDetailId 
 					AND ISH.intInventoryShipmentId = ICT.intTransactionId
-					AND ISH.strShipmentNumber = ICT.strTransactionId 
+					AND ISH.strShipmentNumber = ICT.strTransactionId
+					AND ISNULL(ICT.ysnIsUnposted,0) = 0 
 			WHERE
 				D.intInventoryShipmentItemId IS NOT NULL AND D.intInventoryShipmentItemId <> 0
 				AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0

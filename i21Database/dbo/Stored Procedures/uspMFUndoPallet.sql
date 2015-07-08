@@ -12,6 +12,7 @@ BEGIN TRY
 		,@dblQuantity NUMERIC(18, 6)
 		,@intItemId int
 		,@intBatchId int
+		,@ysnForceUndo bit
 		
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -20,11 +21,13 @@ BEGIN TRY
 		,@intBatchId=intBatchId
 		,@intLotId = intLotId
 		,@intUserId = intUserId
+		,@ysnForceUndo=ysnForceUndo
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intBatchId int
 			,intLotId INT
 			,intUserId INT
+			,ysnForceUndo bit
 			)
 
 	SELECT @intTransactionId=@intBatchId
@@ -72,8 +75,8 @@ BEGIN TRY
 			SELECT *
 			FROM dbo.tblICLot
 			WHERE intLotId = @intLotId
-				AND intLotStatusId = 3
-			)
+				AND intLotStatusId = 2
+			) and @ysnForceUndo=0
 	BEGIN
 		RAISERROR (
 				51139
