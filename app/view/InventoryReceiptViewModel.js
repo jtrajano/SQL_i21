@@ -399,6 +399,14 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 return false;
             }
         },
+        checkHideOwnershipType: function(get) {
+            if (get('current.strReceiptType') === 'Direct') {
+                return false;
+            }
+            else {
+                return true;
+            }
+        },
         checkInventoryCost: function (get) {
             if (get('grdCharges.selection.ysnInventoryCost')) {
                 return false;
@@ -423,14 +431,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 return true;
             }
             else {
-                switch (get('current.strReceiptType')) {
-                    case 'Purchase Contract':
-                        return false;
-                        break;
-                    default:
-                        return true;
-                        break;
-                }
+                return false;
             }
         },
         filterSourceByType: function (get) {

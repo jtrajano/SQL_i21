@@ -216,6 +216,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colOwnershipType: {
+                    hidden: '{checkHideOwnershipType}',
                     dataIndex: 'strOwnershipType',
                     editor: {
                         store: '{ownershipTypes}'
