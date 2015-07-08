@@ -52,7 +52,7 @@ UPDATE A SET strDescription = B.strDescription
 	AND (A.strDescription IS NULL OR A.strDescription = '')
 
 
-
+--AP
 IF EXISTS(
 	SELECT TOP 1 1
 	FROM tblGLDetail A
@@ -123,6 +123,7 @@ BEGIN
 	
 END	
 
+--AR
 IF EXISTS(
 		SELECT TOP 1 1 FROM tblGLDetail A
 		INNER JOIN tblARPayment B ON A.strTransactionId = B.strRecordNumber
@@ -155,6 +156,20 @@ BEGIN
 	
 END
 
+--CM
+IF EXISTS(
+	SELECT TOP 1 1
+	FROM tblGLDetail B INNER JOIN
+	tblGLAccount A ON A.intAccountId = B.intAccountId
+	INNER JOIN tblGLJournal C ON C.intJournalId = B.intTransactionId
+	WHERE B.strModuleName = 'Cash Management')
+BEGIN
+	UPDATE B SET strDescription = A.strDescription
+	FROM tblGLDetail B INNER JOIN
+	tblGLAccount A ON A.intAccountId = B.intAccountId
+	INNER JOIN tblGLJournal C ON C.intJournalId = B.intTransactionId
+	WHERE B.strModuleName = 'Cash Management'
+END
 PRINT N'END Normalize tblGLDetail Fields'
 
 GO
