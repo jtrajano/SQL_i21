@@ -1944,6 +1944,7 @@
     <Build Include="dbo\Views\vyuRKUnrealizedPnL.sql" />
     <Build Include="dbo\Views\vyuRKRealizedPnL.sql" />
     <Build Include="dbo\Functions\fnRKGetLatestClosingPrice.sql" />
+    <Build Include="dbo\Views\vyuLGLoadView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
