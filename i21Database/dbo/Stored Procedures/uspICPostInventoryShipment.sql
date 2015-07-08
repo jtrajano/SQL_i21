@@ -238,7 +238,11 @@ BEGIN
 														LotItemUOM.dblUnitQty
 											END
 
-			,dblCost					= Lot.dblLastCost -- (Last cost is used in case of negative stock).
+			,dblCost					= CASE	WHEN Lot.dblLastCost IS NULL THEN 
+													(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = Detail.intItemId AND intItemLocationId = dbo.fnICGetItemLocation(Detail.intItemId, Header.intShipFromLocationId))
+												ELSE 
+													Lot.dblLastCost 
+											END									
 			,dblSalesPrice				= 0.00
 			,intCurrencyId				= NULL 
 			,dblExchangeRate			= 1
