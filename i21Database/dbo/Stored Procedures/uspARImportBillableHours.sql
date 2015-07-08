@@ -213,7 +213,7 @@ SELECT
 	I.[intInvoiceId]											--[intInvoiceId]
 	,V.[intItemId]												--[intItemId]
 	,IC.[strDescription]										--strItemDescription] 
-	,NULL														--[intItemUOMId]
+	,V.[intItemUOMId]
 	,V.[intHours]												--[dblQtyOrdered]
 	,V.[intHours]												--[dblQtyShipped]
 	,V.[dblPrice] 												--[dblPrice]
