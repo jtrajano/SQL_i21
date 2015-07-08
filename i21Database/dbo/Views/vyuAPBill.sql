@@ -28,7 +28,9 @@ SELECT
 									ELSE 'Awaiting approval' END
 							)
 							ELSE NULL END,
-	strApprover = (SELECT TOP 1 strUserName FROM dbo.tblSMApprovalListUserSecurity WHERE B.intApprovalListId = intApprovalListId),
+	--strApprover = (SELECT TOP 1 strUserName FROM dbo.tblSMApprovalListUserSecurity F
+	--					INNER JOIN dbo.tblSMUserSecurity G ON F.intUserSecurityId = G.intUserSecurityID WHERE B.intApprovalListId = F.intApprovalListId),
+	G.strApprovalList AS strApprover,
 	dtmApprovalDate
 FROM
 	dbo.tblAPBill A
@@ -51,4 +53,4 @@ FROM
 		ORDER BY D.intBillId, D.dtmDatePaid DESC --get only the latest payment
 	) Payment
 	LEFT JOIN dbo.tblEntityCredential F ON A.intEntityId = F.intEntityId
-	--LEFT JOIN dbo.tblSMApprovalListUserSecurity G ON B.intApprovalListId = G.intApprovalListId
+	LEFT JOIN dbo.tblSMApprovalList G ON B.intApprovalListId = G.intApprovalListId
