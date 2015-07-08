@@ -2,6 +2,7 @@
 (
 	[intReminderId] [int] IDENTITY(1,1) NOT NULL,
 	[intTicketId] [int] NOT NULL,
+	[intEntityId] [int] NOT NULL,
 	[strSubject] [nvarchar](255) COLLATE Latin1_General_CI_AS NOT NULL,
 	[dtmDate] [date] NOT NULL,
 	[dtmTime] [date] NOT NULL,
@@ -9,7 +10,8 @@
 	[ysnActive] [bit] NOT NULL DEFAULT 1,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDReminder] PRIMARY KEY CLUSTERED ([intReminderId] ASC),
-    CONSTRAINT [FK_tblHDReminder_tblHDTicket] FOREIGN KEY ([intTicketId]) REFERENCES [dbo].[tblHDTicket] ([intTicketId])
+    CONSTRAINT [FK_tblHDReminder_tblHDTicket] FOREIGN KEY ([intTicketId]) REFERENCES [dbo].[tblHDTicket] ([intTicketId]),
+    CONSTRAINT [FK_tblHDReminder_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId])
 )
 
 GO
@@ -84,3 +86,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblHDReminder',
     @level2type = N'COLUMN',
     @level2name = N'ysnActive'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Entity Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDReminder',
+    @level2type = N'COLUMN',
+    @level2name = N'intEntityId'
