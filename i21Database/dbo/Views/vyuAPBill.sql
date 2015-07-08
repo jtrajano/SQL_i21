@@ -20,7 +20,16 @@ SELECT
 	F.strUserName AS strUserId,
 	Payment.ysnPrinted,
 	Payment.ysnVoid,
-	Payment.intPaymentId
+	Payment.intPaymentId,
+	strApprovalStatus = CASE WHEN A.ysnForApproval = 1 OR A.dtmApprovalDate IS NOT NULL
+							THEN (
+								CASE WHEN A.dtmApprovalDate IS NOT NULL AND A.ysnApproved = 1 THEN 'Approved'
+									WHEN A.dtmApprovalDate IS NOT NULL AND A.ysnApproved = 0 THEN 'Rejected'
+									ELSE 'Pending' END
+							)
+							ELSE NULL END,
+	strApprover = (SELECT TOP 1 strUserName FROM dbo.tblSMApprovalListUserSecurity WHERE B.intApprovalListId = intApprovalListId),
+	dtmApprovalDate
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 
@@ -42,3 +51,4 @@ FROM
 		ORDER BY D.intBillId, D.dtmDatePaid DESC --get only the latest payment
 	) Payment
 	LEFT JOIN dbo.tblEntityCredential F ON A.intEntityId = F.intEntityId
+	--LEFT JOIN dbo.tblSMApprovalListUserSecurity G ON B.intApprovalListId = G.intApprovalListId
