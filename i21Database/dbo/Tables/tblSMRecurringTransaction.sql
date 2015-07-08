@@ -5,7 +5,7 @@
     [strTransactionNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strTransactionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [strReference] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-	[intResponsibleUserId] INT NOT NULL DEFAULT 0 , 
+	[strResponsibleUser] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT '', 
 	[intWarningDays] INT NULL  , 
     [strFrequency] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [dtmLastProcess] DATETIME NOT NULL, 
