@@ -173,7 +173,7 @@ BEGIN TRY
 				   ,@dblUnits
 				   ,dbo.fnRemoveTimeOnDate(GETDATE())
 				   ,0
-				   ,NULL
+				   ,'TakeOut From Scale'
 				   ,1
 				   ,'TakeOut'
 				   ,@strUserName)
@@ -258,7 +258,7 @@ BEGIN TRY
 				   ,@dblRunningBalance
 				   ,dbo.fnRemoveTimeOnDate(GETDATE())
 				   ,0
-				   ,NULL
+				   ,'TakeOut From Scale'
 				   ,1
 				   ,'TakeOut'
 				   ,@strUserName)
