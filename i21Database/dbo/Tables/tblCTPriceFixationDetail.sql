@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblCTPriceFixationDetail]
 (
-	[intPriceFixationDetailId] INT NOT NULL,
+	[intPriceFixationDetailId] INT IDENTITY NOT NULL,
 	[intConcurrencyId] INT NOT NULL,
 	[intPriceFixationId] INT NOT NULL,
 	[strTradeNo] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL ,
