@@ -106,7 +106,15 @@ BEGIN
 				  ,[strReference]
 				  ,[dtmNextProcess]
 				  ,[dtmLastProcess]
-				  ,[intTransactionType]
+				  ,CASE [intTransactionType]
+					WHEN 1 THEN 'Bill'
+					WHEN 2 THEN 'Vendor Payment'
+					WHEN 3 THEN 'Debit Memo'
+					WHEN 4 THEN 'Payable'
+					WHEN 5 THEN 'Purchase Order'
+					WHEN 6 THEN 'Bill Template'
+					WHEN 7 THEN 'Bill Approval'
+				   END as strTransactionType
 				  ,[intConcurrencyId]
 			FROM [dbo].[tblAPRecurringHistory]
 
@@ -125,7 +133,8 @@ BEGIN
 			PRINT 'Table [tblSMRecurringTransaction] doesn''t exist'
 		END
 
-		ROLLBACK TRANSACTION --TEST ONLY: REPLACE WITH 'BEGIN TRANSACTION'
+		--ROLLBACK TRANSACTION --TEST ONLY: REPLACE WITH 'BEGIN TRANSACTION'
+		COMMIT TRANSACTION
 
 	END TRY
 	BEGIN CATCH
