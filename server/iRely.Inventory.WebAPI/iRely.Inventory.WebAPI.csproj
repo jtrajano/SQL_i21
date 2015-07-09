@@ -51,6 +51,12 @@
     <Reference Include="EntityFramework.SqlServer">
       <HintPath>..\..\..\Resources\references\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="FluentValidation">
+      <HintPath>..\..\..\Resources\references\FluentValidation.dll</HintPath>
+    </Reference>
+    <Reference Include="FluentValidation.Mvc">
+      <HintPath>..\..\..\Resources\references\FluentValidation.Mvc.dll</HintPath>
+    </Reference>
     <Reference Include="IdeaBlade.Core">
       <HintPath>..\..\..\Resources\references\IdeaBlade.Core.dll</HintPath>
     </Reference>
