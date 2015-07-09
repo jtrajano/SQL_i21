@@ -27,6 +27,7 @@ Type the overview for the table here.
 		[intTaxCodeId] INT NULL,
 		[intDockDoorId] INT NULL, 
 		[strNotes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
+		[intGradeId] INT NULL,
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICInventoryShipmentItem] PRIMARY KEY ([intInventoryShipmentItemId]), 
@@ -35,7 +36,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblSMTaxCode] FOREIGN KEY ([intTaxCodeId]) REFERENCES [tblSMTaxCode]([intTaxCodeId]), 
-    CONSTRAINT [FK_tblICInventoryShipmentItem_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])
+		CONSTRAINT [FK_tblICInventoryShipmentItem_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
+		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICCommodityAttribute] FOREIGN KEY ([intGradeId]) REFERENCES [tblICCommodityAttribute]([intCommodityAttributeId])
 	)
 
 	GO

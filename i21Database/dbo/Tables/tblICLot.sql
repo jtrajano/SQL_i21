@@ -60,17 +60,19 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 		[ysnReleasedToWarehouse]	BIT DEFAULT((0)),
 		[ysnProduced]				BIT DEFAULT((0)),
 		[ysnInCustody]				BIT DEFAULT((0)),
+		[intOwnershipType]			INT NOT NULL DEFAULT ((1)),
+		[intGradeId]				INT NULL,
 		[dtmDateCreated]			DATETIME NULL,
 		[intCreatedUserId]			INT NULL,
 		[intConcurrencyId]			INT NULL DEFAULT ((1)),
-		[intOwnershipType]			INT NOT NULL DEFAULT ((1)),
 		CONSTRAINT [PK_tblICLot] PRIMARY KEY CLUSTERED ([intLotId] ASC),
 		CONSTRAINT [UN_tblICLot] UNIQUE NONCLUSTERED ([strLotNumber] ASC, [intItemId] ASC, [intLocationId] ASC, [intSubLocationId] ASC, [intStorageLocationId] ASC),		
 		CONSTRAINT [FK_tblICLot_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),		
 		CONSTRAINT [FK_tblICLot_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
 		CONSTRAINT [FK_tblICLot_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
 		CONSTRAINT [FK_tblICLot_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
-		CONSTRAINT [FK_tblICLot_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]) 
+		CONSTRAINT [FK_tblICLot_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
+		CONSTRAINT [FK_tblICLot_tblICCommodityAttribute] FOREIGN KEY ([intGradeId]) REFERENCES [tblICCommodityAttribute]([intCommodityAttributeId]) 
 	)
 	GO
 
