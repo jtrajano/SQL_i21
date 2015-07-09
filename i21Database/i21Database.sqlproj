@@ -1723,6 +1723,7 @@
     <Build Include="dbo\Tables\tblMFBlendRequirementRule.sql" />
     <Build Include="dbo\Tables\tblMFBlendSheetRuleValue.sql" />
     <Build Include="dbo\Tables\tblMFBlendSheetRule.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMMigrateRecurringTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostFIFOInCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInFIFOCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInFIFOCustody.sql" />
@@ -1949,6 +1950,8 @@
     <Build Include="dbo\Tables\tblSRArchive.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertRecurringInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspSMMigrateRecurringTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMGetItemTaxTotal.sql" />
+    <Build Include="dbo\Tables\tblGLAccountRange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2002,6 +2005,7 @@
     <None Include="Scripts\Post-Deployment\EM\010_UpdateVendorAccountNumber.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckTax.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckYTD.sql" />
+    <None Include="Scripts\Post-Deployment\SM\SMDataFixes.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -2027,5 +2031,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\14_CompanyPreference.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountRange.sql" />
   </ItemGroup>
 </Project>
