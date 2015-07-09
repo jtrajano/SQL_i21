@@ -1945,6 +1945,7 @@
     <Build Include="dbo\Views\vyuRKRealizedPnL.sql" />
     <Build Include="dbo\Functions\fnRKGetLatestClosingPrice.sql" />
     <Build Include="dbo\Views\vyuLGLoadView.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMGetItemTaxTotal.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
