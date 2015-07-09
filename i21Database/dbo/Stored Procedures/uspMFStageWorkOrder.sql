@@ -210,6 +210,45 @@ BEGIN TRY
 				)
 	END
 
+	IF EXISTS (
+				SELECT *
+				FROM dbo.tblMFWorkOrder W
+				WHERE intWorkOrderId = @intWorkOrderId AND W.intStatusId=13
+				)
+		BEGIN
+			RAISERROR (
+					51079
+					,11
+					,1
+					)
+		END
+
+		IF EXISTS (
+				SELECT *
+				FROM dbo.tblMFWorkOrder W
+				WHERE intWorkOrderId = @intWorkOrderId AND W.intStatusId=11
+				)
+		BEGIN
+			RAISERROR (
+					51080
+					,11
+					,1
+					)
+		END
+
+		IF NOT EXISTS (
+				SELECT *
+				FROM dbo.tblMFWorkOrder W
+				WHERE intWorkOrderId = @intWorkOrderId AND W.intStatusId=11
+				)
+		BEGIN
+			RAISERROR (
+					51081
+					,11
+					,1
+					)
+		END
+
 	BEGIN TRANSACTION
 
 	INSERT INTO dbo.tblMFWorkOrderInputLot (
