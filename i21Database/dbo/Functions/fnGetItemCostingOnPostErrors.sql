@@ -38,6 +38,21 @@ RETURN (
 				)
 				AND @intItemId IS NOT NULL 	
 
+		-- Check for invalid item UOM Id
+		UNION ALL 
+		SELECT	intItemId = @intItemId
+				,intItemLocationId = @intItemLocationId
+				,strText = FORMATMESSAGE(51133)
+				,intErrorCode = 51133
+		WHERE	NOT EXISTS (
+					SELECT TOP 1 1 
+					FROM	dbo.tblICItemUOM 
+					WHERE	intItemId = @intItemId
+							AND intItemUOMId = @intItemUOMId
+				)
+				AND @intItemId IS NOT NULL 	
+				AND @intItemUOMId IS NOT NULL
+
 		-- Check for missing costing method. 
 		UNION ALL 
 		SELECT	intItemId = @intItemId

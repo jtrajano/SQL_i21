@@ -249,109 +249,26 @@ BEGIN
 		DECLARE @CurrentStockQty AS NUMERIC(18,6)
 		DECLARE @CurrentStockAveCost AS NUMERIC(18,6)
 
-		SELECT	@CurrentStockAveCost = dblAverageCost
-		FROM	dbo.tblICItemPricing ItemPricing
-		WHERE	ItemPricing.intItemId = @intItemId
-				AND ItemPricing.intItemLocationId = @intItemLocationId
-
 		SELECT	@CurrentStockQty = dblUnitOnHand
 		FROM	dbo.tblICItemStock ItemStock
 		WHERE	ItemStock.intItemId = @intItemId
 				AND ItemStock.intItemLocationId = @intItemLocationId
 
-		-----------------------------------
-		-- Update the Item Stock table
-		-----------------------------------
-		MERGE	
-		INTO	dbo.tblICItemStock 
-		WITH	(HOLDLOCK) 
-		AS		ItemStock	
-		USING (
-				SELECT	intItemId = @intItemId
-						,intItemLocationId = @intItemLocationId
-						,Qty = dbo.fnCalculateStockUnitQty(@dblQty, @dblUOMQty) 
-		) AS StockToUpdate
-			ON ItemStock.intItemId = StockToUpdate.intItemId
-			AND ItemStock.intItemLocationId = StockToUpdate.intItemLocationId
+		SELECT	@CurrentStockAveCost = dblAverageCost
+		FROM	dbo.tblICItemPricing ItemPricing
+		WHERE	ItemPricing.intItemId = @intItemId
+				AND ItemPricing.intItemLocationId = @intItemLocationId
 
-		-- If matched, update the unit on hand qty. 
-		WHEN MATCHED THEN 
-			UPDATE 
-			SET		dblUnitOnHand = ISNULL(ItemStock.dblUnitOnHand, 0) + StockToUpdate.Qty
-
-		-- If none found, insert a new item stock record
-		WHEN NOT MATCHED THEN 
-			INSERT (
-				intItemId
-				,intItemLocationId
-				,dblUnitOnHand
-				,dblOrderCommitted
-				,dblOnOrder
-				,dblLastCountRetail
-				,intSort
-				,intConcurrencyId
-			)
-			VALUES (
-				StockToUpdate.intItemId
-				,StockToUpdate.intItemLocationId
-				,StockToUpdate.Qty -- dblUnitOnHand
-				,0
-				,0
-				,0
-				,NULL 
-				,1	
-			)
-		;
-
-		---------------------------------------
-		-- Update the Item Stock UOM table
-		---------------------------------------
-		MERGE	
-		INTO	dbo.tblICItemStockUOM 
-		WITH	(HOLDLOCK) 
-		AS		ItemStock	
-		USING (
-				SELECT	intItemId = @intItemId
-						,intItemLocationId = @intItemLocationId
-						,intItemUOMId = @intItemUOMId
-						,intSubLocationId = @intSubLocationId 
-						,intStorageLocationId = @intStorageLocationId
-						,Qty = ISNULL(@dblQty, 0)  
-		) AS StockToUpdate
-			ON ItemStock.intItemId = StockToUpdate.intItemId
-			AND ItemStock.intItemLocationId = StockToUpdate.intItemLocationId
-			AND ItemStock.intItemUOMId = StockToUpdate.intItemUOMId
-			AND ISNULL(ItemStock.intSubLocationId, 0) = ISNULL(StockToUpdate.intSubLocationId, 0)
-			AND ISNULL(ItemStock.intStorageLocationId, 0) = ISNULL(StockToUpdate.intStorageLocationId, 0)
-
-		-- If matched, update the unit on hand qty. 
-		WHEN MATCHED THEN 
-			UPDATE 
-			SET		dblOnHand = ISNULL(ItemStock.dblOnHand, 0) + StockToUpdate.Qty
-
-		-- If none found, insert a new item stock record
-		WHEN NOT MATCHED THEN 
-			INSERT (
-				intItemId
-				,intItemLocationId
-				,intItemUOMId
-				,intSubLocationId
-				,intStorageLocationId
-				,dblOnHand
-				,dblOnOrder
-				,intConcurrencyId
-			)
-			VALUES (
-				StockToUpdate.intItemId
-				,StockToUpdate.intItemLocationId
-				,StockToUpdate.intItemUOMId
-				,StockToUpdate.intSubLocationId
-				,StockToUpdate.intStorageLocationId
-				,StockToUpdate.Qty 
-				,0
-				,1	
-			)
-		;
+		-- Update the Item Stock and Item Stock UOM tables. 
+		EXEC [dbo].[uspICPostStockQuantity]
+			@intItemId
+			,@intItemLocationId
+			,@intSubLocationId
+			,@intStorageLocationId
+			,@intItemUOMId
+			,@dblQty
+			,@dblUOMQty
+			,@intLotId
 
 		-- Update the Lot's Qty and Weights. 
 		UPDATE	Lot 

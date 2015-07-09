@@ -131,6 +131,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdatePOAddressInfo.sql
 
 -- Inventory 
+:r .\IC\00_RequiredDataFix.sql 
 :r .\IC\01_InventoryTransactionTypes.sql 
 :r .\IC\02_MaterialNMFC.sql 
 :r .\IC\03_DefaultData.sql 

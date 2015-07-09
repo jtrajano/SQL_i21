@@ -163,6 +163,12 @@ BEGIN
 				,strText = FORMATMESSAGE(50027)
 				,intErrorCode = 50027
 
+		UNION ALL
+		SELECT	intItemId = -1
+				,intItemLocationId = @WetGrains_DefaultLocation
+				,strText = FORMATMESSAGE(51133)
+				,intErrorCode = 51133
+
 		-- 3: Valid item and invalid location
 		UNION ALL 
 		SELECT	intItemId = @StickyGrains
