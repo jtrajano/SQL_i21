@@ -1,0 +1,8 @@
+﻿--THIS WILL UPDATE ALL tblAPBill.intShipToId THAT HAS VALUE "0" to NULL
+IF(EXISTS(SELECT 1 FROM tblAPBill WHERE intShipToId = 0))
+BEGIN
+	UPDATE A
+		SET A.intShipToId = NULL
+	FROM tblAPBill A
+	WHERE intShipToId = 0
+END

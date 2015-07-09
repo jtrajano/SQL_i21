@@ -21,6 +21,7 @@
 	[dblFinalPrice]  NUMERIC(8,4),
 
 	CONSTRAINT [PK_tblCTPriceFixation_intPriceFixationId] PRIMARY KEY CLUSTERED ([intPriceFixationId] ASC),
+	CONSTRAINT [UK_tblCTPriceFixation_intContractDetailId] UNIQUE ([intContractDetailId]),
 	CONSTRAINT [FK_tblCTPriceFixation_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]),
 	CONSTRAINT [FK_tblCTPriceFixation_tblICItemUOM_intAgreedItemUOMId_intItemUOMId] FOREIGN KEY ([intAgreedItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])
 )

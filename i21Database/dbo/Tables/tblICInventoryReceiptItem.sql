@@ -30,13 +30,15 @@ Type the overview for the table here.
 		[dblUnitCost] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[dblUnitRetail] NUMERIC(18,6) NULL DEFAULT ((0)),
 		[dblLineTotal] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[intGradeId] INT NULL,
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICInventoryReceiptItem] PRIMARY KEY ([intInventoryReceiptItemId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICItemUOM] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]) ON DELETE NO ACTION, 
-		CONSTRAINT [FK_tblICInventoryReceiptItem_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])
+		CONSTRAINT [FK_tblICInventoryReceiptItem_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
+		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICCommodityAttribute] FOREIGN KEY ([intGradeId]) REFERENCES [tblICCommodityAttribute]([intCommodityAttributeId])
 	)
 
 	GO

@@ -22,6 +22,15 @@ BEGIN
 
 	SELECT @newUserRoleId = SCOPE_IDENTITY();
 
+	EXEC uspSMUpdateUserRoleMenus @newUserRoleId, 1, 0
+
+	UPDATE B SET B.ysnVisible = A.ysnVisible
+	FROM tblSMUserRoleMenu A
+	JOIN tblSMUserRoleMenu B
+	ON A.intMenuId = B.intMenuId
+	WHERE A.intUserRoleId = @intUserRoleId
+	AND B.intUserRoleId = @newUserRoleId
+
 	INSERT INTO [tblSMUserRoleDashboardPermission]([intUserRoleId], [intPanelId], [strPermission])
 	SELECT @newUserRoleId, 
 		   [intPanelId],
@@ -63,15 +72,6 @@ BEGIN
 		   [strDefaultValue],
 		   [ysnRequired]
 	FROM [tblSMUserRoleControlPermission]
-	WHERE [intUserRoleId] = @intUserRoleId
-
-	INSERT INTO [tblSMUserRoleMenu]([intUserRoleId], [intMenuId], [intParentMenuId], [ysnVisible], [intSort])
-	SELECT @newUserRoleId, 
-		   [intMenuId], 
-		   [intParentMenuId], 
-		   [ysnVisible], 
-		   [intSort]
-	FROM [tblSMUserRoleMenu]
 	WHERE [intUserRoleId] = @intUserRoleId
 
 	INSERT INTO [tblSMUserRoleCompanyLocationPermission]([intUserRoleId], [intCompanyLocationId])
