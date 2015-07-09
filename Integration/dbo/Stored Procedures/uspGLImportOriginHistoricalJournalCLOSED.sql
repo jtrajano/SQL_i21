@@ -230,7 +230,7 @@ IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
  -- INSERT JOURNAL [DETAIL]
  --+++++++++++++++++++++++++++++++++
 INSERT tblGLJournalDetail (intLineNo,intJournalId,dtmDate,intAccountId,dblDebit,dblDebitRate,dblCredit,dblCreditRate,dblDebitUnit,dblCreditUnit,strDescription,intConcurrencyId,
- dblUnitsInLBS,strDocument,strComments,strReference,dblDebitUnitsInLBS,strCorrecting,strSourcePgm,strCheckBookNo,strWorkArea,strOriginTable,intOriginId)
+ dblUnitsInLBS,strDocument,strComments,strReference,dblDebitUnitsInLBS,strCorrecting,strSourcePgm,strCheckBookNo,strWorkArea,strOriginTable,strSourceKey)
  SELECT intLineNo,intJournalId,gooddate,intAccountId,Debit,DebitRate,Credit,CreditRate,DebitUnits,CreditUnits,strDescription,1,
  dblUnitsInlbs,strDocument,strComments,strReference,DebitUnitsInlbs,strCorrecting,strSourcePgm,strCheckbookNo,strWorkArea,''glarcmst'',A4GLIdentity
  FROM #iRelyImptblGLJournalDetail
