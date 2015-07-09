@@ -1723,6 +1723,7 @@
     <Build Include="dbo\Tables\tblMFBlendRequirementRule.sql" />
     <Build Include="dbo\Tables\tblMFBlendSheetRuleValue.sql" />
     <Build Include="dbo\Tables\tblMFBlendSheetRule.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMMigrateRecurringTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostFIFOInCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInFIFOCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInFIFOCustody.sql" />
