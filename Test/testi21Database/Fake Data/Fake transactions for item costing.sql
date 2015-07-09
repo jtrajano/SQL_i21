@@ -10,7 +10,7 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
-	EXEC tSQLt.FakeTable 'dbo.tblICItemUOM', @Identity = 1;	
+	--EXEC tSQLt.FakeTable 'dbo.tblICItemUOM', @Identity = 1;	
 
 	-- Re-create the index
 	CREATE CLUSTERED INDEX [IDX_tblICInventoryFIFO]
@@ -130,18 +130,18 @@ BEGIN
 	END 
 
 	-- Create the fake table and data for the unit of measure
-	BEGIN 
-		DECLARE @UOMBushel AS INT = 1
-		DECLARE @UOMPound AS INT = 2
+	--BEGIN 
+	--	DECLARE @UOMBushel AS INT = 1
+	--	DECLARE @UOMPound AS INT = 2
 
-		-- Unit of measure master table
-		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOMBushel, 'Bushel')
-		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOMPound, 'Pound')
+	--	-- Unit of measure master table
+	--	INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOMBushel, 'Bushel')
+	--	INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOMPound, 'Pound')
 		
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@WetGrains, @UOMBushel, 1) -- 1
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@StickyGrains, @UOMBushel, 1) -- 2
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@PremiumGrains, @UOMBushel, 1) -- 3
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@ColdGrains, @UOMBushel, 1) -- 4
-		INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@HotGrains, @UOMBushel, 1) -- 5
-	END 
+	--	INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@WetGrains, @UOMBushel, 1) -- 1
+	--	INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@StickyGrains, @UOMBushel, 1) -- 2
+	--	INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@PremiumGrains, @UOMBushel, 1) -- 3
+	--	INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@ColdGrains, @UOMBushel, 1) -- 4
+	--	INSERT INTO dbo.tblICItemUOM (intItemId, intUnitMeasureId, dblUnitQty) VALUES (@HotGrains, @UOMBushel, 1) -- 5
+	--END 
 END
