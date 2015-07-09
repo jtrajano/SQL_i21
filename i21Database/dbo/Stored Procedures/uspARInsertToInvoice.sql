@@ -1,7 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARInsertToInvoice]
 	@SalesOrderId	INT = 0,
 	@UserId			INT = 0,
-	@IsSoftware     BIT = 0,
 	@InvoiceId		INT = NULL OUTPUT
 
 	AS
@@ -52,7 +51,6 @@ BEGIN
 		,[strBillToState]
 		,[strBillToZipCode]
 		,[strBillToCountry]
-		,[strOrderType]
 	)
 	SELECT
 		[intEntityCustomerId]
@@ -93,7 +91,6 @@ BEGIN
 		,[strBillToState]
 		,[strBillToZipCode]
 		,[strBillToCountry]
-		,[strOrderType]
 	FROM
 	tblSOSalesOrder
 	WHERE intSalesOrderId = @SalesOrderId
@@ -217,41 +214,37 @@ BEGIN
 			
 	
 	UPDATE tblSOSalesOrder SET strOrderStatus = 'Closed', ysnProcessed = 1 WHERE intSalesOrderId = @SalesOrderId
-	
-	
+		
 	SET @InvoiceId  = @NewInvoiceId
-
-	IF (@IsSoftware = 1)
-	BEGIN		
-		--INSERT TO RECURRING TRANSACTION
-		INSERT INTO [tblSMRecurringTransaction]
-			([intTransactionId]
-			,[strTransactionNumber]
-			,[strTransactionType]
-			,[strFrequency]
-			,[dtmLastProcess]
-			,[dtmNextProcess]
-			,[ysnDue]
-			,[strDayOfMonth]
-			,[dtmStartDate]
-			,[dtmEndDate]
-			,[ysnActive]
-			,[intIteration]
-			,[intUserId])
-		SELECT 
-			 @InvoiceId
-			,[strInvoiceNumber]
-			,'Invoice'
-			,'Monthly'
-			,[dtmDate]
-			,DATEADD(MONTH, 1, [dtmDate])
-			,CASE WHEN GETDATE() > [dtmDueDate] THEN 1 ELSE 0 END
-			,CONVERT(NVARCHAR(2), DAY([dtmDate]))
-			,DATEADD(MONTH, 1, [dtmDate])
-			,DATEADD(MONTH, 1, [dtmDate])
-			,1
-			,1
-			,@UserId FROM tblARInvoice
-		WHERE intInvoiceId = @InvoiceId
-	END
+			
+	--INSERT TO RECURRING TRANSACTION
+	INSERT INTO [tblSMRecurringTransaction]
+		([intTransactionId]
+		,[strTransactionNumber]
+		,[strTransactionType]
+		,[strFrequency]
+		,[dtmLastProcess]
+		,[dtmNextProcess]
+		,[ysnDue]
+		,[strDayOfMonth]
+		,[dtmStartDate]
+		,[dtmEndDate]
+		,[ysnActive]
+		,[intIteration]
+		,[intUserId])
+	SELECT 
+		 @InvoiceId
+		,[strInvoiceNumber]
+		,'Invoice'
+		,'Monthly'
+		,[dtmDate]
+		,DATEADD(MONTH, 1, [dtmDate])
+		,CASE WHEN GETDATE() > [dtmDueDate] THEN 1 ELSE 0 END
+		,CONVERT(NVARCHAR(2), DAY([dtmDate]))
+		,DATEADD(MONTH, 1, [dtmDate])
+		,DATEADD(MONTH, 1, [dtmDate])
+		,1
+		,1
+		,@UserId FROM tblARInvoice
+	WHERE intInvoiceId = @InvoiceId
 END

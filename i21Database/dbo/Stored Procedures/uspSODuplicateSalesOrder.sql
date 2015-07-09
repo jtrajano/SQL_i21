@@ -55,7 +55,6 @@ BEGIN
 		   ,[strLostQuoteComment]
 		   ,[strLostQuoteCompetitor]
 		   ,[strLostQuoteReason]
-		   ,[strOrderType]
         )
 	SELECT
 			[intEntityCustomerId]
@@ -104,7 +103,6 @@ BEGIN
 		   ,[strLostQuoteComment]
 		   ,[strLostQuoteCompetitor]
 		   ,[strLostQuoteReason]
-		   ,[strOrderType]
 	FROM
 	tblSOSalesOrder
 	WHERE intSalesOrderId = @SalesOrderId
