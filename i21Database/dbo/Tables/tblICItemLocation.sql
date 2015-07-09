@@ -18,7 +18,7 @@ Type the overview for the table here.
 		[intVendorId] INT NULL, 
 		[strDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
 		[intCostingMethod] INT NULL, 
-		[intAllowNegativeInventory] INT DEFAULT 3,
+		[intAllowNegativeInventory] INT NOT NULL DEFAULT ((3)),
 		[intSubLocationId] INT NULL, 
 		[intStorageLocationId] INT NULL, 
 		[intIssueUOMId] INT NULL, 
@@ -80,7 +80,7 @@ Type the overview for the table here.
 		CONSTRAINT [PK_tblICItemLocation] PRIMARY KEY ([intItemLocationId]), 
 		CONSTRAINT [FK_tblICItemLocation_tblAPVendor] FOREIGN KEY ([intVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]), 
 		CONSTRAINT [FK_tblICItemLocation_tblICCountGroup] FOREIGN KEY ([intCountGroupId]) REFERENCES [tblICCountGroup]([intCountGroupId]), 
-		CONSTRAINT [FK_tblICItemLocation_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intShipViaID]), 
+		CONSTRAINT [FK_tblICItemLocation_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intEntityShipViaId]), 
 		CONSTRAINT [FK_tblICItemLocation_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]), 
 		CONSTRAINT [FK_tblICItemLocation_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]), 
 		CONSTRAINT [AK_tblICItemLocation] UNIQUE ([intItemId], [intLocationId])

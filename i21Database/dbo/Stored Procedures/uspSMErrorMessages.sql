@@ -420,15 +420,15 @@ SET @strmessage = 'No valid input item is configured against the selected run, i
 EXEC sp_addmessage 51104,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51105) EXEC sp_dropmessage 51105, 'us_english'	
-SET @strmessage = 'The run prior to the current run has no cycle count entries. Please do cycle count and close the previous run before starting the cycle count for the current run.'
+SET @strmessage = 'The run ''%s'' prior to the current run has no cycle count entries. Please do cycle count and close the previous run before starting the cycle count for the current run.'
 EXEC sp_addmessage 51105,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51106) EXEC sp_dropmessage 51106, 'us_english'	
-SET @strmessage = 'A cycle count for the item ''%s'' is already started on %s for the target item ''%s''. Please complete the prior cycle count to continue.'
+SET @strmessage = 'A cycle count for the item ''%s'' is already started for work order %s on %s for the target item ''%s''. Please complete the prior cycle count to continue.'
 EXEC sp_addmessage 51106,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51107) EXEC sp_dropmessage 51107, 'us_english'	
-SET @strmessage = 'A run for ''%s'' already exists for %s which is using the same ingredient item ''%s''. Please complete the prior run to continue.'
+SET @strmessage = 'A run for ''%s'' already exists for work order %s on %s which is using the same ingredient item ''%s''. Please complete the prior run to continue.'
 EXEC sp_addmessage 51107,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51108) EXEC sp_dropmessage 51108, 'us_english'	
@@ -464,7 +464,7 @@ SET @strmessage = 'No mapped staging location found, cannot stage.'
 EXEC sp_addmessage 51115,11,@strmessage,'us_english','False'   
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51116) EXEC sp_dropmessage 51116, 'us_english'	
-SET @strmessage = 'The quantity must not exceed the lot quantity.'
+SET @strmessage = 'The quantity to be consumed must not exceed the selected lot quantity.'
 EXEC sp_addmessage 51116,11,@strmessage,'us_english','False'   
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51117) EXEC sp_dropmessage 51117, 'us_english'	
@@ -528,7 +528,7 @@ SET @strmessage = 'Cycle count entries for the run not available, cannot proceed
 EXEC sp_addmessage 51131,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51132) EXEC sp_dropmessage 51132, 'us_english'	
-SET @strmessage = 'Cycle count qty is not saved. Please save cycle count before true up.'
+SET @strmessage = 'Please complete and save Cycle count entries for all the items before posting adjustment.'
 EXEC sp_addmessage 51132,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51133) EXEC sp_dropmessage 51133, 'us_english'	
@@ -578,3 +578,39 @@ EXEC sp_addmessage 51143,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51144) EXEC sp_dropmessage 51144, 'us_english'	
 SET @strmessage = 'Custody or storage for %s is not yet supported. It is currently limited to lot-tracked items.'
 EXEC sp_addmessage 51144,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51145) EXEC sp_dropmessage 51145, 'us_english'	
+SET @strmessage = 'Cannot have the same item and weight UOM. Please remove the weight UOM for %s with lot number %s.'
+EXEC sp_addmessage 51145,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51146) EXEC sp_dropmessage 51146, 'us_english'	
+SET @strmessage = 'Execution order entered is out of range.'
+EXEC sp_addmessage 51146,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51147) EXEC sp_dropmessage 51147, 'us_english'	
+SET @strmessage = 'There is no active recipe found for item  %s Cannot proceed'
+EXEC sp_addmessage 51147,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51148) EXEC sp_dropmessage 51148, 'us_english'	
+SET @strmessage = 'Unable to generate the Inventory Receipt. An error stopped the process from Purchase Contract to Inventory Receipt.'
+EXEC sp_addmessage 51148,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51149) EXEC sp_dropmessage 51149, 'us_english'	
+SET @strmessage = 'Unable to generate the Inventory Receipt. An error stopped the process from Transfer Order to Inventory Receipt.'
+EXEC sp_addmessage 51149,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51150) EXEC sp_dropmessage 51150, 'us_english'	
+SET @strmessage = 'Recap is not applicable when doing an inventory transfer for the same location.'
+EXEC sp_addmessage 51150,11,@strmessage,'us_english','False' 
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51151) EXEC sp_dropmessage 51151, 'us_english'	
+SET @strmessage = 'Unable to generate the Inventory Receipt. An error stopped the process from Inbound Shipment to Inventory Receipt.'
+EXEC sp_addmessage 51151,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51152) EXEC sp_dropmessage 51152, 'us_english'	
+SET @strmessage = 'The target item %s is Phased out or Discontinued, cannot start the work order.'
+EXEC sp_addmessage 51152,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51153) EXEC sp_dropmessage 51153, 'us_english'	
+SET @strmessage = 'The Qty to Ship for %s is %s. Total Lot Quantity is %s. The difference is %s.'
+EXEC sp_addmessage 51153,11,@strmessage,'us_english','False'

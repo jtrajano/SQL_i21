@@ -18,6 +18,7 @@ Type the overview for the table here.
 		[intOrderId] INT NULL,
 		[intSourceId] INT NULL,
 		[intItemId] INT NOT NULL, 
+		[intContainerId] INT NULL,
 		[intSubLocationId] INT NULL,
 		[intOwnershipType] INT NOT NULL DEFAULT ((1)),
 		[dblOrderQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -188,3 +189,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICInventoryReceiptItem',
     @level2type = N'COLUMN',
     @level2name = N'intOrderId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Container Id for Inbound Shipments',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICInventoryReceiptItem',
+    @level2type = N'COLUMN',
+    @level2name = N'intContainerId'

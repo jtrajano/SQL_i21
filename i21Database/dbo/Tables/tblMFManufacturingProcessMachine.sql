@@ -4,6 +4,7 @@
     [intManufacturingProcessId] INT NOT NULL, 
 	[intMachineId] INT NOT NULL,
 	[intLocationId] [int] NOT NULL,
+	[ysnDefault] bit CONSTRAINT [DF_tblMFManufacturingProcessMachine_ysnDefault] DEFAULT 0,
     [intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFManufacturingProcessMachine_intConcurrencyId] DEFAULT 0, 
     CONSTRAINT [PK_tblMFManufacturingProcessMachine_intManufacturingProcessMachineId] PRIMARY KEY ([intManufacturingProcessMachineId]),
 	CONSTRAINT [FK_tblMFManufacturingProcessMachine_tblMFManufacturingProcess_intManufacturingProcessId] FOREIGN KEY ([intManufacturingProcessId]) REFERENCES [tblMFManufacturingProcess]([intManufacturingProcessId]) ON DELETE CASCADE,

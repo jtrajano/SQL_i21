@@ -65,7 +65,7 @@ BEGIN
 		-- Retrieve the highest number part in the transaction id. 
 		SELECT	@intNumber = MAX(CAST(REPLACE(strJournalId, @strPrefix, '') AS INT))			
 		FROM	dbo.tblGLJournal 
-		WHERE	strTransactionType = @strTransactionType AND strJournalType NOT IN ('Reversal Journal','Recurring Journal')
+		WHERE strJournalId LIKE @strPrefix + '%' 
 		
 		IF (@intNumber IS NOT NULL)	
 		BEGIN 	

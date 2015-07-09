@@ -76,11 +76,21 @@
 :r .\11_IC\1510_to_1512.sql
 :r .\11_IC\StatusImplementation.sql
 :r .\11_IC\SourceType_Implementations.sql
+:r .\11_IC\1520_to_1530.sql
 
 --:r :.\11_IC\Drop_References_to_ItemCostingTableType.sql
 --:r :.\11_IC\Drop_References_to_RecapTableType.sql
 -- EM
 :r .\12_EM\01_EntitySchemaUpdate.sql
+:r .\12_EM\02_UpdateGroupIdFromNonExistence.sql
+:r .\12_EM\03_EntityCustomerFarmRename_DataFix.sql
+:r .\12_EM\04_EntityLocationTaxCodeUpdate.sql
+:r .\12_EM\05_EntitySplitSchemaUpdate.sql
+:r .\12_EM\07_EntityFarmSchemaUpdate.sql
+:r .\12_EM\08_EntityShipViaSchemaUpdate.sql
+
+:r .\12_EM\03_EntityCustomerFarmRename_DataFix.sql
+
 
 --RK
 :r .\13_RK\01_DropTableScript.sql

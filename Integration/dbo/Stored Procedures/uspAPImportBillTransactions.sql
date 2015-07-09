@@ -132,7 +132,7 @@ BEGIN
 				[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation
 													WHERE intEntityId = (SELECT intEntityVendorId FROM tblAPVendor
 														WHERE strVendorId COLLATE Latin1_General_CS_AS = A.aptrx_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
-				[intTaxId] 			=	NULL,
+				[intTaxId] 				=	NULL,
 				[dtmDate] 				=	CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[dtmDateCreated] 		=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[dtmBillDate] 			=	CASE WHEN ISDATE(A.aptrx_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
@@ -140,14 +140,16 @@ BEGIN
 				[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
 				[strReference] 		=	A.aptrx_comment,
 				[strPONumber]			=	A.aptrx_pur_ord_no,
-				[dblTotal] 				=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
-				[dblAmountDue]			=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
+				[dblTotal] 				=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt 
+												ELSE (CASE WHEN A.aptrx_orig_amt < 0 THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END) END,
+				[dblAmountDue]			=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt 
+												ELSE (CASE WHEN A.aptrx_orig_amt < 0 THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END) END,
 				[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.aptrx_user_id)),@UserId),
 				[ysnPosted]				=	0,
 				[ysnPaid]				=	0,
-				[intTransactionType]	=	CASE WHEN A.aptrx_trans_type = ''I'' THEN 1
+				[intTransactionType]	=	CASE WHEN A.aptrx_trans_type = ''I'' AND A.aptrx_orig_amt > 0 THEN 1
 												WHEN A.aptrx_trans_type = ''A'' THEN 2
-												WHEN A.aptrx_trans_type = ''C'' THEN 3
+												WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_orig_amt < 0 THEN 3
 												ELSE 0 END,
 				[dblDiscount]			=	A.aptrx_disc_amt,
 				[dblWithheld]			=	A.aptrx_wthhld_amt,
@@ -178,17 +180,18 @@ BEGIN
 				[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
 				[strReference] 		=	A.apivc_comment,
 				[strPONumber]			=	A.apivc_pur_ord_no,
-				[dblTotal] 				=	CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END,
+				[dblTotal] 				=	CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt
+												ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END,
 				[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = ''P'' THEN 0 ELSE 
-													CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt * -1
-															ELSE A.apivc_orig_amt END
+													CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt
+														ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END
 												END,
 				[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.apivc_user_id)),@UserId),
 				[ysnPosted]				=	1,
 				[ysnPaid]				=	CASE WHEN A.apivc_status_ind = ''P'' THEN 1 ELSE 0 END,
-				[intTransactionType]	=	CASE WHEN A.apivc_trans_type = ''I'' THEN 1
+				[intTransactionType]	=	CASE WHEN A.apivc_trans_type = ''I'' AND A.apivc_orig_amt > 0 THEN 1
 												WHEN A.apivc_trans_type = ''A'' THEN 2
-												WHEN A.apivc_trans_type = ''C'' THEN 3
+												WHEN A.apivc_trans_type = ''C'' OR A.apivc_orig_amt < 0 THEN 3
 												ELSE 0 END,
 				[dblDiscount]			=	A.apivc_disc_avail,
 				[dblWithheld]			=	A.apivc_wthhld_amt,
@@ -432,6 +435,8 @@ BEGIN
 				DELETE FROM #tmpBillsPayment WHERE id = @paymentKey
 			END
 
+			EXEC uspAPCreateMissingPaymentOfBills
+
 			--backup data from aptrxmst on one time synchronization
 			INSERT INTO tblAPaptrxmst
 			SELECT
@@ -531,14 +536,16 @@ BEGIN
 				[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
 				[strReference] 		=	A.aptrx_comment,
 				[strPONumber]			=	A.aptrx_pur_ord_no,
-				[dblTotal] 				=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
-				[dblAmountDue]			=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END,
+				[dblTotal] 				=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt
+												ELSE (CASE WHEN A.aptrx_orig_amt < 0 THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END) END,
+				[dblAmountDue]			=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt
+												ELSE (CASE WHEN A.aptrx_orig_amt < 0 THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END) END,
 				[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.aptrx_user_id)),@UserId),
 				[ysnPosted]				=	0,
 				[ysnPaid] 				=	0,
-				[intTransactionType]	=	CASE WHEN A.aptrx_trans_type = ''I'' THEN 1
+				[intTransactionType]	=	CASE WHEN A.aptrx_trans_type = ''I'' AND A.aptrx_orig_amt > 0 THEN 1
             												WHEN A.aptrx_trans_type = ''A'' THEN 3
-            												WHEN A.aptrx_trans_type = ''C'' THEN 3
+            												WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_orig_amt < 0 THEN 3
             												ELSE NULL END,
 				[dblDiscount]			=	A.aptrx_disc_amt,
 				[dblWithheld]			=	A.aptrx_wthhld_amt,

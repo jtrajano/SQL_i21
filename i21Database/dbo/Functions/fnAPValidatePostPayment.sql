@@ -1,7 +1,8 @@
 ﻿CREATE FUNCTION [dbo].[fnAPValidatePostPayment]
 (
 	@paymentIds NVARCHAR(MAX),
-	@post BIT
+	@post BIT,
+	@userId INT
 )
 RETURNS @returntable TABLE
 (
@@ -13,17 +14,31 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 
+	DECLARE @WithholdAccount INT, @DiscountAccount INT, @InterestAccount INT, @CashAccount INT;
+	DECLARE @userLocation INT;
 	DECLARE @tmpPayments TABLE(
 		[intPaymentId] [int]
 	);
 	INSERT INTO @tmpPayments SELECT * FROM [dbo].fnGetRowsFromDelimitedValues(@paymentIds)
+
+	SET @userLocation = (SELECT TOP 1 intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityId = @userId);
+	IF (@userLocation IS NOT NULL AND @userLocation > 0)
+	BEGIN
+		SELECT TOP 1
+			@WithholdAccount = intWithholdAccountId
+			,@DiscountAccount = intDiscountAccountId
+			,@InterestAccount = intInterestAccountId
+			,@CashAccount = intCashAccount
+		FROM tblSMCompanyLocation
+		WHERE intCompanyLocationId = @userLocation
+	END
 
 	IF @post = 1
 	BEGIN
 		--Make sure it has setup for default withhold account if vendor is set for withholding
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
-			'There is no account setup for withholding.',
+			'The Cash Account setup is missing.',
 			'Payable',
 			A.strPaymentRecordNum,
 			A.intPaymentId
@@ -31,12 +46,12 @@ BEGIN
 		INNER JOIN tblAPVendor B
 			ON A.intEntityVendorId = B.intEntityVendorId AND B.ysnWithholding = 1
 		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
-		AND 1 = (CASE WHEN (SELECT intWithholdAccountId FROM tblAPPreference) IS NULL THEN 1 ELSE 0 END)
+		AND @CashAccount IS NULL
 
 		--Make sure it ha setup for default discount account
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
-			'There is no account setup for discount.',
+			'The Discount Account setup is missing.',
 			'Payable',
 			A.strPaymentRecordNum,
 			A.intPaymentId
@@ -49,7 +64,7 @@ BEGIN
 		AND B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest)--fully paid
 		AND B.dblDiscount <> 0
 		AND B.dblPayment <> 0
-		AND 1 = (CASE WHEN (SELECT intDiscountAccountId FROM tblAPPreference) IS NULL THEN 1 ELSE 0 END)
+		AND @DiscountAccount IS NULL
 		GROUP BY A.[strPaymentRecordNum],
 		A.intPaymentId,
 		C.strVendorId,
@@ -58,7 +73,7 @@ BEGIN
 		--Make sure it ha setup for default discount account
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
-			'There is no account setup for interest.',
+			'The Interest Account setup is missing.',
 			'Payable',
 			A.strPaymentRecordNum,
 			A.intPaymentId
@@ -71,7 +86,7 @@ BEGIN
 		AND B.dblAmountDue = ((B.dblPayment + B.dblDiscount) - B.dblInterest) --fully paid
 		AND B.dblInterest <> 0
 		AND B.dblPayment <> 0
-		AND 1 = (CASE WHEN (SELECT intInterestAccountId FROM tblAPPreference) IS NULL THEN 1 ELSE 0 END)
+		AND @InterestAccount IS NULL
 		GROUP BY A.[strPaymentRecordNum],
 		A.intPaymentId,
 		C.strVendorId,
@@ -116,18 +131,18 @@ BEGIN
 			0 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDatePaid]), 0)
 
 		--NOT BALANCE
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
-		SELECT 
-			'The debit and credit amounts are not balanced.',
-			'Payable',
-			A.strPaymentRecordNum,
-			A.intPaymentId
-		FROM tblAPPayment A 
-		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments) AND 
-			(A.dblAmountPaid + A.dblWithheld 
-			+ (SELECT SUM(CASE WHEN dblAmountDue = (dblDiscount + dblPayment) THEN dblDiscount ELSE 0 END) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)) 
-			<> ((SELECT SUM(dblPayment) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId) 
-					+ (SELECT SUM(CASE WHEN dblAmountDue = (dblDiscount + dblPayment) THEN dblDiscount ELSE 0 END) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId))
+		--INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		--SELECT 
+		--	'The debit and credit amounts are not balanced.',
+		--	'Payable',
+		--	A.strPaymentRecordNum,
+		--	A.intPaymentId
+		--FROM tblAPPayment A 
+		--WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments) AND 
+		--	(A.dblAmountPaid + A.dblWithheld 
+		--	+ (SELECT SUM(CASE WHEN dblAmountDue = (dblDiscount + dblPayment) THEN dblDiscount ELSE 0 END) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)) 
+		--	<> ((SELECT SUM(dblPayment) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId) 
+		--			+ (SELECT SUM(CASE WHEN dblAmountDue = (dblDiscount + dblPayment) THEN dblDiscount ELSE 0 END) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId))
 			--include over payment
 
 		--ALREADY POSTED
@@ -140,6 +155,16 @@ BEGIN
 		FROM tblAPPayment A 
 		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments) AND 
 			A.ysnPosted = 1
+
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'Posting negative amount is not allowed.',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A 
+		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments) AND 
+			A.dblAmountPaid < 0
 
 		--BILL(S) ALREADY PAID IN FULL
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)

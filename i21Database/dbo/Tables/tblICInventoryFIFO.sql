@@ -1,7 +1,6 @@
 ﻿/*
 ## Overview
 Tracks all stocks in a FIFO manner. Records are physically arranged in a FIFO manner using a CLUSTERED index. 
-Records must be maintained in this table even if the costing method for an item is average costing. 
 
 ## Fields, description, and mapping. 
 *	[intInventoryFIFOId] INT NOT NULL IDENTITY

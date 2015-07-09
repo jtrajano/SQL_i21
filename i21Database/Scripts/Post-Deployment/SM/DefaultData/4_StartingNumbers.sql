@@ -506,6 +506,60 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Transport Load')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 55
+			,[strTransactionType]	= N'Stage Lot Number'
+			,[strPrefix]			= N'STG-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Stage Lot Number')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 56
+			,[strTransactionType]	= N'Transport Quote'
+			,[strPrefix]			= N'TRQ-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Transports'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Transport Quote')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 57
+			,[strTransactionType]	= N'Collateral'
+			,[strPrefix]			= N'M-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Risk Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Collateral')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 58
+			,[strTransactionType]	= N'Collateral Header'
+			,[strPrefix]			= N''
+			,[intNumber]			= 1
+			,[strModule]			= 'Risk Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Collateral Header')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 59
+			,[strTransactionType]	= N'Bag Off Order'
+			,[strPrefix]			= N'BO-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Bag Off Order')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 60
+			,[strTransactionType]	= N'Price Fixation Trade No'
+			,[strPrefix]			= N''
+			,[intNumber]			= 1
+			,[strModule]			= 'Contract Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Price Fixation Trade No')
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'

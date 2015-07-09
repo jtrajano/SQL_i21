@@ -46,7 +46,8 @@ AS
 		ELS.strCity						AS strShipToCity,
 		ELS.strState					AS strShipToState,
 		ELS.strZipCode					AS strShipToZipCode,
-		ELS.strCountry					AS strShipToCountry
+		ELS.strCountry					AS strShipToCountry,
+		I.strOrderType                  AS strOrderType
 	FROM         
 		dbo.tblARInvoice AS I 
 	INNER JOIN
@@ -74,7 +75,7 @@ AS
 			ON I.intPaymentMethodId = P.intPaymentMethodID
 	LEFT OUTER JOIN
 		dbo.tblSMShipVia AS SV 
-			ON I.intShipViaId = SV.intShipViaID
+			ON I.intShipViaId = SV.[intEntityShipViaId]
 	LEFT OUTER JOIN
 		dbo.tblEntity AS SE 
 			ON I.[intEntitySalespersonId] = SE.intEntityId 

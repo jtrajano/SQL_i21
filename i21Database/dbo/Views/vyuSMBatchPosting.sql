@@ -13,10 +13,10 @@ FROM
 	SELECT strJournalType as strTransactionType, intJournalId, strJournalId, intEntityId, dtmDate, strDescription
 	FROM tblGLJournal 
 	WHERE strJournalType IN ('Adjusted Origin Journal', 'General Journal', 'Audit Adjustment', 'Imported Journal', 'Origin Journal', 'Recurring Journal') 
-	AND strTransactionType <> 'Template'
+	AND strTransactionType <> 'Recurring'
 	AND ysnPosted = 0
 	UNION ALL
-	SELECT 'Bill', intBillId, strBillId, intEntityId, dtmDate, strComment as strReference FROM tblAPBill WHERE ysnPosted = 0
+	SELECT 'Bill', intBillId, strBillId, intEntityId, dtmDate, strComment as strReference FROM tblAPBill WHERE ysnPosted = 0 AND ysnForApproval = 0
 	UNION ALL
 	SELECT 'Payable', intPaymentId, strPaymentRecordNum, intEntityId, dtmDatePaid, strNotes as strReference FROM tblAPPayment WHERE ysnPosted = 0
 	UNION ALL

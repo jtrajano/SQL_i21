@@ -49,11 +49,15 @@ BEGIN
 			strReceiptNumber
 			,intLocationId
 			,dtmReceiptDate
+			,strReceiptType
+			,intSourceType
 		)
 		VALUES (
 			@strTransactionId
 			,@NewHaven
 			,@dtmDate	
+			,'Purchase Order'
+			,1
 		);	
 	
 		INSERT INTO tblICInventoryReceiptItem(
@@ -63,6 +67,7 @@ BEGIN
 			,dblOpenReceive
 			,dblUnitCost
 			,intUnitMeasureId
+			,intOwnershipType
 		)
 		VALUES (
 			1
@@ -71,6 +76,7 @@ BEGIN
 			,10
 			,12.50
 			,@WetGrains_BushelUOMId
+			,1
 		);
 		
 		CREATE TABLE actual (

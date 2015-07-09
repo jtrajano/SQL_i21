@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblCTContractBasis](
 	[intContractBasisId] [int] IDENTITY(1,1) NOT NULL,
-	[strContractBasis] [nvarchar](30) COLLATE Latin1_General_CI_AS NOT NULL,
-	[strDescription] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strContractBasis] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strDescription] [nvarchar](500) COLLATE Latin1_General_CI_AS NOT NULL,
 	[ysnDefault] [bit] NULL,
 	[intInsuranceById] [int] NULL,
 	[intInvoiceTypeId] [int] NULL,

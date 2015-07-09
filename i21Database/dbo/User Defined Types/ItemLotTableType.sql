@@ -199,4 +199,5 @@ CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 	,[ysnReleasedToWarehouse]	BIT DEFAULT((0))
 	,[ysnProduced]				BIT DEFAULT((0))
 	,[intDetailId]				INT NOT NULL
+	,[intOwnershipType]			INT NULL DEFAULT ((1))
 )

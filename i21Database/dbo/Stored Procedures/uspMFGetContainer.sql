@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspMFGetContainer (
 	@intLocationId INT
 	,@intContainerTypeId INT
+	,@strContainerId NVARCHAR(50) = '%'
 	)
 AS
 BEGIN
@@ -10,4 +11,6 @@ BEGIN
 	JOIN dbo.tblICStorageLocation L ON L.intStorageLocationId = C.intStorageLocationId
 	WHERE C.intContainerTypeId = @intContainerTypeId
 		AND L.intLocationId = @intLocationId
+		AND C.strContainerId LIKE @strContainerId + '%'
+	ORDER BY C.strContainerId
 END

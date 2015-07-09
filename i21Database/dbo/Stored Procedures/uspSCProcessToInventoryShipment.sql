@@ -32,6 +32,10 @@ DECLARE @intTicketId AS INT = @intSourceTransactionId
 DECLARE @dblRemainingUnits AS DECIMAL (13,3)
 DECLARE @LineItems AS ScaleTransactionTableType
 DECLARE @strTransactionId NVARCHAR(40) = NULL
+DECLARE @intDirectType AS INT = 3
+DECLARE @intTicketUOM INT
+DECLARE @intTicketItemUOMId INT
+DECLARE @intOrderId INT
 
 DECLARE @ErrMsg                    NVARCHAR(MAX),
               @dblBalance          NUMERIC(12,4),                    
@@ -42,6 +46,27 @@ DECLARE @ErrMsg                    NVARCHAR(MAX),
               @strAdjustmentNo     NVARCHAR(50)
 
 BEGIN TRY
+ 		IF @strDistributionOption = 'CNT'
+ 		BEGIN
+ 			SET @intOrderId = 1
+ 		END
+ 		ELSE
+ 		BEGIN
+ 			SET @intOrderId = 4
+ 		END
+ 		BEGIN 
+ 			SELECT	@intTicketUOM = UOM.intUnitMeasureId
+ 			FROM	dbo.tblSCTicket SC	        
+ 					JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
+ 			WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
+ 		END
+ 
+ 		BEGIN 
+ 			SELECT	@intTicketItemUOMId = UM.intItemUOMId
+ 				FROM	dbo.tblICItemUOM UM	
+ 				  JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
+ 			WHERE	UM.intUnitMeasureId =@intTicketUOM AND SC.intTicketId = @intTicketId
+ 		END
 		IF @strDistributionOption = 'CNT'
 		BEGIN
 			INSERT INTO @LineItems (
@@ -62,12 +87,79 @@ BEGIN TRY
 		END
 		IF(@dblRemainingUnits > 0)
 		BEGIN
-			INSERT INTO @LineItems (
-			intContractDetailId,
-			dblUnitsDistributed,
-			dblUnitsRemaining,
-			dblCost) values (NULL, @dblRemainingUnits, 0, @dblCost)
+			INSERT INTO @ItemsForItemShipment (
+				 intItemId
+				,intItemLocationId
+				,intItemUOMId
+				,dtmDate
+				,dblQty
+				,dblUOMQty
+				,dblCost
+				,dblSalesPrice
+				,intCurrencyId
+				,dblExchangeRate
+				,intTransactionId
+				,strTransactionId
+				,intTransactionTypeId
+				,intLotId
+				,intSubLocationId
+				,intStorageLocationId 
+				,ysnIsCustody
+				)
+				SELECT	intItemId = ScaleTicket.intItemId
+						,intLocationId = ItemLocation.intItemLocationId 
+						,intItemUOMId = ItemUOM.intItemUOMId
+						,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
+						,dblQty = @dblRemainingUnits 
+						,dblUOMQty = ItemUOM.dblUnitQty
+						,dblCost = ScaleTicket.dblUnitBasis + dblUnitPrice
+						,dblSalesPrice = 0
+						,intCurrencyId = ScaleTicket.intCurrencyId
+						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
+						,intTransactionId = ScaleTicket.intTicketId
+						,strTransactionId = ScaleTicket.intTicketNumber
+						,intTransactionTypeId = @intDirectType 
+						,intLotId = NULL 
+						,intSubLocationId = ScaleTicket.intSubLocationId
+						,intStorageLocationId = ScaleTicket.intStorageLocationId
+						,ysnIsCustody = 1
+				FROM	dbo.tblSCTicket ScaleTicket
+						INNER JOIN dbo.tblICItemUOM ItemUOM
+							ON ScaleTicket.intItemId = ItemUOM.intItemId
+							AND @intTicketItemUOMId = ItemUOM.intItemUOMId
+						INNER JOIN dbo.tblICItemLocation ItemLocation
+							ON ScaleTicket.intItemId = ItemLocation.intItemId
+							-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
+							AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+							INNER JOIN dbo.tblICCommodityUnitMeasure TicketCommodityUOM On ScaleTicket.intCommodityId  = TicketCommodityUOM.intCommodityId
+						AND TicketCommodityUOM.ysnStockUnit = 1
+				WHERE	ScaleTicket.intTicketId = @intTicketId
+
+			-- Validate the items to shipment 
+			EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipment; 
+
+			---- Add the items into inventory shipment > sales order type. 
+			BEGIN 
+				EXEC dbo.uspSCAddScaleTicketToItemShipment 
+					  @intTicketId
+					 ,@intUserId
+					 ,@ItemsForItemShipment
+					 ,@intEntityId
+					 ,4
+					 ,@InventoryShipmentId OUTPUT;
+			END
+
+			BEGIN 
+			SELECT	@strTransactionId = ship.strShipmentNumber
+			FROM	dbo.tblICInventoryShipment ship	        
+			WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
+			END
+
+			EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId, @intEntityId;
 		END
+		IF (@dblRemainingUnits = @dblNetUnits)
+		RETURN
+		DELETE FROM @ItemsForItemShipment
 		UPDATE @LineItems set intTicketId = @intTicketId
 		END
 	-- Get the items to process
@@ -85,9 +177,11 @@ BEGIN TRY
 		,intTransactionId
 		,strTransactionId
 		,intTransactionTypeId
+		,intTransactionDetailId
 		,intLotId
 		,intSubLocationId
 		,intStorageLocationId 
+		,ysnIsCustody
 	)
 	EXEC dbo.uspSCGetScaleItemForItemShipment
 		 @intTicketId
@@ -106,13 +200,13 @@ BEGIN TRY
 	EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipment; 
 
 	---- Add the items into inventory shipment > sales order type. 
-	IF @strSourceType = @SALES_ORDER
 	BEGIN 
 		EXEC dbo.uspSCAddScaleTicketToItemShipment 
 			  @intTicketId
 			 ,@intUserId
 			 ,@ItemsForItemShipment
 			 ,@intEntityId
+			 ,@intOrderId
 			 ,@InventoryShipmentId OUTPUT;
 	END
 
@@ -122,7 +216,7 @@ BEGIN TRY
 	WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
 	END
 
-	--EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId, @intEntityId;
+	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId, @intEntityId;
 
 END TRY
 BEGIN CATCH

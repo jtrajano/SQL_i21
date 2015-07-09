@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspMFGetActualItemByProduct (
 	@intItemId INT
 	,@intLocationId INT
+	,@strItemNo nvarchar(MAX)='%'
 	)
 AS
 BEGIN
@@ -19,4 +20,6 @@ BEGIN
 		AND R.intLocationId = @intLocationId
 		AND R.ysnActive = 1
 		AND R.intItemId=@intItemId
+		AND I.strItemNo LIKE @strItemNo+'%'
+	ORDER BY I.strItemNo
 END

@@ -39,7 +39,7 @@ CREATE TABLE [dbo].[tblRKFutureMarket](
     [intNoOfDecimal] INT NULL , 
     [intMarketExchangeId] INT NULL, 
     [strSymbolPrefix] NVARCHAR(5) COLLATE Latin1_General_CI_AS NULL, 
-    [dblConversionRate] NUMERIC(18, 6) NULL, 
+    [dblConversionRate] NUMERIC(18, 6) NULL DEFAULT 1, 
     [intReturnCurrency] INT NULL, 
     [intDisplayCurrency] INT NULL, 
     [strMarketSymbolCode] NVARCHAR(5) COLLATE Latin1_General_CI_AS NULL, 

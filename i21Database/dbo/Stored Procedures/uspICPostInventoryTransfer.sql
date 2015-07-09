@@ -27,10 +27,11 @@ DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory In-
 
 -- Get the Inventory Receipt batch number
 DECLARE @strBatchId AS NVARCHAR(40) 
-DECLARE @strItemNo AS NVARCHAR(50)
+		,@strItemNo AS NVARCHAR(50)
 
 -- Create the gl entries variable 
-DECLARE @GLEntries AS RecapTableType 
+DECLARE		@GLEntries AS RecapTableType 
+			,@ysnGLEntriesRequired AS BIT = 0
 
 -- Ensure ysnPost is not NULL  
 SET @ysnPost = ISNULL(@ysnPost, 0)  
@@ -44,6 +45,7 @@ BEGIN
 			,@ysnTransactionPostedFlag AS BIT  
 			,@ysnShipmentRequired AS BIT
 			,@intTransactionType AS INT 
+			,@strGLDescription AS NVARCHAR(255)
   
 	SELECT TOP 1   
 			@intTransactionId = intInventoryTransferId
@@ -51,6 +53,7 @@ BEGIN
 			,@dtmDate = dtmTransferDate
 			,@intCreatedEntityId = intEntityId
 			,@ysnShipmentRequired = ISNULL(ysnShipmentRequired, 0)
+			,@strGLDescription = strDescription
 	FROM	dbo.tblICInventoryTransfer
 	WHERE	strTransferNo = @strTransactionId
 END  
@@ -272,36 +275,9 @@ BEGIN
 					ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId
 		WHERE	Header.intInventoryTransferId = @intTransactionId
 
-		-----------------------------------------
-		-- Generate the g/l entries
-		-----------------------------------------
-		INSERT INTO @GLEntries (
-				[dtmDate] 
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-		)
+		-------------------------------------------
+		-- Call the costing SP	
+		-------------------------------------------
 		EXEC	dbo.uspICPostCosting  
 				@ItemsForRemovalPost  
 				,@strBatchId  
@@ -364,6 +340,21 @@ BEGIN
 		-- Clear the GL entries 
 		DELETE FROM @GLEntries
 
+		-------------------------------------------
+		-- Call the costing SP
+		-------------------------------------------
+		EXEC	dbo.uspICPostCosting  
+				@ItemsForTransferPost  
+				,@strBatchId  
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
+				,@intUserId
+	END
+
+	-- Check if From and To locations are the same. If not, then generate the GL entries. 
+	IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryTransfer WHERE intInventoryTransferId = @intTransactionId AND intFromLocationId <> intToLocationId)
+	BEGIN 	
+		SET @ysnGLEntriesRequired = 1
+
 		-----------------------------------------
 		-- Generate a new set of g/l entries
 		-----------------------------------------
@@ -394,12 +385,12 @@ BEGIN
 				,[strModuleName]
 				,[intConcurrencyId]
 		)
-		EXEC	dbo.uspICPostCosting  
-				@ItemsForTransferPost  
-				,@strBatchId  
-				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
-				,@intUserId
-	END
+		EXEC dbo.uspICCreateGLEntries 
+			@strBatchId
+			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+			,@intUserId
+			,@strGLDescription
+	END 
 END   	
 
 --------------------------------------------------------------------------------------------  
@@ -407,6 +398,12 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnPost = 0   
 BEGIN   
+	-- Check if From and To locations are the same. If not, then generate the GL entries. 
+	IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryTransfer WHERE intInventoryTransferId = @intTransactionId AND intFromLocationId <> intToLocationId)
+	BEGIN 
+		SET @ysnGLEntriesRequired = 1;
+	END 
+	
 	-- Call the unpost routine 
 	BEGIN 
 		-- Call the post routine 
@@ -454,9 +451,21 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 1
 BEGIN 
-	ROLLBACK TRAN @TransactionName
-	EXEC dbo.uspCMPostRecap @GLEntries
-	COMMIT TRAN @TransactionName
+	IF @ysnGLEntriesRequired = 0
+	BEGIN 
+		ROLLBACK TRAN @TransactionName
+		COMMIT TRAN @TransactionName
+
+		-- 'Recap is not applicable when doing an inventory transfer for the same location.'
+		RAISERROR(51150, 11, 1)  
+		GOTO Post_Exit  
+	END 
+	ELSE 
+	BEGIN 
+		ROLLBACK TRAN @TransactionName
+		EXEC dbo.uspCMPostRecap @GLEntries
+		COMMIT TRAN @TransactionName
+	END 
 END 
 
 --------------------------------------------------------------------------------------------  
@@ -468,7 +477,10 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 0
 BEGIN 	
-	EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 	
+	IF @ysnGLEntriesRequired = 1 
+	BEGIN 
+		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 	
+	END
 
 	UPDATE	dbo.tblICInventoryTransfer  
 	SET		ysnPosted = @ysnPost

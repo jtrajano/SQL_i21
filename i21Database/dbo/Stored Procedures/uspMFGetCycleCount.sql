@@ -11,6 +11,7 @@ SELECT CC.intCycleCountSessionId
 		,CC.intItemId
 		,I.strItemNo
 		,I.strDescription
+		,I.strType
 		,CC.dblQuantity
 		,CC.dblSystemQty
 		,CC.intCreatedUserId 
@@ -28,6 +29,7 @@ SELECT CC.intCycleCountSessionId
 	JOIN dbo.tblSMUserSecurity U1 ON U1.intUserSecurityID = CC.intCreatedUserId
 	JOIN dbo.tblSMCompanyLocationSubLocation SL on SL.intCompanyLocationSubLocationId =M.intSubLocationId
 	WHERE CS.intWorkOrderId=@intWorkOrderId
+	ORDER BY CC.intCycleCountId
 END 
 GO
 

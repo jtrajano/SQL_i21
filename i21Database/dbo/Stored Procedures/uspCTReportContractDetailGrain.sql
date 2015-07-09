@@ -50,12 +50,7 @@ BEGIN TRY
 	WHERE	[fieldname] = 'intContractHeaderId' 
 
 	SELECT	strItemNo,dblDetailQuantity,
-			CASE	WHEN intPricingTypeId = 1 THEN dblCashPrice
-					WHEN intPricingTypeId = 2 THEN dblBasis
-					WHEN intPricingTypeId = 3 THEN dblFutures
-			ELSE
-					0
-			END		AS	dblPrice,
+			ISNULL(dblCashPrice,ISNULL(dblBasis,ISNULL(dblFutures,0)))	dblPrice,
 			dtmStartDate,
 			dtmEndDate,
 			strPricingType,
@@ -63,7 +58,7 @@ BEGIN TRY
 			strLocationName,
 			intContractHeaderId,
 			strRemark,
-			strDetailUnitMeasure
+			strItemUOM strDetailUnitMeasure
 	FROM	vyuCTContractDetailView DV
 	WHERE	intContractHeaderId	=	@intContractHeaderId
 	

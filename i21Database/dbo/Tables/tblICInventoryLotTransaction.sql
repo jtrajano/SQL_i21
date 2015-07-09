@@ -22,8 +22,6 @@ This table logs all inventory transactions related to Lot
 		[dtmDate] DATETIME NOT NULL, 
 		[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 		[intItemUOMId] INT NULL,
-		--[dblWeight] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
-		--[intWeightUOMId] INT NULL,
 		[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
 		[intTransactionId] INT NOT NULL, 
 		[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 

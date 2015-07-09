@@ -7,7 +7,7 @@
     [dtmDueDate]           DATETIME        NOT NULL,
     [intCurrencyId]        INT             NOT NULL,
     [intCompanyLocationId] INT             NULL,
-    [intEntitySalespersonId]     INT             NOT NULL,
+    [intEntitySalespersonId]     INT       NULL,
     [dtmShipDate]          DATETIME        NULL,
     [intShipViaId]         INT             NULL,
     [strPONumber]          NVARCHAR (25)    COLLATE Latin1_General_CI_AS NULL,
@@ -42,6 +42,7 @@
     [strBillToState]       NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
     [strBillToZipCode]     NVARCHAR (12)    COLLATE Latin1_General_CI_AS NULL,
     [strBillToCountry]     NVARCHAR (25)    COLLATE Latin1_General_CI_AS NULL,
+	[strOrderType]         NVARCHAR(25)     COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]     INT             CONSTRAINT [DF_tblARInvoice_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     [intEntityId]		   INT             NOT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
@@ -51,6 +52,7 @@
 	CONSTRAINT [FK_tblARInvoice_tblEntityLocation_intShipToLocationId] FOREIGN KEY ([intShipToLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]),
 	CONSTRAINT [FK_tblARInvoice_tblEntityLocation_intBillToLocationId] FOREIGN KEY ([intBillToLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]),
 	CONSTRAINT [FK_tblARInvoice_tblSMFreightTerm] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]),
+	CONSTRAINT [FK_tblARInvoice_tblSMTerm_intTermId] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID]),
 );
 
 

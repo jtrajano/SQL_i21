@@ -9,11 +9,14 @@ A.[intEntityVendorId]
 ,A.strPurchaseOrderNumber
 ,B.intPurchaseDetailId
 ,B.intItemId
+,B.strMiscDescription
 ,C.strItemNo
 ,C.strDescription
 ,tblReceived.dblOrderQty
-,tblReceived.dblPOOpenReceive
+,tblReceived.dblPOOpenReceive --uom converted received quantity from po to IR
 ,tblReceived.dblOpenReceive
+,(tblReceived.dblPOOpenReceive - tblReceived.dblQuantityBilled) AS dblQuantityToBill
+,tblReceived.dblQuantityBilled
 ,tblReceived.intLineNo
 ,tblReceived.intInventoryReceiptItemId
 ,tblReceived.dblUnitCost
@@ -25,6 +28,7 @@ A.[intEntityVendorId]
 ,F.strTerm
 ,G1.intContractNumber
 ,G1.intContractHeaderId
+,G2.intContractDetailId
 FROM tblPOPurchase A
 	INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	CROSS APPLY 
@@ -40,6 +44,7 @@ FROM tblPOPurchase A
 			,SUM(ISNULL(B1.dblOpenReceive,0)) dblOpenReceive
 			,intAccountId = [dbo].[fnGetItemGLAccount](B1.intItemId, loc.intItemLocationId, 'AP Clearing')
 			,strAccountId = (SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B1.intItemId, loc.intItemLocationId, 'AP Clearing'))
+			,dblQuantityBilled = SUM(ISNULL(B1.dblBillQty, 0))
 		FROM tblICInventoryReceipt A1
 			INNER JOIN tblICInventoryReceiptItem B1 ON A1.intInventoryReceiptId = B1.intInventoryReceiptId
 			INNER JOIN tblICItemLocation loc ON B1.intItemId = loc.intItemId AND A1.intLocationId = loc.intLocationId
@@ -59,7 +64,7 @@ FROM tblPOPurchase A
 	--ON B.intPurchaseDetailId = tblReceived.intLineNo AND B.intItemId = tblReceived.intItemId
 	INNER JOIN tblICItem C ON B.intItemId = C.intItemId
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
-	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.intShipViaID
+	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.[intEntityShipViaId]
 	LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
 	LEFT JOIN (tblCTContractHeader G1 INNER JOIN tblCTContractDetail G2 ON G1.intContractHeaderId = G2.intContractHeaderId) ON G1.intEntityId = D1.intEntityVendorId
 UNION ALL
@@ -72,11 +77,14 @@ A.[intEntityVendorId]
 ,A.strPurchaseOrderNumber
 ,B.intPurchaseDetailId
 ,B.intItemId
+,B.strMiscDescription
 ,C.strItemNo
 ,C.strDescription
 ,B.dblQtyOrdered
 ,B.dblQtyOrdered -B.dblQtyReceived
 ,B.dblQtyOrdered
+,B.dblQtyOrdered -B.dblQtyReceived
+,B.dblQtyReceived
 ,B.intPurchaseDetailId
 ,B.intPurchaseDetailId
 ,B.dblCost
@@ -88,12 +96,13 @@ A.[intEntityVendorId]
 ,F.strTerm
 ,NULL
 ,NULL
+,NULL
 FROM tblPOPurchase A
 	INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 	INNER JOIN tblICItem C ON B.intItemId = C.intItemId
 	INNER JOIN tblICItemLocation loc ON C.intItemId = loc.intItemId AND loc.intLocationId = A.intShipToId
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
-	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.intShipViaID
+	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.[intEntityShipViaId]
 	LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
 WHERE C.strType IN ('Service','Software','Non-Inventory','Other Charge')
 AND B.dblQtyOrdered != B.dblQtyReceived
@@ -107,11 +116,14 @@ A.intEntityVendorId
 ,A.strReceiptNumber
 ,B.intInventoryReceiptItemId
 ,B.intItemId
+,C.strDescription
 ,C.strItemNo
 ,C.strDescription
 ,B.dblOpenReceive
 ,B.dblReceived
 ,B.dblOpenReceive
+,(B.dblOpenReceive - B.dblBillQty)
+,B.dblBillQty
 ,B.intInventoryReceiptItemId
 ,B.intInventoryReceiptItemId
 ,B.dblUnitCost
@@ -121,13 +133,15 @@ A.intEntityVendorId
 ,D1.strVendorId
 ,E.strShipVia
 ,NULL
-,NULL
-,NULL
+,F1.intContractNumber
+,F1.intContractHeaderId
+,CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
 FROM tblICInventoryReceipt A
 INNER JOIN tblICInventoryReceiptItem B
 	ON A.intInventoryReceiptId = B.intInventoryReceiptId
 INNER JOIN tblICItem C ON B.intItemId = C.intItemId
 	INNER JOIN tblICItemLocation loc ON C.intItemId = loc.intItemId AND loc.intLocationId = A.intLocationId
 INNER JOIN  (tblAPVendor D1 INNER JOIN tblEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
-LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.intShipViaID
-WHERE A.strReceiptType = 'Direct' AND A.ysnPosted = 1
+LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.[intEntityShipViaId]
+LEFT JOIN (tblCTContractHeader F1 INNER JOIN tblCTContractDetail F2 ON F1.intContractHeaderId = F2.intContractHeaderId) ON F1.intContractHeaderId = F2.intContractHeaderId
+WHERE A.strReceiptType IN ('Direct','Purchase Contract') AND A.ysnPosted = 1

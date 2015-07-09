@@ -15,6 +15,7 @@ DECLARE @receiptId INT;
 DECLARE @generatedBillId INT;
 DECLARE @generatedBillRecordId NVARCHAR(50);
 DECLARE @APAccount INT;
+DECLARE @shipFrom INT, @shipTo INT;
 
 CREATE TABLE #tmpReceiptIds (
 	[intInventoryReceiptId] [INT] PRIMARY KEY,
@@ -37,10 +38,6 @@ SET @totalReceipts = (SELECT COUNT(*) FROM #tmpReceiptIds)
 --Get the company location of the user to get the default ap account else get from preference
 SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = 
 						(SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityId = @userId))
-
---try to get from AP preference
-IF @APAccount IS NULL
-	SET @APAccount = (SELECT intDefaultAccountId FROM tblAPPreference)
 
 --try to get from Gl Account
 IF @APAccount IS NULL
@@ -66,7 +63,7 @@ ALTER TABLE tblAPBill
 	DROP CONSTRAINT [UK_dbo.tblAPBill_strBillId]
 
 WHILE @counter != @totalReceipts
-BEGIn
+BEGIN
 
 	SET @counter = @counter + 1;
 	SELECT TOP(1) @receiptId = intInventoryReceiptId FROM #tmpReceiptIds
@@ -129,7 +126,7 @@ BEGIn
 	(
 		SELECT 
 			C.intTermsId
-		FROM tblAPVendor B INNER JOIN tblEntityLocation C ON B.intEntityVendorId = C.intEntityId
+		FROM tblAPVendor B INNER JOIN tblEntityLocation C ON B.intEntityVendorId = C.intEntityId AND C.ysnDefaultLocation = 1
 		WHERE B.intEntityVendorId = A.intEntityVendorId
 	) Terms
 	WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1
@@ -160,8 +157,8 @@ BEGIn
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
 		[dblTotal]					=	(B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost,
 		[dblCost]					=	B.dblUnitCost,
-		[intContractDetailId]		=	E1.intContractDetailId,
-		[intContractHeaderId]		=	E.intContractHeaderId,
+		[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E1.intContractDetailId ELSE POContractItems.intContractDetailId END,
+		[intContractHeaderId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E.intContractHeaderId ELSE POContractItems.intContractHeaderId END,
 		[intLineNo]					=	B.intSort
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
@@ -170,13 +167,26 @@ BEGIn
 		ON B.intItemId = C.intItemId
 	INNER JOIN tblICItemLocation D
 		ON A.intLocationId = D.intLocationId AND B.intItemId = D.intItemId
-	LEFT JOIN (tblCTContractHeader E INNER JOIN tblCTContractDetail E1 ON E.intContractHeaderId = E1.intContractHeaderId) ON E.intEntityId = A.intEntityVendorId
+	LEFT JOIN (tblCTContractHeader E INNER JOIN tblCTContractDetail E1 ON E.intContractHeaderId = E1.intContractHeaderId) 
+		ON E.intEntityId = A.intEntityVendorId 
+				AND E.intContractHeaderId = B.intOrderId 
+				AND E1.intContractDetailId = B.intLineNo
+	OUTER APPLY (
+		SELECT
+			PODetails.intContractDetailId
+			,PODetails.intContractHeaderId
+		FROM tblPOPurchaseDetail PODetails
+		WHERE intPurchaseDetailId = B.intLineNo
+	) POContractItems
 	WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1
 
 	UPDATE A
 		SET A.dblTotal = (SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @generatedBillId)
 	FROM tblAPBill A
 	WHERE intBillId = @generatedBillId
+
+	SELECT @shipFrom = intShipFromId, @shipTo = intShipToId FROM tblAPBill
+	EXEC uspAPBillUpdateAddressInfo @generatedBillId, @shipFrom, @shipTo
 
 	DELETE FROM #tmpReceiptIds WHERE intInventoryReceiptId = @receiptId
 END

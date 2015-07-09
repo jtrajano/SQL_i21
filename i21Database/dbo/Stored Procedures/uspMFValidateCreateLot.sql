@@ -141,7 +141,7 @@ BEGIN TRY
 			SELECT *
 			FROM dbo.tblICItemUOM
 			WHERE intItemId = @intItemId
-				AND intItemUOMId = @intItemUOMId and ysnStockUnit=1
+				AND intItemUOMId in (@intItemUOMId,@intItemUnitCountUOMId) and ysnStockUnit=1
 			)
 	BEGIN
 
@@ -234,7 +234,7 @@ BEGIN TRY
 				SELECT 1
 				FROM tblICLot
 				WHERE intStorageLocationId = @intStorageLocationId
-					AND dblWeight > 0
+					AND dblQty > 0
 				)
 		BEGIN
 			RAISERROR (
@@ -253,7 +253,7 @@ BEGIN TRY
 				FROM tblICLot
 				WHERE intStorageLocationId = @intStorageLocationId
 					AND intItemId = @intItemId
-					AND dblWeight > 0
+					AND dblQty > 0
 				)
 		BEGIN
 			RAISERROR (
@@ -272,7 +272,7 @@ BEGIN TRY
 				FROM tblICLot
 				WHERE intStorageLocationId = @intStorageLocationId
 					AND intItemId <> @intItemId
-					AND dblWeight > 0
+					AND dblQty > 0
 				)
 		BEGIN
 			RAISERROR (

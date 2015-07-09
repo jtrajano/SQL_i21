@@ -28,6 +28,8 @@ AS
 		,strDateCreated = convert(nvarchar,tic.dtmCreated, 101)
 		,strDateLastModified = convert(nvarchar,tic.dtmLastModified, 101)
 		,tic.strJiraKey
+		,tic.intCustomerId
+		,tic.intCreatedUserEntityId
 	from
 		tblHDTicket tic
 		left outer join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId

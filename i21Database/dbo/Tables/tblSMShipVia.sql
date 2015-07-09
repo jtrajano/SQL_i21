@@ -1,5 +1,5 @@
 ﻿CREATE TABLE [dbo].[tblSMShipVia] (
-    [intShipViaID]       INT            IDENTITY (1, 1) NOT NULL,
+    [intEntityShipViaId]       INT            NOT NULL,
 	[strShipViaOriginKey]      NVARCHAR (10) COLLATE Latin1_General_CI_AS  NULL,
     [strShipVia]         NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL,
     [strShippingService] NVARCHAR (250) COLLATE Latin1_General_CI_AS NOT NULL,
@@ -12,12 +12,15 @@
 	[strTransporterLicense] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strMotorCarrierIFTA]   NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strTransportationMode] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
-	[ysnCompanyOwnedCarrier]BIT DEFAULT ((1)) NOT NULL,
+	[ysnCompanyOwnedCarrier] BIT DEFAULT ((1)) NOT NULL,
+	[strFreightBilledBy] NVARCHAR (15) COLLATE Latin1_General_CI_AS NULL, 
     [ysnActive]          BIT            DEFAULT ((1)) NOT NULL,
     [intSort]            INT            NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
-    CONSTRAINT [PK_tblSMShipVia] PRIMARY KEY CLUSTERED ([intShipViaID] ASC), 
-    CONSTRAINT [AK_tblSMShipVia_strShipVia] UNIQUE ([strShipVia])
+    CONSTRAINT [PK_tblSMShipVia] PRIMARY KEY CLUSTERED ([intEntityShipViaId] ASC), 
+    CONSTRAINT [AK_tblSMShipVia_strShipVia] UNIQUE ([strShipVia]),
+	CONSTRAINT [FK_dbo_tblSMShipVia_tblEntity_intEntityId] FOREIGN KEY ([intEntityShipViaId]) REFERENCES [dbo].[tblEntity] ([intEntityId]) ON DELETE CASCADE,
+
 );
 
 
@@ -29,7 +32,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblSMShipVia',
     @level2type = N'COLUMN',
-    @level2name = N'intShipViaID'
+    @level2name = N'intEntityShipViaId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Ship Via Name',

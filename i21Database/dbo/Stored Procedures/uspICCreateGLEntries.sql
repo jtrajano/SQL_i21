@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCreateGLEntries]
 	@strBatchId AS NVARCHAR(20)
 	,@AccountCategory_ContraInventory AS NVARCHAR(255) = 'Cost of Goods'
-	,@intUserId AS INT	
+	,@intUserId AS INT
+	,@strGLDescription AS NVARCHAR(255) = NULL 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -261,7 +262,7 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= tblGLAccount.strDescription
+		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
 		,strCode					= 'IC' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -299,7 +300,7 @@ SELECT
 		,dblCredit					= Debit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= tblGLAccount.strDescription
+		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
 		,strCode					= 'IC' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -340,7 +341,7 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= tblGLAccount.strDescription
+		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
 		,strCode					= 'IWS'
 		,strReference				= ''
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -377,7 +378,7 @@ SELECT
 		,dblCredit					= Debit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= tblGLAccount.strDescription
+		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
 		,strCode					= 'IWS' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -418,7 +419,7 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= tblGLAccount.strDescription
+		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
 		,strCode					= 'IRS' -- TODO
 		,strReference				= '' -- TODO
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -456,7 +457,7 @@ SELECT
 		,dblCredit					= Debit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= tblGLAccount.strDescription
+		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
 		,strCode					= 'IRS' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -497,7 +498,7 @@ SELECT
 		,dblCredit					= Credit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= tblGLAccount.strDescription
+		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
 		,strCode					= 'IAN' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -534,7 +535,7 @@ SELECT
 		,dblCredit					= Debit.Value
 		,dblDebitUnit				= 0
 		,dblCreditUnit				= 0
-		,strDescription				= tblGLAccount.strDescription
+		,strDescription				= ISNULL(@strGLDescription, tblGLAccount.strDescription)
 		,strCode					= 'IAN' 
 		,strReference				= '' 
 		,intCurrencyId				= ForGLEntries_CTE.intCurrencyId

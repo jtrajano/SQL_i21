@@ -49,7 +49,11 @@ BEGIN
 		,[strBillToZipCode]
 		,[strBillToCountry]
 		,[intConcurrencyId]
-		,[intEntityId])
+		,[intEntityId]
+		,[strOrderType]
+		,[intOrderedById]
+		,[strBOLNumber]
+		,[intSplitId])
 	SELECT 
 		 [strSalesOrderNumber]
 		,[intEntityCustomerId]
@@ -89,7 +93,11 @@ BEGIN
 		,[strBillToZipCode]
 		,[strBillToCountry]
 		,0
-		,@UserId	
+		,@UserId
+		,[strOrderType]
+		,[intOrderedById]
+		,[strBOLNumber]
+		,[intSplitId]
 	FROM tblSOSalesOrder
 	WHERE intSalesOrderId = @SalesOrderId
 
@@ -135,7 +143,14 @@ BEGIN
 			,[intSalesAccountId]
 			,[intInventoryAccountId]
 			,[intStorageLocationId]
-			,[intConcurrencyId])
+			,[intConcurrencyId]
+			,[strMaintenanceType]
+			,[strFrequency]
+	        ,[dtmMaintenanceDate]
+	        ,[dblMaintenanceAmount]
+	        ,[dblLicenseAmount]
+			,[intContractHeaderId]
+			,[intContractDetailId])
 		SELECT 
 			@NewTransactionId
 			,[intItemId]
@@ -156,6 +171,13 @@ BEGIN
 			,[intInventoryAccountId]
 			,[intStorageLocationId]
 			,0
+			,[strMaintenanceType]
+			,[strFrequency]
+	        ,[dtmMaintenanceDate]
+	        ,[dblMaintenanceAmount]
+	        ,[dblLicenseAmount]
+			,[intContractHeaderId]
+			,[intContractDetailId]
 		FROM tblSOSalesOrderDetail		
 		WHERE [intSalesOrderDetailId] = @SalesOrderDetailId
 

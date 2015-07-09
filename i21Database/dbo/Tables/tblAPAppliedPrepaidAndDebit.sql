@@ -17,5 +17,7 @@
 	[dblBalance] DECIMAL(18, 6) NOT NULL DEFAULT 0,
 	[dblAmountApplied] DECIMAL(18, 6) NOT NULL DEFAULT 0,
     [ysnApplied] BIT NOT NULL DEFAULT 0,
-	[intConcurrencyId] INT NOT NULL DEFAULT 0
+	[intConcurrencyId] INT NOT NULL DEFAULT 0,
+	CONSTRAINT [FK_tblAPAppliedPreapaidAndDebit_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]) ON DELETE CASCADE,
 )
+GO

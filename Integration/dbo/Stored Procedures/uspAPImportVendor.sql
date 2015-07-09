@@ -71,7 +71,8 @@ BEGIN
 		ssvnd_currency					=	E.strCurrency,
 		ssvnd_1099_name					=	CAST(A.str1099Name AS VARCHAR(50)),
 		ssvnd_gl_pur					=	CAST(F.strExternalId AS DECIMAL(16,8)),
-		ssvnd_tax_st					=	CAST(B.strTaxState AS VARCHAR(2))
+		ssvnd_tax_st					=	CAST(B.strTaxState AS VARCHAR(2)),
+		ssvnd_our_cus_no				=	CAST(B.strVendorAccountNum AS VARCHAR(20))
 		FROM ssvndmst 		
 		INNER JOIN tblAPVendor B
 			ON ssvndmst.ssvnd_vnd_no COLLATE Latin1_General_CI_AS = SUBSTRING(B.strVendorId, 1, 10) COLLATE Latin1_General_CI_AS
@@ -112,7 +113,8 @@ BEGIN
 		ssvnd_currency,
 		ssvnd_1099_name,
 		ssvnd_gl_pur,
-		ssvnd_tax_st
+		ssvnd_tax_st,
+		ssvnd_our_cus_no
 		)
 		SELECT 
 			ssvnd_vnd_no					=	CASE WHEN CHARINDEX(CHAR(10), B.strVendorId) > 0 THEN SUBSTRING(B.strVendorId, 0, CHARINDEX(CHAR(10),B.strVendorId)) ELSE B.strVendorId END,
@@ -138,7 +140,8 @@ BEGIN
 			ssvnd_currency					=	E.strCurrency,
 			ssvnd_1099_name					=	CAST(A.str1099Name AS VARCHAR(50)),
 			ssvnd_gl_pur					=	CAST(F.strExternalId AS DECIMAL(16,8)),
-			ssvnd_tax_st					=	CAST(B.strTaxState AS VARCHAR(2))
+			ssvnd_tax_st					=	CAST(B.strTaxState AS VARCHAR(2)),
+			ssvnd_our_cus_no				=	CAST(B.strVendorAccountNum AS VARCHAR(20))
 		FROM
 			tblEntity A
 		INNER JOIN tblAPVendor B
@@ -348,7 +351,7 @@ BEGIN
                 @intPaymentMethodId       	= NULL,
                 @intVendorTaxCodeId     	= NULL,
                 @intGLAccountExpenseId    	= (SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CONVERT(NVARCHAR(50),ssvnd_gl_pur)),
-                @strVendorAccountNum      	= NULL,
+                @strVendorAccountNum      	= ssvnd_our_cus_no,
                 @ysnPymtCtrlActive        	= CASE WHEN ssvnd_pay_ctl_ind = ''A'' THEN 1 ELSE 0 END,
                 @ysnPymtCtrlAlwaysDiscount	= CASE WHEN ssvnd_pay_ctl_ind = ''D'' THEN 1 ELSE 0 END,
                 @ysnPymtCtrlEFTActive     	= CASE WHEN ssvnd_pay_ctl_ind = ''E'' THEN 1 ELSE 0 END,

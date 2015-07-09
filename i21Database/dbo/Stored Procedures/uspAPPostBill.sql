@@ -184,7 +184,15 @@ END
 IF ISNULL(@recap, 0) = 0
 BEGIN
 
+	--handel error here as we do not get the error here
+	BEGIN TRY
 	EXEC uspGLBookEntries @GLEntries, @post
+	END TRY
+	BEGIN CATCH
+		DECLARE @error NVARCHAR(200) = ERROR_MESSAGE()
+		RAISERROR(@error, 16, 1);
+		GOTO Post_Rollback
+	END CATCH
 
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
@@ -202,20 +210,22 @@ BEGIN
 		FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 
 		--UPDATE amount due of vendor prepayment, debit memo once payment has been applied to bill
-		UPDATE A
-			SET dblAmountDue = A.dblAmountDue + AppliedPayments.dblAmountApplied
-			,dblPayment = dblPayment - AppliedPayments.dblAmountApplied
-		FROM tblAPBill A
-		CROSS APPLY
-		(
-			SELECT 
-				SUM(B.dblAmountApplied) AS dblAmountApplied
-			FROM tblAPAppliedPrepaidAndDebit B
-				INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
-			WHERE A.intBillId = B.intTransactionId
-			AND B.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
-			GROUP BY B.intTransactionId
-		) AppliedPayments
+		--UPDATE A
+		--	SET dblAmountDue = A.dblAmountDue + AppliedPayments.dblAmountApplied
+		--	,dblPayment = dblPayment - AppliedPayments.dblAmountApplied
+		--	,ysnPaid = 0
+		--FROM tblAPBill A
+		--CROSS APPLY
+		--(
+		--	SELECT 
+		--		SUM(B.dblAmountApplied) AS dblAmountApplied
+		--	FROM tblAPAppliedPrepaidAndDebit B
+		--		--INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
+		--	WHERE A.intBillId = B.intTransactionId
+		--	AND B.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+		--	GROUP BY B.intTransactionId
+		--) AppliedPayments
+		EXEC uspAPUpdatePrepayAndDebitMemo @validBillIds, 0
 
 		UPDATE tblGLDetail
 			SET ysnIsUnposted = 1
@@ -248,22 +258,23 @@ BEGIN
 			SET ysnPosted = 1
 		WHERE tblAPBill.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 
-		--UPDATE amount due of vendor prepayment, debit memo once payment has been applied to bill
-		UPDATE A
-			SET dblAmountDue = A.dblAmountDue - AppliedPayments.dblAmountApplied
-			,dblPayment = dblPayment + AppliedPayments.dblAmountApplied
-		FROM tblAPBill A
-		CROSS APPLY
-		(
-			SELECT 
-				SUM(B.dblAmountApplied) AS dblAmountApplied
-			FROM tblAPAppliedPrepaidAndDebit B
-				INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
-			WHERE A.intBillId = B.intTransactionId
-			AND B.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
-			GROUP BY B.intTransactionId
-		) AppliedPayments
-		
+		--UPDATE amount due of vendor prepayment, debit memo and overpayment once payment has been applied to bill
+		--UPDATE A
+		--	SET dblAmountDue = A.dblAmountDue - AppliedPayments.dblAmountApplied
+		--	,dblPayment = dblPayment + AppliedPayments.dblAmountApplied
+		--	,ysnPaid = CASE WHEN (A.dblAmountDue - AppliedPayments.dblAmountApplied) = 0 THEN 1 ELSE 0 END
+		--FROM tblAPBill A
+		--CROSS APPLY
+		--(
+		--	SELECT 
+		--		SUM(B.dblAmountApplied) AS dblAmountApplied
+		--	FROM tblAPAppliedPrepaidAndDebit B
+		--		--INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
+		--	WHERE A.intBillId = B.intTransactionId
+		--	AND B.intBillId IN (SELECT intBillId FROM #tmpPostBillData)	--make sure update only those prepayments of the current bills
+		--	GROUP BY B.intTransactionId
+		--) AppliedPayments
+		EXEC uspAPUpdatePrepayAndDebitMemo @validBillIds, 1
 
 		--Update Inventory Item Receipt
 		UPDATE A

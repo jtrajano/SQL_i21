@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblCFItem] (
     [intItemId]                     INT             IDENTITY (1, 1) NOT NULL,
+    [intTaxGroupMaster]             INT             NULL,
     [intNetworkId]                  INT             NULL,
     [intSiteId]                     INT             NULL,
     [strProductNumber]              NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
@@ -29,6 +30,8 @@
     CONSTRAINT [PK_tblCFItem] PRIMARY KEY CLUSTERED ([intItemId] ASC),
     CONSTRAINT [FK_tblCFItem_tblCFSite] FOREIGN KEY ([intSiteId]) REFERENCES [dbo].[tblCFSite] ([intSiteId])
 );
+
+
 
 
 

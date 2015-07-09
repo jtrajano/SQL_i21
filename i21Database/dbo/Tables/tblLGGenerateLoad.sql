@@ -23,10 +23,11 @@
 [intAllocationDetailId] INT NULL,
 
 [dblQuantity] NUMERIC(18, 6) NOT NULL,
-[intUnitMeasureId] INT NOT NULL,
+[intUnitMeasureId] INT NULL,
 [dblUnitsPerLoad] NUMERIC(18, 6) NOT NULL,
 [intNumberOfLoads] INT NOT NULL,
 [strComments] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL,
+[intSourceType] INT NULL,
 
 CONSTRAINT [PK_tblLGGenerateLoad] PRIMARY KEY ([intGenerateLoadId]), 
 CONSTRAINT [UK_tblLGGenerateLoad_intReferenceNumber] UNIQUE ([intReferenceNumber]),

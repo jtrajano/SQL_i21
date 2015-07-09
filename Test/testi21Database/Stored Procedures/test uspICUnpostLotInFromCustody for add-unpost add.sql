@@ -135,30 +135,30 @@ BEGIN
 		)
 
 		CREATE TABLE actualTransactionToReverse (
-			intInventoryLotInCustodyTransactionId INT NOT NULL 
+			intInventoryTransactionInCustodyId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 			,intTransactionTypeId INT NOT NULL 
-			,intInventoryLotInCustodyId INT 
+			,intInventoryCostBucketInCustodyId INT 
 			,dblQty NUMERIC(38,20)
 		)
 
 		CREATE TABLE expectedTransactionToReverse (
-			intInventoryLotInCustodyTransactionId INT NOT NULL 
+			intInventoryTransactionInCustodyId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 			,intTransactionTypeId INT NOT NULL 
-			,intInventoryLotInCustodyId INT 
+			,intInventoryCostBucketInCustodyId INT 
 			,dblQty NUMERIC(38,20)
 		)
 
 		-- Create the temp table 
 		CREATE TABLE #tmpInventoryTransactionStockToReverse (
-			intInventoryLotInCustodyTransactionId INT NOT NULL 
+			intInventoryTransactionInCustodyId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 			,intTransactionTypeId INT NOT NULL 
-			,intInventoryLotInCustodyId INT 
+			,intInventoryCostBucketInCustodyId INT 
 			,dblQty NUMERIC(38,20)
 		)
 
@@ -166,7 +166,8 @@ BEGIN
 		EXEC testi21Database.[Fake inventory items]
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotInCustody', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotInCustodyTransaction', @Identity = 1;	
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransactionInCustody', @Identity = 1;	
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransactionInCustody', @Identity = 1;	
 
 		-- Mark all item as lot items
 		UPDATE dbo.tblICItem
@@ -210,8 +211,8 @@ BEGIN
 				,strTransactionId			= 'InvRcpt-0000002'
 				,intTransactionId			= 7
 
-		-- Add fake data for tblICInventoryLotInCustodyTransaction
-		INSERT INTO dbo.tblICInventoryLotInCustodyTransaction (
+		-- Add fake data for tblICInventoryLotTransactionInCustody
+		INSERT INTO dbo.tblICInventoryTransactionInCustody (
 				intItemId
 				,intItemLocationId
 				,intItemUOMId
@@ -229,7 +230,7 @@ BEGIN
 				,intTransactionId
 				,intTransactionDetailId
 				,strTransactionId
-				,intInventoryLotInCustodyId
+				,intInventoryCostBucketInCustodyId
 				,strBatchId
 				,intTransactionTypeId
 				,ysnIsUnposted
@@ -253,7 +254,7 @@ BEGIN
 				,intTransactionId				= 6
 				,intTransactionDetailId			= NULL 
 				,strTransactionId				= 'InvRcpt-0000001'
-				,intInventoryLotInCustodyId		= 1
+				,intInventoryCostBucketInCustodyId	= 1
 				,strBatchId						= 'BATCH-0001'
 				,intTransactionTypeId			= @InventoryReceipt
 				,ysnIsUnposted					= 0
@@ -277,7 +278,7 @@ BEGIN
 				,intTransactionId				= 7
 				,intTransactionDetailId			= NULL 
 				,strTransactionId				= 'InvRcpt-0000002'
-				,intInventoryLotInCustodyId		= 1
+				,intInventoryCostBucketInCustodyId		= 1
 				,strBatchId						= 'BATCH-0002'
 				,intTransactionTypeId			= @InventoryReceipt
 				,ysnIsUnposted					= 0
@@ -307,18 +308,18 @@ BEGIN
 
 		-- Setup the expected data for transactions to reverse 
 		INSERT INTO expectedTransactionToReverse (
-				intInventoryLotInCustodyTransactionId 
+				intInventoryTransactionInCustodyId 
 				,intTransactionId 
 				,strTransactionId 
 				,intTransactionTypeId 
-				,intInventoryLotInCustodyId 
+				,intInventoryCostBucketInCustodyId 
 				,dblQty 
 		)
-		SELECT	intInventoryLotInCustodyTransactionId	= 1
+		SELECT	intInventoryTransactionInCustodyId	= 1
 				,intTransactionId						= 6
 				,strTransactionId						= 'InvRcpt-0000001'
 				,intTransactionTypeId					= @InventoryReceipt
-				,intInventoryLotInCustodyId				= 1
+				,intInventoryCostBucketInCustodyId		= 1
 				,dblQty									= 25
 	END 
 	
@@ -335,18 +336,18 @@ BEGIN
 	BEGIN 
 		-- Get the date from the temporary table. 
 		INSERT INTO actualTransactionToReverse (
-				intInventoryLotInCustodyTransactionId
+				intInventoryTransactionInCustodyId
 				,intTransactionId
 				,strTransactionId
 				,intTransactionTypeId
-				,intInventoryLotInCustodyId
+				,intInventoryCostBucketInCustodyId
 				,dblQty
 		)
-		SELECT	intInventoryLotInCustodyTransactionId
+		SELECT	intInventoryTransactionInCustodyId
 				,intTransactionId
 				,strTransactionId
 				,intTransactionTypeId
-				,intInventoryLotInCustodyId
+				,intInventoryCostBucketInCustodyId
 				,dblQty
 		FROM	#tmpInventoryTransactionStockToReverse
 				

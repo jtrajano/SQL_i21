@@ -116,11 +116,11 @@ BEGIN
 		IF ISNULL(@strItemNo, '') = '' 
 			SET @strItemNo = 'Item with id ' + CAST(@intItemId AS NVARCHAR(50)) 
 
-		-- The expected qty to receive for {Item} is {Open Receive Qty}. Lot Quantity is {Total Lot Qty}. The difference is {Calculated difference}.'
 		SET @FormattedReceivedQty =  CONVERT(NVARCHAR, CAST(@OpenReceiveQty AS MONEY), 1)
 		SET @FormattedLotQty =  CONVERT(NVARCHAR, CAST(@LotQtyInItemUOM AS MONEY), 1)
 		SET @FormattedDifference =  CAST(ABS(@OpenReceiveQty - @LotQtyInItemUOM) AS NVARCHAR(50))
 
+		-- 'The Qty to Receive for {Item} is {Open Receive Qty}. Total Lot Quantity is {Total Lot Qty}. The difference is {Calculated difference}.'
 		RAISERROR(51038, 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty, @FormattedDifference)  
 		RETURN -1; 
 	END 
@@ -152,7 +152,8 @@ BEGIN
 			,strVendorLotNo
 			,intVendorLocationId
 			,strVendorLocation
-			,intDetailId		
+			,intDetailId
+			,intOwnershipType		
 	)
 	SELECT	intLotId				= ItemLot.intLotId
 			,strLotNumber			= ItemLot.strLotNumber
@@ -178,6 +179,7 @@ BEGIN
 			,intVendorLocationId	= ItemLot.intVendorLocationId
 			,strVendorLocation		= ItemLot.strVendorLocation
 			,intDetailId			= ItemLot.intInventoryReceiptItemLotId
+			,intOwnershipType		= ReceiptItem.intOwnershipType
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item

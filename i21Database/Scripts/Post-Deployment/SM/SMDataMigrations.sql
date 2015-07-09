@@ -57,6 +57,84 @@ GO
 	EXEC uspSMSortOriginMenus
 
 GO
+<<<<<<< HEAD
 	-- UPDATE tblSMRecurringTransaction
 	EXEC uspSMMigrateRecurringTransaction
+=======
+	-- MIGRATE SM COMPANY PREFERENCES
+	EXEC uspSMMigrateCompanyPreference
+GO
+
+	-- MIGRATE AR COMPANY PREFERENCES
+	EXEC uspARMigrateCompanyPreference
+GO
+	PRINT N'MIGRATING tblAPPreference to tblSMCompanyLocation'
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblAPPreference' AND [COLUMN_NAME] IN ('intDefaultAccountId', 'intWithholdAccountId', 'intDiscountAccountId', 'intInterestAccountId'))
+	BEGIN
+		EXEC
+		('
+			IF EXISTS(SELECT TOP 1 1 FROM tblAPPreference)
+			BEGIN		
+				DECLARE @intDefaultAccountId INT,
+						@intWithholdAccountId INT, 
+						@intDiscountAccountId INT, 
+						@intInterestAccountId INT, 
+						@dblWithholdPercent DECIMAL(18, 6)
+
+				SELECT TOP 1 @intDefaultAccountId = intDefaultAccountId, @intWithholdAccountId = intWithholdAccountId, @intDiscountAccountId = intDiscountAccountId, @intInterestAccountId = intInterestAccountId, @dblWithholdPercent = dblWithholdPercent
+				FROM tblAPPreference
+
+				PRINT N''UPDATING intWithholdAccountId, intDiscountAccountId, intInterestAccountId, dblWithholdPercent''
+				UPDATE tblSMCompanyLocation 
+				SET intWithholdAccountId = @intWithholdAccountId, 
+				intDiscountAccountId = @intDiscountAccountId, 
+				intInterestAccountId = @intInterestAccountId, 
+				dblWithholdPercent = @dblWithholdPercent
+
+				PRINT N''UPDATING intAPAccount Where intAPAccount is null''
+				UPDATE tblSMCompanyLocation 
+				SET intAPAccount = @intDefaultAccountId
+				WHERE intAPAccount IS NULL
+
+				PRINT N''TRUNCATING tblAPPreference''
+				TRUNCATE TABLE tblAPPreference
+			END
+		')
+	END
+GO
+	-- MIGRATE DB PREFERENCES
+	EXEC uspDBMigrateUserPreference
+GO
+	-- MIGRATE USER TYPE FROM tblSMPreferences to tblSMUserPreference
+	EXEC uspSMMigrateUserPreference
+GO
+
+-- Update User Preference
+DECLARE @currentRow INT
+DECLARE @totalRows INT
+
+SET @currentRow = 1
+SELECT @totalRows = Count(*) FROM [dbo].[tblSMUserSecurity]
+
+WHILE (@currentRow <= @totalRows)
+BEGIN
+
+Declare @userId INT
+SELECT @userId = intUserSecurityID FROM (  
+	SELECT ROW_NUMBER() OVER(ORDER BY intUserSecurityID ASC) AS 'ROWID', *
+	FROM [dbo].[tblSMUserSecurity]
+) a
+WHERE ROWID = @currentRow
+
+PRINT N'Executing uspSMUpdateUserPreferenceEntry'
+Exec uspSMUpdateUserPreferenceEntry @userId
+
+
+SET @currentRow = @currentRow + 1
+END
+
+GO
+	PRINT N'Updating strHelperUrlDomain in tblSMCompanyPreference'
+	UPDATE tblSMCompanyPreference SET strHelperUrlDomain = N'http://help.irelyserver.com'
+>>>>>>> master
 GO

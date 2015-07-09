@@ -2,7 +2,8 @@
 AS
 BEGIN
 	SELECT W.intWorkOrderProducedLotId,
-		L.strLotNumber
+		L.intLotId
+		,L.strLotNumber
 		,I.strItemNo
 		,I.strDescription
 		,W.dblQuantity
@@ -21,6 +22,7 @@ BEGIN
 		,C.strContainerId
 		,S.intShiftId
 		,S.strShiftName
+		,W.intBatchId 
 	FROM dbo.tblMFWorkOrderProducedLot W
 	JOIN dbo.tblICLot L ON L.intLotId = W.intLotId
 	JOIN dbo.tblICItem I ON I.intItemId = L.intItemId
@@ -31,4 +33,5 @@ BEGIN
 	LEFT JOIN dbo.tblICContainer C ON C.intContainerId = W.intContainerId
 	LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intShiftId
 	WHERE intWorkOrderId = @intWorkOrderId
+	ORDER BY W.intWorkOrderProducedLotId
 END

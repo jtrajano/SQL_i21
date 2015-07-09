@@ -9,7 +9,6 @@
                SELECT * FROM [$(TableName)]					
 --------------------------------------------------------------------------------------
 */
-
 :r .\LoadModules.sql
 
 -- SYSTEM MANAGER
@@ -47,9 +46,6 @@
 
 -- ACCOUNTS PAYABLE
 :r ..\dbo\Views\vwapivcmst.sql
-:r ..\dbo\Views\vwclsmst.sql
-:r ..\dbo\Views\vwcmtmst.sql
-:r ..\dbo\Views\vwcntmst.sql
 :r "..\dbo\Stored Procedures\uspAPCreatePaymentFromOriginBill.sql"
 
 
@@ -89,22 +85,38 @@
 :r ..\dbo\Views\vyuECCFCardTransaction.sql
 
 -- TANK MANAGEMENT
-:r ..\dbo\Views\vyuTMOriginOption.sql
-:r ..\dbo\Views\vwctlmst.sql
-:r ..\dbo\Views\vwitmmst.sql
-:r ..\dbo\Views\vwivcmst.sql
-:r ..\dbo\Views\vwlclmst.sql
-:r ..\dbo\Views\vwlocmst.sql
+:r ..\dbo\Views\vwclsmst.sql
+--:r ..\dbo\Views\vyuTMOriginAccountStatus.sql
+:r "..\dbo\Stored Procedures\uspTMRecreateAccountStatusView.sql"
+--:r ..\dbo\Views\vwcmtmst.sql
+:r "..\dbo\Stored Procedures\uspTMRecreateCommentsView.sql"
+--:r ..\dbo\Views\vwcntmst.sql
+:r "..\dbo\Stored Procedures\uspTMRecreateContractView.sql"
+--:r ..\dbo\Views\vyuTMOriginOption.sql
+:r "..\dbo\Stored Procedures\uspTMRecreateOriginOptionView.sql"
+--:r ..\dbo\Views\vwctlmst.sql
+:r "..\dbo\Stored Procedures\uspTMRecreateCTLMSTView.sql"
+--:r ..\dbo\Views\vwitmmst.sql
+:r "..\dbo\Stored Procedures\uspTMRecreateItemView.sql"
+--:r ..\dbo\Views\vwivcmst.sql
+:r "..\dbo\Stored Procedures\uspTMRecreateInvoiceView.sql"
+--:r ..\dbo\Views\vwlclmst.sql
+:r "..\dbo\Stored Procedures\uspTMRecreateLocaleTaxView.sql"
+--:r ..\dbo\Views\vwlocmst.sql
+:r "..\dbo\Stored Procedures\uspTMRecreateLocationView.sql"
 :r ..\dbo\Views\vwprcmst.sql
 :r ..\dbo\Views\vwpyemst.sql
 :r ..\dbo\Views\vwticmst.sql
-:r ..\dbo\Views\vwcusmst.sql
-:r ..\dbo\Views\vwslsmst.sql
+--:r ..\dbo\Views\vwcusmst.sql
+:r "..\dbo\Stored Procedures\uspTMRecreateCustomerView.sql"
+--:r ..\dbo\Views\vwslsmst.sql
+:r "..\dbo\Stored Procedures\uspTMRecreateSalesPersonView.sql"
 :r ..\dbo\Views\vwtaxmst.sql
-:r ..\dbo\Views\vwtrmmst.sql
+--:r ..\dbo\Views\vwtrmmst.sql
+:r "..\dbo\Stored Procedures\uspTMRecreateTermsView.sql"
 :r ..\dbo\Views\vwDispatch.sql
 :r ..\dbo\Views\vyuTMtrprcmst.sql
-:r ..\dbo\Views\vyuTMOriginAccountStatus.sql
+
 :r "..\dbo\Stored Procedures\TwoPartDeliveryFillReport.sql"
 :r "..\dbo\Stored Procedures\uspTMGetConsumptionWithGasCheck.sql"
 :r "..\dbo\Stored Procedures\uspTMGetConsumptionWithLeakCheck.sql"
@@ -123,6 +135,7 @@
 
 --:r "..\dbo\Functions\fnGetVendorLastName.sql"
 :r "..\dbo\Stored Procedures\uspAPImportBillTransactions.sql"
+:r "..\dbo\Stored Procedures\uspAPCreateMissingPaymentOfBills.sql"
 :r "..\dbo\Stored Procedures\uspAPImportTerms.sql"
 --:r "..\dbo\Stored Procedures\uspAPImportVendor.sql"
 :r "..\dbo\Stored Procedures\uspAPPostOriginPayment.sql"

@@ -12,6 +12,7 @@
 		[dblBatchSize] NUMERIC(18, 6) NULL CONSTRAINT [DF_tblMFMachine_dblBatchSize] DEFAULT 0, 
 		[intBatchSizeUOMId] INT NULL, 
 		[intChildCount] INT NOT NULL CONSTRAINT [DF_tblMFMachine_intChildCount] DEFAULT 0, 
+		[intIssuedUOMTypeId] INT NULL,
 		[ysnActive] BIT NOT NULL CONSTRAINT [DF_tblMFMachine_ysnActive] DEFAULT 0, 
 		[intCreatedUserId] [int] NULL,
 		[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblMFMachine_dtmCreated] DEFAULT GetDate(),
@@ -23,8 +24,8 @@
 		CONSTRAINT [FK_tblMFMachine_tblMFMachine] FOREIGN KEY ([intParentMachineId]) REFERENCES [tblMFMachine]([intMachineId]),
 		CONSTRAINT [FK_tblMFMachine_tblICUnitMeasure] FOREIGN KEY ([intBatchSizeUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
 		CONSTRAINT [FK_tblMFMachine_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
-		CONSTRAINT [FK_tblMFMachine_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId])  
-		
+		CONSTRAINT [FK_tblMFMachine_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),  
+		CONSTRAINT [FK_tblMFMachine_tblMFMachineIssuedUOMType_intIssuedUOMTypeId] FOREIGN KEY ([intIssuedUOMTypeId]) REFERENCES [tblMFMachineIssuedUOMType]([intIssuedUOMTypeId])
 	)
 
 	GO

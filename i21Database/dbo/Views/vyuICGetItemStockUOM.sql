@@ -24,7 +24,9 @@ SELECT
 	dblOnHand = (CASE WHEN ISNULL(Lot.intLotId, '') = '' THEN ISNULL(StockUOM.dblOnHand, 0) ELSE ISNULL(Lot.dblQty, 0) END),
 	dblOnOrder = StockUOM.dblOnOrder,
 	dblReservedQty = ISNULL(Reserve.dblTotalQty, 0),
-	dblAvailableQty = (CASE WHEN ISNULL(Lot.intLotId, '') = '' THEN (ISNULL(StockUOM.dblOnHand, 0) - ISNULL(Reserve.dblTotalQty, 0)) ELSE ISNULL(Lot.dblQty, 0) END)
+	dblAvailableQty = (CASE WHEN ISNULL(Lot.intLotId, '') = '' THEN (ISNULL(StockUOM.dblOnHand, 0) - ISNULL(Reserve.dblTotalQty, 0)) ELSE ISNULL(Lot.dblQty, 0) END),
+	dblUnitQty = ItemUOM.dblUnitQty,
+	ysnStockUnit = ItemUOM.ysnStockUnit
 FROM tblICItemStockUOM StockUOM
 LEFT JOIN tblICItem Item ON Item.intItemId = StockUOM.intItemId
 LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemLocationId = StockUOM.intItemLocationId

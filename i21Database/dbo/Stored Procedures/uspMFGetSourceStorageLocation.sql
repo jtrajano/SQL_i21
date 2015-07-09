@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspMFGetSourceStorageLocation (
-	@intProcessId INT
+	@intProcessId int
 	,@intLocationId INT
+	,@strName nvarchar(50)='%'
 	)
 AS
 BEGIN
@@ -22,4 +23,7 @@ BEGIN
 		,SL.intSubLocationId 
 	FROM dbo.tblICStorageLocation SL
 	WHERE intLocationId = @intLocationId and SL.ysnAllowConsume =1
+	AND SL.strName LIKE @strName+'%'
+	Order by SL.strName
+
 END

@@ -43,7 +43,7 @@ RETURN (
 					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation Location
 								ON Item.intItemId = @intItemId
 								AND Location.intItemLocationId = @intItemLocationId
-							LEFT JOIN dbo.tblICLot Lot
+							INNER JOIN dbo.tblICLot Lot
 								ON Lot.intItemLocationId = Location.intItemLocationId 
 								AND ISNULL(Lot.intLotId, 0) = ISNULL(@intLotId, 0)	
 					WHERE	Item.intItemId = @intItemId

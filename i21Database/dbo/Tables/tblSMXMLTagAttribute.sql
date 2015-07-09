@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblSMXMLTagAttribute]
 (
-	[intTagAttributeId] INT NOT NULL ,
+	[intTagAttributeId] INT IDENTITY(1,1) NOT NULL ,
 	[intImportFileColumnDetailId] INT NOT NULL, 
 	[intSequence] INT NULL,
 	[strTagAttribute] nvarchar(200) COLLATE Latin1_General_CI_AS NULL,

@@ -135,30 +135,30 @@ BEGIN
 		)
 
 		CREATE TABLE actualTransactionToReverse (
-			intInventoryLotInCustodyTransactionId INT NOT NULL 
+			intInventoryTransactionInCustodyId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 			,intTransactionTypeId INT NOT NULL 
-			,intInventoryLotInCustodyId INT 
+			,intInventoryCostBucketInCustodyId INT 
 			,dblQty NUMERIC(38,20)
 		)
 
 		CREATE TABLE expectedTransactionToReverse (
-			intInventoryLotInCustodyTransactionId INT NOT NULL 
+			intInventoryTransactionInCustodyId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 			,intTransactionTypeId INT NOT NULL 
-			,intInventoryLotInCustodyId INT 
+			,intInventoryCostBucketInCustodyId INT 
 			,dblQty NUMERIC(38,20)
 		)
 
 		-- Create the temp table 
 		CREATE TABLE #tmpInventoryTransactionStockToReverse (
-			intInventoryLotInCustodyTransactionId INT NOT NULL 
+			intInventoryTransactionInCustodyId INT NOT NULL 
 			,intTransactionId INT NULL 
 			,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 			,intTransactionTypeId INT NOT NULL 
-			,intInventoryLotInCustodyId INT 
+			,intInventoryCostBucketInCustodyId INT 
 			,dblQty NUMERIC(38,20)
 		)
 
@@ -166,7 +166,8 @@ BEGIN
 		EXEC testi21Database.[Fake inventory items]
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotInCustody', @Identity = 1;
-		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotInCustodyTransaction', @Identity = 1;	
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransactionInCustody', @Identity = 1;	
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransactionInCustody', @Identity = 1;	
 
 		-- Mark all item sa lot items
 		UPDATE dbo.tblICItem
@@ -213,8 +214,8 @@ BEGIN
 				,intTransactionId			= 7
 				,ysnIsUnposted				= 0
 
-		-- Add fake data for tblICInventoryLotInCustodyTransaction
-		INSERT INTO dbo.tblICInventoryLotInCustodyTransaction (
+		-- Add fake data for tblICInventoryLotTransactionInCustody
+		INSERT INTO dbo.tblICInventoryLotTransactionInCustody (
 				intItemId
 				,intItemLocationId
 				,intItemUOMId
@@ -223,16 +224,10 @@ BEGIN
 				,intLotId
 				,dtmDate
 				,dblQty
-				,dblUOMQty
 				,dblCost
-				,dblValue
-				,dblSalesPrice
-				,intCurrencyId
-				,dblExchangeRate
 				,intTransactionId
 				,intTransactionDetailId
 				,strTransactionId
-				,intInventoryLotInCustodyId
 				,strBatchId
 				,intTransactionTypeId
 				,ysnIsUnposted
@@ -247,16 +242,10 @@ BEGIN
 				,intLotId						= 12345
 				,dtmDate						= '1/1/2014'
 				,dblQty							= 25
-				,dblUOMQty						= @BushelUnitQty
 				,dblCost						= 3.00
-				,dblValue						= 0.00
-				,dblSalesPrice					= 0.00
-				,intCurrencyId					= NULL 
-				,dblExchangeRate				= 1
 				,intTransactionId				= 6
 				,intTransactionDetailId			= NULL 
 				,strTransactionId				= 'InvRcpt-0000001'
-				,intInventoryLotInCustodyId		= 1
 				,strBatchId						= 'BATCH-0001'
 				,intTransactionTypeId			= @InventoryReceipt
 				,ysnIsUnposted					= 0
@@ -271,16 +260,10 @@ BEGIN
 				,intLotId						= 12345
 				,dtmDate						= '1/2/2014'
 				,dblQty							= 100
-				,dblUOMQty						= @BushelUnitQty
 				,dblCost						= 2.75
-				,dblValue						= 0.00
-				,dblSalesPrice					= 0.00
-				,intCurrencyId					= NULL 
-				,dblExchangeRate				= 1
 				,intTransactionId				= 7
 				,intTransactionDetailId			= NULL 
 				,strTransactionId				= 'InvRcpt-0000002'
-				,intInventoryLotInCustodyId		= 1
 				,strBatchId						= 'BATCH-0002'
 				,intTransactionTypeId			= @InventoryReceipt
 				,ysnIsUnposted					= 0
@@ -295,16 +278,10 @@ BEGIN
 				,intLotId						= 12345
 				,dtmDate						= '1/10/2014'
 				,dblQty							= -20
-				,dblUOMQty						= @BushelUnitQty
 				,dblCost						= 3.00
-				,dblValue						= 0.00
-				,dblSalesPrice					= 12.14
-				,intCurrencyId					= NULL 
-				,dblExchangeRate				= 1
 				,intTransactionId				= 8
 				,intTransactionDetailId			= NULL 
 				,strTransactionId				= 'InvShip-0000002'
-				,intInventoryLotInCustodyId		= 1
 				,strBatchId						= 'BATCH-0003'
 				,intTransactionTypeId			= @InventoryShipment
 				,ysnIsUnposted					= 0
@@ -334,18 +311,18 @@ BEGIN
 
 		-- Setup the expected data to reverse
 		INSERT INTO expectedTransactionToReverse (
-				intInventoryLotInCustodyTransactionId
+				intInventoryTransactionInCustodyId
 				,intTransactionId
 				,strTransactionId
 				,intTransactionTypeId
-				,intInventoryLotInCustodyId
+				,intInventoryCostBucketInCustodyId
 				,dblQty
 		)
 		SELECT	intInventoryLotInCustodyTransactionId	= 3
 				,intTransactionId						= 8
 				,strTransactionId						= 'InvShip-0000002'
 				,intTransactionTypeId					= @InventoryShipment
-				,intInventoryLotInCustodyId				= 1
+				,intInventoryCostBucketInCustodyId		= 1
 				,dblQty									= -20
 
 	END 
@@ -357,25 +334,25 @@ BEGIN
 		SET @intTransactionId = 8	
 
 		EXEC dbo.uspICUnpostLotOutFromCustody @strTransactionId, @intTransactionId
-	END 
+	END 	
 
 	-- Assert
 	BEGIN 
 
 		-- Get actual data from the temp table. 
 		INSERT INTO actualTransactionToReverse (
-				intInventoryLotInCustodyTransactionId
+				intInventoryTransactionInCustodyId
 				,intTransactionId
 				,strTransactionId
 				,intTransactionTypeId
-				,intInventoryLotInCustodyId
+				,intInventoryCostBucketInCustodyId
 				,dblQty
 		)
-		SELECT	intInventoryLotInCustodyTransactionId
+		SELECT	intInventoryTransactionInCustodyId
 				,intTransactionId
 				,strTransactionId
 				,intTransactionTypeId
-				,intInventoryLotInCustodyId
+				,intInventoryCostBucketInCustodyId
 				,dblQty
 		FROM	#tmpInventoryTransactionStockToReverse
 				
@@ -397,7 +374,6 @@ BEGIN
 		FROM	dbo.tblICInventoryLotInCustody
 
 		EXEC tSQLt.AssertEqualsTable 'expectedLotInCustody', 'actualLotInCustody';
-		EXEC tSQLt.AssertEqualsTable 'expectedTransactionToReverse', 'actualTransactionToReverse';
 	END
 
 	-- Clean-up: remove the tables used in the unit test

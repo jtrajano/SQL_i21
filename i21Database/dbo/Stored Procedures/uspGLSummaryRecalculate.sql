@@ -19,5 +19,22 @@ BEGIN
 	WHERE ysnIsUnposted = 0	
 	GROUP BY intAccountId, dtmDate, strCode
 	
+	UPDATE tblGLJournalDetail
+	SET dblDebitUnit=dblCreditUnit,dblCreditUnit=0
+	where dblDebit > 0 and dblCreditUnit > 0 AND dblDebitUnit = 0
+ 
+	UPDATE  tblGLJournalDetail
+	SET dblCreditUnit=dblDebitUnit,dblDebitUnit=0
+	where dblCredit > 0 and dblDebitUnit > 0 AND dblCreditUnit = 0
+
+ 
+	update tblGLDetail
+	set dblDebitUnit = dblCreditUnit, dblCreditUnit = 0
+	where dblDebit > 0 and dblCreditUnit > 0 and dblDebitUnit = 0
+ 
+	update tblGLDetail
+	set dblCreditUnit= dblDebitUnit, dblDebitUnit= 0
+	where dblCredit > 0 and dblDebitUnit > 0 and dblCreditUnit =0
+
 	
 END

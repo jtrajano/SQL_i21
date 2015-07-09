@@ -1,0 +1,26 @@
+﻿CREATE TABLE [dbo].[tblMFBlendDemand]
+(
+	[intBlendDemandId] INT NOT NULL IDENTITY(1,1), 
+	[strDemandNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
+    [intLocationId] INT NOT NULL, 
+    [intItemId] INT NOT NULL, 
+    [dblQuantity] NUMERIC(18, 6) NOT NULL, 
+    [intManufacturingCellId] INT NULL, 
+    [intMachineId] INT NULL, 
+    [dtmDueDate] DATETIME NULL,
+	[intStatusId] INT NOT NULL CONSTRAINT [DF_tblMFBlendDemand_intStatusId] DEFAULT 1,
+	[intOrderId] INT NULL,
+	[strOrderNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strOrderType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[intCreatedUserId] [int] NULL,
+	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblMFBlendDemand_dtmCreated] DEFAULT GetDate(),
+	[intLastModifiedUserId] [int] NULL,
+	[dtmLastModified] [datetime] NULL CONSTRAINT [DF_tblMFBlendDemand_dtmLastModified] DEFAULT GetDate(),	 
+    [intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFBlendDemand_intConcurrencyId] DEFAULT 0,
+	CONSTRAINT [PK_tblMFBlendDemand_intBlendDemandId] PRIMARY KEY (intBlendDemandId), 
+	CONSTRAINT [FK_tblMFBlendDemand_tblSMCompanyLocation_intCompanyLocationId_intLocationId] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
+	CONSTRAINT [FK_tblMFBlendDemand_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
+	CONSTRAINT [FK_tblMFBlendDemand_tblMFMachine_intMachineId] FOREIGN KEY ([intMachineId]) REFERENCES [tblMFMachine]([intMachineId]),
+	CONSTRAINT [FK_tblMFBlendDemand_tblMFBlendDemandStatus_intStatusId] FOREIGN KEY ([intStatusId]) REFERENCES [tblMFBlendDemandStatus]([intStatusId]),
+	CONSTRAINT [UQ_tblMFBlendDemand_strDemandNo_intLocationId] UNIQUE ([strDemandNo],[intLocationId])
+)

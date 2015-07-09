@@ -21,7 +21,7 @@ BEGIN
 				ELSE     RTRIM(C.vwcus_last_name) + RTRIM(C.vwcus_name_suffix) + '', '' + RTRIM(C.vwcus_first_name) + RTRIM(C.vwcus_mid_init)    
 				END   
 			END
-			) AS strCustomerName
+			)COLLATE Latin1_General_CI_AS AS strCustomerName
 		,RIGHT(''000''+ CAST(A.intSiteNumber AS NVARCHAR(4)),4) AS strSiteNumber
 		,(A.strSiteAddress + CHAR(10) + A.strCity + '', '' + A.strState +  '' '' +  A.strZipCode) AS strSiteAddress
 		,A.strLocation
@@ -49,6 +49,7 @@ BEGIN
 		,ISNULL(G.strWillCallStatus,'''') AS strWillCallStatus
 		,ISNULL(A.ysnTaxable,0) AS ysnTaxable
 		,RTRIM(ISNULL(F.vwitm_desc,'''')) AS strProductDescription
+		,dblPriceAdjustment = ISNULL(A.dblPriceAdjustment,0.0)
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID

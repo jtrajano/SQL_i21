@@ -3,6 +3,7 @@
 	,@intUserId INT
 AS
 BEGIN TRY
+	Select @ysnYieldAdjustmentAllowed=1
 	SET QUOTED_IDENTIFIER OFF
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
@@ -408,6 +409,11 @@ BEGIN TRY
 		,@dblQty NUMERIC(18, 6)
 		,@dblNewQty NUMERIC(18, 6)
 		,@intItemUOMId INT
+		,@intSubLocationId int
+		,@intInventoryAdjustmentId int
+		,@dblAdjustByQuantity numeric(18,6)
+		,@intWeightUOMId int
+		,@dblWeightPerQty numeric(18,6)
 
 	SELECT @intProductionSummaryId = Min(intProductionSummaryId)
 	FROM @tblMFProductionSummaryFinal F
@@ -433,12 +439,132 @@ BEGIN TRY
 				)
 		BEGIN
 			PRINT 'CREATE STAGING LOT'
+
+				--*****************************************************
+				--Create staging lot
+				--*****************************************************
+				DECLARE @ItemsThatNeedLotId AS dbo.ItemLotTableType
+
+				CREATE TABLE #GeneratedLotItems (
+					intLotId INT
+					,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
+					,intDetailId INT
+					)
+
+				-- Create and validate the lot numbers
+				BEGIN
+					DECLARE @strLifeTimeType NVARCHAR(50)
+						,@intLifeTime INT
+						,@dtmExpiryDate DATETIME
+						,@strLotTracking NVARCHAR(50)
+						,@intItemLocationId int
+
+					SELECT @strLifeTimeType = strLifeTimeType
+						,@intLifeTime = intLifeTime
+						,@strLotTracking = strLotTracking
+					FROM dbo.tblICItem
+					WHERE intItemId = @intItemId
+
+					IF @strLifeTimeType = 'Years'
+						SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, @dtmCurrentDateTime)
+					ELSE IF @strLifeTimeType = 'Months'
+						SET @dtmExpiryDate = DateAdd(mm, @intLifeTime, @dtmCurrentDateTime)
+					ELSE IF @strLifeTimeType = 'Days'
+						SET @dtmExpiryDate = DateAdd(dd, @intLifeTime, @dtmCurrentDateTime)
+					ELSE IF @strLifeTimeType = 'Hours'
+						SET @dtmExpiryDate = DateAdd(hh, @intLifeTime, @dtmCurrentDateTime)
+					ELSE IF @strLifeTimeType = 'Minutes'
+						SET @dtmExpiryDate = DateAdd(mi, @intLifeTime, @dtmCurrentDateTime)
+					ELSE
+						SET @dtmExpiryDate = DateAdd(yy, 1, @dtmCurrentDateTime)
+
+					SELECT @intItemLocationId = intItemLocationId
+					FROM dbo.tblICItemLocation
+					WHERE intItemId = @intItemId
+
+					IF @strLotTracking <> 'Yes - Serial Number'
+					BEGIN
+						EXEC dbo.uspSMGetStartingNumber 55
+							,@strLotNumber OUTPUT
+					END
+
+					INSERT INTO @ItemsThatNeedLotId (
+						intLotId
+						,strLotNumber
+						,strLotAlias
+						,intItemId
+						,intItemLocationId
+						,intSubLocationId
+						,intStorageLocationId
+						,dblQty
+						,intItemUOMId
+						,dblWeight
+						,intWeightUOMId
+						,dtmExpiryDate
+						,dtmManufacturedDate
+						,intOriginId
+						,strBOLNo
+						,strVessel
+						,strReceiptNumber
+						,strMarkings
+						,strNotes
+						,intEntityVendorId
+						,strVendorLotNo
+						,intVendorLocationId
+						,strVendorLocation
+						,intDetailId
+						,ysnProduced
+						)
+					SELECT intLotId = NULL
+						,strLotNumber = @strLotNumber
+						,strLotAlias = NULL
+						,intItemId = @intItemId
+						,intItemLocationId = @intItemLocationId
+						,intSubLocationId = @intSubLocationId
+						,intStorageLocationId = @intStorageLocationId
+						,dblQty = @dblYieldQuantity
+						,intItemUOMId = @intItemUOMId
+						,dblWeight = NULL
+						,intWeightUOMId = NULL
+						,dtmExpiryDate = @dtmExpiryDate
+						,dtmManufacturedDate = @dtmCurrentDateTime
+						,intOriginId = NULL
+						,strBOLNo = NULL
+						,strVessel = NULL
+						,strReceiptNumber = NULL
+						,strMarkings = NULL
+						,strNotes = NULL
+						,intEntityVendorId = NULL
+						,strVendorLotNo = NULL
+						,intVendorLocationId = NULL
+						,strVendorLocation = NULL
+						,intDetailId = @intWorkOrderId
+						,ysnProduced = 1
+
+					EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
+						,@intUserId
+
+				END
+
+				--*****************************************************
+				--End of create staging lot
+				--*****************************************************
 		END
+		SELECT TOP 1 @strLotNumber = NULL
+			,@intLotId = NULL
+			,@dblQty = NULL
+			,@intItemUOMId = NULL
+			,@intSubLocationId=NULL
+			,@intWeightUOMId=NULL
+			,@dblWeightPerQty=NULL
 
 		SELECT TOP 1 @strLotNumber = strLotNumber
 			,@intLotId = intLotId
 			,@dblQty = dblQty
 			,@intItemUOMId = intItemUOMId
+			,@intSubLocationId=intSubLocationId
+			,@intWeightUOMId=intWeightUOMId
+			,@dblWeightPerQty=dblWeightPerQty
 		FROM dbo.tblICLot
 		WHERE intStorageLocationId = @intStorageLocationId
 			AND intItemId = @intItemId
@@ -448,12 +574,15 @@ BEGIN TRY
 		ORDER BY dtmDateCreated DESC
 
 		IF @intLotId IS NULL
-			AND @dblYieldQuantity > 0
+			--AND @dblYieldQuantity > 0
 		BEGIN
 			SELECT TOP 1 @strLotNumber = strLotNumber
 				,@intLotId = intLotId
 				,@dblQty = dblQty
 				,@intItemUOMId = intItemUOMId
+				,@intSubLocationId=intSubLocationId
+				,@intWeightUOMId=intWeightUOMId
+				,@dblWeightPerQty=dblWeightPerQty
 			FROM dbo.tblICLot
 			WHERE intStorageLocationId = @intStorageLocationId
 				AND intItemId = @intItemId
@@ -487,6 +616,24 @@ BEGIN TRY
 			IF @dblQty <> @dblNewQty
 				AND @ysnYieldAdjustmentAllowed = 1
 			BEGIN
+				Select @dblAdjustByQuantity=@dblNewQty/(Case When @intWeightUOMId is null Then 1 Else @dblWeightPerQty End)
+
+				EXEC [uspICInventoryAdjustment_CreatePostQtyChange]
+						-- Parameters for filtering:
+						@intItemId = @intItemId
+						,@dtmDate = @dtmCurrentDateTime
+						,@intLocationId = @intLocationId
+						,@intSubLocationId = @intSubLocationId
+						,@intStorageLocationId = @intStorageLocationId
+						,@strLotNumber = @strLotNumber	
+						-- Parameters for the new values: 
+						,@dblAdjustByQuantity =@dblAdjustByQuantity
+						,@dblNewUnitCost =NULL
+						-- Parameters used for linking or FK (foreign key) relationships
+						,@intSourceId = 1
+						,@intSourceTransactionTypeId = 8
+						,@intUserId = @intUserId
+						,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 				PRINT 'Call Adjust Qty procedure'
 			END
 		END
@@ -498,12 +645,12 @@ BEGIN TRY
 
 	UPDATE dbo.tblMFWorkOrder
 	SET intCountStatusId = 13
-		,dtmLastModified = GETDATE()
+		,dtmLastModified = @dtmCurrentDateTime
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	UPDATE tblMFProcessCycleCountSession
-	SET dtmSessionEndDateTime = GETDATE()
+	SET dtmSessionEndDateTime = @dtmCurrentDateTime
 		,ysnCycleCountCompleted = 1
 	WHERE intWorkOrderId = @intWorkOrderId
 

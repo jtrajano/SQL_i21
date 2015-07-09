@@ -80,6 +80,12 @@
 	[intItemId] INT NULL,
 	[intEntityId] INT NULL,
 	[intLoadId] INT NULL,
+	[intMatchTicketId] INT NULL,
+	[intSubLocationId] INT NULL,
+	[intStorageLocationId] INT NULL,
+	[intFarmFieldId] INT NULL,
+	[intDistributionMethod] INT NULL, 
+	[intSplitInvoiceOption] INT NULL, 
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_intTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [intTicketNumber]),
@@ -94,7 +100,10 @@
 	CONSTRAINT [FK_tblSCTicket_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblSCTicket_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]),
 	CONSTRAINT [FK_tblSCTicket_tblLGLoad_intLoadId] FOREIGN KEY ([intLoadId]) REFERENCES [tblLGLoad]([intLoadId]),
-	CONSTRAINT [FK_tblSCTicket_tblCTContractDetail_intContractId] FOREIGN KEY ([intContractId]) REFERENCES [tblCTContractDetail]
+	CONSTRAINT [FK_tblSCTicket_tblCTContractDetail_intContractId] FOREIGN KEY ([intContractId]) REFERENCES [tblCTContractDetail],
+	CONSTRAINT [FK_tblSCTicket_tblSMCompanyLocationSubLocation_intSubLocationId] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation],
+	CONSTRAINT [FK_tblSCTicket_tblICStorageLocation_intStorageLocationId] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation],
+	CONSTRAINT [FK_tblSCTicket_intMatchTicketId] FOREIGN KEY ([intMatchTicketId]) REFERENCES [tblSCTicket]
 )
 
 GO

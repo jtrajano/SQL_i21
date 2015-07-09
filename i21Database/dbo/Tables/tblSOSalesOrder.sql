@@ -2,7 +2,7 @@
     [intSalesOrderId]       INT             IDENTITY (1, 1) NOT NULL,
     [strSalesOrderNumber]   NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,
     [strSalesOrderOriginId] NVARCHAR (8)    COLLATE Latin1_General_CI_AS NULL,
-    [intEntityCustomerId]         INT             NOT NULL,
+    [intEntityCustomerId]         INT             NULL,
     [dtmDate]               DATETIME        NOT NULL,
     [dtmDueDate]            DATETIME        NOT NULL,
     [intCurrencyId]         INT             NOT NULL,
@@ -45,10 +45,11 @@
     [intOrderedById]		INT NULL, 
     [intSplitId]			INT NULL, 
     [intQuoteTemplateId]	INT NULL, 
-    [ysnPleminaryQuote]		BIT NULL, 
+    [ysnPreliminaryQuote]	BIT NULL, 
     [strLostQuoteComment]	NVARCHAR(250)	COLLATE Latin1_General_CI_AS NULL, 
     [strLostQuoteCompetitor] NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL,
     [strLostQuoteReason]	NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL, 
+    [strOrderType]          NVARCHAR(25)    COLLATE Latin1_General_CI_AS NULL, 
     CONSTRAINT [PK_tblSOSalesOrder] PRIMARY KEY CLUSTERED ([intSalesOrderId] ASC),
     CONSTRAINT [FK_tblSOSalesOrder_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
     CONSTRAINT [FK_tblSOSalesOrder_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
@@ -58,7 +59,8 @@
 	CONSTRAINT [FK_tblSOSalesOrder_tblARQuoteTemplate_intQuoteTemplateId] FOREIGN KEY ([intQuoteTemplateId]) REFERENCES [dbo].[tblARQuoteTemplate] ([intQuoteTemplateId]),
 	CONSTRAINT [FK_tblSOSalesOrder_tblSMFreightTerm] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]),
 	CONSTRAINT [FK_tblSOSalesOrder_tblEntity_intOrderedById] FOREIGN KEY ([intOrderedById]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
-	CONSTRAINT [FK_tblSOSalesOrder_tblARCustomerSplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [dbo].[tblARCustomerSplit] ([intSplitId])	
+	CONSTRAINT [FK_tblSOSalesOrder_tblEntitySplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [dbo].[tblEntitySplit] ([intSplitId]),
+	CONSTRAINT [FK_tblSOSalesOrder_tblSMTerm_intTermId] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID])
 );
 GO
 

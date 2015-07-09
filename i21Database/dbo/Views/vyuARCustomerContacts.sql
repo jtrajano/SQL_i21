@@ -21,7 +21,7 @@ D.ysnActive,
 C.ysnDefaultContact 
 FROM dbo.tblARCustomer AS A INNER JOIN
 	dbo.tblEntity AS B ON A.[intEntityCustomerId] = B.intEntityId INNER JOIN
-	dbo.tblARCustomerToContact AS C ON A.[intEntityCustomerId] = C.[intEntityCustomerId] INNER JOIN
+	dbo.tblEntityToContact AS C ON A.[intEntityCustomerId] = C.[intEntityId] INNER JOIN
 	--dbo.tblEntityContact AS D ON C.[intEntityContactId] = D.[intEntityContactId] INNER JOIN
 	dbo.tblEntity AS D ON C.[intEntityContactId] = D.[intEntityId] LEFT OUTER JOIN
 	--dbo.tblEntity AS B2 ON D.[intEntityContactId] = B2.intEntityId LEFT OUTER JOIN	

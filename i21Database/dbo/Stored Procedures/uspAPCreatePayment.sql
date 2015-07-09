@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPCreatePayment]
-	@userId NVARCHAR(50),
+	@userId INT,
 	@bankAccount INT = NULL,
 	@paymentMethod INT = NULL,
 	@paymentInfo NVARCHAR(10) = NULL,
@@ -23,9 +23,11 @@ BEGIN
 	DECLARE @queryPaymentDetail NVARCHAR(MAX)
 	DECLARE @paymentId INT
 	DECLARE @vendorId INT
+	DECLARE @withHoldAccount INT
 	DECLARE @amountPaid NUMERIC(18,6) = @payment;
 	DECLARE @withholdAmount NUMERIC(18,6)
 	DECLARE @withholdPercent NUMERIC(18,6)
+	DECLARE @discountAmount NUMERIC(18,6) = 0;
 	DECLARE @paymentMethodId INT = @paymentMethod
 	DECLARE @intBankAccountId INT = @bankAccount;
 	DECLARE @vendorWithhold BIT = 0;
@@ -56,12 +58,14 @@ BEGIN
 	--Make sure there is bank account to use
 	IF @intBankAccountId IS NULL
 	BEGIN
-		SELECT @intGLBankAccountId = B.intCashAccount FROM tblSMUserSecurity A INNER JOIN tblSMCompanyLocation B ON A.intCompanyLocationId = B.intCompanyLocationId
+		SELECT @intGLBankAccountId = B.intCashAccount FROM tblSMUserSecurity A 
+					INNER JOIN tblSMCompanyLocation B ON A.intCompanyLocationId = B.intCompanyLocationId
+					WHERE A.intEntityId = @userId
 		SELECT TOP 1 @intBankAccountId = intBankAccountId FROM tblCMBankAccount WHERE intGLAccountId = @intGLBankAccountId
 
 		IF @intBankAccountId IS NULL
 		BEGIN
-			RAISERROR('There was not set up for cash account.', 16, 1);
+			RAISERROR('The Cash Account setup is missing.', 16, 1);
 			RETURN;
 		END
 	END
@@ -82,26 +86,39 @@ BEGIN
 		END
 	END
 
+	--Compute Discount Here
+	UPDATE A
+		SET dblDiscount = dbo.fnGetDiscountBasedOnTerm(ISNULL(@datePaid, GETDATE()), A.dtmDate, A.intTermsId, A.dblTotal)
+	FROM tblAPBill A
+	WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId)
+	--Compute Interest Here
+	--UPDATE A
+	--	SET dblInterest = dbo.fnGetDiscountBasedOnTerm(ISNULL(@datePaid, GETDATE()), A.dtmDate, A.intTermsId, A.dblTotal)
+	--FROM tblAPBill A
+	--WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId)
+
+	
 	IF @amountPaid IS NULL
 	BEGIN
 		SET @amountPaid = (SELECT SUM(dblAmountDue) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
+		SET @amountPaid = @amountPaid - (SELECT SUM(dblDiscount) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
 	END
-
-	--Compute Discount Here
-
-	--Compute Interest Here
 
 	--Compute Withheld Here
 	IF @vendorWithhold = 1
 	BEGIN
 		--Validate if there is a set up for withheld account.
-		IF (SELECT TOP 1 intWithholdAccountId FROM tblAPPreference) IS NULL
+		SELECT @withHoldAccount = B.intWithholdAccountId
+			,@withholdPercent = B.dblWithholdPercent
+		 FROM tblSMUserSecurity A 
+		INNER JOIN tblSMCompanyLocation B ON A.intCompanyLocationId = B.intCompanyLocationId
+				WHERE A.intEntityId = @userId
+		IF (@withHoldAccount IS NULL)
 		BEGIN
 			RAISERROR('This vendor enables withholding but there is no setup of withhold account.',16,1);
 			RETURN;
 		END
 
-		SET @withholdPercent = (SELECT TOP 1 dblWithholdPercent FROM tblAPPreference)
 		--SET @withholdAmount = @amountPaid * (@withholdPercent / 100)
 		--SET @amountPaid = @amountPaid - @withholdAmount
 	END
@@ -158,7 +175,7 @@ BEGIN
 		[intAccountId]	= A.intAccountId,
 		[dblDiscount]	= A.dblDiscount,
 		[dblWithheld]	= CASE WHEN @withholdPercent > 0 THEN CAST(ROUND(A.dblTotal * (@withholdPercent / 100), 6) AS NUMERIC(18,6)) ELSE 0 END,
-		[dblAmountDue]	= A.dblAmountDue,
+		[dblAmountDue]	= A.dblAmountDue, -- (A.dblTotal - A.dblDiscount - A.dblPayment),
 		[dblPayment]	= A.dblTotal - A.dblDiscount - A.dblPayment,
 		[dblInterest]	= 0, --TODO
 		[dblTotal]		= A.dblTotal

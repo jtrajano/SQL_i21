@@ -31,6 +31,10 @@ DECLARE @ItemsForItemReceipt AS ItemCostingTableType
 DECLARE @intTicketId AS INT = @intSourceTransactionId
 DECLARE @dblRemainingUnits AS DECIMAL (13,3)
 DECLARE @LineItems AS ScaleTransactionTableType
+DECLARE @intDirectType AS INT = 3
+DECLARE @intTicketUOM INT
+DECLARE @intTicketItemUOMId INT
+DECLARE @strReceiptType AS NVARCHAR(100)
 
 DECLARE @ErrMsg                    NVARCHAR(MAX),
               @dblBalance          NUMERIC(12,4),                    
@@ -41,6 +45,27 @@ DECLARE @ErrMsg                    NVARCHAR(MAX),
               @strAdjustmentNo     NVARCHAR(50)
 
 BEGIN TRY
+		IF @strDistributionOption = 'CNT'
+		BEGIN
+			SET @strReceiptType = 'Purchase Contract'
+		END
+		ELSE
+		BEGIN
+			SET @strReceiptType = 'Direct'
+		END
+		BEGIN 
+			SELECT	@intTicketUOM = UOM.intUnitMeasureId
+			FROM	dbo.tblSCTicket SC	        
+					JOIN dbo.tblICCommodityUnitMeasure UOM On SC.intCommodityId  = UOM.intCommodityId
+			WHERE	SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
+		END
+
+		BEGIN 
+			SELECT	@intTicketItemUOMId = UM.intItemUOMId
+				FROM	dbo.tblICItemUOM UM	
+				  JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
+			WHERE	UM.intUnitMeasureId =@intTicketUOM AND SC.intTicketId = @intTicketId
+		END
 		IF @strDistributionOption = 'CNT'
 		BEGIN
 			INSERT INTO @LineItems (
@@ -66,6 +91,7 @@ BEGIN TRY
 			RETURN
 		END
 		UPDATE @LineItems set intTicketId = @intTicketId
+		DELETE FROM @ItemsForItemReceipt
 		END
 
 	-- Get the items to process
@@ -86,7 +112,8 @@ BEGIN TRY
 		,intTransactionTypeId
 		,intLotId
 		,intSubLocationId
-		,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion. 
+		,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+		,ysnIsCustody 
 	)
 	EXEC dbo.uspSCGetScaleItemForItemReceipt 
 		 @intTicketId
@@ -103,9 +130,9 @@ BEGIN TRY
 	EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemReceipt; 
 
 	-- Add the items to the item receipt 
-	IF @strSourceType = @SourceType_Direct
+	--IF @strSourceType = @SourceType_Direct
 	BEGIN 
-		EXEC dbo.uspSCAddScaleTicketToItemReceipt @intTicketId, @intUserId, @ItemsForItemReceipt, @intEntityId, @InventoryReceiptId OUTPUT; 
+		EXEC dbo.uspSCAddScaleTicketToItemReceipt @intTicketId, @intUserId, @ItemsForItemReceipt, @intEntityId, @strReceiptType, @InventoryReceiptId OUTPUT; 
 	END
 
 	BEGIN 
@@ -113,9 +140,8 @@ BEGIN TRY
 	FROM	dbo.tblICInventoryReceipt IR	        
 	WHERE	IR.intInventoryReceiptId = @InventoryReceiptId		
 	END
-
 	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;
-	EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
+	--EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
 
 END TRY
 BEGIN CATCH

@@ -49,11 +49,15 @@ BEGIN
 			strReceiptNumber
 			,intLocationId
 			,dtmReceiptDate
+			,strReceiptType
+			,intSourceType
 		)
 		VALUES (
 			@strTransactionId
 			,@NewHaven
 			,@dtmDate	
+			,'Purchase Order'
+			,1
 		);	
 	
 		INSERT INTO tblICInventoryReceiptItem(
@@ -63,6 +67,7 @@ BEGIN
 			,dblOpenReceive
 			,dblUnitCost
 			,intUnitMeasureId
+			,intOwnershipType
 		)
 		VALUES (
 			1
@@ -71,21 +76,11 @@ BEGIN
 			,10
 			,12.50
 			,@WetGrains_BushelUOMId
+			,1
 		);
-		
-		CREATE TABLE actual (
-			receiptItemId INT
-		)
-		
-		CREATE TABLE expected (
-			receiptItemId INT
-		)
-		
+	
 		-- Add a spy for uspPOReceived
 		EXEC tSQLt.SpyProcedure 'dbo.uspPOReceived';		
-
-		-- Setup the expected parameter for uspPOReceived
-		INSERT INTO expected (receiptItemId) VALUES (1)
 	END 
 
 	-- Act
@@ -96,16 +91,11 @@ BEGIN
 			,@strTransactionId
 	 		,@intUserId
 			,@intEntityId
-		
-		-- Get the actual 
-		INSERT INTO actual (receiptItemId) 
-		SELECT receiptItemId
-		FROM dbo.uspPOReceived_SpyProcedureLog	
 	END 
 	
 	-- Assert
 	BEGIN 
-		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
+		EXEC tSQLt.AssertObjectExists 'uspPOReceived_SpyProcedureLog'
 	END
 
 	-- Clean-up: remove the tables used in the unit test

@@ -28,7 +28,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\12_ReminderList.sql
 :r .\SM\DefaultData\13_ShortcutKey.sql
 :r .\SM\CustomField.sql
-:r .\SM\SMDataMigrations.sql
+:r .\SM\SMDataMigrations.SQL
+:r .\SM\SMDataFixes.SQL
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
@@ -66,6 +67,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\Reports\Layout\ProductTotals.sql
 :r .\TM\Reports\DataSource\ProductTotals.sql
 
+:r .\TM\Reports\DataSource\CustomerListByRoute.sql
+:r .\TM\Reports\Layout\CustomerListByRoute.sql
+:r .\TM\Reports\DefaultCriteria\CustomerListByRoute.sql
 
 :r .\TM\Reports\DataSource\GasCheckLeakcheck.sql
 :r .\TM\Reports\Layout\WithGasCheckSubReport.sql
@@ -76,6 +80,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\Reports\DataSource\OpenCallEntries.sql
 
 
+
 -- Canned Panels
 :r .\DB\1_CannedPanels_Panel.sql
 :r .\DB\2_CannedPanels_Column.sql
@@ -84,10 +89,16 @@ print 'BEGIN POST DEPLOYMENT'
 -- General Ledger
 :r .\GL\DefaultData\AccountStructure.sql
 :r .\GL\DefaultData\AccountGroup.sql
+:r .\GL\DefaultData\AccountRange.sql
 :r .\GL\DefaultData\AccountCategory.sql
 :r .\GL\DefaultData\AccountTemplate.sql
 :r .\GL\DefaultData\AccountSegmentTemplate.sql
 :r .\GL\GLEntryDataFix.sql
+:r .\GL\ReportData\GeneralLedgerByAccountDetail.sql
+:r .\GL\ReportData\IncomeStatementStandard.sql
+:r .\GL\ReportData\TrialBalance.sql
+:r .\GL\ReportData\TrialBalanceDetail.sql
+:r .\GL\ReportData\BalanceSheetStandard.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
@@ -120,6 +131,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\DateCreatedValueDefault.sql
 :r .\AP\DefaultData\InsertWriteOffPaymentMethod.sql
 :r .\AP\UpdatePOAddressInfo.sql
+:r .\AP\UpdateApprovalRecords.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
@@ -141,12 +153,14 @@ print 'BEGIN POST DEPLOYMENT'
 
 --Contract Management
 :R .\CT\1_MasterTables.sql
+:R .\CT\2_DataMigration.sql
 
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql
 
 --Grain
 :R .\GR\1_MasterTables.sql
+:R .\GR\GRDataMigrations.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql
@@ -167,7 +181,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\006_MoveTerminalData.sql
 :r .\EM\007_MoveShippingLineData.sql
 :r .\EM\008_MoveTruckerData.sql
-
+:r .\EM\009_UpdateEntityContactTypeData.sql
+:r .\EM\010_UpdateVendorAccountNumber.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 
