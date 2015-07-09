@@ -121,6 +121,24 @@ Ext.define('Inventory.view.ItemViewModel', {
                 }
             }
         },
+        categoryList: {
+            autoLoad: true,
+            type: 'icbufferedcategory',
+            proxy: {
+                extraParams: {
+                    include: 'tblICCategoryUOMs.tblICUnitMeasure, tblICCategoryAccounts.tblGLAccount, tblICCategoryAccounts.tblGLAccountCategory'
+                },
+                type: 'rest',
+                api: {
+                    read: '../Inventory/api/Category/Search'
+                },
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    messageProperty: 'message'
+                }
+            }
+        },
         lotTracking: {
             autoLoad: true,
             data: [
@@ -573,6 +591,24 @@ Ext.define('Inventory.view.ItemViewModel', {
 
 
         commodity: {
+            type: 'icbufferedcommodity',
+            proxy: {
+                extraParams: {
+                    include: 'tblICCommodityUnitMeasures.tblICUnitMeasure, tblICCommodityAccounts.tblGLAccount, tblICCommodityAccounts.tblGLAccountCategory'
+                },
+                type: 'rest',
+                api: {
+                    read: '../Inventory/api/Commodity/Search'
+                },
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    messageProperty: 'message'
+                }
+            }
+        },
+        commodityList: {
+            autoLoad: true,
             type: 'icbufferedcommodity',
             proxy: {
                 extraParams: {

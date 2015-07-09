@@ -997,6 +997,42 @@
                                                     "designerId": "f4c3dd65-9389-4983-bd3c-9fc086898bb0"
                                                 },
                                                 {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "icon": null,
+                                                        "iconCls": "small-download",
+                                                        "itemId": "btnCategoryUOM",
+                                                        "layout|flex": null,
+                                                        "tabIndex": -1,
+                                                        "text": "Category UOM"
+                                                    },
+                                                    "name": "MyButton17",
+                                                    "designerId": "5723e7c2-036e-481a-abba-3447c92c2e3c"
+                                                },
+                                                {
+                                                    "type": "Ext.button.Button",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "icon": null,
+                                                        "iconCls": "small-download",
+                                                        "itemId": "btnCommodityUOM",
+                                                        "layout|flex": null,
+                                                        "tabIndex": -1,
+                                                        "text": "Commodity UOM"
+                                                    },
+                                                    "name": "MyButton41",
+                                                    "designerId": "f15f17f4-9277-45dd-8579-53417ffbd98e"
+                                                },
+                                                {
                                                     "type": "Ext.toolbar.Separator",
                                                     "reference": {
                                                         "name": "items",
@@ -1981,6 +2017,25 @@
                                                     },
                                                     "name": "TabConfig13",
                                                     "designerId": "87c3f16f-944e-4813-909b-c5393e928ce9"
+                                                },
+                                                {
+                                                    "type": "Ext.form.Label",
+                                                    "reference": {
+                                                        "name": "dockedItems",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "dock": "top",
+                                                        "itemId": "lblGLNote",
+                                                        "padding": 5,
+                                                        "text": "Note: You can choose not to setup your Item's GL Accounts if the Category specified for this Item has it's own GL Account setup on the Category screen. If there is no Category specified, or the Category has no GL Account setup, then it will look into the Commodity. If there is no Commodity, or Commodity GL Accounts setup, then it will look into the default GL Accounts for the Company Locations."
+                                                    },
+                                                    "name": "MyLabel2",
+                                                    "configAlternates": {
+                                                        "style": "string"
+                                                    },
+                                                    "designerId": "5795494e-5a42-4aef-ab18-6aadadf1ca8f"
                                                 },
                                                 {
                                                     "type": "Ext.grid.Panel",

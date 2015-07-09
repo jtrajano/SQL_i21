@@ -2071,58 +2071,6 @@ Ext.define('Inventory.view.ItemViewController', {
         cboSeason.defaultFilters = filter;
         cboClass.defaultFilters = filter;
         cboProductLine.defaultFilters = filter;
-
-        var current = win.viewModel.data.current;
-        if (current){
-            var uoms = records[0].get('tblICCommodityUnitMeasures');
-            if (uoms) {
-                if (uoms.length > 0) {
-                    current.tblICItemUOMs().removeAll();
-                    uoms.forEach(function(uom){
-                        var newItemUOM = Ext.create('Inventory.model.ItemUOM', {
-                            intItemId : current.get('intItemId'),
-                            strUnitMeasure: uom.strUnitMeasure,
-                            intUnitMeasureId : uom.intUnitMeasureId,
-                            dblUnitQty : uom.dblUnitQty,
-                            ysnStockUnit : uom.ysnStockUnit,
-                            ysnAllowPurchase : true,
-                            ysnAllowSale : true,
-                            dblLength : 0.00,
-                            dblWidth : 0.00,
-                            dblHeight : 0.00,
-                            dblVolume : 0.00,
-                            dblMaxQty : 0.00,
-                            intSort : uom.intSort
-                        });
-                        current.tblICItemUOMs().add(newItemUOM);
-                    });
-                    var grid = win.down('#grdUnitOfMeasure');
-                    grid.gridMgr.newRow.add();
-                }
-            }
-
-            var accounts = records[0].get('tblICCommodityAccounts');
-            if (accounts) {
-                if (accounts.length > 0) {
-                    current.tblICItemAccounts().removeAll();
-                    accounts.forEach(function(acct){
-                        var newItemAccount = Ext.create('Inventory.model.ItemAccount', {
-                            intItemId : current.get('intItemId'),
-                            intAccountCategoryId: acct.intAccountCategoryId,
-                            intAccountId: acct.intAccountId,
-                            intSort: acct.intSort,
-                            strAccountId: acct.strAccountId,
-                            strDescription: acct.strAccountDescription,
-                            strAccountGroup: acct.strAccountGroup,
-                            strAccountCategory: acct.strAccountCategory
-                        });
-                        current.tblICItemAccounts().add(newItemAccount);
-                    });
-                    var grdGlAccounts = win.down('#grdGlAccounts');
-                    grdGlAccounts.gridMgr.newRow.add();
-                }
-            }
-        }
     },
 
     // </editor-fold>
@@ -2338,76 +2286,6 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onItemCategorySelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        if (i21.ModuleMgr.Inventory.getCompanyPreference('intInheritSetup') !== 1)
-            return;
-
-        var win = combo.up('window');
-        var current = win.viewModel.data.current;
-
-        if (current){
-            var uoms = records[0].tblICCategoryUOMs().data.items;
-            if (uoms) {
-                if (uoms.length > 0) {
-                    current.tblICItemUOMs().removeAll();
-                    uoms.forEach(function(uom){
-                        var newItemUOM = Ext.create('Inventory.model.ItemUOM', {
-                            intItemId : current.get('intItemId'),
-                            strUnitMeasure: uom.get('strUnitMeasure'),
-                            intUnitMeasureId : uom.get('intUnitMeasureId'),
-                            dblUnitQty : uom.get('dblUnitQty'),
-                            dblWeight : uom.get('dblWeight'),
-                            strWeightUOM: uom.get('strWeightUOM'),
-                            intWeightUOMId : uom.get('intWeightUOMId'),
-                            strUpcCode : uom.get('strUpcCode'),
-                            ysnStockUnit : uom.get('ysnStockUnit'),
-                            ysnAllowPurchase : uom.get('ysnAllowPurchase'),
-                            ysnAllowSale : uom.get('ysnAllowSale'),
-                            dblLength : uom.get('dblLength'),
-                            dblWidth : uom.get('dblWidth'),
-                            dblHeight : uom.get('dblHeight'),
-                            strDimensionUOM: uom.get('strDimensionUOM'),
-                            intDimensionUOMId : uom.get('intDimensionUOMId'),
-                            dblVolume : uom.get('dblVolume'),
-                            strVolumeUOM: uom.get('strVolumeUOM'),
-                            intVolumeUOMId : uom.get('intVolumeUOMId'),
-                            dblMaxQty : uom.get('dblMaxQty'),
-                            intSort : uom.get('intSort')
-                        });
-                        current.tblICItemUOMs().add(newItemUOM);
-                    });
-                    var grdUnitOfMeasure = win.down('#grdUnitOfMeasure');
-                    grdUnitOfMeasure.gridMgr.newRow.add();
-                }
-            }
-
-            var accounts = records[0].tblICCategoryAccounts().data.items;
-            if (accounts) {
-                if (accounts.length > 0) {
-                    current.tblICItemAccounts().removeAll();
-                    accounts.forEach(function(acct){
-                        var newItemAccount = Ext.create('Inventory.model.ItemAccount', {
-                            intItemId : current.get('intItemId'),
-                            intAccountCategoryId: acct.get('intAccountCategoryId'),
-                            intAccountId: acct.get('intAccountId'),
-                            intSort: acct.get('intSort'),
-                            strAccountId: acct.get('strAccountId'),
-                            strDescription: acct.get('strDescription'),
-                            strAccountGroup: acct.get('strAccountGroup'),
-                            strAccountCategory: acct.get('strAccountCategory')
-                        });
-                        current.tblICItemAccounts().add(newItemAccount);
-                    });
-                    var grdGlAccounts = win.down('#grdGlAccounts');
-                    grdGlAccounts.gridMgr.newRow.add();
-                }
-            }
-        }
-    },
-
     onItemCommodityLocationSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
             return;
@@ -2461,6 +2339,101 @@ Ext.define('Inventory.view.ItemViewController', {
                     itemSetup: current.tblICItemAssemblies().data.items
                 });
             });
+        }
+    },
+
+    onCategoryUOMClick: function(button) {
+        var win = button.up('window');
+        var current = win.viewModel.data.current;
+        var cbo = win.down('#cboCategory');
+        var store = win.viewModel.storeInfo.categoryList;
+
+        if (current) {
+            if (!iRely.Functions.isEmpty(current.get('intCategoryId'))) {
+                if (store) {
+                    var category = store.findRecord(cbo.valueField, cbo.getValue());
+                    if (category) {
+                        var uoms = category.tblICCategoryUOMs().data.items;
+                        if (uoms) {
+                            if (uoms.length > 0) {
+                                current.tblICItemUOMs().removeAll();
+                                uoms.forEach(function(uom){
+                                    var newItemUOM = Ext.create('Inventory.model.ItemUOM', {
+                                        intItemId : current.get('intItemId'),
+                                        strUnitMeasure: uom.get('strUnitMeasure'),
+                                        intUnitMeasureId : uom.get('intUnitMeasureId'),
+                                        dblUnitQty : uom.get('dblUnitQty'),
+                                        dblWeight : uom.get('dblWeight'),
+                                        strWeightUOM: uom.get('strWeightUOM'),
+                                        intWeightUOMId : uom.get('intWeightUOMId'),
+                                        strUpcCode : uom.get('strUpcCode'),
+                                        ysnStockUnit : uom.get('ysnStockUnit'),
+                                        ysnAllowPurchase : uom.get('ysnAllowPurchase'),
+                                        ysnAllowSale : uom.get('ysnAllowSale'),
+                                        dblLength : uom.get('dblLength'),
+                                        dblWidth : uom.get('dblWidth'),
+                                        dblHeight : uom.get('dblHeight'),
+                                        strDimensionUOM: uom.get('strDimensionUOM'),
+                                        intDimensionUOMId : uom.get('intDimensionUOMId'),
+                                        dblVolume : uom.get('dblVolume'),
+                                        strVolumeUOM: uom.get('strVolumeUOM'),
+                                        intVolumeUOMId : uom.get('intVolumeUOMId'),
+                                        dblMaxQty : uom.get('dblMaxQty'),
+                                        intSort : uom.get('intSort')
+                                    });
+                                    current.tblICItemUOMs().add(newItemUOM);
+                                });
+                                var grdUnitOfMeasure = win.down('#grdUnitOfMeasure');
+                                grdUnitOfMeasure.gridMgr.newRow.add();
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+    },
+
+    onCommodityUOMClick: function(button) {
+        var win = button.up('window');
+        var current = win.viewModel.data.current;
+        var cbo = win.down('#cboCommodity');
+        var store = win.viewModel.storeInfo.commodityList;
+
+        if (current) {
+            if (!iRely.Functions.isEmpty(current.get('intCommodityId'))) {
+                if (store) {
+                    var commodity = store.findRecord(cbo.valueField, cbo.getValue());
+                    if (commodity) {
+                        var uoms = commodity.get('tblICCommodityUnitMeasures');
+                        if (uoms) {
+                            if (uoms.length > 0) {
+                                current.tblICItemUOMs().removeAll();
+                                uoms.forEach(function(uom){
+                                    var newItemUOM = Ext.create('Inventory.model.ItemUOM', {
+                                        intItemId : current.get('intItemId'),
+                                        strUnitMeasure: uom.strUnitMeasure,
+                                        intUnitMeasureId : uom.intUnitMeasureId,
+                                        dblUnitQty : uom.dblUnitQty,
+                                        ysnStockUnit : uom.ysnStockUnit,
+                                        ysnAllowPurchase : true,
+                                        ysnAllowSale : true,
+                                        dblLength : 0.00,
+                                        dblWidth : 0.00,
+                                        dblHeight : 0.00,
+                                        dblVolume : 0.00,
+                                        dblMaxQty : 0.00,
+                                        intSort : uom.intSort
+                                    });
+                                    current.tblICItemUOMs().add(newItemUOM);
+                                });
+                                var grid = win.down('#grdUnitOfMeasure');
+                                grid.gridMgr.newRow.add();
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
 
@@ -2589,9 +2562,6 @@ Ext.define('Inventory.view.ItemViewController', {
             "#txtSpecialPricingUnitPrice": {
                 change: this.onSpecialPricingDiscountChange
             },
-            "#cboCategory": {
-                select: this.onItemCategorySelect
-            },
             "#cboCommodityLocation": {
                 select: this.onItemCommodityLocationSelect
             },
@@ -2600,6 +2570,12 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#btnBuildAssembly": {
                 click: this.onBuildAssemblyClick
+            },
+            "#btnCategoryUOM": {
+                click: this.onCategoryUOMClick
+            },
+            "#btnCommodityUOM": {
+                click: this.onCommodityUOMClick
             },
             "#colPricingAmount": {
                 beforerender: this.onPricingGridColumnBeforeRender

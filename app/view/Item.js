@@ -33,6 +33,7 @@ Ext.define('Inventory.view.Item', {
         'Ext.grid.View',
         'Ext.grid.plugin.CellEditing',
         'Ext.selection.CheckboxModel',
+        'Ext.form.Label',
         'Ext.form.field.Checkbox',
         'Ext.form.field.Date',
         'Ext.grid.column.Date',
@@ -538,6 +539,20 @@ Ext.define('Inventory.view.Item', {
                                                                 text: 'Remove'
                                                             },
                                                             {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnCategoryUOM',
+                                                                iconCls: 'small-download',
+                                                                text: 'Category UOM'
+                                                            },
+                                                            {
+                                                                xtype: 'button',
+                                                                tabIndex: -1,
+                                                                itemId: 'btnCommodityUOM',
+                                                                iconCls: 'small-download',
+                                                                text: 'Commodity UOM'
+                                                            },
+                                                            {
                                                                 xtype: 'tbseparator'
                                                             },
                                                             {
@@ -955,6 +970,15 @@ Ext.define('Inventory.view.Item', {
                                                             xtype: 'tab',
                                                             itemId: 'cfgGLAccounts'
                                                         },
+                                                        dockedItems: [
+                                                            {
+                                                                xtype: 'label',
+                                                                dock: 'top',
+                                                                itemId: 'lblGLNote',
+                                                                padding: 5,
+                                                                text: 'Note: You can choose not to setup your Item\'s GL Accounts if the Category specified for this Item has it\'s own GL Account setup on the Category screen. If there is no Category specified, or the Category has no GL Account setup, then it will look into the Commodity. If there is no Commodity, or Commodity GL Accounts setup, then it will look into the default GL Accounts for the Company Locations.'
+                                                            }
+                                                        ],
                                                         items: [
                                                             {
                                                                 xtype: 'advancefiltergrid',
