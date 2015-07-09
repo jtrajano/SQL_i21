@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARInsertToInvoice]
 	@SalesOrderId	INT = 0,
 	@UserId			INT = 0,
+	@IsSoftware     BIT = 0,
 	@InvoiceId		INT = NULL OUTPUT
 
 	AS
@@ -11,8 +12,10 @@ BEGIN
 			
 	SELECT @DateOnly = CAST(GETDATE() as date)
 	
+	--INSERT TO INVOICE HEADER
 	INSERT INTO tblARInvoice
 		([intEntityCustomerId]
+		,[strInvoiceOriginId]
 		,[dtmDate]
 		,[dtmDueDate]
 		,[dtmPostDate]
@@ -33,6 +36,7 @@ BEGIN
 		,[strTransactionType]
 		,[intPaymentMethodId]
 		,[intAccountId]
+		,[intFreightTermId]
 		,[intEntityId]
 		,[intShipToLocationId]
 		,[strShipToLocationName]
@@ -48,10 +52,12 @@ BEGIN
 		,[strBillToState]
 		,[strBillToZipCode]
 		,[strBillToCountry]
+		,[strOrderType]
 	)
 	SELECT
 		[intEntityCustomerId]
-		,@DateOnly --Date
+		,[strSalesOrderNumber] --origin Id
+		,@DateOnly --Date		
 		,[dbo].fnGetDueDateBasedOnTerm(@DateOnly,intTermId) --Due Date
 		,@DateOnly --Post Date
 		,[intCurrencyId]
@@ -71,6 +77,7 @@ BEGIN
 		,'Invoice'
 		,0 --Payment Method
 		,[intAccountId]
+		,[intFreightTermId]
 		,@UserId
 		,[intShipToLocationId]
 		,[strShipToLocationName]
@@ -86,13 +93,14 @@ BEGIN
 		,[strBillToState]
 		,[strBillToZipCode]
 		,[strBillToCountry]
+		,[strOrderType]
 	FROM
 	tblSOSalesOrder
 	WHERE intSalesOrderId = @SalesOrderId
 
 	SET @NewInvoiceId = SCOPE_IDENTITY()
 	
-	
+	--INSERT TO INVOICE DETAIL AND INVOICE DETAIL TAX
 	DECLARE @OrderDetails TABLE(intSalesOrderDetailId INT)
 		
 	INSERT INTO @OrderDetails
@@ -120,6 +128,7 @@ BEGIN
 				,[intItemUOMId]
 				,[dblQtyOrdered]
 				,[dblQtyShipped]
+				,[dblDiscount]
 				,[dblPrice]
 				,[dblTotalTax]
 				,[dblTotal]
@@ -127,6 +136,13 @@ BEGIN
 				,[intCOGSAccountId]
 				,[intSalesAccountId]
 				,[intInventoryAccountId]
+				,[intContractHeaderId]
+				,[intContractDetailId]
+				,[strMaintenanceType]
+				,[strFrequency]
+				,[dblMaintenanceAmount]
+				,[dblLicenseAmount]
+				,[dtmMaintenanceDate]
 				,[intConcurrencyId])
 			SELECT 	
 				 @NewInvoiceId				--[intInvoiceId]
@@ -135,6 +151,7 @@ BEGIN
 				,[intItemUOMId]				--[intItemUOMId]
 				,[dblQtyOrdered]			--[dblQtyOrdered]
 				,[dblQtyOrdered]			--[dblQtyShipped]
+				,[dblDiscount]              --[dblDiscount]
 				,[dblPrice]					--[dblPrice]
 				,[dblTotalTax]				--[dblTotalTax]
 				,[dblTotal]					--[dblTotal]
@@ -142,6 +159,13 @@ BEGIN
 				,[intCOGSAccountId]			--[intCOGSAccountId]
 				,[intSalesAccountId]		--[intSalesAccountId]
 				,[intInventoryAccountId]	--[intInventoryAccountId]
+				,[intContractHeaderId]		--[intContractHeaderId]
+				,[intContractDetailId]		--[intContractDetailId]
+				,[strMaintenanceType]		--[strMaintenanceType]
+				,[strFrequency]		        --[strFrequency]
+				,[dblMaintenanceAmount]		--[dblMaintenanceAmount]
+				,[dblLicenseAmount]			--[dblLicenseAmount]
+				,[dtmMaintenanceDate]		--[dtmMaintenanceDate]
 				,0							--[intConcurrencyId]
 			FROM
 				tblSOSalesOrderDetail
@@ -196,4 +220,38 @@ BEGIN
 	
 	
 	SET @InvoiceId  = @NewInvoiceId
+
+	IF (@IsSoftware = 1)
+	BEGIN		
+		--INSERT TO RECURRING TRANSACTION
+		INSERT INTO [tblSMRecurringTransaction]
+			([intTransactionId]
+			,[strTransactionNumber]
+			,[strTransactionType]
+			,[strFrequency]
+			,[dtmLastProcess]
+			,[dtmNextProcess]
+			,[ysnDue]
+			,[strDayOfMonth]
+			,[dtmStartDate]
+			,[dtmEndDate]
+			,[ysnActive]
+			,[intIteration]
+			,[intUserId])
+		SELECT 
+			 @InvoiceId
+			,[strInvoiceNumber]
+			,'Invoice'
+			,'Monthly'
+			,[dtmDate]
+			,DATEADD(MONTH, 1, [dtmDate])
+			,CASE WHEN GETDATE() > [dtmDueDate] THEN 1 ELSE 0 END
+			,CONVERT(NVARCHAR(2), DAY([dtmDate]))
+			,DATEADD(MONTH, 1, [dtmDate])
+			,DATEADD(MONTH, 1, [dtmDate])
+			,1
+			,1
+			,@UserId FROM tblARInvoice
+		WHERE intInvoiceId = @InvoiceId
+	END
 END
