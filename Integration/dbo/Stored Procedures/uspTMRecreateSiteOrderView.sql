@@ -77,7 +77,6 @@ BEGIN
 				ON A.intDriverID = E.A4GLIdentity	
 			LEFT JOIN vwitmmst F
 				ON A.intProduct = F.A4GLIdentity
-					AND A.intLocationId = F.
 			LEFT JOIN tblTMDispatch G
 				ON A.intSiteID = G.intSiteID
 			')	
