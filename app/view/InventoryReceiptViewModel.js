@@ -431,7 +431,14 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 return true;
             }
             else {
-                return false;
+                switch (get('current.strReceiptType')) {
+                    case 'Purchase Contract':
+                        return false;
+                        break;
+                    default:
+                        return true;
+                        break;
+                }
             }
         },
         filterSourceByType: function (get) {
