@@ -1948,6 +1948,7 @@
     <Build Include="dbo\Tables\tblSRFilterField.sql" />
     <Build Include="dbo\Tables\tblSRArchive.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertRecurringInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMMigrateRecurringTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
