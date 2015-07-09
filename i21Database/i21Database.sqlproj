@@ -1683,6 +1683,7 @@
     <Build Include="dbo\Stored Procedures\uspICFixStockQuantities.sql" />
     <Build Include="dbo\Tables\tblICFixLog.sql" />
     <None Include="Scripts\Post-Deployment\IC\00_RequiredDataFix.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeDirectDeposit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

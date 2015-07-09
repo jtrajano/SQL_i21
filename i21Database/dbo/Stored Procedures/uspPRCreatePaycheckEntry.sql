@@ -51,7 +51,7 @@ INSERT INTO [dbo].[tblPRPaycheck]
 	,[ysnPosted]
 	,[ysnPrinted]
 	,[ysnVoid]
-	,[ysnDirectDeposit]
+	,[intDistributionType]
 	,[dtmCreated]
 	,[intConcurrencyId])
 SELECT
@@ -74,7 +74,7 @@ SELECT
 	,0
 	,0
 	,0
-	,[ysnDirectDeposit]
+	,[intDistributionType]
 	,GETDATE()
 	,1
 FROM [dbo].[tblPREmployee]
