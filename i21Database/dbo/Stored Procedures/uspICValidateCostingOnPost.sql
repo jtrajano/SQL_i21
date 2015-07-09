@@ -60,6 +60,13 @@ BEGIN
 	GOTO _Exit
 END 
 
+-- Check for invalid item UOM 
+IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 51133)
+BEGIN 
+	RAISERROR(51133, 11, 1)
+	GOTO _Exit
+END 
+
 -- Check for negative stock qty 
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 50029)
 BEGIN 

@@ -1064,7 +1064,7 @@
     <Build Include="dbo\Tables\tblICCostingMethod.sql" />
     <None Include="Scripts\Post-Deployment\IC\04_CostingMethods.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostLotOut.sql">
-      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+      <SuppressTSqlWarnings>71005</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\Views\vyuICGetReceiptItemSource.sql" />
     <Build Include="dbo\Views\vyuAPBillLatestPayment.sql" />
@@ -1678,6 +1678,11 @@
     <Build Include="dbo\Views\vyuPRPaycheckHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspARCreateInvoiceFromShipment.sql" />
     <Build Include="dbo\Functions\fnGetPaymentDetailPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostStockQuantity.sql" />
+    <Build Include="dbo\Functions\fnGetItemStockUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixStockQuantities.sql" />
+    <Build Include="dbo\Tables\tblICFixLog.sql" />
+    <None Include="Scripts\Post-Deployment\IC\00_RequiredDataFix.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

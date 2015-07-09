@@ -46,6 +46,7 @@ BEGIN
 			,intItemUOMId
 			,intLotId
 			,dblQty
+			--,dblUOMQty
 			,intSubLocationId
 			,intStorageLocationId			
 	)
@@ -53,9 +54,10 @@ BEGIN
 			,ItemTrans.intItemLocationId
 			,ItemTrans.intItemUOMId
 			,ItemTrans.intLotId
-			,SUM(ISNULL(ItemTrans.dblQty, 0) * -1)			
-			,intSubLocationId
-			,intStorageLocationId
+			,SUM(ISNULL(ItemTrans.dblQty, 0) * -1)	
+			--,ItemTrans.dblUOMQty		
+			,ItemTrans.intSubLocationId
+			,ItemTrans.intStorageLocationId
 	FROM	dbo.tblICInventoryTransaction ItemTrans
 	WHERE	intTransactionId = @intTransactionId
 			AND strTransactionId = @strTransactionId
@@ -280,37 +282,76 @@ BEGIN
 					ON Stock.intItemId = ItemToUnpost.intItemId
 					AND Stock.intItemLocationId = ItemToUnpost.intItemLocationId
 
-		-- Update the Unit On Hand at the Item Stock table
-		UPDATE	Stock
-		SET		Stock.dblUnitOnHand = Stock.dblUnitOnHand +  ItemToUnpost.dblUnpostQty
-		FROM	dbo.tblICItemStock AS Stock INNER JOIN (
-					SELECT	intItemId
-							,intItemLocationId
-							,dblUnpostQty = SUM(dbo.fnCalculateStockUnitQty(dblQty, dblUOMQty))
-					FROM	@ItemsToUnpost 
-					GROUP BY intItemId, intItemLocationId				
-				) ItemToUnpost
-					ON Stock.intItemId = ItemToUnpost.intItemId
-					AND Stock.intItemLocationId = ItemToUnpost.intItemLocationId
+		------------------------------------------------------------
+		-- Update the Stock Quantity
+		------------------------------------------------------------
+		BEGIN 
+			DECLARE @intItemId AS INT
+					,@intItemUOMId AS INT 
+					,@intItemLocationId AS INT 
+					,@intSubLocationId AS INT
+					,@intStorageLocationId AS INT 					
+					,@dblQty AS NUMERIC(18, 6) 
+					,@dblUOMQty AS NUMERIC(18, 6)
+					,@intLotId AS INT
 
-		-- Update the Stock UOM
-		UPDATE	StockUOM
-		SET		StockUOM.dblOnHand = StockUOM.dblOnHand  +  ItemToUnpost.dblUnpostQty
-		FROM	dbo.tblICItemStockUOM AS StockUOM INNER JOIN (
-					SELECT	intItemId
-							,intItemLocationId
-							,intItemUOMId
-							,intSubLocationId
-							,intStorageLocationId
-							,dblUnpostQty = SUM(ISNULL(dblQty, 0))
-					FROM	@ItemsToUnpost 
-					GROUP BY intItemId, intItemLocationId, intItemUOMId, intSubLocationId, intStorageLocationId
-				) ItemToUnpost
-					ON StockUOM.intItemId = ItemToUnpost.intItemId
-					AND StockUOM.intItemLocationId = ItemToUnpost.intItemLocationId
-					AND StockUOM.intItemUOMId = ItemToUnpost.intItemUOMId
-					AND ISNULL(StockUOM.intSubLocationId, 0) =  ISNULL(ItemToUnpost.intSubLocationId, 0)
-					AND ISNULL(StockUOM.intStorageLocationId, 0) =  ISNULL(ItemToUnpost.intStorageLocationId, 0)
+			DECLARE loopItems CURSOR LOCAL FAST_FORWARD
+			FOR 
+			SELECT  intItemId 
+					,intItemUOMId 
+					,intItemLocationId 
+					,intSubLocationId 
+					,intStorageLocationId 
+					,dblQty 
+					,dblUOMQty 
+					,intLotId 
+			FROM	@ItemsToUnpost
+
+			OPEN loopItems;	
+
+			-- Initial fetch attempt
+			FETCH NEXT FROM loopItems INTO 
+				@intItemId
+				,@intItemUOMId
+				,@intItemLocationId 
+				,@intSubLocationId 
+				,@intStorageLocationId 
+				,@dblQty 
+				,@dblUOMQty 
+				,@intLotId;
+
+			-----------------------------------------------------------------------------------------------------------------------------
+			-- Start of the loop
+			-----------------------------------------------------------------------------------------------------------------------------
+			WHILE @@FETCH_STATUS = 0
+			BEGIN 
+				EXEC [dbo].[uspICPostStockQuantity]
+					@intItemId
+					,@intItemLocationId
+					,@intSubLocationId
+					,@intStorageLocationId
+					,@intItemUOMId
+					,@dblQty
+					,@dblUOMQty
+					,@intLotId
+
+				FETCH NEXT FROM loopItems INTO 
+					@intItemId
+					,@intItemUOMId
+					,@intItemLocationId 
+					,@intSubLocationId 
+					,@intStorageLocationId 
+					,@dblQty 
+					,@dblUOMQty 
+					,@intLotId;
+			END;
+
+			-----------------------------------------------------------------------------------------------------------------------------
+			-- End of the loop
+			-----------------------------------------------------------------------------------------------------------------------------
+			CLOSE loopItems;
+			DEALLOCATE loopItems;
+		END
 
 		-- Update the Lot's Qty and Weights. 
 		UPDATE	Lot 

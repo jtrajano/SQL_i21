@@ -389,7 +389,7 @@ BEGIN
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
 				,dblQty = 0
-				,dblUOMQty = 0
+				,dblUOMQty = 1
 				,dblCost = 0
 				,dblValue = 360.00
 				,dblSalesPrice = 0 
@@ -409,7 +409,7 @@ BEGIN
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
 				,dblQty = 0
-				,dblUOMQty = 0
+				,dblUOMQty = 1
 				,dblCost = 0
 				,dblValue = -310.00
 				,dblSalesPrice = 0 
@@ -429,7 +429,7 @@ BEGIN
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
 				,dblQty = 0
-				,dblUOMQty = 0
+				,dblUOMQty = 1
 				,dblCost = 0
 				,dblValue = 55
 				,dblSalesPrice = 0 
@@ -469,7 +469,7 @@ BEGIN
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
 				,dblQty = 0
-				,dblUOMQty = 0
+				,dblUOMQty = 1
 				,dblCost = 0
 				,dblValue = 341.00
 				,dblSalesPrice = 0 
@@ -489,7 +489,7 @@ BEGIN
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = 'November 17, 2014'
 				,dblQty = 0
-				,dblUOMQty = 0
+				,dblUOMQty = 1
 				,dblCost = 0
 				,dblValue = -363.00
 				,dblSalesPrice = 0 
