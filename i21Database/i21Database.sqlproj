@@ -1688,8 +1688,6 @@
     <Build Include="dbo\Views\vyuARCustomerInquiryReport.sql" />
     <Build Include="dbo\Views\vyuARCustomerStatementReport.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingReport.sql" />
-<<<<<<< HEAD
-=======
     <Build Include="dbo\Tables\tblEntityPreferences.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostQtyChange.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WithGasCheckSubReport.sql" />
@@ -1715,7 +1713,6 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillAmounts.sql" />
     <Build Include="dbo\Views\vyuAPBillStatus.sql" />
     <Build Include="dbo\Views\vyuARSalesAnalysisReport.sql" />
->>>>>>> master
     <Build Include="dbo\Views\vyuCTContractHeaderView.sql" />
     <Build Include="dbo\Views\vyuCTContractSearchView.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptCharge.sql" />
@@ -1726,9 +1723,7 @@
     <Build Include="dbo\Tables\tblMFBlendRequirementRule.sql" />
     <Build Include="dbo\Tables\tblMFBlendSheetRuleValue.sql" />
     <Build Include="dbo\Tables\tblMFBlendSheetRule.sql" />
-<<<<<<< HEAD
     <Build Include="dbo\Stored Procedures\uspSMMigrateRecurringTransaction.sql" />
-=======
     <Build Include="dbo\Stored Procedures\uspICPostFIFOInCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInFIFOCustody.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInFIFOCustody.sql" />
@@ -1952,7 +1947,6 @@
     <Build Include="dbo\Functions\fnRKGetLatestClosingPrice.sql" />
     <Build Include="dbo\Views\vyuLGLoadView.sql" />
     <Build Include="dbo\Tables\tblGLAccountRange.sql" />
->>>>>>> master
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2030,13 +2024,10 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\12_ReminderList.sql" />
   </ItemGroup>
-<<<<<<< HEAD
-=======
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\14_CompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountRange.sql" />
   </ItemGroup>
->>>>>>> master
 </Project>

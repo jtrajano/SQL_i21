@@ -57,10 +57,11 @@ GO
 	EXEC uspSMSortOriginMenus
 
 GO
-<<<<<<< HEAD
 	-- UPDATE tblSMRecurringTransaction
 	EXEC uspSMMigrateRecurringTransaction
-=======
+
+GO
+	
 	-- MIGRATE SM COMPANY PREFERENCES
 	EXEC uspSMMigrateCompanyPreference
 GO
@@ -136,5 +137,4 @@ END
 GO
 	PRINT N'Updating strHelperUrlDomain in tblSMCompanyPreference'
 	UPDATE tblSMCompanyPreference SET strHelperUrlDomain = N'http://help.irelyserver.com'
->>>>>>> master
 GO
