@@ -22,7 +22,5 @@ INNER JOIN dbo.tblAPPaymentDetail
 ON dbo.tblAPPayment.intPaymentId = dbo.tblAPPaymentDetail.intPaymentId
 INNER JOIN dbo.tblAPBill
 ON dbo.tblAPBill.intBillId = dbo.tblAPPaymentDetail.intBillId
-INNER JOIN dbo.tblAPBillBatch
-ON dbo.tblAPBill.intBillBatchId = dbo.tblAPBillBatch.intBillBatchId
 LEFT JOIN dbo.tblEntity
 ON dbo.tblEntity.intEntityId = dbo.tblAPVendor.intEntityVendorId

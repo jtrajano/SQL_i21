@@ -1030,7 +1030,7 @@
     <Build Include="dbo\Tables\tblGRDiscountCalculationOption.sql" />
     <Build Include="dbo\Tables\tblGRShrinkCalculationOption.sql" />
     <Build Include="dbo\Stored Procedures\uspPOReceived.sql" />
-    <Build Include="dbo\Views\vyuCTPriceContract.sql" />
+    <Build Include="dbo\Views\vyuCTPriceFixation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDoPrice.sql" />
     <Build Include="dbo\Tables\tblSTStoreGLAccount.sql" />
     <Build Include="dbo\Tables\tblSOSalesOrderDetail.sql" />
@@ -1793,7 +1793,7 @@
     <Build Include="dbo\Stored Procedures\uspLGShipmentUpdateContainerReceivedQty.sql" />
     <Build Include="dbo\Views\vyuICGetItemStockUOMForAdjustment.sql" />
     <Build Include="dbo\Views\vyuLGShippingInstructions.sql" />
-    <Build Include="dbo\Tables\tblSMUserHistory.sql" />
+    <Build Include="dbo\Tables\tblSMAuditLog.sql" />
     <Build Include="dbo\Tables\tblRKOptionsPnSExercisedAssigned.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetContainerType.sql" />
     <Build Include="dbo\Tables\tblMFAttributeType.sql" />
@@ -1933,6 +1933,18 @@
     <Build Include="dbo\Tables\tblCTPriceFixation.sql" />
     <Build Include="dbo\Tables\tblCTPriceFixationDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSPAuditLogs.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdatePrepayAndDebitMemo.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendRequests.sql" />
+    <Build Include="dbo\Tables\tblHDReminder.sql" />
+    <Build Include="dbo\Tables\tblGRCompanyPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMMergeEntity.sql" />
+    <Build Include="dbo\Views\vyuEMSearchMerge.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUndoStageWorkOrder.sql" />
+    <Build Include="dbo\Views\vyuRKSummaryPnL.sql" />
+    <Build Include="dbo\Views\vyuRKUnrealizedPnL.sql" />
+    <Build Include="dbo\Views\vyuRKRealizedPnL.sql" />
+    <Build Include="dbo\Functions\fnRKGetLatestClosingPrice.sql" />
+    <Build Include="dbo\Views\vyuLGLoadView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

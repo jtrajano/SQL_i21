@@ -24,6 +24,8 @@ DECLARE @GLEntries AS RecapTableType
 DECLARE @strBatchId AS NVARCHAR(40) 
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory In-Transit'
+DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY_AP AS NVARCHAR(255) = 'AP Clearing'
+DECLARE @ACCOUNT_CATEGORY AS NVARCHAR(255) = 'AP Clearing'
 DECLARE @dblOriginNetUnits AS DECIMAL (13,3)
 DECLARE @dblDestinationNetUnits AS DECIMAL (13,3)
 DECLARE @strOriginDestination AS NVARCHAR(1)
@@ -135,6 +137,7 @@ BEGIN
 
 		-- Call the post routine 
 		BEGIN 
+		SET @ACCOUNT_CATEGORY = CASE WHEN @differenceUnits > 0 THEN @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY_AP ELSE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY END
 			-- Call the post routine 
 			INSERT INTO @GLEntries (
 					[dtmDate] 
@@ -166,7 +169,7 @@ BEGIN
 			EXEC	dbo.uspICPostCosting  
 					@ItemsForRemovalPost  
 					,@strBatchId  
-					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+					,@ACCOUNT_CATEGORY
 					,@intUserId
 		END
 		END
@@ -243,7 +246,7 @@ BEGIN
 			EXEC	dbo.uspICPostCosting  
 					 @ItemsForTransferPost  
 					,@strBatchId  
-					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY_AP
 					,@intUserId
 		END
 	END
@@ -321,7 +324,7 @@ BEGIN
 			EXEC	dbo.uspICPostCosting  
 					 @ItemsForTransferPost  
 					,@strBatchId  
-					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY_AP
 					,@intUserId
 		END
 	END
@@ -399,7 +402,7 @@ BEGIN
 			EXEC	dbo.uspICPostCosting  
 					 @ItemsForTransferPost  
 					,@strBatchId  
-					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY_AP
 					,@intUserId
 		END
 	END

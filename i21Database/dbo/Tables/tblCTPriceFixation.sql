@@ -3,7 +3,7 @@
 	[intPriceFixationId] INT IDENTITY(1,1) NOT NULL,
 	[intConcurrencyId] INT NOT NULL,
 	[intContractDetailId] INT NOT NULL,
-	[intToatalLots] INT,
+	[intTotalLots] INT,
 	[intLotsFixed] INT,
 	[intLotsHedged] INT,
 	[dblPolResult] NUMERIC(8,4),

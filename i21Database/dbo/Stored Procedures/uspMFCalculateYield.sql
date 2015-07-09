@@ -466,17 +466,17 @@ BEGIN TRY
 					WHERE intItemId = @intItemId
 
 					IF @strLifeTimeType = 'Years'
-						SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, GetDate())
+						SET @dtmExpiryDate = DateAdd(yy, @intLifeTime, @dtmCurrentDateTime)
 					ELSE IF @strLifeTimeType = 'Months'
-						SET @dtmExpiryDate = DateAdd(mm, @intLifeTime, GetDate())
+						SET @dtmExpiryDate = DateAdd(mm, @intLifeTime, @dtmCurrentDateTime)
 					ELSE IF @strLifeTimeType = 'Days'
-						SET @dtmExpiryDate = DateAdd(dd, @intLifeTime, GetDate())
+						SET @dtmExpiryDate = DateAdd(dd, @intLifeTime, @dtmCurrentDateTime)
 					ELSE IF @strLifeTimeType = 'Hours'
-						SET @dtmExpiryDate = DateAdd(hh, @intLifeTime, GetDate())
+						SET @dtmExpiryDate = DateAdd(hh, @intLifeTime, @dtmCurrentDateTime)
 					ELSE IF @strLifeTimeType = 'Minutes'
-						SET @dtmExpiryDate = DateAdd(mi, @intLifeTime, GetDate())
+						SET @dtmExpiryDate = DateAdd(mi, @intLifeTime, @dtmCurrentDateTime)
 					ELSE
-						SET @dtmExpiryDate = DateAdd(yy, 1, GetDate())
+						SET @dtmExpiryDate = DateAdd(yy, 1, @dtmCurrentDateTime)
 
 					SELECT @intItemLocationId = intItemLocationId
 					FROM dbo.tblICItemLocation
@@ -527,7 +527,7 @@ BEGIN TRY
 						,dblWeight = NULL
 						,intWeightUOMId = NULL
 						,dtmExpiryDate = @dtmExpiryDate
-						,dtmManufacturedDate = GetDate()
+						,dtmManufacturedDate = @dtmCurrentDateTime
 						,intOriginId = NULL
 						,strBOLNo = NULL
 						,strVessel = NULL
@@ -645,12 +645,12 @@ BEGIN TRY
 
 	UPDATE dbo.tblMFWorkOrder
 	SET intCountStatusId = 13
-		,dtmLastModified = GETDATE()
+		,dtmLastModified = @dtmCurrentDateTime
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	UPDATE tblMFProcessCycleCountSession
-	SET dtmSessionEndDateTime = GETDATE()
+	SET dtmSessionEndDateTime = @dtmCurrentDateTime
 		,ysnCycleCountCompleted = 1
 	WHERE intWorkOrderId = @intWorkOrderId
 

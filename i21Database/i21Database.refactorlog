@@ -3563,4 +3563,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intEntityShipViaId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="8389abbc-69e5-4228-ad61-6ec538d5f1ea" ChangeDateTime="07/07/2015 13:36:49">
+    <Property Name="ElementName" Value="[dbo].[tblCTPriceFixation].[intToatalLots]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTPriceFixation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTotalLots" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="dae19fc9-b0a8-421b-861b-82030711fbd3" ChangeDateTime="07/08/2015 06:26:39">
+    <Property Name="ElementName" Value="[dbo].[tblGRCompanyPreference].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblGRCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCompanyPreferenceId" />
+  </Operation>
 </Operations>

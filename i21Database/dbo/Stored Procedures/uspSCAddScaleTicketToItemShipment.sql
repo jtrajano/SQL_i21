@@ -3,6 +3,7 @@ CREATE PROCEDURE [dbo].[uspSCAddScaleTicketToItemShipment]
 	,@intUserId AS INT
 	,@Items ItemCostingTableType READONLY
 	,@intEntityId AS INT
+	,@intOrderType AS INT
 	,@InventoryShipmentId AS INT OUTPUT 
 AS
 
@@ -77,10 +78,11 @@ BEGIN
 				,intEntityId
 				,intCreatedUserId
 				,intConcurrencyId
+				,intSourceType
 		)
 		SELECT	strShipmentNumber			= @ShipmentNumber
 				,dtmShipDate				= SC.dtmTicketDateTime
-				,intOrderType				= @SALES_ORDER
+				,intOrderType				= @intOrderType
 				,strReferenceNumber			= SC.strCustomerReference
 				,dtmRequestedArrivalDate	= NULL -- TODO
 				,intShipFromLocationId		= SC.intProcessingLocationId
@@ -105,6 +107,7 @@ BEGIN
 				,intEntityId				= dbo.fnGetUserEntityId(@intUserId) 
 				,intCreatedUserId			= @intUserId
 				,intConcurrencyId			= 1
+				,intSourceType				= 1
 FROM	dbo.tblSCTicket SC
 WHERE	SC.intTicketId = @intTicketId
 END 
@@ -126,6 +129,7 @@ BEGIN
 			intInventoryShipmentId
 			,intSourceId
 			,intLineNo
+			,intOrderId
 			,intItemId
 			,intSubLocationId
 			,dblQuantity
@@ -141,7 +145,8 @@ BEGIN
 	SELECT			
 			intInventoryShipmentId	= @InventoryShipmentId
 			,intSourceId			= @intTicketId
-			,intLineNo				= 1
+			,intLineNo				= ISNULL (LI.intTransactionDetailId, 1)
+			,intOrderId				= CNT.intContractHeaderId
 			,intItemId				= SC.intItemId
 			,intSubLocationId		= SC.intSubLocationId
 			,dblQuantity			= LI.dblQty
@@ -163,6 +168,8 @@ FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransacti
 			AND ItemUOM.intItemUOMId = @intTicketItemUOMId
 		INNER JOIN dbo.tblICUnitMeasure UOM
 			ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+		LEFT JOIN dbo.tblCTContractDetail CNT
+			ON CNT.intContractDetailId = LI.intTransactionDetailId
 WHERE	SC.intTicketId = @intTicketId
 
 END

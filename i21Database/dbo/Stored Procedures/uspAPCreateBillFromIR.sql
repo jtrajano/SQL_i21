@@ -157,8 +157,8 @@ BEGIN
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
 		[dblTotal]					=	(B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost,
 		[dblCost]					=	B.dblUnitCost,
-		[intContractDetailId]		=	E1.intContractDetailId,
-		[intContractHeaderId]		=	E.intContractHeaderId,
+		[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E1.intContractDetailId ELSE POContractItems.intContractDetailId END,
+		[intContractHeaderId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E.intContractHeaderId ELSE POContractItems.intContractHeaderId END,
 		[intLineNo]					=	B.intSort
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
@@ -168,7 +168,16 @@ BEGIN
 	INNER JOIN tblICItemLocation D
 		ON A.intLocationId = D.intLocationId AND B.intItemId = D.intItemId
 	LEFT JOIN (tblCTContractHeader E INNER JOIN tblCTContractDetail E1 ON E.intContractHeaderId = E1.intContractHeaderId) 
-		ON E.intEntityId = A.intEntityVendorId AND E.intContractHeaderId = B.intOrderId AND E1.intContractDetailId = B.intLineNo
+		ON E.intEntityId = A.intEntityVendorId 
+				AND E.intContractHeaderId = B.intOrderId 
+				AND E1.intContractDetailId = B.intLineNo
+	OUTER APPLY (
+		SELECT
+			PODetails.intContractDetailId
+			,PODetails.intContractHeaderId
+		FROM tblPOPurchaseDetail PODetails
+		WHERE intPurchaseDetailId = B.intLineNo
+	) POContractItems
 	WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1
 
 	UPDATE A

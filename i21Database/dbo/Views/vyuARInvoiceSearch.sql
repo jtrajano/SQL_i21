@@ -46,7 +46,8 @@ AS
 		ELS.strCity						AS strShipToCity,
 		ELS.strState					AS strShipToState,
 		ELS.strZipCode					AS strShipToZipCode,
-		ELS.strCountry					AS strShipToCountry
+		ELS.strCountry					AS strShipToCountry,
+		I.strOrderType                  AS strOrderType
 	FROM         
 		dbo.tblARInvoice AS I 
 	INNER JOIN

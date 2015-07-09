@@ -40,3 +40,4 @@ FROM tblEntityPortalMenu Menu
 					EntType.strType = Menu.strEntityType
 					or Menu.strEntityType = ''
 				)
+			and EntType.strType in ('Vendor','Customer')
