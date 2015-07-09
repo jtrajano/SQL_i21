@@ -28,7 +28,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\12_ReminderList.sql
 :r .\SM\DefaultData\13_ShortcutKey.sql
 :r .\SM\CustomField.sql
-:r .\SM\SMDataMigrations.sql
+:r .\SM\SMDataMigrations.SQL
+:r .\SM\SMDataFixes.SQL
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql

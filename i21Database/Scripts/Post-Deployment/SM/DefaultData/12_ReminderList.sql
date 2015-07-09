@@ -9,9 +9,10 @@ GO
 										  'AND GETDATE() >= dtmNextProcess ' + 
 										  'AND dtmNextProcess >= dtmStartDate ' + 
 										  'AND dtmNextProcess <= dtmEndDate ' + 
-										  'AND ysnActive = 1',
+										  'AND ysnActive = 1 ' + 
+										  'AND strResponsibleUser = ''{0}''',
            [strNamespace]       =        N'i21.view.RecurringTransaction', 
-		   [strParameter]		=		 NULL,
+		   [strParameter]		=		 N'strResponsibleUser',
            [intSort]            =        1
 	UNION ALL
 	SELECT [strReminder]        =        N'Process',
@@ -21,9 +22,10 @@ GO
 										  'AND GETDATE() >= dtmNextProcess ' + 
 										  'AND dtmNextProcess >= dtmStartDate ' + 
 										  'AND dtmNextProcess <= dtmEndDate ' +
-										  'AND ysnActive = 1',
+										  'AND ysnActive = 1 ' + 
+										  'AND strResponsibleUser = ''{0}''',
            [strNamespace]       =        N'i21.view.RecurringTransaction', 
-		   [strParameter]		=		 NULL,
+		   [strParameter]		=		 N'strResponsibleUser',
            [intSort]            =        2
 	UNION ALL
 	SELECT [strReminder]        =        N'Process',
@@ -33,9 +35,10 @@ GO
 										  'AND GETDATE() >= dtmNextProcess ' + 
 										  'AND dtmNextProcess >= dtmStartDate ' + 
 										  'AND dtmNextProcess <= dtmEndDate ' +
-										  'AND ysnActive = 1',
+										  'AND ysnActive = 1 ' + 
+										  'AND strResponsibleUser = ''{0}''',
            [strNamespace]       =        N'i21.view.RecurringTransaction', 
-		   [strParameter]		=		 NULL,
+		   [strParameter]		=		 N'strResponsibleUser',
            [intSort]            =        3
 	UNION ALL
 	SELECT [strReminder]        =        N'Process',
@@ -45,9 +48,10 @@ GO
 										  'AND GETDATE() >= dtmNextProcess ' + 
 										  'AND dtmNextProcess >= dtmStartDate ' + 
 										  'AND dtmNextProcess <= dtmEndDate ' +
-										  'AND ysnActive = 1',
+										  'AND ysnActive = 1 ' + 
+										  'AND strResponsibleUser = ''{0}''',
            [strNamespace]       =        N'i21.view.RecurringTransaction', 
-		   [strParameter]		=		 NULL,
+		   [strParameter]		=		 N'strResponsibleUser',
            [intSort]            =        4
 	UNION ALL
 	SELECT [strReminder]        =        N'Approve',
