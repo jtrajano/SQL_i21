@@ -1945,8 +1945,8 @@
     <Build Include="dbo\Views\vyuRKRealizedPnL.sql" />
     <Build Include="dbo\Functions\fnRKGetLatestClosingPrice.sql" />
     <Build Include="dbo\Views\vyuLGLoadView.sql" />
-    <Build Include="dbo\Stored Procedures\uspTMGetItemTaxTotal.sql" />
-    <Build Include="dbo\Tables\tblGLAccountRange.sql" />
+    <Build Include="dbo\Tables\tblSRFilterField.sql" />
+    <Build Include="dbo\Tables\tblSRArchive.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2000,7 +2000,6 @@
     <None Include="Scripts\Post-Deployment\EM\010_UpdateVendorAccountNumber.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckTax.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckYTD.sql" />
-    <None Include="Scripts\Post-Deployment\SM\SMDataFixes.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
@@ -2026,8 +2025,5 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\14_CompanyPreference.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountRange.sql" />
   </ItemGroup>
 </Project>
