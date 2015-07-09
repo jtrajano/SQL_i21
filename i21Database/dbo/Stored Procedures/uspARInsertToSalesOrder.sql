@@ -50,7 +50,6 @@ BEGIN
 		,[strBillToCountry]
 		,[intConcurrencyId]
 		,[intEntityId]
-		,[strOrderType]
 		,[intOrderedById]
 		,[strBOLNumber]
 		,[intSplitId])
@@ -94,7 +93,6 @@ BEGIN
 		,[strBillToCountry]
 		,0
 		,@UserId
-		,[strOrderType]
 		,[intOrderedById]
 		,[strBOLNumber]
 		,[intSplitId]

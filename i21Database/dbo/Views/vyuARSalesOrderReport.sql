@@ -1,7 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuARSalesOrderReport]
 AS
 SELECT SO.intSalesOrderId
-	 , strOrderType = ISNULL(SO.strOrderType, 'General')
      , strCustomerName = E.strName
 	 , L.strLocationName
 	 , SO.dtmDate
