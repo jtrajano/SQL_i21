@@ -20,7 +20,12 @@ SELECT
 	,I.[strInvoiceNumber] 
 	,L.[strLocationName] 
 	,U.[strUnitMeasure] 
-	,IC.[strItemNo]  
+	,IC.[strItemNo]
+	,D.strMaintenanceType
+	,D.strFrequency
+	,D.dtmMaintenanceDate
+	,D.dblMaintenanceAmount
+	,D.dblLicenseAmount  
 FROM         
 	[tblARInvoiceDetail] D
 INNER JOIN	
