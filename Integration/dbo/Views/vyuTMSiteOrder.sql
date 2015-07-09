@@ -50,6 +50,7 @@ BEGIN
 		,ISNULL(A.ysnTaxable,0) AS ysnTaxable
 		,RTRIM(ISNULL(F.vwitm_desc,'''')) AS strProductDescription
 		,dblPriceAdjustment = ISNULL(A.dblPriceAdjustment,0.0)
+		,intCustomerNumber = B.intCustomerNumber
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID

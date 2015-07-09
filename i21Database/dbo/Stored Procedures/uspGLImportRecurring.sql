@@ -45,6 +45,7 @@ BEGIN TRANSACTION
 		  WHERE intJournalRecurringId = @intRecurringId
 		  SELECT @intJournalId = @@IDENTITY
 		  UPDATE @TEMP SET ImportedHeader = 1, JournalID = @intJournalId WHERE RecurringID = @intRecurringId
+		  UPDATE tblGLJournalRecurring SET intJournalId = @intJournalId WHERE intJournalRecurringId = @intRecurringId
 		  UPDATE tblSMStartingNumber SET intNumber = @intNumber where intStartingNumberId = @intStartingNumberId
 		END
 
