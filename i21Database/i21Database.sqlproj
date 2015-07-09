@@ -1999,6 +1999,7 @@
     <None Include="Scripts\Post-Deployment\EM\010_UpdateVendorAccountNumber.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckTax.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckYTD.sql" />
+    <None Include="Scripts\Post-Deployment\SM\SMDataFixes.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
