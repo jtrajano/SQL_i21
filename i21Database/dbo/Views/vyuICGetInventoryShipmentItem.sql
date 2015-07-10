@@ -11,6 +11,7 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, Item.strItemNo
 	, strItemDescription = Item.strDescription
 	, Item.strLotTracking
+	, Item.intCommodityId
 	, ShipmentItem.intSubLocationId
 	, SubLocation.strSubLocationName
 	, strOrderUOM = ShipmentItemSource.strOrderUOM
