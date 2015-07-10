@@ -8,6 +8,7 @@ BEGIN TRY
 		,@ErrMsg NVARCHAR(MAX)
 		,@intWorkOrderId INT
 		,@intUserId INT
+		,@intTransactionCount INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -23,6 +24,33 @@ BEGIN TRY
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
+	IF EXISTS (
+		SELECT *
+		FROM (
+			SELECT strParameterName
+				,ROW_NUMBER() OVER (
+					PARTITION BY strParameterName ORDER BY strParameterName
+					) as intRowNumber
+			FROM OPENXML(@idoc, 'root/WorkOrderProductSpecifications/WorkOrderProductSpecification', 2) WITH (
+					intWorkOrderProductSpecificationId INT
+					,strParameterName NVARCHAR(50)
+					,strParameterValue NVARCHAR(MAX)
+					,strRowState NVARCHAR(50)
+					) x
+			WHERE x.intWorkOrderProductSpecificationId = 0
+				AND x.strRowState = 'ADDED'
+		) AS DT WHERE DT.intRowNumber > 1 )
+	BEGIN
+		RAISERROR (
+				51154
+				,11
+				,1
+				)
+	END
+
+	SELECT @intTransactionCount = @@TRANCOUNT
+
+	IF @intTransactionCount = 0
 	BEGIN TRANSACTION
 
 	INSERT INTO dbo.tblMFWorkOrderProductSpecification (
@@ -69,7 +97,7 @@ BEGIN TRY
 			WHERE x.intWorkOrderProductSpecificationId = tblMFWorkOrderProductSpecification.intWorkOrderProductSpecificationId
 				AND x.strRowState = 'DELETE'
 			)
-
+	IF @intTransactionCount = 0
 	COMMIT TRANSACTION
 
 	EXEC sp_xml_removedocument @idoc
@@ -78,7 +106,7 @@ END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 
-	IF XACT_STATE() != 0
+	IF XACT_STATE() != 0 AND @intTransactionCount = 0
 		ROLLBACK TRANSACTION
 
 	IF @idoc <> 0

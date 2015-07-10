@@ -239,7 +239,7 @@ BEGIN TRY
 		IF NOT EXISTS (
 				SELECT *
 				FROM dbo.tblMFWorkOrder W
-				WHERE intWorkOrderId = @intWorkOrderId AND W.intStatusId=11
+				WHERE intWorkOrderId = @intWorkOrderId AND W.intStatusId=10
 				)
 		BEGIN
 			RAISERROR (
