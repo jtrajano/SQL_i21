@@ -94,6 +94,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,ysnSeparateOnInvoice	BIT
 			,ysnCheckoffTax			BIT
 			,strTaxCode				NVARCHAR(30)
+			,ysnTaxExempt			BIT
 			)
 			
 			
@@ -113,6 +114,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 				,[ysnSeparateOnInvoice]
 				,[ysnCheckoffTax]
 				,[strTaxCode]
+				,[ysnTaxExempt]
 			)
 			EXEC dbo.[uspARGetItemTaxes]  
 					 @ItemId  
