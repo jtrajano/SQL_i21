@@ -1,9 +1,8 @@
 ﻿--THIS WILL UPDATE tblAPBill.intShipViaId
-IF(EXISTS(SELECT 1 FROM tblAPBill
-WHERE intShipViaId NOT IN (SELECT intEntityShipViaId FROM tblSMShipVia)))
+IF(EXISTS(SELECT 1 FROM sys.columns WHERE name = N'intShipViaID' and object_id = OBJECT_ID(N'tblSMShipVia')))
 BEGIN
 	UPDATE A
-		SET A.intShipViaId = ISNULL((SELECT TOP 1 intEntityId FROM tblEntity WHERE strName = 'DHL'), A.intShipViaId)
+		SET A.intShipViaId = ISNULL(B.intShipViaID, A.intShipViaId)
 	FROM tblAPBill A
-	WHERE A.intShipViaId NOT IN (SELECT intEntityShipViaId FROM tblSMShipVia)
+	INNER JOIN tblSMShipVia B ON A.intShipViaId = B.intShipViaID
 END
