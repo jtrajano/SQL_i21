@@ -84,7 +84,7 @@ BEGIN
 						AND CostingLot.intItemUOMId <> @intItemUOMId
 						AND Lot.intWeightUOMId IS NOT NULL 
 						AND ISNULL(CostingLot.ysnIsUnposted, 0) = 0 
-						AND (ISNULL(CostingLot.dblStockIn, 0) - ISNULL(CostingLot.dblStockOut, 0)) <> 0 
+						AND (ISNULL(CostingLot.dblStockIn, 0) - ISNULL(CostingLot.dblStockOut, 0)) > 0 
 			)			 
 			BEGIN 
 				-- Retrieve the correct UOM (Lot UOM or Weight UOM)
