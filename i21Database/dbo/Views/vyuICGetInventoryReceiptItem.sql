@@ -13,6 +13,7 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, Item.strItemNo
 	, strItemDescription = Item.strDescription
 	, Item.strLotTracking
+	, Item.intCommodityId
 	, ReceiptItem.intContainerId
 	, ReceiptItemSource.strContainer
 	, ReceiptItem.intSubLocationId
