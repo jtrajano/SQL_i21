@@ -1958,6 +1958,7 @@
     <Build Include="dbo\Stored Procedures\uspNRMigrateCompanyPreference.sql" />
     <Build Include="dbo\Views\vyuARCustomerConsumptionSite.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessAfloatInventoryReceipt.sql" />
+    <Build Include="dbo\Tables\tblSTMassUpdateReportMaster.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
