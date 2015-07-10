@@ -1954,6 +1954,8 @@
     <Build Include="dbo\Tables\tblGLAccountRange.sql" />
     <Build Include="dbo\Views\vyuHDReminder.sql" />
     <Build Include="dbo\Views\vyuAPRptAPTransactionByGLAccount.sql" />
+    <Build Include="dbo\Tables\tblNRCompanyPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspNRMigrateCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
