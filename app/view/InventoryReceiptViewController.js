@@ -854,15 +854,25 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     break;
             }
         }
-        else if (combo.itemId === 'cboItemUOM')
-        {
+        else if (combo.itemId === 'cboItemUOM') {
             current.set('intUnitMeasureId', records[0].get('intItemUnitMeasureId'));
             current.set('dblItemUOMConvFactor', records[0].get('dblUnitQty'));
             current.set('dblUnitCost', records[0].get('dblLastCost'));
             current.set('dblUnitRetail', records[0].get('dblLastCost'));
             current.set('strUnitType', records[0].get('strUnitType'));
+
+            var origCF = current.get('dblOrderUOMConvFactor');
+            var newCF = current.get('dblItemUOMConvFactor');
+            var received = current.get('dblReceived');
+            var ordered = current.get('dblOrderQty');
+            var qtyToReceive = ordered - received;
+            if (origCF > 0 && newCF > 0) {
+                qtyToReceive = (qtyToReceive * origCF) / newCF;
+                current.set('dblOpenReceive', qtyToReceive);
+            }
+
             if (current.tblICInventoryReceiptItemLots()) {
-                Ext.Array.each(current.tblICInventoryReceiptItemLots().data.items, function(lot) {
+                Ext.Array.each(current.tblICInventoryReceiptItemLots().data.items, function (lot) {
                     if (!lot.dummy) {
                         lot.set('strUnitMeasure', records[0].get('strUnitMeasure'));
                         lot.set('intItemUnitMeasureId', records[0].get('intItemUnitMeasureId'));
@@ -1339,6 +1349,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('strSubLocationName', po.get('strSubLocationName'));
                 current.set('strStorageLocationName', po.get('strStorageName'));
                 current.set('dblItemUOMConvFactor', po.get('dblItemUOMCF'));
+                current.set('dblOrderUOMConvFactor', po.get('dblItemUOMCF'));
                 current.set('strUnitType', po.get('strStockUOMType'));
                 break;
 
@@ -1366,6 +1377,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         current.set('intStorageLocationId', po.get('intStorageLocationId'));
                         current.set('strStorageLocationName', po.get('strStorageLocationName'));
                         current.set('dblItemUOMConvFactor', po.get('dblItemUOMCF'));
+                        current.set('dblOrderUOMConvFactor', po.get('dblItemUOMCF'));
                         current.set('strUnitType', po.get('strStockUOMType'));
                     }
                 }
@@ -1412,6 +1424,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('intSubLocationId', po.get('intSubLocationId'));
                 current.set('strSubLocationName', po.get('strSubLocationName'));
                 current.set('dblItemUOMConvFactor', po.get('dblItemUOMCF'));
+                current.set('dblOrderUOMConvFactor', po.get('dblItemUOMCF'));
                 current.set('strUnitType', po.get('strStockUOMType'));
                 current.set('strContainer', po.get('strContainerNumber'));
                 current.set('intContainerId', po.get('intShipmentBLContainerId'));

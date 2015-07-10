@@ -1139,6 +1139,11 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     flex: 1
                                                                                 },
                                                                                 {
+                                                                                    dataIndex: 'dblUnitQty',
+                                                                                    dataType: 'float',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
                                                                                     xtype: 'checkcolumn',
                                                                                     dataIndex: 'ysnStockUnit',
                                                                                     dataType: 'boolean',
