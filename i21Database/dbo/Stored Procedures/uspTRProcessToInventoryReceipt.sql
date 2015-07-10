@@ -95,7 +95,36 @@ BEGIN TRY
     if (@total = 0)
 	   return;
 
-    EXEC dbo.uspICAddItemReceipt @ReceiptStagingTable,@intUserId, @InventoryReceiptId;
+DECLARE @ReceiptOutputTable TABLE
+    (
+	intId INT IDENTITY PRIMARY KEY CLUSTERED,
+    intSourceId int,
+	intInventoryReceiptId int
+    )
+
+INSERT into @ReceiptOutputTable(
+		 intSourceId	
+		,intInventoryReceiptId		 	
+	 )	
+    EXEC dbo.uspICAddItemReceipt @ReceiptStagingTable,@intUserId;
+
+-- Update the Inventory Receipt Key to the Transaction Table
+                                            
+Declare @incval int,
+        @SouceId int,
+		@ReceiptId int;
+select @total = count(*) from @ReceiptOutputTable;
+set @incval = 1 
+WHILE @incval <=@total 
+BEGIN
+
+  select @SouceId = intSourceId,@ReceiptId =intInventoryReceiptId  from @ReceiptOutputTable where @incval = intId
+  
+   update tblTRTransportReceipt 
+       set intInventoryReceiptId = @ReceiptId
+         where @SouceId = intTransportReceiptId 
+   SET @incval = @incval + 1;
+END;
 
 --	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;
 --	EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;

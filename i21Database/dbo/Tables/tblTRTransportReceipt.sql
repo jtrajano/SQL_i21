@@ -13,6 +13,7 @@
 	[dblNet] DECIMAL(18, 6) NULL DEFAULT 0, 
 	[dblUnitCost] DECIMAL(18, 6) NULL DEFAULT 0, 
 	[dblFreightRate] DECIMAL(18, 6) NULL DEFAULT 0, 
+	[intInventoryReceiptId] int NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	CONSTRAINT [PK_tblTRTransportReceipt] PRIMARY KEY ([intTransportReceiptId]),
 	CONSTRAINT [FK_tblTRTransportReceipt_tblTRTranportLoad_intTransportLoadId] FOREIGN KEY ([intTransportLoadId]) REFERENCES [dbo].[tblTRTransportLoad] ([intTransportLoadId]) ON DELETE CASCADE,
@@ -20,5 +21,6 @@
 	CONSTRAINT [FK_tblTRTransportReceipt_tblTRSupplyPoint_intSupplyPointId] FOREIGN KEY ([intSupplyPointId]) REFERENCES [dbo].[tblTRSupplyPoint] ([intSupplyPointId]),
 	CONSTRAINT [FK_tblTRTransportReceipt_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
 	CONSTRAINT [FK_tblTRTransportReceipt_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),
-	CONSTRAINT [FK_tblTRTransportReceipt_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId])	
+	CONSTRAINT [FK_tblTRTransportReceipt_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]),
+	CONSTRAINT [FK_tblTRTransportReceipt_tblICInventoryReceipt_intInventoryReceiptId] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId])		
 )
