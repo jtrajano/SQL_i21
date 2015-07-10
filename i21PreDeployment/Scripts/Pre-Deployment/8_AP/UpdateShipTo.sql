@@ -4,5 +4,5 @@ BEGIN
 	UPDATE A
 		SET A.intShipToId = NULL
 	FROM tblAPBill A
-	WHERE intShipToId = 0
+	WHERE intShipToId <= 0
 END
