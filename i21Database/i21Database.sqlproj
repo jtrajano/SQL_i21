@@ -1957,6 +1957,7 @@
     <Build Include="dbo\Tables\tblNRCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspNRMigrateCompanyPreference.sql" />
     <Build Include="dbo\Views\vyuARCustomerConsumptionSite.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGProcessAfloatInventoryReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
