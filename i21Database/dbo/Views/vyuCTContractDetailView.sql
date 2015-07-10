@@ -25,6 +25,7 @@ AS
 			CD.intContainerTypeId,				CD.intNumberOfContainers,		CD.intInvoiceCurrencyId,
 			CD.dtmFXValidFrom,					CD.dtmFXValidTo,				CD.strFXRemarks,
 			CD.dblAssumedFX,					CD.strFixationBy,				CD.intItemUOMId,
+			CD.intNoOfLots,
 
 			IM.strItemNo,						FT.strFreightTerm,				IM.strDescription				AS	strItemDescription,
 			SV.strShipVia,						PT.strPricingType,				U1.strUnitMeasure				AS	strItemUOM,
