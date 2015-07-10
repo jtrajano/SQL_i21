@@ -1953,6 +1953,7 @@
     <Build Include="dbo\Stored Procedures\uspTMGetItemTaxTotal.sql" />
     <Build Include="dbo\Tables\tblGLAccountRange.sql" />
     <Build Include="dbo\Views\vyuHDReminder.sql" />
+    <Build Include="dbo\Views\vyuAPRptAPTransactionByGLAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
