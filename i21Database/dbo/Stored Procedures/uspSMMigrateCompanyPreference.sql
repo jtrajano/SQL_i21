@@ -25,9 +25,14 @@ BEGIN
 			  intConcurrencyId
 			  FROM tblTEMPCompanyPreference
 
+	  		DROP TABLE tblTEMPCompanyPreference
 		END
-		IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = ''tblTEMPCompanyPreference'')
-		DROP TABLE tblTEMPCompanyPreference
+		ELSE
+		BEGIN
+			PRINT N''INSERTING tblCFCompanyPreference default data''
+			INSERT INTO tblCFCompanyPreference(strCFServiceReminderMessage, ysnCFUseSpecialPrices, strCFUsePrice, ysnCFUseContracts, ysnCFSummarizeInvoice, strCFInvoiceSummarizationLocation, intConcurrencyId)
+			VALUES(NULL, NULL, NULL, NULL, NULL, NULL, 1)			
+		END
 	')
 	
 

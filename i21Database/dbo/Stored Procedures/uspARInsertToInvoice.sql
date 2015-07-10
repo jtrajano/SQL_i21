@@ -1,16 +1,43 @@
 ﻿CREATE PROCEDURE [dbo].[uspARInsertToInvoice]
-	@SalesOrderId	INT = 0,
-	@UserId			INT = 0,
-	@InvoiceId		INT = NULL OUTPUT
+	@SalesOrderId	  INT = 0,
+	@UserId			  INT = 0,
+	@HasInventoryItem BIT = 0,
+	@InvoiceId		  INT = NULL OUTPUT
 
 	AS
 BEGIN
 
 	DECLARE @NewInvoiceId INT,
-			@DateOnly DATETIME
-			
+			@DateOnly DATETIME,
+			@dblSalesOrderSubtotal NUMERIC(18, 6),			
+			@dblTax	NUMERIC(18, 6),
+			@dblSalesOrderTotal NUMERIC(18, 6),
+			@dblDiscount NUMERIC(18, 6)
+
 	SELECT @DateOnly = CAST(GETDATE() as date)
+
+	DECLARE @OrderDetails TABLE(intSalesOrderDetailId INT, 
+								dblDiscount NUMERIC(18,6), 
+								dblTotalTax NUMERIC(18,6), 
+								dblPrice NUMERIC(18,6), 
+								dblTotal NUMERIC(18,6))
+		
+	INSERT INTO @OrderDetails (intSalesOrderDetailId, dblDiscount, dblTotalTax, dblPrice, dblTotal)
+	SELECT intSalesOrderDetailId
+		 , ROUND(dblDiscount,2)
+		 , ROUND(dblTotalTax,2)
+		 , ROUND(dblPrice,2)
+		 , ROUND(dblTotal,2)
+		FROM tblSOSalesOrderDetail SOD INNER JOIN tblICItem I ON SOD.intItemId = I.intItemId
+		WHERE intSalesOrderId = @SalesOrderId AND I.strType = 'Software'
+		ORDER BY intSalesOrderDetailId
 	
+	SELECT @dblSalesOrderSubtotal = SUM(dblPrice)
+	     , @dblTax = SUM(dblTotalTax)
+		 , @dblSalesOrderTotal = SUM(dblTotal)
+		 , @dblDiscount = SUM(dblDiscount)
+	FROM @OrderDetails
+
 	--INSERT TO INVOICE HEADER
 	INSERT INTO tblARInvoice
 		([intEntityCustomerId]
@@ -65,11 +92,11 @@ BEGIN
 		,[intShipViaId]
 		,[strPONumber]
 		,[intTermId]
-		,ROUND([dblSalesOrderSubtotal],2)
+		,@dblSalesOrderSubtotal --ROUND([dblSalesOrderSubtotal],2)
 		,ROUND([dblShipping],2)
-		,ROUND([dblTax],2)
-		,ROUND([dblSalesOrderTotal],2)
-		,ROUND([dblDiscount],2)
+		,@dblTax--ROUND([dblTax],2)
+		,@dblSalesOrderTotal--ROUND([dblSalesOrderTotal],2)
+		,@dblDiscount--ROUND([dblDiscount],2)
 		,ROUND([dblAmountDue],2)
 		,ROUND([dblPayment],2)
 		,'Invoice'
@@ -97,19 +124,7 @@ BEGIN
 
 	SET @NewInvoiceId = SCOPE_IDENTITY()
 	
-	--INSERT TO INVOICE DETAIL AND INVOICE DETAIL TAX
-	DECLARE @OrderDetails TABLE(intSalesOrderDetailId INT)
-		
-	INSERT INTO @OrderDetails
-		([intSalesOrderDetailId])
-	SELECT 	
-		 [intSalesOrderDetailId]
-	FROM
-		tblSOSalesOrderDetail
-	WHERE
-		[intSalesOrderId] = @SalesOrderId
-	ORDER BY
-		[intSalesOrderDetailId]
+	--INSERT TO INVOICE DETAIL AND INVOICE DETAIL TAX	
 						
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @OrderDetails)
 		BEGIN
@@ -133,6 +148,7 @@ BEGIN
 				,[intCOGSAccountId]
 				,[intSalesAccountId]
 				,[intInventoryAccountId]
+				,[intSalesOrderDetailId]
 				,[intContractHeaderId]
 				,[intContractDetailId]
 				,[strMaintenanceType]
@@ -156,6 +172,7 @@ BEGIN
 				,[intCOGSAccountId]			--[intCOGSAccountId]
 				,[intSalesAccountId]		--[intSalesAccountId]
 				,[intInventoryAccountId]	--[intInventoryAccountId]
+				,[intSalesOrderDetailId]    --[intSalesOrderDetailId]
 				,[intContractHeaderId]		--[intContractHeaderId]
 				,[intContractDetailId]		--[intContractDetailId]
 				,[strMaintenanceType]		--[strMaintenanceType]
@@ -212,39 +229,13 @@ BEGIN
 			DELETE FROM @OrderDetails WHERE [intSalesOrderDetailId] = @SalesOrderDetailId
 		END
 			
-	
-	UPDATE tblSOSalesOrder SET strOrderStatus = 'Closed', ysnProcessed = 1 WHERE intSalesOrderId = @SalesOrderId
-		
+	IF (@HasInventoryItem = 0)
+		BEGIN
+			UPDATE tblSOSalesOrder SET strOrderStatus = 'Closed', ysnProcessed = 1 WHERE intSalesOrderId = @SalesOrderId
+		END
+
 	SET @InvoiceId  = @NewInvoiceId
 			
 	--INSERT TO RECURRING TRANSACTION
-	INSERT INTO [tblSMRecurringTransaction]
-		([intTransactionId]
-		,[strTransactionNumber]
-		,[strTransactionType]
-		,[strFrequency]
-		,[dtmLastProcess]
-		,[dtmNextProcess]
-		,[ysnDue]
-		,[strDayOfMonth]
-		,[dtmStartDate]
-		,[dtmEndDate]
-		,[ysnActive]
-		,[intIteration]
-		,[intUserId])
-	SELECT 
-		 @InvoiceId
-		,[strInvoiceNumber]
-		,'Invoice'
-		,'Monthly'
-		,[dtmDate]
-		,DATEADD(MONTH, 1, [dtmDate])
-		,CASE WHEN GETDATE() > [dtmDueDate] THEN 1 ELSE 0 END
-		,CONVERT(NVARCHAR(2), DAY([dtmDate]))
-		,DATEADD(MONTH, 1, [dtmDate])
-		,DATEADD(MONTH, 1, [dtmDate])
-		,1
-		,1
-		,@UserId FROM tblARInvoice
-	WHERE intInvoiceId = @InvoiceId
+	EXEC dbo.uspARInsertRecurringInvoice @InvoiceId, @UserId
 END

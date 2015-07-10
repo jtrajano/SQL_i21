@@ -96,14 +96,14 @@ GO
 				   [intConcurrencyId]
 				   FROM [dbo].[tblSMCompanyPreference]')
 		END
-		ELSE
-		BEGIN
-			IF NOT EXISTS(SELECT TOP 1 1 FROM tblCFCompanyPreference)
-			BEGIN
-				PRINT N'INSERTING tblCFCompanyPreference default data'
-				INSERT INTO tblCFCompanyPreference(strCFServiceReminderMessage, ysnCFUseSpecialPrices, strCFUsePrice, ysnCFUseContracts, ysnCFSummarizeInvoice, strCFInvoiceSummarizationLocation, intConcurrencyId)
-				VALUES(NULL, NULL, NULL, NULL, NULL, NULL, 1)
-			END
-		END
+		--ELSE
+		--BEGIN
+		--	IF NOT EXISTS(SELECT TOP 1 1 FROM tblCFCompanyPreference)
+		--	BEGIN
+		--		PRINT N'INSERTING tblCFCompanyPreference default data'
+		--		INSERT INTO tblCFCompanyPreference(strCFServiceReminderMessage, ysnCFUseSpecialPrices, strCFUsePrice, ysnCFUseContracts, ysnCFSummarizeInvoice, strCFInvoiceSummarizationLocation, intConcurrencyId)
+		--		VALUES(NULL, NULL, NULL, NULL, NULL, NULL, 1)
+		--	END
+		--END
 	END
 GO
