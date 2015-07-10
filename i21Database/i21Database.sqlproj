@@ -1956,6 +1956,7 @@
     <Build Include="dbo\Views\vyuAPRptAPTransactionByGLAccount.sql" />
     <Build Include="dbo\Tables\tblNRCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspNRMigrateCompanyPreference.sql" />
+    <Build Include="dbo\Views\vyuARCustomerConsumptionSite.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
