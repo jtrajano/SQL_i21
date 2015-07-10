@@ -3,8 +3,8 @@ AS
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblNRCompanyPreference)
 BEGIN
     INSERT INTO tblNRCompanyPreference(dblFee, intNotesReceivableAccountId, intClearingAccountId, intNotesWriteOffAccountId, intInterestIncomeAccountId
-				, intScheduledInvoiceAccountId, intScheduledInvoiceLateFeeAccountId, intCashAccountId, intBankAccountId, blnContinueInterestCalculationAfterNoteMaturityDate
-				, intNumberofDaysPriorNoteBeGenerated, blnOriginCompatible, strOriginSystem, strVersionNumber)
+				, intScheduledInvoiceAccountId, intScheduledInvoiceLateFeeAccountId, intCashAccountId, intBankAccountId, ysnContinueInterestCalculationAfterNoteMaturityDate
+				, intNumberofDaysPriorNoteBeGenerated, ysnOriginCompatible, strOriginSystem, strVersionNumber)
 	SELECT
 		NRFee AS dblFee,
 		NRGLNotesReceivableAccount AS intNotesReceivableAccountId,
@@ -15,9 +15,9 @@ BEGIN
 		NRScheduledInvoiceLateFeeAccount AS intScheduledInvoiceLateFeeAccountId,
 		NRCashAccount AS intCashAccountId,
 		nrBankAccount AS intBankAccountId,
-		NRContinueInterestCalculation AS blnContinueInterestCalculationAfterNoteMaturityDate,
+		NRContinueInterestCalculation AS ysnContinueInterestCalculationAfterNoteMaturityDate,
 		NRNumberOfDaysPriorNoteBeGenerated AS intNumberofDaysPriorNoteBeGenerated,
-		nrSwitchOrigini21 AS blnOriginCompatible,
+		nrSwitchOrigini21 AS ysnOriginCompatible,
 		nrOriginSystem AS strOriginSystem,
 		nrVersionNumber AS strVersionNumber
 		FROM
