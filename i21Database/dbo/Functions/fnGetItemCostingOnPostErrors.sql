@@ -141,6 +141,7 @@ RETURN (
 				,strText = FORMATMESSAGE(51134)
 				,intErrorCode = 51134
 		WHERE	dbo.fnGetItemStockUOM(@intItemId) IS NULL 
+				AND @intItemId IS NOT NULL 
 
 	) AS Query		
 )
