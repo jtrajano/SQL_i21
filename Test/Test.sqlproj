@@ -632,15 +632,7 @@
     <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for a NULL GL description.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for a missing GL description parameter.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for a GL description.sql" />
-	<Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for supplying the GL Description_.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\i21Database\i21Database.sqlproj">
-      <Name>i21Database</Name>
-      <Project>{2e49b212-114b-4cfd-a343-2a2061e987bc}</Project>
-      <Private>True</Private>
-      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
-    </ProjectReference>
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for supplying the GL Description_.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Scripts\PostDeployment.sql" />
