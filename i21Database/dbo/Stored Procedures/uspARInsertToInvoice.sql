@@ -29,7 +29,7 @@ BEGIN
 		 , ROUND(dblPrice,2)
 		 , ROUND(dblTotal,2)
 		FROM tblSOSalesOrderDetail SOD INNER JOIN tblICItem I ON SOD.intItemId = I.intItemId
-		WHERE intSalesOrderId = 124 AND I.strType = 'Software'
+		WHERE intSalesOrderId = @SalesOrderId AND I.strType = 'Software'
 		ORDER BY intSalesOrderDetailId
 	
 	SELECT @dblSalesOrderSubtotal = SUM(dblPrice)
