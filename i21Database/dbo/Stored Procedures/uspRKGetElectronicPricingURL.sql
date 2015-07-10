@@ -228,35 +228,18 @@ BEGIN TRY
 	ORDER BY IntMonthNumber ASC
 
 	SELECT @URL = strInterfaceWebServicesURL FROM tblSMCompanyPreference
-	
 
-	SELECT @strUserName = strValue
-	FROM tblSMPreferences a
-	JOIN tblSMUserSecurity b ON b.intUserSecurityID = a.intUserID
-	WHERE a.strPreference = 'ProviderUserId' AND b.intUserSecurityID = @intUserId
+	SELECT @strUserName = strProviderUserId FROM tblGRUserPreference Where intUserSecurityId= @intUserId  
 
-	IF NOT EXISTS (
-			SELECT 1
-			FROM tblSMPreferences a
-			JOIN tblSMUserSecurity b ON b.intUserSecurityID = a.intUserID
-			WHERE a.strPreference = 'QuoteProvider'
-				AND b.intUserSecurityID = @intUserId
-				AND strValue = 'DTN/Agricharts'
-			)
-		OR (@strUserName = '')
-	BEGIN
-	
-		RAISERROR ('The User cannot access Electronic Pricing',16,1)
-		
-	END
+	 IF NOT EXISTS (SELECT 1 FROM tblGRUserPreference Where strQuoteProvider='DTN/Agricharts' AND intUserSecurityId=@intUserId) OR (@strUserName = '')  
+	 BEGIN
+	  RAISERROR ('The User cannot access Electronic Pricing',16,1)  
+	 END
 
-	SELECT @strPassword = strValue
-	FROM tblSMPreferences a
-	JOIN tblSMUserSecurity b ON b.intUserSecurityID = a.intUserID
-	WHERE a.strPreference = 'ProviderPassword' AND b.intUserSecurityID = @intUserId
 
-	SELECT @IntinterfaceSystem = intInterfaceSystemId
-	FROM   tblSMCompanyPreference
+	SELECT @strPassword = strProviderPassword FROM tblGRUserPreference Where intUserSecurityId=@intUserId  
+
+	SELECT @IntinterfaceSystem = intInterfaceSystemId FROM   tblSMCompanyPreference
 
 	
 	IF ISNULL(@StrTradedMonthSymbol, '') = ''
