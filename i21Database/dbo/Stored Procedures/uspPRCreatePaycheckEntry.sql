@@ -190,6 +190,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 											END
 						FROM tblPRTimecard 
 						WHERE intEmployeeEarningId = @intEmployeeEarningId AND ysnApproved = 1 AND intPaycheckId IS NULL
+						AND intEmployeeId = @intEmployee AND intEmployeeDepartmentId = @intDepartmentId
 						AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
 						AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
 					), 0)
@@ -211,6 +212,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 												END
 							FROM tblPRTimecard 
 							WHERE intEmployeeEarningId = @intEmployeeEarningId AND ysnApproved = 1 AND intPaycheckId IS NULL
+							AND intEmployeeId = @intEmployee AND intEmployeeDepartmentId = @intDepartmentId
 							AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
 							AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
 						), 0)
@@ -328,6 +330,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 		UPDATE tblPRTimecard 
 		SET intPaycheckId = @intPaycheckId
 		WHERE ysnApproved = 1 AND intPaycheckId IS NULL
+		AND intEmployeeId = @intEmployee AND intEmployeeDepartmentId = @intDepartmentId
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
 
