@@ -535,3 +535,8 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51133) EXEC sp_dropmessa
 SET @strmessage = 'Item UOM is invalid or missing.'
 EXEC sp_addmessage 51133,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51134) EXEC sp_dropmessage 51134, 'us_english'	
+SET @strmessage = 'Item %s is missing a Stock Unit. Please check the Unit of Measure setup.'
+EXEC sp_addmessage 51134,11,@strmessage,'us_english','False'
+
+

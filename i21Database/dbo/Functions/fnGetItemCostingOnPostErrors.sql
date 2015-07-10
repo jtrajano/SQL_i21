@@ -133,5 +133,14 @@ RETURN (
 								OR Item.strStatus = 'Phased Out'
 							)		
 				)
+
+		-- Check for the missing Stock Unit UOM 
+		UNION ALL 
+		SELECT	intItemId = @intItemId
+				,intItemLocationId = @intItemLocationId
+				,strText = FORMATMESSAGE(51134)
+				,intErrorCode = 51134
+		WHERE	dbo.fnGetItemStockUOM(@intItemId) IS NULL 
+
 	) AS Query		
 )

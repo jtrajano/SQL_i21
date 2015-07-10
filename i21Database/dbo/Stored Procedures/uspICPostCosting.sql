@@ -70,6 +70,8 @@ DECLARE @AVERAGECOST AS INT = 1
 BEGIN 
 	EXEC dbo.uspICValidateCostingOnPost
 		@ItemsToValidate = @ItemsToPost
+
+	IF @@ERROR <> 0 GOTO _Exit
 END
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -362,3 +364,5 @@ EXEC dbo.uspICCreateGLEntries
 	,@strAccountToCounterInventory
 	,@intUserId
 	,@strGLDescription
+
+_Exit: 

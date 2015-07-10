@@ -55,8 +55,6 @@ USING (
 					ON WeightUOM.intItemUOMId = Lot.intWeightUOMId
 		WHERE	ISNULL(ItemTransactions.ysnIsUnposted, 0) = 0
 		GROUP BY ItemTransactions.intItemId, ItemTransactions.intItemLocationId
-		
-
 ) AS StockToUpdate
 	ON ItemStock.intItemId = StockToUpdate.intItemId
 	AND ItemStock.intItemLocationId = StockToUpdate.intItemLocationId
@@ -126,7 +124,7 @@ WHEN MATCHED THEN
 	SET		dblOnHand = ISNULL(ItemStockUOM.dblOnHand, 0) + RawStockData.Qty
 
 -- If none found, insert a new item stock record
-WHEN NOT MATCHED THEN 
+WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN 
 	INSERT (
 		intItemId
 		,intItemLocationId
@@ -171,6 +169,8 @@ USING (
 					ON WeightUOM.intItemUOMId = Lot.intWeightUOMId
 		WHERE	ISNULL(ItemTransactions.ysnIsUnposted, 0) = 0
 				AND Lot.intLotId IS NULL 
+				AND dbo.fnGetItemStockUOM(ItemTransactions.intItemId) IS NOT NULL 
+				AND dbo.fnGetItemStockUOM(ItemTransactions.intItemId) <> ItemTransactions.intItemUOMId
 		GROUP BY ItemTransactions.intItemId, dbo.fnGetItemStockUOM(ItemTransactions.intItemId), ItemTransactions.intItemLocationId, ItemTransactions.intSubLocationId, ItemTransactions.intStorageLocationId
 ) AS RawStockData
 	ON ItemStockUOM.intItemId = RawStockData.intItemId
@@ -185,7 +185,7 @@ WHEN MATCHED THEN
 	SET		dblOnHand = ISNULL(ItemStockUOM.dblOnHand, 0) + RawStockData.Qty
 
 -- If none found, insert a new item stock record
-WHEN NOT MATCHED THEN 
+WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN 
 	INSERT (
 		intItemId
 		,intItemLocationId
@@ -246,7 +246,7 @@ WHEN MATCHED THEN
 	SET		dblOnHand = ISNULL(ItemStockUOM.dblOnHand, 0) + RawStockData.Qty
 
 -- If none found, insert a new item stock record
-WHEN NOT MATCHED THEN 
+WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN 
 	INSERT (
 		intItemId
 		,intItemLocationId
@@ -295,7 +295,6 @@ USING (
 				AND Lot.intLotId IS NOT NULL 
 				AND Lot.intItemUOMId = ItemTransactions.intItemUOMId
 		GROUP BY ItemTransactions.intItemId, dbo.fnGetItemStockUOM(ItemTransactions.intItemId), ItemTransactions.intItemLocationId ,ItemTransactions.intSubLocationId, ItemTransactions.intStorageLocationId
-
 ) AS RawStockData
 	ON ItemStockUOM.intItemId = RawStockData.intItemId
 	AND ItemStockUOM.intItemLocationId = RawStockData.intItemLocationId
@@ -309,7 +308,7 @@ WHEN MATCHED THEN
 	SET		dblOnHand = ISNULL(ItemStockUOM.dblOnHand, 0) + RawStockData.Qty
 
 -- If none found, insert a new item stock record
-WHEN NOT MATCHED THEN 
+WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN 
 	INSERT (
 		intItemId
 		,intItemLocationId
@@ -372,7 +371,7 @@ WHEN MATCHED THEN
 	SET		dblOnHand = ISNULL(ItemStockUOM.dblOnHand, 0) + RawStockData.Qty
 
 -- If none found, insert a new item stock record
-WHEN NOT MATCHED THEN 
+WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN 
 	INSERT (
 		intItemId
 		,intItemLocationId
@@ -421,7 +420,6 @@ USING (
 				AND Lot.intLotId IS NOT NULL 
 				AND Lot.intWeightUOMId = ItemTransactions.intItemUOMId
 				AND dbo.fnGetItemStockUOM(ItemTransactions.intItemId) IS NOT NULL 
-
 		GROUP BY ItemTransactions.intItemId, dbo.fnGetItemStockUOM(ItemTransactions.intItemId), ItemTransactions.intItemLocationId, ItemTransactions.intSubLocationId, ItemTransactions.intStorageLocationId
 ) AS RawStockData
 	ON ItemStockUOM.intItemId = RawStockData.intItemId
@@ -436,7 +434,7 @@ WHEN MATCHED THEN
 	SET		dblOnHand = ISNULL(ItemStockUOM.dblOnHand, 0) + RawStockData.Qty
 
 -- If none found, insert a new item stock record
-WHEN NOT MATCHED THEN 
+WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN 
 	INSERT (
 		intItemId
 		,intItemLocationId
