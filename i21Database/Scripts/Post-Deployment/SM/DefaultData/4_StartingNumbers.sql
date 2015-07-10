@@ -455,7 +455,7 @@ GO
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 49
 			,[strTransactionType]	= N'Pick Lots'
-			,[strPrefix]			= N'PL'
+			,[strPrefix]			= N'PL-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1
@@ -464,7 +464,7 @@ GO
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 50
 			,[strTransactionType]	= N'Delivery Orders'
-			,[strPrefix]			= N'DO'
+			,[strPrefix]			= N'DO-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1
@@ -560,6 +560,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Price Fixation Trade No')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 61
+			,[strTransactionType]	= N'Stock Sales'
+			,[strPrefix]			= N'SS-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Logistics'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Stock Sales')
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'
@@ -580,6 +589,24 @@ GO
 GO
 	PRINT N'BEGIN CLEAN UP AND INSERT DEFAULT DATA'
 GO
+
+PRINT N'BEGIN RENAME PICK LOTS AND DELIVERY ORDER'
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Pick Lots')
+	BEGIN
+		UPDATE tblSMStartingNumber
+		SET [strPrefix] = 'PL-'
+		WHERE strTransactionType = N'Pick Lots'
+	END  
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Delivery Orders')
+	BEGIN
+		UPDATE tblSMStartingNumber
+		SET [strPrefix] = 'DO-'
+		WHERE strTransactionType = N'Delivery Orders'
+	END  
+GO
+
+PRINT N'BEGIN RENAME S'
 
 PRINT N'BEGIN CHECKING AND FIXING ANY CORRUPT STARTING NUMBERS FOR CASH MANAGEMENT'
 GO
