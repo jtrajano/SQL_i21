@@ -73,10 +73,46 @@ BEGIN TRY
        WHERE SH.intShipmentId = @intShipmentId;
 
     select @total = count(*) from @ReceiptStagingTable;
-    if (@total = 0)
-	   return;
+    IF (@total = 0)
+	BEGIN
+		RAISERROR('Inventorize process failure #1', 11, 1);
+		RETURN;
+	END
 
-    EXEC dbo.uspICAddItemReceipt @ReceiptStagingTable, @intUserId, @InventoryReceiptId;
+DECLARE @ReceiptOutputTable TABLE
+    (
+	intId INT IDENTITY PRIMARY KEY CLUSTERED,
+    intSourceId int,
+	intInventoryReceiptId int
+    )
+
+INSERT into @ReceiptOutputTable(
+		 intSourceId	
+		,intInventoryReceiptId		 	
+	 )	
+    EXEC dbo.uspICAddItemReceipt @ReceiptStagingTable,@intUserId;
+
+Declare @incval int,
+        @SourceId int,
+		@ReceiptId int;
+select @total = count(*) from @ReceiptOutputTable;
+    IF (@total = 0)
+	BEGIN
+		RAISERROR('Inventorize process failure #2', 11, 1);
+		RETURN;
+	END
+
+set @incval = 1 
+WHILE @incval <=@total 
+BEGIN
+
+  select @SourceId = intSourceId, @ReceiptId =intInventoryReceiptId  from @ReceiptOutputTable where @incval = intId
+  
+   update tblLGShipmentContractQty 
+       set intInventoryReceiptId = @ReceiptId
+         where intShipmentContractQtyId = @SourceId 
+   SET @incval = @incval + 1;
+END;
 
 	UPDATE tblLGShipment SET ysnInventorized = 1, dtmInventorizedDate=GETDATE() WHERE intShipmentId=@intShipmentId
 
