@@ -202,6 +202,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colGrade: {
                     dataIndex: 'strGrade',
                     editor: {
+                        readOnly: '{hasItemCommodity}',
                         store: '{grade}',
                         origValueField: 'intCommodityAttributeId',
                         origUpdateField: 'intGradeId',

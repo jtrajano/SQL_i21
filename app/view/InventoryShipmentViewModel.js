@@ -175,6 +175,14 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                     return true;
                     break;
             };
+        },
+        hasItemCommodity: function (get) {
+            if (get('grdInventoryShipment.selection.intCommodityId')) {
+                return false;
+            }
+            else {
+                return true;
+            }
         }
     }
 
