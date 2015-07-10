@@ -189,7 +189,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 												 ELSE SUM(dblRegularHours) 
 											END
 						FROM tblPRTimecard 
-						WHERE intEmployeeEarningId = @intEmployeeEarningId AND ysnApproved = 1
+						WHERE intEmployeeEarningId = @intEmployeeEarningId AND ysnApproved = 1 AND intPaycheckId IS NULL
 						AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
 						AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
 					), 0)
@@ -210,7 +210,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 													 ELSE SUM(dblRegularHours) 
 												END
 							FROM tblPRTimecard 
-							WHERE intEmployeeEarningId = @intEmployeeEarningId AND ysnApproved = 1
+							WHERE intEmployeeEarningId = @intEmployeeEarningId AND ysnApproved = 1 AND intPaycheckId IS NULL
 							AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
 							AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
 						), 0)
@@ -327,7 +327,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 	IF (@ysnUseStandardHours = 0)
 		UPDATE tblPRTimecard 
 		SET intPaycheckId = @intPaycheckId
-		WHERE ysnApproved = 1
+		WHERE ysnApproved = 1 AND intPaycheckId IS NULL
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
 
