@@ -200,6 +200,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colSubLocation: {
                     dataIndex: 'strSubLocationName',
                     editor: {
+                        origValueField: 'intCompanyLocationSubLocationId',
+                        origUpdateField: 'intSubLocationId',
                         store: '{subLocation}',
                         defaultFilters: [
                             {
@@ -218,6 +220,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colGrade: {
                     dataIndex: 'strGrade',
                     editor: {
+                        origValueField: 'intCommodityAttributeId',
+                        origUpdateField: 'intGradeId',
                         store: '{grade}',
                         defaultFilters: [
                             {
@@ -232,6 +236,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     hidden: '{checkHideOwnershipType}',
                     dataIndex: 'strOwnershipType',
                     editor: {
+                        origValueField: 'intOwnershipType',
+                        origUpdateField: 'intOwnershipType',
                         store: '{ownershipTypes}'
                     }
                 },
@@ -319,6 +325,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dataIndex: 'strStorageLocation',
                     editor: {
                         store: '{storageLocation}',
+                        origValueField: 'intStorageLocationId',
+                        origUpdateField: 'intStorageLocationId',
                         defaultFilters: [
                             {
                                 column: 'intLocationId',
@@ -400,6 +408,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dataIndex: 'strCostUOM',
                     editor: {
                         store: '{costUOM}',
+                        origValueField: 'intItemUOMId',
+                        origUpdateField: 'intCostUOMId',
                         defaultFilters: [
                             {
                                 column: 'intItemId',
@@ -413,6 +423,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colCostVendor: {
                     dataIndex: 'strVendorId',
                     editor: {
+                        origValueField: 'intEntityVendorId',
+                        origUpdateField: 'intEntityVendorId',
                         store: '{vendor}'
                     }
                 },
@@ -861,7 +873,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
         else if (combo.itemId === 'cboWeightUOM')
         {
-            current.set('intWeightUOMId', records[0].get('intItemUOMId'));
             current.set('dblWeightUOMConvFactor', records[0].get('dblUnitQty'));
             if (current.tblICInventoryReceiptItemLots()) {
                 Ext.Array.each(current.tblICInventoryReceiptItemLots().data.items, function(lot) {
@@ -870,14 +881,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 });
             }
-        }
-        else if (combo.itemId === 'cboOwnershipType')
-        {
-            current.set('intOwnershipType', records[0].get('intOwnershipType'));
-        }
-        else if (combo.itemId === 'cboGrade')
-        {
-            current.set('intGradeId', records[0].get('intCommodityAttributeId'));
         }
         this.calculateGrossWeight(current);
     },
@@ -2289,36 +2292,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
-    onSubLocationSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var record = records[0];
-        var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepItem');
-        var current = plugin.getActiveRecord();
-
-        if (record)
-        {
-            current.set('intSubLocationId', record.get('intCompanyLocationSubLocationId'));
-        }
-    },
-
-    onStorageLocationSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var record = records[0];
-        var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepItemLots');
-        var current = plugin.getActiveRecord();
-
-        if (record)
-        {
-            current.set('intStorageLocationId', record.get('intStorageLocationId'));
-        }
-    },
-
     onChargeSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
             return;
@@ -2336,12 +2309,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('strCostMethod', record.get('strCostMethod'));
             current.set('strCostUOM', record.get('strCostUOM'));
             current.set('strOnCostType', record.get('strOnCostType'));
-        }
-        else if (combo.itemId === 'cboCostUOM') {
-            current.set('intCostUOMId', record.get('intItemUOMId'));
-        }
-        else if (combo.itemId === 'cboCostVendor') {
-            current.set('intEntityVendorId', record.get('intEntityVendorId'));
         }
     },
 
@@ -2443,25 +2410,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             "#cboWeightUOM": {
                 select: this.onReceiptItemSelect
             },
-            "#cboSubLocation": {
-                select: this.onSubLocationSelect
-            },
-            "#cboOwnershipType": {
-                select: this.onReceiptItemSelect
-            },
-            "#cboGrade": {
-                select: this.onReceiptItemSelect
-            },
-            "#cboStorageLocation": {
-                select: this.onStorageLocationSelect
-            },
             "#cboOtherCharge": {
-                select: this.onChargeSelect
-            },
-            "#cboCostUOM": {
-                select: this.onChargeSelect
-            },
-            "#cboCostVendor": {
                 select: this.onChargeSelect
             },
             "#colLineTotal": {

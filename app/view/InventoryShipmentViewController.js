@@ -190,6 +190,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     dataIndex: 'strSubLocationName',
                     editor: {
                         store: '{subLocation}',
+                        origValueField: 'intCompanyLocationSubLocationId',
+                        origUpdateField: 'intSubLocationId',
                         defaultFilters: [{
                             column: 'intCompanyLocationId',
                             value: '{current.intShipFromLocationId}',
@@ -201,6 +203,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     dataIndex: 'strGrade',
                     editor: {
                         store: '{grade}',
+                        origValueField: 'intCommodityAttributeId',
+                        origUpdateField: 'intGradeId',
                         defaultFilters: [
                             {
                                 column: 'intCommodityId',
@@ -214,6 +218,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     hidden: '{checkHideOwnershipType}',
                     dataIndex: 'strOwnershipType',
                     editor: {
+                        origValueField: 'intOwnershipType',
+                        origUpdateField: 'intOwnershipType',
                         store: '{ownershipTypes}'
                     }
                 },
@@ -229,6 +235,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
+                        origValueField: 'intItemUOMId',
+                        origUpdateField: 'intItemUOMId',
                         store: '{itemUOM}',
                         defaultFilters: [{
                             column: 'intItemId',
@@ -239,6 +247,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colWeightUOM: {
                     dataIndex: 'strWeightUOM',
                     editor: {
+                        origValueField: 'intItemUOMId',
+                        origUpdateField: 'intWeightUOMId',
                         store: '{weightUOM}',
                         defaultFilters: [{
                             column: 'intItemId',
@@ -489,15 +499,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     break;
             }
         }
-        else if (combo.itemId === 'cboSubLocation') {
-            current.set('intSubLocationId', records[0].get('intCompanyLocationSubLocationId'));
-        }
-        else if (combo.itemId === 'cboUOM') {
-            current.set('intItemUOMId', records[0].get('intItemUOMId'));
-        }
         else if (combo.itemId === 'cboWeightUOM') {
-            current.set('intWeightUOMId', records[0].get('intItemUOMId'));
-
             if (current.tblICInventoryShipmentItemLots()) {
                 Ext.Array.each(current.tblICInventoryShipmentItemLots().data.items, function(lot) {
                     if (!lot.dummy) {
@@ -505,13 +507,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     }
                 });
             }
-        }
-        else if (combo.itemId === 'cboOwnershipType') {
-            current.set('intOwnershipType', records[0].get('intOwnershipType'));
-        }
-        else if (combo.itemId === 'cboGrade')
-        {
-            current.set('intGradeId', records[0].get('intCommodityAttributeId'));
         }
     },
 
@@ -1330,21 +1325,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#cboItemNo": {
                 select: this.onItemNoSelect
-            },
-            "#cboSubLocation": {
-                select: this.onOrderNumberSelect
-            },
-            "#cboOwnershipType": {
-                select: this.onOrderNumberSelect
-            },
-            "#cboGrade": {
-                select: this.onOrderNumberSelect
-            },
-            "#cboUOM": {
-                select: this.onOrderNumberSelect
-            },
-            "#cboWeightUOM": {
-                select: this.onOrderNumberSelect
             },
             "#grdInventoryShipment": {
                 selectionchange: this.onItemSelectionChange
