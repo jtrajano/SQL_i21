@@ -4,6 +4,7 @@
     [intDefaultCurrencyId] INT NOT NULL, 
     [intDefaultReportingCurrencyId] INT NOT NULL, 
     [intDefaultCountryId] INT NOT NULL, 
+    [strEnvironmentType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT (''), 
     [ysnLegacyIntegration] BIT NOT NULL, 
     [strAccountingMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [strSMTPHost] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
