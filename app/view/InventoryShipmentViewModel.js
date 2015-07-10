@@ -7,6 +7,7 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.BufferedItemWeightUOM',
         'Inventory.store.BufferedLot',
+        'Inventory.store.BufferedGradeAttribute',
         'i21.store.CompanyLocationBuffered',
         'i21.store.CompanyLocationSubLocationBuffered',
         'i21.store.FreightTermsBuffered',
@@ -108,6 +109,9 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         },
         subLocation: {
             type: 'smcompanylocationsublocationbuffered'
+        },
+        grade: {
+            type: 'icbufferedgradeattribute'
         },
         itemUOM: {
             type: 'icbuffereditemunitmeasure'

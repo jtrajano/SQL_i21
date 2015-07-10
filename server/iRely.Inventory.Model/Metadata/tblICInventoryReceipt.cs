@@ -159,7 +159,7 @@ namespace iRely.Inventory.Model
 
         public int intInventoryReceiptItemId { get; set; }
         public int intInventoryReceiptId { get; set; }
-        public int intLineNo { get; set; }
+        public int? intLineNo { get; set; }
         public int? intOrderId { get; set; }
         public int? intSourceId { get; set; }
         public int? intItemId { get; set; }
@@ -175,6 +175,7 @@ namespace iRely.Inventory.Model
         public decimal? dblUnitCost { get; set; }
         public decimal? dblUnitRetail { get; set; }
         public decimal? dblLineTotal { get; set; }
+        public int? intGradeId { get; set; }
         public int? intSort { get; set; }
 
         private string _orderNumber;
@@ -405,7 +406,42 @@ namespace iRely.Inventory.Model
                 _ownershipType = value;
             }
         }
-        string _weigthUOM;
+        private string _grade;
+        [NotMapped]
+        public string strGrade
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_grade))
+                    if (vyuICGetInventoryReceiptItem != null)
+                        return vyuICGetInventoryReceiptItem.strGrade;
+                    else
+                        return null;
+                else
+                    return _grade;
+            }
+            set
+            {
+                _grade = value;
+            }
+        }
+        private int? _commodityId;
+        [NotMapped]
+        public int? intCommodityId
+        {
+            get
+            {
+                if (vyuICGetInventoryReceiptItem != null)
+                    return vyuICGetInventoryReceiptItem.intCommodityId;
+                else
+                    return null;
+            }
+            set
+            {
+                _commodityId = value;
+            }
+        }
+        private string _weigthUOM;
         [NotMapped]
         public string strWeightUOM
         {
@@ -496,6 +532,7 @@ namespace iRely.Inventory.Model
         public string strItemNo { get; set; }
         public string strItemDescription { get; set; }
         public string strLotTracking { get; set; }
+        public int? intCommodityId { get; set; }
         public int? intContainerId { get; set; }
         public string strContainer { get; set; }
         public int? intSubLocationId { get; set; }
@@ -508,6 +545,8 @@ namespace iRely.Inventory.Model
         public decimal? dblItemUOMConvFactor { get; set; }
         public decimal? dblWeightUOMConvFactor { get; set; }
         public decimal? dblGrossMargin { get; set; }
+        public int? intGradeId { get; set; }
+        public string strGrade { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }

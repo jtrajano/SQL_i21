@@ -94,6 +94,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblUnitCost).HasColumnName("dblUnitCost").HasPrecision(18, 6);
             this.Property(t => t.dblUnitRetail).HasColumnName("dblUnitRetail").HasPrecision(18, 6);
             this.Property(t => t.dblLineTotal).HasColumnName("dblLineTotal").HasPrecision(18, 6);
+            this.Property(t => t.intGradeId).HasColumnName("intGradeId");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasOptional(p => p.vyuICGetInventoryReceiptItem)
@@ -118,12 +119,14 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intLineNo).HasColumnName("intLineNo");
             this.Property(t => t.intOrderId).HasColumnName("intOrderId");
             this.Property(t => t.strOrderNumber).HasColumnName("strOrderNumber");
+            this.Property(t => t.dtmDate).HasColumnName("dtmDate");
             this.Property(t => t.intSourceId).HasColumnName("intSourceId");
             this.Property(t => t.strSourceNumber).HasColumnName("strSourceNumber");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
             this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
             this.Property(t => t.strLotTracking).HasColumnName("strLotTracking");
+            this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");
             this.Property(t => t.intContainerId).HasColumnName("intContainerId");
             this.Property(t => t.strContainer).HasColumnName("strContainer");
             this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
@@ -136,6 +139,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblItemUOMConvFactor).HasColumnName("dblItemUOMConvFactor").HasPrecision(18, 6);
             this.Property(t => t.dblWeightUOMConvFactor).HasColumnName("dblWeightUOMConvFactor").HasPrecision(18, 6);
             this.Property(t => t.dblGrossMargin).HasColumnName("dblGrossMargin").HasPrecision(18, 6);
+            this.Property(t => t.intGradeId).HasColumnName("intGradeId");
+            this.Property(t => t.strGrade).HasColumnName("strGrade");
         }
     }
 

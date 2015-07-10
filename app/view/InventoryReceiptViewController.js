@@ -215,6 +215,19 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         ]
                     }
                 },
+                colGrade: {
+                    dataIndex: 'strGrade',
+                    editor: {
+                        store: '{grade}',
+                        defaultFilters: [
+                            {
+                                column: 'intCommodityId',
+                                value: '{grdInventoryReceipt.selection.intCommodityId}',
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
+                },
                 colOwnershipType: {
                     hidden: '{checkHideOwnershipType}',
                     dataIndex: 'strOwnershipType',
@@ -767,6 +780,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('dblUnitRetail', records[0].get('dblLastCost'));
             current.set('dblItemUOMConvFactor', records[0].get('dblReceiveUOMConvFactor'));
             current.set('strUnitType', records[0].get('strReceiveUOMType'));
+            current.set('intCommodityId', records[0].get('intCommodityId'));
             current.set('intOwnershipType', 1);
             current.set('strOwnershipType', 'Own');
 
@@ -860,6 +874,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         else if (combo.itemId === 'cboOwnershipType')
         {
             current.set('intOwnershipType', records[0].get('intOwnershipType'));
+        }
+        else if (combo.itemId === 'cboGrade')
+        {
+            current.set('intGradeId', records[0].get('intCommodityAttributeId'));
         }
         this.calculateGrossWeight(current);
     },
@@ -1310,6 +1328,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('dblUnitCost', po.get('dblCost'));
                 current.set('dblLineTotal', po.get('dblTotal'));
                 current.set('strLotTracking', po.get('strLotTracking'));
+                current.set('intCommodityId', po.get('intCommodityId'));
                 current.set('intOwnershipType', 1);
                 current.set('strOwnershipType', 'Own');
                 current.set('intSubLocationId', po.get('intSubLocationId'));
@@ -1338,11 +1357,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         current.set('dblUnitCost', po.get('dblCost'));
                         current.set('dblLineTotal', po.get('dblTotal'));
                         current.set('strLotTracking', po.get('strLotTracking'));
+                        current.set('intCommodityId', po.get('intCommodityId'));
                         current.set('intOwnershipType', 1);
                         current.set('strOwnershipType', 'Own');
-//                current.set('intSubLocationId', po.get('intSubLocationId'));
                         current.set('intStorageLocationId', po.get('intStorageLocationId'));
-//                current.set('strSubLocationName', po.get('strSubLocationName'));
                         current.set('strStorageLocationName', po.get('strStorageLocationName'));
                         current.set('dblItemUOMConvFactor', po.get('dblItemUOMCF'));
                         current.set('strUnitType', po.get('strStockUOMType'));
@@ -1385,6 +1403,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('dblUnitCost', po.get('dblCost'));
                 current.set('dblLineTotal', po.get('dblTotal'));
                 current.set('strLotTracking', po.get('strLotTracking'));
+                current.set('intCommodityId', po.get('intCommodityId'));
                 current.set('intOwnershipType', 1);
                 current.set('strOwnershipType', 'Own');
                 current.set('intSubLocationId', po.get('intSubLocationId'));
@@ -2428,6 +2447,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 select: this.onSubLocationSelect
             },
             "#cboOwnershipType": {
+                select: this.onReceiptItemSelect
+            },
+            "#cboGrade": {
                 select: this.onReceiptItemSelect
             },
             "#cboStorageLocation": {

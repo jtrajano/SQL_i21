@@ -197,6 +197,19 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         }]
                     }
                 },
+                colGrade: {
+                    dataIndex: 'strGrade',
+                    editor: {
+                        store: '{grade}',
+                        defaultFilters: [
+                            {
+                                column: 'intCommodityId',
+                                value: '{grdInventoryShipment.selection.intCommodityId}',
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
+                },
                 colOwnershipType: {
                     hidden: '{checkHideOwnershipType}',
                     dataIndex: 'strOwnershipType',
@@ -420,6 +433,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     current.set('strItemNo', records[0].get('strItemNo'));
                     current.set('strItemDescription', records[0].get('strItemDescription'));
                     current.set('strLotTracking', records[0].get('strLotTracking'));
+                    current.set('intCommodityId', records[0].get('intCommodityId'));
                     current.set('intItemUOMId', records[0].get('intItemUOMId'));
                     current.set('strUnitMeasure', records[0].get('strItemUOM'));
                     current.set('dblQuantity', records[0].get('dblBalance'));
@@ -446,6 +460,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     current.set('strItemNo', records[0].get('strItemNo'));
                     current.set('strItemDescription', records[0].get('strItemDescription'));
                     current.set('strLotTracking', records[0].get('strLotTracking'));
+                    current.set('intCommodityId', records[0].get('intCommodityId'));
                     current.set('intItemUOMId', records[0].get('intItemUOMId'));
                     current.set('strUnitMeasure', records[0].get('strUnitMeasure'));
                     current.set('dblQuantity', records[0].get('dblQtyOrdered'));
@@ -490,6 +505,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         else if (combo.itemId === 'cboOwnershipType') {
             current.set('intOwnershipType', records[0].get('intOwnershipType'));
         }
+        else if (combo.itemId === 'cboGrade')
+        {
+            current.set('intGradeId', records[0].get('intCommodityAttributeId'));
+        }
     },
 
     onItemNoSelect: function(combo, records, eOpts) {
@@ -505,6 +524,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('intItemId', records[0].get('intItemId'));
             current.set('strItemDescription', records[0].get('strDescription'));
             current.set('strLotTracking', records[0].get('strLotTracking'));
+            current.set('intCommodityId', records[0].get('intCommodityId'));
             current.set('intItemUOMId', records[0].get('intIssueUOMId'));
             current.set('strUnitMeasure', records[0].get('strIssueUOM'));
             current.set('dblUnitPrice', records[0].get('dblLastCost'));
@@ -1311,6 +1331,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 select: this.onOrderNumberSelect
             },
             "#cboOwnershipType": {
+                select: this.onOrderNumberSelect
+            },
+            "#cboGrade": {
                 select: this.onOrderNumberSelect
             },
             "#cboUOM": {

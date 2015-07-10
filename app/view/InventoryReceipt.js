@@ -1266,6 +1266,37 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
+                                                                        itemId: 'colGrade',
+                                                                        width: 90,
+                                                                        dataIndex: 'strDescription',
+                                                                        text: 'Grade',
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intCommodityAttributeId',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intCommodityId',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strDescription',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Grade',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboGrade',
+                                                                            displayField: 'strDescription',
+                                                                            valueField: 'strDescription'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
                                                                         itemId: 'colContainer',
                                                                         width: 90,
                                                                         dataIndex: 'strDescription',

@@ -169,6 +169,7 @@ namespace iRely.Inventory.Model
         public int? intTaxCodeId { get; set; }
         public int? intDockDoorId { get; set; }
         public string strNotes { get; set; }
+        public int? intGradeId { get; set; }
         public int? intSort { get; set; }
 
         private string _orderNumber;
@@ -447,6 +448,41 @@ namespace iRely.Inventory.Model
                 _ownershipType = value;
             }
         }
+        private string _grade;
+        [NotMapped]
+        public string strGrade
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_grade))
+                    if (vyuICGetInventoryShipmentItem != null)
+                        return vyuICGetInventoryShipmentItem.strGrade;
+                    else
+                        return null;
+                else
+                    return _grade;
+            }
+            set
+            {
+                _grade = value;
+            }
+        }
+        private int? _commodityId;
+        [NotMapped]
+        public int? intCommodityId
+        {
+            get
+            {
+                if (vyuICGetInventoryShipmentItem != null)
+                    return vyuICGetInventoryShipmentItem.intCommodityId;
+                else
+                    return null;
+            }
+            set
+            {
+                _commodityId = value;
+            }
+        }
 
         public vyuICGetInventoryShipmentItem vyuICGetInventoryShipmentItem { get; set; }
         public ICollection<tblICInventoryShipmentItemLot> tblICInventoryShipmentItemLots { get; set; }
@@ -466,6 +502,7 @@ namespace iRely.Inventory.Model
         public string strItemNo { get; set; }
         public string strItemDescription { get; set; }
         public string strLotTracking { get; set; }
+        public int? intCommodityId { get; set; }
         public int? intSubLocationId { get; set; }
         public string strSubLocationName { get; set; }
         public string strOrderUOM { get; set; }
@@ -477,6 +514,8 @@ namespace iRely.Inventory.Model
         public decimal? dblUnitPrice { get; set; }
         public decimal? dblDiscount { get; set; }
         public decimal? dblTotal { get; set; }
+        public int? intGradeId { get; set; }
+        public string strGrade { get; set; }
 
         public tblICInventoryShipmentItem tblICInventoryShipmentItem { get; set; }
     }

@@ -2450,6 +2450,70 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "dataIndex": "strDescription",
+                                                                "itemId": "colGrade",
+                                                                "text": "Grade",
+                                                                "width": 90
+                                                            },
+                                                            "name": "MyColumn59",
+                                                            "designerId": "f7891ac0-bde2-43d7-9fb2-a77666b30afe",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intCommodityAttributeId',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intCommodityId',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strDescription',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Grade',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t}",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strDescription",
+                                                                        "itemId": "cboGrade",
+                                                                        "valueField": "strDescription"
+                                                                    },
+                                                                    "name": "MyComboBox4",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "7ba8752d-9e3d-45bb-8dbb-318ebdec7c01",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "strDescription",
                                                                 "itemId": "colContainer",
                                                                 "text": "Container",
                                                                 "width": 90

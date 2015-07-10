@@ -14,6 +14,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'Inventory.store.BufferedLot',
         'Inventory.store.BufferedOtherCharges',
         'Inventory.store.BufferedStorageLocation',
+        'Inventory.store.BufferedGradeAttribute',
         'EntityManagement.store.VendorBuffered',
         'AccountsPayable.store.PurchaseOrderDetail',
         'EntityManagement.store.LocationBuffered',
@@ -229,6 +230,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         vendor: {
             type: 'emvendorbuffered'
+        },
+        grade: {
+            type: 'icbufferedgradeattribute'
         },
         allocateBy: {
             autoLoad: true,

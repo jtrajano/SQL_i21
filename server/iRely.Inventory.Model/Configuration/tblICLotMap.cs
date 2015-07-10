@@ -60,6 +60,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dtmManufacturedDate).HasColumnName("dtmManufacturedDate");
             this.Property(t => t.ysnReleasedToWarehouse).HasColumnName("ysnReleasedToWarehouse");
             this.Property(t => t.ysnProduced).HasColumnName("ysnProduced");
+            this.Property(t => t.ysnInCustody).HasColumnName("ysnInCustody");
+            this.Property(t => t.intGradeId).HasColumnName("intGradeId");
+            this.Property(t => t.strGrade).HasColumnName("strGrade");
             this.Property(t => t.dtmDateCreated).HasColumnName("dtmDateCreated");
             this.Property(t => t.intCreatedUserId).HasColumnName("intCreatedUserId");
         }
