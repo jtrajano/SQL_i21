@@ -110,6 +110,7 @@
     <None Include="Scripts\Pre-Deployment\12_EM\07_EntityFarmSchemaUpdate.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\08_EntityShipViaSchemaUpdate.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\UpdateShipTo.sql" />
+    <None Include="Scripts\Pre-Deployment\8_AP\UpdateShipVia.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />

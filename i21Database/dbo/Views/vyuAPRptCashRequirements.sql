@@ -2,25 +2,29 @@
 WITH SCHEMABINDING
 AS
 SELECT
-	dbo.tblAPVendor.intEntityVendorId,
-	dbo.tblAPVendor.strVendorId,
-	ISNULL(tblAPVendor.strVendorId, '') + ' - ' + isnull(tblEntity.strName,'''') as strVendorIdName,
-	--dbo.tblAPPayment.dtmDatePaid,
-	dbo.tblAPBill.strBillId,
-	dbo.tblAPBill.dtmDate,
-	dbo.tblAPBill.dtmDueDate,
-	dbo.tblAPBill.dtmDiscountDate,
-	dbo.tblAPPaymentDetail.dblPayment,
-	dbo.tblAPPaymentDetail.dblDiscount,
-	dbo.tblAPPayment.dblUnapplied,
-	dbo.tblAPPayment.dblWithheld,
-	dbo.tblAPPayment.dblAmountPaid
-FROM dbo.tblAPVendor
-INNER JOIN dbo.tblAPPayment
-ON tblAPPayment.intEntityVendorId = tblAPVendor.intEntityVendorId
-INNER JOIN dbo.tblAPPaymentDetail
-ON dbo.tblAPPayment.intPaymentId = dbo.tblAPPaymentDetail.intPaymentId
-INNER JOIN dbo.tblAPBill
-ON dbo.tblAPBill.intBillId = dbo.tblAPPaymentDetail.intBillId
-LEFT JOIN dbo.tblEntity
-ON dbo.tblEntity.intEntityId = dbo.tblAPVendor.intEntityVendorId
+		APV.intEntityVendorId,
+		APV.strVendorId,
+		ISNULL(APV.strVendorId, '') + ' - ' + isnull(E.strName,'''') as strVendorIdName,
+		--dbo.tblAPPayment.dtmDatePaid,
+		APB.strBillId,
+		APB.dtmDate,
+		APB.dtmDueDate,
+		APB.dtmDiscountDate,
+		APPD.dblPayment,
+		APPD.dblDiscount,
+		APP.dblUnapplied,
+		APP.dblWithheld,
+		APP.dblAmountPaid
+	FROM dbo.tblAPVendor APV
+	INNER JOIN dbo.tblAPPayment APP
+		ON APP.intEntityVendorId = APV.intEntityVendorId
+	INNER JOIN dbo.tblAPPaymentDetail APPD
+		ON APP.intPaymentId = APPD.intPaymentId
+	INNER JOIN dbo.tblAPBill APB
+		ON APB.intBillId = APPD.intBillId
+	LEFT JOIN dbo.tblEntity E
+		ON E.intEntityId = APV.intEntityVendorId
+	WHERE 
+			APB.ysnForApproval != 1									   --Will not show For Approval Bills
+		AND (APB.ysnApproved != 0 AND APB.dtmApprovalDate IS NOT NULL) --Will not show Rejected approval bills
+		AND APB.intTransactionType != 6                                --Will not show BillTemplate
