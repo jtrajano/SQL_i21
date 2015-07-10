@@ -1411,6 +1411,11 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                     hidden: true
                                                                                 },
                                                                                 {
+                                                                                    dataIndex: 'intGradeId',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
                                                                                     dataIndex: 'intOwnershipType',
                                                                                     dataType: 'numeric',
                                                                                     hidden: true

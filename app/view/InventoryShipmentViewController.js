@@ -269,6 +269,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             column: 'intOwnershipType',
                             value: '{grdInventoryShipment.selection.intOwnershipType}',
                             conjunction: 'and'
+                        },{
+                            column: 'intGradeId',
+                            value: '{grdInventoryShipment.selection.intGradeId}',
+                            conjunction: 'and'
                         }]
                     }
                 },
