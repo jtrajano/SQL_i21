@@ -18,6 +18,7 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
     ,[dblFreightRate] DECIMAL(18, 6) NULL DEFAULT 0         -- Freight Rate 
 	,[strComments] NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL --comments
-	,[strSourceId] NVARCHAR (250)  COLLATE Latin1_General_CI_AS NOT NULL -- Source Id of the Originated Transaction
+	,[strSourceId] NVARCHAR (250)  COLLATE Latin1_General_CI_AS NOT NULL -- Source Transaction Number of the Originated Transaction
+    ,[intSourceId] INT NOT NULL						                     -- Key Value of the source Id
     ,[strPurchaseOrder] NVARCHAR (25)  COLLATE Latin1_General_CI_AS  NULL -- Purchase Order Number
 )

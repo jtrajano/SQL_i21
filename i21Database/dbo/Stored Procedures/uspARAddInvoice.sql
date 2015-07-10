@@ -1,7 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARAddInvoice]
 	 @InvoiceEntries InvoiceStagingTable READONLY	
-	,@intUserId AS INT	
-	,@InvoiceId AS INT OUTPUT 
+	,@intUserId AS INT		
 AS
 
 BEGIN
@@ -256,8 +255,9 @@ SELECT DISTINCT
 FROM 
 	[tblARInvoice] IV
 JOIN @temp TE
-     on TE.InvoiceNumber = IV.strInvoiceNumber
-		
+     on TE.InvoiceNumber = IV.strInvoiceNumber;
+
+DECLARE @InvoiceId as int;		
 WHILE EXISTS(SELECT NULL FROM @Invoices)
 BEGIN
 	SELECT TOP 1 @InvoiceId = [intInvoiceID] FROM @Invoices
@@ -276,5 +276,15 @@ BEGIN
 
 	DELETE FROM @Invoices WHERE [intInvoiceID] = @InvoiceId
 END
-           
+  
+-- Output the values to calling SP  
+      
+select IE.intSourceId,
+       IV.intInvoiceId
+FROM
+    @InvoiceEntries IE
+	JOIN @temp TE
+	on TE.Customer = IE.intEntityCustomerId and TE.Location = IE.intLocationId	
+	JOIN tblARInvoice IV
+	    on TE.InvoiceNumber = IV.strInvoiceNumber and IE.strSourceId = IV.strInvoiceOriginId	       
 END           

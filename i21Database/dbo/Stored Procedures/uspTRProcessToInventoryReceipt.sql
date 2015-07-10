@@ -112,7 +112,9 @@ INSERT into @ReceiptOutputTable(
                                             
 Declare @incval int,
         @SouceId int,
-		@ReceiptId int;
+		@ReceiptId int,
+		@intEntityId int,
+		@strTransactionId nvarchar(50);
 select @total = count(*) from @ReceiptOutputTable;
 set @incval = 1 
 WHILE @incval <=@total 
@@ -123,11 +125,15 @@ BEGIN
    update tblTRTransportReceipt 
        set intInventoryReceiptId = @ReceiptId
          where @SouceId = intTransportReceiptId 
+    --Posting the Inventory Receipts that were created
+	select @strTransactionId = strReceiptNumber from tblICInventoryReceipt where intInventoryReceiptId = @ReceiptId
+	select TOP 1 @intEntityId = intEntityId FROM dbo.tblSMUserSecurity WHERE intUserSecurityID = @intUserId
+	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;
+	--EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
    SET @incval = @incval + 1;
 END;
 
---	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;
---	EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
+
 
 END TRY
 BEGIN CATCH

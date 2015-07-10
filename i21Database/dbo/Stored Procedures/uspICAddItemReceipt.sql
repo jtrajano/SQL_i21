@@ -125,12 +125,12 @@ SELECT 	 strReceiptNumber       = TE.ReceiptNumber
 		,ysnPosted				= 0
 FROM	@ReceiptEntries RE
         JOIN @temp TE on TE.Vendor = RE.intEntityVendorId 
-		             and TE.BillOfLadding = RE.strBillOfLadding 
-					 and TE.Currency = RE.intCurrencyId
-					 and TE.Location = RE.intLocationId
-					 and TE.ReceiptType = RE.strReceiptType
-					 and TE.ShipFrom = RE.intShipFromId
-					 and TE.ShipVia = RE.intShipViaId		           
+		             and IsNull(TE.BillOfLadding,0) = IsNull(RE.strBillOfLadding,0) 
+					 and IsNull(TE.Currency,0) = IsNull(RE.intCurrencyId,0)
+					 and IsNull(TE.Location,0) = IsNull(RE.intLocationId,0)
+					 and IsNull(TE.ReceiptType,0) = IsNull(RE.strReceiptType,0)
+					 and IsNull(TE.ShipFrom,0) = IsNull(RE.intShipFromId,0)
+					 and IsNull(TE.ShipVia,0) = IsNull(RE.intShipViaId,0)		           
         group by  RE.intEntityVendorId,RE.strBillOfLadding,TE.ReceiptNumber,RE.strReceiptType,RE.intLocationId,RE.intShipViaId,RE.intShipFromId,RE.intCurrencyId
 
 -- Get the identity value from tblICInventoryReceipt to check if the insert was with no errors 
@@ -194,12 +194,12 @@ SELECT	intInventoryReceiptId	= IE.intInventoryReceiptId
 								  END
 FROM	@ReceiptEntries RE
 JOIN @temp TE on TE.Vendor = RE.intEntityVendorId 
-		             and TE.BillOfLadding = RE.strBillOfLadding 
-					 and TE.Currency = RE.intCurrencyId
-					 and TE.Location = RE.intLocationId
-					 and TE.ReceiptType = RE.strReceiptType
-					 and TE.ShipFrom = RE.intShipFromId
-					 and TE.ShipVia = RE.intShipViaId	
+		             and IsNull(TE.BillOfLadding,0) = IsNull(RE.strBillOfLadding,0) 
+					 and IsNull(TE.Currency,0) = IsNull(RE.intCurrencyId,0)
+					 and IsNull(TE.Location,0) = IsNull(RE.intLocationId,0)
+					 and IsNull(TE.ReceiptType,0) = IsNull(RE.strReceiptType,0)
+					 and IsNull(TE.ShipFrom,0) = IsNull(RE.intShipFromId,0)
+					 and IsNull(TE.ShipVia,0) = IsNull(RE.intShipViaId,0)		   
 		JOIN tblICInventoryReceipt IE on IE.strReceiptNumber = TE.ReceiptNumber			 	       
         INNER JOIN dbo.tblICItemUOM ItemUOM			
 			ON ItemUOM.intItemId = RE.intItemId  AND ItemUOM.intItemUOMId = RE.intItemUOMId			
@@ -225,11 +225,11 @@ select
 		,IE.intInventoryReceiptId	
 FROM	@ReceiptEntries RE
 JOIN @temp TE on TE.Vendor = RE.intEntityVendorId 
-		             and TE.BillOfLadding = RE.strBillOfLadding 
-					 and TE.Currency = RE.intCurrencyId
-					 and TE.Location = RE.intLocationId
-					 and TE.ReceiptType = RE.strReceiptType
-					 and TE.ShipFrom = RE.intShipFromId
-					 and TE.ShipVia = RE.intShipViaId	
+		             and IsNull(TE.BillOfLadding,0) = IsNull(RE.strBillOfLadding,0) 
+					 and IsNull(TE.Currency,0) = IsNull(RE.intCurrencyId,0)
+					 and IsNull(TE.Location,0) = IsNull(RE.intLocationId,0)
+					 and IsNull(TE.ReceiptType,0) = IsNull(RE.strReceiptType,0)
+					 and IsNull(TE.ShipFrom,0) = IsNull(RE.intShipFromId,0)
+					 and IsNull(TE.ShipVia,0) = IsNull(RE.intShipViaId,0)		   
 		JOIN tblICInventoryReceipt IE on IE.strReceiptNumber = TE.ReceiptNumber			 	       
 
