@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSMMigrateRecurringTransaction]
 AS
 BEGIN
-
+	/* ACCOUNTS PAYABLE */
 	BEGIN TRY
 		BEGIN TRANSACTION
 		IF EXISTS ( SELECT  1
@@ -147,5 +147,138 @@ BEGIN
 		PRINT 'Actual error number: ' + CAST(@ErrorNumber AS VARCHAR(10))
 		PRINT 'Actual line number: ' + CAST(@ErrorLine AS VARCHAR(10))
 	END CATCH
+  
+  
+  	/* GENERAL JOURNAL */
+	BEGIN TRY
+		BEGIN TRANSACTION
+		IF EXISTS ( SELECT  1
+						FROM    INFORMATION_SCHEMA.TABLES
+						WHERE   table_schema = 'dbo'
+								AND TABLE_NAME = 'tblSMRecurringTransaction' )
+		BEGIN			
+			SELECT  main.strJournalRecurringId
+			,b.intJournalId [intTransactionId]
+			, b.strJournalId [strTransactionNumber]
+			, 'General Journal' [strTransactionType]
+			, main.strReference [strReference]
+			, sec.strFullName [strResponsibleUser]
+			, 0 [intWarningDays]
+			, main.strRecurringPeriod [strFrequency]
+			, (SELECT TOP 1 dtmLastProcess from dbo.tblGLRecurringHistory history
+			WHERE history.strJournalRecurringId = main.strJournalRecurringId
+			ORDER BY dtmNextProcess DESC) [dtmLastProcess]
+			, (SELECT TOP 1 dtmNextProcess from dbo.tblGLRecurringHistory history
+			WHERE history.strJournalRecurringId = main.strJournalRecurringId
+			ORDER BY dtmNextProcess DESC) [dtmNExtProcess]
+			, 0 [ysnDue]
+			, main.strDays [strDayOfMonth]
+			, main.dtmStartDate [dtmStartDate]
+			, main.dtmEndDate [dtmEndDate]
+			, 1 [ysnActive]
+			, 0 [intIteration]
+			, CAST(main.strUserMode AS INT) [intUserId]
+			, 1 [ysnAvailable]
+			, b.intConcurrencyId
+			INTO #tmp
+			FROM dbo.tblGLJournalRecurring main
+			INNER JOIN dbo.tblGLJournal b ON main.intJournalId = b.intJournalId
+			JOIN dbo.tblSMUserSecurity sec ON CAST(main.strUserMode AS INT) = sec.intUserSecurityID
+			WHERE main.strJournalRecurringId IN (SELECT DISTINCT strJournalRecurringId FROM dbo.tblGLRecurringHistory)
+			AND main.ysnImported = 0
+
+			PRINT '------------------BEGIN tblSMRecurringTransaction------------------'
+			INSERT INTO dbo.tblSMRecurringTransaction
+				( intTransactionId ,
+				  strTransactionNumber ,
+				  strTransactionType ,
+				  strReference ,
+				  strResponsibleUser ,
+				  intWarningDays ,
+				  strFrequency ,
+				  dtmLastProcess ,
+				  dtmNextProcess ,
+				  ysnDue ,
+				  strDayOfMonth ,
+				  dtmStartDate ,
+				  dtmEndDate ,
+				  ysnActive ,
+				  intIteration ,
+				  intUserId ,
+				  ysnAvailable ,
+				  intConcurrencyId
+				)
+			SELECT intTransactionId
+				, strTransactionNumber
+				, strTransactionType
+				, strReference
+				, strResponsibleUser
+				, intWarningDays
+				, strFrequency
+				, dtmLastProcess
+				, dtmNExtProcess
+				, ysnDue
+				, strDayOfMonth
+				, dtmStartDate
+				, dtmEndDate
+				, ysnActive
+				, intIteration
+				, intUserId
+				, ysnAvailable
+				, intConcurrencyId
+			FROM #tmp
+			PRINT '------------------END tblSMRecurringTransaction--------------------'
+	
+			PRINT '------------------BEGIN tblSMRecurringHistory------------------'
+			INSERT INTO dbo.tblSMRecurringHistory
+					( strTransactionNumber ,
+					  strTransactionCreated ,
+					  dtmDateProcessed ,
+					  strReference ,
+					  dtmNextProcess ,
+					  dtmLastProcess ,
+					  strTransactionType ,
+					  intConcurrencyId
+					)
+			SELECT #tmp.strTransactionNumber
+				, history.strJournalId
+				, history.dtmProcessDate
+				, history.strReference
+				, history.dtmNextProcess
+				, history.dtmLastProcess
+				, history.strTransactionType
+				, history.intConcurrencyId
+			FROM dbo.tblGLRecurringHistory history
+			INNER JOIN #tmp ON history.strJournalRecurringId = #tmp.strJournalRecurringId
+			WHERE history.strJournalId NOT IN (SELECT strTransactionCreated FROM dbo.tblSMRecurringHistory)
+			PRINT '------------------END tblSMRecurringHistory--------------------'
+
+			-- UPDATE GJ RECURRING IF DONE IMPORTING
+			UPDATE dbo.tblGLJournalRecurring
+			SET ysnImported = 1
+			FROM dbo.tblGLJournalRecurring gl
+			INNER JOIN #tmp ON gl.strJournalRecurringId = #tmp.strJournalRecurringId
+
+			DROP TABLE #tmp
+		END
+		ELSE
+		BEGIN
+			PRINT 'Table [tblSMRecurringTransaction] doesn''t exist'
+		END
+
+		--ROLLBACK TRANSACTION --TEST ONLY: REPLACE WITH 'BEGIN TRANSACTION'
+		COMMIT TRANSACTION
+
+	END TRY
+	BEGIN CATCH
+		IF @@TRANCOUNT > 0
+			ROLLBACK TRANSACTION
+	
+		DECLARE @glErrorNumber INT = ERROR_NUMBER()
+		DECLARE @glErrorLine INT = ERROR_LINE()
+
+		PRINT 'Actual error number: ' + CAST(@glErrorNumber AS VARCHAR(10))
+		PRINT 'Actual line number: ' + CAST(@glErrorLine AS VARCHAR(10))
+	END CATCH    
 
 END
