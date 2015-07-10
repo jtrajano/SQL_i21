@@ -4,13 +4,15 @@ AS
 SELECT
 	 AC.[intEntityCustomerId]
 	,AC.[strCustomerNumber]
-	,TMS.[intSiteID] 
+	,TMS.[intSiteID]
 	,TMS.[intSiteNumber]
+	,REPLACE(STR(TMS.[intSiteNumber], 4), SPACE(1), '0') AS [strSiteNumber]
 	,TMS.[strDescription] 
 	,TMS.[strBillingBy] 
 	,TMS.[dblLastMeterReading] 
 	,TMD.[strMeterType]
 	,TMD.[dblConversionFactor] 
+	,TMS.[ysnActive] 
 FROM
 	tblTMSite TMS
 INNER JOIN
