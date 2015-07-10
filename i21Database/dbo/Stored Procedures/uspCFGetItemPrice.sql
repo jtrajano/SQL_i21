@@ -51,14 +51,12 @@ AS
 --4. Standard Pricing
 
 EXEC [uspARGetItemPrice] 
-@ItemId = @CFItemId,  
-@CustomerId = @CFCustomerId,  
-@LocationId = @CFLocationId,  
-@Quantity = @CFQuantity,  
-@ItemUOMId = @CFItemUOMId,  
-@TransactionDate = @CFTransactionDate,
-@Price = @CFPriceOut OUTPUT,
-@Pricing = @CFPricingOut OUTPUT
+@ItemId = @CFItemId,    
+@CustomerId = @CFCustomerId,    
+@LocationId = @CFLocationId,    
+@Quantity = @CFQuantity,    
+@Price = @CFPriceOut OUTPUT,  
+@Pricing = @CFPricingOut OUTPUT  
 
 IF(@CFPriceOut IS NOT NULL) 
    BEGIN    
