@@ -118,7 +118,7 @@ WHILE EXISTS(SELECT NULL FROM @ItemTaxes WHERE [intInvoiceDetailId] IS NULL OR [
 			,@Tax				= [dblTax]
 			,@Rate				= [numRate]
 			,@CalculationMethod	= [strCalculationMethod]
-			,@CheckoffTax		= [ysnCheckOffTax]
+			,@CheckoffTax		= [ysnCheckoffTax]
 		FROM
 			@ItemTaxes
 		WHERE [Id] = @Id
