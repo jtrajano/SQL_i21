@@ -1952,6 +1952,7 @@
     <Build Include="dbo\Stored Procedures\uspSMMigrateRecurringTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGetItemTaxTotal.sql" />
     <Build Include="dbo\Tables\tblGLAccountRange.sql" />
+    <Build Include="dbo\Views\vyuHDReminder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
