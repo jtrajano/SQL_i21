@@ -1684,6 +1684,10 @@
     <Build Include="dbo\Tables\tblICFixLog.sql" />
     <None Include="Scripts\Post-Deployment\IC\00_RequiredDataFix.sql" />
     <Build Include="dbo\Tables\tblPREmployeeDirectDeposit.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeEarning.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeDeduction.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOff.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
