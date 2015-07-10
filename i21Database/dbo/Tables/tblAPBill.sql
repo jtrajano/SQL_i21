@@ -67,7 +67,7 @@
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblGLAccount_intAccountId] FOREIGN KEY (intAccountId) REFERENCES tblGLAccount(intAccountId),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMCompanyLocation_intShipToId] FOREIGN KEY (intShipToId) REFERENCES tblSMCompanyLocation(intCompanyLocationId),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblEntityLocation_intShipFromId] FOREIGN KEY (intShipFromId) REFERENCES tblEntityLocation(intEntityLocationId),
-	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMShipVia_intShipViaId] FOREIGN KEY (intShipFromId) REFERENCES tblSMShipVia(intEntityShipViaId),
+	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblSMShipVia_intShipViaId] FOREIGN KEY (intShipViaId) REFERENCES tblSMShipVia(intEntityShipViaId),
 	CONSTRAINT [FK_dbo.tblAPBill_dbo.tblEntityContact_intContactId] FOREIGN KEY (intContactId) REFERENCES tblEntity(intEntityId),
 	CONSTRAINT [UK_dbo.tblAPBill_strBillId] UNIQUE (strBillId)
 );

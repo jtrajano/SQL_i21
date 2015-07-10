@@ -53,7 +53,7 @@
 	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEntity(intEntityId),
 	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblSMCompanyLocation_intShipToId] FOREIGN KEY (intShipToId) REFERENCES tblSMCompanyLocation(intCompanyLocationId),
 	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblEntityLocation_intShipFromId] FOREIGN KEY (intShipFromId) REFERENCES tblEntityLocation(intEntityLocationId),
-	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblSMShipVia_intShipViaId] FOREIGN KEY (intShipFromId) REFERENCES tblSMShipVia(intEntityShipViaId),
+	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblSMShipVia_intShipViaId] FOREIGN KEY (intShipViaId) REFERENCES tblSMShipVia(intEntityShipViaId),
 	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblEntityContact_intContactId] FOREIGN KEY (intContactId) REFERENCES tblEntity(intEntityId),
 	CONSTRAINT [FK_dbo.tblPOPurchase_dbo.tblAPVendor_intVendorId] FOREIGN KEY ([intEntityVendorId]) REFERENCES tblAPVendor (intEntityVendorId)
 );

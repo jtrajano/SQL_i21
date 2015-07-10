@@ -59,7 +59,7 @@
 :r .\8_AP\1_1420_to_1430.sql
 :r .\8_AP\DropCK_PO_OrderStatus.sql
 :r .\8_AP\UpdateShipTo.sql
-:r .\8_AP\UpdateShipVia.sql
+
 --:r .\8_AP\AddPOVendorConstraint.sql
 --:r .\8_AP\FixEntityId.sql
 --:r .\8_AP\FixstrBillId.sql
@@ -90,7 +90,7 @@
 :r .\12_EM\05_EntitySplitSchemaUpdate.sql
 :r .\12_EM\07_EntityFarmSchemaUpdate.sql
 :r .\12_EM\08_EntityShipViaSchemaUpdate.sql
-
+:r .\8_AP\UpdateShipVia.sql
 :r .\12_EM\03_EntityCustomerFarmRename_DataFix.sql
 
 
