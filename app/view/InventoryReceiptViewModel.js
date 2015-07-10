@@ -430,6 +430,14 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             else
                 return true;
         },
+        hasItemCommodity: function (get) {
+            if (get('grdInventoryReceipt.selection.intCommodityId')) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        },
         disableSourceType: function (get) {
             if (get('current.ysnPosted') === true) {
                 return true;
