@@ -1961,6 +1961,7 @@
     <Build Include="dbo\Tables\tblSTMassUpdateReportMaster.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\5_UpdateOrderStatus.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\6_UpdateCustomerShipBillTo.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\7_UpdateInvoiceOrderSalesperson.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
