@@ -17,7 +17,17 @@ SELECT Load.intLoadId
         ,Load.dtmScheduledDate
         ,Load.dblQuantity
         ,Load.ysnInProgress
-        ,strScaleTicketNo = ST.intTicketNumber
+        ,strScaleTicketNo = CASE WHEN IsNull(Load.intTicketId, 0) <> 0 
+								 THEN 
+									CAST(ST.intTicketNumber AS VARCHAR(100))
+								 ELSE 
+									CASE WHEN IsNull(Load.intTransportLoadId, 0) <> 0 
+										THEN 
+											TL.strTransaction
+										ELSE 
+											NULL 
+										END 
+								 END
         ,Load.dblDeliveredQuantity
         ,Load.dtmDeliveredDate
         ,strEquipmentType = EQ.strEquipmentType
@@ -42,4 +52,5 @@ LEFT JOIN tblEntityLocation EL ON EL.intEntityLocationId = Load.intEntityLocatio
 LEFT JOIN tblEntity Hauler ON Hauler.intEntityId = Load.intHaulerEntityId
 LEFT JOIN vyuCTContractDetailView CDetail ON CDetail.intContractDetailId = Load.intContractDetailId
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = Load.intTicketId
+LEFT JOIN tblTRTransportLoad TL ON TL.intTransportLoadId = Load.intTransportLoadId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = Load.intEquipmentTypeId
