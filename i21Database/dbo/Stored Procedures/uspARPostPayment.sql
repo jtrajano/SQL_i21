@@ -1224,7 +1224,7 @@ IF @recap = 0
 			UPDATE 
 				tblARPaymentDetail
 			SET 
-				dblPayment = CASE WHEN (ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00)) < A.dblPayment THEN (ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00)) ELSE A.dblPayment END
+				dblPayment = CASE WHEN ((ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) < A.dblPayment THEN ((ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) ELSE A.dblPayment END
 			FROM
 				tblARPaymentDetail A
 			INNER JOIN
@@ -1238,7 +1238,7 @@ IF @recap = 0
 			UPDATE 
 				tblARPaymentDetail
 			SET 
-				dblAmountDue = (ISNULL(C.dblAmountDue, 0.00) - ISNULL(A.dblDiscount,0.00)) - A.dblPayment							
+				dblAmountDue = (((ISNULL(C.dblAmountDue, 0.00) - ISNULL(A.dblDiscount,0.00)) * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) - A.dblPayment)
 			FROM
 				tblARPaymentDetail A
 			INNER JOIN
@@ -1582,7 +1582,7 @@ IF @recap = 0
 		UPDATE 
 			tblARPaymentDetail
 		SET 
-			dblPayment = CASE WHEN (ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00)) < A.dblPayment THEN (ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00)) ELSE A.dblPayment END
+			dblPayment = CASE WHEN ((ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00)) * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) < A.dblPayment THEN ((ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) ELSE A.dblPayment END
 		FROM
 			tblARPaymentDetail A
 		INNER JOIN
@@ -1598,7 +1598,7 @@ IF @recap = 0
 		UPDATE 
 			tblARPaymentDetail
 		SET 
-			dblAmountDue = (ISNULL(C.dblAmountDue, 0.00) - ISNULL(A.dblDiscount,0.00)) - A.dblPayment							
+			dblAmountDue = (((ISNULL(C.dblAmountDue, 0.00) - ISNULL(A.dblDiscount,0.00) * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END))) - A.dblPayment)
 		FROM
 			tblARPaymentDetail A
 		INNER JOIN
