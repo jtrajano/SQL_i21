@@ -3724,4 +3724,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intItemTypeSubCode" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="8d9364c5-69fd-4dfb-9760-f27c7deced19" ChangeDateTime="07/13/2015 11:46:56">
+    <Property Name="ElementName" Value="[dbo].[tblWHTaskPriority].[strIternalCode]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblWHTaskPriority]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strInternalCode]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="fb31baa1-eefd-412c-ae4d-2d70cec7be3e" ChangeDateTime="07/13/2015 11:47:34">
+    <Property Name="ElementName" Value="[dbo].[tblWHTaskState].[strIternalCode]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblWHTaskState]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strInternalCode]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="dfa95afd-ce93-4b23-8881-67b16036c879" ChangeDateTime="07/13/2015 11:48:12">
+    <Property Name="ElementName" Value="[dbo].[tblWHTaskType].[strIternalCode]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblWHTaskType]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strInternalCode]" />
+  </Operation>
 </Operations>
