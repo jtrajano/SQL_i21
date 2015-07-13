@@ -74,29 +74,3 @@ FROM (
 	) t
 	
 
-
-				,dtmTradeDate
-				,intOriginalQty
-				,Long1
-				,Sell1
-				,intNet1
-				,dblActual
-				,(SELECT dbo.fnRKGetLatestClosingPrice(intFutureMarketId, intFutureMonthId, @dtmToDate)
-				  ) AS dblClosing1
-				,dblPrice
-				,dblContractSize
-				,intConcurrencyId
-				,dblFutCommission1
-				,MatchLong
-				,MatchShort
-				,NetPnL
-			FROM vyuRKUnrealizedPnL
-			) t
-		) u
-	GROUP BY intFutureMonthId
-		,intFutureMarketId
-		,strFutMarketName
-		,strFutureMonth
-	) t
-	
-
