@@ -155,6 +155,42 @@ FROM	dbo.tblCTContractDetail ContractDetail
 WHERE	ContractDetail.intContractHeaderId = @PurchaseContractId
 		AND dbo.fnIsStockTrackingItem(ContractDetail.intItemId) = 1
 
+INSERT INTO tblICInventoryReceiptCharge
+(
+		intInventoryReceiptId,
+		intChargeId,
+		ysnInventoryCost,
+		strCostMethod,
+		dblRate,
+		intCostUOMId,
+		intEntityVendorId,
+		dblAmount,
+		strAllocateCostBy,
+		strCostBilledBy,
+		intSort,
+		intConcurrencyId
+)
+SELECT	@InventoryReceiptId, 
+		CC.intItemId,
+		0,
+		CC.strCostMethod,
+		CC.dblRate,
+		CC.intItemUOMId,
+		CC.intVendorId,
+		NULL,
+		NULL,
+		'Vendor',
+		NULL,
+		1
+FROM	tblCTContractCost CC
+JOIN	tblCTContractDetail CD ON CC.intContractDetailId = CC.intContractDetailId AND CD.intContractHeaderId = @PurchaseContractId
+GROUP 
+BY		CC.intItemId,
+		CC.intVendorId,
+		CC.strCostMethod,
+		CC.dblRate,
+		CC.intItemUOMId
+
 --Re-update the total cost 
 UPDATE	Receipt
 SET		dblInvoiceAmount = (
