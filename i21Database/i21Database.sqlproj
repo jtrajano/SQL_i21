@@ -1941,7 +1941,6 @@
     <Build Include="dbo\Stored Procedures\uspEMMergeEntity.sql" />
     <Build Include="dbo\Views\vyuEMSearchMerge.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUndoStageWorkOrder.sql" />
-    <Build Include="dbo\Views\vyuRKSummaryPnL.sql" />
     <Build Include="dbo\Views\vyuRKUnrealizedPnL.sql" />
     <Build Include="dbo\Views\vyuRKRealizedPnL.sql" />
     <Build Include="dbo\Functions\fnRKGetLatestClosingPrice.sql" />
@@ -1963,6 +1962,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\6_UpdateCustomerShipBillTo.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\7_UpdateInvoiceOrderSalesperson.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSummaryPnL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
