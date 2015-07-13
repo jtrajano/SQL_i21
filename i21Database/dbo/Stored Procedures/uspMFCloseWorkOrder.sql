@@ -74,7 +74,9 @@ BEGIN TRY
 	END
 
 	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Is Cycle Count Mandatory'
-	
+
+	Select @strAttributeValue=NULL
+
 	Select @strAttributeValue=strAttributeValue
 	From tblMFManufacturingProcessAttribute
 	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId

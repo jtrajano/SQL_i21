@@ -143,7 +143,7 @@ BEGIN
 	SELECT 7
 		,'Is Cycle Count Mandatory'
 		,5
-		,4
+		,1
 		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
 END
 GO
