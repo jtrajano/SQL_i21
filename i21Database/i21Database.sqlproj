@@ -1962,6 +1962,10 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\5_UpdateOrderStatus.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\6_UpdateCustomerShipBillTo.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\7_UpdateInvoiceOrderSalesperson.sql" />
+    <Build Include="dbo\Views\vyuTMUniqueItemList.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMValidateInvoiceForSync.sql" />
+    <Build Include="dbo\Functions\fnTMGetCalculatedBurnRate.sql" />
+    <Build Include="dbo\Functions\fnTMComputeNewBurnRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
