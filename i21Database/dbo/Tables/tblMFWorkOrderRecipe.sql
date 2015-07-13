@@ -35,4 +35,4 @@
 
 GO
 
-CREATE INDEX [IX_tblMFRecipe_intItemId] ON [dbo].[tblMFRecipe] ([intItemId])
+CREATE INDEX [IX_tblMFWorkOrderRecipe_intItemId] ON [dbo].[tblMFRecipe] ([intItemId])
