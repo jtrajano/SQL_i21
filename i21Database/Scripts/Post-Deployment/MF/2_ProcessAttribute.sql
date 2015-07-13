@@ -338,3 +338,23 @@ BEGIN
 		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
 END
 GO
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFAttribute
+		WHERE intAttributeId = 17
+		)
+BEGIN
+	INSERT INTO tblMFAttribute (
+		intAttributeId
+		,strAttributeName
+		,intAttributeDataTypeId
+		,intAttributeTypeId
+		,strSQL
+		)
+	SELECT 17
+		,'Is Lot No Editable'
+		,5
+		,4
+		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO
