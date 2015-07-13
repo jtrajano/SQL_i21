@@ -1,5 +1,5 @@
 ﻿CREATE PROC uspRKSummaryPnL    
-   @dtmToDate datetime
+    @dtmToDate datetime
  AS  
   
 SELECT *
@@ -23,6 +23,7 @@ FROM (
 			END dblShortAvgPrice
 		,SUM(ISNULL(dblLong, 0)) - SUM(ISNULL(dblShort, 0)) AS intNet
 		,isnull(SUM(dblClosing), 0) dblUnrealized
+		,isnull(max(dblClosing1), 0) dblClosing
 		,isnull(SUM(dblFutCommission), 0) dblFutCommission
 		,isnull(SUM(dblPrice), 0) AS dblPrice
 		,isnull((
@@ -33,7 +34,7 @@ FROM (
 				), 0) AS dblRealized
 	FROM (
 		SELECT *
-			,isnull(GrossPnL, 0) * (dblClosing1 - dblPrice)-dblFutCommission AS dblClosing
+			,(isnull(GrossPnL, 0) * (isnull(dblClosing1,0) - isnull(dblPrice,0)))-isnull(dblFutCommission,0) AS dblClosing
 		FROM (
 			SELECT GrossPnL
 				,LongWaitedPrice
@@ -48,6 +49,32 @@ FROM (
 				,intFutureMonthId
 				,intCommodityId
 				,intFutureMarketId
+				,dtmTradeDate
+				,intOriginalQty
+				,Long1
+				,Sell1
+				,intNet1
+				,dblActual
+				,(SELECT dbo.fnRKGetLatestClosingPrice(intFutureMarketId, intFutureMonthId, @dtmToDate)
+				  ) AS dblClosing1
+				,dblPrice
+				,dblContractSize
+				,intConcurrencyId
+				,dblFutCommission1
+				,MatchLong
+				,MatchShort
+				,NetPnL
+			FROM vyuRKUnrealizedPnL
+			) t
+		) u
+	GROUP BY intFutureMonthId
+		,intFutureMarketId
+		,strFutMarketName
+		,strFutureMonth
+	) t
+	
+
+
 				,dtmTradeDate
 				,intOriginalQty
 				,Long1
