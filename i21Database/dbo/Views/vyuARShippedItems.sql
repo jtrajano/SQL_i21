@@ -8,8 +8,10 @@ SELECT
 	,SO.[strSalesOrderNumber]
 	,SO.[dtmProcessDate]
 	,SHP.[intInventoryShipmentItemId]
+	,SHP.[strShipmentNumber] 
 	,SOD.[intSalesOrderDetailId]
 	,SO.[intCompanyLocationId]
+	,CL.[strLocationName] 
 	,SO.[intShipToLocationId]
 	,SO.[intFreightTermId]
 	,SOD.[intItemId]	
@@ -63,11 +65,15 @@ INNER JOIN
 		ON SOD.[intItemId] = I.[intItemId]
 LEFT OUTER JOIN
 	tblICStorageLocation SL
-		ON SOD.[intStorageLocationId] = SL.[intStorageLocationId] 
+		ON SOD.[intStorageLocationId] = SL.[intStorageLocationId]
+LEFT OUTER JOIN
+	tblSMCompanyLocation CL
+		ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId] 
 CROSS APPLY
 	(
 	SELECT 
 		 ISI.[intInventoryShipmentItemId]
+		,ISH.[strShipmentNumber] 
 		,ISI.[intLineNo]
 		,ISI.[intItemId]
 		,ISI.[dblQuantity]
@@ -94,6 +100,7 @@ CROSS APPLY
 		AND ISI.[intInventoryShipmentItemId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intInventoryShipmentItemId],0) FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.[intInvoiceId] = tblARInvoice.[intInvoiceId] WHERE tblARInvoice.[ysnPosted] = 1)
 	GROUP BY
 		 ISI.[intInventoryShipmentItemId]
+		,ISH.[strShipmentNumber]
 		,ISI.[intLineNo]
 		,ISI.[intItemId]
 		,ISI.[dblQuantity]
@@ -113,8 +120,10 @@ SELECT
 	,SO.[strSalesOrderNumber]
 	,SO.[dtmProcessDate]
 	,NULL								AS [intInventoryShipmentItemId]
+	,''									AS [strShipmentNumber]
 	,SOD.[intSalesOrderDetailId]
 	,SO.[intCompanyLocationId]
+	,CL.[strLocationName] 
 	,SO.[intShipToLocationId]
 	,SO.[intFreightTermId]
 	,SOD.[intItemId]	
@@ -176,6 +185,9 @@ LEFT JOIN
 LEFT JOIN
 	tblICUnitMeasure U
 		ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
+LEFT OUTER JOIN
+	tblSMCompanyLocation CL
+		ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId]		
 WHERE
 	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId WHERE tblARInvoice.[ysnPosted] = 1)
 	AND SO.[strTransactionType] = 'Order'
