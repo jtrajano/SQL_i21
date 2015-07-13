@@ -18,8 +18,8 @@ BEGIN TRY
 			@StandardCost       DECIMAL (18,6),
 			@RetailPrice        DECIMAL (18,6),
 			@SalesPrice         DECIMAL (18,6),
-		    @SalesStartDate		DATETIME,
-			@SalesEndDate   	DATETIME,
+		    @SalesStartDate		NVARCHAR(250),
+			@SalesEndDate   	NVARCHAR(250),
 			@UpdateReportTable  NVARCHAR(1)
 		
 	                  
@@ -59,8 +59,8 @@ BEGIN TRY
 			Cost		            DECIMAL (18,6),
 			Retail		            DECIMAL (18,6),
 			SalesPrice       		DECIMAL (18,6),
-			SalesStartingDate		DATETIME,
-			SalesEndingDate			DATETIME,
+			SalesStartingDate		NVARCHAR(250),
+			SalesEndingDate			NVARCHAR(250),
 			UpdateReportTable       NVARCHAR(1)
 	)  
     -- Insert statements for procedure here
@@ -586,9 +586,10 @@ BEGIN TRY
 
 	       IF (@SalesStartDate IS NOT NULL)
 	       BEGIN
+		      SET @SalesStartDate = CONVERT(VARCHAR(10),@SalesStartDate,111)
    	          SET @SQL1 = 'INSERT INTO tblSTMassUpdateReportMaster(UpcCode,ItemDescription,ChangeDescription,OldData,NewData)
 	                   select b.strUpcCode, c.strDescription, ''Sales Price Start Date Change'',
-					   CAST(a.dtmBeginDate as NVARCHAR(250)),
+					   REPLACE(CONVERT(NVARCHAR(10),a.dtmBeginDate,111), ''/'', ''-''),
 					   ''' + CAST(@SalesStartDate as NVARCHAR(250)) + ''' from tblICItemSpecialPricing a JOIN tblICItemUOM b ON
                        a.intItemUnitMeasureId = b.intItemUOMId JOIN tblICItem c ON a.intItemId = c.intItemId '
 
@@ -680,9 +681,10 @@ BEGIN TRY
 
 	       IF (@SalesEndDate IS NOT NULL)
 	       BEGIN
+		      SET @SalesEndDate = CONVERT(VARCHAR(10),@SalesEndDate,111)
    	          SET @SQL1 = 'INSERT INTO tblSTMassUpdateReportMaster(UpcCode,ItemDescription,ChangeDescription,OldData,NewData)
 	                   select b.strUpcCode, c.strDescription, ''Sales Price End Date Change'',
-					   CAST(a.dtmBeginDate as NVARCHAR(250)),
+					   replace(CONVERT(NVARCHAR(10),a.dtmEndDate,111),''/'',''-''),
 					   ''' + CAST(@SalesEndDate as NVARCHAR(250)) + ''' from tblICItemSpecialPricing a JOIN tblICItemUOM b ON
                        a.intItemUnitMeasureId = b.intItemUOMId JOIN tblICItem c ON a.intItemId = c.intItemId '
 
@@ -772,7 +774,7 @@ BEGIN TRY
             EXEC (@SQL1)
           END 
       
-	      select @UpdateCount = count(*) from tblSTMassUpdateReportMaster
+	      select @UpdateCount = count(*) from tblSTMassUpdateReportMaster 
 
       END
           
