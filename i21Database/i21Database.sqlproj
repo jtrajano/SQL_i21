@@ -1968,6 +1968,7 @@
     <Build Include="dbo\Tables\tblMFWorkOrderRecipe.sql" />
     <Build Include="dbo\Tables\tblMFWorkOrderRecipeItem.sql" />
     <Build Include="dbo\Tables\tblMFWorkOrderRecipeSubstituteItem.sql" />
+    <Build Include="dbo\Tables\tblSTRegisterFileConfiguration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

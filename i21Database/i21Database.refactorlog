@@ -3745,4 +3745,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[strInternalCode]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="13cdc0cf-3cad-4a17-b041-9fd43c3a3a31" ChangeDateTime="07/13/2015 13:21:21">
+    <Property Name="ElementName" Value="[dbo].[tblSTRegisterFileConfiguration].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTRegisterFileConfiguration]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intRegisterFileConfigId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1e79527a-526c-4c76-9ab2-ecdd71e24e3f" ChangeDateTime="07/13/2015 13:22:24">
+    <Property Name="ElementName" Value="[dbo].[tblSTRegisterFileConfiguration].[ strFileType]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTRegisterFileConfiguration]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strFileType" />
+  </Operation>
 </Operations>
