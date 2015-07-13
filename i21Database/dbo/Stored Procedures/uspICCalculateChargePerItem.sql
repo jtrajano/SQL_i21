@@ -36,7 +36,7 @@ BEGIN
 	WHERE intInventoryReceiptId = @intInventoryReceiptId
 END 
 
--- Calculate the cost method per Per Unit
+-- Calculate the cost method is Per Unit
 BEGIN 
 	INSERT INTO dbo.tblICInventoryReceiptChargePerItem (
 			[intInventoryReceiptId]
@@ -57,6 +57,13 @@ BEGIN
 				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
 	WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
 			AND Charge.strCostMethod = @COST_METHOD_PER_UNIT
+			AND (
+				Charge.intContractId IS NULL 
+				OR (
+					Charge.intContractId IS NOT NULL 
+					AND ReceiptItem.intOrderId = Charge.intContractId
+				)	
+			)
 
 	-- Check if the calculated values are valid. 
 	BEGIN 
@@ -86,6 +93,66 @@ BEGIN
 			GOTO _Exit
 		END 
 	END 
+END 
+
+-- Calculate the cost method is %
+BEGIN 
+	INSERT INTO dbo.tblICInventoryReceiptChargePerItem (
+			[intInventoryReceiptId]
+			,[intInventoryReceiptChargeId] 
+			,[intInventoryReceiptItemId] 
+			,[intChargeId] 
+			,[intEntityVendorId] 
+			,[dblCalculatedAmount] 
+	)
+	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
+			,[intInventoryReceiptChargeId]	= Charge.intInventoryReceiptChargeId
+			,[intInventoryReceiptItemId]	= ReceiptItem.intInventoryReceiptItemId
+			,[intChargeId]					= Charge.intChargeId
+			,[intEntityVendorId]			= Charge.intEntityVendorId
+			,[dblCalculatedAmount]			=	(ISNULL(Charge.dblRate, 0) / 100)
+												* ReceiptItem.dblOpenReceive
+												* ReceiptItem.dblUnitCost
+	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
+				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
+	WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
+			AND Charge.strCostMethod = @COST_METHOD_PERCENTAGE
+			AND (
+				Charge.intContractId IS NULL 
+				OR (
+					Charge.intContractId IS NOT NULL 
+					AND ReceiptItem.intOrderId = Charge.intContractId
+				)
+			)
+END 
+
+-- Calculate the cost method is Fixed Amount
+BEGIN 
+	INSERT INTO dbo.tblICInventoryReceiptChargePerItem (
+			[intInventoryReceiptId]
+			,[intInventoryReceiptChargeId] 
+			,[intInventoryReceiptItemId] 
+			,[intChargeId] 
+			,[intEntityVendorId] 
+			,[dblCalculatedAmount] 
+	)
+	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
+			,[intInventoryReceiptChargeId]	= Charge.intInventoryReceiptChargeId
+			,[intInventoryReceiptItemId]	= ReceiptItem.intInventoryReceiptItemId
+			,[intChargeId]					= Charge.intChargeId
+			,[intEntityVendorId]			= Charge.intEntityVendorId
+			,[dblCalculatedAmount]			= Charge.dblAmount
+	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
+				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
+	WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
+			AND Charge.strCostMethod = @COST_METHOD_AMOUNT
+			AND (
+				Charge.intContractId IS NULL 
+				OR (
+					Charge.intContractId IS NOT NULL 
+					AND ReceiptItem.intOrderId = Charge.intContractId
+				)	
+			)
 END 
 
 -- Exit point
