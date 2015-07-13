@@ -76,7 +76,7 @@ BEGIN
 						,vwcnt_un_prc=agcnt_un_prc
 						,vwcnt_prc_lvl = agcnt_prc_lvl
 						,A4GLIdentity = CAST(A4GLIdentity   AS INT)
-						,intContractId = 0
+						,strItemDescription =  ''''
 					FROM agcntmst
 				
 				')
@@ -116,7 +116,7 @@ BEGIN
 						,vwcnt_un_prc=CAST(ptcnt_un_prc AS DECIMAL(18,6))  
 						,vwcnt_prc_lvl = ptcnt_prc_lvl
 						,A4GLIdentity = CAST(A4GLIdentity   AS INT)
-						,intContractId = 0
+						,strItemDescription =  ''''
 					FROM ptcntmst
 				
 				')
@@ -128,17 +128,17 @@ BEGIN
 			CREATE VIEW [dbo].[vwcntmst]
 			AS
 			SELECT
-				vwcnt_cus_no=C.strEntityNo
-				,vwcnt_cnt_no= A.strContractNumber
+				vwcnt_cus_no=C.strEntityNo 
+				,vwcnt_cnt_no= A.strCustomerContract
 				,vwcnt_line_no= 0
 				,vwcnt_alt_cus= ''''
-				,vwcnt_itm_or_cls= E.strItemNo 
+				,vwcnt_itm_or_cls= E.strItemNo
 				,vwcnt_loc_no= F.strLocationNumber
 				,vwcnt_alt_cnt_no=''''
 				,vwcnt_amt_orig= 0.0
-				,vwcnt_amt_bal= 0.0
-				,vwcnt_due_rev_dt= A.dtmDateDue
-				,vwcnt_hdr_comments=A.strComments
+				,vwcnt_amt_bal= B.dblBalance
+				,vwcnt_due_rev_dt= B.dtmEndDate
+				,vwcnt_hdr_comments=A.strContractComments
 				,vwcnt_un_orig=0.0
 				,vwcnt_un_bal=0.0
 				,vwcnt_lc1_yn=''''
@@ -148,26 +148,26 @@ BEGIN
 				,vwcnt_lc5_yn =''''
 				,vwcnt_lc6_yn =''''
 				,vwcnt_ppd_yndm = (CASE 
-										WHEN A.strPrepaid = ''Yes'' THEN ''Y'' 
-										WHEN A.strPrepaid = ''No'' THEN ''N''
+										WHEN A.ysnPrepaid = 1 THEN ''Y'' 
+										WHEN A.ysnPrepaid  = 0 THEN ''N''
 										ELSE ''D''
 									END)
 						  	
-				,vwcnt_un_prc= D.dblUnitPrice
-				,vwcnt_prc_lvl = A.strPriceLevel
-				,A4GLIdentity = CAST(D.intContractDetailId   AS INT)
-				,intContractId = A.intContractId
-			FROM tblARCustomerContract A
-			INNER JOIN tblARCustomer B
-				ON A.intCustomerId = B.intEntityCustomerId
+				,vwcnt_un_prc= ISNULL(B.dblCashPrice,0.0)
+				,vwcnt_prc_lvl = ''''
+				,A4GLIdentity = CAST(B.intContractDetailId  AS INT)
+				,strItemDescription =  E.strDescription
+				,strCustomerName = C.strName
+			FROM tblCTContractHeader A
+			INNER JOIN tblCTContractDetail B
+				ON A.intContractHeaderId = B.intContractHeaderId
 			INNER JOIN tblEntity C
-				ON B.intEntityCustomerId = C.intEntityId
-			INNER JOIN tblARCustomerContractDetail D
-				ON A.intContractId = D.intContractId
-			INNER JOIN tblICItem E
-				ON D.intItemId = E.intItemId	
-			INNER JOIN tblSMCompanyLocation F
-				ON A.intLocationId = F.intCompanyLocationId
+				ON A.intEntityId = C.intEntityId
+			LEFT JOIN tblICItem E
+				ON B.intItemId = E.intItemId	
+			LEFT JOIN tblSMCompanyLocation F
+				ON B.intCompanyLocationId = F.intCompanyLocationId
+	
 		')
 	END
 END

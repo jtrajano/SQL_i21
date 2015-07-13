@@ -31,6 +31,7 @@
 [strTrailerNo3] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [intUserSecurityId] INT NULL, 	
 [strExternalLoadNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+[intTransportLoadId] INT NULL,
 
 CONSTRAINT [PK_tblLGLoad] PRIMARY KEY ([intLoadId]), 
 CONSTRAINT [UK_tblLGLoad_intLoadNumber_intPurchaseSale] UNIQUE ([intLoadNumber],[intPurchaseSale]),
@@ -45,5 +46,6 @@ CONSTRAINT [FK_tblLGLoad_tblEntity_intHaulerEntityId] FOREIGN KEY ([intHaulerEnt
 
 CONSTRAINT [FK_tblLGLoad_tblSCTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [tblSCTicket]([intTicketId]), 
 CONSTRAINT [FK_tblLGLoad_tblLGGenerateLoad_intGenerateLoadId] FOREIGN KEY ([intGenerateLoadId]) REFERENCES [tblLGGenerateLoad]([intGenerateLoadId]) ON DELETE CASCADE,
-CONSTRAINT [FK_tblLGLoad_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intUserSecurityID])
+CONSTRAINT [FK_tblLGLoad_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intUserSecurityID]),
+CONSTRAINT [FK_tblLGLoad_tblTRTransportLoad_intTransportLoadId] FOREIGN KEY ([intTransportLoadId]) REFERENCES [tblTRTransportLoad]([intTransportLoadId])
 )

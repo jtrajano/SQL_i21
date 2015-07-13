@@ -12,8 +12,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
  
 DECLARE	 @ShipmentId INT
-		--,@ShipmentNumber NVARCHAR(100);
-
+		,@InvoiceId  INT
 
 IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrderId AND [strOrderStatus] = 'Closed') 
 	BEGIN
@@ -27,18 +26,33 @@ IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrder
 		RETURN;
 	END
 
-IF NOT EXISTS(	SELECT 1 
-				FROM tblSOSalesOrderDetail A
-					INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
-				WHERE
-					[intSalesOrderId] = @SalesOrderId AND
-					strType NOT IN ('Non-Inventory', 'Other Charge', 'Service')
-				)
+IF NOT EXISTS(SELECT 1 FROM tblSOSalesOrderDetail A INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
+                WHERE intSalesOrderId = @SalesOrderId AND strType NOT IN ('Non-Inventory', 'Other Charge', 'Service'))
 	BEGIN
 		RAISERROR('There is no sellable item on this sales order.', 16, 1);
-		RETURN;
+        RETURN;
 	END
+ELSE
+	BEGIN
+		IF EXISTS(SELECT 1 FROM tblSOSalesOrderDetail SOD INNER JOIN tblICItem I ON SOD.intItemId = I.intItemId 
+				WHERE SOD.intSalesOrderId = @SalesOrderId AND I.strType = 'Software')
+			BEGIN
+				DECLARE @HasInventoryItem BIT = 0
+				IF EXISTS(SELECT 1 FROM tblSOSalesOrderDetail A INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
+					WHERE intSalesOrderId = @SalesOrderId AND strType NOT IN ('Non-Inventory', 'Other Charge', 'Service', 'Software'))
+					BEGIN
+						SET @HasInventoryItem = 1
+					END
 
+				EXEC dbo.uspARInsertToInvoice @SalesOrderId, @UserId, @HasInventoryItem, @InvoiceId OUTPUT
+
+				IF (@HasInventoryItem = 0) 
+					BEGIN
+						SET @InventoryShipmentId = @InvoiceId; 
+						RETURN; 
+					END
+			END
+	END
 
 DECLARE @icUserId INT = (SELECT TOP 1 intUserSecurityID FROM tblSMUserSecurity WHERE intEntityId = @UserId);
 
@@ -51,9 +65,7 @@ EXEC dbo.uspICProcessToInventoryShipment
 IF @@ERROR > 0 
 	RETURN 0;
 
-
 EXEC dbo.uspSOUpdateOrderShipmentStatus @SalesOrderId
-
 
 UPDATE
 	tblSOSalesOrder
@@ -63,7 +75,6 @@ WHERE
 	intSalesOrderId = @SalesOrderId		
 
 SET @InventoryShipmentId = @ShipmentId;
---SELECT @ShipmentNumber = strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = @ShipmentId
 
 RETURN 1;
 

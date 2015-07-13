@@ -1,7 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICAddItemReceipt]
 	 @ReceiptEntries ReceiptStagingTable READONLY	
 	,@intUserId AS INT	
-	,@InventoryReceiptId AS INT OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -14,6 +13,7 @@ DECLARE @StartingNumberId_InventoryReceipt AS INT = 23;
 DECLARE @total as INT;
 DECLARE @incval as INT;
 DECLARE @ReceiptNumber as nvarchar(50);
+Declare @InventoryReceiptId as int;
 DECLARE @temp TABLE
     (
 	intId INT IDENTITY PRIMARY KEY CLUSTERED,
@@ -124,7 +124,13 @@ SELECT 	 strReceiptNumber       = TE.ReceiptNumber
 		,intCreatedUserId		= @intUserId
 		,ysnPosted				= 0
 FROM	@ReceiptEntries RE
-        JOIN @temp TE on TE.Vendor = RE.intEntityVendorId and TE.BillOfLadding = RE.strBillOfLadding		           
+        JOIN @temp TE on TE.Vendor = RE.intEntityVendorId 
+		             and IsNull(TE.BillOfLadding,0) = IsNull(RE.strBillOfLadding,0) 
+					 and IsNull(TE.Currency,0) = IsNull(RE.intCurrencyId,0)
+					 and IsNull(TE.Location,0) = IsNull(RE.intLocationId,0)
+					 and IsNull(TE.ReceiptType,0) = IsNull(RE.strReceiptType,0)
+					 and IsNull(TE.ShipFrom,0) = IsNull(RE.intShipFromId,0)
+					 and IsNull(TE.ShipVia,0) = IsNull(RE.intShipViaId,0)		           
         group by  RE.intEntityVendorId,RE.strBillOfLadding,TE.ReceiptNumber,RE.strReceiptType,RE.intLocationId,RE.intShipViaId,RE.intShipFromId,RE.intCurrencyId
 
 -- Get the identity value from tblICInventoryReceipt to check if the insert was with no errors 
@@ -156,10 +162,7 @@ INSERT INTO dbo.tblICInventoryReceiptItem (
     ,intConcurrencyId
 	,intOwnershipType
 )
-SELECT	intInventoryReceiptId	= (select TOP 1 IR.intInventoryReceiptId from tblICInventoryReceipt IR 
-                                   where RE.intEntityVendorId = IR.intEntityVendorId 
-								     and RE.strBillOfLadding = IR.strBillOfLading
-								   )
+SELECT	intInventoryReceiptId	= IE.intInventoryReceiptId
 		,intLineNo				= RE.intSourceId
 		,intOrderId				= RE.intContractDetailId
 		,intSourceId			= RE.intSourceId
@@ -190,6 +193,14 @@ SELECT	intInventoryReceiptId	= (select TOP 1 IR.intInventoryReceiptId from tblIC
 								  THEN 2
 								  END
 FROM	@ReceiptEntries RE
+JOIN @temp TE on TE.Vendor = RE.intEntityVendorId 
+		             and IsNull(TE.BillOfLadding,0) = IsNull(RE.strBillOfLadding,0) 
+					 and IsNull(TE.Currency,0) = IsNull(RE.intCurrencyId,0)
+					 and IsNull(TE.Location,0) = IsNull(RE.intLocationId,0)
+					 and IsNull(TE.ReceiptType,0) = IsNull(RE.strReceiptType,0)
+					 and IsNull(TE.ShipFrom,0) = IsNull(RE.intShipFromId,0)
+					 and IsNull(TE.ShipVia,0) = IsNull(RE.intShipViaId,0)		   
+		JOIN tblICInventoryReceipt IE on IE.strReceiptNumber = TE.ReceiptNumber			 	       
         INNER JOIN dbo.tblICItemUOM ItemUOM			
 			ON ItemUOM.intItemId = RE.intItemId  AND ItemUOM.intItemUOMId = RE.intItemUOMId			
 		INNER JOIN dbo.tblICUnitMeasure UOM
@@ -206,4 +217,19 @@ FROM	dbo.tblICInventoryReceipt Receipt
         JOIN @ReceiptEntries RE 
              ON RE.intEntityVendorId = Receipt.intEntityVendorId 
 			  and RE.strBillOfLadding = Receipt.strBillOfLading
+
+
+-- Output the values to calling SP
+select 
+		 RE.intSourceId	
+		,IE.intInventoryReceiptId	
+FROM	@ReceiptEntries RE
+JOIN @temp TE on TE.Vendor = RE.intEntityVendorId 
+		             and IsNull(TE.BillOfLadding,0) = IsNull(RE.strBillOfLadding,0) 
+					 and IsNull(TE.Currency,0) = IsNull(RE.intCurrencyId,0)
+					 and IsNull(TE.Location,0) = IsNull(RE.intLocationId,0)
+					 and IsNull(TE.ReceiptType,0) = IsNull(RE.strReceiptType,0)
+					 and IsNull(TE.ShipFrom,0) = IsNull(RE.intShipFromId,0)
+					 and IsNull(TE.ShipVia,0) = IsNull(RE.intShipViaId,0)		   
+		JOIN tblICInventoryReceipt IE on IE.strReceiptNumber = TE.ReceiptNumber			 	       
 

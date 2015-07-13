@@ -149,7 +149,7 @@ BEGIN
 			INNER JOIN tblICItemLocation B
 				ON A.intItemId = B.intItemId
 			INNER JOIN tblSMCompanyLocation C
-				ON B.intItemLocationId = C.intCompanyLocationId
+				ON B.intLocationId = C.intCompanyLocationId
 			LEFT JOIN tblICCategory D
 				ON A.intCategoryId = D.intCategoryId
 			LEFT JOIN tblICItemPricing E

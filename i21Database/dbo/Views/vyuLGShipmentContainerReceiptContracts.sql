@@ -12,6 +12,7 @@ SELECT
 	,intContractHeaderId
 	,intContractSeq
 	,intContractNumber
+	,intCommodityId
 	,intItemId
 	,intItemUOMId
 	,intSubLocationId
@@ -63,6 +64,7 @@ SELECT
 	,intContractHeaderId
 	,intContractSeq
 	,intContractNumber
+	,intCommodityId
 	,intItemId
 	,intItemUOMId
 	,intSubLocationId

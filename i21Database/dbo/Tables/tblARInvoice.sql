@@ -41,7 +41,7 @@
     [strBillToCity]        NVARCHAR (30)    COLLATE Latin1_General_CI_AS NULL,
     [strBillToState]       NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
     [strBillToZipCode]     NVARCHAR (12)    COLLATE Latin1_General_CI_AS NULL,
-    [strBillToCountry]     NVARCHAR (25)    COLLATE Latin1_General_CI_AS NULL,
+    [strBillToCountry]     NVARCHAR (25)    COLLATE Latin1_General_CI_AS NULL,	
     [intConcurrencyId]     INT             CONSTRAINT [DF_tblARInvoice_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     [intEntityId]		   INT             NOT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),

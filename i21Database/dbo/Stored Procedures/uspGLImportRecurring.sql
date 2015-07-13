@@ -3,7 +3,7 @@ CREATE PROCEDURE [dbo].[uspGLImportRecurring]
 AS
 BEGIN
 
-IF EXISTS(SELECT TOP 1 1 FROM tblGLJournal WHERE strJournalType = 'Imported Recurring')	RETURN
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLJournalRecurring WHERE ISNULL(ysnImported,0) = 0) RETURN
 
 DECLARE @TEMP TABLE 
 (
@@ -45,6 +45,7 @@ BEGIN TRANSACTION
 		  WHERE intJournalRecurringId = @intRecurringId
 		  SELECT @intJournalId = @@IDENTITY
 		  UPDATE @TEMP SET ImportedHeader = 1, JournalID = @intJournalId WHERE RecurringID = @intRecurringId
+		  UPDATE tblGLJournalRecurring SET intJournalId = @intJournalId WHERE intJournalRecurringId = @intRecurringId
 		  UPDATE tblSMStartingNumber SET intNumber = @intNumber where intStartingNumberId = @intStartingNumberId
 		END
 

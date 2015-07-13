@@ -230,8 +230,6 @@ BEGIN TRY
 		IF @dblInputWeight > @dblInputLotWeight --and @ysnEmptyOutSource=0
 		BEGIN
 
-			Select @ysnExcessConsumptionAllowed=1
-
 			IF @ysnExcessConsumptionAllowed = 0 or @ysnExcessConsumptionAllowed is null
 			BEGIN
 				RAISERROR (

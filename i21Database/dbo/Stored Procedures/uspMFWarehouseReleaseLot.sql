@@ -109,7 +109,7 @@ BEGIN TRY
 	FROM dbo.tblICLotStatus
 	WHERE intLotStatusId = @intLotStatusId
 
-	IF @strSecondaryStatus = 'Ghost'
+	IF @intLotStatusId = 2
 	BEGIN
 		RAISERROR (
 				51056
@@ -118,7 +118,7 @@ BEGIN TRY
 				)
 	END
 
-	IF @intLotStatusId <> 3
+	IF @intLotStatusId = 1
 		OR (
 			@strSecondaryStatus = 'In_Warehouse'
 			AND @strPrimaryStatus = 'On_Hold'

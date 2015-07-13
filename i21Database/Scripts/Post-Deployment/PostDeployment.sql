@@ -27,8 +27,10 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\11_FreightTerms.sql
 :r .\SM\DefaultData\12_ReminderList.sql
 :r .\SM\DefaultData\13_ShortcutKey.sql
+:r .\SM\DefaultData\14_CompanyPreference.sql
 :r .\SM\CustomField.sql
-:r .\SM\SMDataMigrations.sql
+:r .\SM\SMDataMigrations.SQL
+:r .\SM\SMDataFixes.SQL
 
 -- Canned Report
 :r .\Reports\1_ReportDisableConstraints.sql
@@ -88,6 +90,7 @@ print 'BEGIN POST DEPLOYMENT'
 -- General Ledger
 :r .\GL\DefaultData\AccountStructure.sql
 :r .\GL\DefaultData\AccountGroup.sql
+:r .\GL\DefaultData\AccountRange.sql
 :r .\GL\DefaultData\AccountCategory.sql
 :r .\GL\DefaultData\AccountTemplate.sql
 :r .\GL\DefaultData\AccountSegmentTemplate.sql
@@ -116,6 +119,8 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\AR\DefaultData\3_UpdateInvoiceOrderShipToAndBillTo.sql
 :r .\AR\DefaultData\4_UpdateInvoiceOrderShipVia.sql
 :r .\AR\DefaultData\5_UpdateOrderStatus.sql
+:r .\AR\DefaultData\6_UpdateCustomerShipBillTo.sql
+:r .\AR\DefaultData\7_UpdateInvoiceOrderSalesperson.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -181,6 +186,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\008_MoveTruckerData.sql
 :r .\EM\009_UpdateEntityContactTypeData.sql
 :r .\EM\010_UpdateVendorAccountNumber.sql
+:r .\EM\011_FixEntityLocationNullTerms.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 

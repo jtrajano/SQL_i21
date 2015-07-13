@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblCTPriceFixationDetail]
 (
-	[intPriceFixationDetailId] INT NOT NULL,
+	[intPriceFixationDetailId] INT IDENTITY NOT NULL,
 	[intConcurrencyId] INT NOT NULL,
 	[intPriceFixationId] INT NOT NULL,
 	[strTradeNo] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL ,
@@ -24,6 +24,7 @@
 	[intBrokerageAccountId] INT
 
 	CONSTRAINT [PK_tblCTPriceFixationDetail_intPriceFixationDetailId] PRIMARY KEY CLUSTERED ([intPriceFixationDetailId] ASC),
+	CONSTRAINT [UK_tblCTPackingDescriptionDetail_strTradeNo] UNIQUE ([strTradeNo]),
 	CONSTRAINT [FK_tblCTPriceFixationDetail_tblCTPriceFixation_intPriceFixationId] FOREIGN KEY ([intPriceFixationId]) REFERENCES [tblCTPriceFixation]([intPriceFixationId]) ON DELETE CASCADE,
 	
 	CONSTRAINT [FK_tblCTPriceFixationDetail_tblICItemUOM_intQtyItemUOMId_intItemUOMId] FOREIGN KEY ([intQtyItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),

@@ -11,6 +11,7 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, Item.strItemNo
 	, strItemDescription = Item.strDescription
 	, Item.strLotTracking
+	, Item.intCommodityId
 	, ShipmentItem.intSubLocationId
 	, SubLocation.strSubLocationName
 	, strOrderUOM = ShipmentItemSource.strOrderUOM
@@ -22,6 +23,8 @@ SELECT ShipmentItem.intInventoryShipmentId
     , dblUnitPrice = ISNULL(ShipmentItemSource.dblUnitPrice, 0)
     , dblDiscount = ISNULL(ShipmentItemSource.dblDiscount, 0)
     , dblTotal = ISNULL(ShipmentItemSource.dblTotal, 0)
+	, ShipmentItem.intGradeId
+	, strGrade = Grade.strDescription
 FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN vyuICGetShipmentItemSource ShipmentItemSource ON ShipmentItemSource.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
 	LEFT JOIN tblICItem Item ON Item.intItemId = ShipmentItem.intItemId
@@ -30,3 +33,4 @@ FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = ShipmentItem.intWeightUOMId
 	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId    
+	LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = ShipmentItem.intGradeId

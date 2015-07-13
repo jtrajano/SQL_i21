@@ -752,7 +752,7 @@
     <Build Include="testi21Database\Stored Procedures\test fnGetMatchingItemUOMId if it returns NULL if it UOM cannot be found.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCalculateChargePerItem for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCalculateChargePerItem for generating charges for Per Unit.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICCalculateChargePerItem for error 51154.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCalculateChargePerItem for error 51155.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

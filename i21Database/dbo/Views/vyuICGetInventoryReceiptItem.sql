@@ -13,6 +13,7 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, Item.strItemNo
 	, strItemDescription = Item.strDescription
 	, Item.strLotTracking
+	, Item.intCommodityId
 	, ReceiptItem.intContainerId
 	, ReceiptItemSource.strContainer
 	, ReceiptItem.intSubLocationId
@@ -28,6 +29,8 @@ SELECT ReceiptItem.intInventoryReceiptId
 		CASE WHEN ISNULL(dblUnitRetail, 0) = 0 THEN 0
 			ELSE ((ISNULL(dblUnitRetail, 0) - ISNULL(dblUnitCost, 0)) / dblUnitRetail) * 100 END
 	)
+	, ReceiptItem.intGradeId
+	, strGrade = Grade.strDescription
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 	LEFT JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
@@ -36,3 +39,4 @@ FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = ReceiptItem.intWeightUOMId
 	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
+	LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = ReceiptItem.intGradeId

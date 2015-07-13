@@ -38,6 +38,7 @@ BEGIN TRY
 	 	,dblFreightRate
 		,strComments
 		,strSourceId	
+		,intSourceId
 		,strPurchaseOrder		 	
 	 )	 
 	 select     
@@ -64,6 +65,7 @@ BEGIN TRY
 	   TR.dblFreightRate,
 	   NULL,
 	   TL.strTransaction,
+	   DH.intDistributionHeaderId,
 	   DH.strPurchaseOrder   
 	   from tblTRTransportLoad TL
             JOIN tblTRTransportReceipt TR on TR.intTransportLoadId = TL.intTransportLoadId
@@ -76,7 +78,35 @@ BEGIN TRY
     if (@total = 0)
 	   return;
 
-  EXEC dbo.uspARAddInvoice @InvoiceStagingTable,@intUserId, @InventoryReceiptId;
+DECLARE @InvoiceOutputTable TABLE
+    (
+	intId INT IDENTITY PRIMARY KEY CLUSTERED,
+    intSourceId int,
+	intInvoiceId int
+    )
+
+INSERT into @InvoiceOutputTable(
+		 intSourceId	
+		,intInvoiceId		 	
+	 )	
+  EXEC dbo.uspARAddInvoice @InvoiceStagingTable,@intUserId;
+
+Declare @incval int,
+        @SouceId int,
+		@InvoiceId int;
+select @total = count(*) from @InvoiceOutputTable;
+set @incval = 1 
+WHILE @incval <=@total 
+BEGIN
+
+  select @SouceId = intSourceId,@InvoiceId =intInvoiceId  from @InvoiceOutputTable where @incval = intId
+  
+   update tblTRDistributionHeader 
+       set intInvoiceId = @InvoiceId
+         where @SouceId = intDistributionHeaderId 
+   SET @incval = @incval + 1;
+END;
+
 
 END TRY
 BEGIN CATCH

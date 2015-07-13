@@ -3577,4 +3577,39 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intCompanyPreferenceId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="f3d86a2e-277e-4327-a072-051d9619e72c" ChangeDateTime="07/10/2015 06:24:33">
+    <Property Name="ElementName" Value="[dbo].[tblNRCompanyPreference].[intGLNotesReceivableAccountId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblNRCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intNotesReceivableAccountId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="cdfe1364-e5fb-4dcc-8845-87451d244cbc" ChangeDateTime="07/10/2015 06:24:39">
+    <Property Name="ElementName" Value="[dbo].[tblNRCompanyPreference].[intGLClearingAccountId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblNRCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intClearingAccountId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="704128e0-76f1-4e26-9046-57e68840eaec" ChangeDateTime="07/10/2015 06:24:43">
+    <Property Name="ElementName" Value="[dbo].[tblNRCompanyPreference].[intGLInterestIncomeAccountId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblNRCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInterestIncomeAccountId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7b9c119d-656d-45c4-837b-bf15a2a2d83e" ChangeDateTime="07/10/2015 10:46:44">
+    <Property Name="ElementName" Value="[dbo].[tblNRCompanyPreference].[blnOriginCompatible]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblNRCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnOriginCompatible" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="aa1f216f-1d70-4049-8923-e3d4e3171307" ChangeDateTime="07/10/2015 10:46:51">
+    <Property Name="ElementName" Value="[dbo].[tblNRCompanyPreference].[blnContinueInterestCalculationAfterNoteMaturityDate]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblNRCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ysnContinueInterestCalculationAfterNoteMaturityDate" />
+  </Operation>
 </Operations>

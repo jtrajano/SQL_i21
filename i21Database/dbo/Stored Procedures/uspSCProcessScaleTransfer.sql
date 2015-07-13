@@ -28,15 +28,19 @@ DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY_AP AS NVARCHAR(255) = 'AP Clearin
 DECLARE @ACCOUNT_CATEGORY AS NVARCHAR(255) = 'AP Clearing'
 DECLARE @dblOriginNetUnits AS DECIMAL (13,3)
 DECLARE @dblDestinationNetUnits AS DECIMAL (13,3)
-DECLARE @strOriginDestination AS NVARCHAR(1)
+DECLARE @strOriginDestination AS NVARCHAR(30)
 DECLARE @differenceUnits AS DECIMAL (13,3)
 
 EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT
 BEGIN
-    SELECT @strOriginDestination = SMP.strValue
-	FROM dbo.tblSMPreferences SMP 
-	WHERE SMP.strPreference = 'TransferUpdateOption'
+    SELECT TOP 1 @strOriginDestination = strTransferUpdateOption
+	FROM dbo.tblGRCompanyPreference 
 END
+IF @strOriginDestination IS NULL
+BEGIN 
+    RAISERROR('Invalid option selected for Transfer Update Option under Grain Company Preferences.', 11, 1);
+    GOTO _Exit
+END 
 BEGIN 
 	SELECT	@intTicketUOM = UOM.intUnitMeasureId
 	FROM	dbo.tblSCTicket SC	        
@@ -92,7 +96,7 @@ BEGIN
 			SET @differenceUnits = @dblDestinationNetUnits - @dblOriginNetUnits
 		END
 	END
-	IF @strOriginDestination = '1'
+	IF @strOriginDestination = 'Destination Weights'
 		BEGIN
 		IF @differenceUnits != 0
 		BEGIN
@@ -250,7 +254,7 @@ BEGIN
 					,@intUserId
 		END
 	END
-	IF @strOriginDestination = '2'
+	IF @strOriginDestination = 'Origin Weights'
 	BEGIN
 			-- Get the assembly item to post    
 		INSERT INTO @ItemsForTransferPost (  
@@ -328,7 +332,7 @@ BEGIN
 					,@intUserId
 		END
 	END
-	IF @strOriginDestination = '3'
+	IF @strOriginDestination = 'Actual Weights'
 	BEGIN
 		-- Get the assembly item to post    
 		INSERT INTO @ItemsForTransferPost (  
@@ -547,6 +551,8 @@ BEGIN
 	FROM	dbo.tblSCTicket SC
 	WHERE	SC.intTicketId = @intTicketId
 END
+
+_Exit:
 
 GO
 

@@ -24,6 +24,12 @@ BEGIN
 		DECLARE @ManualLotGrains_DefaultLocation AS INT = 16
 				,@SerializedLotGrains_DefaultLocation AS INT = 17
 
+				-- Source Types
+				,@SOURCE_TYPE_NONE AS INT = 0
+				,@SOURCE_TYPE_SCALE AS INT = 1
+				,@SOURCE_TYPE_INBOUND_SHIPMENT AS INT = 2
+				,@SOURCE_TYPE_TRANSPORT AS INT = 3
+
 		DECLARE @ysnPost AS BIT = 1
 		DECLARE @ysnRecap AS BIT = 0
 		DECLARE @strTransactionId AS NVARCHAR(40) = 'Dummy-000001'
@@ -54,7 +60,7 @@ BEGIN
 			,@Default_Location
 			,@dtmDate	
 			,'Purchase Order'
-			,1
+			,@SOURCE_TYPE_NONE
 		);	
 	
 		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId, intItemId, dblOrderQty, dblOpenReceive, dblUnitCost, intUnitMeasureId, intOwnershipType) VALUES (1, @ManualLotGrains,		10,	10,	12.50, @ManualLotGrains_BushelUOMId, 1);

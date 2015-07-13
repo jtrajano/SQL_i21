@@ -53,6 +53,9 @@ SELECT Lot.intLotId
 	, Lot.dtmManufacturedDate
 	, Lot.ysnReleasedToWarehouse
 	, Lot.ysnProduced
+	, Lot.ysnInCustody
+	, Lot.intGradeId
+	, strGrade = Grade.strDescription
 	, Lot.dtmDateCreated
 	, Lot.intCreatedUserId
 	, Lot.intConcurrencyId
@@ -66,6 +69,7 @@ LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLoca
 LEFT JOIN tblICLotStatus LotStatus ON LotStatus.intLotStatusId = Lot.intLotStatusId
 LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = Lot.intWeightUOMId
 LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
+LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = Lot.intGradeId
 LEFT JOIN (
 		SELECT intItemId
 			, intItemLocationId

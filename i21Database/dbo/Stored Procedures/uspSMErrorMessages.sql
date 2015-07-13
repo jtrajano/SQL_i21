@@ -616,5 +616,9 @@ SET @strmessage = 'The Qty to Ship for %s is %s. Total Lot Quantity is %s. The d
 EXEC sp_addmessage 51153,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51154) EXEC sp_dropmessage 51154, 'us_english'	
-SET @strmessage = 'Unable to calculate the Other Charges per unit. Please check if UOM %s is assigned to item %s.'
+SET @strmessage = 'Product specification entered should be unique.'
 EXEC sp_addmessage 51154,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51155) EXEC sp_dropmessage 51155, 'us_english'	
+SET @strmessage = 'Unable to calculate the Other Charges per unit. Please check if UOM %s is assigned to item %s.'
+EXEC sp_addmessage 51155,11,@strmessage,'us_english','False'

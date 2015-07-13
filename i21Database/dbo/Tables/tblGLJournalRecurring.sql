@@ -21,6 +21,8 @@
     [dtmLastDueDate]        DATETIME         NULL,
     [intMonthInterval]      INT              NULL,
     [dtmReverseDate]        DATETIME         NULL,
+    [intJournalId] INT NULL, 
+    [ysnImported] BIT NULL, 
     CONSTRAINT [PK_tblGLJournalRecurring] PRIMARY KEY CLUSTERED ([intJournalRecurringId] ASC)
 );
 

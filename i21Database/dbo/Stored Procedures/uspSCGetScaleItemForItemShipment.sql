@@ -50,7 +50,6 @@ BEGIN TRY
 		END
 		IF @strDistributionOption = 'CNT'
 		BEGIN
-				IF @strSourceType = @SALES_ORDER
 			BEGIN 
 				SELECT	intItemId = ScaleTicket.intItemId
 						,intLocationId = ItemLocation.intItemLocationId 
@@ -64,7 +63,8 @@ BEGIN TRY
 						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
 						,intTransactionId = ScaleTicket.intTicketId
 						,strTransactionId = ScaleTicket.intTicketNumber
-						,intTransactionTypeId = @intDirectType 
+						,intTransactionTypeId = @intDirectType
+						,intTransactionDetailId = LI.intContractDetailId 
 						,intLotId = NULL 
 						,intSubLocationId = ScaleTicket.intSubLocationId
 						,intStorageLocationId = ScaleTicket.intStorageLocationId
@@ -83,7 +83,6 @@ BEGIN TRY
 		END
 		Else
 		BEGIN
-			IF @strSourceType = @SALES_ORDER
 			BEGIN 
 				SELECT	intItemId = ScaleTicket.intItemId
 						,intLocationId = ItemLocation.intItemLocationId 
@@ -98,6 +97,7 @@ BEGIN TRY
 						,intTransactionId = ScaleTicket.intTicketId
 						,strTransactionId = ScaleTicket.intTicketNumber
 						,intTransactionTypeId = @intDirectType 
+						,intTransactionDetailId = NULL
 						,intLotId = NULL 
 						,intSubLocationId = ScaleTicket.intSubLocationId
 						,intStorageLocationId = ScaleTicket.intStorageLocationId

@@ -26,5 +26,9 @@
 	[intConcurrencyId] INT NOT NULL DEFAULT 0, 
     CONSTRAINT [FK_tblPOPurchaseDetail_tblPOPurchase] FOREIGN KEY ([intPurchaseId]) REFERENCES [dbo].[tblPOPurchase] ([intPurchaseId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_dbo.tblPOPurchaseDetail_dbo.tblGLAccount_intAccountId] FOREIGN KEY (intAccountId) REFERENCES tblGLAccount(intAccountId),
+	CONSTRAINT [FK_tblPOPurchaseDetail_tblICItemUOM_intUnitOfMeasureId] FOREIGN KEY ([intUnitOfMeasureId]) REFERENCES [dbo].[tblICItemUOM] ([intItemUOMId]),
+	CONSTRAINT [FK_tblPOPurchaseDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]),
+	CONSTRAINT [FK_tblPOPurchaseDetail_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId]),
+	CONSTRAINT [FK_tblPOPurchaseDetail_tblSMCompanySubLocation_intSubLocationId] FOREIGN KEY ([intSubLocationId]) REFERENCES [dbo].[tblSMCompanyLocationSubLocation] ([intCompanyLocationSubLocationId]),
 	CONSTRAINT [FK_tblPOPurchaseDetail_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
 )
