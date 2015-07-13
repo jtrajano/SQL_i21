@@ -81,6 +81,12 @@ namespace iRely.Inventory.BusinessLayer
                     {
                         var idParameter = new SqlParameter("intShipmentId", shipmentId);
                         _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdateSOStatusOnShipmentSave @intShipmentId", idParameter);
+                        
+                    }
+                    foreach (var shipment in _db.ContextManager.Set<tblICInventoryShipment>().Local)
+                    {
+                        var idParameter = new SqlParameter("intTransactionId", shipment.intInventoryShipmentId);
+                        _db.ContextManager.Database.ExecuteSqlCommand("uspICReserveStockForInventoryShipment @intTransactionId", idParameter);
                     }
 
                     transaction.Commit();

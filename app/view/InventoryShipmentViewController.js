@@ -318,7 +318,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             include: 'ShipFromLocation, ' +
                 'tblARCustomer, ' +
                 'ShipToLocation, ' +
-                'tblICInventoryShipmentItems.vyuICGetInventoryShipmentItem',
+                'tblICInventoryShipmentItems.vyuICGetInventoryShipmentItem, ' +
+                'tblICInventoryShipmentItems.tblICInventoryShipmentItemLots.tblICLot,' +
+                'tblICInventoryShipmentItems.tblICInventoryShipmentItemLots.tblICItemUOM.tblICUnitMeasure, ' +
+                'tblICInventoryShipmentItems.tblICInventoryShipmentItemLots.WeightUOM.tblICUnitMeasure',
             createRecord: me.createRecord,
             binding: me.config.binding,
             attachment: Ext.create('iRely.attachment.Manager', {
