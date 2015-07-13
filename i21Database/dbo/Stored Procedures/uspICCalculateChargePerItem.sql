@@ -55,6 +55,8 @@ BEGIN
 												* dbo.fnCalculateQtyBetweenUOM(ReceiptItem.intUnitMeasureId, dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId), ReceiptItem.dblOpenReceive) 
 	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
+			INNER JOIN dbo.tblICItem Item 
+				ON Item.intItemId = Charge.intChargeId				
 	WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
 			AND Charge.strCostMethod = @COST_METHOD_PER_UNIT
 			AND (
@@ -64,6 +66,7 @@ BEGIN
 					AND ReceiptItem.intOrderId = Charge.intContractId
 				)	
 			)
+			AND Item.intOnCostTypeId IS NULL 
 
 	-- Check if the calculated values are valid. 
 	BEGIN 
@@ -115,6 +118,8 @@ BEGIN
 												* ReceiptItem.dblUnitCost
 	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
+			INNER JOIN dbo.tblICItem Item 
+				ON Item.intItemId = Charge.intChargeId				
 	WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
 			AND Charge.strCostMethod = @COST_METHOD_PERCENTAGE
 			AND (
@@ -124,6 +129,7 @@ BEGIN
 					AND ReceiptItem.intOrderId = Charge.intContractId
 				)
 			)
+			AND Item.intOnCostTypeId IS NULL 
 END 
 
 -- Calculate the cost method is Fixed Amount
@@ -144,6 +150,8 @@ BEGIN
 			,[dblCalculatedAmount]			= Charge.dblAmount
 	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
+			INNER JOIN dbo.tblICItem Item 
+				ON Item.intItemId = Charge.intChargeId				
 	WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
 			AND Charge.strCostMethod = @COST_METHOD_AMOUNT
 			AND (
@@ -153,6 +161,7 @@ BEGIN
 					AND ReceiptItem.intOrderId = Charge.intContractId
 				)	
 			)
+			AND Item.intOnCostTypeId IS NULL 
 END 
 
 -- Exit point
