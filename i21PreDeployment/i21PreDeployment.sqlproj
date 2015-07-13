@@ -106,11 +106,11 @@
     <None Include="Scripts\Pre-Deployment\12_EM\03_EntityCustomerFarmRename_DataFix.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\04_EntityLocationTaxCodeUpdate.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\05_EntitySplitSchemaUpdate.sql" />
-    <None Include="Scripts\Pre-Deployment\12_EM\06_DeleteOldTables.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\07_EntityFarmSchemaUpdate.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\08_EntityShipViaSchemaUpdate.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\UpdateShipTo.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\UpdateShipVia.sql" />
+    <None Include="Scripts\Pre-Deployment\8_AP\UpdateShipFrom.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
