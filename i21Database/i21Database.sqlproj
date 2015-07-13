@@ -1957,13 +1957,14 @@
     <Build Include="dbo\Stored Procedures\uspNRMigrateCompanyPreference.sql" />
     <Build Include="dbo\Views\vyuARCustomerConsumptionSite.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessAfloatInventoryReceipt.sql" />
-    <None Include="Scripts\Post-Deployment\EM\012_DeleteOldTables.sql" />
+	<None Include="Scripts\Post-Deployment\EM\012_DeleteOldTables.sql" />
     <Build Include="dbo\Tables\tblSTMassUpdateReportMaster.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\5_UpdateOrderStatus.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\6_UpdateCustomerShipBillTo.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\7_UpdateInvoiceOrderSalesperson.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSummaryPnL.sql" />
+    <Build Include="dbo\Tables\tblSTPriceBookStaging.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
