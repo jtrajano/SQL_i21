@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblSTRegisterFileConfiguration]
 (
-	[intRegisterFileConfigId] INT NOT NULL PRIMARY KEY, 
+	[intRegisterFileConfigId] INT NOT NULL, 
     [intRegisterId] INT NULL, 
     [intLayoutId] INT NULL, 
     [strFileType] NVARCHAR(50) NULL, 
