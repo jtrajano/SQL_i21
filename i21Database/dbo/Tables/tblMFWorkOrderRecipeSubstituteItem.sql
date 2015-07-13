@@ -1,0 +1,27 @@
+﻿CREATE TABLE [dbo].[tblMFWorkOrderRecipeSubstituteItem]
+(
+	[intRecipeSubstituteItemId] INT NOT NULL IDENTITY(1,1) , 
+    [intRecipeItemId] INT NOT NULL,
+	[intRecipeId] INT NOT NULL, 
+    [intItemId] INT NOT NULL, 
+    [intSubstituteItemId] INT NOT NULL, 
+    [dblQuantity] NUMERIC(18, 6) NOT NULL, 
+    [intUOMId] INT NOT NULL, 
+    [dblSubstituteRatio] NUMERIC(18, 6) NOT NULL, 
+    [dblMaxSubstituteRatio] NUMERIC(18, 6) NOT NULL,
+    [dblCalculatedUpperTolerance] NUMERIC(18, 6) NOT NULL , 
+    [dblCalculatedLowerTolerance] NUMERIC(18, 6) NOT NULL , 
+	[intRecipeItemTypeId] INT NOT NULL,
+	[intCreatedUserId] [int] NOT NULL,
+	[dtmCreated] [datetime] NOT NULL CONSTRAINT [DF_tblMFWorkOrderRecipeSubstituteItem_dtmCreated] DEFAULT GetDate(),
+	[intLastModifiedUserId] [int] NOT NULL,
+	[dtmLastModified] [datetime] NOT NULL CONSTRAINT [DF_tblMFWorkOrderRecipeSubstituteItem_dtmLastModified] DEFAULT GetDate(),	 
+    [intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFWorkOrderRecipeSubstituteItem_intConcurrencyId] DEFAULT 0,
+    CONSTRAINT [PK_tblMFWorkOrderRecipeSubstituteItem_intRecipeSubstituteItemId] PRIMARY KEY ([intRecipeSubstituteItemId]),
+	CONSTRAINT [FK_tblMFWorkOrderRecipeSubstituteItem_intRecipeItemId] FOREIGN KEY ([intRecipeItemId]) REFERENCES [tblMFRecipeItem]([intRecipeItemId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblMFWorkOrderRecipeSubstituteItem_tblMFRecipe_intRecipeId] FOREIGN KEY ([intRecipeId]) REFERENCES [tblMFRecipe]([intRecipeId]), 
+	CONSTRAINT [FK_tblMFWorkOrderRecipeSubstituteItem_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
+	CONSTRAINT [FK_tblMFWorkOrderRecipeSubstituteItem_tblICItem_intItemId_intSubstituteItemId] FOREIGN KEY ([intSubstituteItemId]) REFERENCES [tblICItem]([intItemId]),
+	CONSTRAINT [FK_tblMFWorkOrderRecipeSubstituteItem_tblICUnitMeasure_intUnitMeasureId_intUOMId] FOREIGN KEY ([intUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+	CONSTRAINT [FK_tblMFWorkOrderRecipeSubstituteItem_tblMFRecipeItemType_intRecipeItemTypeId] FOREIGN KEY ([intRecipeItemTypeId]) REFERENCES [tblMFRecipeItemType]([intRecipeItemTypeId])
+)
