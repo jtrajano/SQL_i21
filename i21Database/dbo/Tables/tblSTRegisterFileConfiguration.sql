@@ -7,7 +7,7 @@
     [strFilePrefix] NVARCHAR(50) NULL, 
     [strFolderPath] NVARCHAR(MAX) NULL, 
     [strURICommand] NVARCHAR(MAX) NULL, 
-    [intCurrencyId] INT NULL, 
+    [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSTRegisterFileConfiguration_intRegisterFileConfigId] PRIMARY KEY CLUSTERED ([intRegisterFileConfigId] ASC)
 
 )

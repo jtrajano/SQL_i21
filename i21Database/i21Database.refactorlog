@@ -3759,4 +3759,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strFileType" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="1b7207a2-8900-4b81-b925-d0b7f6a74d38" ChangeDateTime="07/13/2015 16:21:03">
+    <Property Name="ElementName" Value="[dbo].[tblSTRegisterFileConfiguration].[intCurrencyId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTRegisterFileConfiguration]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConcurrencyId" />
+  </Operation>
 </Operations>
