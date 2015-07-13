@@ -8,6 +8,9 @@ BEGIN TRY
 		,@ysnNegativeQtyAllowed BIT
 		,@intUserId INT
 		,@dtmCurrentDateTime DATETIME
+		,@intTransactionCount INT
+
+	SELECT @intTransactionCount = @@TRANCOUNT
 
 	SELECT @dtmCurrentDateTime = Getdate()
 
@@ -24,7 +27,7 @@ BEGIN TRY
 			,ysnNegativeQtyAllowed BIT
 			,intUserId INT
 			)
-
+	IF @intTransactionCount = 0
 	BEGIN TRANSACTION
 
 	DECLARE @RecordKey INT
@@ -149,7 +152,8 @@ BEGIN TRY
 		,dtmLastModified = @dtmCurrentDateTime
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderInputLotId = @intWorkOrderId
-
+	
+	IF @intTransactionCount = 0
 	COMMIT TRANSACTION
 
 	EXEC sp_xml_removedocument @idoc
@@ -158,7 +162,7 @@ END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 
-	IF XACT_STATE() != 0
+	IF XACT_STATE() != 0 AND @intTransactionCount = 0
 		ROLLBACK TRANSACTION
 
 	IF @idoc <> 0

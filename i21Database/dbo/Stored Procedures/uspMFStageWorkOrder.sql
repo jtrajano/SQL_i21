@@ -44,6 +44,9 @@ BEGIN TRY
 		,@strDestinationLotNumber nvarchar(50)
 		,@intConsumptionSubLocationId int
 		,@intWeightUOMId int
+		,@intTransactionCount INT
+
+	SELECT @intTransactionCount = @@TRANCOUNT
 
 	Select @dtmCurrentDateTime=GetDate()
 
@@ -248,7 +251,8 @@ BEGIN TRY
 					,1
 					)
 		END
-
+	
+	IF @intTransactionCount = 0
 	BEGIN TRANSACTION
 
 	INSERT INTO dbo.tblMFWorkOrderInputLot (
@@ -469,7 +473,7 @@ BEGIN TRY
 					,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 		END
 	END
-
+	IF @intTransactionCount = 0
 	COMMIT TRANSACTION
 
 	EXEC sp_xml_removedocument @idoc
@@ -478,7 +482,7 @@ END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 
-	IF XACT_STATE() != 0
+	IF XACT_STATE() != 0 AND @intTransactionCount = 0
 		ROLLBACK TRANSACTION
 
 	IF @idoc <> 0

@@ -39,11 +39,15 @@ BEGIN TRY
 		,@dblAdjustByQuantity numeric(18,6)
 		,@dblWeightPerQty numeric(18,6)
 		,@intInventoryAdjustmentId int
+		,@intTransactionCount INT
+
+	SELECT @intTransactionCount = @@TRANCOUNT
 
 	Select @dtmCurrentDateTime	=GETDATE()
 	Select @dtmCurrentDate		=CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
 	Select @intDayOfYear		=DATEPART(dy,@dtmCurrentDateTime)
-
+	
+	IF @intTransactionCount = 0
 	BEGIN TRAN
 
 	DECLARE @tblItem TABLE (
@@ -718,13 +722,14 @@ BEGIN TRY
 		FROM @tblItem
 		WHERE intItemRecordKey > @intItemRecordKey
 	END
-
+	
+	IF @intTransactionCount = 0
 	COMMIT TRAN
 END TRY
 
 BEGIN CATCH
 	IF XACT_STATE() != 0
-		AND @@TRANCOUNT > 0
+		AND @@TRANCOUNT > 0 AND @intTransactionCount = 0
 		ROLLBACK TRANSACTION
 
 	SET @ErrMsg = ERROR_MESSAGE()

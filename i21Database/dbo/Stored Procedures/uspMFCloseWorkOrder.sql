@@ -20,6 +20,7 @@ BEGIN TRY
 		,@intExecutionOrder INT
 		,@intManufacturingCellId INT
 		,@dtmPlannedDate DATETIME
+		,@intTransactionCount INT
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -91,7 +92,9 @@ BEGIN TRY
 				,1
 				)
 	End
+	SELECT @intTransactionCount = @@TRANCOUNT
 
+	IF @intTransactionCount = 0
 	BEGIN TRANSACTION
 
 	DECLARE @Lot TABLE (
@@ -200,7 +203,7 @@ BEGIN TRY
 		AND dtmPlannedDate = @dtmPlannedDate
 		AND intExecutionOrder > @intExecutionOrder
 
-
+	IF @intTransactionCount = 0
 	COMMIT TRANSACTION
 
 	EXEC sp_xml_removedocument @idoc
@@ -209,7 +212,7 @@ END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 
-	IF XACT_STATE() != 0
+	IF XACT_STATE() != 0 AND @intTransactionCount = 0
 		ROLLBACK TRANSACTION
 
 	IF @idoc <> 0

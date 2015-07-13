@@ -23,10 +23,7 @@ END TRY
 
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
-
-	IF XACT_STATE() != 0
-		ROLLBACK TRANSACTION
-
+	
 	IF @idoc <> 0
 		EXEC sp_xml_removedocument @idoc
 

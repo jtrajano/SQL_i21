@@ -59,6 +59,9 @@ BEGIN TRY
 		,@dblAdjustByQuantity numeric(18,6)
 		,@intInventoryAdjustmentId int
 		,@intInputLotItemId int
+		,@intTransactionCount INT
+
+	SELECT @intTransactionCount = @@TRANCOUNT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -137,7 +140,7 @@ BEGIN TRY
 			,intDepartmentId int
 			,ysnExcessConsumptionAllowed bit
 			)
-
+	IF @intTransactionCount = 0
 	BEGIN TRANSACTION
 
 	SELECT @dtmCurrentDate = GetDate()
@@ -456,7 +459,8 @@ BEGIN TRY
 	WHERE intLotId = @intLotId
 
 	SELECT @strOutputLotNumber AS strOutputLotNumber
-
+	
+	IF @intTransactionCount = 0
 	COMMIT TRANSACTION
 
 	EXEC sp_xml_removedocument @idoc
@@ -465,7 +469,7 @@ END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 
-	IF XACT_STATE() != 0
+	IF XACT_STATE() != 0 AND @intTransactionCount = 0
 		ROLLBACK TRANSACTION
 
 	IF @idoc <> 0
