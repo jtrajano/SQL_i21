@@ -78,5 +78,11 @@ Ext.define('Inventory.model.ItemStockDetailView', {
         { name: 'dblOnOrder', type: 'float' },
         { name: 'dblOrderCommitted', type: 'float' },
         { name: 'dblBackOrder', type: 'float' },
+        { name: 'dblDefaultFull', type: 'float' },
+        { name: 'ysnAvailableTM', type: 'boolean' },
+        { name: 'dblMaintenanceRate', type: 'float' },
+        { name: 'strMaintenanceCalculationMethod', type: 'string' },
+        { name: 'dblOverReceiveTolerance', type: 'float' },
+        { name: 'dblWeightTolerance', type: 'float' }
     ]
 });

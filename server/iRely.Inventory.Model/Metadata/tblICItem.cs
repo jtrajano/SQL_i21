@@ -367,6 +367,12 @@ namespace iRely.Inventory.Model
         public decimal? dblOnOrder { get; set; }
         public decimal? dblOrderCommitted { get; set; }
         public decimal? dblBackOrder { get; set; }
+        public decimal? dblDefaultFull { get; set; }
+        public bool? ysnAvailableTM { get; set; }
+        public decimal? dblMaintenanceRate { get; set; }
+        public string strMaintenanceCalculationMethod { get; set; }
+        public decimal? dblOverReceiveTolerance { get; set; }
+        public decimal? dblWeightTolerance { get; set; }
 
         public ICollection<vyuICGetItemPricing> tblICItemPricings { get; set; }
         public ICollection<vyuICGetItemAccount> tblICItemAccounts { get; set; }

@@ -384,6 +384,12 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblOnOrder).HasColumnName("dblOnOrder").HasPrecision(18, 6);
             this.Property(t => t.dblOrderCommitted).HasColumnName("dblOrderCommitted").HasPrecision(18, 6);
             this.Property(t => t.dblBackOrder).HasColumnName("dblBackOrder").HasPrecision(18, 6);
+            this.Property(t => t.dblDefaultFull).HasColumnName("dblDefaultFull").HasPrecision(18, 6);
+            this.Property(t => t.ysnAvailableTM).HasColumnName("ysnAvailableTM");
+            this.Property(t => t.dblMaintenanceRate).HasColumnName("dblMaintenanceRate").HasPrecision(18, 6);
+            this.Property(t => t.strMaintenanceCalculationMethod).HasColumnName("strMaintenanceCalculationMethod");
+            this.Property(t => t.dblOverReceiveTolerance).HasColumnName("dblOverReceiveTolerance").HasPrecision(18, 6);
+            this.Property(t => t.dblWeightTolerance).HasColumnName("dblWeightTolerance").HasPrecision(18, 6);
 
             this.HasMany(p => p.tblICItemAccounts)
                 .WithRequired(p => p.vyuICGetItemStock)
