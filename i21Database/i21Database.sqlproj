@@ -1688,6 +1688,7 @@
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeEarning.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeDeduction.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOff.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateAPAccountCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
