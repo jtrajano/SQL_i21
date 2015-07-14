@@ -6,22 +6,39 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intContractSeq] [int] NOT NULL,
 	[intCompanyLocationId] [int] NOT NULL,
 	[dtmStartDate] [datetime] NOT NULL,
-	[intItemId] [int] NULL,
 	[dtmEndDate] [datetime] NOT NULL,
 	[intFreightTermId] [int] NULL,
 	[intShipViaId] [int] NULL,
+	
+	[intItemId] [int] NULL,
+	[intCategoryId] INT NULL,
 	[dblQuantity] [numeric](12, 4) NOT NULL,
 	[intUnitMeasureId] [int] NULL,
-	[intItemUOMId] [int] NULL,
+	[intItemUOMId] [int] NULL,	
+	[intCategoryUOMId] INT NULL, 
+	
+	[intNoOfLoad] INT NULL, 
+	[intBalanceNoOfLoad] INT NULL, 
+	[dblQuantityPerLoad] NUMERIC(18, 4) NULL, 
+    [intLoadItemUOMId] INT NULL, 
+    [intLoadCategoryUOMId] INT NULL, 
+    
+	[intIndexId] INT NULL, 
+	[dblAdjustment] NUMERIC(4, 2) NULL, 
+	[intAdjItemUOMId] [int] NULL,
+    [intAdjCategoryUOMId] INT NULL, 
+    
 	[intPricingTypeId] [int] NULL,
-	[dblFutures] [numeric](8, 4) NULL,
-	[dblBasis] [numeric](8, 4) NULL,
 	[intFutureMarketId] [int] NULL,
 	[intFutureMonthId] INT NULL,
+	[dblFutures] [numeric](8, 4) NULL,
+	[dblBasis] [numeric](8, 4) NULL,	
 	[dblCashPrice] [numeric](9, 4) NULL,
 	[intCurrencyId] [int] NULL,
-	[dblRate] [numeric](8, 4) NULL,
-	[strCurrencyReference] [nvarchar](30) COLLATE Latin1_General_CI_AS NULL,
+	[intPriceItemUOMId]  INT NULL, 
+	[intPriceCategoryUOMId] INT NULL,
+	[intNoOfLots] INT NULL,
+		
 	[intMarketZoneId] [int] NULL,
 	[intDiscountTypeId] [int] NULL ,
 	[intDiscountId] [int] NULL,
@@ -36,8 +53,8 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     [dblBalance] NUMERIC(12, 4) NULL, 
     [dblIntransitQty] NUMERIC(12, 4) NULL, 
     [dblScheduleQty] NUMERIC(12, 4) NULL, 
-    [intPriceUOMId] INT NULL, 
-	[intPriceItemUOMId]  INT NULL, 
+
+	
     [intLoadingPortId] INT NULL, 
     [intDestinationPortId] INT NULL, 
     [strShippingTerm] NVARCHAR(64) COLLATE Latin1_General_CI_AS NULL, 
@@ -50,13 +67,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[strGarden] NVARCHAR(128) COLLATE Latin1_General_CI_AS NULL,
 	[strVendorLotID] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strInvoiceNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-	[intPackingDescriptionId] INT NULL,
-	[dblWeightPerUnit] [numeric](18,4) NULL,
-	[intWeightPerUnitUOMId] INT NULL,
-	[intWeightPerUnitItemUOMId] INT NULL,
-	[dblNoOfPacks] [numeric](18,4) NULL,
-	[intPackingTypeUOMId] INT NULL,
-	[intPackingTypeItemUOMId]  INT NULL,
+
 	[intUnitsPerLayer] INT NULL,
 	[intLayersPerPallet] INT NULL,
 	[dtmEventStartDate] [datetime] NULL,
@@ -70,17 +81,14 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intInvoiceCurrencyId] [int] NULL,
 	[dtmFXValidFrom]  [datetime] NULL,
 	[dtmFXValidTo]  [datetime] NULL,
+	[dblRate] [numeric](8, 4) NULL,
 	[strFXRemarks] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[dblAssumedFX] [numeric](8, 4) NULL,
 	[strFixationBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	[intNoOfLoad] INT NULL, 
-	[intBalanceNoOfLoad] INT NULL, 
-	[intCategoryId] INT NULL,
-	[intCategoryUOMId] INT NULL, 
-    [dblAdjustment] NUMERIC(4, 2) NULL, 
-
-    [intIndexId] INT NULL, 
-	[intNoOfLots] INT NULL,
+	
+	
+    
+	
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 
 	CONSTRAINT [FK_tblCTContractDetail_tblARMarketZone_intMarketZoneId] FOREIGN KEY ([intMarketZoneId]) REFERENCES [tblARMarketZone]([intMarketZoneId]),
@@ -99,7 +107,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblAPVendor_intVendorId] FOREIGN KEY ([intBillTo]) REFERENCES [tblAPVendor]([intEntityVendorId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblGRDiscountId_intDiscountId] FOREIGN KEY ([intDiscountId]) REFERENCES [tblGRDiscountId]([intDiscountId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTDiscount_intDiscountTypeId] FOREIGN KEY ([intDiscountTypeId]) REFERENCES [tblCTDiscountType]([intDiscountTypeId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblICUnitMeasure_intPriceUOMId_intUnitMeasureId] FOREIGN KEY ([intPriceUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
+	
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intLoadingPortId_intCityId] FOREIGN KEY ([intLoadingPortId]) REFERENCES [tblSMCity]([intCityId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intDestinationPortId_intCityId] FOREIGN KEY ([intDestinationPortId]) REFERENCES [tblSMCity]([intCityId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intDestinationCityId_intCityId] FOREIGN KEY ([intDestinationCityId]) REFERENCES [tblSMCity]([intCityId]),
@@ -107,19 +115,22 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblEntity_intShipperId_intEntityId] FOREIGN KEY ([intShipperId]) REFERENCES [tblEntity]([intEntityId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblRKFuturesMonth_intFutureMonthId] FOREIGN KEY ([intFutureMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId]),
 
-	CONSTRAINT [FK_tblCTContractDetail_tblICUnitMeasure_intWeightPerUnitUOMId_intUnitMeasureId] FOREIGN KEY ([intWeightPerUnitUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblICUnitMeasure_intPackingTypeUOMId_intUnitMeasureId] FOREIGN KEY ([intPackingTypeUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTBook_intBookId] FOREIGN KEY ([intBookId]) REFERENCES [tblCTBook]([intBookId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTSubBook_intSubBookId] FOREIGN KEY ([intSubBookId]) REFERENCES [tblCTSubBook]([intSubBookId]),
 
 	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intPriceItemUOMId_intItemUOMId] FOREIGN KEY ([intPriceItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intWeightPerUnitItemUOMId_intItemUOMId] FOREIGN KEY ([intWeightPerUnitItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intPackingTypeItemUOMId_intItemUOMId] FOREIGN KEY ([intPackingTypeItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intAdjItemUOMId_intItemUOMId] FOREIGN KEY ([intAdjItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblICItemUOM_intLoadItemUOMId_intItemUOMId] FOREIGN KEY ([intLoadItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
+
+
+	CONSTRAINT [FK_tblCTContractDetail_tblICCategoryUOM_intCategoryUOMId] FOREIGN KEY([intCategoryUOMId])REFERENCES [tblICCategoryUOM] ([intCategoryUOMId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblICCategoryUOM_intPriceCategoryUOMId_intPriceCategoryUOMId] FOREIGN KEY ([intPriceCategoryUOMId]) REFERENCES [tblICCategoryUOM]([intCategoryUOMId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblICCategoryUOM_intAdjCategoryUOMId_intAdjCategoryUOMId] FOREIGN KEY ([intAdjCategoryUOMId]) REFERENCES [tblICCategoryUOM]([intCategoryUOMId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblICCategoryUOM_intLoadCategoryUOMId_intCategoryUOMId] FOREIGN KEY ([intLoadCategoryUOMId]) REFERENCES [tblICCategoryUOM]([intCategoryUOMId]),
 
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrency_intInvoiceCurrencyId_intCurrencyId] FOREIGN KEY ([intInvoiceCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblCTContractDetail_tblLGContainerType_intContainerTypeId] FOREIGN KEY ([intContainerTypeId]) REFERENCES [tblLGContainerType]([intContainerTypeId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblICCategoryUOM_intCategoryUOMId] FOREIGN KEY([intCategoryUOMId])REFERENCES [tblICCategoryUOM] ([intCategoryUOMId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblICCategory_intCategoryId] FOREIGN KEY([intCategoryId])REFERENCES [tblICCategory] ([intCategoryId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTIndex_intIndexId] FOREIGN KEY ([intIndexId]) REFERENCES [tblCTIndex]([intIndexId])
 ) 
