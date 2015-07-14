@@ -26,7 +26,6 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intIndexId] INT NULL, 
 	[dblAdjustment] NUMERIC(4, 2) NULL, 
 	[intAdjItemUOMId] [int] NULL,
-    [intAdjCategoryUOMId] INT NULL, 
     
 	[intPricingTypeId] [int] NULL,
 	[intFutureMarketId] [int] NULL,
@@ -36,7 +35,6 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[dblCashPrice] [numeric](9, 4) NULL,
 	[intCurrencyId] [int] NULL,
 	[intPriceItemUOMId]  INT NULL, 
-	[intPriceCategoryUOMId] INT NULL,
 	[intNoOfLots] INT NULL,
 		
 	[intMarketZoneId] [int] NULL,
@@ -125,8 +123,6 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 
 
 	CONSTRAINT [FK_tblCTContractDetail_tblICCategoryUOM_intCategoryUOMId] FOREIGN KEY([intCategoryUOMId])REFERENCES [tblICCategoryUOM] ([intCategoryUOMId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblICCategoryUOM_intPriceCategoryUOMId_intPriceCategoryUOMId] FOREIGN KEY ([intPriceCategoryUOMId]) REFERENCES [tblICCategoryUOM]([intCategoryUOMId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblICCategoryUOM_intAdjCategoryUOMId_intAdjCategoryUOMId] FOREIGN KEY ([intAdjCategoryUOMId]) REFERENCES [tblICCategoryUOM]([intCategoryUOMId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblICCategoryUOM_intLoadCategoryUOMId_intCategoryUOMId] FOREIGN KEY ([intLoadCategoryUOMId]) REFERENCES [tblICCategoryUOM]([intCategoryUOMId]),
 
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrency_intInvoiceCurrencyId_intCurrencyId] FOREIGN KEY ([intInvoiceCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
