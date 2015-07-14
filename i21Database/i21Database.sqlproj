@@ -1974,6 +1974,10 @@
     <Build Include="dbo\Stored Procedures\uspLGReserveStockForPickLots.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReceived.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCopyRecipe.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateBlendRelease.sql" />
+    <Build Include="dbo\Tables\tblMFBlendValidation.sql" />
+    <Build Include="dbo\Tables\tblMFBlendValidationDefault.sql" />
+    <Build Include="dbo\Tables\tblMFBlendValidationMessageType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
