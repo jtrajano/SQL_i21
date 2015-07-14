@@ -42,7 +42,8 @@ SELECT
 	,T.[strTerm]
 	,S.[intEntityShipViaId] 
 	,S.[strName]						AS [strShipVia]
-	,''									AS [strScaleTicketNumber]
+	,SCT.[intTicketNumber]				AS [intTicketNumber]
+	,SCT.[intTicketId]					AS [intTicketId]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -80,6 +81,7 @@ CROSS APPLY
 		,ISI.[intItemUOMId]
 		,U.[strUnitMeasure]
 		,ISI.[dblUnitPrice]
+		,ISI.[intSourceId]
 		,dbo.fnCalculateQtyBetweenUOM(ISI.[intItemUOMId], SOD.[intItemUOMId], SUM(ISNULL(ISI.[dblQuantity],0))) dblSOShipped
 		,SUM(ISNULL(ISI.dblQuantity,0)) dblShipped
 	FROM
@@ -107,9 +109,13 @@ CROSS APPLY
 		,ISI.[intItemUOMId]
 		,ISI.[dblUnitPrice]
 		,U.[strUnitMeasure]
+		,ISI.[intSourceId]
 	--HAVING
 	--	SUM(ISNULL(ISI.[dblQuantity],0)) != ISNULL(SOD.[dblQtyOrdered],0)
 	) SHP
+LEFT OUTER JOIN
+	tblSCTicket SCT
+		ON SHP.[intSourceId] = SCT.[intTicketId] 
 	
 UNION ALL
 
@@ -154,7 +160,8 @@ SELECT
 	,T.[strTerm]
 	,S.[intEntityShipViaId] 
 	,S.[strName]						AS [strShipVia]
-	,''									AS [strScaleTicketNumber]
+	,NULL								AS [intTicketNumber]
+	,NULL								AS [intTicketId]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
