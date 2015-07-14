@@ -175,7 +175,7 @@ BEGIN
 					,intStorageLocationId = @intStorageLocationId
 					,Qty = @dblQty
 			WHERE	@intLotId IS NOT NULL 
-					AND @intLotItemUOMId = @intItemUOMId 
+					AND @intLotItemUOMId = @intItemUOMId 					
 
 			-- and if it has weight, convert the qty to weight and then to stock unit. This records the converted qty to the stock unit level. 
 			UNION ALL 
@@ -189,6 +189,7 @@ BEGIN
 					AND @intLotWeightUOMId IS NOT NULL 
 					AND @intLotItemUOMId = @intItemUOMId
 					AND dbo.fnGetItemStockUOM(@intItemId) IS NOT NULL 
+					AND @intLotItemUOMId <> @intLotWeightUOMId
 
 	) AS RawStockData
 		ON ItemStockUOM.intItemId = RawStockData.intItemId
@@ -245,7 +246,7 @@ BEGIN
 					,Qty = dbo.fnCalculateStockUnitQty(@dblQty, @dblUOMQty)
 			WHERE	@intLotId IS NOT NULL 
 					AND @intLotWeightUOMId = @intItemUOMId 			
-					AND dbo.fnGetItemStockUOM(@intItemId)  IS NOT NULL 
+					AND dbo.fnGetItemStockUOM(@intItemId) IS NOT NULL 
 		
 			-- and then, convert the weight back to Lot Item UOM Id and Qty. So if weight is in bags, it will reduce the on-hand qty of the bags. 
 			UNION ALL 
@@ -259,6 +260,7 @@ BEGIN
 					AND @intLotWeightUOMId = @intItemUOMId
 					AND @intLotItemUOMId IS NOT NULL 
 					AND @dblWeightPerQty <> 0 
+					AND @intLotItemUOMId <> @intLotWeightUOMId
 
 	) AS RawStockData
 		ON ItemStockUOM.intItemId = RawStockData.intItemId
