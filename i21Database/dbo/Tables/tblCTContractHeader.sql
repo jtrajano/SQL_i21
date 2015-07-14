@@ -47,7 +47,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 
     [ysnMultiplePriceFixation] BIT NULL, 
 	[intCategoryUnitMeasureId] INT NULL,
-	[intCategoryLoadUnitMeasureId] INT NULL,
+	[intLoadCategoryUnitMeasureId] INT NULL,
     CONSTRAINT [PK_tblCTContractHeader_intContractHeaderId] PRIMARY KEY CLUSTERED ([intContractHeaderId] ASC), 	
 	CONSTRAINT [UQ_tblCTContractHeader_intContractTypeId_intContractNumber] UNIQUE ([intContractTypeId], [intContractNumber]), 
 	CONSTRAINT [FK_tblCTContractHeader_tblCTAssociation_intAssociationId] FOREIGN KEY ([intAssociationId]) REFERENCES [tblCTAssociation]([intAssociationId]),
@@ -73,7 +73,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	CONSTRAINT [FK_tblCTContractHeader_tblICCommodityUnitMeasure_intCommodityUOMId_intCommodityUnitMeasureId] FOREIGN KEY([intCommodityUOMId])REFERENCES [tblICCommodityUnitMeasure] ([intCommodityUnitMeasureId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblICCommodityUnitMeasure_intLoadUOMId_intCommodityUnitMeasureId] FOREIGN KEY([intLoadUOMId])REFERENCES [tblICCommodityUnitMeasure] ([intCommodityUnitMeasureId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblICUnitMeasure_intCategoryUnitMeasureId_intUnitMeasureId] FOREIGN KEY([intCategoryUnitMeasureId])REFERENCES [tblICUnitMeasure] ([intUnitMeasureId]),
-	CONSTRAINT [FK_tblCTContractHeader_tblICUnitMeasure_intCategoryLoadUnitMeasureId_intUnitMeasureId] FOREIGN KEY([intCategoryLoadUnitMeasureId])REFERENCES [tblICUnitMeasure] ([intUnitMeasureId])
+	CONSTRAINT [FK_tblCTContractHeader_tblICUnitMeasure_intLoadCategoryUnitMeasureId_intUnitMeasureId] FOREIGN KEY([intLoadCategoryUnitMeasureId])REFERENCES [tblICUnitMeasure] ([intUnitMeasureId])
 	
 )
 

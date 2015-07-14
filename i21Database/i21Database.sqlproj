@@ -1979,6 +1979,8 @@
     <Build Include="dbo\Stored Procedures\uspTMSyncInvoiceToDeliveryHistory.sql" />
     <Build Include="dbo\Functions\fnTMGetNextJulianDeliveryDate.sql" />
     <Build Include="dbo\Stored Procedures\uspTMRenewJulianCalendar.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGReserveStockForPickLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReceived.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
