@@ -87,6 +87,17 @@ BEGIN
 		WHERE  A.intBillId IN (SELECT [intBillId] FROM @tmpBills) AND 
 			A.intAccountId IS NULL AND A.intAccountId = 0
 
+		--For Approved
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT
+			'You cannot post for approved transaction.',
+			'Bill',
+			A.strBillId,
+			A.intBillId
+		FROM tblAPBill A 
+		WHERE  A.intBillId IN (SELECT [intBillId] FROM @tmpBills) AND 
+			A.ysnForApproval = 1
+
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT
 			'The account id on one of the details is not specified.',
