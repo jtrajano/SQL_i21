@@ -1324,7 +1324,6 @@
     <Build Include="dbo\Tables\tblCFCard.sql" />
     <Build Include="dbo\Tables\tblCFAccount.sql" />
     <Build Include="dbo\Tables\tblLGGenerateLoad.sql" />
-    <Build Include="dbo\Tables\tblLGLoadAllocationDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDuplicateTaxGroupMaster.sql" />
     <Build Include="dbo\Tables\tblSMTaxGroupMaster.sql" />
     <Build Include="dbo\Tables\tblSMTaxGroupMasterGroup.sql" />
@@ -1969,7 +1968,6 @@
     <Build Include="dbo\Tables\tblMFWorkOrderRecipeItem.sql" />
     <Build Include="dbo\Tables\tblMFWorkOrderRecipeSubstituteItem.sql" />
     <Build Include="dbo\Tables\tblSTRegisterFileConfiguration.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTReceived.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
