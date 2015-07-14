@@ -72,8 +72,13 @@ SELECT
 	dblUnitOnHand = ISNULL(ItemStock.dblUnitOnHand, 0),
 	dblOnOrder = ISNULL(ItemStock.dblOnOrder, 0),
 	dblOrderCommitted = ISNULL(ItemStock.dblOrderCommitted, 0),
-	dblBackOrder = ISNULL(ItemStock.dblBackOrder, 0)
-	
+	dblBackOrder = ISNULL(ItemStock.dblBackOrder, 0),
+	Item.dblDefaultFull,
+	Item.ysnAvailableTM,
+	Item.dblMaintenanceRate,
+	Item.strMaintenanceCalculationMethod,
+	Item.dblOverReceiveTolerance,
+	Item.dblWeightTolerance
 FROM tblICItem Item
 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId
 LEFT JOIN tblICItemUOM ReceiveUOM ON ReceiveUOM.intItemUOMId = ItemLocation.intReceiveUOMId

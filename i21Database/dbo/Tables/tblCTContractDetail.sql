@@ -13,7 +13,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[dblQuantity] [numeric](12, 4) NOT NULL,
 	[intUnitMeasureId] [int] NULL,
 	[intItemUOMId] [int] NULL,
-	[intPricingTypeId] [int] NOT NULL,
+	[intPricingTypeId] [int] NULL,
 	[dblFutures] [numeric](8, 4) NULL,
 	[dblBasis] [numeric](8, 4) NULL,
 	[intFutureMarketId] [int] NULL,

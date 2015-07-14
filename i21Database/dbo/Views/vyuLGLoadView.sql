@@ -33,7 +33,7 @@ SELECT Load.intLoadId
         ,strEquipmentType = EQ.strEquipmentType
         ,Load.strCustomerReference
         ,strShipFromTo = EL.strAddress
-        ,Load.strDriver
+        ,strDriver = Driver.strName
         ,Load.strTruckNo
         ,Load.strTrailerNo1
         ,Load.strTrailerNo2
@@ -50,6 +50,7 @@ LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Load.intCompanyLo
 LEFT JOIN tblEntity EN ON EN.intEntityId = Load.intEntityId
 LEFT JOIN tblEntityLocation EL ON EL.intEntityLocationId = Load.intEntityLocationId
 LEFT JOIN tblEntity Hauler ON Hauler.intEntityId = Load.intHaulerEntityId
+LEFT JOIN tblEntity Driver ON Driver.intEntityId = Load.intDriverEntityId
 LEFT JOIN vyuCTContractDetailView CDetail ON CDetail.intContractDetailId = Load.intContractDetailId
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = Load.intTicketId
 LEFT JOIN tblTRTransportLoad TL ON TL.intTransportLoadId = Load.intTransportLoadId

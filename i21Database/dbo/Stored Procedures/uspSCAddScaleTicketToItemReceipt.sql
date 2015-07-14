@@ -187,6 +187,42 @@ FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransacti
 			ON CNT.intContractDetailId = LI.intTransactionDetailId
 WHERE	SC.intTicketId = @intTicketId
 
+INSERT INTO tblICInventoryReceiptCharge
+(
+		intInventoryReceiptId,
+		intChargeId,
+		ysnInventoryCost,
+		strCostMethod,
+		dblRate,
+		intCostUOMId,
+		intEntityVendorId,
+		dblAmount,
+		strAllocateCostBy,
+		strCostBilledBy,
+		intSort,
+		intConcurrencyId
+)
+SELECT	@InventoryReceiptId, 
+		SC.intItemId,
+		0,
+		SC.strCostMethod,
+		SC.dblRate,
+		SC.intItemUOMId,
+		SC.intEntityVendorId,
+		NULL,
+		NULL,
+		'Vendor',
+		NULL,
+		1
+FROM	tblSCTicketCost SC
+WHERE SC.intTicketId = @intTicketId
+GROUP 
+BY		SC.intItemId,
+		SC.intEntityVendorId,
+		SC.strCostMethod,
+		SC.dblRate,
+		SC.intItemUOMId
+
 -- Re-update the total cost 
 UPDATE	Receipt
 SET		dblInvoiceAmount = (

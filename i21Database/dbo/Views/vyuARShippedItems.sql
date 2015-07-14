@@ -8,8 +8,10 @@ SELECT
 	,SO.[strSalesOrderNumber]
 	,SO.[dtmProcessDate]
 	,SHP.[intInventoryShipmentItemId]
+	,SHP.[strShipmentNumber] 
 	,SOD.[intSalesOrderDetailId]
 	,SO.[intCompanyLocationId]
+	,CL.[strLocationName] 
 	,SO.[intShipToLocationId]
 	,SO.[intFreightTermId]
 	,SOD.[intItemId]	
@@ -40,7 +42,8 @@ SELECT
 	,T.[strTerm]
 	,S.[intEntityShipViaId] 
 	,S.[strName]						AS [strShipVia]
-	,''									AS [strScaleTicketNumber]
+	,SCT.[intTicketNumber]				AS [intTicketNumber]
+	,SCT.[intTicketId]					AS [intTicketId]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -63,17 +66,22 @@ INNER JOIN
 		ON SOD.[intItemId] = I.[intItemId]
 LEFT OUTER JOIN
 	tblICStorageLocation SL
-		ON SOD.[intStorageLocationId] = SL.[intStorageLocationId] 
+		ON SOD.[intStorageLocationId] = SL.[intStorageLocationId]
+LEFT OUTER JOIN
+	tblSMCompanyLocation CL
+		ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId] 
 CROSS APPLY
 	(
 	SELECT 
 		 ISI.[intInventoryShipmentItemId]
+		,ISH.[strShipmentNumber] 
 		,ISI.[intLineNo]
 		,ISI.[intItemId]
 		,ISI.[dblQuantity]
 		,ISI.[intItemUOMId]
 		,U.[strUnitMeasure]
 		,ISI.[dblUnitPrice]
+		,ISI.[intSourceId]
 		,dbo.fnCalculateQtyBetweenUOM(ISI.[intItemUOMId], SOD.[intItemUOMId], SUM(ISNULL(ISI.[dblQuantity],0))) dblSOShipped
 		,SUM(ISNULL(ISI.dblQuantity,0)) dblShipped
 	FROM
@@ -94,15 +102,20 @@ CROSS APPLY
 		AND ISI.[intInventoryShipmentItemId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intInventoryShipmentItemId],0) FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.[intInvoiceId] = tblARInvoice.[intInvoiceId] WHERE tblARInvoice.[ysnPosted] = 1)
 	GROUP BY
 		 ISI.[intInventoryShipmentItemId]
+		,ISH.[strShipmentNumber]
 		,ISI.[intLineNo]
 		,ISI.[intItemId]
 		,ISI.[dblQuantity]
 		,ISI.[intItemUOMId]
 		,ISI.[dblUnitPrice]
 		,U.[strUnitMeasure]
+		,ISI.[intSourceId]
 	--HAVING
 	--	SUM(ISNULL(ISI.[dblQuantity],0)) != ISNULL(SOD.[dblQtyOrdered],0)
 	) SHP
+LEFT OUTER JOIN
+	tblSCTicket SCT
+		ON SHP.[intSourceId] = SCT.[intTicketId] 
 	
 UNION ALL
 
@@ -113,8 +126,10 @@ SELECT
 	,SO.[strSalesOrderNumber]
 	,SO.[dtmProcessDate]
 	,NULL								AS [intInventoryShipmentItemId]
+	,''									AS [strShipmentNumber]
 	,SOD.[intSalesOrderDetailId]
 	,SO.[intCompanyLocationId]
+	,CL.[strLocationName] 
 	,SO.[intShipToLocationId]
 	,SO.[intFreightTermId]
 	,SOD.[intItemId]	
@@ -145,7 +160,8 @@ SELECT
 	,T.[strTerm]
 	,S.[intEntityShipViaId] 
 	,S.[strName]						AS [strShipVia]
-	,''									AS [strScaleTicketNumber]
+	,NULL								AS [intTicketNumber]
+	,NULL								AS [intTicketId]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -176,6 +192,9 @@ LEFT JOIN
 LEFT JOIN
 	tblICUnitMeasure U
 		ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
+LEFT OUTER JOIN
+	tblSMCompanyLocation CL
+		ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId]		
 WHERE
 	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId WHERE tblARInvoice.[ysnPosted] = 1)
 	AND SO.[strTransactionType] = 'Order'

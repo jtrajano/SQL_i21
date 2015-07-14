@@ -13,7 +13,10 @@ BEGIN TRY
 		,@intItemId int
 		,@intBatchId int
 		,@ysnForceUndo bit
-		
+		,@intTransactionCount INT
+
+	SELECT @intTransactionCount = @@TRANCOUNT
+	
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
 
@@ -87,6 +90,7 @@ BEGIN TRY
 		RETURN
 	END
 
+	IF @intTransactionCount = 0
 	BEGIN TRANSACTION
 
 	DECLARE @STARTING_NUMBER_BATCH AS INT = 3
@@ -145,7 +149,8 @@ BEGIN TRY
 	UPDATE tblMFWorkOrder
 	SET dblProducedQuantity = isnull(dblProducedQuantity, 0) - (Case When intItemId=@intItemId Then @dblQuantity Else 0 End)
 	WHERE intWorkOrderId = @intWorkOrderId
-
+	
+	IF @intTransactionCount = 0
 	COMMIT TRANSACTION
 
 	EXEC sp_xml_removedocument @idoc
@@ -154,7 +159,7 @@ END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 
-	IF XACT_STATE() != 0
+	IF XACT_STATE() != 0 AND @intTransactionCount = 0
 		ROLLBACK TRANSACTION
 
 	IF @idoc <> 0

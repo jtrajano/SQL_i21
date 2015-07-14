@@ -28,6 +28,7 @@ SET ANSI_WARNINGS OFF
 --------------------------------------------------------------------------------------------   
 -- Create a unique transaction name. 
 DECLARE @TransactionName AS VARCHAR(500) = 'Payment Transaction' + CAST(NEWID() AS NVARCHAR(100));
+BEGIN TRAN @TransactionName
  
 DECLARE @ARReceivablePostData TABLE (
 	intPaymentId int PRIMARY KEY,
@@ -71,6 +72,9 @@ DECLARE @CODE NVARCHAR(25) = 'AR'
 
 DECLARE @ARAccount NVARCHAR(250)
 		,@DiscountAccount NVARCHAR(250)
+		
+DECLARE @totalInvalid INT
+DECLARE @totalRecords INT
 		
 SET @ARAccount = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
 SET @DiscountAccount = ISNULL((SELECT TOP 1 intDiscountAccountId FROM tblARCompanyPreference WHERE intDiscountAccountId IS NOT NULL AND intDiscountAccountId <> 0),0)
@@ -131,6 +135,30 @@ IF(@exclude IS NOT NULL)
 		FROM @ARReceivablePostData A
 		WHERE EXISTS(SELECT * FROM @PaymentsExclude B WHERE A.intPaymentId = B.intPaymentId)
 	END
+	
+	
+---- Get the next batch number
+--IF(@batchId IS NULL AND @param IS NOT NULL AND @param <> 'all')
+--	BEGIN
+--		SELECT TOP 1
+--			@batchId = GL.strBatchId
+--		FROM
+--			tblGLDetailRecap GL
+--		INNER JOIN 
+--			@ARReceivablePostData I
+--				ON GL.intTransactionId = I.intPaymentId
+--				AND GL.strTransactionId = I.strTransactionId
+--		WHERE
+--			GL.strTransactionType = @SCREEN_NAME
+--			AND	GL.strModuleName = @MODULE_NAME
+--	END
+	
+--IF(@batchId IS NULL)
+--	BEGIN
+		EXEC uspSMGetStartingNumber 3, @batchId OUT
+--	END
+
+SET @batchIdUsed = @batchId	
 
 --------------------------------------------------------------------------------------------  
 -- Validations  
@@ -491,8 +519,7 @@ IF @recap = 0
 					
 			END
 		
-	--Get all invalid
-		DECLARE @totalInvalid INT
+	--Get all invalid		
 		SET @totalInvalid = (SELECT COUNT(*) FROM @ARReceivableInvalidData)
 
 		IF(@totalInvalid > 0)
@@ -540,48 +567,12 @@ IF @recap = 0
 			END
 
 	--Get all to be post record
-		DECLARE @totalRecords INT
 		SELECT @totalRecords = COUNT(*) FROM @ARReceivablePostData
 
-		IF(@totalInvalid >= 1)  
-			BEGIN			
-				DECLARE @ErrorMessage NVARCHAR(100)				
-				SELECT TOP 1 @ErrorMessage = strError FROM @ARReceivableInvalidData
-				RAISERROR(@ErrorMessage, 11, 1) 
-				SET @success = 0 
-				GOTO Post_Exit
-			END
-			
-		IF(@totalRecords = 0)  
-			BEGIN			
-				SET @success = 0 
-				GOTO Post_Exit
-			END	
-	END
+		IF(@totalInvalid >= 1 AND @totalRecords <= 0)  
+			GOTO Post_Exit
 
--- Get the next batch number
-IF(@batchId IS NULL AND @param IS NOT NULL AND @param <> 'all')
-	BEGIN
-		SELECT TOP 1
-			@batchId = GL.strBatchId
-		FROM
-			tblGLDetailRecap GL
-		INNER JOIN 
-			@ARReceivablePostData I
-				ON GL.intTransactionId = I.intPaymentId
-				AND GL.strTransactionId = I.strTransactionId
-		WHERE
-			GL.strTransactionType = @SCREEN_NAME
-			AND	GL.strModuleName = @MODULE_NAME
 	END
-	
-IF(@batchId IS NULL)
-	BEGIN
-		EXEC uspSMGetStartingNumber 3, @batchId OUT
-	END
-
-SET @batchIdUsed = @batchId
-
 
 IF @recap = 1
 BEGIN
@@ -660,8 +651,8 @@ END
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
 --------------------------------------------------------------------------------------------  
-BEGIN TRAN @TransactionName
-SAVE TRAN @TransactionName
+--BEGIN TRAN @TransactionName
+--SAVE TRAN @TransactionName
 
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
@@ -672,6 +663,8 @@ IF @post = 1
 		--DELETE FROM A
 		--FROM @ARReceivablePostData A
 		--WHERE EXISTS(SELECT * FROM @ZeroPayment B WHERE A.intPaymentId = B.intPaymentId)
+		
+	BEGIN TRY
 			  		 
 		INSERT INTO @GLEntries (
 			[dtmDate] 
@@ -963,6 +956,16 @@ IF @post = 1
 			,C.strCustomerNumber
 			,A.dtmDatePaid
 			,A.intCurrencyId						
+			
+	END TRY
+	BEGIN CATCH
+		ROLLBACK TRAN @TransactionName
+		BEGIN TRANSACTION
+		INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT ERROR_MESSAGE(), @transType, @param, @batchId, 0
+		COMMIT TRANSACTION
+		GOTO Post_Exit
+	END CATCH
 					
 			
 	END   
@@ -972,7 +975,7 @@ IF @post = 1
 --------------------------------------------------------------------------------------------  
 IF @post = 0   
 	BEGIN   								
-		BEGIN 
+		BEGIN TRY 
 			INSERT INTO @GLEntries(
 				 dtmDate
 				,strBatchId
@@ -1037,7 +1040,15 @@ IF @post = 0
 			ORDER BY
 				GL.intGLDetailId		
 						
-		END		
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN @TransactionName
+			BEGIN TRANSACTION
+			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+			SELECT ERROR_MESSAGE(), @transType, @param, @batchId, 0
+			COMMIT TRANSACTION
+			GOTO Post_Exit
+		END CATCH		
 	END   
 
 --------------------------------------------------------------------------------------------  
@@ -1049,8 +1060,7 @@ IF @post = 0
 --------------------------------------------------------------------------------------------  
 IF @recap = 1
 	BEGIN 
-		ROLLBACK TRAN @TransactionName
-		
+
 		DELETE tblGLDetailRecap  
 		FROM 
 			tblGLDetailRecap A 
@@ -1059,7 +1069,7 @@ IF @recap = 1
 		   AND  A.strCode = @CODE  
 		   
 		   
-		--EXEC dbo.uspCMPostRecap @GLEntries
+	BEGIN TRY
 		
 		INSERT INTO tblGLDetailRecap (  
 		  [dtmDate]  
@@ -1117,12 +1127,15 @@ IF @recap = 1
 		FROM 
 			@GLEntries
 			
-		IF(@@ERROR <> 0)  
-			BEGIN			
-				SET @success = 0 
-				GOTO Post_Exit
-			END	
-		COMMIT TRAN @TransactionName
+	END TRY
+	BEGIN CATCH
+		ROLLBACK TRAN @TransactionName
+		BEGIN TRANSACTION
+		INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+		SELECT ERROR_MESSAGE(), @transType, @param, @batchId, 0
+		COMMIT TRANSACTION
+		GOTO Post_Exit
+	END CATCH	
 	END 
 
 --------------------------------------------------------------------------------------------  
@@ -1132,14 +1145,20 @@ IF @recap = 1
 -- 3. Commit the save point 
 --------------------------------------------------------------------------------------------  
 IF @recap = 0
-	BEGIN 
-		EXEC dbo.uspGLBookEntries @GLEntries, @post
-		IF(@@ERROR <> 0)  
-			BEGIN			
-				SET @success = 0 
-				GOTO Post_Exit
-			END
+	BEGIN
+		BEGIN TRY 
+			EXEC dbo.uspGLBookEntries @GLEntries, @post
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRAN @TransactionName
+			BEGIN TRANSACTION
+			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+			SELECT ERROR_MESSAGE(), @transType, @param, @batchId, 0
+			COMMIT TRANSACTION
+			GOTO Post_Exit
+		END CATCH	
 		 
+		BEGIN TRY 
 		IF @post = 0
 			BEGIN
 			
@@ -1205,7 +1224,7 @@ IF @recap = 0
 			UPDATE 
 				tblARPaymentDetail
 			SET 
-				dblPayment = CASE WHEN (ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00)) < A.dblPayment THEN (ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00)) ELSE A.dblPayment END
+				dblPayment = CASE WHEN ((ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) < A.dblPayment THEN ((ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) ELSE A.dblPayment END
 			FROM
 				tblARPaymentDetail A
 			INNER JOIN
@@ -1219,7 +1238,7 @@ IF @recap = 0
 			UPDATE 
 				tblARPaymentDetail
 			SET 
-				dblAmountDue = (ISNULL(C.dblAmountDue, 0.00) - ISNULL(A.dblDiscount,0.00)) - A.dblPayment							
+				dblAmountDue = (((ISNULL(C.dblAmountDue, 0.00) - ISNULL(A.dblDiscount,0.00)) * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) - A.dblPayment)
 			FROM
 				tblARPaymentDetail A
 			INNER JOIN
@@ -1563,7 +1582,7 @@ IF @recap = 0
 		UPDATE 
 			tblARPaymentDetail
 		SET 
-			dblPayment = CASE WHEN (ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00)) < A.dblPayment THEN (ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00)) ELSE A.dblPayment END
+			dblPayment = CASE WHEN ((ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00)) * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) < A.dblPayment THEN ((ISNULL(C.dblAmountDue,0.00) - ISNULL(A.dblDiscount,0.00))* (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) ELSE A.dblPayment END
 		FROM
 			tblARPaymentDetail A
 		INNER JOIN
@@ -1579,7 +1598,7 @@ IF @recap = 0
 		UPDATE 
 			tblARPaymentDetail
 		SET 
-			dblAmountDue = (ISNULL(C.dblAmountDue, 0.00) - ISNULL(A.dblDiscount,0.00)) - A.dblPayment							
+			dblAmountDue = (((ISNULL(C.dblAmountDue, 0.00) - ISNULL(A.dblDiscount,0.00) * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END))) - A.dblPayment)
 		FROM
 			tblARPaymentDetail A
 		INNER JOIN
@@ -1590,12 +1609,29 @@ IF @recap = 0
 			tblARInvoice C
 				ON A.intInvoiceId = C.intInvoiceId
 		WHERE
-			B.ysnPosted = 0		
+			B.ysnPosted = 0
 			
-		COMMIT TRAN @TransactionName
+		END TRY
+		BEGIN CATCH	
+			ROLLBACK TRAN @TransactionName
+			BEGIN TRANSACTION
+			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+			SELECT ERROR_MESSAGE(), @transType, @param, @batchId, 0
+			COMMIT TRANSACTION
+			GOTO Post_Exit
+		END CATCH
+					
 	END
+
+SET @successfulCount = @totalRecords
+SET @invalidCount = @totalInvalid	
+COMMIT TRAN @TransactionName
+RETURN 1;
 	    
 -- This is our immediate exit in case of exceptions controlled by this stored procedure
 Post_Exit:
-	RETURN;
+	SET @successfulCount = 0	
+	SET @invalidCount = @totalInvalid + @totalRecords
+	SET @success = 0	
+	RETURN 0;
 	

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryReceiptIntegrations for calling uspPOReceived]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryReceiptIntegrations for calling uspCTReceived]
 AS
 BEGIN
 	-- Setup the fake data
@@ -23,12 +23,12 @@ BEGIN
 				,intSourceType
 				,strReceiptNumber
 		)
-		SELECT	strReceiptType = @RECEIPT_TYPE_PURCHASE_ORDER
+		SELECT	strReceiptType = @RECEIPT_TYPE_PURCHASE_CONTRACT
 				,intSourceType = @SOURCE_TYPE_NONE
 				,strReceiptNumber = 'INVRCT-1XXXX1'
 
-		-- Add a spy for uspPOReceived
-		EXEC tSQLt.SpyProcedure 'dbo.uspPOReceived';		
+		-- Add a spy for uspCTReceived
+		EXEC tSQLt.SpyProcedure 'dbo.uspCTReceived';		
 	END
 
 	-- Arrange 
@@ -50,12 +50,12 @@ BEGIN
 
 	-- Assert 
 	BEGIN 
-		EXEC tSQLt.AssertObjectExists 'uspPOReceived_SpyProcedureLog'
+		EXEC tSQLt.AssertObjectExists 'uspCTReceived_SpyProcedureLog'
 		
 		DECLARE @expectedCount AS INT = 1 
 				,@actualCount AS INT
 
-		SELECT @actualCount = COUNT(*) FROM uspPOReceived_SpyProcedureLog
+		SELECT @actualCount = COUNT(*) FROM uspCTReceived_SpyProcedureLog
 
 		EXEC tSQLt.AssertEquals @expectedCount, @actualCount
 	END 

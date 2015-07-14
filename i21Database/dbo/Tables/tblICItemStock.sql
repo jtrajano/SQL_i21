@@ -57,7 +57,7 @@ This table holds stock information like quantity on hand and etc.
 		[intItemStockId] INT NOT NULL IDENTITY, 
 		[intItemId] INT NOT NULL, 
 		[intItemLocationId] INT NOT NULL, 
-		[intSubLocationId] INT NULL, -- IMPORTANT NOTE: This field is transferred to tblICItemStockUOM. DO NOT USE this field. 
+-- IMPORTANT NOTE: This field is transferred to tblICItemStockUOM. DO NOT USE this field. 
 		[dblUnitOnHand] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblUnitInCustody] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblUnitInConsigned] NUMERIC(18, 6) NULL DEFAULT ((0)),
@@ -70,8 +70,7 @@ This table holds stock information like quantity on hand and etc.
 		CONSTRAINT [PK_tblICItemStock] PRIMARY KEY ([intItemStockId]), 
 		CONSTRAINT [UN_tblICItemStock] UNIQUE NONCLUSTERED ([intItemId] ASC, [intItemLocationId] ASC),
 		CONSTRAINT [FK_tblICItemStock_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]) ON DELETE CASCADE, 
-		CONSTRAINT [FK_tblICItemStock_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]), 
-		CONSTRAINT [FK_tblICItemStock_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]) 
+		CONSTRAINT [FK_tblICItemStock_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]) 
 	)
 	GO
 	CREATE NONCLUSTERED INDEX [IX_tblICItemStock_intItemId_intLocationId]
@@ -105,14 +104,7 @@ This table holds stock information like quantity on hand and etc.
 		@level2type = N'COLUMN',
 		@level2name = N'intItemLocationId'
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Sub Location Id. IMPORTANT NOTE: This field is transferred to tblICItemStockUOM. DO NOT USE this field.',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICItemStock',
-		@level2type = N'COLUMN',
-		@level2name = 'intSubLocationId'
+	
 	GO
 
 	GO

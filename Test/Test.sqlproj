@@ -747,6 +747,7 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryShipmentIntegrations for calling uspTRShipped.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryShipment for calling uspICPostInventoryShipmentIntegrations.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceipt for calling uspICPostInventoryReceiptIntegrations.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptIntegrations for calling uspCTReceived.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

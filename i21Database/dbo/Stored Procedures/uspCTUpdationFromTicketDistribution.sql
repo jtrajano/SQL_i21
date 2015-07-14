@@ -4,21 +4,23 @@ CREATE PROCEDURE uspCTUpdationFromTicketDistribution
 	@intEntityId	INT,
 	@dblNetUnits	NUMERIC(10,3),
 	@intContractId	INT,
-	@intUserId		INT
+	@intUserId		INT,
+	@ysnDP			BIT
 	
 AS
 
 BEGIN TRY
 	
-	DECLARE @ErrMsg				NVARCHAR(MAX),
-			@dblBalance			NUMERIC(12,4),			
-			@intItemId			INT,
-			@dblNewBalance		NUMERIC(12,4),
-			@strInOutFlag		NVARCHAR(4),
-			@dblQuantity		NUMERIC(12,4),
-			@strAdjustmentNo	NVARCHAR(50),
-			@dblCost			NUMERIC(9,4),
-			@ApplyScaleToBasis	BIT
+	DECLARE @ErrMsg					NVARCHAR(MAX),
+			@dblBalance				NUMERIC(12,4),			
+			@intItemId				INT,
+			@dblNewBalance			NUMERIC(12,4),
+			@strInOutFlag			NVARCHAR(4),
+			@dblQuantity			NUMERIC(12,4),
+			@strAdjustmentNo		NVARCHAR(50),
+			@dblCost				NUMERIC(9,4),
+			@ApplyScaleToBasis		BIT,
+			@intContractHeaderId	INT
 
 	DECLARE @Processed TABLE
 	(
@@ -47,9 +49,28 @@ BEGIN TRY
 	SELECT	@ApplyScaleToBasis = CAST(strValue AS BIT) FROM tblSMPreferences WHERE strPreference = 'ApplyScaleToBasis'
 	SELECT	@ApplyScaleToBasis = ISNULL(@ApplyScaleToBasis,0)
 
-	IF	ISNULL(@intContractId,0) = 0
+	IF	@ysnDP = 1 AND ISNULL(@intContractId,0) = 0
 	BEGIN
 		SELECT	TOP	1	@intContractId	=	intContractDetailId
+		FROM	tblCTContractDetail CD
+		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
+		WHERE	CH.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
+		AND		CH.intEntityId		=	@intEntityId
+		AND		CD.intItemId		=	@intItemId
+		AND		CD.intPricingTypeId	=	5
+		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
+
+		IF	ISNULL(@intContractId,0) = 0
+		BEGIN
+			RAISERROR ('No DP contract available.',16,1,'WITH NOWAIT')  
+		END
+	END
+
+	IF	ISNULL(@intContractId,0) = 0
+	BEGIN
+		SELECT	TOP	1	
+				@intContractId	=	CD.intContractDetailId,
+				@intContractHeaderId = CD.intContractHeaderId
 		FROM	tblCTContractDetail CD
 		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
 		WHERE	CH.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
@@ -93,6 +114,24 @@ BEGIN TRY
 		UPDATE	tblSMStartingNumber
 		SET		intNumber = intNumber+1
 		WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
+
+		IF @ysnDP = 1
+		BEGIN
+			UPDATE	tblCTContractDetail 
+			SET		dblBalance	= @dblBalance + @dblNetUnits,
+					dblQuantity = dblQuantity + @dblNetUnits
+			WHERE	intContractDetailId = @intContractId
+			
+			UPDATE	tblCTContractHeader
+			SET		dblQuantity = dblQuantity + @dblNetUnits
+			WHERE	intContractHeaderId = @intContractHeaderId
+
+			INSERT	INTO @Processed SELECT @intContractId,@dblNetUnits,NULL,@dblQuantity,@dblBalance,@dblNetUnits,@dblBalance - @dblNetUnits,@dblQuantity,@strAdjustmentNo,@dblCost
+
+			SELECT	@dblNetUnits = 0
+
+			BREAK
+		END
 
 		IF	@dblNetUnits <= @dblBalance
 		BEGIN

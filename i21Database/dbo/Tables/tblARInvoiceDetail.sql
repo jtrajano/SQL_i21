@@ -15,7 +15,9 @@
 	[intSalesAccountId]				INT             NULL,
 	[intInventoryAccountId]			INT				NULL,
 	[intInventoryShipmentItemId]	INT				NULL,
+	[strShipmentNumber]				NVARCHAR(50)	COLLATE Latin1_General_CI_AS NULL,
 	[intSalesOrderDetailId]			INT				NULL,
+	[strSalesOrderNumber]			NVARCHAR (25)   COLLATE Latin1_General_CI_AS NULL,
 	[intSiteId]						INT				NULL,
 	[strBillingBy]                  NVARCHAR(100)   COLLATE Latin1_General_CI_AS NULL,
 	[dblPercentFull]				NUMERIC (18, 6) NULL,
@@ -30,6 +32,7 @@
     [dblMaintenanceAmount]          NUMERIC(18, 6)  NULL, 
     [dblLicenseAmount]              NUMERIC(18, 6)  NULL,  
     [intContractDetailId]			INT				NULL, 
+	[intTicketId]					INT				NULL, 
     [intConcurrencyId]				INT             CONSTRAINT [DF_tblARInvoiceDetail_intConcurrencyId] DEFAULT ((0)) NOT NULL,    
     CONSTRAINT [PK_tblARInvoiceDetail_intInvoiceDetailId] PRIMARY KEY CLUSTERED ([intInvoiceDetailId] ASC),
     CONSTRAINT [FK_tblARInvoiceDetail_tblARInvoice] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId]) ON DELETE CASCADE,
@@ -41,7 +44,8 @@
 	CONSTRAINT [FK_tblARInvoiceDetail_tblSOSalesOrderDetail_intSalesOrderDetailId] FOREIGN KEY ([intSalesOrderDetailId]) REFERENCES [dbo].[tblSOSalesOrderDetail] ([intSalesOrderDetailId]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblTMSite_intSiteId] FOREIGN KEY ([intSiteId]) REFERENCES [dbo].[tblTMSite] ([intSiteID]),
 	CONSTRAINT [FK_tblARInvoiceDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]),
-	CONSTRAINT [FK_tblARInvoiceDetail_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId])
+	CONSTRAINT [FK_tblARInvoiceDetail_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId]),
+	CONSTRAINT [FK_tblARInvoiceDetail_tblSCTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [dbo].[tblSCTicket] ([intTicketId])
 );
 
 
