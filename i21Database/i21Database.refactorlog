@@ -3766,4 +3766,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intConcurrencyId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="8ac17dc3-a8e0-433f-8931-d69fa790081e" ChangeDateTime="07/14/2015 06:04:08">
+    <Property Name="ElementName" Value="[dbo].[tblSTRegisterFileConfiguration].[intLayoutId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTRegisterFileConfiguration]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intImportFileHeaderId" />
+  </Operation>
 </Operations>
