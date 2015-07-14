@@ -2208,6 +2208,23 @@ Ext.define('Inventory.view.ItemViewController', {
         return max;
     },
 
+    onManufacturingCellDefaultCheckChange: function (obj, rowIndex, checked, eOpts) {
+        if (obj.dataIndex === 'ysnDefault'){
+            var grid = obj.up('grid');
+            var current = grid.view.getRecord(rowIndex);
+
+            if (checked === true){
+                var cells = grid.store.data.items;
+                if (cells) {
+                    cells.forEach(function(cell){
+                        if (cell !== current){
+                            cell.set('ysnDefault', false);
+                        }
+                    });
+                }
+            }
+        }
+    },
 
     // </editor-fold>
 
@@ -2549,6 +2566,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#colStockUnit": {
                 beforecheckchange: this.onUOMStockUnitCheckChange
+            },
+            "#colCellNameDefault": {
+                beforecheckchange: this.onManufacturingCellDefaultCheckChange
             },
             "#grdLocationStore": {
                 itemdblclick: this.onLocationDoubleClick

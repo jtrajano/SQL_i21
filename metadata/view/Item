@@ -8617,24 +8617,24 @@
                                                                     "userConfig": {
                                                                         "columns": [
                                                                             "[",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'intCompanyLocationPricingLevelId',",
-                                                                            "\t\tdataType: 'numeric',",
-                                                                            "\t\ttext: 'Key Id',",
-                                                                            "\t\thidden: true",
-                                                                            "\t},",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'intCompanyLocationId',",
-                                                                            "\t\tdataType: 'numeric',",
-                                                                            "\t\ttext: 'Location Id',",
-                                                                            "\t\thidden: true",
-                                                                            "\t},",
-                                                                            "\t{",
-                                                                            "\t\tdataIndex: 'strPricingLevelName',",
-                                                                            "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Pricing Level',",
-                                                                            "\t\tflex: 1",
-                                                                            "\t}",
+                                                                            "{",
+                                                                            "dataIndex: 'intCompanyLocationPricingLevelId',",
+                                                                            "dataType: 'numeric',",
+                                                                            "text: 'Key Id',",
+                                                                            "hidden: true",
+                                                                            "},",
+                                                                            "{",
+                                                                            "dataIndex: 'intCompanyLocationId',",
+                                                                            "dataType: 'numeric',",
+                                                                            "text: 'Location Id',",
+                                                                            "hidden: true",
+                                                                            "},",
+                                                                            "{",
+                                                                            "dataIndex: 'strPricingLevelName',",
+                                                                            "dataType: 'string',",
+                                                                            "text: 'Pricing Level',",
+                                                                            "flex: 1",
+                                                                            "}",
                                                                             "]"
                                                                         ],
                                                                         "designer|createAlias": "gridcombobox",
@@ -12766,19 +12766,7 @@
                                                                 "width": 60
                                                             },
                                                             "name": "MyCheck5",
-                                                            "designerId": "edc19df8-a1a7-4ff4-89bf-6f104c7873f1",
-                                                            "cn": [
-                                                                {
-                                                                    "type": "Ext.form.field.Checkbox",
-                                                                    "reference": {
-                                                                        "name": "editor",
-                                                                        "type": "object"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "name": "MyCheckbox29",
-                                                                    "designerId": "c80be218-1811-4425-a0d1-f5f55c3c401c"
-                                                                }
-                                                            ]
+                                                            "designerId": "edc19df8-a1a7-4ff4-89bf-6f104c7873f1"
                                                         },
                                                         {
                                                             "type": "Ext.grid.column.Number",
