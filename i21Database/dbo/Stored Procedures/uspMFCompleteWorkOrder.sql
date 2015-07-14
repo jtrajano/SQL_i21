@@ -359,7 +359,7 @@ BEGIN TRY
 			,intLastModifiedUserId
 			)
 		SELECT @intWorkOrderId
-			,@intItemId
+			,intItemId
 			,intLotId
 			,CASE 
 				WHEN @dblInputWeight = 0
@@ -381,6 +381,12 @@ BEGIN TRY
 			,@intUserId
 		FROM dbo.tblICLot L
 		WHERE intLotId = @intInputLotId
+
+		EXEC dbo.uspMFCopyRecipe @intItemId = @intItemId
+			,@intLocationId = @intLocationId
+			,@intUserId = @intUserId
+			,@intWorkOrderId = @intWorkOrderId
+
 	END
 
 	IF @ysnProductionOnly = 0--Consumption will happen during true up.

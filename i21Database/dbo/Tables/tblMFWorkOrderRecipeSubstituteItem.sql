@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblMFWorkOrderRecipeSubstituteItem]
 (
-	[intRecipeSubstituteItemId] INT NOT NULL IDENTITY(1,1) , 
+	[intWorkOrderId] int Not NULL,
+	[intRecipeSubstituteItemId] INT NOT NULL, 
     [intRecipeItemId] INT NOT NULL,
 	[intRecipeId] INT NOT NULL, 
     [intItemId] INT NOT NULL, 
@@ -17,7 +18,7 @@
 	[intLastModifiedUserId] [int] NOT NULL,
 	[dtmLastModified] [datetime] NOT NULL CONSTRAINT [DF_tblMFWorkOrderRecipeSubstituteItem_dtmLastModified] DEFAULT GetDate(),	 
     [intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFWorkOrderRecipeSubstituteItem_intConcurrencyId] DEFAULT 0,
-    CONSTRAINT [PK_tblMFWorkOrderRecipeSubstituteItem_intRecipeSubstituteItemId] PRIMARY KEY ([intRecipeSubstituteItemId]),
+    CONSTRAINT [PK_tblMFWorkOrderRecipeSubstituteItem_intRecipeSubstituteItemId] PRIMARY KEY ([intRecipeSubstituteItemId],[intWorkOrderId]),
 	CONSTRAINT [FK_tblMFWorkOrderRecipeSubstituteItem_intRecipeItemId] FOREIGN KEY ([intRecipeItemId]) REFERENCES [tblMFRecipeItem]([intRecipeItemId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblMFWorkOrderRecipeSubstituteItem_tblMFRecipe_intRecipeId] FOREIGN KEY ([intRecipeId]) REFERENCES [tblMFRecipe]([intRecipeId]), 
 	CONSTRAINT [FK_tblMFWorkOrderRecipeSubstituteItem_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
