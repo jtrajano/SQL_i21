@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICCalculateChargePerItem for generating charges for Per Unit]
+﻿CREATE PROCEDURE [testi21Database].[test uspICCalculateInventoryReceiptOtherCharges for error 51155]
 AS
 BEGIN
 	-- Arrange 
@@ -100,61 +100,25 @@ BEGIN
 		DECLARE @intInventoryReceiptId AS INT = 8
 	END 
 
-	-- Setup the expected data
+	-- Delete Pound UOMs in @ManualLotGrains to simulate a missing UOM
 	BEGIN 
-		INSERT INTO expected (
-			[intInventoryReceiptId]
-			,[intInventoryReceiptChargeId]
-			,[intInventoryReceiptItemId]
-			,[intChargeId]
-			,[intEntityVendorId]
-			,[dblCalculatedAmount]
-		)
-		SELECT 
-			[intInventoryReceiptId]			= @intInventoryReceiptId
-			,[intInventoryReceiptChargeId]	= 1
-			,[intInventoryReceiptItemId]	= 21
-			,[intChargeId]					= @OtherCharges
-			,[intEntityVendorId]			= NULL 
-			,[dblCalculatedAmount]			= (10 * @BushelUnitQty) * 5 -- (Open Receive is 10, @BushelUnitQty is 1, Rate is $5)
-		UNION ALL
-		SELECT 
-			[intInventoryReceiptId]			= @intInventoryReceiptId
-			,[intInventoryReceiptChargeId]	= 1
-			,[intInventoryReceiptItemId]	= 22
-			,[intChargeId]					= @OtherCharges
-			,[intEntityVendorId]			= NULL 
-			,[dblCalculatedAmount]			= (20 * @PoundUnitQty) * 5 -- (Open Receive is 20, @PoundUnitQty is 1, Rate is $5)
-	END 
-	
-	-- Act
-	BEGIN 		
-		EXEC [dbo].[uspICCalculateChargePerItem]
-			@intInventoryReceiptId
+		DELETE FROM tblICItemUOM 
+		WHERE	intItemId = @ManualLotGrains
+				AND intItemUOMId = @ManualGrains_PoundUOM
 	END 
 
 	-- Assert
 	BEGIN 
-		INSERT INTO actual (
-			[intInventoryReceiptId]
-			,[intInventoryReceiptChargeId]
-			,[intInventoryReceiptItemId]
-			,[intChargeId]
-			,[intEntityVendorId]
-			,[dblCalculatedAmount]
-		)
-		SELECT
-			[intInventoryReceiptId]
-			,[intInventoryReceiptChargeId]
-			,[intInventoryReceiptItemId]
-			,[intChargeId]
-			,[intEntityVendorId]
-			,[dblCalculatedAmount]
-		FROM	dbo.tblICInventoryReceiptChargePerItem
-		WHERE	intInventoryReceiptId = @intInventoryReceiptId
-
-		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
+		EXEC tSQLt.ExpectException
+			@ExpectedMessage = 'Unable to calculate the Other Charges per unit. Please check if UOM Pound is assigned to item MANUAL LOT GRAINS.'
+			,@ExpectedErrorNumber = 51155
 	END
+	
+	-- Act
+	BEGIN 		
+		EXEC [dbo].[uspICCalculateInventoryReceiptOtherCharges]
+			@intInventoryReceiptId
+	END 
 
 	-- Clean-up: remove the tables used in the unit test
 	IF OBJECT_ID('actual') IS NOT NULL 

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICCalculateChargePerItem for error 51155]
+﻿CREATE PROCEDURE [testi21Database].[test uspICCalculateInventoryReceiptOtherCharges for generating charges for Amount]
 AS
 BEGIN
 	-- Arrange 
@@ -97,28 +97,64 @@ BEGIN
 			[dblCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)) 
 		)
 
-		DECLARE @intInventoryReceiptId AS INT = 8
+		DECLARE @intInventoryReceiptId AS INT = 10
 	END 
 
-	-- Delete Pound UOMs in @ManualLotGrains to simulate a missing UOM
+	-- Setup the expected data
 	BEGIN 
-		DELETE FROM tblICItemUOM 
-		WHERE	intItemId = @ManualLotGrains
-				AND intItemUOMId = @ManualGrains_PoundUOM
+		INSERT INTO expected (
+			[intInventoryReceiptId]
+			,[intInventoryReceiptChargeId]
+			,[intInventoryReceiptItemId]
+			,[intChargeId]
+			,[intEntityVendorId]
+			,[dblCalculatedAmount]
+		)
+		SELECT 
+			[intInventoryReceiptId]			= @intInventoryReceiptId
+			,[intInventoryReceiptChargeId]	= 3
+			,[intInventoryReceiptItemId]	= 25
+			,[intChargeId]					= @OtherCharges
+			,[intEntityVendorId]			= NULL 
+			,[dblCalculatedAmount]			= 25.00 -- Fixed amount
+		UNION ALL
+		SELECT 
+			[intInventoryReceiptId]			= @intInventoryReceiptId
+			,[intInventoryReceiptChargeId]	= 3
+			,[intInventoryReceiptItemId]	= 26
+			,[intChargeId]					= @OtherCharges
+			,[intEntityVendorId]			= NULL 
+			,[dblCalculatedAmount]			= 25.00 -- Fixed amount
+	END 
+	
+	-- Act
+	BEGIN 		
+		EXEC [dbo].[uspICCalculateInventoryReceiptOtherCharges]
+			@intInventoryReceiptId
 	END 
 
 	-- Assert
 	BEGIN 
-		EXEC tSQLt.ExpectException
-			@ExpectedMessage = 'Unable to calculate the Other Charges per unit. Please check if UOM Pound is assigned to item MANUAL LOT GRAINS.'
-			,@ExpectedErrorNumber = 51155
+		INSERT INTO actual (
+			[intInventoryReceiptId]
+			,[intInventoryReceiptChargeId]
+			,[intInventoryReceiptItemId]
+			,[intChargeId]
+			,[intEntityVendorId]
+			,[dblCalculatedAmount]
+		)
+		SELECT
+			[intInventoryReceiptId]
+			,[intInventoryReceiptChargeId]
+			,[intInventoryReceiptItemId]
+			,[intChargeId]
+			,[intEntityVendorId]
+			,[dblCalculatedAmount]
+		FROM	dbo.tblICInventoryReceiptChargePerItem
+		WHERE	intInventoryReceiptId = @intInventoryReceiptId
+
+		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 	END
-	
-	-- Act
-	BEGIN 		
-		EXEC [dbo].[uspICCalculateChargePerItem]
-			@intInventoryReceiptId
-	END 
 
 	-- Clean-up: remove the tables used in the unit test
 	IF OBJECT_ID('actual') IS NOT NULL 

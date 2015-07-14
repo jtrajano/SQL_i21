@@ -1939,7 +1939,7 @@
     <Build Include="dbo\Tables\tblHDReminder.sql" />
     <Build Include="dbo\Tables\tblGRCompanyPreference.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptChargePerItem.sql" />
-    <Build Include="dbo\Stored Procedures\uspICCalculateChargePerItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCalculateInventoryReceiptOtherCharges.sql" />
     <Build Include="dbo\Functions\fnGetItemStockUOM.sql" />
     <Build Include="dbo\Functions\fnGetMatchingItemUOMId.sql" />
     <Build Include="dbo\Stored Procedures\uspEMMergeEntity.sql" />
@@ -1973,6 +1973,7 @@
     <Build Include="dbo\Tables\tblMFWorkOrderRecipeItem.sql" />
     <Build Include="dbo\Tables\tblMFWorkOrderRecipeSubstituteItem.sql" />
     <Build Include="dbo\Tables\tblSTRegisterFileConfiguration.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCalculateSurchargeOnOtherCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

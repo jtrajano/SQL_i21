@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICCalculateChargePerItem for generating charges for Amount]
+﻿CREATE PROCEDURE [testi21Database].[test uspICCalculateInventoryReceiptOtherCharges for generating charges for Percentage]
 AS
 BEGIN
 	-- Arrange 
@@ -97,7 +97,7 @@ BEGIN
 			[dblCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)) 
 		)
 
-		DECLARE @intInventoryReceiptId AS INT = 10
+		DECLARE @intInventoryReceiptId AS INT = 9
 	END 
 
 	-- Setup the expected data
@@ -112,24 +112,24 @@ BEGIN
 		)
 		SELECT 
 			[intInventoryReceiptId]			= @intInventoryReceiptId
-			,[intInventoryReceiptChargeId]	= 3
-			,[intInventoryReceiptItemId]	= 25
+			,[intInventoryReceiptChargeId]	= 2
+			,[intInventoryReceiptItemId]	= 23
 			,[intChargeId]					= @OtherCharges
 			,[intEntityVendorId]			= NULL 
-			,[dblCalculatedAmount]			= 25.00 -- Fixed amount
+			,[dblCalculatedAmount]			= (10 * 6 * 0.05) -- (Open Receive is 10, Unit Cost is $6.00, and Rate is 5%)
 		UNION ALL
 		SELECT 
 			[intInventoryReceiptId]			= @intInventoryReceiptId
-			,[intInventoryReceiptChargeId]	= 3
-			,[intInventoryReceiptItemId]	= 26
+			,[intInventoryReceiptChargeId]	= 2
+			,[intInventoryReceiptItemId]	= 24
 			,[intChargeId]					= @OtherCharges
 			,[intEntityVendorId]			= NULL 
-			,[dblCalculatedAmount]			= 25.00 -- Fixed amount
+			,[dblCalculatedAmount]			= (20 * 7 * 0.05) -- (Open Receive is 10, Unit Cost is $7.00, and Rate is 5%)
 	END 
 	
 	-- Act
 	BEGIN 		
-		EXEC [dbo].[uspICCalculateChargePerItem]
+		EXEC [dbo].[uspICCalculateInventoryReceiptOtherCharges]
 			@intInventoryReceiptId
 	END 
 

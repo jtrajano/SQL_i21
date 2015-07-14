@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICCalculateChargePerItem]
+﻿CREATE PROCEDURE [dbo].[uspICCalculateInventoryReceiptOtherCharges]
 	@intInventoryReceiptId AS INT 
 AS
 

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICCalculateChargePerItem for the basics]
+﻿CREATE PROCEDURE [testi21Database].[test uspICCalculateInventoryReceiptOtherCharges for the basics]
 AS
 BEGIN
 	-- Arrange 
@@ -30,7 +30,7 @@ BEGIN
 	
 	-- Act
 	BEGIN 		
-		EXEC [dbo].[uspICCalculateChargePerItem]
+		EXEC [dbo].[uspICCalculateInventoryReceiptOtherCharges]
 			@intInventoryReceiptId
 	END 
 
