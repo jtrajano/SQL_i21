@@ -22,7 +22,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[strContractComments] [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
 	[intAssociationId] INT NULL, 
     [intTermId] INT NOT NULL, 
-    [intPricingTypeId] INT NOT NULL DEFAULT 4, 
+    [intPricingTypeId] INT NULL , 
 
 	[intApprovalBasisId] [INT] NULL,
 	[intContractBasisId] [INT] NULL,
@@ -45,6 +45,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
     [intLoadUOMId] INT NULL, 
 	[ysnCategory] BIT,
 
+    [ysnMultiplePriceFixation] BIT NULL, 
     CONSTRAINT [PK_tblCTContractHeader_intContractHeaderId] PRIMARY KEY CLUSTERED ([intContractHeaderId] ASC), 	
 	CONSTRAINT [UQ_tblCTContractHeader_intContractTypeId_intContractNumber] UNIQUE ([intContractTypeId], [intContractNumber]), 
 	CONSTRAINT [FK_tblCTContractHeader_tblCTAssociation_intAssociationId] FOREIGN KEY ([intAssociationId]) REFERENCES [tblCTAssociation]([intAssociationId]),
