@@ -142,6 +142,7 @@ BEGIN TRY
 			,@dblNetUnits
 			,@intContractId
 			,@intUserId
+			,0
 		SELECT TOP 1 @dblRemainingUnits = LI.dblUnitsRemaining FROM @LineItems LI
 		IF(@dblRemainingUnits IS NULL)
 		BEGIN
@@ -149,7 +150,7 @@ BEGIN TRY
 		END
 		IF(@dblRemainingUnits > 0)
 		BEGIN
-			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDummyDistributionOption
+			EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDummyDistributionOption, NULL
 			IF (@dblRemainingUnits = @dblNetUnits)
 			RETURN
 		END
