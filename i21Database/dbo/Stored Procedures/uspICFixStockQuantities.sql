@@ -294,6 +294,7 @@ USING (
 		WHERE	ISNULL(ItemTransactions.ysnIsUnposted, 0) = 0
 				AND Lot.intLotId IS NOT NULL 
 				AND Lot.intItemUOMId = ItemTransactions.intItemUOMId
+				AND Lot.intItemUOMId <> Lot.intWeightUOMId
 		GROUP BY ItemTransactions.intItemId, dbo.fnGetItemStockUOM(ItemTransactions.intItemId), ItemTransactions.intItemLocationId ,ItemTransactions.intSubLocationId, ItemTransactions.intStorageLocationId
 ) AS RawStockData
 	ON ItemStockUOM.intItemId = RawStockData.intItemId
@@ -357,6 +358,7 @@ USING (
 				AND Lot.intLotId IS NOT NULL 
 				AND Lot.intWeightUOMId = ItemTransactions.intItemUOMId
 				AND ISNULL(Lot.dblWeightPerQty, 0) <> 0
+				AND Lot.intItemUOMId <> Lot.intWeightUOMId
 		GROUP BY ItemTransactions.intItemId, Lot.intItemUOMId, ItemTransactions.intItemLocationId, ItemTransactions.intSubLocationId, ItemTransactions.intStorageLocationId
 ) AS RawStockData
 	ON ItemStockUOM.intItemId = RawStockData.intItemId
@@ -420,6 +422,7 @@ USING (
 				AND Lot.intLotId IS NOT NULL 
 				AND Lot.intWeightUOMId = ItemTransactions.intItemUOMId
 				AND dbo.fnGetItemStockUOM(ItemTransactions.intItemId) IS NOT NULL 
+				AND Lot.intItemUOMId <> Lot.intWeightUOMId
 		GROUP BY ItemTransactions.intItemId, dbo.fnGetItemStockUOM(ItemTransactions.intItemId), ItemTransactions.intItemLocationId, ItemTransactions.intSubLocationId, ItemTransactions.intStorageLocationId
 ) AS RawStockData
 	ON ItemStockUOM.intItemId = RawStockData.intItemId

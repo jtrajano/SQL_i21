@@ -1680,7 +1680,6 @@
     <None Include="Scripts\Post-Deployment\GL\ReportDataFix.sql" />
     <Build Include="dbo\Functions\fnAPGetPaymentDetailPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspARCreateInvoiceFromShipment.sql" />
-    <Build Include="dbo\Functions\fnGetPaymentDetailPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStockQuantity.sql" />
     <Build Include="dbo\Functions\fnGetItemStockUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixStockQuantities.sql" />
