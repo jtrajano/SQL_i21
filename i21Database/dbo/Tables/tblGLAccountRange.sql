@@ -4,6 +4,7 @@
 	[intMinRange] [int] NULL,
 	[intMaxRange] [int] NULL,
  [intConcurrencyId] INT NOT NULL DEFAULT 1, 
+    [intAccountGroupId] INT NULL, 
     CONSTRAINT [PK_tblGLAccountRange] PRIMARY KEY CLUSTERED 
 (
 	[intAccountRangeId] ASC
