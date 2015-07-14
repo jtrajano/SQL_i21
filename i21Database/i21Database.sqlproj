@@ -1975,6 +1975,10 @@
     <Build Include="dbo\Stored Procedures\uspTMValidateInvoiceForSync.sql" />
     <Build Include="dbo\Functions\fnTMGetCalculatedBurnRate.sql" />
     <Build Include="dbo\Functions\fnTMComputeNewBurnRate.sql" />
+    <Build Include="dbo\Functions\fnTMGetElapseDegreeDayForCalculation.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMSyncInvoiceToDeliveryHistory.sql" />
+    <Build Include="dbo\Functions\fnTMGetNextJulianDeliveryDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMRenewJulianCalendar.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -33,9 +33,7 @@ BEGIN
 	DECLARE @dtmDeliveryDate DATETIME
 	DECLARE @dblElapseDDForCalc NUMERIC(18,6)
 	DECLARE @dblElapseDDDuringHold NUMERIC(18,6)
-	DECLARE @dtmOnHoldStartDate DATETIME 
-	DECLARE @dtmOnHoldEndDate DATETIME 
-	DECLARE @ysnHoldDDCalculation BIT
+	
 	
 	---Get Site Info
 	SELECT
@@ -49,9 +47,6 @@ BEGIN
 		,@dblSummerDailyUse = dblSummerDailyUse
 		,@dblWinterDailyUse = dblWinterDailyUse
 		,@dtmLastDeliveryDate = dtmLastDeliveryDate
-		,@dtmOnHoldStartDate = dtmOnHoldStartDate
-		,@dtmOnHoldEndDate = dtmOnHoldEndDate
-		,@ysnHoldDDCalculation = ysnHoldDDCalculations
 	FROM tblTMSite
 	WHERE intSiteID = @intSiteId
 	
@@ -118,34 +113,8 @@ BEGIN
 	BEGIN
 		SET @intElapseDays = 0
 	END
-	
-	-----Get Elapse DD for calculation
-	IF((SELECT TOP 1 ISNULL(ysnOnHold,0) FROM tblTMSite WHERE intSiteID = @intSiteId) = 0)
-	BEGIN
-		SET @dblElapseDDDuringHold = 0
-	END
-	ELSE
-	BEGIN
-		SET @dblElapseDDDuringHold = 0
-		IF(ISNULL(@ysnHoldDDCalculation,0) = 1)
-		BEGIN
-			IF(@dtmDeliveryDate > @dtmOnHoldEndDate)
-			BEGIN
-				SET @dblElapseDDDuringHold = ISNULL((SELECT TOP 1 dblAccumulatedDegreeDay FROM tblTMDegreeDayReading WHERE dtmDate = @dtmOnHoldEndDate),0)
-											-ISNULL((SELECT TOP 1 dblAccumulatedDegreeDay FROM tblTMDegreeDayReading WHERE dtmDate = @dtmOnHoldStartDate),0)
-			END
-			ELSE
-			BEGIN
-				IF((@dtmDeliveryDate >= @dtmOnHoldStartDate) AND @dtmDeliveryDate <= @dtmOnHoldStartDate)
-				BEGIN
-					SET @dblElapseDDDuringHold = ISNULL((SELECT TOP 1 dblAccumulatedDegreeDay FROM tblTMDegreeDayReading WHERE dtmDate = @dtmDeliveryDate),0)
-												-ISNULL((SELECT TOP 1 dblAccumulatedDegreeDay FROM tblTMDegreeDayReading WHERE dtmDate = @dtmOnHoldStartDate),0)
-				END	
-			END
-		END
-	END
-	
-	SET @dblElapseDDForCalc =  @dblElapseDDBetweenDelivery - @dblElapseDDDuringHold
+
+	SET @dblElapseDDForCalc =  dbo.fnTMGetElapseDegreeDayForCalculation(@intSiteId,@intInvoiceDetailId)
 	
 	IF (ISNULL(@dblGallonsUsed,0) <> 0 AND ((@dblGallonsUsed - (@intElapseDays * @dblDailyGalsUsed)) <> 0))
 	BEGIN
