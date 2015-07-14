@@ -639,7 +639,6 @@ Ext.define('Inventory.view.ItemViewController', {
             //---------//
             grdStock: {
                 colStockLocation: 'strLocationName',
-                colStockSubLocation: 'strWarehouse',
                 colStockUOM: 'strUnitMeasure',
                 colStockOnHand: 'dblUnitOnHand',
                 colStockOnStorage: 'dblUnitInCustody',

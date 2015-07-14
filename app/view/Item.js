@@ -4429,14 +4429,6 @@ Ext.define('Inventory.view.Item', {
                                                         flex: 1
                                                     },
                                                     {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colStockSubLocation',
-                                                        width: 100,
-                                                        dataIndex: 'string',
-                                                        text: 'Sublocation',
-                                                        flex: 1
-                                                    },
-                                                    {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colStockOnHand',
                                                         width: 100,

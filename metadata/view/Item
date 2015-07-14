@@ -9880,23 +9880,6 @@
                                             "designerId": "9c42b824-9011-4c64-b43d-40bda1fe701b"
                                         },
                                         {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
-                                                "flex": 1,
-                                                "itemId": "colStockSubLocation",
-                                                "text": "Sublocation",
-                                                "width": 100
-                                            },
-                                            "name": "MyColumn70",
-                                            "designerId": "701deda7-c5dc-4efc-acac-bd5aa95b18ac"
-                                        },
-                                        {
                                             "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",

@@ -14,7 +14,6 @@ namespace iRely.Inventory.Model
         public int intItemStockId { get; set; }
         public int intItemId { get; set; }
         public int? intItemLocationId { get; set; }
-        public int? intSubLocationId { get; set; }
         public decimal? dblUnitOnHand { get; set; }
         public decimal? dblUnitInCustody { get; set; }
         public decimal? dblUnitInConsigned { get; set; }
@@ -43,29 +42,9 @@ namespace iRely.Inventory.Model
                 _location = value;
             }
         }
-        private string _subLocationName;
-        [NotMapped]
-        public string strSubLocationName
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_subLocationName))
-                    if (tblSMCompanyLocationSubLocation != null)
-                        return tblSMCompanyLocationSubLocation.strSubLocationName;
-                    else
-                        return null;
-                else
-                    return _subLocationName;
-            }
-            set
-            {
-                _subLocationName = value;
-            }
-        }
         
         public tblICItem tblICItem { get; set; }
         public tblICItemLocation tblICItemLocation { get; set; }
-        public tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation { get; set; }
     }
 
     public class ItemStockVM
