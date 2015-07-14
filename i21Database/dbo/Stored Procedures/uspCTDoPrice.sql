@@ -84,11 +84,11 @@ BEGIN TRY
 				dtmStartDate,			intItemId,				dtmEndDate,				intFreightTermId,
 				intShipViaId,			dblQuantity,			intUnitMeasureId,		intPricingTypeId,
 				dblFutures,				dblBasis,				intFutureMarketId,		intFutureMonthId,
-				dblCashPrice,			intCurrencyId,			dblRate,				strCurrencyReference,
+				dblCashPrice,			intCurrencyId,			dblRate,				
 				intMarketZoneId,		intDiscountTypeId,		intDiscountId,			intContractOptHeaderId,
 				strBuyerSeller,			intBillTo,				intFreightRateId,		strFobBasis,
 				intRailGradeId,			strRemark,				dblOriginalQty,			dblBalance,
-				dblIntransitQty,		dblScheduleQty,			intPriceUOMId,			intLoadingPortId,
+				dblIntransitQty,		dblScheduleQty,						intLoadingPortId,
 				intDestinationPortId,	strShippingTerm,		intShippingLineId,		strVessel,
 				intDestinationCityId,	intShipperId
 		)
@@ -97,11 +97,11 @@ BEGIN TRY
 				dtmStartDate,			intItemId,				dtmEndDate,				intFreightTermId,
 				intShipViaId,			@CurrentQty-@dblQtyToPrice,	intUnitMeasureId,		intPricingTypeId,
 				dblFutures,				dblBasis,				intFutureMarketId,		intFutureMonthId,
-				dblCashPrice,			intCurrencyId,			dblRate,				strCurrencyReference,
+				dblCashPrice,			intCurrencyId,			dblRate,				
 				intMarketZoneId,		intDiscountTypeId,		intDiscountId,			intContractOptHeaderId,
 				strBuyerSeller,			intBillTo,				intFreightRateId,		strFobBasis,
 				intRailGradeId,			strRemark,				dblOriginalQty,			dblBalance,
-				dblIntransitQty,		dblScheduleQty,			intPriceUOMId,			intLoadingPortId,
+				dblIntransitQty,		dblScheduleQty,						intLoadingPortId,
 				intDestinationPortId,	strShippingTerm,		intShippingLineId,		strVessel,
 				intDestinationCityId,	intShipperId
 
