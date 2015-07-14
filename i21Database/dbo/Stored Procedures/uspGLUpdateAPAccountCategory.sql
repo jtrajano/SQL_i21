@@ -4,8 +4,9 @@ DECLARE @intLength INT
 DECLARE @apLength INT
 DECLARE @strPad NVARCHAR(5)
 DECLARE @intPrimary	INT
+DECLARE @strMask NVARCHAR(3)
 
-SELECT @intPrimary =intAccountStructureId,  @intLength = intLength FROM tblGLAccountStructure WHERE strType = 'Primary'
+SELECT @intPrimary =intAccountStructureId,@strMask = strMask, @intLength = intLength FROM tblGLAccountStructure WHERE strType = 'Primary'
 
 DECLARE @tblAP TABLE(strCOde NVARCHAR(10) COLLATE Latin1_General_CI_AS)
 
@@ -14,7 +15,7 @@ SELECT TOP 1 @apLength = LEN(strCOde) from @tblAP
 
 IF @intLength > @apLength
 BEGIN
-	UPDATE @tblAP SET strCOde = strCOde +  REPLICATE('0', @intLength - @apLength)
+	UPDATE @tblAP SET strCOde = strCOde +  REPLICATE(@strMask, @intLength - @apLength)
 END
 DECLARE @intPayablesGroup  INT
 DECLARE @intPayablesCategory INT
@@ -39,6 +40,5 @@ BEGIN
 	INNER JOIN tblGLAccountStructure E ON C.intAccountStructureId = E.intAccountStructureId AND E.intAccountStructureId = @intPrimary
 	WHERE A.intAccountGroupId = @intLiabilityGroup
 END
-
 
 
