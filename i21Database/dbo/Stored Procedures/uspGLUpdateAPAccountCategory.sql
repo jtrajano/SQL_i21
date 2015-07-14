@@ -24,7 +24,7 @@ SELECT @intLiabilityGroup = intAccountGroupId FROM tblGLAccountGroup WHERE strAc
 SELECT @intPayablesGroup = intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = 'Payables'
 SELECT @intPayablesCategory = intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'AP Account'
 
-IF EXISTS(SELECT TOP 1 1 FROM tblGLAccountSegment A INNER JOIN @tblAP B ON A.strCode = B.strCOde WHERE A.intAccountGroupId != @intPayablesGroup)
+IF EXISTS(SELECT TOP 1 1 FROM tblGLAccountSegment A INNER JOIN @tblAP B ON A.strCode = B.strCOde WHERE A.intAccountGroupId = @intLiabilityGroup)
 BEGIN
 	UPDATE A SET intAccountGroupId = @intPayablesGroup,	intAccountCategoryId = @intPayablesCategory
 	FROM tblGLAccountSegment A INNER JOIN @tblAP B ON A.strCode = B.strCOde 
