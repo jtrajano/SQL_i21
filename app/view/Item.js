@@ -3903,7 +3903,7 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
-                                                                                    dataIndex: 'intKey',
+                                                                                    dataIndex: 'intCompanyLocationPricingLevelId',
                                                                                     dataType: 'numeric',
                                                                                     text: 'Key Id',
                                                                                     hidden: true
@@ -3915,15 +3915,15 @@ Ext.define('Inventory.view.Item', {
                                                                                     hidden: true
                                                                                 },
                                                                                 {
-                                                                                    dataIndex: 'strPriceLevel',
+                                                                                    dataIndex: 'strPricingLevelName',
                                                                                     dataType: 'string',
                                                                                     text: 'Pricing Level',
                                                                                     flex: 1
                                                                                 }
                                                                             ],
                                                                             itemId: 'cboPricingLevelLevel',
-                                                                            displayField: 'strPriceLevel',
-                                                                            valueField: 'strPriceLevel'
+                                                                            displayField: 'strPricingLevelName',
+                                                                            valueField: 'strPricingLevelName'
                                                                         }
                                                                     },
                                                                     {

@@ -8618,7 +8618,7 @@
                                                                         "columns": [
                                                                             "[",
                                                                             "\t{",
-                                                                            "\t\tdataIndex: 'intKey',",
+                                                                            "\t\tdataIndex: 'intCompanyLocationPricingLevelId',",
                                                                             "\t\tdataType: 'numeric',",
                                                                             "\t\ttext: 'Key Id',",
                                                                             "\t\thidden: true",
@@ -8630,7 +8630,7 @@
                                                                             "\t\thidden: true",
                                                                             "\t},",
                                                                             "\t{",
-                                                                            "\t\tdataIndex: 'strPriceLevel',",
+                                                                            "\t\tdataIndex: 'strPricingLevelName',",
                                                                             "\t\tdataType: 'string',",
                                                                             "\t\ttext: 'Pricing Level',",
                                                                             "\t\tflex: 1",
@@ -8638,9 +8638,9 @@
                                                                             "]"
                                                                         ],
                                                                         "designer|createAlias": "gridcombobox",
-                                                                        "displayField": "strPriceLevel",
+                                                                        "displayField": "strPricingLevelName",
                                                                         "itemId": "cboPricingLevelLevel",
-                                                                        "valueField": "strPriceLevel"
+                                                                        "valueField": "strPricingLevelName"
                                                                     },
                                                                     "name": "MyComboBox56",
                                                                     "configAlternates": {

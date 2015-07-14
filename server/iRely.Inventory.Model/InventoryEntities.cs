@@ -123,7 +123,6 @@ namespace iRely.Inventory.Model
         public DbSet<tblSMFreightTerm> tblSMFreightTerms { get; set; }
         public DbSet<tblSMCompanyLocationSubLocation> tblSMCompanyLocationSubLocations { get; set; }
         public DbSet<tblSMTaxCode> tblSMTaxCodes { get; set; }
-        public DbSet<vyuSMGetLocationPricingLevel> vyuSMGetLocationPricingLevels { get; set; }
 
         public DbSet<tblGLAccount> tblGLAccounts { get; set; }
         public DbSet<tblGLAccountCategory> tblGLAccountCategories { get; set; }
@@ -297,7 +296,6 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetCompactItemMap());
             modelBuilder.Configurations.Add(new vyuICGetItemCommodityMap());
             modelBuilder.Configurations.Add(new vyuICGetOtherChargesMap());
-            modelBuilder.Configurations.Add(new vyuSMGetLocationPricingLevelMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryShipmentItemMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptItemMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptChargeMap());

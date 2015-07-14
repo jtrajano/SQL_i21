@@ -12,7 +12,6 @@ Ext.define('Inventory.view.ItemViewModel', {
         'Inventory.store.BufferedOtherCharges',
         'Inventory.store.BufferedItemLocation',
         'Inventory.store.BufferedUnitMeasure',
-        'Inventory.store.BufferedPricingLevel',
         'Inventory.store.BufferedBrand',
         'Inventory.store.BufferedFuelCategory',
         'Inventory.store.BufferedFuelTaxClass',
@@ -33,6 +32,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         'i21.store.CompanyLocationBuffered',
         'i21.store.CountryBuffered',
         'i21.store.TaxGroupMasterBuffered',
+        'i21.store.CompanyLocationPricingLevelBuffered',
         'GeneralLedger.store.BufAccountId',
         'GeneralLedger.store.BufAccountCategoryGroup',
         'Manufacturing.store.BufferedManufacturingCell'
@@ -486,7 +486,7 @@ Ext.define('Inventory.view.ItemViewModel', {
             type: 'icbuffereditemlocation'
         },
         pricingLevel: {
-            type: 'icbufferedpricinglevel'
+            type: 'smcompanylocationpricinglevelbuffered'
         },
         pricingLevelUOM: {
             type: 'icbuffereditemunitmeasure'

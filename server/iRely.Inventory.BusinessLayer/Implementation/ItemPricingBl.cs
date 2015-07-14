@@ -45,18 +45,6 @@ namespace iRely.Inventory.BusinessLayer
         }
         #endregion
 
-        public async Task<SearchResult> GetPricingLevels(GetParameter param)
-        {
-            var query = _db.GetQuery<vyuSMGetLocationPricingLevel>()
-                .Filter(param, true);
-            var data = await query.ExecuteProjection(param, "intKey").ToListAsync();
-
-            return new SearchResult()
-            {
-                data = data.AsQueryable(),
-                total = await query.CountAsync()
-            };
-        }
     }
 
     public class ItemSpecialPricingBl : BusinessLayer<tblICItemSpecialPricing>, IItemSpecialPricingBl
