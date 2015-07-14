@@ -78,7 +78,15 @@ END
 IF	@ReceiptType = @RECEIPT_TYPE_PURCHASE_ORDER 
 	AND ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_NONE
 BEGIN 
-	EXEC dbo.[uspPOReceived] @ItemsFromInventoryReceipt
+	EXEC dbo.uspPOReceived @ItemsFromInventoryReceipt
+	GOTO _Exit;
+END
+
+-- Update the received quantities back to the Purchase Contract
+IF	@ReceiptType = @RECEIPT_TYPE_PURCHASE_CONTRACT 
+	AND ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_NONE
+BEGIN 
+	EXEC dbo.uspCTReceived @ItemsFromInventoryReceipt
 	GOTO _Exit;
 END
 
