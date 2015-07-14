@@ -49,6 +49,7 @@ BEGIN
 				AND PO.intShipToId = ItemLocation.intLocationId
 	WHERE	PODetail.intPurchaseId = @intSourceTransactionId
 			AND dbo.fnIsStockTrackingItem(PODetail.intItemId) = 1
+			AND PODetail.dblQtyOrdered != PODetail.dblQtyReceived
 			
 END
 
