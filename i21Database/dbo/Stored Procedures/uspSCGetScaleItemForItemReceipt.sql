@@ -48,7 +48,7 @@ BEGIN TRY
 				  JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
 			WHERE	UM.intUnitMeasureId =@intTicketUOM AND SC.intTicketId = @intTicketId
 		END
-		IF @strDistributionOption = 'CNT'
+		IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 		BEGIN
 				--IF @strSourceType = @ReceiptType_Direct
 			BEGIN 

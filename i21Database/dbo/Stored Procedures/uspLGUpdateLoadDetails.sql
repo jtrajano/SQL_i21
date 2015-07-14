@@ -12,12 +12,27 @@ DECLARE @intContractDetailId INT
 BEGIN TRY
 	IF NOT EXISTS(SELECT 1 FROM tblSCTicket WHERE intTicketId=@intTicketId) AND @intTicketId IS NOT NULL
 	BEGIN
-		RAISERROR('Invalid TicketId', 16, 1)
+		IF NOT EXISTS(SELECT 1 FROM tblTRTransportLoad WHERE intTransportLoadId=@intTicketId) AND @intTicketId IS NOT NULL
+		BEGIN
+			RAISERROR('Invalid Ticket/TransportId', 16, 1)
+		END
+	END
+
+	IF EXISTS(SELECT 1 FROM tblSCTicket WHERE intTicketId=@intTicketId)
+	BEGIN
+		UPDATE tblLGLoad SET 
+			intTicketId=@intTicketId
+		WHERE intLoadId=@intLoadId
+	END
+	IF EXISTS(SELECT 1 FROM tblTRTransportLoad WHERE intTransportLoadId=@intTicketId)
+	BEGIN
+		UPDATE tblLGLoad SET 
+			intTransportLoadId=@intTicketId
+		WHERE intLoadId=@intLoadId
 	END
 
 	UPDATE tblLGLoad SET 
 		ysnInProgress=@ysnInProgress,
-		intTicketId=@intTicketId,
 		dtmDeliveredDate=@dtmDeliveredDate,
 		dblDeliveredQuantity=@dblDeliveredQuantity,
 		intConcurrencyId	=	intConcurrencyId + 1

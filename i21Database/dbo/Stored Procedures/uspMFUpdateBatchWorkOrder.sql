@@ -3,10 +3,15 @@ AS
 BEGIN TRY
 	DECLARE @idoc INT
 		,@ErrMsg NVARCHAR(MAX)
+		,@intTransactionCount INT
+
+	SELECT @intTransactionCount = @@TRANCOUNT
+
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
-
+	
+	IF @intTransactionCount = 0
 	BEGIN TRANSACTION
 
 	UPDATE tblMFWorkOrder
@@ -22,7 +27,8 @@ BEGIN TRY
 			,intUserId INT
 			) x
 	WHERE x.intWorkOrderId = tblMFWorkOrder.intWorkOrderId
-
+	
+	IF @intTransactionCount = 0
 	COMMIT TRANSACTION
 
 	EXEC sp_xml_removedocument @idoc
@@ -31,7 +37,7 @@ END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 
-	IF XACT_STATE() != 0
+	IF XACT_STATE() != 0 AND @intTransactionCount = 0
 		ROLLBACK TRANSACTION
 
 	IF @idoc <> 0

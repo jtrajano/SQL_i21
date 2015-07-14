@@ -3,17 +3,19 @@
 	[intTicketCostId] INT NOT NULL IDENTITY, 
     [intTicketId] INT NOT NULL,
 	[intConcurrencyId] [int] NOT NULL,
-	[intCostTypeId] [int] NOT NULL,
-	[intEntityId] [int] NULL,
-	[intCostMethod] [int] NOT NULL,
+	[intItemId] [int] NOT NULL,
+	[intEntityVendorId] INT NULL,
+	[strCostMethod] [nvarchar](30) COLLATE Latin1_General_CI_AS NOT NULL,
 	[dblRate] [numeric](10, 4) NOT NULL,
-	[intUnitMeasureId] [int] NULL,
-	[intCurrencyId] [int] NOT NULL,
-	[ysnAccrue] [bit] NOT NULL DEFAULT ((1)),
+	[intItemUOMId] [int] NULL,
+	[ysnAccrue] [bit] NOT NULL,
 	[ysnMTM] [bit] NULL,
-	[ysnPrice] [bit] NULL, 
+	[ysnPrice] [bit] NULL,
     CONSTRAINT [PK_tblSCTicketCost_intTicketCostId] PRIMARY KEY ([intTicketCostId]),
-	CONSTRAINT [FK_tblSCTicketCost_tblSCTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [tblSCTicket]([intTicketId]) 
+	CONSTRAINT [FK_tblSCTicketCost_tblSCTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [tblSCTicket]([intTicketId]),
+	CONSTRAINT [FK_tblSCTicketCost_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
+	CONSTRAINT [FK_tblSCTicketCost_tblAPVendor_intEntityVendorId] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]),
+	CONSTRAINT [FK_tblSCTicketCost_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]) 
 )
 
 GO
@@ -45,36 +47,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intConcurrencyId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Cost Type Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCTicketCost',
-    @level2type = N'COLUMN',
-    @level2name = N'intCostTypeId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Entity Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCTicketCost',
-    @level2type = N'COLUMN',
-    @level2name = N'intEntityId'
-GO
-
-GO
-
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Unit Measure Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCTicketCost',
-    @level2type = N'COLUMN',
-    @level2name = N'intUnitMeasureId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Rate',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
@@ -82,24 +54,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicketCost',
     @level2type = N'COLUMN',
     @level2name = N'dblRate'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Cost Method',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCTicketCost',
-    @level2type = N'COLUMN',
-    @level2name = N'intCostMethod'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Currency Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSCTicketCost',
-    @level2type = N'COLUMN',
-    @level2name = N'intCurrencyId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Accure',
@@ -127,3 +81,39 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicketCost',
     @level2type = N'COLUMN',
     @level2name = N'ysnPrice'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Item Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicketCost',
+    @level2type = N'COLUMN',
+    @level2name = N'intItemId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Cost Method',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicketCost',
+    @level2type = N'COLUMN',
+    @level2name = N'strCostMethod'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Item UOM Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicketCost',
+    @level2type = N'COLUMN',
+    @level2name = N'intItemUOMId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Entity Vendor Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicketCost',
+    @level2type = N'COLUMN',
+    @level2name = N'intEntityVendorId'

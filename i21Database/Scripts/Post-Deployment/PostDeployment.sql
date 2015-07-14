@@ -187,6 +187,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\009_UpdateEntityContactTypeData.sql
 :r .\EM\010_UpdateVendorAccountNumber.sql
 :r .\EM\011_FixEntityLocationNullTerms.sql
+:r .\EM\012_DeleteOldTables.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 
