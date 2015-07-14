@@ -373,6 +373,10 @@ namespace iRely.Inventory.Model
         public string strMaintenanceCalculationMethod { get; set; }
         public decimal? dblOverReceiveTolerance { get; set; }
         public decimal? dblWeightTolerance { get; set; }
+        public int? intSalesTaxGroupId { get; set; }
+        public string strSalesTax { get; set; }
+        public int? intPurchaseTaxGroupId { get; set; }
+        public string strPurchaseTax { get; set; }
 
         public ICollection<vyuICGetItemPricing> tblICItemPricings { get; set; }
         public ICollection<vyuICGetItemAccount> tblICItemAccounts { get; set; }

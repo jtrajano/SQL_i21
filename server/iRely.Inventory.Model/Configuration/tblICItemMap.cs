@@ -390,6 +390,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strMaintenanceCalculationMethod).HasColumnName("strMaintenanceCalculationMethod");
             this.Property(t => t.dblOverReceiveTolerance).HasColumnName("dblOverReceiveTolerance").HasPrecision(18, 6);
             this.Property(t => t.dblWeightTolerance).HasColumnName("dblWeightTolerance").HasPrecision(18, 6);
+            this.Property(t => t.intSalesTaxGroupId).HasColumnName("intSalesTaxGroupId");
+            this.Property(t => t.strSalesTax).HasColumnName("strSalesTax");
+            this.Property(t => t.intPurchaseTaxGroupId).HasColumnName("intPurchaseTaxGroupId");
+            this.Property(t => t.strPurchaseTax).HasColumnName("strPurchaseTax");
 
             this.HasMany(p => p.tblICItemAccounts)
                 .WithRequired(p => p.vyuICGetItemStock)

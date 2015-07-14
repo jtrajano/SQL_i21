@@ -83,6 +83,10 @@ Ext.define('Inventory.model.ItemStockDetailView', {
         { name: 'dblMaintenanceRate', type: 'float' },
         { name: 'strMaintenanceCalculationMethod', type: 'string' },
         { name: 'dblOverReceiveTolerance', type: 'float' },
-        { name: 'dblWeightTolerance', type: 'float' }
+        { name: 'dblWeightTolerance', type: 'float' },
+        { name: 'intSalesTaxGroupId', type: 'int', allowNull: true },
+        { name: 'strSalesTax', type: 'string' },
+        { name: 'intPurchaseTaxGroupId', type: 'int', allowNull: true },
+        { name: 'strPurchaseTax', type: 'string' }
     ]
 });
