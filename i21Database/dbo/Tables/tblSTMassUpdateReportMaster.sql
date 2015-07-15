@@ -1,4 +1,5 @@
-﻿ Create table tblSTMassUpdateReportMaster (UpcCode NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
+﻿ Create table tblSTMassUpdateReportMaster (strLocationName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+              UpcCode NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
               ItemDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
               ChangeDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
 			  OldData NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
