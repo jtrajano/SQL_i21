@@ -31,6 +31,7 @@
     [intMapId]                  INT             NULL,
     [strOrientation]            NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
     [ysnLowPriority]            BIT             DEFAULT 0 NULL,
+	[dtmDateCreated]			DATETIME DEFAULT (getdate()) NULL,
     [intSort]                   INT             DEFAULT 0 NULL,
     [intConcurrencyId]          INT             DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblFRReport] PRIMARY KEY CLUSTERED ([intReportId] ASC),
