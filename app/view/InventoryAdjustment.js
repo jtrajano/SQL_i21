@@ -34,7 +34,6 @@ Ext.define('Inventory.view.InventoryAdjustment', {
         'Ext.grid.column.Date',
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.View',
-        'Ext.form.field.TextArea',
         'Ext.toolbar.Paging'
     ],
 
@@ -1119,85 +1118,16 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeNotes',
+                                        layout: 'fit',
                                         title: 'Notes',
-                                        layout: {
-                                            type: 'vbox',
-                                            align: 'stretch'
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'cfgNotes'
                                         },
                                         items: [
                                             {
-                                                xtype: 'advancefiltergrid',
-                                                flex: 1,
-                                                itemId: 'grdNotes',
-                                                margin: -1,
-                                                dockedItems: [
-                                                    {
-                                                        xtype: 'toolbar',
-                                                        dock: 'top',
-                                                        itemId: 'tlbGridOptions',
-                                                        layout: {
-                                                            type: 'hbox',
-                                                            padding: '0 0 0 1'
-                                                        },
-                                                        items: [
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnAddNotes',
-                                                                iconCls: 'small-add',
-                                                                text: 'Insert'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnRemoveNotes',
-                                                                iconCls: 'small-delete',
-                                                                text: 'Remove'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
-                                                            },
-                                                            {
-                                                                xtype: 'filter1'
-                                                            }
-                                                        ]
-                                                    }
-                                                ],
-                                                columns: [
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colNoteDescription',
-                                                        dataIndex: 'string',
-                                                        text: 'Description',
-                                                        flex: 1,
-                                                        editor: {
-                                                            xtype: 'textfield'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colNotes',
-                                                        dataIndex: 'string',
-                                                        text: 'Notes',
-                                                        flex: 3,
-                                                        editor: {
-                                                            xtype: 'textareafield'
-                                                        }
-                                                    }
-                                                ],
-                                                viewConfig: {
-                                                    itemId: 'grvNotes'
-                                                },
-                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                    selType: 'checkboxmodel'
-                                                }),
-                                                plugins: [
-                                                    {
-                                                        ptype: 'cellediting',
-                                                        pluginId: 'cepNote',
-                                                        clicksToEdit: 1
-                                                    }
-                                                ]
+                                                xtype: 'commentbox'
                                             }
                                         ]
                                     },

@@ -36,9 +36,6 @@ namespace iRely.Inventory.Model
             this.HasMany(p => p.tblICInventoryTransferDetails)
                 .WithRequired(p => p.tblICInventoryTransfer)
                 .HasForeignKey(p => p.intInventoryTransferId);
-            this.HasMany(p => p.tblICInventoryTransferNotes)
-                .WithRequired(p => p.tblICInventoryTransfer)
-                .HasForeignKey(p => p.intInventoryTransferId);
             this.HasOptional(p => p.FromLocation)
                 .WithMany(p => p.FromInventoryTransfers)
                 .HasForeignKey(p => p.intFromLocationId);
@@ -83,24 +80,7 @@ namespace iRely.Inventory.Model
                 .WithRequired(p => p.tblICInventoryTransferDetail);
         }
     }
-
-    public class tblICInventoryTransferNoteMap : EntityTypeConfiguration<tblICInventoryTransferNote>
-    {
-        public tblICInventoryTransferNoteMap()
-        {
-            // Primary Key
-            this.HasKey(t => t.intInventoryTransferNoteId);
-
-            // Table & Column Mappings
-            this.ToTable("tblICInventoryTransferNote");
-            this.Property(t => t.intInventoryTransferNoteId).HasColumnName("intInventoryTransferNoteId");
-            this.Property(t => t.intInventoryTransferId).HasColumnName("intInventoryTransferId");
-            this.Property(t => t.strNoteType).HasColumnName("strNoteType");
-            this.Property(t => t.strNotes).HasColumnName("strNotes");
-            this.Property(t => t.intSort).HasColumnName("intSort");
-        }
-    }
-
+    
     public class vyuICGetInventoryTransferDetailMap : EntityTypeConfiguration<vyuICGetInventoryTransferDetail>
     {
         public vyuICGetInventoryTransferDetailMap()

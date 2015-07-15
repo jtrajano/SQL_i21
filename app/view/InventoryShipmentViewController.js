@@ -316,6 +316,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         win.context = Ext.create('iRely.Engine', {
             window: win,
             store: store,
+            enableComment: true,
             include: 'ShipFromLocation, ' +
                 'tblARCustomer, ' +
                 'ShipToLocation, ' +

@@ -251,12 +251,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                     dataIndex: 'dblFreightAmount',
                     hidden: '{hideOnStorageToStorage}'
                 }
-            },
-
-            grdNotes: {
-                readOnly: '{current.ysnPosted}',
-                colNoteType: 'strNoteType',
-                colNote: 'strNotes'
             }
         }
     },
@@ -271,8 +265,8 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
         win.context = Ext.create('iRely.Engine', {
             window : win,
             store  : store,
-            include: 'tblICInventoryTransferDetails.vyuICGetInventoryTransferDetail, ' +
-                'tblICInventoryTransferNotes',
+            enableComment: true,
+            include: 'tblICInventoryTransferDetails.vyuICGetInventoryTransferDetail',
             createRecord : me.createRecord,
             binding: me.config.binding,
             attachment: Ext.create('iRely.attachment.Manager', {
@@ -286,21 +280,9 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                         grid: grdInventoryTransfer,
                         deleteButton : grdInventoryTransfer.down('#btnRemoveItem')
                     })
-                },
-                {
-                    key: 'tblICInventoryTransferNotes',
-                    component: Ext.create('iRely.grid.Manager', {
-                        grid: win.down('#grdNotes'),
-                        deleteButton : win.down('#btnRemoveNotes')
-                    })
                 }
             ]
         });
-
-//        var colAvailableQty = grdInventoryTransfer.columns[5];
-//        var colAvailableUOM = grdInventoryTransfer.columns[6];
-//        colAvailableQty.renderer = this.AvailableQtyRenderer;
-//        colAvailableUOM.renderer = this.AvailableUOMRenderer;
         return win.context;
 
     },

@@ -14,7 +14,6 @@ namespace iRely.Inventory.Model
         public tblICInventoryTransfer()
         {
             this.tblICInventoryTransferDetails = new List<tblICInventoryTransferDetail>();
-            this.tblICInventoryTransferNotes = new List<tblICInventoryTransferNote>();
         }
 
         public int intInventoryTransferId { get; set; }
@@ -39,7 +38,6 @@ namespace iRely.Inventory.Model
         public tblSMCompanyLocation ToLocation { get; set; }
         public tblICStatus tblICStatus { get; set; }
         public ICollection<tblICInventoryTransferDetail> tblICInventoryTransferDetails { get; set; }
-        public ICollection<tblICInventoryTransferNote> tblICInventoryTransferNotes { get; set; }
     }
 
     public class tblICInventoryTransferDetail : BaseEntity
@@ -313,17 +311,6 @@ namespace iRely.Inventory.Model
         }
 
         public vyuICGetInventoryTransferDetail vyuICGetInventoryTransferDetail { get; set; }
-        public tblICInventoryTransfer tblICInventoryTransfer { get; set; }
-    }
-
-    public class tblICInventoryTransferNote : BaseEntity
-    {
-        public int intInventoryTransferNoteId { get; set; }
-        public int intInventoryTransferId { get; set; }
-        public string strNoteType { get; set; }
-        public string strNotes { get; set; }
-        public int? intSort { get; set; }
-
         public tblICInventoryTransfer tblICInventoryTransfer { get; set; }
     }
 

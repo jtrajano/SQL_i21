@@ -527,7 +527,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         xtype: 'gridcombobox',
                                                                         columns: [
                                                                             {
-                                                                                dataIndex: 'intShipViaID',
+                                                                                dataIndex: 'intEntityShipViaId',
                                                                                 dataType: 'numeric',
                                                                                 text: 'Ship Via Id',
                                                                                 hidden: true
@@ -550,7 +550,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         fieldLabel: 'Ship Via',
                                                                         labelWidth: 95,
                                                                         displayField: 'strShipVia',
-                                                                        valueField: 'intShipViaID'
+                                                                        valueField: 'intEntityShipViaId'
                                                                     }
                                                                 ]
                                                             },
@@ -627,63 +627,47 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         readOnly: false
                                                                     }
                                                                 ]
-                                                            }
-                                                        ]
-                                                    },
-                                                    {
-                                                        xtype: 'container',
-                                                        flex: 1,
-                                                        layout: {
-                                                            type: 'vbox',
-                                                            align: 'stretch'
-                                                        },
-                                                        items: [
-                                                            {
-                                                                xtype: 'textfield',
-                                                                itemId: 'txtVessel',
-                                                                fieldLabel: 'Vessel',
-                                                                labelWidth: 95
                                                             },
                                                             {
-                                                                xtype: 'gridcombobox',
-                                                                columns: [
+                                                                xtype: 'container',
+                                                                flex: 1,
+                                                                layout: {
+                                                                    type: 'vbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
                                                                     {
-                                                                        dataIndex: 'strDescription',
-                                                                        dataType: 'string',
-                                                                        text: 'Allocate Freight',
-                                                                        flex: 1
+                                                                        xtype: 'textfield',
+                                                                        itemId: 'txtVessel',
+                                                                        fieldLabel: 'Vessel',
+                                                                        labelWidth: 95
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Allocate Freight',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboAllocateFreight',
+                                                                        fieldLabel: 'Allocate Freight',
+                                                                        labelWidth: 95,
+                                                                        displayField: 'strDescription',
+                                                                        valueField: 'strDescription'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numberfield',
+                                                                        itemId: 'txtShiftNumber',
+                                                                        fieldLabel: 'Shift Number',
+                                                                        labelWidth: 95,
+                                                                        hideTrigger: true
                                                                     }
-                                                                ],
-                                                                itemId: 'cboAllocateFreight',
-                                                                fieldLabel: 'Allocate Freight',
-                                                                labelWidth: 95,
-                                                                displayField: 'strDescription',
-                                                                valueField: 'strDescription'
-                                                            },
-                                                            {
-                                                                xtype: 'numberfield',
-                                                                itemId: 'txtShiftNumber',
-                                                                fieldLabel: 'Shift Number',
-                                                                labelWidth: 95,
-                                                                hideTrigger: true
+                                                                ]
                                                             }
                                                         ]
-                                                    }
-                                                ]
-                                            },
-                                            {
-                                                xtype: 'container',
-                                                layout: {
-                                                    type: 'hbox',
-                                                    align: 'stretch'
-                                                },
-                                                items: [
-                                                    {
-                                                        xtype: 'textfield',
-                                                        flex: 3,
-                                                        itemId: 'txtNotes',
-                                                        fieldLabel: 'Notes',
-                                                        labelWidth: 110
                                                     }
                                                 ]
                                             },
@@ -2573,6 +2557,21 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         clicksToEdit: 1
                                                     }
                                                 ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        itemId: 'pgeNotes',
+                                        layout: 'fit',
+                                        title: 'Notes',
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'cfgNotes'
+                                        },
+                                        items: [
+                                            {
+                                                xtype: 'commentbox'
                                             }
                                         ]
                                     },

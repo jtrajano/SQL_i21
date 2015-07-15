@@ -752,7 +752,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter1",
+                                                    "name": "filter139",
                                                     "designerId": "be0a06de-99ab-416d-ae5c-3a1068a87c05",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2274,8 +2274,8 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "container|align": "stretch",
-                                "layout": "vbox",
+                                "itemId": "pgeNotes",
+                                "layout": "fit",
                                 "title": "Notes"
                             },
                             "name": "MyPanel",
@@ -2288,202 +2288,24 @@
                                         "type": "object"
                                     },
                                     "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "cfgNotes"
+                                    },
                                     "name": "TabConfig3",
                                     "designerId": "ed26bf0e-df65-465d-8d0f-001615f712c3"
                                 },
                                 {
-                                    "type": "Ext.grid.Panel",
+                                    "type": "Ext.container.Container",
                                     "reference": {
                                         "name": "items",
                                         "type": "array"
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "designer|createAlias": "advancefiltergrid",
-                                        "itemId": "grdNotes",
-                                        "layout|flex": 1,
-                                        "margin": -1,
-                                        "title": null
+                                        "designer|createAlias": "commentbox"
                                     },
-                                    "name": "MyGridPanel18",
-                                    "designerId": "53cbfd91-9f75-4701-aecb-157c48dd36cc",
-                                    "cn": [
-                                        {
-                                            "type": "Ext.toolbar.Toolbar",
-                                            "reference": {
-                                                "name": "dockedItems",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "container|padding": "0 0 0 1",
-                                                "dock": "top",
-                                                "itemId": "tlbGridOptions"
-                                            },
-                                            "name": "MyToolbar11",
-                                            "designerId": "991ee0c9-257b-49b4-8eec-5dd9f4776d2c",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.button.Button",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "icon": null,
-                                                        "iconCls": "small-add",
-                                                        "itemId": "btnAddNotes",
-                                                        "layout|flex": null,
-                                                        "tabIndex": -1,
-                                                        "text": "Insert"
-                                                    },
-                                                    "name": "MyButton6",
-                                                    "designerId": "b67f3980-6045-4cf9-a4c2-5936fd0e95f5"
-                                                },
-                                                {
-                                                    "type": "Ext.button.Button",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "icon": null,
-                                                        "iconCls": "small-delete",
-                                                        "itemId": "btnRemoveNotes",
-                                                        "layout|flex": null,
-                                                        "tabIndex": -1,
-                                                        "text": "Remove"
-                                                    },
-                                                    "name": "MyButton23",
-                                                    "designerId": "37506642-1edc-4a95-898f-758ffaf31abd"
-                                                },
-                                                {
-                                                    "type": "Ext.toolbar.Separator",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "designer|displayName": "separator",
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MySeparator12",
-                                                    "designerId": "c344e1ef-0c19-4cb9-8095-c89e7bd55c43"
-                                                },
-                                                {
-                                                    "type": "linkedinstance",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "filter11",
-                                                    "designerId": "db7aee6c-0f65-4c31-92b0-c61bf09fe226",
-                                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
-                                                "flex": 1,
-                                                "itemId": "colNoteDescription",
-                                                "text": "Description"
-                                            },
-                                            "name": "MyColumn65",
-                                            "designerId": "1238a59d-fd63-4c73-8075-46747ac68019",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "name": "MyTextField5",
-                                                    "designerId": "72ec1abd-d2e0-448a-9bd1-2a46e74ffb2b"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
-                                                "flex": 3,
-                                                "itemId": "colNotes",
-                                                "text": "Notes"
-                                            },
-                                            "name": "MyColumn66",
-                                            "designerId": "74d99fd7-acb9-4a8d-9246-453c667defb7",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.TextArea",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "name": "MyTextArea2",
-                                                    "designerId": "8e6807fa-9eef-4a69-ba90-500dc331d767"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.View",
-                                            "reference": {
-                                                "name": "viewConfig",
-                                                "type": "object"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "itemId": "grvNotes"
-                                            },
-                                            "name": "MyGridView11",
-                                            "designerId": "c1b98003-4f97-49fe-9ec8-10cbce186472"
-                                        },
-                                        {
-                                            "type": "Ext.selection.CheckboxModel",
-                                            "reference": {
-                                                "name": "selModel",
-                                                "type": "object"
-                                            },
-                                            "codeClass": "Ext.selection.CheckboxModel",
-                                            "name": "MyCheckboxSelectionModel8",
-                                            "designerId": "9277050d-bf9d-4a7f-8f94-b0a21f984219"
-                                        },
-                                        {
-                                            "type": "Ext.grid.plugin.CellEditing",
-                                            "reference": {
-                                                "name": "plugins",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "clicksToEdit": 1,
-                                                "designer|displayName": "cepNote",
-                                                "pluginId": "cepNote"
-                                            },
-                                            "name": "MyCellEditingPlugin4",
-                                            "designerId": "4c8b9476-f9e9-4813-8694-370f745a808a"
-                                        }
-                                    ]
+                                    "name": "MyContainer39",
+                                    "designerId": "a9e9e32e-31f5-4f21-bbca-9a8cddaba487"
                                 }
                             ]
                         },
@@ -2568,7 +2390,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging1",
+                    "name": "statusbarpaging15",
                     "designerId": "fc46f0de-7c8f-4d13-8dd6-f03119153f7d",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

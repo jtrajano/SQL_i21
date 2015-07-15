@@ -7,7 +7,7 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
         'i21.store.CompanyLocationSubLocationBuffered',
         'i21.store.TaxCodeBuffered',
         'i21.store.UserListBuffered',
-        'i21.store.ShipViaBuffered',
+        'EntityManagement.store.ShipViaBuffered',
         'Inventory.store.BufferedItemStockView',
         'Inventory.store.BufferedItemStockUOMView',
         'Inventory.store.BufferedStorageLocation',
@@ -69,7 +69,7 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
             type: 'icbuffereduom'
         },
         shipVia: {
-            type: 'shipviabuffered'
+            type: 'emshipviabuffered'
         },
         status: {
             type: 'icbufferedstatus'

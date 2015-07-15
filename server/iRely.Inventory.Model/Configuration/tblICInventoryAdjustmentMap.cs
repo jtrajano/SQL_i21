@@ -27,9 +27,6 @@ namespace iRely.Inventory.Model
             this.HasMany(p => p.tblICInventoryAdjustmentDetails)
                 .WithRequired(p => p.tblICInventoryAdjustment)
                 .HasForeignKey(p => p.intInventoryAdjustmentId);
-            this.HasMany(p => p.tblICInventoryAdjustmentNotes)
-                .WithRequired(p => p.tblICInventoryAdjustment)
-                .HasForeignKey(p => p.intInventoryAdjustmentId);
         }
     }
 
@@ -141,23 +138,6 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.NewStorageLocation)
                 .WithMany(p => p.InventoryAdjustmentNewStorageLocations)
                 .HasForeignKey(p => p.intNewStorageLocationId);
-        }
-    }
-
-    public class tblICInventoryAdjustmentNoteMap : EntityTypeConfiguration<tblICInventoryAdjustmentNote>
-    {
-        public tblICInventoryAdjustmentNoteMap()
-        {
-            // Primary Key
-            this.HasKey(t => t.intInventoryAdjustmentNoteId);
-
-            // Table & Column Mappings
-            this.ToTable("tblICInventoryAdjustmentNote");
-            this.Property(t => t.intInventoryAdjustmentNoteId).HasColumnName("intInventoryAdjustmentNoteId");
-            this.Property(t => t.intInventoryAdjustmentId).HasColumnName("intInventoryAdjustmentId");
-            this.Property(t => t.strDescription).HasColumnName("strDescription");
-            this.Property(t => t.strNotes).HasColumnName("strNotes");
-            this.Property(t => t.intSort).HasColumnName("intSort");
         }
     }
 }

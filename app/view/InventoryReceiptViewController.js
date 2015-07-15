@@ -521,6 +521,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             createRecord : me.createRecord,
             validateRecord: me.validateRecord,
             binding: me.config.binding,
+            enableComment: true,
             include: 'tblICInventoryReceiptInspections,' +
                 'vyuAPVendor,' +
                 'tblSMFreightTerm,' +
@@ -2412,7 +2413,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             "#colWeightUOM": {
                 change: this.onWeightUOMChange
             },
-            "#txtNotes": {
+            "#txtShiftNumber": {
                 specialKey: this.onSpecialKeyTab
             },
             "#grdInventoryReceipt": {

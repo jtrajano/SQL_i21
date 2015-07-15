@@ -382,12 +382,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                         ]
                     }
                 }
-            },
-
-            grdNotes: {
-                readOnly: '{current.ysnPosted}',
-                colNoteDescription: 'strDescription',
-                colNotes: 'strNotes'
             }
         }
     },
@@ -414,8 +408,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                 'tblICInventoryAdjustmentDetails.NewLotStatus, ' +
                 'tblICInventoryAdjustmentDetails.NewLocation, ' +
                 'tblICInventoryAdjustmentDetails.NewSubLocation, ' +
-                'tblICInventoryAdjustmentDetails.NewStorageLocation, ' +
-                'tblICInventoryAdjustmentNotes',
+                'tblICInventoryAdjustmentDetails.NewStorageLocation',
             createRecord : me.createRecord,
             binding: me.config.binding,
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
@@ -428,13 +421,6 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: win.down('#grdInventoryAdjustment'),
                         deleteButton : win.down('#btnRemoveItem')
-                    })
-                },
-                {
-                    key: 'tblICInventoryAdjustmentNotes',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
-                        grid: win.down('#grdNotes'),
-                        deleteButton : win.down('#btnRemoveNotes')
                     })
                 }
             ]

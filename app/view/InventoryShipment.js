@@ -589,7 +589,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         xtype: 'gridcombobox',
                                                                         columns: [
                                                                             {
-                                                                                dataIndex: 'intShipViaID',
+                                                                                dataIndex: 'intEntityShipViaId',
                                                                                 dataType: 'numeric',
                                                                                 text: 'Ship Via Id',
                                                                                 hidden: true
@@ -613,7 +613,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         fieldLabel: 'Ship Via',
                                                                         labelWidth: 110,
                                                                         displayField: 'strShipVia',
-                                                                        valueField: 'strShipVia'
+                                                                        valueField: 'intEntityShipViaId'
                                                                     },
                                                                     {
                                                                         xtype: 'textfield',
@@ -1655,79 +1655,16 @@ Ext.define('Inventory.view.InventoryShipment', {
                                     },
                                     {
                                         xtype: 'panel',
+                                        itemId: 'pgeNotes',
+                                        layout: 'fit',
                                         title: 'Notes',
-                                        layout: {
-                                            type: 'vbox',
-                                            align: 'stretch'
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'cfgNotes'
                                         },
                                         items: [
                                             {
-                                                xtype: 'advancefiltergrid',
-                                                flex: 1,
-                                                itemId: 'grdNotes',
-                                                margin: -1,
-                                                dockedItems: [
-                                                    {
-                                                        xtype: 'toolbar',
-                                                        dock: 'top',
-                                                        itemId: 'tlbGridOptions',
-                                                        layout: {
-                                                            type: 'hbox',
-                                                            padding: '0 0 0 1'
-                                                        },
-                                                        items: [
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnRemoveNotes',
-                                                                iconCls: 'small-delete',
-                                                                text: 'Remove'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
-                                                            },
-                                                            {
-                                                                xtype: 'filter1'
-                                                            }
-                                                        ]
-                                                    }
-                                                ],
-                                                columns: [
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colNoteLocation',
-                                                        dataIndex: 'string',
-                                                        text: 'Location',
-                                                        flex: 1
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colNoteType',
-                                                        dataIndex: 'string',
-                                                        text: 'Note Type',
-                                                        flex: 1
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colNote',
-                                                        dataIndex: 'string',
-                                                        text: 'Notes',
-                                                        flex: 3
-                                                    }
-                                                ],
-                                                viewConfig: {
-                                                    itemId: 'grvNotes'
-                                                },
-                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                    selType: 'checkboxmodel'
-                                                }),
-                                                plugins: [
-                                                    {
-                                                        ptype: 'cellediting',
-                                                        pluginId: 'cepNote',
-                                                        clicksToEdit: 1
-                                                    }
-                                                ]
+                                                xtype: 'commentbox'
                                             }
                                         ]
                                     },

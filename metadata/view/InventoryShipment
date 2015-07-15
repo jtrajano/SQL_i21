@@ -1156,7 +1156,7 @@
                                                                 "columns": [
                                                                     "[",
                                                                     "\t{",
-                                                                    "\t\tdataIndex: 'intShipViaID',",
+                                                                    "\t\tdataIndex: 'intEntityShipViaId',",
                                                                     "\t\tdataType: 'numeric',",
                                                                     "\t\ttext: 'Ship Via Id',",
                                                                     "\t\thidden: true",
@@ -1185,7 +1185,7 @@
                                                                 "layout|margins": null,
                                                                 "margin": "0 5 0 0",
                                                                 "name": null,
-                                                                "valueField": "strShipVia",
+                                                                "valueField": "intEntityShipViaId",
                                                                 "width": null
                                                             },
                                                             "name": "MyComboBox10",
@@ -1729,7 +1729,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter129",
+                                                                    "name": "filter133",
                                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2782,7 +2782,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter130",
+                                                                    "name": "filter134",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3280,7 +3280,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter131",
+                                                                    "name": "filter135",
                                                                     "designerId": "86706668-0ec9-4541-b78b-d162dd783738",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3443,8 +3443,8 @@
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "container|align": "stretch",
-                                "layout": "vbox",
+                                "itemId": "pgeNotes",
+                                "layout": "fit",
                                 "title": "Notes"
                             },
                             "name": "MyPanel",
@@ -3457,176 +3457,24 @@
                                         "type": "object"
                                     },
                                     "codeClass": null,
+                                    "userConfig": {
+                                        "itemId": "cfgNotes"
+                                    },
                                     "name": "TabConfig3",
                                     "designerId": "b4a5f26f-cb1f-4b6d-abe0-91e1faf95116"
                                 },
                                 {
-                                    "type": "Ext.grid.Panel",
+                                    "type": "Ext.container.Container",
                                     "reference": {
                                         "name": "items",
                                         "type": "array"
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "designer|createAlias": "advancefiltergrid",
-                                        "itemId": "grdNotes",
-                                        "layout|flex": 1,
-                                        "margin": -1,
-                                        "title": null
+                                        "designer|createAlias": "commentbox"
                                     },
-                                    "name": "MyGridPanel18",
-                                    "designerId": "752b5457-a61d-4ea8-9aca-6cf9e9965842",
-                                    "cn": [
-                                        {
-                                            "type": "Ext.toolbar.Toolbar",
-                                            "reference": {
-                                                "name": "dockedItems",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "container|padding": "0 0 0 1",
-                                                "dock": "top",
-                                                "itemId": "tlbGridOptions"
-                                            },
-                                            "name": "MyToolbar11",
-                                            "designerId": "2de4a5dc-6c5c-4b51-b738-417fd421fa5b",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.button.Button",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "icon": null,
-                                                        "iconCls": "small-delete",
-                                                        "itemId": "btnRemoveNotes",
-                                                        "layout|flex": null,
-                                                        "tabIndex": -1,
-                                                        "text": "Remove"
-                                                    },
-                                                    "name": "MyButton23",
-                                                    "designerId": "ec54baf8-3949-4b19-971a-93a24c5054a5"
-                                                },
-                                                {
-                                                    "type": "Ext.toolbar.Separator",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "designer|displayName": "separator",
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "MySeparator12",
-                                                    "designerId": "0ffc8d47-e6bc-473a-874f-e4f8071724a0"
-                                                },
-                                                {
-                                                    "type": "linkedinstance",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "layout|flex": null
-                                                    },
-                                                    "name": "filter132",
-                                                    "designerId": "b4c3f458-33e0-4b9e-972f-6281744af6d7",
-                                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
-                                                "flex": 1,
-                                                "itemId": "colNoteLocation",
-                                                "text": "Location"
-                                            },
-                                            "name": "MyColumn63",
-                                            "designerId": "af27d5d8-dd71-4e49-9d70-561ad10e7978"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
-                                                "flex": 1,
-                                                "itemId": "colNoteType",
-                                                "text": "Note Type"
-                                            },
-                                            "name": "MyColumn65",
-                                            "designerId": "85cf494a-c372-44c0-869b-e2225b1168ae"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "string",
-                                                "flex": 3,
-                                                "itemId": "colNote",
-                                                "text": "Notes"
-                                            },
-                                            "name": "MyColumn66",
-                                            "designerId": "fc9d8df8-6474-4f6a-870a-515e26833d44"
-                                        },
-                                        {
-                                            "type": "Ext.grid.View",
-                                            "reference": {
-                                                "name": "viewConfig",
-                                                "type": "object"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "itemId": "grvNotes"
-                                            },
-                                            "name": "MyGridView11",
-                                            "designerId": "3cd7a4c5-c7ee-4494-9cbc-5532ba66a24b"
-                                        },
-                                        {
-                                            "type": "Ext.selection.CheckboxModel",
-                                            "reference": {
-                                                "name": "selModel",
-                                                "type": "object"
-                                            },
-                                            "codeClass": "Ext.selection.CheckboxModel",
-                                            "name": "MyCheckboxSelectionModel8",
-                                            "designerId": "8db12e65-75c2-4cfb-85b2-2443dbcf6902"
-                                        },
-                                        {
-                                            "type": "Ext.grid.plugin.CellEditing",
-                                            "reference": {
-                                                "name": "plugins",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "clicksToEdit": 1,
-                                                "designer|displayName": "cepNote",
-                                                "pluginId": "cepNote"
-                                            },
-                                            "name": "MyCellEditingPlugin4",
-                                            "designerId": "c4be2e5e-56b3-444e-98eb-bc3ab5d2f4dc"
-                                        }
-                                    ]
+                                    "name": "MyContainer38",
+                                    "designerId": "da1fcb43-0586-4054-aebc-5181c8801426"
                                 }
                             ]
                         },
@@ -3711,7 +3559,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging13",
                     "designerId": "50e4b10d-d851-464f-867c-a04204dccf1e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

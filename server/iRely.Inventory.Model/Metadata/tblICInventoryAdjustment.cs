@@ -15,7 +15,6 @@ namespace iRely.Inventory.Model
         public tblICInventoryAdjustment()
         {
             this.tblICInventoryAdjustmentDetails = new List<tblICInventoryAdjustmentDetail>();
-            this.tblICInventoryAdjustmentNotes = new List<tblICInventoryAdjustmentNote>();
         }
 
         public int intInventoryAdjustmentId { get; set; }
@@ -49,7 +48,6 @@ namespace iRely.Inventory.Model
 
         public tblSMCompanyLocation tblSMCompanyLocation { get; set; }
         public ICollection<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }
-        public ICollection<tblICInventoryAdjustmentNote> tblICInventoryAdjustmentNotes { get; set; }
     }
 
     public class AdjustmentVM : BaseEntity
@@ -594,16 +592,5 @@ namespace iRely.Inventory.Model
         public tblICItemUOM NewWeightUOM { get; set; }
         public tblICLotStatus OldLotStatus { get; set; }
         public tblICLotStatus NewLotStatus { get; set; }
-    }
-
-    public class tblICInventoryAdjustmentNote : BaseEntity
-    {
-        public int intInventoryAdjustmentNoteId { get; set; }
-        public int intInventoryAdjustmentId { get; set; }
-        public string strDescription { get; set; }
-        public string strNotes { get; set; }
-        public int? intSort { get; set; }
-
-        public tblICInventoryAdjustment tblICInventoryAdjustment { get; set; }
     }
 }

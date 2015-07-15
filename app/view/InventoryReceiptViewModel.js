@@ -18,10 +18,10 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'EntityManagement.store.VendorBuffered',
         'AccountsPayable.store.PurchaseOrderDetail',
         'EntityManagement.store.LocationBuffered',
+        'EntityManagement.store.ShipViaBuffered',
         'i21.store.CompanyLocationBuffered',
         'i21.store.CurrencyBuffered',
         'i21.store.FreightTermsBuffered',
-        'i21.store.ShipViaBuffered',
         'i21.store.UserListBuffered',
         'i21.store.CompanyLocationSubLocationBuffered',
         'i21.store.CountryBuffered',
@@ -197,7 +197,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             type: 'currencybuffered'
         },
         shipvia: {
-            type: 'shipviabuffered'
+            type: 'emshipviabuffered'
         },
         freightTerm: {
             type: 'FreightTermsBuffered'

@@ -249,11 +249,9 @@ namespace iRely.Inventory.Model
 
             modelBuilder.Configurations.Add(new tblICInventoryAdjustmentMap());
             modelBuilder.Configurations.Add(new tblICInventoryAdjustmentDetailMap());
-            modelBuilder.Configurations.Add(new tblICInventoryAdjustmentNoteMap());
 
             modelBuilder.Configurations.Add(new tblICInventoryTransferMap());
             modelBuilder.Configurations.Add(new tblICInventoryTransferDetailMap());
-            modelBuilder.Configurations.Add(new tblICInventoryTransferNoteMap());
 
             modelBuilder.Configurations.Add(new tblICBuildAssemblyMap());
             modelBuilder.Configurations.Add(new tblICBuildAssemblyDetailMap());
