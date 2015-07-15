@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspMFGetBlendSheetItems]
+﻿CREATE PROCEDURE [dbo].[uspMFGetBlendSheetItems]
 	@intItemId int,
 	@intLocationId int,
 	@dblQtyToProduce decimal(18,6)
@@ -11,94 +10,169 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-Declare @intRecipeId int
+-- Declare the variables
+BEGIN 
+	DECLARE @WorkOrderStatus_New AS INT = 1
+			,@WorkOrderStatus_Not_Released AS INT = 2
+			,@WorkOrderStatus_Open AS INT = 3
+			,@WorkOrderStatus_Frozen AS INT = 4
+			,@WorkOrderStatus_Hold AS INT = 5
+			,@WorkOrderStatus_Pre_Kitted AS INT = 6
+			,@WorkOrderStatus_Kitted AS INT = 7
+			,@WorkOrderStatus_Kit_Transferred AS INT = 8
+			,@WorkOrderStatus_Released AS INT = 9
+			,@WorkOrderStatus_Started AS INT = 10
+			,@WorkOrderStatus_Paused AS INT = 11
+			,@WorkOrderStatus_Staged AS INT = 12
+			,@WorkOrderStatus_Completed AS INT = 13
+END
 
-Select @intRecipeId = intRecipeId from tblMFRecipe where intItemId=@intItemId and intLocationId=@intLocationId and ysnActive=1
+-- Get the receipt id based on the selected item and company location 
+BEGIN 
+	DECLARE @intRecipeId AS INT 
+	SELECT	@intRecipeId = intRecipeId 
+	FROM	tblMFRecipe 
+	WHERE	intItemId = @intItemId 
+			AND intLocationId = @intLocationId 
+			AND ysnActive = 1
+END
 
-Declare @tblRequiredQty table
-(
-	intItemId int,
-	dblRequiredQty numeric(18,6),
-	ysnIsSubstitute bit,
-	intParentItemId int,
-	ysnHasSubstitute bit,
-	intRecipeItemId int,
-	intParentRecipeItemId int,
-	strGroupName nVarchar(50)
-)
+-- Get the ingredients of the recipe
+BEGIN 
+	DECLARE @tblRequiredQty TABLE
+	(
+		intItemId INT,
+		dblRequiredQty NUMERIC(18,6),
+		ysnIsSubstitute BIT,
+		intParentItemId INT,
+		ysnHasSubstitute BIT,
+		intRecipeItemId INT,
+		intParentRecipeItemId INT,
+		strGroupName NVARCHAR(50)
+	)
 
-Insert into @tblRequiredQty
---Select ri.intItemId,case when ri.ysnScaled=1 then (ri.dblCalculatedQuantity * (@dblQtyToProduce/r.dblQuantity)) else ri.dblCalculatedQuantity end AS RequiredQty
-Select ri.intItemId,(ri.dblCalculatedQuantity * (@dblQtyToProduce/r.dblQuantity)) RequiredQty,0,0,0,ri.intRecipeItemId,0,ri.strItemGroupName
-From tblMFRecipeItem ri 
-Join tblMFRecipe r on r.intRecipeId=ri.intRecipeId 
-where r.intRecipeId=@intRecipeId and ri.intRecipeItemTypeId=1
-Union
-Select rs.intSubstituteItemId AS intItemId,(rs.dblQuantity * (@dblQtyToProduce/r.dblQuantity)) RequiredQty,1,rs.intItemId,0,rs.intRecipeSubstituteItemId,rs.intRecipeItemId,''
-From tblMFRecipeSubstituteItem rs
-Join tblMFRecipe r on r.intRecipeId=rs.intRecipeId 
-where r.intRecipeId=@intRecipeId and rs.intRecipeItemTypeId=1
+	INSERT INTO @tblRequiredQty
+	SELECT	ri.intItemId
+			,(ri.dblCalculatedQuantity * (@dblQtyToProduce / r.dblQuantity)) RequiredQty
+			,0
+			,0
+			,0
+			,ri.intRecipeItemId
+			,0
+			,ri.strItemGroupName
+	FROM	tblMFRecipeItem ri JOIN tblMFRecipe r
+				ON r.intRecipeId = ri.intRecipeId 
+	WHERE	r.intRecipeId = @intRecipeId 
+			AND ri.intRecipeItemTypeId = 1
+	UNION
+	SELECT	rs.intSubstituteItemId AS intItemId
+			,(rs.dblQuantity * (@dblQtyToProduce/r.dblQuantity)) RequiredQty
+			,1
+			,rs.intItemId
+			,0
+			,rs.intRecipeSubstituteItemId
+			,rs.intRecipeItemId
+			,''
+	FROM	tblMFRecipeSubstituteItem rs JOIN tblMFRecipe r 
+				ON r.intRecipeId = rs.intRecipeId 
+	WHERE	r.intRecipeId = @intRecipeId 
+			AND rs.intRecipeItemTypeId = 1
 
-Update a Set a.ysnHasSubstitute=1 from @tblRequiredQty a Join @tblRequiredQty b on a.intItemId=b.intParentItemId
+	-- Flag an ingredient if it has a substitute. 
+	UPDATE	a 
+	SET		a.ysnHasSubstitute = 1 
+	FROM	@tblRequiredQty a JOIN @tblRequiredQty b 
+				ON a.intItemId = b.intParentItemId
+END
 
-Declare @tblPhysicalQty table
-(
-	intItemId int,
-	dblPhysicalQty numeric(18,6)
-)
+-- Get the physical quantities of the ingredients
+BEGIN 
+	DECLARE @tblPhysicalQty TABLE
+	(
+		intItemId int,
+		dblPhysicalQty numeric(18,6)
+	)
+	
+	-- Get the physical quantities of the main ingredients
+	INSERT INTO @tblPhysicalQty
+	SELECT	ri.intItemId
+			,SUM(l.dblWeight) AS dblPhysicalQty 
+	FROM	tblICLot l JOIN tblMFRecipeItem ri 
+				ON ri.intItemId = l.intItemId 
+	WHERE	ri.intRecipeId = @intRecipeId 
+			AND l.intLocationId=@intLocationId
+	GROUP BY ri.intItemId
 
-Insert into @tblPhysicalQty
-Select ri.intItemId,Sum(l.dblWeight) AS dblPhysicalQty 
-From tblICLot l 
-Join tblMFRecipeItem ri on ri.intItemId=l.intItemId 
-where ri.intRecipeId=@intRecipeId and l.intLocationId=@intLocationId
-group by ri.intItemId
+	-- Get the physical quantities of the substitute ingredients
+	INSERT INTO @tblPhysicalQty
+	SELECT	rs.intSubstituteItemId
+			,SUM(l.dblWeight) AS dblPhysicalQty 
+	FROM	tblICLot l JOIN tblMFRecipeSubstituteItem rs 
+				ON rs.intSubstituteItemId = l.intItemId 
+	WHERE	rs.intRecipeId = @intRecipeId 
+			AND l.intLocationId=@intLocationId
+	GROUP BY rs.intSubstituteItemId
 
---Substitute
-Insert into @tblPhysicalQty
-Select rs.intSubstituteItemId,Sum(l.dblWeight) AS dblPhysicalQty 
-From tblICLot l 
-Join tblMFRecipeSubstituteItem rs on rs.intSubstituteItemId=l.intItemId 
-where rs.intRecipeId=@intRecipeId and l.intLocationId=@intLocationId
-group by rs.intSubstituteItemId
+END
 
-Declare @tblReservedQty table
-(
-	intItemId int,
-	dblReservedQty numeric(18,6)
-)
+-- Reserve the ingredients
+BEGIN 
+	DECLARE @tblReservedQty table
+	(
+		intItemId int,
+		dblReservedQty numeric(18,6)
+	)
 
---Insert into @tblReservedQty
---Select ri.intItemId,Sum(rd.dblQuantity) AS dblReservedQty 
---From tblICInventoryReservationDetail rd 
---Join tblMFRecipeItem ri on ri.intItemId=rd.intItemId 
---where ri.intRecipeId=@intRecipeId
---group by ri.intItemId
+	-- Reserve the main ingredients
+	INSERT INTO @tblReservedQty
+	SELECT	ri.intItemId
+			,SUM(cl.dblQuantity) AS dblReservedQty 
+	FROM	tblMFWorkOrderConsumedLot cl JOIN tblMFWorkOrder w 
+				ON cl.intWorkOrderId = w.intWorkOrderId
+			JOIN tblICLot l 
+				ON l.intLotId = cl.intLotId
+			JOIN tblMFRecipeItem ri 
+				ON ri.intItemId = l.intItemId 
+	WHERE	ri.intRecipeId = @intRecipeId 
+			AND w.intStatusId <> @WorkOrderStatus_Completed
+	GROUP BY ri.intItemId
 
-Insert into @tblReservedQty
-Select ri.intItemId,Sum(cl.dblQuantity) AS dblReservedQty 
-From tblMFWorkOrderConsumedLot cl 
-Join tblMFWorkOrder w on cl.intWorkOrderId=w.intWorkOrderId
-join tblICLot l on l.intLotId=cl.intLotId
-Join tblMFRecipeItem ri on ri.intItemId=l.intItemId 
-where ri.intRecipeId=@intRecipeId and w.intStatusId<>13
-group by ri.intItemId
+	-- Reserve the Substitute ingredients
+	INSERT INTO @tblReservedQty
+	SELECT	rs.intSubstituteItemId
+			,SUM(cl.dblQuantity) AS dblReservedQty 
+	FROM	tblMFWorkOrderConsumedLot cl JOIN tblMFWorkOrder w 
+				ON cl.intWorkOrderId = w.intWorkOrderId
+			JOIN tblICLot l 
+				ON l.intLotId = cl.intLotId
+			JOIN tblMFRecipeSubstituteItem rs 
+				ON rs.intItemId = l.intItemId 
+	WHERE	rs.intRecipeId = @intRecipeId 
+			AND w.intStatusId <> @WorkOrderStatus_Completed
+	GROUP BY rs.intSubstituteItemId
+END
 
---Substitute
-Insert into @tblReservedQty
-Select rs.intSubstituteItemId,Sum(cl.dblQuantity) AS dblReservedQty 
-From tblMFWorkOrderConsumedLot cl 
-Join tblMFWorkOrder w on cl.intWorkOrderId=w.intWorkOrderId
-join tblICLot l on l.intLotId=cl.intLotId
-Join tblMFRecipeSubstituteItem rs on rs.intItemId=l.intItemId 
-where rs.intRecipeId=@intRecipeId and w.intStatusId<>13
-group by rs.intSubstituteItemId
-
-Select i.intItemId,i.strItemNo,i.strDescription,a.dblRequiredQty,ISNULL(b.dblPhysicalQty,0) AS dblPhysicalQty,
-ISNULL(c.dblReservedQty,0) AS dblReservedQty, ISNULL((ISNULL(b.dblPhysicalQty,0) - ISNULL(c.dblReservedQty,0)),0) AS dblAvailableQty,
-0.0 AS dblSelectedQty,0.0 AS dblAvailableUnit,a.ysnIsSubstitute,a.intParentItemId,a.ysnHasSubstitute,a.intRecipeItemId,a.intParentRecipeItemId,a.strGroupName
-from @tblRequiredQty a 
-Left Join @tblPhysicalQty b on a.intItemId=b.intItemId
-Left Join @tblReservedQty c on a.intItemId=c.intItemId
-Join tblICItem i on a.intItemId=i.intItemId
-
+-- Return the blend sheet items as a query. 
+BEGIN
+	SELECT	i.intItemId
+			,i.strItemNo
+			,i.strDescription
+			,a.dblRequiredQty
+			,ISNULL(b.dblPhysicalQty,0) AS dblPhysicalQty
+			,ISNULL(c.dblReservedQty,0) AS dblReservedQty
+			,ISNULL((ISNULL(b.dblPhysicalQty,0) - ISNULL(c.dblReservedQty,0)),0) AS dblAvailableQty
+			,0.0 AS dblSelectedQty
+			,0.0 AS dblAvailableUnit
+			,a.ysnIsSubstitute
+			,a.intParentItemId
+			,a.ysnHasSubstitute
+			,a.intRecipeItemId
+			,a.intParentRecipeItemId
+			,a.strGroupName
+	FROM	@tblRequiredQty a LEFT JOIN @tblPhysicalQty b 
+				ON a.intItemId = b.intItemId
+			LEFT JOIN @tblReservedQty c 
+				ON a.intItemId = c.intItemId
+			JOIN tblICItem i 
+				ON a.intItemId=i.intItemId
+END
