@@ -1975,6 +1975,7 @@
     <Build Include="dbo\Tables\tblWHTruck.sql" />
     <Build Include="dbo\Tables\tblWHTruckStatus.sql" />
     <Build Include="dbo\Tables\tblWHTruckOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCreateRecurrence.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
