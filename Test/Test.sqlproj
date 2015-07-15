@@ -755,6 +755,7 @@
     <Build Include="testi21Database\Stored Procedures\test uspICCalculateInventoryReceiptOtherCharges for error 51155.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCalculateInventoryReceiptOtherCharges for generating charges for Percentage.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCalculateInventoryReceiptOtherCharges for generating charges for Amount.sql" />
+	<Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptIntegrations for calling uspCTReceived.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

@@ -13,7 +13,7 @@ BEGIN
 	SET ANSI_WARNINGS OFF
 
 	DECLARE @InsertedData TABLE (intBillId INT, intType INT)
-
+	DECLARE @generatedBillId INT
 	--removed first the constraint
 	ALTER TABLE tblAPBill
 		DROP CONSTRAINT [UK_dbo.tblAPBill_strBillId]
@@ -88,6 +88,8 @@ BEGIN
 		@userId
 	FROM tblAPBill
 	WHERE intBillId IN (@billId)
+		
+	SET @generatedBillId = SCOPE_IDENTITY()
 
 	INSERT INTO tblAPBillDetail(
 		[intBillId],
@@ -110,7 +112,7 @@ BEGIN
 		[intLineNo]
 	)
 	SELECT
-		[intBillId],
+		@generatedBillId,
 		[strMiscDescription],
 		[strComment], 
 		[intAccountId],

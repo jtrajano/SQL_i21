@@ -3766,4 +3766,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intConcurrencyId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="8ac17dc3-a8e0-433f-8931-d69fa790081e" ChangeDateTime="07/14/2015 06:04:08">
+    <Property Name="ElementName" Value="[dbo].[tblSTRegisterFileConfiguration].[intLayoutId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTRegisterFileConfiguration]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intImportFileHeaderId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="1f607a94-d7c6-4eac-a719-d0478a522181" ChangeDateTime="07/14/2015 09:14:33">
+    <Property Name="ElementName" Value="[dbo].[tblRKCompanyPreference].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCompanyPreferenceId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8b8859b2-3cc6-4659-b893-add74e8ccb61" ChangeDateTime="07/14/2015 09:20:54">
+    <Property Name="ElementName" Value="[dbo].[tblRKCompanyPreference].[dbl]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblDecimals" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b582e16a-caa6-4daf-9710-509cc35bbf0b" ChangeDateTime="07/15/2015 08:21:26">
+    <Property Name="ElementName" Value="[dbo].[tblDBUserPreference].[intDafaultTabId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblDBUserPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDefaultTabId" />
+  </Operation>
 </Operations>

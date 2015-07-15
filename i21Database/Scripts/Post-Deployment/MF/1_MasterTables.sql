@@ -491,3 +491,77 @@ BEGIN
     VALUES(2,'Packed')
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendValidationMessageType WHERE intMessageTypeId = 1)
+BEGIN
+    INSERT INTO tblMFBlendValidationMessageType(intMessageTypeId,strName)
+    VALUES(1,'Warning')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendValidationMessageType WHERE intMessageTypeId = 2)
+BEGIN
+    INSERT INTO tblMFBlendValidationMessageType(intMessageTypeId,strName)
+    VALUES(2,'Error')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendValidationDefault WHERE intBlendValidationDefaultId = 1)
+BEGIN
+    INSERT INTO tblMFBlendValidationDefault(intBlendValidationDefaultId,strBlendValidationName,strMessage)
+    VALUES(1,'Input Item Exist Validation','The system has detected that you have not selected any ingredient input lot(s) for item @1.')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendValidationDefault WHERE intBlendValidationDefaultId = 2)
+BEGIN
+    INSERT INTO tblMFBlendValidationDefault(intBlendValidationDefaultId,strBlendValidationName,strMessage)
+    VALUES(2,'Lot Expiry Date Validation','The selected lot @1 is expired.')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendValidationDefault WHERE intBlendValidationDefaultId = 3)
+BEGIN
+    INSERT INTO tblMFBlendValidationDefault(intBlendValidationDefaultId,strBlendValidationName,strMessage)
+    VALUES(3,'Lot Quarantine Status Validation','The selected lot @1 has quarantined status.')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendValidationDefault WHERE intBlendValidationDefaultId = 4)
+BEGIN
+    INSERT INTO tblMFBlendValidationDefault(intBlendValidationDefaultId,strBlendValidationName,strMessage)
+    VALUES(4,'Substitute Item Configuration Validation',
+	'The system has detected that you have selected one substitute lot @1 for item @2. Is this correct?')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendValidationDefault WHERE intBlendValidationDefaultId = 5)
+BEGIN
+    INSERT INTO tblMFBlendValidationDefault(intBlendValidationDefaultId,strBlendValidationName,strMessage)
+    VALUES(5,'Reserve Quantity Greater Than Quantity To Produce Validation',
+	'The system has detected that blend @1 is scheduled for @2 which is greater than the quantity to produce @3. Is this correct?')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendValidationDefault WHERE intBlendValidationDefaultId = 6)
+BEGIN
+    INSERT INTO tblMFBlendValidationDefault(intBlendValidationDefaultId,strBlendValidationName,strMessage)
+    VALUES(6,'Reserve Quantity Less Than Quantity To Produce Validation',
+	'The system has detected that blend @1 is scheduled for @2 which is less than the quantity to produce @3. Is this correct?')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendValidationDefault WHERE intBlendValidationDefaultId = 7)
+BEGIN
+    INSERT INTO tblMFBlendValidationDefault(intBlendValidationDefaultId,strBlendValidationName,strMessage)
+    VALUES(7,'Available Quantity With Over-Commitment Greater Than Weight per Unit Validation',
+	'The system has detected that the ingredient lot @1 has an available qty of @2 of item @3.'
+	+'You are trying to schedule a requirement of @4 from this ingredient lot.'
+	+'The over-commitment quantity is @5 which is greater than the weight per unit value of this ingredient lot.'
+	+'It is suggested that you revise your choice of lots for item @6 for the sheet.'
+	)
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFBlendValidationDefault WHERE intBlendValidationDefaultId = 8)
+BEGIN
+    INSERT INTO tblMFBlendValidationDefault(intBlendValidationDefaultId,strBlendValidationName,strMessage)
+    VALUES(8,'Available Quantity With Over-Commitment Less Than Weight per Unit Validation',
+	'The system has detected that the ingredient lot @1 has an available qty of @2 of item @3.'
+	+'You are trying to schedule a requirement of @4 from this ingredient lot.'
+	+'The over-commitment quantity is @5 which is less than the weight per unit value of this ingredient lot.'
+	+'In this case the system will allow you to release the Blend sheet to finish off the ingredient lot.'
+	+'You may still revise the blend sheet.'
+	)
+END
+GO

@@ -3,17 +3,21 @@
 	@UserId				INT = 0
 AS
 	DECLARE @frequency NVARCHAR(25),
-			@startDate DATETIME
+			@startDate DATETIME,
+			@responsibleUser NVARCHAR(100)
 
 	SELECT TOP 1
 		   @frequency = strFrequency
 	      ,@startDate = dtmMaintenanceDate
 		  FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId
 
+	SELECT @responsibleUser = strName FROM tblEntity WHERE intEntityId = @UserId
+
 	INSERT INTO [tblSMRecurringTransaction]
 		([intTransactionId]
 		,[strTransactionNumber]
 		,[strTransactionType]
+		,[strResponsibleUser]
 		,[strFrequency]
 		,[dtmLastProcess]
 		,[dtmNextProcess]
@@ -28,6 +32,7 @@ AS
 		 @InvoiceId					             --intTransactionId
 		,[strInvoiceNumber]			             --strTransactionNumber
 		,[strTransactionType]		             --strTransactionType
+		,@responsibleUser
 		,@frequency					             --strFrequency
 		,@startDate					             --dtmLastProcess
 		,DATEADD(MONTH, 1, @startDate)           --dtmNextProcess

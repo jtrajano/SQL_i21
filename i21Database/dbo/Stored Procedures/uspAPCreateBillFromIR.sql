@@ -159,7 +159,7 @@ BEGIN
 		[dblCost]					=	B.dblUnitCost,
 		[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E1.intContractDetailId ELSE POContractItems.intContractDetailId END,
 		[intContractHeaderId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E.intContractHeaderId ELSE POContractItems.intContractHeaderId END,
-		[intLineNo]					=	B.intSort
+		[intLineNo]					=	ISNULL(B.intSort,0)
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId

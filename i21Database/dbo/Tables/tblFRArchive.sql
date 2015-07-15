@@ -6,7 +6,7 @@ CREATE TABLE [dbo].[tblFRArchive] (
 	[strDescription]	NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
 	[ysnSupressZero]    BIT DEFAULT(0) NULL,
 	[dtmAsOfDate]		DATETIME NULL,
-	[dtmAdded]			DATETIME DEFAULT (getdate()) NULL,
+	[dtmDateCreated]	DATETIME DEFAULT (getdate()) NULL,
 	[strGUID]			NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
 	[intEntityId]		INT NULL,
 	[intConcurrencyId]	INT NOT NULL,

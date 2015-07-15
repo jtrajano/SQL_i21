@@ -99,8 +99,8 @@ BEGIN
 		INSERT INTO expected VALUES (@amount, 0)
 		INSERT INTO expected VALUES (0, @amount)
 		
-		-- Add a spy for uspPOReceived
-		EXEC tSQLt.SpyProcedure 'dbo.uspPOReceived';						
+		-- Add a spy for uspICPostInventoryReceiptIntegrations
+		EXEC tSQLt.SpyProcedure 'dbo.uspICPostInventoryReceiptIntegrations';						
 	END 
 
 	-- Act
@@ -121,9 +121,9 @@ BEGIN
 	BEGIN 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 
-		--Assert uspPOReceived is called 
-		IF @ysnRecap = 0 AND NOT EXISTS (SELECT 1 FROM dbo.uspPOReceived_SpyProcedureLog)
-			EXEC tSQLt.Fail 'uspPOReceived should been called when @ysnRecap = 0'
+		--Assert uspICPostInventoryReceiptIntegrations is called 
+		IF @ysnRecap = 0 AND NOT EXISTS (SELECT 1 FROM dbo.uspICPostInventoryReceiptIntegrations_SpyProcedureLog)
+			EXEC tSQLt.Fail 'uspICPostInventoryReceiptIntegrations should been called when @ysnRecap = 0'
 	END
 
 	-- Clean-up: remove the tables used in the unit test

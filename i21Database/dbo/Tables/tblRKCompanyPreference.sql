@@ -1,0 +1,31 @@
+﻿CREATE TABLE [dbo].[tblRKCompanyPreference]
+(
+	[intCompanyPreferenceId] INT NOT NULL IDENTITY, 
+    [intConcurrencyId] INT NOT NULL,
+    [intUnitMeasureId] INT NULL, 
+    [dblDecimals] NUMERIC(18, 6) NULL, 
+    [dblRefreshRate] NUMERIC(18, 6) NULL, 
+    [ysnIncludeInTransitInCompanyTitled] BIT NULL, 
+    [ysnIncludeOffsiteInventoryInCompanyTitled] BIT NULL, 
+    [ysnIncludeDPPurchasesInCompanyTitled] BIT NULL, 
+    [ysnIncludeOptionsInRiskInquiryOrCoverage] BIT NULL, 
+    [ysnIncludeInventoryHedge] BIT NULL, 
+    [ysnIncludeExpiredMonths] BIT NULL, 
+    [strRiskView] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strReportLevel] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strTimingField] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strReportTerms] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [ysnIncludeInventoryBasis] BIT NULL, 
+    [strM2MReportLevel] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [ysnIncludeInventoryM2M] BIT NULL, 
+    [ysnIncludeBasisDifferentialsInResults] BIT NULL, 
+    [ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell] BIT NULL, 
+    [ysnEnterForwardCurveForMarketBasisDifferential] BIT NULL, 
+    [ysnAllowPartialPricingOfAContractSequence] BIT NULL, 
+    [strPricingQty] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [ysnEnablePolarizationAdjustments] BIT NULL,
+    [strPeriodType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	
+	CONSTRAINT [PK_tblRKCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]), 
+	CONSTRAINT [FK_tblRKCompanyPreference_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId]),
+)

@@ -111,6 +111,8 @@
     <None Include="Scripts\Pre-Deployment\8_AP\UpdateShipTo.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\UpdateShipVia.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\UpdateShipFrom.sql" />
+    <None Include="Scripts\Pre-Deployment\8_AP\UpdateBillContact.sql" />
+    <None Include="Scripts\Pre-Deployment\12_EM\09_UpdateEntityLocationShipVia.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />

@@ -86,6 +86,8 @@ BEGIN
 		)
 
 		DECLARE @ItemsToReserve AS dbo.ItemReservationTableType
+				,@intTransactionId AS INT = 1
+				,@intTransactionTypeId AS INT = 2
 
 		-- Setup the data to insert. 
 		INSERT @ItemsToReserve (
@@ -103,27 +105,27 @@ BEGIN
 				,intItemUOMId = @SerializedLotGrains_BushelUOMId
 				,intLotId = 1
 				,dblQty = 100
-				,intTransactionId = 1
+				,intTransactionId = @intTransactionId
 				,strTransactionId = 'TRANSACTION-000001'
-				,intTransactionTypeId = 1
+				,intTransactionTypeId = @intTransactionTypeId
 		UNION ALL
 		SELECT	intItemId = @SerializedLotGrains
 				,intItemLocationId = @SerializedLotGrains_DefaultLocation
 				,intItemUOMId = @SerializedLotGrains_PoundUOMId
 				,intLotId = 2
 				,dblQty = 100
-				,intTransactionId = 1
+				,intTransactionId = @intTransactionId
 				,strTransactionId = 'TRANSACTION-000001'
-				,intInventoryTransactionType = 1
+				,intInventoryTransactionType = @intTransactionTypeId
 		UNION ALL
 		SELECT	intItemId = @SerializedLotGrains
 				,intItemLocationId = @SerializedLotGrains_DefaultLocation
 				,intItemUOMId = @SerializedLotGrains_BushelUOMId
 				,intLotId = 1
 				,dblQty = 15
-				,intTransactionId = 1
+				,intTransactionId = @intTransactionId
 				,strTransactionId = 'TRANSACTION-000001'
-				,intInventoryTransactionType = 1
+				,intInventoryTransactionType = @intTransactionTypeId
 
 		-- Setup the existing data
 		INSERT INTO dbo.tblICStockReservation(
@@ -141,27 +143,27 @@ BEGIN
 				,intItemUOMId = @SerializedLotGrains_BushelUOMId
 				,intLotId = 1 
 				,dblQty = 20
-				,intTransactionId = 1
+				,intTransactionId = @intTransactionId
 				,strTransactionId = 'TRANSACTION-000001'
-				,intInventoryTransactionType = 1 
+				,intInventoryTransactionType = @intTransactionTypeId 
 		UNION ALL 
 		SELECT	intItemId = @SerializedLotGrains
 				,intItemLocationId = @SerializedLotGrains_DefaultLocation
 				,intItemUOMId = @SerializedLotGrains_PoundUOMId
 				,intLotId = 2
 				,dblQty = 30
-				,intTransactionId = 1
+				,intTransactionId = @intTransactionId
 				,strTransactionId = 'TRANSACTION-000001'
-				,intInventoryTransactionType = 1 
+				,intInventoryTransactionType = @intTransactionTypeId 
 		UNION ALL 
 		SELECT	intItemId = @ManualLotGrains
 				,intItemLocationId = @ManualLotGrains_DefaultLocation
 				,intItemUOMId = @ManualLotGrains_PoundUOMId
 				,intLotId = 3
 				,dblQty = 300
-				,intTransactionId = 1
+				,intTransactionId = @intTransactionId + 1
 				,strTransactionId = 'TRANSACTION-000011'
-				,intInventoryTransactionType = 1 
+				,intInventoryTransactionType = @intTransactionTypeId 
 
 		-- Setup the expected data
 		INSERT INTO expected (
@@ -179,33 +181,35 @@ BEGIN
 				,intItemUOMId = @SerializedLotGrains_BushelUOMId
 				,intLotId = 1 
 				,dblQty = 115
-				,intTransactionId = 1
+				,intTransactionId = @intTransactionId
 				,strTransactionId = 'TRANSACTION-000001'
-				,intInventoryTransactionType = 1 
+				,intInventoryTransactionType = @intTransactionTypeId 
 		UNION ALL 
 		SELECT	intItemId = @SerializedLotGrains
 				,intItemLocationId = @SerializedLotGrains_DefaultLocation
 				,intItemUOMId = @SerializedLotGrains_PoundUOMId
 				,intLotId = 2
 				,dblQty = 100
-				,intTransactionId = 1
+				,intTransactionId = @intTransactionId
 				,strTransactionId = 'TRANSACTION-000001'
-				,intInventoryTransactionType = 1 
+				,intInventoryTransactionType = @intTransactionTypeId 
 		UNION ALL 
 		SELECT	intItemId = @ManualLotGrains
 				,intItemLocationId = @ManualLotGrains_DefaultLocation
 				,intItemUOMId = @ManualLotGrains_PoundUOMId
 				,intLotId = 3
 				,dblQty = 300
-				,intTransactionId = 1
+				,intTransactionId = @intTransactionId + 1
 				,strTransactionId = 'TRANSACTION-000011'
-				,intInventoryTransactionType = 1 
+				,intInventoryTransactionType = @intTransactionTypeId 
 	END 
 
 	-- ACT
 	BEGIN 
 		EXEC dbo.uspICCreateStockReservation 
 			@ItemsToReserve
+			,@intTransactionId
+			,@intTransactionTypeId 
 	END 
 			
 	-- ASSERT

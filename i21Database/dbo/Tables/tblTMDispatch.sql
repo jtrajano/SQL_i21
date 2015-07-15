@@ -33,6 +33,7 @@
     [dblDeliveryQuantity] NUMERIC(18, 6) NULL, 
     [dblDeliveryPrice] NUMERIC(18, 6) NULL, 
     [dblDeliveryTotal] NUMERIC(18, 6) NULL, 
+    [intContractId] INT NULL, 
     CONSTRAINT [PK_tblTMDispatch] PRIMARY KEY CLUSTERED ([intDispatchID] ASC),
     CONSTRAINT [FK_tblTMDispatch_tblTMSite1] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID])
 );
@@ -344,3 +345,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDispatch',
     @level2type = N'COLUMN',
     @level2name = N'dblDeliveryTotal'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Contract Id Used',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDispatch',
+    @level2type = N'COLUMN',
+    @level2name = N'intContractId'

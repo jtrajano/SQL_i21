@@ -42,7 +42,8 @@ AS
 	JOIN	tblICItem				I	ON	I.intItemId				=	D.intItemId
 	JOIN	tblCTPricingType		P	ON	P.intPricingTypeId		=	D.intPricingTypeId
 	JOIN	tblICUnitMeasure		UM1 ON	UM1.intUnitMeasureId	=	D.intUnitMeasureId		LEFT
-	JOIN	tblICUnitMeasure		UM2 ON	UM2.intUnitMeasureId	=	D.intPriceUOMId			LEFT
+	JOIN	tblICItemUOM			IU	ON	IU.intItemUOMId			=	D.intPriceItemUOMId		LEFT
+	JOIN	tblICUnitMeasure		UM2 ON	UM2.intUnitMeasureId	=	IU.intUnitMeasureId		LEFT
 	JOIN	tblRKFuturesMonth		M	ON	M.intFutureMonthId		=	D.intFutureMonthId
 
 

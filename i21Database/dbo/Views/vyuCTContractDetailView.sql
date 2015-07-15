@@ -8,18 +8,16 @@ AS
 			IU.intUnitMeasureId,				CD.intPricingTypeId,			CD.dblQuantity					AS	dblDetailQuantity,				
 			CD.dblFutures,						CD.dblBasis,					CD.intFutureMarketId,							
 			CD.intFutureMonthId,				CD.dblCashPrice,				CD.intCurrencyId,			
-			CD.dblRate,							CD.strCurrencyReference,		CD.intMarketZoneId,								
+			CD.dblRate,															CD.intMarketZoneId,								
 			CD.intDiscountTypeId,				CD.intDiscountId,				CD.intContractOptHeaderId,						
 			CD.strBuyerSeller,					CD.intBillTo,					CD.intFreightRateId,			
 			CD.strFobBasis,						CD.intRailGradeId,				CD.strRemark,
 			CD.dblOriginalQty,					CD.dblBalance,					CD.dblIntransitQty,
-			CD.dblScheduleQty,					CD.intPriceUOMId,				CD.intPriceItemUOMId,
+			CD.dblScheduleQty,													CD.intPriceItemUOMId,
 			CD.intLoadingPortId,				CD.intDestinationPortId,		CD.strShippingTerm,
 			CD.intShippingLineId,				CD.strVessel,					CD.intDestinationCityId,
 			CD.intShipperId,					CD.strGarden,					CD.strVendorLotID,
-			CD.strInvoiceNo,					CD.intPackingDescriptionId,		CD.dblWeightPerUnit,
-			CD.intWeightPerUnitUOMId,			CD.intWeightPerUnitItemUOMId,	CD.dblNoOfPacks,
-			CD.intPackingTypeUOMId,				CD.intPackingTypeItemUOMId,		CD.intUnitsPerLayer,
+			CD.strInvoiceNo,													CD.intUnitsPerLayer,
 			CD.intLayersPerPallet,				CD.dtmEventStartDate,			CD.dtmPlannedAvailabilityDate,
 			CD.dtmUpdatedAvailabilityDate,		CD.intBookId,					CD.intSubBookId,
 			CD.intContainerTypeId,				CD.intNumberOfContainers,		CD.intInvoiceCurrencyId,
@@ -65,7 +63,7 @@ AS
 	FROM	tblCTContractDetail				CD
 	
 	JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
-	JOIN	vyuCTContractHeaderView			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId				
+	JOIN	vyuCTContractHeaderView			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId		LEFT		
 	JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId			LEFT	
 	JOIN	tblICItem						IM	ON	IM.intItemId				=	CD.intItemId				LEFT
 	JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId				=	CD.intItemUOMId				LEFT

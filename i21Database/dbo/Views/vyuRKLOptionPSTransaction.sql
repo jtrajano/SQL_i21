@@ -65,4 +65,4 @@ JOIN tblRKBrokerageAccount ba on ot.intBrokerageAccountId=ba.intBrokerageAccount
 JOIN tblEntity e on e.intEntityId=ba.intEntityId  
 LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId
 LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId
- )t)t1  where dblOpenLots > 0 and strBuySell='S'
+ )t)t1  where dblOpenLots > 0 and strBuySell='B'
