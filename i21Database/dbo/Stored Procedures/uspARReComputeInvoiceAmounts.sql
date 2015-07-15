@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspARReComputeInvoiceAmounts]
+﻿﻿CREATE PROCEDURE [dbo].[uspARReComputeInvoiceAmounts]
 	 @InvoiceId		AS INT
 AS
 
@@ -56,7 +56,7 @@ UPDATE
 	tblARInvoiceDetail
 SET
 	 [dblTotalTax]	= T.[dblAdjustedTax]
-	,[dblTotal]		= ROUND(([dblPrice] * [dblQtyShipped]) - (([dblPrice] * [dblQtyShipped]) * (dblDiscount/100.00)),2)
+	,[dblTotal]		= ([dblPrice] * [dblQtyShipped]) - (([dblPrice] * [dblQtyShipped]) * (dblDiscount/100.00))
 FROM
 	(
 		SELECT

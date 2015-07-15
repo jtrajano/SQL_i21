@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+﻿﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -1446,7 +1446,6 @@
     <Build Include="dbo\Tables\tblARInvoiceDetailTax.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetItemTaxes.sql" />
     <Build Include="dbo\Tables\tblPRTimecard.sql" />
-    <Build Include="dbo\Tables\tblPRTimeEntry.sql" />
     <Build Include="dbo\Tables\tblGRStorageOption.sql" />
     <Build Include="dbo\Tables\tblGRStorageSchedulePeriod.sql" />
     <Build Include="dbo\Tables\tblGRStorageScheduleRule.sql" />
@@ -1645,8 +1644,8 @@
     <Build Include="dbo\Views\vyuARCustomerInquiryReport.sql" />
     <Build Include="dbo\Views\vyuARCustomerStatementReport.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingReport.sql" />
-    <Build Include="dbo\Tables\tblEntityPreferences.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostQtyChange.sql" />
+    <Build Include="dbo\Tables\tblEntityPreferences.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WithGasCheckSubReport.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WithLeakCheckSubReport.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WithoutGasCheckSubReport.sql" />
@@ -1675,16 +1674,21 @@
     <None Include="Scripts\Post-Deployment\GL\ReportData\TrialBalanceDetail.sql" />
     <None Include="Scripts\Post-Deployment\GL\ReportData\TrialBalance.sql" />
     <None Include="Scripts\Post-Deployment\GL\ReportData\BalanceSheetStandard.sql" />
-    <Build Include="dbo\Tables\tblPRCompanyReference.sql" />
+    <Build Include="dbo\Tables\tblPRCompanyPreference.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckHistory.sql" />
-    <None Include="Scripts\Post-Deployment\GL\ReportDataFix.sql" />
-    <Build Include="dbo\Functions\fnAPGetPaymentDetailPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspARCreateInvoiceFromShipment.sql" />
+    <Build Include="dbo\Functions\fnGetPaymentDetailPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStockQuantity.sql" />
     <Build Include="dbo\Functions\fnGetItemStockUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixStockQuantities.sql" />
     <Build Include="dbo\Tables\tblICFixLog.sql" />
     <None Include="Scripts\Post-Deployment\IC\00_RequiredDataFix.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeDirectDeposit.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeEarning.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeDeduction.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOff.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateAPAccountCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

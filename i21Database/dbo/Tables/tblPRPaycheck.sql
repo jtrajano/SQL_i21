@@ -19,7 +19,7 @@
 	[ysnPosted] [bit] NOT NULL,
 	[ysnPrinted] [bit] NOT NULL,
 	[ysnVoid] [bit] NOT NULL,
-	[ysnDirectDeposit] [bit] NOT NULL,
+	[intDistributionType] [int] NULL DEFAULT ((0)),
 	[dtmCreated] [datetime] NOT NULL,
 	[intConcurrencyId] [int] NULL,
  CONSTRAINT [PK_tblPRPaycheck] PRIMARY KEY CLUSTERED ([intPaycheckId]) WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY],
@@ -66,8 +66,6 @@ GO
 /****** Object:  Default [DF__tblPRPayc__ysnPr__488B0EF4]    Script Date: 08/14/2014 10:50:11 ******/
 ALTER TABLE [dbo].[tblPRPaycheck] ADD  DEFAULT ((0)) FOR [ysnPrinted]
 GO
-/****** Object:  Default [DF__tblPRPayc__ysnDi__497F332D]    Script Date: 08/14/2014 10:50:11 ******/
-ALTER TABLE [dbo].[tblPRPaycheck] ADD  DEFAULT ((0)) FOR [ysnDirectDeposit]
 GO
 /****** Object:  Default [DF__tblPRPayc__dtmCr__4A735766]    Script Date: 08/14/2014 10:50:11 ******/
 ALTER TABLE [dbo].[tblPRPaycheck] ADD  DEFAULT (getdate()) FOR [dtmCreated]
@@ -249,15 +247,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'ysnVoid'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'is Direct Deposit',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPRPaycheck',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnDirectDeposit'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Date Created',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
@@ -283,3 +272,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRPaycheck',
     @level2type = N'COLUMN',
     @level2name = N'dblTotalHours'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Direct Deposit Distribution Type',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheck',
+    @level2type = N'COLUMN',
+    @level2name = N'intDistributionType'

@@ -72,6 +72,9 @@ BEGIN
 			RETURN;
 		END
 
+		--CREATE AP ACCOUNT CATEGORY
+		EXEC uspGLUpdateAPAccountCategory
+
 		IF(@UserId <= 0)
 		BEGIN
 			RAISERROR(''You cannot import without user.'', 16, 1);
@@ -556,7 +559,7 @@ BEGIN
 				--LEFT JOIN tblAPaptrxmst C
 				--	ON A.aptrx_ivc_no = C.aptrx_ivc_no
 			WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
-				 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
+				 --AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
 				 AND A.aptrx_trans_type IN (''I'',''C'',''A'')
 		
 			SELECT @ImportedRecords = @@ROWCOUNT
@@ -710,12 +713,12 @@ BEGIN
 				A.[aptrx_user_rev_dt]
 			 FROM aptrxmst A
 			 WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
-				 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
+				 --AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
 				 AND A.aptrx_trans_type IN (''I'',''C'',''A'')
 
 			DELETE FROM aptrxmst
 			WHERE CONVERT(DATE, CAST(aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
-				 AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
+				 --AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
 				 AND aptrx_trans_type IN (''I'',''C'',''A'')
 	END
 	')
