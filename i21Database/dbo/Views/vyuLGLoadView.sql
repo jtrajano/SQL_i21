@@ -1,7 +1,23 @@
 CREATE VIEW vyuLGLoadView
 AS
 SELECT Load.intLoadId
+		,Load.intConcurrencyId
 		,Load.intLoadNumber
+		,Load.intCompanyLocationId
+		,Load.intPurchaseSale
+		,Load.intItemId
+		,Load.intUnitMeasureId
+		,Load.intEquipmentTypeId
+		,Load.intEntityId
+		,Load.intEntityLocationId
+		,Load.intContractDetailId
+		,Load.intHaulerEntityId
+		,Load.intTicketId
+		,Load.intGenerateLoadId
+		,Load.intUserSecurityId
+		,Load.intTransportLoadId
+		,Load.intDriverEntityId
+		,Load.intDispatcherId
         ,Load.strExternalLoadNumber
         ,strType = CASE WHEN Load.intPurchaseSale = 1 THEN 'Inbound' ELSE 'Outbound' END
         ,ysnDirectShip = CASE WHEN GLoad.intType = 3 THEN CAST(1 AS bit) ELSE CAST(0 AS Bit) END
@@ -44,6 +60,9 @@ SELECT Load.intLoadId
         ,strCounterPartyContractSeq = (SELECT CAST (CT.intContractNumber AS VARCHAR(100)) + '/' + CAST (CT.intContractSeq AS VARCHAR(100)) FROM tblLGLoad L LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = L.intContractDetailId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
         ,strCounterPartyExternalLoadNumber = (SELECT L.strExternalLoadNumber FROM tblLGLoad L WHERE L.intLoadNumber = Load.intLoadNumber and L.intPurchaseSale <> Load.intPurchaseSale)
         ,Load.strComments
+		,Load.ysnDispatched
+		,Load.dtmDispatchedDate
+		,strDispatcher = US.strUserName 
 FROM tblLGLoad Load
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = Load.intGenerateLoadId
 LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Load.intCompanyLocationId
@@ -55,3 +74,4 @@ LEFT JOIN vyuCTContractDetailView CDetail ON CDetail.intContractDetailId = Load.
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = Load.intTicketId
 LEFT JOIN tblTRTransportLoad TL ON TL.intTransportLoadId = Load.intTransportLoadId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = Load.intEquipmentTypeId
+LEFT JOIN tblSMUserSecurity US ON US.intUserSecurityID	= Load.intDispatcherId
