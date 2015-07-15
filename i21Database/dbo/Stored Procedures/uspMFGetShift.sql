@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspMFGetShift (@intLocationId INT)
+﻿CREATE PROCEDURE uspMFGetShift (@intLocationId INT,@strShiftName nvarchar(50)='%')
 AS
 BEGIN
 	DECLARE @CurrentDate DATETIME
@@ -15,5 +15,6 @@ BEGIN
 			END AS intRunningShift
 	FROM dbo.tblMFShift
 	WHERE intLocationId = @intLocationId
+	AND strShiftName  LIKE @strShiftName+'%'
 	Order by intShiftId
 END

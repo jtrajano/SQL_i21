@@ -8,7 +8,7 @@ BEGIN
 	From tblMFManufacturingProcessAttribute
 	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
 	
-	SELECT Count(*)
+	SELECT Count(*) ContainerTypeCount
 	FROM dbo.tblICContainerType CT
 	Where CT.strDisplayMember IN (
 			SELECT Item Collate Latin1_General_CI_AS
