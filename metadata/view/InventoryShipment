@@ -2863,6 +2863,11 @@
                                                                             "flex: 1",
                                                                             "},",
                                                                             "{",
+                                                                            "dataIndex: 'strStorageLocation',",
+                                                                            "dataType: 'string',",
+                                                                            "hidden: true",
+                                                                            "},",
+                                                                            "{",
                                                                             "dataIndex: 'dblAvailableQty',",
                                                                             "dataType: 'float',",
                                                                             "text: 'Quantity',",
@@ -3099,6 +3104,22 @@
                                                                     "type": "string"
                                                                 }
                                                             ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "strUOM",
+                                                                "itemId": "colStorageLocation",
+                                                                "text": "Storage Location",
+                                                                "width": 100
+                                                            },
+                                                            "name": "MyColumn64",
+                                                            "designerId": "f965904d-406e-44c9-938b-6012547c9e32"
                                                         },
                                                         {
                                                             "type": "Ext.grid.column.Column",

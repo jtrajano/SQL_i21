@@ -553,6 +553,25 @@ namespace iRely.Inventory.Model
                 _lotId = value;
             }
         }
+        private string _storageLoc;
+        [NotMapped]
+        public string strStorageLocation
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_storageLoc))
+                    if (tblICLot != null)
+                        return tblICLot.strStorageLocation;
+                    else
+                        return null;
+                else
+                    return _storageLoc;
+            }
+            set
+            {
+                _storageLoc = value;
+            }
+        }
         private decimal _lotQty;
         [NotMapped]
         public decimal dblLotQty

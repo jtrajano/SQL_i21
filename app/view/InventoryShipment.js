@@ -1433,6 +1433,11 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                     flex: 1
                                                                                 },
                                                                                 {
+                                                                                    dataIndex: 'strStorageLocation',
+                                                                                    dataType: 'string',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
                                                                                     dataIndex: 'dblAvailableQty',
                                                                                     dataType: 'float',
                                                                                     text: 'Quantity',
@@ -1516,6 +1521,13 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         dataIndex: 'dblNetWeight',
                                                                         text: 'Net',
                                                                         format: '0,000'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colStorageLocation',
+                                                                        width: 100,
+                                                                        dataIndex: 'strUOM',
+                                                                        text: 'Storage Location'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',

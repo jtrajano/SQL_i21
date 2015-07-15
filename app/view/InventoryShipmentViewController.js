@@ -298,6 +298,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colGrossWeight: 'dblGrossWeight',
                 colTareWeight: 'dblTareWeight',
                 colNetWeight: 'dblNetWeight',
+                colStorageLocation: 'strStorageLocation',
                 colWarehouseCargoNumber: 'strWarehouseCargoNumber'
             }
         }
@@ -554,6 +555,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('intLotId', records[0].get('intLotId'));
             current.set('dblAvailableQty', records[0].get('dblAvailableQty'));
             current.set('strUnitMeasure', records[0].get('strItemUOM'));
+            current.set('strStorageLocation', records[0].get('strStorageLocation'));
         }
     },
 
