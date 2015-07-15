@@ -83,7 +83,7 @@ BEGIN
 		[strBatchId]				=	@batchId,
 		[intAccountId]				=	A.intAccountId,
 		[dblDebit]					=	0,
-		[dblCredit]					=	A.dblAmountPaid,
+		[dblCredit]					=	A.dblAmountPaid + A.dblUnapplied,
 		[dblDebitUnit]				=	0,
 		[dblCreditUnit]				=	0,
 		[strDescription]			=	A.strNotes,

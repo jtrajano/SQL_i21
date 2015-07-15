@@ -373,7 +373,7 @@ BEGIN
 			[strCity] = '',
 			[strState] = '',
 			[strCountry] = '',
-			[dblAmount] = A.dblAmountPaid,
+			[dblAmount] = A.dblAmountPaid + A.dblUnapplied + A.dblWithheld,
 			[strAmountInWords] = dbo.fnConvertNumberToWord(A.dblAmountPaid),
 			[strMemo] = A.strNotes,
 			[strReferenceNo] = CASE WHEN (SELECT strPaymentMethod FROM tblSMPaymentMethod WHERE intPaymentMethodID = A.intPaymentMethodId) = 'Cash' THEN 'Cash' ELSE A.strPaymentInfo END,
