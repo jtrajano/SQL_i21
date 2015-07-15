@@ -11,11 +11,13 @@
     [ysnFreightInPrice] BIT             NOT NULL DEFAULT ((0)),
     [dblFreightMiles]   NUMERIC (18, 6) NULL,
     [intShipViaId]       INT				NULL,
+	[intEntityLocationId]		INT			NULL,
     [intConcurrencyId]  INT             NOT NULL,
     CONSTRAINT [PK_tblARCustomerFreightXRef] PRIMARY KEY CLUSTERED ([intFreightXRefId] ASC),
 	CONSTRAINT [FK_tblARCustomerFreightXRef_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]),
 	CONSTRAINT [FK_tblARCustomerFreightXRef_tblSMShipVia] FOREIGN KEY ([intShipViaId]) REFERENCES [tblSMShipVia]([intEntityShipViaId]),
 	CONSTRAINT [FK_tblARCustomerFreightXRef_tblTRSupplyPoint] FOREIGN KEY ([intSupplyPointId]) REFERENCES [tblTRSupplyPoint]([intSupplyPointId]),
 	CONSTRAINT [FK_tblARCustomerFreightXRef_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
+	CONSTRAINT [FK_tblARCustomerFreightXRef_tblEntityLocation] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]),
 );
 

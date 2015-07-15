@@ -80,6 +80,7 @@ BEGIN TRY
 			,@dblNetUnits
 			,@intContractId
 			,@intUserId
+			,0
 		SELECT TOP 1 @dblRemainingUnits = LI.dblUnitsRemaining FROM @LineItems LI
 		IF(@dblRemainingUnits IS NULL)
 		BEGIN

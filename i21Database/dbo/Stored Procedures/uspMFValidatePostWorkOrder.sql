@@ -14,6 +14,13 @@ BEGIN TRY
 		,@intItemId INT
 		,@dtmPlannedDateTime DATETIME
 		,@intLocationId int
+		,@dtmCurrentDate datetime
+		,@dtmCurrentDateTime datetime
+		,@intDayOfYear int
+	
+	Select @dtmCurrentDateTime	=GETDATE()
+	Select @dtmCurrentDate		=CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
+	Select @intDayOfYear		=DATEPART(dy,@dtmCurrentDateTime)
 
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@intItemId = intItemId
@@ -125,21 +132,18 @@ BEGIN TRY
 	
 		IF EXISTS (
 			SELECT *
-			FROM dbo.tblMFRecipeItem ri
-			JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
-			WHERE r.ysnActive = 1
-				AND r.intItemId = @intItemId
-				AND r.intLocationId = @intLocationId
+			FROM dbo.tblMFWorkOrderRecipeItem ri
+			WHERE ri.intWorkOrderId = @intWorkOrderId
 				AND ri.intRecipeItemTypeId = 1
 				AND (
 					(
 						ri.ysnYearValidationRequired = 1
-						AND CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101)) BETWEEN ri.dtmValidFrom
+						AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
 							AND ri.dtmValidTo
 						)
 					OR (
 						ri.ysnYearValidationRequired = 0
-						AND DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, ri.dtmValidFrom)
+						AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
 							AND DATEPART(dy, ri.dtmValidTo)
 						)
 					)

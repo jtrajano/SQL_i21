@@ -70,6 +70,9 @@ USING	(
 		UNION ALL 
 		SELECT	id = 20
 				,name = 'Inventory Adjustment - Lot Move'
+		UNION ALL 
+		SELECT	id = 21
+				,name = 'Pick Lots'
 
 
 

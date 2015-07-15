@@ -14,6 +14,8 @@ BEGIN TRY
 		,@intBatchId int
 		,@ysnForceUndo bit
 		,@intTransactionCount INT
+		,@intItemUOMId int
+		,@dblPhysicalCount NUMERIC(18,6)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 	
@@ -141,13 +143,15 @@ BEGIN TRY
 	WHERE intLotId = @intLotId
 		AND intWorkOrderId = @intWorkOrderId
 
-	SELECT @dblQuantity = dblQuantity
+	SELECT @dblQuantity = dblQuantity,
+			@intItemUOMId=intItemUOMId,
+			@dblPhysicalCount=dblPhysicalCount
 	FROM tblMFWorkOrderProducedLot
 	WHERE intLotId = @intLotId
 		AND intWorkOrderId = @intWorkOrderId
 
 	UPDATE tblMFWorkOrder
-	SET dblProducedQuantity = isnull(dblProducedQuantity, 0) - (Case When intItemId=@intItemId Then @dblQuantity Else 0 End)
+	SET dblProducedQuantity = isnull(dblProducedQuantity, 0) - (Case When intItemId=@intItemId Then (Case When intItemUOMId=@intItemUOMId Then @dblQuantity Else @dblPhysicalCount End) Else 0 End)
 	WHERE intWorkOrderId = @intWorkOrderId
 	
 	IF @intTransactionCount = 0

@@ -49,6 +49,13 @@ BEGIN TRY
 		,@dblUpperToleranceQuantity NUMERIC(18, 6)
 		,@dblLowerToleranceQuantity NUMERIC(18, 6)
 		,@strLocationName nvarchar(50)
+		,@dtmCurrentDate datetime
+		,@dtmCurrentDateTime datetime
+		,@intDayOfYear int
+	
+	Select @dtmCurrentDateTime	=GETDATE()
+	Select @dtmCurrentDate		=CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
+	Select @intDayOfYear		=DATEPART(dy,@dtmCurrentDateTime)
 
 
 	IF @strLotNumber LIKE '%[@~$\`^&*()%?/<>!|\+;:",.{}'']%'
@@ -334,7 +341,7 @@ BEGIN TRY
 				)
 	END
 	Select @dtmCreated=@dtmCreated+dtmShiftStartTime+intStartOffset from tblMFShift Where intShiftId=@intShiftId 
-	IF @dtmCreated > GetDate()
+	IF @dtmCreated > @dtmCurrentDateTime
 	BEGIN
 		RAISERROR (
 				51075
@@ -375,11 +382,9 @@ BEGIN TRY
 
 		IF @intItemId NOT IN (
 				SELECT RI.intItemId
-				FROM dbo.tblMFRecipe R
-				JOIN dbo.tblMFRecipeItem RI ON R.intRecipeId = RI.intRecipeId
-				WHERE R.intItemId = @intProductId
-					AND R.ysnActive = 1
-					AND intRecipeItemTypeId = 2
+				FROM dbo.tblMFWorkOrderRecipeItem RI 
+				WHERE RI.intWorkOrderId =@intWorkOrderId 
+					AND RI.intRecipeItemTypeId = 2
 				)
 			RAISERROR (
 					51077
@@ -403,9 +408,7 @@ BEGIN TRY
 		IF EXISTS (
 				SELECT *
 				FROM dbo.tblMFWorkOrder W
-				JOIN tblMFWorkOrderStatus WS ON W.intStatusId = WS.intStatusId
-				WHERE intWorkOrderId = @intWorkOrderId
-					AND WS.strName = 'Completed'
+				WHERE intWorkOrderId = @intWorkOrderId and W.intStatusId =13
 				)
 		BEGIN
 			RAISERROR (
@@ -418,9 +421,7 @@ BEGIN TRY
 		IF EXISTS (
 				SELECT *
 				FROM dbo.tblMFWorkOrder W
-				JOIN tblMFWorkOrderStatus WS ON W.intStatusId = WS.intStatusId
-				WHERE intWorkOrderId = @intWorkOrderId
-					AND WS.strName = 'Paused'
+				WHERE intWorkOrderId = @intWorkOrderId and W.intStatusId =11
 				)
 		BEGIN
 			RAISERROR (
@@ -433,9 +434,7 @@ BEGIN TRY
 		IF NOT EXISTS (
 				SELECT *
 				FROM dbo.tblMFWorkOrder W
-				JOIN tblMFWorkOrderStatus WS ON W.intStatusId = WS.intStatusId
-				WHERE intWorkOrderId = @intWorkOrderId
-					AND WS.strName = 'Started'
+				WHERE intWorkOrderId = @intWorkOrderId and W.intStatusId =10
 				)
 		BEGIN
 			RAISERROR (
@@ -460,8 +459,8 @@ BEGIN TRY
 
 		SELECT @dblUpperToleranceQuantity = dblCalculatedUpperTolerance * @dblRequiredQuantity / R.dblQuantity
 			,@dblLowerToleranceQuantity = dblCalculatedLowerTolerance * @dblRequiredQuantity / R.dblQuantity
-		FROM dbo.tblMFRecipe R
-		JOIN dbo.tblMFRecipeItem RI ON R.intRecipeId = RI.intRecipeId
+		FROM dbo.tblMFWorkOrderRecipe R
+		JOIN dbo.tblMFWorkOrderRecipeItem RI ON R.intRecipeId = RI.intRecipeId
 		WHERE R.intItemId = @intProductId
 			AND R.ysnActive = 1
 			AND intRecipeItemTypeId = 2
@@ -499,21 +498,20 @@ BEGIN TRY
 
 		IF @ysnProductionOnly=0 and EXISTS (
 		SELECT *
-		FROM dbo.tblMFRecipeItem ri
-		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
-			LEFT JOIN dbo.tblMFRecipeSubstituteItem SI ON SI.intRecipeItemId = ri.intRecipeItemId
-		AND SI.intRecipeId = r.intRecipeId
-		WHERE r.intItemId = @intProductId
+		FROM dbo.tblMFWorkOrderRecipeItem ri
+		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON SI.intRecipeItemId = ri.intRecipeItemId
+		AND SI.intRecipeId = ri.intRecipeId
+		WHERE ri.intWorkOrderId = @intWorkOrderId
 			AND ri.intRecipeItemTypeId = 1
 			AND (
 				(
 					ri.ysnYearValidationRequired = 1
-					AND CONVERT(DATETIME, CONVERT(CHAR, GETDATE(), 101)) BETWEEN ri.dtmValidFrom
+					AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
 						AND ri.dtmValidTo
 					)
 				OR (
 					ri.ysnYearValidationRequired = 0
-					AND DATEPART(dy, GETDATE()) BETWEEN DATEPART(dy, ri.dtmValidFrom)
+					AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
 						AND DATEPART(dy, ri.dtmValidTo)
 					)
 				)

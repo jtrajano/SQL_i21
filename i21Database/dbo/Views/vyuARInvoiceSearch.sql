@@ -17,6 +17,8 @@ AS
 		I.dtmShipDate,
 		I.ysnPosted, 
 		I.ysnPaid, 
+		I.ysnForgiven,
+		I.ysnCalculated,
 		I.dblInvoiceTotal, 
 		ISNULL(I.dblDiscount,0)			AS dblDiscount, 
 		ISNULL(I.dblAmountDue,0)		AS dblAmountDue, 

@@ -81,10 +81,8 @@ BEGIN TRY
 
 	SELECT @intRecipeId = intRecipeId
 		,@intManufacturingProcessId = intManufacturingProcessId
-	FROM dbo.tblMFRecipe a
-	WHERE a.intItemId = @intItemId
-		AND a.intLocationId = @intLocationId
-		AND ysnActive = 1
+	FROM dbo.tblMFWorkOrderRecipe a
+	WHERE intWorkOrderId = @intWorkOrderId
 
 	INSERT INTO @tblInputItem (
 		intItemId
@@ -98,9 +96,8 @@ BEGIN TRY
 		,ri.ysnScaled
 		,ri.intStorageLocationId
 		,0
-	FROM dbo.tblMFRecipeItem ri
-	JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
-	WHERE ri.intRecipeId = @intRecipeId
+	FROM dbo.tblMFWorkOrderRecipeItem ri
+	WHERE ri.intWorkOrderId = @intWorkOrderId
 		AND ri.intRecipeItemTypeId = 1
 		AND (
 			(
@@ -131,9 +128,9 @@ BEGIN TRY
 		,ri.ysnScaled
 		,ri.intStorageLocationId
 		,1
-	FROM dbo.tblMFRecipeItem ri
-	JOIN dbo.tblMFRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
-	WHERE ri.intRecipeId = @intRecipeId
+	FROM dbo.tblMFWorkOrderRecipeItem ri
+	JOIN dbo.tblMFWorkOrderRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
+	WHERE ri.intWorkOrderId = @intWorkOrderId
 		AND ri.intRecipeItemTypeId = 1
 		AND (
 			(
@@ -158,14 +155,12 @@ BEGIN TRY
 		)
 	SELECT ri.intItemId
 		,r.dblQuantity--It is product standard qty.
-	FROM dbo.tblMFRecipeItem ri
-	JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
-	WHERE ri.intRecipeId = @intRecipeId
+	FROM dbo.tblMFWorkOrderRecipeItem ri
+	JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
+	WHERE r.intWorkOrderId = @intWorkOrderId
 		AND ri.intRecipeItemTypeId = 2
 		AND ri.ysnConsumptionRequired = 1
 
-	--BEGIN TRAN
-	--COMMIT TRAN
 	INSERT INTO @tblMFProductionSummary (
 		intWorkOrderId
 		,intItemId

@@ -73,6 +73,11 @@ BEGIN TRY
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderId = @intWorkOrderId
 
+	EXEC dbo.uspMFCopyRecipe @intItemId = @intItemId
+			,@intLocationId = @intLocationId
+			,@intUserId = @intUserId
+			,@intWorkOrderId = @intWorkOrderId
+
 	EXEC sp_xml_removedocument @idoc
 END TRY
 

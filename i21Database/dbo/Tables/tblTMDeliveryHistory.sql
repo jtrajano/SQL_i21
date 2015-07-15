@@ -46,6 +46,12 @@
     [ysnWillCallPrinted] BIT NULL, 
     [dtmWillCallDispatch] DATETIME NULL, 
     [strWillCallOrderNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [intInvoiceId] INT NULL, 
+    [intWillCallContractId] INT NULL, 
+    [dtmWillCallDeliveryDate] DATETIME NULL, 
+    [dblWillCallDeliveryQuantity] NUMERIC(18, 6) NULL, 
+    [dblWillCallDeliveryPrice] NUMERIC(18, 6) NULL, 
+    [dblWillCallDeliveryTotal] NUMERIC(18, 6) NULL, 
     CONSTRAINT [PK_tblTMDeliveryHistory] PRIMARY KEY CLUSTERED ([intDeliveryHistoryID] ASC),
     CONSTRAINT [FK_tblTMDeliveryHistory_tblTMSite] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID])
 );
@@ -474,3 +480,57 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDeliveryHistory',
     @level2type = N'COLUMN',
     @level2name = N'strWillCallOrderNumber'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Invoice Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'intInvoiceId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Contract Id used in Will Call',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'intWillCallContractId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will call Delivery Date',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmWillCallDeliveryDate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will call Delivery Quantity',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = 'dblWillCallDeliveryQuantity'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will call Delivery Price',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'dblWillCallDeliveryPrice'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Will call Delivery Total',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'dblWillCallDeliveryTotal'

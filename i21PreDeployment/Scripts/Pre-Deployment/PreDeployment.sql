@@ -92,7 +92,7 @@
 :r .\12_EM\07_EntityFarmSchemaUpdate.sql
 :r .\12_EM\08_EntityShipViaSchemaUpdate.sql
 :r .\8_AP\UpdateShipVia.sql
-:r .\12_EM\03_EntityCustomerFarmRename_DataFix.sql
+:r .\12_EM\09_UpdateEntityLocationShipVia.sql
 
 
 --RK

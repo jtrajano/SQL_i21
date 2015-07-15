@@ -1,5 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCreateStockReservation]
 	@ItemsToReserve AS ItemReservationTableType READONLY
+	,@intTransactionId AS INT
+	,@intTransactionTypeId AS INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -33,12 +35,9 @@ GROUP  BY intItemId, intItemLocationId, intItemUOMId, intLotId, intTransactionId
 
 -- Clear the list (if it exists)
 DELETE	Reservations
-FROM	dbo.tblICStockReservation Reservations INNER JOIN @ItemsToReserveAggregrate Items
-			ON Reservations.intItemId = Items.intItemId
-			AND Reservations.intItemLocationId = Items.intItemLocationId
-			AND Reservations.intItemUOMId = Items.intItemUOMId
-			AND Reservations.intInventoryTransactionType = Items.intTransactionTypeId
-			AND ISNULL(Reservations.intLotId, 0) = ISNULL(Items.intLotId, 0)
+FROM	dbo.tblICStockReservation Reservations 
+WHERE	intTransactionId = @intTransactionId
+		AND @intTransactionTypeId = @intTransactionTypeId
 
 -- Add new reservations
 INSERT INTO dbo.tblICStockReservation (

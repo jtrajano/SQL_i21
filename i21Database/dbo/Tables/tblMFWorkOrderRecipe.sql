@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblMFWorkOrderRecipe]
 (
-	[intRecipeId] INT NOT NULL  IDENTITY(1,1),
+	[intWorkOrderId] int,
+	[intRecipeId] INT NOT NULL, 
 	[intItemId] INT NOT NULL, 
     [dblQuantity] NUMERIC(18, 6) NOT NULL, 
     [intUOMId] INT NOT NULL, 
@@ -15,13 +16,12 @@
 	[intCustomerId] INT,
 	[intFarmId] INT,
 	[intFieldId] INT,
-	[intWorkOrderId] int,
 	[intCreatedUserId] [int] NOT NULL,
 	[dtmCreated] [datetime] NOT NULL CONSTRAINT [DF_tblMFWorkOrderRecipe_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NOT NULL,
 	[dtmLastModified] [datetime] NOT NULL CONSTRAINT [DF_tblMFWorkOrderRecipe_dtmLastModified] DEFAULT GetDate(),	 
     [intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFWorkOrderRecipe_intConcurrencyId] DEFAULT 0, 
-    CONSTRAINT [PK_tblMFWorkOrderRecipe_intRecipeId] PRIMARY KEY ([intRecipeId]), 
+    CONSTRAINT [PK_tblMFWorkOrderRecipe_intRecipeId] PRIMARY KEY ([intRecipeId],[intWorkOrderId]), 
     CONSTRAINT [FK_tblMFWorkOrderRecipe_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblMFWorkOrderRecipe_tblICUnitMeasure_intUnitMeasureId_intUOMId] FOREIGN KEY ([intUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 	CONSTRAINT [FK_tblMFWorkOrderRecipe_tblSMCompanyLocation_intCompanyLocationId_intLocationId] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),

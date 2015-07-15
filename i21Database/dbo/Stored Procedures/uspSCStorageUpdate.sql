@@ -4,6 +4,7 @@ CREATE PROCEDURE [dbo].[uspSCStorageUpdate]
 	,@dblNetUnits AS DECIMAL (13,3)
 	,@intEntityId AS INT
 	,@strDistributionOption AS NVARCHAR(3)
+	,@intDPContractId AS INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -32,6 +33,7 @@ DECLARE @intStorageTypeId AS INT
 DECLARE @intStorageLocationId AS INT
 DECLARE @dblRunningBalance AS DECIMAL (13,3)
 DECLARE @strUserName AS NVARCHAR (50)
+DECLARE @ysnDPStorage BIT
 
 
 DECLARE @ErrorMessage NVARCHAR(4000);
@@ -554,6 +556,22 @@ BEGIN TRY
 	
 		EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;
 		--EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
+
+		BEGIN
+	   	SELECT	@ysnDPStorage = ST.ysnDPOwnedType
+		FROM	dbo.tblGRStorageType ST	        
+		WHERE	ST.intStorageScheduleTypeId = @intGRStorageId
+		IF @ysnDPStorage = 1
+		BEGIN
+			 EXEC dbo.uspCTUpdationFromTicketDistribution 
+			 @intTicketId
+			,@intEntityId
+			,@dblNetUnits
+			,@intDPContractId
+			,@intUserId
+			,1
+		END
+	END
 	
 	CONTINUEISH:
 

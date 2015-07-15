@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblMFWorkOrderRecipeItem]
 (
-	[intRecipeItemId] INT NOT NULL  IDENTITY(1,1), 
+	[intWorkOrderId] int,
+	[intRecipeItemId] INT NOT NULL, 
     [intRecipeId] INT NOT NULL, 
     [intItemId] INT NOT NULL, 
     [dblQuantity] NUMERIC(18, 6) NOT NULL, 
@@ -34,7 +35,7 @@
 	[intLastModifiedUserId] [int] NOT NULL,
 	[dtmLastModified] [datetime] NOT NULL CONSTRAINT [DF_tblMFWorkOrderRecipeItem_dtmLastModified] DEFAULT GetDate(),	 
     [intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFWorkOrderRecipeItem_intConcurrencyId] DEFAULT 0,
-	CONSTRAINT [PK_tblMFWorkOrderRecipeItem_intRecipeItemId] PRIMARY KEY ([intRecipeItemId]), 
+	CONSTRAINT [PK_tblMFWorkOrderRecipeItem_intRecipeItemId] PRIMARY KEY ([intRecipeItemId],[intWorkOrderId]), 
     CONSTRAINT [FK_tblMFWorkOrderRecipeItem_tblMFRecipe_intRecipeId] FOREIGN KEY ([intRecipeId]) REFERENCES [tblMFRecipe]([intRecipeId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblMFWorkOrderRecipeItem_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblMFWorkOrderRecipeItem_tblICUnitMeasure_intUnitMeasureId_intStandardUOMId] FOREIGN KEY ([intUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
@@ -43,7 +44,8 @@
 	CONSTRAINT [FK_tblMFWorkOrderRecipeItem_tblICStorageLocation_intStorageLocationId] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
 	CONSTRAINT [FK_tblMFWorkOrderRecipeItem_tblMFRecipe_intRecipeId_intReferenceRecipeId] FOREIGN KEY ([intReferenceRecipeId]) REFERENCES [tblMFRecipe]([intRecipeId]), 
 	CONSTRAINT [FK_tblMFWorkOrderRecipeItem_tblSMCurrency_intCurrencyId_intLaborCostCurrencyId] FOREIGN KEY ([intLaborCostCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]), 
-	CONSTRAINT [FK_tblMFWorkOrderRecipeItem_tblSMCurrency_intCurrencyId_intOverheadCostCurrencyId] FOREIGN KEY ([intOverheadCostCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
+	CONSTRAINT [FK_tblMFWorkOrderRecipeItem_tblSMCurrency_intCurrencyId_intOverheadCostCurrencyId] FOREIGN KEY ([intOverheadCostCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
+	CONSTRAINT [FK_tblMFWorkOrderRecipeItem_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId])
 )
 
 GO

@@ -102,21 +102,16 @@ BEGIN TRY
 		FROM	tblCTContractDetail 
 		WHERE	intContractDetailId = @intContractId
 
-		IF NOT @dblBalance > 0
-		BEGIN
-			GOTO CONTINUEISH
-		END
-
-		SELECT	@strAdjustmentNo = strPrefix+LTRIM(intNumber) 
-		FROM	tblSMStartingNumber 
-		WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
-
-		UPDATE	tblSMStartingNumber
-		SET		intNumber = intNumber+1
-		WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
-
 		IF @ysnDP = 1
 		BEGIN
+			SELECT	@strAdjustmentNo = strPrefix+LTRIM(intNumber) 
+			FROM	tblSMStartingNumber 
+			WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
+
+			UPDATE	tblSMStartingNumber
+			SET		intNumber = intNumber+1
+			WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
+
 			UPDATE	tblCTContractDetail 
 			SET		dblBalance	= @dblBalance + @dblNetUnits,
 					dblQuantity = dblQuantity + @dblNetUnits
@@ -132,6 +127,19 @@ BEGIN TRY
 
 			BREAK
 		END
+
+		IF NOT @dblBalance > 0
+		BEGIN
+			GOTO CONTINUEISH
+		END
+
+		SELECT	@strAdjustmentNo = strPrefix+LTRIM(intNumber) 
+		FROM	tblSMStartingNumber 
+		WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
+
+		UPDATE	tblSMStartingNumber
+		SET		intNumber = intNumber+1
+		WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
 
 		IF	@dblNetUnits <= @dblBalance
 		BEGIN
