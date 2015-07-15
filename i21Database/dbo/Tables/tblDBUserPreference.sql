@@ -14,7 +14,7 @@
     [intColumnWidth2] INT NULL DEFAULT ((0)), 
     [intColumnWidth3] INT NULL DEFAULT ((0)), 
     [intColumnWidth4] INT NULL DEFAULT ((0)), 
-    [intDafaultTabId] INT NULL DEFAULT ((0)), 
+    [intDefaultTabId] INT NULL DEFAULT ((0)), 
     [ysnExportAll] BIT NULL DEFAULT ((1)), 
     [ysnPrintAll] BIT NULL DEFAULT ((1)), 
     [ysnRefreshTab] BIT NULL DEFAULT ((0)), 
