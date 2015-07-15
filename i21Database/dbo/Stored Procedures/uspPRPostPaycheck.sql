@@ -4,6 +4,7 @@
 	@strPaycheckId NVARCHAR(50)
 	,@intUserId INT
 	,@intEntityId INT
+	,@strBatchId NVARCHAR(50) = NULL
 	,@isSuccessful BIT = 0 OUTPUT
 	,@message_id INT = 0 OUTPUT
 
@@ -264,7 +265,7 @@ END
 
 
 /* Execute Bank Transaction Post Procedure */
-EXEC dbo.uspCMPostBankTransaction @ysnPost, @ysnRecap, @strTransactionId, @intUserId, @intEntityId, @isSuccessful OUTPUT, @message_id OUTPUT
+EXEC dbo.uspCMPostBankTransaction @ysnPost, @ysnRecap, @strTransactionId, @strBatchId, @intUserId, @intEntityId, @isSuccessful OUTPUT, @message_id OUTPUT
 
 IF (@isSuccessful <> 0)
 	BEGIN
