@@ -1985,6 +1985,9 @@
     <Build Include="dbo\Tables\tblMFBlendValidationDefault.sql" />
     <Build Include="dbo\Tables\tblMFBlendValidationMessageType.sql" />
     <Build Include="dbo\Stored Procedures\uspGLSyncTemplateToStructure.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCalculateServiceCharge.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertInvoiceServiceCharge.sql" />
+    <Build Include="dbo\User Defined Types\ServiceChargeTableType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
