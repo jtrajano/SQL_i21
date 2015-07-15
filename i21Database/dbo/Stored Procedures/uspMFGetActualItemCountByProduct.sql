@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspMFGetActualItemCountByProduct (
 	@intItemId INT
 	,@intLocationId INT
+	,@strItemNo nvarchar(MAX)='%'
 	,@intWorkOrderId int
 	)
 AS
@@ -15,4 +16,5 @@ BEGIN
 		AND R.intLocationId = @intLocationId
 		AND R.ysnActive = 1
 		AND R.intItemId=@intItemId
+		AND I.strItemNo LIKE @strItemNo+'%'
 END

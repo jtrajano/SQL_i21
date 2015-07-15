@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspMFGetContainerType(@intManufacturingProcessId int,@intLocationId int,@strContainerTypeName nvarchar(50)='%')
+﻿CREATE PROCEDURE uspMFGetContainerTypeCount(@intManufacturingProcessId int,@intLocationId int,@strContainerTypeName nvarchar(50)='%')
 AS
 BEGIN
 	Declare @intAttributeId int,@strContainerType nvarchar(MAX)
@@ -8,15 +8,12 @@ BEGIN
 	From tblMFManufacturingProcessAttribute
 	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
 	
-	SELECT intContainerTypeId
-		,strDisplayMember
-		,ysnDefault
+	SELECT Count(*)
 	FROM dbo.tblICContainerType CT
 	Where CT.strDisplayMember IN (
 			SELECT Item Collate Latin1_General_CI_AS
 			FROM [dbo].[fnSplitString](@strContainerType, ',')
 			)
 	AND CT.strDisplayMember LIKE @strContainerTypeName+'%'
-	ORDER BY strDisplayMember
 END
 Go
