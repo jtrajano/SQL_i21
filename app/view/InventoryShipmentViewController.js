@@ -556,6 +556,19 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('dblAvailableQty', records[0].get('dblAvailableQty'));
             current.set('strUnitMeasure', records[0].get('strItemUOM'));
             current.set('strStorageLocation', records[0].get('strStorageLocation'));
+
+            var shipmentItem = win.viewModel.data.currentShipmentItem;
+            if (shipmentItem) {
+                var shipQty = shipmentItem.get('dblQuantity');
+                var availQty = current.get('dblAvailableQty');
+                if (shipQty > availQty){
+                    current.set('dblQuantityShipped', availQty);
+                }
+                else{
+                    current.set('dblQuantityShipped', shipQty);
+                }
+            }
+
         }
     },
 
