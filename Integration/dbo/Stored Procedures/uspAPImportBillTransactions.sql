@@ -72,6 +72,9 @@ BEGIN
 			RETURN;
 		END
 
+		--CREATE AP ACCOUNT CATEGORY
+		EXEC uspGLUpdateAPAccountCategory
+
 		IF(@UserId <= 0)
 		BEGIN
 			RAISERROR(''You cannot import without user.'', 16, 1);
