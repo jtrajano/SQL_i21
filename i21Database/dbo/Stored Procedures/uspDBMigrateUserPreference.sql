@@ -60,7 +60,7 @@ BEGIN
 			BEGIN
 
 				INSERT INTO [dbo].[tblDBUserPreference] 
-					   ([intAutoRefreshMinute], [intColumns], [intColumnWidth1], [intColumnWidth2], [intColumnWidth3], [intColumnWidth4], [intDafaultTabId], [intUserSecurityId], [ysnAutoPanelWidth], [ysnAutoRefresh], [ysnColumnFiltering], [ysnColumnMoving], [ysnColumnResizing], [ysnColumnSorting], [ysnExportAll], [ysnPrintAll], [ysnRefreshTab], [ysnSaveGridLayout])
+					   ([intAutoRefreshMinute], [intColumns], [intColumnWidth1], [intColumnWidth2], [intColumnWidth3], [intColumnWidth4], [intDefaultTabId], [intUserSecurityId], [ysnAutoPanelWidth], [ysnAutoRefresh], [ysnColumnFiltering], [ysnColumnMoving], [ysnColumnResizing], [ysnColumnSorting], [ysnExportAll], [ysnPrintAll], [ysnRefreshTab], [ysnSaveGridLayout])
 				 VALUES (@AutoRefreshMinute, @Columns, @ColumnWidth1, @ColumnWidth2, @ColumnWidth3, @ColumnWidth4, @DefaultTabId, @intUserSecurityId, @AutoPanelWidth, @AutoRefresh, @ColumnFiltering, @ColumnMoving, @ColumnResizing, @ColumnSorting, @ExportAll, @PrintAll, @RefreshTab, @SaveGridLayout);
 			END 
 

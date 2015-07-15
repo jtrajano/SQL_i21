@@ -3787,4 +3787,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="dblDecimals" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b582e16a-caa6-4daf-9710-509cc35bbf0b" ChangeDateTime="07/15/2015 08:21:26">
+    <Property Name="ElementName" Value="[dbo].[tblDBUserPreference].[intDafaultTabId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblDBUserPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDefaultTabId" />
+  </Operation>
 </Operations>
