@@ -1981,6 +1981,7 @@
     <Build Include="dbo\Tables\tblMFBlendValidationDefault.sql" />
     <Build Include="dbo\Tables\tblMFBlendValidationMessageType.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateBlendRelease.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetContractAndPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
