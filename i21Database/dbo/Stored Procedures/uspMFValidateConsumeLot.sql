@@ -14,7 +14,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 BEGIN TRY
-Return
+
 	DECLARE @ErrMsg NVARCHAR(MAX)
 		,@strSecondaryStatus NVARCHAR(50)
 		,@dtmExpiryDate DATETIME
@@ -146,22 +146,18 @@ Return
 
 	IF @intItemId NOT IN (
 			SELECT RI.intItemId
-			FROM dbo.tblMFRecipe R
-			JOIN dbo.tblMFRecipeItem RI ON R.intRecipeId = RI.intRecipeId
-			WHERE R.intItemId = @intProductId
-				AND R.ysnActive = 1
-				AND intRecipeItemTypeId = 1
-				AND R.intLocationId = @intLocationId
+			FROM dbo.tblMFWorkOrderRecipeItem RI
+			WHERE RI.intWorkOrderId = @intWorkOrderId
+				AND RI.intRecipeItemTypeId = 1
+				
 			)
 		and @intItemId NOT IN (
 			SELECT RSI.intSubstituteItemId
-			FROM dbo.tblMFRecipe R
-			JOIN dbo.tblMFRecipeItem RI ON R.intRecipeId = RI.intRecipeId
-			JOIN dbo.tblMFRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
-			WHERE R.intItemId = @intProductId
-				AND R.ysnActive = 1
+			FROM dbo.tblMFWorkOrderRecipeItem RI 
+			JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
+			WHERE RI.intWorkOrderId = @intWorkOrderId
 				AND RI.intRecipeItemTypeId = 1
-				AND R.intLocationId = @intLocationId
+				
 			)
 	BEGIN
 		SELECT @strProductItemNo = strItemNo
@@ -180,51 +176,45 @@ Return
 		RETURN
 	END
 
-	SELECT @dblTotalQtyToBeConsumed = @dblQuantity * RI.dblCalculatedUpperTolerance / R.dblQuantity
-	FROM dbo.tblMFRecipe R
-	JOIN dbo.tblMFRecipeItem RI ON R.intRecipeId = RI.intRecipeId
-	WHERE R.intItemId = @intProductId
-		AND R.ysnActive = 1
-		AND intRecipeItemTypeId = 1
-		AND R.intLocationId = @intLocationId
-		AND RI.intItemId = @intItemId
+	--SELECT @dblTotalQtyToBeConsumed = @dblQuantity * RI.dblCalculatedUpperTolerance / R.dblQuantity
+	--FROM dbo.tblMFWorkOrdeRecipeItem RI 
+	--WHERE RI.intWorkOrderId = @intWorkOrderId
+	--	AND RI.intRecipeItemTypeId = 1
+	--	AND RI.intItemId = @intItemId
 
-	IF @dblTotalQtyToBeConsumed IS NULL
-	BEGIN
-		SELECT @dblTotalQtyToBeConsumed = (@dblQuantity * RI.dblCalculatedUpperTolerance / R.dblQuantity) * RSI.dblSubstituteRatio
-		FROM dbo.tblMFRecipe R
-		JOIN dbo.tblMFRecipeItem RI ON R.intRecipeId = RI.intRecipeId
-		JOIN dbo.tblMFRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
-		WHERE R.intItemId = @intProductId
-			AND R.ysnActive = 1
-			AND RI.intRecipeItemTypeId = 1
-			AND R.intLocationId = @intLocationId
-			AND RI.intItemId = @intItemId
-	END
+	--IF @dblTotalQtyToBeConsumed IS NULL
+	--BEGIN
+	--	SELECT @dblTotalQtyToBeConsumed = (@dblQuantity * RI.dblCalculatedUpperTolerance / R.dblQuantity) * RSI.dblSubstituteRatio
+	--	FROM dbo.tblMFWorkOrderRecipeItem RI 
+	--	JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
+	--	WHERE RI.intWorkOrderId = @intWorkOrderId
+	--		AND RI.intRecipeItemTypeId = 1
+	--		AND RI.intItemId = @intItemId
+	--END
 
-	SELECT @dblQtyConsumedSoFar = SUM(WC.dblQuantity)
-	FROM dbo.tblMFWorkOrderConsumedLot WC
-	JOIN dbo.tblICLot L ON L.intLotId = WC.intLotId
-	WHERE intWorkOrderId = @intWorkOrderId
-		AND L.intItemId = @intItemId
+	--SELECT @dblQtyConsumedSoFar = SUM(WC.dblQuantity)
+	--FROM dbo.tblMFWorkOrderConsumedLot WC
+	--JOIN dbo.tblICLot L ON L.intLotId = WC.intLotId
+	--WHERE intWorkOrderId = @intWorkOrderId
+	--	AND L.intItemId = @intItemId
 
-	IF @dblQtyConsumedSoFar + @dblConsumeQty > @dblTotalQtyToBeConsumed
-		AND @ysnNegativeQtyAllowed = 0
-	BEGIN
-		RAISERROR (
-				51089
-				,11
-				,1
-				,@dblConsumeQty
-				,@strUnitMeasure
-				,@strItemNo
-				,@strLotNumber
-				,@dblOnHand
-				,@strUnitMeasure
-				)
+	--IF @dblQtyConsumedSoFar + @dblConsumeQty > @dblTotalQtyToBeConsumed
+	--	AND @ysnNegativeQtyAllowed = 0
+	--BEGIN
+	--	RAISERROR (
+	--			51089
+	--			,11
+	--			,1
+	--			,@dblConsumeQty
+	--			,@strUnitMeasure
+	--			,@strItemNo
+	--			,@strLotNumber
+	--			,@dblOnHand
+	--			,@strUnitMeasure
+	--			)
 
-		RETURN
-	END
+	--	RETURN
+	--END
 END TRY
 
 BEGIN CATCH

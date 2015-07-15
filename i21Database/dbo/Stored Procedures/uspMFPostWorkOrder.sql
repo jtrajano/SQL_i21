@@ -67,7 +67,6 @@ BEGIN TRY
 		,@intInventoryAdjustmentId INT
 		,@intItemId INT
 		,@intLocationId INT
-		,@intRecipeId INT
 		,@intStorageLocationId INT
 		,@intInputItemId INT
 		,@strLotNumber NVARCHAR(50)
@@ -96,17 +95,10 @@ BEGIN TRY
 		FROM dbo.tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
-		SELECT @intRecipeId = intRecipeId
-		FROM dbo.tblMFRecipe a
-		WHERE a.intItemId = @intItemId
-			AND a.intLocationId = @intLocationId
-			AND ysnActive = 1
-
 		SELECT @intStorageLocationId = ri.intStorageLocationId
 			,@intConsumptionMethodId = intConsumptionMethodId
-		FROM dbo.tblMFRecipeItem ri
-		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
-		WHERE ri.intRecipeId = @intRecipeId
+		FROM dbo.tblMFWorkOrderRecipeItem ri
+		WHERE ri.intWorkOrderId = @intWorkOrderId
 			AND ri.intItemId = @intInputItemId
 			AND ri.intRecipeItemTypeId = 1
 

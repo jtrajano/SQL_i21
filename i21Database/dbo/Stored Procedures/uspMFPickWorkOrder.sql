@@ -87,10 +87,8 @@ BEGIN TRY
 	WHERE intWorkOrderId = @intWorkOrderId
 
 	SELECT @intRecipeId = intRecipeId
-	FROM dbo.tblMFRecipe a
-	WHERE a.intItemId = @intItemId
-		AND a.intLocationId = @intLocationId
-		AND ysnActive = 1
+	FROM dbo.tblMFWorkOrderRecipe a
+	WHERE intWorkOrderId = @intWorkOrderId
 
 	INSERT INTO dbo.tblMFWorkOrderConsumedLot (
 		intWorkOrderId
@@ -121,8 +119,8 @@ BEGIN TRY
 		,WI.dtmLastModified
 		,WI.intLastModifiedUserId
 	FROM dbo.tblMFWorkOrderInputLot WI
-	JOIN dbo.tblMFRecipeItem ri ON ri.intItemId = WI.intItemId
-	WHERE ri.intRecipeId = @intRecipeId
+	JOIN dbo.tblMFWorkOrderRecipeItem ri ON ri.intItemId = WI.intItemId
+		WHERE ri.intWorkOrderId = @intWorkOrderId
 		AND ri.intRecipeItemTypeId = 1
 		AND (
 			(
@@ -137,8 +135,9 @@ BEGIN TRY
 				)
 			)
 		AND ri.intConsumptionMethodId = 1
-		AND intWorkOrderId = @intWorkOrderId
+		AND WI.intWorkOrderId = @intWorkOrderId
 		AND WI.ysnConsumptionReversed=0
+
 	INSERT INTO @tblItem (
 		intItemId
 		,dblReqQty
@@ -149,9 +148,9 @@ BEGIN TRY
 		,CEILING((ri.dblCalculatedQuantity * (@dblProduceQty / r.dblQuantity))) AS RequiredQty
 		,ri.intStorageLocationId
 		,ri.intConsumptionMethodId
-	FROM dbo.tblMFRecipeItem ri
-	JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
-	WHERE ri.intRecipeId = @intRecipeId
+	FROM dbo.tblMFWorkOrderRecipeItem ri
+	JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
+	WHERE r.intWorkOrderId = @intWorkOrderId
 		AND ri.intRecipeItemTypeId = 1
 		AND (
 			(
@@ -182,9 +181,9 @@ BEGIN TRY
 			,rs.intSubstituteItemId
 			,dblSubstituteRatio
 			,dblMaxSubstituteRatio
-		FROM dbo.tblMFRecipeItem ri
-		JOIN dbo.tblMFRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
-		WHERE ri.intRecipeId = @intRecipeId
+		FROM dbo.tblMFWorkOrderRecipeItem ri
+		JOIN dbo.tblMFWorkOrderRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
+		WHERE ri.intWorkOrderId = @intWorkOrderId
 			AND ri.intRecipeItemTypeId = 1
 			AND (
 				(

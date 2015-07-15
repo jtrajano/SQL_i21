@@ -22,7 +22,10 @@ BEGIN TRY
 		,@intUserId INT
 		,@idoc INT
 		,@ErrMsg NVARCHAR(MAX)
-
+		,@dtmCurrentDate datetime
+		
+	Select @dtmCurrentDate	=GETDATE()
+	
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
 
@@ -163,7 +166,7 @@ BEGIN TRY
 
 	IF NOT EXISTS (
 			SELECT 1
-			FROM dbo.tblMFRecipe R
+			FROM dbo.tblMFWorkOrderRecipe R
 			JOIN dbo.tblICLot L ON L.intItemId = R.intItemId
 				AND R.intLocationId = @intLocationId
 				AND R.intManufacturingProcessId = @intManufacturingProcessId
@@ -176,7 +179,7 @@ BEGIN TRY
 				)
 	END
 
-	SELECT @CurrentDate = Convert(CHAR, Getdate(), 108)
+	SELECT @CurrentDate = Convert(CHAR, @dtmCurrentDate, 108)
 
 	SELECT @intShiftId = intShiftId
 	FROM dbo.tblMFShift
@@ -190,14 +193,14 @@ BEGIN TRY
 	SET dblReleaseQty = @dblReleaseQty
 		,ysnReleased = 1
 		,intReleasedUserId = @intUserId
-		,dtmReleasedDate = GETDATE()
+		,dtmReleasedDate = @dtmCurrentDate
 		,intReleasedShiftId = @intShiftId
 		,strComment = @strComment
-		,dtmLastModified = GETDATE()
+		,dtmLastModified = @dtmCurrentDate
 		,intLastModifiedUserId = @intUserId
 	WHERE intLotId = @intLotId
 
-	Update tblICLot Set intLotStatusId =(Select intLotStatusId from tblICLotStatus Where strSecondaryStatus='Active') Where intLotId=@intLotId
+	Update tblICLot Set intLotStatusId =1 Where intLotId=@intLotId
 
 	COMMIT TRANSACTION
 

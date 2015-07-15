@@ -171,11 +171,8 @@ BEGIN TRY
 	SELECT @intConsumptionMethodId = RI.intConsumptionMethodId
 		,@intConsumptionStorageLocationId = RI.intStorageLocationId
 		,@intInputItemId = RI.intItemId
-	FROM dbo.tblMFRecipe R
-	JOIN dbo.tblMFRecipeItem RI ON R.intRecipeId = RI.intRecipeId
-	WHERE R.intItemId = @intItemId
-		AND R.ysnActive = 1
-		AND R.intLocationId = @intLocationId
+	FROM dbo.tblMFWorkOrderRecipeItem RI
+	WHERE RI.intWorkOrderId = @intWorkOrderId
 		AND RI.intRecipeItemTypeId = 1
 		AND RI.intItemId = @intInputItemId
 

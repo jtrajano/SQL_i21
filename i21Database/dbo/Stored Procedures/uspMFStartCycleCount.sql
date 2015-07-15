@@ -143,11 +143,8 @@ BEGIN TRY
 
 	IF NOT EXISTS (
 			SELECT *
-			FROM dbo.tblMFRecipeItem ri
-			JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
-			WHERE r.ysnActive = 1
-				AND r.intItemId = @intItemId
-				AND r.intLocationId = @intLocationId
+			FROM dbo.tblMFWorkOrderRecipeItem ri
+			WHERE ri.intWorkOrderId = @intWorkOrderId
 				AND ri.intRecipeItemTypeId = 1
 				AND (
 					(
@@ -210,11 +207,8 @@ BEGIN TRY
 			FROM dbo.tblMFWorkOrder W
 			JOIN dbo.tblMFProcessCycleCountSession CS ON W.intWorkOrderId = CS.intWorkOrderId
 			JOIN dbo.tblMFProcessCycleCount CC ON CC.intCycleCountSessionId = CS.intCycleCountSessionId
-			JOIN dbo.tblMFRecipeItem ri ON ri.intItemId = CC.intItemId
-			JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
-			WHERE r.ysnActive = 1
-				AND r.intItemId = @intItemId
-				AND r.intLocationId = @intLocationId
+			JOIN dbo.tblMFWorkOrderRecipeItem ri ON ri.intItemId = CC.intItemId
+			WHERE ri.intWorkOrderId = @intWorkOrderId
 				AND ri.intRecipeItemTypeId = 1
 				AND (
 					(
@@ -245,14 +239,11 @@ BEGIN TRY
 		FROM dbo.tblMFWorkOrder W
 		JOIN dbo.tblMFProcessCycleCountSession CS ON W.intWorkOrderId = CS.intWorkOrderId
 		JOIN dbo.tblMFProcessCycleCount CC ON CC.intCycleCountSessionId = CS.intCycleCountSessionId
-		JOIN dbo.tblMFRecipeItem ri ON ri.intItemId = CC.intItemId
-		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+		JOIN dbo.tblMFWorkOrderRecipeItem ri ON ri.intItemId = CC.intItemId
 		JOIN dbo.tblICItem Product ON Product.intItemId = W.intItemId
 		JOIN dbo.tblICItem Input ON Input.intItemId = ri.intItemId
 		LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
-		WHERE r.ysnActive = 1
-			AND r.intItemId = @intItemId
-			AND r.intLocationId = @intLocationId
+		WHERE ri.intWorkOrderId = @intWorkOrderId
 			AND ri.intRecipeItemTypeId = 1
 			AND (
 				(
@@ -286,13 +277,10 @@ BEGIN TRY
 			SELECT *
 			FROM dbo.tblMFWorkOrder W
 			LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
-			JOIN dbo.tblMFRecipe Product ON Product.intItemId = W.intItemId
-			JOIN dbo.tblMFRecipeItem ProductItem ON ProductItem.intRecipeId = Product.intRecipeId
-			JOIN dbo.tblMFRecipeItem ri ON ri.intItemId = ProductItem.intItemId
-			JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
-			WHERE r.ysnActive = 1
-				AND r.intItemId = @intItemId
-				AND r.intLocationId = @intLocationId
+			JOIN dbo.tblMFWorkOrderRecipe Product ON Product.intItemId = W.intItemId
+			JOIN dbo.tblMFWorkOrderRecipeItem ProductItem ON ProductItem.intRecipeId = Product.intRecipeId
+			JOIN dbo.tblMFWorkOrderRecipeItem ri ON ri.intItemId = ProductItem.intItemId
+			WHERE ri.intWorkOrderId =@intWorkOrderId 
 				AND ri.intRecipeItemTypeId = 1
 				AND (
 					(
@@ -330,15 +318,12 @@ BEGIN TRY
 			,@strWorkOrderNo=strWorkOrderNo
 		FROM dbo.tblMFWorkOrder W
 		LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
-		JOIN dbo.tblMFRecipe P ON P.intItemId = W.intItemId
-		JOIN dbo.tblMFRecipeItem PI ON PI.intRecipeId = P.intRecipeId
-		JOIN dbo.tblMFRecipeItem ri ON ri.intItemId = PI.intItemId
-		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+		JOIN dbo.tblMFWorkOrderRecipe P ON P.intItemId = W.intItemId
+		JOIN dbo.tblMFWorkOrderRecipeItem PI ON PI.intRecipeId = P.intRecipeId
+		JOIN dbo.tblMFWorkOrderRecipeItem ri ON ri.intItemId = PI.intItemId
 		JOIN dbo.tblICItem Product ON Product.intItemId = W.intItemId
 		JOIN dbo.tblICItem Input ON Input.intItemId = PI.intItemId
-		WHERE r.ysnActive = 1
-			AND r.intItemId = @intItemId
-			AND r.intLocationId = @intLocationId
+		WHERE ri.intWorkOrderId = @intWorkOrderId
 			AND ri.intRecipeItemTypeId = 1
 			AND (
 				(
@@ -378,11 +363,8 @@ BEGIN TRY
 
 	INSERT INTO @tblICItem (intItemId)
 	SELECT ri.intItemId
-	FROM dbo.tblMFRecipeItem ri
-	JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
-	WHERE r.ysnActive = 1
-		AND r.intItemId = @intItemId
-		AND r.intLocationId = @intLocationId
+	FROM dbo.tblMFWorkOrderRecipeItem ri
+	WHERE ri.intWorkOrderId = @intWorkOrderId
 		AND (
 			(
 				ri.ysnYearValidationRequired = 1
@@ -400,25 +382,30 @@ BEGIN TRY
 	UNION
 	
 	SELECT RSI.intSubstituteItemId
-	FROM dbo.tblMFRecipe R
-	JOIN dbo.tblMFRecipeItem RI ON R.intRecipeId = RI.intRecipeId
-	JOIN dbo.tblMFRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
-	WHERE R.intItemId = @intItemId
-		AND R.ysnActive = 1
+	FROM dbo.tblMFWorkOrderRecipeItem RI 
+	JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
+	WHERE RI.intWorkOrderId = @intWorkOrderId
+		AND (
+			(
+				RI.ysnYearValidationRequired = 1
+				AND @dtmCurrentDate BETWEEN RI.dtmValidFrom
+					AND RI.dtmValidTo
+				)
+			OR (
+				RI.ysnYearValidationRequired = 0
+				AND @intDayOfYear BETWEEN DATEPART(dy, RI.dtmValidFrom)
+					AND DATEPART(dy, RI.dtmValidTo)
+				)
+			)
 		AND RI.intRecipeItemTypeId = 1
-		AND R.intLocationId = @intLocationId
-
+		
 	if @ysnIncludeOutputItem=1
 	Begin
 		INSERT INTO @tblICItem (intItemId)
 		SELECT ri.intItemId
-		FROM dbo.tblMFRecipeItem ri
-		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
-		WHERE r.ysnActive = 1
-			AND r.intItemId = @intItemId
-			AND r.intLocationId = @intLocationId
+		FROM dbo.tblMFWorkOrderRecipeItem ri
+		WHERE ri.intWorkOrderId = @intWorkOrderId
 			AND ri.intRecipeItemTypeId = 2
-
 	End
 
 	DELETE tempItem 
