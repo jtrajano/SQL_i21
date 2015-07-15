@@ -1984,6 +1984,7 @@
     <Build Include="dbo\Tables\tblMFBlendValidation.sql" />
     <Build Include="dbo\Tables\tblMFBlendValidationDefault.sql" />
     <Build Include="dbo\Tables\tblMFBlendValidationMessageType.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLSyncTemplateToStructure.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -72,6 +72,9 @@ BEGIN
 			RETURN;
 		END
 
+		--CREATE AP ACCOUNT CATEGORY
+		EXEC uspGLUpdateAPAccountCategory
+
 		IF(@UserId <= 0)
 		BEGIN
 			RAISERROR(''You cannot import without user.'', 16, 1);
@@ -93,8 +96,11 @@ BEGIN
 					@billIds NVARCHAR(MAX)
 
 		--removed first the constraint
-		ALTER TABLE tblAPBill
-			DROP CONSTRAINT [UK_dbo.tblAPBill_strBillId]
+		IF OBJECT_ID(''UK_dbo.tblAPBill_strBillId'', ''C'') IS NOT NULL
+		BEGIN
+			ALTER TABLE tblAPBill
+				DROP CONSTRAINT [UK_dbo.tblAPBill_strBillId]
+		END
 
 		IF(@DateFrom IS NULL AND @PeriodFrom IS NULL)
 		BEGIN
