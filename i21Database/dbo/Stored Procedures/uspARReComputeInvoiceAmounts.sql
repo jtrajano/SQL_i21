@@ -1,4 +1,4 @@
-﻿﻿CREATE PROCEDURE [dbo].[uspARReComputeInvoiceAmounts]
+﻿CREATE PROCEDURE [dbo].[uspARReComputeInvoiceAmounts]
 	 @InvoiceId		AS INT
 AS
 

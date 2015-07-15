@@ -1,4 +1,4 @@
-﻿﻿CREATE VIEW [dbo].[vyuARShippedItems]
+﻿CREATE VIEW [dbo].[vyuARShippedItems]
 AS
 
 SELECT

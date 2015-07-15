@@ -1,4 +1,4 @@
-﻿﻿CREATE TABLE [dbo].[tblPRCompanyPreference](
+﻿CREATE TABLE [dbo].[tblPRCompanyPreference](
 	[intCompanyPreferenceId] [int] IDENTITY(1,1) NOT NULL,
 	[intBankAccountId] [int] NULL,
 	[intLiabilityAccount] [int] NULL,
