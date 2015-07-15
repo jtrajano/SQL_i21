@@ -44,7 +44,8 @@ BEGIN
 			,[intInventoryReceiptItemId] 
 			,[intChargeId] 
 			,[intEntityVendorId] 
-			,[dblCalculatedAmount] 
+			,[dblCalculatedAmount]
+			,[intContractId]
 	)
 	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
 			,[intInventoryReceiptChargeId]	= Charge.intInventoryReceiptChargeId
@@ -53,6 +54,7 @@ BEGIN
 			,[intEntityVendorId]			= Charge.intEntityVendorId
 			,[dblCalculatedAmount]			=	Charge.dblRate 
 												* dbo.fnCalculateQtyBetweenUOM(ReceiptItem.intUnitMeasureId, dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId), ReceiptItem.dblOpenReceive) 
+			,[intContractId]				= Charge.intContractId
 	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item 
@@ -107,6 +109,7 @@ BEGIN
 			,[intChargeId] 
 			,[intEntityVendorId] 
 			,[dblCalculatedAmount] 
+			,[intContractId]
 	)
 	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
 			,[intInventoryReceiptChargeId]	= Charge.intInventoryReceiptChargeId
@@ -116,6 +119,7 @@ BEGIN
 			,[dblCalculatedAmount]			=	(ISNULL(Charge.dblRate, 0) / 100)
 												* ReceiptItem.dblOpenReceive
 												* ReceiptItem.dblUnitCost
+			,[intContractId]				= Charge.intContractId
 	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item 
@@ -141,6 +145,7 @@ BEGIN
 			,[intChargeId] 
 			,[intEntityVendorId] 
 			,[dblCalculatedAmount] 
+			,[intContractId]
 	)
 	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
 			,[intInventoryReceiptChargeId]	= Charge.intInventoryReceiptChargeId
@@ -148,6 +153,7 @@ BEGIN
 			,[intChargeId]					= Charge.intChargeId
 			,[intEntityVendorId]			= Charge.intEntityVendorId
 			,[dblCalculatedAmount]			= Charge.dblAmount
+			,[intContractId]				= Charge.intContractId
 	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item 

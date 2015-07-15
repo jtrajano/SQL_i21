@@ -6,6 +6,7 @@
 	[intInventoryReceiptItemId] INT NOT NULL, 
 	[intChargeId] INT NOT NULL, 
 	[intEntityVendorId] INT NULL, 
+	[intContractId] INT NULL, 
 	[dblCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)), 
 	CONSTRAINT [PK_tblICInventoryReceiptChargePerItem] PRIMARY KEY ([intInventoryReceiptChargePerItemId]), 
 	CONSTRAINT [FK_tblICInventoryReceiptChargePerItem_tblICInventoryReceiptItem] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES [tblICInventoryReceiptItem]([intInventoryReceiptItemId]) ON DELETE CASCADE, 

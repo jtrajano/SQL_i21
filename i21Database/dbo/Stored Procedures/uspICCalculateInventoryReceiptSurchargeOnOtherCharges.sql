@@ -62,5 +62,88 @@ BEGIN
 	END 
 END 
 
+-- Calculate the surcharge
+BEGIN 
+	-- Do a loop until all the surcharges are calculated. 
+	WHILE EXISTS (
+		SELECT TOP 1 1 
+		FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Surcharge	
+					ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
+				INNER JOIN dbo.tblICItem SurchargeItem 
+					ON SurchargeItem.intItemId = Surcharge.intChargeId
+				LEFT JOIN dbo.tblICInventoryReceiptChargePerItem SurchargedOtherCharges
+					ON SurchargedOtherCharges.intChargeId = SurchargeItem.intOnCostTypeId
+					AND SurchargedOtherCharges.intEntityVendorId = Surcharge.intEntityVendorId	
+					AND SurchargedOtherCharges.intInventoryReceiptId = Surcharge.intInventoryReceiptId	
+		WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
+				AND Surcharge.strCostMethod = @COST_METHOD_PERCENTAGE -- cost method is limited to percentage
+				AND SurchargeItem.intOnCostTypeId IS NOT NULL -- it is a surcharge item
+				AND SurchargedOtherCharges.dblCalculatedAmount IS NOT NULL -- there is a surcharged amount
+	)
+	BEGIN 
+		INSERT INTO dbo.tblICInventoryReceiptChargePerItem (
+				[intInventoryReceiptId]
+				,[intInventoryReceiptChargeId] 
+				,[intInventoryReceiptItemId] 
+				,[intChargeId] 
+				,[intEntityVendorId] 
+				,[dblCalculatedAmount] 
+				,[intContractId]
+		)
+		SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
+				,[intInventoryReceiptChargeId]	= Surcharge.intInventoryReceiptChargeId
+				,[intInventoryReceiptItemId]	= ReceiptItem.intInventoryReceiptItemId
+				,[intChargeId]					= Charge.intChargeId
+				,[intEntityVendorId]			= Charge.intEntityVendorId
+				,[dblCalculatedAmount]			= (ISNULL(Charge.dblRate, 0) / 100) * SurchargedOtherCharges.dblCalculatedAmount
+				,[intContractId]				= Surcharge.intContractId
+		FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Surcharge	
+					ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
+				INNER JOIN dbo.tblICItem SurchargeItem 
+					ON SurchargeItem.intItemId = Surcharge.intChargeId
+				LEFT JOIN dbo.tblICInventoryReceiptChargePerItem SurchargedOtherCharges
+					ON SurchargedOtherCharges.intChargeId = SurchargeItem.intOnCostTypeId
+					AND SurchargedOtherCharges.intEntityVendorId = Surcharge.intEntityVendorId
+					AND SurchargedOtherCharges.intInventoryReceiptId = Surcharge.intInventoryReceiptId	
+		WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
+				AND Surcharge.strCostMethod = @COST_METHOD_PERCENTAGE -- cost method is limited to percentage
+				AND SurchargeItem.intOnCostTypeId IS NOT NULL -- it is a surcharge item
+				AND SurchargedOtherCharges.dblCalculatedAmount IS NOT NULL -- there is a surcharged amount
+				AND (
+					Surcharge.intContractId IS NULL 
+					OR (
+						Surcharge.intContractId IS NOT NULL 
+						AND Surcharge.intContractId = SurchargedOtherCharges.intContractId
+					)
+				)
+	END 
+
+	-- Check if there are missing calculations for surcharges. 
+	DECLARE @surchargeName AS NVARCHAR(50)
+			,@surchargeId AS INT 
+
+	SELECT TOP 1 
+			@surchargeId = SurchargeItem.intItemId
+			,@surchargeName = SurchargeItem.strItemNo
+	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Surcharge	
+				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
+			INNER JOIN dbo.tblICItem SurchargeItem 
+				ON SurchargeItem.intItemId = Surcharge.intChargeId
+			LEFT JOIN dbo.tblICInventoryReceiptChargePerItem CalculatedSurcharges
+				ON CalculatedSurcharges.intChargeId = SurchargeItem.intItemId
+				AND CalculatedSurcharges.intInventoryReceiptChargeId = Surcharge.intInventoryReceiptChargeId 
+	WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
+			AND Surcharge.strCostMethod = @COST_METHOD_PERCENTAGE -- cost method is limited to percentage
+			AND SurchargeItem.intOnCostTypeId IS NOT NULL -- it is a surcharge item
+			AND CalculatedSurcharges.intInventoryReceiptChargePerItemId IS NULL -- if null, the surcharge was not calculated. 
+
+	IF @surchargeId IS NOT NULL 
+	BEGIN 
+		-- 'Unable to compute the surcharge for %s.'
+		RAISERROR(51157, 11, 1, @surchargeName)  
+		GOTO _Exit
+	END 
+END 
+
 
 _Exit:
