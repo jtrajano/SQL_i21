@@ -28,12 +28,16 @@ BEGIN
 		)
 
 		DECLARE @ItemsToReserve AS dbo.ItemReservationTableType
+				,@intTransactionId AS INT = 1
+				,@intTransactionTypeId AS INT = 2
 	END 
 
 	-- ACT
 	BEGIN 
 		EXEC dbo.uspICCreateStockReservation 
 			@ItemsToReserve
+			,@intTransactionId
+			,@intTransactionTypeId
 	END 
 			
 	-- ASSERT

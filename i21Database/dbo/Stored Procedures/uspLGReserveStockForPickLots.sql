@@ -9,14 +9,14 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @ItemsToReserve AS dbo.ItemReservationTableType;
-DECLARE @InventoryTransactionType AS INT
+DECLARE @intInventoryTransactionType AS INT
 DECLARE @strItemNo AS NVARCHAR(50) 
 DECLARE @intItemId AS INT 
 
 -- Get the transaction type id
 BEGIN 
 	SELECT TOP 1 
-			@InventoryTransactionType = intTransactionTypeId
+			@intInventoryTransactionType = intTransactionTypeId
 	FROM	dbo.tblICInventoryTransactionType
 	WHERE	strName = 'Pick Lots'
 END
@@ -44,7 +44,7 @@ BEGIN
 			,dblQty = PLDetail.dblLotPickedQty
 			,intTransactionId = PLHeader.intPickLotHeaderId
 			,strTransactionId = CAST(PLHeader.intReferenceNumber AS VARCHAR(100))
-			,intTransactionTypeId = @InventoryTransactionType
+			,intTransactionTypeId = @intInventoryTransactionType
 	FROM	tblLGPickLotDetail PLDetail
 			JOIN tblLGPickLotHeader PLHeader ON PLHeader.intPickLotHeaderId = PLDetail.intPickLotHeaderId
 			JOIN tblICLot Lot ON Lot.intLotId = PLDetail.intLotId
@@ -71,4 +71,6 @@ BEGIN
 	-- Otherwise, there are enough stocks and let the system create the reservations
 	EXEC dbo.uspICCreateStockReservation
 		@ItemsToReserve
+		,@intPickLotHeaderId
+		,@intInventoryTransactionType
 END 

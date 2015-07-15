@@ -89,10 +89,9 @@ BEGIN
 
 			WHILE (@intItemLocationCounter <= 3) 
 			BEGIN 
-				INSERT INTO tblICItemStock (
+				INSERT INTO dbo.tblICItemStock (
 						[intItemId]
 						,[intItemLocationId]
-						,[intSubLocationId]
 						,[dblUnitOnHand]
 						,[dblOrderCommitted]
 						,[dblOnOrder]
@@ -138,7 +137,6 @@ BEGIN
 											WHEN @intItemCounter = 7 AND @intItemLocationCounter = 2 THEN @SerializedLotGrains_DefaultLocation
 											WHEN @intItemCounter = 7 AND @intItemLocationCounter = 3 THEN @SerializedLotGrains_DefaultLocation
 									END 
-						,[intSubLocationId] = NULL 										
 						,[dblUnitOnHand] = 0 
 						,[dblOrderCommitted] = 0
 						,[dblOnOrder] = 0

@@ -87,6 +87,8 @@ BEGIN
 		)
 
 		DECLARE @ItemsToReserve AS dbo.ItemReservationTableType
+				,@intTransactionId AS INT = 1
+				,@intTransactionTypeId AS INT = 2
 
 		-- Setup the data to insert. 
 		INSERT @ItemsToReserve (
@@ -104,27 +106,27 @@ BEGIN
 				,intItemUOMId = @SerializedLotGrains_BushelUOMId
 				,intLotId = 1
 				,dblQty = 100
-				,intTransactionId = 1
+				,intTransactionId = @intTransactionId
 				,strTransactionId = 'TRANSACTION-000001'
-				,intTransactionTypeId = 1
+				,intTransactionTypeId = @intTransactionTypeId
 		UNION ALL
 		SELECT	intItemId = @SerializedLotGrains
 				,intItemLocationId = @SerializedLotGrains_DefaultLocation
 				,intItemUOMId = @SerializedLotGrains_PoundUOMId
 				,intLotId = 2
 				,dblQuantity = 100
-				,intTransactionId = 1
+				,intTransactionId = @intTransactionId
 				,strTransactionId = 'TRANSACTION-000001'
-				,intInventoryTransactionType = 1
+				,intInventoryTransactionType = @intTransactionTypeId
 		UNION ALL
 		SELECT	intItemId = @SerializedLotGrains
 				,intItemLocationId = @SerializedLotGrains_DefaultLocation
 				,intItemUOMId = @SerializedLotGrains_BushelUOMId
 				,intLotId = 1
 				,dblQuantity = 15
-				,intTransactionId = 1
+				,intTransactionId = @intTransactionId
 				,strTransactionId = 'TRANSACTION-000001'
-				,intInventoryTransactionType = 1
+				,intInventoryTransactionType = @intTransactionTypeId
 
 		-- Setup the expected data
 		INSERT INTO expected (
@@ -142,24 +144,26 @@ BEGIN
 				,intItemUOMId = @SerializedLotGrains_BushelUOMId
 				,intLotId = 1 
 				,dblQuantity = 115
-				,intTransactionId = 1
+				,intTransactionId = @intTransactionId
 				,strTransactionId = 'TRANSACTION-000001'
-				,intInventoryTransactionType = 1 
+				,intInventoryTransactionType = @intTransactionTypeId 
 		UNION ALL 
 		SELECT	intItemId = @SerializedLotGrains
 				,intItemLocationId = @SerializedLotGrains_DefaultLocation
 				,intItemUOMId = @SerializedLotGrains_PoundUOMId
 				,intLotId = 2
 				,dblQuantity = 100
-				,intTransactionId = 1
+				,intTransactionId = @intTransactionId
 				,strTransactionId = 'TRANSACTION-000001'
-				,intInventoryTransactionType = 1 
+				,intInventoryTransactionType = @intTransactionTypeId 
 	END 
 
 	-- ACT
 	BEGIN 
 		EXEC dbo.uspICCreateStockReservation 
 			@ItemsToReserve
+			,@intTransactionId
+			,@intTransactionTypeId
 	END 
 			
 	-- ASSERT

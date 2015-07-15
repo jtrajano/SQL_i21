@@ -9,14 +9,14 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @ItemsToReserve AS dbo.ItemReservationTableType;
-DECLARE @InventoryTransactionType AS INT
+DECLARE @intInventoryTransactionType AS INT
 DECLARE @strItemNo AS NVARCHAR(50) 
 DECLARE @intItemId AS INT 
 
 -- Get the transaction type id
 BEGIN 
 	SELECT TOP 1 
-			@InventoryTransactionType = intTransactionTypeId
+			@intInventoryTransactionType = intTransactionTypeId
 	FROM	dbo.tblICInventoryTransactionType
 	WHERE	strName = 'Inventory Shipment'
 END
@@ -40,7 +40,7 @@ BEGIN
 			,dblQty = ShipmentItems.dblQuantity
 			,intTransactionId = Shipment.intInventoryShipmentId
 			,strTransactionId = Shipment.strReferenceNumber
-			,intTransactionTypeId = @InventoryTransactionType
+			,intTransactionTypeId = @intInventoryTransactionType
 	FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItems
 				ON Shipment.intInventoryShipmentId = ShipmentItems.intInventoryShipmentId
 			INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -73,4 +73,6 @@ BEGIN
 	-- Otherwise, there are enough stocks and let the system create the reservations
 	EXEC dbo.uspICCreateStockReservation
 		@ItemsToReserve
+		,@intTransactionId
+		,@intInventoryTransactionType
 END 
