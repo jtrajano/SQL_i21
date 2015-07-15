@@ -24,7 +24,7 @@ BEGIN TRANSACTION
 		WHILE EXISTS (SELECT TOP 1 1 FROM @TEMP WHERE ImportedHeader = 0)
 		BEGIN
 			SELECT TOP 1 @intRecurringId = RecurringID FROM @TEMP WHERE ImportedHeader = 0
-			SELECT @intStartingNumberId = intStartingNumberId, @strPrefix = strPrefix ,@intNumber = intNumber + 1 FROM tblSMStartingNumber WHERE strTransactionType = 'General Journal'
+			SELECT @intStartingNumberId = intStartingNumberId, @strPrefix = strPrefix ,@intNumber = intNumber FROM tblSMStartingNumber WHERE strTransactionType = 'General Journal'
 			INSERT INTO [dbo].[tblGLJournal]
 					   ([strDescription]
 					   ,[dblExchangeRate]
@@ -46,7 +46,7 @@ BEGIN TRANSACTION
 		  SELECT @intJournalId = @@IDENTITY
 		  UPDATE @TEMP SET ImportedHeader = 1, JournalID = @intJournalId WHERE RecurringID = @intRecurringId
 		  UPDATE tblGLJournalRecurring SET intJournalId = @intJournalId WHERE intJournalRecurringId = @intRecurringId
-		  UPDATE tblSMStartingNumber SET intNumber = @intNumber where intStartingNumberId = @intStartingNumberId
+		  UPDATE tblSMStartingNumber SET intNumber = @intNumber + 1 where intStartingNumberId = @intStartingNumberId
 		END
 
 		-- Importing the detail
