@@ -1230,7 +1230,6 @@
     <Build Include="dbo\Tables\tblLGEquipmentType.sql" />
     <Build Include="dbo\Tables\tblICInventoryAdjustment.sql" />
     <Build Include="dbo\Tables\tblICInventoryAdjustmentDetail.sql" />
-    <Build Include="dbo\Tables\tblICInventoryAdjustmentNote.sql" />
     <Build Include="dbo\Stored Procedures\uspICProcessToInventoryShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspPOValidateStatus.sql" />
     <Build Include="dbo\Views\vyuPOStatus.sql" />
@@ -1366,7 +1365,6 @@
     <Build Include="dbo\Stored Procedures\uspCMPostVoidCheck.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransfer.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransferDetail.sql" />
-    <Build Include="dbo\Tables\tblICInventoryTransferNote.sql" />
     <Build Include="dbo\Views\vyuLGAllocationDetailOpenGenerateLoads.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportBillableHours.sql" />
     <Build Include="dbo\Views\vyuCCSite.sql" />
@@ -1976,7 +1974,8 @@
     <Build Include="dbo\Views\vyuCTCategoryUOM.sql" />
     <Build Include="dbo\Tables\tblSMComment.sql" />
     <Build Include="dbo\Tables\tblRKCompanyPreference.sql" />	
-	<Build Include="dbo\Stored Procedures\uspICCalculateSurchargeOnOtherCharges.sql" />
+	<Build Include="dbo\Stored Procedures\uspICCalculateSurchargeOnOtherCharges.sql" />	
+    <Build Include="dbo\Stored Procedures\uspCTReceived.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
