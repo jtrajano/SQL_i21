@@ -16,6 +16,11 @@ SELECT
 	,a.intCommodityId
 	,CM.strCommodityCode [Commodity Code]
 	,CM.strDescription   [Commodity Description]
+	,b.strOwnedPhysicalStock
+	,b.ysnReceiptedStorage
+	,b.ysnDPOwnedType
+	,b.ysnGrainBankType
+	,b.ysnCustomerStorage 
 FROM tblGRCustomerStorage a
 JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
 JOIN tblSMCompanyLocation c ON c.intCompanyLocationId=a.intCompanyLocationId
