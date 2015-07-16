@@ -5,6 +5,7 @@
     [intImportFileHeaderId] INT NULL, 
     [strFileType] NVARCHAR(50) NULL, 
     [strFilePrefix] NVARCHAR(50) NULL, 
+	[strFileNamePattern] NVARCHAR(100) NULL,
     [strFolderPath] NVARCHAR(MAX) NULL, 
     [strURICommand] NVARCHAR(MAX) NULL, 
     [intConcurrencyId] INT NULL, 
