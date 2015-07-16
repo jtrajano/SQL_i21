@@ -343,6 +343,9 @@ BEGIN TRY
 				--*****************************************************
 				DECLARE @ItemsThatNeedLotId AS dbo.ItemLotTableType
 
+				IF OBJECT_ID('tempdb..#GeneratedLotItems') IS NOT NULL  
+				DROP TABLE #GeneratedLotItems  
+
 				CREATE TABLE #GeneratedLotItems (
 					intLotId INT
 					,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
@@ -573,8 +576,9 @@ BEGIN TRY
 					END
 					ELSE
 					BEGIN
-						Select @intStorageLocationId=intNewLotBin from tblSMCompanyLocationSubLocation Where intCompanyLocationId=@intLocationId 
-						Select @intSubLocationId=intSubLocationId From tblICStorageLocation Where intStorageLocationId =@intStorageLocationId
+						--Select @intStorageLocationId=intNewLotBin from tblSMCompanyLocationSubLocation Where intCompanyLocationId=@intLocationId 
+						--Select @intSubLocationId=intSubLocationId From tblICStorageLocation Where intStorageLocationId =@intStorageLocationId
+						Select @intStorageLocationId=intStorageLocationId,@intSubLocationId=intSubLocationId from tblICLot Where strLotNumber=@strLotNumber
 					END
 
 					Select @dblAdjustByQuantity=@dblAdjustByQuantity/(Case When @intWeightUOMId is null Then 1 Else @dblWeightPerQty End)
