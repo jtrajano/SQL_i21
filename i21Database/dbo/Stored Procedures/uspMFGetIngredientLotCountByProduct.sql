@@ -5,6 +5,7 @@
 	,@intConsumptionMethodId int=1
 	,@strLotNumber nvarchar(MAX)='%'
 	,@intWorkOrderId int=0
+	,@intLotId int=0
 	)
 AS
 BEGIN
@@ -36,6 +37,7 @@ BEGIN
 			AND L.dblQty>0
 			AND I.strStatus='Active'
 			and L.strLotNumber Like @strLotNumber +'%'
+			AND L.intLotId =(CASE WHEN @intLotId >0 THEN @intLotId ELSE L.intLotId END)
 	End
 	Else
 	Begin
@@ -60,6 +62,7 @@ BEGIN
 			AND L.dblQty>0
 			AND I.strStatus='Active'
 			and L.strLotNumber Like @strLotNumber +'%'
+			AND L.intLotId =(CASE WHEN @intLotId >0 THEN @intLotId ELSE L.intLotId END)
 	End
 	
 END

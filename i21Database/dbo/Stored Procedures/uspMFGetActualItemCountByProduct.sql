@@ -3,6 +3,7 @@
 	,@intLocationId INT
 	,@strItemNo nvarchar(MAX)='%'
 	,@intWorkOrderId int
+	,@intActualItemId int=0
 	)
 AS
 BEGIN
@@ -17,4 +18,5 @@ BEGIN
 		AND R.ysnActive = 1
 		AND R.intItemId=@intItemId
 		AND I.strItemNo LIKE @strItemNo+'%'
+		AND I.intItemId =(CASE WHEN @intActualItemId >0 THEN @intActualItemId ELSE I.intItemId END)
 END
