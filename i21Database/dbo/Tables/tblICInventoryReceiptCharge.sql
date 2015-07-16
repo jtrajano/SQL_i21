@@ -2,6 +2,7 @@
 (
 	[intInventoryReceiptChargeId] INT NOT NULL IDENTITY, 
     [intInventoryReceiptId] INT NOT NULL, 
+	[intContractId] INT NULL,
     [intChargeId] INT NOT NULL, 
     [ysnInventoryCost] BIT NULL DEFAULT ((0)), 
     [strCostMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT ('Per Unit'), 
