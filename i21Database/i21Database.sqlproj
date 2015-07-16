@@ -1986,6 +1986,23 @@
     <Build Include="dbo\Stored Procedures\uspMFGetShiftCount.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateBillReversal.sql" />
+    <Build Include="dbo\Views\vyuTMUniqueItemList.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMValidateInvoiceForSync.sql" />
+    <Build Include="dbo\Functions\fnTMGetCalculatedBurnRate.sql" />
+    <Build Include="dbo\Functions\fnTMComputeNewBurnRate.sql" />
+    <Build Include="dbo\Functions\fnTMGetElapseDegreeDayForCalculation.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMSyncInvoiceToDeliveryHistory.sql" />
+    <Build Include="dbo\Functions\fnTMGetNextJulianDeliveryDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMRenewJulianCalendar.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGReserveStockForPickLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReceived.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCopyRecipe.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateBlendRelease.sql" />
+    <Build Include="dbo\Tables\tblMFBlendValidation.sql" />
+    <Build Include="dbo\Tables\tblMFBlendValidationDefault.sql" />
+    <Build Include="dbo\Tables\tblMFBlendValidationMessageType.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLSyncTemplateToStructure.sql" />
+    <Build Include="dbo\Tables\tblSMModule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2069,5 +2086,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountRange.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\15_Module.sql" />
   </ItemGroup>
 </Project>
