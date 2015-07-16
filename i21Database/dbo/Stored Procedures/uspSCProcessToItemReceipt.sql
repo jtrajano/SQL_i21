@@ -37,8 +37,9 @@ DECLARE @intTicketItemUOMId INT
 DECLARE @strReceiptType AS NVARCHAR(100)
 DECLARE @intLoadId INT
 BEGIN
-    SELECT TOP 1 @intLoadId = intLoadId
-	FROM dbo.tblLGLoad 
+    SELECT TOP 1 @intLoadId = ST.intLoadId
+	FROM dbo.tblSCTicket ST WHERE
+	ST.intTicketId = @intTicketId
 END
 
 DECLARE @ErrMsg                    NVARCHAR(MAX),
@@ -50,39 +51,39 @@ DECLARE @ErrMsg                    NVARCHAR(MAX),
               @strAdjustmentNo     NVARCHAR(50)
 
 BEGIN TRY
-		--IF @strDistributionOption = 'LOD'
-		--BEGIN
-		--	IF @intLoadId IS NULL
-		--	BEGIN 
-		--		RAISERROR('Unable to find load details. Try Again.', 11, 1);
-		--		GOTO _Exit
-		--	END
-		--	ELSE
-		--	BEGIN
-		--		INSERT INTO [dbo].[tblSCTicketCost]
-		--				   ([intTicketId]
-		--				   ,[intConcurrencyId]
-		--				   ,[intItemId]
-		--				   ,[intEntityVendorId]
-		--				   ,[strCostMethod]
-		--				   ,[dblRate]
-		--				   ,[intItemUOMId]
-		--				   ,[ysnAccrue]
-		--				   ,[ysnMTM]
-		--				   ,[ysnPrice])
-		--		SELECT	@intTicketId,
-		--				1, 
-		--				LD.intItemId,
-		--				LD.intVendorId,
-		--				LD.strCostMethod,
-		--				LD.dblRate,
-		--				LD.intItemUOMId,
-		--				LD.ysnAccrue,
-		--				LD.ysnMTM,
-		--				LD.ysnPrice
-		--		FROM	tblLGLoadCost LD WHERE LD.intLoadId = @intLoadId
-		--	END
-		--END
+		IF @strDistributionOption = 'LOD'
+		BEGIN
+			IF @intLoadId IS NULL
+			BEGIN 
+				RAISERROR('Unable to find load details. Try Again.', 11, 1);
+				GOTO _Exit
+			END
+			ELSE
+			BEGIN
+				INSERT INTO [dbo].[tblSCTicketCost]
+						   ([intTicketId]
+						   ,[intConcurrencyId]
+						   ,[intItemId]
+						   ,[intEntityVendorId]
+						   ,[strCostMethod]
+						   ,[dblRate]
+						   ,[intItemUOMId]
+						   ,[ysnAccrue]
+						   ,[ysnMTM]
+						   ,[ysnPrice])
+				SELECT	@intTicketId,
+						1, 
+						LD.intItemId,
+						LD.intVendorId,
+						LD.strCostMethod,
+						LD.dblRate,
+						LD.intItemUOMId,
+						LD.ysnAccrue,
+						LD.ysnMTM,
+						LD.ysnPrice
+				FROM	tblLGLoadCost LD WHERE LD.intLoadId = @intLoadId
+			END
+		END
 		IF @strDistributionOption = 'CNT'
 		BEGIN
 		INSERT INTO [dbo].[tblSCTicketCost]
