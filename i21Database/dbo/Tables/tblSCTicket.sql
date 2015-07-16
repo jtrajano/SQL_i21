@@ -86,6 +86,7 @@
 	[intFarmFieldId] INT NULL,
 	[intDistributionMethod] INT NULL, 
 	[intSplitInvoiceOption] INT NULL, 
+	[intDriverEntityId] INT NULL,
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_intTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [intTicketNumber]),
@@ -103,7 +104,8 @@
 	CONSTRAINT [FK_tblSCTicket_tblCTContractDetail_intContractId] FOREIGN KEY ([intContractId]) REFERENCES [tblCTContractDetail],
 	CONSTRAINT [FK_tblSCTicket_tblSMCompanyLocationSubLocation_intSubLocationId] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation],
 	CONSTRAINT [FK_tblSCTicket_tblICStorageLocation_intStorageLocationId] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation],
-	CONSTRAINT [FK_tblSCTicket_intMatchTicketId] FOREIGN KEY ([intMatchTicketId]) REFERENCES [tblSCTicket]
+	CONSTRAINT [FK_tblSCTicket_intMatchTicketId] FOREIGN KEY ([intMatchTicketId]) REFERENCES [tblSCTicket],
+	CONSTRAINT [FK_tblSCTicket_tblEntity_intDriverEntityId] FOREIGN KEY ([intDriverEntityId]) REFERENCES [tblEntity]([intEntityId])
 )
 
 GO
@@ -826,3 +828,75 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
     @level2name = N'intEntityId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Load Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intLoadId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Match Ticket Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intMatchTicketId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Sub Location Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intSubLocationId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Storage Location Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intStorageLocationId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Farm Field Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intFarmFieldId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Distribution Method',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intDistributionMethod'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Split Option',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intSplitInvoiceOption'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Driver Entity Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intDriverEntityId'

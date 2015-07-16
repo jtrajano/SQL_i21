@@ -71,7 +71,7 @@ INSERT INTO tblAPAppliedPrepaidAndDebit(
 	[ysnApplied],
 	[intConcurrencyId]
 )
---PREPAYMENT
+--PREPAYMENT FOR CONTRACT
 SELECT
 	[intBillId]				=	@billId, 
 	[intBillDetailApplied]	=	CurrentBill.intBillDetailId, 
@@ -141,30 +141,54 @@ AND EXISTS
 UNION ALL
 --DEBIT MEMO AND OVERPAYMENT
 SELECT
-		[intBillId]				=	@billId, 
-		[intBillDetailApplied]	=	NULL, 
-		[intLineApplied]		=	NULL, 
-		[intTransactionId]		=	A.intBillId,
-		[strTransactionNumber]	=	A.strBillId,
-		[intItemId]				=	NULL,
-		[strItemDescription]	=	NULL,
-		[strItemNo]				=	NULL,
-		[intContractHeaderId]	=	NULL,	
-		[intContractNumber]		=	NULL,
-		[intPrepayType]			=	NULL,
-		[dblTotal]				=	A.dblTotal,
-		[dblBillAmount]			=	(SELECT dblTotal FROM tblAPBill WHERE intBillId = @billId),
-		[dblBalance]			=	A.dblAmountDue - (CASE WHEN ISNULL(A.dblPayment,0) = 0 THEN A.dblAmountDue ELSE ISNULL(A.dblPayment,0) END),
-		[dblAmountApplied]		=	A.dblAmountDue,
-		[ysnApplied]			=	0,
-		[intConcurrencyId]		=	0
-	FROM tblAPBill A
-	--LEFT JOIN tblAPAppliedPrepaidAndDebit B ON B.intTransactionId = A.intBillId
-	WHERE A.intTransactionType IN (3,8)
-	AND A.intEntityVendorId = @vendorId
-	AND A.dblAmountDue != 0 --EXCLUDE THOSE FULLY APPLIED
-	AND 1 = CASE WHEN A.intTransactionType = 3 AND A.ysnPosted = 0 THEN 0 --EXCLUDE UNPOSTED DEBIT MEMO
-			ELSE 1 END
+	[intBillId]				=	@billId, 
+	[intBillDetailApplied]	=	NULL, 
+	[intLineApplied]		=	NULL, 
+	[intTransactionId]		=	A.intBillId,
+	[strTransactionNumber]	=	A.strBillId,
+	[intItemId]				=	NULL,
+	[strItemDescription]	=	NULL,
+	[strItemNo]				=	NULL,
+	[intContractHeaderId]	=	NULL,	
+	[intContractNumber]		=	NULL,
+	[intPrepayType]			=	NULL,
+	[dblTotal]				=	A.dblTotal,
+	[dblBillAmount]			=	(SELECT dblTotal FROM tblAPBill WHERE intBillId = @billId),
+	[dblBalance]			=	A.dblAmountDue - (CASE WHEN ISNULL(A.dblPayment,0) = 0 THEN A.dblAmountDue ELSE ISNULL(A.dblPayment,0) END),
+	[dblAmountApplied]		=	A.dblAmountDue,
+	[ysnApplied]			=	0,
+	[intConcurrencyId]		=	0
+FROM tblAPBill A
+--LEFT JOIN tblAPAppliedPrepaidAndDebit B ON B.intTransactionId = A.intBillId
+WHERE A.intTransactionType IN (3,8)
+AND A.intEntityVendorId = @vendorId
+AND A.dblAmountDue != 0 --EXCLUDE THOSE FULLY APPLIED
+AND 1 = CASE WHEN A.intTransactionType = 3 AND A.ysnPosted = 0 THEN 0 --EXCLUDE UNPOSTED DEBIT MEMO
+		ELSE 1 END
+UNION ALL
+--PREPAYMENT WITHOUT CONTRACT
+SELECT
+	[intBillId]				=	@billId, 
+	[intBillDetailApplied]	=	NULL, 
+	[intLineApplied]		=	NULL, 
+	[intTransactionId]		=	A.intBillId,
+	[strTransactionNumber]	=	A.strBillId,
+	[intItemId]				=	NULL,
+	[strItemDescription]	=	NULL,
+	[strItemNo]				=	NULL,
+	[intContractHeaderId]	=	NULL,	
+	[intContractNumber]		=	NULL,
+	[intPrepayType]			=	NULL,
+	[dblTotal]				=	A.dblTotal,
+	[dblBillAmount]			=	(SELECT dblTotal FROM tblAPBill WHERE intBillId = @billId),
+	[dblBalance]			=	A.dblAmountDue - (CASE WHEN ISNULL(A.dblPayment,0) = 0 THEN A.dblAmountDue ELSE ISNULL(A.dblPayment,0) END),
+	[dblAmountApplied]		=	A.dblAmountDue,
+	[ysnApplied]			=	0,
+	[intConcurrencyId]		=	0
+FROM tblAPBill A
+WHERE A.intTransactionType IN (2)
+AND ISNULL((SELECT TOP 1 intItemId FROM tblAPBillDetail WHERE intBillId = A.intBillId),0) <= 0
+AND intEntityVendorId = @vendorId
 
 ----PREPAYMENT
 --MERGE tblAPAppliedPrepaidAndDebit AS Target

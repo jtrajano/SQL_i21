@@ -3,6 +3,7 @@
 	,@intStorageLocationId INT
 	,@intLocationId INT
 	,@intConsumptionMethodId int=1
+	,@strLotNumber nvarchar(MAX)='%'
 	,@intWorkOrderId int=0
 	)
 AS
@@ -34,6 +35,7 @@ BEGIN
 			AND L.dtmExpiryDate >= @dtmCurrentDate
 			AND L.dblQty>0
 			AND I.strStatus='Active'
+			and L.strLotNumber Like @strLotNumber +'%'
 	End
 	Else
 	Begin
@@ -57,6 +59,7 @@ BEGIN
 			AND L.dtmExpiryDate >= @dtmCurrentDate
 			AND L.dblQty>0
 			AND I.strStatus='Active'
+			and L.strLotNumber Like @strLotNumber +'%'
 	End
 	
 END

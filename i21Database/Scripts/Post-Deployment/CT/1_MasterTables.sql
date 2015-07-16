@@ -278,3 +278,44 @@ BEGIN
 	SELECT 3,'Standard Quantity','Standard Quantity',1,1
 END
 GO
+
+--tblCTContractStatus
+GO
+IF NOT EXISTS(SELECT * FROM tblCTContractStatus WHERE intContractStatusId = 1)
+BEGIN
+	INSERT INTO tblCTContractStatus(intContractStatusId,strContractStatus,intConcurrencyId)
+	SELECT 1,'Open',1	
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT * FROM tblCTContractStatus WHERE intContractStatusId = 2)
+BEGIN
+	INSERT INTO tblCTContractStatus(intContractStatusId,strContractStatus,intConcurrencyId)
+	SELECT 2,'Unconfirmed',1	
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT * FROM tblCTContractStatus WHERE intContractStatusId = 3)
+BEGIN
+	INSERT INTO tblCTContractStatus(intContractStatusId,strContractStatus,intConcurrencyId)
+	SELECT 3,'Cancelled',1	
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT * FROM tblCTContractStatus WHERE intContractStatusId = 4)
+BEGIN
+	INSERT INTO tblCTContractStatus(intContractStatusId,strContractStatus,intConcurrencyId)
+	SELECT 4,'Re-Open',1	
+END
+GO
+
+GO
+IF NOT EXISTS(SELECT * FROM tblCTContractStatus WHERE intContractStatusId = 5)
+BEGIN
+	INSERT INTO tblCTContractStatus(intContractStatusId,strContractStatus,intConcurrencyId)
+	SELECT 5,'Complete',1	
+END
+GO

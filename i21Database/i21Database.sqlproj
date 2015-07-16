@@ -1975,10 +1975,20 @@
     <Build Include="dbo\Tables\tblSMComment.sql" />
     <Build Include="dbo\Tables\tblRKCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReceived.sql" />
-    <Build Include="dbo\Stored Procedures\uspICCalculateInventoryReceiptSurchargeOnOtherCharges.sql" />
-    <Build Include="dbo\Tables\tblMFBlendValidationMessageType.sql" />
-    <Build Include="dbo\Tables\tblMFBlendValidationDefault.sql" />
+    <Build Include="dbo\Tables\tblWHOrderDirection.sql" />
+    <Build Include="dbo\Tables\tblWHTruck.sql" />
+    <Build Include="dbo\Tables\tblWHTruckStatus.sql" />
+    <Build Include="dbo\Tables\tblWHTruckOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCreateRecurrence.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetContainerTypeCount.sql" />
     <Build Include="dbo\Tables\tblMFBlendValidation.sql" />
+    <Build Include="dbo\Tables\tblMFBlendValidationDefault.sql" />
+    <Build Include="dbo\Tables\tblMFBlendValidationMessageType.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateBlendRelease.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetContractAndPrice.sql" />
+    <Build Include="dbo\Tables\tblCTContractStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetShiftCount.sql" />
+	<Build Include="dbo\Stored Procedures\uspICCalculateInventoryReceiptSurchargeOnOtherCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

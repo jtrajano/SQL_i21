@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspMFGetDestinationStorageLocationCount (
 	@intProcessId INT
 	,@intLocationId INT
+	,@strName nvarchar(50)='%'
 	)
 AS
 BEGIN
@@ -20,4 +21,5 @@ BEGIN
 	SELECT Count(*) as StorageLocationCount
 	FROM dbo.tblICStorageLocation SL
 	WHERE intLocationId = @intLocationId
+	AND strName LIKE @strName +'%'
 END

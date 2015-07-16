@@ -18,8 +18,8 @@ BEGIN TRY
 			@StandardCost       DECIMAL (18,6),
 			@RetailPrice        DECIMAL (18,6),
 			@SalesPrice         DECIMAL (18,6),
-		    @SalesStartDate		NVARCHAR(250),
-			@SalesEndDate   	NVARCHAR(250),
+		    @SalesStartDate		NVARCHAR(50),
+			@SalesEndDate   	NVARCHAR(50),
 			@UpdateReportTable  NVARCHAR(1)
 		
 	                  
@@ -59,8 +59,8 @@ BEGIN TRY
 			Cost		            DECIMAL (18,6),
 			Retail		            DECIMAL (18,6),
 			SalesPrice       		DECIMAL (18,6),
-			SalesStartingDate		NVARCHAR(250),
-			SalesEndingDate			NVARCHAR(250),
+			SalesStartingDate		NVARCHAR(50),
+			SalesEndingDate			NVARCHAR(50),
 			UpdateReportTable       NVARCHAR(1)
 	)  
     -- Insert statements for procedure here
@@ -307,20 +307,23 @@ BEGIN TRY
 
 	       IF (@StandardCost IS NOT NULL)
 	       BEGIN
-   	        SET @SQL1 = 'INSERT INTO tblSTMassUpdateReportMaster(UpcCode,ItemDescription,ChangeDescription,OldData,NewData)
-	                   select b.strUpcCode, c.strDescription, ''Cost Change'', CAST(a.dblStandardCost as NVARCHAR(250)),
-					   ''' + CAST(@StandardCost as NVARCHAR(250)) + ''' from tblICItemPricing a JOIN tblICItemUOM b ON
-                       a.intItemId = b.intItemId JOIN tblICItem c ON a.intItemId = c.intItemId '
+   	         
+             SET @SQL1 = 'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+	                            select e.strLocationName, b.strUpcCode, c.strDescription, ''Standard Cost'',
+					            CAST(a.dblStandardCost as NVARCHAR(250)),
+					            ''' + CAST(@StandardCost as NVARCHAR(250)) + ''' from 
+								tblICItemPricing a JOIN tblICItemUOM b ON
+                                a.intItemId = b.intItemId JOIN tblICItem c ON a.intItemId = c.intItemId 
+								JOIN tblICItemLocation d ON a.intItemId = d.intItemId JOIN tblSMCompanyLocation e
+								ON d.intLocationId = e.intCompanyLocationId '
 
-            SET @SQL1 = @SQL1 + ' where 1=1 ' 
+             SET @SQL1 = @SQL1 + ' where 1=1 ' 
 
-			IF (@Location IS NOT NULL)
-		         BEGIN 
-		               set @SQL1 = @SQL1 +  ' and  a.intItemLocationId
-		                IN (select intItemLocationId from tblICItemLocation where intLocationId
-		                IN (select intLocationId from tblICItemLocation where intLocationId 
-						IN (' + CAST(@Location as NVARCHAR) + ')' + '))'
-		         END
+			 IF (@Location IS NOT NULL)
+		            BEGIN 
+		               SET @SQL1 = @SQL1 + ' and d.intLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		            END
 
 		    IF (@Vendor IS NOT NULL)
 		        BEGIN 
@@ -400,20 +403,22 @@ BEGIN TRY
 	       IF (@RetailPrice IS NOT NULL)
 	       BEGIN
 
-   	        SET @SQL1 = 'INSERT INTO tblSTMassUpdateReportMaster(UpcCode,ItemDescription,ChangeDescription,OldData,NewData)
-	                   select b.strUpcCode, c.strDescription, ''Retail Price Change'', CAST(a.dblSalePrice as NVARCHAR(250)),
-					   ''' + CAST(@RetailPrice as NVARCHAR(250)) + '''   from tblICItemPricing a JOIN tblICItemUOM b ON
-                       a.intItemId = b.intItemId JOIN tblICItem c ON a.intItemId = c.intItemId '
+		     SET @SQL1 = 'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+	                            select e.strLocationName, b.strUpcCode, c.strDescription, ''Retail Price'',
+					            CAST(a.dblSalePrice as NVARCHAR(250)),
+					            ''' + CAST(@RetailPrice as NVARCHAR(250)) + ''' from 
+								tblICItemPricing a JOIN tblICItemUOM b ON
+                                a.intItemId = b.intItemId JOIN tblICItem c ON a.intItemId = c.intItemId 
+								JOIN tblICItemLocation d ON a.intItemId = d.intItemId JOIN tblSMCompanyLocation e
+								ON d.intLocationId = e.intCompanyLocationId '
 
-            SET @SQL1 = @SQL1 + ' where 1=1 ' 
+             SET @SQL1 = @SQL1 + ' where 1=1 ' 
 
-			IF (@Location IS NOT NULL)
-		         BEGIN 
-		               set @SQL1 = @SQL1 +  ' and  a.intItemLocationId
-		                IN (select intItemLocationId from tblICItemLocation where intLocationId
-		                IN (select intLocationId from tblICItemLocation where intLocationId 
-						IN (' + CAST(@Location as NVARCHAR) + ')' + '))'
-		         END
+			 IF (@Location IS NOT NULL)
+		            BEGIN 
+		               SET @SQL1 = @SQL1 + ' and d.intLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		            END
 
 		    IF (@Vendor IS NOT NULL)
 		        BEGIN 
@@ -492,23 +497,25 @@ BEGIN TRY
 
            IF (@SalesPrice IS NOT NULL)
 	       BEGIN
-   	          SET @SQL1 = 'INSERT INTO tblSTMassUpdateReportMaster(UpcCode,ItemDescription,ChangeDescription,OldData,NewData)
-	                   select b.strUpcCode, c.strDescription, ''Sales Price Change'',
-					    CAST(a.dblUnitAfterDiscount as NVARCHAR(250)),
-					   ''' + CAST(@SalesPrice as NVARCHAR(250)) + '''  from tblICItemSpecialPricing a JOIN tblICItemUOM b ON
-                       a.intItemUnitMeasureId = b.intItemUOMId JOIN tblICItem c ON a.intItemId = c.intItemId '
 
-               SET @SQL1 = @SQL1 + ' where 1=1 ' 
+		        SET @SQL1 = 'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+	                            select e.strLocationName, b.strUpcCode, c.strDescription, ''Sales Price'',
+					            CAST(a.dblUnitAfterDiscount as NVARCHAR(250)),
+					            ''' + CAST(@SalesPrice as NVARCHAR(250)) + ''' from 
+								tblICItemSpecialPricing a JOIN tblICItemUOM b ON
+                                a.intItemUnitMeasureId = b.intItemUOMId JOIN tblICItem c ON a.intItemId = c.intItemId 
+								JOIN tblICItemLocation d ON a.intItemId = d.intItemId JOIN tblSMCompanyLocation e
+								ON d.intLocationId = e.intCompanyLocationId '
 
-			   if (@Location IS NOT NULL)
-		          BEGIN 
-		                set @SQL1 = @SQL1 +  ' and  a.intItemLocationId
-		                IN (select intItemLocationId from tblICItemLocation where intLocationId
-		                IN (select intLocationId from tblICItemLocation where intLocationId
-						IN (' + CAST(@Location as NVARCHAR) + ')' + '))'
-		          END
+				SET @SQL1 = @SQL1 + ' where 1=1 ' 
 
-			   if (@Vendor IS NOT NULL)
+		        IF (@Location IS NOT NULL)
+		           BEGIN 
+		               SET @SQL1 = @SQL1 + ' and d.intLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		           END 
+
+			    IF (@Vendor IS NOT NULL)
 		           BEGIN 
 		                 set @SQL1 = @SQL1 +  ' and  a.intItemLocationId
 		                 IN (select intItemLocationId from tblICItemLocation where intVendorId
@@ -516,7 +523,7 @@ BEGIN TRY
 						 IN (' + CAST(@Vendor as NVARCHAR) + ')' + '))'
 		           END
 
-				  if (@Category IS NOT NULL)
+				IF (@Category IS NOT NULL)
 		             BEGIN
      	                  set @SQL1 = @SQL1 +  ' and a.intItemId  
 		                  IN (select intItemId from tblICItem where intCategoryId IN
@@ -524,7 +531,7 @@ BEGIN TRY
 						   IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
 		             END
 
-				  if (@Family IS NOT NULL)
+				IF (@Family IS NOT NULL)
 		             BEGIN
   			              set @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
 			              (select intItemLocationId from tblICItemLocation where intFamilyId IN
@@ -532,7 +539,7 @@ BEGIN TRY
 						  IN (' + CAST(@Family as NVARCHAR) + ')' + '))'
 		             END
 
-				  if (@Class IS NOT NULL)
+				IF (@Class IS NOT NULL)
 		              BEGIN
 		                  set @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
 			              (select intItemLocationId from tblICItemLocation where intClassId IN
@@ -540,13 +547,13 @@ BEGIN TRY
 						  IN (' + CAST(@Class as NVARCHAR) + ')' + '))'
 		               END
 
-				   if (@UpcCode IS NOT NULL)
+				IF (@UpcCode IS NOT NULL)
 			           BEGIN
 				           set @SQL1 = @SQL1 +  ' and a.intItemUnitMeasureId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
 			           END
 
-				    if ((@Region IS NOT NULL)
-					and(@Region != ''))
+				IF ((@Region IS NOT NULL)
+			    and(@Region != ''))
 						BEGIN
 						 set @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
 						 (select intItemLocationId from tblICItemLocation where intLocationId IN 
@@ -554,8 +561,8 @@ BEGIN TRY
 						 IN ( ''' + (@Region) + ''')' + '))'
 						END
 
-				    if ((@District IS NOT NULL)
-					and(@District != ''))
+				IF ((@District IS NOT NULL)
+			    and(@District != ''))
 						BEGIN
 						 set @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
 						 (select intItemLocationId from tblICItemLocation where intLocationId IN 
@@ -563,8 +570,8 @@ BEGIN TRY
 						 IN ( ''' + (@District) + ''')' + '))'
 						END
 
-                    if ((@State IS NOT NULL)
-					and(@State != ''))
+                IF ((@State IS NOT NULL)
+				and(@State != ''))
 						BEGIN
 						 set @SQL1 = @SQL1 +  ' and a.intItemLocationId IN 
 						 (select intItemLocationId from tblICItemLocation where intLocationId IN 
@@ -572,8 +579,8 @@ BEGIN TRY
 						 IN ( ''' + (@State) + ''')' + '))'
 						END
 
-                    if ((@Description IS NOT NULL)
-					and (@Description != ''))
+                IF ((@Description IS NOT NULL)
+			    and (@Description != ''))
 					BEGIN
 					   set @SQL1 = @SQL1 +  ' and a.intItemId IN 
 					   (select intItemId from tblICItem where strDescription 
@@ -586,24 +593,26 @@ BEGIN TRY
 
 	       IF (@SalesStartDate IS NOT NULL)
 	       BEGIN
-		      SET @SalesStartDate = CONVERT(VARCHAR(10),@SalesStartDate,111)
-   	          SET @SQL1 = 'INSERT INTO tblSTMassUpdateReportMaster(UpcCode,ItemDescription,ChangeDescription,OldData,NewData)
-	                   select b.strUpcCode, c.strDescription, ''Sales Price Start Date Change'',
-					   REPLACE(CONVERT(NVARCHAR(10),a.dtmBeginDate,111), ''/'', ''-''),
-					   ''' + CAST(@SalesStartDate as NVARCHAR(250)) + ''' from tblICItemSpecialPricing a JOIN tblICItemUOM b ON
-                       a.intItemUnitMeasureId = b.intItemUOMId JOIN tblICItem c ON a.intItemId = c.intItemId '
 
-               SET @SQL1 = @SQL1 + ' where 1=1 ' 
+		        SET @SalesStartDate = CONVERT(VARCHAR(10),@SalesStartDate,111)
+   	            SET @SQL1 = 'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				             ChangeDescription,OldData,NewData)
+	                         select e.strLocationName, b.strUpcCode, c.strDescription, ''Sales start date'',
+				              REPLACE(CONVERT(NVARCHAR(10),a.dtmBeginDate,111), ''/'', ''-''),
+					          ''' + CAST(@SalesStartDate as NVARCHAR(250)) + ''' from 
+					   	      tblICItemSpecialPricing a JOIN tblICItemUOM b ON
+                              a.intItemUnitMeasureId = b.intItemUOMId JOIN tblICItem c ON a.intItemId = c.intItemId 
+							  JOIN tblICItemLocation d ON a.intItemId = d.intItemId JOIN tblSMCompanyLocation e
+							  ON d.intLocationId = e.intCompanyLocationId '
 
-			   if (@Location IS NOT NULL)
-		          BEGIN 
-		                set @SQL1 = @SQL1 +  ' and  a.intItemLocationId
-		                IN (select intItemLocationId from tblICItemLocation where intLocationId
-		                IN (select intLocationId from tblICItemLocation where intLocationId
-						IN (' + CAST(@Location as NVARCHAR) + ')' + '))'
-		          END
+				SET @SQL1 = @SQL1 + ' where 1=1 ' 
 
-			   if (@Vendor IS NOT NULL)
+		        IF (@Location IS NOT NULL)
+		            BEGIN 
+		               SET @SQL1 = @SQL1 + ' and d.intLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		            END
+
+			    IF (@Vendor IS NOT NULL)
 		           BEGIN 
 		                 set @SQL1 = @SQL1 +  ' and  a.intItemLocationId
 		                 IN (select intItemLocationId from tblICItemLocation where intVendorId
@@ -681,24 +690,26 @@ BEGIN TRY
 
 	       IF (@SalesEndDate IS NOT NULL)
 	       BEGIN
-		      SET @SalesEndDate = CONVERT(VARCHAR(10),@SalesEndDate,111)
-   	          SET @SQL1 = 'INSERT INTO tblSTMassUpdateReportMaster(UpcCode,ItemDescription,ChangeDescription,OldData,NewData)
-	                   select b.strUpcCode, c.strDescription, ''Sales Price End Date Change'',
-					   replace(CONVERT(NVARCHAR(10),a.dtmEndDate,111),''/'',''-''),
-					   ''' + CAST(@SalesEndDate as NVARCHAR(250)) + ''' from tblICItemSpecialPricing a JOIN tblICItemUOM b ON
-                       a.intItemUnitMeasureId = b.intItemUOMId JOIN tblICItem c ON a.intItemId = c.intItemId '
+		     
+                SET @SalesEndDate = CONVERT(VARCHAR(10),@SalesEndDate,111)
+   	            SET @SQL1 = 'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				             ChangeDescription,OldData,NewData)
+	                         select e.strLocationName, b.strUpcCode, c.strDescription, ''Sales end date'',
+				              REPLACE(CONVERT(NVARCHAR(10),a.dtmEndDate,111), ''/'', ''-''),
+					          ''' + CAST(@SalesEndDate as NVARCHAR(250)) + ''' from 
+					   	      tblICItemSpecialPricing a JOIN tblICItemUOM b ON
+                              a.intItemUnitMeasureId = b.intItemUOMId JOIN tblICItem c ON a.intItemId = c.intItemId 
+							  JOIN tblICItemLocation d ON a.intItemId = d.intItemId JOIN tblSMCompanyLocation e
+							  ON d.intLocationId = e.intCompanyLocationId '
 
-               SET @SQL1 = @SQL1 + ' where 1=1 ' 
+				SET @SQL1 = @SQL1 + ' where 1=1 ' 
 
-			   if (@Location IS NOT NULL)
-		          BEGIN 
-		                set @SQL1 = @SQL1 +  ' and  a.intItemLocationId
-		                IN (select intItemLocationId from tblICItemLocation where intLocationId
-		                IN (select intLocationId from tblICItemLocation where intLocationId
-						IN (' + CAST(@Location as NVARCHAR) + ')' + '))'
-		          END
+		        IF (@Location IS NOT NULL)
+		            BEGIN 
+		               SET @SQL1 = @SQL1 + ' and d.intLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		            END
 
-			   if (@Vendor IS NOT NULL)
+			    IF (@Vendor IS NOT NULL)
 		           BEGIN 
 		                 set @SQL1 = @SQL1 +  ' and  a.intItemLocationId
 		                 IN (select intItemLocationId from tblICItemLocation where intVendorId
