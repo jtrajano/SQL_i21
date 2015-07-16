@@ -358,3 +358,23 @@ BEGIN
 		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
 END
 GO
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFAttribute
+		WHERE intAttributeId = 18
+		)
+BEGIN
+	INSERT INTO tblMFAttribute (
+		intAttributeId
+		,strAttributeName
+		,intAttributeDataTypeId
+		,intAttributeTypeId
+		,strSQL
+		)
+	SELECT 18
+		,'Is Input Qty equal to Gross Weight?'
+		,5
+		,4
+		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO
