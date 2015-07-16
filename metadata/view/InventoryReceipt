@@ -4198,6 +4198,64 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "flex": 1,
+                                                        "itemId": "colContract",
+                                                        "text": "Contract No"
+                                                    },
+                                                    "name": "MyColumn70",
+                                                    "designerId": "92e805a8-908c-4509-8c03-a632763ffc09",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "editor",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intContractNumber',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Contract Number',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intContractHeaderId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "intContractNumber",
+                                                                "itemId": "cboContract",
+                                                                "valueField": "intContractNumber"
+                                                            },
+                                                            "name": "MyComboBox22",
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "a687b55c-ffd7-4ef8-81fc-368977bfb100",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.grid.column.Column",
+                                                    "reference": {
+                                                        "name": "columns",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "flex": 1,
                                                         "itemId": "colOtherCharge",
                                                         "text": "Other Charges"
                                                     },

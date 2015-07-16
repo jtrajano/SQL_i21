@@ -155,6 +155,7 @@ namespace iRely.Inventory.Model
             this.ToTable("tblICInventoryReceiptCharge");
             this.Property(t => t.intInventoryReceiptChargeId).HasColumnName("intInventoryReceiptChargeId");
             this.Property(t => t.intInventoryReceiptId).HasColumnName("intInventoryReceiptId");
+            this.Property(t => t.intContractId).HasColumnName("intContractId");
             this.Property(t => t.intChargeId).HasColumnName("intChargeId");
             this.Property(t => t.ysnInventoryCost).HasColumnName("ysnInventoryCost");
             this.Property(t => t.strCostMethod).HasColumnName("strCostMethod");
@@ -182,6 +183,8 @@ namespace iRely.Inventory.Model
             this.ToTable("vyuICGetInventoryReceiptCharge");
             this.Property(t => t.intInventoryReceiptChargeId).HasColumnName("intInventoryReceiptChargeId");
             this.Property(t => t.intInventoryReceiptId).HasColumnName("intInventoryReceiptId");
+            this.Property(t => t.intContractId).HasColumnName("intContractId");
+            this.Property(t => t.intContractNumber).HasColumnName("intContractNumber");
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
             this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
             this.Property(t => t.ysnInventoryCost).HasColumnName("ysnInventoryCost");

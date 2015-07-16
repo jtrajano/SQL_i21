@@ -26,6 +26,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'i21.store.CompanyLocationSubLocationBuffered',
         'i21.store.CountryBuffered',
         'ContractManagement.store.ContractDetailViewBuffered',
+        'ContractManagement.store.ContractHeaderViewBuffered',
         'Logistics.store.BufferedShipmentReceiptContracts'
     ],
 
@@ -203,6 +204,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             type: 'FreightTermsBuffered'
         },
 
+        contract: {
+            type: 'ctcontractheaderviewbuffered'
+        },
         otherCharges: {
             type: 'icbufferedothercharges'
         },
@@ -504,6 +508,17 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             var sourceType = get('current.intSourceType');
             switch (sourceType) {
                 case 2 :
+                    return false;
+                    break;
+                default:
+                    return true;
+                    break;
+            }
+        },
+        hideContractColumn: function(get) {
+            var receiptType = get('current.strReceiptType');
+            switch (receiptType) {
+                case 'Purchase Contract' :
                     return false;
                     break;
                 default:

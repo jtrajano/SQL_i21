@@ -391,6 +391,24 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             // ---- Charge and Invoice Tab
             grdCharges: {
                 readOnly: '{current.ysnPosted}',
+                colContract: {
+                    hidden: '{hideContractColumn}',
+                    dataIndex: 'intContractNumber',
+                    editor: {
+                        origValueField: 'intContractHeaderId',
+                        origUpdateField: 'intContractId',
+                        store: '{contract}',
+                        defaultFilters: [{
+                            column: 'strContractType',
+                            value: 'Purchase',
+                            conjunction: 'and'
+                        },{
+                            column: 'intEntityId',
+                            value: '{current.intEntityVendorId}',
+                            conjunction: 'and'
+                        }]
+                    }
+                },
                 colOtherCharge: {
                     dataIndex: 'strItemNo',
                     editor: {
@@ -1325,6 +1343,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var grid = combo.up('grid');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
+        var receipt = win.viewModel.data.current;
         var po = records[0];
 
         switch (win.viewModel.data.current.get('strReceiptType')) {
@@ -1358,6 +1377,33 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             case 'Purchase Contract':
                 current.set('intLineNo', po.get('intContractDetailId'));
                 current.set('intOrderId', po.get('intContractHeaderId'));
+
+                var costTypes =  po.get('tblCTContractCosts');
+                if (costTypes) {
+                    if (costTypes.length > 0) {
+                        costTypes.forEach(function(cost){
+                            var newCost = Ext.create('Inventory.model.ReceiptCharge', {
+                                intInventoryReceiptId : receipt.get('intInventoryReceiptId'),
+                                intContractId : po.get('intContractHeaderId'),
+                                intChargeId : cost.intItemId,
+                                ysnInventoryCost : false,
+                                strCostMethod : cost.strCostMethod,
+                                dblRate : cost.dblRate,
+                                intCostUOMId : cost.intItemUOMId,
+                                intEntityVendorId : cost.intVendorId,
+                                dblAmount : 0,
+                                strAllocateCostBy : '',
+                                strCostBilledBy : 'Vendor',
+
+                                strItemNo : cost.strItemNo,
+                                strCostUOM : cost.strUOM,
+                                strVendorId : cost.strVendorName,
+                                intContractNumber : po.get('intContractNumber')
+                            });
+                            receipt.tblICInventoryReceiptCharges().add(newCost);
+                        });
+                    }
+                }
 
                 if (win.viewModel.data.current) {
                     if (win.viewModel.data.current.get('intSourceType') === 0) {
@@ -1631,18 +1677,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         text: 'Balance Qty',
                         flex: 1
                     },
-//                    {
-//                        dataIndex: 'dblCost',
-//                        dataType: 'float',
-//                        text: 'Cost',
-//                        hidden: true
-//                    },
-//                    {
-//                        dataIndex: 'dblTotal',
-//                        dataType: 'float',
-//                        text: 'Line Total',
-//                        hidden: true
-//                    },
                     {
                         dataIndex: 'intContractDetailId',
                         dataType: 'numeric',
@@ -1668,63 +1702,16 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         dataType: 'string',
                         hidden: true
                     },
-//                    {
-//                        dataIndex: 'strLotTracking',
-//                        dataType: 'string',
-//                        hidden: true
-//                    },
                     {
                         dataIndex: 'intStorageLocationId',
                         dataType: 'numeric',
                         hidden: true
                     },
-//                    {
-//                        dataIndex: 'intSubLocationId',
-//                        dataType: 'numeric',
-//                        text: 'Sub Location Id',
-//                        hidden: true
-//                    },
-//                    {
-//                        dataIndex: 'strSubLocationName',
-//                        dataType: 'string',
-//                        text: 'Sub Location Name',
-//                        hidden: true
-//                    },
                     {
                         dataIndex: 'strStorageLocationName',
                         dataType: 'string',
                         hidden: true
                     }
-//                    {
-//                        dataIndex: 'dblItemUOMCF',
-//                        dataType: 'float',
-//                        text: 'Unit Qty',
-//                        hidden: true
-//                    },
-//                    {
-//                        dataIndex: 'intStockUOM',
-//                        dataType: 'numeric',
-//                        text: 'Stock UOM Id',
-//                        hidden: true
-//                    },
-//                    {
-//                        dataIndex: 'strStockUOM',
-//                        dataType: 'string',
-//                        text: 'Stock UOM',
-//                        hidden: true
-//                    },
-//                    {
-//                        dataIndex: 'strStockUOMType',
-//                        dataType: 'string',
-//                        text: 'Stock UOM Type',
-//                        hidden: true
-//                    },
-//                    {
-//                        dataIndex: 'dblStockUOMCF',
-//                        dataType: 'float',
-//                        text: 'Stock UOM Conversion Factor',
-//                        hidden: true
-//                    }
                 ],
                 itemId: 'cboOrderNumber',
                 displayField: 'intContractNumber',

@@ -1990,6 +1990,32 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         columns: [
                                                             {
                                                                 xtype: 'gridcolumn',
+                                                                itemId: 'colContract',
+                                                                text: 'Contract No',
+                                                                flex: 1,
+                                                                editor: {
+                                                                    xtype: 'gridcombobox',
+                                                                    columns: [
+                                                                        {
+                                                                            dataIndex: 'intContractNumber',
+                                                                            dataType: 'string',
+                                                                            text: 'Contract Number',
+                                                                            flex: 1
+                                                                        },
+                                                                        {
+                                                                            dataIndex: 'intContractHeaderId',
+                                                                            dataType: 'numeric',
+                                                                            hidden: true
+                                                                        },
+                                                                        
+                                                                    ],
+                                                                    itemId: 'cboContract',
+                                                                    displayField: 'intContractNumber',
+                                                                    valueField: 'intContractNumber'
+                                                                }
+                                                            },
+                                                            {
+                                                                xtype: 'gridcolumn',
                                                                 itemId: 'colOtherCharge',
                                                                 text: 'Other Charges',
                                                                 flex: 1,

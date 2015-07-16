@@ -28,6 +28,7 @@ Ext.define('Inventory.model.ReceiptCharge', {
                 }
             }
         },
+        { name: 'intContractId', type: 'int', allowNull: true },
         { name: 'intChargeId', type: 'int', allowNull: true },
         { name: 'ysnInventoryCost', type: 'boolean' },
         { name: 'strCostMethod', type: 'string', allowNull: true },
@@ -43,7 +44,8 @@ Ext.define('Inventory.model.ReceiptCharge', {
         { name: 'strItemDescription', type: 'string' },
         { name: 'strCostUOM', type: 'string' },
         { name: 'strUnitType', type: 'string' },
-        { name: 'strVendorId', type: 'string' }
+        { name: 'strVendorId', type: 'string' },
+        { name: 'intContractNumber', type: 'int', allowNull: true }
     ],
 
     validators: [
