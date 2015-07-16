@@ -23,6 +23,7 @@ BEGIN TRY
 		,@idoc INT
 		,@ErrMsg NVARCHAR(MAX)
 		,@dtmCurrentDate datetime
+		,@strGTIN nvarchar(50)
 		
 	Select @dtmCurrentDate	=GETDATE()
 	
@@ -140,6 +141,7 @@ BEGIN TRY
 
 	SELECT @CasesPerPallet = intLayerPerPallet * intUnitPerLayer
 		,@strItemNo = strItemNo
+		,@strGTIN=strGTIN
 	FROM dbo.tblICItem
 	WHERE intItemId = @intItemId
 
@@ -155,7 +157,7 @@ BEGIN TRY
 		RETURN
 	END
 
-	IF @strItemNo <> @strGTINCaseBarCode
+	IF @strGTINCaseBarCode NOT IN (@strItemNo,@strGTIN)
 	BEGIN
 		RAISERROR (
 				51060
