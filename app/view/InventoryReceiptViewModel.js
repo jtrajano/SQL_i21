@@ -504,6 +504,14 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     break;
             };
         },
+        readOnlyCostMethod: function (get) {
+            if (iRely.Functions.isEmpty(get('grdCharges.selection.strOnCostType'))) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        },
         hideContainerColumn: function(get) {
             var sourceType = get('current.intSourceType');
             switch (sourceType) {

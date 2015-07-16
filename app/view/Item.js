@@ -3513,22 +3513,6 @@ Ext.define('Inventory.view.Item', {
                                                                         xtype: 'gridcombobox',
                                                                         columns: [
                                                                             {
-                                                                                dataIndex: 'strDescription',
-                                                                                dataType: 'string',
-                                                                                text: 'Cost Method',
-                                                                                flex: 1
-                                                                            }
-                                                                        ],
-                                                                        itemId: 'cboCostMethod',
-                                                                        fieldLabel: 'Cost Method',
-                                                                        labelWidth: 105,
-                                                                        displayField: 'strDescription',
-                                                                        valueField: 'strDescription'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcombobox',
-                                                                        columns: [
-                                                                            {
                                                                                 dataIndex: 'intItemId',
                                                                                 dataType: 'numeric',
                                                                                 text: 'Item Id',
@@ -3552,6 +3536,22 @@ Ext.define('Inventory.view.Item', {
                                                                         labelWidth: 105,
                                                                         displayField: 'strItemNo',
                                                                         valueField: 'intItemId'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Cost Method',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboCostMethod',
+                                                                        fieldLabel: 'Cost Method',
+                                                                        labelWidth: 105,
+                                                                        displayField: 'strDescription',
+                                                                        valueField: 'strDescription'
                                                                     },
                                                                     {
                                                                         xtype: 'numericfield',

@@ -419,6 +419,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colCostMethod: {
                     dataIndex: 'strCostMethod',
                     editor: {
+                        readOnly: '{readOnlyCostMethod}',
                         store: '{costMethod}'
                     }
                 },
@@ -2311,6 +2312,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('strCostMethod', record.get('strCostMethod'));
             current.set('strCostUOM', record.get('strCostUOM'));
             current.set('strOnCostType', record.get('strOnCostType'));
+            if (!iRely.Functions.isEmpty(record.get('strOnCostType'))) {
+                current.set('strCostMethod', 'Percentage');
+            }
         }
     },
 

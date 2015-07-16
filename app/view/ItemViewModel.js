@@ -1089,6 +1089,15 @@ Ext.define('Inventory.view.ItemViewModel', {
                     return true
                     break;
             }
+        },
+        readOnlyCostMethod: function (get) {
+            if (iRely.Functions.isEmpty(get('current.intOnCostTypeId'))) {
+                return false;
+            }
+            else {
+                this.data.current.set('strCostMethod', 'Percentage');
+                return true;
+            }
         }
     }
 

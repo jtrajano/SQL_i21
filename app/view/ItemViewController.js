@@ -433,6 +433,7 @@ Ext.define('Inventory.view.ItemViewController', {
             chkMTM: '{current.ysnMTM}',
             chkPrice: '{current.ysnPrice}',
             cboCostMethod: {
+                readOnly: '{readOnlyCostMethod}',
                 value: '{current.strCostMethod}',
                 store: '{costMethods}'
             },

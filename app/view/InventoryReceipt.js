@@ -2057,6 +2057,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             },
                                                             {
                                                                 xtype: 'gridcolumn',
+                                                                itemId: 'colOnCostType',
+                                                                text: 'On Cost Type',
+                                                                flex: 1
+                                                            },
+                                                            {
+                                                                xtype: 'gridcolumn',
                                                                 itemId: 'colCostMethod',
                                                                 text: 'Cost Method',
                                                                 flex: 1,
@@ -2122,12 +2128,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     displayField: 'strUnitMeasure',
                                                                     valueField: 'strUnitMeasure'
                                                                 }
-                                                            },
-                                                            {
-                                                                xtype: 'gridcolumn',
-                                                                itemId: 'colOnCostType',
-                                                                text: 'On Cost Type',
-                                                                flex: 1
                                                             },
                                                             {
                                                                 xtype: 'gridcolumn',

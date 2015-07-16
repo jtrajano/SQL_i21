@@ -7705,45 +7705,6 @@
                                                                 "columns": [
                                                                     "[",
                                                                     "\t{",
-                                                                    "        dataIndex: 'strDescription',",
-                                                                    "        dataType: 'string',",
-                                                                    "        text: 'Cost Method',",
-                                                                    "        flex: 1",
-                                                                    "    }",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strDescription",
-                                                                "fieldLabel": "Cost Method",
-                                                                "itemId": "cboCostMethod",
-                                                                "labelWidth": 105,
-                                                                "layout|flex": null,
-                                                                "valueField": "strDescription"
-                                                            },
-                                                            "name": "MyComboBox73",
-                                                            "configAlternates": {
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "53f0848c-564e-4545-a0df-f95230809d4e",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "columns": [
-                                                                    "[",
-                                                                    "\t{",
                                                                     "\t\tdataIndex: 'intItemId',",
                                                                     "\t\tdataType: 'numeric',",
                                                                     "\t\ttext: 'Item Id',",
@@ -7777,6 +7738,45 @@
                                                                 "columns": "array"
                                                             },
                                                             "designerId": "556f6b6c-cff1-430f-b69a-ba6e618d42db",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "        dataIndex: 'strDescription',",
+                                                                    "        dataType: 'string',",
+                                                                    "        text: 'Cost Method',",
+                                                                    "        flex: 1",
+                                                                    "    }",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strDescription",
+                                                                "fieldLabel": "Cost Method",
+                                                                "itemId": "cboCostMethod",
+                                                                "labelWidth": 105,
+                                                                "layout|flex": null,
+                                                                "valueField": "strDescription"
+                                                            },
+                                                            "name": "MyComboBox73",
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "53f0848c-564e-4545-a0df-f95230809d4e",
                                                             "customConfigs": [
                                                                 {
                                                                     "group": "(Custom Properties)",

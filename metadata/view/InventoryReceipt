@@ -4348,6 +4348,21 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "flex": 1,
+                                                        "itemId": "colOnCostType",
+                                                        "text": "On Cost Type"
+                                                    },
+                                                    "name": "MyColumn46",
+                                                    "designerId": "1e4be1c3-9c82-4374-adce-c39a14bcecc9"
+                                                },
+                                                {
+                                                    "type": "Ext.grid.column.Column",
+                                                    "reference": {
+                                                        "name": "columns",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "flex": 1,
                                                         "itemId": "colCostMethod",
                                                         "text": "Cost Method"
                                                     },
@@ -4493,21 +4508,6 @@
                                                             ]
                                                         }
                                                     ]
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Column",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "flex": 1,
-                                                        "itemId": "colOnCostType",
-                                                        "text": "On Cost Type"
-                                                    },
-                                                    "name": "MyColumn46",
-                                                    "designerId": "1e4be1c3-9c82-4374-adce-c39a14bcecc9"
                                                 },
                                                 {
                                                     "type": "Ext.grid.column.Column",
