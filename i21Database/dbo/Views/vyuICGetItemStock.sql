@@ -82,7 +82,9 @@ SELECT
 	Item.intSalesTaxGroupId,
 	strSalesTax = SalesTax.strTaxGroupMaster,
 	Item.intPurchaseTaxGroupId,
-	strPurchaseTax = PurchaseTax.strTaxGroupMaster
+	strPurchaseTax = PurchaseTax.strTaxGroupMaster,
+	Item.intGradeId,
+	strGrade = Grade.strDescription
 FROM tblICItem Item
 LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId
 LEFT JOIN tblICItemUOM ReceiveUOM ON ReceiveUOM.intItemUOMId = ItemLocation.intReceiveUOMId
@@ -98,3 +100,4 @@ LEFT JOIN tblICCategory Category ON Category.intCategoryId = Item.intCategoryId
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 LEFT JOIN tblSMTaxGroupMaster SalesTax ON SalesTax.intTaxGroupMasterId = Item.intSalesTaxGroupId
 LEFT JOIN tblSMTaxGroupMaster PurchaseTax ON PurchaseTax.intTaxGroupMasterId = Item.intPurchaseTaxGroupId
+LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = Item.intGradeId
