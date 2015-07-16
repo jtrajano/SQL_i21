@@ -149,7 +149,7 @@ BEGIN TRY
 		,ri.intStorageLocationId
 		,ri.intConsumptionMethodId
 	FROM dbo.tblMFWorkOrderRecipeItem ri
-	JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId
+	JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId and r.intWorkOrderId =ri.intWorkOrderId 
 	WHERE r.intWorkOrderId = @intWorkOrderId
 		AND ri.intRecipeItemTypeId = 1
 		AND (
@@ -182,7 +182,7 @@ BEGIN TRY
 			,dblSubstituteRatio
 			,dblMaxSubstituteRatio
 		FROM dbo.tblMFWorkOrderRecipeItem ri
-		JOIN dbo.tblMFWorkOrderRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId
+		JOIN dbo.tblMFWorkOrderRecipeSubstituteItem rs ON rs.intRecipeItemId = ri.intRecipeItemId and rs.intWorkOrderId =ri.intWorkOrderId 
 		WHERE ri.intWorkOrderId = @intWorkOrderId
 			AND ri.intRecipeItemTypeId = 1
 			AND (
