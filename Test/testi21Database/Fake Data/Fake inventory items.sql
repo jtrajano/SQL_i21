@@ -35,6 +35,9 @@ BEGIN
 			,@SerializedLotGrains AS INT = 7
 			,@CornCommodity AS INT = 8
 			,@OtherCharges AS INT = 9
+			,@SurchargeOtherCharges AS INT = 10
+			,@SurchargeOnSurcharge AS INT = 11
+			,@SurchargeOnSurchargeOnSurcharge AS INT = 12
 			,@InvalidItem AS INT = -1
 
 	-- Declare the variables for location
@@ -87,6 +90,11 @@ BEGIN
 
 			,@ManualLotGrains_NewHaven AS INT = 21
 			,@SerializedLotGrains_NewHaven AS INT = 22
+
+			,@OtherCharges_DefaultLocation AS INT = 23
+			,@SurchargeOtherCharges_DefaultLocation AS INT = 24
+			,@SurchargeOnSurcharge_DefaultLocation AS INT = 25
+			,@SurchargeOnSurchargeOnSurcharge_DefaultLocation AS INT = 26
 
 	-- Declare the account ids
 	DECLARE @Inventory_Default AS INT = 1000
@@ -421,6 +429,9 @@ BEGIN
 		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo, strType, intCommodityId) VALUES (@CornCommodity, 'CORN - A COMMODITY ITEM', 'CORN', 'Commodity', @Commodity_Corn)
 
 		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo) VALUES (@OtherCharges, 'OTHER CHARGES', 'Other Charges')
+		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo) VALUES (@SurchargeOtherCharges, 'SURCHARGE OTHER CHARGES', 'Surcharge Other Charges')
+		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo) VALUES (@SurchargeOnSurcharge, 'SURCHARGE ON SURCHARGE', 'Surcharge on Surcharge')
+		INSERT INTO dbo.tblICItem (intItemId, strDescription, strItemNo) VALUES (@SurchargeOnSurchargeOnSurcharge, 'SURCHARGE ON SURCHARGE ON SURCHARGE', 'Surcharge on Surcharge on Surcharge')
 	END
 
 	-- Fake data for Item-Location
@@ -457,6 +468,10 @@ BEGIN
 		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@ColdGrains_DefaultLocation, @ColdGrains, @Default_Location, @AllowNegativeStock, @AverageCosting)
 		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@HotGrains_DefaultLocation, @HotGrains, @Default_Location, @AllowNegativeStock, @AverageCosting)
 		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@CornCommodity_DefaultLocation, @CornCommodity, @Default_Location, @AllowNegativeStock, @AverageCosting)
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@OtherCharges_DefaultLocation, @OtherCharges, @Default_Location, @AllowNegativeStock, @AverageCosting)
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@SurchargeOtherCharges_DefaultLocation, @SurchargeOtherCharges, @Default_Location, @AllowNegativeStock, @AverageCosting)
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@SurchargeOnSurcharge_DefaultLocation, @SurchargeOnSurcharge, @Default_Location, @AllowNegativeStock, @AverageCosting)
+		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@SurchargeOnSurchargeOnSurcharge_DefaultLocation, @SurchargeOnSurchargeOnSurcharge, @Default_Location, @AllowNegativeStock, @AverageCosting)
 
 		-- Add items for location 2 ('NEW HAVEN')
 		INSERT INTO dbo.tblICItemLocation (intItemLocationId, intItemId, intLocationId, intAllowNegativeInventory, intCostingMethod) VALUES (@WetGrains_NewHaven, @WetGrains, @NewHaven, @AllowNegativeStockWithWriteOff, @FIFO)
@@ -589,6 +604,9 @@ BEGIN
 				@Corn_25KgBagUOM AS INT = 46,			@Corn_10LbBagUOM AS INT = 47,			@Corn_TonUOM AS INT = 48
 
 		DECLARE @OtherCharges_PoundUOM AS INT = 49
+		DECLARE @SurchargeOtherCharges_PoundUOM AS INT = 50
+		DECLARE @SurchargeOnSurcharge_PoundUOM AS INT = 51
+		DECLARE @SurchargeOnSurchargeOnSurcharge_PoundUOM AS INT = 52
 
 		-- Unit of measure master table
 		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOM_Bushel, 'Bushel')
@@ -654,5 +672,8 @@ BEGIN
 		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (@Corn_TonUOM, @CornCommodity, @UOM_Ton, @TonUnitQty)
 
 		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (@OtherCharges_PoundUOM, @OtherCharges, @UOM_Pound, @PoundUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (@SurchargeOtherCharges_PoundUOM, @SurchargeOtherCharges, @UOM_Pound, @PoundUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (@SurchargeOnSurcharge_PoundUOM, @SurchargeOnSurcharge, @UOM_Pound, @PoundUnitQty)
+		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (@SurchargeOnSurchargeOnSurcharge_PoundUOM, @SurchargeOnSurchargeOnSurcharge, @UOM_Pound, @PoundUnitQty)
 	END 
 END

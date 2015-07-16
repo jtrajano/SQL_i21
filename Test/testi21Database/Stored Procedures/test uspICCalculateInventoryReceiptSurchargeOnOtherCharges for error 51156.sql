@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICCalculateInventoryReceiptOtherCharges for generating charges for Percentage]
+﻿CREATE PROCEDURE [testi21Database].[test uspICCalculateInventoryReceiptSurchargeOnOtherCharges for error 51156]
 AS
 BEGIN
 	-- Arrange 
@@ -17,6 +17,7 @@ BEGIN
 					,@SerializedLotGrains AS INT = 7
 					,@CornCommodity AS INT = 8
 					,@OtherCharges AS INT = 9
+					,@SurchargeOtherCharges AS INT = 10
 					,@InvalidItem AS INT = -1
 
 			-- Declare the variables for location
@@ -84,8 +85,7 @@ BEGIN
 			[intInventoryReceiptItemId] INT NOT NULL, 
 			[intChargeId] INT NOT NULL, 
 			[intEntityVendorId] INT NULL, 
-			[dblCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)),
-			[intContractId] INT NULL
+			[dblCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)) 
 		)
 
 		CREATE TABLE actual
@@ -95,68 +95,35 @@ BEGIN
 			[intInventoryReceiptItemId] INT NOT NULL, 
 			[intChargeId] INT NOT NULL, 
 			[intEntityVendorId] INT NULL, 
-			[dblCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)),
-			[intContractId] INT NULL
+			[dblCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)) 
 		)
 
-		DECLARE @intInventoryReceiptId AS INT = 9
+		DECLARE @intInventoryReceiptId AS INT = 11
 	END 
 
-	-- Setup the expected data
+	-- Create a cyclic surcharge. 
 	BEGIN 
-		INSERT INTO expected (
-			[intInventoryReceiptId]
-			,[intInventoryReceiptChargeId]
-			,[intInventoryReceiptItemId]
-			,[intChargeId]
-			,[intEntityVendorId]
-			,[dblCalculatedAmount]
-		)
-		SELECT 
-			[intInventoryReceiptId]			= @intInventoryReceiptId
-			,[intInventoryReceiptChargeId]	= 2
-			,[intInventoryReceiptItemId]	= 23
-			,[intChargeId]					= @OtherCharges
-			,[intEntityVendorId]			= NULL 
-			,[dblCalculatedAmount]			= (10 * 6 * 0.05) -- (Open Receive is 10, Unit Cost is $6.00, and Rate is 5%)
-		UNION ALL
-		SELECT 
-			[intInventoryReceiptId]			= @intInventoryReceiptId
-			,[intInventoryReceiptChargeId]	= 2
-			,[intInventoryReceiptItemId]	= 24
-			,[intChargeId]					= @OtherCharges
-			,[intEntityVendorId]			= NULL 
-			,[dblCalculatedAmount]			= (20 * 7 * 0.05) -- (Open Receive is 10, Unit Cost is $7.00, and Rate is 5%)
-	END 
-	
-	-- Act
-	BEGIN 		
-		EXEC [dbo].[uspICCalculateInventoryReceiptOtherCharges]
-			@intInventoryReceiptId
+		UPDATE dbo.tblICItem
+		SET intOnCostTypeId = @SurchargeOtherCharges
+		WHERE intItemId = @OtherCharges
+
+		UPDATE dbo.tblICItem
+		SET intOnCostTypeId = @OtherCharges
+		WHERE intItemId = @SurchargeOtherCharges
 	END 
 
 	-- Assert
 	BEGIN 
-		INSERT INTO actual (
-			[intInventoryReceiptId]
-			,[intInventoryReceiptChargeId]
-			,[intInventoryReceiptItemId]
-			,[intChargeId]
-			,[intEntityVendorId]
-			,[dblCalculatedAmount]
-		)
-		SELECT
-			[intInventoryReceiptId]
-			,[intInventoryReceiptChargeId]
-			,[intInventoryReceiptItemId]
-			,[intChargeId]
-			,[intEntityVendorId]
-			,[dblCalculatedAmount]
-		FROM	dbo.tblICInventoryReceiptChargePerItem
-		WHERE	intInventoryReceiptId = @intInventoryReceiptId
-
-		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
+		EXEC tSQLt.ExpectException
+			@ExpectedMessage = 'Cyclic situation found. Unable to compute surcharge because Surcharge Other Charges depends on Other Charges and vice-versa.'
+			,@ExpectedErrorNumber = 51156
 	END
+	
+	-- Act
+	BEGIN 		
+		EXEC [dbo].[uspICCalculateInventoryReceiptSurchargeOnOtherCharges]
+			@intInventoryReceiptId
+	END 
 
 	-- Clean-up: remove the tables used in the unit test
 	IF OBJECT_ID('actual') IS NOT NULL 

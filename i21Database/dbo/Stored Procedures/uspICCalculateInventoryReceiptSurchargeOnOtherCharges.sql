@@ -31,54 +31,64 @@ END
 
 -- Validate for cyclic computations
 BEGIN 
-	DECLARE @intCyclicOtherChargesItemId AS INT 
-			,@strCyclicOtherChargesItem AS NVARCHAR(50)
-			,@intCyclicSurchargeOnOtherChargesItemId AS INT
-			,@strCyclicSurchargeOnOtherChargesItem AS NVARCHAR(50)
+	DECLARE @intOtherChargesItemId AS INT 
+			,@strOtherChargesItem AS NVARCHAR(50)
+			,@intSurchargeItemId AS INT
+			,@strSurchargeItem AS NVARCHAR(50)
 
-	SELECT	@intCyclicOtherChargesItemId = OtherChargesItem.intItemId
-			,@strCyclicOtherChargesItem = OtherChargesItem.strItemNo
-			,@intCyclicSurchargeOnOtherChargesItemId = SurchargeOnOtherChargesItem.intItemId
-			,@strCyclicSurchargeOnOtherChargesItem = SurchargeOnOtherChargesItem.strItemNo
-			--,CyclicSurchargeOnOtherChargesItem.intItemId			
-	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge OtherCharges
-				ON ReceiptItem.intInventoryReceiptId = OtherCharges.intInventoryReceiptId
-			INNER JOIN dbo.tblICItem OtherChargesItem 
+	SELECT	@intOtherChargesItemId = OtherChargesItem.intItemId
+			,@strOtherChargesItem = OtherChargesItem.strItemNo
+			,@intSurchargeItemId = SurchargeItem.intItemId
+			,@strSurchargeItem = SurchargeItem.strItemNo
+	FROM	dbo.tblICInventoryReceiptCharge OtherCharges INNER JOIN dbo.tblICItem OtherChargesItem 
 				ON OtherChargesItem.intItemId = OtherCharges.intChargeId
-			LEFT JOIN dbo.tblICItem SurchargeOnOtherChargesItem
-				ON SurchargeOnOtherChargesItem.intItemId = OtherChargesItem.intOnCostTypeId				
-			LEFT JOIN dbo.tblICInventoryReceiptCharge CyclicOtherCharges
-				ON CyclicOtherCharges.intChargeId = SurchargeOnOtherChargesItem.intOnCostTypeId
-			LEFT JOIN dbo.tblICItem CyclicSurchargeOnOtherChargesItem 
-				ON CyclicSurchargeOnOtherChargesItem.intItemId = CyclicOtherCharges.intChargeId
-	WHERE	CyclicSurchargeOnOtherChargesItem.intItemId IS NOT NULL 
-			AND ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
+
+			LEFT JOIN dbo.tblICInventoryReceiptCharge Surcharge
+				ON Surcharge.intChargeId = OtherChargesItem.intOnCostTypeId
+			INNER JOIN dbo.tblICItem SurchargeItem 
+				ON SurchargeItem.intItemId = Surcharge.intChargeId			
+					
+	WHERE	SurchargeItem.intOnCostTypeId = OtherChargesItem.intItemId -- If equal, there is a cyclic reference. 
+			AND OtherCharges.intInventoryReceiptId = @intInventoryReceiptId
 			
-	IF @intCyclicOtherChargesItemId IS NOT NULL 
+	IF @intOtherChargesItemId IS NOT NULL AND @intSurchargeItemId IS NOT NULL 
 	BEGIN 
 		-- 'Cyclic situation found. Unable to compute surcharge because {Item X} depends on {Item Y} and vice-versa.'
-		RAISERROR(51156, 11, 1, @strCyclicOtherChargesItem, @strCyclicSurchargeOnOtherChargesItem)  
+		RAISERROR(51156, 11, 1, @strSurchargeItem, @strOtherChargesItem)  
 		GOTO _Exit  
 	END 
 END 
 
 -- Calculate the surcharge
 BEGIN 
+	DECLARE @intCount AS INT = 0
+			,@intLastCount AS INT 
+			,@intInfiniteLoopStopper AS INT = 1
+
 	-- Do a loop until all the surcharges are calculated. 
 	WHILE EXISTS (
 		SELECT TOP 1 1 
-		FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Surcharge	
-					ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
-				INNER JOIN dbo.tblICItem SurchargeItem 
+		FROM	dbo.tblICInventoryReceiptCharge Surcharge INNER JOIN dbo.tblICItem SurchargeItem 
 					ON SurchargeItem.intItemId = Surcharge.intChargeId
 				LEFT JOIN dbo.tblICInventoryReceiptChargePerItem SurchargedOtherCharges
 					ON SurchargedOtherCharges.intChargeId = SurchargeItem.intOnCostTypeId
 					AND SurchargedOtherCharges.intEntityVendorId = Surcharge.intEntityVendorId	
 					AND SurchargedOtherCharges.intInventoryReceiptId = Surcharge.intInventoryReceiptId	
-		WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
-				AND Surcharge.strCostMethod = @COST_METHOD_PERCENTAGE -- cost method is limited to percentage
-				AND SurchargeItem.intOnCostTypeId IS NOT NULL -- it is a surcharge item
-				AND SurchargedOtherCharges.dblCalculatedAmount IS NOT NULL -- there is a surcharged amount
+				LEFT JOIN dbo.tblICInventoryReceiptChargePerItem CalculatedSurcharge
+					ON CalculatedSurcharge.intChargeId = Surcharge.intChargeId
+					AND CalculatedSurcharge.intInventoryReceiptChargeId = Surcharge.intInventoryReceiptChargeId
+		WHERE	Surcharge.intInventoryReceiptId = @intInventoryReceiptId
+				AND Surcharge.strCostMethod = @COST_METHOD_PERCENTAGE		-- cost method is limited to percentage
+				AND SurchargedOtherCharges.intChargeId IS NOT NULL			-- it is a surcharge item
+				AND SurchargedOtherCharges.dblCalculatedAmount IS NOT NULL	-- there is a surcharged amount
+				AND CalculatedSurcharge.intInventoryReceiptChargeId IS NULL -- surcharge is not yet calculated. 
+				AND (
+					Surcharge.intContractId IS NULL 
+					OR (
+						Surcharge.intContractId IS NOT NULL 
+						AND Surcharge.intContractId = SurchargedOtherCharges.intContractId
+					)
+				)
 	)
 	BEGIN 
 		INSERT INTO dbo.tblICInventoryReceiptChargePerItem (
@@ -90,25 +100,27 @@ BEGIN
 				,[dblCalculatedAmount] 
 				,[intContractId]
 		)
-		SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
+		SELECT	[intInventoryReceiptId]			= Surcharge.intInventoryReceiptId
 				,[intInventoryReceiptChargeId]	= Surcharge.intInventoryReceiptChargeId
-				,[intInventoryReceiptItemId]	= ReceiptItem.intInventoryReceiptItemId
-				,[intChargeId]					= Charge.intChargeId
-				,[intEntityVendorId]			= Charge.intEntityVendorId
-				,[dblCalculatedAmount]			= (ISNULL(Charge.dblRate, 0) / 100) * SurchargedOtherCharges.dblCalculatedAmount
+				,[intInventoryReceiptItemId]	= SurchargedOtherCharges.intInventoryReceiptItemId
+				,[intChargeId]					= Surcharge.intChargeId
+				,[intEntityVendorId]			= Surcharge.intEntityVendorId
+				,[dblCalculatedAmount]			= (ISNULL(Surcharge.dblRate, 0) / 100) * SurchargedOtherCharges.dblCalculatedAmount
 				,[intContractId]				= Surcharge.intContractId
-		FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Surcharge	
-					ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
-				INNER JOIN dbo.tblICItem SurchargeItem 
+		FROM	dbo.tblICInventoryReceiptCharge Surcharge INNER JOIN dbo.tblICItem SurchargeItem 
 					ON SurchargeItem.intItemId = Surcharge.intChargeId
 				LEFT JOIN dbo.tblICInventoryReceiptChargePerItem SurchargedOtherCharges
 					ON SurchargedOtherCharges.intChargeId = SurchargeItem.intOnCostTypeId
 					AND SurchargedOtherCharges.intEntityVendorId = Surcharge.intEntityVendorId
 					AND SurchargedOtherCharges.intInventoryReceiptId = Surcharge.intInventoryReceiptId	
-		WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
-				AND Surcharge.strCostMethod = @COST_METHOD_PERCENTAGE -- cost method is limited to percentage
-				AND SurchargeItem.intOnCostTypeId IS NOT NULL -- it is a surcharge item
-				AND SurchargedOtherCharges.dblCalculatedAmount IS NOT NULL -- there is a surcharged amount
+				LEFT JOIN dbo.tblICInventoryReceiptChargePerItem CalculatedSurcharge
+					ON CalculatedSurcharge.intChargeId = Surcharge.intChargeId
+					AND CalculatedSurcharge.intInventoryReceiptChargeId = Surcharge.intInventoryReceiptChargeId
+		WHERE	Surcharge.intInventoryReceiptId = @intInventoryReceiptId
+				AND Surcharge.strCostMethod = @COST_METHOD_PERCENTAGE		-- cost method is limited to percentage
+				AND SurchargedOtherCharges.intChargeId IS NOT NULL			-- it is a surcharge item
+				AND SurchargedOtherCharges.dblCalculatedAmount IS NOT NULL	-- there is a surcharged amount
+				AND CalculatedSurcharge.intInventoryReceiptChargeId IS NULL -- surcharge is not yet calculated. 
 				AND (
 					Surcharge.intContractId IS NULL 
 					OR (
@@ -116,7 +128,28 @@ BEGIN
 						AND Surcharge.intContractId = SurchargedOtherCharges.intContractId
 					)
 				)
+
+		-- Check if the SP needs to break from an infinite loop
+		BEGIN 
+			SELECT	@intCount = COUNT(1) 
+			FROM	tblICInventoryReceiptChargePerItem
+			WHERE	intInventoryReceiptId = @intInventoryReceiptId
+
+			IF ISNULL(@intCount, 0) = ISNULL(@intLastCount, 0)
+			BEGIN
+				SET @intInfiniteLoopStopper += 1
+			END 
+
+			SET @intLastCount = @intCount
+
+			IF @intInfiniteLoopStopper > 3 
+			BEGIN
+				GOTO _BreakLoop
+			END 
+		END 
 	END 
+
+	_BreakLoop: 
 
 	-- Check if there are missing calculations for surcharges. 
 	DECLARE @surchargeName AS NVARCHAR(50)
@@ -125,14 +158,12 @@ BEGIN
 	SELECT TOP 1 
 			@surchargeId = SurchargeItem.intItemId
 			,@surchargeName = SurchargeItem.strItemNo
-	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Surcharge	
-				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
-			INNER JOIN dbo.tblICItem SurchargeItem 
+	FROM	dbo.tblICInventoryReceiptCharge Surcharge INNER JOIN dbo.tblICItem SurchargeItem 
 				ON SurchargeItem.intItemId = Surcharge.intChargeId
 			LEFT JOIN dbo.tblICInventoryReceiptChargePerItem CalculatedSurcharges
 				ON CalculatedSurcharges.intChargeId = SurchargeItem.intItemId
 				AND CalculatedSurcharges.intInventoryReceiptChargeId = Surcharge.intInventoryReceiptChargeId 
-	WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
+	WHERE	Surcharge.intInventoryReceiptId = @intInventoryReceiptId
 			AND Surcharge.strCostMethod = @COST_METHOD_PERCENTAGE -- cost method is limited to percentage
 			AND SurchargeItem.intOnCostTypeId IS NOT NULL -- it is a surcharge item
 			AND CalculatedSurcharges.intInventoryReceiptChargePerItemId IS NULL -- if null, the surcharge was not calculated. 

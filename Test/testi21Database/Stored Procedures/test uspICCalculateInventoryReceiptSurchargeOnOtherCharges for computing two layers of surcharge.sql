@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICCalculateInventoryReceiptOtherCharges for generating charges for Percentage]
+﻿CREATE PROCEDURE [testi21Database].[test uspICCalculateInventoryReceiptSurchargeOnOtherCharges for computing two layers of surcharge]
 AS
 BEGIN
 	-- Arrange 
@@ -17,6 +17,9 @@ BEGIN
 					,@SerializedLotGrains AS INT = 7
 					,@CornCommodity AS INT = 8
 					,@OtherCharges AS INT = 9
+					,@SurchargeOtherCharges AS INT = 10
+					,@SurchargeOnSurcharge AS INT = 11
+					,@SurchargeOnSurchargeOnSurcharge AS INT = 12
 					,@InvalidItem AS INT = -1
 
 			-- Declare the variables for location
@@ -75,6 +78,9 @@ BEGIN
 					@Corn_25KgBagUOM AS INT = 46,			@Corn_10LbBagUOM AS INT = 47,			@Corn_TonUOM AS INT = 48
 
 			DECLARE @OtherCharges_PoundUOM AS INT = 49
+			DECLARE @SurchargeOtherCharges_PoundUOM AS INT = 50
+			DECLARE @SurchargeOnSurcharge_PoundUOM AS INT = 51
+			DECLARE @SurchargeOnSurchargeOnSurcharge_PoundUOM AS INT = 52
 		END 
 		
 		CREATE TABLE expected
@@ -99,8 +105,28 @@ BEGIN
 			[intContractId] INT NULL
 		)
 
-		DECLARE @intInventoryReceiptId AS INT = 9
+		DECLARE @intInventoryReceiptId AS INT = 12
 	END 
+
+	-- Setup the links for the surcharge 
+	BEGIN 
+		UPDATE dbo.tblICItem
+		SET intOnCostTypeId = @OtherCharges
+		WHERE intItemId = @SurchargeOtherCharges
+
+		UPDATE dbo.tblICItem
+		SET intOnCostTypeId = @SurchargeOtherCharges
+		WHERE intItemId = @SurchargeOnSurcharge
+	END 
+
+	-- Act
+	BEGIN 		
+		EXEC [dbo].[uspICCalculateInventoryReceiptOtherCharges]
+			@intInventoryReceiptId
+
+		EXEC [dbo].[uspICCalculateInventoryReceiptSurchargeOnOtherCharges]
+			@intInventoryReceiptId
+	END 	
 
 	-- Setup the expected data
 	BEGIN 
@@ -114,44 +140,72 @@ BEGIN
 		)
 		SELECT 
 			[intInventoryReceiptId]			= @intInventoryReceiptId
-			,[intInventoryReceiptChargeId]	= 2
-			,[intInventoryReceiptItemId]	= 23
+			,[intInventoryReceiptChargeId]	= 6
+			,[intInventoryReceiptItemId]	= 29
 			,[intChargeId]					= @OtherCharges
-			,[intEntityVendorId]			= NULL 
-			,[dblCalculatedAmount]			= (10 * 6 * 0.05) -- (Open Receive is 10, Unit Cost is $6.00, and Rate is 5%)
+			,[intEntityVendorId]			= 1 
+			,[dblCalculatedAmount]			= 25.00 -- It is a fixed amount. 
 		UNION ALL
 		SELECT 
 			[intInventoryReceiptId]			= @intInventoryReceiptId
-			,[intInventoryReceiptChargeId]	= 2
-			,[intInventoryReceiptItemId]	= 24
+			,[intInventoryReceiptChargeId]	= 6
+			,[intInventoryReceiptItemId]	= 30
 			,[intChargeId]					= @OtherCharges
-			,[intEntityVendorId]			= NULL 
-			,[dblCalculatedAmount]			= (20 * 7 * 0.05) -- (Open Receive is 10, Unit Cost is $7.00, and Rate is 5%)
-	END 
-	
-	-- Act
-	BEGIN 		
-		EXEC [dbo].[uspICCalculateInventoryReceiptOtherCharges]
-			@intInventoryReceiptId
+			,[intEntityVendorId]			= 1 
+			,[dblCalculatedAmount]			= 25.00 -- It is a fixed amount. 
+		UNION ALL 
+		SELECT 
+			[intInventoryReceiptId]			= @intInventoryReceiptId
+			,[intInventoryReceiptChargeId]	= 7
+			,[intInventoryReceiptItemId]	= 29
+			,[intChargeId]					= @SurchargeOtherCharges
+			,[intEntityVendorId]			= 1 
+			,[dblCalculatedAmount]			= 25.00 * 0.02 -- 2% of $25.00
+		UNION ALL
+		SELECT 
+			[intInventoryReceiptId]			= @intInventoryReceiptId
+			,[intInventoryReceiptChargeId]	= 7
+			,[intInventoryReceiptItemId]	= 30
+			,[intChargeId]					= @SurchargeOtherCharges
+			,[intEntityVendorId]			= 1 
+			,[dblCalculatedAmount]			= 25.00 * 0.02 -- 2% of $25.00
+		UNION ALL 
+		SELECT 
+			[intInventoryReceiptId]			= @intInventoryReceiptId
+			,[intInventoryReceiptChargeId]	= 8
+			,[intInventoryReceiptItemId]	= 29
+			,[intChargeId]					= @SurchargeOnSurcharge
+			,[intEntityVendorId]			= 1 
+			,[dblCalculatedAmount]			= 25.00 * 0.02 * 0.1 -- 10 % of (2% of $25.00)
+		UNION ALL
+		SELECT 
+			[intInventoryReceiptId]			= @intInventoryReceiptId
+			,[intInventoryReceiptChargeId]	= 8
+			,[intInventoryReceiptItemId]	= 30
+			,[intChargeId]					= @SurchargeOnSurcharge
+			,[intEntityVendorId]			= 1 
+			,[dblCalculatedAmount]			= 25.00 * 0.02 * 0.1 -- 10 % of (2% of $25.00)
 	END 
 
 	-- Assert
 	BEGIN 
 		INSERT INTO actual (
-			[intInventoryReceiptId]
-			,[intInventoryReceiptChargeId]
-			,[intInventoryReceiptItemId]
-			,[intChargeId]
-			,[intEntityVendorId]
-			,[dblCalculatedAmount]
+				[intInventoryReceiptId]
+				,[intInventoryReceiptChargeId]
+				,[intInventoryReceiptItemId]
+				,[intChargeId]
+				,[intEntityVendorId]
+				,[dblCalculatedAmount]
+				,[intContractId]
 		)
 		SELECT
-			[intInventoryReceiptId]
-			,[intInventoryReceiptChargeId]
-			,[intInventoryReceiptItemId]
-			,[intChargeId]
-			,[intEntityVendorId]
-			,[dblCalculatedAmount]
+				[intInventoryReceiptId]
+				,[intInventoryReceiptChargeId]
+				,[intInventoryReceiptItemId]
+				,[intChargeId]
+				,[intEntityVendorId]
+				,[dblCalculatedAmount]
+				,[intContractId]
 		FROM	dbo.tblICInventoryReceiptChargePerItem
 		WHERE	intInventoryReceiptId = @intInventoryReceiptId
 

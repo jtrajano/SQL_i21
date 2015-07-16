@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICCalculateInventoryReceiptOtherCharges for generating charges for Percentage]
+﻿CREATE PROCEDURE [testi21Database].[test uspICCalculateInventoryReceiptSurchargeOnOtherCharges for the basics]
 AS
 BEGIN
 	-- Arrange 
@@ -17,6 +17,7 @@ BEGIN
 					,@SerializedLotGrains AS INT = 7
 					,@CornCommodity AS INT = 8
 					,@OtherCharges AS INT = 9
+					,@SurchargeOtherCharges AS INT = 10
 					,@InvalidItem AS INT = -1
 
 			-- Declare the variables for location
@@ -99,39 +100,12 @@ BEGIN
 			[intContractId] INT NULL
 		)
 
-		DECLARE @intInventoryReceiptId AS INT = 9
-	END 
-
-	-- Setup the expected data
-	BEGIN 
-		INSERT INTO expected (
-			[intInventoryReceiptId]
-			,[intInventoryReceiptChargeId]
-			,[intInventoryReceiptItemId]
-			,[intChargeId]
-			,[intEntityVendorId]
-			,[dblCalculatedAmount]
-		)
-		SELECT 
-			[intInventoryReceiptId]			= @intInventoryReceiptId
-			,[intInventoryReceiptChargeId]	= 2
-			,[intInventoryReceiptItemId]	= 23
-			,[intChargeId]					= @OtherCharges
-			,[intEntityVendorId]			= NULL 
-			,[dblCalculatedAmount]			= (10 * 6 * 0.05) -- (Open Receive is 10, Unit Cost is $6.00, and Rate is 5%)
-		UNION ALL
-		SELECT 
-			[intInventoryReceiptId]			= @intInventoryReceiptId
-			,[intInventoryReceiptChargeId]	= 2
-			,[intInventoryReceiptItemId]	= 24
-			,[intChargeId]					= @OtherCharges
-			,[intEntityVendorId]			= NULL 
-			,[dblCalculatedAmount]			= (20 * 7 * 0.05) -- (Open Receive is 10, Unit Cost is $7.00, and Rate is 5%)
+		DECLARE @intInventoryReceiptId AS INT
 	END 
 	
 	-- Act
 	BEGIN 		
-		EXEC [dbo].[uspICCalculateInventoryReceiptOtherCharges]
+		EXEC [dbo].[uspICCalculateInventoryReceiptSurchargeOnOtherCharges]
 			@intInventoryReceiptId
 	END 
 

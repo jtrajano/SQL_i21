@@ -12,7 +12,8 @@ BEGIN
 			[intInventoryReceiptItemId] INT NOT NULL, 
 			[intChargeId] INT NOT NULL, 
 			[intEntityVendorId] INT NOT NULL, 
-			[dblCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)) 
+			[dblCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)),
+			[intContractId] INT NULL
 		)
 
 		CREATE TABLE actual
@@ -22,7 +23,8 @@ BEGIN
 			[intInventoryReceiptItemId] INT NOT NULL, 
 			[intChargeId] INT NOT NULL, 
 			[intEntityVendorId] INT NOT NULL, 
-			[dblCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)) 
+			[dblCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)),
+			[intContractId] INT NULL
 		)
 
 		DECLARE @intInventoryReceiptId AS INT
@@ -42,7 +44,7 @@ BEGIN
 			,[intInventoryReceiptItemId]
 			,[intChargeId]
 			,[intEntityVendorId]
-			,[dblCalculatedAmount]
+			,[dblCalculatedAmount]			
 		)
 		SELECT
 			[intInventoryReceiptId]
