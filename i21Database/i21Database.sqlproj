@@ -2004,6 +2004,10 @@
     <Build Include="dbo\Tables\tblSMModule.sql" />
     <Build Include="dbo\Views\vyuRKGetCompanyLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDPRInvDailyPositionDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetSampleTypeAttributes.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetSampleProperty.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetSampleTestResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetSampleConditionalProperty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -6,6 +6,7 @@
 	[intAttributeId] INT NOT NULL, 
 	[strAttributeValue] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT '', 
 	[intDocumentFileId] INT, 
+	[intListItemId] INT, 
 	
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMSampleDetail_dtmCreated] DEFAULT GetDate(),
@@ -14,6 +15,7 @@
 	
 	CONSTRAINT [PK_tblQMSampleDetail] PRIMARY KEY ([intSampleDetailId]), 
 	CONSTRAINT [FK_tblQMSampleDetail_tblQMSample] FOREIGN KEY ([intSampleId]) REFERENCES [tblQMSample]([intSampleId]) ON DELETE CASCADE, 
-	CONSTRAINT [FK_tblQMSampleDetail_tblQMAttribute] FOREIGN KEY ([intAttributeId]) REFERENCES [tblQMAttribute]([intAttributeId]) 
+	CONSTRAINT [FK_tblQMSampleDetail_tblQMAttribute] FOREIGN KEY ([intAttributeId]) REFERENCES [tblQMAttribute]([intAttributeId]), 
+	CONSTRAINT [FK_tblQMSampleDetail_tblQMListItem] FOREIGN KEY ([intListItemId]) REFERENCES [tblQMListItem]([intListItemId]) 
 	--CONSTRAINT [FK_tblQMSampleDetail_tblQMDocumentFile] FOREIGN KEY ([intDocumentFileId]) REFERENCES [tblQMDocumentFile]([intDocumentFileId]) 
 )
