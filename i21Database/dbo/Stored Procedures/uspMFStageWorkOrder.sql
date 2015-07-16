@@ -45,6 +45,8 @@ BEGIN TRY
 		,@intConsumptionSubLocationId int
 		,@intWeightUOMId int
 		,@intTransactionCount INT
+		,@strWorkOrderNo nvarchar(50)
+		,@strProcessName nvarchar(50)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -209,6 +211,31 @@ BEGIN TRY
 				,1
 				)
 	END
+
+		IF NOT EXISTS (
+				SELECT *
+				FROM dbo.tblMFWorkOrder W
+				WHERE intWorkOrderId = @intWorkOrderId AND intManufacturingProcessId=@intManufacturingProcessId
+				)
+		BEGIN
+
+		SELECT @strWorkOrderNo = strWorkOrderNo
+		FROM dbo.tblMFWorkOrder
+		WHERE intWorkOrderId = @intWorkOrderId
+
+		Select @strProcessName=strProcessName 
+		From dbo.tblMFManufacturingProcess 
+		Where intManufacturingProcessId =@intManufacturingProcessId 
+
+			RAISERROR (
+					51155
+					,11
+					,1
+					,@strLotNumber
+					,@strWorkOrderNo
+					,@strProcessName
+					)
+		END
 
 	IF EXISTS (
 				SELECT *

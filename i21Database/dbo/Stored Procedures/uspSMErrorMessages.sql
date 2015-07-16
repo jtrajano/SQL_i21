@@ -618,3 +618,8 @@ EXEC sp_addmessage 51153,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51154) EXEC sp_dropmessage 51154, 'us_english'	
 SET @strmessage = 'Product specification entered should be unique.'
 EXEC sp_addmessage 51154,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51155) EXEC sp_dropmessage 51155, 'us_english'	
+SET @strmessage = 'Lot %s you are trying to consume for Work order %s is not associated with the selected process %s.'
+EXEC sp_addmessage 51155,11,@strmessage,'us_english','False'
+
