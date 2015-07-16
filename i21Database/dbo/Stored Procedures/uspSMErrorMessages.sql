@@ -320,7 +320,7 @@ SET @strmessage =  'The work order that you clicked on is already completed.'
 EXEC sp_addmessage 51079,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51080) EXEC sp_dropmessage 51080, 'us_english'	
-SET @strmessage =  'It is possible that this work order has been temporarily paused by another user. Please refresh the screen.'
+SET @strmessage =  'The work order has been paused. Please re-start the WO to resume.'
 EXEC sp_addmessage 51080,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51081) EXEC sp_dropmessage 51081, 'us_english'	
