@@ -372,6 +372,37 @@ Ext.define('Inventory.view.ItemViewController', {
             txtMask2: '{current.strMask2}',
             txtMask3: '{current.strMask3}',
 
+            cboPackType: {
+                value: '{current.intPackTypeId}'
+//                ,
+//                store: '{mfgWeightUom}'
+            },
+            txtWeightControlCode: '{current.strWeightControlCode}',
+            txtBlendWeight: '{current.dblBlendWeight}',
+            txtNetWeight: '{current.dblNetWeight}',
+            txtUnitsPerCase: '{current.dblUnitPerCase}',
+            txtQuarantineDuration: '{current.dblQuarantineDuration}',
+//            txtOwner: '{current.strMask3}',
+//            txtCustomer: '{current.strMask3}',
+            txtCaseWeight: '{current.dblCaseWeight}',
+//            txtWarehouseStatus: '{current.strMask3}',
+            chkKosherCertified: '{current.ysnKosherCertified}',
+            chkFairTradeCompliant: '{current.ysnFairTradeCompliant}',
+            chkOrganicItem: '{current.ysnOrganic}',
+            chkRainForestCertified: '{current.ysnRainForestCertified}',
+            txtRiskScore: '{current.dblRiskScore}',
+            txtDensity: '{current.dblDensity}',
+            dtmDateAvailable: '{current.dtmDateAvailable}',
+            chkMinorIngredient: '{current.ysnMinorIngredient}',
+            chkExternalItem: '{current.ysnExternalItem}',
+//            txtExternalGroup: '{current.ysnExternalItem}',
+            chkSellableItem: '{current.ysnSellableItem}',
+            txtMinimumStockWeeks: '{current.dblMinStockWeeks}',
+            txtFullContainerSize: '{current.dblFullContainerSize}',
+
+
+
+
             //-------------------//
             //Cross Reference Tab//
             //-------------------//
@@ -659,23 +690,51 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             cboProductType: {
                 value: '{current.intProductTypeId}',
-                store: '{productTypeAttribute}'
+                store: '{productTypeAttribute}',
+                defaultFilters: [{
+                    column: 'intCommodityId',
+                    value: '{current.intCommodityId}'
+                }]
             },
             cboRegion: {
                 value: '{current.intRegionId}',
-                store: '{regionAttribute}'
+                store: '{regionAttribute}',
+                defaultFilters: [{
+                    column: 'intCommodityId',
+                    value: '{current.intCommodityId}'
+                }]
             },
             cboSeason: {
                 value: '{current.intSeasonId}',
-                store: '{seasonAttribute}'
+                store: '{seasonAttribute}',
+                defaultFilters: [{
+                    column: 'intCommodityId',
+                    value: '{current.intCommodityId}'
+                }]
             },
             cboClass: {
                 value: '{current.intClassVarietyId}',
-                store: '{classAttribute}'
+                store: '{classAttribute}',
+                defaultFilters: [{
+                    column: 'intCommodityId',
+                    value: '{current.intCommodityId}'
+                }]
             },
             cboProductLine: {
                 value: '{current.intProductLineId}',
-                store: '{productLineAttribute}'
+                store: '{productLineAttribute}',
+                defaultFilters: [{
+                    column: 'intCommodityId',
+                    value: '{current.intCommodityId}'
+                }]
+            },
+            cboGrade: {
+                value: '{current.intGradeId}',
+                store: '{gradeAttribute}',
+                defaultFilters: [{
+                    column: 'intCommodityId',
+                    value: '{current.intCommodityId}'
+                }]
             },
             cboMarketValuation: {
                 value: '{current.strMarketValuation}',
@@ -2042,39 +2101,6 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // </editor-fold>
 
-    // <editor-fold desc="Commodity Tab Methods and Event Handlers">
-
-    onCommoditySelect: function (combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        if (i21.ModuleMgr.Inventory.getCompanyPreference('intInheritSetup') !== 2)
-            return;
-
-        var commodity = records[0];
-        var intCommodityId = commodity.get('intCommodityId');
-
-        var win = combo.up('window');
-        var pgeCommodity = win.down('#pgeCommodity');
-        var cboOrigin = pgeCommodity.down('#cboOrigin');
-        var cboProductType = pgeCommodity.down('#cboProductType');
-        var cboRegion = pgeCommodity.down('#cboRegion');
-        var cboSeason = pgeCommodity.down('#cboSeason');
-        var cboClass = pgeCommodity.down('#cboClass');
-        var cboProductLine = pgeCommodity.down('#cboProductLine');
-
-        var filter = [{ dataIndex: 'intCommodityId', value: intCommodityId, condition: 'eq' }];
-
-        cboOrigin.defaultFilters = filter;
-        cboProductType.defaultFilters = filter;
-        cboRegion.defaultFilters = filter;
-        cboSeason.defaultFilters = filter;
-        cboClass.defaultFilters = filter;
-        cboProductLine.defaultFilters = filter;
-    },
-
-    // </editor-fold>
-
     // <editor-fold desc="Assembly Tab Methods and Event Handlers">
 
     onAssemblySelect: function(combo, records, eOpts) {
@@ -2524,9 +2550,6 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboSpecialPricingDiscountBy": {
                 select: this.onSpecialPricingSelect
-            },
-            "#cboCommodity": {
-                select: this.onCommoditySelect
             },
             "#cboAssemblyItem": {
                 select: this.onAssemblySelect

@@ -26,6 +26,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         'Inventory.store.BufferedProductLineAttribute',
         'Inventory.store.BufferedProductTypeAttribute',
         'Inventory.store.BufferedSeasonAttribute',
+        'Inventory.store.BufferedGradeAttribute',
         'Inventory.store.BufferedCategory',
         'EntityManagement.store.VendorBuffered',
         'EntityManagement.store.CustomerBuffered',
@@ -642,6 +643,9 @@ Ext.define('Inventory.view.ItemViewModel', {
         },
         productLineAttribute: {
             type: 'icbufferedproductlineattribute'
+        },
+        gradeAttribute: {
+            type: 'icbufferedgradeattribute'
         },
         marketValuations:{
             autoLoad: true,

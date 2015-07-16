@@ -110,6 +110,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intSeasonId).HasColumnName("intSeasonId");
             this.Property(t => t.intClassVarietyId).HasColumnName("intClassVarietyId");
             this.Property(t => t.intProductLineId).HasColumnName("intProductLineId");
+            this.Property(t => t.intGradeId).HasColumnName("intGradeId");
             this.Property(t => t.strMarketValuation).HasColumnName("strMarketValuation");
             this.Property(t => t.ysnInventoryCost).HasColumnName("ysnInventoryCost");
             this.Property(t => t.ysnAccrue).HasColumnName("ysnAccrue");
@@ -119,6 +120,25 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intOnCostTypeId).HasColumnName("intOnCostTypeId");
             this.Property(t => t.dblAmount).HasColumnName("dblAmount").HasPrecision(18, 6);
             this.Property(t => t.intCostUOMId).HasColumnName("intCostUOMId");
+            this.Property(t => t.intPackTypeId).HasColumnName("intPackTypeId");
+            this.Property(t => t.strWeightControlCode).HasColumnName("strWeightControlCode");
+            this.Property(t => t.dblBlendWeight).HasColumnName("dblBlendWeight").HasPrecision(18, 6);
+            this.Property(t => t.dblNetWeight).HasColumnName("dblNetWeight").HasPrecision(18, 6);
+            this.Property(t => t.dblUnitPerCase).HasColumnName("dblUnitPerCase").HasPrecision(18, 6);
+            this.Property(t => t.dblQuarantineDuration).HasColumnName("dblQuarantineDuration").HasPrecision(18, 6);
+            this.Property(t => t.dblCaseWeight).HasColumnName("dblCaseWeight").HasPrecision(18, 6);
+            this.Property(t => t.ysnKosherCertified).HasColumnName("ysnKosherCertified");
+            this.Property(t => t.ysnFairTradeCompliant).HasColumnName("ysnFairTradeCompliant");
+            this.Property(t => t.ysnOrganic).HasColumnName("ysnOrganic");
+            this.Property(t => t.ysnRainForestCertified).HasColumnName("ysnRainForestCertified");
+            this.Property(t => t.dblRiskScore).HasColumnName("dblRiskScore").HasPrecision(18, 6);
+            this.Property(t => t.dblDensity).HasColumnName("dblDensity").HasPrecision(18, 6);
+            this.Property(t => t.dtmDateAvailable).HasColumnName("dtmDateAvailable");
+            this.Property(t => t.ysnMinorIngredient).HasColumnName("ysnMinorIngredient");
+            this.Property(t => t.ysnExternalItem).HasColumnName("ysnExternalItem");
+            this.Property(t => t.ysnSellableItem).HasColumnName("ysnSellableItem");
+            this.Property(t => t.dblMinStockWeeks).HasColumnName("dblMinStockWeeks").HasPrecision(18, 6);
+            this.Property(t => t.dblFullContainerSize).HasColumnName("dblFullContainerSize").HasPrecision(18, 6);
 
             this.HasOptional(p => p.tblICBrand)
                 .WithMany(p => p.tblICItems)
@@ -280,6 +300,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strClassVariety).HasColumnName("strClassVariety");
             this.Property(t => t.intProductLineId).HasColumnName("intProductLineId");
             this.Property(t => t.strProductLine).HasColumnName("strProductLine");
+            this.Property(t => t.intGradeId).HasColumnName("intGradeId");
+            this.Property(t => t.strGrade).HasColumnName("strGrade");
         }
     }
 
@@ -394,6 +416,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strSalesTax).HasColumnName("strSalesTax");
             this.Property(t => t.intPurchaseTaxGroupId).HasColumnName("intPurchaseTaxGroupId");
             this.Property(t => t.strPurchaseTax).HasColumnName("strPurchaseTax");
+            this.Property(t => t.intGradeId).HasColumnName("intGradeId");
+            this.Property(t => t.strGrade).HasColumnName("strGrade");
 
             this.HasMany(p => p.tblICItemAccounts)
                 .WithRequired(p => p.vyuICGetItemStock)

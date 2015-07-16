@@ -110,6 +110,7 @@ namespace iRely.Inventory.Model
         public int? intSeasonId { get; set; }
         public int? intClassVarietyId { get; set; }
         public int? intProductLineId { get; set; }
+        public int? intGradeId { get; set; }
         public string strMarketValuation { get; set; }
         public bool? ysnInventoryCost { get; set; }
         public bool? ysnAccrue { get; set; }
@@ -119,6 +120,25 @@ namespace iRely.Inventory.Model
         public int? intOnCostTypeId { get; set; }
         public decimal? dblAmount { get; set; }
         public int? intCostUOMId { get; set; }
+        public int? intPackTypeId { get; set; }
+        public string strWeightControlCode { get; set; }
+        public decimal? dblBlendWeight { get; set; }
+        public decimal? dblNetWeight { get; set; }
+        public decimal? dblUnitPerCase { get; set; }
+        public decimal? dblQuarantineDuration { get; set; }
+        public decimal? dblCaseWeight { get; set; }
+        public bool? ysnKosherCertified { get; set; }
+        public bool? ysnFairTradeCompliant { get; set; }
+        public bool? ysnOrganic { get; set; }
+        public bool? ysnRainForestCertified { get; set; }
+        public decimal? dblRiskScore { get; set; }
+        public decimal? dblDensity { get; set; }
+        public DateTime? dtmDateAvailable { get; set; }
+        public bool? ysnMinorIngredient { get; set; }
+        public bool? ysnExternalItem { get; set; }
+        public bool? ysnSellableItem { get; set; }
+        public decimal? dblMinStockWeeks { get; set; }
+        public decimal? dblFullContainerSize { get; set; }
 
         private string _manufacturer;
         [NotMapped]
@@ -278,6 +298,8 @@ namespace iRely.Inventory.Model
         public string strClassVariety { get; set; }
         public int? intProductLineId { get; set; }
         public string strProductLine { get; set; }
+        public int? intGradeId { get; set; }
+        public string strGrade { get; set; }
     }
 
     public class vyuICGetOtherCharges
@@ -377,6 +399,8 @@ namespace iRely.Inventory.Model
         public string strSalesTax { get; set; }
         public int? intPurchaseTaxGroupId { get; set; }
         public string strPurchaseTax { get; set; }
+        public int? intGradeId { get; set; }
+        public string strGrade { get; set; }
 
         public ICollection<vyuICGetItemPricing> tblICItemPricings { get; set; }
         public ICollection<vyuICGetItemAccount> tblICItemAccounts { get; set; }

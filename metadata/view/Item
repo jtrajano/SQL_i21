@@ -5116,7 +5116,7 @@
                                                                     "designerId": "bc8345f8-a98c-414c-8de3-8a74f747e833",
                                                                     "cn": [
                                                                         {
-                                                                            "type": "Ext.form.field.Text",
+                                                                            "type": "Ext.form.field.ComboBox",
                                                                             "reference": {
                                                                                 "name": "items",
                                                                                 "type": "array"
@@ -5124,11 +5124,11 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "fieldLabel": "Pack Type",
-                                                                                "itemId": "txtPackType",
+                                                                                "itemId": "cboPackType",
                                                                                 "labelWidth": 125,
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "MyTextField3",
+                                                                            "name": "MyComboBox88",
                                                                             "designerId": "d06bf7cd-1401-43ee-8ab9-c3357bbdbe6b"
                                                                         },
                                                                         {
@@ -5155,6 +5155,7 @@
                                                                             },
                                                                             "codeClass": null,
                                                                             "userConfig": {
+                                                                                "designer|createAlias": "numberfield",
                                                                                 "fieldLabel": "Blend Weight",
                                                                                 "hideTrigger": true,
                                                                                 "itemId": "txtBlendWeight",
@@ -5172,6 +5173,7 @@
                                                                             },
                                                                             "codeClass": null,
                                                                             "userConfig": {
+                                                                                "designer|createAlias": "numberfield",
                                                                                 "fieldLabel": "Net Weight",
                                                                                 "hideTrigger": true,
                                                                                 "itemId": "txtNetWeight",
@@ -5189,6 +5191,7 @@
                                                                             },
                                                                             "codeClass": null,
                                                                             "userConfig": {
+                                                                                "designer|createAlias": "numberfield",
                                                                                 "fieldLabel": "Units Per Case",
                                                                                 "hideTrigger": true,
                                                                                 "itemId": "txtUnitsPerCase",
@@ -5206,6 +5209,7 @@
                                                                             },
                                                                             "codeClass": null,
                                                                             "userConfig": {
+                                                                                "designer|createAlias": "numberfield",
                                                                                 "fieldLabel": "Quarantine Duration",
                                                                                 "hideTrigger": true,
                                                                                 "itemId": "txtQuarantineDuration",
@@ -5255,6 +5259,7 @@
                                                                             },
                                                                             "codeClass": null,
                                                                             "userConfig": {
+                                                                                "designer|createAlias": "numberfield",
                                                                                 "fieldLabel": "Case Weight",
                                                                                 "hideTrigger": true,
                                                                                 "itemId": "txtCaseWeight",
@@ -5374,6 +5379,7 @@
                                                                             },
                                                                             "codeClass": null,
                                                                             "userConfig": {
+                                                                                "designer|createAlias": "numberfield",
                                                                                 "fieldLabel": "Risk Score",
                                                                                 "hideTrigger": true,
                                                                                 "itemId": "txtRiskScore",
@@ -5391,6 +5397,7 @@
                                                                             },
                                                                             "codeClass": null,
                                                                             "userConfig": {
+                                                                                "designer|createAlias": "numberfield",
                                                                                 "fieldLabel": "Density",
                                                                                 "hideTrigger": true,
                                                                                 "itemId": "txtDensity",
@@ -5491,9 +5498,10 @@
                                                                             },
                                                                             "codeClass": null,
                                                                             "userConfig": {
+                                                                                "designer|createAlias": "numberfield",
                                                                                 "fieldLabel": "Minmum Stock Weeks",
                                                                                 "hideTrigger": true,
-                                                                                "itemId": "txtMinmumStockWeeks",
+                                                                                "itemId": "txtMinimumStockWeeks",
                                                                                 "labelWidth": 125,
                                                                                 "layout|flex": null
                                                                             },
@@ -5508,6 +5516,7 @@
                                                                             },
                                                                             "codeClass": null,
                                                                             "userConfig": {
+                                                                                "designer|createAlias": "numberfield",
                                                                                 "fieldLabel": "Full Container Size",
                                                                                 "hideTrigger": true,
                                                                                 "itemId": "txtFullContainerSize",
@@ -10387,6 +10396,56 @@
                                                                 "columns": "array"
                                                             },
                                                             "designerId": "5d1f49b1-a905-4d49-91a0-63241fa6d161",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intCommodityAttributeId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Commodity Attribute Id',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intCommodityId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Commodity Id',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strDescription',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Attribute',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strDescription",
+                                                                "fieldLabel": "Grade",
+                                                                "itemId": "cboGrade",
+                                                                "layout|flex": null,
+                                                                "valueField": "intCommodityAttributeId"
+                                                            },
+                                                            "name": "MyComboBox87",
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "0d8483ba-f328-411b-859c-b8c85b94b57d",
                                                             "customConfigs": [
                                                                 {
                                                                     "group": "(Custom Properties)",
