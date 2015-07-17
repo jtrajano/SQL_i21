@@ -1,6 +1,6 @@
-﻿CREATE Proc [dbo].[uspRKDPRInvDailyPositionDetail]	 
+﻿CREATE PROC [dbo].[uspRKDPRInvDailyPositionDetail]	
 	 @intCommodityId int,
-		 @intLocationId int= null
+	 @intLocationId int= null
 	
 	AS
 
@@ -88,9 +88,15 @@ UNION ALL
 					
 			SELECT @intCommodityId as intCommodityId, 'Total Non-Receipted' as [strType], dblTotal FROM(         
 			SELECT  SUM(Balance) dblTotal FROM vyuGRGetStorageDetail
-			WHERE ysnReceiptedStorage = 1 AND strOwnedPhysicalStock='Customer'	AND intCommodityId = @intCommodityId and intCompanyLocationId=@intLocationId
+			WHERE ysnReceiptedStorage = 0 AND strOwnedPhysicalStock='Customer'	AND intCommodityId = @intCommodityId and intCompanyLocationId=@intLocationId
 			GROUP BY [Storage Type])t
 
+UNION ALL
+
+			SELECT @intCommodityId as intCommodityId, 'Total Receipted' as [strType], dblTotal FROM(         
+			SELECT  SUM(Balance) dblTotal FROM vyuGRGetStorageDetail
+			WHERE ysnReceiptedStorage = 1 AND intCommodityId = @intCommodityId and intCompanyLocationId=@intLocationId
+			GROUP BY [Storage Type])t
 UNION ALL           
 
 	SELECT @intCommodityId as intCommodityId,'Collatral Receipts - Sales' as [strType], SUM(dblOriginalQuantity)- sum(dblAdjustmentAmount) dblTotal FROM (
@@ -200,7 +206,13 @@ BEGIN
 						
 			SELECT @intCommodityId as intCommodityId, 'Total Non-Receipted' as [strType], dblTotal FROM(         
 			SELECT  SUM(Balance) dblTotal FROM vyuGRGetStorageDetail
-			WHERE ysnReceiptedStorage = 1 AND strOwnedPhysicalStock='Customer'	AND intCommodityId = @intCommodityId
+			WHERE ysnReceiptedStorage = 0 AND strOwnedPhysicalStock='Customer'	AND intCommodityId = @intCommodityId
+			GROUP BY [Storage Type])t
+			UNION ALL
+
+			SELECT @intCommodityId as intCommodityId, 'Total Receipted' as [strType], dblTotal FROM(         
+			SELECT  SUM(Balance) dblTotal FROM vyuGRGetStorageDetail
+			WHERE ysnReceiptedStorage = 1 AND intCommodityId = @intCommodityId and intCompanyLocationId=@intLocationId
 			GROUP BY [Storage Type])t
 
 			UNION ALL           
