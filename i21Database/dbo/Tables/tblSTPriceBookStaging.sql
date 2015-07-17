@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblSTPriceBookStaging]
 (
-	[intPricebookStgId] INT NOT NULL , 
+	[intPricebookStgId] INT NOT NULL IDENTITY , 
     [strStgType] NVARCHAR(50) NULL DEFAULT 'Inbound', 
     [intStoreNumber] INT NULL, 
     [strUPCNumber] NVARCHAR(50) NULL, 
