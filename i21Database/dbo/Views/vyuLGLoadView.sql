@@ -74,6 +74,7 @@ SELECT Load.intLoadId
 		,intCounterPartyContractSeq = (SELECT CT.intContractSeq From tblLGLoad L LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = L.intContractDetailId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
 		,dblCounterPartyCashPrice = (SELECT CT.dblCashPrice From tblLGLoad L LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = L.intContractDetailId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
 		,intCounterPartyItemId = (SELECT L.intItemId FROM tblLGLoad L WHERE L.intLoadNumber = Load.intLoadNumber and L.intPurchaseSale <> Load.intPurchaseSale)
+		,intCounterPartyLoadId = (SELECT L.intLoadId FROM tblLGLoad L WHERE L.intLoadNumber = Load.intLoadNumber and L.intPurchaseSale <> Load.intPurchaseSale)
 FROM tblLGLoad Load
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = Load.intGenerateLoadId
 LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = Load.intCompanyLocationId
