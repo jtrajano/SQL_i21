@@ -1549,7 +1549,6 @@
     <Build Include="dbo\Views\vyuRKGetFutureMarketName.sql" />
     <Build Include="dbo\Views\vyuRKGetBrokerTrader.sql" />
     <Build Include="dbo\Views\vyuRKGetBrokerInstrumentType.sql" />
-    <Build Include="dbo\Views\vyuRKDPRHedgeDailyPositionDetail.sql" />
     <Build Include="dbo\Views\vyuRKDPRDailyPositionByCommodityLocation.sql" />
     <Build Include="dbo\Views\vyuRKDPRDailyPositionByCommodity.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptPayablesAging.sql" />
@@ -2008,6 +2007,7 @@
     <Build Include="dbo\Stored Procedures\uspQMGetSampleProperty.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetSampleTestResult.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetSampleConditionalProperty.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRHedgeDailyPositionDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
