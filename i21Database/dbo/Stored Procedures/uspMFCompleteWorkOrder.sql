@@ -391,18 +391,37 @@ BEGIN TRY
 
 	IF @ysnProductionOnly = 0--Consumption will happen during true up.
 	BEGIN
-		EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
-			,@dblProduceQty = @dblProduceQty
-			,@intProduceUOMKey = @intProduceUnitMeasureId
-			,@intBatchId = @intBatchId
-			,@intUserId = @intUserId
 
-		EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
-			,@dblProduceQty = @dblProduceQty
-			,@intProduceUOMKey = @intProduceUnitMeasureId
-			,@intUserId = @intUserId
-			,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
-			,@strRetBatchId = @strRetBatchId OUTPUT
+		If exists(Select *from tblMFWorkOrder Where intWorkOrderId = @intWorkOrderId and intItemUOMId=@intProduceUnitMeasureId)
+		Begin
+			EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
+				,@dblProduceQty = @dblProduceQty
+				,@intProduceUOMKey = @intProduceUnitMeasureId
+				,@intBatchId = @intBatchId
+				,@intUserId = @intUserId
+
+			EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
+				,@dblProduceQty = @dblProduceQty
+				,@intProduceUOMKey = @intProduceUnitMeasureId
+				,@intUserId = @intUserId
+				,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
+				,@strRetBatchId = @strRetBatchId OUTPUT
+		End
+		Else
+		Begin
+			EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
+				,@dblProduceQty = @dblPhysicalCount
+				,@intProduceUOMKey = @intPhysicalItemUOMId
+				,@intBatchId = @intBatchId
+				,@intUserId = @intUserId
+
+			EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
+				,@dblProduceQty = @dblPhysicalCount
+				,@intProduceUOMKey = @intPhysicalItemUOMId
+				,@intUserId = @intUserId
+				,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
+				,@strRetBatchId = @strRetBatchId OUTPUT
+		End
 	END
 
 	If @strRetBatchId is null
