@@ -3794,4 +3794,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intDefaultTabId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="46ce0fe2-090b-4685-8a14-5f35831fbad9" ChangeDateTime="07/17/2015 16:17:04">
+    <Property Name="ElementName" Value="[dbo].[tblMFWorkOrderStatus].[strColorName]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFWorkOrderStatus]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strColorClassName" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8e6a4c5b-6377-496b-8f72-29afeed04f72" ChangeDateTime="07/17/2015 16:17:59">
+    <Property Name="ElementName" Value="[dbo].[tblMFWorkOrderStatus].[strColorClassName]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFWorkOrderStatus]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strBackColorName" />
+  </Operation>
 </Operations>

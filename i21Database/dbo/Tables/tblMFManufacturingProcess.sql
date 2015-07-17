@@ -5,7 +5,7 @@
 	[strDescription] NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
 	[strWorkInstruction] NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[intAttributeTypeId] INT NULL,
-	[strInternalProcessName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[strInternalName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[intCreatedUserId] [int] NOT NULL,
 	[dtmCreated] [datetime] NOT NULL CONSTRAINT [DF_tblMFManufacturingProcess_dtmCreated] DEFAULT GetDate(),
 	[intLastModifiedUserId] [int] NOT NULL,
