@@ -34,7 +34,7 @@ SELECT Load.intLoadId
 		,strItemNo = CDetail.strItemNo
         ,Load.dtmScheduledDate
         ,Load.dblQuantity
-        ,Load.ysnInProgress
+        ,ysnInProgress = IsNull(Load.ysnInProgress, 0)
         ,strScaleTicketNo = CASE WHEN IsNull(Load.intTicketId, 0) <> 0 
 								 THEN 
 									CAST(ST.intTicketNumber AS VARCHAR(100))
