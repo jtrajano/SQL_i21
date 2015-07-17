@@ -278,7 +278,7 @@ BEGIN TRY
 			FROM dbo.tblMFWorkOrder W
 			LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
 			JOIN dbo.tblMFWorkOrderRecipe Product ON Product.intItemId = W.intItemId
-			JOIN dbo.tblMFWorkOrderRecipeItem ProductItem ON ProductItem.intRecipeId = Product.intRecipeId
+			JOIN dbo.tblMFWorkOrderRecipeItem ProductItem ON ProductItem.intRecipeId = Product.intRecipeId and ProductItem.intWorkOrderId = Product.intWorkOrderId
 			JOIN dbo.tblMFWorkOrderRecipeItem ri ON ri.intItemId = ProductItem.intItemId
 			WHERE ri.intWorkOrderId =@intWorkOrderId 
 				AND ri.intRecipeItemTypeId = 1
@@ -319,7 +319,7 @@ BEGIN TRY
 		FROM dbo.tblMFWorkOrder W
 		LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
 		JOIN dbo.tblMFWorkOrderRecipe P ON P.intItemId = W.intItemId
-		JOIN dbo.tblMFWorkOrderRecipeItem PI ON PI.intRecipeId = P.intRecipeId
+		JOIN dbo.tblMFWorkOrderRecipeItem PI ON PI.intRecipeId = P.intRecipeId and PI.intWorkOrderId = P.intWorkOrderId
 		JOIN dbo.tblMFWorkOrderRecipeItem ri ON ri.intItemId = PI.intItemId
 		JOIN dbo.tblICItem Product ON Product.intItemId = W.intItemId
 		JOIN dbo.tblICItem Input ON Input.intItemId = PI.intItemId
@@ -383,7 +383,7 @@ BEGIN TRY
 	
 	SELECT RSI.intSubstituteItemId
 	FROM dbo.tblMFWorkOrderRecipeItem RI 
-	JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
+	JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId and RI.intWorkOrderId =RSI.intWorkOrderId 
 	WHERE RI.intWorkOrderId = @intWorkOrderId
 		AND (
 			(

@@ -43,11 +43,11 @@ BEGIN
 	Begin
 		SELECT Distinct Count(*) AS LotCount
 		FROM dbo.tblMFWorkOrderRecipe R
-		JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
+		JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId and RI.intWorkOrderId = R.intWorkOrderId
 			AND R.intWorkOrderId = @intWorkOrderId
 			AND RI.intRecipeItemTypeId = 1
 			AND RI.intConsumptionMethodId = (Case When @intConsumptionMethodId=0 Then RI.intConsumptionMethodId else @intConsumptionMethodId End)
-		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON SI.intRecipeItemId = RI.intRecipeItemId
+		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON SI.intRecipeItemId = RI.intRecipeItemId and RI.intWorkOrderId = R.intWorkOrderId
 			AND SI.intRecipeId = R.intRecipeId
 		JOIN dbo.tblICLot L ON (
 			L.intItemId = RI.intItemId
