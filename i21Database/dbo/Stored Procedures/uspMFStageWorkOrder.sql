@@ -117,7 +117,7 @@ BEGIN TRY
 	SELECT @strLotNumber=strLotNumber,
 		@intInputLotId = intLotId
 		,@dblWeight = (CASE WHEN intWeightUOMId IS NOT NULL THEN dblWeight ELSE dblQty END)
-		,@intNewItemUOMId=(CASE WHEN intWeightUOMId IS NOT NULL THEN intWeightUOMId ELSE intItemUOMId END) 
+		,@intNewItemUOMId=intItemUOMId 
 		,@dblWeightPerQty= (Case When dblWeightPerQty is null or dblWeightPerQty=0 Then 1 Else dblWeightPerQty End)
 		,@intWeightUOMId=intWeightUOMId
 	FROM tblICLot
@@ -487,7 +487,7 @@ BEGIN TRY
 					,@dblAdjustByQuantity = @dblAdjustByQuantity
 					,@dblNewSplitLotQuantity = NULL
 					,@dblNewWeight = NULL
-					,@intNewItemUOMId = NULL
+					,@intNewItemUOMId = @intNewItemUOMId
 					,@intNewWeightUOMId = NULL
 					,@dblNewUnitCost = NULL
 					-- Parameters used for linking or FK (foreign key) relationships
