@@ -13,8 +13,9 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @ZeroDecimal decimal(18,6)
 		,@ARAccountId int
+		,@EntityId int
 
-SET @ZeroDecimal = 0.000000
+SET @ZeroDecimal = 0.000000;
 	
 
 
@@ -80,7 +81,10 @@ BEGIN
    SET @incval = @incval + 1;
 END;	
 
+SELECT @EntityId =intEntityId FROM tblSMUserSecurity WHERE intUserSecurityID = @intUserId;
+
 DISABLE TRIGGER dbo.trgInvoiceNumber ON dbo.tblARInvoice;
+
 INSERT INTO 
 	[tblARInvoice]	   
 		([strInvoiceNumber]
@@ -167,7 +171,7 @@ SELECT
 	,min(BL.[strZipCode])			--[strBillToZipCode]
 	,min(BL.[strCountry])			--[strBillToCountry]
 	,1
-	,@intUserId
+	,@EntityId
 FROM
 	@InvoiceEntries IE
 	Join @temp TE
@@ -261,7 +265,7 @@ DECLARE @InvoiceId as int;
 WHILE EXISTS(SELECT NULL FROM @Invoices)
 BEGIN
 	SELECT TOP 1 @InvoiceId = [intInvoiceID] FROM @Invoices
-	EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceId
+--	EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceId
 	--this is added because the reCompute invoice Taxes does not update the totals correctly
 	-- need to review this
     UPDATE
