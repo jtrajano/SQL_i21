@@ -1431,7 +1431,6 @@
     <Build Include="dbo\Tables\tblARInvoiceDetailTax.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetItemTaxes.sql" />
     <Build Include="dbo\Tables\tblPRTimecard.sql" />
-    <Build Include="dbo\Tables\tblPRTimeEntry.sql" />
     <Build Include="dbo\Tables\tblGRStorageOption.sql" />
     <Build Include="dbo\Tables\tblGRStorageSchedulePeriod.sql" />
     <Build Include="dbo\Tables\tblGRStorageScheduleRule.sql" />
@@ -1909,7 +1908,6 @@
     <Build Include="dbo\Tables\tblEntityTariffFuelSurcharge.sql" />
     <Build Include="dbo\Tables\tblEntityTariffMileage.sql" />
     <Build Include="dbo\Views\vyuEMSearchShipVia.sql" />
-    <Build Include="dbo\Tables\tblPRCompanyReference.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInsertINTOTableFromXML.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateOverpayment.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateBillData.sql" />
@@ -2008,6 +2006,12 @@
     <Build Include="dbo\Stored Procedures\uspQMGetSampleTestResult.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetSampleConditionalProperty.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDPRHedgeDailyPositionDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeDeduction.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeEarning.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOff.sql" />
+    <Build Include="dbo\Tables\tblPRCompanyPreference.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeDirectDeposit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -13,22 +13,20 @@ tblPRPaycheck.intEmployeeId
 ,dblTaxTotalYTD = SUM(tblPaychecks.dblTaxTotal) 
 FROM tblPRPaycheck 
 LEFT JOIN
-	(SELECT
-	 intEmployeeId
-	 ,intPaycheckId
-	 ,dblGross
-	 ,dblAdjustedGross
-	 ,dblCompanyTaxTotal
-	 ,dblDeductionTotal
-	 ,dblNetPayTotal
-	 ,dblTaxTotal
-	 ,dtmPayDate
-	FROM tblPRPaycheck) tblPaychecks
+	(--Posted Paychecks
+	 SELECT intEmployeeId ,intPaycheckId ,dblGross ,dblAdjustedGross ,dblCompanyTaxTotal
+	 ,dblDeductionTotal ,dblNetPayTotal ,dblTaxTotal ,dtmPayDate
+	FROM tblPRPaycheck	WHERE ysnPosted = 1 AND ysnVoid = 0
+	UNION ALL
+	 --Current Paycheck (if Unposted)
+	SELECT intEmployeeId ,intPaycheckId ,dblGross ,dblAdjustedGross ,dblCompanyTaxTotal
+	 ,dblDeductionTotal ,dblNetPayTotal ,dblTaxTotal ,dtmPayDate
+	FROM tblPRPaycheck
+	WHERE ysnPosted = 0 AND ysnVoid = 0 AND intPaycheckId = tblPRPaycheck.intPaycheckId) tblPaychecks
 ON tblPRPaycheck.intEmployeeId = tblPaychecks.intEmployeeId
 AND CAST(FLOOR(CAST(tblPaychecks.dtmPayDate AS FLOAT)) AS DATETIME) 
 		BETWEEN CAST(('1/1/' + CAST(YEAR(tblPRPaycheck.dtmPayDate) AS NVARCHAR(4))) AS DATETIME) 
 			AND CAST(FLOOR(CAST(tblPRPaycheck.dtmPayDate AS FLOAT)) AS DATETIME) 
-WHERE ysnPosted = 1 and ysnVoid = 0
 GROUP BY 
 tblPRPaycheck.intEmployeeId
 ,tblPRPaycheck.intPaycheckId
