@@ -98,11 +98,11 @@ BEGIN
 	--WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId)
 
 	
-	IF @amountPaid IS NULL
-	BEGIN
-		SET @amountPaid = (SELECT SUM(dblAmountDue) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
-		SET @amountPaid = @amountPaid - (SELECT SUM(dblDiscount) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
-	END
+	--IF @amountPaid IS NULL
+	--BEGIN
+	--	SET @amountPaid = (SELECT SUM(dblAmountDue) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
+	--	SET @amountPaid = @amountPaid - (SELECT SUM(dblDiscount) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
+	--END
 
 	--Compute Withheld Here
 	IF @vendorWithhold = 1
@@ -149,7 +149,7 @@ BEGIN
 		[strPaymentInfo]		= @paymentInfo,
 		[strNotes]				= @notes,
 		[dtmDatePaid]			= ISNULL(@datePaid, GETDATE()),
-		[dblAmountPaid]			= @payment,
+		[dblAmountPaid]			= ISNULL(@payment,0),
 		[dblUnapplied]			= 0,
 		[ysnPosted]				= @isPost,
 		[dblWithheld]			= 0,
