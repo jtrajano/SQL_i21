@@ -87,7 +87,7 @@ A.[intEntityVendorId]
 ,B.dblQtyOrdered -B.dblQtyReceived
 ,B.dblQtyReceived
 ,B.intPurchaseDetailId
-,B.intPurchaseDetailId
+,NULL --this should be null as this has constraint from IR Receipt item
 ,B.dblCost
 ,intAccountId = [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Inventory')
 ,strAccountId = (SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Inventory'))
