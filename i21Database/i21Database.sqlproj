@@ -2012,6 +2012,7 @@
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOff.sql" />
     <Build Include="dbo\Tables\tblPRCompanyPreference.sql" />
     <Build Include="dbo\Tables\tblPREmployeeDirectDeposit.sql" />
+    <Build Include="dbo\Views\vyuTRDispacthedLoad.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
