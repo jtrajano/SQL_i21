@@ -8,7 +8,7 @@
 	[intBulkPlantTypeId] int NULL,
 	[intXferAcctStatusId] int NULL,
 	[intCongsinmentId] int NULL,
-	[strRackPriceToUse] int NULL,
+	[strRackPriceToUse] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
     [ysnTaxesInXfer] BIT NULL, 
     [ysnAverageCostForNonBulkPlant] BIT NULL,
 	[ysnAutoAssignInvoiceNumber] BIT NULL,
