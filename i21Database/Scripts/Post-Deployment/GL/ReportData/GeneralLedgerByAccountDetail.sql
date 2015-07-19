@@ -143,7 +143,7 @@ SELECT DISTINCT
 					ELSE CAST(ISNULL(ISNULL(B.dblBeginBalanceUnit, 0) / ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0),0) AS NUMERIC(18, 6)) END	
 	
 	FROM GLAccountBalance B
-	LEFT JOIN GLAccountDetails A ON B.intAccountId = A.intAccountId
+	INNER JOIN GLAccountDetails A ON B.intAccountId = A.intAccountId
 	WHERE A.isUnposted = 0 or A.isUnposted IS NULL
 --*CountEnd*--'
 
@@ -257,7 +257,7 @@ AS
   ELSE CAST(ISNULL(ISNULL(B.dblBeginBalanceUnit, 0) / ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0),0) AS NUMERIC(18, 6)) 
   END       
   FROM GLAccountBalance B   
-  LEFT JOIN GLAccountDetails A ON B.intAccountId = A.intAccountId
+  	INNER JOIN GLAccountDetails A ON B.intAccountId = A.intAccountId
   WHERE A.isUnposted = 0 OR A.isUnposted IS NULL
   --*CountEnd*--'
   
