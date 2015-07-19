@@ -25,7 +25,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     [intLoadCategoryUOMId] INT NULL, 
     
 	[intIndexId] INT NULL, 
-	[dblAdjustment] NUMERIC(4, 2) NULL, 
+	[dblAdjustment] NUMERIC(8, 6) NULL, 
 	[intAdjItemUOMId] [int] NULL,
     
 	[intPricingTypeId] [int] NULL,
