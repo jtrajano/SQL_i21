@@ -2014,6 +2014,7 @@
     <Build Include="dbo\Tables\tblPREmployeeDirectDeposit.sql" />
     <Build Include="dbo\Views\vyuTRDispacthedLoad.sql" />
     <Build Include="dbo\Tables\tblTRCompanyPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRProcessLogisticsLoad.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -46,7 +46,7 @@ LG.ysnInProgress,
 LG.intCounterPartyLoadId as intOutboundLoadId
 from dbo.vyuLGLoadView LG
 where 
- (IsNull(LG.ysnDispatched,0)=1) and (IsNull(LG.ysnInProgress,0) = 0) and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and
+ (IsNull(LG.ysnDispatched,0)=1)  and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and
 ((IsNull(LG.ysnDirectShip,0) = 1 and LG.strType ='Inbound') 
 or (IsNull(LG.ysnDirectShip,0) = 0 and LG.strType ='Inbound'))
 UNION ALL
@@ -96,7 +96,7 @@ LG.ysnInProgress,
 LG.intLoadId as intOutboundLoadId
 from dbo.vyuLGLoadView LG
 where 
- (IsNull(LG.ysnDispatched,0)=1) and (IsNull(LG.ysnInProgress,0) = 0) and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and
+ (IsNull(LG.ysnDispatched,0)=1)  and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and
 ((IsNull(LG.ysnDirectShip,0) = 0 and LG.strType ='Outbound'))	
 	
 
