@@ -8,6 +8,7 @@
 	[intEntityVendorId] INT NULL, 
 	[intContractId] INT NULL, 
 	[dblCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)), 
+	[strAllocateCostBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	CONSTRAINT [PK_tblICInventoryReceiptChargePerItem] PRIMARY KEY ([intInventoryReceiptChargePerItemId]), 
 	CONSTRAINT [FK_tblICInventoryReceiptChargePerItem_tblICInventoryReceiptItem] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES [tblICInventoryReceiptItem]([intInventoryReceiptItemId]) ON DELETE CASCADE, 
 	CONSTRAINT [FK_tblICInventoryReceiptChargePerItem_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]),

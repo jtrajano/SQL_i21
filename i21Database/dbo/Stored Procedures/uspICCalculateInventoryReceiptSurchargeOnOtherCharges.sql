@@ -99,6 +99,7 @@ BEGIN
 				,[intEntityVendorId] 
 				,[dblCalculatedAmount] 
 				,[intContractId]
+				,[strAllocateCostBy]
 		)
 		SELECT	[intInventoryReceiptId]			= Surcharge.intInventoryReceiptId
 				,[intInventoryReceiptChargeId]	= Surcharge.intInventoryReceiptChargeId
@@ -107,6 +108,7 @@ BEGIN
 				,[intEntityVendorId]			= Surcharge.intEntityVendorId
 				,[dblCalculatedAmount]			= (ISNULL(Surcharge.dblRate, 0) / 100) * SurchargedOtherCharges.dblCalculatedAmount
 				,[intContractId]				= Surcharge.intContractId
+				,[strAllocateCostBy]			= Charge.strAllocateCostBy
 		FROM	dbo.tblICInventoryReceiptCharge Surcharge INNER JOIN dbo.tblICItem SurchargeItem 
 					ON SurchargeItem.intItemId = Surcharge.intChargeId
 				LEFT JOIN dbo.tblICInventoryReceiptChargePerItem SurchargedOtherCharges

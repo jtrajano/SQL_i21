@@ -1988,7 +1988,8 @@
     <Build Include="dbo\Stored Procedures\uspCTGetContractAndPrice.sql" />
     <Build Include="dbo\Tables\tblCTContractStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShiftCount.sql" />
-	<Build Include="dbo\Stored Procedures\uspICCalculateInventoryReceiptSurchargeOnOtherCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCalculateInventoryReceiptSurchargeOnOtherCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
