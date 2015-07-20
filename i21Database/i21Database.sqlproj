@@ -2015,6 +2015,9 @@
     <Build Include="dbo\Views\vyuTRDispacthedLoad.sql" />
     <Build Include="dbo\Tables\tblTRCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspTRProcessLogisticsLoad.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertInvoiceServiceCharge.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCalculateServiceCharge.sql" />
+    <Build Include="dbo\User Defined Types\ServiceChargeTableType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
