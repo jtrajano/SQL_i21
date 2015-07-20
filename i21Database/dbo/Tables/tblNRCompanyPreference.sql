@@ -13,8 +13,8 @@
     [ysnContinueInterestCalculationAfterNoteMaturityDate] BIT NULL, 
     [intNumberofDaysPriorNoteBeGenerated] INT NULL, 
     [ysnOriginCompatible] BIT NULL, 
-    [strOriginSystem] NVARCHAR(50) NULL, 
-    [strVersionNumber] NVARCHAR(50) NULL, 
+    [strOriginSystem] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [strVersionNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1	,
 	CONSTRAINT [PK_tblNRCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC)
 )
