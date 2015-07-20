@@ -627,7 +627,7 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51156) EXEC sp_dropmessa
 SET @strmessage = 'A run for ''%s'' - ''%s'' is %s on ''%s''. Please create a run later than the ''%s''.'
 EXEC sp_addmessage 51156,11,@strmessage,'us_english','False'
 
-IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = v) EXEC sp_dropmessage 51157, 'us_english'	
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51157) EXEC sp_dropmessage 51157, 'us_english'	
 SET @strmessage = 'A run for ''%s'' - ''%s'' already exists for %s which is using the same ingredient item ''%s'' - ''%s''. Please create a run later than the ''%s''.'
 EXEC sp_addmessage 51157,11,@strmessage,'us_english','False'
 
