@@ -74,22 +74,20 @@ AS
 							INSERT INTO @tblTypeServiceCharge
 							SELECT intInvoiceId
 								 , strInvoiceNumber
-								 , dblSCAmount = dblPercentage
 								 , dblAmountDue
 								 , dblTotalAmount = CASE WHEN strCalculationType = 'Percent'
-														THEN 
-															CASE WHEN dblMinimumCharge > dblAmountDue * (1 + (dblPercentage/100))
-								  								THEN dblMinimumCharge
-								  								ELSE dblAmountDue * (1 + (dblPercentage/100))
+														THEN
+															CASE WHEN dblServiceChargeAPR > 0
+																THEN
+																	CASE WHEN dblMinimumCharge > ((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, I.[dtmDueDate], @asOfDate) * dblAmountDue
+								  										THEN dblAmountDue + dblMinimumCharge
+								  										ELSE dblAmountDue + (((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, I.[dtmDueDate], @asOfDate) * dblAmountDue)
+																	END
+																ELSE 0
 															END
 														ELSE 
 															dblAmountDue + dblPercentage
 													END
-								, dblAPRAmount = CASE WHEN dblServiceChargeAPR > 0
-													 THEN
-														((dblServiceChargeAPR/365) * 0.01) * DATEDIFF(DAY, I.[dtmDueDate], @asOfDate) * dblAmountDue
-													 ELSE 0
-												 END
 							FROM tblARInvoice I
 								INNER JOIN tblARCustomer C ON I.intEntityCustomerId = C.intEntityCustomerId
 								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
@@ -104,24 +102,22 @@ AS
 						BEGIN
 							--GET AMOUNT DUE PER CUSTOMER
 							INSERT INTO @tblTypeServiceCharge
-							SELECT intInvoiceId
-								 , strInvoiceNumber
-								 , dblSCAmount = dblPercentage
-								 , dblAmountDue
-								 , dblTotalAmount = CASE WHEN strCalculationType = 'Percent'
-														THEN 
-															CASE WHEN dblMinimumCharge > dblAmountDue * (1 + (dblPercentage/100))
-								  								THEN dblMinimumCharge
-								  								ELSE dblAmountDue * (1 + (dblPercentage/100))
+							SELECT NULL
+								 , 'Service Charge Computed By Customer Balance'
+								 , dblAmountDue = SUM(dblAmountDue)
+								 , dblTotalAmount = SUM(CASE WHEN strCalculationType = 'Percent'
+													    	THEN 
+													    		CASE WHEN dblServiceChargeAPR > 0
+																THEN
+																	CASE WHEN dblMinimumCharge > ((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, I.[dtmDueDate], @asOfDate) * dblAmountDue
+								  										THEN dblAmountDue + dblMinimumCharge
+								  										ELSE dblAmountDue + (((dblServiceChargeAPR/365) / 100) * DATEDIFF(DAY, I.[dtmDueDate], @asOfDate) * dblAmountDue)
+																	END
+																ELSE 0
 															END
-														ELSE 
-															dblAmountDue + dblPercentage
-													END
-								, dblAPRAmount = CASE WHEN dblServiceChargeAPR > 0
-													 THEN
-														((dblServiceChargeAPR/365) * 0.01) * DATEDIFF(DAY, I.[dtmDueDate], @asOfDate) * dblAmountDue
-													 ELSE 0
-												 END
+													    ELSE 
+													    	dblAmountDue + dblPercentage
+													    END)
 							FROM tblARInvoice I
 								INNER JOIN tblARCustomer C ON I.intEntityCustomerId = C.intEntityCustomerId
 								INNER JOIN tblARServiceCharge SC ON C.intServiceChargeId = SC.intServiceChargeId
@@ -131,6 +127,7 @@ AS
 							  AND I.intEntityCustomerId = @entityId
 							  AND DATEDIFF(DAY, I.[dtmDueDate], @asOfDate) > intGracePeriod
 							  AND I.ysnCalculated = 0
+							GROUP BY I.intEntityCustomerId
 						END
 					
 					IF EXISTS(SELECT TOP 1 1 FROM @tblTypeServiceCharge)
