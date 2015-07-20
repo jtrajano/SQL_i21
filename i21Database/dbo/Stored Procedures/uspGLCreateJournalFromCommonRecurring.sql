@@ -19,7 +19,7 @@ BEGIN
 			SELECT TOP 1 @entityid =intEntityId FROM tblSMUserSecurity WHERE intUserSecurityID = @userId
 			SELECT  @intNumber = intNumber, @strPrefix = strPrefix FROM tblSMStartingNumber WHERE intStartingNumberId = 2
 			SET @smID = @strPrefix + CONVERT(VARCHAR(5),@intNumber)
-			UPDATE tblSMStartingNumber SET intNumber = @intNumber + 1 WHERE intStartingNumberId = 4
+			UPDATE tblSMStartingNumber SET intNumber = @intNumber + 1 WHERE intStartingNumberId = 2
 			INSERT INTO tblGLJournal(strDescription,intCurrencyId,dtmDate,dtmReverseDate,strJournalId,strJournalType,strTransactionType,strSourceType,intEntityId,ysnPosted,strRecurringStatus)
 			SELECT strDescription,intCurrencyId,@dateNow,dtmReverseDate,@smID,'Recurring Journal','General Journal','GJ',@entityid,0,'Locked' FROM tblGLJournal
 			WHERE intJournalId = @journalId
