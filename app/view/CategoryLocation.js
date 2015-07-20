@@ -395,19 +395,18 @@ Ext.define('Inventory.view.CategoryLocation', {
                                     xtype: 'gridcombobox',
                                     columns: [
                                         {
-                                            dataIndex: 'intFamilyId',
+                                            dataIndex: 'intSubcategoryId',
                                             dataType: 'numeric',
-                                            text: 'Family Id',
                                             hidden: true
                                         },
                                         {
-                                            dataIndex: 'strFamilyId',
+                                            dataIndex: 'strSubcategoryId',
                                             dataType: 'string',
                                             text: 'Family',
                                             flex: 1
                                         },
                                         {
-                                            dataIndex: 'strFamilyDesc',
+                                            dataIndex: 'strSubcategoryDesc',
                                             dataType: 'string',
                                             text: 'Description',
                                             flex: 1
@@ -416,26 +415,25 @@ Ext.define('Inventory.view.CategoryLocation', {
                                     itemId: 'cboDefaultFamily',
                                     fieldLabel: 'Default Family',
                                     labelWidth: 175,
-                                    displayField: 'strFamilyId',
-                                    valueField: 'intFamilyId'
+                                    displayField: 'strSubcategoryId',
+                                    valueField: 'inSubcategoryId'
                                 },
                                 {
                                     xtype: 'gridcombobox',
                                     columns: [
                                         {
-                                            dataIndex: 'intClassId',
+                                            dataIndex: 'intSubcategoryId',
                                             dataType: 'numeric',
-                                            text: 'Class Id',
                                             hidden: true
                                         },
                                         {
-                                            dataIndex: 'strClassId',
+                                            dataIndex: 'strSubcategoryId',
                                             dataType: 'string',
-                                            text: 'Class',
+                                            text: 'Family',
                                             flex: 1
                                         },
                                         {
-                                            dataIndex: 'strClassDesc',
+                                            dataIndex: 'strSubcategoryDesc',
                                             dataType: 'string',
                                             text: 'Description',
                                             flex: 1
@@ -444,8 +442,8 @@ Ext.define('Inventory.view.CategoryLocation', {
                                     itemId: 'cboDefaultClass',
                                     fieldLabel: 'Default Class',
                                     labelWidth: 175,
-                                    displayField: 'strClassId',
-                                    valueField: 'intClassId'
+                                    displayField: 'strSubcategoryId',
+                                    valueField: 'inSubcategoryId'
                                 },
                                 {
                                     xtype: 'checkboxfield',

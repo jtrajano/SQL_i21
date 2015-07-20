@@ -179,19 +179,34 @@ Ext.define('Inventory.view.CategoryViewController', {
                 colVendorFamily: {
                     dataIndex: 'intFamilyId',
                     editor: {
-                        store: '{vendorFamily}'
+                        store: '{vendorFamily}',
+                        defaultFilters: [{
+                            column: 'strSubcategoryType',
+                            value: 'F',
+                            conjunction: 'and'
+                        }]
                     }
                 },
                 colVendorSellClass: {
                     dataIndex: 'intSellClassId',
                     editor: {
-                        store: '{vendorSellClass}'
+                        store: '{vendorSellClass}',
+                        defaultFilters: [{
+                            column: 'strSubcategoryType',
+                            value: 'C',
+                            conjunction: 'and'
+                        }]
                     }
                 },
                 colVendorOrderClass: {
                     dataIndex: 'intOrderClassId',
                     editor: {
-                        store: '{vendorOrderClass}'
+                        store: '{vendorOrderClass}',
+                        defaultFilters: [{
+                            column: 'strSubcategoryType',
+                            value: 'C',
+                            conjunction: 'and'
+                        }]
                     }
                 },
                 colVendorComments: 'strComments'

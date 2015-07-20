@@ -53,11 +53,21 @@ Ext.define('Inventory.view.CategoryLocationViewController', {
             },
             cboDefaultFamily: {
                 value: '{current.intFamilyId}',
-                store: '{family}'
+                store: '{family}',
+                defaultFilters: [{
+                    column: 'strSubcategoryType',
+                    value: 'F',
+                    conjunction: 'and'
+                }]
             },
             cboDefaultClass: {
                 value: '{current.intClassId}',
-                store: '{class}'
+                store: '{class}',
+                defaultFilters: [{
+                    column: 'strSubcategoryType',
+                    value: 'C',
+                    conjunction: 'and'
+                }]
             },
             chkDefaultFoodStampable: '{current.ysnFoodStampable}',
             chkDefaultReturnable: '{current.ysnReturnable}',
