@@ -13,6 +13,7 @@ BEGIN
 	SET XACT_ABORT ON
 	SET NOCOUNT ON
 	DECLARE @entityid INT ,@intNumber INT, @strPrefix VARCHAR(10),@smID varchar(10),@intJournalID INT
+	DECLARE @dateNow DATE = CONVERT(DATE, GETDATE(),101)
 	BEGIN TRY
 		BEGIN TRANSACTION
 			SELECT TOP 1 @entityid =intEntityId FROM tblSMUserSecurity WHERE intUserSecurityID = @userId
@@ -20,11 +21,11 @@ BEGIN
 			SET @smID = @strPrefix + CONVERT(VARCHAR(5),@intNumber)
 			UPDATE tblSMStartingNumber SET intNumber = @intNumber + 1 WHERE intStartingNumberId = 4
 			INSERT INTO tblGLJournal(strDescription,intCurrencyId,dtmDate,dtmReverseDate,strJournalId,strJournalType,strTransactionType,strSourceType,intEntityId,ysnPosted,strRecurringStatus)
-			SELECT strDescription,intCurrencyId,dtmDate,dtmReverseDate,@smID,'Recurring Journal','General Journal','GJ',@entityid,0,'Locked' FROM tblGLJournal
+			SELECT strDescription,intCurrencyId,@dateNow,dtmReverseDate,@smID,'Recurring Journal','General Journal','GJ',@entityid,0,'Locked' FROM tblGLJournal
 			WHERE intJournalId = @journalId
 			SELECT  @intJournalID = SCOPE_IDENTITY() 
 			INSERT INTO tblGLJournalDetail (intJournalId,intAccountId,intLineNo,dblCredit,dblCreditUnit,dblCreditRate,dblDebit,dblDebitUnit, dblDebitRate,strDescription,strReference,strComments,strDocument,dtmDate)
-			SELECT @intJournalID,intAccountId,intLineNo,dblCredit,dblCreditUnit,dblCreditRate,dblDebit,dblDebitUnit,dblDebitRate,strDescription,strReference,strComments,strDocument,dtmDate
+			SELECT @intJournalID,intAccountId,intLineNo,dblCredit,dblCreditUnit,dblCreditRate,dblDebit,dblDebitUnit,dblDebitRate,strDescription,strReference,strComments,strDocument,@dateNow
 			FROM tblGLJournalDetail
 			WHERE intJournalId = @journalId
 		COMMIT TRANSACTION
