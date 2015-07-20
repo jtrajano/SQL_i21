@@ -623,3 +623,17 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51155) EXEC sp_dropmessa
 SET @strmessage = 'Lot %s you are trying to consume for Work order %s is not associated with the selected process %s.'
 EXEC sp_addmessage 51155,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51156) EXEC sp_dropmessage 51156, 'us_english'	
+SET @strmessage = 'A run for ''%s'' - ''%s'' is %s on ''%s''. Please create a run later than the ''%s''.'
+EXEC sp_addmessage 51156,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = v) EXEC sp_dropmessage 51157, 'us_english'	
+SET @strmessage = 'A run for ''%s'' - ''%s'' already exists for %s which is using the same ingredient item ''%s'' - ''%s''. Please create a run later than the ''%s''.'
+EXEC sp_addmessage 51157,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51158) EXEC sp_dropmessage 51158, 'us_english'	
+SET @strmessage = 'There is already a run for the date %s and ItemID %s, cannot create one more.'
+EXEC sp_addmessage 51158,11,@strmessage,'us_english','False'
+
+
+
