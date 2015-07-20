@@ -2021,6 +2021,7 @@
     <Build Include="dbo\Views\vyuCTSequenceHistory.sql" />
     <Build Include="dbo\Views\vyuGRGetPurchaseSaleDetail.sql" />
     <Build Include="dbo\Tables\tblQMTicketDiscount.sql" />
+    <Build Include="dbo\Stored Procedures\uspARDeleteRecurrence.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
