@@ -128,8 +128,8 @@ A.intEntityVendorId
 ,B.intInventoryReceiptItemId
 ,B.intInventoryReceiptItemId
 ,B.dblUnitCost
-,intAccountId = [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Inventory')
-,strAccountId = (SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Inventory'))
+,intAccountId = [dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'Inventory')
+,strAccountId = (SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, A.intLocationId, 'Inventory'))
 ,D2.strName
 ,D1.strVendorId
 ,E.strShipVia
@@ -141,7 +141,7 @@ FROM tblICInventoryReceipt A
 INNER JOIN tblICInventoryReceiptItem B
 	ON A.intInventoryReceiptId = B.intInventoryReceiptId
 INNER JOIN tblICItem C ON B.intItemId = C.intItemId
-	INNER JOIN tblICItemLocation loc ON C.intItemId = loc.intItemId AND loc.intLocationId = A.intLocationId
+	--INNER JOIN tblICItemLocation loc ON C.intItemId = loc.intItemId AND loc.intLocationId = A.intLocationId
 INNER JOIN  (tblAPVendor D1 INNER JOIN tblEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
 LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.[intEntityShipViaId]
 LEFT JOIN (tblCTContractHeader F1 INNER JOIN tblCTContractDetail F2 ON F1.intContractHeaderId = F2.intContractHeaderId) ON F1.intContractHeaderId = F2.intContractHeaderId
