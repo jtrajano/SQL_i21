@@ -18,7 +18,7 @@
     [intTicketFileId] INT NULL, 
     [strSourceType] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
 	CONSTRAINT [PK_tblQMTicketDiscount_intTicketDiscountId] PRIMARY KEY ([intTicketDiscountId]),
-	CONSTRAINT [UK_tblQMTicketDiscount_intTicketId_intTicketFileId_intCustomerStorageId_strDiscountCode_strDiscountCodeDescription] UNIQUE ([intTicketId],[intTicketFileId],[strDiscountCode],[strDiscountCodeDescription]), 
+	CONSTRAINT [UK_tblQMTicketDiscount_intTicketId_intTicketFileId_strDiscountCode_strDiscountCodeDescription] UNIQUE ([intTicketId],[intTicketFileId],[strDiscountCode],[strDiscountCodeDescription]), 
 	CONSTRAINT [FK_tblQMTicketDiscount_tblSCTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [tblSCTicket]([intTicketId]),
 	CONSTRAINT [FK_tblQMTicketDiscount_tblGRDiscountScheduleCode_intDiscountScheduleCodeId] FOREIGN KEY ([intDiscountScheduleCodeId]) REFERENCES [tblGRDiscountScheduleCode]([intDiscountScheduleCodeId]) 
 )
