@@ -149,6 +149,8 @@ BEGIN
 		SET @dblItemPriceLevel1 = @dblItemPriceLevel1WithLocation
 		SET @dblItemPriceLevel2 = @dblItemPriceLevel2WithLocation
 		SET	@dblItemPriceLevel3 = @dblItemPriceLevel3WithLocation
+
+		SET @strReturnString = CAST(ISNULL(@dblCurrentItemPrice,0) AS NVARCHAR(40)) + '':Regular''
 	END
 	ELSE
 	BEGIN
