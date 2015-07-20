@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspMFGetProductCountBySubLocation (@intSubLocationId INT)
+﻿CREATE PROCEDURE uspMFGetProductCountBySubLocation (@intSubLocationId INT,@strItemNo nvarchar(50)='%',@intItemId int=0)
 AS
 BEGIN
 	SELECT Count(*) AS ProductCount
@@ -11,4 +11,6 @@ BEGIN
 		AND R.ysnActive = 1
 		AND IU.ysnStockUnit = 1
 		AND I.strStatus='Active'
+		AND I.strItemNo LIKE @strItemNo+'%'
+		AND I.intItemId =(Case When @intItemId >0 then @intItemId else I.intItemId end)
 END

@@ -30,7 +30,7 @@ BEGIN
 				
 		INSERT INTO tblEntity(strName, strContactNumber, strEmail, strPhone, strMobile, strFax, strNotes)	
 		SELECT ISNULL(strName,''), 
-				ISNULL(strName,''),
+				'', -- we do not need this because we only added this to map Origin Contact to i21 contact 
 				ISNULL(strEmail,''), 
 				ISNULL(strPhone,''), 
 				ISNULL(strMobile,''), 

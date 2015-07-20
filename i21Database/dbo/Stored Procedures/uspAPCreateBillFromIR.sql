@@ -50,9 +50,9 @@ BEGIN
 END
 
 --Make sure all items were not yet billed.
-IF NOT EXISTS(SELECT 1 FROM vyuAPReceivedItems 
-				WHERE intInventoryReceiptItemId IN (SELECT intInventoryReceiptItemId FROM tblICInventoryReceiptItem 
-														WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM #tmpReceiptIds)))
+IF NOT EXISTS(SELECT 1 FROM tblICInventoryReceiptItem A
+					WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM #tmpReceiptIds)
+					AND A.dblOpenReceive != A.dblBillQty)
 BEGIN
 	RAISERROR('All of the item in the receipt was fully billed.', 16, 1);
 	GOTO DONE

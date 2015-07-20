@@ -18,7 +18,7 @@ SELECT Lot.intLotId
 	, Lot.intStorageLocationId
 	, strStorageLocation = StorageLocation.strName
 	, Lot.dblQty
-	, Lot.dblQty - IsNull((SELECT SUM (PL.dblLotPickedQty) from tblLGPickLotDetail PL Group By PL.intLotId Having Lot.intLotId = PL.intLotId), 0) AS dblUnPickedQty 
+	, Lot.dblQty - IsNull((SELECT SUM (SR.dblQty) from tblICStockReservation SR Group By SR.intLotId Having Lot.intLotId = SR.intLotId), 0) AS dblUnPickedQty 
 	, Lot.dblLastCost
 	, Lot.dtmExpiryDate
 	, Lot.strLotAlias
@@ -59,6 +59,13 @@ SELECT Lot.intLotId
 	, CTDetail.intContractDetailId
 	, CTDetail.intContractSeq
 	, CTDetail.dblQuantity as dblOriginalQty
+	, dblAllocatedQty = IsNull((SELECT SUM(AL.dblPAllocatedQty) FROM tblLGAllocationDetail AL GROUP BY AL.intPContractDetailId HAVING AL.intPContractDetailId = CTDetail.intContractDetailId), 0)
+	, dblReservedQty = IsNull((SELECT SUM(RS.dblReservedQuantity) FROM tblLGReservation RS GROUP BY RS.intContractDetailId HAVING RS.intContractDetailId = CTDetail.intContractDetailId), 0)
+	, dblAllocReserve = IsNull((SELECT SUM(AL.dblPAllocatedQty) FROM tblLGAllocationDetail AL GROUP BY AL.intPContractDetailId HAVING AL.intPContractDetailId = CTDetail.intContractDetailId), 0) +
+						IsNull((SELECT SUM(RS.dblReservedQuantity) FROM tblLGReservation RS GROUP BY RS.intContractDetailId HAVING RS.intContractDetailId = CTDetail.intContractDetailId), 0)
+	, dblBalance = CTDetail.dblQuantity - 
+					IsNull((SELECT SUM(AL.dblPAllocatedQty) FROM tblLGAllocationDetail AL GROUP BY AL.intPContractDetailId HAVING AL.intPContractDetailId = CTDetail.intContractDetailId), 0) + 
+					IsNull((SELECT SUM(RS.dblReservedQuantity) FROM tblLGReservation RS GROUP BY RS.intContractDetailId HAVING RS.intContractDetailId = CTDetail.intContractDetailId), 0)
 	, ShipmentContainer.strContainerNumber
 	, ShipmentBL.strBLNumber
 

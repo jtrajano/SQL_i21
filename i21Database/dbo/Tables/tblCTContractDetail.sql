@@ -3,6 +3,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intContractDetailId] [int] IDENTITY(1,1) NOT NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	[intContractHeaderId] [int] NOT NULL,
+	[intContractStatusId] [int] NULL,
 	[intContractSeq] [int] NOT NULL,
 	[intCompanyLocationId] [int] NOT NULL,
 	[dtmStartDate] [datetime] NOT NULL,
@@ -24,7 +25,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     [intLoadCategoryUOMId] INT NULL, 
     
 	[intIndexId] INT NULL, 
-	[dblAdjustment] NUMERIC(4, 2) NULL, 
+	[dblAdjustment] NUMERIC(8, 6) NULL, 
 	[intAdjItemUOMId] [int] NULL,
     
 	[intPricingTypeId] [int] NULL,
@@ -89,8 +90,10 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 
+
 	CONSTRAINT [FK_tblCTContractDetail_tblARMarketZone_intMarketZoneId] FOREIGN KEY ([intMarketZoneId]) REFERENCES [tblARMarketZone]([intMarketZoneId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [tblCTContractHeader]([intContractHeaderId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblCTContractDetail_tblCTContractStatus_intContractStatusId] FOREIGN KEY ([intContractStatusId]) REFERENCES [tblCTContractStatus]([intContractStatusId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTContractOptHeader_intContractOptHeaderId] FOREIGN KEY ([intContractOptHeaderId]) REFERENCES [tblCTContractOptHeader]([intContractOptHeaderId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTFreightRate_intFreightRateId] FOREIGN KEY ([intFreightRateId]) REFERENCES [tblCTFreightRate]([intFreightRateId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTPricingType_intPricingTypeId] FOREIGN KEY ([intPricingTypeId]) REFERENCES [tblCTPricingType]([intPricingTypeId]),

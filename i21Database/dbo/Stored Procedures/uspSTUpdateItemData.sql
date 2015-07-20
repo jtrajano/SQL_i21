@@ -4,1044 +4,2572 @@
 	
 	AS
 	BEGIN TRY
-	    
-        SET QUOTED_IDENTIFIER OFF
-        SET ANSI_NULLS ON
-        SET NOCOUNT ON
-        SET XACT_ABORT ON
-        SET ANSI_WARNINGS OFF  
+    
 	    
 		DECLARE @ErrMsg					   NVARCHAR(MAX),
 				@idoc					   INT,
-				@ItemLocation 			   NVARCHAR(MAX),
-				@ItemVendor                NVARCHAR(MAX),
-				@ItemCategory              NVARCHAR(MAX),
-				@ItemManufacturer          NVARCHAR(MAX),
-				@ItemFamily                NVARCHAR(MAX),
-				@ItemClass                 NVARCHAR(MAX),
-				@ItemUpcCode               NVARCHAR(MAX),
-				@ItemDescription           NVARCHAR(250),
-				@ItemPriceBetween1         DECIMAL (18,6),
-				@ItemPriceBetween2         DECIMAL (18,6),
-				@ItemTaxFlag1ysn           NVARCHAR(1),
-				@ItemTaxFlag2ysn           NVARCHAR(1),
-				@ItemTaxFlag3ysn           NVARCHAR(1),
-				@ItemTaxFlag4ysn           NVARCHAR(1),
-				@ItemDepositRequiredysn    NVARCHAR(1),
-				@ItemDepositPLU            BIGINT,
-				@ItemQuantityRequiredysn   NVARCHAR(1),
-				@ItemScaleItemysn          NVARCHAR(1),
-				@ItemFoodStampableysn      NVARCHAR(1),
-				@ItemReturnableysn         NVARCHAR(1),
-				@ItemSaleableysn           NVARCHAR(1),
-				@ItemID1Requiredysn        NVARCHAR(1),
-				@ItemID2Requiredysn        NVARCHAR(1),
-				@ItemPromotionalItemysn    NVARCHAR(1),
-				@ItemPrePricedysn          NVARCHAR(1),
-				@ItemActiveysn             NVARCHAR(1),
-				@ItemBlueLaw1ysn           NVARCHAR(1),
-				@ItemBlueLaw2ysn           NVARCHAR(1),
-				@ItemCountedDailyysn       NVARCHAR(1),
-				@ItemCountedysn            NVARCHAR(1),
-				@ItemCountSerialysn        NVARCHAR(1),
-				@ItemStickReadingysn       NVARCHAR(1),
-				@ItemNewFamily             NVARCHAR(8), 
-				@ItemNewClass              NVARCHAR(8), 
-				@ItemNewProductCode        NVARCHAR(50), 
-				@ItemNewCategory           NVARCHAR(50), 
-				@ItemNewVendor             NVARCHAR(50), 
-				@ItemNewInventoryGroup     NVARCHAR(50), 
-				@ItemNewQuantityCase       INT,
-				@ItemNewQuantitySellUnit   BIGINT,
-				@ItemNewCountCode          NVARCHAR(1),     
-				@ItemNewItemSize           INT,
-				@ItemNewItemUOM            NVARCHAR(50), 
-				@ItemNewMixMatch           BIGINT,
-				@ItemNewMinAge             INT,
-				@ItemNewItemType           NVARCHAR(1),     
-				@ItemNewMinVendorOrderQty  BIGINT,
-				@ItemNewVendorSuggestedQty BIGINT,
-				@ItemNewMinQtyOnHand       BIGINT,
-				@ItemNewBinLocation        NVARCHAR(10), 
-				@ItemNewGLPurchaseAccount  INT,
-				@PurAcctProfitCenter       INT,
-				@ItemNewGLSalesAccount     INT,
-				@SalAcctProfitCenter       INT,
-				@ItemNewGLVarianceAccount  INT,
-				@VarAcctProfitCenter       INT
+				@Location 			       NVARCHAR(MAX),
+				@Vendor                    NVARCHAR(MAX),
+				@Category                  NVARCHAR(MAX),
+				@Family                    NVARCHAR(MAX),
+				@Class                     NVARCHAR(MAX),
+				@UpcCode                   INT,
+				@Description               NVARCHAR(250),
+				@PriceBetween1             DECIMAL (18,6),
+				@PriceBetween2             DECIMAL (18,6),
+				@TaxFlag1ysn               NVARCHAR(1),
+				@TaxFlag2ysn               NVARCHAR(1),
+				@TaxFlag3ysn               NVARCHAR(1),
+				@TaxFlag4ysn               NVARCHAR(1),
+				@DepositRequiredysn        NVARCHAR(1),
+				@DepositPLU                INT,
+				@QuantityRequiredysn       NVARCHAR(1),
+				@ScaleItemysn              NVARCHAR(1),
+				@FoodStampableysn          NVARCHAR(1),
+				@Returnableysn             NVARCHAR(1),
+				@Saleableysn               NVARCHAR(1),
+				@ID1Requiredysn            NVARCHAR(1),
+				@ID2Requiredysn            NVARCHAR(1),
+				@PromotionalItemysn        NVARCHAR(1),
+				@PrePricedysn              NVARCHAR(1),
+				@Activeysn                 NVARCHAR(1),
+				@BlueLaw1ysn               NVARCHAR(1),
+				@BlueLaw2ysn               NVARCHAR(1),
+				@CountedDailyysn           NVARCHAR(1),
+				@Counted                   NVARCHAR(50),
+				@CountSerialysn            NVARCHAR(1),
+				@StickReadingysn           NVARCHAR(1),
+				@NewFamily                 INT,
+				@NewClass                  INT,
+				@NewProductCode            INT,
+				@NewCategory               INT,
+				@NewVendor                 INT,
+				@NewInventoryGroup         NVARCHAR(50), 
+				@NewQuantityCase           INT,
+				@NewCountCode              NVARCHAR(50),     
+				@NewItemSize               INT,
+				@NewItemUOM                INT,
+				@NewMinAge                 INT,
+				@NewItemType               NVARCHAR(1),     
+				@NewMinVendorOrderQty      DECIMAL(18,6),
+				@NewVendorSuggestedQty     DECIMAL(18,6),
+				@NewMinQtyOnHand           DECIMAL(18,6),
+				@NewBinLocation            INT,
+				@NewGLPurchaseAccount      INT,
+			    @NewGLSalesAccount         INT,
+				@NewGLVarianceAccount      INT,
+				@UpdateReportTable         NVARCHAR(1)
+				
 
 	                  
 		EXEC sp_xml_preparedocument @idoc OUTPUT, @XML 
 	
 		SELECT	
-				@ItemLocation	   	 =	 Location,
-				@ItemVendor          =   Vendor,
-				@ItemCategory        =   Category,
-				@ItemManufacturer    =   Manufacturer,
-				@ItemFamily          =   Family,
-				@ItemClass           =   Class,
-				@ItemUpcCode         =   UPCCode,
-				@ItemDescription     =   ItmDescription,
-				@ItemPriceBetween1   =   PriceBetween1,
-				@ItemPriceBetween2   =   PriceBetween2,
-				@ItemTaxFlag1ysn     =   TaxFlag1ysn,
-				@ItemTaxFlag2ysn     =   TaxFlag2ysn ,           
-				@ItemTaxFlag3ysn     =   TaxFlag3ysn,          
-				@ItemTaxFlag4ysn     =   TaxFlag4ysn,           
-				@ItemDepositRequiredysn = DepositRequiredysn, 
-				@ItemDepositPLU       =  DepositPLU,
-				@ItemQuantityRequiredysn = QuantityRequiredysn,
-				@ItemScaleItemysn     =  ScaleItemysn,
-				@ItemFoodStampableysn =  FoodStampableysn,
-				@ItemReturnableysn    =  Returnableysn,
-				@ItemSaleableysn      =  Saleableysn,
-				@ItemID1Requiredysn   =  ID1Requiredysn,                  
-				@ItemID2Requiredysn   =  ID2Requiredysn,
-				@ItemPromotionalItemysn = PromotionalItemysn,
-				@ItemPrePricedysn     =  PrePricedysn,
-				@ItemActiveysn        =  Activeysn,
-				@ItemBlueLaw1ysn      =  BlueLaw1ysn,
-				@ItemBlueLaw2ysn      =  BlueLaw2ysn,
-				@ItemCountedDailyysn  =  CountedDailyysn,
-				@ItemCountedysn       =  Countedysn,
-				@ItemCountSerialysn   =  CountSerialysn,
-				@ItemStickReadingysn  =  StickReadingysn,
-				@ItemNewFamily        =  NewFamily,
-				@ItemNewClass         =  NewClass,
-				@ItemNewProductCode   =  NewProductCode,
-				@ItemNewCategory      =  NewCategory,
-				@ItemNewVendor        =  NewVendor,
-				@ItemNewInventoryGroup = NewInventoryGroup,
-				@ItemNewQuantityCase  =  NewQuantityCase,
-				@ItemNewQuantitySellUnit  = NewQuantitySellUnit,
-				@ItemNewCountCode       = NewCountCode,
-				@ItemNewItemSize        = NewItemSize,
-				@ItemNewItemUOM         = NewItemUOM,
-				@ItemNewMixMatch        = NewMixMatch,
-				@ItemNewMinAge          = NewMinAge,
-				@ItemNewItemType        = NewItemType,
-				@ItemNewMinVendorOrderQty = NewMinVendorOrderQty,
-				@ItemNewVendorSuggestedQty = NewVendorSuggestedQty,
-				@ItemNewMinQtyOnHand     = NewMinQtyOnHand,
-				@ItemNewBinLocation      = NewBinLocation,
-				@ItemNewGLPurchaseAccount  = NewGLPurchaseAccount,
-				@PurAcctProfitCenter   = PurAcctProfitCenter,
-				@ItemNewGLSalesAccount     = NewGLSalesAccount,
-				@SalAcctProfitCenter   =  SalAcctProfitCenter,
-				@ItemNewGLVarianceAccount  = NewGLVarianceAccount,  
-				@VarAcctProfitCenter   =  VarAcctProfitCenter
-		
+				@Location	   	 =	 Location,
+				@Vendor          =   Vendor,
+				@Category        =   Category,
+				@Family          =   Family,
+				@Class           =   Class,
+				@UpcCode         =   UPCCode,
+				@Description     =   ItmDescription,
+				@PriceBetween1   =   PriceBetween1,
+				@PriceBetween2   =   PriceBetween2,
+				@TaxFlag1ysn     =   TaxFlag1ysn,
+				@TaxFlag2ysn     =   TaxFlag2ysn ,           
+				@TaxFlag3ysn     =   TaxFlag3ysn,          
+				@TaxFlag4ysn     =   TaxFlag4ysn,           
+				@DepositRequiredysn = DepositRequiredysn, 
+				@DepositPLU       =  DepositPLU,
+				@QuantityRequiredysn = QuantityRequiredysn,
+				@ScaleItemysn     =  ScaleItemysn,
+				@FoodStampableysn =  FoodStampableysn,
+				@Returnableysn    =  Returnableysn,
+				@Saleableysn      =  Saleableysn,
+				@ID1Requiredysn   =  ID1Requiredysn,                  
+				@ID2Requiredysn   =  ID2Requiredysn,
+				@PromotionalItemysn = PromotionalItemysn,
+				@PrePricedysn     =  PrePricedysn,
+				@Activeysn        =  Activeysn,
+				@BlueLaw1ysn      =  BlueLaw1ysn,
+				@BlueLaw2ysn      =  BlueLaw2ysn,
+				@CountedDailyysn  =  CountedDailyysn,
+				@Counted          =  Counted,
+				@CountSerialysn   =  CountSerialysn,
+				@StickReadingysn  =  StickReadingysn,
+				@NewFamily        =  NewFamily,
+				@NewClass         =  NewClass,
+				@NewProductCode   =  NewProductCode,
+				@NewCategory      =  NewCategory,
+				@NewVendor        =  NewVendor,
+				@NewInventoryGroup = NewInventoryGroup,
+				@NewQuantityCase  =  NewQuantityCase,
+				@NewCountCode       = NewCountCode,
+				@NewItemSize        = NewItemSize,
+				@NewItemUOM         = NewItemUOM,
+				@NewMinAge          = NewMinAge,
+				@NewItemType        = NewItemType,
+				@NewMinVendorOrderQty = NewMinVendorOrderQty,
+				@NewVendorSuggestedQty = NewVendorSuggestedQty,
+				@NewMinQtyOnHand     = NewMinQtyOnHand,
+				@NewBinLocation      = NewBinLocation,
+				@NewGLPurchaseAccount  = NewGLPurchaseAccount,
+			    @NewGLSalesAccount     = NewGLSalesAccount,
+			    @NewGLVarianceAccount  = NewGLVarianceAccount,
+				@UpdateReportTable     = UpdateReportTable
+	
 		
 		FROM	OPENXML(@idoc, 'root',2)
 		WITH
 		(
-				Location		        NVARCHAR(MAX),
-				Vendor	     	        NVARCHAR(MAX),
-				Category		        NVARCHAR(MAX),
-				Manufacturer            NVARCHAR(MAX),
-				Family	     	        NVARCHAR(MAX),
-				Class	     	        NVARCHAR(MAX),
-				UPCCode                 NVARCHAR(MAX),
-				ItmDescription		    NVARCHAR(250),
-				PriceBetween1		    DECIMAL (18,6),
-				PriceBetween2		    DECIMAL (18,6),
-				TaxFlag1ysn             NVARCHAR(1),
-				TaxFlag2ysn             NVARCHAR(1),
-				TaxFlag3ysn             NVARCHAR(1),
-				TaxFlag4ysn             NVARCHAR(1),
-				DepositRequiredysn      NVARCHAR(1),
-				DepositPLU              BIGINT,
-				QuantityRequiredysn     NVARCHAR(1),
-				ScaleItemysn            NVARCHAR(1),
-				FoodStampableysn        NVARCHAR(1),
-				Returnableysn           NVARCHAR(1),
-				Saleableysn             NVARCHAR(1),
-				ID1Requiredysn          NVARCHAR(1),
-				ID2Requiredysn          NVARCHAR(1),			    
-				PromotionalItemysn      NVARCHAR(1),
-				PrePricedysn            NVARCHAR(1),
-				Activeysn               NVARCHAR(1),
-				BlueLaw1ysn             NVARCHAR(1),
-				BlueLaw2ysn             NVARCHAR(1),
-				CountedDailyysn         NVARCHAR(1),
-				Countedysn              NVARCHAR(1),
-				CountSerialysn          NVARCHAR(1),
-				StickReadingysn         NVARCHAR(1),
-				NewFamily               NVARCHAR(8),  
-				NewClass                NVARCHAR(8),  
-				NewProductCode          NVARCHAR(50), 
-				NewCategory             NVARCHAR(50), 
-				NewVendor               NVARCHAR(50), 
-				NewInventoryGroup       NVARCHAR(50), 
-				NewQuantityCase         INT,
-				NewQuantitySellUnit     BIGINT,
-				NewCountCode            NVARCHAR(1),
-				NewItemSize             INT,  
-				NewItemUOM              NVARCHAR(50), 
-				NewMixMatch             BIGINT,
-				NewMinAge               INT,
-				NewItemType             NVARCHAR(1),
-				NewMinVendorOrderQty    BIGINT,
-				NewVendorSuggestedQty   BIGINT,
-				NewMinQtyOnHand         BIGINT,              			   
-				NewBinLocation          NVARCHAR(10),
-				NewGLPurchaseAccount    INT,
-				PurAcctProfitCenter     INT,
-				NewGLSalesAccount       INT,
-				SalAcctProfitCenter     INT,
-				NewGLVarianceAccount    INT,
-				VarAcctProfitCenter     INT
-
-			
-		)  
+				Location 			      NVARCHAR(MAX),
+				Vendor                    NVARCHAR(MAX),
+				Category                  NVARCHAR(MAX),
+				Family                    NVARCHAR(MAX),
+				Class                     NVARCHAR(MAX),
+				UPCCode                   INT,
+				ItmDescription            NVARCHAR(250),
+				PriceBetween1             DECIMAL (18,6),
+				PriceBetween2             DECIMAL (18,6),
+				TaxFlag1ysn               NVARCHAR(1),
+				TaxFlag2ysn               NVARCHAR(1),
+				TaxFlag3ysn               NVARCHAR(1),
+				TaxFlag4ysn               NVARCHAR(1),
+				DepositRequiredysn        NVARCHAR(1),
+				DepositPLU                INT,
+				QuantityRequiredysn       NVARCHAR(1),
+				ScaleItemysn              NVARCHAR(1),
+				FoodStampableysn          NVARCHAR(1),
+				Returnableysn             NVARCHAR(1),
+				Saleableysn               NVARCHAR(1),
+				ID1Requiredysn            NVARCHAR(1),
+				ID2Requiredysn            NVARCHAR(1),
+				PromotionalItemysn        NVARCHAR(1),
+				PrePricedysn              NVARCHAR(1),
+				Activeysn                 NVARCHAR(1),
+				BlueLaw1ysn               NVARCHAR(1),
+				BlueLaw2ysn               NVARCHAR(1),
+				CountedDailyysn           NVARCHAR(1),
+				Counted                   NVARCHAR(50),
+				CountSerialysn            NVARCHAR(1),
+				StickReadingysn           NVARCHAR(1),
+				NewFamily                 INT,
+				NewClass                  INT,
+				NewProductCode            INT,
+				NewCategory               INT,
+				NewVendor                 INT,
+				NewInventoryGroup         NVARCHAR(50), 
+				NewQuantityCase           INT,
+				NewCountCode              NVARCHAR(50),     
+				NewItemSize               INT,
+				NewItemUOM                INT,
+				NewMinAge                 INT,
+				NewItemType               NVARCHAR(1),     
+				NewMinVendorOrderQty      DECIMAL(18,6),
+				NewVendorSuggestedQty     DECIMAL(18,6),
+				NewMinQtyOnHand           DECIMAL(18,6),
+				NewBinLocation            INT,
+				NewGLPurchaseAccount      INT,
+			    NewGLSalesAccount         INT,
+				NewGLVarianceAccount      INT,
+				UpdateReportTable         NVARCHAR(1)
+			)  
 		-- Insert statements for procedure here
 
-		DECLARE @SQL1 NVARCHAR(MAX)
-		DECLARE @PurchaseAcct NVARCHAR(17)
-		DECLARE @SalAcct NVARCHAR(17)
-		DECLARE @VarAcct NVARCHAR(17)
+		  DECLARE @SQL1 NVARCHAR(MAX)
 
-		 set @SQL1 = 'update stpbkmst set ' 
-		 if (@ItemTaxFlag1ysn IS NOT NULL)
+		  DECLARE @FamilyId NVARCHAR(250)
+		  DECLARE @ClassId  NVARCHAR(250)
+		  DECLARE @ProductCode NVARCHAR(250)
+		  DECLARE @VendorId NVARCHAR(250)
+		  DECLARE @NewDepositPluId NVARCHAR(250)
+
+		  DECLARE @UpdateCount INT
+
+	      set @UpdateCount = 0
+			      
+IF(@UpdateReportTable != 'Y')
+   BEGIN
+          SET @SQL1 = ' update tblICItemLocation set '
+
+		  IF (@TaxFlag1ysn IS NOT NULL)
 			  BEGIN
-				set @SQL1 = @SQL1 + 'stpbk_taxflag1_yn = ''' + LTRIM(@ItemTaxFlag1ysn) + ''''
+				set @SQL1 = @SQL1 + 'ysnTaxFlag1 = ''' + LTRIM(@TaxFlag1ysn) + ''''
 			  END
 
-		 if (@ItemTaxFlag2ysn IS NOT NULL)  
+		  IF (@TaxFlag2ysn IS NOT NULL)  
 			  BEGIN
-			  if (@ItemTaxFlag1ysn IS NOT NULL)
- 				 set @SQL1 = @SQL1 + ' , stpbk_taxflag2_yn = ''' + LTRIM(@ItemTaxFlag2ysn) + ''''
+			  if (@TaxFlag1ysn IS NOT NULL)
+ 				 set @SQL1 = @SQL1 + ' , ysnTaxFlag2 = ''' + LTRIM(@TaxFlag2ysn) + ''''
 			  else
-				 set @SQL1 = @SQL1 + ' stpbk_taxflag2_yn = ''' + LTRIM(@ItemTaxFlag2ysn) + '''' 
+				 set @SQL1 = @SQL1 + ' ysnTaxFlag2 = ''' + LTRIM(@TaxFlag2ysn) + '''' 
 			  END
 
-		 if (@ItemTaxFlag3ysn IS NOT NULL)  
+		  IF (@TaxFlag3ysn IS NOT NULL)  
 			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_taxflag3_yn = ''' + LTRIM(@ItemTaxFlag3ysn) + ''''
+			  if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL))   
+ 				 set @SQL1 = @SQL1 + ' , ysnTaxFlag3 = ''' + LTRIM(@TaxFlag3ysn) + ''''
 			  else
-				 set @SQL1 = @SQL1 + ' stpbk_taxflag3_yn = ''' + LTRIM(@ItemTaxFlag3ysn) + '''' 
+				 set @SQL1 = @SQL1 + ' ysnTaxFlag3 = ''' + LTRIM(@TaxFlag3ysn) + '''' 
 			  END
 
-		  if (@ItemTaxFlag4ysn IS NOT NULL)  
+		  IF (@TaxFlag4ysn IS NOT NULL)  
 			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_taxflag4_yn = ''' + LTRIM(@ItemTaxFlag4ysn) + ''''
+			  if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			  OR (@TaxFlag3ysn IS NOT NULL))   
+ 				 set @SQL1 = @SQL1 + ' , ysnTaxFlag4 = ''' + LTRIM(@TaxFlag4ysn) + ''''
 			  else
-				 set @SQL1 = @SQL1 + ' stpbk_taxflag4_yn = ''' + LTRIM(@ItemTaxFlag4ysn) + '''' 
+				 set @SQL1 = @SQL1 + ' ysnTaxFlag4 = ''' + LTRIM(@TaxFlag4ysn) + '''' 
 			  END
 
-		  if (@ItemDepositRequiredysn IS NOT NULL)  
+          IF (@DepositRequiredysn IS NOT NULL)  
 			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_dep_req_yn = ''' + LTRIM(@ItemDepositRequiredysn) + ''''
+			  if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			  OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL))   
+ 				 set @SQL1 = @SQL1 + ' , ysnDepositRequired = ''' + LTRIM(@DepositRequiredysn) + ''''
 			  else
-				 set @SQL1 = @SQL1 + ' stpbk_dep_req_yn = ''' + LTRIM(@ItemDepositRequiredysn) + '''' 
+				 set @SQL1 = @SQL1 + ' ysnDepositRequired = ''' + LTRIM(@DepositRequiredysn) + '''' 
 			  END
 
-		  if (@ItemScaleItemysn IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_scale_yn = ''' + LTRIM(@ItemScaleItemysn) + ''''
+           IF(@DepositPLU IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			  OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			  OR (@DepositRequiredysn IS NOT NULL))   
+ 				 set @SQL1 = @SQL1 + ' , intDepositPLUId = ''' + LTRIM(@DepositPLU) + ''''
 			  else
-				 set @SQL1 = @SQL1 + ' stpbk_scale_yn = ''' + LTRIM(@ItemScaleItemysn) + '''' 
-			  END
-
-		  if (@ItemFoodStampableysn IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_food_stamp_yn = ''' + LTRIM(@ItemFoodStampableysn) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_food_stamp_yn = ''' + LTRIM(@ItemFoodStampableysn) + '''' 
-			  END
-
-		  if (@ItemReturnableysn IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_returnable_yn = ''' + LTRIM(@ItemReturnableysn) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_returnable_yn = ''' + LTRIM(@ItemReturnableysn) + '''' 
-			  END
-
-		  if (@ItemSaleableysn IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_saleable_yn = ''' + LTRIM(@ItemSaleableysn) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_saleable_yn = ''' + LTRIM(@ItemSaleableysn) + '''' 
-			  END
-
-		  if (@ItemID1Requiredysn IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_id1_req_yn = ''' + LTRIM(@ItemID1Requiredysn) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_id1_req_yn = ''' + LTRIM(@ItemID1Requiredysn) + '''' 
-			  END
-
-		   if (@ItemID2Requiredysn IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_id2_req_yn = ''' + LTRIM(@ItemID2Requiredysn) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_id2_req_yn = ''' + LTRIM(@ItemID2Requiredysn) + '''' 
-			  END
-
-		   if (@ItemPromotionalItemysn IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_promo_yn = ''' + LTRIM(@ItemPromotionalItemysn) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_promo_yn = ''' + LTRIM(@ItemPromotionalItemysn) + '''' 
-			  END
-
-		  if (@ItemPrePricedysn IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_pre_prcd_yn = ''' + LTRIM(@ItemPrePricedysn) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_pre_prcd_yn = ''' + LTRIM(@ItemPrePricedysn) + '''' 
-			  END
-
-		 if (@ItemActiveysn IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_active_ynd = ''' + LTRIM(@ItemActiveysn) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_active_ynd = ''' + LTRIM(@ItemActiveysn) + '''' 
-			  END
-
-		  if (@ItemBlueLaw1ysn IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_bluelaw1_yn = ''' + LTRIM(@ItemBlueLaw1ysn) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_bluelaw1_yn = ''' + LTRIM(@ItemBlueLaw1ysn) + '''' 
-			  END
-
-		 if (@ItemBlueLaw2ysn IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_bluelaw2_yn = ''' + LTRIM(@ItemBlueLaw2ysn) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_bluelaw2_yn = ''' + LTRIM(@ItemBlueLaw2ysn) + '''' 
-			  END
-
-		 if (@ItemCountedDailyysn IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_phys_dly_yn = ''' + LTRIM(@ItemCountedDailyysn) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_phys_dly_yn = ''' + LTRIM(@ItemCountedDailyysn) + '''' 
-			  END
-
-		   if (@ItemCountedysn  IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_phys_inv_ynbo = ''' + LTRIM(@ItemCountedysn) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_phys_inv_ynbo = ''' + LTRIM(@ItemCountedysn) + '''' 
-			  END
-
-		   if (@ItemCountSerialysn IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_serials_yn = ''' + LTRIM(@ItemCountSerialysn) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_serials_yn = ''' + LTRIM(@ItemCountSerialysn) + '''' 
-			  END
-
-		  if (@ItemStickReadingysn  IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_stick_yn = ''' + LTRIM(@ItemStickReadingysn) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_stick_yn = ''' + LTRIM(@ItemStickReadingysn) + '''' 
-			  END
-
-		   if (@ItemNewFamily IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_family = ''' + LTRIM(@ItemNewFamily) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_family = ''' + LTRIM(@ItemNewFamily) + '''' 
-			  END
-
-		   if (@ItemNewClass IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL)
-			  OR (@ItemNewFamily IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_class = ''' + LTRIM(@ItemNewClass) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_class = ''' + LTRIM(@ItemNewClass) + '''' 
-			  END
-
-		   if (@ItemNewProductCode IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL)
-			  OR (@ItemNewFamily IS NOT NULL) OR (@ItemNewClass IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_product_cd_n = ''' + LTRIM(@ItemNewProductCode) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_product_cd_n = ''' + LTRIM(@ItemNewProductCode) + '''' 
-			  END
-
-		   if (@ItemNewCategory IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL)
-			  OR (@ItemNewFamily IS NOT NULL) OR (@ItemNewClass IS NOT NULL)
-			  OR (@ItemNewProductCode IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_deptno = ''' + LTRIM(@ItemNewCategory) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_deptno = ''' + LTRIM(@ItemNewCategory) + '''' 
-			  END
-
-		  if (@ItemNewVendor IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL)
-			  OR (@ItemNewFamily IS NOT NULL) OR (@ItemNewClass IS NOT NULL)
-			  OR (@ItemNewProductCode IS NOT NULL) OR (@ItemNewCategory IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_vnd_id = ''' + LTRIM(@ItemNewVendor) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_vnd_id = ''' + LTRIM(@ItemNewVendor) + '''' 
-			  END
-
-		   if (@ItemNewInventoryGroup IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL)
-			  OR (@ItemNewFamily IS NOT NULL) OR (@ItemNewClass IS NOT NULL)
-			  OR (@ItemNewProductCode IS NOT NULL) OR (@ItemNewCategory IS NOT NULL)
-			  OR (@ItemNewVendor IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_alt4_inv_upcno = ''' + LTRIM(@ItemNewInventoryGroup) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_alt4_inv_upcno = ''' + LTRIM(@ItemNewInventoryGroup) + '''' 
-			  END
-
-		  if (@ItemNewQuantityCase IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL)
-			  OR (@ItemNewFamily IS NOT NULL) OR (@ItemNewClass IS NOT NULL)
-			  OR (@ItemNewProductCode IS NOT NULL) OR (@ItemNewCategory IS NOT NULL)
-			  OR (@ItemNewVendor IS NOT NULL) OR (@ItemNewInventoryGroup IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_casesize = ' + LTRIM(@ItemNewQuantityCase) + ''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_casesize = ' + LTRIM(@ItemNewQuantityCase) + '' 
-		      END
-
-		  if (@ItemNewQuantitySellUnit IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL)
-			  OR (@ItemNewFamily IS NOT NULL) OR (@ItemNewClass IS NOT NULL)
-			  OR (@ItemNewProductCode IS NOT NULL) OR (@ItemNewCategory IS NOT NULL)
-			  OR (@ItemNewVendor IS NOT NULL) OR (@ItemNewInventoryGroup IS NOT NULL)
-			  OR (@ItemNewQuantityCase IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_packsize = ' + LTRIM(@ItemNewQuantitySellUnit) + ''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_packsize = ' + LTRIM(@ItemNewQuantitySellUnit) + ''
-			  END
-
-		 if (@ItemNewCountCode  IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL)
-			  OR (@ItemNewFamily IS NOT NULL) OR (@ItemNewClass IS NOT NULL)
-			  OR (@ItemNewProductCode IS NOT NULL) OR (@ItemNewCategory IS NOT NULL)
-			  OR (@ItemNewVendor IS NOT NULL) OR (@ItemNewInventoryGroup IS NOT NULL)
-			  OR (@ItemNewQuantityCase IS NOT NULL) OR (@ItemNewQuantitySellUnit IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_cnt_what_cd = ''' + LTRIM(@ItemNewCountCode) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_cnt_what_cd = ''' + LTRIM(@ItemNewCountCode) + '''' 
-			  END
-
-		 if (@ItemNewItemSize IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL)
-			  OR (@ItemNewFamily IS NOT NULL) OR (@ItemNewClass IS NOT NULL)
-			  OR (@ItemNewProductCode IS NOT NULL) OR (@ItemNewCategory IS NOT NULL)
-			  OR (@ItemNewVendor IS NOT NULL) OR (@ItemNewInventoryGroup IS NOT NULL)
-			  OR (@ItemNewQuantityCase IS NOT NULL) OR (@ItemNewQuantitySellUnit IS NOT NULL)
-			  OR (@ItemNewCountCode  IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_itemsize = ' + LTRIM(@ItemNewItemSize) + ''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_itemsize = ' + LTRIM(@ItemNewItemSize) + '' 
-			  END
-
-		 if (@ItemNewItemUOM IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL)
-			  OR (@ItemNewFamily IS NOT NULL) OR (@ItemNewClass IS NOT NULL)
-			  OR (@ItemNewProductCode IS NOT NULL) OR (@ItemNewCategory IS NOT NULL)
-			  OR (@ItemNewVendor IS NOT NULL) OR (@ItemNewInventoryGroup IS NOT NULL)
-			  OR (@ItemNewQuantityCase IS NOT NULL) OR (@ItemNewQuantitySellUnit IS NOT NULL)
-			  OR (@ItemNewCountCode  IS NOT NULL) OR (@ItemNewItemSize IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_itemuom = ''' + LTRIM(@ItemNewItemUOM) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_itemuom = ''' + LTRIM(@ItemNewItemUOM) + '''' 
-			  END
-
-		 if (@ItemNewMixMatch  IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL)
-			  OR (@ItemNewFamily IS NOT NULL) OR (@ItemNewClass IS NOT NULL)
-			  OR (@ItemNewProductCode IS NOT NULL) OR (@ItemNewCategory IS NOT NULL)
-			  OR (@ItemNewVendor IS NOT NULL) OR (@ItemNewInventoryGroup IS NOT NULL)
-			  OR (@ItemNewQuantityCase IS NOT NULL) OR (@ItemNewQuantitySellUnit IS NOT NULL)
-			  OR (@ItemNewCountCode  IS NOT NULL) OR (@ItemNewItemSize IS NOT NULL)
-			  OR (@ItemNewItemUOM IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_mixmatch_cd = ''' + LTRIM(@ItemNewMixMatch) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_mixmatch_cd = ''' + LTRIM(@ItemNewMixMatch) + '''' 
-			  END
-
-		 if (@ItemNewMinAge IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL)
-			  OR (@ItemNewFamily IS NOT NULL) OR (@ItemNewClass IS NOT NULL)
-			  OR (@ItemNewProductCode IS NOT NULL) OR (@ItemNewCategory IS NOT NULL)
-			  OR (@ItemNewVendor IS NOT NULL) OR (@ItemNewInventoryGroup IS NOT NULL)
-			  OR (@ItemNewQuantityCase IS NOT NULL) OR (@ItemNewQuantitySellUnit IS NOT NULL)
-			  OR (@ItemNewCountCode  IS NOT NULL) OR (@ItemNewItemSize IS NOT NULL)
-			  OR (@ItemNewItemUOM IS NOT NULL) OR (@ItemNewMixMatch  IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_min_age = ' + LTRIM(@ItemNewMinAge) + ''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_min_age = ' + LTRIM(@ItemNewMinAge) + ''
-			  END
-
-
-		   if (@ItemNewItemType  IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL)
-			  OR (@ItemNewFamily IS NOT NULL) OR (@ItemNewClass IS NOT NULL)
-			  OR (@ItemNewProductCode IS NOT NULL) OR (@ItemNewCategory IS NOT NULL)
-			  OR (@ItemNewVendor IS NOT NULL) OR (@ItemNewInventoryGroup IS NOT NULL)
-			  OR (@ItemNewQuantityCase IS NOT NULL) OR (@ItemNewQuantitySellUnit IS NOT NULL)
-			  OR (@ItemNewCountCode  IS NOT NULL) OR (@ItemNewItemSize IS NOT NULL)
-			  OR (@ItemNewItemUOM IS NOT NULL) OR (@ItemNewMixMatch  IS NOT NULL)
-			  OR (@ItemNewMinAge IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_pumped_yn = ''' + LTRIM(@ItemNewItemType) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_pumped_yn = ''' + LTRIM(@ItemNewItemType) + '''' 
-			  END
-
-		   if (@ItemNewMinVendorOrderQty IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL)
-			  OR (@ItemNewFamily IS NOT NULL) OR (@ItemNewClass IS NOT NULL)
-			  OR (@ItemNewProductCode IS NOT NULL) OR (@ItemNewCategory IS NOT NULL)
-			  OR (@ItemNewVendor IS NOT NULL) OR (@ItemNewInventoryGroup IS NOT NULL)
-			  OR (@ItemNewQuantityCase IS NOT NULL) OR (@ItemNewQuantitySellUnit IS NOT NULL)
-			  OR (@ItemNewCountCode  IS NOT NULL) OR (@ItemNewItemSize IS NOT NULL)
-			  OR (@ItemNewItemUOM IS NOT NULL) OR (@ItemNewMixMatch  IS NOT NULL)
-			  OR (@ItemNewMinAge IS NOT NULL) OR (@ItemNewItemType  IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_min_ord_qty = ' + LTRIM(@ItemNewMinVendorOrderQty) + ''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_min_ord_qty = ' + LTRIM(@ItemNewMinVendorOrderQty) + '' 
-			  END
-
-		 if (@ItemNewVendorSuggestedQty IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL)
-			  OR (@ItemNewFamily IS NOT NULL) OR (@ItemNewClass IS NOT NULL)
-			  OR (@ItemNewProductCode IS NOT NULL) OR (@ItemNewCategory IS NOT NULL)
-			  OR (@ItemNewVendor IS NOT NULL) OR (@ItemNewInventoryGroup IS NOT NULL)
-			  OR (@ItemNewQuantityCase IS NOT NULL) OR (@ItemNewQuantitySellUnit IS NOT NULL)
-			  OR (@ItemNewCountCode  IS NOT NULL) OR (@ItemNewItemSize IS NOT NULL)
-			  OR (@ItemNewItemUOM IS NOT NULL) OR (@ItemNewMixMatch  IS NOT NULL)
-			  OR (@ItemNewMinAge IS NOT NULL) OR (@ItemNewItemType  IS NOT NULL)
-			  OR (@ItemNewMinVendorOrderQty IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_sug_qty = ' + LTRIM(@ItemNewVendorSuggestedQty) + ''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_sug_qty = ' + LTRIM(@ItemNewVendorSuggestedQty) + '' 
-			  END
-
-		  if (@ItemNewMinQtyOnHand  IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL)
-			  OR (@ItemNewFamily IS NOT NULL) OR (@ItemNewClass IS NOT NULL)
-			  OR (@ItemNewProductCode IS NOT NULL) OR (@ItemNewCategory IS NOT NULL)
-			  OR (@ItemNewVendor IS NOT NULL) OR (@ItemNewInventoryGroup IS NOT NULL)
-			  OR (@ItemNewQuantityCase IS NOT NULL) OR (@ItemNewQuantitySellUnit IS NOT NULL)
-			  OR (@ItemNewCountCode  IS NOT NULL) OR (@ItemNewItemSize IS NOT NULL)
-			  OR (@ItemNewItemUOM IS NOT NULL) OR (@ItemNewMixMatch  IS NOT NULL)
-			  OR (@ItemNewMinAge IS NOT NULL) OR (@ItemNewItemType  IS NOT NULL)
-			  OR (@ItemNewMinVendorOrderQty IS NOT NULL) OR (@ItemNewVendorSuggestedQty IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_min_qty = ' + LTRIM(@ItemNewMinQtyOnHand) + ''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_min_qty = ' + LTRIM(@ItemNewMinQtyOnHand) + ''
-			  END
-
-		 if (@ItemNewBinLocation  IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL)
-			  OR (@ItemNewFamily IS NOT NULL) OR (@ItemNewClass IS NOT NULL)
-			  OR (@ItemNewProductCode IS NOT NULL) OR (@ItemNewCategory IS NOT NULL)
-			  OR (@ItemNewVendor IS NOT NULL) OR (@ItemNewInventoryGroup IS NOT NULL)
-			  OR (@ItemNewQuantityCase IS NOT NULL) OR (@ItemNewQuantitySellUnit IS NOT NULL)
-			  OR (@ItemNewCountCode  IS NOT NULL) OR (@ItemNewItemSize IS NOT NULL)
-			  OR (@ItemNewItemUOM IS NOT NULL) OR (@ItemNewMixMatch  IS NOT NULL)
-			  OR (@ItemNewMinAge IS NOT NULL) OR (@ItemNewItemType  IS NOT NULL)
-			  OR (@ItemNewMinVendorOrderQty IS NOT NULL) OR (@ItemNewVendorSuggestedQty IS NOT NULL)
-			  OR (@ItemNewMinQtyOnHand  IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_binloc = ''' + LTRIM(@ItemNewBinLocation) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_binloc = ''' + LTRIM(@ItemNewBinLocation) + '''' 
-			  END
-
-		  if (@ItemNewGLPurchaseAccount IS NOT NULL)  
-			  BEGIN
-
-			  set @PurchaseAcct = CONVERT(DECIMAL(16,8),(CONVERT(NVARCHAR(8),@ItemNewGLPurchaseAccount) 
-			   + '.' + RIGHT('00000000' + CONVERT(NVARCHAR(8), @PurAcctProfitCenter),8)))			  
-
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL)
-			  OR (@ItemNewFamily IS NOT NULL) OR (@ItemNewClass IS NOT NULL)
-			  OR (@ItemNewProductCode IS NOT NULL) OR (@ItemNewCategory IS NOT NULL)
-			  OR (@ItemNewVendor IS NOT NULL) OR (@ItemNewInventoryGroup IS NOT NULL)
-			  OR (@ItemNewQuantityCase IS NOT NULL) OR (@ItemNewQuantitySellUnit IS NOT NULL)
-			  OR (@ItemNewCountCode  IS NOT NULL) OR (@ItemNewItemSize IS NOT NULL)
-			  OR (@ItemNewItemUOM IS NOT NULL) OR (@ItemNewMixMatch  IS NOT NULL)
-			  OR (@ItemNewMinAge IS NOT NULL) OR (@ItemNewItemType  IS NOT NULL)
-			  OR (@ItemNewMinVendorOrderQty IS NOT NULL) OR (@ItemNewVendorSuggestedQty IS NOT NULL)
-			  OR (@ItemNewMinQtyOnHand  IS NOT NULL) OR (@ItemNewBinLocation  IS NOT NULL))   
-                 set @SQL1 = @SQL1 + ' , stpbk_gl_pur_acct  = convert(DECIMAL(16,8), '  + @PurchaseAcct + ')'			     
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_gl_pur_acct  = convert(DECIMAL(16,8), '  + @PurchaseAcct + ')'
-			  END
-
-			  print @SQL1
-
-		  if (@ItemNewGLSalesAccount  IS NOT NULL)  
-			  BEGIN
-
-			   set @SalAcct = CONVERT(DECIMAL(16,8),(CONVERT(NVARCHAR(8),@ItemNewGLSalesAccount) 
-			   + '.' + RIGHT('00000000' + CONVERT(NVARCHAR(8), @SalAcctProfitCenter),8)))	
-
-			  set @ItemNewGLSalesAccount = REPLACE(@ItemNewGLSalesAccount, '-','') 
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL)
-			  OR (@ItemNewFamily IS NOT NULL) OR (@ItemNewClass IS NOT NULL)
-			  OR (@ItemNewProductCode IS NOT NULL) OR (@ItemNewCategory IS NOT NULL)
-			  OR (@ItemNewVendor IS NOT NULL) OR (@ItemNewInventoryGroup IS NOT NULL)
-			  OR (@ItemNewQuantityCase IS NOT NULL) OR (@ItemNewQuantitySellUnit IS NOT NULL)
-			  OR (@ItemNewCountCode  IS NOT NULL) OR (@ItemNewItemSize IS NOT NULL)
-			  OR (@ItemNewItemUOM IS NOT NULL) OR (@ItemNewMixMatch  IS NOT NULL)
-			  OR (@ItemNewMinAge IS NOT NULL) OR (@ItemNewItemType  IS NOT NULL)
-			  OR (@ItemNewMinVendorOrderQty IS NOT NULL) OR (@ItemNewVendorSuggestedQty IS NOT NULL)
-			  OR (@ItemNewMinQtyOnHand  IS NOT NULL) OR (@ItemNewBinLocation  IS NOT NULL)
-			  OR (@ItemNewGLPurchaseAccount IS NOT NULL))   
-			    set @SQL1 = @SQL1 + ' , stpbk_gl_sls_acct  = convert(DECIMAL(16,8), '  + @SalAcct + ')'			     
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_gl_sls_acct  = convert(DECIMAL(16,8), '  + @SalAcct + ')'
-			  END
-
-		 if (@ItemNewGLVarianceAccount  IS NOT NULL)  
-			  BEGIN
-
-			  set @VarAcct = CONVERT(DECIMAL(16,8),(CONVERT(NVARCHAR(8),@ItemNewGLVarianceAccount) 
-			   + '.' + RIGHT('00000000' + CONVERT(NVARCHAR(8), @VarAcctProfitCenter),8)))	
-
-			  set @ItemNewGLVarianceAccount = REPLACE(@ItemNewGLVarianceAccount, '-','') 
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL)
-			  OR (@ItemNewFamily IS NOT NULL) OR (@ItemNewClass IS NOT NULL)
-			  OR (@ItemNewProductCode IS NOT NULL) OR (@ItemNewCategory IS NOT NULL)
-			  OR (@ItemNewVendor IS NOT NULL) OR (@ItemNewInventoryGroup IS NOT NULL)
-			  OR (@ItemNewQuantityCase IS NOT NULL) OR (@ItemNewQuantitySellUnit IS NOT NULL)
-			  OR (@ItemNewCountCode  IS NOT NULL) OR (@ItemNewItemSize IS NOT NULL)
-			  OR (@ItemNewItemUOM IS NOT NULL) OR (@ItemNewMixMatch  IS NOT NULL)
-			  OR (@ItemNewMinAge IS NOT NULL) OR (@ItemNewItemType  IS NOT NULL)
-			  OR (@ItemNewMinVendorOrderQty IS NOT NULL) OR (@ItemNewVendorSuggestedQty IS NOT NULL)
-			  OR (@ItemNewMinQtyOnHand  IS NOT NULL) OR (@ItemNewBinLocation  IS NOT NULL)
-			  OR (@ItemNewGLPurchaseAccount IS NOT NULL) OR (@ItemNewGLSalesAccount  IS NOT NULL))   
-			      set @SQL1 = @SQL1 + ' , stpbk_gl_var_acct  = convert(DECIMAL(16,8), '  + @VarAcct + ')'			     
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_gl_var_acct  = convert(DECIMAL(16,8), '  + @VarAcct + ')'
-			  END
-	 
-	    if (@ItemDepositPLU IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL)
-			  OR (@ItemNewFamily IS NOT NULL) OR (@ItemNewClass IS NOT NULL)
-			  OR (@ItemNewProductCode IS NOT NULL) OR (@ItemNewCategory IS NOT NULL)
-			  OR (@ItemNewVendor IS NOT NULL) OR (@ItemNewInventoryGroup IS NOT NULL)
-			  OR (@ItemNewQuantityCase IS NOT NULL) OR (@ItemNewQuantitySellUnit IS NOT NULL)
-			  OR (@ItemNewCountCode  IS NOT NULL) OR (@ItemNewItemSize IS NOT NULL)
-			  OR (@ItemNewItemUOM IS NOT NULL) OR (@ItemNewMixMatch  IS NOT NULL)
-			  OR (@ItemNewMinAge IS NOT NULL) OR (@ItemNewItemType  IS NOT NULL)
-			  OR (@ItemNewMinVendorOrderQty IS NOT NULL) OR (@ItemNewVendorSuggestedQty IS NOT NULL)
-			  OR (@ItemNewMinQtyOnHand  IS NOT NULL) OR (@ItemNewBinLocation  IS NOT NULL)
-			  OR (@ItemNewGLPurchaseAccount IS NOT NULL) OR (@ItemNewGLSalesAccount  IS NOT NULL)
-			  OR (@ItemNewGLVarianceAccount IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_lnk_upcno = ''' + CONVERT(NVARCHAR,(@ItemDepositPLU)) + ''''
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_lnk_upcno = ''' + CONVERT(NVARCHAR,(@ItemDepositPLU)) + '''' 
-			  END
-	 
-	      if (@ItemQuantityRequiredysn IS NOT NULL)  
-			  BEGIN
-			  if ((@ItemTaxFlag1ysn IS NOT NULL) OR (@ItemTaxFlag2ysn IS NOT NULL)
-			  OR (@ItemTaxFlag3ysn IS NOT NULL) OR (@ItemTaxFlag4ysn IS NOT NULL)
-			  OR (@ItemDepositRequiredysn IS NOT NULL) OR (@ItemScaleItemysn IS NOT NULL)
-			  OR (@ItemFoodStampableysn IS NOT NULL) OR (@ItemReturnableysn IS NOT NULL)
-			  OR (@ItemSaleableysn IS NOT NULL) OR (@ItemID1Requiredysn IS NOT NULL)
-			  OR (@ItemID2Requiredysn IS NOT NULL) OR (@ItemPromotionalItemysn IS NOT NULL)
-			  OR (@ItemPrePricedysn IS NOT NULL) OR (@ItemActiveysn IS NOT NULL)
-			  OR (@ItemBlueLaw1ysn IS NOT NULL) OR (@ItemBlueLaw2ysn IS NOT NULL)
-			  OR (@ItemCountedDailyysn IS NOT NULL) OR (@ItemCountedysn  IS NOT NULL)
-			  OR (@ItemCountSerialysn IS NOT NULL) OR (@ItemStickReadingysn  IS NOT NULL)
-			  OR (@ItemNewFamily IS NOT NULL) OR (@ItemNewClass IS NOT NULL)
-			  OR (@ItemNewProductCode IS NOT NULL) OR (@ItemNewCategory IS NOT NULL)
-			  OR (@ItemNewVendor IS NOT NULL) OR (@ItemNewInventoryGroup IS NOT NULL)
-			  OR (@ItemNewQuantityCase IS NOT NULL) OR (@ItemNewQuantitySellUnit IS NOT NULL)
-			  OR (@ItemNewCountCode  IS NOT NULL) OR (@ItemNewItemSize IS NOT NULL)
-			  OR (@ItemNewItemUOM IS NOT NULL) OR (@ItemNewMixMatch  IS NOT NULL)
-			  OR (@ItemNewMinAge IS NOT NULL) OR (@ItemNewItemType  IS NOT NULL)
-			  OR (@ItemNewMinVendorOrderQty IS NOT NULL) OR (@ItemNewVendorSuggestedQty IS NOT NULL)
-			  OR (@ItemNewMinQtyOnHand  IS NOT NULL) OR (@ItemNewBinLocation  IS NOT NULL)
-			  OR (@ItemNewGLPurchaseAccount IS NOT NULL) OR (@ItemNewGLSalesAccount  IS NOT NULL)
-			  OR (@ItemNewGLVarianceAccount IS NOT NULL) OR (@ItemDepositPLU IS NOT NULL))   
- 				 set @SQL1 = @SQL1 + ' , stpbk_qty_req_yn = ''' + LTRIM(@ItemQuantityRequiredysn) + '''' 
-			  else
-				 set @SQL1 = @SQL1 + ' stpbk_qty_req_yn = ''' + LTRIM(@ItemQuantityRequiredysn) + '''' 
-			  END
-	     
-		  set @SQL1 = @SQL1 + ' where 1=1 ' 
-
-		  if (@ItemLocation IS NOT NULL)
-			 BEGIN 
-			   set @SQL1 = @SQL1 +  ' and  stpbk_store_name IN 
-				 (''' + replace((SELECT (CAST(@ItemLocation AS NVARCHAR(MAX)))),',',''',''') +''')'
+				 set @SQL1 = @SQL1 + ' intDepositPLUId = ''' + LTRIM(@DepositPLU) + '''' 
 			 END
-       
-		  if (@ItemVendor IS NOT NULL)
-			  BEGIN
-				set @SQL1 = @SQL1 +  ' and  stpbk_vnd_id IN 
-				 (''' + replace((SELECT (CAST(@ItemVendor AS NVARCHAR(MAX)))),', ',''',''') +''')'
-			  END
-         
-		  if (@ItemCategory IS NOT NULL)
-			  BEGIN
-     			set @SQL1 = @SQL1 +  ' and  stpbk_deptno IN 
-				 (''' + replace((SELECT (CAST(@ItemCategory AS NVARCHAR(MAX)))),',',''',''') +''')'
-			  END
-           
-  		  if (@ItemFamily IS NOT NULL)
-			  BEGIN
-  			   set @SQL1 = @SQL1 +  ' and  stpbk_family IN 
-				 (''' + replace((SELECT (CAST(@ItemFamily AS NVARCHAR(MAX)))),',',''',''') +''')'
-			  END
-    
-		  if (@ItemClass  IS NOT NULL)
-			  BEGIN
-			   set @SQL1 = @SQL1 +  ' and  stpbk_class IN 
-				 (''' + replace((SELECT (CAST(@ItemClass AS NVARCHAR(MAX)))),',',''',''') +''')'
-			  END
-    
-		  if (@ItemUpcCode IS NOT NULL)
-			 BEGIN
-				set @SQL1 = @SQL1 +  ' and  stpbk_upcno IN 
-				 (''' + replace((SELECT (CAST(@ItemUpcCode AS NVARCHAR(MAX)))),',',''',''') +''')'
-			  END
 
-	    
-		  if ((@ItemDescription IS NOT NULL) and (RTRIM (LTRIM(@ItemDescription)) != ''))
-			   BEGIN
-				 set @SQL1 = @SQL1 +  ' and  stpbk_item_desc like ''%' + LTRIM(@ItemDescription) + '%'''
-			   END
-			  
-		  if (@ItemPriceBetween1 IS NOT NULL) 
+           IF(@QuantityRequiredysn IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , ysnQuantityRequired = ''' + LTRIM(@QuantityRequiredysn) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' ysnQuantityRequired = ''' + LTRIM(@QuantityRequiredysn) + '''' 
+			 END
+
+           IF(@ScaleItemysn IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL)
+			   OR (@QuantityRequiredysn IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , ysnScaleItem = ''' + LTRIM(@ScaleItemysn) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' ysnScaleItem = ''' + LTRIM(@ScaleItemysn) + '''' 
+			 END
+
+           IF(@FoodStampableysn IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL)
+			   OR (@QuantityRequiredysn IS NOT NULL) OR (@ScaleItemysn IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , ysnFoodStampable = ''' + LTRIM(@FoodStampableysn) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' ysnFoodStampable = ''' + LTRIM(@FoodStampableysn) + '''' 
+			 END
+
+           IF(@Returnableysn IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL)
+			   OR (@QuantityRequiredysn IS NOT NULL) OR (@ScaleItemysn IS NOT NULL)
+			   OR (@FoodStampableysn IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , ysnReturnable = ''' + LTRIM(@Returnableysn) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' ysnReturnable = ''' + LTRIM(@Returnableysn) + '''' 
+			 END
+
+          IF(@Saleableysn IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL)
+			   OR (@QuantityRequiredysn IS NOT NULL) OR (@ScaleItemysn IS NOT NULL)
+			   OR (@FoodStampableysn IS NOT NULL) OR (@Returnableysn IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , ysnSaleable = ''' + LTRIM(@Saleableysn) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' ysnSaleable = ''' + LTRIM(@Saleableysn) + '''' 
+			 END
+
+          IF(@ID1Requiredysn IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL)
+			   OR (@QuantityRequiredysn IS NOT NULL) OR (@ScaleItemysn IS NOT NULL)
+			   OR (@FoodStampableysn IS NOT NULL) OR (@Returnableysn IS NOT NULL)
+			   OR (@Saleableysn IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , ysnIdRequiredLiquor = ''' + LTRIM(@ID1Requiredysn) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' ysnIdRequiredLiquor = ''' + LTRIM(@ID1Requiredysn) + '''' 
+			 END
+
+          IF(@ID2Requiredysn IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL)
+			   OR (@QuantityRequiredysn IS NOT NULL) OR (@ScaleItemysn IS NOT NULL)
+			   OR (@FoodStampableysn IS NOT NULL) OR (@Returnableysn IS NOT NULL)
+			   OR (@Saleableysn IS NOT NULL) OR (@ID1Requiredysn IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , ysnIdRequiredCigarette = ''' + LTRIM(@ID2Requiredysn) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' ysnIdRequiredCigarette = ''' + LTRIM(@ID2Requiredysn) + '''' 
+			 END
+
+         IF(@PromotionalItemysn IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL)
+			   OR (@QuantityRequiredysn IS NOT NULL) OR (@ScaleItemysn IS NOT NULL)
+			   OR (@FoodStampableysn IS NOT NULL) OR (@Returnableysn IS NOT NULL)
+			   OR (@Saleableysn IS NOT NULL) OR (@ID1Requiredysn IS NOT NULL)
+			   OR (@ID2Requiredysn IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , ysnPromotionalItem = ''' + LTRIM(@PromotionalItemysn) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' ysnPromotionalItem = ''' + LTRIM(@PromotionalItemysn) + '''' 
+			 END
+
+         IF(@PrePricedysn IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL)
+			   OR (@QuantityRequiredysn IS NOT NULL) OR (@ScaleItemysn IS NOT NULL)
+			   OR (@FoodStampableysn IS NOT NULL) OR (@Returnableysn IS NOT NULL)
+			   OR (@Saleableysn IS NOT NULL) OR (@ID1Requiredysn IS NOT NULL)
+			   OR (@ID2Requiredysn IS NOT NULL) OR (@PromotionalItemysn IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , ysnPrePriced = ''' + LTRIM(@PrePricedysn) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' ysnPrePriced = ''' + LTRIM(@PrePricedysn) + '''' 
+			 END
+
+         IF(@BlueLaw1ysn IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL)
+			   OR (@QuantityRequiredysn IS NOT NULL) OR (@ScaleItemysn IS NOT NULL)
+			   OR (@FoodStampableysn IS NOT NULL) OR (@Returnableysn IS NOT NULL)
+			   OR (@Saleableysn IS NOT NULL) OR (@ID1Requiredysn IS NOT NULL)
+			   OR (@ID2Requiredysn IS NOT NULL) OR (@PromotionalItemysn IS NOT NULL)
+			   OR (@PrePricedysn IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , ysnApplyBlueLaw1 = ''' + LTRIM(@BlueLaw1ysn) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' ysnApplyBlueLaw1 = ''' + LTRIM(@BlueLaw1ysn) + '''' 
+			 END
+
+          IF(@BlueLaw2ysn IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL)
+			   OR (@QuantityRequiredysn IS NOT NULL) OR (@ScaleItemysn IS NOT NULL)
+			   OR (@FoodStampableysn IS NOT NULL) OR (@Returnableysn IS NOT NULL)
+			   OR (@Saleableysn IS NOT NULL) OR (@ID1Requiredysn IS NOT NULL)
+			   OR (@ID2Requiredysn IS NOT NULL) OR (@PromotionalItemysn IS NOT NULL)
+			   OR (@PrePricedysn IS NOT NULL) OR (@BlueLaw1ysn IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , ysnApplyBlueLaw2 = ''' + LTRIM(@BlueLaw2ysn) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' ysnApplyBlueLaw2 = ''' + LTRIM(@BlueLaw2ysn) + '''' 
+			 END
+
+          IF(@CountedDailyysn IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL)
+			   OR (@QuantityRequiredysn IS NOT NULL) OR (@ScaleItemysn IS NOT NULL)
+			   OR (@FoodStampableysn IS NOT NULL) OR (@Returnableysn IS NOT NULL)
+			   OR (@Saleableysn IS NOT NULL) OR (@ID1Requiredysn IS NOT NULL)
+			   OR (@ID2Requiredysn IS NOT NULL) OR (@PromotionalItemysn IS NOT NULL)
+			   OR (@PrePricedysn IS NOT NULL) OR (@BlueLaw1ysn IS NOT NULL)
+			   OR (@BlueLaw2ysn IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , ysnCountedDaily = ''' + LTRIM(@CountedDailyysn) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' ysnCountedDaily = ''' + LTRIM(@CountedDailyysn) + '''' 
+			 END
+
+          IF(@Counted IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL)
+			   OR (@QuantityRequiredysn IS NOT NULL) OR (@ScaleItemysn IS NOT NULL)
+			   OR (@FoodStampableysn IS NOT NULL) OR (@Returnableysn IS NOT NULL)
+			   OR (@Saleableysn IS NOT NULL) OR (@ID1Requiredysn IS NOT NULL)
+			   OR (@ID2Requiredysn IS NOT NULL) OR (@PromotionalItemysn IS NOT NULL)
+			   OR (@PrePricedysn IS NOT NULL) OR (@BlueLaw1ysn IS NOT NULL)
+			   OR (@BlueLaw2ysn IS NOT NULL) OR(@CountedDailyysn IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , strCounted = ''' + LTRIM(@Counted) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' strCounted = ''' + LTRIM(@Counted) + '''' 
+			 END
+
+          IF(@CountSerialysn IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL)
+			   OR (@QuantityRequiredysn IS NOT NULL) OR (@ScaleItemysn IS NOT NULL)
+			   OR (@FoodStampableysn IS NOT NULL) OR (@Returnableysn IS NOT NULL)
+			   OR (@Saleableysn IS NOT NULL) OR (@ID1Requiredysn IS NOT NULL)
+			   OR (@ID2Requiredysn IS NOT NULL) OR (@PromotionalItemysn IS NOT NULL)
+			   OR (@PrePricedysn IS NOT NULL) OR (@BlueLaw1ysn IS NOT NULL)
+			   OR (@BlueLaw2ysn IS NOT NULL) OR(@CountedDailyysn IS NOT NULL)
+			   OR (@Counted IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , ysnCountBySINo = ''' + LTRIM(@CountSerialysn) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' ysnCountBySINo = ''' + LTRIM(@CountSerialysn) + '''' 
+			 END
+
+          IF(@NewFamily IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL)
+			   OR (@QuantityRequiredysn IS NOT NULL) OR (@ScaleItemysn IS NOT NULL)
+			   OR (@FoodStampableysn IS NOT NULL) OR (@Returnableysn IS NOT NULL)
+			   OR (@Saleableysn IS NOT NULL) OR (@ID1Requiredysn IS NOT NULL)
+			   OR (@ID2Requiredysn IS NOT NULL) OR (@PromotionalItemysn IS NOT NULL)
+			   OR (@PrePricedysn IS NOT NULL) OR (@BlueLaw1ysn IS NOT NULL)
+			   OR (@BlueLaw2ysn IS NOT NULL) OR(@CountedDailyysn IS NOT NULL)
+			   OR (@Counted IS NOT NULL) OR (@CountSerialysn IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , intFamilyId = ''' + LTRIM(@NewFamily) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' intFamilyId = ''' + LTRIM(@NewFamily) + '''' 
+			 END
+
+          IF(@NewClass IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL)
+			   OR (@QuantityRequiredysn IS NOT NULL) OR (@ScaleItemysn IS NOT NULL)
+			   OR (@FoodStampableysn IS NOT NULL) OR (@Returnableysn IS NOT NULL)
+			   OR (@Saleableysn IS NOT NULL) OR (@ID1Requiredysn IS NOT NULL)
+			   OR (@ID2Requiredysn IS NOT NULL) OR (@PromotionalItemysn IS NOT NULL)
+			   OR (@PrePricedysn IS NOT NULL) OR (@BlueLaw1ysn IS NOT NULL)
+			   OR (@BlueLaw2ysn IS NOT NULL) OR(@CountedDailyysn IS NOT NULL)
+			   OR (@Counted IS NOT NULL) OR (@CountSerialysn IS NOT NULL)
+			   OR (@NewFamily IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , intClassId = ''' + LTRIM(@NewClass) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' intClassId = ''' + LTRIM(@NewClass) + '''' 
+			 END
+
+         IF(@NewProductCode IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL)
+			   OR (@QuantityRequiredysn IS NOT NULL) OR (@ScaleItemysn IS NOT NULL)
+			   OR (@FoodStampableysn IS NOT NULL) OR (@Returnableysn IS NOT NULL)
+			   OR (@Saleableysn IS NOT NULL) OR (@ID1Requiredysn IS NOT NULL)
+			   OR (@ID2Requiredysn IS NOT NULL) OR (@PromotionalItemysn IS NOT NULL)
+			   OR (@PrePricedysn IS NOT NULL) OR (@BlueLaw1ysn IS NOT NULL)
+			   OR (@BlueLaw2ysn IS NOT NULL) OR(@CountedDailyysn IS NOT NULL)
+			   OR (@Counted IS NOT NULL) OR (@CountSerialysn IS NOT NULL)
+			   OR (@NewFamily IS NOT NULL) OR (@NewClass IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , intProductCodeId = ''' + LTRIM(@NewProductCode) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' intProductCodeId = ''' + LTRIM(@NewProductCode) + '''' 
+			 END
+
+         IF(@NewVendor IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL)
+			   OR (@QuantityRequiredysn IS NOT NULL) OR (@ScaleItemysn IS NOT NULL)
+			   OR (@FoodStampableysn IS NOT NULL) OR (@Returnableysn IS NOT NULL)
+			   OR (@Saleableysn IS NOT NULL) OR (@ID1Requiredysn IS NOT NULL)
+			   OR (@ID2Requiredysn IS NOT NULL) OR (@PromotionalItemysn IS NOT NULL)
+			   OR (@PrePricedysn IS NOT NULL) OR (@BlueLaw1ysn IS NOT NULL)
+			   OR (@BlueLaw2ysn IS NOT NULL) OR(@CountedDailyysn IS NOT NULL)
+			   OR (@Counted IS NOT NULL) OR (@CountSerialysn IS NOT NULL)
+			   OR (@NewFamily IS NOT NULL) OR (@NewClass IS NOT NULL)
+			   OR (@NewProductCode IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , intVendorId = ''' + LTRIM(@NewVendor) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' intVendorId = ''' + LTRIM(@NewVendor) + '''' 
+			 END
+
+          IF(@NewMinAge IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL)
+			   OR (@QuantityRequiredysn IS NOT NULL) OR (@ScaleItemysn IS NOT NULL)
+			   OR (@FoodStampableysn IS NOT NULL) OR (@Returnableysn IS NOT NULL)
+			   OR (@Saleableysn IS NOT NULL) OR (@ID1Requiredysn IS NOT NULL)
+			   OR (@ID2Requiredysn IS NOT NULL) OR (@PromotionalItemysn IS NOT NULL)
+			   OR (@PrePricedysn IS NOT NULL) OR (@BlueLaw1ysn IS NOT NULL)
+			   OR (@BlueLaw2ysn IS NOT NULL) OR(@CountedDailyysn IS NOT NULL)
+			   OR (@Counted IS NOT NULL) OR (@CountSerialysn IS NOT NULL)
+			   OR (@NewFamily IS NOT NULL) OR (@NewClass IS NOT NULL)
+			   OR (@NewProductCode IS NOT NULL) OR (@NewVendor IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , intMinimumAge = ''' + LTRIM(@NewMinAge) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' intMinimumAge = ''' + LTRIM(@NewMinAge) + '''' 
+			 END
+
+          IF(@NewMinVendorOrderQty IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL)
+			   OR (@QuantityRequiredysn IS NOT NULL) OR (@ScaleItemysn IS NOT NULL)
+			   OR (@FoodStampableysn IS NOT NULL) OR (@Returnableysn IS NOT NULL)
+			   OR (@Saleableysn IS NOT NULL) OR (@ID1Requiredysn IS NOT NULL)
+			   OR (@ID2Requiredysn IS NOT NULL) OR (@PromotionalItemysn IS NOT NULL)
+			   OR (@PrePricedysn IS NOT NULL) OR (@BlueLaw1ysn IS NOT NULL)
+			   OR (@BlueLaw2ysn IS NOT NULL) OR(@CountedDailyysn IS NOT NULL)
+			   OR (@Counted IS NOT NULL) OR (@CountSerialysn IS NOT NULL)
+			   OR (@NewFamily IS NOT NULL) OR (@NewClass IS NOT NULL)
+			   OR (@NewProductCode IS NOT NULL) OR (@NewVendor IS NOT NULL)
+			   OR (@NewMinAge IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , dblMinOrder = ''' + LTRIM(@NewMinVendorOrderQty) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' dblMinOrder = ''' + LTRIM(@NewMinVendorOrderQty) + '''' 
+			 END
+
+          IF(@NewVendorSuggestedQty IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL)
+			   OR (@QuantityRequiredysn IS NOT NULL) OR (@ScaleItemysn IS NOT NULL)
+			   OR (@FoodStampableysn IS NOT NULL) OR (@Returnableysn IS NOT NULL)
+			   OR (@Saleableysn IS NOT NULL) OR (@ID1Requiredysn IS NOT NULL)
+			   OR (@ID2Requiredysn IS NOT NULL) OR (@PromotionalItemysn IS NOT NULL)
+			   OR (@PrePricedysn IS NOT NULL) OR (@BlueLaw1ysn IS NOT NULL)
+			   OR (@BlueLaw2ysn IS NOT NULL) OR(@CountedDailyysn IS NOT NULL)
+			   OR (@Counted IS NOT NULL) OR (@CountSerialysn IS NOT NULL)
+			   OR (@NewFamily IS NOT NULL) OR (@NewClass IS NOT NULL)
+			   OR (@NewProductCode IS NOT NULL) OR (@NewVendor IS NOT NULL)
+			   OR (@NewMinAge IS NOT NULL) OR (@NewMinVendorOrderQty IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , dblSuggestedQty = ''' + LTRIM(@NewVendorSuggestedQty) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' dblSuggestedQty = ''' + LTRIM(@NewVendorSuggestedQty) + '''' 
+			 END
+
+			 SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+			 IF (@Location IS NOT NULL)
+		         BEGIN 
+		               set @SQL1 = @SQL1 +  ' and  tblICItemLocation.intLocationId
+		             	       IN (' + CAST(@Location as NVARCHAR) + ')' 
+		         END
+			 
+			 IF (@Vendor IS NOT NULL)
+		         BEGIN 
+		               set @SQL1 = @SQL1 +  ' and  tblICItemLocation.intVendorId
+		             	       IN (' + CAST(@Vendor as NVARCHAR) + ')' 
+		         END
+
+             IF (@Category IS NOT NULL)
+		         BEGIN
+     	               set @SQL1 = @SQL1 +  ' and tblICItemLocation.intItemId  
+		               IN (select intItemId from tblICItem where intCategoryId IN
+			           (select intCategoryId from tblICCategory where intCategoryId 
+					 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		         END
+
+             IF (@Family IS NOT NULL)
+		         BEGIN
+  			            set @SQL1 = @SQL1 +  ' and  tblICItemLocation.intFamilyId
+		             	       IN (' + CAST(@Family as NVARCHAR) + ')' 
+		          END
+
+             IF (@Class IS NOT NULL)
+		         BEGIN
+  			            set @SQL1 = @SQL1 +  ' and  tblICItemLocation.intClassId
+		             	       IN (' + CAST(@Class as NVARCHAR) + ')' 
+		          END
+		    
+			 IF (@UpcCode IS NOT NULL)
+			      BEGIN
+				        set @SQL1 = @SQL1 +  ' and tblICItemLocation.intItemId  
+                        IN (select intItemId from tblICItemUOM where  intItemUOMId IN
+				   	    (' + CAST(@UpcCode as NVARCHAR) + ')' + ')'
+			      END
+
+             IF ((@Description IS NOT NULL)
+				   and (@Description != ''))
+					BEGIN
+					   set @SQL1 = @SQL1 +  ' and tblICItemLocation.intItemId IN 
+					   (select intItemId from tblICItem where strDescription 
+					    like ''%' + LTRIM(@Description) + '%'' )'
+					END
+
+             IF (@PriceBetween1 IS NOT NULL) 
 		      BEGIN
-		       set @SQL1 = @SQL1 +  ' and  stpbk_price >= ''' + CONVERT(NVARCHAR,(@ItemPriceBetween1)) + '''' 
+			      set @SQL1 = @SQL1 +  ' and tblICItemLocation.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
 		      END 
 		      
-          if (@ItemPriceBetween2 IS NOT NULL) 
-		      BEGIN
-		       set @SQL1 = @SQL1 +  ' and  stpbk_price <= ''' + CONVERT(NVARCHAR,(@ItemPriceBetween2)) + '''' 
-		      END 		      
+             IF (@PriceBetween2 IS NOT NULL) 
+		        BEGIN
+			        set @SQL1 = @SQL1 +  ' and tblICItemLocation.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+		        END     
+
+
+		  EXEC (@SQL1)
+
+		  SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   
+		  
+END
+  
+IF (@UpdateReportTable = 'Y')
+BEGIN
+     DELETE FROM tblSTMassUpdateReportMaster
+
+	 IF (@TaxFlag1ysn IS NOT NULL)
+     BEGIN
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Tax Flag1'',
+							   case when a.ysnTaxFlag1 = 0 then ''No'' else ''Yes'' end,
+							   ''' + case when @TaxFlag1ysn = 0 then 'No' else 'Yes' end +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
 		    
-		  exec (@SQL1)
-		  select (@@ROWCOUNT)
-      
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
 
-	END TRY
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
 
-	BEGIN CATCH       
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END     
+     EXEC (@SQL1) 
+     END 
+ 
+	 IF (@TaxFlag2ysn IS NOT NULL)
+     BEGIN
+	       
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Tax Flag2'',
+							   case when a.ysnTaxFlag2 = 0 then ''No'' else ''Yes'' end,
+							   ''' + case when @TaxFlag2ysn = 0 then 'No' else 'Yes' end +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END     
+     EXEC (@SQL1)
+     END 
+ 
+
+	 IF (@TaxFlag3ysn IS NOT NULL)
+     BEGIN
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Tax Flag3'',
+							   case when a.ysnTaxFlag3 = 0 then ''No'' else ''Yes'' end,
+							   ''' + case when @TaxFlag3ysn = 0 then 'No' else 'Yes' end +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END     
+	 EXEC (@SQL1)
+     END 
+
+	 IF (@TaxFlag4ysn IS NOT NULL)
+     BEGIN
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Tax Flag4'',
+							   case when a.ysnTaxFlag4 = 0 then ''No'' else ''Yes'' end,
+							   ''' + case when @TaxFlag4ysn = 0 then 'No' else 'Yes' end +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END    
+	 EXEC (@SQL1) 
+     END 
+
+	 IF (@DepositRequiredysn  IS NOT NULL)
+     BEGIN
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Deposit Required'',
+							   case when a.ysnDepositRequired = 0 then ''No'' else ''Yes'' end,
+							   ''' + case when @DepositRequiredysn = 0 then 'No' else 'Yes' end +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END    
+	 EXEC (@SQL1)
+     END 
+
+	 IF (@DepositPLU  IS NOT NULL)
+     BEGIN
+
+
+	       SELECT @NewDepositPluId = strUpcCode from tblICItemUOM where intItemUOMId = @DepositPLU
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Deposit PLU'', 
+							   (select strUpcCode from tblICItemUOM where intItemUOMId = a.intDepositPLUId), 
+							   ''' + @NewDepositPluId + '''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and a.intLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END    
+	 EXEC (@SQL1)
+     END 
+
+	 IF (@QuantityRequiredysn  IS NOT NULL)
+     BEGIN
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Quantity Required'',
+							   case when a.ysnQuantityRequired = 0 then ''No'' else ''Yes'' end,
+							   ''' + case when @QuantityRequiredysn = 0 then 'No' else 'Yes' end +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END     
+	 EXEC (@SQL1)
+     END 
+
+	 IF (@ScaleItemysn  IS NOT NULL)
+     BEGIN
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Scale Item'',
+							   case when a.ysnScaleItem = 0 then ''No'' else ''Yes'' end,
+							   ''' + case when @ScaleItemysn = 0 then 'No' else 'Yes' end +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END     
+	 EXEC (@SQL1)
+     END 
+
+	 IF (@FoodStampableysn  IS NOT NULL)
+     BEGIN
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Food Stampable'',
+							   case when a.ysnFoodStampable = 0 then ''No'' else ''Yes'' end,
+							   ''' + case when @FoodStampableysn = 0 then 'No' else 'Yes' end +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END     
+	 EXEC (@SQL1)
+     END 
+
+	 IF (@Returnableysn  IS NOT NULL)
+     BEGIN
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Returnable '',
+							   case when a.ysnReturnable = 0 then ''No'' else ''Yes'' end,
+							   ''' + case when @Returnableysn = 0 then 'No' else 'Yes' end +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END     
+	 EXEC (@SQL1)
+     END 
+
+	 IF (@Saleableysn  IS NOT NULL)
+     BEGIN
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Saleable '',
+							   case when a.ysnSaleable = 0 then ''No'' else ''Yes'' end,
+							   ''' + case when @Saleableysn = 0 then 'No' else 'Yes' end +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END     
+	 EXEC (@SQL1)
+     END 
+
+	 IF (@ID1Requiredysn  IS NOT NULL)
+     BEGIN
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Liquor Id Required '',
+							   case when a.ysnIdRequiredLiquor = 0 then ''No'' else ''Yes'' end,
+							   ''' + case when @ID1Requiredysn = 0 then 'No' else 'Yes' end +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END     
+	 EXEC (@SQL1)
+     END 
+
+	 IF (@ID2Requiredysn  IS NOT NULL)
+     BEGIN
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Cigarette Id Required '',
+							   case when a.ysnIdRequiredCigarette = 0 then ''No'' else ''Yes'' end,
+							   ''' + case when @ID2Requiredysn = 0 then 'No' else 'Yes' end +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END     
+	 EXEC (@SQL1)
+     END 
+
+	 IF (@PromotionalItemysn  IS NOT NULL)
+     BEGIN
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Promotional Item'',
+							   case when a.ysnPromotionalItem = 0 then ''No'' else ''Yes'' end,
+							   ''' + case when @PromotionalItemysn = 0 then 'No' else 'Yes' end +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END     
+	 EXEC (@SQL1)
+     END 
+
+	 IF (@PrePricedysn  IS NOT NULL)
+     BEGIN
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Pre Priced'',
+							   case when a.ysnPrePriced = 0 then ''No'' else ''Yes'' end,
+							   ''' + case when @PrePricedysn = 0 then 'No' else 'Yes' end +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END     
+	 EXEC (@SQL1)
+     END 
+
+	 IF (@BlueLaw1ysn  IS NOT NULL)
+     BEGIN
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Blue Law1'',
+							   case when a.ysnApplyBlueLaw1 = 0 then ''No'' else ''Yes'' end,
+							   ''' + case when @BlueLaw1ysn = 0 then 'No' else 'Yes' end +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END     
+	 EXEC (@SQL1)
+     END 
+ 
+
+	 IF (@BlueLaw2ysn  IS NOT NULL)
+     BEGIN
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Blue Law2'',
+							   case when a.ysnApplyBlueLaw2 = 0 then ''No'' else ''Yes'' end,
+							   ''' + case when @BlueLaw2ysn = 0 then 'No' else 'Yes' end +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END     
+	 EXEC (@SQL1)
+     END 
+
+	 IF (@CountedDailyysn  IS NOT NULL)
+     BEGIN
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Counted Daily'',
+							   case when a.ysnCountedDaily = 0 then ''No'' else ''Yes'' end,
+							   ''' + case when @CountedDailyysn = 0 then 'No' else 'Yes' end +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END     
+	 EXEC (@SQL1)
+     END 
+ 
+	 IF (@Counted  IS NOT NULL)
+     BEGIN
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Counted '', a.strCounted, 
+							   ''' + CAST(@Counted AS NVARCHAR(250))  +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END     
+	 EXEC (@SQL1)
+     END 
+
+	 IF (@CountSerialysn  IS NOT NULL)
+     BEGIN
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Count By Serial No'',
+							   case when a.ysnCountBySINo = 0 then ''No'' else ''Yes'' end,
+							   ''' + case when @CountSerialysn = 0 then 'No' else 'Yes' end +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END     
+	 EXEC (@SQL1)
+     END 
+ 
+	 IF (@NewFamily  IS NOT NULL)
+     BEGIN
+	        
+           SELECT @FamilyId = strSubcategoryId from tblSTSubcategory where intSubcategoryId = @NewFamily  
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Family '', e.strSubcategoryId, ''' + @FamilyId +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId JOIN 
+							   tblSTSubcategory e ON a.intFamilyId = e.intSubcategoryId'
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END
+     EXEC (@SQL1)     
+     END 
+ 
+
+	 IF (@NewClass  IS NOT NULL)
+     BEGIN
+	       
+		   SELECT @ClassId = strSubcategoryId from tblSTSubcategory where intSubcategoryId = @NewClass
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Class '', e.strSubcategoryId, ''' + @ClassId  +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId JOIN 
+							   tblSTSubcategory e ON a.intFamilyId = e.intSubcategoryId'
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END    
+	 EXEC (@SQL1) 
+     END 
+ 
+
+	 IF (@NewProductCode  IS NOT NULL)
+     BEGIN
+	  
+           SELECT @ProductCode = strRegProdCode from tblSTSubcategoryRegProd where intRegProdId = @NewProductCode
+		     
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Product Code '', e.strRegProdCode, ''' + @ProductCode +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId 
+							   JOIN tblSTSubcategoryRegProd e ON a.intProductCodeId = e.intRegProdId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END      
+	 EXEC (@SQL1)
+     END 
+
+	 IF (@NewVendor  IS NOT NULL)
+     BEGIN
+	       
+		   SELECT @VendorId = strName from tblEntity where intEntityId = @NewVendor
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Vendor '', e.strName, ''' + @VendorId +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId JOIN
+							   tblEntity e ON a.intVendorId = e.intEntityId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END     
+	 EXEC (@SQL1)
+     END 
+ 
+
+	 IF (@NewMinAge  IS NOT NULL)
+     BEGIN
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Minimum Age '', a.intMinimumAge, 
+							   ''' + CAST(@NewMinAge AS NVARCHAR(250))  +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END     
+	 EXEC (@SQL1)
+     END 
+
+	 IF (@NewMinVendorOrderQty  IS NOT NULL)
+     BEGIN
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Vendor Minimum Order Qty'', a.dblMinOrder, 
+							   ''' + CAST(@NewMinVendorOrderQty AS NVARCHAR(250))  +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END    
+     EXEC (@SQL1)		    
+     END 
+
+	 IF (@NewVendorSuggestedQty  IS NOT NULL)
+     BEGIN
+
+	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+				               ChangeDescription,OldData,NewData)
+							   select c.strLocationName, b.strUpcCode, 
+							   d.strDescription, ''Vendor Suggested Qty'', a.dblSuggestedQty, 
+							   ''' + CAST(@NewVendorSuggestedQty AS NVARCHAR(250))  +'''
+							   from tblICItemLocation a JOIN 
+							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+							   tblICItem d ON a.intItemId = d.intItemId '
+
+           SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+	       IF (@Location IS NOT NULL)
+	       BEGIN 
+		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+		   END
+			 
+	       IF (@Vendor IS NOT NULL)
+	       BEGIN 
+               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+		   END
+
+           IF (@Category IS NOT NULL)
+	       BEGIN
+                SET @SQL1 = @SQL1 +  ' and a.intItemId  
+		          IN (select intItemId from tblICItem where intCategoryId IN
+		          (select intCategoryId from tblICCategory where intCategoryId 
+				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+		   END
+
+           IF (@Family IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+		   END
+
+           IF (@Class IS NOT NULL)
+		   BEGIN
+  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+		   END
+		    
+	       IF (@UpcCode IS NOT NULL)
+   	       BEGIN
+			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+		   END
+
+           IF ((@Description IS NOT NULL)
+	       and (@Description != ''))
+	       BEGIN
+   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+           END
+
+           IF (@PriceBetween1 IS NOT NULL) 
+	       BEGIN
+			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+	       END 
+		      
+           IF (@PriceBetween2 IS NOT NULL) 
+	       BEGIN
+			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+	       END     
+	 EXEC (@SQL1)
+     END 
+
+	 SELECT @UpdateCount = count(*) from tblSTMassUpdateReportMaster 
+   
+END
+     
+SELECT @UpdateCount as UpdateItemDataCount	
+
+
+END TRY
+
+BEGIN CATCH       
 	 SET @ErrMsg = ERROR_MESSAGE()      
 	 IF @idoc <> 0 EXEC sp_xml_removedocument @idoc      
 	 RAISERROR(@ErrMsg, 16, 1, 'WITH NOWAIT')      
-	END CATCH
+END CATCH

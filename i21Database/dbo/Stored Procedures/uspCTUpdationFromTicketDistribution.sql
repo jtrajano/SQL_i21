@@ -104,6 +104,7 @@ BEGIN TRY
 
 		IF @ysnDP = 1
 		BEGIN
+			/*
 			SELECT	@strAdjustmentNo = strPrefix+LTRIM(intNumber) 
 			FROM	tblSMStartingNumber 
 			WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
@@ -111,6 +112,7 @@ BEGIN TRY
 			UPDATE	tblSMStartingNumber
 			SET		intNumber = intNumber+1
 			WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
+			*/
 
 			UPDATE	tblCTContractDetail 
 			SET		dblBalance	= @dblBalance + @dblNetUnits,
@@ -133,6 +135,7 @@ BEGIN TRY
 			GOTO CONTINUEISH
 		END
 
+		/*
 		SELECT	@strAdjustmentNo = strPrefix+LTRIM(intNumber) 
 		FROM	tblSMStartingNumber 
 		WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
@@ -140,6 +143,7 @@ BEGIN TRY
 		UPDATE	tblSMStartingNumber
 		SET		intNumber = intNumber+1
 		WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
+		*/
 
 		IF	@dblNetUnits <= @dblBalance
 		BEGIN
@@ -196,6 +200,7 @@ BEGIN TRY
 	
 	UPDATE	@Processed SET dblUnitsRemaining = @dblNetUnits
 	
+	/*
 	INSERT INTO tblCTContractAdjustment
 	(
 			intContractDetailId,	strAdjustmentNo,		dtmAdjustmentDate,			strComment,						ysnAdjustment,		dblOldQuantity,
@@ -207,6 +212,7 @@ BEGIN TRY
 			NULL,					NULL,					NULL,						NULL,							@intUserId,			GETDATE(),@intTicketId
 			
 	FROM	@Processed
+	*/
 
 	UPDATE	@Processed SET dblUnitsRemaining = @dblNetUnits
 	

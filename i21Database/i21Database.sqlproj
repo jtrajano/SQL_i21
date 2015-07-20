@@ -1431,7 +1431,6 @@
     <Build Include="dbo\Tables\tblARInvoiceDetailTax.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetItemTaxes.sql" />
     <Build Include="dbo\Tables\tblPRTimecard.sql" />
-    <Build Include="dbo\Tables\tblPRTimeEntry.sql" />
     <Build Include="dbo\Tables\tblGRStorageOption.sql" />
     <Build Include="dbo\Tables\tblGRStorageSchedulePeriod.sql" />
     <Build Include="dbo\Tables\tblGRStorageScheduleRule.sql" />
@@ -1549,8 +1548,6 @@
     <Build Include="dbo\Views\vyuRKGetFutureMarketName.sql" />
     <Build Include="dbo\Views\vyuRKGetBrokerTrader.sql" />
     <Build Include="dbo\Views\vyuRKGetBrokerInstrumentType.sql" />
-    <Build Include="dbo\Views\vyuRKDPRInvDailyPositionDetail.sql" />
-    <Build Include="dbo\Views\vyuRKDPRHedgeDailyPositionDetail.sql" />
     <Build Include="dbo\Views\vyuRKDPRDailyPositionByCommodityLocation.sql" />
     <Build Include="dbo\Views\vyuRKDPRDailyPositionByCommodity.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptPayablesAging.sql" />
@@ -1911,7 +1908,6 @@
     <Build Include="dbo\Tables\tblEntityTariffFuelSurcharge.sql" />
     <Build Include="dbo\Tables\tblEntityTariffMileage.sql" />
     <Build Include="dbo\Views\vyuEMSearchShipVia.sql" />
-    <Build Include="dbo\Tables\tblPRCompanyReference.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInsertINTOTableFromXML.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateOverpayment.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateBillData.sql" />
@@ -1969,6 +1965,23 @@
     <Build Include="dbo\Stored Procedures\uspGLUpdateAPAccountCategory.sql" />
     <Build Include="dbo\Views\vyuCTCategoryUOM.sql" />
     <Build Include="dbo\Tables\tblSMComment.sql" />
+    <Build Include="dbo\Tables\tblRKCompanyPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReceived.sql" />
+    <Build Include="dbo\Tables\tblWHOrderDirection.sql" />
+    <Build Include="dbo\Tables\tblWHTruck.sql" />
+    <Build Include="dbo\Tables\tblWHTruckStatus.sql" />
+    <Build Include="dbo\Tables\tblWHTruckOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCreateRecurrence.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetContainerTypeCount.sql" />
+    <Build Include="dbo\Tables\tblMFBlendValidation.sql" />
+    <Build Include="dbo\Tables\tblMFBlendValidationDefault.sql" />
+    <Build Include="dbo\Tables\tblMFBlendValidationMessageType.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateBlendRelease.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetContractAndPrice.sql" />
+    <Build Include="dbo\Tables\tblCTContractStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetShiftCount.sql" />
+    <Build Include="dbo\Views\vyuGRGetStorageDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateBillReversal.sql" />
     <Build Include="dbo\Views\vyuTMUniqueItemList.sql" />
     <Build Include="dbo\Stored Procedures\uspTMValidateInvoiceForSync.sql" />
     <Build Include="dbo\Functions\fnTMGetCalculatedBurnRate.sql" />
@@ -1985,6 +1998,23 @@
     <Build Include="dbo\Tables\tblMFBlendValidationDefault.sql" />
     <Build Include="dbo\Tables\tblMFBlendValidationMessageType.sql" />
     <Build Include="dbo\Stored Procedures\uspGLSyncTemplateToStructure.sql" />
+    <Build Include="dbo\Tables\tblSMModule.sql" />
+    <Build Include="dbo\Views\vyuRKGetCompanyLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRInvDailyPositionDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetSampleTypeAttributes.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetSampleProperty.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetSampleTestResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetSampleConditionalProperty.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRHedgeDailyPositionDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeDeduction.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeEarning.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOff.sql" />
+    <Build Include="dbo\Tables\tblPRCompanyPreference.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeDirectDeposit.sql" />
+    <Build Include="dbo\Views\vyuTRDispacthedLoad.sql" />
+    <Build Include="dbo\Tables\tblTRCompanyPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRProcessLogisticsLoad.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2068,5 +2098,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountRange.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\15_Module.sql" />
   </ItemGroup>
 </Project>

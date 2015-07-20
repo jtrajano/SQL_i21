@@ -27,10 +27,12 @@
 	[dblCrdrPrice] NUMERIC(18, 6),
 	[dblCrdrQty] NUMERIC(18, 6),
 	[intProductPropertyValidityPeriodId] INT, 
+	[intPropertyValidityPeriodId] INT, -- For Conditional Property
 	[intControlPointId] INT, 
 	[intParentPropertyId] INT, 
 	[intRepNo] INT, 
 	[strFormula] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS, 
+	[intListItemId] INT, 
 	
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMTestResult_dtmCreated] DEFAULT GetDate(),
@@ -45,6 +47,8 @@
 	CONSTRAINT [FK_tblQMTestResult_tblQMProperty_intPropertyId] FOREIGN KEY ([intPropertyId]) REFERENCES [tblQMProperty]([intPropertyId]), 
 	CONSTRAINT [FK_tblQMTestResult_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
 	CONSTRAINT [FK_tblQMTestResult_tblQMProductPropertyValidityPeriod] FOREIGN KEY ([intProductPropertyValidityPeriodId]) REFERENCES [tblQMProductPropertyValidityPeriod]([intProductPropertyValidityPeriodId]), 
+	CONSTRAINT [FK_tblQMTestResult_tblQMPropertyValidityPeriod] FOREIGN KEY ([intPropertyValidityPeriodId]) REFERENCES [tblQMPropertyValidityPeriod]([intPropertyValidityPeriodId]), 
 	CONSTRAINT [FK_tblQMTestResult_tblQMControlPoint] FOREIGN KEY ([intControlPointId]) REFERENCES [tblQMControlPoint]([intControlPointId]), 
-	CONSTRAINT [FK_tblQMTestResult_tblQMProperty_intParentPropertyId] FOREIGN KEY ([intParentPropertyId]) REFERENCES [tblQMProperty]([intPropertyId]) 
+	CONSTRAINT [FK_tblQMTestResult_tblQMProperty_intParentPropertyId] FOREIGN KEY ([intParentPropertyId]) REFERENCES [tblQMProperty]([intPropertyId]), 
+	CONSTRAINT [FK_tblQMTestResult_tblQMListItem] FOREIGN KEY ([intListItemId]) REFERENCES [tblQMListItem]([intListItemId]) 
 )

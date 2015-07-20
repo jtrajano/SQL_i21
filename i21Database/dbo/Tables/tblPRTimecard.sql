@@ -13,6 +13,7 @@
     [intEmployeeEarningId] INT NULL, 
 	[intEmployeeDepartmentId] INT NULL, 
     [intTimeEntryId] INT NULL, 
+	[intPaycheckId] INT NULL, 
     [strNotes] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
     [ysnApproved] BIT NULL DEFAULT ((0)), 
     [intConcurrencyId] INT NULL DEFAULT ((1))
@@ -162,3 +163,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRTimecard',
     @level2type = N'COLUMN',
     @level2name = N'dtmDateOut'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Paycheck Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTimecard',
+    @level2type = N'COLUMN',
+    @level2name = N'intPaycheckId'

@@ -16,6 +16,7 @@ SELECT
 	,D.[intCOGSAccountId]
 	,D.[intSalesAccountId]
 	,D.[intInventoryAccountId]
+	,D.[intServiceChargeAccountId]
 	,D.[intConcurrencyId]
 	,I.[strInvoiceNumber] 
 	,L.[strLocationName] 
@@ -25,7 +26,9 @@ SELECT
 	,D.strFrequency
 	,D.dtmMaintenanceDate
 	,D.dblMaintenanceAmount
-	,D.dblLicenseAmount  
+	,D.dblLicenseAmount
+	,D.intSCInvoiceId
+	,D.strSCInvoiceNumber
 FROM         
 	[tblARInvoiceDetail] D
 INNER JOIN	

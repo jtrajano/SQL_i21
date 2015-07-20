@@ -59,10 +59,12 @@ BEGIN TRY
 
 	IF @strAttributeValue='True' AND EXISTS (
 			SELECT *
-			FROM dbo.tblMFWorkOrderProducedLot
-			WHERE intWorkOrderId = @intWorkOrderId
-				AND ysnReleased = 0
-				AND ysnProductionReversed = 0
+			FROM dbo.tblMFWorkOrderProducedLot WP
+			JOIN dbo.tblICLot L on L.intLotId=WP.intLotId
+			WHERE WP.intWorkOrderId = @intWorkOrderId
+				AND WP.ysnReleased = 0
+				AND WP.ysnProductionReversed = 0
+				AND L.intLotStatusId =3
 			)
 	BEGIN
 		RAISERROR (

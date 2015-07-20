@@ -3773,4 +3773,39 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intImportFileHeaderId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="1f607a94-d7c6-4eac-a719-d0478a522181" ChangeDateTime="07/14/2015 09:14:33">
+    <Property Name="ElementName" Value="[dbo].[tblRKCompanyPreference].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCompanyPreferenceId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8b8859b2-3cc6-4659-b893-add74e8ccb61" ChangeDateTime="07/14/2015 09:20:54">
+    <Property Name="ElementName" Value="[dbo].[tblRKCompanyPreference].[dbl]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblDecimals" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b582e16a-caa6-4daf-9710-509cc35bbf0b" ChangeDateTime="07/15/2015 08:21:26">
+    <Property Name="ElementName" Value="[dbo].[tblDBUserPreference].[intDafaultTabId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblDBUserPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intDefaultTabId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="46ce0fe2-090b-4685-8a14-5f35831fbad9" ChangeDateTime="07/17/2015 16:17:04">
+    <Property Name="ElementName" Value="[dbo].[tblMFWorkOrderStatus].[strColorName]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFWorkOrderStatus]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strColorClassName" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8e6a4c5b-6377-496b-8f72-29afeed04f72" ChangeDateTime="07/17/2015 16:17:59">
+    <Property Name="ElementName" Value="[dbo].[tblMFWorkOrderStatus].[strColorClassName]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFWorkOrderStatus]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strBackColorName" />
+  </Operation>
 </Operations>

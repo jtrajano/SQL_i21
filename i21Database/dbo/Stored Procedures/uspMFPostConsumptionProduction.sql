@@ -180,7 +180,7 @@ BEGIN
 	FROM tblMFWorkOrderConsumedLot cl
 	INNER JOIN tblICLot l ON cl.intLotId = l.intLotId
 	INNER JOIN dbo.tblICItemUOM ItemUOM ON cl.intItemUOMId = ItemUOM.intItemUOMId
-	WHERE cl.intWorkOrderId = @intWorkOrderId
+	WHERE cl.intWorkOrderId = @intWorkOrderId and cl.intBatchId=@intBatchId
 
 	EXEC dbo.uspICPostCosting @ItemsForPost
 		,@strBatchId

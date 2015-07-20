@@ -32,7 +32,7 @@
 	[ysnStatutoryEmployee] [bit] NOT NULL DEFAULT ((0)),
 	[ysnRetirementPlan] [bit] NOT NULL DEFAULT ((0)),
 	[ysnThirdPartySickPay] [bit] NOT NULL DEFAULT ((0)),
-	[ysnDirectDeposit] [bit] NOT NULL DEFAULT ((0)),
+	[intDistributionType] [int] NULL DEFAULT ((0)),
 	[strTimeEntryPassword] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDateEntered] [datetime] NOT NULL DEFAULT (getdate()),
 	[dtmLastModified] [datetime] NULL DEFAULT (getdate()),
@@ -271,15 +271,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intPayGroupId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Direct Deposit',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'ysnDirectDeposit'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Concurrency Field',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
@@ -386,3 +377,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
     @level2name = N'intWorkersCompensationId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Direct Deposit Distribution Type',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPREmployee',
+    @level2type = N'COLUMN',
+    @level2name = N'intDistributionType'

@@ -98,11 +98,11 @@ BEGIN
 	--WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId)
 
 	
-	IF @amountPaid IS NULL
-	BEGIN
-		SET @amountPaid = (SELECT SUM(dblAmountDue) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
-		SET @amountPaid = @amountPaid - (SELECT SUM(dblDiscount) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
-	END
+	--IF @amountPaid IS NULL
+	--BEGIN
+	--	SET @amountPaid = (SELECT SUM(dblAmountDue) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
+	--	SET @amountPaid = @amountPaid - (SELECT SUM(dblDiscount) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
+	--END
 
 	--Compute Withheld Here
 	IF @vendorWithhold = 1
@@ -149,7 +149,7 @@ BEGIN
 		[strPaymentInfo]		= @paymentInfo,
 		[strNotes]				= @notes,
 		[dtmDatePaid]			= ISNULL(@datePaid, GETDATE()),
-		[dblAmountPaid]			= @payment,
+		[dblAmountPaid]			= ISNULL(@payment,0),
 		[dblUnapplied]			= 0,
 		[ysnPosted]				= @isPost,
 		[dblWithheld]			= 0,
@@ -176,7 +176,7 @@ BEGIN
 		[dblDiscount]	= A.dblDiscount,
 		[dblWithheld]	= CASE WHEN @withholdPercent > 0 THEN CAST(ROUND(A.dblTotal * (@withholdPercent / 100), 6) AS NUMERIC(18,6)) ELSE 0 END,
 		[dblAmountDue]	= A.dblAmountDue, -- (A.dblTotal - A.dblDiscount - A.dblPayment),
-		[dblPayment]	= A.dblTotal - A.dblDiscount - A.dblPayment,
+		[dblPayment]	= 0, --A.dblTotal - A.dblDiscount - A.dblPayment,
 		[dblInterest]	= 0, --TODO
 		[dblTotal]		= A.dblTotal
 	FROM tblAPBill A

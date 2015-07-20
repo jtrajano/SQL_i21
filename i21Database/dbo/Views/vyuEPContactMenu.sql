@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuEPContactMenu
 AS
-SELECT    
+SELECT DISTINCT
 intUserSecurityMenuId = Permission.intEntityPortalPermissionId,
 intUserSecurityId = Contact.[intEntityId],    
 intMenuId = Menu.intEntityPortalMenuId,    

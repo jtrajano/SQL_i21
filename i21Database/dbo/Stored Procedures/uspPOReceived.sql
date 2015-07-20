@@ -98,6 +98,82 @@ BEGIN
 				AND PODetail.intPurchaseId = ReceiptItems.intOrderId
 END
 
+--UPDATE CONTRACT IF PO ITEM IS PART OF A CONTRACT
+
+--IF OBJECT_ID('tempdb..#tmpContractItems') IS NOT NULL DROP TABLE #tmpContractItems
+
+DECLARE @contractItems AS ReceiptItemTableType
+INSERT INTO @contractItems (
+		-- Header
+		[intInventoryReceiptId] 
+		,[strInventoryReceiptId] 
+		,[strReceiptType] 
+		,[intSourceType] 
+		,[dtmDate] 
+		,[intCurrencyId] 
+		,[dblExchangeRate] 
+		-- Detail 
+		,[intInventoryReceiptDetailId] 
+		,[intItemId] 
+		,[intLotId] 
+		,[strLotNumber] 
+		,[intLocationId] 
+		,[intItemLocationId] 
+		,[intSubLocationId] 
+		,[intStorageLocationId] 
+		,[intItemUOMId] 
+		,[intWeightUOMId] 
+		,[dblQty] 
+		,[dblUOMQty] 
+		,[dblNetWeight] 
+		,[dblCost] 
+		,[intContainerId] 
+		,[intOwnershipType] 
+		,[intOrderId] 
+		,[intSourceId] 
+		,[intLineNo] 
+	)
+SELECT
+		A.[intInventoryReceiptId] 
+		,A.[strInventoryReceiptId] 
+		,A.[strReceiptType] 
+		,A.[intSourceType] 
+		,A.[dtmDate] 
+		,A.[intCurrencyId] 
+		,A.[dblExchangeRate] 
+		-- Detail 
+		,A.[intInventoryReceiptDetailId] 
+		,A.[intItemId] 
+		,A.[intLotId] 
+		,A.[strLotNumber] 
+		,A.[intLocationId] 
+		,A.[intItemLocationId] 
+		,A.[intSubLocationId] 
+		,A.[intStorageLocationId] 
+		,A.[intItemUOMId] 
+		,A.[intWeightUOMId] 
+		,A.[dblQty] 
+		,A.[dblUOMQty] 
+		,A.[dblNetWeight] 
+		,A.[dblCost] 
+		,A.[intContainerId] 
+		,A.[intOwnershipType] 
+		,A.[intOrderId] 
+		,A.[intSourceId] 
+		,A.[intLineNo] 
+FROM @ItemsFromInventoryReceipt A 
+INNER JOIN tblPOPurchaseDetail B ON A.intLineNo = B.intPurchaseDetailId
+WHERE B.intContractDetailId > 0
+
+IF EXISTS(SELECT 1 FROM @contractItems)
+BEGIN
+	EXEC uspCTReceived @contractItems
+	IF @@ERROR != 0
+	BEGIN
+		RETURN;
+	END
+END
+
 -- Update the status of the PO
 IF EXISTS (SELECT TOP 1 1 FROM @ItemsFromInventoryReceipt WHERE intOrderId IS NOT NULL)
 BEGIN 

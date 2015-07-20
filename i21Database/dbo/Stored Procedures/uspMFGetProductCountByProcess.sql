@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE uspMFGetProductCountByProcess (
 	@intManufacturingProcessId INT
 	,@intLocationID INT
+	,@strItemNo nvarchar(50)='%'
+	,@intItemId int=0
 	)
 AS
 BEGIN
@@ -14,4 +16,6 @@ BEGIN
 		AND R.intManufacturingProcessId = @intManufacturingProcessId
 		AND IU.ysnStockUnit=1
 		AND I.strStatus='Active'
+		AND I.strItemNo LIKE @strItemNo+'%' 
+		AND I.intItemId =(Case When @intItemId >0 then @intItemId else I.intItemId end)
 END

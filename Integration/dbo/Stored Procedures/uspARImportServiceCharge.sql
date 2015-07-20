@@ -118,22 +118,10 @@ BEGIN
 				SET 
 				ptsrv_code = SrvCharge.strServiceChargeCode,
 				ptsrv_desc = SUBSTRING(SrvCharge.strDescription,1,20),
-				ptsrv_pct = CAST((SrvCharge.dblPercentage/100) as decimal(5,5))
-				,ptsrv_pct_freq = (CASE	WHEN SrvCharge.strFrequency = ''Daily''
-											THEN ''D''
-										WHEN SrvCharge.strFrequency = ''Monthly''
-											THEN ''M''
-										ELSE ''''
-									END)
+				ptsrv_pct = CAST((SrvCharge.dblPercentage/100) as decimal(5,5))				
 				,ptsrv_amt = CAST(SrvCharge.dblServiceChargeAPR as decimal(9,2)) 
 				,ptsrv_min_svchg = CAST(SrvCharge.dblMinimumCharge as decimal(9,2))
-				,ptsrv_grace_per = SrvCharge.intGracePeriod 
-				,ptsrv_applied = (CASE	WHEN SrvCharge.strAppliedPer = ''Invoice''
-											THEN ''I''
-										WHEN SrvCharge.strAppliedPer = ''Customer''
-											THEN ''C''
-										ELSE ''I''
-									END)
+				,ptsrv_grace_per = SrvCharge.intGracePeriod 				
 				,ptsrv_allow_mthly_chg_freq = (CASE	WHEN SrvCharge.ysnAllowCatchUpCharges = 1
 													THEN ''Y''
 												ELSE ''N''
@@ -146,33 +134,19 @@ BEGIN
 			INSERT INTO ptsrvmst(
 				ptsrv_code,
 				ptsrv_desc,
-				ptsrv_pct
-				,ptsrv_pct_freq
+				ptsrv_pct				
 				,ptsrv_amt
 				,ptsrv_min_svchg
-				,ptsrv_grace_per
-				,ptsrv_applied
+				,ptsrv_grace_per				
 				,ptsrv_allow_mthly_chg_freq
 			)
 			SELECT 
 				strServiceChargeCode,
 				SUBSTRING(strDescription,1,20),
-				CAST((dblPercentage/100) as decimal(5,5))
-				,(CASE	WHEN strFrequency = ''Daily''
-						THEN ''D''
-					WHEN strFrequency = ''Monthly''
-						THEN ''M''
-					ELSE NULL
-				END)
+				CAST((dblPercentage/100) as decimal(5,5))				
 				,CAST(dblServiceChargeAPR as decimal(9,2))
 				,CAST(dblMinimumCharge as decimal(9,2))
-				,intGracePeriod
-				,(CASE	WHEN strAppliedPer = ''Invoice''
-							THEN ''I''
-						WHEN strAppliedPer = ''Customer''
-							THEN ''C''
-						ELSE ''''
-					END)
+				,intGracePeriod				
 				,(CASE	WHEN ysnAllowCatchUpCharges = 1
 							THEN ''Y''
 						ELSE ''N''
@@ -200,33 +174,19 @@ BEGIN
 			([strServiceChargeCode],
 			 [strDescription],
 			 [strCalculationType],
-			 [dblPercentage],
-			 [strFrequency],
+			 [dblPercentage],			 
 			 [dblServiceChargeAPR],
 			 [dblMinimumCharge],
-			 [intGracePeriod],
-			 [strAppliedPer],
+			 [intGracePeriod],			 
 			 [ysnAllowCatchUpCharges])
 		 SELECT 
 			 ptsrv_code
 			,ptsrv_desc
 			,''Percent''
-			,CAST((ptsrv_pct * 100) AS numeric(18,2))
-			,(CASE	WHEN ptsrv_pct_freq = ''D''
-						THEN ''Daily''
-					WHEN ptsrv_pct_freq = ''M''
-						THEN ''Monthly''
-					ELSE ''Annual''
-				END)
+			,CAST((ptsrv_pct * 100) AS numeric(18,2))			
 			,CAST(ptsrv_amt AS numeric(18,2))
 			,CAST(ptsrv_min_svchg  AS numeric(18,2))
-			,ptsrv_grace_per
-			,(CASE	WHEN ptsrv_applied = ''I''
-						THEN ''Invoice''
-					WHEN ptsrv_applied = ''C''
-						THEN ''Customer''
-					ELSE ''''
-				END)
+			,ptsrv_grace_per			
 			,(CASE	WHEN ptsrv_allow_mthly_chg_freq = ''Y''
 							THEN 1
 						ELSE 0

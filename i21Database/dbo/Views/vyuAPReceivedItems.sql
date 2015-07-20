@@ -66,7 +66,8 @@ FROM tblPOPurchase A
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
 	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.[intEntityShipViaId]
 	LEFT JOIN tblSMTerm F ON A.intTermsId = F.intTermID
-	LEFT JOIN (tblCTContractHeader G1 INNER JOIN tblCTContractDetail G2 ON G1.intContractHeaderId = G2.intContractHeaderId) ON G1.intEntityId = D1.intEntityVendorId
+	LEFT JOIN (tblCTContractHeader G1 INNER JOIN tblCTContractDetail G2 ON G1.intContractHeaderId = G2.intContractHeaderId) 
+			ON G1.intEntityId = D1.intEntityVendorId AND B.intItemId = G2.intItemId AND B.intContractDetailId = G2.intContractDetailId
 UNION ALL
 --Miscellaneous items
 SELECT
@@ -86,7 +87,7 @@ A.[intEntityVendorId]
 ,B.dblQtyOrdered -B.dblQtyReceived
 ,B.dblQtyReceived
 ,B.intPurchaseDetailId
-,B.intPurchaseDetailId
+,NULL --this should be null as this has constraint from IR Receipt item
 ,B.dblCost
 ,intAccountId = [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Inventory')
 ,strAccountId = (SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Inventory'))
@@ -144,4 +145,4 @@ INNER JOIN tblICItem C ON B.intItemId = C.intItemId
 INNER JOIN  (tblAPVendor D1 INNER JOIN tblEntity D2 ON D1.intEntityVendorId = D2.intEntityId) ON A.[intEntityVendorId] = D1.intEntityVendorId
 LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.[intEntityShipViaId]
 LEFT JOIN (tblCTContractHeader F1 INNER JOIN tblCTContractDetail F2 ON F1.intContractHeaderId = F2.intContractHeaderId) ON F1.intContractHeaderId = F2.intContractHeaderId
-WHERE A.strReceiptType IN ('Direct','Purchase Contract') AND A.ysnPosted = 1
+WHERE A.strReceiptType IN ('Direct','Purchase Contract') AND A.ysnPosted = 1 AND B.dblBillQty != B.dblOpenReceive

@@ -38,7 +38,7 @@ Type the overview for the table here.
 		[dblDepth] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intWeightUOMId] INT NULL, 
 		[dblWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[intMaterialPackTypeId] INT NULL, 
+		[intMaterialPackTypeId] INT NULL,
 		[strMaterialSizeCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intInnerUnits] INT NULL, 
 		[intLayerPerPallet] INT NULL, 
@@ -109,6 +109,7 @@ Type the overview for the table here.
 		[intSeasonId] INT NULL, 
 		[intClassVarietyId] INT NULL, 
 		[intProductLineId] INT NULL, 
+		[intGradeId] INT NULL,
 		[strMarketValuation] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[ysnInventoryCost] BIT NULL DEFAULT ((1)),
 		[ysnAccrue] BIT NULL DEFAULT ((1)),
@@ -118,6 +119,29 @@ Type the overview for the table here.
 		[intOnCostTypeId] INT NULL,
 		[dblAmount] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[intCostUOMId] INT NULL,
+		[intPackTypeId] INT NULL, 
+		[strWeightControlCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[dblBlendWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblNetWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblUnitPerCase] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblQuarantineDuration] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		--[strOwner] NVARCHAR(50) NULL,
+		--[strCustomer] NVARCHAR(50) NULL,
+		[dblCaseWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		--[strWarehouseStatus] NVARCHAR(50) NULL,
+		[ysnKosherCertified] BIT NULL DEFAULT ((0)),
+		[ysnFairTradeCompliant] BIT NULL DEFAULT ((0)),
+		[ysnOrganic] BIT NULL DEFAULT ((0)),
+		[ysnRainForestCertified] BIT NULL DEFAULT ((0)),
+		[dblRiskScore] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblDensity] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dtmDateAvailable] DATETIME NULL DEFAULT (GETDATE()),
+		[ysnMinorIngredient] BIT NULL DEFAULT ((0)),
+		[ysnExternalItem] BIT NULL DEFAULT ((0)),
+		--[strExternalGroup] NVARCHAR(50) NULL,
+		[ysnSellableItem] BIT NULL DEFAULT ((0)),
+		[dblMinStockWeeks] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblFullContainerSize] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
 		CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId]), 
@@ -125,7 +149,6 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItem_tblICBrand] FOREIGN KEY ([intBrandId]) REFERENCES [tblICBrand]([intBrandId]), 
 		CONSTRAINT [FK_tblICItem_DimensionUOM] FOREIGN KEY ([intDimensionUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 		CONSTRAINT [FK_tblICItem_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
-		CONSTRAINT [FK_tblICItem_tblICPackType] FOREIGN KEY ([intMaterialPackTypeId]) REFERENCES [tblMFPackType]([intPackTypeId]), 
 		CONSTRAINT [FK_tblICItem_tblICPatronageCategory] FOREIGN KEY ([intPatronageCategoryId]) REFERENCES [tblICPatronageCategory]([intPatronageCategoryId]), 
 		CONSTRAINT [FK_tblICItem_tblICFuelTaxClass] FOREIGN KEY ([intFuelTaxClassId]) REFERENCES [tblICFuelTaxClass]([intFuelTaxClassId]), 
 		CONSTRAINT [FK_tblICItem_tblICRinFuelCategory] FOREIGN KEY ([intRINFuelTypeId]) REFERENCES [tblICRinFuelCategory]([intRinFuelCategoryId]), 
@@ -135,7 +158,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItem_tblICCategory] FOREIGN KEY ([intCategoryId]) REFERENCES [tblICCategory]([intCategoryId]), 
 		CONSTRAINT [FK_tblICItem_SalesTaxGroup] FOREIGN KEY ([intSalesTaxGroupId]) REFERENCES [tblSMTaxGroupMaster]([intTaxGroupMasterId]),
 		CONSTRAINT [FK_tblICItem_PurchaseTaxGroup] FOREIGN KEY ([intSalesTaxGroupId]) REFERENCES [tblSMTaxGroupMaster]([intTaxGroupMasterId]),
-		CONSTRAINT [FK_tblICItem_tblSMCountry] FOREIGN KEY ([intOriginId]) REFERENCES [tblSMCountry]([intCountryID])  
+		CONSTRAINT [FK_tblICItem_tblSMCountry] FOREIGN KEY ([intOriginId]) REFERENCES [tblSMCountry]([intCountryID]), 
+		CONSTRAINT [FK_tblICItem_MaterialPackType] FOREIGN KEY ([intMaterialPackTypeId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])  
 	);
 	GO
 
@@ -635,14 +659,7 @@ Type the overview for the table here.
 		@level2type = N'COLUMN',
 		@level2name = N'intConcurrencyId'
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Material Pack Type Unit of Measure Id',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICItem',
-		@level2type = N'COLUMN',
-		@level2name = N'intMaterialPackTypeId'
+	
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Tracking Id',
