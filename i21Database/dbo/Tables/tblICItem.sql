@@ -120,7 +120,7 @@ Type the overview for the table here.
 		[dblAmount] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[intCostUOMId] INT NULL,
 		[intPackTypeId] INT NULL, 
-		[strWeightControlCode] NVARCHAR(50) NULL, 
+		[strWeightControlCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[dblBlendWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblNetWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblUnitPerCase] NUMERIC(18, 6) NULL DEFAULT ((0)), 
