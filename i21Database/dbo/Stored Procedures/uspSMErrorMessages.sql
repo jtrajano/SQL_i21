@@ -564,7 +564,7 @@ SET @strmessage = 'The work order that you clicked on no longer exists. This is 
 EXEC sp_addmessage 51140,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51141) EXEC sp_dropmessage 51141, 'us_english'	
-SET @strmessage = 'Work order contains quarantined lot, you need to either release the lot or mark the pallet as ghost to close the work order.'
+SET @strmessage = 'There are lots produced against this workorder which are not yet released to warehouse. In order to complete the workorder, either release the lots to warehouse or mark the pallet(s) as Ghost.'
 EXEC sp_addmessage 51141,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51142) EXEC sp_dropmessage 51142, 'us_english'	
