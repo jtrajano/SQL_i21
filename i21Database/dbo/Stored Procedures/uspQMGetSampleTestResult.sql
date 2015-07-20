@@ -14,7 +14,7 @@ BEGIN
 		,TR.intProductTypeId
 		,TR.intProductValueId
 		,T.intTestId
-		,T.strTestName
+		,CASE WHEN TR.intParentPropertyId IS NOT NULL THEN NULL ELSE T.strTestName END AS strTestName
 		,PRT.intPropertyId
 		,PRT.strPropertyName
 		,PRT.strDescription
@@ -48,13 +48,12 @@ BEGIN
 		,PRT.intDataTypeId
 		,PRT.intListId
 		,L.strListName
-		,PP.strIsMandatory
+		,ISNULL(PP.strIsMandatory,PRT.strIsMandatory) AS strIsMandatory
 	FROM dbo.tblQMTestResult AS TR
 	JOIN dbo.tblQMProperty AS PRT ON PRT.intPropertyId = TR.intPropertyId
 	JOIN dbo.tblQMTest AS T ON T.intTestId = TR.intTestId
-	JOIN dbo.tblQMProductProperty AS PP ON PP.intProductId = TR.intProductId
+	LEFT JOIN dbo.tblQMProductProperty AS PP ON PP.intProductId = TR.intProductId
 		AND PP.intPropertyId = TR.intPropertyId
-		AND PP.intTestId = TR.intTestId
 	LEFT JOIN dbo.tblICUnitMeasure AS U ON U.intUnitMeasureId = TR.intUnitMeasureId
 	LEFT JOIN dbo.tblQMList AS L ON L.intListId = PRT.intListId
 	WHERE TR.intSampleId = @intSampleId
