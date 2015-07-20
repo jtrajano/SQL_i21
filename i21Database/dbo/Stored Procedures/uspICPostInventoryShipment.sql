@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICPostInventoryShipment]
+﻿alter PROCEDURE [dbo].[uspICPostInventoryShipment]
 	@ysnPost BIT  = 0  
 	,@ysnRecap BIT  = 0  
 	,@strTransactionId NVARCHAR(40) = NULL   
@@ -244,7 +244,7 @@ BEGIN
 															LotItemUOM.dblUnitQty
 												END
 				,dblCost					= CASE	WHEN Lot.dblLastCost IS NULL THEN 
-														(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = Detail.intItemId AND intItemLocationId = dbo.fnICGetItemLocation(Detail.intItemId, Header.intShipFromLocationId))
+														(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = DetailItem.intItemId AND intItemLocationId = dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId))
 													ELSE 
 														Lot.dblLastCost 
 												END	
@@ -357,7 +357,7 @@ BEGIN
 															LotItemUOM.dblUnitQty
 												END
 				,dblCost					= CASE	WHEN Lot.dblLastCost IS NULL THEN 
-														(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = Detail.intItemId AND intItemLocationId = dbo.fnICGetItemLocation(Detail.intItemId, Header.intShipFromLocationId))
+														(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = DetailItem.intItemId AND intItemLocationId = dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId))
 													ELSE 
 														Lot.dblLastCost 
 												END	
