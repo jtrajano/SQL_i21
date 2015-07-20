@@ -1,7 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuCTSequenceHistory]
 AS 
 
-	SELECT	CA.dtmAdjustmentDate,
+	SELECT	CA.intContractDetailId,
+			CA.dtmAdjustmentDate,
 			'Inventory Receipt' AS	strAdjustmentType,
 			IR.strReceiptNumber	AS	strNumber,
 			'Balance'			AS	strFieldName,
