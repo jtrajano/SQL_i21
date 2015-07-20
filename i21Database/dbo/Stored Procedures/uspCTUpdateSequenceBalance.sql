@@ -46,9 +46,9 @@ BEGIN TRY
 
 	INSERT INTO tblCTContractAdjustment
 	(
-			intContractDetailId,	strAdjustmentNo,	dtmAdjustmentDate,	dblAdjAmount,	intUserId,	intInventoryReceiptItemId
+			intContractDetailId,	strAdjustmentNo,	dtmAdjustmentDate,	dblOldBalance,	dblAdjAmount,	dblNewBalance,	intUserId,	intInventoryReceiptItemId
 	)
-	SELECT	@intContractDetailId,	@strAdjustmentNo,	GETDATE(),			@dblAdjAmount,	@intUserId,	@intInventoryReceiptDetailId
+	SELECT	@intContractDetailId,	@strAdjustmentNo,	GETDATE(),			@dblOldBalance,	-@dblAdjAmount,	@dblNewBalance,	@intUserId,	@intInventoryReceiptDetailId
 			
 	
 	
