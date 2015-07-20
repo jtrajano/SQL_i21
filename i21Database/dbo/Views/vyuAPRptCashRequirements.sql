@@ -26,5 +26,5 @@ SELECT
 		ON E.intEntityId = APV.intEntityVendorId
 	WHERE 
 			APB.ysnForApproval != 1									   --Will not show For Approval Bills
-		AND (APB.ysnApproved != 0 AND APB.dtmApprovalDate IS NOT NULL) --Will not show Rejected approval bills
+		AND (APB.ysnApproved = 0 AND APB.dtmApprovalDate IS NULL)      --Will not show Rejected approval bills
 		AND APB.intTransactionType != 6                                --Will not show BillTemplate
