@@ -2019,6 +2019,7 @@
     <Build Include="dbo\Stored Procedures\uspARCalculateServiceCharge.sql" />
     <Build Include="dbo\User Defined Types\ServiceChargeTableType.sql" />
     <Build Include="dbo\Views\vyuCTSequenceHistory.sql" />
+    <Build Include="dbo\Views\vyuGRGetPurchaseSaleDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
