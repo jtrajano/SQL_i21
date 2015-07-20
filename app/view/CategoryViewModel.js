@@ -121,7 +121,7 @@ Ext.define('Inventory.view.CategoryViewModel', {
             type: 'stsubcategorybuffered'
         },
         vendorOrderClass: {
-            type: 'storeclass'
+            type: 'stsubcategorybuffered'
         },
         vendorFamily: {
             type: 'stsubcategorybuffered'

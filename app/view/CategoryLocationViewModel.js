@@ -20,7 +20,7 @@ Ext.define('Inventory.view.CategoryLocationViewModel', {
     requires: [
         'i21.store.CompanyLocationBuffered',
         //'Inventory.store.PaidOut',
-        'Inventory.store.Class',
+        //'Inventory.store.Class',
         'Store.store.SubCategoryBuffered'
     ],
 
