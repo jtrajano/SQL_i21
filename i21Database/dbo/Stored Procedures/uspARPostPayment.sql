@@ -569,8 +569,11 @@ IF @recap = 0
 	--Get all to be post record
 		SELECT @totalRecords = COUNT(*) FROM @ARReceivablePostData
 
-		IF(@totalInvalid >= 1 AND @totalRecords <= 0)  
-			GOTO Post_Exit
+		IF(@totalInvalid >= 1 AND @totalRecords <= 0)
+			BEGIN
+				COMMIT TRAN @TransactionName
+				GOTO Post_Exit
+			END			
 
 	END
 
