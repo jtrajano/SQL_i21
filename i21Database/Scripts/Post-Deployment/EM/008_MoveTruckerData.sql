@@ -30,7 +30,7 @@ BEGIN
 				
 		INSERT INTO tblEntity(strName, strContactNumber, strEmail, strPhone, strPhone2, strFax, strNotes, strEmail2, ysnActive)	
 		SELECT ISNULL(strName,''), 
-				ISNULL(strContactName,''),
+				'',
 				ISNULL(strEmail,''), 
 				ISNULL(strPhone,''), 
 				ISNULL(strAltPhone,''), 

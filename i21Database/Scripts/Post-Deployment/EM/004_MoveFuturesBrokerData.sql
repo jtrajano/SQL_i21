@@ -29,7 +29,7 @@ BEGIN
 
 		INSERT INTO tblEntity(strName, strContactNumber, strEmail, strPhone, strPhone2, strFax)	
 		SELECT ISNULL(strBrokerName,''), 
-				ISNULL(strBrokerName,''),
+				'',
 				ISNULL(strEmail,''), 
 				ISNULL(intPhone,''), 
 				ISNULL(intAltPhone,''), 
