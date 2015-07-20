@@ -270,12 +270,12 @@ BEGIN
 	-- need to review this
     UPDATE
 		tblARInvoiceDetail
-		SET [dblTotal]		= ROUND((([dblPrice] * [dblQtyShipped]) + [dblTotalTax]),2)
+		SET [dblTotal]		= ROUND(((isNull([dblPrice],0) )* isNull(([dblQtyShipped]),0) + isNull([dblTotalTax],0)),2)
 		where intInvoiceId = @InvoiceId
 	
 	UPDATE
 		tblARInvoice
-		SET [dblInvoiceTotal]		= (select SUM(dblTotal) from tblARInvoiceDetail where intInvoiceId = @InvoiceId)
+		SET [dblInvoiceTotal]		= isNull((select SUM(dblTotal) from tblARInvoiceDetail where intInvoiceId = @InvoiceId),0)
 		where intInvoiceId = @InvoiceId
 
 	DELETE FROM @Invoices WHERE [intInvoiceID] = @InvoiceId
