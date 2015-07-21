@@ -2100,6 +2100,7 @@
     <Build Include="dbo\Tables\tblWHCycleCountHeader.sql" />
     <Build Include="dbo\Tables\tblWHCycleCountDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLotHistory.sql" />
+    <Build Include="dbo\Functions\fnAPCreateTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
