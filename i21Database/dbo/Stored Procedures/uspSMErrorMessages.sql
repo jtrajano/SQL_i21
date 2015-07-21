@@ -635,7 +635,13 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51158) EXEC sp_dropmessa
 SET @strmessage = 'There is already a run for the date %s and ItemID %s, cannot create one more.'
 EXEC sp_addmessage 51158,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51159) EXEC sp_dropmessage 51159, 'us_english'	
+SET @strmessage = 'Item UOM is invalid or missing.'
+EXEC sp_addmessage 51159,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51160) EXEC sp_dropmessage 51160, 'us_english'	
+SET @strmessage = 'Item %s is missing a Stock Unit. Please check the Unit of Measure setup.'
+EXEC sp_addmessage 51160,11,@strmessage,'us_english','False'
 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51133) EXEC sp_dropmessage 51133, 'us_english'	
