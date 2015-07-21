@@ -2036,6 +2036,7 @@
     <Build Include="dbo\Views\vyuAPRptReconcileAPGL.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleCreate.sql" />
     <Build Include="dbo\Stored Procedures\uspGLImportOriginReallocation.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\8_UpdateInvoiceType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

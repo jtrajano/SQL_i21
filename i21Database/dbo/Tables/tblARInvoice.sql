@@ -20,6 +20,7 @@
     [dblAmountDue]         NUMERIC (18, 6) NULL,
     [dblPayment]           NUMERIC (18, 6) NULL,
     [strTransactionType]   NVARCHAR (25)   COLLATE Latin1_General_CI_AS NOT NULL,
+	[strType]			   NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL ,
     [intPaymentMethodId]   INT             NOT NULL,
     [strComments]          NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [intAccountId]         INT             NOT NULL,

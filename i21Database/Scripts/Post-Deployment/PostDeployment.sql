@@ -122,6 +122,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\5_UpdateOrderStatus.sql
 :r .\AR\DefaultData\6_UpdateCustomerShipBillTo.sql
 :r .\AR\DefaultData\7_UpdateInvoiceOrderSalesperson.sql
+:r .\AR\DefaultData\8_UpdateInvoiceType.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
