@@ -60,6 +60,7 @@ BEGIN TRY
 		,@intInventoryAdjustmentId int
 		,@intInputLotItemId int
 		,@intTransactionCount INT
+		,@intLotStatusId int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -105,6 +106,7 @@ BEGIN TRY
 		,@ysnPostProduction=ysnPostProduction
 		,@intDepartmentId=intDepartmentId
 		,@ysnExcessConsumptionAllowed=ysnExcessConsumptionAllowed
+		,@intLotStatusId=intLotStatusId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intManufacturingProcessId INT
@@ -139,6 +141,7 @@ BEGIN TRY
 			,ysnPostProduction bit
 			,intDepartmentId int
 			,ysnExcessConsumptionAllowed bit
+			,intLotStatusId int
 			)
 	IF @intTransactionCount = 0
 	BEGIN TRANSACTION
@@ -474,10 +477,13 @@ BEGIN TRY
 		,@intLotId = @intLotId OUTPUT
 		,@ysnPostProduction=@ysnPostProduction
 		,@strLotAlias=@strLotAlias
-
-	UPDATE dbo.tblICLot
-	SET intLotStatusId = 3
-	WHERE intLotId = @intLotId
+	
+	IF @intLotStatusId IS NOT NULL
+	BEGIN
+		UPDATE dbo.tblICLot
+		SET intLotStatusId = @intLotStatusId
+		WHERE intLotId = @intLotId
+	END
 
 	SELECT @strOutputLotNumber = strLotNumber
 	FROM dbo.tblICLot
