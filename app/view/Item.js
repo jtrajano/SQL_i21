@@ -2406,10 +2406,31 @@ Ext.define('Inventory.view.Item', {
                                                                                 },
                                                                                 items: [
                                                                                     {
-                                                                                        xtype: 'combobox',
+                                                                                        xtype: 'gridcombobox',
+                                                                                        columns: [
+                                                                                            {
+                                                                                                dataIndex: 'intPackTypeId',
+                                                                                                dataType: 'numeric',
+                                                                                                hidden: true
+                                                                                            },
+                                                                                            {
+                                                                                                dataIndex: 'strPackName',
+                                                                                                dataType: 'numeric',
+                                                                                                text: 'Pack Name',
+                                                                                                flex: 1
+                                                                                            },
+                                                                                            {
+                                                                                                dataIndex: 'strDescription',
+                                                                                                dataType: 'string',
+                                                                                                text: 'Description',
+                                                                                                flex: 1
+                                                                                            }
+                                                                                        ],
                                                                                         itemId: 'cboPackType',
                                                                                         fieldLabel: 'Pack Type',
-                                                                                        labelWidth: 125
+                                                                                        labelWidth: 125,
+                                                                                        displayField: 'strPackName',
+                                                                                        valueField: 'intPackTypeId'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'textfield',
@@ -2446,16 +2467,60 @@ Ext.define('Inventory.view.Item', {
                                                                                         hideTrigger: true
                                                                                     },
                                                                                     {
-                                                                                        xtype: 'textfield',
+                                                                                        xtype: 'gridcombobox',
+                                                                                        columns: [
+                                                                                            {
+                                                                                                dataIndex: 'intEntityCustomerId',
+                                                                                                dataType: 'numeric',
+                                                                                                text: 'Customer Id',
+                                                                                                hidden: true
+                                                                                            },
+                                                                                            {
+                                                                                                dataIndex: 'strName',
+                                                                                                dataType: 'string',
+                                                                                                text: 'Customer Name',
+                                                                                                flex: 1
+                                                                                            },
+                                                                                            {
+                                                                                                dataIndex: 'strCustomerNumber',
+                                                                                                dataType: 'string',
+                                                                                                text: 'Customer No',
+                                                                                                flex: 1
+                                                                                            }
+                                                                                        ],
                                                                                         itemId: 'txtOwner',
                                                                                         fieldLabel: 'Owner',
-                                                                                        labelWidth: 125
+                                                                                        labelWidth: 125,
+                                                                                        displayField: 'strCustomerNumber',
+                                                                                        valueField: 'intEntityCustomerId'
                                                                                     },
                                                                                     {
-                                                                                        xtype: 'textfield',
+                                                                                        xtype: 'gridcombobox',
+                                                                                        columns: [
+                                                                                            {
+                                                                                                dataIndex: 'intEntityCustomerId',
+                                                                                                dataType: 'numeric',
+                                                                                                text: 'Customer Id',
+                                                                                                hidden: true
+                                                                                            },
+                                                                                            {
+                                                                                                dataIndex: 'strName',
+                                                                                                dataType: 'string',
+                                                                                                text: 'Customer Name',
+                                                                                                flex: 1
+                                                                                            },
+                                                                                            {
+                                                                                                dataIndex: 'strCustomerNumber',
+                                                                                                dataType: 'string',
+                                                                                                text: 'Customer No',
+                                                                                                flex: 1
+                                                                                            }
+                                                                                        ],
                                                                                         itemId: 'txtCustomer',
                                                                                         fieldLabel: 'Customer',
-                                                                                        labelWidth: 125
+                                                                                        labelWidth: 125,
+                                                                                        displayField: 'strCustomerNumber',
+                                                                                        valueField: 'intEntityCustomerId'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'numberfield',
@@ -2465,10 +2530,20 @@ Ext.define('Inventory.view.Item', {
                                                                                         hideTrigger: true
                                                                                     },
                                                                                     {
-                                                                                        xtype: 'textfield',
+                                                                                        xtype: 'gridcombobox',
+                                                                                        columns: [
+                                                                                            {
+                                                                                                dataIndex: 'strDescription',
+                                                                                                dataType: 'string',
+                                                                                                text: 'Status',
+                                                                                                flex: 1
+                                                                                            }
+                                                                                        ],
                                                                                         itemId: 'txtWarehouseStatus',
                                                                                         fieldLabel: 'Warehouse Status',
-                                                                                        labelWidth: 125
+                                                                                        labelWidth: 125,
+                                                                                        displayField: 'strDescription',
+                                                                                        valueField: 'strDescription'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'checkboxfield',

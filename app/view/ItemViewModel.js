@@ -36,7 +36,8 @@ Ext.define('Inventory.view.ItemViewModel', {
         'i21.store.CompanyLocationPricingLevelBuffered',
         'GeneralLedger.store.BufAccountId',
         'GeneralLedger.store.BufAccountCategoryGroup',
-        'Manufacturing.store.BufferedManufacturingCell'
+        'Manufacturing.store.BufferedManufacturingCell',
+        'Manufacturing.store.BufferedPackType'
     ],
 
     stores: {
@@ -420,6 +421,31 @@ Ext.define('Inventory.view.ItemViewModel', {
         },
         mfgWeightUom: {
             type: 'icbuffereduom'
+        },
+        packType: {
+            type: 'mfbufferedpacktype'
+        },
+        owner: {
+            type: 'customerbuffered'
+        },
+        customer: {
+            type: 'customerbuffered'
+        },
+        warehouseStatus: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Release'
+                },
+                {
+                    strDescription: 'Hold'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
         },
 
 

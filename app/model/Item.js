@@ -34,6 +34,7 @@ Ext.define('Inventory.model.Item', {
     fields: [
         { name: 'intItemId', type: 'int', allowNull: true },
         { name: 'strItemNo', type: 'string' },
+        { name: 'strShortName', type: 'string' },
         { name: 'strType', type: 'string' },
         { name: 'strDescription', type: 'string' },
         { name: 'intManufacturerId', type: 'int', allowNull: true },
@@ -146,7 +147,10 @@ Ext.define('Inventory.model.Item', {
         { name: 'dblNetWeight', type: 'float' },
         { name: 'dblUnitPerCase', type: 'float' },
         { name: 'dblQuarantineDuration', type: 'float' },
+        { name: 'intOwnerId', type: 'int', allowNull: true },
+        { name: 'intCustomerId', type: 'int', allowNull: true },
         { name: 'dblCaseWeight', type: 'float' },
+        { name: 'strWarehouseStatus', type: 'string' },
         { name: 'ysnKosherCertified', type: 'boolean' },
         { name: 'ysnFairTradeCompliant', type: 'boolean' },
         { name: 'ysnOrganic', type: 'boolean' },
@@ -156,6 +160,7 @@ Ext.define('Inventory.model.Item', {
         { name: 'dtmDateAvailable', type: 'date', dateFormat: 'c', dateWriteFormat: 'Y-m-d' },
         { name: 'ysnMinorIngredient', type: 'boolean' },
         { name: 'ysnExternalItem', type: 'boolean' },
+        { name: 'strExternalGroup', type: 'string' },
         { name: 'ysnSellableItem', type: 'boolean' },
         { name: 'dblMinStockWeeks', type: 'float' },
         { name: 'dblFullContainerSize', type: 'float' }

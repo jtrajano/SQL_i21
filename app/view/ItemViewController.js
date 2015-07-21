@@ -373,19 +373,27 @@ Ext.define('Inventory.view.ItemViewController', {
             txtMask3: '{current.strMask3}',
 
             cboPackType: {
-                value: '{current.intPackTypeId}'
-//                ,
-//                store: '{mfgWeightUom}'
+                value: '{current.intPackTypeId}',
+                store: '{packType}'
             },
             txtWeightControlCode: '{current.strWeightControlCode}',
             txtBlendWeight: '{current.dblBlendWeight}',
             txtNetWeight: '{current.dblNetWeight}',
             txtUnitsPerCase: '{current.dblUnitPerCase}',
             txtQuarantineDuration: '{current.dblQuarantineDuration}',
-//            txtOwner: '{current.strMask3}',
-//            txtCustomer: '{current.strMask3}',
+            txtOwner: {
+                value: '{current.intOwnerId}',
+                store: '{owner}'
+            },
+            txtCustomer: {
+                value: '{current.intCustomerId}',
+                store: '{customer}'
+            },
             txtCaseWeight: '{current.dblCaseWeight}',
-//            txtWarehouseStatus: '{current.strMask3}',
+            txtWarehouseStatus: {
+                value: '{current.strWarehouseStatus}',
+                store: '{warehouseStatus}'
+            },
             chkKosherCertified: '{current.ysnKosherCertified}',
             chkFairTradeCompliant: '{current.ysnFairTradeCompliant}',
             chkOrganicItem: '{current.ysnOrganic}',
@@ -395,7 +403,7 @@ Ext.define('Inventory.view.ItemViewController', {
             dtmDateAvailable: '{current.dtmDateAvailable}',
             chkMinorIngredient: '{current.ysnMinorIngredient}',
             chkExternalItem: '{current.ysnExternalItem}',
-//            txtExternalGroup: '{current.ysnExternalItem}',
+            txtExternalGroup: '{current.strExternalGroup}',
             chkSellableItem: '{current.ysnSellableItem}',
             txtMinimumStockWeeks: '{current.dblMinStockWeeks}',
             txtFullContainerSize: '{current.dblFullContainerSize}',
