@@ -14,6 +14,7 @@ namespace iRely.Inventory.Model
     {
         public int intItemId { get; set; }
         public string strItemNo { get; set; }
+        public string strShortName { get; set; }
         public string strType { get; set; }
         public string strDescription { get; set; }
         public int? intManufacturerId { get; set; }
@@ -126,7 +127,10 @@ namespace iRely.Inventory.Model
         public decimal? dblNetWeight { get; set; }
         public decimal? dblUnitPerCase { get; set; }
         public decimal? dblQuarantineDuration { get; set; }
+        public int? intOwnerId { get; set; }
+        public int? intCustomerId { get; set; }
         public decimal? dblCaseWeight { get; set; }
+        public string strWarehouseStatus { get; set; }
         public bool? ysnKosherCertified { get; set; }
         public bool? ysnFairTradeCompliant { get; set; }
         public bool? ysnOrganic { get; set; }
@@ -136,6 +140,7 @@ namespace iRely.Inventory.Model
         public DateTime? dtmDateAvailable { get; set; }
         public bool? ysnMinorIngredient { get; set; }
         public bool? ysnExternalItem { get; set; }
+        public string strExternalGroup { get; set; }
         public bool? ysnSellableItem { get; set; }
         public decimal? dblMinStockWeeks { get; set; }
         public decimal? dblFullContainerSize { get; set; }

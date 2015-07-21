@@ -14,6 +14,7 @@ namespace iRely.Inventory.Model
             this.ToTable("tblICItem");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.strShortName).HasColumnName("strShortName");
             this.Property(t => t.strType).HasColumnName("strType");
             this.Property(t => t.strDescription).HasColumnName("strDescription");
             this.Property(t => t.intManufacturerId).HasColumnName("intManufacturerId");
@@ -126,7 +127,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblNetWeight).HasColumnName("dblNetWeight").HasPrecision(18, 6);
             this.Property(t => t.dblUnitPerCase).HasColumnName("dblUnitPerCase").HasPrecision(18, 6);
             this.Property(t => t.dblQuarantineDuration).HasColumnName("dblQuarantineDuration").HasPrecision(18, 6);
+            this.Property(t => t.intOwnerId).HasColumnName("intOwnerId");
+            this.Property(t => t.intCustomerId).HasColumnName("intCustomerId");
             this.Property(t => t.dblCaseWeight).HasColumnName("dblCaseWeight").HasPrecision(18, 6);
+            this.Property(t => t.strWarehouseStatus).HasColumnName("strWarehouseStatus");
             this.Property(t => t.ysnKosherCertified).HasColumnName("ysnKosherCertified");
             this.Property(t => t.ysnFairTradeCompliant).HasColumnName("ysnFairTradeCompliant");
             this.Property(t => t.ysnOrganic).HasColumnName("ysnOrganic");
@@ -136,6 +140,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dtmDateAvailable).HasColumnName("dtmDateAvailable");
             this.Property(t => t.ysnMinorIngredient).HasColumnName("ysnMinorIngredient");
             this.Property(t => t.ysnExternalItem).HasColumnName("ysnExternalItem");
+            this.Property(t => t.strExternalGroup).HasColumnName("strExternalGroup");
             this.Property(t => t.ysnSellableItem).HasColumnName("ysnSellableItem");
             this.Property(t => t.dblMinStockWeeks).HasColumnName("dblMinStockWeeks").HasPrecision(18, 6);
             this.Property(t => t.dblFullContainerSize).HasColumnName("dblFullContainerSize").HasPrecision(18, 6);

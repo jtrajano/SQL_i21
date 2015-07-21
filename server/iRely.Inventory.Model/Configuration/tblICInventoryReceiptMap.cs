@@ -95,6 +95,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblUnitRetail).HasColumnName("dblUnitRetail").HasPrecision(18, 6);
             this.Property(t => t.dblLineTotal).HasColumnName("dblLineTotal").HasPrecision(18, 6);
             this.Property(t => t.intGradeId).HasColumnName("intGradeId");
+            this.Property(t => t.dblGross).HasColumnName("dblGross").HasPrecision(18, 6);
+            this.Property(t => t.dblNet).HasColumnName("dblNet").HasPrecision(18, 6);
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasOptional(p => p.vyuICGetInventoryReceiptItem)

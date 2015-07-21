@@ -176,6 +176,8 @@ namespace iRely.Inventory.Model
         public decimal? dblUnitRetail { get; set; }
         public decimal? dblLineTotal { get; set; }
         public int? intGradeId { get; set; }
+        public decimal? dblGross { get; set; }
+        public decimal? dblNet { get; set; }
         public int? intSort { get; set; }
 
         private string _orderNumber;
