@@ -40,6 +40,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 value: '{current.strType}',
                 store: '{itemTypes}'
             },
+            txtShortName: '{current.strShortName}',
             cboManufacturer: {
                 value: '{current.intManufacturerId}',
                 store: '{manufacturer}'

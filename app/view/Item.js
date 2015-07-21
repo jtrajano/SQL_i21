@@ -233,6 +233,12 @@ Ext.define('Inventory.view.Item', {
                                                                 valueField: 'strType'
                                                             },
                                                             {
+                                                                xtype: 'textfield',
+                                                                itemId: 'txtShortName',
+                                                                fieldLabel: 'Short Name',
+                                                                labelWidth: 80
+                                                            },
+                                                            {
                                                                 xtype: 'textareafield',
                                                                 flex: 1,
                                                                 height: 62,

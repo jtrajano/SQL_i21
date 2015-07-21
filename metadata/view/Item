@@ -417,6 +417,30 @@
                                                     "designerId": "f8f088dc-c9c6-4a4e-9a98-af095be1b1dd"
                                                 },
                                                 {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Short Name",
+                                                        "itemId": "txtShortName",
+                                                        "labelWidth": 80,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null,
+                                                        "margin": null,
+                                                        "name": null,
+                                                        "readOnly": null,
+                                                        "tabIndex": null,
+                                                        "validateOnBlur": null,
+                                                        "validateOnChange": null,
+                                                        "width": null
+                                                    },
+                                                    "name": "MyTextField3",
+                                                    "designerId": "438bf344-dfa5-4b17-9a04-950455ecbf50"
+                                                },
+                                                {
                                                     "type": "Ext.form.field.TextArea",
                                                     "reference": {
                                                         "name": "items",
