@@ -37,6 +37,7 @@ AS
 		,[dblAmountDue]
 		,[dblPayment]
 		,[strTransactionType]
+		,[strType]
 		,[intPaymentMethodId]
 		,[intAccountId]
 		,[intFreightTermId]
@@ -75,6 +76,7 @@ AS
 		,0
 		,@dblAmountDue
 		,0
+		,'Invoice'
 		,'Service Charge'
 		,0
 		,@intARAccountId
