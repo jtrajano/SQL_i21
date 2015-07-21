@@ -2032,6 +2032,8 @@
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeDeduction.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOff.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateAPAccountCategory.sql" />
+    <Build Include="dbo\Views\vyuAPRptTaxRemittance.sql" />
+    <Build Include="dbo\Views\vyuAPRptReconcileAPGL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
