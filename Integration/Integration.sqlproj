@@ -141,8 +141,6 @@
     <None Include="Scripts\NR\uspNRGenerateEFTSchedule.sql" />
     <None Include="Scripts\NR\uspNRGetDetailsForInvoice.sql" />
     <None Include="Scripts\NR\uspNRGetPaymentType.sql" />
-    <None Include="dbo\Stored Procedures\uspGLImportOriginReallocation.sql" />
-    <None Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournalCLOSED.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
@@ -217,6 +215,8 @@
     <None Include="dbo\Stored Procedures\uspGLAccountOriginSync.sql" />
     <None Include="dbo\Stored Procedures\uspGLBuildAccount.sql" />
     <None Include="dbo\Stored Procedures\uspGLBuildOriginAccount.sql" />
+    <None Include="dbo\Stored Procedures\uspGLImportOriginReallocation.sql" />
+    <None Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournalCLOSED.sql" />
     <None Include="dbo\Stored Procedures\uspSMMigrateCurrency.sql" />
     <None Include="Scripts\TM\Customer.sql" />
   </ItemGroup>

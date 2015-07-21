@@ -28,6 +28,8 @@
 :r "..\dbo\Stored Procedures\uspGLBuildOriginAccount.sql"
 :r "..\dbo\Stored Procedures\uspGLGetImportOriginHistoricalJournalError.sql"
 :r "..\dbo\Stored Procedures\uspGLImportSubLedger.sql"
+:r "..\dbo\Stored Procedures\uspGLImportOriginHistoricalJournalCLOSED.sql"
+:r "..\dbo\Stored Procedures\uspGLImportOriginReallocation.sql"
 
 -- CASH MANAGEMENT
 :r ..\dbo\Views\apcbkmst.sql
