@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspQMSampleCreate]
 	@strXml NVARCHAR(Max)
 	,@strSampleNumber NVARCHAR(30) OUTPUT
+	,@intSampleId INT OUTPUT
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -15,7 +16,6 @@ BEGIN TRY
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
 
-	DECLARE @intSampleId INT
 	DECLARE @strLotNumber NVARCHAR(30)
 
 	SELECT @strSampleNumber = strSampleNumber
@@ -258,6 +258,7 @@ BEGIN TRY
 		,intRepNo
 		,strFormula
 		,intListItemId
+		,strIsMandatory
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -295,6 +296,7 @@ BEGIN TRY
 		,intRepNo
 		,strFormula
 		,intListItemId
+		,strIsMandatory
 		,intCreatedUserId
 		,dtmCreated
 		,intLastModifiedUserId
@@ -330,6 +332,7 @@ BEGIN TRY
 			,intRepNo INT
 			,strFormula NVARCHAR(MAX)
 			,intListItemId INT
+			,strIsMandatory NVARCHAR(20)
 			,intCreatedUserId INT
 			,dtmCreated DATETIME
 			,intLastModifiedUserId INT
@@ -337,7 +340,7 @@ BEGIN TRY
 			)
 
 	SELECT @strSampleNumber AS strSampleNumber
-	
+
 	EXEC sp_xml_removedocument @idoc
 
 	COMMIT TRAN

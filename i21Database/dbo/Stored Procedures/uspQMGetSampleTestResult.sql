@@ -1,5 +1,8 @@
 ﻿CREATE PROCEDURE uspQMGetSampleTestResult
 	@intSampleId INT
+	,@intProductTypeId INT
+	,@intProductValueId INT
+	,@intControlPointId INT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -14,7 +17,7 @@ BEGIN
 		,TR.intProductTypeId
 		,TR.intProductValueId
 		,T.intTestId
-		,CASE WHEN TR.intParentPropertyId IS NOT NULL THEN NULL ELSE T.strTestName END AS strTestName
+		,T.strTestName
 		,PRT.intPropertyId
 		,PRT.strPropertyName
 		,PRT.strDescription
@@ -48,7 +51,7 @@ BEGIN
 		,PRT.intDataTypeId
 		,PRT.intListId
 		,L.strListName
-		,ISNULL(PP.strIsMandatory,PRT.strIsMandatory) AS strIsMandatory
+		,TR.strIsMandatory
 	FROM dbo.tblQMTestResult AS TR
 	JOIN dbo.tblQMProperty AS PRT ON PRT.intPropertyId = TR.intPropertyId
 	JOIN dbo.tblQMTest AS T ON T.intTestId = TR.intTestId
@@ -57,5 +60,8 @@ BEGIN
 	LEFT JOIN dbo.tblICUnitMeasure AS U ON U.intUnitMeasureId = TR.intUnitMeasureId
 	LEFT JOIN dbo.tblQMList AS L ON L.intListId = PRT.intListId
 	WHERE TR.intSampleId = @intSampleId
+		AND TR.intProductTypeId = @intProductTypeId
+		AND TR.intProductValueId = @intProductValueId
+		AND TR.intControlPointId = @intControlPointId
 	ORDER BY TR.intSequenceNo
 END
