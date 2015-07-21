@@ -34,7 +34,7 @@ BEGIN
 			,[MeterReading] = A.dblNewMeterReading
 			,[InvoiceNumber] = B.strInvoiceNumber
 			,[BulkPlantNumber] = F.strLocationName
-			,[InvoiceDate] = CAST(YEAR(B.dtmDate) AS NVARCHAR(4)) + CAST(MONTH(B.dtmDate) AS NVARCHAR(2)) + CAST(DAY(B.dtmDate) AS NVARCHAR(2)) 
+			,[InvoiceDate] =   CAST(YEAR(B.dtmDate) AS NVARCHAR(4)) + RIGHT('00'+ CAST(MONTH(B.dtmDate) AS NVARCHAR(2)),2) + RIGHT('00'+ CAST(DAY(B.dtmDate) AS NVARCHAR(2)),2)
 			,[ItemNumber] = C.strItemNo
 			,[ItemAvailableForTM] = (CASE WHEN C.strType = 'Service' THEN 'S' ELSE '' END)
 			,[ReversePreviousDelivery] = ''
