@@ -3,7 +3,7 @@ AS
 BEGIN
 	-- Assert 
 	BEGIN 
-		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 50031
+		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 50030
 	END
 	
 	-- Act

@@ -66,7 +66,37 @@ BEGIN
 	-- Reduce stock 
 	IF (ISNULL(@dblQty, 0) < 0)
 	BEGIN 
-		SET @dblReduceQty = ISNULL(@dblQty, 0) 
+		
+		----------------------------------------------------------------------------------------------
+		-- Bagged vs Weight. 
+		----------------------------------------------------------------------------------------------
+		-- 1. If Costing Lot table is using a weight UOM, then convert the UOM and Qty to weight. 
+		-- 2. Otherwise, keep the same Qty and UOM. 
+		BEGIN 
+			SET @dblReduceQty = ISNULL(@dblQty, 0) 
+
+			IF EXISTS (
+				SELECT	TOP 1 1 
+				FROM	dbo.tblICInventoryLot CostingLot INNER JOIN dbo.tblICLot Lot
+							ON CostingLot.intLotId = Lot.intLotId
+				WHERE	CostingLot.intLotId = @intLotId
+						AND CostingLot.intItemUOMId = Lot.intWeightUOMId
+						AND CostingLot.intItemUOMId <> @intItemUOMId
+						AND Lot.intWeightUOMId IS NOT NULL 
+						AND ISNULL(CostingLot.ysnIsUnposted, 0) = 0 
+						AND (ISNULL(CostingLot.dblStockIn, 0) - ISNULL(CostingLot.dblStockOut, 0)) > 0 
+			)			 
+			BEGIN 
+				-- Retrieve the correct UOM (Lot UOM or Weight UOM)
+				-- and also compute the Qty if it has weights. 
+				SELECT	@dblReduceQty =	Lot.dblWeightPerQty * @dblQty
+						,@intItemUOMId = Lot.intWeightUOMId 
+				FROM	dbo.tblICLot Lot
+				WHERE	Lot.intLotId = @intLotId
+
+				SET @dblReduceQty = ISNULL(@dblReduceQty, 0) 
+			END 
+		END 
 
 		-- Repeat call on uspICReduceStockInLot until @dblReduceQty is completely distributed to all available Lot buckets or added a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)

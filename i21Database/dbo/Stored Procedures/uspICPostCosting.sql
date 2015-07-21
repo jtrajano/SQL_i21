@@ -1,5 +1,4 @@
-﻿
-/*
+﻿/*
 	This is the stored procedure that handles the "posting" of items. 
 	
 	It uses a cursor to iterate over the list of records found in @ItemsToPost, a table-valued parameter (variable). 

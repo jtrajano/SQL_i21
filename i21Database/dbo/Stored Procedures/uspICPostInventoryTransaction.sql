@@ -34,6 +34,12 @@ SET ANSI_WARNINGS OFF
 
 SET @InventoryTransactionIdentityId = NULL
 
+-- Initialize the UOM Qty
+SELECT	TOP 1
+		@dblUOMQty = ItemUOM.dblUnitQty
+FROM	tblICItemUOM ItemUOM
+WHERE	intItemUOMId = @intItemUOMId
+
 INSERT INTO dbo.tblICInventoryTransaction (
 		[intItemId] 
 		,[intItemLocationId]
