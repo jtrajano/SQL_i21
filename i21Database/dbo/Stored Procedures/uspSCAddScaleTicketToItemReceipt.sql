@@ -251,7 +251,7 @@ BEGIN
        ,[intTicketId]
        ,[intTicketFileId]
        ,[strSourceType])
-	SELECT	 [intConcurrencyId]= 1
+	SELECT	DISTINCT [intConcurrencyId]= 1
        ,[strDiscountCode] = SD.[strDiscountCode]
        ,[strDiscountCodeDescription]= SD.[strDiscountCodeDescription]
        ,[dblGradeReading]= SD.[dblGradeReading]
@@ -265,8 +265,9 @@ BEGIN
        ,[intDiscountScheduleCodeId]= SD.[intDiscountScheduleCodeId]
        ,[dtmDiscountPaidDate]= SD.[dtmDiscountPaidDate]
        ,[intTicketId]= SD.[intTicketId]
-       ,[intTicketFileId]= IRT.intInventoryReceiptItemId
+       ,[intTicketFileId]= ISH.intInventoryReceiptItemId
        ,[strSourceType]= 'Inventory Receipt'
-	FROM	dbo.tblICInventoryReceiptItem IRT join dbo.[tblQMTicketDiscount] SD
-	ON IRT.intSourceId = SD.intTicketId WHERE	SD.intTicketId = @intTicketId
+	FROM	dbo.tblICInventoryReceiptItem ISH join dbo.[tblQMTicketDiscount] SD
+	ON ISH.intSourceId = SD.intTicketId AND SD.strSourceType = 'Scale' AND
+	SD.intTicketFileId = @intTicketId WHERE	ISH.intSourceId = @intTicketId AND ISH.intInventoryReceiptId = @InventoryReceiptId
 END

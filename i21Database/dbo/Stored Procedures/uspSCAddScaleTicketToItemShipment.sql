@@ -192,7 +192,7 @@ BEGIN
        ,[intTicketId]
        ,[intTicketFileId]
        ,[strSourceType])
-	SELECT	 [intConcurrencyId]= 1
+	SELECT	DISTINCT [intConcurrencyId]= 1
        ,[strDiscountCode] = SD.[strDiscountCode]
        ,[strDiscountCodeDescription]= SD.[strDiscountCodeDescription]
        ,[dblGradeReading]= SD.[dblGradeReading]
@@ -209,10 +209,9 @@ BEGIN
        ,[intTicketFileId]= ISH.intInventoryShipmentItemId
        ,[strSourceType]= 'Inventory Shipment'
 	FROM	dbo.tblICInventoryShipmentItem ISH join dbo.[tblQMTicketDiscount] SD
-	ON ISH.intSourceId = SD.intTicketId WHERE	SD.intTicketId = @intTicketId
+	ON ISH.intSourceId = SD.intTicketId AND SD.strSourceType = 'Scale' AND
+	SD.intTicketFileId = @intTicketId WHERE	ISH.intSourceId = @intTicketId AND ISH.intInventoryShipmentId = @InventoryShipmentId
 END
-
-
 GO
 
 
