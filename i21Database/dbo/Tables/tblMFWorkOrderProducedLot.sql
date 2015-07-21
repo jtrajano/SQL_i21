@@ -21,6 +21,7 @@
 	[strVesselNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[intBatchId] INT NULL,
+	strBatchId nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
 	[dtmCreated] DATETIME NULL, 
     [intCreatedUserId] INT NULL,
 	[dtmLastModified] DATETIME NULL, 

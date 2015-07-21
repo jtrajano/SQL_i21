@@ -61,6 +61,7 @@
 	ysnIngredientAvailable bit CONSTRAINT [DF_tblMFWorkOrder_ysnIngredientAvailable] DEFAULT 1,
 	intCountStatusId INT NULL, 
 	intDepartmentId int,
+	strBatchId nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
 	CONSTRAINT [PK_tblMFWorkOrder_intWorkOrderId] PRIMARY KEY (intWorkOrderId),
 	CONSTRAINT [UQ_tblMFWorkOrder_strWorkOrderNo] UNIQUE ([strWorkOrderNo]),
 	CONSTRAINT [FK_tblMFWorkOrder_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
