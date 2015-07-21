@@ -38,6 +38,21 @@ RETURN (
 				)
 				AND @intItemId IS NOT NULL 	
 
+		-- Check for invalid item UOM Id
+		UNION ALL 
+		SELECT	intItemId = @intItemId
+				,intItemLocationId = @intItemLocationId
+				,strText = FORMATMESSAGE(51133)
+				,intErrorCode = 51133
+		WHERE	NOT EXISTS (
+					SELECT TOP 1 1 
+					FROM	dbo.tblICItemUOM 
+					WHERE	intItemId = @intItemId
+							AND intItemUOMId = @intItemUOMId
+				)
+				AND @intItemId IS NOT NULL 	
+				AND @intItemUOMId IS NOT NULL
+
 		-- Check for missing costing method. 
 		UNION ALL 
 		SELECT	intItemId = @intItemId
@@ -108,8 +123,9 @@ RETURN (
 								AND Location.intItemLocationId = @intItemLocationId
 							LEFT JOIN dbo.tblICLot Lot
 								ON Lot.intItemLocationId = Location.intItemLocationId 
-								AND ISNULL(Lot.intLotId, 0) = ISNULL(@intLotId, 0)	
+								AND ISNULL(Lot.intLotId, 0) = ISNULL(@intLotId, 0)								
 					WHERE	Item.intItemId = @intItemId
+							AND Lot.intLotId IS NOT NULL
 							AND Location.intItemLocationId = @intItemLocationId							
 							AND Lot.intLotId IS NOT NULL 
 							AND ISNULL(@dblQty, 0) + ISNULL(Lot.dblQty, 0) < 0
@@ -118,5 +134,15 @@ RETURN (
 								OR Item.strStatus = 'Phased Out'
 							)		
 				)
+
+		-- Check for the missing Stock Unit UOM 
+		UNION ALL 
+		SELECT	intItemId = @intItemId
+				,intItemLocationId = @intItemLocationId
+				,strText = FORMATMESSAGE(51134)
+				,intErrorCode = 51134
+		WHERE	dbo.fnGetItemStockUOM(@intItemId) IS NULL 
+				AND @intItemId IS NOT NULL 
+
 	) AS Query		
 )

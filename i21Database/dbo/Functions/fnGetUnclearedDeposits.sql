@@ -47,7 +47,7 @@ BEGIN
 					END
 			AND (
 				-- Filter for all the bank deposits and credits:
-				intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT)
+				intBankTransactionTypeId IN (@BANK_DEPOSIT, @BANK_TRANSFER_DEP, @ORIGIN_DEPOSIT, @AR_PAYMENT)
 				OR ( dblAmount > 0 AND intBankTransactionTypeId = @BANK_TRANSACTION )
 			)
 			AND dbo.fnIsDepositEntry(strLink) = 0

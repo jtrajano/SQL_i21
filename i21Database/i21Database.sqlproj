@@ -1054,7 +1054,7 @@
     <Build Include="dbo\Tables\tblICCostingMethod.sql" />
     <None Include="Scripts\Post-Deployment\IC\04_CostingMethods.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostLotOut.sql">
-      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+      <SuppressTSqlWarnings>71005</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\Views\vyuICGetReceiptItemSource.sql" />
     <Build Include="dbo\Tables\tblHDAnnouncementType.sql" />
@@ -1682,8 +1682,8 @@
     <Build Include="dbo\Views\vyuARCustomerInquiryReport.sql" />
     <Build Include="dbo\Views\vyuARCustomerStatementReport.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingReport.sql" />
-    <Build Include="dbo\Tables\tblEntityPreferences.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustment_CreatePostQtyChange.sql" />
+    <Build Include="dbo\Tables\tblEntityPreferences.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WithGasCheckSubReport.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WithLeakCheckSubReport.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\Layout\WithoutGasCheckSubReport.sql" />
@@ -2015,6 +2015,27 @@
     <Build Include="dbo\Views\vyuTRDispacthedLoad.sql" />
     <Build Include="dbo\Tables\tblTRCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspTRProcessLogisticsLoad.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertInvoiceServiceCharge.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCalculateServiceCharge.sql" />
+    <Build Include="dbo\User Defined Types\ServiceChargeTableType.sql" />
+    <Build Include="dbo\Views\vyuCTSequenceHistory.sql" />
+    <Build Include="dbo\Views\vyuGRGetPurchaseSaleDetail.sql" />
+    <Build Include="dbo\Tables\tblQMTicketDiscount.sql" />
+    <Build Include="dbo\Stored Procedures\uspARDeleteRecurrence.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostStockQuantity.sql" />
+    <Build Include="dbo\Functions\fnGetItemStockUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixStockQuantities.sql" />
+    <Build Include="dbo\Tables\tblICFixLog.sql" />
+    <None Include="Scripts\Post-Deployment\IC\00_RequiredDataFix.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeEarning.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeDeduction.sql" />
+    <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOff.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateAPAccountCategory.sql" />
+    <Build Include="dbo\Views\vyuAPRptTaxRemittance.sql" />
+    <Build Include="dbo\Views\vyuAPRptReconcileAPGL.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleCreate.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLImportOriginReallocation.sql" />
     <Build Include="dbo\Stored Procedures\uspTMInsertToCobolWrite.sql" />
     <None Include="Scripts\Post-Deployment\TM\Tables\tblTMCOBOLWRITE.sql" />
   </ItemGroup>

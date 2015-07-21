@@ -232,3 +232,41 @@ SET		dblInvoiceAmount = (
 		)
 FROM	dbo.tblICInventoryReceipt Receipt 
 WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
+
+BEGIN
+	INSERT INTO [dbo].[tblQMTicketDiscount]
+       ([intConcurrencyId]
+       ,[strDiscountCode]
+       ,[strDiscountCodeDescription]
+       ,[dblGradeReading]
+       ,[strCalcMethod]
+       ,[strShrinkWhat]
+       ,[dblShrinkPercent]
+       ,[dblDiscountAmount]
+       ,[dblDiscountDue]
+       ,[dblDiscountPaid]
+       ,[ysnGraderAutoEntry]
+       ,[intDiscountScheduleCodeId]
+       ,[dtmDiscountPaidDate]
+       ,[intTicketId]
+       ,[intTicketFileId]
+       ,[strSourceType])
+	SELECT	 [intConcurrencyId]= 1
+       ,[strDiscountCode] = SD.[strDiscountCode]
+       ,[strDiscountCodeDescription]= SD.[strDiscountCodeDescription]
+       ,[dblGradeReading]= SD.[dblGradeReading]
+       ,[strCalcMethod]= SD.[strCalcMethod]
+       ,[strShrinkWhat]= SD.[strShrinkWhat]
+       ,[dblShrinkPercent]= SD.[dblShrinkPercent]
+       ,[dblDiscountAmount]= SD.[dblDiscountAmount]
+       ,[dblDiscountDue]= SD.[dblDiscountDue]
+       ,[dblDiscountPaid]= SD.[dblDiscountPaid]
+       ,[ysnGraderAutoEntry]= SD.[ysnGraderAutoEntry]
+       ,[intDiscountScheduleCodeId]= SD.[intDiscountScheduleCodeId]
+       ,[dtmDiscountPaidDate]= SD.[dtmDiscountPaidDate]
+       ,[intTicketId]= SD.[intTicketId]
+       ,[intTicketFileId]= IRT.intInventoryReceiptItemId
+       ,[strSourceType]= 'Inventory Receipt'
+	FROM	dbo.tblICInventoryReceiptItem IRT join dbo.[tblQMTicketDiscount] SD
+	ON IRT.intSourceId = SD.intTicketId WHERE	SD.intTicketId = @intTicketId
+END

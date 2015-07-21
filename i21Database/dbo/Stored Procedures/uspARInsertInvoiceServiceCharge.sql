@@ -6,17 +6,13 @@
 	@intSCAccountId			INT = 0,	
 	@tblTypeServiceCharge   [dbo].[ServiceChargeTableType] READONLY
 AS
-	DECLARE @dateNow		    DATE = CAST(GETDATE() AS DATE),
-			@dblInvoiceSubtotal NUMERIC(18,6) = 0,
+	DECLARE @dateNow		    DATE = CAST(GETDATE() AS DATE),			
 			@dblInvoiceTotal    NUMERIC(18,6) = 0,
 			@dblAmountDue		NUMERIC(18,6) = 0,
-			@dblAPRAmount       NUMERIC(18,6) = 0,
 			@NewInvoiceId		INT
 	
-	SELECT @dblInvoiceSubtotal = SUM(dblSCAmount)
-	     , @dblInvoiceTotal    = SUM(dblTotalAmount)
+	SELECT @dblInvoiceTotal    = SUM(dblTotalAmount)
 		 , @dblAmountDue       = SUM(dblAmountDue)
-		 , @dblAPRAmount	   = SUM(dblAPRAmount)
 	FROM @tblTypeServiceCharge
 
 		--INSERT INVOICE HEADER
@@ -72,7 +68,7 @@ AS
 		,[intShipViaId]
 		,NULL --[strPONumber]
 		,[intTermsId]
-		,@dblInvoiceSubtotal
+		,@dblInvoiceTotal
 		,0
 		,0
 		,@dblInvoiceTotal
@@ -125,7 +121,7 @@ AS
 			SELECT 	
 				 @NewInvoiceId
 				,[intInvoiceId]
-				,[strInvoiceNumber]
+				,[strInvoiceNumber]				
 				,@intSCAccountId
 				,[dblAmountDue]
 				,[dblTotalAmount]

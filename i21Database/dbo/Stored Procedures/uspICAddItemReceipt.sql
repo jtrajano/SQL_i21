@@ -163,7 +163,7 @@ INSERT INTO dbo.tblICInventoryReceiptItem (
 	,intOwnershipType
 )
 SELECT	intInventoryReceiptId	= IE.intInventoryReceiptId
-		,intLineNo				= RE.intSourceId
+		,intLineNo				= RE.intContractDetailId
 		,intOrderId				= RE.intContractDetailId
 		,intSourceId			= RE.intSourceId
 		,intItemId				= RE.intItemId

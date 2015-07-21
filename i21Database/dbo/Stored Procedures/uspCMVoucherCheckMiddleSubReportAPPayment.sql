@@ -105,6 +105,7 @@ SELECT TOP 10
 		,strBillId = BILL.strBillId
 		,strInvoice = BILL.strVendorOrderNumber
 		,dtmDate = BILL.dtmBillDate
+		,strComment = SUBSTRING(BILL.strComment,1,25)
 		,dblAmount = BILL.dblTotal
 		,dblDiscount = PYMTDetail.dblDiscount
 		,dblNet = PYMTDetail.dblPayment

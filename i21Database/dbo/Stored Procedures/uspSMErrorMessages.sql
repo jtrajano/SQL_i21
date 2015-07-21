@@ -564,7 +564,7 @@ SET @strmessage = 'The work order that you clicked on no longer exists. This is 
 EXEC sp_addmessage 51140,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51141) EXEC sp_dropmessage 51141, 'us_english'	
-SET @strmessage = 'Work order contains quarantined lot, you need to either release the lot or mark the pallet as ghost to close the work order.'
+SET @strmessage = 'There are lots produced against this workorder which are not yet released to warehouse. In order to complete the workorder, either release the lots to warehouse or mark the pallet(s) as Ghost.'
 EXEC sp_addmessage 51141,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51142) EXEC sp_dropmessage 51142, 'us_english'	
@@ -622,4 +622,34 @@ EXEC sp_addmessage 51154,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51155) EXEC sp_dropmessage 51155, 'us_english'	
 SET @strmessage = 'Lot %s you are trying to consume for Work order %s is not associated with the selected process %s.'
 EXEC sp_addmessage 51155,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51156) EXEC sp_dropmessage 51156, 'us_english'	
+SET @strmessage = 'A run for ''%s'' - ''%s'' is %s on ''%s''. Please create a run later than the ''%s''.'
+EXEC sp_addmessage 51156,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51157) EXEC sp_dropmessage 51157, 'us_english'	
+SET @strmessage = 'A run for ''%s'' - ''%s'' already exists for %s which is using the same ingredient item ''%s'' - ''%s''. Please create a run later than the ''%s''.'
+EXEC sp_addmessage 51157,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51158) EXEC sp_dropmessage 51158, 'us_english'	
+SET @strmessage = 'There is already a run for the date %s and ItemID %s, cannot create one more.'
+EXEC sp_addmessage 51158,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51159) EXEC sp_dropmessage 51159, 'us_english'	
+SET @strmessage = 'Item UOM is invalid or missing.'
+EXEC sp_addmessage 51159,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51160) EXEC sp_dropmessage 51160, 'us_english'	
+SET @strmessage = 'Item %s is missing a Stock Unit. Please check the Unit of Measure setup.'
+EXEC sp_addmessage 51160,11,@strmessage,'us_english','False'
+
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51133) EXEC sp_dropmessage 51133, 'us_english'	
+SET @strmessage = 'Item UOM is invalid or missing.'
+EXEC sp_addmessage 51133,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51134) EXEC sp_dropmessage 51134, 'us_english'	
+SET @strmessage = 'Item %s is missing a Stock Unit. Please check the Unit of Measure setup.'
+EXEC sp_addmessage 51134,11,@strmessage,'us_english','False'
+
 

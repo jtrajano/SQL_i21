@@ -187,10 +187,23 @@ END
 IF (ISNULL(@recap, 0) = 0)
 BEGIN
 
-	--GROUP GL ENTRIES (NOTE: ASK THE DEVELOPER TO DO THIS ON uspGLBookEntries
-	EXEC uspGLBookEntries @GLEntries, @post
+	BEGIN TRY
+		--GROUP GL ENTRIES (NOTE: ASK THE DEVELOPER TO DO THIS ON uspGLBookEntries
+		EXEC uspGLBookEntries @GLEntries, @post
+	END TRY
+	BEGIN CATCH
+		DECLARE
+		  @ErrorMessage   varchar(2000)
+		 ,@ErrorSeverity  tinyint
+		 ,@ErrorState     tinyint;
 
-	IF @@ERROR <> 0	GOTO Post_Rollback;
+		 SET @ErrorMessage  = ERROR_MESSAGE()
+		SET @ErrorSeverity = ERROR_SEVERITY()
+		SET @ErrorState    = ERROR_STATE()
+		RAISERROR(@ErrorMessage, @ErrorSeverity, @ErrorState)
+
+		GOTO Post_Rollback;
+	END CATCH
 
 	IF(ISNULL(@post,0) = 0)
 	BEGIN

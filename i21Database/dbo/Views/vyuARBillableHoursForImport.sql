@@ -17,6 +17,7 @@ SELECT
 	,ISNULL(JC.[intCompanyLocationId], (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1))
 									AS "intCompanyLocationId"
 	,JC.[intItemId]
+	,JC.[intItemUOMId] 
 	,IC.[strItemNo]
 	,HW.[intHours]
 	,HW.[dblRate]					AS "dblPrice"

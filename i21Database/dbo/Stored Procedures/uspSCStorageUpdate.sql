@@ -384,7 +384,8 @@ BEGIN TRY
 	           ,[dblFreightDueRate]
 	           ,[ysnPrinted]
 	           ,[dblCurrencyRate]
-			   ,[intCurrencyId])
+			   ,[intCurrencyId]
+			   ,[intStorageTicketNumber])
 	SELECT 	[intConcurrencyId]		= 1
 			,[intEntityId]			= @intEntityId
 			,[intCommodityId]		= SC.intCommodityId
@@ -411,7 +412,8 @@ BEGIN TRY
 			,[dblFreightDueRate]= 0 
 			,[ysnPrinted]= 0 
 			,[dblCurrencyRate]= 1
-			,[intCurrencyId] = SC.intCurrencyId 
+			,[intCurrencyId] = SC.intCurrencyId
+			,[intStorageTicketNumber] = SC.intTicketNumber 
 	FROM	dbo.tblSCTicket SC
 	WHERE	SC.intTicketId = @intTicketId
 
@@ -456,38 +458,46 @@ BEGIN TRY
 	
 	BEGIN
 		SET @intHoldCustomerStorageId = NULL
-		select @intHoldCustomerStorageId = SD.intCustomerStorageId from tblGRStorageDiscount SD 
-		where intCustomerStorageId = @intCustomerStorageId
+		select @intHoldCustomerStorageId = SD.intTicketFileId from tblQMTicketDiscount SD 
+		where SD.intTicketFileId = @intCustomerStorageId
 	END
 	
 	if @intHoldCustomerStorageId is NULL
 	BEGIN
-		INSERT INTO [dbo].[tblGRStorageDiscount]
-	           ([intConcurrencyId]
-	           ,[intCustomerStorageId]
-	           ,[strDiscountCode]
-	           ,[dblGradeReading]
-	           ,[strCalcMethod]
-	           ,[dblDiscountAmount]
-	           ,[strShrinkWhat]
-	           ,[dblShrinkPercent]
-	           ,[dblDiscountDue]
-	           ,[dblDiscountPaid]
-	           ,[dtmDiscountPaidDate]
-			   ,[intDiscountScheduleCodeId])
+		INSERT INTO [dbo].[tblQMTicketDiscount]
+           ([intConcurrencyId]
+           ,[strDiscountCode]
+           ,[strDiscountCodeDescription]
+           ,[dblGradeReading]
+           ,[strCalcMethod]
+           ,[strShrinkWhat]
+           ,[dblShrinkPercent]
+           ,[dblDiscountAmount]
+           ,[dblDiscountDue]
+           ,[dblDiscountPaid]
+           ,[ysnGraderAutoEntry]
+           ,[intDiscountScheduleCodeId]
+           ,[dtmDiscountPaidDate]
+           ,[intTicketId]
+           ,[intTicketFileId]
+           ,[strSourceType])
 		SELECT	 [intConcurrencyId]= 1
-			,[intCustomerStorageId]= @intCustomerStorageId
-			,[strDiscountCode]= SD.strDiscountCode
-			,[dblGradeReading]= SD.dblGradeReading
-			,[strCalcMethod]= SD.strCalcMethod
-			,[dblDiscountAmount]= SD.dblDiscountAmount
-			,[strShrinkWhat]= SD.strShrinkWhat
-			,[dblShrinkPercent]= SD.dblShrinkPercent
-			,[dblDiscountDue]= SD.dblDiscountAmount
-			,[dblDiscountPaid]=	0
-			,[dtmDiscountPaidDate] = NULL
-			,[intDiscountScheduleCodeId] = SD.intDiscountScheduleCodeId
-		FROM	dbo.tblSCTicketDiscount SD
+           ,[strDiscountCode] = SD.[strDiscountCode]
+           ,[strDiscountCodeDescription]= SD.[strDiscountCodeDescription]
+           ,[dblGradeReading]= SD.[dblGradeReading]
+           ,[strCalcMethod]= SD.[strCalcMethod]
+           ,[strShrinkWhat]= SD.[strShrinkWhat]
+           ,[dblShrinkPercent]= SD.[dblShrinkPercent]
+           ,[dblDiscountAmount]= SD.[dblDiscountAmount]
+           ,[dblDiscountDue]= SD.[dblDiscountDue]
+           ,[dblDiscountPaid]= SD.[dblDiscountPaid]
+           ,[ysnGraderAutoEntry]= SD.[ysnGraderAutoEntry]
+           ,[intDiscountScheduleCodeId]= SD.[intDiscountScheduleCodeId]
+           ,[dtmDiscountPaidDate]= SD.[dtmDiscountPaidDate]
+           ,[intTicketId]= SD.[intTicketId]
+           ,[intTicketFileId]= @intCustomerStorageId
+           ,[strSourceType]= 'Storage'
+		FROM	dbo.[tblQMTicketDiscount] SD
 		WHERE	SD.intTicketId = @intTicketId
 	END
 	
