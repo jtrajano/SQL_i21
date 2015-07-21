@@ -565,3 +565,15 @@ BEGIN
 	)
 END
 GO
+UPDATE dbo.tblMFWorkOrderStatus
+SET strBackColorName = 'bc-palegreen'
+WHERE strBackColorName IS NULL
+	AND intStatusId = 10
+GO
+
+UPDATE dbo.tblMFWorkOrderStatus
+SET strBackColorName = 'bc-sandybrown'
+WHERE strBackColorName IS NULL
+	AND intStatusId = 11
+GO
+
