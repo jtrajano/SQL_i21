@@ -25,6 +25,7 @@
     [strDispatchFile] NVARCHAR(5) COLLATE Latin1_General_CI_AS  NOT NULL DEFAULT 'XML', 
     [ysnUseOriginIntegration] BIT NOT NULL DEFAULT 1, 
     [strCSVPath] NVARCHAR(500)  COLLATE Latin1_General_CI_AS NULL DEFAULT '', 
+    [intLeaseItemId] INT NULL, 
     CONSTRAINT [PK_tblTMPreferenceCompany] PRIMARY KEY CLUSTERED ([intPreferenceCompanyID] ASC)
 );
 
@@ -265,3 +266,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMPreferenceCompany',
     @level2type = N'COLUMN',
     @level2name = N'strCSVPath'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Item Id for the Lease Billing default Item',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMPreferenceCompany',
+    @level2type = N'COLUMN',
+    @level2name = N'intLeaseItemId'
