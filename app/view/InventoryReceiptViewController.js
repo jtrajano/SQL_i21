@@ -292,6 +292,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 },
                 colUnitCost: 'dblUnitCost',
                 colUnitRetail: 'dblUnitRetail',
+                colGross: 'dblGross',
+                colNet: 'dblNet',
                 colLineTotal: 'dblLineTotal',
                 colGrossMargin: 'dblGrossMargin'
             },

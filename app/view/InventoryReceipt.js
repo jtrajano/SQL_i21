@@ -1156,12 +1156,43 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         }
                                                                     },
                                                                     {
+                                                                        xtype: 'numbercolumn',
+                                                                        itemId: 'colUnitCost',
+                                                                        width: 85,
+                                                                        dataIndex: 'dblUnitCost',
+                                                                        text: 'Unit Cost',
+                                                                        editor: {
+                                                                            xtype: 'numberfield',
+                                                                            itemId: 'txtUnitCost',
+                                                                            minValue: 0
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colTax',
+                                                                        width: 85,
+                                                                        dataIndex: 'strTax',
+                                                                        text: 'Tax',
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            itemId: 'cboTax'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'numbercolumn',
+                                                                        summaryType: 'sum',
+                                                                        itemId: 'colLineTotal',
+                                                                        width: 85,
+                                                                        dataIndex: 'dblLineTotal',
+                                                                        text: 'Line Total'
+                                                                    },
+                                                                    {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colWeightUOM',
                                                                         modelValidation: true,
                                                                         width: 100,
                                                                         dataIndex: 'strWeightUOM',
-                                                                        text: 'Lot Wgt UOM',
+                                                                        text: 'Gross/Net UOM',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
@@ -1204,34 +1235,27 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
-                                                                        itemId: 'colUnitCost',
+                                                                        itemId: 'colGross',
                                                                         width: 85,
-                                                                        dataIndex: 'dblUnitCost',
-                                                                        text: 'Unit Cost',
+                                                                        dataIndex: 'dblUnitRetail',
+                                                                        text: 'Gross',
                                                                         editor: {
                                                                             xtype: 'numberfield',
-                                                                            itemId: 'txtUnitCost',
+                                                                            itemId: 'txtGross',
                                                                             minValue: 0
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colTax',
-                                                                        width: 85,
-                                                                        dataIndex: 'strTax',
-                                                                        text: 'Tax',
-                                                                        editor: {
-                                                                            xtype: 'gridcombobox',
-                                                                            itemId: 'cboTax'
-                                                                        }
-                                                                    },
-                                                                    {
                                                                         xtype: 'numbercolumn',
-                                                                        summaryType: 'sum',
-                                                                        itemId: 'colLineTotal',
+                                                                        itemId: 'colNet',
                                                                         width: 85,
-                                                                        dataIndex: 'dblLineTotal',
-                                                                        text: 'Line Total'
+                                                                        dataIndex: 'dblUnitRetail',
+                                                                        text: 'Net',
+                                                                        editor: {
+                                                                            xtype: 'numberfield',
+                                                                            itemId: 'txtNet',
+                                                                            minValue: 0
+                                                                        }
                                                                     },
                                                                     {
                                                                         xtype: 'numbercolumn',
