@@ -11,16 +11,17 @@ Type the overview for the table here.
 ## Source Code:
 */
 	CREATE TABLE [dbo].[tblICItem] (
-		[intItemId]                  INT             IDENTITY (1, 1) NOT NULL,
-		[strItemNo]                  NVARCHAR (50)  COLLATE Latin1_General_CI_AS NOT NULL,
-		[strType]              NVARCHAR(50)    COLLATE Latin1_General_CI_AS           NOT NULL,
-		[strDescription]             NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
-		[intManufacturerId]          INT             NULL,
-		[intBrandId]                 INT             NULL,
+		[intItemId]                 INT             IDENTITY (1, 1) NOT NULL,
+		[strItemNo]                 NVARCHAR (50)  COLLATE Latin1_General_CI_AS NOT NULL,
+		[strShortName]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
+		[strType]					NVARCHAR(50)    COLLATE Latin1_General_CI_AS NOT NULL,
+		[strDescription]            NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
+		[intManufacturerId]         INT             NULL,
+		[intBrandId]                INT             NULL,
 		[intCategoryId]				INT				NULL,
-		[strStatus]                NVARCHAR(50)    COLLATE Latin1_General_CI_AS           NULL,
-		[strModelNo]                 NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
-		[strInventoryTracking] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[strStatus]					NVARCHAR(50)    COLLATE Latin1_General_CI_AS NULL,
+		[strModelNo]                NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
+		[strInventoryTracking]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strLotTracking] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[ysnRequireCustomerApproval] BIT NULL DEFAULT ((0)), 
 		[intRecipeId] INT NULL, 
@@ -125,10 +126,10 @@ Type the overview for the table here.
 		[dblNetWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblUnitPerCase] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblQuarantineDuration] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		--[strOwner] NVARCHAR(50) NULL,
-		--[strCustomer] NVARCHAR(50) NULL,
+		[intOwnerId] INT NULL,
+		[intCustomerId] INT NULL,
 		[dblCaseWeight] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		--[strWarehouseStatus] NVARCHAR(50) NULL,
+		[strWarehouseStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[ysnKosherCertified] BIT NULL DEFAULT ((0)),
 		[ysnFairTradeCompliant] BIT NULL DEFAULT ((0)),
 		[ysnOrganic] BIT NULL DEFAULT ((0)),
@@ -138,7 +139,7 @@ Type the overview for the table here.
 		[dtmDateAvailable] DATETIME NULL DEFAULT (GETDATE()),
 		[ysnMinorIngredient] BIT NULL DEFAULT ((0)),
 		[ysnExternalItem] BIT NULL DEFAULT ((0)),
-		--[strExternalGroup] NVARCHAR(50) NULL,
+		[strExternalGroup] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[ysnSellableItem] BIT NULL DEFAULT ((0)),
 		[dblMinStockWeeks] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblFullContainerSize] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -159,7 +160,9 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItem_SalesTaxGroup] FOREIGN KEY ([intSalesTaxGroupId]) REFERENCES [tblSMTaxGroupMaster]([intTaxGroupMasterId]),
 		CONSTRAINT [FK_tblICItem_PurchaseTaxGroup] FOREIGN KEY ([intSalesTaxGroupId]) REFERENCES [tblSMTaxGroupMaster]([intTaxGroupMasterId]),
 		CONSTRAINT [FK_tblICItem_tblSMCountry] FOREIGN KEY ([intOriginId]) REFERENCES [tblSMCountry]([intCountryID]), 
-		CONSTRAINT [FK_tblICItem_MaterialPackType] FOREIGN KEY ([intMaterialPackTypeId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])  
+		CONSTRAINT [FK_tblICItem_MaterialPackType] FOREIGN KEY ([intMaterialPackTypeId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
+		CONSTRAINT [FK_tblICItem_Owner] FOREIGN KEY ([intOwnerId]) REFERENCES [tblARCustomer]([intEntityCustomerId]),
+		CONSTRAINT [FK_tblICItem_Customer] FOREIGN KEY ([intCustomerId]) REFERENCES [tblARCustomer]([intEntityCustomerId])
 	);
 	GO
 
