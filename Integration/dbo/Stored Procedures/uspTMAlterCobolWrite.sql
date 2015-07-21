@@ -10,7 +10,56 @@ AS
 BEGIN
 	IF (EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'dbo' AND  TABLE_NAME = 'tblTMCOBOLWRITE'))
 	BEGIN
-		EXEC ('DROP TABLE tblTMCOBOLWRITE')
+		EXEC ('
+
+			IF (EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ''dbo'' AND  TABLE_NAME = ''tblTMCOBOLWRITE_backup''))  
+			BEGIN  
+				DROP TABLE tblTMCOBOLWRITE_backup
+			END
+
+			CREATE TABLE tblTMCOBOLWRITE_backup
+			(
+				[CustomerNumber]             NVARCHAR(100)   
+			   ,[SiteNumber]                 CHAR (4)        
+			   ,[MeterReading]               DECIMAL (18, 6) 
+			   ,[InvoiceNumber]              NVARCHAR(25)    
+			   ,[BulkPlantNumber]            NVARCHAR(50)    
+			   ,[InvoiceDate]                CHAR (8)        
+			   ,[ItemNumber]                 NVARCHAR(50)    
+			   ,[ItemAvailableForTM]         CHAR (1)        
+			   ,[ReversePreviousDelivery]    CHAR (1)        
+			   ,[PerformerID]                NVARCHAR(100)   
+			   ,[InvoiceLineNumber]          DECIMAL (18, 6) 
+			   ,[ExtendedAmount]             DECIMAL (18, 6) 
+			   ,[QuantityDelivered]          DECIMAL (18, 6) 
+			   ,[ActualPercentAfterDelivery] DECIMAL (18, 6) 
+			   ,[InvoiceType]                CHAR (1)        
+			   ,[SalesPersonID]              NVARCHAR(100)   
+			)
+
+			INSERT INTO tblTMCOBOLWRITE_backup
+			SELECT 
+				[CustomerNumber]            
+				,[SiteNumber]                
+				,[MeterReading]              
+				,[InvoiceNumber]             
+				,[BulkPlantNumber]           
+				,[InvoiceDate]               
+				,[ItemNumber]                
+				,[ItemAvailableForTM]        
+				,[ReversePreviousDelivery]   
+				,[PerformerID]               
+				,[InvoiceLineNumber]         
+				,[ExtendedAmount]            
+				,[QuantityDelivered]         
+				,[ActualPercentAfterDelivery]
+				,[InvoiceType]               
+				,[SalesPersonID]             
+			FROM tblTMCOBOLWRITE
+
+			DROP TABLE tblTMCOBOLWRITE
+		
+		')
 	END
 
 	IF ((SELECT TOP 1 ysnUseOriginIntegration FROM tblTMPreferenceCompany) = 1)
@@ -180,6 +229,45 @@ BEGIN
 			@level1name = N'tblTMCOBOLWRITE',
 			@level2type = N'COLUMN',
 			@level2name = N'SalesPersonID'
+
+		EXEC ('
+			INSERT INTO tblTMCOBOLWRITE(
+				[CustomerNumber]            
+				,[SiteNumber]                
+				,[MeterReading]              
+				,[InvoiceNumber]             
+				,[BulkPlantNumber]           
+				,[InvoiceDate]               
+				,[ItemNumber]                
+				,[ItemAvailableForTM]        
+				,[ReversePreviousDelivery]   
+				,[PerformerID]               
+				,[InvoiceLineNumber]         
+				,[ExtendedAmount]            
+				,[QuantityDelivered]         
+				,[ActualPercentAfterDelivery]
+				,[InvoiceType]               
+				,[SalesPersonID]        
+			)
+			SELECT 
+				[CustomerNumber]            
+				,[SiteNumber]                
+				,[MeterReading]              
+				,[InvoiceNumber]             
+				,[BulkPlantNumber]           
+				,[InvoiceDate]               
+				,[ItemNumber]                
+				,[ItemAvailableForTM]        
+				,[ReversePreviousDelivery]   
+				,[PerformerID]               
+				,[InvoiceLineNumber]         
+				,[ExtendedAmount]            
+				,[QuantityDelivered]         
+				,[ActualPercentAfterDelivery]
+				,[InvoiceType]               
+				,[SalesPersonID]             
+			FROM tblTMCOBOLWRITE_backup
+			')
 	END
 	ELSE
 	BEGIN
@@ -346,6 +434,45 @@ BEGIN
 			@level1name = N'tblTMCOBOLWRITE',
 			@level2type = N'COLUMN',
 			@level2name = N'SalesPersonID'
+
+		EXEC ('
+			INSERT INTO tblTMCOBOLWRITE(
+				[CustomerNumber]            
+				,[SiteNumber]                
+				,[MeterReading]              
+				,[InvoiceNumber]             
+				,[BulkPlantNumber]           
+				,[InvoiceDate]               
+				,[ItemNumber]                
+				,[ItemAvailableForTM]        
+				,[ReversePreviousDelivery]   
+				,[PerformerID]               
+				,[InvoiceLineNumber]         
+				,[ExtendedAmount]            
+				,[QuantityDelivered]         
+				,[ActualPercentAfterDelivery]
+				,[InvoiceType]               
+				,[SalesPersonID]        
+			)
+			SELECT 
+				[CustomerNumber]            
+				,[SiteNumber]                
+				,[MeterReading]              
+				,[InvoiceNumber]             
+				,[BulkPlantNumber]           
+				,[InvoiceDate]               
+				,[ItemNumber]                
+				,[ItemAvailableForTM]        
+				,[ReversePreviousDelivery]   
+				,[PerformerID]               
+				,[InvoiceLineNumber]         
+				,[ExtendedAmount]            
+				,[QuantityDelivered]         
+				,[ActualPercentAfterDelivery]
+				,[InvoiceType]               
+				,[SalesPersonID]             
+			FROM tblTMCOBOLWRITE_backup
+			')
 		
 	END
 END

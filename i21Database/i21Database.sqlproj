@@ -156,6 +156,7 @@
     <Folder Include="Scripts\Post-Deployment\TM\Reports\SubReportSettings" />
     <Folder Include="Scripts\Post-Deployment\PR\DataFixes" />
     <Folder Include="Scripts\Post-Deployment\GL\ReportData" />
+    <Folder Include="Scripts\Post-Deployment\TM\Tables" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -285,7 +286,6 @@
     <Build Include="dbo\Tables\tblTMCOBOLLeaseBilling.sql" />
     <Build Include="dbo\Tables\tblTMCOBOLREADSite.sql" />
     <Build Include="dbo\Tables\tblTMCOBOLREADSiteLink.sql" />
-    <Build Include="dbo\Tables\tblTMCOBOLWRITE.sql" />
     <Build Include="dbo\Tables\tblTMCustomer.sql" />
     <Build Include="dbo\Tables\tblTMDDReadingSeasonResetArchive.sql" />
     <Build Include="dbo\Tables\tblTMDegreeDayReading.sql" />
@@ -2016,6 +2016,7 @@
     <Build Include="dbo\Tables\tblTRCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspTRProcessLogisticsLoad.sql" />
     <Build Include="dbo\Stored Procedures\uspTMInsertToCobolWrite.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Tables\tblTMCOBOLWRITE.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
