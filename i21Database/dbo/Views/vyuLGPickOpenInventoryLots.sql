@@ -1,5 +1,8 @@
 ﻿CREATE VIEW vyuLGPickOpenInventoryLots
 	AS 
+SELECT *, (dblAllocatedQty + dblReservedQty) AS dblAllocReserved, (dblOriginalQty - (dblAllocatedQty + dblReservedQty)) AS dblBalance, 
+CASE WHEN (((dblAllocatedQty + dblReservedQty) > 0) AND (dblUnPickedQty > (dblAllocatedQty + dblReservedQty))) THEN (dblAllocatedQty + dblReservedQty)  ELSE dblUnPickedQty END AS dblAvailToSell
+FROM (
 SELECT Lot.intLotId
 	, Lot.intItemId
 	, Item.strItemNo
@@ -61,11 +64,6 @@ SELECT Lot.intLotId
 	, CTDetail.dblQuantity as dblOriginalQty
 	, dblAllocatedQty = IsNull((SELECT SUM(AL.dblPAllocatedQty) FROM tblLGAllocationDetail AL GROUP BY AL.intPContractDetailId HAVING AL.intPContractDetailId = CTDetail.intContractDetailId), 0)
 	, dblReservedQty = IsNull((SELECT SUM(RS.dblReservedQuantity) FROM tblLGReservation RS GROUP BY RS.intContractDetailId HAVING RS.intContractDetailId = CTDetail.intContractDetailId), 0)
-	, dblAllocReserve = IsNull((SELECT SUM(AL.dblPAllocatedQty) FROM tblLGAllocationDetail AL GROUP BY AL.intPContractDetailId HAVING AL.intPContractDetailId = CTDetail.intContractDetailId), 0) +
-						IsNull((SELECT SUM(RS.dblReservedQuantity) FROM tblLGReservation RS GROUP BY RS.intContractDetailId HAVING RS.intContractDetailId = CTDetail.intContractDetailId), 0)
-	, dblBalance = CTDetail.dblQuantity - 
-					IsNull((SELECT SUM(AL.dblPAllocatedQty) FROM tblLGAllocationDetail AL GROUP BY AL.intPContractDetailId HAVING AL.intPContractDetailId = CTDetail.intContractDetailId), 0) + 
-					IsNull((SELECT SUM(RS.dblReservedQuantity) FROM tblLGReservation RS GROUP BY RS.intContractDetailId HAVING RS.intContractDetailId = CTDetail.intContractDetailId), 0)
 	, ShipmentContainer.strContainerNumber
 	, ShipmentBL.strBLNumber
 
@@ -88,3 +86,4 @@ LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLoca
 LEFT JOIN tblICLotStatus LotStatus ON LotStatus.intLotStatusId = Lot.intLotStatusId
 LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = Lot.intWeightUOMId
 LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
+) InvLots
