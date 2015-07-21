@@ -51,6 +51,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\DefaultData\8_WorkToDoItem.sql
 :r .\TM\DefaultData\9_WorkCloseReason.sql
 :r .\TM\DefaultData\10_RegulatorType.sql
+:r .\TM\Tables\tblTMCOBOLWRITE.sql
+
 ----TM Reports
 :r .\TM\Reports\FieldSelection\DeliveryFill.sql
 :r .\TM\Reports\Layout\DeliveryFill.sql

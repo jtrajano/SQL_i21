@@ -276,5 +276,6 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateContractView.sql" />
     <None Include="dbo\Stored Procedures\uspAPCreateMissingPaymentOfBills.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateSiteOrderView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMAlterCobolWrite.sql" />
   </ItemGroup>
 </Project>
