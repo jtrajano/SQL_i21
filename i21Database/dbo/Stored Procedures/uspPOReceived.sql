@@ -167,7 +167,8 @@ WHERE B.intContractDetailId > 0
 
 IF EXISTS(SELECT 1 FROM @contractItems)
 BEGIN
-	EXEC uspCTReceived @contractItems
+	DECLARE @userId INT = (SELECT TOP 1  A.intEntityId FROM tblICInventoryReceipt A INNER JOIN @ItemsFromInventoryReceipt B ON A.intInventoryReceiptId = B.intInventoryReceiptId)
+	EXEC uspCTReceived @contractItems, @userId
 	IF @@ERROR != 0
 	BEGIN
 		RETURN;
