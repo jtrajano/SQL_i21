@@ -1,0 +1,26 @@
+﻿CREATE TABLE [dbo].[tblPOPurchaseDetailTax]
+(
+	[intPurchaseDetailTaxId] INT NOT NULL IDENTITY, 
+    [intPurchaseDetailId] INT NOT NULL, 
+    [intTaxGroupMasterId] INT NOT NULL, 
+    [intTaxGroupId] INT NOT NULL, 
+    [intTaxCodeId] INT NOT NULL, 
+    [intTaxClassId] INT NOT NULL, 
+	[strTaxableByOtherTaxes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
+    [strCalculationMethod] NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL, 
+    [dblRate] NUMERIC(18, 6) NULL, 
+    [intPurchaseTaxAccountId] INT NULL, 
+    [dblTax] NUMERIC(18, 6) NULL, 
+    [dblAdjustedTax] NUMERIC(18, 6) NULL, 
+	[ysnTaxAdjusted] BIT NULL DEFAULT ((0)), 
+	[ysnSeparateOnBill] BIT NULL DEFAULT ((0)), 
+	[ysnCheckoffTax] BIT NULL DEFAULT ((0)), 
+    [intConcurrencyId] INT CONSTRAINT [DF_tblPOPurchaseDetailTax_intConcurrencyId] DEFAULT ((0)) NOT NULL,
+	CONSTRAINT [PK_tblPOPurchaseDetailTax_intPurchaseDetailTaxId] PRIMARY KEY CLUSTERED ([intPurchaseDetailTaxId] ASC),
+	CONSTRAINT [FK_tblPOPurchaseDetailTax_tblARPurchaseDetail_intPurchaseDetailId] FOREIGN KEY ([intPurchaseDetailId]) REFERENCES [dbo].[tblPOPurchaseDetail] ([intPurchaseDetailId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblPOPurchaseDetailTax_tblSMTaxGroupMaster_intTaxGroupMasterId] FOREIGN KEY ([intTaxGroupMasterId]) REFERENCES [dbo].[tblSMTaxGroupMaster] ([intTaxGroupMasterId]),
+	CONSTRAINT [FK_tblPOPurchaseDetailTax_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
+	CONSTRAINT [FK_tblPOPurchaseDetailTax_tblSMTaxCode_intTaxCodeId] FOREIGN KEY ([intTaxCodeId]) REFERENCES [dbo].[tblSMTaxCode] ([intTaxCodeId]),
+	CONSTRAINT [FK_tblPOPurchaseDetailTax_tblSMTaxClass_intTaxClassId] FOREIGN KEY ([intTaxClassId]) REFERENCES [dbo].[tblSMTaxClass] ([intTaxClassId]),
+	CONSTRAINT [FK_tblPOPurchaseDetailTax_tblGLAccount_intSalesTaxAccountId] FOREIGN KEY ([intPurchaseTaxAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
+)

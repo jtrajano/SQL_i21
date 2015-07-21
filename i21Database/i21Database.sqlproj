@@ -2101,6 +2101,7 @@
     <Build Include="dbo\Tables\tblWHCycleCountDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetLotHistory.sql" />
     <Build Include="dbo\Functions\fnAPCreateTaxes.sql" />
+    <Build Include="dbo\Tables\tblPOPurchaseDetailTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

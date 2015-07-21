@@ -20,7 +20,7 @@ RETURNS @returntable TABLE
     [dblTax] NUMERIC(18, 6) NULL, 
     [dblAdjustedTax] NUMERIC(18, 6) NULL, 
 	[ysnTaxAdjusted] BIT NULL DEFAULT ((0)), 
-	[ysnSeparateOnInvoice] BIT NULL DEFAULT ((0)), 
+	[ysnSeparateOnBill] BIT NULL DEFAULT ((0)), 
 	[ysnCheckoffTax] BIT NULL DEFAULT ((0))
 )
 AS
