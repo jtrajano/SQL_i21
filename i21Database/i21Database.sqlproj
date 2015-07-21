@@ -2034,6 +2034,7 @@
     <Build Include="dbo\Stored Procedures\uspGLUpdateAPAccountCategory.sql" />
     <Build Include="dbo\Views\vyuAPRptTaxRemittance.sql" />
     <Build Include="dbo\Views\vyuAPRptReconcileAPGL.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleCreate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
