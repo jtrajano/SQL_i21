@@ -428,7 +428,12 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     return true
                 }
                 else {
-                    return false;
+                    if (get('grdInventoryReceipt.selection.strLotTracking') === 'No') {
+                        return true
+                    }
+                    else {
+                        return false;
+                    }
                 }
             }
             else
