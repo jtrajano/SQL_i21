@@ -24,12 +24,17 @@ PRINT N'END Update all existing Category Standard UOM to reference Category UOM'
 
 PRINT N'BEGIN Update all existing Category Standard UOM to reference Category UOM'
 
-	IF EXISTS(SELECT * FROM sys.columns WHERE name = 'intSubLocationId' AND object_id = OBJECT_ID('tblICItemStock'))
+	IF EXISTS(SELECT * FROM sys.sysconstraints WHERE constid = OBJECT_ID('FK_tblICItemStock_tblSMCompanyLocationSubLocation'))
 	BEGIN
 		EXEC ('
 			ALTER TABLE tblICItemStock
 			DROP CONSTRAINT FK_tblICItemStock_tblSMCompanyLocationSubLocation
+		')
+	END
 
+	IF EXISTS(SELECT * FROM sys.columns WHERE name = 'intSubLocationId' AND object_id = OBJECT_ID('tblICItemStock'))
+	BEGIN
+		EXEC ('
 			ALTER TABLE tblICItemStock
 			DROP COLUMN intSubLocationId
 		')
