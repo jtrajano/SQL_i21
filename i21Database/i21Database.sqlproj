@@ -156,6 +156,9 @@
     <Folder Include="Scripts\Post-Deployment\TM\Reports\SubReportSettings" />
     <Folder Include="Scripts\Post-Deployment\PR\DataFixes" />
     <Folder Include="Scripts\Post-Deployment\GL\ReportData" />
+    <Folder Include="Scripts\Utility" />
+    <Folder Include="Scripts\Utility\IC" />
+    <Folder Include="Scripts\Utility\IC\IC-1024" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -1689,6 +1692,10 @@
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeDeduction.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOff.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateAPAccountCategory.sql" />
+    <None Include="Scripts\Utility\IC\IC-1024\Fix Consume.sql" />
+    <None Include="Scripts\Utility\IC\IC-1024\Fix Inventory Adjustment.sql" />
+    <None Include="Scripts\Utility\IC\IC-1024\Fix Produce.sql" />
+    <None Include="Scripts\Utility\IC\IC-1024\Update tblGLSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -1730,6 +1737,7 @@
     <None Include="Scripts\Post-Deployment\EM\003_FixVendorBadData.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckTax.sql" />
     <Build Include="dbo\Views\vyuPRPaycheckYTD.sql" />
+    <None Include="Scripts\Utility\IC\IC-1024\Readme.txt" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
