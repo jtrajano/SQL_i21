@@ -123,8 +123,12 @@ BEGIN
 		,'Produce Lot Status'
 		,5
 		,1
-		,'Select strSecondaryStatus as ValueMember,strSecondaryStatus as DisplayMember from tblICLotStatus'
+		,'Select convert(varchar,intLotStatusId) as ValueMember,strSecondaryStatus as DisplayMember from tblICLotStatus'
 END
+Else
+Begin
+	Update tblMFAttribute Set strSQL='Select convert(varchar,intLotStatusId) as ValueMember,strSecondaryStatus as DisplayMember from tblICLotStatus' Where intAttributeId = 6
+End
 GO
 
 IF NOT EXISTS (

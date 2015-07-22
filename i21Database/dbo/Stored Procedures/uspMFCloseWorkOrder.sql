@@ -89,7 +89,7 @@ BEGIN TRY
 			FROM dbo.tblMFWorkOrderProducedLot
 			WHERE intWorkOrderId = @intWorkOrderId) 
 			OR Exists(SELECT *
-			FROM dbo.tblMFWorkOrderConsumedLot 
+			FROM dbo.tblMFWorkOrderInputLot 
 			WHERE intWorkOrderId = @intWorkOrderId))
 	Begin
 		RAISERROR (

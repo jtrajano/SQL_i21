@@ -119,4 +119,6 @@ BEGIN
 	WHERE PRD.intProductId = @intProductId
 		AND @intValidDate BETWEEN DATEPART(dy, PV.dtmValidFrom)
 			AND DATEPART(dy, PV.dtmValidTo)
+		AND @intValidDate BETWEEN DATEPART(dy, PPV.dtmValidFrom)
+			AND DATEPART(dy, PPV.dtmValidTo)
 END

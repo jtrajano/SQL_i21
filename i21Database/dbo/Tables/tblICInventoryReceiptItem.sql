@@ -31,6 +31,8 @@ Type the overview for the table here.
 		[dblUnitRetail] NUMERIC(18,6) NULL DEFAULT ((0)),
 		[dblLineTotal] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intGradeId] INT NULL,
+		[dblGross] NUMERIC(18, 6) NULL DEFAULT ((0)),
+		[dblNet] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICInventoryReceiptItem] PRIMARY KEY ([intInventoryReceiptItemId]), 

@@ -156,6 +156,7 @@
     <Folder Include="Scripts\Post-Deployment\TM\Reports\SubReportSettings" />
     <Folder Include="Scripts\Post-Deployment\PR\DataFixes" />
     <Folder Include="Scripts\Post-Deployment\GL\ReportData" />
+    <Folder Include="Scripts\Post-Deployment\TM\Tables" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -285,7 +286,6 @@
     <Build Include="dbo\Tables\tblTMCOBOLLeaseBilling.sql" />
     <Build Include="dbo\Tables\tblTMCOBOLREADSite.sql" />
     <Build Include="dbo\Tables\tblTMCOBOLREADSiteLink.sql" />
-    <Build Include="dbo\Tables\tblTMCOBOLWRITE.sql" />
     <Build Include="dbo\Tables\tblTMCustomer.sql" />
     <Build Include="dbo\Tables\tblTMDDReadingSeasonResetArchive.sql" />
     <Build Include="dbo\Tables\tblTMDegreeDayReading.sql" />
@@ -2034,6 +2034,15 @@
     <Build Include="dbo\Stored Procedures\uspGLUpdateAPAccountCategory.sql" />
     <Build Include="dbo\Views\vyuAPRptTaxRemittance.sql" />
     <Build Include="dbo\Views\vyuAPRptReconcileAPGL.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleCreate.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLImportOriginReallocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMInsertToCobolWrite.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Tables\tblTMCOBOLWRITE.sql" />
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\8_UpdateInvoiceType.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateCreateWorkOrder.sql" />
+    <Build Include="dbo\Views\vyuICGetAssemblyItem.sql" />
+    <Build Include="dbo\Views\vyuAPRptCheckRegister.sql" />
+    <Build Include="dbo\Views\vyuRKGetFutureSettlementPriceHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

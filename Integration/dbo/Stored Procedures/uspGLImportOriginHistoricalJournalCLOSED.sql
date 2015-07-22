@@ -1,16 +1,11 @@
-﻿
-IF NOT EXISTS (SELECT 1 FROM sys.objects WHERE name = 'uspGLImportOriginHistoricalJournalCLOSED' and type = 'P')
-	EXEC('CREATE PROCEDURE [dbo].[uspGLImportOriginHistoricalJournalCLOSED]
-		@intEntityId INT,
-		@result NVARCHAR(MAX) = '''' OUTPUT
-		AS')
-	
-
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glarcmst]') AND type IN (N'U')) 
-	RETURN
-
+﻿GO
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glarcmst]') AND type IN (N'U')) 
+BEGIN
+EXEC(
+'IF EXISTS (SELECT 1 FROM sys.objects WHERE name = ''uspGLImportOriginHistoricalJournalCLOSED'' and type = ''P'')
+	DROP PROCEDURE [dbo].[uspGLImportOriginHistoricalJournalCLOSED];')
 EXEC
-('ALTER PROCEDURE [dbo].[uspGLImportOriginHistoricalJournalCLOSED]
+('CREATE PROCEDURE [dbo].[uspGLImportOriginHistoricalJournalCLOSED]
 	@intEntityId INT,
 	@result NVARCHAR(MAX) = '''' OUTPUT
 AS
@@ -19,8 +14,6 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 BEGIN TRANSACTION
 
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N''[dbo].[glarcmst]'') AND type IN (N''U''))
-	RETURN 0
 	
 DELETE h FROM glhstmst h
 INNER JOIN (SELECT MAX(glarc_period) AS period FROM glarcmst GROUP BY SUBSTRING( CONVERT(VARCHAR(10), glarc_period),1,4)) g
@@ -138,9 +131,12 @@ SELECT
  CASE WHEN glarc_amt >= 0 THEN CASE WHEN (glarc_dr_cr_ind=''C'' OR glarc_dr_cr_ind IS NULL) THEN glarc_amt ELSE 0 END
  ELSE CASE WHEN glarc_dr_cr_ind = ''D'' THEN (glarc_amt * -1) ELSE 0 END END AS Credit,
  0 AS CreditRate, -- credit rate
- CASE WHEN glarc_units < 0 THEN (glarc_units * -1) ELSE 0 END AS DebitUnits,
- CASE WHEN glarc_units > 0 THEN glarc_units ELSE 0 END AS CreditUnits,
- glarc_ref AS strDescription,
+ CASE WHEN glarc_units >= 0 THEN CASE WHEN glarc_dr_cr_ind = ''D'' THEN glarc_units ELSE 0 END
+ ELSE CASE WHEN (glarc_dr_cr_ind=''C'' OR glarc_dr_cr_ind IS NULL) THEN (glarc_units * -1) ELSE 0 END END AS Debit,
+ 0 AS DebitUnits, 
+ CASE WHEN glarc_units >= 0 THEN CASE WHEN (glarc_dr_cr_ind=''C'' OR glarc_dr_cr_ind IS NULL) THEN glarc_units ELSE 0 END
+ ELSE CASE WHEN glarc_dr_cr_ind = ''D'' THEN (glarc_units * -1) ELSE 0 END END AS CreditUnits,
+glarc_ref AS strDescription,
  NULL AS intCurrencyId,
  0 AS dblUnitsInlbs,
  glarc_doc AS strDocument,
@@ -265,3 +261,5 @@ ROLLBACK_INSERT:
 IMPORT_EXIT:
  IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#iRelyImptblGLJournal'')) DROP TABLE #iRelyImptblGLJournal
  IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#iRelyImptblGLJournalDetail'')) DROP TABLE #iRelyImptblGLJournalDetail')
+END
+ 

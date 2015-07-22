@@ -30,6 +30,7 @@ BEGIN
            ,[dblAmountDue]
            ,[dblPayment]
            ,[strTransactionType]
+		   ,[strType]
            ,[strOrderStatus]
            ,[intAccountId]
            ,[dtmProcessDate]
@@ -78,6 +79,7 @@ BEGIN
            ,[dblAmountDue]
            ,[dblPayment]
            ,[strTransactionType]
+		   ,[strType]
            ,@OrderStatus
            ,[intAccountId]
            ,NULL --Processed Date

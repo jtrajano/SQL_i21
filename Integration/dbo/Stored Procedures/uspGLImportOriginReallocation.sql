@@ -1,10 +1,8 @@
-﻿IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glragmst]') AND type IN (N'U')) 
-	RETURN
-GO
-
-IF EXISTS (SELECT 1 FROM sys.objects WHERE name = 'uspGLImportOriginReallocation' and type = 'P')
-			DROP PROCEDURE [dbo].[uspGLImportOriginReallocation];
-GO
+﻿GO
+IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glragmst]') AND type IN (N'U')) 
+BEGIN
+EXEC('IF EXISTS (SELECT 1 FROM sys.objects WHERE name = ''uspGLImportOriginReallocation'' and type = ''P'')
+			DROP PROCEDURE [dbo].[uspGLImportOriginReallocation];')
 
 EXEC('CREATE PROCEDURE [dbo].[uspGLImportOriginReallocation]
 AS
@@ -45,23 +43,14 @@ AS
 		INSERT tblGLAccountReallocationDetail (intAccountReallocationId,intAccountId,dblPercentage,intConcurrencyId)
 			SELECT intAccountReallocationId,T.intAccountId,decPercentage,1 FROM tblGLReallocationTemp T inner join
 				tblGLAccount A on T.intAccountId = A.intAccountId ORDER BY intAccountReallocationId
-	
-		--INSERT INTO tblGLImportReallocationLog (strDescription,strVersion,intEntityId)
-		--		VALUES(''Successful Transaction'',@strVersion,@intEntityId)
-				
-		--INSERT INTO tblGLImportReallocationLogDetail(intImportReallocationLogId,strName,strDescription)
-		--SELECT strName,strDescription FROM tblGLAccountReallocation a
-		--	JOIN tblGLReallocationTemp b on a.intAccountReallocationId = b.intAccountReallocationId
 		COMMIT TRANSACTION
 		SELECT ''Success''
 	END TRY
 	BEGIN CATCH
 		ROLLBACK TRANSACTION
-		--INSERT INTO tblGLImportReallocationLog (strDescription,strVersion,intEntityId)
-		SELECT ERROR_MESSAGE() --+ '' at Line no. '' + CONVERT(varchar(10), ERROR_LINE())
-		--SET @intResult = ''
+		SELECT ERROR_MESSAGE()
 	END CATCH')
-	GO
+END
 
 
 

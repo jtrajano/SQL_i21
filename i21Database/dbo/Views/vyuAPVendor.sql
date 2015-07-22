@@ -52,7 +52,8 @@ SELECT
 	ysnHasPayables = CAST((CASE WHEN EXISTS(SELECT 1 FROM dbo.tblAPBill G WHERE G.ysnPosted = 1 AND G.ysnPaid = 0 AND G.[intEntityVendorId] = B.[intEntityVendorId]) 
 						THEN 1 ELSE 0 END) AS BIT),
 	B.intApprovalListId,
-	C.intFreightTermId
+	C.intFreightTermId,
+	H.strPaymentMethod
 FROM
 		dbo.tblEntity A
 	INNER JOIN dbo.tblAPVendor B
@@ -69,3 +70,5 @@ FROM
 		ON B.intCurrencyId = E.intCurrencyID
 	LEFT JOIN dbo.tblGLAccount F 
 		ON B.intGLAccountExpenseId = F.intAccountId
+	LEFT JOIN dbo.tblSMPaymentMethod H
+		ON B.intPaymentMethodId = H.intPaymentMethodID

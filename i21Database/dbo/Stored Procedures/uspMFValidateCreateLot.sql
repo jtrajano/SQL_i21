@@ -20,7 +20,7 @@
 	,@intMachineId int
 	,@ysnLotAlias bit=0
 	,@strLotAlias nvarchar(50)
-	,@ysnProductionOnly bit=0
+	,@intProductionTypeId bit=3
 	)
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -496,7 +496,7 @@ BEGIN TRY
 			RETURN
 		END
 
-		IF @ysnProductionOnly=0 and EXISTS (
+		IF @intProductionTypeId=3 and EXISTS (
 		SELECT *
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON SI.intRecipeItemId = ri.intRecipeItemId and ri.intWorkOrderId =SI.intWorkOrderId 
