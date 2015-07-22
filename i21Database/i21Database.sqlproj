@@ -2045,6 +2045,7 @@
     <Build Include="dbo\Views\vyuRKGetFutureSettlementPriceHeader.sql" />
     <Build Include="dbo\Views\vyuSMPortalPermission.sql" />
     <Build Include="dbo\Views\vyuSMMenuPermission.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleUpdate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
