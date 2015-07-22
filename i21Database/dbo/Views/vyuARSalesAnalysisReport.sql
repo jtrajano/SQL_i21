@@ -13,6 +13,7 @@ SELECT strRecordNumber
 	 , IC.intCategoryId
 	 , A.intEntitySalespersonId	 
 	 , A.strTransactionType
+	 , A.strType
 	 , A.dblPrice
 	 , A.dblTotal
 	 , C.strCustomerNumber
@@ -51,6 +52,7 @@ FROM
 	  , I.intCompanyLocationId	 
 	  , I.intEntitySalespersonId	 
 	  , I.strTransactionType
+	  , I.strType
 	  , ID.dblPrice
 	  , I.dblInvoiceTotal AS dblTotal
 	  , I.strBillToLocationName
@@ -79,6 +81,7 @@ SELECT SO.strSalesOrderNumber AS strRecordNumber
 	 , SO.intCompanyLocationId
 	 , SO.intEntitySalespersonId	 
 	 , SO.strTransactionType
+	 , SO.strType
 	 , SOD.dblPrice
 	 , SO.dblSalesOrderTotal AS dblTotal 
 	 , SO.strBillToLocationName
