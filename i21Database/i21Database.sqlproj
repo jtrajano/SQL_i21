@@ -2043,6 +2043,8 @@
     <Build Include="dbo\Views\vyuICGetAssemblyItem.sql" />
     <Build Include="dbo\Views\vyuAPRptCheckRegister.sql" />
     <Build Include="dbo\Views\vyuRKGetFutureSettlementPriceHeader.sql" />
+    <Build Include="dbo\Views\vyuSMPortalPermission.sql" />
+    <Build Include="dbo\Views\vyuSMMenuPermission.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
