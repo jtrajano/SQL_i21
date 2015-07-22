@@ -45,12 +45,8 @@
 				@NewCategory               INT,
 				@NewVendor                 INT,
 				@NewInventoryGroup         INT,
-				@NewQuantityCase           INT,
 				@NewCountCode              NVARCHAR(50),     
-				@NewItemSize               INT,
-				@NewItemUOM                INT,
 				@NewMinAge                 INT,
-				@NewItemType               NVARCHAR(1),     
 				@NewMinVendorOrderQty      DECIMAL(18,6),
 				@NewVendorSuggestedQty     DECIMAL(18,6),
 				@NewMinQtyOnHand           DECIMAL(18,6),
@@ -102,12 +98,8 @@
 				@NewCategory      =  NewCategory,
 				@NewVendor        =  NewVendor,
 				@NewInventoryGroup = NewInventoryGroup,
-				@NewQuantityCase  =  NewQuantityCase,
 				@NewCountCode       = NewCountCode,
-				@NewItemSize        = NewItemSize,
-				@NewItemUOM         = NewItemUOM,
 				@NewMinAge          = NewMinAge,
-				@NewItemType        = NewItemType,
 				@NewMinVendorOrderQty = NewMinVendorOrderQty,
 				@NewVendorSuggestedQty = NewVendorSuggestedQty,
 				@NewMinQtyOnHand     = NewMinQtyOnHand,
@@ -158,12 +150,8 @@
 				NewCategory               INT,
 				NewVendor                 INT,
 				NewInventoryGroup         INT,
-				NewQuantityCase           INT,
 				NewCountCode              NVARCHAR(50),     
-				NewItemSize               INT,
-				NewItemUOM                INT,
 				NewMinAge                 INT,
-				NewItemType               NVARCHAR(1),     
 				NewMinVendorOrderQty      DECIMAL(18,6),
 				NewVendorSuggestedQty     DECIMAL(18,6),
 				NewMinQtyOnHand           DECIMAL(18,6),
@@ -204,7 +192,8 @@ IF(@UpdateReportTable != 'Y')
 			   OR (@NewFamily IS NOT NULL) OR (@NewClass IS NOT NULL)
 			   OR (@NewProductCode IS NOT NULL) OR (@NewVendor IS NOT NULL)
 			   OR (@NewMinAge IS NOT NULL) OR (@NewMinVendorOrderQty IS NOT NULL)
-			   OR (@NewVendorSuggestedQty IS NOT NULL) OR (@NewInventoryGroup IS NOT NULL))
+			   OR (@NewVendorSuggestedQty IS NOT NULL) OR (@NewInventoryGroup IS NOT NULL)
+			   OR (@NewBinLocation IS NOT NULL) OR (@NewMinQtyOnHand IS NOT NULL))
       BEGIN 
 
           SET @SQL1 = ' update tblICItemLocation set '
@@ -599,6 +588,50 @@ IF(@UpdateReportTable != 'Y')
 				  set @SQL1 = @SQL1 + ' intCountGroupId = ''' + LTRIM(@NewInventoryGroup) + '''' 
 			 END
 
+
+			 IF(@NewBinLocation IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL)
+			   OR (@QuantityRequiredysn IS NOT NULL) OR (@ScaleItemysn IS NOT NULL)
+			   OR (@FoodStampableysn IS NOT NULL) OR (@Returnableysn IS NOT NULL)
+			   OR (@Saleableysn IS NOT NULL) OR (@ID1Requiredysn IS NOT NULL)
+			   OR (@ID2Requiredysn IS NOT NULL) OR (@PromotionalItemysn IS NOT NULL)
+			   OR (@PrePricedysn IS NOT NULL) OR (@BlueLaw1ysn IS NOT NULL)
+			   OR (@BlueLaw2ysn IS NOT NULL) OR(@CountedDailyysn IS NOT NULL)
+			   OR (@Counted IS NOT NULL) OR (@CountSerialysn IS NOT NULL)
+			   OR (@NewFamily IS NOT NULL) OR (@NewClass IS NOT NULL)
+			   OR (@NewProductCode IS NOT NULL) OR (@NewVendor IS NOT NULL)
+			   OR (@NewMinAge IS NOT NULL) OR (@NewMinVendorOrderQty IS NOT NULL)
+			   OR (@NewVendorSuggestedQty IS NOT NULL) OR (@NewInventoryGroup IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , intStorageLocationId = ''' + LTRIM(@NewBinLocation) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' intStorageLocationId = ''' + LTRIM(@NewBinLocation) + '''' 
+			 END
+
+			 IF(@NewMinQtyOnHand IS NOT NULL)
+		     BEGIN
+			   if ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
+			   OR (@TaxFlag3ysn IS NOT NULL) OR (@TaxFlag4ysn IS NOT NULL) 
+			   OR (@DepositRequiredysn IS NOT NULL) OR (@DepositPLU IS NOT NULL)
+			   OR (@QuantityRequiredysn IS NOT NULL) OR (@ScaleItemysn IS NOT NULL)
+			   OR (@FoodStampableysn IS NOT NULL) OR (@Returnableysn IS NOT NULL)
+			   OR (@Saleableysn IS NOT NULL) OR (@ID1Requiredysn IS NOT NULL)
+			   OR (@ID2Requiredysn IS NOT NULL) OR (@PromotionalItemysn IS NOT NULL)
+			   OR (@PrePricedysn IS NOT NULL) OR (@BlueLaw1ysn IS NOT NULL)
+			   OR (@BlueLaw2ysn IS NOT NULL) OR(@CountedDailyysn IS NOT NULL)
+			   OR (@Counted IS NOT NULL) OR (@CountSerialysn IS NOT NULL)
+			   OR (@NewFamily IS NOT NULL) OR (@NewClass IS NOT NULL)
+			   OR (@NewProductCode IS NOT NULL) OR (@NewVendor IS NOT NULL)
+			   OR (@NewMinAge IS NOT NULL) OR (@NewMinVendorOrderQty IS NOT NULL)
+			   OR (@NewVendorSuggestedQty IS NOT NULL) OR (@NewInventoryGroup IS NOT NULL)
+			   OR (@NewBinLocation IS NOT NULL))   
+ 				  set @SQL1 = @SQL1 + ' , dblReorderPoint = ''' + LTRIM(@NewMinQtyOnHand) + ''''
+			   else
+				  set @SQL1 = @SQL1 + ' dblReorderPoint = ''' + LTRIM(@NewMinQtyOnHand) + '''' 
+			 END
+
 			 SET @SQL1 = @SQL1 + ' where 1=1 ' 
 
 			 IF (@Location IS NOT NULL)
@@ -662,7 +695,6 @@ IF(@UpdateReportTable != 'Y')
 					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
 		        END     
 
-
 		  EXEC (@SQL1)
 
 		  SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   
@@ -671,7 +703,9 @@ END
 
 IF(@UpdateReportTable != 'Y')
 BEGIN
-        
+    IF ((@NewCategory IS NOT NULL)
+	OR (@NewCountCode IS NOT NULL))    
+    BEGIN    
 		 SET @SQL1 = ' update tblICItem set '
 		 
          IF(@NewCategory IS NOT NULL)
@@ -752,8 +786,248 @@ BEGIN
 		      END     
 
           EXEC (@SQL1)
-		  
-		  SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   
+		  SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
+	END
+END
+
+IF(@UpdateReportTable != 'Y')
+BEGIN
+      IF ((@NewGLPurchaseAccount IS NOT NULL)
+	  OR (@NewGLSalesAccount IS NOT NULL)    
+	  OR (@NewGLVarianceAccount IS NOT NULL))
+	  BEGIN
+	          
+	         IF (@NewGLPurchaseAccount IS NOT NULL)
+			 BEGIN
+			    
+				SET @SQL1 = ' update tblICItemAccount set '  
+
+			    SET @SQL1 = @SQL1 + ' intAccountId = ''' + LTRIM(@NewGLPurchaseAccount) + '''' 
+
+				SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+		        IF (@Location IS NOT NULL)
+		        BEGIN
+	      	      SET @SQL1 = @SQL1 +  ' and tblICItemAccount.intItemId IN 
+			              (select intItemId from tblICItemLocation where intLocationId IN
+					      (' + CAST(@Location as NVARCHAR) + ')' + ')'
+   		        END
+
+		        IF (@Vendor IS NOT NULL)
+		        BEGIN 
+		            SET @SQL1 = @SQL1 +  ' and tblICItemAccount.intItemId IN 
+			              (select intItemId from tblICItemLocation where intVendorId IN
+					       (' + CAST(@Vendor as NVARCHAR) + ')' + ')'
+		        END
+
+                IF (@Category IS NOT NULL)
+		        BEGIN
+     	            SET @SQL1 = @SQL1 +  ' and  tblICItemAccount.intCategoryId
+		             	       IN (' + CAST(@Category as NVARCHAR) + ')' 
+		        END
+
+                IF (@Family IS NOT NULL)
+		        BEGIN
+  		           SET @SQL1 = @SQL1 +  ' and tblICItemAccount.intItemId IN 
+			              (select intItemId from tblICItemLocation where intFamilyId IN
+					       (' + CAST(@Family as NVARCHAR) + ')' + ')'
+		        END
+
+                IF (@Class IS NOT NULL)
+		        BEGIN
+  			       SET @SQL1 = @SQL1 +  ' and tblICItemAccount.intItemId IN 
+			           (select intItemId from tblICItemLocation where intClassId IN
+					    (' + CAST(@Class as NVARCHAR) + ')' + ')'
+		        END
+		    
+                IF (@UpcCode IS NOT NULL)
+		        BEGIN
+		           SET @SQL1 = @SQL1 +  ' and tblICItemAccount.intItemId  
+                        IN (select intItemId from tblICItemUOM where  intItemUOMId IN
+				   	    (' + CAST(@UpcCode as NVARCHAR) + ')' + ')'
+			    END
+
+                IF ((@Description IS NOT NULL)
+		        and (@Description != ''))
+		 	    BEGIN
+			      SET @SQL1 = @SQL1 +  ' and tblICItemAccount.strDescription like ''%' + LTRIM(@Description) + '%'' '
+			    END
+
+                IF (@PriceBetween1 IS NOT NULL) 
+		        BEGIN
+			      SET @SQL1 = @SQL1 +  ' and tblICItemAccount.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+		        END 
+		      
+                IF (@PriceBetween2 IS NOT NULL) 
+		        BEGIN
+			        set @SQL1 = @SQL1 +  ' and tblICItemAccount.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+		        END     
+
+				SET @SQL1 = @SQL1 + ' and  intAccountCategoryId = 30 '
+
+                EXEC (@SQL1)
+				
+		        SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
+			 END
+
+             IF (@NewGLSalesAccount IS NOT NULL)
+			 BEGIN
+			    
+				SET @SQL1 = ' update tblICItemAccount set '  
+
+			    SET @SQL1 = @SQL1 + ' intAccountId = ''' + LTRIM(@NewGLSalesAccount) + '''' 
+
+				SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+		        IF (@Location IS NOT NULL)
+		        BEGIN
+	      	      SET @SQL1 = @SQL1 +  ' and tblICItemAccount.intItemId IN 
+			              (select intItemId from tblICItemLocation where intLocationId IN
+					      (' + CAST(@Location as NVARCHAR) + ')' + ')'
+   		        END
+
+		        IF (@Vendor IS NOT NULL)
+		        BEGIN 
+		            SET @SQL1 = @SQL1 +  ' and tblICItemAccount.intItemId IN 
+			              (select intItemId from tblICItemLocation where intVendorId IN
+					       (' + CAST(@Vendor as NVARCHAR) + ')' + ')'
+		        END
+
+                IF (@Category IS NOT NULL)
+		        BEGIN
+     	            SET @SQL1 = @SQL1 +  ' and  tblICItemAccount.intCategoryId
+		             	       IN (' + CAST(@Category as NVARCHAR) + ')' 
+		        END
+
+                IF (@Family IS NOT NULL)
+		        BEGIN
+  		           SET @SQL1 = @SQL1 +  ' and tblICItemAccount.intItemId IN 
+			              (select intItemId from tblICItemLocation where intFamilyId IN
+					       (' + CAST(@Family as NVARCHAR) + ')' + ')'
+		        END
+
+                IF (@Class IS NOT NULL)
+		        BEGIN
+  			       SET @SQL1 = @SQL1 +  ' and tblICItemAccount.intItemId IN 
+			           (select intItemId from tblICItemLocation where intClassId IN
+					    (' + CAST(@Class as NVARCHAR) + ')' + ')'
+		        END
+		    
+                IF (@UpcCode IS NOT NULL)
+		        BEGIN
+		           SET @SQL1 = @SQL1 +  ' and tblICItemAccount.intItemId  
+                        IN (select intItemId from tblICItemUOM where  intItemUOMId IN
+				   	    (' + CAST(@UpcCode as NVARCHAR) + ')' + ')'
+			    END
+
+                IF ((@Description IS NOT NULL)
+		        and (@Description != ''))
+		 	    BEGIN
+			      SET @SQL1 = @SQL1 +  ' and tblICItemAccount.strDescription like ''%' + LTRIM(@Description) + '%'' '
+			    END
+
+                IF (@PriceBetween1 IS NOT NULL) 
+		        BEGIN
+			      SET @SQL1 = @SQL1 +  ' and tblICItemAccount.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+		        END 
+		      
+                IF (@PriceBetween2 IS NOT NULL) 
+		        BEGIN
+			        set @SQL1 = @SQL1 +  ' and tblICItemAccount.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+		        END     
+
+				SET @SQL1 = @SQL1 + ' and  intAccountCategoryId = 33 '
+
+                EXEC (@SQL1)
+				
+		        SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
+			 END
+             
+			 IF (@NewGLVarianceAccount IS NOT NULL)
+			 BEGIN
+			    
+				SET @SQL1 = ' update tblICItemAccount set '  
+
+			    SET @SQL1 = @SQL1 + ' intAccountId = ''' + LTRIM(@NewGLVarianceAccount) + '''' 
+
+				SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+		        IF (@Location IS NOT NULL)
+		        BEGIN
+	      	      SET @SQL1 = @SQL1 +  ' and tblICItemAccount.intItemId IN 
+			              (select intItemId from tblICItemLocation where intLocationId IN
+					      (' + CAST(@Location as NVARCHAR) + ')' + ')'
+   		        END
+
+		        IF (@Vendor IS NOT NULL)
+		        BEGIN 
+		            SET @SQL1 = @SQL1 +  ' and tblICItemAccount.intItemId IN 
+			              (select intItemId from tblICItemLocation where intVendorId IN
+					       (' + CAST(@Vendor as NVARCHAR) + ')' + ')'
+		        END
+
+                IF (@Category IS NOT NULL)
+		        BEGIN
+     	            SET @SQL1 = @SQL1 +  ' and  tblICItemAccount.intCategoryId
+		             	       IN (' + CAST(@Category as NVARCHAR) + ')' 
+		        END
+
+                IF (@Family IS NOT NULL)
+		        BEGIN
+  		           SET @SQL1 = @SQL1 +  ' and tblICItemAccount.intItemId IN 
+			              (select intItemId from tblICItemLocation where intFamilyId IN
+					       (' + CAST(@Family as NVARCHAR) + ')' + ')'
+		        END
+
+                IF (@Class IS NOT NULL)
+		        BEGIN
+  			       SET @SQL1 = @SQL1 +  ' and tblICItemAccount.intItemId IN 
+			           (select intItemId from tblICItemLocation where intClassId IN
+					    (' + CAST(@Class as NVARCHAR) + ')' + ')'
+		        END
+		    
+                IF (@UpcCode IS NOT NULL)
+		        BEGIN
+		           SET @SQL1 = @SQL1 +  ' and tblICItemAccount.intItemId  
+                        IN (select intItemId from tblICItemUOM where  intItemUOMId IN
+				   	    (' + CAST(@UpcCode as NVARCHAR) + ')' + ')'
+			    END
+
+                IF ((@Description IS NOT NULL)
+		        and (@Description != ''))
+		 	    BEGIN
+			      SET @SQL1 = @SQL1 +  ' and tblICItemAccount.strDescription like ''%' + LTRIM(@Description) + '%'' '
+			    END
+
+                IF (@PriceBetween1 IS NOT NULL) 
+		        BEGIN
+			      SET @SQL1 = @SQL1 +  ' and tblICItemAccount.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice >= 
+					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+		        END 
+		      
+                IF (@PriceBetween2 IS NOT NULL) 
+		        BEGIN
+			        set @SQL1 = @SQL1 +  ' and tblICItemAccount.intItemId IN 
+					   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+		        END     
+
+				SET @SQL1 = @SQL1 + ' and  intAccountCategoryId = 40 '
+
+                EXEC (@SQL1)
+				
+		        SELECT  @UpdateCount =   @UpdateCount + (@@ROWCOUNT)   	  
+			 END
+	  END
 END
   
 IF (@UpdateReportTable = 'Y')
