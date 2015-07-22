@@ -17,6 +17,7 @@ BEGIN TRY
 		,@intManufacturingProcessId int
 		,@intLocationId int
 		,@strAttributeValue nvarchar(50)
+		,@strCycleCountMandatory nvarchar(50)
 		,@intExecutionOrder INT
 		,@intManufacturingCellId INT
 		,@dtmPlannedDate DATETIME
@@ -78,13 +79,11 @@ BEGIN TRY
 
 	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Is Cycle Count Mandatory'
 
-	Select @strAttributeValue=NULL
-
-	Select @strAttributeValue=strAttributeValue
+	Select @strCycleCountMandatory=strAttributeValue
 	From tblMFManufacturingProcessAttribute
 	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
 
-	If @strAttributeValue='True' and not exists(Select *from tblMFProcessCycleCountSession  Where intWorkOrderId=@intWorkOrderId) 
+	If @strCycleCountMandatory='True' and not exists(Select *from tblMFProcessCycleCountSession  Where intWorkOrderId=@intWorkOrderId) 
 		and (Exists(SELECT *
 			FROM dbo.tblMFWorkOrderProducedLot
 			WHERE intWorkOrderId = @intWorkOrderId) 
@@ -102,6 +101,11 @@ BEGIN TRY
 
 	IF @intTransactionCount = 0
 	BEGIN TRANSACTION
+
+	IF @strCycleCountMandatory='False'
+	BEGIN
+		EXEC dbo.uspMFPostWorkOrder @strXML=@strXML
+	END
 
 	DECLARE @Lot TABLE (
 		RecordKey INT identity(1, 1)
