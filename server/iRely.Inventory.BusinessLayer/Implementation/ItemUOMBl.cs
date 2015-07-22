@@ -81,5 +81,34 @@ namespace iRely.Inventory.BusinessLayer
                 total = await query.CountAsync()
             };
         }
+
+        public async Task<SearchResult> GetWeightVolumeUOMs(GetParameter param)
+        {
+            var query = (
+                    from ItemUOM in _db.GetQuery<tblICItemUOM>()
+                    join UOM in _db.GetQuery<tblICUnitMeasure>()
+                        on ItemUOM.intUnitMeasureId equals UOM.intUnitMeasureId
+                    where UOM.strUnitType == "Weight" || UOM.strUnitType == "Volume"
+                    select new WeightUOMVm
+                    {
+                        intItemUOMId = ItemUOM.intItemUOMId,
+                        strUnitMeasure = UOM.strUnitMeasure,
+                        strUnitType = UOM.strUnitType,
+                        intItemId = ItemUOM.intItemId,
+                        dblUnitQty = ItemUOM.dblUnitQty ?? 0,
+                        ysnStockUnit = ItemUOM.ysnStockUnit,
+                        ysnAllowPurchase = ItemUOM.ysnAllowPurchase,
+                        ysnAllowSale = ItemUOM.ysnAllowSale
+                    }
+                )
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intItemUOMId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
     }
 }

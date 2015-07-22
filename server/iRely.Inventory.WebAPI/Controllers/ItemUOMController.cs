@@ -28,5 +28,11 @@ namespace iRely.Inventory.WebApi
             return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetWeightUOMs(param));
         }
 
+        [HttpGet]
+        public async Task<HttpResponseMessage> GetWeightVolumeUOMs(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetWeightVolumeUOMs(param));
+        }
+
     }
 }

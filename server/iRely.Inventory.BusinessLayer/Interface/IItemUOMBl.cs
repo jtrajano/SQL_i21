@@ -12,5 +12,6 @@ namespace iRely.Inventory.BusinessLayer
     public interface IItemUOMBl : IBusinessLayer<tblICItemUOM>
     {
         Task<SearchResult> GetWeightUOMs(GetParameter param);
+        Task<SearchResult> GetWeightVolumeUOMs(GetParameter param);
     }
 }
