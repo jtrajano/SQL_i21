@@ -15,7 +15,7 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewModel', {
             type: 'icbufferedassemblyitem',
             proxy: {
                 extraParams: {
-                    include: 'tblICItemAssemblies.AssemblyItem, tblICItemAssemblies.tblICItemUOM.tblICUnitMeasure'
+                    include: 'tblICItemAssemblies.vyuICGetAssemblyItem'
                 },
                 type: 'rest',
                 api: {

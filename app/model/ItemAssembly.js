@@ -20,7 +20,7 @@ Ext.define('Inventory.model.ItemAssembly', {
                     storeConfig: {
                         remoteFilter: true,
                         proxy: {
-                            extraParams: { include: 'AssemblyItem, tblICItemUOM.tblICUnitMeasure' },
+                            extraParams: { include: 'vyuICGetAssemblyItem' },
                             type: 'rest',
                             api: {
                                 read: '../Inventory/api/ItemAssembly/Get'

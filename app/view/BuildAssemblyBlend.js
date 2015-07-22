@@ -520,10 +520,7 @@ Ext.define('Inventory.view.BuildAssemblyBlend', {
                             itemId: 'colCost',
                             width: 85,
                             align: 'right',
-                            text: 'Cost',
-                            editor: {
-                                xtype: 'numeric'
-                            }
+                            text: 'Cost'
                         }
                     ],
                     viewConfig: {

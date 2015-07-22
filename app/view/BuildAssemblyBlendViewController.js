@@ -330,6 +330,7 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
         var record = records[0];
 
         if (current) {
+            var totalCost = 0;
             var assemblyItem = record.data.tblICItemAssemblies;
             if (assemblyItem) {
                 Ext.Array.each(assemblyItem, function(row) {
@@ -341,11 +342,13 @@ Ext.define('Inventory.view.BuildAssemblyBlendViewController', {
                     newRecord.set('dblQuantity', row.dblQuantity);
                     newRecord.set('intItemUOMId', row.intItemUnitMeasureId);
                     newRecord.set('strUnitMeasure', row.strUnitMeasure);
-                    newRecord.set('dblCost', row.dblCost);
+                    newRecord.set('dblCost', (row.dblQuantity * row.dblLastCost));
                     newRecord.set('intSort', row.intSort);
                     current.tblICBuildAssemblyDetails().add(newRecord);
+                    totalCost += (row.dblQuantity * row.dblLastCost);
                 });
             }
+            current.set('dblCost', totalCost);
         }
     },
 
