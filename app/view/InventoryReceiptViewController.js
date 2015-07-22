@@ -1419,7 +1419,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         current.set('intUnitMeasureId', po.get('intItemUOMId'));
                         current.set('strUnitMeasure', po.get('strItemUOM'));
                         current.set('strOrderUOM', po.get('strItemUOM'));
-                        current.set('dblUnitCost', po.get('dblCost'));
+                        current.set('dblUnitCost', po.get('dblCashPrice'));
                         current.set('dblLineTotal', po.get('dblTotal'));
                         current.set('strLotTracking', po.get('strLotTracking'));
                         current.set('intCommodityId', po.get('intCommodityId'));
@@ -1657,6 +1657,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         flex: 1
                     },
                     {
+                        dataIndex: 'intContractSeq',
+                        dataType: 'string',
+                        text: 'Sequence',
+                        flex: 1
+                    },
+                    {
                         dataIndex: 'strItemNo',
                         dataType: 'string',
                         text: 'Item No',
@@ -1669,6 +1675,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         flex: 1
                     },
                     {
+                        dataIndex: 'dblCashPrice',
+                        dataType: 'float',
+                        text: 'Cash Price',
+                        flex: 1
+                    },
+                    {
                         dataIndex: 'dblDetailQuantity',
                         dataType: 'float',
                         text: 'Ordered Qty',
@@ -1678,6 +1690,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         dataIndex: 'dblBalance',
                         dataType: 'float',
                         text: 'Balance Qty',
+                        flex: 1
+                    },
+                    {
+                        dataIndex: 'dblAvailableQty',
+                        dataType: 'float',
+                        text: 'Available Qty',
                         flex: 1
                     },
                     {
@@ -1720,6 +1738,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 displayField: 'intContractNumber',
                 valueField: 'intContractNumber',
                 store: win.viewModel.storeInfo.purchaseContract,
+                pickerWidth: 800,
                 defaultFilters: [{
                     column: 'strContractType',
                     value: 'Purchase',
