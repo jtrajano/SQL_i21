@@ -2042,6 +2042,7 @@
     <Build Include="dbo\Stored Procedures\uspMFValidateCreateWorkOrder.sql" />
     <Build Include="dbo\Views\vyuICGetAssemblyItem.sql" />
     <Build Include="dbo\Views\vyuAPRptCheckRegister.sql" />
+    <Build Include="dbo\Views\vyuRKGetFutureSettlementPriceHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
