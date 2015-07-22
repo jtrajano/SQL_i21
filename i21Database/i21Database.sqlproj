@@ -2040,6 +2040,7 @@
     <None Include="Scripts\Post-Deployment\TM\Tables\tblTMCOBOLWRITE.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\8_UpdateInvoiceType.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateCreateWorkOrder.sql" />
+    <Build Include="dbo\Views\vyuICGetAssemblyItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
