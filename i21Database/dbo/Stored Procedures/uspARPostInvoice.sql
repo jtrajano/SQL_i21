@@ -437,6 +437,71 @@ IF @recap = 0
 				WHERE
 					(D.intAccountId IS NULL OR D.intAccountId = 0)
 					AND I.strType IN ('Non-Inventory','Service','Other Charge')
+					
+					
+				BEGIN TRY
+					DECLARE @TankDelivery TABLE (
+							intInvoiceId INT,
+							UNIQUE (intInvoiceId));
+							
+					INSERT INTO @TankDelivery					
+					SELECT DISTINCT
+						I.intInvoiceId
+					FROM
+						tblARInvoice I
+					INNER JOIN
+						tblARInvoiceDetail D
+							ON I.intInvoiceId = D.intInvoiceId		
+					INNER JOIN
+						tblTMSite TMS
+							ON D.intSiteId = TMS.intSiteID 
+					INNER JOIN 
+						@PostInvoiceData B
+							ON I.intInvoiceId = B.intInvoiceId
+							
+					WHILE EXISTS(SELECT TOP 1 NULL FROM @TankDelivery ORDER BY intInvoiceId)
+						BEGIN
+						
+							DECLARE  @intInvoiceId INT
+									,@ResultLog NVARCHAR(MAX)
+									
+							SET @ResultLog = 'OK'
+							
+							SELECT TOP 1 @intInvoiceId = intInvoiceId FROM @TankDelivery ORDER BY intInvoiceId
+
+							EXEC dbo.uspTMValidateInvoiceForSync @intInvoiceId, @ResultLog OUT
+											
+							DELETE FROM @TankDelivery WHERE intInvoiceId = @intInvoiceId
+							
+							IF NOT(@ResultLog = 'OK' OR RTRIM(LTRIM(@ResultLog)) = '')
+								BEGIN
+									INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+									SELECT
+										@ResultLog,
+										A.strTransactionType,
+										A.strInvoiceNumber,
+										@batchId,
+										A.intInvoiceId
+									FROM 
+										tblARInvoice A 
+									INNER JOIN 
+										@PostInvoiceData B
+											ON A.intInvoiceId = B.intInvoiceId
+									WHERE
+										A.intInvoiceId = @intInvoiceId									
+								END														
+						END 							
+							
+															
+				END TRY
+				BEGIN CATCH
+					ROLLBACK TRAN @TransactionName
+					BEGIN TRANSACTION
+					INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+					SELECT ERROR_MESSAGE(), @transType, @param, @batchId, 0
+					COMMIT TRANSACTION
+					GOTO Post_Exit
+				END CATCH
 
 
 			END 
@@ -479,7 +544,7 @@ IF @recap = 0
 				WHERE
 					ISNULL(dbo.isOpenAccountingDate(A.dtmDate), 0) = 0
 
-			END
+			END			
 		
 		SELECT @totalInvalid = COUNT(*) FROM @InvalidInvoiceData
 
@@ -1904,6 +1969,52 @@ IF @recap = 0
 					,dtmBilled = GETDATE()
 				WHERE
 					intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
+					
+				BEGIN TRY
+					DECLARE @TankDeliveryForSync TABLE (
+							intInvoiceId INT,
+							UNIQUE (intInvoiceId));
+							
+					INSERT INTO @TankDeliveryForSync					
+					SELECT DISTINCT
+						I.intInvoiceId
+					FROM
+						tblARInvoice I
+					INNER JOIN
+						tblARInvoiceDetail D
+							ON I.intInvoiceId = D.intInvoiceId		
+					INNER JOIN
+						tblTMSite TMS
+							ON D.intSiteId = TMS.intSiteID 
+					INNER JOIN 
+						@PostInvoiceData B
+							ON I.intInvoiceId = B.intInvoiceId
+							
+					WHILE EXISTS(SELECT TOP 1 NULL FROM @TankDeliveryForSync ORDER BY intInvoiceId)
+						BEGIN
+						
+							DECLARE  @intInvoiceForSyncId INT
+									,@ResultLogForSync NVARCHAR(MAX)
+									
+							
+							SELECT TOP 1 @intInvoiceForSyncId = intInvoiceId FROM @TankDeliveryForSync ORDER BY intInvoiceId
+
+							EXEC dbo.uspTMSyncInvoiceToDeliveryHistory @intInvoiceForSyncId,@userId, @ResultLogForSync OUT
+											
+							DELETE FROM @TankDeliveryForSync WHERE intInvoiceId = @intInvoiceForSyncId
+																											
+						END 							
+							
+															
+				END TRY
+				BEGIN CATCH
+					ROLLBACK TRAN @TransactionName
+					BEGIN TRANSACTION
+					INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+					SELECT ERROR_MESSAGE(), @transType, @param, @batchId, 0
+					COMMIT TRANSACTION
+					GOTO Post_Exit
+				END CATCH
 				
 			END
 		END TRY
@@ -1960,7 +2071,7 @@ IF @recap = 0
 			SELECT ERROR_MESSAGE(), @transType, @param, @batchId, 0
 			COMMIT TRANSACTION
 			GOTO Post_Exit
-		END CATCH				
+		END CATCH									
 			
 	END
 	
