@@ -34,6 +34,8 @@ DECLARE @intStorageLocationId AS INT
 DECLARE @dblRunningBalance AS DECIMAL (13,3)
 DECLARE @strUserName AS NVARCHAR (50)
 DECLARE @ysnDPStorage BIT
+DECLARE @LineItems AS ScaleTransactionTableType
+DECLARE @dblRemainingUnits AS DECIMAL (13,3)
 
 
 DECLARE @ErrorMessage NVARCHAR(4000);
@@ -42,6 +44,7 @@ DECLARE @ErrorState INT;
 DECLARE @PostShipment INT = 1;
 
 DECLARE @ItemsForItemShipment AS ItemCostingTableType 
+DECLARE @ItemsForItemShipmentContract AS ItemCostingTableType
 
 DECLARE @SALES_CONTRACT AS NVARCHAR(50) = 'Sales Contract'
 		,@SALES_ORDER AS NVARCHAR(50) = 'SalesOrder'
@@ -96,53 +99,131 @@ BEGIN TRY
 			ORDER BY CS.intCustomerStorageId ASC
 			IF	ISNULL(@intStorageTicketId,0) = 0 AND @dblUnits > 0
 			BEGIN
-				INSERT INTO @ItemsForItemShipment (
-				intItemId
-				,intItemLocationId
-				,intItemUOMId
-				,dtmDate
-				,dblQty
-				,dblUOMQty
-				,dblCost
-				,dblSalesPrice
-				,intCurrencyId
-				,dblExchangeRate
-				,intTransactionId
-				,strTransactionId
-				,intTransactionTypeId
-				,intLotId
-				,intSubLocationId
-				,intStorageLocationId 
-				,ysnIsCustody
-				)
-				SELECT	intItemId = ScaleTicket.intItemId
-						,intLocationId = ItemLocation.intItemLocationId 
-						,intItemUOMId = ItemUOM.intItemUOMId
-						,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
-						,dblQty = @dblUnits 
-						,dblUOMQty = ItemUOM.dblUnitQty
-						,dblCost = ScaleTicket.dblUnitPrice + ScaleTicket.dblUnitBasis
-						,dblSalesPrice = 0
-						,intCurrencyId = ScaleTicket.intCurrencyId
-						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
-						,intTransactionId = ScaleTicket.intTicketId
-						,strTransactionId = ScaleTicket.intTicketNumber
-						,intTransactionTypeId = @intDirectType 
-						,intLotId = NULL 
-						,intSubLocationId = ScaleTicket.intSubLocationId
-						,intStorageLocationId = ScaleTicket.intStorageLocationId
-						,ysnIsCustody = 0
-				FROM	dbo.tblSCTicket ScaleTicket
-						INNER JOIN dbo.tblICItemUOM ItemUOM
-							ON ScaleTicket.intItemId = ItemUOM.intItemId
-							AND @intTicketItemUOMId = ItemUOM.intItemUOMId
-						INNER JOIN dbo.tblICItemLocation ItemLocation
-							ON ScaleTicket.intItemId = ItemLocation.intItemId
-							-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
-							AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
-							INNER JOIN dbo.tblICCommodityUnitMeasure TicketCommodityUOM On ScaleTicket.intCommodityId  = TicketCommodityUOM.intCommodityId
-						AND TicketCommodityUOM.ysnStockUnit = 1
-				WHERE	ScaleTicket.intTicketId = @intTicketId;
+				INSERT INTO @LineItems (
+						 intContractDetailId,
+						 dblUnitsDistributed,
+						 dblUnitsRemaining,
+						 dblCost)
+					EXEC dbo.uspCTUpdationFromTicketDistribution 
+						 @intTicketId
+						,@intEntityId
+						,@dblUnits
+						,NULL
+						,@intUserId
+						,0
+				UPDATE @LineItems set intTicketId = @intTicketId
+				SELECT TOP 1 @dblRemainingUnits = LI.dblUnitsRemaining FROM @LineItems LI
+				IF(@dblRemainingUnits IS NULL)
+				BEGIN
+				SET @dblRemainingUnits = @dblUnits
+				END
+				IF(@dblRemainingUnits != @dblUnits)
+				BEGIN
+						INSERT INTO @ItemsForItemShipmentContract (
+							intItemId
+							,intItemLocationId
+							,intItemUOMId
+							,dtmDate
+							,dblQty
+							,dblUOMQty
+							,dblCost
+							,dblSalesPrice
+							,intCurrencyId
+							,dblExchangeRate
+							,intTransactionId
+							,strTransactionId
+							,intTransactionTypeId
+							,intTransactionDetailId
+							,intLotId
+							,intSubLocationId
+							,intStorageLocationId 
+							,ysnIsCustody
+						)
+						EXEC dbo.uspSCGetScaleItemForItemShipment
+							 @intTicketId
+							,@strSourceType
+							,@intUserId
+							,@dblRemainingUnits
+							,0
+							,@intEntityId
+							,NULL
+							,'CNT'
+							,@LineItems
+
+							--select * from @ItemsForItemShipment
+
+						-- Validate the items to shipment 
+						EXEC dbo.uspICValidateProcessToInventoryShipment @ItemsForItemShipmentContract; 
+
+						---- Add the items into inventory shipment > sales order type. 
+						BEGIN 
+							EXEC dbo.uspSCAddScaleTicketToItemShipment 
+								  @intTicketId
+								 ,@intUserId
+								 ,@ItemsForItemShipmentContract
+								 ,@intEntityId
+								 ,1
+								 ,@InventoryShipmentId OUTPUT;
+						END
+
+						BEGIN 
+						SELECT	@strTransactionId = ship.strShipmentNumber
+						FROM	dbo.tblICInventoryShipment ship	        
+						WHERE	ship.intInventoryShipmentId = @InventoryShipmentId		
+						END
+
+						EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId, @intEntityId;
+					END
+				IF(@dblRemainingUnits > 0)
+				BEGIN
+						INSERT INTO @ItemsForItemShipment (
+							 intItemId
+							,intItemLocationId
+							,intItemUOMId
+							,dtmDate
+							,dblQty
+							,dblUOMQty
+							,dblCost
+							,dblSalesPrice
+							,intCurrencyId
+							,dblExchangeRate
+							,intTransactionId
+							,strTransactionId
+							,intTransactionTypeId
+							,intLotId
+							,intSubLocationId
+							,intStorageLocationId 
+							,ysnIsCustody
+							)
+							SELECT	intItemId = ScaleTicket.intItemId
+									,intLocationId = ItemLocation.intItemLocationId 
+									,intItemUOMId = ItemUOM.intItemUOMId
+									,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
+									,dblQty = @dblRemainingUnits 
+									,dblUOMQty = ItemUOM.dblUnitQty
+									,dblCost = ScaleTicket.dblUnitBasis + dblUnitPrice
+									,dblSalesPrice = 0
+									,intCurrencyId = ScaleTicket.intCurrencyId
+									,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
+									,intTransactionId = ScaleTicket.intTicketId
+									,strTransactionId = ScaleTicket.intTicketNumber
+									,intTransactionTypeId = @intDirectType 
+									,intLotId = NULL 
+									,intSubLocationId = ScaleTicket.intSubLocationId
+									,intStorageLocationId = ScaleTicket.intStorageLocationId
+									,ysnIsCustody = 0
+							FROM	dbo.tblSCTicket ScaleTicket
+									INNER JOIN dbo.tblICItemUOM ItemUOM
+										ON ScaleTicket.intItemId = ItemUOM.intItemId
+										AND @intTicketItemUOMId = ItemUOM.intItemUOMId
+									INNER JOIN dbo.tblICItemLocation ItemLocation
+										ON ScaleTicket.intItemId = ItemLocation.intItemId
+										-- Use "Ship To" because this is where the items in the PO will be delivered by the Vendor. 
+										AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+										INNER JOIN dbo.tblICCommodityUnitMeasure TicketCommodityUOM On ScaleTicket.intCommodityId  = TicketCommodityUOM.intCommodityId
+									AND TicketCommodityUOM.ysnStockUnit = 1
+							WHERE	ScaleTicket.intTicketId = @intTicketId
+					END
 				SET @dblUnits = 0
 				GOTO CONTINUEISH
 			END
@@ -384,7 +465,8 @@ BEGIN TRY
 	           ,[dblFreightDueRate]
 	           ,[ysnPrinted]
 	           ,[dblCurrencyRate]
-			   ,[intCurrencyId])
+			   ,[intCurrencyId]
+			   ,[intStorageTicketNumber])
 	SELECT 	[intConcurrencyId]		= 1
 			,[intEntityId]			= @intEntityId
 			,[intCommodityId]		= SC.intCommodityId
@@ -411,7 +493,8 @@ BEGIN TRY
 			,[dblFreightDueRate]= 0 
 			,[ysnPrinted]= 0 
 			,[dblCurrencyRate]= 1
-			,[intCurrencyId] = SC.intCurrencyId 
+			,[intCurrencyId] = SC.intCurrencyId
+			,[intStorageTicketNumber] = SC.intTicketNumber 
 	FROM	dbo.tblSCTicket SC
 	WHERE	SC.intTicketId = @intTicketId
 
@@ -456,38 +539,46 @@ BEGIN TRY
 	
 	BEGIN
 		SET @intHoldCustomerStorageId = NULL
-		select @intHoldCustomerStorageId = SD.intCustomerStorageId from tblGRStorageDiscount SD 
-		where intCustomerStorageId = @intCustomerStorageId
+		select @intHoldCustomerStorageId = SD.intTicketFileId from tblQMTicketDiscount SD 
+		where SD.intTicketFileId = @intCustomerStorageId
 	END
 	
 	if @intHoldCustomerStorageId is NULL
 	BEGIN
-		INSERT INTO [dbo].[tblGRStorageDiscount]
-	           ([intConcurrencyId]
-	           ,[intCustomerStorageId]
-	           ,[strDiscountCode]
-	           ,[dblGradeReading]
-	           ,[strCalcMethod]
-	           ,[dblDiscountAmount]
-	           ,[strShrinkWhat]
-	           ,[dblShrinkPercent]
-	           ,[dblDiscountDue]
-	           ,[dblDiscountPaid]
-	           ,[dtmDiscountPaidDate]
-			   ,[intDiscountScheduleCodeId])
+		INSERT INTO [dbo].[tblQMTicketDiscount]
+           ([intConcurrencyId]
+           ,[strDiscountCode]
+           ,[strDiscountCodeDescription]
+           ,[dblGradeReading]
+           ,[strCalcMethod]
+           ,[strShrinkWhat]
+           ,[dblShrinkPercent]
+           ,[dblDiscountAmount]
+           ,[dblDiscountDue]
+           ,[dblDiscountPaid]
+           ,[ysnGraderAutoEntry]
+           ,[intDiscountScheduleCodeId]
+           ,[dtmDiscountPaidDate]
+           ,[intTicketId]
+           ,[intTicketFileId]
+           ,[strSourceType])
 		SELECT	 [intConcurrencyId]= 1
-			,[intCustomerStorageId]= @intCustomerStorageId
-			,[strDiscountCode]= SD.strDiscountCode
-			,[dblGradeReading]= SD.dblGradeReading
-			,[strCalcMethod]= SD.strCalcMethod
-			,[dblDiscountAmount]= SD.dblDiscountAmount
-			,[strShrinkWhat]= SD.strShrinkWhat
-			,[dblShrinkPercent]= SD.dblShrinkPercent
-			,[dblDiscountDue]= SD.dblDiscountAmount
-			,[dblDiscountPaid]=	0
-			,[dtmDiscountPaidDate] = NULL
-			,[intDiscountScheduleCodeId] = SD.intDiscountScheduleCodeId
-		FROM	dbo.tblSCTicketDiscount SD
+           ,[strDiscountCode] = SD.[strDiscountCode]
+           ,[strDiscountCodeDescription]= SD.[strDiscountCodeDescription]
+           ,[dblGradeReading]= SD.[dblGradeReading]
+           ,[strCalcMethod]= SD.[strCalcMethod]
+           ,[strShrinkWhat]= SD.[strShrinkWhat]
+           ,[dblShrinkPercent]= SD.[dblShrinkPercent]
+           ,[dblDiscountAmount]= SD.[dblDiscountAmount]
+           ,[dblDiscountDue]= SD.[dblDiscountDue]
+           ,[dblDiscountPaid]= SD.[dblDiscountPaid]
+           ,[ysnGraderAutoEntry]= SD.[ysnGraderAutoEntry]
+           ,[intDiscountScheduleCodeId]= SD.[intDiscountScheduleCodeId]
+           ,[dtmDiscountPaidDate]= SD.[dtmDiscountPaidDate]
+           ,[intTicketId]= SD.[intTicketId]
+           ,[intTicketFileId]= @intCustomerStorageId
+           ,[strSourceType]= 'Storage'
+		FROM	dbo.[tblQMTicketDiscount] SD
 		WHERE	SD.intTicketId = @intTicketId
 	END
 	

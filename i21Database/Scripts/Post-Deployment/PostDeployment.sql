@@ -28,6 +28,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\DefaultData\12_ReminderList.sql
 :r .\SM\DefaultData\13_ShortcutKey.sql
 :r .\SM\DefaultData\14_CompanyPreference.sql
+:r .\SM\DefaultData\15_Module.sql
 :r .\SM\CustomField.sql
 :r .\SM\SMDataMigrations.SQL
 :r .\SM\SMDataFixes.SQL
@@ -50,6 +51,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TM\DefaultData\8_WorkToDoItem.sql
 :r .\TM\DefaultData\9_WorkCloseReason.sql
 :r .\TM\DefaultData\10_RegulatorType.sql
+:r .\TM\Tables\tblTMCOBOLWRITE.sql
+
 ----TM Reports
 :r .\TM\Reports\FieldSelection\DeliveryFill.sql
 :r .\TM\Reports\Layout\DeliveryFill.sql
@@ -121,6 +124,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AR\DefaultData\5_UpdateOrderStatus.sql
 :r .\AR\DefaultData\6_UpdateCustomerShipBillTo.sql
 :r .\AR\DefaultData\7_UpdateInvoiceOrderSalesperson.sql
+:r .\AR\DefaultData\8_UpdateInvoiceType.sql
 
 --Accounts Payable
 --:r .\AP\RestoreVendorId.sql
@@ -137,6 +141,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdateApprovalRecords.sql
 
 -- Inventory 
+:r .\IC\00_RequiredDataFix.sql 
 :r .\IC\01_InventoryTransactionTypes.sql 
 :r .\IC\02_MaterialNMFC.sql 
 :r .\IC\03_DefaultData.sql 

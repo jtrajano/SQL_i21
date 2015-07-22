@@ -2,6 +2,7 @@
 	@intLocationId INT
 	,@strContainerType NVARCHAR(MAX)
 	,@strContainerId NVARCHAR(50) = '%'
+	,@intContainerId int=0
 	)
 AS
 BEGIN
@@ -15,4 +16,5 @@ BEGIN
 			FROM [dbo].[fnSplitString](@strContainerType, ',')
 			)
 		AND C.strContainerId LIKE @strContainerId + '%'
+		AND C.intContainerId =(CASE WHEN @intContainerId >0 THEN @intContainerId ELSE C.intContainerId END)
 END

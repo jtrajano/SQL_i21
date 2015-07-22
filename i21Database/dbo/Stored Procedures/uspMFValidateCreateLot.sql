@@ -20,7 +20,7 @@
 	,@intMachineId int
 	,@ysnLotAlias bit=0
 	,@strLotAlias nvarchar(50)
-	,@ysnProductionOnly bit=0
+	,@intProductionTypeId bit=3
 	)
 AS
 SET QUOTED_IDENTIFIER OFF
@@ -460,7 +460,7 @@ BEGIN TRY
 		SELECT @dblUpperToleranceQuantity = dblCalculatedUpperTolerance * @dblRequiredQuantity / R.dblQuantity
 			,@dblLowerToleranceQuantity = dblCalculatedLowerTolerance * @dblRequiredQuantity / R.dblQuantity
 		FROM dbo.tblMFWorkOrderRecipe R
-		JOIN dbo.tblMFWorkOrderRecipeItem RI ON R.intRecipeId = RI.intRecipeId
+		JOIN dbo.tblMFWorkOrderRecipeItem RI ON R.intRecipeId = RI.intRecipeId and R.intWorkOrderId=RI.intWorkOrderId 
 		WHERE R.intItemId = @intProductId
 			AND R.ysnActive = 1
 			AND intRecipeItemTypeId = 2
@@ -496,10 +496,10 @@ BEGIN TRY
 			RETURN
 		END
 
-		IF @ysnProductionOnly=0 and EXISTS (
+		IF @intProductionTypeId=3 and EXISTS (
 		SELECT *
 		FROM dbo.tblMFWorkOrderRecipeItem ri
-		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON SI.intRecipeItemId = ri.intRecipeItemId
+		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON SI.intRecipeItemId = ri.intRecipeItemId and ri.intWorkOrderId =SI.intWorkOrderId 
 		AND SI.intRecipeId = ri.intRecipeId
 		WHERE ri.intWorkOrderId = @intWorkOrderId
 			AND ri.intRecipeItemTypeId = 1

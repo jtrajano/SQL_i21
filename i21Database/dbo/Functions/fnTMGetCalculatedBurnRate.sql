@@ -3,6 +3,7 @@
 	@intSiteId INT
 	,@intInvoiceDetailId INT
 	,@intDDReadingId INT 
+	,@ysnMultipleInvoice BIT = 0
 )
 RETURNS NUMERIC(18,6) AS
 BEGIN
@@ -61,11 +62,22 @@ BEGIN
 	SET @dblElapseDDBetweenDelivery = ROUND((ISNULL(@dblAccumulatedDD,0) - ISNULL(@intLastDeliveryDegreeDay,0)),0)
 	
 	--- get Invoice detail total
-	SELECT @dblInvoiceItemTotal = dblTotal + ISNULL(dblTotalTax,0)
-		,@dblInvoiceQuantity = dblQtyShipped
-		,@dblMeterReading = dblNewMeterReading
-	FROM tblARInvoiceDetail
-	WHERE intInvoiceDetailId = @intInvoiceDetailId
+	-------CHECK if multiple Invoice scenario
+	IF(@ysnMultipleInvoice <> 1)
+	BEGIN
+		SELECT @dblInvoiceItemTotal = dblTotal + ISNULL(dblTotalTax,0)
+			,@dblInvoiceQuantity = dblQtyShipped
+			,@dblMeterReading = dblNewMeterReading
+		FROM tblARInvoiceDetail
+		WHERE intInvoiceDetailId = @intInvoiceDetailId
+	END
+	ELSE
+	BEGIN
+		SELECT  @dblInvoiceItemTotal = SUM(dblTotal) + SUM(ISNULL(dblTotalTax,0))
+			,@dblInvoiceQuantity = SUM(dblQtyShipped)
+		FROM tblARInvoiceDetail
+		WHERE intSiteId = (SELECT TOP 1 intSiteId FROM tblARInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId)
+	END
 	
 	----Check for flow meter
 	IF(@strBillingBy = 'Flow Meter')

@@ -58,16 +58,16 @@ BEGIN TRY
 	FROM dbo.tblMFWorkOrderStatus
 	WHERE intStatusId = @intStatusId
 
-	IF @strName <> 'Started'
-	BEGIN
-		RAISERROR (
-				51081
-				,11
-				,1
-				)
+	--IF @strName <> 'Started'
+	--BEGIN
+	--	RAISERROR (
+	--			51081
+	--			,11
+	--			,1
+	--			)
 
-		RETURN
-	END
+	--	RETURN
+	--END
 
 	SELECT @dtmExpiryDate = dtmExpiryDate
 		,@intLotStatusId = intLotStatusId
@@ -144,37 +144,37 @@ BEGIN TRY
 		RETURN
 	END
 
-	IF @intItemId NOT IN (
-			SELECT RI.intItemId
-			FROM dbo.tblMFWorkOrderRecipeItem RI
-			WHERE RI.intWorkOrderId = @intWorkOrderId
-				AND RI.intRecipeItemTypeId = 1
+	--IF @intItemId NOT IN (
+	--		SELECT RI.intItemId
+	--		FROM dbo.tblMFWorkOrderRecipeItem RI
+	--		WHERE RI.intWorkOrderId = @intWorkOrderId
+	--			AND RI.intRecipeItemTypeId = 1
 				
-			)
-		and @intItemId NOT IN (
-			SELECT RSI.intSubstituteItemId
-			FROM dbo.tblMFWorkOrderRecipeItem RI 
-			JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
-			WHERE RI.intWorkOrderId = @intWorkOrderId
-				AND RI.intRecipeItemTypeId = 1
+	--		)
+	--	and @intItemId NOT IN (
+	--		SELECT RSI.intSubstituteItemId
+	--		FROM dbo.tblMFWorkOrderRecipeItem RI 
+	--		JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intRecipeItemId = RI.intRecipeItemId
+	--		WHERE RI.intWorkOrderId = @intWorkOrderId
+	--			AND RI.intRecipeItemTypeId = 1
 				
-			)
-	BEGIN
-		SELECT @strProductItemNo = strItemNo
-		FROM dbo.tblICItem
-		WHERE intItemId = @intProductId
+	--		)
+	--BEGIN
+	--	SELECT @strProductItemNo = strItemNo
+	--	FROM dbo.tblICItem
+	--	WHERE intItemId = @intProductId
 
-		RAISERROR (
-				51082
-				,11
-				,1
-				,@strItemNo
-				,@strLotNumber
-				,@strProductItemNo
-				)
+	--	RAISERROR (
+	--			51082
+	--			,11
+	--			,1
+	--			,@strItemNo
+	--			,@strLotNumber
+	--			,@strProductItemNo
+	--			)
 
-		RETURN
-	END
+	--	RETURN
+	--END
 
 	--SELECT @dblTotalQtyToBeConsumed = @dblQuantity * RI.dblCalculatedUpperTolerance / R.dblQuantity
 	--FROM dbo.tblMFWorkOrdeRecipeItem RI 

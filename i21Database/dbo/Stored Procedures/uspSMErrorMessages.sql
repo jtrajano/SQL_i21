@@ -320,7 +320,7 @@ SET @strmessage =  'The work order that you clicked on is already completed.'
 EXEC sp_addmessage 51079,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51080) EXEC sp_dropmessage 51080, 'us_english'	
-SET @strmessage =  'It is possible that this work order has been temporarily paused by another user. Please refresh the screen.'
+SET @strmessage =  'The work order has been paused. Please re-start the WO to resume.'
 EXEC sp_addmessage 51080,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51081) EXEC sp_dropmessage 51081, 'us_english'	
@@ -564,7 +564,7 @@ SET @strmessage = 'The work order that you clicked on no longer exists. This is 
 EXEC sp_addmessage 51140,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51141) EXEC sp_dropmessage 51141, 'us_english'	
-SET @strmessage = 'Work order contains quarantined lot, you need to either release the lot or mark the pallet as ghost to close the work order.'
+SET @strmessage = 'There are lots produced against this workorder which are not yet released to warehouse. In order to complete the workorder, either release the lots to warehouse or mark the pallet(s) as Ghost.'
 EXEC sp_addmessage 51141,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51142) EXEC sp_dropmessage 51142, 'us_english'	
@@ -620,13 +620,45 @@ SET @strmessage = 'Product specification entered should be unique.'
 EXEC sp_addmessage 51154,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51155) EXEC sp_dropmessage 51155, 'us_english'	
-SET @strmessage = 'Unable to calculate the Other Charges per unit. Please check if UOM %s is assigned to item %s.'
+SET @strmessage = 'Lot %s you are trying to consume for Work order %s is not associated with the selected process %s.'
 EXEC sp_addmessage 51155,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51156) EXEC sp_dropmessage 51156, 'us_english'	
-SET @strmessage = 'Cyclic situation found. Unable to compute surcharge because %s depends on %s and vice-versa.'
+SET @strmessage = 'A run for ''%s'' - ''%s'' is %s on ''%s''. Please create a run later than the ''%s''.'
 EXEC sp_addmessage 51156,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51157) EXEC sp_dropmessage 51157, 'us_english'	
-SET @strmessage = 'Unable to compute the surcharge for %s.'
+SET @strmessage = 'A run for ''%s'' - ''%s'' already exists for %s which is using the same ingredient item ''%s'' - ''%s''. Please create a run later than the ''%s''.'
 EXEC sp_addmessage 51157,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51158) EXEC sp_dropmessage 51158, 'us_english'	
+SET @strmessage = 'There is already a run for the date %s and ItemID %s, cannot create one more.'
+EXEC sp_addmessage 51158,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51159) EXEC sp_dropmessage 51159, 'us_english'	
+SET @strmessage = 'Item UOM is invalid or missing.'
+EXEC sp_addmessage 51159,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51160) EXEC sp_dropmessage 51160, 'us_english'	
+SET @strmessage = 'Item %s is missing a Stock Unit. Please check the Unit of Measure setup.'
+EXEC sp_addmessage 51160,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51161) EXEC sp_dropmessage 51161, 'us_english'	
+SET @strmessage = 'Item UOM is invalid or missing.'
+EXEC sp_addmessage 51161,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51162) EXEC sp_dropmessage 51162, 'us_english'	
+SET @strmessage = 'Item %s is missing a Stock Unit. Please check the Unit of Measure setup.'
+EXEC sp_addmessage 51162,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51163) EXEC sp_dropmessage 51163, 'us_english'	
+SET @strmessage = 'Unable to calculate the Other Charges per unit. Please check if UOM %s is assigned to item %s.'
+EXEC sp_addmessage 51163,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51164) EXEC sp_dropmessage 51164, 'us_english'	
+SET @strmessage = 'Cyclic situation found. Unable to compute surcharge because %s depends on %s and vice-versa.'
+EXEC sp_addmessage 51164,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51165) EXEC sp_dropmessage 51165, 'us_english'	
+SET @strmessage = 'Unable to compute the surcharge for %s.'
+EXEC sp_addmessage 51165,11,@strmessage,'us_english','False'

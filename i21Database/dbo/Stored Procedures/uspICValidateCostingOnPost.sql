@@ -60,6 +60,13 @@ BEGIN
 	GOTO _Exit
 END 
 
+-- Check for invalid item UOM 
+IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 51133)
+BEGIN 
+	RAISERROR(51133, 11, 1)
+	GOTO _Exit
+END 
+
 -- Check for negative stock qty 
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 50029)
 BEGIN 
@@ -92,6 +99,20 @@ IF @strItemNo IS NOT NULL
 BEGIN 
 	-- 'The status of {item} is Discontinued.'
 	RAISERROR(51090, 11, 1, @strItemNo)
+	GOTO _Exit
+END 
+
+-- Check for the missing Stock Unit UOM 
+SELECT TOP 1 
+		@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+FROM	#FoundErrors Errors INNER JOIN tblICItem Item
+			ON Errors.intItemId = Item.intItemId
+WHERE	intErrorCode = 51134
+
+IF @strItemNo IS NOT NULL 
+BEGIN 
+	-- 'Item {Item Name} is missing a Stock Unit. Please check the Unit of Measure setup.'
+	RAISERROR(51134, 11, 1, @strItemNo)
 	GOTO _Exit
 END 
 

@@ -31,6 +31,7 @@ BEGIN
 		,dblAmountDue
 		,dblPayment
 		,strTransactionType
+		,strType
 		,intPaymentMethodId
 		,strComments
 		,intAccountId
@@ -75,6 +76,7 @@ BEGIN
 		,dblInvoiceTotal
 		,0
 		,strTransactionType
+		,strType
 		,intPaymentMethodId
 		,strComments
 		,intAccountId

@@ -2,6 +2,7 @@
 	@intProcessId INT
 	,@intLocationId INT
 	,@strName nvarchar(50)='%'
+	,@intStorageLocationId int=0
 	)
 AS
 BEGIN
@@ -22,4 +23,5 @@ BEGIN
 	FROM dbo.tblICStorageLocation SL
 	WHERE intLocationId = @intLocationId
 	AND strName LIKE @strName +'%'
+	AND SL.intStorageLocationId =(CASE WHEN @intStorageLocationId >0 THEN @intStorageLocationId ELSE SL.intStorageLocationId END)
 END

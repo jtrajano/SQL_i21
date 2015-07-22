@@ -45,6 +45,8 @@ BEGIN TRY
 		,@intConsumptionSubLocationId int
 		,@intWeightUOMId int
 		,@intTransactionCount INT
+		,@strWorkOrderNo nvarchar(50)
+		,@strProcessName nvarchar(50)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -115,7 +117,7 @@ BEGIN TRY
 	SELECT @strLotNumber=strLotNumber,
 		@intInputLotId = intLotId
 		,@dblWeight = (CASE WHEN intWeightUOMId IS NOT NULL THEN dblWeight ELSE dblQty END)
-		,@intNewItemUOMId=(CASE WHEN intWeightUOMId IS NOT NULL THEN intWeightUOMId ELSE intItemUOMId END) 
+		,@intNewItemUOMId=intItemUOMId 
 		,@dblWeightPerQty= (Case When dblWeightPerQty is null or dblWeightPerQty=0 Then 1 Else dblWeightPerQty End)
 		,@intWeightUOMId=intWeightUOMId
 	FROM tblICLot
@@ -209,6 +211,31 @@ BEGIN TRY
 				,1
 				)
 	END
+
+		IF NOT EXISTS (
+				SELECT *
+				FROM dbo.tblMFWorkOrder W
+				WHERE intWorkOrderId = @intWorkOrderId AND intManufacturingProcessId=@intManufacturingProcessId
+				)
+		BEGIN
+
+		SELECT @strWorkOrderNo = strWorkOrderNo
+		FROM dbo.tblMFWorkOrder
+		WHERE intWorkOrderId = @intWorkOrderId
+
+		Select @strProcessName=strProcessName 
+		From dbo.tblMFManufacturingProcess 
+		Where intManufacturingProcessId =@intManufacturingProcessId 
+
+			RAISERROR (
+					51155
+					,11
+					,1
+					,@strLotNumber
+					,@strWorkOrderNo
+					,@strProcessName
+					)
+		END
 
 	IF EXISTS (
 				SELECT *
@@ -460,7 +487,7 @@ BEGIN TRY
 					,@dblAdjustByQuantity = @dblAdjustByQuantity
 					,@dblNewSplitLotQuantity = NULL
 					,@dblNewWeight = NULL
-					,@intNewItemUOMId = NULL
+					,@intNewItemUOMId = @intNewItemUOMId
 					,@intNewWeightUOMId = NULL
 					,@dblNewUnitCost = NULL
 					-- Parameters used for linking or FK (foreign key) relationships

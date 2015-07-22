@@ -131,3 +131,21 @@ IF exists(select 1 from tblEntityPortalMenu where strPortalMenuName = 'Tickets R
 BEGIN
 	exec('update tblEntityPortalMenu set strCommand = ''HelpDesk.view.TicketList'' where strPortalMenuName = ''Tickets Reported by Me'' and strType = ''Screen'' and strCommand = ''HelpDesk.controller.CPTicketsReported''')
 END
+
+
+IF EXISTS( select 1 from tblEntityPortalMenu where intEntityPortalMenuId = 29 AND strPortalMenuName <> 'Reminder Lists')
+BEGIN
+	EXEC('DELETE FROM tblEntityPortalMenu WHERE intEntityPortalMenuId = 29 ')
+END
+IF NOT EXISTS(select 1 from tblEntityPortalMenu where intEntityPortalMenuId = 29) 
+	AND not exists(select 1 from tblEntityPortalMenu where strPortalMenuName = 'Reminder Lists' and strType = 'Screen' and strCommand = 'HelpDesk.view.ReminderList' and intEntityPortalMenuId = 29)
+begin
+	SET IDENTITY_INSERT tblEntityPortalMenu ON
+	EXEC('
+	
+	insert into tblEntityPortalMenu(intEntityPortalMenuId,strPortalMenuName,intPortalParentMenuId,strType,strCommand,strEntityType)
+	select 29,''Reminder Lists'',intEntityPortalMenuId,''Screen'',''HelpDesk.view.ReminderList'','''' from tblEntityPortalMenu where strPortalMenuName = ''Help Desk'' and intPortalParentMenuId = 0
+	')
+	SET IDENTITY_INSERT tblEntityPortalMenu OFF
+end
+

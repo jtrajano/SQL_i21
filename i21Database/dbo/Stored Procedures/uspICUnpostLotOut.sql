@@ -9,6 +9,19 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+-- Create the temp table if it does not exists. 
+IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStockToReverse')) 
+BEGIN 
+	CREATE TABLE #tmpInventoryTransactionStockToReverse (
+		intInventoryTransactionId INT NOT NULL 
+		,intTransactionId INT NULL 
+		,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+		,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+		,intRelatedTransactionId INT NULL 
+		,intTransactionTypeId INT NOT NULL 
+	)
+END 
+
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @AUTO_NEGATIVE AS INT = 1
 DECLARE @WRITE_OFF_SOLD AS INT = 2
@@ -32,12 +45,12 @@ INSERT INTO #tmpInventoryTransactionStockToReverse (
 	,strRelatedTransactionId
 	,intTransactionTypeId
 )
-SELECT	Changes.intInventoryTransactionId
-		,Changes.intTransactionId
-		,Changes.strTransactionId
-		,Changes.intRelatedTransactionId
-		,Changes.strRelatedTransactionId
-		,Changes.intTransactionTypeId
+SELECT	Data_Changes.intInventoryTransactionId
+		,Data_Changes.intTransactionId
+		,Data_Changes.strTransactionId
+		,Data_Changes.intRelatedTransactionId
+		,Data_Changes.strRelatedTransactionId
+		,Data_Changes.intTransactionTypeId
 FROM	(
 			-- Merge will help us get the records we need to unpost and update it at the same time. 
 			MERGE	
@@ -65,14 +78,15 @@ FROM	(
 							AND inventory_transaction.intRelatedTransactionId = Source_Query.intTransactionId
 						)
 					)
+
 				-- If matched, update the ysnIsUnposted and set it to true (1) 
 				WHEN MATCHED THEN 
 					UPDATE 
 					SET		ysnIsUnposted = 1
 
 				OUTPUT $action, Inserted.intInventoryTransactionId, Inserted.intTransactionId, Inserted.strTransactionId, Inserted.intRelatedTransactionId, Inserted.strRelatedTransactionId, Inserted.intTransactionTypeId
-		) AS Changes (Action, intInventoryTransactionId, intTransactionId, strTransactionId, intRelatedTransactionId, strRelatedTransactionId, intTransactionTypeId)
-WHERE	Changes.Action = 'UPDATE'
+		) AS Data_Changes (Action, intInventoryTransactionId, intTransactionId, strTransactionId, intRelatedTransactionId, strRelatedTransactionId, intTransactionTypeId)
+WHERE	Data_Changes.Action = 'UPDATE'
 ;
 
 -- If Lot_bucket was from a negative stock, let dblStockIn equal to dblStockOut. 

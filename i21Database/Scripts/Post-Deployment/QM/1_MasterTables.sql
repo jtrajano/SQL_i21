@@ -298,4 +298,32 @@ BEGIN
 	VALUES(5,'Transfer','Transfer',1)
 END
 GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMProductType WHERE intProductTypeId = 6)
+BEGIN
+	INSERT INTO tblQMProductType(intProductTypeId,strProductTypeName,strDescription,ysnIsTemplate)
+	VALUES(6,'Lot','Lot',0)
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMProductType WHERE intProductTypeId = 7)
+BEGIN
+	INSERT INTO tblQMProductType(intProductTypeId,strProductTypeName,strDescription,ysnIsTemplate)
+	VALUES(7,'Receiving','Receiving',0)
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMProductType WHERE intProductTypeId = 8)
+BEGIN
+	INSERT INTO tblQMProductType(intProductTypeId,strProductTypeName,strDescription,ysnIsTemplate)
+	VALUES(8,'Contract Line Item','Contract Line Item',0)
+END
+GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMProductType WHERE intProductTypeId = 9)
+BEGIN
+	INSERT INTO tblQMProductType(intProductTypeId,strProductTypeName,strDescription,ysnIsTemplate)
+	VALUES(9,'Container Line Item','Container Line Item',0)
+END
+GO
 

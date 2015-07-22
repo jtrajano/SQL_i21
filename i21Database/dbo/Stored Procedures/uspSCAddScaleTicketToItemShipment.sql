@@ -174,7 +174,44 @@ WHERE	SC.intTicketId = @intTicketId
 
 END
 
-
+BEGIN
+	INSERT INTO [dbo].[tblQMTicketDiscount]
+       ([intConcurrencyId]
+       ,[strDiscountCode]
+       ,[strDiscountCodeDescription]
+       ,[dblGradeReading]
+       ,[strCalcMethod]
+       ,[strShrinkWhat]
+       ,[dblShrinkPercent]
+       ,[dblDiscountAmount]
+       ,[dblDiscountDue]
+       ,[dblDiscountPaid]
+       ,[ysnGraderAutoEntry]
+       ,[intDiscountScheduleCodeId]
+       ,[dtmDiscountPaidDate]
+       ,[intTicketId]
+       ,[intTicketFileId]
+       ,[strSourceType])
+	SELECT	DISTINCT [intConcurrencyId]= 1
+       ,[strDiscountCode] = SD.[strDiscountCode]
+       ,[strDiscountCodeDescription]= SD.[strDiscountCodeDescription]
+       ,[dblGradeReading]= SD.[dblGradeReading]
+       ,[strCalcMethod]= SD.[strCalcMethod]
+       ,[strShrinkWhat]= SD.[strShrinkWhat]
+       ,[dblShrinkPercent]= SD.[dblShrinkPercent]
+       ,[dblDiscountAmount]= SD.[dblDiscountAmount]
+       ,[dblDiscountDue]= SD.[dblDiscountDue]
+       ,[dblDiscountPaid]= SD.[dblDiscountPaid]
+       ,[ysnGraderAutoEntry]= SD.[ysnGraderAutoEntry]
+       ,[intDiscountScheduleCodeId]= SD.[intDiscountScheduleCodeId]
+       ,[dtmDiscountPaidDate]= SD.[dtmDiscountPaidDate]
+       ,[intTicketId]= SD.[intTicketId]
+       ,[intTicketFileId]= ISH.intInventoryShipmentItemId
+       ,[strSourceType]= 'Inventory Shipment'
+	FROM	dbo.tblICInventoryShipmentItem ISH join dbo.[tblQMTicketDiscount] SD
+	ON ISH.intSourceId = SD.intTicketId AND SD.strSourceType = 'Scale' AND
+	SD.intTicketFileId = @intTicketId WHERE	ISH.intSourceId = @intTicketId AND ISH.intInventoryShipmentId = @InventoryShipmentId
+END
 GO
 
 

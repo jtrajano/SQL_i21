@@ -752,12 +752,12 @@
     <Build Include="testi21Database\Stored Procedures\test fnGetMatchingItemUOMId if it returns NULL if it UOM cannot be found.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCalculateInventoryReceiptOtherCharges for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCalculateInventoryReceiptOtherCharges for generating charges for Per Unit.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICCalculateInventoryReceiptOtherCharges for error 51155.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCalculateInventoryReceiptOtherCharges for error 51163.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCalculateInventoryReceiptOtherCharges for generating charges for Percentage.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCalculateInventoryReceiptOtherCharges for generating charges for Amount.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptIntegrations for calling uspCTReceived.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCalculateInventoryReceiptSurchargeOnOtherCharges for the basics.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICCalculateInventoryReceiptSurchargeOnOtherCharges for error 51156.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICCalculateInventoryReceiptSurchargeOnOtherCharges for error 51164.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCalculateInventoryReceiptSurchargeOnOtherCharges for computing one layer of surcharge.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCalculateInventoryReceiptSurchargeOnOtherCharges for computing two layers of surcharge.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCalculateInventoryReceiptSurchargeOnOtherCharges for computing three layers of surcharge.sql" />

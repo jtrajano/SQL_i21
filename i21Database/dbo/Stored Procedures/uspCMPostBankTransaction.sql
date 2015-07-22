@@ -3,6 +3,7 @@ CREATE PROCEDURE uspCMPostBankTransaction
 	@ysnPost				BIT		= 0
 	,@ysnRecap				BIT		= 0
 	,@strTransactionId		NVARCHAR(40) = NULL 
+	,@strBatchId			NVARCHAR(40) = NULL 
 	,@intUserId				INT		= NULL 
 	,@intEntityId			INT		= NULL
 	,@isSuccessful			BIT		= 0 OUTPUT 
@@ -90,7 +91,6 @@ DECLARE
 	,@dtmDate AS DATETIME
 	,@dblAmount AS NUMERIC(18,6)
 	,@dblAmountDetailTotal AS NUMERIC(18,6)
-	,@strBatchId AS NVARCHAR(40)
 	,@ysnTransactionPostedFlag AS BIT
 	,@ysnTransactionClearedFlag AS BIT	
 	,@intBankAccountId AS INT
@@ -245,8 +245,11 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 -- Get the batch post id. 
-EXEC dbo.uspSMGetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchId OUTPUT 
-IF @@ERROR <> 0	GOTO Post_Rollback
+IF (@strBatchId IS NULL)
+BEGIN
+	EXEC dbo.uspSMGetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchId OUTPUT 
+	IF @@ERROR <> 0	GOTO Post_Rollback
+END
 
 IF @ysnPost = 1
 BEGIN

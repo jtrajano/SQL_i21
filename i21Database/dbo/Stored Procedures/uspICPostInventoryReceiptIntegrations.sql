@@ -86,7 +86,7 @@ END
 IF	@ReceiptType = @RECEIPT_TYPE_PURCHASE_CONTRACT 
 	AND ISNULL(@SourceType, @SOURCE_TYPE_NONE) = @SOURCE_TYPE_NONE
 BEGIN 
-	EXEC dbo.uspCTReceived @ItemsFromInventoryReceipt
+	EXEC dbo.uspCTReceived @ItemsFromInventoryReceipt,@intUserId
 	GOTO _Exit;
 END
 

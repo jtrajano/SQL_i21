@@ -54,7 +54,7 @@ BEGIN
 	IF @intOtherChargesItemId IS NOT NULL AND @intSurchargeItemId IS NOT NULL 
 	BEGIN 
 		-- 'Cyclic situation found. Unable to compute surcharge because {Item X} depends on {Item Y} and vice-versa.'
-		RAISERROR(51156, 11, 1, @strSurchargeItem, @strOtherChargesItem)  
+		RAISERROR(51164, 11, 1, @strSurchargeItem, @strOtherChargesItem)  
 		GOTO _Exit  
 	END 
 END 
@@ -108,7 +108,7 @@ BEGIN
 				,[intEntityVendorId]			= Surcharge.intEntityVendorId
 				,[dblCalculatedAmount]			= (ISNULL(Surcharge.dblRate, 0) / 100) * SurchargedOtherCharges.dblCalculatedAmount
 				,[intContractId]				= Surcharge.intContractId
-				,[strAllocateCostBy]			= Charge.strAllocateCostBy
+				,[strAllocateCostBy]			= Surcharge.strAllocateCostBy
 		FROM	dbo.tblICInventoryReceiptCharge Surcharge INNER JOIN dbo.tblICItem SurchargeItem 
 					ON SurchargeItem.intItemId = Surcharge.intChargeId
 				LEFT JOIN dbo.tblICInventoryReceiptChargePerItem SurchargedOtherCharges
@@ -173,7 +173,7 @@ BEGIN
 	IF @surchargeId IS NOT NULL 
 	BEGIN 
 		-- 'Unable to compute the surcharge for %s.'
-		RAISERROR(51157, 11, 1, @surchargeName)  
+		RAISERROR(51165, 11, 1, @surchargeName)  
 		GOTO _Exit
 	END 
 END 

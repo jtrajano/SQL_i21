@@ -31,6 +31,8 @@ SELECT Item.intItemId
 , strClassVariety = Class.strDescription
 , Item.intProductLineId
 , strProductLine = ProductLine.strDescription
+, Item.intGradeId
+, strGrade = Grade.strDescription
 FROM tblICItem Item
 	LEFT JOIN tblICBrand Brand ON Brand.intBrandId = Item.intBrandId
 	LEFT JOIN tblICManufacturer Manufacturer ON Manufacturer.intManufacturerId = Item.intManufacturerId
@@ -43,3 +45,4 @@ FROM tblICItem Item
 	LEFT JOIN tblICCommodityAttribute Season ON Season.intCommodityAttributeId = Item.intSeasonId
 	LEFT JOIN tblICCommodityAttribute Class ON Class.intCommodityAttributeId = Item.intClassVarietyId
 	LEFT JOIN tblICCommodityAttribute ProductLine ON ProductLine.intCommodityAttributeId = Item.intProductLineId
+	LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = Item.intGradeId

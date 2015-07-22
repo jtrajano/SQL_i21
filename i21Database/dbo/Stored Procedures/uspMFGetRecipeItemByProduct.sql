@@ -87,7 +87,7 @@ If @intWorkOrderId=0
 			,U1.strUserName AS strLastModifiedUserName
 			,ri.dtmLastModified
 		FROM dbo.tblMFWorkOrderRecipeItem ri
-		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
+		JOIN dbo.tblMFWorkOrderRecipe r ON r.intRecipeId = ri.intRecipeId and r.intWorkOrderId = ri.intWorkOrderId
 		JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
 		JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = ri.intUOMId
 		JOIN dbo.tblMFConsumptionMethod CM ON CM.intConsumptionMethodId = ri.intConsumptionMethodId

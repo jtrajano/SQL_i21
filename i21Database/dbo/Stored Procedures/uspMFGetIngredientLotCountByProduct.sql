@@ -5,6 +5,7 @@
 	,@intConsumptionMethodId int=1
 	,@strLotNumber nvarchar(MAX)='%'
 	,@intWorkOrderId int=0
+	,@intLotId int=0
 	)
 AS
 BEGIN
@@ -36,16 +37,17 @@ BEGIN
 			AND L.dblQty>0
 			AND I.strStatus='Active'
 			and L.strLotNumber Like @strLotNumber +'%'
+			AND L.intLotId =(CASE WHEN @intLotId >0 THEN @intLotId ELSE L.intLotId END)
 	End
 	Else
 	Begin
 		SELECT Distinct Count(*) AS LotCount
 		FROM dbo.tblMFWorkOrderRecipe R
-		JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId
+		JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId and RI.intWorkOrderId = R.intWorkOrderId
 			AND R.intWorkOrderId = @intWorkOrderId
 			AND RI.intRecipeItemTypeId = 1
 			AND RI.intConsumptionMethodId = (Case When @intConsumptionMethodId=0 Then RI.intConsumptionMethodId else @intConsumptionMethodId End)
-		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON SI.intRecipeItemId = RI.intRecipeItemId
+		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON SI.intRecipeItemId = RI.intRecipeItemId and RI.intWorkOrderId = R.intWorkOrderId
 			AND SI.intRecipeId = R.intRecipeId
 		JOIN dbo.tblICLot L ON (
 			L.intItemId = RI.intItemId
@@ -60,6 +62,7 @@ BEGIN
 			AND L.dblQty>0
 			AND I.strStatus='Active'
 			and L.strLotNumber Like @strLotNumber +'%'
+			AND L.intLotId =(CASE WHEN @intLotId >0 THEN @intLotId ELSE L.intLotId END)
 	End
 	
 END

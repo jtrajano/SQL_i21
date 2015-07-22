@@ -14,7 +14,8 @@ BEGIN
 	DECLARE @strSiteBillingBy NVARCHAR(10)
 
 
-	
+	SET @ResultLog = ''
+
 	SELECT 
 		@dtmInvoiceDate = dtmDate
 	FROM tblARInvoice

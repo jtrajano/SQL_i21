@@ -59,10 +59,12 @@ BEGIN TRY
 
 	IF @strAttributeValue='True' AND EXISTS (
 			SELECT *
-			FROM dbo.tblMFWorkOrderProducedLot
-			WHERE intWorkOrderId = @intWorkOrderId
-				AND ysnReleased = 0
-				AND ysnProductionReversed = 0
+			FROM dbo.tblMFWorkOrderProducedLot WP
+			JOIN dbo.tblICLot L on L.intLotId=WP.intLotId
+			WHERE WP.intWorkOrderId = @intWorkOrderId
+				AND WP.ysnReleased = 0
+				AND WP.ysnProductionReversed = 0
+				AND L.intLotStatusId =3
 			)
 	BEGIN
 		RAISERROR (
@@ -82,9 +84,13 @@ BEGIN TRY
 	From tblMFManufacturingProcessAttribute
 	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
 
-	If @strAttributeValue='True' and not exists(Select *from tblMFProcessCycleCountSession  Where intWorkOrderId=@intWorkOrderId) and Exists(SELECT *
+	If @strAttributeValue='True' and not exists(Select *from tblMFProcessCycleCountSession  Where intWorkOrderId=@intWorkOrderId) 
+		and (Exists(SELECT *
 			FROM dbo.tblMFWorkOrderProducedLot
-			WHERE intWorkOrderId = @intWorkOrderId)
+			WHERE intWorkOrderId = @intWorkOrderId) 
+			OR Exists(SELECT *
+			FROM dbo.tblMFWorkOrderInputLot 
+			WHERE intWorkOrderId = @intWorkOrderId))
 	Begin
 		RAISERROR (
 				51131

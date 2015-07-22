@@ -18,7 +18,7 @@ AS
 			EY.intEntityId,				EY.strEntityName,				CY.strDescription		AS	strCommodityDescription,
 			EY.strEntityNumber,			EY.strEntityAddress,			U2.strUnitMeasure		AS	strHeaderUnitMeasure,
 			EY.strEntityState,			EY.strEntityZipCode,			W1.strWeightGradeDesc	AS	strGrade,
-			EY.strEntityPhone,			EY.intDefaultLocationId,		W1.strWeightGradeDesc	AS	strWeight,	
+			EY.strEntityPhone,			EY.intDefaultLocationId,		W2.strWeightGradeDesc	AS	strWeight,	
 			EY.strEntityType,			TX.strTextCode,					AN.strName				AS	strAssociationName,
 			EY.strEntityCity,			TM.strTerm,						CB.strDescription		AS	strContractBasisDescription,
 			EY.strEntityCountry,		PO.strPosition,					IB.strDescription		AS	strInsuranceByDescription,

@@ -50,9 +50,9 @@ BEGIN
 END
 
 --Make sure all items were not yet billed.
-IF NOT EXISTS(SELECT 1 FROM vyuAPReceivedItems 
-				WHERE intInventoryReceiptItemId IN (SELECT intInventoryReceiptItemId FROM tblICInventoryReceiptItem 
-														WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM #tmpReceiptIds)))
+IF NOT EXISTS(SELECT 1 FROM tblICInventoryReceiptItem A
+					WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM #tmpReceiptIds)
+					AND A.dblOpenReceive != A.dblBillQty)
 BEGIN
 	RAISERROR('All of the item in the receipt was fully billed.', 16, 1);
 	GOTO DONE
@@ -154,7 +154,8 @@ BEGIN
 		[intPODetailId]				=	B.intLineNo,
 		[dblQtyOrdered]				=	B.dblOpenReceive - B.dblBillQty,
 		[dblQtyReceived]			=	B.dblOpenReceive - B.dblBillQty,
-		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
+		--[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
+		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'AP Clearing'),
 		[dblTotal]					=	(B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost,
 		[dblCost]					=	B.dblUnitCost,
 		[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E1.intContractDetailId ELSE POContractItems.intContractDetailId END,
@@ -165,8 +166,8 @@ BEGIN
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
 	INNER JOIN tblICItem C
 		ON B.intItemId = C.intItemId
-	INNER JOIN tblICItemLocation D
-		ON A.intLocationId = D.intLocationId AND B.intItemId = D.intItemId
+	--INNER JOIN tblICItemLocation D
+	--	ON A.intLocationId = D.intLocationId AND B.intItemId = D.intItemId
 	LEFT JOIN (tblCTContractHeader E INNER JOIN tblCTContractDetail E1 ON E.intContractHeaderId = E1.intContractHeaderId) 
 		ON E.intEntityId = A.intEntityVendorId 
 				AND E.intContractHeaderId = B.intOrderId 

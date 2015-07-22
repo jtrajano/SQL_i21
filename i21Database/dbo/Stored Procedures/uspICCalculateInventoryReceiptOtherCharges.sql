@@ -96,7 +96,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN 
 			-- 'Unable to calculate the Other Charges per unit. Please check if UOM {Unit of Measure} is assigned to item {Item}.'
-			RAISERROR(51155, 11, 1, @strUnitMeasure, @strItemNo)  
+			RAISERROR(51163, 11, 1, @strUnitMeasure, @strItemNo)  
 			GOTO _Exit
 		END 
 	END 

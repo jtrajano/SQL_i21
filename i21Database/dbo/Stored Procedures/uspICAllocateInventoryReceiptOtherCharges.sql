@@ -61,7 +61,7 @@ BEGIN
 	IF EXISTS (
 		SELECT	TOP 1 1
 		FROM	dbo.tblICInventoryReceipt Receipt 
-		WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
+		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 				AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
 	)
 	BEGIN
@@ -70,7 +70,7 @@ BEGIN
 		SELECT	OtherCharge.intContractId
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptChargePerItem OtherCharge
 					ON Receipt.intInventoryReceiptId = OtherCharge.intInventoryReceiptId	
-		WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
+		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 				AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
 
 		-- Initial fetch attempt

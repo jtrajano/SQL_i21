@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICCalculateInventoryReceiptSurchargeOnOtherCharges for error 51156]
+﻿CREATE PROCEDURE [testi21Database].[test uspICCalculateInventoryReceiptOtherCharges for error 51163]
 AS
 BEGIN
 	-- Arrange 
@@ -17,7 +17,6 @@ BEGIN
 					,@SerializedLotGrains AS INT = 7
 					,@CornCommodity AS INT = 8
 					,@OtherCharges AS INT = 9
-					,@SurchargeOtherCharges AS INT = 10
 					,@InvalidItem AS INT = -1
 
 			-- Declare the variables for location
@@ -98,30 +97,26 @@ BEGIN
 			[dblCalculatedAmount] NUMERIC(38, 20) NULL DEFAULT ((0)) 
 		)
 
-		DECLARE @intInventoryReceiptId AS INT = 11
+		DECLARE @intInventoryReceiptId AS INT = 8
 	END 
 
-	-- Create a cyclic surcharge. 
+	-- Delete Pound UOMs in @ManualLotGrains to simulate a missing UOM
 	BEGIN 
-		UPDATE dbo.tblICItem
-		SET intOnCostTypeId = @SurchargeOtherCharges
-		WHERE intItemId = @OtherCharges
-
-		UPDATE dbo.tblICItem
-		SET intOnCostTypeId = @OtherCharges
-		WHERE intItemId = @SurchargeOtherCharges
+		DELETE FROM tblICItemUOM 
+		WHERE	intItemId = @ManualLotGrains
+				AND intItemUOMId = @ManualGrains_PoundUOM
 	END 
 
 	-- Assert
 	BEGIN 
 		EXEC tSQLt.ExpectException
-			@ExpectedMessage = 'Cyclic situation found. Unable to compute surcharge because Surcharge Other Charges depends on Other Charges and vice-versa.'
-			,@ExpectedErrorNumber = 51156
+			@ExpectedMessage = 'Unable to calculate the Other Charges per unit. Please check if UOM Pound is assigned to item MANUAL LOT GRAINS.'
+			,@ExpectedErrorNumber = 51163
 	END
 	
 	-- Act
 	BEGIN 		
-		EXEC [dbo].[uspICCalculateInventoryReceiptSurchargeOnOtherCharges]
+		EXEC [dbo].[uspICCalculateInventoryReceiptOtherCharges]
 			@intInventoryReceiptId
 	END 
 

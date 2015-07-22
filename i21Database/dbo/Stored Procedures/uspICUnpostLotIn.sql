@@ -9,6 +9,19 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+-- Create the temp table if it does not exists. 
+IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStockToReverse')) 
+BEGIN 
+	CREATE TABLE #tmpInventoryTransactionStockToReverse (
+		intInventoryTransactionId INT NOT NULL 
+		,intTransactionId INT NULL 
+		,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+		,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
+		,intRelatedTransactionId INT NULL 
+		,intTransactionTypeId INT NOT NULL 
+	)
+END 
+
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @AUTO_NEGATIVE AS INT = 1
 DECLARE @WRITE_OFF_SOLD AS INT = 2

@@ -1,7 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTGetContractAndPrice]
+	@intContractTypeId	INT,
+	@intEntityId		INT,
 	@intLocationId		INT,
 	@intItemId			INT,
-	@dblTransactionDate	DATETIME,
+	@dtmTransactionDate	DATETIME,
 	@dblQuantity		NUMERIC(18,4)
 AS
 BEGIN
@@ -15,11 +17,13 @@ SET ANSI_WARNINGS OFF
 SELECT	TOP 1 
 		intContractHeaderId,
 		dblCashPrice
-FROM	tblCTContractDetail
-WHERE	intCompanyLocationId	=		@intLocationId	AND	
-		intItemId				=		@intItemId		AND	
-		dblQuantity				=		@dblQuantity	AND
-		ISNULL(dblCashPrice,0)	>		0				AND
-		@dblTransactionDate	 BETWEEN	dtmStartDate	AND 
+FROM	vyuCTContractDetailView
+WHERE	intContractTypeId		=		@intContractTypeId	AND
+		intEntityId				=		@intEntityId		AND
+		intCompanyLocationId	=		@intLocationId		AND	
+		intItemId				=		@intItemId			AND	
+		dblDetailQuantity		=		@dblQuantity		AND
+		ISNULL(dblCashPrice,0)	>		0					AND
+		@dtmTransactionDate	 BETWEEN	dtmStartDate		AND 
 										dtmEndDate		
 END 

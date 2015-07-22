@@ -36,7 +36,7 @@ BEGIN TRY
 		,@strRetBatchId NVARCHAR(40)
 		,@intLotId INT
 		,@strLotTracking NVARCHAR(50)
-		,@ysnProductionOnly BIT
+		,@intProductionTypeId int
 		,@ysnAllowMultipleItem BIT
 		,@ysnAllowMultipleLot BIT
 		,@ysnMergeOnMove BIT
@@ -60,6 +60,7 @@ BEGIN TRY
 		,@intInventoryAdjustmentId int
 		,@intInputLotItemId int
 		,@intTransactionCount INT
+		,@intLotStatusId int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -97,7 +98,7 @@ BEGIN TRY
 		,@ysnEmptyOutSource = ysnEmptyOutSource
 		,@ysnNegativeQtyAllowed = ysnNegativeQtyAllowed
 		,@ysnSubLotAllowed = ysnSubLotAllowed
-		,@ysnProductionOnly = Isnull(ysnProductionOnly,0)
+		,@intProductionTypeId = intProductionTypeId
 		,@intMachineId =intMachineId
 		,@ysnLotAlias =ysnLotAlias
 		,@strLotAlias =strLotAlias
@@ -105,6 +106,7 @@ BEGIN TRY
 		,@ysnPostProduction=ysnPostProduction
 		,@intDepartmentId=intDepartmentId
 		,@ysnExcessConsumptionAllowed=ysnExcessConsumptionAllowed
+		,@intLotStatusId=intLotStatusId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intManufacturingProcessId INT
@@ -131,7 +133,7 @@ BEGIN TRY
 			,ysnEmptyOutSource BIT
 			,ysnNegativeQtyAllowed BIT
 			,ysnSubLotAllowed BIT
-			,ysnProductionOnly BIT
+			,intProductionTypeId int
 			,intMachineId int
 			,ysnLotAlias bit
 			,strLotAlias nvarchar(50)
@@ -139,6 +141,7 @@ BEGIN TRY
 			,ysnPostProduction bit
 			,intDepartmentId int
 			,ysnExcessConsumptionAllowed bit
+			,intLotStatusId int
 			)
 	IF @intTransactionCount = 0
 	BEGIN TRANSACTION
@@ -389,83 +392,106 @@ BEGIN TRY
 
 	END
 
-	IF @ysnProductionOnly = 0--Consumption will happen during true up.
+	IF @intProductionTypeId in (1,3) 
 	BEGIN
-		EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
-			,@dblProduceQty = @dblProduceQty
-			,@intProduceUOMKey = @intProduceUnitMeasureId
-			,@intBatchId = @intBatchId
-			,@intUserId = @intUserId
 
-		EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
-			,@dblProduceQty = @dblProduceQty
-			,@intProduceUOMKey = @intProduceUnitMeasureId
-			,@intUserId = @intUserId
-			,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
-			,@strRetBatchId = @strRetBatchId OUTPUT
+		If exists(Select *from tblMFWorkOrder Where intWorkOrderId = @intWorkOrderId and intItemUOMId=@intProduceUnitMeasureId)
+		Begin
+			EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
+				,@dblProduceQty = @dblProduceQty
+				,@intProduceUOMKey = @intProduceUnitMeasureId
+				,@intBatchId = @intBatchId
+				,@intUserId = @intUserId
+
+			EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
+				,@dblProduceQty = @dblProduceQty
+				,@intProduceUOMKey = @intProduceUnitMeasureId
+				,@intUserId = @intUserId
+				,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
+				,@strRetBatchId = @strRetBatchId OUTPUT
+		End
+		Else
+		Begin
+			EXEC dbo.uspMFPickWorkOrder @intWorkOrderId = @intWorkOrderId
+				,@dblProduceQty = @dblPhysicalCount
+				,@intProduceUOMKey = @intPhysicalItemUOMId
+				,@intBatchId = @intBatchId
+				,@intUserId = @intUserId
+
+			EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
+				,@dblProduceQty = @dblPhysicalCount
+				,@intProduceUOMKey = @intPhysicalItemUOMId
+				,@intUserId = @intUserId
+				,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
+				,@strRetBatchId = @strRetBatchId OUTPUT
+		End
 	END
+	IF @intProductionTypeId in (2,3) 
+	BEGIN
+		If @strRetBatchId is null
+		Begin
+			-- Get the next batch number
+			EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strRetBatchId OUTPUT  
+		End
 
-	If @strRetBatchId is null
-	Begin
-		-- Get the next batch number
-		EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strRetBatchId OUTPUT  
-	End
+		EXEC dbo.uspMFValidateCreateLot @strLotNumber = @strOutputLotNumber
+			,@dtmCreated = @dtmPlannedDate
+			,@intShiftId = @intPlannedShiftId
+			,@intItemId = @intItemId
+			,@intStorageLocationId = @intStorageLocationId
+			,@intSubLocationId = @intSubLocationId
+			,@intLocationId = @intLocationId
+			,@dblQuantity = @dblProduceQty
+			,@intItemUOMId = @intProduceUnitMeasureId
+			,@dblUnitCount = @dblPhysicalCount
+			,@intItemUnitCountUOMId = @intPhysicalItemUOMId
+			,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
+			,@ysnSubLotAllowed = @ysnSubLotAllowed
+			,@intWorkOrderId = @intWorkOrderId
+			,@intLotTransactionTypeId = 3
+			,@ysnCreateNewLot = 1
+			,@ysnFGProduction = 0
+			,@ysnIgnoreTolerance = 1
+			,@intMachineId =@intMachineId
+			,@ysnLotAlias =@ysnLotAlias
+			,@strLotAlias =@strLotAlias
+			,@intProductionTypeId=@intProductionTypeId
 
-	EXEC dbo.uspMFValidateCreateLot @strLotNumber = @strOutputLotNumber
-		,@dtmCreated = @dtmPlannedDate
-		,@intShiftId = @intPlannedShiftId
-		,@intItemId = @intItemId
-		,@intStorageLocationId = @intStorageLocationId
-		,@intSubLocationId = @intSubLocationId
-		,@intLocationId = @intLocationId
-		,@dblQuantity = @dblProduceQty
-		,@intItemUOMId = @intProduceUnitMeasureId
-		,@dblUnitCount = @dblPhysicalCount
-		,@intItemUnitCountUOMId = @intPhysicalItemUOMId
-		,@ysnNegativeQtyAllowed = @ysnNegativeQtyAllowed
-		,@ysnSubLotAllowed = @ysnSubLotAllowed
-		,@intWorkOrderId = @intWorkOrderId
-		,@intLotTransactionTypeId = 3
-		,@ysnCreateNewLot = 1
-		,@ysnFGProduction = 0
-		,@ysnIgnoreTolerance = 1
-		,@intMachineId =@intMachineId
-		,@ysnLotAlias =@ysnLotAlias
-		,@strLotAlias =@strLotAlias
-		,@ysnProductionOnly=@ysnProductionOnly
-
-	EXEC dbo.uspMFProduceWorkOrder @intWorkOrderId = @intWorkOrderId
-		,@intItemId = @intItemId
-		,@dblProduceQty = @dblProduceQty
-		,@intProduceUOMKey = @intProduceUnitMeasureId
-		,@strVesselNo = @strVesselNo
-		,@intUserId = @intUserId
-		,@intStorageLocationId = @intStorageLocationId
-		,@strLotNumber = @strOutputLotNumber
-		,@intContainerId = @intContainerId
-		,@dblTareWeight = @dblTareWeight
-		,@dblUnitQty = @dblUnitQty
-		,@dblPhysicalCount = @dblPhysicalCount
-		,@intPhysicalItemUOMId = @intPhysicalItemUOMId
-		,@intBatchId = @intBatchId
-		,@strBatchId = @strRetBatchId
-		,@intShiftId=@intPlannedShiftId
-		,@strReferenceNo=@strReferenceNo
-		,@intStatusId=@intStatusId
-		,@intLotId = @intLotId OUTPUT
-		,@ysnPostProduction=@ysnPostProduction
-		,@strLotAlias=@strLotAlias
-
-	UPDATE dbo.tblICLot
-	SET intLotStatusId = 3
-	WHERE intLotId = @intLotId
-
-	SELECT @strOutputLotNumber = strLotNumber
-	FROM dbo.tblICLot
-	WHERE intLotId = @intLotId
-
-	SELECT @strOutputLotNumber AS strOutputLotNumber
+		EXEC dbo.uspMFProduceWorkOrder @intWorkOrderId = @intWorkOrderId
+			,@intItemId = @intItemId
+			,@dblProduceQty = @dblProduceQty
+			,@intProduceUOMKey = @intProduceUnitMeasureId
+			,@strVesselNo = @strVesselNo
+			,@intUserId = @intUserId
+			,@intStorageLocationId = @intStorageLocationId
+			,@strLotNumber = @strOutputLotNumber
+			,@intContainerId = @intContainerId
+			,@dblTareWeight = @dblTareWeight
+			,@dblUnitQty = @dblUnitQty
+			,@dblPhysicalCount = @dblPhysicalCount
+			,@intPhysicalItemUOMId = @intPhysicalItemUOMId
+			,@intBatchId = @intBatchId
+			,@strBatchId = @strRetBatchId
+			,@intShiftId=@intPlannedShiftId
+			,@strReferenceNo=@strReferenceNo
+			,@intStatusId=@intStatusId
+			,@intLotId = @intLotId OUTPUT
+			,@ysnPostProduction=@ysnPostProduction
+			,@strLotAlias=@strLotAlias
 	
+		IF @intLotStatusId IS NOT NULL
+		BEGIN
+			UPDATE dbo.tblICLot
+			SET intLotStatusId = @intLotStatusId
+			WHERE intLotId = @intLotId
+		END
+
+		SELECT @strOutputLotNumber = strLotNumber
+		FROM dbo.tblICLot
+		WHERE intLotId = @intLotId
+
+		SELECT @strOutputLotNumber AS strOutputLotNumber
+	END
 	IF @intTransactionCount = 0
 	COMMIT TRANSACTION
 

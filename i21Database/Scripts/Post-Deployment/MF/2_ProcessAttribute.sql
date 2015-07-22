@@ -123,8 +123,12 @@ BEGIN
 		,'Produce Lot Status'
 		,5
 		,1
-		,'Select strSecondaryStatus as ValueMember,strSecondaryStatus as DisplayMember from tblICLotStatus'
+		,'Select convert(varchar,intLotStatusId) as ValueMember,strSecondaryStatus as DisplayMember from tblICLotStatus'
 END
+Else
+Begin
+	Update tblMFAttribute Set strSQL='Select convert(varchar,intLotStatusId) as ValueMember,strSecondaryStatus as DisplayMember from tblICLotStatus' Where intAttributeId = 6
+End
 GO
 
 IF NOT EXISTS (
@@ -250,7 +254,7 @@ BEGIN
 	SELECT 12
 		,'Is Warehouse Release Mandatory'
 		,5
-		,4
+		,1
 		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
 END
 GO
@@ -332,7 +336,7 @@ BEGIN
 		,strSQL
 		)
 	SELECT 16
-		,'Is Input Quantity read only'
+		,'Is Input Quantity Read Only'
 		,5
 		,1
 		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
@@ -353,6 +357,46 @@ BEGIN
 		)
 	SELECT 17
 		,'Is Lot No Editable'
+		,5
+		,4
+		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFAttribute
+		WHERE intAttributeId = 18
+		)
+BEGIN
+	INSERT INTO tblMFAttribute (
+		intAttributeId
+		,strAttributeName
+		,intAttributeDataTypeId
+		,intAttributeTypeId
+		,strSQL
+		)
+	SELECT 18
+		,'Is Negative Quantity Allowed'
+		,5
+		,1
+		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblMFAttribute
+		WHERE intAttributeId = 19
+		)
+BEGIN
+	INSERT INTO tblMFAttribute (
+		intAttributeId
+		,strAttributeName
+		,intAttributeDataTypeId
+		,intAttributeTypeId
+		,strSQL
+		)
+	SELECT 19
+		,'Is Vendor Lot No Mandatory'
 		,5
 		,4
 		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'

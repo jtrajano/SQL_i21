@@ -60,6 +60,7 @@ BEGIN
 		,[dblAmountDue]
 		,[dblPayment]
 		,[strTransactionType]
+		,[strType]
 		,[intPaymentMethodId]
 		,[intAccountId]
 		,[intFreightTermId]
@@ -100,6 +101,7 @@ BEGIN
 		,ROUND([dblAmountDue],2)
 		,ROUND([dblPayment],2)
 		,'Invoice'
+		,[strType]
 		,0 --Payment Method
 		,[intAccountId]
 		,[intFreightTermId]

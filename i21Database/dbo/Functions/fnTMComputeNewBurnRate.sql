@@ -4,6 +4,7 @@
 	,@intInvoiceDetailId INT
 	,@intDDReadingId INT 
 	,@intPreviousDDReadingId INT 
+	,@ysnMultipleInvoice BIT = 0
 )
 RETURNS NUMERIC(18,6) AS
 BEGIN
@@ -42,7 +43,7 @@ BEGIN
 	BEGIN
 	
 		--- Get Average Burn rate
-		SET	@dblCalculatedBurnRate = dbo.fnTMGetCalculatedBurnRate(@intSiteId,@intInvoiceDetailId,@intDDReadingId)
+		SET	@dblCalculatedBurnRate = dbo.fnTMGetCalculatedBurnRate(@intSiteId,@intInvoiceDetailId,@intDDReadingId,@ysnMultipleInvoice)
 		IF(ISNULL(@dblPreviousBurnRate,0) = 0)
 		BEGIN
 			SET @dblBurnRateAverage = (ISNULL(@dblCalculatedBurnRate,0) + @dblBurnRate)/2

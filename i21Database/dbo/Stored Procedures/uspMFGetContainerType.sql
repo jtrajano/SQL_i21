@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspMFGetContainerType(@intManufacturingProcessId int,@intLocationId int,@strContainerTypeName nvarchar(50)='%')
+﻿CREATE PROCEDURE uspMFGetContainerType(@intManufacturingProcessId int,@intLocationId int,@strContainerTypeName nvarchar(50)='%',@intContainerTypeId int=0)
 AS
 BEGIN
 	Declare @intAttributeId int,@strContainerType nvarchar(MAX)
@@ -17,6 +17,7 @@ BEGIN
 			FROM [dbo].[fnSplitString](@strContainerType, ',')
 			)
 	AND CT.strDisplayMember LIKE @strContainerTypeName+'%'
+	AND CT.intContainerTypeId =(CASE WHEN @intContainerTypeId >0 THEN @intContainerTypeId ELSE CT.intContainerTypeId END)
 	ORDER BY strDisplayMember
 END
 Go

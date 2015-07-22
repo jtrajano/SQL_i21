@@ -104,6 +104,7 @@ BEGIN TRY
 
 		IF @ysnDP = 1
 		BEGIN
+			
 			SELECT	@strAdjustmentNo = strPrefix+LTRIM(intNumber) 
 			FROM	tblSMStartingNumber 
 			WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
@@ -111,6 +112,7 @@ BEGIN TRY
 			UPDATE	tblSMStartingNumber
 			SET		intNumber = intNumber+1
 			WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
+			
 
 			UPDATE	tblCTContractDetail 
 			SET		dblBalance	= @dblBalance + @dblNetUnits,
@@ -125,6 +127,20 @@ BEGIN TRY
 
 			SELECT	@dblNetUnits = 0
 
+			UPDATE	@Processed SET dblUnitsRemaining = @dblNetUnits
+				
+			INSERT INTO tblCTContractAdjustment
+			(
+					intContractDetailId,	strAdjustmentNo,		dtmAdjustmentDate,			strComment,						ysnAdjustment,		dblOldQuantity,
+					dblOldBalance,			dblAdjAmount,			dblNewBalance,				dblNewQuantity,					dblContractPrice,	dblCancellationPrice,
+					dblGainLossPerUnit,		dblCancelFeePerUnit,	dblCancelFeeFlatAmount,		dblTotalGainLoss,				intUserId,			dtmCreatedDate,intTicketId
+			)
+			SELECT	intContractDetailId,	strAdjustmentNo,		GETDATE(),					NULL,							0,					dblOldQuantity,
+					dblOldBalance,			dblAdjAmount,			dblNewBalance,				dblNewQuantity,					NULL,				NULL,
+					NULL,					NULL,					NULL,						NULL,							@intUserId,			GETDATE(),@intTicketId
+			
+			FROM	@Processed
+	
 			BREAK
 		END
 
@@ -133,6 +149,7 @@ BEGIN TRY
 			GOTO CONTINUEISH
 		END
 
+		/*
 		SELECT	@strAdjustmentNo = strPrefix+LTRIM(intNumber) 
 		FROM	tblSMStartingNumber 
 		WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
@@ -140,12 +157,13 @@ BEGIN TRY
 		UPDATE	tblSMStartingNumber
 		SET		intNumber = intNumber+1
 		WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
+		*/
 
 		IF	@dblNetUnits <= @dblBalance
 		BEGIN
-			UPDATE	tblCTContractDetail 
-			SET		dblBalance = @dblBalance - @dblNetUnits
-			WHERE	intContractDetailId = @intContractId
+			--UPDATE	tblCTContractDetail 
+			--SET		dblBalance = @dblBalance - @dblNetUnits
+			--WHERE	intContractDetailId = @intContractId
 			
 			INSERT	INTO @Processed SELECT @intContractId,@dblNetUnits,NULL,@dblQuantity,@dblBalance,@dblNetUnits,@dblBalance - @dblNetUnits,@dblQuantity,@strAdjustmentNo,@dblCost
 
@@ -155,9 +173,9 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			UPDATE	tblCTContractDetail 
-			SET		dblBalance	=	0
-			WHERE	intContractDetailId = @intContractId
+			--UPDATE	tblCTContractDetail 
+			--SET		dblBalance	=	0
+			--WHERE	intContractDetailId = @intContractId
 			
 			INSERT	INTO @Processed SELECT @intContractId,@dblBalance,NULL,@dblQuantity,@dblBalance,@dblBalance,0,@dblQuantity,@strAdjustmentNo,@dblCost
 
@@ -196,6 +214,7 @@ BEGIN TRY
 	
 	UPDATE	@Processed SET dblUnitsRemaining = @dblNetUnits
 	
+	/*
 	INSERT INTO tblCTContractAdjustment
 	(
 			intContractDetailId,	strAdjustmentNo,		dtmAdjustmentDate,			strComment,						ysnAdjustment,		dblOldQuantity,
@@ -207,8 +226,7 @@ BEGIN TRY
 			NULL,					NULL,					NULL,						NULL,							@intUserId,			GETDATE(),@intTicketId
 			
 	FROM	@Processed
-
-	UPDATE	@Processed SET dblUnitsRemaining = @dblNetUnits
+	*/
 	
 	SELECT	intContractDetailId,
 			dblUnitsDistributed,
