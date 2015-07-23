@@ -7,6 +7,7 @@ SELECT Assembly.intItemAssemblyId
 	, ComponentPricing.intItemLocationId
 	, ComponentLocation.intLocationId
 	, strComponentItem = Component.strItemNo
+	, strComponentDescription = Component.strDescription
 	, strComponentType = Component.strType
 	, strComponentLotTracking = Component.strLotTracking
 	, Assembly.dblQuantity
