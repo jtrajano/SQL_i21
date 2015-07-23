@@ -75,7 +75,7 @@ A.[intEntityVendorId]
 ,B.dblQtyOrdered -B.dblQtyReceived
 ,B.dblQtyOrdered
 ,B.intPurchaseDetailId
-,B.intPurchaseDetailId
+,NULL
 ,B.dblCost
 ,intAccountId = [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Inventory')
 ,strAccountId = (SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Inventory'))
@@ -107,7 +107,7 @@ A.intEntityVendorId
 ,B.dblOpenReceive
 ,B.dblReceived
 ,B.dblOpenReceive
-,B.intInventoryReceiptItemId
+,NULL
 ,B.intInventoryReceiptItemId
 ,B.dblUnitCost
 ,intAccountId = [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Inventory')

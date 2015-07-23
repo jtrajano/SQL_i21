@@ -1697,6 +1697,7 @@
     <None Include="Scripts\Utility\IC\IC-1024\Fix Produce.sql" />
     <None Include="Scripts\Utility\IC\IC-1024\Update tblGLSummary.sql" />
     <None Include="Scripts\Post-Deployment\Reports\Pxcyctag.sql" />
+    <Build Include="dbo\Views\vyuAPBillDetailSource.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
