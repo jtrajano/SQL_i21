@@ -47,6 +47,8 @@ BEGIN
 			,[dblCalculatedAmount]
 			,[intContractId]
 			,[strAllocateCostBy]
+			,[strCostBilledBy]
+			,[ysnInventoryCost]
 	)
 	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
 			,[intInventoryReceiptChargeId]	= Charge.intInventoryReceiptChargeId
@@ -57,6 +59,8 @@ BEGIN
 												* dbo.fnCalculateQtyBetweenUOM(ReceiptItem.intUnitMeasureId, dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId), ReceiptItem.dblOpenReceive) 
 			,[intContractId]				= Charge.intContractId
 			,[strAllocateCostBy]			= Charge.strAllocateCostBy
+			,[strCostBilledBy]				= Charge.strCostBilledBy
+			,[ysnInventoryCost]				= Charge.ysnInventoryCost
 	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item 
@@ -113,6 +117,8 @@ BEGIN
 			,[dblCalculatedAmount] 
 			,[intContractId]
 			,[strAllocateCostBy]
+			,[strCostBilledBy]
+			,[ysnInventoryCost]
 	)
 	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
 			,[intInventoryReceiptChargeId]	= Charge.intInventoryReceiptChargeId
@@ -124,6 +130,8 @@ BEGIN
 												* ReceiptItem.dblUnitCost
 			,[intContractId]				= Charge.intContractId
 			,[strAllocateCostBy]			= Charge.strAllocateCostBy
+			,[strCostBilledBy]				= Charge.strCostBilledBy
+			,[ysnInventoryCost]				= Charge.ysnInventoryCost
 	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item 
@@ -151,6 +159,8 @@ BEGIN
 			,[dblCalculatedAmount] 
 			,[intContractId]
 			,[strAllocateCostBy]
+			,[strCostBilledBy]
+			,[ysnInventoryCost]
 	)
 	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
 			,[intInventoryReceiptChargeId]	= Charge.intInventoryReceiptChargeId
@@ -160,6 +170,8 @@ BEGIN
 			,[dblCalculatedAmount]			= Charge.dblAmount
 			,[intContractId]				= Charge.intContractId
 			,[strAllocateCostBy]			= Charge.strAllocateCostBy
+			,[strCostBilledBy]				= Charge.strCostBilledBy
+			,[ysnInventoryCost]				= Charge.ysnInventoryCost
 	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item 

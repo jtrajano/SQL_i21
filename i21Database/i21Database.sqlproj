@@ -2048,6 +2048,13 @@
     <Build Include="dbo\Stored Procedures\uspMFValidateCreateWorkOrder.sql" />
     <Build Include="dbo\Views\vyuICGetAssemblyItem.sql" />
     <Build Include="dbo\Views\vyuAPRptCheckRegister.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByContractAndUnits.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByContractAndWeights.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByContractAndCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByUnits.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByWeights.sql" />
+    <Build Include="dbo\Tables\tblICInventoryReceiptItemAllocatedCharge.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

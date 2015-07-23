@@ -20,6 +20,8 @@ BEGIN
 			,@ALLOCATE_COST_BY_Weight AS NVARCHAR(50) = 'Weight'
 			,@ALLOCATE_COST_BY_Cost AS NVARCHAR(50) = 'Cost'
 
+			,@UNIT_TYPE_Weight AS NVARCHAR(50) = 'Weight'
+
 	DECLARE @strItemNo AS NVARCHAR(50)
 			,@strUnitMeasure AS NVARCHAR(50)
 			,@intItemId AS INT
@@ -49,21 +51,24 @@ BEGIN
 	END
 END
 
--- Set to zero all the existing other charges in receipt item table. 
+-- Remove the allocated records for the inventory receipt. 
 BEGIN 
-	UPDATE	dbo.tblICInventoryReceiptItem
-	SET		dblOtherCharges = 0.00
-	WHERE	intInventoryReceiptId = @intInventoryReceiptId
+	DELETE FROM dbo.tblICInventoryReceiptItemAllocatedCharge
+	WHERE intInventoryReceiptId = @intInventoryReceiptId
 END 
 
 -- Allocate the other cost by contract. 
 BEGIN 
-	IF EXISTS (
-		SELECT	TOP 1 1
-		FROM	dbo.tblICInventoryReceipt Receipt 
-		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-				AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
-	)
+	DECLARE @isPurchaseContract AS BIT 
+
+	-- Check if the receipt is a Purchase Contract. 
+	SELECT	TOP 1 
+			@isPurchaseContract = 1
+	FROM	dbo.tblICInventoryReceipt Receipt 
+	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+			AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
+
+	IF @isPurchaseContract = 1
 	BEGIN
 		DECLARE loopContracts CURSOR LOCAL FAST_FORWARD
 		FOR 
@@ -82,54 +87,24 @@ BEGIN
 		-----------------------------------------------------------------------------------------------------------------------------
 		WHILE @@FETCH_STATUS = 0
 		BEGIN
-			DECLARE @totalOtherChargesForContracts_AllocateByUnit AS NUMERIC(38,20)
-					,@totalOtherChargesForContracts_AllocateByWeight AS NUMERIC(38,20)
-					,@totalOtherChargesForContracts_AllocateByCost AS NUMERIC(38,20)
 
-			-- Get the total other charges with 'allocate cost' set to 'unit'. 
-			SELECT	@totalOtherChargesForContracts_AllocateByUnit = SUM(dblCalculatedAmount)
-			FROM	dbo.tblICInventoryReceiptChargePerItem OtherCharge
-			WHERE	OtherCharge.intInventoryReceiptId = @intInventoryReceiptId
-					AND OtherCharge.intContractId = @intContractId
-					AND OtherCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Unit
+			---- Allocate cost by 'unit'
+			--EXEC dbo.uspICAllocateInventoryReceiptOtherChargesByContractAndUnits
+			--	@intInventoryReceiptId
+			--	,@intContractId
+			--IF @@ERROR <> 0 GOTO _Exit;
 
-			-- Get the total other charges with 'allocate cost' set to 'weight'. 
-			SELECT	@totalOtherChargesForContracts_AllocateByWeight = SUM(dblCalculatedAmount)
-			FROM	dbo.tblICInventoryReceiptChargePerItem OtherCharge
-			WHERE	OtherCharge.intInventoryReceiptId = @intInventoryReceiptId
-					AND OtherCharge.intContractId = @intContractId
-					AND OtherCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Weight
+			-- Allocate cost by 'weight'
+			EXEC dbo.uspICAllocateInventoryReceiptOtherChargesByContractAndWeights
+				@intInventoryReceiptId
+				,@intContractId
+			IF @@ERROR <> 0 GOTO _Exit;
 
-			-- Get the total other charges with 'allocate cost' set to 'cost'. 
-			SELECT	@totalOtherChargesForContracts_AllocateByCost = SUM(dblCalculatedAmount)
-			FROM	dbo.tblICInventoryReceiptChargePerItem OtherCharge
-			WHERE	OtherCharge.intInventoryReceiptId = @intInventoryReceiptId
-					AND OtherCharge.intContractId = @intContractId
-					AND OtherCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Cost
-
-			-- Allocate cost by 'unit'
-			UPDATE	ReceiptItem
-			SET		dblOtherCharges = OtherChargeByContract.dblCalculatedAmount
-			FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
-						ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId	
-					INNER JOIN (
-						SELECT	dblCalculatedAmount = SUM(dblCalculatedAmount)
-								,OtherCharge.intContractId
-						FROM	dbo.tblICInventoryReceiptChargePerItem OtherCharge
-						WHERE	OtherCharge.intInventoryReceiptId = @intInventoryReceiptId
-								AND OtherCharge.intContractId IS NOT NULL 
-						GROUP BY OtherCharge.intContractId
-					) OtherChargeByContract
-						ON ReceiptItem.intOrderId = OtherChargeByContract.intContractId
-			WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
-					AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
-
-			UPDATE	ReceiptItem
-			SET		dblOtherCharges = ReceiptItem.dblOtherCharges + @totalOtherCharges
-			FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
-						ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId	
-			WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
-					AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
+			-- Allocate by 'cost'
+			EXEC dbo.uspICAllocateInventoryReceiptOtherChargesByContractAndCost
+				@intInventoryReceiptId
+				,@intContractId
+			IF @@ERROR <> 0 GOTO _Exit;
 
 			-- Attempt to fetch the next row from cursor. 
 			FETCH NEXT FROM loopContracts INTO 
@@ -145,23 +120,32 @@ BEGIN
 	END 
 END 
 
+-- Allocate cost by 'unit'
+EXEC dbo.uspICAllocateInventoryReceiptOtherChargesByContractAndUnits
+	@intInventoryReceiptId
+IF @@ERROR <> 0 GOTO _Exit;
+
+
 -- Allocate the other cost by unit
-BEGIN 
-	-- Get the total other charges with 'allocate cost' set to 'unit'. 
-	SELECT	@totalOtherCharges = SUM(dblCalculatedAmount)
-	FROM	dbo.tblICInventoryReceiptChargePerItem OtherCharge
-	WHERE	OtherCharge.intInventoryReceiptId = @intInventoryReceiptId
-			AND OtherCharge.intContractId IS NULL
-			AND OtherCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Unit
-
-	UPDATE	ReceiptItem
-	SET		dblOtherCharges = ReceiptItem.dblOtherCharges + @totalOtherCharges
-	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
-				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId	
-	WHERE	ReceiptItem.intInventoryReceiptId = @intInventoryReceiptId
-
+BEGIN 	
+	EXEC dbo.uspICAllocateInventoryReceiptOtherChargesByUnits
+		@intInventoryReceiptId
+	IF @@ERROR <> 0 GOTO _Exit;
 END 
 
+-- Allocate the other cost by weight
+BEGIN 	
+	EXEC dbo.uspICAllocateInventoryReceiptOtherChargesByWeights
+		@intInventoryReceiptId
+	IF @@ERROR <> 0 GOTO _Exit;
+END 
+
+-- Allocate by cost
+BEGIN 	
+	EXEC dbo.uspICAllocateInventoryReceiptOtherChargesByCost
+		@intInventoryReceiptId
+	IF @@ERROR <> 0 GOTO _Exit;
+END 
 
 -- Exit point
 _Exit:

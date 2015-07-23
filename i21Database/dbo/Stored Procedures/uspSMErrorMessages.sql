@@ -662,3 +662,7 @@ EXEC sp_addmessage 51164,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51165) EXEC sp_dropmessage 51165, 'us_english'	
 SET @strmessage = 'Unable to compute the surcharge for %s.'
 EXEC sp_addmessage 51165,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51166) EXEC sp_dropmessage 51166, 'us_english'	
+SET @strmessage = 'Unable to continue. Cost allocation is by Weight but stock unit for %s is not a weight type.'
+EXEC sp_addmessage 51166,11,@strmessage,'us_english','False'
