@@ -115,7 +115,7 @@ A.intEntityVendorId
 ,A.strVendorRefNo
 ,A.strReceiptNumber
 ,A.strReceiptNumber
-,B.intInventoryReceiptItemId
+,NULL
 ,B.intItemId
 ,C.strDescription
 ,C.strItemNo
