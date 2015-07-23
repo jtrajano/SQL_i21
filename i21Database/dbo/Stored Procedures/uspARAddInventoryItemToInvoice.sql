@@ -37,9 +37,35 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ZeroDecimal NUMERIC(18, 6)	
+DECLARE @ZeroDecimal NUMERIC(18, 6)
+		,@EntityCustomerId INT
+		,@CompanyLocationId INT
+		,@InvoiceDate DATETIME
 
-SET @ZeroDecimal = 0.000000	
+SET @ZeroDecimal = 0.000000
+
+SELECT 
+	 @EntityCustomerId	= [intEntityCustomerId]
+	,@CompanyLocationId = [intCompanyLocationId]
+	,@InvoiceDate		= [dtmDate]
+FROM
+	tblARInvoice
+WHERE
+	intInvoiceId = @InvoiceId
+
+
+
+IF ((@ItemId IS NOT NULL OR @ItemId <> 0) AND (@ItemPrice IS NULL OR @ItemPrice = @ZeroDecimal) )
+	BEGIN
+		EXEC dbo.[uspARGetItemPrice]  
+				 @ItemId  
+				,@EntityCustomerId
+				,@CompanyLocationId
+				,@ItemUOMId
+				,@InvoiceDate
+				,@ItemQtyShipped
+				,@ItemPrice OUTPUT
+	END	
 
 
 INSERT INTO [tblARInvoiceDetail]
@@ -130,7 +156,7 @@ LEFT OUTER JOIN
 		ON IC.[intItemId] = Acct.[intItemId]
 WHERE
 	IC.[intItemId] = @ItemId
-	AND IL.[intLocationId] = (SELECT intCompanyLocationId FROM tblARInvoice WHERE intInvoiceId = @InvoiceId)
+	AND IL.[intLocationId] = @CompanyLocationId
 	
 DECLARE @NewId INT
 SET @NewId = SCOPE_IDENTITY()

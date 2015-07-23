@@ -220,6 +220,19 @@ IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @EntityCu
 			[intInvoiceId] = @NewId
 				
 	END
+	
+
+IF ((@ItemId IS NOT NULL OR @ItemId <> 0) AND (@ItemPrice IS NULL OR @ItemPrice = @ZeroDecimal) )
+	BEGIN
+		EXEC dbo.[uspARGetItemPrice]  
+				 @ItemId  
+				,@EntityCustomerId
+				,@CompanyLocationId
+				,@ItemUOMId
+				,@InvoiceDate
+				,@ItemQtyShipped
+				,@ItemPrice OUTPUT
+	END	
 
 INSERT INTO [tblARInvoiceDetail]
 	([intInvoiceId]
