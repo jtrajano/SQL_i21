@@ -2047,6 +2047,7 @@
     <Build Include="dbo\Views\vyuSMMenuPermission.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleUpdate.sql" />
     <Build Include="dbo\Views\vyuAPBillDetailSource.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateShift.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
