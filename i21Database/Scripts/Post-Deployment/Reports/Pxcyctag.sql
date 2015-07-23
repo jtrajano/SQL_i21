@@ -1,7 +1,4 @@
-﻿--=====================MOTOR FUEL TAX CYCLE========================--
-
---This script will alter the data type for date fields from char(8) to int. This will also delete all records from pxcyctag table
-IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[pxcyctag]') AND type in (N'U')) 
+﻿IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[pxcyctag]') AND type in (N'U')) 
 BEGIN
 	DELETE FROM pxcyctag
 	
@@ -20,8 +17,10 @@ BEGIN
     --pxcyctag_cycle_seq
     IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'pxcyctag_cycle_seq' AND OBJECT_ID = OBJECT_ID(N'pxcyctag'))
     BEGIN
+		DROP INDEX Ipxcyctag0 ON  pxcyctag 
         ALTER TABLE pxcyctag 
 		ALTER COLUMN pxcyctag_cycle_seq smallint NOT NULL 
+		CREATE UNIQUE INDEX Ipxcyctag0 ON pxcyctag (pxcyctag_cycle_seq);
     END
     ELSE
     BEGIN
@@ -90,3 +89,4 @@ BEGIN
     END
 END
 GO
+
