@@ -32,6 +32,8 @@
 	intShiftId INT,
 	ysnProductionReversed BIT CONSTRAINT [DF_tblMFWorkOrderProducedLot_ysnProductionReversed] DEFAULT 0,
 	strReferenceNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intMachineId int,
+	dtmBusinessDate datetime null,
 	CONSTRAINT [PK_tblMFWorkOrderProducedLot_intWorkOrderProducedLotId] PRIMARY KEY ([intWorkOrderProducedLotId]),
 	CONSTRAINT [FK_tblMFWorkOrderProducedLot_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblMFWorkOrderProducedLot_tblICItem_inItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
@@ -40,5 +42,6 @@
 	CONSTRAINT [FK_tblMFWorkOrderProducedLot_tblICItemUOM_intItemUOMId_intPhysicalItemUOMId] FOREIGN KEY ([intPhysicalItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
 	CONSTRAINT [FK_tblMFWorkOrderProducedLot_tblICContainer_intContainerId] FOREIGN KEY([intContainerId]) REFERENCES dbo.tblICContainer (intContainerId),
 	CONSTRAINT FK_tblMFWorkOrderProducedLot_tblICStorageLocation_intStorageLocationId FOREIGN KEY(intStorageLocationId) REFERENCES dbo.tblICStorageLocation (intStorageLocationId),
-	CONSTRAINT FK_tblMFWorkOrderProducedLot_tblMFShift_intShiftId FOREIGN KEY(intShiftId) REFERENCES dbo.tblMFShift (intShiftId)
+	CONSTRAINT FK_tblMFWorkOrderProducedLot_tblMFShift_intShiftId FOREIGN KEY(intShiftId) REFERENCES dbo.tblMFShift (intShiftId),
+	CONSTRAINT FK_tblMFWorkOrderProducedLot_tblMFMachine_intMachineId FOREIGN KEY (intMachineId) REFERENCES dbo.tblMFMachine (intMachineId)
 )

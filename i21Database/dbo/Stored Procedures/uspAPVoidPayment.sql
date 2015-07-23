@@ -221,11 +221,12 @@ BEGIN
 	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
 
 	--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
-	UPDATE tblAPBill
-		SET tblAPBill.dblAmountDue = B.dblAmountDue,
-			tblAPBill.ysnPaid = 0,
-			tblAPBill.dtmDatePaid = NULL,
-			tblAPBill.dblWithheld = 0
+	UPDATE C
+		SET C.dblAmountDue = B.dblAmountDue,
+			C.ysnPaid = 0,
+			C.dtmDatePaid = NULL,
+			C.dblWithheld = 0,
+			C.dblPayment = CASE WHEN (C.dblPayment - B.dblPayment) < 0 THEN 0 ELSE (C.dblPayment - B.dblPayment) END
 	FROM tblAPPayment A
 				INNER JOIN tblAPPaymentDetail B 
 						ON A.intPaymentId = B.intPaymentId

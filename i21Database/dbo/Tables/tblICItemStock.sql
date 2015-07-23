@@ -58,12 +58,16 @@ This table holds stock information like quantity on hand and etc.
 		[intItemId] INT NOT NULL, 
 		[intItemLocationId] INT NOT NULL, 
 -- IMPORTANT NOTE: This field is transferred to tblICItemStockUOM. DO NOT USE this field. 
-		[dblUnitOnHand] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[dblUnitInCustody] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[dblUnitInConsigned] NUMERIC(18, 6) NULL DEFAULT ((0)),
-		[dblOrderCommitted] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblOnOrder] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblInTransitInbound] NUMERIC(18, 6) NULL DEFAULT ((0)),
+		[dblUnitOnHand] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblInTransitOutbound] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[dblBackOrder] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblOrderCommitted] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblUnitInCustody] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblConsignedPurchase] NUMERIC(18, 6) NULL DEFAULT ((0)),
+		[dblConsignedSale] NUMERIC(18, 6) NULL DEFAULT ((0)),
+		[dblUnitReserved] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[dblLastCountRetail] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
@@ -109,7 +113,7 @@ This table holds stock information like quantity on hand and etc.
 
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Units on Hand',
+		@value = N'On Hand',
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
@@ -173,19 +177,55 @@ This table holds stock information like quantity on hand and etc.
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Units in Consigned',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICItemStock',
-    @level2type = N'COLUMN',
-    @level2name = N'dblUnitInConsigned'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Units in Custody',
+    @value = N'Stored',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblICItemStock',
     @level2type = N'COLUMN',
     @level2name = N'dblUnitInCustody'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'In Transit Inbound',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemStock',
+    @level2type = N'COLUMN',
+    @level2name = N'dblInTransitInbound'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'In Transit Outbound',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemStock',
+    @level2type = N'COLUMN',
+    @level2name = N'dblInTransitOutbound'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Consigned Purchase',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemStock',
+    @level2type = N'COLUMN',
+    @level2name = N'dblConsignedPurchase'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Consigned Sale',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemStock',
+    @level2type = N'COLUMN',
+    @level2name = N'dblConsignedSale'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Reserved',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICItemStock',
+    @level2type = N'COLUMN',
+    @level2name = N'dblUnitReserved'

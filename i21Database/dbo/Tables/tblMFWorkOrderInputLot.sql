@@ -22,6 +22,7 @@
 	[dtmLastModified] DATETIME NULL, 
     [intLastModifiedUserId] INT NULL,
 	[intConcurrencyId] INT NULL CONSTRAINT [DF_tblMFWorkOrderInputLot_intConcurrencyId] DEFAULT 0, 
+	dtmBusinessDate datetime null,
 	CONSTRAINT [PK_tblMFWorkOrderInputLot_intWorkOrderInputLotId] PRIMARY KEY ([intWorkOrderInputLotId]),
 	CONSTRAINT [FK_tblMFWorkOrderInputLot_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblMFWorkOrderInputLot_tblICItem_inItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),

@@ -47,6 +47,7 @@ BEGIN TRY
 		,@intTransactionCount INT
 		,@strWorkOrderNo nvarchar(50)
 		,@strProcessName nvarchar(50)
+		,@dtmBusinessDate datetime
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -279,6 +280,8 @@ BEGIN TRY
 	IF @intTransactionCount = 0
 	BEGIN TRANSACTION
 
+	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime,@intLocationId) 
+
 	INSERT INTO dbo.tblMFWorkOrderInputLot (
 		intWorkOrderId
 		,intItemId
@@ -295,6 +298,7 @@ BEGIN TRY
 		,intContainerId
 		,strReferenceNo
 		,dtmActualInputDateTime
+		,dtmBusinessDate 
 		,dtmCreated
 		,intCreatedUserId
 		,dtmLastModified
@@ -321,6 +325,7 @@ BEGIN TRY
 		,@intContainerId
 		,@strReferenceNo
 		,@dtmActualInputDateTime
+		,@dtmBusinessDate
 		,@dtmCurrentDateTime
 		,@intUserId
 		,@dtmCurrentDateTime
