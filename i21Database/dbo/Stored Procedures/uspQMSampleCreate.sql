@@ -197,6 +197,7 @@ BEGIN TRY
 		,intSampleId
 		,intAttributeId
 		,strAttributeValue
+		,ysnIsMandatory
 		,intDocumentFileId
 		,intListItemId
 		,intCreatedUserId
@@ -208,6 +209,7 @@ BEGIN TRY
 		,@intSampleId
 		,intAttributeId
 		,strAttributeValue
+		,ysnIsMandatory
 		,intDocumentFileId
 		,intListItemId
 		,intCreatedUserId
@@ -217,6 +219,7 @@ BEGIN TRY
 	FROM OPENXML(@idoc, 'root/SampleDetail', 2) WITH (
 			intAttributeId INT
 			,strAttributeValue NVARCHAR(50)
+			,ysnIsMandatory BIT
 			,intDocumentFileId INT
 			,intListItemId INT
 			,intCreatedUserId INT

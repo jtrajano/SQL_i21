@@ -7,6 +7,7 @@
 	[strAttributeValue] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT '', 
 	[intDocumentFileId] INT, 
 	[intListItemId] INT, 
+	[ysnIsMandatory] BIT NOT NULL CONSTRAINT [DF_tblQMSampleDetail_ysnIsMandatory] DEFAULT 0, 
 	
 	[intCreatedUserId] [int] NULL,
 	[dtmCreated] [datetime] NULL CONSTRAINT [DF_tblQMSampleDetail_dtmCreated] DEFAULT GetDate(),

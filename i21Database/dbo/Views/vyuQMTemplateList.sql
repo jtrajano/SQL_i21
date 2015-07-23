@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuQMTemplateList
 AS
--- Material Type  
+-- Category
 SELECT DISTINCT P.intProductId
 	,PT.strProductTypeName 'strProductTypeName'
 	,IC.strCategoryCode 'strProductValue'
@@ -29,7 +29,7 @@ WHERE P.intProductTypeId = 1
 
 UNION ALL
 
--- Material  
+-- Item
 SELECT DISTINCT P.intProductId
 	,PT.strProductTypeName 'strProductTypeName'
 	,II.strItemNo 'strProductValue'
