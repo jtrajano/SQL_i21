@@ -10,6 +10,7 @@ BEGIN
 	FROM tblARInvoiceDetail
 	WHERE intInvoiceId = @InvoiceId
 		AND ISNULL(intSiteId,0) <> 0
+		AND ISNULL(ysnLeaseBilling,0) <> 1
 			
 	INSERT INTO tblTMCOBOLWRITE
 			([CustomerNumber]
