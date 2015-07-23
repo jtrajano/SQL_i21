@@ -31,49 +31,6 @@ DECLARE	-- Receipt Types
 		,@SOURCE_TYPE_Inbound_Shipment AS INT = 2
 		,@SOURCE_TYPE_Transport AS INT = 3
 
--- Allocate by 'cost'
---BEGIN 
---	DECLARE @totalOtherChargesForContracts_AllocateByCost AS NUMERIC(38,20)
---			,@totalCostOfAllItems AS NUMERIC(18,2)
-
---	-- Get the total other charges with 'allocate cost' set to 'cost'. 
---	SELECT	@totalOtherChargesForContracts_AllocateByCost = SUM(dblCalculatedAmount)
---	FROM	dbo.tblICInventoryReceiptChargePerItem OtherCharge
---	WHERE	OtherCharge.intInventoryReceiptId = @intInventoryReceiptId
---			AND OtherCharge.intContractId = @intContractId
---			AND OtherCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Cost
-
---	-- If there are no other charge to process, then exit.
---	IF ISNULL(@totalOtherChargesForContracts_AllocateByCost, 0) = 0 
---		GOTO _Exit;
-
---	-- Get the total cost from items that share the same contract id. 
---	SELECT @totalCostOfAllItems = SUM(ISNULL(ReceiptItem.dblOpenReceive, 0) * ISNULL(ReceiptItem.dblUnitCost, 0))
---	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
---				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
---			INNER JOIN dbo.tblICItemUOM ItemUOM
---				ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
---	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
---			AND ReceiptItem.intOrderId = @intContractId
-
---	-- Distribute the other charge by 'Cost'. 
---	IF ISNULL(@totalCostOfAllItems, 0) <> 0 
---	BEGIN 
---		UPDATE	ReceiptItem
---		SET		dblOtherCharges +=	(	@totalOtherChargesForContracts_AllocateByCost
---										* (ISNULL(ReceiptItem.dblOpenReceive, 0) * ISNULL(ReceiptItem.dblUnitCost, 0))
---										/ @totalCostOfAllItems
---									)				 
---		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
---					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId	
---				INNER JOIN dbo.tblICItemUOM ItemUOM
---					ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
---		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId						
---				AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
---				AND ReceiptItem.intOrderId = @intContractId
---	END 
---END 
-
 -- Allocate by 'cost
 BEGIN
 	-- Upsert (update or insert) a record into the Receipt Item Allocated Charge table. 
@@ -90,7 +47,9 @@ BEGIN
 				,TotalCostOfItemsPerContract.dblTotalCost 
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+					AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
 					AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
+					AND ReceiptItem.intOrderId IS NOT NULL 
 				INNER JOIN (
 					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
 							,strCostBilledBy
@@ -155,8 +114,5 @@ BEGIN
 		)
 	;
 END 
-
-
-
 
 _Exit:

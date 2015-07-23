@@ -1,6 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspICAllocateInventoryReceiptOtherChargesByContractAndWeights]
 	@intInventoryReceiptId AS INT
-	,@intContractId AS INT  
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -32,98 +31,145 @@ DECLARE	-- Receipt Types
 		,@SOURCE_TYPE_Inbound_Shipment AS INT = 2
 		,@SOURCE_TYPE_Transport AS INT = 3
 
--- Allocate cost by 'weight'
+-- Validate the Stock Unit. It must be a unit type of 'Weight'. Do not allow allocation if stock unit is not a weight. 
 BEGIN 
-	DECLARE @totalOtherChargesForContracts_AllocateByWeight AS NUMERIC(38,20)
-			,@totalWeightOfAllItems AS NUMERIC(18,6) 
+	DECLARE @invalidItem AS NVARCHAR(50)
+			,@intInvalidItemId AS INT 
 
-	-- Get the total other charges with 'allocate cost' set to 'weight'. 
-	SELECT	@totalOtherChargesForContracts_AllocateByWeight = SUM(dblCalculatedAmount)
-	FROM	dbo.tblICInventoryReceiptChargePerItem OtherCharge
-	WHERE	OtherCharge.intInventoryReceiptId = @intInventoryReceiptId
-			AND OtherCharge.intContractId = @intContractId
-			AND OtherCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Weight
-
-	-- If there are no other charge to process, then exit.
-	IF ISNULL(@totalOtherChargesForContracts_AllocateByWeight, 0) = 0 
-		GOTO _Exit;
-
-	-- Validate for non-weight unit type for all items that share the same contract id. 
-	BEGIN 
-		DECLARE @invalidItem AS NVARCHAR(50)
-				,@intInvalidItemId AS INT 
-
-		SELECT	TOP 1 
-				@intInvalidItemId = Item.intItemId 
-				,@invalidItem = Item.strItemNo
-		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
-					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId	
-				INNER JOIN dbo.tblICItem Item 
-					ON Item.intItemId = ReceiptItem.intItemId 
-				INNER JOIN dbo.tblICItemUOM ItemUOM
-					ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
-				LEFT JOIN dbo.tblICItemUOM StockUOM
-					ON StockUOM.intItemId = ReceiptItem.intItemId
-					AND StockUOM.ysnStockUnit = 1
-				INNER JOIN dbo.tblICUnitMeasure UOM
-					ON UOM.intUnitMeasureId = StockUOM.intUnitMeasureId
-					AND UOM.strUnitType = @UNIT_TYPE_Weight
-		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId						
-				AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
-				AND ReceiptItem.intOrderId = @intContractId
-				AND StockUOM.intItemUOMId IS NULL 							
-
-		IF @intInvalidItemId IS NOT NULL 
-		BEGIN 
-			-- Unable to continue. Cost allocation is by Weight but stock unit for {Item} is not a weight type.
-			RAISERROR(51166, 11, 1, @invalidItem) 
-			GOTO _Exit 
-		END 
-	END
-
-	-- Get the total weights from the items that share the same contract id. 
-	SELECT @totalWeightOfAllItems = SUM(dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, ItemUOM.dblUnitQty))
+	SELECT	TOP 1 
+			@intInvalidItemId = Item.intItemId 
+			,@invalidItem = Item.strItemNo
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId	
 			INNER JOIN dbo.tblICItem Item 
 				ON Item.intItemId = ReceiptItem.intItemId 
 			INNER JOIN dbo.tblICItemUOM ItemUOM
 				ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
+			INNER JOIN (
+					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
+							,strCostBilledBy
+							,intContractId
+							,intEntityVendorId
+							,ysnInventoryCost
+					FROM	dbo.tblICInventoryReceiptChargePerItem CalculatedCharge				
+					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
+							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Weight
+							AND CalculatedCharge.intContractId IS NOT NULL 
+					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost
+				) CalculatedCharges 
+					ON ReceiptItem.intOrderId = CalculatedCharges.intContractId
 			LEFT JOIN dbo.tblICItemUOM StockUOM
 				ON StockUOM.intItemId = ReceiptItem.intItemId
 				AND StockUOM.ysnStockUnit = 1
 			INNER JOIN dbo.tblICUnitMeasure UOM
 				ON UOM.intUnitMeasureId = StockUOM.intUnitMeasureId
 				AND UOM.strUnitType = @UNIT_TYPE_Weight
-	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-			AND ReceiptItem.intOrderId = @intContractId
-			AND StockUOM.intItemUOMId IS NOT NULL 
+	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId				
+			AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
+			AND ReceiptItem.intOrderId IS NOT NULL 
+			AND StockUOM.intItemUOMId IS NULL 						
+			AND ISNULL(CalculatedCharges.dblTotalOtherCharge, 0) <> 0
 
-	-- Distribute the other charge by 'Weight'. 
-	--IF ISNULL(@totalWeightOfAllItems, 0) <> 0
-	--BEGIN 
-	--	UPDATE	ReceiptItem
-	--	SET		dblOtherCharges +=	(	@totalOtherChargesForContracts_AllocateByWeight
-	--									* dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, ItemUOM.dblUnitQty)
-	--									/ @totalWeightOfAllItems
-	--								)				 
-	--	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
-	--				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId	
-	--			INNER JOIN dbo.tblICItem Item 
-	--				ON Item.intItemId = ReceiptItem.intItemId 
-	--			INNER JOIN dbo.tblICItemUOM ItemUOM
-	--				ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
-	--			LEFT JOIN dbo.tblICItemUOM StockUOM
-	--				ON StockUOM.intItemId = ReceiptItem.intItemId
-	--				AND StockUOM.ysnStockUnit = 1
-	--			INNER JOIN dbo.tblICUnitMeasure UOM
-	--				ON UOM.intUnitMeasureId = StockUOM.intUnitMeasureId
-	--				AND UOM.strUnitType = @UNIT_TYPE_Weight
-	--	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId						
-	--			AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
-	--			AND ReceiptItem.intOrderId = @intContractId
-	--			AND StockUOM.intItemUOMId IS NOT NULL 
-	--END
+	IF @intInvalidItemId IS NOT NULL 
+	BEGIN 
+		-- Unable to continue. Cost allocation is by Weight but stock unit for {Item} is not a weight type.
+		RAISERROR(51166, 11, 1, @invalidItem) 
+		GOTO _Exit 
+	END 
+END
+
+-- Allocate cost by 'weight'
+BEGIN 
+	-- Upsert (update or insert) a record into the Receipt Item Allocated Charge table. 
+	MERGE	
+	INTO	dbo.tblICInventoryReceiptItemAllocatedCharge 
+	WITH	(HOLDLOCK) 
+	AS		ReceiptItemAllocatedCharge
+	USING (
+		SELECT	CalculatedCharges.*
+				,Receipt.intInventoryReceiptId
+				,ReceiptItem.intInventoryReceiptItemId
+				,ReceiptItem.dblOpenReceive
+				,ItemUOM.dblUnitQty
+				,TotalWeightOfItemsPerContract.dblTotalWeight 
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+					AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
+					AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
+					AND ReceiptItem.intOrderId IS NOT NULL 
+				INNER JOIN dbo.tblICItemUOM ItemUOM	
+					ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
+				INNER JOIN (
+					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
+							,strCostBilledBy
+							,intContractId
+							,intEntityVendorId
+							,ysnInventoryCost
+					FROM	dbo.tblICInventoryReceiptChargePerItem CalculatedCharge				
+					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
+							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Weight
+							AND CalculatedCharge.intContractId IS NOT NULL 
+					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost
+				) CalculatedCharges 
+					ON ReceiptItem.intOrderId = CalculatedCharges.intContractId
+				LEFT JOIN (
+					SELECT  dblTotalWeight = SUM(dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, ItemUOM.dblUnitQty))
+							,ReceiptItem.intOrderId 
+					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
+								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId	
+								AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
+							INNER JOIN dbo.tblICItemUOM ItemUOM
+								ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
+							LEFT JOIN dbo.tblICItemUOM StockUOM
+								ON StockUOM.intItemId = ReceiptItem.intItemId
+								AND StockUOM.ysnStockUnit = 1
+							INNER JOIN dbo.tblICUnitMeasure UOM
+								ON UOM.intUnitMeasureId = StockUOM.intUnitMeasureId
+								AND UOM.strUnitType = @UNIT_TYPE_Weight
+					WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+							AND ReceiptItem.intOrderId IS NOT NULL 
+							AND StockUOM.intItemUOMId IS NOT NULL 
+					GROUP BY ReceiptItem.intOrderId
+				) TotalWeightOfItemsPerContract 
+					ON TotalWeightOfItemsPerContract.intOrderId = ReceiptItem.intOrderId 
+	) AS Source_Query  
+		ON ReceiptItemAllocatedCharge.intInventoryReceiptId = Source_Query.intInventoryReceiptId
+		AND ReceiptItemAllocatedCharge.intEntityVendorId = Source_Query.intEntityVendorId
+		AND ReceiptItemAllocatedCharge.strCostBilledBy = Source_Query.strCostBilledBy
+		AND ReceiptItemAllocatedCharge.ysnInventoryCost = Source_Query.ysnInventoryCost
+
+	-- Add the other charge to an existing allocation. 
+	WHEN MATCHED AND ISNULL(Source_Query.dblTotalWeight, 0) <> 0 THEN 
+		UPDATE 
+		SET		dblAmount = ISNULL(dblAmount, 0) + (
+					Source_Query.dblTotalOtherCharge
+					* dbo.fnCalculateStockUnitQty(Source_Query.dblOpenReceive, Source_Query.dblUnitQty)
+					/ Source_Query.dblTotalWeight 
+				)
+
+	-- Create a new allocation record for the item. 
+	WHEN NOT MATCHED AND ISNULL(Source_Query.dblTotalWeight, 0) <> 0 THEN 
+		INSERT (
+			[intInventoryReceiptId]
+			,[intInventoryReceiptItemId]
+			,[intEntityVendorId]
+			,[dblAmount]
+			,[strCostBilledBy]
+			,[ysnInventoryCost]
+		)
+		VALUES (
+			Source_Query.intInventoryReceiptId
+			,Source_Query.intInventoryReceiptItemId
+			,Source_Query.intEntityVendorId
+			,(
+				Source_Query.dblTotalOtherCharge
+				* dbo.fnCalculateStockUnitQty(Source_Query.dblOpenReceive, Source_Query.dblUnitQty)
+				/ Source_Query.dblTotalWeight 
+			)
+			,Source_Query.strCostBilledBy
+			,Source_Query.ysnInventoryCost
+		)
+	;
 END 
 
 _Exit:

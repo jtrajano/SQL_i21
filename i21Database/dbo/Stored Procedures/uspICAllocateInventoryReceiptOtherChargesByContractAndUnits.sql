@@ -1,6 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspICAllocateInventoryReceiptOtherChargesByContractAndUnits]
 	@intInventoryReceiptId AS INT
-	,@intContractId AS INT  
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -34,45 +33,89 @@ DECLARE	-- Receipt Types
 
 -- Allocate cost by 'unit'
 BEGIN 
-	DECLARE @totalOtherChargesForContracts_AllocateByUnit AS NUMERIC(38,20)
-			,@totalUnitOfAllItems AS NUMERIC(18, 6)
+	-- Upsert (update or insert) a record into the Receipt Item Allocated Charge table. 
+	MERGE	
+	INTO	dbo.tblICInventoryReceiptItemAllocatedCharge 
+	WITH	(HOLDLOCK) 
+	AS		ReceiptItemAllocatedCharge
+	USING (
+		SELECT	CalculatedCharges.*
+				,Receipt.intInventoryReceiptId
+				,ReceiptItem.intInventoryReceiptItemId
+				,ReceiptItem.dblOpenReceive
+				,ItemUOM.dblUnitQty
+				,TotalUnitsOfItemsPerContract.dblTotalUnits 
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+					AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
+					AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
+					AND ReceiptItem.intOrderId IS NOT NULL 
+				INNER JOIN dbo.tblICItemUOM ItemUOM	
+					ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
+				INNER JOIN (
+					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
+							,strCostBilledBy
+							,intContractId
+							,intEntityVendorId
+							,ysnInventoryCost
+					FROM	dbo.tblICInventoryReceiptChargePerItem CalculatedCharge				
+					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
+							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Unit
+							AND CalculatedCharge.intContractId IS NOT NULL 
+					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost
+				) CalculatedCharges 
+					ON ReceiptItem.intOrderId = CalculatedCharges.intContractId
+				LEFT JOIN (
+					SELECT	dblTotalUnits = SUM(dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, ItemUOM.dblUnitQty))
+							,ReceiptItem.intOrderId 
+					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+								AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
+							INNER JOIN dbo.tblICItemUOM ItemUOM
+								ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
+					WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+							AND ReceiptItem.intOrderId IS NOT NULL 
+					GROUP BY ReceiptItem.intOrderId 
+				) TotalUnitsOfItemsPerContract 
+					ON TotalUnitsOfItemsPerContract.intOrderId = ReceiptItem.intOrderId 
+	) AS Source_Query  
+		ON ReceiptItemAllocatedCharge.intInventoryReceiptId = Source_Query.intInventoryReceiptId
+		AND ReceiptItemAllocatedCharge.intEntityVendorId = Source_Query.intEntityVendorId
+		AND ReceiptItemAllocatedCharge.strCostBilledBy = Source_Query.strCostBilledBy
+		AND ReceiptItemAllocatedCharge.ysnInventoryCost = Source_Query.ysnInventoryCost
 
-	-- Get the total other charges with 'allocate cost' set to 'unit'. 
-	SELECT	@totalOtherChargesForContracts_AllocateByUnit = SUM(dblCalculatedAmount)
-	FROM	dbo.tblICInventoryReceiptChargePerItem OtherCharge
-	WHERE	OtherCharge.intInventoryReceiptId = @intInventoryReceiptId
-			AND OtherCharge.intContractId = @intContractId
-			AND OtherCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Unit
+	-- Add the other charge to an existing allocation. 
+	WHEN MATCHED AND ISNULL(Source_Query.dblTotalUnits, 0) <> 0 THEN 
+		UPDATE 
+		SET		dblAmount = ISNULL(dblAmount, 0) + (
+					Source_Query.dblTotalOtherCharge
+					* dbo.fnCalculateStockUnitQty(Source_Query.dblOpenReceive, Source_Query.dblUnitQty)
+					/ Source_Query.dblTotalUnits 
+				)
 
-	-- If there are no other charge to process, then exit.
-	IF ISNULL(@totalOtherChargesForContracts_AllocateByUnit, 0) = 0 
-		GOTO _Exit;
-
-	-- Get the total units from the items that share the same contract id. 
-	SELECT @totalUnitOfAllItems = SUM(dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, ItemUOM.dblUnitQty))
-	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
-				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-			INNER JOIN dbo.tblICItemUOM ItemUOM
-				ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
-	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-			AND ReceiptItem.intOrderId = @intContractId
-
-	-- Distribute the other charge by 'Unit'. 
-	--IF ISNULL(@totalUnitOfAllItems, 0) <> 0
-	--BEGIN 
-	--	UPDATE	ReceiptItem
-	--	SET		dblOtherCharges +=	(	@totalOtherChargesForContracts_AllocateByUnit
-	--									* dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, ItemUOM.dblUnitQty)
-	--									/ @totalUnitOfAllItems
-	--								)				 
-	--	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
-	--				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId	
-	--			INNER JOIN dbo.tblICItemUOM ItemUOM
-	--				ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
-	--	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId						
-	--			AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
-	--			AND ReceiptItem.intOrderId = @intContractId
-	--END
+	-- Create a new allocation record for the item. 
+	WHEN NOT MATCHED AND ISNULL(Source_Query.dblTotalUnits, 0) <> 0 THEN 
+		INSERT (
+			[intInventoryReceiptId]
+			,[intInventoryReceiptItemId]
+			,[intEntityVendorId]
+			,[dblAmount]
+			,[strCostBilledBy]
+			,[ysnInventoryCost]
+		)
+		VALUES (
+			Source_Query.intInventoryReceiptId
+			,Source_Query.intInventoryReceiptItemId
+			,Source_Query.intEntityVendorId
+			,(
+				Source_Query.dblTotalOtherCharge
+				* dbo.fnCalculateStockUnitQty(Source_Query.dblOpenReceive, Source_Query.dblUnitQty)
+				/ Source_Query.dblTotalUnits 
+			)
+			,Source_Query.strCostBilledBy
+			,Source_Query.ysnInventoryCost
+		)
+	;
 END 
 
 _Exit:
