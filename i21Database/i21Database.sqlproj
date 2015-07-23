@@ -2048,6 +2048,7 @@
     <Build Include="dbo\Stored Procedures\uspQMSampleUpdate.sql" />
     <Build Include="dbo\Views\vyuAPBillDetailSource.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateShift.sql" />
+    <Build Include="dbo\Views\vyuGetWorkOrderTransactionView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
