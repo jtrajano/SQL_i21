@@ -475,6 +475,61 @@ BEGIN TRY
 		,dtmLastModified = @dtmCurrentDateTime
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	UPDATE tblMFProductionSummary 
+	SET dblOpeningQuantity=CASE 
+			WHEN RI.intRecipeItemTypeId =1
+				THEN ISNULL(CC.dblSystemQty,0)
+			ELSE 0
+			END
+			,dblOpeningOutputQuantity=CASE 
+			WHEN RI.intRecipeItemTypeId =2
+				THEN ISNULL(CC.dblSystemQty,0)
+			ELSE 0
+			END
+	FROM tblMFProcessCycleCount CC 
+	JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId =CC.intItemId AND RI.intWorkOrderId=@intWorkOrderId 
+	WHERE EXISTS (SELECT *FROM tblMFProductionSummary PS WHERE PS.intWorkOrderId=@intWorkOrderId AND PS.intItemId=CC.intItemId)
+
+	INSERT INTO dbo.tblMFProductionSummary (
+		intWorkOrderId
+		,intItemId
+		,dblOpeningQuantity
+		,dblOpeningOutputQuantity
+		,dblOpeningConversionQuantity
+		,dblInputQuantity
+		,dblConsumedQuantity
+		,dblOutputQuantity
+		,dblOutputConversionQuantity
+		,dblCountQuantity
+		,dblCountOutputQuantity
+		,dblCountConversionQuantity
+		,dblCalculatedQuantity
+		)
+	SELECT DISTINCT @intWorkOrderId
+		,CC.intItemId
+		,CASE 
+			WHEN RI.intRecipeItemTypeId =1
+				THEN ISNULL(CC.dblSystemQty,0)
+			ELSE 0
+			END
+		,CASE 
+			WHEN RI.intRecipeItemTypeId =2
+				THEN ISNULL(CC.dblSystemQty,0)
+			ELSE 0
+			END
+		,0
+		,0
+		,0
+		,0
+		,0
+		,0
+		,0
+		,0
+		,0
+	FROM dbo.tblMFProcessCycleCount CC 
+	JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId =CC.intItemId AND RI.intWorkOrderId=@intWorkOrderId 
+	WHERE NOT EXISTS (SELECT *FROM dbo.tblMFProductionSummary PS WHERE PS.intWorkOrderId=@intWorkOrderId AND PS.intItemId=CC.intItemId)
 	
 	--COMMIT TRANSACTION
 
