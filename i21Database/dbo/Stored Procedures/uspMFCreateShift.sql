@@ -147,7 +147,7 @@ BEGIN TRY
 		,@intUserId
 		,@dtmCurrentDate
 		,1
-	FROM OPENXML(@idoc, 'root/Shifts/ShiftDetail', 2) WITH (
+	FROM OPENXML(@idoc, 'root/ShiftDetails/ShiftDetail', 2) WITH (
 			strShiftName NVARCHAR(50)
 			,intShiftBreakTypeId INT
 			,dtmShiftBreakTypeStartTime DATETIME
@@ -167,7 +167,7 @@ BEGIN TRY
 		,intShiftBreakTypeDuration = x.intShiftBreakTypeDuration
 		,intSequence = x.intSequence
 		,intConcurrencyId = Isnull(tblMFShiftDetail.intConcurrencyId, 0) + 1
-	FROM OPENXML(@idoc, 'root/Shifts/ShiftDetail', 2) WITH (
+	FROM OPENXML(@idoc, 'root/ShiftDetails/ShiftDetail', 2) WITH (
 			intShiftDetailId INT
 			,strShiftName NVARCHAR(50)
 			,intShiftBreakTypeId INT
@@ -185,7 +185,7 @@ BEGIN TRY
 	FROM dbo.tblMFShiftDetail
 	WHERE EXISTS (
 			SELECT *
-			FROM OPENXML(@idoc, 'root/Shifts/ShiftDetail', 2) WITH (
+			FROM OPENXML(@idoc, 'root/ShiftDetails/ShiftDetail', 2) WITH (
 					intShiftDetailId INT
 					,strRowState NVARCHAR(50)
 					) x
