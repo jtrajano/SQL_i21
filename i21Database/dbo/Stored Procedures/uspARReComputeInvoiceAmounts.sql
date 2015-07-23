@@ -56,7 +56,6 @@ UPDATE
 	tblARInvoiceDetail
 SET
 	 [dblTotalTax]	= T.[dblAdjustedTax]
-	,[dblTotal]		= ([dblPrice] * [dblQtyShipped]) - (([dblPrice] * [dblQtyShipped]) * (dblDiscount/100.00))
 FROM
 	(
 		SELECT
@@ -71,6 +70,13 @@ FROM
 WHERE
 	tblARInvoiceDetail.[intInvoiceDetailId] = T.[intInvoiceDetailId]
 	AND tblARInvoiceDetail.[intInvoiceId] = @InvoiceId
+	
+UPDATE
+	tblARInvoiceDetail
+SET
+	[dblTotal]	= ([dblPrice] * [dblQtyShipped]) - (([dblPrice] * [dblQtyShipped]) * (dblDiscount/100.00))
+WHERE
+	tblARInvoiceDetail.[intInvoiceId] = @InvoiceId	
 	
 	
 UPDATE

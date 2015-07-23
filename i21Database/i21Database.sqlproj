@@ -2049,6 +2049,8 @@
     <Build Include="dbo\Views\vyuAPBillDetailSource.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateShift.sql" />
     <Build Include="dbo\Views\vyuGetWorkOrderTransactionView.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCreateCustomerInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddInventoryItemToInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
