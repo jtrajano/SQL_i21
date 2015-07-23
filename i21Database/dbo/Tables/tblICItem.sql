@@ -86,6 +86,7 @@ Type the overview for the table here.
 		[dblOverReceiveTolerance] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[strMaintenanceCalculationMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[dblMaintenanceRate] NUMERIC(18, 6) NULL DEFAULT ((0)),
+		[intModuleId] INT NULL,
 		[strNACSCategory] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strWICCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[intAGCategory] INT NULL, 
@@ -162,7 +163,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICItem_tblSMCountry] FOREIGN KEY ([intOriginId]) REFERENCES [tblSMCountry]([intCountryID]), 
 		CONSTRAINT [FK_tblICItem_MaterialPackType] FOREIGN KEY ([intMaterialPackTypeId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]), 
 		CONSTRAINT [FK_tblICItem_Owner] FOREIGN KEY ([intOwnerId]) REFERENCES [tblARCustomer]([intEntityCustomerId]),
-		CONSTRAINT [FK_tblICItem_Customer] FOREIGN KEY ([intCustomerId]) REFERENCES [tblARCustomer]([intEntityCustomerId])
+		CONSTRAINT [FK_tblICItem_Customer] FOREIGN KEY ([intCustomerId]) REFERENCES [tblARCustomer]([intEntityCustomerId]), 
+		CONSTRAINT [FK_tblICItem_tblSMModule] FOREIGN KEY ([intModuleId]) REFERENCES [tblSMModule]([intModuleId])
 	);
 	GO
 
