@@ -22,6 +22,104 @@ namespace iRely.Inventory.BusinessLayer
         }
         #endregion
 
+        private bool IsAccountExist(ICollection<tblICItemAccount> accounts, string accountCategory, string message, out string newMessage)
+        {
+            var msg = message;
+            var category = accounts.FirstOrDefault(p=> p.strAccountCategory == accountCategory);
+            if (category == null)
+            {
+                if (!string.IsNullOrEmpty(message))
+                {
+                    message += ", ";
+                }
+                message += accountCategory;
+
+                newMessage = message;
+                return false;
+            }
+
+            newMessage = message;
+            return true;
+        }
+
+        public override BusinessResult<tblICItem> Validate(IEnumerable<tblICItem> entities, ValidateAction action, Dictionary<string, string> fieldMap = null)
+        {
+            var isValid = true;
+            var msg = "";
+            switch (action)
+            {
+                case ValidateAction.Post:
+                    foreach (tblICItem item in entities)
+                    {
+                        if (item.intCategoryId == null && item.intCommodityId == null)
+                        {
+                            var accounts = item.tblICItemAccounts;
+                            switch (item.strType)
+                            {
+                                case "Assembly/Blend":
+                                case "Bundle":
+                                case "Inventory":
+                                case "Kit":
+                                    isValid = IsAccountExist(accounts, "AP Clearing", msg, out msg);
+                                    isValid = IsAccountExist(accounts, "Inventory", msg, out msg);
+                                    isValid = IsAccountExist(accounts, "Cost of Goods", msg, out msg);
+                                    isValid = IsAccountExist(accounts, "Sales Account", msg, out msg);
+                                    isValid = IsAccountExist(accounts, "Inventory In-Transit", msg, out msg);
+                                    break;
+
+                                case "Raw Material":
+                                    isValid = IsAccountExist(accounts, "AP Clearing", msg, out msg);
+                                    isValid = IsAccountExist(accounts, "Inventory", msg, out msg);
+                                    isValid = IsAccountExist(accounts, "Cost of Goods", msg, out msg);
+                                    isValid = IsAccountExist(accounts, "Sales Account", msg, out msg);
+                                    isValid = IsAccountExist(accounts, "Inventory In-Transit", msg, out msg);
+                                    isValid = IsAccountExist(accounts, "Work In Progress", msg, out msg);
+                                    break;
+
+                                case "Finished Good":
+                                    isValid = IsAccountExist(accounts, "Inventory", msg, out msg);
+                                    isValid = IsAccountExist(accounts, "Cost of Goods", msg, out msg);
+                                    isValid = IsAccountExist(accounts, "Sales Account", msg, out msg);
+                                    isValid = IsAccountExist(accounts, "Inventory In-Transit", msg, out msg);
+                                    break;
+
+                                case "Non-Inventory":
+                                case "Other Charge":
+                                case "Service":
+                                case "Software":
+                                    isValid = IsAccountExist(accounts, "AP Clearing", msg, out msg);
+                                    isValid = IsAccountExist(accounts, "Sales Account", msg, out msg);
+                                    break;
+
+                            }
+                            goto returnValidate;
+                        }
+                    }
+                    break;
+            }
+
+        returnValidate:
+
+            if (isValid)
+            {
+                msg = "Success";
+            }
+            else
+            {
+                msg += " accounts are required.";
+            }
+            return new BusinessResult<tblICItem>()
+            {
+                success = isValid,
+                message = new MessageResult()
+                {
+                    statusText = msg,
+                    button = "ok",
+                    status = Error.OtherException
+                }
+            };
+        }
+
         public override async Task<BusinessResult<tblICItem>> SaveAsync(bool continueOnConflict)
         {
             var result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
