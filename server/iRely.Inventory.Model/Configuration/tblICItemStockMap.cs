@@ -15,12 +15,16 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intItemStockId).HasColumnName("intItemStockId");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
-            this.Property(t => t.dblUnitOnHand).HasColumnName("dblUnitOnHand").HasPrecision(18, 6);
-            this.Property(t => t.dblUnitInCustody).HasColumnName("dblUnitInCustody").HasPrecision(18, 6);
-            this.Property(t => t.dblUnitInConsigned).HasColumnName("dblUnitInConsigned").HasPrecision(18, 6);
-            this.Property(t => t.dblOrderCommitted).HasColumnName("dblOrderCommitted").HasPrecision(18, 6);
             this.Property(t => t.dblOnOrder).HasColumnName("dblOnOrder").HasPrecision(18, 6);
+            this.Property(t => t.dblInTransitInbound).HasColumnName("dblInTransitInbound").HasPrecision(18, 6);
+            this.Property(t => t.dblUnitOnHand).HasColumnName("dblUnitOnHand").HasPrecision(18, 6);
+            this.Property(t => t.dblInTransitOutbound).HasColumnName("dblInTransitOutbound").HasPrecision(18, 6);
             this.Property(t => t.dblBackOrder).HasColumnName("dblBackOrder").HasPrecision(18, 6);
+            this.Property(t => t.dblOrderCommitted).HasColumnName("dblOrderCommitted").HasPrecision(18, 6);
+            this.Property(t => t.dblUnitInCustody).HasColumnName("dblUnitInCustody").HasPrecision(18, 6);
+            this.Property(t => t.dblConsignedPurchase).HasColumnName("dblConsignedPurchase").HasPrecision(18, 6);
+            this.Property(t => t.dblConsignedSale).HasColumnName("dblConsignedSale").HasPrecision(18, 6);
+            this.Property(t => t.dblUnitReserved).HasColumnName("dblUnitReserved").HasPrecision(18, 6);
             this.Property(t => t.dblLastCountRetail).HasColumnName("dblLastCountRetail").HasPrecision(18, 6);
             this.Property(t => t.intSort).HasColumnName("intSort");
 

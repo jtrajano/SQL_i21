@@ -34,6 +34,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         'i21.store.CountryBuffered',
         'i21.store.TaxGroupMasterBuffered',
         'i21.store.CompanyLocationPricingLevelBuffered',
+        'i21.store.ModuleBuffered',
         'GeneralLedger.store.BufAccountId',
         'GeneralLedger.store.BufAccountCategoryGroup',
         'Manufacturing.store.BufferedManufacturingCell',
@@ -298,6 +299,9 @@ Ext.define('Inventory.view.ItemViewModel', {
                     name: 'strDescription'
                 }
             ]
+        },
+        module: {
+            type: 'smmodulebuffered'
         },
         costMethods: {
             autoLoad: true,
@@ -1126,6 +1130,14 @@ Ext.define('Inventory.view.ItemViewModel', {
             }
             else {
                 this.data.current.set('strCostMethod', 'Percentage');
+                return true;
+            }
+        },
+        hiddenNotSoftware: function (get) {
+            if (get('current.strType') === 'Software') {
+                return false;
+            }
+            else {
                 return true;
             }
         }

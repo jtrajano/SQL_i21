@@ -87,6 +87,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblOverReceiveTolerance).HasColumnName("dblOverReceiveTolerance").HasPrecision(18, 6);
             this.Property(t => t.strMaintenanceCalculationMethod).HasColumnName("strMaintenanceCalculationMethod");
             this.Property(t => t.dblMaintenanceRate).HasColumnName("dblMaintenanceRate").HasPrecision(18, 6);
+            this.Property(t => t.intModuleId).HasColumnName("intModuleId");
             this.Property(t => t.strNACSCategory).HasColumnName("strNACSCategory");
             this.Property(t => t.strWICCode).HasColumnName("strWICCode");
             this.Property(t => t.intAGCategory).HasColumnName("intAGCategory");

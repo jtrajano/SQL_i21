@@ -3362,6 +3362,56 @@
                                                             },
                                                             "name": "MyNumberField50",
                                                             "designerId": "e4449984-1f15-41d6-a681-aa8cea1da768"
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "    {",
+                                                                    "        dataIndex: 'intModuleId',",
+                                                                    "        dataType: 'numeric',",
+                                                                    "        hidden: true",
+                                                                    "    },",
+                                                                    "    {",
+                                                                    "        dataIndex: 'strModule',",
+                                                                    "        dataType: 'string',",
+                                                                    "        text: 'Module',",
+                                                                    "        flex: 1",
+                                                                    "    },",
+                                                                    "    {",
+                                                                    "        dataIndex: 'strApplicationName',",
+                                                                    "        dataType: 'string',",
+                                                                    "        text: 'Application',",
+                                                                    "        flex: 1",
+                                                                    "    }",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strModule",
+                                                                "fieldLabel": "Module",
+                                                                "itemId": "cboModule",
+                                                                "labelWidth": 125,
+                                                                "layout|flex": null,
+                                                                "valueField": "intModuleId"
+                                                            },
+                                                            "name": "MyComboBox89",
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "f90d17f0-185a-4d1d-be01-003a042db94e",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
                                                         }
                                                     ]
                                                 }
@@ -10015,8 +10065,8 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "flex": 1,
                                                 "itemId": "colStockLocation",
+                                                "minWidth": 120,
                                                 "text": "Location"
                                             },
                                             "name": "MyColumn52",
@@ -10031,77 +10081,13 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "dataIndex": "string",
-                                                "flex": 1,
                                                 "itemId": "colStockUOM",
+                                                "minWidth": 100,
                                                 "text": "UOM",
                                                 "width": 100
                                             },
                                             "name": "MyColumn1",
                                             "designerId": "9c42b824-9011-4c64-b43d-40bda1fe701b"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "itemId": "colStockOnHand",
-                                                "text": "On Hand",
-                                                "width": 100
-                                            },
-                                            "name": "MyNumberColumn8",
-                                            "designerId": "60a2ae7d-7d5c-4f2f-aebc-5153a8ccfb09"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "itemId": "colStockOnStorage",
-                                                "text": "On Storage",
-                                                "width": 100
-                                            },
-                                            "name": "MyNumberColumn47",
-                                            "designerId": "860ec4a6-4e58-469d-bbe3-e5d6c3ddc186"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "itemId": "colStockOnConsigned",
-                                                "text": "On Consigned",
-                                                "width": 100
-                                            },
-                                            "name": "MyNumberColumn48",
-                                            "designerId": "e9ce9cb2-1e86-4b30-a062-4ee75dc420eb"
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "itemId": "colStockCommitted",
-                                                "text": "Committed",
-                                                "width": 100
-                                            },
-                                            "name": "MyNumberColumn9",
-                                            "designerId": "41bf8448-72ab-4c3b-8253-6fa29e40cb26"
                                         },
                                         {
                                             "type": "Ext.grid.column.Number",
@@ -10128,12 +10114,156 @@
                                             "codeClass": null,
                                             "userConfig": {
                                                 "align": "right",
+                                                "itemId": "colStockInTransitInbound",
+                                                "text": "In Transit Inbound",
+                                                "width": 120
+                                            },
+                                            "name": "MyNumberColumn51",
+                                            "designerId": "c48f7f0a-a82f-4118-b573-09b6145ea74e"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "itemId": "colStockOnHand",
+                                                "text": "On Hand",
+                                                "width": 100
+                                            },
+                                            "name": "MyNumberColumn8",
+                                            "designerId": "60a2ae7d-7d5c-4f2f-aebc-5153a8ccfb09"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "itemId": "colStockInTransitOutbound",
+                                                "text": "In Transit Outbound",
+                                                "width": 130
+                                            },
+                                            "name": "MyNumberColumn52",
+                                            "designerId": "e254afff-1a25-4ceb-aea3-3a9c61a95aca"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
                                                 "itemId": "colStockBackOrder",
                                                 "text": "Back Order",
                                                 "width": 100
                                             },
                                             "name": "MyNumberColumn30",
                                             "designerId": "782c3231-4e5b-476f-826f-20892267b206"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "itemId": "colStockCommitted",
+                                                "text": "Committed",
+                                                "width": 100
+                                            },
+                                            "name": "MyNumberColumn9",
+                                            "designerId": "41bf8448-72ab-4c3b-8253-6fa29e40cb26"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "itemId": "colStockOnStorage",
+                                                "text": "On Storage",
+                                                "width": 100
+                                            },
+                                            "name": "MyNumberColumn47",
+                                            "designerId": "860ec4a6-4e58-469d-bbe3-e5d6c3ddc186"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "itemId": "colStockConsignedPurchase",
+                                                "text": "On Consigned Purchase",
+                                                "width": 140
+                                            },
+                                            "name": "MyNumberColumn48",
+                                            "designerId": "e9ce9cb2-1e86-4b30-a062-4ee75dc420eb"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "itemId": "colStockConsignedSale",
+                                                "text": "On Consigned Sale",
+                                                "width": 130
+                                            },
+                                            "name": "MyNumberColumn53",
+                                            "designerId": "5336c859-26ef-4eaf-9771-375ddc805bf0"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "itemId": "colStockReserved",
+                                                "text": "Reserved",
+                                                "width": 100
+                                            },
+                                            "name": "MyNumberColumn54",
+                                            "designerId": "6d3c7daf-b333-4e29-9a80-0146aa9e0669"
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Number",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "align": "right",
+                                                "itemId": "colStockAvailable",
+                                                "text": "Available",
+                                                "width": 100
+                                            },
+                                            "name": "MyNumberColumn55",
+                                            "designerId": "33494524-2d19-4dcd-992c-f8384dcf2aea"
                                         },
                                         {
                                             "type": "Ext.grid.View",

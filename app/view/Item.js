@@ -1590,6 +1590,33 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'txtMaintenanceRate',
                                                                         fieldLabel: 'Rate',
                                                                         labelWidth: 125
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intModuleId',
+                                                                                dataType: 'numeric',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strModule',
+                                                                                dataType: 'string',
+                                                                                text: 'Module',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strApplicationName',
+                                                                                dataType: 'string',
+                                                                                text: 'Application',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboModule',
+                                                                        fieldLabel: 'Module',
+                                                                        labelWidth: 125,
+                                                                        displayField: 'strModule',
+                                                                        valueField: 'intModuleId'
                                                                     }
                                                                 ]
                                                             }
@@ -4497,45 +4524,17 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colStockLocation',
+                                                        minWidth: 120,
                                                         dataIndex: 'string',
-                                                        text: 'Location',
-                                                        flex: 1
+                                                        text: 'Location'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colStockUOM',
+                                                        minWidth: 100,
                                                         width: 100,
                                                         dataIndex: 'string',
-                                                        text: 'UOM',
-                                                        flex: 1
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colStockOnHand',
-                                                        width: 100,
-                                                        align: 'right',
-                                                        text: 'On Hand'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colStockOnStorage',
-                                                        width: 100,
-                                                        align: 'right',
-                                                        text: 'On Storage'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colStockOnConsigned',
-                                                        width: 100,
-                                                        align: 'right',
-                                                        text: 'On Consigned'
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colStockCommitted',
-                                                        width: 100,
-                                                        align: 'right',
-                                                        text: 'Committed'
+                                                        text: 'UOM'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
@@ -4546,10 +4545,73 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
+                                                        itemId: 'colStockInTransitInbound',
+                                                        width: 120,
+                                                        align: 'right',
+                                                        text: 'In Transit Inbound'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colStockOnHand',
+                                                        width: 100,
+                                                        align: 'right',
+                                                        text: 'On Hand'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colStockInTransitOutbound',
+                                                        width: 130,
+                                                        align: 'right',
+                                                        text: 'In Transit Outbound'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
                                                         itemId: 'colStockBackOrder',
                                                         width: 100,
                                                         align: 'right',
                                                         text: 'Back Order'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colStockCommitted',
+                                                        width: 100,
+                                                        align: 'right',
+                                                        text: 'Committed'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colStockOnStorage',
+                                                        width: 100,
+                                                        align: 'right',
+                                                        text: 'On Storage'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colStockConsignedPurchase',
+                                                        width: 140,
+                                                        align: 'right',
+                                                        text: 'On Consigned Purchase'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colStockConsignedSale',
+                                                        width: 130,
+                                                        align: 'right',
+                                                        text: 'On Consigned Sale'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colStockReserved',
+                                                        width: 100,
+                                                        align: 'right',
+                                                        text: 'Reserved'
+                                                    },
+                                                    {
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colStockAvailable',
+                                                        width: 100,
+                                                        align: 'right',
+                                                        text: 'Available'
                                                     }
                                                 ],
                                                 viewConfig: {

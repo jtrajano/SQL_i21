@@ -87,6 +87,7 @@ namespace iRely.Inventory.Model
         public decimal? dblOverReceiveTolerance { get; set; }
         public string strMaintenanceCalculationMethod { get; set; }
         public decimal? dblMaintenanceRate { get; set; }
+        public int? intModuleId { get; set; }
         public string strNACSCategory { get; set; }
         public string strWICCode { get; set; }
         public int? intAGCategory { get; set; }

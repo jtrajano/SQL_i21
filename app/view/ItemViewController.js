@@ -288,6 +288,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 store: '{maintenancaCalculationMethods}'
             },
             txtMaintenanceRate: '{current.dblMaintenanceRate}',
+            cboModule: {
+                value: '{current.intModuleId}',
+                store: '{module}',
+                hidden: '{hiddenNotSoftware}'
+            },
 
             //-------//
             //POS Tab//
@@ -681,12 +686,17 @@ Ext.define('Inventory.view.ItemViewController', {
             grdStock: {
                 colStockLocation: 'strLocationName',
                 colStockUOM: 'strUnitMeasure',
-                colStockOnHand: 'dblUnitOnHand',
-                colStockOnStorage: 'dblUnitInCustody',
-                colStockOnConsigned: 'dblUnitInConsigned',
-                colStockCommitted: 'dblOrderCommitted',
                 colStockOnOrder: 'dblOnOrder',
-                colStockBackOrder: 'dblBackOrder'
+                colStockInTransitInbound: 'dblInTransitInbound',
+                colStockOnHand: 'dblUnitOnHand',
+                colStockInTransitOutbound: 'dblInTransitOutbound',
+                colStockBackOrder: 'dblBackOrder',
+                colStockCommitted: 'dblOrderCommitted',
+                colStockOnStorage: 'dblUnitInCustody',
+                colStockConsignedPurchase: 'dblConsignedPurchase',
+                colStockConsignedSale: 'dblConsignedSale',
+                colStockReserved: 'dblUnitReserved',
+                colStockAvailable: 'dblAvailable'
             },
 
             //-------------//

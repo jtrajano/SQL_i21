@@ -41,13 +41,30 @@ Ext.define('Inventory.model.ItemStock', {
             }
         },
         { name: 'intItemLocationId', type: 'int', allowNull: true },
-        { name: 'dblUnitOnHand', type: 'float' },
-        { name: 'dblUnitInCustody', type: 'float' },
-        { name: 'dblUnitInConsigned', type: 'float' },
-        { name: 'dblOrderCommitted', type: 'float' },
         { name: 'dblOnOrder', type: 'float' },
+        { name: 'dblInTransitInbound', type: 'float' },
+        { name: 'dblUnitOnHand', type: 'float' },
+        { name: 'dblInTransitOutbound', type: 'float' },
         { name: 'dblBackOrder', type: 'float' },
+        { name: 'dblOrderCommitted', type: 'float' },
+        { name: 'dblUnitInCustody', type: 'float' },
+        { name: 'dblConsignedPurchase', type: 'float' },
+        { name: 'dblConsignedSale', type: 'float' },
+        { name: 'dblUnitReserved', type: 'float' },
         { name: 'dblLastCountRetail', type: 'float' },
+        { name: 'dblAvailable', type: 'float',
+            persist: false,
+            convert: function(value, record){
+                var dblUnitOnHand = iRely.Functions.isEmpty(record.get('dblUnitOnHand')) ? 0 : record.get('dblUnitOnHand');
+                var dblBackOrder = iRely.Functions.isEmpty(record.get('dblBackOrder')) ? 0 : record.get('dblBackOrder');
+                var dblUnitReserved = iRely.Functions.isEmpty(record.get('dblUnitReserved')) ? 0 : record.get('dblUnitReserved');
+                var dblInTransitOutbound = iRely.Functions.isEmpty(record.get('dblInTransitOutbound')) ? 0 : record.get('dblInTransitOutbound');
+                var dblConsignedSale = iRely.Functions.isEmpty(record.get('dblConsignedSale')) ? 0 : record.get('dblConsignedSale');
+                var dblAvailable = (dblUnitOnHand - (dblBackOrder + dblUnitReserved + dblInTransitOutbound + dblConsignedSale));
+                return dblAvailable;
+            },
+            depends: ['dblUnitOnHand', 'dblBackOrder', 'dblUnitReserved', 'dblInTransitOutbound', 'dblConsignedSale']
+        },
         { name: 'intSort', type: 'int', allowNull: true }
 
     ],

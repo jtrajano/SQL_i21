@@ -14,12 +14,16 @@ namespace iRely.Inventory.Model
         public int intItemStockId { get; set; }
         public int intItemId { get; set; }
         public int? intItemLocationId { get; set; }
-        public decimal? dblUnitOnHand { get; set; }
-        public decimal? dblUnitInCustody { get; set; }
-        public decimal? dblUnitInConsigned { get; set; }
-        public decimal? dblOrderCommitted { get; set; }
         public decimal? dblOnOrder { get; set; }
+        public decimal? dblInTransitInbound { get; set; }
+        public decimal? dblUnitOnHand { get; set; }
+        public decimal? dblInTransitOutbound { get; set; }
         public decimal? dblBackOrder { get; set; }
+        public decimal? dblOrderCommitted { get; set; }
+        public decimal? dblUnitInCustody { get; set; }
+        public decimal? dblConsignedPurchase { get; set; }
+        public decimal? dblConsignedSale { get; set; }
+        public decimal? dblUnitReserved { get; set; }
         public decimal? dblLastCountRetail { get; set; }
         public int? intSort { get; set; }
 
