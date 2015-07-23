@@ -60,6 +60,7 @@
 :r .\8_AP\DropCK_PO_OrderStatus.sql
 :r .\8_AP\UpdateShipTo.sql
 :r .\8_AP\UpdateShipFrom.sql
+:r .\8_AP\UpdateBillToReceiptAssociation.sql
 
 --:r .\8_AP\AddPOVendorConstraint.sql
 --:r .\8_AP\FixEntityId.sql
