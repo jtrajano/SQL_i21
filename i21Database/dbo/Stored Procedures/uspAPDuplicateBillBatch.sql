@@ -47,7 +47,7 @@ SELECT
 	[intAccountId]			=	A.intAccountId,
     [ysnPosted]				=	0,
 	[dtmBatchDate]			=	GETDATE(),
-    [strReference]			=	A.strReference,
+    [strReference]			=	A.strReference + ' Duplicate of ' + A.strBillBatchNumber,
     [dblTotal]				=	A.dblTotal,
     [intConcurrencyId]		=	0, 
     [intEntityId]			=	@userId, 

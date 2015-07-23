@@ -472,12 +472,14 @@ BEGIN TRY
 			,@intPhysicalItemUOMId = @intPhysicalItemUOMId
 			,@intBatchId = @intBatchId
 			,@strBatchId = @strRetBatchId
-			,@intShiftId=@intPlannedShiftId
+			,@intShiftId=NULL
 			,@strReferenceNo=@strReferenceNo
 			,@intStatusId=@intStatusId
 			,@intLotId = @intLotId OUTPUT
 			,@ysnPostProduction=@ysnPostProduction
 			,@strLotAlias=@strLotAlias
+			,@intLocationId=@intLocationId
+			,@intMachineId =@intMachineId
 	
 		IF @intLotStatusId IS NOT NULL
 		BEGIN

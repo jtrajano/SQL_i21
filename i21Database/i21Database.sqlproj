@@ -2041,6 +2041,11 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\8_UpdateInvoiceType.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateCreateWorkOrder.sql" />
     <Build Include="dbo\Views\vyuICGetAssemblyItem.sql" />
+    <Build Include="dbo\Views\vyuAPRptCheckRegister.sql" />
+    <Build Include="dbo\Views\vyuRKGetFutureSettlementPriceHeader.sql" />
+    <Build Include="dbo\Views\vyuSMPortalPermission.sql" />
+    <Build Include="dbo\Views\vyuSMMenuPermission.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleUpdate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
