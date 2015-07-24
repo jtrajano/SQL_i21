@@ -37,12 +37,6 @@ BEGIN
 		AND intCompanyLocationId = @intLocationId
 	
 	UNION ALL
-	
-	SELECT @intCommodityId AS intCommodityId
-		,'' AS [strType]
-		,null AS dblTotal
-	
-	UNION ALL
 	SELECT @intCommodityId AS intCommodityId
 		,'Purchase In-Transit' AS [strType]
 		,ISNULL(ReserveQty, 0) AS dblTotal
