@@ -2048,6 +2048,16 @@
     <Build Include="dbo\Stored Procedures\uspMFValidateCreateWorkOrder.sql" />
     <Build Include="dbo\Views\vyuICGetAssemblyItem.sql" />
     <Build Include="dbo\Views\vyuAPRptCheckRegister.sql" />
+    <Build Include="dbo\Views\vyuRKGetFutureSettlementPriceHeader.sql" />
+    <Build Include="dbo\Views\vyuSMPortalPermission.sql" />
+    <Build Include="dbo\Views\vyuSMMenuPermission.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleUpdate.sql" />
+    <Build Include="dbo\Views\vyuAPBillDetailSource.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateShift.sql" />
+    <Build Include="dbo\Views\vyuGetWorkOrderTransactionView.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCreateCustomerInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddInventoryItemToInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetAttributeByAttributeName.sql" />
     <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByContractAndUnits.sql" />
     <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByContractAndWeights.sql" />
     <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByContractAndCost.sql" />

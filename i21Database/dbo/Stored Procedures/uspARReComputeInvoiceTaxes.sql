@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARReComputeInvoiceTaxes]
 	 @InvoiceId		AS INT
+	 ,@TaxMasterId	AS INT	= NULL	
 AS
 
 BEGIN
@@ -121,6 +122,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 					,@LocationId  
 					,@CustomerId
 					,@TransactionDate
+					,@TaxMasterId
 									
 			
 			-- Calculate Item Tax

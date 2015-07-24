@@ -47,6 +47,7 @@ BEGIN TRY
 		,@intTransactionCount INT
 		,@strWorkOrderNo nvarchar(50)
 		,@strProcessName nvarchar(50)
+		,@dtmBusinessDate datetime
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -279,6 +280,8 @@ BEGIN TRY
 	IF @intTransactionCount = 0
 	BEGIN TRANSACTION
 
+	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime,@intLocationId) 
+
 	INSERT INTO dbo.tblMFWorkOrderInputLot (
 		intWorkOrderId
 		,intItemId
@@ -295,6 +298,7 @@ BEGIN TRY
 		,intContainerId
 		,strReferenceNo
 		,dtmActualInputDateTime
+		,dtmBusinessDate 
 		,dtmCreated
 		,intCreatedUserId
 		,dtmLastModified
@@ -321,6 +325,7 @@ BEGIN TRY
 		,@intContainerId
 		,@strReferenceNo
 		,@dtmActualInputDateTime
+		,@dtmBusinessDate
 		,@dtmCurrentDateTime
 		,@intUserId
 		,@dtmCurrentDateTime
@@ -497,6 +502,42 @@ BEGIN TRY
 					,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 		END
 	END
+	IF NOT EXISTS(SELECT *FROM tblMFProductionSummary WHERE intWorkOrderId=@intWorkOrderId AND intItemId=@intInputItemId)
+	BEGIN
+		INSERT INTO tblMFProductionSummary (
+			intWorkOrderId
+			,intItemId
+			,dblOpeningQuantity
+			,dblOpeningOutputQuantity
+			,dblOpeningConversionQuantity
+			,dblInputQuantity
+			,dblConsumedQuantity
+			,dblOutputQuantity
+			,dblOutputConversionQuantity
+			,dblCountQuantity
+			,dblCountOutputQuantity
+			,dblCountConversionQuantity
+			,dblCalculatedQuantity
+			)
+		SELECT @intWorkOrderId
+			,@intInputItemId
+			,0
+			,0
+			,0
+			,@dblInputWeight
+			,0
+			,0
+			,0
+			,0
+			,0
+			,0
+			,0
+	END
+	ELSE
+	BEGIN
+		UPDATE tblMFProductionSummary SET dblInputQuantity=dblInputQuantity+@dblInputWeight WHERE intWorkOrderId=@intWorkOrderId AND intItemId=@intInputItemId
+	END
+
 	IF @intTransactionCount = 0
 	COMMIT TRANSACTION
 

@@ -85,11 +85,19 @@ DECLARE @InvoiceOutputTable TABLE
 	intInvoiceId int
     )
 
-INSERT into @InvoiceOutputTable(
-		 intSourceId	
-		,intInvoiceId		 	
-	 )	
+--INSERT into @InvoiceOutputTable(
+--		 intSourceId	
+--		,intInvoiceId		 	
+--	 )	
   EXEC dbo.uspARAddInvoice @InvoiceStagingTable,@intUserId;
+
+INSERT INTO @InvoiceOutputTable
+select IE.intSourceId,
+       IV.intInvoiceId
+FROM
+    @InvoiceStagingTable IE  
+    JOIN tblARInvoice IV
+        on IE.intSourceId = IV.intDistributionHeaderId
 
 Declare @incval int,
         @SouceId int,

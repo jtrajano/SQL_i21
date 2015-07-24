@@ -1,7 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspQMSampleCreate]
+﻿CREATE PROCEDURE [dbo].[uspQMSampleUpdate]
 	@strXml NVARCHAR(Max)
-	,@strSampleNumber NVARCHAR(30) OUTPUT
-	,@intSampleId INT OUTPUT
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -16,62 +14,19 @@ BEGIN TRY
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
 
-	DECLARE @strLotNumber NVARCHAR(30)
+	DECLARE @intSampleId INT
 
-	SELECT @strSampleNumber = strSampleNumber
-		,@strLotNumber = strLotNumber
-	FROM OPENXML(@idoc, 'root', 2) WITH (
-			strSampleNumber NVARCHAR(30)
-			,strLotNumber NVARCHAR(30)
-			)
+	SELECT @intSampleId = intSampleId
+	FROM OPENXML(@idoc, 'root', 2) WITH (intSampleId INT)
 
-	IF (
-			@strSampleNumber = ''
-			OR @strSampleNumber IS NULL
-			)
-	BEGIN
-		EXEC dbo.uspSMGetStartingNumber 62
-			,@strSampleNumber OUTPUT
-	END
-
-	IF EXISTS (
+	IF NOT EXISTS (
 			SELECT *
 			FROM dbo.tblQMSample
-			WHERE strSampleNumber = @strSampleNumber
+			WHERE intSampleId = @intSampleId
 			)
 	BEGIN
 		RAISERROR (
-				'Sample number already exists. '
-				,16
-				,1
-				)
-	END
-
-	IF (
-			SELECT CASE 
-					WHEN @strSampleNumber LIKE '%[@~$\`^&*()%?:<>!|\+;",{}'']%'
-						THEN 0
-					ELSE 1
-					END
-			) = 0
-	BEGIN
-		RAISERROR (
-				'Special characters are not allowed for Sample Number. '
-				,16
-				,1
-				)
-	END
-
-	IF (
-			SELECT CASE 
-					WHEN @strLotNumber LIKE '%[@~$\`^&*()%?<>!|\+;:",{}'']%'
-						THEN 0
-					ELSE 1
-					END
-			) = 0
-	BEGIN
-		RAISERROR (
-				'Special characters are not allowed for Lot Number. '
+				'Sample is already deleted by another user. '
 				,16
 				,1
 				)
@@ -79,80 +34,41 @@ BEGIN TRY
 
 	BEGIN TRAN
 
-	INSERT INTO dbo.tblQMSample (
-		intConcurrencyId
-		,intSampleTypeId
-		,strSampleNumber
-		,intProductTypeId
-		,intSampleStatusId
-		,intItemId
-		,intItemContractId
-		,intContractHeaderId
-		,intContractDetailId
-		,intShipmentBLContainerContractId
-		,intShipmentId
-		,intShipmentContractQtyId
-		,intShipmentBLContainerId
-		,intCountryID
-		,ysnIsContractCompleted
-		,intLotStatusId
-		,intEntityId
-		,strShipmentNumber
-		,strLotNumber
-		,strSampleNote
-		,dtmSampleReceivedDate
-		,dtmTestedOn
-		,intTestedById
-		,dblSampleQty
-		,intSampleUOMId
-		,dblRepresentingQty
-		,intRepresentingUOMId
-		,strRefNo
-		,dtmTestingStartDate
-		,dtmTestingEndDate
-		,dtmSamplingEndDate
-		,strSamplingMethod
-		,intCreatedUserId
-		,dtmCreated
-		,intLastModifiedUserId
-		,dtmLastModified
-		)
-	SELECT 1
-		,intSampleTypeId
-		,@strSampleNumber
-		,intProductTypeId
-		,intSampleStatusId
-		,intItemId
-		,intItemContractId
-		,intContractHeaderId
-		,intContractDetailId
-		,intShipmentBLContainerContractId
-		,intShipmentId
-		,intShipmentContractQtyId
-		,intShipmentBLContainerId
-		,intCountryID
-		,ysnIsContractCompleted
-		,intLotStatusId
-		,intEntityId
-		,strShipmentNumber
-		,strLotNumber
-		,strSampleNote
-		,dtmSampleReceivedDate
-		,dtmTestedOn
-		,intTestedById
-		,dblSampleQty
-		,intSampleUOMId
-		,dblRepresentingQty
-		,intRepresentingUOMId
-		,strRefNo
-		,dtmTestingStartDate
-		,dtmTestingEndDate
-		,dtmSamplingEndDate
-		,strSamplingMethod
-		,intCreatedUserId
-		,dtmCreated
-		,intLastModifiedUserId
-		,dtmLastModified
+	-- Sample Header Update
+	UPDATE dbo.tblQMSample
+	SET intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
+		,intSampleTypeId = x.intSampleTypeId
+		,intProductTypeId = x.intProductTypeId
+		,intSampleStatusId = x.intSampleStatusId
+		,intItemId = x.intItemId
+		,intItemContractId = x.intItemContractId
+		,intContractHeaderId = x.intContractHeaderId
+		,intContractDetailId = x.intContractDetailId
+		,intShipmentBLContainerContractId = x.intShipmentBLContainerContractId
+		,intShipmentId = x.intShipmentId
+		,intShipmentContractQtyId = x.intShipmentContractQtyId
+		,intShipmentBLContainerId = x.intShipmentBLContainerId
+		,intCountryID = x.intCountryID
+		,ysnIsContractCompleted = x.ysnIsContractCompleted
+		,intLotStatusId = x.intLotStatusId
+		,intEntityId = x.intEntityId
+		,strShipmentNumber = x.strShipmentNumber
+		,strLotNumber = x.strLotNumber
+		,strSampleNote = x.strSampleNote
+		,dtmSampleReceivedDate = x.dtmSampleReceivedDate
+		,dtmTestedOn = x.dtmTestedOn
+		,intTestedById = x.intTestedById
+		,dblSampleQty = x.dblSampleQty
+		,intSampleUOMId = x.intSampleUOMId
+		,dblRepresentingQty = x.dblRepresentingQty
+		,intRepresentingUOMId = x.intRepresentingUOMId
+		,strRefNo = x.strRefNo
+		,dtmTestingStartDate = x.dtmTestingStartDate
+		,dtmTestingEndDate = x.dtmTestingEndDate
+		,dtmSamplingEndDate = x.dtmSamplingEndDate
+		,strSamplingMethod = x.strSamplingMethod
+		,intLastModifiedUserId = x.intLastModifiedUserId
+		,dtmLastModified = x.dtmLastModified
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intSampleTypeId INT
 			,intProductTypeId INT
@@ -184,14 +100,14 @@ BEGIN TRY
 			,dtmTestingEndDate DATETIME
 			,dtmSamplingEndDate DATETIME
 			,strSamplingMethod NVARCHAR(50)
-			,intCreatedUserId INT
-			,dtmCreated DATETIME
 			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
-			)
+			,strRowState NVARCHAR(50)
+			) x
+	WHERE dbo.tblQMSample.intSampleId = @intSampleId
+		AND x.strRowState = 'MODIFIED'
 
-	SELECT @intSampleId = SCOPE_IDENTITY()
-
+	-- Sample Detail Create, Update, Delete
 	INSERT INTO dbo.tblQMSampleDetail (
 		intConcurrencyId
 		,intSampleId
@@ -226,8 +142,43 @@ BEGIN TRY
 			,dtmCreated DATETIME
 			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
+			,strRowState NVARCHAR(50)
+			) x
+	WHERE x.strRowState = 'ADDED'
+
+	UPDATE dbo.tblQMSampleDetail
+	SET strAttributeValue = x.strAttributeValue
+		,intListItemId = x.intListItemId
+		,intDocumentFileId = x.intDocumentFileId
+		,intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
+		,intLastModifiedUserId = x.intLastModifiedUserId
+		,dtmLastModified = x.dtmLastModified
+	FROM OPENXML(@idoc, 'root/SampleDetail', 2) WITH (
+			intSampleDetailId INT
+			,strAttributeValue NVARCHAR(50)
+			,intListItemId INT
+			,intDocumentFileId INT
+			,intLastModifiedUserId INT
+			,dtmLastModified DATETIME
+			,strRowState NVARCHAR(50)
+			) x
+	WHERE x.intSampleDetailId = dbo.tblQMSampleDetail.intSampleDetailId
+		AND x.strRowState = 'MODIFIED'
+
+	DELETE
+	FROM dbo.tblQMSampleDetail
+	WHERE intSampleId = @intSampleId
+		AND EXISTS (
+			SELECT *
+			FROM OPENXML(@idoc, 'root/SampleDetail', 2) WITH (
+					intSampleDetailId INT
+					,strRowState NVARCHAR(50)
+					) x
+			WHERE x.intSampleDetailId = dbo.tblQMSampleDetail.intSampleDetailId
+				AND x.strRowState = 'DELETE'
 			)
 
+	-- Test Result Create, Update, Delete
 	INSERT INTO dbo.tblQMTestResult (
 		intConcurrencyId
 		,intSampleId
@@ -340,9 +291,45 @@ BEGIN TRY
 			,dtmCreated DATETIME
 			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
-			)
+			,strRowState NVARCHAR(50)
+			) x
+	WHERE x.strRowState = 'ADDED'
 
-	SELECT @strSampleNumber AS strSampleNumber
+	UPDATE dbo.tblQMTestResult
+	SET strPropertyValue = x.strPropertyValue
+		,strResult = x.strResult
+		,strComment = x.strComment
+		,intSequenceNo = x.intSequenceNo
+		,intListItemId = x.intListItemId
+		,intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
+		,intLastModifiedUserId = x.intLastModifiedUserId
+		,dtmLastModified = x.dtmLastModified
+	FROM OPENXML(@idoc, 'root/TestResult', 2) WITH (
+			intTestResultId INT
+			,strPropertyValue NVARCHAR(MAX)
+			,strResult NVARCHAR(20)
+			,strComment NVARCHAR(MAX)
+			,intSequenceNo INT
+			,intListItemId INT
+			,intLastModifiedUserId INT
+			,dtmLastModified DATETIME
+			,strRowState NVARCHAR(50)
+			) x
+	WHERE x.intTestResultId = dbo.tblQMTestResult.intTestResultId
+		AND x.strRowState = 'MODIFIED'
+
+	DELETE
+	FROM dbo.tblQMTestResult
+	WHERE intSampleId = @intSampleId
+		AND EXISTS (
+			SELECT *
+			FROM OPENXML(@idoc, 'root/TestResult', 2) WITH (
+					intTestResultId INT
+					,strRowState NVARCHAR(50)
+					) x
+			WHERE x.intTestResultId = dbo.tblQMTestResult.intTestResultId
+				AND x.strRowState = 'DELETE'
+			)
 
 	EXEC sp_xml_removedocument @idoc
 

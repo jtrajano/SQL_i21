@@ -95,12 +95,11 @@ AS
 			,@ItemCategory	NVARCHAR(100)
 			,@UOMQuantity		NUMERIC(18,6)
 
-	SELECT
-		@VendorId = VI.intVendorId
-		,@ItemLocationId = intItemLocationId
-		,@ItemCategoryId = I.intCategoryId
-		,@ItemCategory = C.strCategoryCode
-		,@UOMQuantity		= ISNULL(UOM.dblUnitQty,1.00)
+	SELECT @VendorId	   = VI.intVendorId
+		  ,@ItemLocationId = intItemLocationId
+		  ,@ItemCategoryId = I.intCategoryId
+		  ,@ItemCategory   = C.strCategoryCode
+		  ,@UOMQuantity    = CASE WHEN UOM.dblUnitQty = 0 OR UOM.dblUnitQty IS NULL THEN 1.00 ELSE UOM.dblUnitQty END
 	FROM
 		tblICItem I
 	INNER JOIN

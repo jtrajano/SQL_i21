@@ -174,7 +174,7 @@ SELECT	@InventoryReceiptId,
 		CC.intItemId,
 		0,
 		CC.strCostMethod,
-		CC.dblRate,
+		SUM(CC.dblRate),
 		CC.intItemUOMId,
 		CC.intVendorId,
 		NULL,
@@ -188,7 +188,6 @@ GROUP
 BY		CC.intItemId,
 		CC.intVendorId,
 		CC.strCostMethod,
-		CC.dblRate,
 		CC.intItemUOMId
 
 --Re-update the total cost 

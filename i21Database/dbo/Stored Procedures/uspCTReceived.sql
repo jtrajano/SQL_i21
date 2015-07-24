@@ -2,7 +2,8 @@
 	@ItemsFromInventoryReceipt ReceiptItemTableType READONLY ,
 	@intUserId  INT
 AS
-BEGIN
+
+BEGIN TRY
 
 	SET QUOTED_IDENTIFIER OFF
 	SET ANSI_NULLS ON
@@ -10,25 +11,60 @@ BEGIN
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF
 
-	DECLARE		@intInventoryReceiptDetailId INT,
-				@intContractDetailId INT,
-				@intFromItemUOMId		INT,
-				@intToItemUOMId		INT,
-				@dblQty				NUMERIC(12,4),
-				@dblConvertedQty				NUMERIC(12,4)
+	DECLARE		@intInventoryReceiptDetailId	INT,
+				@intContractDetailId			INT,
+				@intFromItemUOMId				INT,
+				@intToItemUOMId					INT,
+				@intUniqueId					INT,
+				@dblQty							NUMERIC(12,4),
+				@dblConvertedQty				NUMERIC(12,4),
+				@ErrMsg							NVARCHAR(MAX),
+				@strReceiptType					NVARCHAR(50)
 
-	SELECT @intInventoryReceiptDetailId = MIN(intInventoryReceiptDetailId) FROM @ItemsFromInventoryReceipt
+	SELECT @strReceiptType = strReceiptType FROM @ItemsFromInventoryReceipt
 
-	WHILE ISNULL(@intInventoryReceiptDetailId,0) > 0
+	IF(@strReceiptType <> 'Purchase Contract' AND @strReceiptType <> 'Purchase Order')
+		RETURN
+
+	DECLARE @tblToProcess TABLE
+	(
+		intUniqueId					INT IDENTITY,
+		intInventoryReceiptDetailId INT,
+		intContractDetailId			INT,
+		intItemUOMId				INT,
+		dblQty						NUMERIC(12,4)	
+	)
+
+	IF(@strReceiptType = 'Purchase Contract')
 	BEGIN
-		SELECT	@intContractDetailId	=	NULL,
-				@intFromItemUOMId		=	NULL,
-				@dblQty					=	NULL
+		INSERT	INTO @tblToProcess (intInventoryReceiptDetailId,intContractDetailId,intItemUOMId,dblQty)
+		SELECT 	intInventoryReceiptDetailId,intLineNo,intItemUOMId,	dblQty
+		FROM	@ItemsFromInventoryReceipt
+	END
+	ELSE
+	BEGIN
+		INSERT	INTO @tblToProcess (intInventoryReceiptDetailId,intContractDetailId,intItemUOMId,dblQty)
+		SELECT 	IR.intInventoryReceiptDetailId,PO.intContractDetailId,IR.intItemUOMId,IR.dblQty
+		FROM	@ItemsFromInventoryReceipt	IR
+		JOIN	tblPOPurchaseDetail			PO	ON	PO.intPurchaseDetailId	=	IR.intLineNo
+		WHERE	PO.intContractDetailId		IS	NOT NULL
+	END
 
-		SELECT	@intContractDetailId	=	intLineNo,
-				@intFromItemUOMId		=	intItemUOMId,
-				@dblQty					=	dblQty
-		FROM	@ItemsFromInventoryReceipt WHERE intInventoryReceiptDetailId = @intInventoryReceiptDetailId
+	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
+
+	WHILE ISNULL(@intUniqueId,0) > 0
+	BEGIN
+		SELECT	@intContractDetailId			=	NULL,
+				@intFromItemUOMId				=	NULL,
+				@dblQty							=	NULL,
+				@intInventoryReceiptDetailId	=	NULL
+
+		SELECT	@intContractDetailId			=	intContractDetailId,
+				@intFromItemUOMId				=	intItemUOMId,
+				@dblQty							=	dblQty,
+				@intInventoryReceiptDetailId	=	intInventoryReceiptDetailId
+		FROM	@tblToProcess 
+		WHERE	intUniqueId						=	 @intUniqueId
 
 		IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 		BEGIN
@@ -46,7 +82,15 @@ BEGIN
 
 		EXEC uspCTUpdateSequenceBalance @intContractDetailId,@dblConvertedQty,@intUserId,@intInventoryReceiptDetailId
 
-		SELECT @intInventoryReceiptDetailId = MIN(intInventoryReceiptDetailId) FROM @ItemsFromInventoryReceipt WHERE intInventoryReceiptDetailId > @intInventoryReceiptDetailId
+		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 	END
 
-END 
+END TRY
+
+BEGIN CATCH
+
+	SET @ErrMsg = 'uspCTReceived - ' + ERROR_MESSAGE()  
+	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')  
+	
+END CATCH
+ 

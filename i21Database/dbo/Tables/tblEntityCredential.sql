@@ -3,7 +3,10 @@
     [intEntityId]           INT            NOT NULL,
     [strUserName]           NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL,
     [strPassword]           NVARCHAR (100) NOT NULL,
-    [intConcurrencyId]      INT            DEFAULT ((1)) NOT NULL,
+    [strApiKey]				NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS NULL, 
+    [strApiSecret]			NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS NULL, 
+    [ysnApiDisabled]		BIT NULL, 
+    [intConcurrencyId]      INT            DEFAULT ((1)) NOT NULL
     CONSTRAINT [PK_tblEntityCredential] PRIMARY KEY CLUSTERED ([intEntityCredentialId] ASC),
     CONSTRAINT [FK_tblEntityCredential_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]) ON DELETE CASCADE,
     CONSTRAINT [AK_tblEntityCredential_strUserName] UNIQUE NONCLUSTERED ([strUserName] ASC)

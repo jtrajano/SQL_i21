@@ -71,6 +71,7 @@ UPDATE
 	tblSOSalesOrder
 SET
 	dtmProcessDate = GETDATE()
+  , ysnProcessed = 1
 WHERE
 	intSalesOrderId = @SalesOrderId		
 

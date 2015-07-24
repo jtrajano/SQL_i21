@@ -36,43 +36,6 @@ BEGIN TRY
 		,intItemId INT
 		,dblCalculatedQuantity NUMERIC(18, 6)
 		)
-	DECLARE @tblMFProductionSummary TABLE (
-		intWorkOrderId INT NOT NULL
-		,intItemId INT NOT NULL
-		,intMachineId INT
-		,dblOpeningQuantity NUMERIC(18, 6)
-		,dblOpeningOutputQuantity NUMERIC(18, 6)
-		,dblOpeningConversionQuantity NUMERIC(18, 6)
-		,dblInputQuantity NUMERIC(18, 6)
-		,dblConsumedQuantity NUMERIC(18, 6)
-		,dblOutputQuantity NUMERIC(18, 6)
-		,dblOutputConversionQuantity NUMERIC(18, 6)
-		,dblCountQuantity NUMERIC(18, 6)
-		,dblCountOutputQuantity NUMERIC(18, 6)
-		,dblCountConversionQuantity NUMERIC(18, 6)
-		,dblCalculatedQuantity NUMERIC(18, 6)
-		,dblYieldQuantity NUMERIC(18, 6)
-		,dblYieldPercentage NUMERIC(18, 6)
-		)
-	DECLARE @tblMFProductionSummaryFinal TABLE (
-		intProductionSummaryId INT identity(1, 1)
-		,intWorkOrderId INT NOT NULL
-		,intItemId INT NOT NULL
-		,intMachineId INT
-		,dblOpeningQuantity NUMERIC(18, 6)
-		,dblOpeningOutputQuantity NUMERIC(18, 6)
-		,dblOpeningConversionQuantity NUMERIC(18, 6)
-		,dblInputQuantity NUMERIC(18, 6)
-		,dblConsumedQuantity NUMERIC(18, 6)
-		,dblOutputQuantity NUMERIC(18, 6)
-		,dblOutputConversionQuantity NUMERIC(18, 6)
-		,dblCountQuantity NUMERIC(18, 6)
-		,dblCountOutputQuantity NUMERIC(18, 6)
-		,dblCountConversionQuantity NUMERIC(18, 6)
-		,dblCalculatedQuantity NUMERIC(18, 6)
-		,dblYieldQuantity NUMERIC(18, 6)
-		,dblYieldPercentage NUMERIC(18, 6)
-		)
 
 	SELECT @intItemId = intItemId
 		,@intLocationId = intLocationId
@@ -160,201 +123,15 @@ BEGIN TRY
 	WHERE r.intWorkOrderId = @intWorkOrderId
 		AND ri.intRecipeItemTypeId = 2
 		AND ri.ysnConsumptionRequired = 1
-
-	INSERT INTO @tblMFProductionSummary (
-		intWorkOrderId
-		,intItemId
-		,dblOpeningQuantity
-		,dblOpeningOutputQuantity
-		,dblOpeningConversionQuantity
-		,dblInputQuantity
-		,dblConsumedQuantity
-		,dblOutputQuantity
-		,dblOutputConversionQuantity
-		,dblCountQuantity
-		,dblCountOutputQuantity
-		,dblCountConversionQuantity
-		,dblCalculatedQuantity
-		)
-	SELECT @intWorkOrderId
-		,I.intItemId
-		,0
-		,0
-		,0
-		,ISNULL(SUM(WC.dblQuantity),0)
-		,0
-		,0
-		,0
-		,0
-		,0
-		,0
-		,I.dblCalculatedQuantity
-	FROM @tblInputItem I
-	LEFT JOIN dbo.tblMFWorkOrderInputLot WC ON WC.intItemId = I.intItemId
-		AND WC.intWorkOrderId = @intWorkOrderId
-	GROUP BY I.intItemId
-		,I.dblCalculatedQuantity
-
-	INSERT INTO @tblMFProductionSummary (
-		intWorkOrderId
-		,intItemId
-		,dblOpeningQuantity
-		,dblOpeningOutputQuantity
-		,dblOpeningConversionQuantity
-		,dblInputQuantity
-		,dblConsumedQuantity
-		,dblOutputQuantity
-		,dblOutputConversionQuantity
-		,dblCountQuantity
-		,dblCountOutputQuantity
-		,dblCountConversionQuantity
-		,dblCalculatedQuantity
-		)
-	SELECT @intWorkOrderId
-		,I.intItemId
-		,0
-		,0
-		,0
-		,0
-		,ISNULL(SUM(WC.dblQuantity),0)
-		,0
-		,0
-		,0
-		,0
-		,0
-		,I.dblCalculatedQuantity
-	FROM @tblInputItem I
-	LEFT JOIN dbo.tblMFWorkOrderConsumedLot WC ON WC.intItemId = I.intItemId
-		AND WC.intWorkOrderId = @intWorkOrderId
-	GROUP BY I.intItemId
-		,I.dblCalculatedQuantity
-
-	INSERT INTO @tblMFProductionSummary (
-		intWorkOrderId
-		,intItemId
-		,dblOpeningQuantity
-		,dblOpeningOutputQuantity
-		,dblOpeningConversionQuantity
-		,dblInputQuantity
-		,dblConsumedQuantity
-		,dblOutputQuantity
-		,dblOutputConversionQuantity
-		,dblCountQuantity
-		,dblCountOutputQuantity
-		,dblCountConversionQuantity
-		,dblCalculatedQuantity
-		)
-	SELECT @intWorkOrderId
-		,I.intItemId
-		,0
-		,0
-		,0
-		,0
-		,0
-		,ISNULL(SUM(WC.dblQuantity),0)
-		,0
-		,0
-		,0
-		,0
-		,I.dblCalculatedQuantity
-	FROM @tblOutputItem I
-	LEFT JOIN dbo.tblMFWorkOrderProducedLot WC ON WC.intItemId = I.intItemId
-		AND WC.intWorkOrderId = @intWorkOrderId
-	GROUP BY I.intItemId
-		,I.dblCalculatedQuantity
-
-	INSERT INTO @tblMFProductionSummary (
-		intWorkOrderId
-		,intItemId
-		,intMachineId
-		,dblOpeningQuantity
-		,dblOpeningOutputQuantity
-		,dblOpeningConversionQuantity
-		,dblInputQuantity
-		,dblConsumedQuantity
-		,dblOutputQuantity
-		,dblOutputConversionQuantity
-		,dblCountQuantity
-		,dblCountOutputQuantity
-		,dblCountConversionQuantity
-		,dblCalculatedQuantity
-		)
-	SELECT DISTINCT @intWorkOrderId
-		,CC.intItemId
-		,CC.intMachineId
-		,CASE 
-			WHEN I.intItemId IS NOT NULL
-				THEN ISNULL(CC.dblSystemQty,0)
-			ELSE 0
-			END
-		,CASE 
-			WHEN O.intItemId IS NOT NULL
-				THEN ISNULL(CC.dblSystemQty,0)
-			ELSE 0
-			END
-		,0
-		,0
-		,0
-		,0
-		,0
-		,CASE 
-			WHEN I.intItemId IS NOT NULL
-				THEN ISNULL(CC.dblQuantity,0)
-			ELSE 0
-			END
-		,CASE 
-			WHEN O.intItemId IS NOT NULL
-				THEN ISNULL(CC.dblQuantity,0)
-			ELSE 0
-			END
-		,0
-		,Isnull(I.dblCalculatedQuantity, O.dblCalculatedQuantity)
-	FROM dbo.tblMFProcessCycleCount AS CC
-	JOIN dbo.tblMFProcessCycleCountSession AS CS ON CS.intCycleCountSessionId = CC.intCycleCountSessionId
-	LEFT JOIN @tblInputItem AS I ON I.intItemId = CC.intItemId
-	LEFT JOIN @tblOutputItem AS O ON O.intItemId = CC.intItemId
-	WHERE CS.intWorkOrderId = @intWorkOrderId
-
-	INSERT INTO @tblMFProductionSummaryFinal (
-		intWorkOrderId
-		,intItemId
-		,dblOpeningQuantity
-		,dblOpeningOutputQuantity
-		,dblOpeningConversionQuantity
-		,dblInputQuantity
-		,dblConsumedQuantity 
-		,dblOutputQuantity
-		,dblOutputConversionQuantity
-		,dblCountQuantity
-		,dblCountOutputQuantity
-		,dblCountConversionQuantity
-		,dblCalculatedQuantity
-		)
-	SELECT intWorkOrderId
-		,intItemId
-		,ISNULL(SUM(dblOpeningQuantity),0)
-		,ISNULL(SUM(dblOpeningOutputQuantity),0)
-		,0
-		,ISNULL(SUM(dblInputQuantity),0)
-		,ISNULL(SUM(dblConsumedQuantity),0)
-		,ISNULL(SUM(dblOutputQuantity),0)
-		,0
-		,ISNULL(SUM(dblCountQuantity),0)
-		,ISNULL(SUM(dblCountOutputQuantity),0)
-		,0
-		,MIN(dblCalculatedQuantity)
-	FROM @tblMFProductionSummary
-	GROUP BY intWorkOrderId
-		,intItemId
-
-	UPDATE @tblMFProductionSummaryFinal
+	
+	UPDATE tblMFProductionSummary
 	SET dblOpeningConversionQuantity = dblOpeningConversionQuantity + (
 			CASE 
 				WHEN I.ysnScaled = 1
 					THEN ISNULL((
 							SELECT SUM(F.dblOpeningOutputQuantity / F.dblCalculatedQuantity)
-							FROM @tblMFProductionSummaryFinal F
-							WHERE F.dblOpeningOutputQuantity > 0
+							FROM tblMFProductionSummary F
+							WHERE F.dblOpeningOutputQuantity > 0 AND F.intWorkOrderId =@intWorkOrderId 
 							) * I.dblCalculatedQuantity,0)
 				ELSE I.dblCalculatedQuantity
 				END
@@ -364,8 +141,8 @@ BEGIN TRY
 				WHEN I.ysnScaled = 1
 					THEN ISNULL((
 							SELECT SUM(F.dblOutputQuantity / F.dblCalculatedQuantity)
-							FROM @tblMFProductionSummaryFinal F
-							WHERE F.dblOutputQuantity > 0
+							FROM tblMFProductionSummary F
+							WHERE F.dblOutputQuantity > 0 AND F.intWorkOrderId =@intWorkOrderId
 							) * I.dblCalculatedQuantity,0)
 				ELSE I.dblCalculatedQuantity
 				END
@@ -375,25 +152,28 @@ BEGIN TRY
 				WHEN I.ysnScaled = 1
 					THEN ISNULL((
 							SELECT SUM(F.dblCountOutputQuantity / F.dblCalculatedQuantity)
-							FROM @tblMFProductionSummaryFinal F
-							WHERE F.dblCountOutputQuantity > 0
+							FROM tblMFProductionSummary F
+							WHERE F.dblCountOutputQuantity > 0 AND F.intWorkOrderId =@intWorkOrderId
 							) * I.dblCalculatedQuantity,0)
 				ELSE I.dblCalculatedQuantity
 				END
 			)
-	FROM @tblMFProductionSummaryFinal S
+	FROM tblMFProductionSummary S
 	JOIN @tblInputItem I ON I.intItemId = S.intItemId
+	WHERE S.intWorkOrderId=@intWorkOrderId
 
 	IF @intManufacturingProcessId = 6 --SD process
 	BEGIN
-		UPDATE @tblMFProductionSummaryFinal
+		UPDATE tblMFProductionSummary
 		SET dblYieldQuantity = dblCountQuantity,dblYieldPercentage=100
+		Where intWorkOrderId=@intWorkOrderId
 	END
 	ELSE
 	BEGIN
-		UPDATE @tblMFProductionSummaryFinal
+		UPDATE tblMFProductionSummary
 		SET dblYieldQuantity = (dblConsumedQuantity + dblCountQuantity + dblCountConversionQuantity) - (dblOpeningQuantity + dblOpeningConversionQuantity + dblInputQuantity)
 			,dblYieldPercentage=(Case When dblInputQuantity>0 Then Round((dblConsumedQuantity + dblCountQuantity + dblCountConversionQuantity) / (dblOpeningQuantity + dblOpeningConversionQuantity + dblInputQuantity)*100,2) else 100 End)
+		Where intWorkOrderId=@intWorkOrderId
 	END
 
 	DECLARE @intProductionSummaryId INT
@@ -411,17 +191,18 @@ BEGIN TRY
 		,@dblWeightPerQty numeric(18,6)
 
 	SELECT @intProductionSummaryId = Min(intProductionSummaryId)
-	FROM @tblMFProductionSummaryFinal F
+	FROM tblMFProductionSummary F
 	JOIN @tblInputItem I ON I.intItemId = F.intItemId
+	Where F.intWorkOrderId=@intWorkOrderId
 
 	WHILE @intProductionSummaryId IS NOT NULL
 	BEGIN
 		SELECT @intItemId = F.intItemId
 			,@dblYieldQuantity = F.dblYieldQuantity
 			,@intStorageLocationId = I.intStorageLocationId
-		FROM @tblMFProductionSummaryFinal F
+		FROM tblMFProductionSummary F
 		JOIN @tblInputItem I ON I.intItemId = F.intItemId
-		WHERE intProductionSummaryId = @intProductionSummaryId
+		WHERE F.intProductionSummaryId = @intProductionSummaryId
 
 		IF @dblYieldQuantity > 0
 			AND NOT EXISTS (
@@ -590,12 +371,12 @@ BEGIN TRY
 		BEGIN
 			IF @dblYieldQuantity < 0
 				AND ABS(@dblYieldQuantity) > @dblQty
-				SET @dblNewQty = 0
+				SET @dblNewQty = -@dblQty
 			ELSE
-				SET @dblNewQty = @dblQty + @dblYieldQuantity
+				SET @dblNewQty = @dblYieldQuantity
 
 			IF @intManufacturingProcessId = 6
-				SET @dblQty = @dblYieldQuantity
+				SET @dblQty = -@dblQty+@dblYieldQuantity
 
 			UPDATE dbo.tblMFProcessCycleCount
 			SET intLotId = @intLotId
@@ -633,9 +414,9 @@ BEGIN TRY
 			END
 		END
 		SELECT @intProductionSummaryId = Min(intProductionSummaryId)
-		FROM @tblMFProductionSummaryFinal F
+		FROM tblMFProductionSummary F
 		JOIN @tblInputItem I ON I.intItemId = F.intItemId
-		Where intProductionSummaryId>@intProductionSummaryId
+		Where intProductionSummaryId>@intProductionSummaryId and F.intWorkOrderId=@intWorkOrderId
 	END
 
 	UPDATE dbo.tblMFWorkOrder
@@ -648,42 +429,7 @@ BEGIN TRY
 	SET dtmSessionEndDateTime = @dtmCurrentDateTime
 		,ysnCycleCountCompleted = 1
 	WHERE intWorkOrderId = @intWorkOrderId
-
-	INSERT INTO dbo.tblMFProductionSummary (
-		intWorkOrderId
-		,intItemId
-		,dblOpeningQuantity
-		,dblOpeningOutputQuantity
-		,dblOpeningConversionQuantity
-		,dblInputQuantity
-		,dblConsumedQuantity
-		,dblOutputQuantity
-		,dblOutputConversionQuantity
-		,dblCountQuantity
-		,dblCountOutputQuantity
-		,dblCountConversionQuantity
-		,dblCalculatedQuantity
-		,dblYieldQuantity
-		,dblYieldPercentage
-		,intCreatedUserId
-		)
-	SELECT intWorkOrderId
-		,intItemId
-		,dblOpeningQuantity
-		,dblOpeningOutputQuantity
-		,dblOpeningConversionQuantity
-		,dblInputQuantity
-		,dblConsumedQuantity
-		,dblOutputQuantity
-		,dblOutputConversionQuantity
-		,dblCountQuantity
-		,dblCountOutputQuantity
-		,dblCountConversionQuantity
-		,dblCalculatedQuantity
-		,dblYieldQuantity
-		,dblYieldPercentage
-		,@intUserId 
-	FROM @tblMFProductionSummaryFinal
+	
 END TRY
 
 BEGIN CATCH
