@@ -2053,7 +2053,6 @@
     <Build Include="dbo\Stored Procedures\uspARAddInventoryItemToInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetAttributeByAttributeName.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLot.sql" />
-    <Build Include="dbo\Tables\tblSMCompanyLocationUserRole.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
