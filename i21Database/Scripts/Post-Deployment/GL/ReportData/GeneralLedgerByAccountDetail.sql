@@ -24,19 +24,17 @@ GLAccountDetails
 AS
 (
 --*SC*--
-SELECT 
-		 
-		B.strDescription  as strAccountDescription-- account description
+SELECT B.strDescription  as strAccountDescription-- account description
 		,C.strAccountType
 		,C.strAccountGroup
 		,Cast(Cast(A.dtmDate as Date)as DateTime )as dtmDate
 		,A.strBatchId
 		,ISNULL(A.dblDebit,0) as dblDebit
 		,ISNULL(A.dblCredit,0) as dblCredit
-		,[dblDebitUnit]	= CASE WHEN (ISNULL(dblDebitUnit, 0) = 0) OR (ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) = 0) THEN 0 
-					ELSE CAST(ISNULL(ISNULL(dblDebitUnit, 0) / ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0),0) AS NUMERIC(18, 6)) END
-		,[dblCreditUnit] = CASE WHEN (ISNULL(dblCreditUnit, 0) = 0) OR (ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) = 0) THEN 0 
-					ELSE CAST(ISNULL(ISNULL(dblCreditUnit, 0) / ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0),0) AS NUMERIC(18, 6)) END			
+		,[dblDebitUnit]	= CASE WHEN (ISNULL(A.dblDebitUnit, 0) = 0) OR (ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) = 0) THEN 0 
+					ELSE CAST(ISNULL(ISNULL(A.dblDebitUnit, 0) / ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0),0) AS NUMERIC(18, 6)) END
+		,[dblCreditUnit] = CASE WHEN (ISNULL(A.dblCreditUnit, 0) = 0) OR (ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) = 0) THEN 0 
+					ELSE CAST(ISNULL(ISNULL(A.dblCreditUnit, 0) / ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0),0) AS NUMERIC(18, 6)) END			
 		,A.strDescription as strDetailDescription-- detail description
 		,A.strTransactionId
 		,A.intTransactionId
@@ -44,19 +42,11 @@ SELECT
 		,A.strTransactionForm
 		,A.strModuleName
 		,A.strReference
-		, strReferenceDetail = (select top 1
-								y.strReference
-								from tblGLJournal x 
-								inner join tblGLJournalDetail y on x.intJournalId = y.intJournalId
-								where x.strJournalId = A.strTransactionId)
-,strDocument = (select			strDocument 
-								from tblGLJournalDetail B 
-								where B.intJournalId =
-								(select intJournalId from tblGLJournal C where C.strJournalId = A.strTransactionId) 
-								and B.intJournalDetailId = A.intJournalLineNo and B.intAccountId =  A.intAccountId)	
+		,strReferenceDetail = detail.strReference
+	    ,strDocument = detail.strDocument
 		,dblTotal = ( 
-				CASE	WHEN C.strAccountType in (''Asset'', ''Expense'',''Cost of Goods Sold'') THEN isnull(dblDebit, 0 ) - isnull(dblCredit,0) 
-						ELSE isnull(dblCredit, 0 ) - isnull(dblDebit,0) 
+				CASE	WHEN C.strAccountType in (''Asset'', ''Expense'',''Cost of Goods Sold'') THEN isnull(A.dblDebit, 0 ) - isnull(A.dblCredit,0) 
+						ELSE isnull(A.dblCredit, 0 ) - isnull(A.dblDebit,0) 
 				END
 				)  
 		,B.intAccountUnitId 
@@ -70,11 +60,15 @@ from tblGLDetail  A
 RIGHT join tblGLAccount B on B.intAccountId = A.intAccountId
 INNER join tblGLAccountGroup C on C.intAccountGroupId = B.intAccountGroupId
 INNER JOIN tblGLTempCOASegment D ON D.intAccountId = B.intAccountId
+OUTER APPLY(
+	SELECT  strReference,strDocument FROM tblGLJournalDetail B JOIN tblGLJournal C
+	ON B.intJournalId = C.intJournalId WHERE 
+	 A.intJournalLineNo = B.intLineNo AND
+	 C.intJournalId = A.intTransactionId AND C.strJournalId = A.strTransactionId
+)detail
 --*SCSTART*--
 --Special Case--
-
 ),
-
 GLAccountBalance
 (
 intAccountId
@@ -86,11 +80,10 @@ intAccountId
 ,dblBeginBalanceUnit
 ,[Primary Account]
 ,[Location] 
+,intGLDetailId
 )
 AS
 (
-
-
 	SELECT 
 		A.intAccountId
 		,A.strAccountId
@@ -102,15 +95,15 @@ AS
 		,dblBeginBalanceUnit =  dbo.fnGetBeginBalanceUnit(A.strAccountId,(SELECT MIN(dtmDate) FROM GLAccountDetails),'''')
 		,B.[Primary Account]
 		,B.[Location] 
-		
+		,C.intGLDetailId
 		FROM tblGLAccount A
 		INNER JOIN tblGLTempCOASegment B ON B.intAccountId = A.intAccountId
 		INNER JOIN GLAccountDetails C on A.strAccountId = C.strAccountId
 )
 
---*CountStart*--
+----*CountStart*--
 SELECT DISTINCT
-''Account ID :'' + B.strAccountId + '' - '' + ISNULL(A.strAccountDescription,B.strAccountDescription) + '' - '' + ISNULL(A.strAccountType,B.strAccountType) as AccountHeader,
+''Account ID :'' + B.strAccountId + '' - '' + ISNULL(RTRIM(A.strAccountDescription),RTRIM(B.strAccountDescription)) + '' '' +  A.strAccountGroup + ''-'' + ISNULL(A.strAccountType,B.strAccountType) as AccountHeader,
 (CASE WHEN A.strAccountDescription  is  NULL  then B.strAccountDescription else A.strAccountDescription END) as strAccountDescripion
 ,(CASE WHEN A.strAccountType  is  NULL  then B.strAccountType else A.strAccountType END) as strAccountType
 ,(CASE WHEN A.strAccountGroup  is  NULL  then B.strAccountGroup else A.strAccountGroup END) as strAccountGroup
@@ -141,11 +134,10 @@ SELECT DISTINCT
 ,ISNULL(B.dblBeginBalance,0) AS dblBeginBalance
 ,[dblBeginBalanceUnit] = CASE WHEN (ISNULL(B.dblBeginBalanceUnit, 0) = 0) OR (ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0) = 0) THEN 0 
 					ELSE CAST(ISNULL(ISNULL(B.dblBeginBalanceUnit, 0) / ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0),0) AS NUMERIC(18, 6)) END	
-	
-	FROM GLAccountBalance B
-	INNER JOIN GLAccountDetails A ON B.intAccountId = A.intAccountId
-	WHERE A.isUnposted = 0 or A.isUnposted IS NULL
---*CountEnd*--'
+FROM GLAccountBalance B
+INNER JOIN GLAccountDetails A ON B.intAccountId = A.intAccountId and B.intGLDetailId = A.intGLDetailId
+WHERE A.isUnposted = 0 or A.isUnposted IS NULL
+----*CountEnd*--'
 
 
 DECLARE @GLReportDrillDown NVARCHAR(MAX) =  '[{"Control":"labelEx1","DrillThroughType":1,"Name":"GeneralLedger.Global.GLGlobalDrillDown","DrillThroughFilterType":0,"Filters":null,"id":"Reports.model.DrillThrough-1","DrillThroughValue":"strTransactionId,intTransactionId,strModuleName,strTransactionForm,strTransactionType,intGLDetailId"}]' 
@@ -165,13 +157,13 @@ B.strDescription  as strAccountDescription-- account description
 ,A.strBatchId    
 ,ISNULL(A.dblDebit,0) as dblDebit    
 ,ISNULL(A.dblCredit,0) as dblCredit    
-,[dblDebitUnit] = CASE WHEN (ISNULL(dblDebitUnit, 0) = 0) OR (ISNULL((SELECT [dblLbsPerUnit] FROM Units 
+,[dblDebitUnit] = CASE WHEN (ISNULL(A.dblDebitUnit, 0) = 0) OR (ISNULL((SELECT [dblLbsPerUnit] FROM Units 
 					WHERE [intAccountId] = A.[intAccountId]), 0) = 0) THEN 0        
-					ELSE CAST(ISNULL(ISNULL(dblDebitUnit, 0) / ISNULL((SELECT [dblLbsPerUnit] FROM Units 
+					ELSE CAST(ISNULL(ISNULL(A.dblDebitUnit, 0) / ISNULL((SELECT [dblLbsPerUnit] FROM Units 
 					WHERE [intAccountId] = A.[intAccountId]), 0),0) AS NUMERIC(18, 6)) END    
-					,[dblCreditUnit] = CASE WHEN (ISNULL(dblCreditUnit, 0) = 0) OR (ISNULL((SELECT [dblLbsPerUnit] FROM Units 
+					,[dblCreditUnit] = CASE WHEN (ISNULL(A.dblCreditUnit, 0) = 0) OR (ISNULL((SELECT [dblLbsPerUnit] FROM Units 
 					WHERE [intAccountId] = A.[intAccountId]), 0) = 0) THEN 0        
-					ELSE CAST(ISNULL(ISNULL(dblCreditUnit, 0) / ISNULL((SELECT [dblLbsPerUnit] FROM Units 
+					ELSE CAST(ISNULL(ISNULL(A.dblCreditUnit, 0) / ISNULL((SELECT [dblLbsPerUnit] FROM Units 
 					WHERE [intAccountId] = A.[intAccountId]), 0),0) AS NUMERIC(18, 6)) END       
 					,A.strDescription as strDetailDescription-- detail description    
 ,A.strTransactionId    
@@ -180,18 +172,11 @@ B.strDescription  as strAccountDescription-- account description
 ,A.strTransactionForm    
 ,A.strModuleName    
 ,A.strReference    
-, strReferenceDetail = (select top 1          
-						y.strReference          
-						from tblGLJournal x           
-						inner join tblGLJournalDetail y on x.intJournalId = y.intJournalId          
-						where x.strJournalId = A.strTransactionId)  ,strDocument = (select   strDocument           
-						from tblGLJournalDetail B           
-						where B.intJournalId =          
-						(select intJournalId from tblGLJournal C where C.strJournalId = A.strTransactionId)           
-						and B.intJournalDetailId = A.intJournalLineNo and B.intAccountId =  A.intAccountId)     
+, strReferenceDetail = detail.strReference  
+,strDocument = detail.strDocument
 ,dblTotal = (       
-						CASE WHEN C.strAccountType in (''Asset'', ''Expense'',''Cost of Goods Sold'') THEN isnull(dblDebit, 0 ) - isnull(dblCredit,0)         
-						ELSE isnull(dblCredit, 0 ) - isnull(dblDebit,0)       END      )      
+						CASE WHEN C.strAccountType in (''Asset'', ''Expense'',''Cost of Goods Sold'') THEN isnull(A.dblDebit, 0 ) - isnull(A.dblCredit,0)         
+						ELSE isnull(A.dblCredit, 0 ) - isnull(A.dblDebit,0)       END      )      
 ,B.intAccountUnitId     
 ,A.strCode    
 ,A.intGLDetailId    
@@ -203,11 +188,27 @@ from tblGLDetail A
 RIGHT JOIN tblGLAccount B on A.intAccountId = B.intAccountId  
 INNER JOIN tblGLAccountGroup C on B.intAccountGroupId = C.intAccountGroupId  
 INNER JOIN tblGLTempCOASegment D ON B.intAccountId = D.intAccountId and strCode != ''AA''
- --*SCSTART*--
+OUTER APPLY(
+	SELECT  strReference,strDocument FROM tblGLJournalDetail B JOIN tblGLJournal C
+	ON B.intJournalId = C.intJournalId WHERE 
+	 A.intJournalLineNo = B.intLineNo AND
+	 C.intJournalId = A.intTransactionId AND C.strJournalId = A.strTransactionId
+)detail
+--*SCSTART*--
   --Special Case--
 ),    
-GLAccountBalance  (  intAccountId  ,strAccountId  ,strAccountDescription  ,strAccountType  ,strAccountGroup  ,dblBeginBalance  ,dblBeginBalanceUnit  
-,[Primary Account]  ,[Location]   )  
+GLAccountBalance  (  
+intAccountId  
+,strAccountId  
+,strAccountDescription  
+,strAccountType  
+,strAccountGroup  
+,dblBeginBalance  
+,dblBeginBalanceUnit  
+,[Primary Account]  
+,[Location] 
+,intGLDetailId  
+)  
 AS  
 (    
  
@@ -220,13 +221,14 @@ AS
 	  ,dblBeginBalance = dbo.fnGetBeginBalance(A.strAccountId,(SELECT MIN(dtmDate) FROM GLAccountDetails),'''')    
 	  ,dblBeginBalanceUnit =  dbo.fnGetBeginBalanceUnit(A.strAccountId,(SELECT MIN(dtmDate) FROM GLAccountDetails),'''')    
 	  ,B.[Primary Account]    
-	  ,B.[Location]         
+	  ,B.[Location]    
+	  ,C.intGLDetailId     
 	  FROM tblGLAccount A    INNER JOIN tblGLTempCOASegment B ON B.intAccountId = A.intAccountId         
 	  INNER JOIN GLAccountDetails C on A.strAccountId = C.strAccountId
 ) 
    --*CountStart*--  
   SELECT DISTINCT
-  ''Account ID :'' + B.strAccountId + '' - '' + ISNULL(A.strAccountDescription,B.strAccountDescription) + '' - '' + ISNULL(A.strAccountType,B.strAccountType) as AccountHeader,
+  ''Account ID :'' + B.strAccountId + '' - '' + ISNULL(RTRIM(A.strAccountDescription),RTRIM(B.strAccountDescription)) + '' '' +  A.strAccountGroup + ''-'' + ISNULL(A.strAccountType,B.strAccountType) as AccountHeader,
   (CASE WHEN A.strAccountDescription  is  NULL  THEN B.strAccountDescription ELSE A.strAccountDescription END) as strAccountDescripion  
   ,(CASE WHEN A.strAccountType  is  NULL  THEN B.strAccountType ELSE A.strAccountType END) as strAccountType  
   ,(CASE WHEN A.strAccountGroup  is  NULL  THEN B.strAccountGroup ELSE A.strAccountGroup END) as strAccountGroup  ,A.dtmDate  
@@ -257,9 +259,10 @@ AS
   ELSE CAST(ISNULL(ISNULL(B.dblBeginBalanceUnit, 0) / ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0),0) AS NUMERIC(18, 6)) 
   END       
   FROM GLAccountBalance B   
-  	INNER JOIN GLAccountDetails A ON B.intAccountId = A.intAccountId
+  	INNER JOIN GLAccountDetails A ON B.intAccountId = A.intAccountId AND B.intGLDetailId = A.intGLDetailId
   WHERE A.isUnposted = 0 OR A.isUnposted IS NULL
   --*CountEnd*--'
+  
   
 --UPDATE THE OPTIONS
 UPDATE o SET o.strSettings = @GLReportOptions
