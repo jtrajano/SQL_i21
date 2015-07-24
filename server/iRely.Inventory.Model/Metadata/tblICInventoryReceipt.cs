@@ -383,25 +383,6 @@ namespace iRely.Inventory.Model
                 _subLocationName = value;
             }
         }
-        private string _storageLocationName;
-        [NotMapped]
-        public string strStorageLocationName
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(_storageLocationName))
-                    if (vyuICGetInventoryReceiptItem != null)
-                        return vyuICGetInventoryReceiptItem.strStorageLocationName;
-                    else
-                        return null;
-                else
-                    return _storageLocationName;
-            }
-            set
-            {
-                _storageLocationName = value;
-            }
-        }
         private string _ownershipType;
         [NotMapped]
         public string strOwnershipType
@@ -558,8 +539,6 @@ namespace iRely.Inventory.Model
         public string strContainer { get; set; }
         public int? intSubLocationId { get; set; }
         public string strSubLocationName { get; set; }
-        public int? intStorageLocationId { get; set; }
-        public string strStorageLocationName { get; set; }
         public string strOrderUOM { get; set; }
         public decimal? dblOrderUOMConvFactor { get; set; }
         public string strUnitMeasure { get; set; }
