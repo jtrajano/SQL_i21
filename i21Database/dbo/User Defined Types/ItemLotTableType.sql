@@ -186,7 +186,6 @@ CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 	,[dtmExpiryDate]			DATETIME NULL
 	,[dtmManufacturedDate]		DATETIME NULL
 	,[intOriginId]				INT NULL
-	,[intGradeId]				INT NULL
 	,[strBOLNo]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	,[strVessel]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	,[strReceiptNumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
@@ -195,6 +194,7 @@ CREATE TYPE [dbo].[ItemLotTableType] AS TABLE
 	,[intEntityVendorId]		INT NULL
 	,[strVendorLotNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,[intVendorLocationId]		INT NULL
+	,[strVendorLocation]		NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 	,[strContractNo]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,[ysnReleasedToWarehouse]	BIT DEFAULT((0))
 	,[ysnProduced]				BIT DEFAULT((0))

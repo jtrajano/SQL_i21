@@ -61,7 +61,6 @@ DECLARE
 	,@dtmExpiryDate				AS DATETIME
 	,@dtmManufacturedDate		AS DATETIME
 	,@intOriginId				AS INT
-	,@intGradeId				AS INT
 	,@strBOLNo					AS NVARCHAR(100)
 	,@strVessel					AS NVARCHAR(100)
 	,@strReceiptNumber			AS NVARCHAR(50)
@@ -70,6 +69,7 @@ DECLARE
 	,@intEntityVendorId				AS INT 
 	,@strVendorLotNo			AS NVARCHAR(50)
 	,@intVendorLocationId		AS INT
+	,@strVendorLocation			AS NVARCHAR(100)
 	,@strContractNo				AS NVARCHAR(50)
 	,@ysnReleasedToWarehouse	AS BIT
 	,@ysnProduced				AS BIT 
@@ -145,7 +145,6 @@ SELECT  intId
 		,dtmExpiryDate
 		,dtmManufacturedDate
 		,intOriginId
-		,intGradeId
 		,strBOLNo
 		,strVessel
 		,strReceiptNumber
@@ -154,6 +153,7 @@ SELECT  intId
 		,intEntityVendorId
 		,strVendorLotNo
 		,intVendorLocationId
+		,strVendorLocation 
 		,strContractNo
 		,ysnReleasedToWarehouse
 		,ysnProduced
@@ -180,7 +180,6 @@ FETCH NEXT FROM loopLotItems INTO
 		,@dtmExpiryDate
 		,@dtmManufacturedDate
 		,@intOriginId
-		,@intGradeId
 		,@strBOLNo
 		,@strVessel
 		,@strReceiptNumber
@@ -189,6 +188,7 @@ FETCH NEXT FROM loopLotItems INTO
 		,@intEntityVendorId
 		,@strVendorLotNo
 		,@intVendorLocationId
+		,@strVendorLocation
 		,@strContractNo
 		,@ysnReleasedToWarehouse
 		,@ysnProduced
@@ -352,7 +352,6 @@ BEGIN
 				dtmExpiryDate			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @dtmExpiryDate ELSE LotMaster.dtmExpiryDate END 
 				,strLotAlias			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strLotAlias ELSE ISNULL(@strLotAlias, LotMaster.strLotAlias) END 				
 				,intOriginId			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intOriginId ELSE LotMaster.intOriginId END  
-				,intGradeId				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intGradeId ELSE LotMaster.intGradeId END  
 				,strBOLNo				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strBOLNo ELSE LotMaster.strBOLNo END 
 				,strVessel				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strVessel ELSE LotMaster.strVessel END 
 				,strReceiptNumber		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strReceiptNumber ELSE LotMaster.strReceiptNumber END 
@@ -361,6 +360,7 @@ BEGIN
 				,intEntityVendorId		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intEntityVendorId ELSE LotMaster.intEntityVendorId END 
 				,strVendorLotNo			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strVendorLotNo ELSE LotMaster.strVendorLotNo END 
 				,intVendorLocationId	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intVendorLocationId ELSE LotMaster.intVendorLocationId END
+				,strVendorLocation		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strVendorLocation ELSE LotMaster.strVendorLocation END 
 				,strContractNo			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strContractNo ELSE LotMaster.strContractNo END 
 				,dtmManufacturedDate	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @dtmManufacturedDate ELSE LotMaster.dtmManufacturedDate END 
 								
@@ -480,7 +480,6 @@ BEGIN
 				,intWeightUOMId
 				,dblWeightPerQty
 				,intOriginId
-				,intGradeId
 				,strBOLNo
 				,strVessel
 				,strReceiptNumber
@@ -489,6 +488,7 @@ BEGIN
 				,intEntityVendorId
 				,strVendorLotNo
 				,intVendorLocationId
+				,strVendorLocation
 				,strContractNo
 				,dtmManufacturedDate
 				,ysnReleasedToWarehouse
@@ -513,7 +513,6 @@ BEGIN
 				,@intWeightUOMId
 				,dbo.fnCalculateWeightUnitQty(@dblQty, @dblWeight) -- (though, we need to know immediately the weight per qty). 
 				,@intOriginId
-				,@intGradeId
 				,@strBOLNo
 				,@strVessel
 				,@strReceiptNumber
@@ -522,6 +521,7 @@ BEGIN
 				,@intEntityVendorId
 				,@strVendorLotNo
 				,@intVendorLocationId
+				,@strVendorLocation
 				,@strContractNo
 				,@dtmManufacturedDate
 				,@ysnReleasedToWarehouse
@@ -645,7 +645,6 @@ BEGIN
 		,@dtmExpiryDate
 		,@dtmManufacturedDate
 		,@intOriginId
-		,@intGradeId
 		,@strBOLNo
 		,@strVessel
 		,@strReceiptNumber
@@ -654,6 +653,7 @@ BEGIN
 		,@intEntityVendorId
 		,@strVendorLotNo
 		,@intVendorLocationId
+		,@strVendorLocation
 		,@strContractNo
 		,@ysnReleasedToWarehouse
 		,@ysnProduced
