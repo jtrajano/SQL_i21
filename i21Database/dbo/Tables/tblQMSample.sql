@@ -5,6 +5,7 @@
 	[intSampleTypeId] INT NOT NULL, 
 	[strSampleNumber] NVARCHAR(30) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[intProductTypeId] INT NOT NULL, -- Transaction Type Id
+	[intProductValueId] INT, -- Transaction Object Id
 	[intSampleStatusId] INT NOT NULL, 
 	[intItemId] INT, -- Inventory Item
 	[intItemContractId] INT, -- Contract Item
