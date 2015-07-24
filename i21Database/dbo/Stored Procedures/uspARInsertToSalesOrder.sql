@@ -69,13 +69,13 @@ BEGIN
 		,[intSplitId]
 		,[intFreightTermId]
 		,[strBOLNumber]
-		,ROUND([dblSalesOrderSubtotal],2)
-		,ROUND([dblShipping],2)
-		,ROUND([dblTax],2)
-		,ROUND([dblSalesOrderTotal],2)
-		,ROUND([dblDiscount],2)
-		,ROUND([dblAmountDue],2)
-		,ROUND([dblPayment],2)		
+		,[dblSalesOrderSubtotal]
+		,[dblShipping]
+		,[dblTax]
+		,[dblSalesOrderTotal]
+		,[dblDiscount]
+		,[dblAmountDue]
+		,[dblPayment]	
 		,'Order'
 		,'Open'
 		,[intAccountId]
@@ -149,14 +149,14 @@ BEGIN
 			,[intItemId]
 			,[strItemDescription]
 			,[intItemUOMId]
-			,ROUND([dblQtyOrdered], 2)
-			,ROUND([dblQtyAllocated], 2)
-			,ROUND([dblQtyShipped], 2)
-			,ROUND([dblDiscount], 2)
+			,[dblQtyOrdered]
+			,[dblQtyAllocated]
+			,[dblQtyShipped]
+			,[dblDiscount]
 			,[intTaxId]
-			,ROUND([dblPrice], 2)
-			,ROUND([dblTotalTax], 2)
-			,ROUND([dblTotal], 2)
+			,[dblPrice]
+			,[dblTotalTax]
+			,[dblTotal]
 			,[strComments]
 			,[intAccountId]
 			,[intCOGSAccountId]
