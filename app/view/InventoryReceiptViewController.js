@@ -364,41 +364,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colLotContainerNo: 'strContainerNo',
-                colLotVendorLocation: {
-                    dataIndex: 'strVendorLocation',
-                    editor: {
-                        origValueField: 'intEntityLocationId',
-                        origUpdateField: 'intVendorLocationId',
-                        store: '{vendorLocation}',
-                        defaultFilters: [
-                            {
-                                column: 'intEntityId',
-                                value: '{current.intVendorEntityId}'
-                            }
-                        ]
-                    }
-                },
-                colLotGrade: {
-                    dataIndex: 'strGrade',
-                    editor: {
-                        readOnly: '{hasItemCommodity}',
-                        origValueField: 'intCommodityAttributeId',
-                        origUpdateField: 'intGradeId',
-                        store: '{lotGrade}',
-                        defaultFilters: [
-                            {
-                                column: 'intCommodityId',
-                                value: '{grdInventoryReceipt.selection.intCommodityId}',
-                                conjunction: 'and'
-                            }
-                        ]
-                    }
-                },
+                colLotGarden: 'intGarden',
+                colLotGrade: 'strGrade',
                 colLotOrigin: {
-                    dataIndex: 'strOrigin',
+                    dataIndex: 'strCountry',
                     editor: {
-                        origValueField: 'intCountryID',
-                        origUpdateField: 'intOriginId',
                         store: '{origin}'
                     }
                 },
@@ -578,7 +548,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 'tblSMFreightTerm,' +
                 'tblSMCompanyLocation,' +
                 'tblICInventoryReceiptItems.vyuICGetInventoryReceiptItem,' +
-                'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.vyuICGetInventoryReceiptItemLot, ' +
+                'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.tblICLot,' +
+                'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.tblICItemUOM.tblICUnitMeasure,' +
+                'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.tblICStorageLocation,' +
                 'tblICInventoryReceiptCharges.vyuICGetInventoryReceiptCharge',
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Receipt',

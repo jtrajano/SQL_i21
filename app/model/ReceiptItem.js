@@ -46,13 +46,11 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'dblUnitCost', type: 'float' },
         { name: 'dblUnitRetail', type: 'float' },
         { name: 'dblLineTotal', type: 'float' },
-        { name: 'intGradeId', type: 'int', allowNull: true },
+        { name: 'intGradeId', type: 'int', allowNull: true},
         { name: 'dblGross', type: 'float' },
         { name: 'dblNet', type: 'float' },
         { name: 'intSort', type: 'int', allowNull: true },
 
-        { name: 'strOrderNumber', type: 'string'},
-        { name: 'strSourceNumber', type: 'string'},
         { name: 'strItemNo', type: 'string'},
         { name: 'strItemDescription', type: 'string'},
         { name: 'strOwnershipType', type: 'string'},
@@ -62,8 +60,7 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'strSubLocationName', type: 'string'},
         { name: 'strUnitType', type: 'string'},
         { name: 'strContainer', type: 'string'},
-        { name: 'dblGrossMargin', type: 'float' },
-        { name: 'intCommodityId', type: 'int', allowNull: true }
+        { name: 'dblGrossMargin', type: 'float' }
     ],
 
     validators: [

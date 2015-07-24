@@ -846,7 +846,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     hidden: true
                                                                                 }
                                                                             ],
-                                                                            pickerWidth: 800,
                                                                             itemId: 'cboOrderNumber',
                                                                             displayField: 'strPurchaseOrderNumber',
                                                                             multiSelect: true,
@@ -1756,66 +1755,22 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
+                                                                                itemId: 'colLotGarden',
+                                                                                width: 75,
                                                                                 dataIndex: 'string',
-                                                                                itemId: 'colLotVendorLocation',
-                                                                                width: 120,
-                                                                                text: 'Vendor Location',
+                                                                                text: 'Garden',
                                                                                 editor: {
-                                                                                    xtype: 'gridcombobox',
-                                                                                    columns: [
-                                                                                        {
-                                                                                            dataIndex: 'intEntityLocationId',
-                                                                                            dataType: 'numeric',
-                                                                                            text: 'Location Id',
-                                                                                            hidden: true
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'strLocationName',
-                                                                                            dataType: 'string',
-                                                                                            text: 'Location Name',
-                                                                                            flex: 1
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'strAddress',
-                                                                                            dataType: 'string',
-                                                                                            text: 'Address',
-                                                                                            flex: 1
-                                                                                        }
-                                                                                    ],
-                                                                                    itemId: 'cboVendorLocation',
-                                                                                    displayField: 'strLocationName',
-                                                                                    valueField: 'strLocationName'
+                                                                                    xtype: 'numberfield'
                                                                                 }
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
-                                                                                dataIndex: 'string',
                                                                                 itemId: 'colLotGrade',
                                                                                 width: 75,
+                                                                                dataIndex: 'string',
                                                                                 text: 'Grade',
                                                                                 editor: {
-                                                                                    xtype: 'gridcombobox',
-                                                                                    columns: [
-                                                                                        {
-                                                                                            dataIndex: 'intCommodityAttributeId',
-                                                                                            dataType: 'numeric',
-                                                                                            hidden: true
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'intCommodityId',
-                                                                                            dataType: 'numeric',
-                                                                                            hidden: true
-                                                                                        },
-                                                                                        {
-                                                                                            dataIndex: 'strDescription',
-                                                                                            dataType: 'string',
-                                                                                            text: 'Grade',
-                                                                                            flex: 1
-                                                                                        }
-                                                                                    ],
-                                                                                    itemId: 'cboLotGrade',
-                                                                                    displayField: 'strDescription',
-                                                                                    valueField: 'strDescription'
+                                                                                    xtype: 'textfield'
                                                                                 }
                                                                             },
                                                                             {
