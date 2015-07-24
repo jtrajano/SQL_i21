@@ -3251,35 +3251,6 @@
                                                                     "designerId": "5c720224-3ee8-459a-afe1-3849eebafbf3"
                                                                 },
                                                                 {
-                                                                    "type": "Ext.grid.column.Date",
-                                                                    "reference": {
-                                                                        "name": "columns",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "dataIndex": "string",
-                                                                        "itemId": "colLotExpiryDate",
-                                                                        "modelValidation": true,
-                                                                        "text": "Expiry Date",
-                                                                        "width": 100
-                                                                    },
-                                                                    "name": "MyDateColumn2",
-                                                                    "designerId": "98f08806-228b-4f0f-ab7f-60537c2ee647",
-                                                                    "cn": [
-                                                                        {
-                                                                            "type": "Ext.form.field.Date",
-                                                                            "reference": {
-                                                                                "name": "editor",
-                                                                                "type": "object"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "name": "MyDateField",
-                                                                            "designerId": "b1ebbbb5-f563-4c3e-bc74-0a300c8b59d8"
-                                                                        }
-                                                                    ]
-                                                                },
-                                                                {
                                                                     "type": "Ext.grid.column.Column",
                                                                     "reference": {
                                                                         "name": "columns",
@@ -3342,6 +3313,35 @@
                                                                                     "type": "string"
                                                                                 }
                                                                             ]
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "type": "Ext.grid.column.Date",
+                                                                    "reference": {
+                                                                        "name": "columns",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "dataIndex": "string",
+                                                                        "itemId": "colLotExpiryDate",
+                                                                        "modelValidation": true,
+                                                                        "text": "Expiry Date",
+                                                                        "width": 100
+                                                                    },
+                                                                    "name": "MyDateColumn2",
+                                                                    "designerId": "98f08806-228b-4f0f-ab7f-60537c2ee647",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.Date",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "name": "MyDateField",
+                                                                            "designerId": "b1ebbbb5-f563-4c3e-bc74-0a300c8b59d8"
                                                                         }
                                                                     ]
                                                                 },

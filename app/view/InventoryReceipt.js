@@ -1605,17 +1605,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 text: 'Lot Wgt UOM'
                                                                             },
                                                                             {
-                                                                                xtype: 'datecolumn',
-                                                                                itemId: 'colLotExpiryDate',
-                                                                                modelValidation: true,
-                                                                                width: 100,
-                                                                                dataIndex: 'string',
-                                                                                text: 'Expiry Date',
-                                                                                editor: {
-                                                                                    xtype: 'datefield'
-                                                                                }
-                                                                            },
-                                                                            {
                                                                                 xtype: 'gridcolumn',
                                                                                 itemId: 'colLotStorageLocation',
                                                                                 width: 95,
@@ -1646,6 +1635,17 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     itemId: 'cboStorageLocation',
                                                                                     displayField: 'strName',
                                                                                     valueField: 'strName'
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'datecolumn',
+                                                                                itemId: 'colLotExpiryDate',
+                                                                                modelValidation: true,
+                                                                                width: 100,
+                                                                                dataIndex: 'string',
+                                                                                text: 'Expiry Date',
+                                                                                editor: {
+                                                                                    xtype: 'datefield'
                                                                                 }
                                                                             },
                                                                             {
