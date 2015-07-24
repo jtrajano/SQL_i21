@@ -78,6 +78,40 @@ BEGIN
 		DECLARE @SurchargeOtherCharges_PoundUOM AS INT = 50
 		DECLARE @SurchargeOnSurcharge_PoundUOM AS INT = 51
 		DECLARE @SurchargeOnSurchargeOnSurcharge_PoundUOM AS INT = 52
+
+		-- Other charges constant variables. 
+		DECLARE @COST_METHOD_PER_Unit AS NVARCHAR(50) = 'Per Unit'
+				,@COST_METHOD_Percentage AS NVARCHAR(50) = 'Percentage'
+				,@COST_METHOD_Amount AS NVARCHAR(50) = 'Amount'
+
+				,@INVENTORY_COST_Yes AS BIT = 1
+				,@INVENTORY_COST_No AS BIT = 0
+
+				,@COST_BILLED_BY_Vendor AS NVARCHAR(50) = 'Vendor'
+				,@COST_BILLED_BY_ThirdParty AS NVARCHAR(50) = 'Third Party'
+				,@COST_BILLED_BY_None AS NVARCHAR(50) = 'None'
+
+				,@ALLOCATE_COST_BY_Unit AS NVARCHAR(50) = 'Unit'
+				,@ALLOCATE_COST_BY_Stock_Unit AS NVARCHAR(50) = 'Stock Unit'
+				,@ALLOCATE_COST_BY_Weight AS NVARCHAR(50) = 'Weight'
+				,@ALLOCATE_COST_BY_Cost AS NVARCHAR(50) = 'Cost'
+
+		DECLARE -- Receipt Types
+				@RECEIPT_TYPE_PurchaseContract AS NVARCHAR(50) = 'Purchase Contract'
+				,@RECEIPT_TYPE_PurchaseOrder AS NVARCHAR(50) = 'Purchase Order'
+				,@RECEIPT_TYPE_TransferOrder AS NVARCHAR(50) = 'Transfer Order'
+				,@RECEIPT_TYPE_Direct AS NVARCHAR(50) = 'Direct'
+
+				-- Source Types
+				,@SOURCE_TYPE_None AS INT = 1
+				,@SOURCE_TYPE_Scale AS INT = 2
+				,@SOURCE_TYPE_InboundShipment AS INT = 3
+
+				-- Ownership Types
+				,@OWNERSHIP_TYPE_Own AS INT = 1
+				,@OWNERSHIP_TYPE_Storage AS INT = 2
+				,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
+				,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
 	END 
 	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceipt', @Identity = 1;	
@@ -85,12 +119,9 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptItemLot', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptCharge', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptChargePerItem', @Identity = 1;	
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptItemAllocatedCharge', @Identity = 1;
 
 	EXEC tSQLt.ApplyConstraint 'dbo.tblICLot', 'UN_tblICLot';		
-
-	DECLARE @COST_METHOD_PER_UNIT AS NVARCHAR(50) = 'Per Unit'
-			,@COST_METHOD_PERCENTAGE AS NVARCHAR(50) = 'Percentage'
-			,@COST_METHOD_AMOUNT AS NVARCHAR(50) = 'Amount'
 
 	-- Declare the variables for the transaction 
 	DECLARE @strReceiptNumber AS NVARCHAR(40);
@@ -101,24 +132,6 @@ BEGIN
 	DECLARE @InventoryReceiptTypeId AS INT = 4;
 	DECLARE @intEntityId AS INT = 1;
 	DECLARE @intUserId AS INT = 1;
-
-	DECLARE 
-			-- Receipt Types
-			@RECEIPT_TYPE_PURCHASE_CONTRACT AS NVARCHAR(50) = 'Purchase Contract'
-			,@RECEIPT_TYPE_PURCHASE_ORDER AS NVARCHAR(50) = 'Purchase Order'
-			,@RECEIPT_TYPE_TRANSFER_ORDER AS NVARCHAR(50) = 'Transfer Order'
-			,@RECEIPT_TYPE_DIRECT AS NVARCHAR(50) = 'Direct'
-
-			-- Source Types
-			,@SOURCE_TYPE_NONE AS INT = 1
-			,@SOURCE_TYPE_SCALE AS INT = 2
-			,@SOURCE_TYPE_INBOUND_SHIPMENT AS INT = 3
-
-			-- Ownership Types
-			,@OWNERSHIP_TYPE_OWN AS INT = 1
-			,@OWNERSHIP_TYPE_STORAGE AS INT = 2
-			,@OWNERSHIP_TYPE_CONSIGNED_PURCHASE AS INT = 3
-			,@OWNERSHIP_TYPE_CONSIGNED_SALE AS INT = 4
 
 	-- Create mock data for the starting number 
 	EXEC tSQLt.FakeTable 'dbo.tblSMStartingNumber';	
@@ -174,8 +187,8 @@ BEGIN
 		)
 		SELECT 	strReceiptNumber		= @strReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
-				,strReceiptType			= @RECEIPT_TYPE_PURCHASE_ORDER
-				,intSourceType			= @SOURCE_TYPE_NONE
+				,strReceiptType			= @RECEIPT_TYPE_PurchaseOrder
+				,intSourceType			= @SOURCE_TYPE_None
 				,intLocationId			= @Default_Location
 				,intShipViaId			= @Default_Location
 				,intShipFromId			= @Default_Location
@@ -216,7 +229,7 @@ BEGIN
 				,dblLineTotal			= 10.00
 				,intSort				= 1
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 		-- intInventoryReceiptItemId: 2
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -231,7 +244,7 @@ BEGIN
 				,dblLineTotal			= 20.00
 				,intSort				= 2
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 		-- intInventoryReceiptItemId: 3
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -246,7 +259,7 @@ BEGIN
 				,dblLineTotal			= 30.00
 				,intSort				= 3
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 		-- intInventoryReceiptItemId: 4
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -261,7 +274,7 @@ BEGIN
 				,dblLineTotal			= 40.00
 				,intSort				= 4
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 		-- intInventoryReceiptItemId: 5
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -276,7 +289,7 @@ BEGIN
 				,dblLineTotal			= 50.00
 				,intSort				= 5
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 		-- intInventoryReceiptItemId: 6
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -291,7 +304,7 @@ BEGIN
 				,dblLineTotal			= 60.00
 				,intSort				= 6
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 		-- intInventoryReceiptItemId: 7
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -306,7 +319,7 @@ BEGIN
 				,dblLineTotal			= 70.00
 				,intSort				= 7
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
@@ -371,8 +384,8 @@ BEGIN
 		)
 		SELECT 	strReceiptNumber		= @strReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
-				,strReceiptType			= @RECEIPT_TYPE_PURCHASE_ORDER
-				,intSourceType			= @SOURCE_TYPE_NONE
+				,strReceiptType			= @RECEIPT_TYPE_PurchaseOrder
+				,intSourceType			= @SOURCE_TYPE_None
 				,intLocationId			= @Default_Location
 				,intShipViaId			= @Default_Location
 				,intShipFromId			= @Default_Location
@@ -413,7 +426,7 @@ BEGIN
 				,dblLineTotal			= 10.00
 				,intSort				= 1
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 		-- intInventoryReceiptItemId: 9
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -428,7 +441,7 @@ BEGIN
 				,dblLineTotal			= 20.00
 				,intSort				= 2
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 		-- intInventoryReceiptItemId: 10
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -443,7 +456,7 @@ BEGIN
 				,dblLineTotal			= 30.00
 				,intSort				= 3
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 		-- intInventoryReceiptItemId: 11
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -458,7 +471,7 @@ BEGIN
 				,dblLineTotal			= 40.00
 				,intSort				= 4
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 		-- intInventoryReceiptItemId: 12
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -473,7 +486,7 @@ BEGIN
 				,dblLineTotal			= 50.00
 				,intSort				= 5
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN	
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own	
 	END
 
 	--------------------------------------------------------
@@ -503,8 +516,8 @@ BEGIN
 		)
 		SELECT 	strReceiptNumber		= @strReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
-				,strReceiptType			= @RECEIPT_TYPE_PURCHASE_ORDER
-				,intSourceType			= @SOURCE_TYPE_NONE
+				,strReceiptType			= @RECEIPT_TYPE_PurchaseOrder
+				,intSourceType			= @SOURCE_TYPE_None
 				,intLocationId			= @Default_Location
 				,intShipViaId			= @Default_Location
 				,intShipFromId			= @Default_Location
@@ -545,7 +558,7 @@ BEGIN
 				,dblLineTotal			= 60.00
 				,intSort				= 6
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 		-- intInventoryReceiptItemId: 14
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -560,7 +573,7 @@ BEGIN
 				,dblLineTotal			= 70.00
 				,intSort				= 7
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
@@ -625,8 +638,8 @@ BEGIN
 		)
 		SELECT 	strReceiptNumber		= @strReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
-				,strReceiptType			= @RECEIPT_TYPE_PURCHASE_ORDER
-				,intSourceType			= @SOURCE_TYPE_NONE
+				,strReceiptType			= @RECEIPT_TYPE_PurchaseOrder
+				,intSourceType			= @SOURCE_TYPE_None
 				,intLocationId			= @Default_Location
 				,intShipViaId			= @Default_Location
 				,intShipFromId			= @Default_Location
@@ -667,8 +680,8 @@ BEGIN
 		)
 		SELECT 	strReceiptNumber		= @strReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
-				,strReceiptType			= @RECEIPT_TYPE_PURCHASE_ORDER
-				,intSourceType			= @SOURCE_TYPE_NONE
+				,strReceiptType			= @RECEIPT_TYPE_PurchaseOrder
+				,intSourceType			= @SOURCE_TYPE_None
 				,intLocationId			= @Default_Location
 				,intShipViaId			= @Default_Location
 				,intShipFromId			= @Default_Location
@@ -709,7 +722,7 @@ BEGIN
 				,dblLineTotal			= 60.00
 				,intSort				= 1
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 		-- intInventoryReceiptItemId: 16
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -724,7 +737,7 @@ BEGIN
 				,dblLineTotal			= 70.00
 				,intSort				= 2
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
@@ -786,8 +799,8 @@ BEGIN
 		)
 		SELECT 	strReceiptNumber		= @strReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
-				,strReceiptType			= @RECEIPT_TYPE_PURCHASE_ORDER
-				,intSourceType			= @SOURCE_TYPE_NONE
+				,strReceiptType			= @RECEIPT_TYPE_PurchaseOrder
+				,intSourceType			= @SOURCE_TYPE_None
 				,intLocationId			= @Default_Location
 				,intShipViaId			= @Default_Location
 				,intShipFromId			= @Default_Location
@@ -828,7 +841,7 @@ BEGIN
 				,dblLineTotal			= 60.00
 				,intSort				= 1
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 		-- intInventoryReceiptItemId: 18
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -843,7 +856,7 @@ BEGIN
 				,dblLineTotal			= 70.00
 				,intSort				= 2
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
@@ -904,8 +917,8 @@ BEGIN
 		)
 		SELECT 	strReceiptNumber		= @strReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
-				,strReceiptType			= @RECEIPT_TYPE_PURCHASE_ORDER
-				,intSourceType			= @SOURCE_TYPE_NONE
+				,strReceiptType			= @RECEIPT_TYPE_PurchaseOrder
+				,intSourceType			= @SOURCE_TYPE_None
 				,intLocationId			= @Default_Location
 				,intShipViaId			= @Default_Location
 				,intShipFromId			= @Default_Location
@@ -946,7 +959,7 @@ BEGIN
 				,dblLineTotal			= 60.00
 				,intSort				= 1
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 		-- intInventoryReceiptItemId: 20
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -961,7 +974,7 @@ BEGIN
 				,dblLineTotal			= 70.00
 				,intSort				= 2
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
@@ -985,7 +998,7 @@ BEGIN
 	--------------------------------------------------------
 	-- Add the INVRCPT-XXXXX8
 	-- It has MANUAL lot items on it. 
-	-- Other charges is using Per Unit
+	-- It has Other charges. Cost method is Per Unit 
 	--------------------------------------------------------
 	BEGIN
 		SET @strReceiptNumber = 'INVRCPT-XXXXX8'
@@ -1010,8 +1023,8 @@ BEGIN
 		)
 		SELECT 	strReceiptNumber		= @strReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
-				,strReceiptType			= @RECEIPT_TYPE_PURCHASE_ORDER
-				,intSourceType			= @SOURCE_TYPE_NONE
+				,strReceiptType			= @RECEIPT_TYPE_PurchaseOrder
+				,intSourceType			= @SOURCE_TYPE_None
 				,intLocationId			= @Default_Location
 				,intShipViaId			= @Default_Location
 				,intShipFromId			= @Default_Location
@@ -1052,7 +1065,7 @@ BEGIN
 				,dblLineTotal			= 60.00
 				,intSort				= 1
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 		-- intInventoryReceiptItemId: 22
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -1067,7 +1080,7 @@ BEGIN
 				,dblLineTotal			= 70.00
 				,intSort				= 2
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
@@ -1119,7 +1132,7 @@ BEGIN
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @OtherCharges
 			,[ysnInventoryCost]		= 0
-			,[strCostMethod]		= @COST_METHOD_PER_UNIT
+			,[strCostMethod]		= @COST_METHOD_PER_Unit
 			,[dblRate]				= 5.00
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
 			,[intEntityVendorId]	= NULL 
@@ -1131,7 +1144,7 @@ BEGIN
 	--------------------------------------------------------
 	-- Add the INVRCPT-XXXXX9
 	-- It has MANUAL lot items on it. 
-	-- Other charges is using Per Unit
+	-- It has Other charges. Cost method is Percentage.
 	--------------------------------------------------------
 	BEGIN
 		SET @strReceiptNumber = 'INVRCPT-XXXXX9'
@@ -1156,8 +1169,8 @@ BEGIN
 		)
 		SELECT 	strReceiptNumber		= @strReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
-				,strReceiptType			= @RECEIPT_TYPE_PURCHASE_ORDER
-				,intSourceType			= @SOURCE_TYPE_NONE
+				,strReceiptType			= @RECEIPT_TYPE_PurchaseOrder
+				,intSourceType			= @SOURCE_TYPE_None
 				,intLocationId			= @Default_Location
 				,intShipViaId			= @Default_Location
 				,intShipFromId			= @Default_Location
@@ -1198,7 +1211,7 @@ BEGIN
 				,dblLineTotal			= 60.00
 				,intSort				= 1
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 		-- intInventoryReceiptItemId: 24
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
@@ -1213,7 +1226,7 @@ BEGIN
 				,dblLineTotal			= 70.00
 				,intSort				= 2
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
@@ -1265,7 +1278,7 @@ BEGIN
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @OtherCharges
 			,[ysnInventoryCost]		= 0
-			,[strCostMethod]		= @COST_METHOD_PERCENTAGE
+			,[strCostMethod]		= @COST_METHOD_Percentage
 			,[dblRate]				= 5.00 -- (This means 5%) 
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
 			,[intEntityVendorId]	= NULL 
@@ -1277,7 +1290,7 @@ BEGIN
 	--------------------------------------------------------
 	-- Add the INVRCPT-XXXX10
 	-- It has MANUAL lot items on it. 
-	-- Other charges is using Amount
+	-- It has Other charges. Cost method is Amount 
 	--------------------------------------------------------
 	BEGIN
 		SET @strReceiptNumber = 'INVRCPT-XXXX10'
@@ -1302,8 +1315,8 @@ BEGIN
 		)
 		SELECT 	strReceiptNumber		= @strReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
-				,strReceiptType			= @RECEIPT_TYPE_PURCHASE_ORDER
-				,intSourceType			= @SOURCE_TYPE_NONE
+				,strReceiptType			= @RECEIPT_TYPE_PurchaseOrder
+				,intSourceType			= @SOURCE_TYPE_None
 				,intLocationId			= @Default_Location
 				,intShipViaId			= @Default_Location
 				,intShipFromId			= @Default_Location
@@ -1331,7 +1344,7 @@ BEGIN
 			,intConcurrencyId
 			,intOwnershipType
 		)
-		-- intInventoryReceiptItemId: 24
+		-- intInventoryReceiptItemId: 25
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 1
 				,intSourceId			= NULL
@@ -1344,8 +1357,8 @@ BEGIN
 				,dblLineTotal			= 60.00
 				,intSort				= 1
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
-		-- intInventoryReceiptItemId: 25
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
+		-- intInventoryReceiptItemId: 26
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 2
@@ -1359,7 +1372,7 @@ BEGIN
 				,dblLineTotal			= 70.00
 				,intSort				= 2
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
@@ -1371,7 +1384,7 @@ BEGIN
 		)
 		-- Manual Lot Grains
 		-- intInventoryReceiptItemLotId: 19
-		SELECT	intInventoryReceiptItemId	= 23
+		SELECT	intInventoryReceiptItemId	= 25
 				,strLotNumber				= 'MANUAL-22X-10000'
 				,dblQuantity				= 7
 				,dblCost					= 6.10
@@ -1379,7 +1392,7 @@ BEGIN
 				,intConcurrencyId			= 1
 		-- intInventoryReceiptItemLotId: 20
 		UNION ALL 
-		SELECT	intInventoryReceiptItemId	= 24
+		SELECT	intInventoryReceiptItemId	= 26
 				,strLotNumber				= 'LOT DE MANUAL X 113-133.108985'
 				,dblQuantity				= 20
 				,dblCost					= 7.00
@@ -1387,7 +1400,7 @@ BEGIN
 				,intConcurrencyId			= 1
 		-- intInventoryReceiptItemLotId: 21
 		UNION ALL 
-		SELECT	intInventoryReceiptItemId	= 23
+		SELECT	intInventoryReceiptItemId	= 25
 				,strLotNumber				= 'MANUAL-23X-10000'
 				,dblQuantity				= 3
 				,dblCost					= 5.90
@@ -1411,7 +1424,7 @@ BEGIN
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @OtherCharges
 			,[ysnInventoryCost]		= 0
-			,[strCostMethod]		= @COST_METHOD_AMOUNT
+			,[strCostMethod]		= @COST_METHOD_Amount
 			,[dblRate]				= NULL 
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
 			,[intEntityVendorId]	= NULL 
@@ -1423,7 +1436,7 @@ BEGIN
 	--------------------------------------------------------
 	-- Add the INVRCPT-XXXX11
 	-- It has MANUAL lot items on it. 
-	-- Other charges is using Amount
+	-- It has Other charges. Cost method is Amount. 
 	-- There is a surcharge on Other Charges
 	--------------------------------------------------------
 	BEGIN
@@ -1449,8 +1462,8 @@ BEGIN
 		)
 		SELECT 	strReceiptNumber		= @strReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
-				,strReceiptType			= @RECEIPT_TYPE_PURCHASE_ORDER
-				,intSourceType			= @SOURCE_TYPE_NONE
+				,strReceiptType			= @RECEIPT_TYPE_PurchaseOrder
+				,intSourceType			= @SOURCE_TYPE_None
 				,intLocationId			= @Default_Location
 				,intShipViaId			= @Default_Location
 				,intShipFromId			= @Default_Location
@@ -1478,7 +1491,7 @@ BEGIN
 			,intConcurrencyId
 			,intOwnershipType
 		)
-		-- intInventoryReceiptItemId: 26
+		-- intInventoryReceiptItemId: 27
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 1
 				,intSourceId			= NULL
@@ -1491,8 +1504,8 @@ BEGIN
 				,dblLineTotal			= 60.00
 				,intSort				= 1
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
-		-- intInventoryReceiptItemId: 27
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
+		-- intInventoryReceiptItemId: 28
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 2
@@ -1506,7 +1519,7 @@ BEGIN
 				,dblLineTotal			= 70.00
 				,intSort				= 2
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
@@ -1518,7 +1531,7 @@ BEGIN
 		)
 		-- Manual Lot Grains
 		-- intInventoryReceiptItemLotId: 22
-		SELECT	intInventoryReceiptItemId	= 26
+		SELECT	intInventoryReceiptItemId	= 27
 				,strLotNumber				= 'MANUAL-22X-10000'
 				,dblQuantity				= 7
 				,dblCost					= 6.10
@@ -1526,7 +1539,7 @@ BEGIN
 				,intConcurrencyId			= 1
 		-- intInventoryReceiptItemLotId: 23
 		UNION ALL 
-		SELECT	intInventoryReceiptItemId	= 27
+		SELECT	intInventoryReceiptItemId	= 28
 				,strLotNumber				= 'LOT DE MANUAL X 113-133.108985'
 				,dblQuantity				= 20
 				,dblCost					= 7.00
@@ -1534,7 +1547,7 @@ BEGIN
 				,intConcurrencyId			= 1
 		-- intInventoryReceiptItemLotId: 24
 		UNION ALL 
-		SELECT	intInventoryReceiptItemId	= 26
+		SELECT	intInventoryReceiptItemId	= 27
 				,strLotNumber				= 'MANUAL-23X-10000'
 				,dblQuantity				= 3
 				,dblCost					= 5.90
@@ -1559,7 +1572,7 @@ BEGIN
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @OtherCharges
 			,[ysnInventoryCost]		= 0
-			,[strCostMethod]		= @COST_METHOD_AMOUNT
+			,[strCostMethod]		= @COST_METHOD_Amount
 			,[dblRate]				= NULL 
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
 			,[intEntityVendorId]	= 1 
@@ -1572,7 +1585,7 @@ BEGIN
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @SurchargeOtherCharges
 			,[ysnInventoryCost]		= 0
-			,[strCostMethod]		= @COST_METHOD_PERCENTAGE
+			,[strCostMethod]		= @COST_METHOD_Percentage
 			,[dblRate]				= 2 -- 2%
 			,[intCostUOMId]			= @SurchargeOtherCharges_PoundUOM
 			,[intEntityVendorId]	= 1
@@ -1585,7 +1598,7 @@ BEGIN
 	--------------------------------------------------------
 	-- Add the INVRCPT-XXXX12
 	-- It has MANUAL lot items on it. 
-	-- Other charges is using Amount
+	-- It has Other charges. Cost type is using Percentage.
 	-- There is a surcharge on Other Charges
 	-- Now, there is a surcharge on surcharge
 	--------------------------------------------------------
@@ -1612,8 +1625,8 @@ BEGIN
 		)
 		SELECT 	strReceiptNumber		= @strReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
-				,strReceiptType			= @RECEIPT_TYPE_PURCHASE_ORDER
-				,intSourceType			= @SOURCE_TYPE_NONE
+				,strReceiptType			= @RECEIPT_TYPE_PurchaseOrder
+				,intSourceType			= @SOURCE_TYPE_None
 				,intLocationId			= @Default_Location
 				,intShipViaId			= @Default_Location
 				,intShipFromId			= @Default_Location
@@ -1641,7 +1654,7 @@ BEGIN
 			,intConcurrencyId
 			,intOwnershipType
 		)
-		-- intInventoryReceiptItemId: 28
+		-- intInventoryReceiptItemId: 29
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 1
 				,intSourceId			= NULL
@@ -1654,8 +1667,8 @@ BEGIN
 				,dblLineTotal			= 60.00
 				,intSort				= 1
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
-		-- intInventoryReceiptItemId: 29
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
+		-- intInventoryReceiptItemId: 30
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 2
@@ -1669,7 +1682,7 @@ BEGIN
 				,dblLineTotal			= 70.00
 				,intSort				= 2
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
@@ -1681,7 +1694,7 @@ BEGIN
 		)
 		-- Manual Lot Grains
 		-- intInventoryReceiptItemLotId: 25
-		SELECT	intInventoryReceiptItemId	= 28
+		SELECT	intInventoryReceiptItemId	= 29
 				,strLotNumber				= 'MANUAL-22X-10000'
 				,dblQuantity				= 7
 				,dblCost					= 6.10
@@ -1689,7 +1702,7 @@ BEGIN
 				,intConcurrencyId			= 1
 		-- intInventoryReceiptItemLotId: 26
 		UNION ALL 
-		SELECT	intInventoryReceiptItemId	= 29
+		SELECT	intInventoryReceiptItemId	= 30
 				,strLotNumber				= 'LOT DE MANUAL X 113-133.108985'
 				,dblQuantity				= 20
 				,dblCost					= 7.00
@@ -1697,7 +1710,7 @@ BEGIN
 				,intConcurrencyId			= 1
 		-- intInventoryReceiptItemLotId: 27
 		UNION ALL 
-		SELECT	intInventoryReceiptItemId	= 28
+		SELECT	intInventoryReceiptItemId	= 29
 				,strLotNumber				= 'MANUAL-23X-10000'
 				,dblQuantity				= 3
 				,dblCost					= 5.90
@@ -1722,7 +1735,7 @@ BEGIN
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @OtherCharges
 			,[ysnInventoryCost]		= 0
-			,[strCostMethod]		= @COST_METHOD_AMOUNT
+			,[strCostMethod]		= @COST_METHOD_Amount
 			,[dblRate]				= NULL 
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
 			,[intEntityVendorId]	= 1 
@@ -1735,7 +1748,7 @@ BEGIN
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @SurchargeOtherCharges
 			,[ysnInventoryCost]		= 0
-			,[strCostMethod]		= @COST_METHOD_PERCENTAGE
+			,[strCostMethod]		= @COST_METHOD_Percentage
 			,[dblRate]				= 2 -- 2%
 			,[intCostUOMId]			= @SurchargeOtherCharges_PoundUOM
 			,[intEntityVendorId]	= 1
@@ -1748,7 +1761,7 @@ BEGIN
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @SurchargeOnSurcharge
 			,[ysnInventoryCost]		= 0
-			,[strCostMethod]		= @COST_METHOD_PERCENTAGE
+			,[strCostMethod]		= @COST_METHOD_Percentage
 			,[dblRate]				= 10 -- 10%
 			,[intCostUOMId]			= @SurchargeOnSurcharge_PoundUOM
 			,[intEntityVendorId]	= 1
@@ -1761,7 +1774,7 @@ BEGIN
 	--------------------------------------------------------
 	-- Add the INVRCPT-XXXX13
 	-- It has MANUAL lot items on it. 
-	-- Other charges is using Amount
+	-- It has Other charges. Cost types are Amount and Percentage.
 	-- There is a surcharge on Other Charges
 	-- There is a surcharge on surcharge
 	-- There is another surcharge on "surcharge on surcharge"
@@ -1789,8 +1802,8 @@ BEGIN
 		)
 		SELECT 	strReceiptNumber		= @strReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
-				,strReceiptType			= @RECEIPT_TYPE_PURCHASE_ORDER
-				,intSourceType			= @SOURCE_TYPE_NONE
+				,strReceiptType			= @RECEIPT_TYPE_PurchaseOrder
+				,intSourceType			= @SOURCE_TYPE_None
 				,intLocationId			= @Default_Location
 				,intShipViaId			= @Default_Location
 				,intShipFromId			= @Default_Location
@@ -1818,7 +1831,7 @@ BEGIN
 			,intConcurrencyId
 			,intOwnershipType
 		)
-		-- intInventoryReceiptItemId: 30
+		-- intInventoryReceiptItemId: 31
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 1
 				,intSourceId			= NULL
@@ -1831,8 +1844,8 @@ BEGIN
 				,dblLineTotal			= 60.00
 				,intSort				= 1
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
-		-- intInventoryReceiptItemId: 31
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
+		-- intInventoryReceiptItemId: 32
 		UNION ALL 
 		SELECT	intInventoryReceiptId	= @intReceiptNumber
 				,intLineNo				= 2
@@ -1846,7 +1859,7 @@ BEGIN
 				,dblLineTotal			= 70.00
 				,intSort				= 2
 				,intConcurrencyId		= 1
-				,intOwnershipType		= @OWNERSHIP_TYPE_OWN
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
@@ -1858,7 +1871,7 @@ BEGIN
 		)
 		-- Manual Lot Grains
 		-- intInventoryReceiptItemLotId: 28
-		SELECT	intInventoryReceiptItemId	= 30
+		SELECT	intInventoryReceiptItemId	= 31
 				,strLotNumber				= 'MANUAL-22X-10000'
 				,dblQuantity				= 7
 				,dblCost					= 6.10
@@ -1866,7 +1879,7 @@ BEGIN
 				,intConcurrencyId			= 1
 		-- intInventoryReceiptItemLotId: 29
 		UNION ALL 
-		SELECT	intInventoryReceiptItemId	= 31
+		SELECT	intInventoryReceiptItemId	= 32
 				,strLotNumber				= 'LOT DE MANUAL X 113-133.108985'
 				,dblQuantity				= 20
 				,dblCost					= 7.00
@@ -1874,7 +1887,7 @@ BEGIN
 				,intConcurrencyId			= 1
 		-- intInventoryReceiptItemLotId: 30
 		UNION ALL 
-		SELECT	intInventoryReceiptItemId	= 30
+		SELECT	intInventoryReceiptItemId	= 31
 				,strLotNumber				= 'MANUAL-23X-10000'
 				,dblQuantity				= 3
 				,dblCost					= 5.90
@@ -1899,7 +1912,7 @@ BEGIN
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @OtherCharges
 			,[ysnInventoryCost]		= 0
-			,[strCostMethod]		= @COST_METHOD_AMOUNT
+			,[strCostMethod]		= @COST_METHOD_Amount
 			,[dblRate]				= NULL 
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
 			,[intEntityVendorId]	= 1 
@@ -1912,7 +1925,7 @@ BEGIN
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @SurchargeOtherCharges
 			,[ysnInventoryCost]		= 0
-			,[strCostMethod]		= @COST_METHOD_PERCENTAGE
+			,[strCostMethod]		= @COST_METHOD_Percentage
 			,[dblRate]				= 2 -- 2%
 			,[intCostUOMId]			= @SurchargeOtherCharges_PoundUOM
 			,[intEntityVendorId]	= 1
@@ -1925,7 +1938,7 @@ BEGIN
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @SurchargeOnSurcharge
 			,[ysnInventoryCost]		= 0
-			,[strCostMethod]		= @COST_METHOD_PERCENTAGE
+			,[strCostMethod]		= @COST_METHOD_Percentage
 			,[dblRate]				= 10 -- 10%
 			,[intCostUOMId]			= @SurchargeOnSurcharge_PoundUOM
 			,[intEntityVendorId]	= 1
@@ -1938,7 +1951,7 @@ BEGIN
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @SurchargeOnSurchargeOnSurcharge
 			,[ysnInventoryCost]		= 0
-			,[strCostMethod]		= @COST_METHOD_PERCENTAGE
+			,[strCostMethod]		= @COST_METHOD_Percentage
 			,[dblRate]				= 30 -- 30%
 			,[intCostUOMId]			= @SurchargeOnSurchargeOnSurcharge_PoundUOM
 			,[intEntityVendorId]	= 1
@@ -1946,6 +1959,157 @@ BEGIN
 			,[strAllocateCostBy]	= 'Unit'
 			,[strCostBilledBy] 		= 'None'
 			,[intContractId]		= NULL
+	END
 
+	--------------------------------------------------------
+	-- Add the INVRCPT-XXXX14
+	-- 1. It has MANUAL lot items on it. 
+	-- 2. Two Manual Lot Numbers. 
+	-- 3. One Other Charge. 
+	--      3.1. Cost method is Unit
+	--		3.2. Cost is allocated By Cost. 
+	--		3.3. Inventory cost is Yes
+	--		3.4. Cost billed by Vendor 
+	--		3.5. No contract. 
+	--------------------------------------------------------
+	BEGIN
+		SET @strReceiptNumber = 'INVRCPT-XXXX14'
+		SET @dtmDate = '01/22/2014'
+
+		-- Insert the Inventory Receipt header 
+		INSERT INTO dbo.tblICInventoryReceipt (
+				strReceiptNumber
+				,dtmReceiptDate
+				,strReceiptType
+				,intSourceType
+				,intLocationId
+				,intShipViaId
+				,intShipFromId
+				,intReceiverId
+				,intCurrencyId
+				,strAllocateFreight
+				,intConcurrencyId
+				,intEntityId
+				,intCreatedUserId
+				,ysnPosted
+		)
+		SELECT 	strReceiptNumber		= @strReceiptNumber
+				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
+				,strReceiptType			= @RECEIPT_TYPE_PurchaseOrder
+				,intSourceType			= @SOURCE_TYPE_None
+				,intLocationId			= @Default_Location
+				,intShipViaId			= @Default_Location
+				,intShipFromId			= @Default_Location
+				,intReceiverId			= @Default_Location
+				,intCurrencyId			= @BaseCurrencyId
+				,strAllocateFreight		= 'No' -- Default is No
+				,intConcurrencyId		= 1
+				,intEntityId			= @intEntityId
+				,intCreatedUserId		= @intUserId
+				,ysnPosted				= 0
+		SET @intReceiptNumber = SCOPE_IDENTITY();
+
+		INSERT INTO dbo.tblICInventoryReceiptItem (
+			intInventoryReceiptId
+			,intLineNo
+			,intSourceId
+			,intItemId
+			,dblOrderQty
+			,dblOpenReceive
+			,dblReceived
+			,intUnitMeasureId
+			,dblUnitCost
+			,dblLineTotal
+			,intSort
+			,intConcurrencyId
+			,intOwnershipType
+		)
+		-- intInventoryReceiptItemId: 33
+		SELECT	intInventoryReceiptId	= @intReceiptNumber
+				,intLineNo				= 1
+				,intSourceId			= NULL
+				,intItemId				= @ManualLotGrains
+				,dblOrderQty			= 10
+				,dblOpenReceive			= 10
+				,dblReceived			= 0
+				,intUnitMeasureId		= @ManualGrains_25KgBagUOM
+				,dblUnitCost			= 6.00
+				,dblLineTotal			= 60.00
+				,intSort				= 1
+				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
+		-- intInventoryReceiptItemId: 34
+		UNION ALL 
+		SELECT	intInventoryReceiptId	= @intReceiptNumber
+				,intLineNo				= 2
+				,intSourceId			= NULL
+				,intItemId				= @ManualLotGrains
+				,dblOrderQty			= 20
+				,dblOpenReceive			= 20
+				,dblReceived			= 0
+				,intUnitMeasureId		= @ManualGrains_PoundUOM
+				,dblUnitCost			= 7.00
+				,dblLineTotal			= 70.00
+				,intSort				= 2
+				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
+
+		INSERT INTO dbo.tblICInventoryReceiptItemLot (
+				intInventoryReceiptItemId
+				,strLotNumber
+				,dblQuantity
+				,dblCost
+				,intSort
+				,intConcurrencyId
+		)
+		-- Manual Lot Grains
+		-- intInventoryReceiptItemLotId: 31
+		SELECT	intInventoryReceiptItemId	= 33
+				,strLotNumber				= 'Manual Lot in 25 kg bags'
+				,dblQuantity				= 7
+				,dblCost					= 6.10
+				,intSort					= 1
+				,intConcurrencyId			= 1
+		-- intInventoryReceiptItemLotId: 32
+		UNION ALL 
+		SELECT	intInventoryReceiptItemId	= 34
+				,strLotNumber				= 'Manual Lot in Pounds'
+				,dblQuantity				= 20
+				,dblCost					= 7.00
+				,intSort					= 1
+				,intConcurrencyId			= 1
+		-- intInventoryReceiptItemLotId: 33
+		UNION ALL 
+		SELECT	intInventoryReceiptItemId	= 33
+				,strLotNumber				= 'Manual Lot in 25 kg bags'
+				,dblQuantity				= 3
+				,dblCost					= 5.90
+				,intSort					= 2
+				,intConcurrencyId			= 1
+
+		-- Fake other charges data
+		INSERT INTO tblICInventoryReceiptCharge (
+			[intInventoryReceiptId] 
+			,[intChargeId] 
+			,[ysnInventoryCost] 
+			,[strCostMethod] 
+			,[dblRate] 
+			,[intCostUOMId] 
+			,[intEntityVendorId] 
+			,[dblAmount] 
+			,[strAllocateCostBy] 
+			,[strCostBilledBy] 			
+		)
+		SELECT 
+			[intInventoryReceiptId]	= @intReceiptNumber
+			,[intChargeId]			= @OtherCharges
+			,[ysnInventoryCost]		= @INVENTORY_COST_Yes
+			,[strCostMethod]		= @COST_METHOD_PER_Unit
+			,[dblRate]				= 5.00
+			,[intCostUOMId]			= @OtherCharges_PoundUOM
+			,[intEntityVendorId]	= NULL 
+			,[dblAmount]			= NULL 
+			,[strAllocateCostBy]	= @ALLOCATE_COST_BY_Cost
+			,[strCostBilledBy] 		= @COST_BILLED_BY_Vendor
 	END
 END

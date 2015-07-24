@@ -29,7 +29,6 @@ BEGIN
 	AS		ReceiptItemAllocatedCharge
 	USING (
 		SELECT	CalculatedCharges.*
-				,Receipt.intInventoryReceiptId
 				,ReceiptItem.intInventoryReceiptItemId
 				,ReceiptItem.dblOpenReceive
 				,ReceiptItem.dblUnitCost
@@ -44,26 +43,25 @@ BEGIN
 							,intContractId
 							,intEntityVendorId
 							,ysnInventoryCost
+							,intInventoryReceiptId
 					FROM	dbo.tblICInventoryReceiptChargePerItem CalculatedCharge 					
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Cost
 							AND CalculatedCharge.intContractId IS NULL 
-					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost
+					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId
 				) CalculatedCharges 
-					ON ReceiptItem.intOrderId = CalculatedCharges.intContractId
+					ON ReceiptItem.intInventoryReceiptId = CalculatedCharges.intInventoryReceiptId
 				LEFT JOIN (
 					SELECT	dblTotalCost = SUM(ISNULL(ReceiptItem.dblOpenReceive, 0) * ISNULL(ReceiptItem.dblUnitCost, 0))
-							,ReceiptItem.intOrderId 
+							,ReceiptItem.intInventoryReceiptId 
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 					WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-							AND ReceiptItem.intOrderId IS NULL 
-					GROUP BY ReceiptItem.intOrderId 
+					GROUP BY ReceiptItem.intInventoryReceiptId 
 				) TotalCostOfItemsPerContract 
-					ON TotalCostOfItemsPerContract.intOrderId = ReceiptItem.intOrderId 
+					ON TotalCostOfItemsPerContract.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId 
 	) AS Source_Query  
 		ON ReceiptItemAllocatedCharge.intInventoryReceiptId = Source_Query.intInventoryReceiptId
-		AND ReceiptItemAllocatedCharge.intEntityVendorId = Source_Query.intEntityVendorId
 		AND ReceiptItemAllocatedCharge.strCostBilledBy = Source_Query.strCostBilledBy
 		AND ReceiptItemAllocatedCharge.ysnInventoryCost = Source_Query.ysnInventoryCost
 
@@ -101,4 +99,5 @@ BEGIN
 		)
 	;
 END 
+
 _Exit:

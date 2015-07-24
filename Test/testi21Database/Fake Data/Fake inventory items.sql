@@ -608,13 +608,16 @@ BEGIN
 		DECLARE @SurchargeOnSurcharge_PoundUOM AS INT = 51
 		DECLARE @SurchargeOnSurchargeOnSurcharge_PoundUOM AS INT = 52
 
+		DECLARE @UNIT_TYPE_Weight AS NVARCHAR(50) = 'Weight'
+				,@UNIT_TYPE_Packed AS NVARCHAR(50) = 'Packed'
+
 		-- Unit of measure master table
-		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOM_Bushel, 'Bushel')
-		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOM_Pound, 'Pound')
-		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOM_Kg, 'Kilogram')
-		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOM_25KgBag, '25 Kg Bag')
-		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOM_10LbBag, '10 Lb Bag')
-		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure) VALUES (@UOM_Ton, 'Ton')
+		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure, strUnitType) VALUES (@UOM_Bushel, 'Bushel', @UNIT_TYPE_Weight)
+		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure, strUnitType) VALUES (@UOM_Pound, 'Pound', @UNIT_TYPE_Weight)
+		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure, strUnitType) VALUES (@UOM_Kg, 'Kilogram', @UNIT_TYPE_Weight)
+		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure, strUnitType) VALUES (@UOM_25KgBag, '25 Kg Bag', @UNIT_TYPE_Packed)
+		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure, strUnitType) VALUES (@UOM_10LbBag, '10 Lb Bag', @UNIT_TYPE_Packed)
+		INSERT INTO dbo.tblICUnitMeasure (intUnitMeasureId, strUnitMeasure, strUnitType) VALUES (@UOM_Ton, 'Ton', @UNIT_TYPE_Weight)
 		
 		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (@WetGrains_BushelUOM, @WetGrains, @UOM_Bushel, @BushelUnitQty)			
 		INSERT INTO dbo.tblICItemUOM (intItemUOMId, intItemId, intUnitMeasureId, dblUnitQty) VALUES (@StickyGrains_BushelUOM, @StickyGrains, @UOM_Bushel, @BushelUnitQty)		

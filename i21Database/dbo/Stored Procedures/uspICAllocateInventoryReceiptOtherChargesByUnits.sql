@@ -14,22 +14,22 @@ DECLARE @COST_METHOD_Per_Unit AS NVARCHAR(50) = 'Per Unit'
 		,@COST_METHOD_Amount AS NVARCHAR(50) = 'Amount'
 
 		,@ALLOCATE_COST_BY_Unit AS NVARCHAR(50) = 'Unit'
-		,@ALLOCATE_COST_BY_Stock_Unit AS NVARCHAR(50) = 'Stock Unit'
-		,@ALLOCATE_COST_BY_Weight AS NVARCHAR(50) = 'Weight'
-		,@ALLOCATE_COST_BY_Cost AS NVARCHAR(50) = 'Cost'
+		--,@ALLOCATE_COST_BY_Stock_Unit AS NVARCHAR(50) = 'Stock Unit'
+		--,@ALLOCATE_COST_BY_Weight AS NVARCHAR(50) = 'Weight'
+		--,@ALLOCATE_COST_BY_Cost AS NVARCHAR(50) = 'Cost'
 
 		,@UNIT_TYPE_Weight AS NVARCHAR(50) = 'Weight'
 
-DECLARE	-- Receipt Types
-		@RECEIPT_TYPE_Purchase_Contract AS NVARCHAR(50) = 'Purchase Contract'
-		,@RECEIPT_TYPE_Purchase_Order AS NVARCHAR(50) = 'Purchase Order'
-		,@RECEIPT_TYPE_Transfer_Order AS NVARCHAR(50) = 'Transfer Order'
-		,@RECEIPT_TYPE_Direct AS NVARCHAR(50) = 'Direct'
-		-- Source Types
-		,@SOURCE_TYPE_None AS INT = 0
-		,@SOURCE_TYPE_Scale AS INT = 1
-		,@SOURCE_TYPE_Inbound_Shipment AS INT = 2
-		,@SOURCE_TYPE_Transport AS INT = 3
+--DECLARE	-- Receipt Types
+--		@RECEIPT_TYPE_Purchase_Contract AS NVARCHAR(50) = 'Purchase Contract'
+--		,@RECEIPT_TYPE_Purchase_Order AS NVARCHAR(50) = 'Purchase Order'
+--		,@RECEIPT_TYPE_Transfer_Order AS NVARCHAR(50) = 'Transfer Order'
+--		,@RECEIPT_TYPE_Direct AS NVARCHAR(50) = 'Direct'
+--		-- Source Types
+--		,@SOURCE_TYPE_None AS INT = 0
+--		,@SOURCE_TYPE_Scale AS INT = 1
+--		,@SOURCE_TYPE_Inbound_Shipment AS INT = 2
+--		,@SOURCE_TYPE_Transport AS INT = 3
 
 -- Allocate cost by 'unit'
 BEGIN 
@@ -40,7 +40,6 @@ BEGIN
 	AS		ReceiptItemAllocatedCharge
 	USING (
 		SELECT	CalculatedCharges.*
-				,Receipt.intInventoryReceiptId
 				,ReceiptItem.intInventoryReceiptItemId
 				,ReceiptItem.dblOpenReceive
 				,ItemUOM.dblUnitQty
@@ -57,26 +56,25 @@ BEGIN
 							,intContractId
 							,intEntityVendorId
 							,ysnInventoryCost
-					FROM	dbo.tblICInventoryReceiptChargePerItem CalculatedCharge				
+							,intInventoryReceiptId
+					FROM	dbo.tblICInventoryReceiptChargePerItem CalculatedCharge 					
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Unit
 							AND CalculatedCharge.intContractId IS NULL 
-					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost
+					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId
 				) CalculatedCharges 
-					ON ReceiptItem.intOrderId = CalculatedCharges.intContractId
+					ON ReceiptItem.intInventoryReceiptId = CalculatedCharges.intInventoryReceiptId
 				LEFT JOIN (
 					SELECT	dblTotalUnits = SUM(dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, ItemUOM.dblUnitQty))
-							,ReceiptItem.intOrderId 
+							,ReceiptItem.intInventoryReceiptId 
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-								AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
 							INNER JOIN dbo.tblICItemUOM ItemUOM
 								ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
 					WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-							AND ReceiptItem.intOrderId IS NULL 
-					GROUP BY ReceiptItem.intOrderId 
+					GROUP BY ReceiptItem.intInventoryReceiptId 
 				) TotalUnitsOfItemsPerContract 
-					ON TotalUnitsOfItemsPerContract.intOrderId = ReceiptItem.intOrderId 
+					ON TotalUnitsOfItemsPerContract.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId 
 	) AS Source_Query  
 		ON ReceiptItemAllocatedCharge.intInventoryReceiptId = Source_Query.intInventoryReceiptId
 		AND ReceiptItemAllocatedCharge.intEntityVendorId = Source_Query.intEntityVendorId

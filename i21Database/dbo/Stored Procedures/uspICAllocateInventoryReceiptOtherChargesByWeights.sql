@@ -13,13 +13,12 @@ DECLARE @COST_METHOD_Per_Unit AS NVARCHAR(50) = 'Per Unit'
 		,@COST_METHOD_Percentage AS NVARCHAR(50) = 'Percentage'
 		,@COST_METHOD_Amount AS NVARCHAR(50) = 'Amount'
 
-		,@ALLOCATE_COST_BY_Unit AS NVARCHAR(50) = 'Unit'
-		,@ALLOCATE_COST_BY_Stock_Unit AS NVARCHAR(50) = 'Stock Unit'
+		--,@ALLOCATE_COST_BY_Unit AS NVARCHAR(50) = 'Unit'
+		--,@ALLOCATE_COST_BY_Stock_Unit AS NVARCHAR(50) = 'Stock Unit'
 		,@ALLOCATE_COST_BY_Weight AS NVARCHAR(50) = 'Weight'
-		,@ALLOCATE_COST_BY_Cost AS NVARCHAR(50) = 'Cost'
+		--,@ALLOCATE_COST_BY_Cost AS NVARCHAR(50) = 'Cost'
 
 		,@UNIT_TYPE_Weight AS NVARCHAR(50) = 'Weight'
-
 
 -- Validate the Stock Unit. It must be a unit type of 'Weight'. Do not allow allocation if stock unit is not a weight. 
 BEGIN 
@@ -76,7 +75,6 @@ BEGIN
 	AS		ReceiptItemAllocatedCharge
 	USING (
 		SELECT	CalculatedCharges.*
-				,Receipt.intInventoryReceiptId
 				,ReceiptItem.intInventoryReceiptItemId
 				,ReceiptItem.dblOpenReceive
 				,ItemUOM.dblUnitQty
@@ -93,16 +91,17 @@ BEGIN
 							,intContractId
 							,intEntityVendorId
 							,ysnInventoryCost
+							,intInventoryReceiptId
 					FROM	dbo.tblICInventoryReceiptChargePerItem CalculatedCharge				
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Weight
-							AND CalculatedCharge.intContractId IS NOT NULL 
-					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost
+							AND CalculatedCharge.intContractId IS NULL 
+					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId
 				) CalculatedCharges 
-					ON ReceiptItem.intOrderId = CalculatedCharges.intContractId
+					ON ReceiptItem.intInventoryReceiptId = CalculatedCharges.intInventoryReceiptId
 				LEFT JOIN (
 					SELECT  dblTotalWeight = SUM(dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, ItemUOM.dblUnitQty))
-							,ReceiptItem.intOrderId 
+							,ReceiptItem.intInventoryReceiptId 
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId	
 							INNER JOIN dbo.tblICItemUOM ItemUOM
@@ -114,11 +113,10 @@ BEGIN
 								ON UOM.intUnitMeasureId = StockUOM.intUnitMeasureId
 								AND UOM.strUnitType = @UNIT_TYPE_Weight
 					WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-							AND ReceiptItem.intOrderId IS NULL 
 							AND StockUOM.intItemUOMId IS NOT NULL 
-					GROUP BY ReceiptItem.intOrderId
+					GROUP BY ReceiptItem.intInventoryReceiptId
 				) TotalWeightOfItemsPerContract 
-					ON TotalWeightOfItemsPerContract.intOrderId = ReceiptItem.intOrderId 
+					ON TotalWeightOfItemsPerContract.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId 
 	) AS Source_Query  
 		ON ReceiptItemAllocatedCharge.intInventoryReceiptId = Source_Query.intInventoryReceiptId
 		AND ReceiptItemAllocatedCharge.intEntityVendorId = Source_Query.intEntityVendorId
@@ -158,6 +156,5 @@ BEGIN
 		)
 	;
 END 
-
 
 _Exit:
