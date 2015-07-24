@@ -14,8 +14,6 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, Item.intCommodityId
 	, ShipmentItem.intSubLocationId
 	, SubLocation.strSubLocationName
-	, ShipmentItem.intStorageLocationId
-	, strStorageLocationName = StorageLocation.strName
 	, strOrderUOM = ShipmentItemSource.strOrderUOM
 	, strUnitMeasure = UOM.strUnitMeasure
 	, strUnitType = UOM.strUnitType
@@ -31,7 +29,6 @@ FROM tblICInventoryShipmentItem ShipmentItem
 	LEFT JOIN vyuICGetShipmentItemSource ShipmentItemSource ON ShipmentItemSource.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
 	LEFT JOIN tblICItem Item ON Item.intItemId = ShipmentItem.intItemId
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = ShipmentItem.intSubLocationId
-	LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = ShipmentItem.intStorageLocationId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ShipmentItem.intItemUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = ShipmentItem.intWeightUOMId

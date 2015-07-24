@@ -18,8 +18,6 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, ReceiptItemSource.strContainer
 	, ReceiptItem.intSubLocationId
 	, SubLocation.strSubLocationName
-	, ReceiptItem.intStorageLocationId
-	, strStorageLocationName = StorageLocation.strName
 	, strOrderUOM = ReceiptItemSource.strUnitMeasure
 	, dblOrderUOMConvFactor = ISNULL(ReceiptItemSource.dblUnitQty, 0)
 	, strUnitMeasure = UOM.strUnitMeasure
@@ -37,7 +35,6 @@ FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 	LEFT JOIN tblICItem Item ON Item.intItemId = ReceiptItem.intItemId
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = ReceiptItem.intSubLocationId
-	LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = ReceiptItem.intStorageLocationId
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = ReceiptItem.intWeightUOMId

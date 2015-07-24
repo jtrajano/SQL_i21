@@ -19,7 +19,6 @@ Type the overview for the table here.
 		[intLineNo] INT NULL,
 		[intItemId] INT NOT NULL, 
 		[intSubLocationId] INT NULL, 
-		[intStorageLocationId] INT NULL,
 		[intOwnershipType] INT NOT NULL DEFAULT ((1)),
 		[dblQuantity] NUMERIC(18, 6) NOT NULL DEFAULT ((0)), 
 		[intItemUOMId] INT NOT NULL, 
@@ -38,8 +37,7 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_tblSMTaxCode] FOREIGN KEY ([intTaxCodeId]) REFERENCES [tblSMTaxCode]([intTaxCodeId]), 
 		CONSTRAINT [FK_tblICInventoryShipmentItem_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
-		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICCommodityAttribute] FOREIGN KEY ([intGradeId]) REFERENCES [tblICCommodityAttribute]([intCommodityAttributeId]), 
-		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId])
+		CONSTRAINT [FK_tblICInventoryShipmentItem_tblICCommodityAttribute] FOREIGN KEY ([intGradeId]) REFERENCES [tblICCommodityAttribute]([intCommodityAttributeId])
 	)
 
 	GO
