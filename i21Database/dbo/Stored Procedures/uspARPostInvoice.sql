@@ -602,7 +602,7 @@ IF @post = 1
 			ROLLBACK TRAN @TransactionName
 			BEGIN TRANSACTION
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT '@ItemsForPost' + ' - ' + ERROR_MESSAGE(), @transType, @param, @batchId, 0
+			SELECT ERROR_MESSAGE(), @transType, @param, @batchId, 0
 			COMMIT TRANSACTION
 			GOTO Post_Exit
 		END CATCH			
@@ -647,7 +647,7 @@ IF @post = 1
 			ROLLBACK TRAN @TransactionName
 			BEGIN TRANSACTION
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT 'uspICPostCosting' + ' - ' + ERROR_MESSAGE(), @transType, @param, @batchId, 0
+			SELECT ERROR_MESSAGE(), @transType, @param, @batchId, 0
 			COMMIT TRANSACTION
 			GOTO Post_Exit
 		END CATCH
@@ -1088,7 +1088,7 @@ IF @post = 1
 			ROLLBACK TRAN @TransactionName
 			BEGIN TRANSACTION
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT 'GL ENtries' + ' - ' + ERROR_MESSAGE(), @transType, @param, @batchId, 0
+			SELECT ERROR_MESSAGE(), @transType, @param, @batchId, 0
 			COMMIT TRANSACTION
 			GOTO Post_Exit
 		END CATCH
@@ -1190,7 +1190,7 @@ IF @post = 0
 			ROLLBACK TRAN @TransactionName
 			BEGIN TRANSACTION
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT 'uspICUnpostCosting' + ' - ' +  ERROR_MESSAGE(), @transType, @param, @batchId, 0
+			SELECT ERROR_MESSAGE(), @transType, @param, @batchId, 0
 			COMMIT TRANSACTION
 			GOTO Post_Exit
 		END CATCH		
@@ -1698,7 +1698,7 @@ IF @post = 0
 			ROLLBACK TRAN @TransactionName
 			BEGIN TRANSACTION
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT 'RECAP' + ' - ' +  ERROR_MESSAGE(), @transType, @param, @batchId, 0
+			SELECT ERROR_MESSAGE(), @transType, @param, @batchId, 0
 			COMMIT TRANSACTION
 			GOTO Post_Exit
 		END CATCH		
@@ -1796,7 +1796,7 @@ IF @recap = 1
 		ROLLBACK TRAN @TransactionName
 		BEGIN TRANSACTION
 		INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-		SELECT 'Insert tblRecap' + ' - ' +   ERROR_MESSAGE(), @transType, @param, @batchId, 0
+		SELECT ERROR_MESSAGE(), @transType, @param, @batchId, 0
 		COMMIT TRANSACTION
 		GOTO Post_Exit
 	END CATCH	
