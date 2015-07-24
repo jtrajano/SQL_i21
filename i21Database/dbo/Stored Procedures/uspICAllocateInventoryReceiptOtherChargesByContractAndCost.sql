@@ -21,14 +21,14 @@ DECLARE @COST_METHOD_Per_Unit AS NVARCHAR(50) = 'Per Unit'
 		,@UNIT_TYPE_Weight AS NVARCHAR(50) = 'Weight'
 
 DECLARE	-- Receipt Types
-		@RECEIPT_TYPE_Purchase_Contract AS NVARCHAR(50) = 'Purchase Contract'
-		,@RECEIPT_TYPE_Purchase_Order AS NVARCHAR(50) = 'Purchase Order'
-		,@RECEIPT_TYPE_Transfer_Order AS NVARCHAR(50) = 'Transfer Order'
+		@RECEIPT_TYPE_PurchaseContract AS NVARCHAR(50) = 'Purchase Contract'
+		,@RECEIPT_TYPE_PurchaseOrder AS NVARCHAR(50) = 'Purchase Order'
+		,@RECEIPT_TYPE_TransferOrder AS NVARCHAR(50) = 'Transfer Order'
 		,@RECEIPT_TYPE_Direct AS NVARCHAR(50) = 'Direct'
 		-- Source Types
 		,@SOURCE_TYPE_None AS INT = 0
 		,@SOURCE_TYPE_Scale AS INT = 1
-		,@SOURCE_TYPE_Inbound_Shipment AS INT = 2
+		,@SOURCE_TYPE_InboundShipment AS INT = 2
 		,@SOURCE_TYPE_Transport AS INT = 3
 
 -- Allocate by 'cost
@@ -40,7 +40,6 @@ BEGIN
 	AS		ReceiptItemAllocatedCharge
 	USING (
 		SELECT	CalculatedCharges.*
-				,Receipt.intInventoryReceiptId
 				,ReceiptItem.intInventoryReceiptItemId
 				,ReceiptItem.dblOpenReceive
 				,ReceiptItem.dblUnitCost
@@ -48,7 +47,7 @@ BEGIN
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 					AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
-					AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
+					AND Receipt.strReceiptType = @RECEIPT_TYPE_PurchaseContract
 					AND ReceiptItem.intOrderId IS NOT NULL 
 				INNER JOIN (
 					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
@@ -56,19 +55,20 @@ BEGIN
 							,intContractId
 							,intEntityVendorId
 							,ysnInventoryCost
+							,intInventoryReceiptId
 					FROM	dbo.tblICInventoryReceiptChargePerItem CalculatedCharge 					
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Cost
 							AND CalculatedCharge.intContractId IS NOT NULL 
-					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost
+					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId 
 				) CalculatedCharges 
-					ON ReceiptItem.intOrderId = CalculatedCharges.intContractId
+					ON CalculatedCharges.intContractId = ReceiptItem.intOrderId
 				LEFT JOIN (
 					SELECT	dblTotalCost = SUM(ISNULL(ReceiptItem.dblOpenReceive, 0) * ISNULL(ReceiptItem.dblUnitCost, 0))
 							,ReceiptItem.intOrderId 
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-								AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
+								AND Receipt.strReceiptType = @RECEIPT_TYPE_PurchaseContract
 					WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 							AND ReceiptItem.intOrderId IS NOT NULL 
 					GROUP BY ReceiptItem.intOrderId 

@@ -115,7 +115,7 @@ BEGIN
 	-- Assert
 	BEGIN 
 		EXEC tSQLt.ExpectException
-			@ExpectedMessage = 'Cyclic situation found. Unable to compute surcharge because Surcharge Other Charges depends on Other Charges and vice-versa.'
+			@ExpectedMessage = 'Cyclic situation found. Unable to compute surcharge because Other Charges depends on Surcharge Other Charges and vice-versa.'
 			,@ExpectedErrorNumber = 51164
 	END
 	

@@ -18,10 +18,39 @@ BEGIN
 				,@HotGrains AS INT = 5
 				,@InvalidItem AS INT = -1
 
-		-- Declare the variables for location
-		DECLARE @Default_Location AS INT = 1 -- This location allows negative stock (yes)
-				,@NewHaven AS INT = 2 -- This location allows negative stock (yes with auto write-off)
-				,@BetterHaven AS INT = 3 -- This location does not allow negative stock
+		-- Declare Item-Locations
+		DECLARE @WetGrains_DefaultLocation AS INT = 1
+				,@StickyGrains_DefaultLocation AS INT = 2
+				,@PremiumGrains_DefaultLocation AS INT = 3
+				,@ColdGrains_DefaultLocation AS INT = 4
+				,@HotGrains_DefaultLocation AS INT = 5
+
+				,@WetGrains_NewHaven AS INT = 6
+				,@StickyGrains_NewHaven AS INT = 7
+				,@PremiumGrains_NewHaven AS INT = 8
+				,@ColdGrains_NewHaven AS INT = 9
+				,@HotGrains_NewHaven AS INT = 10
+
+				,@WetGrains_BetterHaven AS INT = 11
+				,@StickyGrains_BetterHaven AS INT = 12
+				,@PremiumGrains_BetterHaven AS INT = 13
+				,@ColdGrains_BetterHaven AS INT = 14
+				,@HotGrains_BetterHaven AS INT = 15
+
+				,@ManualLotGrains_DefaultLocation AS INT = 16
+				,@SerializedLotGrains_DefaultLocation AS INT = 17
+
+				,@CornCommodity_DefaultLocation AS INT = 18
+				,@CornCommodity_NewHaven AS INT = 19
+				,@CornCommodity_BetterHaven AS INT = 20
+
+				,@ManualLotGrains_NewHaven AS INT = 21
+				,@SerializedLotGrains_NewHaven AS INT = 22
+
+				,@OtherCharges_DefaultLocation AS INT = 23
+				,@SurchargeOtherCharges_DefaultLocation AS INT = 24
+				,@SurchargeOnSurcharge_DefaultLocation AS INT = 25
+				,@SurchargeOnSurchargeOnSurcharge_DefaultLocation AS INT = 26
 
 		-- Declare the variables for the Item UOM Ids
 		DECLARE @WetGrains_BushelUOMId AS INT = 1
@@ -51,7 +80,7 @@ BEGIN
 				,intLotId
 		)
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @Default_Location
+				,intItemLocationId = @WetGrains_DefaultLocation
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = GETDATE()
 				,dblQty = -10000
@@ -66,7 +95,7 @@ BEGIN
 				,intLotId = NULL 
 		UNION ALL 
 		SELECT	intItemId = @WetGrains
-				,intItemLocationId = @NewHaven
+				,intItemLocationId = @WetGrains_NewHaven
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,dtmDate = GETDATE()
 				,dblQty = -10000

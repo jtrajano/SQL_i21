@@ -124,14 +124,15 @@ BEGIN
 	EXEC tSQLt.ApplyConstraint 'dbo.tblICLot', 'UN_tblICLot';		
 
 	-- Declare the variables for the transaction 
-	DECLARE @strReceiptNumber AS NVARCHAR(40);
-	DECLARE @intReceiptNumber AS INT;
-	DECLARE @BaseCurrencyId AS INT = 1;
-	DECLARE @dblExchangeRate AS NUMERIC(18,6) = 1;
-	DECLARE @dtmDate AS DATETIME;
-	DECLARE @InventoryReceiptTypeId AS INT = 4;
-	DECLARE @intEntityId AS INT = 1;
-	DECLARE @intUserId AS INT = 1;
+	DECLARE @strReceiptNumber AS NVARCHAR(40)
+			,@intReceiptNumber AS INT
+			,@BaseCurrencyId AS INT = 1
+			,@dblExchangeRate AS NUMERIC(18,6) = 1
+			,@dtmDate AS DATETIME
+			,@InventoryReceiptTypeId AS INT = 4
+			,@intEntityId AS INT = 1
+			,@intUserId AS INT = 1
+			,@intContractId AS INT
 
 	-- Create mock data for the starting number 
 	EXEC tSQLt.FakeTable 'dbo.tblSMStartingNumber';	
@@ -2111,5 +2112,164 @@ BEGIN
 			,[dblAmount]			= NULL 
 			,[strAllocateCostBy]	= @ALLOCATE_COST_BY_Cost
 			,[strCostBilledBy] 		= @COST_BILLED_BY_Vendor
+	END
+
+	--------------------------------------------------------
+	-- Add the INVRCPT-XXXX15
+	-- 1. It is a Purchase Contract 
+	-- 2. It has MANUAL lot items on it. 
+	-- 3. Two Manual Lot Numbers. 
+	-- 4. One Other Charge. 
+	--      3.1. Cost method is Unit
+	--		3.2. Cost is allocated By Cost. 
+	--		3.3. Inventory cost is Yes
+	--		3.4. Cost billed by Vendor 
+	--		3.5. With contract. 
+	--------------------------------------------------------
+	BEGIN
+		SET @strReceiptNumber = 'INVRCPT-XXXX15'
+		SET @dtmDate = '01/23/2014'
+		SET @intContractId = 6992
+
+		-- Insert the Inventory Receipt header 
+		INSERT INTO dbo.tblICInventoryReceipt (
+				strReceiptNumber
+				,dtmReceiptDate
+				,strReceiptType
+				,intSourceType
+				,intLocationId
+				,intShipViaId
+				,intShipFromId
+				,intReceiverId
+				,intCurrencyId
+				,strAllocateFreight
+				,intConcurrencyId
+				,intEntityId
+				,intCreatedUserId
+				,ysnPosted
+		)
+		SELECT 	strReceiptNumber		= @strReceiptNumber
+				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
+				,strReceiptType			= @RECEIPT_TYPE_PurchaseContract
+				,intSourceType			= @SOURCE_TYPE_None
+				,intLocationId			= @Default_Location
+				,intShipViaId			= @Default_Location
+				,intShipFromId			= @Default_Location
+				,intReceiverId			= @Default_Location
+				,intCurrencyId			= @BaseCurrencyId
+				,strAllocateFreight		= 'No' -- Default is No
+				,intConcurrencyId		= 1
+				,intEntityId			= @intEntityId
+				,intCreatedUserId		= @intUserId
+				,ysnPosted				= 0
+		SET @intReceiptNumber = SCOPE_IDENTITY();
+
+		INSERT INTO dbo.tblICInventoryReceiptItem (
+			intInventoryReceiptId
+			,intLineNo
+			,intSourceId
+			,intItemId
+			,dblOrderQty
+			,dblOpenReceive
+			,dblReceived
+			,intUnitMeasureId
+			,dblUnitCost
+			,dblLineTotal
+			,intSort
+			,intConcurrencyId
+			,intOwnershipType
+			,intOrderId
+		)
+		-- intInventoryReceiptItemId: 35
+		SELECT	intInventoryReceiptId	= @intReceiptNumber
+				,intLineNo				= 1
+				,intSourceId			= NULL
+				,intItemId				= @ManualLotGrains
+				,dblOrderQty			= 10
+				,dblOpenReceive			= 10
+				,dblReceived			= 0
+				,intUnitMeasureId		= @ManualGrains_25KgBagUOM
+				,dblUnitCost			= 6.00
+				,dblLineTotal			= 60.00
+				,intSort				= 1
+				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
+				,intOrderId				= @intContractId
+		-- intInventoryReceiptItemId: 36
+		UNION ALL 
+		SELECT	intInventoryReceiptId	= @intReceiptNumber
+				,intLineNo				= 2
+				,intSourceId			= NULL
+				,intItemId				= @ManualLotGrains
+				,dblOrderQty			= 20
+				,dblOpenReceive			= 20
+				,dblReceived			= 0
+				,intUnitMeasureId		= @ManualGrains_PoundUOM
+				,dblUnitCost			= 7.00
+				,dblLineTotal			= 70.00
+				,intSort				= 2
+				,intConcurrencyId		= 1
+				,intOwnershipType		= @OWNERSHIP_TYPE_Own
+				,intOrderId				= @intContractId
+
+		INSERT INTO dbo.tblICInventoryReceiptItemLot (
+				intInventoryReceiptItemId
+				,strLotNumber
+				,dblQuantity
+				,dblCost
+				,intSort
+				,intConcurrencyId
+		)
+		-- Manual Lot Grains
+		-- intInventoryReceiptItemLotId: 34
+		SELECT	intInventoryReceiptItemId	= 35
+				,strLotNumber				= 'Manual Lot in 25 kg bags'
+				,dblQuantity				= 7
+				,dblCost					= 6.10
+				,intSort					= 1
+				,intConcurrencyId			= 1
+		-- intInventoryReceiptItemLotId: 35
+		UNION ALL 
+		SELECT	intInventoryReceiptItemId	= 36
+				,strLotNumber				= 'Manual Lot in Pounds'
+				,dblQuantity				= 20
+				,dblCost					= 7.00
+				,intSort					= 1
+				,intConcurrencyId			= 1
+		-- intInventoryReceiptItemLotId: 36
+		UNION ALL 
+		SELECT	intInventoryReceiptItemId	= 35
+				,strLotNumber				= 'Manual Lot in 25 kg bags'
+				,dblQuantity				= 3
+				,dblCost					= 5.90
+				,intSort					= 2
+				,intConcurrencyId			= 1
+
+		-- Fake other charges data
+		INSERT INTO tblICInventoryReceiptCharge (
+			[intInventoryReceiptId] 
+			,[intChargeId] 
+			,[ysnInventoryCost] 
+			,[strCostMethod] 
+			,[dblRate] 
+			,[intCostUOMId] 
+			,[intEntityVendorId] 
+			,[dblAmount] 
+			,[strAllocateCostBy] 
+			,[strCostBilledBy]
+			,[intContractId]	
+		)
+		SELECT 
+			[intInventoryReceiptId]	= @intReceiptNumber
+			,[intChargeId]			= @OtherCharges
+			,[ysnInventoryCost]		= @INVENTORY_COST_Yes
+			,[strCostMethod]		= @COST_METHOD_PER_Unit
+			,[dblRate]				= 5.00
+			,[intCostUOMId]			= @OtherCharges_PoundUOM
+			,[intEntityVendorId]	= NULL 
+			,[dblAmount]			= NULL 
+			,[strAllocateCostBy]	= @ALLOCATE_COST_BY_Cost
+			,[strCostBilledBy] 		= @COST_BILLED_BY_Vendor
+			,[@intContractId]		= @intContractId
 	END
 END

@@ -35,6 +35,7 @@ RETURN (
 					SELECT TOP 1 1 
 					FROM	dbo.tblICItemLocation
 					WHERE	intItemLocationId = @intItemLocationId
+							AND intItemId = @intItemId
 				)
 				AND @intItemId IS NOT NULL 	
 
