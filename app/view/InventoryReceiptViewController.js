@@ -364,11 +364,41 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colLotContainerNo: 'strContainerNo',
-                colLotGarden: 'intGarden',
-                colLotGrade: 'strGrade',
-                colLotOrigin: {
-                    dataIndex: 'strCountry',
+                colLotVendorLocation: {
+                    dataIndex: 'strVendorLocation',
                     editor: {
+                        origValueField: 'intEntityLocationId',
+                        origUpdateField: 'intVendorLocationId',
+                        store: '{vendorLocation}',
+                        defaultFilters: [
+                            {
+                                column: 'intEntityId',
+                                value: '{current.intVendorEntityId}'
+                            }
+                        ]
+                    }
+                },
+                colLotGrade: {
+                    dataIndex: 'strGrade',
+                    editor: {
+                        readOnly: '{hasItemCommodity}',
+                        origValueField: 'intCommodityAttributeId',
+                        origUpdateField: 'intGradeId',
+                        store: '{lotGrade}',
+                        defaultFilters: [
+                            {
+                                column: 'intCommodityId',
+                                value: '{grdInventoryReceipt.selection.intCommodityId}',
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
+                },
+                colLotOrigin: {
+                    dataIndex: 'strOrigin',
+                    editor: {
+                        origValueField: 'intCountryID',
+                        origUpdateField: 'intOriginId',
                         store: '{origin}'
                     }
                 },
@@ -548,9 +578,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 'tblSMFreightTerm,' +
                 'tblSMCompanyLocation,' +
                 'tblICInventoryReceiptItems.vyuICGetInventoryReceiptItem,' +
-                'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.tblICLot,' +
-                'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.tblICItemUOM.tblICUnitMeasure,' +
-                'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.tblICStorageLocation,' +
+                'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.vyuICGetInventoryReceiptItemLot, ' +
                 'tblICInventoryReceiptCharges.vyuICGetInventoryReceiptCharge',
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Receipt',
