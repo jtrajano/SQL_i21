@@ -20,6 +20,7 @@ Type the overview for the table here.
 		[intItemId] INT NOT NULL, 
 		[intContainerId] INT NULL,
 		[intSubLocationId] INT NULL,
+		[intStorageLocationId] INT NULL,
 		[intOwnershipType] INT NOT NULL DEFAULT ((1)),
 		[dblOrderQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblBillQty] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -40,7 +41,8 @@ Type the overview for the table here.
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICItemUOM] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]) ON DELETE NO ACTION, 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
-		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICCommodityAttribute] FOREIGN KEY ([intGradeId]) REFERENCES [tblICCommodityAttribute]([intCommodityAttributeId])
+		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICCommodityAttribute] FOREIGN KEY ([intGradeId]) REFERENCES [tblICCommodityAttribute]([intCommodityAttributeId]), 
+		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICStorageLocation] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId])
 	)
 
 	GO
