@@ -61,13 +61,13 @@ BEGIN
 		,[intShipViaId]
 		,[strPONumber]
 		,[intTermId]
-		,ROUND([dblSalesOrderSubtotal],2)
-		,ROUND([dblShipping],2)
-		,ROUND([dblTax],2)
-		,ROUND([dblSalesOrderTotal],2)
-		,ROUND([dblDiscount],2)
-		,ROUND([dblAmountDue],2)
-		,ROUND([dblPayment],2)
+		,[dblSalesOrderSubtotal]
+		,[dblShipping]
+		,[dblTax]
+		,[dblSalesOrderTotal]
+		,[dblDiscount]
+		,[dblAmountDue]
+		,[dblPayment]
 		,'Invoice'
 		,0 --Payment Method
 		,[intAccountId]
