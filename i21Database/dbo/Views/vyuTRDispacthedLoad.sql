@@ -97,7 +97,7 @@ LG.intContractDetailId as intOutboundContractDetailId,
 LG.ysnDirectShip,
 LG.ysnInProgress,
 LG.intLoadId as intOutboundLoadId,
-LG.strCounterPartyExternalLoadNumber as strSupplierLoadNumber 
+LG.strExternalLoadNumber as strSupplierLoadNumber 
 from dbo.vyuLGLoadView LG
 where 
  (IsNull(LG.ysnDispatched,0)=1)  and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and
