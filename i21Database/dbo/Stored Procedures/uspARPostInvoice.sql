@@ -1108,7 +1108,7 @@ IF @post = 0
 			);
 			
 			INSERT INTO @UnPostInvoiceData(intInvoiceId, strTransactionId)
-			SELECT
+			SELECT DISTINCT
 				 P.intInvoiceId
 				,P.strTransactionId
 			FROM
@@ -1817,7 +1817,7 @@ IF @recap = 0
 			ROLLBACK TRAN @TransactionName
 			BEGIN TRANSACTION
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT 'uspGLBookEntries' + ' - ' +   ERROR_MESSAGE(), @transType, @param, @batchId, 0
+			SELECT ERROR_MESSAGE(), @transType, @param, @batchId, 0
 			COMMIT TRANSACTION
 			GOTO Post_Exit
 		END CATCH
