@@ -1,7 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuEMSearch]
 as 
 SELECT 
-		a.intEntityId,    
+		a.intEntityId,   
+		a.strEntityNo, 
 		a.Name as strName,  
 		g.strPhone,  
 		e.strAddress,  
@@ -18,9 +19,10 @@ SELECT
 		Terminal,
 		ShippingLine,
 		Trucker,
-		ShipVia
+		ShipVia,
+		VendorOrCustomer =  Vendor + Customer
 	FROM 		
-			(SELECT	intEntityId, Name,		
+			(SELECT	intEntityId, Name, strEntityNo,
 								CASE WHEN [Customer] IS NOT NULL THEN 1 ELSE 0 END Customer, 		
 								CASE WHEN [Vendor] IS NOT NULL THEN 1 ELSE 0 END Vendor, 		
 								CASE WHEN [Employee] IS NOT NULL THEN 1 ELSE 0 END Employee, 		
@@ -34,7 +36,7 @@ SELECT
 								CASE WHEN [Ship Via] IS NOT NULL THEN 1 ELSE 0 END AS  ShipVia
 			FROM
 			(
-				select A.intEntityId,  A.strName Name, strType 
+				select A.intEntityId,  A.strName Name, strType, A.strEntityNo 
 					from tblEntity A
 						JOIN tblEntityType B
 							on A.intEntityId = B.intEntityId		
