@@ -248,13 +248,13 @@ BEGIN
 												DetailItem.intUnitMeasureId
 												,DetailItem.intWeightUOMId
 												,DetailItemLot.intItemUnitMeasureId
-												,DetailItem.dblUnitCost
+												,(DetailItem.dblUnitCost + dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId))
 											) * DetailItemLot.dblQuantity
 											,ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
 										) 
 
 									ELSE 
-										DetailItem.dblUnitCost  
+										DetailItem.dblUnitCost + dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 							END 
 
 				,dblSalesPrice = 0  

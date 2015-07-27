@@ -87,7 +87,6 @@ BEGIN
 	AS		ReceiptItemAllocatedCharge
 	USING (
 		SELECT	CalculatedCharges.*
-				,Receipt.intInventoryReceiptId
 				,ReceiptItem.intInventoryReceiptItemId
 				,ReceiptItem.dblOpenReceive
 				,ItemUOM.dblUnitQty
@@ -105,11 +104,13 @@ BEGIN
 							,intContractId
 							,intEntityVendorId
 							,ysnInventoryCost
+							,intInventoryReceiptId
+							,intInventoryReceiptChargeId
 					FROM	dbo.tblICInventoryReceiptChargePerItem CalculatedCharge				
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Weight
 							AND CalculatedCharge.intContractId IS NOT NULL 
-					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost
+					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
 				) CalculatedCharges 
 					ON ReceiptItem.intOrderId = CalculatedCharges.intContractId
 				LEFT JOIN (
@@ -151,6 +152,7 @@ BEGIN
 	WHEN NOT MATCHED AND ISNULL(Source_Query.dblTotalWeight, 0) <> 0 THEN 
 		INSERT (
 			[intInventoryReceiptId]
+			,[intInventoryReceiptChargeId]
 			,[intInventoryReceiptItemId]
 			,[intEntityVendorId]
 			,[dblAmount]
@@ -159,6 +161,7 @@ BEGIN
 		)
 		VALUES (
 			Source_Query.intInventoryReceiptId
+			,Source_Query.intInventoryReceiptChargeId
 			,Source_Query.intInventoryReceiptItemId
 			,Source_Query.intEntityVendorId
 			,(

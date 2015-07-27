@@ -57,11 +57,12 @@ BEGIN
 							,intEntityVendorId
 							,ysnInventoryCost
 							,intInventoryReceiptId
+							,intInventoryReceiptChargeId
 					FROM	dbo.tblICInventoryReceiptChargePerItem CalculatedCharge 					
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Unit
 							AND CalculatedCharge.intContractId IS NULL 
-					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId
+					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
 				) CalculatedCharges 
 					ON ReceiptItem.intInventoryReceiptId = CalculatedCharges.intInventoryReceiptId
 				LEFT JOIN (
@@ -94,6 +95,7 @@ BEGIN
 	WHEN NOT MATCHED AND ISNULL(Source_Query.dblTotalUnits, 0) <> 0 THEN 
 		INSERT (
 			[intInventoryReceiptId]
+			,[intInventoryReceiptChargeId]
 			,[intInventoryReceiptItemId]
 			,[intEntityVendorId]
 			,[dblAmount]
@@ -102,6 +104,7 @@ BEGIN
 		)
 		VALUES (
 			Source_Query.intInventoryReceiptId
+			,Source_Query.intInventoryReceiptChargeId
 			,Source_Query.intInventoryReceiptItemId
 			,Source_Query.intEntityVendorId
 			,(

@@ -2065,6 +2065,9 @@
     <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByUnits.sql" />
     <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByWeights.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptItemAllocatedCharge.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryReceiptOtherCharges.sql" />
+    <Build Include="dbo\Functions\fnGetOtherChargesFromInventoryReceipt.sql" />
+    <Build Include="dbo\User Defined Types\ItemOtherChargesGLAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

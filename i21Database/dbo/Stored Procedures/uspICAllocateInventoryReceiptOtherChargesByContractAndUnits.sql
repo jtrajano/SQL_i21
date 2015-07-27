@@ -40,7 +40,6 @@ BEGIN
 	AS		ReceiptItemAllocatedCharge
 	USING (
 		SELECT	CalculatedCharges.*
-				,Receipt.intInventoryReceiptId
 				,ReceiptItem.intInventoryReceiptItemId
 				,ReceiptItem.dblOpenReceive
 				,ItemUOM.dblUnitQty
@@ -58,13 +57,15 @@ BEGIN
 							,intContractId
 							,intEntityVendorId
 							,ysnInventoryCost
+							,intInventoryReceiptId
+							,intInventoryReceiptChargeId
 					FROM	dbo.tblICInventoryReceiptChargePerItem CalculatedCharge				
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Unit
 							AND CalculatedCharge.intContractId IS NOT NULL 
-					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost
+					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
 				) CalculatedCharges 
-					ON ReceiptItem.intOrderId = CalculatedCharges.intContractId
+					ON CalculatedCharges.intContractId = ReceiptItem.intOrderId 
 				LEFT JOIN (
 					SELECT	dblTotalUnits = SUM(dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, ItemUOM.dblUnitQty))
 							,ReceiptItem.intOrderId 
@@ -97,6 +98,7 @@ BEGIN
 	WHEN NOT MATCHED AND ISNULL(Source_Query.dblTotalUnits, 0) <> 0 THEN 
 		INSERT (
 			[intInventoryReceiptId]
+			,[intInventoryReceiptChargeId]
 			,[intInventoryReceiptItemId]
 			,[intEntityVendorId]
 			,[dblAmount]
@@ -105,6 +107,7 @@ BEGIN
 		)
 		VALUES (
 			Source_Query.intInventoryReceiptId
+			,Source_Query.intInventoryReceiptChargeId
 			,Source_Query.intInventoryReceiptItemId
 			,Source_Query.intEntityVendorId
 			,(
