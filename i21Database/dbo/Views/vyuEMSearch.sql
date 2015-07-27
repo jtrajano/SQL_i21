@@ -19,7 +19,8 @@ SELECT
 		Terminal,
 		ShippingLine,
 		Trucker,
-		ShipVia
+		ShipVia,
+		VendorOrCustomer =  Vendor + Customer
 	FROM 		
 			(SELECT	intEntityId, Name, strEntityNo,
 								CASE WHEN [Customer] IS NOT NULL THEN 1 ELSE 0 END Customer, 		
