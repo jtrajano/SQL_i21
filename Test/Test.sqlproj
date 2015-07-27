@@ -762,17 +762,24 @@
     <Build Include="testi21Database\Stored Procedures\test uspICCalculateInventoryReceiptSurchargeOnOtherCharges for computing two layers of surcharge.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCalculateInventoryReceiptSurchargeOnOtherCharges for computing three layers of surcharge.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByCost for the basics.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByCost calculation for test case 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByCost calculation for test case 4.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByUnits for the basics.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByUnits calculation for test case 1.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByWeights calculation for test case 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByUnits calculation for test case 5.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByWeights calculation for test case 6.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByWeights for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByContractAndCost for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByContractAndCost calculation for test case 1.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByContractAndUnits calculation for test case 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByContractAndUnits calculation for test case 2.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByContractAndUnits for the basics.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByContractAndWeights calculation for test case 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByContractAndWeights calculation for test case 3.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByContractAndWeights for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherCharges for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherCharges for test case 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherCharges for test case 2.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherCharges for test case 3.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherCharges for test case 4.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherCharges for test case 5.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherCharges for test case 6.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

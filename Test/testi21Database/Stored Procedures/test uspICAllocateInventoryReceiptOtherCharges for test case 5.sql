@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICAllocateInventoryReceiptOtherChargesByWeights calculation for test case 1]
+﻿CREATE PROCEDURE [testi21Database].[test uspICAllocateInventoryReceiptOtherCharges for test case 5]
 AS
 
 /*
@@ -124,8 +124,6 @@ BEGIN
 			,@OWNERSHIP_TYPE_Storage AS INT = 2
 			,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
 			,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
-
-			,@UNIT_TYPE_Weight AS NVARCHAR(50) = 'Weight'
 END 
 
 BEGIN
@@ -158,7 +156,7 @@ BEGIN
 		
 		-- Modify the other charges in the transaction to use Allocate by Units. 
 		UPDATE dbo.tblICInventoryReceiptCharge
-		SET strAllocateCostBy = @ALLOCATE_COST_BY_Weight
+		SET strAllocateCostBy = @ALLOCATE_COST_BY_Unit
 		WHERE intInventoryReceiptId = @intInventoryReceiptId
 
 		-- Calculate the other charges. 
@@ -170,7 +168,7 @@ BEGIN
 			@intInventoryReceiptId
 
 		-- Distribute or allocate the calculate other charges to the items. 
-		EXEC dbo.uspICAllocateInventoryReceiptOtherChargesByWeights 
+		EXEC dbo.uspICAllocateInventoryReceiptOtherCharges
 			@intInventoryReceiptId
 	END 
 
@@ -187,14 +185,14 @@ BEGIN
 		SELECT	[intInventoryReceiptId]			= @intInventoryReceiptId
 				,[intInventoryReceiptItemId]	= 33
 				,[intEntityVendorId]			= NULL 
-				,[dblAmount]					= 2755.775000
+				,[dblAmount]					= 951.925000
 				,[strCostBilledBy]				= @COST_BILLED_BY_Vendor
 				,[ysnInventoryCost]				= @INVENTORY_COST_Yes
 		UNION ALL 
 		SELECT	[intInventoryReceiptId]			= @intInventoryReceiptId
 				,[intInventoryReceiptItemId]	= 34
 				,[intEntityVendorId]			= NULL 
-				,[dblAmount]					= 100.000000
+				,[dblAmount]					= 1903.850000
 				,[strCostBilledBy]				= @COST_BILLED_BY_Vendor
 				,[ysnInventoryCost]				= @INVENTORY_COST_Yes
 	END

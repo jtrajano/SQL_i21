@@ -1,18 +1,5 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICAllocateInventoryReceiptOtherChargesByContractAndWeights calculation for test case 1]
+﻿CREATE PROCEDURE [testi21Database].[test uspICAllocateInventoryReceiptOtherCharges for the basics]
 AS
-
-/*
-	Test Case 1:
-	-----------------------------------------
-	1. One other charge. 
-		1. Cost method is: 				Unit
-		2. Cost is allocated by:		Cost
-		3. Inventory cost is:			Yes
-		4. Cost billed by:				Vendor 
-		5. With contract:				None
-		 	
-	2. Two line items. 
-*/
 
 -- Variables from [testi21Database].[Fake inventory items]
 BEGIN 
@@ -124,102 +111,30 @@ BEGIN
 			,@OWNERSHIP_TYPE_Storage AS INT = 2
 			,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
 			,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
-
-			,@UNIT_TYPE_Weight AS NVARCHAR(50) = 'Weight'
 END 
 
 BEGIN
 	-- Arrange 
 	BEGIN 
 		EXEC [testi21Database].[Fake data for inventory receipt table];
-
-		CREATE TABLE expected (
-			[intInventoryReceiptId] INT
-			,[intInventoryReceiptItemId] INT
-			,[intEntityVendorId] INT
-			,[dblAmount] NUMERIC(38, 20)
-			,[strCostBilledBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS
-			,[ysnInventoryCost] BIT
-		)
-
-		CREATE TABLE actual (
-			[intInventoryReceiptId] INT
-			,[intInventoryReceiptItemId] INT
-			,[intEntityVendorId] INT
-			,[dblAmount] NUMERIC(38, 20)
-			,[strCostBilledBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS
-			,[ysnInventoryCost] BIT
-		)
+	END 
+	
+	-- Assert
+	BEGIN 
+		EXEC tSQLt.ExpectNoException;
 	END 
 
 	-- Act
 	BEGIN 
-		DECLARE @intInventoryReceiptId AS INT = 15 -- 'INVRCPT-XXXX15'
+		DECLARE @intInventoryReceiptId AS INT
 		
-		-- Modify the other charges in the transaction to use Allocate by Units. 
-		UPDATE dbo.tblICInventoryReceiptCharge
-		SET strAllocateCostBy = @ALLOCATE_COST_BY_Weight
-		WHERE intInventoryReceiptId = @intInventoryReceiptId
-
-		-- Calculate the other charges. 
-		EXEC dbo.uspICCalculateInventoryReceiptOtherCharges
-			@intInventoryReceiptId
-
-		-- Calculate the surcharges
-		EXEC dbo.uspICCalculateInventoryReceiptSurchargeOnOtherCharges
-			@intInventoryReceiptId
-
-		-- Distribute or allocate the calculate other charges to the items. 
-		EXEC dbo.uspICAllocateInventoryReceiptOtherChargesByContractAndWeights 
+		EXEC dbo.uspICAllocateInventoryReceiptOtherCharges 
 			@intInventoryReceiptId
 	END 
 
-	-- Setup the expected data
-	BEGIN 
-		INSERT INTO expected (
-				[intInventoryReceiptId]
-				,[intInventoryReceiptItemId]
-				,[intEntityVendorId]
-				,[dblAmount]
-				,[strCostBilledBy]
-				,[ysnInventoryCost]
-		)
-		SELECT	[intInventoryReceiptId]			= @intInventoryReceiptId
-				,[intInventoryReceiptItemId]	= 35
-				,[intEntityVendorId]			= NULL 
-				,[dblAmount]					= 2755.775000
-				,[strCostBilledBy]				= @COST_BILLED_BY_Vendor
-				,[ysnInventoryCost]				= @INVENTORY_COST_Yes
-		UNION ALL 
-		SELECT	[intInventoryReceiptId]			= @intInventoryReceiptId
-				,[intInventoryReceiptItemId]	= 36
-				,[intEntityVendorId]			= NULL 
-				,[dblAmount]					= 100.000000
-				,[strCostBilledBy]				= @COST_BILLED_BY_Vendor
-				,[ysnInventoryCost]				= @INVENTORY_COST_Yes
-	END
-
 	-- Assert
 	BEGIN 
-		INSERT INTO actual (
-				[intInventoryReceiptId]
-				,[intInventoryReceiptItemId]
-				,[intEntityVendorId]
-				,[dblAmount]
-				,[strCostBilledBy]
-				,[ysnInventoryCost]
-		)
-		SELECT 
-				[intInventoryReceiptId]
-				,[intInventoryReceiptItemId]
-				,[intEntityVendorId]
-				,[dblAmount]
-				,[strCostBilledBy]
-				,[ysnInventoryCost]
-		FROM dbo.tblICInventoryReceiptItemAllocatedCharge	
-
-		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
-
+		EXEC tSQLt.AssertEmptyTable 'tblICInventoryReceiptItemAllocatedCharge'
 	END
 
 	-- Clean-up: remove the tables used in the unit test

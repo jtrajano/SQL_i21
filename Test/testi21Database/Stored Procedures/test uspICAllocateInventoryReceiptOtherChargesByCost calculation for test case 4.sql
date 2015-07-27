@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICAllocateInventoryReceiptOtherChargesByUnits calculation for test case 1]
+﻿CREATE PROCEDURE [testi21Database].[test uspICAllocateInventoryReceiptOtherChargesByCost calculation for test case 4]
 AS
 
 /*
@@ -154,11 +154,6 @@ BEGIN
 	BEGIN 
 		DECLARE @intInventoryReceiptId AS INT = 14 -- 'INVRCPT-XXXX14'
 		
-		-- Modify the other charges in the transaction to use Allocate by Units. 
-		UPDATE dbo.tblICInventoryReceiptCharge
-		SET strAllocateCostBy = @ALLOCATE_COST_BY_Unit
-		WHERE intInventoryReceiptId = @intInventoryReceiptId
-
 		-- Calculate the other charges. 
 		EXEC dbo.uspICCalculateInventoryReceiptOtherCharges
 			@intInventoryReceiptId
@@ -168,7 +163,7 @@ BEGIN
 			@intInventoryReceiptId
 
 		-- Distribute or allocate the calculate other charges to the items. 
-		EXEC dbo.uspICAllocateInventoryReceiptOtherChargesByUnits 
+		EXEC dbo.uspICAllocateInventoryReceiptOtherChargesByCost 
 			@intInventoryReceiptId
 	END 
 
@@ -185,14 +180,14 @@ BEGIN
 		SELECT	[intInventoryReceiptId]			= @intInventoryReceiptId
 				,[intInventoryReceiptItemId]	= 33
 				,[intEntityVendorId]			= NULL 
-				,[dblAmount]					= 951.925000
+				,[dblAmount]					= 856.7325
 				,[strCostBilledBy]				= @COST_BILLED_BY_Vendor
 				,[ysnInventoryCost]				= @INVENTORY_COST_Yes
 		UNION ALL 
 		SELECT	[intInventoryReceiptId]			= @intInventoryReceiptId
 				,[intInventoryReceiptItemId]	= 34
 				,[intEntityVendorId]			= NULL 
-				,[dblAmount]					= 1903.850000
+				,[dblAmount]					= 1999.0425
 				,[strCostBilledBy]				= @COST_BILLED_BY_Vendor
 				,[ysnInventoryCost]				= @INVENTORY_COST_Yes
 	END
