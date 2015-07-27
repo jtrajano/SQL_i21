@@ -96,11 +96,11 @@ BEGIN
 					@billIds NVARCHAR(MAX)
 
 		--removed first the constraint
-		IF OBJECT_ID(''UK_dbo.tblAPBill_strBillId'', ''C'') IS NOT NULL
-		BEGIN
+		IF EXISTS(SELECT 1 FROM sys.objects WHERE name = ''UK_dbo.tblAPBill_strBillId'')
+	   BEGIN
 			ALTER TABLE tblAPBill
-				DROP CONSTRAINT [UK_dbo.tblAPBill_strBillId]
-		END
+			  DROP CONSTRAINT [UK_dbo.tblAPBill_strBillId]
+	   END
 
 		IF(@DateFrom IS NULL AND @PeriodFrom IS NULL)
 		BEGIN

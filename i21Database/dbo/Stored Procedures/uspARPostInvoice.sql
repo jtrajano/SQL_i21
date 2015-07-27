@@ -198,36 +198,36 @@ IF @recap = 0
 				WHERE  
 					A.dblInvoiceTotal < 0.00
 
-				--No Freight specified
-				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT 
-					'No freight term has been specified.',
-					A.strTransactionType,
-					A.strInvoiceNumber,
-					@batchId,
-					A.intInvoiceId					
-				FROM 
-					tblARInvoiceDetail Detail
-				INNER JOIN
-					tblARInvoice A
-						ON Detail.intInvoiceId = A.intInvoiceId
-						AND A.strTransactionType = 'Invoice'
-				INNER JOIN
-					@PostInvoiceData P
-						ON A.intInvoiceId = P.intInvoiceId	
-				INNER JOIN
-					tblICItemUOM ItemUOM 
-						ON ItemUOM.intItemUOMId = Detail.intItemUOMId
-				LEFT OUTER JOIN
-					vyuICGetItemStock IST
-						ON Detail.intItemId = IST.intItemId 
-						AND A.intCompanyLocationId = IST.intLocationId 
-				WHERE 
-					(A.intFreightTermId IS NULL OR A.intFreightTermId = 0) 
-					AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
-					AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
-					AND (Detail.intItemId IS NOT NULL OR Detail.intItemId <> 0)
-					AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')
+				----No Freight specified
+				--INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				--SELECT 
+				--	'No freight term has been specified.',
+				--	A.strTransactionType,
+				--	A.strInvoiceNumber,
+				--	@batchId,
+				--	A.intInvoiceId					
+				--FROM 
+				--	tblARInvoiceDetail Detail
+				--INNER JOIN
+				--	tblARInvoice A
+				--		ON Detail.intInvoiceId = A.intInvoiceId
+				--		AND A.strTransactionType = 'Invoice'
+				--INNER JOIN
+				--	@PostInvoiceData P
+				--		ON A.intInvoiceId = P.intInvoiceId	
+				--INNER JOIN
+				--	tblICItemUOM ItemUOM 
+				--		ON ItemUOM.intItemUOMId = Detail.intItemUOMId
+				--LEFT OUTER JOIN
+				--	vyuICGetItemStock IST
+				--		ON Detail.intItemId = IST.intItemId 
+				--		AND A.intCompanyLocationId = IST.intLocationId 
+				--WHERE 
+				--	(A.intFreightTermId IS NULL OR A.intFreightTermId = 0) 
+				--	AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
+				--	AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
+				--	AND (Detail.intItemId IS NOT NULL OR Detail.intItemId <> 0)
+				--	AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')
 					
 				--UOM is required
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)

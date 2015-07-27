@@ -130,6 +130,30 @@ BEGIN
 				WHERE E.dblOpenReceive = E.dblBillQty
 			) C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId]
 			WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+
+		--DO NOT ALLOW TO POST IF BILL ITEMS HAVE ASSOCIATED ITEM RECEIPT AND AND ITEM RECEIPT IS NOT POSTED
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT
+			'The associated item receipt ' + + ' was unposted.',
+			'Bill',
+			A.strBillId,
+			A.intBillId
+		FROM tblAPBill A 
+			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+			INNER JOIN
+			(
+				SELECT
+					D.strReceiptNumber
+					,F.strItemNo
+					,intInventoryReceiptItemId
+				FROM tblICInventoryReceipt D
+					INNER JOIN tblICInventoryReceiptItem E ON D.intInventoryReceiptId = E.intInventoryReceiptId
+					INNER JOIN tblICItem F ON E.intItemId = F.intItemId
+				WHERE D.ysnPosted = 0
+			) C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId]
+			WHERE B.intInventoryReceiptItemId IS NOT NULL
+			AND A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+
 	END
 	ELSE
 	BEGIN

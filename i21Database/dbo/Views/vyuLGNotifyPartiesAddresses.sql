@@ -2,6 +2,7 @@ CREATE VIEW vyuLGNotifyPartiesAddresses
 AS
 	SELECT	intEntityId, 
 			intEntityLocationId, 
+			strLocationName,
 			strAddress, 
 			strCity, 
 			strCountry, 
@@ -16,6 +17,7 @@ AS
 
 	SELECT	intCompanySetupID	AS			intEntityId, 
 			-1					AS			intEntityLocationId, 
+			strCompanyName AS strLocationName,
 			strAddress, 
 			strCity, 
 			strCountry, 

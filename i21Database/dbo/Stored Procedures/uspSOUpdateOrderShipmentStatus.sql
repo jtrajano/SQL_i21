@@ -53,24 +53,7 @@ IF @IsOpen <> 0
 		SET @OrderStatus = 'Open'
 		GOTO SET_ORDER_STATUS;
 	END					
-					
-					
-DECLARE @HasShipment BIT = 0
-SET @HasShipment = (	SELECT COUNT(1) 
-						FROM
-							tblSOSalesOrderDetail
-						WHERE
-							[intSalesOrderId] = @SalesOrderId 
-							AND EXISTS(	SELECT NULL 
-										FROM
-											tblICInventoryShipmentItem
-										WHERE
-											intLineNo = tblSOSalesOrderDetail.intSalesOrderDetailId
-											AND intOrderId = @SalesOrderId
-										)
-						)					
-					
-
+	
 UPDATE
 	tblSOSalesOrderDetail
 SET
@@ -96,23 +79,6 @@ WHERE
 	[intSalesOrderId] = SHP.[intOrderId]
 	AND [intSalesOrderDetailId] = SHP.[intLineNo] 
 
-
-DECLARE @HasMiscItemInInvoice BIT = 0
-SET @HasMiscItemInInvoice = (	SELECT COUNT(1) 
-								FROM
-									tblSOSalesOrderDetail
-								WHERE
-									[intSalesOrderId] = @SalesOrderId 
-									AND EXISTS(	SELECT NULL 
-												FROM
-													tblARInvoiceDetail
-												WHERE
-													[intSalesOrderDetailId] = tblSOSalesOrderDetail.[intSalesOrderDetailId]
-													AND (intInventoryShipmentItemId IS NULL OR intInventoryShipmentItemId = 0)
-												)
-									AND NOT EXISTS(SELECT NULL FROM tblICInventoryShipmentItem WHERE intLineNo = tblSOSalesOrderDetail.[intSalesOrderDetailId])
-								)
-								
 UPDATE
 	tblSOSalesOrderDetail
 SET
@@ -137,62 +103,33 @@ WHERE
 	[intSalesOrderId] = @SalesOrderId
 	AND tblSOSalesOrderDetail.[intSalesOrderDetailId] = SHP.[intSalesOrderDetailId]
 	AND NOT EXISTS(SELECT NULL FROM tblICInventoryShipmentItem WHERE intLineNo = tblSOSalesOrderDetail.[intSalesOrderDetailId]) 		
-		
-		
-
-DECLARE	@PartialShipmentCount		INT
-		,@CompletedShipmentCount	INT
 	
-SELECT	@PartialShipmentCount		= 0
-		,@CompletedShipmentCount	= 0
-			
+DECLARE @TotalQtyOrdered	NUMERIC(18,6) = 0,
+		@TotalQtyShipped	NUMERIC(18,6) = 0
 
-SET @PartialShipmentCount = (	SELECT COUNT(1) 
-								FROM
-									tblSOSalesOrderDetail
-								WHERE
-									[intSalesOrderId] = @SalesOrderId 
-									AND ISNULL([dblQtyShipped],0.00) < ISNULL([dblQtyOrdered],0.00)
-									AND ISNULL([dblQtyShipped],0.00) <> ISNULL([dblQtyOrdered],0.00)
-									AND ISNULL([dblQtyOrdered],0.00) > 0
-									AND ISNULL([dblQtyShipped],0.00) > 0
-								)		
+SELECT @TotalQtyOrdered = SUM(dblQtyOrdered)
+     , @TotalQtyShipped = SUM(dblQtyShipped) 
+FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId 
+GROUP BY intSalesOrderId
 
-SET @CompletedShipmentCount = (	SELECT COUNT(1) 
-								FROM
-									tblSOSalesOrderDetail
-								WHERE
-									[intSalesOrderId] = @SalesOrderId 
-									AND ISNULL([dblQtyShipped],0.00) >= ISNULL([dblQtyOrdered],0.00)									
-								)										
-		
-IF ((@HasShipment <> 0 OR @HasMiscItemInInvoice <> 0) AND @PartialShipmentCount = 0 AND @CompletedShipmentCount = 0)
+IF (@TotalQtyShipped = 0)
 	BEGIN
 		SET @OrderStatus = 'Pending'
 		GOTO SET_ORDER_STATUS;
 	END	
-	
-IF ((@HasShipment <> 0 OR @HasMiscItemInInvoice <> 0) AND (@PartialShipmentCount >= @CompletedShipmentCount))
+
+IF (@TotalQtyShipped < @TotalQtyOrdered)
 	BEGIN
 		SET @OrderStatus = 'Partial'
 		GOTO SET_ORDER_STATUS;
 	END	
-
-	
-SET @OrderStatus = 'Closed'
-
 		
-
+SET @OrderStatus = 'Closed'
 		
 SET_ORDER_STATUS:
-	UPDATE
-		tblSOSalesOrder
-	SET
-		[strOrderStatus] = @OrderStatus
-	WHERE
-		[intSalesOrderId] = @SalesOrderId
+	UPDATE tblSOSalesOrder
+	SET [strOrderStatus] = @OrderStatus
+	WHERE [intSalesOrderId] = @SalesOrderId
 		
 	RETURN;		
-	
-
 END

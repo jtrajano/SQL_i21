@@ -255,3 +255,102 @@ UPDATE tblFRRowDesignCalculation
 GO
 	PRINT N'END FIX ORPHAN(NULL) ID'
 GO
+
+
+--=====================================================================================================================================
+-- 	MOVE GL BUDGET DATA TO FRD BUDGET TABLES
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'MOVE GL BUDGET TO FRD BUDGET TABLES'
+GO
+ 
+SET IDENTITY_INSERT tblFRBudgetCode ON
+GO
+
+INSERT INTO tblFRBudgetCode (intBudgetCode,ysnDefault,strBudgetCode,strBudgetEnglishDescription,intConcurrencyId)
+SELECT  intBudgetCode
+		,ysnDefault
+		,strBudgetCode
+		,strBudgetEnglishDescription + '- GL IMPORTED'
+		,1 
+FROM tblGLBudgetCode
+WHERE strBudgetEnglishDescription NOT LIKE '%GL IMPORTED%'
+
+SET IDENTITY_INSERT tblFRBudgetCode OFF
+GO
+
+CREATE TABLE #Budgets (
+	[cntId] [int] IDENTITY(1, 1) PRIMARY KEY,
+	[intBudgetId] [int],
+	[intBudgetCode] [int],
+	[intFiscalYearId] [int],
+	[intAccountId] [int],
+	[curBudget] [numeric](18,6),
+	[dtmStartDate] [datetime],
+	[dtmEndDate] [datetime]	
+);
+
+SELECT * INTO #BudgetCode FROM tblGLBudgetCode WHERE strBudgetEnglishDescription NOT LIKE '%GL IMPORTED%'
+
+WHILE EXISTS(SELECT 1 FROM #BudgetCode)
+BEGIN 
+	DECLARE @intBudgetCode as INT = (SELECT TOP 1 intBudgetCode FROM #BudgetCode)
+
+	INSERT INTO #Budgets SELECT intBudgetId, intBudgetCode, intFiscalYearId, intAccountId, curBudget, dtmStartDate, dtmEndDate FROM tblGLBudget WHERE intBudgetCode = @intBudgetCode	
+
+	WHILE EXISTS(SELECT 1 FROM #Budgets)
+	BEGIN
+		DECLARE @cntLine as INT = 1
+		DECLARE @intAccountId_OLD as INT = 0
+		DECLARE @SQLString as NVARCHAR(MAX) = ''
+		DECLARE @fieldBudgetPeriod as NVARCHAR(MAX) = ''
+		DECLARE @valueBudgetPeriod as NVARCHAR(MAX) = ''
+
+		DECLARE @intBudgetId as INT = (SELECT TOP 1 intBudgetId FROM #Budgets)
+		DECLARE @intAccountId as INT = (SELECT TOP 1 intAccountId FROM #Budgets WHERE intBudgetId = @intBudgetId)
+
+		WHILE EXISTS(SELECT 1 FROM #Budgets WHERE intAccountId = @intAccountId)
+		BEGIN			
+			SET @intBudgetId = (SELECT TOP 1 intBudgetId FROM #Budgets WHERE intAccountId = @intAccountId)
+
+			DECLARE @intFiscalYearId as INT = (SELECT TOP 1 intFiscalYearId FROM #Budgets WHERE intAccountId = @intAccountId)
+			DECLARE @dtmStartDate as DATETIME = (SELECT TOP 1 dtmStartDate FROM #Budgets WHERE intAccountId = @intAccountId)
+			DECLARE @dtmEndDate as DATETIME = (SELECT TOP 1 dtmEndDate FROM #Budgets WHERE intAccountId = @intAccountId)
+			DECLARE @curBudget as NUMERIC (18,6) = (SELECT TOP 1 curBudget FROM #Budgets WHERE intAccountId = @intAccountId)
+			DECLARE @intGLFiscalYearPeriodId as INT = (SELECT TOP 1 intGLFiscalYearPeriodId FROM tblGLFiscalYearPeriod WHERE dtmStartDate = @dtmStartDate and dtmEndDate = @dtmEndDate)
+			
+			SET @fieldBudgetPeriod = @fieldBudgetPeriod + ',dblBudget' + CAST(@cntLine as NVARCHAR(10)) + ',intPeriod' + CAST(@cntLine as NVARCHAR(10))
+			SET @valueBudgetPeriod = @valueBudgetPeriod + ',' + CAST(@curBudget as NVARCHAR(50)) + ',' + CAST(@intGLFiscalYearPeriodId as NVARCHAR(20))
+
+			SET @cntLine = @cntLine + 1
+			DELETE #Budgets WHERE intBudgetId = @intBudgetId
+
+			IF (NOT EXISTS(SELECT 1 FROM #Budgets WHERE intAccountId = @intAccountId) OR @cntLine > 12)
+			BEGIN
+				SET @SQLString = 'INSERT INTO tblFRBudget (intBudgetCode,intAccountId' + @fieldBudgetPeriod + ',dtmDate,intConcurrencyId) ' +
+									' SELECT ' + CAST(@intBudgetCode as NVARCHAR(10)) + ',' + CAST(@intAccountId as NVARCHAR(10)) + @valueBudgetPeriod + ',CAST(''' + CAST(GETDATE() as NVARCHAR(50))  + ''' as DATETIME), 1'				
+				EXEC(@SQLString)
+
+				UPDATE tblFRBudgetCode SET intFiscalYearId = @intFiscalYearId WHERE intBudgetCode = @intBudgetCode
+
+				IF(@cntLine > 12)
+				BEGIN
+					SET @cntLine = 1
+					BREAK
+				END
+			END
+		END	
+	END
+
+	DELETE #BudgetCode WHERE intBudgetCode = @intBudgetCode
+END
+
+UPDATE tblGLBudgetCode SET strBudgetEnglishDescription = strBudgetEnglishDescription + '- GL IMPORTED' WHERE strBudgetEnglishDescription NOT LIKE '%GL IMPORTED%'
+
+DROP TABLE #Budgets
+DROP TABLE #BudgetCode
+
+GO
+	PRINT N'MOVE GL BUDGET TO FRD BUDGET TABLES'
+GO

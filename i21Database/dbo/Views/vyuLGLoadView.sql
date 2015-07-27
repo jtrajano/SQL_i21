@@ -50,8 +50,8 @@ SELECT Load.intLoadId
         ,Load.dtmDeliveredDate
         ,strEquipmentType = EQ.strEquipmentType
         ,Load.strCustomerReference
-        ,strShipFromTo = EL.strAddress
-		,strShipFromToName = EL.strLocationName
+        ,strShipFromTo = EL.strLocationName
+		,strShipFromToAddress = EL.strAddress
         ,strDriver = Driver.strName
         ,Load.strTruckNo
         ,Load.strTrailerNo1
