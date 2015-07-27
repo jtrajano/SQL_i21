@@ -9,6 +9,7 @@
 	[intEntitySalespersonId] INT NULL,	
 	[strPurchaseOrder] nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	[strComments] nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
+	[dtmInvoiceDateTime]  DATETIME   NULL,
 	[intInvoiceId] INT NULL,	
 	[intConcurrencyId] [int] NOT NULL,
 	CONSTRAINT [PK_tblTRDistributionHeader] PRIMARY KEY ([intDistributionHeaderId]),

@@ -49,7 +49,7 @@ BEGIN TRY
 										IU.intItemUOMId		
 										FROM	dbo.tblICItemUOM IU
 										WHERE	IU.intItemId = DD.intItemId ), -- Need to add the Gallons UOM from Company Preference	   
-	   TL.dtmLoadDateTime,
+	   DH.dtmInvoiceDateTime,
 	   DD.intContractDetailId,	   
 	   TL.intShipViaId,	  
 	   DH.intEntitySalespersonId, 
@@ -63,7 +63,7 @@ BEGIN TRY
 						), -- USD default from company Preference 
 	   1, -- Need to check this	  
 	   TR.dblFreightRate,
-	   NULL,
+	   DH.strComments,
 	   TL.strTransaction,
 	   DH.intDistributionHeaderId,
 	   DH.strPurchaseOrder   
