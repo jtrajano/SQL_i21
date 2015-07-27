@@ -54,7 +54,7 @@
 				@NewGLPurchaseAccount      INT,
 			    @NewGLSalesAccount         INT,
 				@NewGLVarianceAccount      INT,
-				@UpdateReportTable         NVARCHAR(1)
+				@ysnPreview         NVARCHAR(1)
 				
 
 	                  
@@ -107,7 +107,7 @@
 				@NewGLPurchaseAccount  = NewGLPurchaseAccount,
 			    @NewGLSalesAccount     = NewGLSalesAccount,
 			    @NewGLVarianceAccount  = NewGLVarianceAccount,
-				@UpdateReportTable     = UpdateReportTable
+				@ysnPreview     = ysnPreview
 	
 		
 		FROM	OPENXML(@idoc, 'root',2)
@@ -159,7 +159,7 @@
 				NewGLPurchaseAccount      INT,
 			    NewGLSalesAccount         INT,
 				NewGLVarianceAccount      INT,
-				UpdateReportTable         NVARCHAR(1)
+				ysnPreview         NVARCHAR(1)
 			)  
 		-- Insert statements for procedure here
 
@@ -173,10 +173,2461 @@
 		  DECLARE @NewInventoryCountGroupId NVARCHAR(250)
 
 		  DECLARE @UpdateCount INT
+		  DECLARE @RecCount INT
 
-	      set @UpdateCount = 0
+	      SET @UpdateCount = 0
+		  SET @RecCount = 0
+
+
+ DELETE FROM tblSTMassUpdateReportMaster
+
+ IF (@TaxFlag1ysn IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Tax Flag1'',
+						   case when a.ysnTaxFlag1 = 0 then ''No'' else ''Yes'' end,
+						   ''' + case when @TaxFlag1ysn = 0 then 'No' else 'Yes' end +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1) 
+ END 
+
+ IF (@TaxFlag2ysn IS NOT NULL)
+ BEGIN
+       
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Tax Flag2'',
+						   case when a.ysnTaxFlag2 = 0 then ''No'' else ''Yes'' end,
+						   ''' + case when @TaxFlag2ysn = 0 then 'No' else 'Yes' end +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+
+ IF (@TaxFlag3ysn IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Tax Flag3'',
+						   case when a.ysnTaxFlag3 = 0 then ''No'' else ''Yes'' end,
+						   ''' + case when @TaxFlag3ysn = 0 then 'No' else 'Yes' end +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+ IF (@TaxFlag4ysn IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Tax Flag4'',
+						   case when a.ysnTaxFlag4 = 0 then ''No'' else ''Yes'' end,
+						   ''' + case when @TaxFlag4ysn = 0 then 'No' else 'Yes' end +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END    
+ EXEC (@SQL1) 
+ END 
+
+ IF (@DepositRequiredysn  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Deposit Required'',
+						   case when a.ysnDepositRequired = 0 then ''No'' else ''Yes'' end,
+						   ''' + case when @DepositRequiredysn = 0 then 'No' else 'Yes' end +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END    
+ EXEC (@SQL1)
+ END 
+
+ IF (@DepositPLU  IS NOT NULL)
+ BEGIN
+
+
+       SELECT @NewDepositPluId = strUpcCode from tblICItemUOM where intItemUOMId = @DepositPLU
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Deposit PLU'', 
+						   (select strUpcCode from tblICItemUOM where intItemUOMId = a.intDepositPLUId), 
+						   ''' + @NewDepositPluId + '''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and a.intLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END    
+ EXEC (@SQL1)
+ END 
+
+ IF (@QuantityRequiredysn  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Quantity Required'',
+						   case when a.ysnQuantityRequired = 0 then ''No'' else ''Yes'' end,
+						   ''' + case when @QuantityRequiredysn = 0 then 'No' else 'Yes' end +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+ IF (@ScaleItemysn  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Scale Item'',
+						   case when a.ysnScaleItem = 0 then ''No'' else ''Yes'' end,
+						   ''' + case when @ScaleItemysn = 0 then 'No' else 'Yes' end +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+ IF (@FoodStampableysn  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Food Stampable'',
+						   case when a.ysnFoodStampable = 0 then ''No'' else ''Yes'' end,
+						   ''' + case when @FoodStampableysn = 0 then 'No' else 'Yes' end +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+ IF (@Returnableysn  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Returnable '',
+						   case when a.ysnReturnable = 0 then ''No'' else ''Yes'' end,
+						   ''' + case when @Returnableysn = 0 then 'No' else 'Yes' end +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+ IF (@Saleableysn  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Saleable '',
+						   case when a.ysnSaleable = 0 then ''No'' else ''Yes'' end,
+						   ''' + case when @Saleableysn = 0 then 'No' else 'Yes' end +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+ IF (@ID1Requiredysn  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Liquor Id Required '',
+						   case when a.ysnIdRequiredLiquor = 0 then ''No'' else ''Yes'' end,
+						   ''' + case when @ID1Requiredysn = 0 then 'No' else 'Yes' end +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+ IF (@ID2Requiredysn  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Cigarette Id Required '',
+						   case when a.ysnIdRequiredCigarette = 0 then ''No'' else ''Yes'' end,
+						   ''' + case when @ID2Requiredysn = 0 then 'No' else 'Yes' end +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+ IF (@PromotionalItemysn  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Promotional Item'',
+						   case when a.ysnPromotionalItem = 0 then ''No'' else ''Yes'' end,
+						   ''' + case when @PromotionalItemysn = 0 then 'No' else 'Yes' end +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+ IF (@PrePricedysn  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Pre Priced'',
+						   case when a.ysnPrePriced = 0 then ''No'' else ''Yes'' end,
+						   ''' + case when @PrePricedysn = 0 then 'No' else 'Yes' end +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+ IF (@BlueLaw1ysn  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Blue Law1'',
+						   case when a.ysnApplyBlueLaw1 = 0 then ''No'' else ''Yes'' end,
+						   ''' + case when @BlueLaw1ysn = 0 then 'No' else 'Yes' end +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+
+ IF (@BlueLaw2ysn  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Blue Law2'',
+						   case when a.ysnApplyBlueLaw2 = 0 then ''No'' else ''Yes'' end,
+						   ''' + case when @BlueLaw2ysn = 0 then 'No' else 'Yes' end +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+ IF (@CountedDailyysn  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Counted Daily'',
+						   case when a.ysnCountedDaily = 0 then ''No'' else ''Yes'' end,
+						   ''' + case when @CountedDailyysn = 0 then 'No' else 'Yes' end +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+ IF (@Counted  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Counted '', a.strCounted, 
+						   ''' + CAST(@Counted AS NVARCHAR(250))  +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+ IF (@CountSerialysn  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Count By Serial No'',
+						   case when a.ysnCountBySINo = 0 then ''No'' else ''Yes'' end,
+						   ''' + case when @CountSerialysn = 0 then 'No' else 'Yes' end +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+ IF (@NewFamily  IS NOT NULL)
+ BEGIN
+        
+       SELECT @FamilyId = strSubcategoryId from tblSTSubcategory where intSubcategoryId = @NewFamily  
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Family '', 
+						   ( select strSubcategoryId from tblSTSubcategory where intSubcategoryId = a.intFamilyId ),
+						   ''' + @FamilyId +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END
+ EXEC (@SQL1)     
+ END 
+
+
+ IF (@NewClass  IS NOT NULL)
+ BEGIN
+       
+	   SELECT @ClassId = strSubcategoryId from tblSTSubcategory where intSubcategoryId = @NewClass
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Class '',
+						   ( select strSubcategoryId from tblSTSubcategory where intSubcategoryId = a.intClassId ),
+						   ''' + @ClassId  +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId JOIN 
+						   tblSTSubcategory e ON a.intFamilyId = e.intSubcategoryId'
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END    
+ EXEC (@SQL1) 
+ END 
+
+
+ IF (@NewProductCode  IS NOT NULL)
+ BEGIN
+  
+       SELECT @ProductCode = strRegProdCode from tblSTSubcategoryRegProd where intRegProdId = @NewProductCode
+	     
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Product Code '', 
+						   ( select strRegProdCode from tblSTSubcategoryRegProd where intRegProdId = a.intProductCodeId ),
+						   ''' + @ProductCode +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+						   
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END      
+ EXEC (@SQL1)
+ END 
+
+ IF (@NewVendor  IS NOT NULL)
+ BEGIN
+       
+	    SELECT @VendorId = strName from tblEntity where intEntityId = @NewVendor
+
+        SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Vendor '', 
+						   ( select strName from tblEntity where intEntityId = a.intVendorId ),
+						   ''' + @VendorId +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+
+ IF (@NewMinAge  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Minimum Age '', a.intMinimumAge, 
+						   ''' + CAST(@NewMinAge AS NVARCHAR(250))  +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+ IF (@NewMinVendorOrderQty  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Vendor Minimum Order Qty'', a.dblMinOrder, 
+						   ''' + CAST(@NewMinVendorOrderQty AS NVARCHAR(250))  +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END    
+ EXEC (@SQL1)		    
+ END 
+
+ IF (@NewVendorSuggestedQty  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Vendor Suggested Qty'', a.dblSuggestedQty, 
+						   ''' + CAST(@NewVendorSuggestedQty AS NVARCHAR(250))  +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+ IF (@NewMinQtyOnHand  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Min Qty On Hand'', a.dblReorderPoint, 
+						   ''' + CAST(@NewMinQtyOnHand AS NVARCHAR(250))  +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+ IF (@NewInventoryGroup  IS NOT NULL)
+ BEGIN
+
+       SELECT @NewInventoryCountGroupId = strCountGroup FROM tblICCountGroup WHERE intCountGroupId = @NewInventoryGroup
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Inventory Group'', 
+						   ( select strCountGroup from tblICCountGroup where intCountGroupId = a.intCountGroupId ),
+						   ''' + CAST(@NewInventoryCountGroupId AS NVARCHAR(250))  +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+ IF (@NewCountCode  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Count Code'', d.strCountCode,
+						   ''' + CAST(@NewCountCode AS NVARCHAR(250))  +'''
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+ IF (@NewBinLocation  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Storage Location'', 
+						   ( select strName from tblICStorageLocation where intStorageLocationId = a.intStorageLocationId ),
+						   ( select strName from tblICStorageLocation where intStorageLocationId =  CAST( ' +  LTRIM(@NewBinLocation) +' AS INT))
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId '
+		
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+ EXEC (@SQL1)
+ END 
+
+ IF (@NewGLPurchaseAccount  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Purchase Account'', 
+						   ( select strAccountId from tblGLAccount where intAccountId = e.intAccountId ),
+						   ( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  LTRIM(@NewGLPurchaseAccount) +' AS INT))
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId JOIN tblICItemAccount e ON a.intItemId = e.intItemId '
+		
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+
+	   SET @SQL1 = @SQL1 +  ' and e.intAccountCategoryId = 30 ' 
+
+ EXEC (@SQL1)
+ END 
+
+ IF (@NewGLSalesAccount  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Sales Account'', 
+						   ( select strAccountId from tblGLAccount where intAccountId = e.intAccountId ),
+						   ( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  LTRIM(@NewGLSalesAccount) +' AS INT))
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId JOIN tblICItemAccount e ON a.intItemId = e.intItemId '
+		
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END  
+	   
+	   SET @SQL1 = @SQL1 +  ' and e.intAccountCategoryId = 33 ' 
+	      
+ EXEC (@SQL1)
+ END 
+
+ IF (@NewGLVarianceAccount  IS NOT NULL)
+ BEGIN
+
+       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
+			               ChangeDescription,OldData,NewData)
+						   select c.strLocationName, b.strUpcCode, 
+						   d.strDescription, ''Variance Account'', 
+						   ( select strAccountId from tblGLAccount where intAccountId = e.intAccountId ),
+						   ( select strAccountId from tblGLAccount where intAccountId =  CAST( ' +  LTRIM(@NewGLVarianceAccount) +' AS INT))
+						   from tblICItemLocation a JOIN 
+						   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
+						   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
+						   tblICItem d ON a.intItemId = d.intItemId JOIN tblICItemAccount e ON a.intItemId = e.intItemId '
+		
+       SET @SQL1 = @SQL1 + ' where 1=1 ' 
+
+       IF (@Location IS NOT NULL)
+       BEGIN 
+	        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
+	   END
+		 
+       IF (@Vendor IS NOT NULL)
+       BEGIN 
+           SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
+	   END
+
+       IF (@Category IS NOT NULL)
+       BEGIN
+            SET @SQL1 = @SQL1 +  ' and a.intItemId  
+	          IN (select intItemId from tblICItem where intCategoryId IN
+	          (select intCategoryId from tblICCategory where intCategoryId 
+			 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
+	   END
+
+       IF (@Family IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
+	   END
+
+       IF (@Class IS NOT NULL)
+	   BEGIN
+	         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
+	   END
+	    
+       IF (@UpcCode IS NOT NULL)
+       BEGIN
+		   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
+	   END
+
+       IF ((@Description IS NOT NULL)
+       and (@Description != ''))
+       BEGIN
+	        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
+       END
+
+       IF (@PriceBetween1 IS NOT NULL) 
+       BEGIN
+		      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice >= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
+       END 
+	      
+       IF (@PriceBetween2 IS NOT NULL) 
+       BEGIN
+		        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
+				   (select intItemId from tblICItemPricing where dblSalePrice <= 
+				   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
+       END     
+
+	   SET @SQL1 = @SQL1 +  ' and e.intAccountCategoryId = 40 ' 
+
+ EXEC (@SQL1)
+ END 
+
+ SELECT @RecCount  = count(*) from tblSTMassUpdateReportMaster 
+
+ DELETE FROM tblSTMassUpdateReportMaster WHERE OldData =  NewData
+
+ SELECT @UpdateCount = count(*) from tblSTMassUpdateReportMaster WHERE OldData !=  NewData
+
+---Update Logic-------
 			      
-IF(@UpdateReportTable != 'Y')
+IF((@ysnPreview != 'Y')
+AND(@UpdateCount > 0))
    BEGIN
 
      IF ((@TaxFlag1ysn IS NOT NULL) OR (@TaxFlag2ysn IS NOT NULL)
@@ -195,6 +2646,8 @@ IF(@UpdateReportTable != 'Y')
 			   OR (@NewVendorSuggestedQty IS NOT NULL) OR (@NewInventoryGroup IS NOT NULL)
 			   OR (@NewBinLocation IS NOT NULL) OR (@NewMinQtyOnHand IS NOT NULL))
       BEGIN 
+	     
+		  SET @UpdateCount = 0
 
           SET @SQL1 = ' update tblICItemLocation set '
 
@@ -701,7 +3154,8 @@ IF(@UpdateReportTable != 'Y')
 	 END	  
 END
 
-IF(@UpdateReportTable != 'Y')
+IF((@ysnPreview != 'Y')
+AND(@UpdateCount > 0))
 BEGIN
     IF ((@NewCategory IS NOT NULL)
 	OR (@NewCountCode IS NOT NULL))    
@@ -790,7 +3244,8 @@ BEGIN
 	END
 END
 
-IF(@UpdateReportTable != 'Y')
+IF((@ysnPreview != 'Y')
+AND(@UpdateCount > 0))
 BEGIN
       IF ((@NewGLPurchaseAccount IS NOT NULL)
 	  OR (@NewGLSalesAccount IS NOT NULL)    
@@ -1030,2020 +3485,8 @@ BEGIN
 	  END
 END
   
-IF (@UpdateReportTable = 'Y')
-BEGIN
-     DELETE FROM tblSTMassUpdateReportMaster
 
-	 IF (@TaxFlag1ysn IS NOT NULL)
-     BEGIN
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Tax Flag1'',
-							   case when a.ysnTaxFlag1 = 0 then ''No'' else ''Yes'' end,
-							   ''' + case when @TaxFlag1ysn = 0 then 'No' else 'Yes' end +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END     
-     EXEC (@SQL1) 
-     END 
- 
-	 IF (@TaxFlag2ysn IS NOT NULL)
-     BEGIN
-	       
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Tax Flag2'',
-							   case when a.ysnTaxFlag2 = 0 then ''No'' else ''Yes'' end,
-							   ''' + case when @TaxFlag2ysn = 0 then 'No' else 'Yes' end +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END     
-     EXEC (@SQL1)
-     END 
- 
-
-	 IF (@TaxFlag3ysn IS NOT NULL)
-     BEGIN
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Tax Flag3'',
-							   case when a.ysnTaxFlag3 = 0 then ''No'' else ''Yes'' end,
-							   ''' + case when @TaxFlag3ysn = 0 then 'No' else 'Yes' end +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END     
-	 EXEC (@SQL1)
-     END 
-
-	 IF (@TaxFlag4ysn IS NOT NULL)
-     BEGIN
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Tax Flag4'',
-							   case when a.ysnTaxFlag4 = 0 then ''No'' else ''Yes'' end,
-							   ''' + case when @TaxFlag4ysn = 0 then 'No' else 'Yes' end +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END    
-	 EXEC (@SQL1) 
-     END 
-
-	 IF (@DepositRequiredysn  IS NOT NULL)
-     BEGIN
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Deposit Required'',
-							   case when a.ysnDepositRequired = 0 then ''No'' else ''Yes'' end,
-							   ''' + case when @DepositRequiredysn = 0 then 'No' else 'Yes' end +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END    
-	 EXEC (@SQL1)
-     END 
-
-	 IF (@DepositPLU  IS NOT NULL)
-     BEGIN
-
-
-	       SELECT @NewDepositPluId = strUpcCode from tblICItemUOM where intItemUOMId = @DepositPLU
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Deposit PLU'', 
-							   (select strUpcCode from tblICItemUOM where intItemUOMId = a.intDepositPLUId), 
-							   ''' + @NewDepositPluId + '''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and a.intLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END    
-	 EXEC (@SQL1)
-     END 
-
-	 IF (@QuantityRequiredysn  IS NOT NULL)
-     BEGIN
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Quantity Required'',
-							   case when a.ysnQuantityRequired = 0 then ''No'' else ''Yes'' end,
-							   ''' + case when @QuantityRequiredysn = 0 then 'No' else 'Yes' end +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END     
-	 EXEC (@SQL1)
-     END 
-
-	 IF (@ScaleItemysn  IS NOT NULL)
-     BEGIN
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Scale Item'',
-							   case when a.ysnScaleItem = 0 then ''No'' else ''Yes'' end,
-							   ''' + case when @ScaleItemysn = 0 then 'No' else 'Yes' end +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END     
-	 EXEC (@SQL1)
-     END 
-
-	 IF (@FoodStampableysn  IS NOT NULL)
-     BEGIN
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Food Stampable'',
-							   case when a.ysnFoodStampable = 0 then ''No'' else ''Yes'' end,
-							   ''' + case when @FoodStampableysn = 0 then 'No' else 'Yes' end +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END     
-	 EXEC (@SQL1)
-     END 
-
-	 IF (@Returnableysn  IS NOT NULL)
-     BEGIN
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Returnable '',
-							   case when a.ysnReturnable = 0 then ''No'' else ''Yes'' end,
-							   ''' + case when @Returnableysn = 0 then 'No' else 'Yes' end +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END     
-	 EXEC (@SQL1)
-     END 
-
-	 IF (@Saleableysn  IS NOT NULL)
-     BEGIN
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Saleable '',
-							   case when a.ysnSaleable = 0 then ''No'' else ''Yes'' end,
-							   ''' + case when @Saleableysn = 0 then 'No' else 'Yes' end +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END     
-	 EXEC (@SQL1)
-     END 
-
-	 IF (@ID1Requiredysn  IS NOT NULL)
-     BEGIN
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Liquor Id Required '',
-							   case when a.ysnIdRequiredLiquor = 0 then ''No'' else ''Yes'' end,
-							   ''' + case when @ID1Requiredysn = 0 then 'No' else 'Yes' end +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END     
-	 EXEC (@SQL1)
-     END 
-
-	 IF (@ID2Requiredysn  IS NOT NULL)
-     BEGIN
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Cigarette Id Required '',
-							   case when a.ysnIdRequiredCigarette = 0 then ''No'' else ''Yes'' end,
-							   ''' + case when @ID2Requiredysn = 0 then 'No' else 'Yes' end +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END     
-	 EXEC (@SQL1)
-     END 
-
-	 IF (@PromotionalItemysn  IS NOT NULL)
-     BEGIN
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Promotional Item'',
-							   case when a.ysnPromotionalItem = 0 then ''No'' else ''Yes'' end,
-							   ''' + case when @PromotionalItemysn = 0 then 'No' else 'Yes' end +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END     
-	 EXEC (@SQL1)
-     END 
-
-	 IF (@PrePricedysn  IS NOT NULL)
-     BEGIN
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Pre Priced'',
-							   case when a.ysnPrePriced = 0 then ''No'' else ''Yes'' end,
-							   ''' + case when @PrePricedysn = 0 then 'No' else 'Yes' end +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END     
-	 EXEC (@SQL1)
-     END 
-
-	 IF (@BlueLaw1ysn  IS NOT NULL)
-     BEGIN
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Blue Law1'',
-							   case when a.ysnApplyBlueLaw1 = 0 then ''No'' else ''Yes'' end,
-							   ''' + case when @BlueLaw1ysn = 0 then 'No' else 'Yes' end +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END     
-	 EXEC (@SQL1)
-     END 
- 
-
-	 IF (@BlueLaw2ysn  IS NOT NULL)
-     BEGIN
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Blue Law2'',
-							   case when a.ysnApplyBlueLaw2 = 0 then ''No'' else ''Yes'' end,
-							   ''' + case when @BlueLaw2ysn = 0 then 'No' else 'Yes' end +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END     
-	 EXEC (@SQL1)
-     END 
-
-	 IF (@CountedDailyysn  IS NOT NULL)
-     BEGIN
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Counted Daily'',
-							   case when a.ysnCountedDaily = 0 then ''No'' else ''Yes'' end,
-							   ''' + case when @CountedDailyysn = 0 then 'No' else 'Yes' end +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END     
-	 EXEC (@SQL1)
-     END 
- 
-	 IF (@Counted  IS NOT NULL)
-     BEGIN
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Counted '', a.strCounted, 
-							   ''' + CAST(@Counted AS NVARCHAR(250))  +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END     
-	 EXEC (@SQL1)
-     END 
-
-	 IF (@CountSerialysn  IS NOT NULL)
-     BEGIN
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Count By Serial No'',
-							   case when a.ysnCountBySINo = 0 then ''No'' else ''Yes'' end,
-							   ''' + case when @CountSerialysn = 0 then 'No' else 'Yes' end +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END     
-	 EXEC (@SQL1)
-     END 
- 
-	 IF (@NewFamily  IS NOT NULL)
-     BEGIN
-	        
-           SELECT @FamilyId = strSubcategoryId from tblSTSubcategory where intSubcategoryId = @NewFamily  
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Family '', 
-							   ( select strSubcategoryId from tblSTSubcategory where intSubcategoryId = a.intFamilyId ),
-							   ''' + @FamilyId +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END
-     EXEC (@SQL1)     
-     END 
- 
-
-	 IF (@NewClass  IS NOT NULL)
-     BEGIN
-	       
-		   SELECT @ClassId = strSubcategoryId from tblSTSubcategory where intSubcategoryId = @NewClass
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Class '',
-							   ( select strSubcategoryId from tblSTSubcategory where intSubcategoryId = a.intClassId ),
-							   ''' + @ClassId  +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId JOIN 
-							   tblSTSubcategory e ON a.intFamilyId = e.intSubcategoryId'
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END    
-	 EXEC (@SQL1) 
-     END 
- 
-
-	 IF (@NewProductCode  IS NOT NULL)
-     BEGIN
-	  
-           SELECT @ProductCode = strRegProdCode from tblSTSubcategoryRegProd where intRegProdId = @NewProductCode
-		     
-           SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Product Code '', 
-							   ( select strRegProdCode from tblSTSubcategoryRegProd where intRegProdId = a.intProductCodeId ),
-							   ''' + @ProductCode +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-							   
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END      
-	 EXEC (@SQL1)
-     END 
-
-	 IF (@NewVendor  IS NOT NULL)
-     BEGIN
-	       
-		    SELECT @VendorId = strName from tblEntity where intEntityId = @NewVendor
-
-            SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Vendor '', 
-							   ( select strName from tblEntity where intEntityId = a.intVendorId ),
-							   ''' + @VendorId +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END     
-	 EXEC (@SQL1)
-     END 
- 
-
-	 IF (@NewMinAge  IS NOT NULL)
-     BEGIN
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Minimum Age '', a.intMinimumAge, 
-							   ''' + CAST(@NewMinAge AS NVARCHAR(250))  +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END     
-	 EXEC (@SQL1)
-     END 
-
-	 IF (@NewMinVendorOrderQty  IS NOT NULL)
-     BEGIN
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Vendor Minimum Order Qty'', a.dblMinOrder, 
-							   ''' + CAST(@NewMinVendorOrderQty AS NVARCHAR(250))  +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END    
-     EXEC (@SQL1)		    
-     END 
-
-	 IF (@NewVendorSuggestedQty  IS NOT NULL)
-     BEGIN
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Vendor Suggested Qty'', a.dblSuggestedQty, 
-							   ''' + CAST(@NewVendorSuggestedQty AS NVARCHAR(250))  +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END     
-	 EXEC (@SQL1)
-     END 
-
-	 IF (@NewInventoryGroup  IS NOT NULL)
-     BEGIN
-
-	       SELECT @NewInventoryCountGroupId = strCountGroup FROM tblICCountGroup WHERE intCountGroupId = @NewInventoryGroup
-
-	       SET @SQL1 =  'INSERT INTO tblSTMassUpdateReportMaster(strLocationName,UpcCode,ItemDescription,
-				               ChangeDescription,OldData,NewData)
-							   select c.strLocationName, b.strUpcCode, 
-							   d.strDescription, ''Inventory Group'', 
-							   ( select strCountGroup from tblICCountGroup where intCountGroupId = a.intCountGroupId ),
-							   ''' + CAST(@NewInventoryCountGroupId AS NVARCHAR(250))  +'''
-							   from tblICItemLocation a JOIN 
-							   tblICItemUOM b ON a.intItemId = b.intItemId JOIN
-							   tblSMCompanyLocation c ON a.intLocationId = c.intCompanyLocationId JOIN
-							   tblICItem d ON a.intItemId = d.intItemId '
-
-           SET @SQL1 = @SQL1 + ' where 1=1 ' 
-
-	       IF (@Location IS NOT NULL)
-	       BEGIN 
-		        SET @SQL1 = @SQL1 + ' and c.intCompanyLocationId IN (' + CAST(@Location as NVARCHAR) + ')'
-		   END
-			 
-	       IF (@Vendor IS NOT NULL)
-	       BEGIN 
-               SET @SQL1 = @SQL1 + ' and a.intVendorId IN (' + CAST(@Vendor as NVARCHAR) + ')'
-		   END
-
-           IF (@Category IS NOT NULL)
-	       BEGIN
-                SET @SQL1 = @SQL1 +  ' and a.intItemId  
-		          IN (select intItemId from tblICItem where intCategoryId IN
-		          (select intCategoryId from tblICCategory where intCategoryId 
-				 IN (' + CAST(@Category as NVARCHAR) + ')' + '))'
-		   END
-
-           IF (@Family IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intFamilyId IN (' + CAST(@Family as NVARCHAR) + ')'
-		   END
-
-           IF (@Class IS NOT NULL)
-		   BEGIN
-  		         SET @SQL1 = @SQL1 + ' and  a.intClassId IN (' + CAST(@Class as NVARCHAR) + ')'
-		   END
-		    
-	       IF (@UpcCode IS NOT NULL)
-   	       BEGIN
-			   SET @SQL1 = @SQL1 + ' and b.intItemUOMId IN (' + CAST(@UpcCode as NVARCHAR) + ')'
-		   END
-
-           IF ((@Description IS NOT NULL)
-	       and (@Description != ''))
-	       BEGIN
-   		        SET @SQL1 = @SQL1 +  ' and  d.strDescription like ''%' + LTRIM(@Description) + '%'' '
-           END
-
-           IF (@PriceBetween1 IS NOT NULL) 
-	       BEGIN
-			      set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice >= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween1)) + '''' + ')'
-	       END 
-		      
-           IF (@PriceBetween2 IS NOT NULL) 
-	       BEGIN
-			        set @SQL1 = @SQL1 +  ' and a.intItemId IN 
-					   (select intItemId from tblICItemPricing where dblSalePrice <= 
-					   ''' + CONVERT(NVARCHAR,(@PriceBetween2)) + '''' + ')'
-	       END     
-	 EXEC (@SQL1)
-     END 
-
-	 SELECT @UpdateCount = count(*) from tblSTMassUpdateReportMaster 
-   
-END
-     
-SELECT @UpdateCount as UpdateItemDataCount	
-
+SELECT  @RecCount as RecCount,  @UpdateCount as UpdateItemDataCount	
 
 END TRY
 

@@ -3,17 +3,23 @@ AS
 	SELECT 	CD.intContractDetailId, 
 			CD.intContractHeaderId, 
 			CD.intContractSeq, 
-			CD.intItemId, 					IM.strDescription 			AS strItemDescription,
-			CD.dblQuantity												AS dblDetailQuantity,
-			CD.intUnitMeasureId, 			UM.strUnitMeasure,
+			CD.intItemId,
+			CD.strItemDescription,
+			CD.dblDetailQuantity,
+			CD.intUnitMeasureId,
+			CD.strItemUOM as strUnitMeasure,
 			CD.intCompanyLocationId,
 			IsNull(CD.dblBalance, 0) - IsNull(CD.dblScheduleQty, 0)		AS dblUnLoadedQuantity,
-			
-			CH.intContractTypeId intPurchaseSale,
-			CH.intEntityId,
-			CH.intContractNumber,
-			CH.dtmContractDate
-	FROM tblCTContractDetail 		CD
-	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
-	JOIN	tblICItem				IM	ON	IM.intItemId				=	CD.intItemId
-	JOIN	tblICUnitMeasure		UM	ON	UM.intUnitMeasureId			=	CD.intUnitMeasureId
+			CD.intContractTypeId intPurchaseSale,
+			CD.intEntityId,
+			CD.intContractNumber,
+			CD.dtmContractDate,
+			CD.strEntityName,
+			CD.dtmStartDate,
+			CD.dtmEndDate,
+			CD.intDefaultLocationId,
+			IsNull(CD.dblScheduleQty, 0) as dblScheduleQty,
+			CD.strItemNo,
+			CD.strCustomerContract,
+			IsNull(CD.dblBalance, 0) as dblBalance
+	FROM vyuCTContractDetailView 		CD

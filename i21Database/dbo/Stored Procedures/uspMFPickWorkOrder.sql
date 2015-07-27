@@ -645,6 +645,42 @@ BEGIN TRY
 				FROM @tblLot
 				WHERE intLotRecordKey = @intLotRecordKey
 
+				IF NOT EXISTS(SELECT *FROM tblMFProductionSummary WHERE intWorkOrderId=@intWorkOrderId AND intItemId=@intItemId)
+				BEGIN
+					INSERT INTO tblMFProductionSummary (
+						intWorkOrderId
+						,intItemId
+						,dblOpeningQuantity
+						,dblOpeningOutputQuantity
+						,dblOpeningConversionQuantity
+						,dblInputQuantity
+						,dblConsumedQuantity
+						,dblOutputQuantity
+						,dblOutputConversionQuantity
+						,dblCountQuantity
+						,dblCountOutputQuantity
+						,dblCountConversionQuantity
+						,dblCalculatedQuantity
+						)
+					SELECT @intWorkOrderId
+						,@intItemId
+						,0
+						,0
+						,0
+						,0
+						,@dblReqQty
+						,0
+						,0
+						,0
+						,0
+						,0
+						,0
+				END
+				ELSE
+				BEGIN
+					UPDATE tblMFProductionSummary SET dblConsumedQuantity=dblConsumedQuantity+@dblReqQty WHERE intWorkOrderId=@intWorkOrderId AND intItemId=@intItemId
+				END
+
 				UPDATE @tblLot
 				SET dblQty = dblQty - @dblReqQty
 				WHERE intLotRecordKey = @intLotRecordKey
@@ -698,6 +734,42 @@ BEGIN TRY
 					,@intUserId
 				FROM @tblLot
 				WHERE intLotRecordKey = @intLotRecordKey
+
+				IF NOT EXISTS(SELECT *FROM tblMFProductionSummary WHERE intWorkOrderId=@intWorkOrderId AND intItemId=@intItemId)
+				BEGIN
+					INSERT INTO tblMFProductionSummary (
+						intWorkOrderId
+						,intItemId
+						,dblOpeningQuantity
+						,dblOpeningOutputQuantity
+						,dblOpeningConversionQuantity
+						,dblInputQuantity
+						,dblConsumedQuantity
+						,dblOutputQuantity
+						,dblOutputConversionQuantity
+						,dblCountQuantity
+						,dblCountOutputQuantity
+						,dblCountConversionQuantity
+						,dblCalculatedQuantity
+						)
+					SELECT @intWorkOrderId
+						,@intItemId
+						,0
+						,0
+						,0
+						,0
+						,@dblQty
+						,0
+						,0
+						,0
+						,0
+						,0
+						,0
+				END
+				ELSE
+				BEGIN
+					UPDATE tblMFProductionSummary SET dblConsumedQuantity=dblConsumedQuantity+@dblQty WHERE intWorkOrderId=@intWorkOrderId AND intItemId=@intItemId
+				END
 
 				UPDATE @tblLot
 				SET dblQty = 0

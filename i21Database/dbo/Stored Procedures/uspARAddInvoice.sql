@@ -127,6 +127,7 @@ INSERT INTO
 		,[strBillToState]
 		,[strBillToZipCode]
 		,[strBillToCountry]
+		,[intDistributionHeaderId]
 		,[intConcurrencyId]
 		,[intEntityId])
 SELECT
@@ -170,6 +171,7 @@ SELECT
 	,min(BL.[strState])				--[strBillToState]
 	,min(BL.[strZipCode])			--[strBillToZipCode]
 	,min(BL.[strCountry])			--[strBillToCountry]
+	,IE.intSourceId
 	,1
 	,@EntityId
 FROM
@@ -200,7 +202,7 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	tblEntityLocation BL
 		ON AC.intShipToId = BL.intEntityLocationId	
-group by TE.InvoiceNumber,IE.intEntityCustomerId,IE.intLocationId,IE.strSourceId,IE.dtmDate,IE.intCurrencyId,IE.intSalesPersonId,IE.intShipViaId,IE.strComments,EL.intTermsId,IE.strPurchaseOrder;				
+group by TE.InvoiceNumber,IE.intEntityCustomerId,IE.intLocationId,IE.strSourceId,IE.dtmDate,IE.intCurrencyId,IE.intSalesPersonId,IE.intShipViaId,IE.strComments,EL.intTermsId,IE.strPurchaseOrder,IE.intSourceId;				
 
 
 ENABLE TRIGGER dbo.trgInvoiceNumber ON dbo.tblARInvoice;
@@ -265,7 +267,7 @@ DECLARE @InvoiceId as int;
 WHILE EXISTS(SELECT NULL FROM @Invoices)
 BEGIN
 	SELECT TOP 1 @InvoiceId = [intInvoiceID] FROM @Invoices
---	EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceId
+	EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceId
 	--this is added because the reCompute invoice Taxes does not update the totals correctly
 	-- need to review this
     UPDATE

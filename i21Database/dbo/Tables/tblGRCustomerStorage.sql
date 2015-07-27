@@ -35,7 +35,6 @@
     [intCurrencyId] INT NULL,
 	[intStorageTicketNumber] INT NULL, 
     CONSTRAINT [PK_tblGRCustomerStorage_intCustomerStorageId] PRIMARY KEY ([intCustomerStorageId]),
-	CONSTRAINT [UK_tblGRCustomerStorage_intEntityId_intStorageTicket_intStorageTypeId_intCommodityId_intCompanyLocationId_intStorageScheduleId] UNIQUE ([intEntityId],[intStorageTicketNumber],[intStorageTypeId],[intCommodityId],[intCompanyLocationId],[intStorageScheduleId]), 
 	CONSTRAINT [FK_tblGRCustomerStorage_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
 	CONSTRAINT [FK_tblGRCustomerStorage_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [dbo].[tblICCommodity] ([intCommodityId]),
 	CONSTRAINT [FK_tblGRCustomerStorage_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),

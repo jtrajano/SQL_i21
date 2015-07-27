@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARSalesOrderReport]
 AS
 SELECT SO.intSalesOrderId
-	 , strType = ISNULL('General', SO.strType)
+	 , strOrderType = ISNULL('General', SO.strType)
      , strCustomerName = E.strName
 	 , L.strLocationName
 	 , SO.dtmDate
@@ -18,14 +18,14 @@ SELECT SO.intSalesOrderId
 	 , strOrderedByName = EOB.strName
 	 , SO.dtmDueDate
 	 , FT.strFreightTerm
-	 , strSplitName = CS.strDescription
+	 , strSplitName = ES.strDescription
 	 , SO.strComments
 	 , dblSalesOrderSubtotal = ISNULL(SO.dblSalesOrderSubtotal, 0)
 	 , dblShipping = ISNULL(SO.dblShipping, 0)
 	 , dblTax = ISNULL(SO.dblTax, 0)
 	 , dblSalesOrderTotal = ISNULL(SO.dblSalesOrderTotal, 0)
 	 , I.strItemNo
-	 , strItemDescription = I.strDescription
+	 , SD.strItemDescription
 	 , UOM.strUnitMeasure
 	 , dblQtyShipped = ISNULL(SD.dblQtyShipped, 0)
 	 , dblQtyOrdered = ISNULL(SD.dblQtyOrdered, 0)
@@ -35,7 +35,7 @@ SELECT SO.intSalesOrderId
 	 , dblItemPrice = ISNULL(SD.dblTotal, 0)
 FROM tblSOSalesOrder SO
 LEFT JOIN (tblSOSalesOrderDetail SD 
-	INNER JOIN tblICItem I ON SD.intItemId = I.intItemId 
+	LEFT JOIN tblICItem I ON SD.intItemId = I.intItemId 
 	LEFT JOIN vyuARItemUOM UOM ON SD.intItemUOMId = UOM.intItemUOMId AND SD.intItemId = UOM.intItemId) ON SO.intSalesOrderId = SD.intSalesOrderId
 INNER JOIN (tblARCustomer C 
 	INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = SO.intEntityCustomerId
@@ -47,4 +47,4 @@ LEFT JOIN tblSMShipVia SV ON SO.intShipViaId = SV.intEntityShipViaId
 INNER JOIN tblSMTerm T ON SO.intTermId = T.intTermID
 LEFT JOIN tblEntity EOB ON SO.intOrderedById = EOB.intEntityId
 LEFT JOIN tblSMFreightTerms FT ON SO.intFreightTermId = FT.intFreightTermId
-LEFT JOIN tblARCustomerSplit CS ON SO.intSplitId = CS.intSplitId
+LEFT JOIN tblEntitySplit ES ON SO.intSplitId = ES.intSplitId

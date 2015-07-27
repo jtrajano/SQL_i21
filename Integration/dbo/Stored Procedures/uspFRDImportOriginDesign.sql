@@ -84,7 +84,8 @@ BEGIN
 		DECLARE @hdr VARCHAR(10)
 		DECLARE @introwiddet INT
 		DECLARE @insertload VARCHAR(max)
-		DECLARE @@glfsf_no_to_convert VARCHAR(50)
+		DECLARE @glfsf_stmt_type VARCHAR(50)		
+		DECLARE @@glfsf_no_to_convert VARCHAR(50)		
 
 		SET @result = ''Successful''
 		SELECT @hdr= ''''''''+''HDR''+''''''''
@@ -98,7 +99,7 @@ BEGIN
 				  AND CONVERT(varchar(20),glfsf_no) NOT IN (SELECT strDescription FROM tblFRRow)
 
 		SELECT @introwiddet = intRowId FROM tblFRRow WHERE strDescription = @@glfsf_no_to_convert
-		--SELECT @introwiddet --debug
+		SELECT @glfsf_stmt_type = (select TOP 1 glfsf_stmt_type from glfsfmst where glfsf_no = @@glfsf_no_to_convert and glfsf_stmt_type IS NOT NULL group by glfsf_stmt_type)
 
 
 		--=====================================================================================================================================
@@ -538,6 +539,7 @@ BEGIN
 			DECLARE @increment INT
 			DECLARE @introwdetailidint INT 
 			DECLARE @rowcurr INT 
+			DECLARE @strBalanceSide VARCHAR(50)
 
 			WHILE EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId > @minprior AND glfsf_action_type = ''PRN'' AND strRelatedRows IS NULL)
 			BEGIN
@@ -545,21 +547,48 @@ BEGIN
 				SELECT @change = (@min - 1)
 				SELECT @curr = (@curr + 1)
 				SELECT @increment = 1
-
+				SELECT @strBalanceSide = ''''
+				
 				WHILE EXISTS(SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId = @change AND (glfsf_action_type = ''GRA'' OR glfsf_action_type = ''ACA'' OR glfsf_action_type = ''NET''))
-				BEGIN
-					SELECT @intrefno = intRefNo, @introwdetailidint = intRowDetailId FROM #irelyloadFRRowDesign WHERE intRowDetailId = @change
+				BEGIN					
+					SELECT @intrefno = intRefNo, @introwdetailidint = intRowDetailId, @strBalanceSide = strBalanceSide FROM #irelyloadFRRowDesign WHERE intRowDetailId = @change
 					IF EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId = @min AND strRelatedRows IS NOT NULL)
 					BEGIN
-						UPDATE #irelyloadFRRowDesign SET strRelatedRows = strRelatedRows + '' +'' WHERE intRowDetailId = @min
+						--INCOME STATEMENT CHANGING OF SIDE
+						IF(@strBalanceSide = ''Debit'' AND @glfsf_stmt_type = ''I'')
+						BEGIN
+							UPDATE #irelyloadFRRowDesign SET strRelatedRows = strRelatedRows + '' -'' WHERE intRowDetailId = @min
+						END
+						ELSE
+						BEGIN
+							UPDATE #irelyloadFRRowDesign SET strRelatedRows = strRelatedRows  + '' +'' WHERE intRowDetailId = @min
+						END
 					END
 
 					UPDATE #irelyloadFRRowDesign SET strRelatedRows = ISNULL(strRelatedRows,'''') + '' R'' + RTRIM(CONVERT(varchar(10),(@intrefno)))  WHERE intRowDetailId = @min
 					SELECT @rowcurr = intRowId FROM #irelyloadFRRowDesign WHERE intRowDetailId = @min
 
-					INSERT #irelyloaddesigncalc
+					--INCOME STATEMENT CHANGING OF SIDE
+					SELECT @strBalanceSide = strBalanceSide FROM #irelyloadFRRowDesign WHERE intRowDetailId = (@change - 1)
+					IF EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId = @min AND strRelatedRows IS NOT NULL)
+					BEGIN
+						IF(@strBalanceSide = ''Debit'' AND @glfsf_stmt_type = ''I'')
+						BEGIN
+							INSERT #irelyloaddesigncalc
+							SELECT @rowcurr, @min, @intrefno, ''-'', @increment, @introwdetailidint
+						END
+						ELSE
+						BEGIN
+							INSERT #irelyloaddesigncalc
+							SELECT @rowcurr, @min, @intrefno, ''+'', @increment, @introwdetailidint
+						END
+					END
+					ELSE
+					BEGIN
+						INSERT #irelyloaddesigncalc
 						SELECT @rowcurr, @min, @intrefno, ''+'', @increment, @introwdetailidint
-							
+					END
+					
 					SELECT @change = (@change - 1)
 					SELECT @increment = (@increment + 1)
 				END
@@ -596,6 +625,7 @@ BEGIN
 				SET @row = 0
 				SET @rowold = 0
 				SELECT @upper = 0
+				SELECT strBalanceSide = ''''
 
 				WHILE EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId < @tot AND intRowDetailId > @tod AND intRowDetailId > @row AND glfsf_action_type IN (''PRN'',''ACP'',''GRP'',''GRA''))
 						OR EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId < @tot				-- id less than the total id number
@@ -611,20 +641,43 @@ BEGIN
 																					AND intRowDetailId > @totprior
 					SELECT @adder = NULL
 					SELECT @adderintrowdetailid = NULL
-					SELECT @adder = intRefNo, @adderintrowdetailid = intRowDetailId FROM #irelyloadFRRowDesign WHERE intRowDetailId = @row			
+					SELECT @adder = intRefNo, @adderintrowdetailid = intRowDetailId, @strBalanceSide = strBalanceSide FROM #irelyloadFRRowDesign WHERE intRowDetailId = @row			
 					SELECT @maxbeforetot = ISNULL(MAX(glfsf_tot_no),0) FROM #irelyloadFRRowDesign WHERE intRowDetailId > @row AND intRowDetailId < @tot
 
 					IF EXISTS(SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId = @tot AND strRelatedRows IS NOT NULL)
 					BEGIN
-						UPDATE #irelyloadFRRowDesign SET strRelatedRows = strRelatedRows + '' +'' WHERE intRowDetailId = @tot
+						--INCOME STATEMENT CHANGING OF SIDE
+						IF(@strBalanceSide = ''Debit'' AND @glfsf_stmt_type = ''I'')
+						BEGIN
+							UPDATE #irelyloadFRRowDesign SET strRelatedRows = strRelatedRows + '' -'' WHERE intRowDetailId = @tot
+						END
+						ELSE
+						BEGIN
+							UPDATE #irelyloadFRRowDesign SET strRelatedRows = strRelatedRows + '' +'' WHERE intRowDetailId = @tot
+						END
+						
 					END
 
 					IF @adder IS NOT NULL
 					BEGIN
 						UPDATE #irelyloadFRRowDesign SET strRelatedRows = ISNULL(strRelatedRows,'''') + '' R'' + RTRIM(CONVERT(VARCHAR(10),@adder)) WHERE intRowDetailId = @tot
 						SELECT @rowcurr= intRowId FROM #irelyloadFRRowDesign WHERE intRowDetailId = @tot
-						INSERT #irelyloaddesigncalc
-							SELECT @rowcurr, @tot, @adder, ''+'', @upper, @adderintrowdetailid
+
+						--INCOME STATEMENT CHANGING OF SIDE
+						SELECT @strBalanceSide = strBalanceSide FROM #irelyloadFRRowDesign WHERE intRowDetailId = (SELECT MIN(intRowDetailId) FROM #irelyloadFRRowDesign WHERE ((glfsf_action_type IN (''PRN'',''ACP'',''GRP'',''GRA'') AND intRowDetailId > @tod) OR (glfsf_action_type = ''TOT'' AND glfsf_tot_no < @totno AND intRowDetailId > @totprior AND glfsf_tot_no=@maxbeforetot))
+																															AND intRowDetailId > @row
+																															AND intRowDetailId < @tot
+																															AND intRowDetailId > @totprior)
+						IF(@strBalanceSide = ''Debit'' AND @glfsf_stmt_type = ''I'')
+						BEGIN
+							INSERT #irelyloaddesigncalc
+								SELECT @rowcurr, @tot, @adder, ''-'', @upper, @adderintrowdetailid
+						END
+						ELSE
+						BEGIN
+							INSERT #irelyloaddesigncalc
+								SELECT @rowcurr, @tot, @adder, ''+'', @upper, @adderintrowdetailid
+						END						
 					END
 
 					--SELECT @tot --debug
@@ -903,11 +956,11 @@ END
 
 --=====================================================================================================================================
 -- 	SCRIPT EXECUTION 
----------------------------------------------------------------------------------------------------------------------------------------
---DECLARE @res AS NVARCH(MAX)
+-----------------------------------------------------------------------------------------------------------------------------------
+--DECLARE @res AS NVARCHAR(MAX)
 
 --EXEC [dbo].[uspFRDImportOriginDesign]
---			@originglfsf_no	 = '1',					-- ORIGIN ID
+--			@originglfsf_no	 = '7',					-- ORIGIN ID
 --			@result = @res OUTPUT					-- OUTPUT PARAMETER THAT RETURNS TOTAL NUMBER OF SUCCESSFUL RECORDS
 				
 --SELECT @res

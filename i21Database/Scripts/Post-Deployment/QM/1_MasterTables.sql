@@ -201,11 +201,18 @@ BEGIN
 	VALUES(10,'BusinessDate')
 END
 GO
+--GO
+--IF NOT EXISTS(SELECT 1 FROM tblQMDataType WHERE strDataTypeName = 'Time')
+--BEGIN
+--	INSERT INTO tblQMDataType(intDataTypeId,strDataTypeName)
+--	VALUES(11,'Time')
+--END
+--GO
 GO
-IF NOT EXISTS(SELECT 1 FROM tblQMDataType WHERE strDataTypeName = 'Time')
+IF EXISTS(SELECT 1 FROM tblQMDataType WHERE strDataTypeName = 'Time')
 BEGIN
-	INSERT INTO tblQMDataType(intDataTypeId,strDataTypeName)
-	VALUES(11,'Time')
+	UPDATE tblQMProperty Set intDataTypeId = 12 where intDataTypeId = 11
+	DELETE tblQMDataType Where strDataTypeName = 'Time'
 END
 GO
 GO
@@ -267,14 +274,22 @@ GO
 IF NOT EXISTS(SELECT 1 FROM tblQMProductType WHERE intProductTypeId = 1)
 BEGIN
 	INSERT INTO tblQMProductType(intProductTypeId,strProductTypeName,strDescription,ysnIsTemplate)
-	VALUES(1,'Material Type','Material Type',1)
+	VALUES(1,'Category','Category',1)
+END
+ELSE
+BEGIN
+	UPDATE tblQMProductType SET strProductTypeName = 'Category', strDescription = 'Category' WHERE intProductTypeId = 1
 END
 GO
 GO
 IF NOT EXISTS(SELECT 1 FROM tblQMProductType WHERE intProductTypeId = 2)
 BEGIN
 	INSERT INTO tblQMProductType(intProductTypeId,strProductTypeName,strDescription,ysnIsTemplate)
-	VALUES(2,'Material','Material',1)
+	VALUES(2,'Item','Item',1)
+END
+ELSE
+BEGIN
+	UPDATE tblQMProductType SET strProductTypeName = 'Item', strDescription = 'Item' WHERE intProductTypeId = 2
 END
 GO
 GO
@@ -326,4 +341,10 @@ BEGIN
 	VALUES(9,'Container Line Item','Container Line Item',0)
 END
 GO
-
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMProductType WHERE intProductTypeId = 10)
+BEGIN
+	INSERT INTO tblQMProductType(intProductTypeId,strProductTypeName,strDescription,ysnIsTemplate)
+	VALUES(10,'Shipment Line Item','Shipment Line Item',0)
+END
+GO

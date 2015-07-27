@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKDPRInvDailyPositionDetail] 
 	@intCommodityId INT
-	,@intLocationId INT = NULL
+   ,@intLocationId INT = NULL
 AS
 IF ISNULL(@intLocationId, 0) <> 0
 BEGIN
@@ -8,30 +8,21 @@ BEGIN
 		,'In-House' AS [strType]
 		,ISNULL(invQty, 0) - ISNULL(ReserveQty, 0) + ISNULL(dblBalance,0) AS dblTotal
 	FROM (
+	
 		SELECT (
-				SELECT sum(isnull(it1.dblUnitOnHand, 0))
-				FROM tblICItem i
+				SELECT sum(isnull(it1.dblUnitOnHand, 0)) FROM tblICItem i
 				INNER JOIN tblICItemStock it1 ON it1.intItemId = i.intItemId
 				INNER JOIN tblICItemLocation il ON il.intItemLocationId = it1.intItemLocationId
-				WHERE i.intCommodityId = @intCommodityId
-					AND il.intLocationId = @intLocationId
-				) AS invQty
-			,(
-				SELECT SUM(isnull(sr1.dblQty, 0))
-				FROM tblICItem i
+				WHERE i.intCommodityId = @intCommodityId AND il.intLocationId = @intLocationId) AS invQty				
+			,(  
+				SELECT SUM(isnull(sr1.dblQty, 0)) FROM tblICItem i
 				INNER JOIN tblICItemStock it1 ON it1.intItemId = i.intItemId
 				INNER JOIN tblICStockReservation sr1 ON it1.intItemId = sr1.intItemId
 				INNER JOIN tblICItemLocation il ON il.intItemLocationId = it1.intItemLocationId
-				WHERE i.intCommodityId = @intCommodityId
-					AND il.intLocationId = @intLocationId
-				) AS ReserveQty
-			,(
-				SELECT SUM(Balance)
-				FROM vyuGRGetStorageDetail
-				WHERE ysnCustomerStorage <> 1
-					AND intCommodityId = @intCommodityId
-					AND intCompanyLocationId = @intLocationId
-				) dblBalance
+				WHERE i.intCommodityId = @intCommodityId AND il.intLocationId = @intLocationId) AS ReserveQty				
+			,(  
+				SELECT SUM(Balance) FROM vyuGRGetStorageDetail
+				WHERE ysnCustomerStorage <> 1 AND intCommodityId = @intCommodityId AND intCompanyLocationId = @intLocationId) dblBalance				
 		) t
 	
 	UNION ALL
@@ -46,7 +37,6 @@ BEGIN
 		AND intCompanyLocationId = @intLocationId
 	
 	UNION ALL
-	
 	SELECT @intCommodityId AS intCommodityId
 		,'Purchase In-Transit' AS [strType]
 		,ISNULL(ReserveQty, 0) AS dblTotal
@@ -355,6 +345,12 @@ BEGIN
 				) AS dblBalance
 		) t
 	
+	UNION ALL
+	
+	SELECT @intCommodityId AS intCommodityId
+		,'' AS [strType]
+		,null AS dblTotal
+		
 	UNION ALL
 	
 	SELECT @intCommodityId AS intCommodityId

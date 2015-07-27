@@ -145,11 +145,15 @@ BEGIN
 		,strSQL
 		)
 	SELECT 7
-		,'Is Cycle Count Mandatory'
+		,'Is Cycle count required'
 		,5
 		,1
 		,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
 END
+Else
+Begin
+	Update tblMFAttribute Set strAttributeName='Is Cycle count required' Where intAttributeId = 7
+End
 GO
 
 IF NOT EXISTS (
