@@ -2052,6 +2052,7 @@
     <Build Include="dbo\Stored Procedures\uspARCreateCustomerInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARAddInventoryItemToInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetAttributeByAttributeName.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMGetItemTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
