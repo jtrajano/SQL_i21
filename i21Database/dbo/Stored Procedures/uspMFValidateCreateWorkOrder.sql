@@ -153,7 +153,7 @@ BEGIN TRY
 		END
 	END
 
-	IF @strManufacturingProcessRunDurationName = 'Shift'
+	IF @strManufacturingProcessRunDurationName = 'By Shift'
 		AND EXISTS (
 			SELECT *
 			FROM tblMFWorkOrder
@@ -182,7 +182,7 @@ BEGIN TRY
 				)
 	END
 
-	IF @strManufacturingProcessRunDurationName = 'Day'
+	IF @strManufacturingProcessRunDurationName = 'By Day'
 		AND EXISTS (
 			SELECT *
 			FROM dbo.tblMFWorkOrder

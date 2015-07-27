@@ -341,4 +341,10 @@ BEGIN
 	VALUES(9,'Container Line Item','Container Line Item',0)
 END
 GO
-
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMProductType WHERE intProductTypeId = 10)
+BEGIN
+	INSERT INTO tblQMProductType(intProductTypeId,strProductTypeName,strDescription,ysnIsTemplate)
+	VALUES(10,'Shipment Line Item','Shipment Line Item',0)
+END
+GO

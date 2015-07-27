@@ -84,6 +84,7 @@ BEGIN TRY
 		,intSampleTypeId
 		,strSampleNumber
 		,intProductTypeId
+		,intProductValueId
 		,intSampleStatusId
 		,intItemId
 		,intItemContractId
@@ -121,6 +122,7 @@ BEGIN TRY
 		,intSampleTypeId
 		,@strSampleNumber
 		,intProductTypeId
+		,intProductValueId
 		,intSampleStatusId
 		,intItemId
 		,intItemContractId
@@ -156,6 +158,7 @@ BEGIN TRY
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intSampleTypeId INT
 			,intProductTypeId INT
+			,intProductValueId INT
 			,intSampleStatusId INT
 			,intItemId INT
 			,intItemContractId INT

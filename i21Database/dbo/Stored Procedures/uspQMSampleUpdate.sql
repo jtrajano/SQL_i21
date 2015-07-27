@@ -39,6 +39,7 @@ BEGIN TRY
 	SET intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
 		,intSampleTypeId = x.intSampleTypeId
 		,intProductTypeId = x.intProductTypeId
+		,intProductValueId = x.intProductValueId
 		,intSampleStatusId = x.intSampleStatusId
 		,intItemId = x.intItemId
 		,intItemContractId = x.intItemContractId
@@ -72,6 +73,7 @@ BEGIN TRY
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intSampleTypeId INT
 			,intProductTypeId INT
+			,intProductValueId INT
 			,intSampleStatusId INT
 			,intItemId INT
 			,intItemContractId INT
@@ -296,7 +298,9 @@ BEGIN TRY
 	WHERE x.strRowState = 'ADDED'
 
 	UPDATE dbo.tblQMTestResult
-	SET strPropertyValue = x.strPropertyValue
+	SET intProductTypeId = x.intProductTypeId
+		,intProductValueId = x.intProductValueId
+		,strPropertyValue = x.strPropertyValue
 		,strResult = x.strResult
 		,strComment = x.strComment
 		,intSequenceNo = x.intSequenceNo
@@ -306,6 +310,8 @@ BEGIN TRY
 		,dtmLastModified = x.dtmLastModified
 	FROM OPENXML(@idoc, 'root/TestResult', 2) WITH (
 			intTestResultId INT
+			,intProductTypeId INT
+			,intProductValueId INT
 			,strPropertyValue NVARCHAR(MAX)
 			,strResult NVARCHAR(20)
 			,strComment NVARCHAR(MAX)
