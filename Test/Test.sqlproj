@@ -780,6 +780,8 @@
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherCharges for test case 4.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherCharges for test case 5.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherCharges for test case 6.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptOtherCharges for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptOtherCharges for test case 1.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

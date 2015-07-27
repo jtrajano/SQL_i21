@@ -20,6 +20,11 @@ DECLARE @COST_METHOD_Per_Unit AS NVARCHAR(50) = 'Per Unit'
 
 		,@UNIT_TYPE_Weight AS NVARCHAR(50) = 'Weight'
 
+		,@OWNERSHIP_TYPE_Own AS INT = 1
+		,@OWNERSHIP_TYPE_Storage AS INT = 2
+		,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
+		,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
+
 DECLARE	-- Receipt Types
 		@RECEIPT_TYPE_Purchase_Contract AS NVARCHAR(50) = 'Purchase Contract'
 		,@RECEIPT_TYPE_Purchase_Order AS NVARCHAR(50) = 'Purchase Order'
@@ -49,6 +54,7 @@ BEGIN
 					AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
 					AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
 					AND ReceiptItem.intOrderId IS NOT NULL 
+					AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 				INNER JOIN dbo.tblICItemUOM ItemUOM	
 					ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
 				INNER JOIN (

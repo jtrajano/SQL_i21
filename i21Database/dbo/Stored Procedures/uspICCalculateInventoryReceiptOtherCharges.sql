@@ -15,10 +15,20 @@ BEGIN
 			,@COST_METHOD_PERCENTAGE AS NVARCHAR(50) = 'Percentage'
 			,@COST_METHOD_AMOUNT AS NVARCHAR(50) = 'Amount'
 
+			,@INVENTORY_RECEIPT_TYPE AS INT = 4
+			,@STARTING_NUMBER_BATCH AS INT = 3  
+			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'AP Clearing'
+		
+			,@OWNERSHIP_TYPE_Own AS INT = 1
+			,@OWNERSHIP_TYPE_Storage AS INT = 2
+			,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
+			,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
+
 	DECLARE @strItemNo AS NVARCHAR(50)
 			,@strUnitMeasure AS NVARCHAR(50)
 			,@intItemId AS INT
 END 
+
 
 -- Do the validation
 BEGIN 
@@ -75,6 +85,7 @@ BEGIN
 				)	
 			)
 			AND Item.intOnCostTypeId IS NULL 
+			AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 
 	-- Check if the calculated values are valid. 
 	BEGIN 
@@ -146,6 +157,7 @@ BEGIN
 				)
 			)
 			AND Item.intOnCostTypeId IS NULL 
+			AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 END 
 
 -- Calculate the cost method is Fixed Amount
@@ -186,6 +198,7 @@ BEGIN
 				)	
 			)
 			AND Item.intOnCostTypeId IS NULL 
+			AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 END 
 
 -- Exit point

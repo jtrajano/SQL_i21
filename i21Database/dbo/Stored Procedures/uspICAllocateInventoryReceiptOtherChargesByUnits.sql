@@ -14,22 +14,11 @@ DECLARE @COST_METHOD_Per_Unit AS NVARCHAR(50) = 'Per Unit'
 		,@COST_METHOD_Amount AS NVARCHAR(50) = 'Amount'
 
 		,@ALLOCATE_COST_BY_Unit AS NVARCHAR(50) = 'Unit'
-		--,@ALLOCATE_COST_BY_Stock_Unit AS NVARCHAR(50) = 'Stock Unit'
-		--,@ALLOCATE_COST_BY_Weight AS NVARCHAR(50) = 'Weight'
-		--,@ALLOCATE_COST_BY_Cost AS NVARCHAR(50) = 'Cost'
 
-		--,@UNIT_TYPE_Weight AS NVARCHAR(50) = 'Weight'
-
---DECLARE	-- Receipt Types
---		@RECEIPT_TYPE_Purchase_Contract AS NVARCHAR(50) = 'Purchase Contract'
---		,@RECEIPT_TYPE_Purchase_Order AS NVARCHAR(50) = 'Purchase Order'
---		,@RECEIPT_TYPE_Transfer_Order AS NVARCHAR(50) = 'Transfer Order'
---		,@RECEIPT_TYPE_Direct AS NVARCHAR(50) = 'Direct'
---		-- Source Types
---		,@SOURCE_TYPE_None AS INT = 0
---		,@SOURCE_TYPE_Scale AS INT = 1
---		,@SOURCE_TYPE_Inbound_Shipment AS INT = 2
---		,@SOURCE_TYPE_Transport AS INT = 3
+		,@OWNERSHIP_TYPE_Own AS INT = 1
+		,@OWNERSHIP_TYPE_Storage AS INT = 2
+		,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
+		,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
 
 -- Allocate cost by 'unit'
 BEGIN 
@@ -47,7 +36,8 @@ BEGIN
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 					AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
-					AND ReceiptItem.intOrderId IS NULL 					
+					AND ReceiptItem.intOrderId IS NULL 		
+					AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own			
 				INNER JOIN dbo.tblICItemUOM ItemUOM	
 					ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
 				INNER JOIN (
@@ -81,7 +71,7 @@ BEGIN
 		AND ReceiptItemAllocatedCharge.intEntityVendorId = Source_Query.intEntityVendorId
 		AND ReceiptItemAllocatedCharge.strCostBilledBy = Source_Query.strCostBilledBy
 		AND ReceiptItemAllocatedCharge.ysnInventoryCost = Source_Query.ysnInventoryCost
-
+		
 	-- Add the other charge to an existing allocation. 
 	WHEN MATCHED AND ISNULL(Source_Query.dblTotalUnits, 0) <> 0 THEN 
 		UPDATE 

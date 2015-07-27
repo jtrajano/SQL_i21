@@ -20,6 +20,11 @@ DECLARE @COST_METHOD_Per_Unit AS NVARCHAR(50) = 'Per Unit'
 
 		,@UNIT_TYPE_Weight AS NVARCHAR(50) = 'Weight'
 
+		,@OWNERSHIP_TYPE_Own AS INT = 1
+		,@OWNERSHIP_TYPE_Storage AS INT = 2
+		,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
+		,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
+
 -- Allocate by 'cost
 BEGIN
 	-- Upsert (update or insert) a record into the Receipt Item Allocated Charge table. 
@@ -37,6 +42,7 @@ BEGIN
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 					AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
 					AND ReceiptItem.intOrderId IS NULL 	
+					AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 				INNER JOIN (
 					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
 							,strCostBilledBy
@@ -64,7 +70,7 @@ BEGIN
 	) AS Source_Query  
 		ON ReceiptItemAllocatedCharge.intInventoryReceiptId = Source_Query.intInventoryReceiptId
 		AND ReceiptItemAllocatedCharge.strCostBilledBy = Source_Query.strCostBilledBy
-		AND ReceiptItemAllocatedCharge.ysnInventoryCost = Source_Query.ysnInventoryCost
+		AND ReceiptItemAllocatedCharge.ysnInventoryCost = Source_Query.ysnInventoryCost		
 
 	-- Add the other charge to an existing allocation. 
 	WHEN MATCHED AND ISNULL(Source_Query.dblTotalCost, 0) <> 0 THEN 

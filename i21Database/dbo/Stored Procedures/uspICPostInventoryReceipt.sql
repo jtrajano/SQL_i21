@@ -23,10 +23,10 @@ DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 4
 		,@STARTING_NUMBER_BATCH AS INT = 3  
 		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'AP Clearing'
 		
-		,@OWNERSHIP_TYPE_OWN AS INT = 1
-		,@OWNERSHIP_TYPE_STORAGE AS INT = 2
-		,@OWNERSHIP_TYPE_CONSIGNED_PURCHASE AS INT = 3
-		,@OWNERSHIP_TYPE_CONSIGNED_SALE AS INT = 4
+		,@OWNERSHIP_TYPE_Own AS INT = 1
+		,@OWNERSHIP_TYPE_Storage AS INT = 2
+		,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
+		,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
 
 -- Posting variables
 DECLARE @strBatchId AS NVARCHAR(40) 
@@ -275,7 +275,7 @@ BEGIN
 				LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
 					ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
-				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_OWN) = @OWNERSHIP_TYPE_OWN
+				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
   
 		-- Call the post routine 
 		IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
@@ -424,7 +424,7 @@ BEGIN
 				LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
 					ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
-				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_OWN) <> @OWNERSHIP_TYPE_OWN
+				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) <> @OWNERSHIP_TYPE_Own
   
 		-- Call the post routine 
 		IF EXISTS (SELECT TOP 1 1 FROM @CustodyItemsForPost) 

@@ -13,12 +13,13 @@ DECLARE @COST_METHOD_Per_Unit AS NVARCHAR(50) = 'Per Unit'
 		,@COST_METHOD_Percentage AS NVARCHAR(50) = 'Percentage'
 		,@COST_METHOD_Amount AS NVARCHAR(50) = 'Amount'
 
-		--,@ALLOCATE_COST_BY_Unit AS NVARCHAR(50) = 'Unit'
-		--,@ALLOCATE_COST_BY_Stock_Unit AS NVARCHAR(50) = 'Stock Unit'
 		,@ALLOCATE_COST_BY_Weight AS NVARCHAR(50) = 'Weight'
-		--,@ALLOCATE_COST_BY_Cost AS NVARCHAR(50) = 'Cost'
-
 		,@UNIT_TYPE_Weight AS NVARCHAR(50) = 'Weight'
+
+		,@OWNERSHIP_TYPE_Own AS INT = 1
+		,@OWNERSHIP_TYPE_Storage AS INT = 2
+		,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
+		,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
 
 -- Validate the Stock Unit. It must be a unit type of 'Weight'. Do not allow allocation if stock unit is not a weight. 
 BEGIN 
@@ -82,7 +83,8 @@ BEGIN
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 					AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
-					AND ReceiptItem.intOrderId IS NULL 					
+					AND ReceiptItem.intOrderId IS NULL 	
+					AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own				
 				INNER JOIN dbo.tblICItemUOM ItemUOM	
 					ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
 				INNER JOIN (
@@ -123,6 +125,7 @@ BEGIN
 		AND ReceiptItemAllocatedCharge.intEntityVendorId = Source_Query.intEntityVendorId
 		AND ReceiptItemAllocatedCharge.strCostBilledBy = Source_Query.strCostBilledBy
 		AND ReceiptItemAllocatedCharge.ysnInventoryCost = Source_Query.ysnInventoryCost
+		
 
 	-- Add the other charge to an existing allocation. 
 	WHEN MATCHED AND ISNULL(Source_Query.dblTotalWeight, 0) <> 0 THEN 
