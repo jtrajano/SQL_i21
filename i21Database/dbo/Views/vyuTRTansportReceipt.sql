@@ -8,7 +8,14 @@ SELECT
 	TR.intContractDetailId,
 	CT.intContractNumber,
 	TL.strTransaction,
-	LG.dblQuantity as dblOrderedQuantity,	
+	dblOrderedQuantity  = CASE
+								  WHEN isNull(LG.dblQuantity,0) = 0 and SP.strGrossOrNet = 'Net'
+								  THEN TR.dblNet
+								  WHEN isNull(LG.dblQuantity,0) = 0 and SP.strGrossOrNet = 'Gross'
+								  THEN TR.dblGross
+								  WHEN isNull(LG.dblQuantity,0) != 0
+								  THEN LG.dblQuantity
+								  END,
 	dblReceivedQuantity     = CASE
 								  WHEN SP.strGrossOrNet = 'Gross'
 								  THEN TR.dblGross
@@ -29,4 +36,5 @@ FROM
 		
 	
 	
+
 
