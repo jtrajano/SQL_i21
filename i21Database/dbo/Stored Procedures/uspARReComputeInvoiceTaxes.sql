@@ -303,8 +303,8 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
            ,[strCalculationMethod]
            ,[numRate]
            ,[intSalesTaxAccountId]
-           ,[dblTax]
-           ,[dblAdjustedTax]
+           ,[dblTax] * (CASE WHEN [ysnCheckoffTax] = 1 THEN -1 ELSE 1 END)
+           ,[dblAdjustedTax] * (CASE WHEN [ysnCheckoffTax] = 1 THEN -1 ELSE 1 END)
            ,[ysnTaxAdjusted]
            ,[ysnSeparateOnInvoice]
            ,[ysnCheckoffTax]
