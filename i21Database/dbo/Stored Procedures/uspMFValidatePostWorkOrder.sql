@@ -46,7 +46,7 @@ BEGIN TRY
 
 	SELECT @intAttributeId = intAttributeId
 	FROM dbo.tblMFAttribute
-	WHERE strAttributeName = 'Is Cycle Count Mandatory'
+	WHERE strAttributeName = 'Is Cycle Count Required'
 
 	SELECT @strAttributeValue = strAttributeValue
 	FROM dbo.tblMFManufacturingProcessAttribute
