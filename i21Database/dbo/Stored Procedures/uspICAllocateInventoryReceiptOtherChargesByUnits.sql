@@ -18,7 +18,7 @@ DECLARE @COST_METHOD_Per_Unit AS NVARCHAR(50) = 'Per Unit'
 		--,@ALLOCATE_COST_BY_Weight AS NVARCHAR(50) = 'Weight'
 		--,@ALLOCATE_COST_BY_Cost AS NVARCHAR(50) = 'Cost'
 
-		,@UNIT_TYPE_Weight AS NVARCHAR(50) = 'Weight'
+		--,@UNIT_TYPE_Weight AS NVARCHAR(50) = 'Weight'
 
 --DECLARE	-- Receipt Types
 --		@RECEIPT_TYPE_Purchase_Contract AS NVARCHAR(50) = 'Purchase Contract'
@@ -65,7 +65,7 @@ BEGIN
 				) CalculatedCharges 
 					ON ReceiptItem.intInventoryReceiptId = CalculatedCharges.intInventoryReceiptId
 				LEFT JOIN (
-					SELECT	dblTotalUnits = SUM(dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, ItemUOM.dblUnitQty))
+					SELECT	dblTotalUnits = SUM(ReceiptItem.dblOpenReceive)
 							,ReceiptItem.intInventoryReceiptId 
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -86,7 +86,7 @@ BEGIN
 		UPDATE 
 		SET		dblAmount = ISNULL(dblAmount, 0) + (
 					Source_Query.dblTotalOtherCharge
-					* dbo.fnCalculateStockUnitQty(Source_Query.dblOpenReceive, Source_Query.dblUnitQty)
+					* Source_Query.dblOpenReceive
 					/ Source_Query.dblTotalUnits 
 				)
 
@@ -106,7 +106,7 @@ BEGIN
 			,Source_Query.intEntityVendorId
 			,(
 				Source_Query.dblTotalOtherCharge
-				* dbo.fnCalculateStockUnitQty(Source_Query.dblOpenReceive, Source_Query.dblUnitQty)
+				* Source_Query.dblOpenReceive
 				/ Source_Query.dblTotalUnits 
 			)
 			,Source_Query.strCostBilledBy
@@ -114,6 +114,5 @@ BEGIN
 		)
 	;
 END 
-
 
 _Exit:
