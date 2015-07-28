@@ -150,10 +150,6 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 {
                     intOwnershipType: 3,
                     strOwnershipType: 'Consigned Purchase'
-                },
-                {
-                    intOwnershipType: 4,
-                    strOwnershipType: 'Consigned Sale'
                 }
             ],
             fields: {
