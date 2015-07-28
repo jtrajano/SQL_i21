@@ -194,6 +194,13 @@ IF ISNULL(@ysnRecap, 0) = 0
 					WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)	
 					AND C.strAccountCategory <> 'General'  AND @strJournalType NOT IN('Origin Journal','Adjusted Origin Journal')
 					GROUP BY A.intJournalId	
+				UNION 
+				SELECT DISTINCT A.intJournalId,'Unable to post transactions you did not create' as strMessage 
+					FROM #tmpPostJournals   A  
+					JOIN tblGLJournal  B on A.intJournalId = A.intJournalId
+					JOIN tblSMUserSecurity C on B.intEntityId = C.intEntityId
+					JOIN tblSMUserPreference D ON D.intUserSecurityId = C.intUserSecurityID
+					WHERE B.intEntityId <> @intEntityId AND D.ysnAllowUserSelfPost = 1
 				--UNION 
 				--SELECT DISTINCT B.intJournalId,
 				--	'You cannot post this transaction because Accounting Unit setup does not match account id ' + C.strAccountId + ' setup.' AS strMessage
