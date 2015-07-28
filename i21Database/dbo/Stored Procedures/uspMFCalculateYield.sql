@@ -411,6 +411,13 @@ BEGIN TRY
 						,@intUserId = @intUserId
 						,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 				PRINT 'Call Adjust Qty procedure'
+
+				IF EXISTS(SELECT *FROM tblICLot Where intLotId=@intLotId and dblQty=0)
+				Begin
+					UPDATE dbo.tblICLot
+					SET intLotStatusId = 3
+					WHERE intLotId = @intLotId
+				End
 			END
 		END
 		SELECT @intProductionSummaryId = Min(intProductionSummaryId)

@@ -2068,6 +2068,8 @@
     <Build Include="dbo\Stored Procedures\uspICPostInventoryReceiptOtherCharges.sql" />
     <Build Include="dbo\Functions\fnGetOtherChargesFromInventoryReceipt.sql" />
     <Build Include="dbo\User Defined Types\ItemOtherChargesGLAccount.sql" />
+    <Build Include="dbo\Views\vyuTRTansportReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMGetItemTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

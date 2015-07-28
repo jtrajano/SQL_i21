@@ -25,7 +25,7 @@ SELECT INV.intInvoiceId
 	 , dblInvoiceTotal = ISNULL(INV.dblInvoiceTotal, 0)
 	 , dblAmountDue = ISNULL(INV.dblAmountDue, 0)
 	 , I.strItemNo
-	 , strItemDescription = I.strDescription
+	 , strItemDescription = ID.strItemDescription
 	 , UOM.strUnitMeasure
 	 , dblQtyShipped = ISNULL(ID.dblQtyShipped, 0)
 	 , dblQtyOrdered = ISNULL(ID.dblQtyOrdered, 0)
@@ -37,7 +37,7 @@ SELECT INV.intInvoiceId
 	 , strPosted = CASE WHEN ysnPosted = 1 THEN 'Yes' ELSE 'No' END
 FROM tblARInvoice INV
 LEFT JOIN (tblARInvoiceDetail ID 
-	INNER JOIN tblICItem I ON ID.intItemId = I.intItemId 
+	LEFT JOIN tblICItem I ON ID.intItemId = I.intItemId 
 	LEFT JOIN vyuARItemUOM UOM ON ID.intItemUOMId = UOM.intItemUOMId AND ID.intItemId = UOM.intItemId) ON INV.intInvoiceId = ID.intInvoiceId
 INNER JOIN (tblARCustomer C 
 	INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = INV.intEntityCustomerId

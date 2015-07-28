@@ -50,33 +50,68 @@ BEGIN TRY
 
 		  IF (@PromoComboysn = 'Y')
 		  BEGIN
-		       SELECT @ComboCount = COUNT(*) from tblSTPromotionSalesList
-		       WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) and strPromoType = 'C'
+   		       IF(@PromoStore IS NOT NULL)
+			   BEGIN
+		            SELECT @ComboCount = COUNT(*) from tblSTPromotionSalesList
+		            WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) and strPromoType = 'C'
 
-		       DELETE FROM tblSTPromotionSalesList 
-		       WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) and strPromoType = 'C'
+		            DELETE FROM tblSTPromotionSalesList 
+		            WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) and strPromoType = 'C'
+			   END
+
+			   IF(@PromoStore IS NULL)
+			   BEGIN
+		            SELECT @ComboCount = COUNT(*) from tblSTPromotionSalesList
+		            WHERE strPromoType = 'C'
+
+		            DELETE FROM tblSTPromotionSalesList 
+		            WHERE strPromoType = 'C'
+			   END
+
 		  END
 
 	      IF (@PromoMixMatchysn = 'Y')
 		  BEGIN
-                SELECT @MiXMatchCount = COUNT(*) from tblSTPromotionSalesList
-		        WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) and strPromoType = 'M' 
+		       IF(@PromoStore IS NOT NULL)
+			   BEGIN
+                    SELECT @MiXMatchCount = COUNT(*) from tblSTPromotionSalesList
+		            WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) and strPromoType = 'M' 
   
-		        DELETE FROM tblSTPromotionSalesList 
-		        WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) and strPromoType = 'M'
+		            DELETE FROM tblSTPromotionSalesList 
+		            WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) and strPromoType = 'M'
+		       END
+
+			   IF(@PromoStore IS NULL)
+			   BEGIN
+                    SELECT @MiXMatchCount = COUNT(*) from tblSTPromotionSalesList
+		            WHERE strPromoType = 'M' 
+  
+		            DELETE FROM tblSTPromotionSalesList 
+		            WHERE strPromoType = 'M'
+		       END
 		  END
 
 		  IF (@PromoItemListysn = 'Y')
 		  BEGIN
+    		   IF(@PromoStore IS NOT NULL)
+		 	   BEGIN
+		           SELECT @ItemListCount = COUNT (*) FROM tblSTPromotionItemList 
+		           WHERE  intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) AND intPromoItemListId 
+                   NOT IN (SELECT intPromoItemListId FROM tblSTPromotionSalesListDetail)
 
-		       SELECT @ItemListCount = COUNT (*) FROM tblSTPromotionItemList 
-		       WHERE  intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) AND intPromoItemListId 
-               NOT IN (SELECT intPromoItemListId FROM tblSTPromotionSalesListDetail)
+		           DELETE FROM tblSTPromotionItemList 
+		           WHERE  intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) AND intPromoItemListId 
+			       NOT IN (SELECT intPromoItemListId FROM tblSTPromotionSalesListDetail)
+			   END
 
-		       DELETE FROM tblSTPromotionItemList 
-		       WHERE  intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) AND intPromoItemListId 
-			   NOT IN (SELECT intPromoItemListId FROM tblSTPromotionSalesListDetail as adj1 INNER JOIN tblSTPromotionSalesList as adj2
-			   ON adj1.intPromoSalesListId = adj2.intPromoSalesListId and adj2.intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')))
+			   IF(@PromoStore IS NULL)
+		 	   BEGIN
+		           SELECT @ItemListCount = COUNT (*) FROM tblSTPromotionItemList 
+		           WHERE  intPromoItemListId NOT IN (SELECT intPromoItemListId FROM tblSTPromotionSalesListDetail)
+
+		           DELETE FROM tblSTPromotionItemList 
+		           WHERE  intPromoItemListId NOT IN (SELECT intPromoItemListId FROM tblSTPromotionSalesListDetail)
+			   END
 		  END
 	  END
 
@@ -85,47 +120,84 @@ BEGIN TRY
 	      
 		  IF (@PromoComboysn = 'Y')
 		  BEGIN
-		       SELECT @ComboCount = COUNT(*) from tblSTPromotionSalesList
-		       WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) 
-			   and strPromoType = 'C' AND CONVERT(DATETIME,dtmPromoEndPeriod,101) 
-			   <= CONVERT(DATETIME,@PromoEndingPeriodDate,101)
+		       IF(@PromoStore IS NOT NULL)
+		 	   BEGIN
+		            SELECT @ComboCount = COUNT(*) from tblSTPromotionSalesList
+		            WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) 
+			        and strPromoType = 'C' AND CONVERT(DATETIME,dtmPromoEndPeriod,101) 
+			        <= CONVERT(DATETIME,@PromoEndingPeriodDate,101)
 			  			  
-	           DELETE FROM tblSTPromotionSalesList 
-		       WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) 
-			   and strPromoType = 'C' AND CONVERT(DATETIME,dtmPromoEndPeriod,101) 
-			   <= CONVERT(DATETIME,@PromoEndingPeriodDate,101)
+	                DELETE FROM tblSTPromotionSalesList 
+		            WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) 
+			        and strPromoType = 'C' AND CONVERT(DATETIME,dtmPromoEndPeriod,101) 
+			        <= CONVERT(DATETIME,@PromoEndingPeriodDate,101)
+			   END
+
+			   IF(@PromoStore IS NULL)
+		 	   BEGIN
+   	                SELECT @ComboCount = COUNT(*) from tblSTPromotionSalesList
+		            WHERE strPromoType = 'C' AND CONVERT(DATETIME,dtmPromoEndPeriod,101) 
+			        <= CONVERT(DATETIME,@PromoEndingPeriodDate,101)
+			  			  
+	                DELETE FROM tblSTPromotionSalesList 
+		            WHERE strPromoType = 'C' AND CONVERT(DATETIME,dtmPromoEndPeriod,101) 
+			        <= CONVERT(DATETIME,@PromoEndingPeriodDate,101)
+			   END
 		  END
 	      
 		  IF (@PromoMixMatchysn = 'Y')
 		  BEGIN
-                SELECT @MiXMatchCount = COUNT(*) from tblSTPromotionSalesList
-		        WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,','))
-				and strPromoType = 'M' AND CONVERT(DATETIME,dtmPromoEndPeriod,101) 
-			    <= CONVERT(DATETIME,@PromoEndingPeriodDate,101)
+    		   IF(@PromoStore IS NOT NULL)
+		 	   BEGIN
+                    SELECT @MiXMatchCount = COUNT(*) from tblSTPromotionSalesList
+		            WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,','))
+				    and strPromoType = 'M' AND CONVERT(DATETIME,dtmPromoEndPeriod,101) 
+			        <= CONVERT(DATETIME,@PromoEndingPeriodDate,101)
  
-		        DELETE FROM tblSTPromotionSalesList 
-		        WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) 
-				and strPromoType = 'M' AND CONVERT(DATETIME,dtmPromoEndPeriod,101) 
-			    <= CONVERT(DATETIME,@PromoEndingPeriodDate,101)
+		            DELETE FROM tblSTPromotionSalesList 
+		            WHERE intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) 
+				    and strPromoType = 'M' AND CONVERT(DATETIME,dtmPromoEndPeriod,101) 
+			        <= CONVERT(DATETIME,@PromoEndingPeriodDate,101)
+			   END
+
+			   IF(@PromoStore IS NULL)
+		 	   BEGIN
+                    SELECT @MiXMatchCount = COUNT(*) from tblSTPromotionSalesList
+		            WHERE strPromoType = 'M' AND CONVERT(DATETIME,dtmPromoEndPeriod,101) 
+			        <= CONVERT(DATETIME,@PromoEndingPeriodDate,101)
+ 
+		            DELETE FROM tblSTPromotionSalesList 
+		            WHERE strPromoType = 'M' AND CONVERT(DATETIME,dtmPromoEndPeriod,101) 
+			        <= CONVERT(DATETIME,@PromoEndingPeriodDate,101)
+			   END
 		  END
 
 		  IF (@PromoItemListysn = 'Y')
 		  BEGIN
-		       SELECT @ItemListCount = COUNT (*) FROM tblSTPromotionItemList 
-		       WHERE  intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) AND intPromoItemListId 
-               NOT IN (SELECT intPromoItemListId FROM tblSTPromotionSalesListDetail as adj1 INNER JOIN tblSTPromotionSalesList as adj2
-			   ON adj1.intPromoSalesListId = adj2.intPromoSalesListId and adj2.intStoreId 
-			   IN (Select Item from dbo.fnSplitString(@PromoStore,',')))
+    		   IF(@PromoStore IS NOT NULL)
+		 	   BEGIN
+		           SELECT @ItemListCount = COUNT (*) FROM tblSTPromotionItemList 
+		           WHERE  intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) AND intPromoItemListId 
+                   NOT IN (SELECT intPromoItemListId FROM tblSTPromotionSalesListDetail)
 
-		       DELETE FROM tblSTPromotionItemList 
-		       WHERE  intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) AND intPromoItemListId 
-               NOT IN (SELECT intPromoItemListId FROM tblSTPromotionSalesListDetail as adj1 INNER JOIN tblSTPromotionSalesList as adj2
-			   ON adj1.intPromoSalesListId = adj2.intPromoSalesListId and adj2.intStoreId 
-			   IN (Select Item from dbo.fnSplitString(@PromoStore,',')))
+		           DELETE FROM tblSTPromotionItemList 
+		           WHERE  intStoreId IN (Select Item from dbo.fnSplitString(@PromoStore,',')) AND intPromoItemListId 
+			       NOT IN (SELECT intPromoItemListId FROM tblSTPromotionSalesListDetail)
+			   END
+
+			   IF(@PromoStore IS NULL)
+		 	   BEGIN
+		           SELECT @ItemListCount = COUNT (*) FROM tblSTPromotionItemList 
+		           WHERE  intPromoItemListId NOT IN (SELECT intPromoItemListId FROM tblSTPromotionSalesListDetail)
+
+		           DELETE FROM tblSTPromotionItemList 
+		           WHERE  intPromoItemListId NOT IN (SELECT intPromoItemListId FROM tblSTPromotionSalesListDetail)
+			   END
 		  END
+		  
 	  END
 
-      select @MiXMatchCount as MixMatchCount, @ComboCount as ComboCount, @ItemListCount as ItemListCount	
+      SELECT @MiXMatchCount as MixMatchCount, @ComboCount as ComboCount, @ItemListCount as ItemListCount	
 		        
 
 END TRY

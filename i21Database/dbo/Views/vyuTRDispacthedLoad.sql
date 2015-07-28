@@ -31,19 +31,22 @@ LG.dblQuantity as dblOutboundQuantity,
 LG.dblCounterPartyCashPrice as dblOutboundPrice,
 (select strItemNo from tblICItem IC where IC.intItemId = LG.intCounterPartyItemId) as strOutboundItemNo,
 LG.intCounterPartyContractNumber as intOutboundContractNumber,
-LG.dtmDeliveredDate,
+LG.dtmScheduledDate,
+LG.dtmDispatchedDate,
 LG.intHaulerEntityId as intShipViaId,
-LG.intHaulerEntityId as intSellerId,
+(select top 1 intSellerId from tblTRCompanyPreference) as intSellerId,
 LG.intDriverEntityId as intDriverId,
 LG.strTruckNo as strTractor,
 LG.strTrailerNo1 as strTrailer,
 LG.strHauler as strShipVia,
-LG.strHauler as strSeller,
+(select top 1 EM.strName from tblTRCompanyPreference CP 
+                               join tblEntity EM on CP.intSellerId = EM.intEntityId) as strSeller,
 LG.strDriver as strSalespersonId,
 LG.intCounterPartyContractDetailId as intOutboundContractDetailId,
 LG.ysnDirectShip,
 LG.ysnInProgress,
-LG.intCounterPartyLoadId as intOutboundLoadId
+LG.intCounterPartyLoadId as intOutboundLoadId,
+LG.strExternalLoadNumber as strSupplierLoadNumber
 from dbo.vyuLGLoadView LG
 where 
  (IsNull(LG.ysnDispatched,0)=1)  and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and
@@ -81,19 +84,22 @@ LG.dblQuantity as dblOutboundQuantity,
 LG.dblCashPrice as dblOutboundPrice,
 (select strItemNo from tblICItem IC where IC.intItemId = LG.intItemId) as strOutboundItemNo,
 LG.intContractNumber as intOutboundContractNumber,
-LG.dtmDeliveredDate,
+LG.dtmScheduledDate,
+LG.dtmDispatchedDate,
 LG.intHaulerEntityId as intShipViaId,
-LG.intHaulerEntityId as intSellerId,
+(select top 1 intSellerId from tblTRCompanyPreference) as intSellerId,
 LG.intDriverEntityId as intDriverId,
 LG.strTruckNo as strTractor,
 LG.strTrailerNo1 as strTrailer,
 LG.strHauler as strShipVia,
-LG.strHauler as strSeller,
+(select top 1 EM.strName from tblTRCompanyPreference CP 
+                               join tblEntity EM on CP.intSellerId = EM.intEntityId) as strSeller,
 LG.strDriver as strSalespersonId,
 LG.intContractDetailId as intOutboundContractDetailId,
 LG.ysnDirectShip,
 LG.ysnInProgress,
-LG.intLoadId as intOutboundLoadId
+LG.intLoadId as intOutboundLoadId,
+LG.strExternalLoadNumber as strSupplierLoadNumber 
 from dbo.vyuLGLoadView LG
 where 
  (IsNull(LG.ysnDispatched,0)=1)  and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and

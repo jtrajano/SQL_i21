@@ -9,7 +9,7 @@ BEGIN TRY
 		,@intPlannedShiftId INT
 		,@intManufacturingProcessId INT
 		,@strExcludeItemType NVARCHAR(MAX)
-		,@ysnCycleCountMandatory BIT
+		,@ysnCycleCountRequired BIT
 		,@dtmLastPlannedDate DATETIME
 		,@intCountStatusId INT
 		,@dtmLastPlannedDateTime DATETIME
@@ -34,7 +34,7 @@ BEGIN TRY
 		,@intPlannedShiftId = intPlannedShiftId
 		,@intItemId = intItemId
 		,@strExcludeItemType = strExcludeItemType
-		,@ysnCycleCountMandatory = ysnCycleCountMandatory
+		,@ysnCycleCountRequired = ysnCycleCountRequired
 		,@strManufacturingProcessRunDurationName = strManufacturingProcessRunDurationName
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intManufacturingProcessId INT
@@ -43,11 +43,11 @@ BEGIN TRY
 			,intPlannedShiftId INT
 			,intItemId INT
 			,strExcludeItemType NVARCHAR(MAX)
-			,ysnCycleCountMandatory BIT
+			,ysnCycleCountRequired BIT
 			,strManufacturingProcessRunDurationName NVARCHAR(50)
 			)
 
-	IF @ysnCycleCountMandatory = 1
+	IF @ysnCycleCountRequired = 1
 	BEGIN
 		SELECT TOP 1 @dtmLastPlannedDateTime = CASE 
 				WHEN W.intPlannedShiftId IS NOT NULL

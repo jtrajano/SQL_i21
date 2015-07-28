@@ -1,7 +1,7 @@
 ﻿CREATE VIEW vyuLGPickOpenInventoryLots
 	AS 
 SELECT *, (dblAllocatedQty + dblReservedQty) AS dblAllocReserved, (dblOriginalQty - (dblAllocatedQty + dblReservedQty)) AS dblBalance, 
-CASE WHEN (((dblAllocatedQty + dblReservedQty) > 0) AND (dblUnPickedQty > (dblAllocatedQty + dblReservedQty))) THEN (dblAllocatedQty + dblReservedQty)  ELSE dblUnPickedQty END AS dblAvailToSell
+CASE WHEN (((dblAllocatedQty + dblReservedQty) > 0) AND (dblUnPickedQty > (dblOriginalQty - (dblAllocatedQty + dblReservedQty)))) THEN (dblOriginalQty - (dblAllocatedQty + dblReservedQty))  ELSE dblUnPickedQty END AS dblAvailToSell
 FROM (
 SELECT Lot.intLotId
 	, Lot.intItemId

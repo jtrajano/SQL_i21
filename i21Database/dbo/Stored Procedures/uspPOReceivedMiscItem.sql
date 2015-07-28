@@ -84,6 +84,7 @@ BEGIN
 	IF(@@ROWCOUNT != (SELECT COUNT(*) FROM #tmpReceivedPOMiscItems))
 	BEGIN
 		RAISERROR('There was a problem on updating item quantity receive.', 16, 1);
+		RETURN;
 	END
 
 	--Update PO Status
