@@ -22,6 +22,7 @@ BEGIN TRY
 		,@intManufacturingCellId INT
 		,@dtmPlannedDate DATETIME
 		,@intTransactionCount INT
+		,@strInstantConsumption nvarchar(50)
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -102,7 +103,13 @@ BEGIN TRY
 	IF @intTransactionCount = 0
 	BEGIN TRANSACTION
 
-	IF @strCycleCountMandatory='False'
+	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Is Instant Consumption'
+	
+	Select @strInstantConsumption=strAttributeValue
+	From tblMFManufacturingProcessAttribute
+	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
+
+	IF @strCycleCountMandatory='False' and @strInstantConsumption='False'
 	BEGIN
 		EXEC dbo.uspMFPostWorkOrder @strXML=@strXML
 	END
