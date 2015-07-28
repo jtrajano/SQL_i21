@@ -195,20 +195,11 @@ IF ISNULL(@ysnRecap, 0) = 0
 					AND C.strAccountCategory <> 'General'  AND @strJournalType NOT IN('Origin Journal','Adjusted Origin Journal')
 					GROUP BY A.intJournalId	
 				UNION 
-				SELECT DISTINCT A.intJournalId,'Unable to post transactions you did not create' as strMessage 
-					FROM #tmpPostJournals   A  
-					JOIN tblGLJournal  B on A.intJournalId = A.intJournalId
+				SELECT DISTINCT B.intJournalId,'Unable to post transactions you did not create' as strMessage FROM tblGLJournal  B  
 					JOIN tblSMUserSecurity C on B.intEntityId = C.intEntityId
 					JOIN tblSMUserPreference D ON D.intUserSecurityId = C.intUserSecurityID
 					WHERE B.intEntityId <> @intEntityId AND D.ysnAllowUserSelfPost = 1
-				--UNION 
-				--SELECT DISTINCT B.intJournalId,
-				--	'You cannot post this transaction because Accounting Unit setup does not match account id ' + C.strAccountId + ' setup.' AS strMessage
-				--FROM tblGLJournalDetail B 
-				--	LEFT OUTER JOIN tblGLAccount C ON B.intAccountId = C.intAccountId
-				--WHERE (ISNULL(B.dblCreditUnit, 0) > 0 OR ISNULL(B.dblDebitUnit, 0) > 0) AND ISNULL(C.intAccountUnitId, 0) = 0 
-				--	AND B.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)
-				--	GROUP BY B.intJournalId, C.intAccountId, C.strAccountId
+					AND B.intJournalId in (SELECT intJournalId FROM #tmpPostJournals)
 			) tmpBatchResults
 		LEFT JOIN tblGLJournal tblB ON tmpBatchResults.intJournalId = tblB.intJournalId
 	END
