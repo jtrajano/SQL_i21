@@ -29,7 +29,7 @@ SELECT SO.intSalesOrderId
 	 , UOM.strUnitMeasure
 	 , dblQtyShipped = ISNULL(SD.dblQtyShipped, 0)
 	 , dblQtyOrdered = ISNULL(SD.dblQtyOrdered, 0)
-	 , dblDiscount = ISNULL(SD.dblDiscount, 0)
+	 , dblDiscount = ISNULL(SD.dblDiscount, 0) / 100
 	 , dblTotalTax = ISNULL(SD.dblTotalTax, 0)
 	 , dblPrice = ISNULL(SD.dblPrice, 0)
 	 , dblItemPrice = ISNULL(SD.dblTotal, 0)
