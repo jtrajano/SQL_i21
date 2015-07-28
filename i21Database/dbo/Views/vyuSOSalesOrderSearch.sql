@@ -35,7 +35,8 @@ CASE WHEN SP.strSalespersonId = '' THEN NTT.strEntityNo ELSE SP.strSalespersonId
 ESP.strName AS strSalespersonName,
 SO.strLostQuoteCompetitor,
 SO.strLostQuoteReason,
-SO.strLostQuoteComment
+SO.strLostQuoteComment,
+SO.ysnRecurring
 FROM         
 dbo.tblSOSalesOrder AS SO LEFT OUTER JOIN
 dbo.tblARCustomer AS Cus ON SO.[intEntityCustomerId] = Cus.[intEntityCustomerId] LEFT OUTER JOIN
