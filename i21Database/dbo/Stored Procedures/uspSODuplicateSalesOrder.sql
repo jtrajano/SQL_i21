@@ -1,13 +1,16 @@
 ﻿CREATE PROCEDURE [dbo].[uspSODuplicateSalesOrder]
-	@TransactionType NVARCHAR(20) = '',
-	@SalesOrderId	INT = 0,
-	@OrderStatus NVARCHAR(20) = '',
-	@UserId			INT = 0,
-	@NewSalesOrderId INT = NULL OUTPUT
+	@TransactionType	NVARCHAR(20) = '',
+	@SalesOrderId		INT = 0,
+	@OrderStatus		NVARCHAR(20) = '',
+	@UserId				INT = 0,
+	@SalesOrderDate     DATE = NULL,
+	@NewSalesOrderId	INT = NULL OUTPUT,
+	@NewSalesOrderNo	NVARCHAR(20) = NULL OUTPUT
+AS
 
-	AS
 BEGIN
-		
+	SET @SalesOrderDate = CASE WHEN @SalesOrderDate IS NULL THEN GETDATE() ELSE @SalesOrderDate END
+
 	INSERT INTO tblSOSalesOrder
 		(   [intEntityCustomerId]
            ,[dtmDate]
@@ -35,6 +38,7 @@ BEGIN
            ,[intAccountId]
            ,[dtmProcessDate]
            ,[ysnProcessed]
+		   ,[ysnRecurring]
            ,[strComments]
 		   ,[intShipToLocationId]
            ,[strShipToLocationName]
@@ -59,8 +63,8 @@ BEGIN
         )
 	SELECT
 			[intEntityCustomerId]
-           ,GETDATE() --Date
-		   ,[dbo].fnGetDueDateBasedOnTerm(GETDATE(),intTermId) --Due Date
+           ,@SalesOrderDate--Date
+		   ,[dbo].fnGetDueDateBasedOnTerm(@SalesOrderDate,intTermId) --Due Date
            ,[intCurrencyId]
            ,[intCompanyLocationId]
            ,[intEntitySalespersonId]
@@ -84,6 +88,7 @@ BEGIN
            ,[intAccountId]
            ,NULL --Processed Date
            ,0 --Processed
+		   ,[ysnRecurring]
            ,[strComments] + ' DUP: ' + [strSalesOrderNumber]
 		   ,[intShipToLocationId]
            ,[strShipToLocationName]
@@ -110,6 +115,7 @@ BEGIN
 	WHERE intSalesOrderId = @SalesOrderId
 
 	SET @NewSalesOrderId = SCOPE_IDENTITY()
+	SELECT @NewSalesOrderNo = strSalesOrderNumber FROM tblSOSalesOrder WHERE intSalesOrderId = @NewSalesOrderId
 	
 	DECLARE @OrderDetails TABLE(intSalesOrderDetailId INT)
 		

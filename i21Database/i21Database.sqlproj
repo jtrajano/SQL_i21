@@ -945,11 +945,8 @@
     <Build Include="dbo\Stored Procedures\uspGLBookEntries.sql" />
     <Build Include="dbo\Functions\fnGetGLEntriesErrors.sql" />
     <Build Include="dbo\Stored Procedures\uspGLValidateGLEntries.sql" />
-    <Build Include="dbo\Views\vyuARInvoiceRecurring.sql" />
     <Build Include="dbo\Tables\tblTMCOBOLPRICE.sql" />
-    <Build Include="dbo\Views\vyuARInvoiceRecurring.sql" />
     <Build Include="dbo\Tables\tblTMCOBOLPRICE.sql" />
-    <Build Include="dbo\Views\vyuARInvoiceRecurring.sql" />
     <Build Include="dbo\Tables\tblTMCOBOLPRICE.sql" />
     <Build Include="dbo\Tables\tblSMRecurringHistory.sql" />
     <Build Include="dbo\Views\vyuHDAgentDetail.sql" />
@@ -2077,6 +2074,8 @@
     <Build Include="dbo\Views\vyuTMLeaseBilling.sql" />
     <Build Include="dbo\Views\vyuTMFailedLeaseBilling.sql" />
     <None Include="Scripts\Post-Deployment\TM\DefaultData\11_ApplianceType.sql" />
+    <Build Include="dbo\Views\vyuARGetRecurringTransactions.sql" />
+    <Build Include="dbo\Tables\tblCTSequenceUsageHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
