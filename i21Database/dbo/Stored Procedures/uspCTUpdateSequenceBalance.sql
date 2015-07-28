@@ -1,24 +1,27 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTUpdateSequenceBalance]
 	@intContractDetailId			INT,
-	@dblAdjAmount					DECIMAL(12,4),
+	@dblQuantityToUpdate			NUMERIC(12,4),
 	@intUserId						INT,
-	@intInventoryReceiptDetailId	INT
+	@intExternalId					INT,
+	@strScreenName					NVARCHAR(50)
 AS
 
 BEGIN TRY
 	
-	DECLARE @ErrMsg				NVARCHAR(MAX),
-			@dblQuantity		DECIMAL(12,4),
-			@dblOldBalance		DECIMAL(12,4),
-			@dblNewBalance		DECIMAL(12,4),
-			@strAdjustmentNo	NVARCHAR(50)
+	DECLARE @ErrMsg					NVARCHAR(MAX),
+			@dblQuantity			NUMERIC(12,4),
+			@dblOldBalance			NUMERIC(12,4),
+			@dblNewBalance			NUMERIC(12,4),
+			@strAdjustmentNo		NVARCHAR(50),
+			@dblTransactionQuantity	NUMERIC(12,4)
 
 	SELECT	@dblQuantity			=	dblQuantity,
 			@dblOldBalance			=	dblBalance
 	FROM	tblCTContractDetail 
 	WHERE	intContractDetailId		=	@intContractDetailId 
 	
-	SELECT	@dblNewBalance = @dblOldBalance - @dblAdjAmount
+	SELECT	@dblTransactionQuantity	=	- @dblQuantityToUpdate
+	SELECT	@dblNewBalance = @dblOldBalance - @dblQuantityToUpdate
 
 	IF @dblNewBalance < 0
 	BEGIN
@@ -44,13 +47,15 @@ BEGIN TRY
 	SET		intNumber = intNumber+1
 	WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
 
-	INSERT INTO tblCTContractAdjustment
-	(
-			intContractDetailId,	strAdjustmentNo,	dtmAdjustmentDate,	dblOldBalance,	dblAdjAmount,	dblNewBalance,	intUserId,	intInventoryReceiptItemId
-	)
-	SELECT	@intContractDetailId,	@strAdjustmentNo,	GETDATE(),			@dblOldBalance,	-@dblAdjAmount,	@dblNewBalance,	@intUserId,	@intInventoryReceiptDetailId
-			
-	
+	EXEC	uspCTCreateSequenceUsageHistory 
+			@intContractDetailId	=	@intContractDetailId,
+			@strScreenName			=	@strScreenName,
+			@intExternalId			=	@intExternalId,
+			@strFieldName			=	'Balance',
+			@dblOldValue			=	@dblOldBalance,
+			@dblTransactionQuantity =	@dblTransactionQuantity,
+			@dblNewValue			=	@dblNewBalance,	
+			@intUserId				=	@intUserId
 	
 END TRY
 

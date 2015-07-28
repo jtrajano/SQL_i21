@@ -80,8 +80,13 @@ BEGIN TRY
 			RAISERROR('UOM does not exist.',16,1)
 		END
 
-		EXEC uspCTUpdateSequenceBalance @intContractDetailId,@dblConvertedQty,@intUserId,@intInventoryReceiptDetailId
-
+		EXEC	uspCTUpdateSequenceBalance
+				@intContractDetailId	=	@intContractDetailId,
+				@dblQuantityToUpdate	=	@dblConvertedQty,
+				@intUserId				=	@intUserId,
+				@intExternalId			=	@intInventoryReceiptDetailId,
+				@strScreenName			=	'Inventory Receipt' 
+			
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 	END
 
