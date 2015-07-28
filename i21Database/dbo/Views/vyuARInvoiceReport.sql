@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARInvoiceReport]
 AS
 SELECT INV.intInvoiceId
-	 , strType = ISNULL('General', INV.strType)
+	 , strType = ISNULL(INV.strType, 'Standard')
      , strCustomerName = E.strName
 	 , L.strLocationName
 	 , INV.dtmDate

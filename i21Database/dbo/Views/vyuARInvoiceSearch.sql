@@ -7,7 +7,7 @@ AS
 		C.strCustomerNumber, 
 		C.[intEntityCustomerId], 
 		I.strTransactionType, 
-		ISNULL(I.strType, 'General')	AS strType,
+		ISNULL(I.strType, 'Standard')	AS strType,
 		I.strPONumber, 
 		T.strTerm,
 		I.intTermId, 

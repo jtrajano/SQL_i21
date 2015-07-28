@@ -7,7 +7,7 @@
 	,@ErrorMessage					NVARCHAR(50)	= NULL			OUTPUT
 	,@ShipDate						DATETIME		= NULL
 	,@TransactionType				NVARCHAR(50)	= 'Invoice'
-	,@Type							NVARCHAR(200)	= 'General'
+	,@Type							NVARCHAR(200)	= 'Standard'
 	,@Comment						NVARCHAR(500)	= ''
 	,@DistributionHeaderId			INT				= NULL
 	,@PaymentMethodId				INT				= 0
