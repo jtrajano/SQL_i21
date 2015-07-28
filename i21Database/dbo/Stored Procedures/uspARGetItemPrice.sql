@@ -7,6 +7,10 @@
 	,@Quantity			NUMERIC(18,6)
 	,@Price				NUMERIC(18,6)	= NULL OUTPUT
 	,@Pricing			NVARCHAR(250)	= NULL OUTPUT
+	,@ContractHeaderId	INT				= NULL OUTPUT
+	,@ContractDetailId	INT				= NULL OUTPUT
+	,@ContractNumber	INT				= NULL OUTPUT
+	,@ContractSeq		INT				= NULL OUTPUT
 AS
 	--	DECLARE 	
 	--	@ItemId				INT
@@ -31,6 +35,64 @@ AS
 	--		,@Pricing AS NVARCHAR(250)
 	--SET @Price = NULL;
 	--SET @Pricing = '';
+	
+	
+	DECLARE @VendorId			INT
+			,@ItemLocationId	INT
+			,@ItemCategoryId	INT
+			,@ItemCategory	NVARCHAR(100)
+			,@UOMQuantity		NUMERIC(18,6)
+
+	SELECT @VendorId	   = VI.intVendorId
+		  ,@ItemLocationId = intItemLocationId
+		  ,@ItemCategoryId = I.intCategoryId
+		  ,@ItemCategory   = C.strCategoryCode
+		  ,@UOMQuantity    = CASE WHEN UOM.dblUnitQty = 0 OR UOM.dblUnitQty IS NULL THEN 1.00 ELSE UOM.dblUnitQty END
+	FROM
+		tblICItem I
+	INNER JOIN
+		vyuICGetItemStock VI
+			ON I.intItemId = VI.intItemId
+	LEFT OUTER JOIN
+		tblICCategory C
+			ON I.intCategoryId = C.intCategoryId
+	LEFT OUTER JOIN
+		tblICItemUOM UOM
+			ON I.intItemId = UOM.intItemId
+	WHERE
+		I.intItemId = @ItemId
+		AND VI.intLocationId = @LocationId 
+		AND (UOM.intItemUOMId = @ItemUOMId OR @ItemUOMId IS NULL)
+		
+		
+	--Customer Contract Price
+	SELECT TOP 1
+		 @Price				= dblCashPrice
+		,@ContractHeaderId	= intContractHeaderId
+		,@ContractDetailId	= intContractDetailId
+		,@ContractNumber	= intContractNumber
+		,@ContractSeq		= intContractSeq
+	FROM
+		vyuCTContractDetailView
+	WHERE
+		intEntityId = @CustomerId
+		AND intCompanyLocationId = @LocationId
+		AND intItemUOMId = @ItemUOMId
+		AND intItemId = @ItemId
+		AND dblBalance >= @Quantity
+		AND @TransactionDate BETWEEN dtmStartDate AND dtmEndDate
+	ORDER BY
+		 dtmStartDate
+		,intContractSeq
+		
+	IF(@Price IS NOT NULL)
+	BEGIN
+		SET @Pricing = 'Contracts - Customer Princing'
+		--SELECT @Price AS 'Price', @Pricing AS 'Pricing'	
+		RETURN 1;
+	END	
+		
+			
 
 	DECLARE @CustomerSpecialPricing TABLE(
 		intSpecialPriceId INT
@@ -87,35 +149,6 @@ AS
 	WHERE
 		C.intEntityCustomerId = @CustomerId
 		AND @TransactionDate BETWEEN SP.dtmBeginDate AND SP.dtmEndDate
-
-
-	DECLARE @VendorId			INT
-			,@ItemLocationId	INT
-			,@ItemCategoryId	INT
-			,@ItemCategory	NVARCHAR(100)
-			,@UOMQuantity		NUMERIC(18,6)
-
-	SELECT @VendorId	   = VI.intVendorId
-		  ,@ItemLocationId = intItemLocationId
-		  ,@ItemCategoryId = I.intCategoryId
-		  ,@ItemCategory   = C.strCategoryCode
-		  ,@UOMQuantity    = CASE WHEN UOM.dblUnitQty = 0 OR UOM.dblUnitQty IS NULL THEN 1.00 ELSE UOM.dblUnitQty END
-	FROM
-		tblICItem I
-	INNER JOIN
-		vyuICGetItemStock VI
-			ON I.intItemId = VI.intItemId
-	LEFT OUTER JOIN
-		tblICCategory C
-			ON I.intCategoryId = C.intCategoryId
-	LEFT OUTER JOIN
-		tblICItemUOM UOM
-			ON I.intItemId = UOM.intItemId
-	WHERE
-		I.intItemId = @ItemId
-		AND VI.intLocationId = @LocationId 
-		AND (UOM.intItemUOMId = @ItemUOMId OR @ItemUOMId IS NULL)
-	
 
 	--Customer Special Pricing
 	IF(EXISTS(SELECT TOP 1 NULL FROM @CustomerSpecialPricing))
