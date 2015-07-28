@@ -1509,6 +1509,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('strOrderUOM', po.get('strUOM'));
                 current.set('dblUnitCost', po.get('dblCost'));
                 current.set('dblLineTotal', po.get('dblTotal'));
+                current.set('dblTax', po.get('dblTax'));
                 current.set('strLotTracking', po.get('strLotTracking'));
                 current.set('intCommodityId', po.get('intCommodityId'));
                 current.set('intOwnershipType', 1);
@@ -1679,6 +1680,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         dataIndex: 'dblTotal',
                         dataType: 'float',
                         text: 'Line Total',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'dblTax',
+                        dataType: 'float',
+                        text: 'Tax',
                         hidden: true
                     },
                     {
