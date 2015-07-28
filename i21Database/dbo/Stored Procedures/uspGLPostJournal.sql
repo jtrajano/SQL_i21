@@ -194,14 +194,12 @@ IF ISNULL(@ysnRecap, 0) = 0
 					WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)	
 					AND C.strAccountCategory <> 'General'  AND @strJournalType NOT IN('Origin Journal','Adjusted Origin Journal')
 					GROUP BY A.intJournalId	
-				--UNION 
-				--SELECT DISTINCT B.intJournalId,
-				--	'You cannot post this transaction because Accounting Unit setup does not match account id ' + C.strAccountId + ' setup.' AS strMessage
-				--FROM tblGLJournalDetail B 
-				--	LEFT OUTER JOIN tblGLAccount C ON B.intAccountId = C.intAccountId
-				--WHERE (ISNULL(B.dblCreditUnit, 0) > 0 OR ISNULL(B.dblDebitUnit, 0) > 0) AND ISNULL(C.intAccountUnitId, 0) = 0 
-				--	AND B.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)
-				--	GROUP BY B.intJournalId, C.intAccountId, C.strAccountId
+				UNION 
+				SELECT DISTINCT B.intJournalId,'Unable to post transactions you did not create' as strMessage FROM tblGLJournal  B  
+					JOIN tblSMUserSecurity C on B.intEntityId = C.intEntityId
+					JOIN tblSMUserPreference D ON D.intUserSecurityId = C.intUserSecurityID
+					WHERE B.intEntityId <> @intEntityId AND D.ysnAllowUserSelfPost = 1
+					AND B.intJournalId in (SELECT intJournalId FROM #tmpPostJournals)
 			) tmpBatchResults
 		LEFT JOIN tblGLJournal tblB ON tmpBatchResults.intJournalId = tblB.intJournalId
 	END
@@ -276,7 +274,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			 [strTransactionId]		= B.[strJournalId]
 			,[intTransactionId]		= B.[intJournalId]
 			,[intAccountId]			= A.[intAccountId]
-			,[strDescription]		= B.[strDescription]
+			,[strDescription]		= A.[strDescription]
 			,[strReference]			= A.[strReference]
 			,[dtmTransactionDate]	= A.[dtmDate]
 			,[dblDebit]				= CASE	WHEN [dblCredit] < 0 THEN ABS([dblCredit])
@@ -296,7 +294,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= CASE	WHEN B.[strJournalType] in ('Origin Journal','Adjusted Origin Journal') THEN B.[strSourceType]
+			,[strCode]				= CASE	WHEN B.[strJournalType] in ('Origin Journal','Adjusted Origin Journal') THEN RTRIM (B.[strSourceType])
 											ELSE 'GJ' END 
 								
 			,[strJournalLineDescription] = A.[strDescription]
@@ -379,7 +377,7 @@ ELSE
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= CASE	WHEN B.[strJournalType] in ('Origin Journal','Adjusted Origin Journal') THEN B.[strSourceType]
+			,[strCode]				= CASE	WHEN B.[strJournalType] in ('Origin Journal','Adjusted Origin Journal') THEN RTRIM (B.[strSourceType])
 											ELSE 'GJ' END 
 			
 			,[strTransactionType]	= B.[strJournalType]

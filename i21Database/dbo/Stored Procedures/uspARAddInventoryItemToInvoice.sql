@@ -189,6 +189,7 @@ BEGIN TRY
 	LEFT OUTER JOIN
 		vyuARGetItemAccount Acct
 			ON IC.[intItemId] = Acct.[intItemId]
+			AND IL.[intLocationId] = Acct.[intLocationId]
 	WHERE
 		IC.[intItemId] = @ItemId
 		AND IL.[intLocationId] = @CompanyLocationId

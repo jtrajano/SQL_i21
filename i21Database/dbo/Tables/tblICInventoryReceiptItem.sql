@@ -30,7 +30,7 @@ Type the overview for the table here.
 		[dblUnitCost] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[dblUnitRetail] NUMERIC(18,6) NULL DEFAULT ((0)),
 		[dblLineTotal] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[intGradeId] INT NULL,
+		[intGradeId] INT NULL,		
 		[dblGross] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[dblNet] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[dblTax] NUMERIC(18, 6) NULL DEFAULT ((0)),

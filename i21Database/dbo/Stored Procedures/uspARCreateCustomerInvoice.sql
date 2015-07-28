@@ -7,7 +7,7 @@
 	,@ErrorMessage					NVARCHAR(50)	= NULL			OUTPUT
 	,@ShipDate						DATETIME		= NULL
 	,@TransactionType				NVARCHAR(50)	= 'Invoice'
-	,@Type							NVARCHAR(200)	= 'General'
+	,@Type							NVARCHAR(200)	= 'Standard'
 	,@Comment						NVARCHAR(500)	= ''
 	,@DistributionHeaderId			INT				= NULL
 	,@PaymentMethodId				INT				= 0
@@ -296,7 +296,7 @@ IF (@ItemId IS NOT NULL OR @ItemId <> 0)
 			,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
 			,@ItemServiceChargeAccountId	= @ItemServiceChargeAccountId
 			
-			IF (@AddDetailError IS NOT NULL AND RTRIM(LTRIM(@AddDetailError)) = '')
+			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
 					ROLLBACK TRANSACTION
 					SET @ErrorMessage = @AddDetailError;

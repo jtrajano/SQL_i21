@@ -7,7 +7,7 @@ NTT.strName AS strCustomerName,
 Cus.strCustomerNumber, 
 Cus.[intEntityCustomerId], 
 SO.strTransactionType,
-ISNULL(SO.strType, 'General') AS strType,
+ISNULL(SO.strType, 'Standard') AS strType,
 SO.strOrderStatus, 
 Term.strTerm,
 SO.intTermId, 
@@ -35,7 +35,8 @@ CASE WHEN SP.strSalespersonId = '' THEN NTT.strEntityNo ELSE SP.strSalespersonId
 ESP.strName AS strSalespersonName,
 SO.strLostQuoteCompetitor,
 SO.strLostQuoteReason,
-SO.strLostQuoteComment
+SO.strLostQuoteComment,
+SO.ysnRecurring
 FROM         
 dbo.tblSOSalesOrder AS SO LEFT OUTER JOIN
 dbo.tblARCustomer AS Cus ON SO.[intEntityCustomerId] = Cus.[intEntityCustomerId] LEFT OUTER JOIN

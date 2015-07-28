@@ -643,13 +643,31 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51160) EXEC sp_dropmessa
 SET @strmessage = 'Item %s is missing a Stock Unit. Please check the Unit of Measure setup.'
 EXEC sp_addmessage 51160,11,@strmessage,'us_english','False'
 
-
-IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51133) EXEC sp_dropmessage 51133, 'us_english'	
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51161) EXEC sp_dropmessage 51161, 'us_english'	
 SET @strmessage = 'Item UOM is invalid or missing.'
-EXEC sp_addmessage 51133,11,@strmessage,'us_english','False'
+EXEC sp_addmessage 51161,11,@strmessage,'us_english','False'
 
-IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51134) EXEC sp_dropmessage 51134, 'us_english'	
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51162) EXEC sp_dropmessage 51162, 'us_english'	
 SET @strmessage = 'Item %s is missing a Stock Unit. Please check the Unit of Measure setup.'
-EXEC sp_addmessage 51134,11,@strmessage,'us_english','False'
+EXEC sp_addmessage 51162,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51163) EXEC sp_dropmessage 51163, 'us_english'	
+SET @strmessage = 'Unable to calculate the Other Charges per unit. Please check if UOM %s is assigned to item %s.'
+EXEC sp_addmessage 51163,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51164) EXEC sp_dropmessage 51164, 'us_english'	
+SET @strmessage = 'Cyclic situation found. Unable to compute surcharge because %s depends on %s and vice-versa.'
+EXEC sp_addmessage 51164,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51165) EXEC sp_dropmessage 51165, 'us_english'	
+SET @strmessage = 'Unable to compute the surcharge for %s.'
+EXEC sp_addmessage 51165,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51166) EXEC sp_dropmessage 51166, 'us_english'	
+SET @strmessage = 'Unable to continue. Cost allocation is by Weight but stock unit for %s is not a weight type.'
+EXEC sp_addmessage 51166,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51167) EXEC sp_dropmessage 51167, 'us_english'	
+SET @strmessage = 'Unable to unpost the Inventory Receipt. The %s was billed.'
+EXEC sp_addmessage 51167,11,@strmessage,'us_english','False'
 

@@ -945,11 +945,8 @@
     <Build Include="dbo\Stored Procedures\uspGLBookEntries.sql" />
     <Build Include="dbo\Functions\fnGetGLEntriesErrors.sql" />
     <Build Include="dbo\Stored Procedures\uspGLValidateGLEntries.sql" />
-    <Build Include="dbo\Views\vyuARInvoiceRecurring.sql" />
     <Build Include="dbo\Tables\tblTMCOBOLPRICE.sql" />
-    <Build Include="dbo\Views\vyuARInvoiceRecurring.sql" />
-    <Build Include="dbo\Tables\tblTMCOBOLPRICE.sql" />
-    <Build Include="dbo\Views\vyuARInvoiceRecurring.sql" />
+    <Build Include="dbo\Tables\tblTMCOBOLPRICE.sql" />    
     <Build Include="dbo\Tables\tblTMCOBOLPRICE.sql" />
     <Build Include="dbo\Tables\tblSMRecurringHistory.sql" />
     <Build Include="dbo\Views\vyuHDAgentDetail.sql" />
@@ -1931,6 +1928,10 @@
     <Build Include="dbo\Stored Procedures\uspMFGetBlendRequests.sql" />
     <Build Include="dbo\Tables\tblHDReminder.sql" />
     <Build Include="dbo\Tables\tblGRCompanyPreference.sql" />
+    <Build Include="dbo\Tables\tblICInventoryReceiptChargePerItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCalculateInventoryReceiptOtherCharges.sql" />
+    <Build Include="dbo\Functions\fnGetItemStockUOM.sql" />
+    <Build Include="dbo\Functions\fnGetMatchingItemUOMId.sql" />
     <Build Include="dbo\Stored Procedures\uspEMMergeEntity.sql" />
     <Build Include="dbo\Views\vyuEMSearchMerge.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUndoStageWorkOrder.sql" />
@@ -1980,6 +1981,8 @@
     <Build Include="dbo\Stored Procedures\uspCTGetContractAndPrice.sql" />
     <Build Include="dbo\Tables\tblCTContractStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShiftCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCalculateInventoryReceiptSurchargeOnOtherCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherCharges.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateBillReversal.sql" />
     <Build Include="dbo\Views\vyuTMUniqueItemList.sql" />
@@ -2052,8 +2055,23 @@
     <Build Include="dbo\Stored Procedures\uspARCreateCustomerInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARAddInventoryItemToInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetAttributeByAttributeName.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByContractAndUnits.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByContractAndWeights.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByContractAndCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByUnits.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByWeights.sql" />
+    <Build Include="dbo\Tables\tblICInventoryReceiptItemAllocatedCharge.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryReceiptOtherCharges.sql" />
+    <Build Include="dbo\Functions\fnGetOtherChargesFromInventoryReceipt.sql" />
+    <Build Include="dbo\User Defined Types\ItemOtherChargesGLAccount.sql" />
     <Build Include="dbo\Views\vyuTRTansportReceipt.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMGetItemTaxes.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMGetItemTaxes.sql" />	  
+    <Build Include="dbo\Stored Procedures\uspFRDImportOriginDesign.sql" />
+    <Build Include="dbo\Views\vyuRKGetAssignFutureTransaction.sql" />
+    <Build Include="dbo\Views\vyuRKGetAssignPhysicalTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostInventoryReceiptOtherCharges.sql" />	
+    <Build Include="dbo\Views\vyuARGetRecurringTransactions.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

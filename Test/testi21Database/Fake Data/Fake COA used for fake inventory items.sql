@@ -9,116 +9,136 @@ BEGIN
 		EXEC tSQLt.FakeTable 'dbo.tblGLAccountSegmentMapping', @Identity = 1;	
 
 		-- Declare the account ids
-		DECLARE @Inventory_Default AS INT = 1000
-		DECLARE @CostOfGoods_Default AS INT = 2000
-		DECLARE @APClearing_Default AS INT = 3000
-		DECLARE @WriteOffSold_Default AS INT = 4000
-		DECLARE @RevalueSold_Default AS INT = 5000 
-		DECLARE @AutoNegative_Default AS INT = 6000
-		DECLARE @InventoryInTransit_Default AS INT = 7000
-		DECLARE @AccountReceivable_Default AS INT = 8000
-		DECLARE @InventoryAdjustment_Default AS INT = 9000
+		DECLARE	 @Inventory_Default AS INT = 1000
+				,@CostOfGoods_Default AS INT = 2000
+				,@APClearing_Default AS INT = 3000
+				,@WriteOffSold_Default AS INT = 4000
+				,@RevalueSold_Default AS INT = 5000 
+				,@AutoNegative_Default AS INT = 6000
+				,@InventoryInTransit_Default AS INT = 7000
+				,@AccountReceivable_Default AS INT = 8000
+				,@InventoryAdjustment_Default AS INT = 9000
+				,@OtherChargeExpense_Default AS INT = 10000
+				,@OtherChargeIncome_Default AS INT = 11000
+				,@OtherChargeAsset_Default AS INT = 12000
 
-		DECLARE @Inventory_NewHaven AS INT = 1001
-		DECLARE @CostOfGoods_NewHaven AS INT = 2001
-		DECLARE @APClearing_NewHaven AS INT = 3001
-		DECLARE @WriteOffSold_NewHaven AS INT = 4001
-		DECLARE @RevalueSold_NewHaven AS INT = 5001
-		DECLARE @AutoNegative_NewHaven AS INT = 6001
-		DECLARE @InventoryInTransit_NewHaven AS INT = 7001
-		DECLARE @AccountReceivable_NewHaven AS INT = 8001
-		DECLARE @InventoryAdjustment_NewHaven AS INT = 9001
+				,@Inventory_NewHaven AS INT = 1001
+				,@CostOfGoods_NewHaven AS INT = 2001
+				,@APClearing_NewHaven AS INT = 3001
+				,@WriteOffSold_NewHaven AS INT = 4001
+				,@RevalueSold_NewHaven AS INT = 5001
+				,@AutoNegative_NewHaven AS INT = 6001
+				,@InventoryInTransit_NewHaven AS INT = 7001
+				,@AccountReceivable_NewHaven AS INT = 8001
+				,@InventoryAdjustment_NewHaven AS INT = 9001
+				,@OtherChargeExpense_NewHaven AS INT = 10001
+				,@OtherChargeIncome_NewHaven AS INT = 11001
+				,@OtherChargeAsset_NewHaven AS INT = 12001
 
-		DECLARE @Inventory_BetterHaven AS INT = 1002
-		DECLARE @CostOfGoods_BetterHaven AS INT = 2002
-		DECLARE @APClearing_BetterHaven AS INT = 3002
-		DECLARE @WriteOffSold_BetterHaven AS INT = 4002
-		DECLARE @RevalueSold_BetterHaven AS INT = 5002
-		DECLARE @AutoNegative_BetterHaven AS INT = 6002
-		DECLARE @InventoryInTransit_BetterHaven AS INT = 7002
-		DECLARE @AccountReceivable_BetterHaven AS INT = 8002
-		DECLARE @InventoryAdjustment_BetterHaven AS INT = 9002
+				,@Inventory_BetterHaven AS INT = 1002
+				,@CostOfGoods_BetterHaven AS INT = 2002
+				,@APClearing_BetterHaven AS INT = 3002
+				,@WriteOffSold_BetterHaven AS INT = 4002
+				,@RevalueSold_BetterHaven AS INT = 5002
+				,@AutoNegative_BetterHaven AS INT = 6002
+				,@InventoryInTransit_BetterHaven AS INT = 7002
+				,@AccountReceivable_BetterHaven AS INT = 8002
+				,@InventoryAdjustment_BetterHaven AS INT = 9002
+				,@OtherChargeExpense_BetterHaven AS INT = 10002
+				,@OtherChargeIncome_BetterHaven AS INT = 11002
+				,@OtherChargeAsset_BetterHaven AS INT = 12002
 
 		-- Constant Variables
-		DECLARE @Group_Asset AS INT = 1
-		DECLARE @Group_Liability AS INT = 2
-		DECLARE @Group_Equity AS INT = 3
-		DECLARE @Group_Revenue AS INT = 4
-		DECLARE @Group_Expenses AS INT = 5
-		DECLARE @Group_Sales AS INT = 6
-		DECLARE @Group_CostOfGoodsSold AS INT = 7
-		DECLARE @Group_CashAccounts AS INT = 8
-		DECLARE @Group_Receivables AS INT = 9
-		DECLARE @Group_Inventory AS INT = 10
-		DECLARE @Group_MiscExpenses AS INT = 11
+		DECLARE @GROUP_Asset AS INT = 1
+		DECLARE @GROUP_Liability AS INT = 2
+		DECLARE @GROUP_Equity AS INT = 3
+		DECLARE @GROUP_Revenue AS INT = 4
+		DECLARE @GROUP_Expenses AS INT = 5
+		DECLARE @GROUP_Sales AS INT = 6
+		DECLARE @GROUP_CostOfGoodsSold AS INT = 7
+		DECLARE @GROUP_CashAccounts AS INT = 8
+		DECLARE @GROUP_Receivables AS INT = 9
+		DECLARE @GROUP_Inventory AS INT = 10
+		DECLARE @GROUP_MiscExpenses AS INT = 11
 
 		-- Add fake data for the Account Group
 		INSERT INTO tblGLAccountGroup (intAccountGroupId, strAccountGroup, strAccountType, intParentGroupId,intGroup,intSort)
-		SELECT				@Group_Asset, 'Asset', 'Asset', 0, 1, 10000
-		UNION ALL SELECT	@Group_Liability, 'Liability', 'Liability', 0, 1, 20000
-		UNION ALL SELECT	@Group_Equity, 'Equity', 'Equity', 0, 1, 30000
-		UNION ALL SELECT	@Group_Revenue, 'Revenue', 'Revenue', 0, 1, 40000
-		UNION ALL SELECT	@Group_Expenses, 'Expenses', 'Expenses', 0, 1, 50000
-		UNION ALL SELECT	@Group_Sales, 'Sales', 'Sales', 0, 1, 60000
-		UNION ALL SELECT	@Group_CostOfGoodsSold, 'Cost of Goods Sold', 'Cost of Goods Sold', 0, 1, 70000
-		UNION ALL SELECT	@Group_CashAccounts, 'Cash Accounts', 'Asset', 1, NULL, 10001
-		UNION ALL SELECT	@Group_Receivables, 'Receivables', 'Asset', 1, NULL, 10002
-		UNION ALL SELECT	@Group_Inventory, 'Inventory', 'Asset', 1, NULL, 10003
-		UNION ALL SELECT	@Group_MiscExpenses, 'Miscellaneous Expenses', 'Expenses', 5, NULL, 50001
+		SELECT				@GROUP_Asset, 'Asset', 'Asset', 0, 1, 10000
+		UNION ALL SELECT	@GROUP_Liability, 'Liability', 'Liability', 0, 1, 20000
+		UNION ALL SELECT	@GROUP_Equity, 'Equity', 'Equity', 0, 1, 30000
+		UNION ALL SELECT	@GROUP_Revenue, 'Revenue', 'Revenue', 0, 1, 40000
+		UNION ALL SELECT	@GROUP_Expenses, 'Expenses', 'Expenses', 0, 1, 50000
+		UNION ALL SELECT	@GROUP_Sales, 'Sales', 'Sales', 0, 1, 60000
+		UNION ALL SELECT	@GROUP_CostOfGoodsSold, 'Cost of Goods Sold', 'Cost of Goods Sold', 0, 1, 70000
+		UNION ALL SELECT	@GROUP_CashAccounts, 'Cash Accounts', 'Asset', 1, NULL, 10001
+		UNION ALL SELECT	@GROUP_Receivables, 'Receivables', 'Asset', 1, NULL, 10002
+		UNION ALL SELECT	@GROUP_Inventory, 'Inventory', 'Asset', 1, NULL, 10003
+		UNION ALL SELECT	@GROUP_MiscExpenses, 'Miscellaneous Expenses', 'Expenses', 5, NULL, 50001
 
 		--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------	
 		-- Add fake data for Account Structure
 		--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		-- Primary account segment 
-		DECLARE @AccountStructureId_Primary AS INT = 90
-		INSERT INTO tblGLAccountStructure (intAccountStructureId, strType, intStartingPosition, strMask, strStructureName) VALUES (90, 'Primary', 1, '0', 'Primary Segment')
+		DECLARE @ACCOUNT_STRUCTURE_ID_Primary AS INT = 90
+		INSERT INTO tblGLAccountStructure (intAccountStructureId, strType, intStartingPosition, strMask, strStructureName) VALUES (@ACCOUNT_STRUCTURE_ID_Primary, 'Primary', 1, '0', 'Primary Segment')
 
 		-- Divider
 		INSERT INTO tblGLAccountStructure (intAccountStructureId, strType, intStartingPosition, strMask) VALUES (91, 'Divider', 0, '-')
 
 		-- Location account segment 
-		DECLARE @AccountStructureId_Location AS INT = 92
-		INSERT INTO tblGLAccountStructure (intAccountStructureId, strType, intStartingPosition, strMask, strStructureName) VALUES (@AccountStructureId_Location, 'Segment', 2, '0', 'Location')
+		DECLARE @ACCOUNT_STRUCTURE_ID_Location AS INT = 92
+		INSERT INTO tblGLAccountStructure (intAccountStructureId, strType, intStartingPosition, strMask, strStructureName) VALUES (@ACCOUNT_STRUCTURE_ID_Location, 'Segment', 2, '0', 'Location')
 
 		--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		-- Add fake data for Account Segment
 		--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		DECLARE @SegmentId_INVENTORY_WHEAT AS INT = 1
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SegmentId_INVENTORY_WHEAT, '12040', 'INVENTORY WHEAT', @AccountStructureId_Primary)
+
+		-- Primary Segments
+		DECLARE @SEGMENT_ID_InventoryWheat AS INT = 1
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_InventoryWheat, '12040', 'INVENTORY WHEAT', @ACCOUNT_STRUCTURE_ID_Primary)
 		
-		DECLARE @SegmentId_COST_OF_GOODS_WHEAT AS INT = 2
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SegmentId_COST_OF_GOODS_WHEAT, '20100', 'COST OF GOODS WHEAT', @AccountStructureId_Primary)
+		DECLARE @SEGMENT_ID_CostOfGoodsWheat AS INT = 2
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_CostOfGoodsWheat, '20100', 'COST OF GOODS WHEAT', @ACCOUNT_STRUCTURE_ID_Primary)
 
-		DECLARE @SegmentId_AP_Clearing_WHEAT AS INT = 3
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SegmentId_AP_Clearing_WHEAT, '30110', 'AP CLEARING WHEAT', @AccountStructureId_Primary)
+		DECLARE @SEGMENT_ID_APClearingWheat AS INT = 3
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_APClearingWheat, '30110', 'AP CLEARING WHEAT', @ACCOUNT_STRUCTURE_ID_Primary)
 
-		DECLARE @SegmentId_WRITE_OFF_SOLD_WHEAT AS INT = 4
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SegmentId_WRITE_OFF_SOLD_WHEAT, '40110', 'WRITE-OFF SOLD WHEAT', @AccountStructureId_Primary)
+		DECLARE @SEGMENT_ID_WriteOffSoldWheat AS INT = 4
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_WriteOffSoldWheat, '40110', 'WRITE-OFF SOLD WHEAT', @ACCOUNT_STRUCTURE_ID_Primary)
 
-		DECLARE @SegmentId_REVALUE_SOLD_WHEAT AS INT = 5
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SegmentId_REVALUE_SOLD_WHEAT, '50110', 'REVALUE SOLD WHEAT', @AccountStructureId_Primary)
+		DECLARE @SEGMENT_ID_RevalueSoldWheat AS INT = 5
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_RevalueSoldWheat, '50110', 'REVALUE SOLD WHEAT', @ACCOUNT_STRUCTURE_ID_Primary)
 
-		DECLARE @SegmentId_AUTO_NEGATIVE_WHEAT AS INT = 6
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SegmentId_AUTO_NEGATIVE_WHEAT, '60110', 'AUTO NEGATIVE WHEAT', @AccountStructureId_Primary)
+		DECLARE @SEGMENT_ID_AutoNegativeWheat AS INT = 6
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_AutoNegativeWheat, '60110', 'AUTO NEGATIVE WHEAT', @ACCOUNT_STRUCTURE_ID_Primary)
 
-		DECLARE @SegmentId_INVENTORY_IN_TRANSIT AS INT = 7
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SegmentId_INVENTORY_IN_TRANSIT, '12050', 'INVENTORY IN TRANSIT', @AccountStructureId_Primary)
+		DECLARE @SEGMENT_ID_InventoryInTransit AS INT = 7
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_InventoryInTransit, '12050', 'INVENTORY IN TRANSIT', @ACCOUNT_STRUCTURE_ID_Primary)
 
-		DECLARE @SegmentId_ACCOUNT_RECEIVABLE AS INT = 8
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SegmentId_ACCOUNT_RECEIVABLE, '10650', 'ACCOUNT RECEIVABLE', @AccountStructureId_Primary)
+		DECLARE @SEGMENT_ID_AccountReceivable AS INT = 8
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_AccountReceivable, '10650', 'ACCOUNT RECEIVABLE', @ACCOUNT_STRUCTURE_ID_Primary)
 
-		DECLARE @SegmentId_INVENTORY_ADJUSTMENT AS INT = 9
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SegmentId_INVENTORY_ADJUSTMENT, '20500', 'INVENTORY ADJUSTMENT', @AccountStructureId_Primary)
+		DECLARE @SEGMENT_ID_InventoryAdjustment AS INT = 9
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_InventoryAdjustment, '20500', 'INVENTORY ADJUSTMENT', @ACCOUNT_STRUCTURE_ID_Primary)
 
+		DECLARE @SEGMENT_ID_OtherChargeExpense AS INT = 10
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_OtherChargeExpense, '30500', 'OTHER CHARGE EXPENSE', @ACCOUNT_STRUCTURE_ID_Primary)
 
-		DECLARE @SegmentId_DEFAULT_LOCATION AS INT = 100
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SegmentId_DEFAULT_LOCATION, '1000', 'DEFAULT', @AccountStructureId_Location)
+		DECLARE @SEGMENT_ID_OtherChargeIncome AS INT = 11
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_OtherChargeIncome, '40500', 'OTHER CHARGE INCOME', @ACCOUNT_STRUCTURE_ID_Primary)
 
-		DECLARE @SegmentId_NEW_HAVEN_LOCATION AS INT = 101
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SegmentId_NEW_HAVEN_LOCATION, '1001', 'NEW HAVEN', @AccountStructureId_Location)
+		DECLARE @SEGMENT_ID_OtherChargeAsset AS INT = 12
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_OtherChargeAsset, '50500', 'OTHER CHARGE (ASSET)', @ACCOUNT_STRUCTURE_ID_Primary)
 
-		DECLARE @SegmentId_BETTER_HAVEN_LOCATION AS INT = 102
-		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SegmentId_BETTER_HAVEN_LOCATION, '1002', 'BETTER HAVEN', @AccountStructureId_Location)
+		-- Location Segments 				
+		DECLARE @SEGMENT_ID_DefaultLocation AS INT = 100
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_DefaultLocation, '1000', 'DEFAULT', @ACCOUNT_STRUCTURE_ID_Location)
+
+		DECLARE @SEGMENT_ID_NewHavenLocation AS INT = 101
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_NewHavenLocation, '1001', 'NEW HAVEN', @ACCOUNT_STRUCTURE_ID_Location)
+
+		DECLARE @SEGMENT_ID_BetterHavenLocation AS INT = 102
+		INSERT INTO tblGLAccountSegment (intAccountSegmentId, strCode, strDescription, intAccountStructureId) VALUES (@SEGMENT_ID_BetterHavenLocation, '1002', 'BETTER HAVEN', @ACCOUNT_STRUCTURE_ID_Location)
 
 		--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		-- Add fake data for GL Account
@@ -132,6 +152,9 @@ BEGIN
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@InventoryInTransit_Default, 'INVENTORY IN TRANSIT-DEFAULT', '12050-1000');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@AccountReceivable_Default, 'ACCOUNT RECEIVABLE-DEFAULT', '10650-1000');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@InventoryAdjustment_Default, 'INVENTORY ADJUSTMENT-DEFAULT', '20500-1000');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@OtherChargeExpense_Default, 'OTHER CHARGE EXPENSE-DEFAULT', '30500-1000');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@OtherChargeIncome_Default, 'OTHER CHARGE INCOME-DEFAULT', '40500-1000');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@OtherChargeAsset_Default, 'OTHER CHARGE (ASSET)-DEFAULT', '50500-1000');
 
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@Inventory_NewHaven, 'INVENTORY WHEAT-NEW HAVEN', '12040-1001');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@CostOfGoods_NewHaven, 'COST OF GOODS WHEAT-NEW HAVEN', '20100-1001');
@@ -142,6 +165,9 @@ BEGIN
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@InventoryInTransit_NewHaven, 'INVENTORY IN TRANSIT-NEW HAVEN', '12050-1001');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@AccountReceivable_NewHaven, 'ACCOUNT RECEIVABLE-NEW HAVEN', '10650-1001');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@InventoryAdjustment_NewHaven, 'INVENTORY ADJUSTMENT-NEW HAVEN', '20500-1001');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@OtherChargeExpense_NewHaven, 'OTHER CHARGE EXPENSE-NEW HAVEN', '30500-1001');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@OtherChargeIncome_NewHaven, 'OTHER CHARGE INCOME-NEW HAVEN', '40500-1001');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@OtherChargeAsset_NewHaven, 'OTHER CHARGE (ASSET)-NEW HAVEN', '50500-1001');
 
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@Inventory_BetterHaven, 'INVENTORY WHEAT-BETTER HAVEN', '12040-1002');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@CostOfGoods_BetterHaven, 'COST OF GOODS WHEAT-BETTER HAVEN', '20100-1002');
@@ -152,6 +178,9 @@ BEGIN
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@InventoryInTransit_BetterHaven, 'INVENTORY IN TRANSIT-BETTER HAVEN', '12050-1002');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@AccountReceivable_BetterHaven, 'ACCOUNT RECEIVABLE-BETTER HAVEN', '10650-1002');
 		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@InventoryAdjustment_BetterHaven, 'INVENTORY ADJUSTMENT-BETTER HAVEN', '20500-1002');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@OtherChargeExpense_BetterHaven, 'OTHER CHARGE EXPENSE-NEW HAVEN', '30500-1002');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@OtherChargeIncome_BetterHaven, 'OTHER CHARGE INCOME-NEW HAVEN', '40500-1002');
+		INSERT INTO tblGLAccount(intAccountId, strDescription, strAccountId) VALUES (@OtherChargeAsset_BetterHaven, 'OTHER CHARGE (ASSET)-NEW HAVEN', '50500-1002');
 
 		--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		-- Add fake data for Segment Mapping
@@ -159,118 +188,155 @@ BEGIN
 		-- for DEFAULT location 
 		BEGIN 
 			--INVENTORY WHEAT
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@Inventory_Default, @SegmentId_INVENTORY_WHEAT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@Inventory_Default, @SegmentId_DEFAULT_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@Inventory_Default, @SEGMENT_ID_InventoryWheat);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@Inventory_Default, @SEGMENT_ID_DefaultLocation);
 
 			-- COST OF GOODS WHEAT
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostOfGoods_Default, @SegmentId_COST_OF_GOODS_WHEAT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostOfGoods_Default, @SegmentId_DEFAULT_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostOfGoods_Default, @SEGMENT_ID_CostOfGoodsWheat);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostOfGoods_Default, @SEGMENT_ID_DefaultLocation);
 			-- AP CLEARING WHEAT
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@APClearing_Default, @SegmentId_AP_Clearing_WHEAT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@APClearing_Default, @SegmentId_DEFAULT_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@APClearing_Default, @SEGMENT_ID_APClearingWheat);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@APClearing_Default, @SEGMENT_ID_DefaultLocation);
 
 			-- WRITE-OFF SOLD WHEAT
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@WriteOffSold_Default, @SegmentId_WRITE_OFF_SOLD_WHEAT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@WriteOffSold_Default, @SegmentId_DEFAULT_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@WriteOffSold_Default, @SEGMENT_ID_WriteOffSoldWheat);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@WriteOffSold_Default, @SEGMENT_ID_DefaultLocation);
 			
 			-- REVALUE SOLD WHEAT
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueSold_Default, @SegmentId_REVALUE_SOLD_WHEAT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueSold_Default, @SegmentId_DEFAULT_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueSold_Default, @SEGMENT_ID_RevalueSoldWheat);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueSold_Default, @SEGMENT_ID_DefaultLocation);
 			
 			-- AUTO NEGATIVE WHEAT
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AutoNegative_Default, @SegmentId_AUTO_NEGATIVE_WHEAT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AutoNegative_Default, @SegmentId_DEFAULT_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AutoNegative_Default, @SEGMENT_ID_AutoNegativeWheat);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AutoNegative_Default, @SEGMENT_ID_DefaultLocation);
 
 			-- INVENTORY IN TRANSIT
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryInTransit_Default, @SegmentId_INVENTORY_IN_TRANSIT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryInTransit_Default, @SegmentId_DEFAULT_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryInTransit_Default, @SEGMENT_ID_InventoryInTransit);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryInTransit_Default, @SEGMENT_ID_DefaultLocation);
 
 			-- ACCOUNT RECEIVABLE 
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountReceivable_Default, @SegmentId_ACCOUNT_RECEIVABLE);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountReceivable_Default, @SegmentId_DEFAULT_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountReceivable_Default, @SEGMENT_ID_AccountReceivable);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountReceivable_Default, @SEGMENT_ID_DefaultLocation);
 
 			-- INVENTORY ADJUSTMENT 
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryAdjustment_Default, @SegmentId_INVENTORY_ADJUSTMENT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryAdjustment_Default, @SegmentId_DEFAULT_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryAdjustment_Default, @SEGMENT_ID_InventoryAdjustment);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryAdjustment_Default, @SEGMENT_ID_DefaultLocation);
+
+			-- OTHER CHARGE EXPENSE
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeExpense_Default, @SEGMENT_ID_OtherChargeExpense);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeExpense_Default, @SEGMENT_ID_DefaultLocation);
+
+			-- OTHER CHARGE INCOME
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeIncome_Default, @SEGMENT_ID_OtherChargeIncome);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeIncome_Default, @SEGMENT_ID_DefaultLocation);
+
+			-- OTHER CHARGE ASSET
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeAsset_Default, @SEGMENT_ID_OtherChargeAsset);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeAsset_Default, @SEGMENT_ID_DefaultLocation);
 
 		END 
 
 		-- for NEW HAVEN location 
 		BEGIN 
 			-- INVENTORY WHEAT
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@Inventory_NewHaven, @SegmentId_INVENTORY_WHEAT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@Inventory_NewHaven, @SegmentId_NEW_HAVEN_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@Inventory_NewHaven, @SEGMENT_ID_InventoryWheat);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@Inventory_NewHaven, @SEGMENT_ID_NewHavenLocation);
 
 			-- COST OF GOODS WHEAT
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostOfGoods_NewHaven, @SegmentId_COST_OF_GOODS_WHEAT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostOfGoods_NewHaven, @SegmentId_NEW_HAVEN_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostOfGoods_NewHaven, @SEGMENT_ID_CostOfGoodsWheat);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostOfGoods_NewHaven, @SEGMENT_ID_NewHavenLocation);
 
 			-- AP CLEARING WHEAT
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@APClearing_NewHaven, @SegmentId_AP_Clearing_WHEAT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@APClearing_NewHaven, @SegmentId_NEW_HAVEN_LOCATION);	
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@APClearing_NewHaven, @SEGMENT_ID_APClearingWheat);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@APClearing_NewHaven, @SEGMENT_ID_NewHavenLocation);	
 
 			-- WRITE-OFF SOLD WHEAT
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@WriteOffSold_NewHaven, @SegmentId_WRITE_OFF_SOLD_WHEAT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@WriteOffSold_NewHaven, @SegmentId_NEW_HAVEN_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@WriteOffSold_NewHaven, @SEGMENT_ID_WriteOffSoldWheat);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@WriteOffSold_NewHaven, @SEGMENT_ID_NewHavenLocation);
 
 			-- REVALUE SOLD WHEAT
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueSold_NewHaven, @SegmentId_REVALUE_SOLD_WHEAT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueSold_NewHaven, @SegmentId_NEW_HAVEN_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueSold_NewHaven, @SEGMENT_ID_RevalueSoldWheat);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueSold_NewHaven, @SEGMENT_ID_NewHavenLocation);
 			
 			-- AUTO NEGATIVE WHEAT
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AutoNegative_NewHaven, @SegmentId_AUTO_NEGATIVE_WHEAT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AutoNegative_NewHaven, @SegmentId_NEW_HAVEN_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AutoNegative_NewHaven, @SEGMENT_ID_AutoNegativeWheat);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AutoNegative_NewHaven, @SEGMENT_ID_NewHavenLocation);
 
 			-- INVENTORY IN TRANSIT
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryInTransit_NewHaven, @SegmentId_INVENTORY_IN_TRANSIT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryInTransit_NewHaven, @SegmentId_NEW_HAVEN_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryInTransit_NewHaven, @SEGMENT_ID_InventoryInTransit);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryInTransit_NewHaven, @SEGMENT_ID_NewHavenLocation);
 
 			-- ACCOUNT RECEIVABLE
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountReceivable_NewHaven, @SegmentId_ACCOUNT_RECEIVABLE);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountReceivable_NewHaven, @SegmentId_NEW_HAVEN_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountReceivable_NewHaven, @SEGMENT_ID_AccountReceivable);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountReceivable_NewHaven, @SEGMENT_ID_NewHavenLocation);
 
 			-- INVENTORY ADJUSTMENT 
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryAdjustment_NewHaven, @SegmentId_INVENTORY_ADJUSTMENT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryAdjustment_NewHaven, @SegmentId_DEFAULT_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryAdjustment_NewHaven, @SEGMENT_ID_InventoryAdjustment);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryAdjustment_NewHaven, @SEGMENT_ID_NewHavenLocation);
+
+			-- OTHER CHARGE EXPENSE
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeExpense_NewHaven, @SEGMENT_ID_OtherChargeExpense);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeExpense_NewHaven, @SEGMENT_ID_NewHavenLocation);
+
+			-- OTHER CHARGE INCOME
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeIncome_NewHaven, @SEGMENT_ID_OtherChargeIncome);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeIncome_NewHaven, @SEGMENT_ID_NewHavenLocation);
+
+			-- OTHER CHARGE ASSET
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeAsset_NewHaven, @SEGMENT_ID_OtherChargeAsset);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeAsset_NewHaven, @SEGMENT_ID_NewHavenLocation);
 
 		END 
 
 		-- for BETTER HAVEN location 
 		BEGIN 
 			-- INVENTORY WHEAT
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@Inventory_BetterHaven, @SegmentId_INVENTORY_WHEAT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@Inventory_BetterHaven, @SegmentId_BETTER_HAVEN_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@Inventory_BetterHaven, @SEGMENT_ID_InventoryWheat);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@Inventory_BetterHaven, @SEGMENT_ID_BetterHavenLocation);
 
 			-- COST OF GOODS WHEAT
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostOfGoods_BetterHaven, @SegmentId_COST_OF_GOODS_WHEAT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostOfGoods_BetterHaven, @SegmentId_BETTER_HAVEN_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostOfGoods_BetterHaven, @SEGMENT_ID_CostOfGoodsWheat);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@CostOfGoods_BetterHaven, @SEGMENT_ID_BetterHavenLocation);
 
 			-- AP CLEARING WHEAT
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@APClearing_BetterHaven, @SegmentId_AP_Clearing_WHEAT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@APClearing_BetterHaven, @SegmentId_BETTER_HAVEN_LOCATION);	
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@APClearing_BetterHaven, @SEGMENT_ID_APClearingWheat);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@APClearing_BetterHaven, @SEGMENT_ID_BetterHavenLocation);	
 
 			-- WRITE-OFF SOLD WHEAT
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@WriteOffSold_BetterHaven, @SegmentId_WRITE_OFF_SOLD_WHEAT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@WriteOffSold_BetterHaven, @SegmentId_BETTER_HAVEN_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@WriteOffSold_BetterHaven, @SEGMENT_ID_WriteOffSoldWheat);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@WriteOffSold_BetterHaven, @SEGMENT_ID_BetterHavenLocation);
 
 			-- REVALUE SOLD WHEAT
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueSold_BetterHaven, @SegmentId_REVALUE_SOLD_WHEAT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueSold_BetterHaven, @SegmentId_BETTER_HAVEN_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueSold_BetterHaven, @SEGMENT_ID_RevalueSoldWheat);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@RevalueSold_BetterHaven, @SEGMENT_ID_BetterHavenLocation);
 			
 			-- AUTO NEGATIVE WHEAT
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AutoNegative_BetterHaven, @SegmentId_AUTO_NEGATIVE_WHEAT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AutoNegative_BetterHaven, @SegmentId_BETTER_HAVEN_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AutoNegative_BetterHaven, @SEGMENT_ID_AutoNegativeWheat);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AutoNegative_BetterHaven, @SEGMENT_ID_BetterHavenLocation);
 
 			-- INVENTORY IN TRANSIT
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryInTransit_BetterHaven, @SegmentId_INVENTORY_IN_TRANSIT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryInTransit_BetterHaven, @SegmentId_BETTER_HAVEN_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryInTransit_BetterHaven, @SEGMENT_ID_InventoryInTransit);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryInTransit_BetterHaven, @SEGMENT_ID_BetterHavenLocation);
 
 			-- ACCOUNT RECEIVABLE
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountReceivable_BetterHaven, @SegmentId_ACCOUNT_RECEIVABLE);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountReceivable_BetterHaven, @SegmentId_NEW_HAVEN_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountReceivable_BetterHaven, @SEGMENT_ID_AccountReceivable);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@AccountReceivable_BetterHaven, @SEGMENT_ID_NewHavenLocation);
 
 			-- INVENTORY ADJUSTMENT 
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryAdjustment_BetterHaven, @SegmentId_INVENTORY_ADJUSTMENT);
-			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryAdjustment_BetterHaven, @SegmentId_DEFAULT_LOCATION);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryAdjustment_BetterHaven, @SEGMENT_ID_InventoryAdjustment);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@InventoryAdjustment_BetterHaven, @SEGMENT_ID_DefaultLocation);
+
+			-- OTHER CHARGE EXPENSE
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeExpense_BetterHaven, @SEGMENT_ID_OtherChargeExpense);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeExpense_BetterHaven, @SEGMENT_ID_NewHavenLocation);
+
+			-- OTHER CHARGE INCOME
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeIncome_BetterHaven, @SEGMENT_ID_OtherChargeIncome);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeIncome_BetterHaven, @SEGMENT_ID_NewHavenLocation);
+
+			-- OTHER CHARGE ASSET
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeAsset_BetterHaven, @SEGMENT_ID_OtherChargeAsset);
+			INSERT INTO tblGLAccountSegmentMapping (intAccountId, intAccountSegmentId) VALUES (@OtherChargeAsset_BetterHaven, @SEGMENT_ID_NewHavenLocation);
+
 		END
 END

@@ -23,10 +23,10 @@ DECLARE @INVENTORY_RECEIPT_TYPE AS INT = 4
 		,@STARTING_NUMBER_BATCH AS INT = 3  
 		,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'AP Clearing'
 		
-		,@OWNERSHIP_TYPE_OWN AS INT = 1
-		,@OWNERSHIP_TYPE_STORAGE AS INT = 2
-		,@OWNERSHIP_TYPE_CONSIGNED_PURCHASE AS INT = 3
-		,@OWNERSHIP_TYPE_CONSIGNED_SALE AS INT = 4
+		,@OWNERSHIP_TYPE_Own AS INT = 1
+		,@OWNERSHIP_TYPE_Storage AS INT = 2
+		,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
+		,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
 
 -- Posting variables
 DECLARE @strBatchId AS NVARCHAR(40) 
@@ -248,15 +248,14 @@ BEGIN
 												DetailItem.intUnitMeasureId
 												,DetailItem.intWeightUOMId
 												,DetailItemLot.intItemUnitMeasureId
-												,DetailItem.dblUnitCost
+												,(DetailItem.dblUnitCost + dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId))
 											) * DetailItemLot.dblQuantity
 											,ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
 										) 
 
 									ELSE 
-										DetailItem.dblUnitCost  
+										DetailItem.dblUnitCost + dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 							END 
-
 				,dblSalesPrice = 0  
 				,intCurrencyId = Header.intCurrencyId  
 				,dblExchangeRate = 1  
@@ -275,13 +274,11 @@ BEGIN
 				LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
 					ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
-				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_OWN) = @OWNERSHIP_TYPE_OWN
+				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
   
 		-- Call the post routine 
 		IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
 		BEGIN 
-			SET @ysnAllowBlankGLEntries = 0
-
 			-- Call the post routine 
 			INSERT INTO @GLEntries (
 					[dtmDate] 
@@ -424,7 +421,7 @@ BEGIN
 				LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
 					ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
-				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_OWN) <> @OWNERSHIP_TYPE_OWN
+				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) <> @OWNERSHIP_TYPE_Own
   
 		-- Call the post routine 
 		IF EXISTS (SELECT TOP 1 1 FROM @CustodyItemsForPost) 
@@ -435,6 +432,43 @@ BEGIN
 					,@intUserId
 		END
 	END
+
+	-- Process the Other Charges
+	BEGIN 
+		INSERT INTO @GLEntries (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+		)	
+		EXEC dbo.uspICPostInventoryReceiptOtherCharges 
+			@intTransactionId
+			,@strBatchId
+			,@intUserId
+			,@INVENTORY_RECEIPT_TYPE
+			
+	END 
 END   
 
 --------------------------------------------------------------------------------------------  
@@ -476,7 +510,43 @@ BEGIN
 				@intTransactionId
 				,@strTransactionId
 				,@strBatchId
-				,@intUserId						
+				,@intUserId		
+				
+		-- Unpost the Other Charges
+		BEGIN 
+			INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+			)	
+			EXEC dbo.uspICUnpostInventoryReceiptOtherCharges 
+				@intTransactionId
+				,@strBatchId
+				,@intUserId
+				,@INVENTORY_RECEIPT_TYPE			
+		END
 	END 
 END   
 
@@ -503,6 +573,20 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 0
 BEGIN 
+	-- Check if blank GL entries are allowed
+	-- If there is a company owned stock, do not allow blank gl entries. 
+	SELECT	TOP 1 
+			@ysnAllowBlankGLEntries = 0
+	FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICItemLocation ItemLocation
+				ON Header.intLocationId = ItemLocation.intLocationId
+			INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
+				ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
+				AND ItemLocation.intItemId = DetailItem.intItemId
+			LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
+				ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
+	WHERE	Header.intInventoryReceiptId = @intTransactionId   
+			AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+
 	IF @ysnAllowBlankGLEntries = 0 
 	BEGIN 
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
