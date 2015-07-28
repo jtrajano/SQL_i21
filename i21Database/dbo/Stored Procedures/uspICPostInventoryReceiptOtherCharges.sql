@@ -44,8 +44,6 @@ BEGIN
 			,@ACCOUNT_CATEGORY_OtherChargeIncome AS NVARCHAR(30) = 'Other Charge Income'
 			,@ACCOUNT_CATEGORY_OtherChargeAsset AS NVARCHAR(30) = 'Other Charge (Asset)'
 
-			,@AccountCategory_Inventory AS NVARCHAR(50)
-
 	-- Initialize the module name
 	DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory'
 			,@strTransactionForm  AS NVARCHAR(50) = 'Inventory Receipt'
@@ -112,6 +110,9 @@ BEGIN
 
 	-- Check for missing Inventory Account Id
 	BEGIN 
+		SET @strItemNo = NULL
+		SET @intItemId = NULL
+
 		SELECT	TOP 1 
 				@intItemId = Item.intItemId 
 				,@strItemNo = Item.strItemNo
@@ -122,7 +123,7 @@ BEGIN
 		IF @intItemId IS NOT NULL 
 		BEGIN 
 			-- {Item} is missing a GL account setup for {Account Category} account category.
-			RAISERROR(51041, 11, 1, @strItemNo, @AccountCategory_Inventory) 	
+			RAISERROR(51041, 11, 1, @strItemNo, @ACCOUNT_CATEGORY_Inventory) 	
 			RETURN;
 		END 
 	END 
@@ -130,6 +131,9 @@ BEGIN
 
 	-- Check for missing AP Clearing Account Id
 	BEGIN 
+		SET @strItemNo = NULL
+		SET @intItemId = NULL
+
 		SELECT	TOP 1 
 				@intItemId = Item.intItemId 
 				,@strItemNo = Item.strItemNo
