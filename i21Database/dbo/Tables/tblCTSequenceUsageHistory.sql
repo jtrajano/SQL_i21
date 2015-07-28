@@ -5,6 +5,7 @@
 	strScreenName NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	intExternalId INT NOT NULL,
 	
+	strFieldName NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	dblOldValue NUMERIC(12, 4)NOT NULL,
 	dblTransactionQuantity NUMERIC(12, 4) NOT NULL,
 	dblNewValue NUMERIC(12, 4)NOT NULL,
