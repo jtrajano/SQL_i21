@@ -2055,6 +2055,8 @@
     <Build Include="dbo\Views\vyuTRTansportReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGetItemTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDImportOriginDesign.sql" />
+    <Build Include="dbo\Views\vyuRKGetAssignFutureTransaction.sql" />
+    <Build Include="dbo\Views\vyuRKGetAssignPhysicalTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
