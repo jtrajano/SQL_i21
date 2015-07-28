@@ -2076,6 +2076,7 @@
     <Build Include="dbo\Stored Procedures\uspCTCreateSequenceUsageHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspTRGetCustomerFreight.sql" />
     <Build Include="dbo\Stored Procedures\uspTRProcessContracts.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDProcessOriginImport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
