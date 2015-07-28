@@ -2074,6 +2074,8 @@
     <Build Include="dbo\Views\vyuARGetRecurringTransactions.sql" />
     <Build Include="dbo\Tables\tblCTSequenceUsageHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateSequenceUsageHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRGetCustomerFreight.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRProcessContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
