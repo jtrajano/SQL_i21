@@ -2072,6 +2072,9 @@
     <Build Include="dbo\Views\vyuRKGetAssignPhysicalTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostInventoryReceiptOtherCharges.sql" />	
     <Build Include="dbo\Views\vyuARGetRecurringTransactions.sql" />
+    <Build Include="dbo\Tables\tblCFAccountSuccessImport.sql" />
+    <Build Include="dbo\Tables\tblCFAccountFailedImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFImportAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
