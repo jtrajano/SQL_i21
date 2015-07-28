@@ -280,8 +280,6 @@ BEGIN
 		-- Call the post routine 
 		IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
 		BEGIN 
-			SET @ysnAllowBlankGLEntries = 0
-
 			-- Call the post routine 
 			INSERT INTO @GLEntries (
 					[dtmDate] 
@@ -548,9 +546,8 @@ BEGIN
 				@intTransactionId
 				,@strBatchId
 				,@intUserId
-				,@INVENTORY_RECEIPT_TYPE
-			
-		END 								
+				,@INVENTORY_RECEIPT_TYPE			
+		END
 	END 
 END   
 
@@ -577,6 +574,20 @@ END
 --------------------------------------------------------------------------------------------  
 IF @ysnRecap = 0
 BEGIN 
+	-- Check if blank GL entries are allowed
+	-- If there is a company owned stock, do not allow blank gl entries. 
+	SELECT	TOP 1 
+			@ysnAllowBlankGLEntries = 0
+	FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICItemLocation ItemLocation
+				ON Header.intLocationId = ItemLocation.intLocationId
+			INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
+				ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
+				AND ItemLocation.intItemId = DetailItem.intItemId
+			LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
+				ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
+	WHERE	Header.intInventoryReceiptId = @intTransactionId   
+			AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+
 	IF @ysnAllowBlankGLEntries = 0 
 	BEGIN 
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
