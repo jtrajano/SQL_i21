@@ -2102,6 +2102,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetLotHistory.sql" />
     <Build Include="dbo\Functions\fnAPCreateTaxes.sql" />
     <Build Include="dbo\Tables\tblPOPurchaseDetailTax.sql" />
+    <Build Include="dbo\Tables\tblAPBillDetailTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

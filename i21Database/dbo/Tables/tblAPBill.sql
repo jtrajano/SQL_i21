@@ -27,7 +27,7 @@
     [intEntityVendorId] INT NOT NULL  , 
     [dblWithheld] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [dblDiscount] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
-	[dblBillTax] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+	[dblTax] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblPayment] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dblInterest] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
     [intTransactionType] INT NOT NULL DEFAULT 0, 

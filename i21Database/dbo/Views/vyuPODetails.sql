@@ -8,7 +8,6 @@ SELECT
  ,B.intItemId
  ,B.intUnitOfMeasureId
  ,B.intAccountId
- ,B.intTaxId
  ,B.intStorageLocationId
  ,B.intSubLocationId
  ,B.intLocationId
@@ -20,6 +19,7 @@ SELECT
  ,B.dblDiscount
  ,B.dblCost
  ,B.dblTotal
+ ,B.dblTax
  ,B.dtmExpectedDate
  ,B.[strMiscDescription] AS strDescription
  ,B.strPONumber

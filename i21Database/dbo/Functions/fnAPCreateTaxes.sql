@@ -15,8 +15,9 @@ RETURNS @returntable TABLE
     [intTaxClassId] INT NOT NULL, 
 	[strTaxableByOtherTaxes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [strCalculationMethod] NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL, 
+	[strTaxCode] NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL, 
     [dblRate] NUMERIC(18, 6) NULL, 
-    [intPurchaseTaxAccountId] INT NULL, 
+    [intAccountId] INT NULL, 
     [dblTax] NUMERIC(18, 6) NULL, 
     [dblAdjustedTax] NUMERIC(18, 6) NULL, 
 	[ysnTaxAdjusted] BIT NULL DEFAULT ((0)), 
@@ -53,7 +54,7 @@ BEGIN
 								INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
 							WHERE 
 								TGM.[intTaxGroupMasterId] = @taxMasterId
-								AND TC.[strCountry] = @country 
+								AND LOWER(dbo.fnTrim(TC.[strCountry])) = LOWER(dbo.fnTrim(@country))
 						)				
 				END
 				
@@ -73,8 +74,8 @@ BEGIN
 								INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
 							WHERE 
 								TGM.[intTaxGroupMasterId] = @taxMasterId
-								AND TC.[strCountry] = @country
-								AND TC.[strState] = @state 
+								AND LOWER(dbo.fnTrim(TC.[strCountry])) = LOWER(dbo.fnTrim(@country))
+								AND LOWER(dbo.fnTrim(TC.[strState])) = LOWER(dbo.fnTrim(@state))
 						)				
 				END
 				
@@ -94,9 +95,9 @@ BEGIN
 								INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
 							WHERE 
 								TGM.[intTaxGroupMasterId] = @taxMasterId
-								AND TC.[strCountry] = @country
-								AND TC.[strState] = @state 
-								AND TC.[strCounty] = @county
+								AND LOWER(dbo.fnTrim(TC.[strCountry])) = LOWER(dbo.fnTrim(@country))
+								AND LOWER(dbo.fnTrim(TC.[strState])) = LOWER(dbo.fnTrim(@state))
+								AND LOWER(dbo.fnTrim(TC.[strCounty])) = LOWER(dbo.fnTrim(@county))
 						)				
 				END	
 				
@@ -116,10 +117,10 @@ BEGIN
 								INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
 							WHERE 
 								TGM.[intTaxGroupMasterId] = @taxMasterId
-								AND TC.[strCountry] = @country
-								AND TC.[strState] = @state 
-								AND TC.[strCounty] = @county
-								AND TC.[strCity] = @city
+								AND LOWER(dbo.fnTrim(TC.[strCountry])) = LOWER(dbo.fnTrim(@country))
+								AND LOWER(dbo.fnTrim(TC.[strState])) = LOWER(dbo.fnTrim(@state))
+								AND LOWER(dbo.fnTrim(TC.[strCounty])) = LOWER(dbo.fnTrim(@county))
+								AND LOWER(dbo.fnTrim(TC.[strCity])) = LOWER(dbo.fnTrim(@city))
 						)				
 				END		
 
@@ -134,10 +135,12 @@ BEGIN
 						FROM tblSMTaxCodeRate WHERE tblSMTaxCodeRate.[intTaxCodeId] = TC.[intTaxCodeId] 
 						AND  CAST(tblSMTaxCodeRate.[dtmEffectiveDate]  AS DATE) <= CAST(@transactionDate AS DATE) 
 						ORDER BY tblSMTaxCodeRate.[dtmEffectiveDate]ASC ,tblSMTaxCodeRate.[numRate] DESC), 'Unit') AS [strCalculationMethod]
+		,TC.strTaxCode
 		,ISNULL((SELECT TOP 1 tblSMTaxCodeRate.[numRate] 
 						FROM tblSMTaxCodeRate WHERE tblSMTaxCodeRate.[intTaxCodeId] = TC.[intTaxCodeId] 
 						AND  CAST(tblSMTaxCodeRate.[dtmEffectiveDate]  AS DATE) <= CAST(@transactionDate AS DATE) 
 						ORDER BY tblSMTaxCodeRate.[dtmEffectiveDate]ASC ,tblSMTaxCodeRate.[numRate] DESC), 0.00) AS [dblRate]
+		,TC.strTaxCode
 		,TC.[intPurchaseTaxAccountId]		
 		,0.00 AS [dblTax]
 		,0.00 AS [dblAdjustedTax]	

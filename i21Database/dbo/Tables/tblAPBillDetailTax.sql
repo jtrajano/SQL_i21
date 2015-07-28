@@ -1,0 +1,26 @@
+﻿CREATE TABLE [dbo].[tblAPBillDetailTax]
+(
+	[intBillDetailTaxId] INT NOT NULL IDENTITY, 
+    [intBillDetailId] INT NOT NULL, 
+    [intTaxGroupMasterId] INT NOT NULL, 
+    [intTaxGroupId] INT NOT NULL, 
+    [intTaxCodeId] INT NOT NULL, 
+    [intTaxClassId] INT NOT NULL, 
+	[strTaxableByOtherTaxes] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
+    [strCalculationMethod] NVARCHAR(15) COLLATE Latin1_General_CI_AS NULL, 
+    [dblRate] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+    [intAccountId] INT NOT NULL, 
+    [dblTax] NUMERIC(18, 6) NOT NULL DEFAULT 0, 
+    [dblAdjustedTax] NUMERIC(18, 6) NOT NULL, 
+	[ysnTaxAdjusted] BIT NOT NULL DEFAULT 0, 
+	[ysnSeparateOnBill] BIT NOT NULL DEFAULT 0, 
+	[ysnCheckOffTax] BIT NOT NULL DEFAULT 0, 
+    [intConcurrencyId] INT CONSTRAINT [DF_tblAPBillDetailTax_intConcurrencyId] DEFAULT 0 NOT NULL,
+    CONSTRAINT [PK_tblAPBillDetailTax_intBillDetailTaxId] PRIMARY KEY CLUSTERED ([intBillDetailTaxId] ASC),
+	CONSTRAINT [FK_tblAPBillDetailTax_tblAPBillDetail_intBillDetailId] FOREIGN KEY ([intBillDetailId]) REFERENCES [dbo].[tblAPBillDetail] ([intBillDetailId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblAPBillDetailTax_tblSMTaxGroupMaster_intTaxGroupMasterId] FOREIGN KEY ([intTaxGroupMasterId]) REFERENCES [dbo].[tblSMTaxGroupMaster] ([intTaxGroupMasterId]),
+	CONSTRAINT [FK_tblAPBillDetailTax_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
+	CONSTRAINT [FK_tblAPBillDetailTax_tblSMTaxCode_intTaxCodeId] FOREIGN KEY ([intTaxCodeId]) REFERENCES [dbo].[tblSMTaxCode] ([intTaxCodeId]),
+	CONSTRAINT [FK_tblAPBillDetailTax_tblSMTaxClass_intTaxClassId] FOREIGN KEY ([intTaxClassId]) REFERENCES [dbo].[tblSMTaxClass] ([intTaxClassId]),
+	CONSTRAINT [FK_tblAPBillDetailTax_tblGLAccount_intSalesTaxAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId])
+)

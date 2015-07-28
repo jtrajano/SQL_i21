@@ -40,7 +40,7 @@ BEGIN
 		[intEntityVendorId],
 		[dblWithheld],
 		[dblDiscount],
-		[dblBillTax],
+		[dblTax],
 		[dblPayment],
 		[dblInterest],
 		[intTransactionType],
@@ -75,7 +75,7 @@ BEGIN
 		[intEntityVendorId],
 		[dblWithheld],
 		[dblDiscount],
-		[dblBillTax],
+		[dblTax],
 		0,
 		[dblInterest],
 		1,
@@ -108,7 +108,6 @@ BEGIN
 		[dtmExpectedDate], 
 		[int1099Code], 
 		[int1099Category], 
-		[intTaxId],
 		[intLineNo]
 	)
 	SELECT
@@ -128,7 +127,6 @@ BEGIN
 		[dtmExpectedDate], 
 		[int1099Code], 
 		[int1099Category], 
-		[intTaxId],
 		[intLineNo]
 	FROM tblAPBillDetail
 	WHERE intBillId IN (@billId)

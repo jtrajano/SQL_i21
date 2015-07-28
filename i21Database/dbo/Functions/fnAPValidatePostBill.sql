@@ -63,7 +63,7 @@ BEGIN
 			A.intBillId
 		FROM tblAPBill A 
 		WHERE  A.intBillId IN (SELECT [intBillId] FROM @tmpBills) AND 
-			A.dblTotal <> (SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = A.intBillId)
+			(A.dblTotal) <> (SELECT SUM(dblTotal) + SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = A.intBillId)
 
 		--ALREADY POSTED
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)

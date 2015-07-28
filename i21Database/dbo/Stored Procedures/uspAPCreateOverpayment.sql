@@ -48,7 +48,7 @@ BEGIN
 		[intEntityVendorId]		,
 		[dblWithheld]			,
 		[dblDiscount]			,
-		[dblBillTax]			,
+		[dblTax]				,
 		[dblPayment]			,
 		[dblInterest]			,
 		[intTransactionType]	,

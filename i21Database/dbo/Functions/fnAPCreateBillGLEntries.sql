@@ -104,7 +104,7 @@ BEGIN
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	A.dtmDate,
 		[strJournalLineDescription]		=	B.strMiscDescription,
-		[#tmpTransacions]				=	B.intBillDetailId,
+		[intJournalLineNo]				=	B.intBillDetailId,
 		[ysnIsUnposted]					=	0,
 		[intUserId]						=	@intUserId,
 		[intEntityId]					=	@intUserId,
@@ -123,6 +123,51 @@ BEGIN
 			LEFT JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.intEntityVendorId
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
-
+	UNION ALL
+	--TAXES
+	SELECT	
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	D.intAccountId,
+		[dblDebit]						=	SUM(D.dblTax),
+		[dblCredit]						=	0, -- Bill
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,
+		[strDescription]				=	A.strReference,
+		[strCode]						=	'AP',
+		[strReference]					=	C.strVendorId,
+		[intCurrencyId]					=	A.intCurrencyId,
+		[dblExchangeRate]				=	1,
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	A.dtmDate,
+		[strJournalLineDescription]		=	'Purchase Tax',
+		[intJournalLineNo]				=	D.intBillDetailTaxId,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	'Bill',
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[intConcurrencyId]				=	1
+	FROM	[dbo].tblAPBill A 
+			INNER JOIN [dbo].tblAPBillDetail B
+				ON A.intBillId = B.intBillId
+			INNER JOIN tblAPVendor C
+				ON A.intEntityVendorId = C.intEntityVendorId
+			INNER JOIN tblAPBillDetailTax D
+				ON B.intBillDetailId = D.intBillDetailId
+	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	AND A.intTransactionType = 1
+	GROUP BY A.dtmDate
+	,D.intAccountId
+	,A.strReference
+	,C.strVendorId
+	,D.intBillDetailTaxId
+	,A.intCurrencyId
+	,A.strBillId
+	,A.intBillId
+	
 	RETURN
 END
