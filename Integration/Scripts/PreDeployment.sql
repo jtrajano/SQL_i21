@@ -31,6 +31,9 @@
 :r "..\dbo\Stored Procedures\uspGLImportOriginHistoricalJournalCLOSED.sql"
 :r "..\dbo\Stored Procedures\uspGLImportOriginReallocation.sql"
 
+-- FINANCIAL REPORT DESIGNER
+:r "..\dbo\Stored Procedures\uspFRDImportOriginDesign.sql"
+
 -- CASH MANAGEMENT
 :r ..\dbo\Views\apcbkmst.sql
 :r ..\dbo\Views\apchkmst.sql
