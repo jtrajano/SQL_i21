@@ -4,9 +4,9 @@ GO
 Update
 	tblARInvoice
 SET
-	 strType = 'General'
+	 strType = 'Standard'
 WHERE
-	strType IS NULL OR LTRIM(RTRIM(strType)) = ''
+	strType IS NULL OR LTRIM(RTRIM(strType)) = '' OR strType = 'General'
 
 
 
