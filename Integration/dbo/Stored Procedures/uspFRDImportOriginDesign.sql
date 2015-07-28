@@ -408,7 +408,7 @@ BEGIN
 
 			UPDATE #irelyloadFRRowDesign SET rowidupdated = -1
 
-			DECLARE @ROW INT = 0
+			DECLARE @row INT = 0
 			DECLARE @INTROWIDMOVER INT = 0
 			DECLARE @rownumber INT
 			DECLARE @intrefno1 INT
@@ -422,8 +422,8 @@ BEGIN
 					SELECT @intrefno1 = MIN(intRefNo) FROM #irelyloadFRRowDesign WHERE intRowId = @rownumber AND rowidupdated = -1
 					SELECT @INTROWIDMOVER = MIN(intRowDetailId) FROM #irelyloadFRRowDesign WHERE rowidupdated = -1 AND intRowId = @rownumber AND @intrefno1 = intRefNo
 
-				UPDATE #irelyloadFRRowDesign SET intRefNo = @ROW, rowidupdated = 1 WHERE intRowDetailId = @INTROWIDMOVER
-				SELECT @ROW = @ROW + 1
+				UPDATE #irelyloadFRRowDesign SET intRefNo = @row, rowidupdated = 1 WHERE intRowDetailId = @INTROWIDMOVER
+				SELECT @row = @row + 1
 				END
 			END
 
