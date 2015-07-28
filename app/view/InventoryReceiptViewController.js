@@ -291,6 +291,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colUnitCost: 'dblUnitCost',
+                colTax: 'dblTax',
                 colUnitRetail: 'dblUnitRetail',
                 colGross: 'dblGross',
                 colNet: 'dblNet',
@@ -551,6 +552,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.tblICLot,' +
                 'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.tblICItemUOM.tblICUnitMeasure,' +
                 'tblICInventoryReceiptItems.tblICInventoryReceiptItemLots.tblICStorageLocation,' +
+                'tblICInventoryReceiptItems.tblICInventoryReceiptItemTaxes,' +
                 'tblICInventoryReceiptCharges.vyuICGetInventoryReceiptCharge',
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Receipt',
@@ -571,6 +573,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 deleteButton : grdLotTracking.down('#btnRemoveLot'),
                                 createRecord : me.onLotCreateRecord
                             })
+                        },
+                        {
+                            key: 'tblICInventoryReceiptItemTaxes'
                         }
                     ]
                 },
@@ -607,7 +612,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
         }
 
-        var colTaxDetails = grdInventoryReceipt.columns[19];
+        var colTaxDetails = grdInventoryReceipt.columns[22];
         var btnViewTaxDetail = colTaxDetails.items[0];
         if (btnViewTaxDetail){
             btnViewTaxDetail.handler = function(grid, rowIndex, colIndex) {
@@ -916,7 +921,144 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         }
         this.calculateGrossWeight(current);
+        win.viewModel.data.currentReceiptItem = current;
+        this.calculateItemTaxes();
     },
+
+    calculateItemTaxes: function(reset) {
+        var me = this;
+        var win = me.getView();
+        var masterRecord = win.viewModel.data.current;
+        var detailRecord = win.viewModel.data.currentReceiptItem;
+
+        if(reset !== false) reset = true;
+
+        if (detailRecord) {
+            var current = {
+                ItemId: detailRecord.get('intItemId'),
+                LocationId: masterRecord.get('intLocationId'),
+                TransactionDate: masterRecord.get('dtmReceiptDate'),
+                TransactionType: 'Purchase',
+                EntityId: masterRecord.get('intEntityVendorId')
+            };
+
+            if (reset)
+                iRely.Functions.getItemTaxes(current, me.computeItemTax, me);
+            else {
+                var receiptItemTaxes = detailRecord.tblICInventoryReceiptItemTaxes();
+                if (receiptItemTaxes){
+                    var ItemTaxes = new Array();
+                    Ext.Array.each(receiptItemTaxes.data.items, function (itemDetailTax) {
+                        var taxes = {
+                            intTaxGroupMasterId: itemDetailTax.get('intTaxGroupMasterId'),
+                            intTaxGroupId: itemDetailTax.get('intTaxGroupId'),
+                            intTaxCodeId: itemDetailTax.get('intTaxCodeId'),
+                            intTaxClassId: itemDetailTax.get('intTaxClassId'),
+                            strTaxCode: itemDetailTax.get('strTaxCode'),
+                            strTaxableByOtherTaxes: itemDetailTax.get('strTaxableByOtherTaxes'),
+                            strCalculationMethod: itemDetailTax.get('strCalculationMethod'),
+                            dblRate: itemDetailTax.get('dblRate'),
+                            dblTax: itemDetailTax.get('dblTax'),
+                            dblAdjustedTax: itemDetailTax.get('dblAdjustedTax'),
+                            intTaxAccountId: itemDetailTax.get('intTaxAccountId'),
+                            ysnTaxAdjusted: itemDetailTax.get('ysnTaxAdjusted'),
+                            ysnSeparateOnInvoice: itemDetailTax.get('ysnSeparateOnInvoice'),
+                            ysnCheckoffTax: itemDetailTax.get('ysnCheckoffTax')
+                        };
+                        ItemTaxes.push(taxes);
+                    });
+
+                    me.computeItemTax(ItemTaxes, me, reset);
+                }
+            }
+        }
+    },
+
+    computeItemTax: function(itemTaxes, me, reset) {
+        var win = me.getView();
+        var currentRecord = win.viewModel.data.currentReceiptItem;
+        var totalItemTax,
+            qtyOrdered = currentRecord.get('dblOpenReceive'),
+            itemPrice = currentRecord.get('dblUnitCost');
+
+        if(reset !== false) reset = true;
+
+        totalItemTax = 0.00;
+
+        if (reset){
+            currentRecord.tblICInventoryReceiptItemTaxes().removeAll();
+        }
+
+        Ext.Array.each(itemTaxes, function (itemDetailTax) {
+            var taxableAmount,
+                taxAmount;
+
+            taxableAmount = me.getTaxableAmount(qtyOrdered, itemPrice, itemDetailTax, itemTaxes);
+            if (itemDetailTax.strCalculationMethod === 'Percentage') {
+                taxAmount = (taxableAmount * (itemDetailTax.dblRate / 100));
+            } else {
+                taxAmount = qtyOrdered * itemDetailTax.dblRate;
+            }
+
+            if (itemDetailTax.dblTax === itemDetailTax.dblAdjustedTax && !itemDetailTax.ysnTaxAdjusted) {
+                itemDetailTax.dblTax = taxAmount;
+                itemDetailTax.dblAdjustedTax = taxAmount;
+            }
+            else {
+                itemDetailTax.dblTax = taxAmount;
+                itemDetailTax.dblAdjustedTax = itemDetailTax.dblAdjustedTax;
+                itemDetailTax.ysnTaxAdjusted = true;
+            }
+            totalItemTax = totalItemTax + itemDetailTax.dblAdjustedTax;
+
+            if (reset){
+                var newItemTax = Ext.create('Inventory.model.ReceiptItemTax', {
+                    intTaxGroupMasterId: itemDetailTax.intTaxGroupMasterId,
+                    intTaxGroupId: itemDetailTax.intTaxGroupId,
+                    intTaxCodeId: itemDetailTax.intTaxCodeId,
+                    intTaxClassId: itemDetailTax.intTaxClassId,
+                    strTaxCode: itemDetailTax.strTaxCode,
+                    strTaxableByOtherTaxes: itemDetailTax.strTaxableByOtherTaxes,
+                    strCalculationMethod: itemDetailTax.strCalculationMethod,
+                    dblRate: itemDetailTax.dblRate,
+                    dblTax: itemDetailTax.dblTax,
+                    dblAdjustedTax: itemDetailTax.dblAdjustedTax,
+                    intTaxAccountId: itemDetailTax.intTaxAccountId,
+                    ysnTaxAdjusted: itemDetailTax.ysnTaxAdjusted,
+                    ysnSeparateOnInvoice: itemDetailTax.ysnSeparateOnInvoice,
+                    ysnCheckoffTax: itemDetailTax.ysnCheckoffTax
+                });
+                currentRecord.tblICInventoryReceiptItemTaxes().add(newItemTax);
+            }
+        });
+
+        currentRecord.set('dblTax', totalItemTax);
+
+    },
+
+    getTaxableAmount: function(quantity, price, currentItemTax, itemTaxes){
+        var taxableAmount = quantity * price;
+
+        Ext.Array.each(itemTaxes, function (itemDetailTax) {
+            if(itemDetailTax.strTaxableByOtherTaxes && itemDetailTax.strTaxableByOtherTaxes !== String.empty){
+                if(itemDetailTax.strTaxableByOtherTaxes.split(",").indexOf(currentItemTax.intTaxClassId.toString()) > -1){
+                    if(itemDetailTax.ysnTaxAdjusted){
+                        taxableAmount = (quantity * price) + (itemDetailTax.dblAdjustedTax);
+                    }else{
+                        if(itemDetailTax.strCalculationMethod === 'Percentage'){
+                            taxableAmount = (quantity * price) + ((quantity * price) * (itemDetailTax.dblRate/100));
+                        }else{
+                            taxableAmount = (quantity * price) + itemDetailTax.dblRate;
+                        }
+                    }
+                }
+            }
+        });
+
+        return taxableAmount;
+    },
+
+
 
     calculateGrossWeight: function(record){
         if (!record) return;
@@ -1259,6 +1401,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 win.controller.calculateGrossWeight(context.record);
             }
         }
+        context.record.set(context.field, context.value);
+        vw.data.currentReceiptItem = context.record;
+        me.calculateItemTaxes(false);
     },
 
     onEditLots: function (editor, context, eOpts) {

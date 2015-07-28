@@ -60,7 +60,8 @@ Ext.define('Inventory.model.ReceiptItem', {
         { name: 'strSubLocationName', type: 'string'},
         { name: 'strUnitType', type: 'string'},
         { name: 'strContainer', type: 'string'},
-        { name: 'dblGrossMargin', type: 'float' }
+        { name: 'dblGrossMargin', type: 'float' },
+        { name: 'dblTax', type: 'float' }
     ],
 
     validators: [

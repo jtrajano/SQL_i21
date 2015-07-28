@@ -178,6 +178,7 @@ namespace iRely.Inventory.Model
         public int? intGradeId { get; set; }
         public decimal? dblGross { get; set; }
         public decimal? dblNet { get; set; }
+        public decimal? dblTax { get; set; }
         public int? intSort { get; set; }
 
         private string _orderNumber;
@@ -853,9 +854,21 @@ namespace iRely.Inventory.Model
     {
         public int intInventoryReceiptItemTaxId { get; set; }
         public int intInventoryReceiptItemId { get; set; }
-        public int intTaxCodeId { get; set; }
-        public bool ysnSelected { get; set; }
-        public int intSort { get; set; }
+        public int? intTaxGroupMasterId { get; set; }
+        public int? intTaxGroupId { get; set; }
+        public int? intTaxCodeId { get; set; }
+        public int? intTaxClassId { get; set; }
+        public string strTaxableByOtherTaxes { get; set; }
+        public string strCalculationMethod { get; set; }
+        public decimal? dblRate { get; set; }
+        public decimal? dblTax { get; set; }
+        public decimal? dblAdjustedTax { get; set; }
+        public int? intTaxAccountId { get; set; }
+        public bool? ysnTaxAdjusted { get; set; }
+        public bool? ysnSeparateOnInvoice { get; set; }
+        public bool? ysnCheckoffTax { get; set; }
+        public string strTaxCode { get; set; }
+        public int? intSort { get; set; }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
     }

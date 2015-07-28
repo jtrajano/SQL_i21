@@ -28,9 +28,21 @@ Ext.define('Inventory.model.ReceiptItemTax', {
                 }
             }
         },
+        { name: 'intTaxGroupMasterId', type: 'int', allowNull: true },
+        { name: 'intTaxGroupId', type: 'int', allowNull: true },
         { name: 'intTaxCodeId', type: 'int', allowNull: true },
-        { name: 'ysnSelected', type: 'boolean'},
-        { name: 'intSort', type: 'int'}
+        { name: 'intTaxClassId', type: 'int', allowNull: true },
+        { name: 'strTaxableByOtherTaxes', type: 'string' },
+        { name: 'strCalculationMethod', type: 'string' },
+        { name: 'dblRate', type: 'float' },
+        { name: 'dblTax', type: 'float' },
+        { name: 'dblAdjustedTax', type: 'float' },
+        { name: 'intTaxAccountId', type: 'int', allowNull: true },
+        { name: 'ysnTaxAdjusted', type: 'boolean' },
+        { name: 'ysnSeparateOnInvoice', type: 'boolean' },
+        { name: 'ysnCheckoffTax', type: 'boolean' },
+        { name: 'strTaxCode', type: 'string' },
+        { name: 'intSort', type: 'int', allowNull: true }
     ],
 
     validators: [

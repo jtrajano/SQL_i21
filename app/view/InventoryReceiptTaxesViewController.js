@@ -24,74 +24,36 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
         var win = this.getView();
         win.context = Ext.create('iRely.mvvm.Engine', {
             window: win,
-            createRecord : me.createRecord,
             store: Ext.create('Inventory.store.ReceiptItemTax'),
             singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
                 grid: win.down('grid'),
+                position: 'none',
                 title: 'Inventory Receipt Taxes',
                 columns: [
                     {
+                        xtype: 'gridcolumn',
                         itemId: 'colTaxCode',
+                        width: 85,
+                        sortable: false,
                         dataIndex: 'strTaxCode',
                         text: 'Tax Code',
-                        flex: 1,
-                        editor: {
-                            xtype: 'gridcombobox',
-                            columns: [
-                                {
-                                    dataIndex: 'intTaxGroupMasterId',
-                                    dataType: 'numeric',
-                                    text: 'Tax Group Master Id',
-                                    hidden: true
-                                },
-                                {
-                                    dataIndex: 'strTaxGroupMaster',
-                                    dataType: 'string',
-                                    text: 'Tax Group Master',
-                                    flex: 1
-                                },
-                                {
-                                    dataIndex: 'strDescription',
-                                    dataType: 'string',
-                                    text: 'Description',
-                                    flex: 1
-                                },
-                                {
-                                    xtype: 'checkcolumn',
-                                    dataIndex: 'ysnSeparateOnInvoice',
-                                    dataType: 'boolean',
-                                    text: 'Separate on Invoice',
-                                    flex: 1
-                                }
-                            ],
-                            itemId: 'cboTaxGroupMaster',
-                            displayField: 'strTaxGroupMaster',
-                            valueField: 'strTaxGroupMaster',
-                            bind: {
-                                store: '{taxGroupMaster}'
-                            },
-                            listeners: {
-                                select: 'onTaxSelect'
-                            }
-                        }
+                        flex: 1.25
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        itemId: 'colCalculationMethod',
+                        width: 110,
+                        sortable: false,
+                        dataIndex: 'strCalculationMethod',
+                        text: 'Calculation Method'
                     },
                     {
                         xtype: 'numbercolumn',
-                        itemId: 'colTaxRate',
-                        dataIndex: 'dblTaxRate',
-                        text: 'Tax Rate',
-                        flex: 1,
-                        editor: {
-                            xtype: 'numberfield'
-                        }
-                    }
-                    ,
-                    {
-                        xtype: 'numbercolumn',
-                        itemId: 'colTaxAmount',
-                        dataIndex: 'dblTaxAmount',
-                        text: 'Tax Amount',
-                        flex: 1
+                        itemId: 'colRate',
+                        width: 65,
+                        align: 'right',
+                        dataIndex: 'dblRate',
+                        text: 'Rate'
                     }
                 ]
             })
@@ -114,29 +76,6 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
         context.data.load({
             filters: config.filters
         });
-    },
-
-    createRecord: function(config, action) {
-        var me = this;
-        var record = Ext.create('Inventory.model.ReceiptItemTax');
-        record.set('intInventoryReceiptItemId', me.intInventoryReceiptItemId);
-        action(record);
-    },
-
-    onTaxSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var grid = combo.up('grid');
-        var win = combo.up('window');
-        var plugin = grid.plugins[0];
-        var current = plugin.getActiveRecord();
-
-
-        if (combo.column.itemId === 'colTaxCode' && current) {
-            current.set('intTaxCodeId', records[0].get('intTaxGroupMasterId'));
-            current.set('intInventoryReceiptItemId', win.controller.intInventoryReceiptItemId);
-        }
     }
 
 });

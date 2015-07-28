@@ -1168,14 +1168,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         }
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcolumn',
+                                                                        xtype: 'numbercolumn',
                                                                         itemId: 'colTax',
                                                                         width: 85,
                                                                         dataIndex: 'strTax',
                                                                         text: 'Tax',
                                                                         editor: {
-                                                                            xtype: 'gridcombobox',
-                                                                            itemId: 'cboTax'
+                                                                            xtype: 'numberfield'
                                                                         }
                                                                     },
                                                                     {

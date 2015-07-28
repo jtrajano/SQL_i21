@@ -1510,7 +1510,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter132",
+                                                                    "name": "filter14",
                                                                     "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2197,7 +2197,7 @@
                                                             ]
                                                         },
                                                         {
-                                                            "type": "Ext.grid.column.Column",
+                                                            "type": "Ext.grid.column.Number",
                                                             "reference": {
                                                                 "name": "columns",
                                                                 "type": "array"
@@ -2209,22 +2209,18 @@
                                                                 "text": "Tax",
                                                                 "width": 85
                                                             },
-                                                            "name": "MyColumn8",
+                                                            "name": "MyNumberColumn13",
                                                             "designerId": "ad1c1e37-dd14-4f4c-b1f5-b8f5fa23136e",
                                                             "cn": [
                                                                 {
-                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "type": "Ext.form.field.Number",
                                                                     "reference": {
                                                                         "name": "editor",
                                                                         "type": "object"
                                                                     },
                                                                     "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "designer|createAlias": "gridcombobox",
-                                                                        "itemId": "cboTax"
-                                                                    },
-                                                                    "name": "MyComboBox86",
-                                                                    "designerId": "0db11552-4faf-4fb5-a7ea-fd2d62a73199"
+                                                                    "name": "MyNumberField3",
+                                                                    "designerId": "68416b66-4444-41af-b0aa-e41ec51b6f3a"
                                                                 }
                                                             ]
                                                         },
@@ -2940,7 +2936,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter133",
+                                                                            "name": "filter15",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4062,7 +4058,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter134",
+                                                    "name": "filter16",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4267,7 +4263,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter135",
+                                                            "name": "filter17",
                                                             "designerId": "862260b9-0de6-4b16-a64e-db1153706a1f",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -5455,7 +5451,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter136",
+                                                    "name": "filter18",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -5942,7 +5938,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging15",
+                    "name": "statusbarpaging12",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

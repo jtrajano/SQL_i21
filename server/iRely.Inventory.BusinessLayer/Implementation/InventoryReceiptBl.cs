@@ -55,6 +55,32 @@ namespace iRely.Inventory.BusinessLayer
             base.Add(entity);
         }
 
+        //public override void Update(tblICInventoryReceipt entity)
+        //{
+        //    var item = entity.tblICInventoryReceiptItems.First();
+        //    if (item != null)
+        //    {
+        //        var itemTax = new tblICInventoryReceiptItemTax();
+        //         itemTax.intTaxGroupMasterId = itemDetailTax.intTaxGroupMasterId;
+        //         itemTax.intTaxGroupId = itemDetailTax.intTaxGroupId,
+        //         itemTax.intTaxCodeId = itemDetailTax.intTaxCodeId,
+        //         itemTax.intTaxClassId = itemDetailTax.intTaxClassId,
+        //         itemTax.strTaxCode = itemDetailTax.strTaxCode,
+        //         itemTax.strTaxableByOtherTaxes = itemDetailTax.strTaxableByOtherTaxes,
+        //         itemTax.strCalculationMethod = itemDetailTax.strCalculationMethod,
+        //         itemTax.dblRate = itemDetailTax.dblRate,
+        //         itemTax.dblTax = itemDetailTax.dblTax,
+        //         itemTax.dblAdjustedTax = 0;
+        //         itemTax.intTaxAccountId = null;
+        //         itemTax.ysnTaxAdjusted = false;
+        //         itemTax.ysnSeparateOnInvoice = false;
+        //         itemTax.ysnCheckoffTax = false;
+        //        item.tblICInventoryReceiptItemTaxes.Add(itemTax);
+        //    }
+
+        //    base.Update(entity);
+        //}
+
         public override async Task<BusinessResult<tblICInventoryReceipt>> SaveAsync(bool continueOnConflict)
         {
             SaveResult result = new SaveResult();
@@ -94,13 +120,12 @@ namespace iRely.Inventory.BusinessLayer
                             _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdatePOStatusOnReceiptSave @intReceiptNo", idParameter);
                         }
                     }
-
-                    transaction.Commit();
-
+                    
                     if (result.HasError)
                     {
                         throw result.BaseException;
                     }
+                    transaction.Commit();
                 }
                 catch (Exception ex)
                 {
