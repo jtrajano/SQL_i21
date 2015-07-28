@@ -17,10 +17,13 @@ BEGIN
     --pxcyctag_cycle_seq
     IF EXISTS (SELECT TOP 1 1 FROM sys.columns WHERE NAME  = N'pxcyctag_cycle_seq' AND OBJECT_ID = OBJECT_ID(N'pxcyctag'))
     BEGIN
-		DROP INDEX Ipxcyctag0 ON  pxcyctag 
-        ALTER TABLE pxcyctag 
-		ALTER COLUMN pxcyctag_cycle_seq smallint NOT NULL 
-		CREATE UNIQUE INDEX Ipxcyctag0 ON pxcyctag (pxcyctag_cycle_seq);
+		IF EXISTS (SELECT * FROM sys.indexes WHERE name='Ipxcyctag0' AND object_id = OBJECT_ID('pxcyctag'))
+		BEGIN
+			DROP INDEX Ipxcyctag0 ON  pxcyctag 
+			ALTER TABLE pxcyctag 
+			ALTER COLUMN pxcyctag_cycle_seq smallint NOT NULL 
+			CREATE UNIQUE INDEX Ipxcyctag0 ON pxcyctag (pxcyctag_cycle_seq);
+		END
     END
     ELSE
     BEGIN
