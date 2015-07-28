@@ -35,6 +35,7 @@ SELECT
 	,D.intContractDetailId
 	,CH.intContractNumber
 	,CD.intContractSeq
+	,IC.intCommodityId
 FROM         
     [tblSOSalesOrderDetail] D
 LEFT JOIN    
