@@ -1,13 +1,14 @@
-﻿CREATE VIEW [dbo].[vyuCTSequenceHistory]
+﻿CREATE VIEW [dbo].[vyuCTSequenceUsageHistory]
 AS 
 
-	SELECT	UH.intContractDetailId,
-			UH.dtmTransactionDate		AS	dtmAdjustmentDate,
-			UH.strScreenName			AS	strAdjustmentType,
-			IR.strReceiptNumber			AS	strNumber,
+	SELECT	UH.intSequenceUsageHistoryId,
+			UH.intContractDetailId,
+			UH.dtmTransactionDate,
+			UH.strScreenName,
+			IR.strReceiptNumber	AS	strNumber,
 			UH.strFieldName,
 			UH.dblOldValue,
-			UH.dblTransactionQuantity	AS	dblAdjAmount,
+			UH.dblTransactionQuantity,
 			UH.dblNewValue,
 			US.strUserName
 	FROM	tblCTSequenceUsageHistory	UH

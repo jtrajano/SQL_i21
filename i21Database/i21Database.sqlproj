@@ -2021,7 +2021,7 @@
     <Build Include="dbo\Stored Procedures\uspARInsertInvoiceServiceCharge.sql" />
     <Build Include="dbo\Stored Procedures\uspARCalculateServiceCharge.sql" />
     <Build Include="dbo\User Defined Types\ServiceChargeTableType.sql" />
-    <Build Include="dbo\Views\vyuCTSequenceHistory.sql" />
+    <Build Include="dbo\Views\vyuCTSequenceUsageHistory.sql" />
     <Build Include="dbo\Views\vyuGRGetPurchaseSaleDetail.sql" />
     <Build Include="dbo\Tables\tblQMTicketDiscount.sql" />
     <Build Include="dbo\Stored Procedures\uspARDeleteRecurrence.sql" />
