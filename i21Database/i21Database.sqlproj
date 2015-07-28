@@ -2069,13 +2069,14 @@
     <Build Include="dbo\Functions\fnGetOtherChargesFromInventoryReceipt.sql" />
     <Build Include="dbo\User Defined Types\ItemOtherChargesGLAccount.sql" />
     <Build Include="dbo\Views\vyuTRTansportReceipt.sql" />
-    <Build Include="dbo\Stored Procedures\uspSMGetItemTaxes.sql" />	  
+    <Build Include="dbo\Stored Procedures\uspSMGetItemTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDImportOriginDesign.sql" />
     <Build Include="dbo\Views\vyuRKGetAssignFutureTransaction.sql" />
     <Build Include="dbo\Views\vyuRKGetAssignPhysicalTransaction.sql" />
-    <Build Include="dbo\Stored Procedures\uspICUnpostInventoryReceiptOtherCharges.sql" />	
+    <Build Include="dbo\Stored Procedures\uspICUnpostInventoryReceiptOtherCharges.sql" />
     <Build Include="dbo\Views\vyuTMLeaseBilling.sql" />
     <Build Include="dbo\Views\vyuTMFailedLeaseBilling.sql" />
+    <None Include="Scripts\Post-Deployment\TM\DefaultData\11_ApplianceType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
