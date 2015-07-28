@@ -632,7 +632,7 @@ SET @strmessage = 'A run for ''%s'' - ''%s'' already exists for %s which is usin
 EXEC sp_addmessage 51157,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51158) EXEC sp_dropmessage 51158, 'us_english'	
-SET @strmessage = 'There is already a run for the date %s and ItemID %s, cannot create one more.'
+SET @strmessage = 'There is already a run/work order for the date %s and %s, cannot create one more in the same shift and date.'
 EXEC sp_addmessage 51158,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51159) EXEC sp_dropmessage 51159, 'us_english'	
@@ -671,3 +671,6 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51167) EXEC sp_dropmessa
 SET @strmessage = 'Unable to unpost the Inventory Receipt. The %s was billed.'
 EXEC sp_addmessage 51167,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51168) EXEC sp_dropmessage 51168, 'us_english'	
+SET @strmessage = 'There is already a run/work order for the date %s and %s, cannot create one more in the same date.'
+EXEC sp_addmessage 51168,11,@strmessage,'us_english','False'
