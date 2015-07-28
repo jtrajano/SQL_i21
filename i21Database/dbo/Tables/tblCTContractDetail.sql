@@ -14,6 +14,11 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intItemId] [int] NULL,
 	[intCategoryId] INT NULL,
 	[dblQuantity] [numeric](12, 4) NOT NULL,
+	[dblOriginalQty] NUMERIC(12, 4) NULL, 
+    [dblBalance] NUMERIC(12, 4) NULL, 
+    [dblIntransitQty] NUMERIC(12, 4) NULL, 
+    [dblScheduleQty] NUMERIC(12, 4) NULL, 
+	[dblNetWeight] NUMERIC(12, 4) NULL, 
 	[intUnitMeasureId] [int] NULL,
 	[intItemUOMId] [int] NULL,	
 	[intCategoryUOMId] INT NULL, 
@@ -48,10 +53,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[strFobBasis] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intRailGradeId] [int] NULL,
 	[strRailRemark] [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
-	[dblOriginalQty] NUMERIC(12, 4) NULL, 
-    [dblBalance] NUMERIC(12, 4) NULL, 
-    [dblIntransitQty] NUMERIC(12, 4) NULL, 
-    [dblScheduleQty] NUMERIC(12, 4) NULL, 
+	
 
 	
     [intLoadingPortId] INT NULL, 
@@ -66,6 +68,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[strGarden] NVARCHAR(128) COLLATE Latin1_General_CI_AS NULL,
 	[strVendorLotID] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strInvoiceNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strReference] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 
 	[intUnitsPerLayer] INT NULL,
 	[intLayersPerPallet] INT NULL,
