@@ -235,6 +235,33 @@ BEGIN
 			,@intTransactionTypeId AS INT = @INVENTORY_RECEIPT_TYPE
 			,@GLEntries AS RecapTableType 
 
+		-- Simulate a posted Inventory Receipt
+		BEGIN 
+			-- Calculate the other charges. 
+			BEGIN 
+				-- Calculate the other charges. 
+				EXEC dbo.uspICCalculateInventoryReceiptOtherCharges
+					@intInventoryReceiptId
+			END 
+
+			-- Calculate the surcharges
+			BEGIN 
+				EXEC dbo.uspICCalculateInventoryReceiptSurchargeOnOtherCharges
+					@intInventoryReceiptId
+			END
+
+			-- Allocate the other charges and surcharges. 
+			BEGIN 
+				EXEC dbo.uspICAllocateInventoryReceiptOtherCharges 
+					@intInventoryReceiptId
+			END 	
+			
+			-- Mark the receipt as posted. 
+			UPDATE dbo.tblICInventoryReceipt
+			SET ysnPosted = 1
+			WHERE intInventoryReceiptId = @intInventoryReceiptId
+		END
+
 		INSERT INTO @GLEntries (
 			[dtmDate] 
 			,[strBatchId]
