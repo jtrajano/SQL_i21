@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryReceiptOtherCharges for missing Other Charge Income GL account]
+﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostInventoryReceiptOtherCharges for test case 5]
 AS
 
 -- Variables from [testi21Database].[Fake inventory items]
@@ -224,7 +224,7 @@ BEGIN
 	
 	-- Assert
 	BEGIN 
-		EXEC tSQLt.ExpectException @ExpectedMessage = 'Other Charges is missing a GL account setup for Other Charge Income account category.'
+		EXEC tSQLt.ExpectNoException;
 	END 
 
 	-- Act
@@ -235,19 +235,267 @@ BEGIN
 			,@intTransactionTypeId AS INT = @INVENTORY_RECEIPT_TYPE
 			,@GLEntries AS RecapTableType 
 
-		-- Remove the GL Account id assigned to Other Charges
-		UPDATE	dbo.tblICItemAccount
-		SET		intAccountId = NULL 
-		WHERE	intItemId = @OtherCharges
-				AND intAccountCategoryId = (SELECT intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Other Charge Income')
+		-- Simulate a posted Inventory Receipt
+		BEGIN 
+			-- Modify the other charges in the transaction to use Allocate by Units. 
+			UPDATE dbo.tblICInventoryReceiptCharge
+			SET strAllocateCostBy = @ALLOCATE_COST_BY_Unit
+			WHERE intInventoryReceiptId = @intInventoryReceiptId
 
-		EXEC dbo.uspICPostInventoryReceiptOtherCharges 
+			-- Calculate the other charges. 
+			BEGIN 
+				-- Calculate the other charges. 
+				EXEC dbo.uspICCalculateInventoryReceiptOtherCharges
+					@intInventoryReceiptId
+			END 
+
+			-- Calculate the surcharges
+			BEGIN 
+				EXEC dbo.uspICCalculateInventoryReceiptSurchargeOnOtherCharges
+					@intInventoryReceiptId
+			END
+
+			-- Allocate the other charges and surcharges. 
+			BEGIN 
+				EXEC dbo.uspICAllocateInventoryReceiptOtherCharges 
+					@intInventoryReceiptId
+			END 	
+			
+			-- Mark the receipt as posted. 
+			UPDATE dbo.tblICInventoryReceipt
+			SET ysnPosted = 1
+			WHERE intInventoryReceiptId = @intInventoryReceiptId
+		END
+
+		INSERT INTO @GLEntries (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+		)		
+		EXEC dbo.uspICUnpostInventoryReceiptOtherCharges 
 			@intInventoryReceiptId
 			,@strBatchId
 			,@intUserId
 			,@intTransactionTypeId
 	END 
- 
+
+	-- Setup the expected data
+	BEGIN 
+		INSERT INTO expected (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]		
+		)
+		SELECT 
+			[dtmDate]					= '2014-01-22'
+			,[strBatchId]				= @strBatchId
+			,[intAccountId]				= @Inventory_Default
+			,[dblDebit]					= 0
+			,[dblCredit]				= 951.925000
+			,[dblDebitUnit]				= 0
+			,[dblCreditUnit]			= 0
+			,[strDescription]			= 'INVENTORY WHEAT-DEFAULT'
+			,[strCode]					= 'IC'
+			,[strReference]				= ''
+			,[intCurrencyId]			= 1
+			,[dblExchangeRate]			= 1
+			,[dtmDateEntered]			= dbo.fnRemoveTimeOnDate(GETDATE())
+			,[dtmTransactionDate]		= '2014-01-22'
+			,[strJournalLineDescription] = ''
+			,[intJournalLineNo]			= 33
+			,[ysnIsUnposted]			= 0
+			,[intUserId]				= 1
+			,[intEntityId]				= 1 
+			,[strTransactionId]			= 'INVRCPT-XXXX14'
+			,[intTransactionId]			= @intInventoryReceiptId
+			,[strTransactionType]		= 'Inventory Receipt'
+			,[strTransactionForm]		= 'Inventory Receipt'
+			,[strModuleName]			= 'Inventory'
+			,[intConcurrencyId]			= 1
+		UNION ALL
+		SELECT 
+			[dtmDate]					= '2014-01-22'
+			,[strBatchId]				= @strBatchId
+			,[intAccountId]				= @APClearing_Default
+			,[dblDebit]					= 951.925000
+			,[dblCredit]				= 0
+			,[dblDebitUnit]				= 0
+			,[dblCreditUnit]			= 0
+			,[strDescription]			= 'AP CLEARING WHEAT-DEFAULT'
+			,[strCode]					= 'IC'
+			,[strReference]				= ''
+			,[intCurrencyId]			= 1
+			,[dblExchangeRate]			= 1
+			,[dtmDateEntered]			= dbo.fnRemoveTimeOnDate(GETDATE())
+			,[dtmTransactionDate]		= '2014-01-22'
+			,[strJournalLineDescription] = ''
+			,[intJournalLineNo]			= 33
+			,[ysnIsUnposted]			= 0
+			,[intUserId]				= 1
+			,[intEntityId]				= 1 
+			,[strTransactionId]			= 'INVRCPT-XXXX14'
+			,[intTransactionId]			= @intInventoryReceiptId
+			,[strTransactionType]		= 'Inventory Receipt'
+			,[strTransactionForm]		= 'Inventory Receipt'
+			,[strModuleName]			= 'Inventory'
+			,[intConcurrencyId]			= 1
+		UNION ALL 
+		SELECT 
+			[dtmDate]					= '2014-01-22'
+			,[strBatchId]				= @strBatchId
+			,[intAccountId]				= @Inventory_Default
+			,[dblDebit]					= 0
+			,[dblCredit]				= 1903.850000
+			,[dblDebitUnit]				= 0
+			,[dblCreditUnit]			= 0
+			,[strDescription]			= 'INVENTORY WHEAT-DEFAULT'
+			,[strCode]					= 'IC'
+			,[strReference]				= ''
+			,[intCurrencyId]			= 1
+			,[dblExchangeRate]			= 1
+			,[dtmDateEntered]			= dbo.fnRemoveTimeOnDate(GETDATE())
+			,[dtmTransactionDate]		= '2014-01-22'
+			,[strJournalLineDescription] = ''
+			,[intJournalLineNo]			= 34
+			,[ysnIsUnposted]			= 0
+			,[intUserId]				= 1
+			,[intEntityId]				= 1 
+			,[strTransactionId]			= 'INVRCPT-XXXX14'
+			,[intTransactionId]			= @intInventoryReceiptId
+			,[strTransactionType]		= 'Inventory Receipt'
+			,[strTransactionForm]		= 'Inventory Receipt'
+			,[strModuleName]			= 'Inventory'
+			,[intConcurrencyId]			= 1
+		UNION ALL
+		SELECT 
+			[dtmDate]					= '2014-01-22'
+			,[strBatchId]				= @strBatchId
+			,[intAccountId]				= @APClearing_Default
+			,[dblDebit]					= 1903.850000
+			,[dblCredit]				= 0
+			,[dblDebitUnit]				= 0
+			,[dblCreditUnit]			= 0
+			,[strDescription]			= 'AP CLEARING WHEAT-DEFAULT'
+			,[strCode]					= 'IC'
+			,[strReference]				= ''
+			,[intCurrencyId]			= 1
+			,[dblExchangeRate]			= 1
+			,[dtmDateEntered]			= dbo.fnRemoveTimeOnDate(GETDATE())
+			,[dtmTransactionDate]		= '2014-01-22'
+			,[strJournalLineDescription] = ''
+			,[intJournalLineNo]			= 34
+			,[ysnIsUnposted]			= 0
+			,[intUserId]				= 1
+			,[intEntityId]				= 1 
+			,[strTransactionId]			= 'INVRCPT-XXXX14'
+			,[intTransactionId]			= @intInventoryReceiptId
+			,[strTransactionType]		= 'Inventory Receipt'
+			,[strTransactionForm]		= 'Inventory Receipt'
+			,[strModuleName]			= 'Inventory'
+			,[intConcurrencyId]			= 1
+	END 
+
+	-- Get the actual data
+	BEGIN 
+		INSERT INTO actual (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]		
+		)
+		SELECT 
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,dbo.fnRemoveTimeOnDate([dtmDateEntered]) 
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]		
+		FROM @GLEntries
+	END 
 
 	-- Assert
 	BEGIN 

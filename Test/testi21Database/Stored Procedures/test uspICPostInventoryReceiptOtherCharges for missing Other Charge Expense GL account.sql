@@ -230,7 +230,6 @@ BEGIN
 	-- Act
 	BEGIN 
 		DECLARE @intInventoryReceiptId AS INT = 14 -- 'INVRCPT-XXXX14'
-			,@ysnPost AS BIT = 1
 			,@strBatchId AS NVARCHAR(20) = 'BATCH-100001'
 			,@intUserId AS INT = 1
 			,@intTransactionTypeId AS INT = @INVENTORY_RECEIPT_TYPE
@@ -244,7 +243,6 @@ BEGIN
 
 		EXEC dbo.uspICPostInventoryReceiptOtherCharges 
 			@intInventoryReceiptId
-			,@ysnPost
 			,@strBatchId
 			,@intUserId
 			,@intTransactionTypeId

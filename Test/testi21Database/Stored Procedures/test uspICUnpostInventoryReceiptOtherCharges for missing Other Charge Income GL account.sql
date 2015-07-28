@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryReceiptOtherCharges for missing Other Charge Income GL account]
+﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostInventoryReceiptOtherCharges for missing Other Charge Income GL account]
 AS
 
 -- Variables from [testi21Database].[Fake inventory items]
@@ -241,7 +241,7 @@ BEGIN
 		WHERE	intItemId = @OtherCharges
 				AND intAccountCategoryId = (SELECT intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Other Charge Income')
 
-		EXEC dbo.uspICPostInventoryReceiptOtherCharges 
+		EXEC dbo.uspICUnpostInventoryReceiptOtherCharges 
 			@intInventoryReceiptId
 			,@strBatchId
 			,@intUserId

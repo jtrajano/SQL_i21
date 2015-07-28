@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryReceiptOtherCharges for missing Other Charge Income GL account]
+﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostInventoryReceiptOtherCharges for missing Other Charge Expense GL account]
 AS
 
 -- Variables from [testi21Database].[Fake inventory items]
@@ -224,7 +224,7 @@ BEGIN
 	
 	-- Assert
 	BEGIN 
-		EXEC tSQLt.ExpectException @ExpectedMessage = 'Other Charges is missing a GL account setup for Other Charge Income account category.'
+		EXEC tSQLt.ExpectException @ExpectedMessage = 'Other Charges is missing a GL account setup for Other Charge Expense account category.'
 	END 
 
 	-- Act
@@ -239,9 +239,9 @@ BEGIN
 		UPDATE	dbo.tblICItemAccount
 		SET		intAccountId = NULL 
 		WHERE	intItemId = @OtherCharges
-				AND intAccountCategoryId = (SELECT intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Other Charge Income')
+				AND intAccountCategoryId = (SELECT intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Other Charge Expense')
 
-		EXEC dbo.uspICPostInventoryReceiptOtherCharges 
+		EXEC dbo.uspICUnpostInventoryReceiptOtherCharges 
 			@intInventoryReceiptId
 			,@strBatchId
 			,@intUserId

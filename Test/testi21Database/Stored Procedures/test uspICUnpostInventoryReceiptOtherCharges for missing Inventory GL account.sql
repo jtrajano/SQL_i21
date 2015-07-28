@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryReceiptOtherCharges for missing Other Charge Income GL account]
+﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostInventoryReceiptOtherCharges for missing Inventory GL account]
 AS
 
 -- Variables from [testi21Database].[Fake inventory items]
@@ -224,7 +224,7 @@ BEGIN
 	
 	-- Assert
 	BEGIN 
-		EXEC tSQLt.ExpectException @ExpectedMessage = 'Other Charges is missing a GL account setup for Other Charge Income account category.'
+		EXEC tSQLt.ExpectException @ExpectedMessage = 'MANUAL LOT GRAINS is missing a GL account setup for Inventory account category.'
 	END 
 
 	-- Act
@@ -235,13 +235,28 @@ BEGIN
 			,@intTransactionTypeId AS INT = @INVENTORY_RECEIPT_TYPE
 			,@GLEntries AS RecapTableType 
 
-		-- Remove the GL Account id assigned to Other Charges
-		UPDATE	dbo.tblICItemAccount
-		SET		intAccountId = NULL 
-		WHERE	intItemId = @OtherCharges
-				AND intAccountCategoryId = (SELECT intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Other Charge Income')
+		-- Remove the GL Account id assigned to Manual Lot Grains and from the other sources of the Inventory account id. 
+		BEGIN 
+			UPDATE	dbo.tblICItemAccount
+			SET		intAccountId = NULL 
+			WHERE	intItemId = @ManualLotGrains
+					AND intAccountCategoryId = (SELECT intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Inventory')
 
-		EXEC dbo.uspICPostInventoryReceiptOtherCharges 
+			UPDATE  dbo.tblICCategoryAccount
+			SET		intAccountId = NULL 
+			WHERE	intAccountCategoryId = (SELECT intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Inventory')
+
+			UPDATE  dbo.tblICCommodityAccount
+			SET		intAccountId = NULL 
+			WHERE	intAccountCategoryId = (SELECT intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Inventory')
+				
+			UPDATE	tblSMCompanyLocation 
+			SET		intInventory = NULL 
+			FROM	tblSMCompanyLocation 
+			WHERE	intCompanyLocationId = @Default_Location
+		END 
+
+		EXEC dbo.uspICUnpostInventoryReceiptOtherCharges 
 			@intInventoryReceiptId
 			,@strBatchId
 			,@intUserId

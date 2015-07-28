@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryReceiptOtherCharges for missing Other Charge Income GL account]
+﻿CREATE PROCEDURE [testi21Database].[test uspICUnpostInventoryReceiptOtherCharges for unposting a billed other charge]
 AS
 
 -- Variables from [testi21Database].[Fake inventory items]
@@ -224,7 +224,7 @@ BEGIN
 	
 	-- Assert
 	BEGIN 
-		EXEC tSQLt.ExpectException @ExpectedMessage = 'Other Charges is missing a GL account setup for Other Charge Income account category.'
+		EXEC tSQLt.ExpectException @ExpectedMessage = 'Unable to unpost the Inventory Receipt. The Other Charges was billed.'
 	END 
 
 	-- Act
@@ -235,20 +235,84 @@ BEGIN
 			,@intTransactionTypeId AS INT = @INVENTORY_RECEIPT_TYPE
 			,@GLEntries AS RecapTableType 
 
-		-- Remove the GL Account id assigned to Other Charges
-		UPDATE	dbo.tblICItemAccount
-		SET		intAccountId = NULL 
-		WHERE	intItemId = @OtherCharges
-				AND intAccountCategoryId = (SELECT intAccountCategoryId FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Other Charge Income')
-
+		INSERT INTO @GLEntries (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+		)	
 		EXEC dbo.uspICPostInventoryReceiptOtherCharges 
+			@intInventoryReceiptId
+			,@strBatchId
+			,@intUserId
+			,@intTransactionTypeId
+		
+		-- Simulate a billed other charge
+		BEGIN 
+			UPDATE	dbo.tblICInventoryReceiptItemAllocatedCharge
+			SET		dblAmountBilled = 10
+			WHERE	intInventoryReceiptId = @intInventoryReceiptId
+
+			UPDATE	dbo.tblICInventoryReceipt
+			SET		ysnPosted = 1
+			WHERE	intInventoryReceiptId = @intInventoryReceiptId
+		END 
+
+		INSERT INTO @GLEntries (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+		)	
+		EXEC dbo.uspICUnpostInventoryReceiptOtherCharges 
 			@intInventoryReceiptId
 			,@strBatchId
 			,@intUserId
 			,@intTransactionTypeId
 	END 
  
-
 	-- Assert
 	BEGIN 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';

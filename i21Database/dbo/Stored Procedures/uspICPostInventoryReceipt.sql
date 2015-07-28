@@ -435,6 +435,43 @@ BEGIN
 					,@intUserId
 		END
 	END
+
+	-- Process the Other Charges
+	BEGIN 
+		INSERT INTO @GLEntries (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+		)	
+		EXEC dbo.uspICPostInventoryReceiptOtherCharges 
+			@intTransactionId
+			,@strBatchId
+			,@intUserId
+			,@INVENTORY_RECEIPT_TYPE
+			
+	END 
 END   
 
 --------------------------------------------------------------------------------------------  
@@ -476,7 +513,44 @@ BEGIN
 				@intTransactionId
 				,@strTransactionId
 				,@strBatchId
-				,@intUserId						
+				,@intUserId		
+				
+		-- Unpost the Other Charges
+		BEGIN 
+			INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+			)	
+			EXEC dbo.uspICUnpostInventoryReceiptOtherCharges 
+				@intTransactionId
+				,@strBatchId
+				,@intUserId
+				,@INVENTORY_RECEIPT_TYPE
+			
+		END 								
 	END 
 END   
 

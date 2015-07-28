@@ -2070,6 +2070,7 @@
     <Build Include="dbo\User Defined Types\ItemOtherChargesGLAccount.sql" />
     <Build Include="dbo\Views\vyuTRTansportReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGetItemTaxes.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostInventoryReceiptOtherCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

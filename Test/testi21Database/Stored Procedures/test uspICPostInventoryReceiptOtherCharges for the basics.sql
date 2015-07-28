@@ -131,7 +131,6 @@ BEGIN
 	-- Act
 	BEGIN 
 		DECLARE @intInventoryReceiptId AS INT 
-			,@ysnPost AS BIT 
 			,@strBatchId AS NVARCHAR(20)
 			,@intUserId AS INT
 			,@intTransactionTypeId AS INT 
@@ -143,8 +142,7 @@ BEGIN
 			,[intAccountId]
 			,[dblDebit]
 			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
+			,[dblDebitUnit],[dblCreditUnit]
 			,[strDescription]
 			,[strCode]
 			,[strReference]
@@ -166,7 +164,6 @@ BEGIN
 		)		
 		EXEC dbo.uspICPostInventoryReceiptOtherCharges 
 			@intInventoryReceiptId
-			,@ysnPost
 			,@strBatchId
 			,@intUserId
 			,@intTransactionTypeId

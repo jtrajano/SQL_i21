@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspICPostInventoryReceiptOtherCharges]
+﻿CREATE PROCEDURE [dbo].[uspICUnpostInventoryReceiptOtherCharges]
 	@intInventoryReceiptId AS INT 
 	,@strBatchId AS NVARCHAR(20)
 	,@intUserId AS INT
@@ -15,24 +15,30 @@ BEGIN
 	DECLARE @strItemNo AS NVARCHAR(50)
 			,@intItemId AS INT 
 END 
+
+BEGIN 
+	-- Validate if other charge was billed. If billed, do not allow the unpost of the inventory receipt. 
+	SET @strItemNo = NULL
+	SET @intItemId = NULL 
 	
--- Calculate the other charges. 
-BEGIN 
-	-- Calculate the other charges. 
-	EXEC dbo.uspICCalculateInventoryReceiptOtherCharges
-		@intInventoryReceiptId
-END 
+	SELECT	@strItemNo = Item.strItemNo
+			,@intItemId = Item.intItemId
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItemAllocatedCharge AllocatedCharge 
+				ON Receipt.intInventoryReceiptId = AllocatedCharge.intInventoryReceiptId
+			INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
+				ON AllocatedCharge.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+			INNER JOIN dbo.tblICItem Item
+				ON Item.intItemId = ReceiptCharge.intChargeId
+	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId 
+			AND Receipt.ysnPosted = 1
+			AND ISNULL(AllocatedCharge.dblAmountBilled, 0) > 0
 
--- Calculate the surcharges
-BEGIN 
-	EXEC dbo.uspICCalculateInventoryReceiptSurchargeOnOtherCharges
-		@intInventoryReceiptId
-END
-
--- Allocate the other charges and surcharges. 
-BEGIN 
-	EXEC dbo.uspICAllocateInventoryReceiptOtherCharges 
-		@intInventoryReceiptId
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		-- 'Unable to unpost the Inventory Receipt. The {Other Charge} was billed.'
+		RAISERROR(51167, 11, 1, @strItemNo) 	
+		GOTO _Exit
+	END
 END 
 
 -- Create the G/L Entries
@@ -281,15 +287,15 @@ BEGIN
 	-- Cost billed by: Vendor
 	-- Add cost to inventory: Yes
 	-- 
-	-- Dr...... Inventory
-	-- Cr..................... AP Clearing
+	-- Dr...... AP Clearing
+	-- Cr..................... Inventory
 	-------------------------------------------------------------------------------------------
 	SELECT	
 			dtmDate						= ForGLEntries_CTE.dtmDate
 			,strBatchId					= @strBatchId
 			,intAccountId				= GLAccount.intAccountId
-			,dblDebit					= Debit.Value
-			,dblCredit					= Credit.Value
+			,dblDebit					= Credit.Value
+			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= GLAccount.strDescription
@@ -326,8 +332,8 @@ BEGIN
 			dtmDate						= ForGLEntries_CTE.dtmDate
 			,strBatchId					= @strBatchId
 			,intAccountId				= GLAccount.intAccountId
-			,dblDebit					= Credit.Value
-			,dblCredit					= Debit.Value
+			,dblDebit					= Debit.Value
+			,dblCredit					= Credit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= GLAccount.strDescription
@@ -362,16 +368,16 @@ BEGIN
 	-- Cost billed by: Third Party
 	-- Add cost to inventory: Yes
 	-- 
-	-- Dr...... Inventory
-	-- Cr..................... AP Clearing
+	-- Dr...... AP Clearing
+	-- Cr..................... Inventory
 	-------------------------------------------------------------------------------------------
 	UNION ALL 
 	SELECT	
 			dtmDate						= ForGLEntries_CTE.dtmDate
 			,strBatchId					= @strBatchId
 			,intAccountId				= GLAccount.intAccountId
-			,dblDebit					= Debit.Value
-			,dblCredit					= Credit.Value
+			,dblDebit					= Credit.Value
+			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= GLAccount.strDescription
@@ -408,8 +414,8 @@ BEGIN
 			dtmDate						= ForGLEntries_CTE.dtmDate
 			,strBatchId					= @strBatchId
 			,intAccountId				= GLAccount.intAccountId
-			,dblDebit					= Credit.Value
-			,dblCredit					= Debit.Value
+			,dblDebit					= Debit.Value
+			,dblCredit					= Credit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= GLAccount.strDescription
@@ -444,16 +450,16 @@ BEGIN
 	-- Cost billed by: None
 	-- Add cost to inventory: Yes
 	-- 
-	-- Dr...... Inventory
-	-- Cr..................... Freight Income 
+	-- Dr...... Freight Income 
+	-- Cr..................... Inventory
 	-------------------------------------------------------------------------------------------
 	UNION ALL 
 	SELECT	
 			dtmDate						= ForGLEntries_CTE.dtmDate
 			,strBatchId					= @strBatchId
 			,intAccountId				= GLAccount.intAccountId
-			,dblDebit					= Debit.Value
-			,dblCredit					= Credit.Value
+			,dblDebit					= Credit.Value
+			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= GLAccount.strDescription
@@ -490,8 +496,8 @@ BEGIN
 			dtmDate						= ForGLEntries_CTE.dtmDate
 			,strBatchId					= @strBatchId
 			,intAccountId				= GLAccount.intAccountId
-			,dblDebit					= Credit.Value
-			,dblCredit					= Debit.Value
+			,dblDebit					= Debit.Value
+			,dblCredit					= Credit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= GLAccount.strDescription
@@ -526,16 +532,16 @@ BEGIN
 	-- Cost billed by: None
 	-- Add cost to inventory: No
 	-- 
-	-- Dr...... Freight Expense
-	-- Cr..................... Freight Income 
+	-- Dr...... Freight Income 
+	-- Cr..................... Freight Expense
 	-------------------------------------------------------------------------------------------
 	UNION ALL 
 	SELECT	
 			dtmDate						= ForGLEntries_CTE.dtmDate
 			,strBatchId					= @strBatchId
 			,intAccountId				= GLAccount.intAccountId
-			,dblDebit					= Debit.Value
-			,dblCredit					= Credit.Value
+			,dblDebit					= Credit.Value
+			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= GLAccount.strDescription
@@ -571,8 +577,8 @@ BEGIN
 			dtmDate						= ForGLEntries_CTE.dtmDate
 			,strBatchId					= @strBatchId
 			,intAccountId				= GLAccount.intAccountId
-			,dblDebit					= Credit.Value
-			,dblCredit					= Debit.Value
+			,dblDebit					= Debit.Value
+			,dblCredit					= Credit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
 			,strDescription				= GLAccount.strDescription
