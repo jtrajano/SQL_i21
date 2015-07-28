@@ -296,7 +296,7 @@ IF (@ItemId IS NOT NULL OR @ItemId <> 0)
 			,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
 			,@ItemServiceChargeAccountId	= @ItemServiceChargeAccountId
 			
-			IF (@AddDetailError IS NOT NULL AND RTRIM(LTRIM(@AddDetailError)) = '')
+			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
 					ROLLBACK TRANSACTION
 					SET @ErrorMessage = @AddDetailError;
