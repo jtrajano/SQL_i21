@@ -256,7 +256,6 @@ BEGIN
 									ELSE 
 										DetailItem.dblUnitCost + dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 							END 
-
 				,dblSalesPrice = 0  
 				,intCurrencyId = Header.intCurrencyId  
 				,dblExchangeRate = 1  

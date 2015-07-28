@@ -13,6 +13,7 @@ BEGIN
 	FROM	dbo.tblICInventoryReceiptItem ReceiptItems INNER JOIN dbo.tblICInventoryReceiptItemAllocatedCharge ItemOtherCharges
 				ON ReceiptItems.intInventoryReceiptId = ItemOtherCharges.intInventoryReceiptId
 	WHERE	ReceiptItems.intInventoryReceiptItemId = @intInventoryReceiptItemId
+			AND ItemOtherCharges.ysnInventoryCost = 1
 
 	IF @units <> 0 
 		RETURN	ISNULL(@totalOtherCharges / @units, 0);
