@@ -44,59 +44,59 @@ GO
 
 -- Control Point
 GO
-IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE strControlPointName = 'Offer Sample')
+IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE intControlPointId = 1)
 BEGIN
-	INSERT INTO tblQMControlPoint(strControlPointName,strDescription)
-	VALUES('Offer Sample','Offer Sample')
+	INSERT INTO tblQMControlPoint(intControlPointId,strControlPointName,strDescription)
+	VALUES(1,'Offer Sample','Offer Sample')
 END
 GO
 GO
-IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE strControlPointName = 'Approval Sample')
+IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE intControlPointId = 2)
 BEGIN
-	INSERT INTO tblQMControlPoint(strControlPointName,strDescription)
-	VALUES('Approval Sample','Approval Sample')
+	INSERT INTO tblQMControlPoint(intControlPointId,strControlPointName,strDescription)
+	VALUES(2,'Approval Sample','Approval Sample')
 END
 GO
 GO
-IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE strControlPointName = 'Inspection')
+IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE intControlPointId = 3)
 BEGIN
-	INSERT INTO tblQMControlPoint(strControlPointName,strDescription)
-	VALUES('Inspection','Inspection')
+	INSERT INTO tblQMControlPoint(intControlPointId,strControlPointName,strDescription)
+	VALUES(3,'Inspection','Inspection')
 END
 GO
 GO
-IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE strControlPointName = 'Inventory Quality')
+IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE intControlPointId = 4)
 BEGIN
-	INSERT INTO tblQMControlPoint(strControlPointName,strDescription)
-	VALUES('Inventory Quality','Inventory Quality')
+	INSERT INTO tblQMControlPoint(intControlPointId,strControlPointName,strDescription)
+	VALUES(4,'Inventory Quality','Inventory Quality')
 END
 GO
 GO
-IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE strControlPointName = 'Receipt Sample')
+IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE intControlPointId = 5)
 BEGIN
-	INSERT INTO tblQMControlPoint(strControlPointName,strDescription)
-	VALUES('Receipt Sample','Receipt Sample')
+	INSERT INTO tblQMControlPoint(intControlPointId,strControlPointName,strDescription)
+	VALUES(5,'Receipt Sample','Receipt Sample')
 END
 GO
 GO
-IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE strControlPointName = 'Production')
+IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE intControlPointId = 6)
 BEGIN
-	INSERT INTO tblQMControlPoint(strControlPointName,strDescription)
-	VALUES('Production','Production')
+	INSERT INTO tblQMControlPoint(intControlPointId,strControlPointName,strDescription)
+	VALUES(6,'Production','Production')
 END
 GO
 GO
-IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE strControlPointName = 'Production Computed')
+IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE intControlPointId = 7)
 BEGIN
-	INSERT INTO tblQMControlPoint(strControlPointName,strDescription)
-	VALUES('Production Computed','Production Computed')
+	INSERT INTO tblQMControlPoint(intControlPointId,strControlPointName,strDescription)
+	VALUES(7,'Production Computed','Production Computed')
 END
 GO
 GO
-IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE strControlPointName = 'Shipping')
+IF NOT EXISTS(SELECT 1 FROM tblQMControlPoint WHERE intControlPointId = 8)
 BEGIN
-	INSERT INTO tblQMControlPoint(strControlPointName,strDescription)
-	VALUES('Shipping','Shipping')
+	INSERT INTO tblQMControlPoint(intControlPointId,strControlPointName,strDescription)
+	VALUES(8,'Shipping','Shipping')
 END
 GO
 
