@@ -156,7 +156,7 @@ BEGIN
 	BEGIN 
 		DECLARE @intInventoryReceiptId AS INT = 14 -- 'INVRCPT-XXXX14'
 		
-		-- Modify the other charges in the transaction to use Allocate by Units. 
+		-- Modify the other charges in the transaction to use Allocate by Weight. 
 		UPDATE dbo.tblICInventoryReceiptCharge
 		SET strAllocateCostBy = @ALLOCATE_COST_BY_Weight
 		WHERE intInventoryReceiptId = @intInventoryReceiptId

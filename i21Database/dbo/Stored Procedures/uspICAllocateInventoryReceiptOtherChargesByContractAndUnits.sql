@@ -73,7 +73,7 @@ BEGIN
 				) CalculatedCharges 
 					ON CalculatedCharges.intContractId = ReceiptItem.intOrderId 
 				LEFT JOIN (
-					SELECT	dblTotalUnits = SUM(dbo.fnCalculateStockUnitQty(ReceiptItem.dblOpenReceive, ItemUOM.dblUnitQty))
+					SELECT	dblTotalUnits = SUM(ReceiptItem.dblOpenReceive)
 							,ReceiptItem.intOrderId 
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -96,7 +96,7 @@ BEGIN
 		UPDATE 
 		SET		dblAmount = ISNULL(dblAmount, 0) + (
 					Source_Query.dblTotalOtherCharge
-					* dbo.fnCalculateStockUnitQty(Source_Query.dblOpenReceive, Source_Query.dblUnitQty)
+					* Source_Query.dblOpenReceive
 					/ Source_Query.dblTotalUnits 
 				)
 
@@ -118,7 +118,7 @@ BEGIN
 			,Source_Query.intEntityVendorId
 			,(
 				Source_Query.dblTotalOtherCharge
-				* dbo.fnCalculateStockUnitQty(Source_Query.dblOpenReceive, Source_Query.dblUnitQty)
+				* Source_Query.dblOpenReceive
 				/ Source_Query.dblTotalUnits 
 			)
 			,Source_Query.strCostBilledBy

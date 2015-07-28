@@ -154,9 +154,9 @@ BEGIN
 		SELECT	TOP 1 
 				@intItemId = Item.intItemId 
 				,@strItemNo = Item.strItemNo
-		FROM	dbo.tblICItem Item INNER JOIN @OtherChargesGLAccounts ItemGLAccount
-					ON Item.intItemId = ItemGLAccount.intChargeId
-		WHERE	ItemGLAccount.intOtherChargeExpense IS NULL 			
+		FROM	dbo.tblICItem Item INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts
+					ON Item.intItemId = ChargesGLAccounts.intChargeId
+		WHERE	ChargesGLAccounts.intOtherChargeExpense IS NULL 			
 			
 		IF @intItemId IS NOT NULL 
 		BEGIN 
@@ -175,9 +175,9 @@ BEGIN
 		SELECT	TOP 1 
 				@intItemId = Item.intItemId 
 				,@strItemNo = Item.strItemNo
-		FROM	dbo.tblICItem Item INNER JOIN @OtherChargesGLAccounts ItemGLAccount
-					ON Item.intItemId = ItemGLAccount.intChargeId
-		WHERE	ItemGLAccount.intOtherChargeIncome IS NULL 			
+		FROM	dbo.tblICItem Item INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts
+					ON Item.intItemId = ChargesGLAccounts.intChargeId
+		WHERE	ChargesGLAccounts.intOtherChargeIncome IS NULL 			
 			
 		IF @intItemId IS NOT NULL 
 		BEGIN 
@@ -196,9 +196,9 @@ BEGIN
 		SELECT	TOP 1 
 				@intItemId = Item.intItemId 
 				,@strItemNo = Item.strItemNo
-		FROM	dbo.tblICItem Item INNER JOIN @OtherChargesGLAccounts ItemGLAccount
-					ON Item.intItemId = ItemGLAccount.intChargeId
-		WHERE	ItemGLAccount.intOtherChargeAsset IS NULL 			
+		FROM	dbo.tblICItem Item INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts
+					ON Item.intItemId = ChargesGLAccounts.intChargeId
+		WHERE	ChargesGLAccounts.intOtherChargeAsset IS NULL 			
 			
 		IF @intItemId IS NOT NULL 
 		BEGIN 

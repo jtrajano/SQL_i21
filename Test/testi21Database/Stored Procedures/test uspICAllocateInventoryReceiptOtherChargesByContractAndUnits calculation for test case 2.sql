@@ -184,14 +184,14 @@ BEGIN
 		SELECT	[intInventoryReceiptId]			= @intInventoryReceiptId
 				,[intInventoryReceiptItemId]	= 35
 				,[intEntityVendorId]			= NULL 
-				,[dblAmount]					= 2755.775000
+				,[dblAmount]					= 951.925000
 				,[strCostBilledBy]				= @COST_BILLED_BY_Vendor
 				,[ysnInventoryCost]				= @INVENTORY_COST_Yes
 		UNION ALL 
 		SELECT	[intInventoryReceiptId]			= @intInventoryReceiptId
 				,[intInventoryReceiptItemId]	= 36
 				,[intEntityVendorId]			= NULL 
-				,[dblAmount]					= 100.000000
+				,[dblAmount]					= 1903.850000
 				,[strCostBilledBy]				= @COST_BILLED_BY_Vendor
 				,[ysnInventoryCost]				= @INVENTORY_COST_Yes
 	END

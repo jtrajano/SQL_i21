@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryReceiptOtherCharges for test case 1]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryReceiptOtherCharges for test case 4]
 AS
 
 -- Variables from [testi21Database].[Fake inventory items]
@@ -229,7 +229,7 @@ BEGIN
 
 	-- Act
 	BEGIN 
-		DECLARE @intInventoryReceiptId AS INT = 15 -- 'INVRCPT-XXXX15'
+		DECLARE @intInventoryReceiptId AS INT = 14 -- 'INVRCPT-XXXX14'
 			,@ysnPost AS BIT = 1
 			,@strBatchId AS NVARCHAR(20) = 'BATCH-100001'
 			,@intUserId AS INT = 1
@@ -301,7 +301,7 @@ BEGIN
 			,[intConcurrencyId]		
 		)
 		SELECT 
-			[dtmDate]					= '2014-01-23'
+			[dtmDate]					= '2014-01-22'
 			,[strBatchId]				= @strBatchId
 			,[intAccountId]				= @Inventory_Default
 			,[dblDebit]					= 856.732500
@@ -314,21 +314,21 @@ BEGIN
 			,[intCurrencyId]			= 1
 			,[dblExchangeRate]			= 1
 			,[dtmDateEntered]			= dbo.fnRemoveTimeOnDate(GETDATE())
-			,[dtmTransactionDate]		= '2014-01-23'
+			,[dtmTransactionDate]		= '2014-01-22'
 			,[strJournalLineDescription] = ''
-			,[intJournalLineNo]			= 35
+			,[intJournalLineNo]			= 33
 			,[ysnIsUnposted]			= 0
 			,[intUserId]				= 1
 			,[intEntityId]				= 1 
-			,[strTransactionId]			= 'INVRCPT-XXXX15'
-			,[intTransactionId]			= 15
+			,[strTransactionId]			= 'INVRCPT-XXXX14'
+			,[intTransactionId]			= @intInventoryReceiptId
 			,[strTransactionType]		= 'Inventory Receipt'
 			,[strTransactionForm]		= 'Inventory Receipt'
 			,[strModuleName]			= 'Inventory'
 			,[intConcurrencyId]			= 1
 		UNION ALL
 		SELECT 
-			[dtmDate]					= '2014-01-23'
+			[dtmDate]					= '2014-01-22'
 			,[strBatchId]				= @strBatchId
 			,[intAccountId]				= @APClearing_Default
 			,[dblDebit]					= 0
@@ -341,21 +341,21 @@ BEGIN
 			,[intCurrencyId]			= 1
 			,[dblExchangeRate]			= 1
 			,[dtmDateEntered]			= dbo.fnRemoveTimeOnDate(GETDATE())
-			,[dtmTransactionDate]		= '2014-01-23'
+			,[dtmTransactionDate]		= '2014-01-22'
 			,[strJournalLineDescription] = ''
-			,[intJournalLineNo]			= 35
+			,[intJournalLineNo]			= 33
 			,[ysnIsUnposted]			= 0
 			,[intUserId]				= 1
 			,[intEntityId]				= 1 
-			,[strTransactionId]			= 'INVRCPT-XXXX15'
-			,[intTransactionId]			= 15
+			,[strTransactionId]			= 'INVRCPT-XXXX14'
+			,[intTransactionId]			= @intInventoryReceiptId
 			,[strTransactionType]		= 'Inventory Receipt'
 			,[strTransactionForm]		= 'Inventory Receipt'
 			,[strModuleName]			= 'Inventory'
 			,[intConcurrencyId]			= 1
 		UNION ALL 
 		SELECT 
-			[dtmDate]					= '2014-01-23'
+			[dtmDate]					= '2014-01-22'
 			,[strBatchId]				= @strBatchId
 			,[intAccountId]				= @Inventory_Default
 			,[dblDebit]					= 1999.042500
@@ -368,21 +368,21 @@ BEGIN
 			,[intCurrencyId]			= 1
 			,[dblExchangeRate]			= 1
 			,[dtmDateEntered]			= dbo.fnRemoveTimeOnDate(GETDATE())
-			,[dtmTransactionDate]		= '2014-01-23'
+			,[dtmTransactionDate]		= '2014-01-22'
 			,[strJournalLineDescription] = ''
-			,[intJournalLineNo]			= 36
+			,[intJournalLineNo]			= 34
 			,[ysnIsUnposted]			= 0
 			,[intUserId]				= 1
 			,[intEntityId]				= 1 
-			,[strTransactionId]			= 'INVRCPT-XXXX15'
-			,[intTransactionId]			= 15
+			,[strTransactionId]			= 'INVRCPT-XXXX14'
+			,[intTransactionId]			= @intInventoryReceiptId
 			,[strTransactionType]		= 'Inventory Receipt'
 			,[strTransactionForm]		= 'Inventory Receipt'
 			,[strModuleName]			= 'Inventory'
 			,[intConcurrencyId]			= 1
 		UNION ALL
 		SELECT 
-			[dtmDate]					= '2014-01-23'
+			[dtmDate]					= '2014-01-22'
 			,[strBatchId]				= @strBatchId
 			,[intAccountId]				= @APClearing_Default
 			,[dblDebit]					= 0
@@ -395,14 +395,14 @@ BEGIN
 			,[intCurrencyId]			= 1
 			,[dblExchangeRate]			= 1
 			,[dtmDateEntered]			= dbo.fnRemoveTimeOnDate(GETDATE())
-			,[dtmTransactionDate]		= '2014-01-23'
+			,[dtmTransactionDate]		= '2014-01-22'
 			,[strJournalLineDescription] = ''
-			,[intJournalLineNo]			= 36
+			,[intJournalLineNo]			= 34
 			,[ysnIsUnposted]			= 0
 			,[intUserId]				= 1
 			,[intEntityId]				= 1 
-			,[strTransactionId]			= 'INVRCPT-XXXX15'
-			,[intTransactionId]			= 15
+			,[strTransactionId]			= 'INVRCPT-XXXX14'
+			,[intTransactionId]			= @intInventoryReceiptId
 			,[strTransactionType]		= 'Inventory Receipt'
 			,[strTransactionForm]		= 'Inventory Receipt'
 			,[strModuleName]			= 'Inventory'

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryReceiptOtherCharges for test case 1]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryReceiptOtherCharges for test case 6]
 AS
 
 -- Variables from [testi21Database].[Fake inventory items]
@@ -229,12 +229,17 @@ BEGIN
 
 	-- Act
 	BEGIN 
-		DECLARE @intInventoryReceiptId AS INT = 15 -- 'INVRCPT-XXXX15'
+		DECLARE @intInventoryReceiptId AS INT = 14 -- 'INVRCPT-XXXX14'
 			,@ysnPost AS BIT = 1
 			,@strBatchId AS NVARCHAR(20) = 'BATCH-100001'
 			,@intUserId AS INT = 1
 			,@intTransactionTypeId AS INT = @INVENTORY_RECEIPT_TYPE
 			,@GLEntries AS RecapTableType 
+
+		-- Modify the other charges in the transaction to use Allocate by Weight. 
+		UPDATE dbo.tblICInventoryReceiptCharge
+		SET strAllocateCostBy = @ALLOCATE_COST_BY_Weight
+		WHERE intInventoryReceiptId = @intInventoryReceiptId
 
 		INSERT INTO @GLEntries (
 			[dtmDate] 
@@ -301,10 +306,10 @@ BEGIN
 			,[intConcurrencyId]		
 		)
 		SELECT 
-			[dtmDate]					= '2014-01-23'
+			[dtmDate]					= '2014-01-22'
 			,[strBatchId]				= @strBatchId
 			,[intAccountId]				= @Inventory_Default
-			,[dblDebit]					= 856.732500
+			,[dblDebit]					= 2755.775000
 			,[dblCredit]				= 0
 			,[dblDebitUnit]				= 0
 			,[dblCreditUnit]			= 0
@@ -314,25 +319,25 @@ BEGIN
 			,[intCurrencyId]			= 1
 			,[dblExchangeRate]			= 1
 			,[dtmDateEntered]			= dbo.fnRemoveTimeOnDate(GETDATE())
-			,[dtmTransactionDate]		= '2014-01-23'
+			,[dtmTransactionDate]		= '2014-01-22'
 			,[strJournalLineDescription] = ''
-			,[intJournalLineNo]			= 35
+			,[intJournalLineNo]			= 33
 			,[ysnIsUnposted]			= 0
 			,[intUserId]				= 1
 			,[intEntityId]				= 1 
-			,[strTransactionId]			= 'INVRCPT-XXXX15'
-			,[intTransactionId]			= 15
+			,[strTransactionId]			= 'INVRCPT-XXXX14'
+			,[intTransactionId]			= @intInventoryReceiptId
 			,[strTransactionType]		= 'Inventory Receipt'
 			,[strTransactionForm]		= 'Inventory Receipt'
 			,[strModuleName]			= 'Inventory'
 			,[intConcurrencyId]			= 1
 		UNION ALL
 		SELECT 
-			[dtmDate]					= '2014-01-23'
+			[dtmDate]					= '2014-01-22'
 			,[strBatchId]				= @strBatchId
 			,[intAccountId]				= @APClearing_Default
 			,[dblDebit]					= 0
-			,[dblCredit]				= 856.732500
+			,[dblCredit]				= 2755.775000
 			,[dblDebitUnit]				= 0
 			,[dblCreditUnit]			= 0
 			,[strDescription]			= 'AP CLEARING WHEAT-DEFAULT'
@@ -341,24 +346,24 @@ BEGIN
 			,[intCurrencyId]			= 1
 			,[dblExchangeRate]			= 1
 			,[dtmDateEntered]			= dbo.fnRemoveTimeOnDate(GETDATE())
-			,[dtmTransactionDate]		= '2014-01-23'
+			,[dtmTransactionDate]		= '2014-01-22'
 			,[strJournalLineDescription] = ''
-			,[intJournalLineNo]			= 35
+			,[intJournalLineNo]			= 33
 			,[ysnIsUnposted]			= 0
 			,[intUserId]				= 1
 			,[intEntityId]				= 1 
-			,[strTransactionId]			= 'INVRCPT-XXXX15'
-			,[intTransactionId]			= 15
+			,[strTransactionId]			= 'INVRCPT-XXXX14'
+			,[intTransactionId]			= @intInventoryReceiptId
 			,[strTransactionType]		= 'Inventory Receipt'
 			,[strTransactionForm]		= 'Inventory Receipt'
 			,[strModuleName]			= 'Inventory'
 			,[intConcurrencyId]			= 1
 		UNION ALL 
 		SELECT 
-			[dtmDate]					= '2014-01-23'
+			[dtmDate]					= '2014-01-22'
 			,[strBatchId]				= @strBatchId
 			,[intAccountId]				= @Inventory_Default
-			,[dblDebit]					= 1999.042500
+			,[dblDebit]					= 100.00000
 			,[dblCredit]				= 0
 			,[dblDebitUnit]				= 0
 			,[dblCreditUnit]			= 0
@@ -368,25 +373,25 @@ BEGIN
 			,[intCurrencyId]			= 1
 			,[dblExchangeRate]			= 1
 			,[dtmDateEntered]			= dbo.fnRemoveTimeOnDate(GETDATE())
-			,[dtmTransactionDate]		= '2014-01-23'
+			,[dtmTransactionDate]		= '2014-01-22'
 			,[strJournalLineDescription] = ''
-			,[intJournalLineNo]			= 36
+			,[intJournalLineNo]			= 34
 			,[ysnIsUnposted]			= 0
 			,[intUserId]				= 1
 			,[intEntityId]				= 1 
-			,[strTransactionId]			= 'INVRCPT-XXXX15'
-			,[intTransactionId]			= 15
+			,[strTransactionId]			= 'INVRCPT-XXXX14'
+			,[intTransactionId]			= @intInventoryReceiptId
 			,[strTransactionType]		= 'Inventory Receipt'
 			,[strTransactionForm]		= 'Inventory Receipt'
 			,[strModuleName]			= 'Inventory'
 			,[intConcurrencyId]			= 1
 		UNION ALL
 		SELECT 
-			[dtmDate]					= '2014-01-23'
+			[dtmDate]					= '2014-01-22'
 			,[strBatchId]				= @strBatchId
 			,[intAccountId]				= @APClearing_Default
 			,[dblDebit]					= 0
-			,[dblCredit]				= 1999.042500
+			,[dblCredit]				= 100.00000
 			,[dblDebitUnit]				= 0
 			,[dblCreditUnit]			= 0
 			,[strDescription]			= 'AP CLEARING WHEAT-DEFAULT'
@@ -395,14 +400,14 @@ BEGIN
 			,[intCurrencyId]			= 1
 			,[dblExchangeRate]			= 1
 			,[dtmDateEntered]			= dbo.fnRemoveTimeOnDate(GETDATE())
-			,[dtmTransactionDate]		= '2014-01-23'
+			,[dtmTransactionDate]		= '2014-01-22'
 			,[strJournalLineDescription] = ''
-			,[intJournalLineNo]			= 36
+			,[intJournalLineNo]			= 34
 			,[ysnIsUnposted]			= 0
 			,[intUserId]				= 1
 			,[intEntityId]				= 1 
-			,[strTransactionId]			= 'INVRCPT-XXXX15'
-			,[intTransactionId]			= 15
+			,[strTransactionId]			= 'INVRCPT-XXXX14'
+			,[intTransactionId]			= @intInventoryReceiptId
 			,[strTransactionType]		= 'Inventory Receipt'
 			,[strTransactionForm]		= 'Inventory Receipt'
 			,[strModuleName]			= 'Inventory'

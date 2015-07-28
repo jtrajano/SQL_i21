@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryReceiptOtherCharges for test case 1]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostInventoryReceiptOtherCharges for test case 3]
 AS
 
 -- Variables from [testi21Database].[Fake inventory items]
@@ -236,6 +236,11 @@ BEGIN
 			,@intTransactionTypeId AS INT = @INVENTORY_RECEIPT_TYPE
 			,@GLEntries AS RecapTableType 
 
+		-- Modify the other charges in the transaction to use Allocate by Units. 
+		UPDATE dbo.tblICInventoryReceiptCharge
+		SET strAllocateCostBy = @ALLOCATE_COST_BY_Weight
+		WHERE intInventoryReceiptId = @intInventoryReceiptId
+
 		INSERT INTO @GLEntries (
 			[dtmDate] 
 			,[strBatchId]
@@ -304,7 +309,7 @@ BEGIN
 			[dtmDate]					= '2014-01-23'
 			,[strBatchId]				= @strBatchId
 			,[intAccountId]				= @Inventory_Default
-			,[dblDebit]					= 856.732500
+			,[dblDebit]					= 2755.775000
 			,[dblCredit]				= 0
 			,[dblDebitUnit]				= 0
 			,[dblCreditUnit]			= 0
@@ -332,7 +337,7 @@ BEGIN
 			,[strBatchId]				= @strBatchId
 			,[intAccountId]				= @APClearing_Default
 			,[dblDebit]					= 0
-			,[dblCredit]				= 856.732500
+			,[dblCredit]				= 2755.775000
 			,[dblDebitUnit]				= 0
 			,[dblCreditUnit]			= 0
 			,[strDescription]			= 'AP CLEARING WHEAT-DEFAULT'
@@ -358,7 +363,7 @@ BEGIN
 			[dtmDate]					= '2014-01-23'
 			,[strBatchId]				= @strBatchId
 			,[intAccountId]				= @Inventory_Default
-			,[dblDebit]					= 1999.042500
+			,[dblDebit]					= 100.000000
 			,[dblCredit]				= 0
 			,[dblDebitUnit]				= 0
 			,[dblCreditUnit]			= 0
@@ -386,7 +391,7 @@ BEGIN
 			,[strBatchId]				= @strBatchId
 			,[intAccountId]				= @APClearing_Default
 			,[dblDebit]					= 0
-			,[dblCredit]				= 1999.042500
+			,[dblCredit]				= 100.000000
 			,[dblDebitUnit]				= 0
 			,[dblCreditUnit]			= 0
 			,[strDescription]			= 'AP CLEARING WHEAT-DEFAULT'
