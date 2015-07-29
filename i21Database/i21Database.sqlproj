@@ -2081,6 +2081,7 @@
     <Build Include="dbo\Tables\tblCFPriceProfileSuccessImport.sql" />
     <Build Include="dbo\Tables\tblCFPriceProfileFailedImport.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportPriceIndex.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFImportPriceProfile.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
