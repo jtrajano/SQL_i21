@@ -80,6 +80,7 @@ Records must be maintained in this table even if the costing method for an item 
 		[intItemId] INT NOT NULL, 
 		[intItemLocationId] INT NOT NULL,
 		[intItemUOMId] INT NOT NULL,
+		[dtmDate] DATETIME NOT NULL, 
 		[intLotId] INT NOT NULL, 
 		[intSubLocationId] INT NULL,
 		[intStorageLocationId] INT NULL,
@@ -100,11 +101,11 @@ Records must be maintained in this table even if the costing method for an item 
 	GO
 
 	CREATE CLUSTERED INDEX [IDX_tblICInventoryLot]
-		ON [dbo].[tblICInventoryLot]([intInventoryLotId] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intLotId] ASC, [intItemUOMId] ASC);
+		ON [dbo].[tblICInventoryLot]([dtmDate] ASC, [intInventoryLotId] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intLotId] ASC, [intItemUOMId] ASC);
 	GO
 
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLot_intItemId_intLocationId]
 		ON [dbo].[tblICInventoryLot]([intItemId] ASC, [intItemLocationId] ASC)
-		INCLUDE (intLotId, intItemUOMId, dblStockIn, dblStockOut, dblCost);
+		INCLUDE (dtmDate, intLotId, intItemUOMId, dblStockIn, dblStockOut, dblCost);
 	GO
 

@@ -11,6 +11,7 @@ BEGIN
 			[intItemId] INT, 
 			[intItemLocationId] INT,
 			[intItemUOMId] INT,
+			[dtmDate] DATETIME,
 			[intLotId] INT, 
 			[intSubLocationId] INT,
 			[intStorageLocationId] INT,
@@ -30,6 +31,7 @@ BEGIN
 			[intItemId] INT, 
 			[intItemLocationId] INT,
 			[intItemUOMId] INT,
+			[dtmDate] DATETIME,
 			[intLotId] INT, 
 			[intSubLocationId] INT,
 			[intStorageLocationId] INT,
@@ -48,6 +50,7 @@ BEGIN
 		DECLARE @intItemId AS INT
 				,@intItemLocationId AS INT
 				,@intItemUOMId AS INT 
+				,@dtmDate AS DATETIME 
 				,@intLotId AS INT
 				,@intSubLocationId AS INT
 				,@intStorageLocationId AS INT
@@ -74,6 +77,7 @@ BEGIN
 			@intItemId 
 			,@intItemLocationId 
 			,@intItemUOMId 
+			,@dtmDate
 			,@intLotId 
 			,@intSubLocationId 
 			,@intStorageLocationId 
@@ -90,6 +94,7 @@ BEGIN
 				[intItemId]
 				,[intItemLocationId]
 				,[intItemUOMId]
+				,[dtmDate]
 				,[intLotId]
 				,[intSubLocationId]
 				,[intStorageLocationId]
@@ -107,6 +112,7 @@ BEGIN
 				[intItemId]
 				,[intItemLocationId]
 				,[intItemUOMId]
+				,[dtmDate]
 				,[intLotId]
 				,[intSubLocationId]
 				,[intStorageLocationId]

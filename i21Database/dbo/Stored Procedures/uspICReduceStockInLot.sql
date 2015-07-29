@@ -8,6 +8,7 @@ CREATE PROCEDURE [dbo].[uspICReduceStockInLot]
 	@intItemId AS INT
 	,@intItemLocationId AS INT
 	,@intItemUOMId AS INT 
+	,@dtmDate AS DATETIME	
 	,@intLotId AS INT
 	,@intSubLocationId AS INT
 	,@intStorageLocationId AS INT
@@ -57,6 +58,7 @@ USING (
 	AND ISNULL(Lot_bucket.intSubLocationId, 0) = ISNULL(Source_Query.intSubLocationId, 0)
 	AND ISNULL(Lot_bucket.intStorageLocationId, 0) = ISNULL(Source_Query.intStorageLocationId, 0)
 	AND (Lot_bucket.dblStockIn - Lot_bucket.dblStockOut) > 0 
+	AND dbo.fnDateGreaterThanEquals(@dtmDate, Lot_bucket.dtmDate) = 1
 
 -- Update an existing cost bucket
 WHEN MATCHED THEN 
@@ -92,6 +94,7 @@ WHEN NOT MATCHED THEN
 		[intItemId]
 		,[intItemLocationId]
 		,[intItemUOMId]
+		,[dtmDate]
 		,[intLotId]
 		,[intSubLocationId]
 		,[intStorageLocationId]
@@ -108,6 +111,7 @@ WHEN NOT MATCHED THEN
 		@intItemId
 		,@intItemLocationId
 		,@intItemUOMId
+		,@dtmDate
 		,@intLotId
 		,@intSubLocationId
 		,@intStorageLocationId

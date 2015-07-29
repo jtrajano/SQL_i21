@@ -44,6 +44,7 @@ BEGIN
 				[intItemId]
 				,[intItemLocationId]
 				,[intItemUOMId]
+				,[dtmDate]
 				,[intLotId]
 				,[dblStockIn]
 				,[dblStockOut]
@@ -55,6 +56,7 @@ BEGIN
 		SELECT	[intItemId] = @WetGrains
 				,[intItemLocationId] = @Default_Location
 				,[intItemUOMId] = @WetGrains_BushelUOMId
+				,[dtmDate] = '01/01/2014'
 				,[intLotId] = @LotId
 				,[dblStockIn] = 60
 				,[dblStockOut] = 0
@@ -68,6 +70,7 @@ BEGIN
 				[intItemId] INT 
 				,[intItemLocationId] INT 
 				,[intItemUOMId] INT 
+				,[dtmDate] DATETIME
 				,[intLotId] INT
 				,[dblStockIn] NUMERIC(18,6)
 				,[dblStockOut] NUMERIC(18,6)
@@ -80,6 +83,7 @@ BEGIN
 				[intItemId] INT 
 				,[intItemLocationId] INT 
 				,[intItemUOMId] INT 
+				,[dtmDate] DATETIME
 				,[intLotId] INT
 				,[dblStockIn] NUMERIC(18,6)
 				,[dblStockOut] NUMERIC(18,6)
@@ -92,6 +96,7 @@ BEGIN
 		DECLARE @intItemId AS INT					= @WetGrains
 				,@intItemLocationId AS INT			= @Default_Location
 				,@intItemUOMId AS INT				= @WetGrains_BushelUOMId
+				,@dtmDate AS DATETIME				= '01/01/2014'
 				,@intLotId AS INT					= @LotId
 				,@intSubLocationId AS INT
 				,@intStorageLocationId AS INT
@@ -111,6 +116,7 @@ BEGIN
 				[intItemId] 
 				,[intItemLocationId] 
 				,[intItemUOMId] 
+				,[dtmDate]
 				,[intLotId] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -121,6 +127,7 @@ BEGIN
 		SELECT	[intItemId]				= @WetGrains
 				,[intItemLocationId]	= @Default_Location
 				,[intItemUOMId]			= @WetGrains_BushelUOMId 
+				,[dtmDate]				= '01/01/2014'
 				,[intLotId]				= @LotId
 				,[dblStockIn]			= 60
 				,[dblStockOut]			= 10
@@ -153,6 +160,7 @@ BEGIN
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
+				,@dtmDate
 				,@intLotId
 				,@intSubLocationId 
 				,@intStorageLocationId 
@@ -178,6 +186,7 @@ BEGIN
 				[intItemId] 
 				,[intItemLocationId] 
 				,[intItemUOMId] 
+				,[dtmDate]
 				,[intLotId] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -189,6 +198,7 @@ BEGIN
 				[intItemId] 
 				,[intItemLocationId] 
 				,[intItemUOMId] 
+				,[dtmDate]
 				,[intLotId] 
 				,[dblStockIn] 
 				,[dblStockOut]

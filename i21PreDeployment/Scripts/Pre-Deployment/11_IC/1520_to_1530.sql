@@ -41,3 +41,28 @@ PRINT N'BEGIN Update all existing Category Standard UOM to reference Category UO
 	END
 
 PRINT N'END Update all existing Category Standard UOM to reference Category UOM'
+
+
+PRINT N'BEGIN Add dtmDate in tblICInventoryLot'
+
+	IF NOT EXISTS(SELECT * FROM sys.columns WHERE name = 'dtmDate' AND object_id = OBJECT_ID('tblICInventoryLot'))
+	BEGIN
+		EXEC ('
+			ALTER TABLE tblICInventoryLot ADD dtmDate DATETIME NULL 
+		')
+
+		EXEC ('
+			UPDATE LotFIFO
+			SET dtmDate = (
+				SELECT	TOP 1 
+						dtmDate 
+				FROM	dbo.tblICInventoryTransaction
+				WHERE	tblICInventoryTransaction.intTransactionId = LotFIFO.intTransactionId
+						AND tblICInventoryTransaction.strTransactionId = LotFIFO.strTransactionId
+			)
+			FROM	dbo.tblICInventoryLot LotFIFO
+			WHERE	LotFIFO.dtmDate IS NULL 		
+		')
+	END
+
+PRINT N'END Add dtmDate in tblICInventoryLot'

@@ -10,6 +10,7 @@ CREATE PROCEDURE dbo.uspICIncreaseStockInLot
 	@intItemId AS INT
 	,@intItemLocationId AS INT
 	,@intItemUOMId AS INT 
+	,@dtmDate AS DATETIME
 	,@intLotId AS INT
 	,@intSubLocationId AS INT
 	,@intStorageLocationId AS INT
@@ -101,6 +102,7 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		[intItemId]
 		,[intItemLocationId]
 		,[intItemUOMId]
+		,[dtmDate]
 		,[intLotId]
 		,[intSubLocationId]
 		,[intStorageLocationId]
@@ -117,6 +119,7 @@ WHEN NOT MATCHED AND @FullQty > 0 THEN
 		@intItemId
 		,@intItemLocationId
 		,@intItemUOMId
+		,@dtmDate
 		,@intLotId
 		,@intSubLocationId
 		,@intStorageLocationId
@@ -143,6 +146,7 @@ BEGIN
 		[intItemId]
 		,[intItemLocationId]
 		,[intItemUOMId]
+		,[dtmDate]
 		,[intLotId]
 		,[intSubLocationId]
 		,[intStorageLocationId]
@@ -159,6 +163,7 @@ BEGIN
 		@intItemId
 		,@intItemLocationId
 		,@intItemUOMId
+		,@dtmDate
 		,@intLotId
 		,@intSubLocationId
 		,@intStorageLocationId

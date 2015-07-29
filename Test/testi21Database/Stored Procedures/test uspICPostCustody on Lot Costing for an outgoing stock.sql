@@ -242,7 +242,7 @@ BEGIN
 		SELECT	intItemId				= @WetGrains
 				,intItemLocationId		= @WetGrains_DefaultLocation
 				,intItemUOMId			= @WetGrains_PoundUOM
-				,dtmDate				= 'January 25, 2015'
+				,dtmDate				= '01/15/2015'
 				,dblQty					= -10
 				,dblUOMQty				= @PoundUnitQty
 				,dblCost				= 12.00
@@ -284,7 +284,7 @@ BEGIN
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @WetGrains_DefaultLocation
 				,intItemUOMId = @WetGrains_PoundUOM
-				,dtmDate = 'January 1, 2015'
+				,dtmDate = '01/01/2015'
 				,dblStockIn = 110
 				,dblStockOut = 10
 				,dblCost = 11.00

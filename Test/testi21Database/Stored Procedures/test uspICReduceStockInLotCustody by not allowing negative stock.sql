@@ -92,6 +92,7 @@ BEGIN
 		DECLARE @intItemId AS INT					= @WetGrains
 				,@intItemLocationId AS INT			= @Default_Location
 				,@intItemUOMId AS INT				= @WetGrains_BushelUOMId
+				,@dtmDate AS DATETIME				= '01/01/2014'
 				,@intLotId AS INT					= @LotId
 				,@intSubLocationId AS INT
 				,@intStorageLocationId AS INT
@@ -155,6 +156,7 @@ BEGIN
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
+				,@dtmDate
 				,@intLotId
 				,@intSubLocationId 
 				,@intStorageLocationId 

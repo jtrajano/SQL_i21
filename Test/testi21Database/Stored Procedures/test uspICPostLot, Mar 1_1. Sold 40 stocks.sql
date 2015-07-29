@@ -268,6 +268,7 @@ BEGIN
 					intItemId
 					,intItemLocationId
 					,intItemUOMId 
+					,dtmDate
 					,intLotId
 					,dblStockIn
 					,dblStockOut
@@ -278,6 +279,7 @@ BEGIN
 			SELECT	intItemId = @WetGrains
 					,intItemLocationId = @NewHaven
 					,[intItemUOMId] = @WetGrains_BushelUOMId
+					,dtmDate = '01/01/2014'
 					,intLotId = @intLotId
 					,dblStockIn = 20
 					,dblStockOut = 0
@@ -420,6 +422,7 @@ BEGIN
 					intItemId
 					,intItemLocationId
 					,intItemUOMId 
+					,dtmDate
 					,intLotId
 					,dblStockIn
 					,dblStockOut
@@ -430,6 +433,7 @@ BEGIN
 			SELECT	intItemId = @WetGrains
 					,intItemLocationId = @NewHaven
 					,intItemUOMId = @intItemUOMId
+					,dtmDate = '02/10/2014'
 					,intLotId = @intLotId
 					,dblStockIn = 20
 					,dblStockOut = 0
@@ -572,6 +576,7 @@ BEGIN
 					intItemId
 					,intItemLocationId
 					,intItemUOMId
+					,dtmDate
 					,intLotId
 					,dblStockIn
 					,dblStockOut
@@ -582,6 +587,7 @@ BEGIN
 			SELECT	intItemId = @WetGrains
 					,intItemLocationId = @NewHaven
 					,intItemUOMId = @intItemUOMId
+					,dtmDate = '02/15/2014'
 					,intLotId = @intLotId
 					,dblStockIn = 20
 					,dblStockOut = 0

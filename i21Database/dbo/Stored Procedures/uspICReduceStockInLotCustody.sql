@@ -8,6 +8,7 @@ CREATE PROCEDURE [dbo].[uspICReduceStockInLotCustody]
 	@intItemId AS INT
 	,@intItemLocationId AS INT
 	,@intItemUOMId AS INT 
+	,@dtmDate AS DATETIME
 	,@intLotId AS INT
 	,@intSubLocationId AS INT
 	,@intStorageLocationId AS INT
@@ -67,6 +68,7 @@ WHERE	Lot_Custody.intItemId = @intItemId
 		AND ISNULL(Lot_Custody.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 		AND ISNULL(Lot_Custody.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 		AND (Lot_Custody.dblStockIn - Lot_Custody.dblStockOut) > 0 
+		AND dbo.fnDateGreaterThanEquals(@dtmDate, Lot_Custody.dtmDate) = 1
 
 UPDATE	Lot_Custody
 SET		Lot_Custody.dblStockOut = ISNULL(Lot_Custody.dblStockOut, 0) 
