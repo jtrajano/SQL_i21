@@ -87,6 +87,7 @@
 	[intDistributionMethod] INT NULL, 
 	[intSplitInvoiceOption] INT NULL, 
 	[intDriverEntityId] INT NULL,
+	[intStorageScheduleId] INT NULL,
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCTicket_intTicketId] PRIMARY KEY ([intTicketId]), 
     CONSTRAINT [UK_tblSCTicket_intTicketPoolId_intTicketNumber] UNIQUE ([intTicketPoolId], [intTicketType], [strInOutFlag], [intTicketNumber]),
@@ -105,7 +106,8 @@
 	CONSTRAINT [FK_tblSCTicket_tblSMCompanyLocationSubLocation_intSubLocationId] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation],
 	CONSTRAINT [FK_tblSCTicket_tblICStorageLocation_intStorageLocationId] FOREIGN KEY ([intStorageLocationId]) REFERENCES [tblICStorageLocation],
 	CONSTRAINT [FK_tblSCTicket_intMatchTicketId] FOREIGN KEY ([intMatchTicketId]) REFERENCES [tblSCTicket],
-	CONSTRAINT [FK_tblSCTicket_tblEntity_intDriverEntityId] FOREIGN KEY ([intDriverEntityId]) REFERENCES [tblEntity]([intEntityId])
+	CONSTRAINT [FK_tblSCTicket_tblEntity_intDriverEntityId] FOREIGN KEY ([intDriverEntityId]) REFERENCES [tblEntity]([intEntityId]),
+	CONSTRAINT [FK_tblSCTicket_tblGRStorageScheduleRule_intStorageScheduleId] FOREIGN KEY ([intStorageScheduleId]) REFERENCES [dbo].[tblGRStorageScheduleRule] ([intStorageScheduleRuleId])
 )
 
 GO
@@ -900,3 +902,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCTicket',
     @level2type = N'COLUMN',
     @level2name = N'intDriverEntityId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Storage Schedule Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'intStorageScheduleId'

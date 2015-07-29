@@ -10,5 +10,6 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+EXEC dbo.uspCTReceived @ItemsFromInventoryReceipt,@intUserId
 
 END 

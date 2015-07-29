@@ -470,11 +470,11 @@ BEGIN TRY
 	SELECT 	[intConcurrencyId]		= 1
 			,[intEntityId]			= @intEntityId
 			,[intCommodityId]		= SC.intCommodityId
-			,[intStorageScheduleId]	= NULL -- TODO Storage Schedule
+			,[intStorageScheduleId]	= SC.intStorageScheduleId -- TODO Storage Schedule
 			,[intStorageTypeId]		= @intGRStorageId
 			,[intCompanyLocationId]= SC.intProcessingLocationId
 			,[intTicketId]= SC.intTicketId
-			,[intDiscountScheduleId]= SC.intDiscountSchedule
+			,[intDiscountScheduleId]= SC.intDiscountId
 			,[dblTotalPriceShrink]= 0
 			,[dblTotalWeightShrink]= 0 
 			,[dblOriginalBalance]= @dblNetUnits 
@@ -494,7 +494,7 @@ BEGIN TRY
 			,[ysnPrinted]= 0 
 			,[dblCurrencyRate]= 1
 			,[intCurrencyId] = SC.intCurrencyId
-			,[intStorageTicketNumber] = SC.intTicketNumber 
+			,[intStorageTicketNumber] = SC.intTicketNumber
 	FROM	dbo.tblSCTicket SC
 	WHERE	SC.intTicketId = @intTicketId
 
@@ -570,7 +570,7 @@ BEGIN TRY
            ,[strShrinkWhat]= SD.[strShrinkWhat]
            ,[dblShrinkPercent]= SD.[dblShrinkPercent]
            ,[dblDiscountAmount]= SD.[dblDiscountAmount]
-           ,[dblDiscountDue]= SD.[dblDiscountDue]
+           ,[dblDiscountDue]= SD.[dblDiscountAmount]
            ,[dblDiscountPaid]= SD.[dblDiscountPaid]
            ,[ysnGraderAutoEntry]= SD.[ysnGraderAutoEntry]
            ,[intDiscountScheduleCodeId]= SD.[intDiscountScheduleCodeId]

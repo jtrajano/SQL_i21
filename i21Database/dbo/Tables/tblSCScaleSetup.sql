@@ -61,6 +61,8 @@
     [ysnRefreshLoadsOnOpen] BIT NOT NULL, 
 	[ysnAllowSplitWeights] BIT NOT NULL,
 	[ysnRequireContractForInTransitTicket] BIT NOT NULL,
+	[intDefaultFeeItemId] INT NULL,
+	[intFreightItemId] INT NULL,
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCScaleSetup_intScaleSetupId] PRIMARY KEY ([intScaleSetupId]), 
     CONSTRAINT [FK_tblSCScaleSetup_tblSCTicketPool] FOREIGN KEY ([intTicketPoolId]) REFERENCES [tblSCTicketPool]([intTicketPoolId]), 
@@ -73,7 +75,9 @@
     CONSTRAINT [FK_tblSCScaleSetup_tblGRStorageType_intGrainBankStorageTypeId] FOREIGN KEY ([intGrainBankStorageTypeId]) REFERENCES [tblGRStorageType]([intStorageScheduleTypeId]), 
     CONSTRAINT [UK_tblSCScaleSetup_strStationShortDescription] UNIQUE ([strStationShortDescription]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intLocationId] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
-	CONSTRAINT [FK_tblSCScaleSetup_tblSMUserSecurity_intLastPurgeUserId] FOREIGN KEY ([intLastPurgeUserId]) REFERENCES [tblSMUserSecurity]([intUserSecurityID])
+	CONSTRAINT [FK_tblSCScaleSetup_tblSMUserSecurity_intLastPurgeUserId] FOREIGN KEY ([intLastPurgeUserId]) REFERENCES [tblSMUserSecurity]([intUserSecurityID]),
+	CONSTRAINT [FK_tblSCScaleSetup_tblICItem_intDefaultFeeItemId] FOREIGN KEY ([intDefaultFeeItemId]) REFERENCES [tblICItem]([intItemId]),
+	CONSTRAINT [FK_tblSCScaleSetup_tblICItem_intFreightItemId] FOREIGN KEY ([intFreightItemId]) REFERENCES [tblICItem]([intItemId])
 	)
 
 GO
@@ -636,3 +640,21 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSCScaleSetup',
     @level2type = N'COLUMN',
     @level2name = N'ysnRequireContractForInTransitTicket'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Fee Item Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCScaleSetup',
+    @level2type = N'COLUMN',
+    @level2name = N'intDefaultFeeItemId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Freight Item Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSCScaleSetup',
+    @level2type = N'COLUMN',
+    @level2name = N'intFreightItemId'
