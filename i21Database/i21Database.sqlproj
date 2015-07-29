@@ -2081,6 +2081,7 @@
     <Build Include="dbo\Tables\tblCFAccountSuccessImport.sql" />
     <Build Include="dbo\Tables\tblCFAccountFailedImport.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportAccount.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

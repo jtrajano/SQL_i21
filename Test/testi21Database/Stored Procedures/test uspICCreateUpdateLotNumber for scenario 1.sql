@@ -46,6 +46,7 @@ BEGIN
 				,@dtmExpiryDate				AS DATETIME
 				,@dtmManufacturedDate		AS DATETIME
 				,@intOriginId				AS INT
+				,@intGradeId				AS INT
 				,@strBOLNo					AS NVARCHAR(100)
 				,@strVessel					AS NVARCHAR(100)
 				,@strReceiptNumber			AS NVARCHAR(50)
@@ -80,6 +81,7 @@ BEGIN
 			,[intWeightUOMId]			INT 
 			,[dblWeightPerQty]			NUMERIC(38,20) 
 			,[intOriginId]				INT 
+			,[intGradeId]				INT 
 			,[strBOLNo]					NVARCHAR(100) COLLATE Latin1_General_CI_AS 
 			,[strVessel]				NVARCHAR(100) COLLATE Latin1_General_CI_AS 
 			,[strReceiptNumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS 
@@ -116,6 +118,7 @@ BEGIN
 				,@dtmExpiryDate				= '02/14/2024'
 				,@dtmManufacturedDate		= '02/14/2014'
 				,@intOriginId				= 1
+				,@intGradeId				= 2
 				,@strBOLNo					= 'Bill of Lading'
 				,@strVessel					= 'Maesrk'
 				,@strReceiptNumber			= 'INVRPT-10001'
@@ -124,7 +127,6 @@ BEGIN
 				,@intEntityVendorId				= 1
 				,@strVendorLotNo			= 'Vendor lot number is 1abc-049843'
 				,@intVendorLocationId		= 1
-				,@strVendorLocation			= 'Vendor location can be used as the garden.'
 				,@strContractNo				= 'Contract No.'
 				,@ysnReleasedToWarehouse	= 0
 				,@ysnProduced				= 0
@@ -147,6 +149,7 @@ BEGIN
 			,dtmExpiryDate
 			,dtmManufacturedDate
 			,intOriginId
+			,intGradeId
 			,strBOLNo
 			,strVessel
 			,strReceiptNumber
@@ -155,7 +158,6 @@ BEGIN
 			,intEntityVendorId
 			,strVendorLotNo
 			,intVendorLocationId
-			,strVendorLocation
 			,intDetailId		
 	)
 	SELECT	intLotId				= @intLotId
@@ -172,6 +174,7 @@ BEGIN
 			,dtmExpiryDate			= @dtmExpiryDate
 			,dtmManufacturedDate	= @dtmManufacturedDate
 			,intOriginId			= @intOriginId
+			,intGradeId				= @intGradeId
 			,strBOLNo				= @strBOLNo
 			,strVessel				= @strVessel
 			,strReceiptNumber		= @strReceiptNumber
@@ -180,7 +183,6 @@ BEGIN
 			,intEntityVendorId			= @intEntityVendorId
 			,strVendorLotNo			= @strVendorLotNo
 			,intVendorLocationId	= @intVendorLocationId
-			,strVendorLocation		= @strVendorLocation
 			,intDetailId			= @intDetailId
 
 
@@ -201,6 +203,7 @@ BEGIN
 				,dtmExpiryDate
 				,dtmManufacturedDate
 				,intOriginId
+				,intGradeId
 				,strBOLNo
 				,strVessel
 				,strReceiptNumber
@@ -209,7 +212,6 @@ BEGIN
 				,intEntityVendorId
 				,strVendorLotNo
 				,intVendorLocationId
-				,strVendorLocation
 		)
 		SELECT	intLotId				= 1
 				,strLotNumber			= @strLotNumber
@@ -226,6 +228,7 @@ BEGIN
 				,dtmExpiryDate			= @dtmExpiryDate
 				,dtmManufacturedDate	= @dtmManufacturedDate
 				,intOriginId			= @intOriginId
+				,intGradeId				= @intGradeId
 				,strBOLNo				= @strBOLNo
 				,strVessel				= @strVessel
 				,strReceiptNumber		= @strReceiptNumber
@@ -234,7 +237,6 @@ BEGIN
 				,intEntityVendorId			= @intEntityVendorId
 				,strVendorLotNo			= @strVendorLotNo
 				,intVendorLocationId	= @intVendorLocationId
-				,strVendorLocation		= @strVendorLocation
 	END 
 
 	-- Act
@@ -263,6 +265,7 @@ BEGIN
 				,dtmExpiryDate
 				,dtmManufacturedDate
 				,intOriginId
+				,intGradeId 
 				,strBOLNo
 				,strVessel
 				,strReceiptNumber
@@ -270,8 +273,7 @@ BEGIN
 				,strNotes
 				,intEntityVendorId
 				,strVendorLotNo
-				,intVendorLocationId
-				,strVendorLocation				
+				,intVendorLocationId				
 		)
 		SELECT	intLotId				
 				,strLotNumber			
@@ -287,7 +289,8 @@ BEGIN
 				,dblWeightPerQty			
 				,dtmExpiryDate			
 				,dtmManufacturedDate	
-				,intOriginId			
+				,intOriginId
+				,intGradeId 			
 				,strBOLNo				
 				,strVessel				
 				,strReceiptNumber		
@@ -295,8 +298,7 @@ BEGIN
 				,strNotes				
 				,intEntityVendorId			
 				,strVendorLotNo			
-				,intVendorLocationId	
-				,strVendorLocation		
+				,intVendorLocationId					
 		FROM dbo.tblICLot 
 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';

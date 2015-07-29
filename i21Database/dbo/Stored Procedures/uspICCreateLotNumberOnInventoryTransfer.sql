@@ -142,6 +142,7 @@ BEGIN
 			,dtmExpiryDate
 			,dtmManufacturedDate
 			,intOriginId
+			,intGradeId
 			,strBOLNo
 			,strVessel
 			,strReceiptNumber
@@ -150,7 +151,6 @@ BEGIN
 			,intEntityVendorId
 			,strVendorLotNo
 			,intVendorLocationId
-			,strVendorLocation
 			,intDetailId		
 	)
 	SELECT	intLotId				= TransferItem.intNewLotId
@@ -167,6 +167,7 @@ BEGIN
 			,dtmExpiryDate			= SourceLot.dtmExpiryDate
 			,dtmManufacturedDate	= SourceLot.dtmManufacturedDate
 			,intOriginId			= SourceLot.intOriginId
+			,intGradeId				= SourceLot.intGradeId
 			,strBOLNo				= SourceLot.strBOLNo
 			,strVessel				= SourceLot.strVessel
 			,strReceiptNumber		= Transfer.strTransferNo
@@ -175,7 +176,6 @@ BEGIN
 			,intEntityVendorId		= SourceLot.intEntityVendorId
 			,strVendorLotNo			= SourceLot.strVendorLotNo
 			,intVendorLocationId	= SourceLot.intVendorLocationId
-			,strVendorLocation		= SourceLot.strVendorLocation
 			,intDetailId			= TransferItem.intInventoryTransferDetailId
 	FROM	dbo.tblICInventoryTransfer Transfer INNER JOIN dbo.tblICInventoryTransferDetail TransferItem
 				ON Transfer.intInventoryTransferId = TransferItem.intInventoryTransferId
