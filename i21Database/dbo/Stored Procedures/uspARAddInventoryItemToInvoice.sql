@@ -86,6 +86,9 @@ BEGIN TRANSACTION
 	
 IF ((@ItemId IS NOT NULL OR @ItemId <> 0) AND (@ItemPrice IS NULL OR @ItemPrice = @ZeroDecimal) )
 	BEGIN
+		DECLARE @Pricing			NVARCHAR(250)				
+				,@ContractNumber	INT
+				,@ContractSeq		INT
 		BEGIN TRY
 		EXEC dbo.[uspARGetItemPrice]  
 				 @ItemId  
@@ -94,7 +97,12 @@ IF ((@ItemId IS NOT NULL OR @ItemId <> 0) AND (@ItemPrice IS NULL OR @ItemPrice 
 				,@ItemUOMId
 				,@InvoiceDate
 				,@ItemQtyShipped
-				,@ItemPrice OUTPUT
+				,@ItemPrice				OUTPUT
+				,@Pricing				OUTPUT
+				,@ItemContractHeaderId	OUTPUT
+				,@ItemContractDetailId	OUTPUT
+				,@ContractNumber		OUTPUT
+				,@ContractSeq			OUTPUT
 		END TRY
 		BEGIN CATCH
 			SET @ErrorMessage = ERROR_MESSAGE();
@@ -143,7 +151,7 @@ BEGIN TRY
 		,[ysnLeaseBilling]
 		,[intConcurrencyId])
 	SELECT
-			[intInvoiceId]						= @InvoiceId
+		 [intInvoiceId]						= @InvoiceId
 		,[intItemId]						= IC.[intItemId] 
 		,[strItemDescription]				= ISNULL(@ItemDescription, IC.[strDescription])
 		,[intSCInvoiceId]					= @ItemSCInvoiceId

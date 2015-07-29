@@ -126,87 +126,94 @@ BEGIN
 						
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceDetails)
 		BEGIN
-			DECLARE @InvoiceDetailId INT
-					,@NewInvoiceDetailId INT
+			DECLARE @InvoiceDetailId				INT
+					,@NewInvoiceDetailId			INT
+					,@ErrorMessage					NVARCHAR(MAX)
+					,@ItemId						INT
+					,@ItemUOMId						INT
+					,@ItemQtyShipped				NUMERIC(18,6)
+					,@ItemPrice						NUMERIC(18,6)
+					,@ItemDescription				NVARCHAR(500)
+					,@ItemSiteId					INT
+					,@ItemBillingBy					NVARCHAR(200)
+					,@ItemPercentFull				NUMERIC(18,6)
+					,@ItemNewMeterReading			NUMERIC(18,6)
+					,@ItemPreviousMeterReading		NUMERIC(18,6)
+					,@ItemConversionFactor			NUMERIC(18,8)
+					,@ItemPerformerId				INT
+					,@ItemLeaseBilling				BIT
+					,@ItemContractHeaderId			INT
+					,@ItemContractDetailId			INT
+					,@ItemMaintenanceType			NVARCHAR(50)
+					,@ItemFrequency					NVARCHAR(50)
+					,@ItemMaintenanceDate			DATETIME
+					,@ItemMaintenanceAmount			NUMERIC(18,6)
+					,@ItemLicenseAmount				NUMERIC(18,6)
 					
 			SELECT TOP 1 @InvoiceDetailId = [intInvoiceDetailId] FROM @InvoiceDetails ORDER BY [intInvoiceDetailId]
-			
-			INSERT INTO [tblARInvoiceDetail]
-				([intInvoiceId]
-				,[intItemId]
-				,[strItemDescription]
-				,[intItemUOMId]
-				,[dblQtyOrdered]
-				,[dblQtyShipped]
-				,[dblDiscount] 
-				,[dblPrice]
-				,[dblTotalTax]
-				,[dblTotal]
-				,[intAccountId]
-				,[intCOGSAccountId]
-				,[intSalesAccountId]
-				,[intInventoryAccountId]
-				,[intConcurrencyId])
-			SELECT 	
-				 @NewId						--[intInvoiceId]
-				,[intItemId]				--[intItemId]
-				,[strItemDescription]		--[strItemDescription]
-				,[intItemUOMId]				--[intItemUOMId]
-				,[dblQtyShipped]			--[dblQtyOrdered]
-				,[dblQtyShipped]			--[dblQtyShipped]
-				,[dblDiscount] 				--[[dblDiscount]]
-				,[dblPrice]					--[dblPrice]
-				,[dblTotalTax]				--[dblTotalTax]
-				,[dblTotal]					--[dblTotal]
-				,[intAccountId]				--[intAccountId]
-				,[intCOGSAccountId]			--[intCOGSAccountId]
-				,[intSalesAccountId]		--[intSalesAccountId]
-				,[intInventoryAccountId]	--[intInventoryAccountId]
-				,0							--[intConcurrencyId]
-			FROM
-				[tblARInvoiceDetail]
-			WHERE
-				[intInvoiceDetailId] = @InvoiceDetailId
-												
-			SET @NewInvoiceDetailId = SCOPE_IDENTITY()
-						
-			INSERT INTO [tblARInvoiceDetailTax]
-				([intInvoiceDetailId]
-				,[intTaxGroupMasterId]
-				,[intTaxGroupId]
-				,[intTaxCodeId]
-				,[intTaxClassId]
-				,[strTaxableByOtherTaxes]
-				,[strCalculationMethod]
-				,[numRate]
-				,[intSalesTaxAccountId]
-				,[dblTax]
-				,[dblAdjustedTax]
-				,[ysnTaxAdjusted]
-				,[ysnSeparateOnInvoice]
-				,[ysnCheckoffTax]
-				,[intConcurrencyId])
+
 			SELECT
-			    @NewInvoiceDetailId
-			   ,[intTaxGroupMasterId]
-			   ,[intTaxGroupId]
-			   ,[intTaxCodeId]
-			   ,[intTaxClassId]
-			   ,[strTaxableByOtherTaxes]
-			   ,[strCalculationMethod]
-			   ,[numRate]
-			   ,[intSalesTaxAccountId]
-			   ,[dblTax]
-			   ,[dblAdjustedTax]
-			   ,[ysnTaxAdjusted]
-			   ,[ysnSeparateOnInvoice]
-			   ,[ysnCheckoffTax]
-			   ,0
-			FROM 
-				[tblARInvoiceDetailTax]
+				 @ItemId						= [intItemId]			
+				,@ItemUOMId						= [intItemUOMId]
+				,@ItemQtyShipped				= [dblQtyShipped]
+				,@ItemDescription				= [strItemDescription]
+				,@ItemSiteId					= [intSiteId]
+				,@ItemBillingBy					= [strBillingBy]
+				,@ItemPercentFull				= [dblPercentFull]
+				,@ItemNewMeterReading			= [dblNewMeterReading]
+				,@ItemPreviousMeterReading		= [dblPreviousMeterReading]
+				,@ItemConversionFactor			= [dblConversionFactor]
+				,@ItemPerformerId				= [intPerformerId]
+				,@ItemLeaseBilling				= [ysnLeaseBilling]
+				,@ItemContractHeaderId			= [intContractHeaderId]
+				,@ItemContractDetailId			= [intContractDetailId]
+				,@ItemMaintenanceType			= [strMaintenanceType]
+				,@ItemFrequency					= [strFrequency]
+				,@ItemMaintenanceDate			= [dtmMaintenanceDate]
+				,@ItemMaintenanceAmount			= [dblMaintenanceAmount]
+				,@ItemLicenseAmount				= [dblLicenseAmount]
+			FROM
+				tblARInvoiceDetail
 			WHERE
 				[intInvoiceDetailId] = @InvoiceDetailId
-			   	
+
+			BEGIN TRY
+			EXEC [dbo].[uspARAddInventoryItemToInvoice]
+				 @InvoiceId						= @NewId	
+				,@ItemId						= @ItemId
+				,@NewInvoiceDetailId			= @NewInvoiceDetailId	OUTPUT 
+				,@ErrorMessage					= @ErrorMessage	OUTPUT
+				,@ItemUOMId						= @ItemUOMId
+				,@ItemQtyShipped				= @ItemQtyShipped
+				,@ItemPrice						= @ItemPrice
+				,@ItemDescription				= @ItemDescription
+				,@ItemSiteId					= @ItemSiteId											
+				,@ItemBillingBy					= @ItemBillingBy
+				,@ItemPercentFull				= @ItemPercentFull
+				,@ItemNewMeterReading			= @ItemNewMeterReading
+				,@ItemPreviousMeterReading		= @ItemPreviousMeterReading
+				,@ItemConversionFactor			= @ItemConversionFactor
+				,@ItemPerformerId				= @ItemPerformerId
+				,@ItemLeaseBilling				= @ItemLeaseBilling
+				,@ItemContractHeaderId			= @ItemContractHeaderId
+				,@ItemContractDetailId			= @ItemContractDetailId
+				,@ItemMaintenanceType			= @ItemMaintenanceType
+				,@ItemFrequency					= @ItemFrequency
+				,@ItemMaintenanceDate			= @ItemMaintenanceDate
+				,@ItemMaintenanceAmount			= @ItemMaintenanceAmount
+				,@ItemLicenseAmount				= @ItemLicenseAmount					
+			
+				IF LEN(ISNULL(@ErrorMessage,'')) > 0
+					BEGIN
+						RAISERROR(@ErrorMessage, 16, 1);
+						RETURN 0;
+					END
+			END TRY
+			BEGIN CATCH
+				SET @ErrorMessage = ERROR_MESSAGE();
+				RAISERROR(@ErrorMessage, 16, 1);
+				RETURN 0;
+			END CATCH									   	
            			
 			DELETE FROM @InvoiceDetails WHERE [intInvoiceDetailId] = @InvoiceDetailId
 		END		
