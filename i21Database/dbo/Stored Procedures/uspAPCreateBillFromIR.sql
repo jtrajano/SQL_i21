@@ -28,6 +28,10 @@ CREATE TABLE #tmpReceiptBillIds (
 	UNIQUE ([intBillId])
 );
 
+CREATE TABLE #tmpCreatedBillDetail (
+	[intBillDetailId] [INT]
+	UNIQUE ([intBillDetailId])
+);
 
 BEGIN TRANSACTION
 
@@ -140,6 +144,7 @@ BEGIN
 		[intPurchaseDetailId],
 		[dblQtyOrdered],
 		[dblQtyReceived],
+		[dblTax],
 		[intAccountId],
 		[dblTotal],
 		[dblCost],
@@ -147,6 +152,7 @@ BEGIN
 		[intContractHeaderId],
 		[intLineNo]
 	)
+	OUTPUT inserted.intBillDetailId INTO #tmpCreatedBillDetail(intBillDetailId)
 	SELECT
 		[intBillId]					=	@generatedBillId,
 		[intItemId]					=	B.intItemId,
@@ -154,6 +160,7 @@ BEGIN
 		[intPODetailId]				=	B.intLineNo,
 		[dblQtyOrdered]				=	B.dblOpenReceive - B.dblBillQty,
 		[dblQtyReceived]			=	B.dblOpenReceive - B.dblBillQty,
+		[dblTax]					=	B.dblTax,
 		--[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'AP Clearing'),
 		[dblTotal]					=	(B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost,
@@ -181,6 +188,49 @@ BEGIN
 	) POContractItems
 	WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1
 
+	--CREATE TAXES FROM CREATED ITEM RECEIPT
+	DECLARE @intBillDetailId INT;
+	WHILE(EXISTS(SELECT 1 FROM #tmpCreatedBillDetail))
+	BEGIN
+		SET @intBillDetailId = (SELECT TOP 1 intBillDetailId FROM #tmpCreatedBillDetail)
+		INSERT INTO tblAPBillDetailTax(
+			[intBillDetailId]		, 
+			[intTaxGroupMasterId]	, 
+			[intTaxGroupId]			, 
+			[intTaxCodeId]			, 
+			[intTaxClassId]			, 
+			[strTaxableByOtherTaxes], 
+			[strCalculationMethod]	, 
+			[dblRate]				, 
+			[intAccountId]			, 
+			[dblTax]				, 
+			[dblAdjustedTax]		, 
+			[ysnTaxAdjusted]		, 
+			[ysnSeparateOnBill]		, 
+			[ysnCheckOffTax]
+		)
+		SELECT
+			[intBillDetailId]		=	@intBillDetailId, 
+			[intTaxGroupMasterId]	=	A.intTaxGroupMasterId, 
+			[intTaxGroupId]			=	A.intTaxGroupId, 
+			[intTaxCodeId]			=	A.intTaxCodeId, 
+			[intTaxClassId]			=	A.intTaxClassId, 
+			[strTaxableByOtherTaxes]=	A.strTaxableByOtherTaxes, 
+			[strCalculationMethod]	=	A.strCalculationMethod, 
+			[dblRate]				=	A.dblRate, 
+			[intAccountId]			=	A.intTaxAccountId, 
+			[dblTax]				=	A.dblTax, 
+			[dblAdjustedTax]		=	A.dblAdjustedTax, 
+			[ysnTaxAdjusted]		=	A.ysnTaxAdjusted, 
+			[ysnSeparateOnBill]		=	A.ysnSeparateOnInvoice, 
+			[ysnCheckOffTax]		=	A.ysnCheckoffTax
+		FROM tblICInventoryReceiptItemTax A
+		INNER JOIN tblAPBillDetail B ON B.intInventoryReceiptItemId = A.intInventoryReceiptItemId
+		WHERE B.intBillDetailId = @intBillDetailId
+
+		DELETE FROM #tmpCreatedBillDetail WHERE intBillDetailId = @intBillDetailId
+	END
+	
 	UPDATE A
 		SET A.dblTotal = (SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @generatedBillId)
 	FROM tblAPBill A

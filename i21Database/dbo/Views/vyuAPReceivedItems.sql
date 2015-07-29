@@ -18,6 +18,7 @@ FROM
 	,B.strMiscDescription
 	,C.strItemNo
 	,C.strDescription
+	,C.intPurchaseTaxGroupId
 	,tblReceived.dblOrderQty
 	,tblReceived.dblPOOpenReceive --uom converted received quantity from po to IR
 	,tblReceived.dblOpenReceive
@@ -26,6 +27,7 @@ FROM
 	,tblReceived.intLineNo
 	,tblReceived.intInventoryReceiptItemId
 	,tblReceived.dblUnitCost
+	,tblReceived.dblTax
 	,tblReceived.intAccountId
 	,tblReceived.strAccountId
 	,D2.strName
@@ -51,6 +53,7 @@ FROM
 				,intAccountId = [dbo].[fnGetItemGLAccount](B1.intItemId, loc.intItemLocationId, 'AP Clearing')
 				,strAccountId = (SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B1.intItemId, loc.intItemLocationId, 'AP Clearing'))
 				,dblQuantityBilled = SUM(ISNULL(B1.dblBillQty, 0))
+				,B1.dblTax
 			FROM tblICInventoryReceipt A1
 				INNER JOIN tblICInventoryReceiptItem B1 ON A1.intInventoryReceiptId = B1.intInventoryReceiptId
 				INNER JOIN tblICItemLocation loc ON B1.intItemId = loc.intItemId AND A1.intLocationId = loc.intLocationId
@@ -64,6 +67,7 @@ FROM
 				,intLineNo
 				,dblOrderQty
 				,loc.intItemLocationId
+				,B1.dblTax
 				,B1.intUnitMeasureId
 
 		) as tblReceived
@@ -87,6 +91,7 @@ FROM
 	,B.strMiscDescription
 	,C.strItemNo
 	,C.strDescription
+	,C.intPurchaseTaxGroupId
 	,B.dblQtyOrdered
 	,B.dblQtyOrdered -B.dblQtyReceived
 	,B.dblQtyOrdered
@@ -95,6 +100,7 @@ FROM
 	,B.intPurchaseDetailId
 	,NULL --this should be null as this has constraint from IR Receipt item
 	,B.dblCost
+	,B.dblTax
 	,intAccountId = [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Inventory')
 	,strAccountId = (SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Inventory'))
 	,D2.strName
@@ -126,6 +132,7 @@ FROM
 	,C.strDescription
 	,C.strItemNo
 	,C.strDescription
+	,C.intPurchaseTaxGroupId
 	,B.dblOpenReceive
 	,B.dblReceived
 	,B.dblOpenReceive
@@ -134,6 +141,7 @@ FROM
 	,B.intInventoryReceiptItemId
 	,B.intInventoryReceiptItemId
 	,B.dblUnitCost
+	,B.dblTax
 	,intAccountId = [dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'Inventory')
 	,strAccountId = (SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, A.intLocationId, 'Inventory'))
 	,D2.strName

@@ -10,7 +10,6 @@
 	[intContractHeaderId]    INT             NULL,
 	[intContractDetailId]    INT             NULL,
 	[intPrepayTypeId]    INT             NULL,
-	[intPurchaseDetalTaxId]    INT             NULL,
     [dblTotal]        DECIMAL (18, 6) NOT NULL DEFAULT 0,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
     [dblQtyOrdered] DECIMAL(18, 6) NOT NULL DEFAULT 0, 

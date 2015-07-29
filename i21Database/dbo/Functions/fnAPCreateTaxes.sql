@@ -140,7 +140,6 @@ BEGIN
 						FROM tblSMTaxCodeRate WHERE tblSMTaxCodeRate.[intTaxCodeId] = TC.[intTaxCodeId] 
 						AND  CAST(tblSMTaxCodeRate.[dtmEffectiveDate]  AS DATE) <= CAST(@transactionDate AS DATE) 
 						ORDER BY tblSMTaxCodeRate.[dtmEffectiveDate]ASC ,tblSMTaxCodeRate.[numRate] DESC), 0.00) AS [dblRate]
-		,TC.strTaxCode
 		,TC.[intPurchaseTaxAccountId]		
 		,0.00 AS [dblTax]
 		,0.00 AS [dblAdjustedTax]	

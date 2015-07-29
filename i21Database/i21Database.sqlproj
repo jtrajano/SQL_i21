@@ -2103,6 +2103,9 @@
     <Build Include="dbo\Functions\fnAPCreateTaxes.sql" />
     <Build Include="dbo\Tables\tblPOPurchaseDetailTax.sql" />
     <Build Include="dbo\Tables\tblAPBillDetailTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreateBillTaxes.sql" />
+    <Build Include="dbo\Functions\fnAPGetTaxesFromIRItem.sql" />
+    <Build Include="dbo\Views\vyuAPBillItemReceiptTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
