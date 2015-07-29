@@ -19,7 +19,8 @@ BEGIN TRY
 				@dblQty							NUMERIC(12,4),
 				@dblConvertedQty				NUMERIC(12,4),
 				@ErrMsg							NVARCHAR(MAX),
-				@strReceiptType					NVARCHAR(50)
+				@strReceiptType					NVARCHAR(50),
+				@dblSchQuantityToUpdate			NUMERIC(12,4)
 
 	SELECT @strReceiptType = strReceiptType FROM @ItemsFromInventoryReceipt
 
@@ -86,7 +87,13 @@ BEGIN TRY
 				@intUserId				=	@intUserId,
 				@intExternalId			=	@intInventoryReceiptDetailId,
 				@strScreenName			=	'Inventory Receipt' 
-			
+
+		SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
+					
+		EXEC	uspCTUpdateScheduleQuantity
+				@intContractDetailId	=	@intContractDetailId,
+				@dblQuantityToUpdate	=	@dblSchQuantityToUpdate
+
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 	END
 
