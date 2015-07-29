@@ -144,11 +144,6 @@ This is a user-defined table type used in creating records to the lot master tab
 	Optional 
 
 
-*	[strContractNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-	The contract number for the lot. 
-	Optional 
-
-
 *	[ysnReleasedToWarehouse] BIT DEFAULT((0))
 	The flag used to indicate the lot is approved by QC and it can be released to the warehouse. Default is 0. 
 	Optional 
