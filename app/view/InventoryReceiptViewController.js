@@ -217,6 +217,26 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         ]
                     }
                 },
+                colStorageLocation: {
+                    dataIndex: 'strStorageLocationName',
+                    editor: {
+                        store: '{storageLocation}',
+                        origValueField: 'intStorageLocationId',
+                        origUpdateField: 'intStorageLocationId',
+                        defaultFilters: [
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intLocationId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intSubLocationId',
+                                value: '{grdInventoryReceipt.selection.intSubLocationId}',
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
+                },
                 colGrade: {
                     dataIndex: 'strGrade',
                     editor: {
@@ -314,7 +334,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         defaultFilters: [
                             {
                                 column: 'intItemId',
-                                value: '{currentReceiptItem.intItemId}',
+                                value: '{grdInventoryReceipt.selection.intItemId}',
                                 conjunction: 'and'
                             }
                         ]
@@ -328,7 +348,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colLotStorageLocation: {
                     dataIndex: 'strStorageLocation',
                     editor: {
-                        store: '{storageLocation}',
+                        readOnly: '{hasStorageLocation}',
+                        store: '{lotStorageLocation}',
                         origValueField: 'intStorageLocationId',
                         origUpdateField: 'intStorageLocationId',
                         defaultFilters: [
@@ -339,7 +360,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             },
                             {
                                 column: 'intSubLocationId',
-                                value: '{currentReceiptItem.intSubLocationId}',
+                                value: '{grdInventoryReceipt.selection.intSubLocationId}',
                                 conjunction: 'and'
                             }
                         ]
@@ -358,7 +379,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         defaultFilters: [
                             {
                                 column: 'intItemId',
-                                value: '{currentReceiptItem.intItemId}',
+                                value: '{grdInventoryReceipt.selection.intItemId}',
                                 conjunction: 'and'
                             }
                         ]
@@ -641,7 +662,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
         }
 
-        var colTaxDetails = grdInventoryReceipt.columns[22];
+        var colTaxDetails = grdInventoryReceipt.columns[23];
         var btnViewTaxDetail = colTaxDetails.items[0];
         if (btnViewTaxDetail){
             btnViewTaxDetail.handler = function(grid, rowIndex, colIndex) {
@@ -714,6 +735,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         record.set('intItemUnitMeasureId', currentReceiptItem.get('intUnitMeasureId'));
         record.set('dblLotUOMConvFactor', currentReceiptItem.get('dblItemUOMConvFactor'));
         record.set('strWeightUOM', currentReceiptItem.get('strWeightUOM'));
+        record.set('intStorageLocationId', currentReceiptItem.get('intStorageLocationId'));
+        record.set('strStorageLocation', currentReceiptItem.get('strStorageLocationName'));
         record.set('dblGrossWeight', 0.00);
         record.set('dblTareWeight', 0.00);
         record.set('dblNetWeight', 0.00);
@@ -976,28 +999,33 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             else {
                 var receiptItemTaxes = detailRecord.tblICInventoryReceiptItemTaxes();
                 if (receiptItemTaxes){
-                    var ItemTaxes = new Array();
-                    Ext.Array.each(receiptItemTaxes.data.items, function (itemDetailTax) {
-                        var taxes = {
-                            intTaxGroupMasterId: itemDetailTax.get('intTaxGroupMasterId'),
-                            intTaxGroupId: itemDetailTax.get('intTaxGroupId'),
-                            intTaxCodeId: itemDetailTax.get('intTaxCodeId'),
-                            intTaxClassId: itemDetailTax.get('intTaxClassId'),
-                            strTaxCode: itemDetailTax.get('strTaxCode'),
-                            strTaxableByOtherTaxes: itemDetailTax.get('strTaxableByOtherTaxes'),
-                            strCalculationMethod: itemDetailTax.get('strCalculationMethod'),
-                            dblRate: itemDetailTax.get('dblRate'),
-                            dblTax: itemDetailTax.get('dblTax'),
-                            dblAdjustedTax: itemDetailTax.get('dblAdjustedTax'),
-                            intTaxAccountId: itemDetailTax.get('intTaxAccountId'),
-                            ysnTaxAdjusted: itemDetailTax.get('ysnTaxAdjusted'),
-                            ysnSeparateOnInvoice: itemDetailTax.get('ysnSeparateOnInvoice'),
-                            ysnCheckoffTax: itemDetailTax.get('ysnCheckoffTax')
-                        };
-                        ItemTaxes.push(taxes);
-                    });
+                    if (receiptItemTaxes.data.items.length > 0) {
+                        var ItemTaxes = new Array();
+                        Ext.Array.each(receiptItemTaxes.data.items, function (itemDetailTax) {
+                            var taxes = {
+                                intTaxGroupMasterId: itemDetailTax.get('intTaxGroupMasterId'),
+                                intTaxGroupId: itemDetailTax.get('intTaxGroupId'),
+                                intTaxCodeId: itemDetailTax.get('intTaxCodeId'),
+                                intTaxClassId: itemDetailTax.get('intTaxClassId'),
+                                strTaxCode: itemDetailTax.get('strTaxCode'),
+                                strTaxableByOtherTaxes: itemDetailTax.get('strTaxableByOtherTaxes'),
+                                strCalculationMethod: itemDetailTax.get('strCalculationMethod'),
+                                dblRate: itemDetailTax.get('dblRate'),
+                                dblTax: itemDetailTax.get('dblTax'),
+                                dblAdjustedTax: itemDetailTax.get('dblAdjustedTax'),
+                                intTaxAccountId: itemDetailTax.get('intTaxAccountId'),
+                                ysnTaxAdjusted: itemDetailTax.get('ysnTaxAdjusted'),
+                                ysnSeparateOnInvoice: itemDetailTax.get('ysnSeparateOnInvoice'),
+                                ysnCheckoffTax: itemDetailTax.get('ysnCheckoffTax')
+                            };
+                            ItemTaxes.push(taxes);
+                        });
 
-                    me.computeItemTax(ItemTaxes, me, reset);
+                        me.computeItemTax(ItemTaxes, me, reset);
+                    }
+                    else {
+                        iRely.Functions.getItemTaxes(current, me.computeItemTax, me);
+                    }
                 }
             }
         }
@@ -2521,10 +2549,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
         }
         else if (combo.itemId === 'cboCostBilledBy') {
-            switch (record.strDescription) {
+            switch (record.get('strDescription')) {
                 case 'Vendor':
-                    current.set('intEntityVendorId', masterRecord.get('current.intEntityVendorId'));
-                    current.set('strVendorId', masterRecord.get('current.strVendorName'));
+                    current.set('intEntityVendorId', masterRecord.get('intEntityVendorId'));
+                    current.set('strVendorId', masterRecord.get('strVendorName'));
                     break;
                 case 'Third Party':
 
@@ -2534,6 +2562,26 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     current.set('strVendorId', null);
                     break;
             }
+        }
+    },
+
+    onStorageLocationSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var record = records[0];
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepItem');
+        var current = plugin.getActiveRecord();
+        var lots = current.tblICInventoryReceiptItemLots();
+
+        if (lots) {
+            Ext.Array.each(lots.data.items, function (lot) {
+                if (!lot.dummy) {
+                    lot.set('intStorageLocationId', record.get('intStorageLocationId'));
+                    lot.set('strStorageLocation', record.get('strName'));
+                }
+            });
         }
     },
 
@@ -2637,6 +2685,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#cboOtherCharge": {
                 select: this.onChargeSelect
+            },
+            "#cboStorageLocation": {
+                select: this.onStorageLocationSelect
             },
             "#colLineTotal": {
                 beforerender: this.onColumnBeforeRender

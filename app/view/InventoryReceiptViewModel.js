@@ -305,6 +305,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         storageLocation: {
             type: 'icbufferedstoragelocation'
         },
+        lotStorageLocation: {
+            type: 'icbufferedstoragelocation'
+        },
         origin: {
             type: 'countrybuffered'
         },
@@ -447,6 +450,14 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
             }
             else {
                 return false;
+            }
+        },
+        hasStorageLocation: function (get) {
+            if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.intStorageLocationId'))) {
+                return false;
+            }
+            else {
+                return true;
             }
         },
         disableSourceType: function (get) {
