@@ -71,6 +71,14 @@ EXEC dbo.uspSOUpdateOrderShipmentStatus @SalesOrderId
 SET @InventoryShipmentId = @ShipmentId;
 --SELECT @ShipmentNumber = strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = @ShipmentId
 
+UPDATE 
+	tblSOSalesOrder
+SET
+	dtmProcessDate = GETDATE()
+  , ysnProcessed = 1
+WHERE 
+	intSalesOrderId = @SalesOrderId
+
 RETURN 1;
 
 END
