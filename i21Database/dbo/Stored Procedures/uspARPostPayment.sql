@@ -1406,7 +1406,7 @@ IF @recap = 0
 				tblARInvoice
 			SET 
 				tblARInvoice.dblPayment = ISNULL(tblARInvoice.dblPayment,0.00) + P.dblPayment 
-				,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscount,0.00) + P.dblDiscount 
+				,tblARInvoice.dblDiscount = CASE WHEN (P.dblPayment <> 0) THEN ISNULL(tblARInvoice.dblDiscount,0.00) + P.dblDiscount ELSE 0.00 END
 			FROM
 				(
 					SELECT 
