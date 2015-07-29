@@ -118,7 +118,11 @@ BEGIN
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)
 			,dblUOMQty				= ItemUOM.dblUnitQty	
-			,dblCost				= ISNULL(Detail.dblNewCost, Detail.dblCost)	
+			,dblCost				= CASE	WHEN ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) > 0 THEN 
+												ISNULL(Detail.dblNewCost, Detail.dblCost)	
+											ELSE 
+												ISNULL(Detail.dblCost, 0)	
+									  END 			
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1
