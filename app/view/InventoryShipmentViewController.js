@@ -199,6 +199,26 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         }]
                     }
                 },
+                colStorageLocation: {
+                    dataIndex: 'strStorageLocationName',
+                    editor: {
+                        store: '{storageLocation}',
+                        origValueField: 'intStorageLocationId',
+                        origUpdateField: 'intStorageLocationId',
+                        defaultFilters: [
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intLocationId}',
+                                conjunction: 'and'
+                            },
+                            {
+                                column: 'intSubLocationId',
+                                value: '{grdInventoryShipment.selection.intSubLocationId}',
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
+                },
                 colGrade: {
                     dataIndex: 'strGrade',
                     editor: {
@@ -275,6 +295,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                         },{
                             column: 'intSubLocationId',
                             value: '{grdInventoryShipment.selection.intSubLocationId}',
+                            conjunction: 'and'
+                        },{
+                            column: 'intStorageLocationId',
+                            value: '{grdInventoryShipment.selection.intStorageLocationId}',
                             conjunction: 'and'
                         },{
                             column: 'intOwnershipType',

@@ -1729,7 +1729,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter133",
+                                                                    "name": "filter130",
                                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2335,12 +2335,12 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "dataIndex": "strSubLocation",
-                                                                "itemId": "colGrade",
-                                                                "text": "Grade",
+                                                                "itemId": "colStorageLocation",
+                                                                "text": "Storage Location",
                                                                 "width": 100
                                                             },
-                                                            "name": "MyColumn62",
-                                                            "designerId": "035296f2-487f-4599-999e-f9b7c70dd71a",
+                                                            "name": "MyColumn72",
+                                                            "designerId": "809c8deb-e9e4-44ce-a973-154875ebebed",
                                                             "cn": [
                                                                 {
                                                                     "type": "Ext.form.field.ComboBox",
@@ -2353,33 +2353,35 @@
                                                                         "columns": [
                                                                             "[",
                                                                             "\t{",
-                                                                            "\t\tdataIndex: 'intCommodityAttributeId',",
+                                                                            "\t\tdataIndex: 'intStorageLocationId',",
                                                                             "\t\tdataType: 'numeric',",
+                                                                            "\t\ttext: 'Country Id',",
                                                                             "\t\thidden: true",
                                                                             "\t},",
                                                                             "\t{",
-                                                                            "\t\tdataIndex: 'intCommodityId',",
-                                                                            "\t\tdataType: 'numeric',",
-                                                                            "\t\thidden: true",
+                                                                            "\t\tdataIndex: 'strName',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Name',",
+                                                                            "\t\tflex: 1",
                                                                             "\t},",
                                                                             "\t{",
                                                                             "\t\tdataIndex: 'strDescription',",
                                                                             "\t\tdataType: 'string',",
-                                                                            "\t\ttext: 'Grade',",
+                                                                            "\t\ttext: 'Description',",
                                                                             "\t\tflex: 1",
                                                                             "\t}",
                                                                             "]"
                                                                         ],
                                                                         "designer|createAlias": "gridcombobox",
-                                                                        "displayField": "strDescription",
-                                                                        "itemId": "cboGrade",
-                                                                        "valueField": "strDescription"
+                                                                        "displayField": "strName",
+                                                                        "itemId": "cboStorageLocation",
+                                                                        "valueField": "strName"
                                                                     },
                                                                     "name": "MyComboBox2",
                                                                     "configAlternates": {
                                                                         "columns": "array"
                                                                     },
-                                                                    "designerId": "1ec8a629-c233-47e8-b906-00e19207433f",
+                                                                    "designerId": "b4fc1144-bcf5-4560-8255-e781d8dbe303",
                                                                     "customConfigs": [
                                                                         {
                                                                             "group": "(Custom Properties)",
@@ -2652,6 +2654,70 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "dataIndex": "strSubLocation",
+                                                                "itemId": "colGrade",
+                                                                "text": "Grade",
+                                                                "width": 100
+                                                            },
+                                                            "name": "MyColumn62",
+                                                            "designerId": "035296f2-487f-4599-999e-f9b7c70dd71a",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intCommodityAttributeId',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intCommodityId',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strDescription',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Grade',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t}",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strDescription",
+                                                                        "itemId": "cboGrade",
+                                                                        "valueField": "strDescription"
+                                                                    },
+                                                                    "name": "MyComboBox2",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "1ec8a629-c233-47e8-b906-00e19207433f",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
                                                                 "dataIndex": "strDockDoor",
                                                                 "itemId": "colDockDoor",
                                                                 "text": "Dock Door",
@@ -2782,7 +2848,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter134",
+                                                                    "name": "filter131",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3280,7 +3346,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter135",
+                                                                    "name": "filter132",
                                                                     "designerId": "86706668-0ec9-4541-b78b-d162dd783738",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
