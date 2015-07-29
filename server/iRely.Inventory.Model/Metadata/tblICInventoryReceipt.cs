@@ -741,7 +741,6 @@ namespace iRely.Inventory.Model
         public decimal? dblQuantity { get; set; }
         public decimal? dblGrossWeight { get; set; }
         public decimal? dblTareWeight { get; set; }
-        
         public decimal? dblCost { get; set; }
         public int? intUnitPallet { get; set; }
         public decimal? dblStatedGrossPerUnit { get; set; }
@@ -749,10 +748,9 @@ namespace iRely.Inventory.Model
         public string strContainerNo { get; set; }
         public int? intEntityVendorId { get; set; }
         public int? intVendorLocationId { get; set; }
-        public string strVendorLocation { get; set; }
         public string strMarkings { get; set; }
-        public string strGrade { get; set; }
         public int? intOriginId { get; set; }
+        public int? intGradeId { get; set; }
         public int? intSeasonCropYear { get; set; }
         public string strVendorLotId { get; set; }
         public DateTime? dtmManufacturedDate { get; set; }
@@ -777,8 +775,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_uom))
-                    if (tblICItemUOM != null)
-                        return tblICItemUOM.strUnitMeasure;
+                    if (vyuICGetInventoryReceiptItemLot != null)
+                        return vyuICGetInventoryReceiptItemLot.strUnitMeasure;
                     else
                         return null;
                 else
@@ -814,8 +812,8 @@ namespace iRely.Inventory.Model
         {
             get
             {
-                if (tblICItemUOM != null)
-                    return tblICItemUOM.dblUnitQty ?? 0;
+                if (vyuICGetInventoryReceiptItemLot != null)
+                    return vyuICGetInventoryReceiptItemLot.dblUnitQty ?? 0;
                 else
                     return _lotConv;
             }
@@ -831,8 +829,8 @@ namespace iRely.Inventory.Model
             get
             {
                 if (string.IsNullOrEmpty(_storageLocation))
-                    if (tblICStorageLocation != null)
-                        return tblICStorageLocation.strName;
+                    if (vyuICGetInventoryReceiptItemLot != null)
+                        return vyuICGetInventoryReceiptItemLot.strStorageLocationName;
                     else
                         return null;
                 else
@@ -843,11 +841,148 @@ namespace iRely.Inventory.Model
                 _storageLocation = value;
             }
         }
+        private string _subLocation;
+        [NotMapped]
+        public string strSubLocationName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_subLocation))
+                    if (vyuICGetInventoryReceiptItemLot != null)
+                        return vyuICGetInventoryReceiptItemLot.strSubLocationName;
+                    else
+                        return null;
+                else
+                    return _subLocation;
+            }
+            set
+            {
+                _subLocation = value;
+            }
+        }
+        private string _vendorId;
+        [NotMapped]
+        public string strVendorId
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_vendorId))
+                    if (vyuICGetInventoryReceiptItemLot != null)
+                        return vyuICGetInventoryReceiptItemLot.strVendorId;
+                    else
+                        return null;
+                else
+                    return _vendorId;
+            }
+            set
+            {
+                _vendorId = value;
+            }
+        }
+        private string _vendorLoc;
+        [NotMapped]
+        public string strVendorLocation
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_vendorLoc))
+                    if (vyuICGetInventoryReceiptItemLot != null)
+                        return vyuICGetInventoryReceiptItemLot.strVendorLocation;
+                    else
+                        return null;
+                else
+                    return _vendorLoc;
+            }
+            set
+            {
+                _vendorLoc = value;
+            }
+        }
+        private string _origin;
+        [NotMapped]
+        public string strOrigin
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_origin))
+                    if (vyuICGetInventoryReceiptItemLot != null)
+                        return vyuICGetInventoryReceiptItemLot.strOrigin;
+                    else
+                        return null;
+                else
+                    return _origin;
+            }
+            set
+            {
+                _origin = value;
+            }
+        }
+        private string _grade;
+        [NotMapped]
+        public string strGrade
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_grade))
+                    if (vyuICGetInventoryReceiptItemLot != null)
+                        return vyuICGetInventoryReceiptItemLot.strGrade;
+                    else
+                        return null;
+                else
+                    return _grade;
+            }
+            set
+            {
+                _grade = value;
+            }
+        }
 
         public tblICInventoryReceiptItem tblICInventoryReceiptItem { get; set; }
-        public tblICLot tblICLot { get; set; }
-        public tblICItemUOM tblICItemUOM { get; set; }
-        public tblICStorageLocation tblICStorageLocation { get; set; }
+        public vyuICGetInventoryReceiptItemLot vyuICGetInventoryReceiptItemLot { get; set; }
+    }
+
+    public class vyuICGetInventoryReceiptItemLot
+    {
+        public int intInventoryReceiptItemLotId { get; set; }
+        public int intInventoryReceiptItemId { get; set; }
+        public int? intLotId { get; set; }
+        public string strLotNumber { get; set; }
+        public string strLotAlias { get; set; }
+        public int? intSubLocationId { get; set; }
+        public string strSubLocationName { get; set; }
+        public int? intStorageLocationId { get; set; }
+        public string strStorageLocationName { get; set; }
+        public int? intItemUnitMeasureId { get; set; }
+        public decimal? dblUnitQty { get; set; }
+        public string strUnitMeasure { get; set; }
+        public string strUnitType { get; set; }
+        public decimal? dblQuantity { get; set; }
+        public decimal? dblGrossWeight { get; set; }
+        public decimal? dblTareWeight { get; set; }
+        public decimal? dblCost { get; set; }
+        public int? intUnitPallet { get; set; }
+        public decimal? dblStatedGrossPerUnit { get; set; }
+        public decimal? dblStatedTarePerUnit { get; set; }
+        public string strContainerNo { get; set; }
+        public int? intEntityVendorId { get; set; }
+        public string strVendorId { get; set; }
+        public int? intVendorLocationId { get; set; }
+        public string strVendorLocation { get; set; }
+        public string strMarkings { get; set; }
+        public int? intOriginId { get; set; }
+        public string strOrigin { get; set; }
+        public int? intGradeId { get; set; }
+        public string strGrade { get; set; }
+        public int? intSeasonCropYear { get; set; }
+        public string strVendorLotId { get; set; }
+        public DateTime? dtmManufacturedDate { get; set; }
+        public string strRemarks { get; set; }
+        public string strCondition { get; set; }
+        public DateTime? dtmCertified { get; set; }
+        public DateTime? dtmExpiryDate { get; set; }
+        public int? intSort { get; set; }
+
+        public tblICInventoryReceiptItemLot tblICInventoryReceiptItemLot { get; set; }
     }
 
     public class tblICInventoryReceiptItemTax : BaseEntity

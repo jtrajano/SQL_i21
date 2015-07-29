@@ -234,6 +234,12 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         grade: {
             type: 'icbufferedgradeattribute'
         },
+        lotGrade: {
+            type: 'icbufferedgradeattribute'
+        },
+        vendorLocation: {
+            type: 'emlocationbuffered'
+        },
         allocateBy: {
             autoLoad: true,
             data: [
@@ -436,11 +442,11 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 return true;
         },
         hasItemCommodity: function (get) {
-            if (get('grdInventoryReceipt.selection.intCommodityId')) {
-                return false;
+            if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.intCommodityId'))) {
+                return true;
             }
             else {
-                return true;
+                return false;
             }
         },
         disableSourceType: function (get) {
