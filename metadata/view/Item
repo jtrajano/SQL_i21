@@ -10211,7 +10211,7 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "itemId": "colStockConsignedPurchase",
-                                                "text": "On Consigned Purchase",
+                                                "text": "Consigned Purchase",
                                                 "width": 140
                                             },
                                             "name": "MyNumberColumn48",
@@ -10227,7 +10227,7 @@
                                             "userConfig": {
                                                 "align": "right",
                                                 "itemId": "colStockConsignedSale",
-                                                "text": "On Consigned Sale",
+                                                "text": "Consigned Sales",
                                                 "width": 130
                                             },
                                             "name": "MyNumberColumn53",

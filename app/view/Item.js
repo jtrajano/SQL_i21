@@ -4590,14 +4590,14 @@ Ext.define('Inventory.view.Item', {
                                                         itemId: 'colStockConsignedPurchase',
                                                         width: 140,
                                                         align: 'right',
-                                                        text: 'On Consigned Purchase'
+                                                        text: 'Consigned Purchase'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
                                                         itemId: 'colStockConsignedSale',
                                                         width: 130,
                                                         align: 'right',
-                                                        text: 'On Consigned Sale'
+                                                        text: 'Consigned Sales'
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
