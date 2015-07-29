@@ -48,6 +48,7 @@ SELECT
 	,intConcurrencyId = A.intConcurrencyId
 	,intEntityCustomerId = F.intEntityId
 	,intCompanyLocation = D.intLocationId
+	,strReason = O.strStatus
 FROM tblTMSiteDevice A
 INNER JOIN tblTMDevice B
 	ON A.intDeviceId = B.intDeviceId
