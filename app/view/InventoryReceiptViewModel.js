@@ -66,6 +66,10 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 {
                     intSourceType: 2,
                     strSourceType: 'Inbound Shipment'
+                },
+                {
+                    intSourceType: 3,
+                    strSourceType: 'Transport'
                 }
             ],
             filters: '{filterSourceByType}',
