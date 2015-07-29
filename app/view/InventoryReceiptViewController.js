@@ -189,6 +189,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dataIndex: 'strItemNo',
                     editor: {
                         readOnly: '{readOnlyItemDropdown}',
+                        defaultFilters: [
+                            {
+                                column: 'intLocationId',
+                                value: '{current.intLocationId}',
+                                conjunction: 'and'
+                            }
+                        ],
                         store: '{items}'
                     }
                 },
