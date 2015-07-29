@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspSCReceived]
 	@ItemsFromInventoryReceipt ReceiptItemTableType READONLY 
+	,@intUserId INT
 AS
 BEGIN
 
