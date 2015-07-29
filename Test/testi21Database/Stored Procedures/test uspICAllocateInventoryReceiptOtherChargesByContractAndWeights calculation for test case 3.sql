@@ -188,15 +188,15 @@ BEGIN
 				,[intInventoryReceiptItemId]	= 35
 				,[intEntityVendorId]			= NULL 
 				,[dblAmount]					= 2755.775000
-				,[strCostBilledBy]				= @COST_BILLED_BY_Vendor
-				,[ysnInventoryCost]				= @INVENTORY_COST_Yes
+				,[strCostBilledBy]				= @COST_BILLED_BY_None
+				,[ysnInventoryCost]				= @INVENTORY_COST_No
 		UNION ALL 
 		SELECT	[intInventoryReceiptId]			= @intInventoryReceiptId
 				,[intInventoryReceiptItemId]	= 36
 				,[intEntityVendorId]			= NULL 
 				,[dblAmount]					= 100.000000
-				,[strCostBilledBy]				= @COST_BILLED_BY_Vendor
-				,[ysnInventoryCost]				= @INVENTORY_COST_Yes
+				,[strCostBilledBy]				= @COST_BILLED_BY_None
+				,[ysnInventoryCost]				= @INVENTORY_COST_No
 	END
 
 	-- Assert
