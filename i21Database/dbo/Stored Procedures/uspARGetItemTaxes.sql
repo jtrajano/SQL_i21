@@ -343,11 +343,8 @@ AS
 					ON TG.[intTaxGroupId] = FG.[intTaxGroupId]
 			WHERE
 				TGM.[intTaxGroupMasterId] = @TaxGroupMasterId
-				AND ((TC.[intSalesTaxAccountId] IS NOT NULL
-					AND TC.[intSalesTaxAccountId] <> 0) 
-					OR 
-					(@TaxMasterId IS NOT NULL
-					AND @TaxMasterId <> 0))
+				AND (TC.[intSalesTaxAccountId] IS NOT NULL
+					AND TC.[intSalesTaxAccountId] <> 0)
 				
 			RETURN 1											
 		END						
