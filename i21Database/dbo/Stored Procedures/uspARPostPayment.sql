@@ -458,7 +458,7 @@ IF @recap = 0
 				WHERE
 					B.dblPayment <> 0 
 					AND C.ysnPaid = 0 
-					AND C.dblAmountDue < (B.dblPayment + B.dblDiscount)
+					AND C.dblAmountDue + C.dblDiscount < (B.dblPayment + B.dblDiscount)
 				
 			END
 

@@ -271,42 +271,48 @@ IF (@isSuccessful <> 0)
 	BEGIN
 		IF (@ysnPost = 1) 
 			BEGIN
-				/* If Posting succeeds, mark transaction as posted */
-				UPDATE tblPRPaycheck SET 
-					ysnPosted = 1
-					,dtmPosted = (SELECT TOP 1 dtmDate FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId) 
-				WHERE strPaycheckId = @strTransactionId
-				SET @isSuccessful = 1
+				IF (@ysnRecap = 0) 
+					BEGIN
+						/* If Posting succeeds, mark transaction as posted */
+						UPDATE tblPRPaycheck SET 
+							ysnPosted = 1
+							,dtmPosted = (SELECT TOP 1 dtmDate FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId) 
+						WHERE strPaycheckId = @strTransactionId
+						SET @isSuccessful = 1
 
-				/* Update the Employee Time Off Hours */
-				UPDATE tblPREmployeeTimeOff
-					SET	dblHoursUsed = dblHoursUsed + A.dblHours
-					FROM tblPRPaycheckEarning A
-					WHERE tblPREmployeeTimeOff.intEmployeeTimeOffId = A.intEmployeeTimeOffId
-						AND tblPREmployeeTimeOff.intEmployeeId = @intEmployeeId
-						AND A.intPaycheckId = @intPaycheckId
+						/* Update the Employee Time Off Hours */
+						UPDATE tblPREmployeeTimeOff
+							SET	dblHoursUsed = dblHoursUsed + A.dblHours
+							FROM tblPRPaycheckEarning A
+							WHERE tblPREmployeeTimeOff.intEmployeeTimeOffId = A.intEmployeeTimeOffId
+								AND tblPREmployeeTimeOff.intEmployeeId = @intEmployeeId
+								AND A.intPaycheckId = @intPaycheckId
+					END
 			END
 		ELSE
 			BEGIN 
-			/* If Unposting succeeds, mark transaction as unposted and delete the corresponding bank transaction */
-				UPDATE tblPRPaycheck SET 
-					ysnPosted = 0
-					,dtmPosted = NULL 
-				WHERE strPaycheckId = @strTransactionId
+				IF (@ysnRecap = 0) 
+					BEGIN
+					/* If Unposting succeeds, mark transaction as unposted and delete the corresponding bank transaction */
+						UPDATE tblPRPaycheck SET 
+							ysnPosted = 0
+							,dtmPosted = NULL 
+						WHERE strPaycheckId = @strTransactionId
 
-				/* Update the Employee Time Off Hours */
-				UPDATE tblPREmployeeTimeOff
-					SET	dblHoursUsed = dblHoursUsed - A.dblHours
-					FROM tblPRPaycheckEarning A
-					WHERE tblPREmployeeTimeOff.intEmployeeTimeOffId = A.intEmployeeTimeOffId
-						AND tblPREmployeeTimeOff.intEmployeeId = @intEmployeeId
-						AND A.intPaycheckId = @intPaycheckId
+						/* Update the Employee Time Off Hours */
+						UPDATE tblPREmployeeTimeOff
+							SET	dblHoursUsed = dblHoursUsed - A.dblHours
+							FROM tblPRPaycheckEarning A
+							WHERE tblPREmployeeTimeOff.intEmployeeTimeOffId = A.intEmployeeTimeOffId
+								AND tblPREmployeeTimeOff.intEmployeeId = @intEmployeeId
+								AND A.intPaycheckId = @intPaycheckId
 
-				SELECT @intTransactionId = intTransactionId FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId
-				DELETE FROM tblCMBankTransactionDetail WHERE intTransactionId = @intTransactionId
-				DELETE FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId
+						SELECT @intTransactionId = intTransactionId FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId
+						DELETE FROM tblCMBankTransactionDetail WHERE intTransactionId = @intTransactionId
+						DELETE FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId
 
-				SET @isSuccessful = 1
+						SET @isSuccessful = 1
+					END
 			END
 	END
 ELSE

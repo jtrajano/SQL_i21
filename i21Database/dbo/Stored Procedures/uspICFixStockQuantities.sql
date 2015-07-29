@@ -34,7 +34,7 @@ USING (
 		SELECT	ItemTransactions.intItemId
 				,ItemTransactions.intItemLocationId
 				,Qty =	SUM (
-							CASE	WHEN Lot.intLotId IS NOT NULL THEN 
+							CASE	WHEN Lot.intLotId IS NOT NULL AND Lot.intItemUOMId <> Lot.intWeightUOMId THEN 
 										CASE	WHEN Lot.intItemUOMId = ItemTransactions.intItemUOMId THEN 
 													-- Get the actual weight and convert it to stock unit  
 													dbo.fnCalculateStockUnitQty(ItemTransactions.dblQty * Lot.dblWeightPerQty, WeightUOM.dblUnitQty) 

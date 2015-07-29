@@ -288,7 +288,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= 'GJ'			
+			,[strCode]				= CASE	WHEN B.[strJournalType] in ('Origin Journal','Adjusted Origin Journal') THEN RTRIM (B.[strSourceType])
+											ELSE 'GJ' END 
 			,[strJournalLineDescription] = A.[strDescription]
 			,[intJournalLineNo]		= A.[intJournalDetailId]			
 			,[strTransactionType]	= B.[strJournalType]
@@ -368,7 +369,8 @@ ELSE
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= 'GJ'
+			,[strCode]				= CASE	WHEN B.[strJournalType] in ('Origin Journal','Adjusted Origin Journal') THEN RTRIM (B.[strSourceType])
+											ELSE 'GJ' END 
 			,[strTransactionType]	= B.[strJournalType]
 			,[strTransactionForm]	= B.[strTransactionType]
 			,[strModuleName]		= 'General Ledger'			

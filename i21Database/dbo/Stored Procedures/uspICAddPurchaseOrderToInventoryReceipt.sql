@@ -161,6 +161,7 @@ FROM	dbo.tblPOPurchaseDetail PODetail INNER JOIN dbo.tblICItemUOM ItemUOM
 			ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 WHERE	PODetail.intPurchaseId = @PurchaseOrderId
 		AND dbo.fnIsStockTrackingItem(PODetail.intItemId) = 1
+		AND PODetail.dblQtyOrdered != PODetail.dblQtyReceived
 
 -- Re-update the total cost 
 UPDATE	Receipt

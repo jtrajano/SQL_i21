@@ -1,5 +1,27 @@
-﻿CREATE PROCEDURE [dbo].[uspMFCompleteWorkOrder] (@strXML NVARCHAR(MAX),@strOutputLotNumber nvarchar(50) Output)
+﻿CREATE PROCEDURE [dbo].[uspMFCompleteWorkOrder] (
+	@strXML NVARCHAR(MAX)
+	,@strOutputLotNumber NVARCHAR(50) OUTPUT
+)
 AS
+
+BEGIN 
+	-- Constant variables for Work Order Status
+	DECLARE @WORK_ORDER_STATUS_New AS INT = 1
+			,@WORK_ORDER_STATUS_Not_Released AS INT = 2
+			,@WORK_ORDER_STATUS_OPen AS INT = 3
+			,@WORK_ORDER_STATUS_Frozen AS INT = 4
+			,@WORK_ORDER_STATUS_Hold AS INT = 5
+			,@WORK_ORDER_STATUS_Pre_Kitted AS INT = 6
+			,@WORK_ORDER_STATUS_Kitted AS INT = 7
+			,@WORK_ORDER_STATUS_Kit_Transferred AS INT = 8
+			,@WORK_ORDER_STATUS_Released AS INT = 9
+			,@WORK_ORDER_STATUS_Started AS INT = 10
+			,@WORK_ORDER_STATUS_Paused AS INT = 11
+			,@WORK_ORDER_STATUS_Staged AS INT = 12
+			,@WORK_ORDER_STATUS_Completed AS INT = 13
+END 
+
+
 BEGIN TRY
 	DECLARE @idoc INT
 			,@ErrMsg NVARCHAR(MAX)
@@ -114,6 +136,7 @@ BEGIN TRY
 
 	BEGIN TRANSACTION
 
+
 	IF @intPhysicalItemUOMId IS NULL
 	BEGIN
 		SELECT	@intPhysicalItemUOMId = intItemUOMId
@@ -126,8 +149,9 @@ BEGIN TRY
 				)
 	END
 
+	-- Mark the Work Order status as 'Started'
 	UPDATE	tblMFWorkOrder
-	SET		intStatusId = 10
+	SET		intStatusId = @WORK_ORDER_STATUS_Started
 	WHERE	intWorkOrderId = @intWorkOrderId
 
 	SELECT	@dtmCurrentDate = GETDATE()
@@ -267,7 +291,7 @@ BEGIN TRY
 				,@intItemId
 				,@dblProduceQty
 				,@intItemUOMId
-				,10
+				,@WORK_ORDER_STATUS_Started
 				,@intManufacturingCellId
 				,@intStorageLocationId
 				,@intLocationId

@@ -140,7 +140,7 @@ WHERE A.isUnposted = 0 or A.isUnposted IS NULL
 ----*CountEnd*--'
 
 
-DECLARE @GLReportDrillDown NVARCHAR(MAX) =  '[{"Control":"labelEx1","DrillThroughType":1,"Name":"GeneralLedger.Global.GLGlobalDrillDown","DrillThroughFilterType":0,"Filters":null,"id":"Reports.model.DrillThrough-1","DrillThroughValue":"strTransactionId,intTransactionId,strModuleName,strTransactionForm,strTransactionType,intGLDetailId"}]' 
+DECLARE @GLReportDrillDown NVARCHAR(MAX) =  '[{"Control":"labelEx1","DrillThroughType":1,"Name":"GeneralLedger.Global.GLGlobalDrillDown","DrillThroughFilterType":0,"Filters":null,"id":"Reports.model.DrillThrough-1","DrillThroughValue":"strTransactionId,intTransactionId,strModuleName,strTransactionForm,strTransactionType,intGLDetailId,strCode"}]' 
 DECLARE @GLReportDataSource NVARCHAR(MAX) = 
 'WITH Units   AS   ( SELECT A.[dblLbsPerUnit], B.[intAccountId], A.[strUOMCode]    
 FROM tblGLAccountUnit A INNER JOIN tblGLAccount B ON A.[intAccountUnitId] = B.[intAccountUnitId]  ),   
