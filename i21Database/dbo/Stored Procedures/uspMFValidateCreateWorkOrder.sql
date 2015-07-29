@@ -56,8 +56,8 @@ BEGIN TRY
 				END
 			,@strLastPlannedDate = CASE 
 				WHEN W.intPlannedShiftId IS NOT NULL
-					THEN ltrim(W.dtmPlannedDate) + ' ' + SH.strShiftName
-				ELSE ltrim(W.dtmPlannedDate)
+					THEN CONVERT(CHAR,W.dtmPlannedDate,101) + ' ' + SH.strShiftName
+				ELSE CONVERT(CHAR,W.dtmPlannedDate,101)
 				END
 			,@dtmLastPlannedDate = W.dtmPlannedDate
 			,@intCountStatusId = intCountStatusId
@@ -105,8 +105,8 @@ BEGIN TRY
 				END
 			,@strLastPlannedDate = CASE 
 				WHEN W.intPlannedShiftId IS NOT NULL
-					THEN ltrim(W.dtmPlannedDate) + ' ' + SH.strShiftName
-				ELSE ltrim(W.dtmPlannedDate)
+					THEN CONVERT(CHAR,W.dtmPlannedDate,101) + ' ' + SH.strShiftName
+				ELSE CONVERT(CHAR,W.dtmPlannedDate,101)
 				END
 			,@dtmLastPlannedDate = W.dtmPlannedDate
 			,@intCountStatusId = intCountStatusId
@@ -171,7 +171,7 @@ BEGIN TRY
 		FROM dbo.tblICItem
 		WHERE intItemId = @intItemId
 
-		SELECT @strPlannedDate = ltrim(@dtmPlannedDate) + ' ' + @strShiftName
+		SELECT @strPlannedDate = CONVERT(CHAR,@dtmPlannedDate,101) + ' ' + @strShiftName
 
 		RAISERROR (
 				51158
@@ -195,7 +195,7 @@ BEGIN TRY
 		FROM dbo.tblICItem
 		WHERE intItemId = @intItemId
 
-		SELECT @strPlannedDate = ltrim(@dtmPlannedDate)
+		SELECT @strPlannedDate = CONVERT(CHAR,@dtmPlannedDate,101)
 
 		RAISERROR (
 				51168
