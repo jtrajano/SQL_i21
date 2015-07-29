@@ -76,8 +76,8 @@ DECLARE @ARAccount NVARCHAR(250)
 DECLARE @totalInvalid INT
 DECLARE @totalRecords INT
 		
-SET @ARAccount = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
-SET @DiscountAccount = ISNULL((SELECT TOP 1 intDiscountAccountId FROM tblARCompanyPreference WHERE intDiscountAccountId IS NOT NULL AND intDiscountAccountId <> 0),0)
+SET @ARAccount = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0)
+SET @DiscountAccount = (SELECT TOP 1 intDiscountAccountId FROM tblARCompanyPreference WHERE intDiscountAccountId IS NOT NULL AND intDiscountAccountId <> 0)
 		
 
 DECLARE @UserEntityID int
@@ -191,6 +191,26 @@ IF @recap = 0
 		--POST VALIDATIONS
 		IF @post = 1
 			BEGIN
+			
+				--Sales Discount Account
+				INSERT INTO 
+					@ARReceivableInvalidData
+				SELECT 
+					'The AR Account in Company Preference was not set.'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					tblARPaymentDetail D
+						ON A.intPaymentId = D.intPaymentId
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId						 
+				WHERE
+					(@ARAccount IS NULL OR @ARAccount = 0)
 
 				--Payment without payment on detail (get all detail that has 0 payment)
 				INSERT INTO 
@@ -314,15 +334,9 @@ IF @recap = 0
 				INNER JOIN
 					@ARReceivablePostData P
 						ON A.intPaymentId = P.intPaymentId						 
-				INNER JOIN
-					tblSMCompanyLocation L
-						ON A.intLocationId = L.intCompanyLocationId
-				LEFT OUTER JOIN
-					tblGLAccount G
-						ON L.intSalesDiscounts = G.intAccountId						
 				WHERE
 					ISNULL(D.dblDiscount,0) <> 0
-					AND (@DiscountAccount IS NULL OR LTRIM(RTRIM(@DiscountAccount)) = '')
+					AND (@DiscountAccount IS NULL OR @DiscountAccount = 0)
 					
 				--Bank Account
 				INSERT INTO 
