@@ -9,12 +9,11 @@ isnull(CashExposure,0) as dblCaseExposure,
 isnull(CompanyTitled,0) as dblInHouse              
  FROM(              
 SELECT strLocationName,intCommodityId,strCommodityCode,strUnitMeasure,  
-   (invQty)-isnull(ReserveQty,0) +  
+   (invQty)-Case when (select top 1 ysnIncludeInTransitInCompanyTitled from tblRKCompanyPreference)=1 then  isnull(ReserveQty,0) else 0 end +  
    Case when (select top 1 ysnIncludeOffsiteInventoryInCompanyTitled from tblRKCompanyPreference)=1 then OffSite else 0 end +  
    Case when (select top 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then DP else 0 end +   
    dblCollatralSales  + SlsBasisDeliveries  
-   AS CompanyTitled,   
-     
+   AS CompanyTitled,     
             (isnull(invQty,0)-isnull(ReserveQty,0)) +             
             (isnull(OpenPurQty,0)-isnull(OpenSalQty,0))              
             +(((isnull(FutLBalTransQty,0)-isnull(FutMatchedQty,0))- (isnull(FutSBalTransQty,0)-isnull(FutMatchedQty,0)) )*isnull(dblContractSize,1)) +              

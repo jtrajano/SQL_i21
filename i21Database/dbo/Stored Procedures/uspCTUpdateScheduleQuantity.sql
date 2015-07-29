@@ -1,7 +1,10 @@
 CREATE PROCEDURE uspCTUpdateScheduleQuantity
 
 	@intContractDetailId	INT, 
-	@dblQuantityToUpdate	NUMERIC(12,4)
+	@dblQuantityToUpdate	NUMERIC(12,4)/*,
+	@intUserId				INT,
+	@intExternalId			INT,
+	@strScreenName			NVARCHAR(50)*/
 	
 AS
 
@@ -9,7 +12,8 @@ BEGIN TRY
 	
 	DECLARE @ErrMsg			NVARCHAR(MAX),
 			@dblQuantity	NUMERIC(12,4),
-			@dblScheduleQty NUMERIC(12,4)
+			@dblScheduleQty NUMERIC(12,4),
+			@dblBalance		NUMERIC(12,4)
 			
 	IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 	BEGIN
@@ -17,13 +21,14 @@ BEGIN TRY
 	END 
 	
 	SELECT	@dblQuantity	=	dblQuantity,
-			@dblScheduleQty	=	ISNULL(dblScheduleQty,0)
+			@dblScheduleQty	=	ISNULL(dblScheduleQty,0),
+			@dblBalance		=	ISNULL(dblBalance,0)
 	FROM	tblCTContractDetail 
 	WHERE	intContractDetailId = @intContractDetailId
 	
-	IF	@dblScheduleQty + @dblQuantityToUpdate > @dblQuantity
+	IF	@dblScheduleQty + @dblQuantityToUpdate > @dblBalance
 	BEGIN
-		RAISERROR('Total scheduled quantity should not be more than available quantity.',16,1)
+		RAISERROR('Total scheduled quantity should not be more than balance quantity.',16,1)
 	END
 	
 	IF	@dblScheduleQty + @dblQuantityToUpdate < 0

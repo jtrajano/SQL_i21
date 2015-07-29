@@ -19,13 +19,9 @@
 	dblTotalGainLoss NUMERIC(18, 4),
 	intUserId INT NOT NULL,
 	dtmCreatedDate DATETIME,
-	intTicketId INT,
 	intRailId INT,
 	intProvisionalInvoiceId INT,
 	dblProvisionalPrice NUMERIC(8, 4),
-	[intInventoryReceiptItemId] INT NULL, 
     CONSTRAINT [PK_tblCTContractAdjustment_intAdjustmentId] PRIMARY KEY CLUSTERED ([intAdjustmentId] ASC), 
-	CONSTRAINT [FK_tblCTContractAdjustment_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]),
-	CONSTRAINT [FK_tblCTContractAdjustment_tblSCTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [tblSCTicket]([intTicketId]),
-	CONSTRAINT [FK_tblCTContractAdjustment_tblICInventoryReceiptItem_intInventoryReceiptItemId] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES [tblICInventoryReceiptItem]([intInventoryReceiptItemId])
+	CONSTRAINT [FK_tblCTContractAdjustment_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId])
 )

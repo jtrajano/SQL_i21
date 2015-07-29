@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblQMControlPoint]
 (
-	[intControlPointId] INT NOT NULL IDENTITY, 
+	[intControlPointId] INT NOT NULL, 
 	[strControlPointName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
 

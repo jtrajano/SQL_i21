@@ -2021,7 +2021,7 @@
     <Build Include="dbo\Stored Procedures\uspARInsertInvoiceServiceCharge.sql" />
     <Build Include="dbo\Stored Procedures\uspARCalculateServiceCharge.sql" />
     <Build Include="dbo\User Defined Types\ServiceChargeTableType.sql" />
-    <Build Include="dbo\Views\vyuCTSequenceHistory.sql" />
+    <Build Include="dbo\Views\vyuCTSequenceUsageHistory.sql" />
     <Build Include="dbo\Views\vyuGRGetPurchaseSaleDetail.sql" />
     <Build Include="dbo\Tables\tblQMTicketDiscount.sql" />
     <Build Include="dbo\Stored Procedures\uspARDeleteRecurrence.sql" />
@@ -2076,6 +2076,15 @@
     <None Include="Scripts\Post-Deployment\TM\DefaultData\11_ApplianceType.sql" />
     <Build Include="dbo\Views\vyuARGetRecurringTransactions.sql" />
     <Build Include="dbo\Tables\tblCTSequenceUsageHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateSequenceUsageHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRGetCustomerFreight.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRProcessContracts.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDProcessOriginImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspSPAuditRemoveDefendencies.sql" />
+    <Build Include="dbo\Tables\tblCFAccountSuccessImport.sql" />
+    <Build Include="dbo\Tables\tblCFAccountFailedImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFImportAccount.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

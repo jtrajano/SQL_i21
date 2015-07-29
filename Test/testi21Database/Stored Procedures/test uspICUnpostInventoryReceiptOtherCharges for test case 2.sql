@@ -333,12 +333,12 @@ BEGIN
 		SELECT 
 			[dtmDate]					= '2014-01-23'
 			,[strBatchId]				= @strBatchId
-			,[intAccountId]				= @Inventory_Default
+			,[intAccountId]				= @OtherChargeExpense_Default
 			,[dblDebit]					= 0
 			,[dblCredit]				= 951.925000
 			,[dblDebitUnit]				= 0
 			,[dblCreditUnit]			= 0
-			,[strDescription]			= 'INVENTORY WHEAT-DEFAULT'
+			,[strDescription]			= 'OTHER CHARGE EXPENSE-DEFAULT'
 			,[strCode]					= 'IC'
 			,[strReference]				= ''
 			,[intCurrencyId]			= 1
@@ -360,12 +360,12 @@ BEGIN
 		SELECT 
 			[dtmDate]					= '2014-01-23'
 			,[strBatchId]				= @strBatchId
-			,[intAccountId]				= @APClearing_Default
+			,[intAccountId]				= @OtherChargeIncome_Default
 			,[dblDebit]					= 951.925000
 			,[dblCredit]				= 0
 			,[dblDebitUnit]				= 0
 			,[dblCreditUnit]			= 0
-			,[strDescription]			= 'AP CLEARING WHEAT-DEFAULT'
+			,[strDescription]			= 'OTHER CHARGE INCOME-DEFAULT'
 			,[strCode]					= 'IC'
 			,[strReference]				= ''
 			,[intCurrencyId]			= 1
@@ -387,12 +387,12 @@ BEGIN
 		SELECT 
 			[dtmDate]					= '2014-01-23'
 			,[strBatchId]				= @strBatchId
-			,[intAccountId]				= @Inventory_Default
+			,[intAccountId]				= @OtherChargeExpense_Default
 			,[dblDebit]					= 0
 			,[dblCredit]				= 1903.850000
 			,[dblDebitUnit]				= 0
 			,[dblCreditUnit]			= 0
-			,[strDescription]			= 'INVENTORY WHEAT-DEFAULT'
+			,[strDescription]			= 'OTHER CHARGE EXPENSE-DEFAULT'
 			,[strCode]					= 'IC'
 			,[strReference]				= ''
 			,[intCurrencyId]			= 1
@@ -414,12 +414,12 @@ BEGIN
 		SELECT 
 			[dtmDate]					= '2014-01-23'
 			,[strBatchId]				= @strBatchId
-			,[intAccountId]				= @APClearing_Default
+			,[intAccountId]				= @OtherChargeIncome_Default
 			,[dblDebit]					= 1903.850000
 			,[dblCredit]				= 0
 			,[dblDebitUnit]				= 0
 			,[dblCreditUnit]			= 0
-			,[strDescription]			= 'AP CLEARING WHEAT-DEFAULT'
+			,[strDescription]			= 'OTHER CHARGE INCOME-DEFAULT'
 			,[strCode]					= 'IC'
 			,[strReference]				= ''
 			,[intCurrencyId]			= 1

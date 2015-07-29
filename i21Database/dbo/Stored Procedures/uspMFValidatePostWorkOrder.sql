@@ -135,6 +135,7 @@ BEGIN TRY
 			FROM dbo.tblMFWorkOrderRecipeItem ri
 			WHERE ri.intWorkOrderId = @intWorkOrderId
 				AND ri.intRecipeItemTypeId = 1
+				AND ri.intConsumptionMethodId=2
 				AND (
 					(
 						ri.ysnYearValidationRequired = 1

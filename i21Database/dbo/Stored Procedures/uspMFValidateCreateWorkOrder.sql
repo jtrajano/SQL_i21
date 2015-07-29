@@ -198,7 +198,7 @@ BEGIN TRY
 		SELECT @strPlannedDate = ltrim(@dtmPlannedDate)
 
 		RAISERROR (
-				51158
+				51168
 				,11
 				,1
 				,@strPlannedDate

@@ -1,10 +1,4 @@
-﻿
--- =============================================
--- Author:		mpferrer
--- Create date: 04/01/2015
--- Description:	Audit Script - generic script to check all changes from SSDT schema compare to ensure that the update will/will not fail.
--- =============================================
-CREATE PROCEDURE [dbo].[uspSPAuditLogs]
+﻿CREATE PROCEDURE [dbo].[uspSPAuditLogs]
 	@Result NVARCHAR(MAX) OUTPUT, 
 	@FilePath NVARCHAR(256) = null
 AS
@@ -54,13 +48,13 @@ BEGIN
 			@Add NVARCHAR(MAX),
 			@ColumnChanges NVARCHAR(MAX),
 			@Changes NVARCHAR(MAX),	
-			@ForeignKey NVARCHAR(MAX),
-			@Ctr INT = 1 
+			@ForeignKey NVARCHAR(MAX)
 
 		DECLARE @ret NVARCHAR(200), @ret1 NVARCHAR(200)
 
 		DECLARE Cursor_Audit CURSOR FOR 
 			SELECT DISTINCT [Table], [Column], [IsDelete], [Add],[ColumnChanges], [Changes], [ForeignKey] FROM #tempTables
+		
 		OPEN Cursor_Audit
 			FETCH NEXT FROM Cursor_Audit into @Table, @Column, @IsDelete, @Add, @ColumnChanges, @Changes, @ForeignKey
 
@@ -71,6 +65,7 @@ BEGIN
 			IF(@Add <> '' AND @Add <> NULL) 
 			BEGIN
 				SET @Column = SUBSTRING(@Column, LEN(@Table) + 2, LEN(@Column))
+				SET @Sql = ''
 				BEGIN TRY
 					BEGIN TRAN
 						SET @Sql = 'ALTER TABLE ' + @Table + ' ADD ' + @Column + ' ' + @Add;
@@ -78,27 +73,30 @@ BEGIN
 					ROLLBACK TRAN
 				END TRY
 				BEGIN CATCH
-					SET @Result = @Result + 'Table:' + REPLACE(@Table,'dbo.','') + 'Column:' + @Column + '. ' + ERROR_MESSAGE() + CHAR(13) + CHAR(10);
+					SET @Result = @Result + '('+ @Sql + ') ' + ERROR_MESSAGE() + CHAR(13) + CHAR(10);
 					ROLLBACK TRAN
 				END CATCH	
 			END
 
 			ELSE 
 			BEGIN
+
 				-- Data Type Changes
 				IF(@Changes = 'Scale') -- CHANGE SCALE OF A DECIMAL COLUMN
 				BEGIN 
 					SET @Column = SUBSTRING(@Column, LEN(@Table) + 2, LEN(@Column))
 					SET @Sql = N'select @ret=NUMERIC_PRECISION from INFORMATION_SCHEMA.COLUMNS IC where TABLE_NAME = ''' + SUBSTRING(@Table,5,len(@Table)) + ''' and COLUMN_NAME = '''+  @Column  + '''';
-					EXEC sp_executesql @Sql,N'@ret NVARCHAR(20) OUTPUT', @ret OUTPUT;
+					EXEC sp_executesql @Sql,N'@ret NVARCHAR(20) OUTPUT', @ret OUTPUT;	
+					SET @Sql = ''
 					BEGIN TRY
 						BEGIN TRAN
+							EXEC uspSPAuditRemoveDefendencies @Table, @Column
 							SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' DECIMAL(' + @ret + ',' + @ColumnChanges + ')';
 							EXEC sp_executesql @Sql;
-						ROLLBACK TRAN
+						ROLLBACK
 					END TRY
 					BEGIN CATCH
-						SET @Result = @Result + 'Table:' +REPLACE(@Table,'dbo.','') + 'Column:' + @Column + '. ' + ERROR_MESSAGE() + CHAR(13) + CHAR(10);
+						SET @Result = @Result + 'Function:SCALE' + ' Table:' + @Table + ' Column:' + @Column + '. ' + ERROR_MESSAGE() + CHAR(13) + CHAR(10);
 						ROLLBACK TRAN
 					END CATCH
 				END
@@ -106,21 +104,18 @@ BEGIN
 				IF(@Changes = 'Precision') -- CHANGE PRECISION OF A DECIMAL COLUMN
 				BEGIN
 					SET @Column = SUBSTRING(@Column, LEN(@Table) + 2, LEN(@Column))
-					
-					SET @Sql = N'select @ret=NUMERIC_SCALE from INFORMATION_SCHEMA.COLUMNS IC where TABLE_NAME = ''' + SUBSTRING(@Table,5,len(@Table)) + ''' 
-									and COLUMN_NAME = '''+  @Column  + '''';
-					
+					SET @Sql = N'select @ret=NUMERIC_SCALE from INFORMATION_SCHEMA.COLUMNS IC where TABLE_NAME = ''' + SUBSTRING(@Table,5,len(@Table)) + ''' and COLUMN_NAME = '''+  @Column  + '''';	
 					EXEC sp_executesql @Sql,N'@ret NVARCHAR(20) OUTPUT', @ret OUTPUT;
-					
+					SET @Sql = ''
 					BEGIN TRY
 						BEGIN TRAN
+							EXEC uspSPAuditRemoveDefendencies @Table, @Column
 							SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' DECIMAL(' + @ColumnChanges + ',' + @ret + ')';
 							EXEC sp_executesql @Sql;
-						ROLLBACK TRAN
+						ROLLBACK
 					END TRY
 					BEGIN CATCH
-						SET @Result = @Result + 'Table:' + REPLACE(@Table,'dbo.','') + 'Column:' + @Column + '. ' + ERROR_MESSAGE() + CHAR(13) + CHAR(10);
-						--SET @Result = @Result + ERROR_MESSAGE() + ' Changing precision of the decimal to ' + @ColumnChanges + CHAR(13) + CHAR(10);
+						SET @Result = @Result  + 'Function:PRECISION' + ' Table:' + @Table + ' Column:' + @Column + '. ' +ERROR_MESSAGE() + CHAR(13) + CHAR(10);
 						ROLLBACK TRAN
 					END CATCH
 				END
@@ -128,41 +123,37 @@ BEGIN
 				IF(@Changes = 'IsNullable') -- COLUMN SET TO NULL OR NOT NULL
 				BEGIN
 					SET @Column = SUBSTRING(@Column, LEN(@Table) + 2, LEN(@Column))
-					
-					SET @Sql = N'select @ret=DATA_TYPE from INFORMATION_SCHEMA.COLUMNS IC where TABLE_NAME = ''' + SUBSTRING(@Table,5,len(@Table)) + ''' 
-									and COLUMN_NAME = '''+  @Column  + '''';
-					
+					SET @Sql = N'select @ret=DATA_TYPE from INFORMATION_SCHEMA.COLUMNS IC where TABLE_NAME = ''' + SUBSTRING(@Table,5,len(@Table)) + ''' and COLUMN_NAME = '''+  @Column  + '''';
 					EXEC sp_executesql @Sql,N'@ret NVARCHAR(20) OUTPUT', @ret OUTPUT;
-					
+					SET @Sql = ''
 					BEGIN TRY
 						BEGIN TRAN
+							EXEC uspSPAuditRemoveDefendencies @Table, @Column
 							SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' ' + @ret + ' ' +  CASE WHEN @ColumnChanges = 'False' THEN 'NOT NULL' ELSE 'NULL' END;
 							EXEC sp_executesql @Sql;
-						ROLLBACK TRAN
+						ROLLBACK
 					END TRY
 					BEGIN CATCH
-						SET @Result = @Result + 'Table:' + REPLACE(@Table,'dbo.','') + 'Column:' + @Column + '. ' + ERROR_MESSAGE() + CHAR(13) + CHAR(10);
-						ROLLBACK TRAN
+						SET @Result = @Result + 'Function:ISNULLABLE' + ' Table:' + @Table + ' Column:' + @Column + '. ' + ERROR_MESSAGE() + CHAR(13) + CHAR(10);
+						ROLLBACK
 					END CATCH
 				END
 
 				IF(@Changes = 'Length') -- NVARCHAR LENGTH
 				BEGIN
 					SET @Column = SUBSTRING(@Column, LEN(@Table) + 2, LEN(@Column))
-					
-					SET @Sql = N'select @ret=IS_NULLABLE from INFORMATION_SCHEMA.COLUMNS IC where TABLE_NAME = ''' + SUBSTRING(@Table,5,len(@Table)) + ''' and 
-									COLUMN_NAME = '''+  @Column  + '''';
-					
-					EXEC sp_executesql @Sql,N'@ret NVARCHAR(20) OUTPUT', @ret OUTPUT;
-					
+					SET @Sql = N'select @ret=IS_NULLABLE from INFORMATION_SCHEMA.COLUMNS IC where TABLE_NAME = ''' + SUBSTRING(@Table,5,len(@Table)) + ''' and COLUMN_NAME = '''+  @Column  + '''';				
+					EXEC sp_executesql @Sql,N'@ret NVARCHAR(20) OUTPUT', @ret OUTPUT;			
+					SET @Sql = ''
 					BEGIN TRY
-						BEGIN TRAN
+						BEGIN TRAN	
+							EXEC uspSPAuditRemoveDefendencies @Table, @Column
 							SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' NVARCHAR(' + CASE WHEN @ColumnChanges = 0 THEN 'MAX' ELSE @ColumnChanges END + ') ' + CASE WHEN @ret = 'NO' THEN 'NOT NULL' ELSE 'NULL' END;
-							EXEC sp_executesql @Sql;
+							EXEC sp_executesql @Sql	
 						ROLLBACK TRAN
 					END TRY
-					BEGIN CATCH
-						SET @Result = @Result + 'Table:' + REPLACE(@Table,'dbo.','') + 'Column:' + @Column + '. ' + ERROR_MESSAGE() + CHAR(13) + CHAR(10);
+					BEGIN CATCH		
+						SET @Result = @Result + 'Function:LENGTH' + ' Table:' + @Table + ' Column:' + @Column + '. ' + ERROR_MESSAGE() + CHAR(13) + CHAR(10);
 						ROLLBACK TRAN
 					END CATCH
 				END
@@ -172,43 +163,41 @@ BEGIN
 					SET @Column = SUBSTRING(@Column, LEN(@Table) + 2, LEN(@Column))
 					SET @Column = SUBSTRING(@Column, LEN(@Table) + 1, LEN(@Column))	
 					SET @Sql = 'SELECT ' + @Column + ' INTO ##tempData FROM ' + @Table + ' GROUP BY ' + @Column	+ ' HAVING COUNT(*) > 1';
-					EXEC sp_executesql @Sql;
-					
+					EXEC sp_executesql @Sql;	
 					IF((SELECT COUNT(*) FROM ##tempData) > 0)
 					BEGIN
-						SET @Result = @Result + 'Table:' + REPLACE(@Table,'dbo.','') + 'Column:' + @Column + '. ' + 'Adding UNIQUE KEY CONSTRAINT/PRIMARY KEY will cause data error.' + CHAR(13) + CHAR(10);
+						SET @Result = @Result + 'Table:' + REPLACE(@Table,'dbo.','') + ' Column:' + @Column + '. ' + 'Adding UNIQUE KEY CONSTRAINT/PRIMARY KEY will cause data error.' + CHAR(13) + CHAR(10);
 					END
-
 					DROP TABLE ##tempData
 				END
 
 				IF(@ForeignKey IS NOT NULL) -- FOREIGN KEY CONSTRAINT
-				BEGIN
-					
-					declare @tempColumn NVARCHAR(MAX) = parsename(replace(@ForeignKey, '_', '.'), 1)
-					declare @tempTable NVARCHAR(MAX) = parsename(replace(@ForeignKey, '_', '.'), 2)
-					
+				BEGIN				
+					DECLARE @tempColumn NVARCHAR(MAX) = parsename(replace(@ForeignKey, '_', '.'), 1)
+					DECLARE @tempTable NVARCHAR(MAX) = parsename(replace(@ForeignKey, '_', '.'), 2)
 					IF(@Table <> ('dbo.' + @tempTable))
-					BEGIN
+						DECLARE @tblIsExist int = 0				
+						SELECT @tblIsExist=COUNT(*)
+							FROM INFORMATION_SCHEMA.TABLES 
+							WHERE TABLE_TYPE='BASE TABLE'
+							 AND TABLE_NAME= @Table
+						SET @Sql = ''
 						BEGIN TRY
 							BEGIN TRAN
+							IF (@tblIsExist > 0)
+							BEGIN
 								SET @Sql = 'ALTER TABLE ' + @Table + ' ADD FOREIGN KEY (' + @tempColumn +') REFERENCES ' + @tempTable  +'(' + @tempColumn + ')';
 								EXEC sp_executesql @Sql;
+							END
 							ROLLBACK TRAN
 						END TRY
 						BEGIN CATCH
-							SET @Result = @Result + 'Table:' + REPLACE(@Table,'dbo.','') + ' Foreign Key:' + REPLACE(@ForeignKey,'dbo.','')  + '. ' + ERROR_MESSAGE() + CHAR(13) + CHAR(10);
+							SET @Result = @Result + 'Function: FOREIGN KEY' + ' Table:' + @Table + ' Column:' + @tempColumn + ' References:' + @tempTable + '. ' + ERROR_MESSAGE() + CHAR(13) + CHAR(10);
 							ROLLBACK TRAN
 						END CATCH
-					END
-
 				END
-
 			END
-
-			SET @Ctr = @Ctr + 1;
 			FETCH NEXT FROM Cursor_Audit into @Table, @Column, @IsDelete, @Add, @ColumnChanges, @Changes, @ForeignKey
-
 		END
 
 		CLOSE Cursor_Audit

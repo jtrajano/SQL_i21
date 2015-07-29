@@ -421,6 +421,7 @@ BEGIN TRY
 						,dtmExpiryDate
 						,dtmManufacturedDate
 						,intOriginId
+						,intGradeId
 						,strBOLNo
 						,strVessel
 						,strReceiptNumber
@@ -429,7 +430,6 @@ BEGIN TRY
 						,intEntityVendorId
 						,strVendorLotNo
 						,intVendorLocationId
-						,strVendorLocation
 						,intDetailId
 						,ysnProduced
 						)
@@ -447,6 +447,7 @@ BEGIN TRY
 						,dtmExpiryDate = @dtmExpiryDate
 						,dtmManufacturedDate = @dtmCurrentDateTime
 						,intOriginId = NULL
+						,intGradeId = NULL 
 						,strBOLNo = NULL
 						,strVessel = NULL
 						,strReceiptNumber = NULL
@@ -455,7 +456,6 @@ BEGIN TRY
 						,intEntityVendorId = NULL
 						,strVendorLotNo = NULL
 						,intVendorLocationId = NULL
-						,strVendorLocation = NULL
 						,intDetailId = @intWorkOrderId
 						,ysnProduced = 1
 
@@ -797,6 +797,43 @@ BEGIN TRY
 		FROM @tblItem
 		WHERE intItemRecordKey > @intItemRecordKey
 	END
+
+	IF EXISTS (
+		SELECT *
+		FROM dbo.tblMFWorkOrderRecipeItem ri
+		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON SI.intRecipeItemId = ri.intRecipeItemId and ri.intWorkOrderId =SI.intWorkOrderId 
+		AND SI.intRecipeId = ri.intRecipeId
+		WHERE ri.intWorkOrderId = @intWorkOrderId
+			AND ri.intRecipeItemTypeId = 1
+			AND (
+				(
+					ri.ysnYearValidationRequired = 1
+					AND @dtmCurrentDate BETWEEN ri.dtmValidFrom
+						AND ri.dtmValidTo
+					)
+				OR (
+					ri.ysnYearValidationRequired = 0
+					AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom)
+						AND DATEPART(dy, ri.dtmValidTo)
+					)
+				)
+			AND ri.intConsumptionMethodId <>4
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblMFWorkOrderConsumedLot WC
+				JOIN dbo.tblICLot L ON L.intLotId = WC.intLotId
+				WHERE (L.intItemId = ri.intItemId OR L.intItemId = SI.intSubstituteItemId)and WC.intWorkOrderId =@intWorkOrderId 
+				)
+		)
+		BEGIN
+			RAISERROR (
+					51095
+					,11
+					,1
+					)
+
+			RETURN
+		END
 	
 	IF @intTransactionCount = 0
 	COMMIT TRAN

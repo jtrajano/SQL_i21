@@ -33,6 +33,7 @@
 
 -- FINANCIAL REPORT DESIGNER
 :r "..\dbo\Stored Procedures\uspFRDImportOriginDesign.sql"
+:r "..\dbo\Stored Procedures\uspFRDProcessOriginImport.sql"
 
 -- CASH MANAGEMENT
 :r ..\dbo\Views\apcbkmst.sql

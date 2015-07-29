@@ -143,6 +143,7 @@ BEGIN
 			,dtmExpiryDate
 			,dtmManufacturedDate
 			,intOriginId
+			,intGradeId
 			,strBOLNo
 			,strVessel
 			,strReceiptNumber
@@ -151,7 +152,6 @@ BEGIN
 			,intEntityVendorId
 			,strVendorLotNo
 			,intVendorLocationId
-			,strVendorLocation
 			,intDetailId
 			,intOwnershipType		
 	)
@@ -169,6 +169,7 @@ BEGIN
 			,dtmExpiryDate			= ItemLot.dtmExpiryDate
 			,dtmManufacturedDate	= ItemLot.dtmManufacturedDate
 			,intOriginId			= ItemLot.intOriginId
+			,intGradeId				= ItemLot.intGradeId
 			,strBOLNo				= Receipt.strBillOfLading
 			,strVessel				= Receipt.strVessel
 			,strReceiptNumber		= Receipt.strReceiptNumber
@@ -177,7 +178,6 @@ BEGIN
 			,intEntityVendorId		= ISNULL(ItemLot.intEntityVendorId, Receipt.intEntityVendorId)  
 			,strVendorLotNo			= ItemLot.strVendorLotId
 			,intVendorLocationId	= ItemLot.intVendorLocationId
-			,strVendorLocation		= ItemLot.strVendorLocation
 			,intDetailId			= ItemLot.intInventoryReceiptItemLotId
 			,intOwnershipType		= ReceiptItem.intOwnershipType
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem

@@ -96,6 +96,7 @@ BEGIN
 		,dtmExpiryDate
 		,dtmManufacturedDate
 		,intOriginId
+		,intGradeId
 		,strBOLNo
 		,strVessel
 		,strReceiptNumber
@@ -104,7 +105,6 @@ BEGIN
 		,intEntityVendorId
 		,strVendorLotNo
 		,intVendorLocationId
-		,strVendorLocation
 		,intDetailId
 		,ysnProduced
 		)
@@ -122,6 +122,7 @@ BEGIN
 		,dtmExpiryDate = @dtmExpiryDate
 		,dtmManufacturedDate = @dtmPlannedDate
 		,intOriginId = NULL
+		,intGradeId = NULL 
 		,strBOLNo = NULL
 		,strVessel = NULL
 		,strReceiptNumber = NULL
@@ -130,7 +131,6 @@ BEGIN
 		,intEntityVendorId = NULL
 		,strVendorLotNo = NULL
 		,intVendorLocationId = NULL
-		,strVendorLocation = NULL
 		,intDetailId = @intWorkOrderId
 		,ysnProduced = 1
 

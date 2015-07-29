@@ -1,16 +1,16 @@
 ﻿CREATE TABLE [dbo].[tblCFAccount] (
     [intAccountId]                INT             IDENTITY (1, 1) NOT NULL,
-    [intCustomerId]               INT             NULL,
+    [intCustomerId]               INT             NOT NULL,
     [intDiscountDays]             INT             NULL,
-    [intDiscountScheduleId]       INT             NULL,
-    [intInvoiceCycle]             INT             NULL,
-    [intSalesPersonId]            INT             NULL,
+    [intDiscountScheduleId]       INT             NOT NULL,
+    [intInvoiceCycle]             INT             NOT NULL,
+    [intSalesPersonId]            INT             NOT NULL,
     [dtmBonusCommissionDate]      DATETIME        NULL,
     [dblBonusCommissionRate]      NUMERIC (18, 6) NULL,
     [dblRegularCommissionRate]    NUMERIC (18, 6) NULL,
     [ysnPrintTimeOnInvoices]      BIT             NULL,
     [ysnPrintTimeOnReports]       BIT             NULL,
-    [intTermsCode]                INT             NULL,
+    [intTermsCode]                INT             NOT NULL,
     [strBillingSite]              NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [strPrimarySortOptions]       NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [strSecondarySortOptions]     NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
@@ -20,7 +20,7 @@
     [ysnSummaryByProduct]         BIT             NULL,
     [ysnSummaryByDepartment]      BIT             NULL,
     [ysnVehicleRequire]           BIT             NULL,
-    [strAccountStatusCode]        NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
+    [intAccountStatusCodeId]      INT             NOT NULL,
     [strPrintRemittancePage]      NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [strInvoiceProgramName]       NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [intPriceRuleGroup]           INT             NULL,
@@ -43,6 +43,8 @@
     CONSTRAINT [FK_tblCFAccount_tblCFDiscountSchedule] FOREIGN KEY ([intDiscountScheduleId]) REFERENCES [dbo].[tblCFDiscountSchedule] ([intDiscountScheduleId]),
     CONSTRAINT [FK_tblCFAccount_tblCFInvoiceCycle] FOREIGN KEY ([intInvoiceCycle]) REFERENCES [dbo].[tblCFInvoiceCycle] ([intInvoiceCycleId])
 );
+
+
 
 
 

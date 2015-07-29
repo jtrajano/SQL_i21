@@ -38,12 +38,12 @@ BEGIN TRY
 		intConcurrencyId	=	intConcurrencyId + 1
 	WHERE intLoadId=@intLoadId
 	
-	IF @dblDeliveredQuantity > 0
-	BEGIN
-		SET @dblQuantity = -1
-		SELECT @intContractDetailId = intContractDetailId, @dblQuantity = @dblQuantity * dblQuantity from tblLGLoad WHERE intLoadId=@intLoadId
-		exec uspCTUpdateScheduleQuantity @intContractDetailId, @dblQuantity
-	END
+--	IF @dblDeliveredQuantity > 0
+--	BEGIN
+--		SET @dblQuantity = -1
+--		SELECT @intContractDetailId = intContractDetailId, @dblQuantity = @dblQuantity * dblQuantity from tblLGLoad WHERE intLoadId=@intLoadId
+--		exec uspCTUpdateScheduleQuantity @intContractDetailId, @dblQuantity
+--	END
 END TRY
 
 BEGIN CATCH

@@ -1,11 +1,11 @@
 CREATE PROCEDURE uspCTUpdationFromTicketDistribution
 
-	@intTicketId	INT,
-	@intEntityId	INT,
-	@dblNetUnits	NUMERIC(10,3),
-	@intContractId	INT,
-	@intUserId		INT,
-	@ysnDP			BIT
+	@intTicketId			INT,
+	@intEntityId			INT,
+	@dblNetUnits			NUMERIC(10,3),
+	@intContractDetailId	INT,
+	@intUserId				INT,
+	@ysnDP					BIT
 	
 AS
 
@@ -49,9 +49,9 @@ BEGIN TRY
 	SELECT	@ApplyScaleToBasis = CAST(strValue AS BIT) FROM tblSMPreferences WHERE strPreference = 'ApplyScaleToBasis'
 	SELECT	@ApplyScaleToBasis = ISNULL(@ApplyScaleToBasis,0)
 
-	IF	@ysnDP = 1 AND ISNULL(@intContractId,0) = 0
+	IF	@ysnDP = 1 AND ISNULL(@intContractDetailId,0) = 0
 	BEGIN
-		SELECT	TOP	1	@intContractId	=	intContractDetailId
+		SELECT	TOP	1	@intContractDetailId	=	intContractDetailId
 		FROM	tblCTContractDetail CD
 		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
 		WHERE	CH.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
@@ -60,16 +60,16 @@ BEGIN TRY
 		AND		CD.intPricingTypeId	=	5
 		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
 
-		IF	ISNULL(@intContractId,0) = 0
+		IF	ISNULL(@intContractDetailId,0) = 0
 		BEGIN
 			RAISERROR ('No DP contract available.',16,1,'WITH NOWAIT')  
 		END
 	END
 
-	IF	ISNULL(@intContractId,0) = 0
+	IF	ISNULL(@intContractDetailId,0) = 0
 	BEGIN
 		SELECT	TOP	1	
-				@intContractId	=	CD.intContractDetailId,
+				@intContractDetailId	=	CD.intContractDetailId,
 				@intContractHeaderId = CD.intContractHeaderId
 		FROM	tblCTContractDetail CD
 		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
@@ -81,9 +81,9 @@ BEGIN TRY
 		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
 	END
 	
-	IF	ISNULL(@intContractId,0) = 0
+	IF	ISNULL(@intContractDetailId,0) = 0
 	BEGIN
-		SELECT	TOP	1	@intContractId	=	intContractDetailId
+		SELECT	TOP	1	@intContractDetailId	=	intContractDetailId
 		FROM	tblCTContractDetail CD
 		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
 		WHERE	CH.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
@@ -94,13 +94,13 @@ BEGIN TRY
 		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
 	END
 		
-	WHILE	@dblNetUnits > 0 AND ISNULL(@intContractId,0) > 0
+	WHILE	@dblNetUnits > 0 AND ISNULL(@intContractDetailId,0) > 0
 	BEGIN
 		SELECT	@dblBalance		=	dblBalance,
 				@dblQuantity	=	dblQuantity,
 				@dblCost		=	ISNULL(dblBasis,0)+ISNULL(dblFutures,0)
 		FROM	tblCTContractDetail 
-		WHERE	intContractDetailId = @intContractId
+		WHERE	intContractDetailId = @intContractDetailId
 
 		IF @ysnDP = 1
 		BEGIN
@@ -117,30 +117,39 @@ BEGIN TRY
 			UPDATE	tblCTContractDetail 
 			SET		dblBalance	= @dblBalance + @dblNetUnits,
 					dblQuantity = dblQuantity + @dblNetUnits
-			WHERE	intContractDetailId = @intContractId
+			WHERE	intContractDetailId = @intContractDetailId
 			
 			UPDATE	tblCTContractHeader
 			SET		dblQuantity = dblQuantity + @dblNetUnits
 			WHERE	intContractHeaderId = @intContractHeaderId
 
-			INSERT	INTO @Processed SELECT @intContractId,@dblNetUnits,NULL,@dblQuantity,@dblBalance,@dblNetUnits,@dblBalance - @dblNetUnits,@dblQuantity,@strAdjustmentNo,@dblCost
+			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblQuantity,@dblBalance,@dblNetUnits,@dblBalance - @dblNetUnits,@dblQuantity,@strAdjustmentNo,@dblCost
 
 			SELECT	@dblNetUnits = 0
 
 			UPDATE	@Processed SET dblUnitsRemaining = @dblNetUnits
-				
+			
+			EXEC	uspCTUpdateSequenceBalance 
+					@intContractDetailId	=	@intContractDetailId,
+					@dblQuantityToUpdate	=	@dblNetUnits,
+					@intUserId				=	@intUserId,
+					@intExternalId			=	@intTicketId,
+					@strScreenName			=	'Scale'
+			/*	
 			INSERT INTO tblCTContractAdjustment
 			(
 					intContractDetailId,	strAdjustmentNo,		dtmAdjustmentDate,			strComment,						ysnAdjustment,		dblOldQuantity,
 					dblOldBalance,			dblAdjAmount,			dblNewBalance,				dblNewQuantity,					dblContractPrice,	dblCancellationPrice,
-					dblGainLossPerUnit,		dblCancelFeePerUnit,	dblCancelFeeFlatAmount,		dblTotalGainLoss,				intUserId,			dtmCreatedDate,intTicketId
+					dblGainLossPerUnit,		dblCancelFeePerUnit,	dblCancelFeeFlatAmount,		dblTotalGainLoss,				intUserId,			dtmCreatedDate
 			)
 			SELECT	intContractDetailId,	strAdjustmentNo,		GETDATE(),					NULL,							0,					dblOldQuantity,
 					dblOldBalance,			dblAdjAmount,			dblNewBalance,				dblNewQuantity,					NULL,				NULL,
-					NULL,					NULL,					NULL,						NULL,							@intUserId,			GETDATE(),@intTicketId
+					NULL,					NULL,					NULL,						NULL,							@intUserId,			GETDATE()
 			
 			FROM	@Processed
-	
+			*/
+
+
 			BREAK
 		END
 
@@ -163,9 +172,9 @@ BEGIN TRY
 		BEGIN
 			--UPDATE	tblCTContractDetail 
 			--SET		dblBalance = @dblBalance - @dblNetUnits
-			--WHERE	intContractDetailId = @intContractId
+			--WHERE	intContractDetailId = @intContractDetailId
 			
-			INSERT	INTO @Processed SELECT @intContractId,@dblNetUnits,NULL,@dblQuantity,@dblBalance,@dblNetUnits,@dblBalance - @dblNetUnits,@dblQuantity,@strAdjustmentNo,@dblCost
+			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblQuantity,@dblBalance,@dblNetUnits,@dblBalance - @dblNetUnits,@dblQuantity,@strAdjustmentNo,@dblCost
 
 			SELECT	@dblNetUnits = 0
 
@@ -175,18 +184,18 @@ BEGIN TRY
 		BEGIN
 			--UPDATE	tblCTContractDetail 
 			--SET		dblBalance	=	0
-			--WHERE	intContractDetailId = @intContractId
+			--WHERE	intContractDetailId = @intContractDetailId
 			
-			INSERT	INTO @Processed SELECT @intContractId,@dblBalance,NULL,@dblQuantity,@dblBalance,@dblBalance,0,@dblQuantity,@strAdjustmentNo,@dblCost
+			INSERT	INTO @Processed SELECT @intContractDetailId,@dblBalance,NULL,@dblQuantity,@dblBalance,@dblBalance,0,@dblQuantity,@strAdjustmentNo,@dblCost
 
 			SELECT	@dblNetUnits	=	@dblNetUnits - @dblBalance					
 		END
 		
 		CONTINUEISH:
 
-		SELECT	@intContractId = NULL
+		SELECT	@intContractDetailId = NULL
 		
-		SELECT	TOP	1	@intContractId	=	intContractDetailId
+		SELECT	TOP	1	@intContractDetailId	=	intContractDetailId
 		FROM	tblCTContractDetail CD
 		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
 		WHERE	CH.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
@@ -197,9 +206,9 @@ BEGIN TRY
 		AND		CD.intContractDetailId NOT IN (SELECT intContractDetailId FROM @Processed)
 		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
 
-		IF	ISNULL(@intContractId,0) = 0
+		IF	ISNULL(@intContractDetailId,0) = 0
 		BEGIN
-			SELECT	TOP	1	@intContractId	=	intContractDetailId
+			SELECT	TOP	1	@intContractDetailId	=	intContractDetailId
 			FROM	tblCTContractDetail CD
 			JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
 			WHERE	CH.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
