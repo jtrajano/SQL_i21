@@ -1132,7 +1132,7 @@ BEGIN
 		SELECT 
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @OtherCharges
-			,[ysnInventoryCost]		= 0
+			,[ysnInventoryCost]		= @INVENTORY_COST_No
 			,[strCostMethod]		= @COST_METHOD_PER_Unit
 			,[dblRate]				= 5.00
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
@@ -1278,7 +1278,7 @@ BEGIN
 		SELECT 
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @OtherCharges
-			,[ysnInventoryCost]		= 0
+			,[ysnInventoryCost]		= @INVENTORY_COST_No
 			,[strCostMethod]		= @COST_METHOD_Percentage
 			,[dblRate]				= 5.00 -- (This means 5%) 
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
@@ -1424,7 +1424,7 @@ BEGIN
 		SELECT 
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @OtherCharges
-			,[ysnInventoryCost]		= 0
+			,[ysnInventoryCost]		= @INVENTORY_COST_No
 			,[strCostMethod]		= @COST_METHOD_Amount
 			,[dblRate]				= NULL 
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
@@ -1572,7 +1572,7 @@ BEGIN
 		SELECT 
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @OtherCharges
-			,[ysnInventoryCost]		= 0
+			,[ysnInventoryCost]		= @INVENTORY_COST_No
 			,[strCostMethod]		= @COST_METHOD_Amount
 			,[dblRate]				= NULL 
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
@@ -1912,7 +1912,7 @@ BEGIN
 		SELECT 
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @OtherCharges
-			,[ysnInventoryCost]		= 0
+			,[ysnInventoryCost]		= @INVENTORY_COST_No
 			,[strCostMethod]		= @COST_METHOD_Amount
 			,[dblRate]				= NULL 
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
@@ -1938,7 +1938,7 @@ BEGIN
 		SELECT 
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @SurchargeOnSurcharge
-			,[ysnInventoryCost]		= 0
+			,[ysnInventoryCost]		= @INVENTORY_COST_No
 			,[strCostMethod]		= @COST_METHOD_Percentage
 			,[dblRate]				= 10 -- 10%
 			,[intCostUOMId]			= @SurchargeOnSurcharge_PoundUOM
@@ -2104,14 +2104,14 @@ BEGIN
 		SELECT 
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @OtherCharges
-			,[ysnInventoryCost]		= @INVENTORY_COST_Yes
+			,[ysnInventoryCost]		= @INVENTORY_COST_No
 			,[strCostMethod]		= @COST_METHOD_PER_Unit
 			,[dblRate]				= 5.00
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
 			,[intEntityVendorId]	= NULL 
 			,[dblAmount]			= NULL 
 			,[strAllocateCostBy]	= @ALLOCATE_COST_BY_Cost
-			,[strCostBilledBy] 		= @COST_BILLED_BY_Vendor
+			,[strCostBilledBy] 		= @COST_BILLED_BY_None
 	END
 
 	--------------------------------------------------------
@@ -2262,14 +2262,14 @@ BEGIN
 		SELECT 
 			[intInventoryReceiptId]	= @intReceiptNumber
 			,[intChargeId]			= @OtherCharges
-			,[ysnInventoryCost]		= @INVENTORY_COST_Yes
+			,[ysnInventoryCost]		= @INVENTORY_COST_No
 			,[strCostMethod]		= @COST_METHOD_PER_Unit
 			,[dblRate]				= 5.00
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
 			,[intEntityVendorId]	= NULL 
 			,[dblAmount]			= NULL 
 			,[strAllocateCostBy]	= @ALLOCATE_COST_BY_Cost
-			,[strCostBilledBy] 		= @COST_BILLED_BY_Vendor
+			,[strCostBilledBy] 		= @COST_BILLED_BY_None
 			,[@intContractId]		= @intContractId
 	END
 END
