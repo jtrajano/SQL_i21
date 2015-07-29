@@ -87,8 +87,7 @@ namespace iRely.Inventory.BusinessLayer
                                 case "Other Charge":
                                 case "Service":
                                 case "Software":
-                                    isValid = IsAccountExist(accounts, "AP Clearing", msg, out msg);
-                                    isValid = IsAccountExist(accounts, "Sales Account", msg, out msg);
+                                    isValid = IsAccountExist(accounts, "General", msg, out msg);
                                     break;
 
                             }
