@@ -2077,6 +2077,7 @@
     <Build Include="dbo\Stored Procedures\uspTRGetCustomerFreight.sql" />
     <Build Include="dbo\Stored Procedures\uspTRProcessContracts.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDProcessOriginImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspSPAuditRemoveDefendencies.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
