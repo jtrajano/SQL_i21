@@ -22,7 +22,13 @@ DECLARE @ZeroDecimal decimal(18,6)
 SET @ZeroDecimal = 0.000000
 		
 SELECT @DateOnly = CAST(GETDATE() as date)
-SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
+SET @ARAccountId = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0)
+
+IF @ARAccountId IS NULL OR @ARAccountId = 0
+	BEGIN
+		RAISERROR('There is no setup for AR Account in the Company Preference.', 16, 1);
+		RETURN;
+	END
 
 INSERT INTO [tblARInvoice]
 	([strInvoiceOriginId]

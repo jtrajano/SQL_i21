@@ -22,7 +22,13 @@ DECLARE @ZeroDecimal decimal(18,6)
 SET @ZeroDecimal = 0.000000
 		
 SELECT @DateOnly = CAST(GETDATE() as date)
-SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
+SET @ARAccountId = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0)
+
+IF @ARAccountId IS NULL OR @ARAccountId = 0
+	BEGIN
+		RAISERROR('There is no setup for AR Account in the Company Preference.', 16, 1);
+		RETURN;
+	END
 
 INSERT INTO [tblARInvoice]
 	([strInvoiceOriginId]
@@ -79,7 +85,7 @@ SELECT
 	,[dblInvoiceSubtotal]	= A.[dblOverpayment] 
 	,[dblShipping]			= @ZeroDecimal
 	,[dblTax]				= @ZeroDecimal
-	,[dblInvoiceTotal]		= A.[dblOverpayment] 
+	,[dblInvoiceTotal]		= A.[dblUnappliedAmount] 
 	,[dblDiscount]			= @ZeroDecimal		
 	,[dblAmountDue]			= A.[dblOverpayment] 
 	,[dblPayment]			= @ZeroDecimal
@@ -162,8 +168,8 @@ SELECT
 	,intItemUOMId			= NULL
 	,dblQtyOrdered			= 1
 	,dblQtyShipped			= 1
-	,dblPrice				= A.[dblOverpayment]
-	,dblTotal				= A.[dblOverpayment]
+	,dblPrice				= A.[dblUnappliedAmount]
+	,dblTotal				= A.[dblUnappliedAmount]
 	,intAccountId			= NULL
 	,intCOGSAccountId		= NULL
 	,intSalesAccountId		= NULL
