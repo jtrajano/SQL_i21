@@ -3808,4 +3808,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strBackColorName" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b737d963-5fea-444d-8387-b4ebc6642496" ChangeDateTime="07/28/2015 10:51:31">
+    <Property Name="ElementName" Value="[dbo].[tblWHOrderLineItem].[intExternalSystemId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblWHOrderLineItem]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConcurrencyId" />
+  </Operation>
 </Operations>

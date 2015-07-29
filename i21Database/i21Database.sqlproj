@@ -2085,6 +2085,20 @@
     <Build Include="dbo\Tables\tblCFAccountFailedImport.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportAccount.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLot.sql" />
+    <Build Include="dbo\Tables\tblWHSKUHistory.sql" />
+    <Build Include="dbo\Tables\tblWHSKUReasonCode.sql" />
+    <Build Include="dbo\Tables\tblWHOrderTerms.sql" />
+    <Build Include="dbo\Tables\tblWHOrderStatus.sql" />
+    <Build Include="dbo\Tables\tblWHOrderHeader.sql" />
+    <Build Include="dbo\Tables\tblWHOrderType.sql" />
+    <Build Include="dbo\Tables\tblWHOrderLineItem.sql" />
+    <Build Include="dbo\Tables\tblWHOrderManifest.sql" />
+    <Build Include="dbo\Tables\tblWHContainerPreload.sql" />
+    <Build Include="dbo\Tables\tblWHSpaceConfig.sql" />
+    <Build Include="dbo\Tables\tblWHCycleCountType.sql" />
+    <Build Include="dbo\Tables\tblWHCycleCountStatus.sql" />
+    <Build Include="dbo\Tables\tblWHCycleCountHeader.sql" />
+    <Build Include="dbo\Tables\tblWHCycleCountDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
