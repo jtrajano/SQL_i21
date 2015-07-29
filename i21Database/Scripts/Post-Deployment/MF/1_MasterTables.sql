@@ -78,8 +78,12 @@ END
 GO
 IF NOT EXISTS(SELECT * FROM tblMFWorkOrderStatus WHERE intStatusId = 1)
 BEGIN
-    INSERT INTO tblMFWorkOrderStatus(intStatusId,strName)
-    VALUES(1,'New')
+    INSERT INTO tblMFWorkOrderStatus(intStatusId,strName,intSequenceNo)
+    VALUES(1,'New',1)
+END
+ELSE
+BEGIN
+	UPDATE tblMFWorkOrderStatus SET intSequenceNo=1 WHERE intStatusId = 1
 END
 GO
 IF NOT EXISTS(SELECT * FROM tblMFWorkOrderStatus WHERE intStatusId = 2)
@@ -90,15 +94,25 @@ END
 GO
 IF NOT EXISTS(SELECT * FROM tblMFWorkOrderStatus WHERE intStatusId = 3)
 BEGIN
-    INSERT INTO tblMFWorkOrderStatus(intStatusId,strName)
-    VALUES(3,'Open')
+    INSERT INTO tblMFWorkOrderStatus(intStatusId,strName,intSequenceNo)
+    VALUES(3,'Open',2)
 END
+ELSE
+BEGIN
+	UPDATE tblMFWorkOrderStatus SET intSequenceNo=2 WHERE intStatusId = 3
+END
+
 GO
 IF NOT EXISTS(SELECT * FROM tblMFWorkOrderStatus WHERE intStatusId = 4)
 BEGIN
-    INSERT INTO tblMFWorkOrderStatus(intStatusId,strName)
-    VALUES(4,'Frozen')
+    INSERT INTO tblMFWorkOrderStatus(intStatusId,strName,intSequenceNo)
+    VALUES(4,'Frozen',3)
 END
+ELSE
+BEGIN
+	UPDATE tblMFWorkOrderStatus SET intSequenceNo=3 WHERE intStatusId = 4
+END
+
 GO
 IF NOT EXISTS(SELECT * FROM tblMFWorkOrderStatus WHERE intStatusId = 5)
 BEGIN
@@ -126,21 +140,36 @@ END
 GO
 IF NOT EXISTS(SELECT * FROM tblMFWorkOrderStatus WHERE intStatusId = 9)
 BEGIN
-    INSERT INTO tblMFWorkOrderStatus(intStatusId,strName)
-    VALUES(9,'Released')
+    INSERT INTO tblMFWorkOrderStatus(intStatusId,strName,intSequenceNo)
+    VALUES(9,'Released',3)
 END
+ELSE
+BEGIN
+	UPDATE tblMFWorkOrderStatus SET intSequenceNo=3 WHERE intStatusId = 9
+END
+
 GO
 IF NOT EXISTS(SELECT * FROM tblMFWorkOrderStatus WHERE intStatusId = 10)
 BEGIN
-    INSERT INTO tblMFWorkOrderStatus(intStatusId,strName)
-    VALUES(10,'Started')
+    INSERT INTO tblMFWorkOrderStatus(intStatusId,strName,intSequenceNo)
+    VALUES(10,'Started',4)
 END
+ELSE
+BEGIN
+	UPDATE tblMFWorkOrderStatus SET intSequenceNo=4 WHERE intStatusId = 10
+END
+
 GO
 IF NOT EXISTS(SELECT * FROM tblMFWorkOrderStatus WHERE intStatusId = 11)
 BEGIN
-    INSERT INTO tblMFWorkOrderStatus(intStatusId,strName)
-    VALUES(11,'Paused')
+    INSERT INTO tblMFWorkOrderStatus(intStatusId,strName,intSequenceNo)
+    VALUES(11,'Paused',3)
 END
+ELSE
+BEGIN
+	UPDATE tblMFWorkOrderStatus SET intSequenceNo=3 WHERE intStatusId = 11
+END
+
 GO
 IF NOT EXISTS(SELECT * FROM tblMFWorkOrderStatus WHERE intStatusId = 12)
 BEGIN
@@ -577,3 +606,361 @@ WHERE strBackColorName IS NULL
 	AND intStatusId = 11
 GO
 
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 1
+		)
+BEGIN
+	INSERT INTO tblMFLotTransactionType (
+		intTransactionTypeId
+		,ysnUndoneAllowed
+		)
+	VALUES (
+		1
+		,0
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 2
+		)
+BEGIN
+	INSERT INTO tblMFLotTransactionType (
+		intTransactionTypeId
+		,ysnUndoneAllowed
+		)
+	VALUES (
+		2
+		,0
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 3
+		)
+BEGIN
+	INSERT INTO tblMFLotTransactionType (
+		intTransactionTypeId
+		,ysnUndoneAllowed
+		)
+	VALUES (
+		3
+		,0
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 4
+		)
+BEGIN
+	INSERT INTO tblMFLotTransactionType (
+		intTransactionTypeId
+		,ysnUndoneAllowed
+		)
+	VALUES (
+		4
+		,0
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 5
+		)
+BEGIN
+	INSERT INTO tblMFLotTransactionType (
+		intTransactionTypeId
+		,ysnUndoneAllowed
+		)
+	VALUES (
+		5
+		,0
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 6
+		)
+BEGIN
+	INSERT INTO tblMFLotTransactionType (
+		intTransactionTypeId
+		,ysnUndoneAllowed
+		)
+	VALUES (
+		6
+		,0
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 7
+		)
+BEGIN
+	INSERT INTO tblMFLotTransactionType (
+		intTransactionTypeId
+		,ysnUndoneAllowed
+		)
+	VALUES (
+		7
+		,0
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 8
+		)
+BEGIN
+	INSERT INTO tblMFLotTransactionType (
+		intTransactionTypeId
+		,ysnUndoneAllowed
+		)
+	VALUES (
+		8
+		,0
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 9
+		)
+BEGIN
+	INSERT INTO tblMFLotTransactionType (
+		intTransactionTypeId
+		,ysnUndoneAllowed
+		)
+	VALUES (
+		9
+		,0
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 10
+		)
+BEGIN
+	INSERT INTO tblMFLotTransactionType (
+		intTransactionTypeId
+		,ysnUndoneAllowed
+		)
+	VALUES (
+		10
+		,0
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 11
+		)
+BEGIN
+	INSERT INTO tblMFLotTransactionType (
+		intTransactionTypeId
+		,ysnUndoneAllowed
+		)
+	VALUES (
+		11
+		,0
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 12
+		)
+BEGIN
+	INSERT INTO tblMFLotTransactionType (
+		intTransactionTypeId
+		,ysnUndoneAllowed
+		)
+	VALUES (
+		12
+		,0
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 13
+		)
+BEGIN
+	INSERT INTO tblMFLotTransactionType (
+		intTransactionTypeId
+		,ysnUndoneAllowed
+		)
+	VALUES (
+		13
+		,0
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 14
+		)
+BEGIN
+	INSERT INTO tblMFLotTransactionType (
+		intTransactionTypeId
+		,ysnUndoneAllowed
+		)
+	VALUES (
+		14
+		,0
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 15
+		)
+BEGIN
+	INSERT INTO tblMFLotTransactionType (
+		intTransactionTypeId
+		,ysnUndoneAllowed
+		)
+	VALUES (
+		15
+		,0
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 16
+		)
+BEGIN
+	INSERT INTO tblMFLotTransactionType (
+		intTransactionTypeId
+		,ysnUndoneAllowed
+		)
+	VALUES (
+		16
+		,0
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 17
+		)
+BEGIN
+	INSERT INTO tblMFLotTransactionType (
+		intTransactionTypeId
+		,ysnUndoneAllowed
+		)
+	VALUES (
+		17
+		,0
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 18
+		)
+BEGIN
+	INSERT INTO tblMFLotTransactionType (
+		intTransactionTypeId
+		,ysnUndoneAllowed
+		)
+	VALUES (
+		18
+		,0
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 19
+		)
+BEGIN
+	INSERT INTO tblMFLotTransactionType (
+		intTransactionTypeId
+		,ysnUndoneAllowed
+		)
+	VALUES (
+		19
+		,0
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 20
+		)
+BEGIN
+	INSERT INTO tblMFLotTransactionType (
+		intTransactionTypeId
+		,ysnUndoneAllowed
+		)
+	VALUES (
+		20
+		,0
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFLotTransactionType
+		WHERE intTransactionTypeId = 21
+		)
+BEGIN
+	INSERT INTO tblMFLotTransactionType (
+		intTransactionTypeId
+		,ysnUndoneAllowed
+		)
+	VALUES (
+		21
+		,0
+		)
+END
+GO

@@ -2106,6 +2106,7 @@
     <Build Include="dbo\Stored Procedures\uspAPCreateBillTaxes.sql" />
     <Build Include="dbo\Functions\fnAPGetTaxesFromIRItem.sql" />
     <Build Include="dbo\Views\vyuAPBillItemReceiptTaxes.sql" />
+    <Build Include="dbo\Tables\tblMFLotTransactionType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
