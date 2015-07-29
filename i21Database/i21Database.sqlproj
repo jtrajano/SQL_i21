@@ -2109,6 +2109,7 @@
     <Build Include="dbo\Tables\tblMFLotTransactionType.sql" />
     <Build Include="dbo\Views\vyuSTPricebookMaster.sql" />
     <Build Include="dbo\Stored Procedures\uspSTInventoryMassUpdate.sql" />
+    <Build Include="dbo\Tables\tblAROriginCompanies.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
