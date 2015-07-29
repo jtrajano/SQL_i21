@@ -20,11 +20,13 @@ DECLARE @ZeroDecimal decimal(18,6)
 		,@DateOnly DATETIME
 		,@Currency INT
 		,@ARAccountId INT
+		,@CompanyLocationId int
 
 SET @ZeroDecimal = 0.000000	
-SELECT @DateOnly = CAST(GETDATE() as date)
+SET @DateOnly = CAST(GETDATE() as date)
 SET @Currency = ISNULL((SELECT strValue FROM tblSMPreferences WHERE strPreference = 'defaultCurrency'),0)
-SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
+SET @ARAccountId = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0)
+SET @CompanyLocationId = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1)
 
 IF(@ARAccountId IS NULL OR @ARAccountId = 0)  
 	BEGIN			
@@ -34,26 +36,34 @@ IF(@ARAccountId IS NULL OR @ARAccountId = 0)
 
 DECLARE @TicketHoursWorked TABLE(
 		intTicketHoursWorkedId INT,
-		intEntityCustomerId INT)
+		intEntityCustomerId INT,
+		intTicketId INT)
 		
 IF (@HoursWorkedIDs IS NOT NULL) 
 BEGIN
 	IF(@HoursWorkedIDs = 'all')
 	BEGIN
-		INSERT INTO @TicketHoursWorked SELECT [intTicketHoursWorkedId], [intEntityCustomerId] FROM vyuARBillableHoursForImport
+		INSERT INTO @TicketHoursWorked SELECT [intTicketHoursWorkedId], [intEntityCustomerId], [intTicketId] FROM vyuARBillableHoursForImport
 	END
 	ELSE
 	BEGIN
-		INSERT INTO @TicketHoursWorked SELECT [intTicketHoursWorkedId], [intEntityCustomerId] FROM vyuARBillableHoursForImport WHERE [intTicketHoursWorkedId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@HoursWorkedIDs))
+		INSERT INTO @TicketHoursWorked SELECT [intTicketHoursWorkedId], [intEntityCustomerId], [intTicketId] FROM vyuARBillableHoursForImport WHERE [intTicketHoursWorkedId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@HoursWorkedIDs))
 	END
 END
 
 --VALIDATE NULL TERMS
 
 DECLARE @NullTermsTable TABLE(intEntityCustomerId INT)
-	INSERT INTO @NullTermsTable SELECT intEntityCustomerId FROM @TicketHoursWorked THW
-		INNER JOIN tblEntityLocation EL ON THW.intEntityCustomerId = EL.intEntityId AND EL.ysnDefaultLocation = 1		
-		WHERE EL.intTermsId IS NULL
+INSERT INTO @NullTermsTable 
+SELECT
+	intEntityCustomerId 
+FROM
+	@TicketHoursWorked THW
+INNER JOIN 
+	tblEntityLocation EL 
+		ON THW.intEntityCustomerId = EL.intEntityId AND EL.ysnDefaultLocation = 1		
+WHERE
+	EL.intTermsId IS NULL
 
 IF EXISTS(SELECT * FROM @NullTermsTable)
 BEGIN
@@ -110,22 +120,22 @@ SELECT
 	,V.[dtmBilled]				--[dtmDate]
 	,dbo.fnGetDueDateBasedOnTerm(V.[dtmBilled], ISNULL(EL.[intTermsId],0))	--[dtmDueDate]
 	,ISNULL(C.[intCurrencyId], @Currency)									--[intCurrencyId]
-	,ISNULL(V.[intCompanyLocationId], (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1))	--[intCompanyLocationId]
-	,ISNULL(C.[intSalespersonId],V.[intAgentEntityId])		--[intEntitySalespersonId]
+	,ISNULL(V.[intCompanyLocationId], @CompanyLocationId)	--[intCompanyLocationId]
+	,ISNULL(C.[intSalespersonId],0)		--[intEntitySalespersonId]
 	,V.[dtmBilled]				--[dtmShipDate]
 	,ISNULL(EL.[intShipViaId], 0)											--[intShipViaId]
 	,''							--[strPONumber]
 	,EL.[intTermsId]			--[intTermId]
-	,V.[dblTotal]				--[dblInvoiceSubtotal]
+	,SUM(V.[dblTotal])				--[dblInvoiceSubtotal]
 	,@ZeroDecimal				--[dblShipping]
 	,@ZeroDecimal				--[dblTax]
-	,V.[dblTotal]				--[dblInvoiceTotal]
+	,SUM(V.[dblTotal])				--[dblInvoiceTotal]
 	,@ZeroDecimal				--[dblDiscount]
-	,V.[dblTotal]				--[[dblAmountDue]]
+	,SUM(V.[dblTotal])				--[[dblAmountDue]]
 	,@ZeroDecimal				--[dblPayment]
 	,'Invoice'					--[strTransactionType]
 	,0							--[intPaymentMethodId]
-	,V.[intTicketHoursWorkedId]	--[strComments] 
+	,V.[intTicketId]	--[strComments] 
 	,@ARAccountId				--[intAccountId]
 	,[dtmBilled]				--[dtmPostDate]
 	,0							--[ysnPosted]
@@ -150,7 +160,7 @@ FROM
 	vyuARBillableHoursForImport V
 INNER JOIN
 	@TicketHoursWorked HW
-		ON V.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]
+		ON V.[intTicketId] = HW.[intTicketId]
 INNER JOIN
 	tblARCustomer C
 		ON V.[intEntityCustomerId] = C.[intEntityCustomerId]
@@ -174,7 +184,34 @@ LEFT OUTER JOIN
 		ON C.intShipToId = SL.intEntityLocationId
 LEFT OUTER JOIN
 	tblEntityLocation BL
-		ON C.intShipToId = BL.intEntityLocationId							
+		ON C.intShipToId = BL.intEntityLocationId
+		
+GROUP BY
+	V.[intEntityCustomerId]
+	,V.[dtmBilled]
+	,ISNULL(C.[intCurrencyId], @Currency)
+	,ISNULL(V.[intCompanyLocationId], @CompanyLocationId)
+	,ISNULL(C.[intSalespersonId],0)
+	,V.[dtmBilled]
+	,ISNULL(EL.[intShipViaId], 0)
+	,EL.[intTermsId]
+	,V.[intTicketId]
+	,[dtmBilled]
+	,ISNULL(C.[intShipToId], EL.[intEntityLocationId])
+	,SL.[strLocationName]
+	,SL.[strAddress]
+	,SL.[strCity]
+	,SL.[strState]
+	,SL.[strZipCode]
+	,SL.[strCountry]
+	,ISNULL(C.[intBillToId], EL.[intEntityLocationId])
+	,BL.[strLocationName]
+	,BL.[strAddress]
+	,BL.[strCity]
+	,BL.[strState]
+	,BL.[strZipCode]
+	,BL.[strCountry]
+							
 
 		
 INSERT INTO [tblARInvoiceDetail]
@@ -209,7 +246,7 @@ FROM
 	[tblARInvoice] I
 INNER JOIN
 	vyuARBillableHoursForImport V
-		ON RTRIM(I.[strComments]) = RTRIM(CONVERT(nvarchar(250),V.[intTicketHoursWorkedId]))
+		ON RTRIM(I.[strComments]) = RTRIM(CONVERT(nvarchar(250),V.[intTicketId]))
 INNER JOIN
 	@TicketHoursWorked HW
 		ON V.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]
@@ -223,6 +260,37 @@ LEFT OUTER JOIN
 	vyuARGetItemAccount Acct
 		ON V.[intItemId] = Acct.[intItemId]
 			AND V.[intCompanyLocationId] = Acct.[intLocationId]
+			
+BEGIN			
+	DECLARE @InvoiceToUpdate TABLE (intInvoiceId INT);
+	
+	INSERT INTO @InvoiceToUpdate(intInvoiceId)
+	SELECT DISTINCT
+		 I.intInvoiceId
+	FROM
+		[tblARInvoice] I
+	INNER JOIN
+		vyuARBillableHoursForImport V
+			ON RTRIM(I.[strComments]) = RTRIM(CONVERT(nvarchar(250),V.[intTicketId]))
+	INNER JOIN
+		@TicketHoursWorked HW
+			ON V.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]
+		
+
+	WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceToUpdate ORDER BY intInvoiceId)
+		BEGIN
+		
+			DECLARE @intInvoiceId INT;
+			
+			SELECT TOP 1 @intInvoiceId = intInvoiceId FROM @InvoiceToUpdate ORDER BY intInvoiceId
+
+			EXEC dbo.uspARReComputeInvoiceTaxes @intInvoiceId
+					
+	
+			DELETE FROM @InvoiceToUpdate WHERE intInvoiceId = @intInvoiceId AND intInvoiceId = @intInvoiceId 										
+		END 
+														
+END			
 
 		
 UPDATE
@@ -233,33 +301,12 @@ FROM
 	[tblARInvoice] I
 INNER JOIN
 	tblHDTicketHoursWorked V
-		ON RTRIM(I.[strComments]) = RTRIM(CONVERT(nvarchar(250),V.[intTicketHoursWorkedId]))
+		ON RTRIM(I.[strComments]) = RTRIM(CONVERT(nvarchar(250),V.[intTicketId]))
 INNER JOIN
 	@TicketHoursWorked HW
-		ON V.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]
-		
-DECLARE @Invoices AS TABLE(intInvoiceID INT)
-INSERT INTO @Invoices 
-SELECT DISTINCT
-	I.[intInvoiceId]
-FROM 
-	[tblARInvoice] I
-INNER JOIN
-	tblHDTicketHoursWorked V
-		ON RTRIM(I.[strComments]) = RTRIM(CONVERT(nvarchar(250),V.[intTicketHoursWorkedId]))
-INNER JOIN
-	@TicketHoursWorked HW
-		ON V.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]
-		
-WHILE EXISTS(SELECT NULL FROM @Invoices)
-BEGIN
-	DECLARE @InvoiceID AS INT
-	SELECT TOP 1 @InvoiceID = [intInvoiceID] FROM @Invoices
-	EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceID
-	DELETE FROM @Invoices WHERE [intInvoiceID] = @InvoiceID
-END
-          
-           
+		ON V.[intTicketId] = HW.[intTicketId]
+		AND V.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId] 
+		                    
 IF @Post = 1
 	BEGIN
 		DECLARE	@return_value int,
@@ -277,10 +324,10 @@ IF @Post = 1
 			[tblARInvoice] I
 		INNER JOIN
 			tblHDTicketHoursWorked V
-				ON RTRIM(I.[strComments]) = RTRIM(CONVERT(nvarchar(250),V.[intTicketHoursWorkedId]))
+				ON RTRIM(I.[strComments]) = RTRIM(CONVERT(nvarchar(250),V.[intTicketId]))
 		INNER JOIN
 			@TicketHoursWorked HW
-				ON V.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]		
+				ON V.[intTicketId] = HW.[intTicketId]	
 				
 		UPDATE
 			[tblARInvoice]
@@ -293,12 +340,12 @@ IF @Post = 1
 				ON H.[intJobCodeId] = JC.[intJobCodeId] 
 		INNER JOIN
 			@TicketHoursWorked HW
-				ON H.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]
+				ON H.[intTicketId] = HW.[intTicketId]
 		INNER JOIN
 			tblHDTicket T
 				ON H.[intTicketId] = T.[intTicketId] 
 		WHERE
-			[tblARInvoice].[strComments] = RTRIM(CONVERT(nvarchar(250),H.[intTicketHoursWorkedId])) 						
+			[tblARInvoice].[strComments] = RTRIM(CONVERT(nvarchar(250),H.[intTicketId])) 						
 				
 
 		EXEC	@return_value = [dbo].[uspARPostInvoice]
@@ -337,12 +384,12 @@ BEGIN
 				ON H.[intJobCodeId] = JC.[intJobCodeId] 
 		INNER JOIN
 			@TicketHoursWorked HW
-				ON H.[intTicketHoursWorkedId] = HW.[intTicketHoursWorkedId]
+				ON H.[intTicketId] = HW.[intTicketId]
 		INNER JOIN
 			tblHDTicket T
 				ON H.[intTicketId] = T.[intTicketId] 
 		WHERE
-			[tblARInvoice].[strComments] = RTRIM(CONVERT(nvarchar(250),H.[intTicketHoursWorkedId])) 	
+			[tblARInvoice].[strComments] = RTRIM(CONVERT(nvarchar(250),H.[intTicketId])) 	
 END			 
 	
 	        
