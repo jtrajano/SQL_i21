@@ -203,9 +203,8 @@ Ext.define('Inventory.view.ItemLocation', {
                                                     xtype: 'gridcombobox',
                                                     columns: [
                                                         {
-                                                            dataIndex: 'intVendorId',
+                                                            dataIndex: 'intEntityVendorId',
                                                             dataType: 'numeric',
-                                                            text: 'Vendor Id',
                                                             hidden: true
                                                         },
                                                         {
@@ -227,7 +226,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                     fieldLabel: 'Vendor',
                                                     labelWidth: 50,
                                                     displayField: 'strVendorId',
-                                                    valueField: 'intVendorId'
+                                                    valueField: 'intEntityVendorId'
                                                 }
                                             ]
                                         },
