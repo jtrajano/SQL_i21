@@ -210,6 +210,8 @@ BEGIN
            			
 			DELETE FROM @InvoiceDetails WHERE [intInvoiceDetailId] = @InvoiceDetailId
 		END		
+	
+	EXEC dbo.uspARReComputeInvoiceAmounts @NewId
 
 	SET  @NewInvoiceNumber = (SELECT strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @NewId)
 
