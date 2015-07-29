@@ -114,41 +114,11 @@ BEGIN
 	)
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
-			,intItemUOMId			= -- Use weight UOM id if it is present. Otherwise, use the qty UOM. 
-										CASE	WHEN ISNULL(Detail.intWeightUOMId, 0) <> 0 THEN Detail.intWeightUOMId 
-												ELSE Detail.intItemUOMId 
-										END
-
+			,intItemUOMId			= Detail.intItemUOMId 
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					=	CASE	WHEN ISNULL(Detail.intLotId, 0) <> 0  THEN 
-												-- When item is a Lot 
-													CASE	WHEN ISNULL(Detail.intWeightUOMId, 0) = 0  THEN 												
-																-- Lot has no weight UOM. Do regular computation on the Qty. 
-																ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)
-															ELSE
-																-- The item has a weight UOM, convert the Qty to Weight.  																
-																dbo.fnCalculateQtyBetweenUOM(
-																	Detail.intItemUOMId, 
-																	Detail.intWeightUOMId, 
-																	ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)
-																)
-													END 									
-												ELSE	
-													-- Else the item is just a regular item. Do regular computation on the Qty. 
-													ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)
-										END 
-			,dblUOMQty				=	CASE	WHEN ISNULL(Detail.intLotId, 0) <> 0  THEN 
-													CASE	WHEN ISNULL(Detail.intWeightUOMId, 0) = 0  THEN 																												
-																ItemUOM.dblUnitQty
-															ELSE
-																WeightUOM.dblUnitQty
-													END 									
-												ELSE	
-													ItemUOM.dblUnitQty
-										END 
-			,dblCost				=	ISNULL(Detail.dblNewCost, 
-											Detail.dblCost
-										)	
+			,dblQty					= ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)
+			,dblUOMQty				= ItemUOM.dblUnitQty	
+			,dblCost				= ISNULL(Detail.dblNewCost, Detail.dblCost)	
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1
@@ -171,8 +141,7 @@ BEGIN
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 			AND Detail.dblNewQuantity IS NOT NULL 
 			AND ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) <> 0 
-			--AND Detail.intNewItemUOMId IS NULL 
-			--AND Detail.intNewWeightUOMId IS NULL 
+
 END
 
 
