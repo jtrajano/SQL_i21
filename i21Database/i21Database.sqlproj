@@ -2078,6 +2078,9 @@
     <Build Include="dbo\Stored Procedures\uspTRProcessContracts.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDProcessOriginImport.sql" />
     <Build Include="dbo\Stored Procedures\uspSPAuditRemoveDefendencies.sql" />
+    <Build Include="dbo\Tables\tblCFAccountSuccessImport.sql" />
+    <Build Include="dbo\Tables\tblCFAccountFailedImport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFImportAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
