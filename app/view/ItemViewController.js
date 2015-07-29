@@ -764,6 +764,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colCommodityLocation: {
                     dataIndex: 'strLocationName',
                     editor: {
+                        origValueField: 'intItemLocationId',
+                        origUpdateField: 'intItemLocationId',
                         store: '{commodityLocations}',
                         defaultFilters: [{
                             column: 'intItemId',
@@ -2319,19 +2321,6 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onItemCommodityLocationSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepCommodityCost');
-        var current = plugin.getActiveRecord();
-
-        if (combo.column.itemId === 'colCommodityLocation'){
-            current.set('intItemLocationId', records[0].get('intItemLocationId'));
-        }
-    },
-
     onDuplicateClick: function(button) {
         var win = button.up('window');
         var context = win.context;
@@ -2594,9 +2583,6 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#txtSpecialPricingUnitPrice": {
                 change: this.onSpecialPricingDiscountChange
-            },
-            "#cboCommodityLocation": {
-                select: this.onItemCommodityLocationSelect
             },
             "#btnDuplicate": {
                 click: this.onDuplicateClick

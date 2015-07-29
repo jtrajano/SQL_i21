@@ -4932,7 +4932,13 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
-                                                                                    dataIndex: 'intCompanyLocationId',
+                                                                                    dataIndex: 'intItemLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Item Location Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intLocationId',
                                                                                     dataType: 'numeric',
                                                                                     text: 'Location Id',
                                                                                     hidden: true
