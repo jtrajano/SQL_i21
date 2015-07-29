@@ -34,6 +34,7 @@ BEGIN TRY
 		FROM dbo.tblMFRecipe
 		WHERE intItemId = @intItemId
 			AND intLocationId = @intLocationId
+			AND ysnActive=1
 
 		INSERT INTO dbo.tblMFWorkOrderRecipe (
 			intRecipeId
