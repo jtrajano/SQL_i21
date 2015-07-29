@@ -540,7 +540,7 @@ BEGIN TRY
 	BEGIN
 		SET @intHoldCustomerStorageId = NULL
 		select @intHoldCustomerStorageId = SD.intTicketFileId from tblQMTicketDiscount SD 
-		where SD.intTicketFileId = @intCustomerStorageId
+		where SD.intTicketFileId = @intCustomerStorageId and SD.[strSourceType]= 'Storage'
 	END
 	
 	if @intHoldCustomerStorageId is NULL
@@ -579,7 +579,7 @@ BEGIN TRY
            ,[intTicketFileId]= @intCustomerStorageId
            ,[strSourceType]= 'Storage'
 		FROM	dbo.[tblQMTicketDiscount] SD
-		WHERE	SD.intTicketId = @intTicketId
+		WHERE	SD.intTicketId = @intTicketId AND SD.strSourceType = 'Scale'
 	END
 	
 	INSERT INTO @ItemsForItemReceipt (
