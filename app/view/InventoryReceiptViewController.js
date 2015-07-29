@@ -446,6 +446,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colCostVendor: {
                     dataIndex: 'strVendorId',
                     editor: {
+                        readOnly: '{readOnlyCostBilledBy}',
                         origValueField: 'intEntityVendorId',
                         origUpdateField: 'intEntityVendorId',
                         store: '{vendor}'
@@ -2472,10 +2473,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (records.length <= 0)
             return;
 
+        var win = combo.up('window');
         var record = records[0];
         var grid = combo.up('grid');
         var plugin = grid.getPlugin('cepCharges');
         var current = plugin.getActiveRecord();
+        var masterRecord = win.viewModel.data.current;
 
         if (combo.itemId === 'cboOtherCharge') {
             current.set('intChargeId', record.get('intItemId'));
@@ -2487,6 +2490,21 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('strOnCostType', record.get('strOnCostType'));
             if (!iRely.Functions.isEmpty(record.get('strOnCostType'))) {
                 current.set('strCostMethod', 'Percentage');
+            }
+        }
+        else if (combo.itemId === 'cboCostBilledBy') {
+            switch (record.strDescription) {
+                case 'Vendor':
+                    current.set('intEntityVendorId', masterRecord.get('current.intEntityVendorId'));
+                    current.set('strVendorId', masterRecord.get('current.strVendorName'));
+                    break;
+                case 'Third Party':
+
+                    break;
+                default:
+                    current.set('intEntityVendorId', null);
+                    current.set('strVendorId', null);
+                    break;
             }
         }
     },
@@ -2600,6 +2618,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#colUnitCost": {
                 beforerender: this.onColumnBeforeRender
+            },
+            "#cboCostBilledBy": {
+                select: this.onChargeSelect
             }
         })
     }

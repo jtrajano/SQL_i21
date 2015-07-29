@@ -4590,71 +4590,6 @@
                                                     ]
                                                 },
                                                 {
-                                                    "type": "Ext.grid.column.Column",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "flex": 1,
-                                                        "itemId": "colCostVendor",
-                                                        "text": "Vendor"
-                                                    },
-                                                    "name": "MyColumn47",
-                                                    "designerId": "8fa09d01-4ad2-4906-8b40-26d1b9471f60",
-                                                    "cn": [
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "editor",
-                                                                "type": "object"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "columns": [
-                                                                    "[",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'intVendorId',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\ttext: 'Vendor Id',",
-                                                                    "\t\thidden: true",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strVendorId',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Vendor No',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'strName',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Vendor Name',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t}",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strVendorId",
-                                                                "itemId": "cboCostVendor",
-                                                                "valueField": "strVendorId"
-                                                            },
-                                                            "name": "MyComboBox83",
-                                                            "configAlternates": {
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "62fb327d-d2f9-4ca7-aa2d-67d8c9cd54d6",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
-                                                        }
-                                                    ]
-                                                },
-                                                {
                                                     "type": "Ext.grid.column.Number",
                                                     "reference": {
                                                         "name": "columns",
@@ -4780,6 +4715,71 @@
                                                                 "columns": "array"
                                                             },
                                                             "designerId": "bf19cc5f-d25b-4cc9-a589-4a510b6bbeb0",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.grid.column.Column",
+                                                    "reference": {
+                                                        "name": "columns",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "flex": 1,
+                                                        "itemId": "colCostVendor",
+                                                        "text": "Vendor"
+                                                    },
+                                                    "name": "MyColumn47",
+                                                    "designerId": "8fa09d01-4ad2-4906-8b40-26d1b9471f60",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "editor",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intVendorId',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Vendor Id',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strVendorId',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Vendor No',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strName',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Vendor Name',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strVendorId",
+                                                                "itemId": "cboCostVendor",
+                                                                "valueField": "strVendorId"
+                                                            },
+                                                            "name": "MyComboBox83",
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "62fb327d-d2f9-4ca7-aa2d-67d8c9cd54d6",
                                                             "customConfigs": [
                                                                 {
                                                                     "group": "(Custom Properties)",

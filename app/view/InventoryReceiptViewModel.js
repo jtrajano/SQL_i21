@@ -534,6 +534,19 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     return true;
                     break;
             }
+        },
+        readOnlyCostBilledBy: function (get) {
+            switch (get('grdCharges.selection.strCostBilledBy')) {
+                case 'Vendor':
+                    return true;
+                    break;
+                case 'Third Party':
+                    return false;
+                    break;
+                default:
+                    return true;
+                    break;
+            }
         }
     }
 

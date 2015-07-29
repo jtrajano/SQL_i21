@@ -2153,38 +2153,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 }
                                                             },
                                                             {
-                                                                xtype: 'gridcolumn',
-                                                                itemId: 'colCostVendor',
-                                                                text: 'Vendor',
-                                                                flex: 1,
-                                                                editor: {
-                                                                    xtype: 'gridcombobox',
-                                                                    columns: [
-                                                                        {
-                                                                            dataIndex: 'intVendorId',
-                                                                            dataType: 'numeric',
-                                                                            text: 'Vendor Id',
-                                                                            hidden: true
-                                                                        },
-                                                                        {
-                                                                            dataIndex: 'strVendorId',
-                                                                            dataType: 'string',
-                                                                            text: 'Vendor No',
-                                                                            flex: 1
-                                                                        },
-                                                                        {
-                                                                            dataIndex: 'strName',
-                                                                            dataType: 'string',
-                                                                            text: 'Vendor Name',
-                                                                            flex: 1
-                                                                        }
-                                                                    ],
-                                                                    itemId: 'cboCostVendor',
-                                                                    displayField: 'strVendorId',
-                                                                    valueField: 'strVendorId'
-                                                                }
-                                                            },
-                                                            {
                                                                 xtype: 'numbercolumn',
                                                                 itemId: 'colChargeAmount',
                                                                 text: 'Amount',
@@ -2231,6 +2199,38 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     itemId: 'cboCostBilledBy',
                                                                     displayField: 'strDescription',
                                                                     valueField: 'strDescription'
+                                                                }
+                                                            },
+                                                            {
+                                                                xtype: 'gridcolumn',
+                                                                itemId: 'colCostVendor',
+                                                                text: 'Vendor',
+                                                                flex: 1,
+                                                                editor: {
+                                                                    xtype: 'gridcombobox',
+                                                                    columns: [
+                                                                        {
+                                                                            dataIndex: 'intVendorId',
+                                                                            dataType: 'numeric',
+                                                                            text: 'Vendor Id',
+                                                                            hidden: true
+                                                                        },
+                                                                        {
+                                                                            dataIndex: 'strVendorId',
+                                                                            dataType: 'string',
+                                                                            text: 'Vendor No',
+                                                                            flex: 1
+                                                                        },
+                                                                        {
+                                                                            dataIndex: 'strName',
+                                                                            dataType: 'string',
+                                                                            text: 'Vendor Name',
+                                                                            flex: 1
+                                                                        }
+                                                                    ],
+                                                                    itemId: 'cboCostVendor',
+                                                                    displayField: 'strVendorId',
+                                                                    valueField: 'strVendorId'
                                                                 }
                                                             }
                                                         ],
