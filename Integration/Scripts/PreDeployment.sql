@@ -53,40 +53,40 @@
 :r "..\dbo\Stored Procedures\uspAPCreatePaymentFromOriginBill.sql"
 
 
--- CUSTOMER PORTAL
-:r ..\dbo\Views\vyuCPAgcusMst.sql
-:r ..\dbo\Views\vyuCPBABusinessSummary.sql
-:r ..\dbo\Views\vyuCPPaymentsDetails.sql
+---- CUSTOMER PORTAL
+--:r ..\dbo\Views\vyuCPAgcusMst.sql
+--:r ..\dbo\Views\vyuCPBABusinessSummary.sql
+--:r ..\dbo\Views\vyuCPPaymentsDetails.sql
 
-:r ..\dbo\Views\vyuCPBillingAccountPayments.sql
-:r ..\dbo\Views\vyuCPContracts.sql
-:r ..\dbo\Views\vyuCPCurrentCashBids.sql
-:r ..\dbo\Views\vyuCPDatabaseDate.sql
-:r ..\dbo\Views\vyuCPGABusinessSummary.sql
-:r ..\dbo\Views\vyuCPGAContractDetail.sql
-:r ..\dbo\Views\vyuCPGAContracts.sql
-:r ..\dbo\Views\vyuCPGASettlementsReports.sql
-:r ..\dbo\Views\vyuCPInvoicesCredits.sql
-:r ..\dbo\Views\vyuCPInvoicesCreditsReports.sql
-:r ..\dbo\Views\vyuCPOptions.sql
-:r ..\dbo\Views\vyuCPOrders.sql
-:r ..\dbo\Views\vyuCPPayments.sql
+--:r ..\dbo\Views\vyuCPBillingAccountPayments.sql
+--:r ..\dbo\Views\vyuCPContracts.sql
+--:r ..\dbo\Views\vyuCPCurrentCashBids.sql
+--:r ..\dbo\Views\vyuCPDatabaseDate.sql
+--:r ..\dbo\Views\vyuCPGABusinessSummary.sql
+--:r ..\dbo\Views\vyuCPGAContractDetail.sql
+--:r ..\dbo\Views\vyuCPGAContracts.sql
+--:r ..\dbo\Views\vyuCPGASettlementsReports.sql
+--:r ..\dbo\Views\vyuCPInvoicesCredits.sql
+--:r ..\dbo\Views\vyuCPInvoicesCreditsReports.sql
+--:r ..\dbo\Views\vyuCPOptions.sql
+--:r ..\dbo\Views\vyuCPOrders.sql
+--:r ..\dbo\Views\vyuCPPayments.sql
 
-:r ..\dbo\Views\vyuCPPendingInvoices.sql
-:r ..\dbo\Views\vyuCPPendingPayments.sql
-:r ..\dbo\Views\vyuCPPrepaidCredits.sql
-:r ..\dbo\Views\vyuCPProductionHistory.sql
-:r ..\dbo\Views\vyuCPPurchaseDetail.sql
-:r ..\dbo\Views\vyuCPPurchaseMain.sql
-:r ..\dbo\Views\vyuCPPurchases.sql
-:r ..\dbo\Views\vyuCPPurchasesDetail.sql
-:r ..\dbo\Views\vyuCPSettlements.sql
-:r ..\dbo\Views\vyuCPStorage.sql
-:r ..\dbo\Views\vyuCPCustomer.sql
-:r ..\dbo\Views\vyuCPAgcrdMst.sql
-:r ..\dbo\Views\vyuCPGAContractHistory.sql
-:r ..\dbo\Views\vyuCPGAContractOption.sql
-:r ..\dbo\Views\vyuECCFCardTransaction.sql
+--:r ..\dbo\Views\vyuCPPendingInvoices.sql
+--:r ..\dbo\Views\vyuCPPendingPayments.sql
+--:r ..\dbo\Views\vyuCPPrepaidCredits.sql
+--:r ..\dbo\Views\vyuCPProductionHistory.sql
+--:r ..\dbo\Views\vyuCPPurchaseDetail.sql
+--:r ..\dbo\Views\vyuCPPurchaseMain.sql
+--:r ..\dbo\Views\vyuCPPurchases.sql
+--:r ..\dbo\Views\vyuCPPurchasesDetail.sql
+--:r ..\dbo\Views\vyuCPSettlements.sql
+--:r ..\dbo\Views\vyuCPStorage.sql
+--:r ..\dbo\Views\vyuCPCustomer.sql
+--:r ..\dbo\Views\vyuCPAgcrdMst.sql
+--:r ..\dbo\Views\vyuCPGAContractHistory.sql
+--:r ..\dbo\Views\vyuCPGAContractOption.sql
+--:r ..\dbo\Views\vyuECCFCardTransaction.sql
 
 -- TANK MANAGEMENT
 :r ..\dbo\Views\vyuTMOriginOption.sql
