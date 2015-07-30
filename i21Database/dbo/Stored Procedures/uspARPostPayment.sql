@@ -1165,16 +1165,32 @@ IF @recap = 0
 			SELECT Z.intPaymentId, Z.strTransactionId FROM @ZeroPayment Z
 			WHERE NOT EXISTS(SELECT NULL FROM @ARReceivablePostData WHERE intPaymentId = Z.intPaymentId)
 
+			UPDATE tblARPaymentDetail
+			SET dblDiscount = CASE WHEN tblARPaymentDetail.dblPayment + P.dblPayment + tblARPaymentDetail.dblDiscount = tblARPaymentDetail.dblInvoiceTotal
+								THEN tblARPaymentDetail.dblDiscount
+								ELSE 0.00
+							  END
+			FROM (SELECT SUM(C.dblPayment) dblPayment
+					   , A.intInvoiceId 
+					FROM tblARPaymentDetail A
+					INNER JOIN tblARPayment B
+						ON A.intPaymentId = B.intPaymentId
+					INNER JOIN tblARInvoice C
+						ON A.intInvoiceId = C.intInvoiceId
+					WHERE A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
+					GROUP BY A.intInvoiceId) P
+			WHERE tblARPaymentDetail.intInvoiceId = P.intInvoiceId
+
 			UPDATE 
 				tblARInvoice
 			SET 
 				tblARInvoice.dblPayment = ISNULL(tblARInvoice.dblPayment,0.00) - P.dblPayment 
-				,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscount,0.00) - P.dblDiscount 
+				,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscount,0.00) - P.dblDiscount
 			FROM
 				(
 					SELECT 
 						SUM(A.dblPayment * (CASE WHEN C.strTransactionType = 'Invoice' THEN 1 ELSE -1 END)) dblPayment
-						,SUM(A.dblDiscount) dblDiscount
+						, SUM(A.dblDiscount) dblDiscount
 						,A.intInvoiceId 
 					FROM
 						tblARPaymentDetail A
@@ -1370,11 +1386,27 @@ IF @recap = 0
 					--,intConcurrencyId += 1 
 			WHERE	intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
 
+			UPDATE tblARPaymentDetail
+			SET dblDiscount = CASE WHEN tblARPaymentDetail.dblPayment + P.dblPayment + tblARPaymentDetail.dblDiscount = tblARPaymentDetail.dblInvoiceTotal
+								THEN tblARPaymentDetail.dblDiscount
+								ELSE 0.00
+							  END
+			FROM (SELECT SUM(C.dblPayment) dblPayment
+					   , A.intInvoiceId 
+					FROM tblARPaymentDetail A
+					INNER JOIN tblARPayment B
+						ON A.intPaymentId = B.intPaymentId
+					INNER JOIN tblARInvoice C
+						ON A.intInvoiceId = C.intInvoiceId
+					WHERE A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
+					GROUP BY A.intInvoiceId) P
+			WHERE tblARPaymentDetail.intInvoiceId = P.intInvoiceId
+
 			UPDATE 
 				tblARInvoice
 			SET 
 				tblARInvoice.dblPayment = ISNULL(tblARInvoice.dblPayment,0.00) + P.dblPayment 
-				,tblARInvoice.dblDiscount = CASE WHEN (P.dblPayment <> 0) THEN ISNULL(tblARInvoice.dblDiscount,0.00) + P.dblDiscount ELSE 0.00 END
+				,tblARInvoice.dblDiscount = ISNULL(tblARInvoice.dblDiscount,0.00) + P.dblDiscount
 			FROM
 				(
 					SELECT 
