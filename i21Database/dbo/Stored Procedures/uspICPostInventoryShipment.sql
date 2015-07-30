@@ -245,11 +245,12 @@ BEGIN
 															LotItemUOM.dblUnitQty
 												END
 
-				,dblCost					= CASE	WHEN Lot.dblLastCost IS NULL THEN 
+				,dblCost					=  ISNULL(
+												CASE	WHEN Lot.dblLastCost IS NULL THEN 
 														(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = DetailItem.intItemId AND intItemLocationId = dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId))
 													ELSE 
 														Lot.dblLastCost 
-												END
+												END, 0)
 				,dblSalesPrice              = 0.00
 				,intCurrencyId              = NULL 
 				,dblExchangeRate            = 1
@@ -359,11 +360,12 @@ BEGIN
 															LotItemUOM.dblUnitQty
 												END
 
-				,dblCost					= CASE	WHEN Lot.dblLastCost IS NULL THEN 
+				,dblCost					=  ISNULL(
+												CASE	WHEN Lot.dblLastCost IS NULL THEN 
 														(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = DetailItem.intItemId AND intItemLocationId = dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId))
 													ELSE 
 														Lot.dblLastCost 
-												END
+												END, 0)
 				,dblSalesPrice              = 0.00
 				,intCurrencyId              = NULL 
 				,dblExchangeRate            = 1
