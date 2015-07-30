@@ -6,7 +6,7 @@ BEGIN
 	FROM (
 		SELECT	ilt.dtmDate AS dtmDateTime, 
 				l.strLotNumber AS strLotNo, 
-				i.strItemNo AS strItemNo, 
+				i.strItemNo AS strItem, 
 				i.strDescription AS strDescription, 
 				clsl.strSubLocationName AS strSubLocation, 
 				sl.strName AS strStorageLocation, 
