@@ -25,7 +25,6 @@ BEGIN
 	INSERT INTO tblAPBill
 	(
 		[intTermsId]			,
-		[intTaxId]				,
 		[dtmDate]				,
 		[dtmDueDate]			,
 		[intAccountId]			,

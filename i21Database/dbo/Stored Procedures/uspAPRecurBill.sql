@@ -21,7 +21,6 @@ BEGIN
 	INSERT INTO tblAPBill(
 		[strVendorOrderNumber], 
 		[intTermsId],
-		[intTaxId],
 		[dtmDate],            
 		[dtmDueDate],
 		[intAccountId],
@@ -56,7 +55,6 @@ BEGIN
 	SELECT 
 		[strVendorOrderNumber], 
 		[intTermsId],
-		[intTaxId],
 		@billDate,            
 		dbo.fnGetDueDateBasedOnTerm(@billDate, intTermsId),
 		[intAccountId],

@@ -42,7 +42,6 @@ BEGIN
 	INSERT INTO tblAPBill(
 		[strVendorOrderNumber], 
 		[intTermsId],
-		[intTaxId],
 		[dtmDate],            
 		[dtmDueDate],
 		[intAccountId],
@@ -76,7 +75,6 @@ BEGIN
 	SELECT 
 		[strVendorOrderNumber], 
 		[intTermsId],
-		[intTaxId],
 		[dtmDate],            
 		[dtmDueDate],
 		[intAccountId],
