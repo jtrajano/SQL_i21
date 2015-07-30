@@ -2116,6 +2116,10 @@
     <Build Include="dbo\Views\vyuMFInventoryView.sql" />
     <Build Include="dbo\Views\vyuAPChargesForBilling.sql" />
     <Build Include="dbo\Functions\fnCTGetContractStatuses.sql" />
+    <Build Include="dbo\User Defined Types\InvoiceItemTableType.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostInvoiceIntegrations.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetItemsFromInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTInvoicePosted.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

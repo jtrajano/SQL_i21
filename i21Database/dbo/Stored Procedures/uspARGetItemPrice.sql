@@ -79,7 +79,7 @@ AS
 		AND intCompanyLocationId = @LocationId
 		AND intItemUOMId = @ItemUOMId
 		AND intItemId = @ItemId
-		AND dblDetailQuantity >= @Quantity
+		AND (dblDetailQuantity - ISNULL(dblScheduleQty,0)) >= @Quantity
 		AND @TransactionDate BETWEEN dtmStartDate AND dtmEndDate
 	ORDER BY
 		 dtmStartDate

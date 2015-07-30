@@ -1071,7 +1071,7 @@ IF @post = 1
 					AND ISNULL(ICT.ysnIsUnposted,0) = 0
 			WHERE
 				D.intInventoryShipmentItemId IS NOT NULL AND D.intInventoryShipmentItemId <> 0
-				AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
+				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')
 				
@@ -1135,7 +1135,7 @@ IF @post = 1
 					AND ISNULL(ICT.ysnIsUnposted,0) = 0 
 			WHERE
 				D.intInventoryShipmentItemId IS NOT NULL AND D.intInventoryShipmentItemId <> 0
-				AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
+				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')		
 		END TRY
@@ -1679,7 +1679,7 @@ IF @post = 0
 					AND ISNULL(ICT.ysnIsUnposted,0) = 0 
 			WHERE
 				D.intInventoryShipmentItemId IS NOT NULL AND D.intInventoryShipmentItemId <> 0
-				AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
+				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')
 				
@@ -1743,7 +1743,7 @@ IF @post = 0
 					AND ISNULL(ICT.ysnIsUnposted,0) = 0  
 			WHERE
 				D.intInventoryShipmentItemId IS NOT NULL AND D.intInventoryShipmentItemId <> 0
-				AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
+				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')									
 		
@@ -2028,38 +2028,21 @@ IF @recap = 0
 		END CATCH
 			
 		BEGIN TRY			
-			DECLARE @OrderToUpdate TABLE (intSalesOrderId INT);
+			DECLARE @InvoiceToUpdate TABLE (intInvoiceId INT);
 			
-			INSERT INTO @OrderToUpdate(intSalesOrderId)
-			SELECT DISTINCT
-				 SODetail.intSalesOrderId
-			FROM
-				tblSOSalesOrderDetail SODetail
-			INNER JOIN 
-				tblARInvoiceDetail Detail
-					ON SODetail.intSalesOrderDetailId = Detail.intSalesOrderDetailId 
-			INNER JOIN
-				tblARInvoice Header
-					ON Detail.intInvoiceId = Header.intInvoiceId
-					AND Header.strTransactionType IN ('Invoice', 'Credit Memo')
-			INNER JOIN
-				@PostInvoiceData P
-					ON Header.intInvoiceId = P.intInvoiceId	
-			WHERE 
-				Detail.intSalesOrderDetailId IS NOT NULL 
-				AND Detail.intSalesOrderDetailId <> 0
+			INSERT INTO @InvoiceToUpdate(intInvoiceId)
+			SELECT DISTINCT intInvoiceId FROM @PostInvoiceData
 				
-
-			WHILE EXISTS(SELECT TOP 1 NULL FROM @OrderToUpdate ORDER BY intSalesOrderId)
+			WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceToUpdate ORDER BY intInvoiceId)
 				BEGIN
 				
-					DECLARE @intSalesOrderId INT;
+					DECLARE @intInvoiceIntegractionId INT;
 					
-					SELECT TOP 1 @intSalesOrderId = intSalesOrderId FROM @OrderToUpdate ORDER BY intSalesOrderId
+					SELECT TOP 1 @intInvoiceIntegractionId = intInvoiceId FROM @InvoiceToUpdate ORDER BY intInvoiceId
 
-					EXEC dbo.uspSOUpdateOrderShipmentStatus @intSalesOrderId
+						EXEC dbo.uspARPostInvoiceIntegrations @post, @intInvoiceIntegractionId, @userId
 									
-					DELETE FROM @OrderToUpdate WHERE intSalesOrderId = @intSalesOrderId AND intSalesOrderId = @intSalesOrderId 
+					DELETE FROM @InvoiceToUpdate WHERE intInvoiceId = @intInvoiceIntegractionId AND intInvoiceId = @intInvoiceIntegractionId 
 												
 				END 
 																
@@ -2071,7 +2054,7 @@ IF @recap = 0
 			SELECT ERROR_MESSAGE(), @transType, @param, @batchId, 0
 			COMMIT TRANSACTION
 			GOTO Post_Exit
-		END CATCH									
+		END CATCH										
 			
 	END
 	
