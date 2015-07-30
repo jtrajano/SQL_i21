@@ -137,7 +137,6 @@ BEGIN
 			@strItemNo					= Item.strItemNo
 			,@intItemId					= Item.intItemId
 			,@dblQuantityShipped		= Detail.dblQuantity
-			--,@LotQty					= ISNULL(ItemLot.TotalLotQty, 0)
 			,@LotQtyInItemUOM			= ISNULL(ItemLot.TotalLotQtyInDetailItemUOM, 0)
 	FROM	tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem Detail 
 				ON Header.intInventoryShipmentId = Detail.intInventoryShipmentId	
@@ -147,16 +146,17 @@ BEGIN
 				SELECT  AggregrateLot.intInventoryShipmentItemId
 						,TotalLotQtyInDetailItemUOM = SUM(
 							dbo.fnCalculateQtyBetweenUOM(
-								ISNULL(AggregrateLot.intItemUOMId, tblICInventoryShipmentItem.intItemUOMId)
+								ISNULL(Lot.intItemUOMId, tblICInventoryShipmentItem.intItemUOMId)
 								,tblICInventoryShipmentItem.intItemUOMId
 								,AggregrateLot.dblQuantityShipped
 							)
 						)
-						--,TotalLotQty = SUM(ISNULL(AggregrateLot.dblQuantityShipped, 0))
 				FROM	dbo.tblICInventoryShipment INNER JOIN dbo.tblICInventoryShipmentItem 
 							ON tblICInventoryShipment.intInventoryShipmentId = tblICInventoryShipmentItem.intInventoryShipmentId
 						INNER JOIN dbo.tblICInventoryShipmentItemLot AggregrateLot
 							ON AggregrateLot.intInventoryShipmentItemId = tblICInventoryShipmentItem.intInventoryShipmentItemId
+						INNER JOIN tblICLot Lot
+							ON Lot.intLotId = AggregrateLot.intLotId
 				WHERE	tblICInventoryShipment.strShipmentNumber = @strTransactionId				
 				GROUP BY AggregrateLot.intInventoryShipmentItemId
 			) ItemLot
@@ -178,6 +178,7 @@ BEGIN
 
 		-- 'The Qty to Ship for {Item} is {Ship Qty}. Total Lot Quantity is {Total Lot Qty}. The difference is {Calculated difference}.'
 		RAISERROR(51153, 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty, @FormattedDifference)  
+
 		RETURN -1; 
 	END 
 END
@@ -228,7 +229,7 @@ BEGIN
 															ItemUOM.intItemUOMId
 														ELSE
 															LotItemUOM.intItemUOMId
-												END
+			 									END
 
 				,dtmDate					=	dbo.fnRemoveTimeOnDate(Header.dtmShipDate)
 				,dblQty						=	-1 *
@@ -243,14 +244,12 @@ BEGIN
 														ELSE
 															LotItemUOM.dblUnitQty
 												END
-				,dblCost					= ISNULL(
-													CASE	WHEN Lot.dblLastCost IS NULL THEN 
-																(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = DetailItem.intItemId AND intItemLocationId = dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId))
-															ELSE 
-																Lot.dblLastCost
-													END,
-													0.00
-												)
+
+				,dblCost					= CASE	WHEN Lot.dblLastCost IS NULL THEN 
+														(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = DetailItem.intItemId AND intItemLocationId = dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId))
+													ELSE 
+														Lot.dblLastCost 
+												END
 				,dblSalesPrice              = 0.00
 				,intCurrencyId              = NULL 
 				,dblExchangeRate            = 1
@@ -344,7 +343,7 @@ BEGIN
 															ItemUOM.intItemUOMId
 														ELSE
 															LotItemUOM.intItemUOMId
-												END
+			 									END
 
 				,dtmDate					=	dbo.fnRemoveTimeOnDate(Header.dtmShipDate)
 				,dblQty						=	-1 *
@@ -359,14 +358,12 @@ BEGIN
 														ELSE
 															LotItemUOM.dblUnitQty
 												END
-				,dblCost					= ISNULL(
-												CASE	WHEN Lot.dblLastCost IS NULL THEN 
-															(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = DetailItem.intItemId AND intItemLocationId = dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId))
-														ELSE 
-															Lot.dblLastCost
-												END					
-												,0.00
-											)
+
+				,dblCost					= CASE	WHEN Lot.dblLastCost IS NULL THEN 
+														(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = DetailItem.intItemId AND intItemLocationId = dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId))
+													ELSE 
+														Lot.dblLastCost 
+												END
 				,dblSalesPrice              = 0.00
 				,intCurrencyId              = NULL 
 				,dblExchangeRate            = 1
@@ -384,7 +381,7 @@ BEGIN
 				LEFT JOIN tblICInventoryShipmentItemLot DetailLot 
 					ON DetailLot.intInventoryShipmentItemId = DetailItem.intInventoryShipmentItemId
 				LEFT JOIN tblICLot Lot 
-					ON Lot.intLotId = DetailLot.intLotId
+					ON Lot.intLotId = DetailLot.intLotId            
 				LEFT JOIN tblICItemUOM LotItemUOM
 					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId            
 				INNER JOIN vyuICGetShipmentItemSource ItemSource 
