@@ -81,6 +81,36 @@ BEGIN TRY
 			,@intContractId
 			,@intUserId
 			,0
+			IF @strDistributionOption = 'CNT'
+			BEGIN
+				DECLARE @intLoopContractId INT;
+				DECLARE @dblLoopContractUnits NUMERIC(12,4);
+				DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
+				FOR
+				SELECT intContractDetailId, dblUnitsDistributed
+				FROM @LineItems;
+
+				OPEN intListCursor;
+
+				-- Initial fetch attempt
+				FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
+
+				WHILE @@FETCH_STATUS = 0
+				BEGIN
+				   -- Here we do some kind of action that requires us to 
+				   -- process the table variable row-by-row. This example simply
+				   -- uses a PRINT statement as that action (not a very good
+				   -- example).
+				   IF	ISNULL(@intLoopContractId,0) != 0
+				   EXEC uspCTUpdateScheduleQuantity @intLoopContractId, @dblLoopContractUnits
+
+				   -- Attempt to fetch next row from cursor
+				   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
+				END;
+
+				CLOSE intListCursor;
+				DEALLOCATE intListCursor;
+			END
 		SELECT TOP 1 @dblRemainingUnits = LI.dblUnitsRemaining FROM @LineItems LI
 		IF(@dblRemainingUnits IS NULL)
 		BEGIN
