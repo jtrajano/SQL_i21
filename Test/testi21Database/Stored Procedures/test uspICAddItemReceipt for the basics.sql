@@ -4,6 +4,7 @@ BEGIN
 	-- Arrange 
 	BEGIN 
 		DECLARE @ReceiptDataToCreate AS ReceiptStagingTable
+				,@OtherCharges AS ReceiptOtherChargesTableType
 				,@intUserId AS INT 
 	END 
 	
@@ -18,6 +19,7 @@ BEGIN
 	BEGIN 
 		EXEC dbo.uspICAddItemReceipt
 			@ReceiptDataToCreate
+			,@OtherCharges
 			,@intUserId
 	END 
 

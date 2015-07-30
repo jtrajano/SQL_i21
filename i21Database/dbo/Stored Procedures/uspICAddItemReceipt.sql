@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICAddItemReceipt]
-	 @ReceiptEntries ReceiptStagingTable READONLY
+	@ReceiptEntries ReceiptStagingTable READONLY
+	,@OtherCharges ReceiptOtherChargesTableType READONLY 
 	,@intUserId AS INT	
 AS
 
@@ -22,6 +23,12 @@ DECLARE @DataForReceiptHeader TABLE(
 	,ShipVia INT
 	,ShipFrom INT
 	,Currency INT
+	,strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+)
+
+DECLARE @result AS TABLE (
+	intSourceId INT
+	,intInventoryReceiptId INT
 )
 
 -- Sort the data from @ReceiptEntries and determine which ones are the header records. 
@@ -171,6 +178,7 @@ BEGIN
 			RETURN;
 		END
 
+		-- Insert the Inventory Receipt Detail. 
 		INSERT INTO dbo.tblICInventoryReceiptItem (
 				intInventoryReceiptId
 				,intLineNo
@@ -231,6 +239,47 @@ BEGIN
 					ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId	
 		WHERE RawHeaderData.intId = @intId
 
+		-- Insert the Other Charges
+		INSERT INTO dbo.tblICInventoryReceiptCharge (
+				[intInventoryReceiptId]
+				,[intContractId]
+				,[intChargeId]
+				,[ysnInventoryCost]
+				,[strCostMethod]
+				,[dblRate]
+				,[intCostUOMId]
+				,[intEntityVendorId]
+				,[dblAmount]
+				,[strAllocateCostBy]
+				,[strCostBilledBy]
+		)
+		SELECT 
+				[intInventoryReceiptId]		= @InventoryReceiptId
+				,[intContractId]			= RawData.intContractDetailId
+				,[intChargeId]				= RawData.intChargeId
+				,[ysnInventoryCost]			= RawData.ysnInventoryCost
+				,[strCostMethod]			= RawData.strCostMethod
+				,[dblRate]					= RawData.dblRate
+				,[intCostUOMId]				= RawData.intCostUOMId
+				,[intEntityVendorId]		= RawData.intEntityVendorId
+				,[dblAmount]				= RawData.dblAmount
+				,[strAllocateCostBy]		= RawData.strAllocateCostBy
+				,[strCostBilledBy]			= RawData.strCostBilledBy
+		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
+					ON RawHeaderData.Vendor = RawData.intEntityVendorId 
+					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)		   
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+				LEFT JOIN dbo.tblICItemUOM ItemUOM			
+					ON ItemUOM.intItemId = RawData.intChargeId  
+					AND ItemUOM.intItemUOMId = RawData.intCostUOMId
+				INNER JOIN dbo.tblICUnitMeasure UOM
+					ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId	
+		WHERE RawHeaderData.intId = @intId
+
 		-- Re-update the total cost 
 		UPDATE	Receipt
 		SET		dblInvoiceAmount = (
@@ -240,6 +289,17 @@ BEGIN
 				)
 		FROM	dbo.tblICInventoryReceipt Receipt 
 		WHERE	intInventoryReceiptId = @InventoryReceiptId
+
+		-- Log successful inserts. 
+		INSERT INTO @result (
+			intSourceId
+			,intInventoryReceiptId
+		)
+		SELECT	ReceiptItem.intSourceId
+				,Receipt.intInventoryReceiptId
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+		WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
 
 		-- Fetch the next row from cursor. 
 		FETCH NEXT FROM loopDataForReceiptHeader INTO @intId;
@@ -253,11 +313,6 @@ BEGIN
 END 
 
 -- Output the values to calling SP
-SELECT	ReceiptItem.intSourceId
-		,Receipt.intInventoryReceiptId
-FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptDetail ReceiptItem
-			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId 
-		INNER JOIN @DataForReceiptHeader RawData
-			ON RawData.strReceiptNumber = Receipt.strReceiptNumber
+SELECT * FROM @result
 
 _Exit:

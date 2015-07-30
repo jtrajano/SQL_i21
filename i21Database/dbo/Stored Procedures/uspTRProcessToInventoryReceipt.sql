@@ -17,6 +17,7 @@ DECLARE @InventoryReceiptId AS INT;
 DECLARE @ErrMsg                    NVARCHAR(MAX);
 
 DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
+		@OtherCharges AS ReceiptOtherChargesTableType, 
         @total as int;
 BEGIN TRY
 
@@ -106,7 +107,10 @@ INSERT into @ReceiptOutputTable(
 		 intSourceId	
 		,intInventoryReceiptId		 	
 	 )	
-    EXEC dbo.uspICAddItemReceipt @ReceiptStagingTable,@intUserId;
+    EXEC dbo.uspICAddItemReceipt 
+			@ReceiptStagingTable
+			,@OtherCharges
+			,@intUserId;
 
 -- Update the Inventory Receipt Key to the Transaction Table
                                             

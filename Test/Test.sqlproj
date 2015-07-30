@@ -805,6 +805,8 @@
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostInventoryReceiptOtherCharges for test case 5.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostInventoryReceiptOtherCharges for test case 6.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAddItemReceipt for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddItemReceipt to add a purchase contract type.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddItemReceipt to add other charges.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">
