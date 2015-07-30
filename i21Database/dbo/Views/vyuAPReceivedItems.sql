@@ -8,35 +8,36 @@ FROM
 (
 	--PO Items
 	SELECT
-	A.[intEntityVendorId]
-	,A.dtmDate
-	,A.strReference
-	,tblReceived.strReceiptNumber AS strSourceNumber
-	,A.strPurchaseOrderNumber
-	,B.intPurchaseDetailId
-	,B.intItemId
-	,B.strMiscDescription
-	,C.strItemNo
-	,C.strDescription
-	,C.intPurchaseTaxGroupId
-	,tblReceived.dblOrderQty
-	,tblReceived.dblPOOpenReceive --uom converted received quantity from po to IR
-	,tblReceived.dblOpenReceive
-	,(tblReceived.dblPOOpenReceive - tblReceived.dblQuantityBilled) AS dblQuantityToBill
-	,tblReceived.dblQuantityBilled
-	,tblReceived.intLineNo
-	,tblReceived.intInventoryReceiptItemId
-	,tblReceived.dblUnitCost
-	,tblReceived.dblTax
-	,tblReceived.intAccountId
-	,tblReceived.strAccountId
-	,D2.strName
-	,D1.strVendorId
-	,E.strShipVia
-	,F.strTerm
-	,G1.intContractNumber
-	,G1.intContractHeaderId
-	,G2.intContractDetailId
+		[intEntityVendorId]			=	A.[intEntityVendorId]
+		,[dtmDate]					=	A.dtmDate
+		,[strReference]				=	A.strReference
+		,[strSourceNumber]			=	tblReceived.strReceiptNumber
+		,[strPurchaseOrderNumber]	=	A.strPurchaseOrderNumber
+		,[intPurchaseDetailId]		=	B.intPurchaseDetailId
+		,[intItemId]				=	B.intItemId
+		,[strMiscDescription]		=	B.strMiscDescription
+		,[strItemNo]				=	C.strItemNo
+		,[strDescription]			=	C.strDescription
+		,[intPurchaseTaxGroupId]	=	C.intPurchaseTaxGroupId
+		,[dblOrderQty]				=	tblReceived.dblOrderQty
+		,[dblPOOpenReceive]			=	tblReceived.dblPOOpenReceive --uom converted received quantity from po to IR
+		,[dblOpenReceive]			=	tblReceived.dblOpenReceive
+		,[dblQuantityToBill]		=	(tblReceived.dblPOOpenReceive - tblReceived.dblQuantityBilled)
+		,[dblQuantityBilled]		=	tblReceived.dblQuantityBilled
+		,[intLineNo]				=	tblReceived.intLineNo
+		,[intInventoryReceiptItemId]=	tblReceived.intInventoryReceiptItemId
+		,[intInventoryReceiptItemAllocatedChargeId]	= NULL
+		,[dblUnitCost]				=	tblReceived.dblUnitCost
+		,[dblTax]					=	tblReceived.dblTax
+		,[intAccountId]				=	tblReceived.intAccountId
+		,[strAccountId]				=	tblReceived.strAccountId
+		,[strName]					=	D2.strName
+		,[strVendorId]				=	D1.strVendorId
+		,[strShipVia]				=	E.strShipVia
+		,[strTerm]					=	F.strTerm
+		,[intContractNumber]		=	G1.intContractNumber
+		,[intContractHeaderId]		=	G1.intContractHeaderId
+		,[intContractDetailId]		=	G2.intContractDetailId
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		CROSS APPLY 
@@ -81,35 +82,36 @@ FROM
 	UNION ALL
 	--Miscellaneous items
 	SELECT
-	A.[intEntityVendorId]
-	,A.dtmDate
-	,A.strReference
-	,A.strPurchaseOrderNumber
-	,A.strPurchaseOrderNumber
-	,B.intPurchaseDetailId
-	,B.intItemId
-	,B.strMiscDescription
-	,C.strItemNo
-	,C.strDescription
-	,C.intPurchaseTaxGroupId
-	,B.dblQtyOrdered
-	,B.dblQtyOrdered -B.dblQtyReceived
-	,B.dblQtyOrdered
-	,B.dblQtyOrdered -B.dblQtyReceived
-	,B.dblQtyReceived
-	,B.intPurchaseDetailId
-	,NULL --this should be null as this has constraint from IR Receipt item
-	,B.dblCost
-	,B.dblTax
-	,intAccountId = [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Inventory')
-	,strAccountId = (SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Inventory'))
-	,D2.strName
-	,D1.strVendorId
-	,E.strShipVia
-	,F.strTerm
-	,NULL
-	,NULL
-	,NULL
+	[intEntityVendorId]			=	A.[intEntityVendorId]
+	,[dtmDate]					=	A.dtmDate
+	,[strReference]				=	A.strReference
+	,[strSourceNumber]			=	A.strPurchaseOrderNumber
+	,[strPurchaseOrderNumber]	=	A.strPurchaseOrderNumber
+	,[intPurchaseDetailId]		=	B.intPurchaseDetailId
+	,[intItemId]				=	B.intItemId
+	,[strMiscDescription]		=	B.strMiscDescription
+	,[strItemNo]				=	C.strItemNo
+	,[strDescription]			=	C.strDescription
+	,[intPurchaseTaxGroupId]	=	C.intPurchaseTaxGroupId
+	,[dblOrderQty]				=	B.dblQtyOrdered
+	,[dblPOOpenReceive]			=	B.dblQtyOrdered -B.dblQtyReceived
+	,[dblOpenReceive]			=	B.dblQtyOrdered
+	,[dblQuantityToBill]		=	B.dblQtyOrdered -B.dblQtyReceived
+	,[dblQuantityBilled]		=	B.dblQtyReceived
+	,[intLineNo]				=	B.intPurchaseDetailId
+	,[intInventoryReceiptItemId]=	NULL --this should be null as this has constraint from IR Receipt item
+	,[intInventoryReceiptItemAllocatedChargeId]	= NULL
+	,[dblUnitCost]				=	B.dblCost
+	,[dblTax]					=	B.dblTax
+	,[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Inventory')
+	,[strAccountId]				=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, loc.intItemLocationId, 'Inventory'))
+	,[strName]					=	D2.strName
+	,[strVendorId]				=	D1.strVendorId
+	,[strShipVia]				=	E.strShipVia
+	,[strTerm]					=	F.strTerm
+	,[intContractNumber]		=	NULL
+	,[intContractHeaderId]		=	NULL
+	,[intContractDetailId]		=	NULL
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -122,35 +124,36 @@ FROM
 	UNION ALL
 	--DIRECT TYPE
 	SELECT
-	A.intEntityVendorId
-	,A.dtmReceiptDate
-	,A.strVendorRefNo
-	,A.strReceiptNumber
-	,A.strReceiptNumber
-	,NULL
-	,B.intItemId
-	,C.strDescription
-	,C.strItemNo
-	,C.strDescription
-	,C.intPurchaseTaxGroupId
-	,B.dblOpenReceive
-	,B.dblReceived
-	,B.dblOpenReceive
-	,(B.dblOpenReceive - B.dblBillQty)
-	,B.dblBillQty
-	,B.intInventoryReceiptItemId
-	,B.intInventoryReceiptItemId
-	,B.dblUnitCost
-	,B.dblTax
-	,intAccountId = [dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'Inventory')
-	,strAccountId = (SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, A.intLocationId, 'Inventory'))
-	,D2.strName
-	,D1.strVendorId
-	,E.strShipVia
-	,NULL
-	,F1.intContractNumber
-	,F1.intContractHeaderId
-	,CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
+	[intEntityVendorId]			=	A.intEntityVendorId
+	,[dtmDate]					=	A.dtmReceiptDate
+	,[strReference]				=	A.strVendorRefNo
+	,[strSourceNumber]			=	A.strReceiptNumber
+	,[strPurchaseOrderNumber]	=	A.strReceiptNumber
+	,[intPurchaseDetailId]		=	NULL
+	,[intItemId]				=	B.intItemId
+	,[strMiscDescription]		=	C.strDescription
+	,[strItemNo]				=	C.strItemNo
+	,[strDescription]			=	C.strDescription
+	,[intPurchaseTaxGroupId]	=	C.intPurchaseTaxGroupId
+	,[dblOrderQty]				=	B.dblOpenReceive
+	,[dblPOOpenReceive]			=	B.dblReceived
+	,[dblOpenReceive]			=	B.dblOpenReceive
+	,[dblQuantityToBill]		=	(B.dblOpenReceive - B.dblBillQty)
+	,[dblQuantityBilled]		=	B.dblBillQty
+	,[intLineNo]				=	B.intInventoryReceiptItemId
+	,[intInventoryReceiptItemId]=	B.intInventoryReceiptItemId
+	,[intInventoryReceiptItemAllocatedChargeId]	= NULL
+	,[dblUnitCost]				=	B.dblUnitCost
+	,[dblTax]					=	B.dblTax
+	,[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'Inventory')
+	,[strAccountId]				=	(SELECT strAccountId FROM tblGLAccount WHERE intAccountId = dbo.fnGetItemGLAccount(B.intItemId, A.intLocationId, 'Inventory'))
+	,[strName]					=	D2.strName
+	,[strVendorId]				=	D1.strVendorId
+	,[strShipVia]				=	E.strShipVia
+	,[strTerm]					=	NULL
+	,[intContractNumber]		=	F1.intContractNumber
+	,[intContractHeaderId]		=	F1.intContractHeaderId
+	,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -161,4 +164,38 @@ FROM
 	LEFT JOIN (tblCTContractHeader F1 INNER JOIN tblCTContractDetail F2 ON F1.intContractHeaderId = F2.intContractHeaderId) 
 		ON F1.intEntityId = A.intEntityVendorId AND B.intItemId = F2.intItemId AND B.intLineNo = F2.intContractDetailId
 	WHERE A.strReceiptType IN ('Direct','Purchase Contract') AND A.ysnPosted = 1 AND B.dblBillQty != B.dblOpenReceive AND F1.intContractTypeId = 1
+	UNION ALL
+	--CHARGES
+	SELECT
+		[intEntityVendorId]							=	A.intEntityVendorId
+		,[dtmDate]									=	A.dtmDate
+		,[strReference]								=	A.strReference
+		,[strSourceNumber]							=	A.strSourceNumber
+		,[strPurchaseOrderNumber]					=	NULL
+		,[intPurchaseDetailId]						=	NULL
+		,[intItemId]								=	A.intItemId
+		,[strMiscDescription]						=	A.strMiscDescription
+		,[strItemNo]								=	A.strItemNo
+		,[strDescription]							=	A.strDescription
+		,[intPurchaseTaxGroupId]					=	NULL
+		,[dblOrderQty]								=	A.dblOrderQty
+		,[dblPOOpenReceive]							=	A.dblPOOpenReceive
+		,[dblOpenReceive]							=	A.dblOpenReceive
+		,[dblQuantityToBill]						=	A.dblQuantityToBill
+		,[dblQuantityBilled]						=	A.dblQuantityBilled
+		,[intLineNo]								=	A.intLineNo
+		,[intInventoryReceiptItemId]				=	A.intInventoryReceiptItemId
+		,[intInventoryReceiptItemAllocatedChargeId]	=	A.intInventoryReceiptItemAllocatedChargeId
+		,[dblUnitCost]								=	A.dblUnitCost
+		,[dblTax]									=	A.dblTax
+		,[intAccountId]								=	A.intAccountId
+		,[strAccountId]								=	A.strAccountId
+		,[strName]									=	A.strName
+		,[strVendorId]								=	A.strVendorId
+		,[strShipVia]								=	NULL
+		,[strTerm]									=	NULL
+		,[intContractNumber]						=	NULL
+		,[intContractHeaderId]						=	NULL
+		,[intContractDetailId]						=	NULL
+	FROM [vyuAPChargesForBilling] A
 ) Items

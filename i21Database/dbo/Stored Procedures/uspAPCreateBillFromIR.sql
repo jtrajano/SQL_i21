@@ -185,6 +185,23 @@ BEGIN
 		WHERE intPurchaseDetailId = B.intLineNo
 	) POContractItems
 	WHERE A.intInventoryReceiptId = @receiptId AND A.ysnPosted = 1
+	UNION ALL
+	--CHARGES
+	SELECT
+		[intBillId]					=	@generatedBillId,
+		[intItemId]					=	A.intItemId,
+		[intInventoryReceiptItemId]	=	A.intInventoryReceiptItemId,
+		[intPODetailId]				=	NULL,
+		[dblQtyOrdered]				=	1,
+		[dblQtyReceived]			=	1,
+		[dblTax]					=	0,
+		[intAccountId]				=	A.intAccountId,
+		[dblTotal]					=	A.dblUnitCost,
+		[dblCost]					=	A.dblUnitCost,
+		[intContractDetailId]		=	NULL,
+		[intContractHeaderId]		=	NULL,
+		[intLineNo]					=	1
+	FROM [vyuAPChargesForBilling] A
 
 	--CREATE TAXES FROM CREATED ITEM RECEIPT
 	DECLARE @intBillDetailId INT;
