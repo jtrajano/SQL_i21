@@ -141,8 +141,8 @@ Ext.define('Inventory.view.CommodityViewController', {
                 colRegion: 'strDescription'
             },
 
-            grdClassVarient: {
-                colClassVarient: 'strDescription'
+            grdClassVariant: {
+                colClassVariant: 'strDescription'
             },
 
             grdSeason: {
@@ -197,7 +197,7 @@ Ext.define('Inventory.view.CommodityViewController', {
                 {
                     key: 'tblICCommodityClassVariants',
                     component: Ext.create('iRely.mvvm.grid.Manager', {
-                        grid: win.down('#grdClassVarient'),
+                        grid: win.down('#grdClassVariant'),
                         deleteButton : win.down('#btnDeleteClasses')
                     })
                 },

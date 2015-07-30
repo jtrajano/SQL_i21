@@ -34,9 +34,6 @@ Ext.define('Inventory.view.Commodity', {
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
         'Ext.grid.plugin.CellEditing',
-        'Ext.tree.Panel',
-        'Ext.tree.View',
-        'Ext.tree.Column',
         'Ext.grid.column.Date',
         'Ext.toolbar.Paging'
     ],
@@ -228,7 +225,6 @@ Ext.define('Inventory.view.Commodity', {
                                                             },
                                                             {
                                                                 xtype: 'gridcombobox',
-                                                                flex: 1,
                                                                 columns: [
                                                                     {
                                                                         dataIndex: 'intFutureMarketId',
@@ -242,6 +238,7 @@ Ext.define('Inventory.view.Commodity', {
                                                                         flex: 1
                                                                     }
                                                                 ],
+                                                                flex: 1,
                                                                 itemId: 'cboFutureMarket',
                                                                 fieldLabel: 'Default Future Market',
                                                                 labelWidth: 140,
@@ -666,180 +663,121 @@ Ext.define('Inventory.view.Commodity', {
                                                         ]
                                                     }
                                                 ]
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        xtype: 'panel',
-                                        title: 'UOM',
-                                        layout: {
-                                            type: 'vbox',
-                                            align: 'stretch'
-                                        },
-                                        items: [
+                                            },
                                             {
-                                                xtype: 'advancefiltergrid',
+                                                xtype: 'container',
                                                 flex: 1,
-                                                itemId: 'grdUom',
-                                                margin: -1,
-                                                dockedItems: [
+                                                margin: 1,
+                                                layout: {
+                                                    type: 'vbox',
+                                                    align: 'stretch'
+                                                },
+                                                items: [
                                                     {
-                                                        xtype: 'toolbar',
-                                                        dock: 'top',
-                                                        itemId: 'tlbGridOptions',
-                                                        layout: {
-                                                            type: 'hbox',
-                                                            padding: '0 0 0 1'
-                                                        },
-                                                        items: [
+                                                        xtype: 'advancefiltergrid',
+                                                        flex: 1,
+                                                        itemId: 'grdUom',
+                                                        dockedItems: [
                                                             {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnDeleteUom',
-                                                                iconCls: 'small-delete',
-                                                                text: 'Remove'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
-                                                            },
-                                                            {
-                                                                xtype: 'filter1'
+                                                                xtype: 'toolbar',
+                                                                dock: 'top',
+                                                                itemId: 'tlbGridOptions',
+                                                                layout: {
+                                                                    type: 'hbox',
+                                                                    padding: '0 0 0 1'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'button',
+                                                                        tabIndex: -1,
+                                                                        itemId: 'btnDeleteUom',
+                                                                        iconCls: 'small-delete',
+                                                                        text: 'Remove'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'tbseparator'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'filter1'
+                                                                    }
+                                                                ]
                                                             }
-                                                        ]
-                                                    }
-                                                ],
-                                                columns: [
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colUOMCode',
-                                                        dataIndex: 'strFieldName',
-                                                        text: 'UOM',
-                                                        flex: 3,
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intUnitMeasureId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Unit Of Measure ID',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strUnitMeasure',
-                                                                    dataType: 'string',
-                                                                    text: 'Unit Measure',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strUnitType',
-                                                                    dataType: 'string',
-                                                                    text: 'Unit Type',
-                                                                    flex: 1
+                                                        ],
+                                                        columns: [
+                                                            {
+                                                                xtype: 'gridcolumn',
+                                                                itemId: 'colUOMCode',
+                                                                dataIndex: 'strFieldName',
+                                                                text: 'UOM',
+                                                                flex: 3,
+                                                                editor: {
+                                                                    xtype: 'gridcombobox',
+                                                                    columns: [
+                                                                        {
+                                                                            dataIndex: 'intUnitMeasureId',
+                                                                            dataType: 'numeric',
+                                                                            text: 'Unit Of Measure ID',
+                                                                            hidden: true
+                                                                        },
+                                                                        {
+                                                                            dataIndex: 'strUnitMeasure',
+                                                                            dataType: 'string',
+                                                                            text: 'Unit Measure',
+                                                                            flex: 1
+                                                                        },
+                                                                        {
+                                                                            dataIndex: 'strUnitType',
+                                                                            dataType: 'string',
+                                                                            text: 'Unit Type',
+                                                                            flex: 1
+                                                                        }
+                                                                    ],
+                                                                    itemId: 'cboUOM',
+                                                                    displayField: 'strUnitMeasure',
+                                                                    valueField: 'strUnitMeasure'
                                                                 }
-                                                            ],
-                                                            itemId: 'cboUOM',
-                                                            displayField: 'strUnitMeasure',
-                                                            valueField: 'strUnitMeasure'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colUOMUnitQty',
-                                                        align: 'right',
-                                                        dataIndex: 'strFieldName',
-                                                        text: 'Unit Qty',
-                                                        flex: 3,
-                                                        editor: {
-                                                            xtype: 'numberfield',
-                                                            fieldStyle: 'text-align:right',
-                                                            hideTrigger: true
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'checkcolumn',
-                                                        itemId: 'colUOMStockUnit',
-                                                        text: 'Stock Unit',
-                                                        flex: 1,
-                                                        stopSelection: false
-                                                    },
-                                                    {
-                                                        xtype: 'checkcolumn',
-                                                        itemId: 'colUOMDefaultUOM',
-                                                        text: 'Default UOM',
-                                                        flex: 1,
-                                                        stopSelection: false
-                                                    }
-                                                ],
-                                                viewConfig: {
-                                                    itemId: 'grvUom'
-                                                },
-                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                    selType: 'checkboxmodel'
-                                                }),
-                                                plugins: [
-                                                    {
-                                                        ptype: 'cellediting',
-                                                        pluginId: 'cepUOM',
-                                                        clicksToEdit: 1
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        xtype: 'panel',
-                                        hidden: true,
-                                        layout: 'fit',
-                                        title: 'Group',
-                                        items: [
-                                            {
-                                                xtype: 'treepanel',
-                                                height: 250,
-                                                itemId: 'grdCommodityGroup',
-                                                margin: -1,
-                                                width: 400,
-                                                dockedItems: [
-                                                    {
-                                                        xtype: 'toolbar',
-                                                        dock: 'top',
-                                                        itemId: 'tlbGridOptions',
-                                                        layout: {
-                                                            type: 'hbox',
-                                                            padding: '0 0 0 1'
+                                                            },
+                                                            {
+                                                                xtype: 'numbercolumn',
+                                                                itemId: 'colUOMUnitQty',
+                                                                align: 'right',
+                                                                dataIndex: 'strFieldName',
+                                                                text: 'Unit Qty',
+                                                                flex: 3,
+                                                                editor: {
+                                                                    xtype: 'numberfield',
+                                                                    fieldStyle: 'text-align:right',
+                                                                    hideTrigger: true
+                                                                }
+                                                            },
+                                                            {
+                                                                xtype: 'checkcolumn',
+                                                                itemId: 'colUOMStockUnit',
+                                                                text: 'Stock Unit',
+                                                                flex: 1,
+                                                                stopSelection: false
+                                                            },
+                                                            {
+                                                                xtype: 'checkcolumn',
+                                                                itemId: 'colUOMDefaultUOM',
+                                                                text: 'Default UOM',
+                                                                flex: 1,
+                                                                stopSelection: false
+                                                            }
+                                                        ],
+                                                        viewConfig: {
+                                                            itemId: 'grvUom'
                                                         },
-                                                        items: [
+                                                        selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                            selType: 'checkboxmodel'
+                                                        }),
+                                                        plugins: [
                                                             {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnAddGroup',
-                                                                iconCls: 'small-add',
-                                                                text: 'Add'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnDeleteGroup1',
-                                                                iconCls: 'small-delete',
-                                                                text: 'Delete'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
-                                                            },
-                                                            {
-                                                                xtype: 'filter1'
+                                                                ptype: 'cellediting',
+                                                                pluginId: 'cepUOM',
+                                                                clicksToEdit: 1
                                                             }
                                                         ]
-                                                    }
-                                                ],
-                                                viewConfig: {
-
-                                                },
-                                                columns: [
-                                                    {
-                                                        xtype: 'treecolumn',
-                                                        dataIndex: 'text',
-                                                        text: 'Nodes',
-                                                        flex: 1
                                                     }
                                                 ]
                                             }
@@ -1075,9 +1013,9 @@ Ext.define('Inventory.view.Commodity', {
                                                         xtype: 'advancefiltergrid',
                                                         includeFullTextSearch: false,
                                                         flex: 1,
-                                                        itemId: 'grdClassVarient',
+                                                        itemId: 'grdClassVariant',
                                                         margin: '0 0 0 5',
-                                                        title: 'Classes and Varients',
+                                                        title: 'Classes and Variants',
                                                         dockedItems: [
                                                             {
                                                                 xtype: 'toolbar',
@@ -1118,9 +1056,9 @@ Ext.define('Inventory.view.Commodity', {
                                                         columns: [
                                                             {
                                                                 xtype: 'gridcolumn',
-                                                                itemId: 'colClassVarient',
+                                                                itemId: 'colClassVariant',
                                                                 dataIndex: 'string',
-                                                                text: 'Class/Varient',
+                                                                text: 'Class/Variant',
                                                                 flex: 1,
                                                                 editor: {
                                                                     xtype: 'textfield'
@@ -1128,7 +1066,7 @@ Ext.define('Inventory.view.Commodity', {
                                                             }
                                                         ],
                                                         viewConfig: {
-                                                            itemId: 'grvClassVarient'
+                                                            itemId: 'grvClassVariant'
                                                         },
                                                         selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                             selType: 'checkboxmodel'
