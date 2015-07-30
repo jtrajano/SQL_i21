@@ -1,15 +1,69 @@
-﻿CREATE PROCEDURE [dbo].[uspCTInvoicePosted]
-	@ItemsFromInvoice InvoiceItemTableType READONLY
-	,@intUserId  INT
-AS
+﻿CREATE PROCEDURE [dbo].[uspARUpdateContractOnInvoice]  
+	 @TransactionId	INT   
+	,@ForDelete		BIT = 0
+	,@UserId		INT = NULL     
+AS  
+  
+SET QUOTED_IDENTIFIER OFF  
+SET ANSI_NULLS ON  
+SET NOCOUNT ON  
+SET XACT_ABORT ON  
+SET ANSI_WARNINGS OFF  
 
+
+
+-- Get the details from the invoice 
 BEGIN TRY
+	DECLARE @ItemsFromInvoice AS dbo.[InvoiceItemTableType]
+	INSERT INTO @ItemsFromInvoice (
+		-- Header
+		 [intInvoiceId]
+		,[strInvoiceNumber]
+		,[intEntityCustomerId]
+		,[dtmDate]
+		,[intCurrencyId]
+		,[intCompanyLocationId]
+		,[intDistributionHeaderId]
 
-	SET QUOTED_IDENTIFIER OFF
-	SET ANSI_NULLS ON
-	SET NOCOUNT ON
-	SET XACT_ABORT ON
-	SET ANSI_WARNINGS OFF
+		-- Detail 
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strItemDescription]
+		,[intSCInvoiceId]
+		,[strSCInvoiceNumber]
+		,[intItemUOMId]
+		,[dblQtyOrdered]
+		,[dblQtyShipped]
+		,[dblDiscount]
+		,[dblPrice]
+		,[dblTotalTax]
+		,[dblTotal]
+		,[intServiceChargeAccountId]
+		,[intInventoryShipmentItemId]
+		,[intSalesOrderDetailId]
+		,[intSiteId]
+		,[strBillingBy]
+		,[dblPercentFull]
+		,[dblNewMeterReading]
+		,[dblPreviousMeterReading]
+		,[dblConversionFactor]
+		,[intPerformerId]
+		,[intContractHeaderId]
+		,[strMaintenanceType]
+		,[strFrequency]
+		,[dtmMaintenanceDate]
+		,[dblMaintenanceAmount]
+		,[dblLicenseAmount]
+		,[intContractDetailId]
+		,[intTicketId]
+		,[ysnLeaseBilling]
+	)
+	EXEC dbo.[uspARGetItemsFromInvoice]
+			@intInvoiceId = @TransactionId
+
+	-- Change quantity to negative if doing a post. Otherwise, it should be the same value if doing an unpost. 
+	UPDATE @ItemsFromInvoice
+		SET [dblQtyShipped] = [dblQtyShipped] * CASE WHEN @ForDelete = 1 THEN -1 ELSE 1 END 
 
 	DECLARE		@intInvoiceDetailId				INT,
 				@intContractDetailId			INT,
@@ -21,10 +75,6 @@ BEGIN TRY
 				@ErrMsg							NVARCHAR(MAX),
 				@dblSchQuantityToUpdate			NUMERIC(12,4)
 
-	--SELECT @strReceiptType = strReceiptType FROM @ItemsFromInvoice
-
-	--IF(@strReceiptType <> 'Purchase Contract' AND @strReceiptType <> 'Purchase Order')
-	--	RETURN
 
 	DECLARE @tblToProcess TABLE
 	(
@@ -85,18 +135,18 @@ BEGIN TRY
 			RAISERROR('UOM does not exist.',16,1)
 		END
 
-		EXEC	uspCTUpdateSequenceBalance
-				@intContractDetailId	=	@intContractDetailId,
-				@dblQuantityToUpdate	=	@dblConvertedQty,
-				@intUserId				=	@intUserId,
-				@intExternalId			=	@intInvoiceDetailId,
-				@strScreenName			=	'Invoice' 
+		--EXEC	uspCTUpdateSequenceBalance
+		--		@intContractDetailId	=	@intContractDetailId,
+		--		@dblQuantityToUpdate	=	@dblConvertedQty,
+		--		@intUserId				=	@UserId,
+		--		@intExternalId			=	@intInvoiceDetailId,
+		--		@strScreenName			=	'Invoice' 
 
 		--SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
 					
-		--EXEC	uspCTUpdateScheduleQuantity
-		--		@intContractDetailId	=	@intContractDetailId,
-		--		@dblQuantityToUpdate	=	@dblSchQuantityToUpdate
+		EXEC	uspCTUpdateScheduleQuantity
+				@intContractDetailId	=	@intContractDetailId,
+				@dblQuantityToUpdate	=	@dblConvertedQty
 
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 	END
@@ -109,4 +159,6 @@ BEGIN CATCH
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')  
 	
 END CATCH
- 
+GO
+
+
