@@ -434,7 +434,17 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         hasItemSelection: function (get) {
             if (get('grdInventoryReceipt.selection')) {
                 if (get('grdInventoryReceipt.selection').dummy === true) {
-                    return true
+                    if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strLotTracking'))) {
+                        return true
+                    }
+                    else {
+                        if (get('grdInventoryReceipt.selection.strLotTracking') === 'No') {
+                            return true
+                        }
+                        else {
+                            return false;
+                        }
+                    }
                 }
                 else {
                     if (get('grdInventoryReceipt.selection.strLotTracking') === 'No') {
