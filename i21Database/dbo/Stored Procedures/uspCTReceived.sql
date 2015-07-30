@@ -20,9 +20,10 @@ BEGIN TRY
 				@dblConvertedQty				NUMERIC(12,4),
 				@ErrMsg							NVARCHAR(MAX),
 				@strReceiptType					NVARCHAR(50),
-				@dblSchQuantityToUpdate			NUMERIC(12,4)
+				@dblSchQuantityToUpdate			NUMERIC(12,4),
+				@intSourceType					INT
 
-	SELECT @strReceiptType = strReceiptType FROM @ItemsFromInventoryReceipt
+	SELECT @strReceiptType = strReceiptType,@intSourceType = intSourceType FROM @ItemsFromInventoryReceipt
 
 	IF(@strReceiptType <> 'Purchase Contract' AND @strReceiptType <> 'Purchase Order')
 		RETURN
@@ -89,10 +90,13 @@ BEGIN TRY
 				@strScreenName			=	'Inventory Receipt' 
 
 		SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
-					
-		EXEC	uspCTUpdateScheduleQuantity
-				@intContractDetailId	=	@intContractDetailId,
-				@dblQuantityToUpdate	=	@dblSchQuantityToUpdate
+
+		IF @intSourceType = 1 OR @intSourceType = 3
+		BEGIN					
+			EXEC	uspCTUpdateScheduleQuantity
+					@intContractDetailId	=	@intContractDetailId,
+					@dblQuantityToUpdate	=	@dblSchQuantityToUpdate
+		END
 
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 	END
