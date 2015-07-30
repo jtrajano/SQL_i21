@@ -2164,7 +2164,7 @@
     <Build Include="dbo\Tables\tblLGWarehouseInstructionHeader.sql" />
     <Build Include="dbo\Tables\tblLGWarehouseInstructionCost.sql" />
     <Build Include="dbo\Tables\tblLGWarehouseInstructionDetail.sql" />
-	<Build Include="dbo\Stored Procedures\uspICPostStockReservation.sql" />
+	  <Build Include="dbo\Stored Procedures\uspICPostStockReservation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
