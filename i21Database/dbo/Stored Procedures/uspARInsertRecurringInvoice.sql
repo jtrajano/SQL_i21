@@ -8,7 +8,7 @@ AS
 
 	SELECT TOP 1
 		   @frequency = strFrequency
-	      ,@startDate = dtmMaintenanceDate
+	      ,@startDate = ISNULL(dtmMaintenanceDate, GETDATE())
 		  FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId
 
 	SELECT @responsibleUser = strName FROM tblEntity WHERE intEntityId = @UserId
