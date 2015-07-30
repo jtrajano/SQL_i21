@@ -10,12 +10,14 @@ SELECT S.intSampleId
 	,C.strContainerNumber
 	,SH.intTrackingNumber
 	,S.strLotNumber
-	,S.strSampleNote
 	,SS.strStatus
 	,S.dtmSampleReceivedDate
+	,S.strSampleNote
+	,E.strName AS strPartyName
+	,S.strRefNo
+	,S.strSamplingMethod
 	,S.dtmTestedOn
 	,U.strUserName AS strTestedUserName
-	,E.strName AS strPartyName
 FROM dbo.tblQMSample S
 JOIN dbo.tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId AND S.ysnIsContractCompleted <> 1
 JOIN dbo.tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId

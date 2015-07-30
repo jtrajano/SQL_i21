@@ -2121,6 +2121,7 @@
     <Build Include="dbo\Stored Procedures\uspARGetItemsFromInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInvoicePosted.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateContractOnInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleApprove.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

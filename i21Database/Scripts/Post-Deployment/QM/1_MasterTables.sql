@@ -348,3 +348,10 @@ BEGIN
 	VALUES(10,'Shipment Line Item','Shipment Line Item',0)
 END
 GO
+GO
+IF NOT EXISTS(SELECT 1 FROM tblQMProductType WHERE intProductTypeId = 11)
+BEGIN
+	INSERT INTO tblQMProductType(intProductTypeId,strProductTypeName,strDescription,ysnIsTemplate)
+	VALUES(11,'Parent Lot','Parent Lot',0)
+END
+GO
