@@ -96,6 +96,8 @@ BEGIN TRY
 		,intStartOffset = x.intStartOffset
 		,intEndOffset = x.intEndOffset
 		,intShiftSequence = x.intShiftSequence
+		,intLastModifiedUserId=@intUserId
+		,dtmLastModified=GetDate()
 		,intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
 	FROM OPENXML(@idoc, 'root/Shifts/Shift', 2) WITH (
 			intShiftId INT
@@ -166,6 +168,8 @@ BEGIN TRY
 		,dtmShiftBreakTypeEndTime = x.dtmShiftBreakTypeEndTime
 		,intShiftBreakTypeDuration = x.intShiftBreakTypeDuration
 		,intSequence = x.intSequence
+		,intLastModifiedUserId=@intUserId
+		,dtmLastModified=GetDate()
 		,intConcurrencyId = Isnull(tblMFShiftDetail.intConcurrencyId, 0) + 1
 	FROM OPENXML(@idoc, 'root/ShiftDetails/ShiftDetail', 2) WITH (
 			intShiftDetailId INT
