@@ -1,7 +1,7 @@
 ﻿/*
 	This is a user-defined table type used in the inventory costing stored procedures. 
 */
-CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
+CREATE TYPE [dbo].[ReceiptOtherChargesTableType] AS TABLE
 (
 	
 	 [intId] INT IDENTITY PRIMARY KEY CLUSTERED

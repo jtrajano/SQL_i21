@@ -674,3 +674,7 @@ EXEC sp_addmessage 51167,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51168) EXEC sp_dropmessage 51168, 'us_english'	
 SET @strmessage = 'There is already a run/work order for the date %s and %s, cannot create one more in the same date.'
 EXEC sp_addmessage 51168,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51169) EXEC sp_dropmessage 51169, 'us_english'	
+SET @strmessage = 'Data not found. Unable to create the Inventory Receipt.'
+EXEC sp_addmessage 51169,11,@strmessage,'us_english','False'
