@@ -36,6 +36,8 @@ AS
 			CU.strCurrency,						CS.strContractStatus,			ISNULL(dblStockUOMCF,0)			AS	dblStockUOMCF,	
 			IX.strIndex,						VR.strVendorId,					
 
+			CAST(CASE WHEN CD.intContractStatusId IN (1,4) THEN 1 ELSE 0 END AS BIT) AS ysnAllowedToShow,
+
 			--Header Detail
 
 			CH.intContractHeaderId,				CH.intHeaderConcurrencyId,		CH.intContractTypeId,
