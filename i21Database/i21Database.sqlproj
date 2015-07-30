@@ -2115,6 +2115,7 @@
     <Build Include="dbo\Stored Procedures\uspTRIndexContractsPrice.sql" />
     <Build Include="dbo\Views\vyuMFInventoryView.sql" />
     <Build Include="dbo\Views\vyuAPChargesForBilling.sql" />
+    <Build Include="dbo\Functions\fnCTGetContractStatuses.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
