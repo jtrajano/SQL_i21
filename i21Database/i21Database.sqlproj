@@ -2113,6 +2113,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostInventoryShipmentIntegrations.sql" />
     <Build Include="dbo\Views\vyuTRRackPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspTRIndexContractsPrice.sql" />
+    <Build Include="dbo\Views\vyuMFInventoryView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
