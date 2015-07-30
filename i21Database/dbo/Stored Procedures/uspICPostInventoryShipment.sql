@@ -380,6 +380,8 @@ BEGIN
 			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
 	WHERE	strShipmentNumber = @strTransactionId  
 
+	EXEC dbo.[uspSOShipped] @intTransactionId
+
 	COMMIT TRAN @TransactionName
 END 
     
