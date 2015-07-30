@@ -179,6 +179,7 @@ INSERT INTO [tblARInvoiceDetail]
 	,[intPerformerId]
 	,[intContractHeaderId]
     ,[intContractDetailId]
+    ,[intTicketId] 
 	,[intConcurrencyId])
            
 SELECT 
@@ -202,14 +203,107 @@ SELECT
 	,@ZeroDecimal							--[dblPercentFull]
 	,@ZeroDecimal							--[dblMeterReading]
 	,NULL									--[intServicePerformerId]
-	,NULL									--[intContractHeaderId]
-    ,NULL									--[intContractDetailId]
+	,SOD.[intContractHeaderId]				--[intContractHeaderId]
+    ,SOD.[intContractDetailId]				--[intContractDetailId]
+    ,(CASE WHEN HD.[intSourceType] = 1 THEN SD.intSourceId ELSE NULL END) --[intTicketId]
 	,1		
 FROM
 	[tblICInventoryShipmentItem] SD
+INNER JOIN
+	[tblICInventoryShipment] HD
+		ON SD.[intInventoryShipmentId] = HD.[intInventoryShipmentId]
+		AND HD.[intOrderType] = 2 --Sales Order
 LEFT OUTER JOIN
 	[tblSOSalesOrderDetail] SOD
 		ON SD.[intLineNo] = SOD.[intSalesOrderDetailId]
+WHERE
+	SD.[intInventoryShipmentId] = @ShipmentId
+	
+	
+UNION ALL
+
+SELECT 
+	 @NewId									--[intInvoiceId]
+	,SD.[intItemId]							--[intItemId]
+	,COD.[strItemDescription]				--[strItemDescription] 
+	,SD.[intItemUOMId]						--[intItemUOMId]
+	,SD.[dblQuantity]						--[dblQtyOrdered]
+	,SD.[dblQuantity]						--[dblQtyShipped]
+	,@ZeroDecimal							--[dblDiscount] 
+	,SD.[dblUnitPrice]						--[dblPrice]
+	,@ZeroDecimal							--[dblTotalTax]
+	,SD.[dblQuantity] * SD.[dblUnitPrice]	--[dblTotal]
+	,ACCT.[intAccountId]					--[intAccountId]
+	,ACCT.[intCOGSAccountId]				--[intCOGSAccountId]
+	,ACCT.[intSalesAccountId]				--[intSalesAccountId]
+	,ACCT.[intInventoryAccountId]			--[intInventoryAccountId]
+	,SD.[intInventoryShipmentItemId]		--[intInventoryShipmentItemId]
+	,NULL									--[intSalesOrderDetailId]
+	,NULL									--[intSiteId]
+	,@ZeroDecimal							--[dblPercentFull]
+	,@ZeroDecimal							--[dblMeterReading]
+	,NULL									--[intServicePerformerId]
+	,COD.[intContractHeaderId]				--[intContractHeaderId]
+    ,COD.[intContractDetailId]				--[intContractDetailId]
+    ,(CASE WHEN HD.[intSourceType] = 1 THEN SD.intSourceId ELSE NULL END) --[intTicketId]
+	,1		
+FROM
+	[tblICInventoryShipmentItem] SD
+INNER JOIN
+	[tblICInventoryShipment] HD
+		ON SD.[intInventoryShipmentId] = HD.[intInventoryShipmentId]
+		AND HD.[intOrderType] = 1 --Sales Contract		
+LEFT OUTER JOIN
+	[vyuCTContractDetailView] COD
+		ON SD.[intOrderId] = COD.[intContractHeaderId]
+		AND SD.[intLineNo] = COD.[intContractDetailId] 
+LEFT OUTER JOIN
+	[vyuARGetItemAccount] ACCT
+		ON SD.intItemId = ACCT.[intItemId]
+		AND HD.[intShipFromLocationId] = ACCT.[intLocationId] 
+WHERE
+	SD.[intInventoryShipmentId] = @ShipmentId
+
+UNION ALL	
+	
+SELECT 
+	 @NewId									--[intInvoiceId]
+	,SD.[intItemId]							--[intItemId]
+	,I.[strDescription]						--[strItemDescription]  
+	,SD.[intItemUOMId]						--[intItemUOMId]
+	,SD.[dblQuantity]						--[dblQtyOrdered]
+	,SD.[dblQuantity]						--[dblQtyShipped]
+	,@ZeroDecimal							--[dblDiscount] 
+	,SD.[dblUnitPrice]						--[dblPrice]
+	,@ZeroDecimal							--[dblTotalTax]
+	,SD.[dblQuantity] * SD.[dblUnitPrice]	--[dblTotal]
+	,ACCT.[intAccountId]					--[intAccountId]
+	,ACCT.[intCOGSAccountId]				--[intCOGSAccountId]
+	,ACCT.[intSalesAccountId]				--[intSalesAccountId]
+	,ACCT.[intInventoryAccountId]			--[intInventoryAccountId]
+	,SD.[intInventoryShipmentItemId]		--[intInventoryShipmentItemId]
+	,NULL									--[intSalesOrderDetailId]
+	,NULL									--[intSiteId]
+	,@ZeroDecimal							--[dblPercentFull]
+	,@ZeroDecimal							--[dblMeterReading]
+	,NULL									--[intServicePerformerId]
+	,NULL									--[intContractHeaderId]
+    ,NULL									--[intContractDetailId]
+    ,(CASE WHEN HD.[intSourceType] = 1 THEN SD.intSourceId ELSE NULL END) --[intTicketId]
+	,1		
+FROM
+	[tblICInventoryShipmentItem] SD
+INNER JOIN
+	[tblICInventoryShipment] HD
+		ON SD.[intInventoryShipmentId] = HD.[intInventoryShipmentId]
+		AND HD.[intOrderType] IN (3,4) --Transfer Order & Direct
+INNER JOIN
+	[tblICItem]	I
+		ON SD.[intItemId] = I.[intItemId] 
+LEFT OUTER JOIN
+	[vyuARGetItemAccount] ACCT
+		ON SD.intItemId = ACCT.[intItemId]
+		AND HD.[intShipFromLocationId] = ACCT.[intLocationId] 
 WHERE
 	SD.[intInventoryShipmentId] = @ShipmentId
 
