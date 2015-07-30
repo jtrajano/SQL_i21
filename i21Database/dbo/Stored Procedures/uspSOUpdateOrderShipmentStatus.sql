@@ -45,7 +45,17 @@ SET @IsOpen = (	SELECT COUNT(1)
 						)										
 					)
 					
-IF(NOT EXISTS(SELECT NULL FROM tblICInventoryShipmentItem WHERE intSourceId = @SalesOrderId))
+IF(NOT EXISTS(SELECT NULL FROM tblICInventoryShipmentItem WHERE intSourceId = @SalesOrderId) 
+		AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ISD
+		INNER JOIN tblARInvoice ISH
+			ON ISD.intInvoiceId = ISH.intInvoiceId
+		INNER JOIN tblSOSalesOrderDetail SOD
+			ON ISD.intSalesOrderDetailId = SOD.intSalesOrderDetailId
+		WHERE (ISD.[intInventoryShipmentId] IS NULL OR ISD.[intInventoryShipmentId] = 0)			
+		  AND (ISD.[intSalesOrderDetailId] IS NOT NULL OR ISD.[intSalesOrderDetailId] <> 0)	
+		  AND SOD.intSalesOrderId = @SalesOrderId
+		GROUP BY
+			ISD.[intSalesOrderDetailId]))
 	SET @IsOpen = 1
 					
 IF @IsOpen <> 0
@@ -108,7 +118,7 @@ DECLARE @TotalQtyOrdered	NUMERIC(18,6) = 0,
 		@TotalQtyShipped	NUMERIC(18,6) = 0
 
 SELECT @TotalQtyOrdered = SUM(dblQtyOrdered)
-     , @TotalQtyShipped = SUM(dblQtyShipped) 
+     , @TotalQtyShipped = SUM(CASE WHEN dblQtyShipped > dblQtyOrdered THEN dblQtyOrdered ELSE dblQtyShipped END) 
 FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @SalesOrderId 
 GROUP BY intSalesOrderId
 
