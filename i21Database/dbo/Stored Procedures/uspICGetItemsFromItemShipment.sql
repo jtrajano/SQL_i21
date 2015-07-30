@@ -51,6 +51,4 @@ FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentIt
 			ON ShipmentItemLot.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
 		LEFT JOIN dbo.tblICLot Lot
 			ON Lot.intLotId = ShipmentItemLot.intLotId
-		LEFT JOIN dbo.tblICItemUOM LotItemtUOM
-			ON LotItemtUOM.intItemUOMId = ShipmentItemLot.intItemUOMId
 WHERE	Shipment.intInventoryShipmentId = @intShipmentId

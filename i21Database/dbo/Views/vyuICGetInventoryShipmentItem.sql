@@ -18,8 +18,10 @@ SELECT ShipmentItem.intInventoryShipmentId
 	, strStorageLocationName = StorageLocation.strName
 	, strOrderUOM = ShipmentItemSource.strOrderUOM
 	, strUnitMeasure = UOM.strUnitMeasure
+	, dblItemUOMConv = ItemUOM.dblUnitQty
 	, strUnitType = UOM.strUnitType
 	, strWeightUOM = WeightUOM.strUnitMeasure
+	, dblWeightItemUOMConv = ItemWeightUOM.dblUnitQty
 	, dblQtyOrdered = ISNULL(ShipmentItemSource.dblQtyOrdered, 0)
     , dblQtyAllocated = ISNULL(ShipmentItemSource.dblQtyAllocated, 0)
     , dblUnitPrice = ISNULL(ShipmentItemSource.dblUnitPrice, 0)
