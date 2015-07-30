@@ -26,9 +26,9 @@ DECLARE @COST_METHOD_Per_Unit AS NVARCHAR(50) = 'Per Unit'
 		,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
 
 DECLARE	-- Receipt Types
-		@RECEIPT_TYPE_Purchase_Contract AS NVARCHAR(50) = 'Purchase Contract'
-		,@RECEIPT_TYPE_Purchase_Order AS NVARCHAR(50) = 'Purchase Order'
-		,@RECEIPT_TYPE_Transfer_Order AS NVARCHAR(50) = 'Transfer Order'
+		@RECEIPT_TYPE_PurchaseContract AS NVARCHAR(50) = 'Purchase Contract'
+		,@RECEIPT_TYPE_PurchaseOrder AS NVARCHAR(50) = 'Purchase Order'
+		,@RECEIPT_TYPE_TransferOrder AS NVARCHAR(50) = 'Transfer Order'
 		,@RECEIPT_TYPE_Direct AS NVARCHAR(50) = 'Direct'
 		-- Source Types
 		,@SOURCE_TYPE_None AS INT = 0
@@ -52,7 +52,7 @@ BEGIN
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 					AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
-					AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
+					AND Receipt.strReceiptType = @RECEIPT_TYPE_PurchaseContract
 					AND ReceiptItem.intOrderId IS NOT NULL 
 					AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 				INNER JOIN dbo.tblICItemUOM ItemUOM	
@@ -77,7 +77,7 @@ BEGIN
 							,ReceiptItem.intOrderId 
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-								AND Receipt.strReceiptType = @RECEIPT_TYPE_Purchase_Contract
+								AND Receipt.strReceiptType = @RECEIPT_TYPE_PurchaseContract
 							INNER JOIN dbo.tblICItemUOM ItemUOM
 								ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
 					WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
