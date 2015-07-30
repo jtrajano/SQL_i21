@@ -13,6 +13,7 @@ BEGIN TRY
 	
 	DECLARE @ErrMsg					NVARCHAR(MAX),
 			@dblBalance				NUMERIC(12,4),			
+			@dblAvailable			NUMERIC(12,4),	
 			@intItemId				INT,
 			@dblNewBalance			NUMERIC(12,4),
 			@strInOutFlag			NVARCHAR(4),
@@ -77,7 +78,7 @@ BEGIN TRY
 		AND		CH.intEntityId		=	@intEntityId
 		AND		CD.intItemId		=	@intItemId
 		AND		CD.intPricingTypeId	=	1
-		AND		CD.dblBalance		>	0
+		AND		CD.dblBalance - CD.dblScheduleQty	>	0
 		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
 	END
 	
@@ -90,15 +91,21 @@ BEGIN TRY
 		AND		CH.intEntityId		=	@intEntityId
 		AND		CD.intItemId		=	@intItemId
 		AND	   (CD.intPricingTypeId	=	1 OR CD.intPricingTypeId = CASE WHEN @ApplyScaleToBasis = 0 THEN 1 ELSE 2 END)
-		AND		CD.dblBalance		>	0
+		AND		CD.dblBalance - CD.dblScheduleQty	>	0
 		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
 	END
 		
 	WHILE	@dblNetUnits > 0 AND ISNULL(@intContractDetailId,0) > 0
 	BEGIN
+		SELECT	@dblBalance		=	NULL,
+				@dblQuantity	=	NULL,
+				@dblCost		=	NULL,
+				@dblAvailable	=	NULL
+
 		SELECT	@dblBalance		=	dblBalance,
 				@dblQuantity	=	dblQuantity,
-				@dblCost		=	ISNULL(dblBasis,0)+ISNULL(dblFutures,0)
+				@dblCost		=	ISNULL(dblBasis,0)+ISNULL(dblFutures,0),
+				@dblAvailable	=	dblBalance - dblScheduleQty
 		FROM	tblCTContractDetail 
 		WHERE	intContractDetailId = @intContractDetailId
 
@@ -115,7 +122,7 @@ BEGIN TRY
 			
 
 			UPDATE	tblCTContractDetail 
-			SET		dblBalance	= @dblBalance + @dblNetUnits,
+			SET		dblBalance	= dblBalance + @dblNetUnits,
 					dblQuantity = dblQuantity + @dblNetUnits
 			WHERE	intContractDetailId = @intContractDetailId
 			
@@ -153,7 +160,7 @@ BEGIN TRY
 			BREAK
 		END
 
-		IF NOT @dblBalance > 0
+		IF NOT @dblAvailable > 0
 		BEGIN
 			GOTO CONTINUEISH
 		END
@@ -168,13 +175,13 @@ BEGIN TRY
 		WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
 		*/
 
-		IF	@dblNetUnits <= @dblBalance
+		IF	@dblNetUnits <= @dblAvailable
 		BEGIN
 			--UPDATE	tblCTContractDetail 
 			--SET		dblBalance = @dblBalance - @dblNetUnits
 			--WHERE	intContractDetailId = @intContractDetailId
 			
-			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblQuantity,@dblBalance,@dblNetUnits,@dblBalance - @dblNetUnits,@dblQuantity,@strAdjustmentNo,@dblCost
+			INSERT	INTO @Processed SELECT @intContractDetailId,@dblNetUnits,NULL,@dblQuantity,@dblAvailable,@dblNetUnits,@dblAvailable - @dblNetUnits,@dblQuantity,@strAdjustmentNo,@dblCost
 
 			SELECT	@dblNetUnits = 0
 
@@ -186,9 +193,9 @@ BEGIN TRY
 			--SET		dblBalance	=	0
 			--WHERE	intContractDetailId = @intContractDetailId
 			
-			INSERT	INTO @Processed SELECT @intContractDetailId,@dblBalance,NULL,@dblQuantity,@dblBalance,@dblBalance,0,@dblQuantity,@strAdjustmentNo,@dblCost
+			INSERT	INTO @Processed SELECT @intContractDetailId,@dblAvailable,NULL,@dblQuantity,@dblAvailable,@dblAvailable,0,@dblQuantity,@strAdjustmentNo,@dblCost
 
-			SELECT	@dblNetUnits	=	@dblNetUnits - @dblBalance					
+			SELECT	@dblNetUnits	=	@dblNetUnits - @dblAvailable					
 		END
 		
 		CONTINUEISH:
@@ -202,7 +209,7 @@ BEGIN TRY
 		AND		CH.intEntityId		=	@intEntityId
 		AND		CD.intItemId		=	@intItemId
 		AND		CD.intPricingTypeId	=	1
-		AND		CD.dblBalance		>	0
+		AND		CD.dblBalance - CD.dblScheduleQty	>	0
 		AND		CD.intContractDetailId NOT IN (SELECT intContractDetailId FROM @Processed)
 		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
 
@@ -215,7 +222,7 @@ BEGIN TRY
 			AND		CH.intEntityId		=	@intEntityId
 			AND		CD.intItemId		=	@intItemId
 			AND	   (CD.intPricingTypeId	=	1 OR CD.intPricingTypeId = CASE WHEN @ApplyScaleToBasis = 0 THEN 1 ELSE 2 END)
-			AND		CD.dblBalance		>	0
+			AND		CD.dblBalance - CD.dblScheduleQty	>	0
 			AND		CD.intContractDetailId NOT IN (SELECT intContractDetailId FROM @Processed)
 			ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
 		END
