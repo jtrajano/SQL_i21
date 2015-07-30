@@ -19,5 +19,6 @@
 	CONSTRAINT [FK_tblARCustomerFreightXRef_tblTRSupplyPoint] FOREIGN KEY ([intSupplyPointId]) REFERENCES [tblTRSupplyPoint]([intSupplyPointId]),
 	CONSTRAINT [FK_tblARCustomerFreightXRef_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
 	CONSTRAINT [FK_tblARCustomerFreightXRef_tblEntityLocation] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]),
+	CONSTRAINT [UK_tblARCustomerFreightXRef_reference_columns] UNIQUE NONCLUSTERED ([intSupplyPointId] ASC, [intCategoryId] ASC,[intEntityLocationId] ASC)	--THE NAME IS USED IN THE FRONT END, IF THERE ARE CHANGES PLEASE INFORM MON.GONZALES
 );
 
