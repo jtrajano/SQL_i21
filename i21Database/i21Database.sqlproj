@@ -2110,6 +2110,8 @@
     <Build Include="dbo\Views\vyuSTPricebookMaster.sql" />
     <Build Include="dbo\Stored Procedures\uspSTInventoryMassUpdate.sql" />
     <Build Include="dbo\Tables\tblAROriginCompanies.sql" />
+    <Build Include="dbo\Views\vyuTRRackPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRIndexContractsPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

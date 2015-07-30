@@ -46,7 +46,11 @@ LG.intCounterPartyContractDetailId as intOutboundContractDetailId,
 LG.ysnDirectShip,
 LG.ysnInProgress,
 LG.intCounterPartyLoadId as intOutboundLoadId,
-LG.strExternalLoadNumber as strSupplierLoadNumber
+LG.strExternalLoadNumber as strSupplierLoadNumber,
+(select strPricingType from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId ) as strInboundPricingType,
+(select strPricingType from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intCounterPartyContractDetailId  ) as strOutboundPricingType,
+(select dblAdjustment from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId )  as dblInboundAdjustment,
+(select dblAdjustment from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intCounterPartyContractDetailId )  as dblOutboundAdjustment
 from dbo.vyuLGLoadView LG
 where 
  (IsNull(LG.ysnDispatched,0)=1)  and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and
@@ -99,10 +103,12 @@ LG.intContractDetailId as intOutboundContractDetailId,
 LG.ysnDirectShip,
 LG.ysnInProgress,
 LG.intLoadId as intOutboundLoadId,
-LG.strExternalLoadNumber as strSupplierLoadNumber 
+LG.strExternalLoadNumber as strSupplierLoadNumber,
+null as strInboundPricingType,
+(select strPricingType from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId  ) as strOutboundPricingType,
+null as dblInboundAdjustment,
+(select dblAdjustment from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId  ) as dblOutboundAdjustment  
 from dbo.vyuLGLoadView LG
 where 
  (IsNull(LG.ysnDispatched,0)=1)  and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and
 ((IsNull(LG.ysnDirectShip,0) = 0 and LG.strType ='Outbound'))	
-	
-
