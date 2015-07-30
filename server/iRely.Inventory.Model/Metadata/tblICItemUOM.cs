@@ -140,7 +140,6 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemBundle> tblICItemBundles { get; set; }
         public ICollection<tblICItemUPC> tblICItemUPCs { get; set; }
 
-        public ICollection<tblICInventoryReceiptItemLot> tblICInventoryReceiptItemLots { get; set; }        
         public ICollection<tblICBuildAssemblyDetail> tblICBuildAssemblyDetails { get; set; }
         public ICollection<tblICBuildAssembly> tblICBuildAssemblies { get; set; }
         
