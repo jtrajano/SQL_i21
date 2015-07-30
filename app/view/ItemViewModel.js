@@ -1089,12 +1089,12 @@ Ext.define('Inventory.view.ItemViewModel', {
                 case 'Manufacturing':
                 case 'Finished Good' :
                 case 'Non-Inventory':
-                case 'Other Charge':
                 case 'Service':
                 case 'Raw Material':
                     return false;
                     break;
 
+                case 'Other Charge':
                 case 'Software':
                     return true
                     break;
