@@ -36,8 +36,15 @@ DECLARE @intTicketUOM INT
 DECLARE @intTicketItemUOMId INT
 DECLARE @strReceiptType AS NVARCHAR(100)
 DECLARE @intLoadId INT
+DECLARE @dblTicketFreightRate AS DECIMAL (9, 5)
+DECLARE @intScaleStationId AS INT
+DECLARE @intFreightItemId AS INT
+DECLARE @intFreightVendorId AS INT
+DECLARE @ysnDeductFreightFarmer AS BIT
+
 BEGIN
-    SELECT TOP 1 @intLoadId = ST.intLoadId
+    SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
+	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight
 	FROM dbo.tblSCTicket ST WHERE
 	ST.intTicketId = @intTicketId
 END
@@ -129,6 +136,40 @@ BEGIN TRY
 				FROM	dbo.tblICItemUOM UM	
 				  JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
 			WHERE	UM.intUnitMeasureId =@intTicketUOM AND SC.intTicketId = @intTicketId
+		END
+				IF @dblTicketFreightRate > 0
+		BEGIN
+	   	SELECT	@intFreightItemId = ST.intFreightItemId
+		FROM	dbo.tblSCScaleSetup ST	        
+		WHERE	ST.intScaleSetupId = @intScaleStationId
+		IF @intFreightItemId IS NULL 
+		BEGIN 
+			-- Raise the error:
+			RAISERROR('Invalid Default Freight Item in Scale Setup - uspSCProcessToItemReceipt', 16, 1);
+			RETURN;
+		END
+		INSERT INTO [dbo].[tblSCTicketCost]
+				   ([intTicketId]
+				   ,[intConcurrencyId]
+				   ,[intItemId]
+				   ,[intEntityVendorId]
+				   ,[strCostMethod]
+				   ,[dblRate]
+				   ,[intItemUOMId]
+				   ,[ysnAccrue]
+				   ,[ysnMTM]
+				   ,[ysnPrice])
+		SELECT	@intTicketId,
+				1, 
+				@intFreightItemId,
+				SS.intFreightCarrierId,
+				'Per Unit',
+				SS.dblFreightRate,
+				@intTicketItemUOMId,
+				1,
+				0,
+				0
+		FROM	tblSCTicket SS WHERE SS.intTicketId = @intTicketId
 		END
 		IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 		BEGIN
