@@ -239,6 +239,13 @@ BEGIN
 			INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptItemId] = A.intInventoryReceiptItemId
 		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
 
+		--UPDATE CHARGES
+		UPDATE A
+			SET A.dblAmountBilled = A.dblAmountBilled - B.dblTotal
+		FROM tblICInventoryReceiptItemAllocatedCharge A
+			INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptItemAllocatedChargeId] = A.intInventoryReceiptItemAllocatedChargeId
+		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
+
 		--Insert Successfully unposted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT
@@ -281,6 +288,13 @@ BEGIN
 			SET A.dblBillQty = A.dblBillQty + B.dblQtyReceived
 		FROM tblICInventoryReceiptItem A
 			INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptItemId] = A.intInventoryReceiptItemId
+		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
+
+		--UPDATE CHARGES
+		UPDATE A
+			SET A.dblAmountBilled = A.dblAmountBilled + B.dblTotal
+		FROM tblICInventoryReceiptItemAllocatedCharge A
+			INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptItemId] = A.intInventoryReceiptItemAllocatedChargeId
 		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
 
 		--Insert Successfully posted transactions.
