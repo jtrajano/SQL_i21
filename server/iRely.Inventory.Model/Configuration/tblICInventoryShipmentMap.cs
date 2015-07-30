@@ -102,8 +102,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intInventoryShipmentItemId).HasColumnName("intInventoryShipmentItemId");
             this.Property(t => t.intLotId).HasColumnName("intLotId");
             this.Property(t => t.dblQuantityShipped).HasColumnName("dblQuantityShipped").HasPrecision(18, 6);
-            this.Property(t => t.intItemUOMId).HasColumnName("intItemUOMId");
-            this.Property(t => t.intWeightUOMId).HasColumnName("intWeightUOMId");
             this.Property(t => t.dblGrossWeight).HasColumnName("dblGrossWeight").HasPrecision(18, 6);
             this.Property(t => t.dblTareWeight).HasColumnName("dblTareWeight").HasPrecision(18, 6);
             this.Property(t => t.strWarehouseCargoNumber).HasColumnName("strWarehouseCargoNumber");
@@ -112,12 +110,6 @@ namespace iRely.Inventory.Model
             this.HasOptional(p => p.tblICLot)
                 .WithMany(p => p.tblICInventoryShipmentItemLots)
                 .HasForeignKey(p => p.intLotId);
-            this.HasOptional(p => p.tblICItemUOM)
-                .WithMany(p => p.ShipmentItemLots)
-                .HasForeignKey(p => p.intItemUOMId);
-            this.HasOptional(p => p.WeightUOM)
-                .WithMany(p => p.WeightShipmentItemLot)
-                .HasForeignKey(p => p.intWeightUOMId);
         }
     }
 
@@ -147,8 +139,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strStorageLocationName).HasColumnName("strStorageLocationName");
             this.Property(t => t.strOrderUOM).HasColumnName("strOrderUOM");
             this.Property(t => t.strUnitMeasure).HasColumnName("strUnitMeasure");
+            this.Property(t => t.dblItemUOMConv).HasColumnName("dblItemUOMConv").HasPrecision(18, 6);
             this.Property(t => t.strUnitType).HasColumnName("strUnitType");
             this.Property(t => t.strWeightUOM).HasColumnName("strWeightUOM");
+            this.Property(t => t.dblWeightItemUOMConv).HasColumnName("dblWeightItemUOMConv").HasPrecision(18, 6);
             this.Property(t => t.dblQtyOrdered).HasColumnName("dblQtyOrdered").HasPrecision(18, 6);
             this.Property(t => t.dblQtyAllocated).HasColumnName("dblQtyAllocated").HasPrecision(18, 6);
             this.Property(t => t.dblUnitPrice).HasColumnName("dblUnitPrice").HasPrecision(18, 6);

@@ -385,6 +385,22 @@ namespace iRely.Inventory.Model
                 _uom = value;
             }
         }
+        private decimal _itemUOMConv;
+        [NotMapped]
+        public decimal dblItemUOMConv
+        {
+            get
+            {
+                if (vyuICGetInventoryShipmentItem != null)
+                    return vyuICGetInventoryShipmentItem.dblItemUOMConv ?? 0;
+                else
+                    return _itemUOMConv;
+            }
+            set
+            {
+                _itemUOMConv = value;
+            }
+        }
         private string _weightUOM;
         [NotMapped]
         public string strWeightUOM
@@ -402,6 +418,22 @@ namespace iRely.Inventory.Model
             set
             {
                 _weightUOM = value;
+            }
+        }
+        private decimal _weightItemUOMConv;
+        [NotMapped]
+        public decimal dblWeightItemUOMConv
+        {
+            get
+            {
+                if (vyuICGetInventoryShipmentItem != null)
+                    return vyuICGetInventoryShipmentItem.dblWeightItemUOMConv ?? 0;
+                else
+                    return _weightItemUOMConv;
+            }
+            set
+            {
+                _weightItemUOMConv = value;
             }
         }
         private string _subLocationName;
@@ -528,8 +560,10 @@ namespace iRely.Inventory.Model
         public string strStorageLocationName { get; set; }
         public string strOrderUOM { get; set; }
         public string strUnitMeasure { get; set; }
+        public decimal? dblItemUOMConv { get; set; }
         public string strUnitType { get; set; }
         public string strWeightUOM { get; set; }
+        public decimal? dblWeightItemUOMConv { get; set; }
         public decimal? dblQtyOrdered { get; set; }
         public decimal? dblQtyAllocated { get; set; }
         public decimal? dblUnitPrice { get; set; }
@@ -548,8 +582,6 @@ namespace iRely.Inventory.Model
         public int intInventoryShipmentItemId { get; set; }
         public int? intLotId { get; set; }
         public decimal? dblQuantityShipped { get; set; }
-        public int? intItemUOMId { get; set; }
-        public int? intWeightUOMId { get; set; }
         public decimal? dblGrossWeight { get; set; }
         public decimal? dblTareWeight { get; set; }
         public string strWarehouseCargoNumber { get; set; }
@@ -650,8 +682,8 @@ namespace iRely.Inventory.Model
         {
             get
             {
-                if (tblICItemUOM != null)
-                    return tblICItemUOM.dblUnitQty ?? 0;
+                if (tblICInventoryShipmentItem != null)
+                    return tblICInventoryShipmentItem.dblItemUOMConv;
                 else
                     return _itemUOMConv;
             }
@@ -685,8 +717,8 @@ namespace iRely.Inventory.Model
         {
             get
             {
-                if (WeightUOM != null)
-                    return WeightUOM.dblUnitQty ?? 0;
+                if (tblICInventoryShipmentItem != null)
+                    return tblICInventoryShipmentItem.dblWeightItemUOMConv;
                 else
                     return _weightConv;
             }
@@ -713,8 +745,6 @@ namespace iRely.Inventory.Model
         }
 
         public tblICInventoryShipmentItem tblICInventoryShipmentItem { get; set; }
-        public tblICItemUOM tblICItemUOM { get; set; }
-        public tblICItemUOM WeightUOM { get; set; }
         public tblICLot tblICLot { get; set; }
 
     }
