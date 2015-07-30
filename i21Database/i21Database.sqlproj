@@ -1885,7 +1885,6 @@
     <Build Include="dbo\Stored Procedures\uspTRProcessToInventoryReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddItemReceipt.sql" />
     <Build Include="dbo\User Defined Types\ReceiptStagingTable.sql" />
-    <Build Include="dbo\Stored Procedures\uspICPostInventoryShipmentIntegrations.sql" />
     <Build Include="dbo\User Defined Types\ShipmentItemTableType.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemsFromItemShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspSOShipped.sql" />
@@ -2110,6 +2109,8 @@
     <Build Include="dbo\Views\vyuSTPricebookMaster.sql" />
     <Build Include="dbo\Stored Procedures\uspSTInventoryMassUpdate.sql" />
     <Build Include="dbo\Tables\tblAROriginCompanies.sql" />
+    <Build Include="dbo\User Defined Types\ReceiptOtherChargesTableType.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryShipmentIntegrations.sql" />
     <Build Include="dbo\Views\vyuTRRackPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspTRIndexContractsPrice.sql" />
   </ItemGroup>

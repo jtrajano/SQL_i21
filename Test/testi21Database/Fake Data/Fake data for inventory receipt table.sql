@@ -160,6 +160,14 @@ BEGIN
 			,[strModule]			= N'Posting'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 23
+			,[strTransactionType]	= N'Inventory Receipt'
+			,[strPrefix]			= N'INVRCT-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Inventory'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
 		
 	--------------------------------------------------------
 	-- Add INVRCPT-XXXXX1

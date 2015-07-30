@@ -4,32 +4,26 @@
 CREATE TYPE [dbo].[ReceiptOtherChargesTableType] AS TABLE
 (
 	
-	 [intId] INT IDENTITY PRIMARY KEY CLUSTERED
+	[intId] INT IDENTITY PRIMARY KEY CLUSTERED
 
-	 -- Header
-	,[strReceiptType] nvarchar(50) COLLATE Latin1_General_CI_AS NULL 
-	,[intEntityVendorId] INT NOT NULL						-- The Vendor. 
-	,[intShipFromId] INT NOT NULL						    -- The Vendor Location. 
-	,[intLocationId] INT NOT NULL                           -- Company Location	
-	,[strBillOfLadding] nvarchar(50) COLLATE Latin1_General_CI_AS NULL --Bill of Ladding Number
-	,[intContractDetailId] INT NULL                         -- Contract
-	,[dtmDate] DATETIME NOT NULL							-- The date of the transaction
-	,[intShipViaId] INT NULL                                -- ShipVia
-	,[intCurrencyId] INT NULL								-- The currency id used in a tranaction. 
-	,[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
-	,[intSourceId] INT NULL                                 -- Source Id of the Originated Transaction
+	-- Linking fields to the Header 
+	,[intEntityVendorId] INT NOT NULL														-- The Vendor. 
+	,[strBillOfLadding] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL						-- Bill of Ladding Number
+	,[strReceiptType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL						-- Receipt type. It can be a 'Purchase Contract', 'Purchase Order', 'Transfer Order', or 'Direct'. 
+	,[intLocationId] INT NOT NULL															-- Company Location	
+	,[intShipViaId] INT NULL																-- ShipVia
+	,[intShipFromId] INT NOT NULL															-- The Vendor Location. 
+	,[intCurrencyId] INT NULL																-- The currency id used in a tranaction. 	
 
-	-- Detail 
-	,[intItemId] INT NOT NULL								-- The item. 
-	,[intItemLocationId] INT NOT NULL						-- The location where the item is stored.
-	,[intItemUOMId] INT NOT NULL							-- The UOM used for the item.
-    ,[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0				-- The quantity of an item in relation to its UOM. For example a box can have 12 pieces of an item. If you have 10 boxes, this parameter must be 10 and not 120 (10 boxes x 12 pieces per box). Positive unit qty means additional stock. Negative unit qty means reduction (selling) of the stock. 
-    ,[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0			-- The cost of purchasing a item per UOM. For example, $12 is the cost for a 12-piece box. This parameter should hold a $12 value and not $1 per pieces found in a 12-piece box. The cost is stored in base currency. 
-	,[intSubLocationId] INT NULL							-- Place holder field for lot numbers
-	,[intStorageLocationId] INT NULL						-- Place holder field for lot numbers
-	,[ysnIsCustody] BIT NULL								-- If Yes (value is 1), then the item is not owned by the company. The company is only the custodian of the item (like a consignor). Add or remove stock from Inventory-Lot-In-Custody table. 
-
-	-- Detail Lot
-	,[intLotId] INT NULL									-- Place holder field for lot numbers	
-	,[dblFreightRate] DECIMAL(18, 6) NULL DEFAULT 0         -- Freight Rate 
+	-- Other Charges Fields		
+	,[intChargeId] INT NOT NULL																-- The item id of Other Charge type. 
+    ,[ysnInventoryCost] BIT NULL DEFAULT ((0))												-- True if allocated cost is included in the stock cost. False if not. 
+    ,[strCostMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT ('Per Unit')	-- Additional charge can be calculated by 'Per Unit', 'Percentage', or 'Amount'. 
+    ,[dblRate] NUMERIC(18, 6) NULL DEFAULT ((0))											-- Used if Cost method used is 'Per Unit' or 'Percentage'. This indicates the dollar amount per UOM or percentage per UOM. 
+    ,[intCostUOMId] INT NULL																-- Used with Cost Method 'Per Unit'. It is the dollar amount per UOM. 
+    ,[intOtherChargeEntityVendorId] INT NULL												-- Used if Other Charge is a surcharge. It works with 'On Cost Type'. 'On Cost Type' is configured in the item setup. 
+    ,[dblAmount] NUMERIC(18, 6) NULL DEFAULT ((0))											-- Used if Cost method is 'Amount'. The additional charge applied per line item, regardless of Qty or Cost. 
+    ,[strAllocateCostBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT ('Unit')	-- Determines how the computed other charges are allocated per item. It can be allocated by 'Unit', 'Weight', or 'Cost'. 
+    ,[strCostBilledBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT ('Vendor')	-- Determines if the computed charge is billed by the inventory receipt vendor, a third party vendor, or by no one. 
+	,[intContractDetailId] INT NULL															-- Contract
 )
