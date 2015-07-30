@@ -1698,6 +1698,7 @@
     <None Include="Scripts\Utility\IC\IC-1024\Update tblGLSummary.sql" />
     <None Include="Scripts\Post-Deployment\Reports\Pxcyctag.sql" />
     <Build Include="dbo\Views\vyuAPBillDetailSource.sql" />
+    <Build Include="dbo\Stored Procedures\uspSOShipped.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
