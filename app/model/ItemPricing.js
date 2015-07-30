@@ -58,5 +58,18 @@ Ext.define('Inventory.model.ItemPricing', {
         {type: 'presence', field: 'dblStandardCost'},
         {type: 'presence', field: 'strPricingMethod'},
         {type: 'presence', field: 'dblSalePrice'}
-    ]
+    ],
+
+    validate: function(options) {
+        var errors = this.callParent(arguments);
+        if (this.get('strPricingMethod') === 'Percent of Margin') {
+            if (this.get('dblAmountPercent') <= 100) {
+                errors.add({
+                    field: 'dblAmountPercent',
+                    message: 'Percent of Margin cannot be greater than or equal to 100.'
+                })
+            }
+        }
+        return errors;
+    }
 });

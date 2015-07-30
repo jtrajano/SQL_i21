@@ -2029,9 +2029,14 @@ Ext.define('Inventory.view.ItemViewController', {
                     var markup = (cost * (amount / 100));
                     context.record.set('dblSalePrice', (cost + markup));
                 }
-                else if (iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'Percent of Margin'){
-                    var markup = (cost / (1 - (amount / 100)));
-                    context.record.set('dblSalePrice', markup);
+                else if (iRely.Functions.isEmpty(pricingMethod) || pricingMethod === 'Percent of Margin') {
+                    if (amount < 100){
+                        var markup = (cost / (1 - (amount / 100)));
+                        context.record.set('dblSalePrice', markup);
+                    }
+                    else {
+                        win.context.data.validator.validateGrid(grdPricing);
+                    }
                 }
             }
         }
