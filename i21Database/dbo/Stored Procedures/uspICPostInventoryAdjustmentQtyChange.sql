@@ -66,10 +66,8 @@ BEGIN
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
-			AND (
-				Detail.dblNewQuantity IS NULL 
-				OR ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) = 0 
-			)
+			AND ISNULL(Detail.dblQuantity, 0) = 0
+			AND ISNULL(Detail.dblNewQuantity, 0) = 0
 	
 	IF @intItemId IS NOT NULL 
 	BEGIN
