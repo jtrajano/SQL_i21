@@ -1699,6 +1699,8 @@
     <None Include="Scripts\Post-Deployment\Reports\Pxcyctag.sql" />
     <Build Include="dbo\Views\vyuAPBillDetailSource.sql" />
     <Build Include="dbo\Stored Procedures\uspSOShipped.sql" />
+    <None Include="Scripts\Utility\IC\IC-1090\Fix the On Hand Qty.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateSOStatusFromInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
