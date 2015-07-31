@@ -7915,6 +7915,45 @@
                                                                 "columns": [
                                                                     "[",
                                                                     "\t{",
+                                                                    "        dataIndex: 'strDescription',",
+                                                                    "        dataType: 'string',",
+                                                                    "        text: 'Cost Method',",
+                                                                    "        flex: 1",
+                                                                    "    }",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strDescription",
+                                                                "fieldLabel": "Cost Type",
+                                                                "itemId": "cboCostType",
+                                                                "labelWidth": 105,
+                                                                "layout|flex": null,
+                                                                "valueField": "strDescription"
+                                                            },
+                                                            "name": "MyComboBox86",
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "8758691a-294d-4389-99c9-e7a102868473",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
                                                                     "\t\tdataIndex: 'intItemId',",
                                                                     "\t\tdataType: 'numeric',",
                                                                     "\t\ttext: 'Item Id',",
@@ -7937,8 +7976,8 @@
                                                                 ],
                                                                 "designer|createAlias": "gridcombobox",
                                                                 "displayField": "strItemNo",
-                                                                "fieldLabel": "On Cost Type",
-                                                                "itemId": "cboOnCostType",
+                                                                "fieldLabel": "On Cost",
+                                                                "itemId": "cboOnCost",
                                                                 "labelWidth": 105,
                                                                 "layout|flex": null,
                                                                 "valueField": "intItemId"

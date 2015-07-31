@@ -483,7 +483,11 @@ Ext.define('Inventory.view.ItemViewController', {
                 value: '{current.strCostMethod}',
                 store: '{costMethods}'
             },
-            cboOnCostType: {
+            cboCostType: {
+                value: '{current.strCostType}',
+                store: '{costTypes}'
+            },
+            cboOnCost: {
                 value: '{current.intOnCostTypeId}',
                 store: '{otherCharges}',
                 defaultFilters: [{

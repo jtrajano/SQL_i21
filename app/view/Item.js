@@ -3621,6 +3621,22 @@ Ext.define('Inventory.view.Item', {
                                                                         xtype: 'gridcombobox',
                                                                         columns: [
                                                                             {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Cost Method',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboCostType',
+                                                                        fieldLabel: 'Cost Type',
+                                                                        labelWidth: 105,
+                                                                        displayField: 'strDescription',
+                                                                        valueField: 'strDescription'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
                                                                                 dataIndex: 'intItemId',
                                                                                 dataType: 'numeric',
                                                                                 text: 'Item Id',
@@ -3639,8 +3655,8 @@ Ext.define('Inventory.view.Item', {
                                                                                 flex: 1
                                                                             }
                                                                         ],
-                                                                        itemId: 'cboOnCostType',
-                                                                        fieldLabel: 'On Cost Type',
+                                                                        itemId: 'cboOnCost',
+                                                                        fieldLabel: 'On Cost',
                                                                         labelWidth: 105,
                                                                         displayField: 'strItemNo',
                                                                         valueField: 'intItemId'

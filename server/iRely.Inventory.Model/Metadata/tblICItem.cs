@@ -119,6 +119,7 @@ namespace iRely.Inventory.Model
         public bool? ysnMTM { get; set; }
         public bool? ysnPrice { get; set; }
         public string strCostMethod { get; set; }
+        public string strCostType { get; set; }
         public int? intOnCostTypeId { get; set; }
         public decimal? dblAmount { get; set; }
         public int? intCostUOMId { get; set; }
@@ -322,6 +323,7 @@ namespace iRely.Inventory.Model
         public int? intCostUOMId { get; set; }
         public string strCostUOM { get; set; }
         public string strUnitType { get; set; }
+        public string strCostType { get; set; }
         public int? intOnCostTypeId { get; set; }
         public string strOnCostType { get; set; }
     }

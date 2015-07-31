@@ -2169,7 +2169,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                             {
                                                                 xtype: 'gridcolumn',
                                                                 itemId: 'colOnCostType',
-                                                                text: 'On Cost Type',
+                                                                text: 'On Cost',
                                                                 flex: 1
                                                             },
                                                             {

@@ -31,6 +31,7 @@ Ext.define('Inventory.model.CompactItem', {
         { name: 'ysnMTM', type: 'boolean' },
         { name: 'ysnPrice', type: 'boolean' },
         { name: 'strCostMethod', type: 'string' },
+        { name: 'strCostType', type: 'string' },
         { name: 'intOnCostTypeId', type: 'int', allowNull: true },
         { name: 'strOnCostType', type: 'string' },
         { name: 'dblAmount', type: 'float' },

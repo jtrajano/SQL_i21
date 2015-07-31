@@ -322,6 +322,22 @@ Ext.define('Inventory.view.ItemViewModel', {
                 }
             ]
         },
+        costTypes: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Freight'
+                },
+                {
+                    strDescription: 'Other Charges'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
         otherCharges: {
             type: 'icbufferedothercharges'
         },

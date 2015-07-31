@@ -4593,7 +4593,7 @@
                                                     "userConfig": {
                                                         "flex": 1,
                                                         "itemId": "colOnCostType",
-                                                        "text": "On Cost Type"
+                                                        "text": "On Cost"
                                                     },
                                                     "name": "MyColumn46",
                                                     "designerId": "1e4be1c3-9c82-4374-adce-c39a14bcecc9"
