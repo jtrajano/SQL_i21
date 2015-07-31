@@ -13,6 +13,7 @@ SELECT Item.intItemId
 	, Item.intCostUOMId
 	, strCostUOM = UOM.strUnitMeasure
 	, UOM.strUnitType
+	, Item.strCostType
 	, Item.intOnCostTypeId
 	, strOnCostType = OnCostType.strItemNo
 FROM tblICItem Item
