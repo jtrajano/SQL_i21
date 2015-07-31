@@ -5,7 +5,7 @@ SELECT	intItemId, intItemLocationId, dblAverageCost,
 			(
 				SELECT	SUM(dbo.fnCalculateStockUnitQty(dblQty, dblUOMQty) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty)) / SUM(dbo.fnCalculateStockUnitQty(dblQty, dblUOMQty))
 				FROM	dbo.tblICInventoryTransaction InvTransactions
-				WHERE	InvTransactions.dblQty > 1
+				WHERE	InvTransactions.dblQty > 0
 						AND InvTransactions.ysnIsUnposted = 0
 						AND InvTransactions.intItemId = ItemPricing.intItemId
 						AND InvTransactions.intItemLocationId = ItemPricing.intItemLocationId
@@ -16,7 +16,7 @@ WHERE	dblAverageCost <> ISNULL(
 				(
 					SELECT	SUM(dbo.fnCalculateStockUnitQty(dblQty, dblUOMQty) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty)) / SUM(dbo.fnCalculateStockUnitQty(dblQty, dblUOMQty))
 					FROM	dbo.tblICInventoryTransaction InvTransactions
-					WHERE	InvTransactions.dblQty > 1
+					WHERE	InvTransactions.dblQty > 0
 							AND InvTransactions.ysnIsUnposted = 0
 							AND InvTransactions.intItemId = ItemPricing.intItemId
 							AND InvTransactions.intItemLocationId = ItemPricing.intItemLocationId
@@ -29,7 +29,7 @@ SET		dblAverageCost = ISNULL(
 				(
 					SELECT	SUM(dbo.fnCalculateStockUnitQty(dblQty, dblUOMQty) * dbo.fnCalculateUnitCost(dblCost, dblUOMQty)) / SUM(dbo.fnCalculateStockUnitQty(dblQty, dblUOMQty))
 					FROM	dbo.tblICInventoryTransaction InvTransactions
-					WHERE	InvTransactions.dblQty > 1
+					WHERE	InvTransactions.dblQty > 0
 							AND InvTransactions.ysnIsUnposted = 0
 							AND InvTransactions.intItemId = ItemPricing.intItemId
 							AND InvTransactions.intItemLocationId = ItemPricing.intItemLocationId
