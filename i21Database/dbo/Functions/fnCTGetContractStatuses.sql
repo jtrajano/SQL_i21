@@ -10,8 +10,9 @@ BEGIN
 	SELECT	@strStatus	=	STUFF(															
 								   (
 										SELECT	DISTINCT												
-										', ' + CD.strContractStatus											
-										FROM vyuCTContractDetailView CD																								
+										', ' + CS.strContractStatus											
+										FROM tblCTContractDetail CD																								
+										JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
 										WHERE CD.intContractHeaderId=CH.intContractHeaderId																			
 										FOR XML PATH('')
 								   )											
