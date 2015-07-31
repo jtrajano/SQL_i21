@@ -103,7 +103,9 @@ BEGIN TRY
 					THEN	'BUYER'
 			END		AS	strD,
 			TX.strText,
-			CH.strContractBasis,
+			CH.strContractBasis +
+			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strINCOLocation)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strINCOLocation)) END,'') + 
+			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strCountry)) END,'') strContractBasis ,
 			CH.strWeight,
 			CH.strGrade
 
