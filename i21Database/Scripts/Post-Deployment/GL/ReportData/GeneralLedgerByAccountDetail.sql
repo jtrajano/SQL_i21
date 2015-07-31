@@ -63,7 +63,7 @@ INNER JOIN tblGLTempCOASegment D ON D.intAccountId = B.intAccountId
 OUTER APPLY(
 	SELECT TOP 1 strReference,strDocument FROM tblGLJournalDetail B JOIN tblGLJournal C
 	ON B.intJournalId = C.intJournalId WHERE 
-	 A.intJournalLineNo = B.intLineNo AND
+	 A.intJournalLineNo = B.intJournalDetailId AND
 	 C.intJournalId = A.intTransactionId AND C.strJournalId = A.strTransactionId
 )detail
 --*SCSTART*--
@@ -191,7 +191,7 @@ INNER JOIN tblGLTempCOASegment D ON B.intAccountId = D.intAccountId and strCode 
 OUTER APPLY(
 	SELECT TOP 1 strReference,strDocument FROM tblGLJournalDetail B JOIN tblGLJournal C
 	ON B.intJournalId = C.intJournalId WHERE 
-	 A.intJournalLineNo = B.intLineNo AND
+	 A.intJournalLineNo = B.intJournalDetailId AND
 	 C.intJournalId = A.intTransactionId AND C.strJournalId = A.strTransactionId
 )detail
 --*SCSTART*--
