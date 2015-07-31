@@ -9,11 +9,13 @@ Issues to fix are:
 INSTRUCTIONS: 
 Here is how you can use it on your target database. 
 
-1. Run Fix Consume.sql
-2. Run Fix Produce.sql. 
-3. Do #1 and #2, simultaneously, (2) two more times. Running it twice should cover 3-levels of produce-consume. WM seems to have 3 levels. 
-4. Run Update tblGLSummary.sql 
-5. Run Fix Inventory Adjustment.sql
+1. Run Fix UOM Qty on Inventory Transactions.sql
+2. Run Fix Consume.sql
+3. Run Fix Produce.sql. 
+4. Do #2 and #3, simultaneously, again for four (4) more times. Running it four times should cover 3-4 levels of produce-consume. WM seems to have 3 levels. 
+5. Run Fix the item average cost.sql
+6. Run Update tblGLSummary.sql 
+7. Run Fix Inventory Adjustment.sql
 
 The following are the quick descriptions of the scripts: 
 
