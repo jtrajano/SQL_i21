@@ -50,7 +50,7 @@ BEGIN
 					SELECT
 						vwcnt_cus_no=agcnt_cus_no
 						,vwcnt_cnt_no= agcnt_cnt_no
-						,vwcnt_line_no= agcnt_line_no
+						,vwcnt_line_no= CAST(agcnt_line_no AS INT)
 						,vwcnt_alt_cus=agcnt_alt_cus
 						,vwcnt_itm_or_cls=agcnt_itm_or_cls
 						,vwcnt_loc_no=agcnt_loc_no
@@ -77,6 +77,7 @@ BEGIN
 						,vwcnt_prc_lvl = agcnt_prc_lvl
 						,A4GLIdentity = CAST(A4GLIdentity   AS INT)
 						,strItemDescription =  ''''
+						,strCustomerName =  ''''
 					FROM agcntmst
 				
 				')
@@ -90,7 +91,7 @@ BEGIN
 					SELECT
 						vwcnt_cus_no=ptcnt_cus_no
 						,vwcnt_cnt_no= CAST(ptcnt_cnt_no AS CHAR(8))  
-						,vwcnt_line_no= ptcnt_line_no
+						,vwcnt_line_no= CAST(ptcnt_line_no AS INT)
 						,vwcnt_alt_cus=ptcnt_alt_cus_no
 						,vwcnt_itm_or_cls=CAST(ptcnt_itm_or_cls AS CHAR(13))  
 						,vwcnt_loc_no=ptcnt_loc_no
@@ -117,6 +118,7 @@ BEGIN
 						,vwcnt_prc_lvl = ptcnt_prc_lvl
 						,A4GLIdentity = CAST(A4GLIdentity   AS INT)
 						,strItemDescription =  ''''
+						,strCustomerName =  ''''
 					FROM ptcntmst
 				
 				')
