@@ -64,7 +64,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             cboLocation: {
                 value: '{current.intLocationId}',
                 store: '{location}',
-                readOnly: '{current.ysnPosted}'
+                readOnly: '{checkReadOnlyWithOrder}'
             },
             dtmReceiptDate: {
                 value: '{current.dtmReceiptDate}',
@@ -1737,109 +1737,96 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     {
                         dataIndex: 'dblCost',
                         dataType: 'float',
-                        text: 'Cost',
                         hidden: true
                     },
                     {
                         dataIndex: 'dblTotal',
                         dataType: 'float',
-                        text: 'Line Total',
                         hidden: true
                     },
                     {
                         dataIndex: 'dblTax',
                         dataType: 'float',
-                        text: 'Tax',
                         hidden: true
                     },
                     {
                         dataIndex: 'intPurchaseDetailId',
                         dataType: 'numeric',
-                        text: 'Purchase Detail Id',
                         hidden: true
                     },
                     {
                         dataIndex: 'intPurchaseId',
                         dataType: 'numeric',
-                        text: 'Purchase Detail Id',
                         hidden: true
                     },
                     {
                         dataIndex: 'intItemId',
                         dataType: 'numeric',
-                        text: 'Purchase Detail Id',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intLocationId',
+                        dataType: 'numeric',
                         hidden: true
                     },
                     {
                         dataIndex: 'intUnitOfMeasureId',
                         dataType: 'numeric',
-                        text: 'Purchase Detail Id',
                         hidden: true
                     },
                     {
                         dataIndex: 'strUOM',
                         dataType: 'string',
-                        text: 'Unit of Measure',
                         hidden: true
                     },
                     {
                         dataIndex: 'strLotTracking',
                         dataType: 'string',
-                        text: 'Lot Tracking',
                         hidden: true
                     },
                     {
                         dataIndex: 'intStorageLocationId',
                         dataType: 'numeric',
-                        text: 'Storage Location Id',
                         hidden: true
                     },
                     {
                         dataIndex: 'intSubLocationId',
                         dataType: 'numeric',
-                        text: 'Sub Location Id',
                         hidden: true
                     },
                     {
                         dataIndex: 'strSubLocationName',
                         dataType: 'string',
-                        text: 'Sub Location Name',
                         hidden: true
                     },
                     {
                         dataIndex: 'strStorageName',
                         dataType: 'string',
-                        text: 'Storage Location Name',
                         hidden: true
                     },
                     {
                         dataIndex: 'dblItemUOMCF',
                         dataType: 'float',
-                        text: 'Unit Qty',
                         hidden: true
                     },
                     {
                         dataIndex: 'intStockUOM',
                         dataType: 'numeric',
-                        text: 'Stock UOM Id',
                         hidden: true
                     },
                     {
                         dataIndex: 'strStockUOM',
                         dataType: 'string',
-                        text: 'Stock UOM',
                         hidden: true
                     },
                     {
                         dataIndex: 'strStockUOMType',
                         dataType: 'string',
-                        text: 'Stock UOM Type',
                         hidden: true
                     },
                     {
                         dataIndex: 'dblStockUOMCF',
                         dataType: 'float',
-                        text: 'Stock UOM Conversion Factor',
                         hidden: true
                     }
                 ],
@@ -1854,6 +1841,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 },{
                     column: 'intEntityVendorId',
                     value: win.viewModel.data.current.get('intEntityVendorId'),
+                    conjunction: 'and'
+                },{
+                    column: 'intLocationId',
+                    value: win.viewModel.data.current.get('intLocationId'),
                     conjunction: 'and'
                 }]
             })
@@ -1962,6 +1953,14 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 },{
                     column: 'intEntityId',
                     value: win.viewModel.data.current.get('intEntityVendorId'),
+                    conjunction: 'and'
+                },{
+                    column: 'ysnAllowedToShow',
+                    value: true,
+                    conjunction: 'and'
+                },{
+                    column: 'intCompanyLocationId',
+                    value: win.viewModel.data.current.get('intLocationId'),
                     conjunction: 'and'
                 }]
             })
