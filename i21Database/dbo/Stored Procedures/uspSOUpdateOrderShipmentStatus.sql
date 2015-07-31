@@ -137,6 +137,13 @@ IF (@TotalQtyShipped < @TotalQtyOrdered)
 SET @OrderStatus = 'Closed'
 		
 SET_ORDER_STATUS:
+	IF (@OrderStatus <> 'Open')
+	BEGIN
+		UPDATE tblSOSalesOrder
+		SET ysnProcessed = 1
+		WHERE [intSalesOrderId] = @SalesOrderId
+	END
+
 	UPDATE tblSOSalesOrder
 	SET [strOrderStatus] = @OrderStatus
 	WHERE [intSalesOrderId] = @SalesOrderId
