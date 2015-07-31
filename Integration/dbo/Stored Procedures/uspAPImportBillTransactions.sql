@@ -192,9 +192,9 @@ BEGIN
 				[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.apivc_user_id)),@UserId),
 				[ysnPosted]				=	1,
 				[ysnPaid]				=	CASE WHEN A.apivc_status_ind = ''P'' THEN 1 ELSE 0 END,
-				[intTransactionType]	=	CASE WHEN A.apivc_trans_type = ''I'' AND A.apivc_orig_amt > 0 THEN 1
+				[intTransactionType]	=	CASE WHEN A.apivc_trans_type = ''I'' THEN 1
 												WHEN A.apivc_trans_type = ''A'' THEN 2
-												WHEN A.apivc_trans_type = ''C'' OR A.apivc_orig_amt < 0 THEN 3
+												WHEN A.apivc_trans_type = ''C'' THEN 3
 												ELSE 0 END,
 				[dblDiscount]			=	A.apivc_disc_avail,
 				[dblWithheld]			=	A.apivc_wthhld_amt,
@@ -272,12 +272,14 @@ BEGIN
 					ORDER BY C.aphgl_dist_no
 			--Create Bill Batch transaction
 			--SELECT @totalBills = COUNT(*) FROM #InsertedData
+			--SELECT * FROM tblAPBill
 
 			WHILE((SELECT TOP 1 1 FROM #InsertedData) IS NOT NULL)
 			BEGIN
 
 				SELECT TOP 1 @BillId = intBillId, @IsPosted = ysnPosted, @IsPaid = ysnPaid, @type = intTransactionType FROM #InsertedData
 
+				
 				INSERT INTO tblAPBillBatch(intAccountId, ysnPosted, dblTotal, intEntityId, dtmBatchDate)
 				--OUTPUT inserted.intBillBatchId, @BillId INTO @insertedBillBatch
 				SELECT 
@@ -297,16 +299,20 @@ BEGIN
 					EXEC uspSMGetStartingNumber 18, @GeneratedBillId OUT
 				ELSE IF @type = 2
 					EXEC uspSMGetStartingNumber 20, @GeneratedBillId OUT
+				ELSE
+					EXEC uspSMGetStartingNumber 9, @GeneratedBillId OUT
 
 				--UPDATE billbatch of Bill
 				UPDATE tblAPBill
 					SET intBillBatchId = @BillBatchId, strBillId = @GeneratedBillId
 				FROM tblAPBill
 				WHERE intBillId = @BillId
+				
 
 				DELETE FROM #InsertedData WHERE intBillId = @BillId
 			END;
 
+			--SELECT * FROM tblAPBill
 			--CREATE PAYMENT
 
 			CREATE TABLE #tmpBillsPayment
