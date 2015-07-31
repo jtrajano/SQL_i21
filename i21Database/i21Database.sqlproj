@@ -2123,6 +2123,7 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateContractOnInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleApprove.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetCustomerSpecialPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMSampleReject.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
