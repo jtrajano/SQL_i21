@@ -15,12 +15,7 @@ SELECT
 	 END AS strTransactionType 
 	,strBillId = APB.strBillId
 	,strInvoiceNumber = strVendorOrderNumber
-	,CASE WHEN APB.intTransactionType IN (2,3) THEN (CASE WHEN APB.dblTotal > 0  
-												        THEN ISNULL(APB.dblTotal * -1,0) 
-														ELSE ISNULL(APB.dblTotal,0) 
-												     END)
-	 ELSE ISNULL(APB.dblTotal,0) 
-	 END AS dblTotal
+	,dblTotal = (CASE WHEN APB.intTransactionType != 1 AND APB.dblTotal > 0 THEN APB.dblTotal * -1 ELSE APB.dblTotal END)
 	,dblDiscount = ISNULL(Payments.dblDiscount,0)
 	,dblWithheld = ISNULL(Payments.dblWithheld,0)
 	,dblInterest = ISNULL(Payments.dblInterest,0)
@@ -28,12 +23,8 @@ SELECT
 	,APB.ysnPaid
 	,strVendorOrderNumber
 	,APB.strReference
-	,dblAmountDue = CASE WHEN APB.intTransactionType IN (2,3) THEN (CASE WHEN APB.dblTotal > 0  
-																	   THEN ISNULL(APB.dblTotal * -1,0) 
-																	   ELSE ISNULL(APB.dblTotal,0) 
-																    END)
-					ELSE ISNULL(APB.dblTotal,0) 
-					END - ((Payments.dblPayment + Payments.dblDiscount) - Payments.dblInterest)
+	,dblAmountDue = (CASE WHEN APB.intTransactionType != 1 AND APB.dblTotal > 0  THEN APB.dblTotal * -1 ELSE APB.dblTotal END) -
+					ISNULL(((Payments.dblPayment + Payments.dblDiscount) - Payments.dblInterest),0)
 FROM dbo.tblAPBill APB
 LEFT JOIN dbo.tblAPVendor APV
 	ON APV.[intEntityVendorId] = APB.[intEntityVendorId]
@@ -43,13 +34,15 @@ OUTER APPLY
 (
 	SELECT
 		APPD.intBillId
-		,SUM(APPD.dblPayment) dblPayment
+		,SUM(CASE WHEN APB2.intTransactionType != 1 AND APPD.dblPayment > 0 THEN APPD.dblPayment * -1 ELSE APPD.dblPayment END) dblPayment
 		,SUM(APPD.dblDiscount) dblDiscount
 		,SUM(APPD.dblInterest) dblInterest
 		,SUM(APPD.dblWithheld) dblWithheld
 	FROM dbo.tblAPPayment APP
 		INNER JOIN dbo.tblAPPaymentDetail APPD
 			ON APP.intPaymentId = APPD.intPaymentId
+		INNER JOIN dbo.tblAPBill APB2
+			ON APB2.intBillId = APPD.intBillId
 	WHERE APP.ysnPosted = 1 AND APB.intBillId = APPD.intBillId
 	GROUP BY APPD.intBillId
 ) Payments
