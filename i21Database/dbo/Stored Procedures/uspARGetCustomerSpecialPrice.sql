@@ -209,7 +209,12 @@ AS
 										THEN ISNULL(TRRACK.dblJobberRack, 0.00)
 								END) + dblDeviation
 					WHEN strPriceBasis = 'L'
-						THEN dblDeviation
+						THEN (CASE
+									WHEN strCostToUse = 'Vendor'
+										THEN ISNULL(RACK.dblVendorRack, 0.00)
+									WHEN strCostToUse = 'Jobber'
+										THEN ISNULL(RACK.dblJobberRack, 0.00)
+								END) + dblDeviation
 					WHEN strPriceBasis = 'O'
 						THEN dblDeviation
 				END)
