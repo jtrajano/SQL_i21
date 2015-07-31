@@ -10,7 +10,37 @@ AS
 			l.dblWeightPerQty,        
 			l.strVendorLotNo,        
           
-			i.intItemId,         
+			l.intItemId,
+			l.intLocationId,
+			l.intItemLocationId,
+			l.intItemUOMId,
+			l.intSubLocationId,
+			l.intStorageLocationId,
+			l.intLotStatusId,
+			l.intParentLotId,
+			l.intSplitFromLotId,
+			l.dblWeight,
+			l.intWeightUOMId,
+			l.intOriginId,
+			l.strBOLNo,
+			l.strVessel,
+			l.strReceiptNumber,
+			l.strMarkings,
+			l.strNotes,
+			l.intEntityVendorId,
+			l.intVendorLocationId,
+			l.strVendorLocation,
+			l.strContractNo,
+			l.dtmManufacturedDate,
+			l.ysnReleasedToWarehouse,
+			l.ysnProduced,
+			l.ysnInCustody,
+			l.intOwnershipType,
+			l.intGradeId,
+			l.intCreatedUserId,
+			l.intConcurrencyId,
+
+
 			i.strItemNo,         
 			i.strDescription strItemDescription,         
 			i.strType strItemType,         
@@ -29,7 +59,11 @@ AS
 			cl.intCompanyLocationId,      
 			um1.strUnitMeasure strWeightUOM,
 			pl.strParentLotNumber,
-			c1.strCustomerNumber strOwner
+			c1.strCustomerNumber strOwner,    
+		    '' AS strCurrency,    
+		    '' AS strCostUOM,    
+		    0 AS intContainerId,    
+		    '' AS strContainerNo    
 	FROM tblICLot l
 	LEFT JOIN tblICItem i ON i.intItemId = l.intItemId
 	LEFT JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId
