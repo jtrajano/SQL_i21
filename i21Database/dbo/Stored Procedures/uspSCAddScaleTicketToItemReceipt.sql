@@ -22,6 +22,12 @@ DECLARE @ReceiptType_Direct AS NVARCHAR(100) = 'Direct'
 
 DECLARE @intTicketUOM INT
 DECLARE @intTicketItemUOMId INT
+DECLARE @dblTicketFreightRate AS DECIMAL (9, 5)
+DECLARE @intScaleStationId AS INT
+DECLARE @intFreightItemId AS INT
+DECLARE @intFreightVendorId AS INT
+DECLARE @ysnDeductFreightFarmer AS BIT
+DECLARE @intTicketNumber AS INT
 
 
 BEGIN 
@@ -36,6 +42,13 @@ BEGIN
 		FROM	dbo.tblICItemUOM UM	
 	      JOIN tblSCTicket SC ON SC.intItemId = UM.intItemId  
 	WHERE	UM.intUnitMeasureId =@intTicketUOM AND SC.intTicketId = @intTicketId
+END
+
+BEGIN
+    SELECT TOP 1 @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
+	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight, @intTicketNumber = ST.intTicketNumber
+	FROM dbo.tblSCTicket ST WHERE
+	ST.intTicketId = @intTicketId
 END
 
 -- Get the transaction id 
@@ -206,7 +219,7 @@ SELECT	@InventoryReceiptId,
 		SC.intItemId,
 		0,
 		SC.strCostMethod,
-		SC.dblRate,
+		SUM(SC.dblRate),
 		SC.intItemUOMId,
 		SC.intEntityVendorId,
 		NULL,
@@ -222,6 +235,53 @@ BY		SC.intItemId,
 		SC.strCostMethod,
 		SC.dblRate,
 		SC.intItemUOMId
+
+IF @dblTicketFreightRate > 0
+BEGIN
+SELECT	@intFreightItemId = ST.intFreightItemId
+FROM	dbo.tblSCScaleSetup ST	        
+WHERE	ST.intScaleSetupId = @intScaleStationId
+IF @intFreightItemId IS NULL 
+BEGIN 
+	-- Raise the error:
+	RAISERROR('Invalid Default Freight Item in Scale Setup - uspSCProcessToItemReceipt', 16, 1);
+	RETURN;
+END
+INSERT INTO tblICInventoryReceiptCharge
+(
+		intInventoryReceiptId,
+		intChargeId,
+		ysnInventoryCost,
+		strCostMethod,
+		dblRate,
+		intCostUOMId,
+		intEntityVendorId,
+		dblAmount,
+		strAllocateCostBy,
+		strCostBilledBy,
+		intSort,
+		intConcurrencyId
+)
+SELECT	@InventoryReceiptId, 
+		@intFreightItemId,
+		0,
+		'Per Unit',
+		@dblTicketFreightRate,
+		@intTicketItemUOMId,
+		CASE
+		WHEN SS.ysnFarmerPaysFreight = 1 THEN NULL
+		WHEN SS.ysnFarmerPaysFreight = 0 THEN SS.intFreightCarrierId
+		END,
+		NULL,
+		NULL,
+		CASE
+		WHEN SS.ysnFarmerPaysFreight = 1 THEN 'Vendor'
+		WHEN SS.ysnFarmerPaysFreight = 0 THEN 'Third Party'
+		END,
+		NULL,
+		1
+FROM	tblSCTicket SS WHERE SS.intTicketId = @intTicketId
+END
 
 -- Re-update the total cost 
 UPDATE	Receipt
@@ -272,3 +332,93 @@ BEGIN
 	SD.intTicketFileId = @intTicketId  JOIN dbo.tblICInventoryReceipt IRH ON IRH.intInventoryReceiptId = @InventoryReceiptId AND IRH.strReceiptType = 'Scale' WHERE	
 	ISH.intSourceId = @intTicketId AND ISH.intInventoryReceiptId = @InventoryReceiptId AND IRH.strReceiptType = 'Scale'
 END
+
+DECLARE @intLoopReceiptItemId INT;
+DECLARE @LotType_Manual AS INT = 1
+		,@LotType_Serial AS INT = 2
+DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
+FOR
+SELECT  IRI.intInventoryReceiptItemId
+FROM tblICInventoryReceiptItem IRI WHERE 
+IRI.intInventoryReceiptId = @InventoryReceiptId AND dbo.fnGetItemLotType(IRI.intItemId) IN (@LotType_Manual, @LotType_Serial);
+
+OPEN intListCursor;
+
+-- Initial fetch attempt
+FETCH NEXT FROM intListCursor INTO @intLoopReceiptItemId;
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+   -- Here we do some kind of action that requires us to 
+   -- process the table variable row-by-row. This example simply
+   -- uses a PRINT statement as that action (not a very good
+   -- example).
+   IF	ISNULL(@intLoopReceiptItemId,0) != 0
+   BEGIN
+   INSERT INTO [dbo].[tblICInventoryReceiptItemLot]
+           ([intInventoryReceiptItemId]
+           ,[intLotId]
+           ,[strLotNumber]
+           ,[strLotAlias]
+           ,[intSubLocationId]
+           ,[intStorageLocationId]
+           ,[intItemUnitMeasureId]
+           ,[dblQuantity]
+           ,[dblGrossWeight]
+           ,[dblTareWeight]
+           ,[dblCost]
+           ,[intUnitPallet]
+           ,[dblStatedGrossPerUnit]
+           ,[dblStatedTarePerUnit]
+           ,[strContainerNo]
+           ,[intEntityVendorId]
+           ,[intVendorLocationId]
+           ,[strMarkings]
+           ,[intOriginId]
+           ,[intSeasonCropYear]
+           ,[strVendorLotId]
+           ,[dtmManufacturedDate]
+           ,[strRemarks]
+           ,[strCondition]
+           ,[dtmCertified]
+           ,[dtmExpiryDate]
+           ,[intSort]
+           ,[intConcurrencyId])
+     SELECT
+            [intInventoryReceiptItemId] = @intLoopReceiptItemId
+           ,[intLotId] = NULL
+           ,[strLotNumber]  = 'SC-' + CAST(@intTicketNumber  AS VARCHAR(20)) 
+           ,[strLotAlias] = @intTicketNumber 
+           ,[intSubLocationId] = RCT.intSubLocationId
+           ,[intStorageLocationId] = RCT.intStorageLocationId
+           ,[intItemUnitMeasureId] = @intTicketItemUOMId
+           ,[dblQuantity] = RCT.dblReceived
+           ,[dblGrossWeight] = NULL
+           ,[dblTareWeight] = NULL
+           ,[dblCost] = RCT.dblUnitCost
+           ,[intUnitPallet] = NULL
+           ,[dblStatedGrossPerUnit] = NULL
+           ,[dblStatedTarePerUnit] = NULL
+           ,[strContainerNo] = NULL
+           ,[intEntityVendorId] = NULL
+           ,[intVendorLocationId] = NULL
+           ,[strMarkings] = NULL 
+           ,[intOriginId] = NULL
+           ,[intSeasonCropYear] = NULL
+           ,[strVendorLotId] = NULL
+           ,[dtmManufacturedDate] = NULL
+           ,[strRemarks] = NULL
+           ,[strCondition] = NULL
+           ,[dtmCertified] = NULL
+           ,[dtmExpiryDate] = NULL
+           ,[intSort] = NULL
+           ,[intConcurrencyId] = 1
+		   FROM	dbo.tblICInventoryReceiptItem RCT WHERE RCT.intInventoryReceiptItemId = @intLoopReceiptItemId
+   END
+
+   -- Attempt to fetch next row from cursor
+   FETCH NEXT FROM intListCursor INTO @intLoopReceiptItemId;
+END;
+
+CLOSE intListCursor;
+DEALLOCATE intListCursor;
