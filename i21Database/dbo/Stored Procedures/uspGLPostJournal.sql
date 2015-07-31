@@ -87,7 +87,7 @@ IF ISNULL(@ysnPost, 0) = 0
 						JOIN tblGLAccountCategory C
 						ON B.intAccountCategoryId = C.intAccountCategoryId
 						WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)	
-						AND C.strAccountCategory != 'General'
+						AND C.strAccountCategory != 'General' AND @strJournalType NOT IN('Origin Journal','Adjusted Origin Journal')
 						GROUP BY A.intJournalId	
 
 					) tmpBatchResults
