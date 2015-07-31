@@ -106,6 +106,10 @@ BEGIN
 	SET @dblNewCost = ABS(@dblNewCost)
 	SET @dblNewUnitCost = ABS(@dblNewCost) / @dblQty
 
+	DECLARE @dblCostPerLB NUMERIC(18,6)
+
+	SELECT @dblCostPerLB=dbo.fnCalculateUnitCost(@dblNewUnitCost,@dblUnitQty)
+
 	CREATE TABLE #GeneratedLotItems (
 		intLotId INT
 		,strLotNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
@@ -213,27 +217,28 @@ BEGIN
 		)
 	SELECT intItemId = @intItemId
 		,intItemLocationId = @intItemLocationId
-		,intItemUOMId = @intItemUOMId
+		,intItemUOMId = @intWeightUOMId
 		,dtmDate = @dtmPlannedDate
-		,dblQty = @dblQty
-		,dblUOMQty = CASE 
-			WHEN (@intWeightUOMId = @intItemUOMId)
-				THEN (
-						SELECT 1
-						)
-			ELSE (
-					CASE 
-						WHEN @dblUnitQty IS NOT NULL
-							THEN @dblUnitQty
-						ELSE (
-								SELECT TOP 1 dblUnitQty
-								FROM dbo.tblICItemUOM
-								WHERE intItemUOMId = @intItemUOMId
-								)
-						END
-					)
-			END
-		,dblCost = @dblNewUnitCost
+		,dblQty = @dblWeight
+		--,dblUOMQty = CASE 
+		--	WHEN (@intWeightUOMId = @intItemUOMId)
+		--		THEN (
+		--				SELECT 1
+		--				)
+		--	ELSE (
+		--			CASE 
+		--				WHEN @dblUnitQty IS NOT NULL
+		--					THEN @dblUnitQty
+		--				ELSE (
+		--						SELECT TOP 1 dblUnitQty
+		--						FROM dbo.tblICItemUOM
+		--						WHERE intItemUOMId = @intItemUOMId
+		--						)
+		--				END
+		--			)
+		--	END
+		,dblUOMQty=1
+		,dblCost = @dblCostPerLB
 		,dblSalesPrice = 0
 		,intCurrencyId = NULL
 		,dblExchangeRate = 1
