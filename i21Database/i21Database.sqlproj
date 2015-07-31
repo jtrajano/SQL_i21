@@ -2122,6 +2122,7 @@
     <Build Include="dbo\Stored Procedures\uspCTInvoicePosted.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateContractOnInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleApprove.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetCustomerSpecialPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
