@@ -159,6 +159,7 @@
     <Folder Include="Scripts\Utility" />
     <Folder Include="Scripts\Utility\IC" />
     <Folder Include="Scripts\Utility\IC\IC-1024" />
+    <Folder Include="Scripts\Utility\IC\IC-1090" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -1701,6 +1702,7 @@
     <Build Include="dbo\Stored Procedures\uspSOShipped.sql" />
     <None Include="Scripts\Utility\IC\IC-1090\Fix the On Hand Qty.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateSOStatusFromInvoice.sql" />
+    <None Include="Scripts\Utility\IC\IC-1024\Fix the item average cost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

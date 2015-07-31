@@ -2,7 +2,8 @@
 -- The purpose of this view is to retrieve the G/L and amount associated to the Deposit Entry from origin. 
 -- Records from this view will be used as detail items in the Bank Deposit. 
 
-IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
+IF (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1 and
+	(SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'apeglmst') = 1
 BEGIN
 	EXEC ('
 		IF OBJECT_ID(''vyuCMOriginUndepositedFund'', ''V'') IS NOT NULL 

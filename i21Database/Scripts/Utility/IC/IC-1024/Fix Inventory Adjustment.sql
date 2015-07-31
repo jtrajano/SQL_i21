@@ -19,113 +19,107 @@ FROM	tblGLFiscalYearPeriod
 UPDATE tblGLFiscalYearPeriod
 SET ysnOpen = 1
 
-------------------------------------------------------------------------------------------------------------------------------------
--- Unpost all the inventory adjustments
-------------------------------------------------------------------------------------------------------------------------------------
+GO
 
-DECLARE @intInventoryAdjustmentId AS INT
-		,@strAdjustmentNo AS NVARCHAR(50)
-		,@intEntityId AS INT 
+BEGIN TRY 
+	BEGIN TRANSACTION
 
-DECLARE loopAdjustment CURSOR LOCAL FAST_FORWARD
-FOR 
-SELECT	intInventoryAdjustmentId
-		,strAdjustmentNo
-		,intEntityId
-FROM	dbo.tblICInventoryAdjustment
-WHERE	ysnPosted = 1
-ORDER BY dtmPostedDate DESC 
+	DECLARE @intInventoryAdjustmentId AS INT
+			,@strAdjustmentNo AS NVARCHAR(50)
+			,@intEntityId AS INT 
+			,@ysnPosted AS BIT
+			,@dtmUnpostedDate AS DATETIME 
+
+	DECLARE loopAdjustment CURSOR LOCAL FAST_FORWARD
+	FOR 
+	SELECT	intInventoryAdjustmentId
+			,strAdjustmentNo
+			,intEntityId
+			,ysnPosted
+			,dtmUnpostedDate
+	FROM	dbo.tblICInventoryAdjustment
+	WHERE	ysnPosted = 1
+			OR dbo.fnRemoveTimeOnDate(dtmUnpostedDate) = CAST('2015-07-23' AS DATETIME)
+	ORDER BY dtmPostedDate DESC 
 		
-OPEN loopAdjustment;
+	OPEN loopAdjustment;
 
--- Initial fetch attempt
-FETCH NEXT FROM loopAdjustment INTO 
-		@intInventoryAdjustmentId	
-		,@strAdjustmentNo
-		,@intEntityId
-;
+	-- Initial fetch attempt
+	FETCH NEXT FROM loopAdjustment INTO 
+			@intInventoryAdjustmentId	
+			,@strAdjustmentNo
+			,@intEntityId
+			,@ysnPosted
+			,@dtmUnpostedDate
+	;
 
-WHILE @@FETCH_STATUS = 0
-BEGIN
-	
-	BEGIN 
-		EXEC dbo.uspICPostInventoryAdjustment  
-			@ysnPost = 0
-			,@ysnRecap = 0  
-			,@strTransactionId = @strAdjustmentNo
-			,@intUserId = @intEntityId
-			,@intEntityId = @intEntityId
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+		PRINT 'Processing ' + @strAdjustmentNo
+
+
+		-- Unpost 
+		IF ISNULL(@ysnPosted, 0) = 1
+		BEGIN 
+			PRINT 'Unposting ' + @strAdjustmentNo
+
+			EXEC dbo.uspICPostInventoryAdjustment  
+				@ysnPost = 0
+				,@ysnRecap = 0  
+				,@strTransactionId = @strAdjustmentNo
+				,@intUserId = @intEntityId
+				,@intEntityId = @intEntityId
+
+			IF @@ERROR <> 0
+				PRINT ERROR_MESSAGE()  
+		END 
+
+		-- Repost 
+		BEGIN 
+			PRINT 'Reposting ' + @strAdjustmentNo
+
+			-- Update the original costs in the adjustment detail. 
+			UPDATE	AdjDetail
+			SET		AdjDetail.dblCost = Lot.dblLastCost
+			FROM	dbo.tblICInventoryAdjustmentDetail AdjDetail INNER JOIN dbo.tblICLot Lot
+						ON AdjDetail.intLotId = Lot.intLotId
+			WHERE	AdjDetail.intInventoryAdjustmentId = @intInventoryAdjustmentId
+
+			-- Repost all the inventory adjustments 
+			EXEC dbo.uspICPostInventoryAdjustment  
+				@ysnPost = 1
+				,@ysnRecap = 0  
+				,@strTransactionId = @strAdjustmentNo
+				,@intUserId = @intEntityId
+				,@intEntityId = @intEntityId
+
+			IF @@ERROR <> 0
+				PRINT ERROR_MESSAGE()  
+		END 
+
+		FETCH NEXT FROM loopAdjustment INTO 
+			@intInventoryAdjustmentId	
+			,@strAdjustmentNo
+			,@intEntityId
+			,@ysnPosted
+			,@dtmUnpostedDate
+		;
 	END 
 
-	FETCH NEXT FROM loopAdjustment INTO 
-		@intInventoryAdjustmentId	
-		,@strAdjustmentNo
-		,@intEntityId
-	;
-END 
+	CLOSE loopAdjustment;
+	DEALLOCATE loopAdjustment;
 
-CLOSE loopAdjustment;
-DEALLOCATE loopAdjustment;
+	COMMIT TRANSACTION 
+END TRY 
+BEGIN CATCH 
 
-GO 
-
-------------------------------------------------------------------------------------------------------------------------------------
--- Re-post all the inventory adjustments
-------------------------------------------------------------------------------------------------------------------------------------
-
-DECLARE @intInventoryAdjustmentId AS INT
-		,@strAdjustmentNo AS NVARCHAR(50)
-		,@intEntityId AS INT 
-
-DECLARE loopAdjustment CURSOR LOCAL FAST_FORWARD
-FOR 
-SELECT	intInventoryAdjustmentId
-		,strAdjustmentNo
-		,intEntityId
-FROM	dbo.tblICInventoryAdjustment
-WHERE	ysnPosted = 1
-ORDER BY dtmPostedDate ASC 
-		
-OPEN loopAdjustment;
-
--- Initial fetch attempt
-FETCH NEXT FROM loopAdjustment INTO 
-		@intInventoryAdjustmentId	
-		,@strAdjustmentNo
-		,@intEntityId
-;
-
-WHILE @@FETCH_STATUS = 0
-BEGIN
+	PRINT 'Error found in ' + @strAdjustmentNo
+	PRINT ERROR_MESSAGE()           
 	
-	BEGIN 
-		-- Update the original costs in the adjustment detail. 
-		UPDATE	AdjDetail
-		SET		AdjDetail.dblCost = Lot.dblLastCost
-		FROM	dbo.tblICInventoryAdjustmentDetail AdjDetail INNER JOIN dbo.tblICLot Lot
-					ON AdjDetail.intLotId = Lot.intLotId
-		WHERE	AdjDetail.intInventoryAdjustmentId = @intInventoryAdjustmentId
+	ROLLBACK TRANSACTION 
+END CATCH 
 
-		-- Repost all the inventory adjustments 
-		EXEC dbo.uspICPostInventoryAdjustment  
-			@ysnPost = 1
-			,@ysnRecap = 0  
-			,@strTransactionId = @strAdjustmentNo
-			,@intUserId = @intEntityId
-			,@intEntityId = @intEntityId
-	END 
-
-	FETCH NEXT FROM loopAdjustment INTO 
-		@intInventoryAdjustmentId	
-		,@strAdjustmentNo
-		,@intEntityId
-	;
-END 
-
-CLOSE loopAdjustment;
-DEALLOCATE loopAdjustment;
-
-GO 
+GO
 
 ------------------------------------------------------------------------------------------------------------------------------------
 -- Re-close the fiscal year periods

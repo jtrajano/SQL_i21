@@ -1,4 +1,4 @@
-﻿/*
+/*
 	CAUTION: Execute this stored procedure with extreme care.
 
 	This is a utility stored procedure used to fix the stock quantities. 
@@ -8,6 +8,10 @@
 	07/08/2015:		Re-calculate the On-Hand Qty. 
 
 */
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE name = 'uspICFixStockQuantities' AND type = 'P')
+	DROP PROCEDURE [dbo].[uspICFixStockQuantities]
+
+GO
 CREATE PROCEDURE [dbo].[uspICFixStockQuantities]
 AS
 
@@ -459,3 +463,6 @@ WHEN NOT MATCHED AND RawStockData.intItemUOMId IS NOT NULL THEN
 		,1	
 	)
 ;
+GO
+
+EXEC [dbo].[uspICFixStockQuantities]

@@ -15,7 +15,7 @@ SELECT
 	END AS strTransactionType 
 	,strBillId = A.strBillId
 	,strInvoiceNumber = strVendorOrderNumber
-	,dblTotal = ISNULL(A.dblTotal,0)
+	,dblTotal = (CASE WHEN A.intTransactionType != 1 AND A.dblTotal > 0 THEN A.dblTotal * -1 ELSE A.dblTotal END)
 	,dblDiscount = ISNULL(Payments.dblDiscount,0)
 	,dblWithheld = ISNULL(Payments.dblWithheld,0)
 	,dblInterest = ISNULL(Payments.dblInterest,0)
@@ -23,7 +23,8 @@ SELECT
 	,A.ysnPaid
 	,strVendorOrderNumber
 	,A.strReference
-	,dblAmountDue = A.dblTotal - ((Payments.dblPayment + Payments.dblDiscount) - Payments.dblInterest)
+	,dblAmountDue = (CASE WHEN A.intTransactionType != 1 AND A.dblTotal > 0 THEN A.dblTotal * -1 ELSE A.dblTotal END) - 
+				ISNULL(((Payments.dblPayment + Payments.dblDiscount) - Payments.dblInterest),0)
 FROM dbo.tblAPBill A
 LEFT JOIN dbo.tblAPVendor
 	ON tblAPVendor.[intEntityVendorId] = A.[intEntityVendorId]
@@ -31,13 +32,16 @@ OUTER APPLY
 (
 	SELECT
 		C.intBillId
-		,SUM(C.dblPayment) dblPayment
+		,SUM(CASE WHEN D.intTransactionType != 1 AND C.dblPayment > 0 THEN C.dblPayment * -1 ELSE C.dblPayment END) dblPayment
 		,SUM(C.dblDiscount) dblDiscount
 		,SUM(C.dblInterest) dblInterest
 		,SUM(C.dblWithheld) dblWithheld
 	FROM dbo.tblAPPayment B
 		INNER JOIN dbo.tblAPPaymentDetail C
 			ON B.intPaymentId = C.intPaymentId
-	WHERE B.ysnPosted = 1 AND A.intBillId = C.intBillId
+		INNER JOIN dbo.tblAPBill D
+			ON C.intBillId = D.intBillId
+	WHERE B.ysnPosted = 1 
+	AND A.intBillId = C.intBillId
 	GROUP BY C.intBillId
 ) Payments
