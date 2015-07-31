@@ -39,16 +39,22 @@ BEGIN TRY
 		,strComments
 		,strSourceId	
 		,intSourceId
-		,strPurchaseOrder		 	
+		,strPurchaseOrder	
+		,strDeliverPickup	 	
 	 )	 
 	 select     
        DH.intEntityCustomerId,     
 	   DH.intCompanyLocationId,
        DD.intItemId,	  
-	   intItemUOMId = (SELECT	TOP 1 
-										IU.intItemUOMId		
-										FROM	dbo.tblICItemUOM IU
-										WHERE	IU.intItemId = DD.intItemId ), -- Need to add the Gallons UOM from Company Preference	   
+	   intItemUOMId = CASE
+                            WHEN DD.intContractDetailId is NULL  
+	                           THEN (SELECT	TOP 1 
+										IU.intItemUOMId											
+										FROM dbo.tblICItemUOM IU 
+										WHERE	IU.intItemId = DD.intItemId and IU.ysnStockUnit = 1)
+							WHEN DD.intContractDetailId is NOT NULL 
+							   THEN	(select intItemUOMId from vyuCTContractDetailView CT where CT.intContractDetailId = DD.intContractDetailId)
+							   END, 	   
 	   DH.dtmInvoiceDateTime,
 	   DD.intContractDetailId,	   
 	   TL.intShipViaId,	  
@@ -66,7 +72,8 @@ BEGIN TRY
 	   DH.strComments,
 	   TL.strTransaction,
 	   DH.intDistributionHeaderId,
-	   DH.strPurchaseOrder   
+	   DH.strPurchaseOrder,
+	   'Deliver'   
 	   from tblTRTransportLoad TL
             JOIN tblTRTransportReceipt TR on TR.intTransportLoadId = TL.intTransportLoadId
 			JOIN tblTRDistributionHeader DH on DH.intTransportReceiptId = TR.intTransportReceiptId

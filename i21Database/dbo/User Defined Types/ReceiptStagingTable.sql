@@ -32,4 +32,5 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	-- Detail Lot
 	,[intLotId] INT NULL									-- Place holder field for lot numbers	
 	,[dblFreightRate] DECIMAL(18, 6) NULL DEFAULT 0         -- Freight Rate 
+	,[intSourceType] int NULL                               -- for Transports its 3
 )

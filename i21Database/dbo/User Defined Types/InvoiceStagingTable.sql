@@ -21,4 +21,5 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[strSourceId] NVARCHAR (250)  COLLATE Latin1_General_CI_AS NOT NULL -- Source Transaction Number of the Originated Transaction
     ,[intSourceId] INT NOT NULL						                     -- Key Value of the source Id
     ,[strPurchaseOrder] NVARCHAR (25)  COLLATE Latin1_General_CI_AS  NULL -- Purchase Order Number
+	,[strDeliverPickup] nvarchar(50) COLLATE Latin1_General_CI_AS  NULL --Pickup or Deliver
 )

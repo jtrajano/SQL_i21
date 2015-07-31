@@ -43,7 +43,8 @@ BEGIN TRY
 	 	,intStorageLocationId
 	 	,ysnIsCustody
 	 	,dblFreightRate
-		,intSourceId			 	
+		,intSourceId	
+		,intSourceType		 	
 	 )	
       select strReceiptType = CASE
                             WHEN TR.intContractDetailId IS NULL
@@ -56,10 +57,15 @@ BEGIN TRY
 	   TR.intCompanyLocationId,
        TR.intItemId,
 	   TR.intCompanyLocationId,
-	   intItemUOMId = (SELECT	TOP 1 
-										IU.intItemUOMId		
-										FROM	dbo.tblICItemUOM IU
-										WHERE	IU.intItemId = TR.intItemId ), -- Need to add the Gallons UOM from Company Preference	   
+	   intItemUOMId =CASE
+                            WHEN TR.intContractDetailId is NULL  
+	                           THEN (SELECT	TOP 1 
+										IU.intItemUOMId											
+										FROM dbo.tblICItemUOM IU 
+										WHERE	IU.intItemId = TR.intItemId and IU.ysnStockUnit = 1)
+							WHEN TR.intContractDetailId is NOT NULL 
+							   THEN	(select intItemUOMId from vyuCTContractDetailView CT where CT.intContractDetailId = TR.intContractDetailId)
+							   END,-- Need to add the Gallons UOM from Company Preference	   
 	   TR.strBillOfLadding,
 	   TR.intContractDetailId,
 	   TL.dtmLoadDateTime,
@@ -83,7 +89,8 @@ BEGIN TRY
 	   NULL, -- No Storage Location from transport
 	   0,-- No Custody from transports
 	   TR.dblFreightRate,
-	   TR.intTransportReceiptId	   
+	   TR.intTransportReceiptId,	  
+	   3 -- Source type for transports is 3 
 	   from tblTRTransportLoad TL
             JOIN tblTRTransportReceipt TR on TR.intTransportLoadId = TL.intTransportLoadId
 			LEFT JOIN tblTRSupplyPoint SP on SP.intSupplyPointId = TR.intSupplyPointId

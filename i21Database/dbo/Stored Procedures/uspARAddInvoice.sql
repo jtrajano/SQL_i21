@@ -129,7 +129,8 @@ INSERT INTO
 		,[strBillToCountry]
 		,[intDistributionHeaderId]
 		,[intConcurrencyId]
-		,[intEntityId])
+		,[intEntityId]
+		,[strDeliverPickup])
 SELECT
      TE.InvoiceNumber           -- invoice number
 	,IE.strSourceId				--[strInvoiceOriginId]
@@ -174,6 +175,7 @@ SELECT
 	,IE.intSourceId
 	,1
 	,@EntityId
+	,IE.strDeliverPickup
 FROM
 	@InvoiceEntries IE
 	Join @temp TE
@@ -202,7 +204,7 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	tblEntityLocation BL
 		ON AC.intShipToId = BL.intEntityLocationId	
-group by TE.InvoiceNumber,IE.intEntityCustomerId,IE.intLocationId,IE.strSourceId,IE.dtmDate,IE.intCurrencyId,IE.intSalesPersonId,IE.intShipViaId,IE.strComments,EL.intTermsId,IE.strPurchaseOrder,IE.intSourceId;				
+group by TE.InvoiceNumber,IE.intEntityCustomerId,IE.intLocationId,IE.strSourceId,IE.dtmDate,IE.intCurrencyId,IE.intSalesPersonId,IE.intShipViaId,IE.strComments,EL.intTermsId,IE.strPurchaseOrder,IE.intSourceId,IE.strDeliverPickup;				
 
 
 ENABLE TRIGGER dbo.trgInvoiceNumber ON dbo.tblARInvoice;
@@ -220,15 +222,14 @@ INSERT INTO [tblARInvoiceDetail]
 	,[intCOGSAccountId]
 	,[intSalesAccountId]
 	,[intInventoryAccountId]
+	,[intContractHeaderId]
+	,[intContractDetailId]
 	,[intConcurrencyId])
 SELECT
 	IV.[intInvoiceId]											--[intInvoiceId]
 	,IE.[intItemId]												--[intItemId]
 	,IC.[strDescription]										--strItemDescription] 
-	,(SELECT	TOP 1 
-										IU.intItemUOMId		
-										FROM	dbo.tblICItemUOM IU
-										WHERE	IU.intItemId = IE.intItemId)	--[intItemUOMId]
+	,IE.intItemUOMId                                            --[intItemUOMId]
 	,IE.dblQty   												--[dblQtyOrdered]
 	,IE.dblQty  												--[dblQtyShipped]
 	,IE.[dblPrice] 												--[dblPrice]
@@ -237,6 +238,8 @@ SELECT
 	,Acct.[intCOGSAccountId]									--[intCOGSAccountId]
 	,Acct.[intSalesAccountId]									--[intSalesAccountId]
 	,Acct.[intInventoryAccountId]								--[intInventoryAccountId]
+	,(select intContractHeaderId from vyuCTContractDetailView CT where CT.intContractDetailId = IE.intContractDetailId)   --[intContractHeaderId]
+	,IE.intContractDetailId                                     --[intContractDetailId]
 	,1															--[intConcurrencyId]
 FROM
     @InvoiceEntries IE
@@ -272,7 +275,7 @@ BEGIN
 	-- need to review this
     UPDATE
 		tblARInvoiceDetail
-		SET [dblTotal]		= ROUND(((isNull([dblPrice],0) )* isNull(([dblQtyShipped]),0) + isNull([dblTotalTax],0)),2)
+		SET [dblTotal]		= ROUND(((isNull([dblPrice],0) )* isNull(([dblQtyShipped]),0) ),2)
 		where intInvoiceId = @InvoiceId
 	
 	UPDATE

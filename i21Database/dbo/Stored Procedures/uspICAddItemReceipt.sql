@@ -23,6 +23,7 @@ DECLARE @DataForReceiptHeader TABLE(
 	,ShipVia INT
 	,ShipFrom INT
 	,Currency INT
+	,intSourceType INT
 	,strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 )
 
@@ -40,6 +41,7 @@ INSERT INTO @DataForReceiptHeader(
 		,ShipVia
 		,ShipFrom
 		,Currency
+		,intSourceType
 )
 SELECT	RawData.intEntityVendorId
 		,RawData.strBillOfLadding
@@ -48,6 +50,7 @@ SELECT	RawData.intEntityVendorId
 		,RawData.intShipViaId
 		,RawData.intShipFromId
 		,RawData.intCurrencyId
+		,RawData.intSourceType
 FROM	@ReceiptEntries RawData
 GROUP BY RawData.intEntityVendorId
 		,RawData.strBillOfLadding
@@ -56,6 +59,7 @@ GROUP BY RawData.intEntityVendorId
 		,RawData.intShipViaId
 		,RawData.intShipFromId
 		,RawData.intCurrencyId
+		,RawData.intSourceType
 ;
 
 -- Validate if there is data to process. If there is no data, then raise an error. 
@@ -98,6 +102,7 @@ BEGIN
 				,dtmReceiptDate
 				,intEntityVendorId
 				,strReceiptType
+				,intSourceType
 				,intBlanketRelease
 				,intLocationId
 				,strVendorRefNo
@@ -130,6 +135,7 @@ BEGIN
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(GETDATE())
 				,intEntityVendorId		= RawData.intEntityVendorId
 				,strReceiptType			= RawData.strReceiptType
+				,intSourceType          = RawData.intSourceType
 				,intBlanketRelease		= NULL
 				,intLocationId			= RawData.intLocationId
 				,strVendorRefNo			= NULL
@@ -198,7 +204,7 @@ BEGIN
 				,intOwnershipType
 		)
 		SELECT	intInventoryReceiptId	= @InventoryReceiptId
-				,intLineNo				= RawData.intContractDetailId
+				,intLineNo				= isNull(RawData.intContractDetailId,0)
 				,intOrderId				= RawData.intContractDetailId
 				,intSourceId			= RawData.intSourceId
 				,intItemId				= RawData.intItemId
