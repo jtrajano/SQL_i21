@@ -804,6 +804,21 @@ Ext.define('Inventory.view.ItemViewModel', {
                 return true;
             }
         },
+        readOnlyCommodity: function (get) {
+            switch (get('current.strType')) {
+                case 'Bundle':
+                case 'Kit':
+                case 'Non-Inventory':
+                case 'Other Charge':
+                case 'Service':
+                    this.data.current.set('intCommodityId', null);
+                    return true;
+                    break;
+                default:
+                    return false;
+                    break;
+            };
+        },
         checkStockTracking: function (get) {
             var isNotStockTracked = false;
 

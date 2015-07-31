@@ -58,6 +58,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 store: '{itemCategory}'
             },
             cboCommodity: {
+                readOnly: '{readOnlyCommodity}',
                 value: '{current.intCommodityId}',
                 store: '{commodity}'
             },
