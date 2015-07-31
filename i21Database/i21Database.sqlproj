@@ -2124,6 +2124,25 @@
     <Build Include="dbo\Stored Procedures\uspQMSampleApprove.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetCustomerSpecialPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleReject.sql" />
+    <Build Include="dbo\Tables\tblMFHolidayType.sql" />
+    <Build Include="dbo\Tables\tblMFHolidayCalendar.sql" />
+    <Build Include="dbo\Tables\tblMFScheduleAttribute.sql" />
+    <Build Include="dbo\Tables\tblMFScheduleRuleType.sql" />
+    <Build Include="dbo\Tables\tblMFScheduleRule.sql" />
+    <Build Include="dbo\Views\vyuMFGetPackType.sql" />
+    <Build Include="dbo\Views\vyuMFGetBlendItem.sql" />
+    <Build Include="dbo\Tables\tblMFScheduleGroup.sql" />
+    <Build Include="dbo\Tables\tblMFScheduleGroupDetail.sql" />
+    <Build Include="dbo\Tables\tblMFScheduleChangeoverFactor.sql" />
+    <Build Include="dbo\Tables\tblMFScheduleChangeoverFactorDetail.sql" />
+    <Build Include="dbo\Tables\tblMFScheduleCalendar.sql" />
+    <Build Include="dbo\Tables\tblMFScheduleCalendarDetail.sql" />
+    <Build Include="dbo\Tables\tblMFScheduleCalendarMachineDetail.sql" />
+    <Build Include="dbo\Tables\tblMFSchedule.sql" />
+    <Build Include="dbo\Tables\tblMFScheduleLine.sql" />
+    <Build Include="dbo\Tables\tblMFScheduleLineDetail.sql" />
+    <Build Include="dbo\Tables\tblMFScheduleMachineDetail.sql" />
+    <Build Include="dbo\Tables\tblMFScheduleConstraintDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

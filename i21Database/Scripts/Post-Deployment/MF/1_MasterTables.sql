@@ -964,3 +964,78 @@ BEGIN
 		)
 END
 GO
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFScheduleAttribute
+		WHERE intScheduleAttributeId = 1
+		)
+BEGIN
+	INSERT INTO tblMFScheduleAttribute (
+		intScheduleAttributeId
+		,strName
+		,strTableName
+		,strColumnName
+		)
+	VALUES (
+		1
+		,'Pack Type Change'
+		,'vyuGetPackType'
+		,'strPackName'
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFScheduleAttribute
+		WHERE intScheduleAttributeId = 1
+		)
+BEGIN
+	INSERT INTO tblMFScheduleAttribute (
+		intScheduleAttributeId
+		,strName
+		,strTableName
+		,strColumnName
+		)
+	VALUES (
+		1
+		,'Blend Change'
+		,'vyuMFGetBlendItem'
+		,'strItemNo'
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFHolidayType
+		WHERE intHolidayTypeId = 1
+		)
+BEGIN
+	INSERT INTO tblMFHolidayType (
+		intHolidayTypeId
+		,strName
+		)
+	VALUES (
+		1
+		,'General/Public'
+		)
+END
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFHolidayType
+		WHERE intHolidayTypeId = 2
+		)
+BEGIN
+	INSERT INTO tblMFHolidayType (
+		intHolidayTypeId
+		,strName
+		)
+	VALUES (
+		2
+		,'Weekly'
+		)
+END
+GO
