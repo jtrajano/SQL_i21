@@ -61,7 +61,7 @@ RIGHT join tblGLAccount B on B.intAccountId = A.intAccountId
 INNER join tblGLAccountGroup C on C.intAccountGroupId = B.intAccountGroupId
 INNER JOIN tblGLTempCOASegment D ON D.intAccountId = B.intAccountId
 OUTER APPLY(
-	SELECT  strReference,strDocument FROM tblGLJournalDetail B JOIN tblGLJournal C
+	SELECT TOP 1 strReference,strDocument FROM tblGLJournalDetail B JOIN tblGLJournal C
 	ON B.intJournalId = C.intJournalId WHERE 
 	 A.intJournalLineNo = B.intLineNo AND
 	 C.intJournalId = A.intTransactionId AND C.strJournalId = A.strTransactionId
@@ -189,7 +189,7 @@ RIGHT JOIN tblGLAccount B on A.intAccountId = B.intAccountId
 INNER JOIN tblGLAccountGroup C on B.intAccountGroupId = C.intAccountGroupId  
 INNER JOIN tblGLTempCOASegment D ON B.intAccountId = D.intAccountId and strCode != ''AA''
 OUTER APPLY(
-	SELECT  strReference,strDocument FROM tblGLJournalDetail B JOIN tblGLJournal C
+	SELECT TOP 1 strReference,strDocument FROM tblGLJournalDetail B JOIN tblGLJournal C
 	ON B.intJournalId = C.intJournalId WHERE 
 	 A.intJournalLineNo = B.intLineNo AND
 	 C.intJournalId = A.intTransactionId AND C.strJournalId = A.strTransactionId
