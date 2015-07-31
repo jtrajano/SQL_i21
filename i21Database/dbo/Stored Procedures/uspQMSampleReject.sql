@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspQMSampleApprove]
+﻿CREATE PROCEDURE [dbo].[uspQMSampleReject]
 	@strXml NVARCHAR(Max)
 AS
 BEGIN TRY
@@ -46,7 +46,7 @@ BEGIN TRY
 
 	UPDATE dbo.tblQMSample
 	SET intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
-		,intSampleStatusId = 3 -- Approved
+		,intSampleStatusId = 4 -- Rejected
 		,intTestedById = x.intLastModifiedUserId
 		,dtmTestedOn = x.dtmLastModified
 		,intLastModifiedUserId = x.intLastModifiedUserId
