@@ -678,3 +678,7 @@ EXEC sp_addmessage 51168,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51169) EXEC sp_dropmessage 51169, 'us_english'	
 SET @strmessage = 'Data not found. Unable to create the Inventory Receipt.'
 EXEC sp_addmessage 51169,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51170) EXEC sp_dropmessage 51170, 'us_english'	
+SET @strmessage = 'This shift configuration is overlapping with existing shifts, cannot be allowed.'
+EXEC sp_addmessage 51170,11,@strmessage,'us_english','False'
