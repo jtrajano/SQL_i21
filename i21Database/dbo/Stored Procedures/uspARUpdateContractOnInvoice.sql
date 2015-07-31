@@ -61,10 +61,6 @@ BEGIN TRY
 	EXEC dbo.[uspARGetItemsFromInvoice]
 			@intInvoiceId = @TransactionId
 
-	-- Change quantity to negative if doing a post. Otherwise, it should be the same value if doing an unpost. 
-	UPDATE @ItemsFromInvoice
-		SET [dblQtyShipped] = [dblQtyShipped] * CASE WHEN @ForDelete = 1 THEN -1 ELSE 1 END 
-
 	DECLARE		@intInvoiceDetailId				INT,
 				@intContractDetailId			INT,
 				@intFromItemUOMId				INT,
@@ -129,20 +125,13 @@ BEGIN TRY
 		SELECT @intToItemUOMId	=	intItemUOMId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 
 		SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblQty)
+		
+		SET @dblConvertedQty = @dblConvertedQty * (CASE WHEN @ForDelete = 1 THEN -1 ELSE 1 END)
 
 		IF ISNULL(@dblConvertedQty,0) = 0
 		BEGIN
 			RAISERROR('UOM does not exist.',16,1)
 		END
-
-		--EXEC	uspCTUpdateSequenceBalance
-		--		@intContractDetailId	=	@intContractDetailId,
-		--		@dblQuantityToUpdate	=	@dblConvertedQty,
-		--		@intUserId				=	@UserId,
-		--		@intExternalId			=	@intInvoiceDetailId,
-		--		@strScreenName			=	'Invoice' 
-
-		--SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
 					
 		EXEC	uspCTUpdateScheduleQuantity
 				@intContractDetailId	=	@intContractDetailId,
