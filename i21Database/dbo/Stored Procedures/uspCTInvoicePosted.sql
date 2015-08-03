@@ -92,11 +92,11 @@ BEGIN TRY
 				@intExternalId			=	@intInvoiceDetailId,
 				@strScreenName			=	'Invoice' 
 
-		--SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
+		SELECT	@dblSchQuantityToUpdate = - @dblConvertedQty
 					
-		--EXEC	uspCTUpdateScheduleQuantity
-		--		@intContractDetailId	=	@intContractDetailId,
-		--		@dblQuantityToUpdate	=	@dblSchQuantityToUpdate
+		EXEC	uspCTUpdateScheduleQuantity
+				@intContractDetailId	=	@intContractDetailId,
+				@dblQuantityToUpdate	=	@dblSchQuantityToUpdate
 
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 	END
