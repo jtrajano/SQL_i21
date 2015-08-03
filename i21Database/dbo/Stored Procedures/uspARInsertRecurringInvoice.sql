@@ -2,15 +2,23 @@
 	@InvoiceId			INT = 0,
 	@UserId				INT = 0
 AS
-	DECLARE @frequency NVARCHAR(25),
-			@startDate DATETIME,
-			@responsibleUser NVARCHAR(100)
+	DECLARE @frequency			NVARCHAR(25),
+			@startDate			DATETIME,
+			@responsibleUser	NVARCHAR(100),
+			@monthsToAdd		INT
 
 	SELECT TOP 1
-		   @frequency = strFrequency
+		   @frequency = CASE WHEN strFrequency IS NULL OR strFrequency = '' THEN 'Monthly' ELSE strFrequency END
 	      ,@startDate = ISNULL(dtmMaintenanceDate, GETDATE())
 		  FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId
-
+	
+	SELECT @monthsToAdd = CASE WHEN @frequency = 'Monthly' THEN 1 
+							   WHEN @frequency = 'Bi-Monthly' THEN 2
+							   WHEN @frequency = 'Quarterly' THEN 4
+							   WHEN @frequency = 'Semi-Annually' THEN 6
+							   WHEN @frequency = 'Annually' THEN 12
+							   ELSE 0
+						  END
 	SELECT @responsibleUser = strName FROM tblEntity WHERE intEntityId = @UserId
 
 	INSERT INTO [tblSMRecurringTransaction]
@@ -34,13 +42,13 @@ AS
 		,[strTransactionType]		             --strTransactionType
 		,@responsibleUser
 		,@frequency					             --strFrequency
-		,@startDate					             --dtmLastProcess
-		,DATEADD(MONTH, 1, @startDate)           --dtmNextProcess
-		,CASE WHEN GETDATE() > [dtmDueDate] 
+		,dtmDate					             --dtmLastProcess
+		,DATEADD(MONTH, @monthsToAdd, dtmDate)   --dtmNextProcess
+		,CASE WHEN dtmDate > dtmDueDate 
 			THEN 1 ELSE 0 END                    --ysnDue
 		,CONVERT(NVARCHAR(2), DAY(@startDate))   --strDayOfMonth
-		,DATEADD(MONTH, 1, @startDate)		     --dtmStartDate
-		,DATEADD(MONTH, 1, @startDate)           --dtmEndDate
+		,@startDate								 --dtmStartDate
+		,DATEADD(MONTH, @monthsToAdd, @startDate)--dtmEndDate
 		,1									     --ysnActive
 		,1									     --intIteration
 		,@UserId							     --intUserId
