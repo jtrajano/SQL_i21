@@ -2139,8 +2139,8 @@
     <Build Include="dbo\Tables\tblMFScheduleCalendarDetail.sql" />
     <Build Include="dbo\Tables\tblMFScheduleCalendarMachineDetail.sql" />
     <Build Include="dbo\Tables\tblMFSchedule.sql" />
-    <Build Include="dbo\Tables\tblMFScheduleLine.sql" />
-    <Build Include="dbo\Tables\tblMFScheduleLineDetail.sql" />
+    <Build Include="dbo\Tables\tblMFScheduleWorkOrder.sql" />
+    <Build Include="dbo\Tables\tblMFScheduleWorkOrderDetail.sql" />
     <Build Include="dbo\Tables\tblMFScheduleMachineDetail.sql" />
     <Build Include="dbo\Tables\tblMFScheduleConstraintDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspTRProcessLoadContracts.sql" />

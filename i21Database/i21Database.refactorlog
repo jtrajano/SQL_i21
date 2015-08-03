@@ -3815,4 +3815,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intConcurrencyId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="03619893-e165-4628-8511-0423f13a4626" ChangeDateTime="08/03/2015 15:54:16">
+    <Property Name="ElementName" Value="[dbo].[tblMFScheduleLine]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblMFScheduleWorkOrder]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="654ad4fd-dace-46e6-92e1-77664148c85a" ChangeDateTime="08/03/2015 15:55:32">
+    <Property Name="ElementName" Value="[dbo].[tblMFScheduleLineDetail]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblMFScheduleWorkOrderDetail]" />
+  </Operation>
 </Operations>

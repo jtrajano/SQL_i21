@@ -1,7 +1,7 @@
 ﻿CREATE TABLE tblMFScheduleCalendar (
 	intCalendarId INT NOT NULL identity(1, 1)
 	,strName NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-	,intManufacturingCell INT
+	,intManufacturingCellId INT
 	,dtmFromDate DATETIME NOT NULL
 	,dtmToDate DATETIME NOT NULL
 	,ysnStandard BIT NOT NULL
@@ -17,5 +17,5 @@
 		,intLocationId
 		)
 	,CONSTRAINT [FK_tblMFScheduleCalendar_tblSMCompanyLocation_intLocationId] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId])
-	,CONSTRAINT [FK_tblMFScheduleCalendar_tblMFManufacturingCell_intManufacturingCellId] FOREIGN KEY (intManufacturingCell) REFERENCES tblMFManufacturingCell(intManufacturingCellId)
+	,CONSTRAINT [FK_tblMFScheduleCalendar_tblMFManufacturingCellId_intManufacturingCellId] FOREIGN KEY (intManufacturingCellId) REFERENCES tblMFManufacturingCell(intManufacturingCellId)
 	)

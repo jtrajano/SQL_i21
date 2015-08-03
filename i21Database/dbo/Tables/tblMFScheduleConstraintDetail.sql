@@ -6,6 +6,6 @@
 	,dtmChangeoverEndDate DATETIME NOT NULL
 	,intDuration INT NOT NULL
 	,CONSTRAINT PK_tblMFScheduleConstraintDetail_intScheduleConstraintDetailId PRIMARY KEY (intScheduleConstraintDetailId)
-	,CONSTRAINT [FK_tblMFScheduleConstraintDetail_tblMFScheduleLine_intScheduleLineId] FOREIGN KEY (intScheduleLineId) REFERENCES tblMFScheduleLine(intScheduleLineId)
+	,CONSTRAINT [FK_tblMFScheduleConstraintDetail_tblMFScheduleLine_intScheduleLineId] FOREIGN KEY (intScheduleLineId) REFERENCES tblMFScheduleWorkOrder(intScheduleWorkOrderId)
 	,CONSTRAINT [FK_tblMFScheduleConstraintDetail_tblMFScheduleRule_intScheduleRuleId] FOREIGN KEY (intScheduleRuleId) REFERENCES tblMFScheduleRule(intScheduleRuleId)
 	)
