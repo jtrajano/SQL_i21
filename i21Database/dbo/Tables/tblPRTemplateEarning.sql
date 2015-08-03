@@ -8,6 +8,7 @@
 	[intAccountId] INT NULL,
 	[strW2Code] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intTemplateTimeOffId] [int] NULL,
+	[intTemplateEarningLinkId] [int] NULL,
 	[ysnDefault] [bit] NOT NULL DEFAULT ((1)),
 	[intSort] [int] NULL,
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
@@ -132,3 +133,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRTemplateEarning',
     @level2type = N'COLUMN',
     @level2name = 'intTemplateEarningId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Linked Template Earning Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTemplateEarning',
+    @level2type = N'COLUMN',
+    @level2name = N'intTemplateEarningLinkId'
