@@ -50,7 +50,7 @@ BEGIN
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intItemUOMId			= C.intUnitOfMeasureId
 			,intSubLocationId		= C.intSubLocationId
-			,dblQty					= B.dblQtyReceived * CASE WHEN @posted = 1 THEN -1 ELSE 1 END -- dbo.fnCalculateQtyBetweenUOM(ReceiptItem.intUnitMeasureId, PODetail.intUnitOfMeasureId, ReceiptItem.dblOpenReceive) 
+			,dblQty					= B.dblQtyReceived * -1 --CASE WHEN @posted = 1 THEN -1 ELSE 1 END -- dbo.fnCalculateQtyBetweenUOM(ReceiptItem.intUnitMeasureId, PODetail.intUnitOfMeasureId, ReceiptItem.dblOpenReceive) 
 			,dblUOMQty				= 1   --1 -- Keep value as one (1). The dblQty is converted manually by using the fnCalculateQtyBetweenUOM function.
 			,intTransactionId		= A.intBillId
 			,intTransactionDetailId = B.intBillDetailId
