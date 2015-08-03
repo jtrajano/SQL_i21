@@ -187,9 +187,9 @@ BEGIN
 END
 PRINT N'END Normalize tblGLDetail Fields'
 
-GO
+--GO
   PRINT N'Begin Update tblGLDetail.strCode based on tblGLJournal.strSourceType'
-GO
+--GO
     UPDATE A
     SET A.strCode = RTRIM (B.strSourceType)
     FROM tblGLDetail A INNER JOIN tblGLJournal B ON A.strTransactionId = B.strJournalId
