@@ -11,8 +11,14 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @StartingNumberId_InventoryReceipt AS INT = 23;
-DECLARE @ReceiptNumber as nvarchar(50);
-Declare @InventoryReceiptId as int;
+DECLARE @ReceiptNumber AS NVARCHAR(50);
+DECLARE @InventoryReceiptId AS INT;
+
+				-- Ownership Types
+DECLARE	@OWNERSHIP_TYPE_Own AS INT = 1
+		,@OWNERSHIP_TYPE_Storage AS INT = 2
+		,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
+		,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
 
 DECLARE @DataForReceiptHeader TABLE(
 	intId INT IDENTITY PRIMARY KEY CLUSTERED
@@ -204,14 +210,14 @@ BEGIN
 				,intOwnershipType
 		)
 		SELECT	intInventoryReceiptId	= @InventoryReceiptId
-				,intLineNo				= isNull(RawData.intContractDetailId,0)
+				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
 				,intOrderId				= RawData.intContractDetailId
 				,intSourceId			= RawData.intSourceId
 				,intItemId				= RawData.intItemId
-				,intSubLocationId		= NUll
-				,dblOrderQty			= RawData.dblQty
-				,dblOpenReceive			= RawData.dblQty
-				,dblReceived			= RawData.dblQty
+				,intSubLocationId		= NULL
+				,dblOrderQty			= ISNULL(RawData.dblQty, 0)
+				,dblOpenReceive			= ISNULL(RawData.dblQty, 0)
+				,dblReceived			= ISNULL(RawData.dblQty, 0)
 				,intUnitMeasureId		= ItemUOM.intItemUOMId
 				,intWeightUOMId			= (
 												SELECT	TOP 1 
@@ -227,8 +233,9 @@ BEGIN
 				,dblLineTotal			= RawData.dblQty * RawData.dblCost
 				,intSort				= 1
 				,intConcurrencyId		= 1
-				,intOwnershipType       = CASE	WHEN RawData.ysnIsCustody = 0 THEN 1
-												WHEN RawData.ysnIsCustody = 1 THEN 2
+				,intOwnershipType       = CASE	WHEN RawData.ysnIsCustody = 0 THEN @OWNERSHIP_TYPE_Own
+												WHEN RawData.ysnIsCustody = 1 THEN @OWNERSHIP_TYPE_Storage
+												ELSE @OWNERSHIP_TYPE_Own
 										  END
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON RawHeaderData.Vendor = RawData.intEntityVendorId 
