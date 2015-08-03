@@ -75,7 +75,7 @@ AS
 	LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
 	LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = clsl.intCompanyLocationId
 	LEFT JOIN tblICItemUOM ium1 ON ium1.intItemUOMId = l.intWeightUOMId
-	LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = ium1.intItemUOMId
+	LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = ium1.intUnitMeasureId
 	LEFT JOIN tblICParentLot pl ON pl.intParentLotId = l.intParentLotId
 	LEFT JOIN tblICItemOwner ito ON ito.intItemId = i.intItemId
 	LEFT JOIN tblARCustomer c1 ON c1. intEntityCustomerId = ito.intOwnerId
