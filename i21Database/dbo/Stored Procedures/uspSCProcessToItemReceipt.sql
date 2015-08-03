@@ -41,6 +41,8 @@ DECLARE @intScaleStationId AS INT
 DECLARE @intFreightItemId AS INT
 DECLARE @intFreightVendorId AS INT
 DECLARE @ysnDeductFreightFarmer AS BIT
+DECLARE @intLoadContractId AS INT
+DECLARE @dblLoadScheduledUnits AS NUMERIC(12,4)
 
 BEGIN
     SELECT TOP 1 @intLoadId = ST.intLoadId, @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
@@ -66,6 +68,18 @@ BEGIN TRY
 				GOTO _Exit
 			END
 			ELSE
+			BEGIN
+				SELECT @intLoadContractId = LGL.intContractDetailId, @dblLoadScheduledUnits = LGL.dblQuantity FROM tblLGLoad LGL WHERE LGL.intLoadId = @intLoadId
+			END
+			IF @intLoadContractId IS NULL
+			BEGIN 
+				RAISERROR('Unable to find load contract details. Try Again.', 11, 1);
+				GOTO _Exit
+			END
+			BEGIN
+			SET @dblLoadScheduledUnits = @dblLoadScheduledUnits * -1;
+			EXEC uspCTUpdateScheduleQuantity @intLoadContractId, @dblLoadScheduledUnits
+			END
 			BEGIN
 				INSERT INTO [dbo].[tblSCTicketCost]
 						   ([intTicketId]
@@ -152,7 +166,7 @@ BEGIN TRY
 			,@intContractId
 			,@intUserId
 			,0
-			IF @strDistributionOption = 'CNT'
+			IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 			BEGIN
 				DECLARE @intLoopContractId INT;
 				DECLARE @dblLoopContractUnits NUMERIC(12,4);
