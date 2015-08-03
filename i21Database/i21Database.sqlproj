@@ -2145,6 +2145,7 @@
     <Build Include="dbo\Tables\tblMFScheduleConstraintDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspTRProcessLoadContracts.sql" />
     <Build Include="dbo\Views\vyuLGWarehouseRateMatrix.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTXMLToIntermediateTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
