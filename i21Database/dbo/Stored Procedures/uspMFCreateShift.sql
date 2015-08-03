@@ -183,6 +183,32 @@ BEGIN TRY
 				)
 	END
 
+	If EXISTS (
+			SELECT *
+			FROM OPENXML(@idoc, 'root/Shifts/Shift', 2) WITH (
+					intShiftId INT
+					,strRowState NVARCHAR(50)
+					) x
+			Where x.strRowState = 'DELETE'
+			AND EXISTS(SELECT *FROM dbo.tblMFWorkOrder W WHERE W.intPlannedShiftId =x.intShiftId)
+			)
+	BEGIN
+		SELECT @strShiftName =strShiftName
+		FROM OPENXML(@idoc, 'root/Shifts/Shift', 2) WITH (
+				intShiftId INT
+				,strShiftName nvarchar(50)
+				,strRowState NVARCHAR(50)
+				) x
+		WHERE x.strRowState = 'DELETE' AND EXISTS(SELECT *FROM dbo.tblMFWorkOrder W WHERE W.intPlannedShiftId =x.intShiftId)
+
+		RAISERROR (
+				51171
+				,11
+				,1
+				,@strShiftName
+				)
+	END
+
 	DELETE
 	FROM dbo.tblMFShift
 	WHERE EXISTS (
