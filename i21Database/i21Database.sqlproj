@@ -2155,6 +2155,10 @@
     <Build Include="dbo\Stored Procedures\uspMFGetBlendSheetInputLots.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetBlendSheetRecipeComputations.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateBlendRecipeComputation.sql" />
+    <Build Include="dbo\Tables\tblRKAssignFuturesToContractSummaryHeader.sql" />
+    <Build Include="dbo\Tables\tblRKAssignFuturesToContractSummary.sql" />
+    <Build Include="dbo\Views\vyuRKAssignFuturesToContractSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKAssignFuturesToContractSummarySave.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -1,6 +1,7 @@
 ﻿CREATE VIEW vyuRKGetAssignFutureTransaction
 
 AS
+SELECT * FROM(SELECT *,isnull(intLots,0)-intBalanceLots1 as intBalanceLots FROM(
 SELECT 
 		ot.intFutOptTransactionId,
 		ot.strInternalTradeNo AS strInternalTradeNo,
@@ -8,15 +9,14 @@ SELECT
 		,ot.dtmFilledDate as dtmFilledDate
 		,strBuySell as strBuySell      
 		,ot.intNoOfContract as intLots
-		--,IsNull((SELECT SUM (AD.dblMatchQty) from tblRKMatchFuturesPSDetail AD Group By AD.intSFutOptTransactionId 
-		--Having ot.intFutOptTransactionId = AD.intSFutOptTransactionId), 0)  As dblSelectedLot1
-		,0 as intBalanceLots
+		,IsNull((SELECT SUM(AD.intAssignedLots)+SUM(AD.intHedgedLots) FROM tblRKAssignFuturesToContractSummary AD Group By AD.intFutOptTransactionId 
+		Having ot.intFutOptTransactionId = AD.intFutOptTransactionId), 0)  As intBalanceLots1
 		,fm.strFutMarketName
 		,fmh.strFutureMonth
 		,ba.strAccountNumber
 		,e.strName strBrokerName
 		,c.strCommodityCode
-		,scl.strLocationName
+		,scl.strLocationName,ot.dblPrice
 		,b.strBook
 		,sb.strSubBook
 		,fmh.ysnExpired      		   
@@ -28,4 +28,4 @@ JOIN tblEntity e on ot.intEntityId=e.intEntityId
 JOIN tblICCommodity c on ot.intCommodityId=c.intCommodityId
 JOIN tblSMCompanyLocation scl on scl.intCompanyLocationId=ot.intLocationId
 LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId
-LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId
+LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId) t) t1 where intBalanceLots >0
