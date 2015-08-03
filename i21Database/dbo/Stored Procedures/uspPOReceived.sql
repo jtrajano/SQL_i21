@@ -75,7 +75,9 @@ BEGIN
 			,intItemLocationId		= ReceiptItems.intItemLocationId
 			,intItemUOMId			= ReceiptItems.intItemUOMId
 			,intSubLocationId		= ReceiptItems.intSubLocationId
-			,dblQty					= ReceiptItems.dblQty
+			--IC send this data as is, posted or unposted, they are the one doing the logic if on order will be deducted or added
+			--NOTE: logic here that we will increase the on order or deduct was on IC, we just need to make here negative
+			,dblQty					= ReceiptItems.dblQty * -1
 			,dblUOMQty				= ReceiptItems.dblUOMQty
 			,intTransactionId		= ReceiptItems.intInventoryReceiptId
 			,intTransactionDetailId = ReceiptItems.intInventoryReceiptDetailId
