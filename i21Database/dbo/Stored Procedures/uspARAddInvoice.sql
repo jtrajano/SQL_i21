@@ -273,15 +273,15 @@ BEGIN
 	EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceId
 	--this is added because the reCompute invoice Taxes does not update the totals correctly
 	-- need to review this
-    UPDATE
-		tblARInvoiceDetail
-		SET [dblTotal]		= ROUND(((isNull([dblPrice],0) )* isNull(([dblQtyShipped]),0) ),2)
-		where intInvoiceId = @InvoiceId
+ --   UPDATE
+	--	tblARInvoiceDetail
+	--	SET [dblTotal]		= ROUND(((isNull([dblPrice],0) )* isNull(([dblQtyShipped]),0) ),2)
+	--	where intInvoiceId = @InvoiceId
 	
-	UPDATE
-		tblARInvoice
-		SET [dblInvoiceTotal]		= isNull((select SUM(dblTotal) from tblARInvoiceDetail where intInvoiceId = @InvoiceId),0)
-		where intInvoiceId = @InvoiceId
+	--UPDATE
+	--	tblARInvoice
+	--	SET [dblInvoiceTotal]		= isNull((select SUM(dblTotal) from tblARInvoiceDetail where intInvoiceId = @InvoiceId),0)
+	--	where intInvoiceId = @InvoiceId
 
 	DELETE FROM @Invoices WHERE [intInvoiceID] = @InvoiceId
 END
