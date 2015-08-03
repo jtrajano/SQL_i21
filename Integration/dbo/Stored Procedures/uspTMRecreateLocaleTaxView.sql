@@ -64,7 +64,7 @@ BEGIN
 						,vwlcl_user_id	=	aglcl_user_id
 						,vwlcl_user_rev_dt	=	aglcl_user_rev_dt
 						,A4GLIdentity	=	CAST(A4GLIdentity   AS INT)
-						,strTaxStateLocale = ISNULL(aglcl_tax_state,'''') + ''-'' + ISNULL(aglcl_tax_auth_id1,'''') + ''-'' + ISNULL(aglcl_tax_auth_id2,'''')
+						,strTaxStateLocale = RTRIM(ISNULL(aglcl_tax_state,'''')) + ''-'' + RTRIM(ISNULL(aglcl_tax_auth_id1,'''')) + ''-'' + RTRIM(ISNULL(aglcl_tax_auth_id2,''''))
 						,strDescription = ''''
 						,intConcurrencyId = 0 
 					FROM aglclmst
@@ -94,7 +94,7 @@ BEGIN
 						,vwlcl_user_id	=	CAST(NULL AS CHAR(16))
 						,vwlcl_user_rev_dt	=	NULL
 						,A4GLIdentity	=	CAST(A4GLIdentity   AS INT)
-						,strTaxStateLocale = ISNULL(ptlcl_state,'''') + ''-'' + ISNULL(ptlcl_local1_id,'''') + ''-'' + ISNULL(ptlcl_local2_id,'''')
+						,strTaxStateLocale = RTRIM(ISNULL(ptlcl_state,'''')) + ''-'' + RTRIM(ISNULL(ptlcl_local1_id,'''')) + ''-'' + RTRIM(ISNULL(ptlcl_local2_id,''''))
 						,strDescription = ''''
 						,intConcurrencyId = 0 
 						
