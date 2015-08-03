@@ -8,11 +8,9 @@
 AS
 	DECLARE @dateNow		    DATE = CAST(GETDATE() AS DATE),			
 			@dblInvoiceTotal    NUMERIC(18,6) = 0,
-			@dblAmountDue		NUMERIC(18,6) = 0,
 			@NewInvoiceId		INT
 	
 	SELECT @dblInvoiceTotal    = SUM(dblTotalAmount)
-		 , @dblAmountDue       = SUM(dblAmountDue)
 	FROM @tblTypeServiceCharge
 
 		--INSERT INVOICE HEADER
@@ -74,7 +72,7 @@ AS
 		,0
 		,@dblInvoiceTotal
 		,0
-		,@dblAmountDue
+		,@dblInvoiceTotal
 		,0
 		,'Invoice'
 		,'Service Charge'
@@ -105,7 +103,7 @@ AS
 	DECLARE @totalCount INT = 0,
 			@counter INT = 1
 
-	SELECT @totalCount = COUNT(*) FROM @tblTypeServiceCharge
+	SELECT @totalCount = COUNT(*) FROM @tblTypeServiceCharge WHERE intEntityCustomerId = @intEntityCustomerId
 	WHILE (@counter <= @totalCount)
 		BEGIN
 			DECLARE @intInvoiceIdToUpdate INT = 0
@@ -125,7 +123,7 @@ AS
 				,[intInvoiceId]
 				,[strInvoiceNumber]				
 				,@intSCAccountId
-				,[dblAmountDue]
+				,[dblTotalAmount]
 				,[dblTotalAmount]
 				,0
 			FROM @tblTypeServiceCharge WHERE intServiceChargeId = @counter
@@ -133,4 +131,4 @@ AS
 			UPDATE tblARInvoice SET ysnCalculated = 1 WHERE intInvoiceId = @intInvoiceIdToUpdate
 
 			SET @counter += 1
-		END	
+		END
