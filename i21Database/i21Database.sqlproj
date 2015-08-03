@@ -2155,6 +2155,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGetBlendSheetInputLots.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetBlendSheetRecipeComputations.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateBlendRecipeComputation.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportPromotionItemListDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportPromotionSalesListDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
