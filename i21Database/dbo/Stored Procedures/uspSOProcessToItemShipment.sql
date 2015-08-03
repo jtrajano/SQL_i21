@@ -13,6 +13,8 @@ SET ANSI_WARNINGS OFF
  
 DECLARE	 @ShipmentId INT
 		,@InvoiceId  INT
+		,@IsSoftwareType BIT = 0
+		,@HasInventoryItem BIT = 0
 
 IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrderId AND [strOrderStatus] = 'Closed') 
 	BEGIN
@@ -37,7 +39,7 @@ ELSE
 		IF EXISTS(SELECT 1 FROM tblSOSalesOrderDetail SOD INNER JOIN tblICItem I ON SOD.intItemId = I.intItemId 
 				WHERE SOD.intSalesOrderId = @SalesOrderId AND I.strType = 'Software')
 			BEGIN
-				DECLARE @HasInventoryItem BIT = 0
+				SET @IsSoftwareType = 1
 				IF EXISTS(SELECT 1 FROM tblSOSalesOrderDetail A INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
 					WHERE intSalesOrderId = @SalesOrderId AND strType NOT IN ('Non-Inventory', 'Other Charge', 'Service', 'Software'))
 					BEGIN
@@ -61,6 +63,13 @@ EXEC dbo.uspICProcessToInventoryShipment
 		,@strSourceType = 'Sales Order'
 		,@intUserId = @icUserId
 		,@InventoryShipmentId = @ShipmentId OUTPUT
+
+IF (@IsSoftwareType = 1 AND @HasInventoryItem = 1)
+	BEGIN
+		DECLARE @strTransactionId NVARCHAR(40) = NULL
+		SELECT @strTransactionId = strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = @ShipmentId
+		EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @icUserId, @UserId
+	END
 
 IF @@ERROR > 0 
 	RETURN 0;

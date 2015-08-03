@@ -7,20 +7,20 @@
 	AS
 BEGIN
 
-	DECLARE @NewInvoiceId INT,
-			@DateOnly DATETIME,
-			@dblSalesOrderSubtotal NUMERIC(18, 6),			
-			@dblTax	NUMERIC(18, 6),
-			@dblSalesOrderTotal NUMERIC(18, 6),
-			@dblDiscount NUMERIC(18, 6)
+	DECLARE @NewInvoiceId			INT,
+			@DateOnly				DATETIME,
+			@dblSalesOrderSubtotal	NUMERIC(18, 6),			
+			@dblTax					NUMERIC(18, 6),
+			@dblSalesOrderTotal		NUMERIC(18, 6),
+			@dblDiscount			NUMERIC(18, 6)
 
-	SELECT @DateOnly = CAST(GETDATE() as date)
+	SELECT @DateOnly = CAST(GETDATE() AS DATE)
 
-	DECLARE @OrderDetails TABLE(intSalesOrderDetailId INT, 
-								dblDiscount NUMERIC(18,6), 
-								dblTotalTax NUMERIC(18,6), 
-								dblPrice NUMERIC(18,6), 
-								dblTotal NUMERIC(18,6))
+	DECLARE @OrderDetails TABLE(intSalesOrderDetailId	INT, 
+								dblDiscount				NUMERIC(18,6), 
+								dblTotalTax				NUMERIC(18,6), 
+								dblPrice				NUMERIC(18,6), 
+								dblTotal				NUMERIC(18,6))
 		
 	INSERT INTO @OrderDetails (intSalesOrderDetailId, dblDiscount, dblTotalTax, dblPrice, dblTotal)
 	SELECT intSalesOrderDetailId
@@ -28,8 +28,8 @@ BEGIN
 		 , ROUND(dblTotalTax,2)
 		 , ROUND(dblPrice,2)
 		 , ROUND(dblTotal,2)
-		FROM tblSOSalesOrderDetail SOD INNER JOIN tblICItem I ON SOD.intItemId = I.intItemId
-		WHERE intSalesOrderId = @SalesOrderId AND I.strType = 'Software'
+	FROM tblSOSalesOrderDetail SOD
+		WHERE intSalesOrderId = @SalesOrderId
 		ORDER BY intSalesOrderDetailId
 	
 	SELECT @dblSalesOrderSubtotal = SUM(dblPrice)
@@ -79,6 +79,7 @@ BEGIN
 		,[strBillToState]
 		,[strBillToZipCode]
 		,[strBillToCountry]
+		,[ysnTemplate]
 	)
 	SELECT
 		[intEntityCustomerId]
@@ -120,6 +121,7 @@ BEGIN
 		,[strBillToState]
 		,[strBillToZipCode]
 		,[strBillToCountry]
+		,1
 	FROM
 	tblSOSalesOrder
 	WHERE intSalesOrderId = @SalesOrderId
