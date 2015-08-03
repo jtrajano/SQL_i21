@@ -2159,6 +2159,8 @@
     <Build Include="dbo\Tables\tblRKAssignFuturesToContractSummary.sql" />
     <Build Include="dbo\Views\vyuRKAssignFuturesToContractSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspRKAssignFuturesToContractSummarySave.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportPromotionItemListDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTReportPromotionSalesListDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
