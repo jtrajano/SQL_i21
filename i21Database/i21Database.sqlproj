@@ -2161,6 +2161,9 @@
     <Build Include="dbo\Stored Procedures\uspRKAssignFuturesToContractSummarySave.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportPromotionItemListDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSTReportPromotionSalesListDetail.sql" />
+    <Build Include="dbo\Tables\tblLGWarehouseInstructionHeader.sql" />
+    <Build Include="dbo\Tables\tblLGWarehouseInstructionCost.sql" />
+    <Build Include="dbo\Tables\tblLGWarehouseInstructionDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
