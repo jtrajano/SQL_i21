@@ -2146,6 +2146,15 @@
     <Build Include="dbo\Stored Procedures\uspTRProcessLoadContracts.sql" />
     <Build Include="dbo\Views\vyuLGWarehouseRateMatrix.sql" />
     <Build Include="dbo\Stored Procedures\uspSTXMLToIntermediateTable.sql" />
+    <Build Include="dbo\Views\vyuQMGetLotQuality.sql" />
+    <Build Include="dbo\Tables\tblMFWorkOrderRecipeComputation.sql" />
+    <Build Include="dbo\Tables\tblMFWorkOrderRecipeComputationType.sql" />
+    <Build Include="dbo\Tables\tblMFWorkOrderRecipeComputationMethod.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendRecipeComputation.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendSheet.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendSheetInputLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendSheetRecipeComputations.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateBlendRecipeComputation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

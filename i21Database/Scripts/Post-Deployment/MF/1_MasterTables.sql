@@ -1039,3 +1039,21 @@ BEGIN
 		)
 END
 GO
+IF NOT EXISTS(SELECT * FROM tblMFWorkOrderRecipeComputationType WHERE intTypeId = 1)
+BEGIN
+	INSERT INTO tblMFWorkOrderRecipeComputationType(intTypeId,strName)
+	VALUES(1,'Blend Management')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFWorkOrderRecipeComputationType WHERE intTypeId = 2)
+BEGIN
+	INSERT INTO tblMFWorkOrderRecipeComputationType(intTypeId,strName)
+	VALUES(2,'Blend Production')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFWorkOrderRecipeComputationMethod WHERE intMethodId = 1)
+BEGIN
+	INSERT INTO tblMFWorkOrderRecipeComputationMethod(intMethodId,strName)
+	VALUES(1,'Weighted Average')
+END
+GO
