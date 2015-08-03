@@ -690,3 +690,11 @@ EXEC sp_addmessage 51171,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51172) EXEC sp_dropmessage 51172, 'us_english'	
 SET @strmessage = 'Shift name should be unique.'
 EXEC sp_addmessage 51172,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51173) EXEC sp_dropmessage 51173, 'us_english'	
+SET @strmessage = 'Unable to Unreceive. The inventory receipt is already billed in %s.'
+EXEC sp_addmessage 51173,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51174) EXEC sp_dropmessage 51174, 'us_english'	
+SET @strmessage = 'Unable to Unreceive. The %s is already billed in %s.'
+EXEC sp_addmessage 51174,11,@strmessage,'us_english','False'

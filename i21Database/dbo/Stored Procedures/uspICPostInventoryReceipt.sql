@@ -71,6 +71,10 @@ END
 --------------------------------------------------------------------------------------------  
 -- Validate  
 --------------------------------------------------------------------------------------------  
+DECLARE @strBillNumber AS NVARCHAR(50)
+DECLARE @strChargeItem AS NVARCHAR(50)
+
+
 -- Validate if the Inventory Receipt exists   
 IF @intTransactionId IS NULL  
 BEGIN   
@@ -119,6 +123,57 @@ BEGIN
 		GOTO Post_Exit    
 	END  
 END   
+
+-- Do not allow unpost if Bill has been created for the inventory receipt
+BEGIN 
+
+	SELECT	TOP 1 
+			@strBillNumber = Bill.strBillId
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+			LEFT JOIN dbo.tblAPBillDetail BillItems
+				ON BillItems.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+			INNER JOIN dbo.tblAPBill Bill
+				ON Bill.intBillId = BillItems.intBillId
+	WHERE	Receipt.intInventoryReceiptId = @intTransactionId
+			AND BillItems.intBillDetailId IS NOT NULL
+
+	IF ISNULL(@strBillNumber, '') <> ''
+	BEGIN 
+		-- 'Unable to Unreceive. The inventory receipt is already billed in {Bill Id}.'
+		RAISERROR(51173, 11, 1, @strBillNumber)  
+		GOTO Post_Exit    
+	END 
+
+END 
+
+-- Do not allow unpost if other charge is already billed. 
+BEGIN 
+	SET @strBillNumber = NULL 
+	SELECT	TOP 1 
+			@strBillNumber = Bill.strBillId
+			,@strChargeItem = Item.strItemNo
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItemAllocatedCharge AllocatedCharges
+				ON Receipt.intInventoryReceiptId = AllocatedCharges.intInventoryReceiptId
+			INNER JOIN dbo.tblICInventoryReceiptCharge Charge
+				ON Charge.intInventoryReceiptChargeId = AllocatedCharges.intInventoryReceiptChargeId
+			INNER JOIN dbo.tblICItem Item
+				ON Item.intItemId = Charge.intChargeId				
+			LEFT JOIN dbo.tblAPBillDetail BillItems
+				ON BillItems.intInventoryReceiptItemAllocatedChargeId = Charge.intInventoryReceiptChargeId
+			INNER JOIN dbo.tblAPBill Bill
+				ON Bill.intBillId = BillItems.intBillId
+	WHERE	Receipt.intInventoryReceiptId = @intTransactionId
+			AND BillItems.intBillDetailId IS NOT NULL
+
+	IF ISNULL(@strBillNumber, '') <> ''
+	BEGIN 
+		-- 'Unable to Unreceive. The {Other Charge} is already billed in {Bill Id}.'
+		RAISERROR(51174, 11, 1, @strChargeItem, @strBillNumber)  
+		GOTO Post_Exit    
+	END 
+
+END 
 
 -- Check the UOM
 --IF @ysnPost = 1 
