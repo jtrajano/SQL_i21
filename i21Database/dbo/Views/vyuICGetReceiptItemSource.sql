@@ -7,15 +7,8 @@ SELECT
 	Receipt.strReceiptType,
 	strOrderNumber = 
 		(
-			CASE WHEN Receipt.strReceiptType = 'Purchase Contract' AND ISNULL(Receipt.intSourceType, 0) <> 3
-				THEN (SELECT CAST(ISNULL(intContractNumber, 'PO Number not found!') AS NVARCHAR) FROM tblCTContractHeader WHERE intContractHeaderId = ReceiptItem.intOrderId)			
-			WHEN Receipt.strReceiptType = 'Purchase Contract' AND Receipt.intSourceType = 3 -- Transport
-				THEN (	SELECT	TOP 1 
-								CAST(ISNULL(CH.intContractNumber, 'PO Number not found!') AS NVARCHAR) 
-						FROM	dbo.tblCTContractHeader CH INNER JOIN  tblCTContractDetail CD
-									ON CH.intContractHeaderId = CD.intContractHeaderId
-						WHERE	CD.intContractDetailId = ReceiptItem.intOrderId
-					)
+			CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
+				THEN (SELECT CAST(ISNULL(intContractNumber, 'PO Number not found!') AS NVARCHAR) FROM tblCTContractHeader WHERE intContractHeaderId = ReceiptItem.intOrderId)
 			WHEN Receipt.strReceiptType = 'Purchase Order'
 				THEN (SELECT ISNULL(strPurchaseOrderNumber, 'PO Number not found!') FROM tblPOPurchase WHERE intPurchaseId = ReceiptItem.intOrderId)
 			WHEN Receipt.strReceiptType = 'Transfer Receipt'
@@ -49,7 +42,7 @@ SELECT
 			WHEN Receipt.intSourceType = 2 -- Inbound Shipment
 				THEN (SELECT CAST(ISNULL(intTrackingNumber, 'Inbound Shipment not found!')AS NVARCHAR(50)) FROM vyuLGShipmentContainerReceiptContracts WHERE intShipmentContractQtyId = ReceiptItem.intSourceId AND intShipmentBLContainerId = ReceiptItem.intContainerId)
 			WHEN Receipt.intSourceType = 3 -- Transport
-				THEN (SELECT CAST(ISNULL(strTransaction, 'Transport Load not found!')AS NVARCHAR(50)) FROM vyuTRTransportReceipt WHERE intTransportReceiptId = ReceiptItem.intSourceId)
+				THEN (SELECT CAST(ISNULL(strTransaction, 'Transport not found!')AS NVARCHAR(50)) FROM vyuTRTransportReceipt WHERE intTransportReceiptId = ReceiptItem.intSourceId)
 			ELSE NULL
 			END
 		),
@@ -64,8 +57,9 @@ SELECT
 						THEN NULL
 					WHEN Receipt.intSourceType = 2 -- Inbound Shipment
 						THEN (SELECT ISNULL(strUnitMeasure, 'Inbound Shipment not found!') FROM vyuLGShipmentContainerReceiptContracts
-						WHERE intShipmentContractQtyId = ReceiptItem.intSourceId AND intShipmentBLContainerId = ReceiptItem.intContainerId
-						)
+						WHERE intShipmentContractQtyId = ReceiptItem.intSourceId AND intShipmentBLContainerId = ReceiptItem.intContainerId)
+					WHEN Receipt.intSourceType = 3 -- Transport
+						THEN (SELECT ISNULL(strUnitMeasure, 'Transport not found!')  FROM tblICItemUOM LEFT JOIN tblICUnitMeasure ON tblICUnitMeasure.intUnitMeasureId = tblICItemUOM.intUnitMeasureId WHERE intItemUOMId = ReceiptItem.intUnitMeasureId)
 					ELSE NULL
 					END
 				)
@@ -92,8 +86,9 @@ SELECT
 						THEN 0
 					WHEN Receipt.intSourceType = 2 -- Inbound Shipment
 						THEN (SELECT ISNULL(dblItemUOMCF, 0) FROM vyuLGShipmentContainerReceiptContracts
-						WHERE intShipmentContractQtyId = ReceiptItem.intSourceId AND intShipmentBLContainerId = ReceiptItem.intContainerId
-						)
+						WHERE intShipmentContractQtyId = ReceiptItem.intSourceId AND intShipmentBLContainerId = ReceiptItem.intContainerId)
+					WHEN Receipt.intSourceType = 3 -- Transport
+						THEN (SELECT ISNULL(dblUnitQty, 'Transport not found!')  FROM tblICItemUOM WHERE intItemUOMId = ReceiptItem.intUnitMeasureId)
 					ELSE NULL
 					END
 				)
@@ -121,8 +116,10 @@ SELECT
 						THEN 0
 					WHEN Receipt.intSourceType = 2 -- Inbound Shipment
 						THEN (SELECT ISNULL(dblQuantity, 0) FROM vyuLGShipmentContainerReceiptContracts
-						WHERE intShipmentContractQtyId = ReceiptItem.intSourceId AND intShipmentBLContainerId = ReceiptItem.intContainerId
-						)
+						WHERE intShipmentContractQtyId = ReceiptItem.intSourceId AND intShipmentBLContainerId = ReceiptItem.intContainerId)
+					WHEN Receipt.intSourceType = 3 -- Transport
+						THEN (SELECT ISNULL(dblOrderedQuantity, 0) FROM vyuTRTransportReceipt
+						WHERE intTransportReceiptId = ReceiptItem.intSourceId)
 					ELSE NULL
 					END
 				)
@@ -146,8 +143,10 @@ SELECT
 						THEN 0
 					WHEN Receipt.intSourceType = 2 -- Inbound Shipment
 						THEN (SELECT ISNULL(dblReceivedQty, 0) FROM vyuLGShipmentContainerReceiptContracts
-						WHERE intShipmentContractQtyId = ReceiptItem.intSourceId AND intShipmentBLContainerId = ReceiptItem.intContainerId
-						)
+						WHERE intShipmentContractQtyId = ReceiptItem.intSourceId AND intShipmentBLContainerId = ReceiptItem.intContainerId)
+					WHEN Receipt.intSourceType = 3 -- Transport
+						THEN (SELECT ISNULL(dblReceivedQuantity, 0) FROM vyuTRTransportReceipt
+						WHERE intTransportReceiptId = ReceiptItem.intSourceId)
 					ELSE NULL
 					END
 				)
