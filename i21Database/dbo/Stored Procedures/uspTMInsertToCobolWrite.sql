@@ -59,7 +59,7 @@ BEGIN
 		ON B.intCompanyLocationId = F.intCompanyLocationId
 	LEFT JOIN vyuEMSalesperson G
 		ON B.intEntitySalespersonId = G.intEntitySalespersonId
-	LEFT JOIN tblARSalesperson H
+	LEFT JOIN vyuEMSalesperson H
 		ON A.intPerformerId = H.intEntitySalespersonId
 	
 END
