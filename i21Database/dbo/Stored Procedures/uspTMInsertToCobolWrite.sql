@@ -39,7 +39,7 @@ BEGIN
 			,[ItemNumber] = C.strItemNo
 			,[ItemAvailableForTM] = (CASE WHEN C.strType = 'Service' THEN 'S' ELSE '' END)
 			,[ReversePreviousDelivery] = ''
-			,[PerformerID] = G.strSalespersonId
+			,[PerformerID] = H.strSalespersonId
 			,[InvoiceLineNumber] = A.intTMLineNumber
 			,[ExtendedAmount] = ISNULL(A.dblTotal,0) + ISNULL(A.dblTotalTax,0)
 			,[QuantityDelivered] = A.dblQtyShipped
