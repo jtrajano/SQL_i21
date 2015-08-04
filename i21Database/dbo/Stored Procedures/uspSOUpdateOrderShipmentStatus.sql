@@ -1,10 +1,16 @@
 ﻿CREATE PROCEDURE [dbo].[uspSOUpdateOrderShipmentStatus]
-	@SalesOrderId			INT
+	@SalesOrderId			INT,
+	@ysnOpenStatus			BIT = 0
 AS
 BEGIN
 
 DECLARE	@OrderStatus NVARCHAR(50)
 SET @OrderStatus = 'Open'
+
+IF @ysnOpenStatus = 1
+	BEGIN		
+		GOTO SET_ORDER_STATUS;
+	END	
 
 DECLARE @IsOpen BIT = 0
 SET @IsOpen = (	SELECT COUNT(1) 
