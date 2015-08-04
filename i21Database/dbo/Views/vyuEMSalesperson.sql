@@ -13,6 +13,7 @@ select
 	d.strPhone,
 	d.strPhone2,
 	d.strMobile,
+	d.strEmail,
 	d.strEmail2,
 	d.strFax,
 	e.strAddress,
