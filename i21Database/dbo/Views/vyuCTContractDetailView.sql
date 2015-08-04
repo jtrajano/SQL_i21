@@ -34,7 +34,7 @@ AS
 			strStockUOM,						strStockUOMType,				ISNULL(IU.dblUnitQty,0)			AS	dblItemUOMCF,  
 			SB.intCompanyLocationSubLocationId,	SB.strSubLocationName,			ISNULL(intStockUOM,0)			AS	intStockUOM,		
 			CU.strCurrency,						CS.strContractStatus,			ISNULL(dblStockUOMCF,0)			AS	dblStockUOMCF,	
-			IX.strIndex,						VR.strVendorId,					
+			IX.strIndex,						VR.strVendorId,					CD.strReference,
 
 			CAST(CASE WHEN CD.intContractStatusId IN (1,4) THEN 1 ELSE 0 END AS BIT) AS ysnAllowedToShow,
 
