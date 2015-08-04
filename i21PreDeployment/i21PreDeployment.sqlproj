@@ -102,6 +102,7 @@
     <None Include="i21PreDeployment_1.publish.xml" />
     <None Include="Scripts\Pre-Deployment\12_EM\03_EntityCustomerFarmRename_DataFix.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\UpdateMissingPaymentInfo.sql" />
+    <None Include="Scripts\Pre-Deployment\8_AP\UpdateBillStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
