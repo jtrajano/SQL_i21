@@ -57,10 +57,12 @@ DECLARE @SCREEN_NAME NVARCHAR(25) = 'Invoice'
 DECLARE @CODE NVARCHAR(25) = 'AR'
 
 
-DECLARE @UserEntityID int
-		,@DiscountAccountId int
+DECLARE @UserEntityID		INT
+		,@DiscountAccountId INT
+		,@ServiceChargesAccountId    INT
 SET @UserEntityID = ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE intUserSecurityID = @userId),@userId)
 SET @DiscountAccountId = (SELECT TOP 1 intDiscountAccountId FROM tblARCompanyPreference WHERE intDiscountAccountId IS NOT NULL AND intDiscountAccountId <> 0)
+SET @ServiceChargesAccountId = (SELECT TOP 1 intServiceChargeAccountId FROM tblARCompanyPreference WHERE intServiceChargeAccountId IS NOT NULL AND intServiceChargeAccountId <> 0)
 
 SET @recapId = '1'
 SET @success = 1
@@ -394,7 +396,7 @@ IF @recap = 0
 				
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT
-					'The Service Charge account of Company Location - ' + L.strLocationName + ' was not set.',
+					'The Service Charge account in either Company Preferences or Company Location - ' + L.strLocationName + ' was not set.',
 					A.strTransactionType,
 					A.strInvoiceNumber,
 					@batchId,
@@ -414,6 +416,7 @@ IF @recap = 0
 					(D.intAccountId IS NULL OR D.intAccountId = 0)
 					AND (D.intItemId IS NULL OR D.intItemId = 0)
 					AND (L.intServiceCharges  IS NULL OR L.intServiceCharges  = 0)
+					AND (@ServiceChargesAccountId IS NULL OR @ServiceChargesAccountId = 0)
 								
 								
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -782,12 +785,12 @@ IF @post = 1
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
 				,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))) 
-													AND B.intSalesAccountId IS NOT NULL
-													AND B.intSalesAccountId <> 0
+													AND IST.intSalesAccountId IS NOT NULL
+													AND IST.intSalesAccountId <> 0
 													THEN
-														B.intSalesAccountId
+														IST.intSalesAccountId
 													ELSE
-														(CASE WHEN B.intAccountId IS NOT NULL AND B.intAccountId <> 0 THEN B.intAccountId ELSE CL.intServiceCharges END)
+														(CASE WHEN IST.intAccountId IS NOT NULL AND IST.intAccountId <> 0 THEN IST.intAccountId ELSE ISNULL(@ServiceChargesAccountId,CL.intServiceCharges) END)
 												END)
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2)  END
 				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) ELSE 0  END
@@ -824,7 +827,11 @@ IF @post = 1
 					ON A.intInvoiceId = P.intInvoiceId
 			LEFT OUTER JOIN
 				tblSMCompanyLocation CL
-					ON A.intCompanyLocationId = CL.intCompanyLocationId			
+					ON A.intCompanyLocationId = CL.intCompanyLocationId
+			LEFT OUTER JOIN
+				vyuARGetItemAccount IST
+					ON B.intItemId = IST.intItemId 
+					AND A.intCompanyLocationId = IST.intLocationId 		
 			WHERE 
 				(B.intItemId IS NULL OR B.intItemId = 0)
 				OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge')))
@@ -834,7 +841,7 @@ IF @post = 1
 			SELECT			
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
-				,intAccountId				= B.intSalesAccountId
+				,intAccountId				= IST.intSalesAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) END
 				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) ELSE  0 END
 				,dblDebitUnit				= 0
@@ -870,7 +877,11 @@ IF @post = 1
 					ON A.intInvoiceId = P.intInvoiceId
 			INNER JOIN
 				tblICItem I
-					ON B.intItemId = I.intItemId 
+					ON B.intItemId = I.intItemId
+			LEFT OUTER JOIN
+				vyuARGetItemAccount IST
+					ON B.intItemId = IST.intItemId 
+					AND A.intCompanyLocationId = IST.intLocationId 
 			WHERE 
 				(B.intItemId IS NOT NULL OR B.intItemId <> 0)
 				AND I.strType NOT IN ('Non-Inventory','Service','Other Charge')
@@ -1388,12 +1399,12 @@ IF @post = 0
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
 				,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))) 
-													AND B.intSalesAccountId IS NOT NULL
-													AND B.intSalesAccountId <> 0
+													AND IST.intSalesAccountId IS NOT NULL
+													AND IST.intSalesAccountId <> 0
 													THEN
-														B.intSalesAccountId
+														IST.intSalesAccountId
 													ELSE
-														(CASE WHEN B.intAccountId IS NOT NULL AND B.intAccountId <> 0 THEN B.intAccountId ELSE CL.intServiceCharges END)
+														(CASE WHEN IST.intAccountId IS NOT NULL AND IST.intAccountId <> 0 THEN IST.intAccountId ELSE ISNULL(@ServiceChargesAccountId,CL.intServiceCharges) END)
 												END)
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) ELSE 0  END
 				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) END
@@ -1430,7 +1441,11 @@ IF @post = 0
 					ON A.intInvoiceId = P.intInvoiceId
 			LEFT OUTER JOIN
 				tblSMCompanyLocation CL
-					ON A.intCompanyLocationId = CL.intCompanyLocationId			
+					ON A.intCompanyLocationId = CL.intCompanyLocationId
+			LEFT OUTER JOIN
+				vyuARGetItemAccount IST
+					ON B.intItemId = IST.intItemId 
+					AND A.intCompanyLocationId = IST.intLocationId			
 			WHERE 
 				(B.intItemId IS NULL OR B.intItemId = 0)
 				OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge')))
@@ -1440,7 +1455,7 @@ IF @post = 0
 			SELECT			
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
-				,intAccountId				= B.intSalesAccountId
+				,intAccountId				= IST.intSalesAccountId
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) ELSE  0 END
 				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) END
 				,dblDebitUnit				= 0
@@ -1476,7 +1491,11 @@ IF @post = 0
 					ON A.intInvoiceId = P.intInvoiceId
 			INNER JOIN
 				tblICItem I
-					ON B.intItemId = I.intItemId 
+					ON B.intItemId = I.intItemId
+			LEFT OUTER JOIN
+				vyuARGetItemAccount IST
+					ON B.intItemId = IST.intItemId 
+					AND A.intCompanyLocationId = IST.intLocationId
 			WHERE 
 				(B.intItemId IS NOT NULL OR B.intItemId <> 0)
 				AND I.strType NOT IN ('Non-Inventory','Service','Other Charge')
