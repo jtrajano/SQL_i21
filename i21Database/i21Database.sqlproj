@@ -2170,6 +2170,10 @@
     <Build Include="dbo\Views\vyuGRGetStorageCustomer.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageLocation.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageTransferTicket.sql" />
+    <Build Include="dbo\Functions\fnQMGetTestNames.sql" />
+    <Build Include="dbo\Views\vyuQMPropertyList.sql" />
+    <Build Include="dbo\Functions\fnQMGetTemplateNames.sql" />
+    <Build Include="dbo\Views\vyuQMTestList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
