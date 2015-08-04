@@ -51,7 +51,7 @@ IF(NOT EXISTS(SELECT NULL FROM tblICInventoryShipmentItem WHERE intSourceId = @S
 			ON ISD.intInvoiceId = ISH.intInvoiceId
 		INNER JOIN tblSOSalesOrderDetail SOD
 			ON ISD.intSalesOrderDetailId = SOD.intSalesOrderDetailId
-		WHERE (ISD.[intInventoryShipmentId] IS NULL OR ISD.[intInventoryShipmentId] = 0)			
+		WHERE (ISD.intInventoryShipmentItemId IS NULL OR ISD.intInventoryShipmentItemId = 0)			
 		  AND (ISD.[intSalesOrderDetailId] IS NOT NULL OR ISD.[intSalesOrderDetailId] <> 0)	
 		  AND SOD.intSalesOrderId = @SalesOrderId
 		GROUP BY
