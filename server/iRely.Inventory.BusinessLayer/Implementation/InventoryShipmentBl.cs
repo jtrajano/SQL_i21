@@ -65,8 +65,8 @@ namespace iRely.Inventory.BusinessLayer
                                 soList.Add(shipment.intInventoryShipmentId);
                         }
                     }
-                    var changedReceipts = _db.ContextManager.ChangeTracker.Entries<tblICInventoryShipment>().Where(p => p.State == EntityState.Deleted).ToList();
-                    foreach (var shipment in changedReceipts)
+                    var deletedShipments = _db.ContextManager.ChangeTracker.Entries<tblICInventoryShipment>().Where(p => p.State == EntityState.Deleted).ToList();
+                    foreach (var shipment in deletedShipments)
                     {
                         if (shipment.Entity.intOrderType == 2)
                         {
@@ -83,6 +83,15 @@ namespace iRely.Inventory.BusinessLayer
                         _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdateSOStatusOnShipmentSave @intShipmentId", idParameter);
                         
                     }
+                    
+                    // Update the stock reservation for the deleted shipments                    
+                    foreach (var shipment in deletedShipments)
+                    {
+                        var idParameter = new SqlParameter("intTransactionId", shipment.Entity.intInventoryShipmentId);
+                        _db.ContextManager.Database.ExecuteSqlCommand("uspICReserveStockForInventoryShipment @intTransactionId", idParameter);
+                    }
+
+                    // Update the stock reservation for the latest shipment data. 
                     foreach (var shipment in _db.ContextManager.Set<tblICInventoryShipment>().Local)
                     {
                         var idParameter = new SqlParameter("intTransactionId", shipment.intInventoryShipmentId);
