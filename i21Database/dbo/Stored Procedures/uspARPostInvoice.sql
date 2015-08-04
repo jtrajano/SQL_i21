@@ -590,7 +590,8 @@ IF @recap = 0
 -- Begin a transaction and immediately create a save point 
 --------------------------------------------------------------------------------------------  
 --BEGIN TRAN @TransactionName
---SAVE TRAN @TransactionName
+if @recap = 1
+	SAVE TRAN @TransactionName
 
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
@@ -790,7 +791,7 @@ IF @post = 1
 													THEN
 														IST.intSalesAccountId
 													ELSE
-														(CASE WHEN IST.intAccountId IS NOT NULL AND IST.intAccountId <> 0 THEN IST.intAccountId ELSE ISNULL(@ServiceChargesAccountId,CL.intServiceCharges) END)
+														(CASE WHEN B.intServiceChargeAccountId IS NOT NULL AND B.intServiceChargeAccountId <> 0 THEN B.intServiceChargeAccountId ELSE ISNULL(@ServiceChargesAccountId,CL.intServiceCharges) END)
 												END)
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2)  END
 				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) ELSE 0  END
@@ -1404,7 +1405,7 @@ IF @post = 0
 													THEN
 														IST.intSalesAccountId
 													ELSE
-														(CASE WHEN IST.intAccountId IS NOT NULL AND IST.intAccountId <> 0 THEN IST.intAccountId ELSE ISNULL(@ServiceChargesAccountId,CL.intServiceCharges) END)
+														(CASE WHEN B.intServiceChargeAccountId IS NOT NULL AND B.intServiceChargeAccountId <> 0 THEN B.intServiceChargeAccountId ELSE ISNULL(@ServiceChargesAccountId,CL.intServiceCharges) END)
 												END)
 				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) ELSE 0  END
 				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) END
@@ -1797,6 +1798,8 @@ IF @recap = 1
 	--	--	END	
 	--	COMMIT TRAN @TransactionName
 	--END 
+	
+	ROLLBACK TRAN @TransactionName
 	BEGIN 
 
 		DELETE tblGLDetailRecap  
@@ -1873,7 +1876,8 @@ IF @recap = 1
 		SELECT ERROR_MESSAGE(), @transType, @param, @batchId, 0
 		COMMIT TRANSACTION
 		GOTO Post_Exit
-	END CATCH	
+	END CATCH
+	
 	END 	
 
 --------------------------------------------------------------------------------------------  
