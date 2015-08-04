@@ -484,6 +484,12 @@ BEGIN
 			,@intUserId 
 			,@intEntityId
 
+	-- Mark stock reservation as posted (or unposted)
+	EXEC dbo.uspICPostStockReservation
+		@intTransactionId
+		,@INVENTORY_SHIPMENT_TYPE
+		,@ysnPost
+
 	COMMIT TRAN @TransactionName
 END 
     

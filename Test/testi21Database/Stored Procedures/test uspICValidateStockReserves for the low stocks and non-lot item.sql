@@ -109,6 +109,11 @@ BEGIN
 				,dblOnHand = 0
 	END 
 	
+	-- Assert
+	BEGIN 
+		EXEC tSQLt.ExpectException 'There is not enough stocks for WET GRAINS. Reserved stocks is 0.00 while On Hand Qty is 0.00.';
+	END 	
+	
 	-- Act
 	BEGIN 
 		EXEC dbo.uspICValidateStockReserves

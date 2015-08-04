@@ -10,8 +10,8 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @ItemsToReserve AS dbo.ItemReservationTableType;
 DECLARE @intInventoryTransactionType AS INT
-DECLARE @strItemNo AS NVARCHAR(50) 
-DECLARE @intItemId AS INT 
+DECLARE @strInvalidItemNo AS NVARCHAR(50) 
+DECLARE @intInvalidItemId AS INT 
 
 -- Get the transaction type id
 BEGIN 
@@ -51,26 +51,22 @@ BEGIN
 	WHERE	PLHeader.intPickLotHeaderId = @intPickLotHeaderId
 END
 
--- Validate the reservation 
+-- Do the reservations
 BEGIN 
+	-- Validate the reservation 
 	EXEC dbo.uspICValidateStockReserves 
 		@ItemsToReserve
-		,@strItemNo OUTPUT 
-		,@intItemId OUTPUT 
+		,@strInvalidItemNo OUTPUT 
+		,@intInvalidItemId OUTPUT 
+
+	-- If there are enough stocks, let the system create the reservations
+	IF (@intInvalidItemId IS NULL)	
+	BEGIN 
+		EXEC dbo.uspICCreateStockReservation
+			@ItemsToReserve
+			,@intPickLotHeaderId
+			,@intInventoryTransactionType	
+	END 	
+
 END 
 
--- If item id is not null, then the reservation is invalid. 
--- The error should be handled by the caller and rollback any data changes. 
-IF (@intItemId IS NOT NULL)
-BEGIN 
-	-- There is not enough stocks for %s
-	RAISERROR(51040, 11, 1, @strItemNo)   
-END 
-ELSE 
-BEGIN 
-	-- Otherwise, there are enough stocks and let the system create the reservations
-	EXEC dbo.uspICCreateStockReservation
-		@ItemsToReserve
-		,@intPickLotHeaderId
-		,@intInventoryTransactionType
-END 

@@ -120,6 +120,8 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptCharge', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptChargePerItem', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptItemAllocatedCharge', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblAPBill', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblAPBillDetail', @Identity = 1;
 
 	EXEC tSQLt.ApplyConstraint 'dbo.tblICLot', 'UN_tblICLot';		
 

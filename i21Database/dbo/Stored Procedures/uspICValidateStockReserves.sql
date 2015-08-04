@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspICValidateStockReserves]
 	@ItemsToValidate AS ItemReservationTableType READONLY
-	,@strItemNo AS NVARCHAR(50) OUTPUT 
-	,@intItemId AS INT OUTPUT 
+	,@strInvalidItemNo AS NVARCHAR(50) OUTPUT 
+	,@intInvalidItemId AS INT OUTPUT 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -11,15 +11,22 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @AllowNegativeInventory_NoOption AS INT = 3
-SET @intItemId = NULL 
+		
+DECLARE @dblReservedQty AS NUMERIC(18,6)
+		,@dblOnHandQty AS NUMERIC(18,6)
+		,@intLotId AS INT 
+
+SET @intInvalidItemId = NULL 
 
 --------------------------------------------------
 -- Check all the non-Lot items.
 -- Check the quantity from the stock UOM table. 
 --------------------------------------------------
 SELECT	TOP 1 
-		@strItemNo = Item.strItemNo
-		,@intItemId = Item.intItemId 
+		@strInvalidItemNo = Item.strItemNo
+		,@intInvalidItemId = Item.intItemId 
+		,@dblReservedQty = ISNULL(Reserves.dblQuantity, 0)
+		,@dblOnHandQty = ISNULL(StockUOM.dblOnHand, 0)
 FROM	(
 			SELECT	intItemId
 					,intItemLocationId
@@ -27,6 +34,8 @@ FROM	(
 					,intSubLocationId
 					,intStorageLocationId
 					,dblQty = SUM(dblQty)
+					,intTransactionId
+					,intTransactionTypeId
 			FROM	@ItemsToValidate	
 			WHERE	ISNULL(intLotId, 0) = 0 
 			GROUP BY 
@@ -35,6 +44,8 @@ FROM	(
 				,intItemUOMId
 				,intSubLocationId
 				,intStorageLocationId
+				,intTransactionId
+				,intTransactionTypeId
 		) ValidateItems INNER JOIN dbo.tblICItemLocation ItemLocation
 			ON ValidateItems.intItemId = ItemLocation.intItemId
 			AND ValidateItems.intItemLocationId = ItemLocation.intItemLocationId
@@ -55,7 +66,10 @@ FROM	(
 						AND tblICStockReservation.intItemUOMId = ValidateItems.intItemUOMId
 						AND ISNULL(tblICStockReservation.intSubLocationId, 0) = ISNULL(ValidateItems.intSubLocationId, 0)
 						AND ISNULL(tblICStockReservation.intStorageLocationId, 0) = ISNULL(ValidateItems.intStorageLocationId, 0)
+						AND tblICStockReservation.intTransactionId <> ValidateItems.intTransactionId
+						AND tblICStockReservation.strTransactionId <> ValidateItems.strTransactionId
 			WHERE	ISNULL(tblICStockReservation.intLotId, 0) = 0 
+					AND ISNULL(tblICStockReservation.ysnPosted, 0) = 0				
 			GROUP BY 
 				tblICStockReservation.intItemId
 				,tblICStockReservation.intItemLocationId
@@ -72,16 +86,25 @@ WHERE	ISNULL(StockUOM.dblOnHand, 0) - ISNULL(Reserves.dblQuantity, 0) - Validate
 		AND ItemLocation.intAllowNegativeInventory = @AllowNegativeInventory_NoOption -- If No is selected, it does not allow negative stock
 
 -- If invalid, exit immediately.
-IF @intItemId IS NOT NULL 
-	RETURN;
+IF @intInvalidItemId IS NOT NULL 
+BEGIN 
+	GOTO _Exit;
+END 	
 
 --------------------------------------------------
 -- Check all the lot Items.
 -- Check the quantity from the Lot table
 --------------------------------------------------
+SELECT	@intInvalidItemId = NULL 
+		,@dblReservedQty = 0
+		,@dblOnHandQty = 0
+
 SELECT	TOP 1 
-		@strItemNo = Item.strItemNo
-		,@intItemId = Item.intItemId 
+		@strInvalidItemNo = Item.strItemNo
+		,@intInvalidItemId = Item.intItemId 
+		,@dblReservedQty = ISNULL(Reserves.dblQty, 0)
+		,@dblOnHandQty = ISNULL(Lot.dblQty, 0)
+		,@intLotId = Lot.intLotId
 FROM	(
 			SELECT	intItemId
 					,intItemLocationId
@@ -90,6 +113,8 @@ FROM	(
 					,intSubLocationId
 					,intStorageLocationId
 					,dblQty = SUM(dblQty)
+					,intTransactionId
+					,intTransactionTypeId
 			FROM	@ItemsToValidate	
 			WHERE	ISNULL(intLotId, 0) <> 0 
 			GROUP BY 
@@ -99,6 +124,8 @@ FROM	(
 				,intLotId
 				,intSubLocationId
 				,intStorageLocationId
+				,intTransactionId
+				,intTransactionTypeId
 		) ValidateItems
 		INNER JOIN dbo.tblICItemLocation ItemLocation
 			ON ValidateItems.intItemId = ItemLocation.intItemId
@@ -123,7 +150,15 @@ FROM	(
 						AND tblICStockReservation.intLotId = ValidateItems.intLotId
 						AND ISNULL(tblICStockReservation.intSubLocationId, 0) = ISNULL(ValidateItems.intSubLocationId, 0)
 						AND ISNULL(tblICStockReservation.intStorageLocationId, 0) = ISNULL(ValidateItems.intStorageLocationId, 0)
+						AND tblICStockReservation.intTransactionId <> ValidateItems.intTransactionId
+						AND tblICStockReservation.strTransactionId <> ValidateItems.strTransactionId
 			WHERE	ISNULL(tblICStockReservation.intLotId, 0) <> 0 
+					AND ISNULL(tblICStockReservation.ysnPosted, 0) = 0
+					AND NOT (
+						tblICStockReservation.intTransactionId = ValidateItems.intTransactionId
+						AND tblICStockReservation.intTransactionId = ValidateItems.intTransactionTypeId
+					)
+
 			GROUP BY 
 				tblICStockReservation.intItemId
 				,tblICStockReservation.intItemLocationId
@@ -140,3 +175,27 @@ FROM	(
 			AND ISNULL(ValidateItems.intStorageLocationId, 0) = ISNULL(Reserves.intStorageLocationId, 0)
 WHERE	ISNULL(Lot.dblQty, 0) - ISNULL(Reserves.dblQty, 0) - ValidateItems.dblQty < 0
 		AND ItemLocation.intAllowNegativeInventory = @AllowNegativeInventory_NoOption -- If No is selected, it does not allow negative stock
+
+_Exit:
+
+IF @intInvalidItemId IS NOT NULL 
+BEGIN 
+		DECLARE @FormattedReservedQty AS NVARCHAR(50)
+				,@FormattedOnHandQty AS NVARCHAR(50)
+
+		SET @FormattedReservedQty =  CONVERT(NVARCHAR, CAST(@dblReservedQty AS MONEY), 1)
+		SET @FormattedOnHandQty =  CONVERT(NVARCHAR, CAST(@dblOnHandQty AS MONEY), 1)
+
+		IF @intLotId IS NOT NULL 
+		BEGIN 
+			-- = 'There is not enough stocks for {Item}. Reserved stocks is {Reserved Lot Qty} while Lot Qty is {Lot Qty}.'
+			RAISERROR(51175, 11, 1, @strInvalidItemNo, @FormattedReservedQty, @FormattedOnHandQty) 
+		END 
+		ELSE 
+		BEGIN 
+			-- 'There is not enough stocks for {Item}. Reserved stocks is {Reserved Stock Qty} while On Hand Qty is {On Hand Qty}.'
+			RAISERROR(51040, 11, 1, @strInvalidItemNo, @FormattedReservedQty, @FormattedOnHandQty) 
+		END 
+
+		RETURN -1;
+END 

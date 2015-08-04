@@ -43,6 +43,8 @@ BEGIN
 		EXEC tSQLt.FakeTable 'dbo.tblGLDetailRecap', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;	
+		EXEC tSQLt.FakeTable 'dbo.tblAPBill', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblAPBillDetail', @Identity = 1;
 
 		INSERT INTO tblICInventoryReceipt (
 			strReceiptNumber

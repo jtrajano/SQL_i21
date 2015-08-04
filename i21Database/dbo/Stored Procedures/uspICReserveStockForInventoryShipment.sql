@@ -10,8 +10,8 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @ItemsToReserve AS dbo.ItemReservationTableType;
 DECLARE @intInventoryTransactionType AS INT
-DECLARE @strItemNo AS NVARCHAR(50) 
-DECLARE @intItemId AS INT 
+DECLARE @strInvalidItemNo AS NVARCHAR(50) 
+DECLARE @intInvalidItemId AS INT 
 
 -- Get the transaction type id
 BEGIN 
@@ -39,7 +39,7 @@ BEGIN
 			,intLotId = ShipmentItemLots.intLotId
 			,dblQty = ShipmentItems.dblQuantity
 			,intTransactionId = Shipment.intInventoryShipmentId
-			,strTransactionId = Shipment.strReferenceNumber
+			,strTransactionId = Shipment.strShipmentNumber
 			,intTransactionTypeId = @intInventoryTransactionType
 	FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItems
 				ON Shipment.intInventoryShipmentId = ShipmentItems.intInventoryShipmentId
@@ -53,26 +53,21 @@ BEGIN
 	WHERE	Shipment.intInventoryShipmentId = @intTransactionId
 END
 
--- Validate the reservation 
+-- Do the reservations
 BEGIN 
+	-- Validate the reservation 
 	EXEC dbo.uspICValidateStockReserves 
 		@ItemsToReserve
-		,@strItemNo OUTPUT 
-		,@intItemId OUTPUT 
+		,@strInvalidItemNo OUTPUT 
+		,@intInvalidItemId OUTPUT 
+
+	-- If there are enough stocks, let the system create the reservations
+	IF (@intInvalidItemId IS NULL)	
+	BEGIN 
+		EXEC dbo.uspICCreateStockReservation
+			@ItemsToReserve
+			,@intTransactionId
+			,@intInventoryTransactionType
+	END 
 END 
 
--- If item id is not null, then the reservation is invalid. 
--- The error should be handled by the caller and rollback any data changes. 
-IF (@intItemId IS NOT NULL)
-BEGIN 
-	-- There is not enough stocks for %s
-	RAISERROR(51040, 11, 1, @strItemNo)   
-END 
-ELSE 
-BEGIN 
-	-- Otherwise, there are enough stocks and let the system create the reservations
-	EXEC dbo.uspICCreateStockReservation
-		@ItemsToReserve
-		,@intTransactionId
-		,@intInventoryTransactionType
-END 

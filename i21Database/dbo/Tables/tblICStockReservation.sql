@@ -13,6 +13,7 @@
     ,[intSort] INT NULL
 	,[intInventoryTransactionType] INT NULL
     ,[intConcurrencyId] INT NULL DEFAULT ((0))
+	,[ysnPosted] BIT NULL DEFAULT((0))
     ,CONSTRAINT [PK_tblICStockReservation] PRIMARY KEY ([intStockReservationId])
     ,CONSTRAINT [FK_tblICStockReservation_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
     ,CONSTRAINT [FK_tblICStockReservation_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId])

@@ -160,7 +160,7 @@ SET @strmessage = 'Cannot process Purchase Order with 0 amount.'
 EXEC sp_addmessage 51039,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51040) EXEC sp_dropmessage 51040, 'us_english'	
-SET @strmessage = 'There is not enough stocks for %s'
+SET @strmessage = 'There is not enough stocks for %s. Reserved stocks is %s while On Hand Qty is %s.'
 EXEC sp_addmessage 51040,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51041) EXEC sp_dropmessage 51041, 'us_english'	
@@ -698,3 +698,7 @@ EXEC sp_addmessage 51173,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51174) EXEC sp_dropmessage 51174, 'us_english'	
 SET @strmessage = 'Unable to Unreceive. The %s is already billed in %s.'
 EXEC sp_addmessage 51174,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51175) EXEC sp_dropmessage 51175, 'us_english'	
+SET @strmessage = 'There is not enough stocks for %s. Reserved stocks is %s while Lot Qty is %s.'
+EXEC sp_addmessage 51175,11,@strmessage,'us_english','False'
