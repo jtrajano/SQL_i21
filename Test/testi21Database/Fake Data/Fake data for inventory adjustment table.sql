@@ -11,6 +11,8 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;	
+	EXEC tSQLt.FakeTable 'dbo.tblSMUserSecurity', @Identity = 1;	
+
 
 	-- Item Ids
 	DECLARE @WetGrains AS INT = 1
@@ -155,6 +157,13 @@ BEGIN
 			,[strModule]			= N'Inventory'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1	
+
+	INSERT INTO dbo.tblSMUserSecurity (
+		intEntityId
+		,strUserName
+	)
+	SELECT intEntityId = 1
+			,strUserName = 'i21User'
 
 	-- Create mock data for Lot Numbers
 	DECLARE @ManualLotGrains_Lot_100001 AS INT = 1
