@@ -1,5 +1,5 @@
 ﻿CREATE TABLE [dbo].[tblPREmployeeEarning] (
-    [intEmployeeEarningId]		INT NOT NULL,
+    [intEmployeeEarningId]		INT				IDENTITY (1, 1) NOT NULL,
     [intEmployeeId]				INT             NOT NULL,
     [intTypeEarningId]			INT             NOT NULL,
     [strCalculationType]		NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
