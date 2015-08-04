@@ -211,7 +211,7 @@ BEGIN
 		)
 		SELECT	intInventoryReceiptId	= @InventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
-				,intOrderId				= RawData.intContractDetailId
+				,intOrderId				= RawData.intContractHeaderId
 				,intSourceId			= RawData.intSourceId
 				,intItemId				= RawData.intItemId
 				,intSubLocationId		= NULL

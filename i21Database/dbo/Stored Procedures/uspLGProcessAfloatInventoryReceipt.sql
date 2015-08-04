@@ -31,6 +31,7 @@ BEGIN TRY
 	 	,intItemLocationId
 	 	,intItemUOMId
 	 	,strBillOfLadding
+		,intContractHeaderId
 	 	,intContractDetailId
 	 	,dtmDate
 	 	,intShipViaId
@@ -53,6 +54,7 @@ BEGIN TRY
 	   CT.intCompanyLocationId,
 	   CT.intItemUOMId,
 	   NULL,
+	   CT.intContractHeaderId,
 	   SC.intContractDetailId,
 	   GETDATE(),
 	   NULL,	  
