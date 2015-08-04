@@ -63,6 +63,7 @@
 --:r .\8_AP\UpdateBillToReceiptAssociation.sql
 
 :r .\8_AP\UpdateMissingPaymentInfo.sql
+:r .\8_AP\UpdateBillStatus.sql
 --:r .\8_AP\AddPOVendorConstraint.sql
 --:r .\8_AP\FixEntityId.sql
 --:r .\8_AP\FixstrBillId.sql
