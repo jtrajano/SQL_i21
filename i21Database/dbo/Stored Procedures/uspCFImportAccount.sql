@@ -18,9 +18,10 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 		--1 Time synchronization here
 		PRINT '1 Time ACCOUNT Synchronization'
 
-		DECLARE @originCustomer NVARCHAR(50)
-
+		DECLARE @originCustomer					NVARCHAR(50)
 		DECLARE @Counter						INT = 0
+		DECLARE @MasterPk						INT
+
 		DECLARE @intAccountId					INT
 		DECLARE @intCustomerId					INT
 		DECLARE @intDiscountDays				INT
@@ -60,7 +61,107 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 		DECLARE @dtmCreated						DATETIME
 		DECLARE @intLastModifiedUserId			int
 		DECLARE @dtmLastModified				DATETIME
+
+
+		--========================--
+		--    DETAIL DEPARTMENT   --
+		--========================--
+		DECLARE @originDepartment				NVARCHAR(50)
+		DECLARE @strDepartment					NVARCHAR(500)
+		DECLARE @strDepartmentDescription		NVARCHAR(500)
+
+
+		--========================--
+		--    DETAIL VEHICLE      --
+		--========================--
+		DECLARE @originVehicle							NVARCHAR(500)
+		DECLARE @strVehicleVehicleNumber				NVARCHAR(500)
+		DECLARE @strVehicleCustomerUnitNumber			NVARCHAR(500)
+		DECLARE @strVehicleVehicleDescription			NVARCHAR(500)
+		DECLARE @intVehicleDaysBetweenService			INT
+		DECLARE @intVehicleMilesBetweenService			INT
+		DECLARE @intVehicleLastReminderOdometer			INT
+		DECLARE @dtmVehicleLastReminderDate				DATETIME
+		DECLARE @dtmVehicleLastServiceDate				DATETIME
+		DECLARE @intVehicleLastServiceOdometer			INT
+		DECLARE @strVehicleNoticeMessageLine1			NVARCHAR(500)
+		DECLARE @strVehicleNoticeMessageLine2			NVARCHAR(500)
+		DECLARE @strVehicleVehicleForOwnUse				NVARCHAR(500)
+		DECLARE @intVehicleExpenseItemId				INT
+		DECLARE @strVehicleLicencePlateNumber			NVARCHAR(500)
+		DECLARE @strVehicleDepartment					NVARCHAR(500)
+		DECLARE @intVehicleCreatedUserId				INT
+		DECLARE @dtmVehicleCreated						DATETIME
+		DECLARE @intVehicleLastModifiedUserId			INT
+		DECLARE @dtmVehicleLastModified					DATETIME
+		DECLARE @ysnVehicleCardForOwnUse				BIT
+
+
+		--============================--
+		--    DETAIL MISCELLANEOUS    --
+		--============================--
+		DECLARE @originMiscellaneous					NVARCHAR(500)
+		DECLARE @strMiscellaneous					    NVARCHAR(500)
+		DECLARE @strMiscellaneousDescription		    NVARCHAR(500)
+
+
+		--============================--
+		--    DETAIL PURCHASE ORDER   --
+		--============================--
+		DECLARE @dtmPurchaseOrderExpirationDate			DATETIME
+		DECLARE @strPurchaseOrderNo						NVARCHAR(500)
+
+
+		--===================--
+		--    DETAIL CARDS   --
+		--===================--
+		DECLARE @intCardNetworkId							INT
+		DECLARE @strCardCardNumber							NVARCHAR(500)
+		DECLARE @strCardCardDescription						NVARCHAR(500)
+		DECLARE @strCardCardForOwnUse						NVARCHAR(500)
+		DECLARE @intCardExpenseItemId						INT
+		DECLARE @intCardDefaultFixVehicleNumber				INT
+		DECLARE @intCardDepartmentId						INT
+		DECLARE @dtmCardLastUsedDated						DATETIME
+		DECLARE @intCardCardTypeId							INT
+		DECLARE @dtmCardIssueDate							DATETIME
+		DECLARE @ysnCardActive								BIT
+		DECLARE @ysnCardCardLocked							BIT
+		DECLARE @strCardCardPinNumber						NVARCHAR(500)
+		DECLARE @dtmCardCardExpiratioYearMonth				DATETIME
+		DECLARE @strCardCardValidationCode					NVARCHAR(500)
+		DECLARE @intCardNumberOfCardsIssued					INT
+		DECLARE @intCardCardLimitedCode						INT
+		DECLARE @intCardCardFuelCode						INT
+		DECLARE @strCardCardTierCode						NVARCHAR(500)
+		DECLARE @strCardCardOdometerCode					NVARCHAR(500)
+		DECLARE @strCardCardWCCode							NVARCHAR(500)
+		DECLARE @strCardSplitNumber							NVARCHAR(500)
+		DECLARE @intCardCardManCode							INT
+		DECLARE @intCardCardShipCat							INT
+		DECLARE @intCardCardProfileNumber					INT
+		DECLARE @intCardCardPositionSite					INT
+		DECLARE @intCardCardvehicleControl					INT
+		DECLARE @intCardCardCustomPin						INT
+		DECLARE @intCardCreatedUserId						INT
+		DECLARE @dtmCardCreated								DATETIME
+		DECLARE @intCardLastModifiedUserId					INT
+		DECLARE @dtmCardLastModified						DATETIME
+		DECLARE @ysnCardCardForOwnUse						BIT
+		DECLARE @ysnCardIgnoreCardTransaction				BIT
     
+
+		--=============================--
+				--		INSERT INTO ACCOUNT    --
+				--        REQUIRED FIELDS	   --
+				--							   --
+				-- 1. intCustomerId            --
+				-- 2. intInvoiceCycle          --
+				-- 3. intDiscountScheduleId    --
+				-- 4. intSalesPersonId         --
+				-- 5. intTermsCode             --
+				-- 6. intAccountStatusCodeId   --
+				--							   --
 		--Import only those are not yet imported
 		SELECT cfact_cus_no INTO #tmpcfactmst 
 			FROM cfactmst
@@ -72,29 +173,20 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 
 		WHILE (EXISTS(SELECT 1 FROM #tmpcfactmst))
 		BEGIN
-				
-			--=============================--
-			--       REQUIRED FIELDS	   --
-			--							   --
-			-- 1. intCustomerId            --
-			-- 2. intInvoiceCycle          --
-			-- 3. intDiscountScheduleId    --
-			-- 4. intSalesPersonId         --
-			-- 5. intTermsCode             --
-			-- 6. intAccountStatusCodeId   --
-			--=============================--
 
 			SELECT @originCustomer = cfact_cus_no FROM #tmpcfactmst
 			BEGIN TRY
 				BEGIN TRANSACTION
 				SELECT TOP 1
 
-					--Tracking Fields--
+					--================================--
+					--       INSERT MASTER RECORD     --
+					--================================--
+
 					@intCreatedUserId = 0,		
 					@dtmCreated = CONVERT(VARCHAR(10), GETDATE(), 120),				
 					@intLastModifiedUserId = 0,
 					@dtmLastModified = CONVERT(VARCHAR(10), GETDATE(), 120),
-					--Tracking Fields--
 
 					@intCustomerId = (SELECT intEntityCustomerId 
 									  FROM tblARCustomer 
@@ -242,8 +334,6 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 
 				FROM cfactmst
 				WHERE cfact_cus_no = @originCustomer
-					
-		--INSERT into Customer
 				INSERT [dbo].[tblCFAccount](		
 					[intCustomerId]					
 					,[intDiscountDays]				
@@ -322,6 +412,197 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 					,@dtmCreated					
 					,@intLastModifiedUserId		
 					,@dtmLastModified)
+				--=============================--
+
+				SELECT @MasterPk  = SCOPE_IDENTITY();
+
+				--====================================--
+				--		INSERT DETAIL DEPARTMENT	  --
+				--			 REQUIRED FIELDS		  --
+				--									  --
+				--	1. intAccountId					  --
+				--									  --
+				SELECT cfdpt_dept INTO #tmpcfdptmst
+				FROM cfdptmst
+				WHERE cfdpt_cus_no COLLATE Latin1_General_CI_AS = @originCustomer				
+				WHILE (EXISTS(SELECT 1 FROM #tmpcfdptmst))
+				BEGIN
+
+					SELECT @originDepartment = cfdpt_dept FROM #tmpcfdptmst
+
+					SELECT TOP 1
+					 @strDepartment							= LTRIM(RTRIM(cfdpt_dept))
+					,@strDepartmentDescription				= LTRIM(RTRIM(cfdpt_dept_desc))
+
+					FROM cfdptmst
+					WHERE cfdpt_dept = @originDepartment
+					
+					INSERT [dbo].[tblCFDepartment](
+						[intAccountId]
+						,[strDepartment]				
+						,[strDepartmentDescription]
+					)
+					VALUES(
+						@MasterPk
+						,@strDepartment				
+						,@strDepartmentDescription
+					)
+					DEPARTMENTLOOP:
+					PRINT @originDepartment
+					DELETE FROM #tmpcfdptmst WHERE cfdpt_dept = @originDepartment
+				END
+				DROP TABLE #tmpcfdptmst
+				--====================================--
+
+
+				--====================================--
+				--	  INSERT DETAIL MISCELLANEOUS     --
+				--			 REQUIRED FIELDS		  --
+				--									  --
+				--	1. intAccountId					  --
+				--									  --
+				SELECT cfmsc_misc INTO #tmpcfmscmst
+				FROM cfmscmst
+				WHERE cfmsc_cus_no COLLATE Latin1_General_CI_AS = @originCustomer				
+				WHILE (EXISTS(SELECT 1 FROM #tmpcfmscmst))
+				BEGIN
+
+					SELECT @originMiscellaneous = cfmsc_misc FROM #tmpcfmscmst
+
+					SELECT TOP 1
+					 @strMiscellaneous							= LTRIM(RTRIM(cfmsc_misc))
+					,@strMiscellaneousDescription				= LTRIM(RTRIM(cfmsc_misc_desc))
+
+					FROM cfmscmst
+					WHERE cfmsc_misc = @originMiscellaneous
+					
+					INSERT [dbo].[tblCFMiscellaneous](
+						[intAccountId]
+						,[strMiscellaneous]				
+						,[strMiscellaneousDescription]
+					)
+					VALUES(
+						@MasterPk
+						,@strMiscellaneous				
+						,@strMiscellaneousDescription
+					)
+					MISCELLANEOUSLOOP:
+					PRINT @originMiscellaneous
+					DELETE FROM #tmpcfmscmst WHERE cfmsc_misc = @originMiscellaneous
+				END
+				DROP TABLE #tmpcfmscmst
+				--====================================--
+
+				--====================================--
+				--		  INSERT DETAIL VEHICLE       --
+				--			 REQUIRED FIELDS		  --
+				--									  --
+				--	1. intAccountId					  --
+				--  2. intItemId					  --
+				--									  --
+				SELECT cfveh_vehl_no INTO #tmpcfvehmst
+				FROM cfvehmst
+				WHERE cfveh_ar_cus_no COLLATE Latin1_General_CI_AS = @originCustomer				
+				WHILE (EXISTS(SELECT 1 FROM #tmpcfvehmst))
+				BEGIN
+
+					SELECT @originVehicle = cfveh_vehl_no FROM #tmpcfvehmst
+
+					SELECT TOP 1
+					
+
+					@strVehicleVehicleNumber					= LTRIM(RTRIM(cfveh_vehl_no))
+					,@strVehicleCustomerUnitNumber				= LTRIM(RTRIM(cfveh_cus_unit_no))
+					,@strVehicleVehicleDescription				= LTRIM(RTRIM(cfveh_vehicle_desc))
+					,@intVehicleDaysBetweenService				= cfveh_days_between_serv
+					,@intVehicleMilesBetweenService				= cfveh_mile_between_serv
+					,@intVehicleLastReminderOdometer			= cfveh_last_serv_odom
+					,@dtmVehicleLastReminderDate				= (case
+																	when LEN(RTRIM(LTRIM(ISNULL(cfveh_last_rmndr_date,0)))) = 8 
+																	then CONVERT(datetime, SUBSTRING (RTRIM(LTRIM(cfveh_last_rmndr_date)),1,4) 
+																		+ '/' + SUBSTRING (RTRIM(LTRIM(cfveh_last_rmndr_date)),5,2) + '/' 
+																		+ SUBSTRING (RTRIM(LTRIM(cfveh_last_rmndr_date)),7,2), 120)
+																	else NULL
+																end) 
+					,@dtmVehicleLastServiceDate					= cfveh_last_serv_rev_dt
+					,@intVehicleLastServiceOdometer				= cfveh_last_serv_odom
+					,@strVehicleNoticeMessageLine1				= LTRIM(RTRIM(cfveh_notice_msg1))
+					,@strVehicleNoticeMessageLine2				= LTRIM(RTRIM(cfveh_notice_msg2))
+					--,@strVehicleVehicleForOwnUse				= LTRIM(RTRIM(cfveh_vehl_no))
+
+					,@intVehicleExpenseItemId					= (SELECT intItemId 
+																   FROM tblICItem 
+																   WHERE strItemNo = LTRIM(RTRIM(cfveh_exp_itm_no)) 
+																   COLLATE Latin1_General_CI_AS)
+
+					,@strVehicleLicencePlateNumber				= LTRIM(RTRIM(cfveh_lic_plate_no))
+					--,@strVehicleDepartment					= LTRIM(RTRIM(cfveh_vehl_no))
+					,@intVehicleCreatedUserId					= 0		
+					,@dtmVehicleCreated							= CONVERT(VARCHAR(10), GETDATE(), 120)				
+					,@intVehicleLastModifiedUserId				= 0
+					,@dtmVehicleLastModified					= CONVERT(VARCHAR(10), GETDATE(), 120)
+					,@ysnVehicleCardForOwnUse					= (case
+																   when RTRIM(LTRIM(cfveh_own_use_yn)) = 'N' then 'FALSE'
+																   when RTRIM(LTRIM(cfveh_own_use_yn)) = 'Y' then 'TRUE'
+																   else 'FALSE'
+																   end)
+					FROM cfvehmst
+					WHERE cfveh_vehl_no = @originVehicle
+					
+					INSERT [dbo].[tblCFVehicle](
+						[intAccountId]
+						,[strVehicleNumber]		
+						,[strCustomerUnitNumber]	
+						,[strVehicleDescription]	
+						,[intDaysBetweenService]	
+						,[intMilesBetweenService]	
+						,[intLastReminderOdometer]	
+						,[dtmLastReminderDate]		
+						,[dtmLastServiceDate]		
+						,[intLastServiceOdometer]	
+						,[strNoticeMessageLine1]	
+						,[strNoticeMessageLine2]	
+						,[strVehicleForOwnUse]		
+						,[intExpenseItemId]		
+						,[strLicencePlateNumber]	
+						,[strDepartment]			
+						,[intCreatedUserId]		
+						,[dtmCreated]			
+						,[intLastModifiedUserId]	
+						,[dtmLastModified]		
+						,[ysnCardForOwnUse]		
+					)
+					VALUES(
+						@MasterPk
+						,@strVehicleVehicleNumber		
+						,@strVehicleCustomerUnitNumber	
+						,@strVehicleVehicleDescription	
+						,@intVehicleDaysBetweenService	
+						,@intVehicleMilesBetweenService	
+						,@intVehicleLastReminderOdometer	
+						,@dtmVehicleLastReminderDate		
+						,@dtmVehicleLastServiceDate		
+						,@intVehicleLastServiceOdometer	
+						,@strVehicleNoticeMessageLine1	
+						,@strVehicleNoticeMessageLine2	
+						,@strVehicleVehicleForOwnUse		
+						,@intVehicleExpenseItemId		
+						,@strVehicleLicencePlateNumber	
+						,@strVehicleDepartment			
+						,@intVehicleCreatedUserId		
+						,@dtmVehicleCreated				
+						,@intVehicleLastModifiedUserId	
+						,@dtmVehicleLastModified			
+						,@ysnVehicleCardForOwnUse		
+					)
+					VEHICLELOOP:
+					PRINT @originVehicle
+					DELETE FROM #tmpcfvehmst WHERE cfveh_vehl_no = @originVehicle
+				END
+				DROP TABLE #tmpcfvehmst
+				--====================================--
+
+
 				COMMIT TRANSACTION
 				SET @TotalSuccess += 1;
 				INSERT INTO tblCFAccountSuccessImport(strAccountNumber)					
@@ -332,6 +613,7 @@ CREATE PROCEDURE [dbo].[uspCFImportAccount]
 				SET @TotalFailed += 1;
 				INSERT INTO tblCFAccountFailedImport(strAccountNumber,strReason)					
 				VALUES(@originCustomer,ERROR_MESSAGE())					
+				PRINT 'IMPORTING ACCOUNTS' + ERROR_MESSAGE()
 				--PRINT 'Failed to imports' + @originCustomer; --@@ERROR;
 				GOTO CONTINUELOOP;
 			END CATCH

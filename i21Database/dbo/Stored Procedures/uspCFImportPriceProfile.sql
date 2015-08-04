@@ -172,6 +172,7 @@ CREATE PROCEDURE [dbo].[uspCFImportPriceProfile]
 				VALUES(@originPriceProfile)			
 			END TRY
 			BEGIN CATCH
+				PRINT 'IMPORTING PRICE PROFILE' + ERROR_MESSAGE()
 				ROLLBACK TRANSACTION
 				SET @TotalFailed += 1;
 				INSERT INTO tblCFPriceProfileFailedImport(strPriceProfileId,strReason)					

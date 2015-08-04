@@ -20,6 +20,7 @@ CREATE PROCEDURE [dbo].[uspCFImportNetwork]
 
 		DECLARE @originNetwork NVARCHAR(50)
 		DECLARE @Counter								 INT = 0
+		DECLARE @MasterPk								 INT
 
 		DECLARE @strNetwork								 NVARCHAR(MAX)
 		DECLARE @strNetworkType							 NVARCHAR(MAX)
@@ -49,6 +50,13 @@ CREATE PROCEDURE [dbo].[uspCFImportNetwork]
 		DECLARE @ysnExemptFETOnRemotes					 BIT
 		DECLARE @ysnExemptSETOnRemotes					 BIT
 		DECLARE @ysnExemptLCOnRemotes					 BIT
+
+		--========================--
+		--    DETAIL CARD TYPE    --
+		--========================--
+		DECLARE @originCardType							 NVARCHAR(MAX)
+		DECLARE @strCardType							 NVARCHAR(MAX)
+		DECLARE @strCardTypeDescription					 NVARCHAR(MAX)
 
 		--Import only those are not yet imported
 		SELECT cfnet_network_id INTO #tmpcfnetmst
@@ -139,9 +147,10 @@ CREATE PROCEDURE [dbo].[uspCFImportNetwork]
 															end)
 				FROM cfnetmst
 				WHERE cfnet_network_id = @originNetwork
-					
-				--INSERT into Network
-				INSERT [dbo].[tblCFNetwork](		
+				--================================--
+				--       INSERT MASTER RECORD     --
+				--================================--
+				INSERT [dbo].[tblCFNetwork](
 					 [strNetwork]							
 					,[strNetworkType]						
 					,[strNetworkDescription]				
@@ -199,6 +208,48 @@ CREATE PROCEDURE [dbo].[uspCFImportNetwork]
 					,@ysnExemptFETOnRemotes				
 					,@ysnExemptSETOnRemotes				
 					,@ysnExemptLCOnRemotes)
+
+				SELECT @MasterPk  = SCOPE_IDENTITY();
+
+				--====================================--
+				--		INSERT DETAIL CARD TYPE 	  --
+				--			 REQUIRED FIELDS		  --
+				--									  --
+				--	1. intNetworkId					  --
+				--									  --
+			
+				SELECT cfcty_type INTO #tmpcfctymst
+				FROM cfctymst
+				WHERE cfcty_network_id COLLATE Latin1_General_CI_AS = @originNetwork			
+					
+				WHILE (EXISTS(SELECT 1 FROM #tmpcfctymst))
+				BEGIN
+					
+					SELECT @originCardType = cfcty_type FROM #tmpcfctymst
+					
+					SELECT TOP 1
+					 @strCardType					  = LTRIM(RTRIM(cfcty_type))
+					,@strCardTypeDescription		  = LTRIM(RTRIM(cfcty_desc))
+					FROM cfctymst
+					WHERE cfcty_type = @originCardType
+					
+					INSERT [dbo].[tblCFCardType](
+						 [intNetworkId]
+						,[strCardType]	
+						,[strDescription]	
+					)
+					VALUES(
+						 @MasterPk
+						,@strCardType	
+						,@strCardTypeDescription	
+					)
+					CARDTYPELOOP:
+					PRINT @originCardType
+					DELETE FROM #tmpcfctymst WHERE cfcty_type = @originCardType
+				END
+				DROP TABLE #tmpcfctymst
+				--====================================--
+
 				COMMIT TRANSACTION
 				SET @TotalSuccess += 1;
 				INSERT INTO tblCFNetworkSuccessImport(strNetworkId)					
@@ -208,7 +259,8 @@ CREATE PROCEDURE [dbo].[uspCFImportNetwork]
 				ROLLBACK TRANSACTION
 				SET @TotalFailed += 1;
 				INSERT INTO tblCFNetworkFailedImport(strNetworkId,strReason)					
-				VALUES(@originNetwork,ERROR_MESSAGE())					
+				VALUES(@originNetwork,ERROR_MESSAGE())			
+				PRINT 'IMPORTING NETWORK' + ERROR_MESSAGE()		
 				--PRINT 'Failed to imports' + @originCustomer; --@@ERROR;
 				GOTO CONTINUELOOP;
 			END CATCH

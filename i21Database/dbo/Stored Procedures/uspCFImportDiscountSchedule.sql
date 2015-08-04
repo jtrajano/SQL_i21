@@ -514,6 +514,7 @@ CREATE PROCEDURE [dbo].[uspCFImportDiscountSchedule]
 				INSERT INTO tblCFDiscountScheduleFailedImport(strDiscountScheduleId,strReason)					
 				VALUES(@originDiscountSchedule,ERROR_MESSAGE())					
 				--PRINT 'Failed to imports' + @originCustomer; --@@ERROR;
+				PRINT 'IMPORTING DISCOUNT SCHEDULE' + ERROR_MESSAGE()
 				GOTO CONTINUELOOP;
 			END CATCH
 			IF(@@ERROR <> 0) 
