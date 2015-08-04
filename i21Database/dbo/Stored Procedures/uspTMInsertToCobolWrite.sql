@@ -57,7 +57,7 @@ BEGIN
 		ON B.intEntityCustomerId = E.intEntityId
 	INNER JOIN tblSMCompanyLocation F
 		ON B.intCompanyLocationId = F.intCompanyLocationId
-	LEFT JOIN tblARSalesperson G
+	LEFT JOIN vyuEMSalesperson G
 		ON B.intEntitySalespersonId = G.intEntitySalespersonId
 	LEFT JOIN tblARSalesperson H
 		ON A.intPerformerId = H.intEntitySalespersonId
