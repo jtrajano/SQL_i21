@@ -2,6 +2,7 @@
 AS
 SELECT 
 		cs.intAssignFuturesToContractSummaryId,
+		ch.intContractNumber,
 		ch.strContractType,  
 		cd.intContractSeq,
 		m.strFutMarketName CTFutureMarketName,
