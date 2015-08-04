@@ -95,7 +95,7 @@ BEGIN TRY
 	   3 -- Source type for transports is 3 
 	   from tblTRTransportLoad TL
             JOIN tblTRTransportReceipt TR ON TR.intTransportLoadId = TL.intTransportLoadId			
-			JOIN tblCTContractDetail CT ON CT.intContractDetailId = TR.intContractDetailId
+			LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = TR.intContractDetailId
 			LEFT JOIN tblTRSupplyPoint SP on SP.intSupplyPointId = TR.intSupplyPointId
             where TL.intTransportLoadId = @intTransportLoadId and TR.strOrigin = 'Terminal';
 
