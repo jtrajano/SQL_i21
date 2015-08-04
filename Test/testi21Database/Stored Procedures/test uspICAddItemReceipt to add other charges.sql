@@ -195,6 +195,7 @@ BEGIN
 				,intItemLocationId
 				,intItemUOMId
 				,strBillOfLadding
+				,intContractHeaderId
 				,intContractDetailId
 				,dtmDate
 				,intShipViaId
@@ -217,6 +218,7 @@ BEGIN
 				,intItemLocationId	= @ManualLotGrains_DefaultLocation
 				,intItemUOMId		= @ManualGrains_KgUOM
 				,strBillOfLadding	= '7'
+				,intContractHeaderId = 7
 				,intContractDetailId = 8
 				,dtmDate			= '09/09/2009'
 				,intShipViaId		= 10
