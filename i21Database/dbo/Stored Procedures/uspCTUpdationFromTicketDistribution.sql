@@ -105,7 +105,7 @@ BEGIN TRY
 		SELECT	@dblBalance		=	dblBalance,
 				@dblQuantity	=	dblQuantity,
 				@dblCost		=	ISNULL(dblBasis,0)+ISNULL(dblFutures,0),
-				@dblAvailable	=	dblBalance - dblScheduleQty
+				@dblAvailable	=	ISNULL(dblBalance,0) - ISNULL(dblScheduleQty,0)
 		FROM	tblCTContractDetail 
 		WHERE	intContractDetailId = @intContractDetailId
 
