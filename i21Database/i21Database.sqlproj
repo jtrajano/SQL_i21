@@ -2170,6 +2170,7 @@
     <Build Include="dbo\Views\vyuGRGetStorageCustomer.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageLocation.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageTransferTicket.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRecomputeBillTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
