@@ -28,7 +28,7 @@ BEGIN
 		,E.vwsls_name AS strDriverName
 		,F.vwitm_no AS strItemNo
 		,CAST(ISNULL(A.dblEstimatedPercentLeft,0) AS DECIMAL(18,2)) AS dblEstimatedPercentLeft
-		,CAST(ISNULL(A.dblTotalCapacity,0.0) * ((ISNULL(F.vwitm_deflt_percnt,100) - ISNULL(dblEstimatedPercentLeft,0.0))/100) AS INT) AS intCalculatedQuantity
+		,CAST(ROUND((ISNULL(A.dblTotalCapacity,0.0) * ((ISNULL(F.vwitm_deflt_percnt,100) - ISNULL(dblEstimatedPercentLeft,0.0))/100)), 0) AS INT) AS intCalculatedQuantity
 		,CAST(ISNULL(A.dblTotalCapacity,0.0) AS DECIMAL(18,2)) AS dblTotalCapacity
 		,ISNULL(D.strRouteId,'''') AS strRouteId
 		,A.intConcurrencyId
