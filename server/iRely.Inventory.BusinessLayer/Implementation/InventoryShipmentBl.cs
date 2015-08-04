@@ -50,40 +50,44 @@ namespace iRely.Inventory.BusinessLayer
         public override async Task<BusinessResult<tblICInventoryShipment>> SaveAsync(bool continueOnConflict)
         {
             SaveResult result = new SaveResult();
-            var soList = new List<int>();
+            var salesOrderToUpdate = new List<int>();
 
             using (var transaction = _db.ContextManager.Database.BeginTransaction())
             {
                 var connection = _db.ContextManager.Database.Connection;
                 try
                 {
+                    // Get the shipment id from records with Updated or New data. 
                     foreach (var shipment in _db.ContextManager.Set<tblICInventoryShipment>().Local)
                     {
                         if (shipment.intOrderType == 2)
                         {
-                            if (!soList.Contains(shipment.intInventoryShipmentId))
-                                soList.Add(shipment.intInventoryShipmentId);
+                            if (!salesOrderToUpdate.Contains(shipment.intInventoryShipmentId))
+                                salesOrderToUpdate.Add(shipment.intInventoryShipmentId);
                         }
                     }
+
+                    // Get the shipment id from deleted records 
                     var deletedShipments = _db.ContextManager.ChangeTracker.Entries<tblICInventoryShipment>().Where(p => p.State == EntityState.Deleted).ToList();
                     foreach (var shipment in deletedShipments)
                     {
                         if (shipment.Entity.intOrderType == 2)
                         {
-                            if (!soList.Contains(shipment.Entity.intInventoryShipmentId))
-                                soList.Add(shipment.Entity.intInventoryShipmentId);
+                            if (!salesOrderToUpdate.Contains(shipment.Entity.intInventoryShipmentId))
+                                salesOrderToUpdate.Add(shipment.Entity.intInventoryShipmentId);
                         }
                     }
 
-                    result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
-
-                    foreach (var shipmentId in soList)
+                    // Call the Sales Order SP to update the SO status 
+                    foreach (var shipmentId in salesOrderToUpdate)
                     {
                         var idParameter = new SqlParameter("intShipmentId", shipmentId);
-                        _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdateSOStatusOnShipmentSave @intShipmentId", idParameter);
-                        
+                        var openStatus = new SqlParameter("ysnOpenStatus", true);
+                        _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdateSOStatusOnShipmentSave @intShipmentId", idParameter, openStatus);
                     }
-                    
+
+                    result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
+                                        
                     // Update the stock reservation for the deleted shipments                    
                     foreach (var shipment in deletedShipments)
                     {
@@ -91,12 +95,27 @@ namespace iRely.Inventory.BusinessLayer
                         _db.ContextManager.Database.ExecuteSqlCommand("uspICReserveStockForInventoryShipment @intTransactionId", idParameter);
                     }
 
-                    // Update the stock reservation for the latest shipment data. 
+                    
                     foreach (var shipment in _db.ContextManager.Set<tblICInventoryShipment>().Local)
                     {
-                        var idParameter = new SqlParameter("intTransactionId", shipment.intInventoryShipmentId);
-                        _db.ContextManager.Database.ExecuteSqlCommand("uspICReserveStockForInventoryShipment @intTransactionId", idParameter);
+                        
+                        // Update the stock reservation for the latest shipment data. 
+                        var intTransactionId = new SqlParameter("intTransactionId", shipment.intInventoryShipmentId);
+                        _db.ContextManager.Database.ExecuteSqlCommand("uspICReserveStockForInventoryShipment @intTransactionId", intTransactionId);
+
+                        // Update the sales order status using the latest shipment data
+                        var intShipmentId = new SqlParameter("intShipmentId", shipment.intInventoryShipmentId);
+                        _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdateSOStatusOnShipmentSave @intShipmentId", intShipmentId);
                     }
+
+                    
+                    foreach (var shipment in _db.ContextManager.Set<tblICInventoryShipment>().Local)
+                    {
+                        
+                        
+
+                    }
+
 
                     transaction.Commit();
 
