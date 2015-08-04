@@ -45,7 +45,7 @@ SET @IsOpen = (	SELECT COUNT(1)
 						)										
 					)
 					
-IF(NOT EXISTS(SELECT NULL FROM tblICInventoryShipmentItem WHERE intSourceId = @SalesOrderId) 
+IF(NOT EXISTS(SELECT NULL FROM tblICInventoryShipmentItem WHERE intOrderId = @SalesOrderId) 
 		AND NOT EXISTS(SELECT NULL FROM tblARInvoiceDetail ISD
 		INNER JOIN tblARInvoice ISH
 			ON ISD.intInvoiceId = ISH.intInvoiceId
@@ -136,17 +136,12 @@ IF (@TotalQtyShipped < @TotalQtyOrdered)
 		
 SET @OrderStatus = 'Closed'
 		
-SET_ORDER_STATUS:
-	IF (@OrderStatus <> 'Open')
-	BEGIN
-		UPDATE tblSOSalesOrder
-		SET ysnProcessed = 1
-		WHERE [intSalesOrderId] = @SalesOrderId
-	END
-
+SET_ORDER_STATUS:	
 	UPDATE tblSOSalesOrder
 	SET [strOrderStatus] = @OrderStatus
+	  , [dtmProcessDate] = GETDATE()
+	  , [ysnProcessed] = CASE WHEN @OrderStatus <> 'Open' THEN 1 ELSE 0 END
 	WHERE [intSalesOrderId] = @SalesOrderId
 		
-	RETURN;		
+	RETURN;
 END

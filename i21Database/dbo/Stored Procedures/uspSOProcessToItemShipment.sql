@@ -86,14 +86,6 @@ WHERE
 
 SET @InventoryShipmentId = @ShipmentId;
 
-UPDATE 
-	tblSOSalesOrder
-SET
-	dtmProcessDate = GETDATE()
-  , ysnProcessed = 1
-WHERE 
-	intSalesOrderId = @SalesOrderId
-
 RETURN 1;
 
 END
