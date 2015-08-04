@@ -990,6 +990,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var masterRecord = win.viewModel.data.current;
         var detailRecord = win.viewModel.data.currentReceiptItem;
 
+        if (!masterRecord) return;
+        if (!detailRecord) return;
+        if (iRely.Functions.isEmpty(detailRecord.get('intItemId'))) return;
+
         if(reset !== false) reset = true;
 
         if (detailRecord) {
@@ -1097,6 +1101,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         });
 
         currentRecord.set('dblTax', totalItemTax);
+        var unitCost = currentRecord.get('dblUnitCost');
+        var qty = currentRecord.get('dblOpenReceive');
+        currentRecord.set('dblLineTotal', totalItemTax + (qty * unitCost));
 
     },
 
@@ -1440,6 +1447,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     record.set('dblUnitRetail', context.value);
                     record.set('dblGrossMargin', 0);
                 }
+                value += record.get('dblTax');
                 record.set('dblLineTotal', value);
             }
         }
@@ -1572,7 +1580,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('strUnitMeasure', po.get('strUOM'));
                 current.set('strOrderUOM', po.get('strUOM'));
                 current.set('dblUnitCost', po.get('dblCost'));
-                current.set('dblLineTotal', po.get('dblTotal'));
+                current.set('dblLineTotal', po.get('dblTotal') + po.get('dblTax'));
                 current.set('dblTax', po.get('dblTax'));
                 current.set('strLotTracking', po.get('strLotTracking'));
                 current.set('intCommodityId', po.get('intCommodityId'));
