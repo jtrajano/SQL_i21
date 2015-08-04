@@ -249,6 +249,7 @@ BEGIN
 	
 	UPDATE A
 		SET A.dblTotal = (SELECT SUM(dblTotal) FROM tblAPBillDetail WHERE intBillId = @generatedBillId)
+		,A.dblTax = (SELECT SUM(dblTax) FROM tblAPBillDetail WHERE intBillId = @generatedBillId)
 	FROM tblAPBill A
 	WHERE intBillId = @generatedBillId
 
