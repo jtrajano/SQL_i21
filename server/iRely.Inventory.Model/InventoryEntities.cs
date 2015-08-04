@@ -132,8 +132,7 @@ namespace iRely.Inventory.Model
         
         public DbSet<tblSTPaidOut> tblSTPaidOut { get; set; }
         public DbSet<tblSTStore> tblSTStore { get; set; }
-        public DbSet<tblSTSubcategoryClass> tblSTSubcategoryClasses { get; set; }
-        public DbSet<tblSTSubcategoryFamily> tblSTSubcategoryFamilies { get; set; }
+        public DbSet<tblSTSubcategory> tblSTSubcategories { get; set; }
         public DbSet<tblSTSubcategoryRegProd> tblSTSubcategoryRegProds { get; set; }
         public DbSet<tblSTPromotionSalesList> tblSTPromotionSalesLists { get; set; }
 
@@ -272,8 +271,7 @@ namespace iRely.Inventory.Model
 
             modelBuilder.Configurations.Add(new tblSTPaidOutMap());
             modelBuilder.Configurations.Add(new tblSTStoreMap());
-            modelBuilder.Configurations.Add(new tblSTSubcategoryClassMap());
-            modelBuilder.Configurations.Add(new tblSTSubcategoryFamilyMap());
+            modelBuilder.Configurations.Add(new tblSTSubcategoryMap());
             modelBuilder.Configurations.Add(new tblSTSubcategoryRegProdMap());
 
             modelBuilder.Configurations.Add(new tblGRStorageTypeMap());

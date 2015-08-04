@@ -170,7 +170,7 @@ namespace iRely.Inventory.Model
                 .WithMany(p => p.tblICCategoryVendors)
                 .HasForeignKey(p => p.intCategoryLocationId);
             this.HasOptional(p => p.Family)
-                .WithMany(p => p.tblICCategoryVendors)
+                .WithMany(p => p.tblICCategoryVendorFamily)
                 .HasForeignKey(p => p.intFamilyId);
             this.HasOptional(p => p.OrderClass)
                 .WithMany(p => p.tblICCategoryVendorOrderClasses)

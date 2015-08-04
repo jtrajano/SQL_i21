@@ -162,12 +162,21 @@ Ext.define('Inventory.view.CategoryViewController', {
                 colVendorLocation: {
                     dataIndex: 'strLocationName',
                     editor: {
-                        store: '{location}'
+                        origValueField: 'intCategoryLocationId',
+                        origUpdateField: 'intCategoryLocationId',
+                        store: '{location}',
+                        defaultFilters: [{
+                            column: 'intCategoryId',
+                            value: '{current.intCategoryId}',
+                            conjunction: 'and'
+                        }]
                     }
                 },
                 colVendorId: {
                     dataIndex: 'strVendorId',
                     editor: {
+                        origValueField: 'intEntityVendorId',
+                        origUpdateField: 'intVendorId',
                         store: '{vendor}'
                     }
                 },
@@ -177,8 +186,10 @@ Ext.define('Inventory.view.CategoryViewController', {
                 colVendorAddNew: 'ysnAddNewRecords',
                 colVendorUpdatePrice: 'ysnUpdatePrice',
                 colVendorFamily: {
-                    dataIndex: 'intFamilyId',
+                    dataIndex: 'strFamilyId',
                     editor: {
+                        origValueField: 'intSubcategoryId',
+                        origUpdateField: 'intFamilyId',
                         store: '{vendorFamily}',
                         defaultFilters: [{
                             column: 'strSubcategoryType',
@@ -188,8 +199,10 @@ Ext.define('Inventory.view.CategoryViewController', {
                     }
                 },
                 colVendorSellClass: {
-                    dataIndex: 'intSellClassId',
+                    dataIndex: 'strSellClassId',
                     editor: {
+                        origValueField: 'intSubcategoryId',
+                        origUpdateField: 'intSellClassId',
                         store: '{vendorSellClass}',
                         defaultFilters: [{
                             column: 'strSubcategoryType',
@@ -199,8 +212,10 @@ Ext.define('Inventory.view.CategoryViewController', {
                     }
                 },
                 colVendorOrderClass: {
-                    dataIndex: 'intOrderClassId',
+                    dataIndex: 'strOrderClassId',
                     editor: {
+                        origValueField: 'intSubcategoryId',
+                        origUpdateField: 'intOrderClassId',
                         store: '{vendorOrderClass}',
                         defaultFilters: [{
                             column: 'strSubcategoryType',
@@ -247,6 +262,9 @@ Ext.define('Inventory.view.CategoryViewController', {
                 'tblICCategoryAccounts.tblGLAccountCategory, ' +
                 'tblICCategoryLocations.tblSMCompanyLocation, ' +
                 'tblICCategoryVendors.vyuAPVendor, ' +
+                'tblICCategoryVendors.Family, ' +
+                'tblICCategoryVendors.SellClass, ' +
+                'tblICCategoryVendors.OrderClass, ' +
                 'tblICCategoryVendors.tblICCategoryLocation.tblSMCompanyLocation, ' +
                 'tblICCategoryUOMs.tblICUnitMeasure',
             createRecord : me.createRecord,
@@ -337,36 +355,6 @@ Ext.define('Inventory.view.CategoryViewController', {
         else if (combo.column.itemId === 'colAccountCategory')
         {
             current.set('intAccountCategoryId', records[0].get('intAccountCategoryId'));
-        }
-    },
-
-    onVendorXRefSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepVendor');
-        var current = plugin.getActiveRecord();
-
-        if (combo.column.itemId === 'colVendorLocation')
-        {
-            current.set('intCategoryLocationId', records[0].get('intCategoryLocationId'));
-        }
-        else if (combo.column.itemId === 'colVendorId')
-        {
-            current.set('intVendorId', records[0].get('intVendorId'));
-        }
-        else if (combo.column.itemId === 'colVendorFamily')
-        {
-            current.set('intFamilyId', records[0].get('intFamilyId'));
-        }
-        else if (combo.column.itemId === 'colVendorSellClass')
-        {
-            current.set('intSellClassId', records[0].get('intClassId'));
-        }
-        else if (combo.column.itemId === 'colVendorOrderClass')
-        {
-            current.set('intOrderClassId', records[0].get('intClassId'));
         }
     },
 
@@ -569,21 +557,6 @@ Ext.define('Inventory.view.CategoryViewController', {
             },
             "#btnEditLocation": {
                 click: this.onbtnEditLocationClick
-            },
-            "#cboVendorLocation": {
-                select: this.onVendorXRefSelect
-            },
-            "#cboVendorId": {
-                select: this.onVendorXRefSelect
-            },
-            "#cboVendorFamily": {
-                select: this.onVendorXRefSelect
-            },
-            "#cboVendorSellClass": {
-                select: this.onVendorXRefSelect
-            },
-            "#cboVendorOrderClass": {
-                select: this.onVendorXRefSelect
             },
             "#colStockUnit": {
                 beforecheckchange: this.onUOMStockUnitCheckChange

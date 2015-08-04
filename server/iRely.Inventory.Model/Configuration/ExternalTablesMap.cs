@@ -136,35 +136,20 @@ namespace iRely.Inventory.Model
         }
     }
 
-    public class tblSTSubcategoryClassMap : EntityTypeConfiguration<tblSTSubcategoryClass>
+    public class tblSTSubcategoryMap : EntityTypeConfiguration<tblSTSubcategory>
     {
-        public tblSTSubcategoryClassMap()
+        public tblSTSubcategoryMap()
         {
             // Primary Key
-            this.HasKey(t => t.intClassId);
+            this.HasKey(t => t.intSubcategoryId);
 
             // Table & Column Mappings
-            this.ToTable("tblSTSubcategoryClass");
-            this.Property(t => t.intClassId).HasColumnName("intClassId");
-            this.Property(t => t.strClassComment).HasColumnName("strClassComment");
-            this.Property(t => t.strClassDesc).HasColumnName("strClassDesc");
-            this.Property(t => t.strClassId).HasColumnName("strClassId");
-        }
-    }
-
-    public class tblSTSubcategoryFamilyMap : EntityTypeConfiguration<tblSTSubcategoryFamily>
-    {
-        public tblSTSubcategoryFamilyMap()
-        {
-            // Primary Key
-            this.HasKey(t => t.intFamilyId);
-
-            // Table & Column Mappings
-            this.ToTable("tblSTSubcategoryFamily");
-            this.Property(t => t.intFamilyId).HasColumnName("intFamilyId");
-            this.Property(t => t.strFamilyComment).HasColumnName("strFamilyComment");
-            this.Property(t => t.strFamilyDesc).HasColumnName("strFamilyDesc");
-            this.Property(t => t.strFamilyId).HasColumnName("strFamilyId");
+            this.ToTable("tblSTSubcategory");
+            this.Property(t => t.intSubcategoryId).HasColumnName("intSubcategoryId");
+            this.Property(t => t.strSubcategoryType).HasColumnName("strSubcategoryType");
+            this.Property(t => t.strSubcategoryId).HasColumnName("strSubcategoryId");
+            this.Property(t => t.strSubcategoryDesc).HasColumnName("strSubcategoryDesc");
+            this.Property(t => t.strSubCategoryComment).HasColumnName("strSubCategoryComment");
         }
     }
 

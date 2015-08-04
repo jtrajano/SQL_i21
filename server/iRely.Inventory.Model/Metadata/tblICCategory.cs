@@ -477,7 +477,7 @@ namespace iRely.Inventory.Model
             {
                 if (string.IsNullOrEmpty(_familyId))
                     if (Family != null)
-                        return Family.strFamilyId;
+                        return Family.strSubcategoryId;
                     else
                         return null;
                 else
@@ -496,7 +496,7 @@ namespace iRely.Inventory.Model
             {
                 if (string.IsNullOrEmpty(_sellclassId))
                     if (SellClass != null)
-                        return SellClass.strClassId;
+                        return SellClass.strSubcategoryId;
                     else
                         return null;
                 else
@@ -515,7 +515,7 @@ namespace iRely.Inventory.Model
             {
                 if (string.IsNullOrEmpty(_orderclassId))
                     if (OrderClass != null)
-                        return OrderClass.strClassId;
+                        return OrderClass.strSubcategoryId;
                     else
                         return null;
                 else
@@ -529,9 +529,9 @@ namespace iRely.Inventory.Model
 
         public vyuAPVendor vyuAPVendor { get; set; }
         public tblICCategory tblICCategory { get; set; }
-        public tblSTSubcategoryFamily Family { get; set; }
-        public tblSTSubcategoryClass SellClass { get; set; }
-        public tblSTSubcategoryClass OrderClass { get; set; }
+        public tblSTSubcategory Family { get; set; }
+        public tblSTSubcategory SellClass { get; set; }
+        public tblSTSubcategory OrderClass { get; set; }
         public tblICCategoryLocation tblICCategoryLocation { get; set; }
 
     }

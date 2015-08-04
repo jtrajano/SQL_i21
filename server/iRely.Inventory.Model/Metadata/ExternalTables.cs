@@ -115,25 +115,17 @@ namespace iRely.Inventory.Model
         public string strDestrict { get; set; }
     }
 
-    public class tblSTSubcategoryClass : BaseEntity
+    public class tblSTSubcategory : BaseEntity
     {
-        public int intClassId { get; set; }
-        public string strClassId { get; set; }
-        public string strClassDesc { get; set; }
-        public string strClassComment { get; set; }
+        public int intSubcategoryId { get; set; }
+        public string strSubcategoryType { get; set; }
+        public string strSubcategoryId { get; set; }
+        public string strSubcategoryDesc { get; set; }
+        public string strSubCategoryComment { get; set; }
 
+        public ICollection<tblICCategoryVendor> tblICCategoryVendorFamily { get; set; }
         public ICollection<tblICCategoryVendor> tblICCategoryVendorSellClasses { get; set; }
         public ICollection<tblICCategoryVendor> tblICCategoryVendorOrderClasses { get; set; }
-    }
-
-    public class tblSTSubcategoryFamily : BaseEntity
-    {
-        public int intFamilyId { get; set; }
-        public string strFamilyId { get; set; }
-        public string strFamilyDesc { get; set; }
-        public string strFamilyComment { get; set; }
-
-        public ICollection<tblICCategoryVendor> tblICCategoryVendors { get; set; }
     }
 
     public class tblSTSubcategoryRegProd : BaseEntity

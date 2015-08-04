@@ -1000,7 +1000,11 @@ Ext.define('Inventory.view.Category', {
                                                                 {
                                                                     dataIndex: 'intCompanyLocationId',
                                                                     dataType: 'numeric',
-                                                                    text: 'Location Id',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intCategoryLocationId',
+                                                                    dataType: 'numeric',
                                                                     hidden: true
                                                                 },
                                                                 {
@@ -1125,7 +1129,7 @@ Ext.define('Inventory.view.Category', {
                                                             ],
                                                             itemId: 'cboVendorFamily',
                                                             displayField: 'strSubcategoryId',
-                                                            valueField: 'inSubcategoryId'
+                                                            valueField: 'strSubcategoryId'
                                                         }
                                                     },
                                                     {
@@ -1156,7 +1160,7 @@ Ext.define('Inventory.view.Category', {
                                                             ],
                                                             itemId: 'cboVendorSellClass',
                                                             displayField: 'strSubcategoryId',
-                                                            valueField: 'inSubcategoryId'
+                                                            valueField: 'strSubcategoryId'
                                                         }
                                                     },
                                                     {
@@ -1164,7 +1168,7 @@ Ext.define('Inventory.view.Category', {
                                                         itemId: 'colVendorOrderClass',
                                                         width: 105,
                                                         dataIndex: 'string',
-                                                        text: 'Default Order Class',
+                                                        text: 'Default<br>Order Class',
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -1188,7 +1192,7 @@ Ext.define('Inventory.view.Category', {
                                                             ],
                                                             itemId: 'cboVendorOrderClass',
                                                             displayField: 'strSubcategoryId',
-                                                            valueField: 'inSubcategoryId'
+                                                            valueField: 'strSubcategoryId'
                                                         }
                                                     },
                                                     {
