@@ -151,9 +151,9 @@ BEGIN
 				[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.aptrx_user_id)),@UserId),
 				[ysnPosted]				=	0,
 				[ysnPaid]				=	0,
-				[intTransactionType]	=	CASE WHEN A.aptrx_trans_type = ''I'' AND A.aptrx_orig_amt > 0 THEN 1
+				[intTransactionType]	=	CASE WHEN A.aptrx_trans_type = ''I'' THEN 1
 												WHEN A.aptrx_trans_type = ''A'' THEN 2
-												WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_orig_amt < 0 THEN 3
+												WHEN A.aptrx_trans_type = ''C'' THEN 3
 												ELSE 0 END,
 				[dblDiscount]			=	A.aptrx_disc_amt,
 				[dblWithheld]			=	A.aptrx_wthhld_amt,
@@ -164,6 +164,7 @@ BEGIN
 				INNER JOIN tblAPVendor D
 					ON A.aptrx_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
 				WHERE A.aptrx_trans_type IN (''I'',''C'',''A'')
+				AND aptrx_orig_amt != 0
 
 
 			--Posted
@@ -205,6 +206,7 @@ BEGIN
 				INNER JOIN tblAPVendor D
 					ON A.apivc_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
 				WHERE A.apivc_trans_type IN (''I'',''C'',''A'')
+				AND A.apivc_orig_amt != 0
 				
 			SELECT @ImportedRecords = @@ROWCOUNT
 
@@ -550,9 +552,9 @@ BEGIN
 				[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.aptrx_user_id)),@UserId),
 				[ysnPosted]				=	0,
 				[ysnPaid] 				=	0,
-				[intTransactionType]	=	CASE WHEN A.aptrx_trans_type = ''I'' AND A.aptrx_orig_amt > 0 THEN 1
+				[intTransactionType]	=	CASE WHEN A.aptrx_trans_type = ''I'' THEN 1
             												WHEN A.aptrx_trans_type = ''A'' THEN 3
-            												WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_orig_amt < 0 THEN 3
+            												WHEN A.aptrx_trans_type = ''C'' THEN 3
             												ELSE NULL END,
 				[dblDiscount]			=	A.aptrx_disc_amt,
 				[dblWithheld]			=	A.aptrx_wthhld_amt,
@@ -567,6 +569,7 @@ BEGIN
 			WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
 				 --AND CONVERT(INT,SUBSTRING(CONVERT(VARCHAR(8), CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112), 3), 4, 2)) BETWEEN @PeriodFrom AND @PeriodTo
 				 AND A.aptrx_trans_type IN (''I'',''C'',''A'')
+				 AND A.aptrx_orig_amt != 0
 		
 			SELECT @ImportedRecords = @@ROWCOUNT
 
