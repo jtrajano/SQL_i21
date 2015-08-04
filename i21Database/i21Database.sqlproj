@@ -2166,6 +2166,10 @@
     <Build Include="dbo\Tables\tblLGWarehouseInstructionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStockReservation.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateSOStatusFromInvoice.sql" />
+    <Build Include="dbo\Views\vyuGRGetStorageCommodity.sql" />
+    <Build Include="dbo\Views\vyuGRGetStorageCustomer.sql" />
+    <Build Include="dbo\Views\vyuGRGetStorageLocation.sql" />
+    <Build Include="dbo\Views\vyuGRGetStorageTransferTicket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
