@@ -35,9 +35,9 @@ BEGIN
 	)
 	SELECT	intItemId = ShipmentItems.intItemId
 			,intItemLocationId = ItemLocation.intItemLocationId
-			,intItemUOMId = ItemUOM.intItemUOMId
-			,intLotId = ShipmentItemLots.intLotId
-			,dblQty = ShipmentItems.dblQuantity
+			,intItemUOMId = ISNULL(Lot.intItemUOMId, ItemUOM.intItemUOMId)
+			,intLotId = Lot.intLotId
+			,dblQty = ISNULL(ShipmentItemLots.dblQuantityShipped, ShipmentItems.dblQuantity)
 			,intTransactionId = Shipment.intInventoryShipmentId
 			,strTransactionId = Shipment.strShipmentNumber
 			,intTransactionTypeId = @intInventoryTransactionType
@@ -48,8 +48,10 @@ BEGIN
 				AND ShipmentItems.intItemId = ItemLocation.intItemId
 			INNER JOIN dbo.tblICItemUOM ItemUOM
 				ON ShipmentItems.intItemUOMId = ItemUOM.intItemUOMId
-			LEFT JOiN dbo.tblICInventoryShipmentItemLot ShipmentItemLots
+			LEFT JOIN dbo.tblICInventoryShipmentItemLot ShipmentItemLots
 				ON ShipmentItems.intInventoryShipmentItemId = ShipmentItemLots.intInventoryShipmentItemId
+			LEFT JOIN dbo.tblICLot Lot
+				ON Lot.intLotId = ShipmentItemLots.intLotId
 	WHERE	Shipment.intInventoryShipmentId = @intTransactionId
 END
 
