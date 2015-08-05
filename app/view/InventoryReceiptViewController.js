@@ -1768,6 +1768,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         hidden: true
                     },
                     {
+                        dataIndex: 'intCommodityId',
+                        dataType: 'numeric',
+                        hidden: true
+                    },
+                    {
                         dataIndex: 'intItemId',
                         dataType: 'numeric',
                         hidden: true
