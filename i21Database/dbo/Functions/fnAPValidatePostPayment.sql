@@ -14,14 +14,14 @@ RETURNS @returntable TABLE
 AS
 BEGIN
 
-	DECLARE @WithholdAccount INT, @DiscountAccount INT, @InterestAccount INT, @CashAccount INT;
+	DECLARE @WithholdAccount INT, @DiscountAccount INT, @InterestAccount INT, @CashAccount INT, @APAccount INT;
 	DECLARE @userLocation INT;
 	DECLARE @tmpPayments TABLE(
 		[intPaymentId] [int]
 	);
 	INSERT INTO @tmpPayments SELECT * FROM [dbo].fnGetRowsFromDelimitedValues(@paymentIds)
 
-	SET @userLocation = (SELECT TOP 1 intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityId = @userId);
+	SELECT TOP 1 @userLocation = intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityId = @userId;
 	IF (@userLocation IS NOT NULL AND @userLocation > 0)
 	BEGIN
 		SELECT TOP 1
@@ -29,13 +29,49 @@ BEGIN
 			,@DiscountAccount = intDiscountAccountId
 			,@InterestAccount = intInterestAccountId
 			,@CashAccount = intCashAccount
+			,@APAccount  = intAPAccount
 		FROM tblSMCompanyLocation
 		WHERE intCompanyLocationId = @userLocation
 	END
 
 	IF @post = 1
 	BEGIN
+		
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT TOP 1
+			'User did not setup default location',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A 
+		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		AND @userLocation IS NULL
+
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT TOP 1
+			'Overpayment requires to have default AP account setup.',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A 
+		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		AND (@APAccount IS NULL OR @APAccount <= 0) AND A.dblUnapplied > 0
+
 		--Make sure it has setup for default withhold account if vendor is set for withholding
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'There is no account setup for withholding.',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A 
+		INNER JOIN tblAPVendor B
+			ON A.intEntityVendorId = B.intEntityVendorId
+		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		AND @WithholdAccount IS NULL
+		 AND B.ysnWithholding = 1
+
+		----Make sure it has setup for default withhold account if vendor is set for withholding
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
 			'The Cash Account setup is missing.',

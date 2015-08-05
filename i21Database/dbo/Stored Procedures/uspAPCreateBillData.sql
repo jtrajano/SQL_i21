@@ -13,7 +13,6 @@ SET ANSI_WARNINGS OFF
 DECLARE @bill TABLE
 (
 	[intTermsId]			INT             NOT NULL DEFAULT 0,
-    [intTaxId]				INT             NULL ,
     [dtmDate]				DATETIME        NOT NULL DEFAULT GETDATE(),
     [dtmDueDate]			DATETIME        NOT NULL DEFAULT GETDATE(),
     [intAccountId]			INT             NOT NULL DEFAULT 0,
