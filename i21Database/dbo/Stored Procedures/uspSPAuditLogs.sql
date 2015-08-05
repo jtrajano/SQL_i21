@@ -50,7 +50,7 @@ BEGIN
 			@Changes NVARCHAR(MAX),	
 			@ForeignKey NVARCHAR(MAX)
 
-		DECLARE @ret NVARCHAR(200), @ret1 NVARCHAR(200)
+		DECLARE @ret NVARCHAR(200), @ret1 NVARCHAR(200), @retSize NVARCHAR(200)
 
 		DECLARE Cursor_Audit CURSOR FOR 
 			SELECT DISTINCT [Table], [Column], [IsDelete], [Add],[ColumnChanges], [Changes], [ForeignKey] FROM #tempTables
@@ -86,7 +86,7 @@ BEGIN
 				BEGIN 
 					SET @Column = SUBSTRING(@Column, LEN(@Table) + 2, LEN(@Column))
 					SET @Sql = N'select @ret=NUMERIC_PRECISION from INFORMATION_SCHEMA.COLUMNS IC where TABLE_NAME = ''' + SUBSTRING(@Table,5,len(@Table)) + ''' and COLUMN_NAME = '''+  @Column  + '''';
-					EXEC sp_executesql @Sql,N'@ret NVARCHAR(20) OUTPUT', @ret OUTPUT;	
+					EXEC sp_executesql @Sql,N'@ret NVARCHAR(50) OUTPUT', @ret OUTPUT;	
 					SET @Sql = ''
 					BEGIN TRY
 						BEGIN TRAN
@@ -105,7 +105,7 @@ BEGIN
 				BEGIN
 					SET @Column = SUBSTRING(@Column, LEN(@Table) + 2, LEN(@Column))
 					SET @Sql = N'select @ret=NUMERIC_SCALE from INFORMATION_SCHEMA.COLUMNS IC where TABLE_NAME = ''' + SUBSTRING(@Table,5,len(@Table)) + ''' and COLUMN_NAME = '''+  @Column  + '''';	
-					EXEC sp_executesql @Sql,N'@ret NVARCHAR(20) OUTPUT', @ret OUTPUT;
+					EXEC sp_executesql @Sql,N'@ret NVARCHAR(50) OUTPUT', @ret OUTPUT;
 					SET @Sql = ''
 					BEGIN TRY
 						BEGIN TRAN
@@ -123,13 +123,21 @@ BEGIN
 				IF(@Changes = 'IsNullable') -- COLUMN SET TO NULL OR NOT NULL
 				BEGIN
 					SET @Column = SUBSTRING(@Column, LEN(@Table) + 2, LEN(@Column))
-					SET @Sql = N'select @ret=DATA_TYPE from INFORMATION_SCHEMA.COLUMNS IC where TABLE_NAME = ''' + SUBSTRING(@Table,5,len(@Table)) + ''' and COLUMN_NAME = '''+  @Column  + '''';
-					EXEC sp_executesql @Sql,N'@ret NVARCHAR(20) OUTPUT', @ret OUTPUT;
+					SET @Sql = N'select @ret=DATA_TYPE,@retSize=CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS IC where TABLE_NAME = ''' + SUBSTRING(@Table,5,len(@Table)) + ''' and COLUMN_NAME = '''+  @Column  + '''';
+					EXEC sp_executesql @Sql,N'@ret NVARCHAR(50) OUTPUT, @retSize NVARCHAR(50) OUTPUT', @ret OUTPUT, @retSize OUTPUT;
 					SET @Sql = ''
 					BEGIN TRY
 						BEGIN TRAN
 							EXEC uspSPAuditRemoveDefendencies @Table, @Column
-							SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' ' + @ret + ' ' +  CASE WHEN @ColumnChanges = 'False' THEN 'NOT NULL' ELSE 'NULL' END;
+							IF (LOWER(@ret) = 'nvarchar' OR LOWER(@ret) = 'varchar')
+								BEGIN
+								SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' ' + @ret + '(' + @retSize + ')' +' COLLATE Latin1_General_CI_AS ' +  CASE WHEN @ColumnChanges = 'False' THEN 'NULL' ELSE 'NOT NULL' END;
+								END
+							ELSE
+								BEGIN
+								SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' ' + @ret + ' ' +  CASE WHEN @ColumnChanges = 'False' THEN 'NULL' ELSE 'NOT NULL' END;
+								END 
+							
 							EXEC sp_executesql @Sql;
 						ROLLBACK
 					END TRY
@@ -143,12 +151,12 @@ BEGIN
 				BEGIN
 					SET @Column = SUBSTRING(@Column, LEN(@Table) + 2, LEN(@Column))
 					SET @Sql = N'select @ret=IS_NULLABLE from INFORMATION_SCHEMA.COLUMNS IC where TABLE_NAME = ''' + SUBSTRING(@Table,5,len(@Table)) + ''' and COLUMN_NAME = '''+  @Column  + '''';				
-					EXEC sp_executesql @Sql,N'@ret NVARCHAR(20) OUTPUT', @ret OUTPUT;			
+					EXEC sp_executesql @Sql,N'@ret NVARCHAR(50) OUTPUT', @ret OUTPUT;			
 					SET @Sql = ''
 					BEGIN TRY
 						BEGIN TRAN	
 							EXEC uspSPAuditRemoveDefendencies @Table, @Column
-							SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' NVARCHAR(' + CASE WHEN @ColumnChanges = 0 THEN 'MAX' ELSE @ColumnChanges END + ') ' + CASE WHEN @ret = 'NO' THEN 'NOT NULL' ELSE 'NULL' END;
+							SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' NVARCHAR(' + CASE WHEN @ColumnChanges = 0 THEN 'MAX' ELSE @ColumnChanges END + ') COLLATE Latin1_General_CI_AS ' + CASE WHEN @ret = 'NO' THEN 'NOT NULL' ELSE 'NULL' END;
 							EXEC sp_executesql @Sql	
 						ROLLBACK TRAN
 					END TRY
@@ -207,7 +215,3 @@ BEGIN
 
 	END
 END
-
-GO
-
-
