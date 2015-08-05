@@ -297,6 +297,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             value: '{grdInventoryShipment.selection.intSubLocationId}',
                             conjunction: 'and'
                         },{
+                            column: 'intLocationId',
+                            value: '{current.intShipFromLocationId}',
+                            conjunction: 'and'
+                        },{
                             column: 'intStorageLocationId',
                             value: '{grdInventoryShipment.selection.intStorageLocationId}',
                             conjunction: 'and'
