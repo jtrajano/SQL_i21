@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARCustomerInquiryReport]
 AS 
 SELECT A.strCustomerName
+	 , A.intEntityCustomerId
      , SUM(B.dbl10Days) AS dbl10Days
 	 , SUM(B.dbl30Days) AS dbl30Days
 	 , SUM(B.dbl60Days) AS dbl60Days
