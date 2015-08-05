@@ -101,19 +101,19 @@ BEGIN TRY
 
     
 
---No Records to process so exit
+	--No Records to process so exit
     select @total = count(*) from @ReceiptStagingTable;
     if (@total = 0)
 	   return;
 
-DECLARE @ReceiptOutputTable TABLE
+	DECLARE @ReceiptOutputTable TABLE
     (
-	intId INT IDENTITY PRIMARY KEY CLUSTERED,
-    intSourceId int,
-	intInventoryReceiptId int
+		intId INT IDENTITY PRIMARY KEY CLUSTERED,
+		intSourceId int,
+		intInventoryReceiptId int
     )
 
-INSERT into @ReceiptOutputTable(
+	INSERT into @ReceiptOutputTable(
 		 intSourceId	
 		,intInventoryReceiptId		 	
 	 )	
@@ -122,32 +122,40 @@ INSERT into @ReceiptOutputTable(
 			,@OtherCharges
 			,@intUserId;
 
--- Update the Inventory Receipt Key to the Transaction Table
-                                            
-Declare @incval int,
-        @SouceId int,
-		@ReceiptId int,
-		@intEntityId int,
-		@strTransactionId nvarchar(50);
-select @total = count(*) from @ReceiptOutputTable;
-set @incval = 1 
-WHILE @incval <=@total 
-BEGIN
+	-- Update the Inventory Receipt Key to the Transaction Table
+	UPDATE	TR
+	SET		intInventoryReceiptId = addResult.intInventoryReceiptId
+	FROM	dbo.tblTRTransportReceipt TR INNER JOIN @ReceiptOutputTable addResult
+				ON TR.intTransportReceiptId = addResult.intSourceId
 
-  select @SouceId = intSourceId,@ReceiptId =intInventoryReceiptId  from @ReceiptOutputTable where @incval = intId
+	-- Post the Inventory Receipts                                            
+	DECLARE @ReceiptId INT
+			,@intEntityId INT
+			,@strTransactionId NVARCHAR(50);
+
+	WHILE EXISTS (SELECT TOP 1 1 FROM @ReceiptOutputTable) 
+	BEGIN
+
+		SELECT TOP 1 
+				@ReceiptId = intInventoryReceiptId  
+		FROM	@ReceiptOutputTable 
   
-   update tblTRTransportReceipt 
-       set intInventoryReceiptId = @ReceiptId
-         where @SouceId = intTransportReceiptId 
-    --Posting the Inventory Receipts that were created
-	select @strTransactionId = strReceiptNumber from tblICInventoryReceipt where intInventoryReceiptId = @ReceiptId
-	select TOP 1 @intEntityId = intEntityId FROM dbo.tblSMUserSecurity WHERE intUserSecurityID = @intUserId
-	EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;
-	--EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
-   SET @incval = @incval + 1;
-END;
+		-- Post the Inventory Receipts that were created
+		SELECT	@strTransactionId = strReceiptNumber 
+		FROM	tblICInventoryReceipt 
+		WHERE	intInventoryReceiptId = @ReceiptId
 
+		SELECT	TOP 1 @intEntityId = intEntityId 
+		FROM	dbo.tblSMUserSecurity 
+		WHERE	intUserSecurityID = @intUserId
 
+		EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;			
+		
+		--EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
+
+		DELETE	FROM @ReceiptOutputTable 
+		WHERE	intInventoryReceiptId = @ReceiptId
+	END;
 
 END TRY
 BEGIN CATCH

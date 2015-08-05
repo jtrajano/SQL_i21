@@ -137,7 +137,8 @@ BEGIN
 				,intCreatedUserId
 				,ysnPosted
 		)
-		SELECT 	 strReceiptNumber       = @ReceiptNumber
+		SELECT 	TOP 1  
+				strReceiptNumber       = @ReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(GETDATE())
 				,intEntityVendorId		= RawData.intEntityVendorId
 				,strReceiptType			= RawData.strReceiptType
