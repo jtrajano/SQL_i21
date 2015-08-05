@@ -130,6 +130,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\DateCreatedValueDefault.sql
 :r .\AP\DefaultData\InsertWriteOffPaymentMethod.sql
 :r .\AP\UpdatePOAddressInfo.sql
+:r .\AP\UpdateBillStatus.sql
 
 -- Inventory 
 :r .\IC\00_RequiredDataFix.sql 

@@ -1703,6 +1703,7 @@
     <None Include="Scripts\Utility\IC\IC-1090\Fix the On Hand Qty.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateSOStatusFromInvoice.sql" />
     <None Include="Scripts\Utility\IC\IC-1024\Fix the item average cost.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateBillStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
