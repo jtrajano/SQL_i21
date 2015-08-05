@@ -30,6 +30,7 @@ AS
 		,tic.strJiraKey
 		,tic.intCustomerId
 		,tic.intCreatedUserEntityId
+		,proj.strProjectName
 	from
 		tblHDTicket tic
 		left outer join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId
@@ -38,3 +39,4 @@ AS
 		left outer join tblHDTicketProduct pro on pro.intTicketProductId = tic.intTicketProductId
 		left outer join tblHDModule mo on mo.intModuleId = tic.intModuleId
 		left outer join tblHDVersion ver on ver.intVersionId = tic.intVersionId  
+		left outer join tblHDProject proj on proj.intProjectId = (select top 1 projt.intProjectId from tblHDProjectTask projt where projt.intTicketId = tic.intTicketId)
