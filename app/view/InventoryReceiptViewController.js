@@ -1049,13 +1049,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             qtyOrdered = currentRecord.get('dblOpenReceive'),
             itemPrice = currentRecord.get('dblUnitCost');
 
-        if(reset !== false) reset = true;
+        if (reset !== false) reset = true;
 
         totalItemTax = 0.00;
 
-        if (reset){
-            currentRecord.tblICInventoryReceiptItemTaxes().removeAll();
-        }
+        currentRecord.tblICInventoryReceiptItemTaxes().removeAll();
 
         Ext.Array.each(itemTaxes, function (itemDetailTax) {
             var taxableAmount,
@@ -1079,25 +1077,23 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             }
             totalItemTax = totalItemTax + itemDetailTax.dblAdjustedTax;
 
-            if (reset){
-                var newItemTax = Ext.create('Inventory.model.ReceiptItemTax', {
-                    intTaxGroupMasterId: itemDetailTax.intTaxGroupMasterId,
-                    intTaxGroupId: itemDetailTax.intTaxGroupId,
-                    intTaxCodeId: itemDetailTax.intTaxCodeId,
-                    intTaxClassId: itemDetailTax.intTaxClassId,
-                    strTaxCode: itemDetailTax.strTaxCode,
-                    strTaxableByOtherTaxes: itemDetailTax.strTaxableByOtherTaxes,
-                    strCalculationMethod: itemDetailTax.strCalculationMethod,
-                    dblRate: itemDetailTax.dblRate,
-                    dblTax: itemDetailTax.dblTax,
-                    dblAdjustedTax: itemDetailTax.dblAdjustedTax,
-                    intTaxAccountId: itemDetailTax.intTaxAccountId,
-                    ysnTaxAdjusted: itemDetailTax.ysnTaxAdjusted,
-                    ysnSeparateOnInvoice: itemDetailTax.ysnSeparateOnInvoice,
-                    ysnCheckoffTax: itemDetailTax.ysnCheckoffTax
-                });
-                currentRecord.tblICInventoryReceiptItemTaxes().add(newItemTax);
-            }
+            var newItemTax = Ext.create('Inventory.model.ReceiptItemTax', {
+                intTaxGroupMasterId: itemDetailTax.intTaxGroupMasterId,
+                intTaxGroupId: itemDetailTax.intTaxGroupId,
+                intTaxCodeId: itemDetailTax.intTaxCodeId,
+                intTaxClassId: itemDetailTax.intTaxClassId,
+                strTaxCode: itemDetailTax.strTaxCode,
+                strTaxableByOtherTaxes: itemDetailTax.strTaxableByOtherTaxes,
+                strCalculationMethod: itemDetailTax.strCalculationMethod,
+                dblRate: itemDetailTax.dblRate,
+                dblTax: itemDetailTax.dblTax,
+                dblAdjustedTax: itemDetailTax.dblAdjustedTax,
+                intTaxAccountId: itemDetailTax.intTaxAccountId,
+                ysnTaxAdjusted: itemDetailTax.ysnTaxAdjusted,
+                ysnSeparateOnInvoice: itemDetailTax.ysnSeparateOnInvoice,
+                ysnCheckoffTax: itemDetailTax.ysnCheckoffTax
+            });
+            currentRecord.tblICInventoryReceiptItemTaxes().add(newItemTax);
         });
 
         currentRecord.set('dblTax', totalItemTax);
@@ -1475,7 +1471,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
         context.record.set(context.field, context.value);
         vw.data.currentReceiptItem = context.record;
-        me.calculateItemTaxes(false);
+        me.calculateItemTaxes();
     },
 
     onEditLots: function (editor, context, eOpts) {
