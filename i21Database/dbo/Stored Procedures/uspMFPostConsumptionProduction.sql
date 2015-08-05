@@ -36,6 +36,7 @@ BEGIN
 		,@intLifeTime INT
 		,@dtmExpiryDate DATETIME
 		,@dtmPlannedDate datetime
+		,@intItemStockUOMId int
 
 	SELECT TOP 1 @intLocationId = intLocationId
 		,@intSubLocationId = intSubLocationId
@@ -47,15 +48,77 @@ BEGIN
 	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
 		,@strBatchId OUTPUT
 
+		INSERT INTO @ItemsForPost (
+		intItemId
+		,intItemLocationId
+		,intItemUOMId
+		,dtmDate
+		,dblQty
+		,dblUOMQty
+		,dblCost
+		,dblSalesPrice
+		,intCurrencyId
+		,dblExchangeRate
+		,intTransactionId
+		,intTransactionDetailId
+		,strTransactionId
+		,intTransactionTypeId
+		,intLotId
+		,intSubLocationId
+		,intStorageLocationId
+		)
+	SELECT intItemId = l.intItemId
+		,intItemLocationId = l.intItemLocationId
+		,intItemUOMId = ISNULL(l.intWeightUOMId, l.intItemUOMId)
+		,dtmDate = @dtmPlannedDate
+		,dblQty = (- cl.dblQuantity)
+		,dblUOMQty = (Case When l.intWeightUOMId is null then 0 else ItemUOM.dblUnitQty End)
+		,dblCost = l.dblLastCost
+		,dblSalesPrice = 0
+		,intCurrencyId = NULL
+		,dblExchangeRate = 1
+		,intTransactionId = @intBatchId
+		,intTransactionDetailId = cl.intWorkOrderConsumedLotId
+		,strTransactionId = @strLotNumber
+		,intTransactionTypeId = @INVENTORY_CONSUME
+		,intLotId = l.intLotId
+		,intSubLocationId = l.intSubLocationId
+		,intStorageLocationId = l.intStorageLocationId
+	FROM tblMFWorkOrderConsumedLot cl
+	INNER JOIN tblICLot l ON cl.intLotId = l.intLotId
+	INNER JOIN dbo.tblICItemUOM ItemUOM ON cl.intItemUOMId = ItemUOM.intItemUOMId
+	WHERE cl.intWorkOrderId = @intWorkOrderId and cl.intBatchId=@intBatchId
+
+	EXEC dbo.uspICPostCosting @ItemsForPost
+		,@strBatchId
+		,NULL
+		,@intUserId
+
 	SELECT @intItemLocationId = intItemLocationId
 	FROM tblICItemLocation
 	WHERE intLocationId = @intLocationId
 		AND intItemId = @intItemId
 
-	SELECT @dblNewCost = [dbo].[fnGetTotalStockValueFromTransactionBatch](@intWorkOrderId, @strBatchId)
+	SELECT @intItemStockUOMId = intItemUOMId
+	FROM tblICItemUOM
+	WHERE intItemId = @intItemId and ysnStockUnit=1 
+
+	SELECT @dblNewCost = [dbo].[fnGetTotalStockValueFromTransactionBatch](@intBatchId, @strBatchId)
 
 	SET @dblNewCost = ABS(@dblNewCost)
+
 	SET @dblNewUnitCost = ABS(@dblNewCost) / @dblQty
+
+	DECLARE @dblCostPerStockUOM NUMERIC(18,6)
+
+	IF @intItemStockUOMId=@intItemUOMId
+	BEGIN
+		SELECT @dblCostPerStockUOM=@dblNewUnitCost
+	END
+	ELSE
+	BEGIN
+		SELECT @dblCostPerStockUOM=dbo.fnCalculateUnitCost(@dblNewUnitCost,@dblUnitQty)
+	END
 
 	CREATE TABLE #GeneratedLotItems (
 		intLotId INT
@@ -141,51 +204,7 @@ BEGIN
 	FROM #GeneratedLotItems
 	WHERE intDetailId = @intWorkOrderId
 
-	INSERT INTO @ItemsForPost (
-		intItemId
-		,intItemLocationId
-		,intItemUOMId
-		,dtmDate
-		,dblQty
-		,dblUOMQty
-		,dblCost
-		,dblSalesPrice
-		,intCurrencyId
-		,dblExchangeRate
-		,intTransactionId
-		,intTransactionDetailId
-		,strTransactionId
-		,intTransactionTypeId
-		,intLotId
-		,intSubLocationId
-		,intStorageLocationId
-		)
-	SELECT intItemId = l.intItemId
-		,intItemLocationId = l.intItemLocationId
-		,intItemUOMId = ISNULL(l.intWeightUOMId, l.intItemUOMId)
-		,dtmDate = @dtmPlannedDate
-		,dblQty = (- cl.dblQuantity)
-		,dblUOMQty = (Case When l.intWeightUOMId is null then 0 else ItemUOM.dblUnitQty End)
-		,dblCost = l.dblLastCost
-		,dblSalesPrice = 0
-		,intCurrencyId = NULL
-		,dblExchangeRate = 1
-		,intTransactionId = @intBatchId
-		,intTransactionDetailId = cl.intWorkOrderConsumedLotId
-		,strTransactionId = @strLotNumber
-		,intTransactionTypeId = @INVENTORY_CONSUME
-		,intLotId = l.intLotId
-		,intSubLocationId = l.intSubLocationId
-		,intStorageLocationId = l.intStorageLocationId
-	FROM tblMFWorkOrderConsumedLot cl
-	INNER JOIN tblICLot l ON cl.intLotId = l.intLotId
-	INNER JOIN dbo.tblICItemUOM ItemUOM ON cl.intItemUOMId = ItemUOM.intItemUOMId
-	WHERE cl.intWorkOrderId = @intWorkOrderId and cl.intBatchId=@intBatchId
-
-	EXEC dbo.uspICPostCosting @ItemsForPost
-		,@strBatchId
-		,NULL
-		,@intUserId
+	
 
 	DELETE
 	FROM @ItemsForPost
@@ -210,27 +229,11 @@ BEGIN
 		)
 	SELECT intItemId = @intItemId
 		,intItemLocationId = @intItemLocationId
-		,intItemUOMId = @intItemUOMId
+		,intItemUOMId = (CASE WHEN @intItemStockUOMId=@intItemUOMId THEN @intItemUOMId ELSE @intWeightUOMId END)
 		,dtmDate = @dtmPlannedDate
-		,dblQty = @dblQty
-		,dblUOMQty = CASE 
-			WHEN (@intWeightUOMId = @intItemUOMId)
-				THEN (
-						SELECT 1
-						)
-			ELSE (
-					CASE 
-						WHEN @dblUnitQty IS NOT NULL
-							THEN @dblUnitQty
-						ELSE (
-								SELECT TOP 1 dblUnitQty
-								FROM dbo.tblICItemUOM
-								WHERE intItemUOMId = @intItemUOMId
-								)
-						END
-					)
-			END
-		,dblCost = @dblNewUnitCost
+		,dblQty = (CASE WHEN @intItemStockUOMId=@intItemUOMId THEN @dblQty ELSE @dblWeight END) 
+		,dblUOMQty = 1
+		,dblCost = @dblCostPerStockUOM
 		,dblSalesPrice = 0
 		,intCurrencyId = NULL
 		,dblExchangeRate = 1
