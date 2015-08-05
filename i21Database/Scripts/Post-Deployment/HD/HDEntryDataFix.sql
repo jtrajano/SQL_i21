@@ -259,4 +259,11 @@ GO
 
 GO
 	PRINT N'End fixing Help Desk Settings.'
+	PRINT N'Start fixing Milestone data.'
+GO
+
+	Update tblHDMilestone set intSort = intPriority
+
+GO
+	PRINT N'End fixing Milestone data.'
 GO
