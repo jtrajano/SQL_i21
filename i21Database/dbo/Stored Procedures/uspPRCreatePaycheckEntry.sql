@@ -198,11 +198,12 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 				END
 			,CASE 
 				WHEN ([strCalculationType] IN ('Rate Factor', 'Overtime')) 
-					THEN [dblAmount] * ISNULL((SELECT dblAmount FROM tblPREmployeeEarning WHERE intEmployeeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId), 0)
+					THEN [dblAmount] * ISNULL((SELECT B.dblAmount FROM tblPREmployeeEarning B WHERE B.intEmployeeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId), 1)
 				ELSE
 					[dblAmount]
 				END
-			,CASE WHEN ([strCalculationType] IN ('Hourly Rate', 'Overtime')) THEN 
+			,CASE WHEN ([strCalculationType] IN ('Hourly Rate', 'Overtime')
+					OR ([strCalculationType] = 'Rate Factor' AND (SELECT TOP 1 strCalculationType FROM tblPREmployeeEarning WHERE intEmployeeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId) = 'Hourly Rate')) THEN 
 				CASE 
 					--If Earning Id is HOLIDAY, use the specified Pay Group Holiday Hours
 					WHEN (@intPayGroup IS NOT NULL AND ((SELECT TOP 1 LOWER(strEarning) FROM tblPRTypeEarning WHERE intTypeEarningId = tblPREmployeeEarning.intTypeEarningId) LIKE '%holiday%'))
@@ -226,14 +227,14 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 					END 
 				* CASE 
 					WHEN ([strCalculationType] IN ('Rate Factor', 'Overtime')) 
-						THEN [dblAmount] * ISNULL((SELECT dblAmount FROM tblPREmployeeEarning WHERE intEmployeeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId), 0)
+						THEN [dblAmount] * ISNULL((SELECT B.dblAmount FROM tblPREmployeeEarning B WHERE B.intEmployeeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId), 1)
 					ELSE
 						[dblAmount]
 					END
 				ELSE 
 					CASE 
 						WHEN ([strCalculationType] IN ('Rate Factor', 'Overtime')) 
-							THEN [dblAmount] * ISNULL((SELECT dblAmount FROM tblPREmployeeEarning WHERE intEmployeeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId), 0)
+							THEN [dblAmount] * ISNULL((SELECT B.dblAmount FROM tblPREmployeeEarning B WHERE B.intEmployeeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId), 1)
 						ELSE
 							[dblAmount]
 						END
