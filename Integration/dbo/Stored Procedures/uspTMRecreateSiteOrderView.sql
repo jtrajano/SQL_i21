@@ -42,7 +42,7 @@ BEGIN
 				,E.vwsls_name AS strDriverName
 				,F.vwitm_no AS strItemNo
 				,CAST(ISNULL(A.dblEstimatedPercentLeft,0) AS DECIMAL(18,2)) AS dblEstimatedPercentLeft
-				,CAST(ISNULL(A.dblTotalCapacity,0.0) * ((ISNULL(F.vwitm_deflt_percnt,100) - ISNULL(dblEstimatedPercentLeft,0.0))/100) AS INT) AS intCalculatedQuantity
+				,ROUND((ISNULL(A.dblTotalCapacity,0.0) * (((CASE WHEN ISNULL(D.dblDefaultFull,0) = 0 THEN 100 ELSE D.dblDefaultFull END) - ISNULL(A.dblEstimatedPercentLeft,0.0))/100)),0) AS intCalculatedQuantity
 				,CAST(ISNULL(A.dblTotalCapacity,0.0) AS DECIMAL(18,2)) AS dblTotalCapacity
 				,ISNULL(D.strRouteId,'''') AS strRouteId
 				,A.intConcurrencyId
@@ -65,7 +65,16 @@ BEGIN
 				,RTRIM(ISNULL(F.vwitm_desc,'''')) AS strProductDescription
 				,dblPriceAdjustment = ISNULL(A.dblPriceAdjustment,0.0)
 				,intCustomerNumber = B.intCustomerNumber
+				,intClockLocation = A.intClockID
+				,ysnPastDue = CAST((CASE WHEN ISNULL(C.vwcus_high_past_due,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
+				,ysnOverCreditLimit = CAST((CASE WHEN ISNULL(C.vwcus_balance,0.0) < C.vwcus_cred_limit  THEN 0 ELSE 1 END)  AS BIT)
+				,ysnBudgetCustomers = CAST((CASE WHEN ISNULL(C.vwcus_budget_amt_due,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
+				,dblARBalance = ISNULL(C.vwcus_balance,0.0)
+				,dblPastDue = ISNULL(C.vwcus_high_past_due,0.0)
+				,dblBudgetAmount = ISNULL(C.vwcus_budget_amt_due,0.0)
+				,dblCreditLimit = ISNULL(C.vwcus_cred_limit,0.0)
 				,intLocationId = A.intLocationId
+				,A.intCustomerID
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID
@@ -75,7 +84,13 @@ BEGIN
 				ON A.intRouteId = D.intRouteId	
 			LEFT JOIN vwslsmst E
 				ON A.intDriverID = E.A4GLIdentity	
-			LEFT JOIN vwitmmst F
+			LEFT JOIN (SELECT DISTINCT 
+					vwitm_no
+					,vwitm_deflt_percnt
+					,vwitm_class
+					,vwitm_desc
+					,A4GLIdentity
+				FROM vwitmmst) F
 				ON A.intProduct = F.A4GLIdentity
 			LEFT JOIN tblTMDispatch G
 				ON A.intSiteID = G.intSiteID
@@ -99,7 +114,7 @@ BEGIN
 				,E.vwsls_name AS strDriverName
 				,D.strItemNo AS strItemNo
 				,CAST(ISNULL(A.dblEstimatedPercentLeft,0) AS DECIMAL(18,2)) AS dblEstimatedPercentLeft
-				,CAST(ISNULL(A.dblTotalCapacity,0.0) * (((CASE WHEN ISNULL(D.dblDefaultFull,0) = 0 THEN 100 ELSE D.dblDefaultFull END) - ISNULL(A.dblEstimatedPercentLeft,0.0))/100) AS INT) AS intCalculatedQuantity
+				,ROUND((ISNULL(A.dblTotalCapacity,0.0) * (((CASE WHEN ISNULL(D.dblDefaultFull,0) = 0 THEN 100 ELSE D.dblDefaultFull END) - ISNULL(A.dblEstimatedPercentLeft,0.0))/100)),0) AS intCalculatedQuantity
 				,CAST(ISNULL(A.dblTotalCapacity,0.0) AS DECIMAL(18,2)) AS dblTotalCapacity
 				,ISNULL(F.strRouteId,'''') AS strRouteId
 				,A.intConcurrencyId
@@ -122,6 +137,14 @@ BEGIN
 				,D.strDescription AS strProductDescription
 				,dblPriceAdjustment = ISNULL(A.dblPriceAdjustment,0.0)
 				,intCustomerNumber = B.intCustomerNumber
+				,ysnPastDue = CAST((CASE WHEN ISNULL(I.vwcus_high_past_due,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
+				,ysnOverCreditLimit = CAST((CASE WHEN ISNULL(I.vwcus_balance,0.0) < I.vwcus_cred_limit  THEN 0 ELSE 1 END)  AS BIT)
+				,ysnBudgetCustomers = CAST((CASE WHEN ISNULL(I.vwcus_budget_amt_due,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
+				,dblARBalance = ISNULL(I.vwcus_balance,0.0)
+				,dblPastDue = ISNULL(I.vwcus_high_past_due,0.0)
+				,dblBudgetAmount = ISNULL(I.vwcus_budget_amt_due,0.0)
+				,dblCreditLimit = ISNULL(I.vwcus_cred_limit,0.0)
+				,intLocationId = A.intLocationId
 				,intLocationId = A.intLocationId
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
@@ -138,6 +161,8 @@ BEGIN
 				ON A.intSiteID = G.intSiteID
 			LEFT JOIN tblICCategory H
 				ON D.intCategoryId = H.intCategoryId	
+			INNER JOIN vwcusmst I
+				ON B.intCustomerNumber = I.A4GLIdentity
 			
 		')
 	END

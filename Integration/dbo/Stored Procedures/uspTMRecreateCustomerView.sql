@@ -301,8 +301,8 @@ BEGIN
 				,vwcus_tax_state = ''''  
 				,A4GLIdentity = Ent.intEntityId
 				,vwcus_phone2 =  (CASE WHEN CHARINDEX(''x'', Con.strPhone2) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone2,1,15), 0, CHARINDEX(''x'',Con.strPhone2)) ELSE SUBSTRING(Con.strPhone2,1,15)END)
-				,vwcus_balance = 0.0
-				,vwcus_ptd_sls = 0.0 
+				,vwcus_balance = ISNULL(CI.dblFuture,0.0) + ISNULL(CI.dbl10Days,0.0) + ISNULL(CI.dbl30Days,0.0) + ISNULL(CI.dbl60Days,0.0) + ISNULL(CI.dbl90Days,0.0) + ISNULL(CI.dbl91Days,0.0) - ISNULL(CI.dblUnappliedCredits,0.0) 
+				,vwcus_ptd_sls = CI.dblYTDSales
 				,vwcus_lyr_sls = ISNULL(CI.dblLastYearSales,0.0)
 				,vwcus_acct_stat_x_1 = (SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId)
 				,dblFutureCurrent = 0.0
@@ -320,7 +320,7 @@ BEGIN
 				ON Ent.intEntityId = Loc.intEntityId 
 					and Loc.ysnDefaultLocation = 1
 			LEFT JOIN [vyuARCustomerInquiryReport] CI
-				ON Ent.strName = CI.strCustomerName
+				ON Ent.intEntityId = CI.intEntityCustomerId
 		
 		')
 	END
@@ -338,3 +338,4 @@ GO
 GO 
 	PRINT 'END OF EXECUTE uspTMRecreateCustomerView'
 GO
+
