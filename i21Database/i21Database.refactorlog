@@ -3836,4 +3836,39 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intInventoryShipmentChargeId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="25fe2549-b6e5-430e-8b7b-1555dc25ad68" ChangeDateTime="08/05/2015 07:41:19">
+    <Property Name="ElementName" Value="[dbo].[tblMFScheduleWorkOrder].[intScheduleLineId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFScheduleWorkOrder]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intScheduleWorkOrderId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="009d0f58-bffa-4b48-bdc3-3b484a1bceca" ChangeDateTime="08/05/2015 07:44:12">
+    <Property Name="ElementName" Value="[dbo].[tblMFScheduleWorkOrderDetail].[intScheduleLineDetailId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFScheduleWorkOrderDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intScheduleWorkOrderDetailId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="74447ddb-e98b-4d1a-a43f-d266367fc5c7" ChangeDateTime="08/05/2015 07:46:09">
+    <Property Name="ElementName" Value="[dbo].[tblMFScheduleCalendar].[intManufacturingCell]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFScheduleCalendar]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intManufacturingCellId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4c79a9e8-bcf9-4384-8904-397ea0124f68" ChangeDateTime="08/05/2015 07:47:30">
+    <Property Name="ElementName" Value="[dbo].[tblMFScheduleMachineDetail].[intScheduleLineDetailId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFScheduleMachineDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intScheduleWorkOrderDetailId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="aa27341b-c48a-4f7e-a55d-6957020b2765" ChangeDateTime="08/05/2015 07:48:42">
+    <Property Name="ElementName" Value="[dbo].[tblMFScheduleConstraintDetail].[intScheduleLineId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFScheduleConstraintDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intScheduleWorkOrderId" />
+  </Operation>
 </Operations>
