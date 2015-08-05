@@ -31,6 +31,7 @@ BEGIN TRY
 	 	,intItemLocationId
 	 	,intItemUOMId
 	 	,strBillOfLadding
+		,intContractHeaderId
 	 	,intContractDetailId
 	 	,dtmDate
 	 	,intShipViaId
@@ -67,9 +68,10 @@ BEGIN TRY
 							   THEN	(select intItemUOMId from vyuCTContractDetailView CT where CT.intContractDetailId = TR.intContractDetailId)
 							   END,-- Need to add the Gallons UOM from Company Preference	   
 	   TR.strBillOfLadding,
+	   CT.intContractHeaderId,
 	   TR.intContractDetailId,
 	   TL.dtmLoadDateTime,
-	   intShipViaId,	  
+	   TL.intShipViaId,	  
 	   dblGallons              = CASE
 								  WHEN SP.strGrossOrNet = 'Gross'
 								  THEN TR.dblGross
@@ -92,7 +94,8 @@ BEGIN TRY
 	   TR.intTransportReceiptId,	  
 	   3 -- Source type for transports is 3 
 	   from tblTRTransportLoad TL
-            JOIN tblTRTransportReceipt TR on TR.intTransportLoadId = TL.intTransportLoadId
+            JOIN tblTRTransportReceipt TR ON TR.intTransportLoadId = TL.intTransportLoadId			
+			LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = TR.intContractDetailId
 			LEFT JOIN tblTRSupplyPoint SP on SP.intSupplyPointId = TR.intSupplyPointId
             where TL.intTransportLoadId = @intTransportLoadId and TR.strOrigin = 'Terminal';
 

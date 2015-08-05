@@ -3,11 +3,11 @@
 AS
   SELECT *,intNoOfLots-intHedgedLots as intToBeHedgedLots FROM
  (SELECT intContractDetailId,CH.intContractHeaderId,
- CH.dtmContractDate,CH.strContractType,CD.intContractSeq,
+ CH.dtmContractDate,CH.strContractType,CH.intContractNumber ,CD.intContractSeq,
  strEntityName as strCustomer,
  dblQuantity as dblQuantity,
  uc.strUnitMeasure,
- 0.0 as dblWeights,
+ isnull(CD.dblNetWeight,0.0) as dblWeights,
  m.strFutMarketName,
  mo.strFutureMonth,
  isnull(CD.intNoOfLots,0) intNoOfLots,

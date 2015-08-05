@@ -161,7 +161,7 @@ BEGIN
 			,intItemId				= ReceiptItem.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intSubLocationId		= ReceiptItem.intSubLocationId
-			,intStorageLocationId	= ItemLot.intStorageLocationId
+			,intStorageLocationId	= ISNULL(ItemLot.intStorageLocationId, ReceiptItem.intStorageLocationId)
 			,dblQty					= ItemLot.dblQuantity * CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END 
 			,intItemUOMId			= ISNULL(ItemLot.intItemUnitMeasureId, ReceiptItem.intUnitMeasureId) 
 			,dblWeight				= ISNULL(ItemLot.dblGrossWeight, 0) - ISNULL(ItemLot.dblTareWeight, 0) * CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END
@@ -169,7 +169,7 @@ BEGIN
 			,dtmExpiryDate			= ItemLot.dtmExpiryDate
 			,dtmManufacturedDate	= ItemLot.dtmManufacturedDate
 			,intOriginId			= ItemLot.intOriginId
-			,intGradeId				= ItemLot.intGradeId
+			,intGradeId				= ISNULL(ItemLot.intGradeId, ReceiptItem.intGradeId)
 			,strBOLNo				= Receipt.strBillOfLading
 			,strVessel				= Receipt.strVessel
 			,strReceiptNumber		= Receipt.strReceiptNumber

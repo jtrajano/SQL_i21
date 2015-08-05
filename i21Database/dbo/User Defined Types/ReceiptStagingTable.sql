@@ -12,7 +12,8 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[intShipFromId] INT NOT NULL						    -- The Vendor Location. 
 	,[intLocationId] INT NOT NULL                           -- Company Location	
 	,[strBillOfLadding] nvarchar(50) COLLATE Latin1_General_CI_AS NULL --Bill of Ladding Number
-	,[intContractDetailId] INT NULL                         -- Contract
+	,[intContractHeaderId] INT NULL							-- Contract Header Id
+	,[intContractDetailId] INT NULL                         -- Contract Detail Id
 	,[dtmDate] DATETIME NOT NULL							-- The date of the transaction
 	,[intShipViaId] INT NULL                                -- ShipVia
 	,[intCurrencyId] INT NULL								-- The currency id used in a tranaction. 

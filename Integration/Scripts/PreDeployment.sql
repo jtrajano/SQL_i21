@@ -131,7 +131,7 @@
 :r "..\dbo\Views\vyuTMOriginDegreeOption.sql"
 :r "..\Scripts\TM\Customer.sql"
 :r "..\dbo\Views\vyuTMConsumptionSiteSearch.sql"
---:r "..\dbo\Views\vyuTMSiteOrder.sql"
+:r "..\dbo\Views\vyuTMSiteOrder.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateSiteOrderView.sql"
 :r "..\dbo\Functions\fnTMGetSalesTax.sql"
 :r "..\dbo\Functions\fnTMGetContractForCustomer.sql"

@@ -2,21 +2,14 @@
 	@ItemsFromInventoryShipment ShipmentItemTableType READONLY 
 AS
 
-SET QUOTED_IDENTIFIER OFF
-SET ANSI_NULLS ON
-SET NOCOUNT ON
-SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
-
-DECLARE @intTransactionId INT
-
-SELECT TOP 1 @intTransactionId = intShipmentId FROM @ItemsFromInventoryShipment
-
 BEGIN	
+	DECLARE @intTransactionId INT
 	DECLARE @OrderToUpdate TABLE (intSalesOrderId INT);
 
+	SELECT TOP 1 @intTransactionId = intShipmentId FROM @ItemsFromInventoryShipment
+
 	INSERT INTO @OrderToUpdate(intSalesOrderId)
-	SELECT DISTINCT intSourceId 
+	SELECT DISTINCT intOrderId 
 		FROM tblICInventoryShipmentItem 
 	WHERE intInventoryShipmentId = @intTransactionId
 	
@@ -28,6 +21,6 @@ BEGIN
 
 		EXEC dbo.uspSOUpdateOrderShipmentStatus @intSalesOrderId
 			
-		DELETE FROM @OrderToUpdate WHERE intSalesOrderId = @intSalesOrderId AND intSalesOrderId = @intSalesOrderId
+		DELETE FROM @OrderToUpdate WHERE intSalesOrderId = @intSalesOrderId
 	END 
 END

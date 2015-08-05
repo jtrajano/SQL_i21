@@ -39,7 +39,7 @@ BEGIN
 			,[ItemNumber] = C.strItemNo
 			,[ItemAvailableForTM] = (CASE WHEN C.strType = 'Service' THEN 'S' ELSE '' END)
 			,[ReversePreviousDelivery] = ''
-			,[PerformerID] = G.strSalespersonId
+			,[PerformerID] = H.strSalespersonId
 			,[InvoiceLineNumber] = A.intTMLineNumber
 			,[ExtendedAmount] = ISNULL(A.dblTotal,0) + ISNULL(A.dblTotalTax,0)
 			,[QuantityDelivered] = A.dblQtyShipped
@@ -57,9 +57,9 @@ BEGIN
 		ON B.intEntityCustomerId = E.intEntityId
 	INNER JOIN tblSMCompanyLocation F
 		ON B.intCompanyLocationId = F.intCompanyLocationId
-	LEFT JOIN tblARSalesperson G
+	LEFT JOIN vyuEMSalesperson G
 		ON B.intEntitySalespersonId = G.intEntitySalespersonId
-	LEFT JOIN tblARSalesperson H
+	LEFT JOIN vyuEMSalesperson H
 		ON A.intPerformerId = H.intEntitySalespersonId
 	
 END

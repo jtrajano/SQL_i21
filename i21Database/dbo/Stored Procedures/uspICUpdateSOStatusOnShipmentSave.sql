@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspICUpdateSOStatusOnShipmentSave]
 	@intShipmentId INT
+	,@ysnOpenStatus	BIT = 0
 AS
 
 DECLARE @SOId INT
@@ -15,8 +16,11 @@ BEGIN
 		WHILE EXISTS(SELECT TOP 1 1 FROM #tmpSOList)
 		BEGIN
 			SELECT TOP 1 @SOId = intOrderId FROM #tmpSOList
-			
-			EXEC uspSOUpdateOrderShipmentStatus @SOId
+
+			IF (@ysnOpenStatus = 1)
+				EXEC uspSOUpdateOrderShipmentStatus @SOId, 1
+			ELSE
+				EXEC uspSOUpdateOrderShipmentStatus @SOId, NULL 
 
 			DELETE FROM #tmpSOList WHERE intOrderId = @SOId
 		END

@@ -163,7 +163,10 @@ FROM
 	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.[intEntityShipViaId]
 	LEFT JOIN (tblCTContractHeader F1 INNER JOIN tblCTContractDetail F2 ON F1.intContractHeaderId = F2.intContractHeaderId) 
 		ON F1.intEntityId = A.intEntityVendorId AND B.intItemId = F2.intItemId AND B.intLineNo = F2.intContractDetailId
-	WHERE A.strReceiptType IN ('Direct','Purchase Contract') AND A.ysnPosted = 1 AND B.dblBillQty != B.dblOpenReceive AND F1.intContractTypeId = 1
+	WHERE A.strReceiptType IN ('Direct','Purchase Contract') AND A.ysnPosted = 1 AND B.dblBillQty != B.dblOpenReceive 
+	AND 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' THEN
+						CASE WHEN F1.intContractTypeId = 1 THEN 1 ELSE 0 END
+					ELSE 1 END)
 	UNION ALL
 	--CHARGES
 	SELECT
