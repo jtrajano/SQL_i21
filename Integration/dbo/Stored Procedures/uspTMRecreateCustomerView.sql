@@ -118,6 +118,11 @@ BEGIN
 				,dblFutureCurrent = ISNULL(A.agcus_ar_future,0.0) + ISNULL(A.agcus_ar_per1,0.0)
 				,intConcurrencyId = 0
 				,strFullLocation =  ISNULL(B.agloc_loc_no ,'''') + '' '' + ISNULL(agloc_name,'''')
+				,intTaxId = CAST((SELECT TOP 1 A4GLIdentity 
+								FROM aglclmst 
+								WHERE ISNULL(aglcl_tax_state,'''') COLLATE Latin1_General_CI_AS = ISNULL(agcus_tax_state,'''') COLLATE Latin1_General_CI_AS
+									AND ISNULL(aglcl_tax_auth_id1,'''') COLLATE Latin1_General_CI_AS = ISNULL(agcus_tax_auth_id1,'''') COLLATE Latin1_General_CI_AS
+									AND ISNULL(aglcl_tax_auth_id2,'''') COLLATE Latin1_General_CI_AS = ISNULL(agcus_tax_auth_id2,'''') COLLATE Latin1_General_CI_AS) AS INT)
 				FROM agcusmst A
 				LEFT JOIN aglocmst B
 					ON A.agcus_bus_loc_no = B.agloc_loc_no
@@ -227,6 +232,11 @@ BEGIN
 				,dblFutureCurrent = ISNULL(A.ptcus_ar_curr,0.0)
 				,intConcurrencyId = 0
 				,strFullLocation =  ISNULL(B.ptloc_loc_no ,'''') + '' '' + ISNULL(ptloc_name,'''')
+				,intTaxId = CAST((SELECT TOP 1 A4GLIdentity 
+								FROM ptlclmst 
+								WHERE ISNULL(ptlcl_state,'''') COLLATE Latin1_General_CI_AS = ISNULL(ptcus_state,'''') COLLATE Latin1_General_CI_AS
+									AND ISNULL(ptlcl_local1_id,'''') COLLATE Latin1_General_CI_AS = ISNULL(ptcus_local1,'''') COLLATE Latin1_General_CI_AS
+									AND ISNULL(ptlcl_local2_id,'''') COLLATE Latin1_General_CI_AS = ISNULL(ptcus_local2,'''') COLLATE Latin1_General_CI_AS) AS INT)
 				FROM ptcusmst A
 				LEFT JOIN ptlocmst B
 					ON A.ptcus_bus_loc_no = B.ptloc_loc_no
@@ -308,6 +318,7 @@ BEGIN
 				,dblFutureCurrent = 0.0
 				,intConcurrencyId = 0
 				,strFullLocation =  ISNULL(Loc.strLocationName ,'''')
+				,intTaxId = CAST(NULL AS INT)
 			FROM tblEntity Ent
 			INNER JOIN tblARCustomer Cus 
 				ON Ent.intEntityId = Cus.intEntityCustomerId
@@ -338,4 +349,3 @@ GO
 GO 
 	PRINT 'END OF EXECUTE uspTMRecreateCustomerView'
 GO
-
