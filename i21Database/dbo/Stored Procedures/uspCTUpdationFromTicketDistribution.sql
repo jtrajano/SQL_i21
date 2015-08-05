@@ -21,7 +21,9 @@ BEGIN TRY
 			@strAdjustmentNo		NVARCHAR(50),
 			@dblCost				NUMERIC(9,4),
 			@ApplyScaleToBasis		BIT,
-			@intContractHeaderId	INT
+			@intContractHeaderId	INT,
+			@ysnAllowedToShow		BIT,
+			@strContractStatus		NVARCHAR(MAX)
 
 	DECLARE @Processed TABLE
 	(
@@ -50,15 +52,30 @@ BEGIN TRY
 	SELECT	@ApplyScaleToBasis = CAST(strValue AS BIT) FROM tblSMPreferences WHERE strPreference = 'ApplyScaleToBasis'
 	SELECT	@ApplyScaleToBasis = ISNULL(@ApplyScaleToBasis,0)
 
+	IF	ISNULL(@intContractDetailId,0) > 0
+	BEGIN
+		SELECT	@ysnAllowedToShow	=	ysnAllowedToShow,
+				@strContractStatus	=	strContractStatus 
+		FROM	vyuCTContractDetailView
+		WHERE	intContractDetailId =	@intContractDetailId
+
+		IF	ISNULL(@ysnAllowedToShow,0) = 0
+		BEGIN
+			SET @ErrMsg = 'Using of contract having status '''+@strContractStatus+''' is not allowed.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+	END
+
 	IF	@ysnDP = 1 AND ISNULL(@intContractDetailId,0) = 0
 	BEGIN
 		SELECT	TOP	1	@intContractDetailId	=	intContractDetailId
-		FROM	tblCTContractDetail CD
-		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
-		WHERE	CH.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
-		AND		CH.intEntityId		=	@intEntityId
-		AND		CD.intItemId		=	@intItemId
-		AND		CD.intPricingTypeId	=	5
+		FROM	vyuCTContractDetailView CD
+		--JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
+		WHERE	CD.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
+		AND		CD.intEntityId			=	@intEntityId
+		AND		CD.intItemId			=	@intItemId
+		AND		CD.intPricingTypeId		=	5
+		AND		CD.ysnAllowedToShow		=	1
 		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
 
 		IF	ISNULL(@intContractDetailId,0) = 0
@@ -71,26 +88,29 @@ BEGIN TRY
 	BEGIN
 		SELECT	TOP	1	
 				@intContractDetailId	=	CD.intContractDetailId,
-				@intContractHeaderId = CD.intContractHeaderId
-		FROM	tblCTContractDetail CD
-		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
-		WHERE	CH.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
-		AND		CH.intEntityId		=	@intEntityId
-		AND		CD.intItemId		=	@intItemId
-		AND		CD.intPricingTypeId	=	1
+				@intContractHeaderId	=	CD.intContractHeaderId
+		FROM	vyuCTContractDetailView CD
+		--JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
+		WHERE	CD.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
+		AND		CD.intEntityId			=	@intEntityId
+		AND		CD.intItemId			=	@intItemId
+		AND		CD.intPricingTypeId		=	1
+		AND		CD.ysnAllowedToShow		=	1
 		AND		CD.dblBalance - CD.dblScheduleQty	>	0
 		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
 	END
 	
 	IF	ISNULL(@intContractDetailId,0) = 0
 	BEGIN
-		SELECT	TOP	1	@intContractDetailId	=	intContractDetailId
-		FROM	tblCTContractDetail CD
-		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
-		WHERE	CH.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
-		AND		CH.intEntityId		=	@intEntityId
-		AND		CD.intItemId		=	@intItemId
-		AND	   (CD.intPricingTypeId	=	1 OR CD.intPricingTypeId = CASE WHEN @ApplyScaleToBasis = 0 THEN 1 ELSE 2 END)
+		SELECT	TOP	1	
+				@intContractDetailId	=	intContractDetailId
+		FROM	vyuCTContractDetailView CD
+		--JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
+		WHERE	CD.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
+		AND		CD.intEntityId			=	@intEntityId
+		AND		CD.intItemId			=	@intItemId
+		AND	   (CD.intPricingTypeId		=	1 OR CD.intPricingTypeId = CASE WHEN @ApplyScaleToBasis = 0 THEN 1 ELSE 2 END)
+		AND		CD.ysnAllowedToShow		=	1
 		AND		CD.dblBalance - CD.dblScheduleQty	>	0
 		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
 	END
@@ -202,26 +222,30 @@ BEGIN TRY
 
 		SELECT	@intContractDetailId = NULL
 		
-		SELECT	TOP	1	@intContractDetailId	=	intContractDetailId
-		FROM	tblCTContractDetail CD
-		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
-		WHERE	CH.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
-		AND		CH.intEntityId		=	@intEntityId
-		AND		CD.intItemId		=	@intItemId
-		AND		CD.intPricingTypeId	=	1
+		SELECT	TOP	1	
+				@intContractDetailId	=	intContractDetailId
+		FROM	vyuCTContractDetailView CD
+		--JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
+		WHERE	CD.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
+		AND		CD.intEntityId			=	@intEntityId
+		AND		CD.intItemId			=	@intItemId
+		AND		CD.intPricingTypeId		=	1
+		AND		CD.ysnAllowedToShow		=	1
 		AND		CD.dblBalance - CD.dblScheduleQty	>	0
 		AND		CD.intContractDetailId NOT IN (SELECT intContractDetailId FROM @Processed)
 		ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
 
 		IF	ISNULL(@intContractDetailId,0) = 0
 		BEGIN
-			SELECT	TOP	1	@intContractDetailId	=	intContractDetailId
-			FROM	tblCTContractDetail CD
-			JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
-			WHERE	CH.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
-			AND		CH.intEntityId		=	@intEntityId
-			AND		CD.intItemId		=	@intItemId
-			AND	   (CD.intPricingTypeId	=	1 OR CD.intPricingTypeId = CASE WHEN @ApplyScaleToBasis = 0 THEN 1 ELSE 2 END)
+			SELECT	TOP	1	
+					@intContractDetailId	=	intContractDetailId
+			FROM	vyuCTContractDetailView CD
+			--JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId = CD.intContractHeaderId
+			WHERE	CD.intContractTypeId	=	CASE WHEN @strInOutFlag = 'I' THEN 1 ELSE 2 END
+			AND		CD.intEntityId			=	@intEntityId
+			AND		CD.intItemId			=	@intItemId
+			AND	   (CD.intPricingTypeId		=	1 OR CD.intPricingTypeId = CASE WHEN @ApplyScaleToBasis = 0 THEN 1 ELSE 2 END)
+			AND		CD.ysnAllowedToShow		=	1
 			AND		CD.dblBalance - CD.dblScheduleQty	>	0
 			AND		CD.intContractDetailId NOT IN (SELECT intContractDetailId FROM @Processed)
 			ORDER BY CD.dtmStartDate, CD.intContractDetailId ASC
