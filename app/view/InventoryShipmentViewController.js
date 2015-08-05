@@ -818,31 +818,31 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     {
                         dataIndex: 'intSalesOrderId',
                         dataType: 'numeric',
-                        text: 'Sales Order Id',
                         hidden: true
                     },
                     {
                         dataIndex: 'intSalesOrderDetailId',
                         dataType: 'numeric',
-                        text: 'Sales Order Detail Id',
                         hidden: true
                     },
                     {
                         dataIndex: 'intCompanyLocationId',
                         dataType: 'string',
-                        text: 'Location Id',
                         hidden: true
                     },
                     {
                         dataIndex: 'intItemId',
                         dataType: 'string',
-                        text: 'Item Id',
+                        hidden: true
+                    },
+                    {
+                        dataIndex: 'intCommodityId',
+                        dataType: 'string',
                         hidden: true
                     },
                     {
                         dataIndex: 'intItemUOMId',
                         dataType: 'string',
-                        text: 'Item UOM Id',
                         hidden: true
                     },
                     {
@@ -884,13 +884,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     {
                         dataIndex: 'dblPrice',
                         dataType: 'float',
-                        text: 'Unit Price',
                         hidden: true
                     },
                     {
                         dataIndex: 'strStorageLocation',
                         dataType: 'string',
-                        text: 'Storage Location',
                         hidden: true
                     }
                 ],
