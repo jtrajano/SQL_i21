@@ -1,11 +1,14 @@
 CREATE PROCEDURE uspCTUpdateScheduleQuantity
 
 	@intContractDetailId	INT, 
-	@dblQuantityToUpdate	NUMERIC(12,4)/*,
-	@intUserId				INT,
-	@intExternalId			INT,
-	@strScreenName			NVARCHAR(50)*/
-	
+	@dblQuantityToUpdate	NUMERIC(12,4),
+	@intUserId				INT = NULL,
+	@intExternalId			INT = NULL,
+	@strScreenName			NVARCHAR(50) = NULL
+	/*
+	All the parameters are required. I am going to remove default value from the parameter in future.
+	So provide all the parameter while calling the sp.
+	*/
 AS
 
 BEGIN TRY
