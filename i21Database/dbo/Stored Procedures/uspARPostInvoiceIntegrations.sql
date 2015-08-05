@@ -63,7 +63,7 @@ BEGIN
 
 	-- Change quantity to negative if doing a post. Otherwise, it should be the same value if doing an unpost. 
 	UPDATE @ItemsFromInvoice
-		SET [dblQtyShipped] = [dblQtyShipped] * CASE WHEN @post = 1 THEN -1 ELSE 1 END 
+		SET [dblQtyShipped] = [dblQtyShipped] * CASE WHEN @post = 1 THEN 1 ELSE -1 END 
 END
 
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @userId
