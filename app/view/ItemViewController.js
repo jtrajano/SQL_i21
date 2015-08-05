@@ -126,6 +126,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colDetailWeightUOM: {
                     dataIndex: 'strWeightUOM',
                     editor: {
+                        origValueField: 'intUnitMeasureId',
+                        origUpdateField: 'intWeightUOMId',
                         store: '{weightUOM}',
                         defaultFilters: [{
                             column: 'strUnitType',
@@ -147,6 +149,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colDetailDimensionUOM: {
                     dataIndex: 'strDimensionUOM',
                     editor: {
+                        origValueField: 'intUnitMeasureId',
+                        origUpdateField: 'intDimensionUOMId',
                         store: '{dimensionUOM}',
                         defaultFilters: [{
                             column: 'strUnitType',
@@ -159,6 +163,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colDetailVolumeUOM: {
                     dataIndex: 'strVolumeUOM',
                     editor: {
+                        origValueField: 'intUnitMeasureId',
+                        origUpdateField: 'intVolumeUOMId',
                         store: '{volumeUOM}',
                         defaultFilters: [{
                             column: 'strUnitType',
@@ -1505,18 +1511,6 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 }
             }
-        }
-        else if (combo.column.itemId === 'colDetailWeightUOM')
-        {
-            current.set('intWeightUOMId', records[0].get('intUnitMeasureId'));
-        }
-        else if (combo.column.itemId === 'colDetailDimensionUOM')
-        {
-            current.set('intDimensionUOMId', records[0].get('intUnitMeasureId'));
-        }
-        else if (combo.column.itemId === 'colDetailVolumeUOM')
-        {
-            current.set('intVolumeUOMId', records[0].get('intUnitMeasureId'));
         }
     },
 
