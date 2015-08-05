@@ -89,6 +89,14 @@ IF ISNULL(@ysnPost, 0) = 0
 						WHERE A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)	
 						AND C.strAccountCategory != 'General' AND @strJournalType NOT IN('Origin Journal','Adjusted Origin Journal')
 						GROUP BY A.intJournalId	
+						UNION 
+						SELECT DISTINCT B.intJournalId,'Unable to unpost transactions you did not create.' as strMessage 
+						FROM tblGLJournal  B JOIN
+						#tmpPostJournals A ON B.intJournalId = A.intJournalId
+						CROSS APPLY(SELECT C.intEntityId FROM tblSMUserSecurity C 
+								JOIN tblSMUserPreference D ON D.intUserSecurityId = C.intUserSecurityID
+								WHERE C.intEntityId = @intEntityId AND D.ysnAllowUserSelfPost = 1) usr
+						WHERE usr.intEntityId <> B.intEntityId
 
 					) tmpBatchResults
 			END
@@ -195,7 +203,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 					AND C.strAccountCategory <> 'General'  AND @strJournalType NOT IN('Origin Journal','Adjusted Origin Journal')
 					GROUP BY A.intJournalId	
 				UNION 
-				SELECT DISTINCT B.intJournalId,'Unable to post transactions you did not create' as strMessage 
+				SELECT DISTINCT B.intJournalId,'Unable to post transactions you did not create.' as strMessage 
 					FROM tblGLJournal  B JOIN
 					#tmpPostJournals A ON B.intJournalId = A.intJournalId
 					CROSS APPLY(SELECT C.intEntityId FROM tblSMUserSecurity C 
