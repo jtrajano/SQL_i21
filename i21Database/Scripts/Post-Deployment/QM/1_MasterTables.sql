@@ -34,11 +34,18 @@ BEGIN
 	VALUES(5,'List')
 END
 GO
+--GO
+--IF NOT EXISTS(SELECT 1 FROM tblQMAttributeDataType WHERE intDataTypeId = 6)
+--BEGIN
+--	INSERT INTO tblQMAttributeDataType(intDataTypeId,strDataTypeName)
+--	VALUES(6,'Document')
+--END
+--GO
 GO
-IF NOT EXISTS(SELECT 1 FROM tblQMAttributeDataType WHERE intDataTypeId = 6)
+IF EXISTS(SELECT 1 FROM tblQMAttributeDataType WHERE intDataTypeId = 6)
 BEGIN
-	INSERT INTO tblQMAttributeDataType(intDataTypeId,strDataTypeName)
-	VALUES(6,'Document')
+	UPDATE tblQMAttribute Set intDataTypeId = 4 where intDataTypeId = 6
+	DELETE tblQMAttributeDataType Where intDataTypeId = 6
 END
 GO
 
@@ -353,5 +360,13 @@ IF NOT EXISTS(SELECT 1 FROM tblQMProductType WHERE intProductTypeId = 11)
 BEGIN
 	INSERT INTO tblQMProductType(intProductTypeId,strProductTypeName,strDescription,ysnIsTemplate)
 	VALUES(11,'Parent Lot','Parent Lot',0)
+END
+GO
+
+-- Drop unwanted tables
+GO
+IF EXISTS(SELECT * FROM sysobjects where xtype = 'U' and name = 'tblQMDocumentFile')
+BEGIN
+	DROP TABLE tblQMDocumentFile
 END
 GO

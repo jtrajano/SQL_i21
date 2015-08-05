@@ -201,7 +201,6 @@ BEGIN TRY
 		,intAttributeId
 		,strAttributeValue
 		,ysnIsMandatory
-		,intDocumentFileId
 		,intListItemId
 		,intCreatedUserId
 		,dtmCreated
@@ -213,7 +212,6 @@ BEGIN TRY
 		,intAttributeId
 		,strAttributeValue
 		,ysnIsMandatory
-		,intDocumentFileId
 		,intListItemId
 		,intCreatedUserId
 		,dtmCreated
@@ -223,7 +221,6 @@ BEGIN TRY
 			intAttributeId INT
 			,strAttributeValue NVARCHAR(50)
 			,ysnIsMandatory BIT
-			,intDocumentFileId INT
 			,intListItemId INT
 			,intCreatedUserId INT
 			,dtmCreated DATETIME

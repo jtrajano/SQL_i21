@@ -17,7 +17,6 @@ SELECT DISTINCT A.intAttributeId
 	,ISNULL(A.intDataTypeId, 0) AS intDataTypeId
 	,ISNULL(AD.strDataTypeName, 'Text') AS strDataTypeName
 	,ISNULL(A.intListId, 0) AS intListId
-	,0 AS intDocumentFileId
 	,'' AS DocFile
 	,'' AS DocType
 	,0 AS DocSize

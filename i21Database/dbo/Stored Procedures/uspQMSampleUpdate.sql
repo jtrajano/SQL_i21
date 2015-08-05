@@ -116,7 +116,6 @@ BEGIN TRY
 		,intAttributeId
 		,strAttributeValue
 		,ysnIsMandatory
-		,intDocumentFileId
 		,intListItemId
 		,intCreatedUserId
 		,dtmCreated
@@ -128,7 +127,6 @@ BEGIN TRY
 		,intAttributeId
 		,strAttributeValue
 		,ysnIsMandatory
-		,intDocumentFileId
 		,intListItemId
 		,intCreatedUserId
 		,dtmCreated
@@ -138,7 +136,6 @@ BEGIN TRY
 			intAttributeId INT
 			,strAttributeValue NVARCHAR(50)
 			,ysnIsMandatory BIT
-			,intDocumentFileId INT
 			,intListItemId INT
 			,intCreatedUserId INT
 			,dtmCreated DATETIME
@@ -151,7 +148,6 @@ BEGIN TRY
 	UPDATE dbo.tblQMSampleDetail
 	SET strAttributeValue = x.strAttributeValue
 		,intListItemId = x.intListItemId
-		,intDocumentFileId = x.intDocumentFileId
 		,intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
 		,intLastModifiedUserId = x.intLastModifiedUserId
 		,dtmLastModified = x.dtmLastModified
@@ -159,7 +155,6 @@ BEGIN TRY
 			intSampleDetailId INT
 			,strAttributeValue NVARCHAR(50)
 			,intListItemId INT
-			,intDocumentFileId INT
 			,intLastModifiedUserId INT
 			,dtmLastModified DATETIME
 			,strRowState NVARCHAR(50)

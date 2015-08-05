@@ -1872,7 +1872,6 @@
     <Build Include="dbo\Tables\tblMFMachineIssuedUOMType.sql" />
     <Build Include="dbo\Tables\tblQMTestResult.sql" />
     <Build Include="dbo\Tables\tblQMSampleDetail.sql" />
-    <Build Include="dbo\Tables\tblQMDocumentFile.sql" />
     <Build Include="dbo\Tables\tblQMSample.sql" />
     <Build Include="dbo\Views\vyuQMSampleList.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheet.sql" />
