@@ -244,6 +244,7 @@ namespace iRely.Inventory.Model
 
             modelBuilder.Configurations.Add(new tblICInventoryShipmentMap());
             modelBuilder.Configurations.Add(new tblICInventoryShipmentItemMap());
+            modelBuilder.Configurations.Add(new tblICInventoryShipmentChargeMap());
             modelBuilder.Configurations.Add(new tblICInventoryShipmentItemLotMap());
 
             modelBuilder.Configurations.Add(new tblICInventoryAdjustmentMap());
@@ -297,6 +298,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptItemMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptItemLotMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptChargeMap());
+            modelBuilder.Configurations.Add(new vyuICGetInventoryShipmentChargeMap());
             modelBuilder.Configurations.Add(new vyuICGetPackedUOMMap());
             modelBuilder.Configurations.Add(new vyuICGetUOMConversionMap());
             modelBuilder.Configurations.Add(new vyuICGetStorageLocationMap());

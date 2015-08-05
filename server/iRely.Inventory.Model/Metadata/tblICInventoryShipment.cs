@@ -15,6 +15,7 @@ namespace iRely.Inventory.Model
         public tblICInventoryShipment()
         {
             this.tblICInventoryShipmentItems = new List<tblICInventoryShipmentItem>();
+            this.tblICInventoryShipmentCharges = new List<tblICInventoryShipmentCharge>();
         }
 
         public int intInventoryShipmentId { get; set; }
@@ -105,6 +106,7 @@ namespace iRely.Inventory.Model
         }
         
         public ICollection<tblICInventoryShipmentItem> tblICInventoryShipmentItems { get; set; }
+        public ICollection<tblICInventoryShipmentCharge> tblICInventoryShipmentCharges { get; set; }
         public tblSMCompanyLocation ShipFromLocation { get; set; }
         public tblEntityLocation ShipToLocation { get; set; }
         public tblARCustomer tblARCustomer { get; set; } 
@@ -573,6 +575,177 @@ namespace iRely.Inventory.Model
         public string strGrade { get; set; }
 
         public tblICInventoryShipmentItem tblICInventoryShipmentItem { get; set; }
+    }
+
+    public class tblICInventoryShipmentCharge : BaseEntity
+    {
+        public int intInventoryShipmentChargeId { get; set; }
+        public int intInventoryShipmentId { get; set; }
+        public int? intContractId { get; set; }
+        public int? intChargeId { get; set; }
+        public string strCostMethod { get; set; }
+        public decimal? dblRate { get; set; }
+        public int? intCostUOMId { get; set; }
+        public decimal? dblAmount { get; set; }
+        public string strCostBilledBy { get; set; }
+        public int? intEntityVendorId { get; set; }
+        public int? intSort { get; set; }
+
+        private int? _contractNo;
+        [NotMapped]
+        public int? intContractNumber
+        {
+            get
+            {
+                if (vyuICGetInventoryShipmentCharge != null)
+                    return vyuICGetInventoryShipmentCharge.intContractNumber;
+                else
+                    return null;
+            }
+            set
+            {
+                _contractNo = value;
+            }
+        }
+        private string _itemNo;
+        [NotMapped]
+        public string strItemNo
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_itemNo))
+                    if (vyuICGetInventoryShipmentCharge != null)
+                        return vyuICGetInventoryShipmentCharge.strItemNo;
+                    else
+                        return null;
+                else
+                    return _itemNo;
+            }
+            set
+            {
+                _itemNo = value;
+            }
+        }
+        private string _itemDesc;
+        [NotMapped]
+        public string strItemDescription
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_itemDesc))
+                    if (vyuICGetInventoryShipmentCharge != null)
+                        return vyuICGetInventoryShipmentCharge.strItemDescription;
+                    else
+                        return null;
+                else
+                    return _itemDesc;
+            }
+            set
+            {
+                _itemDesc = value;
+            }
+        }
+        private string _uom;
+        [NotMapped]
+        public string strCostUOM
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_uom))
+                    if (vyuICGetInventoryShipmentCharge != null)
+                        return vyuICGetInventoryShipmentCharge.strCostUOM;
+                    else
+                        return null;
+                else
+                    return _uom;
+            }
+            set
+            {
+                _uom = value;
+            }
+        }
+        private string _uomType;
+        [NotMapped]
+        public string strUnitType
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_uomType))
+                    if (vyuICGetInventoryShipmentCharge != null)
+                        return vyuICGetInventoryShipmentCharge.strUnitType;
+                    else
+                        return null;
+                else
+                    return _uomType;
+            }
+            set
+            {
+                _uomType = value;
+            }
+        }
+        private string _onCostType;
+        [NotMapped]
+        public string strOnCostType
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_onCostType))
+                    if (vyuICGetInventoryShipmentCharge != null)
+                        return vyuICGetInventoryShipmentCharge.strOnCostType;
+                    else
+                        return null;
+                else
+                    return _onCostType;
+            }
+            set
+            {
+                _onCostType = value;
+            }
+        }
+        private string _vendorId;
+        [NotMapped]
+        public string strVendorId
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_vendorId))
+                    if (vyuICGetInventoryShipmentCharge != null)
+                        return vyuICGetInventoryShipmentCharge.strVendorId;
+                    else
+                        return null;
+                else
+                    return _vendorId;
+            }
+            set
+            {
+                _vendorId = value;
+            }
+        }
+
+        public tblICInventoryShipment tblICInventoryShipment { get; set; }
+        public vyuICGetInventoryShipmentCharge vyuICGetInventoryShipmentCharge { get; set; }
+    }
+
+    public class vyuICGetInventoryShipmentCharge
+    {
+        public int intInventoryShipmentChargeId { get; set; }
+        public int intInventoryShipmentId { get; set; }
+        public int? intContractId { get; set; }
+        public int? intContractNumber { get; set; }
+        public string strItemNo { get; set; }
+        public string strItemDescription { get; set; }
+        public string strCostMethod { get; set; }
+        public decimal? dblRate { get; set; }
+        public string strCostUOM { get; set; }
+        public string strUnitType { get; set; }
+        public int? intOnCostTypeId { get; set; }
+        public string strOnCostType { get; set; }
+        public int? intEntityVendorId { get; set; }
+        public string strVendorId { get; set; }
+        public decimal? dblAmount { get; set; }
+        public string strCostBilledBy { get; set; }
+
+        public tblICInventoryShipmentCharge tblICInventoryShipmentCharge { get; set; }
     }
 
     public class tblICInventoryShipmentItemLot : BaseEntity

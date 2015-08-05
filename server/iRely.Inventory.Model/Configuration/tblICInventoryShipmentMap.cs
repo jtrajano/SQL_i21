@@ -44,6 +44,9 @@ namespace iRely.Inventory.Model
             this.HasMany(p => p.tblICInventoryShipmentItems)
                 .WithRequired(p => p.tblICInventoryShipment)
                 .HasForeignKey(p => p.intInventoryShipmentId);
+            this.HasMany(p => p.tblICInventoryShipmentCharges)
+                .WithRequired(p => p.tblICInventoryShipment)
+                .HasForeignKey(p => p.intInventoryShipmentId);
             this.HasOptional(p => p.ShipFromLocation)
                 .WithMany(p => p.ShipFromLocations)
                 .HasForeignKey(p => p.intShipFromLocationId);
@@ -86,6 +89,60 @@ namespace iRely.Inventory.Model
 
             this.HasOptional(p => p.vyuICGetInventoryShipmentItem)
                 .WithRequired(p => p.tblICInventoryShipmentItem);
+        }
+    }
+
+    public class tblICInventoryShipmentChargeMap : EntityTypeConfiguration<tblICInventoryShipmentCharge>
+    {
+        public tblICInventoryShipmentChargeMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intInventoryShipmentChargeId);
+
+            // Table & Column Mappings
+            this.ToTable("tblICInventoryShipmentCharge");
+            this.Property(t => t.intInventoryShipmentChargeId).HasColumnName("intInventoryShipmentChargeId");
+            this.Property(t => t.intInventoryShipmentId).HasColumnName("intInventoryShipmentId");
+            this.Property(t => t.intContractId).HasColumnName("intContractId");
+            this.Property(t => t.intChargeId).HasColumnName("intChargeId");
+            this.Property(t => t.strCostMethod).HasColumnName("strCostMethod");
+            this.Property(t => t.dblRate).HasColumnName("dblRate").HasPrecision(18, 6);
+            this.Property(t => t.intCostUOMId).HasColumnName("intCostUOMId");
+            this.Property(t => t.dblAmount).HasColumnName("dblAmount").HasPrecision(18, 6);
+            this.Property(t => t.strCostBilledBy).HasColumnName("strCostBilledBy");
+            this.Property(t => t.intEntityVendorId).HasColumnName("intEntityVendorId");
+            this.Property(t => t.intSort).HasColumnName("intSort");
+
+            this.HasOptional(p => p.vyuICGetInventoryShipmentCharge)
+                .WithRequired(p => p.tblICInventoryShipmentCharge);
+        }
+    }
+
+    public class vyuICGetInventoryShipmentChargeMap : EntityTypeConfiguration<vyuICGetInventoryShipmentCharge>
+    {
+        public vyuICGetInventoryShipmentChargeMap()
+        {
+            // Primary Key
+            this.HasKey(t => t.intInventoryShipmentChargeId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetInventoryShipmentCharge");
+            this.Property(t => t.intInventoryShipmentChargeId).HasColumnName("intInventoryShipmentChargeId");
+            this.Property(t => t.intInventoryShipmentId).HasColumnName("intInventoryShipmentId");
+            this.Property(t => t.intContractId).HasColumnName("intContractId");
+            this.Property(t => t.intContractNumber).HasColumnName("intContractNumber");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
+            this.Property(t => t.strCostMethod).HasColumnName("strCostMethod");
+            this.Property(t => t.dblRate).HasColumnName("dblRate").HasPrecision(18, 6);
+            this.Property(t => t.strCostUOM).HasColumnName("strCostUOM");
+            this.Property(t => t.strUnitType).HasColumnName("strUnitType");
+            this.Property(t => t.intOnCostTypeId).HasColumnName("intOnCostTypeId");
+            this.Property(t => t.strOnCostType).HasColumnName("strOnCostType");
+            this.Property(t => t.intEntityVendorId).HasColumnName("intEntityVendorId");
+            this.Property(t => t.strVendorId).HasColumnName("strVendorId");
+            this.Property(t => t.dblAmount).HasColumnName("dblAmount").HasPrecision(18, 6);
+            this.Property(t => t.strCostBilledBy).HasColumnName("strCostBilledBy");
         }
     }
 
