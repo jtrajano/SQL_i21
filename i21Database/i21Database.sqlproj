@@ -2166,6 +2166,8 @@
     <Build Include="dbo\Tables\tblLGWarehouseInstructionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostStockReservation.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateSOStatusFromInvoice.sql" />
+    <Build Include="dbo\Tables\tblICInventoryShipmentCharge.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryShipmentCharge.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

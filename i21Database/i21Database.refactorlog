@@ -3829,4 +3829,11 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="[tblMFScheduleWorkOrderDetail]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="f1a33e61-08d5-4ddb-88fe-416bab7640f1" ChangeDateTime="08/04/2015 08:41:18">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryShipmentCharge].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryShipmentCharge]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intInventoryShipmentChargeId" />
+  </Operation>
 </Operations>
