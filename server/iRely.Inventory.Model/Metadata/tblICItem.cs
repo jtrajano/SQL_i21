@@ -234,7 +234,6 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemBundle> tblICItemBundles { get; set; }
         public ICollection<tblICItemBundle> BundleItems { get; set; }
         public ICollection<tblICItemAssembly> tblICItemAssemblies { get; set; }
-        public ICollection<tblICItemAssembly> AssemblyItems { get; set; }
         public ICollection<tblICStorageLocationSku> tblICStorageLocationSkus { get; set; }
         public ICollection<tblICItemCommodityCost> tblICItemCommodityCosts { get; set; }
         public ICollection<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }

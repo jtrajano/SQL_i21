@@ -136,7 +136,6 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemPricingLevel> tblICItemPricingLevels { get; set; }
         public ICollection<tblICItemSpecialPricing> tblICItemSpecialPricings { get; set; }
         public ICollection<tblICItemKitDetail> tblICItemKitDetails { get; set; }
-        public ICollection<tblICItemAssembly> tblICItemAssemblies { get; set; }
         public ICollection<tblICItemBundle> tblICItemBundles { get; set; }
         public ICollection<tblICItemUPC> tblICItemUPCs { get; set; }
 
