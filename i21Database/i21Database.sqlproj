@@ -2193,6 +2193,7 @@
     <Build Include="dbo\Stored Procedures\uspCFImportFeeProfile.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportFee.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportCard.sql" />
+    <Build Include="dbo\Stored Procedures\uspPODuplicate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
