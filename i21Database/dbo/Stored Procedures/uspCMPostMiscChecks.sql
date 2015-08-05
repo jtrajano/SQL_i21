@@ -107,10 +107,9 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 
 -- Read the user preference
 SELECT	@ysnAllowUserSelfPost = 1
-FROM	dbo.tblSMPreferences 
-WHERE	strPreference = 'AllowUserSelfPost' 
-		AND LOWER(RTRIM(LTRIM(strValue))) = 'true'		
-		AND intUserID = @intUserId
+FROM	dbo.tblSMUserPreference 
+WHERE	ysnAllowUserSelfPost = 1 
+		AND intUserSecurityId = @intUserId
 IF @@ERROR <> 0	GOTO Post_Rollback	
 
 --=====================================================================================================================================
