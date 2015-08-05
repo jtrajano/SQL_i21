@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblMFScheduleWorkOrderDetail] (
 	intScheduleWorkOrderDetailId INT NOT NULL identity(1, 1)
 	,intScheduleWorkOrderId INT NOT NULL
+	,intWorkOrderId INT NOT NULL
 	,dtmPlannedStartDate DATETIME NOT NULL
 	,dtmPlannedEndDate DATETIME NOT NULL
 	,intPlannedShiftId INT NOT NULL
@@ -13,7 +14,8 @@
 		intScheduleWorkOrderId
 		,intPlannedShiftId
 		)
-	,CONSTRAINT [FK_tblMFScheduleWorkOrderDetail_tblMFScheduleWorkOrder_intScheduleWorkOrderId] FOREIGN KEY (intScheduleWorkOrderId) REFERENCES [dbo].[tblMFScheduleWorkOrder](intScheduleWorkOrderId)
+	,CONSTRAINT [FK_tblMFScheduleWorkOrderDetail_tblMFScheduleWorkOrder_intScheduleWorkOrderId] FOREIGN KEY (intScheduleWorkOrderId) REFERENCES [dbo].[tblMFScheduleWorkOrder](intScheduleWorkOrderId) ON DELETE CASCADE
+	,CONSTRAINT [FK_tblMFScheduleWorkOrderDetail_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY (intWorkOrderId) REFERENCES [dbo].[tblMFWorkOrder](intWorkOrderId)
 	,CONSTRAINT [FK_tblMFScheduleWorkOrderDetail_tblMFScheduleCalendar_intCalendarDetailId] FOREIGN KEY (intCalendarDetailId) REFERENCES [dbo].[tblMFScheduleCalendarDetail](intCalendarDetailId)
 	,CONSTRAINT [FK_tblMFScheduleWorkOrderDetail_tblMFShift_intShiftId] FOREIGN KEY (intPlannedShiftId) REFERENCES [dbo].[tblMFShift](intShiftId)
 	)

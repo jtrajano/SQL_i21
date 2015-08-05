@@ -23,7 +23,7 @@
 	,dtmLastModified DATETIME NOT NULL
 	,intLastModifiedUserId INT NOT NULL
 	,CONSTRAINT PK_tblMFScheduleWorkOrder_intScheduleWorkOrderId PRIMARY KEY (intScheduleWorkOrderId)
-	,CONSTRAINT [FK_tblMFScheduleWorkOrder_tblMFSchedule_intScheduleId] FOREIGN KEY (intScheduleId) REFERENCES [dbo].[tblMFSchedule](intScheduleId)
+	,CONSTRAINT [FK_tblMFScheduleWorkOrder_tblMFSchedule_intScheduleId] FOREIGN KEY (intScheduleId) REFERENCES [dbo].[tblMFSchedule](intScheduleId) ON DELETE CASCADE
 	,CONSTRAINT [FK_tblMFScheduleWorkOrder_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY (intWorkOrderId) REFERENCES [dbo].[tblMFWorkOrder](intWorkOrderId)
 	,CONSTRAINT [FK_tblMFScheduleWorkOrder_tblMFShift_intShiftId] FOREIGN KEY (intPlannedShiftId) REFERENCES [dbo].[tblMFShift](intShiftId)
 	)
