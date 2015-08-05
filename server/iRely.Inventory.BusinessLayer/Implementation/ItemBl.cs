@@ -42,7 +42,7 @@ namespace iRely.Inventory.BusinessLayer
             return true;
         }
 
-        public override BusinessResult<tblICItem> Validate(IEnumerable<tblICItem> entities, ValidateAction action, Dictionary<string, string> fieldMap = null)
+        public override BusinessResult<tblICItem> Validate(IEnumerable<tblICItem> entities, ValidateAction action)
         {
             var isValid = true;
             var msg = "";
