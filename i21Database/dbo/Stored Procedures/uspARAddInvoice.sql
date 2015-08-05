@@ -179,7 +179,15 @@ SELECT
 FROM
 	@InvoiceEntries IE
 	Join @temp TE
-       on TE.Customer = IE.intEntityCustomerId and TE.Location = IE.intLocationId
+       on TE.Customer = IE.intEntityCustomerId 
+	   and TE.Location = IE.intLocationId 
+	   and TE.strSource = IE.strSourceId
+	   and TE.dtmDate = IE.dtmDate
+	   and TE.Currency = IE.intCurrencyId
+       and TE.Salesperson = IE.intSalesPersonId
+	   and TE.Shipvia = IE.intShipViaId
+	   and TE.Comments = IE.strComments
+	   and TE.PurchaseOrder = IE.strPurchaseOrder	  
 INNER JOIN
 	tblARCustomer AC
 		ON IE.[intEntityCustomerId] = AC.[intEntityCustomerId]
@@ -244,7 +252,15 @@ SELECT
 FROM
     @InvoiceEntries IE
 	JOIN @temp TE
-	on TE.Customer = IE.intEntityCustomerId and TE.Location = IE.intLocationId	
+	 on TE.Customer = IE.intEntityCustomerId 
+	   and TE.Location = IE.intLocationId 
+	   and TE.strSource = IE.strSourceId
+	   and TE.dtmDate = IE.dtmDate
+	   and TE.Currency = IE.intCurrencyId
+       and TE.Salesperson = IE.intSalesPersonId
+	   and TE.Shipvia = IE.intShipViaId
+	   and TE.Comments = IE.strComments
+	   and TE.PurchaseOrder = IE.strPurchaseOrder	  
 	JOIN tblARInvoice IV
 	    on TE.InvoiceNumber = IV.strInvoiceNumber and IE.strSourceId = IV.strInvoiceOriginId
     INNER JOIN
