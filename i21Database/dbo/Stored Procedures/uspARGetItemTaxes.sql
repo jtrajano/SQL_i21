@@ -148,10 +148,10 @@ AS
 			IF @TaxMasterId IS NULL OR @TaxMasterId = 0
 				BEGIN
 					SELECT
-						@Country = ISNULL(SL.[strCountry], EL.[strCountry])
-						,@State = ISNULL(SL.[strState], EL.[strState])
-						,@County = TC.[strCounty] 
-						,@City = ISNULL(SL.[strCity], EL.[strCity])
+						@Country = UPPER(RTRIM(LTRIM(ISNULL(ISNULL(SL.[strCountry], EL.[strCountry]),''))))
+						,@State = UPPER(RTRIM(LTRIM(ISNULL(ISNULL(SL.[strState], EL.[strState]),''))))
+						,@County = UPPER(RTRIM(LTRIM(ISNULL(TC.[strCounty],'')))) 
+						,@City = UPPER(RTRIM(LTRIM(ISNULL(ISNULL(SL.[strCity], EL.[strCity]),''))))
 					FROM
 						tblARCustomer C
 					LEFT OUTER JOIN
@@ -179,10 +179,10 @@ AS
 			ELSE
 				BEGIN
 					SELECT
-						@Country = ISNULL(CL.[strCountry], '')
-						,@State = ISNULL(CL.[strStateProvince], '')
+						@Country = UPPER(RTRIM(LTRIM(ISNULL(CL.[strCountry], ''))))
+						,@State = UPPER(RTRIM(LTRIM(ISNULL(CL.[strStateProvince], ''))))
 						,@County = '' 
-						,@City = ISNULL(CL.[strCity], '')
+						,@City = UPPER(RTRIM(LTRIM(ISNULL(CL.[strCity], ''))))
 					FROM
 						tblSMCompanyLocation CL													
 					WHERE
@@ -192,9 +192,25 @@ AS
 
 				
 			DECLARE @TaxGroups TABLE(intTaxGroupId INT)				
+			DECLARE @ValidTaxGroups TABLE(intTaxGroupId INT)				
+			DECLARE @TaxCodes TABLE(
+				intTaxGroupMasterId INT
+				,intTaxGroupId INT
+				,intTaxCodeId INT
+				,strCountry NVARCHAR(500)
+				,strState NVARCHAR(500)
+				,strCounty NVARCHAR(500)
+				,strCity NVARCHAR(500))			
 			
-			INSERT INTO @TaxGroups
-			SELECT DISTINCT TG.[intTaxGroupId]
+			INSERT INTO @TaxCodes
+			SELECT DISTINCT 
+				TGM.[intTaxGroupMasterId]
+				,TG.[intTaxGroupId]
+				,TC.[intTaxCodeId]
+				,UPPER(RTRIM(LTRIM(TC.[strCountry])))
+				,UPPER(RTRIM(LTRIM(TC.[strState])))
+				,UPPER(RTRIM(LTRIM(TC.[strCounty])))
+				,UPPER(RTRIM(LTRIM(TC.[strCity])))
 			FROM tblSMTaxCode TC	
 				INNER JOIN tblSMTaxGroupCode TGC ON TC.[intTaxCodeId] = TGC.[intTaxCodeId] 
 				INNER JOIN tblSMTaxGroup TG ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
@@ -202,92 +218,95 @@ AS
 				INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
 			WHERE 
 				TGM.[intTaxGroupMasterId] = @TaxGroupMasterId
-				
+				AND TC.[intTaxCodeId] NOT IN
+					(
+						SELECT DISTINCT TC.intTaxCodeId
+						FROM tblSMTaxCode TC	
+							INNER JOIN tblSMTaxGroupCode TGC ON TC.[intTaxCodeId] = TGC.[intTaxCodeId] 
+							INNER JOIN tblSMTaxGroup TG ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
+							INNER JOIN tblSMTaxGroupMasterGroup TGTM ON TG.[intTaxGroupId] = TGTM.[intTaxGroupId]
+							INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
+						WHERE 
+							TGM.[intTaxGroupMasterId] = @TaxGroupMasterId
+						GROUP BY
+							TC.intTaxCodeId
+						HAVING COUNT(TC.intTaxCodeId) > 1
+					)
+											
+			
+			INSERT INTO @TaxGroups
+			SELECT DISTINCT [intTaxGroupId]
+			FROM @TaxCodes
+			
+
+
 			--Country
-			IF (SELECT COUNT(1) FROM @TaxGroups) > 1
+			INSERT INTO @ValidTaxGroups
+			SELECT DISTINCT
+				[intTaxGroupId] 
+			FROM 
+				@TaxCodes
+			WHERE
+				[strCountry] = @Country 
+				
+			IF (SELECT COUNT(1) FROM @TaxGroups) > 1 AND ((SELECT COUNT(1) FROM @TaxGroups) > (SELECT COUNT(1) FROM @ValidTaxGroups))
 				BEGIN
 					DELETE FROM @TaxGroups
-					WHERE
-						[intTaxGroupId] NOT IN
-						(
-							SELECT DISTINCT
-								TG.[intTaxGroupId] 
-							FROM tblSMTaxCode TC	
-								INNER JOIN tblSMTaxGroupCode TGC ON TC.[intTaxCodeId] = TGC.[intTaxCodeId] 
-								INNER JOIN tblSMTaxGroup TG ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
-								INNER JOIN tblSMTaxGroupMasterGroup TGTM ON TG.[intTaxGroupId] = TGTM.[intTaxGroupId]
-								INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
-							WHERE 
-								TGM.[intTaxGroupMasterId] = @TaxGroupMasterId
-								AND TC.[strCountry] = @Country 
-						)				
+					WHERE [intTaxGroupId] NOT IN (SELECT DISTINCT [intTaxGroupId] FROM @ValidTaxGroups)				
 				END
 				
+				
+			DELETE FROM @ValidTaxGroups				
 			--State
-			IF (SELECT COUNT(1) FROM @TaxGroups) > 1
+			INSERT INTO @ValidTaxGroups
+			SELECT DISTINCT
+				[intTaxGroupId] 
+			FROM 
+				@TaxCodes
+			WHERE 
+				[strCountry] = @Country
+				AND [strState] = @State 																			
+			IF (SELECT COUNT(1) FROM @TaxGroups) > 1 AND ((SELECT COUNT(1) FROM @TaxGroups) > (SELECT COUNT(1) FROM @ValidTaxGroups))
 				BEGIN
 					DELETE FROM @TaxGroups
-					WHERE
-						[intTaxGroupId] NOT IN
-						(
-							SELECT DISTINCT
-								TG.[intTaxGroupId] 
-							FROM tblSMTaxCode TC	
-								INNER JOIN tblSMTaxGroupCode TGC ON TC.[intTaxCodeId] = TGC.[intTaxCodeId] 
-								INNER JOIN tblSMTaxGroup TG ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
-								INNER JOIN tblSMTaxGroupMasterGroup TGTM ON TG.[intTaxGroupId] = TGTM.[intTaxGroupId]
-								INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
-							WHERE 
-								TGM.[intTaxGroupMasterId] = @TaxGroupMasterId
-								AND TC.[strCountry] = @Country
-								AND TC.[strState] = @State 
-						)				
+					WHERE [intTaxGroupId] NOT IN (SELECT DISTINCT [intTaxGroupId] FROM @ValidTaxGroups)
 				END
 				
+			DELETE FROM @ValidTaxGroups				
 			--County
-			IF (SELECT COUNT(1) FROM @TaxGroups) > 1
+			INSERT INTO @ValidTaxGroups
+			SELECT DISTINCT
+				[intTaxGroupId] 
+			FROM 
+				@TaxCodes
+			WHERE 
+				[strCountry] = @Country
+				AND [strState] = @State
+				AND [strCounty] = @County	
+			IF (SELECT COUNT(1) FROM @TaxGroups) > 1 AND ((SELECT COUNT(1) FROM @TaxGroups) > (SELECT COUNT(1) FROM @ValidTaxGroups))
 				BEGIN
 					DELETE FROM @TaxGroups
-					WHERE
-						[intTaxGroupId] NOT IN
-						(
-							SELECT DISTINCT
-								TG.[intTaxGroupId] 
-							FROM tblSMTaxCode TC	
-								INNER JOIN tblSMTaxGroupCode TGC ON TC.[intTaxCodeId] = TGC.[intTaxCodeId] 
-								INNER JOIN tblSMTaxGroup TG ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
-								INNER JOIN tblSMTaxGroupMasterGroup TGTM ON TG.[intTaxGroupId] = TGTM.[intTaxGroupId]
-								INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
-							WHERE 
-								TGM.[intTaxGroupMasterId] = @TaxGroupMasterId
-								AND TC.[strCountry] = @Country
-								AND TC.[strState] = @State 
-								AND TC.[strCounty] = @County
-						)				
+					WHERE [intTaxGroupId] NOT IN (SELECT DISTINCT [intTaxGroupId] FROM @ValidTaxGroups)			
 				END	
 				
+			DELETE FROM @ValidTaxGroups				
 			--City
-			IF (SELECT COUNT(1) FROM @TaxGroups) > 1
+			INSERT INTO @ValidTaxGroups
+			SELECT DISTINCT
+				[intTaxGroupId] 
+			FROM 
+				@TaxCodes
+			WHERE 
+				[strCountry] = @Country
+				AND [strState] = @State
+				AND [strCounty] = @County
+				AND [strCity] = @City																					
+			IF (SELECT COUNT(1) FROM @TaxGroups) > 1 AND ((SELECT COUNT(1) FROM @TaxGroups) > (SELECT COUNT(1) FROM @ValidTaxGroups))
 				BEGIN
 					DELETE FROM @TaxGroups
-					WHERE
-						[intTaxGroupId] NOT IN
-						(
-							SELECT DISTINCT
-								TG.[intTaxGroupId] 
-							FROM tblSMTaxCode TC	
-								INNER JOIN tblSMTaxGroupCode TGC ON TC.[intTaxCodeId] = TGC.[intTaxCodeId] 
-								INNER JOIN tblSMTaxGroup TG ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
-								INNER JOIN tblSMTaxGroupMasterGroup TGTM ON TG.[intTaxGroupId] = TGTM.[intTaxGroupId]
-								INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
-							WHERE 
-								TGM.[intTaxGroupMasterId] = @TaxGroupMasterId
-								AND TC.[strCountry] = @Country
-								AND TC.[strState] = @State 
-								AND TC.[strCounty] = @County
-								AND TC.[strCity] = @City
-						)				
-				END									
+					WHERE [intTaxGroupId] NOT IN (SELECT DISTINCT [intTaxGroupId] FROM @ValidTaxGroups)				
+				END	
+				
 					
 			SELECT
 				0
@@ -305,24 +324,9 @@ AS
 				,TGM.[ysnSeparateOnInvoice] 
 				,TC.[ysnCheckoffTax]
 				,TC.[strTaxCode]
-				,@TaxExempt AS [ysnTaxExempt] 				
+				,0 AS [ysnTaxExempt] 				
 			FROM
 				tblSMTaxCode TC
-			--LEFT OUTER JOIN
-			--	(
-			--		SELECT TOP 1
-			--			 [intTaxCodeId]
-			--			,[numRate]
-			--			,[strCalculationMethod]
-			--		FROM
-			--			tblSMTaxCodeRate
-			--		WHERE
-			--			CAST([dtmEffectiveDate] AS DATE) <= CAST(@TransactionDate AS DATE)
-			--		ORDER BY
-			--			 [dtmEffectiveDate]	ASC
-			--			,[numRate]			DESC
-			--	) TCR
-			--		ON TC.[intTaxCodeId] = TCR.[intTaxCodeId]
 			INNER JOIN
 				tblSMTaxGroupCode TGC
 					ON TC.[intTaxCodeId] = TGC.[intTaxCodeId] 
@@ -345,6 +349,8 @@ AS
 				TGM.[intTaxGroupMasterId] = @TaxGroupMasterId
 				AND (TC.[intSalesTaxAccountId] IS NOT NULL
 					AND TC.[intSalesTaxAccountId] <> 0)
+			ORDER BY
+				TGTM.intTaxGroupMasterGroupId
 				
 			RETURN 1											
 		END						
