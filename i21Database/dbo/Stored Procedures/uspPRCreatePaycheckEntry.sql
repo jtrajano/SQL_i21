@@ -196,7 +196,12 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 						AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
 					), 0)
 				END
-			,[dblAmount]
+			,CASE 
+				WHEN ([strCalculationType] IN ('Rate Factor', 'Overtime')) 
+					THEN [dblAmount] * ISNULL((SELECT dblAmount FROM tblPREmployeeEarning WHERE intEmployeeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId), 0)
+				ELSE
+					[dblAmount]
+				END
 			,CASE WHEN ([strCalculationType] IN ('Hourly Rate', 'Overtime')) THEN 
 				CASE 
 					--If Earning Id is HOLIDAY, use the specified Pay Group Holiday Hours
@@ -219,7 +224,20 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 							AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
 						), 0)
 					END 
-				* [dblAmount] ELSE [dblAmount] END
+				* CASE 
+					WHEN ([strCalculationType] IN ('Rate Factor', 'Overtime')) 
+						THEN [dblAmount] * ISNULL((SELECT dblAmount FROM tblPREmployeeEarning WHERE intEmployeeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId), 0)
+					ELSE
+						[dblAmount]
+					END
+				ELSE 
+					CASE 
+						WHEN ([strCalculationType] IN ('Rate Factor', 'Overtime')) 
+							THEN [dblAmount] * ISNULL((SELECT dblAmount FROM tblPREmployeeEarning WHERE intEmployeeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId), 0)
+						ELSE
+							[dblAmount]
+						END
+				END
 			,[strW2Code]
 			,[intEmployeeTimeOffId]
 			,[intAccountId]
