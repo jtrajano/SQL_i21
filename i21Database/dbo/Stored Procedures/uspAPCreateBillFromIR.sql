@@ -163,8 +163,12 @@ BEGIN
 		--[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'AP Clearing'),
 		[dblTotal]					=	(B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost,
 		[dblCost]					=	B.dblUnitCost,
-		[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E1.intContractDetailId ELSE POContractItems.intContractDetailId END,
-		[intContractHeaderId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E.intContractHeaderId ELSE POContractItems.intContractHeaderId END,
+		[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E1.intContractDetailId 
+											WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.intContractDetailId
+											ELSE NULL END,
+		[intContractHeaderId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E.intContractHeaderId 
+											WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.intContractDetailId
+											ELSE NULL END,
 		[intLineNo]					=	ISNULL(B.intSort,0)
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
