@@ -2083,7 +2083,6 @@
     <Build Include="dbo\Tables\tblCFAccountSuccessImport.sql" />
     <Build Include="dbo\Tables\tblCFAccountFailedImport.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportAccount.sql" />
-<<<<<<< HEAD
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLot.sql" />
     <Build Include="dbo\Tables\tblWHSKUHistory.sql" />
     <Build Include="dbo\Tables\tblWHSKUReasonCode.sql" />
@@ -2177,7 +2176,6 @@
     <Build Include="dbo\Views\vyuQMTestList.sql" />
     <Build Include="dbo\Tables\tblICInventoryShipmentCharge.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryShipmentCharge.sql" />
-=======
     <Build Include="dbo\Tables\tblCFDiscountScheduleSuccessImport.sql" />
     <Build Include="dbo\Tables\tblCFDiscountScheduleFailedImport.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportDiscountSchedule.sql" />
@@ -2195,7 +2193,6 @@
     <Build Include="dbo\Stored Procedures\uspCFImportFeeProfile.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportFee.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportCard.sql" />
->>>>>>> CF-306-Create-Origin-Conversions-to-i21-for-Setup
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
