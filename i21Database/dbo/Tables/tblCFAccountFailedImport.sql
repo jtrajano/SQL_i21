@@ -5,3 +5,5 @@
     CONSTRAINT [PK_tblCFAccountFailedImport] PRIMARY KEY CLUSTERED ([intAccountFailedImportId] ASC)
 );
 
+
+
