@@ -7,19 +7,20 @@
 	,@Quantity			NUMERIC(18,6)
 	,@Price				NUMERIC(18,6)	= NULL OUTPUT
 	,@Pricing			NVARCHAR(250)	= NULL OUTPUT	
+	,@VendorId			INT				= NULL
 AS		
 	
-	DECLARE @VendorId			INT
+	DECLARE @ItemVendorId		INT
 			,@ItemLocationId	INT
 			,@ItemCategoryId	INT
 			,@ItemCategory		NVARCHAR(100)
 			,@UOMQuantity		NUMERIC(18,6)
 
-	SELECT @VendorId	   = VI.intVendorId
-		  ,@ItemLocationId = intItemLocationId
-		  ,@ItemCategoryId = I.intCategoryId
-		  ,@ItemCategory   = C.strCategoryCode
-		  ,@UOMQuantity    = CASE WHEN UOM.dblUnitQty = 0 OR UOM.dblUnitQty IS NULL THEN 1.00 ELSE UOM.dblUnitQty END
+	SELECT @ItemVendorId	= ISNULL(@VendorId, VI.intVendorId)
+		  ,@ItemLocationId	= intItemLocationId
+		  ,@ItemCategoryId	= I.intCategoryId
+		  ,@ItemCategory	= C.strCategoryCode
+		  ,@UOMQuantity		= CASE WHEN UOM.dblUnitQty = 0 OR UOM.dblUnitQty IS NULL THEN 1.00 ELSE UOM.dblUnitQty END
 	FROM
 		tblICItem I
 	INNER JOIN
@@ -374,7 +375,7 @@ AS
 				ON SP.strCustomerGroup = CG.strGroupName
 				
 		--Customer Group - Rack Vendor No + Rack Item No
-		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialGroupPricing WHERE intRackItemId = @ItemId AND intRackVendorId = @VendorId)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialGroupPricing WHERE intRackItemId = @ItemId AND intRackVendorId = @ItemVendorId)
 		IF(@Price IS NOT NULL)
 			BEGIN
 				SET @Pricing = 'Customer Group - Rack Vendor No + Rack Item No'
@@ -383,7 +384,7 @@ AS
 			END
 
 		--Customer Group - Rack Vendor No
-		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialGroupPricing WHERE intRackVendorId = @VendorId)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialGroupPricing WHERE intRackVendorId = @ItemVendorId)
 		IF(@Price IS NOT NULL)
 			BEGIN
 				SET @Pricing = 'Customer Group - Rack Vendor No'
@@ -460,7 +461,7 @@ AS
 			
 
 		--Customer - Rack Vendor No + Rack Item No
-		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intRackItemId = @ItemId AND intRackVendorId = @VendorId)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intRackItemId = @ItemId AND intRackVendorId = @ItemVendorId)
 		IF(@Price IS NOT NULL)
 			BEGIN
 				SET @Pricing = 'Customer - Rack Vendor No + Rack Item No'
@@ -469,7 +470,7 @@ AS
 			END
 
 		--Customer - Vendor + Rack Vendor No
-		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intRackVendorId = @VendorId)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intRackVendorId = @ItemVendorId)
 		IF(@Price IS NOT NULL)
 			BEGIN
 				SET @Pricing = 'Customer - Rack Vendor No'
@@ -488,7 +489,7 @@ AS
 					
 
 		--Customer Group - Vendor + Item
-		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialGroupPricing WHERE intItemId = @ItemId AND intVendorId = @VendorId)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialGroupPricing WHERE intItemId = @ItemId AND intVendorId = @ItemVendorId)
 		IF(@Price IS NOT NULL)
 			BEGIN
 				SET @Pricing = 'Customer Group - Vendor + Item'
@@ -506,7 +507,7 @@ AS
 			END
 
 		--Customer Group - Vendor
-		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialGroupPricing WHERE intVendorId = @VendorId)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialGroupPricing WHERE intVendorId = @ItemVendorId)
 		IF(@Price IS NOT NULL)
 			BEGIN
 				SET @Pricing = 'Customer Group - Vendor'
@@ -533,7 +534,7 @@ AS
 			END			
 
 		--Customer - Vendor + Item
-		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId AND intVendorId = @VendorId)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId AND intVendorId = @ItemVendorId)
 		IF(@Price IS NOT NULL)
 			BEGIN
 				SET @Pricing = 'Customer - Vendor + Item'
@@ -551,7 +552,7 @@ AS
 			END
 
 		--Customer - Vendor
-		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intVendorId = @VendorId)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intVendorId = @ItemVendorId)
 		IF(@Price IS NOT NULL)
 			BEGIN
 				SET @Pricing = 'Customer - Vendor'
