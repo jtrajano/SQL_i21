@@ -83,7 +83,7 @@ namespace iRely.Inventory.BusinessLayer
                     {
                         var idParameter = new SqlParameter("intShipmentId", shipmentId);
                         var openStatus = new SqlParameter("ysnOpenStatus", true);
-                        _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdateSOStatusOnShipmentSave @intShipmentId", idParameter, openStatus);
+                        _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdateSOStatusOnShipmentSave @intShipmentId, @ysnOpenStatus", idParameter, openStatus);
                     }
 
                     result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
