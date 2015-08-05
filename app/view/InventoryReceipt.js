@@ -1178,6 +1178,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'numbercolumn',
+                                                                                summaryType: 'sum',
                                                                                 itemId: 'colTax',
                                                                                 width: 85,
                                                                                 dataIndex: 'strTax',
@@ -1244,7 +1245,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             {
                                                                                 xtype: 'numbercolumn',
                                                                                 itemId: 'colGross',
-                                                                                width: 85,
+                                                                                width: 150,
                                                                                 dataIndex: 'dblUnitRetail',
                                                                                 text: 'Gross',
                                                                                 editor: {
@@ -1256,7 +1257,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             {
                                                                                 xtype: 'numbercolumn',
                                                                                 itemId: 'colNet',
-                                                                                width: 85,
+                                                                                width: 150,
                                                                                 dataIndex: 'dblUnitRetail',
                                                                                 text: 'Net',
                                                                                 editor: {

@@ -318,7 +318,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colUnitCost: 'dblUnitCost',
-                colTax: 'dblTax',
+                colTax: {
+                    dataIndex: 'dblTax'
+                },
                 colUnitRetail: 'dblUnitRetail',
                 colGross: 'dblGross',
                 colNet: 'dblNet',
@@ -675,6 +677,39 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             btnViewTaxDetail.handler = function(grid, rowIndex, colIndex) {
                 var current = grid.store.data.items[rowIndex];
                 me.onViewTaxDetailsClick(current.get('intInventoryReceiptItemId'));
+            }
+        }
+
+        var colTax = grdInventoryReceipt.columns[10];
+        if (colTax){
+            colTax.summaryRenderer = function(val, params, data) {
+                return Ext.util.Format.number(val, '0,000.00');
+            }
+        }
+
+        var colGross = grdInventoryReceipt.columns[13];
+        if (colGross){
+            colGross.summaryRenderer = function(val, params, data) {
+                var win = me.getView();
+                var current = win.viewModel.data.current;
+
+                var value = me.calculateCharges(current);
+                var finalValue = Ext.util.Format.number(value, '0,000.00');
+
+                return 'Total Charges: ' + finalValue + '';
+            }
+        }
+        var colNet = grdInventoryReceipt.columns[14];
+        if (colNet){
+            colNet.summaryRenderer = function(val, params, data) {
+                var win = me.getView();
+                var current = win.viewModel.data.current;
+
+                var charges = me.calculateCharges(current);
+                var lineItems = me.calculateLineTotals(current);
+                var finalValue = Ext.util.Format.number((lineItems + charges), '0,000.00');
+
+                return 'Grand Total: ' + finalValue + '';
             }
         }
 
@@ -1125,7 +1160,38 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         return taxableAmount;
     },
 
+    calculateCharges: function(current) {
+        var totalCharges = 0;
+        if (current) {
+            var charges = current.tblICInventoryReceiptCharges();
+            if (charges) {
 
+                Ext.Array.each(charges.data.items, function(charge) {
+                    if (!charge.dummy) {
+                        var amount = charge.get('dblAmount');
+                        totalCharges += amount;
+                    }
+                });
+            }
+        }
+        return totalCharges;
+    },
+
+    calculateLineTotals: function(current) {
+        var totalAmount = 0;
+        if (current) {
+            var items = current.tblICInventoryReceiptItems();
+            if (items) {
+                Ext.Array.each(items.data.items, function(item) {
+                    if (!item.dummy) {
+                        var amount = item.get('dblLineTotal');
+                        totalAmount += amount;
+                    }
+                });
+            }
+        }
+        return totalAmount;
+    },
 
     calculateGrossWeight: function(record){
         if (!record) return;

@@ -1525,7 +1525,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter124",
+                                                                            "name": "filter14",
                                                                             "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -2228,6 +2228,7 @@
                                                                     "userConfig": {
                                                                         "dataIndex": "strTax",
                                                                         "itemId": "colTax",
+                                                                        "summaryType": "sum",
                                                                         "text": "Tax",
                                                                         "width": 85
                                                                     },
@@ -2373,7 +2374,7 @@
                                                                         "format": null,
                                                                         "itemId": "colGross",
                                                                         "text": "Gross",
-                                                                        "width": 85
+                                                                        "width": 150
                                                                     },
                                                                     "name": "MyNumberColumn49",
                                                                     "designerId": "fa8d795e-fddf-4bfe-87d5-c46e5d9fea21",
@@ -2415,7 +2416,7 @@
                                                                         "format": null,
                                                                         "itemId": "colNet",
                                                                         "text": "Net",
-                                                                        "width": 85
+                                                                        "width": 150
                                                                     },
                                                                     "name": "MyNumberColumn50",
                                                                     "designerId": "846e1f7f-c996-4c6c-997d-4a8eda189d83",
@@ -3026,7 +3027,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter125",
+                                                                            "name": "filter15",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4222,7 +4223,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter126",
+                                                    "name": "filter16",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4427,7 +4428,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter127",
+                                                            "name": "filter17",
                                                             "designerId": "862260b9-0de6-4b16-a64e-db1153706a1f",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -5615,7 +5616,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter128",
+                                                    "name": "filter18",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -6102,7 +6103,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging12",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
