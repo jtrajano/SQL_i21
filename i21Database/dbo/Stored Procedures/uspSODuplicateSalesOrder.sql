@@ -88,7 +88,7 @@ BEGIN
            ,[intAccountId]
            ,NULL --Processed Date
            ,0 --Processed
-		   ,[ysnRecurring]
+		   ,0 --Recurring
            ,[strComments] + ' DUP: ' + [strSalesOrderNumber]
 		   ,[intShipToLocationId]
            ,[strShipToLocationName]
