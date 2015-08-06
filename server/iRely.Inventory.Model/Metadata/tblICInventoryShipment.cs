@@ -702,6 +702,22 @@ namespace iRely.Inventory.Model
                 _onCostType = value;
             }
         }
+        private bool _price;
+        [NotMapped]
+        public bool ysnPrice
+        {
+            get
+            {
+                if (vyuICGetInventoryShipmentCharge != null)
+                    return vyuICGetInventoryShipmentCharge.ysnPrice;
+                else
+                    return _price;
+            }
+            set
+            {
+                _price = value;
+            }
+        }
         private string _vendorId;
         [NotMapped]
         public string strVendorId
@@ -739,6 +755,7 @@ namespace iRely.Inventory.Model
         public string strCostUOM { get; set; }
         public string strUnitType { get; set; }
         public int? intOnCostTypeId { get; set; }
+        public bool ysnPrice { get; set; }
         public string strOnCostType { get; set; }
         public int? intEntityVendorId { get; set; }
         public string strVendorId { get; set; }

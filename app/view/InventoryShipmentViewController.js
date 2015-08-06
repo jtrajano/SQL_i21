@@ -328,6 +328,89 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colNetWeight: 'dblNetWeight',
                 colStorageLocation: 'strStorageLocation',
                 colWarehouseCargoNumber: 'strWarehouseCargoNumber'
+            },
+
+            btnInsertCharge: {
+                hidden: '{current.ysnPosted}'
+            },
+            btnRemoveCharge: {
+                hidden: '{current.ysnPosted}'
+            },
+            grdCharges: {
+                readOnly: '{current.ysnPosted}',
+                colContract: {
+                    hidden: '{hideContractColumn}',
+                    dataIndex: 'intContractNumber',
+                    editor: {
+                        origValueField: 'intContractHeaderId',
+                        origUpdateField: 'intContractId',
+                        store: '{contract}',
+                        defaultFilters: [{
+                            column: 'strContractType',
+                            value: 'Purchase',
+                            conjunction: 'and'
+                        },{
+                            column: 'intEntityId',
+                            value: '{current.intEntityVendorId}',
+                            conjunction: 'and'
+                        }]
+                    }
+                },
+                colOtherCharge: {
+                    dataIndex: 'strItemNo',
+                    editor: {
+                        store: '{otherCharges}'
+                    }
+                },
+                colOnCostType: 'strOnCostType',
+                colCostMethod: {
+                    dataIndex: 'strCostMethod',
+                    editor: {
+                        readOnly: '{readOnlyCostMethod}',
+                        store: '{costMethod}'
+                    }
+                },
+                colRate: 'dblRate',
+                colCostUOM: {
+                    dataIndex: 'strCostUOM',
+                    editor: {
+                        readOnly: '{readOnlyCostUOM}',
+                        store: '{costUOM}',
+                        origValueField: 'intItemUOMId',
+                        origUpdateField: 'intCostUOMId',
+                        defaultFilters: [
+                            {
+                                column: 'intItemId',
+                                value: '{grdCharges.selection.intChargeId}',
+                                conjunction: 'and'
+                            }
+                        ]
+                    }
+                },
+                colChargeAmount: 'dblAmount',
+                colAllocateCostBy: {
+                    dataIndex: 'strAllocateCostBy',
+                    editor: {
+                        readOnly: '{checkInventoryCost}',
+                        store: '{allocateBy}'
+                    }
+                },
+                colPrice: 'ysnPrice',
+                colCostBilledBy: {
+                    dataIndex: 'strCostBilledBy',
+                    editor: {
+                        store: '{billedBy}'
+                    }
+                },
+                colCostVendor: {
+                    dataIndex: 'strVendorId',
+                    editor: {
+                        readOnly: '{readOnlyCostBilledBy}',
+                        origValueField: 'intEntityVendorId',
+                        origUpdateField: 'intEntityVendorId',
+                        store: '{vendor}'
+                    }
+                }
             }
         }
     },
@@ -339,7 +422,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             store = Ext.create('Inventory.store.Shipment', { pageSize: 1 });
 
         var grdInventoryShipment = win.down('#grdInventoryShipment'),
-            grdLotTracking = win.down('#grdLotTracking');
+            grdLotTracking = win.down('#grdLotTracking'),
+            grdCharges = win.down('#grdCharges');
 
         win.context = Ext.create('iRely.Engine', {
             window: win,
@@ -348,6 +432,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             include: 'ShipFromLocation, ' +
                 'tblARCustomer, ' +
                 'ShipToLocation, ' +
+                'tblICInventoryShipmentCharges.vyuICGetInventoryShipmentCharge, ' +
                 'tblICInventoryShipmentItems.vyuICGetInventoryShipmentItem, ' +
                 'tblICInventoryShipmentItems.tblICInventoryShipmentItemLots.tblICLot',
             createRecord: me.createRecord,
@@ -373,6 +458,13 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                             })
                         }
                     ]
+                },
+                {
+                    key: 'tblICInventoryShipmentCharges',
+                    component: Ext.create('iRely.grid.Manager', {
+                        grid: grdCharges,
+                        deleteButton: grdCharges.down('#btnRemoveCharge')
+                    })
                 }
             ]
         });
@@ -1353,6 +1445,42 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         };
     },
 
+    onChargeSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var record = records[0];
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepCharges');
+        var current = plugin.getActiveRecord();
+        var masterRecord = win.viewModel.data.current;
+
+        if (combo.itemId === 'cboOtherCharge') {
+            current.set('intChargeId', record.get('intItemId'));
+            current.set('dblRate', record.get('dblAmount'));
+            current.set('intCostUOMId', record.get('intCostUOMId'));
+            current.set('strCostMethod', record.get('strCostMethod'));
+            current.set('strCostUOM', record.get('strCostUOM'));
+            current.set('strOnCostType', record.get('strOnCostType'));
+            current.set('ysnPrice', record.get('ysnPrice'));
+            if (!iRely.Functions.isEmpty(record.get('strOnCostType'))) {
+                current.set('strCostMethod', 'Percentage');
+            }
+        }
+        else if (combo.itemId === 'cboCostBilledBy') {
+            switch (record.get('strDescription')) {
+                case 'Third Party':
+
+                    break;
+                default:
+                    current.set('intEntityVendorId', null);
+                    current.set('strVendorId', null);
+                    break;
+            }
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboShipFromAddress": {
@@ -1396,6 +1524,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#colSourceNumber": {
                 beforerender: this.onItemGridColumnBeforeRender
+            },
+            "#cboOtherCharge": {
+                select: this.onChargeSelect
+            },
+            "#cboCostBilledBy": {
+                select: this.onChargeSelect
             }
         })
     }

@@ -6,6 +6,7 @@ Ext.define('Inventory.model.Shipment', {
 
     requires: [
         'Inventory.model.ShipmentItem',
+        'Inventory.model.ShipmentCharge',
         'Ext.data.Field'
     ],
 

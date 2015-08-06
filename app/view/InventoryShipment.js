@@ -34,7 +34,6 @@ Ext.define('Inventory.view.InventoryShipment', {
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.View',
         'Ext.grid.column.Check',
-        'Ext.form.field.Checkbox',
         'Ext.toolbar.Paging'
     ],
 
@@ -1804,15 +1803,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         }
                                                     },
                                                     {
-                                                        xtype: 'checkcolumn',
-                                                        itemId: 'colInventoryCost',
-                                                        text: 'Inventory Cost',
-                                                        flex: 1,
-                                                        editor: {
-                                                            xtype: 'checkboxfield'
-                                                        }
-                                                    },
-                                                    {
                                                         xtype: 'gridcolumn',
                                                         itemId: 'colOnCostType',
                                                         text: 'On Cost',
@@ -1914,6 +1904,12 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             displayField: 'strDescription',
                                                             valueField: 'strDescription'
                                                         }
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        itemId: 'colPrice',
+                                                        text: 'Price',
+                                                        flex: 1
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',

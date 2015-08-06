@@ -3757,33 +3757,6 @@
                                             ]
                                         },
                                         {
-                                            "type": "Ext.grid.column.Check",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "flex": 1,
-                                                "itemId": "colInventoryCost",
-                                                "text": "Inventory Cost"
-                                            },
-                                            "name": "MyCheck8",
-                                            "designerId": "e06a7efb-0be3-43ea-93b8-1d50d246ce32",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Checkbox",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "name": "MyCheckbox33",
-                                                    "designerId": "3b6193e9-5d8c-4e57-9632-33e5f6361497"
-                                                }
-                                            ]
-                                        },
-                                        {
                                             "type": "Ext.grid.column.Column",
                                             "reference": {
                                                 "name": "columns",
@@ -4035,6 +4008,21 @@
                                                     ]
                                                 }
                                             ]
+                                        },
+                                        {
+                                            "type": "Ext.grid.column.Check",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "flex": 1,
+                                                "itemId": "colPrice",
+                                                "text": "Price"
+                                            },
+                                            "name": "MyCheck",
+                                            "designerId": "7344297e-a8a8-4ca5-9a5d-727f5204d7b1"
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",

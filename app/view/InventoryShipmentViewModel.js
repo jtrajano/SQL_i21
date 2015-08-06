@@ -9,14 +9,17 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         'Inventory.store.BufferedLot',
         'Inventory.store.BufferedGradeAttribute',
         'Inventory.store.BufferedStorageLocation',
+        'Inventory.store.BufferedOtherCharges',
         'i21.store.CompanyLocationBuffered',
         'i21.store.CompanyLocationSubLocationBuffered',
         'i21.store.FreightTermsBuffered',
         'EntityManagement.store.ShipViaBuffered',
         'EntityManagement.store.CustomerBuffered',
         'EntityManagement.store.LocationBuffered',
+        'EntityManagement.store.VendorBuffered',
         'AccountsReceivable.store.SalesOrderDetailCompactBuffered',
-        'ContractManagement.store.ContractDetailViewBuffered'
+        'ContractManagement.store.ContractDetailViewBuffered',
+        'ContractManagement.store.ContractHeaderViewBuffered'
     ],
 
     stores: {
@@ -125,6 +128,75 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
         },
         lot: {
             type: 'icbufferedlot'
+        },
+        contract: {
+            type: 'ctcontractheaderviewbuffered'
+        },
+        otherCharges: {
+            type: 'icbufferedothercharges'
+        },
+        costUOM: {
+            type: 'icbuffereditemunitmeasure'
+        },
+        vendor: {
+            type: 'emvendorbuffered'
+        },
+        costMethod: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Per Unit'
+                },
+                {
+                    strDescription: 'Percentage'
+                },
+                {
+                    strDescription: 'Amount'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        allocateBy: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Unit'
+                },
+                {
+                    strDescription: 'Stock Unit'
+                },
+                {
+                    strDescription: 'Cost'
+                },
+                {
+                    strDescription: ''
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
+        billedBy: {
+            autoLoad: true,
+            data: [
+                {
+                    strDescription: 'Third Party'
+                },
+                {
+                    strDescription: 'None'
+                }
+            ],
+            fields: [
+                {
+                    name: 'strDescription'
+                }
+            ]
         }
     },
 
@@ -186,6 +258,39 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
             }
             else {
                 return true;
+            }
+        },
+        hideContractColumn: function(get) {
+            var orderType = get('current.intOrderType');
+            switch (orderType) {
+                case 1:
+                    return false;
+                    break;
+                default:
+                    return true;
+                    break;
+            };
+        },
+        readOnlyCostMethod: function (get) {
+            if (iRely.Functions.isEmpty(get('grdCharges.selection.strOnCostType'))) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        },
+
+        readOnlyCostBilledBy: function (get) {
+            switch (get('grdCharges.selection.strCostBilledBy')) {
+                case 'Vendor':
+                    return true;
+                    break;
+                case 'Third Party':
+                    return false;
+                    break;
+                default:
+                    return true;
+                    break;
             }
         }
     }
