@@ -56,7 +56,7 @@ BEGIN
 	END
 	ELSE IF @statusId = 2 --PARTIAL
 	BEGIN
-		IF EXISTS(SELECT 1 FROM vyuPOStatus WHERE intPurchaseId = @poId AND dblQtyReceived > 0) AND @currentStatus != 2
+		IF EXISTS(SELECT 1 FROM vyuPOStatus WHERE intPurchaseId = @poId AND dblQtyReceived > 0) AND @currentStatus != 2 AND @currentStatus != 6
 		BEGIN
 			SET @success = 0;
 			SET @errorMsg = 'Purchase order will automatically set to "Partial" when at least 1 item have been received/billed.';
