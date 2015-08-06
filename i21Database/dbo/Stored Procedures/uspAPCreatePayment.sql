@@ -33,7 +33,6 @@ BEGIN
 	DECLARE @withholdAmount NUMERIC(18,6)
 	DECLARE @withholdPercent NUMERIC(18,6)
 	DECLARE @discountAmount NUMERIC(18,6) = 0;
-	DECLARE @withholdAccount INT
 	DECLARE @paymentMethodId INT = @paymentMethod
 	DECLARE @intBankAccountId INT = @bankAccount;
 	DECLARE @vendorWithhold BIT = 0;
