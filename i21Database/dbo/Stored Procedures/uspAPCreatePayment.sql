@@ -1,4 +1,9 @@
-﻿CREATE PROCEDURE [dbo].[uspAPCreatePayment]
+﻿/*
+Usage:
+1. Creating payment from Bill screen.
+2. Creating payment from Importing of bills.
+*/
+CREATE PROCEDURE [dbo].[uspAPCreatePayment]
 	@userId NVARCHAR(50),
 	@bankAccount INT = NULL,
 	@paymentMethod INT = NULL,
@@ -26,6 +31,7 @@ BEGIN
 	DECLARE @amountPaid NUMERIC(18,6) = @payment;
 	DECLARE @withholdAmount NUMERIC(18,6)
 	DECLARE @withholdPercent NUMERIC(18,6)
+	DECLARE @withholdAccount INT
 	DECLARE @paymentMethodId INT = @paymentMethod
 	DECLARE @intBankAccountId INT = @bankAccount;
 	DECLARE @vendorWithhold BIT = 0;
@@ -56,7 +62,9 @@ BEGIN
 	--Make sure there is bank account to use
 	IF @intBankAccountId IS NULL
 	BEGIN
-		SELECT @intGLBankAccountId = B.intCashAccount FROM tblSMUserSecurity A INNER JOIN tblSMCompanyLocation B ON A.intCompanyLocationId = B.intCompanyLocationId
+		SELECT 
+			@intGLBankAccountId = B.intCashAccount 
+		FROM tblSMUserSecurity A INNER JOIN tblSMCompanyLocation B ON A.intCompanyLocationId = B.intCompanyLocationId
 		SELECT TOP 1 @intBankAccountId = intBankAccountId FROM tblCMBankAccount WHERE intGLAccountId = @intGLBankAccountId
 
 		IF @intBankAccountId IS NULL
@@ -92,7 +100,8 @@ BEGIN
 	--Compute Interest Here
 
 	--Compute Withheld Here
-	IF @vendorWithhold = 1
+	--Compute only if the payment that will create is posted
+	IF @vendorWithhold = 1 AND @isPost = 0
 	BEGIN
 		--Validate if there is a set up for withheld account.
 		IF (SELECT TOP 1 intWithholdAccountId FROM tblAPPreference) IS NULL
@@ -157,7 +166,7 @@ BEGIN
 		[intBillId]		= A.intBillId,
 		[intAccountId]	= A.intAccountId,
 		[dblDiscount]	= A.dblDiscount,
-		[dblWithheld]	= CASE WHEN @withholdPercent > 0 THEN CAST(ROUND(A.dblTotal * (@withholdPercent / 100), 6) AS NUMERIC(18,6)) ELSE 0 END,
+		[dblWithheld]	= CASE WHEN @withholdPercent > 0 AND A.dblWithheld <= 0 THEN CAST(ROUND(A.dblTotal * (@withholdPercent / 100), 6) AS NUMERIC(18,6)) ELSE A.dblWithheld END,
 		[dblAmountDue]	= A.dblAmountDue,
 		[dblPayment]	= A.dblTotal - A.dblDiscount - A.dblPayment,
 		[dblInterest]	= 0, --TODO
