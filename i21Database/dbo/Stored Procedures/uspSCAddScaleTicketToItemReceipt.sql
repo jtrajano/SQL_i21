@@ -28,6 +28,8 @@ DECLARE @intFreightItemId AS INT
 DECLARE @intFreightVendorId AS INT
 DECLARE @ysnDeductFreightFarmer AS BIT
 DECLARE @intTicketNumber AS INT
+DECLARE @dblTicketFees AS DECIMAL(7, 2)
+DECLARE @intFeeItemId AS INT
 
 
 BEGIN 
@@ -46,7 +48,8 @@ END
 
 BEGIN
     SELECT TOP 1 @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
-	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight, @intTicketNumber = ST.intTicketNumber
+	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight, @intTicketNumber = ST.intTicketNumber,
+	@dblTicketFees = ST.dblTicketFees
 	FROM dbo.tblSCTicket ST WHERE
 	ST.intTicketId = @intTicketId
 END
@@ -278,6 +281,47 @@ SELECT	@InventoryReceiptId,
 		WHEN SS.ysnFarmerPaysFreight = 1 THEN 'Vendor'
 		WHEN SS.ysnFarmerPaysFreight = 0 THEN 'Third Party'
 		END,
+		NULL,
+		1
+FROM	tblSCTicket SS WHERE SS.intTicketId = @intTicketId
+END
+
+IF @dblTicketFees > 0
+BEGIN
+SELECT	@intFeeItemId = ST.intFreightItemId
+FROM	dbo.tblSCScaleSetup ST	        
+WHERE	ST.intScaleSetupId = @intScaleStationId
+IF @intFeeItemId IS NULL 
+BEGIN 
+	-- Raise the error:
+	RAISERROR('Invalid Default Fee Item in Scale Setup - uspSCProcessToItemReceipt', 16, 1);
+	RETURN;
+END
+INSERT INTO tblICInventoryReceiptCharge
+(
+		intInventoryReceiptId,
+		intChargeId,
+		ysnInventoryCost,
+		strCostMethod,
+		dblRate,
+		intCostUOMId,
+		intEntityVendorId,
+		dblAmount,
+		strAllocateCostBy,
+		strCostBilledBy,
+		intSort,
+		intConcurrencyId
+)
+SELECT	@InventoryReceiptId, 
+		@intFeeItemId,
+		0,
+		'Amount',
+		0,
+		NULL,
+		NULL,
+		@dblTicketFees * -1,
+		NULL,
+		'None',
 		NULL,
 		1
 FROM	tblSCTicket SS WHERE SS.intTicketId = @intTicketId
