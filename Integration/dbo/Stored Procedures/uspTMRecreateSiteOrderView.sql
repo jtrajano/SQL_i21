@@ -42,7 +42,7 @@ BEGIN
 				,E.vwsls_name AS strDriverName
 				,F.vwitm_no AS strItemNo
 				,CAST(ISNULL(A.dblEstimatedPercentLeft,0) AS DECIMAL(18,2)) AS dblEstimatedPercentLeft
-				,ROUND((ISNULL(A.dblTotalCapacity,0.0) * (((CASE WHEN ISNULL(F.vwitm_deflt_percnt,0) = 0 THEN 100 ELSE F.vwitm_deflt_percnt END) - ISNULL(A.dblEstimatedPercentLeft,0.0))/100)),0) AS intCalculatedQuantity
+				,CAST(ROUND((ISNULL(A.dblTotalCapacity,0.0) * (((CASE WHEN ISNULL(F.vwitm_deflt_percnt,0) = 0 THEN 100 ELSE F.vwitm_deflt_percnt END) - ISNULL(A.dblEstimatedPercentLeft,0.0))/100)),0) AS INT) AS intCalculatedQuantity
 				,CAST(ISNULL(A.dblTotalCapacity,0.0) AS DECIMAL(18,2)) AS dblTotalCapacity
 				,ISNULL(D.strRouteId,'''') AS strRouteId
 				,A.intConcurrencyId
@@ -114,7 +114,7 @@ BEGIN
 				,E.vwsls_name AS strDriverName
 				,D.strItemNo AS strItemNo
 				,CAST(ISNULL(A.dblEstimatedPercentLeft,0) AS DECIMAL(18,2)) AS dblEstimatedPercentLeft
-				,ROUND((ISNULL(A.dblTotalCapacity,0.0) * (((CASE WHEN ISNULL(D.dblDefaultFull,0) = 0 THEN 100 ELSE D.dblDefaultFull END) - ISNULL(A.dblEstimatedPercentLeft,0.0))/100)),0) AS intCalculatedQuantity
+				,CAST(ROUND((ISNULL(A.dblTotalCapacity,0.0) * (((CASE WHEN ISNULL(D.dblDefaultFull,0) = 0 THEN 100 ELSE D.dblDefaultFull END) - ISNULL(A.dblEstimatedPercentLeft,0.0))/100)),0) AS INT) AS intCalculatedQuantity
 				,CAST(ISNULL(A.dblTotalCapacity,0.0) AS DECIMAL(18,2)) AS dblTotalCapacity
 				,ISNULL(F.strRouteId,'''') AS strRouteId
 				,A.intConcurrencyId
