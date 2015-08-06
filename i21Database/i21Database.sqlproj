@@ -2212,6 +2212,8 @@
     <None Include="Scripts\Utility\IC\IC-1092\Fix missing GL entries for Inventory Adj posting.sql" />
     <None Include="Scripts\Utility\IC\IC-1092\Fix the Inventory Lot Out table.sql" />
     <None Include="Scripts\Utility\IC\IC-1092\Fix the Lot Qty.sql" />
+    <Build Include="dbo\Stored Procedures\uspSOUpdateCommitted.sql" />
+    <Build Include="dbo\Stored Procedures\uspSOUpdateOrderIntegrations.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
