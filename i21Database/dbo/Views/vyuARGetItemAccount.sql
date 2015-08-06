@@ -5,47 +5,24 @@ SELECT
 	I.strItemNo,
 	I.strType,
 	IL.intLocationId,
-	(CASE WHEN ISNULL(dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, N'Service Charges'),0) = 0
+	dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, N'Cost of Goods') AS intCOGSAccountId, 	
+	dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, N'Sales Account') AS intSalesAccountId, 
+	dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, N'Inventory') AS intInventoryAccountId, 
+	dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, N'Inventory In-Transit') AS intInventoryInTransitAccountId,
+	(CASE WHEN ISNULL((SELECT TOP 1 intServiceChargeAccountId FROM tblARCompanyPreference WHERE intServiceChargeAccountId IS NOT NULL AND intServiceChargeAccountId <> 0),0) = 0
 		THEN 
-			(CASE WHEN CL.intServiceCharges = 0 THEN NULL ELSE CL.intServiceCharges END)
+			dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, N'Service Charges')
 		ELSE
-			dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, N'Service Charges')				
-	END) AS intAccountId, 
-	(CASE WHEN ISNULL(dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, N'Cost of Goods'),0) = 0
+			(SELECT TOP 1 intServiceChargeAccountId FROM tblARCompanyPreference WHERE intServiceChargeAccountId IS NOT NULL AND intServiceChargeAccountId <> 0)				
+	END) AS intAccountId, 		
+	(CASE WHEN ISNULL((SELECT TOP 1 intDiscountAccountId FROM tblARCompanyPreference WHERE intDiscountAccountId IS NOT NULL AND intDiscountAccountId <> 0),0) = 0
 		THEN 
-			(CASE WHEN CL.intCostofGoodsSold = 0 THEN NULL ELSE CL.intCostofGoodsSold END)
-		ELSE
-			dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, N'Cost of Goods')				
-	END) AS intCOGSAccountId, 	
-	(CASE WHEN ISNULL(dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, N'Sales Account'),0) = 0
-		THEN 
-			(CASE WHEN CL.intSalesAccount = 0 THEN NULL ELSE CL.intSalesAccount END)
-		ELSE
-			dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, N'Sales Account')				
-	END) AS intSalesAccountId, 
-	(CASE WHEN ISNULL(dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, N'Inventory'),0) = 0
-		THEN 
-			(CASE WHEN CL.intInventory = 0 THEN NULL ELSE CL.intInventory END)
-		ELSE
-			dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, N'Inventory')				
-	END) AS intInventoryAccountId, 
-	(CASE WHEN ISNULL(dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, N'Discount Receivable'),0) = 0
-		THEN 
-			(SELECT TOP 1 intDiscountAccountId FROM tblARCompanyPreference WHERE intDiscountAccountId IS NOT NULL AND intDiscountAccountId <> 0)
-		ELSE
 			dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, N'Discount Receivable')				
-	END) AS intDiscountAccountId,
-	(CASE WHEN ISNULL(dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, N'Inventory In-Transit'),0) = 0
-		THEN 
-			(CASE WHEN CL.intInventoryInTransit = 0 THEN NULL ELSE CL.intInventoryInTransit END)
 		ELSE
-			dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, N'Inventory In-Transit')				
-	END) AS intInventoryInTransitAccountId
+			(SELECT TOP 1 intDiscountAccountId FROM tblARCompanyPreference WHERE intDiscountAccountId IS NOT NULL AND intDiscountAccountId <> 0)
+	END) AS intDiscountAccountId		
 FROM         
 	dbo.tblICItem AS I 
 LEFT OUTER JOIN
 	dbo.tblICItemLocation AS IL 
 		ON IL.intItemId = I.intItemId
-LEFT OUTER JOIN
-	dbo.tblSMCompanyLocation CL
-		ON IL.intLocationId = CL.intCompanyLocationId
