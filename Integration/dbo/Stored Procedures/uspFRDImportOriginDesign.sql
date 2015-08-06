@@ -466,6 +466,21 @@ BEGIN
 				INNER JOIN tblGLAccountGroup 
 					ON tblGLAccount.intAccountGroupId = tblGLAccountGroup.intAccountGroupId
 			WHERE #irelyloadFRRowDesign.strBalanceSide IS NULL
+
+			UPDATE #irelyloadFRRowDesign
+					SET #irelyloadFRRowDesign.strBalanceSide = 
+					CASE 
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Asset'' THEN ''Debit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Equity'' THEN ''Credit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Expense'' THEN ''Debit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Liability'' THEN ''Credit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Revenue'' THEN ''Credit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Sales'' THEN ''Credit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Cost of Goods Sold'' THEN ''Debit''
+						ELSE NULL
+					END
+			FROM #irelyloadFRRowDesign 
+			WHERE #irelyloadFRRowDesign.strBalanceSide IS NULL AND #irelyloadFRRowDesign.isprimary = ''YES''
 		
 			UPDATE #irelyloadFRRowDesign
 					SET #irelyloadFRRowDesign.strBalanceSide = 
@@ -625,7 +640,7 @@ BEGIN
 				SET @row = 0
 				SET @rowold = 0
 				SELECT @upper = 0
-				SELECT strBalanceSide = ''''
+				SELECT @strBalanceSide = ''''
 
 				WHILE EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId < @tot AND intRowDetailId > @tod AND intRowDetailId > @row AND glfsf_action_type IN (''PRN'',''ACP'',''GRP'',''GRA''))
 						OR EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId < @tot				-- id less than the total id number
@@ -960,7 +975,7 @@ END
 --DECLARE @res AS NVARCHAR(MAX)
 
 --EXEC [dbo].[uspFRDImportOriginDesign]
---			@originglfsf_no	 = '7',					-- ORIGIN ID
+--			@originglfsf_no	 = '2',					-- ORIGIN ID
 --			@result = @res OUTPUT					-- OUTPUT PARAMETER THAT RETURNS TOTAL NUMBER OF SUCCESSFUL RECORDS
 				
 --SELECT @res
