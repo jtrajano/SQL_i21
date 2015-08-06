@@ -38,6 +38,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\Reports\2_ReportDeleteOldData.sql
 :r .\Reports\3_ReportEnableConstraints.sql
 :r .\Reports\4_ReportData.sql
+:r .\Reports\Pxcyctag.sql
 
 -- Tank Management
 -- :r .\TM\1_OriginIndexing.sql
@@ -140,6 +141,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\DefaultData\InsertWriteOffPaymentMethod.sql
 :r .\AP\UpdatePOAddressInfo.sql
 :r .\AP\UpdateApprovalRecords.sql
+:r .\AP\UpdateBillStatus.sql
 
 -- Inventory 
 :r .\IC\00_RequiredDataFix.sql 

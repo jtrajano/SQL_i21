@@ -33,16 +33,22 @@
 	[ysnRetirementPlan] [bit] NOT NULL DEFAULT ((0)),
 	[ysnThirdPartySickPay] [bit] NOT NULL DEFAULT ((0)),
 	[intDistributionType] [int] NULL DEFAULT ((0)),
+	[intUserSecurityId] [int] NULL,
+	[intRank] [int] NULL,
 	[strTimeEntryPassword] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDateEntered] [datetime] NOT NULL DEFAULT (getdate()),
 	[dtmLastModified] [datetime] NULL DEFAULT (getdate()),
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
 	CONSTRAINT [PK_tblPREmployee] PRIMARY KEY ([intEntityId]),
-    CONSTRAINT [UK_tblPREmployee] UNIQUE ([intEmployeeId]), 
+    CONSTRAINT [UK_tblPREmployee] UNIQUE ([intEmployeeId]),
     CONSTRAINT [AK_tblPREmployee_strEmployeeId] UNIQUE ([strEmployeeId]),
 	CONSTRAINT [FK_tblPREmployee_tblPRPayGroup] FOREIGN KEY ([intPayGroupId]) REFERENCES [tblPRPayGroup]([intPayGroupId]),
-	CONSTRAINT [FK_tblPREmployee_tblPRWorkersCompensation] FOREIGN KEY ([intWorkersCompensationId]) REFERENCES [tblPRWorkersCompensation]([intWorkersCompensationId])
+	CONSTRAINT [FK_tblPREmployee_tblPRWorkersCompensation] FOREIGN KEY ([intWorkersCompensationId]) REFERENCES [tblPRWorkersCompensation]([intWorkersCompensationId]),
+	CONSTRAINT [FK_tblPREmployee_tblSMuserSecurity] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intUserSecurityID])
 ) ON [PRIMARY]
+GO
+
+CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREmployee_intUserId] ON [dbo].[tblPREmployee] ([intUserSecurityId]) WHERE [intUserSecurityId] IS NOT NULL
 GO
 
 EXEC sp_addextendedproperty @name = N'MS_Description',
@@ -386,3 +392,21 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
     @level2name = N'intDistributionType'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'User Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPREmployee',
+    @level2type = N'COLUMN',
+    @level2name = 'intUserSecurityId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Rank',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPREmployee',
+    @level2type = N'COLUMN',
+    @level2name = N'intRank'

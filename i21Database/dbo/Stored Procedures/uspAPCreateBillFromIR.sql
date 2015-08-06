@@ -155,7 +155,7 @@ BEGIN
 		[intBillId]					=	@generatedBillId,
 		[intItemId]					=	B.intItemId,
 		[intInventoryReceiptItemId]	=	B.intInventoryReceiptItemId,
-		[intPODetailId]				=	B.intLineNo,
+		[intPODetailId]				=	CASE WHEN B.intLineNo <= 0 THEN NULL ELSE B.intLineNo END,
 		[dblQtyOrdered]				=	B.dblOpenReceive - B.dblBillQty,
 		[dblQtyReceived]			=	B.dblOpenReceive - B.dblBillQty,
 		[dblTax]					=	B.dblTax,
@@ -167,7 +167,7 @@ BEGIN
 											WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.intContractDetailId
 											ELSE NULL END,
 		[intContractHeaderId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN E.intContractHeaderId 
-											WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.intContractDetailId
+											WHEN A.strReceiptType = 'Purchase Order' THEN POContractItems.intContractHeaderId
 											ELSE NULL END,
 		[intLineNo]					=	ISNULL(B.intSort,0)
 	FROM tblICInventoryReceipt A
