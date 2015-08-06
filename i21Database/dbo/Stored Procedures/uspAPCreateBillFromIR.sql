@@ -155,7 +155,7 @@ BEGIN
 		[intBillId]					=	@generatedBillId,
 		[intItemId]					=	B.intItemId,
 		[intInventoryReceiptItemId]	=	B.intInventoryReceiptItemId,
-		[intPODetailId]				=	B.intLineNo,
+		[intPODetailId]				=	CASE WHEN B.intLineNo <= 0 THEN NULL ELSE B.intLineNo END,
 		[dblQtyOrdered]				=	B.dblOpenReceive - B.dblBillQty,
 		[dblQtyReceived]			=	B.dblOpenReceive - B.dblBillQty,
 		[dblTax]					=	B.dblTax,

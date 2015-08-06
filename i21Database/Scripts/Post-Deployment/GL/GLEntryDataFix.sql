@@ -60,6 +60,16 @@ GO
 GO	
 	PRINT N'BEGIN Update Transaction Type to Recurring if strTransactionType is equal to Template '
 GO
+  PRINT N'Begin Update tblGLDetail.strCode based on tblGLJournal.strSourceType'
+GO
+    UPDATE A
+    SET A.strCode = RTRIM (B.strSourceType)
+    FROM tblGLDetail A INNER JOIN tblGLJournal B ON A.strTransactionId = B.strJournalId
+    WHERE A.strTransactionType IN( 'Origin Journal', 'Adjusted Origin Journal' )
+    AND A.strCode <> B.strSourceType
+GO
+    PRINT N'End Update tblGLDetail.strCode based on tblGLJournal.strSourceType'
+GO
 
 UPDATE tblGLJournal SET strTransactionType = 'Recurring' WHERE strTransactionType ='Template'
 
