@@ -2197,8 +2197,8 @@
     <Build Include="dbo\Stored Procedures\uspCFImportFee.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportCard.sql" />
     <Build Include="dbo\Stored Procedures\uspPODuplicate.sql" />
-
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheetHeader.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRPostingValidation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2255,7 +2255,6 @@
     <None Include="Scripts\Post-Deployment\SM\SMDataFixes.sql" />
     <None Include="Scripts\Post-Deployment\EM\011_FixEntityLocationNullTerms.sql" />
     <None Include="i21Database2014.publish.publish.xml" />
-
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
