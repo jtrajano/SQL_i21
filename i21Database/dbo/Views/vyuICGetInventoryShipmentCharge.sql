@@ -9,9 +9,10 @@ SELECT ShipmentCharge.intInventoryShipmentChargeId
 	, strItemDescription = Charge.strDescription
 	, ShipmentCharge.strCostMethod
 	, ShipmentCharge.dblRate
-	, Charge.strCostUOM
+	, strCostUOM = UOM.strUnitMeasure
 	, Charge.strUnitType
 	, Charge.intOnCostTypeId
+	, Charge.ysnPrice
 	, strOnCostType = Charge.strOnCostType
 	, ShipmentCharge.intEntityVendorId
 	, Vendor.strVendorId
@@ -19,5 +20,7 @@ SELECT ShipmentCharge.intInventoryShipmentChargeId
 	, ShipmentCharge.strCostBilledBy
 FROM tblICInventoryShipmentCharge ShipmentCharge
 	LEFT JOIN vyuICGetOtherCharges Charge ON Charge.intItemId = ShipmentCharge.intChargeId
+	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = ShipmentCharge.intCostUOMId
+	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = CostUOM.intUnitMeasureId
 	LEFT JOIN tblAPVendor Vendor ON Vendor.intEntityVendorId = ShipmentCharge.intEntityVendorId
 	LEFT JOIN tblCTContractHeader Contract ON Contract.intContractHeaderId = ShipmentCharge.intContractId
