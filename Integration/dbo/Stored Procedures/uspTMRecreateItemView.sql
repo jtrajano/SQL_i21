@@ -137,7 +137,7 @@ BEGIN
 				,vwitm_un_prc9 = CAST(0.00  AS DECIMAL(18,6))    
 				,vwitm_ytd_ivc_cost = CAST(0.00  AS DECIMAL(18,6))    
 				,A4GLIdentity  = A.intItemId
-				,vwitm_avail_tm = (CASE WHEN A.ysnAvailableTM = 1 THEN ''Y'' ELSE ''N'' END)
+				,vwitm_avail_tm = (CASE WHEN strType = ''Service'' THEN ''S'' ELSE (CASE WHEN A.ysnAvailableTM = 1 THEN ''Y'' ELSE ''N'' END) END)
 				,vwitm_phys_inv_ynbo = ISNULL(B.strCounted,'''') 
 				,vwitm_deflt_percnt = CAST(ISNULL(A.dblDefaultFull,0) AS INT)
 				,vwitm_slstax_rpt_ynha = ''N''  
