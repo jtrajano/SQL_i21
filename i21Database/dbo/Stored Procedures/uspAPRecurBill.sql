@@ -18,6 +18,7 @@ BEGIN
 	UPDATE A
 		SET A.dtmDate = @billDate
 		,dtmDueDate = dbo.fnGetDueDateBasedOnTerm(@billDate, A.intTermsId)
+		,intTransactionType = 1
 	FROM tblAPBill A
 	WHERE intBillId = @billCreatedPrimaryKey
 
