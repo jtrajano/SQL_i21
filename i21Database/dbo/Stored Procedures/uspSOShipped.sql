@@ -1,8 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[uspSOShipped]
-	@intTransactionId INT
+	@intTransactionId	INT
+	,@ysnPost			BIT = 0
 AS
 BEGIN	
 	DECLARE @OrderToUpdate TABLE (intSalesOrderId INT);
+	DECLARE @forDelete BIT
+
 
 	INSERT INTO @OrderToUpdate(intSalesOrderId)
 	SELECT DISTINCT intSourceId 
@@ -16,6 +19,8 @@ BEGIN
 		SELECT TOP 1 @intSalesOrderId = intSalesOrderId FROM @OrderToUpdate ORDER BY intSalesOrderId
 
 		EXEC dbo.uspSOUpdateOrderShipmentStatus @intSalesOrderId
+
+		EXEC dbo.[uspSOUpdateCommitted] @intSalesOrderId, @ysnPost
 			
 		DELETE FROM @OrderToUpdate WHERE intSalesOrderId = @intSalesOrderId AND intSalesOrderId = @intSalesOrderId
 	END 
