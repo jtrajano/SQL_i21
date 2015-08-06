@@ -12,8 +12,8 @@
 			,strContactName = conEnt.strName
 			,strModule = m.strModule
 			,strAssignedTo = assEnt.strName
-			,dtmDueDate = t.dtmCreated
-			,strDueDate = CONVERT(nvarchar(10),t.dtmCreated,101)
+			,t.dtmDueDate
+			,strDueDate = CONVERT(nvarchar(10),t.dtmDueDate,101)
 			,ysnCompleted = Convert(bit,(case when t.intTicketStatusId = 2 then 1 else 0 end))
 			,t.dblQuotedHours
 			,t.dblActualHours

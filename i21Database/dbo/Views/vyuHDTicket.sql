@@ -31,6 +31,8 @@ AS
 		,tic.intCustomerId
 		,tic.intCreatedUserEntityId
 		,proj.strProjectName
+		,tic.dtmDueDate
+		,strDueDate = convert(nvarchar,tic.dtmDueDate, 101)
 	from
 		tblHDTicket tic
 		left outer join tblHDTicketType typ on typ.intTicketTypeId = tic.intTicketTypeId

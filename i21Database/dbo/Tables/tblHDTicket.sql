@@ -18,6 +18,7 @@
 	[intCreatedUserId] [int] NULL,
 	[intCreatedUserEntityId] [int] NULL,
 	[dtmCreated] [datetime] NULL,
+	[dtmDueDate] [datetime] Null,
 	[intLastModifiedUserId] [int] NULL,
 	[intLastModifiedUserEntityId] [int] NULL,
 	[dtmLastModified] [datetime] NULL,
@@ -511,3 +512,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblHDTicket',
     @level2type = N'COLUMN',
     @level2name = N'strDatabase'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Due Date',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDTicket',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmDueDate'
