@@ -98,8 +98,8 @@ BEGIN
 	 
 	   INSERT INTO tblSTPromotionSalesList (strPromoType, intStoreId, intPromoSalesId, intCategoryId,
 	   strPromoSalesDescription, strPromoReason, intPromoUnits, dblPromoPrice,
-	   intPromoFeeType, intRegProdId, strProductCode, dtmPromoBegPeriod,
-	   dtmPromoBegTime, dtmPromoEndPeriod, dtmPromoEndTime, intPurchaseLimit,
+	   intPromoFeeType, intRegProdId, dtmPromoBegPeriod,
+	   dtmPromoEndPeriod, intPurchaseLimit,
 	   intSalesRestrictCode, ysnPurchaseAtleastMin, ysnPurchaseExactMultiples,ysnRecieptItemSize,
 	   ysnReturnable, ysnFoodStampable, ysnId1Required, ysnId2Required,
 	   ysnDiscountAllowed, ysnBlueLaw1, ysnBlueLaw2, ysnUserTaxFlag1, ysnUserTaxFlag2,
@@ -107,8 +107,8 @@ BEGIN
 	   ysnSentToRuby, dtmLastUpdateDate, intConcurrencyId) 
 	   SELECT strPromoType, @ToStore, intPromoSalesId, intCategoryId,
 	   strPromoSalesDescription, strPromoReason, intPromoUnits, dblPromoPrice,
-	   intPromoFeeType, intRegProdId, strProductCode, dtmPromoBegPeriod,
-	   dtmPromoBegTime, dtmPromoEndPeriod, dtmPromoEndTime, intPurchaseLimit,
+	   intPromoFeeType, intRegProdId, dtmPromoBegPeriod,
+	   dtmPromoEndPeriod, intPurchaseLimit,
 	   intSalesRestrictCode, ysnPurchaseAtleastMin, ysnPurchaseExactMultiples,ysnRecieptItemSize,
 	   ysnReturnable, ysnFoodStampable, ysnId1Required, ysnId2Required,
 	   ysnDiscountAllowed, ysnBlueLaw1, ysnBlueLaw2, ysnUserTaxFlag1, ysnUserTaxFlag2,
@@ -145,8 +145,8 @@ BEGIN
 	  
 	   INSERT INTO tblSTPromotionSalesList (strPromoType, intStoreId, intPromoSalesId, intCategoryId,
 	   strPromoSalesDescription, strPromoReason, intPromoUnits, dblPromoPrice,
-	   intPromoFeeType, intRegProdId, strProductCode, dtmPromoBegPeriod,
-	   dtmPromoBegTime, dtmPromoEndPeriod, dtmPromoEndTime, intPurchaseLimit,
+	   intPromoFeeType, intRegProdId,  dtmPromoBegPeriod,
+	    dtmPromoEndPeriod,  intPurchaseLimit,
 	   intSalesRestrictCode, ysnPurchaseAtleastMin, ysnPurchaseExactMultiples,ysnRecieptItemSize,
 	   ysnReturnable, ysnFoodStampable, ysnId1Required, ysnId2Required,
 	   ysnDiscountAllowed, ysnBlueLaw1, ysnBlueLaw2, ysnUserTaxFlag1, ysnUserTaxFlag2,
@@ -154,8 +154,8 @@ BEGIN
 	   ysnSentToRuby, dtmLastUpdateDate, intConcurrencyId) 
 	   SELECT strPromoType, @ToStore, intPromoSalesId, intCategoryId,
 	   strPromoSalesDescription, strPromoReason, intPromoUnits, dblPromoPrice,
-	   intPromoFeeType, intRegProdId, strProductCode, dtmPromoBegPeriod,
-	   dtmPromoBegTime, dtmPromoEndPeriod, dtmPromoEndTime, intPurchaseLimit,
+	   intPromoFeeType, intRegProdId,  dtmPromoBegPeriod,
+	   dtmPromoEndPeriod,  intPurchaseLimit,
 	   intSalesRestrictCode, ysnPurchaseAtleastMin, ysnPurchaseExactMultiples,ysnRecieptItemSize,
 	   ysnReturnable, ysnFoodStampable, ysnId1Required, ysnId2Required,
 	   ysnDiscountAllowed, ysnBlueLaw1, ysnBlueLaw2, ysnUserTaxFlag1, ysnUserTaxFlag2,
