@@ -4,7 +4,7 @@
     [intPromoSalesListId] INT NOT NULL, 
     [intPromoItemListId] INT NOT NULL, 
     [intQuantity] INT NULL, 
-    [dblPrice] NUMERIC(5, 2) NULL, 
+    [dblPrice] NUMERIC(18, 6) NULL, 
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTPromotionSalesListDetail] PRIMARY KEY ([intPromoSalesListDetailId]), 
 	CONSTRAINT [FK_tblSTPromotionSalesListDetail_tblSTPromotionSalesList] FOREIGN KEY ([intPromoSalesListId]) REFERENCES [tblSTPromotionSalesList]([intPromoSalesListId]),
