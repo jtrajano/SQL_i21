@@ -336,6 +336,15 @@ BEGIN TRY
 	WHERE x.intShiftDetailId = tblMFShiftDetail.intShiftDetailId
 		AND x.strRowState = 'MODIFIED'
 
+	Declare @tblMFShiftDetail table(intShiftDetailId int,intSequence int)
+
+	Insert into @tblMFShiftDetail(intShiftDetailId,intSequence)
+	Select intShiftDetailId,ROW_NUMBER() Over(Partition by intShiftId Order by dtmShiftBreakTypeStartTime)  from tblMFShiftDetail
+
+	Update SD
+	Set intSequence =S.intSequence 
+	From @tblMFShiftDetail S
+	JOIN tblMFShiftDetail SD on SD.intShiftDetailId=S.intShiftDetailId
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
