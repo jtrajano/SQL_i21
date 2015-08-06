@@ -16,7 +16,9 @@ FROM
 	AND strTransactionType <> 'Recurring'
 	AND ysnPosted = 0
 	UNION ALL
-	SELECT 'Bill', intBillId, strBillId, intEntityId, dtmDate, strComment as strReference FROM tblAPBill WHERE ysnPosted = 0 AND ysnForApproval = 0
+	SELECT 'Bill', intBillId, strBillId, intEntityId, dtmDate, strComment as strReference FROM tblAPBill WHERE ysnPosted = 0 AND ysnForApproval = 0 AND intTransactionType = 1
+	UNION ALL
+	SELECT 'Bill Template', intBillId, strBillId, intEntityId, dtmDate, strComment as strReference FROM tblAPBill WHERE ysnPosted = 0 AND ysnForApproval = 0 AND intTransactionType = 6
 	UNION ALL
 	SELECT 'Payable', intPaymentId, strPaymentRecordNum, intEntityId, dtmDatePaid, strNotes as strReference FROM tblAPPayment WHERE ysnPosted = 0
 	UNION ALL
