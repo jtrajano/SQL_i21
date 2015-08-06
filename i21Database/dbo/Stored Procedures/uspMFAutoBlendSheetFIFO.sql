@@ -2,7 +2,7 @@
     @intLocationId INT,                            
     @intBlendRequirementId INT,    
     @dblQtyToProduce NUMERIC(18,6),                                  
-    @strXML NVARCHAR(MAX)=NULL  
+    @strXml NVARCHAR(MAX)=NULL  
 AS
 BEGIN TRY      
 	SET QUOTED_IDENTIFIER OFF
@@ -68,8 +68,9 @@ BEGIN TRY
 			 END
 
 			 SELECT @EstNoOfSheets=(CASE WHEN dblEstNoOfBlendSheet =0 THEN 1 ELSE CEILING(dblEstNoOfBlendSheet) END) FROM tblMFBlendRequirement WHERE intBlendRequirementId=@intBlendRequirementId
+			 IF @EstNoOfSheets is null Set @EstNoOfSheets=1
 			 SET @NoOfSheets=@EstNoOfSheets
-
+			 
 			DECLARE @tblInputItem table      
             ( 
                   RowNumber               INT IDENTITY(1,1),
@@ -237,10 +238,33 @@ BEGIN TRY
 						dblWeightPerQty NUMERIC(38,20)
 						)
 						
+						----INSERT INTO #tblParentLot
+						----Select * FROM (
+						----SELECT L.intParentLotId,
+						----PL.strParentLotNumber,
+						----MAX(L.dtmDateCreated) AS CreateDate,
+						----US.strUserName, --To Review US.strUserName whether nameor Id since added in Group By Clause
+						----L.intItemId,
+						----SUM(L.dblWeight)AS QueuedQty ,
+						----L.intLocationId,
+						----L.intSubLocationId,
+						----MAX(L.dtmExpiryDate) AS ExpiryDate,
+						----L.dblLastCost AS UnitCost,L.intStorageLocationId,L.dblWeightPerQty --To Review L.dblWeightPerQty New Field Added since added in Group By Clause
+						----FROM tblICLot L 
+						----JOIN tblICParentLot PL on PL.intParentLotId=L.intParentLotId
+						----JOIN tblSMUserSecurity US ON L.intCreatedUserId=US.intUserSecurityID
+						----WHERE L.intItemId=@BOMItemKey and L.intLocationId=@intLocationId 
+						----and (L.intLotStatusId =1 or L.intLotStatusId =3) --ACTIVE,QUARANTINED
+						----and L.dtmExpiryDate >= GETDATE() and L.dblWeight > 0 
+						----GROUP BY  L.intParentLotId,PL.strParentLotNumber,US.strUserName,L.intItemId,L.intLocationId,L.intSubLocationId,L.intStorageLocationId,
+						----L.dblLastCost,L.dblWeightPerQty) AS DT 
+						----WHERE DT.QueuedQty>0
+					
+			
 						INSERT INTO #tblParentLot
 						Select * FROM (
-						SELECT L.intParentLotId,
-						PL.strParentLotNumber,
+						SELECT L.intLotId,
+						L.strLotNumber,
 						MAX(L.dtmDateCreated) AS CreateDate,
 						US.strUserName, --To Review US.strUserName whether nameor Id since added in Group By Clause
 						L.intItemId,
@@ -250,16 +274,15 @@ BEGIN TRY
 						MAX(L.dtmExpiryDate) AS ExpiryDate,
 						L.dblLastCost AS UnitCost,L.intStorageLocationId,L.dblWeightPerQty --To Review L.dblWeightPerQty New Field Added since added in Group By Clause
 						FROM tblICLot L 
-						JOIN tblICParentLot PL on PL.intParentLotId=L.intParentLotId
 						JOIN tblSMUserSecurity US ON L.intCreatedUserId=US.intUserSecurityID
 						WHERE L.intItemId=@BOMItemKey and L.intLocationId=@intLocationId 
 						and (L.intLotStatusId =1 or L.intLotStatusId =3) --ACTIVE,QUARANTINED
 						and L.dtmExpiryDate >= GETDATE() and L.dblWeight > 0 
-						GROUP BY  L.intParentLotId,PL.strParentLotNumber,US.strUserName,L.intItemId,L.intLocationId,L.intSubLocationId,L.intStorageLocationId,
+						GROUP BY  L.intLotId,L.strLotNumber,US.strUserName,L.intItemId,L.intLocationId,L.intSubLocationId,L.intStorageLocationId,
 						L.dblLastCost,L.dblWeightPerQty) AS DT 
 						WHERE DT.QueuedQty>0
-					
-			
+
+
 						SET @SQLSTR ='INSERT INTO #tblInputLot SELECT PL.ParentLotID,PL.MaterialKey,
 						(PL.QueuedQty-((SELECT isnull(sum(dblQty),0) from tblICStockReservation where intLotId=PL.MainLotKey And intStorageLocationId=PL.UnitKey) 
 						+ (SELECT isnull(sum(Qty),0) from #tblBlendSheetLot where ParentLotKey=PL.MainLotKey))) AS AvailableQty,
@@ -298,53 +321,97 @@ BEGIN TRY
 							BEGIN
 							IF(@AvailQty>=@RequiredQty) 
 								BEGIN			
+										----INSERT INTO #tblBlendSheetLot 
+										----Select
+										----PL.intParentLotId As 'ParentLotKey',  
+										----PL.intItemId  AS 'MaterialKey',
+										----CASE WHEN @intIssuedUOMTypeId =2 THEN (ROUND(@RequiredQty/PL.dblWeightPerQty,0) * PL.dblWeightPerQty)
+										----ELSE ROUND(@RequiredQty,3) 
+										----END AS 'Quantity',       
+										----PL.intWeightUOMId, -- To Review whether UOMId or ItemUOMId  
+										----CASE WHEN @intIssuedUOMTypeId =2 THEN ROUND(@RequiredQty/PL.dblWeightPerQty,0)
+										----ELSE ROUND(@RequiredQty,3) 
+										----END AS 'Issued Qty',
+										----CASE WHEN @intIssuedUOMTypeId =2 THEN PL.intItemUOMId
+										----ELSE PL.intWeightUOMId 
+										----END AS 'IssuedUOMKey',-- To Review whether UOMId or ItemUOMId
+										----@BOMItemDetailKey AS 'BOMItemDetailKey',
+										----@UnitKey AS 'UnitKey'										  
+										----from tblICParentLot PL JOIN tblICItem MR1 ON PL.intItemId=MR1.intItemId
+										------JOIn UOMConversion UC1 ON UC1.UOMKey=@Issued_UOMKey --No Link with Lot
+										----WHERE PL.strParentLotNumber=@LotID and MR1.intItemId=@BOMItemKey AND PL.dblWeight > 0 --AND PL.FactoryKey=@intLocationId
+
 										INSERT INTO #tblBlendSheetLot 
 										Select
-										PL.intParentLotId As 'ParentLotKey',  
-										PL.intItemId  AS 'MaterialKey',
-										CASE WHEN @intIssuedUOMTypeId =2 THEN (ROUND(@RequiredQty/PL.dblWeightPerQty,0) * PL.dblWeightPerQty)
+										L.intLotId As 'ParentLotKey',  
+										L.intItemId  AS 'MaterialKey',
+										CASE WHEN @intIssuedUOMTypeId =2 THEN (ROUND(@RequiredQty/L.dblWeightPerQty,0) * L.dblWeightPerQty)
 										ELSE ROUND(@RequiredQty,3) 
 										END AS 'Quantity',       
-										PL.intWeightUOMId, -- To Review whether UOMId or ItemUOMId  
-										CASE WHEN @intIssuedUOMTypeId =2 THEN ROUND(@RequiredQty/PL.dblWeightPerQty,0)
+										L.intWeightUOMId, -- To Review whether UOMId or ItemUOMId  
+										CASE WHEN @intIssuedUOMTypeId =2 THEN ROUND(@RequiredQty/L.dblWeightPerQty,0)
 										ELSE ROUND(@RequiredQty,3) 
 										END AS 'Issued Qty',
-										CASE WHEN @intIssuedUOMTypeId =2 THEN PL.intItemUOMId
-										ELSE PL.intWeightUOMId 
+										CASE WHEN @intIssuedUOMTypeId =2 THEN L.intItemUOMId
+										ELSE L.intWeightUOMId 
 										END AS 'IssuedUOMKey',-- To Review whether UOMId or ItemUOMId
 										@BOMItemDetailKey AS 'BOMItemDetailKey',
 										@UnitKey AS 'UnitKey'										  
-										from tblICParentLot PL JOIN tblICItem MR1 ON PL.intItemId=MR1.intItemId
+										from tblICLot L JOIN tblICItem MR1 ON L.intItemId=MR1.intItemId
 										--JOIn UOMConversion UC1 ON UC1.UOMKey=@Issued_UOMKey --No Link with Lot
-										WHERE PL.strParentLotNumber=@LotID and MR1.intItemId=@BOMItemKey AND PL.dblWeight > 0 --AND PL.FactoryKey=@intLocationId
-                                          										   
+										WHERE L.strLotNumber=@LotID and MR1.intItemId=@BOMItemKey AND L.dblWeight > 0 --AND PL.FactoryKey=@intLocationId
+										
+										                                          										   
 										SET @RequiredQty=0
 										goto LOOP_END;    
 								END
 
 							ELSE                    
 								BEGIN
+										----INSERT INTO #tblBlendSheetLot 
+										----Select
+										----PL.intParentLotId As 'ParentLotKey',  
+										----PL.intItemId  AS 'MaterialKey',
+										----CASE WHEN @intIssuedUOMTypeId =2 THEN (ROUND(@AvailQty/PL.dblWeightPerQty,0) * PL.dblWeightPerQty)
+										----ELSE ROUND(@AvailQty,3) 
+										----END AS 'Quantity',
+										----PL.intWeightUOMId, -- To Review whether UOMId or ItemUOMId  
+										----CASE WHEN @intIssuedUOMTypeId =2 THEN ROUND(@AvailQty/PL.dblWeightPerQty,0)
+										----ELSE ROUND(@AvailQty,3) 
+										----END AS 'Issued Qty', 
+										----CASE WHEN @intIssuedUOMTypeId =2 THEN PL.intItemUOMId
+										----ELSE PL.intWeightUOMId 
+										----END AS 'IssuedUOMKey',-- To Review whether UOMId or ItemUOMId
+										----@BOMItemDetailKey AS 'BOMItemDetailKey',
+										----@UnitKey AS 'UnitKey'
+										----from tblICParentLot PL 
+										----JOIN tblICItem MR1 ON PL.intItemId=MR1.intItemId
+										------JOIn UOMConversion UC1 ON UC1.UOMKey=@Issued_UOMKey
+										----WHERE PL.strParentLotNumber=@LotID and PL.intItemId=@BOMItemKey AND PL.dblWeight > 0-- AND PL.FactoryKey=@intLocationId -- To Review Parent Lot Unique in a Factory
+
+                           
 										INSERT INTO #tblBlendSheetLot 
 										Select
-										PL.intParentLotId As 'ParentLotKey',  
-										PL.intItemId  AS 'MaterialKey',
-										CASE WHEN @intIssuedUOMTypeId =2 THEN (ROUND(@AvailQty/PL.dblWeightPerQty,0) * PL.dblWeightPerQty)
+										L.intLotId As 'ParentLotKey',  
+										L.intItemId  AS 'MaterialKey',
+										CASE WHEN @intIssuedUOMTypeId =2 THEN (ROUND(@AvailQty/L.dblWeightPerQty,0) * L.dblWeightPerQty)
 										ELSE ROUND(@AvailQty,3) 
 										END AS 'Quantity',
-										PL.intWeightUOMId, -- To Review whether UOMId or ItemUOMId  
-										CASE WHEN @intIssuedUOMTypeId =2 THEN ROUND(@AvailQty/PL.dblWeightPerQty,0)
+										L.intWeightUOMId, -- To Review whether UOMId or ItemUOMId  
+										CASE WHEN @intIssuedUOMTypeId =2 THEN ROUND(@AvailQty/L.dblWeightPerQty,0)
 										ELSE ROUND(@AvailQty,3) 
 										END AS 'Issued Qty', 
-										CASE WHEN @intIssuedUOMTypeId =2 THEN PL.intItemUOMId
-										ELSE PL.intWeightUOMId 
+										CASE WHEN @intIssuedUOMTypeId =2 THEN L.intItemUOMId
+										ELSE L.intWeightUOMId 
 										END AS 'IssuedUOMKey',-- To Review whether UOMId or ItemUOMId
 										@BOMItemDetailKey AS 'BOMItemDetailKey',
 										@UnitKey AS 'UnitKey'
-										from tblICParentLot PL 
-										JOIN tblICItem MR1 ON PL.intItemId=MR1.intItemId
+										from tblICLot L 
+										JOIN tblICItem MR1 ON L.intItemId=MR1.intItemId
 										--JOIn UOMConversion UC1 ON UC1.UOMKey=@Issued_UOMKey
-										WHERE PL.strParentLotNumber=@LotID and PL.intItemId=@BOMItemKey AND PL.dblWeight > 0-- AND PL.FactoryKey=@intLocationId -- To Review Parent Lot Unique in a Factory
-                            
+										WHERE L.strLotNumber=@LotID and L.intItemId=@BOMItemKey AND L.dblWeight > 0-- AND PL.FactoryKey=@intLocationId -- To Review Parent Lot Unique in a Factory
+
+
 										SET @RequiredQty=@RequiredQty-@AvailQty
 								END
 							END --AvailaQty>0 End
@@ -371,6 +438,7 @@ BEGIN TRY
 		group by ParentLotKey,MaterialKey,UOMKey,IssuedUOMKey,BOMItemDetailKey,UnitKey
 
 
+		--NA
   ----  	EXEC('SELECT PL.MainLotKey AS ParentLotKey,PL.ParentLotID AS Lot,M.MaterialName AS [Material Name],
 		----M.Description AS [Material Description],
 		----((Case When U1.UOMName=''BAG'' Then ROUND((BS.IssuedQty),0) Else BS.IssuedQty End) 
@@ -393,9 +461,78 @@ BEGIN TRY
 		----JOIN tblICStorageLocation UT On UT.intStorageLocationId=BS.UnitKey
 		----JOIN tblSMCompanyLocation F on F.intCompanyLocationId=UT.intLocationId
 		----WHERE BS.Qty>0') --To Review  ORDER BY M.UDA_RiskScore ASC
+		--NA
 
-		SELECT	PL.intParentLotId AS intLotId
-		,PL.strParentLotNumber AS strLotNumber
+		----SELECT	PL.intParentLotId AS intLotId
+		----,PL.strParentLotNumber AS strLotNumber
+		----,M.strItemNo AS strItemNo
+		----,M.strDescription AS strDescription
+		------,(
+		------	(
+		------	CASE 
+		------		WHEN @intIssuedUOMTypeId=2 --U1.UOMName = 'BAG'
+		------			THEN ROUND((BS.IssuedQty), 0)
+		------		ELSE BS.IssuedQty
+		------		END
+		------	) * (PL.dblWeightPerQty)
+		------) AS Quantity
+		----,BS.Qty AS dblQuantity
+		----,BS.UOMKey AS intItemUOMId
+		----,UM1.strUnitMeasure AS strUOM
+		------,CASE 
+		------	WHEN  @intIssuedUOMTypeId=2 --U1.UOMName = 'BAG'
+		------		THEN ROUND((BS.IssuedQty), 0)
+		------	ELSE BS.IssuedQty
+		------END AS [Issued Qty]
+		----,BS.IssuedQty  AS dblIssuedQuantity
+		----,BS.IssuedUOMKey AS intItemIssuedUOMId
+		----,UM2.strUnitMeasure AS strIssuedUOM
+		----,BS.MaterialKey AS intItemId
+		------,BS.MaterialKey AS [BOMItemKey]
+		------,@BOMKey AS [BOMKey]
+		----,BS.BOMItemDetailKey AS intRecipeItemId
+		----,1 AS CostPerLB --To Review PL.UnitCost
+		------,(
+		------	SELECT TOP 1 (CAST(PropertyValue AS NUMERIC(18,6))) AS PropertyValue
+		------	FROM dbo.QM_TestResult AS TR
+		------	INNER JOIN dbo.QM_Property AS P ON P.PropertyKey = TR.PropertyKey
+		------	WHERE ProductObjectKey = PL.MainLotKey
+		------		AND TR.ProductTypeKey = 16
+		------		AND P.PropertyName IN (
+		------			SELECT V.SettingValue
+		------			FROM dbo.iMake_AppSettingValue AS V
+		------			INNER JOIN dbo.iMake_AppSetting AS S ON V.SettingKey = S.SettingKey
+		------				AND S.SettingName = '' Average Density ''
+		------			)
+		------		AND PropertyValue IS NOT NULL
+		------		AND PropertyValue <> ''''
+		------		AND isnumeric(tr.PropertyValue) = 1
+		------	ORDER BY TR.LastUpdateOn DESC
+		------	) AS 'Density' --To Review
+		----,0 AS Density
+		----,(BS.Qty / @EstNoOfSheets) AS RequiredQtyPerSheet
+		----,PL.dblWeightPerQty AS dblWeightPerUnit
+		------,M.UDA_RiskScore AS RiskScore --To Review
+		----,1 AS RiskScore
+		----,BS.UnitKey AS intStorageLocationId
+		----,F.strLocationName AS strLocationName
+		----,@intLocationId AS intLocationId
+		----,CAST(1 AS BIT) ysnParentLot
+		----FROM #tblBlendSheetLotFinal BS
+		----INNER JOIN tblICParentLot PL ON BS.ParentLotKey = PL.intParentLotId	AND PL.dblWeight > 0
+		----INNER JOIN tblICItem M ON M.intItemId = PL.intItemId
+		----INNER JOIN tblICItemUOM IU1 ON IU1.intItemUOMId = BS.UOMKey
+		----INNER JOIN tblICUnitMeasure UM1 ON IU1.intUnitMeasureId=UM1.intUnitMeasureId
+		----INNER JOIN tblICItemUOM IU2 ON IU2.intItemUOMId = BS.IssuedUOMKey
+		----INNER JOIN tblICUnitMeasure UM2 ON IU2.intUnitMeasureId=UM2.intUnitMeasureId
+		----INNER JOIN tblICStorageLocation UT ON UT.intStorageLocationId = BS.UnitKey
+		----INNER JOIN tblSMCompanyLocation F ON F.intCompanyLocationId = UT.intLocationId
+		----WHERE BS.Qty > 0
+
+		SELECT	
+		 L.intLotId AS intWorkOrderInputLotId
+		,L.intLotId AS intLotId
+		,L.strLotNumber AS strLotNumber
 		,M.strItemNo AS strItemNo
 		,M.strDescription AS strDescription
 		--,(
@@ -422,7 +559,7 @@ BEGIN TRY
 		--,BS.MaterialKey AS [BOMItemKey]
 		--,@BOMKey AS [BOMKey]
 		,BS.BOMItemDetailKey AS intRecipeItemId
-		,1 AS CostPerLB --To Review PL.UnitCost
+		,L.dblLastCost AS dblUnitCost --To Review PL.UnitCost
 		--,(
 		--	SELECT TOP 1 (CAST(PropertyValue AS NUMERIC(18,6))) AS PropertyValue
 		--	FROM dbo.QM_TestResult AS TR
@@ -440,18 +577,19 @@ BEGIN TRY
 		--		AND isnumeric(tr.PropertyValue) = 1
 		--	ORDER BY TR.LastUpdateOn DESC
 		--	) AS 'Density' --To Review
-		,0 AS Density
-		,(BS.Qty / @EstNoOfSheets) AS RequiredQtyPerSheet
-		,PL.dblWeightPerQty AS dblWeightPerUnit
+		,CAST(0 AS decimal) AS dblDensity
+		,(BS.Qty / @EstNoOfSheets) AS dblRequiredQtyPerSheet
+		,L.dblWeightPerQty AS dblWeightPerUnit
 		--,M.UDA_RiskScore AS RiskScore --To Review
-		,1 AS RiskScore
+		,ISNULL(M.dblRiskScore,0) AS RiskScore
 		,BS.UnitKey AS intStorageLocationId
 		,F.strLocationName AS strLocationName
 		,@intLocationId AS intLocationId
-		,CAST(1 AS BIT) ysnParentLot
+		,CAST(0 AS BIT) ysnParentLot
+		,'Added' AS strRowState
 		FROM #tblBlendSheetLotFinal BS
-		INNER JOIN tblICParentLot PL ON BS.ParentLotKey = PL.intParentLotId	AND PL.dblWeight > 0
-		INNER JOIN tblICItem M ON M.intItemId = PL.intItemId
+		INNER JOIN tblICLot L ON BS.ParentLotKey = L.intLotId	AND L.dblWeight > 0
+		INNER JOIN tblICItem M ON M.intItemId = L.intItemId
 		INNER JOIN tblICItemUOM IU1 ON IU1.intItemUOMId = BS.UOMKey
 		INNER JOIN tblICUnitMeasure UM1 ON IU1.intUnitMeasureId=UM1.intUnitMeasureId
 		INNER JOIN tblICItemUOM IU2 ON IU2.intItemUOMId = BS.IssuedUOMKey

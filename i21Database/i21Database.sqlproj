@@ -2198,6 +2198,7 @@
     <Build Include="dbo\Stored Procedures\uspCFImportCard.sql" />
     <Build Include="dbo\Stored Procedures\uspPODuplicate.sql" />
 
+    <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheetHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
