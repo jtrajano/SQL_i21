@@ -1714,6 +1714,9 @@
     <None Include="Scripts\Utility\IC\IC-1092\Fix the Lot Qty.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateCommitted.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateOrderIntegrations.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceIntegrations.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateCommitted.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostInvoiceIntegrations.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
