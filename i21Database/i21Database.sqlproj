@@ -1707,6 +1707,9 @@
     <Build Include="dbo\Stored Procedures\uspICIncreaseCommittedQty.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateCommitted.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateOrderIntegrations.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceIntegrations.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateCommitted.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPostInvoiceIntegrations.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -1957,7 +1957,7 @@ IF @recap = 0
 					SELECT TOP 1 @intSalesOrderId = intSalesOrderId FROM @OrderToUpdate ORDER BY intSalesOrderId
 
 					EXEC dbo.uspSOUpdateOrderShipmentStatus @intSalesOrderId
-							
+						
 					--IF(@@ERROR <> 0)  
 					--	BEGIN			
 					--		SET @success = 0 
@@ -1965,6 +1965,41 @@ IF @recap = 0
 					--	END	
 			
 					DELETE FROM @OrderToUpdate WHERE intSalesOrderId = @intSalesOrderId AND intSalesOrderId = @intSalesOrderId 
+												
+				END 
+																
+		END TRY
+		BEGIN CATCH	
+			ROLLBACK TRAN @TransactionName
+			BEGIN TRANSACTION
+			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+			SELECT ERROR_MESSAGE(), @transType, @param, @batchId, 0
+			COMMIT TRANSACTION
+			GOTO Post_Exit
+		END CATCH		
+		
+		BEGIN TRY			
+			DECLARE @InvoiceIntegration TABLE  (
+					intInvoiceId int PRIMARY KEY,
+					strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+					UNIQUE (intInvoiceId)
+				);
+			
+			INSERT INTO @InvoiceIntegration(intInvoiceId, strTransactionId)
+			SELECT intInvoiceId, strTransactionId FROM @PostInvoiceData
+				
+				
+
+			WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoiceIntegration ORDER BY intInvoiceId)
+				BEGIN
+				
+					DECLARE @intInvoiceId INT;
+					
+					SELECT TOP 1 @intInvoiceId = intInvoiceId FROM @InvoiceIntegration ORDER BY intInvoiceId
+
+					EXEC dbo.uspARPostInvoiceIntegrations @intInvoiceId, @post, @userId
+									
+					DELETE FROM @InvoiceIntegration WHERE intInvoiceId = @intInvoiceId
 												
 				END 
 																

@@ -1,6 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[uspSOUpdateCommitted]
-	@SalesOrderId INT,
-	@Negate BIT
+﻿CREATE PROCEDURE [dbo].[uspARUpdateCommitted]
+	@InvoiceId	INT,
+	@Negate		BIT	= 0
 AS
 BEGIN
 
@@ -37,28 +37,25 @@ BEGIN
 		,[intItemLocationId]		=	IST.intItemLocationId
 		,[intItemUOMId]				=	Detail.intItemUOMId
 		,[dtmDate]					=	Header.dtmDate
-		,[dblQty]					=	(CASE WHEN Header.strOrderStatus IN ('Short Closed', 'Cancellled')
-											THEN 0
-											ELSE Detail.dblQtyOrdered - Detail.dblQtyShipped
-										END) * (CASE WHEN @Negate = 1 THEN -1 ELSE 1 END)										
+		,[dblQty]					=	Detail.dblQtyShipped * (CASE WHEN @Negate = 1 THEN -1 ELSE 1 END)
 		,[dblUOMQty]				=	ItemUOM.dblUnitQty
 		,[dblCost]					=	IST.dblLastCost
 		,[dblValue]					=	0
 		,[dblSalesPrice]			=	Detail.dblPrice
 		,[intCurrencyId]			=	Header.intCurrencyId
 		,[dblExchangeRate]			=	0
-		,[intTransactionId]			=	Header.intSalesOrderId
+		,[intTransactionId]			=	Header.intInvoiceId
 		,[intTransactionDetailId]	=	Detail.intSalesOrderDetailId
-		,[strTransactionId]			=	Header.strSalesOrderNumber
+		,[strTransactionId]			=	Header.strInvoiceNumber
 		,[intTransactionTypeId]		=	7
 		,[intLotId]					=	NULL
 		,[intSubLocationId]			=	NULL
-		,[intStorageLocationId]		=	Detail.intStorageLocationId
+		,[intStorageLocationId]		=	NULL
 	FROM 
-		tblSOSalesOrderDetail Detail
+		tblARInvoiceDetail Detail
 	INNER JOIN
-		tblSOSalesOrder Header
-			ON Detail.intSalesOrderId = Header.intSalesOrderId
+		tblARInvoice Header
+			ON Detail.intInvoiceId = Header.intInvoiceId
 	INNER JOIN
 		tblICItemUOM ItemUOM 
 			ON ItemUOM.intItemUOMId = Detail.intItemUOMId
@@ -67,8 +64,8 @@ BEGIN
 			ON Detail.intItemId = IST.intItemId 
 			AND Header.intCompanyLocationId = IST.intLocationId 
 	WHERE 
-		Header.intSalesOrderId = @SalesOrderId
-		AND Header.strTransactionType = 'Order'	
+		Header.intInvoiceId = @InvoiceId
+		AND (Detail.intInventoryShipmentId IS NULL OR Detail.intInventoryShipmentId = 0)
 
 	EXEC uspICIncreaseOrderCommitted @items
 
