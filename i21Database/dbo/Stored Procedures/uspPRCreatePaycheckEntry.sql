@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspPRCreatePaycheckEntry]
-	@intEmployeeId			INT
+	@intEmployeeId			INT	
 	,@dtmBeginDate			DATETIME
 	,@dtmEndDate			DATETIME
 	,@dtmPayDate			DATETIME
@@ -141,9 +141,16 @@ WHERE [intEmployeeId] = @intEmployee
 /* Create Paycheck Earnings and Taxes*/
 DECLARE @intPaycheckEarningId INT
 DECLARE @intEmployeeEarningId INT
+DECLARE @dblEarningAmount NUMERIC(18,6)
 
 /* Insert Earnings to Temp Table for iteration */
-SELECT tblPREmployeeEarning.intEmployeeEarningId 
+SELECT 
+tblPREmployeeEarning.intEmployeeEarningId,
+dblAmount = CASE WHEN ([strCalculationType] IN ('Rate Factor', 'Overtime')) 
+				THEN [dblAmount] * ISNULL((SELECT B.dblAmount FROM tblPREmployeeEarning B WHERE B.intEmployeeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId), 1)
+			ELSE
+				[dblAmount]
+			END
 INTO #tmpEarnings FROM tblPREmployeeEarning 
 WHERE intEmployeeId = @intEmployee
   AND ysnDefault = CASE WHEN @intPayGroup IS NULL THEN 1 ELSE ysnDefault END
@@ -154,7 +161,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 	BEGIN
 
 		/* Select Employee Earning to Add */
-		SELECT TOP 1 @intEmployeeEarningId = intEmployeeEarningId FROM #tmpEarnings
+		SELECT TOP 1 @intEmployeeEarningId = intEmployeeEarningId, @dblEarningAmount = dblAmount FROM #tmpEarnings
 	
 		/* Insert Paycheck Earning */
 		INSERT INTO tblPRPaycheckEarning
@@ -191,19 +198,15 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 						FROM tblPRTimecard 
 						WHERE intEmployeeEarningId = (CASE WHEN [strCalculationType] IN ('Overtime') THEN intEmployeeEarningId ELSE @intEmployeeEarningId END)
 						AND ysnApproved = 1 AND intPaycheckId IS NULL
-						AND intEmployeeId = @intEmployee AND intEmployeeDepartmentId = @intDepartmentId
+						AND intEmployeeId = @intEmployee AND intEmployeeDepartmentId = ISNULL(@intDepartmentId, intEmployeeDepartmentId)
 						AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
 						AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
 					), 0)
 				END
-			,CASE 
-				WHEN ([strCalculationType] IN ('Rate Factor', 'Overtime')) 
-					THEN [dblAmount] * ISNULL((SELECT B.dblAmount FROM tblPREmployeeEarning B WHERE B.intEmployeeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId), 1)
-				ELSE
-					[dblAmount]
-				END
+			,@dblEarningAmount
 			,CASE WHEN ([strCalculationType] IN ('Hourly Rate', 'Overtime')
 					OR ([strCalculationType] = 'Rate Factor' AND (SELECT TOP 1 strCalculationType FROM tblPREmployeeEarning WHERE intEmployeeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId) = 'Hourly Rate')) THEN 
+				-- If Calculation is Hourly Based
 				CASE 
 					--If Earning Id is HOLIDAY, use the specified Pay Group Holiday Hours
 					WHEN (@intPayGroup IS NOT NULL AND ((SELECT TOP 1 LOWER(strEarning) FROM tblPRTypeEarning WHERE intTypeEarningId = tblPREmployeeEarning.intTypeEarningId) LIKE '%holiday%'))
@@ -220,25 +223,16 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 							FROM tblPRTimecard 
 							WHERE intEmployeeEarningId = (CASE WHEN [strCalculationType] IN ('Overtime') THEN intEmployeeEarningId ELSE @intEmployeeEarningId END)
 							AND ysnApproved = 1 AND intPaycheckId IS NULL
-							AND intEmployeeId = @intEmployee AND intEmployeeDepartmentId = @intDepartmentId
+							AND intEmployeeId = @intEmployee AND intEmployeeDepartmentId = ISNULL(@intDepartmentId, intEmployeeDepartmentId)
 							AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
 							AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
 						), 0)
 					END 
-				* CASE 
-					WHEN ([strCalculationType] IN ('Rate Factor', 'Overtime')) 
-						THEN [dblAmount] * ISNULL((SELECT B.dblAmount FROM tblPREmployeeEarning B WHERE B.intEmployeeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId), 1)
-					ELSE
-						[dblAmount]
-					END
-				ELSE 
-					CASE 
-						WHEN ([strCalculationType] IN ('Rate Factor', 'Overtime')) 
-							THEN [dblAmount] * ISNULL((SELECT B.dblAmount FROM tblPREmployeeEarning B WHERE B.intEmployeeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId), 1)
-						ELSE
-							[dblAmount]
-						END
-				END
+				  * @dblEarningAmount
+			 ELSE 
+				 -- If Calculation is Fixed Amount
+				 @dblEarningAmount
+			 END
 			,[strW2Code]
 			,[intEmployeeTimeOffId]
 			,[intAccountId]
@@ -351,7 +345,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 		UPDATE tblPRTimecard 
 		SET intPaycheckId = @intPaycheckId
 		WHERE ysnApproved = 1 AND intPaycheckId IS NULL
-		AND intEmployeeId = @intEmployee AND intEmployeeDepartmentId = @intDepartmentId
+		AND intEmployeeId = @intEmployee AND intEmployeeDepartmentId = ISNULL(@intDepartmentId, intEmployeeDepartmentId)
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
 
