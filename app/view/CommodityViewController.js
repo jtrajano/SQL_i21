@@ -60,21 +60,26 @@ Ext.define('Inventory.view.CommodityViewController', {
             dtmCropEndDateCurrent: '{current.dtmCropEndDateCurrent}',
             dtmCropEndDateNew: '{current.dtmCropEndDateNew}',
             txtEdiCode: '{current.strEDICode}',
-            txtDefaultScheduleStore: '{current.strScheduleStore}',
-            txtDefaultScheduleDiscount: '{current.strScheduleDiscount}',
-            txtTextPurchase: '{current.strTextPurchase}',
-            txtTextSales: '{current.strTextSales}',
-            txtTextFees: '{current.strTextFees}',
-            txtAgItemNumber: '{current.strAGItemNumber}',
+            cboDefaultScheduleStore: {
+                value: '{current.intScheduleStoreId}',
+                store: '{scheduleStore}',
+                defaultFilters: [{
+                    column: 'intCommodity',
+                    value: '{current.intCommodityId}',
+                    conjunction: 'and'
+                }]
+            },
+            cboDefaultScheduleDiscount: {
+                value: '{current.intScheduleDiscountId}',
+                store: '{scheduleDiscount}'
+            },
             cboScaleAutoDistDefault: {
-                value: '{current.strScaleAutoDist}',
+                value: '{current.intScaleAutoDistId}',
                 store: '{autoScaleDist}'
             },
-            chkRequireLoadNoAtKiosk: '{current.ysnRequireLoadNumber}',
-            chkAllowVariety: '{current.ysnAllowVariety}',
-            chkAllowLoadContracts: '{current.ysnAllowLoadContracts}',
-            txtMaximumUnder: '{current.dblMaxUnder}',
-            txtMaximumOver: '{current.dblMaxOver}',
+//            chkAllowLoadContracts: '{current.ysnAllowLoadContracts}',
+//            txtMaximumUnder: '{current.dblMaxUnder}',
+//            txtMaximumOver: '{current.dblMaxOver}',
             cboPatronageCategory: {
                 value: '{current.intPatronageCategoryId}',
                 store: '{patronageCategory}'

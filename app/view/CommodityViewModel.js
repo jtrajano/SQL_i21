@@ -24,7 +24,10 @@ Ext.define('Inventory.view.CommodityViewModel', {
         'GeneralLedger.store.BufAccountId',
         'GeneralLedger.store.BufAccountCategoryGroup',
         'i21.store.CompanyLocationBuffered',
-        'RiskManagement.store.FutureMarketBuffered'
+        'RiskManagement.store.FutureMarketBuffered',
+        'Grain.store.BufferedStorageSchedule',
+        'Grain.store.BufferedDiscountId',
+        'Grain.store.BufferedDistributions'
     ],
 
     stores: {
@@ -116,8 +119,14 @@ Ext.define('Inventory.view.CommodityViewModel', {
         location: {
             type: 'companylocationbuffered'
         },
+        scheduleStore: {
+            type: 'grbufferedstorageschedule'
+        },
+        scheduleDiscount: {
+            type: 'grbuffereddiscountid'
+        },
         autoScaleDist: {
-            type: 'icbufferedstoragetype'
+            type: 'grbuffereddistributions'
         }
     }
 

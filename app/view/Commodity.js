@@ -397,142 +397,94 @@ Ext.define('Inventory.view.Commodity', {
                                                                 labelWidth: 140
                                                             },
                                                             {
-                                                                xtype: 'container',
-                                                                margin: '0 0 5 0',
-                                                                layout: {
-                                                                    type: 'hbox',
-                                                                    align: 'stretch'
-                                                                },
-                                                                items: [
+                                                                xtype: 'gridcombobox',
+                                                                columns: [
                                                                     {
-                                                                        xtype: 'numberfield',
-                                                                        itemId: 'txtDefaultScheduleStore',
-                                                                        width: 280,
-                                                                        fieldLabel: 'Default Schedule Store',
-                                                                        labelWidth: 140,
-                                                                        fieldStyle: 'text-align:right',
-                                                                        hideTrigger: true
+                                                                        dataIndex: 'intStorageScheduleRuleId',
+                                                                        dataType: 'numeric',
+                                                                        hidden: true
                                                                     },
                                                                     {
-                                                                        xtype: 'numberfield',
-                                                                        flex: 1,
-                                                                        itemId: 'txtDefaultScheduleDiscount',
-                                                                        margin: '0 0 0 5',
-                                                                        fieldLabel: 'Discount',
-                                                                        labelWidth: 60,
-                                                                        fieldStyle: 'text-align:right',
-                                                                        hideTrigger: true
+                                                                        dataIndex: 'intCommodity',
+                                                                        dataType: 'numeric',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strScheduleId',
+                                                                        dataType: 'string',
+                                                                        text: 'Storage Type',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strScheduleDescription',
+                                                                        dataType: 'string',
+                                                                        text: 'Description',
+                                                                        flex: 1
                                                                     }
-                                                                ]
+                                                                ],
+                                                                itemId: 'cboDefaultScheduleStore',
+                                                                fieldLabel: 'Default Schedule Store',
+                                                                labelWidth: 140,
+                                                                displayField: 'strScheduleId',
+                                                                valueField: 'intStorageScheduleRuleId'
+                                                            },
+                                                            {
+                                                                xtype: 'gridcombobox',
+                                                                columns: [
+                                                                    {
+                                                                        dataIndex: 'intDiscountId',
+                                                                        dataType: 'numeric',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strDiscountId',
+                                                                        dataType: 'string',
+                                                                        text: 'Storage Type',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strDiscountDescription',
+                                                                        dataType: 'string',
+                                                                        text: 'Description',
+                                                                        flex: 1
+                                                                    }
+                                                                ],
+                                                                itemId: 'cboDefaultScheduleDiscount',
+                                                                fieldLabel: 'Discount',
+                                                                labelWidth: 140,
+                                                                displayField: 'strDiscountId',
+                                                                valueField: 'intDiscountId'
+                                                            },
+                                                            {
+                                                                xtype: 'gridcombobox',
+                                                                columns: [
+                                                                    {
+                                                                        dataIndex: 'intStorageScheduleTypeId',
+                                                                        dataType: 'numeric',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strStorageTypeCode',
+                                                                        dataType: 'string',
+                                                                        text: 'Storage Type',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strStorageTypeDescription',
+                                                                        dataType: 'string',
+                                                                        text: 'Description',
+                                                                        flex: 1
+                                                                    }
+                                                                ],
+                                                                itemId: 'cboScaleAutoDistDefault',
+                                                                fieldLabel: 'Scale Auto Dist Default',
+                                                                labelWidth: 140,
+                                                                displayField: 'strStorageTypeCode',
+                                                                valueField: 'intStorageScheduleTypeId'
                                                             },
                                                             {
                                                                 xtype: 'container',
-                                                                margin: '0 0 5 0',
-                                                                layout: {
-                                                                    type: 'hbox',
-                                                                    align: 'stretch'
-                                                                },
-                                                                items: [
-                                                                    {
-                                                                        xtype: 'textfield',
-                                                                        itemId: 'txtTextPurchase',
-                                                                        width: 200,
-                                                                        fieldLabel: 'Text Purchase',
-                                                                        labelWidth: 140
-                                                                    },
-                                                                    {
-                                                                        xtype: 'textfield',
-                                                                        itemId: 'txtTextSales',
-                                                                        margin: '0 5',
-                                                                        width: 125,
-                                                                        fieldLabel: 'Text Sales',
-                                                                        labelWidth: 65
-                                                                    },
-                                                                    {
-                                                                        xtype: 'numberfield',
-                                                                        flex: 1,
-                                                                        itemId: 'txtTextFees',
-                                                                        fieldLabel: 'Text Fees',
-                                                                        labelWidth: 60,
-                                                                        fieldStyle: 'text-align:right',
-                                                                        hideTrigger: true
-                                                                    }
-                                                                ]
-                                                            },
-                                                            {
-                                                                xtype: 'container',
-                                                                margin: '0 0 5 0',
-                                                                layout: {
-                                                                    type: 'hbox',
-                                                                    align: 'stretch'
-                                                                },
-                                                                items: [
-                                                                    {
-                                                                        xtype: 'textfield',
-                                                                        flex: 1,
-                                                                        itemId: 'txtAgItemNumber',
-                                                                        width: 280,
-                                                                        fieldLabel: 'AG Item Number',
-                                                                        labelWidth: 140
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcombobox',
-                                                                        columns: [
-                                                                            {
-                                                                                dataIndex: 'intStorageTypeId',
-                                                                                dataType: 'numeric',
-                                                                                text: 'Storage Type Id',
-                                                                                hidden: true
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strStorageType',
-                                                                                dataType: 'string',
-                                                                                text: 'Storage Type',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strDescription',
-                                                                                dataType: 'string',
-                                                                                text: 'Description',
-                                                                                flex: 1
-                                                                            }
-                                                                        ],
-                                                                        flex: 1.2,
-                                                                        itemId: 'cboScaleAutoDistDefault',
-                                                                        padding: '0 0 0 5',
-                                                                        fieldLabel: 'Scale Auto Dist Default',
-                                                                        labelWidth: 130,
-                                                                        displayField: 'strStorageType',
-                                                                        valueField: 'intStorageTypeId'
-                                                                    }
-                                                                ]
-                                                            },
-                                                            {
-                                                                xtype: 'container',
-                                                                margin: '0 0 5 0',
-                                                                layout: {
-                                                                    type: 'hbox',
-                                                                    align: 'stretch'
-                                                                },
-                                                                items: [
-                                                                    {
-                                                                        xtype: 'checkboxfield',
-                                                                        itemId: 'chkRequireLoadNoAtKiosk',
-                                                                        fieldLabel: 'Require Load No at Kiosk',
-                                                                        labelWidth: 140
-                                                                    },
-                                                                    {
-                                                                        xtype: 'checkboxfield',
-                                                                        flex: 1,
-                                                                        itemId: 'chkAllowVariety',
-                                                                        margin: '0 0 0 15',
-                                                                        fieldLabel: 'Allow Variety',
-                                                                        labelWidth: 80
-                                                                    }
-                                                                ]
-                                                            },
-                                                            {
-                                                                xtype: 'container',
+                                                                hidden: true,
                                                                 margin: '0 0 5 0',
                                                                 layout: {
                                                                     type: 'hbox',
@@ -568,97 +520,85 @@ Ext.define('Inventory.view.Commodity', {
                                                                 ]
                                                             },
                                                             {
-                                                                xtype: 'container',
-                                                                margin: '0 0 5 0',
-                                                                layout: {
-                                                                    type: 'hbox',
-                                                                    align: 'stretch'
-                                                                },
-                                                                items: [
+                                                                xtype: 'gridcombobox',
+                                                                columns: [
                                                                     {
-                                                                        xtype: 'gridcombobox',
-                                                                        columns: [
-                                                                            {
-                                                                                dataIndex: 'intPatronageCategoryId',
-                                                                                dataType: 'numeric',
-                                                                                text: 'Patronage Category ID',
-                                                                                hidden: true
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strCategoryCode',
-                                                                                dataType: 'string',
-                                                                                text: 'Category Code',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strDescription',
-                                                                                dataType: 'string',
-                                                                                text: 'Description',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strPurchaseSale',
-                                                                                dataType: 'string',
-                                                                                text: 'Purchase/Sale',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strUnitAmount',
-                                                                                dataType: 'string',
-                                                                                text: 'Unit/Amount',
-                                                                                flex: 1
-                                                                            }
-                                                                        ],
-                                                                        itemId: 'cboPatronageCategory',
-                                                                        width: 280,
-                                                                        fieldLabel: 'Patronage Category',
-                                                                        labelWidth: 140,
-                                                                        displayField: 'strCategoryCode',
-                                                                        valueField: 'intPatronageCategoryId'
+                                                                        dataIndex: 'intPatronageCategoryId',
+                                                                        dataType: 'numeric',
+                                                                        text: 'Patronage Category ID',
+                                                                        hidden: true
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcombobox',
-                                                                        columns: [
-                                                                            {
-                                                                                dataIndex: 'intPatronageCategoryId',
-                                                                                dataType: 'numeric',
-                                                                                text: 'Patronage Category ID',
-                                                                                hidden: true
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strCategoryCode',
-                                                                                dataType: 'string',
-                                                                                text: 'Category Code',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strDescription',
-                                                                                dataType: 'string',
-                                                                                text: 'Description',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strPurchaseSale',
-                                                                                dataType: 'string',
-                                                                                text: 'Purchase/Sale',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strUnitAmount',
-                                                                                dataType: 'string',
-                                                                                text: 'Unit/Amount',
-                                                                                flex: 1
-                                                                            }
-                                                                        ],
-                                                                        flex: 1,
-                                                                        itemId: 'cboPatronageCategoryDirect',
-                                                                        margin: '0 0 0 5',
-                                                                        fieldLabel: 'Direct',
-                                                                        labelWidth: 45,
-                                                                        displayField: 'strCategoryCode',
-                                                                        valueField: 'intPatronageCategoryId'
+                                                                        dataIndex: 'strCategoryCode',
+                                                                        dataType: 'string',
+                                                                        text: 'Category Code',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strDescription',
+                                                                        dataType: 'string',
+                                                                        text: 'Description',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strPurchaseSale',
+                                                                        dataType: 'string',
+                                                                        text: 'Purchase/Sale',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strUnitAmount',
+                                                                        dataType: 'string',
+                                                                        text: 'Unit/Amount',
+                                                                        flex: 1
                                                                     }
-                                                                ]
+                                                                ],
+                                                                itemId: 'cboPatronageCategory',
+                                                                width: 280,
+                                                                fieldLabel: 'Patronage Category',
+                                                                labelWidth: 140,
+                                                                displayField: 'strCategoryCode',
+                                                                valueField: 'intPatronageCategoryId'
+                                                            },
+                                                            {
+                                                                xtype: 'gridcombobox',
+                                                                columns: [
+                                                                    {
+                                                                        dataIndex: 'intPatronageCategoryId',
+                                                                        dataType: 'numeric',
+                                                                        text: 'Patronage Category ID',
+                                                                        hidden: true
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strCategoryCode',
+                                                                        dataType: 'string',
+                                                                        text: 'Category Code',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strDescription',
+                                                                        dataType: 'string',
+                                                                        text: 'Description',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strPurchaseSale',
+                                                                        dataType: 'string',
+                                                                        text: 'Purchase/Sale',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        dataIndex: 'strUnitAmount',
+                                                                        dataType: 'string',
+                                                                        text: 'Unit/Amount',
+                                                                        flex: 1
+                                                                    }
+                                                                ],
+                                                                itemId: 'cboPatronageCategoryDirect',
+                                                                fieldLabel: 'Direct',
+                                                                labelWidth: 140,
+                                                                displayField: 'strCategoryCode',
+                                                                valueField: 'intPatronageCategoryId'
                                                             }
                                                         ]
                                                     }

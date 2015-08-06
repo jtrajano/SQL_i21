@@ -29,11 +29,11 @@ namespace iRely.Inventory.Model
         public int intCommodityId { get; set; }
         public string strCommodityCode { get; set; }
         public string strDescription { get; set; }
-        public bool ysnExchangeTraded { get; set; }
+        public bool? ysnExchangeTraded { get; set; }
         public int? intFutureMarketId { get; set; }
-        public int intDecimalDPR { get; set; }
+        public int? intDecimalDPR { get; set; }
         public decimal? dblConsolidateFactor { get; set; }
-        public bool ysnFXExposure { get; set; }
+        public bool? ysnFXExposure { get; set; }
         public decimal? dblPriceCheckMin { get; set; }
         public decimal? dblPriceCheckMax { get; set; }
         public string strCheckoffTaxDesc { get; set; }
@@ -43,16 +43,10 @@ namespace iRely.Inventory.Model
         public DateTime? dtmCropEndDateCurrent { get; set; }
         public DateTime? dtmCropEndDateNew { get; set; }
         public string strEDICode { get; set; }
-        public string strScheduleStore { get; set; }
-        public string strScheduleDiscount { get; set; }
-        public string strTextPurchase { get; set; }
-        public string strTextSales { get; set; }
-        public string strTextFees { get; set; }
-        public string strAGItemNumber { get; set; }
-        public string strScaleAutoDist { get; set; }
-        public bool ysnRequireLoadNumber { get; set; }
-        public bool ysnAllowVariety { get; set; }
-        public bool ysnAllowLoadContracts { get; set; }
+        public int? intScheduleStoreId { get; set; }
+        public int? intScheduleDiscountId { get; set; }
+        public int? intScaleAutoDistId { get; set; }
+        public bool? ysnAllowLoadContracts { get; set; }
         public decimal? dblMaxUnder { get; set; }
         public decimal? dblMaxOver { get; set; }
         public int? intPatronageCategoryId { get; set; }
