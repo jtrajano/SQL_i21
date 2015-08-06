@@ -5,6 +5,7 @@ SELECT
 A.intBillId
 ,A.strBillId
 ,A.dblTotal
+,A.intShipToId AS intLocationId
 ,Payments.dblPayment AS dblPayment
 ,Payments.dblDiscount AS dblDiscount
 ,Payments.dblInterest AS dblInterest
