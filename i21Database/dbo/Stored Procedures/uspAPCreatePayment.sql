@@ -1,4 +1,9 @@
-﻿CREATE PROCEDURE [dbo].[uspAPCreatePayment]
+﻿/*
+Usage:
+1. Creating payment from Bill screen.
+2. Creating payment from Importing of bills.
+*/
+CREATE PROCEDURE [dbo].[uspAPCreatePayment]
 	@userId INT,
 	@bankAccount INT = NULL,
 	@paymentMethod INT = NULL,
@@ -28,6 +33,7 @@ BEGIN
 	DECLARE @withholdAmount NUMERIC(18,6)
 	DECLARE @withholdPercent NUMERIC(18,6)
 	DECLARE @discountAmount NUMERIC(18,6) = 0;
+	DECLARE @withholdAccount INT
 	DECLARE @paymentMethodId INT = @paymentMethod
 	DECLARE @intBankAccountId INT = @bankAccount;
 	DECLARE @vendorWithhold BIT = 0;
@@ -105,7 +111,8 @@ BEGIN
 	--END
 
 	--Compute Withheld Here
-	IF @vendorWithhold = 1
+	--Compute only if the payment that will create is posted
+	IF @vendorWithhold = 1 AND @isPost = 0
 	BEGIN
 		--Validate if there is a set up for withheld account.
 		SELECT @withHoldAccount = B.intWithholdAccountId
@@ -174,7 +181,7 @@ BEGIN
 		[intBillId]		= A.intBillId,
 		[intAccountId]	= A.intAccountId,
 		[dblDiscount]	= A.dblDiscount,
-		[dblWithheld]	= CASE WHEN @withholdPercent > 0 THEN CAST(ROUND(A.dblTotal * (@withholdPercent / 100), 6) AS NUMERIC(18,6)) ELSE 0 END,
+		[dblWithheld]	= CASE WHEN @withholdPercent > 0 AND A.dblWithheld <= 0 THEN CAST(ROUND(A.dblTotal * (@withholdPercent / 100), 6) AS NUMERIC(18,6)) ELSE A.dblWithheld END,
 		[dblAmountDue]	= A.dblAmountDue, -- (A.dblTotal - A.dblDiscount - A.dblPayment),
 		[dblPayment]	= 0, --A.dblTotal - A.dblDiscount - A.dblPayment,
 		[dblInterest]	= 0, --TODO
