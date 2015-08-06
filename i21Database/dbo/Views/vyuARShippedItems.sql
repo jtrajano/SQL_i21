@@ -98,7 +98,7 @@ CROSS APPLY
 	WHERE
 		ISH.[ysnPosted] = 1
 		AND ISI.[intLineNo] = SOD.[intSalesOrderDetailId]
-		AND SO.[strTransactionType] = 'Order'
+		AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus <> 'Cancelled'
 		AND ISI.[intInventoryShipmentItemId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intInventoryShipmentItemId],0) FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.[intInvoiceId] = tblARInvoice.[intInvoiceId] WHERE tblARInvoice.[ysnPosted] = 1)
 	GROUP BY
 		 ISI.[intInventoryShipmentItemId]
@@ -199,7 +199,7 @@ WHERE
 	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
 		FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
 		WHERE tblARInvoice.[ysnPosted] = 1  AND tblARInvoiceDetail.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped)
-	AND SO.[strTransactionType] = 'Order'
+	AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus <> 'Cancelled'
 
 	UNION ALL
 
@@ -281,4 +281,4 @@ WHERE
 	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
 		FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
 		WHERE tblARInvoice.[ysnPosted] = 1 AND tblARInvoiceDetail.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped)
-	AND SO.[strTransactionType] = 'Order'
+	AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus <> 'Cancelled'
