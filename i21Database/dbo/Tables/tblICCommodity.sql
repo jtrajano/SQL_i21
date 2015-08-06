@@ -28,28 +28,22 @@ Type the overview for the table here.
 		[strInsuranceAllState] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[dtmCropEndDateCurrent] DATETIME NULL, 
 		[dtmCropEndDateNew] DATETIME NULL, 
-
 		[strEDICode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-		[strScheduleStore] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-		[strScheduleDiscount] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-		[strTextPurchase] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-		[strTextSales] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-		[strTextFees] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-		[strAGItemNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-		[strScaleAutoDist	] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-		[ysnRequireLoadNumber] BIT NULL, 
-		[ysnAllowVariety] BIT NULL, 
+		[intScheduleStoreId] INT NULL,
+		[intScheduleDiscountId] INT NULL,
+		[intScaleAutoDistId] INT NULL,
 		[ysnAllowLoadContracts] BIT NULL, 
 		[dblMaxUnder] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblMaxOver] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-
 		[intPatronageCategoryId] INT NULL, 
 		[intPatronageCategoryDirectId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICCommodity] PRIMARY KEY ([intCommodityId]), 
 		CONSTRAINT [FK_tblICCommodity_tblICPatronageCategory] FOREIGN KEY ([intPatronageCategoryId]) REFERENCES [tblICPatronageCategory]([intPatronageCategoryId]),
 		CONSTRAINT [FK_tblICCommodity_tblICPatronageCategoryDirect] FOREIGN KEY ([intPatronageCategoryDirectId]) REFERENCES [tblICPatronageCategory]([intPatronageCategoryId]), 
-		CONSTRAINT [FK_tblICCommodity_tblRKFutureMarket] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]) 
+		CONSTRAINT [FK_tblICCommodity_tblRKFutureMarket] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]), 
+		CONSTRAINT [FK_tblICCommodity_tblGRDiscount] FOREIGN KEY ([intScheduleDiscountId]) REFERENCES [tblGRDiscountId]([intDiscountId]), 
+		CONSTRAINT [FK_tblICCommodity_tblGRStorageSchedule] FOREIGN KEY ([intScheduleStoreId]) REFERENCES [tblGRStorageScheduleRule]([intStorageScheduleRuleId]) 
 	)
 
 	GO
@@ -187,87 +181,6 @@ Type the overview for the table here.
 		@level1name = N'tblICCommodity',
 		@level2type = N'COLUMN',
 		@level2name = N'strEDICode'
-	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Default Schedule Store',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICCommodity',
-		@level2type = N'COLUMN',
-		@level2name = N'strScheduleStore'
-	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Discount',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICCommodity',
-		@level2type = N'COLUMN',
-		@level2name = N'strScheduleDiscount'
-	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Text Purchase',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICCommodity',
-		@level2type = N'COLUMN',
-		@level2name = N'strTextPurchase'
-	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Text Sales',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICCommodity',
-		@level2type = N'COLUMN',
-		@level2name = N'strTextSales'
-	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Text Fees',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICCommodity',
-		@level2type = N'COLUMN',
-		@level2name = N'strTextFees'
-	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'AG Item Number',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICCommodity',
-		@level2type = N'COLUMN',
-		@level2name = N'strAGItemNumber'
-	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Scale Auto Distribution Default',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICCommodity',
-		@level2type = N'COLUMN',
-		@level2name = N'strScaleAutoDist	'
-	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Require Load Number at Kiosk',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICCommodity',
-		@level2type = N'COLUMN',
-		@level2name = N'ysnRequireLoadNumber'
-	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Allow Variety',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICCommodity',
-		@level2type = N'COLUMN',
-		@level2name = N'ysnAllowVariety'
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Allow Load Contracts',
