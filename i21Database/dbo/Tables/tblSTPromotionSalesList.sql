@@ -9,7 +9,7 @@
     [strPromoReason] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intPromoUnits] INT NULL, 
     [dblPromoPrice] NUMERIC(18, 6) NULL, 
-    [intPromoFeeType] INT NOT NULL, 
+    [intPromoFeeType] INT NULL, 
     [intRegProdId] INT NULL, 
 	[strProductCode] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL,
     [dtmPromoBegPeriod] DATETIME NULL, 
