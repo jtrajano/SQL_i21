@@ -2,6 +2,7 @@
 	intScheduleWorkOrderDetailId INT NOT NULL identity(1, 1)
 	,intScheduleWorkOrderId INT NOT NULL
 	,intWorkOrderId INT NOT NULL
+	,intScheduleId INT NOT NULL
 	,dtmPlannedStartDate DATETIME NOT NULL
 	,dtmPlannedEndDate DATETIME NOT NULL
 	,intPlannedShiftId INT NOT NULL
@@ -18,4 +19,5 @@
 	,CONSTRAINT [FK_tblMFScheduleWorkOrderDetail_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY (intWorkOrderId) REFERENCES [dbo].[tblMFWorkOrder](intWorkOrderId)
 	,CONSTRAINT [FK_tblMFScheduleWorkOrderDetail_tblMFScheduleCalendar_intCalendarDetailId] FOREIGN KEY (intCalendarDetailId) REFERENCES [dbo].[tblMFScheduleCalendarDetail](intCalendarDetailId)
 	,CONSTRAINT [FK_tblMFScheduleWorkOrderDetail_tblMFShift_intShiftId] FOREIGN KEY (intPlannedShiftId) REFERENCES [dbo].[tblMFShift](intShiftId)
+	,CONSTRAINT [FK_tblMFScheduleWorkOrderDetail_tblMFSchedule_intScheduleId] FOREIGN KEY (intScheduleId) REFERENCES [dbo].[tblMFSchedule](intScheduleId) 
 	)
