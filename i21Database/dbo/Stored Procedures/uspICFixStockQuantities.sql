@@ -35,8 +35,8 @@ USING (
 				,ItemTransactions.intItemLocationId
 				,Qty =	SUM (
 							CASE	WHEN Lot.intLotId IS NOT NULL AND Lot.intItemUOMId <> Lot.intWeightUOMId THEN
-										CASE	WHEN Lot.intItemUOMId = ItemTransactions.intItemUOMId THEN 
-													-- Get the actual weight and convert it to stock unit  
+										CASE	WHEN Lot.intItemUOMId = ItemTransactions.intItemUOMId AND ISNULL(Lot.dblWeightPerQty, 0) <> 0 THEN 
+													-- Get the actual weight and convert it to stock unit  													
 													dbo.fnCalculateStockUnitQty(ItemTransactions.dblQty * Lot.dblWeightPerQty, WeightUOM.dblUnitQty) 
 												ELSE
 													-- the qty is already in weight, then convert the weight to stock unit. 
@@ -101,7 +101,22 @@ USING (
 				,ItemTransactions.intItemLocationId
 				,ItemTransactions.intSubLocationId
 				,ItemTransactions.intStorageLocationId
-				,Qty = SUM(ItemTransactions.dblQty)
+				,Qty = --SUM(ItemTransactions.dblQty)
+						SUM (
+							CASE	WHEN Lot.intLotId IS NOT NULL AND Lot.intItemUOMId <> Lot.intWeightUOMId THEN
+										CASE	WHEN Lot.intItemUOMId = ItemTransactions.intItemUOMId AND ISNULL(Lot.dblWeightPerQty, 0) <> 0 THEN 
+													-- Get the actual weight and convert it to stock unit  													
+													dbo.fnCalculateStockUnitQty(ItemTransactions.dblQty * Lot.dblWeightPerQty, WeightUOM.dblUnitQty) 
+												ELSE
+													-- the qty is already in weight, then convert the weight to stock unit. 
+													dbo.fnCalculateStockUnitQty(ItemTransactions.dblQty, WeightUOM.dblUnitQty) 
+										END 
+									ELSE
+										dbo.fnCalculateStockUnitQty(ItemTransactions.dblQty, ItemTransactions.dblUOMQty) 
+							END				
+						)
+
+
 		FROM	dbo.tblICInventoryTransaction ItemTransactions LEFT JOIN tblICLot Lot
 					ON ItemTransactions.intLotId = Lot.intLotId
 				LEFT JOIN tblICItemUOM LotItemUOM

@@ -28,13 +28,14 @@ DECLARE @strItemNo AS NVARCHAR(50)
 
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType 
+		,@adjustmentTypeRequiresGLEntries AS BIT 
 
 -- Ensure ysnPost is not NULL  
 SET @ysnPost = ISNULL(@ysnPost, 0)  
  
 -- Create the type of lot numbers
 DECLARE @LotType_Manual AS INT = 1
-	,@LotType_Serial AS INT = 2
+		,@LotType_Serial AS INT = 2
 
 DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
 		,@ADJUSTMENT_TYPE_UOMChange AS INT = 2
@@ -131,12 +132,20 @@ END
 EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT   
 IF @@ERROR <> 0 GOTO Post_Exit    
 
+-- Determine if Adjustment requires costing and GL entries. 
+SELECT @adjustmentTypeRequiresGLEntries = 1
+WHERE 	@adjustmentType IN (
+			@ADJUSTMENT_TYPE_QuantityChange
+			, @ADJUSTMENT_TYPE_SplitLot
+			, @ADJUSTMENT_TYPE_LotMerge
+			, @ADJUSTMENT_TYPE_LotMove
+		)
+
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
 --------------------------------------------------------------------------------------------  
 BEGIN TRAN @TransactionName
 SAVE TRAN @TransactionName
-
 
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
@@ -345,12 +354,7 @@ BEGIN
 	-----------------------------------
 	--  Call the costing routine 
 	-----------------------------------
-	IF @adjustmentType IN (
-		@ADJUSTMENT_TYPE_QuantityChange
-		, @ADJUSTMENT_TYPE_SplitLot
-		, @ADJUSTMENT_TYPE_LotMerge
-		, @ADJUSTMENT_TYPE_LotMove
-	)
+	IF @adjustmentTypeRequiresGLEntries = 1
 	BEGIN 
 		INSERT INTO @GLEntries (
 				[dtmDate] 
@@ -494,7 +498,7 @@ END
 IF @ysnRecap = 0 
 BEGIN 
 	-- If there are items for adjust, expect it to have g/l entries. 
-	IF EXISTS (SELECT TOP 1 1 FROM @ItemsForAdjust) 
+	IF @adjustmentTypeRequiresGLEntries = 1
 	BEGIN 
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 	END
