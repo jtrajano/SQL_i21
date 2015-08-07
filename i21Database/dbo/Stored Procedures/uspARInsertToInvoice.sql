@@ -194,6 +194,7 @@ BEGIN
 	
 	UPDATE tblSOSalesOrder SET strOrderStatus = 'Closed', ysnProcessed = 1 WHERE intSalesOrderId = @SalesOrderId
 	
-	
+	EXEC dbo.[uspARUpdateCommitted] @NewInvoiceId, 0
+
 	SET @InvoiceId  = @NewInvoiceId
 END

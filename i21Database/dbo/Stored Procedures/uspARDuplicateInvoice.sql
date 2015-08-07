@@ -138,8 +138,8 @@ BEGIN
 				,[intItemId]				--[intItemId]
 				,[strItemDescription]		--[strItemDescription]
 				,[intItemUOMId]				--[intItemUOMId]
-				,[dblQtyOrdered]			--[dblQtyOrdered]
-				,[dblQtyOrdered]			--[dblQtyShipped]
+				,[dblQtyShipped]			--[dblQtyOrdered]
+				,[dblQtyShipped]			--[dblQtyShipped]
 				,[dblDiscount] 				--[[dblDiscount]]
 				,[dblPrice]					--[dblPrice]
 				,[dblTotalTax]				--[dblTotalTax]
@@ -198,6 +198,8 @@ BEGIN
 		END		
 
 	SET  @NewInvoiceNumber = (SELECT strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @NewId)
+
+	EXEC dbo.[uspARUpdateCommitted] @NewId, 0
 
 	Return @NewId
 END

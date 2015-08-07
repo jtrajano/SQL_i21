@@ -26,7 +26,7 @@ USING (
 -- If matched, update the On-Order qty 
 WHEN MATCHED THEN 
 	UPDATE 
-	SET		dblOrderCommitted = CASE WHEN ISNULL(ItemStock.dblOnOrder, 0) + Source_Query.Aggregrate_OrderCommitted < 0 THEN 0 ELSE ISNULL(ItemStock.dblOnOrder, 0) + Source_Query.Aggregrate_OrderCommitted END 
+	SET		dblOrderCommitted = CASE WHEN ISNULL(ItemStock.dblOrderCommitted, 0) + Source_Query.Aggregrate_OrderCommitted < 0 THEN 0 ELSE ISNULL(ItemStock.dblOrderCommitted, 0) + Source_Query.Aggregrate_OrderCommitted END 
 
 -- If none is found, insert a new item stock record
 WHEN NOT MATCHED THEN 
@@ -76,7 +76,7 @@ USING (
 -- If matched, update the On-Order qty 
 WHEN MATCHED THEN 
 	UPDATE 
-	SET		dblOrderCommitted = CASE WHEN ISNULL(ItemStockUOM.dblOnOrder, 0) + Source_Query.Aggregrate_OrderCommitted < 0 THEN 0 ELSE ISNULL(ItemStockUOM.dblOnOrder, 0) + Source_Query.Aggregrate_OrderCommitted END 
+	SET		dblOrderCommitted = CASE WHEN ISNULL(ItemStockUOM.dblOrderCommitted, 0) + Source_Query.Aggregrate_OrderCommitted < 0 THEN 0 ELSE ISNULL(ItemStockUOM.dblOrderCommitted, 0) + Source_Query.Aggregrate_OrderCommitted END 
 
 -- If none is found, insert a new item stock record
 WHEN NOT MATCHED THEN 
