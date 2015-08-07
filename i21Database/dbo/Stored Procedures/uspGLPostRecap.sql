@@ -16,7 +16,7 @@ DELETE tblGLDetailRecap
 FROM	tblGLDetailRecap 
 WHERE	strTransactionId = @strTransactionId
 		AND intTransactionId = @intTransactionId
-		AND strCode = @strCode
+		--AND strCode = @strCode
 
 IF NOT EXISTS (SELECT TOP 1 1 FROM @RecapTable)
 BEGIN 
