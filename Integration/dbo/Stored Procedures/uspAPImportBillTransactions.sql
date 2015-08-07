@@ -603,7 +603,10 @@ BEGIN
 								AND C2.aptrx_trans_type = C.apegl_trx_ind)
 					ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.aptrx_ivc_no
 					AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.aptrx_vnd_no
-					ORDER BY C.apegl_dist_no
+				WHERE CONVERT(DATE, CAST(C2.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
+				 AND C2.aptrx_trans_type IN (''I'',''C'',''A'')
+				 AND C2.aptrx_orig_amt != 0
+				ORDER BY C.apegl_dist_no
 			--UNION
 			--SELECT 
 			--	A.intBillId,
