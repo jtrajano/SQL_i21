@@ -563,7 +563,7 @@ IF @post = 1
 				,IST.intItemLocationId
 				,Detail.intItemUOMId  
 				,Header.dtmShipDate
-				,(Detail.dblQtyShipped * ItemUOM.dblUnitQty) * (CASE WHEN Header.strTransactionType = 'Invoice' THEN -1 ELSE 1 END)
+				,Detail.dblQtyShipped * (CASE WHEN Header.strTransactionType = 'Invoice' THEN -1 ELSE 1 END)
 				,ItemUOM.dblUnitQty
 				,IST.dblLastCost
 				,Detail.dblPrice 
