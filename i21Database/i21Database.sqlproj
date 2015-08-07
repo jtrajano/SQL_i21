@@ -161,6 +161,7 @@
     <Folder Include="Scripts\Utility\IC" />
     <Folder Include="Scripts\Utility\IC\IC-1024" />
     <Folder Include="Scripts\Utility\IC\IC-1090" />
+    <Folder Include="Scripts\Utility\IC\IC-1092" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -2202,6 +2203,15 @@
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleOverflowReport.sql" />
     <Build Include="dbo\Views\vyuGLJournalDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateFiscalYearStatus.sql" />
+    <None Include="Scripts\Utility\IC\IC-1024\Fix the item average cost.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateBillStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseCommittedQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLPostRecap.sql" />
+    <None Include="Scripts\Utility\IC\IC-1092\Fix Inventory Adjustment Cost for Outgoing stocks.sql" />
+    <None Include="Scripts\Utility\IC\IC-1092\Fix Inventory Adjustments.sql" />
+    <None Include="Scripts\Utility\IC\IC-1092\Fix missing GL entries for Inventory Adj posting.sql" />
+    <None Include="Scripts\Utility\IC\IC-1092\Fix the Inventory Lot Out table.sql" />
+    <None Include="Scripts\Utility\IC\IC-1092\Fix the Lot Qty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

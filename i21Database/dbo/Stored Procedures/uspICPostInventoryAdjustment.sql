@@ -466,15 +466,14 @@ END
 --------------------------------------------------------------------------------------------  
 IF	@ysnRecap = 1	
 BEGIN 
-	IF @adjustmentType IN (
-		@ADJUSTMENT_TYPE_QuantityChange
-		, @ADJUSTMENT_TYPE_SplitLot
-		, @ADJUSTMENT_TYPE_LotMerge
-		, @ADJUSTMENT_TYPE_LotMove
-	)
+	IF @adjustmentTypeRequiresGLEntries = 1
 	BEGIN 
 		ROLLBACK TRAN @TransactionName
-		EXEC dbo.uspCMPostRecap @GLEntries
+		EXEC dbo.uspGLPostRecap 
+				@GLEntries
+				,@intTransactionId
+				,@strTransactionId
+				,'IC'
 		COMMIT TRAN @TransactionName
 	END 
 	ELSE 
