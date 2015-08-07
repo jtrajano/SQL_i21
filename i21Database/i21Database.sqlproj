@@ -2199,8 +2199,7 @@
     <Build Include="dbo\Stored Procedures\uspPODuplicate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheetHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspTRPostingValidation.sql" />
-    <Build Include="dbo\Views\vyuGLJournalDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspARValidatePendingSOItems.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleOverflowReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2257,6 +2256,10 @@
     <None Include="Scripts\Post-Deployment\SM\SMDataFixes.sql" />
     <None Include="Scripts\Post-Deployment\EM\011_FixEntityLocationNullTerms.sql" />
     <None Include="i21Database2014.publish.publish.xml" />
+    <None Include="Scripts\Post-Deployment\CM\Reports\CheckVoucherMiddleOverflow.sql" />
+    <None Include="Scripts\Post-Deployment\CM\Reports\SubReports\CheckVoucherMiddleSubReportAPPaymentOverflow.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReportAPPaymentOverflow.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMCheckPrint_GetCheckOverflow.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

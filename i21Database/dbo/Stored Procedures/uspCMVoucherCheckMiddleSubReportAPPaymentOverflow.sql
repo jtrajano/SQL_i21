@@ -1,7 +1,7 @@
 ﻿/*  
- This stored procedure is used as data source for "Check Voucher Middle Sub Report AP Payment"
+ This stored procedure is used as data source in the Voucher Check Middle AP Sub Report Overflow 
 */  
-CREATE PROCEDURE uspCMVoucherCheckMiddleSubReportAPPayment  
+CREATE PROCEDURE [dbo].[uspCMVoucherCheckMiddleSubReportAPPaymentOverflow]
  @xmlParam NVARCHAR(MAX) = NULL  
 AS  
   
@@ -26,7 +26,7 @@ DECLARE @BANK_DEPOSIT INT = 1
   ,@ORIGIN_EFT AS INT = 13  
   ,@ORIGIN_WITHDRAWAL AS INT = 14  
   ,@ORIGIN_WIRE AS INT = 15  
-  ,@AP_PAYMENT AS INT = 16
+  ,@AP_PAYMENT AS INT = 16  
   ,@BANK_STMT_IMPORT AS INT = 17
   ,@AR_PAYMENT AS INT = 18
   ,@VOID_CHECK AS INT = 19
@@ -56,7 +56,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
  SET @xmlParam = NULL   
   
 -- Declare the variables.  
-DECLARE @intTransactionIdFrom AS INT  
+DECLARE @intTransactionIdFrom AS INT    
   
   -- Declare the variables for the XML parameter  
   ,@xmlDocumentId AS INT  
@@ -98,23 +98,44 @@ WHERE [fieldname] = 'intTransactionId'
   
 -- Sanitize the parameters  
 SET @intTransactionIdFrom = CASE WHEN ISNULL(@intTransactionIdFrom, 0) = 0 THEN NULL ELSE @intTransactionIdFrom END  
-  
+
 -- Report Query:  
-SELECT TOP 10 
-		intTransactionId = F.intTransactionId
-		,strBillId = BILL.strBillId
-		,strInvoice = BILL.strVendorOrderNumber
-		,dtmDate = BILL.dtmBillDate
-		,strComment = SUBSTRING(BILL.strComment,1,25)
-		,dblAmount = BILL.dblTotal
-		,dblDiscount = PYMTDetail.dblDiscount
-		,dblNet = PYMTDetail.dblPayment
-FROM	[dbo].[tblCMBankTransaction] F INNER JOIN [dbo].[tblAPPayment] PYMT
-			ON F.strTransactionId = PYMT.strPaymentRecordNum
-		INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail
-			ON PYMT.intPaymentId = PYMTDetail.intPaymentId
-		INNER JOIN [dbo].[tblAPBill] BILL
-			ON PYMTDetail.intBillId = BILL.intBillId
-WHERE	F.intTransactionId = ISNULL(@intTransactionIdFrom, F.intTransactionId)
-		AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK)
-ORDER BY BILL.strBillId
+SELECT 
+		intTransactionId
+		,strBillId
+		,strInvoice
+		,dtmDate
+		,strComment
+		,dblAmount
+		,dblDiscount
+		,dblNet
+		,strPaymentRecordNum
+		,dblTotalAmount
+		,dtmCheckDate
+		,strCheckNumber
+ FROM 
+(
+	SELECT 
+			intTransactionId = F.intTransactionId
+			,strBillId = BILL.strBillId
+			,strInvoice = BILL.strVendorOrderNumber
+			,dtmDate = BILL.dtmBillDate
+			,strComment = SUBSTRING(BILL.strComment,1,25)
+			,dblAmount = BILL.dblTotal
+			,dblDiscount = PYMTDetail.dblDiscount
+			,dblNet = PYMTDetail.dblPayment
+			,strPaymentRecordNum  = PYMT.strPaymentRecordNum
+			,dblTotalAmount = F.dblAmount
+			,dtmCheckDate = F.dtmDate
+			,strCheckNumber = F.strReferenceNo
+			,ROW_NUMBER() OVER (ORDER BY BILL.strBillId ASC) AS [row_number]
+	FROM	[dbo].[tblCMBankTransaction] F INNER JOIN [dbo].[tblAPPayment] PYMT
+				ON F.strTransactionId = PYMT.strPaymentRecordNum
+			INNER JOIN [dbo].[tblAPPaymentDetail] PYMTDetail
+				ON PYMT.intPaymentId = PYMTDetail.intPaymentId
+			INNER JOIN [dbo].[tblAPBill] BILL
+				ON PYMTDetail.intBillId = BILL.intBillId	
+	WHERE	F.intTransactionId = @intTransactionIdFrom
+			AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK)
+) Data
+WHERE [row_number] > 10
