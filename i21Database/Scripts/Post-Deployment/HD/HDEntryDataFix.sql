@@ -226,6 +226,7 @@ GO
 
 GO
 	PRINT N'End updating tblHDTicket Customer Id.'
+	/*
 	PRINT N'Start fixing tblHDTicket Due Date.'
 GO
 
@@ -233,6 +234,7 @@ GO
 
 GO
 	PRINT N'End fixing tblHDTicket Due Date.'
+	*/
 	PRINT N'Start fixing Help Desk Settings.'
 GO
 

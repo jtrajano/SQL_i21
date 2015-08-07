@@ -8,6 +8,7 @@
 	[strFontColor] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strBackColor] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intSort] [int] NULL,
+	[intTurnAroundDays] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
  CONSTRAINT [PK_tblHDTicketPriority] PRIMARY KEY CLUSTERED ([intTicketPriorityId] ASC),
  CONSTRAINT [UNQ_tblHDTicketPriority] UNIQUE ([strPriority])
@@ -94,3 +95,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblHDTicketPriority',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Turn Around Days',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblHDTicketPriority',
+    @level2type = N'COLUMN',
+    @level2name = N'intTurnAroundDays'
