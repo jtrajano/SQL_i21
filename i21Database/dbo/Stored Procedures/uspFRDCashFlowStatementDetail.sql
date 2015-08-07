@@ -221,49 +221,18 @@ BEGIN
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1
 
-				DECLARE @strRelatedRowsHidden NVARCHAR(MAX) = ''
+				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '     Current Year Earnings', 'Filter Accounts', 'Credit', 'Column', '', '[Type]  =  ''Revenue'' Or [Type]  =  ''Expense''', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort
+				SET @intRowDetailId = (SELECT MAX(intRowDetailId) FROM tblFRRowDesign WHERE intRowId =  @intRowId)
+				EXEC [dbo].[uspFRDCreateRowFilter] @intRowDetailId, @intRowId, @intRefNo, 'Type', '=', 'Revenue', '', 'Or'
+				EXEC [dbo].[uspFRDCreateRowFilter] @intRowDetailId, @intRowId, @intRefNo, 'Type', '=', 'Expense', '', 'Or'
 
-				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '     Total Revenue', 'Hidden', @BalanceSide, 'Column', '', '[Type]  =  ''Revenue''', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort
-				INSERT INTO #tmpRelatedRowsHidden (intRefNo, strAction) VALUES (@intRefNo, '-')
-
-				SET @strRelatedRowsHidden =  @strRelatedRowsHidden + 'R' + CAST(@intRefNo as NVARCHAR(25)) + ' - '					
-				SET @intRefNo = @intRefNo + 1
-				SET @intSort = @intSort + 1	
-				
-				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '     Total Expense', 'Hidden', @BalanceSide, 'Column', '', '[Type]  =  ''Expense''', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort
-				INSERT INTO #tmpRelatedRowsHidden (intRefNo, strAction) VALUES (@intRefNo, '+')
-
-				SET @strRelatedRowsHidden =  @strRelatedRowsHidden + 'R' + CAST(@intRefNo as NVARCHAR(25))
-				SET @intRefNo = @intRefNo + 1
-				SET @intSort = @intSort + 1								
-
-				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '     Current Year Earnings', 'Row Calculation', '', '', @strRelatedRowsHidden, '', 1, 1, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort	
-				
-				SET @intRowDetailId = (SELECT MAX(intRowDetailId) FROM tblFRRowDesign WHERE intRowId =  @intRowId)				
 				SET @intRowDetailId_CY = @intRowDetailId
 				SET @intRefNo_CY = @intRefNo
 
-				WHILE EXISTS(SELECT 1 FROM #tmpRelatedRowsHidden)
-				BEGIN
-					SET @intSort_Calculation = 1
-					SET @cntID = 0 
-					SET @intRefNo_Calculation = 0
-					SET @strAction = ''
-					SET @intRowDetailRefNo = 0
-					
-					SELECT TOP 1 @cntID = cntID, @intRefNo_Calculation = intRefNo, @strAction = strAction FROM #tmpRelatedRowsHidden ORDER BY cntID
-					SELECT TOP 1 @intRowDetailRefNo = intRowDetailId FROM tblFRRowDesign WHERE intRowId = @intRowId AND intRefNo = @intRefNo_Calculation
-
-					EXEC [dbo].[uspFRDCreateRowCalculation] @intRowDetailId, @intRowDetailRefNo, @intRowId, @intRefNo, @intRefNo_Calculation, @strAction, @intSort_Calculation	
-
-					DELETE FROM #tmpRelatedRowsHidden WHERE cntID = @cntID
-				END
-
 				INSERT INTO #tmpRelatedRows (intRefNo, strAction) VALUES (@intRefNo, '+')
-
 				SET @strRelatedRows =  @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25))
 				SET @intRefNo = @intRefNo + 1
-				SET @intSort = @intSort + 1		
+				SET @intSort = @intSort + 1					
 
 				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Row Calculation', '', '', @strRelatedRows, '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, @intSort	
 
@@ -327,7 +296,7 @@ BEGIN
 	SET @strAccountType = ''
 
 	SELECT TOP 1 @strAccountType = CashFlowType, @BalanceSide = BalanceSide FROM #TempCashFlow ORDER BY cntID
-	SELECT * INTO #TempGLAccountCashFlow FROM vyuGLAccountView where intAccountId IN (SELECT intAccountId FROM tblGLAccount WHERE strCashFlow = @strAccountType) ORDER BY strAccountId
+	SELECT * INTO #TempGLAccountCashFlow FROM vyuGLAccountView where intAccountId IN (SELECT intAccountId FROM tblGLAccount WHERE strCashFlow = @strAccountType) AND strAccountType NOT IN ('Expense','Revenue') ORDER BY strAccountId
 	
 	IF(@strAccountType = 'Operations')
 	BEGIN
