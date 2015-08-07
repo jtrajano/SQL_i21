@@ -65,6 +65,7 @@ BEGIN
 			AND Header.intCompanyLocationId = IST.intLocationId 
 	WHERE 
 		Header.intInvoiceId = @InvoiceId
+		AND Header.strTransactionType = 'Invoice'
 		AND (Detail.intInventoryShipmentId IS NULL OR Detail.intInventoryShipmentId = 0)
 
 	EXEC uspICIncreaseOrderCommitted @items

@@ -225,4 +225,6 @@ BEGIN
 	UPDATE tblSOSalesOrder SET ysnProcessed = 1 WHERE intSalesOrderId = @SalesOrderId
 
 	SET @NewSalesOrderId = @NewTransactionId
+
+	EXEC dbo.[uspSOUpdateCommitted] @NewSalesOrderId, 0
 END

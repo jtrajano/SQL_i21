@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspSOUpdateCommitted]
 	@SalesOrderId INT,
-	@Negate BIT
+	@Negate BIT,
+	@QuantityToPost NUMERIC (18, 6) = NULL
 AS
 BEGIN
 
@@ -39,7 +40,7 @@ BEGIN
 		,[dtmDate]					=	Header.dtmDate
 		,[dblQty]					=	(CASE WHEN Header.strOrderStatus IN ('Short Closed', 'Cancellled')
 											THEN 0
-											ELSE Detail.dblQtyOrdered - Detail.dblQtyShipped
+											ELSE (CASE WHEN @QuantityToPost IS NULL OR @QuantityToPost = 0 THEN Detail.dblQtyOrdered - Detail.dblQtyShipped ELSE @QuantityToPost END) --Detail.dblQtyShipped 
 										END) * (CASE WHEN @Negate = 1 THEN -1 ELSE 1 END)										
 		,[dblUOMQty]				=	ItemUOM.dblUnitQty
 		,[dblCost]					=	IST.dblLastCost
