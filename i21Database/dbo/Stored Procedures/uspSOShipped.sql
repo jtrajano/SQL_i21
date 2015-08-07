@@ -12,7 +12,7 @@ BEGIN
 	SELECT TOP 1 @intTransactionId = intShipmentId FROM @ItemsFromInventoryShipment
 
 	INSERT INTO @OrderToUpdate(intSalesOrderId, dblQuantity)
-    SELECT DISTINCT intSourceId, dblQuantity 
+    SELECT DISTINCT intOrderId, dblQuantity 
 		FROM tblICInventoryShipmentItem 
 	WHERE intInventoryShipmentId = @intTransactionId
 	
