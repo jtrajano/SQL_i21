@@ -33,6 +33,7 @@ BEGIN
 	DECLARE @withholdAmount NUMERIC(18,6)
 	DECLARE @withholdPercent NUMERIC(18,6)
 	DECLARE @discountAmount NUMERIC(18,6) = 0;
+
 	DECLARE @paymentMethodId INT = @paymentMethod
 	DECLARE @intBankAccountId INT = @bankAccount;
 	DECLARE @vendorWithhold BIT = 0;
@@ -63,9 +64,11 @@ BEGIN
 	--Make sure there is bank account to use
 	IF @intBankAccountId IS NULL
 	BEGIN
+
 		SELECT @intGLBankAccountId = B.intCashAccount FROM tblSMUserSecurity A 
 					INNER JOIN tblSMCompanyLocation B ON A.intCompanyLocationId = B.intCompanyLocationId
 					WHERE A.intEntityId = @userId
+
 		SELECT TOP 1 @intBankAccountId = intBankAccountId FROM tblCMBankAccount WHERE intGLAccountId = @intGLBankAccountId
 
 		IF @intBankAccountId IS NULL
@@ -181,8 +184,8 @@ BEGIN
 		[intAccountId]	= A.intAccountId,
 		[dblDiscount]	= A.dblDiscount,
 		[dblWithheld]	= CASE WHEN @withholdPercent > 0 AND A.dblWithheld <= 0 THEN CAST(ROUND(A.dblTotal * (@withholdPercent / 100), 6) AS NUMERIC(18,6)) ELSE A.dblWithheld END,
-		[dblAmountDue]	= A.dblAmountDue, -- (A.dblTotal - A.dblDiscount - A.dblPayment),
-		[dblPayment]	= 0, --A.dblTotal - A.dblDiscount - A.dblPayment,
+		[dblAmountDue]	= A.dblAmountDue,
+		[dblPayment]	= A.dblTotal - A.dblDiscount - A.dblPayment,
 		[dblInterest]	= 0, --TODO
 		[dblTotal]		= A.dblTotal
 	FROM tblAPBill A
