@@ -456,7 +456,7 @@ Declare @tblMoreOverCommitQty table
 
 Insert Into @tblMoreOverCommitQty(intLotId,intItemId,strLotNo,strItemNo,dblAvailableQty,dblSelectedQty,dblOverCommitQty,dblWeightPerUnit,strUOM)
 Select intLotId,intItemId,strLotNo,strItemNo,dblAvailableQty,dblSelectedQty,dblOverCommitQty,dblWeightPerUnit,strUOM 
-From  @tblAvailableQty where dblOverCommitQty > dblWeightPerUnit
+From  @tblAvailableQty where dblOverCommitQty > dblWeightPerUnit AND dblOverCommitQty > 0
 
 If (Select Count(1) From @tblMoreOverCommitQty)>0
 Begin
@@ -519,7 +519,7 @@ Declare @tblLessOverCommitQty table
 
 Insert Into @tblLessOverCommitQty(intLotId,intItemId,strLotNo,strItemNo,dblAvailableQty,dblSelectedQty,dblOverCommitQty,dblWeightPerUnit,strUOM)
 Select intLotId,intItemId,strLotNo,strItemNo,dblAvailableQty,dblSelectedQty,dblOverCommitQty,dblWeightPerUnit,strUOM 
-From  @tblAvailableQty where dblOverCommitQty < dblWeightPerUnit
+From  @tblAvailableQty where dblOverCommitQty < dblWeightPerUnit AND dblOverCommitQty > 0
 
 If (Select Count(1) From @tblLessOverCommitQty)>0
 Begin
