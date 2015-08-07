@@ -72,10 +72,8 @@ BEGIN
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
-			AND (
-				Detail.dblNewQuantity IS NULL 
-				OR ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) = 0 
-			)
+			AND ISNULL(Detail.dblQuantity, 0) = 0
+			AND ISNULL(Detail.dblNewQuantity, 0) = 0
 	
 	IF @intItemId IS NOT NULL 
 	BEGIN
@@ -84,7 +82,7 @@ BEGIN
 		WHERE intItemId = @intItemId		
 
 		-- 'Please specify the Adjust By Quantity or New Quantity on {Item}.'
-		RAISERROR(51143, 11, 1, @strItemNo);
+		RAISERROR(51131, 11, 1, @strItemNo);
 		GOTO _Exit
 	END
 END 
@@ -143,8 +141,6 @@ BEGIN
 			LEFT JOIN dbo.tblICItemUOM WeightUOM
 				ON Detail.intWeightUOMId = WeightUOM.intItemUOMId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
-			AND Detail.dblNewQuantity IS NOT NULL 
-			AND ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) <> 0 
 
 END
 
