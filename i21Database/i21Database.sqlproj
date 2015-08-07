@@ -2200,6 +2200,7 @@
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheetHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspTRPostingValidation.sql" />
     <Build Include="dbo\Views\vyuGLJournalDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARValidatePendingSOItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
