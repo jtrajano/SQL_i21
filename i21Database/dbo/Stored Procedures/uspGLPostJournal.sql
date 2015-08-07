@@ -173,6 +173,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 				FROM tblGLJournalDetail A 
 					LEFT OUTER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
 				WHERE ISNULL(B.ysnActive, 0) = 0 AND A.intJournalId IN (SELECT intJournalId FROM #tmpPostJournals)
+				AND @strJournalType NOT IN('Origin Journal','Adjusted Origin Journal')
 				UNION
 				SELECT DISTINCT A.intJournalId,
 					'You cannot post this transaction because it has invalid account(s).' AS strMessage
