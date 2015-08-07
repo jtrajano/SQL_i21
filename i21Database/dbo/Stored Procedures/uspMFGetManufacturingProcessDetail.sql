@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspMFGetManufacturingProcessDetail (@strProcessName NVARCHAR(50)='')
+﻿CREATE PROCEDURE uspMFGetManufacturingProcessDetail (@strProcessName NVARCHAR(50)='',@strUserName nvarchar(50)='')
 AS
 BEGIN
 	DECLARE @intCompanyLocationId INT
@@ -11,9 +11,21 @@ BEGIN
 
 	Select @dtmCurrentDate=Getdate()
 
-	SELECT TOP 1 @intCompanyLocationId = intCompanyLocationId
-		,@strLocationName = strLocationName
-	FROM dbo.tblSMCompanyLocation
+	Select @intCompanyLocationId=intCompanyLocationId from tblSMUserSecurity Where strUserName=@strUserName
+
+	IF @intCompanyLocationId IS NULL
+	BEGIN
+		SELECT TOP 1 @intCompanyLocationId = intCompanyLocationId
+			,@strLocationName = strLocationName
+		FROM dbo.tblSMCompanyLocation
+	END
+	ELSE
+	BEGIN
+		SELECT @intCompanyLocationId = intCompanyLocationId
+			,@strLocationName = strLocationName
+		FROM dbo.tblSMCompanyLocation
+		WHERE intCompanyLocationId=@intCompanyLocationId
+	END
 
 	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDate,@intCompanyLocationId) 
 

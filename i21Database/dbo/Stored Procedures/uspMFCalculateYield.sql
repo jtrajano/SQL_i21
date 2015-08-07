@@ -124,6 +124,16 @@ BEGIN TRY
 		AND ri.intRecipeItemTypeId = 2
 		AND ri.ysnConsumptionRequired = 1
 	
+	Update tblMFProductionSummary
+	Set dblCalculatedQuantity=I.dblCalculatedQuantity
+	From tblMFProductionSummary PS
+	JOIN @tblInputItem I on I.intItemId=PS.intItemId
+
+	Update tblMFProductionSummary
+	Set dblCalculatedQuantity=O.dblCalculatedQuantity
+	From tblMFProductionSummary PS
+	JOIN @tblOutputItem O on O.intItemId=PS.intItemId
+
 	UPDATE tblMFProductionSummary
 	SET dblOpeningConversionQuantity = dblOpeningConversionQuantity + (
 			CASE 
