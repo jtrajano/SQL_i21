@@ -24,6 +24,7 @@ BEGIN
 				,U.strUnitMeasure
 				,IU.intUnitMeasureId
 				,L.dtmDateCreated 
+				,L.strLotAlias
 			FROM dbo.tblMFRecipe R
 			JOIN dbo.tblMFRecipeItem RI ON RI.intRecipeId = R.intRecipeId
 				AND R.intItemId = @intItemId
@@ -60,7 +61,8 @@ BEGIN
 				,ISNULL(L.intWeightUOMId,L.intItemUOMId) as intWeightUOMId
 				,U.strUnitMeasure
 				,IU.intUnitMeasureId
-				,L.dtmDateCreated 
+				,L.dtmDateCreated
+				,L.strLotAlias 
 			FROM dbo.tblMFWorkOrderRecipe R
 			JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intRecipeId = R.intRecipeId and RI.intWorkOrderId = R.intWorkOrderId
 				AND R.intWorkOrderId = @intWorkOrderId
