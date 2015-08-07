@@ -88,7 +88,7 @@ END
 IF	@OrderType = @INT_ORDER_TYPE_SALES_ORDER 
 	AND ISNULL(@SourceType, @INT_SOURCE_TYPE_NONE) = @INT_SOURCE_TYPE_NONE
 BEGIN 
-	EXEC dbo.uspSOShipped @ItemsFromInventoryShipment
+	EXEC dbo.uspSOShipped @ItemsFromInventoryShipment, @ysnPost
 	GOTO _Exit;
 END
 

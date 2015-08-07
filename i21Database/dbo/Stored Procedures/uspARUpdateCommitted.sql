@@ -66,7 +66,7 @@ BEGIN
 	WHERE 
 		Header.intInvoiceId = @InvoiceId
 		AND Header.strTransactionType = 'Invoice'
-		AND (Detail.intInventoryShipmentId IS NULL OR Detail.intInventoryShipmentId = 0)
+		AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 
 	EXEC uspICIncreaseOrderCommitted @items
 
