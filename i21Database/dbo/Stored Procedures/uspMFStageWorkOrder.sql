@@ -173,11 +173,12 @@ BEGIN TRY
 
 	SELECT @intConsumptionMethodId = RI.intConsumptionMethodId
 		,@intConsumptionStorageLocationId = RI.intStorageLocationId
-		,@intInputItemId = RI.intItemId
+		--,@intInputItemId = ISNULL(RS.intSubstituteItemId,RI.intItemId)
 	FROM dbo.tblMFWorkOrderRecipeItem RI
+	Left JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS on RS.intRecipeItemId=RI.intRecipeItemId
 	WHERE RI.intWorkOrderId = @intWorkOrderId
 		AND RI.intRecipeItemTypeId = 1
-		AND RI.intItemId = @intInputItemId
+		AND (RI.intItemId = @intInputItemId OR RS.intSubstituteItemId=@intInputItemId)
 
 	Select @intConsumptionSubLocationId=intSubLocationId 
 	From dbo.tblICStorageLocation 
