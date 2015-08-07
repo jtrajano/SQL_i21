@@ -2199,6 +2199,7 @@
     <Build Include="dbo\Stored Procedures\uspPODuplicate.sql" />
     <Build Include="dbo\Stored Procedures\uspMFAutoBlendSheetHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspTRPostingValidation.sql" />
+    <Build Include="dbo\Views\vyuGLJournalDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
