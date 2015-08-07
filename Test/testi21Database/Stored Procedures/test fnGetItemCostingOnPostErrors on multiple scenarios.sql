@@ -166,8 +166,8 @@ BEGIN
 		UNION ALL
 		SELECT	intItemId = -1
 				,intItemLocationId = @WetGrains_DefaultLocation
-				,strText = FORMATMESSAGE(51133)
-				,intErrorCode = 51133
+				,strText = FORMATMESSAGE(51159)
+				,intErrorCode = 51159
 
 		UNION ALL
 		SELECT	intItemId = -1

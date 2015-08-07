@@ -43,8 +43,8 @@ RETURN (
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = FORMATMESSAGE(51133)
-				,intErrorCode = 51133
+				,strText = FORMATMESSAGE(51159)
+				,intErrorCode = 51159
 		WHERE	NOT EXISTS (
 					SELECT TOP 1 1 
 					FROM	dbo.tblICItemUOM 

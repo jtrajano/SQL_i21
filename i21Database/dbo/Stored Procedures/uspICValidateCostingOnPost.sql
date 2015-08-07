@@ -61,9 +61,9 @@ BEGIN
 END 
 
 -- Check for invalid item UOM 
-IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 51133)
+IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 51159)
 BEGIN 
-	RAISERROR(51133, 11, 1)
+	RAISERROR(51159, 11, 1)
 	GOTO _Exit
 END 
 
