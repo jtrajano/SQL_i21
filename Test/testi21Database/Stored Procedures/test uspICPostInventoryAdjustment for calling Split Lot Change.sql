@@ -13,12 +13,9 @@ BEGIN
 	BEGIN 
 		DECLARE @ysnPost AS BIT = 1
 		DECLARE @ysnRecap AS BIT = 0
-		DECLARE @strTransactionId AS NVARCHAR(40) = 'ADJ-1'
+		DECLARE @strTransactionId AS NVARCHAR(40) = 'ADJ-7'
 		DECLARE @intUserId AS INT = 1
 		DECLARE @intEntityId AS INT = 1
-
-		-- Add a spy for uspICPostInventoryAdjustmentSplitLotChange
-		EXEC tSQLt.SpyProcedure 'dbo.uspICPostInventoryAdjustmentSplitLotChange';	
 
 		EXEC [testi21Database].[Fake data for inventory adjustment table];
 
@@ -26,6 +23,11 @@ BEGIN
 		UPDATE dbo.tblICInventoryAdjustment
 		SET intAdjustmentType = @ADJUSTMENT_TYPE_LOT_ID_CHANGE					
 	END 
+
+	-- Assert
+	BEGIN
+		EXEC tSQLt.ExpectNoException;
+	END
 
 	-- Act
 	BEGIN 
@@ -36,11 +38,4 @@ BEGIN
 			,@intUserId
 			,@intEntityId
 	END 
-
-	-- Assert
-	BEGIN 
-		--Assert uspICPostInventoryAdjustmentSplitLotChange is called 
-		IF @ysnPost = 1 AND NOT EXISTS (SELECT 1 FROM dbo.uspICPostInventoryAdjustmentSplitLotChange_SpyProcedureLog)
-			EXEC tSQLt.Fail 'A helper stored procedure uspICPostInventoryAdjustmentSplitLotChange is expected to be called.'
-	END
-END 
+END  
