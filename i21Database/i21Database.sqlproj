@@ -2217,6 +2217,7 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateInvoiceIntegrations.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateCommitted.sql" />
     <Build Include="dbo\Stored Procedures\uspARPostInvoiceIntegrations.sql" />
+    <Build Include="dbo\Views\vyuLGAllocatedContracts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
