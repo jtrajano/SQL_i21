@@ -2217,6 +2217,7 @@
     <Build Include="dbo\Stored Procedures\uspARPostInvoiceIntegrations.sql" />
     <Build Include="dbo\Views\vyuLGAllocatedContracts.sql" />
     <Build Include="dbo\Views\vyuLGAllocationOpenContracts.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGenerateAccountRange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2304,7 +2305,6 @@
     <None Include="Scripts\Post-Deployment\SM\DefaultData\14_CompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountRange.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\15_Module.sql" />
   </ItemGroup>
 </Project>
