@@ -151,7 +151,7 @@
 :r "..\Scripts\AP\FixPaymentCMRecords.sql"
 :r "..\Scripts\AP\FixBillData.sql"
 --:r "..\Scripts\AP\UpdateBillPONumber.sql"
-
+:r "..\dbo\Stored Procedures\uspAPImportVendorContact.sql"
 
 
 -- TAX FORMS

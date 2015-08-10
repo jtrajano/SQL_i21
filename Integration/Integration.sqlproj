@@ -141,6 +141,7 @@
     <None Include="Scripts\NR\uspNRGenerateEFTSchedule.sql" />
     <None Include="Scripts\NR\uspNRGetDetailsForInvoice.sql" />
     <None Include="Scripts\NR\uspNRGetPaymentType.sql" />
+    <None Include="dbo\Stored Procedures\uspAPImportVendorContact.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
