@@ -112,7 +112,7 @@ SET @strmessage = 'Item id is invalid or missing.'
 EXEC sp_addmessage 50027,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50028) EXEC sp_dropmessage 50028, 'us_english'	
-SET @strmessage = 'Item Location is invalid or missing.'
+SET @strmessage = 'Item Location is invalid or missing for %s.'
 EXEC sp_addmessage 50028,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 50029) EXEC sp_dropmessage 50029, 'us_english'	
@@ -702,3 +702,4 @@ EXEC sp_addmessage 51174,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51175) EXEC sp_dropmessage 51175, 'us_english'	
 SET @strmessage = 'There is not enough stocks for %s. Reserved stocks is %s while Lot Qty is %s.'
 EXEC sp_addmessage 51175,11,@strmessage,'us_english','False'
+

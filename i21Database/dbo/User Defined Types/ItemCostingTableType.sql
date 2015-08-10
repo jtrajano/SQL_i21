@@ -5,7 +5,7 @@ CREATE TYPE [dbo].[ItemCostingTableType] AS TABLE
 (
 	[intId] INT IDENTITY PRIMARY KEY CLUSTERED
 	,[intItemId] INT NOT NULL								-- The item. 
-	,[intItemLocationId] INT NOT NULL						-- The location where the item is stored.
+	,[intItemLocationId] INT NULL							-- The location where the item is stored.
 	,[intItemUOMId] INT NOT NULL							-- The UOM used for the item.
 	,[dtmDate] DATETIME NOT NULL							-- The date of the transaction
     ,[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0				-- The quantity of an item in relation to its UOM. For example a box can have 12 pieces of an item. If you have 10 boxes, this parameter must be 10 and not 120 (10 boxes x 12 pieces per box). Positive unit qty means additional stock. Negative unit qty means reduction (selling) of the stock. 

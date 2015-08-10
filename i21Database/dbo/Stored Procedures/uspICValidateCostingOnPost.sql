@@ -28,6 +28,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @strItemNo AS NVARCHAR(50)
+	,@intItemId AS INT 
 
 CREATE TABLE #FoundErrors (
 	intItemId INT
@@ -53,10 +54,18 @@ BEGIN
 	GOTO _Exit
 END 
 
--- Check for invalid location in the item-location setup. 
-IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 50028)
+-- Check for invalid location in the item-location setup.
+SELECT @strItemNo = NULL, @intItemId = NULL 
+SELECT TOP 1 
+		@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+		,@intItemId = Item.intItemId
+FROM	#FoundErrors Errors INNER JOIN tblICItem Item
+			ON Errors.intItemId = Item.intItemId
+WHERE	intErrorCode = 50028
+IF @intItemId IS NOT NULL 
 BEGIN 
-	RAISERROR(50028, 11, 1)
+	-- 'Item Location is invalid or missing for {Item}.'
+	RAISERROR(50028, 11, 1, @strItemNo)
 	GOTO _Exit
 END 
 
@@ -75,13 +84,15 @@ BEGIN
 END 
 
 -- Check for Missing Costing Method
+SELECT @strItemNo = NULL, @intItemId = NULL
 SELECT TOP 1 
 		@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+		,@intItemId = Item.intItemId
 FROM	#FoundErrors Errors INNER JOIN tblICItem Item
 			ON Errors.intItemId = Item.intItemId
 WHERE	intErrorCode = 51091
 
-IF @strItemNo IS NOT NULL 
+IF @intItemId IS NOT NULL 
 BEGIN 
 	-- 'Missing costing method setup for item {Item}.'
 	RAISERROR(51091, 11, 1, @strItemNo)
@@ -89,13 +100,15 @@ BEGIN
 END 
 
 -- Check for "Discontinued" status
+SELECT @strItemNo = NULL, @intItemId = NULL
 SELECT TOP 1 
 		@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+		,@intItemId = Item.intItemId
 FROM	#FoundErrors Errors INNER JOIN tblICItem Item
 			ON Errors.intItemId = Item.intItemId
 WHERE	intErrorCode = 51090
 
-IF @strItemNo IS NOT NULL 
+IF @intItemId IS NOT NULL 
 BEGIN 
 	-- 'The status of {item} is Discontinued.'
 	RAISERROR(51090, 11, 1, @strItemNo)
@@ -103,13 +116,15 @@ BEGIN
 END 
 
 -- Check for the missing Stock Unit UOM 
+SELECT @strItemNo = NULL, @intItemId = NULL
 SELECT TOP 1 
 		@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+		,@intItemId = Item.intItemId
 FROM	#FoundErrors Errors INNER JOIN tblICItem Item
 			ON Errors.intItemId = Item.intItemId
 WHERE	intErrorCode = 51134
 
-IF @strItemNo IS NOT NULL 
+IF @intItemId IS NOT NULL 
 BEGIN 
 	-- 'Item {Item Name} is missing a Stock Unit. Please check the Unit of Measure setup.'
 	RAISERROR(51134, 11, 1, @strItemNo)
