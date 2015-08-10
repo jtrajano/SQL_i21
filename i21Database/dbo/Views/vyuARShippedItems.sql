@@ -282,3 +282,104 @@ WHERE
 		FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
 		WHERE tblARInvoice.[ysnPosted] = 1 AND tblARInvoiceDetail.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped)
 	AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus <> 'Cancelled'
+	
+UNION ALL
+
+SELECT 
+	 ISH.[intEntityCustomerId]
+	,E.[strName]						AS [strCustomerName]
+	,NULL								AS [intSalesOrderId]
+	,NULL								AS [strSalesOrderNumber]
+	,ISH.[dtmShipDate] 					AS [dtmProcessDate]
+	,ISI.[intInventoryShipmentItemId]
+	,ISH.[strShipmentNumber] 
+	,NULL								AS [intSalesOrderDetailId]
+	,ISH.[intShipFromLocationId]		AS [intCompanyLocationId] 
+	,CL.[strLocationName] 
+	,ISH.[intShipToLocationId]			AS [intShipToLocationId]
+	,ISH.[intFreightTermId]
+	,ISI.[intItemId]	
+	,I.[strItemNo] 
+	,I.[strDescription]					AS [strItemDescription]
+	,ISI.[intItemUOMId]
+	,ISI.[intItemUOMId]					AS [intShipmentItemUOMId]
+	,U.[strUnitMeasure]					AS [strShipmentUnitMeasure]
+	,ISI.[dblQuantity]					AS [dblQtyOrdered] 
+	,ISI.[dblQuantity]					AS [dblShipmentQuantity] 
+	,ISI.[dblQuantity]					AS [dblQtyShipped]	
+	,ISI.[dblQuantity]					AS [dblShipmentQtyShipped] 
+	,ISI.[dblQuantity]					AS [dblShipmentQtyShippedTotal]
+	,ISI.[dblQuantity]					AS [dblQtyRemaining]
+	,0.00								AS [dblDiscount] 
+	,ISI.[dblUnitPrice]					AS [dblPrice]
+	,ISI.[dblUnitPrice]					AS [dblShipmentUnitPrice]
+	,0.00								AS [dblTotalTax]
+	,ISI.[dblQuantity] * 
+		ISI.[dblUnitPrice]				AS [dblTotal]
+	,A.[intAccountId]
+	,A.[intCOGSAccountId]
+	,A.[intSalesAccountId]
+	,A.[intInventoryAccountId]
+	,ISI.[intStorageLocationId]
+	,SL.[strName]						AS [strStorageLocationName]
+	,T.[intTermID]
+	,T.[strTerm]
+	,S.[intEntityShipViaId] 
+	,S.[strShipVia]						AS [strShipVia]
+	,SCT.[intTicketNumber]				AS [intTicketNumber]
+	,SCT.[intTicketId]					AS [intTicketId]
+	FROM
+		tblICInventoryShipmentItem ISI
+	INNER JOIN
+		tblICItem I
+			ON ISI.[intItemId] = I.[intItemId]
+	INNER JOIN
+		tblICInventoryShipment ISH
+			ON ISI.[intInventoryShipmentId] = ISH.[intInventoryShipmentId]
+	INNER JOIN
+		tblEntity E
+			ON ISH.[intEntityCustomerId] = E.[intEntityId]
+	LEFT OUTER JOIN
+					(	SELECT TOP 1
+							[intEntityLocationId]
+							,[intEntityId] 
+							,[strCountry]
+							,[strState]
+							,[strCity]
+							,[intTermsId]
+							,[intShipViaId]
+						FROM 
+						tblEntityLocation
+						WHERE
+							ysnDefaultLocation = 1
+					) EL
+						ON ISH.[intEntityCustomerId] = EL.[intEntityId]			
+	LEFT OUTER JOIN
+		tblSMCompanyLocation CL
+			ON ISH.[intShipFromLocationId] = CL.[intCompanyLocationId]
+	LEFT OUTER JOIN
+		tblSMTerm T
+			ON EL.[intTermsId] = T.[intTermID]
+	LEFT OUTER JOIN
+		tblSMShipVia S
+			ON EL.[intShipViaId] = S.[intEntityShipViaId]			
+	LEFT JOIN
+		[tblICItemUOM] IU
+			ON ISI.[intItemUOMId] = IU.[intItemUOMId]
+	LEFT JOIN
+		[tblICUnitMeasure] U
+			ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
+	LEFT OUTER JOIN
+		tblICStorageLocation SL
+			ON ISI.[intStorageLocationId] = SL.[intStorageLocationId]												
+	LEFT OUTER JOIN
+		tblSCTicket SCT
+			ON ISI.[intSourceId] = SCT.[intTicketId]
+	LEFT OUTER JOIN
+		vyuARGetItemAccount A
+			ON ISI.[intItemId] = A.[intItemId]
+			AND ISH.[intShipFromLocationId] = A.[intLocationId] 						 
+	WHERE
+		ISH.[ysnPosted] = 1
+		AND ISH.[intOrderType] <> 2
+		AND ISI.[intInventoryShipmentItemId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intInventoryShipmentItemId],0) FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.[intInvoiceId] = tblARInvoice.[intInvoiceId] WHERE tblARInvoice.[ysnPosted] = 1)
