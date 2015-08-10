@@ -21,15 +21,16 @@ RETURN (
 		WHERE	EXISTS (
 					SELECT	TOP 1 1
 					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation Location
-								ON Item.intItemId = @intItemId
+								ON Item.intItemId = @intItemId								
 								AND Location.intItemLocationId = @intItemLocationId
 							LEFT JOIN dbo.tblICItemStockUOM StockUOM
-								ON StockUOM.intItemId = Item.intItemId
+								ON StockUOM.intItemId = Item.intItemId								
 								AND StockUOM.intItemLocationId = Location.intItemLocationId
 								AND ISNULL(StockUOM.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 								AND ISNULL(StockUOM.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 					WHERE	ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0)  < 0
 							AND Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 						
+							AND StockUOM.intItemUOMId = @intItemUOMId
 				)
 
 		-- Check for negative stocks at the lot table. 
@@ -50,6 +51,7 @@ RETURN (
 							AND Location.intItemLocationId = @intItemLocationId							
 							AND ISNULL(@dblQty, 0) + ISNULL(Lot.dblQty, 0) < 0
 							AND Location.intAllowNegativeInventory = 3						
+							AND Lot.intItemUOMId = @intItemUOMId
 				)
 
 	) AS Query		
