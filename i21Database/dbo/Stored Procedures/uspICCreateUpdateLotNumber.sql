@@ -256,21 +256,21 @@ BEGIN
 	END 
 
 	-- Check if Item and Weight UOM are the same value. 
-	IF @intItemUOMId = @intWeightUOMId
-	BEGIN 
-		SELECT	@strItemNo = strItemNo
-		FROM	dbo.tblICItem Item
-		WHERE	Item.intItemId = @intItemId
+	--IF @intItemUOMId = @intWeightUOMId
+	--BEGIN 
+	--	SELECT	@strItemNo = strItemNo
+	--	FROM	dbo.tblICItem Item
+	--	WHERE	Item.intItemId = @intItemId
 
-		IF @intLotTypeId = @LotType_Serial
-		BEGIN 
-			SET @strLotNumber = '(To be generated)'
-		END 
+	--	IF @intLotTypeId = @LotType_Serial
+	--	BEGIN 
+	--		SET @strLotNumber = '(To be generated)'
+	--	END 
 
-		-- Cannot have the same item and weight UOM. Please remove the weight UOM for {Item} with lot number {Lot Number}.
-		RAISERROR(51145, 11, 1, @strItemNo, @strLotNumber)  
-		RETURN -5; 
-	END 
+	--	-- Cannot have the same item and weight UOM. Please remove the weight UOM for {Item} with lot number {Lot Number}.
+	--	RAISERROR(51145, 11, 1, @strItemNo, @strLotNumber)  
+	--	RETURN -5; 
+	--END 
 
 	-- Upsert (update or insert) the record to the lot master table. 
 	BEGIN  
