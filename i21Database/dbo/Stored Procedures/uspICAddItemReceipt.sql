@@ -139,7 +139,7 @@ BEGIN
 		)
 		SELECT 	TOP 1  
 				strReceiptNumber       = @ReceiptNumber
-				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(GETDATE())
+				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(ISNULL(RawData.dtmDate, GETDATE()))
 				,intEntityVendorId		= RawData.intEntityVendorId
 				,strReceiptType			= RawData.strReceiptType
 				,intSourceType          = RawData.intSourceType
@@ -293,6 +293,141 @@ BEGIN
 				INNER JOIN dbo.tblICUnitMeasure UOM
 					ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId	
 		WHERE RawHeaderData.intId = @intId
+
+		-- Add taxes into the receipt. 
+		BEGIN
+			DECLARE	@ItemId				INT
+					,@LocationId		INT
+					,@TransactionDate	DATETIME
+					,@TransactionType	NVARCHAR(20) = 'Purchase'
+					,@EntityId			INT	
+					,@TaxMasterId		INT	
+					,@InventoryReceiptItemId INT
+
+			DECLARE @Taxes AS TABLE (
+				id INT
+				,intInvoiceDetailId INT
+				,intTaxGroupMasterId INT
+				,intTaxGroupId INT 
+				,intTaxCodeId INT
+				,intTaxClassId INT
+				,strTaxableByOtherTaxes INT 
+				,strCalculationMethod NVARCHAR(50)
+				,numRate NUMERIC(18,6)
+				,dblTax NUMERIC(18,6)
+				,dblAdjustedTax NUMERIC(18,6)
+				,intTaxAccountId INT
+				,ysnSeparateOnInvoice BIT
+				,ysnCheckoffTax BIT
+				,strTaxCode NVARCHAR(50)
+				,ysnTaxExempt BIT
+			)
+
+			-- Create the cursor
+			DECLARE loopReceiptItems CURSOR LOCAL FAST_FORWARD
+			FOR 
+			SELECT  ReceiptItem.intItemId
+					,Receipt.intLocationId
+					,Receipt.dtmReceiptDate
+					,Receipt.intEntityId
+					,Receipt.intInventoryReceiptId
+			FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+						ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptItemId
+			WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
+
+			OPEN loopReceiptItems;
+
+			-- Initial fetch attempt
+			FETCH NEXT FROM loopReceiptItems INTO 
+				@ItemId
+				,@LocationId
+				,@TransactionDate
+				,@EntityId
+				,@InventoryReceiptItemId
+
+			WHILE @@FETCH_STATUS = 0
+			BEGIN 
+				-- Clear the contents of the table variable.
+				DELETE FROM @Taxes
+
+				-- Add the computed taxes in the table variable. 
+				INSERT INTO @Taxes (
+					id
+					,intInvoiceDetailId
+					,intTaxGroupMasterId
+					,intTaxGroupId
+					,intTaxCodeId
+					,intTaxClassId
+					,strTaxableByOtherTaxes
+					,strCalculationMethod
+					,numRate
+					,dblTax
+					,dblAdjustedTax
+					,intTaxAccountId
+					,ysnSeparateOnInvoice
+					,ysnCheckoffTax
+					,strTaxCode
+					,ysnTaxExempt				
+				)
+				EXEC dbo.uspSMGetItemuspSMGetItemTaxes
+					@ItemId
+					,@LocationId
+					,@TransactionDate
+					,@TransactionType
+					,@EntityId
+					,@TaxMasterId
+
+				-- Insert the data from the table variable into Inventory Receipt Item tax table. 
+				INSERT INTO dbo.tblICInventoryReceiptItemTax (
+					[intInventoryReceiptItemId]
+					,[intTaxGroupMasterId]
+					,[intTaxGroupId]
+					,[intTaxCodeId]
+					,[intTaxClassId]
+					,[strTaxableByOtherTaxes]
+					,[strCalculationMethod]
+					,[dblRate]
+					,[dblTax]
+					,[dblAdjustedTax]
+					,[intTaxAccountId]
+					,[ysnTaxAdjusted]
+					,[ysnSeparateOnInvoice]
+					,[ysnCheckoffTax]
+					,[strTaxCode]
+					,[intSort]
+					,[intConcurrencyId]				
+				)
+				SELECT 	[intInventoryReceiptItemId]		= @InventoryReceiptItemId
+						,[intTaxGroupMasterId]			= intTaxGroupMasterId
+						,[intTaxGroupId]				= intTaxGroupId
+						,[intTaxCodeId]					= intTaxCodeId
+						,[intTaxClassId]				= intTaxClassId
+						,[strTaxableByOtherTaxes]		= strTaxableByOtherTaxes
+						,[strCalculationMethod]			= strCalculationMethod
+						,[dblRate]						= 20
+						,[dblTax]						= dblTax
+						,[dblAdjustedTax]				= dblAdjustedTax
+						,[intTaxAccountId]				= intTaxAccountId
+						,[ysnTaxAdjusted]				= CASE WHEN ISNULL(dblAdjustedTax, 0) <> 0 THEN 1 ELSE 0 END 
+						,[ysnSeparateOnInvoice]			= ysnSeparateOnInvoice
+						,[ysnCheckoffTax]				= ysnCheckoffTax
+						,[strTaxCode]					= strTaxCode
+						,[intSort]						= 1
+						,[intConcurrencyId]				= 1
+				FROM	@Taxes
+					
+				-- Get the next item. 
+				FETCH NEXT FROM loopReceiptItems INTO 
+					@ItemId
+					,@LocationId
+					,@TransactionDate
+					,@EntityId
+					,@InventoryReceiptItemId
+			END 
+
+			CLOSE loopReceiptItems;
+			DEALLOCATE loopReceiptItems;
+		END 
 
 		-- Re-update the total cost 
 		UPDATE	Receipt
