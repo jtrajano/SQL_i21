@@ -9,7 +9,7 @@ SELECT DISTINCT
 	 , dblAmountPaid = ISNULL(PD.dblPayment, 0)
 	 , dblAmountApplied = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblPayment, 0) * -1 ELSE ISNULL(I.dblPayment, 0) END	 
 	 , dblInvoiceTotal = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END	 
-	 , dblAmountDue = ISNULL(PD.dblAmountDue, 0)
+	 , dblAmountDue = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(PD.dblAmountDue, 0) * -1 ELSE ISNULL(PD.dblAmountDue, 0) END
 	 , ysnPaid = CASE WHEN I.ysnPaid = 1 THEN 'Yes' ELSE 'No' END
 	 , P.intPaymentId	 
 	 , I.intEntityCustomerId
