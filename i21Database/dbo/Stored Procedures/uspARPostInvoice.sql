@@ -432,10 +432,17 @@ IF @recap = 0
 						ON A.intInvoiceId = D.intInvoiceId
 				INNER JOIN
 					tblICItem I
-						ON D.intItemId = I.intItemId			 				
+						ON D.intItemId = I.intItemId
+				LEFT OUTER JOIN
+					tblSMCompanyLocation L
+						ON A.intCompanyLocationId = L.intCompanyLocationId
+				LEFT OUTER JOIN
+					vyuARGetItemAccount Acct
+						ON A.intCompanyLocationId = Acct.intLocationId 
+						AND D.intItemId = Acct.intItemId 		 				
 				WHERE
 					(D.intAccountId IS NULL OR D.intAccountId = 0)
-					AND (@ServiceChargesAccountId IS NULL OR @ServiceChargesAccountId = 0)
+					AND (Acct.intGeneralAccountId IS NULL OR Acct.intGeneralAccountId = 0)
 					AND I.strType IN ('Non-Inventory','Service','Other Charge')
 					
 					
@@ -783,10 +790,10 @@ IF @post = 1
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
 				,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))) 
-													AND IST.intSalesAccountId IS NOT NULL
-													AND IST.intSalesAccountId <> 0
+													AND IST.intGeneralAccountId IS NOT NULL
+													AND IST.intGeneralAccountId <> 0
 													THEN
-														IST.intSalesAccountId
+														IST.intGeneralAccountId
 													ELSE
 														(CASE WHEN B.intServiceChargeAccountId IS NOT NULL AND B.intServiceChargeAccountId <> 0 THEN B.intServiceChargeAccountId ELSE @ServiceChargesAccountId END)
 												END)
@@ -1394,10 +1401,10 @@ IF @post = 0
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
 				,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))) 
-													AND IST.intSalesAccountId IS NOT NULL
-													AND IST.intSalesAccountId <> 0
+													AND IST.intGeneralAccountId IS NOT NULL
+													AND IST.intGeneralAccountId <> 0
 													THEN
-														IST.intSalesAccountId
+														IST.intGeneralAccountId
 													ELSE
 														(CASE WHEN B.intServiceChargeAccountId IS NOT NULL AND B.intServiceChargeAccountId <> 0 THEN B.intServiceChargeAccountId ELSE @ServiceChargesAccountId END)
 												END)
