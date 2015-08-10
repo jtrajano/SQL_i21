@@ -1,7 +1,8 @@
 CREATE VIEW [dbo].[vyuGRGetStorageDetail]
 AS
 SELECT
-	 a.intCompanyLocationId	
+	  a.intCustomerStorageId
+	 ,a.intCompanyLocationId	
 	,c.strLocationName [Loc]
 	,a.dtmDeliveryDate [Delivery Date]
 	,a.intStorageTicketNumber [Ticket]
@@ -21,8 +22,12 @@ SELECT
 	,b.ysnDPOwnedType
 	,b.ysnGrainBankType
 	,b.ysnCustomerStorage 
+	,a.strCustomerReference  
+ 	,a.dtmLastStorageAccrueDate  
+ 	,c1.strScheduleId
 FROM tblGRCustomerStorage a
 JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId
+LEFT JOIN tblGRStorageScheduleRule c1 on c1.intStorageScheduleRuleId=a.intStorageScheduleId  
 JOIN tblSMCompanyLocation c ON c.intCompanyLocationId=a.intCompanyLocationId
 JOIN tblEntity E ON E.intEntityId=a.intEntityId
 JOIN tblICCommodity CM ON CM.intCommodityId=a.intCommodityId
