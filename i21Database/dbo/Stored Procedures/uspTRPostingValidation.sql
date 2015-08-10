@@ -276,7 +276,10 @@ BEGIN
                RAISERROR('Distribution entries are Not Found', 16, 1);
            END	
 	  END
-
+  if (@dblUnitCost is null or @dblUnitCost = 0)
+     BEGIN
+         RAISERROR('Unit Cost cannot be 0', 16, 1);
+     END
   if(@GrossorNet = 'Gross')
       BEGIN
 	   set @dblReveivedQuantity = @dblGross
