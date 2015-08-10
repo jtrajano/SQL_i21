@@ -2,6 +2,7 @@
 AS
 SELECT I.strInvoiceNumber AS strReferenceNumber
 	 , I.strTransactionType
+	 , I.dtmDate
 	 , I.dtmDueDate
 	 , intDaysDue = DATEDIFF(DAY, I.[dtmDueDate], GETDATE())
 	 , dblTotalAmount = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
@@ -20,7 +21,7 @@ SELECT I.strInvoiceNumber AS strReferenceNumber
 	 , strFullAddress = [dbo].fnARFormatCustomerAddress(NULL, NULL, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry)
 FROM tblARInvoice I
 	INNER JOIN (tblARInvoiceDetail ID 
-		INNER JOIN tblICItem IC ON ID.intItemId = IC.intItemId) ON I.intInvoiceId = ID.intInvoiceId
+		LEFT JOIN tblICItem IC ON ID.intItemId = IC.intItemId) ON I.intInvoiceId = ID.intInvoiceId
 	INNER JOIN vyuARCustomer C ON I.intEntityCustomerId = C.intEntityCustomerId
 WHERE I.ysnPosted = 1
   AND I.ysnPaid = 0

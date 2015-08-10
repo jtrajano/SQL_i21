@@ -3,6 +3,7 @@ AS
 SELECT I.strInvoiceNumber AS strReferenceNumber
 	 , I.strTransactionType
 	 , I.dtmDueDate
+	 , I.dtmDate
 	 , intDaysDue = DATEDIFF(DAY, I.[dtmDueDate], GETDATE())
 	 , dblTotalAmount = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
 	 , dblAmountPaid = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblPayment, 0) * -1 ELSE ISNULL(I.dblPayment, 0) END
