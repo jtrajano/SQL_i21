@@ -171,6 +171,11 @@ namespace iRely.Inventory.BusinessLayer
                 }
                 catch (Exception ex)
                 {
+                    if (ex.Message.Contains("Please setup default AP Account"))
+                    {
+                        ex = new Exception("Please setup default AP Account.", ex.InnerException);
+                    }
+
                     saveResult.BaseException = ex;
                     saveResult.Exception = new ServerException(ex);
                     saveResult.HasError = true;
