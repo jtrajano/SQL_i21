@@ -507,6 +507,8 @@ BEGIN
 
 		INSERT INTO [dbo].[tblAPImportedVendors]
 			VALUES(@originVendor, 1)
+		
+		EXEC uspAPImportVendorContact @originVendor
 
 		IF(@@ERROR <> 0) 
 		BEGIN

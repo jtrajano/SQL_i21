@@ -7,7 +7,10 @@ CREATE PROCEDURE [dbo].[uspAPImportVendorContact]
 	@UpdateVendorId nvarchar(max) = NULL
 AS
 BEGIN
-	
+	if(@UpdateVendorId IS NOT NULL)
+	BEGIN
+		SET @UpdateVendorId = dbo.fnTrim(@UpdateVendorId)
+	END
 	DECLARE @Contacts TABLE
 	(
 		 id int identity(1,1)
