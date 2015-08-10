@@ -212,7 +212,7 @@ BEGIN TRY
 			,@intStorageLocationId = I.intStorageLocationId
 		FROM tblMFProductionSummary F
 		JOIN @tblInputItem I ON I.intItemId = F.intItemId
-		WHERE F.intProductionSummaryId = @intProductionSummaryId
+		WHERE F.intProductionSummaryId = @intProductionSummaryId and F.dblYieldQuantity<>0
 
 		IF @dblYieldQuantity > 0
 			AND NOT EXISTS (
@@ -379,14 +379,16 @@ BEGIN TRY
 
 		IF @intLotId IS NOT NULL
 		BEGIN
-			IF @dblYieldQuantity < 0
-				AND ABS(@dblYieldQuantity) > @dblQty
-				SET @dblNewQty = -@dblQty
-			ELSE
-				SET @dblNewQty = @dblYieldQuantity
+			--IF @dblYieldQuantity < 0
+			--	AND ABS(@dblYieldQuantity) > @dblQty
+			--	SET @dblNewQty = -@dblQty
+			--ELSE
+			--	SET @dblNewQty = @dblYieldQuantity
 
-			IF @intManufacturingProcessId = 6
-				SET @dblQty = -@dblQty+@dblYieldQuantity
+			SET @dblNewQty = @dblYieldQuantity
+
+			--IF @intManufacturingProcessId = 6
+			--	SET @dblQty = -@dblQty+@dblYieldQuantity
 
 			UPDATE dbo.tblMFProcessCycleCount
 			SET intLotId = @intLotId
@@ -399,8 +401,7 @@ BEGIN TRY
 					OR dblSystemQty > 0
 					)
 
-			IF @dblQty <> @dblNewQty
-				AND @ysnYieldAdjustmentAllowed = 1
+			IF @ysnYieldAdjustmentAllowed = 1
 			BEGIN
 				Select @dblAdjustByQuantity=@dblNewQty/(Case When @intWeightUOMId is null Then 1 Else @dblWeightPerQty End)
 
@@ -433,7 +434,7 @@ BEGIN TRY
 		SELECT @intProductionSummaryId = Min(intProductionSummaryId)
 		FROM tblMFProductionSummary F
 		JOIN @tblInputItem I ON I.intItemId = F.intItemId
-		Where intProductionSummaryId>@intProductionSummaryId and F.intWorkOrderId=@intWorkOrderId
+		Where intProductionSummaryId>@intProductionSummaryId and F.intWorkOrderId=@intWorkOrderId and F.dblYieldQuantity<>0
 	END
 
 	UPDATE dbo.tblMFWorkOrder
