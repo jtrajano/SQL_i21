@@ -2224,6 +2224,8 @@
     <Build Include="dbo\Stored Procedures\uspRKGetGrainBankDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetCollateralDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetContractDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetSampleNumber.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetSampleHeaderData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
