@@ -1261,6 +1261,27 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onQualityClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var grd = win.down('#grdInventoryReceipt');
+
+        var selected = grd.getSelectionModel().getSelection();
+
+        if (selected) {
+            if (selected.length > 0){
+                var current = selected[0];
+                if (!current.dummy)
+                    iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', { strSourceType: 'Inventory Receipt', intTicketFileId: current.get('intInventoryReceiptItemId') });
+            }
+            else {
+                iRely.Functions.showErrorDialog('Please select an Item to view.');
+            }
+        }
+        else {
+            iRely.Functions.showErrorDialog('Please select an Item to view.');
+        }
+    },
+
     onBillClick: function(button, e, eOpts) {
         var win = button.up('window');
         var current = win.viewModel.data.current;
@@ -2725,6 +2746,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#btnViewItem": {
                 click: this.onInventoryClick
+            },
+            "#btnQuality": {
+                click: this.onQualityClick
             },
             "#btnVendor": {
                 click: this.onVendorClick
