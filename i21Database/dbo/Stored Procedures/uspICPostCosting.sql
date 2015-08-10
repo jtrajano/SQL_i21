@@ -234,6 +234,17 @@ BEGIN
 			,@intUserId;
 	END
 
+	-- Update the Lot's Qty and Weights. 
+	BEGIN 
+		UPDATE	Lot 
+		SET		Lot.dblQty = dbo.fnCalculateLotQty(Lot.intItemUOMId, @intItemUOMId, Lot.dblQty, Lot.dblWeight, @dblQty, Lot.dblWeightPerQty)
+				,Lot.dblWeight = dbo.fnCalculateLotWeight(Lot.intItemUOMId, Lot.intWeightUOMId, @intItemUOMId, Lot.dblWeight, @dblQty, Lot.dblWeightPerQty)
+				,Lot.dblLastCost = CASE WHEN @dblQty > 0 THEN dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) ELSE Lot.dblLastCost END 
+		FROM	dbo.tblICLot Lot
+		WHERE	Lot.intItemLocationId = @intItemLocationId
+				AND Lot.intLotId = @intLotId
+	END 
+
 	--------------------------------------------------
 	-- Adjust the average cost and units on hand. 
 	--------------------------------------------------
@@ -310,6 +321,28 @@ BEGIN
 						,intSubLocationId = @intSubLocationId 
 						,intStorageLocationId = @intStorageLocationId
 						,Qty = ISNULL(@dblQty, 0)  
+				
+				-- If incoming Lot has a weight, then get value of the other UOM Id. 
+				UNION ALL 
+				SELECT	intItemId = @intItemId
+						,intItemLocationId = @intItemLocationId
+						,intItemUOMId =	CASE	WHEN (@intItemUOMId = Lot.intItemUOMId) THEN Lot.intWeightUOMId -- Stock is in packs, then get the weight UOM id. 
+												WHEN (@intItemUOMId = Lot.intWeightUOMId) THEN Lot.intItemUOMId -- Stock is in weight, then get the pack UOM id. 
+												ELSE @intItemUOMId
+										END 
+						,intSubLocationId = @intSubLocationId 
+						,intStorageLocationId = @intStorageLocationId
+						,Qty =	CASE	WHEN (@intItemUOMId = Lot.intItemUOMId) THEN @dblQty * Lot.dblWeightPerQty -- Stock is in packs, then convert the qty to weight. 
+										WHEN (@intItemUOMId = Lot.intWeightUOMId) THEN @dblQty / Lot.dblWeightPerQty -- Stock is in weights, then convert it to packs. 
+										ELSE @dblQty
+								END 
+				FROM	dbo.tblICLot Lot 
+				WHERE	Lot.intItemLocationId = @intItemLocationId
+						AND Lot.intLotId = @intLotId
+						AND Lot.intWeightUOMId IS NOT NULL 
+						AND Lot.intItemUOMId <> Lot.intWeightUOMId
+						AND ISNULL(Lot.dblWeightPerQty, 0) <> 0
+
 		) AS StockToUpdate
 			ON ItemStock.intItemId = StockToUpdate.intItemId
 			AND ItemStock.intItemLocationId = StockToUpdate.intItemLocationId
@@ -345,15 +378,6 @@ BEGIN
 				,1	
 			)
 		;
-
-		-- Update the Lot's Qty and Weights. 
-		UPDATE	Lot 
-		SET		Lot.dblQty = dbo.fnCalculateLotQty(Lot.intItemUOMId, @intItemUOMId, Lot.dblQty, Lot.dblWeight, @dblQty, Lot.dblWeightPerQty)
-				,Lot.dblWeight = dbo.fnCalculateLotWeight(Lot.intItemUOMId, Lot.intWeightUOMId, @intItemUOMId, Lot.dblWeight, @dblQty, Lot.dblWeightPerQty)
-				,Lot.dblLastCost = CASE WHEN @dblQty > 0 THEN dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty) ELSE Lot.dblLastCost END 
-		FROM	dbo.tblICLot Lot
-		WHERE	Lot.intItemLocationId = @intItemLocationId
-				AND Lot.intLotId = @intLotId
 
 		-- Update the Item Pricing table
 		MERGE	
