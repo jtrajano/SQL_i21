@@ -829,6 +829,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colBundleItem: {
                     dataIndex: 'strItemNo',
                     editor: {
+                        origValueField: 'intItemId',
+                        origUpdateField: 'intBundleItemId',
                         store: '{bundleItem}',
                         defaultFilters: [{
                             column: 'strType',
@@ -845,7 +847,14 @@ Ext.define('Inventory.view.ItemViewController', {
                 colBundleUOM: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
-                        store: '{bundleUOM}'
+                        store: '{bundleUOM}',
+                        origValueField: 'intItemUOMId',
+                        origUpdateField: 'intItemUnitMeasureId',
+                        defaultFilters: [{
+                            column: 'intItemId',
+                            value: '{grdBundle.selection.intBundleItemId}',
+                            conjunction: 'or'
+                        }]
                     }
                 },
                 colBundleUnit: 'dblUnit',
@@ -2119,26 +2128,6 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // </editor-fold>
 
-    // <editor-fold desc="Bundle Details Tab Methods and Event Handlers">
-
-    onBundleSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepBundle');
-        var current = plugin.getActiveRecord();
-
-        if (combo.column.itemId === 'colBundleItem'){
-            current.set('intBundleItemId', records[0].get('intItemId'));
-        }
-        else if (combo.column.itemId === 'colBundleUOM') {
-            current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
-        }
-    },
-
-    // </editor-fold>
-
     // <editor-fold desc="Kit Details Tab Methods and Event Handlers">
 
     onKitSelect: function(combo, records, eOpts) {
@@ -2539,12 +2528,6 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboAssemblyUOM": {
                 select: this.onAssemblySelect
-            },
-            "#cboBundleItem": {
-                select: this.onBundleSelect
-            },
-            "#cboBundleUOM": {
-                select: this.onBundleSelect
             },
             "#cboKitDetailItem": {
                 select: this.onKitSelect
