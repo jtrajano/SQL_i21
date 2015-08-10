@@ -2220,6 +2220,10 @@
     <Build Include="dbo\Stored Procedures\uspGLGenerateAccountRange.sql" />
     <Build Include="dbo\Views\vyuLGInboundShipmentView.sql" />
     <Build Include="dbo\Views\vyuICGetUnpostedTransactions.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetNetHedgeDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetGrainBankDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCollateralDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetContractDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
