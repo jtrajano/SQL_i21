@@ -15,10 +15,14 @@ SELECT DISTINCT
 	 , I.intEntityCustomerId
 	 , PM.strPaymentMethod
 	 , I.intInvoiceId	 
+	 , I.intCompanyLocationId
+	 , Item.intCommodityId
 FROM tblARInvoice I
 	LEFT JOIN (tblARPayment P INNER JOIN tblARPaymentDetail PD ON P.intPaymentId = PD.intPaymentId 
 							  LEFT JOIN tblSMPaymentMethod PM ON P.intPaymentMethodId = PM.intPaymentMethodID) ON I.intEntityCustomerId = P.intEntityCustomerId  AND PD.intInvoiceId = I.intInvoiceId
 	INNER JOIN (vyuARCustomer C INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId) ON I.intEntityCustomerId = C.intEntityCustomerId		
+	LEFT OUTER JOIN tblARInvoiceDetail D ON I.intInvoiceId = D.intInvoiceId
+	INNER JOIN tblICItem Item ON D.intItemId = Item.intItemId	
 WHERE I.ysnPosted = 1 AND P.ysnPosted = 1
   AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
