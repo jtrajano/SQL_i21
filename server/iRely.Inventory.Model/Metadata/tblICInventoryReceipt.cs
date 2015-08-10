@@ -165,6 +165,7 @@ namespace iRely.Inventory.Model
         public int? intItemId { get; set; }
         public int? intContainerId { get; set; }
         public int? intSubLocationId { get; set; }
+        public int? intStorageLocationId { get; set; }
         public int intOwnershipType { get; set; }
         public decimal? dblOrderQty { get; set; }
         public decimal? dblBillQty { get; set; }
