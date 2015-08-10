@@ -97,7 +97,7 @@ BEGIN
 		SET @dblReduceQty = ISNULL(@dblQty, 0)
 
 		SELECT @dblCost = AverageCost
-		FROM dbo.fnGetItemAverageCostAsTable(@intItemId, @intItemLocationId)
+		FROM dbo.fnGetItemAverageCostAsTable(@intItemId, @intItemLocationId, @intItemUOMId)
 
 		EXEC [dbo].[uspICPostInventoryTransaction]
 				@intItemId = @intItemId

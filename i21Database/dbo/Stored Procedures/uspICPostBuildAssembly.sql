@@ -161,11 +161,12 @@ BEGIN
 			, NULL
 			, Detail.intSubLocationId
 			, NULL
-	FROM	tblICBuildAssemblyDetail Detail LEFT JOIN tblICBuildAssembly AssemblyItem 
+	FROM	tblICBuildAssembly AssemblyItem INNER JOIN tblICBuildAssemblyDetail Detail 
 				ON AssemblyItem.intBuildAssemblyId = Detail.intBuildAssemblyId
 			LEFT JOIN tblICItemUOM ItemUOM 
-				ON ItemUOM.intItemUOMId = AssemblyItem.intItemUOMId
-	WHERE	Detail.intBuildAssemblyId = @intTransactionId
+				ON ItemUOM.intItemUOMId = Detail.intItemUOMId
+				AND ItemUOM.intItemId = Detail.intItemId
+	WHERE	AssemblyItem.intBuildAssemblyId = @intTransactionId
 
 	-- Call the post routine 
 	BEGIN 
