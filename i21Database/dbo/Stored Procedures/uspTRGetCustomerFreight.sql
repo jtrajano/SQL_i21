@@ -11,8 +11,8 @@ CREATE PROCEDURE [dbo].[uspTRGetCustomerFreight]
 	 @dblInvoiceFreightRate decimal(18,6) OUTPUT,
 	 @dblReceiptFreightRate decimal(18,6) OUTPUT,
 	 @dblReceiptSurchargeRate decimal(18,6) OUTPUT,
-	 @dblInvoiceSurchargeRate decimal(18,6) OUTPUT
---	 @ysnIncludeInPrice bit
+	 @dblInvoiceSurchargeRate decimal(18,6) OUTPUT,
+	 @ysnFreightInPrice bit OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -31,7 +31,6 @@ DECLARE @freight decimal(18,6),
 		@intEntityShipViaId int,
 		@intMiles int,
 		@dblRate decimal(18,6),
-		@ysnFreightInPrice bit,
 		@dblMinimumUnits decimal(18,6),
 		@dblCostRatePerUnit decimal(18,6),
 		@dblInvoiceRatePerUnit decimal(18,6);
@@ -127,7 +126,12 @@ BEGIN
     set @dblInvoiceSurchargeRate = 0;
 END
 
---set @ysnIncludeInPrice = @ysnFreightInPrice;
+
+if (@ysnFreightInPrice is null)
+BEGIN
+    set @ysnFreightInPrice = 0;
+END
+
 END TRY
 BEGIN CATCH
 	SELECT 
