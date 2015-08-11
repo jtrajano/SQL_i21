@@ -2268,7 +2268,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         {
                                                                             dataIndex: 'strDescription',
                                                                             dataType: 'string',
-                                                                            text: 'Allocate By',
+                                                                            text: 'Allocate Cost By',
                                                                             flex: 1
                                                                         }
                                                                     ],
