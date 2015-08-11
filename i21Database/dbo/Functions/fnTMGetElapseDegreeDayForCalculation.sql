@@ -1,7 +1,8 @@
 ﻿CREATE FUNCTION [dbo].[fnTMGetElapseDegreeDayForCalculation]
 (
 	@intSiteId INT
-	,@intDDReadingId INT 
+	,@intDDReadingId INT
+	,@intDeliveryHistoryId INT = NULL
 )
 RETURNS NUMERIC(18,6) AS
 BEGIN
@@ -27,15 +28,31 @@ BEGIN
 	DECLARE @ysnOnHold BIT
 	DECLARE @dblElapseDDForCalc NUMERIC(18,6)
 	
-	-----Get Site Info
-	SELECT 
-		@dtmOnHoldStartDate = dtmOnHoldStartDate
-		,@dtmOnHoldEndDate = dtmOnHoldEndDate
-		,@intLastDeliveryDegreeDay = intLastDeliveryDegreeDay
-		,@ysnCalcOnHold = ysnHoldDDCalculations
-		,@ysnOnHold = ysnOnHold
-	FROM tblTMSite
-	WHERE intSiteID = @intSiteId
+
+	IF(@intDeliveryHistoryId IS NULL)
+	BEGIN
+		-----Get Site Info
+		SELECT 
+			@dtmOnHoldStartDate = dtmOnHoldStartDate
+			,@dtmOnHoldEndDate = dtmOnHoldEndDate
+			,@intLastDeliveryDegreeDay = intLastDeliveryDegreeDay
+			,@ysnCalcOnHold = ysnHoldDDCalculations
+			,@ysnOnHold = ysnOnHold
+		FROM tblTMSite
+		WHERE intSiteID = @intSiteId
+	END
+	ELSE
+	BEGIN
+		---Get Site Info from delivery history
+		SELECT
+			@dtmOnHoldStartDate = dtmSiteOnHoldStartDate
+			,@dtmOnHoldEndDate = dtmSiteOnHoldEndDate
+			,@intLastDeliveryDegreeDay = intDegreeDayOnLastDeliveryDate
+			,@ysnCalcOnHold = ysnSiteHoldDDCalculations
+			,@ysnOnHold = ysnSiteOnHold
+		FROM tblTMDeliveryHistory A
+		WHERE A.intDeliveryHistoryID = @intDeliveryHistoryId
+	END
 	
 	---Get Degree REading Info
 	SELECT 

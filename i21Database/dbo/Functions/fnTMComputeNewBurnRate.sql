@@ -5,6 +5,7 @@
 	,@intDDReadingId INT 
 	,@intPreviousDDReadingId INT 
 	,@ysnMultipleInvoice BIT = 0
+	,@intDeliveryHistoryId INT = NULL
 )
 RETURNS NUMERIC(18,6) AS
 BEGIN
@@ -20,13 +21,26 @@ BEGIN
 	DECLARE @dblCappedOrFloored NUMERIC(18,6)
 	DECLARE @dblReturnValue NUMERIC(18,6)
 	
-	---Get Site Info
-	SELECT
-		@dblBurnRate = dblBurnRate
-		,@dblPreviousBurnRate = dblPreviousBurnRate
-		,@ysnAdjustBurnRate = ysnAdjustBurnRate
-	FROM tblTMSite
-	WHERE intSiteID = @intSiteId
+	IF(@intDeliveryHistoryId IS NULL)
+	BEGIN
+		---Get Site Info
+		SELECT
+			@dblBurnRate = dblBurnRate
+			,@dblPreviousBurnRate = dblPreviousBurnRate
+			,@ysnAdjustBurnRate = ysnAdjustBurnRate
+		FROM tblTMSite
+		WHERE intSiteID = @intSiteId
+	END
+	ELSE
+	BEGIN
+		---Get Site Info from delivery history
+		SELECT
+			@dblBurnRate = dblSiteBurnRate
+			,@dblPreviousBurnRate = dblSitePreviousBurnRate
+			,@ysnAdjustBurnRate = ysnAdjustBurnRate
+		FROM tblTMDeliveryHistory
+		WHERE intDeliveryHistoryID = @intDeliveryHistoryId
+	END
 	
 	---- Check for previous Reading 
 	IF (ISNULL(@intPreviousDDReadingId,0) = 0)
@@ -43,7 +57,7 @@ BEGIN
 	BEGIN
 	
 		--- Get Average Burn rate
-		SET	@dblCalculatedBurnRate = dbo.fnTMGetCalculatedBurnRate(@intSiteId,@intInvoiceDetailId,@intDDReadingId,@ysnMultipleInvoice)
+		SET	@dblCalculatedBurnRate = dbo.fnTMGetCalculatedBurnRate(@intSiteId,@intInvoiceDetailId,@intDDReadingId,@ysnMultipleInvoice,@intDeliveryHistoryId)
 		IF(ISNULL(@dblPreviousBurnRate,0) = 0)
 		BEGIN
 			SET @dblBurnRateAverage = (ISNULL(@dblCalculatedBurnRate,0) + @dblBurnRate)/2

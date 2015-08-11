@@ -53,9 +53,13 @@
     [dblWillCallDeliveryPrice] NUMERIC(18, 6) NULL, 
     [dblWillCallDeliveryTotal] NUMERIC(18, 6) NULL, 
     [intInvoiceDetailId] INT NULL, 
-    [dtmSiteLastDeliveryDuringDelivery] DATETIME NULL, 
-    [dblSiteBurnRateDuringDelivery] NUMERIC(18, 6) NULL, 
-    [dblSitePreviousBurnRateDuringDelivery] NCHAR(10) NULL, 
+    [dtmSiteLastDelivery] DATETIME NULL, 
+    [dblSitePreviousBurnRate] NUMERIC(18, 6) NULL, 
+    [dblSiteBurnRate] NUMERIC(18, 6) NULL, 
+    [dtmSiteOnHoldStartDate] DATETIME NULL, 
+    [dtmSiteOnHoldEndDate] DATETIME NULL, 
+    [ysnSiteHoldDDCalculations] BIT NULL, 
+    [ysnSiteOnHold] BIT NULL, 
     CONSTRAINT [PK_tblTMDeliveryHistory] PRIMARY KEY CLUSTERED ([intDeliveryHistoryID] ASC),
     CONSTRAINT [FK_tblTMDeliveryHistory_tblTMSite] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID])
 );
@@ -549,22 +553,15 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intInvoiceDetailId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Last Delivery of the site during the invoice date',
+    @value = N'Last Delivery date  of the site during delivery',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblTMDeliveryHistory',
     @level2type = N'COLUMN',
-    @level2name = 'dtmSiteLastDeliveryDuringDelivery'
+    @level2name = 'dtmSiteLastDelivery'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Site Burn rate during delivery',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblTMDeliveryHistory',
-    @level2type = N'COLUMN',
-    @level2name = N'dblSiteBurnRateDuringDelivery'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Site Previous Burn rate during delivery',
@@ -573,4 +570,50 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblTMDeliveryHistory',
     @level2type = N'COLUMN',
-    @level2name = N'dblSitePreviousBurnRateDuringDelivery'
+    @level2name = 'dblSitePreviousBurnRate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Site Burn rate during delivery',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = 'dblSiteBurnRate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Site On Hold Start Date during Delivery',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = 'dtmSiteOnHoldStartDate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Site On Hold End Date during Delivery',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmSiteOnHoldEndDate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Site Hold DD Calculation during Delivery',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnSiteHoldDDCalculations'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Site On Hold during delivery',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnSiteOnHold'
+GO

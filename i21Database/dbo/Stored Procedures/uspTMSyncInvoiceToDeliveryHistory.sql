@@ -36,6 +36,7 @@ BEGIN
 	DECLARE @intPreviousDeliveryHistoryId INT
 	DECLARE @intDeliveryHistoryInvoiceDetailId INT
 	DECLARE @intNewDeliveryHistoryId INT
+	DECLARE @intTopInvoiceDetailId INT
 	
 
 
@@ -46,7 +47,8 @@ BEGIN
 		GOTO DONESYNCHING
 	END
 	
-	-----Get invoice header total
+	PRINT 'Get invoice header detail'
+	-----Get invoice header detail
 	SELECT 
 		@dtmInvoiceDate = DATEADD(DAY, DATEDIFF(DAY, 0, dtmDate), 0) 
 		,@intInvoiceCompanyLocationId = intCompanyLocationId
@@ -74,7 +76,9 @@ BEGIN
 	FROM tblARInvoiceDetail
 	WHERE intInvoiceId = @InvoiceId
 		AND intSiteId IS NOT NULL
-		
+		AND ISNULL(ysnLeaseBilling,0) <> 1
+	
+	
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpInvoiceDetail)
 	BEGIN
 		SET @intPerformerId = NULL
@@ -89,6 +93,8 @@ BEGIN
 			,@dblItemTotal = dblTotal
 		FROM #tmpInvoiceDetail
 		
+		print 'Check ysnProcessed'
+		---Check ysnProcessed
 		IF((SELECT TOP 1 ysnTMProcessed FROM #tmpInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId) = 1)
 		BEGIN
 			GOTO CONTINUELOOP
@@ -99,7 +105,7 @@ BEGIN
 		SET ysnTMProcessed = 1
 		WHERE intInvoiceDetailId = @intInvoiceDetailId
 
-		-------Check for last Delivery Date
+		-------GEt site Detail
 		SELECT @intClockId = intClockID
 		,@dtmLastDeliveryDate = dtmLastDeliveryDate
 		FROM tblTMSite
@@ -153,6 +159,7 @@ BEGIN
 			SET @intElapseDays = 0
 		END
 		
+		PRINT 'BEGIN'
 		
 		----Check for service item
 		IF((SELECT TOP 1 strType FROM tblICItem WHERE intItemId = @intItemId) = 'Service')
@@ -180,22 +187,7 @@ BEGIN
 			FROM tblTMEventAutomation A
 			INNER JOIN tblTMEventType B
 				ON A.intEventTypeID = B.intEventTypeID
-				
-			---- Update consumption Site
-			UPDATE tblTMSite
-			SET intLastDeliveryDegreeDay = @dblAccumulatedDegreeDay
-				,dblLastGalsInTank =   ISNULL(dblTotalCapacity,0)  * ISNULL(@dblPercentAfterDelivery,0)/100
-				,dblYTDGalsThisSeason = dblYTDGalsThisSeason + @dblQuantityShipped
-				,dblYTDSales = dblYTDSales + @dblItemTotal + @dblTotalTax
-				,dblLastDeliveredGal = @dblQuantityShipped
-				,dtmLastDeliveryDate = @dtmInvoiceDate
-				,dtmLastUpdated = GETDATE()
-				,ysnDeliveryTicketPrinted = 0
-				,dblPreviousBurnRate = (CASE WHEN ysnAdjustBurnRate = 1 THEN dblBurnRate ELSE dblPreviousBurnRate END)
-				,dblBurnRate = (CASE WHEN ysnAdjustBurnRate = 1 THEN dbo.[fnTMComputeNewBurnRate](@intSiteId,@intInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0) ELSE dblBurnRate END)
-				,intConcurrencyId = intConcurrencyId + 1
-			WHERE intSiteID = @intSiteId
-				
+			WHERE A.intItemId = @intItemId
 				
 			GOTO CONTINUELOOP
 		END
@@ -213,346 +205,233 @@ BEGIN
 				ON A.intItemId = B.intItemId
 			WHERE intSiteId = @intSiteId
 				AND  B.strType <> 'Service'
-			ORDER BY dblPercentFull DESC,intInvoiceDetailId ASC
+			ORDER BY dblPercentFull DESC, dblNewMeterReading DESC, intInvoiceDetailId ASC
 			
-			IF((SELECT COUNT(intInvoiceDetailId) FROM #tmpSiteInvoiceLineItems) > 1)
+			-----Get the detail that has the highest percentful after delivery
+			SELECT TOP 1 @intTopInvoiceDetailId = intInvoiceDetailId FROM #tmpSiteInvoiceLineItems
+			
+			-----Mark Invoice detail that are of the same site as processed
+			UPDATE #tmpInvoiceDetail 
+			SET ysnTMProcessed = 1
+			FROM  #tmpSiteInvoiceLineItems A
+			WHERE #tmpInvoiceDetail.intInvoiceDetailId = A.intInvoiceDetailId
+			
+			
+			
+			IF(@ysnLessThanLastDeliveryDate = 1)
 			BEGIN
-				---Multiple Invoice Begin Here
-				PRINT 'Multiple Invoice'
-				---------GET New Burn rate 
-				SET @dblNewBurnRate = dbo.[fnTMComputeNewBurnRate](@intSiteId,@intInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,1) 
-				IF(@ysnLessThanLastDeliveryDate = 1)
+				PRINT 'Left Over Invoice'
+				IF(@dtmLastDeliveryDate = @dtmInvoiceDate)
 				BEGIN
-					PRINT 'Left Over'
-					IF(@strTransactionType = 'Invoice')
-					BEGIN
-						PRINT 'Invoice'
-						----- Check for previous deliveries with same date
-						IF EXISTS(SELECT TOP 1 1 FROM tblTMDeliveryHistory WHERE dtmInvoiceDate = @dtmInvoiceDate AND intSiteID = @intSiteId)
-						BEGIN
-							PRINT 'Has previous transaction'
-							SELECT TOP 1 @intPreviousDeliveryHistoryId = intDeliveryHistoryID
-								,@intDeliveryHistoryInvoiceDetailId = intInvoiceDetailId
-							FROM tblTMDeliveryHistory WHERE dtmInvoiceDate = @dtmInvoiceDate AND intSiteID = @intSiteId
-
-							------Check if have Delivery Detail Records
-							IF EXISTS(SELECT TOP 1 1 FROM tblTMDeliveryHistoryDetail WHERE intDeliveryHistoryID = @intPreviousDeliveryHistoryId)
-							BEGIN
-								PRINT 'With Existing Delivery Detail'
-							END
-							ELSE
-							BEGIN
-								PRINT 'Without Existing Delivery Detail'
-								--- insert Header to detail
-								INSERT INTO tblTMDeliveryHistoryDetail(
-									strInvoiceNumber
-									,dblQuantityDelivered
-									,strItemNumber
-									,intDeliveryHistoryID
-									,dblPercentAfterDelivery
-									,dblExtendedAmount
-									,intInvoiceDetailId
-								)
-								SELECT TOP 1 
-									strInvoiceNumber = A.strInvoiceNumber
-									,dblQuantityDelivered = A.dblQuantityDelivered
-									,strItemNumber = A.strProductDelivered
-									,intDeliveryHistoryID = A.intDeliveryHistoryID
-									,dblPercentAfterDelivery = dblActualPercentAfterDelivery
-									,dblExtendedAmount = ISNULL(B.dblTotal,0) + ISNULL(B.dblTotalTax,0)
-									,intInvoiceDetailId = A.intInvoiceDetailId
-								FROM tblTMDeliveryHistory A
-								INNER JOIN tblARInvoiceDetail B
-									ON A.intInvoiceDetailId = B.intInvoiceDetailId
-								WHERE intDeliveryHistoryID = @intPreviousDeliveryHistoryId	
-							END
-
-						
-							----- Insert Invoicedetail to History Detail
-							INSERT INTO tblTMDeliveryHistoryDetail(
-								strInvoiceNumber
-								,dblQuantityDelivered
-								,strItemNumber
-								,intDeliveryHistoryID
-								,dblPercentAfterDelivery
-								,dblExtendedAmount
-								,intInvoiceDetailId
-							)
-							SELECT 
-								strInvoiceNumber = B.strInvoiceNumber
-								,dblQuantityDelivered = A.dblQtyShipped
-								,strItemNumber = C.strItemNo
-								,intDeliveryHistoryID = @intPreviousDeliveryHistoryId
-								,dblPercentAfterDelivery = A.dblPercentFull
-								,dblExtendedAmount = ISNULL(A.dblTotal,0) + ISNULL(A.dblTotalTax,0)
-								,intInvoiceDetailId = A.intInvoiceDetailId
-							FROM #tmpSiteInvoiceLineItems A
-							INNER JOIN tblARInvoice B
-								ON A.intInvoiceId = B.intInvoiceId
-							INNER JOIN tblICItem C
-								ON A.intItemId = C.intItemId
-							WHERE A.intInvoiceDetailId <> ISNULL((SELECT intInvoiceDetailId FROM tblTMDeliveryHistory WHERE intDeliveryHistoryID = @intPreviousDeliveryHistoryId),0)
-							
-
-							----Check which has higher percent after delivery AND update delivery Header
-							IF((SELECT dblActualPercentAfterDelivery FROM tblTMDeliveryHistory WHERE intDeliveryHistoryID = @intPreviousDeliveryHistoryId) < (SELECT TOP 1 dblPercentFull FROM #tmpSiteInvoiceLineItems ORDER BY dblPercentFull DESC,intInvoiceDetailId ASC))
-							BEGIN
-								PRINT 'Detail has higher %'
-								UPDATE tblTMDeliveryHistory
-								SET	intInvoiceDetailId = NULL
-									,strInvoiceNumber = Z.strInvoiceNumber
-									,dblActualPercentAfterDelivery = Z.dblPercentFull
-									,strProductDelivered = Z.strItemNo
-								FROM (
-									SELECT TOP 1
-										B.strInvoiceNumber
-										,C.strItemNo
-										,A.dblPercentFull
-										,dblExtendedAmount = ISNULL(A.dblTotal,0) + ISNULL(A.dblTotalTax,0)
-									FROM #tmpSiteInvoiceLineItems A
-									INNER JOIN tblARInvoice B
-										ON A.intInvoiceId = B.intInvoiceId
-									INNER JOIN tblICItem C
-										ON A.intItemId = C.intItemId 
-									ORDER BY A.dblPercentFull DESC, A.intInvoiceDetailId ASC
-								)Z
-								WHERE intDeliveryHistoryID = @intPreviousDeliveryHistoryId
-
-							END
-
-							----Update Header Quantity Delivered and extended amount Based on Detail total and set intInvoiceDetailId to null
-							UPDATE tblTMDeliveryHistory
-							SET dblQuantityDelivered = (SELECT SUM(ISNULL(dblQuantityDelivered,0)) FROM tblTMDeliveryHistoryDetail WHERE intDeliveryHistoryID = @intPreviousDeliveryHistoryId)
-								,dblExtendedAmount = (SELECT SUM(ISNULL(dblExtendedAmount,0)) FROM tblTMDeliveryHistoryDetail WHERE intDeliveryHistoryID = @intPreviousDeliveryHistoryId)
-								,intInvoiceDetailId = NULL
-							WHERE intDeliveryHistoryID = @intPreviousDeliveryHistoryId
-
-							---Update Site Info
-							UPDATE tblTMSite
-							SET 
-								dblYTDGalsThisSeason = dblYTDGalsThisSeason + ISNULL((SELECT SUM(ISNULL(dblQtyShipped,0)) FROM #tmpSiteInvoiceLineItems),0)
-								,dblYTDSales = dblYTDSales + ISNULL((SELECT SUM(ISNULL(dblTotal,0) + ISNULL(dblTotalTax,0)) FROM #tmpSiteInvoiceLineItems),0)
-								,intConcurrencyId = intConcurrencyId + 1
-							WHERE intSiteID = @intSiteId
-
-							---- Mark the invoice details as processed for the site
-							UPDATE #tmpInvoiceDetail
-							SET ysnTMProcessed = 1
-							FROM #tmpSiteInvoiceLineItems A
-							WHERE #tmpInvoiceDetail.intInvoiceDetailId = A.intInvoiceDetailId
-
-						END
-						ELSE
-						BEGIN
-							PRINT 'No Previous Transaction'
-							---- Insert Header
-							INSERT INTO tblTMDeliveryHistory(
-								strInvoiceNumber
-								,strBulkPlantNumber
-								,dtmInvoiceDate
-								,strProductDelivered
-								,dblQuantityDelivered
-								,intDegreeDayOnDeliveryDate
-								,intDegreeDayOnLastDeliveryDate
-								,dblBurnRateAfterDelivery
-								,dblCalculatedBurnRate
-								,ysnAdjustBurnRate
-								,intElapsedDegreeDaysBetweenDeliveries
-								,intElapsedDaysBetweenDeliveries
-								,strSeason
-								,dblWinterDailyUsageBetweenDeliveries
-								,dblSummerDailyUsageBetweenDeliveries
-								,dblGallonsInTankbeforeDelivery
-								,dblGallonsInTankAfterDelivery
-								,dblEstimatedPercentBeforeDelivery
-								,dblActualPercentAfterDelivery
-								,dblMeterReading
-								,dblLastMeterReading
-								,intUserID
-								,dtmLastUpdated
-								,intSiteID
-								,strSalesPersonID
-								,dblExtendedAmount
-								,ysnForReview
-								,dtmMarkForReviewDate
-								,dblWillCallCalculatedQuantity
-								,dblWillCallDesiredQuantity
-								,intWillCallDriverId
-								,intWillCallProductId
-								,intWillCallSubstituteProductId
-								,dblWillCallPrice
-								,intWillCallDeliveryTermId
-								,dtmWillCallRequestedDate
-								,intWillCallPriority
-								,dblWillCallTotal
-								,strWillCallComments
-								,dtmWillCallCallInDate
-								,intWillCallUserId
-								,ysnWillCallPrinted
-								,dtmWillCallDispatch
-								,strWillCallOrderNumber
-								,intWillCallContractId
-								,intInvoiceId
+					PRINT 'Same date as the last delivery'
 					
-							)
-							SELECT TOP 1
-								strInvoiceNumber = C.strInvoiceNumber
-								,strBulkPlantNumber = D.strLocationName
-								,dtmInvoiceDate = C.dtmDate
-								,strProductDelivered = E.strItemNo
-								,dblQuantityDelivered = B.dblQtyShipped
-								,intDegreeDayOnDeliveryDate = @dblAccumulatedDegreeDay
-								,intDegreeDayOnLastDeliveryDate = @dblLastAccumulatedDegreeDay
-								,dblBurnRateAfterDelivery = dbo.[fnTMComputeNewBurnRate](A.intSiteID,B.intInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,1)
-								,dblCalculatedBurnRate = dbo.[fnTMGetCalculatedBurnRate](A.intSiteID,B.intInvoiceDetailId,@intClockReadingId,1)
-								,ysnAdjustBurnRate = ISNULL(A.ysnAdjustBurnRate,0)
-								,intElapsedDegreeDaysBetweenDeliveries = 0
-								,intElapsedDaysBetweenDeliveries = 0
-								,strSeason = H.strCurrentSeason
-								,dblWinterDailyUsageBetweenDeliveries = A.dblWinterDailyUse
-								,dblSummerDailyUsageBetweenDeliveries = A.dblSummerDailyUse
-								,dblGallonsInTankbeforeDelivery = A.dblEstimatedGallonsLeft
-								,dblGallonsInTankAfterDelivery = A.dblTotalCapacity * (ISNULL(B.dblPercentFull,0)/100)
-								,dblEstimatedPercentBeforeDelivery = A.dblEstimatedPercentLeft
-								,dblActualPercentAfterDelivery = B.dblPercentFull
-								,dblMeterReading = B.dblNewMeterReading
-								,dblLastMeterReading = A.dblLastMeterReading
-								,intUserID = @intUserId
-								,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
-								,intSiteID = A.intSiteID
-								,strSalesPersonID = I.strSalespersonId
-								,dblExtendedAmount = B.dblTotal + ISNULL(B.dblTotalTax,0.0)
-								,ysnForReview = 1
-								,dtmMarkForReviewDate = NULL
-								,dblWillCallCalculatedQuantity  = G.dblQuantity
-								,dblWillCallDesiredQuantity = G.dblMinimumQuantity
-								,intWillCallDriverId = G.intDriverID
-								,intWillCallProductId = G.intProductID
-								,intWillCallSubstituteProductId = G.intSubstituteProductID
-								,dblWillCallPrice = G.dblPrice
-								,intWillCallDeliveryTermId = G.intDeliveryTermID
-								,dtmWillCallRequestedDate = G.dtmRequestedDate
-								,intWillCallPriority = G.intPriority
-								,dblWillCallTotal = G.dblTotal
-								,strWillCallComments = G.strComments
-								,dtmWillCallCallInDate = G.dtmCallInDate
-								,intWillCallUserId = G.intUserID
-								,ysnWillCallPrinted = G.ysnCallEntryPrinted
-								,dtmWillCallDispatch = G.dtmDispatchingDate
-								,strWillCallOrderNumber = G.strOrderNumber
-								,intWillCallContractId = G.intContractId
-								,intInvoiceId = C.intInvoiceId
-							FROM tblTMSite A
-							INNER JOIN tblARInvoiceDetail B
-								ON A.intSiteID = B.intSiteId
-							INNER JOIN tblARInvoice C
-								ON B.intInvoiceId = C.intInvoiceId
-							INNER JOIN tblSMCompanyLocation D
-								ON C.intCompanyLocationId = D.intCompanyLocationId
-							INNER JOIN tblICItem E
-								ON B.intItemId = E.intItemId
-							INNER JOIN #tmpSiteInvoiceLineItems F
-								ON B.intInvoiceDetailId = F.intInvoiceDetailId
-							LEFT JOIN tblTMDispatch G
-								ON A.intSiteID = G.intSiteID
-							INNER JOIN tblTMClock H
-								ON A.intClockID = H.intClockID
-							LEFT JOIN tblARSalesperson I
-								ON I.intEntitySalespersonId = C.intEntitySalespersonId
-							ORDER BY F.dblPercentFull DESC,F.intInvoiceDetailId ASC
-
-							SET @intNewDeliveryHistoryId = @@IDENTITY
-
-							---- INSERT Delivery History Details
-							INSERT INTO tblTMDeliveryHistoryDetail(
-								strInvoiceNumber
-								,dblQuantityDelivered
-								,strItemNumber
-								,intDeliveryHistoryID
-								,dblPercentAfterDelivery
-								,dblExtendedAmount
-								,intInvoiceDetailId
-							)
-							SELECT 
-								strInvoiceNumber = B.strInvoiceNumber
-								,dblQuantityDelivered = A.dblQtyShipped
-								,strItemNumber = C.strItemNo
-								,intDeliveryHistoryID = @intNewDeliveryHistoryId
-								,dblPercentAfterDelivery = A.dblPercentFull
-								,dblExtendedAmount = ISNULL(A.dblTotal,0) + ISNULL(A.dblTotalTax,0)
-								,intInvoiceDetailId = A.intInvoiceDetailId
-							FROM #tmpSiteInvoiceLineItems A
-							INNER JOIN tblARInvoice B
-								ON A.intInvoiceId = B.intInvoiceId
-							INNER JOIN tblICItem C
-								ON A.intItemId = C.intItemId
-						
-							-----GET totals of the invoice details
-							SELECT TOP 1 
-								@dblPercentAfterDelivery = dblPercentFull 
-							FROM #tmpSiteInvoiceLineItems
-
-							SET @dblQuantityShipped = (SELECT SUM(ISNULL(dblQtyShipped,0)) FROM #tmpSiteInvoiceLineItems)
-							SET @dblItemTotal = (SELECT SUM(ISNULL(dblTotal,0)) FROM #tmpSiteInvoiceLineItems)
-							SET @dblTotalTax = (SELECT SUM(ISNULL(dblTotalTax,0)) FROM #tmpSiteInvoiceLineItems)
-
-							----Update Header Quantity Delivered and extended amount Based on Detail total and set intInvoiceDetailId to null
-							UPDATE tblTMDeliveryHistory
-							SET dblQuantityDelivered = @dblQuantityShipped
-								,dblExtendedAmount = @dblItemTotal + @dblTotalTax
-								,intInvoiceDetailId = NULL
-							WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
-
-						
-						
-							---Update Site Info
-							UPDATE tblTMSite
-							SET intLastDeliveryDegreeDay = @dblAccumulatedDegreeDay
-								,dblLastGalsInTank =   ISNULL(dblTotalCapacity,0)  * ISNULL(@dblPercentAfterDelivery,0)/100
-								,dblYTDGalsThisSeason = dblYTDGalsThisSeason + @dblQuantityShipped
-								,dblYTDSales = dblYTDSales + @dblItemTotal + @dblTotalTax
-								,dblLastDeliveredGal = @dblQuantityShipped
-								,dtmLastDeliveryDate = @dtmInvoiceDate
-								,dtmLastUpdated = GETDATE()
-								,ysnDeliveryTicketPrinted = 0
-								,dblEstimatedPercentLeft = @dblPercentAfterDelivery
-								,dblEstimatedGallonsLeft = dblTotalCapacity * @dblPercentAfterDelivery /100
-								,dblPreviousBurnRate = (CASE WHEN ysnAdjustBurnRate = 1 
-															THEN dblBurnRate 
-															ELSE dblPreviousBurnRate 
-														END)
-								,dblBurnRate = (CASE WHEN ysnAdjustBurnRate = 1 
-													THEN @dblNewBurnRate
-													ELSE dblBurnRate 
-												END)
-								,dblDegreeDayBetweenDelivery = @dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END)
-								,intNextDeliveryDegreeDay = @dblAccumulatedDegreeDay + (@dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END))
-								,dtmLastReadingUpdate = @dtmInvoiceDate
-							WHERE intSiteID = @intSiteId
+					-----Get the previous delivery record
+					SELECT TOP 1 @intNewDeliveryHistoryId = intDeliveryHistoryID FROM tblTMDeliveryHistory WHERE intSiteID = @intSiteId AND dtmInvoiceDate = @dtmInvoiceDate
 					
-				
-							----Update Next Julian Calendar Date of the site
-							UPDATE tblTMSite
-							SET dtmNextDeliveryDate = (CASE WHEN intFillMethodId = @intJulianCalendarFillId THEN dbo.fnTMGetNextJulianDeliveryDate(intSiteID) ELSE NULL END)
-								,intConcurrencyId = intConcurrencyId + 1
-							WHERE intSiteID = @intSiteId
+					---Add to detail of the delivery history
+					INSERT INTO tblTMDeliveryHistoryDetail(
+					intDeliveryHistoryID
+					,dblPercentAfterDelivery
+					,dblExtendedAmount
+					,dblQuantityDelivered
+					,strInvoiceNumber
+					,strItemNumber
+					,intInvoiceDetailId
+					)
+					SELECT 
+						intDeliveryHistoryID = @intNewDeliveryHistoryId
+						,dblPercentAfterDelivery = ISNULL(dblPercentFull,0)
+						,dblExtendedAmount = ISNULL(dblTotal,0) + ISNULL(dblTotalTax,0)
+						,dblQuantityDelivered = dblQtyShipped
+						,strInvoiceNumber = B.strInvoiceNumber
+						,strItemNumber = C.strItemNo
+						,intInvoiceDetailId
+					FROM #tmpSiteInvoiceLineItems A
+					INNER JOIN tblARInvoice B
+						ON A.intInvoiceId = B.intInvoiceId
+					INNER JOIN tblICItem C
+						ON A.intItemId = C.intItemId
+						
+					---- Update delivery History Table Header
+					UPDATE tblTMDeliveryHistory
+						SET dblActualPercentAfterDelivery = A.dblPercentAfterDelivery
+						,strInvoiceNumber = A.strInvoiceNumber
+						,strProductDelivered = A.strItemNumber
+						,dblGallonsInTankAfterDelivery = A.dblGalsAfterDelivery
+					FROM (
+						SELECT TOP 1 
+							Z.dblPercentAfterDelivery
+							,Z.strInvoiceNumber
+							,Z.strItemNumber
+							,dblGalsAfterDelivery = ISNULL(Z.dblPercentAfterDelivery,0) * ISNULL(X.dblTotalCapacity,0) / 100
+						FROM tblTMDeliveryHistoryDetail Z
+						INNER JOIN tblTMDeliveryHistory Y
+							ON Z.intDeliveryHistoryID = Y.intDeliveryHistoryID
+						INNER JOIN tblTMSite X
+							ON Y.intSiteID = X.intSiteID
+						WHERE Z.intDeliveryHistoryID = @intNewDeliveryHistoryId
+						ORDER BY Z.dblPercentAfterDelivery DESC, Z.intInvoiceDetailId ASC
+					)A
+					WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
+					
+					UPDATE tblTMDeliveryHistory
+					SET dblExtendedAmount = A.dblExtendedAmount
+						,dblQuantityDelivered = A.dblQuantityDelivered
+					FROM(
+						SELECT TOP 1 
+							dblExtendedAmount = SUM(ISNULL(dblExtendedAmount,0))
+							,dblQuantityDelivered = SUM(ISNULL(dblQuantityDelivered,0))
+						FROM tblTMDeliveryHistoryDetail
+						WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
+					)A
+					
+					---Update Site Info
+					UPDATE tblTMSite
+					SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + A.dblQuantityTotal
+						,dblYTDSales = ISNULL(dblYTDSales,0.0) + ISNULL(A.dblSalesTotal,0.)
+						,dtmLastReadingUpdate = @dtmInvoiceDate
+						,dblLastDeliveredGal = dblQuantityTotal
+					FROM(
+						SELECT dblQuantityTotal = SUM(ISNULL(dblQtyShipped,0))
+							,dblSalesTotal = SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0))
+						FROM #tmpSiteInvoiceLineItems
+					)A
+					WHERE intSiteID = @intSiteId
+					
+					---Update Site Estimated Gals and last gals in tank
+					UPDATE tblTMSite
+					SET dblEstimatedPercentLeft = A.dblPercentAfterDelivery
+						,dblEstimatedGallonsLeft = ISNULL(A.dblPercentAfterDelivery,0.0) * tblTMSite.dblTotalCapacity /100
+					FROM(
+						SELECT   
+							dblPercentAfterDelivery = MAX(dblPercentAfterDelivery)
+						FROM tblTMDeliveryHistoryDetail
+					)A
+					WHERE tblTMSite.intSiteID = @intSiteId
 
-							---- Mark the invoice details as processed for the site
-							UPDATE #tmpInvoiceDetail
-							SET ysnTMProcessed = 1
-							FROM #tmpSiteInvoiceLineItems A
-							WHERE #tmpInvoiceDetail.intInvoiceDetailId = A.intInvoiceDetailId
-						END
-					END
+					UPDATE tblTMSite
+					SET dblLastDeliveredGal = A.dblShippedQuantity
+						,dblLastGalsInTank =   ISNULL(dblTotalCapacity,0)  * ISNULL(A.dblPercentAfterDelivery,0)/100
+					FROM(
+						SELECT   
+							dblPercentAfterDelivery = MAX(dblPercentAfterDelivery)
+							,dblShippedQuantity = SUM(ISNULL(dblQuantityDelivered,0.0))
+						FROM tblTMDeliveryHistoryDetail		
+					)A
+					
+					---- get the invoicedetail Id of the highest percent full
+					SELECT TOP 1 @intTopInvoiceDetailId = intInvoiceDetailId 
+					FROM tblTMDeliveryHistoryDetail
+					ORDER BY dblPercentAfterDelivery DESC, intInvoiceDetailId ASC
+					
+					SET @dblNewBurnRate = dbo.[fnTMComputeNewBurnRate](@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,@intNewDeliveryHistoryId) 
+					
+					---Update Site Burn Rate, dblDegreeDayBetweenDelivery,intNextDeliveryDegreeDay based on the new calculated burn rate
+					UPDATE tblTMSite
+					SET dblBurnRate = (CASE WHEN ysnAdjustBurnRate = 1 
+											THEN @dblNewBurnRate
+											ELSE dblBurnRate 
+										END)
+						,dblDegreeDayBetweenDelivery = @dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END)
+						,intNextDeliveryDegreeDay = @dblAccumulatedDegreeDay + (@dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END))
+					WHERE intSiteID = @intSiteId
+
+					----UPDATE Delivery history header for the new calc burnrate 
+					UPDATE tblTMDeliveryHistory
+						SET 
+						dblBurnRateAfterDelivery = dbo.[fnTMComputeNewBurnRate](@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,@intNewDeliveryHistoryId)
+						,dblCalculatedBurnRate = dbo.[fnTMGetCalculatedBurnRate](@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,0,@intNewDeliveryHistoryId)
+					WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
+					
+					
+					---- Update forecasted nad estimated % left
+					EXEC uspTMUpdateEstimatedValuesBySite @intSiteId
+					EXEC uspTMUpdateForecastedValuesBySite @intSiteId
 				END
 				ELSE
 				BEGIN
-					PRINT 'Standard Multiple'
-					
-					IF(@strTransactionType = 'Invoice')
+					PRINT 'Previous Dates'
+					IF EXISTS(SELECT TOP 1 1 FROM tblTMDeliveryHistory WHERE intSiteID = @intSiteId AND dtmInvoiceDate = @dtmInvoiceDate)
 					BEGIN
-						PRINT 'Invoice'
-						---- Insert Header
+						PRINT 'Has previous entry'
+						
+						-----Get the previous delivery record
+						SELECT TOP 1 @intNewDeliveryHistoryId = intDeliveryHistoryID FROM tblTMDeliveryHistory WHERE intSiteID = @intSiteId AND dtmInvoiceDate = @dtmInvoiceDate
+						
+						---Add to detail of the delivery history
+						INSERT INTO tblTMDeliveryHistoryDetail(
+						intDeliveryHistoryID
+						,dblPercentAfterDelivery
+						,dblExtendedAmount
+						,dblQuantityDelivered
+						,strInvoiceNumber
+						,strItemNumber
+						,intInvoiceDetailId
+						)
+						SELECT 
+							intDeliveryHistoryID = @intNewDeliveryHistoryId
+							,dblPercentAfterDelivery = ISNULL(dblPercentFull,0)
+							,dblExtendedAmount = ISNULL(dblTotal,0) + ISNULL(dblTotalTax,0)
+							,dblQuantityDelivered = dblQtyShipped
+							,strInvoiceNumber = B.strInvoiceNumber
+							,strItemNumber = C.strItemNo
+							,intInvoiceDetailId
+						FROM #tmpSiteInvoiceLineItems A
+						INNER JOIN tblARInvoice B
+							ON A.intInvoiceId = B.intInvoiceId
+						INNER JOIN tblICItem C
+							ON A.intItemId = C.intItemId
+							
+						---- Update delivery History Table Header
+						UPDATE tblTMDeliveryHistory
+							SET dblActualPercentAfterDelivery = A.dblPercentAfterDelivery
+							,strInvoiceNumber = A.strInvoiceNumber
+							,strProductDelivered = A.strItemNumber
+							,dblGallonsInTankAfterDelivery = A.dblGalsAfterDelivery
+						FROM (
+							SELECT TOP 1 
+								Z.dblPercentAfterDelivery
+								,Z.strInvoiceNumber
+								,Z.strItemNumber
+								,dblGalsAfterDelivery = ISNULL(Z.dblPercentAfterDelivery,0) * ISNULL(X.dblTotalCapacity,0) / 100
+							FROM tblTMDeliveryHistoryDetail Z
+							INNER JOIN tblTMDeliveryHistory Y
+								ON Z.intDeliveryHistoryID = Y.intDeliveryHistoryID
+							INNER JOIN tblTMSite X
+								ON Y.intSiteID = X.intSiteID
+							WHERE Z.intDeliveryHistoryID = @intNewDeliveryHistoryId
+							ORDER BY Z.dblPercentAfterDelivery DESC, Z.intInvoiceDetailId ASC
+						)A
+						WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
+						
+						UPDATE tblTMDeliveryHistory
+						SET dblExtendedAmount = A.dblExtendedAmount
+							,dblQuantityDelivered = A.dblQuantityDelivered
+						FROM(
+							SELECT TOP 1 
+								dblExtendedAmount = SUM(ISNULL(dblExtendedAmount,0))
+								,dblQuantityDelivered = SUM(ISNULL(dblQuantityDelivered,0))
+							FROM tblTMDeliveryHistoryDetail
+							WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
+						)A
+						
+						-----Update Site
+						UPDATE tblTMSite
+						SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + A.dblQuantityTotal
+							,dblYTDSales = ISNULL(dblYTDSales,0.0) + A.dblSalesTotal
+						FROM(
+							SELECT dblQuantityTotal = SUM(ISNULL(dblQtyShipped,0))
+								,dblSalesTotal = SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0))
+							FROM #tmpSiteInvoiceLineItems
+						)A
+						WHERE intSiteID = @intSiteId
+						
+						
+					END
+					ELSE
+					BEGIN
+						PRINT 'No previous entry'
+						
 						INSERT INTO tblTMDeliveryHistory(
 							strInvoiceNumber
 							,strBulkPlantNumber
@@ -599,22 +478,20 @@ BEGIN
 							,dtmWillCallDispatch
 							,strWillCallOrderNumber
 							,intWillCallContractId
-							,intInvoiceId
-					
 						)
 						SELECT TOP 1
 							strInvoiceNumber = C.strInvoiceNumber
 							,strBulkPlantNumber = D.strLocationName
 							,dtmInvoiceDate = C.dtmDate
 							,strProductDelivered = E.strItemNo
-							,dblQuantityDelivered = B.dblQtyShipped
+							,dblQuantityDelivered = (SELECT SUM(ISNULL(dblQtyShipped,0.0)) FROM #tmpSiteInvoiceLineItems)
 							,intDegreeDayOnDeliveryDate = @dblAccumulatedDegreeDay
 							,intDegreeDayOnLastDeliveryDate = @dblLastAccumulatedDegreeDay
-							,dblBurnRateAfterDelivery = dbo.[fnTMComputeNewBurnRate](A.intSiteID,B.intInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,1)
-							,dblCalculatedBurnRate = dbo.[fnTMGetCalculatedBurnRate](A.intSiteID,B.intInvoiceDetailId,@intClockReadingId,1)
-							,ysnAdjustBurnRate = ISNULL(A.ysnAdjustBurnRate,0)
-							,intElapsedDegreeDaysBetweenDeliveries = dbo.fnTMGetElapseDegreeDayForCalculation(@intSiteId,@intInvoiceDetailId)
-							,intElapsedDaysBetweenDeliveries = @intElapseDays
+							,dblBurnRateAfterDelivery = A.dblBurnRate
+							,dblCalculatedBurnRate = A.dblBurnRate
+							,ysnAdjustBurnRate = 0
+							,intElapsedDegreeDaysBetweenDeliveries = 0
+							,intElapsedDaysBetweenDeliveries = 0
 							,strSeason = H.strCurrentSeason
 							,dblWinterDailyUsageBetweenDeliveries = A.dblWinterDailyUse
 							,dblSummerDailyUsageBetweenDeliveries = A.dblSummerDailyUse
@@ -628,27 +505,26 @@ BEGIN
 							,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
 							,intSiteID = A.intSiteID
 							,strSalesPersonID = I.strSalespersonId
-							,dblExtendedAmount = B.dblTotal + ISNULL(B.dblTotalTax,0.0)
-							,ysnForReview = 0
-							,dtmMarkForReviewDate = NULL
-							,dblWillCallCalculatedQuantity  = G.dblQuantity
-							,dblWillCallDesiredQuantity = G.dblMinimumQuantity
-							,intWillCallDriverId = G.intDriverID
-							,intWillCallProductId = G.intProductID
-							,intWillCallSubstituteProductId = G.intSubstituteProductID
-							,dblWillCallPrice = G.dblPrice
-							,intWillCallDeliveryTermId = G.intDeliveryTermID
-							,dtmWillCallRequestedDate = G.dtmRequestedDate
-							,intWillCallPriority = G.intPriority
-							,dblWillCallTotal = G.dblTotal
-							,strWillCallComments = G.strComments
-							,dtmWillCallCallInDate = G.dtmCallInDate
-							,intWillCallUserId = G.intUserID
-							,ysnWillCallPrinted = G.ysnCallEntryPrinted
-							,dtmWillCallDispatch = G.dtmDispatchingDate
-							,strWillCallOrderNumber = G.strOrderNumber
-							,intWillCallContractId = G.intContractId
-							,intInvoiceId = C.intInvoiceId
+							,dblExtendedAmount = (SELECT SUM(ISNULL(dblTotal,0.0)) + SUM(ISNULL(dblTotalTax,0.0)) FROM #tmpSiteInvoiceLineItems)
+							,ysnForReview = 1
+							,dtmMarkForReviewDate = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
+							,dblWillCallCalculatedQuantity  = NULL
+							,dblWillCallDesiredQuantity = NULL
+							,intWillCallDriverId = NULL
+							,intWillCallProductId = NULL
+							,intWillCallSubstituteProductId = NULL
+							,dblWillCallPrice = NULL
+							,intWillCallDeliveryTermId = NULL
+							,dtmWillCallRequestedDate = NULL
+							,intWillCallPriority = NULL
+							,dblWillCallTotal = NULL
+							,strWillCallComments = NULL
+							,dtmWillCallCallInDate = NULL
+							,intWillCallUserId = NULL
+							,ysnWillCallPrinted = NULL
+							,dtmWillCallDispatch = NULL
+							,strWillCallOrderNumber = NULL
+							,intWillCallContractId = NULL
 						FROM tblTMSite A
 						INNER JOIN tblARInvoiceDetail B
 							ON A.intSiteID = B.intSiteId
@@ -658,7 +534,7 @@ BEGIN
 							ON C.intCompanyLocationId = D.intCompanyLocationId
 						INNER JOIN tblICItem E
 							ON B.intItemId = E.intItemId
-						INNER JOIN #tmpSiteInvoiceLineItems F
+						INNER JOIN (SELECT TOP 1 * FROM #tmpSiteInvoiceLineItems) F
 							ON B.intInvoiceDetailId = F.intInvoiceDetailId
 						LEFT JOIN tblTMDispatch G
 							ON A.intSiteID = G.intSiteID
@@ -666,499 +542,250 @@ BEGIN
 							ON A.intClockID = H.intClockID
 						LEFT JOIN tblARSalesperson I
 							ON I.intEntitySalespersonId = C.intEntitySalespersonId
-						ORDER BY F.dblPercentFull DESC,F.intInvoiceDetailId ASC
-
+						
 						SET @intNewDeliveryHistoryId = @@IDENTITY
-
-						---- INSERT Delivery History Details
+						
+						--Insert Delivery History Detail	
 						INSERT INTO tblTMDeliveryHistoryDetail(
-							strInvoiceNumber
-							,dblQuantityDelivered
-							,strItemNumber
-							,intDeliveryHistoryID
+							intDeliveryHistoryID
 							,dblPercentAfterDelivery
 							,dblExtendedAmount
+							,dblQuantityDelivered
+							,strInvoiceNumber
+							,strItemNumber
 							,intInvoiceDetailId
 						)
 						SELECT 
-							strInvoiceNumber = B.strInvoiceNumber
-							,dblQuantityDelivered = A.dblQtyShipped
+							intDeliveryHistoryID = @intNewDeliveryHistoryId
+							,dblPercentAfterDelivery = ISNULL(dblPercentFull,0)
+							,dblExtendedAmount = ISNULL(dblTotal,0) + ISNULL(dblTotalTax,0)
+							,dblQuantityDelivered = dblQtyShipped
+							,strInvoiceNumber = B.strInvoiceNumber
 							,strItemNumber = C.strItemNo
-							,intDeliveryHistoryID = @intNewDeliveryHistoryId
-							,dblPercentAfterDelivery = A.dblPercentFull
-							,dblExtendedAmount = ISNULL(A.dblTotal,0) + ISNULL(A.dblTotalTax,0)
-							,intInvoiceDetailId = A.intInvoiceDetailId
+							,intInvoiceDetailId
 						FROM #tmpSiteInvoiceLineItems A
 						INNER JOIN tblARInvoice B
 							ON A.intInvoiceId = B.intInvoiceId
 						INNER JOIN tblICItem C
 							ON A.intItemId = C.intItemId
-						
-						-----GET totals of the invoice details
-						SELECT TOP 1 
-							@dblPercentAfterDelivery = dblPercentFull 
-						FROM #tmpSiteInvoiceLineItems
-
-						SET @dblQuantityShipped = (SELECT SUM(ISNULL(dblQtyShipped,0)) FROM #tmpSiteInvoiceLineItems)
-						SET @dblItemTotal = (SELECT SUM(ISNULL(dblTotal,0)) FROM #tmpSiteInvoiceLineItems)
-						SET @dblTotalTax = (SELECT SUM(ISNULL(dblTotalTax,0)) FROM #tmpSiteInvoiceLineItems)
-
-						----Update Header Quantity Delivered and extended amount Based on Detail total and set intInvoiceDetailId to null
-						UPDATE tblTMDeliveryHistory
-						SET dblQuantityDelivered = @dblQuantityShipped
-							,dblExtendedAmount = @dblItemTotal + @dblTotalTax
-							,intInvoiceDetailId = NULL
-						WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
-
-						
-						
-						---Update Site Info
+							
+						-----Update Site
 						UPDATE tblTMSite
-						SET intLastDeliveryDegreeDay = @dblAccumulatedDegreeDay
-							,dblLastGalsInTank =   ISNULL(dblTotalCapacity,0)  * ISNULL(@dblPercentAfterDelivery,0)/100
-							,dblYTDGalsThisSeason = dblYTDGalsThisSeason + @dblQuantityShipped
-							,dblYTDSales = dblYTDSales + @dblItemTotal + @dblTotalTax
-							,dblLastDeliveredGal = @dblQuantityShipped
-							,dtmLastDeliveryDate = @dtmInvoiceDate
-							,dtmLastUpdated = GETDATE()
-							,ysnDeliveryTicketPrinted = 0
-							,dblEstimatedPercentLeft = @dblPercentAfterDelivery
-							,dblEstimatedGallonsLeft = dblTotalCapacity * @dblPercentAfterDelivery /100
-							,dblPreviousBurnRate = (CASE WHEN ysnAdjustBurnRate = 1 
-														THEN dblBurnRate 
-														ELSE dblPreviousBurnRate 
-													END)
-							,dblBurnRate = (CASE WHEN ysnAdjustBurnRate = 1 
-												THEN @dblNewBurnRate
-												ELSE dblBurnRate 
-											END)
-							,dblDegreeDayBetweenDelivery = @dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END)
-							,intNextDeliveryDegreeDay = @dblAccumulatedDegreeDay + (@dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END))
-							,dtmLastReadingUpdate = @dtmInvoiceDate
+						SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) + A.dblQuantityTotal
+							,dblYTDSales = ISNULL(dblYTDSales,0.0) + A.dblSalesTotal
+						FROM(
+							SELECT dblQuantityTotal = SUM(ISNULL(dblQtyShipped,0))
+								,dblSalesTotal = SUM(ISNULL(dblTotal,0)) + SUM(ISNULL(dblTotalTax,0))
+							FROM #tmpSiteInvoiceLineItems
+						)A
 						WHERE intSiteID = @intSiteId
-					
 				
-						----Update Next Julian Calendar Date of the site
-						UPDATE tblTMSite
-						SET dtmNextDeliveryDate = (CASE WHEN intFillMethodId = @intJulianCalendarFillId THEN dbo.fnTMGetNextJulianDeliveryDate(intSiteID) ELSE NULL END)
-							,intConcurrencyId = intConcurrencyId + 1
-						WHERE intSiteID = @intSiteId
-
-						---- Mark the invoice details as processed for the site
-						UPDATE #tmpInvoiceDetail
-						SET ysnTMProcessed = 1
-						FROM #tmpSiteInvoiceLineItems A
-						WHERE #tmpInvoiceDetail.intInvoiceDetailId = A.intInvoiceDetailId
-
 					END
 				END
 			END
 			ELSE
 			BEGIN
-				---Single Invoice Begin Here
-				PRINT 'Single Invoice'
 				---------GET New Burn rate 
-				SET @dblNewBurnRate = dbo.[fnTMComputeNewBurnRate](@intSiteId,@intInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0) 
+				SET @dblNewBurnRate = dbo.[fnTMComputeNewBurnRate](@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,NULL) 
 				
-				IF(@ysnLessThanLastDeliveryDate = 1)
+				IF(@strTransactionType = 'Invoice')
 				BEGIN
-					----Left-over Invoices
-					PRINT 'Single left over Invoice'
-					IF(@strTransactionType = 'Invoice')
-					BEGIN
-						PRINT 'INVOICE'
-						----- Check for previous deliveries with same date
-						IF EXISTS(SELECT TOP 1 1 FROM tblTMDeliveryHistory WHERE dtmInvoiceDate = @dtmInvoiceDate AND intSiteID = @intSiteId)
-						BEGIN
-							PRINT 'Has previous transaction'
-							SELECT TOP 1 @intPreviousDeliveryHistoryId = intDeliveryHistoryID
-								,@intDeliveryHistoryInvoiceDetailId = intInvoiceDetailId
-							FROM tblTMDeliveryHistory WHERE dtmInvoiceDate = @dtmInvoiceDate AND intSiteID = @intSiteId
-
-							------Check if have Delivery Detail Records
-							IF EXISTS(SELECT TOP 1 1 FROM tblTMDeliveryHistoryDetail WHERE intDeliveryHistoryID = @intPreviousDeliveryHistoryId)
-							BEGIN
-								PRINT 'With Existing Delivery Detail'
-
-							END
-							ELSE
-							BEGIN
-								PRINT 'Without Existing Delivery Detail'
-
-								--- insert Header to detail
-								INSERT INTO tblTMDeliveryHistoryDetail(
-									strInvoiceNumber
-									,dblQuantityDelivered
-									,strItemNumber
-									,intDeliveryHistoryID
-									,dblPercentAfterDelivery
-									,dblExtendedAmount
-									,intInvoiceDetailId
-								)
-								SELECT TOP 1 
-									strInvoiceNumber = A.strInvoiceNumber
-									,dblQuantityDelivered = A.dblQuantityDelivered
-									,strItemNumber = A.strProductDelivered
-									,intDeliveryHistoryID = A.intDeliveryHistoryID
-									,dblPercentAfterDelivery = dblActualPercentAfterDelivery
-									,dblExtendedAmount = ISNULL(B.dblTotal,0) + ISNULL(B.dblTotalTax,0)
-									,intInvoiceDetailId = A.intInvoiceDetailId
-								FROM tblTMDeliveryHistory A
-								INNER JOIN tblARInvoiceDetail B
-									ON A.intInvoiceDetailId = B.intInvoiceDetailId
-								WHERE intDeliveryHistoryID = @intPreviousDeliveryHistoryId					
-							END
-
-							----- Insert Invoicedetail to History Detail
-							INSERT INTO tblTMDeliveryHistoryDetail(
-								strInvoiceNumber
-								,dblQuantityDelivered
-								,strItemNumber
-								,intDeliveryHistoryID
-								,dblPercentAfterDelivery
-								,dblExtendedAmount
-								,intInvoiceDetailId
-							)
-							SELECT 
-								strInvoiceNumber = B.strInvoiceNumber
-								,dblQuantityDelivered = A.dblQtyShipped
-								,strItemNumber = C.strItemNo
-								,intDeliveryHistoryID = @intPreviousDeliveryHistoryId
-								,dblPercentAfterDelivery = A.dblPercentFull
-								,dblExtendedAmount = ISNULL(A.dblTotal,0) + ISNULL(A.dblTotalTax,0)
-								,intInvoiceDetailId = A.intInvoiceDetailId
-							FROM #tmpSiteInvoiceLineItems A
-							INNER JOIN tblARInvoice B
-								ON A.intInvoiceId = B.intInvoiceId
-							INNER JOIN tblICItem C
-								ON A.intItemId = C.intItemId
-							WHERE intInvoiceDetailId <> ISNULL((SELECT intInvoiceDetailId FROM tblTMDeliveryHistory WHERE intDeliveryHistoryID = @intPreviousDeliveryHistoryId),0)
-
-
-							----Check which has higher percent after delivery AND update delivery Header
-							IF((SELECT dblActualPercentAfterDelivery FROM tblTMDeliveryHistory WHERE intDeliveryHistoryID = @intPreviousDeliveryHistoryId) < (SELECT TOP 1 dblPercentFull FROM #tmpSiteInvoiceLineItems))
-							BEGIN
-								UPDATE tblTMDeliveryHistory
-								SET	intInvoiceDetailId = NULL
-									,strInvoiceNumber = Z.strInvoiceNumber
-								FROM (
-									SELECT TOP 1
-										B.strInvoiceNumber
-										,C.strItemNo
-										,A.dblPercentFull
-										,dblExtendedAmount = ISNULL(A.dblTotal,0) + ISNULL(A.dblTotalTax,0)
-										,strProductDelivered = Z.strItemNo
-									FROM #tmpSiteInvoiceLineItems A
-									INNER JOIN tblARInvoice B
-										ON A.intInvoiceId = B.intInvoiceId
-									INNER JOIN tblICItem C
-										ON A.intItemId = C.intItemId 
-									ORDER BY A.dblPercentFull DESC, A.intInvoiceDetailId ASC
-								)Z
-								WHERE intDeliveryHistoryID = @intPreviousDeliveryHistoryId
-							END
-
-							----Update Header Quantity Delivered and extended amount Based on Detail total and set intInvoiceDetailId to null
-							UPDATE tblTMDeliveryHistory
-							SET dblQuantityDelivered = (SELECT SUM(ISNULL(dblQuantityDelivered,0)) FROM tblTMDeliveryHistoryDetail WHERE intDeliveryHistoryID = @intPreviousDeliveryHistoryId)
-								,dblExtendedAmount = (SELECT SUM(ISNULL(dblExtendedAmount,0)) FROM tblTMDeliveryHistoryDetail WHERE intDeliveryHistoryID = @intPreviousDeliveryHistoryId)
-								,intInvoiceDetailId = NULL
-							WHERE intDeliveryHistoryID = @intPreviousDeliveryHistoryId
-
-							---Update Site Info
-							UPDATE tblTMSite
-							SET 
-								dblYTDGalsThisSeason = dblYTDGalsThisSeason + ISNULL((SELECT SUM(ISNULL(dblQtyShipped,0)) FROM #tmpSiteInvoiceLineItems),0)
-								,dblYTDSales = dblYTDSales + ISNULL((SELECT SUM(ISNULL(dblTotal,0) + ISNULL(dblTotalTax,0)) FROM #tmpSiteInvoiceLineItems),0)
-								,intConcurrencyId = intConcurrencyId + 1
-							WHERE intSiteID = @intSiteId
-						END
-						ELSE
-						BEGIN
-							PRINT 'No Previous Transaction'
-							---- Insert Delivery History
-							INSERT INTO tblTMDeliveryHistory(
-								strInvoiceNumber
-								,strBulkPlantNumber
-								,dtmInvoiceDate
-								,strProductDelivered
-								,dblQuantityDelivered
-								,intDegreeDayOnDeliveryDate
-								,intDegreeDayOnLastDeliveryDate
-								,dblBurnRateAfterDelivery
-								,dblCalculatedBurnRate
-								,ysnAdjustBurnRate
-								,intElapsedDegreeDaysBetweenDeliveries
-								,intElapsedDaysBetweenDeliveries
-								,strSeason
-								,dblWinterDailyUsageBetweenDeliveries
-								,dblSummerDailyUsageBetweenDeliveries
-								,dblGallonsInTankbeforeDelivery
-								,dblGallonsInTankAfterDelivery
-								,dblEstimatedPercentBeforeDelivery
-								,dblActualPercentAfterDelivery
-								,dblMeterReading
-								,dblLastMeterReading
-								,intUserID
-								,dtmLastUpdated
-								,intSiteID
-								,strSalesPersonID
-								,dblExtendedAmount
-								,ysnForReview
-								,dtmMarkForReviewDate
-								,dblWillCallCalculatedQuantity
-								,dblWillCallDesiredQuantity
-								,intWillCallDriverId
-								,intWillCallProductId
-								,intWillCallSubstituteProductId
-								,dblWillCallPrice
-								,intWillCallDeliveryTermId
-								,dtmWillCallRequestedDate
-								,intWillCallPriority
-								,dblWillCallTotal
-								,strWillCallComments
-								,dtmWillCallCallInDate
-								,intWillCallUserId
-								,ysnWillCallPrinted
-								,dtmWillCallDispatch
-								,strWillCallOrderNumber
-								,intWillCallContractId
-								,intInvoiceId
-								,intInvoiceDetailId
+					PRINT 'Invoice'
+					INSERT INTO tblTMDeliveryHistory(
+						strInvoiceNumber
+						,strBulkPlantNumber
+						,dtmInvoiceDate
+						,strProductDelivered
+						,dblQuantityDelivered
+						,intDegreeDayOnDeliveryDate
+						,intDegreeDayOnLastDeliveryDate
+						,dblBurnRateAfterDelivery
+						,dblCalculatedBurnRate
+						,ysnAdjustBurnRate
+						,intElapsedDegreeDaysBetweenDeliveries
+						,intElapsedDaysBetweenDeliveries
+						,strSeason
+						,dblWinterDailyUsageBetweenDeliveries
+						,dblSummerDailyUsageBetweenDeliveries
+						,dblGallonsInTankbeforeDelivery
+						,dblGallonsInTankAfterDelivery
+						,dblEstimatedPercentBeforeDelivery
+						,dblActualPercentAfterDelivery
+						,dblMeterReading
+						,dblLastMeterReading
+						,intUserID
+						,dtmLastUpdated
+						,intSiteID
+						,strSalesPersonID
+						,dblExtendedAmount
+						,ysnForReview
+						,dtmMarkForReviewDate
+						,dblWillCallCalculatedQuantity
+						,dblWillCallDesiredQuantity
+						,intWillCallDriverId
+						,intWillCallProductId
+						,intWillCallSubstituteProductId
+						,dblWillCallPrice
+						,intWillCallDeliveryTermId
+						,dtmWillCallRequestedDate
+						,intWillCallPriority
+						,dblWillCallTotal
+						,strWillCallComments
+						,dtmWillCallCallInDate
+						,intWillCallUserId
+						,ysnWillCallPrinted
+						,dtmWillCallDispatch
+						,strWillCallOrderNumber
+						,intWillCallContractId
+						,dtmSiteLastDelivery
+						,dblSiteBurnRate
+						,dblSitePreviousBurnRate	
+						,dtmSiteOnHoldStartDate
+						,dtmSiteOnHoldEndDate
+						,ysnSiteHoldDDCalculations
+						,ysnSiteOnHold
+					)
+					SELECT TOP 1
+						strInvoiceNumber = C.strInvoiceNumber
+						,strBulkPlantNumber = D.strLocationName
+						,dtmInvoiceDate = C.dtmDate
+						,strProductDelivered = E.strItemNo
+						,dblQuantityDelivered = (SELECT SUM(ISNULL(dblQtyShipped,0.0)) FROM #tmpSiteInvoiceLineItems)
+						,intDegreeDayOnDeliveryDate = @dblAccumulatedDegreeDay
+						,intDegreeDayOnLastDeliveryDate = @dblLastAccumulatedDegreeDay
+						,dblBurnRateAfterDelivery = dbo.[fnTMComputeNewBurnRate](A.intSiteID,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,null)
+						,dblCalculatedBurnRate = dbo.[fnTMGetCalculatedBurnRate](A.intSiteID,@intTopInvoiceDetailId,@intClockReadingId,0,null)
+						,ysnAdjustBurnRate = ISNULL(A.ysnAdjustBurnRate,0)
+						,intElapsedDegreeDaysBetweenDeliveries = dbo.fnTMGetElapseDegreeDayForCalculation(@intSiteId,@intTopInvoiceDetailId,null)
+						,intElapsedDaysBetweenDeliveries = @intElapseDays
+						,strSeason = H.strCurrentSeason
+						,dblWinterDailyUsageBetweenDeliveries = A.dblWinterDailyUse
+						,dblSummerDailyUsageBetweenDeliveries = A.dblSummerDailyUse
+						,dblGallonsInTankbeforeDelivery = A.dblEstimatedGallonsLeft
+						,dblGallonsInTankAfterDelivery = A.dblTotalCapacity * (ISNULL(B.dblPercentFull,0)/100)
+						,dblEstimatedPercentBeforeDelivery = A.dblEstimatedPercentLeft
+						,dblActualPercentAfterDelivery = B.dblPercentFull
+						,dblMeterReading = B.dblNewMeterReading
+						,dblLastMeterReading = A.dblLastMeterReading
+						,intUserID = @intUserId
+						,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
+						,intSiteID = A.intSiteID
+						,strSalesPersonID = I.strSalespersonId
+						,dblExtendedAmount = (SELECT SUM(ISNULL(dblTotal,0.0)) + SUM(ISNULL(dblTotalTax,0.0)) FROM #tmpSiteInvoiceLineItems)
+						,ysnForReview = 0
+						,dtmMarkForReviewDate = NULL
+						,dblWillCallCalculatedQuantity  = G.dblQuantity
+						,dblWillCallDesiredQuantity = G.dblMinimumQuantity
+						,intWillCallDriverId = G.intDriverID
+						,intWillCallProductId = G.intProductID
+						,intWillCallSubstituteProductId = G.intSubstituteProductID
+						,dblWillCallPrice = G.dblPrice
+						,intWillCallDeliveryTermId = G.intDeliveryTermID
+						,dtmWillCallRequestedDate = G.dtmRequestedDate
+						,intWillCallPriority = G.intPriority
+						,dblWillCallTotal = G.dblTotal
+						,strWillCallComments = G.strComments
+						,dtmWillCallCallInDate = G.dtmCallInDate
+						,intWillCallUserId = G.intUserID
+						,ysnWillCallPrinted = G.ysnCallEntryPrinted
+						,dtmWillCallDispatch = G.dtmDispatchingDate
+						,strWillCallOrderNumber = G.strOrderNumber
+						,intWillCallContractId = G.intContractId
+						,dtmSiteLastDelivery = A.dtmLastDeliveryDate	
+						,dblSiteBurnRate = A.dblBurnRate
+						,dblSitePreviousBurnRate	= A.dblPreviousBurnRate
+						,dtmSiteOnHoldStartDate = A.dtmOnHoldStartDate
+						,dtmSiteOnHoldEndDate = A.dtmOnHoldEndDate
+						,ysnSiteHoldDDCalculations = A.ysnHoldDDCalculations
+						,ysnSiteOnHold = A.ysnOnHold
+					FROM tblTMSite A
+					INNER JOIN tblARInvoiceDetail B
+						ON A.intSiteID = B.intSiteId
+					INNER JOIN tblARInvoice C
+						ON B.intInvoiceId = C.intInvoiceId
+					INNER JOIN tblSMCompanyLocation D
+						ON C.intCompanyLocationId = D.intCompanyLocationId
+					INNER JOIN tblICItem E
+						ON B.intItemId = E.intItemId
+					INNER JOIN (SELECT TOP 1 * FROM #tmpSiteInvoiceLineItems) F
+						ON B.intInvoiceDetailId = F.intInvoiceDetailId
+					LEFT JOIN tblTMDispatch G
+						ON A.intSiteID = G.intSiteID
+					INNER JOIN tblTMClock H
+						ON A.intClockID = H.intClockID
+					LEFT JOIN tblARSalesperson I
+						ON I.intEntitySalespersonId = C.intEntitySalespersonId
 					
-							)
-							SELECT
-								strInvoiceNumber = C.strInvoiceNumber
-								,strBulkPlantNumber = D.strLocationName
-								,dtmInvoiceDate = C.dtmDate
-								,strProductDelivered = E.strItemNo
-								,dblQuantityDelivered = B.dblQtyShipped
-								,intDegreeDayOnDeliveryDate = @dblAccumulatedDegreeDay
-								,intDegreeDayOnLastDeliveryDate = @dblLastAccumulatedDegreeDay
-								,dblBurnRateAfterDelivery = A.dblBurnRate
-								,dblCalculatedBurnRate = A.dblBurnRate
-								,ysnAdjustBurnRate = 0
-								,intElapsedDegreeDaysBetweenDeliveries = 0
-								,intElapsedDaysBetweenDeliveries = 0
-								,strSeason = H.strCurrentSeason
-								,dblWinterDailyUsageBetweenDeliveries = A.dblWinterDailyUse
-								,dblSummerDailyUsageBetweenDeliveries = A.dblSummerDailyUse
-								,dblGallonsInTankbeforeDelivery = A.dblEstimatedGallonsLeft
-								,dblGallonsInTankAfterDelivery = A.dblTotalCapacity * (ISNULL(B.dblPercentFull,0)/100)
-								,dblEstimatedPercentBeforeDelivery = A.dblEstimatedPercentLeft
-								,dblActualPercentAfterDelivery = B.dblPercentFull
-								,dblMeterReading = B.dblNewMeterReading
-								,dblLastMeterReading = A.dblLastMeterReading
-								,intUserID = @intUserId
-								,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
-								,intSiteID = A.intSiteID
-								,strSalesPersonID = I.strSalespersonId
-								,dblExtendedAmount = B.dblTotal + ISNULL(B.dblTotalTax,0.0)
-								,ysnForReview = 1
-								,dtmMarkForReviewDate = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
-								,dblWillCallCalculatedQuantity  = G.dblQuantity
-								,dblWillCallDesiredQuantity = G.dblMinimumQuantity
-								,intWillCallDriverId = G.intDriverID
-								,intWillCallProductId = G.intProductID
-								,intWillCallSubstituteProductId = G.intSubstituteProductID
-								,dblWillCallPrice = G.dblPrice
-								,intWillCallDeliveryTermId = G.intDeliveryTermID
-								,dtmWillCallRequestedDate = G.dtmRequestedDate
-								,intWillCallPriority = G.intPriority
-								,dblWillCallTotal = G.dblTotal
-								,strWillCallComments = G.strComments
-								,dtmWillCallCallInDate = G.dtmCallInDate
-								,intWillCallUserId = G.intUserID
-								,ysnWillCallPrinted = G.ysnCallEntryPrinted
-								,dtmWillCallDispatch = G.dtmDispatchingDate
-								,strWillCallOrderNumber = G.strOrderNumber
-								,intWillCallContractId = G.intContractId
-								,intInvoiceId = C.intInvoiceId
-								,intInvoiceDetailId = F.intInvoiceDetailId
-							FROM tblTMSite A
-							INNER JOIN tblARInvoiceDetail B
-								ON A.intSiteID = B.intSiteId
-							INNER JOIN tblARInvoice C
-								ON B.intInvoiceId = C.intInvoiceId
-							INNER JOIN tblSMCompanyLocation D
-								ON C.intCompanyLocationId = D.intCompanyLocationId
-							INNER JOIN tblICItem E
-								ON B.intItemId = E.intItemId
-							INNER JOIN #tmpSiteInvoiceLineItems F
-								ON B.intInvoiceDetailId = F.intInvoiceDetailId
-							LEFT JOIN tblTMDispatch G
-								ON A.intSiteID = G.intSiteID
-							INNER JOIN tblTMClock H
-								ON A.intClockID = H.intClockID
-							LEFT JOIN tblARSalesperson I
-								ON I.intEntitySalespersonId = C.intEntitySalespersonId
-				
-							---Update Site Info
-							UPDATE tblTMSite
-							SET 
-								dblYTDGalsThisSeason = dblYTDGalsThisSeason + @dblQuantityShipped
-								,dblYTDSales = dblYTDSales + @dblItemTotal + @dblTotalTax
-								,intConcurrencyId = intConcurrencyId + 1
-							WHERE intSiteID = @intSiteId
-						END
-					END
-				END
-				ELSE
-				BEGIN
-					---- Insert Delivery History
-					PRINT 'Standard Single'
-					IF(@strTransactionType = 'Invoice')
-					BEGIN
-						PRINT 'Invoice'
-						INSERT INTO tblTMDeliveryHistory(
-							--SELECT * FROM tblTMDeliveryHistory
-							strInvoiceNumber
-							,strBulkPlantNumber
-							,dtmInvoiceDate
-							,strProductDelivered
-							,dblQuantityDelivered
-							,intDegreeDayOnDeliveryDate
-							,intDegreeDayOnLastDeliveryDate
-							,dblBurnRateAfterDelivery
-							,dblCalculatedBurnRate
-							,ysnAdjustBurnRate
-							,intElapsedDegreeDaysBetweenDeliveries
-							,intElapsedDaysBetweenDeliveries
-							,strSeason
-							,dblWinterDailyUsageBetweenDeliveries
-							,dblSummerDailyUsageBetweenDeliveries
-							,dblGallonsInTankbeforeDelivery
-							,dblGallonsInTankAfterDelivery
-							,dblEstimatedPercentBeforeDelivery
-							,dblActualPercentAfterDelivery
-							,dblMeterReading
-							,dblLastMeterReading
-							,intUserID
-							,dtmLastUpdated
-							,intSiteID
-							,strSalesPersonID
-							,dblExtendedAmount
-							,ysnForReview
-							,dtmMarkForReviewDate
-							,dblWillCallCalculatedQuantity
-							,dblWillCallDesiredQuantity
-							,intWillCallDriverId
-							,intWillCallProductId
-							,intWillCallSubstituteProductId
-							,dblWillCallPrice
-							,intWillCallDeliveryTermId
-							,dtmWillCallRequestedDate
-							,intWillCallPriority
-							,dblWillCallTotal
-							,strWillCallComments
-							,dtmWillCallCallInDate
-							,intWillCallUserId
-							,ysnWillCallPrinted
-							,dtmWillCallDispatch
-							,strWillCallOrderNumber
-							,intWillCallContractId
-							,intInvoiceId
-							,intInvoiceDetailId
-						)
-						SELECT
-							strInvoiceNumber = C.strInvoiceNumber
-							,strBulkPlantNumber = D.strLocationName
-							,dtmInvoiceDate = C.dtmDate
-							,strProductDelivered = E.strItemNo
-							,dblQuantityDelivered = B.dblQtyShipped
-							,intDegreeDayOnDeliveryDate = @dblAccumulatedDegreeDay
-							,intDegreeDayOnLastDeliveryDate = @dblLastAccumulatedDegreeDay
-							,dblBurnRateAfterDelivery = dbo.[fnTMComputeNewBurnRate](A.intSiteID,B.intInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0)
-							,dblCalculatedBurnRate = dbo.[fnTMGetCalculatedBurnRate](A.intSiteID,B.intInvoiceDetailId,@intClockReadingId,0)
-							,ysnAdjustBurnRate = ISNULL(A.ysnAdjustBurnRate,0)
-							,intElapsedDegreeDaysBetweenDeliveries = dbo.fnTMGetElapseDegreeDayForCalculation(@intSiteId,@intInvoiceDetailId)
-							,intElapsedDaysBetweenDeliveries = @intElapseDays
-							,strSeason = H.strCurrentSeason
-							,dblWinterDailyUsageBetweenDeliveries = A.dblWinterDailyUse
-							,dblSummerDailyUsageBetweenDeliveries = A.dblSummerDailyUse
-							,dblGallonsInTankbeforeDelivery = A.dblEstimatedGallonsLeft
-							,dblGallonsInTankAfterDelivery = A.dblTotalCapacity * (ISNULL(B.dblPercentFull,0)/100)
-							,dblEstimatedPercentBeforeDelivery = A.dblEstimatedPercentLeft
-							,dblActualPercentAfterDelivery = B.dblPercentFull
-							,dblMeterReading = B.dblNewMeterReading
-							,dblLastMeterReading = A.dblLastMeterReading
-							,intUserID = @intUserId
-							,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
-							,intSiteID = A.intSiteID
-							,strSalesPersonID = I.strSalespersonId
-							,dblExtendedAmount = B.dblTotal + ISNULL(B.dblTotalTax,0.0)
-							,ysnForReview = 0
-							,dtmMarkForReviewDate = NULL
-							,dblWillCallCalculatedQuantity  = G.dblQuantity
-							,dblWillCallDesiredQuantity = G.dblMinimumQuantity
-							,intWillCallDriverId = G.intDriverID
-							,intWillCallProductId = G.intProductID
-							,intWillCallSubstituteProductId = G.intSubstituteProductID
-							,dblWillCallPrice = G.dblPrice
-							,intWillCallDeliveryTermId = G.intDeliveryTermID
-							,dtmWillCallRequestedDate = G.dtmRequestedDate
-							,intWillCallPriority = G.intPriority
-							,dblWillCallTotal = G.dblTotal
-							,strWillCallComments = G.strComments
-							,dtmWillCallCallInDate = G.dtmCallInDate
-							,intWillCallUserId = G.intUserID
-							,ysnWillCallPrinted = G.ysnCallEntryPrinted
-							,dtmWillCallDispatch = G.dtmDispatchingDate
-							,strWillCallOrderNumber = G.strOrderNumber
-							,intWillCallContractId = G.intContractId
-							,intInvoiceId = C.intInvoiceId
-							,intInvoiceDetailId = F.intInvoiceDetailId
-						FROM tblTMSite A
-						INNER JOIN tblARInvoiceDetail B
-							ON A.intSiteID = B.intSiteId
-						INNER JOIN tblARInvoice C
-							ON B.intInvoiceId = C.intInvoiceId
-						INNER JOIN tblSMCompanyLocation D
-							ON C.intCompanyLocationId = D.intCompanyLocationId
-						INNER JOIN tblICItem E
-							ON B.intItemId = E.intItemId
-						INNER JOIN #tmpSiteInvoiceLineItems F
-							ON B.intInvoiceDetailId = F.intInvoiceDetailId
-						INNER JOIN tblTMDispatch G
-							ON A.intSiteID = G.intSiteID
-						INNER JOIN tblTMClock H
-							ON A.intClockID = H.intClockID
-						LEFT JOIN tblARSalesperson I
-							ON I.intEntitySalespersonId = C.intEntitySalespersonId
-				
-						---Update Site Info
-						UPDATE tblTMSite
-						SET intLastDeliveryDegreeDay = @dblAccumulatedDegreeDay
-							,dblLastGalsInTank =   ISNULL(dblTotalCapacity,0)  * ISNULL(@dblPercentAfterDelivery,0)/100
-							,dblYTDGalsThisSeason = dblYTDGalsThisSeason + @dblQuantityShipped
-							,dblYTDSales = dblYTDSales + @dblItemTotal + @dblTotalTax
-							,dblLastDeliveredGal = @dblQuantityShipped
-							,dtmLastDeliveryDate = @dtmInvoiceDate
-							,dtmLastUpdated = GETDATE()
-							,ysnDeliveryTicketPrinted = 0
-							,dblEstimatedPercentLeft = @dblPercentAfterDelivery
-							,dblEstimatedGallonsLeft = dblTotalCapacity * @dblPercentAfterDelivery /100
-							,dblPreviousBurnRate = (CASE WHEN ysnAdjustBurnRate = 1 
-														THEN dblBurnRate 
-														ELSE dblPreviousBurnRate 
-													END)
-							,dblBurnRate = (CASE WHEN ysnAdjustBurnRate = 1 
-												THEN @dblNewBurnRate
-												ELSE dblBurnRate 
-											END)
-							,dblDegreeDayBetweenDelivery = @dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END)
-							,intNextDeliveryDegreeDay = @dblAccumulatedDegreeDay + (@dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END))
-							,dtmLastReadingUpdate = @dtmInvoiceDate
-						WHERE intSiteID = @intSiteId
+					SET @intNewDeliveryHistoryId = @@IDENTITY
 					
+					--Insert Delivery History Detail	
+					INSERT INTO tblTMDeliveryHistoryDetail(
+						intDeliveryHistoryID
+						,dblPercentAfterDelivery
+						,dblExtendedAmount
+						,dblQuantityDelivered
+						,strInvoiceNumber
+						,strItemNumber
+						,intInvoiceDetailId
+					)
+					SELECT 
+						intDeliveryHistoryID = @intNewDeliveryHistoryId
+						,dblPercentAfterDelivery = ISNULL(dblPercentFull,0)
+						,dblExtendedAmount = ISNULL(dblTotal,0) + ISNULL(dblTotalTax,0)
+						,dblQuantityDelivered = dblQtyShipped
+						,strInvoiceNumber = B.strInvoiceNumber
+						,strItemNumber = C.strItemNo
+						,intInvoiceDetailId
+					FROM #tmpSiteInvoiceLineItems A
+					INNER JOIN tblARInvoice B
+						ON A.intInvoiceId = B.intInvoiceId
+					INNER JOIN tblICItem C
+						ON A.intItemId = C.intItemId
+			
+					---Update Site Info
+					UPDATE tblTMSite
+					SET dblLastGalsInTank =   ISNULL(dblTotalCapacity,0)  * ISNULL(@dblPercentAfterDelivery,0)/100
+					WHERE intSiteID = @intSiteId
+					
+					UPDATE tblTMSite
+					SET intLastDeliveryDegreeDay = @dblAccumulatedDegreeDay
+						,dblLastGalsInTank =   ISNULL(dblTotalCapacity,0)  * ISNULL(@dblPercentAfterDelivery,0)/100
+						,dblYTDGalsThisSeason = dblYTDGalsThisSeason + @dblQuantityShipped
+						,dblYTDSales = dblYTDSales + @dblItemTotal + @dblTotalTax
+						,dblLastDeliveredGal = @dblQuantityShipped
+						,dtmLastDeliveryDate = @dtmInvoiceDate
+						,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
+						,ysnDeliveryTicketPrinted = 0
+						,dblEstimatedPercentLeft = @dblPercentAfterDelivery
+						,dblEstimatedGallonsLeft = dblTotalCapacity * @dblPercentAfterDelivery /100
+						,dblPreviousBurnRate = (CASE WHEN ysnAdjustBurnRate = 1 
+													THEN dblBurnRate 
+													ELSE dblPreviousBurnRate 
+												END)
+						,dblBurnRate = (CASE WHEN ysnAdjustBurnRate = 1 
+											THEN @dblNewBurnRate
+											ELSE dblBurnRate 
+										END)
+						,dblDegreeDayBetweenDelivery = @dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END)
+						,intNextDeliveryDegreeDay = @dblAccumulatedDegreeDay + (@dblNewBurnRate * (CASE WHEN (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) < 0 THEN 0 ELSE (ISNULL(dblLastGalsInTank,0.0) - ISNULL(dblTotalReserve,0.0)) END))
+						,dtmLastReadingUpdate = @dtmInvoiceDate
+					WHERE intSiteID = @intSiteId
 				
-						----Update Next Julian Calendar Date of the site
-						UPDATE tblTMSite
-						SET dtmNextDeliveryDate = (CASE WHEN intFillMethodId = @intJulianCalendarFillId THEN dbo.fnTMGetNextJulianDeliveryDate(intSiteID) ELSE NULL END)
-							,intConcurrencyId = intConcurrencyId + 1
-						WHERE intSiteID = @intSiteId
-					END
+			
+					----Update Next Julian Calendar Date of the site
+					UPDATE tblTMSite
+					SET dtmNextDeliveryDate = (CASE WHEN intFillMethodId = @intJulianCalendarFillId THEN dbo.fnTMGetNextJulianDeliveryDate(intSiteID) ELSE NULL END)
+						,intConcurrencyId = intConcurrencyId + 1
+					WHERE intSiteID = @intSiteId
+					
+					---- Update forecasted nad estimated % left
+					EXEC uspTMUpdateEstimatedValuesBySite @intSiteId
+					EXEC uspTMUpdateForecastedValuesBySite @intSiteId
+					
+					DELETE FROM tblTMDispatch
+					WHERE intSiteID = @intSiteId
 				END
+				
 			END
 		END
 		CONTINUELOOP:

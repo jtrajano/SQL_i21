@@ -29,7 +29,7 @@ BEGIN
 	
 	SET @intRowCount = 0
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM #tmpInvoiceDetail WHERE intSiteId IS NOT NULL AND ysnLeaseBilling <> 1)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM #tmpInvoiceDetail WHERE intSiteId IS NOT NULL AND ISNULL(ysnLeaseBilling ,0) <> 1)
 	BEGIN
 		SET @ResultLog = @ResultLog + 'Exception:No Consumption Site invoice to process.'
 	END

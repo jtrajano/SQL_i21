@@ -4,6 +4,7 @@
 	,@intInvoiceDetailId INT
 	,@intDDReadingId INT 
 	,@ysnMultipleInvoice BIT = 0
+	,@intDeliveryHistoryId INT = NULL
 )
 RETURNS NUMERIC(18,6) AS
 BEGIN
@@ -36,20 +37,42 @@ BEGIN
 	DECLARE @dblElapseDDDuringHold NUMERIC(18,6)
 	
 	
-	---Get Site Info
-	SELECT
-		@dblBurnRate = dblBurnRate
-		,@dblPreviousBurnRate = dblPreviousBurnRate
-		,@ysnAdjustBurnRate = ysnAdjustBurnRate
-		,@intLastDeliveryDegreeDay = intLastDeliveryDegreeDay
-		,@strBillingBy = strBillingBy
-		,@dblLastMeterReading = dblLastMeterReading
-		,@dblEstimatedGallonsLeft = dblEstimatedGallonsLeft
-		,@dblSummerDailyUse = dblSummerDailyUse
-		,@dblWinterDailyUse = dblWinterDailyUse
-		,@dtmLastDeliveryDate = dtmLastDeliveryDate
-	FROM tblTMSite
-	WHERE intSiteID = @intSiteId
+	IF(@intDeliveryHistoryId IS NULL)
+	BEGIN
+		---Get Site Info
+		SELECT
+			@dblBurnRate = dblBurnRate
+			,@dblPreviousBurnRate = dblPreviousBurnRate
+			,@ysnAdjustBurnRate = ysnAdjustBurnRate
+			,@intLastDeliveryDegreeDay = intLastDeliveryDegreeDay
+			,@strBillingBy = strBillingBy
+			,@dblLastMeterReading = dblLastMeterReading
+			,@dblEstimatedGallonsLeft = dblEstimatedGallonsLeft
+			,@dblSummerDailyUse = dblSummerDailyUse
+			,@dblWinterDailyUse = dblWinterDailyUse
+			,@dtmLastDeliveryDate = dtmLastDeliveryDate
+		FROM tblTMSite
+		WHERE intSiteID = @intSiteId
+	END
+	ELSE
+	BEGIN
+		---Get Site Info from delivery history
+		SELECT
+			@dblBurnRate = A.dblSiteBurnRate
+			,@dblPreviousBurnRate = A.dblSitePreviousBurnRate
+			,@ysnAdjustBurnRate = A.ysnAdjustBurnRate
+			,@intLastDeliveryDegreeDay = A.intDegreeDayOnLastDeliveryDate
+			,@strBillingBy = B.strBillingBy
+			,@dblLastMeterReading = A.dblLastMeterReading
+			,@dblEstimatedGallonsLeft = A.dblGallonsInTankbeforeDelivery
+			,@dblSummerDailyUse = A.dblSummerDailyUsageBetweenDeliveries
+			,@dblWinterDailyUse = A.dblWinterDailyUsageBetweenDeliveries
+			,@dtmLastDeliveryDate = A.dtmSiteLastDelivery
+		FROM tblTMDeliveryHistory A
+		INNER JOIN tblTMSite B
+			ON A.intSiteID = B.intSiteID
+		WHERE A.intDeliveryHistoryID = @intDeliveryHistoryId
+	END
 	
 	--- Get Degree Day reading
 	SELECT @dblAccumulatedDD = dblAccumulatedDegreeDay
@@ -126,7 +149,7 @@ BEGIN
 		SET @intElapseDays = 0
 	END
 
-	SET @dblElapseDDForCalc =  dbo.fnTMGetElapseDegreeDayForCalculation(@intSiteId,@intInvoiceDetailId)
+	SET @dblElapseDDForCalc =  dbo.fnTMGetElapseDegreeDayForCalculation(@intSiteId,@intInvoiceDetailId,@intDeliveryHistoryId)
 	
 	IF (ISNULL(@dblGallonsUsed,0) <> 0 AND ((@dblGallonsUsed - (@intElapseDays * @dblDailyGalsUsed)) <> 0))
 	BEGIN

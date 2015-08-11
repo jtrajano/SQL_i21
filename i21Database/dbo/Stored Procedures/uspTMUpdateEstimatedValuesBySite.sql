@@ -1,12 +1,4 @@
-﻿GO
-	PRINT 'START OF CREATING [uspTMUpdateEstimatedValuesBySite] SP'
-GO
-
-IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspTMUpdateEstimatedValuesBySite]') AND type in (N'P', N'PC'))
-DROP PROCEDURE [dbo].uspTMUpdateEstimatedValuesBySite
-GO
-
-CREATE PROCEDURE uspTMUpdateEstimatedValuesBySite 
+﻿CREATE PROCEDURE uspTMUpdateEstimatedValuesBySite 
 	@intSiteId AS INT
 AS
 BEGIN
@@ -136,9 +128,4 @@ BEGIN
     
 	END
 END
-
-
-GO
-	PRINT 'END OF CREATING [uspTMUpdateEstimatedValuesBySite] SP'
-GO
 

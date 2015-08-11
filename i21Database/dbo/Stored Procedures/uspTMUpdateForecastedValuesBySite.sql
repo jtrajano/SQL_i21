@@ -1,12 +1,4 @@
-﻿GO
-	PRINT 'START OF CREATING [uspTMUpdateForecastedValuesBySite] SP'
-GO
-
-IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspTMUpdateForecastedValuesBySite]') AND type in (N'P', N'PC'))
-DROP PROCEDURE [dbo].uspTMUpdateForecastedValuesBySite
-GO
-
-CREATE PROCEDURE uspTMUpdateForecastedValuesBySite 
+﻿CREATE PROCEDURE uspTMUpdateForecastedValuesBySite 
 	@intSiteId AS INT
 AS
 BEGIN
@@ -287,7 +279,4 @@ BEGIN
 END
 
 
-GO
-	PRINT 'END OF CREATING [uspTMUpdateForecastedValuesBySite] SP'
-GO
 
