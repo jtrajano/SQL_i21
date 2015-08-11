@@ -2232,6 +2232,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetCollateralDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetGrainBankDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetNetHedgeDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMComputeTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -102,21 +102,19 @@ BEGIN TRY
     
 
 	--No Records to process so exit
-    select @total = count(*) from @ReceiptStagingTable;
-    if (@total = 0)
-	   return;
+    SELECT @total = COUNT(*) FROM @ReceiptStagingTable;
+    IF (@total = 0)
+	   RETURN;
 
-	DECLARE @ReceiptOutputTable TABLE
-    (
-		intId INT IDENTITY PRIMARY KEY CLUSTERED,
-		intSourceId int,
-		intInventoryReceiptId int
-    )
+	-- Create the temp table if it does not exists. 
+	IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
+	BEGIN 
+		CREATE TABLE #tmpAddItemReceiptResult (
+			intSourceId INT
+			,intInventoryReceiptId INT
+		)
+	END 
 
-	INSERT into @ReceiptOutputTable(
-		 intSourceId	
-		,intInventoryReceiptId		 	
-	 )	
     EXEC dbo.uspICAddItemReceipt 
 			@ReceiptStagingTable
 			,@OtherCharges
@@ -125,7 +123,7 @@ BEGIN TRY
 	-- Update the Inventory Receipt Key to the Transaction Table
 	UPDATE	TR
 	SET		intInventoryReceiptId = addResult.intInventoryReceiptId
-	FROM	dbo.tblTRTransportReceipt TR INNER JOIN @ReceiptOutputTable addResult
+	FROM	dbo.tblTRTransportReceipt TR INNER JOIN #tmpAddItemReceiptResult addResult
 				ON TR.intTransportReceiptId = addResult.intSourceId
 
 	-- Post the Inventory Receipts                                            
@@ -133,14 +131,14 @@ BEGIN TRY
 			,@intEntityId INT
 			,@strTransactionId NVARCHAR(50);
 
-	WHILE EXISTS (SELECT TOP 1 1 FROM @ReceiptOutputTable) 
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpAddItemReceiptResult) 
 	BEGIN
 
 		SELECT TOP 1 
 				@ReceiptId = intInventoryReceiptId  
-		FROM	@ReceiptOutputTable 
+		FROM	#tmpAddItemReceiptResult 
   
-		-- Post the Inventory Receipts that were created
+		-- Post the Inventory Receipt that was created
 		SELECT	@strTransactionId = strReceiptNumber 
 		FROM	tblICInventoryReceipt 
 		WHERE	intInventoryReceiptId = @ReceiptId
@@ -153,7 +151,7 @@ BEGIN TRY
 		
 		--EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
 
-		DELETE	FROM @ReceiptOutputTable 
+		DELETE	FROM #tmpAddItemReceiptResult 
 		WHERE	intInventoryReceiptId = @ReceiptId
 	END;
 

@@ -27,8 +27,7 @@ BEGIN
 		INSERT INTO @EntitySpecialTax(
 			 intSpecialTaxId
 			,intEntityCustomerId
-			,intEntityVendorId
-			,intItemId
+			,intEntityVendorId,intItemId
 			,intCategoryId
 			,intTaxGroupMasterId)
 		SELECT
