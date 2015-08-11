@@ -224,6 +224,43 @@ BEGIN
 	DECLARE @ItemsForPost AS ItemCostingTableType  
 	DECLARE @CustodyItemsForPost AS ItemCostingTableType  
 
+	-- Process the Other Charges
+	BEGIN 
+		INSERT INTO @GLEntries (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+		)	
+		EXEC dbo.uspICPostInventoryReceiptOtherCharges 
+			@intTransactionId
+			,@strBatchId
+			,@intUserId
+			,@INVENTORY_RECEIPT_TYPE
+			
+	END 
+
 	-- Get company owned items to post. 
 	BEGIN 
 		INSERT INTO @ItemsForPost (  
@@ -487,43 +524,6 @@ BEGIN
 					,@intUserId
 		END
 	END
-
-	-- Process the Other Charges
-	BEGIN 
-		INSERT INTO @GLEntries (
-			[dtmDate] 
-			,[strBatchId]
-			,[intAccountId]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[strDescription]
-			,[strCode]
-			,[strReference]
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[dtmDateEntered]
-			,[dtmTransactionDate]
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[ysnIsUnposted]
-			,[intUserId]
-			,[intEntityId]
-			,[strTransactionId]
-			,[intTransactionId]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]
-			,[intConcurrencyId]
-		)	
-		EXEC dbo.uspICPostInventoryReceiptOtherCharges 
-			@intTransactionId
-			,@strBatchId
-			,@intUserId
-			,@INVENTORY_RECEIPT_TYPE
-			
-	END 
 END   
 
 --------------------------------------------------------------------------------------------  
