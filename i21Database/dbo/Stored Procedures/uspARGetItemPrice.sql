@@ -85,6 +85,8 @@ AS
 		AND @TransactionDate BETWEEN dtmStartDate AND dtmEndDate
 		AND intContractHeaderId = @ContractHeaderId
 		AND intContractDetailId = @ContractDetailId
+		AND ISNULL(@OriginalQuantity,0.00) + (dblDetailQuantity - ISNULL(dblScheduleQty,0)) > 0
+		AND dblBalance > 0
 	ORDER BY
 		 dtmStartDate
 		,intContractSeq
@@ -116,6 +118,8 @@ AS
 		AND intItemId = @ItemId
 		AND (dblDetailQuantity - ISNULL(dblScheduleQty,0)) >= @Quantity
 		AND @TransactionDate BETWEEN dtmStartDate AND dtmEndDate
+		AND (dblDetailQuantity - ISNULL(dblScheduleQty,0)) > 0
+		AND dblBalance > 0
 	ORDER BY
 		 dtmStartDate
 		,intContractSeq
