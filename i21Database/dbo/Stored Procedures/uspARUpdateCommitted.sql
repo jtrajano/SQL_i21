@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateCommitted]
-	@InvoiceId	INT,
-	@Negate		BIT	= 0
+	@InvoiceId		INT
+	,@Negate		BIT	= 0
+	,@UserId		INT = NULL     
 AS
 BEGIN
 
@@ -71,6 +72,5 @@ BEGIN
 	EXEC uspICIncreaseOrderCommitted @items
 
 END
+
 GO
-
-
