@@ -2222,6 +2222,7 @@
     <Build Include="dbo\Views\vyuICGetUnpostedTransactions.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateContractOnReceiptSave.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateContractOnShipmentSave.sql" />
+    <Build Include="dbo\Views\vyuAPUnpostedTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
