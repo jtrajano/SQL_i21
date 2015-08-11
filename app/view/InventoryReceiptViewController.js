@@ -317,7 +317,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         ]
                     }
                 },
-                colUnitCost: 'dblUnitCost',
+                colUnitCost: {
+                    dataIndex: 'dblUnitCost',
+                    editor: {
+                        readOnly: '{readOnlyUnitCost}'
+                    }
+                },
                 colTax: {
                     dataIndex: 'dblTax'
                 },

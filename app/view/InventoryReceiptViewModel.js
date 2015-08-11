@@ -579,6 +579,16 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     return true;
                     break;
             }
+        },
+        readOnlyUnitCost: function (get) {
+            switch (get('current.strReceiptType')) {
+                case 'Purchase Contract':
+                    return true;
+                    break;
+                default:
+                    return false;
+                    break;
+            }
         }
     }
 
