@@ -1578,11 +1578,6 @@ Ext.define('Inventory.view.ItemViewController', {
 
     subscribeLocationEvents: function (grid, scope) {
         var me = scope;
-        var btnAddLocation = grid.down('#btnAddLocation');
-        if (btnAddLocation) btnAddLocation.on('click', me.onAddLocationClick);
-        var btnEditLocation = grid.down('#btnEditLocation');
-        if (btnEditLocation) btnEditLocation.on('click', me.onEditLocationClick);
-
         var colLocationCostingMethod = grid.columns[4];
         if (colLocationCostingMethod) colLocationCostingMethod.renderer = me.CostingMethodRenderer;
     },
@@ -1600,12 +1595,14 @@ Ext.define('Inventory.view.ItemViewController', {
         if (vm.data.current.phantom === true) {
             win.context.data.saveRecord({ successFn: function(batch, eOpts){
                 me.openItemLocationScreen('edit', win, record);
+                return;
             } });
         }
         else {
             win.context.data.validator.validateRecord({ window: win }, function(valid) {
                 if (valid) {
                     me.openItemLocationScreen('edit', win, record);
+                    return;
                 }
             });
         }
@@ -1619,12 +1616,14 @@ Ext.define('Inventory.view.ItemViewController', {
         if (vm.data.current.phantom === true) {
             win.context.data.saveRecord({ successFn: function(batch, eOpts){
                 me.openItemLocationScreen('new', win);
+                return;
             } });
         }
         else {
             win.context.data.validator.validateRecord({ window: win }, function(valid) {
                 if (valid) {
                     me.openItemLocationScreen('new', win);
+                    return;
                 }
             });
         }
@@ -1661,38 +1660,50 @@ Ext.define('Inventory.view.ItemViewController', {
         var me = win.controller;
         var screenName = 'Inventory.view.ItemLocation';
 
-        Ext.require([
-            screenName,
-                screenName + 'ViewModel',
-                screenName + 'ViewController'
-        ], function() {
-            var screen = 'ic' + screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
-            var view = Ext.create(screenName, { controller: screen.toLowerCase(), viewModel: screen.toLowerCase() });
-            view.on('destroy', me.onDestroyItemLocationScreen, me, { window: win });
+        var current = win.getViewModel().data.current;
+        if (action === 'edit'){
+            iRely.Functions.openScreen(screenName, {
+                viewConfig: {
+                    listeners: {
+                        destroy: function() {
+                            var grdLocation = win.down('#grdLocationStore');
+                            var vm = win.getViewModel();
+                            var itemId = vm.data.current.get('intItemId');
+                            var filterItem = grdLocation.store.filters.items[0];
 
-            var controller = view.getController();
-            var current = win.getViewModel().data.current;
-            if (action === 'edit'){
-                controller.show({ itemId: current.get('intItemId'), locationId: record.get('intItemLocationId'), action: action });
-            }
-            else if (action === 'new') {
-                controller.show({ itemId: current.get('intItemId'), action: action });
-            }
-        });
-    },
+                            filterItem.setValue(itemId);
+                            filterItem.config.value = itemId;
+                            filterItem.initialConfig.value = itemId;
+                            grdLocation.store.load();
+                        }
+                    }
+                },
+                itemId: current.get('intItemId'),
+                locationId: record.get('intItemLocationId'),
+                action: action
+            });
+        }
+        else if (action === 'new') {
+            iRely.Functions.openScreen(screenName, {
+                viewConfig: {
+                    listeners: {
+                        destroy: function() {
+                            var grdLocation = win.down('#grdLocationStore');
+                            var vm = win.getViewModel();
+                            var itemId = vm.data.current.get('intItemId');
+                            var filterItem = grdLocation.store.filters.items[0];
 
-    onDestroyItemLocationScreen: function(win, eOpts) {
-        var me = eOpts.window.getController();
-        var win = eOpts.window;
-        var grdLocation = win.down('#grdLocationStore');
-        var vm = win.getViewModel();
-        var itemId = vm.data.current.get('intItemId');
-        var filterItem = grdLocation.store.filters.items[0];
-
-        filterItem.setValue(itemId);
-        filterItem.config.value = itemId;
-        filterItem.initialConfig.value = itemId;
-        grdLocation.store.load();
+                            filterItem.setValue(itemId);
+                            filterItem.config.value = itemId;
+                            filterItem.initialConfig.value = itemId;
+                            grdLocation.store.load();
+                        }
+                    }
+                },
+                itemId: current.get('intItemId'),
+                action: action
+            });
+        }
     },
 
     CostingMethodRenderer: function (value, metadata, record) {
@@ -2588,6 +2599,12 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboLotTracking" : {
                 select: this.onLotTrackingSelect
+            },
+            "#btnAddLocation": {
+                click: this.onAddLocationClick
+            },
+            "#btnEditLocation": {
+                click: this.onEditLocationClick
             }
         });
     }

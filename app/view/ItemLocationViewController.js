@@ -204,17 +204,17 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             win.show();
 
             var context = me.setupContext( { window : win } );
-            me.intItemId = config.itemId;
+            me.intItemId = config.param.itemId;
             if (config.action === 'new') {
                 context.data.addRecord();
             } else {
                 var filter = [{
                     column: 'intItemId',
-                    value: config.itemId,
+                    value: me.intItemId,
                     conjunction: 'and'
                 },{
                     column: 'intItemLocationId',
-                    value: config.locationId,
+                    value: config.param.locationId,
                     conjunction: 'and'
                 }
                 ];
