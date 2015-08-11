@@ -13,10 +13,11 @@ AS
 
 BEGIN TRY
 	
-	DECLARE @ErrMsg			NVARCHAR(MAX),
-			@dblQuantity	NUMERIC(12,4),
-			@dblScheduleQty NUMERIC(12,4),
-			@dblBalance		NUMERIC(12,4)
+	DECLARE @ErrMsg				NVARCHAR(MAX),
+			@dblQuantity		NUMERIC(12,4),
+			@dblScheduleQty		NUMERIC(12,4),
+			@dblBalance			NUMERIC(12,4),
+			@dblNewScheduleQty	NUMERIC(12,4)
 			
 	IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 	BEGIN
@@ -39,11 +40,26 @@ BEGIN TRY
 		RAISERROR('Total scheduled quantity cannot be less than zero.',16,1)
 	END
 	
+	SELECT	@dblNewScheduleQty =	@dblScheduleQty + @dblQuantityToUpdate
+
 	UPDATE 	tblCTContractDetail
-	SET		dblScheduleQty		=	@dblScheduleQty + @dblQuantityToUpdate,
+	SET		dblScheduleQty		=	@dblNewScheduleQty,
 			intConcurrencyId	=	intConcurrencyId + 1
-	WHERE	intContractDetailId = @intContractDetailId
+	WHERE	intContractDetailId =	@intContractDetailId
 	
+	IF ISNULL(@intUserId,0) <> 0 AND ISNULL(@strScreenName,'') <> '' AND ISNULL(@intExternalId,0) <> 0 
+	BEGIN
+		EXEC	uspCTCreateSequenceUsageHistory 
+				@intContractDetailId	=	@intContractDetailId,
+				@strScreenName			=	@strScreenName,
+				@intExternalId			=	@intExternalId,
+				@strFieldName			=	'Scheduled Quantiy',
+				@dblOldValue			=	@dblScheduleQty,
+				@dblTransactionQuantity =	@dblQuantityToUpdate,
+				@dblNewValue			=	@dblNewScheduleQty,	
+				@intUserId				=	@intUserId
+	END
+
 END TRY
 
 BEGIN CATCH
