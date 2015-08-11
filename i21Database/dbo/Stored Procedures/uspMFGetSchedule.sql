@@ -34,9 +34,9 @@ BEGIN
 		,@dtmCurrentDate AS dtmScheduleDate
 		,0 AS intCalendarId
 		,'' AS strName
-		,0 AS intManufacturingCellId
+		,@intManufacturingCellId AS intManufacturingCellId
 		,'' AS strCellName
-		,0 AS ysnStandard
+		,CONVERT(bit,0) AS ysnStandard
 		,0 AS intLocationId
 		,0 AS intConcurrencyId
 		,@dtmCurrentDate AS dtmCreated
