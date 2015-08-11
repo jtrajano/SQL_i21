@@ -246,7 +246,8 @@ Ext.define('Inventory.view.CategoryViewController', {
             txtPercentage: '{current.dblPercentage}',
             txtCostDistributionMethod: '{current.strCostDistributionMethod}',
             chkSellable: '{current.ysnSellable}',
-            chkYieldAdjustment: '{current.ysnYieldAdjustment}'
+            chkYieldAdjustment: '{current.ysnYieldAdjustment}',
+            chkTrackedInWarehouse: '{current.ysnWarehouseTracked}'
         }
     },
 

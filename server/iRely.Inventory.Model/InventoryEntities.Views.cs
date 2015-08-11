@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets3b0a7b98cbd35a2bfd6ca6911f522180a0a3a0e430eb3127e8805497c7872ed3))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets8fc9b975782c3eeb639e4248256ca066971d99190c60868afd8596dbf37e25c0))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets3b0a7b98cbd35a2bfd6ca6911f522180a0a3a0e430eb3127e8805497c7872ed3 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets8fc9b975782c3eeb639e4248256ca066971d99190c60868afd8596dbf37e25c0 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "3b0a7b98cbd35a2bfd6ca6911f522180a0a3a0e430eb3127e8805497c7872ed3"; }
+            get { return "8fc9b975782c3eeb639e4248256ca066971d99190c60868afd8596dbf37e25c0"; }
         }
 
         /// <summary>
@@ -1728,7 +1728,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCategory
-        [CodeFirstDatabaseSchema.tblICCategory](T1.tblICCategory_intCategoryId, T1.tblICCategory_strCategoryCode, T1.tblICCategory_strDescription, T1.tblICCategory_intLineOfBusinessId, T1.tblICCategory_intCostingMethod, T1.tblICCategory_strInventoryTracking, T1.tblICCategory_dblStandardQty, T1.tblICCategory_intUOMId, T1.tblICCategory_strGLDivisionNumber, T1.tblICCategory_ysnSalesAnalysisByTon, T1.tblICCategory_strMaterialFee, T1.tblICCategory_intMaterialItemId, T1.tblICCategory_ysnAutoCalculateFreight, T1.tblICCategory_intFreightItemId, T1.tblICCategory_strERPItemClass, T1.tblICCategory_dblLifeTime, T1.tblICCategory_dblBOMItemShrinkage, T1.tblICCategory_dblBOMItemUpperTolerance, T1.tblICCategory_dblBOMItemLowerTolerance, T1.tblICCategory_ysnScaled, T1.tblICCategory_ysnOutputItemMandatory, T1.tblICCategory_strConsumptionMethod, T1.tblICCategory_strBOMItemType, T1.tblICCategory_strShortName, T1.tblICCategory_imgReceiptImage, T1.tblICCategory_imgWIPImage, T1.tblICCategory_imgFGImage, T1.tblICCategory_imgShipImage, T1.tblICCategory_dblLaborCost, T1.tblICCategory_dblOverHead, T1.tblICCategory_dblPercentage, T1.tblICCategory_strCostDistributionMethod, T1.tblICCategory_ysnSellable, T1.tblICCategory_ysnYieldAdjustment, T1.tblICCategory_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICCategory](T1.tblICCategory_intCategoryId, T1.tblICCategory_strCategoryCode, T1.tblICCategory_strDescription, T1.tblICCategory_intLineOfBusinessId, T1.tblICCategory_intCostingMethod, T1.tblICCategory_strInventoryTracking, T1.tblICCategory_dblStandardQty, T1.tblICCategory_intUOMId, T1.tblICCategory_strGLDivisionNumber, T1.tblICCategory_ysnSalesAnalysisByTon, T1.tblICCategory_strMaterialFee, T1.tblICCategory_intMaterialItemId, T1.tblICCategory_ysnAutoCalculateFreight, T1.tblICCategory_intFreightItemId, T1.tblICCategory_strERPItemClass, T1.tblICCategory_dblLifeTime, T1.tblICCategory_dblBOMItemShrinkage, T1.tblICCategory_dblBOMItemUpperTolerance, T1.tblICCategory_dblBOMItemLowerTolerance, T1.tblICCategory_ysnScaled, T1.tblICCategory_ysnOutputItemMandatory, T1.tblICCategory_strConsumptionMethod, T1.tblICCategory_strBOMItemType, T1.tblICCategory_strShortName, T1.tblICCategory_imgReceiptImage, T1.tblICCategory_imgWIPImage, T1.tblICCategory_imgFGImage, T1.tblICCategory_imgShipImage, T1.tblICCategory_dblLaborCost, T1.tblICCategory_dblOverHead, T1.tblICCategory_dblPercentage, T1.tblICCategory_strCostDistributionMethod, T1.tblICCategory_ysnSellable, T1.tblICCategory_ysnYieldAdjustment, T1.tblICCategory_ysnWarehouseTracked, T1.tblICCategory_intConcurrencyId)
     FROM (
         SELECT 
             T.intCategoryId AS tblICCategory_intCategoryId, 
@@ -1765,6 +1765,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strCostDistributionMethod AS tblICCategory_strCostDistributionMethod, 
             T.ysnSellable AS tblICCategory_ysnSellable, 
             T.ysnYieldAdjustment AS tblICCategory_ysnYieldAdjustment, 
+            T.ysnWarehouseTracked AS tblICCategory_ysnWarehouseTracked, 
             T.intConcurrencyId AS tblICCategory_intConcurrencyId, 
             True AS _from0
         FROM InventoryEntities.tblICCategorys AS T
@@ -4786,7 +4787,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCategorys
-        [iRely.Inventory.Model.tblICCategory](T1.tblICCategory_intCategoryId, T1.tblICCategory_strCategoryCode, T1.tblICCategory_strDescription, T1.tblICCategory_intLineOfBusinessId, T1.tblICCategory_intCostingMethod, T1.tblICCategory_strInventoryTracking, T1.tblICCategory_dblStandardQty, T1.tblICCategory_intUOMId, T1.tblICCategory_strGLDivisionNumber, T1.tblICCategory_ysnSalesAnalysisByTon, T1.tblICCategory_strMaterialFee, T1.tblICCategory_intMaterialItemId, T1.tblICCategory_ysnAutoCalculateFreight, T1.tblICCategory_intFreightItemId, T1.tblICCategory_strERPItemClass, T1.tblICCategory_dblLifeTime, T1.tblICCategory_dblBOMItemShrinkage, T1.tblICCategory_dblBOMItemUpperTolerance, T1.tblICCategory_dblBOMItemLowerTolerance, T1.tblICCategory_ysnScaled, T1.tblICCategory_ysnOutputItemMandatory, T1.tblICCategory_strConsumptionMethod, T1.tblICCategory_strBOMItemType, T1.tblICCategory_strShortName, T1.tblICCategory_imgReceiptImage, T1.tblICCategory_imgWIPImage, T1.tblICCategory_imgFGImage, T1.tblICCategory_imgShipImage, T1.tblICCategory_dblLaborCost, T1.tblICCategory_dblOverHead, T1.tblICCategory_dblPercentage, T1.tblICCategory_strCostDistributionMethod, T1.tblICCategory_ysnSellable, T1.tblICCategory_ysnYieldAdjustment, T1.tblICCategory_intConcurrencyId)
+        [iRely.Inventory.Model.tblICCategory](T1.tblICCategory_intCategoryId, T1.tblICCategory_strCategoryCode, T1.tblICCategory_strDescription, T1.tblICCategory_intLineOfBusinessId, T1.tblICCategory_intCostingMethod, T1.tblICCategory_strInventoryTracking, T1.tblICCategory_dblStandardQty, T1.tblICCategory_intUOMId, T1.tblICCategory_strGLDivisionNumber, T1.tblICCategory_ysnSalesAnalysisByTon, T1.tblICCategory_strMaterialFee, T1.tblICCategory_intMaterialItemId, T1.tblICCategory_ysnAutoCalculateFreight, T1.tblICCategory_intFreightItemId, T1.tblICCategory_strERPItemClass, T1.tblICCategory_dblLifeTime, T1.tblICCategory_dblBOMItemShrinkage, T1.tblICCategory_dblBOMItemUpperTolerance, T1.tblICCategory_dblBOMItemLowerTolerance, T1.tblICCategory_ysnScaled, T1.tblICCategory_ysnOutputItemMandatory, T1.tblICCategory_strConsumptionMethod, T1.tblICCategory_strBOMItemType, T1.tblICCategory_strShortName, T1.tblICCategory_imgReceiptImage, T1.tblICCategory_imgWIPImage, T1.tblICCategory_imgFGImage, T1.tblICCategory_imgShipImage, T1.tblICCategory_dblLaborCost, T1.tblICCategory_dblOverHead, T1.tblICCategory_dblPercentage, T1.tblICCategory_strCostDistributionMethod, T1.tblICCategory_ysnSellable, T1.tblICCategory_ysnYieldAdjustment, T1.tblICCategory_ysnWarehouseTracked, T1.tblICCategory_intConcurrencyId)
     FROM (
         SELECT 
             T.intCategoryId AS tblICCategory_intCategoryId, 
@@ -4823,6 +4824,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.strCostDistributionMethod AS tblICCategory_strCostDistributionMethod, 
             T.ysnSellable AS tblICCategory_ysnSellable, 
             T.ysnYieldAdjustment AS tblICCategory_ysnYieldAdjustment, 
+            T.ysnWarehouseTracked AS tblICCategory_ysnWarehouseTracked, 
             T.intConcurrencyId AS tblICCategory_intConcurrencyId, 
             True AS _from0
         FROM CodeFirstDatabase.tblICCategory AS T

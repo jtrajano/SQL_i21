@@ -54,6 +54,7 @@ namespace iRely.Inventory.Model
         public string strCostDistributionMethod { get; set; }
         public bool ysnSellable { get; set; }
         public bool ysnYieldAdjustment { get; set; }
+        public bool ysnWarehouseTracked { get; set; }
 
         public ICollection<tblICCategoryAccount> tblICCategoryAccounts { get; set; }
         public ICollection<tblICCategoryLocation> tblICCategoryLocations { get; set; }

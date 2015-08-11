@@ -46,6 +46,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strCostDistributionMethod).HasColumnName("strCostDistributionMethod");
             this.Property(t => t.ysnSellable).HasColumnName("ysnSellable");
             this.Property(t => t.ysnYieldAdjustment).HasColumnName("ysnYieldAdjustment");
+            this.Property(t => t.ysnWarehouseTracked).HasColumnName("ysnWarehouseTracked");
 
             this.HasMany(p => p.tblICCategoryAccounts)
                 .WithRequired(p => p.tblICCategory)

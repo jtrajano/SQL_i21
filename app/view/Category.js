@@ -1366,10 +1366,27 @@ Ext.define('Inventory.view.Category', {
                                                                 labelWidth: 160
                                                             },
                                                             {
-                                                                xtype: 'checkboxfield',
-                                                                itemId: 'chkYieldAdjustment',
-                                                                fieldLabel: 'Yield Adjustment',
-                                                                labelWidth: 160
+                                                                xtype: 'container',
+                                                                layout: {
+                                                                    type: 'hbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'checkboxfield',
+                                                                        flex: 1,
+                                                                        itemId: 'chkYieldAdjustment',
+                                                                        fieldLabel: 'Yield Adjustment',
+                                                                        labelWidth: 160
+                                                                    },
+                                                                    {
+                                                                        xtype: 'checkboxfield',
+                                                                        flex: 1,
+                                                                        itemId: 'chkTrackedInWarehouse',
+                                                                        fieldLabel: 'Tracked In Warehouse',
+                                                                        labelWidth: 160
+                                                                    }
+                                                                ]
                                                             }
                                                         ]
                                                     }
