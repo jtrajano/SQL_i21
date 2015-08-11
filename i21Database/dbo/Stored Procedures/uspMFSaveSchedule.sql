@@ -95,6 +95,8 @@ BEGIN TRY
 		WHERE intScheduleId = @intScheduleId
 	END
 
+	DELETE FROM dbo.tblMFScheduleWorkOrder WHERE intScheduleId =@intScheduleId 
+
 	INSERT INTO dbo.tblMFScheduleWorkOrder (
 		intScheduleId
 		,intWorkOrderId
@@ -165,7 +167,7 @@ BEGIN TRY
 			,dtmLastModified DATETIME
 			,intLastModifiedUserId INT
 			) x
-	WHERE x.intScheduleWorkOrderId IS NULL
+	/*WHERE x.intScheduleWorkOrderId IS NULL
 
 	UPDATE tblMFScheduleWorkOrder
 	SET intDuration = x.intDuration
@@ -222,7 +224,7 @@ BEGIN TRY
 				AND x.intWorkOrderId = tblMFScheduleWorkOrder.intWorkOrderId
 				AND x.intStatusId = 1
 			)
-
+*/
 	INSERT INTO tblMFScheduleWorkOrderDetail (
 		intScheduleWorkOrderId
 		,intWorkOrderId

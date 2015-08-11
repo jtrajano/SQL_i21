@@ -459,24 +459,45 @@ BEGIN TRY
 		END
 	END
 
-	SELECT S.intScheduleId
-		,S.strScheduleNo
-		,S.dtmScheduleDate
-		,S.intCalendarId
-		,SC.strName
-		,S.intManufacturingCellId
-		,MC.strCellName
-		,S.ysnStandard
-		,S.intLocationId
-		,S.intConcurrencyId
-		,S.dtmCreated
-		,S.intCreatedUserId
-		,S.dtmLastModified
-		,S.intLastModifiedUserId
-	FROM tblMFSchedule S
-	JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = S.intManufacturingCellId
-	JOIN dbo.tblMFScheduleCalendar SC ON SC.intCalendarId = S.intCalendarId
-	WHERE intScheduleId = @intScheduleId
+	IF @intScheduleId>0
+	BEGIN
+		SELECT S.intScheduleId
+			,S.strScheduleNo
+			,S.dtmScheduleDate
+			,S.intCalendarId
+			,SC.strName
+			,S.intManufacturingCellId
+			,MC.strCellName
+			,S.ysnStandard
+			,S.intLocationId
+			,S.intConcurrencyId
+			,S.dtmCreated
+			,S.intCreatedUserId
+			,S.dtmLastModified
+			,S.intLastModifiedUserId
+		FROM tblMFSchedule S
+		JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = S.intManufacturingCellId
+		JOIN dbo.tblMFScheduleCalendar SC ON SC.intCalendarId = S.intCalendarId
+		WHERE intScheduleId = @intScheduleId
+	END
+	ELSE
+	BEGIN
+		SELECT 0 AS intScheduleId
+		,'' AS strScheduleNo
+		,@dtmCurrentDate AS dtmScheduleDate
+		,0 AS intCalendarId
+		,'' AS strName
+		,0 AS intManufacturingCellId
+		,'' AS strCellName
+		,0 AS ysnStandard
+		,0 AS intLocationId
+		,0 AS intConcurrencyId
+		,@dtmCurrentDate AS dtmCreated
+		,0 AS intCreatedUserId
+		,@dtmCurrentDate AS dtmLastModified
+		,0 AS intLastModifiedUserId
+	END
+
 
 	SELECT C.intManufacturingCellId
 		,C.strCellName

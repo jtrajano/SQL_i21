@@ -3,7 +3,10 @@
 	,@intScheduleId INT
 	)
 AS
-IF @intScheduleId IS NOT NULL
+Declare @dtmCurrentDate datetime
+Select @dtmCurrentDate=GETDATE()
+
+IF @intScheduleId >0
 BEGIN
 	SELECT S.intScheduleId
 		,S.strScheduleNo
@@ -28,7 +31,7 @@ ELSE
 BEGIN
 	SELECT 0 AS intScheduleId
 		,'' AS strScheduleNo
-		,Getdate() AS dtmScheduleDate
+		,@dtmCurrentDate AS dtmScheduleDate
 		,0 AS intCalendarId
 		,'' AS strName
 		,0 AS intManufacturingCellId
@@ -36,9 +39,9 @@ BEGIN
 		,0 AS ysnStandard
 		,0 AS intLocationId
 		,0 AS intConcurrencyId
-		,Getdate() AS dtmCreated
+		,@dtmCurrentDate AS dtmCreated
 		,0 AS intCreatedUserId
-		,Getdate() AS dtmLastModified
+		,@dtmCurrentDate AS dtmLastModified
 		,0 AS intLastModifiedUserId
 END
 
