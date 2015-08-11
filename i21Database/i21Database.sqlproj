@@ -2226,6 +2226,8 @@
     <Build Include="dbo\Stored Procedures\uspSOGetItemsFromSalesOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateContractOnSalesOrder.sql" />
     <Build Include="dbo\User Defined Types\SalesOrderItemTableType.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetAllUnpostedTransactionsByFiscal.sql" />
+    <Build Include="dbo\Views\vyuARCustomerInvoiceHistoryReport.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetBasisDeliveries.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetContractDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetPayableDetail.sql" />
