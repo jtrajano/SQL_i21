@@ -2226,6 +2226,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetContractDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetSampleNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetSampleHeaderData.sql" />
+    <Build Include="dbo\Views\vyuAPUnpostedTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
