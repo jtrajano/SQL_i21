@@ -1793,6 +1793,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('strContainer', po.get('strContainerNumber'));
                 current.set('intContainerId', po.get('intShipmentBLContainerId'));
 
+                if (iRely.Functions.isEmpty(current.get('intOrderId'))) {
+                    current.set('intLineNo', po.get('intContractDetailId'));
+                    current.set('intOrderId', po.get('intContractHeaderId'));
+                    current.set('strOrderNumber', po.get('intContractNumber'));
+                }
                 break;
 
             case 1:
