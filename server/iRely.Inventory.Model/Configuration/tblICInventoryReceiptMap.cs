@@ -89,7 +89,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblOrderQty).HasColumnName("dblOrderQty").HasPrecision(18, 6);
             this.Property(t => t.dblBillQty).HasColumnName("dblBillQty").HasPrecision(18, 6);
             this.Property(t => t.dblOpenReceive).HasColumnName("dblOpenReceive").HasPrecision(18, 6);
-            this.Property(t => t.dblReceived).HasColumnName("dblReceived").HasPrecision(18, 6);
             this.Property(t => t.intUnitMeasureId).HasColumnName("intUnitMeasureId");
             this.Property(t => t.intWeightUOMId).HasColumnName("intWeightUOMId");
             this.Property(t => t.dblUnitCost).HasColumnName("dblUnitCost").HasPrecision(18, 6);
@@ -124,6 +123,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intOrderId).HasColumnName("intOrderId");
             this.Property(t => t.strOrderNumber).HasColumnName("strOrderNumber");
             this.Property(t => t.dtmDate).HasColumnName("dtmDate");
+            this.Property(t => t.dblOrdered).HasColumnName("dblOrdered").HasPrecision(18, 6);
+            this.Property(t => t.dblReceived).HasColumnName("dblReceived").HasPrecision(18, 6);
             this.Property(t => t.intSourceId).HasColumnName("intSourceId");
             this.Property(t => t.strSourceNumber).HasColumnName("strSourceNumber");
             this.Property(t => t.intItemId).HasColumnName("intItemId");

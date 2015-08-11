@@ -170,7 +170,6 @@ namespace iRely.Inventory.Model
         public decimal? dblOrderQty { get; set; }
         public decimal? dblBillQty { get; set; }
         public decimal? dblOpenReceive { get; set; }
-        public decimal? dblReceived { get; set; }
         public int? intUnitMeasureId { get; set; }
         public int? intWeightUOMId { get; set; }
         public decimal? dblUnitCost { get; set; }
@@ -310,6 +309,38 @@ namespace iRely.Inventory.Model
             set
             {
                 _orderUOM = value;
+            }
+        }
+        private decimal _orderedQty;
+        [NotMapped]
+        public decimal dblOrdered
+        {
+            get
+            {
+                if (vyuICGetInventoryReceiptItem != null)
+                    return vyuICGetInventoryReceiptItem.dblOrdered ?? 0;
+                else
+                    return _orderedQty;
+            }
+            set
+            {
+                _orderedQty = value;
+            }
+        }
+        private decimal _receivedQty;
+        [NotMapped]
+        public decimal dblReceived
+        {
+            get
+            {
+                if (vyuICGetInventoryReceiptItem != null)
+                    return vyuICGetInventoryReceiptItem.dblReceived ?? 0;
+                else
+                    return _receivedQty;
+            }
+            set
+            {
+                _receivedQty = value;
             }
         }
         private decimal _orderConvFactor;
@@ -483,6 +514,25 @@ namespace iRely.Inventory.Model
                 _weigthUOM = value;
             }
         }
+        private string _container;
+        [NotMapped]
+        public string strContainer
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_container))
+                    if (vyuICGetInventoryReceiptItem != null)
+                        return vyuICGetInventoryReceiptItem.strContainer;
+                    else
+                        return null;
+                else
+                    return _container;
+            }
+            set
+            {
+                _container = value;
+            }
+        }
         private decimal _itemConv;
         [NotMapped]
         public decimal dblItemUOMConvFactor
@@ -549,6 +599,8 @@ namespace iRely.Inventory.Model
         public int? intOrderId { get; set; }
         public string strOrderNumber { get; set; }
         public DateTime? dtmDate { get; set; }
+        public decimal? dblOrdered { get; set; }
+        public decimal? dblReceived { get; set; }
         public int? intSourceId { get; set; }
         public string strSourceNumber { get; set; }
         public int? intItemId { get; set; }
