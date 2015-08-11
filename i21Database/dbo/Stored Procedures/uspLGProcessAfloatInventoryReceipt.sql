@@ -82,43 +82,42 @@ BEGIN TRY
 		RETURN;
 	END
 
-DECLARE @ReceiptOutputTable TABLE
-    (
-	intId INT IDENTITY PRIMARY KEY CLUSTERED,
-    intSourceId int,
-	intInventoryReceiptId int
-    )
+	-- Create the temp table if it does not exists. 
+	IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
+	BEGIN 
+		CREATE TABLE #tmpAddItemReceiptResult (
+			intSourceId INT
+			,intInventoryReceiptId INT
+		)
+	END 
 
-INSERT into @ReceiptOutputTable(
-		 intSourceId	
-		,intInventoryReceiptId		 	
-	 )	
     EXEC dbo.uspICAddItemReceipt 
 			@ReceiptStagingTable 
 			,@OtherCharges
 			,@intUserId;
 
-Declare @incval int,
-        @SourceId int,
-		@ReceiptId int;
-select @total = count(*) from @ReceiptOutputTable;
-    IF (@total = 0)
+	IF NOT EXISTS (SELECT TOP 1 1 FROM #tmpAddItemReceiptResult)
 	BEGIN
 		RAISERROR('Inventorize process failure #2', 11, 1);
 		RETURN;
 	END
 
-set @incval = 1 
-WHILE @incval <=@total 
-BEGIN
+	DECLARE @SourceId INT, @ReceiptId INT
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpAddItemReceiptResult) 
+	BEGIN
+		SELECT TOP 1 
+				@SourceId = intSourceId
+				,@ReceiptId = intInventoryReceiptId  
+		FROM	#tmpAddItemReceiptResult 
 
-  select @SourceId = intSourceId, @ReceiptId =intInventoryReceiptId  from @ReceiptOutputTable where @incval = intId
-  
-   update tblLGShipmentContractQty 
-       set intInventoryReceiptId = @ReceiptId
-         where intShipmentContractQtyId = @SourceId 
-   SET @incval = @incval + 1;
-END;
+		UPDATE	tblLGShipmentContractQty 
+		SET		intInventoryReceiptId = @ReceiptId
+		WHERE	intShipmentContractQtyId = @SourceId 
+
+		DELETE	FROM #tmpAddItemReceiptResult 
+		WHERE	intSourceId = @SourceId
+				AND intInventoryReceiptId = @ReceiptId
+	END;
 
 	UPDATE tblLGShipment SET ysnInventorized = 1, dtmInventorizedDate=GETDATE() WHERE intShipmentId=@intShipmentId
 
