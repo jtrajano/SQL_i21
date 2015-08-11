@@ -1,12 +1,13 @@
 ﻿CREATE PROCEDURE [dbo].[uspPOUpdateContract]
 	@poId INT,
-	@userId INT
+	@userId INT,
+	@negate INT
 AS
 
 DECLARE @contractDetails TABLE(intContractDetailId INT, intPurchaseDetailId INT, dblQtyOrdered NUMERIC(18,6));
 
 INSERT INTO @contractDetails
-SELECT intContractDetailId, intPurchaseDetailId, dblQtyOrdered FROM tblPOPurchaseDetail WHERE intPurchaseId = @poId
+SELECT intContractDetailId, intPurchaseDetailId, CASE WHEN @negate = 1 THEN dblQtyOrdered * -1 ELSE dblQtyOrdered END FROM tblPOPurchaseDetail WHERE intPurchaseId = @poId
 
 WHILE EXISTS(SELECT 1 FROM @contractDetails)
 BEGIN
