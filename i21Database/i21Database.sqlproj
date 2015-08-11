@@ -2223,6 +2223,9 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateContractOnReceiptSave.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateContractOnShipmentSave.sql" />
     <Build Include="dbo\Views\vyuAPUnpostedTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspSOGetItemsFromSalesOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspSOUpdateContractOnSalesOrder.sql" />
+    <Build Include="dbo\User Defined Types\SalesOrderItemTableType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspARUpdateContractOnInvoice]  
+﻿CREATE PROCEDURE [dbo].[uspSOUpdateContractOnSalesOrder]  
 	 @TransactionId	INT   
 	,@ForDelete		BIT = 0
 	,@UserId		INT = NULL     
@@ -12,56 +12,46 @@ SET ANSI_WARNINGS OFF
 
 
 
--- Get the details from the invoice 
+-- Get the details from the SalesOrder 
 BEGIN TRY
-	DECLARE @ItemsFromInvoice AS dbo.[InvoiceItemTableType]
-	INSERT INTO @ItemsFromInvoice (
+	DECLARE @ItemsFromSalesOrder AS dbo.[SalesOrderItemTableType]
+	INSERT INTO @ItemsFromSalesOrder (
 		-- Header
-		 [intInvoiceId]
-		,[strInvoiceNumber]
+		 [intSalesOrderId]
+		,[strSalesOrderNumber]
 		,[intEntityCustomerId]
 		,[dtmDate]
 		,[intCurrencyId]
 		,[intCompanyLocationId]
-		,[intDistributionHeaderId]
+		,[intQuoteTemplateId]
 
 		-- Detail 
-		,[intInvoiceDetailId]
+		,[intSalesOrderDetailId]
 		,[intItemId]
 		,[strItemDescription]
-		,[intSCInvoiceId]
-		,[strSCInvoiceNumber]
 		,[intItemUOMId]
 		,[dblQtyOrdered]
+		,[dblQtyAllocated]
 		,[dblQtyShipped]
 		,[dblDiscount]
+		,[intTaxId]
 		,[dblPrice]
 		,[dblTotalTax]
 		,[dblTotal]
-		,[intServiceChargeAccountId]
-		,[intInventoryShipmentItemId]
-		,[intSalesOrderDetailId]
-		,[intSiteId]
-		,[strBillingBy]
-		,[dblPercentFull]
-		,[dblNewMeterReading]
-		,[dblPreviousMeterReading]
-		,[dblConversionFactor]
-		,[intPerformerId]
-		,[intContractHeaderId]
+		,[strComments]
 		,[strMaintenanceType]
 		,[strFrequency]
 		,[dtmMaintenanceDate]
 		,[dblMaintenanceAmount]
 		,[dblLicenseAmount]
+		,[intContractHeaderId]
 		,[intContractDetailId]
-		,[intTicketId]
-		,[ysnLeaseBilling]
+		,[intStorageLocationId]
 	)
-	EXEC dbo.[uspARGetItemsFromInvoice]
-			@intInvoiceId = @TransactionId
+	EXEC dbo.[uspSOGetItemsFromSalesOrder]
+			@SalesOrderId = @TransactionId
 
-	DECLARE		@intInvoiceDetailId				INT,
+	DECLARE		@intSalesOrderDetailId				INT,
 				@intContractDetailId			INT,
 				@intFromItemUOMId				INT,
 				@intToItemUOMId					INT,
@@ -75,31 +65,29 @@ BEGIN TRY
 	DECLARE @tblToProcess TABLE
 	(
 		intUniqueId					INT IDENTITY,
-		intInvoiceDetailId			INT,
+		intSalesOrderDetailId			INT,
 		intContractDetailId			INT,
 		intItemUOMId				INT,
 		dblQty						NUMERIC(12,4)	
 	)
 
 	INSERT INTO @tblToProcess(
-		 [intInvoiceDetailId]
+		 [intSalesOrderDetailId]
 		,[intContractDetailId]
 		,[intItemUOMId]
 		,[dblQty])
 	SELECT
-		 I.[intInvoiceDetailId]
+		 I.[intSalesOrderDetailId]
 		,D.[intContractDetailId]
 		,D.[intItemUOMId]
-		,D.[dblQtyShipped]
+		,D.[dblQtyOrdered] 
 	FROM
-		@ItemsFromInvoice I
+		@ItemsFromSalesOrder I
 	INNER JOIN
-		tblARInvoiceDetail D
-			ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
+		tblSOSalesOrderDetail D
+			ON	I.[intSalesOrderDetailId] = D.[intSalesOrderDetailId]
 	WHERE
 		D.intContractDetailId IS NOT NULL
-		AND D.[intInventoryShipmentItemId] IS NULL
-		AND D.[intSalesOrderDetailId] IS NULL
 
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
@@ -109,12 +97,12 @@ BEGIN TRY
 		SELECT	@intContractDetailId			=	NULL,
 				@intFromItemUOMId				=	NULL,
 				@dblQty							=	NULL,
-				@intInvoiceDetailId	=	NULL
+				@intSalesOrderDetailId			=	NULL
 
 		SELECT	@intContractDetailId			=	[intContractDetailId],
 				@intFromItemUOMId				=	[intItemUOMId],
 				@dblQty							=	[dblQty],
-				@intInvoiceDetailId				=	[intInvoiceDetailId]
+				@intSalesOrderDetailId			=	[intSalesOrderDetailId]
 		FROM	@tblToProcess 
 		WHERE	[intUniqueId]					=	 @intUniqueId
 
@@ -138,8 +126,8 @@ BEGIN TRY
 				@intContractDetailId	=	@intContractDetailId,
 				@dblQuantityToUpdate	=	@dblConvertedQty,
 				@intUserId				=	@UserId,
-				@intExternalId			=	@intInvoiceDetailId,
-				@strScreenName			=	'Invoice'
+				@intExternalId			=	@intSalesOrderDetailId,
+				@strScreenName			=	'Sales Order'
 
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 	END
@@ -153,5 +141,3 @@ BEGIN CATCH
 	
 END CATCH
 GO
-
-
