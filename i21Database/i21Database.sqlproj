@@ -2220,6 +2220,8 @@
     <Build Include="dbo\Stored Procedures\uspGLGenerateAccountRange.sql" />
     <Build Include="dbo\Views\vyuLGInboundShipmentView.sql" />
     <Build Include="dbo\Views\vyuICGetUnpostedTransactions.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateContractOnReceiptSave.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateContractOnShipmentSave.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
