@@ -2,7 +2,7 @@
 AS 
 SELECT DISTINCT 
 	  C.strName
-	, strContact = [dbo].fnARFormatCustomerAddress(C.strPhone, E.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry)
+	 , strContact = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry)
 	 , P.strRecordNumber
 	 , I.strInvoiceNumber
 	 , P.dtmDatePaid
@@ -20,7 +20,7 @@ SELECT DISTINCT
 FROM tblARInvoice I
 	LEFT JOIN (tblARPayment P INNER JOIN tblARPaymentDetail PD ON P.intPaymentId = PD.intPaymentId 
 							  LEFT JOIN tblSMPaymentMethod PM ON P.intPaymentMethodId = PM.intPaymentMethodID) ON I.intEntityCustomerId = P.intEntityCustomerId  AND PD.intInvoiceId = I.intInvoiceId
-	INNER JOIN (vyuARCustomer C INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId) ON I.intEntityCustomerId = C.intEntityCustomerId		
+	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) ON I.intEntityCustomerId = C.intEntityCustomerId
 	LEFT OUTER JOIN tblARInvoiceDetail D ON I.intInvoiceId = D.intInvoiceId
 	INNER JOIN tblICItem Item ON D.intItemId = Item.intItemId	
 WHERE I.ysnPosted = 1 AND P.ysnPosted = 1
