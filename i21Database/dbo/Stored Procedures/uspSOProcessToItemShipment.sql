@@ -31,7 +31,7 @@ IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrder
 IF NOT EXISTS(SELECT 1 FROM tblSOSalesOrderDetail A INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
                 WHERE intSalesOrderId = @SalesOrderId AND strType NOT IN ('Non-Inventory', 'Other Charge', 'Service'))
 	BEGIN
-		RAISERROR('There is no sellable item on this sales order.', 16, 1);
+		RAISERROR('Process Failed. There is no shippable item on this sales order', 16, 1);
         RETURN;
 	END
 ELSE
