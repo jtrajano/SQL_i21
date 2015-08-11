@@ -12,5 +12,6 @@ SET ANSI_WARNINGS OFF
 
 
 EXEC dbo.[uspSOUpdateCommitted] @SalesOrderId, @ForDelete
+EXEC dbo.[uspSOUpdateContractOnSalesOrder] @SalesOrderId, @ForDelete, @UserId
 
 GO
