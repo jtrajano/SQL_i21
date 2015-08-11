@@ -11,6 +11,7 @@
 	,@ContractDetailId	INT				= NULL OUTPUT
 	,@ContractNumber	INT				= NULL OUTPUT
 	,@ContractSeq		INT				= NULL OUTPUT
+	,@OriginalQuantity	NUMERIC(18,6)	= NULL
 AS
 	--	DECLARE 	
 	--	@ItemId				INT
@@ -66,6 +67,40 @@ AS
 		
 		
 	--Customer Contract Price
+	
+	SELECT TOP 1
+		 @Price				= dblCashPrice
+		,@ContractHeaderId	= intContractHeaderId
+		,@ContractDetailId	= intContractDetailId
+		,@ContractNumber	= intContractNumber
+		,@ContractSeq		= intContractSeq
+	FROM
+		vyuCTContractDetailView
+	WHERE
+		intEntityId = @CustomerId
+		AND intCompanyLocationId = @LocationId
+		AND intItemUOMId = @ItemUOMId
+		AND intItemId = @ItemId
+		AND ISNULL(@OriginalQuantity,0.00) + (dblDetailQuantity - ISNULL(dblScheduleQty,0)) >= @Quantity
+		AND @TransactionDate BETWEEN dtmStartDate AND dtmEndDate
+		AND intContractHeaderId = @ContractHeaderId
+		AND intContractDetailId = @ContractDetailId
+	ORDER BY
+		 dtmStartDate
+		,intContractSeq
+		
+	IF(@Price IS NOT NULL)
+	BEGIN
+		SET @Pricing = 'Contracts - Customer Princing'
+		--SELECT @Price AS 'Price', @Pricing AS 'Pricing'	
+		RETURN 1;
+	END
+	
+	SET @ContractHeaderId	= NULL
+	SET @ContractDetailId	= NULL
+	SET @ContractNumber		= NULL
+	SET @ContractSeq		= NULL		
+			
 	SELECT TOP 1
 		 @Price				= dblCashPrice
 		,@ContractHeaderId	= intContractHeaderId
