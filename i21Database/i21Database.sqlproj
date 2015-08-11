@@ -2227,6 +2227,10 @@
     <Build Include="dbo\Stored Procedures\uspQMGetSampleNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetSampleHeaderData.sql" />
     <Build Include="dbo\Views\vyuAPUnpostedTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetSchedule.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRescheduleWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSaveSchedule.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetYield.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
