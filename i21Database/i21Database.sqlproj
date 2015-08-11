@@ -2227,6 +2227,8 @@
     <Build Include="dbo\Stored Procedures\uspQMGetSampleNumber.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetSampleHeaderData.sql" />
     <Build Include="dbo\Views\vyuAPUnpostedTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMUpdateEstimatedValuesBySite.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMUpdateForecastedValuesBySite.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

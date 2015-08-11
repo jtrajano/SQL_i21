@@ -29,7 +29,7 @@ BEGIN
 	
 	SET @intRowCount = 0
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM #tmpInvoiceDetail)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM #tmpInvoiceDetail WHERE intSiteId IS NOT NULL AND ysnLeaseBilling <> 1)
 	BEGIN
 		SET @ResultLog = @ResultLog + 'Exception:No Consumption Site invoice to process.'
 	END
@@ -81,8 +81,11 @@ BEGIN
 		BEGIN
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblTMDegreeDayReading WHERE intClockID = @intClockId AND dtmDate = DATEADD(DAY, DATEDIFF(DAY, 0, @dtmInvoiceDate), 0))
 			BEGIN 
-				SET @ResultLog = @ResultLog + 'Exception:Invoice date does not have a matching Clock Reading record.' + CHAR(10)
-				GOTO DONEVALIDATING
+				IF NOT EXISTS(SELECT TOP 1 1 FROM tblTMDDReadingSeasonResetArchive WHERE intClockID = @intClockId AND dtmDate = DATEADD(DAY, DATEDIFF(DAY, 0, @dtmInvoiceDate), 0))
+				BEGIN
+					SET @ResultLog = @ResultLog + 'Exception:Invoice date does not have a matching Clock Reading record.' + CHAR(10)
+					GOTO DONEVALIDATING
+				END
 			END
 			IF(@strSiteBillingBy = 'Flow Meter')
 			BEGIN

@@ -3871,4 +3871,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intScheduleWorkOrderId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="07356e6c-e972-4e2f-8b19-31822cdaf52e" ChangeDateTime="08/11/2015 03:33:14">
+    <Property Name="ElementName" Value="[dbo].[tblTMDeliveryHistory].[dtmSiteLastDelivery]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMDeliveryHistory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dtmSiteLastDeliveryDuringDelivery" />
+  </Operation>
 </Operations>

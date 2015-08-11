@@ -7,10 +7,6 @@ BEGIN
 
 	
 
-	---- REmove on 15.4
-	EXEC uspTMInsertToCobolWrite @InvoiceId
-	GOTO DONESYNCHING
-
 	DECLARE @intSiteId INT
 	DECLARE @intItemId INT
 	DECLARE @intClockId INT

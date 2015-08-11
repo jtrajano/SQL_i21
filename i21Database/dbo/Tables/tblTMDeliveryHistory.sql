@@ -53,6 +53,9 @@
     [dblWillCallDeliveryPrice] NUMERIC(18, 6) NULL, 
     [dblWillCallDeliveryTotal] NUMERIC(18, 6) NULL, 
     [intInvoiceDetailId] INT NULL, 
+    [dtmSiteLastDeliveryDuringDelivery] DATETIME NULL, 
+    [dblSiteBurnRateDuringDelivery] NUMERIC(18, 6) NULL, 
+    [dblSitePreviousBurnRateDuringDelivery] NCHAR(10) NULL, 
     CONSTRAINT [PK_tblTMDeliveryHistory] PRIMARY KEY CLUSTERED ([intDeliveryHistoryID] ASC),
     CONSTRAINT [FK_tblTMDeliveryHistory_tblTMSite] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID])
 );
@@ -544,3 +547,30 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDeliveryHistory',
     @level2type = N'COLUMN',
     @level2name = N'intInvoiceDetailId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Last Delivery of the site during the invoice date',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = 'dtmSiteLastDeliveryDuringDelivery'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Site Burn rate during delivery',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'dblSiteBurnRateDuringDelivery'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Site Previous Burn rate during delivery',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'dblSitePreviousBurnRateDuringDelivery'
