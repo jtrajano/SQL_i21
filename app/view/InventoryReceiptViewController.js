@@ -1282,6 +1282,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onInsertChargeClick: function(button, e, eOpts) {
+        var grd = button.up('grid');
+        if (grd) {
+            grd.startAdd();
+        }
+    },
+
     onBillClick: function(button, e, eOpts) {
         var win = button.up('window');
         var current = win.viewModel.data.current;
@@ -2752,6 +2759,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#btnVendor": {
                 click: this.onVendorClick
+            },
+            "#btnInsertCharge": {
+                click: this.onInsertChargeClick
             },
             "#cboShipFrom": {
                 beforequery: this.onShipFromBeforeQuery,

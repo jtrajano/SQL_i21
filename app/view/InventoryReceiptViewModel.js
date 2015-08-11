@@ -27,7 +27,8 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'i21.store.CountryBuffered',
         'ContractManagement.store.ContractDetailViewBuffered',
         'ContractManagement.store.ContractHeaderViewBuffered',
-        'Logistics.store.BufferedShipmentReceiptContracts'
+        'Logistics.store.BufferedShipmentReceiptContracts',
+        'AccountsPayable.common.extensions.GridExtension'
     ],
 
     stores: {
@@ -251,7 +252,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     strDescription: 'Unit'
                 },
                 {
-                    strDescription: 'Stock Unit'
+                    strDescription: 'Weight'
                 },
                 {
                     strDescription: 'Cost'
