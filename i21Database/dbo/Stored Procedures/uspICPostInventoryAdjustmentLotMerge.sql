@@ -108,36 +108,15 @@ BEGIN
 	)
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
-			,intItemUOMId			=	-- Use weight UOM id if it is present. Otherwise, use the qty UOM. 
-										CASE	WHEN ISNULL(Detail.intWeightUOMId, 0) <> 0 THEN Detail.intWeightUOMId 
-												ELSE Detail.intItemUOMId 
-										END
+			,intItemUOMId			= Detail.intItemUOMId 
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					=	-- If using Weight UOM, convert the qty from Item UOM to Weight UOM. 
-										-- Otherwise, use the same value (New Quantity - Original Quantity). 
-										CASE	WHEN ISNULL(Detail.intWeightUOMId, 0) <> 0  THEN
-													dbo.fnCalculateQtyBetweenUOM(
-														Detail.intItemUOMId,
-														Detail.intWeightUOMId, 
-														ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)
-													)
-												ELSE 
-													ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)
-										END 
-			,dblUOMQty				=	-- If using Weight UOM, use the Unit Qty from the Weight UOM. 
-										-- Otherwise, use the unit qty from the Item UOM. 
-										CASE	WHEN ISNULL(Detail.intWeightUOMId, 0) <> 0  THEN
-													WeightUOM.dblUnitQty
-												ELSE 
-													ItemUOM.dblUnitQty
-										END 				
-			,dblCost				=	-- If using Weight UOM, use the same cost. This is the cost from the Lot costing bucket. 
-										-- Otherwise, adjustment needs to calculate the cost by the Item UOM > Unit Qty. 
-										CASE	WHEN ISNULL(Detail.intWeightUOMId, 0) <> 0  THEN
-													Detail.dblCost
-												ELSE 
-													Detail.dblCost * ItemUOM.dblUnitQty
-										END
+			,dblQty					= ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)
+			,dblUOMQty				= ItemUOM.dblUnitQty	
+			,dblCost				= CASE	WHEN ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) > 0 THEN 
+												ISNULL(Detail.dblNewCost, Detail.dblCost)	
+											ELSE 
+												ISNULL(Detail.dblCost, 0)	
+									  END 
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1
