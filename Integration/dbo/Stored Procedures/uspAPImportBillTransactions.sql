@@ -506,27 +506,27 @@ BEGIN
 		ELSE
 		BEGIN
 
-			--VALIDATE IF THERE ARE DUPLICATE VENDOR ORDER NUMBER
-			DECLARE @duplicateVendorNumber NVARCHAR(100);
-			SELECT TOP 1 @duplicateVendorNumber = A.aptrx_ivc_no
-						FROM aptrxmst A
-						WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
-						AND A.aptrx_trans_type IN (''I'',''C'',''A'')
-						AND A.aptrx_orig_amt != 0
-						AND EXISTS (
-							SELECT 1
-							FROM tblAPBill A1
-							INNER JOIN (tblAPVendor B INNER JOIN tblEntity B1 ON B.intEntityVendorId = B1.intEntityId) ON A1.intEntityVendorId = B.intEntityVendorId
-							WHERE A.aptrx_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
-							AND A.aptrx_ivc_no = A1.strVendorOrderNumber COLLATE Latin1_General_CS_AS
-						)
-			IF @duplicateVendorNumber IS NOT NULL
-			BEGIN
-				DECLARE @error NVARCHAR(200);
-				SET @error = ''Duplicate vendor number exists ('' + @duplicateVendorNumber + '')''
-				RAISERROR(@error, 16, 1);
-				RETURN;
-			END
+			----VALIDATE IF THERE ARE DUPLICATE VENDOR ORDER NUMBER
+			--DECLARE @duplicateVendorNumber NVARCHAR(100);
+			--SELECT TOP 1 @duplicateVendorNumber = A.aptrx_ivc_no
+			--			FROM aptrxmst A
+			--			WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
+			--			AND A.aptrx_trans_type IN (''I'',''C'',''A'')
+			--			AND A.aptrx_orig_amt != 0
+			--			AND EXISTS (
+			--				SELECT 1
+			--				FROM tblAPBill A1
+			--				INNER JOIN (tblAPVendor B INNER JOIN tblEntity B1 ON B.intEntityVendorId = B1.intEntityId) ON A1.intEntityVendorId = B.intEntityVendorId
+			--				WHERE A.aptrx_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
+			--				AND A.aptrx_ivc_no = A1.strVendorOrderNumber COLLATE Latin1_General_CS_AS
+			--			)
+			--IF @duplicateVendorNumber IS NOT NULL
+			--BEGIN
+			--	DECLARE @error NVARCHAR(200);
+			--	SET @error = ''Duplicate vendor number exists ('' + @duplicateVendorNumber + '')''
+			--	RAISERROR(@error, 16, 1);
+			--	RETURN;
+			--END
 
 			INSERT [dbo].[tblAPBill] (
 				[intEntityVendorId], 
@@ -629,6 +629,7 @@ BEGIN
 				WHERE CONVERT(DATE, CAST(C2.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
 				 AND C2.aptrx_trans_type IN (''I'',''C'',''A'')
 				 AND C2.aptrx_orig_amt != 0
+				 AND A.ysnPosted = 0
 				ORDER BY C.apegl_dist_no
 			--UNION
 			--SELECT 
