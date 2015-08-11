@@ -3619,7 +3619,7 @@ Ext.define('Inventory.view.Item', {
                                                                             {
                                                                                 dataIndex: 'strDescription',
                                                                                 dataType: 'string',
-                                                                                text: 'Cost Method',
+                                                                                text: 'Cost Type',
                                                                                 flex: 1
                                                                             }
                                                                         ],
