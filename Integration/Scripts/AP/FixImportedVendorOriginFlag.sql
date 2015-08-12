@@ -1,4 +1,4 @@
-﻿if not exists(select top 1 1 from tblEntityPreferences where strPreference = 'Fix Imported Vendor ysnOrigin Data' and strValue = '1')
+﻿/*if not exists(select top 1 1 from tblEntityPreferences where strPreference = 'Fix Imported Vendor ysnOrigin Data' and strValue = '1')
 begin
 	print 'Fix Imported Vendor ysnOrigin Data'
 	IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblAPVendor') AND name = 'strVendorId')
@@ -12,4 +12,4 @@ begin
 			VALUES (''Fix Imported Vendor ysnOrigin Data'',''1'') ')
 	END
 	print 'End Fix Imported Vendor ysnOrigin Data'
-end
+end*/
