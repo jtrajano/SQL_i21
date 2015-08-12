@@ -2141,6 +2141,11 @@
                                                                                     "\t\tdataType: 'boolean',",
                                                                                     "\t\ttext: 'Stock Unit',",
                                                                                     "\t\tflex: 1",
+                                                                                    "\t},",
+                                                                                    "\t{",
+                                                                                    "\t\tdataIndex: 'dblLastCost',",
+                                                                                    "\t\tdataType: 'float',",
+                                                                                    "\t\thidden: true",
                                                                                     "\t}",
                                                                                     "]"
                                                                                 ],

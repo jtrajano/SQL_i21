@@ -1011,7 +1011,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     if (!lot.dummy) {
                         lot.set('strUnitMeasure', records[0].get('strUnitMeasure'));
                         lot.set('intItemUnitMeasureId', records[0].get('intItemUnitMeasureId'));
-                        lot.set('dblLotUOMConvFactor', records[0].get('dblItemUOMConvFactor'));
+                        lot.set('dblLotUOMConvFactor', records[0].get('dblUnitQty'));
                     }
                 });
             }

@@ -1161,6 +1161,11 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             dataType: 'boolean',
                                                                                             text: 'Stock Unit',
                                                                                             flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'dblLastCost',
+                                                                                            dataType: 'float',
+                                                                                            hidden: true
                                                                                         }
                                                                                     ],
                                                                                     itemId: 'cboItemUOM',
