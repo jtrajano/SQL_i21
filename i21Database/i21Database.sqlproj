@@ -2218,7 +2218,6 @@
     <Build Include="dbo\Views\vyuLGAllocatedContracts.sql" />
     <Build Include="dbo\Views\vyuLGAllocationOpenContracts.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGenerateAccountRange.sql" />
-    <Build Include="dbo\Stored Procedures\uspPOUpdateContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

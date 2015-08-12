@@ -113,7 +113,7 @@ BEGIN
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)	
 			,dblUOMQty				= ItemUOM.dblUnitQty
-			,dblCost				= Lot.dblLastCost * ItemUOM.dblUnitQty
+			,dblCost				= Detail.dblCost -- Cost saved in Adj is expected come from the cost bucket. 
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1
@@ -209,26 +209,21 @@ BEGIN
 													FromStock.dblQty
 										END 
 			,dblUOMQty				= ISNULL(NewItemUOM.dblUnitQty, FromStock.dblUOMQty)
-			,dblCost				= CASE	WHEN Detail.dblNewSplitLotQuantity IS NOT NULL THEN 
-													-- Distribute the unit cost over the new split lot qty. 
-													CASE	WHEN Detail.dblNewSplitLotQuantity = 0 THEN 
-																ISNULL(Detail.dblNewCost / ISNULL(NewItemUOM.dblUnitQty, FromStock.dblUOMQty), FromStock.dblCost / FromStock.dblUOMQty) 
-																* ISNULL(NewItemUOM.dblUnitQty, FromStock.dblUOMQty)
+			,dblCost				=	-- Get the correct cost. 
+										CASE	-- No new cost found... 
+												WHEN Detail.dblNewCost IS NULL THEN 
+													CASE	-- ... but there is a split lot qty. Then, calculate a new cost. 
+															WHEN Detail.dblNewSplitLotQuantity IS NOT NULL AND Detail.dblNewSplitLotQuantity <> 0 THEN 
+																Detail.dblCost 
+																* -1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
+																/ Detail.dblNewSplitLotQuantity
+															-- ... otherwise, use the same cost in FromStock.
 															ELSE 
-																ISNULL(Detail.dblNewCost / ISNULL(NewItemUOM.dblUnitQty, FromStock.dblUOMQty), FromStock.dblCost / FromStock.dblUOMQty) 
-																* ISNULL(NewItemUOM.dblUnitQty, FromStock.dblUOMQty)
-																* (
-																	(Detail.dblNewSplitLotQuantity / (-1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)))) -- Ratio
-																	* (-1 * FromStock.dblQty * FromStock.dblUOMQty)
-																)
-																/ (
-																	Detail.dblNewSplitLotQuantity
-																	* ISNULL(NewItemUOM.dblUnitQty, FromStock.dblUOMQty)
-																)
-													END
-												ELSE 
-													-- Otherwise, recalculate the (new or original) cost 
-													ISNULL(Detail.dblNewCost, FromStock.dblCost / FromStock.dblUOMQty) 
+																FromStock.dblCost
+													END	
+												ELSE	
+													-- New cost found. 
+													Detail.dblNewCost
 										END 
 
 			,dblValue				= 0

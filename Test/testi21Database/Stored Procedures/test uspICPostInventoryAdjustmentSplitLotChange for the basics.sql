@@ -5,8 +5,12 @@ BEGIN
 	BEGIN 
 		EXEC testi21Database.[Fake open fiscal year and accounting periods];
 		EXEC testi21Database.[Fake data for inventory adjustment table];
-		DECLARE @intTransactionId AS INT
-		DECLARE @intUserId AS INT
+
+		DECLARE	@intTransactionId AS INT
+				,@strBatchId AS NVARCHAR(50)
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(50)
+				,@intUserId AS INT
+				,@strAdjustmentDescription AS NVARCHAR(255)
 	END 
 
 	-- Assert
@@ -18,6 +22,9 @@ BEGIN
 	BEGIN 
 		EXEC dbo.uspICPostInventoryAdjustmentSplitLotChange
 			@intTransactionId
-	 		,@intUserId
+			,@strBatchId
+			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+			,@intUserId
+			,@strAdjustmentDescription
 	END 
 END 

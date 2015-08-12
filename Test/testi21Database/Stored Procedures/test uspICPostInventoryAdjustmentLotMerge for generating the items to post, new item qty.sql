@@ -190,10 +190,10 @@ BEGIN
 		)
 		SELECT 	intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_PoundUOM
+				,intItemUOMId			= @ManualGrains_25KgBagUOM
 				,dtmDate				= '05/20/2015'
-				,dblQty					= -500.000000 * 55.115500	-- Convert 500 25KgBagUOM to Pound
-				,dblUOMQty				= 1							-- Unit qty of @ManualGrains_PoundUOM
+				,dblQty					= -500.000000 
+				,dblUOMQty				= @25KgBagUnitQty
 				,dblCost				= 2.500000
 				,dblValue				= 0
 				,dblSalesPrice			= 0
@@ -210,11 +210,11 @@ BEGIN
 		SELECT	
 				intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_PoundUOM
+				,intItemUOMId			= @ManualGrains_PoundUOM		-- Processed in LB because Lot is stored as LB. 
 				,dtmDate				= '05/20/2015'
-				,dblQty					= 500.000000 * 55.115500	-- Since weight does not change, use the same weight as the Qty. 
-				,dblUOMQty				= 1							-- Unit qty of @ManualGrains_PoundUOM
-				,dblCost				= 2.50						-- Since weight remains the same, the cost will remain the same. 
+				,dblQty					= 500.000000 * @25KgBagUnitQty
+				,dblUOMQty				= @PoundUnitQty			
+				,dblCost				= 2.50							-- Since weight remains the same, the cost will remain the same. 
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 
