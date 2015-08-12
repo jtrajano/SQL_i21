@@ -61,8 +61,6 @@ BEGIN TRY
 		,@intInputLotItemId int
 		,@intTransactionCount INT
 		,@intLotStatusId int
-		,@intAttributeId int
-		,@strYieldAdjustmentAllowed nvarchar(50)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -145,19 +143,6 @@ BEGIN TRY
 			,ysnExcessConsumptionAllowed bit
 			,intLotStatusId int
 			)
-
-	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Is Yield Adjustment Allowed'
-
-	Select @strYieldAdjustmentAllowed=strAttributeValue
-	From tblMFManufacturingProcessAttribute
-	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
-
-	Select @ysnExcessConsumptionAllowed=0
-	If @strYieldAdjustmentAllowed='True'
-	Begin
-		Select @ysnExcessConsumptionAllowed=1
-	End
-
 	IF @intTransactionCount = 0
 	BEGIN TRANSACTION
 
@@ -251,7 +236,7 @@ BEGIN TRY
 		IF @dblInputWeight > @dblInputLotWeight --and @ysnEmptyOutSource=0
 		BEGIN
 
-			IF @ysnExcessConsumptionAllowed = 0 
+			IF @ysnExcessConsumptionAllowed = 0 or @ysnExcessConsumptionAllowed is null
 			BEGIN
 				RAISERROR (
 						51116

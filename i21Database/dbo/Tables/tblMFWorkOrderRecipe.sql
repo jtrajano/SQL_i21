@@ -30,7 +30,7 @@
 	CONSTRAINT [FK_tblMFWorkOrderRecipe_tblARCustomer_intCustomerId] FOREIGN KEY ([intCustomerId]) REFERENCES [tblARCustomer]([intEntityCustomerId]),
 	CONSTRAINT [FK_tblMFWorkOrderRecipe_tblARCustomerFarm_intFarmFieldId_intFarmId] FOREIGN KEY ([intFarmId]) REFERENCES [tblARCustomerFarm]([intFarmFieldId]),
 	CONSTRAINT [FK_tblMFWorkOrderRecipe_tblARCustomerFarm_intFarmFieldId_intFieldId] FOREIGN KEY ([intFieldId]) REFERENCES [tblARCustomerFarm]([intFarmFieldId]),
-	CONSTRAINT [FK_tblMFWorkOrderRecipe_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId]) ON DELETE CASCADE
+	CONSTRAINT [FK_tblMFWorkOrderRecipe_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY ([intWorkOrderId]) REFERENCES [tblMFWorkOrder]([intWorkOrderId])
 )
 
 GO

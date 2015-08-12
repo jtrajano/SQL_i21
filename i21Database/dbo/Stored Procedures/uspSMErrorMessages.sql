@@ -368,7 +368,7 @@ SET @strmessage = 'Missing costing method setup for item %s.'
 EXEC sp_addmessage 51091,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51092) EXEC sp_dropmessage 51092, 'us_english'	
-SET @strmessage =  'Please configure the location %s for the item %s in the Item maintenance.'
+SET @strmessage =  'Please configure the location %s in the Item maintenance.'
 EXEC sp_addmessage 51092,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51093) EXEC sp_dropmessage 51093, 'us_english'	

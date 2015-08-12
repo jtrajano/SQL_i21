@@ -203,7 +203,7 @@ BEGIN TRY
 	SELECT @intProductionSummaryId = Min(intProductionSummaryId)
 	FROM tblMFProductionSummary F
 	JOIN @tblInputItem I ON I.intItemId = F.intItemId
-	Where F.intWorkOrderId=@intWorkOrderId and F.dblYieldQuantity<>0
+	Where F.intWorkOrderId=@intWorkOrderId
 
 	WHILE @intProductionSummaryId IS NOT NULL
 	BEGIN

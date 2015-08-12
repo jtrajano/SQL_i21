@@ -2233,22 +2233,6 @@
     <Build Include="dbo\Stored Procedures\uspSOGetItemsFromSalesOrder.sql" />
     <Build Include="dbo\User Defined Types\SalesOrderItemTableType.sql" />
     <None Include="Scripts\Post-Deployment\DB\4_Create_Role_for_DashboardReports.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKGetNetHedgeDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKGetGrainBankDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKGetCollateralDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKGetContractDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspQMGetSampleNumber.sql" />
-    <Build Include="dbo\Stored Procedures\uspQMGetSampleHeaderData.sql" />
-    <Build Include="dbo\Views\vyuAPUnpostedTransaction.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFGetSchedule.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFRescheduleWorkOrder.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFSaveSchedule.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFGetYield.sql" />
-    <None Include="Scripts\Post-Deployment\DB\4_Create_Role_for_DashboardReports.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFGetManufacturingCellByPackType.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFGetManufacturingCellCountByPackType.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKGetBasisDeliveries.sql" />
-    <Build Include="dbo\Stored Procedures\uspRKGetPayableDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
