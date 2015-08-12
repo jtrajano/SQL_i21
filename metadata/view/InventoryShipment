@@ -2608,7 +2608,6 @@
                                                                 "align": "right",
                                                                 "dataIndex": "dblUnitPrice",
                                                                 "dataType": "numeric",
-                                                                "format": "0,000.##",
                                                                 "itemId": "colUnitPrice",
                                                                 "text": "Unit Price",
                                                                 "width": 81
@@ -2649,7 +2648,6 @@
                                                                 "align": "right",
                                                                 "dataIndex": "dblUnitPrice",
                                                                 "dataType": "numeric",
-                                                                "format": "0,000.##",
                                                                 "itemId": "colLineTotal",
                                                                 "text": "Line Total",
                                                                 "width": 81

@@ -1319,7 +1319,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         align: 'right',
                                                                         dataIndex: 'dblUnitPrice',
                                                                         text: 'Unit Price',
-                                                                        format: '0,000.##',
                                                                         editor: {
                                                                             xtype: 'numeric'
                                                                         }
@@ -1331,8 +1330,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         width: 81,
                                                                         align: 'right',
                                                                         dataIndex: 'dblUnitPrice',
-                                                                        text: 'Line Total',
-                                                                        format: '0,000.##'
+                                                                        text: 'Line Total'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
