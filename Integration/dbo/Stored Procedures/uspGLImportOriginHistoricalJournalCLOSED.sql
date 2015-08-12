@@ -132,8 +132,7 @@ SELECT
  ELSE CASE WHEN glarc_dr_cr_ind = ''D'' THEN (glarc_amt * -1) ELSE 0 END END AS Credit,
  0 AS CreditRate, -- credit rate
  CASE WHEN glarc_units >= 0 THEN CASE WHEN glarc_dr_cr_ind = ''D'' THEN glarc_units ELSE 0 END
- ELSE CASE WHEN (glarc_dr_cr_ind=''C'' OR glarc_dr_cr_ind IS NULL) THEN (glarc_units * -1) ELSE 0 END END AS Debit,
- 0 AS DebitUnits, 
+ ELSE CASE WHEN (glarc_dr_cr_ind=''C'' OR glarc_dr_cr_ind IS NULL) THEN (glarc_units * -1) ELSE 0 END END AS DebitUnits,
  CASE WHEN glarc_units >= 0 THEN CASE WHEN (glarc_dr_cr_ind=''C'' OR glarc_dr_cr_ind IS NULL) THEN glarc_units ELSE 0 END
  ELSE CASE WHEN glarc_dr_cr_ind = ''D'' THEN (glarc_units * -1) ELSE 0 END END AS CreditUnits,
 glarc_ref AS strDescription,
