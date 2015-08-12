@@ -41,11 +41,11 @@ BEGIN
 		,S.intShipmentContractQtyId
 		,S.intShipmentBLContainerId
 		,S.intShipmentBLContainerContractId
+		,S.dblQuantity AS dblRepresentingQty
 		,C.intContractHeaderId
 		,C.intContractDetailId
 		,C.intItemId
 		,C.strItemDescription AS strDescription
-		,C.dblDetailQuantity AS dblRepresentingQty
 		,C.intUnitMeasureId AS intRepresentingUOMId
 		,C.intCountryId
 		,C.intEntityId
@@ -59,11 +59,11 @@ BEGIN
 		,@intProductValueId AS intProductValueId
 		,S.intShipmentId
 		,S.intShipmentContractQtyId
+		,S.dblQuantity AS dblRepresentingQty
 		,C.intContractHeaderId
 		,C.intContractDetailId
 		,C.intItemId
 		,C.strItemDescription AS strDescription
-		,C.dblDetailQuantity AS dblRepresentingQty
 		,C.intUnitMeasureId AS intRepresentingUOMId
 		,C.intCountryId
 		,C.intEntityId
