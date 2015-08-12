@@ -223,34 +223,10 @@ BEGIN
 		) 
 		SELECT	Detail.intItemId  
 				,dbo.fnICGetItemLocation(Detail.intItemId, Header.intFromLocationId)
-				,intItemUOMId = 
-					CASE	WHEN Lot.intLotId IS NOT NULL THEN 
-								CASE	WHEN LotWeightUOM.intItemUOMId IS NOT NULL THEN LotWeightUOM.intItemUOMId
-										WHEN LotItemUOM.intItemUOMId IS NOT NULL THEN LotItemUOM.intItemUOMId
-								END 
-							ELSE Detail.intItemUOMId
-					END 
+				,intItemUOMId = Detail.intItemUOMId
 				,Header.dtmTransferDate
-				,dblQty = -1 * 
-					CASE	WHEN ISNULL(Detail.intLotId, 0) <> 0  THEN 
-									CASE	-- The item has no weight UOM. Transfer it by the quantity provided. 
-											WHEN ISNULL(Lot.intWeightUOMId, 0) = 0  THEN 												
-												Detail.dblQuantity
-											
-											-- The item has a weight UOM. 
-											ELSE 
-												-- If there is weight value (non-zero), use it. 
-												dbo.fnCalculateQtyBetweenUOM(LotItemUOM.intItemUOMId, LotWeightUOM.intItemUOMId, Detail.dblQuantity)												
-									END 
-								ELSE	
-									Detail.dblQuantity
-						END 
-				,dblUOMQty = 
-					CASE	WHEN Lot.intLotId IS NULL THEN ItemUOM.dblUnitQty
-							WHEN LotWeightUOM.intItemUOMId IS NOT NULL THEN LotWeightUOM.dblUnitQty
-							WHEN LotItemUOM.intItemUOMId IS NOT NULL THEN LotItemUOM.dblUnitQty
-							ELSE ItemUOM.dblUnitQty
-					END 
+				,dblQty = -1 * Detail.dblQuantity
+				,dblUOMQty = ItemUOM.dblUnitQty
 				,ISNULL(Detail.dblCost, 0)
 				,0
 				,NULL
