@@ -2219,6 +2219,9 @@
     <Build Include="dbo\Views\vyuLGAllocationOpenContracts.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGenerateAccountRange.sql" />
     <Build Include="dbo\Stored Procedures\uspPOUpdateContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspSOUpdateContractOnSalesOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspSOGetItemsFromSalesOrder.sql" />
+    <Build Include="dbo\User Defined Types\SalesOrderItemTableType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
