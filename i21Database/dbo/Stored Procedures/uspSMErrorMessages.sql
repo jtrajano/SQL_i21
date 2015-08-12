@@ -707,4 +707,6 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51176) EXEC sp_dropmessa
 SET @strmessage = 'Unable to calculate the tax for %s used in %s.'
 EXEC sp_addmessage 51176,11,@strmessage,'us_english','False'
 
-
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51177) EXEC sp_dropmessage 51177, 'us_english'	
+SET @strmessage = 'Split Lot Qty requires a negative Adjust Qty on %s to split stocks from it.'
+EXEC sp_addmessage 51177,11,@strmessage,'us_english','False'
