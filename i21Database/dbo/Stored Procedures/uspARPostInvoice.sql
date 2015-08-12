@@ -290,7 +290,7 @@ IF @recap = 0
 					@PostInvoiceData B
 						ON A.intInvoiceId = B.intInvoiceId
 				WHERE  
-					ROUND(A.dblInvoiceTotal,2) <> ROUND(((SELECT SUM(ROUND(dblTotal,2)) FROM tblARInvoiceDetail WHERE intInvoiceId = A.intInvoiceId) + ISNULL(ROUND(A.dblShipping,2),0.0) + ISNULL(ROUND(A.dblTax,2),0.0)),2)
+					A.dblInvoiceTotal <> ((SELECT SUM(dblTotal) FROM tblARInvoiceDetail WHERE intInvoiceId = A.intInvoiceId) + ISNULL(A.dblShipping,0.0) + ISNULL(A.dblTax,0.0))
 
 				--ALREADY POSTED
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -773,8 +773,8 @@ IF @post = 1
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
 				,intAccountId				= A.intAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  ROUND(A.dblInvoiceTotal,2) ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  0 ELSE ROUND(A.dblInvoiceTotal,2) END
+				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  A.dblInvoiceTotal ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN  0 ELSE A.dblInvoiceTotal END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -817,8 +817,8 @@ IF @post = 1
 													ELSE
 														(CASE WHEN B.intServiceChargeAccountId IS NOT NULL AND B.intServiceChargeAccountId <> 0 THEN B.intServiceChargeAccountId ELSE @ServiceChargesAccountId END)
 												END)
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2)  END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) ELSE 0  END
+				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00)))  END
+				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) ELSE 0  END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -864,8 +864,8 @@ IF @post = 1
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intSalesAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(ROUND(B.dblTotal,2), 0.00) + ROUND(((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))),2) ELSE  0 END
+				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) END
+				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ISNULL(B.dblTotal, 0.00) + ((ISNULL(B.dblDiscount, 0.00)/100.00) * (ISNULL(B.dblQtyShipped, 0.00) * ISNULL(B.dblPrice, 0.00))) ELSE  0 END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -913,8 +913,8 @@ IF @post = 1
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
 				,intAccountId				= L.intFreightIncome
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ROUND(A.dblShipping,2) END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ROUND(A.dblShipping,2) ELSE 0  END
+				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE A.dblShipping END
+				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN A.dblShipping ELSE 0  END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -955,8 +955,8 @@ IF @post = 1
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
 				,intAccountId				= ISNULL(DT.intSalesTaxAccountId,TC.intSalesTaxAccountId)
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ROUND(DT.dblAdjustedTax,2) END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ROUND(DT.dblAdjustedTax,2) ELSE 0 END
+				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE DT.dblAdjustedTax END
+				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN DT.dblAdjustedTax ELSE 0 END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -1003,8 +1003,8 @@ IF @post = 1
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
 				,intAccountId				= ISNULL(IST.intDiscountAccountId, @DiscountAccountId)
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ROUND(((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)),2) ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ROUND(((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)),2) END
+				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -1050,8 +1050,8 @@ IF @post = 1
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intCOGSAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ROUND((ABS(ICT.dblQty) * ICT.dblCost),2) ELSE 0 END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ROUND((ABS(ICT.dblQty) * ICT.dblCost),2) END
+				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN (ABS(ICT.dblQty) * ICT.dblCost) ELSE 0 END
+				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE (ABS(ICT.dblQty) * ICT.dblCost) END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -1114,8 +1114,8 @@ IF @post = 1
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
 				,intAccountId				= IST.intInventoryInTransitAccountId
-				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE ROUND((ABS(ICT.dblQty) * ICT.dblCost),2) END
-				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN ROUND((ABS(ICT.dblQty) * ICT.dblCost),2) ELSE 0 END
+				,dblDebit					= CASE WHEN A.strTransactionType = 'Invoice' THEN 0 ELSE (ABS(ICT.dblQty) * ICT.dblCost) END
+				,dblCredit					= CASE WHEN A.strTransactionType = 'Invoice' THEN (ABS(ICT.dblQty) * ICT.dblCost) ELSE 0 END
 				,dblDebitUnit				= 0
 				,dblCreditUnit				= 0				
 				,strDescription				= A.strComments
@@ -1505,7 +1505,7 @@ IF @recap = 0
 				SET
 					ysnPosted = 0
 					,ysnPaid = 0
-					,dblAmountDue = ISNULL(ROUND(dblInvoiceTotal,2), 0.000000)
+					,dblAmountDue = ISNULL(dblInvoiceTotal, 0.000000)
 					,dblDiscount = ISNULL(dblDiscount, 0.000000)
 					,dblPayment = 0.000000
 					,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
@@ -1559,8 +1559,8 @@ IF @recap = 0
 					tblARInvoice
 				SET
 					ysnPosted = 1
-					,dblInvoiceTotal = ROUND(dblInvoiceTotal,2)
-					,dblAmountDue = ISNULL(ROUND(dblInvoiceTotal,2), 0.000000)
+					,dblInvoiceTotal = dblInvoiceTotal
+					,dblAmountDue = ISNULL(dblInvoiceTotal, 0.000000)
 					,dblDiscount = ISNULL(dblDiscount, 0.000000)
 					,dblPayment = 0.000000
 					,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
