@@ -2231,6 +2231,7 @@
     <Build Include="dbo\Stored Procedures\uspMFRescheduleWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSaveSchedule.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetYield.sql" />
+    <None Include="Scripts\Post-Deployment\DB\4_Create_Role_for_DashboardReports.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
