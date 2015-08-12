@@ -27,8 +27,8 @@ BEGIN
 	SELECT intSalesOrderDetailId
 		 , 0
 		 , 0
-		 , ROUND(dblMaintenanceAmount,2)
-		 , ROUND(dblMaintenanceAmount,2) * dblQtyOrdered
+		 , dblMaintenanceAmount
+		 , dblMaintenanceAmount * dblQtyOrdered
 	FROM tblSOSalesOrderDetail SOD INNER JOIN tblICItem ICI ON SOD.intItemId = ICI.intItemId
 		WHERE intSalesOrderId = @SalesOrderId AND ICI.strType = 'Software'
 		ORDER BY intSalesOrderDetailId
@@ -118,12 +118,12 @@ BEGIN
 				,[strPONumber]
 				,[intTermId]
 				,@dblSalesOrderSubtotal --ROUND([dblSalesOrderSubtotal],2)
-				,ROUND([dblShipping],2)
+				,[dblShipping]
 				,@dblTax--ROUND([dblTax],2)
 				,@dblSalesOrderTotal--ROUND([dblSalesOrderTotal],2)
 				,@dblDiscount--ROUND([dblDiscount],2)
-				,ROUND([dblAmountDue],2)
-				,ROUND([dblPayment],2)
+				,[dblAmountDue]
+				,[dblPayment]
 				,'Invoice'
 				,'Software'
 				,0 --Payment Method
@@ -234,10 +234,10 @@ BEGIN
 
 	INSERT INTO @OrderDetails(intSalesOrderDetailId, dblDiscount, dblTotalTax, dblPrice, dblTotal)
 	SELECT intSalesOrderDetailId
-			, ROUND(dblDiscount,2)
-			, ROUND(dblTotalTax,2)
-			, CASE WHEN ICI.strType <> 'Software' THEN ROUND(dblPrice,2) ELSE ROUND(dblLicenseAmount, 2) END
-			, CASE WHEN ICI.strType <> 'Software' THEN ROUND(dblTotal,2) ELSE ROUND(dblLicenseAmount, 2) * dblQtyOrdered END
+			, dblDiscount
+			, dblTotalTax
+			, CASE WHEN ICI.strType <> 'Software' THEN dblPrice ELSE dblLicenseAmount END
+			, CASE WHEN ICI.strType <> 'Software' THEN dblTotal ELSE dblLicenseAmount * dblQtyOrdered END
 	FROM tblSOSalesOrderDetail SOD LEFT JOIN tblICItem ICI ON SOD.intItemId = ICI.intItemId 
 		WHERE SOD.intSalesOrderId = @SalesOrderId AND (ICI.strType IN ('Non-Inventory', 'Other Charge', 'Service', 'Software') OR ICI.strType IS NULL)
 		ORDER BY intSalesOrderDetailId
@@ -304,12 +304,12 @@ BEGIN
 		,[strPONumber]
 		,[intTermId]
 		,@dblSalesOrderSubtotal
-		,ROUND([dblShipping],2)
+		,[dblShipping]
 		,@dblTax
 		,@dblSalesOrderTotal
 		,@dblDiscount
-		,ROUND([dblAmountDue],2)
-		,ROUND([dblPayment],2)
+		,[dblAmountDue]
+		,[dblPayment]
 		,'Invoice'
 		,'Software'
 		,0

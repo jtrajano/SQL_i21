@@ -715,7 +715,7 @@ IF @post = 1
 			 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
 			,strBatchID					= @batchId
 			,intAccountId				= A.intAccountId
-			,dblDebit					= ROUND(A.dblAmountPaid,2)
+			,dblDebit					= A.dblAmountPaid
 			,dblCredit					= 0
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0				
@@ -756,7 +756,7 @@ IF @post = 1
 			,strBatchID					= @batchId
 			,intAccountId				= @ARAccount
 			,dblDebit					= 0
-			,dblCredit					= ROUND(A.dblUnappliedAmount,2)
+			,dblCredit					= A.dblUnappliedAmount
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0				
 			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = @ARAccount)  
@@ -793,7 +793,7 @@ IF @post = 1
 			,strBatchID					= @batchId
 			,intAccountId				= @ARAccount 
 			,dblDebit					= 0
-			,dblCredit					= ROUND(A.dblAmountPaid,2)
+			,dblCredit					= A.dblAmountPaid
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0				
 			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = @ARAccount) 
@@ -830,7 +830,7 @@ IF @post = 1
 			 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
 			,strBatchID					= @batchId
 			,intAccountId				= @DiscountAccount 
-			,dblDebit					= SUM(ROUND(B.dblDiscount,2))
+			,dblDebit					= SUM(B.dblDiscount)
 			,dblCredit					= 0 
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0				
@@ -881,9 +881,9 @@ IF @post = 1
 			,strBatchID					= @batchId
 			,intAccountId				= B.intAccountId 
 			,dblDebit					= 0
-			,dblCredit					= ROUND(SUM((CASE WHEN (B.dblAmountDue = B.dblPayment + B.dblDiscount) --add discount only if fully paid
+			,dblCredit					= SUM((CASE WHEN (B.dblAmountDue = B.dblPayment + B.dblDiscount) --add discount only if fully paid
 												THEN B.dblPayment + B.dblDiscount
-												ELSE B.dblPayment END)),2)
+												ELSE B.dblPayment END))
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0				
 			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = B.intAccountId) 
@@ -932,7 +932,7 @@ IF @post = 1
 			,strBatchID					= @batchId
 			,intAccountId				= @ARAccount
 			,dblDebit					= 0
-			,dblCredit					= SUM(ROUND(B.dblDiscount,2)) 
+			,dblCredit					= SUM(B.dblDiscount) 
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0				
 			,strDescription				= (SELECT strDescription FROM tblGLAccount WHERE intAccountId = @ARAccount) 
