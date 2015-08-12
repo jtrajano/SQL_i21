@@ -155,6 +155,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             btnRemoveItem: {
                 hidden: '{current.ysnPosted}'
             },
+            btnQuality: {
+                hidden: '{current.ysnPosted}'
+            },
             grdInventoryShipment: {
                 readOnly: '{current.ysnPosted}',
                 colOrderNumber: {
@@ -1481,6 +1484,26 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },
 
+    onQualityClick: function(button, e, eOpts) {
+        var grid = button.up('grid');
+
+        var selected = grid.getSelectionModel().getSelection();
+
+        if (selected) {
+            if (selected.length > 0){
+                var current = selected[0];
+                if (!current.dummy)
+                    iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', { strSourceType: 'Inventory Shipment', intTicketFileId: current.get('intInventoryShipmentItemId') });
+            }
+            else {
+                iRely.Functions.showErrorDialog('Please select an Item to view.');
+            }
+        }
+        else {
+            iRely.Functions.showErrorDialog('Please select an Item to view.');
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboShipFromAddress": {
@@ -1530,6 +1553,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#cboCostBilledBy": {
                 select: this.onChargeSelect
+            },
+            "#btnQuality": {
+                click: this.onQualityClick
             }
         })
     }
