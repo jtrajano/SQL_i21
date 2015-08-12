@@ -2234,6 +2234,8 @@
     <None Include="Scripts\Post-Deployment\DB\4_Create_Role_for_DashboardReports.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetManufacturingCellByPackType.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetManufacturingCellCountByPackType.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetBasisDeliveries.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetPayableDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
