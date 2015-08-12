@@ -64,10 +64,12 @@ Ext.define('Inventory.model.ReceiptCharge', {
             }
         }
         if (this.get('dblRate') <= 0) {
-            errors.add({
-                field: 'dblRate',
-                message: 'Rate must be greater than zero.'
-            })
+            if (this.get('strCostMethod') !== 'Amount'){
+                errors.add({
+                    field: 'dblRate',
+                    message: 'Rate must be greater than zero.'
+                })
+            }
         }
         return errors;
     }
