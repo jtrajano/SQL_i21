@@ -379,7 +379,7 @@ BEGIN
 				,dtmNewExpiryDate			= NULL 
 				,intLotStatusId				= 1
 				,intNewLotStatusId			= NULL 
-				,dblCost					= 2.50
+				,dblCost					= 2.50 * @ManualGrains_25KgBagUOM
 				,dblNewCost					= NULL 
 				,dblLineTotal				= 1875.00
 				,intSort					= 1
@@ -465,7 +465,7 @@ BEGIN
 				,dtmNewExpiryDate			= NULL 
 				,intLotStatusId				= 1
 				,intNewLotStatusId			= NULL 
-				,dblCost					= 7.50
+				,dblCost					= 7.50 * @ManualGrains_25KgBagUOM
 				,dblNewCost					= NULL 
 				,dblLineTotal				= 660.00
 				,intSort					= 1
@@ -718,7 +718,7 @@ BEGIN
 				,dblNewWeight				= NULL 
 				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
-				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
+				,dblCost					= 2.50 * @25KgBagUnitQty -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
 				,dblNewCost					= NULL 
 				,intNewLocationId			= NULL 
 				,intNewSubLocationId		= NULL 
@@ -795,8 +795,8 @@ BEGIN
 				,dblNewWeight				= NULL 
 				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
-				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
-				,dblNewCost					= 3.50
+				,dblCost					= 2.50 * @ManualGrains_25KgBagUOM -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
+				,dblNewCost					= 3.50 * @ManualGrains_25KgBagUOM
 				,intNewLocationId			= NULL 
 				,intNewSubLocationId		= NULL 
 				,intNewStorageLocationId	= NULL 
@@ -872,7 +872,7 @@ BEGIN
 				,dblNewWeight				= 27500.00
 				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
-				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
+				,dblCost					= 2.50 * @ManualGrains_25KgBagUOM -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
 				,dblNewCost					= NULL 
 				,intNewLocationId			= NULL 
 				,intNewSubLocationId		= NULL 
@@ -949,7 +949,7 @@ BEGIN
 				,dblNewWeight				= NULL
 				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
-				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
+				,dblCost					= 2.50 * @ManualGrains_25KgBagUOM -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
 				,dblNewCost					= NULL 
 				,intNewLocationId			= NULL 
 				,intNewSubLocationId		= NULL  
@@ -1026,7 +1026,7 @@ BEGIN
 				,dblNewWeight				= NULL
 				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
-				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
+				,dblCost					= 2.50 * @ManualGrains_25KgBagUOM -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
 				,dblNewCost					= NULL 
 				,intNewLocationId			= NULL 
 				,intNewSubLocationId		= NULL  
@@ -1103,7 +1103,7 @@ BEGIN
 				,dblNewWeight				= NULL
 				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
-				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
+				,dblCost					= 2.50 * @ManualGrains_25KgBagUOM -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
 				,dblNewCost					= NULL 
 				,intNewLocationId			= NULL 
 				,intNewSubLocationId		= NULL  
@@ -1180,7 +1180,7 @@ BEGIN
 				,dblNewWeight				= NULL
 				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
-				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
+				,dblCost					= 2.50 * @ManualGrains_25KgBagUOM -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
 				,dblNewCost					= NULL 
 				,intNewLocationId			= NULL 
 				,intNewSubLocationId		= NULL  
