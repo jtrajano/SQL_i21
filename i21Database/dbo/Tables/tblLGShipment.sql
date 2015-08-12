@@ -54,6 +54,7 @@
 
 [intCompanyLocationId] INT NOT NULL, 
 [intCommodityId] INT NOT NULL, 
+[intInsurerEntityId] INT NULL,
 
 CONSTRAINT [PK_tblLGShipment_intShipmentId] PRIMARY KEY ([intShipmentId]), 
 CONSTRAINT [UK_tblLGShipment_intTrackingNumber] UNIQUE ([intTrackingNumber]),
@@ -69,5 +70,6 @@ CONSTRAINT [FK_tblLGShipment_tblEntity_intForwardingAgentEntityId_intEntityId] F
 CONSTRAINT [FK_tblLGShipment_tblSMCurrency_intInsuranceCurrencyId_intCurrencyID] FOREIGN KEY ([intInsuranceCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 CONSTRAINT [FK_tblLGShipmentInStore_tblEntity_intTruckerEntityId] FOREIGN KEY ([intTruckerEntityId]) REFERENCES [tblEntity]([intEntityId]),
 CONSTRAINT [FK_tblLGShipment_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
-CONSTRAINT [FK_tblLGShipment_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId])
+CONSTRAINT [FK_tblLGShipment_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
+CONSTRAINT [FK_tblLGShipment_tblEntity_intInsurerEntityId_intEntityId] FOREIGN KEY ([intInsurerEntityId]) REFERENCES [tblEntity]([intEntityId])
 )
