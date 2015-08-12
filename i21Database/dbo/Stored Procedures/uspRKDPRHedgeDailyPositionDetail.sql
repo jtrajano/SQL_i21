@@ -325,9 +325,11 @@ BEGIN
 					) AS dblTotal
 			FROM tblICInventoryReceipt r
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId AND strDistributionOption IN ('CNT')
+			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId
+				AND strDistributionOption IN ('CNT')
 			INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = ri.intOrderId
-			INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId AND cd.intPricingTypeId = 1
+			INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
+				AND cd.intPricingTypeId = 1
 			WHERE intSourceType = 1
 				AND strReceiptType IN ('Purchase Contract')
 				AND ch.intCommodityId = @intCommodityId
@@ -991,7 +993,6 @@ BEGIN
 			,(
 				SELECT SUM(dblAmountPaid) dblAmountPaid
 				FROM vyuARCustomerPaymentHistoryReport R
-				
 				WHERE R.intCommodityId = @intCommodityId
 				) AS dbltotal
 		FROM (
