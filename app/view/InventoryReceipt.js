@@ -992,13 +992,11 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         {
                                                                                             dataIndex: 'intItemId',
                                                                                             dataType: 'numeric',
-                                                                                            text: 'Item Id',
                                                                                             hidden: true
                                                                                         },
                                                                                         {
                                                                                             dataIndex: 'intLocationId',
                                                                                             dataType: 'numeric',
-                                                                                            text: 'Location Id',
                                                                                             hidden: true
                                                                                         },
                                                                                         {
@@ -1040,37 +1038,51 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         {
                                                                                             dataIndex: 'strReceiveUOM',
                                                                                             dataType: 'string',
-                                                                                            text: 'Receive UOM',
                                                                                             hidden: true
                                                                                         },
                                                                                         {
                                                                                             dataIndex: 'strStockUOM',
                                                                                             dataType: 'string',
-                                                                                            text: 'Stock UOM',
                                                                                             hidden: true
                                                                                         },
                                                                                         {
                                                                                             dataIndex: 'dblLastCost',
                                                                                             dataType: 'float',
-                                                                                            text: 'Last Cost',
                                                                                             hidden: true
                                                                                         },
                                                                                         {
                                                                                             dataIndex: 'dblReceiveUOMConvFactor',
                                                                                             dataType: 'float',
-                                                                                            text: 'Receive UOM Conversion Factor',
                                                                                             hidden: true
                                                                                         },
                                                                                         {
                                                                                             dataIndex: 'intReceiveUOMId',
                                                                                             dataType: 'numeric',
-                                                                                            text: 'Receive UOM Id',
                                                                                             hidden: true
                                                                                         },
                                                                                         {
                                                                                             dataIndex: 'intStockUOMId',
                                                                                             dataType: 'numeric',
-                                                                                            text: 'Stock UOM Id',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intSubLocationId',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strSubLocationName',
+                                                                                            dataType: 'string',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intStorageLocationId',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strStorageLocationName',
+                                                                                            dataType: 'string',
                                                                                             hidden: true
                                                                                         }
                                                                                     ],

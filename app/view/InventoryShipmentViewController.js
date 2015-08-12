@@ -329,7 +329,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colGrossWeight: 'dblGrossWeight',
                 colTareWeight: 'dblTareWeight',
                 colNetWeight: 'dblNetWeight',
-                colStorageLocation: 'strStorageLocation',
+                colLotStorageLocation: 'strStorageLocation',
                 colWarehouseCargoNumber: 'strWarehouseCargoNumber'
             },
 
@@ -658,6 +658,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('strUnitType', records[0].get('strIssueUOMType'));
             current.set('intOwnershipType', 1);
             current.set('strOwnershipType', 'Own');
+
+            current.set('intSubLocationId', records[0].get('intSubLocationId'));
+            current.set('strSubLocationName', records[0].get('strSubLocationName'));
+            current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
+            current.set('strStorageLocationName', records[0].get('strStorageLocationName'));
         }
     },
 

@@ -34,6 +34,7 @@ Ext.define('Inventory.model.ShipmentItem', {
         { name: 'intLineNo', type: 'int', allowNull: true },
         { name: 'intItemId', type: 'int', allowNull: true },
         { name: 'intSubLocationId', type: 'int', allowNull: true },
+        { name: 'intStorageLocationId', type: 'int', allowNull: true },
         { name: 'dblQuantity', type: 'float' },
         { name: 'intItemUOMId', type: 'int', allowNull: true },
         { name: 'intWeightUOMId', type: 'int', allowNull: true },
@@ -46,6 +47,8 @@ Ext.define('Inventory.model.ShipmentItem', {
         { name: 'strItemNo', type: 'string'},
         { name: 'strUnitMeasure', type: 'string'},
         { name: 'strWeightUOM', type: 'string'},
+        { name: 'strSubLocationName', type: 'string'},
+        { name: 'strStorageLocationName', type: 'string'},
 
         { name: 'dblLineTotal', type: 'float',
             persist: false,

@@ -926,6 +926,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             current.set('intOwnershipType', 1);
             current.set('strOwnershipType', 'Own');
 
+            current.set('intSubLocationId', records[0].get('intSubLocationId'));
+            current.set('strSubLocationName', records[0].get('strSubLocationName'));
+            current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
+            current.set('strStorageLocationName', records[0].get('strStorageLocationName'));
+
             var intUOM = null;
             var strUOM = '';
             var strWeightUOM = '';

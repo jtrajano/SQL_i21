@@ -1089,6 +1089,26 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                     dataIndex: 'intStockUOMId',
                                                                                     dataType: 'numeric',
                                                                                     hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intSubLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strSubLocationName',
+                                                                                    dataType: 'string',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intStorageLocationId',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strStorageLocationName',
+                                                                                    dataType: 'string',
+                                                                                    hidden: true
                                                                                 }
                                                                             ],
                                                                             itemId: 'cboItemNo',
@@ -1189,7 +1209,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                         xtype: 'gridcolumn',
                                                                         itemId: 'colStorageLocation',
                                                                         width: 100,
-                                                                        dataIndex: 'strSubLocation',
+                                                                        dataIndex: 'string',
                                                                         text: 'Storage Location',
                                                                         editor: {
                                                                             xtype: 'gridcombobox',
@@ -1570,7 +1590,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     },
                                                                     {
                                                                         xtype: 'gridcolumn',
-                                                                        itemId: 'colStorageLocation',
+                                                                        itemId: 'colLotStorageLocation',
                                                                         width: 100,
                                                                         dataIndex: 'strUOM',
                                                                         text: 'Storage Location'
