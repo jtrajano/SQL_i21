@@ -141,6 +141,7 @@
     <None Include="Scripts\NR\uspNRGenerateEFTSchedule.sql" />
     <None Include="Scripts\NR\uspNRGetDetailsForInvoice.sql" />
     <None Include="Scripts\NR\uspNRGetPaymentType.sql" />
+    <None Include="Scripts\AP\FixImportedVendorOriginFlag.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
