@@ -140,7 +140,7 @@ BEGIN
 				[dtmDateCreated] 		=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[dtmBillDate] 			=	CASE WHEN ISDATE(A.aptrx_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[dtmDueDate] 			=	CASE WHEN ISDATE(A.aptrx_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-				[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
+				[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(B.apcbk_gl_ap AS NVARCHAR(MAX))),
 				[strReference] 		=	A.aptrx_comment,
 				[strPONumber]			=	A.aptrx_pur_ord_no,
 				[dblTotal] 				=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt 
@@ -181,7 +181,7 @@ BEGIN
 				[dtmDateCreated] 		=	CASE WHEN ISDATE(A.apivc_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[dtmBillDate] 			=	CASE WHEN ISDATE(A.apivc_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[dtmDueDate] 			=	CASE WHEN ISDATE(A.apivc_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.apivc_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-				[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
+				[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(B.apcbk_gl_ap AS NVARCHAR(MAX))),
 				[strReference] 		=	A.apivc_comment,
 				[strPONumber]			=	A.apivc_pur_ord_no,
 				[dblTotal] 				=	CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt
@@ -226,7 +226,7 @@ BEGIN
 				A.strReference,
 				1,
 				1,
-				ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.apegl_gl_acct), 0),
+				ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.apegl_gl_acct AS NVARCHAR(MAX))), 0),
 				C.apegl_gl_amt,
 				C.apegl_gl_amt,
 				C.apegl_dist_no
@@ -257,7 +257,7 @@ BEGIN
 				A.strReference,
 				1,
 				1,
-				ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.aphgl_gl_acct), 0),
+				ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.aphgl_gl_acct AS NVARCHAR(MAX))), 0),
 				C.aphgl_gl_amt,
 				C.aphgl_gl_amt,
 				C.aphgl_dist_no
@@ -506,27 +506,27 @@ BEGIN
 		ELSE
 		BEGIN
 
-			--VALIDATE IF THERE ARE DUPLICATE VENDOR ORDER NUMBER
-			DECLARE @duplicateVendorNumber NVARCHAR(100);
-			SELECT TOP 1 @duplicateVendorNumber = A.aptrx_ivc_no
-						FROM aptrxmst A
-						WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
-						AND A.aptrx_trans_type IN (''I'',''C'',''A'')
-						AND A.aptrx_orig_amt != 0
-						AND EXISTS (
-							SELECT 1
-							FROM tblAPBill A1
-							INNER JOIN (tblAPVendor B INNER JOIN tblEntity B1 ON B.intEntityVendorId = B1.intEntityId) ON A1.intEntityVendorId = B.intEntityVendorId
-							WHERE A.aptrx_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
-							AND A.aptrx_ivc_no = A1.strVendorOrderNumber COLLATE Latin1_General_CS_AS
-						)
-			IF @duplicateVendorNumber IS NOT NULL
-			BEGIN
-				DECLARE @error NVARCHAR(200);
-				SET @error = ''Duplicate vendor number exists ('' + @duplicateVendorNumber + '')''
-				RAISERROR(@error, 16, 1);
-				RETURN;
-			END
+			----VALIDATE IF THERE ARE DUPLICATE VENDOR ORDER NUMBER
+			--DECLARE @duplicateVendorNumber NVARCHAR(100);
+			--SELECT TOP 1 @duplicateVendorNumber = A.aptrx_ivc_no
+			--			FROM aptrxmst A
+			--			WHERE CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
+			--			AND A.aptrx_trans_type IN (''I'',''C'',''A'')
+			--			AND A.aptrx_orig_amt != 0
+			--			AND EXISTS (
+			--				SELECT 1
+			--				FROM tblAPBill A1
+			--				INNER JOIN (tblAPVendor B INNER JOIN tblEntity B1 ON B.intEntityVendorId = B1.intEntityId) ON A1.intEntityVendorId = B.intEntityVendorId
+			--				WHERE A.aptrx_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
+			--				AND A.aptrx_ivc_no = A1.strVendorOrderNumber COLLATE Latin1_General_CS_AS
+			--			)
+			--IF @duplicateVendorNumber IS NOT NULL
+			--BEGIN
+			--	DECLARE @error NVARCHAR(200);
+			--	SET @error = ''Duplicate vendor number exists ('' + @duplicateVendorNumber + '')''
+			--	RAISERROR(@error, 16, 1);
+			--	RETURN;
+			--END
 
 			INSERT [dbo].[tblAPBill] (
 				[intEntityVendorId], 
@@ -565,7 +565,7 @@ BEGIN
 				[dtmDateCreated] 		=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[dtmBillDate] 			=	CASE WHEN ISDATE(A.aptrx_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
 				[dtmDueDate] 			=	CASE WHEN ISDATE(A.aptrx_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-				[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = B.apcbk_gl_ap),
+				[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(B.apcbk_gl_ap AS NVARCHAR(MAX))),
 				[strReference] 		=	A.aptrx_comment,
 				[strPONumber]			=	A.aptrx_pur_ord_no,
 				[dblTotal] 				=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt
@@ -612,7 +612,7 @@ BEGIN
 				A.strReference,
 				1,
 				1,
-				ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = C.apegl_gl_acct), 0),
+				ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.apegl_gl_acct AS NVARCHAR(MAX))), 0),
 				C.apegl_gl_amt,
 				C.apegl_gl_amt,
 				C.apegl_dist_no
@@ -629,6 +629,7 @@ BEGIN
 				WHERE CONVERT(DATE, CAST(C2.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo
 				 AND C2.aptrx_trans_type IN (''I'',''C'',''A'')
 				 AND C2.aptrx_orig_amt != 0
+				 AND A.ysnPosted = 0
 				ORDER BY C.apegl_dist_no
 			--UNION
 			--SELECT 

@@ -20,6 +20,7 @@ GO
 
 
 :r "..\Scripts\AP\TransferImportedTermsData.sql"
+:r "..\Scripts\AP\FixImportedVendorOriginFlag.sql"
 :r "..\Scripts\AP\TransferImportedVendorData.sql"
 :r "..\Scripts\NR\uspNRGetPaymentType.sql"
 :r "..\Scripts\NR\uspNRGetDetailsForInvoice.sql"

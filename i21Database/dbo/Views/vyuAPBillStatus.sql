@@ -22,8 +22,10 @@ SELECT
 			THEN 'Invalid Interest'
 		  WHEN A.dblWithheld != B.dblWithheld
 			THEN 'Invalid Withheld'
-		 WHEN A.ysnPaid = 1 AND A.dblTotal != (A.dblPayment + A.dblDiscount - A.dblInterest) 
+		 WHEN (A.ysnPaid = 1 AND A.dblTotal != (A.dblPayment + A.dblDiscount - A.dblInterest))
 			THEN 'Invalid Paid Status. Bill was not fully paid.'
+		 WHEN (A.ysnPaid = 0 AND A.dblTotal = (A.dblPayment + A.dblDiscount - A.dblInterest))
+			THEN 'Invalid Paid Status. Bill was already fully paid.'
 			ELSE 'OK' END AS strStatus
 FROM tblAPBill A
 	INNER JOIN vyuAPBillPayment B ON A.intBillId = B.intBillId

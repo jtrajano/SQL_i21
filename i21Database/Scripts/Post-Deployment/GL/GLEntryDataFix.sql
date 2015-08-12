@@ -52,12 +52,15 @@ UPDATE A SET strDescription = B.strDescription
 
 
 --AP
+DECLARE @DateRestricion DATETIME = '07-16-2015'
 IF EXISTS(
 	SELECT TOP 1 1
 	FROM tblGLDetail A
 	INNER JOIN tblAPPayment B ON A.strTransactionId = B.strPaymentRecordNum
 	INNER JOIN tblGLJournal C ON C.intJournalId = B.intPaymentId
-	AND A.strCode = 'AP')
+	AND A.strCode = 'AP'
+	AND A.dtmDateEntered <= @DateRestricion
+	)
 BEGIN
 	--update payment
 	UPDATE A SET A.strDescription ='Posted Payment'
@@ -74,6 +77,7 @@ BEGIN
 		select intDiscountAccountId FROM tblAPPreference UNION
 		SELECT intInterestAccountId FROM tblAPPreference
 	)
+	AND A.dtmDateEntered <= @DateRestricion
 
 	UPDATE 	A SET strDescription='Posted Payment - Withheld' FROM tblGLDetail A
 	INNER JOIN  [dbo].tblAPPayment B 
@@ -85,6 +89,7 @@ BEGIN
 	INNER JOIN tblGLJournal F ON F.intJournalId =B.intPaymentId				
 	AND A.strDescription <> 'Posted Payment - Withheld'
 	AND A.strCode = 'AP'
+	AND A.dtmDateEntered <= @DateRestricion
 
 	UPDATE A SET strDescription = 'Posted Payment - Discount' 
 	from tblGLDetail A 
@@ -97,6 +102,7 @@ BEGIN
 	AND A.strCode = 'AP'	
 	WHERE	1 = (CASE WHEN C.dblAmountDue = ((C.dblPayment + C.dblDiscount) - C.dblInterest) THEN 1 ELSE 0 END)
 	AND C.dblDiscount <> 0 AND C.dblPayment > 0
+	AND A.dtmDateEntered <= @DateRestricion
 
 
 	UPDATE A set strDescription = 'Posted Payment - Interest' 
@@ -107,18 +113,19 @@ BEGIN
 	INNER JOIN tblAPPreference E ON A.intAccountId = E.intInterestAccountId
 	INNER JOIN tblGLAccount F ON F.intAccountId = B.intAccountId
 	INNER JOIN tblGLJournal G ON G.intJournalId = B.intPaymentId	
-	AND A.strDescription = 'Posted Payment - Interest' 
+	AND A.strDescription <> 'Posted Payment - Interest' 
 	AND A.strCode = 'AP'
 	WHERE 1 = (CASE WHEN C.dblAmountDue = ((C.dblPayment + C.dblDiscount) - C.dblInterest) THEN 1 ELSE 0 END)
 		AND C.dblInterest <> 0 AND C.dblPayment > 0
+	AND A.dtmDateEntered <= @DateRestricion
 		
 	-- update bill
 	UPDATE A SET strDescription = B.strReference
 	FROM tblGLDetail A INNER JOIN 
 	[dbo].tblAPBill B ON A.strTransactionId = B.strBillId
 	INNER JOIN tblGLJournal C ON C.intJournalId = B.intBillId
-	AND C.intJournalId = B.intBillId
 	AND A.strDescription <> B.strReference
+	AND A.dtmDateEntered <= @DateRestricion
 	
 END	
 
@@ -126,7 +133,9 @@ END
 IF EXISTS(
 		SELECT TOP 1 1 FROM tblGLDetail A
 		INNER JOIN tblARPayment B ON A.strTransactionId = B.strRecordNumber
-		INNER JOIN tblGLJournal C ON B.intPaymentId = C.intJournalId)
+		INNER JOIN tblGLJournal C ON B.intPaymentId = C.intJournalId
+		AND A.dtmDateEntered <= @DateRestricion
+		)
 BEGIN
 
 	UPDATE A SET strDescription = GLAccnt.strDescription
@@ -137,6 +146,7 @@ BEGIN
 	INNER JOIN tblSMPreferences D ON CONVERT(NVARCHAR(50), A.intAccountId) =  D.strValue AND D.strPreference IN ('DefaultARAccount' ,'DefaultARDiscountAccount')
 	INNER JOIN tblGLJournal E ON E.intJournalId = B.intPaymentId
 	WHERE A.strDescription <> GLAccnt.strDescription
+	AND A.dtmDateEntered <= @DateRestricion
 		 
 	-- select B.strNotes 
 	UPDATE A SET strDescription = B.strNotes
@@ -146,12 +156,14 @@ BEGIN
 	INNER JOIN tblARCustomer C ON B.[intEntityCustomerId] = C.[intEntityCustomerId]
 	INNER JOIN tblGLJournal E ON E.intJournalId = B.intPaymentId
 	WHERE  CONVERT(NVARCHAR(50), A.intAccountId) NOT IN(SELECT strValue FROM tblSMPreferences WHERE strPreference IN( 'DefaultARAccount','DefaultARDiscountAccount'))
+	AND A.dtmDateEntered <= @DateRestricion
 		 			
 		--SELECT B.strComments
 	UPDATE A SET strDescription = B.strComments
 	FROM tblGLDetail A 
 	INNER JOIN tblARInvoice B  ON A.strTransactionId = B.strInvoiceNumber AND A.strDescription <> B.strComments
 	INNER JOIN tblGLJournal C ON C.intJournalId = B.intInvoiceId AND C.intJournalId =B.intInvoiceId
+	AND A.dtmDateEntered <= @DateRestricion
 	
 END
 
@@ -161,13 +173,16 @@ IF EXISTS(
 	FROM tblGLDetail B INNER JOIN
 	tblGLAccount A ON A.intAccountId = B.intAccountId
 	INNER JOIN tblGLJournal C ON C.intJournalId = B.intTransactionId
-	WHERE B.strModuleName = 'Cash Management')
+	WHERE B.strModuleName = 'Cash Management'
+	AND B.dtmDateEntered <= @DateRestricion
+	)
 BEGIN
 	UPDATE B SET strDescription = A.strDescription
 	FROM tblGLDetail B INNER JOIN
 	tblGLAccount A ON A.intAccountId = B.intAccountId
 	INNER JOIN tblGLJournal C ON C.intJournalId = B.intTransactionId
 	WHERE B.strModuleName = 'Cash Management'
+	AND B.dtmDateEntered <= @DateRestricion
 END
 PRINT N'END Normalize tblGLDetail Fields'
 
