@@ -2232,6 +2232,7 @@
     <Build Include="dbo\Stored Procedures\uspSOUpdateContractOnSalesOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspSOGetItemsFromSalesOrder.sql" />
     <Build Include="dbo\User Defined Types\SalesOrderItemTableType.sql" />
+    <None Include="Scripts\Post-Deployment\DB\4_Create_Role_for_DashboardReports.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
