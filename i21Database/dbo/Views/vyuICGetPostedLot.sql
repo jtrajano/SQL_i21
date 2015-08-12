@@ -23,6 +23,7 @@ SELECT	intLotId				= Lot.intLotId
 		,dblWeight				= Lot.dblWeight
 		,dblWeightPerQty		= Lot.dblWeightPerQty
 		,dblCost				= (
+				-- Get the last cost from the cost bucket table.
 				SELECT	TOP 1 
 						dblCost 
 				FROM	dbo.tblICInventoryLot PostedLot

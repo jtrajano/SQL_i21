@@ -190,10 +190,10 @@ BEGIN
 		)
 		SELECT 	intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_PoundUOM
+				,intItemUOMId			= @ManualGrains_25KgBagUOM
 				,dtmDate				= '05/17/2015'
-				,dblQty					= -500.000000 * @25KgBagUnitQty
-				,dblUOMQty				= @PoundUnitQty
+				,dblQty					= -500.000000 
+				,dblUOMQty				= @25KgBagUnitQty
 				,dblCost				= 2.500000
 				,dblValue				= 0
 				,dblSalesPrice			= 0
