@@ -256,29 +256,13 @@ BEGIN
 	-----------------------------------
 	IF @adjustmentType = @ADJUSTMENT_TYPE_SplitLot
 	BEGIN 
-		INSERT INTO @ItemsForAdjust (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost
-				,dblValue
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,intTransactionDetailId   
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-		)  	
+	
 		EXEC dbo.uspICPostInventoryAdjustmentSplitLotChange
 				@intTransactionId
+				,@strBatchId  
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 				,@intUserId
+				,@strAdjustmentDescription	
 	END 
 
 	-----------------------------------
@@ -308,7 +292,9 @@ BEGIN
 		)  	
 		EXEC dbo.uspICPostInventoryAdjustmentLotMerge 
 				@intTransactionId
+				,@strBatchId
 				,@intUserId
+				,@strAdjustmentDescription	
 	END 
 
 	-----------------------------------
@@ -356,6 +342,22 @@ BEGIN
 	-----------------------------------
 	IF @adjustmentTypeRequiresGLEntries = 1
 	BEGIN 
+		-----------------------------------------
+		-- Generate the Costing
+		-----------------------------------------
+		IF EXISTS (SELECT TOP 1 1 FROM @ItemsForAdjust)
+		BEGIN 
+			EXEC	dbo.uspICPostCosting  
+					@ItemsForAdjust  
+					,@strBatchId  
+					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+					,@intUserId
+					,@strAdjustmentDescription
+		END				
+				
+		-----------------------------------------
+		-- Generate a new set of g/l entries
+		-----------------------------------------
 		INSERT INTO @GLEntries (
 				[dtmDate] 
 				,[strBatchId]
@@ -383,12 +385,11 @@ BEGIN
 				,[strModuleName]
 				,[intConcurrencyId]
 		)
-		EXEC	dbo.uspICPostCosting  
-				@ItemsForAdjust  
-				,@strBatchId  
-				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-				,@intUserId
-				,@strAdjustmentDescription		
+		EXEC dbo.uspICCreateGLEntries 
+			@strBatchId
+			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+			,@intUserId
+			,@strAdjustmentDescription						
 	END 
 END   
 
