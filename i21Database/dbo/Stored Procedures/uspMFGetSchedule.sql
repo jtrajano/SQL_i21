@@ -53,6 +53,7 @@ SELECT C.intManufacturingCellId
 	,W.dblQuantity
 	,W.dtmExpectedDate
 	,W.dblQuantity - W.dblProducedQuantity AS dblBalanceQuantity
+	,W.dblProducedQuantity
 	,W.strComment AS strWorkOrderComments
 	,W.dtmOrderDate
 	,(
