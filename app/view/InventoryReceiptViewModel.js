@@ -252,7 +252,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     strDescription: 'Unit'
                 },
                 {
-                    strDescription: 'Weight'
+                    strDescription: 'Stock Unit'
                 },
                 {
                     strDescription: 'Cost'
