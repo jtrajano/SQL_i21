@@ -298,18 +298,10 @@ BEGIN
 			--SELECT @SQL --debug
 			EXEC (@SQL)
 
-			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + '' [ID] Between '' + '''''''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''' + ''-'' + ''''''''
-							+ ''+convert (varchar('' + @9_16size + ''),acct9_16) +'' + '''''''''''''''' + '' AND '' + '''''''''''''''' 
-							+ ''+convert (varchar('' + @1_8size + ''),acct1_8end)+'' + '''''''' + ''-'' + ''''''''
-							+ ''+convert (varchar('' + @9_16size + ''),acct9_16) '' + '' + ''''''''''''''''''
-							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRP'' + '''''''' + '' AND acct9_16 like '' + '''''''' + ''%*%'' + ''''''''
-			--SELECT @SQL --debug
-			EXEC (@SQL)
-
 			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + ''[Primary Account] Between '' 
 							+ '''''''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''''''''''' + '' AND ''
 							+ '''''''''''''''' + ''+ convert (varchar('' + @1_8size + ''),acct1_8end)'' + '' + ''''''''''''''''''
-							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRP'' + '''''''' + '' AND glfsf_action_crl = '' + '''''''' + ''E'' + '''''''' + '' AND acct9_16 like '' + '''''''' + ''%*%'' + ''''''''			
+							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRP'' + '''''''' + '' AND acct9_16 like '' + '''''''' + ''%*%'' + ''''''''			
 			--SELECT @SQL --debug
 			EXEC (@SQL)
 
