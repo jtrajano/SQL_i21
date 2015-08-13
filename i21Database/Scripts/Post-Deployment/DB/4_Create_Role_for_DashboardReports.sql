@@ -57,6 +57,7 @@ CLOSE db_cursor
 DEALLOCATE db_cursor
 
 IF NOT EXISTS (SELECT * FROM sys.server_principals WHERE name = N'irelydashboard')
+Begin
 CREATE LOGIN [irelydashboard] WITH PASSWORD=N'6Ö!Ú=çôrÍ>ú(Y÷?½Û´º²''?6	ûq­{j:', DEFAULT_DATABASE=[master], DEFAULT_LANGUAGE=[us_english], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
 -- Password:iRely@dash
 
@@ -64,3 +65,4 @@ EXEC sp_adduser 'irelydashboard'
 EXEC sp_addrolemember 'db_datareader', 'irelydashboard';
 EXEC sp_addrolemember 'db_dashboardreports', 'irelydashboard';
 DROP SCHEMA irelydashboard
+End
