@@ -268,7 +268,4 @@
     <Build Include="dbo\Tables\tblAPImportBillError.sql" />
     <None Include="dbo\Stored Procedures\uspAPImportBillsFromAPTRXMST.sql" />
   </ItemGroup>
-  <ItemGroup>
-    <RefactorLog Include="Integration.refactorlog" />
-  </ItemGroup>
 </Project>
