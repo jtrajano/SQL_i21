@@ -983,7 +983,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         dblGrossWeight: '',
                         dblTareWeight: '',
                         dblStatedGrossPerUnit: '',
-                        dblStatedTarePerUnit: ''
+                        dblStatedTarePerUnit: '',
+                        intStorageLocationId: current.get('intStorageLocationId'),
+                        strStorageLocation: current.get('strStorageLocationName')
                     });
                     current.tblICInventoryReceiptItemLots().add(newLot);
                     break;
@@ -2777,6 +2779,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#btnVendor": {
                 click: this.onVendorClick
+            },
+            "#btnInsertInventoryReceipt": {
+                click: this.onInsertChargeClick
+            },
+            "#btnInsertLot": {
+                click: this.onInsertChargeClick
             },
             "#btnInsertCharge": {
                 click: this.onInsertChargeClick
