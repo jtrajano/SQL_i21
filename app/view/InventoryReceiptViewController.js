@@ -163,7 +163,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
 
             grdInventoryReceipt: {
-                readOnly: '{current.ysnPosted}',
+                readOnly: '{readOnlyReceiptItemGrid}',
                 colOrderNumber: {
                     hidden: '{checkHideOrderNo}',
                     dataIndex: 'strOrderNumber',
