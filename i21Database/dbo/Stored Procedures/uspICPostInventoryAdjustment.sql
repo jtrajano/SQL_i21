@@ -255,8 +255,7 @@ BEGIN
 	--  Call Split Lot Change
 	-----------------------------------
 	IF @adjustmentType = @ADJUSTMENT_TYPE_SplitLot
-	BEGIN 
-	
+	BEGIN 	
 		EXEC dbo.uspICPostInventoryAdjustmentSplitLotChange
 				@intTransactionId
 				,@strBatchId  
@@ -270,31 +269,12 @@ BEGIN
 	-----------------------------------
 	IF @adjustmentType = @ADJUSTMENT_TYPE_LotMerge
 	BEGIN 
-		INSERT INTO @ItemsForAdjust (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost
-				,dblValue
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,intTransactionDetailId   
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-		)  	
-		EXEC dbo.uspICPostInventoryAdjustmentLotMerge 
+		EXEC dbo.uspICPostInventoryAdjustmentLotMerge
 				@intTransactionId
-				,@strBatchId
+				,@strBatchId  
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 				,@intUserId
-				,@strAdjustmentDescription	
+				,@strAdjustmentDescription
 	END 
 
 	-----------------------------------
@@ -302,29 +282,12 @@ BEGIN
 	-----------------------------------
 	IF @adjustmentType = @ADJUSTMENT_TYPE_LotMove
 	BEGIN 
-		INSERT INTO @ItemsForAdjust (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost
-				,dblValue
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,intTransactionDetailId   
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-		)  	
 		EXEC dbo.uspICPostInventoryAdjustmentLotMove
 				@intTransactionId
+				,@strBatchId  
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 				,@intUserId
+				,@strAdjustmentDescription
 	END 
 
 	-----------------------------------

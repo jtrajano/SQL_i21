@@ -68,8 +68,6 @@ BEGIN
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
-			AND ISNULL(Detail.dblNewQuantity, 0) = 0
-			AND ISNULL(Detail.dblAdjustByQuantity, 0) = 0
 			AND ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0) > 0 
 	
 	IF @intItemId IS NOT NULL 
@@ -196,36 +194,9 @@ BEGIN
 			,intItemLocationId		= ISNULL(NewItemLocation.intItemLocationId, OriginalItemLocation.intItemLocationId) 
 			,intItemUOMId			= ISNULL(NewItemUOM.intItemUOMId, FromStock.intItemUOMId) 
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= -1 * 
-									  CASE	WHEN Detail.dblNewSplitLotQuantity IS NOT NULL THEN 
-													(
-														-- Calculate the ratio between FromStock Qty and New Split Lot Qty. 
-														-- Formula: (New Split Qty / Reduce Qty) * (From Stock Qty)
-														(Detail.dblNewSplitLotQuantity / (-1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)))) -- Ratio
-														* (FromStock.dblQty * FromStock.dblUOMQty)
-														/ ISNULL(NewItemUOM.dblUnitQty, FromStock.dblUOMQty)
-													)													
-												ELSE 
-													FromStock.dblQty
-										END 
+			,dblQty					= -1 * FromStock.dblQty
 			,dblUOMQty				= ISNULL(NewItemUOM.dblUnitQty, FromStock.dblUOMQty)
-			,dblCost				=	-- Get the correct cost. 
-										CASE	-- No new cost found... 
-												WHEN Detail.dblNewCost IS NULL THEN 
-													CASE	-- ... but there is a split lot qty. Then, calculate a new cost. 
-															WHEN Detail.dblNewSplitLotQuantity IS NOT NULL AND Detail.dblNewSplitLotQuantity <> 0 THEN 
-																Detail.dblCost 
-																* -1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
-																/ Detail.dblNewSplitLotQuantity
-															-- ... otherwise, use the same cost in FromStock.
-															ELSE 
-																FromStock.dblCost
-													END	
-												ELSE	
-													-- New cost found. 
-													Detail.dblNewCost
-										END 
-
+			,dblCost				= ISNULL(Detail.dblNewCost, FromStock.dblCost) 
 			,dblValue				= 0
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 

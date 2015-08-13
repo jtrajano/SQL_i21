@@ -710,3 +710,11 @@ EXEC sp_addmessage 51176,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51177) EXEC sp_dropmessage 51177, 'us_english'	
 SET @strmessage = 'Split Lot Qty requires a negative Adjust Qty on %s to split stocks from it.'
 EXEC sp_addmessage 51177,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51178) EXEC sp_dropmessage 51178, 'us_english'	
+SET @strmessage = 'Merge Lot requires a negative Adjust Qty on %s as stock for the merge.'
+EXEC sp_addmessage 51178,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51179) EXEC sp_dropmessage 51179, 'us_english'	
+SET @strmessage = 'Move Lot requires a negative Adjust Qty on %s as stock for the move.'
+EXEC sp_addmessage 51179,11,@strmessage,'us_english','False'

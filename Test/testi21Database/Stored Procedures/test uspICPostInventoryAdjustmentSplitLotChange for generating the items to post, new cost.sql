@@ -192,7 +192,7 @@ BEGIN
 				,dtmDate				= '05/18/2015'
 				,dblQty					= -500.00 
 				,dblUOMQty				= @25KgBagUnitQty
-				,dblCost				= 2.500000
+				,dblCost				= 2.500000 * @25KgBagUnitQty
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 
@@ -212,7 +212,7 @@ BEGIN
 				,dtmDate				= '05/18/2015'
 				,dblQty					= 500
 				,dblUOMQty				= @25KgBagUnitQty
-				,dblCost				= 3.50
+				,dblCost				= 3.50 * @25KgBagUnitQty
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 
