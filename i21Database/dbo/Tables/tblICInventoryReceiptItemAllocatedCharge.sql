@@ -10,10 +10,9 @@
 	[ysnInventoryCost] BIT NULL DEFAULT ((0)),	
 	[dblAmountBilled] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblAmountPaid] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-	CONSTRAINT [PK_tblICInventoryReceiptItemAllocatedCharge] PRIMARY KEY ([intInventoryReceiptItemAllocatedChargeId]), 
-	CONSTRAINT [FK_tblICInventoryReceiptItemAllocatedCharge_tblICInventoryReceiptItem] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES [tblICInventoryReceiptItem]([intInventoryReceiptItemId]) ON DELETE CASCADE, 
-	CONSTRAINT [FK_tblICInventoryReceiptItemAllocatedCharge_tblICInventoryReceiptCharge] FOREIGN KEY ([intInventoryReceiptChargeId]) REFERENCES [tblICInventoryReceiptCharge]([intInventoryReceiptChargeId]) ON DELETE CASCADE, 
-	CONSTRAINT [FK_tblICInventoryReceiptItemAllocatedCharge_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId])
+	CONSTRAINT [PK_tblICInventoryReceiptItemAllocatedCharge] PRIMARY KEY ([intInventoryReceiptItemAllocatedChargeId]),
+	CONSTRAINT [FK_tblICInventoryReceiptItemAllocatedCharge_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]), 
+    CONSTRAINT [FK_tblICInventoryReceiptItemAllocatedCharge_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE
 )
 GO
 
