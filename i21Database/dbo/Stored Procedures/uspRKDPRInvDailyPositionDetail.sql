@@ -235,7 +235,7 @@ BEGIN
 		
 		UNION ALL
 		
-		SELECT isnull(SUM(isnull(ri.dblOpenReceive, 0)), 0) AS dblTotal
+		SELECT isnull(SUM(isnull(ri.dblReceived, 0)), 0) AS dblTotal
 		FROM tblICInventoryReceipt r
 		INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 			AND r.strReceiptType = 'Purchase Contract'
@@ -255,7 +255,6 @@ BEGIN
 	INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
 	INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo
 		AND cd.intPricingTypeId = 2
-		AND ri.intOrderId = 1
 	INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 	WHERE ch.intCommodityId = @intCommodityId
 		AND cd.intCompanyLocationId = @intLocationId
@@ -524,7 +523,7 @@ BEGIN
 		
 		UNION ALL
 		
-		SELECT isnull(SUM(isnull(ri.dblOpenReceive, 0)), 0) AS dblTotal
+		SELECT isnull(SUM(isnull(ri.dblReceived, 0)), 0) AS dblTotal
 		FROM tblICInventoryReceipt r
 		INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId
 			AND r.strReceiptType = 'Purchase Contract'
@@ -542,8 +541,7 @@ BEGIN
 	FROM tblICInventoryShipment r
 	INNER JOIN tblICInventoryShipmentItem ri ON r.intInventoryShipmentId = ri.intInventoryShipmentId
 	INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo
-		AND cd.intPricingTypeId = 2
-		AND ri.intOrderId = 1
+		AND cd.intPricingTypeId = 2	
 	INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 	WHERE ch.intCommodityId = @intCommodityId
 	

@@ -41,11 +41,11 @@ BEGIN
 		,S.intShipmentContractQtyId
 		,S.intShipmentBLContainerId
 		,S.intShipmentBLContainerContractId
+		,S.dblQuantity AS dblRepresentingQty
 		,C.intContractHeaderId
 		,C.intContractDetailId
 		,C.intItemId
 		,C.strItemDescription AS strDescription
-		,C.dblDetailQuantity AS dblRepresentingQty
 		,C.intUnitMeasureId AS intRepresentingUOMId
 		,C.intCountryId
 		,C.intEntityId
@@ -59,11 +59,11 @@ BEGIN
 		,@intProductValueId AS intProductValueId
 		,S.intShipmentId
 		,S.intShipmentContractQtyId
+		,S.dblQuantity AS dblRepresentingQty
 		,C.intContractHeaderId
 		,C.intContractDetailId
 		,C.intItemId
 		,C.strItemDescription AS strDescription
-		,C.dblDetailQuantity AS dblRepresentingQty
 		,C.intUnitMeasureId AS intRepresentingUOMId
 		,C.intCountryId
 		,C.intEntityId
@@ -79,10 +79,11 @@ BEGIN
 		,L.strLotNumber
 		,L.intItemId
 		,I.strDescription
-		,L.dblQty
-		,L.intItemUOMId AS intRepresentingUOMId
+		,L.dblQty AS dblRepresentingQty
+		,IU.intUnitMeasureId AS intRepresentingUOMId
 	FROM tblICLot L
 	JOIN tblICItem I ON I.intItemId = L.intItemId
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
 	WHERE L.intLotId = @intProductValueId
 END
 ELSE IF @intProductTypeId = 11 -- Parent Lot
@@ -93,9 +94,10 @@ BEGIN
 		,PL.strParentLotNumber
 		,PL.intItemId
 		,I.strDescription
-		,PL.dblQty
-		,PL.intItemUOMId AS intRepresentingUOMId
+		,PL.dblQty AS dblRepresentingQty
+		,IU.intUnitMeasureId AS intRepresentingUOMId
 	FROM tblICParentLot PL
 	JOIN tblICItem I ON I.intItemId = PL.intItemId
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = PL.intItemUOMId
 	WHERE PL.intParentLotId = @intProductValueId
 END
