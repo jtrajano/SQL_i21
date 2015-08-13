@@ -24,6 +24,9 @@ BEGIN TRY
 		,@intShiftId INT
 		,@strShiftName NVARCHAR(50)
 		,@strPlannedDate NVARCHAR(50)
+		,@intAttributeId int
+		,@strTimebasedProduction nvarchar(50)
+		,@intLocationId int
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -46,8 +49,14 @@ BEGIN TRY
 			,ysnCycleCountRequired BIT
 			,strManufacturingProcessRunDurationName NVARCHAR(50)
 			)
+	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Time based Production'
+	Select @intLocationId=intLocationId from tblMFManufacturingCell Where intManufacturingCellId = @intManufacturingCellId
 
-	IF @ysnCycleCountRequired = 1
+	Select @strTimebasedProduction=strAttributeValue
+	From tblMFManufacturingProcessAttribute
+	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
+
+	IF @strTimebasedProduction='True'
 	BEGIN
 		SELECT TOP 1 @dtmLastPlannedDateTime = CASE 
 				WHEN W.intPlannedShiftId IS NOT NULL
@@ -151,61 +160,61 @@ BEGIN TRY
 					,@strLastPlannedDate
 					)
 		END
-	END
+	
 
-	IF @strManufacturingProcessRunDurationName = 'By Shift'
-		AND EXISTS (
-			SELECT *
-			FROM tblMFWorkOrder
-			WHERE dtmPlannedDate = @dtmPlannedDate
-				AND intPlannedShiftId = @intPlannedShiftId
-				AND intManufacturingProcessId = @intManufacturingProcessId
-				AND intItemId = @intItemId
-			)
-	BEGIN
-		SELECT @strShiftName = strShiftName
-		FROM dbo.tblMFShift
-		WHERE intShiftId = @intPlannedShiftId
-
-		SELECT @strItemNo = strItemNo + ' ' + strDescription
-		FROM dbo.tblICItem
-		WHERE intItemId = @intItemId
-
-		SELECT @strPlannedDate = CONVERT(CHAR,@dtmPlannedDate,101) + ' ' + @strShiftName
-
-		RAISERROR (
-				51158
-				,11
-				,1
-				,@strPlannedDate
-				,@strItemNo
+		IF @strManufacturingProcessRunDurationName = 'By Shift'
+			AND EXISTS (
+				SELECT *
+				FROM tblMFWorkOrder
+				WHERE dtmPlannedDate = @dtmPlannedDate
+					AND intPlannedShiftId = @intPlannedShiftId
+					AND intManufacturingProcessId = @intManufacturingProcessId
+					AND intItemId = @intItemId
 				)
-	END
+		BEGIN
+			SELECT @strShiftName = strShiftName
+			FROM dbo.tblMFShift
+			WHERE intShiftId = @intPlannedShiftId
 
-	IF @strManufacturingProcessRunDurationName = 'By Day'
-		AND EXISTS (
-			SELECT *
-			FROM dbo.tblMFWorkOrder
-			WHERE dtmPlannedDate = @dtmPlannedDate
-				AND intManufacturingProcessId = @intManufacturingProcessId
-				AND intItemId = @intItemId
-			)
-	BEGIN
-		SELECT @strItemNo = strItemNo + ' ' + strDescription
-		FROM dbo.tblICItem
-		WHERE intItemId = @intItemId
+			SELECT @strItemNo = strItemNo + ' ' + strDescription
+			FROM dbo.tblICItem
+			WHERE intItemId = @intItemId
 
-		SELECT @strPlannedDate = CONVERT(CHAR,@dtmPlannedDate,101)
+			SELECT @strPlannedDate = CONVERT(CHAR,@dtmPlannedDate,101) + ' ' + @strShiftName
 
-		RAISERROR (
-				51168
-				,11
-				,1
-				,@strPlannedDate
-				,@strItemNo
+			RAISERROR (
+					51158
+					,11
+					,1
+					,@strPlannedDate
+					,@strItemNo
+					)
+		END
+
+		IF @strManufacturingProcessRunDurationName = 'By Day'
+			AND EXISTS (
+				SELECT *
+				FROM dbo.tblMFWorkOrder
+				WHERE dtmPlannedDate = @dtmPlannedDate
+					AND intManufacturingProcessId = @intManufacturingProcessId
+					AND intItemId = @intItemId
 				)
-	END
+		BEGIN
+			SELECT @strItemNo = strItemNo + ' ' + strDescription
+			FROM dbo.tblICItem
+			WHERE intItemId = @intItemId
 
+			SELECT @strPlannedDate = CONVERT(CHAR,@dtmPlannedDate,101)
+
+			RAISERROR (
+					51168
+					,11
+					,1
+					,@strPlannedDate
+					,@strItemNo
+					)
+		END
+	END
 	EXEC sp_xml_removedocument @idoc
 END TRY
 

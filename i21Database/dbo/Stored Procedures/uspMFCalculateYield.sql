@@ -203,7 +203,7 @@ BEGIN TRY
 	SELECT @intProductionSummaryId = Min(intProductionSummaryId)
 	FROM tblMFProductionSummary F
 	JOIN @tblInputItem I ON I.intItemId = F.intItemId
-	Where F.intWorkOrderId=@intWorkOrderId and F.dblYieldQuantity<>0
+	Where F.intWorkOrderId=@intWorkOrderId 
 
 	WHILE @intProductionSummaryId IS NOT NULL
 	BEGIN
@@ -273,6 +273,10 @@ BEGIN TRY
 						EXEC dbo.uspSMGetStartingNumber 55
 							,@strLotNumber OUTPUT
 					END
+
+					Select @intItemUOMId =intItemUOMId
+					From dbo.tblICItemUOM
+					Where intItemId=@intItemId and ysnStockUnit =1
 
 					INSERT INTO @ItemsThatNeedLotId (
 						intLotId
@@ -379,16 +383,7 @@ BEGIN TRY
 
 		IF @intLotId IS NOT NULL
 		BEGIN
-			--IF @dblYieldQuantity < 0
-			--	AND ABS(@dblYieldQuantity) > @dblQty
-			--	SET @dblNewQty = -@dblQty
-			--ELSE
-			--	SET @dblNewQty = @dblYieldQuantity
-
 			SET @dblNewQty = @dblYieldQuantity
-
-			--IF @intManufacturingProcessId = 6
-			--	SET @dblQty = -@dblQty+@dblYieldQuantity
 
 			UPDATE dbo.tblMFProcessCycleCount
 			SET intLotId = @intLotId
@@ -401,7 +396,7 @@ BEGIN TRY
 					OR dblSystemQty > 0
 					)
 
-			IF @ysnYieldAdjustmentAllowed = 1
+			IF @ysnYieldAdjustmentAllowed = 1 and @dblYieldQuantity<>0
 			BEGIN
 				Select @dblAdjustByQuantity=@dblNewQty/(Case When @intWeightUOMId is null Then 1 Else @dblWeightPerQty End)
 
@@ -422,19 +417,20 @@ BEGIN TRY
 						,@intUserId = @intUserId
 						,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
 				PRINT 'Call Adjust Qty procedure'
+			END
 
-				IF EXISTS(SELECT *FROM tblICLot Where intLotId=@intLotId and dblQty=0)
-				Begin
-					UPDATE dbo.tblICLot
-					SET intLotStatusId = 3
-					WHERE intLotId = @intLotId
-				End
+			IF EXISTS(SELECT *FROM tblICLot Where intLotId=@intLotId and dblQty=0)
+			BEGIN
+				UPDATE dbo.tblICLot
+				SET intLotStatusId = 3
+				WHERE intLotId = @intLotId
 			END
 		END
+
 		SELECT @intProductionSummaryId = Min(intProductionSummaryId)
 		FROM tblMFProductionSummary F
 		JOIN @tblInputItem I ON I.intItemId = F.intItemId
-		Where intProductionSummaryId>@intProductionSummaryId and F.intWorkOrderId=@intWorkOrderId and F.dblYieldQuantity<>0
+		Where intProductionSummaryId>@intProductionSummaryId and F.intWorkOrderId=@intWorkOrderId 
 	END
 
 	UPDATE dbo.tblMFWorkOrder
