@@ -1057,3 +1057,10 @@ BEGIN
 	VALUES(1,'Weighted Average')
 END
 GO
+DELETE
+FROM tblMFManufacturingProcessRunDuration
+WHERE intManufacturingProcessRunDurationId IN (
+		1
+		,4
+		)
+GO
