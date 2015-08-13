@@ -704,5 +704,14 @@ SET @strmessage = 'There is not enough stocks for %s. Reserved stocks is %s whil
 EXEC sp_addmessage 51175,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51176) EXEC sp_dropmessage 51176, 'us_english'	
-SET @strmessage = 'Split Lot Qty requires a negative Adjust Qty on %s to split stocks from it.'
+SET @strmessage = 'Split Lot requires a negative Adjust Qty on %s to split stocks from it.'
 EXEC sp_addmessage 51176,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51177) EXEC sp_dropmessage 51177, 'us_english'	
+SET @strmessage = 'Merge Lot requires a negative Adjust Qty on %s as stock for the merge.'
+EXEC sp_addmessage 51177,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51178) EXEC sp_dropmessage 51178, 'us_english'	
+SET @strmessage = 'Move Lot requires a negative Adjust Qty on %s as stock for the move.'
+EXEC sp_addmessage 51178,11,@strmessage,'us_english','False'
+

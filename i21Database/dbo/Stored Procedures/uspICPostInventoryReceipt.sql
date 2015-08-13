@@ -287,7 +287,7 @@ BEGIN
 				,intItemUOMId = 
 							-- Use weight UOM id if it is present. Otherwise, use the qty UOM. 
 							CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN DetailItem.intWeightUOMId 
-									ELSE DetailItem.intUnitMeasureId 
+									ELSE DetailItem.intUnitMeasureId
 							END
 				,dtmDate = Header.dtmReceiptDate  
 				,dblQty =						

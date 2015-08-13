@@ -192,7 +192,7 @@ BEGIN
 				,dtmDate				= '05/20/2015'
 				,dblQty					= -500.000000 
 				,dblUOMQty				= @25KgBagUnitQty
-				,dblCost				= 2.500000
+				,dblCost				= 2.500000 * @25KgBagUnitQty
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 
@@ -210,13 +210,9 @@ BEGIN
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
 				,intItemUOMId			= @ManualGrains_25KgBagUOM
 				,dtmDate				= '05/20/2015'
-				,dblQty					= 400.000000
+				,dblQty					= 500.000000
 				,dblUOMQty				= @25KgBagUnitQty
-				,dblCost				= (
-											2.50
-											* 500
-											/ 400				
-										)
+				,dblCost				= 2.500000 * @25KgBagUnitQty
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 

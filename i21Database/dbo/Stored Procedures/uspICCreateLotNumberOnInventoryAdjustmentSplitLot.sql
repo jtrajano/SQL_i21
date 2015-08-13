@@ -115,7 +115,8 @@ BEGIN
 													, ISNULL(Detail.dblWeightPerQty, 0) * -1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
 												)
 											ELSE 
-												ISNULL(Detail.dblWeightPerQty, 0) * -1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
+												ISNULL(Detail.dblWeightPerQty, 0) 
+												* -1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
 										END
 			,intWeightUOMId			= ISNULL(Detail.intNewWeightUOMId, Detail.intWeightUOMId)
 			,dtmExpiryDate			= SourceLot.dtmExpiryDate
