@@ -274,6 +274,10 @@ BEGIN TRY
 							,@strLotNumber OUTPUT
 					END
 
+					Select @intItemUOMId =intItemUOMId
+					From dbo.tblICItemUOM
+					Where intItemId=@intItemId and ysnStockUnit =1
+
 					INSERT INTO @ItemsThatNeedLotId (
 						intLotId
 						,strLotNumber
