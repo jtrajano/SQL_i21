@@ -8,8 +8,6 @@
 AS
 BEGIN TRY
 
-	Select @ysnExcessConsumptionAllowed=1
-
 	SET QUOTED_IDENTIFIER OFF
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
@@ -40,13 +38,34 @@ BEGIN TRY
 		,@dblWeightPerQty numeric(18,6)
 		,@intInventoryAdjustmentId int
 		,@intTransactionCount INT
+		,@intAttributeId int
+		,@strYieldAdjustmentAllowed nvarchar(50)
+		,@intManufacturingProcessId int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
 	Select @dtmCurrentDateTime	=GETDATE()
 	Select @dtmCurrentDate		=CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
 	Select @intDayOfYear		=DATEPART(dy,@dtmCurrentDateTime)
+
+	SELECT @intItemId = intItemId
+		,@intLocationId = intLocationId
+		,@intManufacturingProcessId=intManufacturingProcessId
+	FROM dbo.tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
 	
+	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Is Yield Adjustment Allowed'
+
+	Select @strYieldAdjustmentAllowed=strAttributeValue
+	From tblMFManufacturingProcessAttribute
+	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
+
+	Select @ysnExcessConsumptionAllowed=0
+	If @strYieldAdjustmentAllowed='True'
+	Begin
+		Select @ysnExcessConsumptionAllowed=1
+	End
+
 	IF @intTransactionCount = 0
 	BEGIN TRAN
 
@@ -81,10 +100,7 @@ BEGIN TRY
 		,dblMaxSubstituteRatio NUMERIC(18, 6)
 		)
 
-	SELECT @intItemId = intItemId
-		,@intLocationId = intLocationId
-	FROM dbo.tblMFWorkOrder
-	WHERE intWorkOrderId = @intWorkOrderId
+
 
 	SELECT @intRecipeId = intRecipeId
 	FROM dbo.tblMFWorkOrderRecipe a
