@@ -2237,6 +2237,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGetContractDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetPayableDetail.sql" />
     <Build Include="dbo\Views\vyuCMUnpostedTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateBillContractPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
