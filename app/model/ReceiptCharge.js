@@ -71,6 +71,14 @@ Ext.define('Inventory.model.ReceiptCharge', {
                 })
             }
         }
+        if (this.get('ysnInventoryCost')) {
+            if (iRely.Functions.isEmpty(this.get('strAllocateCostBy'))){
+                errors.add({
+                    field: 'strAllocateCostBy',
+                    message: 'Allocate Cost By cannot be blank when Inventory Cost is checked.'
+                })
+            }
+        }
         return errors;
     }
 
