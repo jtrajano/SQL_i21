@@ -903,6 +903,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colFactoryName: {
                     dataIndex: 'strLocationName',
                     editor: {
+                        origValueField: 'intCompanyLocationId',
+                        origUpdateField: 'intFactoryId',
                         store: '{factory}'
                     }
                 },
@@ -913,6 +915,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colCellName: {
                     dataIndex: 'strCellName',
                     editor: {
+                        origValueField: 'intManufacturingCellId',
+                        origUpdateField: 'intManufacturingCellId',
                         store: '{factoryManufacturingCell}'
                     }
                 },
@@ -924,6 +928,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colOwner: {
                     dataIndex: 'strCustomerNumber',
                     editor: {
+                        origValueField: 'intEntityCustomerId',
+                        origUpdateField: 'intOwnerId',
                         store: '{owner}'
                     }
                 },
@@ -2162,19 +2168,6 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Factory & Lines Tab Methods and Event Handlers">
 
-    onFactorySelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepFactory');
-        var current = plugin.getActiveRecord();
-
-        if (combo.column.itemId === 'colFactoryName'){
-            current.set('intFactoryId', records[0].get('intCompanyLocationId'));
-        }
-    },
-
     onManufacturingCellSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
             return;
@@ -2186,21 +2179,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var current = plugin.getActiveRecord();
 
         if (combo.column.itemId === 'colCellName'){
-            current.set('intManufacturingCellId', records[0].get('intManufacturingCellId'));
             current.set('intPreference', controller.getNewPreferenceNo(grid.store));
-        }
-    },
-
-    onOwnerSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepOwner');
-        var current = plugin.getActiveRecord();
-
-        if (combo.column.itemId === 'colOwner'){
-            current.set('intOwnerId', records[0].get('intCustomerId'));
         }
     },
 
@@ -2549,14 +2528,8 @@ Ext.define('Inventory.view.ItemViewController', {
             "#cboNoteLocation": {
                 select: this.onNoteSelect
             },
-            "#cboFactory": {
-                select: this.onFactorySelect
-            },
             "#cboManufacturingCell": {
                 select: this.onManufacturingCellSelect
-            },
-            "#cboOwner": {
-                select: this.onOwnerSelect
             },
             "#tabItem": {
                 tabchange: this.onItemTabChange
