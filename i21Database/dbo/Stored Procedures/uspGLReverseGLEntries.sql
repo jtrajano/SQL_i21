@@ -144,7 +144,7 @@ ELSE
 			,[intAccountId]			
 			,[strAccountId]			= (SELECT [strAccountId] FROM Accounts WHERE [intAccountId] = A.[intAccountId])
 			,[strAccountGroup]		= (SELECT [strAccountGroup] FROM Accounts WHERE [intAccountId] = A.[intAccountId])
-			,[strDescription]		= (SELECT [strDescription] FROM Accounts WHERE [intAccountId] = A.[intAccountId])
+			,[strDescription]		=  A.[strDescription]
 			,[strReference]			
 			,[dtmTransactionDate]	
 			,[dblDebit]				= [dblCredit]
