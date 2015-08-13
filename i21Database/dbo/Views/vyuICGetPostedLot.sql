@@ -22,17 +22,7 @@ SELECT	intLotId				= Lot.intLotId
 		,dblQty					= Lot.dblQty
 		,dblWeight				= Lot.dblWeight
 		,dblWeightPerQty		= Lot.dblWeightPerQty
-		,dblCost				= (
-				-- Get the last cost from the cost bucket table.
-				SELECT	TOP 1 
-						dblCost 
-				FROM	dbo.tblICInventoryLot PostedLot
-				WHERE	PostedLot.intLotId = Lot.intLotId
-						AND PostedLot.intItemId = Lot.intItemId
-						AND PostedLot.intItemLocationId = Lot.intItemLocationId
-						AND ISNULL(PostedLot.ysnIsUnposted, 0) = 0 
-				ORDER BY intInventoryLotId DESC 
-			)
+		,dblCost				= Lot.dblLastCost
 		,dtmExpiryDate			= Lot.dtmExpiryDate
 		,intLotStatusId			= Lot.intLotStatusId
 		,strLotStatus			= LotStatus.strSecondaryStatus
