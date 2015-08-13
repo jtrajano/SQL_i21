@@ -57,9 +57,7 @@ namespace iRely.Inventory.BusinessLayer
                             switch (item.strType)
                             {
                                 case "Assembly/Blend":
-                                case "Bundle":
                                 case "Inventory":
-                                case "Kit":
                                     isValid = IsAccountExist(accounts, "AP Clearing", msg, out msg);
                                     isValid = IsAccountExist(accounts, "Inventory", msg, out msg);
                                     isValid = IsAccountExist(accounts, "Cost of Goods", msg, out msg);
@@ -83,8 +81,12 @@ namespace iRely.Inventory.BusinessLayer
                                     isValid = IsAccountExist(accounts, "Inventory In-Transit", msg, out msg);
                                     break;
 
-                                case "Non-Inventory":
                                 case "Other Charge":
+                                    isValid = IsAccountExist(accounts, "Other Charge Income", msg, out msg);
+                                    isValid = IsAccountExist(accounts, "Other Charge Expense", msg, out msg);
+                                    break;
+
+                                case "Non-Inventory":
                                 case "Service":
                                 case "Software":
                                     isValid = IsAccountExist(accounts, "General", msg, out msg);
