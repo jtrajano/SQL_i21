@@ -55,8 +55,9 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[strRailRemark] [nvarchar](250) COLLATE Latin1_General_CI_AS NULL,
 	
 
-	
+	[strLoadingPointType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
     [intLoadingPortId] INT NULL, 
+	[strDestinationPointType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
     [intDestinationPortId] INT NULL, 
     [strShippingTerm] NVARCHAR(64) COLLATE Latin1_General_CI_AS NULL, 
     [intShippingLineId] INT NULL, 
