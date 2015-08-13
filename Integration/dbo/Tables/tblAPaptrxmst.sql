@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblAPaptrxmst] (
     [aptrx_vnd_no]       CHAR (10)       NOT NULL,
-    [aptrx_ivc_no]       CHAR (18)       NOT NULL,
+    [aptrx_ivc_no]       CHAR (26)       NOT NULL,
     [aptrx_sys_rev_dt]   INT             NOT NULL,
     [aptrx_sys_time]     INT             NOT NULL,
     [aptrx_cbk_no]       CHAR (2)        NOT NULL,
@@ -30,7 +30,9 @@
     [aptrx_user_id]      CHAR (16)       NULL,
     [aptrx_user_rev_dt]  INT             NULL,
     [A4GLIdentity]       NUMERIC (9)     IDENTITY (1, 1) NOT NULL,
-    CONSTRAINT [APk_aptrxmst] PRIMARY KEY NONCLUSTERED ([aptrx_vnd_no] ASC, [aptrx_ivc_no] ASC)
+	[intBillId] INT
+    CONSTRAINT [APk_aptrxmst] PRIMARY KEY NONCLUSTERED ([aptrx_vnd_no] ASC, [aptrx_ivc_no] ASC), 
+    [dtmDateImported] DATETIME NOT NULL DEFAULT GETDATE()
 );
 
 
