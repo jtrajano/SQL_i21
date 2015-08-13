@@ -42,17 +42,14 @@ BEGIN TRY
 		,[dblQty])
 	SELECT
 		 I.[intInvoiceDetailId]
-		,D.[intContractDetailId]
-		,D.[intItemUOMId]
-		,D.[dblQtyShipped]
+		,I.[intContractDetailId]
+		,I.[intItemUOMId]
+		,I.[dblQtyShipped]
 	FROM
 		@ItemsFromInvoice I
-	INNER JOIN
-		tblARInvoiceDetail D
-			ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
 	WHERE
-		D.intContractDetailId IS NOT NULL
-		AND D.[intInventoryShipmentItemId] IS NULL
+		I.intContractDetailId IS NOT NULL
+		AND I.[intInventoryShipmentItemId] IS NULL
 
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
