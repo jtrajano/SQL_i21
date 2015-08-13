@@ -47,13 +47,23 @@ BEGIN
 					ON tblSMCurrency.intCurrencyID = CAST(tblSMPreferences.strValue AS INT)
 		WHERE	tblSMPreferences.strPreference = ''defaultCurrency''
 
-		-- Auto-fix the GL Accounts used in Origin. Move it to under the "Cash Accounts" group. 
+		-- Auto-fix the GL Accounts used in Origin. Move it to under the "Cash Accounts" category. 
 		UPDATE	tblGLAccount
-		SET		intAccountGroupId = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = ''Cash Accounts'')
+		SET		intAccountGroupId = (SELECT intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = ''Cash Accounts''),
+				intAccountCategoryId = (SELECT intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = ''Cash Account'')
 		from	tblGLAccount gl INNER JOIN (
 					SELECT DISTINCT intGLAccountId = dbo.fnGetGLAccountIdFromOriginToi21(apcbk_gl_cash) FROM apcbkmst 
 				) Q
 					ON gl.intAccountId = Q.intGLAccountId
+
+		-- Auto-fix the GL Account Segment used on GL Account. Move it under "Cash Account" category.
+		UPDATE tblGLAccountSegment
+		SET intAccountCategoryId = (SELECT intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = ''Cash Account'')
+		WHERE intAccountSegmentId IN (Select DISTINCT intAccountSegmentId
+										FROM tblGLAccount gl 
+										INNER JOIN (SELECT DISTINCT intGLAccountId = dbo.fnGetGLAccountIdFromOriginToi21(apcbk_gl_cash) FROM apcbkmst ) Q
+											ON gl.intAccountId = Q.intGLAccountId
+										INNER JOIN tblGLAccountSegmentMapping ASM ON gl.intAccountId = ASM.intAccountId)
 
 		-- INSERT new records for tblCMBank
 		INSERT INTO tblCMBank (
