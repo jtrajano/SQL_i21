@@ -10,8 +10,20 @@ SELECT
 	,TMS.[strDescription] 
 	,TMS.[strBillingBy] 
 	,TMS.[dblLastMeterReading] 
-	,TMD.[strMeterType]
-	,TMD.[dblConversionFactor] 
+	,(SELECT TOP 1 MT.[strMeterType] FROM tblTMSiteDevice SD
+		INNER JOIN tblTMDevice D ON SD.[intDeviceId] = D.[intDeviceId]  
+		INNER JOIN tblTMDeviceType DT ON D.[intDeviceTypeId] = DT.[intDeviceTypeId] 
+		INNER JOIN tblTMMeterType MT ON D.[intMeterTypeId] = MT.[intMeterTypeId]
+		WHERE SD.[intSiteID] = TMS.[intSiteID] AND DT.strDeviceType = 'Flow Meter'
+		ORDER BY intSiteDeviceID ASC)
+		AS [strMeterType]
+	,(SELECT TOP 1 MT.[dblConversionFactor] FROM tblTMSiteDevice SD
+		INNER JOIN tblTMDevice D ON SD.[intDeviceId] = D.[intDeviceId]  
+		INNER JOIN tblTMDeviceType DT ON D.[intDeviceTypeId] = DT.[intDeviceTypeId] 
+		INNER JOIN tblTMMeterType MT ON D.[intMeterTypeId] = MT.[intMeterTypeId]
+		WHERE SD.[intSiteID] = TMS.[intSiteID] AND DT.strDeviceType = 'Flow Meter'
+		ORDER BY intSiteDeviceID ASC)
+		AS [dblConversionFactor] 
 	,TMS.[ysnActive] 
 FROM
 	tblTMSite TMS
@@ -21,27 +33,28 @@ INNER JOIN
 INNER JOIN
 	tblARCustomer AC
 		ON TMC.[intCustomerNumber] = AC.[intEntityCustomerId]
-LEFT OUTER JOIN
-	(
-		SELECT TOP 1
-			 SD.[intSiteID]
-			,MT.[strMeterType] 
-			,MT.[dblConversionFactor]
-		FROM
-			tblTMSiteDevice SD
-		LEFT OUTER JOIN
-			tblTMDevice D
-				ON SD.[intSiteID] = SD.[intSiteID]
-		INNER JOIN
-			tblTMDeviceType DT
-				ON D.[intDeviceTypeId] = DT.[intDeviceTypeId] 
-		LEFT OUTER JOIN
-			tblTMMeterType MT
-				ON D.[intMeterTypeId] = MT.[intMeterTypeId]
-		WHERE
-			DT.strDeviceType = 'Flow Meter'
-		ORDER BY
-			SD.[intSiteDeviceID] ASC
-	) TMD
-		ON TMS.[intSiteID] = TMD.[intSiteID]
+--LEFT OUTER JOIN
+--	(
+--		SELECT TOP 1
+--			 SD.[intSiteID]
+--			,MT.[strMeterType] 
+--			,MT.[dblConversionFactor]
+--		FROM
+--			tblTMSiteDevice SD
+--		INNER JOIN
+--			tblTMDevice D
+--				ON SD.[intDeviceId] = D.[intDeviceId]  
+--		INNER JOIN
+--			tblTMDeviceType DT
+--				ON D.[intDeviceTypeId] = DT.[intDeviceTypeId] 
+--		INNER JOIN
+--			tblTMMeterType MT
+--				ON D.[intMeterTypeId] = MT.[intMeterTypeId]
+--		WHERE
+--			DT.strDeviceType = 'Flow Meter'
+--		ORDER BY
+--			intSiteDeviceID ASC
+
+--	) TMD
+--		ON TMS.[intSiteID] = TMD.[intSiteID]
 

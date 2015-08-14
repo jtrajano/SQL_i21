@@ -15,6 +15,7 @@
 	[dblFreightRate] DECIMAL(18, 6) NULL DEFAULT 0,
 	[dblPurSurcharge] DECIMAL(18, 6) NULL DEFAULT 0, 
 	[intInventoryReceiptId] int NULL,
+	[ysnFreightInPrice] BIT  DEFAULT ((0)) NOT NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	CONSTRAINT [PK_tblTRTransportReceipt] PRIMARY KEY ([intTransportReceiptId]),
 	CONSTRAINT [FK_tblTRTransportReceipt_tblTRTranportLoad_intTransportLoadId] FOREIGN KEY ([intTransportLoadId]) REFERENCES [dbo].[tblTRTransportLoad] ([intTransportLoadId]) ON DELETE CASCADE,

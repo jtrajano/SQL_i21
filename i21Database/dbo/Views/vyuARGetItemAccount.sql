@@ -9,6 +9,7 @@ SELECT
 	dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, N'Sales Account') AS intSalesAccountId, 
 	dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, N'Inventory') AS intInventoryAccountId, 
 	dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, N'Inventory In-Transit') AS intInventoryInTransitAccountId,
+	dbo.fnGetItemBaseGLAccount(I.intItemId, IL.intItemLocationId, N'General') AS intGeneralAccountId,
 	(CASE WHEN ISNULL((SELECT TOP 1 intServiceChargeAccountId FROM tblARCompanyPreference WHERE intServiceChargeAccountId IS NOT NULL AND intServiceChargeAccountId <> 0),0) = 0
 		THEN 
 			dbo.fnGetItemGLAccount(I.intItemId, IL.intItemLocationId, N'Service Charges')

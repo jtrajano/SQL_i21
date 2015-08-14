@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspSPAuditLogs]
+﻿
+CREATE PROCEDURE [dbo].[uspSPAuditLogs]
 	@Result NVARCHAR(MAX) OUTPUT, 
 	@FilePath NVARCHAR(256) = null
 AS
@@ -51,6 +52,7 @@ BEGIN
 			@ForeignKey NVARCHAR(MAX)
 
 		DECLARE @ret NVARCHAR(200), @ret1 NVARCHAR(200), @retSize NVARCHAR(200)
+		DECLARE @retDataType NVARCHAR(50), @retScale NVARCHAR(50), @retPrecision NVARCHAR(50)
 
 		DECLARE Cursor_Audit CURSOR FOR 
 			SELECT DISTINCT [Table], [Column], [IsDelete], [Add],[ColumnChanges], [Changes], [ForeignKey] FROM #tempTables
@@ -84,38 +86,58 @@ BEGIN
 				-- Data Type Changes
 				IF(@Changes = 'Scale') -- CHANGE SCALE OF A DECIMAL COLUMN
 				BEGIN 
+					SET @retDataType = ''
+					SET @retScale = ''
+					SET @retPrecision = ''
+
 					SET @Column = SUBSTRING(@Column, LEN(@Table) + 2, LEN(@Column))
-					SET @Sql = N'select @ret=NUMERIC_PRECISION from INFORMATION_SCHEMA.COLUMNS IC where TABLE_NAME = ''' + SUBSTRING(@Table,5,len(@Table)) + ''' and COLUMN_NAME = '''+  @Column  + '''';
-					EXEC sp_executesql @Sql,N'@ret NVARCHAR(50) OUTPUT', @ret OUTPUT;	
+					SET @Sql = N'select @retPrecision=NUMERIC_PRECISION, @retScale=NUMERIC_SCALE, @retDataType=DATA_TYPE from INFORMATION_SCHEMA.COLUMNS IC where TABLE_NAME = ''' + SUBSTRING(@Table,5,len(@Table)) + ''' and COLUMN_NAME = '''+  @Column  + '''';
+					EXEC sp_executesql @Sql,N'@retPrecision NVARCHAR(50) OUTPUT, @retScale NVARCHAR(50) OUTPUT, @retDataType NVARCHAR(50) OUTPUT', @retPrecision OUTPUT, @retScale OUTPUT, @retDataType OUTPUT;	
 					SET @Sql = ''
 					BEGIN TRY
 						BEGIN TRAN
+							IF (@ColumnChanges < @retScale)
+							BEGIN
 							EXEC uspSPAuditRemoveDefendencies @Table, @Column
-							SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' DECIMAL(' + @ret + ',' + @ColumnChanges + ')';
+							-- SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' DECIMAL(' + @ret + ',' + @ColumnChanges + ')';
+							 SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' ' + @retDataType + '(' + @retPrecision + ',' + @ColumnChanges + ')';
 							EXEC sp_executesql @Sql;
+							END
 						ROLLBACK
 					END TRY
 					BEGIN CATCH
-						SET @Result = @Result + 'Function:SCALE' + ' Table:' + @Table + ' Column:' + @Column + '. ' + ERROR_MESSAGE() + CHAR(13) + CHAR(10);
+						--SET @Result = @Result + 'Function:SCALE' + ' Table:' + @Table + ' Column:' + @Column + '. ' + ERROR_MESSAGE() + CHAR(13) + CHAR(10);
+						SET @Result = @Result + 'Function:SCALE' + ' Table:' + @Table + ' Column:' + @Column + ' ' + @retDataType + '(' +  @retPrecision + ',' + @ColumnChanges + '). ' + ERROR_MESSAGE() + CHAR(13) + CHAR(10);
 						ROLLBACK TRAN
 					END CATCH
 				END
 
 				IF(@Changes = 'Precision') -- CHANGE PRECISION OF A DECIMAL COLUMN
 				BEGIN
+
+					SET @retDataType = ''
+					SET @retScale = ''
+					SET @retPrecision = ''
+
 					SET @Column = SUBSTRING(@Column, LEN(@Table) + 2, LEN(@Column))
-					SET @Sql = N'select @ret=NUMERIC_SCALE from INFORMATION_SCHEMA.COLUMNS IC where TABLE_NAME = ''' + SUBSTRING(@Table,5,len(@Table)) + ''' and COLUMN_NAME = '''+  @Column  + '''';	
-					EXEC sp_executesql @Sql,N'@ret NVARCHAR(50) OUTPUT', @ret OUTPUT;
+					SET @Sql = N'select @retPrecision=NUMERIC_PRECISION, @retScale=NUMERIC_SCALE, @retDataType=DATA_TYPE from INFORMATION_SCHEMA.COLUMNS IC where TABLE_NAME = ''' + SUBSTRING(@Table,5,len(@Table)) + ''' and COLUMN_NAME = '''+  @Column  + '''';
+					EXEC sp_executesql @Sql,N'@retPrecision NVARCHAR(50) OUTPUT, @retScale NVARCHAR(50) OUTPUT, @retDataType NVARCHAR(50) OUTPUT', @retPrecision OUTPUT, @retScale OUTPUT, @retDataType OUTPUT;	
+
 					SET @Sql = ''
 					BEGIN TRY
 						BEGIN TRAN
+							IF (@ColumnChanges < @retPrecision)
+							BEGIN
 							EXEC uspSPAuditRemoveDefendencies @Table, @Column
-							SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' DECIMAL(' + @ColumnChanges + ',' + @ret + ')';
+							--SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' DECIMAL(' + @ColumnChanges + ',' + @ret + ')';
+							SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' ' +  @retDataType + '(' + @ColumnChanges + ',' + @retScale + ')';
 							EXEC sp_executesql @Sql;
+							END
 						ROLLBACK
 					END TRY
 					BEGIN CATCH
-						SET @Result = @Result  + 'Function:PRECISION' + ' Table:' + @Table + ' Column:' + @Column + '. ' +ERROR_MESSAGE() + CHAR(13) + CHAR(10);
+						--SET @Result = @Result  + 'Function:PRECISION' + ' Table:' + @Table + ' Column:' + @Column + '. ' +ERROR_MESSAGE() + CHAR(13) + CHAR(10);
+						SET @Result = @Result + 'Function:PRECISION' + ' Table:' + @Table + ' Column:' + @Column + ' ' + @retDataType + '(' +  @ColumnChanges + ',' + @retScale + '). ' + ERROR_MESSAGE() + CHAR(13) + CHAR(10);
 						ROLLBACK TRAN
 					END CATCH
 				END

@@ -12,6 +12,7 @@ PRINT N'END Update all existing Item Locations and set Allow Negative Inventory 
 PRINT N'BEGIN Update all existing Category Standard UOM to reference Category UOM'
 
 	IF EXISTS(SELECT * FROM sys.columns WHERE name = 'intUOMId' AND object_id = OBJECT_ID('tblICCategory'))
+		AND EXISTS(SELECT * FROM sys.columns WHERE name = 'intCategoryUOMId' AND object_id = OBJECT_ID('tblICCategoryUOM'))
 	BEGIN
 		EXEC ('
 			UPDATE tblICCategory
@@ -47,22 +48,27 @@ PRINT N'BEGIN Add dtmDate in tblICInventoryLot'
 
 	IF NOT EXISTS(SELECT * FROM sys.columns WHERE name = 'dtmDate' AND object_id = OBJECT_ID('tblICInventoryLot'))
 	BEGIN
-		EXEC ('
-			ALTER TABLE tblICInventoryLot ADD dtmDate DATETIME NULL 
-		')
+		IF EXISTS (SELECT TOP 1 1 FROM sys.tables WHERE object_id = OBJECT_ID('tblICInventoryLot'))
+		BEGIN
 
-		EXEC ('
-			UPDATE LotFIFO
-			SET dtmDate = (
-				SELECT	TOP 1 
-						dtmDate 
-				FROM	dbo.tblICInventoryTransaction
-				WHERE	tblICInventoryTransaction.intTransactionId = LotFIFO.intTransactionId
-						AND tblICInventoryTransaction.strTransactionId = LotFIFO.strTransactionId
-			)
-			FROM	dbo.tblICInventoryLot LotFIFO
-			WHERE	LotFIFO.dtmDate IS NULL 		
-		')
+			EXEC ('
+				ALTER TABLE tblICInventoryLot ADD dtmDate DATETIME NULL 
+			')
+
+			EXEC ('
+				UPDATE LotFIFO
+				SET dtmDate = (
+					SELECT	TOP 1 
+							dtmDate 
+					FROM	dbo.tblICInventoryTransaction
+					WHERE	tblICInventoryTransaction.intTransactionId = LotFIFO.intTransactionId
+							AND tblICInventoryTransaction.strTransactionId = LotFIFO.strTransactionId
+				)
+				FROM	dbo.tblICInventoryLot LotFIFO
+				WHERE	LotFIFO.dtmDate IS NULL 		
+			')
+
+		END
 	END
 
 PRINT N'END Add dtmDate in tblICInventoryLot'

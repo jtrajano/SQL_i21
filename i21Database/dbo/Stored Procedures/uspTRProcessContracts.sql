@@ -1,6 +1,7 @@
 CREATE PROCEDURE [dbo].[uspTRProcessContracts]
 	 @strTransaction AS nvarchar(50),
-	 @action as nvarchar(50)
+	 @action as nvarchar(50),
+	 @intUserId as int
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -16,7 +17,9 @@ DECLARE  @intTransportLoadId AS INT;
 DECLARE @intContractDetailId as int,
         @dblQuantity as float;
 Declare @incval int,
-        @total int;
+        @total int,
+		@intReceiptId int,
+		@intDistributionId int;
 
 
 BEGIN TRY
@@ -28,24 +31,29 @@ DECLARE @tempReceipt TABLE
     (
 	intId INT IDENTITY PRIMARY KEY CLUSTERED,
 	intReceiptContractId int,
-	dblQuantity float
+	dblQuantity float,
+	intReceiptId int
     )	  
 DECLARE @tempDistribution TABLE
     (
 	intId INT IDENTITY PRIMARY KEY CLUSTERED,
 	intDistributionContractId int,
-	dblQuantity float
+	dblQuantity float,
+	intDistributionId int
     )     
 
 	--Receipts which used Contract
 	Insert into @tempReceipt(intReceiptContractId,
-	                 dblQuantity)
-	select TR.intContractDetailId,dblQuantity = CASE
+	                 dblQuantity,
+					 intReceiptId)
+	select TR.intContractDetailId,
+	          dblQuantity = CASE
 								  WHEN SP.strGrossOrNet = 'Gross'
 								  THEN TR.dblGross
 								  WHEN SP.strGrossOrNet = 'Net'
 								  THEN TR.dblNet
-								  END
+								  END,
+		      intTransportReceiptId
 	 from tblTRTransportLoad TL
 	           join tblTRTransportReceipt TR on TR.intTransportLoadId = TL.intTransportLoadId
 			   join tblTRSupplyPoint SP on SP.intSupplyPointId = TR.intSupplyPointId
@@ -55,19 +63,19 @@ DECLARE @tempDistribution TABLE
     set @incval = 1 
     WHILE @incval <=@total 
     BEGIN    
-      select @dblQuantity = dblQuantity,@intContractDetailId =intReceiptContractId  from @tempReceipt where @incval = intId    
+      select @dblQuantity = dblQuantity,@intContractDetailId =intReceiptContractId,@intReceiptId = intReceiptId  from @tempReceipt where @incval = intId    
 	  if (@action = 'Delete')
 	  BEGIN 
 	     set @dblQuantity = @dblQuantity * -1
 	  END
-      exec uspCTUpdateScheduleQuantity @intContractDetailId, @dblQuantity    
+      exec uspCTUpdateScheduleQuantity @intContractDetailId, @dblQuantity,@intUserId,@intReceiptId,'Transport Purchase'    
       SET @incval = @incval + 1;
     END;
   
 --Distribution which used Contract	
     Insert into @tempDistribution(intDistributionContractId,
-	                 dblQuantity)
-	select DD.intContractDetailId,DD.dblUnits from tblTRTransportLoad TL
+	                 dblQuantity,intDistributionId)
+	select DD.intContractDetailId,DD.dblUnits,DD.intDistributionDetailId from tblTRTransportLoad TL
 	           join tblTRTransportReceipt TR on TR.intTransportLoadId = TL.intTransportLoadId
 			   join tblTRDistributionHeader DH on DH.intTransportReceiptId = TR.intTransportReceiptId
 			   join tblTRDistributionDetail DD on DD.intDistributionHeaderId = DH.intDistributionHeaderId
@@ -77,12 +85,12 @@ DECLARE @tempDistribution TABLE
     set @incval = 1 
     WHILE @incval <=@total 
     BEGIN    
-      select @dblQuantity = dblQuantity,@intContractDetailId = intDistributionContractId  from @tempDistribution where @incval = intId
+      select @dblQuantity = dblQuantity,@intContractDetailId = intDistributionContractId ,@intDistributionId = intDistributionId from @tempDistribution where @incval = intId
 	  if (@action = 'Delete')
 	  BEGIN 
 	     set @dblQuantity = @dblQuantity * -1
 	  END      
-      exec uspCTUpdateScheduleQuantity @intContractDetailId, @dblQuantity    
+      exec uspCTUpdateScheduleQuantity @intContractDetailId, @dblQuantity ,@intUserId,@intDistributionId,'Transport Sale'   
       SET @incval = @incval + 1;
     END;
 

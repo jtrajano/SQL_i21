@@ -14,7 +14,7 @@ SET ANSI_WARNINGS OFF
 DECLARE	 @ShipmentId INT
 		,@InvoiceId  INT
 		,@IsSoftwareType BIT = 0
-		,@HasInventoryItem BIT = 0
+		,@HasNonSoftwareItems BIT = 0
 
 IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrderId AND [strOrderStatus] = 'Closed') 
 	BEGIN
@@ -31,7 +31,7 @@ IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrder
 IF NOT EXISTS(SELECT 1 FROM tblSOSalesOrderDetail A INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
                 WHERE intSalesOrderId = @SalesOrderId AND strType NOT IN ('Non-Inventory', 'Other Charge', 'Service'))
 	BEGIN
-		RAISERROR('There is no sellable item on this sales order.', 16, 1);
+		RAISERROR('Process Failed. There is no shippable item on this sales order', 16, 1);
         RETURN;
 	END
 ELSE
@@ -40,15 +40,15 @@ ELSE
 				WHERE SOD.intSalesOrderId = @SalesOrderId AND I.strType = 'Software')
 			BEGIN
 				SET @IsSoftwareType = 1
-				IF EXISTS(SELECT 1 FROM tblSOSalesOrderDetail A INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
-					WHERE intSalesOrderId = @SalesOrderId AND strType NOT IN ('Non-Inventory', 'Other Charge', 'Service', 'Software'))
+				IF EXISTS(SELECT 1 FROM tblSOSalesOrderDetail A LEFT JOIN tblICItem B ON A.intItemId = B.intItemId 
+					WHERE intSalesOrderId = @SalesOrderId AND strType <> 'Software')
 					BEGIN
-						SET @HasInventoryItem = 1
+						SET @HasNonSoftwareItems = 1
 					END
 
-				EXEC dbo.uspARInsertToInvoice @SalesOrderId, @UserId, @HasInventoryItem, @InvoiceId OUTPUT
+				EXEC dbo.uspARInsertToInvoice @SalesOrderId, @UserId, @HasNonSoftwareItems, @InvoiceId OUTPUT
 
-				IF (@HasInventoryItem = 0) 
+				IF (@HasNonSoftwareItems = 0) 
 					BEGIN
 						SET @InventoryShipmentId = @InvoiceId; 
 						RETURN; 
@@ -58,17 +58,27 @@ ELSE
 
 DECLARE @icUserId INT = (SELECT TOP 1 intUserSecurityID FROM tblSMUserSecurity WHERE intEntityId = @UserId);
 
-EXEC dbo.uspICProcessToInventoryShipment
+IF EXISTS(SELECT 1 FROM tblSOSalesOrderDetail A INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
+                WHERE intSalesOrderId = @SalesOrderId AND strType = 'Inventory')
+	BEGIN		
+        EXEC dbo.uspICProcessToInventoryShipment
 		 @intSourceTransactionId = @SalesOrderId
 		,@strSourceType = 'Sales Order'
 		,@intUserId = @icUserId
 		,@InventoryShipmentId = @ShipmentId OUTPUT
 
-IF (@IsSoftwareType = 1 AND @HasInventoryItem = 1)
+		IF (@IsSoftwareType = 1)
+			BEGIN
+				DECLARE @strTransactionId NVARCHAR(40) = NULL
+				SELECT @strTransactionId = strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = @ShipmentId
+				EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @icUserId, @UserId
+			END
+
+		SET @InventoryShipmentId = @ShipmentId;
+	END
+ELSE
 	BEGIN
-		DECLARE @strTransactionId NVARCHAR(40) = NULL
-		SELECT @strTransactionId = strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = @ShipmentId
-		EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @icUserId, @UserId
+		SET @InventoryShipmentId = @InvoiceId;
 	END
 
 IF @@ERROR > 0 
@@ -83,17 +93,7 @@ SET
   , ysnProcessed = 1
 WHERE
 	intSalesOrderId = @SalesOrderId		
-
-SET @InventoryShipmentId = @ShipmentId;
-
-UPDATE 
-	tblSOSalesOrder
-SET
-	dtmProcessDate = GETDATE()
-  , ysnProcessed = 1
-WHERE 
-	intSalesOrderId = @SalesOrderId
-
+	
 RETURN 1;
 
 END

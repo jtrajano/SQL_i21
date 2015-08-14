@@ -99,18 +99,25 @@ BEGIN
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intSubLocationId		= ISNULL(Detail.intNewSubLocationId, Detail.intSubLocationId)
 			,intStorageLocationId	= ISNULL(Detail.intNewStorageLocationId, Detail.intStorageLocationId)
-			,dblQty					=	CASE	WHEN ISNULL(Detail.dblNewSplitLotQuantity, 0) <> 0 THEN 
-													Detail.dblNewSplitLotQuantity
-												ELSE 
-													-1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
+			,dblQty					= CASE	WHEN ISNULL(Detail.dblNewSplitLotQuantity, 0) <> 0 THEN 
+												Detail.dblNewSplitLotQuantity
+											ELSE  
+												-1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
 										END 
 			,intItemUOMId			= ISNULL(Detail.intNewItemUOMId, Detail.intItemUOMId)
-			,dblWeight				=	
-										CASE	WHEN ISNULL(Detail.dblNewWeight, 0) <> 0  THEN 
-													Detail.dblNewWeight 
-												ELSE 
-													ISNULL(Detail.dblWeightPerQty, 0) * (-1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))) 
-										END 
+			,dblWeight				= CASE	WHEN ISNULL(Detail.dblNewWeight, 0) <> 0 THEN 
+												Detail.dblNewWeight
+											WHEN Detail.intNewWeightUOMId IS NOT NULL THEN 
+												-- Convert the weight into the new Weight UOM.
+												dbo.fnCalculateQtyBetweenUOM(
+													Detail.intWeightUOMId
+													, Detail.intNewWeightUOMId
+													, ISNULL(Detail.dblWeightPerQty, 0) * -1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
+												)
+											ELSE 
+												ISNULL(Detail.dblWeightPerQty, 0) 
+												* -1 * (ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0))
+										END
 			,intWeightUOMId			= ISNULL(Detail.intNewWeightUOMId, Detail.intWeightUOMId)
 			,dtmExpiryDate			= SourceLot.dtmExpiryDate
 			,dtmManufacturedDate	= SourceLot.dtmManufacturedDate
@@ -132,6 +139,7 @@ BEGIN
 			INNER JOIN dbo.tblICLot SourceLot
 				ON SourceLot.intLotId = Detail.intLotId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+
 END 
 
 -- Call the common stored procedure that will create or update the lot master table

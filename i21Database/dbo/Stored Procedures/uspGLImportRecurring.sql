@@ -34,7 +34,7 @@ BEGIN TRANSACTION
 					   ,strJournalType
 					   ,strJournalId)
 			SELECT 
-			  [strRecurringPeriod] 
+			  CASE WHEN RTRIM(strReference) = '' OR ISNULL(strReference,'') = '' THEN [strRecurringPeriod] ELSE strReference END
 			  ,[dblExchangeRate]
 			  ,[dtmReverseDate]
 			  ,(SELECT TOP 1 intCurrencyId FROM tblGLJournalDetail where intJournalRecurringId = @intRecurringId)

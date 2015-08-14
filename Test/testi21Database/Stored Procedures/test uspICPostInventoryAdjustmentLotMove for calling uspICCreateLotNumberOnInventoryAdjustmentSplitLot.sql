@@ -6,12 +6,11 @@ BEGIN
 		EXEC testi21Database.[Fake open fiscal year and accounting periods];
 		EXEC testi21Database.[Fake data for inventory adjustment table];
 
-		DECLARE @ysnPost AS BIT = 1
-		DECLARE @ysnRecap AS BIT = 0
-		DECLARE @intTransactionId AS INT = 7
-		DECLARE @intUserId AS INT = 1
-		DECLARE @intEntityId AS INT = 1
-		DECLARE @dtmDate AS DATETIME = GETDATE()
+		DECLARE	@intTransactionId AS INT = 7
+				,@strBatchId AS NVARCHAR(50) = 'BATCH-XXX1'
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(50) = 'Inventory Adjustment'
+				,@intUserId AS INT = 1
+				,@strAdjustmentDescription AS NVARCHAR(255)
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
@@ -55,8 +54,11 @@ BEGIN
 	-- Act
 	BEGIN 
 		EXEC dbo.uspICPostInventoryAdjustmentLotMove
-			@intTransactionId
-	 		,@intUserId
+				@intTransactionId
+				,@strBatchId
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+				,@intUserId
+				,@strAdjustmentDescription
 	END 
 
 	-- Assert 

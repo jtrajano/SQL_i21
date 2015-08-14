@@ -83,7 +83,9 @@ LEFT JOIN tblTMDeviceType L
 	ON B.intDeviceTypeId = L.intDeviceTypeId
 LEFT JOIN tblICItem M
 	ON D.intProduct = M.intItemId
-WHERE F.ysnActive = 1
+INNER JOIN tblARCustomer O
+	ON O.intEntityCustomerId = F.intEntityId
+WHERE O.ysnActive = 1
 	AND C.strLeaseStatus <> 'Inactive'
 	AND B.strOwnership <> 'Customer Owned'
 GO

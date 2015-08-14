@@ -36,6 +36,9 @@ DECLARE @strUserName AS NVARCHAR (50)
 DECLARE @ysnDPStorage BIT
 DECLARE @LineItems AS ScaleTransactionTableType
 DECLARE @dblRemainingUnits AS DECIMAL (13,3)
+DECLARE @intDefaultStorageSchedule AS INT
+DECLARE @intCommodityId AS INT
+DECLARE @matchStorageType AS INT
 
 
 DECLARE @ErrorMessage NVARCHAR(4000);
@@ -64,6 +67,16 @@ BEGIN TRY
 
 	SELECT @strUserName = US.strUserName FROM tblSMUserSecurity US
 	WHERE US.intUserSecurityID = @intUserId
+
+	SELECT @intDefaultStorageSchedule = TIC.intStorageScheduleId, @intCommodityId = TIC.intCommodityId FROM tblSCTicket TIC
+	WHERE TIC.intTicketId = @intTicketId
+
+	IF @intDefaultStorageSchedule is NULL
+	BEGIN
+	   	SELECT	@intDefaultStorageSchedule = COM.intScheduleStoreId
+		FROM	dbo.tblICCommodity COM	        
+		WHERE	COM.intCommodityId = @intCommodityId
+	END
 
     BEGIN
 	IF @dblNetUnits < 0
@@ -422,6 +435,26 @@ BEGIN TRY
 		RAISERROR('Invalid Default Storage Setup - uspSCStorageUpdate', 16, 1);
 		RETURN;
 	END
+
+	IF @intDefaultStorageSchedule IS NULL 
+	BEGIN 
+		-- Raise the error:
+		RAISERROR('Invalid Storage Schedule - uspSCStorageUpdate', 16, 1);
+		RETURN;
+	END
+
+	BEGIN 
+		SELECT	@matchStorageType = SSR.intStorageType
+		FROM	dbo.tblGRStorageScheduleRule SSR	        
+		WHERE	SSR.intStorageScheduleRuleId = @intDefaultStorageSchedule		
+	END
+
+	IF @matchStorageType !=  @intGRStorageId
+	BEGIN 
+		-- Raise the error:
+		RAISERROR('Storage type / Storage Schedule Mismatch - uspSCStorageUpdate', 16, 1);
+		RETURN;
+	END
 	
 	BEGIN 
 		SELECT	@intTicketUOM = UOM.intUnitMeasureId
@@ -470,7 +503,7 @@ BEGIN TRY
 	SELECT 	[intConcurrencyId]		= 1
 			,[intEntityId]			= @intEntityId
 			,[intCommodityId]		= SC.intCommodityId
-			,[intStorageScheduleId]	= SC.intStorageScheduleId -- TODO Storage Schedule
+			,[intStorageScheduleId]	= @intDefaultStorageSchedule -- TODO Storage Schedule
 			,[intStorageTypeId]		= @intGRStorageId
 			,[intCompanyLocationId]= SC.intProcessingLocationId
 			,[intTicketId]= SC.intTicketId

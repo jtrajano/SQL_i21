@@ -30,8 +30,7 @@ DECLARE @intUserId INT, @intNumber INT, @strPrefix NVARCHAR(10),@intStartingNumb
 SELECT @intUserId =intUserSecurityID from tblSMUserSecurity WHERE intEntityId = @intEntityId
 SELECT @intStartingNumberId = intStartingNumberId, @strPrefix = strPrefix ,@intNumber = intNumber + 1 FROM tblSMStartingNumber WHERE strTransactionType = 'General Journal Reversal'
 INSERT INTO [tblGLJournal]
-           ([dtmReverseDate]
-           ,[strJournalId]
+           ([strJournalId]
            ,[strTransactionType]
            ,[dtmDate]
            ,[strReverseLink]
@@ -49,12 +48,10 @@ INSERT INTO [tblGLJournal]
            ,[strSourceType]
            ,[intFiscalPeriodId]
            ,[intFiscalYearId]
-           ,[intJournalIdToReverse]
-           )
-	SELECT [dtmReverseDate]
-           ,@strPrefix + CONVERT(NVARCHAR(10), @intNumber)
+           ,[intJournalIdToReverse])
+	SELECT @strPrefix + CONVERT(NVARCHAR(10), @intNumber)
            ,[strTransactionType]
-           ,[dtmDate]
+           ,GETDATE()
            ,[strReverseLink]
            ,[intCurrencyId]
            ,[dblExchangeRate]
