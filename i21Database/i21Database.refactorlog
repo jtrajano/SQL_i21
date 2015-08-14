@@ -3878,4 +3878,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="dtmSiteLastDeliveryDuringDelivery" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="be613007-bd5e-4509-ad09-26bf851e4537" ChangeDateTime="08/13/2015 08:32:36">
+    <Property Name="ElementName" Value="[dbo].[tblTMDeliveryHistory].[dblLastDeliveredGa]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMDeliveryHistory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblSiteLastDeliveredGal" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a48dca63-6295-4526-8869-e43e03cbf017" ChangeDateTime="08/13/2015 09:01:58">
+    <Property Name="ElementName" Value="[dbo].[tblTMDeliveryHistory].[dblSiteLast]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblTMDeliveryHistory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblSiteLastGalsInTank" />
+  </Operation>
 </Operations>

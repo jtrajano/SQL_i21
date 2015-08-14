@@ -60,6 +60,13 @@
     [dtmSiteOnHoldEndDate] DATETIME NULL, 
     [ysnSiteHoldDDCalculations] BIT NULL, 
     [ysnSiteOnHold] BIT NULL, 
+    [dblSiteLastDeliveredGal] NUMERIC(18, 6) NULL, 
+    [ysnSiteDeliveryTicketPrinted] BIT NULL, 
+    [dblSiteDegreeDayBetweenDelivery] NUMERIC(18, 6) NULL, 
+    [intSiteNextDeliveryDegreeDay] INT NULL, 
+    [dblSiteLastGalsInTank] NUMERIC(18, 6) NULL, 
+    [dblSiteEstimatedPercentLeft] NUMERIC(18, 6) NULL, 
+    [dtmSiteLastReadingUpdate] DATETIME NULL, 
     CONSTRAINT [PK_tblTMDeliveryHistory] PRIMARY KEY CLUSTERED ([intDeliveryHistoryID] ASC),
     CONSTRAINT [FK_tblTMDeliveryHistory_tblTMSite] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID])
 );
@@ -617,3 +624,66 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'ysnSiteOnHold'
 GO
+
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Site Last Delivered Gallons',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'dblSiteLastDeliveredGal'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Site Delivery Ticket Printed Option',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnSiteDeliveryTicketPrinted'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Site Degree Day Between Delivery',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'dblSiteDegreeDayBetweenDelivery'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Site Next Delivery Degree Day',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'intSiteNextDeliveryDegreeDay'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Site Last Gallons in Tank',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'dblSiteLastGalsInTank'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Site Estimated Percent Left during delivery',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'dblSiteEstimatedPercentLeft'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Site Last Reding Update during delivery',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmSiteLastReadingUpdate'

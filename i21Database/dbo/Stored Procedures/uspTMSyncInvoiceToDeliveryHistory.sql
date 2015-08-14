@@ -305,7 +305,8 @@ BEGIN
 					FROM(
 						SELECT   
 							dblPercentAfterDelivery = MAX(dblPercentAfterDelivery)
-						FROM tblTMDeliveryHistoryDetail
+						FROM tblTMDeliveryHistoryDetail 
+						WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
 					)A
 					WHERE tblTMSite.intSiteID = @intSiteId
 
@@ -316,12 +317,14 @@ BEGIN
 						SELECT   
 							dblPercentAfterDelivery = MAX(dblPercentAfterDelivery)
 							,dblShippedQuantity = SUM(ISNULL(dblQuantityDelivered,0.0))
-						FROM tblTMDeliveryHistoryDetail		
+						FROM tblTMDeliveryHistoryDetail	
+						WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId	 
 					)A
 					
 					---- get the invoicedetail Id of the highest percent full
 					SELECT TOP 1 @intTopInvoiceDetailId = intInvoiceDetailId 
-					FROM tblTMDeliveryHistoryDetail
+					FROM tblTMDeliveryHistoryDetail 
+					WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
 					ORDER BY dblPercentAfterDelivery DESC, intInvoiceDetailId ASC
 					
 					SET @dblNewBurnRate = dbo.[fnTMComputeNewBurnRate](@intSiteId,@intTopInvoiceDetailId,@intClockReadingId,@intLastClockReadingId,0,@intNewDeliveryHistoryId) 
@@ -644,6 +647,13 @@ BEGIN
 						,dtmSiteOnHoldEndDate
 						,ysnSiteHoldDDCalculations
 						,ysnSiteOnHold
+						,dblSiteLastDeliveredGal
+						,ysnSiteDeliveryTicketPrinted
+						,dblSiteDegreeDayBetweenDelivery
+						,intSiteNextDeliveryDegreeDay
+						,dblSiteLastGalsInTank
+						,dblSiteEstimatedPercentLeft
+						,dtmSiteLastReadingUpdate
 					)
 					SELECT TOP 1
 						strInvoiceNumber = C.strInvoiceNumber
@@ -698,6 +708,13 @@ BEGIN
 						,dtmSiteOnHoldEndDate = A.dtmOnHoldEndDate
 						,ysnSiteHoldDDCalculations = A.ysnHoldDDCalculations
 						,ysnSiteOnHold = A.ysnOnHold
+						,dblSiteLastDeliveredGal = A.dblLastDeliveredGal
+						,ysnSiteDeliveryTicketPrinted = A.ysnDeliveryTicketPrinted
+						,dblSiteDegreeDayBetweenDelivery = A.dblDegreeDayBetweenDelivery
+						,intSiteNextDeliveryDegreeDay = A.intNextDeliveryDegreeDay
+						,dblSiteLastGalsInTank = A.dblLastGalsInTank
+						,dblSiteEstimatedPercentLeft = A.dblEstimatedPercentLeft
+						,dtmSiteLastReadingUpdate = A.dtmLastReadingUpdate
 					FROM tblTMSite A
 					INNER JOIN tblARInvoiceDetail B
 						ON A.intSiteID = B.intSiteId
@@ -743,9 +760,9 @@ BEGIN
 						ON A.intItemId = C.intItemId
 			
 					---Update Site Info
-					UPDATE tblTMSite
-					SET dblLastGalsInTank =   ISNULL(dblTotalCapacity,0)  * ISNULL(@dblPercentAfterDelivery,0)/100
-					WHERE intSiteID = @intSiteId
+					--UPDATE tblTMSite
+					--SET dblLastGalsInTank =   ISNULL(dblTotalCapacity,0)  * ISNULL(@dblPercentAfterDelivery,0)/100
+					--WHERE intSiteID = @intSiteId
 					
 					UPDATE tblTMSite
 					SET intLastDeliveryDegreeDay = @dblAccumulatedDegreeDay

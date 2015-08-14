@@ -2239,6 +2239,7 @@
     <Build Include="dbo\Views\vyuCMUnpostedTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspTMUpdateEstimatedValuesBySite.sql" />
     <Build Include="dbo\Stored Procedures\uspTMUpdateForecastedValuesBySite.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMUnSyncInvoiceFromDeliveryHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
