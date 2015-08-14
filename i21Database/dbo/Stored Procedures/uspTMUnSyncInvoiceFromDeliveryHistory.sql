@@ -131,6 +131,7 @@ BEGIN
 				FROM tblTMDeliveryHistoryDetail
 				WHERE intDeliveryHistoryID = @intDeliveryHistoryId
 			)A
+			WHERE intDeliveryHistoryID = @intDeliveryHistoryId
 			
 			---Update Site Info
 			UPDATE tblTMSite
@@ -209,6 +210,8 @@ BEGIN
 			ELSE
 			BEGIN
 				PRINT 'Delivery History is not the last delivery of the site'
+				--update Delivery history Header
+
 			END
 		END
 		ELSE
@@ -268,12 +271,9 @@ BEGIN
 						AND dtmInvoiceDate < @dtmInvoiceDate
 					ORDER BY dtmInvoiceDate DESC
 
-					---DELETE Delivery History Header
-					DELETE FROM tblTMDeliveryHistory
-					WHERE intDeliveryHistoryID = @intDeliveryHistoryId
-
+					
 					---Check if the previous Last Delivery is the same as the previous delivery of the invoice date
-					IF((SELECT dtmInvoiceDate FROM #tmpDeliveryHistory WHERE intDeliveryHistoryID = @intDeliveryHistoryId) =  @dtmPreviousLastDelivery)
+					IF((SELECT dtmSiteLastDelivery FROM #tmpDeliveryHistory WHERE intDeliveryHistoryID = @intDeliveryHistoryId) =  @dtmPreviousLastDelivery)
 					BEGIN
 						PRINT 'update site rollback previous last is valid'
 						------Update Site INfo (rollback)
@@ -284,18 +284,31 @@ BEGIN
 							,dtmLastDeliveryDate = A.dtmSiteLastDelivery
 							,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
 							,ysnDeliveryTicketPrinted = A.ysnSiteDeliveryTicketPrinted
-							,dblEstimatedPercentLeft = A.dblEstimatedPercentBeforeDelivery
-							,dblEstimatedGallonsLeft = tblTMSite.dblTotalCapacity * A.dblEstimatedPercentBeforeDelivery /100
+							,dblEstimatedPercentLeft = A.dblSiteEstimatedPercentLeft
+							,dblEstimatedGallonsLeft = tblTMSite.dblTotalCapacity * A.dblSiteEstimatedPercentLeft /100
 							,dblPreviousBurnRate = A.dblSitePreviousBurnRate
 							,dblBurnRate = A.dblSiteBurnRate
 							,dblDegreeDayBetweenDelivery = A.dblSiteDegreeDayBetweenDelivery
 							,intNextDeliveryDegreeDay = A.intSiteNextDeliveryDegreeDay
-							,dtmLastReadingUpdate = @dtmPreviousLastDelivery
+							,dtmLastReadingUpdate = A.dtmSiteLastReadingUpdate
 						FROM(
 							SELECT TOP 1 * FROM tblTMDeliveryHistory
 							WHERE intDeliveryHistoryID = @intDeliveryHistoryId
 						)A
 						WHERE tblTMSite.intSiteID = @intSiteId
+
+						---Update Site Info
+						UPDATE tblTMSite
+						SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) - A.dblQuantityTotal
+							,dblYTDSales = ISNULL(dblYTDSales,0.0) - ISNULL(A.dblSalesTotal,0.)
+							,intConcurrencyId = intConcurrencyId + 1
+						FROM(
+							SELECT dblQuantityTotal = SUM(ISNULL(dblQuantityDelivered,0))
+								,dblSalesTotal = SUM(ISNULL(dblExtendedAmount,0))
+							FROM #tmpDeliveryHistoryDetail 
+							WHERE intDeliveryHistoryID = @intDeliveryHistoryId
+						)A
+						WHERE intSiteID = @intSiteId
 			
 			
 						----Update Next Julian Calendar Date of the site
@@ -303,6 +316,10 @@ BEGIN
 						SET dtmNextDeliveryDate = (CASE WHEN intFillMethodId = @intJulianCalendarFillId THEN dbo.fnTMGetNextJulianDeliveryDate(intSiteID) ELSE NULL END)
 							,intConcurrencyId = intConcurrencyId + 1
 						WHERE intSiteID = @intSiteId
+
+						---DELETE Delivery History Header
+						DELETE FROM tblTMDeliveryHistory
+						WHERE intDeliveryHistoryID = @intDeliveryHistoryId
 
 						---- Update forecasted nad estimated % left
 						EXEC uspTMUpdateEstimatedValuesBySite @intSiteId
@@ -312,6 +329,7 @@ BEGIN
 					ELSE
 					BEGIN
 						PRINT 'No REcord in the delivery history for the previouse delivery' 
+						--TODO
 					END
 				END
 				ELSE
@@ -343,7 +361,6 @@ BEGIN
 					UPDATE tblTMSite
 					SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) - A.dblQuantityTotal
 						,dblYTDSales = ISNULL(dblYTDSales,0.0) - ISNULL(A.dblSalesTotal,0.)
-						,dtmLastReadingUpdate = @dtmInvoiceDate
 						,intConcurrencyId = intConcurrencyId + 1
 					FROM(
 						SELECT dblQuantityTotal = SUM(ISNULL(dblQuantityDelivered,0))
@@ -358,6 +375,11 @@ BEGIN
 					SET dtmNextDeliveryDate = (CASE WHEN intFillMethodId = @intJulianCalendarFillId THEN dbo.fnTMGetNextJulianDeliveryDate(intSiteID) ELSE NULL END)
 						,intConcurrencyId = intConcurrencyId + 1
 					WHERE intSiteID = @intSiteId
+
+
+					---DELETE Delivery History Header
+					DELETE FROM tblTMDeliveryHistory
+					WHERE intDeliveryHistoryID = @intDeliveryHistoryId
 
 					-- Update forecasted nad estimated % left
 					EXEC uspTMUpdateEstimatedValuesBySite @intSiteId

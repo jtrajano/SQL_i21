@@ -284,6 +284,7 @@ BEGIN
 						FROM tblTMDeliveryHistoryDetail
 						WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
 					)A
+					WHERE tblTMDeliveryHistory.intDeliveryHistoryID = @intNewDeliveryHistoryId
 					
 					---Update Site Info
 					UPDATE tblTMSite
@@ -320,6 +321,7 @@ BEGIN
 						FROM tblTMDeliveryHistoryDetail	
 						WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId	 
 					)A
+					WHERE tblTMSite.intSiteID = @intSiteId
 					
 					---- get the invoicedetail Id of the highest percent full
 					SELECT TOP 1 @intTopInvoiceDetailId = intInvoiceDetailId 
@@ -417,6 +419,7 @@ BEGIN
 							FROM tblTMDeliveryHistoryDetail
 							WHERE intDeliveryHistoryID = @intNewDeliveryHistoryId
 						)A
+						WHERE tblTMDeliveryHistory.intDeliveryHistoryID = @intNewDeliveryHistoryId
 						
 						-----Update Site
 						UPDATE tblTMSite
@@ -714,7 +717,7 @@ BEGIN
 						,intSiteNextDeliveryDegreeDay = A.intNextDeliveryDegreeDay
 						,dblSiteLastGalsInTank = A.dblLastGalsInTank
 						,dblSiteEstimatedPercentLeft = A.dblEstimatedPercentLeft
-						,dtmSiteLastReadingUpdate = A.dtmLastReadingUpdate
+						,dtmSiteLastReadingUpdate = ISNULL(A.dtmLastReadingUpdate,DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0))
 					FROM tblTMSite A
 					INNER JOIN tblARInvoiceDetail B
 						ON A.intSiteID = B.intSiteId
