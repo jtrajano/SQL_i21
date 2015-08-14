@@ -551,6 +551,7 @@ BEGIN TRY
 		,@intUserId intCreatedUserId
 		,@dtmCurrentDate dtmLastModified
 		,@intUserId intLastModifiedUserId
+		,WS.intSequenceNo
 	FROM tblMFWorkOrder W
 	JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 		AND W.intStatusId <> 13

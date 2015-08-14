@@ -96,10 +96,13 @@ BEGIN
 					SET @Sql = ''
 					BEGIN TRY
 						BEGIN TRAN
+							IF (@ColumnChanges < @retScale)
+							BEGIN
 							EXEC uspSPAuditRemoveDefendencies @Table, @Column
 							-- SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' DECIMAL(' + @ret + ',' + @ColumnChanges + ')';
 							 SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' ' + @retDataType + '(' + @retPrecision + ',' + @ColumnChanges + ')';
 							EXEC sp_executesql @Sql;
+							END
 						ROLLBACK
 					END TRY
 					BEGIN CATCH
@@ -123,10 +126,13 @@ BEGIN
 					SET @Sql = ''
 					BEGIN TRY
 						BEGIN TRAN
+							IF (@ColumnChanges < @retPrecision)
+							BEGIN
 							EXEC uspSPAuditRemoveDefendencies @Table, @Column
 							--SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' DECIMAL(' + @ColumnChanges + ',' + @ret + ')';
 							SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' ' +  @retDataType + '(' + @ColumnChanges + ',' + @retScale + ')';
 							EXEC sp_executesql @Sql;
+							END
 						ROLLBACK
 					END TRY
 					BEGIN CATCH
