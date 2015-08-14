@@ -806,6 +806,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             weightCF = itemUOMCF;
         }
 
+        if (!iRely.Functions.isEmpty(currentReceiptItem.get('strContainer'))) {
+            record.set('strContainerNo', currentReceiptItem.get('strContainer'));
+        }
+
         var total = (lotCF * qty) * weightCF;
         record.set('dblGrossWeight', total);
         var tare = config.dummy.get('dblTareWeight');
