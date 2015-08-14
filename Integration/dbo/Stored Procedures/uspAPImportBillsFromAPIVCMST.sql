@@ -30,7 +30,9 @@ BEGIN
 		DECLARE @totalInsertedBillDetail INT;
 		DECLARE @totalInsertedTBLAPIVCMST INT;
 		DECLARE @totalInsertedTBLAPHGLMST INT;
+		DECLARE @userLocation INT;
 		DECLARE @transCount INT = @@TRANCOUNT;
+
 		IF @transCount = 0 BEGIN TRANSACTION
 
 			--CREATE TEMPORARY TABLE TO TRACK INSERTED AND ORIGINAL RECORDS
@@ -43,6 +45,10 @@ BEGIN
 			CREATE NONCLUSTERED INDEX [IX_tmpInsertedPostedBill_intBillId] ON #InsertedPostedBill([intBillId]);
 			CREATE TABLE #InsertedPostedBillDetail(intBillDetailId INT PRIMARY KEY CLUSTERED, A4GLIdentity INT)
 			CREATE NONCLUSTERED INDEX [IX_tmpInsertedPostedBillDetail_intBillDetailId] ON #InsertedPostedBillDetail([intBillDetailId]);
+
+			SELECT @userLocation = A.intCompanyLocationId FROM tblSMCompanyLocation A
+					INNER JOIN tblSMUserSecurity B ON A.intCompanyLocationId = B.intCompanyLocationId
+			WHERE intEntityId = @UserId
 
 			--removed first the constraint
 			ALTER TABLE tblAPBill DROP CONSTRAINT [UK_dbo.tblAPBill_strBillId]
@@ -80,12 +86,16 @@ BEGIN
 					[dblDiscount]			=	A.apivc_disc_avail,
 					[dblWithheld]			=	A.apivc_wthhld_amt,
 					[ysnOrigin]				=	1,
+					[intShipToId]			=	@userLocation,
+					[intShipFromId]			=	loc.intEntityLocationId,
 					[A4GLIdentity]			=	A.[A4GLIdentity]
 				FROM apivcmst A
 					LEFT JOIN apcbkmst B
 						ON A.apivc_cbk_no = B.apcbk_no
 					INNER JOIN tblAPVendor D
 						ON A.apivc_vnd_no = D.strVendorId COLLATE Latin1_General_CS_AS
+					LEFT JOIN tblEntityLocation loc
+						ON D.intEntityVendorId = loc.intEntityId AND loc.ysnDefaultLocation = 1
 					OUTER APPLY (
 						SELECT E.* FROM apivcmst E
 						WHERE EXISTS(
@@ -125,6 +135,8 @@ BEGIN
 				[intTransactionType],
 				[dblDiscount],
 				[dblWithheld],
+				[intShipToId],
+				[intShipFromId],
 				[ysnOrigin]
 			)
 			VALUES (
@@ -146,6 +158,8 @@ BEGIN
 				[intTransactionType],
 				[dblDiscount],
 				[dblWithheld],
+				[intShipToId],
+				[intShipFromId],
 				[ysnOrigin])
 			OUTPUT inserted.intBillId
 				, inserted.strBillId
@@ -409,10 +423,17 @@ BEGIN
 			DECLARE @IsPaid BIT
 			DECLARE @type INT
 			DECLARE @GeneratedBillId NVARCHAR(50)
+			DECLARE @shipFrom INT, @shipTo INT;
 			WHILE((SELECT TOP 1 1 FROM #InsertedPostedBill) IS NOT NULL)
 			BEGIN
-				SELECT TOP 1 @BillId = intBillId, @IsPosted = ysnPosted, @IsPaid = ysnPaid, @type = intTransactionType 
-				FROM #InsertedPostedBill
+				SELECT TOP 1 @BillId = A.intBillId
+					, @IsPosted = A.ysnPosted
+					, @IsPaid = A.ysnPaid
+					, @type = A.intTransactionType 
+					, @shipFrom = B.intShipFromId
+					, @shipTo = B.intShipToId
+				FROM #InsertedPostedBill A
+				INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
 
 				IF @type = 1
 					EXEC uspSMGetStartingNumber 9, @GeneratedBillId OUT
@@ -428,6 +449,8 @@ BEGIN
 					SET strBillId = @GeneratedBillId
 				FROM tblAPBill
 				WHERE intBillId = @BillId
+
+				EXEC uspAPBillUpdateAddressInfo @BillId, @shipFrom, @shipTo
 				
 				DELETE FROM #InsertedPostedBill WHERE intBillId = @BillId
 			END;

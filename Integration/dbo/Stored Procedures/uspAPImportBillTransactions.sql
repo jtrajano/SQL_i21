@@ -56,6 +56,17 @@ BEGIN
 				RAISERROR(''You cannot import without user.'', 16, 1);
 			END
 
+			--MAKE SURE USER HAS DEFAULT LOCATION
+			DECLARE @userLocation INT;
+			SELECT @userLocation = A.intCompanyLocationId FROM tblSMCompanyLocation A
+					INNER JOIN tblSMUserSecurity B ON A.intCompanyLocationId = B.intCompanyLocationId
+			WHERE intEntityId = @UserId
+
+			IF(@userLocation IS NULL OR @userLocation <= 0)
+			BEGIN
+				RAISERROR(''Please setup default location on user screen.'', 16, 1);
+			END
+
 			EXEC uspAPImportBillsFromAPIVCMST @UserId, @DateFrom, @DateTo, @totalPostedImport OUTPUT
 			SET @Total = @totalPostedImport;
 			EXEC uspAPImportBillsFromAPTRXMST @UserId,@DateFrom, @DateTo, @totalPostedImport OUTPUT
