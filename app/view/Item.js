@@ -4209,7 +4209,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'panel',
                                                         layout: 'fit',
-                                                        title: 'Special Pricing',
+                                                        title: 'Promotional Pricing',
                                                         items: [
                                                             {
                                                                 xtype: 'advancefiltergrid',
