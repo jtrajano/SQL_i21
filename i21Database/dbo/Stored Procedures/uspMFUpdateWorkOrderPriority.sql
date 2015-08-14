@@ -115,7 +115,7 @@ BEGIN TRY
 		,x.intScheduleWorkOrderId
 		,x.ysnFrozen
 		,@intConcurrencyId
-		,x.intSequenceId as intConcurrencyId
+		,x.intSequenceId
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -204,7 +204,7 @@ BEGIN TRY
 		,x.intScheduleWorkOrderId
 		,x.ysnFrozen
 		,@intConcurrencyId
-		,x.intSequenceId as intConcurrencyId
+		,x.intSequenceId
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
