@@ -170,7 +170,7 @@ INNER JOIN
 INNER JOIN
 	tblICItem I
 		ON SOD.[intItemId] = I.[intItemId]
-		AND I.[strType] IN ('Service','Software','Non-Inventory','Other Charge')
+		AND I.[strType] IN ('Service','Software','Non-Inventory','Other Charge','Software')
 INNER JOIN
 	tblARCustomer C
 		ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 

@@ -230,7 +230,7 @@ IF @recap = 0
 					AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 					AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
 					AND (Detail.intItemId IS NOT NULL OR Detail.intItemId <> 0)
-					AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')
+					AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 					
 				--Dsicount Account
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -390,7 +390,7 @@ IF @recap = 0
 								
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT
-					'The Service Charge Account of item - ' + I.strItemNo + ' was not specified.',
+					'The General Account of item - ' + I.strItemNo + ' was not specified.',
 					A.strTransactionType,
 					A.strInvoiceNumber,
 					@batchId,
@@ -414,9 +414,8 @@ IF @recap = 0
 						ON A.intCompanyLocationId = Acct.intLocationId 
 						AND D.intItemId = Acct.intItemId 		 				
 				WHERE
-					(D.intAccountId IS NULL OR D.intAccountId = 0)
-					AND (Acct.intGeneralAccountId IS NULL OR Acct.intGeneralAccountId = 0)
-					AND I.strType IN ('Non-Inventory','Service','Other Charge')
+					(Acct.intGeneralAccountId IS NULL OR Acct.intGeneralAccountId = 0)
+					AND I.strType IN ('Non-Inventory','Service','Other Charge','Software')
 					
 					
 				BEGIN TRY
@@ -669,7 +668,7 @@ IF @post = 1
 				(Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 				AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
 				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
-				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')
+				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 			
 		END TRY
 		BEGIN CATCH
@@ -809,7 +808,7 @@ IF @post = 1
 			SELECT
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
-				,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge'))) 
+				,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge','Software'))) 
 													AND IST.intGeneralAccountId IS NOT NULL
 													AND IST.intGeneralAccountId <> 0
 													THEN
@@ -856,7 +855,7 @@ IF @post = 1
 					AND A.intCompanyLocationId = IST.intLocationId 		
 			WHERE 
 				(B.intItemId IS NULL OR B.intItemId = 0)
-				OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge')))
+				OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge','Software')))
 
 			--CREDIT SALES
 			UNION ALL 
@@ -906,7 +905,7 @@ IF @post = 1
 					AND A.intCompanyLocationId = IST.intLocationId 
 			WHERE 
 				(B.intItemId IS NOT NULL OR B.intItemId <> 0)
-				AND I.strType NOT IN ('Non-Inventory','Service','Other Charge')
+				AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 			--CREDIT Shipping
 			UNION ALL 
 			SELECT
@@ -1106,7 +1105,7 @@ IF @post = 1
 				D.intInventoryShipmentItemId IS NOT NULL AND D.intInventoryShipmentItemId <> 0
 				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
-				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')
+				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 				
 			UNION ALL 
 			--CREDIT Inventory In-Transit - SHIPPED
@@ -1170,7 +1169,7 @@ IF @post = 1
 				D.intInventoryShipmentItemId IS NOT NULL AND D.intInventoryShipmentItemId <> 0
 				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
-				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')		
+				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')		
 		END TRY
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()
@@ -1307,7 +1306,7 @@ IF @post = 0
 				(Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 				AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
 				AND (Detail.intItemId IS NOT NULL OR Detail.intItemId <> 0)
-				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge')
+				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 
 			WHILE EXISTS(SELECT TOP 1 NULL FROM @UnPostInvoiceData ORDER BY intInvoiceId)
 				BEGIN
