@@ -34,11 +34,13 @@ BEGIN
 		SELECT aptrx_ivc_no as strTransactionId, 'Origin - AP' as strTransactionType, CAST(SUBSTRING(CAST(aptrx_gl_rev_dt AS NVARCHAR(10)),1,4) + '-' + SUBSTRING(CAST(aptrx_gl_rev_dt AS NVARCHAR(10)),5,2) + '-' + SUBSTRING(CAST(aptrx_gl_rev_dt AS NVARCHAR(10)),7,2) AS DATE) as dtmDate 
 			FROM aptrxmst WHERE @blnLegacyIntegration  = 1   GROUP BY aptrx_ivc_no, aptrx_gl_rev_dt --ORIGIN AP
 		UNION
-		SELECT strTransactionId, strTransactionType,dtmDate from vyuICGetUnpostedTransactions --IC
+		SELECT strTransactionId, strTransactionType,dtmDate from [vyuICGetUnpostedTransactions] --IC
 		UNION
 		SELECT strTransactionId, strTransactionType,dtmDate from [vyuAPUnpostedTransaction] --AP
-		--CM view here CM-775
-		--AR view here AR-1563
+		UNION
+		SELECT strTransactionId, strTransactionType,dtmDate from [vyuCMUnpostedTransaction] --CM
+		UNION
+		SELECT strTransactionId, strTransactionType,dtmDate from [vyuARUnpostedTransactions] --AR
 	)
 	INSERT INTO @tblTransactions
 	SELECT strTransactionId,strTransactionType,dtmDate from Transactions,FiscalYear WHERE dtmDate >= FiscalYear.dtmDateFrom AND dtmDate <= FiscalYear.dtmDateTo
