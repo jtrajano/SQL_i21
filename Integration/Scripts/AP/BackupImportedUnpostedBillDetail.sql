@@ -3,7 +3,7 @@ GO
 IF(NOT EXISTS(SELECT 1 FROM tblAPapeglmst) AND EXISTS(SELECT 1 FROM tblAPBill WHERE ysnPosted = 0 AND ysnOrigin = 1))
 BEGIN
 	BEGIN TRY
-		DECLARE @insertedUnpostedBillDetail TABLE(A4GLIdentity INT)
+		DECLARE @insertedUnpostedBillDetail TABLE(A4GLIdentity INT, A4GLaptrx INT, intBillId INT)
 		DECLARE @transCount INT = 0
 		DECLARE @totalBackupedUnpostedBillDetails INT
 		SET @transCount = 0
@@ -17,14 +17,16 @@ BEGIN
 				[apegl_cbk_no]		=	C.[apegl_cbk_no]		,
 				[apegl_trx_ind]		=	C.[apegl_trx_ind]		,
 				[apegl_vnd_no]		=	C.[apegl_vnd_no]		,
-				[apegl_ivc_no]		=	A.[strVendorOrderNumber], --Use vendor order number of bill so we could know what bills owns this, this only applicable for existing imported
+				[apegl_ivc_no]		=	C.[apegl_ivc_no],
 				[apegl_dist_no]		=	C.[apegl_dist_no]		,
 				[apegl_alt_cbk_no]	=	C.[apegl_alt_cbk_no]	,
 				[apegl_gl_acct]		=	C.[apegl_gl_acct]		,
 				[apegl_gl_amt]		=	C.[apegl_gl_amt]		,
 				[apegl_gl_un]		=	C.[apegl_gl_un]			,
 				[A4GLIdentity]		=	C.[A4GLIdentity]		,
-				[intBillDetailId]	=	(SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = A.intBillId AND intLineNo = C.apegl_dist_no)
+				[intBillDetailId]	=	(SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = A.intBillId AND intLineNo = C.apegl_dist_no),
+				[A4GLaptrx]			=	C2.A4GLIdentity,
+				[intBillId]			=	A.intBillId
 			FROM tblAPBill A
 			INNER JOIN tblAPVendor B
 				ON A.intEntityVendorId = B.intEntityVendorId
@@ -66,11 +68,18 @@ BEGIN
 			[A4GLIdentity]		,
 			[intBillDetailId]	
 		)
-		OUTPUT sourceData.A4GLIdentity INTO @insertedUnpostedBillDetail;
+		OUTPUT sourceData.A4GLIdentity, sourceData.A4GLaptrx, intBillId INTO @insertedUnpostedBillDetail;
 		SET @totalBackupedUnpostedBillDetails = @@ROWCOUNT;
 		SET IDENTITY_INSERT tblAPapeglmst OFF
 
 		PRINT 'End backing up imported unposted bill details'
+
+		PRINT 'Updating tblAPaptrxmst link to Bill'
+			UPDATE A
+				SET A.intBillId = B.intBillId
+			FROM tblAPaptrxmst A
+			INNER JOIN (SELECT DISTINCT intBillId, A4GLaptrx FROM @insertedUnpostedBillDetail) B ON A.A4GLIdentity = B.A4GLaptrx
+		PRINT 'END Updating tblAPaptrxmst link to Bill'
 
 		DELETE FROM apeglmst
 		WHERE A4GLIdentity IN (SELECT A4GLIdentity FROM @insertedUnpostedBillDetail)

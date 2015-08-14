@@ -378,27 +378,29 @@ BEGIN
 			SET @totalImported = (SELECT COUNT(*) FROM #InsertedPostedBill)
 
 
-			DELETE A
-			FROM apivcmst A
-			INNER JOIN #InsertedPostedBill B
-				ON A.A4GLIdentity = B.A4GLIdentity
+			--DELETE A
+			--FROM apivcmst A
+			--INNER JOIN #InsertedPostedBill B
+			--	ON A.A4GLIdentity = B.A4GLIdentity
 
-			SET @totalDeletedAPIVCMST = @@ROWCOUNT
+			--SET @totalDeletedAPIVCMST = @@ROWCOUNT
 
-			DELETE A
-			FROM aphglmst A
-			INNER JOIN #InsertedPostedBillDetail B
-				ON A.A4GLIdentity = B.A4GLIdentity
+			--DELETE A
+			--FROM aphglmst A
+			--INNER JOIN #InsertedPostedBillDetail B
+			--	ON A.A4GLIdentity = B.A4GLIdentity
 
-			SET @totalDeletedAPHGLMST = @@ROWCOUNT
+			--SET @totalDeletedAPHGLMST = @@ROWCOUNT
 
 			DECLARE @error NVARCHAR(1000);
 			SET @error = ''Unexpected number of rows inserted in tblAPapivcmst: Bill='' + CAST(@totalInsertedBill AS NVARCHAR(100)) + '',tblAPapivcmst='' + CAST(@totalInsertedTBLAPIVCMST AS NVARCHAR(100))
 			IF @totalInsertedBill != @totalInsertedTBLAPIVCMST RAISERROR(@error, 16, 1);
-			SET @error = ''Unexpected number of rows deleted in apivcmst: Bill='' + CAST(@totalInsertedBill AS NVARCHAR(100)) + '',apivcmst='' + CAST(@totalDeletedAPIVCMST AS NVARCHAR(100))
-			IF @totalInsertedBill != @totalDeletedAPIVCMST RAISERROR(@error, 16, 1);
-			SET @error = ''Unexpected number of rows deleted in aphglmst: Bill='' + CAST(@totalInsertedBillDetail AS NVARCHAR(100)) + '',aphglmst='' + CAST(@totalDeletedAPHGLMST AS NVARCHAR(100))
-			IF @totalInsertedBillDetail != @totalDeletedAPHGLMST RAISERROR(@error, 16, 1);
+			SET @error = ''Unexpected number of rows inserted in tblAPaphglmst: Bill='' + CAST(@totalInsertedBill AS NVARCHAR(100)) + '',tblAPaphglmst='' + CAST(@totalInsertedTBLAPHGLMST AS NVARCHAR(100))
+			IF @totalInsertedBillDetail != @totalInsertedTBLAPHGLMST RAISERROR(@error, 16, 1);
+			--SET @error = ''Unexpected number of rows deleted in apivcmst: Bill='' + CAST(@totalInsertedBill AS NVARCHAR(100)) + '',apivcmst='' + CAST(@totalDeletedAPIVCMST AS NVARCHAR(100))
+			--IF @totalInsertedBill != @totalDeletedAPIVCMST RAISERROR(@error, 16, 1);
+			--SET @error = ''Unexpected number of rows deleted in aphglmst: Bill='' + CAST(@totalInsertedBillDetail AS NVARCHAR(100)) + '',aphglmst='' + CAST(@totalDeletedAPHGLMST AS NVARCHAR(100))
+			--IF @totalInsertedBillDetail != @totalDeletedAPHGLMST RAISERROR(@error, 16, 1);
 
 			--UPDATE strBillId
 			DECLARE @totalBills INT
