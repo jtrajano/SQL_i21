@@ -68,7 +68,7 @@ BEGIN
 			[A4GLIdentity]		,
 			[intBillDetailId]	
 		)
-		OUTPUT sourceData.A4GLIdentity, sourceData.A4GLaptrx, intBillId INTO @insertedUnpostedBillDetail;
+		OUTPUT sourceData.A4GLIdentity, sourceData.A4GLaptrx, sourceData.intBillId INTO @insertedUnpostedBillDetail;
 		SET @totalBackupedUnpostedBillDetails = @@ROWCOUNT;
 		SET IDENTITY_INSERT tblAPapeglmst OFF
 

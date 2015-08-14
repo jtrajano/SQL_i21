@@ -1,7 +1,7 @@
 ﻿GO
 
-IF EXISTS(select top 1 1 from sys.procedures where name = 'uspAPImportBillsFromAPTRXMST')
-	DROP PROCEDURE uspAPImportBillsFromAPTRXMST
+IF EXISTS(select top 1 1 from sys.procedures where name = 'uspAPImportBillsFromAPIVCMST')
+	DROP PROCEDURE uspAPImportBillsFromAPIVCMST
 GO
 
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
