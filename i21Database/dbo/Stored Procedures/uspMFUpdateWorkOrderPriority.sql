@@ -29,8 +29,6 @@ BEGIN TRY
 		,intNoOfSelectedMachine INT
 		,dtmEarliestStartDate DATETIME
 		,intPackTypeId INT
-		,intNoOfUnit INT
-		,dblConversionFactor NUMERIC(18, 6)
 		,dtmPlannedStartDate DATETIME
 		,dtmPlannedEndDate DATETIME
 		,intPlannedShiftId INT
@@ -76,6 +74,14 @@ BEGIN TRY
 		,intNoOfSelectedMachine
 		,dtmEarliestStartDate
 		,intPackTypeId
+		,dtmPlannedStartDate
+		,dtmPlannedEndDate
+		,intPlannedShiftId
+		,intDuration
+		,intChangeoverDuration
+		,intSetupDuration
+		,dtmChangeoverStartDate
+		,dtmChangeoverEndDate
 		,intScheduleWorkOrderId
 		,ysnFrozen
 		,intConcurrencyId
@@ -98,6 +104,14 @@ BEGIN TRY
 		,x.intNoOfSelectedMachine
 		,x.dtmEarliestStartDate
 		,x.intPackTypeId
+		,x.dtmPlannedStartDate
+		,x.dtmPlannedEndDate
+		,x.intPlannedShiftId
+		,x.intDuration
+		,x.intChangeoverDuration
+		,x.intSetupDuration
+		,x.dtmChangeoverStartDate
+		,x.dtmChangeoverEndDate
 		,x.intScheduleWorkOrderId
 		,x.ysnFrozen
 		,@intConcurrencyId
@@ -119,6 +133,14 @@ BEGIN TRY
 			,intNoOfSelectedMachine INT
 			,dtmEarliestStartDate DATETIME
 			,intPackTypeId INT
+			,dtmPlannedStartDate DATETIME
+			,dtmPlannedEndDate DATETIME
+			,intPlannedShiftId INT
+			,intDuration INT
+			,intChangeoverDuration INT
+			,intSetupDuration INT
+			,dtmChangeoverStartDate DATETIME
+			,dtmChangeoverEndDate DATETIME
 			,intScheduleWorkOrderId INT
 			,ysnFrozen BIT
 			,intSequenceId int
@@ -142,6 +164,14 @@ BEGIN TRY
 		,intNoOfSelectedMachine
 		,dtmEarliestStartDate
 		,intPackTypeId
+		,dtmPlannedStartDate
+		,dtmPlannedEndDate
+		,intPlannedShiftId
+		,intDuration
+		,intChangeoverDuration
+		,intSetupDuration
+		,dtmChangeoverStartDate
+		,dtmChangeoverEndDate
 		,intScheduleWorkOrderId
 		,ysnFrozen
 		,intConcurrencyId
@@ -163,6 +193,14 @@ BEGIN TRY
 		,x.intNoOfSelectedMachine
 		,x.dtmEarliestStartDate
 		,x.intPackTypeId
+		,x.dtmPlannedStartDate
+		,x.dtmPlannedEndDate
+		,x.intPlannedShiftId
+		,x.intDuration
+		,x.intChangeoverDuration
+		,x.intSetupDuration
+		,x.dtmChangeoverStartDate
+		,x.dtmChangeoverEndDate
 		,x.intScheduleWorkOrderId
 		,x.ysnFrozen
 		,@intConcurrencyId
@@ -184,6 +222,14 @@ BEGIN TRY
 			,intNoOfSelectedMachine INT
 			,dtmEarliestStartDate DATETIME
 			,intPackTypeId INT
+			,dtmPlannedStartDate DATETIME
+			,dtmPlannedEndDate DATETIME
+			,intPlannedShiftId INT
+			,intDuration INT
+			,intChangeoverDuration INT
+			,intSetupDuration INT
+			,dtmChangeoverStartDate DATETIME
+			,dtmChangeoverEndDate DATETIME
 			,intScheduleWorkOrderId INT
 			,ysnFrozen BIT
 			,intSequenceId int
