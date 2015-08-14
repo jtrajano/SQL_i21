@@ -23,6 +23,8 @@ BEGIN
 		-- Integration fields. Foreign keys. 
 		,intHeaderId			INT
 		,intDetailId			INT 
+		,intTaxDetailId			INT 
+		,dtmDate				DATETIME 
 		,intItemId				INT
 
 		-- Taxes fields
