@@ -363,9 +363,9 @@ BEGIN
 					,Receipt.intLocationId
 					,Receipt.dtmReceiptDate
 					,Receipt.intEntityId
-					,Receipt.intInventoryReceiptId
+					,ReceiptItem.intInventoryReceiptItemId
 			FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
-						ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptItemId
+						ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
 
 			OPEN loopReceiptItems;
@@ -503,7 +503,8 @@ BEGIN
 								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 							INNER JOIN dbo.tblICInventoryReceiptItemTax ItemTax
 								ON ItemTax.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-					WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptItemId
+					WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
+							AND ReceiptItem.intInventoryReceiptItemId = @InventoryReceiptItemId
 					
 					-- Call the SM stored procedure to compute the tax. 
 					EXEC dbo.[uspSMComputeItemTaxes]
@@ -533,14 +534,15 @@ BEGIN
 		UPDATE	ReceiptItem 
 		SET		dblTax = ISNULL(Taxes.dblTaxPerLineItem, 0)
 		FROM	dbo.tblICInventoryReceiptItem ReceiptItem LEFT JOIN (
-					SELECT	dblTaxPerLineItem = SUM(dblTax) 
-							,intInventoryReceiptItemId
-					FROM	dbo.tblICInventoryReceiptItemTax 
-					WHERE	intInventoryReceiptItemId = @InventoryReceiptId		
-					GROUP BY intInventoryReceiptItemId
+					SELECT	dblTaxPerLineItem = SUM(ReceiptItemTax.dblTax) 
+							,ReceiptItemTax.intInventoryReceiptItemId
+					FROM	dbo.tblICInventoryReceiptItemTax ReceiptItemTax INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+								ON ReceiptItemTax.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+					WHERE	ReceiptItem.intInventoryReceiptId = @InventoryReceiptId
+					GROUP BY ReceiptItemTax.intInventoryReceiptItemId
 				) Taxes
-					ON ReceiptItem.intInventoryReceiptId = Taxes.intInventoryReceiptItemId
-		WHERE	intInventoryReceiptId = @InventoryReceiptId
+					ON ReceiptItem.intInventoryReceiptItemId = Taxes.intInventoryReceiptItemId
+		WHERE	ReceiptItem.intInventoryReceiptId = @InventoryReceiptId
 
 		-- Re-update the line total 
 		UPDATE	ReceiptItem 
