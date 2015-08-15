@@ -2236,6 +2236,7 @@
     <Build Include="dbo\Views\vyuCMUnpostedTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillContractPrice.sql" />
     <Build Include="dbo\Views\vyuARUnpostedTransactions.sql" />
+	<Build Include="dbo\Stored Procedures\uspSMComputeItemTaxes.sql" />	
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
