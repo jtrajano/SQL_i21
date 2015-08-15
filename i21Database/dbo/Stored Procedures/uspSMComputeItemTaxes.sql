@@ -51,7 +51,7 @@ END
 BEGIN 
 	UPDATE	ItemTaxes
 	SET		dblCalculatedTaxAmount =	
-				CASE	WHEN dblAdjustedTax IS NOT NULL THEN 
+				CASE	WHEN ISNULL(dblAdjustedTax, 0) <> 0 THEN 
 							dblAdjustedTax
 						WHEN strCalculationMethod = @CALC_METHOD_Percentage THEN 						
 							ISNULL(dblAmount, 0) * ISNULL(dblQty, 0) * (numRate / 100)
