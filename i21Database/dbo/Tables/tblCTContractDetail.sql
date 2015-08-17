@@ -88,8 +88,8 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[strFXRemarks] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[dblAssumedFX] [numeric](8, 4) NULL,
 	[strFixationBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	
-	
+	[strPackingDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[intCurrencyExchangeRateId] INT NULL,
     
 	
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
@@ -135,5 +135,6 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrency_intInvoiceCurrencyId_intCurrencyId] FOREIGN KEY ([intInvoiceCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblCTContractDetail_tblLGContainerType_intContainerTypeId] FOREIGN KEY ([intContainerTypeId]) REFERENCES [tblLGContainerType]([intContainerTypeId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblICCategory_intCategoryId] FOREIGN KEY([intCategoryId])REFERENCES [tblICCategory] ([intCategoryId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblCTIndex_intIndexId] FOREIGN KEY ([intIndexId]) REFERENCES [tblCTIndex]([intIndexId])
+	CONSTRAINT [FK_tblCTContractDetail_tblCTIndex_intIndexId] FOREIGN KEY ([intIndexId]) REFERENCES [tblCTIndex]([intIndexId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblSMCurrencyExchangeRate_intCurrencyExchangeRateId] FOREIGN KEY ([intCurrencyExchangeRateId]) REFERENCES [tblSMCurrencyExchangeRate]([intCurrencyExchangeRateId]),
 ) 

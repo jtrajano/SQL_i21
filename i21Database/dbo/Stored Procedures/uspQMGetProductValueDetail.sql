@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE uspQMGetProductValueDetail
 	@intProductTypeId INT
 	,@intProductValueId INT
+	,@strProductValue NVARCHAR(50)
+	,@intCount INT = 0 OUTPUT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -21,7 +23,19 @@ BEGIN
 				ELSE intCategoryId
 				END
 			)
+		AND strCategoryCode LIKE @strProductValue + '%'
 	ORDER BY strCategoryCode
+
+	SELECT @intCount = COUNT(*)
+	FROM tblICCategory
+	WHERE intCategoryId = (
+			CASE 
+				WHEN @intProductValueId > 0
+					THEN @intProductValueId
+				ELSE intCategoryId
+				END
+			)
+		AND strCategoryCode LIKE @strProductValue + '%'
 END
 ELSE IF @intProductTypeId = 2
 BEGIN
@@ -37,5 +51,18 @@ BEGIN
 				ELSE intItemId
 				END
 			)
+		AND strItemNo LIKE @strProductValue + '%'
 	ORDER BY strItemNo
+
+	SELECT @intCount = COUNT(*)
+	FROM tblICItem
+	WHERE strStatus = 'Active'
+		AND intItemId = (
+			CASE 
+				WHEN @intProductValueId > 0
+					THEN @intProductValueId
+				ELSE intItemId
+				END
+			)
+		AND strItemNo LIKE @strProductValue + '%'
 END

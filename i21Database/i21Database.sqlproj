@@ -2240,6 +2240,7 @@
     <Build Include="dbo\Stored Procedures\uspTMUpdateEstimatedValuesBySite.sql" />
     <Build Include="dbo\Stored Procedures\uspTMUpdateForecastedValuesBySite.sql" />
     <Build Include="dbo\Stored Procedures\uspTMUnSyncInvoiceFromDeliveryHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUpdateWorkOrderPriority.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

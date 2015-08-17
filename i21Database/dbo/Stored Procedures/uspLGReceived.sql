@@ -13,7 +13,7 @@ SET ANSI_WARNINGS OFF
 	DECLARE		@ErrMsg							NVARCHAR(MAX),
 				@strReceiptType					NVARCHAR(50),
 				@intSourceType					INT,
-				@intInventoryReceiptItemId		INT,
+				@intLotId						INT,
 				@intSourceId					INT,
 				@intContainerId					INT,
 				@dblQty							NUMERIC(18,6),
@@ -24,9 +24,8 @@ SET ANSI_WARNINGS OFF
 	IF (@strReceiptType <> 'Purchase Contract' AND @intSourceType <> 2)
 		RETURN
 	
-	SELECT @intInventoryReceiptItemId = MIN(intInventoryReceiptDetailId) FROM @ItemsFromInventoryReceipt
-	SELECT @intInventoryReceiptItemId
-	WHILE ISNULL(@intInventoryReceiptItemId,0) > 0
+	SELECT @intLotId = MIN(intLotId) FROM @ItemsFromInventoryReceipt
+	WHILE ISNULL(@intLotId,0) > 0
 	BEGIN
 		SELECT	@intSourceId					=	NULL,
 				@intContainerId					=	NULL,
@@ -36,9 +35,9 @@ SET ANSI_WARNINGS OFF
 		SELECT	@intSourceId					=	intSourceId,
 				@intContainerId					=	intContainerId,
 				@dblQty							=	dblQty,
-				@intInventoryReceiptItemId		=	intInventoryReceiptDetailId
+				@intLotId						=	intLotId
 		FROM	@ItemsFromInventoryReceipt 
-		WHERE	intInventoryReceiptDetailId		=	 @intInventoryReceiptItemId
+		WHERE	intLotId						=	 @intLotId
 		
 		IF NOT EXISTS(SELECT * FROM tblLGShipmentContractQty WHERE intShipmentContractQtyId = @intSourceId)
 		BEGIN
@@ -71,7 +70,7 @@ SET ANSI_WARNINGS OFF
 		UPDATE tblLGShipmentContractQty 		SET dblReceivedQty = (@dblContractQty + @dblQty) WHERE intShipmentContractQtyId = @intSourceId
 		UPDATE tblLGShipmentBLContainerContract SET dblReceivedQty = (@dblContainerQty + @dblQty) WHERE intShipmentContractQtyId = @intSourceId AND intShipmentBLContainerId = @intContainerId
 		
-		SELECT @intInventoryReceiptItemId = MIN(intInventoryReceiptDetailId) FROM @ItemsFromInventoryReceipt WHERE intInventoryReceiptDetailId > @intInventoryReceiptItemId
+		SELECT @intLotId = MIN(intLotId) FROM @ItemsFromInventoryReceipt WHERE intLotId > @intLotId
 	END
 
 END TRY
