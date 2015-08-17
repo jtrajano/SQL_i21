@@ -2236,7 +2236,10 @@
     <Build Include="dbo\Views\vyuCMUnpostedTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillContractPrice.sql" />
     <Build Include="dbo\Views\vyuARUnpostedTransactions.sql" />
-	<Build Include="dbo\Stored Procedures\uspSMComputeItemTaxes.sql" />	
+    <Build Include="dbo\Stored Procedures\uspSMComputeItemTaxes.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCollateralDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetGrainBankDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetNetHedgeDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
