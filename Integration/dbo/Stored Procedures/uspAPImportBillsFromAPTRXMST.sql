@@ -40,6 +40,7 @@ BEGIN
 					, strBillId NVARCHAR(100)
 					, ysnPosted BIT, ysnPaid BIT
 					, strVendorOrderNumber NVARCHAR(50)
+					, strVendorOrderNumberOrig NVARCHAR(50)
 					, intTransactionType INT
 					, A4GLIdentity INT)
 			CREATE NONCLUSTERED INDEX [IX_tmpInsertedUnpostedBill_intBillId] ON #InsertedUnpostedBill([intBillId]);
@@ -56,35 +57,36 @@ BEGIN
 			MERGE INTO tblAPBill AS destination
 			USING (
 				SELECT
-					[intEntityVendorId]		=	D.intEntityVendorId,
-					[strVendorOrderNumber] 	=	(CASE WHEN DuplicateData.aptrx_ivc_no IS NOT NULL THEN dbo.fnTrim(A.aptrx_ivc_no) + ''-DUP'' ELSE A.aptrx_ivc_no END),
-					[intTermsId] 			=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation
-														WHERE intEntityId = (SELECT intEntityVendorId FROM tblAPVendor
-															WHERE strVendorId COLLATE Latin1_General_CS_AS = A.aptrx_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
-					[dtmDate] 				=	CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-					[dtmDateCreated] 		=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-					[dtmBillDate] 			=	CASE WHEN ISDATE(A.aptrx_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-					[dtmDueDate] 			=	CASE WHEN ISDATE(A.aptrx_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
-					[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(B.apcbk_gl_ap AS NVARCHAR(MAX))),
-					[strReference] 			=	A.aptrx_comment,
-					[strPONumber]			=	A.aptrx_pur_ord_no,
-					[dblTotal] 				=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt 
-													ELSE (CASE WHEN A.aptrx_orig_amt < 0 THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END) END,
-					[dblAmountDue]			=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt 
-													ELSE (CASE WHEN A.aptrx_orig_amt < 0 THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END) END,
-					[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.aptrx_user_id)),@UserId),
-					[ysnPosted]				=	0,
-					[ysnPaid]				=	0,
-					[intTransactionType]	=	CASE WHEN A.aptrx_trans_type = ''I'' THEN 1
-													WHEN A.aptrx_trans_type = ''A'' THEN 2
-													WHEN A.aptrx_trans_type = ''C'' THEN 3
-													ELSE 0 END,
-					[dblDiscount]			=	A.aptrx_disc_amt,
-					[dblWithheld]			=	A.aptrx_wthhld_amt,
-					[ysnOrigin]				=	1,
-					[intShipToId]			=	@userLocation,
-					[intShipFromId]			=	loc.intEntityLocationId,
-					[A4GLIdentity]			=	A.A4GLIdentity
+					[intEntityVendorId]			=	D.intEntityVendorId,
+					[strVendorOrderNumber] 		=	(CASE WHEN DuplicateData.aptrx_ivc_no IS NOT NULL THEN dbo.fnTrim(A.aptrx_ivc_no) + ''-DUP'' ELSE A.aptrx_ivc_no END),
+					[strVendorOrderNumberOrig] 	=	A.aptrx_ivc_no,
+					[intTermsId] 				=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation
+															WHERE intEntityId = (SELECT intEntityVendorId FROM tblAPVendor
+																WHERE strVendorId COLLATE Latin1_General_CS_AS = A.aptrx_vnd_no)), (SELECT TOP 1 intTermID FROM tblSMTerm WHERE strTerm = ''Due on Receipt'')),
+					[dtmDate] 					=	CASE WHEN ISDATE(A.aptrx_gl_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+					[dtmDateCreated] 			=	CASE WHEN ISDATE(A.aptrx_sys_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_sys_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+					[dtmBillDate] 				=	CASE WHEN ISDATE(A.aptrx_ivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_ivc_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+					[dtmDueDate] 				=	CASE WHEN ISDATE(A.aptrx_due_rev_dt) = 1 THEN CONVERT(DATE, CAST(A.aptrx_due_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END,
+					[intAccountId] 				=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(B.apcbk_gl_ap AS NVARCHAR(MAX))),
+					[strReference] 				=	A.aptrx_comment,
+					[strPONumber]				=	A.aptrx_pur_ord_no,
+					[dblTotal] 					=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt 
+														ELSE (CASE WHEN A.aptrx_orig_amt < 0 THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END) END,
+					[dblAmountDue]				=	CASE WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_trans_type = ''A'' THEN A.aptrx_orig_amt 
+														ELSE (CASE WHEN A.aptrx_orig_amt < 0 THEN A.aptrx_orig_amt * -1 ELSE A.aptrx_orig_amt END) END,
+					[intEntityId]				=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.aptrx_user_id)),@UserId),
+					[ysnPosted]					=	0,
+					[ysnPaid]					=	0,
+					[intTransactionType]		=	CASE WHEN A.aptrx_trans_type = ''I'' THEN 1
+														WHEN A.aptrx_trans_type = ''A'' THEN 2
+														WHEN A.aptrx_trans_type = ''C'' THEN 3
+														ELSE 0 END,
+					[dblDiscount]				=	A.aptrx_disc_amt,
+					[dblWithheld]				=	A.aptrx_wthhld_amt,
+					[ysnOrigin]					=	1,
+					[intShipToId]				=	@userLocation,
+					[intShipFromId]				=	loc.intEntityLocationId,
+					[A4GLIdentity]				=	A.A4GLIdentity
 				FROM aptrxmst A
 					LEFT JOIN apcbkmst B
 						ON A.aptrx_cbk_no = B.apcbk_no
@@ -162,6 +164,7 @@ BEGIN
 				, inserted.ysnPosted
 				, inserted.ysnPaid
 				, inserted.strVendorOrderNumber
+				, sourceData.strVendorOrderNumberOrig
 				, inserted.intTransactionType 
 				, sourceData.A4GLIdentity INTO #InsertedUnpostedBill;
 
@@ -185,6 +188,8 @@ BEGIN
 					[intLineNo]				=	C.apegl_dist_no,
 					[A4GLIdentity]			=	C.A4GLIdentity
 				FROM tblAPBill A
+					INNER JOIN #InsertedUnpostedBill A2
+						ON A.intBillId  = A2.intBillId
 					INNER JOIN tblAPVendor B
 						ON A.intEntityVendorId = B.intEntityVendorId
 					INNER JOIN (aptrxmst C2 INNER JOIN apeglmst C 
@@ -192,7 +197,7 @@ BEGIN
 									AND C2.aptrx_vnd_no = C.apegl_vnd_no
 									AND C2.aptrx_cbk_no = C.apegl_cbk_no
 									AND C2.aptrx_trans_type = C.apegl_trx_ind)
-						ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.aptrx_ivc_no
+						ON A2.strVendorOrderNumberOrig COLLATE Latin1_General_CS_AS = C2.aptrx_ivc_no
 						AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.aptrx_vnd_no
 				WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 								THEN
