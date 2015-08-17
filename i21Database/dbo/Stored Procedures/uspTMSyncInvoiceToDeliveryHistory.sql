@@ -152,7 +152,7 @@ BEGIN
 		---GET  Elapse Degree Day and Days
 		IF(@dtmLastDeliveryDate IS NOT NULL AND @dtmInvoiceDate > @dtmLastDeliveryDate)
 		BEGIN
-			SET @intElapseDays = DATEDIFF(DAY,@dtmInvoiceDate,@dtmLastDeliveryDate)
+			SET @intElapseDays = DATEDIFF(DAY,@dtmLastDeliveryDate,@dtmInvoiceDate)
 		END
 		ELSE
 		BEGIN

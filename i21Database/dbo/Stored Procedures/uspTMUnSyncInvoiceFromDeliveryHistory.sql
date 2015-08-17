@@ -137,7 +137,6 @@ BEGIN
 			UPDATE tblTMSite
 			SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) - A.dblQuantityTotal
 				,dblYTDSales = ISNULL(dblYTDSales,0.0) - ISNULL(A.dblSalesTotal,0.)
-				,dtmLastReadingUpdate = @dtmInvoiceDate
 				,intConcurrencyId = intConcurrencyId + 1
 			FROM(
 				SELECT dblQuantityTotal = SUM(ISNULL(dblQuantityDelivered,0))
@@ -156,6 +155,7 @@ BEGIN
 				UPDATE tblTMSite
 				SET dblEstimatedPercentLeft = A.dblPercentAfterDelivery
 					,dblEstimatedGallonsLeft = ISNULL(A.dblPercentAfterDelivery,0.0) * tblTMSite.dblTotalCapacity /100
+					,dtmLastReadingUpdate = @dtmInvoiceDate
 				FROM(
 					SELECT   
 						dblPercentAfterDelivery = MAX(dblPercentAfterDelivery)
@@ -329,7 +329,56 @@ BEGIN
 					ELSE
 					BEGIN
 						PRINT 'No REcord in the delivery history for the previouse delivery' 
-						--TODO
+						------Update Site INfo (rollback) base on the first delivery history before the invoice date
+
+						UPDATE tblTMSite
+						SET intLastDeliveryDegreeDay = A.intDegreeDayOnDeliveryDate
+							,dblLastGalsInTank =   ISNULL(A.dblActualPercentAfterDelivery,0.0) * ISNULL(tblTMSite.dblTotalCapacity,1) /100
+							,dblLastDeliveredGal = A.dblQuantityDelivered
+							,dtmLastDeliveryDate = A.dtmInvoiceDate
+							,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
+							,dblEstimatedPercentLeft = A.dblActualPercentAfterDelivery
+							,dblEstimatedGallonsLeft = tblTMSite.dblTotalCapacity * A.dblActualPercentAfterDelivery /100
+							,dblDegreeDayBetweenDelivery =	(tblTMSite.dblBurnRate
+																* (CASE WHEN (ISNULL(A.dblActualPercentAfterDelivery,0.0) * ISNULL(tblTMSite.dblTotalCapacity,1) /100) < 0 
+																	THEN 0 ELSE (ISNULL(A.dblActualPercentAfterDelivery,0.0) * ISNULL(tblTMSite.dblTotalCapacity,1) /100) END)
+															)
+							,intNextDeliveryDegreeDay =  ROUND((A.intDegreeDayOnDeliveryDate  
+															+	(tblTMSite.dblBurnRate
+																	* (CASE WHEN (ISNULL(A.dblActualPercentAfterDelivery,0.0) * ISNULL(tblTMSite.dblTotalCapacity,1) /100) < 0 
+																		THEN 0 ELSE (ISNULL(A.dblActualPercentAfterDelivery,0.0) * ISNULL(tblTMSite.dblTotalCapacity,1) /100) END)
+																)),0)
+							,dtmLastReadingUpdate = A.dtmInvoiceDate
+						FROM(
+							SELECT TOP 1 * FROM tblTMDeliveryHistory
+							WHERE intDeliveryHistoryID = (SELECT TOP 1 intDeliveryHistoryID
+															FROM tblTMDeliveryHistory
+															WHERE intSiteID = @intSiteId
+																AND dtmInvoiceDate < @dtmInvoiceDate
+															ORDER BY dtmInvoiceDate DESC)
+						)A
+						WHERE tblTMSite.intSiteID = @intSiteId
+
+						---Update Site YTD Info 
+						UPDATE tblTMSite
+						SET dblYTDGalsThisSeason = ISNULL(dblYTDGalsThisSeason,0.0) - A.dblQuantityTotal
+							,dblYTDSales = ISNULL(dblYTDSales,0.0) - ISNULL(A.dblSalesTotal,0.)
+							,intConcurrencyId = intConcurrencyId + 1
+						FROM(
+							SELECT dblQuantityTotal = SUM(ISNULL(dblQuantityDelivered,0))
+								,dblSalesTotal = SUM(ISNULL(dblExtendedAmount,0))
+							FROM #tmpDeliveryHistoryDetail 
+							WHERE intDeliveryHistoryID = @intDeliveryHistoryId
+						)A
+						WHERE intSiteID = @intSiteId
+
+						--DELETE Delivery History Header
+						DELETE FROM tblTMDeliveryHistory
+						WHERE intDeliveryHistoryID = @intDeliveryHistoryId
+
+						---- Update forecasted nad estimated % left
+						EXEC uspTMUpdateEstimatedValuesBySite @intSiteId
+						EXEC uspTMUpdateForecastedValuesBySite @intSiteId
 					END
 				END
 				ELSE
