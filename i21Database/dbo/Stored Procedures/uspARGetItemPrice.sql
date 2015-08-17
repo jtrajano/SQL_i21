@@ -93,7 +93,7 @@ AS
 		
 	IF(@Price IS NOT NULL)
 	BEGIN
-		SET @Pricing = 'Contracts - Customer Princing'
+		SET @Pricing = 'Contracts - Customer Pricing'
 		--SELECT @Price AS 'Price', @Pricing AS 'Pricing'	
 		RETURN 1;
 	END
@@ -126,7 +126,7 @@ AS
 		
 	IF(@Price IS NOT NULL)
 	BEGIN
-		SET @Pricing = 'Contracts - Customer Princing'
+		SET @Pricing = 'Contracts - Customer Pricing'
 		--SELECT @Price AS 'Price', @Pricing AS 'Pricing'	
 		RETURN 1;
 	END	
