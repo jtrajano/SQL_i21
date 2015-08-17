@@ -2243,6 +2243,7 @@
     <Build Include="dbo\Stored Procedures\uspGRProcessTransfer.sql" />
     <Build Include="dbo\Views\vyuGRGetTransferStorageSchedule.sql" />
     <Build Include="dbo\Views\vyuGRGetTransferStorageType.sql" />
+    <Build Include="dbo\Views\vyuCFCardAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
