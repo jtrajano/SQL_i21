@@ -4,7 +4,7 @@ AS
 
 	SELECT	CH.intContractHeaderId,		CH.intContractTypeId,			CH.intConcurrencyId			AS	intHeaderConcurrencyId,					
 			CH.intCommodityId,			CH.strCustomerContract,			CH.intCommodityUOMId		AS	intCommodityUnitMeasureId,					
-			CH.intContractNumber,		CH.dtmContractDate,				CH.dblQuantity				AS	dblHeaderQuantity,
+			CH.strContractNumber,		CH.dtmContractDate,				CH.dblQuantity				AS	dblHeaderQuantity,
 			CH.dtmDeferPayDate,			CH.dblDeferPayRate,				CH.intContractTextId,			
 			CH.strInternalComments,		CH.ysnSigned,					CH.ysnPrinted,
 			CH.intSalespersonId,		CH.intGradeId,					CH.intWeightId,									

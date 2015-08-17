@@ -4,7 +4,7 @@
 SELECT ShipmentCharge.intInventoryShipmentChargeId
 	, ShipmentCharge.intInventoryShipmentId
 	, ShipmentCharge.intContractId
-	, Contract.intContractNumber
+	, Contract.strContractNumber
 	, Charge.strItemNo
 	, strItemDescription = Charge.strDescription
 	, ShipmentCharge.strCostMethod

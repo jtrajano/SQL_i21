@@ -59,9 +59,9 @@ SELECT
 -- Purchase Contract Details
 		CT.intContractDetailId,
 		CT.intContractHeaderId,
-		CT.intContractNumber,
+		CT.strContractNumber,
 		CT.intContractSeq,
-		strPContractNumber = CAST(CT.intContractNumber as VARCHAR(100)) + '/' + CAST(CT.intContractSeq AS VARCHAR(100)),
+		strPContractNumber = CAST(CT.strContractNumber as VARCHAR(100)) + '/' + CAST(CT.intContractSeq AS VARCHAR(100)),
 		CT.intItemId,
 		CT.intItemUOMId,
 		CT.strItemNo,
