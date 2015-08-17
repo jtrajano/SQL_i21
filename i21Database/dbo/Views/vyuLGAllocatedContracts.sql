@@ -24,9 +24,9 @@ SELECT
 	,ALD.intPContractDetailId
 	,ALD.dblPAllocatedQty
 	,ALD.intPUnitMeasureId
-	,PCT.intContractNumber as intPContractNumber
+	,PCT.strContractNumber as strPurchaseContractNumber
 	,PCT.intContractSeq as intPContractSeq
-	,strPContractNumber = Cast(PCT.intContractNumber as VarChar(100)) + '/' + Cast(PCT.intContractSeq as VarChar(100))
+	,strPContractNumber = Cast(PCT.strContractNumber as VarChar(100)) + '/' + Cast(PCT.intContractSeq as VarChar(100))
 	,PCT.strItemUOM as strPItemUOM
 	,PCT.strItemNo as strPItemNo
 	,PCT.strItemDescription as strPItemDescription
@@ -54,9 +54,9 @@ SELECT
 	,ALD.intSContractDetailId
 	,ALD.dblSAllocatedQty
 	,ALD.intSUnitMeasureId
-	,SCT.intContractNumber as intSContractNumber
+	,SCT.strContractNumber as intSalesContractNumber
 	,SCT.intContractSeq as intSContractSeq
-	,strSContractNumber = Cast(SCT.intContractNumber as VarChar(100)) + '/' + Cast(SCT.intContractSeq as VarChar(100))
+	,strSContractNumber = Cast(SCT.strContractNumber as VarChar(100)) + '/' + Cast(SCT.intContractSeq as VarChar(100))
 	,SCT.strItemUOM as strSItemUOM
 	,SCT.strItemNo as strSItemNo
 	,SCT.strItemDescription as strSItemDescription
