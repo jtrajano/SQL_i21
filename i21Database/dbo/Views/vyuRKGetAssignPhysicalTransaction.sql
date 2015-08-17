@@ -3,7 +3,7 @@
 AS
   SELECT *,intNoOfLots-intHedgedLots as intToBeHedgedLots FROM
  (SELECT intContractDetailId,CH.intContractHeaderId,
- CH.dtmContractDate,CH.strContractType,CH.intContractNumber ,CD.intContractSeq,
+ CH.dtmContractDate,CH.strContractType,CH.strContractNumber ,CD.intContractSeq,
  strEntityName as strCustomer,
  dblQuantity as dblQuantity,
  uc.strUnitMeasure,

@@ -43,7 +43,7 @@ BEGIN
 SELECT 
 	SICQ.intShippingInstructionId,
 	SICQ.intContractDetailId,
-	CH.intContractNumber,
+	CH.strContractNumber,
 	CT.intContractSeq,
 	EN.strName as strVendor,
 	SICQ.dblQuantity,
