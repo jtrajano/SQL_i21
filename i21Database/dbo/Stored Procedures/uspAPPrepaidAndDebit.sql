@@ -122,11 +122,13 @@ INNER JOIN
 		,C.intBillDetailId
 		,D.intContractNumber
 		,D.intContractHeaderId
+		,C.intContractDetailId
 	FROM tblAPBillDetail C
 	INNER JOIN tblCTContractHeader D ON C.intContractHeaderId = D.intContractHeaderId
 	WHERE intBillId = @billId
 	AND C.intContractDetailId IS NOT NULL
 ) CurrentBill ON B.intItemId = CurrentBill.intItemId
+				AND B.intContractDetailId = CurrentBill.intContractDetailId
 --LEFT JOIN AppliedPrepaidAndDebitMemo D ON D.intTransactionId = A.intBillId
 WHERE A.intTransactionType IN (2)
 AND A.intEntityVendorId = @vendorId

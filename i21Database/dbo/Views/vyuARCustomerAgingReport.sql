@@ -27,11 +27,11 @@ FROM
 	 , I.intTermId
 	 , T.intBalanceDue    
      , E.strName AS strCustomerName	 
-	 , strAge = CASE WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())<=10 THEN '0 - 10 Days'
-				     WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())>10 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())<=30 THEN '11 - 30 Days'
-					 WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())>30 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())<=60 THEN '31 - 60 Days'     
-					 WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())>60 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())<=90 THEN '61 - 90 Days'    
-					 WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())>90 THEN 'Over 90'     
+	 , strAge = CASE WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, I.dtmDate)<=10 THEN '0 - 10 Days'
+				     WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, I.dtmDate)>10 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, I.dtmDate)<=30 THEN '11 - 30 Days'
+					 WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, I.dtmDate)>30 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, I.dtmDate)<=60 THEN '31 - 60 Days'     
+					 WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, I.dtmDate)>60 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, I.dtmDate)<=90 THEN '61 - 90 Days'    
+					 WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, I.dtmDate)>90 THEN 'Over 90'     
 					 ELSE '0 - 10 Days' END 
 	, I.ysnPosted
 	, dblAvailableCredit = 0
@@ -59,11 +59,11 @@ SELECT I.dtmPostDate
 	 , I.intTermId
 	 , T.intBalanceDue
 	 , E.strName AS strCustomerName
-	 , strAge = CASE WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=10 THEN '0 - 10 Days'
-			         WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())>10 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=30 THEN '11 - 30 Days'
-				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())>30 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=60 THEN '31 - 60 Days'     
-				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())>60 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=90 THEN '61 - 90 Days'    
-				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())>90 THEN 'Over 90' END
+	 , strAge = CASE WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,I.dtmDate)<=10 THEN '0 - 10 Days'
+			         WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,I.dtmDate)>10 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate,I.dtmDate)<=30 THEN '11 - 30 Days'
+				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,I.dtmDate)>30 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate,I.dtmDate)<=60 THEN '31 - 60 Days'     
+				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,I.dtmDate)>60 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate,I.dtmDate)<=90 THEN '61 - 90 Days'    
+				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,I.dtmDate)>90 THEN 'Over 90' END
 	 , I.ysnPosted
 	 , dblAvailableCredit = ISNULL(I.dblAmountDue,0)
 FROM tblARInvoice I
@@ -91,11 +91,11 @@ SELECT I.dtmPostDate
 	 , ISNULL(T.intTermID, '')
      , ISNULL(T.intBalanceDue, 0)    
      , ISNULL(E.strName, '') AS strCustomerName	 
-     , strAge = CASE WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=10 THEN '0 - 10 Days'
-				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())>10 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=30 THEN '11 - 30 Days'
-				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())>30 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=60 THEN '31 - 60 Days'
-				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())>60 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())<=90 THEN '61 - 90 Days'
-				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,GETDATE())>90 THEN 'Over 90'
+     , strAge = CASE WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,I.dtmDate)<=10 THEN '0 - 10 Days'
+				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,I.dtmDate)>10 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate,I.dtmDate)<=30 THEN '11 - 30 Days'
+				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,I.dtmDate)>30 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate,I.dtmDate)<=60 THEN '31 - 60 Days'
+				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,I.dtmDate)>60 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate,I.dtmDate)<=90 THEN '61 - 90 Days'
+				     WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate,I.dtmDate)>90 THEN 'Over 90'
 				     ELSE '0 - 10 Days' END
      , ISNULL(I.ysnPosted, 1)
 	 , dblAvailableCredit = 0 
@@ -119,15 +119,15 @@ LEFT JOIN
   , dblAmountPaid
   , (dblInvoiceTotal) -(dblAmountPaid) - (dblDiscount) AS dblTotalDue
   , dblAvailableCredit
-  , CASE WHEN DATEDIFF(DAYOFYEAR,TBL.dtmDueDate,GETDATE())<=10
+  , CASE WHEN DATEDIFF(DAYOFYEAR,TBL.dtmDueDate,TBL.dtmDate)<=10
 		 THEN ISNULL((TBL.dblInvoiceTotal),0)-ISNULL((TBL.dblAmountPaid),0) ELSE 0 END dbl10Days
-  , CASE WHEN DATEDIFF(DAYOFYEAR,dtmDueDate,GETDATE())>10 AND DATEDIFF(DAYOFYEAR,TBL.dtmDueDate,GETDATE())<=30
+  , CASE WHEN DATEDIFF(DAYOFYEAR,dtmDueDate,TBL.dtmDate)>10 AND DATEDIFF(DAYOFYEAR,TBL.dtmDueDate,TBL.dtmDate)<=30
 		 THEN ISNULL((TBL.dblInvoiceTotal),0)-ISNULL((TBL.dblAmountPaid),0) ELSE 0 END dbl30Days
-  , CASE WHEN DATEDIFF(DAYOFYEAR,dtmDueDate,GETDATE())>30 AND DATEDIFF(DAYOFYEAR,TBL.dtmDueDate,GETDATE())<=60    
+  , CASE WHEN DATEDIFF(DAYOFYEAR,dtmDueDate,TBL.dtmDate)>30 AND DATEDIFF(DAYOFYEAR,TBL.dtmDueDate,TBL.dtmDate)<=60    
 		 THEN ISNULL((TBL.dblInvoiceTotal),0)-ISNULL((TBL.dblAmountPaid),0) ELSE 0 END dbl60Days
-  , CASE WHEN DATEDIFF(DAYOFYEAR,dtmDueDate,GETDATE())>60 AND DATEDIFF(DAYOFYEAR,TBL.dtmDueDate,GETDATE())<=90     
+  , CASE WHEN DATEDIFF(DAYOFYEAR,dtmDueDate,TBL.dtmDate)>60 AND DATEDIFF(DAYOFYEAR,TBL.dtmDueDate,TBL.dtmDate)<=90     
 		 THEN ISNULL((TBL.dblInvoiceTotal),0)-ISNULL((TBL.dblAmountPaid),0) ELSE 0 END dbl90Days    
-  , CASE WHEN DATEDIFF(DAYOFYEAR,dtmDueDate,GETDATE())>90      
+  , CASE WHEN DATEDIFF(DAYOFYEAR,dtmDueDate,TBL.dtmDate)>90      
 	     THEN ISNULL((TBL.dblInvoiceTotal),0)-ISNULL((TBL.dblAmountPaid),0) ELSE 0 END dbl91Days    
 FROM
 (SELECT I.strInvoiceNumber
@@ -138,6 +138,7 @@ FROM
 	  , I.dtmDueDate    
 	  , I.intEntityCustomerId
 	  , dblAvailableCredit = 0
+	  , I.dtmDate
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
 WHERE I.ysnPosted = 1
@@ -156,6 +157,7 @@ SELECT I.strInvoiceNumber
 	  , I.dtmDueDate    
 	  , I.intEntityCustomerId
 	  , dblAvailableCredit = ISNULL(I.dblAmountDue,0)
+	  , I.dtmDate
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 WHERE I.ysnPosted = 1
@@ -176,6 +178,7 @@ SELECT DISTINCT
   , ISNULL(I.dtmDueDate, GETDATE())
   , ISNULL(I.intEntityCustomerId, '')
   , dblAvailableCredit = 0
+  , I.dtmDate
 FROM tblARInvoice I 
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId	

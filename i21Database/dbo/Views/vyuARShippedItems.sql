@@ -98,7 +98,7 @@ CROSS APPLY
 	WHERE
 		ISH.[ysnPosted] = 1
 		AND ISI.[intLineNo] = SOD.[intSalesOrderDetailId]
-		AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus <> 'Cancelled'
+		AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
 		AND ISI.[intInventoryShipmentItemId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intInventoryShipmentItemId],0) FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.[intInvoiceId] = tblARInvoice.[intInvoiceId] WHERE tblARInvoice.[ysnPosted] = 1)
 	GROUP BY
 		 ISI.[intInventoryShipmentItemId]
@@ -170,7 +170,7 @@ INNER JOIN
 INNER JOIN
 	tblICItem I
 		ON SOD.[intItemId] = I.[intItemId]
-		AND I.[strType] IN ('Service','Software','Non-Inventory','Other Charge')
+		AND I.[strType] IN ('Service','Software','Non-Inventory','Other Charge','Software')
 INNER JOIN
 	tblARCustomer C
 		ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
@@ -199,7 +199,7 @@ WHERE
 	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
 		FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
 		WHERE tblARInvoice.[ysnPosted] = 1  AND tblARInvoiceDetail.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped)
-	AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus <> 'Cancelled'
+	AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
 
 	UNION ALL
 
@@ -281,7 +281,7 @@ WHERE
 	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
 		FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
 		WHERE tblARInvoice.[ysnPosted] = 1 AND tblARInvoiceDetail.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped)
-	AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus <> 'Cancelled'
+	AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
 	
 UNION ALL
 

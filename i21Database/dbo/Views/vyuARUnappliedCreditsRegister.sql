@@ -2,18 +2,19 @@
 AS
 SELECT DISTINCT 
       C.strCustomerNumber
-	, RTRIM(C.strCustomerNumber) + ' - ' + C.strName AS strName
+	, strName	   = RTRIM(C.strCustomerNumber) + ' - ' + C.strName
 	, I.intEntityCustomerId
 	, strInvoiceNumber
 	, strTransactionType	
-	, CC.strLocationName
+	, L.strLocationName
 	, dtmDate
-	, dblAmount = ISNULL(dblInvoiceTotal, 0) * -1
-	, dblUsed = ISNULL(dblPayment, 0) * -1
+	, dblAmount	   = ISNULL(dblInvoiceTotal, 0) * -1
+	, dblUsed	   = ISNULL(dblPayment, 0) * -1
 	, dblRemaining = ISNULL(dblAmountDue, 0) * -1
 	, strContact = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry)
 FROM tblARInvoice I
-	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) ON I.intEntityCustomerId = C.intEntityCustomerId
+	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) 
+		ON I.intEntityCustomerId = C.intEntityCustomerId
 	INNER JOIN tblSMCompanyLocation L ON I.intCompanyLocationId = L.intCompanyLocationId
 WHERE I.ysnPosted = 1
 AND I.ysnPaid = 0

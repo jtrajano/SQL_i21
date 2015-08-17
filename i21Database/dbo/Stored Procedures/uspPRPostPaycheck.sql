@@ -261,6 +261,31 @@ IF NOT EXISTS (SELECT strTransactionId FROM tblCMBankTransaction WHERE strTransa
 		  AND T.dblTotal > 0
 		  AND T.intPaycheckId = @intPaycheckId
 	END
+ELSE
+BEGIN
+
+	 CREATE TABLE #Accounts (intAccountId int)
+	 
+	 /* Insert paycheck earning */
+	 INSERT INTO #Accounts 
+				(intAccountId)  
+		  SELECT intAccountId 
+		    FROM tblPRPaycheckEarning
+		   WHERE intPaycheckId = @intPaycheckId
+
+     /* Insert paycheck deduction */
+	 INSERT INTO #Accounts 
+				(intAccountId)  
+		  SELECT intAccountId 
+		    FROM tblPRPaycheckDeduction
+		   WHERE intPaycheckId = @intPaycheckId
+
+	DELETE FROM tblCMBankTransactionDetail 
+	      WHERE intGLAccountId NOT IN (SELECT intAccountId FROM #Accounts)
+	
+	DROP TABLE #Accounts
+
+END
 END
 
 

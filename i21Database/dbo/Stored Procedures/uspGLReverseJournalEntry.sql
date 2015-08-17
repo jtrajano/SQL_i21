@@ -51,7 +51,7 @@ INSERT INTO [tblGLJournal]
            ,[intJournalIdToReverse])
 	SELECT @strPrefix + CONVERT(NVARCHAR(10), @intNumber)
            ,[strTransactionType]
-           ,[dtmDate]
+           ,GETDATE()
            ,[strReverseLink]
            ,[intCurrencyId]
            ,[dblExchangeRate]

@@ -715,3 +715,7 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51178) EXEC sp_dropmessa
 SET @strmessage = 'Move Lot requires a negative Adjust Qty on %s as stock for the move.'
 EXEC sp_addmessage 51178,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51179) EXEC sp_dropmessage 51179, 'us_english'	
+SET @strmessage = 'Unable to calculate the tax for %s used in %s.'
+EXEC sp_addmessage 51179,11,@strmessage,'us_english','False'
+

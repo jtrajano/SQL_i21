@@ -46,7 +46,7 @@ AS
 		,DATEADD(MONTH, @monthsToAdd, dtmDate)   --dtmNextProcess
 		,CASE WHEN dtmDate > dtmDueDate 
 			THEN 1 ELSE 0 END                    --ysnDue
-		,CONVERT(NVARCHAR(2), DAY(@startDate))   --strDayOfMonth
+		,CONVERT(NVARCHAR(2), DAY(dtmDate))      --strDayOfMonth
 		,@startDate								 --dtmStartDate
 		,DATEADD(MONTH, @monthsToAdd, @startDate)--dtmEndDate
 		,1									     --ysnActive

@@ -109,18 +109,60 @@ FROM
 Declare @incval int,
         @SouceId int,
 		@InvoiceId int;
+
+DECLARE @minId int = 0,
+        @maxId int,
+		@SuccessCount int,
+		@InvCount int,
+		@IsSuccess BIT,
+		@batchId NVARCHAR(20);
 select @total = count(*) from @InvoiceOutputTable;
 set @incval = 1 
 WHILE @incval <=@total 
 BEGIN
-
-  select @SouceId = intSourceId,@InvoiceId =intInvoiceId  from @InvoiceOutputTable where @incval = intId
-  
+     select @SouceId = intSourceId,@InvoiceId =intInvoiceId  from @InvoiceOutputTable where @incval = intId
+     
+   if @minId = 0
+   BEGIN
+      set @minId = @InvoiceId
+   END
+   if @minId != 0
+   BEGIN
+      set @maxId = @InvoiceId
+   END
    update tblTRDistributionHeader 
        set intInvoiceId = @InvoiceId
          where @SouceId = intDistributionHeaderId 
    SET @incval = @incval + 1;
+
 END;
+
+--Post the invoice that was created
+
+		
+EXEC	 [dbo].[uspARPostInvoice]
+     				@batchId = NULL,
+     				@post = 1,
+     				@recap = 0,
+     				@param = NULL,
+     				@userId = @intUserId,
+     				@beginDate = NULL,
+     				@endDate = NULL,
+     				@beginTransaction = @minId,
+     				@endTransaction = @maxId,
+     				@exclude = NULL,
+     				@successfulCount = @SuccessCount OUTPUT,
+     				@invalidCount = @InvCount OUTPUT,
+     				@success = @IsSuccess OUTPUT,
+     				@batchIdUsed = @batchId OUTPUT,
+     				@recapId = NULL,
+     				@transType = N'Invoice',
+                    @raiseError = 1
+     if @IsSuccess = 0
+     BEGIN
+        RAISERROR('Invoice did not Post', 16, 1);
+     END
+
 
 
 END TRY
