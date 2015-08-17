@@ -6,7 +6,9 @@ SELECT TOP 100 PERCENT
   ,a.intEntityId  
  ,E.strName  
  ,a.intStorageTypeId  
- ,b.strStorageTypeDescription  
+ ,b.strStorageTypeDescription
+ ,a.intStorageScheduleId
+ ,SR.strScheduleId  
  ,a.intCommodityId  
  ,CM.strCommodityCode  
  ,CM.strDescription   
@@ -19,6 +21,7 @@ FROM tblGRCustomerStorage a
 JOIN tblGRStorageType b ON b.intStorageScheduleTypeId = a.intStorageTypeId  
 JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = a.intCompanyLocationId  
 JOIN tblEntity E ON E.intEntityId = a.intEntityId  
-JOIN tblICCommodity CM ON CM.intCommodityId = a.intCommodityId  
-Where a.dblOpenBalance >0   
-ORDER BY 3,5
+JOIN tblICCommodity CM ON CM.intCommodityId = a.intCommodityId
+JOIN tblGRStorageScheduleRule SR ON SR.intStorageScheduleRuleId=a.intStorageScheduleId  
+Where a.dblOpenBalance >0 AND ISNULL(a.strStorageType,'') <> 'ITR'  
+ORDER BY a.dtmDeliveryDate

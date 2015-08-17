@@ -2240,6 +2240,9 @@
     <Build Include="dbo\Stored Procedures\uspRKGetCollateralDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetGrainBankDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetNetHedgeDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRProcessTransfer.sql" />
+    <Build Include="dbo\Views\vyuGRGetTransferStorageSchedule.sql" />
+    <Build Include="dbo\Views\vyuGRGetTransferStorageType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
