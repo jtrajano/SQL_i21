@@ -51,7 +51,7 @@ BEGIN
 	SELECT @intAACount = COUNT(1) FROM @tblTransactions WHERE strTransactionType = 'Audit Adjustment'
 	
 	SELECT strTransactionId,strTransactionType,dtmDate FROM @tblTransactions
-	SELECT CASE WHEN @intCount >0 AND @intAACount = @intCount THEN 'AA' ELSE '' END
+	SELECT CASE WHEN @intCount >0 AND @intAACount = @intCount THEN 'AA' ELSE '' END AS message
 
 END
 GO
