@@ -49,7 +49,9 @@ AS
 		ELS.strCity						AS strShipToCity,
 		ELS.strState					AS strShipToState,
 		ELS.strZipCode					AS strShipToZipCode,
-		ELS.strCountry					AS strShipToCountry		
+		ELS.strCountry					AS strShipToCountry,
+		I.intEntityId					AS intEntredById,
+		EB.strName						AS strEnteredBy
 	FROM         
 		dbo.tblARInvoice AS I 
 	INNER JOIN
@@ -84,3 +86,6 @@ AS
 	LEFT OUTER JOIN
 		dbo.tblSMCurrency CUR
 			ON I.intCurrencyId = CUR.intCurrencyID
+	LEFT OUTER JOIN
+		dbo.tblEntity AS EB 
+			ON I.[intEntityId] = EB.intEntityId 			 

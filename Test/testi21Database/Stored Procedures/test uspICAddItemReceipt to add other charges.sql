@@ -277,10 +277,14 @@ BEGIN
 				,[strCostBilledBy]				= @COST_BILLED_BY_Vendor
 				,[intContractDetailId]			= 8
 
-		INSERT INTO actual (
-			intSourceId
-			,intInventoryReceiptId
-		)
+		IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
+		BEGIN 
+			CREATE TABLE #tmpAddItemReceiptResult (
+				intSourceId INT
+				,intInventoryReceiptId INT
+			)
+		END 
+
 		EXEC dbo.uspICAddItemReceipt
 			@ReceiptDataToCreate
 			,@ReceiptOtherCharges
@@ -295,8 +299,8 @@ BEGIN
 
 		SELECT	@strReceiptNumber = tblICInventoryReceipt.strReceiptNumber
 				,@intReceiptId = tblICInventoryReceipt.intInventoryReceiptId
-		FROM	dbo.tblICInventoryReceipt INNER JOIN actual 
-					ON tblICInventoryReceipt.intInventoryReceiptId = actual.intInventoryReceiptId
+		FROM	dbo.tblICInventoryReceipt INNER JOIN #tmpAddItemReceiptResult 
+					ON tblICInventoryReceipt.intInventoryReceiptId = #tmpAddItemReceiptResult.intInventoryReceiptId
 
 		DECLARE @HasOtherCharges AS BIT 
 		SELECT TOP 1 @HasOtherCharges = 1
