@@ -49,7 +49,7 @@ END
 BEGIN
     SELECT TOP 1 @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
 	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight, @intTicketNumber = ST.intTicketNumber,
-	@dblTicketFees = ST.dblTicketFees
+	@dblTicketFees = ST.dblTicketFees, @intFreightVendorId = ST.intFreightCarrierId
 	FROM dbo.tblSCTicket ST WHERE
 	ST.intTicketId = @intTicketId
 END
@@ -239,7 +239,7 @@ BY		SC.intItemId,
 		SC.dblRate,
 		SC.intItemUOMId
 
-IF @dblTicketFreightRate > 0
+IF (@dblTicketFreightRate > 0 AND (@intFreightVendorId != null OR @ysnDeductFreightFarmer = 1))
 BEGIN
 SELECT	@intFreightItemId = ST.intFreightItemId
 FROM	dbo.tblSCScaleSetup ST	        
@@ -288,7 +288,7 @@ END
 
 IF @dblTicketFees > 0
 BEGIN
-SELECT	@intFeeItemId = ST.intFreightItemId
+SELECT	@intFeeItemId = ST.intDefaultFeeItemId
 FROM	dbo.tblSCScaleSetup ST	        
 WHERE	ST.intScaleSetupId = @intScaleStationId
 IF @intFeeItemId IS NULL 
