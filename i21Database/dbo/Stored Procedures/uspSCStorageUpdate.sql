@@ -5,6 +5,7 @@ CREATE PROCEDURE [dbo].[uspSCStorageUpdate]
 	,@intEntityId AS INT
 	,@strDistributionOption AS NVARCHAR(3)
 	,@intDPContractId AS INT
+	,@intStorageScheduleId AS INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -70,6 +71,11 @@ BEGIN TRY
 
 	SELECT @intDefaultStorageSchedule = TIC.intStorageScheduleId, @intCommodityId = TIC.intCommodityId FROM tblSCTicket TIC
 	WHERE TIC.intTicketId = @intTicketId
+
+	IF @intStorageScheduleId IS NOT NULL
+	BEGIN
+		SET @intDefaultStorageSchedule = @intStorageScheduleId
+	END
 
 	IF @intDefaultStorageSchedule is NULL
 	BEGIN
