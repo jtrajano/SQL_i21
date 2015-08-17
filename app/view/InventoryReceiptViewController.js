@@ -857,7 +857,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 });
                                 if (exists) {
                                     isValid = false;
-                                    return;
                                 }
                             });
                             if (!isValid) {
@@ -867,8 +866,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                             else
                                 action(true);
                         }
-
-                        if (app.DefaultLocation > 0) {
+                        else if (app.DefaultLocation > 0) {
                             if (app.DefaultLocation !== current.get('intLocationId')) {
                                 var result = function(button) {
                                     if (button === 'yes') {
