@@ -141,7 +141,7 @@ IF NOT EXISTS (SELECT strTransactionId FROM tblCMBankTransaction WHERE strTransa
 		WHERE E.dblTotal > 0
 		  AND E.intPaycheckId = @intPaycheckId
 
-		/* Insert Earnings into tblCMBankTransactionDetail */
+		/* Insert Employee Paid Deductions into tblCMBankTransactionDetail */
 		INSERT INTO [dbo].[tblCMBankTransactionDetail]
 			([intTransactionId]
 			,[dtmDate]
@@ -171,7 +171,61 @@ IF NOT EXISTS (SELECT strTransactionId FROM tblCMBankTransaction WHERE strTransa
 			,[dtmLastModified]			= GETDATE()
 			,[intConcurrencyId]			= 1
 		FROM tblPRPaycheckDeduction D
-		WHERE D.dblTotal > 0 
+		WHERE D.strPaidBy = 'Employee'
+		  AND D.dblTotal > 0 
+		  AND D.intPaycheckId = @intPaycheckId
+
+		/* Insert Company Paid Deductions into tblCMBankTransactionDetail */
+		INSERT INTO [dbo].[tblCMBankTransactionDetail]
+			([intTransactionId]
+			,[dtmDate]
+			,[intGLAccountId]
+			,[strDescription]
+			,[dblDebit]
+			,[dblCredit]
+			,[intUndepositedFundId]
+			,[intEntityId]
+			,[intCreatedUserId]
+			,[dtmCreated]
+			,[intLastModifiedUserId]
+			,[dtmLastModified]
+			,[intConcurrencyId])
+		SELECT
+			[intTransactionId]			= @intTransactionId
+			,[dtmDate]					= @dtmPayDate
+			,[intGLAccountId]			= D.intAccountId
+			,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = D.intAccountId)
+			,[dblDebit]					= 0
+			,[dblCredit]				= D.dblTotal
+			,[intUndepositedFundId]		= NULL
+			,[intEntityId]				= NULL
+			,[intCreatedUserId]			= @intUserId
+			,[dtmCreated]				= GETDATE()
+			,[intLastModifiedUserId]	= @intUserId
+			,[dtmLastModified]			= GETDATE()
+			,[intConcurrencyId]			= 1
+		FROM tblPRPaycheckDeduction D
+		WHERE D.strPaidBy = 'Company'
+		  AND D.dblTotal > 0 
+		  AND D.intPaycheckId = @intPaycheckId
+		UNION ALL
+		SELECT
+			[intTransactionId]			= @intTransactionId
+			,[dtmDate]					= @dtmPayDate
+			,[intGLAccountId]			= D.intExpenseAccountId
+			,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = D.intExpenseAccountId)
+			,[dblDebit]					= D.dblTotal
+			,[dblCredit]				= 0
+			,[intUndepositedFundId]		= NULL
+			,[intEntityId]				= NULL
+			,[intCreatedUserId]			= @intUserId
+			,[dtmCreated]				= GETDATE()
+			,[intLastModifiedUserId]	= @intUserId
+			,[dtmLastModified]			= GETDATE()
+			,[intConcurrencyId]			= 1
+		FROM tblPRPaycheckDeduction D
+		WHERE D.strPaidBy = 'Company'
+		  AND D.dblTotal > 0 
 		  AND D.intPaycheckId = @intPaycheckId
 
 		/* Insert Employee Taxes into tblCMBankTransactionDetail */
