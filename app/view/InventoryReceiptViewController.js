@@ -1741,25 +1741,35 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 if (costTypes) {
                     if (costTypes.length > 0) {
                         costTypes.forEach(function(cost){
-                            var newCost = Ext.create('Inventory.model.ReceiptCharge', {
-                                intInventoryReceiptId : receipt.get('intInventoryReceiptId'),
-                                intContractId : po.get('intContractHeaderId'),
-                                intChargeId : cost.intItemId,
-                                ysnInventoryCost : false,
-                                strCostMethod : cost.strCostMethod,
-                                dblRate : cost.dblRate,
-                                intCostUOMId : cost.intItemUOMId,
-                                intEntityVendorId : cost.intVendorId,
-                                dblAmount : 0,
-                                strAllocateCostBy : '',
-                                strCostBilledBy : 'Vendor',
-
-                                strItemNo : cost.strItemNo,
-                                strCostUOM : cost.strUOM,
-                                strVendorId : cost.strVendorName,
-                                intContractNumber : po.get('intContractNumber')
+                            var charges = receipt.tblICInventoryReceiptCharges().data.items;
+                            var exists = Ext.Array.findBy(charges, function (row) {
+                                if ((row.get('intContractId') === po.get('intContractHeaderId')
+                                    && row.get('intChargeId') === cost.intItemId)) {
+                                    return true;
+                                }
                             });
-                            receipt.tblICInventoryReceiptCharges().add(newCost);
+
+                            if (!exists) {
+                                var newCost = Ext.create('Inventory.model.ReceiptCharge', {
+                                    intInventoryReceiptId : receipt.get('intInventoryReceiptId'),
+                                    intContractId : po.get('intContractHeaderId'),
+                                    intChargeId : cost.intItemId,
+                                    ysnInventoryCost : false,
+                                    strCostMethod : cost.strCostMethod,
+                                    dblRate : cost.dblRate,
+                                    intCostUOMId : cost.intItemUOMId,
+                                    intEntityVendorId : cost.intVendorId,
+                                    dblAmount : 0,
+                                    strAllocateCostBy : '',
+                                    strCostBilledBy : 'Vendor',
+
+                                    strItemNo : cost.strItemNo,
+                                    strCostUOM : cost.strUOM,
+                                    strVendorId : cost.strVendorName,
+                                    intContractNumber : po.get('intContractNumber')
+                                });
+                                receipt.tblICInventoryReceiptCharges().add(newCost);
+                            }
                         });
                     }
                 }
