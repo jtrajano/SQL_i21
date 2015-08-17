@@ -842,6 +842,32 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                     //Validate Logged in User's default location against the selected Location for the receipt
                     if (current.get('strReceiptType') !== 'Direct') {
+                        //Validate recurring instances of Inbound Shipment Container Line Items
+                        if (current.get('strReceiptType') === 'Purchase Contract' && current.get('intSourceType') === 2) {
+                            var receiptItems = current.tblICInventoryReceiptItems().data.items;
+                            var isValid = true;
+                            Ext.Array.each(receiptItems, function(item) {
+                                var exists = Ext.Array.findBy(receiptItems, function (row) {
+                                    if ((row.get('intSourceId') === item.get('intSourceId')
+                                        && row.get('intContainerId') === item.get('intContainerId')
+                                        && (!iRely.Functions.isEmpty(item.get('intContainerId')) && item.get('intContainerId') !== -1))
+                                        && row.get('intInventoryReceiptItemId') !== item.get('intInventoryReceiptItemId')) {
+                                        return true;
+                                    }
+                                });
+                                if (exists) {
+                                    isValid = false;
+                                    return;
+                                }
+                            });
+                            if (!isValid) {
+                                iRely.Functions.showErrorDialog('This information is already selected. Please select a different container.');
+                                action(false);
+                            }
+                            else
+                                action(true);
+                        }
+
                         if (app.DefaultLocation > 0) {
                             if (app.DefaultLocation !== current.get('intLocationId')) {
                                 var result = function(button) {
@@ -1099,6 +1125,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     computeItemTax: function(itemTaxes, me, reset) {
         var win = me.getView();
         var currentRecord = win.viewModel.data.currentReceiptItem;
+
+        if (!currentRecord) { return; }
+
         var totalItemTax,
             qtyOrdered = currentRecord.get('dblOpenReceive'),
             itemPrice = currentRecord.get('dblUnitCost');
