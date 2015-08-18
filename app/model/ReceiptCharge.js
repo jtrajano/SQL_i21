@@ -45,7 +45,7 @@ Ext.define('Inventory.model.ReceiptCharge', {
         { name: 'strCostUOM', type: 'string' },
         { name: 'strUnitType', type: 'string' },
         { name: 'strVendorId', type: 'string' },
-        { name: 'intContractNumber', type: 'int', allowNull: true }
+        { name: 'strContractNumber', type: 'string' }
     ],
 
     validators: [

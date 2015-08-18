@@ -2133,7 +2133,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     xtype: 'gridcombobox',
                                                                     columns: [
                                                                         {
-                                                                            dataIndex: 'intContractNumber',
+                                                                            dataIndex: 'strContractNumber',
                                                                             dataType: 'string',
                                                                             text: 'Contract Number',
                                                                             flex: 1
@@ -2146,8 +2146,8 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         
                                                                     ],
                                                                     itemId: 'cboContract',
-                                                                    displayField: 'intContractNumber',
-                                                                    valueField: 'intContractNumber'
+                                                                    displayField: 'strContractNumber',
+                                                                    valueField: 'strContractNumber'
                                                                 }
                                                             },
                                                             {

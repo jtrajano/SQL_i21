@@ -4494,23 +4494,23 @@
                                                             "userConfig": {
                                                                 "columns": [
                                                                     "[",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'intContractNumber',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Contract Number',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'intContractHeaderId',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\thidden: true",
-                                                                    "\t},",
+                                                                    "{",
+                                                                    "dataIndex: 'strContractNumber',",
+                                                                    "dataType: 'string',",
+                                                                    "text: 'Contract Number',",
+                                                                    "flex: 1",
+                                                                    "},",
+                                                                    "{",
+                                                                    "dataIndex: 'intContractHeaderId',",
+                                                                    "dataType: 'numeric',",
+                                                                    "hidden: true",
+                                                                    "},",
                                                                     "]"
                                                                 ],
                                                                 "designer|createAlias": "gridcombobox",
-                                                                "displayField": "intContractNumber",
+                                                                "displayField": "strContractNumber",
                                                                 "itemId": "cboContract",
-                                                                "valueField": "intContractNumber"
+                                                                "valueField": "strContractNumber"
                                                             },
                                                             "name": "MyComboBox22",
                                                             "configAlternates": {

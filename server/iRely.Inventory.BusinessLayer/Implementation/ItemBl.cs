@@ -1,15 +1,10 @@
 ﻿using iRely.Common;
-
-using System;
+using iRely.Inventory.Model;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.Entity;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-
-using iRely.Inventory.Model;
 
 namespace iRely.Inventory.BusinessLayer
 {

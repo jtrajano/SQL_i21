@@ -3695,7 +3695,7 @@
                                                         "columns": [
                                                             "[",
                                                             "\t{",
-                                                            "\t\tdataIndex: 'intContractNumber',",
+                                                            "\t\tdataIndex: 'strContractNumber',",
                                                             "\t\tdataType: 'string',",
                                                             "\t\ttext: 'Contract Number',",
                                                             "\t\tflex: 1",
@@ -3708,9 +3708,9 @@
                                                             "]"
                                                         ],
                                                         "designer|createAlias": "gridcombobox",
-                                                        "displayField": "intContractNumber",
+                                                        "displayField": "strContractNumber",
                                                         "itemId": "cboContract",
-                                                        "valueField": "intContractNumber"
+                                                        "valueField": "strContractNumber"
                                                     },
                                                     "name": "MyComboBox22",
                                                     "configAlternates": {
