@@ -2244,6 +2244,8 @@
     <Build Include="dbo\Views\vyuGRGetTransferStorageSchedule.sql" />
     <Build Include="dbo\Views\vyuGRGetTransferStorageType.sql" />
     <Build Include="dbo\Views\vyuCFCardAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryReceiptTaxes.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostInventoryReceiptTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
