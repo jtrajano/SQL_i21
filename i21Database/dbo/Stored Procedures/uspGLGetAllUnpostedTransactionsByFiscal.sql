@@ -11,7 +11,7 @@ BEGIN
 	SET NOCOUNT ON;
 	DECLARE @blnLegacyIntegration BIT = 0
 	DECLARE @tblTransactions TABLE(
-		strTransactionId NVARCHAR(20),
+		strTransactionId NVARCHAR(50),
 		strTransactionType NVARCHAR(25),
 		dtmDate DATETIME
 	)
