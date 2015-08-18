@@ -19,7 +19,7 @@ AS
 			ENP.intDefaultLocationId as intPDefaultLocationId,
 
 			AD.intSContractDetailId,
-			CHS.strContractNumber as intSalesContractNumber,
+			CHS.strContractNumber as strSalesContractNumber,
 			CDS.intContractSeq as intSContractSeq,
 			CHS.intEntityId AS intSEntityId,
 			CDS.intCompanyLocationId AS intSCompanyLocationId,

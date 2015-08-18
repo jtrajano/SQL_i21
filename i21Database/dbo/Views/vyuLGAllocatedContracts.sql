@@ -54,7 +54,7 @@ SELECT
 	,ALD.intSContractDetailId
 	,ALD.dblSAllocatedQty
 	,ALD.intSUnitMeasureId
-	,SCT.strContractNumber as intSalesContractNumber
+	,SCT.strContractNumber as strSalesContractNumber
 	,SCT.intContractSeq as intSContractSeq
 	,strSContractNumber = Cast(SCT.strContractNumber as VarChar(100)) + '/' + Cast(SCT.intContractSeq as VarChar(100))
 	,SCT.strItemUOM as strSItemUOM
