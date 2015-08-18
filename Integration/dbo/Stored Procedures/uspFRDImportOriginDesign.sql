@@ -643,7 +643,7 @@ BEGIN
 
 				WHILE EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId < @tot AND intRowDetailId > @tod AND intRowDetailId > @ROW AND glfsf_action_type IN (''PRN'',''ACP'',''GRP''))
 						OR EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId < @tot				-- id less than the total id number
-																			   AND intRowDetailId > @row				-- current row - WHERE it is
+																			   AND intRowDetailId > @ROW				-- current row - WHERE it is
 																			   AND glfsf_action_type IN (''TOT'')			-- sum tots not anything else
 																			   AND intRowDetailId > @totprior			-- makes sure you do not go above an equal or greater tot number
 																			)											-- prevents it FROM doing anything after total
@@ -655,7 +655,7 @@ BEGIN
 																					AND intRowDetailId > @totprior
 					SELECT @adder = NULL
 					SELECT @adderintrowdetailid = NULL
-					SELECT @adder = intRefNo, @adderintrowdetailid = intRowDetailId, @strBalanceSide = strBalanceSide, @glfsf_tot_no = glfsf_tot_no FROM #irelyloadFRRowDesign WHERE intRowDetailId = @row
+					SELECT @adder = intRefNo, @adderintrowdetailid = intRowDetailId, @strBalanceSide = strBalanceSide, @glfsf_tot_no = glfsf_tot_no FROM #irelyloadFRRowDesign WHERE intRowDetailId = @ROW
 					SELECT @maxbeforetot = ISNULL(MAX(glfsf_tot_no),0) FROM #irelyloadFRRowDesign WHERE intRowDetailId > @ROW AND intRowDetailId < @tot
 
 					IF(@TotalSide = '''')
@@ -690,7 +690,7 @@ BEGIN
 
 						--INCOME STATEMENT CHANGING OF SIDE
 						SELECT @strBalanceSide = strBalanceSide FROM #irelyloadFRRowDesign WHERE intRowDetailId = (SELECT MIN(intRowDetailId) FROM #irelyloadFRRowDesign WHERE ((glfsf_action_type IN (''PRN'',''ACP'',''GRP'',''GRA'') AND intRowDetailId > @tod) OR (glfsf_action_type = ''TOT'' AND glfsf_tot_no < @totno AND intRowDetailId > @totprior AND glfsf_tot_no=@maxbeforetot))
-																															AND intRowDetailId > @row
+																															AND intRowDetailId > @ROW
 																															AND intRowDetailId < @tot
 																															AND intRowDetailId > @totprior)
 						IF(@strBalanceSide = ''Debit'' AND @glfsf_stmt_type = ''I'')
@@ -705,7 +705,7 @@ BEGIN
 						END						
 					END
 
-					SELECT @rowold = @row
+					SELECT @rowold = @ROW
 					SELECT @upper = (@upper + 1)
 				END
 
