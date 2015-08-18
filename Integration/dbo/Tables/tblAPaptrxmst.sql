@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblAPaptrxmst] (
     [aptrx_vnd_no]       CHAR (10)       NOT NULL,
-    [aptrx_ivc_no]       CHAR (26)       NOT NULL,
+    [aptrx_ivc_no]       CHAR (50)       NOT NULL,
     [aptrx_sys_rev_dt]   INT             NOT NULL,
     [aptrx_sys_time]     INT             NOT NULL,
     [aptrx_cbk_no]       CHAR (2)        NOT NULL,

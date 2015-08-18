@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblAPapivcmst](
 	[apivc_vnd_no] [char](10) NOT NULL,
-	[apivc_ivc_no] [char](26) NOT NULL,
+	[apivc_ivc_no] [char](50) NOT NULL,
 	[apivc_status_ind] [char](1) NOT NULL,
 	[apivc_cbk_no] [char](2) NOT NULL,
 	[apivc_chk_no] [char](8) NOT NULL,
