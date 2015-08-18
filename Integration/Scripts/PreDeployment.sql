@@ -136,6 +136,7 @@
 :r "..\dbo\Functions\fnTMGetSalesTax.sql"
 :r "..\dbo\Functions\fnTMGetContractForCustomer.sql"
 :r "..\dbo\Functions\fnTMGetSpecialPricing.sql"
+:r "..\dbo\Functions\fnTMGetSpecialPricingPrice.sql"
 :r "..\dbo\Stored Procedures\uspTMImportTankMonitorReading.sql"
 :r "..\dbo\Views\vyuTMLeaseCode.sql"
 :r "..\dbo\Stored Procedures\uspTMAlterCobolWrite.sql"

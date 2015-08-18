@@ -21,15 +21,14 @@ UPDATE tblRMDatasource
 SET strQuery = '
 SELECT DISTINCT  
 A.intCustomerID
-,ISNULL(K.vwprc_factor,((CASE WHEN B.vwcus_prc_lvl = 1 THEN G.vwitm_un_prc1 
-					   WHEN B.vwcus_prc_lvl = 2 THEN G.vwitm_un_prc2
-					   WHEN B.vwcus_prc_lvl = 3 THEN G.vwitm_un_prc3
-					   WHEN B.vwcus_prc_lvl = 4 THEN G.vwitm_un_prc4
-					   WHEN B.vwcus_prc_lvl = 5 THEN G.vwitm_un_prc5
-					   WHEN B.vwcus_prc_lvl = 6 THEN G.vwitm_un_prc6
-					   WHEN B.vwcus_prc_lvl = 7 THEN G.vwitm_un_prc7
-					   WHEN B.vwcus_prc_lvl = 8 THEN G.vwitm_un_prc8
-					   WHEN B.vwcus_prc_lvl = 9 THEN G.vwitm_un_prc9 END)+ ISNULL(C.dblPriceAdjustment,0.0)))  AS dblProductCost
+,COALESCE(F.dblPrice,dbo.[fnTMGetSpecialPricingPrice](
+		B.vwcus_key
+		,G.vwitm_no
+		,CAST(C.strLocation AS NVARCHAR(5))
+		,G.vwitm_class
+		,(CASE WHEN F.dtmCallInDate IS NULL THEN GETDATE() ELSE F.dtmCallInDate END)
+		,(CASE WHEN F.dblMinimumQuantity IS NULL THEN COALESCE(F.dblQuantity,1.00) ELSE F.dblMinimumQuantity END)
+		,NULL)) AS dblProductCost
 , rtrim(ltrim(B.vwcus_last_name)) as agcus_last_name
 , rtrim(ltrim(B.vwcus_first_name)) as agcus_first_name
 ,(Case WHEN B.vwcus_first_name IS NULL OR B.vwcus_first_name = ''''  THEN
@@ -163,7 +162,7 @@ End) as [SiteDeliveryDD]
 ,CAST((CASE WHEN F.intDispatchID IS NULL THEN 0 ELSE 1 END) AS BIT) AS ysnPending
 FROM 
 	tblTMCustomer A inner join vwcusmst B on A.intCustomerNumber = B.A4GLIdentity 
-	LEFT JOIN tblTMSite C ON A.intCustomerID = C.intCustomerID
+	INNER JOIN tblTMSite C ON A.intCustomerID = C.intCustomerID
 			           LEFT JOIN tblTMDispatch F ON C.intSiteID = F.intSiteID
                            LEFT JOIN vwitmmst G ON C.intProduct = G.A4GLIdentity
 							LEFT JOIN tblTMClock H ON H.intClockID = C.intClockID

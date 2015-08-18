@@ -278,5 +278,6 @@
     <None Include="dbo\Stored Procedures\uspAPCreateMissingPaymentOfBills.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateSiteOrderView.sql" />
     <None Include="dbo\Stored Procedures\uspTMAlterCobolWrite.sql" />
+    <None Include="dbo\Functions\fnTMGetSpecialPricingPrice.sql" />
   </ItemGroup>
 </Project>
