@@ -84,8 +84,8 @@ BEGIN
 		DECLARE @hdr VARCHAR(10)
 		DECLARE @introwiddet INT
 		DECLARE @insertload VARCHAR(max)
-		DECLARE @glfsf_stmt_type VARCHAR(50)		
-		DECLARE @@glfsf_no_to_convert VARCHAR(50)		
+		DECLARE @glfsf_stmt_type VARCHAR(50)
+		DECLARE @@glfsf_no_to_convert VARCHAR(50)
 
 		SET @result = ''Successful''
 		SELECT @hdr= ''''''''+''HDR''+''''''''
@@ -269,21 +269,13 @@ BEGIN
 			--SELECT @SQL --debug
 			EXEC (@SQL)
 
+			--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+			--								ACP / ACA / NET
+			--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + '' [ID] = '' + '''''''' + ''+'' +
 							+ '''''''' + '''''''' + '''''''' + '''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8) +'' + '''''''' + ''-'' + '''''''' + ''+ CASE WHEN LEN(acct9_16) = 1 THEN replicate(''''0'''',('' + @9_16size + '')-1)+acct9_16 ELSE convert (varchar('' + @9_16size + ''),acct9_16) END '' + ''+'' + '''''''' + '''''''' + '''''''' + '''''''' + 
-							''WHERE glfsf_action_type in ('' +
-							'''''''' + ''ACP'' + '''''''' + '','' +
-							'''''''' + ''GRA'' + '''''''' + '','' +
-							'''''''' + ''ACA'' + '''''''' + '')''
-
-			--SELECT @SQL --debug
-			EXEC (@SQL)
-
-			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + ''[Primary Account] Between '' 
-							+ '''''''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''''''''''' + '' AND ''
-							+ '''''''''''''''' + ''+ convert (varchar('' + @1_8size + ''),acct1_8end)'' + '' + ''''''''''''''''''
-							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRP'' + ''''''''
-			
+							''WHERE glfsf_action_type in ('' + '''''''' + ''ACP'' + '''''''' + '','' + '''''''' + ''ACA'' + '''''''' + '')''
 			--SELECT @SQL --debug
 			EXEC (@SQL)
 
@@ -293,50 +285,6 @@ BEGIN
 			--SELECT @SQL --debug
 			EXEC (@SQL)
 
-			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + '' [Type] = '' + '''''''''''' + ''Revenue'' + '''''''''''' + '' Or [Type] = '' + '''''''''''' + ''Expense'' + ''''''''''''''''
-							+ '' WHERE glfsf_action_type='' + '''''''' + ''NET'' + ''''''''
-			--SELECT @SQL --debug
-			EXEC (@SQL)
-
-			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + ''[Primary Account] Between '' 
-							+ '''''''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''''''''''' + '' AND ''
-							+ '''''''''''''''' + ''+ convert (varchar('' + @1_8size + ''),acct1_8end)'' + '' + ''''''''''''''''''
-							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRP'' + '''''''' + '' AND acct9_16 like '' + '''''''' + ''%*%'' + ''''''''			
-			--SELECT @SQL --debug
-			EXEC (@SQL)
-
-			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + ''[ID] Between '' + '''''''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''' + ''-'' + '''''''' 
-							+ ''+convert (varchar('' + @9_16size + ''),acct9_16) +'' + '''''''''''''''' + '' AND '' + '''''''''''''''' 
-							+ ''+convert (varchar('' + @1_8size + ''),acct1_8end)+'' + '''''''' + ''-'' + '''''''' 
-							+ ''+convert (varchar('' + @9_16size + ''),acct9_16) '' + '' + ''''''''''''''''''
-							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRA'' + '''''''' + '' AND glfsf_action_crl != '' + '''''''' + ''E'' + '''''''' + '' AND acct9_16 like '' + '''''''' + ''%*%'' + ''''''''
-			--SELECT @SQL --debug
-			exec (@SQL)			
-
-			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + ''[Primary Account] Between '' 
-							+ '''''''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''''''''''' + '' AND ''
-							+ '''''''''''''''' + ''+ convert (varchar('' + @1_8size + ''),acct1_8end)'' + '' + ''''''''''''''''''
-							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRA'' + '''''''' + '' AND glfsf_action_crl = '' + '''''''' + ''E'' + '''''''' + '' AND acct9_16 like '' + '''''''' + ''%*%'' + ''''''''			
-			--SELECT @SQL --debug
-			EXEC (@SQL)
-
-			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + ''[Primary Account] Between '' 
-							+ '''''''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''''''''''' + '' AND ''
-							+ '''''''''''''''' + ''+ convert (varchar('' + @1_8size + ''),acct1_8end)+ '' + '''''''''''''''' + '' Or [Location] = ''							
-							+ '''''''''''''''' + ''+ convert (varchar('' + @9_16size + ''),acct9_16) '' + '' + ''''''''''''''''''
-							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRA'' + '''''''' + '' AND glfsf_action_crl = '' + '''''''' + ''E'' + '''''''' + '' AND acct9_16 not like '' + '''''''' + ''%*%'' + ''''''''			
-			--SELECT @SQL --debug
-			EXEC (@SQL)  
-
-			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + '' [ID] = '' + '''''''''''''''' + ''+'' + ''full_account+ '' + '''''''''''''''''''' + 
-							+ '' WHERE glfsf_action_type='' + '''''''' + ''GRA'' + '''''''' + '' AND glfsf_action_crl = '' + '''''''' + ''E'' + '''''''' 
-							+ '' AND acct9_16 not like '' + '''''''' + ''%*%'' + '''''''' + '' AND '' +		
-							+ '''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''''''' + '' = ''
-							+ '''''''''''' + ''+ convert (varchar('' + @1_8size + ''),acct1_8end)+ '' +  ''''''''''''							
-
-			--SELECT @SQL --debug
-			EXEC (@SQL)  
-
 			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + ''[ID] Between '' + '''''''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''' + ''-'' + '''''''' 
 							+ ''+convert (varchar('' + @9_16size + ''),acct9_16) +'' + '''''''''''''''' + '' AND '' + '''''''''''''''' 
 							+ ''+convert (varchar('' + @1_8size + ''),acct1_8end)+'' + '''''''' + ''-'' + '''''''' 
@@ -344,6 +292,38 @@ BEGIN
 							+ '' WHERE glfsf_action_type='' + '''''''' + ''ACA'' + '''''''' + '' AND acct9_16 like '' + '''''''' + ''%*%'' + ''''''''
 			--SELECT @SQL --debug
 			exec (@SQL)
+
+			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + '' [Type] = '' + '''''''''''' + ''Revenue'' + '''''''''''' + '' Or [Type] = '' + '''''''''''' + ''Expense'' + ''''''''''''''''
+							+ '' WHERE glfsf_action_type='' + '''''''' + ''NET'' + ''''''''
+			--SELECT @SQL --debug
+			EXEC (@SQL)
+
+
+			--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+			--									GRP / GRA
+			--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + ''[Primary Account] Between '' 
+							+ '''''''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''''''''''' + '' AND ''
+							+ '''''''''''''''' + ''+ convert (varchar('' + @1_8size + ''),acct1_8end)'' + '' + ''''''''''''''''''
+							+ '' WHERE glfsf_action_type in ('' + '''''''' + ''GRP'' + '''''''' + '','' + '''''''' + ''GRA'' + '''''''' + '')'' + '' AND acct9_16 like '' + '''''''' + ''%*%'' + ''''''''			
+			--SELECT @SQL --debug
+			EXEC (@SQL)
+
+			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + ''[ID] Between '' + '''''''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''' + ''-'' + '''''''' 
+							+ ''+convert (varchar('' + @9_16size + ''),acct9_16) +'' + '''''''''''''''' + '' AND '' + '''''''''''''''' 
+							+ ''+convert (varchar('' + @1_8size + ''),acct1_8end)+'' + '''''''' + ''-'' + '''''''' 
+							+ ''+convert (varchar('' + @9_16size + ''),acct9_16) '' + '' + ''''''''''''''''''
+							+ '' WHERE glfsf_action_type in ('' + '''''''' + ''GRP'' + '''''''' + '','' + '''''''' + ''GRA'' + '''''''' + '')'' + '' AND acct9_16 not like '' + '''''''' + ''%*%'' + ''''''''
+			--SELECT @SQL --debug
+			EXEC (@SQL)
+
+			SELECT @SQL= ''update #irelyloadFRRowDesign set strAccountsUsed='' + '''''''' + '' [ID] = '' + '''''''''''''''' + ''+'' + ''full_account+ '' + '''''''''''''''''''' + 
+							+ '' WHERE glfsf_action_type in ('' + '''''''' + ''GRP'' + '''''''' + '','' + '''''''' + ''GRA'' + '''''''' + '')'' + '' AND acct9_16 not like '' + '''''''' + ''%*%'' + '''''''' + '' AND '' +		
+							+ '''''''''''' + ''+'' + ''convert (varchar('' + @1_8size + ''),acct1_8)+ '' + '''''''''''' + '' = ''
+							+ '''''''''''' + ''+ convert (varchar('' + @1_8size + ''),acct1_8end)+ '' +  ''''''''''''							
+
+			--SELECT @SQL --debug
+			EXEC (@SQL)  
 
 
 			--=====================================================================================================================================
@@ -400,7 +380,7 @@ BEGIN
 
 			UPDATE #irelyloadFRRowDesign SET rowidupdated = -1
 
-			DECLARE @row INT = 0
+			DECLARE @ROW INT = 0
 			DECLARE @INTROWIDMOVER INT = 0
 			DECLARE @rownumber INT
 			DECLARE @intrefno1 INT
@@ -414,8 +394,8 @@ BEGIN
 					SELECT @intrefno1 = MIN(intRefNo) FROM #irelyloadFRRowDesign WHERE intRowId = @rownumber AND rowidupdated = -1
 					SELECT @INTROWIDMOVER = MIN(intRowDetailId) FROM #irelyloadFRRowDesign WHERE rowidupdated = -1 AND intRowId = @rownumber AND @intrefno1 = intRefNo
 
-				UPDATE #irelyloadFRRowDesign SET intRefNo = @row, rowidupdated = 1 WHERE intRowDetailId = @INTROWIDMOVER
-				SELECT @row = @row + 1
+				UPDATE #irelyloadFRRowDesign SET intRefNo = @ROW, rowidupdated = 1 WHERE intRowDetailId = @INTROWIDMOVER
+				SELECT @ROW = @ROW + 1
 				END
 			END
 
@@ -458,21 +438,6 @@ BEGIN
 				INNER JOIN tblGLAccountGroup 
 					ON tblGLAccount.intAccountGroupId = tblGLAccountGroup.intAccountGroupId
 			WHERE #irelyloadFRRowDesign.strBalanceSide IS NULL
-
-			UPDATE #irelyloadFRRowDesign
-					SET #irelyloadFRRowDesign.strBalanceSide = 
-					CASE 
-						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Asset'' THEN ''Debit''
-						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Equity'' THEN ''Credit''
-						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Expense'' THEN ''Debit''
-						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Liability'' THEN ''Credit''
-						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Revenue'' THEN ''Credit''
-						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Sales'' THEN ''Credit''
-						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Cost of Goods Sold'' THEN ''Debit''
-						ELSE NULL
-					END
-			FROM #irelyloadFRRowDesign 
-			WHERE #irelyloadFRRowDesign.strBalanceSide IS NULL AND #irelyloadFRRowDesign.isprimary = ''YES''
 		
 			UPDATE #irelyloadFRRowDesign
 					SET #irelyloadFRRowDesign.strBalanceSide = 
@@ -493,10 +458,25 @@ BEGIN
 					ON tblGLAccountSegment.intAccountGroupId = tblGLAccountGroup.intAccountGroupId
 			WHERE #irelyloadFRRowDesign.strBalanceSide IS NULL
 
+			UPDATE #irelyloadFRRowDesign
+					SET #irelyloadFRRowDesign.strBalanceSide = 
+					CASE 
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Asset'' THEN ''Debit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Equity'' THEN ''Credit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Expense'' THEN ''Debit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Liability'' THEN ''Credit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Revenue'' THEN ''Credit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Sales'' THEN ''Credit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Cost of Goods Sold'' THEN ''Debit''
+						ELSE NULL
+					END
+			FROM #irelyloadFRRowDesign 
+			WHERE #irelyloadFRRowDesign.strBalanceSide IS NULL AND #irelyloadFRRowDesign.isprimary = ''YES''
+
 			UPDATE #irelyloadFRRowDesign SET strDescription = ''none'' WHERE strDescription IS NULL AND strRowType IN (''Hidden'',''Row Calculation'',''Filter Accounts'')
 			UPDATE #irelyloadFRRowDesign SET strBalanceSide = ''Debit'' WHERE strBalanceSide = ''D''
 			UPDATE #irelyloadFRRowDesign SET strBalanceSide = ''Credit'' WHERE strBalanceSide = ''C''
-
+			
 			--=====================================================================================================================================
 			-- 	BUILDING DETAILS 3
 			---------------------------------------------------------------------------------------------------------------------------------------
@@ -541,24 +521,35 @@ BEGIN
 			DECLARE @min INT
 			DECLARE @minprior INT = 0
 			DECLARE @change INT
-			DECLARE @curr INT
 			DECLARE @intrefno INT
 			DECLARE @increment INT
 			DECLARE @introwdetailidint INT 
 			DECLARE @rowcurr INT 
 			DECLARE @strBalanceSide VARCHAR(50)
+			DECLARE @TotalSide VARCHAR(50)
+			DECLARE @min_previous INT = 0
 
 			WHILE EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId > @minprior AND glfsf_action_type = ''PRN'' AND strRelatedRows IS NULL)
 			BEGIN
 				SELECT @min = MIN(intRowDetailId) FROM #irelyloadFRRowDesign WHERE intRowDetailId > @minprior AND glfsf_action_type = ''PRN'' AND strRelatedRows IS NULL		
 				SELECT @change = (@min - 1)
-				SELECT @curr = (@curr + 1)
 				SELECT @increment = 1
 				SELECT @strBalanceSide = ''''
-				
-				WHILE EXISTS(SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId = @change AND (glfsf_action_type = ''GRA'' OR glfsf_action_type = ''ACA'' OR glfsf_action_type = ''NET''))
-				BEGIN					
-					SELECT @intrefno = intRefNo, @introwdetailidint = intRowDetailId, @strBalanceSide = strBalanceSide FROM #irelyloadFRRowDesign WHERE intRowDetailId = @change
+				SELECT @TotalSide = ''''	
+
+				SELECT @introwdetailidint = MIN(intRowDetailId) FROM #irelyloadFRRowDesign WHERE intRowDetailId > @min_previous AND intRowDetailId <= @min AND (glfsf_action_type = ''GRA'' OR glfsf_action_type = ''ACA'' OR glfsf_action_type = ''NET'')
+
+				WHILE EXISTS(SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId >= @introwdetailidint AND intRowDetailId <= @min AND (glfsf_action_type = ''GRA'' OR glfsf_action_type = ''ACA'' OR glfsf_action_type = ''NET''))
+				BEGIN
+					SELECT @introwdetailidint = intRowDetailId, @intrefno = intRefNo, @min_previous = intRowDetailId, @strBalanceSide = strBalanceSide FROM #irelyloadFRRowDesign WHERE intRowDetailId = @introwdetailidint
+
+					--SELECT * FROM #irelyloadFRRowDesign WHERE intRowDetailId = @introwdetailidint
+
+					IF(@TotalSide = '''')
+					BEGIN
+						SET @TotalSide = @strBalanceSide
+					END
+
 					IF EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId = @min AND strRelatedRows IS NOT NULL)
 					BEGIN
 						--INCOME STATEMENT CHANGING OF SIDE
@@ -569,15 +560,19 @@ BEGIN
 						ELSE
 						BEGIN
 							UPDATE #irelyloadFRRowDesign SET strRelatedRows = strRelatedRows  + '' +'' WHERE intRowDetailId = @min
-						END
+						END			
+					END
+
+					IF(@TotalSide != @strBalanceSide)
+					BEGIN
+						SET @TotalSide = ''MIXED''
 					END
 
 					UPDATE #irelyloadFRRowDesign SET strRelatedRows = ISNULL(strRelatedRows,'''') + '' R'' + RTRIM(CONVERT(varchar(10),(@intrefno)))  WHERE intRowDetailId = @min
 					SELECT @rowcurr = intRowId FROM #irelyloadFRRowDesign WHERE intRowDetailId = @min
 
 					--INCOME STATEMENT CHANGING OF SIDE
-					SELECT @strBalanceSide = strBalanceSide FROM #irelyloadFRRowDesign WHERE intRowDetailId = (@change - 1)
-					IF EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId = @min AND strRelatedRows IS NOT NULL)
+					IF EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId = @min)
 					BEGIN
 						IF(@strBalanceSide = ''Debit'' AND @glfsf_stmt_type = ''I'')
 						BEGIN
@@ -598,9 +593,19 @@ BEGIN
 					
 					SELECT @change = (@change - 1)
 					SELECT @increment = (@increment + 1)
+					SELECT @introwdetailidint = (@introwdetailidint + 1)
 				END
 
 				UPDATE #irelyloadFRRowDesign SET strRelatedRows = '''' WHERE intRowDetailId = @min AND strRelatedRows IS NULL
+
+				IF(@TotalSide != ''MIXED'')
+				BEGIN
+					UPDATE #irelyloadFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,''-'',''+'') WHERE intRowDetailId = @min
+					UPDATE #irelyloaddesigncalc SET strAction = REPLACE(strAction,''-'',''+'') WHERE intRowId = @rowcurr and intRefNoId = @min
+				END
+
+				SET @min_previous = @min
+
 			END
  
 
@@ -617,6 +622,7 @@ BEGIN
 			DECLARE @totprior INT 
 			DECLARE @upper INT 
 			DECLARE @maxbeforetot INT
+			DECLARE @glfsf_tot_no INT			
 
 			SELECT @row = 0
 
@@ -633,8 +639,9 @@ BEGIN
 				SET @rowold = 0
 				SELECT @upper = 0
 				SELECT @strBalanceSide = ''''
+				SELECT @TotalSide = ''''
 
-				WHILE EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId < @tot AND intRowDetailId > @tod AND intRowDetailId > @row AND glfsf_action_type IN (''PRN'',''ACP'',''GRP'',''GRA''))
+				WHILE EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId < @tot AND intRowDetailId > @tod AND intRowDetailId > @row AND glfsf_action_type IN (''PRN'',''ACP'',''GRP''))
 						OR EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId < @tot				-- id less than the total id number
 																			   AND intRowDetailId > @row				-- current row - WHERE it is
 																			   AND glfsf_action_type IN (''TOT'')			-- sum tots not anything else
@@ -642,18 +649,24 @@ BEGIN
 																			)											-- prevents it FROM doing anything after total
 				BEGIN
 					SELECT @row = 0
-					SELECT @row = MIN(intRowDetailId) FROM #irelyloadFRRowDesign WHERE ((glfsf_action_type IN (''PRN'',''ACP'',''GRP'',''GRA'') AND intRowDetailId > @tod) OR (glfsf_action_type = ''TOT'' AND glfsf_tot_no < @totno AND intRowDetailId > @totprior AND glfsf_tot_no=@maxbeforetot))
+					SELECT @row = MIN(intRowDetailId) FROM #irelyloadFRRowDesign WHERE ((glfsf_action_type IN (''PRN'',''ACP'',''GRP'') AND intRowDetailId > @tod) OR (glfsf_action_type = ''TOT'' AND glfsf_tot_no < @totno AND intRowDetailId > @totprior AND glfsf_tot_no=@maxbeforetot))
 																					AND intRowDetailId > @rowold
 																					AND intRowDetailId < @tot
 																					AND intRowDetailId > @totprior
 					SELECT @adder = NULL
 					SELECT @adderintrowdetailid = NULL
-					SELECT @adder = intRefNo, @adderintrowdetailid = intRowDetailId, @strBalanceSide = strBalanceSide FROM #irelyloadFRRowDesign WHERE intRowDetailId = @row			
+					SELECT @adder = intRefNo, @adderintrowdetailid = intRowDetailId, @strBalanceSide = strBalanceSide, @glfsf_tot_no = glfsf_tot_no FROM #irelyloadFRRowDesign WHERE intRowDetailId = @row
 					SELECT @maxbeforetot = ISNULL(MAX(glfsf_tot_no),0) FROM #irelyloadFRRowDesign WHERE intRowDetailId > @row AND intRowDetailId < @tot
+
+					IF(@TotalSide = '''')
+					BEGIN
+						SET @TotalSide = @strBalanceSide
+					END
 
 					IF EXISTS(SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId = @tot AND strRelatedRows IS NOT NULL)
 					BEGIN
 						--INCOME STATEMENT CHANGING OF SIDE
+						--IF((select top 1 strBalanceSide from #irelyloadFRRowDesign WHERE intRowDetailId = @tot) = ''Credit'' AND @glfsf_stmt_type = ''I'')
 						IF(@strBalanceSide = ''Debit'' AND @glfsf_stmt_type = ''I'')
 						BEGIN
 							UPDATE #irelyloadFRRowDesign SET strRelatedRows = strRelatedRows + '' -'' WHERE intRowDetailId = @tot
@@ -661,8 +674,13 @@ BEGIN
 						ELSE
 						BEGIN
 							UPDATE #irelyloadFRRowDesign SET strRelatedRows = strRelatedRows + '' +'' WHERE intRowDetailId = @tot
+						END						
+
+						IF(@TotalSide != @strBalanceSide)
+						BEGIN
+							SET @TotalSide = ''MIXED''
 						END
-						
+
 					END
 
 					IF @adder IS NOT NULL
@@ -687,15 +705,19 @@ BEGIN
 						END						
 					END
 
-					--SELECT @tot --debug
-					--SELECT @adder --debug
 					SELECT @rowold = @row
 					SELECT @upper = (@upper + 1)
 				END
+
+				IF(@TotalSide != ''MIXED'')
+				BEGIN
+					UPDATE #irelyloadFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,''-'',''+'') WHERE intRowDetailId = @tot				
+					UPDATE #irelyloaddesigncalc SET strAction = REPLACE(strAction,''-'',''+'') WHERE intRowId = @rowcurr and intRefNoId = @tot
+				END
+
 			END
 
 			DELETE FROM #irelyloadFRRowDesign WHERE intRefNo = 0
-			--DELETE FROM #irelyloadFRRowDesign WHERE glfsf_action_type = ''LGN''
 
 			INSERT tblFRRowDesign 
 			(
@@ -922,6 +944,8 @@ BEGIN
 			UPDATE tblFRRowDesign SET strRelatedRows = '''' WHERE strRelatedRows IS NULL
 			UPDATE tblFRRowDesign SET strAccountsUsed = '''' WHERE strAccountsUsed IS NULL
 			UPDATE tblFRRowDesign SET strBalanceSide = '''' WHERE strRowType = ''Row Calculation''
+			UPDATE tblFRRowDesign SET strSource = ''Column'' WHERE strRowType IN (''Hidden'',''Filter Accounts'',''Cash Flow Activity'',''Percentage'')
+			UPDATE tblFRRowDesign SET strSource = '''' WHERE strRowType NOT IN (''Hidden'',''Filter Accounts'',''Cash Flow Activity'',''Percentage'')
 			UPDATE tblFRRowDesignFilterAccount SET strJoin = ''Or'' WHERE strJoin = ''''
  
 			SELECT * INTO #TempRowDesign FROM tblFRRowDesign where intRowId = @introwiddet order by intRefNo
@@ -961,13 +985,13 @@ BEGIN
 END 
 
 
---=====================================================================================================================================
--- 	SCRIPT EXECUTION 
------------------------------------------------------------------------------------------------------------------------------------
+----=====================================================================================================================================
+---- 	SCRIPT EXECUTION 
+-----------------------------------------------------------------------------------------------------------------------------------------
 --DECLARE @res AS NVARCHAR(MAX)
 
 --EXEC [dbo].[uspFRDImportOriginDesign]
---			@originglfsf_no	 = '2',					-- ORIGIN ID
+--			@originglfsf_no	 = '25',					-- ORIGIN ID
 --			@result = @res OUTPUT					-- OUTPUT PARAMETER THAT RETURNS TOTAL NUMBER OF SUCCESSFUL RECORDS
 				
 --SELECT @res
