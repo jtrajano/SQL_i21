@@ -28,10 +28,9 @@ WHERE strPaycheckId = @strPaycheckId
 
 IF (@ysnPost = 1)
 BEGIN
-
-IF NOT EXISTS (SELECT strTransactionId FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId)
+	IF NOT EXISTS (SELECT strTransactionId FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId)
 	BEGIN
-		/* Insert Paycheck data into tblCMBankTransaction */
+		--PRINT 'Insert Paycheck data into tblCMBankTransaction'
 		INSERT INTO [dbo].[tblCMBankTransaction]
 			([strTransactionId]
 			,[intBankTransactionTypeId] 
@@ -68,7 +67,7 @@ IF NOT EXISTS (SELECT strTransactionId FROM tblCMBankTransaction WHERE strTransa
 			,[dtmLastModified] 
 			,[intConcurrencyId])
 		SELECT		 
-			 [strTransactionId]			= PC.strPaycheckId
+			[strTransactionId]			= PC.strPaycheckId
 			,[intBankTransactionTypeId] = 21
 			,[intBankAccountId]			= PC.intBankAccountId
 			,[intCurrencyId]			= BA.intCurrencyId
@@ -81,7 +80,7 @@ IF NOT EXISTS (SELECT strTransactionId FROM tblCMBankTransaction WHERE strTransa
 			,[strCity]					= BA.strCity
 			,[strState]					= BA.strState
 			,[strCountry]				= BA.strCountry             
-			,[dblAmount]				= PC.dblNetPayTotal * -1 --Insert as Credit
+			,[dblAmount]				= PC.dblNetPayTotal * -1
 			,[strAmountInWords]			= dbo.fnConvertNumberToWord(PC.dblNetPayTotal)
 			,[strMemo]					= ''
 			,[strReferenceNo]			= ''
@@ -108,14 +107,16 @@ IF NOT EXISTS (SELECT strTransactionId FROM tblCMBankTransaction WHERE strTransa
 
 		SELECT @intTransactionId = @@IDENTITY
 	END
-ELSE
-BEGIN
-	 SELECT @intTransactionId = (SELECT intTransactionId FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId)
-	 DELETE FROM tblCMBankTransactionDetail WHERE intTransactionId = @intTransactionId
-END
+	ELSE
+	BEGIN
+		SELECT @intTransactionId = (SELECT intTransactionId FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId)
+		DELETE FROM tblCMBankTransactionDetail WHERE intTransactionId = @intTransactionId
+	END
 END
 
-	/* Insert Earnings into tblCMBankTransactionDetail */
+IF (@ysnPost = 1)
+BEGIN
+	--PRINT 'Insert Earnings into tblCMBankTransactionDetail'
 	INSERT INTO [dbo].[tblCMBankTransactionDetail]
 		([intTransactionId]
 		,[dtmDate]
@@ -148,7 +149,7 @@ END
 	WHERE E.dblTotal > 0
 		AND E.intPaycheckId = @intPaycheckId
 
-	/* Insert Employee Paid Deductions into tblCMBankTransactionDetail */
+	--PRINT 'Insert Employee Paid Deductions into tblCMBankTransactionDetail'
 	INSERT INTO [dbo].[tblCMBankTransactionDetail]
 		([intTransactionId]
 		,[dtmDate]
@@ -182,7 +183,7 @@ END
 		AND D.dblTotal > 0 
 		AND D.intPaycheckId = @intPaycheckId
 
-	/* Insert Company Paid Deductions into tblCMBankTransactionDetail */
+	--PRINT 'Insert Company Paid Deductions into tblCMBankTransactionDetail'
 	INSERT INTO [dbo].[tblCMBankTransactionDetail]
 		([intTransactionId]
 		,[dtmDate]
@@ -235,7 +236,7 @@ END
 		AND D.dblTotal > 0 
 		AND D.intPaycheckId = @intPaycheckId
 
-	/* Insert Employee Taxes into tblCMBankTransactionDetail */
+	--PRINT 'Insert Employee Taxes into tblCMBankTransactionDetail'
 	INSERT INTO [dbo].[tblCMBankTransactionDetail]
 		([intTransactionId]
 		,[dtmDate]
@@ -269,7 +270,7 @@ END
 		AND T.dblTotal > 0
 		AND T.intPaycheckId = @intPaycheckId
 
-	/* Insert Company Taxes into tblCMBankTransactionDetail */
+	--PRINT 'Insert Company Taxes into tblCMBankTransactionDetail'
 	INSERT INTO [dbo].[tblCMBankTransactionDetail]
 		([intTransactionId]
 		,[dtmDate]
@@ -321,9 +322,16 @@ END
 	WHERE T.strPaidBy = 'Company'
 		AND T.dblTotal > 0
 		AND T.intPaycheckId = @intPaycheckId
+END
 
+/*
+	--Bank Transaction Entry before Posting procedure
+	SELECT * FROM tblCMBankTransactionDetail 
+	WHERE intTransactionId = (SELECT intTransactionId FROM tblCMBankTransaction WHERE strTransactionId = @strPaycheckId)
+	SELECT * FROM tblCMBankTransaction WHERE strTransactionId = @strPaycheckId
+*/
 
-/* Execute Bank Transaction Post Procedure */
+--PRINT 'Execute Bank Transaction Post Procedure'
 EXEC dbo.uspCMPostBankTransaction @ysnPost, @ysnRecap, @strTransactionId, @strBatchId, @intUserId, @intEntityId, @isSuccessful OUTPUT, @message_id OUTPUT
 
 IF (@isSuccessful <> 0)
