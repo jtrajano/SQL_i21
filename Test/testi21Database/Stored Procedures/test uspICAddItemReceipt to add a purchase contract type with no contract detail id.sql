@@ -232,10 +232,15 @@ BEGIN
 				,dblFreightRate			= 19
 				,intSourceId			= 20
 
-		INSERT INTO actual (
-			intSourceId
-			,intInventoryReceiptId
-		)
+		-- Create the temp table if it does not exists. 
+		IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
+		BEGIN 
+			CREATE TABLE #tmpAddItemReceiptResult (
+				intSourceId INT
+				,intInventoryReceiptId INT
+			)
+		END 
+
 		EXEC dbo.uspICAddItemReceipt
 			@ReceiptDataToCreate
 			,@ReceiptOtherCharges
@@ -256,8 +261,8 @@ BEGIN
 
 		DECLARE @strReceiptNumber AS NVARCHAR(50)
 		SELECT	@strReceiptNumber = tblICInventoryReceipt.strReceiptNumber
-		FROM	dbo.tblICInventoryReceipt INNER JOIN actual 
-					ON tblICInventoryReceipt.intInventoryReceiptId = actual.intInventoryReceiptId
+		FROM	dbo.tblICInventoryReceipt INNER JOIN #tmpAddItemReceiptResult 
+					ON tblICInventoryReceipt.intInventoryReceiptId = #tmpAddItemReceiptResult.intInventoryReceiptId
 
 		EXEC tSQLt.AssertEquals @strReceiptNumber, 'INVRCT-1'
 
