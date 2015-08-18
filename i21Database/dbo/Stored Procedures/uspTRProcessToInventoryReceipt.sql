@@ -46,6 +46,8 @@ BEGIN TRY
 	 	,dblFreightRate
 		,intSourceId	
 		,intSourceType		 	
+		,dblGross
+		,dblNet
 	 )	
       select strReceiptType = CASE
                             WHEN TR.intContractDetailId IS NULL
@@ -92,7 +94,9 @@ BEGIN TRY
 	   0,-- No Custody from transports
 	   TR.dblFreightRate,
 	   TR.intTransportReceiptId,	  
-	   3 -- Source type for transports is 3 
+	   3, -- Source type for transports is 3 
+	   dblGross = TR.dblGross,
+       dblNet = TR.dblNet
 	   from tblTRTransportLoad TL
             JOIN tblTRTransportReceipt TR ON TR.intTransportLoadId = TL.intTransportLoadId			
 			LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = TR.intContractDetailId

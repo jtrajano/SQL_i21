@@ -208,7 +208,9 @@ BEGIN
 				,intStorageLocationId
 				,ysnIsCustody
 				,dblFreightRate
-				,intSourceId			 	
+				,intSourceId
+				,dblGross
+				,dblNet
 		)	
 		SELECT	strReceiptType		= 'Purchase Contract'
 				,intEntityVendorId	= 1
@@ -232,6 +234,8 @@ BEGIN
 				,ysnIsCustody			= 18
 				,dblFreightRate			= 19
 				,intSourceId			= 20
+				,dblGross				= 21
+				,dblNet					= 22
 
 		INSERT INTO @ReceiptOtherCharges (
 				-- Linking fields
