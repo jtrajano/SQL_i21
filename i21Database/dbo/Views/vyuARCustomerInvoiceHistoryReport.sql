@@ -30,6 +30,7 @@ LEFT JOIN
 (SELECT grandDblInvoiceTotal = SUM(ISNULL(dblInvoiceTotal, 0))
      , grandDblAmountApplied = SUM(ISNULL(dblPayment, 0))
 	 , grandDblAmountDue     = SUM(ISNULL(dblAmountDue, 0))
+	 , intTotalCount	     = COUNT(*)
 	 , intEntityCustomer     = intEntityCustomerId
 FROM
 (SELECT DISTINCT

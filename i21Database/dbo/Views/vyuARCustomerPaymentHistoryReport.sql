@@ -32,7 +32,8 @@ WHERE I.ysnPosted = 1 AND P.ysnPosted = 1
 						WHERE AG.strAccountGroup = 'Receivables')) AS A
 LEFT JOIN 
 (SELECT grandDblAmountPaid = SUM(dblAmountPaid)
-	 , intEntityCustomer     = intEntityCustomerId
+	 , intTotalCount	   = COUNT(*)
+	 , intEntityCustomer   = intEntityCustomerId
 FROM
 (SELECT DISTINCT
 	   intEntityCustomerId
