@@ -79,11 +79,11 @@ BEGIN
 		,L.strLotNumber
 		,L.intItemId
 		,I.strDescription
-		,L.dblQty AS dblRepresentingQty
+		,(CASE WHEN L.intWeightUOMId IS NOT NULL THEN L.dblWeight ELSE L.dblQty END) AS dblRepresentingQty
 		,IU.intUnitMeasureId AS intRepresentingUOMId
 	FROM tblICLot L
 	JOIN tblICItem I ON I.intItemId = L.intItemId
-	JOIN tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId,L.intItemUOMId)
 	WHERE L.intLotId = @intProductValueId
 END
 ELSE IF @intProductTypeId = 11 -- Parent Lot
@@ -94,10 +94,10 @@ BEGIN
 		,PL.strParentLotNumber
 		,PL.intItemId
 		,I.strDescription
-		,PL.dblQty AS dblRepresentingQty
+		,(CASE WHEN PL.intWeightUOMId IS NOT NULL THEN PL.dblWeight ELSE PL.dblQty END) AS dblRepresentingQty
 		,IU.intUnitMeasureId AS intRepresentingUOMId
 	FROM tblICParentLot PL
 	JOIN tblICItem I ON I.intItemId = PL.intItemId
-	JOIN tblICItemUOM IU ON IU.intItemUOMId = PL.intItemUOMId
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = ISNULL(PL.intWeightUOMId,PL.intItemUOMId)
 	WHERE PL.intParentLotId = @intProductValueId
 END
