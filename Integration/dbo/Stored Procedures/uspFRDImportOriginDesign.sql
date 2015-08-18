@@ -624,7 +624,7 @@ BEGIN
 			DECLARE @maxbeforetot INT
 			DECLARE @glfsf_tot_no INT			
 
-			SELECT @row = 0
+			SELECT @ROW = 0
 
 			WHILE EXISTS(SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE glfsf_action_type = ''TOT'' AND intRowDetailId > @tod)
 			BEGIN
@@ -635,28 +635,28 @@ BEGIN
 				SELECT @totprior = ISNULL(MAX(intRowDetailId),0) FROM #irelyloadFRRowDesign WHERE intRowDetailId < @tot AND glfsf_tot_no >= @totno
 				SELECT @maxbeforetot = ISNULL(MAX(glfsf_tot_no),0) FROM #irelyloadFRRowDesign WHERE intRowDetailId > @totprior AND intRowDetailId < @tot
 
-				SET @row = 0
+				SET @ROW = 0
 				SET @rowold = 0
 				SELECT @upper = 0
 				SELECT @strBalanceSide = ''''
 				SELECT @TotalSide = ''''
 
-				WHILE EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId < @tot AND intRowDetailId > @tod AND intRowDetailId > @row AND glfsf_action_type IN (''PRN'',''ACP'',''GRP''))
+				WHILE EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId < @tot AND intRowDetailId > @tod AND intRowDetailId > @ROW AND glfsf_action_type IN (''PRN'',''ACP'',''GRP''))
 						OR EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE intRowDetailId < @tot				-- id less than the total id number
 																			   AND intRowDetailId > @row				-- current row - WHERE it is
 																			   AND glfsf_action_type IN (''TOT'')			-- sum tots not anything else
 																			   AND intRowDetailId > @totprior			-- makes sure you do not go above an equal or greater tot number
 																			)											-- prevents it FROM doing anything after total
 				BEGIN
-					SELECT @row = 0
-					SELECT @row = MIN(intRowDetailId) FROM #irelyloadFRRowDesign WHERE ((glfsf_action_type IN (''PRN'',''ACP'',''GRP'') AND intRowDetailId > @tod) OR (glfsf_action_type = ''TOT'' AND glfsf_tot_no < @totno AND intRowDetailId > @totprior AND glfsf_tot_no=@maxbeforetot))
+					SELECT @ROW = 0
+					SELECT @ROW = MIN(intRowDetailId) FROM #irelyloadFRRowDesign WHERE ((glfsf_action_type IN (''PRN'',''ACP'',''GRP'') AND intRowDetailId > @tod) OR (glfsf_action_type = ''TOT'' AND glfsf_tot_no < @totno AND intRowDetailId > @totprior AND glfsf_tot_no=@maxbeforetot))
 																					AND intRowDetailId > @rowold
 																					AND intRowDetailId < @tot
 																					AND intRowDetailId > @totprior
 					SELECT @adder = NULL
 					SELECT @adderintrowdetailid = NULL
 					SELECT @adder = intRefNo, @adderintrowdetailid = intRowDetailId, @strBalanceSide = strBalanceSide, @glfsf_tot_no = glfsf_tot_no FROM #irelyloadFRRowDesign WHERE intRowDetailId = @row
-					SELECT @maxbeforetot = ISNULL(MAX(glfsf_tot_no),0) FROM #irelyloadFRRowDesign WHERE intRowDetailId > @row AND intRowDetailId < @tot
+					SELECT @maxbeforetot = ISNULL(MAX(glfsf_tot_no),0) FROM #irelyloadFRRowDesign WHERE intRowDetailId > @ROW AND intRowDetailId < @tot
 
 					IF(@TotalSide = '''')
 					BEGIN
