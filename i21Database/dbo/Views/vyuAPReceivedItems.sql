@@ -35,7 +35,7 @@ FROM
 		,[strVendorId]				=	D1.strVendorId
 		,[strShipVia]				=	E.strShipVia
 		,[strTerm]					=	F.strTerm
-		,[intContractNumber]		=	G1.strContractNumber
+		,[intContractNumber]		=	G1.intContractNumber
 		,[intContractHeaderId]		=	G1.intContractHeaderId
 		,[intContractDetailId]		=	G2.intContractDetailId
 	FROM tblPOPurchase A
@@ -151,7 +151,7 @@ FROM
 	,[strVendorId]				=	D1.strVendorId
 	,[strShipVia]				=	E.strShipVia
 	,[strTerm]					=	NULL
-	,[intContractNumber]		=	F1.strContractNumber
+	,[intContractNumber]		=	F1.intContractNumber
 	,[intContractHeaderId]		=	F1.intContractHeaderId
 	,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
 	FROM tblICInventoryReceipt A

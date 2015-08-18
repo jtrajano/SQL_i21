@@ -58,7 +58,7 @@ SELECT Lot.intLotId
 	, ReceiptLot.intInventoryReceiptItemLotId
 	, ReceiptLot.strCondition
 	, ReceiptItem.intSourceId
-	, CTHeader.strContractNumber
+	, CTHeader.intContractNumber
 	, CTDetail.intContractDetailId
 	, CTDetail.intContractSeq
 	, CTDetail.dblQuantity as dblOriginalQty

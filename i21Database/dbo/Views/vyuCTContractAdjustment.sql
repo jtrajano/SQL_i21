@@ -29,7 +29,7 @@ AS
 			CAST(NULL AS INT)	AS	intUserId,
 			CAST(NULL AS DATETIME)	AS	dtmCreatedDate,
 			
-			H.strContractNumber,
+			H.intContractNumber,
 			E.strName	AS strCustomerVendor,
 			I.strItemNo,
 			T.strContractType,

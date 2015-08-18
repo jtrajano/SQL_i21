@@ -4,7 +4,7 @@
 SELECT ReceiptCharge.intInventoryReceiptChargeId
 	, ReceiptCharge.intInventoryReceiptId
 	, ReceiptCharge.intContractId
-	, Contract.strContractNumber
+	, Contract.intContractNumber
 	, Charge.strItemNo
 	, strItemDescription = Charge.strDescription
 	, ReceiptCharge.ysnInventoryCost

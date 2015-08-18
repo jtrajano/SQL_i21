@@ -10,7 +10,7 @@ AS
 			
 			CH.intContractTypeId intPurchaseSale,
 			CH.intEntityId,
-			CH.strContractNumber,
+			CH.intContractNumber,
 			CH.dtmContractDate,
 			CD.intCompanyLocationId,
 			CH.intCommodityId,

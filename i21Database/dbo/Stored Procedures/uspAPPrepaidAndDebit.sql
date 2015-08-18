@@ -82,7 +82,7 @@ SELECT
 	[strItemDescription]	=	E.strDescription,
 	[strItemNo]				=	E.strItemNo,
 	[intContractHeaderId]	=	CurrentBill.intContractHeaderId,	
-	[intContractNumber]		=	CurrentBill.strContractNumber,
+	[intContractNumber]		=	CurrentBill.intContractNumber,
 	[intPrepayType]			=	B.intPrepayTypeId,
 	[dblTotal]				=	B.dblTotal,
 	[dblBillAmount]			=	CurrentBill.dblTotal,
@@ -120,7 +120,7 @@ INNER JOIN
 		,C.dblCost
 		,C.dblQtyReceived
 		,C.intBillDetailId
-		,D.strContractNumber
+		,D.intContractNumber
 		,D.intContractHeaderId
 		,C.intContractDetailId
 	FROM tblAPBillDetail C

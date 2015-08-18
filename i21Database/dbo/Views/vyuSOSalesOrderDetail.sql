@@ -33,7 +33,7 @@ SELECT
 	,D.dblLicenseAmount
 	,D.intContractHeaderId
 	,D.intContractDetailId
-	,CH.strContractNumber
+	,CH.intContractNumber
 	,CD.intContractSeq
 	,IC.intCommodityId
 FROM         

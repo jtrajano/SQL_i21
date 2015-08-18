@@ -3871,11 +3871,4 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intScheduleWorkOrderId" />
   </Operation>
-  <Operation Name="Rename Refactor" Key="8657281b-9cd6-4ec4-b90f-9fa21f557774" ChangeDateTime="08/17/2015 09:38:41">
-    <Property Name="ElementName" Value="[dbo].[tblCTContractHeader].[intContractNumber]" />
-    <Property Name="ElementType" Value="SqlSimpleColumn" />
-    <Property Name="ParentElementName" Value="[dbo].[tblCTContractHeader]" />
-    <Property Name="ParentElementType" Value="SqlTable" />
-    <Property Name="NewName" Value="strContractNumber" />
-  </Operation>
 </Operations>

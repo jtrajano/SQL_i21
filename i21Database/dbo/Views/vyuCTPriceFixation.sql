@@ -18,7 +18,7 @@ AS
 				D.strContractType,
 				D.strCommodityCode,
 				D.strEntityName,
-				D.strContractNumber,
+				D.intContractNumber,
 				D.strLocationName,
 				D.strPricingType,
 				D.strFutureMonth,

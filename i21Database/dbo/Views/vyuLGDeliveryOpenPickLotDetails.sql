@@ -17,7 +17,7 @@ SELECT	PL.intPickLotDetailId,
 		Lot.strReceiptNumber,
 		Lot.strMarkings,
 		IM.strDescription as strItemDescription,
-		CH.strContractNumber as strSContractNumber,
+		CH.intContractNumber as intSContractNumber,
 		CD.intContractSeq as intSContractSeq,
 		UM.strUnitMeasure as strLotUnitMeasure
 FROM	tblLGPickLotDetail		PL

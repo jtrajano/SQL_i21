@@ -47,7 +47,7 @@ AS
 			CH.strEntityCountry,				CH.strEntityPhone,				CH.intDefaultLocationId,
 			CH.intCommodityId,					CH.strCommodityCode,			CH.strCommodityDescription,
 			CH.dblHeaderQuantity,				CH.intCommodityUnitMeasureId,	CH.strHeaderUnitMeasure,
-			CH.strContractNumber,				CH.dtmContractDate,				CH.strCustomerContract,
+			CH.intContractNumber,				CH.dtmContractDate,				CH.strCustomerContract,
 			CH.dtmDeferPayDate,					CH.dblDeferPayRate,				CH.intContractTextId,
 			CH.strTextCode,						CH.strInternalComments,			CH.ysnSigned,
 			CH.ysnPrinted,						CH.intSalespersonId,			CH.strSalespersonId,

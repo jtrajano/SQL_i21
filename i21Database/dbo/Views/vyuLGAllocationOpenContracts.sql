@@ -28,7 +28,7 @@ AS
 			CD.intEntityId,
 			CD.strEntityName as strName,
 			CD.intDefaultLocationId as intEntityLocationId,
-			CD.strContractNumber,
+			CD.intContractNumber,
 			CD.dtmContractDate,
 			CD.intCommodityId,
 			CD.intItemUOMId,

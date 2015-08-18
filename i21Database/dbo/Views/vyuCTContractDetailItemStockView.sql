@@ -2,7 +2,7 @@
 
 AS
 	SELECT 
-			CD.intContractHeaderId,			CD.strContractNumber,			CD.intContractDetailId,		CD.intContractSeq,
+			CD.intContractHeaderId,			CD.intContractNumber,			CD.intContractDetailId,		CD.intContractSeq,
 			IK.intKey,						IK.intItemId,					IK.strItemNo,
 			IK.strType,						IK.strDescription,				IK.strLotTracking,			IK.strInventoryTracking,
 			IK.strStatus,					IK.intLocationId,				IK.intItemLocationId,		IK.intSubLocationId,

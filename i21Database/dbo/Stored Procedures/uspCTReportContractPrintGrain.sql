@@ -77,7 +77,7 @@ BEGIN TRY
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(CH.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(CH.strEntityCountry)) END,'')
 			AS	strB,
 			CH.dtmContractDate,
-			CH.strContractNumber intContractNumber,
+			CH.intContractNumber,
 			CH.intContractHeaderId,
 			CH.strEntityNumber strNumber,
 			CASE	WHEN	CH.intContractTypeId  =	1	

@@ -9,7 +9,7 @@
 	,@Pricing			NVARCHAR(250)	= NULL OUTPUT
 	,@ContractHeaderId	INT				= NULL OUTPUT
 	,@ContractDetailId	INT				= NULL OUTPUT
-	,@ContractNumber	NVARCHAR(50)	= NULL OUTPUT
+	,@ContractNumber	INT				= NULL OUTPUT
 	,@ContractSeq		INT				= NULL OUTPUT
 	,@OriginalQuantity	NUMERIC(18,6)	= NULL
 AS
@@ -72,7 +72,7 @@ AS
 		 @Price				= dblCashPrice
 		,@ContractHeaderId	= intContractHeaderId
 		,@ContractDetailId	= intContractDetailId
-		,@ContractNumber	= strContractNumber
+		,@ContractNumber	= intContractNumber
 		,@ContractSeq		= intContractSeq
 	FROM
 		vyuCTContractDetailView
@@ -107,7 +107,7 @@ AS
 		 @Price				= dblCashPrice
 		,@ContractHeaderId	= intContractHeaderId
 		,@ContractDetailId	= intContractDetailId
-		,@ContractNumber	= strContractNumber
+		,@ContractNumber	= intContractNumber
 		,@ContractSeq		= intContractSeq
 	FROM
 		vyuCTContractDetailView
