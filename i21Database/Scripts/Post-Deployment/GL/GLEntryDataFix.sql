@@ -69,15 +69,17 @@ GO
 GO
     PRINT N'End Update tblGLDetail.strCode based on tblGLJournal.strSourceType'
 GO
+	PRINT N'BEGIN Updating Transaction Type to Recurring if strTransactionType is equal to Template '
+GO
 
-UPDATE tblGLJournal SET strTransactionType = 'Recurring' WHERE strTransactionType ='Template'
+	UPDATE tblGLJournal SET strTransactionType = 'Recurring' WHERE strTransactionType ='Template'
 
 GO	
-	PRINT N'END BEGIN Update Transaction Type to Recurring if strTransactionType is equal to Template '
+	PRINT N'END Updating Transaction Type to Recurring if strTransactionType is equal to Template '
 GO
 
 GO
-	PRINT N'Begin updating fiscalyear/period id in tblGLJournal' -- USE BY General Journal Reversal
+	PRINT N'Begin updating fiscalyear/period id in tblGLJournal' -- USED BY General Journal Reversal
 GO
 	UPDATE j SET intFiscalPeriodId = f.intGLFiscalYearPeriodId, intFiscalYearId = f.intFiscalYearId
 	FROM tblGLJournal j, tblGLFiscalYearPeriod f
@@ -86,13 +88,7 @@ GO
 GO
 	PRINT N'End updating fiscalyear/period id in tblGLJournal'
 GO
-	PRINT N'Begin Import Recurring'
-GO
-	EXEC dbo.uspGLImportRecurring
-GO
-	PRINT N'End Import Recurring'
-GO
-	PRINT N'Begin Update tblGLDetail.strCode based on tblGLJournal.strSourceType'
+	PRINT N'Begin Updating tblGLDetail.strCode based on tblGLJournal.strSourceType'
 GO
 	UPDATE A
     SET A.strCode = RTRIM (B.strSourceType)
@@ -100,5 +96,5 @@ GO
 	WHERE A.strTransactionType IN( 'Origin Journal', 'Adjusted Origin Journal' )
 	AND A.strCode <> B.strSourceType
 GO
-	PRINT N'End Update tblGLDetail.strCode based on tblGLJournal.strSourceType'
+	PRINT N'End Updating tblGLDetail.strCode based on tblGLJournal.strSourceType'
 GO
