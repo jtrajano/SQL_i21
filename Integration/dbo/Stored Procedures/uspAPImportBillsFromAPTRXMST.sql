@@ -58,7 +58,7 @@ BEGIN
 			USING (
 				SELECT
 					[intEntityVendorId]			=	D.intEntityVendorId,
-					[strVendorOrderNumber] 		=	(CASE WHEN DuplicateData.aptrx_ivc_no IS NOT NULL THEN dbo.fnTrim(A.aptrx_ivc_no) + ''-'' + CAST(A.A4GLIdentity AS NVARCHAR(MAX)) ELSE A.aptrx_ivc_no END),
+					[strVendorOrderNumber] 		=	(CASE WHEN DuplicateData.aptrx_ivc_no IS NOT NULL THEN dbo.fnTrim(A.aptrx_ivc_no) + ''-DUP'' + CAST(A.A4GLIdentity AS NVARCHAR(MAX)) ELSE A.aptrx_ivc_no END),
 					[strVendorOrderNumberOrig] 	=	A.aptrx_ivc_no,
 					[intTermsId] 				=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation
 															WHERE intEntityId = (SELECT intEntityVendorId FROM tblAPVendor
