@@ -205,7 +205,7 @@ BEGIN
        ,[ysnGraderAutoEntry]= SD.[ysnGraderAutoEntry]
        ,[intDiscountScheduleCodeId]= SD.[intDiscountScheduleCodeId]
        ,[dtmDiscountPaidDate]= SD.[dtmDiscountPaidDate]
-       ,[intTicketId]= SD.[intTicketId]
+       ,[intTicketId]= NULL
        ,[intTicketFileId]= ISH.intInventoryShipmentItemId
        ,[strSourceType]= 'Inventory Shipment'
 	FROM	dbo.tblICInventoryShipmentItem ISH join dbo.[tblQMTicketDiscount] SD

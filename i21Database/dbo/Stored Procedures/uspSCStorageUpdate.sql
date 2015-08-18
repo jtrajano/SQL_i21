@@ -614,7 +614,7 @@ BEGIN TRY
            ,[ysnGraderAutoEntry]= SD.[ysnGraderAutoEntry]
            ,[intDiscountScheduleCodeId]= SD.[intDiscountScheduleCodeId]
            ,[dtmDiscountPaidDate]= SD.[dtmDiscountPaidDate]
-           ,[intTicketId]= SD.[intTicketId]
+           ,[intTicketId]= NULL
            ,[intTicketFileId]= @intCustomerStorageId
            ,[strSourceType]= 'Storage'
 		FROM	dbo.[tblQMTicketDiscount] SD

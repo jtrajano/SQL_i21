@@ -368,13 +368,12 @@ BEGIN
        ,[ysnGraderAutoEntry]= SD.[ysnGraderAutoEntry]
        ,[intDiscountScheduleCodeId]= SD.[intDiscountScheduleCodeId]
        ,[dtmDiscountPaidDate]= SD.[dtmDiscountPaidDate]
-       ,[intTicketId]= SD.[intTicketId]
+       ,[intTicketId]= NULL
        ,[intTicketFileId]= ISH.intInventoryReceiptItemId
        ,[strSourceType]= 'Inventory Receipt'
 	FROM	dbo.tblICInventoryReceiptItem ISH join dbo.[tblQMTicketDiscount] SD
 	ON ISH.intSourceId = SD.intTicketId AND SD.strSourceType = 'Scale' AND
-	SD.intTicketFileId = @intTicketId  JOIN dbo.tblICInventoryReceipt IRH ON IRH.intInventoryReceiptId = @InventoryReceiptId AND IRH.strReceiptType = 'Scale' WHERE	
-	ISH.intSourceId = @intTicketId AND ISH.intInventoryReceiptId = @InventoryReceiptId AND IRH.strReceiptType = 'Scale'
+	SD.intTicketFileId = @intTicketId WHERE	ISH.intSourceId = @intTicketId AND ISH.intInventoryReceiptId = @InventoryReceiptId
 END
 
 DECLARE @intLoopReceiptItemId INT;
