@@ -2229,6 +2229,9 @@
     <Build Include="dbo\Stored Procedures\uspRKGetBasisDeliveries.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetContractDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetPayableDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetCollateralDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetGrainBankDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetNetHedgeDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
