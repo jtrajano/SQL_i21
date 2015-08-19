@@ -601,6 +601,14 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     return false;
                     break;
             }
+        },
+        readOnlyNoGrossNetUOM: function (get) {
+            if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.intWeightUOMId'))) {
+                return true;
+            }
+            else {
+                return false;
+            }
         }
     }
 

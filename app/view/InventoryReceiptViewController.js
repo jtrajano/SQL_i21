@@ -330,8 +330,18 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     dataIndex: 'dblTax'
                 },
                 colUnitRetail: 'dblUnitRetail',
-                colGross: 'dblGross',
-                colNet: 'dblNet',
+                colGross: {
+                    dataIndex: 'dblGross',
+                    editor: {
+                        readOnly: '{readOnlyNoGrossNetUOM}'
+                    }
+                },
+                colNet: {
+                    dataIndex: 'dblNet',
+                    editor: {
+                        readOnly: '{readOnlyNoGrossNetUOM}'
+                    }
+                },
                 colLineTotal: 'dblLineTotal',
                 colGrossMargin: 'dblGrossMargin'
             },
@@ -358,9 +368,24 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colLotQuantity: 'dblQuantity',
-                colLotGrossWeight: 'dblGrossWeight',
-                colLotTareWeight: 'dblTareWeight',
-                colLotNetWeight: 'dblNetWeight',
+                colLotGrossWeight: {
+                    dataIndex: 'dblGrossWeight',
+                    editor: {
+                        readOnly: '{readOnlyNoGrossNetUOM}'
+                    }
+                },
+                colLotTareWeight: {
+                    dataIndex: 'dblTareWeight',
+                    editor: {
+                        readOnly: '{readOnlyNoGrossNetUOM}'
+                    }
+                },
+                colLotNetWeight: {
+                    dataIndex: 'dblNetWeight',
+                    editor: {
+                        readOnly: '{readOnlyNoGrossNetUOM}'
+                    }
+                },
                 colLotExpiryDate: 'dtmExpiryDate',
                 colLotStorageLocation: {
                     dataIndex: 'strStorageLocation',
