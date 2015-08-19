@@ -2154,7 +2154,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 xtype: 'gridcolumn',
                                                                 itemId: 'colOtherCharge',
                                                                 text: 'Other Charges',
-                                                                flex: 1,
+                                                                flex: 1.2,
                                                                 editor: {
                                                                     xtype: 'gridcombobox',
                                                                     columns: [
@@ -2186,7 +2186,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 xtype: 'checkcolumn',
                                                                 itemId: 'colInventoryCost',
                                                                 text: 'Inventory Cost',
-                                                                flex: 1,
+                                                                flex: 1.2,
                                                                 editor: {
                                                                     xtype: 'checkboxfield'
                                                                 }
@@ -2278,7 +2278,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 xtype: 'gridcolumn',
                                                                 itemId: 'colAllocateCostBy',
                                                                 text: 'Allocate Cost By',
-                                                                flex: 1,
+                                                                flex: 1.2,
                                                                 editor: {
                                                                     xtype: 'gridcombobox',
                                                                     columns: [
@@ -2295,24 +2295,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 }
                                                             },
                                                             {
-                                                                xtype: 'gridcolumn',
-                                                                itemId: 'colCostBilledBy',
-                                                                text: 'Cost Billed By',
-                                                                flex: 1,
-                                                                editor: {
-                                                                    xtype: 'gridcombobox',
-                                                                    columns: [
-                                                                        {
-                                                                            dataIndex: 'strDescription',
-                                                                            dataType: 'string',
-                                                                            text: 'Billed By',
-                                                                            flex: 1
-                                                                        }
-                                                                    ],
-                                                                    itemId: 'cboCostBilledBy',
-                                                                    displayField: 'strDescription',
-                                                                    valueField: 'strDescription'
-                                                                }
+                                                                xtype: 'checkcolumn',
+                                                                itemId: 'colAccrue',
+                                                                text: 'Accrue',
+                                                                flex: 0.7
                                                             },
                                                             {
                                                                 xtype: 'gridcolumn',
@@ -2345,6 +2331,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     displayField: 'strVendorId',
                                                                     valueField: 'strVendorId'
                                                                 }
+                                                            },
+                                                            {
+                                                                xtype: 'checkcolumn',
+                                                                itemId: 'colPrice',
+                                                                text: 'Price',
+                                                                flex: 0.7
                                                             }
                                                         ],
                                                         viewConfig: {

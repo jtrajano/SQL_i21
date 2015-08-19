@@ -4535,7 +4535,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "flex": 1,
+                                                        "flex": 1.2,
                                                         "itemId": "colOtherCharge",
                                                         "text": "Other Charges"
                                                     },
@@ -4600,7 +4600,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "flex": 1,
+                                                        "flex": 1.2,
                                                         "itemId": "colInventoryCost",
                                                         "text": "Inventory Cost"
                                                     },
@@ -4827,7 +4827,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "flex": 1,
+                                                        "flex": 1.2,
                                                         "itemId": "colAllocateCostBy",
                                                         "text": "Allocate Cost By"
                                                     },
@@ -4873,57 +4873,19 @@
                                                     ]
                                                 },
                                                 {
-                                                    "type": "Ext.grid.column.Column",
+                                                    "type": "Ext.grid.column.Check",
                                                     "reference": {
                                                         "name": "columns",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "flex": 1,
-                                                        "itemId": "colCostBilledBy",
-                                                        "text": "Cost Billed By"
+                                                        "flex": 0.7,
+                                                        "itemId": "colAccrue",
+                                                        "text": "Accrue"
                                                     },
-                                                    "name": "MyColumn58",
-                                                    "designerId": "811ab515-1f3a-4953-9b04-a0354e778ab7",
-                                                    "cn": [
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "editor",
-                                                                "type": "object"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "columns": [
-                                                                    "[",
-                                                                    "\t{",
-                                                                    "        dataIndex: 'strDescription',",
-                                                                    "        dataType: 'string',",
-                                                                    "        text: 'Billed By',",
-                                                                    "        flex: 1",
-                                                                    "    }",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strDescription",
-                                                                "itemId": "cboCostBilledBy",
-                                                                "valueField": "strDescription"
-                                                            },
-                                                            "name": "MyComboBox85",
-                                                            "configAlternates": {
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "bf19cc5f-d25b-4cc9-a589-4a510b6bbeb0",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
-                                                        }
-                                                    ]
+                                                    "name": "MyCheck",
+                                                    "designerId": "811ab515-1f3a-4953-9b04-a0354e778ab7"
                                                 },
                                                 {
                                                     "type": "Ext.grid.column.Column",
@@ -4989,6 +4951,21 @@
                                                             ]
                                                         }
                                                     ]
+                                                },
+                                                {
+                                                    "type": "Ext.grid.column.Check",
+                                                    "reference": {
+                                                        "name": "columns",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "flex": 0.7,
+                                                        "itemId": "colPrice",
+                                                        "text": "Price"
+                                                    },
+                                                    "name": "MyCheck5",
+                                                    "designerId": "58de2b34-7d00-4617-a58d-2d6fdad77514"
                                                 },
                                                 {
                                                     "type": "Ext.grid.View",

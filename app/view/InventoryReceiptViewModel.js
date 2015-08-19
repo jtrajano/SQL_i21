@@ -267,26 +267,6 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 }
             ]
         },
-        billedBy: {
-            autoLoad: true,
-            data: [
-                {
-                    strDescription: 'Vendor'
-                },
-                {
-                    strDescription: 'Third Party'
-                },
-                {
-                    strDescription: 'None'
-                }
-            ],
-            fields: [
-                {
-                    name: 'strDescription'
-                }
-            ]
-        },
-
 
         equipmentLength: {
             type: 'icbufferedequipmentlength'
@@ -579,16 +559,13 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     break;
             }
         },
-        readOnlyCostBilledBy: function (get) {
-            switch (get('grdCharges.selection.strCostBilledBy')) {
-                case 'Vendor':
+        readOnlyAccrue: function (get) {
+            switch (get('grdCharges.selection.ysnAccrue')) {
+                case false:
                     return true;
-                    break;
-                case 'Third Party':
-                    return false;
                     break;
                 default:
-                    return true;
+                    return false;
                     break;
             }
         },

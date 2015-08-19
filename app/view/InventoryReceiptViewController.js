@@ -539,7 +539,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 colCostVendor: {
                     dataIndex: 'strVendorId',
                     editor: {
-                        readOnly: '{readOnlyCostBilledBy}',
+                        readOnly: '{readOnlyAccrue}',
                         origValueField: 'intEntityVendorId',
                         origUpdateField: 'intEntityVendorId',
                         store: '{vendor}'
@@ -553,11 +553,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         store: '{allocateBy}'
                     }
                 },
-                colCostBilledBy: {
-                    dataIndex: 'strCostBilledBy',
-                    editor: {
-                        store: '{billedBy}'
-                    }
+                colAccrue: {
+                    dataIndex: 'ysnAccrue'
+                },
+                colPrice: {
+                    dataIndex: 'ysnPrice'
                 }
             },
 
@@ -1784,7 +1784,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     intEntityVendorId : cost.intVendorId,
                                     dblAmount : 0,
                                     strAllocateCostBy : '',
-                                    strCostBilledBy : 'Vendor',
+                                    ysnAccrue : cost.ysnAccrue,
+                                    ysnAccrue : cost.ysnPrice,
 
                                     strItemNo : cost.strItemNo,
                                     strCostUOM : cost.strUOM,
@@ -2745,21 +2746,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 current.set('strCostMethod', 'Percentage');
             }
         }
-        else if (combo.itemId === 'cboCostBilledBy') {
-            switch (record.get('strDescription')) {
-                case 'Vendor':
-                    current.set('intEntityVendorId', masterRecord.get('intEntityVendorId'));
-                    current.set('strVendorId', masterRecord.get('strVendorName'));
-                    break;
-                case 'Third Party':
-
-                    break;
-                default:
-                    current.set('intEntityVendorId', null);
-                    current.set('strVendorId', null);
-                    break;
-            }
-        }
     },
 
     onStorageLocationSelect: function(combo, records, eOpts) {
@@ -2906,9 +2892,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#colUnitCost": {
                 beforerender: this.onColumnBeforeRender
-            },
-            "#cboCostBilledBy": {
-                select: this.onChargeSelect
             }
         })
     }
