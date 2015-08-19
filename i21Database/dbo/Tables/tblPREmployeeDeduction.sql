@@ -9,6 +9,7 @@
     [dtmBeginDate]           DATETIME        NULL,
     [dtmEndDate]             DATETIME        NULL,
     [intAccountId]           INT             NULL,
+	[intExpenseAccountId]	 INT			 NULL,
     [strPaidBy]              NVARCHAR (15)   COLLATE Latin1_General_CI_AS DEFAULT ('Employee') NOT NULL,
     [ysnDefault]             BIT             DEFAULT ((1)) NOT NULL,
     [intSort]                INT             NULL,
@@ -79,8 +80,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'dblAmount'
 GO
-
-GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Limit',
     @level0type = N'SCHEMA',
@@ -116,6 +115,15 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPREmployeeDeduction',
     @level2type = N'COLUMN',
     @level2name = N'intAccountId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Expense Account',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPREmployeeDeduction',
+    @level2type = N'COLUMN',
+    @level2name = N'intExpenseAccountId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Paid By',

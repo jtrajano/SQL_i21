@@ -7,6 +7,7 @@ BEGIN
 	UPDATE tblPREmployeeDeduction
 	SET strCalculationType = Deduction.strCalculationType
 		,intAccountId = Deduction.intAccountId
+		,intExpenseAccountId = Deduction.intExpenseAccountId
 		,strDeductFrom = Deduction.strDeductFrom
 		,dblAmount = Deduction.dblAmount
 		,dblLimit = Deduction.dblLimit

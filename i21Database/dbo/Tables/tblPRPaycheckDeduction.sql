@@ -11,6 +11,7 @@
 	[dtmBeginDate] [datetime] NULL,
 	[dtmEndDate] [datetime] NULL,
 	[intAccountId] INT NULL,
+	[intExpenseAccountId] INT NULL,
 	[strPaidBy] [nvarchar](15) COLLATE Latin1_General_CI_AS NULL,
 	[ysnSet] [bit] NOT NULL,
 	[intSort] [int] NULL,
@@ -184,3 +185,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRPaycheckDeduction',
     @level2type = N'COLUMN',
     @level2name = N'intTypeDeductionId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Expense Account',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRPaycheckDeduction',
+    @level2type = N'COLUMN',
+    @level2name = N'intExpenseAccountId'
