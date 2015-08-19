@@ -131,11 +131,9 @@ SELECT
  CASE WHEN glarc_amt >= 0 THEN CASE WHEN (glarc_dr_cr_ind=''C'' OR glarc_dr_cr_ind IS NULL) THEN glarc_amt ELSE 0 END
  ELSE CASE WHEN glarc_dr_cr_ind = ''D'' THEN (glarc_amt * -1) ELSE 0 END END AS Credit,
  0 AS CreditRate, -- credit rate
- CASE WHEN glarc_units >= 0 THEN CASE WHEN glarc_dr_cr_ind = ''D'' THEN glarc_units ELSE 0 END
- ELSE CASE WHEN (glarc_dr_cr_ind=''C'' OR glarc_dr_cr_ind IS NULL) THEN (glarc_units * -1) ELSE 0 END END AS DebitUnits,
- CASE WHEN glarc_units >= 0 THEN CASE WHEN (glarc_dr_cr_ind=''C'' OR glarc_dr_cr_ind IS NULL) THEN glarc_units ELSE 0 END
- ELSE CASE WHEN glarc_dr_cr_ind = ''D'' THEN (glarc_units * -1) ELSE 0 END END AS CreditUnits,
-glarc_ref AS strDescription,
+ 0 AS DebitUnits,
+ 0 AS CreditUnits,
+ glarc_ref AS strDescription,
  NULL AS intCurrencyId,
  0 AS dblUnitsInlbs,
  glarc_doc AS strDocument,
@@ -157,7 +155,31 @@ glarc_ref AS strDescription,
  INNER JOIN tblGLCOACrossReference ON
  SUBSTRING(strCurrentExternalId,1,8) = glarc_acct1_8 AND SUBSTRING(strCurrentExternalId,10,8) = glarc_acct9_16
  INNER JOIN tblGLAccount ON tblGLAccount.intAccountId = tblGLCOACrossReference.inti21Id
-   
+  
+UPDATE 
+A SET DebitUnits = 
+case
+	WHEN B.glarc_units < 0	THEN B.glarc_units * -1
+	ELSE B.glarc_units END
+
+FROM
+#iRelyImptblGLJournalDetail A
+JOIN glarcmst B ON A.A4GLIdentity = B.A4GLIdentity
+WHERE A.Debit > 0
+
+UPDATE 
+A SET CreditUnits = 
+	CASE 
+		WHEN B.glarc_units < 0	THEN B.glarc_units * -1
+		ELSE B.glarc_units END
+
+FROM
+#iRelyImptblGLJournalDetail A
+JOIN glarcmst B ON A.A4GLIdentity = B.A4GLIdentity
+WHERE A.Credit > 0
+
+
+
  IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
    
  --+++++++++++++++++++++++++++++++++
