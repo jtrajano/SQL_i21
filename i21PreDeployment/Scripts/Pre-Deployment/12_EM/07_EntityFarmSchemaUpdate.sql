@@ -30,32 +30,65 @@ BEGIN
 			)
 		')	
 		PRINT '***  Move the data Entity Farm   ***'
-		EXEC('
-			DELETE FROM tblEntityFarm
+		IF EXISTS  (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblARCustomerFarm'  and [COLUMN_NAME] = 'intEntityCustomerId' )
+		BEGIN
+			EXEC('
+				DELETE FROM tblEntityFarm
 
-			INSERT INTO tblEntityFarm (
-				intFarmFieldId					,intEntityId				,strFarmNumber
-				,strFarmDescription				,strFieldNumber
-				,strFieldDescription			,strDefaultLocation			,dblAcres
-				,strFSANumber					,ysnObsolete				,dblLatitudeDegrees
-				,strLatitudeNS					,dblLongitudeDegrees		,strLongitudeEW
-				,strComments					,strSplitNumber				,strSplitType
-				,strFieldMapFileName			,strDirections				,intConcurrencyId
+				INSERT INTO tblEntityFarm (
+					intFarmFieldId					,intEntityId				,strFarmNumber
+					,strFarmDescription				,strFieldNumber
+					,strFieldDescription			,strDefaultLocation			,dblAcres
+					,strFSANumber					,ysnObsolete				,dblLatitudeDegrees
+					,strLatitudeNS					,dblLongitudeDegrees		,strLongitudeEW
+					,strComments					,strSplitNumber				,strSplitType
+					,strFieldMapFileName			,strDirections				,intConcurrencyId
 
-			)
-			SELECT 
-				intFarmFieldId					,intEntityCustomerId		,strFarmNumber
-				,strFarmDescription				,strFieldNumber
-				,strFieldDescription			,strDefaultLocation			,dblAcres
-				,strFSANumber					,ysnObsolete				,dblLatitudeDegrees
-				,strLatitudeNS					,dblLongitudeDegrees		,strLongitudeEW
-				,strComments					,strSplitNumber				,strSplitType
-				,strFieldMapFileName			,strDirections				,intConcurrencyId
+				)
+				SELECT 
+					intFarmFieldId					,intEntityCustomerId		,strFarmNumber
+					,strFarmDescription				,strFieldNumber
+					,strFieldDescription			,strDefaultLocation			,dblAcres
+					,strFSANumber					,ysnObsolete				,dblLatitudeDegrees
+					,strLatitudeNS					,dblLongitudeDegrees		,strLongitudeEW
+					,strComments					,strSplitNumber				,strSplitType
+					,strFieldMapFileName			,strDirections				,intConcurrencyId
 
-			FROM tblARCustomerFarm
+				FROM tblARCustomerFarm
 
 		
-		')
+			')
+		END
+		ELSE
+		BEGIN
+			EXEC('
+				DELETE FROM tblEntityFarm
+
+				INSERT INTO tblEntityFarm (
+					intFarmFieldId					,intEntityId				,strFarmNumber
+					,strFarmDescription				,strFieldNumber
+					,strFieldDescription			,strDefaultLocation			,dblAcres
+					,strFSANumber					,ysnObsolete				,dblLatitudeDegrees
+					,strLatitudeNS					,dblLongitudeDegrees		,strLongitudeEW
+					,strComments					,strSplitNumber				,strSplitType
+					,strFieldMapFileName			,strDirections				,intConcurrencyId
+
+				)
+				SELECT 
+					intFarmFieldId					,intEntityId				,strFarmNumber
+					,strFarmDescription				,strFieldNumber
+					,strFieldDescription			,strDefaultLocation			,dblAcres
+					,strFSANumber					,ysnObsolete				,dblLatitudeDegrees
+					,strLatitudeNS					,dblLongitudeDegrees		,strLongitudeEW
+					,strComments					,strSplitNumber				,strSplitType
+					,strFieldMapFileName			,strDirections				,intConcurrencyId
+
+				FROM tblARCustomerFarm
+
+		
+			')
+		END
+		
 	END 
 
 	

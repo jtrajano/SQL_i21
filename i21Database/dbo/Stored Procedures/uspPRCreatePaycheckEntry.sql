@@ -294,6 +294,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 			,[dtmBeginDate]
 			,[dtmEndDate]
 			,[intAccountId]
+			,[intExpenseAccountId]
 			,[strPaidBy]
 			,[intSort]
 			,[intConcurrencyId])
@@ -309,6 +310,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 			,[dtmBeginDate]
 			,[dtmEndDate]
 			,[intAccountId]
+			,[intExpenseAccountId]
 			,[strPaidBy]
 			,[intSort]
 			,1

@@ -1,7 +1,7 @@
 CREATE PROCEDURE [dbo].[uspTRGetCustomerFreight]
 	 @intEntityCustomerId AS INT,
 	 @intItemId AS INT,
-	 @intSupplyPointId AS INT,
+	 @strZipCode NVARCHAR (MAX),
 	 @intShipViaId as int,
 	 @intShipToId as int,
 	 @dblReceiptGallons as decimal(18,6),
@@ -11,8 +11,8 @@ CREATE PROCEDURE [dbo].[uspTRGetCustomerFreight]
 	 @dblInvoiceFreightRate decimal(18,6) OUTPUT,
 	 @dblReceiptFreightRate decimal(18,6) OUTPUT,
 	 @dblReceiptSurchargeRate decimal(18,6) OUTPUT,
-	 @dblInvoiceSurchargeRate decimal(18,6) OUTPUT
---	 @ysnIncludeInPrice bit
+	 @dblInvoiceSurchargeRate decimal(18,6) OUTPUT,
+	 @ysnFreightInPrice bit OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -31,7 +31,6 @@ DECLARE @freight decimal(18,6),
 		@intEntityShipViaId int,
 		@intMiles int,
 		@dblRate decimal(18,6),
-		@ysnFreightInPrice bit,
 		@dblMinimumUnits decimal(18,6),
 		@dblCostRatePerUnit decimal(18,6),
 		@dblInvoiceRatePerUnit decimal(18,6);
@@ -48,7 +47,7 @@ set @dblInvoiceSurchargeRate =0;
      BEGIN
 		RAISERROR('Category is not setup for Item', 16, 1);
 	 END
-	 
+
 	 select top 1 @ysnFreightOnly = CF.ysnFreightOnly,
 	              @strFreightType = CF.strFreightType,
 	  		       @intEntityShipViaId = CF.intShipViaId,
@@ -58,7 +57,7 @@ set @dblInvoiceSurchargeRate =0;
 	  		       @dblMinimumUnits = CF.dblMinimumUnits
 	 from tblARCustomerFreightXRef CF 
 	          where CF.intEntityCustomerId = @intEntityCustomerId 
-	      	         and CF.intSupplyPointId = @intSupplyPointId
+			         and CF.strZipCode = @strZipCode
 	  			     and CF.intCategoryId = @intCategoryid
                      and CF.intEntityLocationId = @intShipToId
      IF ((isNull(@dblMinimumUnits,0) > isNull(@dblInvoiceGallons,0)) or (isNull(@dblMinimumUnits,0) > isNull(@dblReceiptGallons,0)) )
@@ -127,7 +126,12 @@ BEGIN
     set @dblInvoiceSurchargeRate = 0;
 END
 
---set @ysnIncludeInPrice = @ysnFreightInPrice;
+
+if (@ysnFreightInPrice is null)
+BEGIN
+    set @ysnFreightInPrice = 0;
+END
+
 END TRY
 BEGIN CATCH
 	SELECT 

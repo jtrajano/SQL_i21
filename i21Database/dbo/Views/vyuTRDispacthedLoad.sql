@@ -50,7 +50,10 @@ LG.strExternalLoadNumber as strSupplierLoadNumber,
 (select strPricingType from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId ) as strInboundPricingType,
 (select strPricingType from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intCounterPartyContractDetailId  ) as strOutboundPricingType,
 (select dblAdjustment from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId )  as dblInboundAdjustment,
-(select dblAdjustment from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intCounterPartyContractDetailId )  as dblOutboundAdjustment
+(select dblAdjustment from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intCounterPartyContractDetailId )  as dblOutboundAdjustment,
+(select top 1 strZipCode from dbo.tblTRSupplyPoint SP
+                                    join dbo.tblEntityLocation EL on SP.intEntityLocationId = EL.intEntityLocationId and SP.intEntityVendorId = EL.intEntityId
+									where SP.intEntityLocationId = LG.intEntityLocationId) as strZipCode
 from dbo.vyuLGLoadView LG
 where 
  (IsNull(LG.ysnDispatched,0)=1)  and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and
@@ -107,7 +110,8 @@ LG.strExternalLoadNumber as strSupplierLoadNumber,
 null as strInboundPricingType,
 (select strPricingType from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId  ) as strOutboundPricingType,
 null as dblInboundAdjustment,
-(select dblAdjustment from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId  ) as dblOutboundAdjustment  
+(select dblAdjustment from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId  ) as dblOutboundAdjustment,
+(select strZipPostalCode from dbo.tblSMCompanyLocation SM where LG.intCompanyLocationId = SM.intCompanyLocationId) as strZipCode 
 from dbo.vyuLGLoadView LG
 where 
  (IsNull(LG.ysnDispatched,0)=1)  and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and

@@ -12,6 +12,7 @@ PRINT N'END Update all existing Item Locations and set Allow Negative Inventory 
 PRINT N'BEGIN Update all existing Category Standard UOM to reference Category UOM'
 
 	IF EXISTS(SELECT * FROM sys.columns WHERE name = 'intUOMId' AND object_id = OBJECT_ID('tblICCategory'))
+		AND EXISTS(SELECT * FROM sys.columns WHERE name = 'intCategoryUOMId' AND object_id = OBJECT_ID('tblICCategoryUOM'))
 	BEGIN
 		EXEC ('
 			UPDATE tblICCategory

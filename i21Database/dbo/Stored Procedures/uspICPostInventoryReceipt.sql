@@ -224,6 +224,43 @@ BEGIN
 	DECLARE @ItemsForPost AS ItemCostingTableType  
 	DECLARE @CustodyItemsForPost AS ItemCostingTableType  
 
+	-- Process the Other Charges
+	BEGIN 
+		INSERT INTO @GLEntries (
+			[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+		)	
+		EXEC dbo.uspICPostInventoryReceiptOtherCharges 
+			@intTransactionId
+			,@strBatchId
+			,@intUserId
+			,@INVENTORY_RECEIPT_TYPE
+			
+	END 
+
 	-- Get company owned items to post. 
 	BEGIN 
 		INSERT INTO @ItemsForPost (  
@@ -488,7 +525,7 @@ BEGIN
 		END
 	END
 
-	-- Process the Other Charges
+	-- Process the Inventory Receipt Taxes
 	BEGIN 
 		INSERT INTO @GLEntries (
 			[dtmDate] 
@@ -517,7 +554,7 @@ BEGIN
 			,[strModuleName]
 			,[intConcurrencyId]
 		)	
-		EXEC dbo.uspICPostInventoryReceiptOtherCharges 
+		EXEC dbo.uspICPostInventoryReceiptTaxes 
 			@intTransactionId
 			,@strBatchId
 			,@intUserId
@@ -597,6 +634,42 @@ BEGIN
 				,[intConcurrencyId]
 			)	
 			EXEC dbo.uspICUnpostInventoryReceiptOtherCharges 
+				@intTransactionId
+				,@strBatchId
+				,@intUserId
+				,@INVENTORY_RECEIPT_TYPE			
+		END
+
+		-- Unpost the Receipt Taxes
+		BEGIN 
+			INSERT INTO @GLEntries (
+				[dtmDate] 
+				,[strBatchId]
+				,[intAccountId]
+				,[dblDebit]
+				,[dblCredit]
+				,[dblDebitUnit]
+				,[dblCreditUnit]
+				,[strDescription]
+				,[strCode]
+				,[strReference]
+				,[intCurrencyId]
+				,[dblExchangeRate]
+				,[dtmDateEntered]
+				,[dtmTransactionDate]
+				,[strJournalLineDescription]
+				,[intJournalLineNo]
+				,[ysnIsUnposted]
+				,[intUserId]
+				,[intEntityId]
+				,[strTransactionId]
+				,[intTransactionId]
+				,[strTransactionType]
+				,[strTransactionForm]
+				,[strModuleName]
+				,[intConcurrencyId]
+			)	
+			EXEC dbo.uspICUnpostInventoryReceiptTaxes 
 				@intTransactionId
 				,@strBatchId
 				,@intUserId

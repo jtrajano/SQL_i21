@@ -13,7 +13,8 @@
 			ISNULL(APP.dblWithheld,0) AS dblWithheldAmount,
 			ISNULL(CMBT.dblAmount,0) AS dblAmount,
 			CMBA.strCbkNo,
-			CMBT.strMemo,
+			--CMBT.strMemo, --Remove Field notes from CM
+			APP.strNotes,
 			CMBT.dtmDate,
 			CMBT.strReferenceNo AS chkNo,
 			CMBT.strPayee,

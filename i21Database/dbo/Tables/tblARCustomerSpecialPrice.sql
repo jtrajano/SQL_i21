@@ -15,6 +15,7 @@
     [intRackVendorId]   INT				NULL,
     [intRackItemId] INT				NULL,
 	[intEntityLocationId] INT			NULL,
+	[intRackLocationId] INT			NULL,
     [intConcurrencyId]  INT             NOT NULL,
     CONSTRAINT [PK_tblARCustomerSpecialPrice] PRIMARY KEY CLUSTERED ([intSpecialPriceId] ASC),
 	CONSTRAINT [FK_tblARCustomerSpecialPrice_tblEntityLocation] FOREIGN KEY ([intEntityLocationId]) REFERENCES [tblEntityLocation]([intEntityLocationId])

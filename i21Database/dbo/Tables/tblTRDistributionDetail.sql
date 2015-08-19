@@ -8,6 +8,7 @@
 	[dblPrice] DECIMAL(18, 6) NULL DEFAULT 0, 
 	[dblFreightRate] DECIMAL(18, 6) NULL DEFAULT 0,
 	[dblDistSurcharge] DECIMAL(18, 6) NULL DEFAULT 0,
+	[ysnFreightInPrice] BIT  DEFAULT ((0)) NOT NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	CONSTRAINT [PK_tblTRDistributionDetail] PRIMARY KEY ([intDistributionDetailId]),
 	CONSTRAINT [FK_tblTRDistributionDetail_tblTRDistributionHeader_intDistributionHeaderId] FOREIGN KEY ([intDistributionHeaderId]) REFERENCES [dbo].[tblTRDistributionHeader] ([intDistributionHeaderId]) ON DELETE CASCADE,

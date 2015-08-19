@@ -6,7 +6,7 @@
     [intTransactionReversed]				INT             NULL ,
     [dtmDate]              DATETIME        NOT NULL DEFAULT GETDATE(),
     [dtmDueDate]           DATETIME        NOT NULL DEFAULT GETDATE(),
-    [intAccountId]         INT             NOT NULL DEFAULT 0,
+    [intAccountId]         INT             NULL ,
     [strReference]			NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
 	[strApprovalNotes]     NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
 	[strComment]			NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,

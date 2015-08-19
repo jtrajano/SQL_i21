@@ -4,6 +4,7 @@
 	[strDescription] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strCheckLiteral] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intAccountId] INT NULL,
+	[intExpenseAccountId] INT NULL,
 	[strDeductFrom] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strCalculationType] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[dblAmount] [numeric](18, 6) NULL DEFAULT ((0)),
@@ -144,3 +145,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPRTypeDeduction',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Expense Account',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPRTypeDeduction',
+    @level2type = N'COLUMN',
+    @level2name = N'intExpenseAccountId'

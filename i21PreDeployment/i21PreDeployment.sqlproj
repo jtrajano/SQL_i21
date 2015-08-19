@@ -105,6 +105,8 @@
     <None Include="Scripts\Pre-Deployment\11_IC\1520_to_1530.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\02_UpdateGroupIdFromNonExistence.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\03_EntityCustomerFarmRename_DataFix.sql" />
+    <None Include="Scripts\Pre-Deployment\8_AP\UpdateMissingPaymentInfo.sql" />
+    <None Include="Scripts\Pre-Deployment\8_AP\UpdateBillStatus.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\04_EntityLocationTaxCodeUpdate.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\05_EntitySplitSchemaUpdate.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\07_EntityFarmSchemaUpdate.sql" />

@@ -809,8 +809,6 @@ IF @post = 1
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
 				,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge','Software'))) 
-													AND IST.intGeneralAccountId IS NOT NULL
-													AND IST.intGeneralAccountId <> 0
 													THEN
 														IST.intGeneralAccountId
 													ELSE
