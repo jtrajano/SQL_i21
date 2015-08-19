@@ -641,7 +641,8 @@ namespace iRely.Inventory.Model
         public int? intEntityVendorId { get; set; }
         public decimal? dblAmount { get; set; }
         public string strAllocateCostBy { get; set; }
-        public string strCostBilledBy { get; set; }
+        public bool? ysnAccrue { get; set; }
+        public bool? ysnPrice { get; set; }
         public int? intSort { get; set; }
 
         private string _contractNo;
@@ -797,7 +798,8 @@ namespace iRely.Inventory.Model
         public string strVendorId { get; set; }
         public decimal? dblAmount { get; set; }
         public string strAllocateCostBy { get; set; }
-        public string strCostBilledBy { get; set; }
+        public bool? ysnAccrue { get; set; }
+        public bool? ysnPrice { get; set; }
 
         public tblICInventoryReceiptCharge tblICInventoryReceiptCharge { get; set; }
     }

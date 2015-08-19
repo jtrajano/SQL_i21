@@ -171,7 +171,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intEntityVendorId).HasColumnName("intEntityVendorId");
             this.Property(t => t.dblAmount).HasColumnName("dblAmount").HasPrecision(18, 6);
             this.Property(t => t.strAllocateCostBy).HasColumnName("strAllocateCostBy");
-            this.Property(t => t.strCostBilledBy).HasColumnName("strCostBilledBy");
+            this.Property(t => t.ysnAccrue).HasColumnName("ysnAccrue");
+            this.Property(t => t.ysnPrice).HasColumnName("ysnPrice");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasOptional(p => p.vyuICGetInventoryReceiptCharge)
@@ -204,7 +205,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strVendorId).HasColumnName("strVendorId");
             this.Property(t => t.dblAmount).HasColumnName("dblAmount").HasPrecision(18, 6);
             this.Property(t => t.strAllocateCostBy).HasColumnName("strAllocateCostBy");
-            this.Property(t => t.strCostBilledBy).HasColumnName("strCostBilledBy");
+            this.Property(t => t.ysnAccrue).HasColumnName("ysnAccrue");
+            this.Property(t => t.ysnPrice).HasColumnName("ysnPrice");
         }
     }
 
