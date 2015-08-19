@@ -391,29 +391,19 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     }
                 },
                 colChargeAmount: 'dblAmount',
-                colAllocateCostBy: {
-                    dataIndex: 'strAllocateCostBy',
-                    editor: {
-                        readOnly: '{checkInventoryCost}',
-                        store: '{allocateBy}'
-                    }
-                },
-                colPrice: 'ysnPrice',
-                colCostBilledBy: {
-                    dataIndex: 'strCostBilledBy',
-                    editor: {
-                        store: '{billedBy}'
-                    }
+                colAccrue: {
+                    dataIndex: 'ysnAccrue'
                 },
                 colCostVendor: {
                     dataIndex: 'strVendorId',
                     editor: {
-                        readOnly: '{readOnlyCostBilledBy}',
+                        readOnly: '{readOnlyAccrue}',
                         origValueField: 'intEntityVendorId',
                         origUpdateField: 'intEntityVendorId',
                         store: '{vendor}'
                     }
-                }
+                },
+                colPrice: 'ysnPrice'
             }
         }
     },
@@ -1476,17 +1466,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 current.set('strCostMethod', 'Percentage');
             }
         }
-        else if (combo.itemId === 'cboCostBilledBy') {
-            switch (record.get('strDescription')) {
-                case 'Third Party':
-
-                    break;
-                default:
-                    current.set('intEntityVendorId', null);
-                    current.set('strVendorId', null);
-                    break;
-            }
-        }
     },
 
     onQualityClick: function(button, e, eOpts) {
@@ -1554,9 +1533,6 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 beforerender: this.onItemGridColumnBeforeRender
             },
             "#cboOtherCharge": {
-                select: this.onChargeSelect
-            },
-            "#cboCostBilledBy": {
                 select: this.onChargeSelect
             },
             "#btnQuality": {

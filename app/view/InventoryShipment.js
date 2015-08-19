@@ -1911,36 +1911,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         }
                                                     },
                                                     {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colAllocateCostBy',
-                                                        text: 'Allocate Cost By',
-                                                        flex: 1,
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'strDescription',
-                                                                    dataType: 'string',
-                                                                    text: 'Allocate By',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboAllocateCostBy',
-                                                            displayField: 'strDescription',
-                                                            valueField: 'strDescription'
-                                                        }
-                                                    },
-                                                    {
                                                         xtype: 'checkcolumn',
-                                                        itemId: 'colPrice',
-                                                        text: 'Price',
-                                                        flex: 1
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colCostBilledBy',
-                                                        text: 'Cost Billed By',
-                                                        flex: 1,
+                                                        itemId: 'colAccrue',
+                                                        text: 'Accrue',
+                                                        flex: 0.7,
                                                         editor: {
                                                             xtype: 'gridcombobox',
                                                             columns: [
@@ -1987,6 +1961,12 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                             displayField: 'strVendorId',
                                                             valueField: 'strVendorId'
                                                         }
+                                                    },
+                                                    {
+                                                        xtype: 'checkcolumn',
+                                                        itemId: 'colPrice',
+                                                        text: 'Price',
+                                                        flex: 0.7
                                                     }
                                                 ],
                                                 viewConfig: {

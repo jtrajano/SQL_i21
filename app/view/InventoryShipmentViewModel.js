@@ -181,22 +181,6 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                     name: 'strDescription'
                 }
             ]
-        },
-        billedBy: {
-            autoLoad: true,
-            data: [
-                {
-                    strDescription: 'Third Party'
-                },
-                {
-                    strDescription: 'None'
-                }
-            ],
-            fields: [
-                {
-                    name: 'strDescription'
-                }
-            ]
         }
     },
 
@@ -279,17 +263,13 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                 return true;
             }
         },
-
-        readOnlyCostBilledBy: function (get) {
-            switch (get('grdCharges.selection.strCostBilledBy')) {
-                case 'Vendor':
+        readOnlyAccrue: function (get) {
+            switch (get('grdCharges.selection.ysnAccrue')) {
+                case false:
                     return true;
-                    break;
-                case 'Third Party':
-                    return false;
                     break;
                 default:
-                    return true;
+                    return false;
                     break;
             }
         }
