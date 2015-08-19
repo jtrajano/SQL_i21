@@ -124,7 +124,7 @@ BEGIN
 				* dbo.fnCalculateStockUnitQty(Source_Query.dblOpenReceive, Source_Query.dblUnitQty)
 				/ Source_Query.dblTotalStockUnit 
 			)
-			,Source_Query.strCostBilledBy
+			,Source_Query.ysnAccrue
 			,Source_Query.ysnInventoryCost
 		)
 	;
