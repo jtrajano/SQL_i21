@@ -53,7 +53,7 @@ BEGIN
 				ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
 			INNER JOIN (
 					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
-							,strCostBilledBy
+							,ysnAccrue
 							,intContractId
 							,intEntityVendorId
 							,ysnInventoryCost
@@ -61,7 +61,7 @@ BEGIN
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Weight
 							AND CalculatedCharge.intContractId IS NOT NULL 
-					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost
+					GROUP BY ysnAccrue, intContractId, intEntityVendorId, ysnInventoryCost
 				) CalculatedCharges 
 					ON ReceiptItem.intOrderId = CalculatedCharges.intContractId
 			LEFT JOIN dbo.tblICItemUOM StockUOM
@@ -107,7 +107,7 @@ BEGIN
 					ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
 				INNER JOIN (
 					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
-							,strCostBilledBy
+							,ysnAccrue
 							,intContractId
 							,intEntityVendorId
 							,ysnInventoryCost
@@ -117,7 +117,7 @@ BEGIN
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Weight
 							AND CalculatedCharge.intContractId IS NOT NULL 
-					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
+					GROUP BY ysnAccrue, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
 				) CalculatedCharges 
 					ON ReceiptItem.intOrderId = CalculatedCharges.intContractId
 				LEFT JOIN (
@@ -143,7 +143,7 @@ BEGIN
 	) AS Source_Query  
 		ON ReceiptItemAllocatedCharge.intInventoryReceiptId = Source_Query.intInventoryReceiptId
 		AND ReceiptItemAllocatedCharge.intEntityVendorId = Source_Query.intEntityVendorId
-		AND ReceiptItemAllocatedCharge.strCostBilledBy = Source_Query.strCostBilledBy
+		AND ReceiptItemAllocatedCharge.ysnAccrue = Source_Query.ysnAccrue
 		AND ReceiptItemAllocatedCharge.ysnInventoryCost = Source_Query.ysnInventoryCost
 
 	-- Add the other charge to an existing allocation. 
@@ -163,7 +163,7 @@ BEGIN
 			,[intInventoryReceiptItemId]
 			,[intEntityVendorId]
 			,[dblAmount]
-			,[strCostBilledBy]
+			,[ysnAccrue]
 			,[ysnInventoryCost]
 		)
 		VALUES (

@@ -249,7 +249,8 @@ BEGIN
 		,intInventoryReceiptItemId
 		,strInventoryTransactionTypeName
 		,strTransactionForm
-		,strCostBilledBy
+		,ysnAccrue
+		,ysnPrice
 		,ysnInventoryCost
 	)
 	AS 
@@ -268,7 +269,8 @@ BEGIN
 				,ReceiptItem.intInventoryReceiptItemId
 				,strInventoryTransactionTypeName = TransType.strName
 				,strTransactionForm = @strTransactionForm
-				,AllocatedOtherCharges.strCostBilledBy
+				,AllocatedOtherCharges.ysnAccrue
+				,AllocatedOtherCharges.ysnPrice
 				,AllocatedOtherCharges.ysnInventoryCost
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId

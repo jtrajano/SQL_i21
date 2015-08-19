@@ -140,7 +140,7 @@ BEGIN
 	) AS Source_Query  
 		ON ReceiptItemAllocatedCharge.intInventoryReceiptId = Source_Query.intInventoryReceiptId
 		AND ReceiptItemAllocatedCharge.intEntityVendorId = Source_Query.intEntityVendorId
-		AND ReceiptItemAllocatedCharge.strCostBilledBy = Source_Query.strCostBilledBy
+		AND ReceiptItemAllocatedCharge.ysnAccrue = Source_Query.ysnAccrue
 		AND ReceiptItemAllocatedCharge.ysnInventoryCost = Source_Query.ysnInventoryCost
 		
 
@@ -161,7 +161,7 @@ BEGIN
 			,[intInventoryReceiptItemId]
 			,[intEntityVendorId]
 			,[dblAmount]
-			,[strCostBilledBy]
+			,[ysnAccrue]
 			,[ysnInventoryCost]
 		)
 		VALUES (
@@ -174,7 +174,7 @@ BEGIN
 				* dbo.fnCalculateStockUnitQty(Source_Query.dblOpenReceive, Source_Query.dblUnitQty)
 				/ Source_Query.dblTotalWeight 
 			)
-			,Source_Query.strCostBilledBy
+			,Source_Query.ysnAccrue
 			,Source_Query.ysnInventoryCost
 		)
 	;

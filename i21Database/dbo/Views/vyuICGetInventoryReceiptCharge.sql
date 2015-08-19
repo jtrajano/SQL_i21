@@ -14,10 +14,12 @@ SELECT ReceiptCharge.intInventoryReceiptChargeId
 	, Charge.strUnitType
 	, Charge.intOnCostTypeId
 	, strOnCostType = Charge.strOnCostType
-	, Vendor.strVendorId
 	, ReceiptCharge.dblAmount
 	, ReceiptCharge.strAllocateCostBy
-	, ReceiptCharge.strCostBilledBy
+	, ReceiptCharge.ysnAccrue
+	, ReceiptCharge.intEntityVendorId
+	, Vendor.strVendorId
+	, ReceiptCharge.ysnPrice
 FROM tblICInventoryReceiptCharge ReceiptCharge
 	LEFT JOIN vyuICGetOtherCharges Charge ON Charge.intItemId = ReceiptCharge.intChargeId
 	LEFT JOIN tblAPVendor Vendor ON Vendor.intEntityVendorId = ReceiptCharge.intEntityVendorId

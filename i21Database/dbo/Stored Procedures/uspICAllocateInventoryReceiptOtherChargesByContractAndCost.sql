@@ -57,7 +57,7 @@ BEGIN
 					AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 				INNER JOIN (
 					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
-							,strCostBilledBy
+							,ysnAccrue
 							,intContractId
 							,intEntityVendorId
 							,ysnInventoryCost
@@ -67,7 +67,7 @@ BEGIN
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Cost
 							AND CalculatedCharge.intContractId IS NOT NULL 
-					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
+					GROUP BY ysnAccrue, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
 				) CalculatedCharges 
 					ON CalculatedCharges.intContractId = ReceiptItem.intOrderId
 				LEFT JOIN (
@@ -84,7 +84,7 @@ BEGIN
 	) AS Source_Query  
 		ON ReceiptItemAllocatedCharge.intInventoryReceiptId = Source_Query.intInventoryReceiptId
 		AND ReceiptItemAllocatedCharge.intEntityVendorId = Source_Query.intEntityVendorId
-		AND ReceiptItemAllocatedCharge.strCostBilledBy = Source_Query.strCostBilledBy
+		AND ReceiptItemAllocatedCharge.ysnAccrue = Source_Query.ysnAccrue
 		AND ReceiptItemAllocatedCharge.ysnInventoryCost = Source_Query.ysnInventoryCost
 
 	-- Add the other charge to an existing allocation. 
@@ -105,7 +105,7 @@ BEGIN
 			,[intInventoryReceiptItemId]
 			,[intEntityVendorId]
 			,[dblAmount]
-			,[strCostBilledBy]
+			,[ysnAccrue]
 			,[ysnInventoryCost]
 		)
 		VALUES (
@@ -118,7 +118,7 @@ BEGIN
 				* Source_Query.dblUnitCost
 				/ Source_Query.dblTotalCost 
 			)
-			,Source_Query.strCostBilledBy
+			,Source_Query.ysnAccrue
 			,Source_Query.ysnInventoryCost
 		)
 	;
