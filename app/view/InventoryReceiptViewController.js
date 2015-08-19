@@ -2707,6 +2707,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         if (current && (newValue === null || newValue === '')){
             current.set('intWeightUOMId', null);
             current.set('dblWeightUOMConvFactor', null);
+            current.set('dblGross', 0);
+            current.set('dblNet', 0);
             if (current.tblICInventoryReceiptItemLots()) {
                 Ext.Array.each(current.tblICInventoryReceiptItemLots().data.items, function(lot) {
                     if (!lot.dummy) {
