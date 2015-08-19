@@ -18,7 +18,6 @@ SELECT ShipmentCharge.intInventoryShipmentChargeId
 	, ShipmentCharge.ysnAccrue
 	, ShipmentCharge.intEntityVendorId
 	, Vendor.strVendorId
-	, ShipmentCharge.ysnPrice
 FROM tblICInventoryShipmentCharge ShipmentCharge
 	LEFT JOIN vyuICGetOtherCharges Charge ON Charge.intItemId = ShipmentCharge.intChargeId
 	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = ShipmentCharge.intCostUOMId
