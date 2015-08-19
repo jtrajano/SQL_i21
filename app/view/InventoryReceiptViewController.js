@@ -489,7 +489,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 readOnly: '{current.ysnPosted}',
                 colContract: {
                     hidden: '{hideContractColumn}',
-                    dataIndex: 'intContractNumber',
+                    dataIndex: 'strContractNumber',
                     editor: {
                         origValueField: 'intContractHeaderId',
                         origUpdateField: 'intContractId',
@@ -1789,7 +1789,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     strItemNo : cost.strItemNo,
                                     strCostUOM : cost.strUOM,
                                     strVendorId : cost.strVendorName,
-                                    intContractNumber : po.get('intContractNumber')
+                                    strContractNumber : po.get('strContractNumber')
                                 });
                                 receipt.tblICInventoryReceiptCharges().add(newCost);
                             }
@@ -1872,7 +1872,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 if (iRely.Functions.isEmpty(current.get('intOrderId'))) {
                     current.set('intLineNo', po.get('intContractDetailId'));
                     current.set('intOrderId', po.get('intContractHeaderId'));
-                    current.set('strOrderNumber', po.get('intContractNumber'));
+                    current.set('strOrderNumber', po.get('strContractNumber'));
                 }
                 break;
 
@@ -2047,7 +2047,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 matchFieldWidth: false,
                 columns: [
                     {
-                        dataIndex: 'intContractNumber',
+                        dataIndex: 'strContractNumber',
                         dataType: 'string',
                         text: 'Contract Number',
                         flex: 1
@@ -2131,8 +2131,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 ],
                 itemId: 'cboOrderNumber',
-                displayField: 'intContractNumber',
-                valueField: 'intContractNumber',
+                displayField: 'strContractNumber',
+                valueField: 'strContractNumber',
                 store: win.viewModel.storeInfo.purchaseContract,
                 pickerWidth: 800,
                 defaultFilters: [{

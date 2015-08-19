@@ -644,14 +644,14 @@ namespace iRely.Inventory.Model
         public string strCostBilledBy { get; set; }
         public int? intSort { get; set; }
 
-        private int? _contractNo;
+        private string _contractNo;
         [NotMapped]
-        public int? intContractNumber
+        public string strContractNumber
         {
             get
             {
                 if (vyuICGetInventoryReceiptCharge != null)
-                    return vyuICGetInventoryReceiptCharge.intContractNumber;
+                    return vyuICGetInventoryReceiptCharge.strContractNumber;
                 else
                     return null;
             }
@@ -784,7 +784,7 @@ namespace iRely.Inventory.Model
         public int intInventoryReceiptChargeId { get; set; }
         public int intInventoryReceiptId { get; set; }
         public int? intContractId { get; set; }
-        public int? intContractNumber { get; set; }
+        public string strContractNumber { get; set; }
         public string strItemNo { get; set; }
         public string strItemDescription { get; set; }
         public bool? ysnInventoryCost { get; set; }

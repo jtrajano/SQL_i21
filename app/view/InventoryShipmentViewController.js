@@ -343,7 +343,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 readOnly: '{current.ysnPosted}',
                 colContract: {
                     hidden: '{hideContractColumn}',
-                    dataIndex: 'intContractNumber',
+                    dataIndex: 'strContractNumber',
                     editor: {
                         origValueField: 'intContractHeaderId',
                         origUpdateField: 'intContractId',
@@ -1014,7 +1014,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 matchFieldWidth: false,
                 columns: [
                     {
-                        dataIndex: 'intContractNumber',
+                        dataIndex: 'strContractNumber',
                         dataType: 'string',
                         text: 'Contract Number',
                         flex: 1
@@ -1128,8 +1128,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 ],
                 pickerWidth: 600,
                 itemId: 'cboOrderNumber',
-                displayField: 'intContractNumber',
-                valueField: 'intContractNumber',
+                displayField: 'strContractNumber',
+                valueField: 'strContractNumber',
                 store: win.viewModel.storeInfo.salesContract,
                 defaultFilters: [{
                     column: 'strContractType',
