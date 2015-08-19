@@ -771,7 +771,7 @@
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByContractAndCost calculation for test case 1.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByContractAndUnits calculation for test case 2.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByContractAndUnits for the basics.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByContractAndWeights calculation for test case 3.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByContractAndStockUnit calculation for test case 3.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherChargesByContractAndWeights for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherCharges for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAllocateInventoryReceiptOtherCharges for test case 1.sql" />
