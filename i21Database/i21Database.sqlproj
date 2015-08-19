@@ -2246,6 +2246,8 @@
     <Build Include="dbo\Views\vyuCFCardAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryReceiptTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostInventoryReceiptTaxes.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByContractAndStockUnit.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByStockUnit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
