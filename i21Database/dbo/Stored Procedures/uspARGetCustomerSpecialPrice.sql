@@ -8,8 +8,6 @@
 	,@Price				NUMERIC(18,6)	= NULL OUTPUT
 	,@Pricing			NVARCHAR(250)	= NULL OUTPUT	
 	,@VendorId			INT				= NULL
-	,@SupplyPointId		INT				= NULL
-	,@LastCost			NUMERIC(18,6)	= NULL
 AS		
 	
 	DECLARE @ItemVendorId		INT
@@ -55,8 +53,7 @@ AS
 		,intRackVendorId INT
 		,intRackItemId INT
 		,intEntityLocationId INT
-		,dblCustomerPrice NUMERIC(18,6)
-		,strPricing NVARCHAR(200) COLLATE Latin1_General_CI_AS)
+		,dblCustomerPrice NUMERIC(18,6))
 
 
 	INSERT INTO @CustomerSpecialPricing(
@@ -74,8 +71,7 @@ AS
 		,intRackVendorId
 		,intRackItemId
 		,intEntityLocationId
-		,dblCustomerPrice
-		,strPricing)
+		,dblCustomerPrice)
 	SELECT
 		SP.intSpecialPriceId
 		,SP.intEntityCustomerId
@@ -92,7 +88,6 @@ AS
 		,SP.intRackItemId
 		,SP.intEntityLocationId
 		,NULL
-		,''
 	FROM
 		tblARCustomerSpecialPrice SP
 	INNER JOIN
@@ -118,7 +113,7 @@ AS
 					WHEN strPriceBasis = 'C'
 						THEN	(CASE
 									WHEN strCostToUse = 'Last'
-										THEN ISNULL(ISNULL(@LastCost, VI.dblLastCost), 0.00)
+										THEN ISNULL(VI.dblLastCost, 0.00)
 									WHEN strCostToUse = 'Standard'
 										THEN ISNULL(VI.dblStandardCost, 0.00)
 									WHEN strCostToUse = 'Average'
@@ -133,7 +128,7 @@ AS
 								 +
 								(	(CASE
 									WHEN strCostToUse = 'Last'
-										THEN ISNULL(ISNULL(@LastCost, VI.dblLastCost), 0.00)
+										THEN ISNULL(VI.dblLastCost, 0.00)
 									WHEN strCostToUse = 'Standard'
 										THEN ISNULL(VI.dblStandardCost, 0.00)
 									WHEN strCostToUse = 'Average'
@@ -147,9 +142,9 @@ AS
 									END)
 								* (dblDeviation/100.00))
 					WHEN strPriceBasis = 'A'
-						THEN	((CASE
+						THEN	(CASE
 									WHEN strCostToUse = 'Last'
-										THEN ISNULL(ISNULL(@LastCost, VI.dblLastCost), 0.00)
+										THEN ISNULL(VI.dblLastCost, 0.00)
 									WHEN strCostToUse = 'Standard'
 										THEN ISNULL(VI.dblStandardCost, 0.00)
 									WHEN strCostToUse = 'Average'
@@ -168,7 +163,30 @@ AS
 										THEN ISNULL(VI.dblMSRPPrice, 0.00)
 									WHEN strCostToUse = 'Pricing Level'
 										THEN 0
-								END)								 
+								END)
+								 +
+								(	(CASE
+									WHEN strCostToUse = 'Last'
+										THEN ISNULL(VI.dblLastCost, 0.00)
+									WHEN strCostToUse = 'Standard'
+										THEN ISNULL(VI.dblStandardCost, 0.00)
+									WHEN strCostToUse = 'Average'
+										THEN ISNULL(VI.dblAverageCost, 0.00)
+									WHEN strCostToUse = 'EOM'
+										THEN ISNULL(VI.dblEndMonthCost, 0.00)
+									WHEN strCostToUse = 'Sale Price'
+										THEN ISNULL(VI.dblSalePrice, 0.00)
+									WHEN strCostToUse = 'Retail Price'
+										THEN ISNULL(VI.dblSalePrice, 0.00)
+									WHEN strCostToUse = 'Wholesale Price'
+										THEN ISNULL(VI.dblSalePrice, 0.00)
+									WHEN strCostToUse = 'Large Volume Pricing'
+										THEN ISNULL(VI.dblSalePrice, 0.00)
+									WHEN strCostToUse = 'MSRP'
+										THEN ISNULL(VI.dblMSRPPrice, 0.00)
+									WHEN strCostToUse = 'Pricing Level'
+										THEN 0
+									END)
 								+ dblDeviation)
 					WHEN strPriceBasis = 'S'
 						THEN VI.dblSalePrice - (VI.dblSalePrice * (dblDeviation/100.00)) 
@@ -189,33 +207,6 @@ AS
 								END) + dblDeviation
 					WHEN strPriceBasis = 'L'
 						THEN dblDeviation
-				END)
-			,strPricing  = 
-				(CASE 
-					WHEN strPriceBasis = 'X'
-						THEN ''
-					WHEN strPriceBasis = 'F'
-						THEN 'Customer Pricing of (F)Fixed'
-					WHEN strPriceBasis = 'C'
-						THEN 'Customer Pricing of (C)Inventory Cost + Pct'
-					WHEN strPriceBasis = 'A'
-						THEN 'Customer Pricing of (A)Inventory Cost + Amt'
-					WHEN strPriceBasis = 'S'
-						THEN 'Customer Pricing of (S)Sell - Pct'
-					WHEN strPriceBasis = 'M'
-						THEN 'Customer Pricing of (M)Sell - Amt'
-					WHEN strPriceBasis = '1'
-						THEN 'Customer Pricing of (1)Price Level + Amt'
-					WHEN strPriceBasis = '2'
-						THEN 'Customer Pricing of (2)Price Level + Amt'
-					WHEN strPriceBasis = '3'
-						THEN 'Customer Pricing of (3)Price Level + Amt'
-					WHEN strPriceBasis = 'R'
-						THEN 'Customer Pricing of (R)Fixed Rack + Amount'
-					WHEN strPriceBasis = 'L'
-						THEN 'Customer Pricing of (L)Link'
-					WHEN strPriceBasis = 'O'
-						THEN 'Customer Pricing of (O)Origin Rack + Amt'
 				END)
 		FROM
 			vyuICGetItemStock VI
@@ -252,8 +243,7 @@ AS
 				AND VI.intStockUOMId = UOM.intItemUOMId
 		LEFT OUTER JOIN
 			vyuTRRackPrice AS RACK
-				ON  VI.intItemId = RACK.intItemId
-				AND (RACK.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL)
+				ON  VI.intItemId = RACK.intItemId 
 				AND CAST(@TransactionDate AS DATE) >= CAST(RACK.dtmEffectiveDateTime AS DATE)
 		WHERE 
 			VI.intItemId = @ItemId
@@ -288,8 +278,7 @@ AS
 			,intRackVendorId INT
 			,intRackItemId INT
 			,intEntityLocationId INT
-			,dblCustomerPrice NUMERIC(18,6)
-			,strPricing NVARCHAR(200) COLLATE Latin1_General_CI_AS)
+			,dblCustomerPrice NUMERIC(18,6))
 
 		--Customer Group 
 		DECLARE @CustomerGroup TABLE(
@@ -345,8 +334,7 @@ AS
 			,intRackVendorId
 			,intRackItemId
 			,intEntityLocationId
-			,dblCustomerPrice
-			,strPricing)
+			,dblCustomerPrice)
 		SELECT
 			SP.intSpecialPriceId
 			,SP.intEntityId
@@ -363,7 +351,6 @@ AS
 			,SP.intRackItemId
 			,SP.intEntityLocationId
 			,SP.dblCustomerPrice
-			,SP.strPricing 
 		FROM
 			@CustomerSpecialPricing SP
 		INNER JOIN
@@ -371,28 +358,28 @@ AS
 				ON SP.strCustomerGroup = CG.strGroupName
 				
 		--Customer Group - Rack Vendor No + Rack Item No
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 SP.dblCustomerPrice FROM @SpecialGroupPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND SP.intEntityLocationId = TR.intEntityLocationId  WHERE SP.intRackItemId = @ItemId AND SP.intRackVendorId = @ItemVendorId AND (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialGroupPricing WHERE intRackItemId = @ItemId AND intRackVendorId = @ItemVendorId)
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 SP.strPricing FROM @SpecialGroupPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND SP.intEntityLocationId = TR.intEntityLocationId  WHERE SP.intRackItemId = @ItemId AND SP.intRackVendorId = @ItemVendorId AND (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))
+				SET @Pricing = 'Customer Group - Rack Vendor No + Rack Item No'
 				--SELECT @Price AS 'Price', @Pricing AS 'Pricing'
 				RETURN 1;
 			END
 
 		--Customer Group - Rack Vendor No
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 SP.dblCustomerPrice FROM @SpecialGroupPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND SP.intEntityLocationId = TR.intEntityLocationId  WHERE SP.intRackItemId = @ItemId AND (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialGroupPricing WHERE intRackVendorId = @ItemVendorId)
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 SP.strPricing FROM @SpecialGroupPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND SP.intEntityLocationId = TR.intEntityLocationId  WHERE SP.intRackItemId = @ItemId AND (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))
+				SET @Pricing = 'Customer Group - Rack Vendor No'
 				--SELECT @Price AS 'Price', @Pricing AS 'Pricing'
 				RETURN 1;
 			END
 
 		--Customer Group - Rack Item No
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 SP.dblCustomerPrice FROM @SpecialGroupPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND SP.intEntityLocationId = TR.intEntityLocationId  WHERE SP.intRackVendorId = @ItemVendorId AND (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialGroupPricing WHERE intRackItemId = @ItemId)
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 SP.strPricing FROM @SpecialGroupPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND SP.intEntityLocationId = TR.intEntityLocationId  WHERE SP.intRackVendorId = @ItemVendorId AND (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))
+				SET @Pricing = 'Customer Group - Rack Item No'
 				--SELECT @Price AS 'Price', @Pricing AS 'Pricing'
 				RETURN 1;
 			END
@@ -412,8 +399,7 @@ AS
 			,intRackVendorId INT
 			,intRackItemId INT
 			,intEntityLocationId INT
-			,dblCustomerPrice NUMERIC(18,6)
-			,strPricing NVARCHAR(200) COLLATE Latin1_General_CI_AS)
+			,dblCustomerPrice NUMERIC(18,6))
 					
 		--Customer Special Pricing
 		INSERT INTO @SpecialPricing (
@@ -431,8 +417,7 @@ AS
 			,intRackVendorId
 			,intRackItemId
 			,intEntityLocationId
-			,dblCustomerPrice
-			,strPricing)
+			,dblCustomerPrice)
 		SELECT
 			SP.intSpecialPriceId
 			,SP.intEntityId
@@ -449,7 +434,6 @@ AS
 			,SP.intRackItemId
 			,SP.intEntityLocationId
 			,SP.dblCustomerPrice
-			,SP.strPricing
 		FROM
 			@CustomerSpecialPricing SP
 		LEFT OUTER JOIN
@@ -460,119 +444,119 @@ AS
 			
 
 		--Customer - Rack Vendor No + Rack Item No
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 SP.dblCustomerPrice FROM @SpecialPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND SP.intEntityLocationId = TR.intEntityLocationId  WHERE SP.intRackItemId = @ItemId AND SP.intRackVendorId = @ItemVendorId AND (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intRackItemId = @ItemId AND intRackVendorId = @ItemVendorId)
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 SP.strPricing FROM @SpecialPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND SP.intEntityLocationId = TR.intEntityLocationId  WHERE SP.intRackItemId = @ItemId AND SP.intRackVendorId = @ItemVendorId AND (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))
+				SET @Pricing = 'Customer - Rack Vendor No + Rack Item No'
 				--SELECT @Price AS 'Price', @Pricing AS 'Pricing'	
 				RETURN 1;
 			END
 
 		--Customer - Vendor + Rack Vendor No
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND SP.intEntityLocationId = TR.intEntityLocationId  WHERE SP.intRackVendorId = @ItemVendorId AND (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intRackVendorId = @ItemVendorId)
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND SP.intEntityLocationId = TR.intEntityLocationId  WHERE SP.intRackVendorId = @ItemVendorId AND (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))
+				SET @Pricing = 'Customer - Rack Vendor No'
 				--SELECT @Price AS 'Price', @Pricing AS 'Pricing'	
 				RETURN 1;
 			END
 
 		--Customer - Rack Item No
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND SP.intEntityLocationId = TR.intEntityLocationId  WHERE SP.intRackItemId = @ItemId AND (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intRackItemId = @ItemId)
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND SP.intEntityLocationId = TR.intEntityLocationId  WHERE SP.intRackItemId = @ItemId AND (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))
+				SET @Pricing = 'Customer - Rack Item No'
 				--SELECT @Price AS 'Price', @Pricing AS 'Pricing'	
 				RETURN 1;
 			END										
 					
 
 		--Customer Group - Vendor + Item
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialGroupPricing WHERE intItemId = @ItemId AND intVendorId = @ItemVendorId)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialGroupPricing WHERE intItemId = @ItemId AND intVendorId = @ItemVendorId)
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE intItemId = @ItemId AND intVendorId = @ItemVendorId)
+				SET @Pricing = 'Customer Group - Vendor + Item'
 				--SELECT @Price AS 'Price', @Pricing AS 'Pricing'
 				RETURN 1;
 			END
 
 		--Customer Group - Vendor + Item Class
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialGroupPricing WHERE intItemId = @ItemId AND strClass = @ItemCategory)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialGroupPricing WHERE intItemId = @ItemId AND strClass = @ItemCategory)
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE intItemId = @ItemId AND strClass = @ItemCategory)
+				SET @Pricing = 'Customer Group - Vendor + Item Class'
 				--SELECT @Price AS 'Price', @Pricing AS 'Pricing'
 				RETURN 1;
 			END
 
 		--Customer Group - Vendor
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialGroupPricing WHERE intVendorId = @ItemVendorId)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialGroupPricing WHERE intVendorId = @ItemVendorId)
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE intVendorId = @ItemVendorId)
+				SET @Pricing = 'Customer Group - Vendor'
 				--SELECT @Price AS 'Price', @Pricing AS 'Pricing'
 				RETURN 1;
 			END		
 
 		--Customer Group - Item
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialGroupPricing WHERE intItemId = @ItemId)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialGroupPricing WHERE intItemId = @ItemId)
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE intItemId = @ItemId)
+				SET @Pricing = 'Customer Group - Item'
 				--SELECT @Price AS 'Price', @Pricing AS 'Pricing'				
 				RETURN 1;
 			END	
 				
 		--Customer Group - Item Class
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialGroupPricing WHERE strClass = @ItemCategory)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialGroupPricing WHERE strClass = @ItemCategory)
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE strClass = @ItemCategory)
+				SET @Pricing = 'Customer Group - Item Class'
 				--SELECT @Price AS 'Price', @Pricing AS 'Pricing'	
 				RETURN 1;
 			END			
 
 		--Customer - Vendor + Item
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId AND intVendorId = @ItemVendorId)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId AND intVendorId = @ItemVendorId)
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE intItemId = @ItemId AND intVendorId = @ItemVendorId)
+				SET @Pricing = 'Customer - Vendor + Item'
 				--SELECT @Price AS 'Price', @Pricing AS 'Pricing'	
 				RETURN 1;
 			END
 
 		--Customer - Vendor + Item Class
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId AND strClass = @ItemCategory)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId AND strClass = @ItemCategory)
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE intItemId = @ItemId AND strClass = @ItemCategory)
+				SET @Pricing = 'Customer - Vendor + Item Class'
 				--SELECT @Price AS 'Price', @Pricing AS 'Pricing'	
 				RETURN 1;
 			END
 
 		--Customer - Vendor
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialPricing WHERE intVendorId = @ItemVendorId)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intVendorId = @ItemVendorId)
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE intVendorId = @ItemVendorId)
+				SET @Pricing = 'Customer - Vendor'
 				--SELECT @Price AS 'Price', @Pricing AS 'Pricing'	
 				RETURN 1;
 			END		
 
 		--Customer - Item
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId)
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE intItemId = @ItemId)
+				SET @Pricing = 'Customer - Item'
 				--SELECT @Price AS 'Price', @Pricing AS 'Pricing'	
 				RETURN 1;
 			END	
 				
 		--Customer - Item Class
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @CustomerSpecialPricing WHERE strClass = @ItemCategory)
+		SET @Price = @UOMQuantity *	(SELECT dblCustomerPrice FROM @CustomerSpecialPricing WHERE strClass = @ItemCategory)
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @CustomerSpecialPricing WHERE strClass = @ItemCategory)
+				SET @Pricing = 'Customer - Item Class'
 				--SELECT @Price AS 'Price', @Pricing AS 'Pricing'	
 				RETURN 1;
 			END	
