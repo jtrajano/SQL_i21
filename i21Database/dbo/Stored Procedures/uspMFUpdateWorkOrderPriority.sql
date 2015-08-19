@@ -291,16 +291,15 @@ BEGIN TRY
 		,@intUserId intLastModifiedUserId
 		,WS.intSequenceNo
 	FROM tblMFWorkOrder W
-	JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
-		AND W.intStatusId <> 13
-		AND intManufacturingCellId = @intManufacturingCellId
-	JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId
+	JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId AND W.intManufacturingCellId = @intManufacturingCellId
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	LEFT JOIN tblMFPackType P ON P.intPackTypeId = I.intPackTypeId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
 	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN dbo.tblMFWorkOrderProductionType PT ON PT.intProductionTypeId = W.intProductionTypeId
 	LEFT JOIN @tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
+		JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = SL.intStatusId
+		AND W.intStatusId <> 13
 	LEFT JOIN dbo.tblMFShift SH ON SH.intShiftId = SL.intPlannedShiftId
 	JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
 		AND R.intLocationId = C.intLocationId

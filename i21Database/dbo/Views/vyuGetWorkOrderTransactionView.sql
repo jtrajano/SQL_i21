@@ -7,6 +7,7 @@ SELECT W.intWorkOrderId,
 	,I.strType AS strTargetItemType
 	,I.strItemNo AS strTargetItemNo
 	,I.strDescription AS strTargetItemDesc
+		,I.strShortName AS strTargetItemShortDesc
 	,W.dblQuantity AS dblPlannedQty
 	,UM.intUnitMeasureId as intTargetUnitMeasureId
 	,UM.strUnitMeasure AS strTargetUnitMeasure
@@ -22,13 +23,15 @@ SELECT W.intWorkOrderId,
 	,II.strType
 	,II.strItemNo
 	,II.strDescription
+		,II.strShortName AS strShortDesc
 	,WI.dblQuantity
 	,IUM.intUnitMeasureId
 	,IUM.strUnitMeasure
+	,WI.dtmBusinessDate
 	,S.intShiftId as intBusinessShiftId
 	,S.strShiftName AS strBusinessShiftName
 	,SL.intStorageLocationId
-	,SL.strName AS [FROM/To]
+	,SL.strName AS [strFromTo]
 	,M.intMachineId
 	,M.strName AS strMachineName
 	,WI.strReferenceNo
@@ -40,7 +43,26 @@ SELECT W.intWorkOrderId,
 	,WI.dtmLastModified
 	,US.intUserSecurityID
 	,US.strUserName
-	,'CONSUME' AS TransactionName
+	,'CONSUME' AS strTransactionName
+	,NULL as dblReadingQty
+	,NULL as dblTotalizerStartReading
+	,NULL as dblTotalizerEndReading
+	,NULL as dblTotalizerQty
+	,NULL as dblPulseStartReading
+	,NULL as dblPulseEndReading
+	,NULL as dblPulseQty
+	,W.strComment
+	,NULL as strFormulaUsedForTotalizerReading
+	,NULL as strFormulaUsedForPulseReading
+	,NULL as dblMinMoisture
+	,NULL as dblMoisture
+	,NULL as dblMaxMoisture
+	,NULL as dblMinDensity
+	,NULL as dblDensity
+	,NULL as dblMaxDensity
+	,NULL as dblMinColor
+	,NULL as dblColor
+	,NULL as dblMaxColor
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -70,6 +92,7 @@ SELECT W.intWorkOrderId,
 	,I.strType AS strTargetItemType
 	,I.strItemNo AS strTargetItemNo
 	,I.strDescription AS strTargetItemDesc
+	,I.strShortName AS strTargetItemShortDesc
 	,W.dblQuantity AS dblPlannedQty
 	,UM.intUnitMeasureId as intTargetUnitMeasureId
 	,UM.strUnitMeasure AS strTargetUnitMeasure
@@ -85,13 +108,15 @@ SELECT W.intWorkOrderId,
 	,II.strType
 	,II.strItemNo
 	,II.strDescription
+	,II.strShortName AS strShortDesc
 	,-WI.dblQuantity
 	,IUM.intUnitMeasureId
 	,IUM.strUnitMeasure
+	,WI.dtmBusinessDate
 	,S.intShiftId as intBusinessShiftId
 	,S.strShiftName AS strBusinessShiftName
 	,SL.intStorageLocationId
-	,SL.strName AS [FROM/To]
+	,SL.strName AS [strFromTo]
 	,M.intMachineId
 	,M.strName AS strMachineName
 	,WI.strReferenceNo
@@ -103,7 +128,26 @@ SELECT W.intWorkOrderId,
 	,WI.dtmLastModified
 	,US.intUserSecurityID
 	,US.strUserName
-	,'REVERSAL' AS TransactionName
+	,'REVERSAL' AS strTransactionName
+	,NULL as dblReadingQty
+	,NULL as dblTotalizerStartReading
+	,NULL as dblTotalizerEndReading
+	,NULL as dblTotalizerQty
+	,NULL as dblPulseStartReading
+	,NULL as dblPulseEndReading
+	,NULL as dblPulseQty
+	,W.strComment
+	,NULL as strFormulaUsedForTotalizerReading
+	,NULL as strFormulaUsedForPulseReading
+	,NULL as dblMinMoisture
+	,NULL as dblMoisture
+	,NULL as dblMaxMoisture
+	,NULL as dblMinDensity
+	,NULL as dblDensity
+	,NULL as dblMaxDensity
+	,NULL as dblMinColor
+	,NULL as dblColor
+	,NULL as dblMaxColor
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -133,6 +177,7 @@ SELECT W.intWorkOrderId,
 	,I.strType AS strTargetItemType
 	,I.strItemNo AS strTargetItemNo
 	,I.strDescription AS strTargetItemDesc
+		,I.strShortName AS strTargetItemShortDesc
 	,W.dblQuantity
 	,UM.intUnitMeasureId
 	,UM.strUnitMeasure
@@ -148,13 +193,15 @@ SELECT W.intWorkOrderId,
 	,II.strType
 	,II.strItemNo
 	,II.strDescription
+		,II.strShortName AS strShortDesc
 	,WP.dblQuantity
 	,IUM.intUnitMeasureId
 	,IUM.strUnitMeasure
+	,WP.dtmBusinessDate
 	,S.intShiftId
 	,S.strShiftName AS strBusinessShiftName
 	,SL.intStorageLocationId
-	,SL.strName AS [FROM/To]
+	,SL.strName AS [strFromTo]
 	,M.intMachineId
 	,M.strName AS strMachineName
 	,WP.strReferenceNo
@@ -166,7 +213,26 @@ SELECT W.intWorkOrderId,
 	,WP.dtmLastModified
 	,US.intUserSecurityID
 	,US.strUserName
-	,'PRODUCE' AS TransactionName
+	,'PRODUCE' AS strTransactionName
+	,NULL as dblReadingQty
+	,NULL as dblTotalizerStartReading
+	,NULL as dblTotalizerEndReading
+	,NULL as dblTotalizerQty
+	,NULL as dblPulseStartReading
+	,NULL as dblPulseEndReading
+	,NULL as dblPulseQty
+	,W.strComment
+	,NULL as strFormulaUsedForTotalizerReading
+	,NULL as strFormulaUsedForPulseReading
+	,NULL as dblMinMoisture
+	,NULL as dblMoisture
+	,NULL as dblMaxMoisture
+	,NULL as dblMinDensity
+	,NULL as dblDensity
+	,NULL as dblMaxDensity
+	,NULL as dblMinColor
+	,NULL as dblColor
+	,NULL as dblMaxColor
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -195,6 +261,7 @@ SELECT W.intWorkOrderId,
 	,I.strType AS strTargetItemType
 	,I.strItemNo AS strTargetItemNo
 	,I.strDescription AS strTargetItemDesc
+		,I.strShortName AS strTargetItemShortDesc
 	,W.dblQuantity
 	,UM.intUnitMeasureId
 	,UM.strUnitMeasure
@@ -210,9 +277,11 @@ SELECT W.intWorkOrderId,
 	,II.strType
 	,II.strItemNo
 	,II.strDescription
+		,II.strShortName AS strShortDesc
 	,-WP.dblQuantity
 	,IUM.intUnitMeasureId
 	,IUM.strUnitMeasure
+	,WP.dtmBusinessDate
 	,S.intShiftId
 	,S.strShiftName AS strBusinessShiftName
 	,SL.intStorageLocationId
@@ -229,6 +298,25 @@ SELECT W.intWorkOrderId,
 	,US.intUserSecurityID
 	,US.strUserName
 	,'REVERSAL' AS TransactionName
+	,NULL as dblReadingQty
+	,NULL as dblTotalizerStartReading
+	,NULL as dblTotalizerEndReading
+	,NULL as dblTotalizerQty
+	,NULL as dblPulseStartReading
+	,NULL as dblPulseEndReading
+	,NULL as dblPulseQty
+	,W.strComment
+	,NULL as strFormulaUsedForTotalizerReading
+	,NULL as strFormulaUsedForPulseReading
+	,NULL as dblMinMoisture
+	,NULL as dblMoisture
+	,NULL as dblMaxMoisture
+	,NULL as dblMinDensity
+	,NULL as dblDensity
+	,NULL as dblMaxDensity
+	,NULL as dblMinColor
+	,NULL as dblColor
+	,NULL as dblMaxColor
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId

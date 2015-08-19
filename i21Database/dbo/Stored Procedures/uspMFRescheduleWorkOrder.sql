@@ -99,11 +99,13 @@ BEGIN TRY
 		,@strXML
 
 	SELECT @intManufacturingCellId = intManufacturingCellId
-		,@intScheduleId = intScheduleId
+		,@intCalendarId = intCalendarId
+		,@intScheduleId = Isnull(intScheduleId,0)
 		,@intConcurrencyId = intConcurrencyId
 		,@intUserId = intUserId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intManufacturingCellId INT
+			,intCalendarId int
 			,intScheduleId INT
 			,intConcurrencyId INT
 			,intUserId INT
@@ -178,7 +180,7 @@ BEGIN TRY
 	JOIN dbo.tblMFPackTypeDetail PTD ON PTD.intPackTypeId = x.intPackTypeId
 		AND PTD.intTargetUnitMeasureId = x.intUnitMeasureId
 		AND PTD.intSourceUnitMeasureId = MC.intLineCapacityUnitMeasureId
-		Where intStatusId<>1 and dblBalance>0
+		Where intStatusId<>1 --and dblBalance>0
 	ORDER BY x.intExecutionOrder
 	
 	--Select *from @tblMFScheduleWorkOrder
@@ -205,7 +207,7 @@ BEGIN TRY
 	FROM dbo.tblMFScheduleCalendar C
 	JOIN dbo.tblMFScheduleCalendarDetail CD ON C.intCalendarId = CD.intCalendarId
 	WHERE C.intManufacturingCellId = @intManufacturingCellId
-		AND ysnStandard = 1
+		AND C.intCalendarId=@intCalendarId
 		AND CD.dtmShiftEndTime > GetDate()
 
 	SELECT @intCalendarDetailId = Min(intCalendarDetailId)
@@ -485,7 +487,7 @@ BEGIN TRY
 		SELECT 0 AS intScheduleId
 		,'' AS strScheduleNo
 		,@dtmCurrentDate AS dtmScheduleDate
-		,0 AS intCalendarId
+		,@intCalendarId AS intCalendarId
 		,'' AS strName
 		,@intManufacturingCellId AS intManufacturingCellId
 		,'' AS strCellName
