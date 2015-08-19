@@ -2241,6 +2241,16 @@
     <Build Include="dbo\Stored Procedures\uspTMUpdateForecastedValuesBySite.sql" />
     <Build Include="dbo\Stored Procedures\uspTMUnSyncInvoiceFromDeliveryHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateWorkOrderPriority.sql" />
+    <Build Include="dbo\Tables\tblTFTerminalControlNumber.sql" />
+    <Build Include="dbo\Tables\tblTFTaxAuthorityConfiguration.sql" />
+    <Build Include="dbo\Tables\tblTFTaxAuthority.sql" />
+    <Build Include="dbo\Tables\tblTFReportingComponent.sql" />
+    <Build Include="dbo\Tables\tblTFProductCode.sql" />
+    <Build Include="dbo\Tables\tblTFFrequency.sql" />
+    <Build Include="dbo\Tables\tblTFFilingPacket.sql" />
+    <Build Include="dbo\Tables\tblTFConfigurationType.sql" />
+    <Build Include="dbo\Tables\tblTFConfigurationTemplate.sql" />
+    <Build Include="dbo\Tables\tblTFCompanyPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
