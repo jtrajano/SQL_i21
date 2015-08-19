@@ -4,7 +4,7 @@
 [intConcurrencyId] INT NOT NULL, 
 [intShippingInstructionId] INT NOT NULL,
 [intContractDetailId] INT NOT NULL,
-[strContractNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+[intContractNumber] INT NOT NULL,
 [intContractSeq] INT NOT NULL,
 [intItemId] INT NOT NULL,
 [dblQuantity] NUMERIC(18, 6) NOT NULL,
