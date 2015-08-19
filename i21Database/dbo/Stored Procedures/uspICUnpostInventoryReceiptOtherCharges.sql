@@ -249,7 +249,8 @@ BEGIN
 		,intInventoryReceiptItemId
 		,strInventoryTransactionTypeName
 		,strTransactionForm
-		,strCostBilledBy
+		,ysnAccrue
+		,ysnPrice
 		,ysnInventoryCost
 	)
 	AS 
@@ -268,7 +269,8 @@ BEGIN
 				,ReceiptItem.intInventoryReceiptItemId
 				,strInventoryTransactionTypeName = TransType.strName
 				,strTransactionForm = @strTransactionForm
-				,AllocatedOtherCharges.strCostBilledBy
+				,AllocatedOtherCharges.ysnAccrue
+				,AllocatedOtherCharges.ysnPrice
 				,AllocatedOtherCharges.ysnInventoryCost
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -573,7 +575,7 @@ BEGIN
 				ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeExpense
 			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) Debit
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
-	WHERE	ForGLEntries_CTE.strCostBilledBy = @COST_BILLED_BY_None
+	WHERE	ForGLEntries_CTE.ysnAccrue = 0 -- @COST_BILLED_BY_None
 			AND ForGLEntries_CTE.ysnInventoryCost = 0
 
 	UNION ALL 
@@ -610,7 +612,7 @@ BEGIN
 				ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeIncome
 			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) Debit
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
-	WHERE	ForGLEntries_CTE.strCostBilledBy = @COST_BILLED_BY_None
+	WHERE	ForGLEntries_CTE.ysnAccrue = 0 -- @COST_BILLED_BY_None
 			AND ForGLEntries_CTE.ysnInventoryCost = 0
 END
 

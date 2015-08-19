@@ -375,7 +375,8 @@ BEGIN
 				,[intEntityVendorId]
 				,[dblAmount]
 				,[strAllocateCostBy]
-				,[strCostBilledBy]
+				,[ysnAccrue]
+				,[ysnPrice]
 		)
 		SELECT 
 				[intInventoryReceiptId]		= @InventoryReceiptId
@@ -388,7 +389,8 @@ BEGIN
 				,[intEntityVendorId]		= RawData.intEntityVendorId
 				,[dblAmount]				= RawData.dblAmount
 				,[strAllocateCostBy]		= RawData.strAllocateCostBy
-				,[strCostBilledBy]			= RawData.strCostBilledBy
+				,[ysnAccrue]				= RawData.ysnAccrue
+				,[ysnPrice]					= RawData.ysnPrice
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON RawHeaderData.Vendor = RawData.intEntityVendorId 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 

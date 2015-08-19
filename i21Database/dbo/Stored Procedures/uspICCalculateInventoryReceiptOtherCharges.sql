@@ -57,7 +57,8 @@ BEGIN
 			,[dblCalculatedAmount]
 			,[intContractId]
 			,[strAllocateCostBy]
-			,[strCostBilledBy]
+			,[ysnAccrue]
+			,[ysnPrice]
 			,[ysnInventoryCost]
 	)
 	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
@@ -65,11 +66,12 @@ BEGIN
 			,[intInventoryReceiptItemId]	= ReceiptItem.intInventoryReceiptItemId
 			,[intChargeId]					= Charge.intChargeId
 			,[intEntityVendorId]			= Charge.intEntityVendorId
-			,[dblCalculatedAmount]			=	Charge.dblRate 
+			,[dblCalculatedAmount]			= Charge.dblRate 
 												* dbo.fnCalculateQtyBetweenUOM(ReceiptItem.intUnitMeasureId, dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId), ReceiptItem.dblOpenReceive) 
 			,[intContractId]				= Charge.intContractId
 			,[strAllocateCostBy]			= Charge.strAllocateCostBy
-			,[strCostBilledBy]				= Charge.strCostBilledBy
+			,[ysnAccrue]					= Charge.ysnAccrue
+			,[ysnPrice]						= Charge.ysnPrice
 			,[ysnInventoryCost]				= Charge.ysnInventoryCost
 	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
@@ -128,7 +130,8 @@ BEGIN
 			,[dblCalculatedAmount] 
 			,[intContractId]
 			,[strAllocateCostBy]
-			,[strCostBilledBy]
+			,[ysnAccrue]
+			,[ysnPrice]
 			,[ysnInventoryCost]
 	)
 	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
@@ -141,7 +144,8 @@ BEGIN
 												* ReceiptItem.dblUnitCost
 			,[intContractId]				= Charge.intContractId
 			,[strAllocateCostBy]			= Charge.strAllocateCostBy
-			,[strCostBilledBy]				= Charge.strCostBilledBy
+			,[ysnAccrue]					= Charge.ysnAccrue
+			,[ysnPrice]						= Charge.ysnPrice
 			,[ysnInventoryCost]				= Charge.ysnInventoryCost
 	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
@@ -171,7 +175,8 @@ BEGIN
 			,[dblCalculatedAmount] 
 			,[intContractId]
 			,[strAllocateCostBy]
-			,[strCostBilledBy]
+			,[ysnAccrue]
+			,[ysnPrice]
 			,[ysnInventoryCost]
 	)
 	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
@@ -182,7 +187,8 @@ BEGIN
 			,[dblCalculatedAmount]			= Charge.dblAmount
 			,[intContractId]				= Charge.intContractId
 			,[strAllocateCostBy]			= Charge.strAllocateCostBy
-			,[strCostBilledBy]				= Charge.strCostBilledBy
+			,[ysnAccrue]					= Charge.ysnAccrue
+			,[ysnPrice]						= Charge.ysnPrice
 			,[ysnInventoryCost]				= Charge.ysnInventoryCost
 	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
