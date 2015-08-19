@@ -214,7 +214,7 @@ INSERT INTO tblICInventoryReceiptCharge
 		intEntityVendorId,
 		dblAmount,
 		strAllocateCostBy,
-		strCostBilledBy,
+		ysnAccrue,
 		intSort,
 		intConcurrencyId
 )
@@ -227,7 +227,7 @@ SELECT	@InventoryReceiptId,
 		SC.intEntityVendorId,
 		NULL,
 		NULL,
-		'Vendor',
+		1,
 		NULL,
 		1
 FROM	tblSCTicketCost SC
@@ -261,28 +261,25 @@ INSERT INTO tblICInventoryReceiptCharge
 		intEntityVendorId,
 		dblAmount,
 		strAllocateCostBy,
-		strCostBilledBy,
+		ysnAccrue,
 		intSort,
 		intConcurrencyId
 )
-SELECT	@InventoryReceiptId, 
-		@intFreightItemId,
-		0,
-		'Per Unit',
-		@dblTicketFreightRate,
-		@intTicketItemUOMId,
-		CASE
-		WHEN SS.ysnFarmerPaysFreight = 1 THEN NULL
-		WHEN SS.ysnFarmerPaysFreight = 0 THEN SS.intFreightCarrierId
-		END,
-		NULL,
-		NULL,
-		CASE
-		WHEN SS.ysnFarmerPaysFreight = 1 THEN 'Vendor'
-		WHEN SS.ysnFarmerPaysFreight = 0 THEN 'Third Party'
-		END,
-		NULL,
-		1
+SELECT	
+		intInventoryReceiptId	= @InventoryReceiptId
+		,intChargeId			= @intFreightItemId
+		,ysnInventoryCost		= 0
+		,strCostMethod			= 'Per Unit'
+		,dblRate				= @dblTicketFreightRate
+		,intCostUOMId			= @intTicketItemUOMId
+		,intEntityVendorId		= CASE	WHEN SS.ysnFarmerPaysFreight = 1 THEN NULL
+										WHEN SS.ysnFarmerPaysFreight = 0 THEN SS.intFreightCarrierId
+								END
+		,dblAmount				= NULL
+		,strAllocateCostBy		= NULL
+		,ysnAccrue				= 1
+		,intSort				= NULL 
+		,intConcurrencyId		= 1
 FROM	tblSCTicket SS WHERE SS.intTicketId = @intTicketId
 END
 
@@ -308,22 +305,22 @@ INSERT INTO tblICInventoryReceiptCharge
 		intEntityVendorId,
 		dblAmount,
 		strAllocateCostBy,
-		strCostBilledBy,
+		ysnAccrue,
 		intSort,
 		intConcurrencyId
 )
-SELECT	@InventoryReceiptId, 
-		@intFeeItemId,
-		0,
-		'Amount',
-		0,
-		NULL,
-		NULL,
-		@dblTicketFees * -1,
-		NULL,
-		'None',
-		NULL,
-		1
+SELECT	intInventoryReceiptId	= @InventoryReceiptId
+		,intChargeId			= @intFeeItemId
+		,ysnInventoryCost		= 0
+		,strCostMethod			= 'Amount'
+		,dblRate				= 0
+		,intCostUOMId			= NULL
+		,intEntityVendorId		= NULL
+		,dblAmount				= @dblTicketFees * -1
+		,strAllocateCostBy		= NULL
+		,ysnAccrue				= 0
+		,intSort				= NULL
+		,intConcurrencyId		= 1		
 FROM	tblSCTicket SS WHERE SS.intTicketId = @intTicketId
 END
 

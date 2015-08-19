@@ -57,7 +57,8 @@ BEGIN
 			,[dblCalculatedAmount]
 			,[intContractId]
 			,[strAllocateCostBy]
-			,[strCostBilledBy]
+			,[ysnAccrue]
+			,[ysnPrice]
 			,[ysnInventoryCost]
 	)
 	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
@@ -129,7 +130,8 @@ BEGIN
 			,[dblCalculatedAmount] 
 			,[intContractId]
 			,[strAllocateCostBy]
-			,[strCostBilledBy]
+			,[ysnAccrue]
+			,[ysnPrice]
 			,[ysnInventoryCost]
 	)
 	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId

@@ -594,7 +594,7 @@ BEGIN
 				ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeExpense
 			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) Debit
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
-	WHERE	ForGLEntries_CTE.strCostBilledBy = @COST_BILLED_BY_None
+	WHERE	ForGLEntries_CTE.ysnAccrue = 0 -- @COST_BILLED_BY_None
 			AND ForGLEntries_CTE.ysnInventoryCost = 0
 
 	UNION ALL 
@@ -631,7 +631,7 @@ BEGIN
 				ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeIncome
 			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) Debit
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
-	WHERE	ForGLEntries_CTE.strCostBilledBy = @COST_BILLED_BY_None
+	WHERE	ForGLEntries_CTE.ysnAccrue = 0 -- @COST_BILLED_BY_None
 			AND ForGLEntries_CTE.ysnInventoryCost = 0
 END
 

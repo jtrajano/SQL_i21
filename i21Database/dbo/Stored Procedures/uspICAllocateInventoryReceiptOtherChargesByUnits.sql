@@ -116,7 +116,7 @@ BEGIN
 				* Source_Query.dblOpenReceive
 				/ Source_Query.dblTotalUnits 
 			)
-			,Source_Query.strCostBilledBy
+			,Source_Query.ysnAccrue 
 			,Source_Query.ysnInventoryCost
 		)
 	;

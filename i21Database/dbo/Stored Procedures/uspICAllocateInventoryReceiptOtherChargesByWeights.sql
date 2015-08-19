@@ -48,7 +48,7 @@ BEGIN
 				ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
 			INNER JOIN (
 					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
-							,strCostBilledBy
+							,ysnAccrue
 							,intContractId
 							,intEntityVendorId
 							,ysnInventoryCost
@@ -56,7 +56,7 @@ BEGIN
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Weight
 							AND CalculatedCharge.intContractId IS NOT NULL 
-					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost
+					GROUP BY ysnAccrue, intContractId, intEntityVendorId, ysnInventoryCost
 				) CalculatedCharges 
 					ON ReceiptItem.intOrderId = CalculatedCharges.intContractId
 			LEFT JOIN dbo.tblICItemUOM StockUOM
@@ -106,7 +106,7 @@ BEGIN
 					ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
 				INNER JOIN (
 					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
-							,strCostBilledBy
+							,ysnAccrue
 							,intContractId
 							,intEntityVendorId
 							,ysnInventoryCost
@@ -116,7 +116,7 @@ BEGIN
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Weight
 							AND CalculatedCharge.intContractId IS NULL 
-					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
+					GROUP BY ysnAccrue, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
 				) CalculatedCharges 
 					ON ReceiptItem.intInventoryReceiptId = CalculatedCharges.intInventoryReceiptId
 				LEFT JOIN (
