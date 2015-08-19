@@ -134,7 +134,7 @@ BEGIN
 		--DO NOT ALLOW TO POST IF BILL ITEMS HAVE ASSOCIATED ITEM RECEIPT AND AND ITEM RECEIPT IS NOT POSTED
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT
-			'The associated item receipt ' + + ' was unposted.',
+			'The associated item receipt ' + C.strReceiptNumber + ' was unposted.',
 			'Bill',
 			A.strBillId,
 			A.intBillId
@@ -153,6 +153,22 @@ BEGIN
 			) C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId]
 			WHERE B.intInventoryReceiptItemId IS NOT NULL
 			AND A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+
+		--DO NOT ALLOW TO POST IF BILL HAS CONTRACT ITEMS AND CONTRACT PRICE ON CONTRACT RECORD DID NOT MATCHED
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT
+			'The cost of item ' + D.strItemNo + ' did not match with the contract price.'
+			,'Bill'
+			,A.strBillId
+			,A.intBillId
+		FROM  tblAPBill A
+		INNER JOIN tblAPBillDetail C ON A.intBillId = C.intBillId
+		INNER JOIN (tblCTContractHeader B1 INNER JOIN tblCTContractDetail B2 ON B1.intContractHeaderId = B2.intContractHeaderId)
+			ON C.intContractDetailId = B2.intContractDetailId
+		INNER JOIN tblICItem D ON C.intItemId = D.intItemId
+		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+		AND A.ysnPosted = 0 AND C.intContractDetailId IS NOT NULL
+		AND ISNULL(B2.dblCashPrice,0) <> ISNULL(C.dblCost,0)
 
 	END
 	ELSE

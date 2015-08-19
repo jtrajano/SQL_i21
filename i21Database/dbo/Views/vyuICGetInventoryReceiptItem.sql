@@ -7,6 +7,8 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, ReceiptItemSource.intOrderId
 	, ReceiptItemSource.strOrderNumber
 	, ReceiptItemSource.dtmDate
+	, ReceiptItemSource.dblOrdered
+	, ReceiptItemSource.dblReceived
 	, ReceiptItem.intSourceId
 	, ReceiptItemSource.strSourceNumber
 	, ReceiptItem.intItemId

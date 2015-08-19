@@ -5,10 +5,16 @@
 AS
 BEGIN
 	DECLARE @NewTransactionId INT,
-			@DateOnly DATETIME
+			@DateOnly DATETIME,
+			@Type NVARCHAR(25) = 'Standard'
 
 	SELECT @DateOnly = CAST(GETDATE() AS DATE)
 
+	IF EXISTS (SELECT NULL FROM tblSOSalesOrderDetail SOD INNER JOIN tblICItem ICI ON SOD.intItemId = ICI.intItemId 
+				WHERE intSalesOrderId = @SalesOrderId AND ICI.strType = 'Software')
+		BEGIN
+			SET @Type = 'Software'
+		END
 	--HEADER
 	INSERT INTO tblSOSalesOrder
 		([strSalesOrderOriginId]
@@ -73,7 +79,7 @@ BEGIN
 		,[dblAmountDue]
 		,[dblPayment]
 		,'Order'
-		,[strType]
+		,@Type
 		,'Open'
 		,[intAccountId]
 		,[dtmProcessDate]

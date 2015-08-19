@@ -26,7 +26,6 @@ Type the overview for the table here.
 		[intMaterialItemId] INT NULL, 
 		[ysnAutoCalculateFreight] BIT NULL DEFAULT ((0)), 
 		[intFreightItemId] INT NULL, 
-
 		[strERPItemClass] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[dblLifeTime] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblBOMItemShrinkage] NUMERIC(18, 6) NULL DEFAULT ((0)), 
@@ -47,6 +46,7 @@ Type the overview for the table here.
 		[strCostDistributionMethod] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[ysnSellable] BIT NULL DEFAULT ((0)), 
 		[ysnYieldAdjustment] BIT NULL DEFAULT ((0)), 
+		[ysnWarehouseTracked] BIT NULL DEFAULT((0)),
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICCategory] PRIMARY KEY ([intCategoryId]), 
 		CONSTRAINT [AK_tblICCategory_strCategoryCode] UNIQUE ([strCategoryCode]), 
@@ -373,3 +373,12 @@ Type the overview for the table here.
 		@level1name = N'tblICCategory',
 		@level2type = N'COLUMN',
 		@level2name = 'intLineOfBusinessId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Tracked In Warehouse',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblICCategory',
+    @level2type = N'COLUMN',
+    @level2name = N'ysnWarehouseTracked'

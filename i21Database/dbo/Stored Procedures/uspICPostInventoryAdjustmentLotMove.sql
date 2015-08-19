@@ -77,7 +77,7 @@ BEGIN
 		WHERE intItemId = @intItemId		
 
 		-- 'Move Lot requires a negative Adjust Qty on %s as stock for the move.'
-		RAISERROR(51179, 11, 1, @strItemNo);
+		RAISERROR(51178, 11, 1, @strItemNo);
 		GOTO Exit_With_Errors
 	END
 END 

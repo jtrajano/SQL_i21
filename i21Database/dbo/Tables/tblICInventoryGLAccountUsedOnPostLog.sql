@@ -23,6 +23,7 @@ Type the overview for the table here.
 		[intOtherChargeExpense] INT NULL, 
 		[intOtherChargeIncome] INT NULL, 
 		[intOtherChargeAsset] INT NULL, 
+		[intPurchaseTaxCodeId] INT NULL, 
 		[strBatchId] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
 		[dtmDateCreated] DATETIME NULL DEFAULT (GETDATE()), 
 		CONSTRAINT [PK_tblICInventoryGLAccountUsedOnPostLog] PRIMARY KEY ([intId])

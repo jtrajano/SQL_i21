@@ -49,7 +49,7 @@ END
 BEGIN
     SELECT TOP 1 @dblTicketFreightRate = ST.dblFreightRate, @intScaleStationId = ST.intScaleSetupId,
 	@ysnDeductFreightFarmer = ST.ysnFarmerPaysFreight, @intTicketNumber = ST.intTicketNumber,
-	@dblTicketFees = ST.dblTicketFees
+	@dblTicketFees = ST.dblTicketFees, @intFreightVendorId = ST.intFreightCarrierId
 	FROM dbo.tblSCTicket ST WHERE
 	ST.intTicketId = @intTicketId
 END
@@ -239,7 +239,7 @@ BY		SC.intItemId,
 		SC.dblRate,
 		SC.intItemUOMId
 
-IF @dblTicketFreightRate > 0
+IF (@dblTicketFreightRate > 0 AND (@intFreightVendorId != null OR @ysnDeductFreightFarmer = 1))
 BEGIN
 SELECT	@intFreightItemId = ST.intFreightItemId
 FROM	dbo.tblSCScaleSetup ST	        
@@ -288,7 +288,7 @@ END
 
 IF @dblTicketFees > 0
 BEGIN
-SELECT	@intFeeItemId = ST.intFreightItemId
+SELECT	@intFeeItemId = ST.intDefaultFeeItemId
 FROM	dbo.tblSCScaleSetup ST	        
 WHERE	ST.intScaleSetupId = @intScaleStationId
 IF @intFeeItemId IS NULL 
@@ -368,13 +368,12 @@ BEGIN
        ,[ysnGraderAutoEntry]= SD.[ysnGraderAutoEntry]
        ,[intDiscountScheduleCodeId]= SD.[intDiscountScheduleCodeId]
        ,[dtmDiscountPaidDate]= SD.[dtmDiscountPaidDate]
-       ,[intTicketId]= SD.[intTicketId]
+       ,[intTicketId]= NULL
        ,[intTicketFileId]= ISH.intInventoryReceiptItemId
        ,[strSourceType]= 'Inventory Receipt'
 	FROM	dbo.tblICInventoryReceiptItem ISH join dbo.[tblQMTicketDiscount] SD
 	ON ISH.intSourceId = SD.intTicketId AND SD.strSourceType = 'Scale' AND
-	SD.intTicketFileId = @intTicketId  JOIN dbo.tblICInventoryReceipt IRH ON IRH.intInventoryReceiptId = @InventoryReceiptId AND IRH.strReceiptType = 'Scale' WHERE	
-	ISH.intSourceId = @intTicketId AND ISH.intInventoryReceiptId = @InventoryReceiptId AND IRH.strReceiptType = 'Scale'
+	SD.intTicketFileId = @intTicketId WHERE	ISH.intSourceId = @intTicketId AND ISH.intInventoryReceiptId = @InventoryReceiptId
 END
 
 DECLARE @intLoopReceiptItemId INT;

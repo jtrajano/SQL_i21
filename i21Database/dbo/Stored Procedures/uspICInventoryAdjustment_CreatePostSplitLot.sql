@@ -101,9 +101,9 @@ BEGIN
 	FROM	dbo.tblICLot Lot 
 	WHERE	Lot.strLotNumber = @strLotNumber
 			AND Lot.intItemId = @intItemId
-			AND Lot.intLocationId = @intLocationId
-			AND Lot.intSubLocationId = @intSubLocationId
-			AND Lot.intStorageLocationId = @intStorageLocationId
+			AND ISNULL(Lot.intLocationId, 0) = ISNULL(@intLocationId, ISNULL(Lot.intLocationId, 0)) 
+			AND ISNULL(Lot.intSubLocationId, 0) = ISNULL(@intSubLocationId, ISNULL(Lot.intSubLocationId, 0))
+			AND ISNULL(Lot.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, ISNULL(Lot.intStorageLocationId, 0)) 
 END 
 
 -- Raise an error if Lot id is invalid. 

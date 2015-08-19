@@ -1,6 +1,7 @@
 CREATE PROCEDURE [dbo].[uspTRProcessLogisticsLoad]
 	 @strTransaction AS nvarchar(50),
-	 @action as nvarchar(50)
+	 @action as nvarchar(50),
+	 @intUserId as int
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -38,7 +39,7 @@ BEGIN TRY
 		     BEGIN
 		       set @dblQuantity = @dblQuantity * -1
              END 
-		     exec uspCTUpdateScheduleQuantity @intContractDetailId, @dblQuantity
+		     exec uspCTUpdateScheduleQuantity @intContractDetailId, @dblQuantity,@intUserId,@intInboundLoadId,'Load Schedule'
 		  END
 	   if (@action = 'Delete')
 	   BEGIN
@@ -62,7 +63,7 @@ BEGIN TRY
 		    BEGIN
 		        set @dblQuantity = @dblQuantity * -1
 		    END
-		    exec uspCTUpdateScheduleQuantity @intContractDetailId, @dblQuantity
+		    exec uspCTUpdateScheduleQuantity @intContractDetailId, @dblQuantity,@intUserId,@intOutboundLoadId,'Load Schedule'
 		  END
 	   if (@action = 'Delete')
 	   BEGIN

@@ -25,7 +25,9 @@ BEGIN
 		DROP VIEW vyuTMOriginOption
 	END
 
-	IF ((SELECT TOP 1 ysnUseOriginIntegration FROM tblTMPreferenceCompany) = 1)
+	IF ((SELECT TOP 1 ysnUseOriginIntegration FROM tblTMPreferenceCompany) = 1 
+		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'coctlmst') = 1 
+	)
 	BEGIN
 		EXEC('
 			CREATE VIEW [dbo].[vyuTMOriginOption]
@@ -43,12 +45,11 @@ BEGIN
 		EXEC('
 			CREATE VIEW [dbo].[vyuTMOriginOption]
 			AS
-			SELECT TOP 1
+			SELECT 
 				ysnLoanEquipment = CAST(0 AS BIT)
 				,ysnPetro = CAST(0 AS BIT)
 				,intOriginOptionId = CAST(0 AS INT)
-			FROM
-			coctlmst
+			
 		')
 	END
 END

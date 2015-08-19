@@ -47,7 +47,7 @@ BEGIN
 	)
 END 
 
--- Calculate the tax for the base taxes. 
+-- Calculate the base tax. 
 BEGIN 
 	UPDATE	ItemTaxes
 	SET		dblCalculatedTaxAmount =	
@@ -60,78 +60,136 @@ BEGIN
 				END 
 			,ysnCalculated = 1
 	FROM	#tmpComputeItemTaxes ItemTaxes
-	WHERE	ISNULL(strTaxableByOtherTaxes, '') = ''
+	--WHERE	ISNULL(TaxableOtherTaxes.strTaxableByOtherTaxes, '') = ''
 END 
 
--- Calculate the AddOn Taxes. Loop until all are calculated. 
+-- Calculate the 'Taxable Other Taxes'
+-- TODO: Replace this part with the commented code below when 'Taxable by Other Taxes' are going to be computed from the 'tax code' instead of the 'tax class'. 
 BEGIN 
-	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpComputeItemTaxes WHERE ISNULL(ysnCalculated, 0) = 0)
-	BEGIN 
-		UPDATE	AddOnTaxes
-		SET		dblCalculatedTaxAmount = ISNULL(dblCalculatedTaxAmount, 0) + 
-					CASE	WHEN strCalculationMethod = @CALC_METHOD_Percentage THEN 						
-								(AddOnTaxes.numRate / 100) * 
-								(
-									SELECT	ISNULL(SUM(dblCalculatedTaxAmount), 0)
-									FROM	#tmpComputeItemTaxes SourceTaxes INNER JOIN dbo.fnGetRowsFromDelimitedValues(AddOnTaxes.strTaxableByOtherTaxes) AddOnTaxClass
-												ON SourceTaxes.intTaxClassId = AddOnTaxClass.intID
-									WHERE	SourceTaxes.intId <> AddOnTaxes.intId
-											AND SourceTaxes.intHeaderId = AddOnTaxes.intHeaderId	
-											AND SourceTaxes.intDetailId = AddOnTaxes.intDetailId
-								)
-							ELSE 						
-								AddOnTaxes.numRate * 
-								(
-									SELECT	ISNULL(SUM(dblQty), 0)
-									FROM	#tmpComputeItemTaxes SourceTaxes INNER JOIN dbo.fnGetRowsFromDelimitedValues(AddOnTaxes.strTaxableByOtherTaxes) AddOnTaxClass
-												ON SourceTaxes.intTaxClassId = AddOnTaxClass.intID
-									WHERE	SourceTaxes.intId <> AddOnTaxes.intId
-											AND SourceTaxes.intHeaderId = AddOnTaxes.intHeaderId	
-											AND SourceTaxes.intDetailId = AddOnTaxes.intDetailId
-								)
-					END 
-				,ysnCalculated = 1
-		FROM	#tmpComputeItemTaxes AddOnTaxes 
-		WHERE	ISNULL(AddOnTaxes.strTaxableByOtherTaxes, '') <> ''
-				AND AddOnTaxes.dblCalculatedTaxAmount IS NULL 
-				AND EXISTS (
-						SELECT	TOP 1 1 
-						FROM	#tmpComputeItemTaxes SourceTaxes INNER JOIN dbo.fnGetRowsFromDelimitedValues(AddOnTaxes.strTaxableByOtherTaxes) AddOnTaxClass
-									ON SourceTaxes.intTaxClassId = AddOnTaxClass.intID
-						WHERE	SourceTaxes.intId <> AddOnTaxes.intId
-								AND dblCalculatedTaxAmount IS NOT NULL
+	UPDATE	TaxableOtherTaxes
+	SET		dblCalculatedTaxAmount = 
+				ISNULL(dblCalculatedTaxAmount, 0) 
+				
+				-- Sub Query if the cost method is 'Percentage'
+				+ (
+					TaxableOtherTaxes.dblCalculatedTaxAmount 
+					* (
+						SELECT	ISNULL( SUM (OtherTaxRate.numRate / 100), 0)
+						FROM	dbo.tblSMTaxCode OtherTax INNER JOIN dbo.tblSMTaxCodeRate OtherTaxRate
+									ON OtherTax.intTaxCodeId = OtherTaxRate.intTaxCodeId
+								INNER JOIN dbo.fnGetRowsFromDelimitedValues(TaxableOtherTaxes.strTaxableByOtherTaxes) AddOnTaxClass
+									ON AddOnTaxClass.intID = OtherTax.intTaxClassId
+						WHERE	OtherTax.intTaxCodeId <> TaxableOtherTaxes.intTaxCodeId
+								AND ISNULL(OtherTaxRate.numRate, 0) <> 0 
+								AND dbo.fnDateLessThanEquals(OtherTaxRate.dtmEffectiveDate, TaxableOtherTaxes.dtmDate) = 1
+								AND ISNULL(OtherTax.strZipCode, '') = ISNULL(TaxCode.strZipCode, '')
+								AND ISNULL(OtherTax.strCity, '') = ISNULL(TaxCode.strCity, '')
+								AND ISNULL(OtherTax.strState, '') = ISNULL(TaxCode.strState, '')
+								AND ISNULL(OtherTax.strCounty, '') = ISNULL(TaxCode.strCounty, '')
+								AND ISNULL(OtherTax.strCountry, '') = ISNULL(TaxCode.strCountry, '')
+								AND OtherTaxRate.strCalculationMethod = @CALC_METHOD_Percentage
 					)
+				)
 
-		-- Detect an endless loop
-		BEGIN 
-			-- Decrement the loop counter if no records was updated. 
-			IF @@ROWCOUNT = 0 
-			BEGIN 
-				SET @endlessLoopLimit -= 1
-			END 
+				-- Sub Query if the cost method is 'Unit'
+				+ (
+					TaxableOtherTaxes.dblCalculatedTaxAmount 
+					* (
+						SELECT	ISNULL( SUM (OtherTaxRate.numRate), 0)
+						FROM	dbo.tblSMTaxCode OtherTax INNER JOIN dbo.tblSMTaxCodeRate OtherTaxRate
+									ON OtherTax.intTaxCodeId = OtherTaxRate.intTaxCodeId
+								INNER JOIN dbo.fnGetRowsFromDelimitedValues(TaxableOtherTaxes.strTaxableByOtherTaxes) AddOnTaxClass
+									ON AddOnTaxClass.intID = OtherTax.intTaxClassId
+						WHERE	OtherTax.intTaxCodeId <> TaxableOtherTaxes.intTaxCodeId
+								AND ISNULL(OtherTaxRate.numRate, 0) <> 0 
+								AND dbo.fnDateLessThanEquals(OtherTaxRate.dtmEffectiveDate, TaxableOtherTaxes.dtmDate) = 1
+								AND ISNULL(OtherTax.strZipCode, '') = ISNULL(TaxCode.strZipCode, '')
+								AND ISNULL(OtherTax.strCity, '') = ISNULL(TaxCode.strCity, '')
+								AND ISNULL(OtherTax.strState, '') = ISNULL(TaxCode.strState, '')
+								AND ISNULL(OtherTax.strCounty, '') = ISNULL(TaxCode.strCounty, '')
+								AND ISNULL(OtherTax.strCountry, '') = ISNULL(TaxCode.strCountry, '')
+								AND OtherTaxRate.strCalculationMethod = @CALC_METHOD_Unit
+					)
+				)
+			,ysnCalculated = 1
+	FROM	#tmpComputeItemTaxes TaxableOtherTaxes INNER JOIN dbo.tblSMTaxCode TaxCode
+				ON TaxableOtherTaxes.intTaxCodeId = TaxCode.intTaxCodeId
+	WHERE	ISNULL(TaxableOtherTaxes.strTaxableByOtherTaxes, '') <> ''
 
-			-- If counter is beyond the threshold, throw an error. 
-			IF @endlessLoopLimit <= 0 
-			BEGIN 
-				DECLARE @strItemNo AS NVARCHAR(50)
-						,@strTaxCode AS NVARCHAR(50)
+END
 
-				SELECT TOP 1 
-						@strItemNo = Item.strItemNo
-						,@strTaxCode = TaxCode.strTaxCode
-				FROM	#tmpComputeItemTaxes FailedTaxes LEFT JOIN dbo.tblICItem Item
-							ON FailedTaxes.intItemId = Item.intItemId
-						LEFT JOIN dbo.tblSMTaxCode TaxCode
-							ON TaxCode.intTaxCodeId = FailedTaxes.intTaxCodeId
-				WHERE	ISNULL(ysnCalculated, 0) = 0				
+------------------------------------------------------------------------------------------------------------------------------------------------
+-- DO NOT REMOVE THE CODE BELOW. IT CAN BE WHEN 'Taxable by Other Taxes' IS MOVED FROM 'Tax Class' TO 'Tax Code'.
+------------------------------------------------------------------------------------------------------------------------------------------------
+---- Calculate the AddOn Taxes. Loop until all are calculated. 
+--BEGIN 
+--	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpComputeItemTaxes WHERE ISNULL(ysnCalculated, 0) = 0)
+--	BEGIN 
+--		UPDATE	AddOnTaxes
+--		SET		dblCalculatedTaxAmount = ISNULL(dblCalculatedTaxAmount, 0) + 
+--					CASE	WHEN strCalculationMethod = @CALC_METHOD_Percentage THEN 						
+--								(AddOnTaxes.numRate / 100) * 
+--								(
+--									SELECT	ISNULL(SUM(dblCalculatedTaxAmount), 0)
+--									FROM	#tmpComputeItemTaxes SourceTaxes INNER JOIN dbo.fnGetRowsFromDelimitedValues(AddOnTaxes.strTaxableByOtherTaxes) AddOnTaxClass
+--												ON SourceTaxes.intTaxClassId = AddOnTaxClass.intID
+--									WHERE	SourceTaxes.intId <> AddOnTaxes.intId
+--											AND SourceTaxes.intHeaderId = AddOnTaxes.intHeaderId	
+--											AND SourceTaxes.intDetailId = AddOnTaxes.intDetailId
+--								)
+--							ELSE 						
+--								AddOnTaxes.numRate * 
+--								(
+--									SELECT	ISNULL(SUM(dblQty), 0)
+--									FROM	#tmpComputeItemTaxes SourceTaxes INNER JOIN dbo.fnGetRowsFromDelimitedValues(AddOnTaxes.strTaxableByOtherTaxes) AddOnTaxClass
+--												ON SourceTaxes.intTaxClassId = AddOnTaxClass.intID
+--									WHERE	SourceTaxes.intId <> AddOnTaxes.intId
+--											AND SourceTaxes.intHeaderId = AddOnTaxes.intHeaderId	
+--											AND SourceTaxes.intDetailId = AddOnTaxes.intDetailId
+--								)
+--					END 
+--				,ysnCalculated = 1
+--		FROM	#tmpComputeItemTaxes AddOnTaxes 
+--		WHERE	ISNULL(AddOnTaxes.strTaxableByOtherTaxes, '') <> ''
+--				AND AddOnTaxes.dblCalculatedTaxAmount IS NULL 
+--				AND EXISTS (
+--						SELECT	TOP 1 1 
+--						FROM	#tmpComputeItemTaxes SourceTaxes INNER JOIN dbo.fnGetRowsFromDelimitedValues(AddOnTaxes.strTaxableByOtherTaxes) AddOnTaxClass
+--									ON SourceTaxes.intTaxClassId = AddOnTaxClass.intID
+--						WHERE	SourceTaxes.intId <> AddOnTaxes.intId
+--								AND dblCalculatedTaxAmount IS NOT NULL
+--					)
 
-				-- 'Unable to calculate the tax for {tax code} used in {Item}.'
-				RAISERROR(51176, 11, 1, @strTaxCode, @strItemNo) 
-				GOTO _Exit;
-			END 
-		END 
-	END
-END 
+--		-- Detect an endless loop
+--		BEGIN 
+--			-- Decrement the loop counter if no records was updated. 
+--			IF @@ROWCOUNT = 0 
+--			BEGIN 
+--				SET @endlessLoopLimit -= 1
+--			END 
+
+--			-- If counter is beyond the threshold, throw an error. 
+--			IF @endlessLoopLimit <= 0 
+--			BEGIN 
+--				DECLARE @strItemNo AS NVARCHAR(50)
+--						,@strTaxCode AS NVARCHAR(50)
+
+--				SELECT TOP 1 
+--						@strItemNo = Item.strItemNo
+--						,@strTaxCode = TaxCode.strTaxCode
+--				FROM	#tmpComputeItemTaxes FailedTaxes LEFT JOIN dbo.tblICItem Item
+--							ON FailedTaxes.intItemId = Item.intItemId
+--						LEFT JOIN dbo.tblSMTaxCode TaxCode
+--							ON TaxCode.intTaxCodeId = FailedTaxes.intTaxCodeId
+--				WHERE	ISNULL(ysnCalculated, 0) = 0				
+
+--				-- 'Unable to calculate the tax for {tax code} used in {Item}.'
+--				RAISERROR(51179, 11, 1, @strTaxCode, @strItemNo) 
+--				GOTO _Exit;
+--			END 
+--		END 
+--	END
+--END 
 
 -- Process the final result
 UPDATE	Result

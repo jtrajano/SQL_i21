@@ -13,7 +13,7 @@ adj2.strDescription as PosDescription,
 adj1.intItemPricingId,
 adj1.dblSalePrice,
 adj2.intVendorId,
-adj9.strName,
+adj9.strVendorId,
 adj8.intCategoryId,
 adj8.strCategoryCode,
 adj10.intItemVendorXrefId,
@@ -33,5 +33,5 @@ ON adj1.intItemId = adj6.intItemId AND adj6.strUpcCode IS NOT NULL
 AND adj6.strUpcCode <> '' LEFT JOIN tblICItem adj7
 ON adj1.intItemId = adj7.intItemId 
 LEFT JOIN tblICCategory adj8 ON adj7.intCategoryId = adj8.intCategoryId 
-LEFT JOIN tblEntity adj9 ON adj2.intVendorId = adj9.intEntityId 
+LEFT JOIN tblAPVendor adj9 ON adj2.intVendorId = adj9.intEntityVendorId 
 LEFT JOIN tblICItemVendorXref adj10 ON adj2.intItemLocationId = adj10.intItemLocationId

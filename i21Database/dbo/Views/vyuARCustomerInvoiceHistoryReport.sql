@@ -6,6 +6,7 @@ SELECT DISTINCT
 	 , strContact = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry)
 	 , P.strRecordNumber
 	 , I.strInvoiceNumber
+	 , I.dtmDate
 	 , P.dtmDatePaid
 	 , dblAmountPaid    = ISNULL(PD.dblPayment, 0)
 	 , dblAmountApplied = CASE WHEN I.strTransactionType <> 'Invoice' THEN ISNULL(I.dblPayment, 0) * -1 ELSE ISNULL(I.dblPayment, 0) END
@@ -29,6 +30,7 @@ LEFT JOIN
 (SELECT grandDblInvoiceTotal = SUM(ISNULL(dblInvoiceTotal, 0))
      , grandDblAmountApplied = SUM(ISNULL(dblPayment, 0))
 	 , grandDblAmountDue     = SUM(ISNULL(dblAmountDue, 0))
+	 , intTotalCount	     = COUNT(*)
 	 , intEntityCustomer     = intEntityCustomerId
 FROM
 (SELECT DISTINCT

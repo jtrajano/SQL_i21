@@ -44,7 +44,7 @@ BEGIN TRY
 	 	,intStorageLocationId
 	 	,ysnIsCustody
 	 	,dblFreightRate
-		,intSourceId			 	
+		,intSourceId		 	
 	 )	
       SELECT strReceiptType = 'Purchase Contract',
        CH.intEntityId,

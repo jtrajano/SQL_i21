@@ -242,6 +242,8 @@ BEGIN
 				,intSort
 				,intConcurrencyId
 				,intOwnershipType
+				,dblGross
+				,dblNet
 		)
 		SELECT	intInventoryReceiptId	= @InventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -271,6 +273,8 @@ BEGIN
 												WHEN RawData.ysnIsCustody = 1 THEN @OWNERSHIP_TYPE_Storage
 												ELSE @OWNERSHIP_TYPE_Own
 										  END
+				,dblGross				= RawData.dblGross
+				,dblNet					= RawData.dblNet
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON RawHeaderData.Vendor = RawData.intEntityVendorId 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 

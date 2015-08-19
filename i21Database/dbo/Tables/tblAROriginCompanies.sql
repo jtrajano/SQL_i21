@@ -21,7 +21,7 @@ CREATE TABLE [dbo].[tblAROriginCompanies](
 	[strACU_Version] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[strDB_Version] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[irDateTime] [datetime] NOT NULL CONSTRAINT [DF_tblHDCompanies1_irDateTime_1]  DEFAULT (getdate()),
-	[irUser] [varchar](150) NOT NULL CONSTRAINT [DF_tblHDCompanies1_irUser_1]  DEFAULT (suser_name()),
+	[irUser] [varchar](150) COLLATE Latin1_General_CI_AS NOT NULL CONSTRAINT [DF_tblHDCompanies1_irUser_1]  DEFAULT (suser_name()),
  CONSTRAINT [PK_tblHDCompanies] PRIMARY KEY CLUSTERED 
 (
 	[strCustomer_lic_co] ASC,

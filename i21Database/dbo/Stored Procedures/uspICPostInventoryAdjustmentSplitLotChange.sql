@@ -76,8 +76,8 @@ BEGIN
 		FROM dbo.tblICItem Item 
 		WHERE intItemId = @intItemId		
 
-		-- 'Split Lot Qty requires a negative Adjust Qty on {Item} to split stocks from it.'
-		RAISERROR(51177, 11, 1, @strItemNo);
+		-- 'Split Lot requires a negative Adjust Qty on {Item} to split stocks from it.'
+		RAISERROR(51176, 11, 1, @strItemNo);
 		GOTO Exit_With_Errors
 	END
 END 
