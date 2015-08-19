@@ -1718,6 +1718,7 @@
     <None Include="Scripts\Utility\IC\IC-1092\Fix the Inventory Lot Out table.sql" />
     <None Include="Scripts\Utility\IC\IC-1092\Fix the Lot Qty.sql" />
     <Build Include="dbo\Stored Procedures\uspAPBillUpdateAddressInfo.sql" />
+    <None Include="Scripts\Post-Deployment\DB\4_Create_Role_for_DashboardReports.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
