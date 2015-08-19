@@ -45,12 +45,11 @@ BEGIN
 		EXEC('
 			CREATE VIEW [dbo].[vyuTMOriginOption]
 			AS
-			SELECT TOP 1
+			SELECT 
 				ysnLoanEquipment = CAST(0 AS BIT)
 				,ysnPetro = CAST(0 AS BIT)
 				,intOriginOptionId = CAST(0 AS INT)
-			FROM
-			coctlmst
+			
 		')
 	END
 END
