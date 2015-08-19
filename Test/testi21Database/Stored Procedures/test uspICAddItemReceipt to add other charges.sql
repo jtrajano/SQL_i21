@@ -256,7 +256,7 @@ BEGIN
 				,[intOtherChargeEntityVendorId] 
 				,[dblAmount] 
 				,[strAllocateCostBy] 
-				,[strCostBilledBy] 
+				,[ysnAccrue] 
 				,[intContractDetailId] 
 		)
 		SELECT
@@ -278,7 +278,7 @@ BEGIN
 				,[intOtherChargeEntityVendorId] = NULL 
 				,[dblAmount]					= 0
 				,[strAllocateCostBy]			= @ALLOCATE_COST_BY_Unit
-				,[strCostBilledBy]				= @COST_BILLED_BY_Vendor
+				,[ysnAccrue]					= 1 -- @COST_BILLED_BY_Vendor
 				,[intContractDetailId]			= 8
 
 		IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 

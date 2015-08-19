@@ -6,7 +6,7 @@ SELECT
 	TR.intTransportReceiptId,
     CT.intContractHeaderId,
 	TR.intContractDetailId,
-	CT.intContractNumber,
+	CT.strContractNumber,
 	TL.strTransaction,
 	dblOrderedQuantity  = CASE
 								  WHEN isNull(LG.dblQuantity,0) = 0 and SP.strGrossOrNet = 'Net'

@@ -65,13 +65,18 @@ BEGIN
 		@intInventoryReceiptId
 	IF @@ERROR <> 0 GOTO _Exit;
 
-	-- Allocate cost by 'weight'
-	EXEC dbo.uspICAllocateInventoryReceiptOtherChargesByContractAndWeights
-		@intInventoryReceiptId
-	IF @@ERROR <> 0 GOTO _Exit;
+	---- Allocate cost by 'weight'
+	--EXEC dbo.uspICAllocateInventoryReceiptOtherChargesByContractAndWeights
+	--	@intInventoryReceiptId
+	--IF @@ERROR <> 0 GOTO _Exit;
 
 	-- Allocate by 'cost'
 	EXEC dbo.uspICAllocateInventoryReceiptOtherChargesByContractAndCost
+		@intInventoryReceiptId
+	IF @@ERROR <> 0 GOTO _Exit;
+
+	-- Allocate by 'stock unit'
+	EXEC dbo.uspICAllocateInventoryReceiptOtherChargesByContractAndStockUnit
 		@intInventoryReceiptId
 	IF @@ERROR <> 0 GOTO _Exit;
 END
@@ -85,16 +90,23 @@ BEGIN
 		IF @@ERROR <> 0 GOTO _Exit;
 	END 
 
-	-- Allocate the other cost by weight
-	BEGIN 	
-		EXEC dbo.uspICAllocateInventoryReceiptOtherChargesByWeights
-			@intInventoryReceiptId
-		IF @@ERROR <> 0 GOTO _Exit;
-	END 
+	---- Allocate the other cost by weight
+	--BEGIN 	
+	--	EXEC dbo.uspICAllocateInventoryReceiptOtherChargesByWeights
+	--		@intInventoryReceiptId
+	--	IF @@ERROR <> 0 GOTO _Exit;
+	--END 
 
 	-- Allocate by cost
 	BEGIN 	
 		EXEC dbo.uspICAllocateInventoryReceiptOtherChargesByCost
+			@intInventoryReceiptId
+		IF @@ERROR <> 0 GOTO _Exit;
+	END 
+
+	-- Allocate by stock unit
+	BEGIN 	
+		EXEC dbo.uspICAllocateInventoryReceiptOtherChargesByStockUnit
 			@intInventoryReceiptId
 		IF @@ERROR <> 0 GOTO _Exit;
 	END 

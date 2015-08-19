@@ -20,6 +20,8 @@ SELECT TC.intTaxCodeId
 	 , E.strName
 	 , SUM(IDT.dblAdjustedTax - IDT.dblTax) AS dblTaxDifference
 	 , SUM(IDT.dblAdjustedTax)		AS dblTaxAmount
+	 , I.dblInvoiceSubtotal
+	 , I.dblInvoiceTotal
 FROM tblSMTaxCode TC
 	LEFT OUTER JOIN tblSMTaxClass CL ON TC.intTaxClassId = CL.intTaxClassId
 	LEFT OUTER JOIN tblGLAccount SA ON TC.intSalesTaxAccountId = SA.intAccountId 
@@ -48,3 +50,5 @@ GROUP BY
 	,I.dtmDate
 	,C.strCustomerNumber
 	,E.strName
+	, I.dblInvoiceSubtotal
+	, I.dblInvoiceTotal
