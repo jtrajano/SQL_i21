@@ -59,7 +59,7 @@ BEGIN
 					ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId 
 				INNER JOIN (
 					SELECT	dblTotalOtherCharge = SUM(dblCalculatedAmount)
-							,strCostBilledBy
+							,ysnAccrue 
 							,intContractId
 							,intEntityVendorId
 							,ysnInventoryCost
@@ -69,7 +69,7 @@ BEGIN
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 							AND CalculatedCharge.strAllocateCostBy = @ALLOCATE_COST_BY_Stock_Unit
 							AND CalculatedCharge.intContractId IS NULL 
-					GROUP BY strCostBilledBy, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
+					GROUP BY ysnAccrue, intContractId, intEntityVendorId, ysnInventoryCost, intInventoryReceiptId, intInventoryReceiptChargeId
 				) CalculatedCharges 
 					ON ReceiptItem.intInventoryReceiptId = CalculatedCharges.intInventoryReceiptId
 				LEFT JOIN (
@@ -90,7 +90,7 @@ BEGIN
 	) AS Source_Query  
 		ON ReceiptItemAllocatedCharge.intInventoryReceiptId = Source_Query.intInventoryReceiptId
 		AND ReceiptItemAllocatedCharge.intEntityVendorId = Source_Query.intEntityVendorId
-		AND ReceiptItemAllocatedCharge.strCostBilledBy = Source_Query.strCostBilledBy
+		AND ReceiptItemAllocatedCharge.ysnAccrue = Source_Query.ysnAccrue
 		AND ReceiptItemAllocatedCharge.ysnInventoryCost = Source_Query.ysnInventoryCost
 		
 
@@ -111,7 +111,7 @@ BEGIN
 			,[intInventoryReceiptItemId]
 			,[intEntityVendorId]
 			,[dblAmount]
-			,[strCostBilledBy]
+			,[ysnAccrue]
 			,[ysnInventoryCost]
 		)
 		VALUES (
