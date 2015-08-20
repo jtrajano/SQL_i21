@@ -722,3 +722,7 @@ EXEC sp_addmessage 51179,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51180) EXEC sp_dropmessage 51180, 'us_english'	
 SET @strmessage = 'Old and new expiry date cannot be same.'
 EXEC sp_addmessage 51180,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51181) EXEC sp_dropmessage 51181, 'us_english'	
+SET @strmessage = 'Old and new lot status cannot be same.'
+EXEC sp_addmessage 51181,11,@strmessage,'us_english','False'
