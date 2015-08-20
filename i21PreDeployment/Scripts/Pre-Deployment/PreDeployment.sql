@@ -96,6 +96,7 @@
 :r .\12_EM\08_EntityShipViaSchemaUpdate.sql
 :r .\8_AP\UpdateShipVia.sql
 :r .\12_EM\09_UpdateEntityLocationShipVia.sql
+:r .\12_EM\10_CheckAndFixSpecialPricingRackLocation.sql
 
 
 --RK
