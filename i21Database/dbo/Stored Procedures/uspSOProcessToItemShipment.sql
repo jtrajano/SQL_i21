@@ -13,8 +13,9 @@ SET ANSI_WARNINGS OFF
  
 DECLARE	 @ShipmentId INT
 		,@InvoiceId  INT
-		,@IsSoftwareType BIT = 0
+		,@HasSoftwareItems BIT = 0
 		,@HasNonSoftwareItems BIT = 0
+	    ,@icUserId INT = (SELECT TOP 1 intUserSecurityID FROM tblSMUserSecurity WHERE intEntityId = @UserId)
 
 IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrderId AND [strOrderStatus] = 'Closed') 
 	BEGIN
@@ -39,27 +40,20 @@ ELSE
 		IF EXISTS(SELECT 1 FROM tblSOSalesOrderDetail SOD INNER JOIN tblICItem I ON SOD.intItemId = I.intItemId 
 				WHERE SOD.intSalesOrderId = @SalesOrderId AND I.strType = 'Software')
 			BEGIN
-				SET @IsSoftwareType = 1
+				SET @HasSoftwareItems = 1
 				IF EXISTS(SELECT 1 FROM tblSOSalesOrderDetail A LEFT JOIN tblICItem B ON A.intItemId = B.intItemId 
 					WHERE intSalesOrderId = @SalesOrderId AND strType <> 'Software')
 					BEGIN
 						SET @HasNonSoftwareItems = 1
 					END
 
-				EXEC dbo.uspARInsertToInvoice @SalesOrderId, @UserId, @HasNonSoftwareItems, @InvoiceId OUTPUT
-
-				IF (@HasNonSoftwareItems = 0) 
-					BEGIN
-						SET @InventoryShipmentId = @InvoiceId; 
-						RETURN; 
-					END
+				GOTO PROCESS_SHIPMENT;				
 			END
 	END
 
-DECLARE @icUserId INT = (SELECT TOP 1 intUserSecurityID FROM tblSMUserSecurity WHERE intEntityId = @UserId);
-
+PROCESS_SHIPMENT:
 IF EXISTS(SELECT 1 FROM tblSOSalesOrderDetail A INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
-                WHERE intSalesOrderId = @SalesOrderId AND strType = 'Inventory')
+                WHERE intSalesOrderId = @SalesOrderId AND strType = 'Inventory' AND intItemUOMId IS NOT NULL)
 	BEGIN		
         EXEC dbo.uspICProcessToInventoryShipment
 		 @intSourceTransactionId = @SalesOrderId
@@ -67,7 +61,7 @@ IF EXISTS(SELECT 1 FROM tblSOSalesOrderDetail A INNER JOIN tblICItem B ON A.intI
 		,@intUserId = @icUserId
 		,@InventoryShipmentId = @ShipmentId OUTPUT
 
-		IF (@IsSoftwareType = 1)
+		IF (@HasSoftwareItems = 1)
 			BEGIN
 				DECLARE @strTransactionId NVARCHAR(40) = NULL
 				SELECT @strTransactionId = strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = @ShipmentId
@@ -83,6 +77,11 @@ ELSE
 
 IF @@ERROR > 0 
 	RETURN 0;
+
+IF @HasSoftwareItems = 1
+	BEGIN
+		EXEC dbo.uspARInsertToInvoice @SalesOrderId, @UserId, @HasNonSoftwareItems, @ShipmentId, @InvoiceId OUTPUT
+	END
 
 EXEC dbo.uspSOUpdateOrderShipmentStatus @SalesOrderId
 

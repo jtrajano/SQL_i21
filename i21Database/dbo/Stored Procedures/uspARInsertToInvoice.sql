@@ -2,6 +2,7 @@
 	@SalesOrderId	     INT = 0,
 	@UserId			     INT = 0,
 	@HasNonSoftwareItems BIT = 0,
+	@ShipmentId			 INT = 0,
 	@InvoiceId		     INT = NULL OUTPUT
 
 AS
@@ -17,7 +18,9 @@ BEGIN
 	SELECT @DateOnly = CAST(GETDATE() AS DATE)
 
 	--COMPUTE INVOICE TOTAL AMOUNTS FOR SOFTWARE
-	DECLARE @OrderDetails TABLE(intSalesOrderDetailId	INT, 
+	DECLARE @OrderDetails TABLE(intSalesOrderDetailId	INT,
+								intInventoryShipmentItemId INT,
+								strShipmentNumber		NVARCHAR(50),	 
 								dblDiscount				NUMERIC(18,6), 
 								dblTotalTax				NUMERIC(18,6), 
 								dblPrice				NUMERIC(18,6), 
@@ -232,14 +235,24 @@ BEGIN
 			, @dblSalesOrderTotal	  = 0.000000
 			, @dblDiscount			  = 0.000000
 
-	INSERT INTO @OrderDetails(intSalesOrderDetailId, dblDiscount, dblTotalTax, dblPrice, dblTotal)
+	INSERT INTO @OrderDetails(intSalesOrderDetailId, intInventoryShipmentItemId, strShipmentNumber, dblDiscount, dblTotalTax, dblPrice, dblTotal)
 	SELECT intSalesOrderDetailId
+			, CASE WHEN ICI.strType = 'Inventory'
+				THEN (SELECT intInventoryShipmentItemId FROM tblICInventoryShipmentItem 
+				 	WHERE intOrderId = @SalesOrderId
+						AND intLineNo = SOD.intSalesOrderDetailId
+						AND intItemId = SOD.intItemId)
+				ELSE NULL END
+			, CASE WHEN ICI.strType = 'Inventory' 
+				THEN (SELECT strShipmentNumber FROM tblICInventoryShipment 
+					WHERE intInventoryShipmentId = @ShipmentId) 
+				ELSE NULL END
 			, dblDiscount
 			, dblTotalTax
 			, CASE WHEN ICI.strType <> 'Software' THEN dblPrice ELSE dblLicenseAmount END
-			, CASE WHEN ICI.strType <> 'Software' THEN dblTotal ELSE dblLicenseAmount * dblQtyOrdered END
+			, CASE WHEN ICI.strType <> 'Software' THEN dblTotal ELSE dblLicenseAmount * dblQtyOrdered END			
 	FROM tblSOSalesOrderDetail SOD LEFT JOIN tblICItem ICI ON SOD.intItemId = ICI.intItemId 
-		WHERE SOD.intSalesOrderId = @SalesOrderId AND (ICI.strType IN ('Non-Inventory', 'Other Charge', 'Service', 'Software') OR ICI.strType IS NULL)
+		WHERE SOD.intSalesOrderId = @SalesOrderId-- AND (ICI.strType IN ('Non-Inventory', 'Other Charge', 'Service', 'Software') OR ICI.strType IS NULL)
 		ORDER BY intSalesOrderDetailId
 
 	SELECT @dblSalesOrderSubtotal = SUM(dblPrice)
@@ -341,9 +354,14 @@ BEGIN
 	WHILE EXISTS(SELECT TOP 1 NULL FROM @OrderDetails)
 		BEGIN
 			DECLARE @intSODetailId		INT
-					, @intInvoiceDetailId	INT
+				  , @intInvoiceDetailId	INT
+				  , @intInventoryShipmentItemId INT
+				  , @strShipmentNumber  NVARCHAR(50)
 					
-			SELECT TOP 1 @intSODetailId = [intSalesOrderDetailId] FROM @OrderDetails ORDER BY [intSalesOrderDetailId]
+			SELECT TOP 1 @intSODetailId = [intSalesOrderDetailId]
+			           , @intInventoryShipmentItemId = [intInventoryShipmentItemId]
+					   , @strShipmentNumber = [strShipmentNumber] 
+		    FROM @OrderDetails ORDER BY [intSalesOrderDetailId]
 			
 			INSERT INTO [tblARInvoiceDetail]
 				([intInvoiceId]
@@ -363,6 +381,8 @@ BEGIN
 				,[intSalesOrderDetailId]
 				,[intContractHeaderId]
 				,[intContractDetailId]
+				,[intInventoryShipmentItemId]
+				,[strShipmentNumber]
 				,[strMaintenanceType]
 				,[strFrequency]
 				,[dblMaintenanceAmount]
@@ -370,8 +390,8 @@ BEGIN
 				,[dtmMaintenanceDate]
 				,[intConcurrencyId])
 			SELECT 	
-					@NewInvoiceId				--[intInvoiceId]
-				,SOD.[intItemId]				--[intItemId]
+				  @NewInvoiceId				--[intInvoiceId]
+				,SOD.[intItemId]			--[intItemId]
 				,[strItemDescription]		--[strItemDescription]
 				,[intItemUOMId]				--[intItemUOMId]
 				,[dblQtyOrdered]			--[dblQtyOrdered]
@@ -387,6 +407,8 @@ BEGIN
 				,[intSalesOrderDetailId]    --[intSalesOrderDetailId]
 				,[intContractHeaderId]		--[intContractHeaderId]
 				,[intContractDetailId]		--[intContractDetailId]
+				,@intInventoryShipmentItemId --[intInventoryShipmentItemId]
+				,@strShipmentNumber		    --[strShipmentNumber]
 				,[strMaintenanceType]		--[strMaintenanceType]
 				,[strFrequency]		        --[strFrequency]
 				,0							--[dblMaintenanceAmount]
