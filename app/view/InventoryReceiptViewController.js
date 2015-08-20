@@ -1295,20 +1295,28 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     },
 
     onViewTaxDetailsClick: function (ReceiptItemId) {
-        var win = window;
-        var me = win.controller;
+        var win = this.getView();
         var screenName = 'Inventory.view.InventoryReceiptTaxes';
+        var vm = win.getViewModel();
 
-        Ext.require([
-            screenName,
-                screenName + 'ViewModel',
-                screenName + 'ViewController'
-        ], function() {
-            var screen = screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
-            var view = Ext.create(screenName, { controller: 'ic' + screen.toLowerCase(), viewModel: 'ic' + screen.toLowerCase() });
-            var controller = view.getController();
-            controller.show({ id: ReceiptItemId});
-        });
+        if (vm.data.current.phantom === true) {
+            win.context.data.saveRecord({ successFn: function(batch, eOpts){
+                iRely.Functions.openScreen(screenName, {
+                    id: ReceiptItemId
+                });
+                return;
+            } });
+        }
+        else {
+            win.context.data.validator.validateRecord({ window: win }, function(valid) {
+                if (valid) {
+                    iRely.Functions.openScreen(screenName, {
+                        id: ReceiptItemId
+                    });
+                    return;
+                }
+            });
+        }
     },
 
     onInventoryClick: function(button, e, eOpts) {
