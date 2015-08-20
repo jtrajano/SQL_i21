@@ -100,7 +100,6 @@
     <None Include="Scripts\Pre-Deployment\14_CT\01_Make_Column_Null.sql" />
     <None Include="Scripts\Pre-Deployment\11_IC\StatusImplementation.sql" />
     <None Include="i21PreDeployment_1.publish.xml" />
-    
     <None Include="i21PreDeployment_2.publish.xml" />
     <None Include="Scripts\Pre-Deployment\11_IC\1520_to_1530.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\02_UpdateGroupIdFromNonExistence.sql" />
@@ -118,6 +117,7 @@
     <None Include="Scripts\Pre-Deployment\12_EM\09_UpdateEntityLocationShipVia.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\UpdateBillToReceiptAssociation.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\UpdateMissingPaymentInfo.sql" />
+    <None Include="Scripts\Pre-Deployment\12_EM\10_CheckAndFixSpecialPricingRackLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
