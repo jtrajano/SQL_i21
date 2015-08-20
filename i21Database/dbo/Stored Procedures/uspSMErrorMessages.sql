@@ -703,3 +703,6 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51175) EXEC sp_dropmessa
 SET @strmessage = 'There is not enough stocks for %s. Reserved stocks is %s while Lot Qty is %s.'
 EXEC sp_addmessage 51175,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51176) EXEC sp_dropmessage 51176, 'us_english'	
+SET @strmessage = 'Old and new lot qty cannot be same.'
+EXEC sp_addmessage 51176,11,@strmessage,'us_english','False'
