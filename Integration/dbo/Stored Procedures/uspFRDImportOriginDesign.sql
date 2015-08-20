@@ -86,10 +86,13 @@ BEGIN
 		DECLARE @insertload VARCHAR(max)
 		DECLARE @glfsf_stmt_type VARCHAR(50)
 		DECLARE @@glfsf_no_to_convert VARCHAR(50)
+		DECLARE @segmentLength INT = 1
 
 		SET @result = ''Successful''
 		SELECT @hdr= ''''''''+''HDR''+''''''''
 		SELECT @@glfsf_no_to_convert = @originglfsf_no				--strDescription = @glfsf_no_to_convert
+
+		SET @segmentLength = (select SUM(intLength) from tblGLAccountStructure where strType = ''Segment'')
 
 		INSERT tblFRRow (strRowName,strDescription,intMapId,intConcurrencyId)
 			SELECT DISTINCT (RTRIM(glfsf_report_title) + '' - '' + CONVERT(NVARCHAR(100),GETDATE(),9)) AS newTitle, glfsf_no, NULL, 1 FROM glfsfmst
@@ -140,7 +143,7 @@ BEGIN
 					WHEN glfsf_action_type=''NET'' THEN ''Hidden''
 					WHEN glfsf_action_type=''ACP'' AND glfsf_action_crl =''E'' THEN ''Filter Accounts''
 					WHEN glfsf_action_type=''GRP'' AND glfsf_action_crl =''E'' AND glfsf_grp_printall_yn=''N'' THEN ''Filter Accounts''
-					WHEN glfsf_action_type=''GRP'' AND glfsf_action_crl =''E'' AND glfsf_grp_printall_yn=''Y'' THEN ''Hidden''
+					WHEN glfsf_action_type=''GRP'' AND glfsf_action_crl =''E'' AND glfsf_grp_printall_yn=''Y'' THEN ''Filter Accounts''
 					WHEN glfsf_action_type=''GRP'' AND glfsf_action_crl =''A'' THEN ''Filter Accounts''
 					WHEN glfsf_action_type=''GRP'' AND glfsf_action_crl =''F'' THEN ''Filter Accounts''
 					WHEN glfsf_action_type=''GRP'' AND glfsf_action_crl =''L'' THEN ''Filter Accounts''
@@ -194,18 +197,18 @@ BEGIN
 				CASE											--FULL ACCOUNT END
 					WHEN glfsf_action_type=''GRA'' THEN 
 								CASE												
-									WHEN glfsf_gra_sub9_16 LIKE ''%*%'' THEN CONVERT(VARCHAR(8), glfsf_gra_end1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),''99999999''),4)
-									ELSE CONVERT(VARCHAR(8),glfsf_gra_end1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_gra_sub9_16),4)
+									WHEN glfsf_gra_sub9_16 LIKE ''%*%'' THEN CONVERT(VARCHAR(8), glfsf_gra_end1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),''99999999''),@segmentLength)
+									ELSE CONVERT(VARCHAR(8),glfsf_gra_end1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_gra_sub9_16),@segmentLength)
 								END
 					WHEN glfsf_action_type=''GRP'' THEN 
 								CASE
-									WHEN glfsf_grp_sub9_16 LIKE ''%*%'' THEN CONVERT(VARCHAR(8), glfsf_grp_end1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),''99999999''),4)
-									ELSE CONVERT(VARCHAR(8),glfsf_grp_end1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_grp_sub9_16),4)
+									WHEN glfsf_grp_sub9_16 LIKE ''%*%'' THEN CONVERT(VARCHAR(8), glfsf_grp_end1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),''99999999''),@segmentLength)
+									ELSE CONVERT(VARCHAR(8),glfsf_grp_end1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_grp_sub9_16),@segmentLength)
 								END
 					WHEN glfsf_action_type=''ACA'' THEN 
-								CONVERT(VARCHAR(8),glfsf_aca1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_aca9_16),4)
+								CONVERT(VARCHAR(8),glfsf_aca1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_aca9_16),@segmentLength)
 					WHEN glfsf_action_type=''ACP'' THEN 
-								CONVERT(VARCHAR(8),glfsf_acp1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_acp9_16),4)
+								CONVERT(VARCHAR(8),glfsf_acp1_8) + ''-'' + RIGHT(CONVERT(VARCHAR(8),glfsf_acp9_16),@segmentLength)
 					END,
 				CASE 
 					WHEN glfsf_gra_sub9_16 like ''%*%'' THEN ''YES''
@@ -268,7 +271,7 @@ BEGIN
 
 			--SELECT @SQL --debug
 			EXEC (@SQL)
-
+			
 			--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 			--								ACP / ACA / NET
 			--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -329,54 +332,54 @@ BEGIN
 			--=====================================================================================================================================
 			-- 	BUILDING DETAILS 2
 			---------------------------------------------------------------------------------------------------------------------------------------
-			DECLARE @min1 int = 0
-			DECLARE @min1old int = 0
-			DECLARE @min1acct VARCHAR(20)
-			DECLARE @max1acct VARCHAR (20)
-			DECLARE @min1acctold VARCHAR(20) = ''0''
-			DECLARE @acct9_16 VARCHAR (10)
+			--DECLARE @min1 int = 0
+			--DECLARE @min1old int = 0
+			--DECLARE @min1acct VARCHAR(20)
+			--DECLARE @max1acct VARCHAR (20)
+			--DECLARE @min1acctold VARCHAR(20) = ''0''
+			--DECLARE @acct9_16 VARCHAR (10)
 
-			WHILE EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE glfsf_action_type = ''GRP'' AND glfsf_grp_printall_yn = ''Y'' AND intRowDetailId > @min1old)
-			BEGIN
-				SELECT @min1=min(intRowDetailId) FROM #irelyloadFRRowDesign WHERE intRowDetailId > @min1old AND glfsf_action_type = ''GRP'' AND glfsf_grp_printall_yn = ''Y''
+			--WHILE EXISTS (SELECT TOP 1 1 FROM #irelyloadFRRowDesign WHERE glfsf_action_type = ''GRP'' AND glfsf_grp_printall_yn = ''Y'' AND intRowDetailId > @min1old)
+			--BEGIN
+			--	SELECT @min1=min(intRowDetailId) FROM #irelyloadFRRowDesign WHERE intRowDetailId > @min1old AND glfsf_action_type = ''GRP'' AND glfsf_grp_printall_yn = ''Y''
 
-				SELECT @min1acct = full_account, 
-					   @max1acct = full_account_end, 
-					   @min1acctold=full_account, 
-					   @acct9_16=acct9_16
-				FROM #irelyloadFRRowDesign WHERE intRowDetailId = @min1
+			--	SELECT @min1acct = full_account, 
+			--		   @max1acct = full_account_end, 
+			--		   @min1acctold=full_account, 
+			--		   @acct9_16=acct9_16
+			--	FROM #irelyloadFRRowDesign WHERE intRowDetailId = @min1
 				
-				WHILE @min1acct <= @max1acct
-				BEGIN
-					INSERT #irelyloadFRRowDesign
-					(
-						intRowId, intRefNo, strDescription, strRowType, strBalanceSide, strRelatedRows, strAccountsUsed, ysnShowCredit,
-						ysnShowDebit, ysnShowOthers, ysnLinktoGL, dblHeight, strFontName, strFontStyle, strFontColor, intFontSize,
-						strOverrideFormatMask, ysnForceReversedExpense, intSort, intConcurrencyId, glfsf_action_type, glfsf_tot_no, full_account, glfsf_grp_printall_yn,
-						full_account_end, isprimary, acct9_16, glfsf_no, glfsf_line_no, acct1_8, acct1_8end, acct9_16end
-					)
-					SELECT 
-						intRowId, intRefNo-.5, '''', ''Filter Accounts'', strBalanceSide, strRelatedRows, '' [ID] = '' + '''''''' + @min1acct + '''''''', ysnShowCredit,
-						ysnShowDebit, ysnShowOthers, ysnLinktoGL, dblHeight, strFontName, strFontStyle, strFontColor, intFontSize,
-						strOverrideFormatMask, ysnForceReversedExpense, intSort, intConcurrencyId, ''ACP'', glfsf_tot_no, @min1acct, ''N'',
-						full_account_end, isprimary, acct9_16, glfsf_no, glfsf_line_no, acct1_8, acct1_8end, acct9_16end
-					FROM #irelyloadFRRowDesign WHERE intRowDetailId = @min1
+			--	WHILE @min1acct <= @max1acct
+			--	BEGIN
+			--		INSERT #irelyloadFRRowDesign
+			--		(
+			--			intRowId, intRefNo, strDescription, strRowType, strBalanceSide, strRelatedRows, strAccountsUsed, ysnShowCredit,
+			--			ysnShowDebit, ysnShowOthers, ysnLinktoGL, dblHeight, strFontName, strFontStyle, strFontColor, intFontSize,
+			--			strOverrideFormatMask, ysnForceReversedExpense, intSort, intConcurrencyId, glfsf_action_type, glfsf_tot_no, full_account, glfsf_grp_printall_yn,
+			--			full_account_end, isprimary, acct9_16, glfsf_no, glfsf_line_no, acct1_8, acct1_8end, acct9_16end
+			--		)
+			--		SELECT 
+			--			intRowId, intRefNo-.5, '''', ''Filter Accounts'', strBalanceSide, strRelatedRows, '' [ID] = '' + '''''''' + @min1acct + '''''''', ysnShowCredit,
+			--			ysnShowDebit, ysnShowOthers, ysnLinktoGL, dblHeight, strFontName, strFontStyle, strFontColor, intFontSize,
+			--			strOverrideFormatMask, ysnForceReversedExpense, intSort, intConcurrencyId, ''ACP'', glfsf_tot_no, @min1acct, ''N'',
+			--			full_account_end, isprimary, acct9_16, glfsf_no, glfsf_line_no, acct1_8, acct1_8end, acct9_16end
+			--		FROM #irelyloadFRRowDesign WHERE intRowDetailId = @min1
 
-					SELECT @min1acctold = @min1acct
+			--		SELECT @min1acctold = @min1acct
 
-					IF @acct9_16 LIKE ''%*%''
-					BEGIN
-						SELECT @min1acct = MIN(strAccountId) FROM tblGLAccount WHERE strAccountId > @min1acctold
-					END
-					IF @acct9_16 NOT LIKE ''%*%''
-					BEGIN
-						SELECT @min1acct = MIN(strAccountId) FROM tblGLAccount WHERE strAccountId > @min1acctold AND SUBSTRING(strAccountId,7,4) = RIGHT(@acct9_16,4)	--- Account Replace		
-					END
-				END
+			--		IF @acct9_16 LIKE ''%*%''
+			--		BEGIN
+			--			SELECT @min1acct = MIN(strAccountId) FROM tblGLAccount WHERE strAccountId > @min1acctold
+			--		END
+			--		IF @acct9_16 NOT LIKE ''%*%''
+			--		BEGIN
+			--			SELECT @min1acct = MIN(strAccountId) FROM tblGLAccount WHERE strAccountId > @min1acctold AND SUBSTRING(strAccountId,7,4) = RIGHT(@acct9_16,4)	--- Account Replace		
+			--		END
+			--	END
 
-			SELECT @min1old = @min1
+			--SELECT @min1old = @min1
 
-			END
+			--END
 
 			UPDATE #irelyloadFRRowDesign SET rowidupdated = -1
 
@@ -461,22 +464,37 @@ BEGIN
 			UPDATE #irelyloadFRRowDesign
 					SET #irelyloadFRRowDesign.strBalanceSide = 
 					CASE 
-						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Asset'' THEN ''Debit''
-						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Equity'' THEN ''Credit''
-						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Expense'' THEN ''Debit''
-						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Liability'' THEN ''Credit''
-						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Revenue'' THEN ''Credit''
-						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Sales'' THEN ''Credit''
-						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8end) = ''Cost of Goods Sold'' THEN ''Debit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS <= #irelyloadFRRowDesign.acct1_8end) = ''Asset'' THEN ''Debit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS <= #irelyloadFRRowDesign.acct1_8end) = ''Equity'' THEN ''Credit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS <= #irelyloadFRRowDesign.acct1_8end) = ''Expense'' THEN ''Debit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS <= #irelyloadFRRowDesign.acct1_8end) = ''Liability'' THEN ''Credit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS <= #irelyloadFRRowDesign.acct1_8end) = ''Revenue'' THEN ''Credit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS <= #irelyloadFRRowDesign.acct1_8end) = ''Sales'' THEN ''Credit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.acct1_8 AND vyuGLAccountView.[Primary Account] COLLATE SQL_Latin1_General_CP1_CS_AS <= #irelyloadFRRowDesign.acct1_8end) = ''Cost of Goods Sold'' THEN ''Debit''
 						ELSE NULL
 					END
 			FROM #irelyloadFRRowDesign 
 			WHERE #irelyloadFRRowDesign.strBalanceSide IS NULL AND #irelyloadFRRowDesign.isprimary = ''YES''
 
+			UPDATE #irelyloadFRRowDesign
+					SET #irelyloadFRRowDesign.strBalanceSide = 
+					CASE 
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[strAccountId] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.full_account AND vyuGLAccountView.[strAccountId] COLLATE SQL_Latin1_General_CP1_CS_AS <= #irelyloadFRRowDesign.full_account_end) = ''Asset'' THEN ''Debit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[strAccountId] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.full_account AND vyuGLAccountView.[strAccountId] COLLATE SQL_Latin1_General_CP1_CS_AS <= #irelyloadFRRowDesign.full_account_end) = ''Equity'' THEN ''Credit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[strAccountId] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.full_account AND vyuGLAccountView.[strAccountId] COLLATE SQL_Latin1_General_CP1_CS_AS <= #irelyloadFRRowDesign.full_account_end) = ''Expense'' THEN ''Debit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[strAccountId] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.full_account AND vyuGLAccountView.[strAccountId] COLLATE SQL_Latin1_General_CP1_CS_AS <= #irelyloadFRRowDesign.full_account_end) = ''Liability'' THEN ''Credit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[strAccountId] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.full_account AND vyuGLAccountView.[strAccountId] COLLATE SQL_Latin1_General_CP1_CS_AS <= #irelyloadFRRowDesign.full_account_end) = ''Revenue'' THEN ''Credit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[strAccountId] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.full_account AND vyuGLAccountView.[strAccountId] COLLATE SQL_Latin1_General_CP1_CS_AS <= #irelyloadFRRowDesign.full_account_end) = ''Sales'' THEN ''Credit''
+						WHEN (SELECT TOP 1 strAccountType FROM vyuGLAccountView WHERE vyuGLAccountView.[strAccountId] COLLATE SQL_Latin1_General_CP1_CS_AS >= #irelyloadFRRowDesign.full_account AND vyuGLAccountView.[strAccountId] COLLATE SQL_Latin1_General_CP1_CS_AS <= #irelyloadFRRowDesign.full_account_end) = ''Cost of Goods Sold'' THEN ''Debit''
+						ELSE NULL
+					END
+			FROM #irelyloadFRRowDesign 
+			WHERE #irelyloadFRRowDesign.strBalanceSide IS NULL AND #irelyloadFRRowDesign.isprimary = ''NO''
+
 			UPDATE #irelyloadFRRowDesign SET strDescription = ''none'' WHERE strDescription IS NULL AND strRowType IN (''Hidden'',''Row Calculation'',''Filter Accounts'')
 			UPDATE #irelyloadFRRowDesign SET strBalanceSide = ''Debit'' WHERE strBalanceSide = ''D''
-			UPDATE #irelyloadFRRowDesign SET strBalanceSide = ''Credit'' WHERE strBalanceSide = ''C''
-			
+			UPDATE #irelyloadFRRowDesign SET strBalanceSide = ''Credit'' WHERE strBalanceSide = ''C''			
+
 			--=====================================================================================================================================
 			-- 	BUILDING DETAILS 3
 			---------------------------------------------------------------------------------------------------------------------------------------
@@ -786,7 +804,7 @@ BEGIN
 								'''''''' + '','' + ''''''''
 								+ ''Between'' + '''''''' + '',''
 								+ ''substring(LTRIM(strAccountsUsed),15,'' + CONVERT(VARCHAR(10),(CONVERT(INT,@1_8size) + 1 + CONVERT(INT,@9_16size))) + ''),''
-								+ ''substring(LTRIM(strAccountsUsed),30,'' + CONVERT(VARCHAR(10),(CONVERT(INT,@1_8size) + 1 + CONVERT(INT,@9_16size))) + ''),''
+								+ ''substring(LTRIM(strAccountsUsed),35,'' + CONVERT(VARCHAR(10),(CONVERT(INT,@1_8size) + 1 + CONVERT(INT,@9_16size))) + ''),''
 								+ '''''''' + '''''''' + '' ,
 								intRowDetailId
 							FROM tblFRRowDesign
@@ -995,3 +1013,5 @@ END
 --			@result = @res OUTPUT					-- OUTPUT PARAMETER THAT RETURNS TOTAL NUMBER OF SUCCESSFUL RECORDS
 				
 --SELECT @res
+
+
