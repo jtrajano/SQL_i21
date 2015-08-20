@@ -10,18 +10,19 @@ SELECT TC.intTaxCodeId
 	 , TC.strCounty
 	 , TC.strCity
 	 , TC.intSalesTaxAccountId
-	 , SA.strAccountId				AS SalesTaxAccount
+	 , SalesTaxAccount = SA.strAccountId
 	 , TC.intPurchaseTaxAccountId
-	 , ISNULL(PA.strAccountId, '')	AS PurchaseTaxAccount
+	 , PurchaseTaxAccount = ISNULL(PA.strAccountId, '')
 	 , I.intInvoiceId
 	 , I.strInvoiceNumber
 	 , I.dtmDate
 	 , C.strCustomerNumber
 	 , E.strName
-	 , SUM(IDT.dblAdjustedTax - IDT.dblTax) AS dblTaxDifference
-	 , SUM(IDT.dblAdjustedTax)		AS dblTaxAmount
-	 , I.dblInvoiceSubtotal
-	 , I.dblInvoiceTotal
+	 , dblTaxDifference = SUM(IDT.dblAdjustedTax - IDT.dblTax)
+	 , dblTaxAmount     = SUM(IDT.dblAdjustedTax)
+	 , dblNonTaxable    = (SELECT ISNULL(SUM(dblTotal), 0) FROM tblARInvoiceDetail WHERE dblTotalTax = 0 AND intInvoiceId = I.intInvoiceId)
+	 , dblTaxable       = (SELECT ISNULL(SUM(dblTotal), 0) FROM tblARInvoiceDetail WHERE dblTotalTax > 0 AND intInvoiceId = I.intInvoiceId)
+	 , dblTotalSales    = I.dblInvoiceTotal
 FROM tblSMTaxCode TC
 	LEFT OUTER JOIN tblSMTaxClass CL ON TC.intTaxClassId = CL.intTaxClassId
 	LEFT OUTER JOIN tblGLAccount SA ON TC.intSalesTaxAccountId = SA.intAccountId 
@@ -49,6 +50,5 @@ GROUP BY
 	,I.strInvoiceNumber
 	,I.dtmDate
 	,C.strCustomerNumber
-	,E.strName
-	, I.dblInvoiceSubtotal
-	, I.dblInvoiceTotal
+	,E.strName	
+	,I.dblInvoiceTotal
