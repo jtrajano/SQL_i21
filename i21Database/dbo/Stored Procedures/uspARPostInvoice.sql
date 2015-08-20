@@ -29,7 +29,7 @@ SET ANSI_WARNINGS OFF
 --------------------------------------------------------------------------------------------   
 -- Create a unique transaction name. 
 DECLARE @TransactionName AS VARCHAR(500) = 'Invoice Transaction' + CAST(NEWID() AS NVARCHAR(100));
-IF @raiseError = 0
+IF @raiseError = 0 OR @recap = 1
 	BEGIN TRAN @TransactionName
 DECLARE @totalRecords INT = 0
 DECLARE @totalInvalid INT = 0
@@ -415,7 +415,37 @@ IF @recap = 0
 						AND D.intItemId = Acct.intItemId 		 				
 				WHERE
 					(Acct.intGeneralAccountId IS NULL OR Acct.intGeneralAccountId = 0)
-					AND I.strType IN ('Non-Inventory','Service','Other Charge','Software')
+					AND I.strType IN ('Non-Inventory','Service','Software')
+					
+					
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The Other Charge Income Account of item - ' + I.strItemNo + ' was not specified.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					tblARInvoice A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					tblARInvoiceDetail D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					tblICItem I
+						ON D.intItemId = I.intItemId
+				LEFT OUTER JOIN
+					tblSMCompanyLocation L
+						ON A.intCompanyLocationId = L.intCompanyLocationId
+				LEFT OUTER JOIN
+					vyuARGetItemAccount Acct
+						ON A.intCompanyLocationId = Acct.intLocationId 
+						AND D.intItemId = Acct.intItemId 		 				
+				WHERE
+					(Acct.intOtherChargeIncomeAccountId IS NULL OR Acct.intOtherChargeIncomeAccountId = 0)
+					AND I.strType = 'Other Charge'					
 					
 					
 				BEGIN TRY
@@ -475,13 +505,13 @@ IF @recap = 0
 				END TRY
 				BEGIN CATCH
 					SELECT @ErrorMerssage = ERROR_MESSAGE()
-					IF @raiseError = 0
+					IF @raiseError = 0 OR @recap = 1
 						ROLLBACK TRAN @TransactionName
-					IF @raiseError = 0
+					IF @raiseError = 0 OR @recap = 1
 						BEGIN TRANSACTION
 					INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 					SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-					IF @raiseError = 0
+					IF @raiseError = 0 OR @recap = 1
 						COMMIT TRANSACTION
 					IF @raiseError = 1
 						RAISERROR(@ErrorMerssage, 11, 1)
@@ -583,7 +613,7 @@ IF @recap = 0
 			
 		IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 			BEGIN
-				IF @raiseError = 0
+				IF @raiseError = 0 OR @recap = 1
 					COMMIT TRAN @TransactionName
 				IF @raiseError = 1
 					BEGIN
@@ -673,13 +703,13 @@ IF @post = 1
 		END TRY
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				BEGIN TRANSACTION
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				COMMIT TRANSACTION
 			IF @raiseError = 1
 				RAISERROR(@ErrorMerssage, 11, 1)
@@ -725,13 +755,13 @@ IF @post = 1
 		END TRY
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				BEGIN TRANSACTION
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				COMMIT TRANSACTION
 			IF @raiseError = 1
 				RAISERROR(@ErrorMerssage, 11, 1)
@@ -808,9 +838,12 @@ IF @post = 1
 			SELECT
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
-				,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge','Software'))) 
+				,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Software'))) 
 													THEN
 														IST.intGeneralAccountId
+													WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType = 'Other Charge')) 
+													THEN
+														IST.intOtherChargeIncomeAccountId
 													ELSE
 														(CASE WHEN B.intServiceChargeAccountId IS NOT NULL AND B.intServiceChargeAccountId <> 0 THEN B.intServiceChargeAccountId ELSE @ServiceChargesAccountId END)
 												END)
@@ -1171,13 +1204,13 @@ IF @post = 1
 		END TRY
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				BEGIN TRANSACTION
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				COMMIT TRANSACTION
 			IF @raiseError = 1
 				RAISERROR(@ErrorMerssage, 11, 1)
@@ -1260,13 +1293,13 @@ IF @post = 0
 		END TRY
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				BEGIN TRANSACTION
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				COMMIT TRANSACTION
 			IF @raiseError = 1
 				RAISERROR(@ErrorMerssage, 11, 1)
@@ -1355,13 +1388,13 @@ IF @post = 0
 		END TRY
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				BEGIN TRANSACTION
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				COMMIT TRANSACTION
 			IF @raiseError = 1
 				RAISERROR(@ErrorMerssage, 11, 1)
@@ -1379,7 +1412,7 @@ IF @post = 0
 --------------------------------------------------------------------------------------------  
 IF @recap = 1
 	
-	IF @raiseError = 0
+	IF @raiseError = 0 OR @recap = 1
 		ROLLBACK TRAN @TransactionName
 	BEGIN 
 
@@ -1452,13 +1485,13 @@ IF @recap = 1
 	END TRY
 	BEGIN CATCH
 		SELECT @ErrorMerssage = ERROR_MESSAGE()
-		IF @raiseError = 0
+		IF @raiseError = 0 OR @recap = 1
 			ROLLBACK TRAN @TransactionName
-		IF @raiseError = 0
+		IF @raiseError = 0 OR @recap = 1
 			BEGIN TRANSACTION
 		INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-		IF @raiseError = 0
+		IF @raiseError = 0 OR @recap = 1
 			COMMIT TRANSACTION
 		IF @raiseError = 1
 			RAISERROR(@ErrorMerssage, 11, 1)
@@ -1480,13 +1513,13 @@ IF @recap = 0
 		END TRY
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				BEGIN TRANSACTION
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				COMMIT TRANSACTION
 			IF @raiseError = 1
 				RAISERROR(@ErrorMerssage, 11, 1)
@@ -1625,13 +1658,13 @@ IF @recap = 0
 				END TRY
 				BEGIN CATCH
 					SELECT @ErrorMerssage = ERROR_MESSAGE()
-					IF @raiseError = 0
+					IF @raiseError = 0 OR @recap = 1
 						ROLLBACK TRAN @TransactionName
-					IF @raiseError = 0
+					IF @raiseError = 0 OR @recap = 1
 						BEGIN TRANSACTION
 					INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 					SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-					IF @raiseError = 0
+					IF @raiseError = 0 OR @recap = 1
 						COMMIT TRANSACTION
 					IF @raiseError = 1
 						RAISERROR(@ErrorMerssage, 11, 1)
@@ -1642,13 +1675,13 @@ IF @recap = 0
 		END TRY
 		BEGIN CATCH	
 			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				BEGIN TRANSACTION
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				COMMIT TRANSACTION
 			IF @raiseError = 1
 				RAISERROR(@ErrorMerssage, 11, 1)
@@ -1677,13 +1710,13 @@ IF @recap = 0
 		END TRY
 		BEGIN CATCH	
 			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				BEGIN TRANSACTION
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				COMMIT TRANSACTION
 			IF @raiseError = 1
 				RAISERROR(@ErrorMerssage, 11, 1)
@@ -1694,7 +1727,7 @@ IF @recap = 0
 	
 SET @successfulCount = @totalRecords
 SET @invalidCount = @totalInvalid	
-IF @raiseError = 0
+IF @raiseError = 0 OR @recap = 1
 	COMMIT TRAN @TransactionName
 RETURN 1;	
 	    
