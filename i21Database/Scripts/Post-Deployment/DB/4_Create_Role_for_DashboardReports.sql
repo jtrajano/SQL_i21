@@ -62,10 +62,14 @@ DEALLOCATE db_cursor
 GO
 
 IF NOT EXISTS (SELECT * FROM sys.server_principals WHERE name = N'irelydashboard')
-BEGIN
-	CREATE LOGIN [irelydashboard] WITH PASSWORD=N'6Ö!Ú=çôrÍ>ú(Y÷?½Û´º²''?6	ûq­{j:', DEFAULT_DATABASE=[master], DEFAULT_LANGUAGE=[us_english], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
-	-- Password:iRely@dash
-END	
+	BEGIN
+		CREATE LOGIN [irelydashboard] WITH PASSWORD=N'iRely@dash', DEFAULT_DATABASE=[master], DEFAULT_LANGUAGE=[us_english], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
+		-- Password:iRely@dash
+	END
+else
+	BEGIN
+		ALTER LOGIN [irelydashboard] WITH PASSWORD=N'iRely@dash'
+	END		
 	
 --EXEC sp_adduser 'irelydashboard';
 --CREATE USER [irelydashboard]; --FOR LOGIN [irelydashboard];
