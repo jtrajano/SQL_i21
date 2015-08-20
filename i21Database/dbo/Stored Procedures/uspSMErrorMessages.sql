@@ -706,3 +706,11 @@ EXEC sp_addmessage 51175,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51176) EXEC sp_dropmessage 51176, 'us_english'	
 SET @strmessage = 'Old and new lot qty cannot be same.'
 EXEC sp_addmessage 51176,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51177) EXEC sp_dropmessage 51177, 'us_english'	
+SET @strmessage = 'Reason code cannot be blank.'
+EXEC sp_addmessage 51177,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51178) EXEC sp_dropmessage 51178, 'us_english'	
+SET @strmessage = 'Supplied lot is not available.'
+EXEC sp_addmessage 51178,11,@strmessage,'us_english','False'
