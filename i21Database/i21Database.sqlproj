@@ -2250,6 +2250,7 @@
     <Build Include="dbo\Stored Procedures\uspICAllocateInventoryReceiptOtherChargesByStockUnit.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingReport.sql" />
     <Build Include="dbo\Views\vyuGRGetTransferLocation.sql" />
+    <None Include="Scripts\Post-Deployment\IC\11_RemoveOtherChargesAsset.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

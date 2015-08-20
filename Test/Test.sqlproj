@@ -789,13 +789,11 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptOtherCharges for test case 6.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptOtherCharges for missing Other Charge Expense GL account.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptOtherCharges for missing Other Charge Income GL account.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptOtherCharges for missing Other Charge Asset GL account.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptOtherCharges for missing Inventory GL account.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptOtherCharges for missing AP Clearing GL account.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostInventoryReceiptOtherCharges for unposting a billed other charge.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostInventoryReceiptOtherCharges for missing AP Clearing GL account.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostInventoryReceiptOtherCharges for missing Inventory GL account.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICUnpostInventoryReceiptOtherCharges for missing Other Charge Asset GL account.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostInventoryReceiptOtherCharges for missing Other Charge Expense GL account.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostInventoryReceiptOtherCharges for missing Other Charge Income GL account.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostInventoryReceiptOtherCharges for test case 1.sql" />

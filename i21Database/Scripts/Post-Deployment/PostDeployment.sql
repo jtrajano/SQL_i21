@@ -157,8 +157,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\08_InventoryTransactionPostingIntegration.sql
 :r .\IC\09_InventoryTransactionsWithNoCounterAccountCategory.sql
 :r .\IC\10_RemoveCommodityItems.sql
+:r .\IC\11_RemoveOtherChargesAsset.sql
 :r .\IC\PatchFor_1510_to_1520.sql
-
 
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql
