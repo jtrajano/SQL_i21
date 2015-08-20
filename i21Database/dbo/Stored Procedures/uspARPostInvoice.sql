@@ -75,6 +75,9 @@ DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Cost of Goods
 DECLARE @INVENTORY_SHIPMENT_TYPE AS INT = 5
 SELECT @INVENTORY_SHIPMENT_TYPE = intTransactionTypeId FROM tblICInventoryTransactionType WHERE strName = @SCREEN_NAME
 
+DECLARE @ZeroDecimal decimal(18,6)
+SET @ZeroDecimal = 0.000000	
+
 -- Ensure @post and @recap is not NULL  
 SET @post = ISNULL(@post, 0)
 SET @recap = ISNULL(@recap, 0)  
@@ -366,7 +369,7 @@ IF @recap = 0
 					G.intAccountId IS NULL	
 					AND A.dblShipping <> 0.0	
 				
-				
+				--Service Charge Account
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT
 					'The Service Charge account in the Company Preferences was not set.',
@@ -387,7 +390,7 @@ IF @recap = 0
 					AND (D.intItemId IS NULL OR D.intItemId = 0)
 					AND (@ServiceChargesAccountId IS NULL OR @ServiceChargesAccountId = 0)
 								
-								
+				--General Account				
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT
 					'The General Account of item - ' + I.strItemNo + ' was not specified.',
@@ -417,7 +420,7 @@ IF @recap = 0
 					(Acct.intGeneralAccountId IS NULL OR Acct.intGeneralAccountId = 0)
 					AND I.strType IN ('Non-Inventory','Service','Software')
 					
-					
+				--Other Charge Income Account	
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT
 					'The Other Charge Income Account of item - ' + I.strItemNo + ' was not specified.',
@@ -445,7 +448,61 @@ IF @recap = 0
 						AND D.intItemId = Acct.intItemId 		 				
 				WHERE
 					(Acct.intOtherChargeIncomeAccountId IS NULL OR Acct.intOtherChargeIncomeAccountId = 0)
-					AND I.strType = 'Other Charge'					
+					AND I.strType = 'Other Charge'	
+					
+				
+				--Zero Contract Item Price	
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The contract item - ' + I.strItemNo + ' price can not be of zero value.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					tblARInvoice A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					tblARInvoiceDetail D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					tblICItem I
+						ON D.intItemId = I.intItemId
+				INNER JOIN
+					vyuCTContractDetailView CT
+						ON D.intContractHeaderId = CT.intContractHeaderId 
+						AND D.intContractDetailId = CT.intContractDetailId 		 				
+				WHERE
+					D.dblPrice = @ZeroDecimal
+					
+				--Contract Item Price not Equal to Contract Sequence Cash Price
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The contract item - ' + I.strItemNo + ' price(' + CONVERT(NVARCHAR(100),CAST(ISNULL(D.dblPrice,@ZeroDecimal) AS MONEY),2) + ') is not equal to the contract sequence cash price(' + CONVERT(NVARCHAR(100),CAST(ISNULL(CT.dblCashPrice,@ZeroDecimal) AS MONEY),2) + ').',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					tblARInvoice A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					tblARInvoiceDetail D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					tblICItem I
+						ON D.intItemId = I.intItemId
+				INNER JOIN
+					vyuCTContractDetailView CT
+						ON D.intContractHeaderId = CT.intContractHeaderId 
+						AND D.intContractDetailId = CT.intContractDetailId 		 				
+				WHERE
+					D.dblPrice <> @ZeroDecimal				
+					AND CT.dblCashPrice <> D.dblPrice 
 					
 					
 				BEGIN TRY
@@ -694,8 +751,9 @@ IF @post = 1
 				vyuICGetItemStock IST
 					ON Detail.intItemId = IST.intItemId 
 					AND Header.intCompanyLocationId = IST.intLocationId 
-			WHERE 
-				(Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
+			WHERE
+				Detail.dblTotal <> @ZeroDecimal
+				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 				AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
 				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
@@ -884,9 +942,10 @@ IF @post = 1
 				vyuARGetItemAccount IST
 					ON B.intItemId = IST.intItemId 
 					AND A.intCompanyLocationId = IST.intLocationId 		
-			WHERE 
-				(B.intItemId IS NULL OR B.intItemId = 0)
-				OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge','Software')))
+			WHERE
+				B.dblTotal <> @ZeroDecimal 
+				AND ((B.intItemId IS NULL OR B.intItemId = 0)
+					OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge','Software'))))
 
 			--CREDIT SALES
 			UNION ALL 
@@ -934,8 +993,9 @@ IF @post = 1
 				vyuARGetItemAccount IST
 					ON B.intItemId = IST.intItemId 
 					AND A.intCompanyLocationId = IST.intLocationId 
-			WHERE 
-				(B.intItemId IS NOT NULL OR B.intItemId <> 0)
+			WHERE
+				B.dblTotal <> @ZeroDecimal  
+				AND (B.intItemId IS NOT NULL OR B.intItemId <> 0)
 				AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 			--CREDIT Shipping
 			UNION ALL 
@@ -977,7 +1037,7 @@ IF @post = 1
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId	
 			WHERE
-				A.dblShipping <> 0.0		
+				A.dblShipping <> @ZeroDecimal		
 				
 		UNION ALL 
 			--CREDIT Tax
@@ -1025,7 +1085,7 @@ IF @post = 1
 				tblSMTaxCode TC
 					ON DT.intTaxCodeId = TC.intTaxCodeId	
 			WHERE
-				DT.dblAdjustedTax <> 0.0
+				DT.dblAdjustedTax <> @ZeroDecimal
 				
 			UNION ALL 
 			--DEBIT Discount
@@ -1071,7 +1131,7 @@ IF @post = 1
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId					
 			WHERE
-				((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) <> 0.0
+				((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) <> @ZeroDecimal
 
 
 			UNION ALL 
@@ -1133,7 +1193,8 @@ IF @post = 1
 					AND ISH.strShipmentNumber = ICT.strTransactionId
 					AND ISNULL(ICT.ysnIsUnposted,0) = 0
 			WHERE
-				D.intInventoryShipmentItemId IS NOT NULL AND D.intInventoryShipmentItemId <> 0
+				D.dblTotal <> @ZeroDecimal
+				AND D.intInventoryShipmentItemId IS NOT NULL AND D.intInventoryShipmentItemId <> 0
 				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
@@ -1197,7 +1258,8 @@ IF @post = 1
 					AND ISH.strShipmentNumber = ICT.strTransactionId
 					AND ISNULL(ICT.ysnIsUnposted,0) = 0 
 			WHERE
-				D.intInventoryShipmentItemId IS NOT NULL AND D.intInventoryShipmentItemId <> 0
+				D.dblTotal <> @ZeroDecimal
+				AND D.intInventoryShipmentItemId IS NOT NULL AND D.intInventoryShipmentItemId <> 0
 				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')		
