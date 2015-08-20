@@ -1,44 +1,57 @@
 CREATE VIEW vyuLGGenerateLoadOpenAllocationDetails
 AS
-	SELECT	AH.intReferenceNumber,
+	SELECT *,
+			CASE WHEN  dblSCUnLoadedQuantity <= (dblSAllocatedQty - dblSGeneratedScheduleQty) 
+				THEN  dblSCUnLoadedQuantity 
+				ELSE (dblSAllocatedQty - dblSGeneratedScheduleQty) 
+				END as dblGenerateLoadOpenQuantity
+	FROM 
+	(SELECT	AH.intReferenceNumber,
 			AH.intAllocationHeaderId,
 
 			AD.intAllocationDetailId,
 
 			AD.intPContractDetailId,
-			CHP.strContractNumber as strPurchaseContractNumber,
+			CDP.strContractNumber as strPurchaseContractNumber,
 			CDP.intContractSeq as intPContractSeq,
-			CHP.intEntityId AS intPEntityId,
+			CDP.intEntityId AS intPEntityId,
 			CDP.intCompanyLocationId AS intPCompanyLocationId,
 			CDP.intItemId AS intPItemId,
-			CAST (CHP.strContractNumber AS VARCHAR(100)) +  '/' + CAST(CDP.intContractSeq AS VARCHAR(100)) AS strPContractNumber, 
-			AD.dblPAllocatedQty,
+			CAST (CDP.strContractNumber AS VARCHAR(100)) +  '/' + CAST(CDP.intContractSeq AS VARCHAR(100)) AS strPContractNumber, 
 			AD.intPUnitMeasureId,
-			ENP.strName AS strVendor,
-			IsNull(CDP.dblBalance, 0) - IsNull(CDP.dblScheduleQty, 0)		AS dblPUnLoadedQuantity,
-			ENP.intDefaultLocationId as intPDefaultLocationId,
+			CDP.intDefaultLocationId as intPDefaultLocationId,
+			CDP.strEntityName as strVendor,
 
 			AD.intSContractDetailId,
-			CHS.strContractNumber as strSalesContractNumber,
+			CDS.strContractNumber as strSalesContractNumber,
 			CDS.intContractSeq as intSContractSeq,
-			CHS.intEntityId AS intSEntityId,
+			CDS.intEntityId AS intSEntityId,
 			CDS.intCompanyLocationId AS intSCompanyLocationId,
 			CDS.intItemId AS intSItemId,
-			CAST (CHS.strContractNumber AS VARCHAR(100)) +  '/' + CAST(CDS.intContractSeq AS VARCHAR(100)) AS strSContractNumber, 
-			AD.dblSAllocatedQty,
+			CAST (CDS.strContractNumber AS VARCHAR(100)) +  '/' + CAST(CDS.intContractSeq AS VARCHAR(100)) AS strSContractNumber, 
 			AD.intSUnitMeasureId,
-			ENS.strName AS strCustomer,
-			IsNull(CDS.dblBalance, 0) - IsNull(CDS.dblScheduleQty, 0)		AS dblSUnLoadedQuantity,
-			IsNull(AD.dblPAllocatedQty, 0) - IsNull(GL.dblQuantity, 0)		AS dblGenerateLoadOpenQuantity,
-			ENS.intDefaultLocationId as intSDefaultLocationId
+			CDS.intDefaultLocationId as intSDefaultLocationId,
+			CDS.strEntityName as strCustomer,
 
-	FROM 	tblLGAllocationDetail AD
-	LEFT JOIN	tblLGGenerateLoad		GL	ON GL.intAllocationDetailId = AD.intAllocationDetailId
+			AD.dblPAllocatedQty,
+			AD.dblSAllocatedQty,
+			dblPCScheduleQty = IsNull(CDP.dblScheduleQty, 0),
+			dblSCScheduleQty = IsNull(CDS.dblScheduleQty, 0),
+
+			dblPCBalance = IsNull(CDP.dblBalance, 0),
+			dblSCBalance = IsNull(CDS.dblBalance, 0),
+
+			dblPCUnLoadedQuantity = IsNull(CDP.dblBalance, 0) - IsNull(CDP.dblScheduleQty, 0),
+			dblSCUnLoadedQuantity = IsNull(CDS.dblBalance, 0) - IsNull(CDS.dblScheduleQty, 0),
+
+			IsNull((SELECT SUM(Load.dblQuantity) FROM tblLGLoad Load LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = Load.intGenerateLoadId Group By GL.intAllocationDetailId, Load.intContractDetailId Having GL.intAllocationDetailId = AD.intAllocationDetailId AND Load.intContractDetailId = AD.intPContractDetailId), 0) as dblPGeneratedScheduleQty,
+			IsNull((SELECT SUM(Load.dblQuantity) FROM tblLGLoad Load LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = Load.intGenerateLoadId Group By GL.intAllocationDetailId, Load.intContractDetailId Having GL.intAllocationDetailId = AD.intAllocationDetailId AND Load.intContractDetailId = AD.intSContractDetailId), 0) as dblSGeneratedScheduleQty,
+			IsNull((SELECT SUM(Load.dblDeliveredQuantity) FROM tblLGLoad Load LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = Load.intGenerateLoadId Group By GL.intAllocationDetailId, Load.intContractDetailId Having GL.intAllocationDetailId = AD.intAllocationDetailId AND Load.intContractDetailId = AD.intPContractDetailId), 0) as dblPGeneratedDeliveredQty,
+			IsNull((SELECT SUM(Load.dblDeliveredQuantity) FROM tblLGLoad Load LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = Load.intGenerateLoadId Group By GL.intAllocationDetailId, Load.intContractDetailId Having GL.intAllocationDetailId = AD.intAllocationDetailId AND Load.intContractDetailId = AD.intSContractDetailId), 0) as dblSGeneratedDeliveredQty
+
+	FROM 	tblLGAllocationDetail AD	
 	JOIN	tblLGAllocationHeader	AH	ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
-	JOIN	tblCTContractDetail 	CDP	ON CDP.intContractDetailId = AD.intPContractDetailId
-	JOIN	tblCTContractHeader		CHP	ON	CHP.intContractHeaderId		=	CDP.intContractHeaderId
-	JOIN	tblCTContractDetail 	CDS	ON CDS.intContractDetailId = AD.intSContractDetailId
-	JOIN	tblCTContractHeader		CHS	ON	CHS.intContractHeaderId		=	CDS.intContractHeaderId
-	LEFT JOIN	tblEntity				ENP	ON	ENP.intEntityId				=	CHP.intEntityId
-	LEFT JOIN	tblEntity				ENS	ON	ENS.intEntityId				=	CHS.intEntityId
+	JOIN	vyuCTContractDetailView 	CDP	ON CDP.intContractDetailId = AD.intPContractDetailId
+	JOIN	vyuCTContractDetailView 	CDS	ON CDS.intContractDetailId = AD.intSContractDetailId
 	WHERE	AD.intPUnitMeasureId = AD.intSUnitMeasureId
+	) t1
