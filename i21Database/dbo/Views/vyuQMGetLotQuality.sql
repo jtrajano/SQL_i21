@@ -3,7 +3,7 @@
 SELECT intProductValueId AS intLotId
 	,intSampleId
 	,Moisture
-	,Density
+	,case when ISNULL(Density,0)='' then 0 else ISNULL(Density,0) end AS Density
 	,Color
 	,Brightness
 	,Thickness

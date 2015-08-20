@@ -443,6 +443,8 @@ BEGIN TRY
 	END
 	IF @intProductionTypeId in (2,3) 
 	BEGIN
+		Select @strRetBatchId=strBatchId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
+
 		If @strRetBatchId is null
 		Begin
 			-- Get the next batch number

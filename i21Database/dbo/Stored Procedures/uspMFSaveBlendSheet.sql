@@ -99,10 +99,15 @@ INSERT INTO @tblLot(
 	)
 
 Declare	@intBlendRequirementId int,
-		@strDemandNo nVarchar(50)
+		@strDemandNo nVarchar(50),
+		@intManufacturingProcessId int
 
 Select @intWorkOrderId=intWorkOrderId,@intBlendRequirementId=intBlendRequirementId from @tblBlendSheet
 Select @strDemandNo=strDemandNo from tblMFBlendRequirement where intBlendRequirementId=@intBlendRequirementId
+
+Select @intManufacturingProcessId=a.intManufacturingProcessId 
+from tblMFRecipe a Join @tblBlendSheet b on a.intItemId=b.intItemId
+ and a.intLocationId=b.intLocationId and ysnActive=1
 
 Begin Tran
 
@@ -116,9 +121,9 @@ else
 Select @strNextWONo= convert(varchar,@strDemandNo) + right('00' + Convert(varchar,(Max(Cast(right(strWorkOrderNo,2) as int)))+1),2)  from tblMFWorkOrder where strWorkOrderNo like @strDemandNo + '%'
 
 insert into tblMFWorkOrder(strWorkOrderNo,intItemId,dblQuantity,intItemUOMId,intStatusId,intManufacturingCellId,intMachineId,intLocationId,dblBinSize,dtmExpectedDate,intExecutionOrder,
-intProductionTypeId,dblPlannedQuantity,intBlendRequirementId,ysnKittingEnabled,ysnUseTemplate,strComment,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intConcurrencyId)
+intProductionTypeId,dblPlannedQuantity,intBlendRequirementId,ysnKittingEnabled,ysnUseTemplate,strComment,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intConcurrencyId,intManufacturingProcessId)
 Select @strNextWONo ,intItemId,dblQtyToProduce,intItemUOMId,2,intCellId,intMachineId,intLocationId,dblBinSize,dtmDueDate,0,1,dblPlannedQuantity,intBlendRequirementId,
-	ysnKittingEnabled,ysnUseTemplate,strComment,GetDate(),intUserId,GetDate(),intUserId,intConcurrencyId +1 
+	ysnKittingEnabled,ysnUseTemplate,strComment,GetDate(),intUserId,GetDate(),intUserId,intConcurrencyId +1,@intManufacturingProcessId 
 	from @tblBlendSheet
 
 Set @intWorkOrderId=SCOPE_IDENTITY()
@@ -151,9 +156,9 @@ Begin
 Select @strRowState=strRowState,@intWorkOrderInputLotId=intWorkOrderInputLotId from @tblLot where intRowNo=@intMinRowNo
 
 If @strRowState='ADDED'
-	Insert Into tblMFWorkOrderInputLot(intWorkOrderId,intLotId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
+	Insert Into tblMFWorkOrderInputLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
 	dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId)
-	Select @intWorkOrderId,intLotId,dblQty,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,null,
+	Select @intWorkOrderId,intLotId,intItemId,dblQty,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,null,
 	GetDate(),intUserId,GetDate(),intUserId,intRecipeItemId
 	From @tblLot where intRowNo=@intMinRowNo
 

@@ -434,7 +434,7 @@ BEGIN TRY
 		IF NOT EXISTS (
 				SELECT *
 				FROM dbo.tblMFWorkOrder W
-				WHERE intWorkOrderId = @intWorkOrderId and W.intStatusId =10
+				WHERE intWorkOrderId = @intWorkOrderId and W.intStatusId in(10,12)
 				)
 		BEGIN
 			RAISERROR (

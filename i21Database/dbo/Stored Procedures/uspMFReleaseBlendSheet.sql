@@ -20,6 +20,8 @@ Declare @ErrMsg nVarchar(Max)
 Declare @intLocationId int
 Declare @intUserId int
 Declare @dblQtyToProduce numeric(18,6)
+Declare @dtmDueDate datetime
+Declare @intExecutionOrder int=1
 
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml  
 
@@ -68,6 +70,7 @@ Declare @tblLot table
 Declare @tblBSLot table
 (
 	intLotId int,
+	intItemId int,
 	dblQty numeric(18,6),
 	intUOMId int,
 	dblIssuedQuantity numeric(18,6),
@@ -122,7 +125,7 @@ INSERT INTO @tblLot(
 
 Update @tblBlendSheet Set dblQtyToProduce=(Select sum(dblQty) from @tblLot)
 
-Select @dblQtyToProduce=dblQtyToProduce,@intUserId=intUserId,@intLocationId=intLocationId from @tblBlendSheet
+Select @dblQtyToProduce=dblQtyToProduce,@intUserId=intUserId,@intLocationId=intLocationId,@dtmDueDate=dtmDueDate from @tblBlendSheet
 
 Update a Set a.dblWeightPerUnit=b.dblWeightPerQty 
 from @tblLot a join tblICLot b on a.intLotId=b.intLotId
@@ -139,9 +142,10 @@ from @tblBlendSheet
 
 Set @intNoOfSheetOriginal=@intNoOfSheet
 
-Declare @intRecipeId int,@intDemandItemId int
+Declare @intRecipeId int,@intDemandItemId int,@intManufacturingProcessId int
 
-Select @intRecipeId = intRecipeId from tblMFRecipe a Join @tblBlendSheet b on a.intItemId=b.intItemId
+Select @intRecipeId = intRecipeId ,@intManufacturingProcessId=a.intManufacturingProcessId 
+from tblMFRecipe a Join @tblBlendSheet b on a.intItemId=b.intItemId
  and a.intLocationId=b.intLocationId and ysnActive=1
 
 Select @strDemandNo=strDemandNo,@intDemandItemId=intItemId from tblMFBlendRequirement where intBlendRequirementId=@intBlendRequirementId
@@ -150,17 +154,14 @@ Select @strDemandNo=strDemandNo,@intDemandItemId=intItemId from tblMFBlendRequir
 If Exists (Select 1 From tblMFWorkOrder where intWorkOrderId=@intWorkOrderId) 
 		Delete From tblMFWorkOrder where intWorkOrderId=@intWorkOrderId
 
-
-Declare @intItemCount int
-
-
-Declare @intLotCount int
-
-Declare @intItemId int,
+Declare @intItemCount int,
+		@intLotCount int,
+		@intItemId int,
 		@dblReqQty numeric(18,6),
 		@intLotId int,
 		@dblQty numeric(18,6)
 
+Select @intExecutionOrder = Count(1) From tblMFWorkOrder Where convert(date,dtmExpectedDate)=convert(date,@dtmDueDate) And intBlendRequirementId is not null
 
 While(@intNoOfSheet > 0)
 Begin
@@ -199,16 +200,16 @@ Begin
 			
 				if (@dblQty >= @dblReqQty And @intNoOfSheet>1)
 					Begin
-						insert into @tblBSLot(intLotId,dblQty,intUOMId,dblIssuedQuantity,intIssuedUOMId,dblWeightPerUnit,intRecipeItemId)
-						Select intLotId,@dblReqQty,intItemUOMId,@dblReqQty/dblWeightPerUnit,intItemIssuedUOMId,dblWeightPerUnit,intRecipeItemId from @tblLot where intRowNo=@intLotCount
+						insert into @tblBSLot(intLotId,intItemId,dblQty,intUOMId,dblIssuedQuantity,intIssuedUOMId,dblWeightPerUnit,intRecipeItemId)
+						Select intLotId,intItemId,@dblReqQty,intItemUOMId,@dblReqQty/dblWeightPerUnit,intItemIssuedUOMId,dblWeightPerUnit,intRecipeItemId from @tblLot where intRowNo=@intLotCount
 
 						Update @tblLot set dblQty=dblQty-@dblReqQty where intRowNo=@intLotCount
 						GOTO NextItem
 					End
 					Else
 					Begin
-						insert into @tblBSLot(intLotId,dblQty,intUOMId,dblIssuedQuantity,intIssuedUOMId,dblWeightPerUnit,intRecipeItemId)
-						Select intLotId,@dblQty,intItemUOMId,@dblQty/dblWeightPerUnit,intItemIssuedUOMId,dblWeightPerUnit,intRecipeItemId from @tblLot where intRowNo=@intLotCount
+						insert into @tblBSLot(intLotId,intItemId,dblQty,intUOMId,dblIssuedQuantity,intIssuedUOMId,dblWeightPerUnit,intRecipeItemId)
+						Select intLotId,intItemId,@dblQty,intItemUOMId,@dblQty/dblWeightPerUnit,intItemIssuedUOMId,dblWeightPerUnit,intRecipeItemId from @tblLot where intRowNo=@intLotCount
 
 						Update @tblLot set dblQty=0 where intRowNo=@intLotCount
 						Set @dblReqQty=@dblReqQty-@dblQty
@@ -227,25 +228,27 @@ Begin
 	else
 	Select @strNextWONo= convert(varchar,@strDemandNo) + right('00' + Convert(varchar,(Max(Cast(right(strWorkOrderNo,2) as int)))+1),2)  from tblMFWorkOrder where strWorkOrderNo like @strDemandNo + '%'
 
+	Set @intExecutionOrder=@intExecutionOrder +1 
+
 	insert into tblMFWorkOrder(strWorkOrderNo,intItemId,dblQuantity,intItemUOMId,intStatusId,intManufacturingCellId,intMachineId,intLocationId,dblBinSize,dtmExpectedDate,intExecutionOrder,
-	intProductionTypeId,dblPlannedQuantity,intBlendRequirementId,ysnKittingEnabled,ysnUseTemplate,strComment,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId)
-	Select @strNextWONo ,intItemId,@PerBlendSheetQty,intItemUOMId,9,intCellId,intMachineId,intLocationId,dblBinSize,dtmDueDate,0,1,
+	intProductionTypeId,dblPlannedQuantity,intBlendRequirementId,ysnKittingEnabled,ysnUseTemplate,strComment,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,dtmReleasedDate,intManufacturingProcessId)
+	Select @strNextWONo ,intItemId,@PerBlendSheetQty,intItemUOMId,9,intCellId,intMachineId,intLocationId,dblBinSize,dtmDueDate,@intExecutionOrder,1,
 	Case When @intNoOfSheetOriginal=1 then dblPlannedQuantity else @PerBlendSheetQty End,intBlendRequirementId,
-	ysnKittingEnabled,ysnUseTemplate,strComment,GetDate(),intUserId,GetDate(),intUserId
+	ysnKittingEnabled,ysnUseTemplate,strComment,GetDate(),intUserId,GetDate(),intUserId,GetDate(),@intManufacturingProcessId
 	from @tblBlendSheet
 
 	Set @intWorkOrderId=SCOPE_IDENTITY()
 	
 	--Insert Into Input/Consumed Lot
-	Insert Into tblMFWorkOrderInputLot(intWorkOrderId,intLotId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
+	Insert Into tblMFWorkOrderInputLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
 	dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId)
-	Select @intWorkOrderId,intLotId,dblQty,intUOMId,dblIssuedQuantity,intIssuedUOMId,null,
+	Select @intWorkOrderId,intLotId,intItemId,dblQty,intUOMId,dblIssuedQuantity,intIssuedUOMId,null,
 	GetDate(),@intUserId,GetDate(),@intUserId,intRecipeItemId
 	From @tblBSLot
 
-	Insert Into tblMFWorkOrderConsumedLot(intWorkOrderId,intLotId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
+	Insert Into tblMFWorkOrderConsumedLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
 	dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId)
-	Select @intWorkOrderId,intLotId,dblQty,intUOMId,dblIssuedQuantity,intIssuedUOMId,null,
+	Select @intWorkOrderId,intLotId,intItemId,dblQty,intUOMId,dblIssuedQuantity,intIssuedUOMId,null,
 	GetDate(),@intUserId,GetDate(),@intUserId,intRecipeItemId
 	From @tblBSLot
 

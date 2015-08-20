@@ -2245,6 +2245,17 @@
     <Build Include="dbo\Stored Procedures\uspMFSetLotStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspMFLotAdjustQty.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSetLotExpiryDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendProductions.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUpdateBlendProduction.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendProductionChildLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendProductionParentLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFUpdateBlendProductionDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateBlendProduction.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendProduction.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFEndBlendSheet.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendSheetLotUOMs.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFStartBlendSheet.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendSheetItemUOMs.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

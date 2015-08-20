@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspMFValidateBlendRelease]
+﻿CREATE PROCEDURE [dbo].[uspMFValidateBlendProduction]
 @strXml nVarchar(Max)
 AS
 Begin Try
@@ -37,18 +37,9 @@ Declare @tblBlendSheet table
 (
 	intWorkOrderId int,
 	intItemId int,
-	intCellId int,
-	intMachineId int,
-	dtmDueDate DateTime,
-	dblQtyToProduce numeric(18,6),
-	dblPlannedQuantity  numeric(18,6),
-	dblBinSize numeric(18,6),
-	strComment nVarchar(Max),
-	ysnUseTemplate bit,
-	ysnKittingEnabled bit,
-	intLocationId int,
-	intBlendRequirementId int,
 	intItemUOMId int,
+	dblQtyToProduce numeric(18,6),
+	intLocationId int,
 	intUserId int
 )
 
@@ -63,15 +54,16 @@ Declare @tblItem table
 Declare @tblLot table
 (
 	intRowNo int Identity(1,1),
+	intWorkOrderConsumedLotId int,
 	intLotId int,
 	intItemId int,
 	dblQty numeric(18,6),
-	dblIssuedQuantity numeric(18,6),
-	dblWeightPerUnit numeric(18,6),
 	intItemUOMId int,
+	dblIssuedQuantity numeric(18,6),
 	intItemIssuedUOMId int,
-	intUserId int,
-	intRecipeItemId int
+	dblWeightPerUnit numeric(18,6),
+	intRecipeItemId int,
+	ysnStaged bit
 )
 
 Declare @tblValidationMessages table
@@ -103,49 +95,39 @@ Declare @tblAvailableQty table
 )
 
 INSERT INTO @tblBlendSheet(
- intWorkOrderId,intItemId,intCellId,intMachineId,dtmDueDate,dblQtyToProduce,dblPlannedQuantity,dblBinSize,strComment,  
- ysnUseTemplate,ysnKittingEnabled,intLocationId,intBlendRequirementId,intItemUOMId,intUserId)
- Select intWorkOrderId,intItemId,intCellId,intMachineId,dtmDueDate,dblQtyToProduce,dblPlannedQuantity,dblBinSize,strComment,  
- ysnUseTemplate,ysnKittingEnabled,intLocationId,intBlendRequirementId,intItemUOMId,intUserId
+ intWorkOrderId,intItemId,intItemUOMId,dblQtyToProduce,intLocationId,intUserId)
+ Select intWorkOrderId,intItemId,intItemUOMId,dblQtyToProduce,intLocationId,intUserId
  FROM OPENXML(@idoc, 'root', 2)  
  WITH ( 
 	intWorkOrderId int, 
 	intItemId int,
-	intCellId int,
-	intMachineId int,
-	dtmDueDate DateTime,
+	intItemUOMId int,
 	dblQtyToProduce numeric(18,6),
 	dblPlannedQuantity  numeric(18,6),
-	dblBinSize numeric(18,6),
-	strComment nVarchar(Max),
-	ysnUseTemplate bit,
-	ysnKittingEnabled bit,
 	intLocationId int,
-	intBlendRequirementId int,
-	intItemUOMId int,
 	intUserId int
 	)
 	
 INSERT INTO @tblLot(
- intLotId,intItemId,dblQty,dblIssuedQuantity,dblWeightPerUnit,intItemUOMId,intItemIssuedUOMId,intUserId,intRecipeItemId)
- Select intLotId,intItemId,dblQty,dblIssuedQuantity,dblWeightPerUnit,intItemUOMId,intItemIssuedUOMId,intUserId,intRecipeItemId
+ intWorkOrderConsumedLotId,intLotId,intItemId,dblQty,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,dblWeightPerUnit,intRecipeItemId,ysnStaged)
+ Select intWorkOrderConsumedLotId,intLotId,intItemId,dblQty,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,dblWeightPerUnit,intRecipeItemId,ysnStaged
  FROM OPENXML(@idoc, 'root/lot', 2)  
  WITH (  
+    intWorkOrderConsumedLotId int,
 	intLotId int,
 	intItemId int,
 	dblQty numeric(18,6),
-	dblIssuedQuantity numeric(18,6),
-	dblPickedQuantity numeric(18,6),
-	dblWeightPerUnit numeric(18,6),
 	intItemUOMId int,
+	dblIssuedQuantity numeric(18,6),
 	intItemIssuedUOMId int,
-	intUserId int,
-	intRecipeItemId int
+	dblWeightPerUnit numeric(18,6),
+	intRecipeItemId int,
+	ysnStaged bit
 	)
 
---Update @tblBlendSheet Set dblQtyToProduce=(Select sum(dblQty) from @tblLot)
+Update @tblBlendSheet Set dblQtyToProduce=(Select sum(dblQty) from @tblLot)
 
-Select @dblQtyToProduce=dblQtyToProduce,@dblPlannedQuantity=dblPlannedQuantity,@intUserId=intUserId,@intLocationId=intLocationId,@strBlendItemNo=b.strItemNo,
+Select @intWorkOrderId=intWorkOrderId,@dblQtyToProduce=dblQtyToProduce,@intUserId=intUserId,@intLocationId=intLocationId,@strBlendItemNo=b.strItemNo,
 @strUOM=d.strUnitMeasure 
 from @tblBlendSheet a 
 Join tblICItem b On a.intItemId=b.intItemId
@@ -155,21 +137,18 @@ Join tblICUnitMeasure d on c.intUnitMeasureId=d.intUnitMeasureId
 Update a Set a.dblWeightPerUnit=b.dblWeightPerQty 
 from @tblLot a join tblICLot b on a.intLotId=b.intLotId
 
-Declare @intRecipeId int
+Declare @dblRecipeQuantity numeric(18,6)
 
-Select @intRecipeId = intRecipeId from tblMFRecipe a Join @tblBlendSheet b on a.intItemId=b.intItemId
- and a.intLocationId=b.intLocationId and ysnActive=1
+Select @dblRecipeQuantity = dblQuantity from tblMFWorkOrderRecipe Where intWorkOrderId=@intWorkOrderId
 
 Insert into @tblItem(intItemId,dblReqQty,ysnSubstituteItem)
-Select ri.intItemId,(ri.dblCalculatedQuantity * (@dblQtyToProduce/r.dblQuantity)) AS RequiredQty,0
-From tblMFRecipeItem ri 
-Join tblMFRecipe r on r.intRecipeId=ri.intRecipeId 
-where ri.intRecipeId=@intRecipeId and ri.intRecipeItemTypeId=1
+Select ri.intItemId,(ri.dblCalculatedQuantity * (@dblQtyToProduce/@dblRecipeQuantity)) AS RequiredQty,0
+From tblMFWorkOrderRecipeItem ri 
+where ri.intWorkOrderId=@intWorkOrderId and ri.intRecipeItemTypeId=1
 UNION
-Select rs.intSubstituteItemId,(rs.dblQuantity * (@dblQtyToProduce/r.dblQuantity)) AS RequiredQty,1
-From tblMFRecipeSubstituteItem rs 
-Join tblMFRecipe r on r.intRecipeId=rs.intRecipeId 
-where rs.intRecipeId=@intRecipeId and rs.intRecipeItemTypeId=1
+Select rs.intSubstituteItemId,(rs.dblQuantity * (@dblQtyToProduce/@dblRecipeQuantity)) AS RequiredQty,1
+From tblMFWorkOrderRecipeSubstituteItem rs 
+where rs.intWorkOrderId=@intWorkOrderId and rs.intRecipeItemTypeId=1
 
 Insert into @tblReservedQty
 Select cl.intLotId,Sum(cl.dblQuantity) AS dblReservedQty 
@@ -194,14 +173,14 @@ Join tblICItemUOM iu on l.intItemUOMId=iu.intItemUOMId
 Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 
 --Validation #1
-If Exists(Select 1 From tblMFBlendValidation Where intBlendValidationDefaultId=1 AND intTypeId=1)
+If Exists(Select 1 From tblMFBlendValidation Where intBlendValidationDefaultId=1 AND intTypeId=2)
 Begin
 
 Set @strMessage=''
 
 Select @strMessage=a.strMessage,@intMessageTypeId=a.intMessageTypeId 
 From tblMFBlendValidation a
-Where intBlendValidationDefaultId=1 AND intTypeId=1
+Where intBlendValidationDefaultId=1 AND intTypeId=2
 
 Declare @tblMissingItem table
 (
@@ -241,14 +220,14 @@ End --End Validation #1
 
 
 --Validation #2
-If Exists(Select 1 From tblMFBlendValidation Where intBlendValidationDefaultId=2 AND intTypeId=1)
+If Exists(Select 1 From tblMFBlendValidation Where intBlendValidationDefaultId=2 AND intTypeId=2)
 Begin
 
 Set @strMessage=''
 
 Select @strMessage=a.strMessage,@intMessageTypeId=a.intMessageTypeId 
 From tblMFBlendValidation a
-Where intBlendValidationDefaultId=2 AND intTypeId=1
+Where intBlendValidationDefaultId=2 AND intTypeId=2
 
 Declare @tblExpiredLots table
 (
@@ -285,14 +264,14 @@ End --End Validation #2
 
 
 --Validation #3
-If Exists(Select 1 From tblMFBlendValidation Where intBlendValidationDefaultId=3 AND intTypeId=1)
+If Exists(Select 1 From tblMFBlendValidation Where intBlendValidationDefaultId=3 AND intTypeId=2)
 Begin
 
 Set @strMessage=''
 
 Select @strMessage=a.strMessage,@intMessageTypeId=a.intMessageTypeId 
 From tblMFBlendValidation a
-Where intBlendValidationDefaultId=3 AND intTypeId=1
+Where intBlendValidationDefaultId=3 AND intTypeId=2
 
 Declare @tblQuarantineLots table
 (
@@ -329,14 +308,14 @@ End --End Validation #3
 
 
 --Validation #4
-If Exists(Select 1 From tblMFBlendValidation Where intBlendValidationDefaultId=4 AND intTypeId=1)
+If Exists(Select 1 From tblMFBlendValidation Where intBlendValidationDefaultId=4 AND intTypeId=2)
 Begin
 
 Set @strMessage=''
 
 Select @strMessage=a.strMessage,@intMessageTypeId=a.intMessageTypeId 
 From tblMFBlendValidation a
-Where intBlendValidationDefaultId=4 AND intTypeId=1
+Where intBlendValidationDefaultId=4 AND intTypeId=2
 
 Declare @tblSubstituteLots table
 (
@@ -379,14 +358,14 @@ End --End Validation #4
 
 
 --Validation #5
-If Exists(Select 1 From tblMFBlendValidation Where intBlendValidationDefaultId=5 AND intTypeId=1)
+If Exists(Select 1 From tblMFBlendValidation Where intBlendValidationDefaultId=5 AND intTypeId=2)
 Begin
 
 Set @strMessage=''
 
 Select @strMessage=a.strMessage,@intMessageTypeId=a.intMessageTypeId 
 From tblMFBlendValidation a
-Where intBlendValidationDefaultId=5 AND intTypeId=1
+Where intBlendValidationDefaultId=5 AND intTypeId=2
 
 If (@dblQtyToProduce > @dblPlannedQuantity)
 Begin
@@ -405,14 +384,14 @@ End --End Validation #5
 
 
 --Validation #6
-If Exists(Select 1 From tblMFBlendValidation Where intBlendValidationDefaultId=6 AND intTypeId=1)
+If Exists(Select 1 From tblMFBlendValidation Where intBlendValidationDefaultId=6 AND intTypeId=2)
 Begin
 
 Set @strMessage=''
 
 Select @strMessage=a.strMessage,@intMessageTypeId=a.intMessageTypeId 
 From tblMFBlendValidation a
-Where intBlendValidationDefaultId=6 AND intTypeId=1
+Where intBlendValidationDefaultId=6 AND intTypeId=2
 
 If (@dblQtyToProduce < @dblPlannedQuantity)
 Begin
@@ -431,14 +410,14 @@ End --End Validation #6
 
 
 --Validation #7
-If Exists(Select 1 From tblMFBlendValidation Where intBlendValidationDefaultId=7 AND intTypeId=1)
+If Exists(Select 1 From tblMFBlendValidation Where intBlendValidationDefaultId=7 AND intTypeId=2)
 Begin
 
 Set @strMessage=''
 
 Select @strMessage=a.strMessage,@intMessageTypeId=a.intMessageTypeId 
 From tblMFBlendValidation a
-Where intBlendValidationDefaultId=7 AND intTypeId=1
+Where intBlendValidationDefaultId=7 AND intTypeId=2
 
 Declare @tblMoreOverCommitQty table
 (
@@ -494,14 +473,14 @@ End --End Validation #7
 
 
 --Validation #8
-If Exists(Select 1 From tblMFBlendValidation Where intBlendValidationDefaultId=8 AND intTypeId=1)
+If Exists(Select 1 From tblMFBlendValidation Where intBlendValidationDefaultId=8 AND intTypeId=2)
 Begin
 
 Set @strMessage=''
 
 Select @strMessage=a.strMessage,@intMessageTypeId=a.intMessageTypeId 
 From tblMFBlendValidation a
-Where intBlendValidationDefaultId=8 AND intTypeId=1
+Where intBlendValidationDefaultId=8 AND intTypeId=2
 
 Declare @tblLessOverCommitQty table
 (
