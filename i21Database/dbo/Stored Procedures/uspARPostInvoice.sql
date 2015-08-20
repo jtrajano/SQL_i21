@@ -1286,7 +1286,7 @@ IF @post = 0
 					AND GL.strTransactionId = P.strTransactionId
 			WHERE
 				GL.ysnIsUnposted = 0
-				AND GL.strCode = 'AR'
+				--AND GL.strCode = 'AR'
 			ORDER BY
 				GL.intGLDetailId		
 						
@@ -1348,33 +1348,33 @@ IF @post = 0
 					SELECT TOP 1 @intTransactionId = intInvoiceId, @strTransactionId = strTransactionId FROM @UnPostInvoiceData ORDER BY intInvoiceId
 
 					-- Call the post routine 
-					INSERT INTO @GLEntries (
-						 dtmDate
-						,strBatchId
-						,intAccountId
-						,dblDebit
-						,dblCredit
-						,dblDebitUnit
-						,dblCreditUnit
-						,strDescription
-						,strCode
-						,strReference
-						,intCurrencyId
-						,dblExchangeRate
-						,dtmDateEntered
-						,dtmTransactionDate
-						,strJournalLineDescription
-						,intJournalLineNo
-						,ysnIsUnposted
-						,intUserId
-						,intEntityId
-						,strTransactionId
-						,intTransactionId
-						,strTransactionType
-						,strTransactionForm
-						,strModuleName
-						,intConcurrencyId
-					)
+					--INSERT INTO @GLEntries (
+					--	 dtmDate
+					--	,strBatchId
+					--	,intAccountId
+					--	,dblDebit
+					--	,dblCredit
+					--	,dblDebitUnit
+					--	,dblCreditUnit
+					--	,strDescription
+					--	,strCode
+					--	,strReference
+					--	,intCurrencyId
+					--	,dblExchangeRate
+					--	,dtmDateEntered
+					--	,dtmTransactionDate
+					--	,strJournalLineDescription
+					--	,intJournalLineNo
+					--	,ysnIsUnposted
+					--	,intUserId
+					--	,intEntityId
+					--	,strTransactionId
+					--	,intTransactionId
+					--	,strTransactionType
+					--	,strTransactionForm
+					--	,strModuleName
+					--	,intConcurrencyId
+					--)
 					EXEC	dbo.uspICUnpostCosting
 							@intTransactionId
 							,@strTransactionId
