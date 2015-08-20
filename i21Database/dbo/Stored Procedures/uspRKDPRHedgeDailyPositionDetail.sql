@@ -317,7 +317,7 @@ BEGIN
 	FROM (
 		SELECT isnull(sum(dblLineTotal), 0) - isnull(sum(dblTotal), 0) dblBalance
 		FROM (
-			SELECT DISTINCT ri.dblLineTotal
+			SELECT ri.dblLineTotal
 				,(
 					SELECT isnull(sum(dblTotal), 0)
 					FROM tblAPBillDetail apd
@@ -338,7 +338,7 @@ BEGIN
 		
 		SELECT sum(dblLineTotal) - sum(dblTotal) AS dblBalance
 		FROM (
-			SELECT DISTINCT ri.dblLineTotal
+			SELECT ri.dblLineTotal
 				,(
 					SELECT isnull(sum(dblTotal), 0)
 					FROM tblAPBillDetail apd
@@ -907,7 +907,7 @@ BEGIN
 	FROM (
 		SELECT isnull(sum(dblLineTotal), 0) - isnull(sum(dblTotal), 0) dblBalance
 		FROM (
-			SELECT DISTINCT ri.dblLineTotal
+			SELECT ri.dblLineTotal
 				,(
 					SELECT isnull(sum(dblTotal), 0)
 					FROM tblAPBillDetail apd
@@ -929,7 +929,7 @@ BEGIN
 		
 		SELECT sum(dblLineTotal) - sum(dblTotal) AS dblBalance
 		FROM (
-			SELECT DISTINCT ri.dblLineTotal
+			SELECT ri.dblLineTotal
 				,(
 					SELECT isnull(sum(dblTotal), 0)
 					FROM tblAPBillDetail apd
