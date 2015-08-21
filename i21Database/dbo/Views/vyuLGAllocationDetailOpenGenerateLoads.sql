@@ -1,9 +1,9 @@
 CREATE VIEW vyuLGGenerateLoadOpenAllocationDetails
 AS
 	SELECT *,
-			CASE WHEN  dblSCUnLoadedQuantity <= (dblSAllocatedQty - dblSGeneratedScheduleQty) 
-				THEN  dblSCUnLoadedQuantity 
-				ELSE (dblSAllocatedQty - dblSGeneratedScheduleQty) 
+			CASE WHEN (dblSAllocatedQty - dblSGeneratedScheduleQty - dblSGeneratedDeliveredQty) > 0
+				THEN (dblSAllocatedQty - dblSGeneratedScheduleQty - dblSGeneratedDeliveredQty)
+				ELSE 0
 				END as dblGenerateLoadOpenQuantity
 	FROM 
 	(SELECT	AH.intReferenceNumber,
@@ -44,10 +44,10 @@ AS
 			dblPCUnLoadedQuantity = IsNull(CDP.dblBalance, 0) - IsNull(CDP.dblScheduleQty, 0),
 			dblSCUnLoadedQuantity = IsNull(CDS.dblBalance, 0) - IsNull(CDS.dblScheduleQty, 0),
 
-			IsNull((SELECT SUM(Load.dblQuantity) FROM tblLGLoad Load LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = Load.intGenerateLoadId Group By GL.intAllocationDetailId, Load.intContractDetailId Having GL.intAllocationDetailId = AD.intAllocationDetailId AND Load.intContractDetailId = AD.intPContractDetailId), 0) as dblPGeneratedScheduleQty,
-			IsNull((SELECT SUM(Load.dblQuantity) FROM tblLGLoad Load LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = Load.intGenerateLoadId Group By GL.intAllocationDetailId, Load.intContractDetailId Having GL.intAllocationDetailId = AD.intAllocationDetailId AND Load.intContractDetailId = AD.intSContractDetailId), 0) as dblSGeneratedScheduleQty,
-			IsNull((SELECT SUM(Load.dblDeliveredQuantity) FROM tblLGLoad Load LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = Load.intGenerateLoadId Group By GL.intAllocationDetailId, Load.intContractDetailId Having GL.intAllocationDetailId = AD.intAllocationDetailId AND Load.intContractDetailId = AD.intPContractDetailId), 0) as dblPGeneratedDeliveredQty,
-			IsNull((SELECT SUM(Load.dblDeliveredQuantity) FROM tblLGLoad Load LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = Load.intGenerateLoadId Group By GL.intAllocationDetailId, Load.intContractDetailId Having GL.intAllocationDetailId = AD.intAllocationDetailId AND Load.intContractDetailId = AD.intSContractDetailId), 0) as dblSGeneratedDeliveredQty
+			IsNull((SELECT SUM(Load.dblQuantity) FROM tblLGLoad Load LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = Load.intGenerateLoadId AND IsNull(Load.dblDeliveredQuantity, 0) <= 0 Group By GL.intAllocationDetailId, Load.intContractDetailId Having GL.intAllocationDetailId = AD.intAllocationDetailId AND Load.intContractDetailId = AD.intPContractDetailId), 0) as dblPGeneratedScheduleQty,
+			IsNull((SELECT SUM(Load.dblQuantity) FROM tblLGLoad Load LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = Load.intGenerateLoadId AND IsNull(Load.dblDeliveredQuantity, 0) <= 0 Group By GL.intAllocationDetailId, Load.intContractDetailId Having GL.intAllocationDetailId = AD.intAllocationDetailId AND Load.intContractDetailId = AD.intSContractDetailId), 0) as dblSGeneratedScheduleQty,
+			IsNull((SELECT SUM(Load.dblDeliveredQuantity) FROM tblLGLoad Load LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = Load.intGenerateLoadId AND IsNull(Load.dblDeliveredQuantity, 0) > 0 Group By GL.intAllocationDetailId, Load.intContractDetailId Having GL.intAllocationDetailId = AD.intAllocationDetailId AND Load.intContractDetailId = AD.intPContractDetailId), 0) as dblPGeneratedDeliveredQty,
+			IsNull((SELECT SUM(Load.dblDeliveredQuantity) FROM tblLGLoad Load LEFT JOIN tblLGGenerateLoad GL ON GL.intGenerateLoadId = Load.intGenerateLoadId AND IsNull(Load.dblDeliveredQuantity, 0) > 0 Group By GL.intAllocationDetailId, Load.intContractDetailId Having GL.intAllocationDetailId = AD.intAllocationDetailId AND Load.intContractDetailId = AD.intSContractDetailId), 0) as dblSGeneratedDeliveredQty
 
 	FROM 	tblLGAllocationDetail AD	
 	JOIN	tblLGAllocationHeader	AH	ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
