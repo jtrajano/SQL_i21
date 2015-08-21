@@ -127,10 +127,10 @@ BEGIN
 		,'Collatral Receipts - Sales' AS [strType]
 		,isnull(SUM(dblOriginalQuantity), 0) - isnull(sum(dblAdjustmentAmount), 0) dblTotal
 	FROM (
-		SELECT SUM(dblAdjustmentAmount) dblAdjustmentAmount	,c.intCollateralId,
+		SELECT isnull(SUM(dblAdjustmentAmount),0) dblAdjustmentAmount	,c.intCollateralId,
 		(select dblOriginalQuantity from tblRKCollateral cc where cc.intCollateralId=c.intCollateralId) dblOriginalQuantity
 		FROM tblRKCollateral c
-		INNER JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
+		LEFT JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
 		WHERE strType = 'Sale' 	AND c.intCommodityId = @intCommodityId AND c.intLocationId = @intLocationId	GROUP BY c.intCollateralId ) t
 	WHERE dblAdjustmentAmount <> dblOriginalQuantity
 	
@@ -140,10 +140,10 @@ BEGIN
 		,'Collatral Receipts - Purchase' AS [strType]
 		,isnull(SUM(dblOriginalQuantity), 0) - isnull(sum(dblAdjustmentAmount), 0) dblTotal
 	FROM (
-		SELECT SUM(dblAdjustmentAmount) dblAdjustmentAmount	,c.intCollateralId,
+		SELECT isnull(SUM(dblAdjustmentAmount),0) dblAdjustmentAmount	,c.intCollateralId,
 		(select dblOriginalQuantity from tblRKCollateral cc where cc.intCollateralId=c.intCollateralId) dblOriginalQuantity
 		FROM tblRKCollateral c
-		INNER JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
+		LEFT JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
 		WHERE strType = 'Purchase' 	AND c.intCommodityId = @intCommodityId AND c.intLocationId = @intLocationId	GROUP BY c.intCollateralId ) t
 	WHERE dblAdjustmentAmount <> dblOriginalQuantity
 	
@@ -176,11 +176,11 @@ BEGIN
 		,(
 			SELECT isnull(SUM(dblOriginalQuantity), 0) - isnull(sum(dblAdjustmentAmount), 0) CollateralSale
 			FROM (
-				SELECT SUM(dblAdjustmentAmount) dblAdjustmentAmount
+				SELECT isnull(SUM(dblAdjustmentAmount),0) dblAdjustmentAmount
 					,intContractHeaderId
 					,SUM(dblOriginalQuantity) dblOriginalQuantity
 				FROM tblRKCollateral c
-				INNER JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
+				LEFT JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
 				WHERE strType = 'Sale'
 					AND c.intCommodityId = @intCommodityId
 					AND c.intLocationId = @intLocationId
@@ -195,7 +195,7 @@ BEGIN
 					,intContractHeaderId
 					,isnull(SUM(dblOriginalQuantity), 0) dblOriginalQuantity
 				FROM tblRKCollateral c
-				INNER JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
+				LEFT JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
 				WHERE strType = 'Purchase'
 					AND c.intCommodityId = @intCommodityId
 					AND c.intLocationId = @intLocationId
@@ -299,7 +299,7 @@ BEGIN
 							,intContractHeaderId
 							,isnull(SUM(dblOriginalQuantity), 0) dblOriginalQuantity
 						FROM tblRKCollateral c
-						INNER JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
+						LEFT JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
 						WHERE strType = 'Sale'
 							AND c.intCommodityId = @intCommodityId
 							AND c.intLocationId = @intLocationId
@@ -314,7 +314,7 @@ BEGIN
 							,intContractHeaderId
 							,isnull(SUM(dblOriginalQuantity), 0) dblOriginalQuantity
 						FROM tblRKCollateral c
-						INNER JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
+						LEFT JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
 						WHERE strType = 'Purchase'
 							AND c.intCommodityId = @intCommodityId
 							AND c.intLocationId = @intLocationId
@@ -421,10 +421,10 @@ BEGIN
 		,'Collatral Receipts - Sales' AS [strType]
 		,isnull(SUM(dblOriginalQuantity), 0) - isnull(sum(dblAdjustmentAmount), 0) dblTotal
 	FROM (
-		SELECT SUM(dblAdjustmentAmount) dblAdjustmentAmount	,c.intCollateralId,
+		SELECT isnull(SUM(dblAdjustmentAmount),0) dblAdjustmentAmount	,c.intCollateralId,
 		(select dblOriginalQuantity from tblRKCollateral cc where cc.intCollateralId=c.intCollateralId) dblOriginalQuantity
 		FROM tblRKCollateral c
-		INNER JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
+		LEFT JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
 		WHERE strType = 'Sale' 	AND c.intCommodityId = @intCommodityId	GROUP BY c.intCollateralId ) t
 	WHERE dblAdjustmentAmount <> dblOriginalQuantity
 	
@@ -434,10 +434,10 @@ BEGIN
 		,'Collatral Receipts - Purchase' AS [strType]
 		,isnull(SUM(dblOriginalQuantity), 0) - isnull(sum(dblAdjustmentAmount), 0) dblTotal
 	FROM (
-		SELECT SUM(dblAdjustmentAmount) dblAdjustmentAmount	,c.intCollateralId,
+		SELECT isnull(SUM(dblAdjustmentAmount),0) dblAdjustmentAmount	,c.intCollateralId,
 		(select dblOriginalQuantity from tblRKCollateral cc where cc.intCollateralId=c.intCollateralId) dblOriginalQuantity
 		FROM tblRKCollateral c
-		INNER JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
+		LEFT JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
 		WHERE strType = 'Purchase' 	AND c.intCommodityId = @intCommodityId 	GROUP BY c.intCollateralId ) t
 	WHERE dblAdjustmentAmount <> dblOriginalQuantity
 	
@@ -472,7 +472,7 @@ BEGIN
 					,intContractHeaderId
 					,isnull(SUM(dblOriginalQuantity), 0) dblOriginalQuantity
 				FROM tblRKCollateral c
-				INNER JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
+				LEFT JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
 				WHERE strType = 'Sale'
 					AND c.intCommodityId = @intCommodityId
 				GROUP BY intContractHeaderId
@@ -486,7 +486,7 @@ BEGIN
 					,intContractHeaderId
 					,isnull(SUM(dblOriginalQuantity), 0) dblOriginalQuantity
 				FROM tblRKCollateral c
-				INNER JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
+				LEFT JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
 				WHERE strType = 'Purchase'
 					AND c.intCommodityId = @intCommodityId
 				GROUP BY intContractHeaderId
@@ -582,7 +582,7 @@ BEGIN
 							,intContractHeaderId
 							,isnull(SUM(dblOriginalQuantity), 0) dblOriginalQuantity
 						FROM tblRKCollateral c
-						INNER JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
+						LEFT JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
 						WHERE strType = 'Sale'
 							AND c.intCommodityId = @intCommodityId
 						GROUP BY intContractHeaderId
@@ -596,7 +596,7 @@ BEGIN
 							,intContractHeaderId
 							,isnull(SUM(dblOriginalQuantity), 0) dblOriginalQuantity
 						FROM tblRKCollateral c
-						INNER JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
+						LEFT JOIN tblRKCollateralAdjustment ca ON c.intCollateralId = ca.intCollateralId
 						WHERE strType = 'Purchase'
 							AND c.intCommodityId = @intCommodityId
 						GROUP BY intContractHeaderId

@@ -13,7 +13,7 @@ BEGIN
 				,Loc AS strLocation
 				,[Delivery Date] AS dtmDeliveryDate
 				,Ticket intTicket
-				,strCustomerReference
+				,Customer AS strCustomerReference
 				,Receipt AS strDPAReceiptNo
 				,[Disc Due] AS dblDiscDue
 				,[Storage Due] AS dblStorageDue
@@ -33,7 +33,7 @@ BEGIN
 				,Loc AS strLocation
 				,[Delivery Date] AS dtmDeliveryDate
 				,Ticket intTicket
-				,strCustomerReference
+				,Customer AS strCustomerReference
 				,Receipt AS strDPAReceiptNo
 				,[Disc Due] AS dblDiscDue
 				,[Storage Due] AS dblStorageDue
@@ -55,7 +55,7 @@ BEGIN
 				,Loc AS strLocation
 				,[Delivery Date] AS dtmDeliveryDate
 				,Ticket intTicket
-				,strCustomerReference
+				,Customer AS strCustomerReference
 				,Receipt AS strDPAReceiptNo
 				,[Disc Due] AS dblDiscDue
 				,[Storage Due] AS dblStorageDue
@@ -74,7 +74,7 @@ BEGIN
 				,Loc AS strLocation
 				,[Delivery Date] AS dtmDeliveryDate
 				,Ticket intTicket
-				,strCustomerReference
+				,Customer AS strCustomerReference
 				,Receipt AS strDPAReceiptNo
 				,[Disc Due] AS dblDiscDue
 				,[Storage Due] AS dblStorageDue
@@ -95,7 +95,7 @@ BEGIN
 				,Loc AS strLocation
 				,[Delivery Date] AS dtmDeliveryDate
 				,Ticket intTicket
-				,strCustomerReference
+				,Customer AS strCustomerReference
 				,Receipt AS strDPAReceiptNo
 				,[Disc Due] AS dblDiscDue
 				,[Storage Due] AS dblStorageDue
@@ -103,7 +103,7 @@ BEGIN
 				,strScheduleId
 				,ISNULL(Balance, 0) dblTotal
 			FROM vyuGRGetStorageDetail
-			WHERE 	ysnReceiptedStorage = 1
+			WHERE ysnReceiptedStorage = 1
 				AND intCommodityId = @intCommodityId
 				AND intCompanyLocationId = @intLocationId
 		END
@@ -114,7 +114,7 @@ BEGIN
 				,Loc AS strLocation
 				,[Delivery Date] AS dtmDeliveryDate
 				,Ticket intTicket
-				,strCustomerReference
+				,Customer AS strCustomerReference
 				,Receipt AS strDPAReceiptNo
 				,[Disc Due] AS dblDiscDue
 				,[Storage Due] AS dblStorageDue
@@ -126,15 +126,14 @@ BEGIN
 				AND intCommodityId = @intCommodityId
 		END
 	END
-	ELSE 
-	IF ISNULL(@intLocationId, 0) <> 0
+	ELSE IF ISNULL(@intLocationId, 0) <> 0
 	BEGIN
 		SELECT intCustomerStorageId
 			,[Storage Type] strType
 			,Loc AS strLocation
 			,[Delivery Date] AS dtmDeliveryDate
 			,Ticket intTicket
-			,strCustomerReference
+			,Customer AS strCustomerReference
 			,Receipt AS strDPAReceiptNo
 			,[Disc Due] AS dblDiscDue
 			,[Storage Due] AS dblStorageDue
@@ -155,7 +154,7 @@ BEGIN
 			,Loc AS strLocation
 			,[Delivery Date] AS dtmDeliveryDate
 			,Ticket intTicket
-			,strCustomerReference
+			,Customer AS strCustomerReference
 			,Receipt AS strDPAReceiptNo
 			,[Disc Due] AS dblDiscDue
 			,[Storage Due] AS dblStorageDue
@@ -168,4 +167,4 @@ BEGIN
 			AND ysnReceiptedStorage = 0
 			AND [Storage Type] = @strGrainType
 	END
-END 
+END
