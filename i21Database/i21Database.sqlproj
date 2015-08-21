@@ -2259,6 +2259,7 @@
     <Build Include="dbo\Stored Procedures\uspSTstgInsertPromotionItemListSend.sql" />
     <Build Include="dbo\Stored Procedures\uspSTstgInsertComboSalesFile.sql" />
     <Build Include="dbo\Stored Procedures\uspSTstgInsertMixMatchFile.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetQuantitiesForAllocatedDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
