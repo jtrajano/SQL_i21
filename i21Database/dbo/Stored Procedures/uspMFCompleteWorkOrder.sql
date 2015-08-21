@@ -489,7 +489,7 @@ BEGIN TRY
 			,@intPhysicalItemUOMId = @intPhysicalItemUOMId
 			,@intBatchId = @intBatchId
 			,@strBatchId = @strRetBatchId
-			,@intShiftId=NULL
+			,@intShiftId=@intPlannedShiftId 
 			,@strReferenceNo=@strReferenceNo
 			,@intStatusId=@intStatusId
 			,@intLotId = @intLotId OUTPUT
@@ -497,6 +497,7 @@ BEGIN TRY
 			,@strLotAlias=@strLotAlias
 			,@intLocationId=@intLocationId
 			,@intMachineId =@intMachineId
+			,@dtmProductionDate=@dtmPlannedDate 
 	
 		IF @intLotStatusId IS NOT NULL
 		BEGIN

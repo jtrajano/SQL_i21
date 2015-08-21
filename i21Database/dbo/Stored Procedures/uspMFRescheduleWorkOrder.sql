@@ -27,6 +27,7 @@ BEGIN TRY
 		,@intConcurrencyId INT
 		,@dtmCurrentDate DATETIME
 		,@intUserId INT
+		,@intLocationId int
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -103,12 +104,14 @@ BEGIN TRY
 		,@intScheduleId = Isnull(intScheduleId,0)
 		,@intConcurrencyId = intConcurrencyId
 		,@intUserId = intUserId
+		,@intLocationId=intLocationId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intManufacturingCellId INT
 			,intCalendarId int
 			,intScheduleId INT
 			,intConcurrencyId INT
 			,intUserId INT
+			,intLocationId int
 			)
 
 	INSERT INTO @tblMFScheduleWorkOrder (
@@ -208,7 +211,7 @@ BEGIN TRY
 	JOIN dbo.tblMFScheduleCalendarDetail CD ON C.intCalendarId = CD.intCalendarId
 	WHERE C.intManufacturingCellId = @intManufacturingCellId
 		AND C.intCalendarId=@intCalendarId
-		AND CD.dtmShiftEndTime > GetDate()
+		AND CD.dtmShiftEndTime > @dtmCurrentDate
 
 	SELECT @intCalendarDetailId = Min(intCalendarDetailId)
 	FROM @tblMFScheduleWorkOrderCalendarDetail
@@ -234,9 +237,9 @@ BEGIN TRY
 		FROM @tblMFScheduleWorkOrderCalendarDetail
 		WHERE intCalendarDetailId = @intCalendarDetailId
 
-		IF GetDate() > @dtmShiftStartTime
+		IF @dtmCurrentDate > @dtmShiftStartTime
 		BEGIN
-			SELECT @dtmShiftStartTime = GetDate()
+			SELECT @dtmShiftStartTime = @dtmCurrentDate
 
 			SELECT @intDuration = DateDiff(minute, @dtmShiftStartTime, @dtmShiftEndTime)
 		END
@@ -276,21 +279,38 @@ BEGIN TRY
 
 			SELECT @intWODuration = @intNoOfUnit / @dblMachineCapacity
 
-			IF @intNoOfUnit > isnull((
-						SELECT Count(*)
-						FROM @tblMFScheduleMachineDetail
-						WHERE intCalendarDetailId = @intCalendarDetailId
-						), 0)
-			BEGIN
-				PRINT 1
-			END
-			ELSE
+			--IF @intNoOfUnit > isnull((
+			--			SELECT Count(*)
+			--			FROM @tblMFScheduleMachineDetail
+			--			WHERE intCalendarDetailId = @intCalendarDetailId
+			--			), 0)
+			--BEGIN
+			--	PRINT 1
+			--END
+			--ELSE
+			--BEGIN
+			--	SELECT @dtmShiftStartTime = min(dtmPlannedEndDate)
+			--	FROM @tblMFScheduleWorkOrderDetail
+			--	WHERE intCalendarDetailId = @intCalendarDetailId
+
+			--	SELECT @intDuration = DateDiff(minute, @dtmShiftStartTime, @dtmShiftEndTime)
+			--END
+
+			IF EXISTS (
+					SELECT *
+					FROM @tblMFScheduleWorkOrderDetail
+					WHERE intCalendarDetailId = @intCalendarDetailId
+						AND dtmPlannedEndDate BETWEEN @dtmShiftStartTime
+							AND @dtmShiftEndTime and dtmPlannedEndDate<>@dtmShiftEndTime
+					)
 			BEGIN
 				SELECT @dtmShiftStartTime = min(dtmPlannedEndDate)
 				FROM @tblMFScheduleWorkOrderDetail
 				WHERE intCalendarDetailId = @intCalendarDetailId
 
+				--IF @dtmShiftStartTime IS NOT NULL
 				SELECT @intDuration = DateDiff(minute, @dtmShiftStartTime, @dtmShiftEndTime)
+					--Select @intDuration
 			END
 
 			IF @intDuration > @intWODuration
@@ -454,6 +474,12 @@ BEGIN TRY
 				JOIN @tblMFScheduleWorkOrder S ON S.intWorkOrderId = SD.intWorkOrderId
 				WHERE SD.intCalendarDetailId = @intCalendarDetailId
 				) >= @intDuration * @intNoOfMachine
+		OR NOT EXISTS (
+		SELECT *
+		FROM @tblMFScheduleWorkOrder
+		WHERE intNoOfUnit > 0
+			AND intWorkOrderId <> @intWorkOrderId
+		)
 		BEGIN
 			SELECT @intCalendarDetailId = Min(intCalendarDetailId)
 			FROM @tblMFScheduleWorkOrderCalendarDetail
@@ -492,7 +518,7 @@ BEGIN TRY
 		,@intManufacturingCellId AS intManufacturingCellId
 		,'' AS strCellName
 		,CONVERT(bit,0) AS ysnStandard
-		,0 AS intLocationId
+		,@intLocationId AS intLocationId
 		,0 AS intConcurrencyId
 		,@dtmCurrentDate AS dtmCreated
 		,0 AS intCreatedUserId
@@ -525,8 +551,8 @@ BEGIN TRY
 		,IU.intItemUOMId
 		,U.intUnitMeasureId
 		,U.strUnitMeasure
-		,WS.intStatusId
-		,WS.strName AS strStatusName
+		,IsNull(WS.intStatusId,1) as intStatusId
+		,IsNull(WS.strName,'New') AS strStatusName
 		,PT.intProductionTypeId
 		,PT.strName AS strProductionType
 		,SL.intScheduleWorkOrderId
@@ -555,16 +581,14 @@ BEGIN TRY
 		,@intUserId intLastModifiedUserId
 		,WS.intSequenceNo
 	FROM tblMFWorkOrder W
-	JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
-		AND W.intStatusId <> 13
-		AND intManufacturingCellId = @intManufacturingCellId
-	JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId
+	JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId AND W.intManufacturingCellId = @intManufacturingCellId AND W.intStatusId <> 13
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	LEFT JOIN tblMFPackType P ON P.intPackTypeId = I.intPackTypeId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
 	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN dbo.tblMFWorkOrderProductionType PT ON PT.intProductionTypeId = W.intProductionTypeId
 	LEFT JOIN @tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
+	Left JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = SL.intStatusId
 	LEFT JOIN dbo.tblMFShift SH ON SH.intShiftId = SL.intPlannedShiftId
 	JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
 		AND R.intLocationId = C.intLocationId

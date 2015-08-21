@@ -2,19 +2,19 @@
 	intScheduleWorkOrderId INT NOT NULL identity(1, 1)
 	,intScheduleId INT NOT NULL
 	,intWorkOrderId INT NOT NULL
-	,intDuration INT NOT NULL
+	,intDuration INT NULL
 	,intExecutionOrder INT NOT NULL
-	,intChangeoverDuration INT NOT NULL
-	,intSetupDuration INT NOT NULL
-	,dtmChangeoverStartDate DATETIME NOT NULL
-	,dtmChangeoverEndDate DATETIME NOT NULL
-	,dtmPlannedStartDate DATETIME NOT NULL
-	,dtmPlannedEndDate DATETIME NOT NULL
-	,intPlannedShiftId INT NOT NULL
+	,intChangeoverDuration INT NULL
+	,intSetupDuration INT NULL
+	,dtmChangeoverStartDate DATETIME NULL
+	,dtmChangeoverEndDate DATETIME NULL
+	,dtmPlannedStartDate DATETIME NULL
+	,dtmPlannedEndDate DATETIME NULL
+	,intPlannedShiftId INT NULL
 	,intNoOfSelectedMachine INT NOT NULL
-	,strComments NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL
-	,strNote NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL
-	,strAdditionalComments NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL
+	,strComments NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	,strNote NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	,strAdditionalComments NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,dtmEarliestStartDate DATETIME
 	,ysnFrozen bit
 	,intConcurrencyId INT

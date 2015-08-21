@@ -96,7 +96,7 @@ BEGIN TRY
 		,x.dblBalance
 		,x.dtmExpectedDate
 		,x.intStatusId
-		,Row_number() OVER (ORDER BY x.intSequenceId Desc,x.intExecutionOrder
+		,Row_number() OVER (ORDER BY x.intSequenceNo Desc,x.intExecutionOrder
 			) as intExecutionOrder
 		,x.strComments
 		,x.strNote
@@ -115,7 +115,7 @@ BEGIN TRY
 		,x.intScheduleWorkOrderId
 		,x.ysnFrozen
 		,@intConcurrencyId
-		,x.intSequenceId
+		,x.intSequenceNo
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -143,7 +143,7 @@ BEGIN TRY
 			,dtmChangeoverEndDate DATETIME
 			,intScheduleWorkOrderId INT
 			,ysnFrozen BIT
-			,intSequenceId int
+			,intSequenceNo int
 			) x Where x.intStatusId<>1
 	ORDER BY x.intExecutionOrder
 	
@@ -204,7 +204,7 @@ BEGIN TRY
 		,x.intScheduleWorkOrderId
 		,x.ysnFrozen
 		,@intConcurrencyId
-		,x.intSequenceId
+		,x.intSequenceNo
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -232,7 +232,7 @@ BEGIN TRY
 			,dtmChangeoverEndDate DATETIME
 			,intScheduleWorkOrderId INT
 			,ysnFrozen BIT
-			,intSequenceId int
+			,intSequenceNo int
 			) x Where x.intStatusId=1
 	ORDER BY x.intExecutionOrder
 	

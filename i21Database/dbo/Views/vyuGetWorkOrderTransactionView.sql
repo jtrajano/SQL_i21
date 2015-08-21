@@ -7,7 +7,7 @@ SELECT W.intWorkOrderId,
 	,I.strType AS strTargetItemType
 	,I.strItemNo AS strTargetItemNo
 	,I.strDescription AS strTargetItemDesc
-		,I.strShortName AS strTargetItemShortDesc
+	,I.strShortName AS strTargetItemShortDesc
 	,W.dblQuantity AS dblPlannedQty
 	,UM.intUnitMeasureId as intTargetUnitMeasureId
 	,UM.strUnitMeasure AS strTargetUnitMeasure
@@ -23,7 +23,7 @@ SELECT W.intWorkOrderId,
 	,II.strType
 	,II.strItemNo
 	,II.strDescription
-		,II.strShortName AS strShortDesc
+	,II.strShortName AS strShortDesc
 	,WI.dblQuantity
 	,IUM.intUnitMeasureId
 	,IUM.strUnitMeasure
@@ -63,6 +63,9 @@ SELECT W.intWorkOrderId,
 	,NULL as dblMinColor
 	,NULL as dblColor
 	,NULL as dblMaxColor
+	,L.intLotId 
+	,L.strLotNumber 
+	,L.strLotAlias 
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -148,6 +151,9 @@ SELECT W.intWorkOrderId,
 	,NULL as dblMinColor
 	,NULL as dblColor
 	,NULL as dblMaxColor
+		,L.intLotId 
+	,L.strLotNumber 
+	,L.strLotAlias
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -193,7 +199,7 @@ SELECT W.intWorkOrderId,
 	,II.strType
 	,II.strItemNo
 	,II.strDescription
-		,II.strShortName AS strShortDesc
+	,II.strShortName AS strShortDesc
 	,WP.dblQuantity
 	,IUM.intUnitMeasureId
 	,IUM.strUnitMeasure
@@ -233,6 +239,9 @@ SELECT W.intWorkOrderId,
 	,NULL as dblMinColor
 	,NULL as dblColor
 	,NULL as dblMaxColor
+		,L.intLotId 
+	,L.strLotNumber 
+	,L.strLotAlias
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -317,6 +326,9 @@ SELECT W.intWorkOrderId,
 	,NULL as dblMinColor
 	,NULL as dblColor
 	,NULL as dblMaxColor
+		,L.intLotId 
+	,L.strLotNumber 
+	,L.strLotAlias
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId

@@ -48,6 +48,7 @@ BEGIN TRY
 		,@strWorkOrderNo nvarchar(50)
 		,@strProcessName nvarchar(50)
 		,@dtmBusinessDate datetime
+		,@intBusinessShiftId int
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -283,6 +284,12 @@ BEGIN TRY
 
 	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime,@intLocationId) 
 
+	SELECT @intBusinessShiftId = intShiftId
+	FROM dbo.tblMFShift
+	WHERE intLocationId = @intLocationId
+		AND @dtmCurrentDateTime BETWEEN @dtmBusinessDate+dtmShiftStartTime+intStartOffset
+					AND @dtmBusinessDate+dtmShiftEndTime + intEndOffset
+
 	INSERT INTO dbo.tblMFWorkOrderInputLot (
 		intWorkOrderId
 		,intItemId
@@ -292,6 +299,7 @@ BEGIN TRY
 		,dblIssuedQuantity
 		,intItemIssuedUOMId
 		,intSequenceNo
+		,dtmProductionDate 
 		,intShiftId
 		,intStorageLocationId
 		,intMachineId
@@ -300,6 +308,7 @@ BEGIN TRY
 		,strReferenceNo
 		,dtmActualInputDateTime
 		,dtmBusinessDate 
+		,intBusinessShiftId 
 		,dtmCreated
 		,intCreatedUserId
 		,dtmLastModified
@@ -319,6 +328,7 @@ BEGIN TRY
 			)
 		,intItemUOMId
 		,1
+		,@dtmPlannedDate
 		,@intShiftId
 		,@intStorageLocationId
 		,@intMachineId
@@ -327,6 +337,7 @@ BEGIN TRY
 		,@strReferenceNo
 		,@dtmActualInputDateTime
 		,@dtmBusinessDate
+		,@intBusinessShiftId
 		,@dtmCurrentDateTime
 		,@intUserId
 		,@dtmCurrentDateTime
