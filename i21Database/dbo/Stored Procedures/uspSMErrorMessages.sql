@@ -726,3 +726,7 @@ EXEC sp_addmessage 51180,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51181) EXEC sp_dropmessage 51181, 'us_english'	
 SET @strmessage = 'Old and new lot status cannot be same.'
 EXEC sp_addmessage 51181,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51182) EXEC sp_dropmessage 51182, 'us_english'	
+SET @strmessage = 'The Lot already exists in the selected destination storage location. Please select a different destination storage location.'
+EXEC sp_addmessage 51182,11,@strmessage,'us_english','False'
