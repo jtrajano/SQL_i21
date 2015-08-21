@@ -15,8 +15,8 @@ SELECT W.intWorkOrderId,
 	,MC.intManufacturingCellId
 	,MC.strCellName
 	,W.dtmPlannedDate
-	,S.intShiftId
-	,S.strShiftName AS strPlannedShiftName
+	,PS.intShiftId as intPlannedShiftId
+	,PS.strShiftName AS strPlannedShiftName
 	,MP.intManufacturingProcessId
 	,MP.strProcessName
 	,II.intItemId
@@ -28,8 +28,8 @@ SELECT W.intWorkOrderId,
 	,IUM.intUnitMeasureId
 	,IUM.strUnitMeasure
 	,WI.dtmBusinessDate
-	,S.intShiftId as intBusinessShiftId
-	,S.strShiftName AS strBusinessShiftName
+	,BS.intShiftId as intBusinessShiftId
+	,BS.strShiftName AS strBusinessShiftName
 	,SL.intStorageLocationId
 	,SL.strName AS [strFromTo]
 	,M.intMachineId
@@ -66,6 +66,9 @@ SELECT W.intWorkOrderId,
 	,L.intLotId 
 	,L.strLotNumber 
 	,L.strLotAlias 
+	,S.intShiftId 
+	,S.strShiftName 
+	,WI.dtmProductionDate 
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -74,12 +77,13 @@ JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
 JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intManufacturingProcessId
-LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
+LEFT JOIN dbo.tblMFShift BS ON BS.intShiftId = WI.intBusinessShiftId
 JOIN dbo.tblICItem II ON II.intItemId = WI.intItemId
 JOIN dbo.tblICLot L ON L.intLotId = WI.intLotId
 JOIN dbo.tblICItemUOM IIU ON IIU.intItemUOMId = WI.intItemUOMId
 JOIN dbo.tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IIU.intUnitMeasureId
-LEFT JOIN dbo.tblMFShift BS ON BS.intShiftId = WI.intShiftId
+LEFT JOIN dbo.tblMFShift S ON S.intShiftId = WI.intShiftId
+LEFT JOIN dbo.tblMFShift PS ON PS.intShiftId = W.intPlannedShiftId
 JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = WI.intStorageLocationId
 JOIN dbo.tblMFMachine M ON M.intMachineId = WI.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WI.intContainerId
@@ -103,8 +107,8 @@ SELECT W.intWorkOrderId,
 	,MC.intManufacturingCellId
 	,MC.strCellName
 	,W.dtmPlannedDate
-	,S.intShiftId
-	,S.strShiftName AS strPlannedShiftName
+	,PS.intShiftId As intPlannedShiftId
+	,PS.strShiftName AS strPlannedShiftName
 	,MP.intManufacturingProcessId
 	,MP.strProcessName
 	,II.intItemId
@@ -116,8 +120,8 @@ SELECT W.intWorkOrderId,
 	,IUM.intUnitMeasureId
 	,IUM.strUnitMeasure
 	,WI.dtmBusinessDate
-	,S.intShiftId as intBusinessShiftId
-	,S.strShiftName AS strBusinessShiftName
+	,BS.intShiftId as intBusinessShiftId
+	,BS.strShiftName AS strBusinessShiftName
 	,SL.intStorageLocationId
 	,SL.strName AS [strFromTo]
 	,M.intMachineId
@@ -154,6 +158,9 @@ SELECT W.intWorkOrderId,
 		,L.intLotId 
 	,L.strLotNumber 
 	,L.strLotAlias
+	,S.intShiftId 
+	,S.strShiftName 
+	,WI.dtmProductionDate 
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -162,12 +169,13 @@ JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
 JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intManufacturingProcessId
-LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
+LEFT JOIN dbo.tblMFShift BS ON BS.intShiftId = WI.intBusinessShiftId
 JOIN dbo.tblICItem II ON II.intItemId = WI.intItemId
 JOIN dbo.tblICLot L ON L.intLotId = WI.intLotId
 JOIN dbo.tblICItemUOM IIU ON IIU.intItemUOMId = WI.intItemUOMId
 JOIN dbo.tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IIU.intUnitMeasureId
-LEFT JOIN dbo.tblMFShift BS ON BS.intShiftId = WI.intShiftId
+LEFT JOIN dbo.tblMFShift S ON S.intShiftId = WI.intShiftId
+LEFT JOIN dbo.tblMFShift PS ON PS.intShiftId = W.intPlannedShiftId
 JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = WI.intStorageLocationId
 JOIN dbo.tblMFMachine M ON M.intMachineId = WI.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WI.intContainerId
@@ -191,8 +199,8 @@ SELECT W.intWorkOrderId,
 	,MC.intManufacturingCellId
 	,MC.strCellName
 	,W.dtmPlannedDate
-	,S.intShiftId
-	,S.strShiftName AS strPlannedShiftName
+	,PS.intShiftId
+	,PS.strShiftName AS strPlannedShiftName
 	,MP.intManufacturingProcessId
 	,MP.strProcessName
 	,II.intItemId
@@ -204,8 +212,8 @@ SELECT W.intWorkOrderId,
 	,IUM.intUnitMeasureId
 	,IUM.strUnitMeasure
 	,WP.dtmBusinessDate
-	,S.intShiftId
-	,S.strShiftName AS strBusinessShiftName
+	,BS.intShiftId
+	,BS.strShiftName AS strBusinessShiftName
 	,SL.intStorageLocationId
 	,SL.strName AS [strFromTo]
 	,M.intMachineId
@@ -242,6 +250,9 @@ SELECT W.intWorkOrderId,
 		,L.intLotId 
 	,L.strLotNumber 
 	,L.strLotAlias
+	,S.intShiftId 
+	,S.strShiftName 
+	,WP.dtmProductionDate 
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -250,12 +261,13 @@ JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
 JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intManufacturingProcessId
-LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
+LEFT JOIN dbo.tblMFShift BS ON BS.intShiftId = WP.intBusinessShiftId
 JOIN dbo.tblICItem II ON II.intItemId = WP.intItemId
 JOIN dbo.tblICLot L ON L.intLotId = WP.intLotId
 JOIN dbo.tblICItemUOM IIU ON IIU.intItemUOMId = WP.intItemUOMId
 JOIN dbo.tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IIU.intUnitMeasureId
-LEFT JOIN dbo.tblMFShift BS ON BS.intShiftId = WP.intShiftId
+LEFT JOIN dbo.tblMFShift S ON S.intShiftId = WP.intShiftId
+LEFT JOIN dbo.tblMFShift PS ON PS.intShiftId = W.intPlannedShiftId
 JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = WP.intStorageLocationId
 JOIN dbo.tblMFMachine M ON M.intMachineId = WP.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WP.intContainerId
@@ -278,8 +290,8 @@ SELECT W.intWorkOrderId,
 	,MC.intManufacturingCellId
 	,MC.strCellName
 	,W.dtmPlannedDate
-	,S.intShiftId
-	,S.strShiftName AS strPlannedShiftName
+	,PS.intShiftId
+	,PS.strShiftName AS strPlannedShiftName
 	,MP.intManufacturingProcessId
 	,MP.strProcessName
 	,II.intItemId
@@ -291,8 +303,8 @@ SELECT W.intWorkOrderId,
 	,IUM.intUnitMeasureId
 	,IUM.strUnitMeasure
 	,WP.dtmBusinessDate
-	,S.intShiftId
-	,S.strShiftName AS strBusinessShiftName
+	,BS.intShiftId
+	,BS.strShiftName AS strBusinessShiftName
 	,SL.intStorageLocationId
 	,SL.strName AS [FROM/To]
 	,M.intMachineId
@@ -329,6 +341,9 @@ SELECT W.intWorkOrderId,
 		,L.intLotId 
 	,L.strLotNumber 
 	,L.strLotAlias
+		,S.intShiftId 
+	,S.strShiftName 
+	,WP.dtmProductionDate 
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -337,12 +352,13 @@ JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
 JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intManufacturingProcessId
-LEFT JOIN dbo.tblMFShift S ON S.intShiftId = W.intPlannedShiftId
+LEFT JOIN dbo.tblMFShift BS ON BS.intShiftId = WP.intBusinessShiftId
 JOIN dbo.tblICItem II ON II.intItemId = WP.intItemId
 JOIN dbo.tblICLot L ON L.intLotId = WP.intLotId
 JOIN dbo.tblICItemUOM IIU ON IIU.intItemUOMId = WP.intItemUOMId
 JOIN dbo.tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IIU.intUnitMeasureId
-LEFT JOIN dbo.tblMFShift BS ON BS.intShiftId = WP.intShiftId
+LEFT JOIN dbo.tblMFShift S ON S.intShiftId = WP.intShiftId
+LEFT JOIN dbo.tblMFShift PS ON PS.intShiftId = W.intPlannedShiftId
 JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = WP.intStorageLocationId
 JOIN dbo.tblMFMachine M ON M.intMachineId = WP.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WP.intContainerId
