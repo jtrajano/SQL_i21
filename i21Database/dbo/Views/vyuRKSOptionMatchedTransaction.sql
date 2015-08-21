@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuRKSOptionMatchedTransaction
 AS
-SELECT *,(isnull(dblLPrice,0)-isnull(dblSPrice,0))*intMatchQty*dblContractSize as dblImpact FROM(
+SELECT *,(isnull(dblSPrice,0)-isnull(dblLPrice,0))*intMatchQty*dblContractSize as dblImpact FROM(
 SELECT m.intMatchOptionsPnSId,strTranNo,dtmMatchDate,intMatchQty,e.strName,b.strAccountNumber,t.strInternalTradeNo,scl.strLocationName,t.dblPrice as dblLPrice,
 	   fm.strFutMarketName,om.strOptionMonth,t.dblStrike,t.strOptionType,fm.dblContractSize
 	   ,strCommodityCode,t.dtmFilledDate as dtmMLTransactionDate,t.strInternalTradeNo as strMLInternalTradeNo,cb.strBook as strMLBook,csb.strSubBook as strMLSubBook,
