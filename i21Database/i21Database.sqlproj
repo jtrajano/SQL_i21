@@ -2251,6 +2251,14 @@
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingReport.sql" />
     <Build Include="dbo\Views\vyuGRGetTransferLocation.sql" />
     <None Include="Scripts\Post-Deployment\IC\11_RemoveOtherChargesAsset.sql" />
+    <Build Include="dbo\Tables\tblSTstgPricebookSendFile.sql" />
+    <Build Include="dbo\Tables\tblSTstgPromotionItemListSend.sql" />
+    <Build Include="dbo\Tables\tblSTstgComboSalesFile.sql" />
+    <Build Include="dbo\Tables\tblSTstgMixMatchFile.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTstgInsertPricebookSendFile.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTstgInsertPromotionItemListSend.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTstgInsertComboSalesFile.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTstgInsertMixMatchFile.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

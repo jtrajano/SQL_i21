@@ -3878,4 +3878,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strContractNumber" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="8a474694-2eaf-4b86-9f8f-1c4cc250e3db" ChangeDateTime="08/20/2015 06:49:07">
+    <Property Name="ElementName" Value="[dbo].[tblSTstgPricebookSendFile].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTstgPricebookSendFile]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="StoreLocationID" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="51b12129-5f10-4ba1-8f41-87bc14469f89" ChangeDateTime="08/20/2015 08:23:57">
+    <Property Name="ElementName" Value="[dbo].[tblSTstgComboSalesFile].[SalesRestrictionStrategyID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTstgComboSalesFile]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="ItemListID" />
+  </Operation>
 </Operations>
