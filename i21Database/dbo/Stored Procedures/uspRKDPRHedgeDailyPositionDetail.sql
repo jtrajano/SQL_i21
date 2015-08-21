@@ -397,7 +397,7 @@ BEGIN
 	
 	SELECT 12 AS intSeqId
 		,'Net Receivable' [strType]
-		,(dblprice - dbltotal) AS dblTotal
+		,(isnull(dblprice,0) - isnull(dbltotal,0)) AS dblTotal
 	FROM (
 		SELECT SUM(dblprice) AS dblprice
 			,(
@@ -985,7 +985,7 @@ BEGIN
 	
 	SELECT 12 AS intSeqId
 		,'Net Receivable' [strType]
-		,(dblprice - dbltotal) AS dblTotal
+		,(isnull(dblprice,0) - isnull(dbltotal,0)) AS dblTotal
 	FROM (
 		SELECT SUM(dblprice) AS dblprice
 			,(
