@@ -54,7 +54,8 @@ LG.strExternalLoadNumber as strSupplierLoadNumber,
 (select top 1 strZipCode from dbo.tblTRSupplyPoint SP
                                     join dbo.tblEntityLocation EL on SP.intEntityLocationId = EL.intEntityLocationId and SP.intEntityVendorId = EL.intEntityId
 									where SP.intEntityLocationId = LG.intEntityLocationId) as strZipCode,
-(select top 1 SP.intRackPriceSupplyPointId from dbo.tblTRSupplyPoint SP where SP.intEntityLocationId = LG.intEntityLocationId) as intRackPriceSupplyPointId
+(select top 1 SP.intRackPriceSupplyPointId from dbo.tblTRSupplyPoint SP where SP.intEntityLocationId = LG.intEntityLocationId) as intRackPriceSupplyPointId,
+(select top 1 intItemUOMId from tblICItemUOM IT where IT.intItemId = LG.intItemId) as intItemUOMId
 from dbo.vyuLGLoadView LG
 where 
  (IsNull(LG.ysnDispatched,0)=1)  and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and
@@ -113,7 +114,8 @@ null as strInboundPricingType,
 null as dblInboundAdjustment,
 (select dblAdjustment from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId  ) as dblOutboundAdjustment,
 (select strZipPostalCode from dbo.tblSMCompanyLocation SM where LG.intCompanyLocationId = SM.intCompanyLocationId) as strZipCode,
-NULL as intRackPriceSupplyPointId 
+NULL as intRackPriceSupplyPointId,
+(select top 1 intItemUOMId from tblICItemUOM IT where IT.intItemId = LG.intItemId) as intItemUOMId 
 from dbo.vyuLGLoadView LG
 where 
  (IsNull(LG.ysnDispatched,0)=1)  and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and
