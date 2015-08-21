@@ -357,7 +357,12 @@ BEGIN
        ,[strDiscountCodeDescription]= SD.[strDiscountCodeDescription]
        ,[dblGradeReading]= SD.[dblGradeReading]
        ,[strCalcMethod]= SD.[strCalcMethod]
-       ,[strShrinkWhat]= SD.[strShrinkWhat]
+       ,[strShrinkWhat]= 
+		CASE 
+			 WHEN SD.[strShrinkWhat]='N' THEN 'Net Weight' 
+			 WHEN SD.[strShrinkWhat]='W' THEN 'Wet Weight' 
+			 WHEN SD.[strShrinkWhat]='G' THEN 'Gross Weight' 
+		END
        ,[dblShrinkPercent]= SD.[dblShrinkPercent]
        ,[dblDiscountAmount]= SD.[dblDiscountAmount]
        ,[dblDiscountDue]= SD.[dblDiscountDue]
