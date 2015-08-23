@@ -55,9 +55,10 @@ Left Join @tblItemConfirmQty cq on wri.intItemId=cq.intItemId
 Where wri.intWorkOrderId=@intWorkOrderId And wri.intRecipeItemTypeId=1
 UNION
 Select wri.intWorkOrderId,i.intItemId,i.strItemNo,i.strDescription,
-iq.dblQuantity,iq.intItemUOMId,iq.strUOM,iq.dblIssuedQuantity,iq.intItemIssuedUOMId,iq.strIssuedUOM,
+ISNULL(iq.dblQuantity,0) AS dblQuantity,ISNULL(iq.intItemUOMId,0) AS intItemUOMId,ISNULL(iq.strUOM,'') AS strUOM,
+ISNULL(iq.dblIssuedQuantity,0) AS dblIssuedQuantity,ISNULL(iq.intItemIssuedUOMId,'') AS intItemIssuedUOMId,ISNULL(iq.strIssuedUOM,'') AS strIssuedUOM,
 ISNULL(cq.dblQuantity,0.0) AS dblConfirmedQty 
-From tblMFWorkOrderRecipeSubstituteItem wri Join tblICItem i on wri.intItemId=i.intItemId 
+From tblMFWorkOrderRecipeSubstituteItem wri Join tblICItem i on wri.intSubstituteItemId=i.intItemId 
 Left Join @tblItemQty iq on wri.intItemId=iq.intItemId
 Left Join @tblItemConfirmQty cq on wri.intItemId=cq.intItemId
 Where wri.intWorkOrderId=@intWorkOrderId And wri.intRecipeItemTypeId=1
