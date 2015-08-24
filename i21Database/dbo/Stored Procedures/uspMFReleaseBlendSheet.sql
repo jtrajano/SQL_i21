@@ -22,6 +22,11 @@ Declare @intUserId int
 Declare @dblQtyToProduce numeric(18,6)
 Declare @dtmDueDate datetime
 Declare @intExecutionOrder int=1
+Declare @intBlendItemId int
+Declare @strBlendItemNo nVarchar(50)
+Declare @strBlendItemStatus nVarchar(50)
+Declare @strInputItemNo nVarchar(50)
+Declare @strInputItemStatus nVarchar(50)
 
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml  
 
@@ -125,7 +130,25 @@ INSERT INTO @tblLot(
 
 Update @tblBlendSheet Set dblQtyToProduce=(Select sum(dblQty) from @tblLot)
 
-Select @dblQtyToProduce=dblQtyToProduce,@intUserId=intUserId,@intLocationId=intLocationId,@dtmDueDate=dtmDueDate from @tblBlendSheet
+Select @dblQtyToProduce=dblQtyToProduce,@intUserId=intUserId,@intLocationId=intLocationId,@dtmDueDate=dtmDueDate,@intBlendItemId=intItemId from @tblBlendSheet
+
+Select @strBlendItemNo=strItemNo,@strBlendItemStatus=strStatus From tblICItem Where intItemId=@intBlendItemId
+
+If (@strBlendItemStatus <> 'Active')
+	Begin
+		Set @ErrMsg='The blend item ' + @strBlendItemNo + ' is not active, cannot release the blend sheet.'
+		RaisError(@ErrMsg,16,1)
+	End
+
+Select TOP 1 @strInputItemNo=strItemNo,@strInputItemStatus=strStatus 
+From @tblLot l join tblICItem i on l.intItemId=i.intItemId 
+Where strStatus <> 'Active'
+
+If @strInputItemNo is not null
+	Begin
+		Set @ErrMsg='The input item ' + @strInputItemNo + ' is not active, cannot release the blend sheet.'
+		RaisError(@ErrMsg,16,1)
+	End
 
 Update a Set a.dblWeightPerUnit=b.dblWeightPerQty 
 from @tblLot a join tblICLot b on a.intLotId=b.intLotId
