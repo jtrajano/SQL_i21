@@ -11,6 +11,7 @@
     [strCity]				NVARCHAR (50)	COLLATE Latin1_General_CI_AS NOT NULL,
     [strCountry]			NVARCHAR (25)	COLLATE Latin1_General_CI_AS NOT NULL,
 	[strCounty]				NVARCHAR (25)	COLLATE Latin1_General_CI_AS NULL,
+	[ysnMatchTaxAddress]		BIT		NOT NULL	DEFAULT 1,
 	[intSalesTaxAccountId]		INT		NULL, 
     [intPurchaseTaxAccountId]	INT		NULL, 
     [strTaxableByOtherTaxes]	NVARCHAR (MAX)	COLLATE Latin1_General_CI_AS NULL,
