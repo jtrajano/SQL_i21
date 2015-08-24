@@ -21,5 +21,5 @@ CREATE TABLE tblMFScheduleCalendarDetail (
 		,intShiftId
 		)
 	,CONSTRAINT [FK_tblMFScheduleCalendarDetail_tblMFShift_intShiftId] FOREIGN KEY (intShiftId) REFERENCES tblMFShift(intShiftId)
-	,CONSTRAINT [FK_tblMFScheduleCalendarDetail_tblMFScheduleCalendar_intCalendarId] FOREIGN KEY (intCalendarId) REFERENCES tblMFScheduleCalendar(intCalendarId)
+	,CONSTRAINT [FK_tblMFScheduleCalendarDetail_tblMFScheduleCalendar_intCalendarId] FOREIGN KEY (intCalendarId) REFERENCES tblMFScheduleCalendar(intCalendarId) ON DELETE CASCADE
 	)

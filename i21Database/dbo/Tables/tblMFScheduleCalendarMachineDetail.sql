@@ -7,5 +7,5 @@
 		intCalendarDetailId
 		,intMachineId
 		)
-	,CONSTRAINT [FK_tblMFScheduleCalendarMachineDetail_tblMFScheduleCalendarDetail_intCalendarDetailId] FOREIGN KEY (intCalendarDetailId) REFERENCES tblMFScheduleCalendarDetail(intCalendarDetailId)
+	,CONSTRAINT [FK_tblMFScheduleCalendarMachineDetail_tblMFScheduleCalendarDetail_intCalendarDetailId] FOREIGN KEY (intCalendarDetailId) REFERENCES tblMFScheduleCalendarDetail(intCalendarDetailId) ON DELETE CASCADE
 	)

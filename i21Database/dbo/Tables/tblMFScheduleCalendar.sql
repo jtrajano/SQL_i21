@@ -1,7 +1,7 @@
 ﻿CREATE TABLE tblMFScheduleCalendar (
 	intCalendarId INT NOT NULL identity(1, 1)
 	,strName NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
-	,intManufacturingCellId INT
+	,intManufacturingCellId INT NOT NULL
 	,dtmFromDate DATETIME NOT NULL
 	,dtmToDate DATETIME NOT NULL
 	,ysnStandard BIT NOT NULL

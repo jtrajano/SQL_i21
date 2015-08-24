@@ -5,7 +5,7 @@ BEGIN TRY
 		,@ErrMsg NVARCHAR(MAX)
 		,@intTransactionCount INT
 		,@intScheduleId INT
-		,@strScheduleNo NVARCHAR
+		,@strScheduleNo NVARCHAR(50)
 		,@intCalendarId INT
 		,@intManufacturingCellId INT
 		,@ysnStandard BIT
@@ -148,6 +148,7 @@ BEGIN TRY
 			,intWorkOrderId INT
 			,intDuration INT
 			,intExecutionOrder INT
+			,intStatusId int
 			,intChangeoverDuration INT
 			,intSetupDuration INT
 			,dtmChangeoverStartDate DATETIME
@@ -167,6 +168,14 @@ BEGIN TRY
 			,dtmLastModified DATETIME
 			,intLastModifiedUserId INT
 			) x
+	Where x.intStatusId<>1
+
+	Update tblMFWorkOrder 
+	Set intStatusId =x.intStatusId
+	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
+			intWorkOrderId INT
+			,intStatusId int) x JOIN tblMFWorkOrder W on W.intWorkOrderId =x.intWorkOrderId
+	
 	/*WHERE x.intScheduleWorkOrderId IS NULL
 
 	UPDATE tblMFScheduleWorkOrder
@@ -244,15 +253,15 @@ BEGIN TRY
 			WHERE W.intWorkOrderId = x.intWorkOrderId
 				AND W.intScheduleId = @intScheduleId
 			)
-		,intWorkOrderId
+		,x.intWorkOrderId
 		,@intScheduleId
-		,dtmPlannedStartDate
-		,dtmPlannedEndDate
-		,intPlannedShiftId
-		,intDuration
-		,dblPlannedQty
-		,intSequenceNo
-		,intCalendarDetailId
+		,x.dtmPlannedStartDate
+		,x.dtmPlannedEndDate
+		,x.intPlannedShiftId
+		,x.intDuration
+		,x.dblPlannedQty
+		,x.intSequenceNo
+		,x.intCalendarDetailId
 		,1
 	FROM OPENXML(@idoc, 'root/WorkOrderDetails/WorkOrderDetail', 2) WITH (
 			intWorkOrderId INT
@@ -263,7 +272,7 @@ BEGIN TRY
 			,dblPlannedQty NUMERIC(18, 6)
 			,intSequenceNo INT
 			,intCalendarDetailId INT
-			) x
+			) x JOIN tblMFScheduleWorkOrder W on x.intWorkOrderId=W.intWorkOrderId 
 
 	INSERT INTO tblMFScheduleMachineDetail (
 		intScheduleWorkOrderDetailId
@@ -281,16 +290,16 @@ BEGIN TRY
 				AND W.intScheduleId = @intScheduleId
 				AND WD.intCalendarDetailId = x.intCalendarDetailId
 			)
-		,intWorkOrderId
+		,x.intWorkOrderId
 		,@intScheduleId
-		,intCalendarMachineId
-		,intCalendarDetailId
+		,x.intCalendarMachineId
+		,x.intCalendarDetailId
 		,1
 	FROM OPENXML(@idoc, 'root/MachineDetails/MachineDetail', 2) WITH (
 			intWorkOrderId INT
 			,intCalendarMachineId INT
 			,intCalendarDetailId INT
-			) x
+			) x JOIN tblMFScheduleWorkOrder W on x.intWorkOrderId=W.intWorkOrderId
 
 	INSERT INTO tblMFScheduleConstraintDetail (
 		intScheduleWorkOrderId
@@ -308,12 +317,12 @@ BEGIN TRY
 			WHERE W.intWorkOrderId = x.intWorkOrderId
 				AND W.intScheduleId = @intScheduleId
 			)
-		,intWorkOrderId
+		,x.intWorkOrderId
 		,@intScheduleId
-		,intScheduleRuleId
-		,dtmChangeoverStartDate
-		,dtmChangeoverEndDate
-		,intDuration
+		,x.intScheduleRuleId
+		,x.dtmChangeoverStartDate
+		,x.dtmChangeoverEndDate
+		,x.intDuration
 		,1
 	FROM OPENXML(@idoc, 'root/ConstraintDetails/ConstraintDetail', 2) WITH (
 			intWorkOrderId INT
@@ -321,7 +330,7 @@ BEGIN TRY
 			,dtmChangeoverStartDate DATETIME
 			,dtmChangeoverEndDate DATETIME
 			,intDuration INT
-			) x
+			) x JOIN tblMFScheduleWorkOrder W on x.intWorkOrderId=W.intWorkOrderId
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
