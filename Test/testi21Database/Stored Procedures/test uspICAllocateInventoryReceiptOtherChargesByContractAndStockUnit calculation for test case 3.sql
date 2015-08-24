@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICAllocateInventoryReceiptOtherChargesByContractAndWeights calculation for test case 3]
+﻿CREATE PROCEDURE [testi21Database].[test uspICAllocateInventoryReceiptOtherChargesByContractAndStockUnit calculation for test case 3]
 AS
 
 /*
@@ -158,7 +158,7 @@ BEGIN
 		
 		-- Modify the other charges in the transaction to use Allocate by Units. 
 		UPDATE dbo.tblICInventoryReceiptCharge
-		SET strAllocateCostBy = @ALLOCATE_COST_BY_Weight
+		SET strAllocateCostBy = @ALLOCATE_COST_BY_Stock_Unit
 		WHERE intInventoryReceiptId = @intInventoryReceiptId
 
 		-- Calculate the other charges. 
@@ -170,7 +170,7 @@ BEGIN
 			@intInventoryReceiptId
 
 		-- Distribute or allocate the calculate other charges to the items. 
-		EXEC dbo.uspICAllocateInventoryReceiptOtherChargesByContractAndWeights 
+		EXEC dbo.uspICAllocateInventoryReceiptOtherChargesByContractAndStockUnit
 			@intInventoryReceiptId
 	END 
 

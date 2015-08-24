@@ -239,7 +239,7 @@ BEGIN
 		BEGIN 
 			-- Modify the other charges in the transaction to use Allocate by Units. 
 			UPDATE dbo.tblICInventoryReceiptCharge
-			SET strAllocateCostBy = @ALLOCATE_COST_BY_Weight
+			SET strAllocateCostBy = @ALLOCATE_COST_BY_Stock_Unit
 			WHERE intInventoryReceiptId = @intInventoryReceiptId
 
 			-- Calculate the other charges. 

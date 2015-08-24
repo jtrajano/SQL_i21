@@ -82,8 +82,8 @@ BEGIN
 
           DELETE FROM tblSTPromotionItemList 
 		  WHERE  intPromoItemListNo BETWEEN @BeginingItemsList AND @EndingItemsList
-	      AND intStoreId = @ToStore AND intPromoItemListId 
-          NOT IN (SELECT intPromoItemListId FROM tblSTPromotionSalesListDetail)
+	      AND intStoreId = @ToStore AND intPromoItemListId   
+		  NOT IN (SELECT intPromoItemListId FROM tblSTPromotionSalesListDetail)
 	 
 	  END
 
@@ -167,16 +167,19 @@ BEGIN
 	   (SELECT TOP 1 adj4.intPromoSalesListId From tblSTPromotionSalesList AS
 	   adj4 Where adj4.intStoreId = @ToStore and adj4.intPromoSalesId = adj2.intPromoSalesId AND  adj4.strPromoType = 'C') 
 	   AS intPromoSalesListId,
-	   (SELECT intPromoItemListId FROM tblSTPromotionItemList WHERE intStoreId = @ToStore AND intPromoItemListNo IN
-       (SELECT intPromoItemListNo FROM tblSTPromotionItemList WHERE intPromoItemListId = adj1.intPromoItemListId)),
+	   (SELECT intPromoItemListId FROM tblSTPromotionItemList WHERE intStoreId = @ToStore  AND intPromoItemListNo IN 
+       (SELECT intPromoItemListNo FROM tblSTPromotionItemList WHERE intPromoItemListId = adj1.intPromoItemListId )),
 	   adj1.intQuantity,
 	   adj1.dblPrice, adj1.intConcurrencyId FROM tblSTPromotionSalesListDetail
 	   AS adj1 INNER JOIN tblSTPromotionSalesList  AS adj2
 	   ON adj1.intPromoSalesListId = adj2.intPromoSalesListId and intStoreId = @FromStore and strPromoType = 'C'
+	   INNER JOIN tblSTPromotionItemList as adj5 ON adj1.intPromoItemListId = adj5.intPromoItemListId
 	   WHERE adj2.intPromoSalesId in 
 	   (SELECT adj3.intPromoSalesId FROM tblSTPromotionSalesList adj3 WHERE adj3.intStoreId = @ToStore and adj3.strPromoType = 'C')	
        AND intPromoSalesId NOT IN (select intPromoSalesId from tblSTPromotionSalesList as adj11 INNER JOIN tblSTPromotionSalesListDetail
 	   AS adj22 ON adj22.intPromoSalesListId = adj11.intPromoSalesListId AND intStoreId = @ToStore and adj11.strPromoType = 'C')
+	   AND adj5.intPromoItemListNo BETWEEN @BeginingItemsList AND @EndingItemsList
+
       
 	   SELECT @MixMatchAdded = COUNT(*) from tblSTPromotionSalesList
 	   WHERE intPromoSalesId BETWEEN @BeginingMixMatchID AND @EndingMixMatchID
@@ -222,10 +225,12 @@ BEGIN
 	  adj1.dblPrice, adj1.intConcurrencyId FROM tblSTPromotionSalesListDetail 
 	  AS adj1 INNER JOIN tblSTPromotionSalesList  AS adj2
  	  ON adj1.intPromoSalesListId = adj2.intPromoSalesListId and intStoreId = @FromStore and strPromoType = 'M'
+	  INNER JOIN tblSTPromotionItemList as adj5 ON adj1.intPromoItemListId = adj5.intPromoItemListId
 	  WHERE adj2.intPromoSalesId in 
 	  (SELECT adj3.intPromoSalesId FROM tblSTPromotionSalesList adj3 WHERE adj3.intStoreId = @ToStore and adj3.strPromoType = 'M')	
 	  AND intPromoSalesId NOT IN (SELECT intPromoSalesId FROM tblSTPromotionSalesList AS adj11 INNER JOIN tblSTPromotionSalesListDetail
 	  AS adj22 ON adj22.intPromoSalesListId = adj11.intPromoSalesListId AND intStoreId = @ToStore and adj11.strPromoType = 'M')
+	  AND adj5.intPromoItemListNo BETWEEN @BeginingItemsList AND @EndingItemsList
 
 
 	  if (@ReplaceDuplicateRecordsysn = 'Y')

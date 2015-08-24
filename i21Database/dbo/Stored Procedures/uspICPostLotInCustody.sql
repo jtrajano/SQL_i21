@@ -21,6 +21,7 @@ CREATE PROCEDURE [dbo].[uspICPostLotInCustody]
 	,@strTransactionId AS NVARCHAR(20)
 	,@strBatchId AS NVARCHAR(20)
 	,@intTransactionTypeId AS INT
+	,@strTransactionForm AS NVARCHAR(255) 
 	,@intUserId AS INT
 AS
 
@@ -39,13 +40,6 @@ DECLARE @CostUsed AS NUMERIC(18,6);
 DECLARE @NewInventoryLotInCustodyId AS INT
 DECLARE @UpdatedInventoryLotInCustodyId AS INT 
 DECLARE @NewInventoryLotInCustodyTransactionId AS INT
-
--- Initialize the transaction name. Use this as the transaction form name
-DECLARE @TransactionTypeName AS NVARCHAR(200) 
-SELECT	TOP 1 
-		@TransactionTypeName = strName
-FROM	dbo.tblICInventoryTransactionType
-WHERE	intTransactionTypeId = @intTransactionTypeId
 
 -------------------------------------------------
 -- 1. Process the Lot Cost buckets
@@ -101,7 +95,7 @@ BEGIN
 					,@strBatchId							= @strBatchId
 					,@intTransactionTypeId					= @intTransactionTypeId
 					,@intLotId								= @intLotId
-					,@strTransactionForm					= @TransactionTypeName
+					,@strTransactionForm					= @strTransactionForm
 					,@intUserId								= @intUserId
 					,@SourceCostBucketInCustodyId			= @UpdatedInventoryLotInCustodyId
 					,@InventoryTransactionIdInCustodyId		= @NewInventoryLotInCustodyTransactionId OUTPUT 
@@ -152,7 +146,7 @@ BEGIN
 				,@strBatchId							= @strBatchId
 				,@intTransactionTypeId					= @intTransactionTypeId
 				,@intLotId								= @intLotId
-				,@strTransactionForm					= @TransactionTypeName
+				,@strTransactionForm					= @strTransactionForm
 				,@intUserId								= @intUserId
 				,@SourceCostBucketInCustodyId			= @NewInventoryLotInCustodyId
 				,@InventoryTransactionIdInCustodyId		= @NewInventoryLotInCustodyTransactionId OUTPUT 						
