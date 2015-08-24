@@ -3,6 +3,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[intConcurrencyId] [int] NOT NULL,
 	[intContractTypeId] [int] NOT NULL,
 	[intEntityId] [int] NOT NULL,
+	[intContractPlanId] [int],
 	[intCommodityId] [int] NULL,
 	[dblQuantity] [numeric](24, 4) NOT NULL,
 	[intCommodityUOMId] INT NULL, 
@@ -73,8 +74,8 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	CONSTRAINT [FK_tblCTContractHeader_tblICCommodityUnitMeasure_intCommodityUOMId_intCommodityUnitMeasureId] FOREIGN KEY([intCommodityUOMId])REFERENCES [tblICCommodityUnitMeasure] ([intCommodityUnitMeasureId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblICCommodityUnitMeasure_intLoadUOMId_intCommodityUnitMeasureId] FOREIGN KEY([intLoadUOMId])REFERENCES [tblICCommodityUnitMeasure] ([intCommodityUnitMeasureId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblICUnitMeasure_intCategoryUnitMeasureId_intUnitMeasureId] FOREIGN KEY([intCategoryUnitMeasureId])REFERENCES [tblICUnitMeasure] ([intUnitMeasureId]),
-	CONSTRAINT [FK_tblCTContractHeader_tblICUnitMeasure_intLoadCategoryUnitMeasureId_intUnitMeasureId] FOREIGN KEY([intLoadCategoryUnitMeasureId])REFERENCES [tblICUnitMeasure] ([intUnitMeasureId])
-	
+	CONSTRAINT [FK_tblCTContractHeader_tblICUnitMeasure_intLoadCategoryUnitMeasureId_intUnitMeasureId] FOREIGN KEY([intLoadCategoryUnitMeasureId])REFERENCES [tblICUnitMeasure] ([intUnitMeasureId]),
+	CONSTRAINT [FK_tblCTContractHeader_tblCTContractPlan_intContractPlanId] FOREIGN KEY([intContractPlanId])REFERENCES [tblCTContractPlan] ([intContractPlanId])
 )
 
 
