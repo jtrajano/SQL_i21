@@ -246,7 +246,7 @@ AS
 			,TRANS.dblExchangeRate
 			,TRANS.intInventoryTransactionId
 			,strInventoryTransactionTypeName = TransType.strName
-			,TRANS.strTransactionForm
+			,TRANS.strTransactionForm 
 	FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
 				ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
 	WHERE	TRANS.strBatchId = @strBatchId

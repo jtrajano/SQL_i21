@@ -702,7 +702,7 @@ BEGIN
 				,strTransactionId  = 'PURCHASE-000002'  
 				,intTransactionId  = 1  
 				,strTransactionType  = @INVENTORY_WRITEOFFSOLD_NAME  
-				,strTransactionForm  = 'Inventory Receipt'  
+				,strTransactionForm  = 'Inventory Receipt'
 				,strModuleName = @MODULENAME  
 				,intConcurrencyId  = 1  
 		FROM dbo.tblGLAccount   
@@ -732,7 +732,7 @@ BEGIN
 				,strTransactionId  = 'PURCHASE-000002'  
 				,intTransactionId  = 1  
 				,strTransactionType  = @INVENTORY_REVALUESOLD_NAME  
-				,strTransactionForm  = 'Inventory Receipt'  
+				,strTransactionForm  = 'Inventory Receipt'
 				,strModuleName = @MODULENAME  
 				,intConcurrencyId  = 1  
 		FROM dbo.tblGLAccount   
@@ -761,7 +761,7 @@ BEGIN
 				,strTransactionId  = 'PURCHASE-000002'  
 				,intTransactionId  = 1  
 				,strTransactionType  = @INVENTORY_REVALUESOLD_NAME  
-				,strTransactionForm  = 'Inventory Receipt'  
+				,strTransactionForm  = 'Inventory Receipt'
 				,strModuleName = @MODULENAME  
 				,intConcurrencyId  = 1  
 		FROM dbo.tblGLAccount   
@@ -791,7 +791,7 @@ BEGIN
 				,strTransactionId  = 'PURCHASE-000002'  
 				,intTransactionId  = 1  
 				,strTransactionType  = @INVENTORY_AUTONEGATIVE_NAME
-				,strTransactionForm  = 'Inventory Receipt'  
+				,strTransactionForm  = 'Inventory Receipt'
 				,strModuleName = @MODULENAME  
 				,intConcurrencyId  = 1  
 		FROM dbo.tblGLAccount   
@@ -820,7 +820,7 @@ BEGIN
 				,strTransactionId  = 'PURCHASE-000002'  
 				,intTransactionId  = 1  
 				,strTransactionType  = @INVENTORY_AUTONEGATIVE_NAME  
-				,strTransactionForm  = 'Inventory Receipt'  
+				,strTransactionForm  = 'Inventory Receipt'
 				,strModuleName = @MODULENAME  
 				,intConcurrencyId  = 1     
 		FROM dbo.tblGLAccount   

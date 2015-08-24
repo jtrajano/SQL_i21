@@ -42,6 +42,7 @@ DECLARE @intId AS INT
 		,@intTransactionDetailId AS INT 
 		,@strTransactionId AS NVARCHAR(40) 
 		,@intTransactionTypeId AS INT 
+		,@strTransactionForm AS NVARCHAR(255)
 		,@intLotId AS INT
 		,@intSubLocationId AS INT
 		,@intStorageLocationId AS INT 
@@ -122,6 +123,11 @@ BEGIN
 	-- Initialize the costing method and negative inventory option. 
 	SET @CostingMethod = NULL;
 
+	SELECT TOP 1 
+			@strTransactionForm = strTransactionForm
+	FROM	dbo.tblICInventoryTransactionType
+	WHERE	intTransactionTypeId = @intTransactionTypeId
+
 	-- Get the costing method of an item 
 	SELECT	@CostingMethod = CostingMethod 
 	FROM	dbo.fnGetCostingMethodAsTable(@intItemId, @intItemLocationId)
@@ -148,6 +154,7 @@ BEGIN
 				,@strTransactionId
 				,@strBatchId
 				,@intTransactionTypeId
+				,@strTransactionForm
 				,@intUserId
 	END
 	ELSE IF @CostingMethod IN (@FIFO, @AVERAGECOST)
@@ -170,6 +177,7 @@ BEGIN
 				,@strTransactionId 
 				,@strBatchId 
 				,@intTransactionTypeId 
+				,@strTransactionForm
 				,@intUserId 
 	END 
 	ELSE IF @CostingMethod IN (@LIFO)
@@ -192,6 +200,7 @@ BEGIN
 				,@strTransactionId 
 				,@strBatchId 
 				,@intTransactionTypeId 
+				,@strTransactionForm
 				,@intUserId 
 	END
 	

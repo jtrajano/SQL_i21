@@ -56,6 +56,7 @@ BEGIN
 			@strBatchId
 			,@UseGLAccount_ContraInventory
 			,@intUserId
+			,NULL
 
 		-- Remove the column dtmDateEntered. We don't need to assert it. 
 		ALTER TABLE actual 
