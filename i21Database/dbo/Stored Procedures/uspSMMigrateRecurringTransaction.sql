@@ -162,7 +162,7 @@ BEGIN
 				, b.strJournalId [strTransactionNumber]
 				, 'General Journal' [strTransactionType]
 				, main.strReference [strReference]
-				, sec.strFullName [strResponsibleUser]
+				, ISNULL(sec.strFullName, '') [strResponsibleUser]
 				, 0 [intWarningDays]
 				, CASE 
 						WHEN main.strRecurringPeriod IS NULL THEN 'Monthly'
@@ -193,7 +193,7 @@ BEGIN
 			INTO #tmp
 			FROM dbo.tblGLJournalRecurring main
 			INNER JOIN dbo.tblGLJournal b ON main.intJournalId = b.intJournalId
-			JOIN dbo.tblSMUserSecurity sec ON CAST(case when ISNUMERIC(main.strUserMode) = 0 THEN '0' ELSE main.strUserMode END AS INT) = sec.intUserSecurityID
+			LEFT JOIN dbo.tblSMUserSecurity sec ON CAST(case when ISNUMERIC(main.strUserMode) = 0 THEN '0' ELSE main.strUserMode END AS INT) = sec.intUserSecurityID
 			WHERE (1=1)
 			-- removed to include all recurring with or without history
 			-- AND main.strJournalRecurringId IN (SELECT DISTINCT strJournalRecurringId FROM dbo.tblGLRecurringHistory)
