@@ -2251,6 +2251,7 @@
     <Build Include="dbo\Stored Procedures\uspARCustomerAgingReport.sql" />
     <None Include="Scripts\Post-Deployment\IC\11_RemoveOtherChargesAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetQuantitiesForAllocatedDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceQuantity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
