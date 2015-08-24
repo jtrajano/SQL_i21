@@ -13,19 +13,40 @@ BEGIN TRY
 			@dblOldBalance			NUMERIC(12,4),
 			@dblNewBalance			NUMERIC(12,4),
 			@strAdjustmentNo		NVARCHAR(50),
-			@dblTransactionQuantity	NUMERIC(12,4)
+			@dblTransactionQuantity	NUMERIC(12,4),
+			@dblQuantityToIncrease	NUMERIC(12,4),
+			@ysnUnlimitedQuantity	BIT
+	
+	BEGINING:
 
-	SELECT	@dblQuantity			=	dblQuantity,
-			@dblOldBalance			=	dblBalance
-	FROM	tblCTContractDetail 
+	SELECT	@dblQuantity			=	ISNULL(dblDetailQuantity,0),
+			@dblOldBalance			=	ISNULL(dblBalance,0),
+			@ysnUnlimitedQuantity	=	ISNULL(ysnUnlimitedQuantity,0)
+	FROM	vyuCTContractDetailView 
 	WHERE	intContractDetailId		=	@intContractDetailId 
 	
 	SELECT	@dblTransactionQuantity	=	- @dblQuantityToUpdate
-	SELECT	@dblNewBalance = @dblOldBalance - @dblQuantityToUpdate
+	SELECT	@dblNewBalance			=	@dblOldBalance - @dblQuantityToUpdate
 
 	IF @dblNewBalance < 0
 	BEGIN
-		RAISERROR('Balance cannot be less than zero.',16,1)
+		IF @ysnUnlimitedQuantity = 1
+		BEGIN
+			SET		@dblQuantityToIncrease	= @dblNewBalance * -1
+
+			EXEC	uspCTUpdateSequenceQuantity
+					@intContractDetailId	=	@intContractDetailId,
+					@dblQuantityToUpdate	=	@dblQuantityToIncrease,
+					@intUserId				=	@intUserId,
+					@intExternalId			=	@intExternalId,
+					@strScreenName			=	@strScreenName
+
+			GOTO BEGINING
+		END
+		ELSE
+		BEGIN
+			RAISERROR('Balance cannot be less than zero.',16,1)
+		END
 	END
 	
 	IF @dblNewBalance > @dblQuantity

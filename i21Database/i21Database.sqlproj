@@ -2260,6 +2260,7 @@
     <Build Include="dbo\Stored Procedures\uspSTstgInsertComboSalesFile.sql" />
     <Build Include="dbo\Stored Procedures\uspSTstgInsertMixMatchFile.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetQuantitiesForAllocatedDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceQuantity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
