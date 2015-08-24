@@ -162,9 +162,13 @@ BEGIN
 				, b.strJournalId [strTransactionNumber]
 				, 'General Journal' [strTransactionType]
 				, main.strReference [strReference]
-				, sec.strFullName [strResponsibleUser]
+				, ISNULL(sec.strFullName, '') [strResponsibleUser]
 				, 0 [intWarningDays]
-				, ISNULL(main.strRecurringPeriod, 'Monthly') [strFrequency] 
+				, CASE 
+						WHEN main.strRecurringPeriod IS NULL THEN 'Monthly'
+						WHEN main.strRecurringPeriod = 'Weekly' THEN 'Weekly'
+						WHEN main.strRecurringPeriod = 'MonthlyEnd' THEN 'Monthly'
+				  END [strFrequency] 
 				, ISNULL((SELECT TOP 1 dtmLastProcess from dbo.tblGLRecurringHistory history
 					WHERE history.strJournalRecurringId = main.strJournalRecurringId
 					ORDER BY dtmNextProcess DESC), b.dtmDateEntered) [dtmLastProcess]			
@@ -174,21 +178,22 @@ BEGIN
 					CASE 
 						WHEN main.strRecurringPeriod IS NULL THEN DATEADD(MONTH, 1, b.dtmDateEntered)
 						WHEN main.strRecurringPeriod = 'Weekly' THEN DATEADD(WEEk, 1, b.dtmDateEntered)
+						WHEN main.strRecurringPeriod = 'MonthlyEnd' THEN DATEADD(s,-1, DATEADD(mm, DATEDIFF(m,0,GETDATE())+1,0))
 					END			
 				  ) [dtmNExtProcess]
 				, 0 [ysnDue]
-				, main.strDays [strDayOfMonth]
+				, CASE WHEN main.strRecurringPeriod = 'MonthlyEnd' THEN 'Last Day' ELSE NULL END [strDayOfMonth]
 				, main.dtmStartDate [dtmStartDate]
 				, main.dtmEndDate [dtmEndDate]
 				, 1 [ysnActive]
 				, 1 [intIteration]
-				, CAST(main.strUserMode AS INT) [intUserId]
+				, CAST(case when ISNUMERIC(main.strUserMode) = 0 THEN '0' ELSE main.strUserMode END AS INT) [intUserId]
 				, 1 [ysnAvailable]
 				, b.intConcurrencyId
 			INTO #tmp
 			FROM dbo.tblGLJournalRecurring main
 			INNER JOIN dbo.tblGLJournal b ON main.intJournalId = b.intJournalId
-			JOIN dbo.tblSMUserSecurity sec ON CAST(main.strUserMode AS INT) = sec.intUserSecurityID
+			LEFT JOIN dbo.tblSMUserSecurity sec ON CAST(case when ISNUMERIC(main.strUserMode) = 0 THEN '0' ELSE main.strUserMode END AS INT) = sec.intUserSecurityID
 			WHERE (1=1)
 			-- removed to include all recurring with or without history
 			-- AND main.strJournalRecurringId IN (SELECT DISTINCT strJournalRecurringId FROM dbo.tblGLRecurringHistory)
