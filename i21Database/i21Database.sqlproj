@@ -2256,6 +2256,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGetBlendSheetLotUOMs.sql" />
     <Build Include="dbo\Stored Procedures\uspMFStartBlendSheet.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetBlendSheetItemUOMs.sql" />
+    <Build Include="dbo\Views\vyuMFGetRecipe.sql" />
+    <Build Include="dbo\Views\vyuMFGetBlendSheet.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
