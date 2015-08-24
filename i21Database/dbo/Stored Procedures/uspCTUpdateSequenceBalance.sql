@@ -57,16 +57,17 @@ BEGIN TRY
 	UPDATE	tblCTContractDetail
 	SET		intConcurrencyId	=	intConcurrencyId + 1,
 			dblBalance			=	@dblNewBalance,
-			intContractStatusId	=	CASE WHEN @dblNewBalance = 0 THEN 5 ELSE CASE WHEN intContractStatusId = 5 THEN 1 ELSE intContractStatusId END END
+			intContractStatusId	=	CASE	WHEN @ysnUnlimitedQuantity = 0  
+											THEN	CASE	WHEN @dblNewBalance = 0 
+															THEN 5 
+															ELSE	CASE	WHEN intContractStatusId = 5 
+																			THEN 1 
+																			ELSE intContractStatusId 
+																	END 
+													END 
+											ELSE intContractStatusId 
+									END
 	WHERE	intContractDetailId =	@intContractDetailId
-	
-	SELECT	@strAdjustmentNo = strPrefix+LTRIM(intNumber) 
-	FROM	tblSMStartingNumber 
-	WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
-
-	UPDATE	tblSMStartingNumber
-	SET		intNumber = intNumber+1
-	WHERE	strModule = 'Contract Management' AND strTransactionType = 'ContractAdjNo'
 
 	EXEC	uspCTCreateSequenceUsageHistory 
 			@intContractDetailId	=	@intContractDetailId,
