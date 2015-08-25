@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspICUpdateInventoryReceiptUnitCost]
-	@intContractId AS INT,
+	@intContractDetailId AS INT,
 	@newUnitCost AS NUMERIC(18,6)
 AS
 BEGIN
@@ -8,7 +8,7 @@ BEGIN
 	INTO #tmpContractCost
 	FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-	WHERE ReceiptItem.intOrderId = @intContractId
+	WHERE ReceiptItem.intLineNo = @intContractDetailId
 		AND Receipt.ysnPosted = 0
 		AND Receipt.strReceiptType = 'Purchase Contract'
 
