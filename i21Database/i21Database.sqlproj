@@ -2258,6 +2258,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGetBlendSheetItemUOMs.sql" />
     <Build Include="dbo\Views\vyuMFGetRecipe.sql" />
     <Build Include="dbo\Views\vyuMFGetBlendSheet.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetWIPSubLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetWIPSubLocationCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
