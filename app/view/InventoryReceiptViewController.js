@@ -1355,6 +1355,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
     onCalculateChargeClick: function(button, e, eOpts) {
         var win = button.up('window');
+        var context = win.context;
         var current = win.viewModel.data.current;
 
         if (current) {
@@ -1366,6 +1367,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     var jsonData = Ext.decode(response.responseText);
                     if (!jsonData.success) {
                         iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                    }
+                    else {
+                        context.configuration.paging.store.load();
                     }
                 },
                 failure: function(response) {
