@@ -311,6 +311,7 @@ BEGIN
 			,strBatchId
 			,dblExchangeRate
 			,intCurrencyId
+			,strTransactionForm
 		)
 		SELECT	dtmDate = '01/01/2014'
 				,dblQty = 100
@@ -329,6 +330,7 @@ BEGIN
 				,strBatchId = @strBatchId
 				,dblExchangeRate = @USD_ExchangeRate
 				,intCurrencyId = @USD
+				,strTransactionForm = 'Inventory Receipt'
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,dblQty = 100
@@ -347,6 +349,7 @@ BEGIN
 				,strBatchId = @strBatchId
 				,dblExchangeRate = @USD_ExchangeRate
 				,intCurrencyId = @USD
+				,strTransactionForm = 'Inventory Receipt'
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,dblQty = 100
@@ -365,6 +368,7 @@ BEGIN
 				,strBatchId = @strBatchId
 				,dblExchangeRate = @USD_ExchangeRate
 				,intCurrencyId = @USD
+				,strTransactionForm = 'Inventory Receipt'
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,dblQty = 100
@@ -383,6 +387,7 @@ BEGIN
 				,strBatchId = @strBatchId
 				,dblExchangeRate = @USD_ExchangeRate
 				,intCurrencyId = @USD
+				,strTransactionForm = 'Inventory Receipt'
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,dblQty = 100
@@ -401,6 +406,7 @@ BEGIN
 				,strBatchId = @strBatchId
 				,dblExchangeRate = @USD_ExchangeRate
 				,intCurrencyId = @USD
+				,strTransactionForm = 'Inventory Receipt'
 	END 
 
 	----------------------------------------------------------------

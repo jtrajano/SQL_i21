@@ -63,6 +63,7 @@ BEGIN
 			,@strTransactionId AS NVARCHAR(20)
 			,@strBatchId AS NVARCHAR(20)
 			,@intTransactionTypeId AS INT
+			,@strTransactionForm AS NVARCHAR(255)
 			,@intUserId AS INT
 
 		CREATE TABLE expected (
@@ -269,6 +270,7 @@ BEGIN
 					intItemId
 					,intItemLocationId
 					,intItemUOMId 
+					,dtmDate
 					,intLotId
 					,dblStockIn
 					,dblStockOut
@@ -279,6 +281,7 @@ BEGIN
 			SELECT	intItemId = @WetGrains
 					,intItemLocationId = @NewHaven
 					,intItemUOMId = @intItemUOMId
+					,dtmDate = '01/01/2014'
 					,intLotId = @intLotId
 					,dblStockIn = @dblQty
 					,dblStockOut = 0
@@ -424,6 +427,7 @@ BEGIN
 					intItemId
 					,intItemLocationId
 					,intItemUOMId 
+					,dtmDate
 					,intLotId
 					,dblStockIn
 					,dblStockOut
@@ -434,6 +438,7 @@ BEGIN
 			SELECT	intItemId = @WetGrains
 					,intItemLocationId = @NewHaven
 					,intItemUOMId = @intItemUOMId
+					,dtmDate = '02/10/2014'
 					,intLotId = @intLotId
 					,dblStockIn = @dblQty
 					,dblStockOut = 0
@@ -579,6 +584,7 @@ BEGIN
 					intItemId
 					,intItemLocationId
 					,intItemUOMId 
+					,dtmDate
 					,intLotId
 					,dblStockIn
 					,dblStockOut
@@ -589,6 +595,7 @@ BEGIN
 			SELECT	intItemId = @WetGrains
 					,intItemLocationId = @NewHaven
 					,intItemUOMId = @intItemUOMId
+					,dtmDate = '02/15/2014'
 					,intLotId = @intLotId
 					,dblStockIn = @dblQty
 					,dblStockOut = 0
@@ -938,6 +945,7 @@ BEGIN
 			,@strTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
+			,@strTransactionForm
 			,@intUserId
 	END 
 

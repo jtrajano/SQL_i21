@@ -7,7 +7,7 @@ BEGIN
 
 		-- Re-add the clustered index. This is critical for the Lot table because it arranges the data physically by that order. 
 		CREATE CLUSTERED INDEX [Fake_IDX_tblICInventoryLot]
-			ON [dbo].[tblICInventoryLot]([intInventoryLotId] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intLotId] ASC);
+			ON [dbo].[tblICInventoryLot]([dtmDate] ASC, [intInventoryLotId] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intLotId] ASC, [intItemUOMId] ASC);
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -35,6 +35,7 @@ BEGIN
 			[intItemId] INT 
 			,[intItemLocationId] INT 
 			,[intItemUOMId] INT 
+			,[dtmDate] DATETIME
 			,[intLotId] INT
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -47,6 +48,7 @@ BEGIN
 			[intItemId] INT 
 			,[intItemLocationId] INT 
 			,[intItemUOMId] INT 
+			,[dtmDate] DATETIME
 			,[intLotId] INT
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -59,6 +61,7 @@ BEGIN
 		DECLARE @intItemId AS INT					= @PremiumGrains
 				,@intItemLocationId AS INT			= @BetterHaven
 				,@intItemUOMId AS INT				= @PremiumGrains_BushelUOMId
+				,@dtmDate AS DATETIME				= '01/01/2014'
 				,@intLotId AS INT					= @LotId
 				,@intSubLocationId AS INT
 				,@intStorageLocationId AS INT
@@ -82,6 +85,7 @@ BEGIN
 				[intItemId] 
 				,[intItemLocationId] 
 				,[intItemUOMId] 
+				,[dtmDate]
 				,[intLotId] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -92,6 +96,7 @@ BEGIN
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
 				,[intItemUOMId] = @intItemUOMId
+				,[dtmDate] = '01/01/2014'
 				,[intLotId] = @intLotId
 				,[dblStockIn] = 40
 				,[dblStockOut] = 0
@@ -124,6 +129,7 @@ BEGIN
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
+				,@dtmDate
 				,@intLotId
 				,@intSubLocationId
 				,@intStorageLocationId
@@ -160,6 +166,7 @@ BEGIN
 				[intItemId] 
 				,[intItemLocationId] 
 				,[intItemUOMId] 
+				,[dtmDate]
 				,[intLotId] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -171,6 +178,7 @@ BEGIN
 				[intItemId] 
 				,[intItemLocationId] 
 				,[intItemUOMId] 
+				,[dtmDate]
 				,[intLotId] 
 				,[dblStockIn] 
 				,[dblStockOut]

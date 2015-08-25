@@ -252,7 +252,7 @@ BEGIN
 				,dblWeight						= 55.1155 * 1000
 				,dblNewWeight					= NULL 
 				,dblWeightPerQty				= 55.1155
-				,dblNewWeightPerQty				= NULL 
+				,dblNewWeightPerQty				= 0.00 
 				,dblCost						= 2.50
 				,dblNewCost						= NULL 
 				,intConcurrencyId				= 1

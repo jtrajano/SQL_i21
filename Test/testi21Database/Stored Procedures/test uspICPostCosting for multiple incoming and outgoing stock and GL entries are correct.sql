@@ -89,7 +89,26 @@ BEGIN
 		DECLARE @intUserId AS INT = 1;  
 
 		-- Setup the items to post  
-		INSERT INTO @ItemsToPost  
+		INSERT INTO @ItemsToPost (
+				intItemId 
+				,intItemLocationId 
+				,intItemUOMId 
+				,dtmDate 
+				,dblQty 
+				,dblUOMQty 
+				,dblCost 
+				,dblSalesPrice 
+				,dblValue 
+				,intCurrencyId 
+				,dblExchangeRate 
+				,intTransactionId 
+				,intTransactionDetailId
+				,strTransactionId 
+				,intTransactionTypeId 
+				,intLotId 
+				,intSubLocationId 
+				,intStorageLocationId 
+		) 
 		-- in (Stock goes up to 200)  
 		SELECT  intItemId = @WetGrains  
 				,intItemLocationId = @Default_Location 
@@ -683,7 +702,7 @@ BEGIN
 				,strTransactionId  = 'PURCHASE-000002'  
 				,intTransactionId  = 1  
 				,strTransactionType  = @INVENTORY_WRITEOFFSOLD_NAME  
-				,strTransactionForm  = 'Inventory Receipt'  
+				,strTransactionForm  = 'Inventory Receipt'
 				,strModuleName = @MODULENAME  
 				,intConcurrencyId  = 1  
 		FROM dbo.tblGLAccount   
@@ -713,7 +732,7 @@ BEGIN
 				,strTransactionId  = 'PURCHASE-000002'  
 				,intTransactionId  = 1  
 				,strTransactionType  = @INVENTORY_REVALUESOLD_NAME  
-				,strTransactionForm  = 'Inventory Receipt'  
+				,strTransactionForm  = 'Inventory Receipt'
 				,strModuleName = @MODULENAME  
 				,intConcurrencyId  = 1  
 		FROM dbo.tblGLAccount   
@@ -742,7 +761,7 @@ BEGIN
 				,strTransactionId  = 'PURCHASE-000002'  
 				,intTransactionId  = 1  
 				,strTransactionType  = @INVENTORY_REVALUESOLD_NAME  
-				,strTransactionForm  = 'Inventory Receipt'  
+				,strTransactionForm  = 'Inventory Receipt'
 				,strModuleName = @MODULENAME  
 				,intConcurrencyId  = 1  
 		FROM dbo.tblGLAccount   
@@ -772,7 +791,7 @@ BEGIN
 				,strTransactionId  = 'PURCHASE-000002'  
 				,intTransactionId  = 1  
 				,strTransactionType  = @INVENTORY_AUTONEGATIVE_NAME
-				,strTransactionForm  = 'Inventory Receipt'  
+				,strTransactionForm  = 'Inventory Receipt'
 				,strModuleName = @MODULENAME  
 				,intConcurrencyId  = 1  
 		FROM dbo.tblGLAccount   
@@ -801,7 +820,7 @@ BEGIN
 				,strTransactionId  = 'PURCHASE-000002'  
 				,intTransactionId  = 1  
 				,strTransactionType  = @INVENTORY_AUTONEGATIVE_NAME  
-				,strTransactionForm  = 'Inventory Receipt'  
+				,strTransactionForm  = 'Inventory Receipt'
 				,strModuleName = @MODULENAME  
 				,intConcurrencyId  = 1     
 		FROM dbo.tblGLAccount   

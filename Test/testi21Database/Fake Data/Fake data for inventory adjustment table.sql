@@ -5,12 +5,14 @@ BEGIN
 	EXEC testi21Database.[Fake open fiscal year and accounting periods]
 		
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryAdjustment', @Identity = 1;	
-	EXEC tSQLt.FakeTable 'dbo.tblICInventoryAdjustmentDetail', @Identity = 1;	
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryAdjustmentDetail', @Identity = 1, @Defaults = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICLot', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;	
+	EXEC tSQLt.FakeTable 'dbo.tblSMUserSecurity', @Identity = 1;	
+
 
 	-- Item Ids
 	DECLARE @WetGrains AS INT = 1
@@ -156,6 +158,13 @@ BEGIN
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1	
 
+	INSERT INTO dbo.tblSMUserSecurity (
+		intEntityId
+		,strUserName
+	)
+	SELECT intEntityId = 1
+			,strUserName = 'i21User'
+
 	-- Create mock data for Lot Numbers
 	DECLARE @ManualLotGrains_Lot_100001 AS INT = 1
 			,@ManualLotGrains_Lot_100002 AS INT = 2
@@ -251,12 +260,14 @@ BEGIN
 	-- 7. Change the value/cost of an existing stock. 
 
 	-- Constant for Adjustment Types
-	DECLARE @ADJUSTMENT_TYPE_QTY_CHANGE AS INT = 1
-			,@ADJUSTMENT_TYPE_UOM_CHANGE AS INT = 2
-			,@ADJUSTMENT_TYPE_ITEM_CHANGE AS INT = 3
-			,@ADJUSTMENT_TYPE_LOT_STATUS_CHANGE AS INT = 4
-			,@ADJUSTMENT_TYPE_SPLIT_LOT AS INT = 5
-			,@ADJUSTMENT_TYPE_EXPIRY_DATE_CHANGE AS INT = 6
+	DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
+			,@ADJUSTMENT_TYPE_UOMChange AS INT = 2
+			,@ADJUSTMENT_TYPE_ItemChange AS INT = 3
+			,@ADJUSTMENT_TYPE_LotStatusChange AS INT = 4
+			,@ADJUSTMENT_TYPE_SplitLot AS INT = 5
+			,@ADJUSTMENT_TYPE_ExpiryDateChange AS INT = 6
+			,@ADJUSTMENT_TYPE_LotMerge AS INT = 7
+			,@ADJUSTMENT_TYPE_LotMove AS INT = 8
 
 	DECLARE @intInventoryAdjustmentId AS INT 
 
@@ -280,7 +291,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @NewHaven
 				,dtmAdjustmentDate  = GETDATE()     
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_QTY_CHANGE 
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_QuantityChange 
 				,strAdjustmentNo    = 'ADJ-1'                              
 				,strDescription     = 'Header only record'                                                                          
 				,intSort			= 1
@@ -307,7 +318,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/14/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_QTY_CHANGE 
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_QuantityChange 
 				,strAdjustmentNo    = 'ADJ-2'                              
 				,strDescription     = 'With a lot item in the detail. Change Qty from 1,000 to 750.'
 				,intSort			= 1
@@ -368,7 +379,7 @@ BEGIN
 				,dtmNewExpiryDate			= NULL 
 				,intLotStatusId				= 1
 				,intNewLotStatusId			= NULL 
-				,dblCost					= 2.50
+				,dblCost					= 2.50 * @25KgBagUnitQty
 				,dblNewCost					= NULL 
 				,dblLineTotal				= 1875.00
 				,intSort					= 1
@@ -393,7 +404,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/14/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_QTY_CHANGE 
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_QuantityChange 
 				,strAdjustmentNo    = 'ADJ-3'                              
 				,strDescription     = 'With a lot item in the detail that is purely in 25 kg bags, no weight UOM.'
 				,intSort			= 1
@@ -454,7 +465,7 @@ BEGIN
 				,dtmNewExpiryDate			= NULL 
 				,intLotStatusId				= 1
 				,intNewLotStatusId			= NULL 
-				,dblCost					= 7.50
+				,dblCost					= 7.50 * @25KgBagUnitQty
 				,dblNewCost					= NULL 
 				,dblLineTotal				= 660.00
 				,intSort					= 1
@@ -479,7 +490,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/14/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_LOT_STATUS_CHANGE
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_LotStatusChange
 				,strAdjustmentNo    = 'ADJ-4'                              
 				,strDescription     = 'Change lot status from Active to Quarantine.'
 				,intSort			= 1
@@ -524,7 +535,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/14/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_QTY_CHANGE 
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_QuantityChange 
 				,strAdjustmentNo    = 'ADJ-5'                              
 				,strDescription     = 'Qty Adjustment for Non lot items.'
 				,intSort			= 1
@@ -585,7 +596,7 @@ BEGIN
 				,dtmNewExpiryDate			= NULL 
 				,intLotStatusId				= NULL 
 				,intNewLotStatusId			= NULL 
-				,dblCost					= 7.50
+				,dblCost					= 7.50 * @PoundUnitQty
 				,dblNewCost					= NULL 
 				,dblLineTotal				= 2250.00
 				,intSort					= 1
@@ -610,7 +621,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/14/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_EXPIRY_DATE_CHANGE
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_ExpiryDateChange
 				,strAdjustmentNo    = 'ADJ-6'                              
 				,strDescription     = 'Changes the expiry date of a lot item.'
 				,intSort			= 1
@@ -655,7 +666,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/17/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_SPLIT_LOT
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_SplitLot
 				,strAdjustmentNo    = 'ADJ-7'                              
 				,strDescription     = 'Split Lot. Split to the same Item UOM, Weight, and Cost.'
 				,intSort			= 1
@@ -707,7 +718,7 @@ BEGIN
 				,dblNewWeight				= NULL 
 				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
-				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
+				,dblCost					= 2.50 * @25KgBagUnitQty -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
 				,dblNewCost					= NULL 
 				,intNewLocationId			= NULL 
 				,intNewSubLocationId		= NULL 
@@ -732,7 +743,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/18/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_SPLIT_LOT
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_SplitLot
 				,strAdjustmentNo    = 'ADJ-8'
 				,strDescription     = 'Split Lot. Same Item UOM, Split Qty, and Weight. Different Cost.'
 				,intSort			= 1
@@ -784,8 +795,8 @@ BEGIN
 				,dblNewWeight				= NULL 
 				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
-				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
-				,dblNewCost					= 3.50
+				,dblCost					= 2.50 * @25KgBagUnitQty -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
+				,dblNewCost					= 3.50 * @25KgBagUnitQty
 				,intNewLocationId			= NULL 
 				,intNewSubLocationId		= NULL 
 				,intNewStorageLocationId	= NULL 
@@ -809,7 +820,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/19/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_SPLIT_LOT
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_SplitLot
 				,strAdjustmentNo    = 'ADJ-9'
 				,strDescription     = 'Split Lot. Same Item UOM, Split Qty, and Cost. Different Weight.'
 				,intSort			= 1
@@ -861,7 +872,7 @@ BEGIN
 				,dblNewWeight				= 27500.00
 				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
-				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
+				,dblCost					= 2.50 * @25KgBagUnitQty -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
 				,dblNewCost					= NULL 
 				,intNewLocationId			= NULL 
 				,intNewSubLocationId		= NULL 
@@ -886,7 +897,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/20/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_SPLIT_LOT
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_SplitLot
 				,strAdjustmentNo    = 'ADJ-10'
 				,strDescription     = 'Split Lot. Same Item UOM, Weight, and Cost. Different Split Qty.'
 				,intSort			= 1
@@ -938,7 +949,7 @@ BEGIN
 				,dblNewWeight				= NULL
 				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
-				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
+				,dblCost					= 2.50 * @25KgBagUnitQty -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
 				,dblNewCost					= NULL 
 				,intNewLocationId			= NULL 
 				,intNewSubLocationId		= NULL  
@@ -963,7 +974,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/21/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_SPLIT_LOT
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_SplitLot
 				,strAdjustmentNo    = 'ADJ-11'
 				,strDescription     = 'Split Lot. Same Weight, Split Qty, and Cost. Different Item UOM.'
 				,intSort			= 1
@@ -1015,7 +1026,7 @@ BEGIN
 				,dblNewWeight				= NULL
 				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
-				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
+				,dblCost					= 2.50 * @25KgBagUnitQty -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
 				,dblNewCost					= NULL 
 				,intNewLocationId			= NULL 
 				,intNewSubLocationId		= NULL  
@@ -1040,7 +1051,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/22/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_SPLIT_LOT
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_SplitLot
 				,strAdjustmentNo    = 'ADJ-12'
 				,strDescription     = 'Split Lot. Same Item UOM, Weight, Split Qty, and Cost. Different Weight UOM.'
 				,intSort			= 1
@@ -1092,7 +1103,7 @@ BEGIN
 				,dblNewWeight				= NULL
 				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
-				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
+				,dblCost					= 2.50 * @25KgBagUnitQty -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
 				,dblNewCost					= NULL 
 				,intNewLocationId			= NULL 
 				,intNewSubLocationId		= NULL  
@@ -1117,7 +1128,7 @@ BEGIN
 		SELECT 	intInventoryAdjustmentId = @intInventoryAdjustmentId
 				,intLocationId		= @Default_Location
 				,dtmAdjustmentDate  = '05/22/2015'
-				,intAdjustmentType	= @ADJUSTMENT_TYPE_SPLIT_LOT
+				,intAdjustmentType	= @ADJUSTMENT_TYPE_SplitLot
 				,strAdjustmentNo    = 'ADJ-13'
 				,strDescription     = 'Split Lot. Reusing an existing lot for the split.'
 				,intSort			= 1
@@ -1169,7 +1180,7 @@ BEGIN
 				,dblNewWeight				= NULL
 				,dblWeightPerQty			= 55.115500
 				,dblNewWeightPerQty			= NULL 
-				,dblCost					= 2.50 -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
+				,dblCost					= 2.50 * @25KgBagUnitQty -- Note: the detail cost will come from the costing bucket (see vyuICGetPostedLot). 
 				,dblNewCost					= NULL 
 				,intNewLocationId			= NULL 
 				,intNewSubLocationId		= NULL  

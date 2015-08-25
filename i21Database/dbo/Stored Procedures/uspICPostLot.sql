@@ -21,6 +21,7 @@ CREATE PROCEDURE [dbo].[uspICPostLot]
 	,@strTransactionId AS NVARCHAR(20)
 	,@strBatchId AS NVARCHAR(20)
 	,@intTransactionTypeId AS INT
+	,@strTransactionForm AS NVARCHAR(255)
 	,@intUserId AS INT
 AS
 
@@ -53,11 +54,11 @@ DECLARE @intRelatedTransactionId AS INT
 DECLARE @dblValue AS NUMERIC(18,6)
 
 -- Initialize the transaction name. Use this as the transaction form name
-DECLARE @TransactionTypeName AS NVARCHAR(200) 
-SELECT	TOP 1 
-		@TransactionTypeName = strName
-FROM	dbo.tblICInventoryTransactionType
-WHERE	intTransactionTypeId = @intTransactionTypeId
+--DECLARE @TransactionTypeName AS NVARCHAR(200) 
+--SELECT	TOP 1 
+--		@TransactionTypeName = strName
+--FROM	dbo.tblICInventoryTransactionType
+--WHERE	intTransactionTypeId = @intTransactionTypeId
 
 -------------------------------------------------
 -- 1. Process the Lot Cost buckets
@@ -93,8 +94,13 @@ BEGIN
 						,@intItemUOMId = Lot.intWeightUOMId 
 				FROM	dbo.tblICLot Lot
 				WHERE	Lot.intLotId = @intLotId
-
+				
 				SET @dblReduceQty = ISNULL(@dblReduceQty, 0) 
+
+				-- Adjust the Unit Qty 
+				SELECT @dblUOMQty = dblUnitQty
+				FROM dbo.tblICItemUOM
+				WHERE intItemUOMId = @intItemUOMId
 			END 
 		END 
 
@@ -105,6 +111,7 @@ BEGIN
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
+				,@dtmDate
 				,@intLotId
 				,@intSubLocationId
 				,@intStorageLocationId
@@ -145,7 +152,7 @@ BEGIN
 					,@intRelatedInventoryTransactionId = NULL 
 					,@intRelatedTransactionId = NULL 
 					,@strRelatedTransactionId = NULL 
-					,@strTransactionForm = @TransactionTypeName
+					,@strTransactionForm = @strTransactionForm
 					,@intUserId = @intUserId
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT			
 
@@ -171,7 +178,48 @@ BEGIN
 	ELSE IF (ISNULL(@dblQty, 0) > 0)
 	BEGIN 
 
-		SET @dblAddQty = ISNULL(@dblQty, 0) 
+		----------------------------------------------------------------------------------------------
+		-- Bagged vs Weight. 
+		----------------------------------------------------------------------------------------------
+		-- 1. If Costing Lot table is using a weight UOM, then convert the UOM and Qty to weight. 
+		-- 2. Otherwise, keep the same Qty, Cost, and UOM Id. 
+		BEGIN 
+			SET @dblAddQty = ISNULL(@dblQty, 0) 
+
+			IF EXISTS (
+				SELECT	TOP 1 1 
+				FROM	dbo.tblICInventoryLot CostingLot INNER JOIN dbo.tblICLot Lot
+							ON CostingLot.intLotId = Lot.intLotId
+				WHERE	CostingLot.intLotId = @intLotId
+						AND CostingLot.intItemUOMId = Lot.intWeightUOMId
+						AND CostingLot.intItemUOMId <> @intItemUOMId
+						AND Lot.intWeightUOMId IS NOT NULL 
+						AND ISNULL(CostingLot.ysnIsUnposted, 0) = 0 
+						AND (ISNULL(CostingLot.dblStockIn, 0) - ISNULL(CostingLot.dblStockOut, 0)) > 0 
+			)			 
+			BEGIN 
+				-- Retrieve the correct UOM (Lot UOM or Weight UOM)
+				-- and also compute the Qty if it has weights. 
+				SELECT	@dblAddQty =	Lot.dblWeightPerQty * @dblQty
+						,@intItemUOMId = Lot.intWeightUOMId 				
+				FROM	dbo.tblICLot Lot
+				WHERE	Lot.intLotId = @intLotId
+
+				SET @dblAddQty = ISNULL(@dblAddQty, 0)
+
+				-- Get the unit cost. 
+				SET @dblCost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty)
+
+				-- Adjust the Unit Qty 
+				SELECT @dblUOMQty = dblUnitQty
+				FROM dbo.tblICItemUOM
+				WHERE intItemUOMId = @intItemUOMId
+
+				-- Adjust the cost to the new UOM
+				SET @dblCost = @dblCost * @dblUOMQty
+			END 
+		END 
+						
 		SET @FullQty = @dblAddQty
 		SET @TotalQtyOffset = 0;
 
@@ -199,7 +247,7 @@ BEGIN
 				,@intRelatedInventoryTransactionId = NULL 
 				,@intRelatedTransactionId = NULL 
 				,@strRelatedTransactionId = NULL 
-				,@strTransactionForm = @TransactionTypeName
+				,@strTransactionForm = @strTransactionForm
 				,@intUserId = @intUserId
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 			
 
@@ -210,6 +258,7 @@ BEGIN
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
+				,@dtmDate
 				,@intLotId
 				,@intSubLocationId
 				,@intStorageLocationId
@@ -259,7 +308,7 @@ BEGIN
 						,@intRelatedInventoryTransactionId = NULL 
 						,@intRelatedTransactionId = @intRelatedTransactionId
 						,@strRelatedTransactionId = @strRelatedTransactionId 
-						,@strTransactionForm = @TransactionTypeName
+						,@strTransactionForm = @strTransactionForm
 						,@intUserId = @intUserId
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 
@@ -288,12 +337,12 @@ BEGIN
 						,@intRelatedInventoryTransactionId = NULL 
 						,@intRelatedTransactionId = @intRelatedTransactionId
 						,@strRelatedTransactionId = @strRelatedTransactionId 
-						,@strTransactionForm = @TransactionTypeName
+						,@strTransactionForm = @strTransactionForm
 						,@intUserId = @intUserId
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 			END
 			
-			-- Insert the record the the Lot-out table
+			-- Insert the record to the Lot-out table
 			INSERT INTO dbo.tblICInventoryLotOut (
 					intInventoryTransactionId
 					,intInventoryLotId

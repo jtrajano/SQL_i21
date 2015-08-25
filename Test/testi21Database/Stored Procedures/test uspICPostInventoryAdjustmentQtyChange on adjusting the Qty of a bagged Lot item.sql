@@ -142,7 +142,7 @@ BEGIN
 				,dtmDate				= '05/14/2015'
 				,dblQty					= -88
 				,dblUOMQty				= @25KgBagUnitQty
-				,dblCost				= 7.50
+				,dblCost				= 7.50 * @25KgBagUnitQty
 				,dblValue				= 0.00
 				,dblSalesPrice			= 0.00
 				,intCurrencyId			= NULL 

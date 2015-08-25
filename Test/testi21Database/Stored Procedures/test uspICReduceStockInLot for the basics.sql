@@ -35,6 +35,7 @@ BEGIN
 		DECLARE @intItemId AS INT
 				,@intItemLocationId AS INT
 				,@intItemUOMId AS INT
+				,@dtmDate AS DATETIME 
 				,@intLotId AS INT
 				,@intSubLocationId AS INT
 				,@intStorageLocationId AS INT
@@ -55,6 +56,7 @@ BEGIN
 			@intItemId 
 			,@intItemLocationId 
 			,@intItemUOMId 
+			,@dtmDate
 			,@intLotId 
 			,@intSubLocationId 
 			,@intStorageLocationId 

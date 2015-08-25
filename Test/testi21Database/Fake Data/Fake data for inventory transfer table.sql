@@ -246,6 +246,7 @@ BEGIN
 		intItemId
 		,intItemLocationId
 		,intItemUOMId
+		,dtmDate
 		,intLotId
 		,intSubLocationId
 		,intStorageLocationId
@@ -257,6 +258,7 @@ BEGIN
 		intItemId				= @ManualLotGrains
 		,intItemLocationId		= @ManualLotGrains_DefaultLocation
 		,intItemUOMId			= @ManualGrains_PoundUOM
+		,dtmDate				= '01/01/2014'
 		,intLotId				= @ManualLotGrains_Lot_100001
 		,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
 		,intStorageLocationId	= @StorageSilo_RM_DL

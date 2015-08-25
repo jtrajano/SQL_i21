@@ -405,7 +405,6 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling Split Lot Change.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for calling UOM Change.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for the basics.sql" />
-    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for the transaction type.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment on getting the batch id.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentExpiryLotChange on adjusting the expiry date.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustmentLotStatusChange on adjusting the lot status.sql" />
@@ -633,6 +632,14 @@
     <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for a missing GL description parameter.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICCreateGLEntries for a GL description.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for supplying the GL Description_.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for the transaction type  - expiry date change.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for the transaction type  - item change.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for the transaction type  - lot merge.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for the transaction type  - lot move.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for the transaction type  - lot status change.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for the transaction type  - quantity change.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for the transaction type  - split lot.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryAdjustment for the transaction type  - uom change.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Scripts\PostDeployment.sql" />

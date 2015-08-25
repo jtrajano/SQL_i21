@@ -8,13 +8,14 @@ BEGIN
 
 		-- Re-add the clustered index. This is critical for the Lot table because it arranges the data physically by that order. 
 		CREATE CLUSTERED INDEX [Fake_IDX_tblICInventoryLot]
-			ON [dbo].[tblICInventoryLot]([intInventoryLotId] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intLotId] ASC);
+			ON [dbo].[tblICInventoryLot]([dtmDate] ASC, [intInventoryLotId] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intLotId] ASC, [intItemUOMId] ASC);
 
 		-- Create the expected and actual tables 
 		CREATE TABLE expected (
 			[intItemId] INT 
 			,[intItemLocationId] INT 
 			,[intItemUOMId] INT 
+			,[dtmDate] DATETIME
 			,[intLotId] INT
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -27,6 +28,7 @@ BEGIN
 			[intItemId] INT 
 			,[intItemLocationId] INT 
 			,[intItemUOMId] INT 
+			,[dtmDate] DATETIME
 			,[intLotId] INT
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -56,6 +58,7 @@ BEGIN
 		DECLARE @intItemId AS INT					= 1
 				,@intItemLocationId AS INT			= 1
 				,@intItemUOMId AS INT				= @WetGrains_BushelUOMId
+				,@dtmDate AS DATETIME				= '01/01/2014'
 				,@intLotId AS INT					= @LotId
 				,@intSubLocationId AS INT
 				,@intStorageLocationId AS INT
@@ -76,6 +79,7 @@ BEGIN
 				[intItemId] 
 				,[intItemLocationId] 
 				,[intItemUOMId]
+				,[dtmDate]
 				,[intLotId] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -86,12 +90,13 @@ BEGIN
 		SELECT	[intItemId]					= @intItemId
 				,[intItemLocationId]		= @intItemLocationId
 				,[intItemUOMId]				= @WetGrains_BushelUOMId
+				,[dtmDate]					= '01/01/2014'
 				,[intLotId]					= @intLotId
 				,[dblStockIn]				= 0
 				,[dblStockOut]				= ABS(@dblSoldQty)
 				,[dblCost]					= @dblCost
 				,[intCreatedUserId]			= @intUserId
-				,[intConcurrencyId]				= 1
+				,[intConcurrencyId]			= 1
 
 		/***************************************************************************************************************************************************************************************************************
 				The following are the expected records to be affected. Here is how it should look like: 
@@ -112,6 +117,7 @@ BEGIN
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
+				,@dtmDate
 				,@intLotId
 				,@intSubLocationId 
 				,@intStorageLocationId 
@@ -141,6 +147,7 @@ BEGIN
 				[intItemId] 
 				,[intItemLocationId] 
 				,[intItemUOMId] 
+				,[dtmDate]
 				,[intLotId] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -152,6 +159,7 @@ BEGIN
 				[intItemId] 
 				,[intItemLocationId] 
 				,[intItemUOMId] 
+				,[dtmDate]
 				,[intLotId] 
 				,[dblStockIn] 
 				,[dblStockOut]
