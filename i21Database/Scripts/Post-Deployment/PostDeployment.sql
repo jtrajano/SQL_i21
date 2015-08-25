@@ -85,7 +85,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\DB\1_CannedPanels_Panel.sql
 :r .\DB\2_CannedPanels_Column.sql
 :r .\DB\3_CannedPanels_Format.sql
---:r .\DB\4_Create_Role_for_DashboardReports.sql
+:r .\DB\4_Create_Role_for_DashboardReports.sql
 
 -- General Ledger
 :r .\GL\DefaultData\AccountStructure.sql
