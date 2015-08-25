@@ -81,7 +81,7 @@ BEGIN
 					ON SurchargeItem.intItemId = Surcharge.intChargeId
 				LEFT JOIN dbo.tblICInventoryReceiptChargePerItem SurchargedOtherCharges
 					ON SurchargedOtherCharges.intChargeId = SurchargeItem.intOnCostTypeId
-					AND SurchargedOtherCharges.intEntityVendorId = Surcharge.intEntityVendorId	
+					AND ISNULL(SurchargedOtherCharges.intEntityVendorId, 0) = ISNULL(Surcharge.intEntityVendorId, 0)
 					AND SurchargedOtherCharges.intInventoryReceiptId = Surcharge.intInventoryReceiptId	
 				LEFT JOIN dbo.tblICInventoryReceiptChargePerItem CalculatedSurcharge
 					ON CalculatedSurcharge.intChargeId = Surcharge.intChargeId
@@ -128,7 +128,7 @@ BEGIN
 					ON SurchargeItem.intItemId = Surcharge.intChargeId
 				LEFT JOIN dbo.tblICInventoryReceiptChargePerItem SurchargedOtherCharges
 					ON SurchargedOtherCharges.intChargeId = SurchargeItem.intOnCostTypeId
-					AND SurchargedOtherCharges.intEntityVendorId = Surcharge.intEntityVendorId
+					AND ISNULL(SurchargedOtherCharges.intEntityVendorId, 0) = ISNULL(Surcharge.intEntityVendorId, 0)
 					AND SurchargedOtherCharges.intInventoryReceiptId = Surcharge.intInventoryReceiptId	
 				LEFT JOIN dbo.tblICInventoryReceiptChargePerItem CalculatedSurcharge
 					ON CalculatedSurcharge.intChargeId = Surcharge.intChargeId
