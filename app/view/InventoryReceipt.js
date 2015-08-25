@@ -1333,7 +1333,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 xtype: 'gridcolumn',
                                                                                 itemId: 'colStorageLocation',
                                                                                 width: 120,
-                                                                                dataIndex: 'strDescription',
+                                                                                dataIndex: 'strStorageLocationName',
                                                                                 text: 'Storage Location',
                                                                                 editor: {
                                                                                     xtype: 'gridcombobox',
@@ -2113,6 +2113,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         itemId: 'btnRemoveCharge',
                                                                         iconCls: 'small-delete',
                                                                         text: 'Remove'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'button',
+                                                                        tabIndex: -1,
+                                                                        itemId: 'btnCalculateCharges',
+                                                                        iconCls: 'small-delete',
+                                                                        text: 'Calculate'
                                                                     },
                                                                     {
                                                                         xtype: 'tbseparator'

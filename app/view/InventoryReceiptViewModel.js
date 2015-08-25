@@ -529,6 +529,22 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     break;
             };
         },
+        readOnlySourceNumberDropdown: function (get) {
+            var receiptType = get('current.strReceiptType');
+            switch (receiptType) {
+                case 'Direct' :
+                    return true;
+                    break;
+                default:
+                    if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strSourceNumber'))) {
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
+                    break;
+            };
+        },
         readOnlyCostMethod: function (get) {
             if (iRely.Functions.isEmpty(get('grdCharges.selection.strOnCostType'))) {
                 return false;

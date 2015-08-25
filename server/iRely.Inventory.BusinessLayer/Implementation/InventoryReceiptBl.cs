@@ -186,6 +186,31 @@ namespace iRely.Inventory.BusinessLayer
             return saveResult;
         }
 
+        public SaveResult CalculateCharges(int receiptId)
+        {
+            SaveResult saveResult = new SaveResult();
+
+            using (var transaction = _db.ContextManager.Database.BeginTransaction())
+            {
+                var connection = _db.ContextManager.Database.Connection;
+                try
+                {
+                    var idParameter = new SqlParameter("@intInventoryReceiptId", receiptId);
+                    _db.ContextManager.Database.ExecuteSqlCommand("uspICCalculateOtherCharges @intInventoryReceiptId", idParameter);
+                    saveResult = _db.Save(false);
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    saveResult.BaseException = ex;
+                    saveResult.Exception = new ServerException(ex);
+                    saveResult.HasError = true;
+                    transaction.Rollback();
+                }
+            }
+            return saveResult;
+        }
+
         public SaveResult PostTransaction(Common.Posting_RequestModel receipt, bool isRecap)
         {
             // Save the record first 

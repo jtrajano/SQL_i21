@@ -2559,7 +2559,7 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "dataIndex": "strDescription",
+                                                                        "dataIndex": "strStorageLocationName",
                                                                         "itemId": "colStorageLocation",
                                                                         "text": "Storage Location",
                                                                         "width": 120
@@ -4438,6 +4438,24 @@
                                                             },
                                                             "name": "MyButton23",
                                                             "designerId": "fb0f5848-4a90-43aa-ac34-d1edbf65c90c"
+                                                        },
+                                                        {
+                                                            "type": "Ext.button.Button",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "icon": null,
+                                                                "iconCls": "small-delete",
+                                                                "itemId": "btnCalculateCharges",
+                                                                "layout|flex": null,
+                                                                "tabIndex": -1,
+                                                                "text": "Calculate"
+                                                            },
+                                                            "name": "MyButton8",
+                                                            "designerId": "51028879-90a1-4d8d-a1b8-fb85b197cb79"
                                                         },
                                                         {
                                                             "type": "Ext.toolbar.Separator",

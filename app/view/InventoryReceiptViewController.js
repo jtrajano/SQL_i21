@@ -155,6 +155,15 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             btnRemoveLot: {
                 hidden: '{current.ysnPosted}'
             },
+            btnInsertCharge: {
+                hidden: '{current.ysnPosted}'
+            },
+            btnRemoveCharge: {
+                hidden: '{current.ysnPosted}'
+            },
+            btnCalculateCharges: {
+                hidden: '{current.ysnPosted}'
+            },
             btnBill: {
                 hidden: '{!current.ysnPosted}'
             },
@@ -867,31 +876,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
 
                     //Validate Logged in User's default location against the selected Location for the receipt
                     if (current.get('strReceiptType') !== 'Direct') {
-                        //Validate recurring instances of Inbound Shipment Container Line Items
-                        if (current.get('strReceiptType') === 'Purchase Contract' && current.get('intSourceType') === 2) {
-                            var receiptItems = current.tblICInventoryReceiptItems().data.items;
-                            var isValid = true;
-                            Ext.Array.each(receiptItems, function(item) {
-                                var exists = Ext.Array.findBy(receiptItems, function (row) {
-                                    if ((row.get('intSourceId') === item.get('intSourceId')
-                                        && row.get('intContainerId') === item.get('intContainerId')
-                                        && (!iRely.Functions.isEmpty(item.get('intContainerId')) && item.get('intContainerId') !== -1))
-                                        && row.get('intInventoryReceiptItemId') !== item.get('intInventoryReceiptItemId')) {
-                                        return true;
-                                    }
-                                });
-                                if (exists) {
-                                    isValid = false;
-                                }
-                            });
-                            if (!isValid) {
-                                iRely.Functions.showErrorDialog('This information is already selected. Please select a different container.');
-                                action(false);
-                            }
-                            else
-                                action(true);
-                        }
-                        else if (app.DefaultLocation > 0) {
+                        if (app.DefaultLocation > 0) {
                             if (app.DefaultLocation !== current.get('intLocationId')) {
                                 var result = function(button) {
                                     if (button === 'yes') {
@@ -1365,6 +1350,29 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var grd = button.up('grid');
         if (grd) {
             grd.startAdd();
+        }
+    },
+
+    onCalculateChargeClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) {
+            Ext.Ajax.request({
+                timeout: 120000,
+                url: '../Inventory/api/InventoryReceipt/CalculateCharges?id=' + current.get('intInventoryReceiptId'),
+                method: 'post',
+                success: function(response){
+                    var jsonData = Ext.decode(response.responseText);
+                    if (!jsonData.success) {
+                        iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                    }
+                },
+                failure: function(response) {
+                    var jsonData = Ext.decode(response.responseText);
+                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
+                }
+            });
         }
     },
 
@@ -1850,6 +1858,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var grid = combo.up('grid');
         var plugin = grid.getPlugin('cepItem');
         var current = plugin.getActiveRecord();
+        var masterRecord = win.viewModel.data.current;
         var po = records[0];
 
         switch (win.viewModel.data.current.get('intSourceType')) {
@@ -1889,6 +1898,31 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 break;
         }
         win.viewModel.data.currentReceiptItem = current;
+    },
+
+    onSourceNumberBeforeSelect: function(combo, record, index, eOpts ) {
+        if (!record)
+            return false;
+
+        var win = combo.up('window');
+        var masterRecord = win.viewModel.data.current;
+        var po = record;
+
+        //Validate recurring instances of Inbound Shipment Container Line Items
+        if (masterRecord.get('strReceiptType') === 'Purchase Contract' && masterRecord.get('intSourceType') === 2) {
+            var receiptItems = masterRecord.tblICInventoryReceiptItems().data.items;
+            var exists = Ext.Array.findBy(receiptItems, function (row) {
+                if ((row.get('intSourceId') === po.get('intShipmentContractQtyId')
+                    && row.get('intContainerId') === po.get('intShipmentBLContainerId'))) {
+                    return true;
+                }
+            });
+            if (exists) {
+                iRely.Functions.showErrorDialog('This information is already selected. Please select a different container.');
+                return false;
+            }
+
+        }
     },
 
     purchaseOrderDropdown: function(win) {
@@ -2494,40 +2528,26 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                     break;
                 case 'Purchase Contract' :
-                    if (iRely.Functions.isEmpty(record.get('strOrderNumber')))
-                    {
-                        switch (columnId) {
-                            case 'colOrderNumber' :
+                    switch (columnId) {
+                        case 'colOrderNumber' :
+                            if (iRely.Functions.isEmpty(record.get('strOrderNumber')))
                                 return controller.purchaseContractDropdown(win);
-                                break;
-                            case 'colSourceNumber' :
-                                switch (current.get('intSourceType')) {
-                                    case 2:
-                                        return controller.inboundShipmentDropdown(win, record);
-                                        break;
-                                    default:
-                                        return false;
-                                        break;
-                                }
-                                break;
-                        }
-                    }
-                    else {
-                        switch (columnId) {
-                            case 'colOrderNumber' :
+                            else
                                 return false;
-                                break;
-                            case 'colSourceNumber' :
-                                switch (current.get('intSourceType')) {
-                                    case 2:
+                            break;
+                        case 'colSourceNumber' :
+                            switch (current.get('intSourceType')) {
+                                case 2:
+                                    if (iRely.Functions.isEmpty(record.get('strSourceNumber')))
                                         return controller.inboundShipmentDropdown(win, record);
-                                        break;
-                                    default:
+                                    else
                                         return false;
-                                        break;
-                                }
-                                break;
-                        };
+                                    break;
+                                default:
+                                    return false;
+                                    break;
+                            }
+                            break;
                     }
                     break;
                 case 'Transfer Order' :
@@ -2851,6 +2871,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             "#btnInsertCharge": {
                 click: this.onInsertChargeClick
             },
+            "#btnCalculateCharges": {
+                click: this.onCalculateChargeClick
+            },
             "#cboShipFrom": {
                 beforequery: this.onShipFromBeforeQuery,
                 select: this.onShipFromSelect
@@ -2860,7 +2883,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 select: this.onOrderNumberSelect
             },
             "#cboSourceNumber": {
-                select: this.onSourceNumberSelect
+                select: this.onSourceNumberSelect,
+                beforeSelect: this.onSourceNumberBeforeSelect
             },
             "#colOrderNumber": {
                 beforerender: this.onItemGridColumnBeforeRender
