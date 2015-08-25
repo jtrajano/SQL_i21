@@ -33,6 +33,7 @@ BEGIN TRY
 		,@strProductItemNo NVARCHAR(50)
 		,@dblTotalQtyToBeConsumed NUMERIC(18, 6)
 		,@dblQtyConsumedSoFar NUMERIC(18, 6)
+		,@strStatus NVARCHAR(50)
 
 	IF @dblConsumeQty <= 0
 		AND @ysnNegativeQtyAllowed = 0
@@ -79,6 +80,7 @@ BEGIN TRY
 	WHERE intLotId = @intLotId
 
 	SELECT @strItemNo = strItemNo
+			,@strStatus = strStatus
 	FROM dbo.tblICItem
 	WHERE intItemId = @intItemId
 
@@ -144,6 +146,15 @@ BEGIN TRY
 		RETURN
 	END
 
+	IF @strStatus = 'InActive'
+	BEGIN
+		RAISERROR (
+				51065
+				,11
+				,1
+				,@strItemNo
+				)
+	END
 	--IF @intItemId NOT IN (
 	--		SELECT RI.intItemId
 	--		FROM dbo.tblMFWorkOrderRecipeItem RI

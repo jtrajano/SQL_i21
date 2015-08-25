@@ -2260,6 +2260,7 @@
     <Build Include="dbo\Views\vyuMFGetBlendSheet.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWIPSubLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWIPSubLocationCount.sql" />
+    <Build Include="dbo\Views\vyuMFGetWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
