@@ -532,9 +532,9 @@ BEGIN TRY
 		,W.intWorkOrderId
 		,@intScheduleId AS intScheduleId
 		,W.strWorkOrderNo
-		,W.dblQuantity
-		,W.dtmExpectedDate
-		,W.dblQuantity - W.dblProducedQuantity AS dblBalanceQuantity
+		,SL.dblQuantity
+		,SL.dtmExpectedDate
+		,SL.dblQuantity - W.dblProducedQuantity AS dblBalanceQuantity
 		,W.dblProducedQuantity
 		,W.strComment AS strWorkOrderComments
 		,W.dtmOrderDate
