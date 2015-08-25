@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPCreatePrepayment]
-	@userId NVARCHAR(50),
+	@userId INT,
 	@bankAccount INT = NULL,
 	@paymentMethod INT = NULL,
 	@paymentInfo NVARCHAR(10) = NULL,
@@ -71,6 +71,7 @@ BEGIN
 	IF @intBankAccountId IS NULL
 	BEGIN
 		SELECT @intGLBankAccountId = B.intCashAccount FROM tblSMUserSecurity A INNER JOIN tblSMCompanyLocation B ON A.intCompanyLocationId = B.intCompanyLocationId
+		WHERE A.intEntityId = @userId
 		SELECT TOP 1 @intBankAccountId = intBankAccountId FROM tblCMBankAccount WHERE intGLAccountId = @intGLBankAccountId
 
 		IF @intBankAccountId IS NULL
