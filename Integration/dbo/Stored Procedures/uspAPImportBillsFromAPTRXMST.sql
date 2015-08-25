@@ -194,9 +194,7 @@ BEGIN
 						ON A.intEntityVendorId = B.intEntityVendorId
 					INNER JOIN (aptrxmst C2 INNER JOIN apeglmst C 
 									ON C2.aptrx_ivc_no = C.apegl_ivc_no 
-									AND C2.aptrx_vnd_no = C.apegl_vnd_no
-									AND C2.aptrx_cbk_no = C.apegl_cbk_no
-									AND C2.aptrx_trans_type = C.apegl_trx_ind)
+									AND C2.aptrx_vnd_no = C.apegl_vnd_no)
 						ON A2.strVendorOrderNumberOrig COLLATE Latin1_General_CS_AS = C2.aptrx_ivc_no
 						AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.aptrx_vnd_no
 				WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
@@ -349,8 +347,6 @@ BEGIN
 				INNER JOIN aptrxmst  B
 				ON B.aptrx_ivc_no = A.apegl_ivc_no 
 					AND B.aptrx_vnd_no = A.apegl_vnd_no
-					AND B.aptrx_cbk_no = A.apegl_cbk_no
-					AND B.aptrx_trans_type = A.apegl_trx_ind
 				INNER JOIN #InsertedUnpostedBillDetail C
 					ON A.[A4GLIdentity] = C.[A4GLIdentity]
 				WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
