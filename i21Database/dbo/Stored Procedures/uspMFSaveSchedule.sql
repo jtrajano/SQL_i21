@@ -1,10 +1,9 @@
-﻿CREATE PROCEDURE [dbo].[uspMFSaveSchedule] (@strXML NVARCHAR(MAX))
+﻿CREATE PROCEDURE [dbo].[uspMFSaveSchedule] (@strXML NVARCHAR(MAX),@intScheduleId INT OUTPUT)
 AS
 BEGIN TRY
 	DECLARE @idoc INT
 		,@ErrMsg NVARCHAR(MAX)
 		,@intTransactionCount INT
-		,@intScheduleId INT
 		,@strScheduleNo NVARCHAR(50)
 		,@intCalendarId INT
 		,@intManufacturingCellId INT
@@ -272,7 +271,9 @@ BEGIN TRY
 			,dblPlannedQty NUMERIC(18, 6)
 			,intSequenceNo INT
 			,intCalendarDetailId INT
-			) x JOIN tblMFScheduleWorkOrder W on x.intWorkOrderId=W.intWorkOrderId 
+			) x 
+	JOIN tblMFScheduleWorkOrder W on x.intWorkOrderId=W.intWorkOrderId 
+	WHERE W.intScheduleId = @intScheduleId
 
 	INSERT INTO tblMFScheduleMachineDetail (
 		intScheduleWorkOrderDetailId
@@ -299,7 +300,9 @@ BEGIN TRY
 			intWorkOrderId INT
 			,intCalendarMachineId INT
 			,intCalendarDetailId INT
-			) x JOIN tblMFScheduleWorkOrder W on x.intWorkOrderId=W.intWorkOrderId
+			) x 
+	JOIN tblMFScheduleWorkOrder W on x.intWorkOrderId=W.intWorkOrderId
+	WHERE W.intScheduleId = @intScheduleId
 
 	INSERT INTO tblMFScheduleConstraintDetail (
 		intScheduleWorkOrderId
@@ -330,7 +333,9 @@ BEGIN TRY
 			,dtmChangeoverStartDate DATETIME
 			,dtmChangeoverEndDate DATETIME
 			,intDuration INT
-			) x JOIN tblMFScheduleWorkOrder W on x.intWorkOrderId=W.intWorkOrderId
+			) x 
+	JOIN tblMFScheduleWorkOrder W on x.intWorkOrderId=W.intWorkOrderId
+	WHERE W.intScheduleId = @intScheduleId
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
