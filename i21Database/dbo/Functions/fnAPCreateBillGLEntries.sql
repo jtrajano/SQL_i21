@@ -129,7 +129,7 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	D.intAccountId,
-		[dblDebit]						=	CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax) ELSE SUM(D.dblTax) END,
+		[dblDebit]						=	CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax) ELSE SUM(D.dblTax) END,
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
