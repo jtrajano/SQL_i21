@@ -15,7 +15,7 @@ LG.strCustomer as strTerminalName,
 (select strLocationName from tblEntityLocation EM where EM.intEntityLocationId = LG.intEntityLocationId) as strSupplyPoint,
 LG.strLocationName,
 LG.strItemNo as strInboundItemNo,
-LG.intContractNumber as intInboundContractNumber,
+LG.strContractNumber as strInboundContractNumber,
 LG.intCounterPartyEntityId as intEntityCustomerId,
 LG.intCounterPartyCompanyLocationId as intOutboundCompanyLocationId, 
 LG.intCounterPartyEntityLocationId as intShipToLocationId,
@@ -30,7 +30,7 @@ LG.intCounterPartyItemId as intOutboundItemId,
 LG.dblQuantity as dblOutboundQuantity,
 LG.dblCounterPartyCashPrice as dblOutboundPrice,
 (select strItemNo from tblICItem IC where IC.intItemId = LG.intCounterPartyItemId) as strOutboundItemNo,
-LG.intCounterPartyContractNumber as intOutboundContractNumber,
+LG.strCounterPartyContractNumber as strOutboundContractNumber,
 LG.dtmScheduledDate,
 LG.dtmDispatchedDate,
 LG.intHaulerEntityId as intShipViaId,
@@ -53,7 +53,9 @@ LG.strExternalLoadNumber as strSupplierLoadNumber,
 (select dblAdjustment from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intCounterPartyContractDetailId )  as dblOutboundAdjustment,
 (select top 1 strZipCode from dbo.tblTRSupplyPoint SP
                                     join dbo.tblEntityLocation EL on SP.intEntityLocationId = EL.intEntityLocationId and SP.intEntityVendorId = EL.intEntityId
-									where SP.intEntityLocationId = LG.intEntityLocationId) as strZipCode
+									where SP.intEntityLocationId = LG.intEntityLocationId) as strZipCode,
+(select top 1 SP.intRackPriceSupplyPointId from dbo.tblTRSupplyPoint SP where SP.intEntityLocationId = LG.intEntityLocationId) as intRackPriceSupplyPointId,
+(select top 1 intItemUOMId from tblICItemUOM IT where IT.intItemId = LG.intItemId) as intItemUOMId
 from dbo.vyuLGLoadView LG
 where 
  (IsNull(LG.ysnDispatched,0)=1)  and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and
@@ -90,7 +92,7 @@ LG.intItemId as intOutboundItemId,
 LG.dblQuantity as dblOutboundQuantity,
 LG.dblCashPrice as dblOutboundPrice,
 (select strItemNo from tblICItem IC where IC.intItemId = LG.intItemId) as strOutboundItemNo,
-LG.intContractNumber as intOutboundContractNumber,
+LG.strContractNumber as strOutboundContractNumber,
 LG.dtmScheduledDate,
 LG.dtmDispatchedDate,
 LG.intHaulerEntityId as intShipViaId,
@@ -111,7 +113,9 @@ null as strInboundPricingType,
 (select strPricingType from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId  ) as strOutboundPricingType,
 null as dblInboundAdjustment,
 (select dblAdjustment from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId  ) as dblOutboundAdjustment,
-(select strZipPostalCode from dbo.tblSMCompanyLocation SM where LG.intCompanyLocationId = SM.intCompanyLocationId) as strZipCode 
+(select strZipPostalCode from dbo.tblSMCompanyLocation SM where LG.intCompanyLocationId = SM.intCompanyLocationId) as strZipCode,
+NULL as intRackPriceSupplyPointId,
+(select top 1 intItemUOMId from tblICItemUOM IT where IT.intItemId = LG.intItemId) as intItemUOMId 
 from dbo.vyuLGLoadView LG
 where 
  (IsNull(LG.ysnDispatched,0)=1)  and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and

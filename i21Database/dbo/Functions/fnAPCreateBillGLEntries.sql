@@ -129,7 +129,7 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	D.intAccountId,
-		[dblDebit]						=	SUM(D.dblTax),
+		[dblDebit]						=	CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax) ELSE SUM(D.dblTax) END,
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -160,7 +160,12 @@ BEGIN
 				ON B.intBillDetailId = D.intBillDetailId
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	AND A.intTransactionType = 1
+	AND 1 = (
+		--create tax only from item receipt if it is adjusted
+		CASE WHEN B.intInventoryReceiptItemId IS NOT NULL AND D.ysnTaxAdjusted = 0 THEN 0 ELSE 1 END
+	)
 	GROUP BY A.dtmDate
+	,D.ysnTaxAdjusted
 	,D.intAccountId
 	,A.strReference
 	,C.strVendorId

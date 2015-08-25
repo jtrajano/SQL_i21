@@ -5,6 +5,7 @@ CREATE PROCEDURE [dbo].[uspSCStorageUpdate]
 	,@intEntityId AS INT
 	,@strDistributionOption AS NVARCHAR(3)
 	,@intDPContractId AS INT
+	,@intStorageScheduleId AS INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -70,6 +71,11 @@ BEGIN TRY
 
 	SELECT @intDefaultStorageSchedule = TIC.intStorageScheduleId, @intCommodityId = TIC.intCommodityId FROM tblSCTicket TIC
 	WHERE TIC.intTicketId = @intTicketId
+
+	IF @intStorageScheduleId IS NOT NULL
+	BEGIN
+		SET @intDefaultStorageSchedule = @intStorageScheduleId
+	END
 
 	IF @intDefaultStorageSchedule is NULL
 	BEGIN
@@ -600,7 +606,12 @@ BEGIN TRY
            ,[strDiscountCodeDescription]= SD.[strDiscountCodeDescription]
            ,[dblGradeReading]= SD.[dblGradeReading]
            ,[strCalcMethod]= SD.[strCalcMethod]
-           ,[strShrinkWhat]= SD.[strShrinkWhat]
+           ,[strShrinkWhat]= 
+			CASE 
+			 WHEN SD.[strShrinkWhat]='N' THEN 'Net Weight' 
+			 WHEN SD.[strShrinkWhat]='W' THEN 'Wet Weight' 
+			 WHEN SD.[strShrinkWhat]='G' THEN 'Gross Weight' 
+			END
            ,[dblShrinkPercent]= SD.[dblShrinkPercent]
            ,[dblDiscountAmount]= SD.[dblDiscountAmount]
            ,[dblDiscountDue]= SD.[dblDiscountAmount]
@@ -608,7 +619,7 @@ BEGIN TRY
            ,[ysnGraderAutoEntry]= SD.[ysnGraderAutoEntry]
            ,[intDiscountScheduleCodeId]= SD.[intDiscountScheduleCodeId]
            ,[dtmDiscountPaidDate]= SD.[dtmDiscountPaidDate]
-           ,[intTicketId]= SD.[intTicketId]
+           ,[intTicketId]= NULL
            ,[intTicketFileId]= @intCustomerStorageId
            ,[strSourceType]= 'Storage'
 		FROM	dbo.[tblQMTicketDiscount] SD

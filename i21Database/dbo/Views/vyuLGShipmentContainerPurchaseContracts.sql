@@ -11,7 +11,7 @@ SELECT
        SCQ.intContractDetailId,
        CH.intContractHeaderId,
        CT.intContractSeq,
-       CH.intContractNumber,
+       CH.strContractNumber,
 	   Item.intCommodityId,
        SCQ.intItemId,
        CT.intItemUOMId,

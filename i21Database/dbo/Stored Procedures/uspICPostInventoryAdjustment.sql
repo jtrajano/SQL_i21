@@ -352,7 +352,7 @@ BEGIN
 			@strBatchId
 			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 			,@intUserId
-			,@strAdjustmentDescription						
+			,@strAdjustmentDescription
 	END 
 END   
 

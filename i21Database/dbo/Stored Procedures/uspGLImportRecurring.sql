@@ -2,8 +2,7 @@
 CREATE PROCEDURE [dbo].[uspGLImportRecurring]
 AS
 BEGIN
-
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLJournalRecurring WHERE ISNULL(ysnImported,0) = 0) RETURN
+IF EXISTS(SELECT TOP 1 1 FROM tblGLJournal WHERE strTransactionType = 'Recurring') RETURN
 
 DECLARE @TEMP TABLE 
 (

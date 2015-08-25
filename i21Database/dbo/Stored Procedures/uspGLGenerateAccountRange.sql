@@ -21,5 +21,5 @@ AS
 	FROM  tblGLAccountGroup A INNER JOIN tblGLAccountRange B ON A.strAccountType = B.strAccountType
 	UPDATE tblGLAccountRange SET intAccountGroupId = 0 WHERE strAccountType = 'All'
 	UPDATE A SET intAccountGroupId = B.intAccountGroupId FROM tblGLAccountRange A
-	INNER JOIN tblGLAccountGroup B ON B.strAccountGroup = A.strAccountType AND B.intParentGroupId = 0
+	INNER JOIN tblGLAccountGroup B ON B.strAccountType = A.strAccountType AND B.intParentGroupId = 0
 RETURN 0

@@ -4,7 +4,7 @@
 SELECT ShipmentCharge.intInventoryShipmentChargeId
 	, ShipmentCharge.intInventoryShipmentId
 	, ShipmentCharge.intContractId
-	, Contract.intContractNumber
+	, Contract.strContractNumber
 	, Charge.strItemNo
 	, strItemDescription = Charge.strDescription
 	, ShipmentCharge.strCostMethod
@@ -14,10 +14,10 @@ SELECT ShipmentCharge.intInventoryShipmentChargeId
 	, Charge.intOnCostTypeId
 	, Charge.ysnPrice
 	, strOnCostType = Charge.strOnCostType
+	, ShipmentCharge.dblAmount
+	, ShipmentCharge.ysnAccrue
 	, ShipmentCharge.intEntityVendorId
 	, Vendor.strVendorId
-	, ShipmentCharge.dblAmount
-	, ShipmentCharge.strCostBilledBy
 FROM tblICInventoryShipmentCharge ShipmentCharge
 	LEFT JOIN vyuICGetOtherCharges Charge ON Charge.intItemId = ShipmentCharge.intChargeId
 	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = ShipmentCharge.intCostUOMId

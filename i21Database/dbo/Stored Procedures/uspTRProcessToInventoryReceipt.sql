@@ -21,85 +21,93 @@ DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
         @total as int;
 BEGIN TRY
 
--- Insert Entries to Stagging table that needs to processed to Transport Load
+	-- Insert Entries to Stagging table that needs to processed to Transport Load
      INSERT into @ReceiptStagingTable(
-	     strReceiptType
-	 	,intEntityVendorId
-	 	,intShipFromId
-	 	,intLocationId
-	 	,intItemId
-	 	,intItemLocationId
-	 	,intItemUOMId
-	 	,strBillOfLadding
-		,intContractHeaderId
-	 	,intContractDetailId
-	 	,dtmDate
-	 	,intShipViaId
-	    ,dblQty
-	    ,dblCost
-	  	,intCurrencyId
-	 	,dblExchangeRate
-	  	,intLotId
-	 	,intSubLocationId
-	 	,intStorageLocationId
-	 	,ysnIsCustody
-	 	,dblFreightRate
-		,intSourceId	
-		,intSourceType		 	
-	 )	
-      select strReceiptType = CASE
-                            WHEN TR.intContractDetailId IS NULL
-								  THEN 'Direct'
-							WHEN TR.intContractDetailId IS NOT NULL
-								  THEN 'Purchase Contract'
-							END,
-       TR.intTerminalId,
-       SP.intEntityLocationId,
-	   TR.intCompanyLocationId,
-       TR.intItemId,
-	   TR.intCompanyLocationId,
-	   intItemUOMId =CASE
-                            WHEN TR.intContractDetailId is NULL  
-	                           THEN (SELECT	TOP 1 
-										IU.intItemUOMId											
-										FROM dbo.tblICItemUOM IU 
-										WHERE	IU.intItemId = TR.intItemId and IU.ysnStockUnit = 1)
-							WHEN TR.intContractDetailId is NOT NULL 
-							   THEN	(select intItemUOMId from vyuCTContractDetailView CT where CT.intContractDetailId = TR.intContractDetailId)
-							   END,-- Need to add the Gallons UOM from Company Preference	   
-	   TR.strBillOfLadding,
-	   CT.intContractHeaderId,
-	   TR.intContractDetailId,
-	   TL.dtmLoadDateTime,
-	   TL.intShipViaId,	  
-	   dblGallons              = CASE
-								  WHEN SP.strGrossOrNet = 'Gross'
-								  THEN TR.dblGross
-								  WHEN SP.strGrossOrNet = 'Net'
-								  THEN TR.dblNet
-								  END,
-       TR.dblUnitCost,
-	   intCurrencyId = (SELECT	TOP 1 
-										CP.intDefaultCurrencyId		
-										FROM	dbo.tblSMCompanyPreference CP
-										WHERE	CP.intCompanyPreferenceId = 1 
+			strReceiptType
+			,intEntityVendorId
+			,intShipFromId
+			,intLocationId
+			,intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,strBillOfLadding
+			,intContractHeaderId
+			,intContractDetailId
+			,dtmDate
+			,intShipViaId
+			,dblQty
+			,dblCost
+			,intCurrencyId
+			,dblExchangeRate
+			,intLotId
+			,intSubLocationId
+			,intStorageLocationId
+			,ysnIsCustody
+			,dblFreightRate
+			,intSourceId	
+			,intSourceType		 	
+			,dblGross
+			,dblNet
+			,intInventoryReceiptId
+	)	
+	select 
+			strReceiptType = CASE
+								WHEN TR.intContractDetailId IS NULL
+										THEN 'Direct'
+								WHEN TR.intContractDetailId IS NOT NULL
+										THEN 'Purchase Contract'
+								END,
+			TR.intTerminalId,
+			SP.intEntityLocationId,
+			TR.intCompanyLocationId,
+			TR.intItemId,
+			TR.intCompanyLocationId,
+			intItemUOMId =CASE
+								WHEN TR.intContractDetailId is NULL  
+									THEN (SELECT	TOP 1 
+											IU.intItemUOMId											
+											FROM dbo.tblICItemUOM IU 
+											WHERE	IU.intItemId = TR.intItemId and IU.ysnStockUnit = 1)
+								WHEN TR.intContractDetailId is NOT NULL 
+									THEN	(select intItemUOMId from vyuCTContractDetailView CT where CT.intContractDetailId = TR.intContractDetailId)
+									END,-- Need to add the Gallons UOM from Company Preference	   
+			TR.strBillOfLadding,
+			CT.intContractHeaderId,
+			TR.intContractDetailId,
+			TL.dtmLoadDateTime,
+			TL.intShipViaId,	  
+			dblGallons              = CASE
+										WHEN SP.strGrossOrNet = 'Gross'
+										THEN TR.dblGross
+										WHEN SP.strGrossOrNet = 'Net'
+										THEN TR.dblNet
+										END,
+			TR.dblUnitCost,
+			intCurrencyId = (SELECT	TOP 1 
+											CP.intDefaultCurrencyId		
+											FROM	dbo.tblSMCompanyPreference CP
+											WHERE	CP.intCompanyPreferenceId = 1 
 												
-						), -- USD default from company Preference 
-	   1, -- Need to check this
-	   NULL,--No LOTS from transport
-	   NULL, -- No Sub Location from transport
-	   NULL, -- No Storage Location from transport
-	   0,-- No Custody from transports
-	   TR.dblFreightRate,
-	   TR.intTransportReceiptId,	  
-	   3 -- Source type for transports is 3 
-	   from tblTRTransportLoad TL
-            JOIN tblTRTransportReceipt TR ON TR.intTransportLoadId = TL.intTransportLoadId			
-			LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = TR.intContractDetailId
-			LEFT JOIN tblTRSupplyPoint SP on SP.intSupplyPointId = TR.intSupplyPointId
-            where TL.intTransportLoadId = @intTransportLoadId and TR.strOrigin = 'Terminal';
-
-    
+							), -- USD default from company Preference 
+			1, -- Need to check this
+			NULL,--No LOTS from transport
+			NULL, -- No Sub Location from transport
+			NULL, -- No Storage Location from transport
+			0,-- No Custody from transports
+			TR.dblFreightRate,
+			TR.intTransportReceiptId,	  
+			3, -- Source type for transports is 3 
+			dblGross = TR.dblGross,
+			dblNet = TR.dblNet,
+			TR.intInventoryReceiptId
+	from	tblTRTransportLoad TL JOIN tblTRTransportReceipt TR 
+				ON TR.intTransportLoadId = TL.intTransportLoadId			
+			LEFT JOIN vyuCTContractDetailView CT 
+				ON CT.intContractDetailId = TR.intContractDetailId
+			LEFT JOIN tblTRSupplyPoint SP 
+				ON SP.intSupplyPointId = TR.intSupplyPointId
+	where	TL.intTransportLoadId = @intTransportLoadId 
+			AND TR.strOrigin = 'Terminal';
 
 	--No Records to process so exit
     SELECT @total = COUNT(*) FROM @ReceiptStagingTable;

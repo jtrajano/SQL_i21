@@ -1137,7 +1137,7 @@ BEGIN
 			,[intEntityVendorId] 
 			,[dblAmount] 
 			,[strAllocateCostBy] 
-			,[strCostBilledBy] 			
+			,[ysnAccrue] 			
 		)
 		SELECT 
 			[intInventoryReceiptId]	= @intReceiptNumber
@@ -1149,7 +1149,7 @@ BEGIN
 			,[intEntityVendorId]	= NULL 
 			,[dblAmount]			= NULL 
 			,[strAllocateCostBy]	= 'Unit'
-			,[strCostBilledBy] 		= 'None'
+			,[ysnAccrue]			= 0 --'None'
 	END
 
 	--------------------------------------------------------
@@ -1283,7 +1283,7 @@ BEGIN
 			,[intEntityVendorId] 
 			,[dblAmount] 
 			,[strAllocateCostBy] 
-			,[strCostBilledBy] 			
+			,[ysnAccrue] 			
 		)
 		SELECT 
 			[intInventoryReceiptId]	= @intReceiptNumber
@@ -1295,7 +1295,7 @@ BEGIN
 			,[intEntityVendorId]	= NULL 
 			,[dblAmount]			= NULL 
 			,[strAllocateCostBy]	= 'Unit'
-			,[strCostBilledBy] 		= 'None'
+			,[ysnAccrue] 			= 0 -- 'None'
 	END
 
 	--------------------------------------------------------
@@ -1429,7 +1429,7 @@ BEGIN
 			,[intEntityVendorId] 
 			,[dblAmount] 
 			,[strAllocateCostBy] 
-			,[strCostBilledBy] 			
+			,[ysnAccrue] 			
 		)
 		SELECT 
 			[intInventoryReceiptId]	= @intReceiptNumber
@@ -1441,7 +1441,7 @@ BEGIN
 			,[intEntityVendorId]	= NULL 
 			,[dblAmount]			= 25.00
 			,[strAllocateCostBy]	= 'Unit'
-			,[strCostBilledBy] 		= 'None'
+			,[ysnAccrue] 			= 0 -- 'None'
 	END
 
 	--------------------------------------------------------
@@ -1576,7 +1576,7 @@ BEGIN
 			,[intEntityVendorId] 
 			,[dblAmount] 
 			,[strAllocateCostBy] 
-			,[strCostBilledBy]
+			,[ysnAccrue]
 			,[intContractId]
 		)
 		SELECT 
@@ -1589,7 +1589,7 @@ BEGIN
 			,[intEntityVendorId]	= 1 
 			,[dblAmount]			= 25.00
 			,[strAllocateCostBy]	= 'Unit'
-			,[strCostBilledBy] 		= 'None'
+			,[ysnAccrue] 			= 0 -- 'None'
 			,[intContractId]		= NULL
 		UNION ALL
 		SELECT 
@@ -1602,7 +1602,7 @@ BEGIN
 			,[intEntityVendorId]	= 1
 			,[dblAmount]			= NULL 
 			,[strAllocateCostBy]	= 'Unit'
-			,[strCostBilledBy] 		= 'None'
+			,[ysnAccrue] 			= 0 -- 'None'
 			,[intContractId]		= NULL
 	END
 
@@ -1739,7 +1739,7 @@ BEGIN
 			,[intEntityVendorId] 
 			,[dblAmount] 
 			,[strAllocateCostBy] 
-			,[strCostBilledBy]
+			,[ysnAccrue]
 			,[intContractId]
 		)
 		SELECT 
@@ -1752,7 +1752,7 @@ BEGIN
 			,[intEntityVendorId]	= 1 
 			,[dblAmount]			= 25.00
 			,[strAllocateCostBy]	= 'Unit'
-			,[strCostBilledBy] 		= 'None'
+			,[ysnAccrue] 			= 0 -- 'None'
 			,[intContractId]		= NULL
 		UNION ALL
 		SELECT 
@@ -1765,7 +1765,7 @@ BEGIN
 			,[intEntityVendorId]	= 1
 			,[dblAmount]			= NULL 
 			,[strAllocateCostBy]	= 'Unit'
-			,[strCostBilledBy] 		= 'None'
+			,[ysnAccrue] 			= 0 -- 'None'
 			,[intContractId]		= NULL
 		UNION ALL
 		SELECT 
@@ -1778,7 +1778,7 @@ BEGIN
 			,[intEntityVendorId]	= 1
 			,[dblAmount]			= NULL 
 			,[strAllocateCostBy]	= 'Unit'
-			,[strCostBilledBy] 		= 'None'
+			,[ysnAccrue] 			= 0 -- 'None'
 			,[intContractId]		= NULL
 	END
 
@@ -1916,7 +1916,7 @@ BEGIN
 			,[intEntityVendorId] 
 			,[dblAmount] 
 			,[strAllocateCostBy] 
-			,[strCostBilledBy]
+			,[ysnAccrue]
 			,[intContractId]
 		)
 		SELECT 
@@ -1929,7 +1929,7 @@ BEGIN
 			,[intEntityVendorId]	= 1 
 			,[dblAmount]			= 25.00
 			,[strAllocateCostBy]	= 'Unit'
-			,[strCostBilledBy] 		= 'None'
+			,[ysnAccrue] 			= 0 -- 'None'
 			,[intContractId]		= NULL
 		UNION ALL
 		SELECT 
@@ -1942,7 +1942,7 @@ BEGIN
 			,[intEntityVendorId]	= 1
 			,[dblAmount]			= NULL 
 			,[strAllocateCostBy]	= 'Unit'
-			,[strCostBilledBy] 		= 'None'
+			,[ysnAccrue] 			= 0 -- 'None'
 			,[intContractId]		= NULL
 		UNION ALL
 		SELECT 
@@ -1955,7 +1955,7 @@ BEGIN
 			,[intEntityVendorId]	= 1
 			,[dblAmount]			= NULL 
 			,[strAllocateCostBy]	= 'Unit'
-			,[strCostBilledBy] 		= 'None'
+			,[ysnAccrue] 			= 0 -- 'None'
 			,[intContractId]		= NULL
 		UNION ALL
 		SELECT 
@@ -1968,7 +1968,7 @@ BEGIN
 			,[intEntityVendorId]	= 1
 			,[dblAmount]			= NULL 
 			,[strAllocateCostBy]	= 'Unit'
-			,[strCostBilledBy] 		= 'None'
+			,[ysnAccrue] 			= 0 -- 'None'
 			,[intContractId]		= NULL
 	END
 
@@ -2109,7 +2109,7 @@ BEGIN
 			,[intEntityVendorId] 
 			,[dblAmount] 
 			,[strAllocateCostBy] 
-			,[strCostBilledBy] 			
+			,[ysnAccrue] 			
 		)
 		SELECT 
 			[intInventoryReceiptId]	= @intReceiptNumber
@@ -2121,7 +2121,7 @@ BEGIN
 			,[intEntityVendorId]	= NULL 
 			,[dblAmount]			= NULL 
 			,[strAllocateCostBy]	= @ALLOCATE_COST_BY_Cost
-			,[strCostBilledBy] 		= @COST_BILLED_BY_None
+			,[ysnAccrue] 			= 0 -- @COST_BILLED_BY_None
 	END
 
 	--------------------------------------------------------
@@ -2266,7 +2266,7 @@ BEGIN
 			,[intEntityVendorId] 
 			,[dblAmount] 
 			,[strAllocateCostBy] 
-			,[strCostBilledBy]
+			,[ysnAccrue]
 			,[intContractId]	
 		)
 		SELECT 
@@ -2279,7 +2279,7 @@ BEGIN
 			,[intEntityVendorId]	= NULL 
 			,[dblAmount]			= NULL 
 			,[strAllocateCostBy]	= @ALLOCATE_COST_BY_Cost
-			,[strCostBilledBy] 		= @COST_BILLED_BY_None
+			,[ysnAccrue] 			= 0 -- @COST_BILLED_BY_None
 			,[@intContractId]		= @intContractId
 	END
 END

@@ -1,15 +1,19 @@
-﻿-- **************************************************************
+﻿
+-- **************************************************************
 -- 1 - db_dashboardreports
 -- 1a - Create role
 -- Create Role in Database
+go
 if not exists (select 1 from sys.database_principals where name='db_dashboardreports' and Type = 'R')
 begin
 	print 'db_dashboardreports does not exists'
 	CREATE ROLE db_dashboardreports
 end
 else
+begin
 	print 'db_dashboardreports exists'
-
+end
+go
 -- 1b - Grant permissions
 -- CHANGE ROLE Name
 GRANT EXECUTE TO db_dashboardreports
@@ -55,14 +59,26 @@ BEGIN
 END
 CLOSE db_cursor   
 DEALLOCATE db_cursor
+GO
 
 IF NOT EXISTS (SELECT * FROM sys.server_principals WHERE name = N'irelydashboard')
-Begin
-CREATE LOGIN [irelydashboard] WITH PASSWORD=N'6Ö!Ú=çôrÍ>ú(Y÷?½Û´º²''?6	ûq­{j:', DEFAULT_DATABASE=[master], DEFAULT_LANGUAGE=[us_english], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
--- Password:iRely@dash
+	BEGIN
+		CREATE LOGIN [irelydashboard] WITH PASSWORD=N'iRely@dash', DEFAULT_DATABASE=[master], DEFAULT_LANGUAGE=[us_english], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
+		-- Password:iRely@dash
+	END
+else
+	BEGIN
+		ALTER LOGIN [irelydashboard] WITH PASSWORD=N'iRely@dash'
+	END	
+	
+--EXEC sp_adduser 'irelydashboard';
+--CREATE USER [irelydashboard]; --FOR LOGIN [irelydashboard];
+IF  EXISTS (SELECT * FROM sys.database_principals WHERE name = N'irelydashboard')
+BEGIN
+	DROP USER [irelydashboard]
+END
 
-EXEC sp_adduser 'irelydashboard'
+CREATE USER [irelydashboard] FOR LOGIN [irelydashboard] WITH DEFAULT_SCHEMA = [irelydashboard];
 EXEC sp_addrolemember 'db_datareader', 'irelydashboard';
 EXEC sp_addrolemember 'db_dashboardreports', 'irelydashboard';
-DROP SCHEMA irelydashboard
-End
+--DROP SCHEMA irelydashboard

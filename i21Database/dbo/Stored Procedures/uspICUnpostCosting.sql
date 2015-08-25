@@ -78,13 +78,13 @@ BEGIN
 	EXEC dbo.uspICValidateCostingOnUnpost @ItemsToUnpost
 END 
 
--- Get the transaction type 
-DECLARE @TransactionType AS INT 
-SELECT TOP 1 
-		@TransactionType = intTransactionTypeId
-FROM	dbo.tblICInventoryTransaction
-WHERE	intTransactionId = @intTransactionId
-		AND strTransactionId = @strTransactionId
+---- Get the transaction type 
+--DECLARE @TransactionType AS INT 
+--SELECT TOP 1 
+--		@TransactionType = intTransactionTypeId
+--FROM	dbo.tblICInventoryTransaction
+--WHERE	intTransactionId = @intTransactionId
+--		AND strTransactionId = @strTransactionId
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Call the FIFO unpost stored procedures. This is also used in Average Costing.

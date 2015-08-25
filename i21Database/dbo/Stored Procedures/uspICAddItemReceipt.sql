@@ -129,14 +129,82 @@ BEGIN
 		SET @ReceiptNumber = NULL 
 		SET @InventoryReceiptId = NULL 
 
-		-- Generate the receipt starting number
-		-- If @ReceiptNumber IS NULL, uspSMGetStartingNumber will throw an error. 
-		-- Error is 'Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.'
-		EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryReceipt, @ReceiptNumber OUTPUT 
-		IF @@ERROR <> 0 OR @ReceiptNumber IS NULL GOTO _BreakLoop;
+		-- Check if there is an existing Inventory receipt 
+		SELECT	@InventoryReceiptId = RawData.intInventoryReceiptId
+		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData
+					ON RawHeaderData.Vendor = RawData.intEntityVendorId 
+					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)	
+		WHERE	RawHeaderData.intId = @intId
+				
+		IF @InventoryReceiptId IS NULL 
+		BEGIN 
+			-- Generate the receipt starting number
+			-- If @ReceiptNumber IS NULL, uspSMGetStartingNumber will throw an error. 
+			-- Error is 'Unable to generate the transaction id. Please ask your local administrator to check the starting numbers setup.'
+			EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryReceipt, @ReceiptNumber OUTPUT 
+			IF @@ERROR <> 0 OR @ReceiptNumber IS NULL GOTO _BreakLoop;
+		END 
 
-		-- Insert the Inventory Receipt header 
-		INSERT INTO dbo.tblICInventoryReceipt (
+		MERGE	
+		INTO	dbo.tblICInventoryReceipt 
+		WITH	(HOLDLOCK) 
+		AS		Receipt 
+		USING (
+			SELECT	RawData.*
+			FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData
+						ON RawHeaderData.Vendor = RawData.intEntityVendorId 
+						AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
+						AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
+						AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
+						AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
+						AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
+						AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)	
+			WHERE	RawHeaderData.intId = @intId
+		) AS IntegrationData
+			ON Receipt.intInventoryReceiptId = IntegrationData.intInventoryReceiptId
+
+		WHEN MATCHED THEN 
+			UPDATE
+			SET 
+				dtmReceiptDate			= dbo.fnRemoveTimeOnDate(ISNULL(IntegrationData.dtmDate, GETDATE()))
+				,intEntityVendorId		= IntegrationData.intEntityVendorId
+				,strReceiptType			= IntegrationData.strReceiptType
+				,intSourceType          = IntegrationData.intSourceType
+				,intBlanketRelease		= NULL
+				,intLocationId			= IntegrationData.intLocationId
+				,strVendorRefNo			= NULL
+				,strBillOfLading		= IntegrationData.strBillOfLadding
+				,intShipViaId			= IntegrationData.intShipViaId
+				,intShipFromId			= IntegrationData.intShipFromId
+				,intReceiverId			= @intUserId 
+				,intCurrencyId			= IntegrationData.intCurrencyId
+				,strVessel				= NULL
+				,intFreightTermId		= NULL
+				,strAllocateFreight		= 'No' -- Default is No
+				,intShiftNumber			= NULL 
+				,dblInvoiceAmount		= 0
+				,ysnInvoicePaid			= 0 
+				,intCheckNo				= NULL 
+				,dtmCheckDate			= NULL 
+				,intTrailerTypeId		= NULL 
+				,dtmTrailerArrivalDate	= NULL 
+				,dtmTrailerArrivalTime	= NULL 
+				,strSealNo				= NULL 
+				,strSealStatus			= NULL 
+				,dtmReceiveTime			= NULL 
+				,dblActualTempReading	= NULL 
+				,intConcurrencyId		= 1
+				,intEntityId			= (SELECT TOP 1 intEntityId FROM dbo.tblSMUserSecurity WHERE intUserSecurityID = @intUserId)
+				,intCreatedUserId		= @intUserId
+				,ysnPosted				= 0
+
+		WHEN NOT MATCHED THEN 
+			INSERT (
 				strReceiptNumber
 				,dtmReceiptDate
 				,intEntityVendorId
@@ -169,52 +237,48 @@ BEGIN
 				,intEntityId
 				,intCreatedUserId
 				,ysnPosted
-		)
-		SELECT 	TOP 1  
-				strReceiptNumber       = @ReceiptNumber
-				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(ISNULL(RawData.dtmDate, GETDATE()))
-				,intEntityVendorId		= RawData.intEntityVendorId
-				,strReceiptType			= RawData.strReceiptType
-				,intSourceType          = RawData.intSourceType
-				,intBlanketRelease		= NULL
-				,intLocationId			= RawData.intLocationId
-				,strVendorRefNo			= NULL
-				,strBillOfLading		= RawData.strBillOfLadding
-				,intShipViaId			= RawData.intShipViaId
-				,intShipFromId			= RawData.intShipFromId
-				,intReceiverId			= @intUserId 
-				,intCurrencyId			= RawData.intCurrencyId
-				,strVessel				= NULL
-				,intFreightTermId		= NULL
-				,strAllocateFreight		= 'No' -- Default is No
-				,intShiftNumber			= NULL 
-				,dblInvoiceAmount		= 0
-				,ysnInvoicePaid			= 0 
-				,intCheckNo				= NULL 
-				,dteCheckDate			= NULL 
-				,intTrailerTypeId		= NULL 
-				,dteTrailerArrivalDate	= NULL 
-				,dteTrailerArrivalTime	= NULL 
-				,strSealNo				= NULL 
-				,strSealStatus			= NULL 
-				,dteReceiveTime			= NULL 
-				,dblActualTempReading	= NULL 
-				,intConcurrencyId		= 1
-				,intEntityId			= (SELECT TOP 1 intEntityId FROM dbo.tblSMUserSecurity WHERE intUserSecurityID = @intUserId)
-				,intCreatedUserId		= @intUserId
-				,ysnPosted				= 0
-		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData
-					ON RawHeaderData.Vendor = RawData.intEntityVendorId 
-					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
-					AND ISNULL(RawHeaderData.Currency,0) = ISNULL(RawData.intCurrencyId,0)
-					AND ISNULL(RawHeaderData.Location,0) = ISNULL(RawData.intLocationId,0)
-					AND ISNULL(RawHeaderData.ReceiptType,0) = ISNULL(RawData.strReceiptType,0)
-					AND ISNULL(RawHeaderData.ShipFrom,0) = ISNULL(RawData.intShipFromId,0)
-					AND ISNULL(RawHeaderData.ShipVia,0) = ISNULL(RawData.intShipViaId,0)	
-		WHERE	RawHeaderData.intId = @intId	           
+			)
+			VALUES (
+				/*strReceiptNumber*/			@ReceiptNumber
+				/*dtmReceiptDate*/				,dbo.fnRemoveTimeOnDate(ISNULL(IntegrationData.dtmDate, GETDATE()))
+				/*intEntityVendorId*/			,IntegrationData.intEntityVendorId
+				/*strReceiptType*/				,IntegrationData.strReceiptType
+				/*intSourceType*/				,IntegrationData.intSourceType
+				/*intBlanketRelease*/			,NULL
+				/*intLocationId*/				,IntegrationData.intLocationId
+				/*strVendorRefNo*/				,NULL
+				/*strBillOfLading*/				,IntegrationData.strBillOfLadding
+				/*intShipViaId*/				,IntegrationData.intShipViaId
+				/*intShipFromId*/				,IntegrationData.intShipFromId
+				/*intReceiverId*/				,@intUserId 
+				/*intCurrencyId*/				,IntegrationData.intCurrencyId
+				/*strVessel*/					,NULL
+				/*intFreightTermId*/			,NULL
+				/*strAllocateFreight*/			,'No' -- Default is No
+				/*intShiftNumber*/				,NULL 
+				/*dblInvoiceAmount*/			,0
+				/*ysnInvoicePaid*/				,0 
+				/*intCheckNo*/					,NULL 
+				/*dteCheckDate*/				,NULL 
+				/*intTrailerTypeId*/			,NULL 
+				/*dtmTrailerArrivalDate*/		,NULL 
+				/*dtmTrailerArrivalTime*/		,NULL 
+				/*strSealNo*/					,NULL 
+				/*strSealStatus*/				,NULL 
+				/*dtmReceiveTime*/				,NULL 
+				/*dblActualTempReading*/		,NULL 
+				/*intConcurrencyId*/			,1
+				/*intEntityId*/					,(SELECT TOP 1 intEntityId FROM dbo.tblSMUserSecurity WHERE intUserSecurityID = @intUserId)
+				/*intCreatedUserId*/			,@intUserId
+				/*ysnPosted*/					,0
+			)
+		;
 				
-		-- Get the identity value from tblICInventoryReceipt to check if the insert was created with no errors 
-		SELECT @InventoryReceiptId = SCOPE_IDENTITY()
+		-- Get the identity value from tblICInventoryReceipt to check if the insert was successful
+		IF @InventoryReceiptId IS NULL 
+		BEGIN 
+			SELECT @InventoryReceiptId = SCOPE_IDENTITY()
+		END 
 						
 		-- Validate the inventory receipt id
 		IF @InventoryReceiptId IS NULL 
@@ -223,6 +287,15 @@ BEGIN
 			RAISERROR(50031, 11, 1);
 			RETURN;
 		END
+
+		--  Flush out existing detail detail data for re-insertion
+		BEGIN 
+			DELETE FROM dbo.tblICInventoryReceiptItem
+			WHERE intInventoryReceiptId = @InventoryReceiptId
+
+			DELETE FROM dbo.tblICInventoryReceiptCharge
+			WHERE intInventoryReceiptId = @InventoryReceiptId
+		END 
 
 		-- Insert the Inventory Receipt Detail. 
 		INSERT INTO dbo.tblICInventoryReceiptItem (
@@ -242,6 +315,8 @@ BEGIN
 				,intSort
 				,intConcurrencyId
 				,intOwnershipType
+				,dblGross
+				,dblNet
 		)
 		SELECT	intInventoryReceiptId	= @InventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -271,6 +346,8 @@ BEGIN
 												WHEN RawData.ysnIsCustody = 1 THEN @OWNERSHIP_TYPE_Storage
 												ELSE @OWNERSHIP_TYPE_Own
 										  END
+				,dblGross				= RawData.dblGross
+				,dblNet					= RawData.dblNet
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON RawHeaderData.Vendor = RawData.intEntityVendorId 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -298,7 +375,8 @@ BEGIN
 				,[intEntityVendorId]
 				,[dblAmount]
 				,[strAllocateCostBy]
-				,[strCostBilledBy]
+				,[ysnAccrue]
+				,[ysnPrice]
 		)
 		SELECT 
 				[intInventoryReceiptId]		= @InventoryReceiptId
@@ -311,7 +389,8 @@ BEGIN
 				,[intEntityVendorId]		= RawData.intEntityVendorId
 				,[dblAmount]				= RawData.dblAmount
 				,[strAllocateCostBy]		= RawData.strAllocateCostBy
-				,[strCostBilledBy]			= RawData.strCostBilledBy
+				,[ysnAccrue]				= RawData.ysnAccrue
+				,[ysnPrice]					= RawData.ysnPrice
 		FROM	@OtherCharges RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON RawHeaderData.Vendor = RawData.intEntityVendorId 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 

@@ -23,8 +23,8 @@ SELECT DISTINCT
       ,e.strName as strName
       ,ba.strAccountNumber
       ,ot.intNoOfContract as intTotalLot
-      ,IsNull((SELECT SUM (AD.intMatchQty) from tblRKOptionsMatchPnS AD Group By AD.intSFutOptTransactionId 
-                  Having ot.intFutOptTransactionId = AD.intSFutOptTransactionId), 0) As dblSelectedLot1
+      ,IsNull((SELECT SUM (AD.intMatchQty) from tblRKOptionsMatchPnS AD Group By AD.intLFutOptTransactionId 
+                  Having ot.intFutOptTransactionId = AD.intLFutOptTransactionId), 0) As dblSelectedLot1
       ,ot.strOptionType
       ,ot.dblStrike
       ,ot.dblPrice as dblPremium

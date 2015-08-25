@@ -145,6 +145,8 @@
 
 :r "..\dbo\Functions\fnGetVendorLastName.sql"
 :r "..\dbo\Stored Procedures\uspAPCreateMissingPaymentOfBills.sql"
+:r "..\dbo\Stored Procedures\uspAPImportBillsFromAPTRXMST.sql"
+:r "..\dbo\Stored Procedures\uspAPImportBillsFromAPIVCMST.sql"
 :r "..\dbo\Stored Procedures\uspAPImportBillTransactions.sql"
 :r "..\dbo\Stored Procedures\uspAPImportTerms.sql"
 --:r "..\dbo\Stored Procedures\uspAPImportVendor.sql"

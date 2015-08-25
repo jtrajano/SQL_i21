@@ -29,7 +29,7 @@ SET ANSI_WARNINGS OFF
 --------------------------------------------------------------------------------------------   
 -- Create a unique transaction name. 
 DECLARE @TransactionName AS VARCHAR(500) = 'Invoice Transaction' + CAST(NEWID() AS NVARCHAR(100));
-IF @raiseError = 0
+IF @raiseError = 0 OR @recap = 1
 	BEGIN TRAN @TransactionName
 DECLARE @totalRecords INT = 0
 DECLARE @totalInvalid INT = 0
@@ -74,6 +74,9 @@ SET @success = 1
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Cost of Goods'
 DECLARE @INVENTORY_SHIPMENT_TYPE AS INT = 5
 SELECT @INVENTORY_SHIPMENT_TYPE = intTransactionTypeId FROM tblICInventoryTransactionType WHERE strName = @SCREEN_NAME
+
+DECLARE @ZeroDecimal decimal(18,6)
+SET @ZeroDecimal = 0.000000	
 
 -- Ensure @post and @recap is not NULL  
 SET @post = ISNULL(@post, 0)
@@ -366,7 +369,7 @@ IF @recap = 0
 					G.intAccountId IS NULL	
 					AND A.dblShipping <> 0.0	
 				
-				
+				--Service Charge Account
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT
 					'The Service Charge account in the Company Preferences was not set.',
@@ -387,7 +390,7 @@ IF @recap = 0
 					AND (D.intItemId IS NULL OR D.intItemId = 0)
 					AND (@ServiceChargesAccountId IS NULL OR @ServiceChargesAccountId = 0)
 								
-								
+				--General Account				
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 				SELECT
 					'The General Account of item - ' + I.strItemNo + ' was not specified.',
@@ -415,7 +418,91 @@ IF @recap = 0
 						AND D.intItemId = Acct.intItemId 		 				
 				WHERE
 					(Acct.intGeneralAccountId IS NULL OR Acct.intGeneralAccountId = 0)
-					AND I.strType IN ('Non-Inventory','Service','Other Charge','Software')
+					AND I.strType IN ('Non-Inventory','Service','Software')
+					
+				--Other Charge Income Account	
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The Other Charge Income Account of item - ' + I.strItemNo + ' was not specified.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					tblARInvoice A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					tblARInvoiceDetail D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					tblICItem I
+						ON D.intItemId = I.intItemId
+				LEFT OUTER JOIN
+					tblSMCompanyLocation L
+						ON A.intCompanyLocationId = L.intCompanyLocationId
+				LEFT OUTER JOIN
+					vyuARGetItemAccount Acct
+						ON A.intCompanyLocationId = Acct.intLocationId 
+						AND D.intItemId = Acct.intItemId 		 				
+				WHERE
+					(Acct.intOtherChargeIncomeAccountId IS NULL OR Acct.intOtherChargeIncomeAccountId = 0)
+					AND I.strType = 'Other Charge'	
+					
+				
+				--Zero Contract Item Price	
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The contract item - ' + I.strItemNo + ' price can not be of zero value.',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					tblARInvoice A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					tblARInvoiceDetail D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					tblICItem I
+						ON D.intItemId = I.intItemId
+				INNER JOIN
+					vyuCTContractDetailView CT
+						ON D.intContractHeaderId = CT.intContractHeaderId 
+						AND D.intContractDetailId = CT.intContractDetailId 		 				
+				WHERE
+					D.dblPrice = @ZeroDecimal
+					
+				--Contract Item Price not Equal to Contract Sequence Cash Price
+				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT
+					'The contract item - ' + I.strItemNo + ' price(' + CONVERT(NVARCHAR(100),CAST(ISNULL(D.dblPrice,@ZeroDecimal) AS MONEY),2) + ') is not equal to the contract sequence cash price(' + CONVERT(NVARCHAR(100),CAST(ISNULL(CT.dblCashPrice,@ZeroDecimal) AS MONEY),2) + ').',
+					A.strTransactionType,
+					A.strInvoiceNumber,
+					@batchId,
+					A.intInvoiceId
+				FROM 
+					tblARInvoice A 
+				INNER JOIN 
+					@PostInvoiceData B
+						ON A.intInvoiceId = B.intInvoiceId
+				INNER JOIN
+					tblARInvoiceDetail D
+						ON A.intInvoiceId = D.intInvoiceId
+				INNER JOIN
+					tblICItem I
+						ON D.intItemId = I.intItemId
+				INNER JOIN
+					vyuCTContractDetailView CT
+						ON D.intContractHeaderId = CT.intContractHeaderId 
+						AND D.intContractDetailId = CT.intContractDetailId 		 				
+				WHERE
+					D.dblPrice <> @ZeroDecimal				
+					AND CT.dblCashPrice <> D.dblPrice 
 					
 					
 				BEGIN TRY
@@ -475,13 +562,13 @@ IF @recap = 0
 				END TRY
 				BEGIN CATCH
 					SELECT @ErrorMerssage = ERROR_MESSAGE()
-					IF @raiseError = 0
+					IF @raiseError = 0 OR @recap = 1
 						ROLLBACK TRAN @TransactionName
-					IF @raiseError = 0
+					IF @raiseError = 0 OR @recap = 1
 						BEGIN TRANSACTION
 					INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 					SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-					IF @raiseError = 0
+					IF @raiseError = 0 OR @recap = 1
 						COMMIT TRANSACTION
 					IF @raiseError = 1
 						RAISERROR(@ErrorMerssage, 11, 1)
@@ -583,7 +670,7 @@ IF @recap = 0
 			
 		IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 			BEGIN
-				IF @raiseError = 0
+				IF @raiseError = 0 OR @recap = 1
 					COMMIT TRAN @TransactionName
 				IF @raiseError = 1
 					BEGIN
@@ -664,8 +751,9 @@ IF @post = 1
 				vyuICGetItemStock IST
 					ON Detail.intItemId = IST.intItemId 
 					AND Header.intCompanyLocationId = IST.intLocationId 
-			WHERE 
-				(Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
+			WHERE
+				Detail.dblTotal <> @ZeroDecimal
+				AND (Detail.intInventoryShipmentItemId IS NULL OR Detail.intInventoryShipmentItemId = 0)
 				AND (Detail.intSalesOrderDetailId IS NULL OR Detail.intSalesOrderDetailId = 0)
 				AND Detail.intItemId IS NOT NULL AND Detail.intItemId <> 0
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
@@ -673,13 +761,13 @@ IF @post = 1
 		END TRY
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				BEGIN TRANSACTION
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				COMMIT TRANSACTION
 			IF @raiseError = 1
 				RAISERROR(@ErrorMerssage, 11, 1)
@@ -725,13 +813,13 @@ IF @post = 1
 		END TRY
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				BEGIN TRANSACTION
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				COMMIT TRANSACTION
 			IF @raiseError = 1
 				RAISERROR(@ErrorMerssage, 11, 1)
@@ -808,11 +896,12 @@ IF @post = 1
 			SELECT
 				 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0)
 				,strBatchID					= @batchId
-				,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge','Software'))) 
-													AND IST.intGeneralAccountId IS NOT NULL
-													AND IST.intGeneralAccountId <> 0
+				,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Software'))) 
 													THEN
 														IST.intGeneralAccountId
+													WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType = 'Other Charge')) 
+													THEN
+														IST.intOtherChargeIncomeAccountId
 													ELSE
 														(CASE WHEN B.intServiceChargeAccountId IS NOT NULL AND B.intServiceChargeAccountId <> 0 THEN B.intServiceChargeAccountId ELSE @ServiceChargesAccountId END)
 												END)
@@ -853,9 +942,10 @@ IF @post = 1
 				vyuARGetItemAccount IST
 					ON B.intItemId = IST.intItemId 
 					AND A.intCompanyLocationId = IST.intLocationId 		
-			WHERE 
-				(B.intItemId IS NULL OR B.intItemId = 0)
-				OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge','Software')))
+			WHERE
+				B.dblTotal <> @ZeroDecimal 
+				AND ((B.intItemId IS NULL OR B.intItemId = 0)
+					OR (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service','Other Charge','Software'))))
 
 			--CREDIT SALES
 			UNION ALL 
@@ -903,8 +993,9 @@ IF @post = 1
 				vyuARGetItemAccount IST
 					ON B.intItemId = IST.intItemId 
 					AND A.intCompanyLocationId = IST.intLocationId 
-			WHERE 
-				(B.intItemId IS NOT NULL OR B.intItemId <> 0)
+			WHERE
+				B.dblTotal <> @ZeroDecimal  
+				AND (B.intItemId IS NOT NULL OR B.intItemId <> 0)
 				AND I.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
 			--CREDIT Shipping
 			UNION ALL 
@@ -946,7 +1037,7 @@ IF @post = 1
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId	
 			WHERE
-				A.dblShipping <> 0.0		
+				A.dblShipping <> @ZeroDecimal		
 				
 		UNION ALL 
 			--CREDIT Tax
@@ -994,7 +1085,7 @@ IF @post = 1
 				tblSMTaxCode TC
 					ON DT.intTaxCodeId = TC.intTaxCodeId	
 			WHERE
-				DT.dblAdjustedTax <> 0.0
+				DT.dblAdjustedTax <> @ZeroDecimal
 				
 			UNION ALL 
 			--DEBIT Discount
@@ -1040,7 +1131,7 @@ IF @post = 1
 				@PostInvoiceData	P
 					ON A.intInvoiceId = P.intInvoiceId					
 			WHERE
-				((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) <> 0.0
+				((D.dblDiscount/100.00) * (D.dblQtyShipped * D.dblPrice)) <> @ZeroDecimal
 
 
 			UNION ALL 
@@ -1102,7 +1193,8 @@ IF @post = 1
 					AND ISH.strShipmentNumber = ICT.strTransactionId
 					AND ISNULL(ICT.ysnIsUnposted,0) = 0
 			WHERE
-				D.intInventoryShipmentItemId IS NOT NULL AND D.intInventoryShipmentItemId <> 0
+				D.dblTotal <> @ZeroDecimal
+				AND D.intInventoryShipmentItemId IS NOT NULL AND D.intInventoryShipmentItemId <> 0
 				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')
@@ -1166,20 +1258,21 @@ IF @post = 1
 					AND ISH.strShipmentNumber = ICT.strTransactionId
 					AND ISNULL(ICT.ysnIsUnposted,0) = 0 
 			WHERE
-				D.intInventoryShipmentItemId IS NOT NULL AND D.intInventoryShipmentItemId <> 0
+				D.dblTotal <> @ZeroDecimal
+				AND D.intInventoryShipmentItemId IS NOT NULL AND D.intInventoryShipmentItemId <> 0
 				--AND D.intSalesOrderDetailId IS NOT NULL AND D.intSalesOrderDetailId <> 0
 				AND D.intItemId IS NOT NULL AND D.intItemId <> 0
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')		
 		END TRY
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				BEGIN TRANSACTION
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				COMMIT TRANSACTION
 			IF @raiseError = 1
 				RAISERROR(@ErrorMerssage, 11, 1)
@@ -1255,20 +1348,20 @@ IF @post = 0
 					AND GL.strTransactionId = P.strTransactionId
 			WHERE
 				GL.ysnIsUnposted = 0
-				AND GL.strCode = 'AR'
+				--AND GL.strCode = 'AR'
 			ORDER BY
 				GL.intGLDetailId		
 						
 		END TRY
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				BEGIN TRANSACTION
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				COMMIT TRANSACTION
 			IF @raiseError = 1
 				RAISERROR(@ErrorMerssage, 11, 1)
@@ -1317,33 +1410,33 @@ IF @post = 0
 					SELECT TOP 1 @intTransactionId = intInvoiceId, @strTransactionId = strTransactionId FROM @UnPostInvoiceData ORDER BY intInvoiceId
 
 					-- Call the post routine 
-					INSERT INTO @GLEntries (
-						 dtmDate
-						,strBatchId
-						,intAccountId
-						,dblDebit
-						,dblCredit
-						,dblDebitUnit
-						,dblCreditUnit
-						,strDescription
-						,strCode
-						,strReference
-						,intCurrencyId
-						,dblExchangeRate
-						,dtmDateEntered
-						,dtmTransactionDate
-						,strJournalLineDescription
-						,intJournalLineNo
-						,ysnIsUnposted
-						,intUserId
-						,intEntityId
-						,strTransactionId
-						,intTransactionId
-						,strTransactionType
-						,strTransactionForm
-						,strModuleName
-						,intConcurrencyId
-					)
+					--INSERT INTO @GLEntries (
+					--	 dtmDate
+					--	,strBatchId
+					--	,intAccountId
+					--	,dblDebit
+					--	,dblCredit
+					--	,dblDebitUnit
+					--	,dblCreditUnit
+					--	,strDescription
+					--	,strCode
+					--	,strReference
+					--	,intCurrencyId
+					--	,dblExchangeRate
+					--	,dtmDateEntered
+					--	,dtmTransactionDate
+					--	,strJournalLineDescription
+					--	,intJournalLineNo
+					--	,ysnIsUnposted
+					--	,intUserId
+					--	,intEntityId
+					--	,strTransactionId
+					--	,intTransactionId
+					--	,strTransactionType
+					--	,strTransactionForm
+					--	,strModuleName
+					--	,intConcurrencyId
+					--)
 					EXEC	dbo.uspICUnpostCosting
 							@intTransactionId
 							,@strTransactionId
@@ -1357,13 +1450,13 @@ IF @post = 0
 		END TRY
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				BEGIN TRANSACTION
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				COMMIT TRANSACTION
 			IF @raiseError = 1
 				RAISERROR(@ErrorMerssage, 11, 1)
@@ -1381,7 +1474,7 @@ IF @post = 0
 --------------------------------------------------------------------------------------------  
 IF @recap = 1
 	
-	IF @raiseError = 0
+	IF @raiseError = 0 OR @recap = 1
 		ROLLBACK TRAN @TransactionName
 	BEGIN 
 
@@ -1454,13 +1547,13 @@ IF @recap = 1
 	END TRY
 	BEGIN CATCH
 		SELECT @ErrorMerssage = ERROR_MESSAGE()
-		IF @raiseError = 0
+		IF @raiseError = 0 OR @recap = 1
 			ROLLBACK TRAN @TransactionName
-		IF @raiseError = 0
+		IF @raiseError = 0 OR @recap = 1
 			BEGIN TRANSACTION
 		INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-		IF @raiseError = 0
+		IF @raiseError = 0 OR @recap = 1
 			COMMIT TRANSACTION
 		IF @raiseError = 1
 			RAISERROR(@ErrorMerssage, 11, 1)
@@ -1482,13 +1575,13 @@ IF @recap = 0
 		END TRY
 		BEGIN CATCH
 			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				BEGIN TRANSACTION
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				COMMIT TRANSACTION
 			IF @raiseError = 1
 				RAISERROR(@ErrorMerssage, 11, 1)
@@ -1627,13 +1720,13 @@ IF @recap = 0
 				END TRY
 				BEGIN CATCH
 					SELECT @ErrorMerssage = ERROR_MESSAGE()
-					IF @raiseError = 0
+					IF @raiseError = 0 OR @recap = 1
 						ROLLBACK TRAN @TransactionName
-					IF @raiseError = 0
+					IF @raiseError = 0 OR @recap = 1
 						BEGIN TRANSACTION
 					INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 					SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-					IF @raiseError = 0
+					IF @raiseError = 0 OR @recap = 1
 						COMMIT TRANSACTION
 					IF @raiseError = 1
 						RAISERROR(@ErrorMerssage, 11, 1)
@@ -1644,13 +1737,13 @@ IF @recap = 0
 		END TRY
 		BEGIN CATCH	
 			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				BEGIN TRANSACTION
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				COMMIT TRANSACTION
 			IF @raiseError = 1
 				RAISERROR(@ErrorMerssage, 11, 1)
@@ -1679,13 +1772,13 @@ IF @recap = 0
 		END TRY
 		BEGIN CATCH	
 			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				BEGIN TRANSACTION
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0
+			IF @raiseError = 0 OR @recap = 1
 				COMMIT TRANSACTION
 			IF @raiseError = 1
 				RAISERROR(@ErrorMerssage, 11, 1)
@@ -1696,7 +1789,7 @@ IF @recap = 0
 	
 SET @successfulCount = @totalRecords
 SET @invalidCount = @totalInvalid	
-IF @raiseError = 0
+IF @raiseError = 0 OR @recap = 1
 	COMMIT TRAN @TransactionName
 RETURN 1;	
 	    

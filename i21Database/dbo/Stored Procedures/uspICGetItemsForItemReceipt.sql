@@ -72,7 +72,7 @@ BEGIN
 		,dblExchangeRate = 1
 		,intTransactionId = Contract.intContractHeaderId
 		,intTransactionDetailId = Contract.intContractDetailId
-		,strTransactionId = CAST(Contract.intContractNumber AS nvarchar)
+		,strTransactionId = CAST(Contract.strContractNumber AS nvarchar)
 		,intTransactionTypeId = @intPurchaseContractType 
 		,intLotId = null
 		,intSubLocationId = Contract.intCompanyLocationSubLocationId
@@ -93,7 +93,7 @@ BEGIN
 		,dblExchangeRate = 1
 		,intTransactionId = Shipments.intContractHeaderId
 		,intTransactionDetailId = Shipments.intContractDetailId
-		,strTransactionId = CAST(Shipments.intContractNumber AS nvarchar)
+		,strTransactionId = CAST(Shipments.strContractNumber AS nvarchar)
 		,intTransactionTypeId = @intScaleType 
 		,intLotId = null
 		,intSubLocationId = Shipments.intSubLocationId
@@ -114,7 +114,7 @@ BEGIN
 		,dblExchangeRate = 1
 		,intTransactionId = Contract.intContractHeaderId
 		,intTransactionDetailId = ContractDetail.intContractDetailId
-		,strTransactionId = CAST(Contract.intContractNumber AS nvarchar)
+		,strTransactionId = CAST(Contract.strContractNumber AS nvarchar)
 		,intTransactionTypeId = @intPurchaseContractType 
 		,intLotId = null
 		,intSubLocationId = null

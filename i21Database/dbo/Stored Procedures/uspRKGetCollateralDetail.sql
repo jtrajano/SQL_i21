@@ -7,7 +7,7 @@ IF @strCollateralType ='Sale'
 BEGIN
 IF ISNULL(@intLocationId, 0) <> 0
 BEGIN
-	    SELECT c.intCollateralId,cl.strLocationName,c.strCustomer,c.intReceiptNo,ch.intContractNumber,c.dtmOpenDate,
+	    SELECT c.intCollateralId,cl.strLocationName,c.strCustomer,c.intReceiptNo,ch.strContractNumber,c.dtmOpenDate,
 		isnull(c.dblOriginalQuantity,0.0) dblOriginalQuantity,isnull(c.dblRemainingQuantity,0.0) as dblRemainingQuantity	
 		FROM tblRKCollateral c
 		LEFT JOIN tblCTContractHeader ch on c.intContractHeaderId=ch.intContractHeaderId
@@ -16,7 +16,7 @@ BEGIN
 END
 ELSE
 BEGIN
-	    SELECT c.intCollateralId,cl.strLocationName,c.strCustomer,c.intReceiptNo,ch.intContractNumber,c.dtmOpenDate,
+	    SELECT c.intCollateralId,cl.strLocationName,c.strCustomer,c.intReceiptNo,ch.strContractNumber,c.dtmOpenDate,
 		isnull(c.dblOriginalQuantity,0) dblOriginalQuantity,c.dblRemainingQuantity	
 		FROM tblRKCollateral c
 		LEFT JOIN tblCTContractHeader ch on c.intContractHeaderId=ch.intContractHeaderId
@@ -30,7 +30,7 @@ ELSE
 BEGIN
 	IF ISNULL(@intLocationId, 0) <> 0
 		BEGIN
-				SELECT c.intCollateralId,cl.strLocationName,c.strCustomer,c.intReceiptNo,ch.intContractNumber,c.dtmOpenDate,
+				SELECT c.intCollateralId,cl.strLocationName,c.strCustomer,c.intReceiptNo,ch.strContractNumber,c.dtmOpenDate,
 				isnull(c.dblOriginalQuantity,0.0) dblOriginalQuantity,isnull(c.dblRemainingQuantity,0.0) as dblRemainingQuantity	
 				FROM tblRKCollateral c
 				LEFT JOIN tblCTContractHeader ch on c.intContractHeaderId=ch.intContractHeaderId
@@ -39,7 +39,7 @@ BEGIN
 		END
 	ELSE
 		BEGIN
-				SELECT c.intCollateralId,cl.strLocationName,c.strCustomer,c.intReceiptNo,ch.intContractNumber,c.dtmOpenDate,
+				SELECT c.intCollateralId,cl.strLocationName,c.strCustomer,c.intReceiptNo,ch.strContractNumber,c.dtmOpenDate,
 				isnull(c.dblOriginalQuantity,0) dblOriginalQuantity,c.dblRemainingQuantity	
 				FROM tblRKCollateral c
 				LEFT JOIN tblCTContractHeader ch on c.intContractHeaderId=ch.intContractHeaderId

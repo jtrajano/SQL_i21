@@ -155,14 +155,85 @@ WHERE	PODetail.intPurchaseId = @PurchaseOrderId
 		AND dbo.fnIsStockTrackingItem(PODetail.intItemId) = 1
 		AND PODetail.dblQtyOrdered != PODetail.dblQtyReceived
 
+INSERT INTO dbo.tblICInventoryReceiptItemTax (
+		[intInventoryReceiptItemId]
+		,[intTaxGroupMasterId]
+		,[intTaxGroupId]
+		,[intTaxCodeId]
+		,[intTaxClassId]
+		,[strTaxableByOtherTaxes]
+		,[strCalculationMethod]
+		,[dblRate]
+		,[dblTax]
+		,[dblAdjustedTax]
+		,[intTaxAccountId]
+		,[ysnTaxAdjusted]
+		,[ysnSeparateOnInvoice]
+		,[ysnCheckoffTax]
+		,[strTaxCode]
+		,[intSort]
+		,[intConcurrencyId]
+)
+SELECT 
+		[intInventoryReceiptItemId]		= ReceiptItem.intInventoryReceiptItemId
+		,[intTaxGroupMasterId]			= PODetailTax.intTaxGroupMasterId
+		,[intTaxGroupId]				= PODetailTax.intTaxGroupId
+		,[intTaxCodeId]					= PODetailTax.intTaxCodeId
+		,[intTaxClassId]				= PODetailTax.intTaxClassId
+		,[strTaxableByOtherTaxes]		= PODetailTax.strTaxableByOtherTaxes
+		,[strCalculationMethod]			= PODetailTax.strCalculationMethod
+		,[dblRate]						= PODetailTax.dblRate
+		,[dblTax]						= PODetailTax.dblTax
+		,[dblAdjustedTax]				= PODetailTax.dblAdjustedTax
+		,[intTaxAccountId]				= TaxCode.intPurchaseTaxAccountId
+		,[ysnTaxAdjusted]				= PODetailTax.ysnTaxAdjusted
+		,[ysnSeparateOnInvoice]			= PODetailTax.ysnSeparateOnBill
+		,[ysnCheckoffTax]				= PODetailTax.ysnCheckOffTax
+		,[strTaxCode]					= TaxCode.strTaxCode
+		,[intSort]						= ReceiptItem.intSort
+		,[intConcurrencyId]				= 1
+FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+			ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+		INNER JOIN dbo.tblPOPurchaseDetail PODetail
+			ON PODetail.intPurchaseDetailId = ReceiptItem.intLineNo
+			AND PODetail.intPurchaseId = ReceiptItem.intOrderId
+		INNER JOIN dbo.tblPOPurchaseDetailTax PODetailTax
+			ON PODetailTax.intPurchaseDetailId = PODetail.intPurchaseDetailId
+		LEFT JOIN dbo.tblSMTaxCode TaxCode
+			ON TaxCode.intTaxCodeId = PODetailTax.intTaxCodeId
+WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
+
+-- Calculate the tax per line item 
+UPDATE	ReceiptItem 
+SET		dblTax = ISNULL(Taxes.dblTaxPerLineItem, 0)
+FROM	dbo.tblICInventoryReceiptItem ReceiptItem LEFT JOIN (
+			SELECT	dblTaxPerLineItem = SUM(ReceiptItemTax.dblTax) 
+					,ReceiptItemTax.intInventoryReceiptItemId
+			FROM	dbo.tblICInventoryReceiptItemTax ReceiptItemTax INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+						ON ReceiptItemTax.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+			WHERE	ReceiptItem.intInventoryReceiptId = @InventoryReceiptId
+			GROUP BY ReceiptItemTax.intInventoryReceiptItemId
+		) Taxes
+			ON ReceiptItem.intInventoryReceiptItemId = Taxes.intInventoryReceiptItemId
+WHERE	ReceiptItem.intInventoryReceiptId = @InventoryReceiptId
+
+-- Re-update the line total 
+UPDATE	ReceiptItem 
+SET		dblLineTotal = ISNULL(dblOpenReceive, 0) * ISNULL(dblUnitCost, 0) + ISNULL(dblTax, 0)
+FROM	dbo.tblICInventoryReceiptItem ReceiptItem
+WHERE	intInventoryReceiptId = @InventoryReceiptId
+
 -- Re-update the total cost 
 UPDATE	Receipt
-SET		dblInvoiceAmount = (
-			SELECT	ISNULL(SUM(ISNULL(ReceiptItem.dblOpenReceive, 0) * ISNULL(ReceiptItem.dblUnitCost, 0)) , 0)
-			FROM	dbo.tblICInventoryReceiptItem ReceiptItem
-			WHERE	ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
-		)
-FROM	dbo.tblICInventoryReceipt Receipt 
+SET		dblInvoiceAmount = Detail.dblTotal
+FROM	dbo.tblICInventoryReceipt Receipt LEFT JOIN (
+			SELECT	dblTotal = SUM(dblLineTotal) 
+					,intInventoryReceiptId
+			FROM	dbo.tblICInventoryReceiptItem 
+			WHERE	intInventoryReceiptId = @InventoryReceiptId
+			GROUP BY intInventoryReceiptId
+		) Detail
+			ON Receipt.intInventoryReceiptId = Detail.intInventoryReceiptId
 WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
 
 _Exit: 

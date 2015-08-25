@@ -317,6 +317,7 @@ BEGIN
 				,strBatchId
 				,dblExchangeRate
 				,intCurrencyId
+				,strTransactionForm
 			)
 			SELECT	dtmDate = '01/01/2014'
 					,dblQty = 100
@@ -335,6 +336,7 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strTransactionForm = 'Inventory Receipt'
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
 					,dblQty = 100
@@ -353,6 +355,7 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strTransactionForm = 'Inventory Receipt'
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
 					,dblQty = 100
@@ -371,6 +374,7 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strTransactionForm = 'Inventory Receipt'
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
 					,dblQty = 100
@@ -389,6 +393,7 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strTransactionForm = 'Inventory Receipt'
 			UNION ALL 
 			SELECT	dtmDate = '01/01/2014'
 					,dblQty = 100
@@ -407,6 +412,7 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strTransactionForm = 'Inventory Receipt'
 		END 
 
 		----------------------------------------------------------------
@@ -692,6 +698,7 @@ BEGIN
 				,intItemLocationId
 				,intItemUOMId
 				,strBatchId
+				,strTransactionForm
 		)
 		SELECT	dtmDate = '01/16/2014'
 				,dblQty = -75
@@ -707,7 +714,8 @@ BEGIN
 				,intItemId = @WetGrains
 				,intItemLocationId = @WetGrains_BetterHaven
 				,intItemUOMId = @WetGrains_BushelUOMId
-				,strBatchId = @strBatchId			
+				,strBatchId = @strBatchId	
+				,strTransactionForm = 'Inventory Shipment'
 		UNION ALL 
 		SELECT	dtmDate = '01/16/2014'
 				,dblQty = -75
@@ -724,6 +732,7 @@ BEGIN
 				,intItemLocationId = @StickyGrains_BetterHaven
 				,intItemUOMId = @StickyGrains_BushelUOMId
 				,strBatchId = @strBatchId
+				,strTransactionForm = 'Inventory Shipment'
 		UNION ALL 
 		SELECT	dtmDate = '01/16/2014'
 				,dblQty = -75
@@ -740,6 +749,7 @@ BEGIN
 				,intItemLocationId = @PremiumGrains_BetterHaven
 				,intItemUOMId = @PremiumGrains_BushelUOMId
 				,strBatchId = @strBatchId
+				,strTransactionForm = 'Inventory Shipment'
 		UNION ALL 
 		SELECT	dtmDate = '01/16/2014'
 				,dblQty = -75
@@ -755,7 +765,8 @@ BEGIN
 				,intItemId = @ColdGrains
 				,intItemLocationId = @ColdGrains_BetterHaven
 				,intItemUOMId = @ColdGrains_BushelUOMId
-				,strBatchId = @strBatchId			
+				,strBatchId = @strBatchId
+				,strTransactionForm = 'Inventory Shipment'	
 		UNION ALL 
 		SELECT	dtmDate = '01/16/2014'
 				,dblQty = -75
@@ -772,6 +783,7 @@ BEGIN
 				,intItemLocationId = @HotGrains_BetterHaven
 				,intItemUOMId = @HotGrains_BushelUOMId
 				,strBatchId = @strBatchId
+				,strTransactionForm = 'Inventory Shipment'
 
 		----------------------------------------------------------------
 		-- Fake data for tblGLDetail & GL Summary 

@@ -66,7 +66,7 @@ BEGIN
 			,@ACCOUNT_CATEGORY_APClearing AS NVARCHAR(30) = 'AP Clearing'
 			,@ACCOUNT_CATEGORY_OtherChargeExpense AS NVARCHAR(30) = 'Other Charge Expense'
 			,@ACCOUNT_CATEGORY_OtherChargeIncome AS NVARCHAR(30) = 'Other Charge Income'
-			,@ACCOUNT_CATEGORY_OtherChargeAsset AS NVARCHAR(30) = 'Other Charge (Asset)'
+			--,@ACCOUNT_CATEGORY_OtherChargeAsset AS NVARCHAR(30) = 'Other Charge (Asset)'
 
 	-- Initialize the module name
 	DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory'
@@ -107,14 +107,14 @@ BEGIN
 		,intItemLocationId 
 		,intOtherChargeExpense 
 		,intOtherChargeIncome 
-		,intOtherChargeAsset 
+		--,intOtherChargeAsset 
 		,intTransactionTypeId
 	)
 	SELECT	Query.intChargeId
 			,Query.intItemLocationId
 			,intOtherChargeExpense = dbo.fnGetItemGLAccount(Query.intChargeId, Query.intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeExpense) 
 			,intOtherChargeIncome = dbo.fnGetItemGLAccount(Query.intChargeId, Query.intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeIncome) 
-			,intOtherChargeAsset = dbo.fnGetItemGLAccount(Query.intChargeId, Query.intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeAsset) 
+			--,intOtherChargeAsset = dbo.fnGetItemGLAccount(Query.intChargeId, Query.intItemLocationId, @ACCOUNT_CATEGORY_OtherChargeAsset) 
 			,intTransactionTypeId = @intTransactionTypeId
 	FROM	(
 				SELECT	DISTINCT 
@@ -213,26 +213,26 @@ BEGIN
 	END 
 	;
 
-	-- Check for missing Other Charge Asset 
-	BEGIN 
-		SET @strItemNo = NULL
-		SET @intItemId = NULL
+	---- Check for missing Other Charge Asset 
+	--BEGIN 
+	--	SET @strItemNo = NULL
+	--	SET @intItemId = NULL
 
-		SELECT	TOP 1 
-				@intItemId = Item.intItemId 
-				,@strItemNo = Item.strItemNo
-		FROM	dbo.tblICItem Item INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts
-					ON Item.intItemId = ChargesGLAccounts.intChargeId
-		WHERE	ChargesGLAccounts.intOtherChargeAsset IS NULL 			
+	--	SELECT	TOP 1 
+	--			@intItemId = Item.intItemId 
+	--			,@strItemNo = Item.strItemNo
+	--	FROM	dbo.tblICItem Item INNER JOIN @OtherChargesGLAccounts ChargesGLAccounts
+	--				ON Item.intItemId = ChargesGLAccounts.intChargeId
+	--	WHERE	ChargesGLAccounts.intOtherChargeAsset IS NULL 			
 			
-		IF @intItemId IS NOT NULL 
-		BEGIN 
-			-- {Item} is missing a GL account setup for {Account Category} account category.
-			RAISERROR(51041, 11, 1, @strItemNo, @ACCOUNT_CATEGORY_OtherChargeAsset) 	
-			RETURN;
-		END 
-	END 
-	;
+	--	IF @intItemId IS NOT NULL 
+	--	BEGIN 
+	--		-- {Item} is missing a GL account setup for {Account Category} account category.
+	--		RAISERROR(51041, 11, 1, @strItemNo, @ACCOUNT_CATEGORY_OtherChargeAsset) 	
+	--		RETURN;
+	--	END 
+	--END 
+	--;
 
 	-- Log the g/l account used in this batch. 
 	INSERT INTO dbo.tblICInventoryGLAccountUsedOnPostLog (
@@ -268,7 +268,8 @@ BEGIN
 		,intInventoryReceiptItemId
 		,strInventoryTransactionTypeName
 		,strTransactionForm
-		,strCostBilledBy
+		,ysnAccrue
+		,ysnPrice
 		,ysnInventoryCost
 	)
 	AS 
@@ -287,7 +288,8 @@ BEGIN
 				,ReceiptItem.intInventoryReceiptItemId
 				,strInventoryTransactionTypeName = TransType.strName
 				,strTransactionForm = @strTransactionForm
-				,AllocatedOtherCharges.strCostBilledBy
+				,AllocatedOtherCharges.ysnAccrue
+				,AllocatedOtherCharges.ysnPrice
 				,AllocatedOtherCharges.ysnInventoryCost
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -592,7 +594,7 @@ BEGIN
 				ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeExpense
 			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) Debit
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
-	WHERE	ForGLEntries_CTE.strCostBilledBy = @COST_BILLED_BY_None
+	WHERE	ForGLEntries_CTE.ysnAccrue = 0 -- @COST_BILLED_BY_None
 			AND ForGLEntries_CTE.ysnInventoryCost = 0
 
 	UNION ALL 
@@ -629,7 +631,7 @@ BEGIN
 				ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeIncome
 			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) Debit
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
-	WHERE	ForGLEntries_CTE.strCostBilledBy = @COST_BILLED_BY_None
+	WHERE	ForGLEntries_CTE.ysnAccrue = 0 -- @COST_BILLED_BY_None
 			AND ForGLEntries_CTE.ysnInventoryCost = 0
 END
 

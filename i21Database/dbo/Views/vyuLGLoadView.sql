@@ -28,7 +28,7 @@ SELECT Load.intLoadId
         ,stCommodityCode = CDetail.strCommodityCode
         ,strCustomer = EN.strName
         ,strHauler = Hauler.strName
-        ,intContractNumber = CDetail.intContractNumber
+        ,strContractNumber = CDetail.strContractNumber
         ,intContractSeq = CDetail.intContractSeq
 		,dblCashPrice = CDetail.dblCashPrice
 		,strItemNo = CDetail.strItemNo
@@ -64,13 +64,13 @@ SELECT Load.intLoadId
         ,strCounterPartyName = (SELECT Entity1.strName From tblLGLoad L LEFT JOIN tblEntity Entity1 ON Entity1.intEntityId = L.intEntityId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
         ,strCounterPartyAddress = (SELECT EL1.strAddress From tblLGLoad L LEFT JOIN tblEntityLocation EL1 ON EL1.intEntityLocationId = L.intEntityLocationId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
         ,dtmCounterPartyScheduleDate = (SELECT L.dtmScheduledDate FROM tblLGLoad L WHERE L.intLoadNumber = Load.intLoadNumber and L.intPurchaseSale <> Load.intPurchaseSale)
-        ,strCounterPartyContractSeq = (SELECT CAST (CT.intContractNumber AS VARCHAR(100)) + '/' + CAST (CT.intContractSeq AS VARCHAR(100)) FROM tblLGLoad L LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = L.intContractDetailId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
+        ,strCounterPartyContractSeq = (SELECT CAST (CT.strContractNumber AS VARCHAR(100)) + '/' + CAST (CT.intContractSeq AS VARCHAR(100)) FROM tblLGLoad L LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = L.intContractDetailId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
         ,strCounterPartyExternalLoadNumber = (SELECT L.strExternalLoadNumber FROM tblLGLoad L WHERE L.intLoadNumber = Load.intLoadNumber and L.intPurchaseSale <> Load.intPurchaseSale)
 		,intCounterPartyEntityId = (SELECT Entity1.intEntityId From tblLGLoad L LEFT JOIN tblEntity Entity1 ON Entity1.intEntityId = L.intEntityId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
 		,intCounterPartyEntityLocationId = (SELECT EL.intEntityLocationId From tblLGLoad L LEFT JOIN tblEntityLocation EL ON EL.intEntityLocationId = L.intEntityLocationId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
 		,strCounterPartyLocationName = (SELECT EL.strLocationName From tblLGLoad L LEFT JOIN tblEntityLocation EL ON EL.intEntityLocationId = L.intEntityLocationId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
 		,intCounterPartyContractDetailId = (SELECT CT.intContractDetailId From tblLGLoad L LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = L.intContractDetailId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
-		,intCounterPartyContractNumber = (SELECT CT.intContractNumber From tblLGLoad L LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = L.intContractDetailId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
+		,strCounterPartyContractNumber = (SELECT CT.strContractNumber From tblLGLoad L LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = L.intContractDetailId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
 		,intCounterPartyContractSeq = (SELECT CT.intContractSeq From tblLGLoad L LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = L.intContractDetailId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
 		,dblCounterPartyCashPrice = (SELECT CT.dblCashPrice From tblLGLoad L LEFT JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = L.intContractDetailId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
 		,intCounterPartyItemId = (SELECT L.intItemId FROM tblLGLoad L WHERE L.intLoadNumber = Load.intLoadNumber and L.intPurchaseSale <> Load.intPurchaseSale)

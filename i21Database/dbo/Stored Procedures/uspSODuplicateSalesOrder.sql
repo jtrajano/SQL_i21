@@ -3,7 +3,7 @@
 	@SalesOrderId		INT = 0,
 	@OrderStatus		NVARCHAR(20) = '',
 	@UserId				INT = 0,
-	@SalesOrderDate     DATE = NULL,
+	@SalesOrderDate     DATETIME = NULL,
 	@NewSalesOrderId	INT = NULL OUTPUT,
 	@NewSalesOrderNo	NVARCHAR(20) = NULL OUTPUT
 AS

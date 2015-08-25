@@ -30,9 +30,14 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[intStorageLocationId] INT NULL						-- Place holder field for lot numbers
 	,[ysnIsCustody] BIT NULL								-- If Yes (value is 1), then the item is not owned by the company. The company is only the custodian of the item (like a consignor). Add or remove stock from Inventory-Lot-In-Custody table. 
 	,[intTaxMasterId] INT NULL								-- Manually specify a tax master id. It overrides the 'Purchase Tax Code' for an item found in its item setup screen.
+	,[dblGross] NUMERIC(18,6) NULL 
+	,[dblNet] NUMERIC(18,6) NULL 
 
 	-- Detail Lot
 	,[intLotId] INT NULL									-- Place holder field for lot numbers	
 	,[dblFreightRate] DECIMAL(18, 6) NULL DEFAULT 0         -- Freight Rate 
-	,[intSourceType] int NULL                               -- for Transports its 3
+	,[intSourceType] INT NULL                               -- FOR TRANSPORTS ITS 3
+
+	-- Integration Field
+	,[intInventoryReceiptId] INT NULL						-- Existing id of an Inventory Receipt. 
 )

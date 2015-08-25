@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuAPChargesForBilling]
 AS
 SELECT
-	[intEntityVendorId]							=	CASE WHEN A.strCostBilledBy = 'Third Party' THEN A.intEntityVendorId ELSE D.intEntityVendorId END
+	[intEntityVendorId]							=	E.intEntityVendorId
 	,[dtmDate]									=	D.dtmReceiptDate
 	,[strReference]								=	D.strVendorRefNo
 	,[strSourceNumber]							=	D.strReceiptNumber
@@ -29,6 +29,7 @@ INNER JOIN tblICItem C ON B.intChargeId = C.intItemId
 INNER JOIN tblICInventoryReceiptItem G ON A.intInventoryReceiptItemId = G.intInventoryReceiptItemId
 INNER JOIN tblICItem C1 ON G.intItemId = C1.intItemId
 INNER JOIN tblICInventoryReceipt D ON A.intInventoryReceiptId = D.intInventoryReceiptId
-INNER JOIN (tblAPVendor E INNER JOIN tblEntity E2 ON E.intEntityVendorId = E2.intEntityId) ON (CASE WHEN A.strCostBilledBy = 'Third Party' THEN A.intEntityVendorId ELSE D.intEntityVendorId END) = E.intEntityVendorId
+INNER JOIN (tblAPVendor E INNER JOIN tblEntity E2 ON E.intEntityVendorId = E2.intEntityId) ON (CASE WHEN A.ysnAccrue = 1 THEN ISNULL(A.intEntityVendorId, D.intEntityVendorId) ELSE NULL END) = E.intEntityVendorId
 LEFT JOIN tblGLAccount F ON [dbo].[fnGetItemGLAccount](C1.intItemId, D.intLocationId, 'AP Clearing') = F.intAccountId
-WHERE A.strCostBilledBy != 'None' AND A.dblAmountBilled != A.dblAmount
+WHERE	A.ysnAccrue = 1 
+		AND A.dblAmountBilled != A.dblAmount
