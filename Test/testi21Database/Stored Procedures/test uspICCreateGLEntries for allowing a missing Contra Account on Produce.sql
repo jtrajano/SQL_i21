@@ -158,5 +158,6 @@ BEGIN
 			@strBatchId
 			,@UseGLAccount_ContraInventory
 			,@intUserId
+			,NULL
 	END 
 END

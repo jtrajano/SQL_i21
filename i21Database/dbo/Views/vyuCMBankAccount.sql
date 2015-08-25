@@ -176,3 +176,67 @@ CREATE TRIGGER trg_insert_vyuCMBankAccount
 			EXIT_TRIGGER: 
 
 END
+
+GO
+ --Create trigger that will update the record on the main table
+CREATE TRIGGER trg_update_vyuCMBankAccount
+		ON [dbo].vyuCMBankAccount
+		INSTEAD OF UPDATE
+		AS
+		BEGIN 
+
+		SET NOCOUNT ON
+
+			-- Proceed in updating the base table (tblCMBankAccount)				
+			UPDATE	dbo.tblCMBankAccount 
+			SET		intBankId							= i.intBankId
+					,ysnActive							= i.ysnActive
+					,intGLAccountId						= i.intGLAccountId
+					,intCurrencyId						= i.intCurrencyId
+					,intBankAccountType					= i.intBankAccountType
+					,strContact							= i.strContact
+					,strBankAccountNo					= i.strBankAccountNo
+					,strRTN								= i.strRTN
+					,strAddress							= i.strAddress
+					,strZipCode							= i.strZipCode
+					,strCity							= i.strCity
+					,strState							= i.strState
+					,strCountry							= i.strCountry
+					,strPhone							= i.strPhone
+					,strFax								= i.strFax
+					,strWebsite							= i.strWebsite
+					,strEmail							= i.strEmail
+					,intCheckStartingNo					= i.intCheckStartingNo
+					,intCheckEndingNo					= i.intCheckEndingNo
+					,intCheckNextNo						= i.intCheckNextNo
+					,ysnCheckEnableMICRPrint			= i.ysnCheckEnableMICRPrint
+					,ysnCheckDefaultToBePrinted			= i.ysnCheckDefaultToBePrinted
+					,intBackupCheckStartingNo			= i.intBackupCheckStartingNo
+					,intBackupCheckEndingNo				= i.intBackupCheckEndingNo
+					,intEFTNextNo						= i.intEFTNextNo
+					,intBankStatementImportId			= i.intBankStatementImportId
+					,intEFTBankFileFormatId				= i.intEFTBankFileFormatId
+					,intPositivePayBankFileFormatId		= i.intPositivePayBankFileFormatId
+					,strEFTCompanyId					= i.strEFTCompanyId
+					,strEFTBankName						= i.strEFTBankName
+					,strMICRDescription					= i.strMICRDescription
+					,intMICRBankAccountSpacesCount		= i.intMICRBankAccountSpacesCount
+					,intMICRBankAccountSpacesPosition	= i.intMICRBankAccountSpacesPosition
+					,intMICRCheckNoSpacesCount			= i.intMICRCheckNoSpacesCount
+					,intMICRCheckNoSpacesPosition		= i.intMICRCheckNoSpacesPosition
+					,intMICRCheckNoLength				= i.intMICRCheckNoLength
+					,intMICRCheckNoPosition				= i.intMICRCheckNoPosition
+					,strMICRLeftSymbol					= i.strMICRLeftSymbol
+					,strMICRRightSymbol					= i.strMICRRightSymbol
+					,intCreatedUserId					= i.intCreatedUserId
+					,dtmCreated							= i.dtmCreated
+					,intLastModifiedUserId				= i.intLastModifiedUserId
+					,dtmLastModified					= i.dtmLastModified
+					,intConcurrencyId					= i.intConcurrencyId
+					,strCbkNo							= i.strCbkNo
+			FROM	inserted i INNER JOIN dbo.tblCMBankAccount B
+						ON i.intBankAccountId = B.intBankAccountId
+
+			IF @@ERROR <> 0 GOTO EXIT_TRIGGER
+			EXIT_TRIGGER:
+END

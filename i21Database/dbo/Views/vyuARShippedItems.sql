@@ -98,7 +98,7 @@ CROSS APPLY
 	WHERE
 		ISH.[ysnPosted] = 1
 		AND ISI.[intLineNo] = SOD.[intSalesOrderDetailId]
-		AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
+		AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus <> 'Cancelled'
 		AND ISI.[intInventoryShipmentItemId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intInventoryShipmentItemId],0) FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.[intInvoiceId] = tblARInvoice.[intInvoiceId] WHERE tblARInvoice.[ysnPosted] = 1)
 	GROUP BY
 		 ISI.[intInventoryShipmentItemId]

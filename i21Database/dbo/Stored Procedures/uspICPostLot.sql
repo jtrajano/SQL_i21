@@ -21,6 +21,7 @@ CREATE PROCEDURE [dbo].[uspICPostLot]
 	,@strTransactionId AS NVARCHAR(20)
 	,@strBatchId AS NVARCHAR(20)
 	,@intTransactionTypeId AS INT
+	,@strTransactionForm AS NVARCHAR(255)
 	,@intUserId AS INT
 AS
 
@@ -53,11 +54,11 @@ DECLARE @intRelatedTransactionId AS INT
 DECLARE @dblValue AS NUMERIC(18,6)
 
 -- Initialize the transaction name. Use this as the transaction form name
-DECLARE @TransactionTypeName AS NVARCHAR(200) 
-SELECT	TOP 1 
-		@TransactionTypeName = strName
-FROM	dbo.tblICInventoryTransactionType
-WHERE	intTransactionTypeId = @intTransactionTypeId
+--DECLARE @TransactionTypeName AS NVARCHAR(200) 
+--SELECT	TOP 1 
+--		@TransactionTypeName = strName
+--FROM	dbo.tblICInventoryTransactionType
+--WHERE	intTransactionTypeId = @intTransactionTypeId
 
 -------------------------------------------------
 -- 1. Process the Lot Cost buckets
@@ -151,7 +152,7 @@ BEGIN
 					,@intRelatedInventoryTransactionId = NULL 
 					,@intRelatedTransactionId = NULL 
 					,@strRelatedTransactionId = NULL 
-					,@strTransactionForm = @TransactionTypeName
+					,@strTransactionForm = @strTransactionForm
 					,@intUserId = @intUserId
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT			
 
@@ -246,7 +247,7 @@ BEGIN
 				,@intRelatedInventoryTransactionId = NULL 
 				,@intRelatedTransactionId = NULL 
 				,@strRelatedTransactionId = NULL 
-				,@strTransactionForm = @TransactionTypeName
+				,@strTransactionForm = @strTransactionForm
 				,@intUserId = @intUserId
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 			
 
@@ -307,7 +308,7 @@ BEGIN
 						,@intRelatedInventoryTransactionId = NULL 
 						,@intRelatedTransactionId = @intRelatedTransactionId
 						,@strRelatedTransactionId = @strRelatedTransactionId 
-						,@strTransactionForm = @TransactionTypeName
+						,@strTransactionForm = @strTransactionForm
 						,@intUserId = @intUserId
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 
@@ -336,7 +337,7 @@ BEGIN
 						,@intRelatedInventoryTransactionId = NULL 
 						,@intRelatedTransactionId = @intRelatedTransactionId
 						,@strRelatedTransactionId = @strRelatedTransactionId 
-						,@strTransactionForm = @TransactionTypeName
+						,@strTransactionForm = @strTransactionForm
 						,@intUserId = @intUserId
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 			END

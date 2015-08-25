@@ -317,7 +317,7 @@ BEGIN
 			,intRelatedInventoryTransactionId 
 			,intRelatedTransactionId 
 			,strRelatedTransactionId 
-			,strTransactionForm 
+			,ICType.strTransactionForm 
 	FROM	dbo.tblICInventoryTransaction INNER JOIN dbo.tblICInventoryTransactionType ICType
 				ON tblICInventoryTransaction.intTransactionTypeId = ICType.intTransactionTypeId
 	WHERE	intRelatedTransactionId = @intTransactionId
@@ -346,7 +346,7 @@ BEGIN
 			,intRelatedInventoryTransactionId = intInventoryTransactionId
 			,intRelatedTransactionId 
 			,strRelatedTransactionId 
-			,strTransactionForm 
+			,ICType.strTransactionForm 
 	FROM	dbo.tblICInventoryTransaction INNER JOIN dbo.tblICInventoryTransactionType ICType
 				ON tblICInventoryTransaction.intTransactionTypeId = ICType.intTransactionTypeId
 	WHERE	intRelatedTransactionId = @intTransactionId
@@ -623,7 +623,7 @@ BEGIN
 			,intRelatedInventoryTransactionId 
 			,intRelatedTransactionId 
 			,strRelatedTransactionId 
-			,strTransactionForm 
+			,ICType.strTransactionForm 
 	FROM	dbo.tblICInventoryTransaction Trans INNER JOIN dbo.tblICInventoryTransactionType ICType
 				ON Trans.intTransactionTypeId = ICType.intTransactionTypeId
 	WHERE	(

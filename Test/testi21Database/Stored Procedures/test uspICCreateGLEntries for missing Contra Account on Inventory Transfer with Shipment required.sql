@@ -163,5 +163,6 @@ BEGIN
 			@strBatchId
 			,@AccountCategoryName_InventoryInTransit
 			,@intUserId
+			,NULL
 	END 
 END

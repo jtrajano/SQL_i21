@@ -324,7 +324,7 @@ BEGIN
 			,intRelatedInventoryTransactionId 
 			,intRelatedTransactionId 
 			,strRelatedTransactionId 
-			,strTransactionForm 
+			,tblICInventoryTransaction.strTransactionForm 
 	FROM	dbo.tblICInventoryTransaction INNER JOIN dbo.tblICInventoryTransactionType ICType
 				ON tblICInventoryTransaction.intTransactionTypeId = ICType.intTransactionTypeId
 	WHERE	intRelatedTransactionId = @intTransactionId
@@ -353,7 +353,7 @@ BEGIN
 			,intRelatedInventoryTransactionId = intInventoryTransactionId
 			,intRelatedTransactionId 
 			,strRelatedTransactionId 
-			,strTransactionForm 
+			,tblICInventoryTransaction.strTransactionForm 
 	FROM	dbo.tblICInventoryTransaction INNER JOIN dbo.tblICInventoryTransactionType ICType
 				ON tblICInventoryTransaction.intTransactionTypeId = ICType.intTransactionTypeId
 	WHERE	intRelatedTransactionId = @intTransactionId
@@ -682,12 +682,12 @@ BEGIN
 			,intRelatedInventoryTransactionId = intInventoryTransactionId
 			,intRelatedTransactionId 
 			,strRelatedTransactionId 
-			,strTransactionForm 
-	FROM	dbo.tblICInventoryTransaction Trans INNER JOIN dbo.tblICInventoryTransactionType IType
-				ON Trans.intTransactionTypeId = IType.intTransactionTypeId
+			,Trans.strTransactionForm 
+	FROM	dbo.tblICInventoryTransaction Trans INNER JOIN dbo.tblICInventoryTransactionType ICType
+				ON Trans.intTransactionTypeId = ICType.intTransactionTypeId
 	WHERE	Trans.intTransactionId = @intTransactionId
 			AND Trans.strTransactionId = @strTransactionId
-			AND IType.strName <> 'Inventory Auto Negative'
+			AND ICType.strName <> 'Inventory Auto Negative'
 			AND intInventoryTransactionId IN (6, 9, 12, 15, 18)	
 
 	-- BEGIN Setup the expected Item Stock

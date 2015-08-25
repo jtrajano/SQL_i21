@@ -20,6 +20,7 @@ CREATE PROCEDURE [dbo].[uspICPostLIFOInCustody]
 	,@strTransactionId AS NVARCHAR(20)
 	,@strBatchId AS NVARCHAR(20)
 	,@intTransactionTypeId AS INT
+	,@strTransactionForm AS NVARCHAR(255) 
 	,@intUserId AS INT
 AS
 
@@ -38,13 +39,6 @@ DECLARE @CostUsed AS NUMERIC(18,6);
 DECLARE @NewInventoryCostBucketCustodyId AS INT
 DECLARE @UpdatedCostBucketInCustodyId AS INT 
 DECLARE @NewInventoryTransactionInCustodyId AS INT
-
--- Initialize the transaction name. Use this as the transaction form name
-DECLARE @TransactionTypeName AS NVARCHAR(200) 
-SELECT	TOP 1 
-		@TransactionTypeName = strName
-FROM	dbo.tblICInventoryTransactionType
-WHERE	intTransactionTypeId = @intTransactionTypeId
 
 -------------------------------------------------
 -- 1. Process the LIFO Cost buckets
@@ -98,7 +92,7 @@ BEGIN
 					,@strBatchId = @strBatchId
 					,@intTransactionTypeId = @intTransactionTypeId
 					,@intLotId = NULL 
-					,@strTransactionForm = @TransactionTypeName
+					,@strTransactionForm = @strTransactionForm
 					,@intUserId = @intUserId
 					,@SourceCostBucketInCustodyId = @UpdatedCostBucketInCustodyId
 					,@InventoryTransactionIdInCustodyId = @NewInventoryTransactionInCustodyId OUTPUT			
@@ -148,7 +142,7 @@ BEGIN
 			,@strBatchId = @strBatchId
 			,@intTransactionTypeId = @intTransactionTypeId
 			,@intLotId = NULL  
-			,@strTransactionForm = @TransactionTypeName
+			,@strTransactionForm = @strTransactionForm
 			,@intUserId = @intUserId
 			,@SourceCostBucketInCustodyId = @NewInventoryCostBucketCustodyId
 			,@InventoryTransactionIdInCustodyId = @NewInventoryTransactionInCustodyId OUTPUT						

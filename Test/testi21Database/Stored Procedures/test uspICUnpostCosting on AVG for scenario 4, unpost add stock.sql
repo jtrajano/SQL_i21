@@ -351,12 +351,12 @@ BEGIN
 			,intRelatedInventoryTransactionId = intInventoryTransactionId
 			,intRelatedTransactionId 
 			,strRelatedTransactionId 
-			,strTransactionForm 
-	FROM	dbo.tblICInventoryTransaction Trans INNER JOIN dbo.tblICInventoryTransactionType IType
-				ON Trans.intTransactionTypeId = IType.intTransactionTypeId
+			,Trans.strTransactionForm 
+	FROM	dbo.tblICInventoryTransaction Trans INNER JOIN dbo.tblICInventoryTransactionType ICType
+				ON Trans.intTransactionTypeId = ICType.intTransactionTypeId
 	WHERE	Trans.intTransactionId = @intTransactionId
 			AND Trans.strTransactionId = @strTransactionId
-			AND IType.strName <> 'Inventory Auto Negative'	
+			AND ICType.strName <> 'Inventory Auto Negative'	
 	-----------------------------------------------------------------------------------
 	-- Expect the auto negative transactions
 	UNION ALL 
@@ -377,7 +377,7 @@ BEGIN
 			,intRelatedInventoryTransactionId = NULL
 			,intRelatedTransactionId = NULL
 			,strRelatedTransactionId = NULL
-			,strTransactionForm = NULL
+			,strTransactionForm = 'Inventory Receipt'
 	FROM	(
 				SELECT	Stock.intItemId, Stock.intItemLocationId, AutoNegative.intAccountId 
 				FROM	dbo.tblICItemStock Stock INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -663,7 +663,7 @@ BEGIN
 			,intRelatedInventoryTransactionId 
 			,intRelatedTransactionId 
 			,strRelatedTransactionId 
-			,strTransactionForm 
+			,Trans.strTransactionForm 
 	FROM	dbo.tblICInventoryTransaction Trans INNER JOIN dbo.tblICInventoryTransactionType ICType
 				ON Trans.intTransactionTypeId = ICType.intTransactionTypeId
 	WHERE	(
