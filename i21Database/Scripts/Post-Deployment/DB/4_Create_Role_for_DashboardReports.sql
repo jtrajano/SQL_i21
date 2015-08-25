@@ -62,14 +62,6 @@ DEALLOCATE db_cursor
 GO
 
 IF NOT EXISTS (SELECT * FROM sys.server_principals WHERE name = N'irelydashboard')
-<<<<<<< HEAD
-<<<<<<< HEAD
-Begin
-CREATE LOGIN [irelydashboard] WITH PASSWORD=N'6Ö!Ú=çôrÍ>ú(Y÷?½Û´º²''?6	ûq­{j:', DEFAULT_DATABASE=[master], DEFAULT_LANGUAGE=[us_english], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
--- Password:iRely@dash
-=======
-=======
->>>>>>> 1520_Dev
 	BEGIN
 		CREATE LOGIN [irelydashboard] WITH PASSWORD=N'iRely@dash', DEFAULT_DATABASE=[master], DEFAULT_LANGUAGE=[us_english], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
 		-- Password:iRely@dash
@@ -85,17 +77,8 @@ IF  EXISTS (SELECT * FROM sys.database_principals WHERE name = N'irelydashboard'
 BEGIN
 	DROP USER [irelydashboard]
 END
-<<<<<<< HEAD
->>>>>>> fe92998... IG-1375 - irelydashboard sql user fails connection.
-=======
->>>>>>> 1520_Dev
 
 CREATE USER [irelydashboard] FOR LOGIN [irelydashboard] WITH DEFAULT_SCHEMA = [irelydashboard];
 EXEC sp_addrolemember 'db_datareader', 'irelydashboard';
 EXEC sp_addrolemember 'db_dashboardreports', 'irelydashboard';
-<<<<<<< HEAD
-DROP SCHEMA irelydashboard
-End
-=======
 --DROP SCHEMA irelydashboard
->>>>>>> 1520_Dev
