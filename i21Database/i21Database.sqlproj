@@ -2263,6 +2263,7 @@
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceQuantity.sql" />
     <None Include="Scripts\Post-Deployment\IC\12_UpdateExistingInventoryTransactionForm.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateOtherCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateInventoryReceiptUnitCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
