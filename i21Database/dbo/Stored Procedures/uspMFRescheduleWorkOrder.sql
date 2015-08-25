@@ -543,7 +543,7 @@ BEGIN TRY
 			FROM dbo.tblMFRecipeItem RI
 			JOIN dbo.tblICItem WI ON RI.intItemId = WI.intItemId
 			WHERE RI.intRecipeId = R.intRecipeId
-				AND WI.strType = 'Blend'
+				AND WI.strType = 'Assembly/Blend'
 			) AS strWIPItemNo
 			,I.intItemId
 		,I.strItemNo

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspMFSaveSchedule] (@strXML NVARCHAR(MAX),@intScheduleId INT OUTPUT)
+﻿CREATE PROCEDURE [dbo].[uspMFSaveSchedule] (@strXML NVARCHAR(MAX),@intScheduleId INT OUTPUT,@intConcurrencyId int OUTPUT)
 AS
 BEGIN TRY
 	DECLARE @idoc INT
@@ -9,7 +9,6 @@ BEGIN TRY
 		,@intManufacturingCellId INT
 		,@ysnStandard BIT
 		,@intLocationId INT
-		,@intConcurrencyId INT
 		,@intUserId INT
 		,@dtmCurrentDate DATETIME
 
@@ -93,6 +92,8 @@ BEGIN TRY
 			,intLastModifiedUserId = @intUserId
 		WHERE intScheduleId = @intScheduleId
 	END
+
+	SELECT @intConcurrencyId=intConcurrencyId from tblMFSchedule Where intScheduleId = @intScheduleId
 
 	DELETE FROM dbo.tblMFScheduleWorkOrder WHERE intScheduleId =@intScheduleId 
 
