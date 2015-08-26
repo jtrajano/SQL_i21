@@ -1,6 +1,5 @@
 ﻿CREATE TABLE [dbo].[tblTFTaxAuthority] (
     [intTaxAuthorityId]             INT            IDENTITY (1, 1) NOT NULL,
-    [intCompanyPreferenceId]        INT            NULL,
     [strTaxAuthorityCode]           VARCHAR (2)    COLLATE Latin1_General_CI_AS NOT NULL,
     [strDescription]                NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     [ysnPaperVersionAvailable]      BIT            NULL,

@@ -7,6 +7,7 @@
     [strScheduleName]         VARCHAR (200) COLLATE Latin1_General_CI_AS NULL,
     [strType]                 VARCHAR (200) COLLATE Latin1_General_CI_AS NULL,
     [strNote]                 VARCHAR (300) COLLATE Latin1_General_CI_AS NULL,
+    [intPositionId]           INT           NULL,
     [intConcurrencyId]        INT           CONSTRAINT [DF_tblTFReportingComponent_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblTFReportingComponent] PRIMARY KEY CLUSTERED ([intReportingComponentId] ASC)
 );
