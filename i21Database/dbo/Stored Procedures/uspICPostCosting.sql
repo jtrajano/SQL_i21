@@ -469,8 +469,11 @@ DEALLOCATE loopItems;
 -----------------------------------------
 -- Generate the g/l entries
 -----------------------------------------
-EXEC dbo.uspICCreateGLEntries 
-	@strBatchId
-	,@strAccountToCounterInventory
-	,@intUserId
-	,@strGLDescription
+IF @strAccountToCounterInventory IS NOT NULL 
+BEGIN 
+	EXEC dbo.uspICCreateGLEntries 
+		@strBatchId
+		,@strAccountToCounterInventory
+		,@intUserId
+		,@strGLDescription
+END 
