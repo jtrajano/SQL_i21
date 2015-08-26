@@ -1171,6 +1171,14 @@ Ext.define('Inventory.view.ItemViewModel', {
             else {
                 return true;
             }
+        },
+        readOnlyLongUPC: function(get) {
+            if (iRely.Functions.isEmpty(get('grdUnitOfMeasure.selection.strUpcCode'))) {
+                return false;
+            }
+            else {
+                return true;
+            }
         }
     }
 

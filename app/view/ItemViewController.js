@@ -137,7 +137,12 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colDetailShortUPC: 'strUpcCode',
-                colDetailUpcCode: 'strFullUPC',
+                colDetailUpcCode: {
+                    dataIndex: 'strLongUPCCode',
+                    editor: {
+                        readOnly: '{readOnlyLongUPC}'
+                    }
+                },
                 colStockUnit: 'ysnStockUnit',
                 colAllowSale: 'ysnAllowSale',
                 colAllowPurchase: 'ysnAllowPurchase',
@@ -2304,6 +2309,17 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    onUpcChange: function(obj, newValue, oldValue, eOpts) {
+        var grid = obj.up('grid');
+        var plugin = grid.getPlugin('cepDetailUOM');
+        var record = plugin.getActiveRecord();
+
+        if (!iRely.Functions.isEmpty(record.get('strUpcCode')))
+        {
+            return record.set('strLongUPCCode', i21.ModuleMgr.Inventory.getFullUPCString(record.get('strUpcCode')))
+        }
+    },
+
     onDuplicateClick: function(button) {
         var win = button.up('window');
         var context = win.context;
@@ -2554,6 +2570,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#txtSpecialPricingUnitPrice": {
                 change: this.onSpecialPricingDiscountChange
+            },
+            "#txtShortUPCCode": {
+                change: this.onUpcChange
             },
             "#btnDuplicate": {
                 click: this.onDuplicateClick

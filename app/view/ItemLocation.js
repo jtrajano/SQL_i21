@@ -471,7 +471,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                             fieldLabel: 'Family',
                                                             labelWidth: 105,
                                                             displayField: 'strSubcategoryId',
-                                                            valueField: 'inSubcategoryId'
+                                                            valueField: 'intSubcategoryId'
                                                         },
                                                         {
                                                             xtype: 'gridcombobox',

@@ -1510,6 +1510,24 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "icon": null,
+                                                                                "iconCls": "small-view",
+                                                                                "itemId": "btnTaxDetails",
+                                                                                "layout|flex": null,
+                                                                                "tabIndex": -1,
+                                                                                "text": "Tax Details"
+                                                                            },
+                                                                            "name": "MyButton43",
+                                                                            "designerId": "0eb6f32a-a5ce-48e9-b10a-a8a8ee4900eb"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.button.Button",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "icon": null,
                                                                                 "iconCls": "small-delete",
                                                                                 "itemId": "btnRemoveInventoryReceipt",
                                                                                 "layout|flex": null,
@@ -2559,7 +2577,7 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "dataIndex": "strDescription",
+                                                                        "dataIndex": "strStorageLocationName",
                                                                         "itemId": "colStorageLocation",
                                                                         "text": "Storage Location",
                                                                         "width": 120
@@ -2840,41 +2858,6 @@
                                                                     },
                                                                     "name": "MyColumn7",
                                                                     "designerId": "668bcfec-389d-4c2f-b424-0bea283da0f3"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.grid.column.Action",
-                                                                    "reference": {
-                                                                        "name": "columns",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "align": "center",
-                                                                        "altText": "View",
-                                                                        "itemId": "colTaxDetails",
-                                                                        "menuText": "Tax Details",
-                                                                        "text": "Tax Details"
-                                                                    },
-                                                                    "name": "MyActionColumn",
-                                                                    "designerId": "1f7a0973-7d01-4365-943f-27b56645467e",
-                                                                    "cn": [
-                                                                        {
-                                                                            "type": "actioncolumnitem",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "altText": "View",
-                                                                                "designer|displayName": "btnViewTaxDetail",
-                                                                                "iconCls": "small-view",
-                                                                                "tooltip": "View Tax Details"
-                                                                            },
-                                                                            "name": "MyActionColumnItem1",
-                                                                            "designerId": "26125c47-1d73-4259-9d5f-602cbd039a48"
-                                                                        }
-                                                                    ]
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.plugin.CellEditing",
@@ -4438,6 +4421,24 @@
                                                             },
                                                             "name": "MyButton23",
                                                             "designerId": "fb0f5848-4a90-43aa-ac34-d1edbf65c90c"
+                                                        },
+                                                        {
+                                                            "type": "Ext.button.Button",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "icon": null,
+                                                                "iconCls": "small-delete",
+                                                                "itemId": "btnCalculateCharges",
+                                                                "layout|flex": null,
+                                                                "tabIndex": -1,
+                                                                "text": "Calculate"
+                                                            },
+                                                            "name": "MyButton8",
+                                                            "designerId": "51028879-90a1-4d8d-a1b8-fb85b197cb79"
                                                         },
                                                         {
                                                             "type": "Ext.toolbar.Separator",

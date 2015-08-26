@@ -651,10 +651,13 @@ namespace iRely.Inventory.Model
         {
             get
             {
-                if (vyuICGetInventoryReceiptCharge != null)
-                    return vyuICGetInventoryReceiptCharge.strContractNumber;
+                if (string.IsNullOrEmpty(_contractNo))
+                    if (vyuICGetInventoryReceiptCharge != null)
+                        return vyuICGetInventoryReceiptCharge.strContractNumber;
+                    else
+                        return null;
                 else
-                    return null;
+                    return _contractNo;
             }
             set
             {

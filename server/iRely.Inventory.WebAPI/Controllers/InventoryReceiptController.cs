@@ -60,5 +60,23 @@ namespace iRely.Inventory.WebApi
                 }
             });
         }
+
+        [HttpPost]
+        [ActionName("CalculateCharges")]
+        public HttpResponseMessage CalculateCharges(int id)
+        {
+            var result = _bl.CalculateCharges(id);
+
+            return Request.CreateResponse(HttpStatusCode.Accepted, new
+            {
+                success = !result.HasError,
+                message = new
+                {
+                    statusText = result.Exception.Message,
+                    status = result.Exception.Error,
+                    button = result.Exception.Button.ToString()
+                }
+            });
+        }
     }
 }
