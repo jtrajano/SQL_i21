@@ -160,31 +160,23 @@ End) as [SiteDeliveryDD]
 	substring(C.strLocation, patindex(''%[^0]%'',C.strLocation), 50) END) AS strLocation
 ,C.dtmForecastedDelivery
 ,CAST((CASE WHEN F.intDispatchID IS NULL THEN 0 ELSE 1 END) AS BIT) AS ysnPending
-FROM 
-	tblTMCustomer A inner join vwcusmst B on A.intCustomerNumber = B.A4GLIdentity 
-	INNER JOIN tblTMSite C ON A.intCustomerID = C.intCustomerID
-			           LEFT JOIN tblTMDispatch F ON C.intSiteID = F.intSiteID
-                           LEFT JOIN vwitmmst G ON C.intProduct = G.A4GLIdentity
-							LEFT JOIN tblTMClock H ON H.intClockID = C.intClockID
-							Left Join tblTMFillGroup I On I.intFillGroupId = C.intFillGroupId
-							LEFT JOIN vwslsmst J ON J.A4GLIdentity = C.intDriverID
-							LEFT JOIN tblTMHoldReason HR ON C.intHoldReasonID = HR.intHoldReasonID
-							LEFT JOIN vwprcmst K
-							ON  K.vwprc_cus_no =B.vwcus_key
-							AND G.vwitm_no = K.vwprc_itm_no
-							AND GETDATE() BETWEEN CASE ISNULL(vwprc_begin_rev_dt,0) 
-																WHEN 0 THEN
-																	CAST(''1/1/1900'' AS DATETIME)
-																ELSE
-																	CAST(SUBSTRING(CAST(vwprc_begin_rev_dt AS NVARCHAR(20)),5,2)	+''/''+ RIGHT(CAST(vwprc_begin_rev_dt AS NVARCHAR(20)),2)+''/''+LEFT(CAST(vwprc_begin_rev_dt AS NVARCHAR(20)),4) AS DATETIME)
-																END	
-													AND			
-															CASE ISNULL(vwprc_end_rev_dt,0) 
-																WHEN 0 THEN
-																	CAST(''1/1/1900'' AS DATETIME)
-																ELSE
-																	CAST(SUBSTRING(CAST(vwprc_end_rev_dt AS NVARCHAR(20)),5,2)	+''/''+ RIGHT(CAST(vwprc_end_rev_dt AS NVARCHAR(20)),2)+''/''+LEFT(CAST(vwprc_end_rev_dt AS NVARCHAR(20)),4) AS DATETIME)
-																END	
+FROM tblTMCustomer A 
+INNER JOIN vwcusmst B 
+	on A.intCustomerNumber = B.A4GLIdentity 
+INNER JOIN tblTMSite C 
+	ON A.intCustomerID = C.intCustomerID
+LEFT JOIN tblTMDispatch F 
+	ON C.intSiteID = F.intSiteID
+LEFT JOIN vwitmmst G 
+	ON C.intProduct = G.A4GLIdentity
+LEFT JOIN tblTMClock H 
+	ON H.intClockID = C.intClockID
+Left Join tblTMFillGroup I 
+	On I.intFillGroupId = C.intFillGroupId
+LEFT JOIN vwslsmst J 
+	ON J.A4GLIdentity = C.intDriverID
+LEFT JOIN tblTMHoldReason HR 
+	ON C.intHoldReasonID = HR.intHoldReasonID
 WHERE vwcus_active_yn = ''Y'' and C.ysnActive = 1 
 
 ' 

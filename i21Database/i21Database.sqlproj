@@ -2262,6 +2262,9 @@
     <Build Include="dbo\Stored Procedures\uspLGGetQuantitiesForAllocatedDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceQuantity.sql" />
     <None Include="Scripts\Post-Deployment\IC\12_UpdateExistingInventoryTransactionForm.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\RegulatorInformation.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\DeliveryFillGroup.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\TankInformation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
