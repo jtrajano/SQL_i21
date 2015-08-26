@@ -35,7 +35,7 @@ FROM
 		,[strVendorId]				=	D1.strVendorId
 		,[strShipVia]				=	E.strShipVia
 		,[strTerm]					=	F.strTerm
-		,[intContractNumber]		=	G1.strContractNumber
+		,[strContractNumber]		=	G1.strContractNumber
 		,[intContractHeaderId]		=	G1.intContractHeaderId
 		,[intContractDetailId]		=	G2.intContractDetailId
 	FROM tblPOPurchase A
@@ -109,7 +109,7 @@ FROM
 	,[strVendorId]				=	D1.strVendorId
 	,[strShipVia]				=	E.strShipVia
 	,[strTerm]					=	F.strTerm
-	,[intContractNumber]		=	NULL
+	,[strContractNumber]		=	NULL
 	,[intContractHeaderId]		=	NULL
 	,[intContractDetailId]		=	NULL
 	FROM tblPOPurchase A
@@ -151,7 +151,7 @@ FROM
 	,[strVendorId]				=	D1.strVendorId
 	,[strShipVia]				=	E.strShipVia
 	,[strTerm]					=	NULL
-	,[intContractNumber]		=	F1.strContractNumber
+	,[strContractNumber]		=	F1.strContractNumber
 	,[intContractHeaderId]		=	F1.intContractHeaderId
 	,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
 	FROM tblICInventoryReceipt A
@@ -197,7 +197,7 @@ FROM
 		,[strVendorId]								=	A.strVendorId
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
-		,[intContractNumber]						=	NULL
+		,[strContractNumber]						=	NULL
 		,[intContractHeaderId]						=	NULL
 		,[intContractDetailId]						=	NULL
 	FROM [vyuAPChargesForBilling] A
