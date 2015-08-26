@@ -52,7 +52,7 @@ BEGIN
 		[intAccountId]					=	A.intAccountId,
 		[dblDebit]						=	0,
 		[dblCredit]						=	(CASE WHEN A.intTransactionType IN (2, 3) AND A.dblTotal > 0 
-													THEN A.dblTotal * -1 ELSE A.dblTotal END) - Taxes.dblTotalICTax,
+													THEN A.dblTotal * -1 ELSE A.dblTotal END) - ISNULL(Taxes.dblTotalICTax,0),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
 		[strDescription]				=	A.strReference,
@@ -82,7 +82,7 @@ BEGIN
 	FROM	[dbo].tblAPBill A
 			LEFT JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.intEntityVendorId
-			CROSS APPLY (
+			OUTER APPLY (
 			--Subtract the tax from IR because IC already entered the gl entries for taxes
 				SELECT 
 					SUM(D.dblTax) dblTotalICTax
