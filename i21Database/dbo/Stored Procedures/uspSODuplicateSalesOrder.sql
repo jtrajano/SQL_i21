@@ -236,6 +236,6 @@ BEGIN
 			DELETE FROM @OrderDetails WHERE [intSalesOrderDetailId] = @SalesOrderDetailId
 		END	
 
-	EXEC dbo.[uspSOUpdateCommitted] @NewSalesOrderId, 0
+	EXEC dbo.[uspSOUpdateOrderIntegrations] @NewSalesOrderId, 0, @UserId
 	
 END
