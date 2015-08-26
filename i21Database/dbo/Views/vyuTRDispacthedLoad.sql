@@ -55,7 +55,21 @@ LG.strExternalLoadNumber as strSupplierLoadNumber,
                                     join dbo.tblEntityLocation EL on SP.intEntityLocationId = EL.intEntityLocationId and SP.intEntityVendorId = EL.intEntityId
 									where SP.intEntityLocationId = LG.intEntityLocationId) as strZipCode,
 (select top 1 SP.intRackPriceSupplyPointId from dbo.tblTRSupplyPoint SP where SP.intEntityLocationId = LG.intEntityLocationId) as intRackPriceSupplyPointId,
-(select top 1 intItemUOMId from tblICItemUOM IT where IT.intItemId = LG.intItemId) as intItemUOMId
+(select top 1 intItemUOMId from tblICItemUOM IT where IT.intItemId = LG.intItemId) as intItemUOMId,
+(select top 1 strIndexType from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId ) as strInboundIndexType,
+(select top 1 strIndexType from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intCounterPartyContractDetailId) as strOutboundIndexType,
+intInboundIndexRackPriceSupplyPointId  = CASE
+								  WHEN isNull((select top 1 strIndexType from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId ),0) = 'Fixed' 							        
+								     THEN isNull((select top 1 intRackPriceSupplyPointId from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId ),(select top 1 intSupplyPointId from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId )) 
+								  WHEN isNull((select top 1 strIndexType from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId ),0) != 'Fixed' 
+								     THEN null
+								  END,
+intOutboundIndexRackPriceSupplyPointId  = CASE
+								  WHEN isNull((select top 1 strIndexType from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intCounterPartyContractDetailId ),0) = 'Fixed' 							        
+								     THEN isNull((select top 1 intRackPriceSupplyPointId from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intCounterPartyContractDetailId ),(select top 1 intSupplyPointId from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intCounterPartyContractDetailId )) 
+								  WHEN isNull((select top 1 strIndexType from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intCounterPartyContractDetailId ),0) != 'Fixed' 
+								     THEN null
+								  END
 from dbo.vyuLGLoadView LG
 where 
  (IsNull(LG.ysnDispatched,0)=1)  and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and
@@ -115,7 +129,16 @@ null as dblInboundAdjustment,
 (select dblAdjustment from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId  ) as dblOutboundAdjustment,
 (select strZipPostalCode from dbo.tblSMCompanyLocation SM where LG.intCompanyLocationId = SM.intCompanyLocationId) as strZipCode,
 NULL as intRackPriceSupplyPointId,
-(select top 1 intItemUOMId from tblICItemUOM IT where IT.intItemId = LG.intItemId) as intItemUOMId 
+(select top 1 intItemUOMId from tblICItemUOM IT where IT.intItemId = LG.intItemId) as intItemUOMId, 
+NULL as strInboundIndexType,
+(select top 1 strIndexType from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId ) as strOutboundIndexType,
+NULL as intInboundIndexRackPriceSupplyPointId,   
+intOutboundIndexRackPriceSupplyPointId  = CASE
+								  WHEN isNull((select top 1 strIndexType from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId ),0) = 'Fixed' 							        
+								     THEN isNull((select top 1 intRackPriceSupplyPointId from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId ),(select top 1 intSupplyPointId from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId )) 
+								  WHEN isNull((select top 1 strIndexType from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId ),0) != 'Fixed' 
+								     THEN null
+								  END
 from dbo.vyuLGLoadView LG
 where 
  (IsNull(LG.ysnDispatched,0)=1)  and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and
