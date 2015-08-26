@@ -30,11 +30,17 @@ AS
 			FM.strFutMarketName,				MO.strFutureMonth,				U2.strUnitMeasure				AS	strPriceUOM,
 			MZ.strMarketZoneCode,				OH.strContractOptDesc,			U3.strUnitMeasure				AS	strAdjUOM,
 			RG.strRailGrade,					CL.strLocationName,				FR.strOrigin+' - '+FR.strDest	AS	strOriginDest,
+			IX.strIndexType,					
+			ISNULL(CD.dblBalance,0) -	ISNULL(CD.dblScheduleQty,0) AS dblAvailableQty,
+			--Required by other modules
+
 			SL.intStorageLocationId,			IM.strLotTracking,				SL.strName						AS	strStorageLocationName,
-			strStockUOM,						strStockUOMType,				ISNULL(IU.dblUnitQty,0)			AS	dblItemUOMCF,  
-			SB.intCompanyLocationSubLocationId,	SB.strSubLocationName,			ISNULL(intStockUOM,0)			AS	intStockUOM,		
-			CU.strCurrency,						CS.strContractStatus,			ISNULL(dblStockUOMCF,0)			AS	dblStockUOMCF,	
+			SU.strStockUOM,						SU.strStockUOMType,				ISNULL(IU.dblUnitQty,0)			AS	dblItemUOMCF,  
+			SB.intCompanyLocationSubLocationId,	SB.strSubLocationName,			ISNULL(SU.intStockUOM,0)		AS	intStockUOM,		
+			CU.strCurrency,						CS.strContractStatus,			ISNULL(SU.dblStockUOMCF,0)		AS	dblStockUOMCF,	
 			IX.strIndex,						VR.strVendorId,					CD.strReference,
+			IM.intPurchaseTaxGroupId,			SP.intSupplyPointId,			SP.intEntityVendorId			AS	intTerminalId,
+			SP.intRackPriceSupplyPointId,
 
 			CAST(CASE WHEN CD.intContractStatusId IN (1,4) THEN 1 ELSE 0 END AS BIT) AS ysnAllowedToShow,
 
@@ -95,8 +101,8 @@ AS
 			FROM	tblICItemUOM			IU	LEFT 
 			JOIN	tblICUnitMeasure		UM	ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId 
 			WHERE	ysnStockUnit = 1)		SU	ON	SU.intStockUOM				=	IU.intItemUOMId				LEFT
-	JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	=	CASE WHEN CH.strINCOLocationType = 'Warehouse' THEN CH.intINCOLocationTypeId ELSE 0 END
-
+	JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	=	CASE WHEN CH.strINCOLocationType = 'Warehouse' THEN CH.intINCOLocationTypeId ELSE 0 END		LEFT
+	JOIN	tblTRSupplyPoint				SP	ON	SP.intEntityVendorId		=	IX.intVendorId	AND SP.intEntityLocationId = IX.intVendorLocationId
 	/*
 	JOIN	tblICItemPricing			IP	ON	IP.intItemId				=	IM.intItemId				AND
 												IP.intItemLocationId		=	IL.intItemLocationId		LEFT

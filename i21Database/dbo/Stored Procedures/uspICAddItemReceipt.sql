@@ -386,7 +386,7 @@ BEGIN
 				,[strCostMethod]			= RawData.strCostMethod
 				,[dblRate]					= RawData.dblRate
 				,[intCostUOMId]				= RawData.intCostUOMId
-				,[intEntityVendorId]		= RawData.intEntityVendorId
+				,[intEntityVendorId]		= RawData.intOtherChargeEntityVendorId
 				,[dblAmount]				= RawData.dblAmount
 				,[strAllocateCostBy]		= RawData.strAllocateCostBy
 				,[ysnAccrue]				= RawData.ysnAccrue

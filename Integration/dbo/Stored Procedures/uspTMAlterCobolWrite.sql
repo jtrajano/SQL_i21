@@ -1,4 +1,7 @@
 ﻿GO
+PRINT 'BEGIN CREATE uspTMAlterCobolWrite'
+
+GO
 
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspTMAlterCobolWrite]') AND type in (N'P', N'PC'))
 DROP PROCEDURE [dbo].uspTMAlterCobolWrite
@@ -476,4 +479,8 @@ BEGIN
 		
 	END
 END
+GO
+
+GO
+PRINT 'END CREATE uspTMAlterCobolWrite'
 GO

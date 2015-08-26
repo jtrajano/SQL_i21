@@ -2265,6 +2265,8 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\RegulatorInformation.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\DeliveryFillGroup.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\TankInformation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCalculateOtherCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateInventoryReceiptUnitCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

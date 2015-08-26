@@ -39,5 +39,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[intSourceType] INT NULL                               -- FOR TRANSPORTS ITS 3
 
 	-- Integration Field
-	,[intInventoryReceiptId] INT NULL						-- Existing id of an Inventory Receipt. 
+	,[intInventoryReceiptId] INT NULL                   -- Existing id of an Inventory Receipt. 
+	,[dblSurcharge] DECIMAL(18, 6) NULL DEFAULT 0       -- Fuel Surcharge	
+	,[ysnFreightInPrice] BIT NULL DEFAULT 0				-- Freight should be included In Price
 )
