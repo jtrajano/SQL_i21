@@ -16,6 +16,7 @@
 	,@VendorId				INT				= NULL
 	,@SupplyPointId			INT				= NULL
 	,@LastCost				NUMERIC(18,6)	= NULL
+	,@ShipToLocationId      INT				= NULL
 AS
 	--	DECLARE 	
 	--	@ItemId				INT
@@ -153,6 +154,7 @@ AS
 		,@ItemVendorId
 		,@SupplyPointId
 		,@LastCost
+		,@ShipToLocationId
 		
 	IF(@Price IS NOT NULL)
 	BEGIN		
