@@ -29,7 +29,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Ext.grid.Panel',
         'Ext.selection.CheckboxModel',
         'Ext.grid.column.Number',
-        'Ext.grid.column.Action',
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.View',
         'Ext.grid.feature.Summary',
@@ -732,6 +731,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         itemId: 'btnQuality',
                                                                                         iconCls: 'small-view',
                                                                                         text: 'Quality'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        tabIndex: -1,
+                                                                                        itemId: 'btnTaxDetails',
+                                                                                        iconCls: 'small-view',
+                                                                                        text: 'Tax Details'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'button',
@@ -1452,21 +1458,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 width: 100,
                                                                                 dataIndex: 'strDescription',
                                                                                 text: 'Lot Tracking'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'actioncolumn',
-                                                                                itemId: 'colTaxDetails',
-                                                                                align: 'center',
-                                                                                menuText: 'Tax Details',
-                                                                                text: 'Tax Details',
-                                                                                altText: 'View',
-                                                                                items: [
-                                                                                    {
-                                                                                        altText: 'View',
-                                                                                        iconCls: 'small-view',
-                                                                                        tooltip: 'View Tax Details'
-                                                                                    }
-                                                                                ]
                                                                             }
                                                                         ],
                                                                         plugins: [

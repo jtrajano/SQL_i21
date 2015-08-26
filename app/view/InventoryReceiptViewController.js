@@ -713,15 +713,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             });
         }
 
-        var colTaxDetails = grdInventoryReceipt.columns[23];
-        var btnViewTaxDetail = colTaxDetails.items[0];
-        if (btnViewTaxDetail){
-            btnViewTaxDetail.handler = function(grid, rowIndex, colIndex) {
-                var current = grid.store.data.items[rowIndex];
-                me.onViewTaxDetailsClick(current.get('intInventoryReceiptItemId'));
-            }
-        }
-
         var colTax = grdInventoryReceipt.columns[10];
         if (colTax){
             colTax.summaryRenderer = function(val, params, data) {
@@ -1336,6 +1327,27 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 var current = selected[0];
                 if (!current.dummy)
                     iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', { strSourceType: 'Inventory Receipt', intTicketFileId: current.get('intInventoryReceiptItemId') });
+            }
+            else {
+                iRely.Functions.showErrorDialog('Please select an Item to view.');
+            }
+        }
+        else {
+            iRely.Functions.showErrorDialog('Please select an Item to view.');
+        }
+    },
+
+    onTaxDetailsClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var grd = win.down('#grdInventoryReceipt');
+
+        var selected = grd.getSelectionModel().getSelection();
+
+        if (selected) {
+            if (selected.length > 0){
+                var current = selected[0];
+                if (!current.dummy)
+                    this.onViewTaxDetailsClick(current.get('intInventoryReceiptItemId'));
             }
             else {
                 iRely.Functions.showErrorDialog('Please select an Item to view.');
@@ -2862,6 +2874,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#btnQuality": {
                 click: this.onQualityClick
+            },
+            "#btnTaxDetails": {
+                click: this.onTaxDetailsClick
             },
             "#btnVendor": {
                 click: this.onVendorClick
