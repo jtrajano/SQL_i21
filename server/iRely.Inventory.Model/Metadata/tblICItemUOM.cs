@@ -18,6 +18,7 @@ namespace iRely.Inventory.Model
         public decimal? dblWeight { get; set; }
         public int? intWeightUOMId { get; set; }
         public string strUpcCode { get; set; }
+        public string strLongUPCCode { get; set; }
         public bool ysnStockUnit { get; set; }
         public bool ysnAllowPurchase { get; set; }
         public bool ysnAllowSale { get; set; }
@@ -158,6 +159,7 @@ namespace iRely.Inventory.Model
         public decimal? dblWeight { get; set; }
         public int? intWeightUOMId { get; set; }
         public string strUpcCode { get; set; }
+        public string strLongUPCCode { get; set; }
         public bool ysnStockUnit { get; set; }
         public bool ysnAllowPurchase { get; set; }
         public bool ysnAllowSale { get; set; }

@@ -964,6 +964,7 @@
                                         "forceFit": true,
                                         "itemId": "grdUnitOfMeasure",
                                         "layout|flex": 3,
+                                        "reference": "grdUnitOfMeasure",
                                         "title": "Unit of Measure"
                                     },
                                     "name": "MyGridPanel",
@@ -1216,7 +1217,8 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "allowDecimals": false,
-                                                        "allowExponential": false
+                                                        "allowExponential": false,
+                                                        "itemId": "txtShortUPCCode"
                                                     },
                                                     "name": "MyNumberField49",
                                                     "designerId": "41a2e42c-a230-49ab-959a-24609a791f87"
@@ -1238,7 +1240,19 @@
                                                 "text": "UPC Code"
                                             },
                                             "name": "MyColumn23",
-                                            "designerId": "57be5075-40ca-438c-99ec-cd53ee934ba8"
+                                            "designerId": "57be5075-40ca-438c-99ec-cd53ee934ba8",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "editor",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "name": "MyTextField15",
+                                                    "designerId": "ff3bd980-1a90-48bf-9f97-72c313539905"
+                                                }
+                                            ]
                                         },
                                         {
                                             "type": "Ext.grid.column.Check",

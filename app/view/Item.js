@@ -517,6 +517,7 @@ Ext.define('Inventory.view.Item', {
                                             {
                                                 xtype: 'advancefiltergrid',
                                                 flex: 3,
+                                                reference: 'grdUnitOfMeasure',
                                                 itemId: 'grdUnitOfMeasure',
                                                 title: 'Unit of Measure',
                                                 forceFit: true,
@@ -626,6 +627,7 @@ Ext.define('Inventory.view.Item', {
                                                         text: 'Short UPC',
                                                         editor: {
                                                             xtype: 'numberfield',
+                                                            itemId: 'txtShortUPCCode',
                                                             allowDecimals: false,
                                                             allowExponential: false
                                                         }
@@ -636,7 +638,10 @@ Ext.define('Inventory.view.Item', {
                                                         minWidth: 110,
                                                         dataIndex: 'string',
                                                         text: 'UPC Code',
-                                                        flex: 2
+                                                        flex: 2,
+                                                        editor: {
+                                                            xtype: 'textfield'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'checkcolumn',

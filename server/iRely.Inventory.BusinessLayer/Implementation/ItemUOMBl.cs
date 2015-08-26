@@ -36,6 +36,7 @@ namespace iRely.Inventory.BusinessLayer
                     dblWeight = p.dblWeight,
                     intWeightUOMId = p.intWeightUOMId,
                     strUpcCode = p.strUpcCode,
+                    strLongUPCCode = p.strLongUPCCode,
                     ysnStockUnit = p.ysnStockUnit,
                     ysnAllowPurchase = p.ysnAllowPurchase,
                     ysnAllowSale = p.ysnAllowSale,
