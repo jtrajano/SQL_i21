@@ -172,9 +172,12 @@ BEGIN TRY
 
 	Update tblMFWorkOrder 
 	Set intStatusId =x.intStatusId
+		,dblQuantity =x.dblQuantity
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intWorkOrderId INT
-			,intStatusId int) x JOIN tblMFWorkOrder W on W.intWorkOrderId =x.intWorkOrderId
+			,intStatusId int
+			,dblQuantity numeric(18,6)) x 
+	JOIN tblMFWorkOrder W on W.intWorkOrderId =x.intWorkOrderId
 	
 	/*WHERE x.intScheduleWorkOrderId IS NULL
 

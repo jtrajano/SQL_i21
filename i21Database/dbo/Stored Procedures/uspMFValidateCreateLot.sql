@@ -52,6 +52,8 @@ BEGIN TRY
 		,@dtmCurrentDate datetime
 		,@dtmCurrentDateTime datetime
 		,@intDayOfYear int
+		,@intAttributeId int
+		,@strAllInputItemsMandatoryforConsumption nvarchar(50)
 	
 	Select @dtmCurrentDateTime	=GETDATE()
 	Select @dtmCurrentDate		=CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
@@ -374,9 +376,11 @@ BEGIN TRY
 	BEGIN
 		DECLARE @intProductId INT
 			,@dblRequiredQuantity DECIMAL(18, 6)
+			,@intManufacturingProcessId int
 
 		SELECT @intProductId = intItemId
 			,@dblRequiredQuantity = dblQuantity
+			,@intManufacturingProcessId=intManufacturingProcessId 
 		FROM dbo.tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
@@ -496,7 +500,13 @@ BEGIN TRY
 			RETURN
 		END
 
-		IF @intProductionTypeId=3 and EXISTS (
+		Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='All input items mandatory for consumption'
+
+		Select @strAllInputItemsMandatoryforConsumption=strAttributeValue
+		From tblMFManufacturingProcessAttribute
+		Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
+
+		IF @strAllInputItemsMandatoryforConsumption='True' and @intProductionTypeId=3 and EXISTS (
 		SELECT *
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON SI.intRecipeItemId = ri.intRecipeItemId and ri.intWorkOrderId =SI.intWorkOrderId 

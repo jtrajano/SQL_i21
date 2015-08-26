@@ -567,3 +567,26 @@ BEGIN
         ,0
         ,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
 END
+Go
+
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 28
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 28
+        ,'All input items mandatory for consumption'
+        ,5
+        ,1
+        ,0
+        ,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
