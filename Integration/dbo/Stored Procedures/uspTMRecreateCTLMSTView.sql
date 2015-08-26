@@ -100,7 +100,6 @@ BEGIN
 				,vwcar_future_desc	= ''Future''
 				,vwctl_sa_cost_ind	= ''''
 				,vwctl_stmt_close_rev_dt = 0
-			FROM ptctlmst
 		')
 	END
 END
