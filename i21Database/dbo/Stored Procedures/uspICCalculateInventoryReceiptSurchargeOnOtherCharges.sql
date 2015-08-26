@@ -81,7 +81,7 @@ BEGIN
 					ON SurchargeItem.intItemId = Surcharge.intChargeId
 				LEFT JOIN dbo.tblICInventoryReceiptChargePerItem SurchargedOtherCharges
 					ON SurchargedOtherCharges.intChargeId = SurchargeItem.intOnCostTypeId
-					AND SurchargedOtherCharges.intEntityVendorId = Surcharge.intEntityVendorId	
+					AND ISNULL(SurchargedOtherCharges.intEntityVendorId, 0) = ISNULL(Surcharge.intEntityVendorId, 0)
 					AND SurchargedOtherCharges.intInventoryReceiptId = Surcharge.intInventoryReceiptId	
 				LEFT JOIN dbo.tblICInventoryReceiptChargePerItem CalculatedSurcharge
 					ON CalculatedSurcharge.intChargeId = Surcharge.intChargeId
@@ -128,7 +128,7 @@ BEGIN
 					ON SurchargeItem.intItemId = Surcharge.intChargeId
 				LEFT JOIN dbo.tblICInventoryReceiptChargePerItem SurchargedOtherCharges
 					ON SurchargedOtherCharges.intChargeId = SurchargeItem.intOnCostTypeId
-					AND SurchargedOtherCharges.intEntityVendorId = Surcharge.intEntityVendorId
+					AND ISNULL(SurchargedOtherCharges.intEntityVendorId, 0) = ISNULL(Surcharge.intEntityVendorId, 0)
 					AND SurchargedOtherCharges.intInventoryReceiptId = Surcharge.intInventoryReceiptId	
 				LEFT JOIN dbo.tblICInventoryReceiptChargePerItem CalculatedSurcharge
 					ON CalculatedSurcharge.intChargeId = Surcharge.intChargeId
@@ -193,5 +193,22 @@ BEGIN
 	END 
 END 
 
+-- Update the Surcharge amounts
+BEGIN 
+	UPDATE	Charge
+	SET		dblAmount = ISNULL(CalculatedCharges.dblAmount, 0)
+	FROM	dbo.tblICInventoryReceiptCharge Charge 	INNER JOIN dbo.tblICItem Item 
+				ON Item.intItemId = Charge.intChargeId		
+			LEFT JOIN (
+					SELECT	dblAmount = SUM(dblCalculatedAmount)
+							,intInventoryReceiptChargeId
+					FROM	dbo.tblICInventoryReceiptChargePerItem
+					WHERE	intInventoryReceiptId = @intInventoryReceiptId
+					GROUP BY intInventoryReceiptChargeId
+			) CalculatedCharges
+				ON CalculatedCharges.intInventoryReceiptChargeId = Charge.intInventoryReceiptChargeId
+	WHERE	Charge.intInventoryReceiptId = @intInventoryReceiptId
+			AND Item.intOnCostTypeId IS NOT NULL
+END 
 
 _Exit:

@@ -85,6 +85,28 @@ print 'BEGIN POST DEPLOYMENT'
 
 :r .\TM\Reports\DataSource\OpenCallEntries.sql
 
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateAccountStatusView.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateCommentsView.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateContractView.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateOriginOptionView.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateCTLMSTView.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateItemView.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateInvoiceView.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateLocaleTaxView.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateLocationView.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateCustomerView.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateSalesPersonView.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateTermsView.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\TwoPartDeliveryFillReport.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMGetConsumptionWithGasCheck.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMGetConsumptionWithLeakCheck.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMGetConsumptionWithoutLeakCheck.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMGetConsumptionWithoutGasCheck.sql"
+:r "..\..\..\Integration\dbo\Views\vyuTMOriginDegreeOption.sql"
+:r "..\..\..\Integration\dbo\Functions\fnTMGetContractForCustomer.sql"
+:r "..\..\..\Integration\dbo\Views\vyuTMLeaseCode.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMAlterCobolWrite.sql"
+
 
 
 -- Canned Panels

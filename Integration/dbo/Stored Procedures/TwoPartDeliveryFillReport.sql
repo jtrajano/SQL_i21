@@ -8,8 +8,8 @@ GO
 
 
 
-IF  (((SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()) = 1) OR ((SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1))
-BEGIN
+--IF  (((SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AG' and strDBName = db_name()) = 1) OR ((SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'PT' and strDBName = db_name()) = 1))
+--BEGIN
 	EXEC('
 
 	
@@ -1610,7 +1610,7 @@ BEGIN
 		 FROM #tmpResult  
 		 ORDER BY agcus_key, intSiteNumber, intLineNumber ,strLine DESC
 	')
-END
+--END
 GO
 
 PRINT 'END OF CREATING TwoPartDeliveryFillReport SP'

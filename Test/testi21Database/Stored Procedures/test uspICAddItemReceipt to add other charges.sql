@@ -275,7 +275,7 @@ BEGIN
 				,[strCostMethod]				= @COST_METHOD_PER_Unit
 				,[dblRate]						= 1
 				,[intCostUOMId]					= @OtherCharges_PoundUOM
-				,[intOtherChargeEntityVendorId] = NULL 
+				,[intOtherChargeEntityVendorId] = 2 
 				,[dblAmount]					= 0
 				,[strAllocateCostBy]			= @ALLOCATE_COST_BY_Unit
 				,[ysnAccrue]					= 1 -- @COST_BILLED_BY_Vendor
@@ -300,19 +300,25 @@ BEGIN
 
 		DECLARE @strReceiptNumber AS NVARCHAR(50)
 				,@intReceiptId AS INT
+				,@intOtherChargeEntityVendorId AS INT
 
 		SELECT	@strReceiptNumber = tblICInventoryReceipt.strReceiptNumber
 				,@intReceiptId = tblICInventoryReceipt.intInventoryReceiptId
 		FROM	dbo.tblICInventoryReceipt INNER JOIN #tmpAddItemReceiptResult 
 					ON tblICInventoryReceipt.intInventoryReceiptId = #tmpAddItemReceiptResult.intInventoryReceiptId
 
+		SELECT @intOtherChargeEntityVendorId = intEntityVendorId
+		FROM dbo.tblICInventoryReceiptCharge
+		WHERE intInventoryReceiptId = @intReceiptId
+
 		DECLARE @HasOtherCharges AS BIT 
 		SELECT TOP 1 @HasOtherCharges = 1
 		FROM	dbo.tblICInventoryReceiptCharge 
 		WHERE	intInventoryReceiptId = @intReceiptId
 
-		EXEC tSQLt.AssertEquals @strReceiptNumber, 'INVRCT-1'
-		EXEC tSQLt.AssertEquals @HasOtherCharges, 1
+		EXEC tSQLt.AssertEquals 'INVRCT-1', @strReceiptNumber
+		EXEC tSQLt.AssertEquals 1, @HasOtherCharges
+		EXEC tSQLt.AssertEquals 2, @intOtherChargeEntityVendorId
 	END 
 
 	-- Clean-up: remove the tables used in the unit test

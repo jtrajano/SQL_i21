@@ -263,12 +263,15 @@ AS
 		UPDATE
 			@CustomerSpecialPricing
 		SET
-			dblCustomerPrice = (CASE
-									WHEN strCostToUse = 'Vendor'
-										THEN (SELECT TOP 1 dblVendorRack FROM vyuTRRackPrice INNER JOIN tblTRSupplyPoint ON vyuTRRackPrice.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId WHERE tblTRSupplyPoint.intEntityLocationId = intEntityLocationId AND vyuTRRackPrice.intItemId = intRackItemId AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE))
-									WHEN strCostToUse = 'Jobber'
-										THEN (SELECT TOP 1 dblJobberRack FROM vyuTRRackPrice INNER JOIN tblTRSupplyPoint ON vyuTRRackPrice.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId WHERE tblTRSupplyPoint.intEntityLocationId = intEntityLocationId AND vyuTRRackPrice.intItemId = intRackItemId AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE))
-								END) + dblDeviation
+			dblCustomerPrice = (SELECT TOP 1 CASE WHEN strCostToUse = 'Vendor' THEN dblVendorRack 
+								    			   WHEN strCostToUse = 'Jobber' THEN dblJobberRack
+											  END 
+								FROM vyuTRRackPrice INNER JOIN tblTRSupplyPoint 
+									ON vyuTRRackPrice.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId 
+								WHERE tblTRSupplyPoint.intEntityLocationId = intEntityLocationId 
+									AND vyuTRRackPrice.intItemId = intRackItemId
+									AND vyuTRRackPrice.intSupplyPointId = @SupplyPointId 
+									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE)) + dblDeviation
 		WHERE
 			strPriceBasis = 'R'
 

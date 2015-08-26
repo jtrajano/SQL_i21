@@ -23,4 +23,6 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
     ,[intSourceId] INT NOT NULL						                     -- Key Value of the source Id
     ,[strPurchaseOrder] NVARCHAR (25)  COLLATE Latin1_General_CI_AS  NULL -- Purchase Order Number
 	,[strDeliverPickup] nvarchar(50) COLLATE Latin1_General_CI_AS  NULL --Pickup or Deliver
+	,[dblSurcharge] DECIMAL(18, 6) NULL DEFAULT 0   --Fuel Surcharge
+	,[ysnFreightInPrice] bit NULL DEFAULT 0         --freight in price
 )

@@ -40,7 +40,9 @@ BEGIN TRY
 		,strSourceId	
 		,intSourceId
 		,strPurchaseOrder	
-		,strDeliverPickup	 	
+		,strDeliverPickup	 
+		,dblSurcharge
+		,ysnFreightInPrice	
 	 )	 
 	 select     
        DH.intEntityCustomerId,     
@@ -68,12 +70,14 @@ BEGIN TRY
 												
 						), -- USD default from company Preference 
 	   1, -- Need to check this	  
-	   TR.dblFreightRate,
+	   DD.dblFreightRate,
 	   DH.strComments,
 	   TL.strTransaction,
 	   DH.intDistributionHeaderId,
 	   DH.strPurchaseOrder,
-	   'Deliver'   
+	   'Deliver',   
+	   DD.dblDistSurcharge,
+	   DD.ysnFreightInPrice
 	   from tblTRTransportLoad TL
             JOIN tblTRTransportReceipt TR on TR.intTransportLoadId = TL.intTransportLoadId
 			JOIN tblTRDistributionHeader DH on DH.intTransportReceiptId = TR.intTransportReceiptId

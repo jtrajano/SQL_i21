@@ -148,6 +148,7 @@ BEGIN
 END 
 
 -- Do not allow unpost if other charge is already billed. 
+IF @ysnPost = 0 AND @ysnRecap = 0 
 BEGIN 
 	SET @strBillNumber = NULL 
 	SELECT	TOP 1 

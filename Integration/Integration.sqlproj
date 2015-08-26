@@ -281,6 +281,7 @@
     <None Include="dbo\Stored Procedures\uspAPCreateMissingPaymentOfBills.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateSiteOrderView.sql" />
     <None Include="dbo\Stored Procedures\uspTMAlterCobolWrite.sql" />
+    <None Include="dbo\Functions\fnTMGetSpecialPricingPrice.sql" />
     <Build Include="dbo\Tables\tblAPapeglmst.sql" />
     <Build Include="dbo\Tables\tblAPaphglmst.sql" />
     <Build Include="dbo\Tables\tblAPapivcmst.sql" />

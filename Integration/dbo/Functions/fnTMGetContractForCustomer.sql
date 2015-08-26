@@ -1,4 +1,7 @@
 ﻿GO
+PRINT 'BEGIN CREATE fnTMGetContractPriceForCustomer'
+
+GO
 IF EXISTS (SELECT TOP 1 1 FROM   sys.objects WHERE  object_id = OBJECT_ID(N'[dbo].[fnTMGetContractPriceForCustomer]') AND type IN (N'FN'))
 	DROP FUNCTION [dbo].[fnTMGetContractPriceForCustomer]
 GO 
@@ -29,4 +32,7 @@ BEGIN
 	END
 	')
 END
+GO
+PRINT 'END CREATE fnTMGetContractPriceForCustomer'
+
 GO

@@ -21,15 +21,14 @@ UPDATE tblRMDatasource
 SET strQuery = '
 SELECT DISTINCT  
 A.intCustomerID
-,ISNULL(K.vwprc_factor,((CASE WHEN B.vwcus_prc_lvl = 1 THEN G.vwitm_un_prc1 
-					   WHEN B.vwcus_prc_lvl = 2 THEN G.vwitm_un_prc2
-					   WHEN B.vwcus_prc_lvl = 3 THEN G.vwitm_un_prc3
-					   WHEN B.vwcus_prc_lvl = 4 THEN G.vwitm_un_prc4
-					   WHEN B.vwcus_prc_lvl = 5 THEN G.vwitm_un_prc5
-					   WHEN B.vwcus_prc_lvl = 6 THEN G.vwitm_un_prc6
-					   WHEN B.vwcus_prc_lvl = 7 THEN G.vwitm_un_prc7
-					   WHEN B.vwcus_prc_lvl = 8 THEN G.vwitm_un_prc8
-					   WHEN B.vwcus_prc_lvl = 9 THEN G.vwitm_un_prc9 END)+ ISNULL(C.dblPriceAdjustment,0.0)))  AS dblProductCost
+,COALESCE(F.dblPrice,dbo.[fnTMGetSpecialPricingPrice](
+		B.vwcus_key
+		,G.vwitm_no
+		,CAST(C.strLocation AS NVARCHAR(5))
+		,G.vwitm_class
+		,(CASE WHEN F.dtmCallInDate IS NULL THEN GETDATE() ELSE F.dtmCallInDate END)
+		,(CASE WHEN F.dblMinimumQuantity IS NULL THEN COALESCE(F.dblQuantity,1.00) ELSE F.dblMinimumQuantity END)
+		,NULL)) AS dblProductCost
 , rtrim(ltrim(B.vwcus_last_name)) as agcus_last_name
 , rtrim(ltrim(B.vwcus_first_name)) as agcus_first_name
 ,(Case WHEN B.vwcus_first_name IS NULL OR B.vwcus_first_name = ''''  THEN
@@ -161,31 +160,23 @@ End) as [SiteDeliveryDD]
 	substring(C.strLocation, patindex(''%[^0]%'',C.strLocation), 50) END) AS strLocation
 ,C.dtmForecastedDelivery
 ,CAST((CASE WHEN F.intDispatchID IS NULL THEN 0 ELSE 1 END) AS BIT) AS ysnPending
-FROM 
-	tblTMCustomer A inner join vwcusmst B on A.intCustomerNumber = B.A4GLIdentity 
-	LEFT JOIN tblTMSite C ON A.intCustomerID = C.intCustomerID
-			           LEFT JOIN tblTMDispatch F ON C.intSiteID = F.intSiteID
-                           LEFT JOIN vwitmmst G ON C.intProduct = G.A4GLIdentity
-							LEFT JOIN tblTMClock H ON H.intClockID = C.intClockID
-							Left Join tblTMFillGroup I On I.intFillGroupId = C.intFillGroupId
-							LEFT JOIN vwslsmst J ON J.A4GLIdentity = C.intDriverID
-							LEFT JOIN tblTMHoldReason HR ON C.intHoldReasonID = HR.intHoldReasonID
-							LEFT JOIN vwprcmst K
-							ON  K.vwprc_cus_no =B.vwcus_key
-							AND G.vwitm_no = K.vwprc_itm_no
-							AND GETDATE() BETWEEN CASE ISNULL(vwprc_begin_rev_dt,0) 
-																WHEN 0 THEN
-																	CAST(''1/1/1900'' AS DATETIME)
-																ELSE
-																	CAST(SUBSTRING(CAST(vwprc_begin_rev_dt AS NVARCHAR(20)),5,2)	+''/''+ RIGHT(CAST(vwprc_begin_rev_dt AS NVARCHAR(20)),2)+''/''+LEFT(CAST(vwprc_begin_rev_dt AS NVARCHAR(20)),4) AS DATETIME)
-																END	
-													AND			
-															CASE ISNULL(vwprc_end_rev_dt,0) 
-																WHEN 0 THEN
-																	CAST(''1/1/1900'' AS DATETIME)
-																ELSE
-																	CAST(SUBSTRING(CAST(vwprc_end_rev_dt AS NVARCHAR(20)),5,2)	+''/''+ RIGHT(CAST(vwprc_end_rev_dt AS NVARCHAR(20)),2)+''/''+LEFT(CAST(vwprc_end_rev_dt AS NVARCHAR(20)),4) AS DATETIME)
-																END	
+FROM tblTMCustomer A 
+INNER JOIN vwcusmst B 
+	on A.intCustomerNumber = B.A4GLIdentity 
+INNER JOIN tblTMSite C 
+	ON A.intCustomerID = C.intCustomerID
+LEFT JOIN tblTMDispatch F 
+	ON C.intSiteID = F.intSiteID
+LEFT JOIN vwitmmst G 
+	ON C.intProduct = G.A4GLIdentity
+LEFT JOIN tblTMClock H 
+	ON H.intClockID = C.intClockID
+Left Join tblTMFillGroup I 
+	On I.intFillGroupId = C.intFillGroupId
+LEFT JOIN vwslsmst J 
+	ON J.A4GLIdentity = C.intDriverID
+LEFT JOIN tblTMHoldReason HR 
+	ON C.intHoldReasonID = HR.intHoldReasonID
 WHERE vwcus_active_yn = ''Y'' and C.ysnActive = 1 
 
 ' 

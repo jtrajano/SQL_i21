@@ -14,7 +14,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @ZeroDecimal decimal(18,6)
 		,@ARAccountId int
 		,@EntityId int
-
+		,@intFreightItemId int
 SET @ZeroDecimal = 0.000000;
 	
 
@@ -355,8 +355,15 @@ SELECT
 	,IC.[strDescription]										--strItemDescription] 
 	,IE.intItemUOMId                                            --[intItemUOMId]
 	,IE.dblQty   												--[dblQtyOrdered]
-	,IE.dblQty  												--[dblQtyShipped]
-	,IE.[dblPrice] 												--[dblPrice]
+	,IE.dblQty  												--[dblQtyShipped]		
+	,dblPrice = CASE
+                    WHEN IE.ysnFreightInPrice = 0  
+	                   THEN IE.[dblPrice]					
+					WHEN IE.ysnFreightInPrice = 1 and isNull(IE.dblSurcharge,0) != 0
+					   THEN	IE.[dblPrice] + isNull(IE.[dblFreightRate],0) + (IE.dblSurcharge / 100)
+					WHEN IE.ysnFreightInPrice = 1
+					   THEN	IE.[dblPrice] + isNull(IE.[dblFreightRate],0) 
+			        END 	                                    --[dblPrice]
 	,0          												--[dblTotal]
 	,Acct.[intAccountId]										--[intAccountId]
 	,Acct.[intCOGSAccountId]									--[intCOGSAccountId]
@@ -386,8 +393,72 @@ FROM
 	 	vyuARGetItemAccount Acct
 	 		ON IE.[intItemId] = Acct.[intItemId]
 	 			AND IE.[intLocationId] = Acct.[intLocationId]
-		
 
+
+select @intFreightItemId = intItemForFreightId from tblTRCompanyPreference
+		
+--Freight Items
+INSERT INTO [tblARInvoiceDetail]
+	([intInvoiceId]
+	,[intItemId]
+	,[strItemDescription]
+	,[intItemUOMId]
+	,[dblQtyOrdered]
+	,[dblQtyShipped]
+	,[dblPrice]
+	,[dblTotal]
+	,[intAccountId]
+	,[intCOGSAccountId]
+	,[intSalesAccountId]
+	,[intInventoryAccountId]
+	,[intContractHeaderId]
+	,[intContractDetailId]
+	,[intConcurrencyId])
+SELECT
+	IV.[intInvoiceId]											--[intInvoiceId]
+	,@intFreightItemId										    --[intItemId]
+	,IC.[strDescription]										--strItemDescription] 
+	,(SELECT	TOP 1 IU.intItemUOMId											
+						FROM dbo.tblICItemUOM IU 
+						WHERE	IU.intItemId = @intFreightItemId and IU.ysnStockUnit = 1)                                            --[intItemUOMId]
+	,IE.dblQty   												--[dblQtyOrdered]
+	,IE.dblQty  												--[dblQtyShipped]
+	,dblPrice = CASE		
+					WHEN isNull(IE.dblSurcharge,0) != 0
+					   THEN	isNull(IE.[dblFreightRate],0) + (IE.dblSurcharge / 100)
+					WHEN isNull(IE.dblSurcharge,0) = 0
+					   THEN	 isNull(IE.[dblFreightRate],0) 
+			        END 
+	,0          												--[dblTotal]
+	,Acct.[intAccountId]										--[intAccountId]
+	,Acct.[intCOGSAccountId]									--[intCOGSAccountId]
+	,Acct.[intSalesAccountId]									--[intSalesAccountId]
+	,Acct.[intInventoryAccountId]								--[intInventoryAccountId]
+	,null   --[intContractHeaderId]
+	,null                                    --[intContractDetailId]
+	,1															--[intConcurrencyId]
+FROM
+    @InvoiceEntries IE
+	JOIN @temp TE
+	 on TE.Customer = IE.intEntityCustomerId 
+	   and TE.Location = IE.intLocationId 
+	   and TE.strSource = IE.strSourceId
+	   and TE.dtmDate = IE.dtmDate
+	   and TE.Currency = IE.intCurrencyId
+       and TE.Salesperson = IE.intSalesPersonId
+	   and TE.Shipvia = IE.intShipViaId
+	   and TE.Comments = IE.strComments
+	   and TE.PurchaseOrder = IE.strPurchaseOrder	  
+	JOIN tblARInvoice IV
+	    on TE.InvoiceNumber = IV.strInvoiceNumber and IE.strSourceId = IV.strInvoiceOriginId
+    INNER JOIN
+	 	tblICItem IC
+	 		ON @intFreightItemId = IC.[intItemId] 
+	 LEFT OUTER JOIN
+	 	vyuARGetItemAccount Acct
+	 		ON @intFreightItemId = Acct.[intItemId]
+	 			AND IE.[intLocationId] = Acct.[intLocationId]
+     where isNull(IE.dblFreightRate,0) != 0 and IE.ysnFreightInPrice !=1
 		
 DECLARE @Invoices AS TABLE(intInvoiceID INT)
 INSERT INTO @Invoices 
