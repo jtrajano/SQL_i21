@@ -271,11 +271,14 @@ BEGIN TRY
 			FROM @tblMFScheduleWorkOrder
 			WHERE intRecordId = @intRecordId
 
-			SELECT TOP (@intNoOfSelectedMachine) @dblMachineCapacity = Sum(MP.dblMachineCapacity)
-			FROM dbo.tblMFScheduleCalendarMachineDetail MD
-			JOIN dbo.tblMFMachinePackType MP ON MP.intMachineId = MD.intMachineId
-			WHERE intCalendarDetailId = @intCalendarDetailId
-				AND MP.intPackTypeId = @intPackTypeId
+			SELECT @dblMachineCapacity = SUM(DT.dblMachineCapacity)
+			FROM (
+				SELECT TOP (@intNoOfSelectedMachine) MP.dblMachineCapacity
+				FROM dbo.tblMFScheduleCalendarMachineDetail MD
+				JOIN dbo.tblMFMachinePackType MP ON MP.intMachineId = MD.intMachineId
+				WHERE intCalendarDetailId = @intCalendarDetailId
+					AND MP.intPackTypeId = @intPackTypeId
+				) AS DT
 
 			SELECT @intWODuration = @intNoOfUnit / @dblMachineCapacity
 
