@@ -97,6 +97,7 @@ SELECT C.intManufacturingCellId
 	,SL.intCreatedUserId
 	,SL.dtmLastModified
 	,SL.intLastModifiedUserId
+	,WS.intSequenceNo 
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 	AND W.intStatusId <> 13
