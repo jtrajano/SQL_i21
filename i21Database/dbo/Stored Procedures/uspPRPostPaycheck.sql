@@ -539,7 +539,7 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 -- Get the batch post id. 
-IF (@strBatchId = NULL)
+IF (@ysnPost = 1 AND @strBatchId IS NULL)
 BEGIN
 	EXEC dbo.uspSMGetStartingNumber @STARTING_NUM_TRANSACTION_TYPE_Id, @strBatchId OUTPUT 
 	IF @@ERROR <> 0	GOTO Post_Rollback
