@@ -2272,6 +2272,7 @@
     <Build Include="dbo\Tables\tblTFTaxAuthority.sql" />
     <Build Include="dbo\Tables\tblTFTaxAuthorityConfiguration.sql" />
     <Build Include="dbo\Tables\tblTFTerminalControlNumber.sql" />
+    <Build Include="dbo\Tables\tblCTSpreadArbitrage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
