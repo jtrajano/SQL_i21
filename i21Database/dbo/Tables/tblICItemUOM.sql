@@ -19,6 +19,7 @@ Type the overview for the table here.
 		[dblWeight] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[intWeightUOMId] INT NULL,
 		[strUpcCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[strLongUPCCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[ysnStockUnit] BIT NULL DEFAULT ((0)),
 		[ysnAllowPurchase] BIT NULL DEFAULT ((0)),
 		[ysnAllowSale] BIT NULL DEFAULT ((0)),
