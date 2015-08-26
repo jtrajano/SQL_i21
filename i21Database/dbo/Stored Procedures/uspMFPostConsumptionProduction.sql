@@ -37,11 +37,13 @@ BEGIN
 		,@dtmExpiryDate DATETIME
 		,@dtmPlannedDate datetime
 		,@intItemStockUOMId int
+		,@strWorkOrderNo NVARCHAR(50)
 
 	SELECT TOP 1 @intLocationId = intLocationId
 		,@intSubLocationId = intSubLocationId
 		,@intStorageLocationId = intStorageLocationId
 		,@dtmPlannedDate=dtmPlannedDate
+		,@strWorkOrderNo=strWorkOrderNo 
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -79,7 +81,7 @@ BEGIN
 		,dblExchangeRate = 1
 		,intTransactionId = @intBatchId
 		,intTransactionDetailId = cl.intWorkOrderConsumedLotId
-		,strTransactionId = @strLotNumber
+		,strTransactionId = ISNULL(@strLotNumber,@strWorkOrderNo)
 		,intTransactionTypeId = @INVENTORY_CONSUME
 		,intLotId = l.intLotId
 		,intSubLocationId = l.intSubLocationId
@@ -204,8 +206,6 @@ BEGIN
 	FROM #GeneratedLotItems
 	WHERE intDetailId = @intWorkOrderId
 
-	
-
 	DELETE
 	FROM @ItemsForPost
 
@@ -238,7 +238,7 @@ BEGIN
 		,intCurrencyId = NULL
 		,dblExchangeRate = 1
 		,intTransactionId = @intBatchId
-		,strTransactionId = @strLotNumber
+		,strTransactionId = ISNULL(@strLotNumber,@strWorkOrderNo)
 		,intTransactionTypeId = @INVENTORY_PRODUCE
 		,intLotId = @intLotId
 		,intSubLocationId = @intSubLocationId
