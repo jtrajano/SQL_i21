@@ -309,6 +309,8 @@ SELECT @SystemManagerParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenu
 /* Start of Rename */
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'User Security' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerParentMenuId)
 UPDATE tblSMMasterMenu SET strMenuName = N'Users', strDescription = N'Users' WHERE strMenuName = N'User Security' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Company Preferences' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerParentMenuId)
+UPDATE tblSMMasterMenu SET strMenuName = N'Company Configuration', intSort = 5 WHERE strMenuName = N'Company Preferences' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
 /* End of Rename */
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Users' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerParentMenuId)
@@ -330,8 +332,8 @@ IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Motor Fuel T
 UPDATE tblSMMasterMenu SET strCommand = N'Reports.controller.RunTaxCycle', intSort = 4 WHERE strMenuName = N'Motor Fuel Tax Cycle' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
 
 /* Change Command from i21.view.CompanyPreferences to i21.view.CompanyPreference */
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Company Preferences' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerParentMenuId)
-UPDATE tblSMMasterMenu SET strCommand = N'i21.view.CompanyPreference', intSort = 5 WHERE strMenuName = N'Company Preferences' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Company Configuration' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerParentMenuId)
+UPDATE tblSMMasterMenu SET strCommand = N'i21.view.CompanyPreference', intSort = 5 WHERE strMenuName = N'Company Configuration' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Starting Numbers' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerParentMenuId)
 UPDATE tblSMMasterMenu SET strCommand = N'i21.view.StartingNumbers', intSort = 6 WHERE strMenuName = N'Starting Numbers' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
@@ -434,6 +436,14 @@ UPDATE tblSMMasterMenu SET strMenuName = 'Currency Exchange Rates', strDescripti
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Currency Exchange Rate Type' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId)
 UPDATE tblSMMasterMenu SET strMenuName = 'Currency Exchange Rate Types', strDescription = 'Currency Exchange Rate Types' WHERE strMenuName = 'Currency Exchange Rate Type' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
 /* End of Pluralize */
+
+/* Start Move */
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Motor Fuel Tax Cycle' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerParentMenuId)
+UPDATE tblSMMasterMenu SET intParentMenuID = @CommonInfoParentMenuId, intSort = 20 WHERE strMenuName = N'Motor Fuel Tax Cycle' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Announcements' AND strModuleName = 'Help Desk' AND intParentMenuID = @SystemManagerParentMenuId)
+UPDATE tblSMMasterMenu SET intParentMenuID = @CommonInfoParentMenuId WHERE strMenuName = N'Announcements' AND strModuleName = N'Help Desk' AND intParentMenuID = @SystemManagerParentMenuId
+/* End Move */
+
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Countries' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoParentMenuId)
 UPDATE tblSMMasterMenu SET strCommand = N'i21.view.Country' WHERE strMenuName = N'Countries' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
