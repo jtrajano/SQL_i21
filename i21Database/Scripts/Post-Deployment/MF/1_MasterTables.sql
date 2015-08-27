@@ -1064,3 +1064,21 @@ WHERE intManufacturingProcessRunDurationId IN (
 		,4
 		)
 GO
+--Open
+GO
+UPDATE dbo.tblMFWorkOrderStatus
+SET strBackColorName = 'bc-paleturquoise'
+WHERE intStatusId = 3
+GO
+
+--Released
+UPDATE dbo.tblMFWorkOrderStatus
+SET strBackColorName = 'bc-gold'
+WHERE  intStatusId = 9
+GO
+
+--Frozen
+UPDATE dbo.tblMFWorkOrderStatus
+SET strBackColorName = 'bc-gainsboro'
+WHERE  intStatusId = 4
+GO
