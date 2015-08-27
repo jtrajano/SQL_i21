@@ -4431,7 +4431,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "icon": null,
-                                                                "iconCls": "small-delete",
+                                                                "iconCls": "small-calculator",
                                                                 "itemId": "btnCalculateCharges",
                                                                 "layout|flex": null,
                                                                 "tabIndex": -1,
