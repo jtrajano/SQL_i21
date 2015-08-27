@@ -93,7 +93,10 @@ BEGIN TRY
 					
 		EXEC	uspCTUpdateScheduleQuantity
 				@intContractDetailId	=	@intContractDetailId,
-				@dblQuantityToUpdate	=	@dblSchQuantityToUpdate
+				@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
+				@intUserId				=	@intUserId,
+				@intExternalId			=	@intInvoiceDetailId,
+				@strScreenName			=	'Invoice' 
 
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 	END
