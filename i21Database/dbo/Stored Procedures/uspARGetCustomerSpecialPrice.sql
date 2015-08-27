@@ -272,7 +272,8 @@ AS
 								WHERE tblTRSupplyPoint.intEntityLocationId = intEntityLocationId 
 									AND vyuTRRackPrice.intItemId = intRackItemId
 									AND vyuTRRackPrice.intSupplyPointId = @SupplyPointId 
-									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE)) + dblDeviation
+									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE)
+									ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC) + dblDeviation
 		WHERE
 			strPriceBasis = 'R'
 
