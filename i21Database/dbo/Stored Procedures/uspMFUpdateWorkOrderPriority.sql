@@ -242,9 +242,9 @@ BEGIN TRY
 		,W.intWorkOrderId
 		,@intScheduleId AS intScheduleId
 		,W.strWorkOrderNo
-		,W.dblQuantity
-		,W.dtmExpectedDate
-		,W.dblQuantity - W.dblProducedQuantity AS dblBalanceQuantity
+		,SL.dblQuantity
+		,SL.dtmExpectedDate
+		,SL.dblQuantity - W.dblProducedQuantity AS dblBalanceQuantity
 		,W.dblProducedQuantity
 		,W.strComment AS strWorkOrderComments
 		,W.dtmOrderDate
@@ -253,7 +253,7 @@ BEGIN TRY
 			FROM dbo.tblMFRecipeItem RI
 			JOIN dbo.tblICItem WI ON RI.intItemId = WI.intItemId
 			WHERE RI.intRecipeId = R.intRecipeId
-				AND WI.strType = 'Blend'
+				AND WI.strType = 'Assembly/Blend'
 			) AS strWIPItemNo
 		,I.intItemId
 		,I.strItemNo
@@ -291,8 +291,7 @@ BEGIN TRY
 		,@intUserId intLastModifiedUserId
 		,WS.intSequenceNo
 	FROM tblMFWorkOrder W
-	JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId AND W.intManufacturingCellId = @intManufacturingCellId
-	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
+	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId AND W.intManufacturingCellId = @intManufacturingCellId
 	LEFT JOIN tblMFPackType P ON P.intPackTypeId = I.intPackTypeId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
 	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
@@ -301,6 +300,7 @@ BEGIN TRY
 		JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = SL.intStatusId
 		AND W.intStatusId <> 13
 	LEFT JOIN dbo.tblMFShift SH ON SH.intShiftId = SL.intPlannedShiftId
+	LEFT JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = SL.intManufacturingCellId 
 	JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
 		AND R.intLocationId = C.intLocationId
 		AND R.ysnActive = 1
