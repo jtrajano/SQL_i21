@@ -49,6 +49,7 @@ CREATE PROCEDURE [dbo].[uspICPostAverageCosting]
 	,@strTransactionId AS NVARCHAR(20)
 	,@strBatchId AS NVARCHAR(20)
 	,@intTransactionTypeId AS INT
+	,@strTransactionForm AS NVARCHAR(255)
 	,@intUserId AS INT
 AS
 
@@ -80,13 +81,6 @@ DECLARE @strRelatedTransactionId AS NVARCHAR(40)
 DECLARE @intRelatedTransactionId AS INT 
 DECLARE @dblValue AS NUMERIC(18,6)
 
--- Initialize the transaction name. Use this as the transaction form name
-DECLARE @TransactionTypeName AS NVARCHAR(200) 
-SELECT	TOP 1 
-		@TransactionTypeName = strName
-FROM	dbo.tblICInventoryTransactionType
-WHERE	intTransactionTypeId = @intTransactionTypeId
-
 -------------------------------------------------
 -- 1. Process the Fifo Cost buckets
 -------------------------------------------------
@@ -97,7 +91,7 @@ BEGIN
 		SET @dblReduceQty = ISNULL(@dblQty, 0)
 
 		SELECT @dblCost = AverageCost
-		FROM dbo.fnGetItemAverageCostAsTable(@intItemId, @intItemLocationId)
+		FROM dbo.fnGetItemAverageCostAsTable(@intItemId, @intItemLocationId, @intItemUOMId)
 
 		EXEC [dbo].[uspICPostInventoryTransaction]
 				@intItemId = @intItemId
@@ -122,7 +116,7 @@ BEGIN
 				,@intRelatedInventoryTransactionId = NULL 
 				,@intRelatedTransactionId = NULL 
 				,@strRelatedTransactionId = NULL 
-				,@strTransactionForm = @TransactionTypeName
+				,@strTransactionForm = @strTransactionForm
 				,@intUserId = @intUserId
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 
@@ -194,7 +188,7 @@ BEGIN
 				,@intRelatedInventoryTransactionId = NULL 
 				,@intRelatedTransactionId = NULL 
 				,@strRelatedTransactionId = NULL 
-				,@strTransactionForm = @TransactionTypeName
+				,@strTransactionForm = @strTransactionForm
 				,@intUserId = @intUserId
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT			
 
@@ -252,7 +246,7 @@ BEGIN
 						,@intRelatedInventoryTransactionId = NULL 
 						,@intRelatedTransactionId = @intRelatedTransactionId
 						,@strRelatedTransactionId = @strRelatedTransactionId 
-						,@strTransactionForm = @TransactionTypeName
+						,@strTransactionForm = @strTransactionForm
 						,@intUserId = @intUserId
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 
@@ -281,7 +275,7 @@ BEGIN
 						,@intRelatedInventoryTransactionId = NULL 
 						,@intRelatedTransactionId = @intRelatedTransactionId
 						,@strRelatedTransactionId = @strRelatedTransactionId 
-						,@strTransactionForm = @TransactionTypeName
+						,@strTransactionForm = @strTransactionForm
 						,@intUserId = @intUserId
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 			END
@@ -350,7 +344,7 @@ BEGIN
 					,@intRelatedInventoryTransactionId = NULL 
 					,@intRelatedTransactionId = NULL
 					,@strRelatedTransactionId = NULL 
-					,@strTransactionForm = @TransactionTypeName
+					,@strTransactionForm = @strTransactionForm
 					,@intUserId = @intUserId
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 		END 

@@ -19,7 +19,6 @@ SET ANSI_WARNINGS OFF
 DECLARE @TransactionName AS VARCHAR(500) = 'Inventory Adjustment Transaction' + CAST(NEWID() AS NVARCHAR(100));
 
 -- Constants  
-DECLARE @INVENTORY_ADJUSTMENT_TYPE AS INT = 10
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3  
 DECLARE @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(255) = 'Inventory Adjustment'
 
@@ -38,13 +37,14 @@ SET @ysnPost = ISNULL(@ysnPost, 0)
 DECLARE @LotType_Manual AS INT = 1
 		,@LotType_Serial AS INT = 2
 
-
 DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
 		,@ADJUSTMENT_TYPE_UOMChange AS INT = 2
 		,@ADJUSTMENT_TYPE_ItemChange AS INT = 3
 		,@ADJUSTMENT_TYPE_LotStatusChange AS INT = 4
 		,@ADJUSTMENT_TYPE_SplitLot AS INT = 5
 		,@ADJUSTMENT_TYPE_ExpiryDateChange AS INT = 6
+		,@ADJUSTMENT_TYPE_LotMerge AS INT = 7
+		,@ADJUSTMENT_TYPE_LotMove AS INT = 8
 
 -- Read the transaction info   
 BEGIN   
@@ -134,7 +134,12 @@ IF @@ERROR <> 0 GOTO Post_Exit
 
 -- Determine if Adjustment requires costing and GL entries. 
 SELECT @adjustmentTypeRequiresGLEntries = 1
-WHERE @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange, @ADJUSTMENT_TYPE_SplitLot)
+WHERE 	@adjustmentType IN (
+			@ADJUSTMENT_TYPE_QuantityChange
+			, @ADJUSTMENT_TYPE_SplitLot
+			, @ADJUSTMENT_TYPE_LotMerge
+			, @ADJUSTMENT_TYPE_LotMove
+		)
 
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
@@ -250,30 +255,13 @@ BEGIN
 	--  Call Split Lot Change
 	-----------------------------------
 	IF @adjustmentType = @ADJUSTMENT_TYPE_SplitLot
-	BEGIN 
-		INSERT INTO @ItemsForAdjust (  
-				intItemId  
-				,intItemLocationId 
-				,intItemUOMId  
-				,dtmDate  
-				,dblQty  
-				,dblUOMQty  
-				,dblCost
-				,dblValue
-				,dblSalesPrice  
-				,intCurrencyId  
-				,dblExchangeRate  
-				,intTransactionId  
-				,intTransactionDetailId   
-				,strTransactionId  
-				,intTransactionTypeId  
-				,intLotId 
-				,intSubLocationId
-				,intStorageLocationId
-		)  	
+	BEGIN 	
 		EXEC dbo.uspICPostInventoryAdjustmentSplitLotChange
 				@intTransactionId
+				,@strBatchId  
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 				,@intUserId
+				,@strAdjustmentDescription	
 	END 
 
 	-----------------------------------
@@ -291,6 +279,22 @@ BEGIN
 	-----------------------------------
 	IF @adjustmentTypeRequiresGLEntries = 1
 	BEGIN 
+		-----------------------------------------
+		-- Generate the Costing
+		-----------------------------------------
+		IF EXISTS (SELECT TOP 1 1 FROM @ItemsForAdjust)
+		BEGIN 
+			EXEC	dbo.uspICPostCosting  
+					@ItemsForAdjust  
+					,@strBatchId  
+					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+					,@intUserId
+					,@strAdjustmentDescription
+		END				
+				
+		-----------------------------------------
+		-- Generate a new set of g/l entries
+		-----------------------------------------
 		INSERT INTO @GLEntries (
 				[dtmDate] 
 				,[strBatchId]
@@ -318,12 +322,11 @@ BEGIN
 				,[strModuleName]
 				,[intConcurrencyId]
 		)
-		EXEC	dbo.uspICPostCosting  
-				@ItemsForAdjust  
-				,@strBatchId  
-				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-				,@intUserId
-				,@strAdjustmentDescription		
+		EXEC dbo.uspICCreateGLEntries 
+			@strBatchId
+			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+			,@intUserId
+			,@strAdjustmentDescription
 	END 
 END   
 
@@ -333,7 +336,12 @@ END
 IF @ysnPost = 0   
 BEGIN   
 	-- Call the unpost routine 
-	IF @adjustmentType IN (@ADJUSTMENT_TYPE_QuantityChange, @ADJUSTMENT_TYPE_SplitLot)
+	IF @adjustmentType IN (
+		@ADJUSTMENT_TYPE_QuantityChange
+		, @ADJUSTMENT_TYPE_SplitLot
+		, @ADJUSTMENT_TYPE_LotMerge
+		, @ADJUSTMENT_TYPE_LotMove
+	)
 	BEGIN 
 		-- Call the post routine 
 		INSERT INTO @GLEntries (

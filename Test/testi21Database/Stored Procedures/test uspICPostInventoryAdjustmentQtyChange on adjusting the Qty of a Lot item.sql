@@ -139,9 +139,9 @@ BEGIN
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
 				,intItemUOMId			= @ManualGrains_25KgBagUOM
 				,dtmDate				= '05/14/2015'
-				,dblQty					= -250  
+				,dblQty					= -250.00
 				,dblUOMQty				= @25KgBagUnitQty
-				,dblCost				= 2.50
+				,dblCost				= 2.50 * @25KgBagUnitQty
 				,dblValue				= 0.00
 				,dblSalesPrice			= 0.00
 				,intCurrencyId			= NULL 

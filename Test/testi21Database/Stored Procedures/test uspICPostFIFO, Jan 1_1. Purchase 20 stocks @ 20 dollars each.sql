@@ -59,6 +59,7 @@ BEGIN
 			,@strTransactionId AS NVARCHAR(20)
 			,@strBatchId AS NVARCHAR(20)
 			,@intTransactionTypeId AS INT
+			,@strTransactionForm AS NVARCHAR(255)
 			,@intUserId AS INT
 
 		SET	@intItemId = @WetGrains
@@ -202,6 +203,7 @@ BEGIN
 			,@strTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
+			,@strTransactionForm
 			,@intUserId
 	END 
 

@@ -81,7 +81,26 @@ BEGIN
 		DECLARE @intUserId AS INT = 1;
 
 		-- Setup the items to post
-		INSERT INTO @ItemsToPost
+		INSERT INTO @ItemsToPost (
+				intItemId 
+				,intItemLocationId 
+				,intItemUOMId 
+				,dtmDate 
+				,dblQty 
+				,dblUOMQty 
+				,dblCost 
+				,dblValue 
+				,dblSalesPrice 
+				,intCurrencyId 
+				,dblExchangeRate 
+				,intTransactionId
+				,intTransactionDetailId 
+				,strTransactionId 
+				,intTransactionTypeId 
+				,intLotId 
+				,intSubLocationId 
+				,intStorageLocationId 
+		)
 		-- in (Stock goes up to 200)
 		SELECT 	intItemId = @WetGrains
 				,intItemLocationId = @Default_Location

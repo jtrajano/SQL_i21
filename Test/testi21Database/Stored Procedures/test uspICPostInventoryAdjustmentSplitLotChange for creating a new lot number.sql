@@ -119,13 +119,35 @@ BEGIN
 			,@LOT_STATUS_On_Hold AS INT = 2
 			,@LOT_STATUS_Quarantine AS INT = 3
 
+	-- Constant for Adjustment Types
+	DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
+			,@ADJUSTMENT_TYPE_UOMChange AS INT = 2
+			,@ADJUSTMENT_TYPE_ItemChange AS INT = 3
+			,@ADJUSTMENT_TYPE_LotStatusChange AS INT = 4
+			,@ADJUSTMENT_TYPE_SplitLot AS INT = 5
+			,@ADJUSTMENT_TYPE_ExpiryDateChange AS INT = 6
+			,@ADJUSTMENT_TYPE_LotMerge AS INT = 7
+			,@ADJUSTMENT_TYPE_LotMove AS INT = 8
+
+	DECLARE @INVENTORY_ADJUSTMENT_QuantityChange AS INT = 10
+			,@INVENTORY_ADJUSTMENT_UOMChange AS INT = 14
+			,@INVENTORY_ADJUSTMENT_ItemChange AS INT = 15
+			,@INVENTORY_ADJUSTMENT_LotStatusChange AS INT = 16
+			,@INVENTORY_ADJUSTMENT_SplitLot AS INT = 17
+			,@INVENTORY_ADJUSTMENT_ExpiryDateChange AS INT = 18
+			,@INVENTORY_ADJUSTMENT_LotMerge AS INT = 19
+			,@INVENTORY_ADJUSTMENT_LotMove AS INT = 20
+
 	-- Arrange 
 	BEGIN 
 		EXEC testi21Database.[Fake open fiscal year and accounting periods];
 		EXEC testi21Database.[Fake data for inventory adjustment table];
 
-		DECLARE @intTransactionId AS INT = 7
-		DECLARE @intUserId AS INT = 1
+		DECLARE	@intTransactionId AS INT = 7
+				,@strBatchId AS NVARCHAR(50) = 'BATCH-XXX1'
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(50) = 'Inventory Adjustment'
+				,@intUserId AS INT = 1
+				,@strAdjustmentDescription AS NVARCHAR(255)
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
@@ -199,12 +221,12 @@ BEGIN
 			,strLotNumber			= 'ABC-123'
 			,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
 			,intStorageLocationId	= @StorageSilo_RM_DL
-			,dblQty					= 0 -- This is populated by uspICPostCosting
-			,dblLastCost			= NULL -- This is populated by uspICPostCosting
+			,dblQty					= 500.00
+			,dblLastCost			= 2.50
 			,dtmExpiryDate			= '01/10/2018'
 			,strLotAlias			= 'Fine grade raw material'
 			,intLotStatusId			= @LOT_STATUS_Active
-			,dblWeight				= 0 -- This is populated by uspICPostCosting
+			,dblWeight				= 27557.750000
 			,intWeightUOMId			= @ManualGrains_PoundUOM
 			,dblWeightPerQty		= 55.1155
 	END 
@@ -212,8 +234,11 @@ BEGIN
 	-- Act
 	BEGIN 
 		EXEC dbo.uspICPostInventoryAdjustmentSplitLotChange
-			@intTransactionId
-	 		,@intUserId
+				@intTransactionId
+				,@strBatchId
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+				,@intUserId
+				,@strAdjustmentDescription
 	END 
 
 	-- Assert 

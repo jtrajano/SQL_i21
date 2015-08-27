@@ -34,6 +34,7 @@ BEGIN
 				,@intItemLocationId AS INT
 				,@intItemUOMId AS INT
 				,@intLotId AS INT
+				,@dtmDate AS DATETIME 
 				,@intSubLocationId AS INT
 				,@intStorageLocationId AS INT
 				,@dblQty NUMERIC(18,6) 
@@ -58,6 +59,7 @@ BEGIN
 			@intItemId
 			,@intItemLocationId
 			,@intItemUOMId
+			,@dtmDate
 			,@intLotId
 			,@intSubLocationId
 			,@intStorageLocationId

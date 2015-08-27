@@ -120,22 +120,34 @@ BEGIN
 			,@LOT_STATUS_Quarantine AS INT = 3
 
 	-- Constant for Adjustment Types
-	DECLARE @ADJUSTMENT_TYPE_QTY_CHANGE AS INT = 1
-			,@ADJUSTMENT_TYPE_UOM_CHANGE AS INT = 2
-			,@ADJUSTMENT_TYPE_ITEM_CHANGE AS INT = 3
-			,@ADJUSTMENT_TYPE_LOT_STATUS_CHANGE AS INT = 4
-			,@ADJUSTMENT_TYPE_SPLIT_LOT AS INT = 5
-			,@ADJUSTMENT_TYPE_EXPIRY_DATE_CHANGE AS INT = 6
+	DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
+			,@ADJUSTMENT_TYPE_UOMChange AS INT = 2
+			,@ADJUSTMENT_TYPE_ItemChange AS INT = 3
+			,@ADJUSTMENT_TYPE_LotStatusChange AS INT = 4
+			,@ADJUSTMENT_TYPE_SplitLot AS INT = 5
+			,@ADJUSTMENT_TYPE_ExpiryDateChange AS INT = 6
+			,@ADJUSTMENT_TYPE_LotMerge AS INT = 7
+			,@ADJUSTMENT_TYPE_LotMove AS INT = 8
 
-	DECLARE @INVENTORY_ADJUSTMENT AS INT = 10
+	DECLARE @INVENTORY_ADJUSTMENT_QuantityChange AS INT = 10
+			,@INVENTORY_ADJUSTMENT_UOMChange AS INT = 14
+			,@INVENTORY_ADJUSTMENT_ItemChange AS INT = 15
+			,@INVENTORY_ADJUSTMENT_LotStatusChange AS INT = 16
+			,@INVENTORY_ADJUSTMENT_SplitLot AS INT = 17
+			,@INVENTORY_ADJUSTMENT_ExpiryDateChange AS INT = 18
+			,@INVENTORY_ADJUSTMENT_LotMerge AS INT = 19
+			,@INVENTORY_ADJUSTMENT_LotMove AS INT = 20
 
 	-- Arrange 
 	BEGIN 
 		EXEC testi21Database.[Fake open fiscal year and accounting periods];
 		EXEC testi21Database.[Fake data for inventory adjustment table];
 
-		DECLARE @intTransactionId AS INT = 8
-		DECLARE @intUserId AS INT = 1
+		DECLARE	@intTransactionId AS INT = 8
+				,@strBatchId AS NVARCHAR(50) = 'BATCH-XXX1'
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(50) = 'Inventory Adjustment'
+				,@intUserId AS INT = 1
+				,@strAdjustmentDescription AS NVARCHAR(255)
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
@@ -176,11 +188,11 @@ BEGIN
 		)
 		SELECT 	intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_PoundUOM -- Since there is weight, convert the bags into weights. 
+				,intItemUOMId			= @ManualGrains_25KgBagUOM
 				,dtmDate				= '05/18/2015'
-				,dblQty					= -500.00 * 55.115500  -- bags x unit qty. 
-				,dblUOMQty				= 1 -- Unit Qty of @ManualGrains_PoundUOM
-				,dblCost				= 2.500000
+				,dblQty					= -500.00 
+				,dblUOMQty				= @25KgBagUnitQty
+				,dblCost				= 2.500000 * @25KgBagUnitQty
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 
@@ -188,7 +200,7 @@ BEGIN
 				,intTransactionId		= 8
 				,intTransactionDetailId = 7
 				,strTransactionId		= 'ADJ-8'
-				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT
+				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_SplitLot
 				,intLotId				= @ManualLotGrains_Lot_100001
 				,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
 				,intStorageLocationId	= @StorageSilo_RM_DL
@@ -196,11 +208,11 @@ BEGIN
 		SELECT	
 				intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_PoundUOM
+				,intItemUOMId			= @ManualGrains_25KgBagUOM
 				,dtmDate				= '05/18/2015'
-				,dblQty					= 500 * 55.115500 -- bags x unit qty. 
-				,dblUOMQty				= 1 -- Unit Qty of @ManualGrains_PoundUOM
-				,dblCost				= 3.50
+				,dblQty					= 500
+				,dblUOMQty				= @25KgBagUnitQty
+				,dblCost				= 3.50 * @25KgBagUnitQty
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 
@@ -208,7 +220,7 @@ BEGIN
 				,intTransactionId		= 8
 				,intTransactionDetailId = 7
 				,strTransactionId		= 'ADJ-8'
-				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT
+				,intTransactionTypeId	= @INVENTORY_ADJUSTMENT_SplitLot
 				,intLotId				= 4
 				,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
 				,intStorageLocationId	= @StorageSilo_RM_DL
@@ -216,29 +228,56 @@ BEGIN
 
 	-- Act
 	BEGIN 
-		INSERT INTO actual (
-			intItemId			
-			,intItemLocationId	
-			,intItemUOMId		
-			,dtmDate			
-			,dblQty				
-			,dblUOMQty			
-			,dblCost  
-			,dblValue 
-			,dblSalesPrice  
-			,intCurrencyId  
-			,dblExchangeRate  
-			,intTransactionId  
-			,intTransactionDetailId
-			,strTransactionId  
-			,intTransactionTypeId  
-			,intLotId 
-			,intSubLocationId
-			,intStorageLocationId
-		) 
+
 		EXEC dbo.uspICPostInventoryAdjustmentSplitLotChange
-			@intTransactionId
-	 		,@intUserId
+				@intTransactionId
+				,@strBatchId
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+				,@intUserId
+				,@strAdjustmentDescription
+
+		INSERT INTO actual (
+				intItemId			
+				,intItemLocationId	
+				,intItemUOMId		
+				,dtmDate			
+				,dblQty				
+				,dblUOMQty			
+				,dblCost  
+				,dblValue 
+				,dblSalesPrice  
+				,intCurrencyId  
+				,dblExchangeRate  
+				,intTransactionId  
+				,intTransactionDetailId
+				,strTransactionId  
+				,intTransactionTypeId  
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
+		) 
+		SELECT 
+				intItemId			
+				,intItemLocationId	
+				,intItemUOMId		
+				,dtmDate			
+				,dblQty				
+				,dblUOMQty			
+				,dblCost  
+				,dblValue 
+				,dblSalesPrice  
+				,intCurrencyId  
+				,dblExchangeRate  
+				,intTransactionId  
+				,intTransactionDetailId
+				,strTransactionId  
+				,intTransactionTypeId  
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
+		FROM	dbo.tblICInventoryTransaction
+		WHERE	intTransactionId = @intTransactionId
+
 	END 
 
 	-- Assert 

@@ -69,9 +69,9 @@ BEGIN
 		FROM	dbo.tblICLot Lot 
 		WHERE	Lot.strLotNumber = @strLotNumber
 				AND Lot.intItemId = @intItemId
-				AND Lot.intLocationId = @intLocationId
-				AND Lot.intSubLocationId = @intSubLocationId
-				AND Lot.intStorageLocationId = @intStorageLocationId
+				AND ISNULL(Lot.intLocationId, 0) = ISNULL(@intLocationId, ISNULL(Lot.intLocationId, 0)) 
+				AND ISNULL(Lot.intSubLocationId, 0) = ISNULL(@intSubLocationId, ISNULL(Lot.intSubLocationId, 0))
+				AND ISNULL(Lot.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, ISNULL(Lot.intStorageLocationId, 0)) 
 	END 
 
 	-- Raise an error if Lot id is invalid. 
@@ -84,9 +84,9 @@ BEGIN
 END 
 
 -- Raise an error if Adjust By Quantity is invalid
-IF ISNULL(@dblAdjustByQuantity, 0) > 0 
+IF ISNULL(@dblAdjustByQuantity, 0) = 0 
 BEGIN 
-	-- 'Internal Error. The Adjust By Quantity is required to be a negative value.'
+	-- 'Internal Error. The Adjust By Quantity is required.'
 	RAISERROR(51127, 11, 1)  
 	GOTO _Exit
 END 
@@ -202,5 +202,4 @@ BEGIN
 		,@intEntityId = @intEntityId
 END 
 
-_Exit: 
-
+_Exit:

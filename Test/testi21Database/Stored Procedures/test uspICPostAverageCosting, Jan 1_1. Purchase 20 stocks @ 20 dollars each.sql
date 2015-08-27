@@ -66,6 +66,7 @@ BEGIN
 			,@strTransactionId AS NVARCHAR(20)
 			,@strBatchId AS NVARCHAR(20)
 			,@intTransactionTypeId AS INT
+			,@strTransactionForm AS NVARCHAR(255)
 			,@intUserId AS INT
 
 		-- Declare the variables to check the average cost. 
@@ -219,6 +220,7 @@ BEGIN
 			,@strTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
+			,@strTransactionForm
 			,@intUserId
 	END 
 

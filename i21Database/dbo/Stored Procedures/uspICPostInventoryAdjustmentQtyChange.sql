@@ -23,8 +23,13 @@ SET ANSI_WARNINGS OFF
 
 */
 
+DECLARE @INVENTORY_ADJUSTMENT_QuantityChange AS INT = 10
+		,@INVENTORY_ADJUSTMENT_UOMChange AS INT = 14
+		,@INVENTORY_ADJUSTMENT_ItemChange AS INT = 15
+		,@INVENTORY_ADJUSTMENT_LotStatusChange AS INT = 16
+		,@INVENTORY_ADJUSTMENT_SplitLot AS INT = 17
+		,@INVENTORY_ADJUSTMENT_ExpiryDateChange AS INT = 18
 
-DECLARE @INVENTORY_ADJUSTMENT_TYPE AS INT = 10
 DECLARE @ItemsForQtyChange AS ItemCostingTableType
 
 --------------------------------------------------------------------------------
@@ -52,7 +57,7 @@ BEGIN
 		WHERE intItemId = @intItemId		
 
 		-- 'The UOM is missing on {Item}.'
-		RAISERROR(51130, 11, 1, @strItemNo);
+		RAISERROR(51136, 11, 1, @strItemNo);
 		GOTO _Exit
 	END
 
@@ -122,7 +127,7 @@ BEGIN
 			,intTransactionId		= Header.intInventoryAdjustmentId
 			,intTransactionDetailId = Detail.intInventoryAdjustmentDetailId
 			,strTransactionId		= Header.strAdjustmentNo
-			,intTransactionTypeId   = @INVENTORY_ADJUSTMENT_TYPE
+			,intTransactionTypeId  = @INVENTORY_ADJUSTMENT_QuantityChange
 			,intLotId				= Detail.intLotId
 			,intSubLocationId		= Detail.intSubLocationId
 			,intStorageLocationId	= Detail.intStorageLocationId
@@ -136,6 +141,7 @@ BEGIN
 			LEFT JOIN dbo.tblICItemUOM WeightUOM
 				ON Detail.intWeightUOMId = WeightUOM.intItemUOMId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
+
 END
 
 

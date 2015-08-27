@@ -21,7 +21,7 @@
 	,@intSourceId AS INT
 	,@intSourceTransactionTypeId AS INT
 	,@intUserId AS INT 
-	,@intInventoryAdjustmentId AS INT OUTPUT
+	,@intInventoryAdjustmentId AS INT OUTPUT	
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -36,7 +36,18 @@ DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
 		,@ADJUSTMENT_TYPE_LotStatusChange AS INT = 4
 		,@ADJUSTMENT_TYPE_SplitLot AS INT = 5
 		,@ADJUSTMENT_TYPE_ExpiryDateChange AS INT = 6
+		,@ADJUSTMENT_TYPE_LotMerge AS INT = 7
+		,@ADJUSTMENT_TYPE_LotMove AS INT = 8
 
+DECLARE @INVENTORY_ADJUSTMENT_QuantityChange AS INT = 10
+		,@INVENTORY_ADJUSTMENT_UOMChange AS INT = 14
+		,@INVENTORY_ADJUSTMENT_ItemChange AS INT = 15
+		,@INVENTORY_ADJUSTMENT_LotStatusChange AS INT = 16
+		,@INVENTORY_ADJUSTMENT_SplitLot AS INT = 17
+		,@INVENTORY_ADJUSTMENT_ExpiryDateChange AS INT = 18
+		,@INVENTORY_ADJUSTMENT_LotMerge AS INT = 19
+		,@INVENTORY_ADJUSTMENT_LotMove AS INT = 20
+		
 DECLARE @TRANSACTION_TYPE_INVENTORY_ADJUSTMENT AS INT = 10
 
 DECLARE @InventoryAdjustment_Batch_Id AS INT = 30
@@ -90,9 +101,9 @@ BEGIN
 	FROM	dbo.tblICLot Lot 
 	WHERE	Lot.strLotNumber = @strLotNumber
 			AND Lot.intItemId = @intItemId
-			AND Lot.intLocationId = @intLocationId
-			AND Lot.intSubLocationId = @intSubLocationId
-			AND Lot.intStorageLocationId = @intStorageLocationId
+			AND ISNULL(Lot.intLocationId, 0) = ISNULL(@intLocationId, ISNULL(Lot.intLocationId, 0)) 
+			AND ISNULL(Lot.intSubLocationId, 0) = ISNULL(@intSubLocationId, ISNULL(Lot.intSubLocationId, 0))
+			AND ISNULL(Lot.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, ISNULL(Lot.intStorageLocationId, 0)) 
 END 
 
 -- Raise an error if Lot id is invalid. 
@@ -214,6 +225,7 @@ BEGIN
 			,dblWeight
 			,dblNewWeight
 			,dblWeightPerQty
+			,dblNewWeightPerQty
 			,dblCost
 			,dblNewCost
 			,intNewLocationId
@@ -239,6 +251,9 @@ BEGIN
 			,dblWeight					= Lot.dblWeight
 			,dblNewWeight				= @dblNewWeight
 			,dblWeightPerQty			= Lot.dblWeightPerQty
+			,dblNewWeightPerQty			= CASE	WHEN ABS(ISNULL(@dblAdjustByQuantity, 0)) = 0 THEN 0
+												ELSE ISNULL(@dblNewWeight, 0) / ABS(ISNULL(@dblAdjustByQuantity, 0))
+										  END 											
 			,dblCost					= Lot.dblLastCost
 			,dblNewCost					= @dblNewUnitCost
 			,intNewLocationId			= @intNewLocationId
@@ -264,4 +279,3 @@ BEGIN
 END 
 
 _Exit: 
-

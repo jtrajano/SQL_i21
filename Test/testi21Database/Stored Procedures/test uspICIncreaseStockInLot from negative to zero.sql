@@ -7,7 +7,7 @@ BEGIN
 
 		-- Re-add the clustered index. This is critical for the Lot table because it arranges the data physically by that order. \
 		CREATE CLUSTERED INDEX [Fake_IDX_tblICInventoryLot]
-			ON [dbo].[tblICInventoryLot]([intInventoryLotId] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intLotId] ASC);
+			ON [dbo].[tblICInventoryLot]([dtmDate] ASC, [intInventoryLotId] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intLotId] ASC, [intItemUOMId] ASC);
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -45,6 +45,7 @@ BEGIN
 			[intItemId]
 			,[intItemLocationId]
 			,[intItemUOMId]
+			,[dtmDate]
 			,[intLotId]
 			,[dblStockIn]
 			,[dblStockOut]
@@ -56,6 +57,7 @@ BEGIN
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
 				,[intItemUOMId] = @PremiumGrains_BushelUOMId
+				,[dtmDate] = '01/01/2014'
 				,[intLotId] = @LotId
 				,[dblStockIn] = 0
 				,[dblStockOut] = 77
@@ -67,6 +69,7 @@ BEGIN
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
 				,[intItemUOMId] = @PremiumGrains_BushelUOMId
+				,[dtmDate] = '01/02/2014'
 				,[intLotId] = @LotId
 				,[dblStockIn] = 0
 				,[dblStockOut] = 56
@@ -78,6 +81,7 @@ BEGIN
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
 				,[intItemUOMId] = @PremiumGrains_BushelUOMId
+				,[dtmDate] = '01/03/2014'
 				,[intLotId] = @LotId
 				,[dblStockIn] = 0
 				,[dblStockOut] = 30
@@ -90,6 +94,7 @@ BEGIN
 			[intItemId] INT 
 			,[intItemLocationId] INT 
 			,[intItemUOMId] INT 
+			,[dtmDate] DATETIME
 			,[intLotId] INT
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -102,6 +107,7 @@ BEGIN
 			[intItemId] INT 
 			,[intItemLocationId] INT 
 			,[intItemUOMId] INT 
+			,[dtmDate] DATETIME
 			,[intLotId] INT
 			,[dblStockIn] NUMERIC(18,6)
 			,[dblStockOut] NUMERIC(18,6)
@@ -114,6 +120,7 @@ BEGIN
 		DECLARE @intItemId AS INT					= @PremiumGrains
 				,@intItemLocationId AS INT			= @BetterHaven
 				,@intItemUOMId AS INT				= @PremiumGrains_BushelUOMId
+				,@dtmDate AS DATETIME				= '01/04/2014'
 				,@intLotId AS INT					= @LotId
 				,@intSubLocationId AS INT
 				,@intStorageLocationId AS INT
@@ -137,6 +144,7 @@ BEGIN
 				[intItemId] 
 				,[intItemLocationId] 
 				,[intItemUOMId] 
+				,[dtmDate]
 				,[intLotId] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -148,6 +156,7 @@ BEGIN
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
 				,[intItemUOMId] = @intItemUOMId
+				,[dtmDate] = '01/01/2014'
 				,[intLotId] = @LotId
 				,[dblStockIn] = 77
 				,[dblStockOut] = 77
@@ -159,6 +168,7 @@ BEGIN
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
 				,[intItemUOMId] = @intItemUOMId
+				,[dtmDate] = '01/02/2014'
 				,[intLotId] = @LotId
 				,[dblStockIn] = 56
 				,[dblStockOut] = 56
@@ -170,6 +180,7 @@ BEGIN
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
 				,[intItemUOMId] = @intItemUOMId
+				,[dtmDate] = '01/03/2014'
 				,[intLotId] = @LotId
 				,[dblStockIn] = 30
 				,[dblStockOut] = 30
@@ -181,6 +192,7 @@ BEGIN
 		SELECT	[intItemId] = @PremiumGrains
 				,[intItemLocationId] = @BetterHaven
 				,[intItemUOMId] = @intItemUOMId
+				,[dtmDate] = '01/04/2014'
 				,[intLotId] = @LotId
 				,[dblStockIn] = 163
 				,[dblStockOut] = 163
@@ -215,6 +227,7 @@ BEGIN
 				@intItemId
 				,@intItemLocationId
 				,@intItemUOMId
+				,@dtmDate
 				,@intLotId
 				,@intSubLocationId
 				,@intStorageLocationId
@@ -277,6 +290,7 @@ BEGIN
 				[intItemId] 
 				,[intItemLocationId] 
 				,[intItemUOMId] 
+				,[dtmDate]
 				,[intLotId] 
 				,[dblStockIn] 
 				,[dblStockOut]
@@ -288,6 +302,7 @@ BEGIN
 				[intItemId] 
 				,[intItemLocationId] 
 				,[intItemUOMId] 
+				,[dtmDate]
 				,[intLotId] 
 				,[dblStockIn] 
 				,[dblStockOut]
