@@ -302,7 +302,7 @@ BEGIN TRY
 	LEFT JOIN dbo.tblMFShift SH ON SH.intShiftId = SL.intPlannedShiftId
 	LEFT JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = SL.intManufacturingCellId 
 	JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
-		AND R.intLocationId = C.intLocationId
+		AND R.intLocationId = W.intLocationId
 		AND R.ysnActive = 1
 	ORDER BY WS.intSequenceNo DESC
 		,SL.intExecutionOrder
