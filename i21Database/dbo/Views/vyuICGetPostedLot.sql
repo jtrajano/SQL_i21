@@ -1,4 +1,4 @@
-﻿alter VIEW [dbo].[vyuICGetPostedLot]
+﻿CREATE VIEW [dbo].[vyuICGetPostedLot]
 AS 
 
 SELECT	intLotId				= Lot.intLotId
