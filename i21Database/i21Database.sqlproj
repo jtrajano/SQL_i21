@@ -1722,6 +1722,7 @@
     <None Include="Scripts\Post-Deployment\DB\4_Create_Role_for_DashboardReports.sql" />
     <Build Include="dbo\Stored Procedures\uspICRepostCosting.sql" />
     <None Include="Scripts\Utility\IC\IC-1227\Repost Costing.sql" />
+    <None Include="Scripts\Utility\IC\IC-1227\Fix cost in adjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

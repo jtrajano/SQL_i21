@@ -1,4 +1,35 @@
 ------------------------------------------------------------------------------------------------------------------------------------
+-- Fix the cost in the Inventory Adjustment 
+------------------------------------------------------------------------------------------------------------------------------------
+
+UPDATE	Lot
+SET		dblLastCost = dbo.fnCalculateUnitCost(ReceiptItem.dblUnitCost , ItemUOM.dblUnitQty)
+FROM	dbo.tblICLot Lot INNER JOIN dbo.tblICInventoryReceiptItemLot ReceiptLot
+			ON Lot.intLotId = ReceiptLot.intLotId
+		INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+			ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
+		LEFT JOIN dbo.tblICItemUOM ItemUOM
+			ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
+
+UPDATE	AdjDetail
+SET		dblCost = Lot.dblLastCost * ItemUOM.dblUnitQty 
+FROM	dbo.tblICInventoryAdjustmentDetail AdjDetail INNER JOIN dbo.tblICLot Lot
+			ON AdjDetail.intLotId = Lot.intLotId
+		LEFT JOIN dbo.tblICItemUOM ItemUOM
+			ON ItemUOM.intItemUOMId = AdjDetail.intItemUOMId
+
+UPDATE	InvTrans
+SET		dblCost = Lot.dblLastCost * ItemUOM.dblUnitQty 
+FROM	dbo.tblICInventoryTransaction InvTrans INNER JOIN dbo.tblICLot Lot
+			ON InvTrans.intLotId = Lot.intLotId
+		LEFT JOIN dbo.tblICItemUOM ItemUOM
+			ON ItemUOM.intItemUOMId = InvTrans.intItemUOMId
+WHERE	InvTrans.ysnIsUnposted = 0 
+		AND InvTrans.strTransactionId LIKE 'ADJ%'
+
+GO 
+
+------------------------------------------------------------------------------------------------------------------------------------
 -- Open the fiscal year periods
 ------------------------------------------------------------------------------------------------------------------------------------
 SELECT	* 
@@ -42,7 +73,9 @@ END
 DELETE FROM tblICInventoryTransaction
 DELETE FROM tblICInventoryLotTransaction
 
+--------------------------
 -- Zero out the stocks 
+--------------------------
 UPDATE tblICItemStockUOM 
 SET dblOnHand = 0 
 
@@ -53,10 +86,13 @@ UPDATE dbo.tblICLot
 SET dblQty = 0
 	,dblWeight = 0 
 
+--------------------------
 -- Zero out the costs
+--------------------------
 UPDATE tblICItemPricing
 SET dblLastCost = 0 
 	,dblAverageCost = 0 
+	,dblStandardCost = 0 
 
 UPDATE dbo.tblICLot
 SET dblLastCost = 0 
