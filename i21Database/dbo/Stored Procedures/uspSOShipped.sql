@@ -32,7 +32,8 @@ BEGIN
 					WHERE SOD.intSalesOrderId = @intSalesOrderId)
 			BEGIN
 				UPDATE CD 
-				SET dblBalance = dblBalance - @qtyToPost 
+				SET dblBalance = dblBalance - @qtyToPost
+				  , dblScheduleQty = dblScheduleQty - @qtyToPost 
 				FROM tblCTContractDetail CD
 				INNER JOIN tblSOSalesOrderDetail SOD ON 
 					SOD.intContractDetailId = CD.intContractDetailId AND SOD.intContractHeaderId = CD.intContractHeaderId 
