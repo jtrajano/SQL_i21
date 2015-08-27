@@ -21,11 +21,12 @@ SELECT	intLotId				= Lot.intLotId
 		,dblQty					= Lot.dblQty
 		,dblWeight				= Lot.dblWeight
 		,dblWeightPerQty		= Lot.dblWeightPerQty
-		,dblCost				= Lot.dblLastCost * ItemUOM.dblUnitQty
+		,dblCost				= Lot.dblLastCost 
 		,dtmExpiryDate			= Lot.dtmExpiryDate
 		,intLotStatusId			= Lot.intLotStatusId
 		,strLotStatus			= LotStatus.strSecondaryStatus
 		,strLotPrimaryStatus	= LotStatus.strPrimaryStatus
+		,dblItemUOMUnitQty		= ItemUOM.dblUnitQty
 FROM	dbo.tblICLot Lot INNER JOIN tblICItem Item 
 			ON Item.intItemId = Lot.intItemId
 		LEFT JOIN tblSMCompanyLocation Location 
