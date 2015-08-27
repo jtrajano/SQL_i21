@@ -64,7 +64,7 @@ BEGIN TRY
 			Delete from tblMFWorkOrder where intWorkOrderId=@intWorkOrderId
 			Update tblMFBlendRequirement Set dblIssuedQty=ISNULL(dblIssuedQty,0) - ISNULL(@dblQuantity,0) where intBlendRequirementId=@intBlendRequirementId
 
-			If (Select ISNULL(dblIssuedQty,0) From tblMFBlendRequirement where intBlendRequirementId=@intBlendRequirementId) > 0
+			If (Select ISNULL(dblQuantity,0) - ISNULL(dblIssuedQty,0) From tblMFBlendRequirement where intBlendRequirementId=@intBlendRequirementId) > 0
 				Update tblMFBlendRequirement Set intStatusId=1 where intBlendRequirementId=@intBlendRequirementId
 			Else
 				Update tblMFBlendRequirement Set intStatusId=2 where intBlendRequirementId=@intBlendRequirementId
