@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets0db79dc455b9bccd71e1911bbebfe4f88fb7750d9eb0e28db1f4b7003aec93ed))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsf601dcf8f79723f0deca2a2141dd7574ebad22946cab9ead1cbdf9a5ae89692e))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets0db79dc455b9bccd71e1911bbebfe4f88fb7750d9eb0e28db1f4b7003aec93ed : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsf601dcf8f79723f0deca2a2141dd7574ebad22946cab9ead1cbdf9a5ae89692e : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "0db79dc455b9bccd71e1911bbebfe4f88fb7750d9eb0e28db1f4b7003aec93ed"; }
+            get { return "f601dcf8f79723f0deca2a2141dd7574ebad22946cab9ead1cbdf9a5ae89692e"; }
         }
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace Edm_EntityMappingGeneratedViews
                 return GetView6();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICCategoryUOM")
+            if (extentName == "CodeFirstDatabase.tblICUnitMeasureConversion")
             {
                 return GetView7();
             }
@@ -457,7 +457,7 @@ namespace Edm_EntityMappingGeneratedViews
                 return GetView81();
             }
 
-            if (extentName == "CodeFirstDatabase.tblICUnitMeasureConversion")
+            if (extentName == "CodeFirstDatabase.tblICCategoryUOM")
             {
                 return GetView82();
             }
@@ -582,7 +582,7 @@ namespace Edm_EntityMappingGeneratedViews
                 return GetView106();
             }
 
-            if (extentName == "InventoryEntities.tblICCategoryUOMs")
+            if (extentName == "InventoryEntities.tblICUnitMeasureConversions")
             {
                 return GetView107();
             }
@@ -962,7 +962,7 @@ namespace Edm_EntityMappingGeneratedViews
                 return GetView182();
             }
 
-            if (extentName == "InventoryEntities.tblICUnitMeasureConversions")
+            if (extentName == "InventoryEntities.tblICCategoryUOMs")
             {
                 return GetView183();
             }
@@ -1685,39 +1685,24 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for CodeFirstDatabase.tblICCategoryUOM.
+        /// Gets the view for CodeFirstDatabase.tblICUnitMeasureConversion.
         /// </summary>
         /// <returns>The mapping view.</returns>
         private static DbMappingView GetView7()
         {
             return new DbMappingView(@"
-    SELECT VALUE -- Constructing tblICCategoryUOM
-        [CodeFirstDatabaseSchema.tblICCategoryUOM](T1.tblICCategoryUOM_intCategoryUOMId, T1.tblICCategoryUOM_intCategoryId, T1.tblICCategoryUOM_intUnitMeasureId, T1.tblICCategoryUOM_dblUnitQty, T1.tblICCategoryUOM_dblSellQty, T1.tblICCategoryUOM_dblWeight, T1.tblICCategoryUOM_intWeightUOMId, T1.tblICCategoryUOM_strDescription, T1.tblICCategoryUOM_strUpcCode, T1.tblICCategoryUOM_ysnStockUnit, T1.tblICCategoryUOM_ysnAllowPurchase, T1.tblICCategoryUOM_ysnAllowSale, T1.tblICCategoryUOM_dblLength, T1.tblICCategoryUOM_dblWidth, T1.tblICCategoryUOM_dblHeight, T1.tblICCategoryUOM_intDimensionUOMId, T1.tblICCategoryUOM_dblVolume, T1.tblICCategoryUOM_intVolumeUOMId, T1.tblICCategoryUOM_dblMaxQty, T1.tblICCategoryUOM_intSort, T1.tblICCategoryUOM_intConcurrencyId)
+    SELECT VALUE -- Constructing tblICUnitMeasureConversion
+        [CodeFirstDatabaseSchema.tblICUnitMeasureConversion](T1.tblICUnitMeasureConversion_intUnitMeasureConversionId, T1.tblICUnitMeasureConversion_intUnitMeasureId, T1.tblICUnitMeasureConversion_intStockUnitMeasureId, T1.tblICUnitMeasureConversion_dblConversionToStock, T1.tblICUnitMeasureConversion_intSort, T1.tblICUnitMeasureConversion_intConcurrencyId)
     FROM (
         SELECT 
-            T.intCategoryUOMId AS tblICCategoryUOM_intCategoryUOMId, 
-            T.intCategoryId AS tblICCategoryUOM_intCategoryId, 
-            T.intUnitMeasureId AS tblICCategoryUOM_intUnitMeasureId, 
-            T.dblUnitQty AS tblICCategoryUOM_dblUnitQty, 
-            T.dblSellQty AS tblICCategoryUOM_dblSellQty, 
-            T.dblWeight AS tblICCategoryUOM_dblWeight, 
-            T.intWeightUOMId AS tblICCategoryUOM_intWeightUOMId, 
-            T.strDescription AS tblICCategoryUOM_strDescription, 
-            T.strUpcCode AS tblICCategoryUOM_strUpcCode, 
-            T.ysnStockUnit AS tblICCategoryUOM_ysnStockUnit, 
-            T.ysnAllowPurchase AS tblICCategoryUOM_ysnAllowPurchase, 
-            T.ysnAllowSale AS tblICCategoryUOM_ysnAllowSale, 
-            T.dblLength AS tblICCategoryUOM_dblLength, 
-            T.dblWidth AS tblICCategoryUOM_dblWidth, 
-            T.dblHeight AS tblICCategoryUOM_dblHeight, 
-            T.intDimensionUOMId AS tblICCategoryUOM_intDimensionUOMId, 
-            T.dblVolume AS tblICCategoryUOM_dblVolume, 
-            T.intVolumeUOMId AS tblICCategoryUOM_intVolumeUOMId, 
-            T.dblMaxQty AS tblICCategoryUOM_dblMaxQty, 
-            T.intSort AS tblICCategoryUOM_intSort, 
-            T.intConcurrencyId AS tblICCategoryUOM_intConcurrencyId, 
+            T.intUnitMeasureConversionId AS tblICUnitMeasureConversion_intUnitMeasureConversionId, 
+            T.intUnitMeasureId AS tblICUnitMeasureConversion_intUnitMeasureId, 
+            T.intStockUnitMeasureId AS tblICUnitMeasureConversion_intStockUnitMeasureId, 
+            T.dblConversionToStock AS tblICUnitMeasureConversion_dblConversionToStock, 
+            T.intSort AS tblICUnitMeasureConversion_intSort, 
+            T.intConcurrencyId AS tblICUnitMeasureConversion_intConcurrencyId, 
             True AS _from0
-        FROM InventoryEntities.tblICCategoryUOMs AS T
+        FROM InventoryEntities.tblICUnitMeasureConversions AS T
     ) AS T1");
         }
 
@@ -4015,24 +4000,28 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for CodeFirstDatabase.tblICUnitMeasureConversion.
+        /// Gets the view for CodeFirstDatabase.tblICCategoryUOM.
         /// </summary>
         /// <returns>The mapping view.</returns>
         private static DbMappingView GetView82()
         {
             return new DbMappingView(@"
-    SELECT VALUE -- Constructing tblICUnitMeasureConversion
-        [CodeFirstDatabaseSchema.tblICUnitMeasureConversion](T1.tblICUnitMeasureConversion_intUnitMeasureConversionId, T1.tblICUnitMeasureConversion_intUnitMeasureId, T1.tblICUnitMeasureConversion_intStockUnitMeasureId, T1.tblICUnitMeasureConversion_dblConversionToStock, T1.tblICUnitMeasureConversion_intSort, T1.tblICUnitMeasureConversion_intConcurrencyId)
+    SELECT VALUE -- Constructing tblICCategoryUOM
+        [CodeFirstDatabaseSchema.tblICCategoryUOM](T1.tblICCategoryUOM_intCategoryUOMId, T1.tblICCategoryUOM_intCategoryId, T1.tblICCategoryUOM_intUnitMeasureId, T1.tblICCategoryUOM_dblUnitQty, T1.tblICCategoryUOM_ysnStockUnit, T1.tblICCategoryUOM_ysnAllowPurchase, T1.tblICCategoryUOM_ysnAllowSale, T1.tblICCategoryUOM_ysnDefault, T1.tblICCategoryUOM_intSort, T1.tblICCategoryUOM_intConcurrencyId)
     FROM (
         SELECT 
-            T.intUnitMeasureConversionId AS tblICUnitMeasureConversion_intUnitMeasureConversionId, 
-            T.intUnitMeasureId AS tblICUnitMeasureConversion_intUnitMeasureId, 
-            T.intStockUnitMeasureId AS tblICUnitMeasureConversion_intStockUnitMeasureId, 
-            T.dblConversionToStock AS tblICUnitMeasureConversion_dblConversionToStock, 
-            T.intSort AS tblICUnitMeasureConversion_intSort, 
-            T.intConcurrencyId AS tblICUnitMeasureConversion_intConcurrencyId, 
+            T.intCategoryUOMId AS tblICCategoryUOM_intCategoryUOMId, 
+            T.intCategoryId AS tblICCategoryUOM_intCategoryId, 
+            T.intUnitMeasureId AS tblICCategoryUOM_intUnitMeasureId, 
+            T.dblUnitQty AS tblICCategoryUOM_dblUnitQty, 
+            T.ysnStockUnit AS tblICCategoryUOM_ysnStockUnit, 
+            T.ysnAllowPurchase AS tblICCategoryUOM_ysnAllowPurchase, 
+            T.ysnAllowSale AS tblICCategoryUOM_ysnAllowSale, 
+            T.ysnDefault AS tblICCategoryUOM_ysnDefault, 
+            T.intSort AS tblICCategoryUOM_intSort, 
+            T.intConcurrencyId AS tblICCategoryUOM_intConcurrencyId, 
             True AS _from0
-        FROM InventoryEntities.tblICUnitMeasureConversions AS T
+        FROM InventoryEntities.tblICCategoryUOMs AS T
     ) AS T1");
         }
 
@@ -4750,39 +4739,24 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for InventoryEntities.tblICCategoryUOMs.
+        /// Gets the view for InventoryEntities.tblICUnitMeasureConversions.
         /// </summary>
         /// <returns>The mapping view.</returns>
         private static DbMappingView GetView107()
         {
             return new DbMappingView(@"
-    SELECT VALUE -- Constructing tblICCategoryUOMs
-        [iRely.Inventory.Model.tblICCategoryUOM](T1.tblICCategoryUOM_intCategoryUOMId, T1.tblICCategoryUOM_intCategoryId, T1.tblICCategoryUOM_intUnitMeasureId, T1.tblICCategoryUOM_dblUnitQty, T1.tblICCategoryUOM_dblSellQty, T1.tblICCategoryUOM_dblWeight, T1.tblICCategoryUOM_intWeightUOMId, T1.tblICCategoryUOM_strDescription, T1.tblICCategoryUOM_strUpcCode, T1.tblICCategoryUOM_ysnStockUnit, T1.tblICCategoryUOM_ysnAllowPurchase, T1.tblICCategoryUOM_ysnAllowSale, T1.tblICCategoryUOM_dblLength, T1.tblICCategoryUOM_dblWidth, T1.tblICCategoryUOM_dblHeight, T1.tblICCategoryUOM_intDimensionUOMId, T1.tblICCategoryUOM_dblVolume, T1.tblICCategoryUOM_intVolumeUOMId, T1.tblICCategoryUOM_dblMaxQty, T1.tblICCategoryUOM_intSort, T1.tblICCategoryUOM_intConcurrencyId)
+    SELECT VALUE -- Constructing tblICUnitMeasureConversions
+        [iRely.Inventory.Model.tblICUnitMeasureConversion](T1.tblICUnitMeasureConversion_intUnitMeasureConversionId, T1.tblICUnitMeasureConversion_intUnitMeasureId, T1.tblICUnitMeasureConversion_intStockUnitMeasureId, T1.tblICUnitMeasureConversion_dblConversionToStock, T1.tblICUnitMeasureConversion_intSort, T1.tblICUnitMeasureConversion_intConcurrencyId)
     FROM (
         SELECT 
-            T.intCategoryUOMId AS tblICCategoryUOM_intCategoryUOMId, 
-            T.intCategoryId AS tblICCategoryUOM_intCategoryId, 
-            T.intUnitMeasureId AS tblICCategoryUOM_intUnitMeasureId, 
-            T.dblUnitQty AS tblICCategoryUOM_dblUnitQty, 
-            T.dblSellQty AS tblICCategoryUOM_dblSellQty, 
-            T.dblWeight AS tblICCategoryUOM_dblWeight, 
-            T.intWeightUOMId AS tblICCategoryUOM_intWeightUOMId, 
-            T.strDescription AS tblICCategoryUOM_strDescription, 
-            T.strUpcCode AS tblICCategoryUOM_strUpcCode, 
-            T.ysnStockUnit AS tblICCategoryUOM_ysnStockUnit, 
-            T.ysnAllowPurchase AS tblICCategoryUOM_ysnAllowPurchase, 
-            T.ysnAllowSale AS tblICCategoryUOM_ysnAllowSale, 
-            T.dblLength AS tblICCategoryUOM_dblLength, 
-            T.dblWidth AS tblICCategoryUOM_dblWidth, 
-            T.dblHeight AS tblICCategoryUOM_dblHeight, 
-            T.intDimensionUOMId AS tblICCategoryUOM_intDimensionUOMId, 
-            T.dblVolume AS tblICCategoryUOM_dblVolume, 
-            T.intVolumeUOMId AS tblICCategoryUOM_intVolumeUOMId, 
-            T.dblMaxQty AS tblICCategoryUOM_dblMaxQty, 
-            T.intSort AS tblICCategoryUOM_intSort, 
-            T.intConcurrencyId AS tblICCategoryUOM_intConcurrencyId, 
+            T.intUnitMeasureConversionId AS tblICUnitMeasureConversion_intUnitMeasureConversionId, 
+            T.intUnitMeasureId AS tblICUnitMeasureConversion_intUnitMeasureId, 
+            T.intStockUnitMeasureId AS tblICUnitMeasureConversion_intStockUnitMeasureId, 
+            T.dblConversionToStock AS tblICUnitMeasureConversion_dblConversionToStock, 
+            T.intSort AS tblICUnitMeasureConversion_intSort, 
+            T.intConcurrencyId AS tblICUnitMeasureConversion_intConcurrencyId, 
             True AS _from0
-        FROM CodeFirstDatabase.tblICCategoryUOM AS T
+        FROM CodeFirstDatabase.tblICUnitMeasureConversion AS T
     ) AS T1");
         }
 
@@ -7102,24 +7076,28 @@ namespace Edm_EntityMappingGeneratedViews
         }
 
         /// <summary>
-        /// Gets the view for InventoryEntities.tblICUnitMeasureConversions.
+        /// Gets the view for InventoryEntities.tblICCategoryUOMs.
         /// </summary>
         /// <returns>The mapping view.</returns>
         private static DbMappingView GetView183()
         {
             return new DbMappingView(@"
-    SELECT VALUE -- Constructing tblICUnitMeasureConversions
-        [iRely.Inventory.Model.tblICUnitMeasureConversion](T1.tblICUnitMeasureConversion_intUnitMeasureConversionId, T1.tblICUnitMeasureConversion_intUnitMeasureId, T1.tblICUnitMeasureConversion_intStockUnitMeasureId, T1.tblICUnitMeasureConversion_dblConversionToStock, T1.tblICUnitMeasureConversion_intSort, T1.tblICUnitMeasureConversion_intConcurrencyId)
+    SELECT VALUE -- Constructing tblICCategoryUOMs
+        [iRely.Inventory.Model.tblICCategoryUOM](T1.tblICCategoryUOM_intCategoryUOMId, T1.tblICCategoryUOM_intCategoryId, T1.tblICCategoryUOM_intUnitMeasureId, T1.tblICCategoryUOM_dblUnitQty, T1.tblICCategoryUOM_ysnStockUnit, T1.tblICCategoryUOM_ysnAllowPurchase, T1.tblICCategoryUOM_ysnAllowSale, T1.tblICCategoryUOM_ysnDefault, T1.tblICCategoryUOM_intSort, T1.tblICCategoryUOM_intConcurrencyId)
     FROM (
         SELECT 
-            T.intUnitMeasureConversionId AS tblICUnitMeasureConversion_intUnitMeasureConversionId, 
-            T.intUnitMeasureId AS tblICUnitMeasureConversion_intUnitMeasureId, 
-            T.intStockUnitMeasureId AS tblICUnitMeasureConversion_intStockUnitMeasureId, 
-            T.dblConversionToStock AS tblICUnitMeasureConversion_dblConversionToStock, 
-            T.intSort AS tblICUnitMeasureConversion_intSort, 
-            T.intConcurrencyId AS tblICUnitMeasureConversion_intConcurrencyId, 
+            T.intCategoryUOMId AS tblICCategoryUOM_intCategoryUOMId, 
+            T.intCategoryId AS tblICCategoryUOM_intCategoryId, 
+            T.intUnitMeasureId AS tblICCategoryUOM_intUnitMeasureId, 
+            T.dblUnitQty AS tblICCategoryUOM_dblUnitQty, 
+            T.ysnStockUnit AS tblICCategoryUOM_ysnStockUnit, 
+            T.ysnAllowPurchase AS tblICCategoryUOM_ysnAllowPurchase, 
+            T.ysnAllowSale AS tblICCategoryUOM_ysnAllowSale, 
+            T.ysnDefault AS tblICCategoryUOM_ysnDefault, 
+            T.intSort AS tblICCategoryUOM_intSort, 
+            T.intConcurrencyId AS tblICCategoryUOM_intConcurrencyId, 
             True AS _from0
-        FROM CodeFirstDatabase.tblICUnitMeasureConversion AS T
+        FROM CodeFirstDatabase.tblICCategoryUOM AS T
     ) AS T1");
         }
 

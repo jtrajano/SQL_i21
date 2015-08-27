@@ -72,58 +72,10 @@ Ext.define('Inventory.view.CategoryViewController', {
                 colDetailUnitQty: {
                     dataIndex: 'dblUnitQty'
                 },
-                colDetailSellQty: {
-                    dataIndex: 'dblSellQty'
-                },
-                colDetailWeight: {
-                    dataIndex: 'dblWeight'
-                },
-                colDetailWeightUOM: {
-                    dataIndex: 'strWeightUOM',
-                    editor: {
-                        store: '{weightUOM}',
-                        defaultFilters: [{
-                            column: 'strUnitType',
-                            value: 'Weight',
-                            conjunction: 'and'
-                        }]
-                    }
-                },
-                colDetailDescription: 'strDescription',
-                colDetailShortUPC: 'strUpcCode',
-                colDetailUpcCode: 'strFullUPC',
                 colStockUnit: 'ysnStockUnit',
                 colAllowSale: 'ysnAllowSale',
                 colAllowPurchase: 'ysnAllowPurchase',
-                colConvertToStock: 'dblConvertToStock',
-                colConvertFromStock: 'dblConvertFromStock',
-                colDetailLength: 'dblLength',
-                colDetailWidth: 'dblWidth',
-                colDetailHeight: 'dblHeight',
-                colDetailDimensionUOM: {
-                    dataIndex: 'strDimensionUOM',
-                    editor: {
-                        store: '{dimensionUOM}',
-                        defaultFilters: [{
-                            column: 'strUnitType',
-                            value: '',
-                            conjunction: 'and'
-                        }]
-                    }
-                },
-                colDetailVolume: 'dblVolume',
-                colDetailVolumeUOM: {
-                    dataIndex: 'strVolumeUOM',
-                    editor: {
-                        store: '{volumeUOM}',
-                        defaultFilters: [{
-                            column: 'strUnitType',
-                            value: 'Volume',
-                            conjunction: 'and'
-                        }]
-                    }
-                },
-                colDetailMaxQty: 'dblMaxQty'
+                colDefault: 'ysnDefault'
             },
 
             grdLocation: {
@@ -479,18 +431,6 @@ Ext.define('Inventory.view.CategoryViewController', {
                 }
             }
         }
-        else if (combo.column.itemId === 'colDetailWeightUOM')
-        {
-            current.set('intWeightUOMId', records[0].get('intUnitMeasureId'));
-        }
-        else if (combo.column.itemId === 'colDetailDimensionUOM')
-        {
-            current.set('intDimensionUOMId', records[0].get('intUnitMeasureId'));
-        }
-        else if (combo.column.itemId === 'colDetailVolumeUOM')
-        {
-            current.set('intVolumeUOMId', records[0].get('intUnitMeasureId'));
-        }
     },
 
     onUOMStockUnitCheckChange: function (obj, rowIndex, checked, eOpts) {
@@ -542,6 +482,24 @@ Ext.define('Inventory.view.CategoryViewController', {
         }
     },
 
+    onUOMDefaultCheckChange: function (obj, rowIndex, checked, eOpts) {
+        if (obj.dataIndex === 'ysnDefault'){
+            var grid = obj.up('grid');
+            var current = grid.view.getRecord(rowIndex);
+
+            if (checked === true){
+                var uoms = grid.store.data.items;
+                if (uoms) {
+                    uoms.forEach(function(uom){
+                        if (uom !== current){
+                            uom.set('ysnDefault', false);
+                        }
+                    });
+                }
+            }
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboDetailUnitMeasure": {
@@ -561,6 +519,9 @@ Ext.define('Inventory.view.CategoryViewController', {
             },
             "#colStockUnit": {
                 beforecheckchange: this.onUOMStockUnitCheckChange
+            },
+            "#colDefault": {
+                beforecheckchange: this.onUOMDefaultCheckChange
             }
         });
     }
