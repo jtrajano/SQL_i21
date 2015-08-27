@@ -24,6 +24,7 @@ BEGIN
 			ELSE RIGHT('00000000000'+ISNULL(IUOM.strUpcCode,''),11) 
 		END [POSCode]
 	, IUM.strUnitMeasure [PosCodeModifierName] 
+	, 0 [POSCodeModifierValue]
 	from 
 	tblSTStore ST
 	JOIN tblSTRegister R ON R.intStoreId = ST.intStoreId

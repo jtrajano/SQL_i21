@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblSTstgComboSalesFile]
 (
+	[intComboSalesFile] INT NOT NULL IDENTITY,
 	[StoreLocationID] INT NULL, 
     [VendorName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [VendorModelVersion] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -14,5 +15,6 @@
     [ComboItemQuantity] INT NULL, 
     [ComboItemUnitPrice] NUMERIC(18, 6) NULL, 
     [StartDate] DATETIME NULL, 
-    [StopDate] DATETIME NULL  
+    [StopDate] DATETIME NULL, 
+    CONSTRAINT [PK_tblSTstgComboSalesFile] PRIMARY KEY ([intComboSalesFile])  
 )

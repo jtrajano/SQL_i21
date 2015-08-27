@@ -105,7 +105,8 @@ BEGIN
 
 --SELECT @PKColumnCondition
 
-	DECLARE @tblXML TABLE (intImportFileColumnDetailId int, intLevel int, intLength int, intPosition int, strXMLTag nvarchar(200), strTable nvarchar(200), strColumnName nvarchar(200), strDefaultValue nvarchar(200))
+	DECLARE @tblXML TABLE (intImportFileColumnDetailId int, intLevel int, intLength int, intPosition int, strXMLTag nvarchar(200)
+							, strTable nvarchar(200), strColumnName nvarchar(200), strDefaultValue nvarchar(200), strHeader nvarchar(50))
 	DECLARE @intParent Int, @intRootChild Int
 
 	SELECT @intRootChild = COUNT(intLevel) FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLength = 1
@@ -119,7 +120,8 @@ BEGIN
 		DELETE FROM @tblXML
 		
 		INSERT INTO @tblXML
-		SELECT intImportFileColumnDetailId, intLevel, intLength, intPosition, strXMLTag, strTable, strColumnName, strDefaultValue FROM dbo.tblSMImportFileColumnDetail 
+		SELECT intImportFileColumnDetailId, intLevel, intLength, intPosition, strXMLTag, strTable, strColumnName, strDefaultValue, strDataType 
+		FROM dbo.tblSMImportFileColumnDetail 
 		WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLength = @intParent Order By intPosition
 		
 	--SELECT * FROM @tblXML
@@ -130,14 +132,16 @@ BEGIN
 		
 		WHILE(@intMinPosition <= @intMaxPosition)
 		BEGIN
-			DECLARE @intImportFileColumnDetailId int, @intLevel int, @strXMLTag nvarchar(200), @strTable nvarchar(200), @strColumnName nvarchar(200), @strDefaultValue nvarchar(200)
+			DECLARE @intImportFileColumnDetailId int, @intLevel int, @strXMLTag nvarchar(200), @strTable nvarchar(200), @strColumnName nvarchar(200)
+				, @strDefaultValue nvarchar(200), @strHeader nvarchar(50)
 			DECLARE @strTagAttribute nvarchar(max), @strParentTag nvarchar(200), @strParentTable nvarchar(200), @intParentLevel Int, @intParentChild Int
 			
 			SET @strTagAttribute = ''
 			
 			SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId, @intLevel = intLevel,  @strXMLTag = strXMLTag
-			, @strTable = strTable, @strColumnName = strColumnName, @strDefaultValue = strDefaultValue 
+			, @strTable = strTable, @strColumnName = strColumnName, @strDefaultValue = strDefaultValue, @strHeader = strHeader  
 			FROM @tblXML WHERE intPosition = @intMinPosition
+			
 			
 	--SELECT @strXMLTag '@strXMLTag'
 			IF (CHARINDEX(':' ,@strXMLTag) > 0	)		
@@ -274,10 +278,23 @@ BEGIN
 					END
 					SET @strMainSQL = LEFT(@strMainSQL,LEN(@strMainSQL)-3)
 					
-					DECLARE @strParentParentTable nvarchar(200), @intParentParentLevel Int, @intCurrentLength Int
+					--DECLARE @strParentParentTable nvarchar(200), @intParentParentLevel Int, @intCurrentLength Int
+					--SELECT @intCurrentLength = intLength FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = @intLevel
+					--SELECT @intParentParentLevel = intLevel, @strParentParentTable = strTable FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = @intCurrentLength
+					--IF ((ISNULL(@strParentParentTable,'') = '' ) OR (@intParentLevel = 1 AND @intParentChild = 1))
+					--BEGIN
+					--	SET @strMainSQL = @strMainSQL  + ' '' FROM [dbo].[' + @strMainTable + '] main ' + 
+					--	CASE WHEN (SELECT COUNT(1) FROM @tblWhereClause) = 0 THEN ' '' ' 
+					--	ELSE ' WHERE ' +  (SELECT REPLACE(strWhereCondition, '''', '''''') FROM @tblWhereClause WHERE LTRIM(RTRIM(strWhereTable)) = @strTable) + ' '' ' END 										
+					--END
+					
+					DECLARE @strParentParentTable nvarchar(200), @intParentParentLength Int, @intCurrentLength Int
 					SELECT @intCurrentLength = intLength FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = @intLevel
-					SELECT @intParentParentLevel = intLevel, @strParentParentTable = strTable FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = @intCurrentLength
-					IF ((ISNULL(@strParentParentTable,'') = '' ) OR (@intParentLevel = 1 AND @intParentChild = 1))
+					
+					SELECT @intParentParentLength = intLength, @strParentParentTable = strTable FROM dbo.tblSMImportFileColumnDetail 
+					WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = @intCurrentLength
+					
+					IF ((ISNULL(@strParentParentTable,'') <> '' ) AND @intParentParentLength = 1 AND ISNULL(@strHeader,'') = ''	) --OR (@intParentLevel = 1 AND @intParentChild = 1))
 					BEGIN
 						SET @strMainSQL = @strMainSQL  + ' '' FROM [dbo].[' + @strMainTable + '] main ' + 
 						CASE WHEN (SELECT COUNT(1) FROM @tblWhereClause) = 0 THEN ' '' ' 
@@ -339,8 +356,11 @@ BEGIN
 		BEGIN	
 			
 			DECLARE @intStart Int, @intEnd Int
-			SELECT @intLevel = intLevel, @strParentTag = strXMLTag, @strTable = strTable, @strDataType = strDataType, @strColumnName = strColumnName FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND intLength = 1 AND intPosition = @intMinPosFin
-			SELECT @intStart = MIN(intPosition), @intEnd = MAX(intPosition) FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND intLength = @intLevel 
+			SELECT @intLevel = intLevel, @strParentTag = strXMLTag, @strTable = strTable, @strDataType = strDataType, @strColumnName = strColumnName 
+			FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND intLength = 1 AND intPosition = @intMinPosFin
+			
+			SELECT @intStart = MIN(intPosition), @intEnd = MAX(intPosition) FROM dbo.tblSMImportFileColumnDetail 
+			Where intImportFileHeaderId = @intImportFileHeaderId AND intLength = @intLevel 
 			
 			IF (CHARINDEX(':' ,@strParentTag) > 0	)		
 			SET @strParentTag = REPLACE(SUBSTRING(@strParentTag, CHARINDEX(':', @strParentTag), LEN(@strParentTag)), ':', '')			

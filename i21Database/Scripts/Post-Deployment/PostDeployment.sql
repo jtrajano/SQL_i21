@@ -224,5 +224,8 @@ print 'BEGIN POST DEPLOYMENT'
 -- Quality Module
 :r .\QM\1_MasterTables.sql
 
+-- Store Module
+:r .\ST\1_FileFieldMapping_PricebookSale.sql
+
 
 print 'END POST DEPLOYMENT'
