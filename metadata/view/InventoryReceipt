@@ -2240,7 +2240,7 @@
                                                                         "align": null,
                                                                         "dataIndex": "dblUnitCost",
                                                                         "dataType": null,
-                                                                        "format": null,
+                                                                        "format": "0,000.00####",
                                                                         "itemId": "colUnitCost",
                                                                         "text": "Unit Cost",
                                                                         "width": 85
