@@ -12,7 +12,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
  
 DECLARE	 @ShipmentId INT
-		,@InvoiceId  INT
+		,@InvoiceId  INT = 0
 		,@HasSoftwareItems BIT = 0
 		,@HasNonSoftwareItems BIT = 0
 	    ,@icUserId INT = (SELECT TOP 1 intUserSecurityID FROM tblSMUserSecurity WHERE intEntityId = @UserId)
@@ -70,10 +70,6 @@ IF EXISTS(SELECT 1 FROM tblSOSalesOrderDetail A INNER JOIN tblICItem B ON A.intI
 
 		SET @InventoryShipmentId = @ShipmentId;
 	END
-ELSE
-	BEGIN
-		SET @InventoryShipmentId = @InvoiceId;
-	END
 
 IF @@ERROR > 0 
 	RETURN 0;
@@ -81,6 +77,13 @@ IF @@ERROR > 0
 IF @HasSoftwareItems = 1
 	BEGIN
 		EXEC dbo.uspARInsertToInvoice @SalesOrderId, @UserId, @HasNonSoftwareItems, @ShipmentId, @InvoiceId OUTPUT
+		IF @InvoiceId > 0
+			BEGIN
+				DECLARE @param NVARCHAR(MAX) = CONVERT(NVARCHAR(MAX), @InvoiceId)
+
+				EXEC dbo.uspARPostInvoice NULL, 1, 0, @param, @UserId				
+			END
+		SET @InventoryShipmentId = @InvoiceId
 	END
 
 EXEC dbo.uspSOUpdateOrderShipmentStatus @SalesOrderId
