@@ -734,3 +734,7 @@ EXEC sp_addmessage 51182,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51183) EXEC sp_dropmessage 51183, 'us_english'	
 SET @strmessage = 'Transaction exists for this record, record cannot be deleted.'
 EXEC sp_addmessage 51183,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51184) EXEC sp_dropmessage 51184, 'us_english'	
+SET @strmessage = 'There is an already existing calendar for the date range %s to %s.'
+EXEC sp_addmessage 51184,11,@strmessage,'us_english','False'

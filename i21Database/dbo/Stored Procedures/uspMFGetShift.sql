@@ -17,5 +17,5 @@ BEGIN
 	WHERE intLocationId = @intLocationId
 	AND strShiftName  LIKE @strShiftName+'%'
 	AND intShiftId =(Case When @intShiftId >0 then @intShiftId else intShiftId end)
-	Order by intShiftId
+	Order by intShiftSequence
 END
