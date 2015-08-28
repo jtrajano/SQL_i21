@@ -26,6 +26,7 @@ AS
 		,[strTransactionNumber]
 		,[strTransactionType]
 		,[strResponsibleUser]
+		,[intEntityId]
 		,[strFrequency]
 		,[dtmLastProcess]
 		,[dtmNextProcess]
@@ -40,7 +41,8 @@ AS
 		 @InvoiceId					             --intTransactionId
 		,[strInvoiceNumber]			             --strTransactionNumber
 		,[strTransactionType]		             --strTransactionType
-		,@responsibleUser
+		,@responsibleUser						 --strResponsibleUser
+		,@UserId								 --intEntityId
 		,@frequency					             --strFrequency
 		,dtmDate					             --dtmLastProcess
 		,DATEADD(MONTH, @monthsToAdd, dtmDate)   --dtmNextProcess
