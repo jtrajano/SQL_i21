@@ -25,7 +25,8 @@
     [dblMaintenanceAmount]  NUMERIC(18, 6)  NULL, 
     [dblLicenseAmount]      NUMERIC(18, 6)  NULL,     
     [intContractHeaderId] INT NULL, 
-    [intContractDetailId] INT NULL, 
+    [intContractDetailId] INT NULL,
+	[intTaxGroupId] INT NULL, 
     CONSTRAINT [PK_tblSOSalesOrderDetail] PRIMARY KEY CLUSTERED ([intSalesOrderDetailId] ASC),
     CONSTRAINT [FK_tblSOSalesOrderDetail_tblSOSalesOrder] FOREIGN KEY ([intSalesOrderId]) REFERENCES [dbo].[tblSOSalesOrder] ([intSalesOrderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblSOSalesOrderDetail_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
@@ -34,5 +35,6 @@
 	CONSTRAINT [FK_tblSOSalesOrderDetail_tblGLAccount_intInventoryAccountId] FOREIGN KEY ([intInventoryAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblSOSalesOrderDetail_tblICStorageLocation_intStorageLocationId] FOREIGN KEY ([intStorageLocationId]) REFERENCES [dbo].[tblICStorageLocation] ([intStorageLocationId]),
 	CONSTRAINT [FK_tblSOSalesOrderDetail_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [dbo].[tblCTContractHeader] ([intContractHeaderId]),
-	CONSTRAINT [FK_tblSOSalesOrderDetail_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId])
+	CONSTRAINT [FK_tblSOSalesOrderDetail_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId]),
+	CONSTRAINT [FK_tblSOSalesOrderDetail_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId])
 );
