@@ -48,12 +48,12 @@ BEGIN
 	UPDATE tblFRColumnDesignCalculation SET intRefNoId = @SORT WHERE intColumnId = @ColumnId and intColumnDetailId = @intColumnDetailId
 	UPDATE tblFRColumnDesignCalculation SET intRefNoCalc = @SORT WHERE intColumnId = @ColumnId and intColumnDetailRefNo = @intColumnDetailId
 	
-	UPDATE tblFRColumnDesign SET strColumnFormula = REPLACE(REPLACE(REPLACE(		REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(' ' + REPLACE(strColumnFormula,' ','') + ' ','/',' /'),'*',' *'),'-',' -'),'+',' +'),'(',' ('),')',' )'),':',' :')		,'R',' R'),'R' + CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ','X' + CAST(@SORT AS NVARCHAR(15)) + ' '),' ','') WHERE intColumnId = @ColumnId and strColumnType = 'Column Calculation'
+	UPDATE tblFRColumnDesign SET strColumnFormula = REPLACE(REPLACE(REPLACE(		REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(' ' + REPLACE(strColumnFormula,' ','') + ' ','/',' /'),'*',' *'),'-',' -'),'+',' +'),'(',' ('),')',' )'),':',' :')		,'C',' C'),'C' + CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ','X' + CAST(@SORT AS NVARCHAR(15)) + ' '),' ','') WHERE intColumnId = @ColumnId and strColumnType = 'Column Calculation'
 
 	DELETE #TempColumnDesign WHERE [ColumnDetailId] = @intColumnDetailId
 END
 
-UPDATE tblFRColumnDesign SET strColumnFormula = REPLACE(strColumnFormula,'X','R') WHERE intColumnId = @ColumnId and strColumnType = 'Column Calculation'
+UPDATE tblFRColumnDesign SET strColumnFormula = REPLACE(strColumnFormula,'X','C') WHERE intColumnId = @ColumnId and strColumnType = 'Column Calculation'
 UPDATE tblFRColumnDesign SET strColumnFormula = SUBSTRING(REPLACE(strColumnFormula,' ',''),2,LEN(REPLACE(strColumnFormula,' ','')))  WHERE intColumnId = @ColumnId and strColumnType = 'Column Calculation' and (REPLACE(strColumnFormula,' ','') like '+%' OR REPLACE(strColumnFormula,' ','') like '-%' OR REPLACE(strColumnFormula,' ','') like '*%' OR REPLACE(strColumnFormula,' ','') like '/%')
 UPDATE tblFRColumnDesign SET strColumnFormula = '(' + strColumnFormula WHERE intColumnId = @ColumnId and strColumnType = 'Column Calculation' and strColumnFormula like '%)%' and strColumnFormula not like '%(%'
 UPDATE tblFRColumnDesign SET strColumnFormula = strColumnFormula + ')' WHERE intColumnId = @ColumnId and strColumnType = 'Column Calculation' and strColumnFormula like '%(%' and strColumnFormula not like '%)%'
