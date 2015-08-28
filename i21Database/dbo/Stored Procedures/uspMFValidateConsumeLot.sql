@@ -34,15 +34,18 @@ BEGIN TRY
 		,@dblTotalQtyToBeConsumed NUMERIC(18, 6)
 		,@dblQtyConsumedSoFar NUMERIC(18, 6)
 		,@strStatus NVARCHAR(50)
+		,@strConsumeQty nvarchar(50)
+		,@strOnHand nvarchar(50)
 
 	IF @dblConsumeQty <= 0
 		AND @ysnNegativeQtyAllowed = 0
 	BEGIN
+		SELECT @strConsumeQty=@dblConsumeQty
 		RAISERROR (
 				51085
 				,11
 				,1
-				,@dblConsumeQty
+				,@strConsumeQty
 				)
 
 		RETURN
@@ -131,15 +134,17 @@ BEGIN TRY
 	IF @dblConsumeQty > @dblOnHand
 		AND @ysnNegativeQtyAllowed = 0
 	BEGIN
+		SELECT @strConsumeQty=@dblConsumeQty
+		Select @strOnHand=@dblOnHand
 		RAISERROR (
 				51089
 				,11
 				,1
-				,@dblConsumeQty
+				,@strConsumeQty
 				,@strUnitMeasure
 				,@strItemNo
 				,@strLotNumber
-				,@dblOnHand
+				,@strOnHand
 				,@strUnitMeasure
 				)
 

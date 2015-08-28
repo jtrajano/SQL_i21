@@ -332,15 +332,15 @@ SET @strmessage = 'The item ''%s'' on lot ''%s'' is not a configured input item 
 EXEC sp_addmessage 51082,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51083) EXEC sp_dropmessage 51083, 'us_english'	
-SET @strmessage = 'The attempted produce quantity of ''%d'' for material ''%s'' is more than the allowed production quantity with upper tolerance %d. The transaction will not be allowed to proceed.'
+SET @strmessage = 'The attempted produce quantity of ''%s'' for material ''%s'' is more than the allowed production quantity with upper tolerance %s. The transaction will not be allowed to proceed.'
 EXEC sp_addmessage 51083,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51084) EXEC sp_dropmessage 51084, 'us_english'	
-SET @strmessage =  'The attempted produce quantity of ''%d'' for material ''%s'' is more than the allowed production quantity with lower tolerance %d. The transaction will not be allowed to proceed.'
+SET @strmessage =  'The attempted produce quantity of ''%s'' for material ''%s'' is more than the allowed production quantity with lower tolerance %s. The transaction will not be allowed to proceed.'
 EXEC sp_addmessage 51084,11,@strmessage,'us_english','False'  
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51085) EXEC sp_dropmessage 51085, 'us_english'	
-SET @strmessage =  'The requested consume quantity of %d is invalid. Please attempt to consume a positive quantity less than or equal to input lot quantity.'
+SET @strmessage =  'The requested consume quantity of %s is invalid. Please attempt to consume a positive quantity less than or equal to input lot quantity.'
 EXEC sp_addmessage 51085,11,@strmessage,'us_english','False'  
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51086) EXEC sp_dropmessage 51086, 'us_english'	
@@ -356,7 +356,7 @@ SET @strmessage =  'The Lot ''%s'' is expired. You cannot consume.'
 EXEC sp_addmessage 51088,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51089) EXEC sp_dropmessage 51089, 'us_english'	
-SET @strmessage = 'The attempted consumption quantity of %d %s of material ''%s'' from lot ''%s'' is more than the lot''s queued quantity of %d %s. The transaction will not be allowed to proceed.'
+SET @strmessage = 'The attempted consumption quantity of %s %s of material ''%s'' from lot ''%s'' is more than the lot''s queued quantity of %s %s. The transaction will not be allowed to proceed.'
 EXEC sp_addmessage 51089,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51090) EXEC sp_dropmessage 51090, 'us_english'	

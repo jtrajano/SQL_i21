@@ -54,6 +54,9 @@ BEGIN TRY
 		,@intDayOfYear int
 		,@intAttributeId int
 		,@strAllInputItemsMandatoryforConsumption nvarchar(50)
+		,@strUpperToleranceQuantity nvarchar(50)
+		,@strLowerToleranceQuantity nvarchar(50)
+		,@strQuantity nvarchar(50)
 	
 	Select @dtmCurrentDateTime	=GETDATE()
 	Select @dtmCurrentDate		=CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
@@ -473,13 +476,15 @@ BEGIN TRY
 		IF @ysnIgnoreTolerance = 0
 			AND @dblQuantity > @dblUpperToleranceQuantity
 		BEGIN
+			SELECT @strQuantity=@dblQuantity
+			SELECT @strUpperToleranceQuantity=@dblUpperToleranceQuantity
 			RAISERROR (
 					51083
 					,11
 					,1
-					,@dblQuantity
+					,@strQuantity
 					,@strItemNo
-					,@dblUpperToleranceQuantity
+					,@strUpperToleranceQuantity
 					)
 
 			RETURN
@@ -488,13 +493,15 @@ BEGIN TRY
 		IF @ysnIgnoreTolerance = 0
 			AND @dblLowerToleranceQuantity > @dblQuantity
 		BEGIN
+			SELECT @strQuantity=@dblQuantity
+			SELECT @strLowerToleranceQuantity=@dblLowerToleranceQuantity
 			RAISERROR (
 					51084
 					,11
 					,1
-					,@dblQuantity
+					,@strQuantity
 					,@strItemNo
-					,@dblLowerToleranceQuantity
+					,@strLowerToleranceQuantity
 					)
 
 			RETURN
