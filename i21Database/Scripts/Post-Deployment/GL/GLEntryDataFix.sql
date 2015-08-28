@@ -234,17 +234,6 @@ GO
 	PRINT N'End Updating tblGLDetail.strCode based on tblGLJournal.strSourceType'
 GO
 
-	PRINT N'Begin Deleting Categories not used in Inventory'
-	--GL-2016
-GO
-	DELETE FROM tblGLAccountCategoryGroup
-	WHERE intAccountCategoryId IN(SELECT intAccountCategoryId
-							  FROM tblGLAccountCategory
-							  WHERE strAccountCategory IN('Broker Expense', 'Contract Equity', 'Contract Purchase Gain/Loss', 'Contract Sales Gain/Loss', 'Currency Equity', 'Currency Purchase Gain/Loss', 'Currency Sales Gain/Loss', 'DP Liability','DP Income', 'DP Income', 'Fee Expense', 'Fee Income', 'Freight Expenses', 'Interest Expense', 'Interest Income', 'Options Expense', 'Options Income', 'Purchase Account', 'Rail Freight', 'Storage Expense', 'Storage Income', 'Storage Receivable','Other Charge (Asset)')) AND 
-	  strAccountCategoryGroupCode = 'INV'
-GO
-	PRINT N'End Deleting Categories not used in Inventory'
-GO
-
+	
 
 

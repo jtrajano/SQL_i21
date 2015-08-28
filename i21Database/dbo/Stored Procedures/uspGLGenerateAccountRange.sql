@@ -1,9 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[uspGLGenerateAccountRange]
 AS
 	SET NOCOUNT ON;
+	--exits if already existing
+	IF EXISTS(SELECT TOP 1 1 FROM tblGLAccountRange) RETURN
+
 	UPDATE tblGLAccountGroup set intAccountRangeId = null
 	DELETE FROM tblGLAccountRange
-	
 	DECLARE @intLength INT
 	SELECT TOP 1 @intLength = intLength - 1  FROM tblGLAccountStructure WHERE strType = 'Primary'
 	SET IDENTITY_INSERT tblGLAccountRange ON
