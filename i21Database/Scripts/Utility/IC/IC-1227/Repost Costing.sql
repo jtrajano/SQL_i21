@@ -3,6 +3,10 @@
 ------------------------------------------------------------------------------------------------------------------------------------
 
 UPDATE	Lot
+SET		dblLastCost = 0 
+FROM	dbo.tblICLot Lot 
+
+UPDATE	Lot
 SET		dblLastCost = dbo.fnCalculateUnitCost(ReceiptItem.dblUnitCost , ItemUOM.dblUnitQty)
 FROM	dbo.tblICLot Lot INNER JOIN dbo.tblICInventoryReceiptItemLot ReceiptLot
 			ON Lot.intLotId = ReceiptLot.intLotId
@@ -12,8 +16,11 @@ FROM	dbo.tblICLot Lot INNER JOIN dbo.tblICInventoryReceiptItemLot ReceiptLot
 			ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
 
 UPDATE	AdjDetail
-SET		dblCost = Lot.dblLastCost * ItemUOM.dblUnitQty 
-FROM	dbo.tblICInventoryAdjustmentDetail AdjDetail INNER JOIN dbo.tblICLot Lot
+SET		dblCost =	CASE	WHEN Lot.dblLastCost <> 0 THEN Lot.dblLastCost 
+							ELSE AdjDetail.dblCost 
+					END 
+					* ItemUOM.dblUnitQty 
+FROM	dbo.tblICInventoryAdjustmentDetail AdjDetail LEFT JOIN dbo.tblICLot Lot
 			ON AdjDetail.intLotId = Lot.intLotId
 		LEFT JOIN dbo.tblICItemUOM ItemUOM
 			ON ItemUOM.intItemUOMId = AdjDetail.intItemUOMId
