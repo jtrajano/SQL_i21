@@ -214,11 +214,11 @@ BEGIN
 		SELECT	
 				intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_25KgBagUOM		-- Processed in LB because Lot is stored as LB. 
+				,intItemUOMId			= @ManualGrains_PoundUOM
 				,dtmDate				= '05/20/2015'
-				,dblQty					= 500.000000 
-				,dblUOMQty				= @25KgBagUnitQty	
-				,dblCost				= 2.500000 * @25KgBagUnitQty
+				,dblQty					= 400.000000 * (@25KgBagUnitQty * 500.00 / 400.00)
+				,dblUOMQty				= @PoundUnitQty
+				,dblCost				= 2.500000 
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 
@@ -231,6 +231,8 @@ BEGIN
 				,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
 				,intStorageLocationId	= @StorageSilo_RM_DL
 	END 
+
+	SELECT * FROM tblICLot
 
 	-- Act
 	BEGIN 
@@ -283,6 +285,8 @@ BEGIN
 		FROM	dbo.tblICInventoryTransaction
 		WHERE	intTransactionId = @intTransactionId
 	END 
+
+	SELECT * FROM tblICLot
 
 	-- Assert 
 	BEGIN 

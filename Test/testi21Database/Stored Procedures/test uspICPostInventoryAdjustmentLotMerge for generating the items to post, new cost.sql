@@ -214,11 +214,11 @@ BEGIN
 		SELECT	
 				intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_25KgBagUOM
+				,intItemUOMId			= @ManualGrains_PoundUOM
 				,dtmDate				= '05/18/2015'
-				,dblQty					= 500 
-				,dblUOMQty				= @25KgBagUnitQty
-				,dblCost				= 3.50 * @25KgBagUnitQty
+				,dblQty					= 500 * @25KgBagUnitQty
+				,dblUOMQty				= @PoundUnitQty
+				,dblCost				= 3.50 
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 
