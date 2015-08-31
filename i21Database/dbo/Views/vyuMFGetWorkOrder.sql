@@ -38,11 +38,22 @@ SELECT C.intManufacturingCellId
 	,P.strPackName
 	,W.dtmCreated
 	,W.intCreatedUserId
+	,US.strUserName
 	,W.dtmLastModified
 	,W.intLastModifiedUserId
+	,LM.strUserName AS LastModifiedUser
 	,W.intExecutionOrder
 	,W.strVendorLotNo
 	,W.strLotNumber
+	,W.intLocationId
+	,W.strSalesOrderNo
+	,W.strCustomerOrderNo
+	,PW.intWorkOrderId AS intParentWorkOrderId
+	,PW.strWorkOrderNo AS strParentWorkOrderNo
+	,W.intManufacturingProcessId
+	,MP.strProcessName
+	,W.intSupervisorId
+	,SS.strUserName AS strSupervisor
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 	AND W.intStatusId <> 13
@@ -57,3 +68,8 @@ LEFT JOIN dbo.tblMFShift SH ON SH.intShiftId = W.intPlannedShiftId
 JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
 	AND R.intLocationId = C.intLocationId
 	AND R.ysnActive = 1
+JOIN dbo.tblSMUserSecurity US ON US.intUserSecurityID = W.intCreatedUserId
+JOIN dbo.tblSMUserSecurity SS ON SS.intUserSecurityID = W.intSupervisorId
+JOIN dbo.tblSMUserSecurity LM ON LM.intUserSecurityID = W.intLastModifiedUserId
+JOIN dbo.tblMFManufacturingProcess MP ON MP.intManufacturingProcessId = W.intManufacturingProcessId
+LEFT JOIN dbo.tblMFWorkOrder PW ON PW.intWorkOrderId = W.intParentWorkOrderId
