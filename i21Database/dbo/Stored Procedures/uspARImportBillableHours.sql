@@ -143,6 +143,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @NewInvoices)
 		INNER JOIN
 			tblICItemLocation IL
 				ON V.intItemId = IL.intItemId
+				AND V.intCompanyLocationId = IL.intLocationId
 		LEFT OUTER JOIN
 			vyuARGetItemAccount Acct
 				ON V.[intItemId] = Acct.[intItemId]
