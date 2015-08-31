@@ -41,7 +41,7 @@ SELECT C.intManufacturingCellId
 	,US.strUserName
 	,W.dtmLastModified
 	,W.intLastModifiedUserId
-	,LM.strUserName AS LastModifiedUser
+	,LM.strUserName AS strLastModifiedUser
 	,W.intExecutionOrder
 	,W.strVendorLotNo
 	,W.strLotNumber
