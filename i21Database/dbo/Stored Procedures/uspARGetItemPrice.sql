@@ -16,6 +16,7 @@
 	,@VendorId				INT				= NULL
 	,@SupplyPointId			INT				= NULL
 	,@LastCost				NUMERIC(18,6)	= NULL
+	,@ShipToLocationId      INT				= NULL
 AS
 	--	DECLARE 	
 	--	@ItemId				INT
@@ -89,11 +90,11 @@ AS
 			AND intCompanyLocationId = @LocationId
 			AND intItemUOMId = @ItemUOMId
 			AND intItemId = @ItemId
-			AND ISNULL(@OriginalQuantity,0.00) + (dblDetailQuantity - ISNULL(dblScheduleQty,0)) >= @Quantity
+			AND ((ISNULL(@OriginalQuantity,0.00) + (dblDetailQuantity - ISNULL(dblScheduleQty,0)) >= @Quantity) OR ysnUnlimitedQuantity = 1)
 			AND @TransactionDate BETWEEN dtmStartDate AND dtmEndDate
 			AND intContractHeaderId = @ContractHeaderId
 			AND intContractDetailId = @ContractDetailId
-			AND ISNULL(@OriginalQuantity,0.00) + (dblDetailQuantity - ISNULL(dblScheduleQty,0)) > 0
+			AND ((ISNULL(@OriginalQuantity,0.00) + (dblDetailQuantity - ISNULL(dblScheduleQty,0)) > 0) OR ysnUnlimitedQuantity = 1)
 			AND dblBalance > 0
 		ORDER BY
 			 dtmStartDate
@@ -124,9 +125,9 @@ AS
 			AND intCompanyLocationId = @LocationId
 			AND intItemUOMId = @ItemUOMId
 			AND intItemId = @ItemId
-			AND (dblDetailQuantity - ISNULL(dblScheduleQty,0)) >= @Quantity
+			AND (((dblDetailQuantity - ISNULL(dblScheduleQty,0)) >= @Quantity) OR ysnUnlimitedQuantity = 1)
 			AND @TransactionDate BETWEEN dtmStartDate AND dtmEndDate
-			AND (dblDetailQuantity - ISNULL(dblScheduleQty,0)) > 0
+			AND (((dblDetailQuantity - ISNULL(dblScheduleQty,0)) > 0) OR ysnUnlimitedQuantity = 1)
 			AND dblBalance > 0
 		ORDER BY
 			 dtmStartDate
@@ -153,6 +154,7 @@ AS
 		,@ItemVendorId
 		,@SupplyPointId
 		,@LastCost
+		,@ShipToLocationId
 		
 	IF(@Price IS NOT NULL)
 	BEGIN		

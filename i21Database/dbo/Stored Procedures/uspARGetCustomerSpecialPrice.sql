@@ -10,6 +10,7 @@
 	,@VendorId			INT				= NULL
 	,@SupplyPointId		INT				= NULL
 	,@LastCost			NUMERIC(18,6)	= NULL
+	,@ShipToLocationId  INT				= NULL
 AS		
 	
 	DECLARE @ItemVendorId		INT
@@ -99,7 +100,7 @@ AS
 		tblARCustomer C
 			ON SP.intEntityCustomerId = C.intEntityCustomerId
 	WHERE
-		C.intEntityCustomerId = @CustomerId
+		C.intEntityCustomerId = @CustomerId AND SP.intCustomerLocationId = @ShipToLocationId
 		AND ((@TransactionDate BETWEEN SP.dtmBeginDate AND ISNULL(SP.dtmEndDate, GETDATE())) OR (CAST(@TransactionDate AS DATE) >= CAST(SP.dtmBeginDate AS DATE) AND SP.dtmBeginDate IS NULL))
 
 	--Customer Special Pricing
@@ -271,7 +272,8 @@ AS
 								WHERE tblTRSupplyPoint.intEntityLocationId = intEntityLocationId 
 									AND vyuTRRackPrice.intItemId = intRackItemId
 									AND vyuTRRackPrice.intSupplyPointId = @SupplyPointId 
-									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE)) + dblDeviation
+									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE)
+									ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC) + dblDeviation
 		WHERE
 			strPriceBasis = 'R'
 

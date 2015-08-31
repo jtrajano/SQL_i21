@@ -182,8 +182,8 @@ BEGIN
 	        ,[dtmMaintenanceDate]
 	        ,[dblMaintenanceAmount]
 	        ,[dblLicenseAmount]
-			,[intContractHeaderId]
-			,[intContractDetailId]
+			,NULL
+			,NULL
 		FROM tblSOSalesOrderDetail		
 		WHERE [intSalesOrderDetailId] = @SalesOrderDetailId
 

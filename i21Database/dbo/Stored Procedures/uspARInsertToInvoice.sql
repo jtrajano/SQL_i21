@@ -3,7 +3,7 @@
 	@UserId			     INT = 0,
 	@HasNonSoftwareItems BIT = 0,
 	@ShipmentId			 INT = 0,
-	@InvoiceId		     INT = NULL OUTPUT
+	@InvoiceId		     INT = 0 OUTPUT
 
 AS
 BEGIN
@@ -45,10 +45,10 @@ BEGIN
 	--GET EXISTING RECURRING INVOICE RECORD OF CUSTOMER
 	SELECT @customerId = intEntityCustomerId FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
 	
-	IF EXISTS(SELECT NULL FROM tblARInvoice WHERE intEntityCustomerId = @customerId AND ysnTemplate = 1)
+	IF EXISTS(SELECT NULL FROM tblARInvoice WHERE intEntityCustomerId = @customerId AND ysnTemplate = 1 AND strType = 'Software')
 		BEGIN
 			--UPDATE EXISTING RECURRING INVOICE
-			SELECT @InvoiceId = intInvoiceId FROM tblARInvoice WHERE intEntityCustomerId = @customerId AND ysnTemplate = 1
+			SELECT TOP 1 @InvoiceId = intInvoiceId FROM tblARInvoice WHERE intEntityCustomerId = @customerId AND ysnTemplate = 1 AND strType = 'Software'
 						
 			UPDATE tblARInvoice 
 			SET dblInvoiceSubtotal = dblInvoiceSubtotal + @dblSalesOrderSubtotal
@@ -247,17 +247,17 @@ BEGIN
 				THEN (SELECT strShipmentNumber FROM tblICInventoryShipment 
 					WHERE intInventoryShipmentId = @ShipmentId) 
 				ELSE NULL END
-			, dblDiscount
+			, (dblPrice * dblQtyOrdered) * (CONVERT(NUMERIC(18,6), dblDiscount) / 100)
 			, dblTotalTax
-			, CASE WHEN ICI.strType <> 'Software' THEN dblPrice ELSE dblLicenseAmount END
-			, CASE WHEN ICI.strType <> 'Software' THEN dblTotal ELSE dblLicenseAmount * dblQtyOrdered END			
+			, dblPrice
+			, dblPrice * dblQtyOrdered - (dblPrice * dblQtyOrdered) * (CONVERT(NUMERIC(18,6), dblDiscount) / 100)
 	FROM tblSOSalesOrderDetail SOD LEFT JOIN tblICItem ICI ON SOD.intItemId = ICI.intItemId 
-		WHERE SOD.intSalesOrderId = @SalesOrderId-- AND (ICI.strType IN ('Non-Inventory', 'Other Charge', 'Service', 'Software') OR ICI.strType IS NULL)
+		WHERE SOD.intSalesOrderId = @SalesOrderId
 		ORDER BY intSalesOrderDetailId
 
-	SELECT @dblSalesOrderSubtotal = SUM(dblPrice)
+	SELECT    @dblSalesOrderSubtotal  = SUM(dblTotal)
 			, @dblTax				  = SUM(dblTotalTax)
-			, @dblSalesOrderTotal	  = SUM(dblTotal)
+			, @dblSalesOrderTotal	  = SUM(dblTotal) + SUM(dblTotalTax)
 			, @dblDiscount			  = SUM(dblDiscount)
 	FROM @OrderDetails
 
@@ -302,6 +302,8 @@ BEGIN
 		,[strBillToZipCode]
 		,[strBillToCountry]
 		,[ysnTemplate]
+		,[strComments]
+		,[strDeliverPickup]
 	)
 	SELECT
 		[intEntityCustomerId]
@@ -344,6 +346,8 @@ BEGIN
 		,[strBillToZipCode]
 		,[strBillToCountry]
 		,0
+		,''
+		,''
 	FROM
 	tblSOSalesOrder
 	WHERE intSalesOrderId = @SalesOrderId
@@ -397,9 +401,9 @@ BEGIN
 				,[dblQtyOrdered]			--[dblQtyOrdered]
 				,[dblQtyOrdered]			--[dblQtyShipped]
 				,[dblDiscount]              --[dblDiscount]
-				,CASE WHEN ICI.strType <> 'Software' THEN [dblPrice] ELSE [dblLicenseAmount] END --[dblPrice]
+				,[dblPrice]					--[dblPrice]
 				,[dblTotalTax]				--[dblTotalTax]
-				,CASE WHEN ICI.strType <> 'Software' THEN [dblTotal] ELSE [dblLicenseAmount] * [dblQtyOrdered] END --[dblTotal]
+				,[dblTotal]				    --[dblTotal]
 				,[intAccountId]				--[intAccountId]
 				,[intCOGSAccountId]			--[intCOGSAccountId]
 				,[intSalesAccountId]		--[intSalesAccountId]
@@ -464,12 +468,13 @@ BEGIN
 		END
 	
 	--INSERT TO RECURRING TRANSACTION
-	IF @InvoiceId <> NULL OR @InvoiceId <> 0
+	IF @InvoiceId > 0
 		BEGIN
 			IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMRecurringTransaction WHERE intTransactionId = @InvoiceId)
 				BEGIN
 					EXEC dbo.uspARInsertRecurringInvoice @InvoiceId, @UserId
-				END
-		END	
+				END			
+		END
 
+	SET @InvoiceId = @NewInvoiceId
 END

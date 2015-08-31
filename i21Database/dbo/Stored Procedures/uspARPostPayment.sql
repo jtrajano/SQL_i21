@@ -72,8 +72,9 @@ DECLARE @MODULE_NAME NVARCHAR(25) = 'Accounts Receivable'
 DECLARE @SCREEN_NAME NVARCHAR(25) = 'Receive Payments'
 DECLARE @CODE NVARCHAR(25) = 'AR'
 
-DECLARE @ARAccount NVARCHAR(250)
-		,@DiscountAccount NVARCHAR(250)
+DECLARE @ARAccount INT
+		,@DiscountAccount INT
+		,@WriteOffAccount INT
 		
 DECLARE @totalInvalid INT
 DECLARE @totalRecords INT
@@ -82,6 +83,7 @@ DECLARE @ErrorMerssage NVARCHAR(MAX)
 		
 SET @ARAccount = (SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0)
 SET @DiscountAccount = (SELECT TOP 1 intDiscountAccountId FROM tblARCompanyPreference WHERE intDiscountAccountId IS NOT NULL AND intDiscountAccountId <> 0)
+SET @WriteOffAccount = (SELECT TOP 1 intWriteOffAccountId FROM tblARCompanyPreference WHERE intWriteOffAccountId IS NOT NULL AND intWriteOffAccountId <> 0)
 		
 
 DECLARE @UserEntityID int
@@ -369,6 +371,28 @@ IF @recap = 0
 					AG.strAccountGroup = 'Cash Accounts'
 					AND (BA.intGLAccountId IS NULL
 						 OR BA.ysnActive = 0)
+						 
+						 
+				--Write Off Account
+				INSERT INTO 
+					@ARReceivableInvalidData
+				SELECT 
+					'The Write Off account in Company Preference was not set.'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId
+				INNER JOIN
+					tblSMPaymentMethod PM
+						ON A.intPaymentMethodId = PM.intPaymentMethodID						
+				WHERE
+					UPPER(RTRIM(LTRIM(PM.strPaymentMethod))) = UPPER('Write Off')
+					AND (@WriteOffAccount IS NULL OR @WriteOffAccount = 0)
 					
 
 				--NOT BALANCE 
@@ -732,7 +756,7 @@ IF @post = 1
 		SELECT
 			 dtmDate					= DATEADD(dd, DATEDIFF(dd, 0, A.dtmDatePaid), 0)
 			,strBatchID					= @batchId
-			,intAccountId				= A.intAccountId
+			,intAccountId				= (CASE WHEN UPPER(RTRIM(LTRIM(PM.strPaymentMethod))) = UPPER('Write Off') THEN @WriteOffAccount ELSE A.intAccountId END)
 			,dblDebit					= A.dblAmountPaid
 			,dblCredit					= 0
 			,dblDebitUnit				= 0
@@ -756,10 +780,10 @@ IF @post = 1
 			,strModuleName				= @MODULE_NAME
 			,intConcurrencyId			= 1				 
 		FROM
-			tblARPayment A 
+			tblARPayment A			 
 		INNER JOIN
-			tblGLAccount GLAccnt
-				ON A.intAccountId = GLAccnt.intAccountId
+			tblSMPaymentMethod PM
+				ON A.intPaymentMethodId = PM.intPaymentMethodID
 		INNER JOIN
 			tblARCustomer C
 				ON A.[intEntityCustomerId] = C.[intEntityCustomerId]
