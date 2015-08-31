@@ -16,7 +16,7 @@ FROM	dbo.tblICLot Lot INNER JOIN dbo.tblICInventoryReceiptItemLot ReceiptLot
 			ON ItemUOM.intItemUOMId = ReceiptItem.intUnitMeasureId
 
 UPDATE	AdjDetail
-SET		dblCost =	CASE	WHEN Lot.dblLastCost <> 0 THEN Lot.dblLastCost 
+SET		dblCost =	CASE	WHEN ISNULL(Lot.dblLastCost, 0) <> 0 THEN Lot.dblLastCost 
 							ELSE AdjDetail.dblCost 
 					END 
 					* ItemUOM.dblUnitQty 
@@ -26,7 +26,11 @@ FROM	dbo.tblICInventoryAdjustmentDetail AdjDetail LEFT JOIN dbo.tblICLot Lot
 			ON ItemUOM.intItemUOMId = AdjDetail.intItemUOMId
 
 UPDATE	InvTrans
-SET		dblCost = Lot.dblLastCost * ItemUOM.dblUnitQty 
+SET		dblCost =	CASE	WHEN InvTrans.dblQty > 0 THEN 
+								InvTrans.dblCost * InvTrans.dblUOMQty 
+							ELSE 
+								InvTrans.dblCost 
+					END
 FROM	dbo.tblICInventoryTransaction InvTrans INNER JOIN dbo.tblICLot Lot
 			ON InvTrans.intLotId = Lot.intLotId
 		LEFT JOIN dbo.tblICItemUOM ItemUOM
@@ -176,7 +180,7 @@ BEGIN
 					,dtmDate  
 					,dblQty  
 					,dblUOMQty  
-					,dblCost  
+					,dblCost  = (SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = #tmpICInventoryTransaction.intItemId) * dblUOMQty  
 					,dblSalesPrice  
 					,intCurrencyId  
 					,dblExchangeRate  
@@ -276,7 +280,21 @@ BEGIN
 					,dtmDate  
 					,dblQty  
 					,dblUOMQty  
-					,dblCost  
+					,dblCost  = CASE WHEN dblQty < 0 THEN 
+										(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = #tmpICInventoryTransaction.intItemId) * dblUOMQty  
+									 WHEN dblQty > 0 AND strTransactionId LIKE 'ADJ%' THEN 
+										(	
+											SELECT TOP 1 CASE WHEN ISNULL(Lot.dblLastCost, 0) = 0 THEN ItemPricing.dblLastCost ELSE Lot.dblLastCost END 
+											FROM	tblICItem Item LEFT JOIN dbo.tblICItemPricing ItemPricing
+														ON Item.intItemId = ItemPricing.intItemId
+													LEFT JOIN dbo.tblICLot Lot
+														ON Lot.intItemId = Item.intItemId 
+														AND Lot.intLotId = #tmpICInventoryTransaction.intLotId
+											WHERE	Item.intItemId = #tmpICInventoryTransaction.intItemId
+										) * dblUOMQty  
+									 ELSE 
+										dblCost
+								END 
 					,dblSalesPrice  
 					,intCurrencyId  
 					,dblExchangeRate  
@@ -296,6 +314,19 @@ BEGIN
 				,@intUserId
 				,@strGLDescription
 				,@ItemsToPost
+
+			UPDATE	AdjDetail
+			SET		dblCost =	CASE	WHEN ISNULL(Lot.dblLastCost, 0) <> 0 THEN Lot.dblLastCost 
+										ELSE AdjDetail.dblCost 
+								END 
+								* ItemUOM.dblUnitQty 
+			FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
+						ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId 
+					LEFT JOIN dbo.tblICLot Lot
+						ON AdjDetail.intLotId = Lot.intLotId
+					LEFT JOIN dbo.tblICItemUOM ItemUOM
+						ON ItemUOM.intItemUOMId = AdjDetail.intItemUOMId
+			WHERE	Adj.strAdjustmentNo = @strTransactionId
 		END 		
 
 		-- Create the GL Entries

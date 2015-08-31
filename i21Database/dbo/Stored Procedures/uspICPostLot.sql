@@ -97,10 +97,16 @@ BEGIN
 				
 				SET @dblReduceQty = ISNULL(@dblReduceQty, 0) 
 
+				-- Get the unit cost. 
+				SET @dblCost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty)
+
 				-- Adjust the Unit Qty 
 				SELECT @dblUOMQty = dblUnitQty
 				FROM dbo.tblICItemUOM
 				WHERE intItemUOMId = @intItemUOMId
+
+				-- Adjust the cost to the new UOM
+				SET @dblCost = @dblCost * @dblUOMQty
 			END 
 		END 
 
