@@ -360,7 +360,7 @@ SELECT
                     WHEN IE.ysnFreightInPrice = 0  
 	                   THEN IE.[dblPrice]					
 					WHEN IE.ysnFreightInPrice = 1 and isNull(IE.dblSurcharge,0) != 0
-					   THEN	IE.[dblPrice] + isNull(IE.[dblFreightRate],0) + (IE.dblSurcharge / 100)
+					   THEN	IE.[dblPrice] + isNull(IE.[dblFreightRate],0) + (isNull(IE.[dblFreightRate],0) *(IE.dblSurcharge / 100))
 					WHEN IE.ysnFreightInPrice = 1
 					   THEN	IE.[dblPrice] + isNull(IE.[dblFreightRate],0) 
 			        END 	                                    --[dblPrice]
@@ -425,7 +425,7 @@ SELECT
 	,IE.dblQty  												--[dblQtyShipped]
 	,dblPrice = CASE		
 					WHEN isNull(IE.dblSurcharge,0) != 0
-					   THEN	isNull(IE.[dblFreightRate],0) + (IE.dblSurcharge / 100)
+					   THEN	isNull(IE.[dblFreightRate],0) + (isNull(IE.[dblFreightRate],0) * (IE.dblSurcharge / 100))
 					WHEN isNull(IE.dblSurcharge,0) = 0
 					   THEN	 isNull(IE.[dblFreightRate],0) 
 			        END 
