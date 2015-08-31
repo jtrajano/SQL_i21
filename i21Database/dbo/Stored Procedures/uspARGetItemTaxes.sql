@@ -3,7 +3,8 @@
 	,@LocationId		INT	
 	,@CustomerId		INT			= NULL	
 	,@TransactionDate	DATETIME
-	,@TaxMasterId		INT			= NULL		
+	,@TaxMasterId		INT			= NULL	
+	,@TaxGroupId		INT			= NULL		
 AS
 
 --DECLARE 	
@@ -14,6 +15,44 @@ AS
 --SET @ItemId = 5323
 --SET @LocationId = 1
 --SET @CustomerId = 10075
+
+
+	IF @TaxGroupId IS NOT NULL AND @TaxGroupId <> 0
+		BEGIN
+			SELECT
+				0
+				,0 AS [intInvoiceDetailId]
+				,0 AS [intTaxGroupMasterId] 
+				,TG.[intTaxGroupId] 
+				,TC.[intTaxCodeId]
+				,TC.[intTaxClassId]				
+				,TC.[strTaxableByOtherTaxes]
+				,ISNULL((SELECT TOP 1 tblSMTaxCodeRate.[strCalculationMethod] FROM tblSMTaxCodeRate WHERE tblSMTaxCodeRate.[intTaxCodeId] = TC.[intTaxCodeId] AND  CAST(tblSMTaxCodeRate.[dtmEffectiveDate]  AS DATE) <= CAST(@TransactionDate AS DATE) ORDER BY tblSMTaxCodeRate.[dtmEffectiveDate]ASC ,tblSMTaxCodeRate.[numRate] DESC), 'Unit') AS [strCalculationMethod]
+				,ISNULL((SELECT TOP 1 tblSMTaxCodeRate.[numRate] FROM tblSMTaxCodeRate WHERE tblSMTaxCodeRate.[intTaxCodeId] = TC.[intTaxCodeId] AND  CAST(tblSMTaxCodeRate.[dtmEffectiveDate]  AS DATE) <= CAST(@TransactionDate AS DATE) ORDER BY tblSMTaxCodeRate.[dtmEffectiveDate]ASC ,tblSMTaxCodeRate.[numRate] DESC), 0.00) AS [numRate]
+				,0.00 AS [dblTax]
+				,0.00 AS [dblAdjustedTax]				
+				,TC.[intSalesTaxAccountId]								
+				,0 [ysnSeparateOnInvoice] 
+				,TC.[ysnCheckoffTax]
+				,TC.[strTaxCode]
+				,0 AS [ysnTaxExempt] 				
+			FROM
+				tblSMTaxCode TC
+			INNER JOIN
+				tblSMTaxGroupCode TGC
+					ON TC.[intTaxCodeId] = TGC.[intTaxCodeId] 
+			INNER JOIN
+				tblSMTaxGroup TG
+					ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
+			WHERE
+				TG.intTaxGroupId = @TaxGroupId
+				AND (TC.[intSalesTaxAccountId] IS NOT NULL
+					AND TC.[intSalesTaxAccountId] <> 0)
+			ORDER BY
+				TGC.[intTaxGroupCodeId]
+				
+			RETURN 1
+		END
 
 	DECLARE @CustomerSpecialTax TABLE(
 		[intARSpecialTaxId] INT
