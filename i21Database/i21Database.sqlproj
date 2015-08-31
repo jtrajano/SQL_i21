@@ -2275,6 +2275,10 @@
     <Build Include="dbo\Tables\tblCTSpreadArbitrage.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteBlendSheet.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUndoStartBlendSheet.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetCalendarDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetManufacturingCell.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetMachineByManufacturingCell.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSaveCalendar.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
