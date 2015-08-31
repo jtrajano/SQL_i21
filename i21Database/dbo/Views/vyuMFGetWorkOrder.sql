@@ -17,9 +17,9 @@ SELECT C.intManufacturingCellId
 		WHERE RI.intRecipeId = R.intRecipeId
 			AND WI.strType = 'Assembly/Blend'
 		) AS strWIPItemNo
-	--		,IC.intCategoryId
-	--		,IC.strCategoryCode
-	--,IC.strDescription as strCategoryDesc
+	,IC.intCategoryId
+	,IC.strCategoryCode
+	,IC.strDescription AS strCategoryDesc
 	,I.strType
 	,I.intItemId
 	,I.strItemNo
@@ -41,12 +41,14 @@ SELECT C.intManufacturingCellId
 	,W.dtmLastModified
 	,W.intLastModifiedUserId
 	,W.intExecutionOrder
+	,W.strVendorLotNo
+	,W.strLotNumber
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 	AND W.intStatusId <> 13
 JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
---JOIN dbo.tblICCategory IC on IC.intCategoryId=I.intCategoryId
+JOIN dbo.tblICCategory IC ON IC.intCategoryId = I.intCategoryId
 LEFT JOIN dbo.tblMFPackType P ON P.intPackTypeId = I.intPackTypeId
 JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
 JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
