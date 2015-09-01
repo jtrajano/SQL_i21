@@ -2287,6 +2287,8 @@
     <Build Include="dbo\Views\vyuCFCardAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspCFGetItemTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspCFFeeProfile.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFLotMerge.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFLotMove.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
