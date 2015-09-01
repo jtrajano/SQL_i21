@@ -26,6 +26,8 @@ BEGIN
 	JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = S.intManufacturingCellId
 	JOIN dbo.tblMFScheduleCalendar SC ON SC.intCalendarId = S.intCalendarId
 	WHERE intScheduleId = @intScheduleId
+
+	Select @intManufacturingCellId=S.intManufacturingCellId from dbo.tblMFSchedule S WHERE S.intScheduleId = @intScheduleId
 END
 ELSE
 BEGIN

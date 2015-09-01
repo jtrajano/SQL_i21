@@ -2289,6 +2289,7 @@
     <Build Include="dbo\Stored Procedures\uspCFFeeProfile.sql" />
     <Build Include="dbo\Stored Procedures\uspMFLotMerge.sql" />
     <Build Include="dbo\Stored Procedures\uspMFLotMove.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetCalendarShift.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

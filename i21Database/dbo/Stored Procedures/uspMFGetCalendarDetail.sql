@@ -2,9 +2,11 @@
 	@dtmFromDate DATETIME
 	,@dtmToDate DATETIME
 	,@strShiftId NVARCHAR(50)
+	,@strMachineId NVARCHAR(100)
 	,@intManufacturingCellId INT
 	,@intCalendarId INT
 	,@intLocationId INT
+	,@ysnpivot BIT
 	)
 AS
 BEGIN
@@ -169,19 +171,81 @@ BEGIN
 		SELECT @dtmFromDate = @dtmFromDate + 1
 	END
 
-	SELECT @strMachineName = STUFF((
-				SELECT '],[' + M.strName
-				FROM tblMFMachine M
-				JOIN tblMFMachinePackType MP ON MP.intMachineId = M.intMachineId
-				JOIN tblMFManufacturingCellPackType LP ON LP.intPackTypeId = MP.intPackTypeId
-					AND LP.intManufacturingCellId = @intManufacturingCellId
-				ORDER BY '],[' + M.strName
-				FOR XML Path('')
-				), 1, 2, '') + ']'
+	SELECT C.intCalendarId
+		,C.strName
+		,C.intManufacturingCellId
+		,MC.strCellName
+		,C.dtmFromDate
+		,C.dtmToDate
+		,C.ysnStandard
+		,C.intLocationId
+		,L.strLocationName
+	FROM dbo.tblMFScheduleCalendar C
+	JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = C.intManufacturingCellId
+	JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = C.intLocationId
+	WHERE C.intCalendarId = @intCalendarId
 
-	SELECT @SQL = 'SELECT *
-	FROM (
-		SELECT CD.dtmCalendarDate,DATENAME(dw,CD.dtmCalendarDate) AS Day
+	IF @ysnpivot = 1
+	BEGIN
+		SELECT @strMachineName = STUFF((
+					SELECT '],[' + M.strName
+					FROM tblMFMachine M
+					JOIN tblMFMachinePackType MP ON MP.intMachineId = M.intMachineId
+					JOIN tblMFManufacturingCellPackType LP ON LP.intPackTypeId = MP.intPackTypeId
+						AND LP.intManufacturingCellId = @intManufacturingCellId
+						AND M.intMachineId IN (
+							SELECT Item
+							FROM dbo.fnSplitString(@strMachineId, ',')
+							)
+					ORDER BY '],[' + M.strName
+					FOR XML Path('')
+					), 1, 2, '') + ']'
+
+		SELECT @SQL = 'SELECT *
+		FROM (
+			SELECT CD.dtmCalendarDate,DATENAME(dw,CD.dtmCalendarDate) AS Day
+				,CD.intShiftId
+				,S.strShiftName
+				,CD.dtmShiftStartTime
+				,CD.dtmShiftEndTime
+				,CD.intNoOfMachine
+				,CD.ysnHoliday
+				,M.intMachineId
+				,M.strName
+			FROM #tblMFCalendarDetail CD
+			JOIN dbo.tblMFShift S ON S.intShiftId = CD.intShiftId
+			LEFT JOIN dbo.tblMFScheduleCalendarMachineDetail MD ON MD.intCalendarDetailId = CD.intCalendarDetailId
+			LEFT JOIN dbo.tblMFMachine M ON M.intMachineId = MD.intMachineId
+			) AS DT
+		PIVOT(Count(DT.intMachineId) FOR strName IN (' + @strMachineName + ')) pvt'
+
+		EXEC (@SQL)
+	END
+	ELSE
+	BEGIN
+		DECLARE @tblMFMachine TABLE (
+			intMachineId INT
+			,strName NVARCHAR(50)
+			)
+
+		INSERT INTO @tblMFMachine (
+			intMachineId
+			,strName
+			)
+		SELECT M.intMachineId
+			,M.strName
+		FROM tblMFMachine M
+		JOIN tblMFMachinePackType MP ON MP.intMachineId = M.intMachineId
+		JOIN tblMFManufacturingCellPackType LP ON LP.intPackTypeId = MP.intPackTypeId
+			AND LP.intManufacturingCellId = @intManufacturingCellId
+			AND M.intMachineId IN (
+				SELECT Item
+				FROM dbo.fnSplitString(@strMachineId, ',')
+				)
+		ORDER BY M.strName
+
+		SELECT CD.dtmCalendarDate
+			,DATENAME(dw, CD.dtmCalendarDate) AS Day
 			,CD.intShiftId
 			,S.strShiftName
 			,CD.dtmShiftStartTime
@@ -190,12 +254,19 @@ BEGIN
 			,CD.ysnHoliday
 			,M.intMachineId
 			,M.strName
+			,CONVERT(BIT, CASE 
+					WHEN EXISTS (
+							SELECT *
+							FROM tblMFScheduleCalendarMachineDetail MD
+							WHERE MD.intCalendarDetailId = CD.intCalendarDetailId
+								AND MD.intMachineId = M.intMachineId
+							)
+						THEN 1
+					ELSE 0
+					END) AS ysnSelect
 		FROM #tblMFCalendarDetail CD
-		JOIN dbo.tblMFShift S ON S.intShiftId = CD.intShiftId
-		LEFT JOIN dbo.tblMFScheduleCalendarMachineDetail MD ON MD.intCalendarDetailId = CD.intCalendarDetailId
-		LEFT JOIN dbo.tblMFMachine M ON M.intMachineId = MD.intMachineId
-		) AS DT
-	PIVOT(Count(DT.intMachineId) FOR strName IN (' + @strMachineName + ')) pvt'
-
-	EXEC (@SQL)
+			,dbo.tblMFShift S
+			,@tblMFMachine M
+		WHERE S.intShiftId = CD.intShiftId
+	END
 END
