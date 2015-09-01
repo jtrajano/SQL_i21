@@ -2269,6 +2269,7 @@
     <Build Include="dbo\Stored Procedures\uspICCalculateOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryReceiptUnitCost.sql" />
     <None Include="Scripts\Post-Deployment\GL\InventoryCategoryFix.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRPosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
