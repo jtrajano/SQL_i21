@@ -2284,6 +2284,9 @@
     <Build Include="dbo\User Defined Types\JournalIDTableType.sql" />
     <Build Include="dbo\Views\vyuMFGetSchedule.sql" />
     <Build Include="dbo\Views\vyuMFGetCalendar.sql" />
+    <Build Include="dbo\Views\vyuCFCardAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFGetItemTaxes.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFFeeProfile.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
