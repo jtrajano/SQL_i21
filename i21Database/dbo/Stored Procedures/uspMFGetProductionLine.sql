@@ -4,7 +4,7 @@
 	)
 AS
 BEGIN
-	SELECT C.intManufacturingCellId
+	SELECT DISTINCT C.intManufacturingCellId
 		,C.strCellName
 		,C.strDescription
 	FROM dbo.tblICItem I
