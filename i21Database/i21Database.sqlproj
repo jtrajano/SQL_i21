@@ -2280,6 +2280,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGetMachineByManufacturingCell.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSaveCalendar.sql" />
     <Build Include="dbo\Views\vyuTMOpenCallEntry.sql" />
+    <Build Include="dbo\Functions\fnGLGetPostErrrors.sql" />
+    <Build Include="dbo\User Defined Types\JournalIDTableType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -1,8 +1,4 @@
-﻿
---=====================================================================================================================================
--- 	CREATE THE STORED PROCEDURE AFTER DELETING IT
----------------------------------------------------------------------------------------------------------------------------------------
-CREATE PROCEDURE [dbo].[uspGLReverseGLEntries]
+﻿CREATE PROCEDURE [dbo].[uspGLReverseGLEntries]
 	 @strBatchId		AS NVARCHAR(100)	= ''
 	,@strTransactionId	NVARCHAR(40)	= NULL
 	,@ysnRecap			AS BIT			= 0
@@ -37,7 +33,8 @@ END
 ---------------------------------------------------------------------------------------------------------------------------------------
 IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN			
-		INSERT INTO tblGLDetail (
+		DECLARE @GLEntries RecapTableType
+		INSERT INTO @GLEntries (
 				 [strTransactionId]
 				,[intTransactionId]
 				,[dtmDate]
@@ -92,6 +89,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 		FROM	tblGLDetail 
 		WHERE	strTransactionId = @strTransactionId and ysnIsUnposted = 0
 		ORDER BY intGLDetailId		
+
+		EXEC uspGLBookEntries @GLEntries, 0
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
@@ -167,50 +166,6 @@ ELSE
 
 	END
 
-IF @@ERROR <> 0	GOTO Post_Rollback;
-
---=====================================================================================================================================
--- 	UPDATE GL SUMMARY RECORDS
----------------------------------------------------------------------------------------------------------------------------------------
-WITH GLDetail
-AS
-(
-	SELECT   [dtmDate]		= ISNULL(A.[dtmDate], GETDATE())
-			,[intAccountId]	= A.[intAccountId]
-			,[dblDebit]		= CASE	WHEN [dblDebit] < 0 THEN ABS([dblDebit])
-									WHEN [dblCredit] < 0 THEN 0
-									ELSE [dblCredit] END 
-			,[dblCredit]	= CASE	WHEN [dblCredit] < 0 THEN ABS([dblCredit])
-									WHEN [dblDebit] < 0 THEN 0
-									ELSE [dblDebit] END									
-			,[dblDebitUnit]		= CASE	WHEN [dblDebitUnit] < 0 THEN ABS([dblDebitUnit])
-									WHEN [dblCreditUnit] < 0 THEN 0
-									ELSE [dblCreditUnit] END
-			,[dblCreditUnit]	= CASE	WHEN [dblCreditUnit] < 0 THEN ABS([dblCreditUnit])
-									WHEN [dblDebitUnit] < 0 THEN 0
-									ELSE [dblDebitUnit] END	
-	FROM [dbo].tblGLDetail A WHERE A.[strTransactionId] = @strTransactionId AND ysnIsUnposted = 0 AND strCode = ISNULL(@strCode, strCode)
-)
-UPDATE	tblGLSummary 
-SET		 [dblDebit] = ISNULL(tblGLSummary.[dblDebit], 0) - ISNULL(GLDetailGrouped.[dblDebit], 0)
-		,[dblCredit] = ISNULL(tblGLSummary.[dblCredit], 0) - ISNULL(GLDetailGrouped.[dblCredit], 0)
-		,[dblDebitUnit] = ISNULL(tblGLSummary.[dblDebitUnit], 0) - ISNULL(GLDetailGrouped.[dblDebitUnit], 0)
-		,[dblCreditUnit] = ISNULL(tblGLSummary.[dblCreditUnit], 0) - ISNULL(GLDetailGrouped.[dblCreditUnit], 0)
-		,[intConcurrencyId] = ISNULL([intConcurrencyId], 0) + 1
-FROM	(
-			SELECT	 [dblDebit]			= SUM(ISNULL(B.[dblCredit], 0))
-					,[dblCredit]		= SUM(ISNULL(B.[dblDebit], 0))
-					,[dblDebitUnit]		= SUM(ISNULL(B.[dblCreditUnit], 0))
-					,[dblCreditUnit]	= SUM(ISNULL(B.[dblDebitUnit], 0))
-					,[intAccountId]		= A.[intAccountId]
-					,[dtmDate]			= ISNULL(CONVERT(DATE, A.[dtmDate]), '') 								
-			FROM tblGLSummary A 
-					INNER JOIN GLDetail B 
-					ON CONVERT(DATE, A.[dtmDate]) = CONVERT(DATE, B.[dtmDate]) AND A.[intAccountId] = B.[intAccountId] AND A.[strCode] = ISNULL(@strCode, '')
-			GROUP BY ISNULL(CONVERT(DATE, A.[dtmDate]), ''), A.[intAccountId]
-		) AS GLDetailGrouped
-WHERE tblGLSummary.[intAccountId] = GLDetailGrouped.[intAccountId] AND tblGLSummary.[strCode] = ISNULL(@strCode, '') AND
-	  ISNULL(CONVERT(DATE, tblGLSummary.[dtmDate]), '') = ISNULL(CONVERT(DATE, GLDetailGrouped.[dtmDate]), '');
 
 IF @@ERROR <> 0	GOTO Post_Rollback;
 
@@ -245,19 +200,3 @@ Post_Exit:
 	
 GO
 
-
-----=====================================================================================================================================
----- 	SCRIPT EXECUTION 
------------------------------------------------------------------------------------------------------------------------------------------
---DECLARE @intCount AS INT
-
---EXEC [dbo].[usp_ReverseGLEntries]
---	@strBatchId		= 'BATCH-13131'
---	,@strTransactionId	= 'GJ-29'
---	,@ysnRecap					= 0
---	,@strCode			= 'GJ'
---	,@dtmDateReverse	= NULL 
---	,@intEntityId			= 1
---	,@successfulCount	= @intCount OUTPUT			
-				
---SELECT @intCount
