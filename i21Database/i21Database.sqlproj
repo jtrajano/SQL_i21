@@ -2277,7 +2277,7 @@
     <Build Include="dbo\Stored Procedures\uspMFUndoStartBlendSheet.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCalendarDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetManufacturingCell.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFGetMachineByManufacturingCell.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetCalendarMachineByManufacturingCell.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSaveCalendar.sql" />
     <Build Include="dbo\Views\vyuTMOpenCallEntry.sql" />
     <Build Include="dbo\Functions\fnGLGetPostErrrors.sql" />

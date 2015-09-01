@@ -3899,4 +3899,11 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="vyuMFGetWorkOrderTransactionView" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="9b4c06b1-6b99-4be3-84c2-8701b8abfad3" ChangeDateTime="09/01/2015 15:19:06">
+    <Property Name="ElementName" Value="[dbo].[uspMFGetMachineByManufacturingCell]" />
+    <Property Name="ElementType" Value="SqlProcedure" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="uspMFGetCalendarMachineByManufacturingCell" />
+  </Operation>
 </Operations>

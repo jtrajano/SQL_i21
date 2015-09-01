@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspMFGetMachineByManufacturingCell (
+﻿CREATE PROCEDURE uspMFGetCalendarMachineByManufacturingCell (
 	@dtmFromDate DATETIME
 	,@dtmToDate DATETIME
 	,@intCalendarId INT
