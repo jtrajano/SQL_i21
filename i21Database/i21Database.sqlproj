@@ -2052,7 +2052,7 @@
     <Build Include="dbo\Stored Procedures\uspQMSampleUpdate.sql" />
     <Build Include="dbo\Views\vyuAPBillDetailSource.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateShift.sql" />
-    <Build Include="dbo\Views\vyuGetWorkOrderTransactionView.sql" />
+    <Build Include="dbo\Views\vyuMFGetWorkOrderTransactionView.sql" />
     <Build Include="dbo\Stored Procedures\uspARCreateCustomerInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARAddInventoryItemToInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetAttributeByAttributeName.sql" />

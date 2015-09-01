@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuGetWorkOrderTransactionView
+﻿CREATE VIEW vyuMFGetWorkOrderTransactionView
 AS
 SELECT W.intWorkOrderId,
 	W.strWorkOrderNo

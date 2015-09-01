@@ -3892,4 +3892,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="dblSiteLastGalsInTank" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="eb7f5a43-3d68-48ef-8483-19a34f3ead16" ChangeDateTime="09/01/2015 10:55:01">
+    <Property Name="ElementName" Value="[dbo].[vyuGetWorkOrderTransactionView]" />
+    <Property Name="ElementType" Value="SqlView" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="vyuMFGetWorkOrderTransactionView" />
+  </Operation>
 </Operations>
