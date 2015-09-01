@@ -124,7 +124,7 @@ BEGIN TRY
 	SELECT @intScheduleId
 		,x.intWorkOrderId
 		,x.intDuration
-		,x.intExecutionOrder
+		,ROW_NUMBER() OVER (ORDER BY x.intExecutionOrder) as intExecutionOrder
 		,x.intChangeoverDuration
 		,x.intSetupDuration
 		,x.dtmChangeoverStartDate
@@ -170,70 +170,26 @@ BEGIN TRY
 			) x
 	Where x.intStatusId<>1
 
-	Update tblMFWorkOrder 
-	Set intStatusId =x.intStatusId
-	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
-			intWorkOrderId INT
-			,intStatusId int) x JOIN tblMFWorkOrder W on W.intWorkOrderId =x.intWorkOrderId
+	IF @ysnStandard=1
+	BEGIN
+		UPDATE tblMFWorkOrder 
+		SET intStatusId =(CASE WHEN W.intManufacturingCellId =x.intManufacturingCellId THEN x.intStatusId ELSE 1 END)
+			,dblQuantity =x.dblQuantity
+			,intManufacturingCellId =x.intManufacturingCellId
+			,intPlannedShiftId =x.intPlannedShiftId
+			,dtmPlannedDate =x.dtmPlannedDate
+			,intExecutionOrder =x.intExecutionOrder 
+		FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
+				intWorkOrderId INT
+				,intStatusId int
+				,dblQuantity numeric(18,6)
+				,intManufacturingCellId int
+				,intPlannedShiftId int
+				,dtmPlannedDate datetime
+				,intExecutionOrder int) x 
+		JOIN tblMFWorkOrder W on W.intWorkOrderId =x.intWorkOrderId
+	END
 	
-	/*WHERE x.intScheduleWorkOrderId IS NULL
-
-	UPDATE tblMFScheduleWorkOrder
-	SET intDuration = x.intDuration
-		,intExecutionOrder = x.intExecutionOrder
-		,intChangeoverDuration = x.intChangeoverDuration
-		,intSetupDuration = x.intSetupDuration
-		,dtmChangeoverStartDate = x.dtmChangeoverStartDate
-		,dtmChangeoverEndDate = x.dtmChangeoverEndDate
-		,dtmPlannedStartDate = x.dtmPlannedStartDate
-		,dtmPlannedEndDate = x.dtmPlannedEndDate
-		,intPlannedShiftId = x.intPlannedShiftId
-		,intNoOfSelectedMachine = x.intNoOfSelectedMachine
-		,strComments = x.strComments
-		,strNote = x.strNote
-		,strAdditionalComments = x.strAdditionalComments
-		,dtmEarliestStartDate = x.dtmEarliestStartDate
-		,ysnFrozen = x.ysnFrozen
-		,intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
-	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
-			intScheduleWorkOrderId INT
-			,intWorkOrderId INT
-			,intDuration INT
-			,intExecutionOrder INT
-			,intChangeoverDuration INT
-			,intSetupDuration INT
-			,dtmChangeoverStartDate DATETIME
-			,dtmChangeoverEndDate DATETIME
-			,dtmPlannedStartDate DATETIME
-			,dtmPlannedEndDate DATETIME
-			,intPlannedShiftId INT
-			,intNoOfSelectedMachine INT
-			,strComments NVARCHAR(MAX)
-			,strNote NVARCHAR(MAX)
-			,strAdditionalComments NVARCHAR(MAX)
-			,dtmEarliestStartDate DATETIME
-			,ysnFrozen BIT
-			,intStatusId INT
-			) x
-	WHERE x.intScheduleWorkOrderId = tblMFScheduleWorkOrder.intScheduleWorkOrderId
-		AND x.intWorkOrderId = tblMFScheduleWorkOrder.intWorkOrderId
-		AND x.intScheduleWorkOrderId IS NOT NULL
-		AND x.intStatusId <> 1
-
-	DELETE
-	FROM dbo.tblMFScheduleWorkOrder
-	WHERE EXISTS (
-			SELECT *
-			FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
-					intScheduleWorkOrderId INT
-					,intWorkOrderId INT
-					,intStatusId INT
-					) x
-			WHERE x.intScheduleWorkOrderId = tblMFScheduleWorkOrder.intScheduleWorkOrderId
-				AND x.intWorkOrderId = tblMFScheduleWorkOrder.intWorkOrderId
-				AND x.intStatusId = 1
-			)
-*/
 	INSERT INTO tblMFScheduleWorkOrderDetail (
 		intScheduleWorkOrderId
 		,intWorkOrderId

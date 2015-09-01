@@ -246,7 +246,7 @@ BEGIN TRY
 
 		SELECT @intRecordId = Min(intRecordId)
 		FROM @tblMFScheduleWorkOrder S
-		WHERE S.intNoOfUnit > 0
+		WHERE S.intNoOfUnit > 0 AND intManufacturingCellId =@intManufacturingCellId 
 			AND NOT EXISTS (
 				SELECT *
 				FROM @tblMFScheduleWorkOrderDetail SD
@@ -271,11 +271,14 @@ BEGIN TRY
 			FROM @tblMFScheduleWorkOrder
 			WHERE intRecordId = @intRecordId
 
-			SELECT TOP (@intNoOfSelectedMachine) @dblMachineCapacity = Sum(MP.dblMachineCapacity)
-			FROM dbo.tblMFScheduleCalendarMachineDetail MD
-			JOIN dbo.tblMFMachinePackType MP ON MP.intMachineId = MD.intMachineId
-			WHERE intCalendarDetailId = @intCalendarDetailId
-				AND MP.intPackTypeId = @intPackTypeId
+			SELECT @dblMachineCapacity = SUM(DT.dblMachineCapacity)
+			FROM (
+				SELECT TOP (@intNoOfSelectedMachine) MP.dblMachineCapacity
+				FROM dbo.tblMFScheduleCalendarMachineDetail MD
+				JOIN dbo.tblMFMachinePackType MP ON MP.intMachineId = MD.intMachineId
+				WHERE intCalendarDetailId = @intCalendarDetailId
+					AND MP.intPackTypeId = @intPackTypeId
+				) AS DT
 
 			SELECT @intWODuration = @intNoOfUnit / @dblMachineCapacity
 
@@ -446,7 +449,7 @@ BEGIN TRY
 
 			SELECT @intRecordId = Min(intRecordId)
 			FROM @tblMFScheduleWorkOrder S
-			WHERE S.intNoOfUnit > 0
+			WHERE S.intNoOfUnit > 0 AND intManufacturingCellId =@intManufacturingCellId 
 				AND NOT EXISTS (
 					SELECT *
 					FROM @tblMFScheduleWorkOrderDetail SD
@@ -532,9 +535,9 @@ BEGIN TRY
 		,W.intWorkOrderId
 		,@intScheduleId AS intScheduleId
 		,W.strWorkOrderNo
-		,SL.dblQuantity
-		,SL.dtmExpectedDate
-		,SL.dblQuantity - W.dblProducedQuantity AS dblBalanceQuantity
+		,IsNULL(SL.dblQuantity,W.dblQuantity) as dblQuantity
+		,Isnull(SL.dtmExpectedDate,W.dtmExpectedDate) as dtmExpectedDate
+		,IsNULL(SL.dblQuantity,W.dblQuantity) - W.dblProducedQuantity AS dblBalanceQuantity
 		,W.dblProducedQuantity
 		,W.strComment AS strWorkOrderComments
 		,W.dtmOrderDate
@@ -581,17 +584,17 @@ BEGIN TRY
 		,@intUserId intLastModifiedUserId
 		,WS.intSequenceNo
 	FROM tblMFWorkOrder W
-	JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId AND W.intManufacturingCellId = @intManufacturingCellId AND W.intStatusId <> 13
-	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
+	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId AND W.intManufacturingCellId = @intManufacturingCellId AND W.intStatusId <> 13
 	LEFT JOIN tblMFPackType P ON P.intPackTypeId = I.intPackTypeId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
 	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN dbo.tblMFWorkOrderProductionType PT ON PT.intProductionTypeId = W.intProductionTypeId
 	LEFT JOIN @tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
-	Left JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = SL.intStatusId
+	LEFT JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = SL.intStatusId
 	LEFT JOIN dbo.tblMFShift SH ON SH.intShiftId = SL.intPlannedShiftId
+	LEFT JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = ISNULL(SL.intManufacturingCellId,W.intManufacturingCellId)
 	JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
-		AND R.intLocationId = C.intLocationId
+		AND R.intLocationId = W.intLocationId
 		AND R.ysnActive = 1
 	ORDER BY WS.intSequenceNo DESC
 		,SL.intExecutionOrder

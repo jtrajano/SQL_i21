@@ -41,6 +41,7 @@ BEGIN TRY
 		,@intAttributeId int
 		,@strYieldAdjustmentAllowed nvarchar(50)
 		,@intManufacturingProcessId int
+		,@strAllInputItemsMandatoryforConsumption nvarchar(50)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -814,7 +815,15 @@ BEGIN TRY
 		WHERE intItemRecordKey > @intItemRecordKey
 	END
 
-	IF EXISTS (
+	Select @intAttributeId=NULL
+
+	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='All input items mandatory for consumption'
+
+	Select @strAllInputItemsMandatoryforConsumption=strAttributeValue
+	From tblMFManufacturingProcessAttribute
+	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
+
+	IF @strAllInputItemsMandatoryforConsumption='True' AND EXISTS (
 		SELECT *
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON SI.intRecipeItemId = ri.intRecipeItemId and ri.intWorkOrderId =SI.intWorkOrderId 

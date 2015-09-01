@@ -52,6 +52,11 @@ BEGIN TRY
 		,@dtmCurrentDate datetime
 		,@dtmCurrentDateTime datetime
 		,@intDayOfYear int
+		,@intAttributeId int
+		,@strAllInputItemsMandatoryforConsumption nvarchar(50)
+		,@strUpperToleranceQuantity nvarchar(50)
+		,@strLowerToleranceQuantity nvarchar(50)
+		,@strQuantity nvarchar(50)
 	
 	Select @dtmCurrentDateTime	=GETDATE()
 	Select @dtmCurrentDate		=CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
@@ -374,9 +379,11 @@ BEGIN TRY
 	BEGIN
 		DECLARE @intProductId INT
 			,@dblRequiredQuantity DECIMAL(18, 6)
+			,@intManufacturingProcessId int
 
 		SELECT @intProductId = intItemId
 			,@dblRequiredQuantity = dblQuantity
+			,@intManufacturingProcessId=intManufacturingProcessId 
 		FROM dbo.tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
 
@@ -469,13 +476,15 @@ BEGIN TRY
 		IF @ysnIgnoreTolerance = 0
 			AND @dblQuantity > @dblUpperToleranceQuantity
 		BEGIN
+			SELECT @strQuantity=@dblQuantity
+			SELECT @strUpperToleranceQuantity=@dblUpperToleranceQuantity
 			RAISERROR (
 					51083
 					,11
 					,1
-					,@dblQuantity
+					,@strQuantity
 					,@strItemNo
-					,@dblUpperToleranceQuantity
+					,@strUpperToleranceQuantity
 					)
 
 			RETURN
@@ -484,19 +493,27 @@ BEGIN TRY
 		IF @ysnIgnoreTolerance = 0
 			AND @dblLowerToleranceQuantity > @dblQuantity
 		BEGIN
+			SELECT @strQuantity=@dblQuantity
+			SELECT @strLowerToleranceQuantity=@dblLowerToleranceQuantity
 			RAISERROR (
 					51084
 					,11
 					,1
-					,@dblQuantity
+					,@strQuantity
 					,@strItemNo
-					,@dblLowerToleranceQuantity
+					,@strLowerToleranceQuantity
 					)
 
 			RETURN
 		END
 
-		IF @intProductionTypeId=3 and EXISTS (
+		Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='All input items mandatory for consumption'
+
+		Select @strAllInputItemsMandatoryforConsumption=strAttributeValue
+		From tblMFManufacturingProcessAttribute
+		Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
+
+		IF @strAllInputItemsMandatoryforConsumption='True' and @intProductionTypeId=3 and EXISTS (
 		SELECT *
 		FROM dbo.tblMFWorkOrderRecipeItem ri
 		LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem SI ON SI.intRecipeItemId = ri.intRecipeItemId and ri.intWorkOrderId =SI.intWorkOrderId 
