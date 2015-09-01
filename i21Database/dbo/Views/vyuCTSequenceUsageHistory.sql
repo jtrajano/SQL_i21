@@ -123,3 +123,24 @@ AS
 	JOIN	tblSCTicket					DL	ON	DL.intTicketId				=	UH.intExternalId 
 	JOIN	tblSMUserSecurity			US	ON	US.intUserSecurityID		=	UH.intUserId
 	WHERE	UH.strScreenName	=	'Scale'
+
+	UNION ALL
+
+	SELECT	UH.intSequenceUsageHistoryId,
+			UH.intContractDetailId,
+			CD.intContractHeaderId,
+			CD.intContractSeq,
+			UH.dtmTransactionDate,
+			UH.strScreenName,
+			LTRIM(HR.strPurchaseOrderNumber) AS strNumber,
+			UH.strFieldName,
+			UH.dblOldValue,
+			UH.dblTransactionQuantity,
+			UH.dblNewValue,
+			US.strUserName
+	 FROM	tblCTSequenceUsageHistory	UH
+	 JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId		=	UH.intContractDetailId
+	 JOIN	tblPOPurchaseDetail			DL	ON	DL.intPurchaseDetailId		=	UH.intExternalId 
+	 JOIN	tblPOPurchase				HR	ON	HR.intPurchaseId			=	DL.intPurchaseId
+	 JOIN	tblSMUserSecurity			US	ON	US.intUserSecurityID		=	UH.intUserId
+	 WHERE	UH.strScreenName	=	'Purchase Order'
