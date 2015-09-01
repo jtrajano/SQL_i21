@@ -1370,26 +1370,37 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         var context = win.context;
         var current = win.viewModel.data.current;
 
-        if (current) {
-            Ext.Ajax.request({
-                timeout: 120000,
-                url: '../Inventory/api/InventoryReceipt/CalculateCharges?id=' + current.get('intInventoryReceiptId'),
-                method: 'post',
-                success: function(response){
-                    var jsonData = Ext.decode(response.responseText);
-                    if (!jsonData.success) {
-                        iRely.Functions.showErrorDialog(jsonData.message.statusText);
+        var doPost = function() {
+            if (current) {
+                Ext.Ajax.request({
+                    timeout: 120000,
+                    url: '../Inventory/api/InventoryReceipt/CalculateCharges?id=' + current.get('intInventoryReceiptId'),
+                    method: 'post',
+                    success: function(response){
+                        var jsonData = Ext.decode(response.responseText);
+                        if (!jsonData.success) {
+                            iRely.Functions.showErrorDialog(jsonData.message.statusText);
+                        }
+                        else {
+                            context.configuration.paging.store.load();
+                        }
+                    },
+                    failure: function(response) {
+                        var jsonData = Ext.decode(response.responseText);
+                        iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
                     }
-                    else {
-                        context.configuration.paging.store.load();
-                    }
-                },
-                failure: function(response) {
-                    var jsonData = Ext.decode(response.responseText);
-                    iRely.Functions.showErrorDialog(jsonData.ExceptionMessage);
-                }
-            });
-        }
+                });
+            }
+        };
+
+        // Save has data changes first before doing the post.
+        context.data.saveRecord({
+            successFn: function() {
+                doPost();
+            }
+        });
+
+
     },
 
     onBillClick: function(button, e, eOpts) {
