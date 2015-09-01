@@ -2276,6 +2276,17 @@
     <Build Include="dbo\Tables\tblICCommodityProductLine.sql" />
     <Build Include="dbo\Views\vyuTRSupplyPointView.sql" />
     <Build Include="dbo\Stored Procedures\uspCTContractSave.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostActualCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReduceStockInActualCost.sql" />
+    <Build Include="dbo\Tables\tblICInventoryActualCost.sql" />
+    <Build Include="dbo\Tables\tblICInventoryActualCostOut.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseStockInActualCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostActualCostIn.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspICUnpostActualCostOut.sql">
+      <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

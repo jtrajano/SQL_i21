@@ -3,7 +3,7 @@
 */
 CREATE TYPE [dbo].[ItemCostingTableType] AS TABLE
 (
-	[intId] INT IDENTITY PRIMARY KEY CLUSTERED
+	[intId] INT IDENTITY PRIMARY KEY CLUSTERED	
 	,[intItemId] INT NOT NULL								-- The item. 
 	,[intItemLocationId] INT NULL							-- The location where the item is stored.
 	,[intItemUOMId] INT NOT NULL							-- The UOM used for the item.
@@ -23,4 +23,5 @@ CREATE TYPE [dbo].[ItemCostingTableType] AS TABLE
 	,[intSubLocationId] INT NULL							-- Place holder field for lot numbers
 	,[intStorageLocationId] INT NULL						-- Place holder field for lot numbers
 	,[ysnIsCustody] BIT NULL								-- If Yes (value is 1), then the item is not owned by the company. The company is only the custodian of the item (like a consignor). Add or remove stock from Inventory-Lot-In-Custody table. 
+	,[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- If there is a value, this means the item is used in Actual Costing. 
 )

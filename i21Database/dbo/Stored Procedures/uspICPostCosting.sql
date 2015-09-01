@@ -53,10 +53,10 @@ DECLARE @intId AS INT
 		,@intLotId AS INT
 		,@intSubLocationId AS INT
 		,@intStorageLocationId AS INT 
+		,@strActualCostId AS NVARCHAR(50)
 
 DECLARE @CostingMethod AS INT 
 		,@strTransactionForm AS NVARCHAR(255)
-
 
 -- Create the CONSTANT variables for the costing methods
 DECLARE @AVERAGECOST AS INT = 1
@@ -99,6 +99,7 @@ SELECT  intId
 		,intLotId
 		,intSubLocationId
 		,intStorageLocationId
+		,strActualCostId
 FROM	@ItemsToPost
 
 OPEN loopItems;
@@ -122,7 +123,8 @@ FETCH NEXT FROM loopItems INTO
 	,@intTransactionTypeId
 	,@intLotId
 	,@intSubLocationId
-	,@intStorageLocationId;
+	,@intStorageLocationId
+	,@strActualCostId;
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Start of the loop
@@ -244,6 +246,33 @@ BEGIN
 			,@intTransactionTypeId
 			,@strTransactionForm
 			,@intUserId;
+	END
+
+	-- ACTUAL COST 
+	IF (@strActualCostId IS NOT NULL)
+	BEGIN 
+		EXEC dbo.uspICPostActualCost
+			@intItemId
+			,@intItemLocationId
+			,@intItemUOMId
+			,@intSubLocationId
+			,@intStorageLocationId
+			,@dtmDate
+			,@intLotId
+			,@dblQty
+			,@dblUOMQty
+			,@dblCost
+			,@dblSalesPrice
+			,@intCurrencyId
+			,@dblExchangeRate
+			,@intTransactionId
+			,@intTransactionDetailId
+			,@strTransactionId
+			,@strBatchId
+			,@intTransactionTypeId
+			,@strTransactionForm
+			,@intUserId
+			,@strActualCostId;
 	END
 
 	-- Update the Lot's Qty and Weights. 
@@ -458,6 +487,7 @@ BEGIN
 		,@intLotId
 		,@intSubLocationId
 		,@intStorageLocationId
+		,@strActualCostId 
 END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End of the loop
