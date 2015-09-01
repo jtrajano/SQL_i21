@@ -2282,6 +2282,7 @@
     <Build Include="dbo\Views\vyuTMOpenCallEntry.sql" />
     <Build Include="dbo\Functions\fnGLGetPostErrrors.sql" />
     <Build Include="dbo\User Defined Types\JournalIDTableType.sql" />
+    <Build Include="dbo\Views\vyuMFGetSchedule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
