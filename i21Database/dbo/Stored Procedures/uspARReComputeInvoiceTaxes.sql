@@ -57,6 +57,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 				,@ItemPrice			DECIMAL(18,6) 
 				,@QtyShipped		DECIMAL(18,6) 
 				,@TotalItemTax		DECIMAL(18,6) 
+				,@TaxGroupId		INT
 				
 
 		SELECT TOP 1
@@ -70,10 +71,14 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			 @ItemId				= [intItemId]
 			,@ItemPrice				= [dblPrice]
 			,@QtyShipped			= [dblQtyShipped]
+			,@TaxGroupId			= [intTaxGroupId]
 		FROM
 			tblARInvoiceDetail
 		WHERE
 			[intInvoiceDetailId] = @InvoiceDetailId
+			
+		IF @TaxGroupId = 0
+			SET @TaxGroupId = NULL
 			
 		DELETE FROM tblARInvoiceDetailTax WHERE [intInvoiceDetailId] = @InvoiceDetailId
 			
@@ -81,7 +86,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			 Id						UNIQUEIDENTIFIER DEFAULT(NEWID())
 			,intInvoiceDetailTaxId	INT
 			,intInvoiceDetailId		INT	NULL
-			,intTaxGroupMasterId	INT
+			,intTaxGroupMasterId	INT NULL
 			,intTaxGroupId			INT
 			,intTaxCodeId			INT
 			,intTaxClassId			INT
@@ -118,11 +123,14 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 				,[ysnTaxExempt]
 			)
 			EXEC dbo.[uspARGetItemTaxes]  
-					 @ItemId  
-					,@LocationId  
-					,@CustomerId
-					,@TransactionDate
-					,@TaxMasterId
+					 @ItemId			= @ItemId  
+					,@LocationId		= @LocationId  
+					,@CustomerId		= @CustomerId
+					,@TransactionDate	= @TransactionDate
+					,@TaxMasterId		= @TaxMasterId
+					,@TaxGroupId		= @TaxGroupId
+					
+			UPDATE @ItemTaxes SET intTaxGroupMasterId = NULL WHERE intTaxGroupMasterId NOT IN (SELECT intTaxGroupMasterId FROM tblSMTaxGroupMaster)
 									
 			
 			-- Calculate Item Tax
