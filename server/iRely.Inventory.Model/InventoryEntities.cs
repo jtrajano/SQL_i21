@@ -214,7 +214,6 @@ namespace iRely.Inventory.Model
             modelBuilder.Entity<tblICCommodityAttribute>().Map<tblICCommodityClassVariant>(p => p.Requires("strType").HasValue("Class"));
             modelBuilder.Entity<tblICCommodityAttribute>().Map<tblICCommodityGrade>(p => p.Requires("strType").HasValue("Grade"));
             modelBuilder.Entity<tblICCommodityAttribute>().Map<tblICCommodityOrigin>(p => p.Requires("strType").HasValue("Origin"));
-            modelBuilder.Entity<tblICCommodityAttribute>().Map<tblICCommodityProductLine>(p => p.Requires("strType").HasValue("ProductLine"));
             modelBuilder.Entity<tblICCommodityAttribute>().Map<tblICCommodityProductType>(p => p.Requires("strType").HasValue("ProductType"));
             modelBuilder.Entity<tblICCommodityAttribute>().Map<tblICCommodityRegion>(p => p.Requires("strType").HasValue("Region"));
             modelBuilder.Entity<tblICCommodityAttribute>().Map<tblICCommoditySeason>(p => p.Requires("strType").HasValue("Season"));

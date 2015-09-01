@@ -8,10 +8,10 @@ Ext.define('Inventory.model.CommodityProductLine', {
         'Ext.data.Field'
     ],
 
-    idProperty: 'intCommodityAttributeId',
+    idProperty: 'intCommodityProductLineId',
 
     fields: [
-        { name: 'intCommodityAttributeId', type: 'int'},
+        { name: 'intCommodityProductLineId', type: 'int'},
         { name: 'intCommodityId', type: 'int',
             reference: {
                 type: 'Inventory.model.Commodity',
@@ -29,6 +29,8 @@ Ext.define('Inventory.model.CommodityProductLine', {
             }
         },
         { name: 'strDescription', type: 'string'},
+        { name: 'ysnDeltaHedge', type: 'boolean'},
+        { name: 'dblDeltaPercent', type: 'float'},
         { name: 'intSort', type: 'int'}
     ],
 
