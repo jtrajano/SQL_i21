@@ -3892,4 +3892,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="ItemListID" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="01bbdcb7-fe8c-41cd-9aa1-850cd52cfccb" ChangeDateTime="09/01/2015 11:27:28">
+    <Property Name="ElementName" Value="[dbo].[tblSTRadiantItemTypeCode].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTRadiantItemTypeCode]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intRadaintItemTypeCodeId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7cb664b2-f3cc-4859-8eb5-ac20a25a2e5d" ChangeDateTime="09/01/2015 11:28:25">
+    <Property Name="ElementName" Value="[dbo].[tblSTRadiantItemTypeCode].[str]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSTRadiantItemTypeCode]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strDescription" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9ab9d8da-5798-4b6c-a3a6-b8cf87e8cfb3" ChangeDateTime="09/01/2015 14:22:19">
+    <Property Name="ElementName" Value="[dbo].[tblICCommodityProductLine].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCommodityProductLine]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCommodityProductLineId" />
+  </Operation>
 </Operations>
