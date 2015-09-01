@@ -137,8 +137,11 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             chkApplyBlueLaw1: '{current.ysnApplyBlueLaw1}',
             chkApplyBlueLaw2: '{current.ysnApplyBlueLaw2}',
             chkCarWash: '{current.ysnCarWash}',
-//            cboItemTypeCode: '{current.intItemTypeCode}',
-//            txtItemTypeSubcode: '{current.intItemTypeSubCode}',
+            cboItemTypeCode: {
+                value: '{current.intItemTypeCode}',
+                store: '{itemTypeCode}'
+            },
+            txtItemTypeSubcode: '{current.intItemTypeSubCode}',
             chkAutoCalculateFreight: '{current.ysnAutoCalculateFreight}',
             cboFreightMethod: {
                 value: '{current.intFreightMethodId}',

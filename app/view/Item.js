@@ -4835,7 +4835,7 @@ Ext.define('Inventory.view.Item', {
                                                                         xtype: 'gridcombobox',
                                                                         columns: [
                                                                             {
-                                                                                dataIndex: 'intCommodityAttributeId',
+                                                                                dataIndex: 'intCommodityProductLineId',
                                                                                 dataType: 'numeric',
                                                                                 text: 'Commodity Attribute Id',
                                                                                 hidden: true
@@ -4856,7 +4856,7 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'cboProductLine',
                                                                         fieldLabel: 'Product Line',
                                                                         displayField: 'strDescription',
-                                                                        valueField: 'intCommodityAttributeId'
+                                                                        valueField: 'intCommodityProductLineId'
                                                                     },
                                                                     {
                                                                         xtype: 'gridcombobox',

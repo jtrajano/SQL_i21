@@ -1172,7 +1172,7 @@ Ext.define('Inventory.view.Commodity', {
                                                     {
                                                         xtype: 'advancefiltergrid',
                                                         includeFullTextSearch: false,
-                                                        flex: 1,
+                                                        flex: 2,
                                                         itemId: 'grdProductLine',
                                                         margin: '0 0 0 5',
                                                         title: 'Product Lines',
@@ -1223,6 +1223,24 @@ Ext.define('Inventory.view.Commodity', {
                                                                 editor: {
                                                                     xtype: 'textfield'
                                                                 }
+                                                            },
+                                                            {
+                                                                xtype: 'checkcolumn',
+                                                                itemId: 'colDeltaHedge',
+                                                                text: 'Delta Hedge',
+                                                                editor: {
+                                                                    xtype: 'checkboxfield',
+                                                                    itemId: 'chkDeltaHedge'
+                                                                }
+                                                            },
+                                                            {
+                                                                xtype: 'numbercolumn',
+                                                                itemId: 'colDeltaPercent',
+                                                                text: 'Delta %',
+                                                                editor: {
+                                                                    xtype: 'numberfield',
+                                                                    formItemCls: 'txtDeltaPercent'
+                                                                }
                                                             }
                                                         ],
                                                         viewConfig: {
@@ -1238,11 +1256,6 @@ Ext.define('Inventory.view.Commodity', {
                                                                 clicksToEdit: 1
                                                             }
                                                         ]
-                                                    },
-                                                    {
-                                                        xtype: 'container',
-                                                        flex: 1,
-                                                        margin: '0 0 0 5'
                                                     }
                                                 ]
                                             }

@@ -2240,7 +2240,7 @@
                                                                         "align": null,
                                                                         "dataIndex": "dblUnitCost",
                                                                         "dataType": null,
-                                                                        "format": null,
+                                                                        "format": "0,000.00####",
                                                                         "itemId": "colUnitCost",
                                                                         "text": "Unit Cost",
                                                                         "width": 85
@@ -4431,7 +4431,7 @@
                                                             "codeClass": null,
                                                             "userConfig": {
                                                                 "icon": null,
-                                                                "iconCls": "small-delete",
+                                                                "iconCls": "small-calculator",
                                                                 "itemId": "btnCalculateCharges",
                                                                 "layout|flex": null,
                                                                 "tabIndex": -1,

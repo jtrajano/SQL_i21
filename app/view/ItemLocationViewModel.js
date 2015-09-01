@@ -68,6 +68,83 @@ Ext.define('Inventory.view.ItemLocationViewModel', {
                 }
             ]
         },
+        itemTypeCode: {
+            data: [
+                {
+                    intItemTypeCodeId: '1',
+                    strDescription: '01 Merchandise Item'
+                },
+                {
+                    intItemTypeCodeId: '2',
+                    strDescription: '02 Condiments'
+                },
+                {
+                    intItemTypeCodeId: '3',
+                    strDescription: '03 Combos'
+                },
+                {
+                    intItemTypeCodeId: '4',
+                    strDescription: '04'
+                },
+                {
+                    intItemTypeCodeId: '5',
+                    strDescription: '05'
+                },
+                {
+                    intItemTypeCodeId: '6',
+                    strDescription: '06'
+                },
+                {
+                    intItemTypeCodeId: '7',
+                    strDescription: '07'
+                },
+                {
+                    intItemTypeCodeId: '8',
+                    strDescription: '08'
+                },
+                {
+                    intItemTypeCodeId: '9',
+                    strDescription: '09'
+                },
+                {
+                    intItemTypeCodeId: '10',
+                    strDescription: '10 Car Wash Item'
+                },
+                {
+                    intItemTypeCodeId: '11',
+                    strDescription: '11 Open Department Item'
+                },
+                {
+                    intItemTypeCodeId: '12',
+                    strDescription: '12 Lottery Ticket'
+                },
+                {
+                    intItemTypeCodeId: '13',
+                    strDescription: '13 Money Order'
+                },
+                {
+                    intItemTypeCodeId: '15',
+                    strDescription: '15 Container Deposit'
+                },
+                {
+                    intItemTypeCodeId: '20',
+                    strDescription: '20 GC Reload'
+                },
+                {
+                    intItemTypeCodeId: '28',
+                    strDescription: '28 GC Activation'
+                }
+            ],
+            fields: [
+                {
+                    type: 'int',
+                    name: 'intItemTypeCodeId'
+                },
+                {
+                    name: 'strDescription'
+                }
+            ]
+        },
         storageLocation: {
             type: 'icbufferedstoragelocation'
         },

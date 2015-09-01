@@ -29,29 +29,10 @@ Ext.define('Inventory.model.CategoryUOM', {
             }},
         { name: 'intUnitMeasureId', type: 'int', allowNull: true },
         { name: 'dblUnitQty', type: 'float' },
-        { name: 'dblSellQty', type: 'float' },
-        { name: 'dblWeight', type: 'float' },
-        { name: 'intWeightUOMId', type: 'int', allowNull: true },
-        { name: 'strDescription', type: 'string' },
-        { name: 'strUpcCode', type: 'string' },
-        { name: 'strFullUPC', type: 'string',
-            persist: false,
-            convert: function(value, record){
-                var shortUPC = record.get('strUpcCode');
-                return i21.ModuleMgr.Inventory.getFullUPCString(shortUPC);
-            },
-            depends: ['strUpcCode']
-        },
         { name: 'ysnStockUnit', type: 'boolean' },
         { name: 'ysnAllowPurchase', type: 'boolean' },
         { name: 'ysnAllowSale', type: 'boolean' },
-        { name: 'dblLength', type: 'float' },
-        { name: 'dblWidth', type: 'float' },
-        { name: 'dblHeight', type: 'float' },
-        { name: 'intDimensionUOMId', type: 'int', allowNull: true },
-        { name: 'dblVolume', type: 'float' },
-        { name: 'intVolumeUOMId', type: 'int', allowNull: true },
-        { name: 'dblMaxQty', type: 'float' },
+        { name: 'ysnDefault', type: 'boolean' },
         { name: 'intSort', type: 'int', allowNull: true }
     ],
 

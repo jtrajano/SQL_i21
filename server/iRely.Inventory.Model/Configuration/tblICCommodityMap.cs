@@ -149,7 +149,17 @@ namespace iRely.Inventory.Model
     {
         public tblICCommodityProductLineMap()
         {
+            // Primary Key
+            this.HasKey(t => t.intCommodityProductLineId);
+
+            // Table & Column Mappings
+            this.ToTable("tblICCommodityProductLine");
+            this.Property(t => t.intCommodityProductLineId).HasColumnName("intCommodityProductLineId");
             this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");
+            this.Property(t => t.strDescription).HasColumnName("strDescription");
+            this.Property(t => t.ysnDeltaHedge).HasColumnName("ysnDeltaHedge");
+            this.Property(t => t.dblDeltaPercent).HasColumnName("dblDeltaPercent").HasPrecision(18, 6);
+            this.Property(t => t.intSort).HasColumnName("intSort");
         }
     }
 
