@@ -138,7 +138,7 @@
 :r "..\dbo\Functions\fnTMGetSpecialPricing.sql"
 :r "..\dbo\Functions\fnTMGetSpecialPricingPrice.sql"
 :r "..\dbo\Stored Procedures\uspTMImportTankMonitorReading.sql"
-:r "..\dbo\Views\vyuTMLeaseCode.sql"
+--:r "..\dbo\Views\vyuTMLeaseCode.sql"
 :r "..\dbo\Stored Procedures\uspTMAlterCobolWrite.sql"
 
 

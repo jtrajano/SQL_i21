@@ -31,17 +31,13 @@ SELECT
 	,dtmLastLeaseBillingDate = C.dtmLastLeaseBillingDate
 	,dtmDontBillAfter = C.dtmDontBillAfter
 	,strBillingFrequency = C.strBillingFrequency
-	,ysnTaxable = ISNULL(D.ysnTaxable,0)
-	,strSiteState = (CASE WHEN  G.intTaxIndicatorId IS NULL 
-						THEN  ( CASE WHEN D.intTaxStateID  IS NULL
-									THEN
-										''
-									ELSE
-										I.strTaxGroupMaster
-									END)
-						ELSE
-							H.strTaxGroupMaster
-						END)
+	,ysnTaxable = ISNULL(G.ysnTaxable,0)
+	,strSiteState =( CASE WHEN D.intTaxStateID  IS NULL
+                THEN
+                    ''
+                ELSE
+                    I.strTaxGroupMaster
+                END)
 	,strSiteLocale1 = ''
 	,strSiteLocale2 = ''
 	,intSiteDeviceId = A.intSiteDeviceID
@@ -62,8 +58,6 @@ INNER JOIN tblEntity F
 	ON E.intCustomerNumber = F.intEntityId		
 LEFT JOIN tblTMLeaseCode G
 	ON C.intLeaseCodeId = G.intLeaseCodeId
-LEFT JOIN tblSMTaxGroupMaster H
-	ON G.intTaxIndicatorId = H.intTaxGroupMasterId
 LEFT JOIN tblSMTaxGroupMaster I
 	ON D.intTaxStateID = I.intTaxGroupMasterId
 LEFT JOIN tblEntity J
