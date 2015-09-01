@@ -181,6 +181,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\10_RemoveCommodityItems.sql
 :r .\IC\11_RemoveOtherChargesAsset.sql
 :r .\IC\12_UpdateExistingInventoryTransactionForm.sql
+:r .\IC\13_MoveCommodityAttributes.sql
 :r .\IC\PatchFor_1510_to_1520.sql
 :r .\GL\InventoryCategoryFix.sql
 
