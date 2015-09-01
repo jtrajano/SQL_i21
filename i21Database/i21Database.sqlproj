@@ -162,6 +162,7 @@
     <Folder Include="Scripts\Utility\IC\IC-1024" />
     <Folder Include="Scripts\Utility\IC\IC-1090" />
     <Folder Include="Scripts\Utility\IC\IC-1092" />
+    <Folder Include="Scripts\Post-Deployment\ST" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -2267,6 +2268,8 @@
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\TankInformation.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryReceiptUnitCost.sql" />
+    <None Include="Scripts\Post-Deployment\GL\InventoryCategoryFix.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRPosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2327,6 +2330,7 @@
     <None Include="Scripts\Post-Deployment\CM\Reports\SubReports\CheckVoucherMiddleSubReportAPPaymentOverflow.sql" />
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReportAPPaymentOverflow.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCheckPrint_GetCheckOverflow.sql" />
+    <None Include="Scripts\Post-Deployment\ST\1_FileFieldMapping_PricebookSale.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
