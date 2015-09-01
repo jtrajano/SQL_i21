@@ -30,7 +30,7 @@ BEGIN
 	IF(@contractDetailId IS NOT NULL AND @contractDetailId > 0)
 	EXEC uspCTUpdateScheduleQuantity @contractDetailId, @qty, @userId, @purchaseDetailId, 'Purchase Order'
 
-	DELETE FROM #poContractDetails WHERE intContractDetailId = @contractDetailId
+	DELETE FROM #poContractDetails WHERE intPurchaseDetailId = @purchaseDetailId
 END
 
 IF @transCount = 0 COMMIT TRANSACTION
