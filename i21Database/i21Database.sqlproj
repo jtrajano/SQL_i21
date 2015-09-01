@@ -2271,6 +2271,7 @@
     <None Include="Scripts\Post-Deployment\GL\InventoryCategoryFix.sql" />
     <Build Include="dbo\Stored Procedures\uspTRPosting.sql" />
     <Build Include="dbo\Views\vyuTRRackPriceView.sql" />
+    <Build Include="dbo\Tables\tblSTRadiantItemTypeCode.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
