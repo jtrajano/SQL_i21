@@ -179,6 +179,7 @@ namespace iRely.Inventory.Model
         public decimal? dblGross { get; set; }
         public decimal? dblNet { get; set; }
         public decimal? dblTax { get; set; }
+        public int? intTaxGroupId { get; set; }
         public int? intSort { get; set; }
 
         private string _orderNumber;
@@ -397,6 +398,25 @@ namespace iRely.Inventory.Model
                 _uomType = value;
             }
         }
+        private string _taxGroup;
+        [NotMapped]
+        public string strTaxGroup
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_taxGroup))
+                    if (vyuICGetInventoryReceiptItem != null)
+                        return vyuICGetInventoryReceiptItem.strTaxGroup;
+                    else
+                        return null;
+                else
+                    return _taxGroup;
+            }
+            set
+            {
+                _taxGroup = value;
+            }
+        }
         private string _subLocationName;
         [NotMapped]
         public string strSubLocationName
@@ -610,6 +630,8 @@ namespace iRely.Inventory.Model
         public int? intCommodityId { get; set; }
         public int? intContainerId { get; set; }
         public string strContainer { get; set; }
+        public int? intTaxGroupId { get; set; }
+        public string strTaxGroup { get; set; }
         public int? intSubLocationId { get; set; }
         public string strSubLocationName { get; set; }
         public int? intStorageLocationId { get; set; }

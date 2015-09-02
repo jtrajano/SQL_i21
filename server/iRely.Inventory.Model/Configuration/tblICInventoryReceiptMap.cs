@@ -98,6 +98,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblGross).HasColumnName("dblGross").HasPrecision(18, 6);
             this.Property(t => t.dblNet).HasColumnName("dblNet").HasPrecision(18, 6);
             this.Property(t => t.dblTax).HasColumnName("dblTax").HasPrecision(18, 6);
+            this.Property(t => t.intTaxGroupId).HasColumnName("intTaxGroupId");
             this.Property(t => t.intSort).HasColumnName("intSort");
 
             this.HasOptional(p => p.vyuICGetInventoryReceiptItem)
@@ -134,6 +135,8 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");
             this.Property(t => t.intContainerId).HasColumnName("intContainerId");
             this.Property(t => t.strContainer).HasColumnName("strContainer");
+            this.Property(t => t.intTaxGroupId).HasColumnName("intTaxGroupId");
+            this.Property(t => t.strTaxGroup).HasColumnName("strTaxGroup");
             this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
             this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
             this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
