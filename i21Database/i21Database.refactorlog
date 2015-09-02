@@ -3906,4 +3906,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strDescription" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="9ab9d8da-5798-4b6c-a3a6-b8cf87e8cfb3" ChangeDateTime="09/01/2015 14:22:19">
+    <Property Name="ElementName" Value="[dbo].[tblICCommodityProductLine].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICCommodityProductLine]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCommodityProductLineId" />
+  </Operation>
 </Operations>
