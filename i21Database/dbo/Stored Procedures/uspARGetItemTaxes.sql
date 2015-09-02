@@ -271,11 +271,34 @@ AS
 							TC.intTaxCodeId
 						HAVING COUNT(TC.intTaxCodeId) > 1
 					)
+					
+			IF (SELECT COUNT(1) FROM @TaxCodes) < 1
+				BEGIN
+					INSERT INTO @TaxCodes
+					SELECT DISTINCT 
+						TGM.[intTaxGroupMasterId]
+						,TG.[intTaxGroupId]
+						,TC.[intTaxCodeId]
+						,UPPER(RTRIM(LTRIM(TC.[strCountry])))
+						,UPPER(RTRIM(LTRIM(TC.[strState])))
+						,UPPER(RTRIM(LTRIM(TC.[strCounty])))
+						,UPPER(RTRIM(LTRIM(TC.[strCity])))
+					FROM tblSMTaxCode TC	
+						INNER JOIN tblSMTaxGroupCode TGC ON TC.[intTaxCodeId] = TGC.[intTaxCodeId] 
+						INNER JOIN tblSMTaxGroup TG ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
+						INNER JOIN tblSMTaxGroupMasterGroup TGTM ON TG.[intTaxGroupId] = TGTM.[intTaxGroupId]
+						INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
+					WHERE 
+						TGM.[intTaxGroupMasterId] = @TaxGroupMasterId
+				END
 											
 			
 			INSERT INTO @TaxGroups
 			SELECT DISTINCT [intTaxGroupId]
 			FROM @TaxCodes
+			
+			DECLARE @TaxGroupCount INT
+					,@ValidTaxGroupCount INT
 			
 
 
@@ -286,9 +309,12 @@ AS
 			FROM 
 				@TaxCodes
 			WHERE
-				[strCountry] = @Country 
+				[strCountry] = @Country
 				
-			IF (SELECT COUNT(1) FROM @TaxGroups) > 1 AND ((SELECT COUNT(1) FROM @TaxGroups) > (SELECT COUNT(1) FROM @ValidTaxGroups))
+			SELECT @TaxGroupCount = COUNT(1) FROM @TaxGroups
+			SELECT @ValidTaxGroupCount = COUNT(1) FROM @ValidTaxGroups
+				
+			IF @TaxGroupCount >= 1 AND @ValidTaxGroupCount >= 1 AND (@TaxGroupCount - @ValidTaxGroupCount >= 1)
 				BEGIN
 					DELETE FROM @TaxGroups
 					WHERE [intTaxGroupId] NOT IN (SELECT DISTINCT [intTaxGroupId] FROM @ValidTaxGroups)				
@@ -305,7 +331,11 @@ AS
 			WHERE 
 				[strCountry] = @Country
 				AND [strState] = @State 																			
-			IF (SELECT COUNT(1) FROM @TaxGroups) > 1 AND ((SELECT COUNT(1) FROM @TaxGroups) > (SELECT COUNT(1) FROM @ValidTaxGroups))
+				
+			SELECT @TaxGroupCount = COUNT(1) FROM @TaxGroups
+			SELECT @ValidTaxGroupCount = COUNT(1) FROM @ValidTaxGroups
+				
+			IF @TaxGroupCount >= 1 AND @ValidTaxGroupCount >= 1 AND (@TaxGroupCount - @ValidTaxGroupCount >= 1)
 				BEGIN
 					DELETE FROM @TaxGroups
 					WHERE [intTaxGroupId] NOT IN (SELECT DISTINCT [intTaxGroupId] FROM @ValidTaxGroups)
@@ -322,7 +352,11 @@ AS
 				[strCountry] = @Country
 				AND [strState] = @State
 				AND [strCounty] = @County	
-			IF (SELECT COUNT(1) FROM @TaxGroups) > 1 AND ((SELECT COUNT(1) FROM @TaxGroups) > (SELECT COUNT(1) FROM @ValidTaxGroups))
+				
+			SELECT @TaxGroupCount = COUNT(1) FROM @TaxGroups
+			SELECT @ValidTaxGroupCount = COUNT(1) FROM @ValidTaxGroups
+				
+			IF @TaxGroupCount >= 1 AND @ValidTaxGroupCount >= 1 AND (@TaxGroupCount - @ValidTaxGroupCount >= 1)
 				BEGIN
 					DELETE FROM @TaxGroups
 					WHERE [intTaxGroupId] NOT IN (SELECT DISTINCT [intTaxGroupId] FROM @ValidTaxGroups)			
@@ -340,7 +374,11 @@ AS
 				AND [strState] = @State
 				AND [strCounty] = @County
 				AND [strCity] = @City																					
-			IF (SELECT COUNT(1) FROM @TaxGroups) > 1 AND ((SELECT COUNT(1) FROM @TaxGroups) > (SELECT COUNT(1) FROM @ValidTaxGroups))
+				
+			SELECT @TaxGroupCount = COUNT(1) FROM @TaxGroups
+			SELECT @ValidTaxGroupCount = COUNT(1) FROM @ValidTaxGroups
+				
+			IF @TaxGroupCount >= 1 AND @ValidTaxGroupCount >= 1 AND (@TaxGroupCount - @ValidTaxGroupCount >= 1)
 				BEGIN
 					DELETE FROM @TaxGroups
 					WHERE [intTaxGroupId] NOT IN (SELECT DISTINCT [intTaxGroupId] FROM @ValidTaxGroups)				
