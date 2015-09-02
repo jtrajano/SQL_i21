@@ -9,9 +9,11 @@
 	[dblFreightRate] DECIMAL(18, 6) NULL DEFAULT 0,
 	[dblDistSurcharge] DECIMAL(18, 6) NULL DEFAULT 0,
 	[ysnFreightInPrice] BIT  DEFAULT ((0)) NOT NULL,
+	[intTaxGroupId]		INT	NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	CONSTRAINT [PK_tblTRDistributionDetail] PRIMARY KEY ([intDistributionDetailId]),
 	CONSTRAINT [FK_tblTRDistributionDetail_tblTRDistributionHeader_intDistributionHeaderId] FOREIGN KEY ([intDistributionHeaderId]) REFERENCES [dbo].[tblTRDistributionHeader] ([intDistributionHeaderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblTRDistributionDetail_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),	
-	CONSTRAINT [FK_tblTRDistributionDetail_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId])
+	CONSTRAINT [FK_tblTRDistributionDetail_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]),
+	CONSTRAINT [FK_tblTRDistributionDetail_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId])
 )
