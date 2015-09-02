@@ -84,7 +84,7 @@ set @dblInvoiceSurchargeRate =0;
 	                 join tblEntityTariffCategory TC on TA.intEntityTariffId = TC.intEntityTariffId					   
 	  			      left join tblEntityTariffMileage TM on TM.intEntityTariffId = TC.intEntityTariffId
 	  			      where (TM.intFromMiles >= @intMiles 
-				        or TM.intToMiles <= @intMiles)
+				        and @intMiles  <= TM.intToMiles)
 	  			            and TA.intEntityId = @intEntityShipViaId
 	  					    and TC.intCategoryId = @intCategoryid
 	 
