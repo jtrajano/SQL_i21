@@ -16,6 +16,8 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, strItemDescription = Item.strDescription
 	, Item.strLotTracking
 	, Item.intCommodityId
+	, ReceiptItem.intTaxGroupId
+	, TaxGroup.strTaxGroup
 	, ReceiptItem.intContainerId
 	, ReceiptItemSource.strContainer
 	, ReceiptItem.intSubLocationId
@@ -45,3 +47,4 @@ FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemUOMId = ReceiptItem.intWeightUOMId
 	LEFT JOIN tblICUnitMeasure WeightUOM ON WeightUOM.intUnitMeasureId = ItemWeightUOM.intUnitMeasureId
 	LEFT JOIN tblICCommodityAttribute Grade ON Grade.intCommodityAttributeId = ReceiptItem.intGradeId
+	LEFT JOIN tblSMTaxGroup TaxGroup ON TaxGroup.intTaxGroupId = ReceiptItem.intTaxGroupId
