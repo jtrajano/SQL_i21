@@ -44,9 +44,9 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[dblCredit]
 				,[dblDebitUnit]
 				,[dblCreditUnit]
-				,[dblDebitForeign]
-				,[dblCreditForeign]
-				,[dblForeignRate]
+				--,[dblDebitForeign]
+				--,[dblCreditForeign]
+				--,[dblForeignRate]
 				,[strDescription]
 				,[strCode]
 				,[strReference]
@@ -73,9 +73,9 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,dblCredit			= [dblDebit]		-- (Debit <- Credit)
 				,dblDebitUnit		= [dblCreditUnit]	-- (Debit Unit -> Credit Unit)
 				,dblCreditUnit		= [dblDebitUnit]	-- (Debit Unit <- Credit Unit)
-				,dblDebitForeign	= [dblCreditForeign]
-				,dblCreditForeign	= [dblDebitForeign]
-				,dblForeignRate		
+				--,dblDebitForeign	= [dblCreditForeign]
+				--,dblCreditForeign	= [dblDebitForeign]
+				--,dblForeignRate		
 				,[strDescription]
 				,[strCode]
 				,[strReference]
