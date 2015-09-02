@@ -120,16 +120,17 @@ BEGIN
 		--NOT BALANCE
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
-			'The debit and credit amounts are not balanced.',
-			'Payable',
-			A.strPaymentRecordNum,
-			A.intPaymentId
+		'The debit and credit amounts are not balanced.',
+		'Payable',
+		A.strPaymentRecordNum,
+		A.intPaymentId
 		FROM tblAPPayment A 
 		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments) AND 
-			(A.dblAmountPaid + A.dblWithheld 
-			+ (SELECT SUM(CASE WHEN dblAmountDue = (dblDiscount + dblPayment) THEN dblDiscount ELSE 0 END) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)) 
-			<> ((SELECT SUM(dblPayment) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId) 
-					+ (SELECT SUM(CASE WHEN dblAmountDue = (dblDiscount + dblPayment) THEN dblDiscount ELSE 0 END) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId))
+		(A.dblAmountPaid + A.dblWithheld 
+		+ (SELECT SUM(CASE WHEN dblAmountDue = (dblDiscount + dblPayment) THEN dblDiscount ELSE 0 END) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)) 
+		<> ((SELECT SUM(CASE WHEN B2.intTransactionType != 1 AND B1.dblPayment > 0 THEN B1.dblPayment * -1 ELSE B1.dblPayment END) FROM tblAPPaymentDetail B1 INNER JOIN tblAPBill B2 ON B1.intBillId = B2.intBillId
+			WHERE B1.intPaymentId = A.intPaymentId) 
+			+ (SELECT SUM(CASE WHEN dblAmountDue = (dblDiscount + dblPayment) THEN dblDiscount ELSE 0 END) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId))
 		--include over payment
 
 		--ALREADY POSTED
