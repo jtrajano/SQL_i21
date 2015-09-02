@@ -10,6 +10,57 @@ AS
 BEGIN
 	DECLARE @TaxGroupMasterId INT
 			,@TaxExempt BIT
+			
+			
+		IF @TaxMasterId IS NOT NULL AND @TaxMasterId <> 0
+		BEGIN				
+			SELECT
+				0
+				,0 AS intInvoiceDetailId
+				,0 AS intTaxGroupMasterId 
+				,TaxGroup.intTaxGroupId 
+				,TaxCode.intTaxCodeId
+				,TaxCode.intTaxClassId				
+				,TaxCode.strTaxableByOtherTaxes
+				,ISNULL(
+						(SELECT TOP 1 tblSMTaxCodeRate.strCalculationMethod 
+							FROM tblSMTaxCodeRate 
+							WHERE tblSMTaxCodeRate.intTaxCodeId = TaxCode.intTaxCodeId 
+								AND CAST(tblSMTaxCodeRate.dtmEffectiveDate  AS DATE) <= CAST(@TransactionDate AS DATE)
+							ORDER BY tblSMTaxCodeRate.dtmEffectiveDate ASC
+								,tblSMTaxCodeRate.numRate DESC
+						), 'Unit'
+					) AS strCalculationMethod
+				,ISNULL(
+						(SELECT TOP 1 tblSMTaxCodeRate.numRate 
+							FROM tblSMTaxCodeRate 
+							WHERE tblSMTaxCodeRate.intTaxCodeId = TaxCode.intTaxCodeId 
+								AND CAST(tblSMTaxCodeRate.dtmEffectiveDate  AS DATE) <= CAST(@TransactionDate AS DATE)
+							ORDER BY tblSMTaxCodeRate.dtmEffectiveDate ASC
+								,tblSMTaxCodeRate.numRate DESC
+						), 0.00
+					) AS numRate
+				,0.00 AS dblTax
+				,0.00 AS dblAdjustedTax				
+				,intTaxAccountId = (CASE WHEN @TransactionType = 'Sale' THEN TaxCode.intSalesTaxAccountId
+										WHEN @TransactionType = 'Purchase' THEN TaxCode.intPurchaseTaxAccountId
+									END)
+				,0 AS ysnSeparateOnInvoice 
+				,TaxCode.ysnCheckoffTax
+				,TaxCode.strTaxCode
+				,@TaxExempt AS ysnTaxExempt 				
+			FROM tblSMTaxCode TaxCode
+			INNER JOIN tblSMTaxGroupCode TaxGroupCode ON TaxCode.intTaxCodeId = TaxGroupCode.intTaxCodeId 
+			INNER JOIN tblSMTaxGroup TaxGroup ON TaxGroupCode.intTaxGroupId = TaxGroup.intTaxGroupId
+			WHERE TaxGroup.intTaxGroupId = @TaxMasterId
+				AND (
+						((CASE WHEN @TransactionType = 'Sale' THEN ISNULL(TaxCode.intSalesTaxAccountId, 0) 
+							WHEN @TransactionType = 'Purchase' THEN ISNULL(TaxCode.intPurchaseTaxAccountId, 0) 
+							END) <> 0)
+					)				
+				
+			RETURN 1
+		END
 
 	IF (@TransactionType = 'Sale')
 	BEGIN
