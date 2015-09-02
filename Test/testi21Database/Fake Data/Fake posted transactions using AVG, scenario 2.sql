@@ -303,6 +303,7 @@ BEGIN
 			,intItemLocationId
 			,intItemUOMId
 			,strBatchId
+			,strTransactionForm
 		)
 		SELECT	dtmDate = '01/01/2014'
 				,dblQty = -100
@@ -320,6 +321,7 @@ BEGIN
 				,intItemLocationId = 1
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,strBatchId = @strBatchId			
+				,strTransactionForm = 'Inventory Shipment'
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,dblQty = -100
@@ -337,6 +339,7 @@ BEGIN
 				,intItemLocationId = 2
 				,intItemUOMId = @StickyGrains_BushelUOMId
 				,strBatchId = @strBatchId
+				,strTransactionForm = 'Inventory Shipment'
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,dblQty = -100
@@ -354,6 +357,7 @@ BEGIN
 				,intItemLocationId = 3
 				,intItemUOMId = @PremiumGrains_BushelUOMId
 				,strBatchId = @strBatchId
+				,strTransactionForm = 'Inventory Shipment'
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,dblQty = -100
@@ -371,6 +375,7 @@ BEGIN
 				,intItemLocationId = 4
 				,intItemUOMId = @ColdGrains_BushelUOMId
 				,strBatchId = @strBatchId			
+				,strTransactionForm = 'Inventory Shipment'
 		UNION ALL 
 		SELECT	dtmDate = '01/01/2014'
 				,dblQty = -100
@@ -388,6 +393,7 @@ BEGIN
 				,intItemLocationId = 5
 				,intItemUOMId = @HotGrains_BushelUOMId
 				,strBatchId = @strBatchId				
+				,strTransactionForm = 'Inventory Shipment'
 	END 
 
 	----------------------------------------------------------------

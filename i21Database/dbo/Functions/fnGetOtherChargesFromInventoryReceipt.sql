@@ -1,5 +1,5 @@
 ﻿-- This function returns the cost per lot item. 
-CREATE FUNCTION [dbo].[fnGetOtherChargesFromInventoryReceipt] (	
+CREATE FUNCTION [dbo].[fnGetOtherChargesFromInventoryReceipt] ( 
 	@intInventoryReceiptItemId AS INT
 )
 RETURNS NUMERIC(18,6)
@@ -9,14 +9,18 @@ BEGIN
 			,@units AS NUMERIC(18,6)
 
 	SELECT	@totalOtherCharges= SUM(ItemOtherCharges.dblAmount)
-			,@units = SUM(ReceiptItems.dblOpenReceive)
-	FROM	dbo.tblICInventoryReceiptItem ReceiptItems INNER JOIN dbo.tblICInventoryReceiptItemAllocatedCharge ItemOtherCharges
-				ON ReceiptItems.intInventoryReceiptId = ItemOtherCharges.intInventoryReceiptId
+	FROM	dbo.tblICInventoryReceiptItem ReceiptItems INNER JOIN dbo.tblICInventoryReceiptItemAllocatedCharge ItemOtherCharges 
+				ON ReceiptItems.intInventoryReceiptItemId = ItemOtherCharges.intInventoryReceiptItemId
 	WHERE	ReceiptItems.intInventoryReceiptItemId = @intInventoryReceiptItemId
 			AND ItemOtherCharges.ysnInventoryCost = 1
 
-	IF @units <> 0 
-		RETURN	ISNULL(@totalOtherCharges / @units, 0);
+	SELECT	@units = ReceiptItems.dblOpenReceive
+	FROM	dbo.tblICInventoryReceiptItem ReceiptItems 
+	WHERE	ReceiptItems.intInventoryReceiptItemId = @intInventoryReceiptItemId
 
-	RETURN 0;
+	IF @units <> 0 
+		RETURN ISNULL(@totalOtherCharges / @units, 0);
+
+	RETURN 0
+	;
 END

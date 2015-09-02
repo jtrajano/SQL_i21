@@ -31,8 +31,7 @@ FROM
 				     WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())>10 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())<=30 THEN '11 - 30 Days'
 					 WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())>30 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())<=60 THEN '31 - 60 Days'     
 					 WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())>60 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())<=90 THEN '61 - 90 Days'    
-					 WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())>90 THEN 'Over 90'     
-					 ELSE '0 - 10 Days' END 
+					 WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE())>90 THEN 'Over 90' END
 	, I.ysnPosted
 	, dblAvailableCredit = 0
 FROM tblARInvoice I

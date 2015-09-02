@@ -8,7 +8,7 @@ SELECT
 	strOrderNumber = 
 		(
 			CASE WHEN Receipt.strReceiptType = 'Purchase Contract'
-				THEN (SELECT CAST(ISNULL(intContractNumber, 'PO Number not found!') AS NVARCHAR) FROM tblCTContractHeader WHERE intContractHeaderId = ReceiptItem.intOrderId)
+				THEN (SELECT CAST(ISNULL(strContractNumber, 'PO Number not found!') AS NVARCHAR) FROM tblCTContractHeader WHERE intContractHeaderId = ReceiptItem.intOrderId)
 			WHEN Receipt.strReceiptType = 'Purchase Order'
 				THEN (SELECT ISNULL(strPurchaseOrderNumber, 'PO Number not found!') FROM tblPOPurchase WHERE intPurchaseId = ReceiptItem.intOrderId)
 			WHEN Receipt.strReceiptType = 'Transfer Receipt'
@@ -151,7 +151,7 @@ SELECT
 					END
 				)
 			WHEN Receipt.strReceiptType = 'Purchase Order'
-				THEN ISNULL((SELECT ISNULL(dblReceived, 0.00) FROM tblPOPurchaseDetail WHERE intPurchaseId = ReceiptItem.intOrderId AND intPurchaseDetailId = ReceiptItem.intLineNo), 0.00)
+				THEN ISNULL((SELECT ISNULL(dblQtyReceived, 0.00) FROM tblPOPurchaseDetail WHERE intPurchaseId = ReceiptItem.intOrderId AND intPurchaseDetailId = ReceiptItem.intLineNo), 0.00)
 			WHEN Receipt.strReceiptType = 'Transfer Order'
 				THEN 0.00
 			WHEN Receipt.strReceiptType = 'Direct'

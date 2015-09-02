@@ -44,6 +44,9 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,[dblCredit]
 				,[dblDebitUnit]
 				,[dblCreditUnit]
+				,[dblDebitForeign]
+				,[dblCreditForeign]
+				,[dblForeignRate]
 				,[strDescription]
 				,[strCode]
 				,[strReference]
@@ -70,6 +73,9 @@ IF ISNULL(@ysnRecap, 0) = 0
 				,dblCredit			= [dblDebit]		-- (Debit <- Credit)
 				,dblDebitUnit		= [dblCreditUnit]	-- (Debit Unit -> Credit Unit)
 				,dblCreditUnit		= [dblDebitUnit]	-- (Debit Unit <- Credit Unit)
+				,dblDebitForeign	= [dblCreditForeign]
+				,dblCreditForeign	= [dblDebitForeign]
+				,dblForeignRate		
 				,[strDescription]
 				,[strCode]
 				,[strReference]
@@ -137,7 +143,7 @@ ELSE
 			,[intAccountId]			
 			,[strAccountId]			= (SELECT [strAccountId] FROM Accounts WHERE [intAccountId] = A.[intAccountId])
 			,[strAccountGroup]		= (SELECT [strAccountGroup] FROM Accounts WHERE [intAccountId] = A.[intAccountId])
-			,[strDescription]		= (SELECT [strDescription] FROM Accounts WHERE [intAccountId] = A.[intAccountId])
+			,[strDescription]		=  A.[strDescription]
 			,[strReference]			
 			,[dtmTransactionDate]	
 			,[dblDebit]				= [dblCredit]

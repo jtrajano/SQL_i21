@@ -131,7 +131,7 @@ SELECT
 		,strTransactionId			= CAST(@intYear as NVARCHAR(10)) + '-' + @strRetainedAccount
 		,intTransactionId			= @intFiscalYearId
 		,strReference				= 'Fiscal Year'
-		,intCurrencyId				= intCurrencyId
+		,intCurrencyId				= tblGLDetail.intCurrencyId
 		,dblExchangeRate			= dblExchangeRate		
 		,dtmDateEntered				= GETDATE()
 		,dtmTransactionDate			= @dtmDateTo

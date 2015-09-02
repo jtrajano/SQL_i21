@@ -24,6 +24,8 @@ CREATE TYPE [dbo].[ReceiptOtherChargesTableType] AS TABLE
     ,[intOtherChargeEntityVendorId] INT NULL												-- Used if Other Charge is a surcharge. It works with 'On Cost Type'. 'On Cost Type' is configured in the item setup. 
     ,[dblAmount] NUMERIC(18, 6) NULL DEFAULT ((0))											-- Used if Cost method is 'Amount'. The additional charge applied per line item, regardless of Qty or Cost. 
     ,[strAllocateCostBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT ('Unit')	-- Determines how the computed other charges are allocated per item. It can be allocated by 'Unit', 'Weight', or 'Cost'. 
-    ,[strCostBilledBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT ('Vendor')	-- Determines if the computed charge is billed by the inventory receipt vendor, a third party vendor, or by no one. 
+    --,[strCostBilledBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT ('Vendor')	-- Determines if the computed charge is billed by the inventory receipt vendor, a third party vendor, or by no one. 
+	,[ysnAccrue] BIT NULL 
+	,[ysnPrice] BIT NULL 
 	,[intContractDetailId] INT NULL															-- Contract
 )

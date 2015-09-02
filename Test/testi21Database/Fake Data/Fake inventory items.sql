@@ -218,11 +218,11 @@ BEGIN
 	FROM dbo.tblGLAccountCategory
 	WHERE strAccountCategory = @ACCOUNT_CATEGORY_NAME_OtherChargeIncome
 	
-	DECLARE @ACCOUNT_CATEGORY_NAME_OtherChargeAsset AS NVARCHAR(100) = 'Other Charge (Asset)'	
-	DECLARE @ACCOUNT_CATEGORY_ID_OtherChargeAsset AS INT
-	SELECT @ACCOUNT_CATEGORY_ID_OtherChargeAsset = intAccountCategoryId
-	FROM dbo.tblGLAccountCategory
-	WHERE strAccountCategory = @ACCOUNT_CATEGORY_NAME_OtherChargeAsset
+	--DECLARE @ACCOUNT_CATEGORY_NAME_OtherChargeAsset AS NVARCHAR(100) = 'Other Charge (Asset)'	
+	--DECLARE @ACCOUNT_CATEGORY_ID_OtherChargeAsset AS INT
+	--SELECT @ACCOUNT_CATEGORY_ID_OtherChargeAsset = intAccountCategoryId
+	--FROM dbo.tblGLAccountCategory
+	--WHERE strAccountCategory = @ACCOUNT_CATEGORY_NAME_OtherChargeAsset
 	
 	-- Declare the item categories
 	DECLARE @HotItems AS INT = 1
@@ -605,17 +605,17 @@ BEGIN
 		-- Add the G/L Account for Other Charges
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@OtherCharges, @ACCOUNT_CATEGORY_ID_OtherChargeExpense, @OtherChargeExpense_Default);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@OtherCharges, @ACCOUNT_CATEGORY_ID_OtherChargeIncome, @OtherChargeIncome_Default);
-		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@OtherCharges, @ACCOUNT_CATEGORY_ID_OtherChargeAsset, @OtherChargeAsset_Default);
+		--INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@OtherCharges, @ACCOUNT_CATEGORY_ID_OtherChargeAsset, @OtherChargeAsset_Default);
 
 		-- Add the G/L Account for Surcharges Other Charges
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@SurchargeOtherCharges, @ACCOUNT_CATEGORY_ID_OtherChargeExpense, @OtherChargeExpense_Default);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@SurchargeOtherCharges, @ACCOUNT_CATEGORY_ID_OtherChargeIncome, @OtherChargeIncome_Default);
-		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@SurchargeOtherCharges, @ACCOUNT_CATEGORY_ID_OtherChargeAsset, @OtherChargeAsset_Default);
+		--INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@SurchargeOtherCharges, @ACCOUNT_CATEGORY_ID_OtherChargeAsset, @OtherChargeAsset_Default);
 
 		-- Add the G/L Account for Surcharge On Surcharge
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@SurchargeOnSurcharge, @ACCOUNT_CATEGORY_ID_OtherChargeExpense, @OtherChargeExpense_Default);
 		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@SurchargeOnSurcharge, @ACCOUNT_CATEGORY_ID_OtherChargeIncome, @OtherChargeIncome_Default);
-		INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@SurchargeOnSurcharge, @ACCOUNT_CATEGORY_ID_OtherChargeAsset, @OtherChargeAsset_Default);
+		--INSERT INTO tblICItemAccount (intItemId, intAccountCategoryId, intAccountId) VALUES (@SurchargeOnSurcharge, @ACCOUNT_CATEGORY_ID_OtherChargeAsset, @OtherChargeAsset_Default);
 	END
 	
 	-- Create the fake table and data for the unit of measure

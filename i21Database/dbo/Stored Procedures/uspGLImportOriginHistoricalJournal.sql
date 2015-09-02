@@ -111,17 +111,18 @@ BEGIN TRANSACTION
 		CONVERT(int,1) AS intJournalId,
 		glhst_trans_dt,
 		tblGLAccount.intAccountId,
-		CASE WHEN glhst_amt >= 0 THEN CASE WHEN glhst_dr_cr_ind = 'D' THEN glhst_amt ELSE 0 END
-			ELSE CASE WHEN (glhst_dr_cr_ind='C' OR glhst_dr_cr_ind IS NULL) THEN (glhst_amt * -1) ELSE 0 END END AS Debit,			
+		CASE WHEN glhst_amt >= 0 THEN 
+			CASE WHEN glhst_dr_cr_ind = 'D' THEN glhst_amt ELSE 0 END
+			ELSE CASE WHEN (glhst_dr_cr_ind='C' OR glhst_dr_cr_ind IS NULL) THEN (glhst_amt * -1) ELSE 0 END 
+			END AS Debit,			
 		0 AS DebitRate,																						-- debit rate		
-		CASE WHEN glhst_amt >= 0 THEN CASE WHEN (glhst_dr_cr_ind='C' OR glhst_dr_cr_ind IS NULL) THEN glhst_amt ELSE 0 END
-			ELSE CASE WHEN glhst_dr_cr_ind = 'D' THEN (glhst_amt * -1) ELSE 0 END END AS Credit,		
+		CASE WHEN glhst_amt >= 0 THEN 
+			CASE WHEN (glhst_dr_cr_ind='C' OR glhst_dr_cr_ind IS NULL) THEN glhst_amt ELSE 0 END
+			ELSE CASE WHEN glhst_dr_cr_ind = 'D' THEN (glhst_amt * -1) ELSE 0 END 
+			END AS Credit,		
 		0 AS CreditRate,		
-		CASE WHEN glhst_units >= 0 THEN CASE WHEN glhst_dr_cr_ind = 'D' THEN glhst_units ELSE 0 END
-		ELSE CASE WHEN (glhst_dr_cr_ind='C' OR glhst_dr_cr_ind IS NULL) THEN (glhst_units * -1) ELSE 0 END END AS DebitUnits,
-		0 AS DebitUnits, --debit unit rate
-		CASE WHEN glhst_units >= 0 THEN CASE WHEN (glhst_dr_cr_ind='C' OR glhst_dr_cr_ind IS NULL) THEN glhst_units ELSE 0 END
-		ELSE CASE WHEN glhst_dr_cr_ind = 'D' THEN (glhst_units * -1) ELSE 0 END END AS CreditUnits, -- credit unit rate
+		0 AS DebitUnits,
+		0 AS CreditUnits, -- credit unit rate
 		glhst_ref AS strDescription,
 		NULL AS intCurrencyId,
 		0 AS dblUnitsInlbs,
@@ -145,6 +146,29 @@ BEGIN TRANSACTION
 		SUBSTRING(strCurrentExternalId,1,8) = glhst_acct1_8 AND SUBSTRING(strCurrentExternalId,10,8) = glhst_acct9_16 
 	 INNER JOIN tblGLAccount ON tblGLAccount.intAccountId = tblGLCOACrossReference.inti21Id
 	 
+
+	 UPDATE 
+	A SET DebitUnits = 
+	case
+		WHEN B.glhst_units < 0	THEN B.glhst_units * -1
+		ELSE B.glhst_units END
+
+	FROM
+	#iRelyImptblGLJournalDetail A
+	JOIN glhstmst B ON A.A4GLIdentity = B.A4GLIdentity
+	WHERE A.Debit > 0
+
+	UPDATE 
+	A SET CreditUnits = 
+		CASE 
+			WHEN B.glhst_units < 0	THEN B.glhst_units * -1
+			ELSE B.glhst_units END
+
+	FROM
+	#iRelyImptblGLJournalDetail A
+	JOIN glhstmst B ON A.A4GLIdentity = B.A4GLIdentity
+	WHERE A.Credit > 0
+
 	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 	 
 	--+++++++++++++++++++++++++++++++++

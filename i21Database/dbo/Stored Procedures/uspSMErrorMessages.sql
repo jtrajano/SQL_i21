@@ -368,7 +368,7 @@ SET @strmessage = 'Missing costing method setup for item %s.'
 EXEC sp_addmessage 51091,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51092) EXEC sp_dropmessage 51092, 'us_english'	
-SET @strmessage =  'Please configure the location %s for the item %s in the Item maintenance.'
+SET @strmessage =  'Please configure the location %s in the Item maintenance.'
 EXEC sp_addmessage 51092,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51093) EXEC sp_dropmessage 51093, 'us_english'	
@@ -702,6 +702,22 @@ EXEC sp_addmessage 51174,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51175) EXEC sp_dropmessage 51175, 'us_english'	
 SET @strmessage = 'There is not enough stocks for %s. Reserved stocks is %s while Lot Qty is %s.'
 EXEC sp_addmessage 51175,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51176) EXEC sp_dropmessage 51176, 'us_english'	
+SET @strmessage = 'Split Lot requires a negative Adjust Qty on %s to split stocks from it.'
+EXEC sp_addmessage 51176,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51177) EXEC sp_dropmessage 51177, 'us_english'	
+SET @strmessage = 'Merge Lot requires a negative Adjust Qty on %s as stock for the merge.'
+EXEC sp_addmessage 51177,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51178) EXEC sp_dropmessage 51178, 'us_english'	
+SET @strmessage = 'Move Lot requires a negative Adjust Qty on %s as stock for the move.'
+EXEC sp_addmessage 51178,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51179) EXEC sp_dropmessage 51179, 'us_english'	
+SET @strmessage = 'Unable to calculate the tax for %s used in %s.'
+EXEC sp_addmessage 51179,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51176) EXEC sp_dropmessage 51176, 'us_english'	
 SET @strmessage = 'Old and new lot qty cannot be same.'

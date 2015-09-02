@@ -55,6 +55,8 @@ DECLARE @intId AS INT
 		,@intStorageLocationId AS INT 
 
 DECLARE @CostingMethod AS INT 
+		,@strTransactionForm AS NVARCHAR(255)
+
 
 -- Create the CONSTANT variables for the costing methods
 DECLARE @AVERAGECOST AS INT = 1
@@ -130,6 +132,12 @@ BEGIN
 	-- Initialize the costing method and negative inventory option. 
 	SET @CostingMethod = NULL;
 
+	-- Initialize the transaction form
+	SELECT	@strTransactionForm = strTransactionForm
+	FROM	dbo.tblICInventoryTransactionType
+	WHERE	intTransactionTypeId = @intTransactionTypeId
+			AND strTransactionForm IS NOT NULL 
+
 	-- Get the costing method of an item 
 	SELECT	@CostingMethod = CostingMethod 
 	FROM	dbo.fnGetCostingMethodAsTable(@intItemId, @intItemLocationId)
@@ -158,6 +166,7 @@ BEGIN
 			,@strTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
+			,@strTransactionForm
 			,@intUserId
 	END
 
@@ -182,6 +191,7 @@ BEGIN
 			,@strTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
+			,@strTransactionForm
 			,@intUserId;
 	END
 
@@ -206,6 +216,7 @@ BEGIN
 			,@strTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
+			,@strTransactionForm
 			,@intUserId;
 	END
 
@@ -231,6 +242,7 @@ BEGIN
 			,@strTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
+			,@strTransactionForm
 			,@intUserId;
 	END
 
@@ -457,8 +469,11 @@ DEALLOCATE loopItems;
 -----------------------------------------
 -- Generate the g/l entries
 -----------------------------------------
-EXEC dbo.uspICCreateGLEntries 
-	@strBatchId
-	,@strAccountToCounterInventory
-	,@intUserId
-	,@strGLDescription
+IF @strAccountToCounterInventory IS NOT NULL 
+BEGIN 
+	EXEC dbo.uspICCreateGLEntries 
+		@strBatchId
+		,@strAccountToCounterInventory
+		,@intUserId
+		,@strGLDescription
+END 

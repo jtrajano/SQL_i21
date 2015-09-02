@@ -68,6 +68,7 @@ BEGIN
 			,@strTransactionId AS NVARCHAR(20)
 			,@strBatchId AS NVARCHAR(20)
 			,@intTransactionTypeId AS INT
+			,@strTransactionForm AS NVARCHAR(255)
 			,@intUserId AS INT
 
 		CREATE TABLE expected (
@@ -1665,6 +1666,7 @@ BEGIN
 			,@strTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
+			,@strTransactionForm
 			,@intUserId
 	END 
 	

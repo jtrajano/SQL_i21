@@ -1,4 +1,7 @@
 ﻿GO
+PRINT 'BEGIN CREATE vyuTMLeaseCode'
+
+GO
 
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuTMLeaseCode')
 	DROP VIEW vyuTMLeaseCode
@@ -20,4 +23,7 @@ BEGIN
 			ON A.intTaxIndicatorId = B.A4GLIdentity
 		')
 END	
-GO	
+GO
+PRINT 'END CREATE vyuTMLeaseCode'
+
+GO

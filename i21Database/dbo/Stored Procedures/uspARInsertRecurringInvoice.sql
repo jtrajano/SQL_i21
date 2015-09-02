@@ -26,6 +26,7 @@ AS
 		,[strTransactionNumber]
 		,[strTransactionType]
 		,[strResponsibleUser]
+		,[intEntityId]
 		,[strFrequency]
 		,[dtmLastProcess]
 		,[dtmNextProcess]
@@ -40,13 +41,14 @@ AS
 		 @InvoiceId					             --intTransactionId
 		,[strInvoiceNumber]			             --strTransactionNumber
 		,[strTransactionType]		             --strTransactionType
-		,@responsibleUser
+		,@responsibleUser						 --strResponsibleUser
+		,@UserId								 --intEntityId
 		,@frequency					             --strFrequency
 		,dtmDate					             --dtmLastProcess
 		,DATEADD(MONTH, @monthsToAdd, dtmDate)   --dtmNextProcess
 		,CASE WHEN dtmDate > dtmDueDate 
 			THEN 1 ELSE 0 END                    --ysnDue
-		,CONVERT(NVARCHAR(2), DAY(@startDate))   --strDayOfMonth
+		,CONVERT(NVARCHAR(2), DAY(dtmDate))      --strDayOfMonth
 		,@startDate								 --dtmStartDate
 		,DATEADD(MONTH, @monthsToAdd, @startDate)--dtmEndDate
 		,1									     --ysnActive

@@ -2,8 +2,7 @@
 CREATE PROCEDURE [dbo].[uspGLImportRecurring]
 AS
 BEGIN
-
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLJournalRecurring WHERE ISNULL(ysnImported,0) = 0) RETURN
+IF EXISTS(SELECT TOP 1 1 FROM tblGLJournal WHERE strTransactionType = 'Recurring') RETURN
 
 DECLARE @TEMP TABLE 
 (
@@ -34,7 +33,7 @@ BEGIN TRANSACTION
 					   ,strJournalType
 					   ,strJournalId)
 			SELECT 
-			  [strRecurringPeriod] 
+			  CASE WHEN RTRIM(strReference) = '' OR ISNULL(strReference,'') = '' THEN [strRecurringPeriod] ELSE strReference END
 			  ,[dblExchangeRate]
 			  ,[dtmReverseDate]
 			  ,(SELECT TOP 1 intCurrencyId FROM tblGLJournalDetail where intJournalRecurringId = @intRecurringId)

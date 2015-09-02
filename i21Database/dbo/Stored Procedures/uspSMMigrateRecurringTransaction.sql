@@ -177,6 +177,7 @@ BEGIN
 					ORDER BY dtmNextProcess DESC),
 					CASE 
 						WHEN main.strRecurringPeriod IS NULL THEN DATEADD(MONTH, 1, b.dtmDateEntered)
+						WHEN main.strRecurringPeriod = 'Daily' THEN DATEADD(DAY, 1, b.dtmDateEntered)
 						WHEN main.strRecurringPeriod = 'Weekly' THEN DATEADD(WEEk, 1, b.dtmDateEntered)
 						WHEN main.strRecurringPeriod = 'MonthlyEnd' THEN DATEADD(s,-1, DATEADD(mm, DATEDIFF(m,0,GETDATE())+1,0))
 					END			

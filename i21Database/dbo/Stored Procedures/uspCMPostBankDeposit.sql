@@ -37,6 +37,9 @@ DECLARE
 	,@intTransactionId AS INT
 	,@dtmDate AS DATETIME
 	,@dblAmount AS NUMERIC(18,6)
+	,@dblShortAmount AS NUMERIC(18,6)
+	,@dblTotalAmount AS NUMERIC(18,6)
+	,@intShortGLAccountId AS INT
 	,@dblAmountDetailTotal AS NUMERIC(18,6)
 	,@strBatchId AS NVARCHAR(40)
 	,@ysnTransactionPostedFlag AS BIT
@@ -93,6 +96,9 @@ SELECT	TOP 1
 		@intTransactionId = intTransactionId
 		,@dtmDate = dtmDate
 		,@dblAmount = dblAmount
+		,@dblShortAmount = dblShortAmount
+		,@dblTotalAmount = ISNULL(dblAmount, 0) + ISNULL(dblShortAmount,0)
+		,@intShortGLAccountId = intShortGLAccountId
 		,@ysnTransactionPostedFlag = ysnPosted
 		,@ysnTransactionClearedFlag = ysnClr
 		,@intBankAccountId = intBankAccountId
@@ -106,7 +112,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 SELECT	@ysnAllowUserSelfPost = 1
 FROM	dbo.tblSMUserPreference 
 WHERE	ysnAllowUserSelfPost = 1 
-		AND intUserSecurityId = @intUserId
+		AND intUserSecurityId = @intEntityId
 IF @@ERROR <> 0	GOTO Post_Rollback		
 		
 -- Read the detail table and populate the variables. 
@@ -136,7 +142,7 @@ BEGIN
 END
 
 -- Check the bank deposit balance. 
-IF ISNULL(@dblAmountDetailTotal, 0) <> ISNULL(@dblAmount, 0) AND @ysnRecap = 0
+IF ISNULL(@dblAmountDetailTotal, 0) <> ISNULL(@dblTotalAmount, 0) AND @ysnRecap = 0
 BEGIN
 	-- The debit and credit amounts are not balanced.
 	RAISERROR(50006, 11, 1)
@@ -286,6 +292,41 @@ BEGIN
 			LEFT JOIN [dbo].tblEntity Entity
 				ON A.intPayeeId = Entity.intEntityId
 	WHERE	A.strTransactionId = @strTransactionId
+
+	--1.5 DEBIT SIDE SHORT
+	UNION ALL
+	SELECT	[strTransactionId]		= @strTransactionId 
+			,[intTransactionId]		= @intTransactionId
+			,[dtmDate]				= @dtmDate
+			,[strBatchId]			= @strBatchId
+			,[intAccountId]			= A.intShortGLAccountId
+			,[dblDebit]				= A.dblShortAmount
+			,[dblCredit]			= 0
+			,[dblDebitUnit]			= 0
+			,[dblCreditUnit]		= 0
+			,[strDescription]		= GLAccnt.strDescription 
+			,[strCode]				= @GL_DETAIL_CODE
+			,[strReference]			= ISNULL(Entity.strName, A.strPayee)
+			,[intCurrencyId]		= A.intCurrencyId
+			,[dblExchangeRate]		= 1
+			,[dtmDateEntered]		= GETDATE()
+			,[dtmTransactionDate]	= A.dtmDate
+			,[strJournalLineDescription] = GLAccnt.strDescription
+			,[ysnIsUnposted]		= 0 
+			,[intConcurrencyId]		= 1
+			,[intUserId]			= A.intLastModifiedUserId
+			,[strTransactionForm]	= @TRANSACTION_FORM
+			,[strModuleName]		= @MODULE_NAME
+			,[intEntityId]			= A.intEntityId
+	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankAccount BankAccnt
+				ON A.intBankAccountId = BankAccnt.intBankAccountId
+			INNER JOIN [dbo].tblGLAccount GLAccnt
+				ON A.intShortGLAccountId = GLAccnt.intAccountId
+			INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
+				ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
+			LEFT JOIN [dbo].tblEntity Entity
+				ON A.intPayeeId = Entity.intEntityId
+	WHERE	A.strTransactionId = @strTransactionId AND A.intShortGLAccountId IS NOT NULL AND A.intShortGLAccountId <> 0
 	
 	-- 2. CREDIT SIdE
 	UNION ALL 

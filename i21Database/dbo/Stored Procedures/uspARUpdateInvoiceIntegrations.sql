@@ -11,6 +11,8 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF  
 
 
-EXEC dbo.[uspARUpdateCommitted] @InvoiceId, @ForDelete
+EXEC dbo.[uspARUpdateSOStatusFromInvoice] @InvoiceId
+EXEC dbo.[uspARUpdateCommitted] @InvoiceId, @ForDelete, @UserId
+EXEC dbo.[uspARUpdateContractOnInvoice] @InvoiceId, @ForDelete, @UserId
 
 GO

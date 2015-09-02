@@ -10,7 +10,7 @@
 	[strItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strItemDescription] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
 	[intContractHeaderId] INT NULL,
-	[intContractNumber] INT NULL,
+	[strContractNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intPrepayType] INT NULL,
 	[dblTotal] DECIMAL(18, 6) NOT NULL DEFAULT 0,
 	[dblBillAmount] DECIMAL(18, 6) NOT NULL DEFAULT 0,

@@ -18,10 +18,10 @@ SELECT I.strInvoiceNumber AS strReferenceNumber
 	 , C.strName
 	 , I.intInvoiceId
 	 , I.intEntityCustomerId
-	 , strFullAddress = [dbo].fnARFormatCustomerAddress(NULL, NULL, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry)
+	 , strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry)
 FROM tblARInvoice I
 	INNER JOIN (tblARInvoiceDetail ID 
-		LEFT JOIN tblICItem IC ON ID.intItemId = IC.intItemId) ON I.intInvoiceId = ID.intInvoiceId
-	INNER JOIN vyuARCustomer C ON I.intEntityCustomerId = C.intEntityCustomerId
+		LEFT JOIN tblICItem IC ON ID.intItemId = IC.intItemId) ON I.intInvoiceId = ID.intInvoiceId	
+	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) ON I.intEntityCustomerId = C.intEntityCustomerId
 WHERE I.ysnPosted = 1
   AND I.ysnPaid = 0

@@ -27,8 +27,7 @@ BEGIN
 		INSERT INTO @EntitySpecialTax(
 			 intSpecialTaxId
 			,intEntityCustomerId
-			,intEntityVendorId
-			,intItemId
+			,intEntityVendorId,intItemId
 			,intCategoryId
 			,intTaxGroupMasterId)
 		SELECT
@@ -141,25 +140,33 @@ BEGIN
 					END
 					ELSE IF (@TransactionType = 'Purchase')
 					BEGIN
+						--SELECT
+						--	@Country = ISNULL(ShipToLocation.strCountry, EntityLocation.strCountry)
+						--	,@State = ISNULL(ShipToLocation.strState, EntityLocation.strState)
+						--	,@County = TaxCode.strCounty 
+						--	,@City = ISNULL(ShipToLocation.strCity, EntityLocation.strCity)
+						--FROM tblAPVendor Vendor
+						--LEFT OUTER JOIN
+						--	(	SELECT
+						--			intEntityLocationId
+						--			,intEntityId 
+						--			,strCountry
+						--			,strState
+						--			,strCity
+						--		FROM tblEntityLocation
+						--		WHERE ysnDefaultLocation = 1
+						--	) EntityLocation ON Vendor.intEntityVendorId = EntityLocation.intEntityId
+						--LEFT OUTER JOIN tblEntityLocation ShipToLocation ON Vendor.intShipFromId = ShipToLocation.intEntityLocationId
+						--LEFT OUTER JOIN tblSMTaxCode TaxCode ON Vendor.intTaxCodeId = TaxCode.intTaxCodeId 								
+						--WHERE Vendor.intEntityVendorId = @EntityId
+
 						SELECT
-							@Country = ISNULL(ShipToLocation.strCountry, EntityLocation.strCountry)
-							,@State = ISNULL(ShipToLocation.strState, EntityLocation.strState)
-							,@County = TaxCode.strCounty 
-							,@City = ISNULL(ShipToLocation.strCity, EntityLocation.strCity)
-						FROM tblAPVendor Vendor
-						LEFT OUTER JOIN
-							(	SELECT
-									intEntityLocationId
-									,intEntityId 
-									,strCountry
-									,strState
-									,strCity
-								FROM tblEntityLocation
-								WHERE ysnDefaultLocation = 1
-							) EntityLocation ON Vendor.intEntityVendorId = EntityLocation.intEntityId
-						LEFT OUTER JOIN tblEntityLocation ShipToLocation ON Vendor.intShipFromId = ShipToLocation.intEntityLocationId
-						LEFT OUTER JOIN tblSMTaxCode TaxCode ON Vendor.intTaxCodeId = TaxCode.intTaxCodeId 								
-						WHERE Vendor.intEntityVendorId = @EntityId
+							@Country = ISNULL(Location.strCountry, '')
+							,@State = ISNULL(Location.strStateProvince, '')
+							,@County = '' 
+							,@City = ISNULL(Location.strCity, '')
+						FROM tblSMCompanyLocation Location
+						WHERE Location.intCompanyLocationId = @LocationId	
 					END
 				END
 			ELSE

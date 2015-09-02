@@ -136,7 +136,7 @@ BEGIN
 			,[intInventoryReceiptItemId] INT
 			,[intEntityVendorId] INT
 			,[dblAmount] NUMERIC(38, 20)
-			,[strCostBilledBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS
+			,[ysnAccrue] BIT 
 			,[ysnInventoryCost] BIT
 		)
 
@@ -145,7 +145,7 @@ BEGIN
 			,[intInventoryReceiptItemId] INT
 			,[intEntityVendorId] INT
 			,[dblAmount] NUMERIC(38, 20)
-			,[strCostBilledBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS
+			,[ysnAccrue] BIT 
 			,[ysnInventoryCost] BIT
 		)
 	END 
@@ -174,21 +174,21 @@ BEGIN
 				,[intInventoryReceiptItemId]
 				,[intEntityVendorId]
 				,[dblAmount]
-				,[strCostBilledBy]
+				,[ysnAccrue]
 				,[ysnInventoryCost]
 		)
 		SELECT	[intInventoryReceiptId]			= @intInventoryReceiptId
 				,[intInventoryReceiptItemId]	= 33
 				,[intEntityVendorId]			= NULL 
 				,[dblAmount]					= 856.7325
-				,[strCostBilledBy]				= @COST_BILLED_BY_None
+				,[ysnAccrue]					= 0 -- @COST_BILLED_BY_None
 				,[ysnInventoryCost]				= @INVENTORY_COST_No
 		UNION ALL 
 		SELECT	[intInventoryReceiptId]			= @intInventoryReceiptId
 				,[intInventoryReceiptItemId]	= 34
 				,[intEntityVendorId]			= NULL 
 				,[dblAmount]					= 1999.0425
-				,[strCostBilledBy]				= @COST_BILLED_BY_None
+				,[ysnAccrue]					= 0 -- @COST_BILLED_BY_None
 				,[ysnInventoryCost]				= @INVENTORY_COST_No
 	END
 
@@ -199,7 +199,7 @@ BEGIN
 				,[intInventoryReceiptItemId]
 				,[intEntityVendorId]
 				,[dblAmount]
-				,[strCostBilledBy]
+				,[ysnAccrue]
 				,[ysnInventoryCost]
 		)
 		SELECT 
@@ -207,7 +207,7 @@ BEGIN
 				,[intInventoryReceiptItemId]
 				,[intEntityVendorId]
 				,[dblAmount]
-				,[strCostBilledBy]
+				,[ysnAccrue]
 				,[ysnInventoryCost]
 		FROM dbo.tblICInventoryReceiptItemAllocatedCharge	
 

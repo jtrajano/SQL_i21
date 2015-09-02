@@ -120,7 +120,7 @@ group by rs.intSubstituteItemId
 Select i.intItemId,i.strItemNo,i.strDescription,a.dblRequiredQty,ISNULL(b.dblPhysicalQty,0) AS dblPhysicalQty,
 ISNULL(c.dblReservedQty,0) AS dblReservedQty, ISNULL((ISNULL(b.dblPhysicalQty,0) - ISNULL(c.dblReservedQty,0)),0) AS dblAvailableQty,
 0.0 AS dblSelectedQty,
-ROUND((ISNULL((ISNULL(b.dblPhysicalQty,0) - ISNULL(c.dblReservedQty,0)),0))/b.dblWeightPerUnit,0) AS dblAvailableUnit,
+ISNULL(ROUND((ISNULL((ISNULL(b.dblPhysicalQty,0) - ISNULL(c.dblReservedQty,0)),0))/ CASE WHEN ISNULL(b.dblWeightPerUnit,1)=0 THEN 1 ELSE ISNULL(b.dblWeightPerUnit,1) END,0),0.0) AS dblAvailableUnit,
 a.ysnIsSubstitute,a.intParentItemId,a.ysnHasSubstitute,a.intRecipeItemId,a.intParentRecipeItemId,a.strGroupName,
 a.dblLowerToleranceQty,a.dblUpperToleranceQty,
 a.ysnMinorIngredient,a.ysnScaled,a.dblRecipeQty,

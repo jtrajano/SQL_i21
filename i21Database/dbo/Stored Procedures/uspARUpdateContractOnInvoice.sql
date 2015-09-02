@@ -99,6 +99,7 @@ BEGIN TRY
 	WHERE
 		D.intContractDetailId IS NOT NULL
 		AND D.[intInventoryShipmentItemId] IS NULL
+		AND D.[intSalesOrderDetailId] IS NULL
 
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
@@ -135,7 +136,10 @@ BEGIN TRY
 					
 		EXEC	uspCTUpdateScheduleQuantity
 				@intContractDetailId	=	@intContractDetailId,
-				@dblQuantityToUpdate	=	@dblConvertedQty
+				@dblQuantityToUpdate	=	@dblConvertedQty,
+				@intUserId				=	@UserId,
+				@intExternalId			=	@intInvoiceDetailId,
+				@strScreenName			=	'Invoice'
 
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 	END

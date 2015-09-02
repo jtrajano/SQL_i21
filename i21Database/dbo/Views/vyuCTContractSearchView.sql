@@ -3,7 +3,7 @@
 AS
 
 	SELECT		CH.intContractHeaderId,				CH.dtmContractDate,				CH.strEntityName		AS strCustomerVendor,
-				CH.strContractType,					CH.dblHeaderQuantity,			CH.intContractNumber,
+				CH.strContractType,					CH.dblHeaderQuantity,			CH.strContractNumber,
 				CH.strCustomerContract,				CH.ysnSigned,					CH.ysnPrinted,
 				BL.dblBalance,						CH.strHeaderUnitMeasure,		CH.dtmDeferPayDate,
 				CH.dblDeferPayRate,					CH.strInternalComments,			CH.strContractComments,									

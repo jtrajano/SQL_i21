@@ -46,7 +46,7 @@ BEGIN
 	WHERE intInventoryReceiptId = @intInventoryReceiptId
 END 
 
--- Calculate the cost method is Per Unit
+-- Calculate the cost method for "Per Unit"
 BEGIN 
 	INSERT INTO dbo.tblICInventoryReceiptChargePerItem (
 			[intInventoryReceiptId]
@@ -57,7 +57,8 @@ BEGIN
 			,[dblCalculatedAmount]
 			,[intContractId]
 			,[strAllocateCostBy]
-			,[strCostBilledBy]
+			,[ysnAccrue]
+			,[ysnPrice]
 			,[ysnInventoryCost]
 	)
 	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
@@ -65,11 +66,12 @@ BEGIN
 			,[intInventoryReceiptItemId]	= ReceiptItem.intInventoryReceiptItemId
 			,[intChargeId]					= Charge.intChargeId
 			,[intEntityVendorId]			= Charge.intEntityVendorId
-			,[dblCalculatedAmount]			=	Charge.dblRate 
+			,[dblCalculatedAmount]			= Charge.dblRate 
 												* dbo.fnCalculateQtyBetweenUOM(ReceiptItem.intUnitMeasureId, dbo.fnGetMatchingItemUOMId(ReceiptItem.intItemId, Charge.intCostUOMId), ReceiptItem.dblOpenReceive) 
 			,[intContractId]				= Charge.intContractId
 			,[strAllocateCostBy]			= Charge.strAllocateCostBy
-			,[strCostBilledBy]				= Charge.strCostBilledBy
+			,[ysnAccrue]					= Charge.ysnAccrue
+			,[ysnPrice]						= Charge.ysnPrice
 			,[ysnInventoryCost]				= Charge.ysnInventoryCost
 	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
@@ -117,7 +119,7 @@ BEGIN
 	END 
 END 
 
--- Calculate the cost method is %
+-- Calculate the cost method for "Percentage"
 BEGIN 
 	INSERT INTO dbo.tblICInventoryReceiptChargePerItem (
 			[intInventoryReceiptId]
@@ -128,7 +130,8 @@ BEGIN
 			,[dblCalculatedAmount] 
 			,[intContractId]
 			,[strAllocateCostBy]
-			,[strCostBilledBy]
+			,[ysnAccrue]
+			,[ysnPrice]
 			,[ysnInventoryCost]
 	)
 	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
@@ -141,7 +144,8 @@ BEGIN
 												* ReceiptItem.dblUnitCost
 			,[intContractId]				= Charge.intContractId
 			,[strAllocateCostBy]			= Charge.strAllocateCostBy
-			,[strCostBilledBy]				= Charge.strCostBilledBy
+			,[ysnAccrue]					= Charge.ysnAccrue
+			,[ysnPrice]						= Charge.ysnPrice
 			,[ysnInventoryCost]				= Charge.ysnInventoryCost
 	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
@@ -160,7 +164,7 @@ BEGIN
 			AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
 END 
 
--- Calculate the cost method is Fixed Amount
+-- Calculate the cost method for "Amount" or Fixed Amount. 
 BEGIN 
 	INSERT INTO dbo.tblICInventoryReceiptChargePerItem (
 			[intInventoryReceiptId]
@@ -171,7 +175,8 @@ BEGIN
 			,[dblCalculatedAmount] 
 			,[intContractId]
 			,[strAllocateCostBy]
-			,[strCostBilledBy]
+			,[ysnAccrue]
+			,[ysnPrice]
 			,[ysnInventoryCost]
 	)
 	SELECT	[intInventoryReceiptId]			= ReceiptItem.intInventoryReceiptId
@@ -179,10 +184,11 @@ BEGIN
 			,[intInventoryReceiptItemId]	= ReceiptItem.intInventoryReceiptItemId
 			,[intChargeId]					= Charge.intChargeId
 			,[intEntityVendorId]			= Charge.intEntityVendorId
-			,[dblCalculatedAmount]			= Charge.dblAmount
+			,[dblCalculatedAmount]			= Charge.dblRate
 			,[intContractId]				= Charge.intContractId
 			,[strAllocateCostBy]			= Charge.strAllocateCostBy
-			,[strCostBilledBy]				= Charge.strCostBilledBy
+			,[ysnAccrue]					= Charge.ysnAccrue
+			,[ysnPrice]						= Charge.ysnPrice
 			,[ysnInventoryCost]				= Charge.ysnInventoryCost
 	FROM	dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN dbo.tblICInventoryReceiptCharge Charge	
 				ON ReceiptItem.intInventoryReceiptId = Charge.intInventoryReceiptId
@@ -199,6 +205,24 @@ BEGIN
 			)
 			AND Item.intOnCostTypeId IS NULL 
 			AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+END 
+
+-- Update the Other Charge amounts
+BEGIN 
+	UPDATE	Charge
+	SET		dblAmount = ISNULL(CalculatedCharges.dblAmount, 0)
+	FROM	dbo.tblICInventoryReceiptCharge Charge 	INNER JOIN dbo.tblICItem Item 
+				ON Item.intItemId = Charge.intChargeId		
+			LEFT JOIN (
+					SELECT	dblAmount = SUM(dblCalculatedAmount)
+							,intInventoryReceiptChargeId
+					FROM	dbo.tblICInventoryReceiptChargePerItem
+					WHERE	intInventoryReceiptId = @intInventoryReceiptId
+					GROUP BY intInventoryReceiptChargeId
+			) CalculatedCharges
+				ON CalculatedCharges.intInventoryReceiptChargeId = Charge.intInventoryReceiptChargeId
+	WHERE	Charge.intInventoryReceiptId = @intInventoryReceiptId
+			AND Item.intOnCostTypeId IS NULL
 END 
 
 -- Exit point

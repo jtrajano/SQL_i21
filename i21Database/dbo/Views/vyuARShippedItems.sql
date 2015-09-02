@@ -139,9 +139,10 @@ SELECT
 	,SOD.[intItemUOMId]					AS [intShipmentItemUOMId]
 	,U.[strUnitMeasure]					AS [strShipmentUnitMeasure]
 	,SOD.[dblQtyOrdered] 
-	,SOD.[dblQtyOrdered]				AS [dblShipmentQuantity] 
+	,SOD.[dblQtyShipped]				AS [dblShipmentQuantity] 
 	,SOD.[dblQtyShipped]	
-	,SOD.[dblQtyShipped]				AS [dblShipmentQtyShipped] 
+	,SOD.[dblQtyOrdered] 
+		- SOD.[dblQtyShipped]			AS [dblShipmentQtyShipped] 
 	,SOD.[dblQtyShipped]				AS [dblShipmentQtyShippedTotal]
 	,SOD.[dblQtyOrdered] 
 		- SOD.[dblQtyShipped]			AS [dblQtyRemaining]
@@ -170,7 +171,7 @@ INNER JOIN
 INNER JOIN
 	tblICItem I
 		ON SOD.[intItemId] = I.[intItemId]
-		AND I.[strType] IN ('Service','Software','Non-Inventory','Other Charge')
+		AND I.[strType] IN ('Service','Software','Non-Inventory','Other Charge','Software')
 INNER JOIN
 	tblARCustomer C
 		ON SO.[intEntityCustomerId] = C.[intEntityCustomerId] 
@@ -199,7 +200,7 @@ WHERE
 	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
 		FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
 		WHERE tblARInvoice.[ysnPosted] = 1  AND tblARInvoiceDetail.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped)
-	AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus <> 'Cancelled'
+	AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
 
 	UNION ALL
 
@@ -223,9 +224,10 @@ SELECT
 	,SOD.[intItemUOMId]					AS [intShipmentItemUOMId]
 	,U.[strUnitMeasure]					AS [strShipmentUnitMeasure]
 	,SOD.[dblQtyOrdered] 
-	,SOD.[dblQtyOrdered]				AS [dblShipmentQuantity] 
+	,SOD.[dblQtyShipped]				AS [dblShipmentQuantity] 
 	,SOD.[dblQtyShipped]	
-	,SOD.[dblQtyShipped]				AS [dblShipmentQtyShipped] 
+	,SOD.[dblQtyOrdered] 
+		- SOD.[dblQtyShipped]			AS [dblShipmentQtyShipped] 
 	,SOD.[dblQtyShipped]				AS [dblShipmentQtyShippedTotal]
 	,SOD.[dblQtyOrdered] 
 		- SOD.[dblQtyShipped]			AS [dblQtyRemaining]
@@ -281,7 +283,7 @@ WHERE
 	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
 		FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
 		WHERE tblARInvoice.[ysnPosted] = 1 AND tblARInvoiceDetail.dblQtyOrdered <= tblARInvoiceDetail.dblQtyShipped)
-	AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus <> 'Cancelled'
+	AND SO.[strTransactionType] = 'Order' AND SO.strOrderStatus NOT IN ('Cancelled', 'Closed', 'Short Closed')
 	
 UNION ALL
 

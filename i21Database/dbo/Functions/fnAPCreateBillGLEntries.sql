@@ -51,7 +51,8 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	A.intAccountId,
 		[dblDebit]						=	0,
-		[dblCredit]						=	CASE WHEN A.intTransactionType IN (2, 3) AND A.dblTotal > 0 THEN A.dblTotal * -1 ELSE A.dblTotal END,
+		[dblCredit]						=	(CASE WHEN A.intTransactionType IN (2, 3) AND A.dblTotal > 0 
+													THEN A.dblTotal * -1 ELSE A.dblTotal END) - ISNULL(Taxes.dblTotalICTax,0),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
 		[strDescription]				=	A.strReference,
@@ -81,6 +82,16 @@ BEGIN
 	FROM	[dbo].tblAPBill A
 			LEFT JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.intEntityVendorId
+			OUTER APPLY (
+			--Subtract the tax from IR because IC already entered the gl entries for taxes
+				SELECT 
+					SUM(D.dblTax) dblTotalICTax
+				FROM tblAPBillDetailTax D
+				WHERE D.intBillDetailId IN (SELECT intBillDetailId FROM tblAPBillDetail E
+											WHERE E.intBillId = A.intBillId
+											AND E.intInventoryReceiptItemId IS NOT NULL)
+				GROUP BY D.intBillDetailId
+			) Taxes
 			--CROSS APPLY
 			--(
 			--	SELECT * FROM #tmpGLUnits WHERE intAccountId = A.intAccountId
@@ -129,7 +140,7 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	D.intAccountId,
-		[dblDebit]						=	SUM(D.dblTax),
+		[dblDebit]						=	CASE WHEN D.ysnTaxAdjusted = 1 THEN SUM(D.dblAdjustedTax - D.dblTax) ELSE SUM(D.dblTax) END,
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -160,7 +171,12 @@ BEGIN
 				ON B.intBillDetailId = D.intBillDetailId
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	AND A.intTransactionType = 1
+	AND 1 = (
+		--create tax only from item receipt if it is adjusted
+		CASE WHEN B.intInventoryReceiptItemId IS NOT NULL AND D.ysnTaxAdjusted = 0 THEN 0 ELSE 1 END
+	)
 	GROUP BY A.dtmDate
+	,D.ysnTaxAdjusted
 	,D.intAccountId
 	,A.strReference
 	,C.strVendorId

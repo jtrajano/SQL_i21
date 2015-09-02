@@ -16,6 +16,8 @@ DECLARE @generatedBillId INT;
 DECLARE @generatedBillRecordId NVARCHAR(50);
 DECLARE @APAccount INT;
 DECLARE @shipFrom INT, @shipTo INT;
+DECLARE @receiptLocation INT;
+DECLARE @userLocation INT;
 
 CREATE TABLE #tmpReceiptIds (
 	[intInventoryReceiptId] [INT] PRIMARY KEY,
@@ -38,10 +40,10 @@ BEGIN TRANSACTION
 INSERT INTO #tmpReceiptIds(intInventoryReceiptId) SELECT [intID] FROM [dbo].fnGetRowsFromDelimitedValues(@receiptIds)
 
 SET @totalReceipts = (SELECT COUNT(*) FROM #tmpReceiptIds)
+SET @userLocation = (SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityId = @userId);
 
 --Get the company location of the user to get the default ap account else get from preference
-SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = 
-						(SELECT intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityId = @userId))
+SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = @userLocation)
 
 ----try to get from Gl Account
 --IF @APAccount IS NULL
@@ -72,6 +74,19 @@ BEGIN
 	SET @counter = @counter + 1;
 	SELECT TOP(1) @receiptId = intInventoryReceiptId FROM #tmpReceiptIds
 	EXEC uspSMGetStartingNumber 9, @generatedBillRecordId OUT
+
+	--IF DEFAULT LOCATION OF USER WAS DIFFERENT FROM CURRENT IR LOCATION
+	SET @receiptLocation = (SELECT intLocationId FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId)
+	IF @userLocation != @receiptLocation
+	BEGIN
+		SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = @receiptLocation)
+		IF @APAccount IS NULL
+		BEGIN
+			RAISERROR('Please setup default AP Account.', 16, 1);
+			GOTO DONE
+		END
+	END
+						
 
 	INSERT INTO tblAPBill(
 		[intEntityVendorId],

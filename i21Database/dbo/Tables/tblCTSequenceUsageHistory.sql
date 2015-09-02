@@ -14,5 +14,5 @@
 	dtmTransactionDate DATETIME NOT NULL,
 
     CONSTRAINT [PK_tblCTSequenceUsageHistory_intSequenceUsageHistoryId] PRIMARY KEY CLUSTERED ([intSequenceUsageHistoryId] ASC), 
-	CONSTRAINT [FK_tblCTSequenceUsageHistory_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId])
+	CONSTRAINT [FK_tblCTSequenceUsageHistory_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]) ON DELETE CASCADE
 )

@@ -55,8 +55,9 @@ GO
 GO
 	-- UPDATE ORIGIN MENUS SORT ORDER
 	EXEC uspSMSortOriginMenus
-
 GO
+	-- EXECUTE FIRST BEFORE MIGRATE RECURRING TRANSACTIONS
+	EXEC uspGLImportRecurring
 	-- UPDATE tblSMRecurringTransaction
 	EXEC uspSMMigrateRecurringTransaction
 

@@ -100,6 +100,7 @@ RETURN (
 								AND Location.intItemLocationId = @intItemLocationId
 							LEFT JOIN dbo.tblICItemStockUOM StockUOM
 								ON StockUOM.intItemId = Item.intItemId
+								AND StockUOM.intItemUOMId = @intItemUOMId
 								AND StockUOM.intItemLocationId = Location.intItemLocationId
 								AND ISNULL(StockUOM.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 								AND ISNULL(StockUOM.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
@@ -107,8 +108,7 @@ RETURN (
 							AND (							
 								Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 
 								OR Item.strStatus = 'Phased Out'
-							)
-							AND StockUOM.intItemUOMId = @intItemUOMId
+							)							
 				)
 
 		-- Check for negative stocks at the lot table. 
@@ -126,16 +126,14 @@ RETURN (
 							LEFT JOIN dbo.tblICLot Lot
 								ON Lot.intItemLocationId = Location.intItemLocationId 
 								AND ISNULL(Lot.intLotId, 0) = ISNULL(@intLotId, 0)								
+								AND Lot.intItemUOMId = @intItemUOMId
 					WHERE	Item.intItemId = @intItemId
 							AND Lot.intLotId IS NOT NULL
-							AND Location.intItemLocationId = @intItemLocationId							
-							AND Lot.intLotId IS NOT NULL 
 							AND ISNULL(@dblQty, 0) + ISNULL(Lot.dblQty, 0) < 0
 							AND (							
 								Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 
 								OR Item.strStatus = 'Phased Out'
 							)		
-							AND Lot.intItemUOMId = @intItemUOMId
 				)
 
 		-- Check for the missing Stock Unit UOM 

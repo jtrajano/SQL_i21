@@ -2,7 +2,7 @@
 (
 	[intInvoiceDetailTaxId] INT NOT NULL IDENTITY, 
     [intInvoiceDetailId] INT NOT NULL, 
-    [intTaxGroupMasterId] INT NOT NULL, 
+    [intTaxGroupMasterId] INT NULL, 
     [intTaxGroupId] INT NOT NULL, 
     [intTaxCodeId] INT NOT NULL, 
     [intTaxClassId] INT NOT NULL, 

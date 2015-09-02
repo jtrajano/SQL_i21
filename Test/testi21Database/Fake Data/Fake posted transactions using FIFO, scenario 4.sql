@@ -328,6 +328,7 @@ BEGIN
 				,intItemUOMId
 				,strBatchId
 				,dblExchangeRate
+				,strTransactionForm
 		)
 		SELECT	dtmDate = @dtmDate
 				,dblQty = -75
@@ -346,6 +347,7 @@ BEGIN
 				,intItemUOMId = @WetGrains_BushelUOMId
 				,strBatchId = @strBatchId
 				,dblExchangeRate = 1		
+				,strTransactionForm = 'Inventory Shipment'
 		UNION ALL 
 		SELECT	dtmDate = @dtmDate
 				,dblQty = -75
@@ -364,6 +366,7 @@ BEGIN
 				,intItemUOMId = @StickyGrains_BushelUOMId
 				,strBatchId = @strBatchId
 				,dblExchangeRate = 1
+				,strTransactionForm = 'Inventory Shipment'
 		UNION ALL 
 		SELECT	dtmDate = @dtmDate
 				,dblQty = -75
@@ -382,6 +385,7 @@ BEGIN
 				,intItemUOMId = @PremiumGrains_BushelUOMId
 				,strBatchId = @strBatchId
 				,dblExchangeRate = 1
+				,strTransactionForm = 'Inventory Shipment'
 		UNION ALL 
 		SELECT	dtmDate = @dtmDate
 				,dblQty = -75
@@ -400,6 +404,7 @@ BEGIN
 				,intItemUOMId = @ColdGrains_BushelUOMId
 				,strBatchId = @strBatchId			
 				,dblExchangeRate = 1
+				,strTransactionForm = 'Inventory Shipment'
 		UNION ALL 
 		SELECT	dtmDate = @dtmDate
 				,dblQty = -75
@@ -418,6 +423,7 @@ BEGIN
 				,intItemUOMId = @HotGrains_BushelUOMId
 				,strBatchId = @strBatchId
 				,dblExchangeRate = 1
+				,strTransactionForm = 'Inventory Shipment'
 
 		----------------------------------------------------------------
 		-- Fake data for tblGLDetail & GL Summary 
@@ -793,6 +799,7 @@ BEGIN
 				,strBatchId
 				,dblExchangeRate
 				,intCurrencyId
+				,strTransactionForm
 			)
 			----------------------------------------------------
 			SELECT	dtmDate = @dtmDate
@@ -812,6 +819,7 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strTransactionForm = 'Inventory Receipt'
 			-- Write-Off Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -831,6 +839,7 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strTransactionForm = 'Inventory Receipt'
 			-- Revalue Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -850,6 +859,7 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strTransactionForm = 'Inventory Receipt'
 			----------------------------------------------------
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -869,6 +879,7 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strTransactionForm = 'Inventory Receipt'
 			-- Write-Off Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -888,6 +899,7 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strTransactionForm = 'Inventory Receipt'
 			-- Revalue Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -907,6 +919,7 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strTransactionForm = 'Inventory Receipt'
 			----------------------------------------------------
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -926,6 +939,7 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strTransactionForm = 'Inventory Receipt'
 			-- Write-Off Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -945,6 +959,7 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strTransactionForm = 'Inventory Receipt'
 			-- Revalue Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -964,6 +979,7 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strTransactionForm = 'Inventory Receipt'
 			----------------------------------------------------
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -983,6 +999,7 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strTransactionForm = 'Inventory Receipt'
 			-- Write-Off Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1002,6 +1019,7 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strTransactionForm = 'Inventory Receipt'
 			-- Revalue Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1021,6 +1039,7 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strTransactionForm = 'Inventory Receipt'
 			----------------------------------------------------
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1040,6 +1059,7 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strTransactionForm = 'Inventory Receipt'
 			-- Write-Off Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1059,6 +1079,7 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strTransactionForm = 'Inventory Receipt'
 			-- Revalue Sold
 			UNION ALL 
 			SELECT	dtmDate = @dtmDate
@@ -1078,6 +1099,7 @@ BEGIN
 					,strBatchId = @strBatchId
 					,dblExchangeRate = @USD_ExchangeRate
 					,intCurrencyId = @USD
+					,strTransactionForm = 'Inventory Receipt'
 		END 
 
 		----------------------------------------------------------------

@@ -3,10 +3,11 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	[intConcurrencyId] [int] NOT NULL,
 	[intContractTypeId] [int] NOT NULL,
 	[intEntityId] [int] NOT NULL,
+	[intContractPlanId] [int],
 	[intCommodityId] [int] NULL,
 	[dblQuantity] [numeric](24, 4) NOT NULL,
 	[intCommodityUOMId] INT NULL, 
-	[intContractNumber] [int] NOT NULL,
+	[strContractNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[dtmContractDate] [datetime] NOT NULL,
 	[strCustomerContract] [nvarchar](30) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDeferPayDate] [datetime] NULL,
@@ -48,9 +49,8 @@ CREATE TABLE [dbo].[tblCTContractHeader](
     [ysnMultiplePriceFixation] BIT NULL, 
 	[intCategoryUnitMeasureId] INT NULL,
 	[intLoadCategoryUnitMeasureId] INT NULL,
-	[intArbitrationId] INT NULL,
     CONSTRAINT [PK_tblCTContractHeader_intContractHeaderId] PRIMARY KEY CLUSTERED ([intContractHeaderId] ASC), 	
-	CONSTRAINT [UQ_tblCTContractHeader_intContractTypeId_intContractNumber] UNIQUE ([intContractTypeId], [intContractNumber]), 
+	CONSTRAINT [UQ_tblCTContractHeader_intContractTypeId_intContractNumber] UNIQUE ([intContractTypeId], [strContractNumber]), 
 	CONSTRAINT [FK_tblCTContractHeader_tblCTAssociation_intAssociationId] FOREIGN KEY ([intAssociationId]) REFERENCES [tblCTAssociation]([intAssociationId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblSMTerm_intTermId] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID]),
 	CONSTRAINT [FK_tblCTContractHeader_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity] ([intEntityId]),
@@ -75,8 +75,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	CONSTRAINT [FK_tblCTContractHeader_tblICCommodityUnitMeasure_intLoadUOMId_intCommodityUnitMeasureId] FOREIGN KEY([intLoadUOMId])REFERENCES [tblICCommodityUnitMeasure] ([intCommodityUnitMeasureId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblICUnitMeasure_intCategoryUnitMeasureId_intUnitMeasureId] FOREIGN KEY([intCategoryUnitMeasureId])REFERENCES [tblICUnitMeasure] ([intUnitMeasureId]),
 	CONSTRAINT [FK_tblCTContractHeader_tblICUnitMeasure_intLoadCategoryUnitMeasureId_intUnitMeasureId] FOREIGN KEY([intLoadCategoryUnitMeasureId])REFERENCES [tblICUnitMeasure] ([intUnitMeasureId]),
-	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intArbitrationId_intCityId] FOREIGN KEY ([intArbitrationId]) REFERENCES [tblSMCity]([intCityId]),
-	
+	CONSTRAINT [FK_tblCTContractHeader_tblCTContractPlan_intContractPlanId] FOREIGN KEY([intContractPlanId])REFERENCES [tblCTContractPlan] ([intContractPlanId])
 )
 
 

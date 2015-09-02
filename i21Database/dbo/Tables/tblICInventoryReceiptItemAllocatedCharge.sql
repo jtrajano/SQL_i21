@@ -6,17 +6,17 @@
 	[intInventoryReceiptItemId] INT NOT NULL, 
 	[intEntityVendorId] INT NULL, 
 	[dblAmount] NUMERIC(38, 20) NULL DEFAULT ((0)), 
-	[strCostBilledBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[ysnAccrue] BIT NULL DEFAULT ((0)),
 	[ysnInventoryCost] BIT NULL DEFAULT ((0)),	
+	[ysnPrice] BIT NULL DEFAULT ((0)),	
 	[dblAmountBilled] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	[dblAmountPaid] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-	CONSTRAINT [PK_tblICInventoryReceiptItemAllocatedCharge] PRIMARY KEY ([intInventoryReceiptItemAllocatedChargeId]), 
-	CONSTRAINT [FK_tblICInventoryReceiptItemAllocatedCharge_tblICInventoryReceiptItem] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES [tblICInventoryReceiptItem]([intInventoryReceiptItemId]) ON DELETE CASCADE, 
-	CONSTRAINT [FK_tblICInventoryReceiptItemAllocatedCharge_tblICInventoryReceiptCharge] FOREIGN KEY ([intInventoryReceiptChargeId]) REFERENCES [tblICInventoryReceiptCharge]([intInventoryReceiptChargeId]), 
-	CONSTRAINT [FK_tblICInventoryReceiptItemAllocatedCharge_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId])
+	CONSTRAINT [PK_tblICInventoryReceiptItemAllocatedCharge] PRIMARY KEY ([intInventoryReceiptItemAllocatedChargeId]),
+	CONSTRAINT [FK_tblICInventoryReceiptItemAllocatedCharge_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]), 
+    CONSTRAINT [FK_tblICInventoryReceiptItemAllocatedCharge_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE
 )
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblICInventoryReceiptItemAllocatedCharge_intInventoryReceiptId_intChargeId_intInventoryReceiptChargeId]
-	ON [dbo].[tblICInventoryReceiptItemAllocatedCharge]([intInventoryReceiptId] ASC, [intEntityVendorId] ASC, [strCostBilledBy] ASC)
+	ON [dbo].[tblICInventoryReceiptItemAllocatedCharge]([intInventoryReceiptId] ASC, [intEntityVendorId] ASC, [ysnAccrue] ASC)
 	INCLUDE (dblAmount, ysnInventoryCost);

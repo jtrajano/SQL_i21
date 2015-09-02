@@ -21,7 +21,7 @@ DECLARE @vendorId INT = (SELECT intEntityVendorId FROM tblAPBill WHERE intBillId
 --	[strItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 --	[strItemDescription] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
 --	[intContractHeaderId] INT NULL,
---	[intContractNumber] INT NULL,
+--	[strContractNumber] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 --	[intPrepayType] INT NULL,
 --	[dblTotal] DECIMAL(18, 6) NOT NULL DEFAULT 0,
 --	[dblBillAmount] DECIMAL(18, 6) NOT NULL DEFAULT 0,
@@ -62,7 +62,7 @@ INSERT INTO tblAPAppliedPrepaidAndDebit(
 	[strItemDescription],
 	[strItemNo],
 	[intContractHeaderId],
-	[intContractNumber],
+	[strContractNumber],
 	[intPrepayType],
 	[dblTotal],
 	[dblBillAmount],
@@ -82,7 +82,7 @@ SELECT
 	[strItemDescription]	=	E.strDescription,
 	[strItemNo]				=	E.strItemNo,
 	[intContractHeaderId]	=	CurrentBill.intContractHeaderId,	
-	[intContractNumber]		=	CurrentBill.intContractNumber,
+	[strContractNumber]		=	CurrentBill.strContractNumber,
 	[intPrepayType]			=	B.intPrepayTypeId,
 	[dblTotal]				=	B.dblTotal,
 	[dblBillAmount]			=	CurrentBill.dblTotal,
@@ -120,13 +120,15 @@ INNER JOIN
 		,C.dblCost
 		,C.dblQtyReceived
 		,C.intBillDetailId
-		,D.intContractNumber
+		,D.strContractNumber
 		,D.intContractHeaderId
+		,C.intContractDetailId
 	FROM tblAPBillDetail C
 	INNER JOIN tblCTContractHeader D ON C.intContractHeaderId = D.intContractHeaderId
 	WHERE intBillId = @billId
 	AND C.intContractDetailId IS NOT NULL
 ) CurrentBill ON B.intItemId = CurrentBill.intItemId
+				AND B.intContractDetailId = CurrentBill.intContractDetailId
 --LEFT JOIN AppliedPrepaidAndDebitMemo D ON D.intTransactionId = A.intBillId
 WHERE A.intTransactionType IN (2)
 AND A.intEntityVendorId = @vendorId
@@ -150,7 +152,7 @@ SELECT
 	[strItemDescription]	=	NULL,
 	[strItemNo]				=	NULL,
 	[intContractHeaderId]	=	NULL,	
-	[intContractNumber]		=	NULL,
+	[strContractNumber]		=	NULL,
 	[intPrepayType]			=	NULL,
 	[dblTotal]				=	A.dblTotal,
 	[dblBillAmount]			=	(SELECT dblTotal FROM tblAPBill WHERE intBillId = @billId),
@@ -177,7 +179,7 @@ SELECT
 	[strItemDescription]	=	NULL,
 	[strItemNo]				=	NULL,
 	[intContractHeaderId]	=	NULL,	
-	[intContractNumber]		=	NULL,
+	[strContractNumber]		=	NULL,
 	[intPrepayType]			=	NULL,
 	[dblTotal]				=	A.dblTotal,
 	[dblBillAmount]			=	(SELECT dblTotal FROM tblAPBill WHERE intBillId = @billId),
@@ -211,7 +213,7 @@ AND intEntityVendorId = @vendorId
 --		[strItemDescription],
 --		[strItemNo],
 --		[intContractHeaderId],
---		[intContractNumber],
+--		[strContractNumber],
 --		[intPrepayType],
 --		[dblTotal],
 --		[dblBillAmount],
@@ -229,7 +231,7 @@ AND intEntityVendorId = @vendorId
 --		Source.[strItemDescription],
 --		Source.[strItemNo],
 --		Source.[intContractHeaderId],
---		Source.[intContractNumber],
+--		Source.[strContractNumber],
 --		Source.[intPrepayType],
 --		Source.[dblTotal],
 --		Source.[dblBillAmount],
@@ -261,7 +263,7 @@ AND intEntityVendorId = @vendorId
 --		[strItemDescription],
 --		[strItemNo],
 --		[intContractHeaderId],
---		[intContractNumber],
+--		[strContractNumber],
 --		[intPrepayType],
 --		[dblTotal],
 --		[dblBillAmount],
@@ -279,7 +281,7 @@ AND intEntityVendorId = @vendorId
 --		Source.[strItemDescription],
 --		Source.[strItemNo],
 --		Source.[intContractHeaderId],
---		Source.[intContractNumber],
+--		Source.[strContractNumber],
 --		Source.[intPrepayType],
 --		Source.[dblTotal],
 --		Source.[dblBillAmount],

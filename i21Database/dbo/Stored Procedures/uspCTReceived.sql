@@ -21,7 +21,8 @@ BEGIN TRY
 				@ErrMsg							NVARCHAR(MAX),
 				@strReceiptType					NVARCHAR(50),
 				@dblSchQuantityToUpdate			NUMERIC(12,4),
-				@intSourceType					INT
+				@intSourceType					INT,
+				@ysnPO							BIT
 
 	SELECT @strReceiptType = strReceiptType,@intSourceType = intSourceType FROM @ItemsFromInventoryReceipt
 
@@ -43,8 +44,9 @@ BEGIN TRY
 		SELECT 	intInventoryReceiptDetailId,intLineNo,intItemUOMId,	dblQty
 		FROM	@ItemsFromInventoryReceipt
 	END
-	ELSE
+	ELSE IF(@strReceiptType = 'Purchase Order')
 	BEGIN
+		SELECT	@ysnPO = 1
 		INSERT	INTO @tblToProcess (intInventoryReceiptDetailId,intContractDetailId,intItemUOMId,dblQty)
 		SELECT 	IR.intInventoryReceiptDetailId,PO.intContractDetailId,IR.intItemUOMId,IR.dblQty
 		FROM	@ItemsFromInventoryReceipt	IR
@@ -91,11 +93,14 @@ BEGIN TRY
 
 		SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
 
-		IF @intSourceType = 3
+		IF @intSourceType = 1 OR @intSourceType = 3 OR @ysnPO = 1
 		BEGIN					
 			EXEC	uspCTUpdateScheduleQuantity
 					@intContractDetailId	=	@intContractDetailId,
-					@dblQuantityToUpdate	=	@dblSchQuantityToUpdate
+					@dblQuantityToUpdate	=	@dblSchQuantityToUpdate,
+					@intUserId				=	@intUserId,
+					@intExternalId			=	@intInventoryReceiptDetailId,
+					@strScreenName			=	'Inventory Receipt' 
 		END
 
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId

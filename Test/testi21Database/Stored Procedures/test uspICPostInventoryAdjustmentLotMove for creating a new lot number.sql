@@ -134,8 +134,11 @@ BEGIN
 		EXEC testi21Database.[Fake open fiscal year and accounting periods];
 		EXEC testi21Database.[Fake data for inventory adjustment table];
 
-		DECLARE @intTransactionId AS INT = 7
-		DECLARE @intUserId AS INT = 1
+		DECLARE	@intTransactionId AS INT = 7
+				,@strBatchId AS NVARCHAR(50) = 'BATCH-XXX1'
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(50) = 'Inventory Adjustment'
+				,@intUserId AS INT = 1
+				,@strAdjustmentDescription AS NVARCHAR(255)
 
 		-- Change the all split lot into lot merge type
 		UPDATE dbo.tblICInventoryAdjustment
@@ -214,21 +217,24 @@ BEGIN
 			,strLotNumber			= 'ABC-123'
 			,intSubLocationId		= @Raw_Materials_SubLocation_DefaultLocation
 			,intStorageLocationId	= @StorageSilo_RM_DL
-			,dblQty					= 0 -- This is populated by uspICPostCosting
-			,dblLastCost			= NULL -- This is populated by uspICPostCosting
+			,dblQty					= 500.00
+			,dblLastCost			= 2.50
 			,dtmExpiryDate			= '01/10/2018'
 			,strLotAlias			= 'Fine grade raw material'
 			,intLotStatusId			= @LOT_STATUS_Active
-			,dblWeight				= 0 -- This is populated by uspICPostCosting
+			,dblWeight				= 27557.750000
 			,intWeightUOMId			= @ManualGrains_PoundUOM
 			,dblWeightPerQty		= 55.1155
 	END 
 
 	-- Act
 	BEGIN 
-		EXEC dbo.uspICPostInventoryAdjustmentLotMove
-			@intTransactionId
-	 		,@intUserId
+		EXEC dbo.uspICPostInventoryAdjustmentSplitLotChange
+				@intTransactionId
+				,@strBatchId
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+				,@intUserId
+				,@strAdjustmentDescription
 	END 
 
 	-- Assert 

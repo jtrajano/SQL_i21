@@ -511,7 +511,11 @@ BEGIN
 				,@intLotStatusId
 				,0 -- (keep at zero. We only need to create the lot record)
 				,@intWeightUOMId
-				,dbo.fnCalculateWeightUnitQty(@dblQty, @dblWeight) -- (though, we need to know immediately the weight per qty). 
+				,CASE WHEN ISNULL(@intWeightUOMId, 0) <> 0 THEN 
+						dbo.fnCalculateWeightUnitQty(@dblQty, @dblWeight) -- (though, we need to know immediately the weight per qty). 
+					  ELSE
+						0.00
+				END 
 				,@intOriginId
 				,@intGradeId
 				,@strBOLNo

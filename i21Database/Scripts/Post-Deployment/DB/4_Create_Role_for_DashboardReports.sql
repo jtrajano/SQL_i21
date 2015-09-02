@@ -69,7 +69,7 @@ IF NOT EXISTS (SELECT * FROM sys.server_principals WHERE name = N'irelydashboard
 else
 	BEGIN
 		ALTER LOGIN [irelydashboard] WITH PASSWORD=N'iRely@dash'
-	END		
+	END	
 	
 --EXEC sp_adduser 'irelydashboard';
 --CREATE USER [irelydashboard]; --FOR LOGIN [irelydashboard];

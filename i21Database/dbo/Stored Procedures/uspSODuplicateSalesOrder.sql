@@ -3,7 +3,7 @@
 	@SalesOrderId		INT = 0,
 	@OrderStatus		NVARCHAR(20) = '',
 	@UserId				INT = 0,
-	@SalesOrderDate     DATE = NULL,
+	@SalesOrderDate     DATETIME = NULL,
 	@NewSalesOrderId	INT = NULL OUTPUT,
 	@NewSalesOrderNo	NVARCHAR(20) = NULL OUTPUT
 AS
@@ -236,6 +236,6 @@ BEGIN
 			DELETE FROM @OrderDetails WHERE [intSalesOrderDetailId] = @SalesOrderDetailId
 		END	
 
-	EXEC dbo.[uspSOUpdateCommitted] @NewSalesOrderId, 0
+	EXEC dbo.[uspSOUpdateOrderIntegrations] @NewSalesOrderId, 0, @UserId
 	
 END

@@ -1,6 +1,18 @@
 ﻿CREATE VIEW [dbo].[vyuARSalesOrderReport]
 AS
 SELECT SO.intSalesOrderId
+	 , strCompanyName = CASE WHEN L.strUseLocationAddress = 'Letterhead'
+								THEN ''
+							 ELSE
+								(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
+						END
+	 , strCompanyAddress = CASE WHEN L.strUseLocationAddress IS NULL OR L.strUseLocationAddress = 'No' OR L.strUseLocationAddress = '' OR L.strUseLocationAddress = 'Always'
+									THEN (SELECT TOP 1 [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry) FROM tblSMCompanySetup)
+								WHEN L.strUseLocationAddress = 'Yes'
+									THEN [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, L.strAddress, L.strCity, L.strStateProvince, L.strZipPostalCode, L.strCountry)
+								WHEN L.strUseLocationAddress = 'Letterhead'
+									THEN ''
+						   END 
 	 , strOrderType = ISNULL(SO.strType, 'Standard')
      , strCustomerName = E.strName
 	 , L.strLocationName

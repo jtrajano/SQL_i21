@@ -143,8 +143,11 @@ BEGIN
 		EXEC testi21Database.[Fake open fiscal year and accounting periods];
 		EXEC testi21Database.[Fake data for inventory adjustment table];
 
-		DECLARE @intTransactionId AS INT = 10
-		DECLARE @intUserId AS INT = 1
+		DECLARE	@intTransactionId AS INT = 10
+				,@strBatchId AS NVARCHAR(50) = 'BATCH-XXX1'
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(50) = 'Inventory Adjustment'
+				,@intUserId AS INT = 1
+				,@strAdjustmentDescription AS NVARCHAR(255)
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
@@ -190,11 +193,11 @@ BEGIN
 		)
 		SELECT 	intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_PoundUOM
+				,intItemUOMId			= @ManualGrains_25KgBagUOM
 				,dtmDate				= '05/20/2015'
-				,dblQty					= -500.000000 * 55.115500	-- Convert 500 25KgBagUOM to Pound
-				,dblUOMQty				= 1							-- Unit qty of @ManualGrains_PoundUOM
-				,dblCost				= 2.500000
+				,dblQty					= -500.000000 
+				,dblUOMQty				= @25KgBagUnitQty
+				,dblCost				= 2.500000 * @25KgBagUnitQty
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 
@@ -210,11 +213,11 @@ BEGIN
 		SELECT	
 				intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_PoundUOM
+				,intItemUOMId			= @ManualGrains_25KgBagUOM
 				,dtmDate				= '05/20/2015'
-				,dblQty					= 500.000000 * 55.115500	-- Since weight does not change, use the same weight as the Qty. 
-				,dblUOMQty				= 1							-- Unit qty of @ManualGrains_PoundUOM
-				,dblCost				= 2.50						-- Since weight remains the same, the cost will remain the same. 
+				,dblQty					= 500.000000 
+				,dblUOMQty				= @25KgBagUnitQty
+				,dblCost				= 2.500000 * @25KgBagUnitQty
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 
@@ -230,29 +233,54 @@ BEGIN
 
 	-- Act
 	BEGIN 
-		INSERT INTO actual (
-			intItemId			
-			,intItemLocationId	
-			,intItemUOMId		
-			,dtmDate			
-			,dblQty				
-			,dblUOMQty			
-			,dblCost  
-			,dblValue 
-			,dblSalesPrice  
-			,intCurrencyId  
-			,dblExchangeRate  
-			,intTransactionId  
-			,intTransactionDetailId 
-			,strTransactionId  
-			,intTransactionTypeId  
-			,intLotId 
-			,intSubLocationId
-			,intStorageLocationId
-		) 
 		EXEC dbo.uspICPostInventoryAdjustmentLotMove
-			@intTransactionId
-	 		,@intUserId
+				@intTransactionId
+				,@strBatchId
+				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
+				,@intUserId
+				,@strAdjustmentDescription
+
+		INSERT INTO actual (
+				intItemId			
+				,intItemLocationId	
+				,intItemUOMId		
+				,dtmDate			
+				,dblQty				
+				,dblUOMQty			
+				,dblCost  
+				,dblValue 
+				,dblSalesPrice  
+				,intCurrencyId  
+				,dblExchangeRate  
+				,intTransactionId  
+				,intTransactionDetailId
+				,strTransactionId  
+				,intTransactionTypeId  
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
+		) 
+		SELECT 
+				intItemId			
+				,intItemLocationId	
+				,intItemUOMId		
+				,dtmDate			
+				,dblQty				
+				,dblUOMQty			
+				,dblCost  
+				,dblValue 
+				,dblSalesPrice  
+				,intCurrencyId  
+				,dblExchangeRate  
+				,intTransactionId  
+				,intTransactionDetailId
+				,strTransactionId  
+				,intTransactionTypeId  
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
+		FROM	dbo.tblICInventoryTransaction
+		WHERE	intTransactionId = @intTransactionId
 	END 
 
 	-- Assert 

@@ -136,7 +136,7 @@ BEGIN TRY
 				51092
 				,11
 				,1
-				,@strLocationName,@strItemNo
+				,@strLocationName
 				)
 	END
 

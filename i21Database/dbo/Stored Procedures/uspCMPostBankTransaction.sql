@@ -144,6 +144,10 @@ SELECT	@GL_DETAIL_CODE = REPLACE(strPrefix, '-', '')
 FROM	dbo.tblSMStartingNumber
 WHERE	strTransactionType = @STARTING_NUMBER_TRANS_TYPE
 
+SELECT	@MODULE_NAME = strModule
+FROM	dbo.tblSMStartingNumber
+WHERE	strTransactionType = @STARTING_NUMBER_TRANS_TYPE
+
 IF @@ERROR <> 0	GOTO Post_Rollback		
 
 --=====================================================================================================================================

@@ -207,7 +207,9 @@ BEGIN
 				,intStorageLocationId
 				,ysnIsCustody
 				,dblFreightRate
-				,intSourceId			 	
+				,intSourceId
+				,dblGross
+				,dblNet
 		)	
 		SELECT	strReceiptType		= 'Purchase Contract'
 				,intEntityVendorId	= 1
@@ -231,11 +233,19 @@ BEGIN
 				,ysnIsCustody			= 18
 				,dblFreightRate			= 19
 				,intSourceId			= 20
+				,dblGross				= 21
+				,dblNet					= 22
 
-		INSERT INTO actual (
-			intSourceId
-			,intInventoryReceiptId
-		)
+
+		-- Create the temp table if it does not exists. 
+		IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
+		BEGIN 
+			CREATE TABLE #tmpAddItemReceiptResult (
+				intSourceId INT
+				,intInventoryReceiptId INT
+			)
+		END 
+
 		EXEC dbo.uspICAddItemReceipt
 			@ReceiptDataToCreate
 			,@ReceiptOtherCharges
@@ -255,11 +265,13 @@ BEGIN
 	BEGIN
 
 		DECLARE @strReceiptNumber AS NVARCHAR(50)
-		SELECT	@strReceiptNumber = tblICInventoryReceipt.strReceiptNumber
-		FROM	dbo.tblICInventoryReceipt INNER JOIN actual 
-					ON tblICInventoryReceipt.intInventoryReceiptId = actual.intInventoryReceiptId
 
-		EXEC tSQLt.AssertEquals @strReceiptNumber, 'INVRCT-1'
+
+		SELECT	@strReceiptNumber = tblICInventoryReceipt.strReceiptNumber
+		FROM	dbo.tblICInventoryReceipt INNER JOIN #tmpAddItemReceiptResult 
+					ON tblICInventoryReceipt.intInventoryReceiptId = #tmpAddItemReceiptResult.intInventoryReceiptId
+
+		EXEC tSQLt.AssertEquals 'INVRCT-1', @strReceiptNumber
 
 		INSERT INTO actual_tblICInventoryReceiptItem (
 			intLineNo

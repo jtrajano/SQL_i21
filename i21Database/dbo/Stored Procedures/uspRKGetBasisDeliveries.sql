@@ -7,7 +7,7 @@ IF @intSeqId = 13
 	BEGIN
 		IF ISNULL(@intLocationId, 0) <> 0
 		BEGIN
-			SELECT PLDetail.intPickLotDetailId as intInventoryShipmentItemId,cl.strLocationName,convert(nvarchar,CT.intContractNumber)+'/'+convert(nvarchar,CT.intContractSeq) strTicketNumber,CT.dtmContractDate as dtmTicketDateTime ,
+			SELECT PLDetail.intPickLotDetailId as intInventoryShipmentItemId,cl.strLocationName,convert(nvarchar,CT.strContractNumber)+'/'+convert(nvarchar,CT.intContractSeq) strTicketNumber,CT.dtmContractDate as dtmTicketDateTime ,
 			CT.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,	PLDetail.dblLotPickedQty AS dblTotal
 			FROM tblLGDeliveryPickDetail Del
 			INNER JOIN tblLGPickLotDetail PLDetail ON PLDetail.intPickLotDetailId = Del.intPickLotDetailId
@@ -22,7 +22,7 @@ IF @intSeqId = 13
 					strDistributionOption,isnull(ri.dblReceived, 0) AS dblTotal
 			FROM tblICInventoryReceipt r
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
-			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId
+			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId  AND strDistributionOption IN ('CNT')
 			INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2
 			INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=st.intProcessingLocationId 
@@ -30,7 +30,7 @@ IF @intSeqId = 13
 		END
 		ELSE
 		BEGIN
-			SELECT PLDetail.intPickLotDetailId as intInventoryShipmentItemId,CT.strLocationName,convert(nvarchar,CT.intContractNumber)+'/'+convert(nvarchar,CT.intContractSeq) strTicketNumber,CT.dtmContractDate as dtmTicketDateTime ,
+			SELECT PLDetail.intPickLotDetailId as intInventoryShipmentItemId,CT.strLocationName,convert(nvarchar,CT.strContractNumber)+'/'+convert(nvarchar,CT.intContractSeq) strTicketNumber,CT.dtmContractDate as dtmTicketDateTime ,
 			CT.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,	PLDetail.dblLotPickedQty AS dblTotal
 			FROM tblLGDeliveryPickDetail Del
 			INNER JOIN tblLGPickLotDetail PLDetail ON PLDetail.intPickLotDetailId = Del.intPickLotDetailId
@@ -45,7 +45,7 @@ IF @intSeqId = 13
 					strDistributionOption,isnull(ri.dblReceived, 0) AS dblTotal
 			FROM tblICInventoryReceipt r
 			INNER JOIN tblICInventoryReceiptItem ri ON r.intInventoryReceiptId = ri.intInventoryReceiptId AND r.strReceiptType = 'Purchase Contract'
-			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId
+			INNER JOIN tblSCTicket st ON st.intTicketId = ri.intSourceId  AND strDistributionOption IN ('CNT')
 			INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = ri.intLineNo AND cd.intPricingTypeId = 2
 			INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 			INNER JOIN tblSMCompanyLocation  cl on cl.intCompanyLocationId=st.intProcessingLocationId
@@ -56,7 +56,7 @@ ELSE IF @intSeqId = 14
 	BEGIN
 		IF ISNULL(@intLocationId, 0) <> 0
 		BEGIN
-			SELECT ri.intInventoryShipmentItemId,cl.strLocationName,convert(nvarchar,ch.intContractNumber)+'/'+convert(nvarchar,cd.intContractSeq) strTicketNumber,
+			SELECT ri.intInventoryShipmentItemId,cl.strLocationName,convert(nvarchar,ch.strContractNumber)+'/'+convert(nvarchar,cd.intContractSeq) strTicketNumber,
 			ch.dtmContractDate as dtmTicketDateTime ,
 			ch.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,	ri.dblQuantity AS dblTotal
 			FROM tblICInventoryShipment r
@@ -69,7 +69,7 @@ ELSE IF @intSeqId = 14
 		END
 		ELSE
 		BEGIN
-			SELECT ri.intInventoryShipmentItemId,cl.strLocationName,convert(nvarchar,ch.intContractNumber)+'/'+convert(nvarchar,cd.intContractSeq) strTicketNumber,
+			SELECT ri.intInventoryShipmentItemId,cl.strLocationName,convert(nvarchar,ch.strContractNumber)+'/'+convert(nvarchar,cd.intContractSeq) strTicketNumber,
 			ch.dtmContractDate as dtmTicketDateTime ,
 			ch.strCustomerContract as strCustomerReference, 'CNT' as strDistributionOption,	ri.dblQuantity AS dblTotal
 			FROM tblICInventoryShipment r

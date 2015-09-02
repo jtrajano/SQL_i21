@@ -55,7 +55,7 @@ FROM	[dbo].[tblCMBankTransaction] A INNER JOIN [dbo].[tblCMBankTransactionDetail
 WHERE	A.ysnPosted = 1
 		AND A.intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(A.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, A.dtmDate) AS FLOAT)) AS DATETIME)		
-		AND A.intBankTransactionTypeId IN (@BANK_TRANSACTION, @BANK_WITHDRAWAL, @PAYCHECK)
+		AND A.intBankTransactionTypeId IN (@BANK_TRANSACTION, @BANK_WITHDRAWAL)
 HAVING	ISNULL(SUM(ISNULL(B.dblCredit, 0)), 0) - ISNULL(SUM(ISNULL(B.dblDebit, 0)), 0) <> 0
 
 -- Get bank amounts for the rest of the transactions like deposits, transfer (dep), and etc.
