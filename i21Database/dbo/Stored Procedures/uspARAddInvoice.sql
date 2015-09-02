@@ -413,6 +413,7 @@ INSERT INTO [tblARInvoiceDetail]
 	,[intInventoryAccountId]
 	,[intContractHeaderId]
 	,[intContractDetailId]
+	,[intTaxGroupId] 
 	,[intConcurrencyId])
 SELECT
 	IV.[intInvoiceId]											--[intInvoiceId]
@@ -436,6 +437,7 @@ SELECT
 	,Acct.[intInventoryAccountId]								--[intInventoryAccountId]
 	,null   --[intContractHeaderId]
 	,null                                    --[intContractDetailId]
+	,IE.[intTaxGroupId]											--[intTaxGroupId]
 	,1															--[intConcurrencyId]
 FROM
     @InvoiceEntries IE
