@@ -581,11 +581,11 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         readOnlyAccrue: function (get) {
             switch (get('grdCharges.selection.ysnAccrue')) {
-                case false:
-                    return true;
+                case true:
+                    return false;
                     break;
                 default:
-                    return false;
+                    return true;
                     break;
             }
         },
