@@ -18,6 +18,7 @@ Declare @strDemandNo nVarchar(50)
 Declare @intBlendRequirementId int
 Declare @ErrMsg nVarchar(Max)
 Declare @intLocationId int
+Declare @intCellId int
 Declare @intUserId int
 Declare @dblQtyToProduce numeric(18,6)
 Declare @dtmDueDate datetime
@@ -27,6 +28,7 @@ Declare @strBlendItemNo nVarchar(50)
 Declare @strBlendItemStatus nVarchar(50)
 Declare @strInputItemNo nVarchar(50)
 Declare @strInputItemStatus nVarchar(50)
+Declare @ysnEnableParentLot bit=0
 
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml  
 
@@ -69,7 +71,10 @@ Declare @tblLot table
 	intItemUOMId int,
 	intItemIssuedUOMId int,
 	intUserId int,
-	intRecipeItemId int
+	intRecipeItemId int,
+	intLocationId int,
+	intStorageLocationId int,
+	ysnParentLot bit
 )
 
 Declare @tblBSLot table
@@ -81,7 +86,9 @@ Declare @tblBSLot table
 	dblIssuedQuantity numeric(18,6),
 	intIssuedUOMId int,
 	dblWeightPerUnit numeric(18,6),
-	intRecipeItemId int
+	intRecipeItemId int,
+	intLocationId int,
+	intStorageLocationId int
 )
 
 INSERT INTO @tblBlendSheet(
@@ -112,8 +119,8 @@ INSERT INTO @tblBlendSheet(
 --Select @intUserId=intUserId,@intLocationId=intLocationId from @tblBlendSheet
 
 INSERT INTO @tblLot(
- intLotId,intItemId,dblQty,dblIssuedQuantity,dblWeightPerUnit,intItemUOMId,intItemIssuedUOMId,intUserId,intRecipeItemId)
- Select intLotId,intItemId,dblQty,dblIssuedQuantity,dblWeightPerUnit,intItemUOMId,intItemIssuedUOMId,intUserId,intRecipeItemId
+ intLotId,intItemId,dblQty,dblIssuedQuantity,dblWeightPerUnit,intItemUOMId,intItemIssuedUOMId,intUserId,intRecipeItemId,intLocationId,intStorageLocationId,ysnParentLot)
+ Select intLotId,intItemId,dblQty,dblIssuedQuantity,dblWeightPerUnit,intItemUOMId,intItemIssuedUOMId,intUserId,intRecipeItemId,intLocationId,intStorageLocationId,ysnParentLot
  FROM OPENXML(@idoc, 'root/lot', 2)  
  WITH (  
 	intLotId int,
@@ -125,12 +132,20 @@ INSERT INTO @tblLot(
 	intItemUOMId int,
 	intItemIssuedUOMId int,
 	intUserId int,
-	intRecipeItemId int
+	intRecipeItemId int,
+	intLocationId int,
+	intStorageLocationId int,
+	ysnParentLot bit
 	)
 
 Update @tblBlendSheet Set dblQtyToProduce=(Select sum(dblQty) from @tblLot)
 
-Select @dblQtyToProduce=dblQtyToProduce,@intUserId=intUserId,@intLocationId=intLocationId,@dtmDueDate=dtmDueDate,@intBlendItemId=intItemId from @tblBlendSheet
+Update @tblLot Set intStorageLocationId=null where intStorageLocationId=0
+
+Select TOP 1 @ysnEnableParentLot=ISNULL(ysnEnableParentLot,0) From tblMFCompanyPreference
+
+Select @dblQtyToProduce=dblQtyToProduce,@intUserId=intUserId,@intLocationId=intLocationId,@dtmDueDate=dtmDueDate,
+@intBlendItemId=intItemId,@intCellId=intCellId from @tblBlendSheet
 
 Select @strBlendItemNo=strItemNo,@strBlendItemStatus=strStatus From tblICItem Where intItemId=@intBlendItemId
 
@@ -150,8 +165,12 @@ If @strInputItemNo is not null
 		RaisError(@ErrMsg,16,1)
 	End
 
-Update a Set a.dblWeightPerUnit=b.dblWeightPerQty 
-from @tblLot a join tblICLot b on a.intLotId=b.intLotId
+If @ysnEnableParentLot=0
+	Update a Set a.dblWeightPerUnit=b.dblWeightPerQty 
+	from @tblLot a join tblICLot b on a.intLotId=b.intLotId
+Else
+	Update a Set a.dblWeightPerUnit=b.dblWeightPerQty 
+	from @tblLot a join tblICParentLot b on a.intLotId=b.intParentLotId
 
 Declare @intNoOfSheet int
 Declare @intNoOfSheetOriginal int
@@ -184,7 +203,9 @@ Declare @intItemCount int,
 		@intLotId int,
 		@dblQty numeric(18,6)
 
-Select @intExecutionOrder = Count(1) From tblMFWorkOrder Where convert(date,dtmExpectedDate)=convert(date,@dtmDueDate) And intBlendRequirementId is not null
+Select @intExecutionOrder = Count(1) From tblMFWorkOrder Where intManufacturingCellId=@intCellId 
+And convert(date,dtmExpectedDate)=convert(date,@dtmDueDate) And intBlendRequirementId is not null
+And intStatusId Not in (2,13)
 
 While(@intNoOfSheet > 0)
 Begin
@@ -223,16 +244,18 @@ Begin
 			
 				if (@dblQty >= @dblReqQty And @intNoOfSheet>1)
 					Begin
-						insert into @tblBSLot(intLotId,intItemId,dblQty,intUOMId,dblIssuedQuantity,intIssuedUOMId,dblWeightPerUnit,intRecipeItemId)
-						Select intLotId,intItemId,@dblReqQty,intItemUOMId,@dblReqQty/dblWeightPerUnit,intItemIssuedUOMId,dblWeightPerUnit,intRecipeItemId from @tblLot where intRowNo=@intLotCount
+						insert into @tblBSLot(intLotId,intItemId,dblQty,intUOMId,dblIssuedQuantity,intIssuedUOMId,dblWeightPerUnit,intRecipeItemId,intLocationId,intStorageLocationId)
+						Select intLotId,intItemId,@dblReqQty,intItemUOMId,@dblReqQty/dblWeightPerUnit,intItemIssuedUOMId,dblWeightPerUnit,intRecipeItemId,intLocationId,intStorageLocationId 
+						from @tblLot where intRowNo=@intLotCount
 
 						Update @tblLot set dblQty=dblQty-@dblReqQty where intRowNo=@intLotCount
 						GOTO NextItem
 					End
 					Else
 					Begin
-						insert into @tblBSLot(intLotId,intItemId,dblQty,intUOMId,dblIssuedQuantity,intIssuedUOMId,dblWeightPerUnit,intRecipeItemId)
-						Select intLotId,intItemId,@dblQty,intItemUOMId,@dblQty/dblWeightPerUnit,intItemIssuedUOMId,dblWeightPerUnit,intRecipeItemId from @tblLot where intRowNo=@intLotCount
+						insert into @tblBSLot(intLotId,intItemId,dblQty,intUOMId,dblIssuedQuantity,intIssuedUOMId,dblWeightPerUnit,intRecipeItemId,intLocationId,intStorageLocationId)
+						Select intLotId,intItemId,@dblQty,intItemUOMId,@dblQty/dblWeightPerUnit,intItemIssuedUOMId,dblWeightPerUnit,intRecipeItemId,intLocationId,intStorageLocationId 
+						from @tblLot where intRowNo=@intLotCount
 
 						Update @tblLot set dblQty=0 where intRowNo=@intLotCount
 						Set @dblReqQty=@dblReqQty-@dblQty
@@ -263,19 +286,33 @@ Begin
 	Set @intWorkOrderId=SCOPE_IDENTITY()
 	
 	--Insert Into Input/Consumed Lot
-	Insert Into tblMFWorkOrderInputLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
-	dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId)
-	Select @intWorkOrderId,intLotId,intItemId,dblQty,intUOMId,dblIssuedQuantity,intIssuedUOMId,null,
-	GetDate(),@intUserId,GetDate(),@intUserId,intRecipeItemId
-	From @tblBSLot
+	if @ysnEnableParentLot=0
+	Begin
+		Insert Into tblMFWorkOrderInputLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
+		dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId)
+		Select @intWorkOrderId,intLotId,intItemId,dblQty,intUOMId,dblIssuedQuantity,intIssuedUOMId,null,
+		GetDate(),@intUserId,GetDate(),@intUserId,intRecipeItemId
+		From @tblBSLot
 
-	Insert Into tblMFWorkOrderConsumedLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
-	dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId)
-	Select @intWorkOrderId,intLotId,intItemId,dblQty,intUOMId,dblIssuedQuantity,intIssuedUOMId,null,
-	GetDate(),@intUserId,GetDate(),@intUserId,intRecipeItemId
-	From @tblBSLot
+		Insert Into tblMFWorkOrderConsumedLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
+		dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId)
+		Select @intWorkOrderId,intLotId,intItemId,dblQty,intUOMId,dblIssuedQuantity,intIssuedUOMId,null,
+		GetDate(),@intUserId,GetDate(),@intUserId,intRecipeItemId
+		From @tblBSLot
+	End
+	Else
+	Begin
+		Insert Into tblMFWorkOrderInputParentLot(intWorkOrderId,intParentLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
+		dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId,dblWeightPerUnit,intLocationId,intStorageLocationId)
+		Select @intWorkOrderId,intLotId,intItemId,dblQty,intUOMId,dblIssuedQuantity,intIssuedUOMId,null,
+		GetDate(),@intUserId,GetDate(),@intUserId,intRecipeItemId,dblWeightPerUnit,intLocationId,intStorageLocationId
+		From @tblBSLot
+	End
 
-	Update tblMFWorkOrder Set dblQuantity=(Select sum(dblQuantity) from tblMFWorkOrderConsumedLot where intWorkOrderId=@intWorkOrderId) where intWorkOrderId=@intWorkOrderId
+	if @ysnEnableParentLot=0
+		Update tblMFWorkOrder Set dblQuantity=(Select sum(dblQuantity) from tblMFWorkOrderConsumedLot where intWorkOrderId=@intWorkOrderId) where intWorkOrderId=@intWorkOrderId
+	Else
+		Update tblMFWorkOrder Set dblQuantity=(Select sum(dblQuantity) from tblMFWorkOrderInputParentLot where intWorkOrderId=@intWorkOrderId) where intWorkOrderId=@intWorkOrderId
 
 	EXEC dbo.uspMFCopyRecipe @intItemId = @intDemandItemId
 			,@intLocationId = @intLocationId

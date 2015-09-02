@@ -2332,6 +2332,7 @@
     <Build Include="dbo\Tables\tblMFCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRiskPositionInquiry.sql" />
     <Build Include="dbo\Functions\fnRKConvertQuantityToTargetUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetBlendProductionAvailableLots.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

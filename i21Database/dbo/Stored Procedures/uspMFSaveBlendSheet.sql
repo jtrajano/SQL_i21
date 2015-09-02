@@ -13,6 +13,7 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @idoc int 
 Declare @ErrMsg nVarchar(Max)
+Declare @ysnEnableParentLot bit=0
 
 Set @intWorkOrderId=0;
 
@@ -49,9 +50,13 @@ Declare @tblLot table
 	intItemUOMId int,
 	dblIssuedQuantity numeric(18,6),
 	intItemIssuedUOMId int,
+	dblWeightPerUnit numeric(18,6),
 	intUserId int,
 	strRowState nVarchar(50),
-	intRecipeItemId int
+	intRecipeItemId int,
+	intLocationId int,
+	intStorageLocationId int,
+	ysnParentLot bit
 )
 
 INSERT INTO @tblBlendSheet(intWorkOrderId,strWorkOrderNo,intBlendRequirementId,
@@ -82,8 +87,8 @@ INSERT INTO @tblBlendSheet(intWorkOrderId,strWorkOrderNo,intBlendRequirementId,
 	)
 
 INSERT INTO @tblLot(
- intWorkOrderInputLotId,intLotId,intItemId,dblQty,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,strRowState,intRecipeItemId)
- Select intWorkOrderInputLotId,intLotId,intItemId,dblQty,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,strRowState,intRecipeItemId
+ intWorkOrderInputLotId,intLotId,intItemId,dblQty,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,dblWeightPerUnit,intUserId,strRowState,intRecipeItemId,intLocationId,intStorageLocationId,ysnParentLot)
+ Select intWorkOrderInputLotId,intLotId,intItemId,dblQty,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,dblWeightPerUnit,intUserId,strRowState,intRecipeItemId,intLocationId,intStorageLocationId,ysnParentLot
  FROM OPENXML(@idoc, 'root/lot', 2)  
  WITH (  
 	intWorkOrderInputLotId int,
@@ -93,10 +98,25 @@ INSERT INTO @tblLot(
 	intItemUOMId int,
 	dblIssuedQuantity numeric(18,6),
 	intItemIssuedUOMId int,
+	dblWeightPerUnit numeric(18,6),
 	intUserId int,
 	strRowState nVarchar(50),
-	intRecipeItemId int
+	intRecipeItemId int,
+	intLocationId int,
+	intStorageLocationId int,
+	ysnParentLot bit
 	)
+
+Update @tblLot Set intStorageLocationId=null where intStorageLocationId=0
+
+Select TOP 1 @ysnEnableParentLot=ISNULL(ysnEnableParentLot,0) From tblMFCompanyPreference
+
+If @ysnEnableParentLot=0
+	Update a Set a.dblWeightPerUnit=b.dblWeightPerQty 
+	from @tblLot a join tblICLot b on a.intLotId=b.intLotId
+Else
+	Update a Set a.dblWeightPerUnit=b.dblWeightPerQty 
+	from @tblLot a join tblICParentLot b on a.intLotId=b.intParentLotId
 
 Declare	@intBlendRequirementId int,
 		@strDemandNo nVarchar(50),
@@ -156,20 +176,42 @@ Begin
 Select @strRowState=strRowState,@intWorkOrderInputLotId=intWorkOrderInputLotId from @tblLot where intRowNo=@intMinRowNo
 
 If @strRowState='ADDED'
-	Insert Into tblMFWorkOrderInputLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
-	dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId)
-	Select @intWorkOrderId,intLotId,intItemId,dblQty,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,null,
-	GetDate(),intUserId,GetDate(),intUserId,intRecipeItemId
-	From @tblLot where intRowNo=@intMinRowNo
+	Begin
+		If @ysnEnableParentLot=0
+			Insert Into tblMFWorkOrderInputLot(intWorkOrderId,intLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
+			dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId)
+			Select @intWorkOrderId,intLotId,intItemId,dblQty,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,null,
+			GetDate(),intUserId,GetDate(),intUserId,intRecipeItemId
+			From @tblLot where intRowNo=@intMinRowNo
+		Else
+			Insert Into tblMFWorkOrderInputParentLot(intWorkOrderId,intParentLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,intSequenceNo,
+			dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intRecipeItemId,dblWeightPerUnit,intLocationId,intStorageLocationId)
+			Select @intWorkOrderId,intLotId,intItemId,dblQty,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,null,
+			GetDate(),intUserId,GetDate(),intUserId,intRecipeItemId,dblWeightPerUnit,intLocationId,intStorageLocationId
+			From @tblLot where intRowNo=@intMinRowNo
+	End
 
 If @strRowState='MODIFIED'
-		Update  tblMFWorkOrderInputLot 
-			Set dblQuantity=(Select dblQty from @tblLot where intRowNo=@intMinRowNo),
-				dblIssuedQuantity=(Select dblIssuedQuantity from @tblLot where intRowNo=@intMinRowNo)
-				where intWorkOrderInputLotId=@intWorkOrderInputLotId
+	Begin
+		If @ysnEnableParentLot=0
+			Update  tblMFWorkOrderInputLot 
+				Set dblQuantity=(Select dblQty from @tblLot where intRowNo=@intMinRowNo),
+					dblIssuedQuantity=(Select dblIssuedQuantity from @tblLot where intRowNo=@intMinRowNo)
+					where intWorkOrderInputLotId=@intWorkOrderInputLotId
+		Else
+			Update  tblMFWorkOrderInputParentLot 
+				Set dblQuantity=(Select dblQty from @tblLot where intRowNo=@intMinRowNo),
+					dblIssuedQuantity=(Select dblIssuedQuantity from @tblLot where intRowNo=@intMinRowNo)
+					where intWorkOrderInputParentLotId=@intWorkOrderInputLotId
+	End
 
 If @strRowState='DELETE'
-	Delete From tblMFWorkOrderInputLot where intWorkOrderInputLotId=@intWorkOrderInputLotId
+	Begin
+	If @ysnEnableParentLot=0	
+		Delete From tblMFWorkOrderInputLot where intWorkOrderInputLotId=@intWorkOrderInputLotId
+	Else
+		Delete From tblMFWorkOrderInputParentLot where intWorkOrderInputParentLotId=@intWorkOrderInputLotId
+	End
 
 Select @intMinRowNo=Min(intRowNo) from @tblLot where intRowNo>@intMinRowNo
 End

@@ -25,7 +25,7 @@ wcl.dblQuantity,wcl.intItemUOMId,um.strUnitMeasure AS strUOM,wcl.dblIssuedQuanti
 wcl.intItemIssuedUOMId,iu2.strUnitMeasure AS strIssuedUOM,
 sl.strName AS strStorageLocationName,i.dblRiskScore,ISNULL(wcl.ysnStaged,0) AS ysnStaged,
 (ISNULL(l.dblWeight,0) - ISNULL(rq.dblReservedQty,0)) AS dblAvailableQty,ISNULL(l.dblWeightPerQty,0) AS dblWeightPerUnit,
-wcl.intRecipeItemId
+wcl.intRecipeItemId,l.intParentLotId,pl.strParentLotNumber
 from tblMFWorkOrderConsumedLot wcl
 Join tblICLot l on wcl.intLotId=l.intLotId
 Join tblICItem i on l.intItemId=i.intItemId
@@ -33,6 +33,7 @@ Join tblICItemUOM iu on wcl.intItemUOMId=iu.intItemUOMId
 Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 Join tblICItemUOM iu1 on wcl.intItemIssuedUOMId=iu1.intItemUOMId
 Join tblICUnitMeasure iu2 on iu1.intUnitMeasureId=iu2.intUnitMeasureId
-Left Join tblICStorageLocation sl on l.intStorageLocationId=sl.intStorageLocationId 
+Left Join tblICStorageLocation sl on l.intStorageLocationId=sl.intStorageLocationId
+Left Join tblICParentLot pl on l.intParentLotId=pl.intParentLotId 
 Left Join @tblReservedQty rq on l.intLotId=rq.intLotId
 Where wcl.intWorkOrderId=@intWorkOrderId

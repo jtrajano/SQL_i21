@@ -7,8 +7,12 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+Declare @ysnEnableParentLot bit=0
+
 Declare @tblItemQty table
 (
+	intParentLotId int,
+	strParentLotNumber nvarchar(50),
 	intItemId int,
 	dblQuantity numeric(18,6),
 	intItemUOMId int,
@@ -20,46 +24,73 @@ Declare @tblItemQty table
 
 Declare @tblItemConfirmQty table
 (
+	intParentLotId int,
 	intItemId int,
 	dblQuantity numeric(18,6)
 )
 
-Insert into @tblItemConfirmQty(intItemId,dblQuantity)
-Select i.intItemId,sum(wcl.dblQuantity) AS dblQuantity
-from tblMFWorkOrderConsumedLot wcl
-Join tblICLot l on wcl.intLotId=l.intLotId
-Join tblICItem i on l.intItemId=i.intItemId
-Where wcl.intWorkOrderId=@intWorkOrderId And ISNULL(wcl.ysnStaged,0)=1
-group by i.intItemId
+Select TOP 1 @ysnEnableParentLot=ISNULL(ysnEnableParentLot,0) From tblMFCompanyPreference
 
-Insert into @tblItemQty(intItemId,dblQuantity,intItemUOMId,strUOM,dblIssuedQuantity,intItemIssuedUOMId,strIssuedUOM)
-Select i.intItemId,sum(wcl.dblQuantity) AS dblQuantity,max(wcl.intItemUOMId) AS intItemUOMId,max(um.strUnitMeasure) AS strUOM,
-sum(wcl.dblIssuedQuantity) AS dblIssuedQuantity,max(wcl.intItemIssuedUOMId) AS intItemIssuedUOMId,max(um1.strUnitMeasure) AS strIssuedUOM
-from tblMFWorkOrderConsumedLot wcl
-Join tblICLot l on wcl.intLotId=l.intLotId
-Join tblICItem i on l.intItemId=i.intItemId
-Join tblICItemUOM iu on wcl.intItemUOMId=iu.intItemUOMId
-Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
-Join tblICItemUOM iu1 on wcl.intItemIssuedUOMId=iu1.intItemUOMId
-Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
-Where wcl.intWorkOrderId=@intWorkOrderId
-group by i.intItemId
+If @ysnEnableParentLot=0
+Begin
+	Insert into @tblItemConfirmQty(intItemId,dblQuantity)
+	Select i.intItemId,sum(wcl.dblQuantity) AS dblQuantity
+	from tblMFWorkOrderConsumedLot wcl
+	Join tblICLot l on wcl.intLotId=l.intLotId
+	Join tblICItem i on l.intItemId=i.intItemId
+	Where wcl.intWorkOrderId=@intWorkOrderId And ISNULL(wcl.ysnStaged,0)=1
+	group by i.intItemId
 
-Select wri.intWorkOrderId,i.intItemId,i.strItemNo,i.strDescription,
-ISNULL(iq.dblQuantity,0) AS dblQuantity,ISNULL(iq.intItemUOMId,0) AS intItemUOMId,ISNULL(iq.strUOM,'') AS strUOM,
-ISNULL(iq.dblIssuedQuantity,0) AS dblIssuedQuantity,ISNULL(iq.intItemIssuedUOMId,'') AS intItemIssuedUOMId,ISNULL(iq.strIssuedUOM,'') AS strIssuedUOM,
-ISNULL(cq.dblQuantity,0.0) AS dblConfirmedQty 
-From tblMFWorkOrderRecipeItem wri Join tblICItem i on wri.intItemId=i.intItemId 
-Left Join @tblItemQty iq on wri.intItemId=iq.intItemId
-Left Join @tblItemConfirmQty cq on wri.intItemId=cq.intItemId
-Where wri.intWorkOrderId=@intWorkOrderId And wri.intRecipeItemTypeId=1
-UNION
-Select wri.intWorkOrderId,i.intItemId,i.strItemNo,i.strDescription,
-ISNULL(iq.dblQuantity,0) AS dblQuantity,ISNULL(iq.intItemUOMId,0) AS intItemUOMId,ISNULL(iq.strUOM,'') AS strUOM,
-ISNULL(iq.dblIssuedQuantity,0) AS dblIssuedQuantity,ISNULL(iq.intItemIssuedUOMId,'') AS intItemIssuedUOMId,ISNULL(iq.strIssuedUOM,'') AS strIssuedUOM,
-ISNULL(cq.dblQuantity,0.0) AS dblConfirmedQty 
-From tblMFWorkOrderRecipeSubstituteItem wri Join tblICItem i on wri.intSubstituteItemId=i.intItemId 
-Left Join @tblItemQty iq on wri.intItemId=iq.intItemId
-Left Join @tblItemConfirmQty cq on wri.intItemId=cq.intItemId
-Where wri.intWorkOrderId=@intWorkOrderId And wri.intRecipeItemTypeId=1
+	Insert into @tblItemQty(intItemId,dblQuantity,intItemUOMId,strUOM,dblIssuedQuantity,intItemIssuedUOMId,strIssuedUOM)
+	Select i.intItemId,sum(wcl.dblQuantity) AS dblQuantity,max(wcl.intItemUOMId) AS intItemUOMId,max(um.strUnitMeasure) AS strUOM,
+	sum(wcl.dblIssuedQuantity) AS dblIssuedQuantity,max(wcl.intItemIssuedUOMId) AS intItemIssuedUOMId,max(um1.strUnitMeasure) AS strIssuedUOM
+	from tblMFWorkOrderConsumedLot wcl
+	Join tblICLot l on wcl.intLotId=l.intLotId
+	Join tblICItem i on l.intItemId=i.intItemId
+	Join tblICItemUOM iu on wcl.intItemUOMId=iu.intItemUOMId
+	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+	Join tblICItemUOM iu1 on wcl.intItemIssuedUOMId=iu1.intItemUOMId
+	Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
+	Where wcl.intWorkOrderId=@intWorkOrderId
+	group by i.intItemId
 
+	Select wri.intWorkOrderId,i.intItemId,i.strItemNo,i.strDescription,
+	ISNULL(iq.dblQuantity,0) AS dblQuantity,ISNULL(iq.intItemUOMId,0) AS intItemUOMId,ISNULL(iq.strUOM,'') AS strUOM,
+	ISNULL(iq.dblIssuedQuantity,0) AS dblIssuedQuantity,ISNULL(iq.intItemIssuedUOMId,'') AS intItemIssuedUOMId,ISNULL(iq.strIssuedUOM,'') AS strIssuedUOM,
+	ISNULL(cq.dblQuantity,0.0) AS dblConfirmedQty 
+	From tblMFWorkOrderRecipeItem wri Join tblICItem i on wri.intItemId=i.intItemId 
+	Left Join @tblItemQty iq on wri.intItemId=iq.intItemId
+	Left Join @tblItemConfirmQty cq on wri.intItemId=cq.intItemId
+	Where wri.intWorkOrderId=@intWorkOrderId And wri.intRecipeItemTypeId=1
+	UNION
+	Select wri.intWorkOrderId,i.intItemId,i.strItemNo,i.strDescription,
+	ISNULL(iq.dblQuantity,0) AS dblQuantity,ISNULL(iq.intItemUOMId,0) AS intItemUOMId,ISNULL(iq.strUOM,'') AS strUOM,
+	ISNULL(iq.dblIssuedQuantity,0) AS dblIssuedQuantity,ISNULL(iq.intItemIssuedUOMId,'') AS intItemIssuedUOMId,ISNULL(iq.strIssuedUOM,'') AS strIssuedUOM,
+	ISNULL(cq.dblQuantity,0.0) AS dblConfirmedQty 
+	From tblMFWorkOrderRecipeSubstituteItem wri Join tblICItem i on wri.intSubstituteItemId=i.intItemId 
+	Left Join @tblItemQty iq on wri.intItemId=iq.intItemId
+	Left Join @tblItemConfirmQty cq on wri.intItemId=cq.intItemId
+	Where wri.intWorkOrderId=@intWorkOrderId And wri.intRecipeItemTypeId=1
+End
+Else
+Begin
+	Insert into @tblItemConfirmQty(intParentLotId,dblQuantity)
+	Select l.intParentLotId,sum(wcl.dblQuantity) AS dblQuantity
+	from tblMFWorkOrderConsumedLot wcl
+	Join tblICLot l on wcl.intLotId=l.intLotId
+	Where wcl.intWorkOrderId=@intWorkOrderId And ISNULL(wcl.ysnStaged,0)=1
+	group by l.intParentLotId
+
+	Select wi.intWorkOrderId,pl.intParentLotId,pl.strParentLotNumber,i.intItemId,i.strItemNo,i.strDescription,wi.dblQuantity,wi.intItemUOMId,um.strUnitMeasure AS strUOM,
+	wi.dblIssuedQuantity,wi.intItemIssuedUOMId,um1.strUnitMeasure AS strIssuedUOM,ISNULL(cq.dblQuantity,0.0) AS dblConfirmedQty 
+	from tblMFWorkOrderInputParentLot wi
+	Join tblICParentLot pl on wi.intParentLotId=pl.intParentLotId
+	Join tblICItem i on pl.intItemId=i.intItemId
+	Join tblICItemUOM iu on wi.intItemUOMId=iu.intItemUOMId
+	Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
+	Join tblICItemUOM iu1 on wi.intItemIssuedUOMId=iu1.intItemUOMId
+	Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
+	Left Join @tblItemConfirmQty cq on wi.intParentLotId=cq.intParentLotId
+	Where wi.intWorkOrderId=@intWorkOrderId
+
+End
