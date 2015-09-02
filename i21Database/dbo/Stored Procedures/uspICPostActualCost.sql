@@ -47,8 +47,8 @@ DECLARE @TotalQtyOffset AS NUMERIC(18,6);
 
 DECLARE @InventoryTransactionIdentityId AS INT
 
-DECLARE @NewActualId AS INT
-DECLARE @UpdatedActualId AS INT 
+DECLARE @NewActualCostId AS INT
+DECLARE @UpdatedActualCostId AS INT 
 DECLARE @strRelatedTransactionId AS NVARCHAR(40)
 DECLARE @intRelatedTransactionId AS INT 
 DECLARE @dblValue AS NUMERIC(18,6)
@@ -65,7 +65,7 @@ BEGIN
 		-- Repeat call on uspICReduceStockInActual until @dblReduceQty is completely distributed to all available Actual buckets or added a new negative bucket. 
 		WHILE (ISNULL(@dblReduceQty, 0) < 0)
 		BEGIN 
-			EXEC dbo.uspICReduceStockInActual
+			EXEC dbo.uspICReduceStockInActualCost
 				@strActualCostId	
 				,@intItemId
 				,@intItemLocationId
@@ -79,7 +79,7 @@ BEGIN
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT 
 				,@QtyOffset OUTPUT 
-				,@UpdatedActualId OUTPUT 
+				,@UpdatedActualCostId OUTPUT 
 
 			-- Insert the inventory transaction record
 			DECLARE @dblComputedQty AS NUMERIC(18,6) = @dblReduceQty - ISNULL(@RemainingQty, 0) 
@@ -114,16 +114,16 @@ BEGIN
 
 			
 			-- Insert the record the the Actual-out table
-			INSERT INTO dbo.tblICInventoryActualOut (
+			INSERT INTO dbo.tblICInventoryActualCostOut (
 					intInventoryTransactionId
-					,intInventoryActualId
+					,intInventoryActualCostId
 					,dblQty
 			)
 			SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
-					,intInventoryActualId = @UpdatedActualId
+					,intInventoryActualCostId = @UpdatedActualCostId
 					,dblQty = @QtyOffset
 			WHERE	@InventoryTransactionIdentityId IS NOT NULL
-					AND @UpdatedActualId IS NOT NULL 
+					AND @UpdatedActualCostId IS NOT NULL 
 					AND @QtyOffset IS NOT NULL 
 			
 			-- Reduce the remaining qty
@@ -170,7 +170,7 @@ BEGIN
 		-- Repeat call on uspICIncreaseStockInActual until @dblAddQty is completely distributed to the negative cost Actual buckets or added as a new bucket. 
 		WHILE (ISNULL(@dblAddQty, 0) > 0)
 		BEGIN 
-			EXEC dbo.uspICIncreaseStockInActual
+			EXEC dbo.uspICIncreaseStockInActualCost
 				@strActualCostId	
 				,@intItemId
 				,@intItemLocationId
@@ -186,8 +186,8 @@ BEGIN
 				,@RemainingQty OUTPUT
 				,@CostUsed OUTPUT
 				,@QtyOffset OUTPUT 
-				,@NewActualId OUTPUT 
-				,@UpdatedActualId OUTPUT 
+				,@NewActualCostId OUTPUT 
+				,@UpdatedActualCostId OUTPUT 
 				,@strRelatedTransactionId OUTPUT
 				,@intRelatedTransactionId OUTPUT 
 
@@ -256,34 +256,34 @@ BEGIN
 			END
 			
 			-- Insert the record the the Actual-out table
-			INSERT INTO dbo.tblICInventoryActualOut (
+			INSERT INTO dbo.tblICInventoryActualCostOut (
 					intInventoryTransactionId
-					,intInventoryActualId
+					,intInventoryActualCostId
 					,dblQty
-					,intRevalueActualId
+					,intRevalueActualCostId
 			)
 			SELECT	intInventoryTransactionId = @InventoryTransactionIdentityId
-					,intInventoryActualId = NULL 
+					,intInventoryActualCostId = NULL 
 					,dblQty = @QtyOffset
-					,intRevalueActualId = @UpdatedActualId
+					,intRevalueActualCostId = @UpdatedActualCostId
 			WHERE	@InventoryTransactionIdentityId IS NOT NULL
-					AND @UpdatedActualId IS NOT NULL 
+					AND @UpdatedActualCostId IS NOT NULL 
 					AND @QtyOffset IS NOT NULL 
 
 			SET @dblAddQty = @RemainingQty;
 		END 
 
 		-- Update the Actual out table and assign the correct Actual id. 
-		UPDATE	ActualOut
-		SET		ActualOut.intInventoryActualId = @NewActualId
-		FROM	dbo.tblICInventoryActualOut ActualOut INNER JOIN dbo.tblICInventoryTransaction TRANS
-					ON ActualOut.intInventoryTransactionId = TRANS.intInventoryTransactionId 
-					AND ActualOut.intInventoryActualId IS NULL 
+		UPDATE	ActualCostOut
+		SET		ActualCostOut.intInventoryActualCostId = @NewActualCostId
+		FROM	dbo.tblICInventoryActualCostOut ActualCostOut INNER JOIN dbo.tblICInventoryTransaction TRANS
+					ON ActualCostOut.intInventoryTransactionId = TRANS.intInventoryTransactionId 
+					AND ActualCostOut.intInventoryActualCostId IS NULL 
 					AND TRANS.intItemId = @intItemId
 					AND TRANS.intItemLocationId = @intItemLocationId
 					AND TRANS.intItemUOMId = @intItemUOMId
 					AND TRANS.intTransactionId = @intTransactionId
 					AND TRANS.strBatchId = @strBatchId
-		WHERE	@NewActualId IS NOT NULL 
+		WHERE	@NewActualCostId IS NOT NULL 
 	END 
 END 

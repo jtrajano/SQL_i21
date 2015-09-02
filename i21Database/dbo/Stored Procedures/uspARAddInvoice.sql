@@ -135,7 +135,8 @@ INSERT INTO
 		,[intDistributionHeaderId]
 		,[intConcurrencyId]
 		,[intEntityId]
-		,[strDeliverPickup])
+		,[strDeliverPickup]
+)
 SELECT
      TE.InvoiceNumber           -- invoice number
 	,IE.strSourceId				--[strInvoiceOriginId]
@@ -268,7 +269,8 @@ SET
 	,[intDistributionHeaderId]	= IE.intSourceId
 	,[intConcurrencyId]			= I.[intConcurrencyId] + 1
 	,[intEntityId]				= @EntityId
-	,[strDeliverPickup]			= IE.strDeliverPickup     		
+	,[strDeliverPickup]			= IE.strDeliverPickup   
+	,[strActualCostId]  		= IE.strActualCostId
 FROM
 	[tblARInvoice] I
 INNER JOIN 

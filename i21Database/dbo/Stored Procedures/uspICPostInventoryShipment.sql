@@ -222,6 +222,7 @@ BEGIN
 				,intLotId 
 				,intSubLocationId
 				,intStorageLocationId
+				,strActualCostId
 		) 
 		SELECT	intItemId					= DetailItem.intItemId
 				,intItemLocationId			= dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId)
@@ -261,6 +262,7 @@ BEGIN
 				,intLotId                   = Lot.intLotId
 				,intSubLocationId           = Lot.intSubLocationId
 				,intStorageLocationId       = Lot.intStorageLocationId
+				,strActualCostId			= Header.strActualCostId
 		FROM    tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem DetailItem 
 					ON Header.intInventoryShipmentId = DetailItem.intInventoryShipmentId    
 				INNER JOIN tblICItemUOM ItemUOM 
@@ -273,6 +275,7 @@ BEGIN
 					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId            
 				INNER JOIN vyuICGetShipmentItemSource ItemSource 
 					ON ItemSource.intInventoryShipmentItemId = DetailItem.intInventoryShipmentItemId
+				
 		WHERE   Header.intInventoryShipmentId = @intTransactionId
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_OWN) = @OWNERSHIP_TYPE_OWN
 

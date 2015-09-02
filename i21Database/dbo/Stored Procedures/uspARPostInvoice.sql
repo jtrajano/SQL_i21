@@ -717,6 +717,7 @@ IF @post = 1
 				,intLotId 
 				,intSubLocationId
 				,intStorageLocationId
+				,strActualCostId
 			) 
 			SELECT 
 				Detail.intItemId  
@@ -735,6 +736,7 @@ IF @post = 1
 				,NULL 
 				,NULL
 				,NULL
+				,strActualCostId = Header.strActualCostId
 			FROM 
 				tblARInvoiceDetail Detail
 			INNER JOIN

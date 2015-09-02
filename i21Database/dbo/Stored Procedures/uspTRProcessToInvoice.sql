@@ -44,6 +44,7 @@ BEGIN TRY
 		,dblSurcharge
 		,ysnFreightInPrice
 		,intTaxGroupId	
+		,strActualCostId
 	 )	 
 	 select     
        DH.intEntityCustomerId,     
@@ -79,7 +80,8 @@ BEGIN TRY
 	   'Deliver',   
 	   DD.dblDistSurcharge,
 	   DD.ysnFreightInPrice,
-	   DD.intTaxGroupId
+	   DD.intTaxGroupId,
+	   strActualCostId = NULL -- TODO: Pruthvi, kindly add the TR transaction id if Invoice is for direct shipment. 
 	   from tblTRTransportLoad TL
             JOIN tblTRTransportReceipt TR on TR.intTransportLoadId = TL.intTransportLoadId
 			JOIN tblTRDistributionHeader DH on DH.intTransportReceiptId = TR.intTransportReceiptId

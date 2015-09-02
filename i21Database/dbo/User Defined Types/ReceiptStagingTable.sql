@@ -19,6 +19,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[intCurrencyId] INT NULL								-- The currency id used in a tranaction. 
 	,[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
 	,[intSourceId] INT NULL                                 -- Source Id of the Originated Transaction
+	,[strActualCostId] nvarchar(50) COLLATE Latin1_General_CI_AS NULL -- Direct Cost Id
 
 	-- Detail 
 	,[intItemId] INT NOT NULL								-- The item. 

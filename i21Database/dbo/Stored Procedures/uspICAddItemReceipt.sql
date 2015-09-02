@@ -202,6 +202,7 @@ BEGIN
 				,intEntityId			= (SELECT TOP 1 intEntityId FROM dbo.tblSMUserSecurity WHERE intUserSecurityID = @intUserId)
 				,intCreatedUserId		= @intUserId
 				,ysnPosted				= 0
+				,strActualCostId		= IntegrationData.strActualCostId
 
 		WHEN NOT MATCHED THEN 
 			INSERT (
@@ -237,6 +238,7 @@ BEGIN
 				,intEntityId
 				,intCreatedUserId
 				,ysnPosted
+				,strActualCostId
 			)
 			VALUES (
 				/*strReceiptNumber*/			@ReceiptNumber
@@ -271,6 +273,7 @@ BEGIN
 				/*intEntityId*/					,(SELECT TOP 1 intEntityId FROM dbo.tblSMUserSecurity WHERE intUserSecurityID = @intUserId)
 				/*intCreatedUserId*/			,@intUserId
 				/*ysnPosted*/					,0
+				/*strActualCostId*/				,IntegrationData.strActualCostId
 			)
 		;
 				

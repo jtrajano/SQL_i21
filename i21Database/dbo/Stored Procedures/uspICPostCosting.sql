@@ -148,7 +148,7 @@ BEGIN
 	-- Call the SP that can process the item's costing method
 	--------------------------------------------------------------------------------
 	-- Average Cost
-	IF (@CostingMethod = @AVERAGECOST)
+	IF (@CostingMethod = @AVERAGECOST AND @strActualCostId IS NULL)
 	BEGIN 
 		EXEC dbo.uspICPostAverageCosting
 			@intItemId
@@ -173,7 +173,7 @@ BEGIN
 	END
 
 	-- FIFO 
-	IF (@CostingMethod = @FIFO)
+	IF (@CostingMethod = @FIFO AND @strActualCostId IS NULL)
 	BEGIN 
 		EXEC dbo.uspICPostFIFO
 			@intItemId
@@ -198,7 +198,7 @@ BEGIN
 	END
 
 	-- LIFO 
-	IF (@CostingMethod = @LIFO)
+	IF (@CostingMethod = @LIFO AND @strActualCostId IS NULL)
 	BEGIN 
 		EXEC dbo.uspICPostLIFO
 			@intItemId
@@ -223,7 +223,7 @@ BEGIN
 	END
 
 	-- LOT 
-	IF (@CostingMethod = @LOTCOST)
+	IF (@CostingMethod = @LOTCOST AND @strActualCostId IS NULL)
 	BEGIN 
 		EXEC dbo.uspICPostLot
 			@intItemId
@@ -252,27 +252,27 @@ BEGIN
 	IF (@strActualCostId IS NOT NULL)
 	BEGIN 
 		EXEC dbo.uspICPostActualCost
-			@intItemId
-			,@intItemLocationId
-			,@intItemUOMId
-			,@intSubLocationId
-			,@intStorageLocationId
-			,@dtmDate
-			,@intLotId
-			,@dblQty
-			,@dblUOMQty
-			,@dblCost
-			,@dblSalesPrice
-			,@intCurrencyId
-			,@dblExchangeRate
-			,@intTransactionId
-			,@intTransactionDetailId
-			,@strTransactionId
-			,@strBatchId
-			,@intTransactionTypeId
-			,@strTransactionForm
-			,@intUserId
-			,@strActualCostId;
+			@strActualCostId 
+			,@intItemId 
+			,@intItemLocationId 
+			,@intItemUOMId 
+			,@intSubLocationId 
+			,@intStorageLocationId 
+			,@dtmDate 
+			,@dblQty 
+			,@dblUOMQty 
+			,@dblCost 
+			,@dblSalesPrice 
+			,@intCurrencyId 
+			,@dblExchangeRate 
+			,@intTransactionId 
+			,@intTransactionDetailId 
+			,@strTransactionId 
+			,@strBatchId 
+			,@intTransactionTypeId 
+			,@strTransactionForm 
+			,@intUserId 
+			;
 	END
 
 	-- Update the Lot's Qty and Weights. 
