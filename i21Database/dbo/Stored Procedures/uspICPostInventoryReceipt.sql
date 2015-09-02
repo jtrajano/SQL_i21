@@ -154,14 +154,12 @@ BEGIN
 	SELECT	TOP 1 
 			@strBillNumber = Bill.strBillId
 			,@strChargeItem = Item.strItemNo
-	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItemAllocatedCharge AllocatedCharges
-				ON Receipt.intInventoryReceiptId = AllocatedCharges.intInventoryReceiptId
-			INNER JOIN dbo.tblICInventoryReceiptCharge Charge
-				ON Charge.intInventoryReceiptChargeId = AllocatedCharges.intInventoryReceiptChargeId
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge
+				ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item
 				ON Item.intItemId = Charge.intChargeId				
 			LEFT JOIN dbo.tblAPBillDetail BillItems
-				ON BillItems.intInventoryReceiptItemAllocatedChargeId = Charge.intInventoryReceiptChargeId
+				ON BillItems.intInventoryReceiptChargeId = Charge.intInventoryReceiptChargeId
 			INNER JOIN dbo.tblAPBill Bill
 				ON Bill.intBillId = BillItems.intBillId
 	WHERE	Receipt.intInventoryReceiptId = @intTransactionId

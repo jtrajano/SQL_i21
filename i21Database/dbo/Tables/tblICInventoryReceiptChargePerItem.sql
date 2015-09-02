@@ -12,6 +12,8 @@
 	[ysnAccrue] BIT NULL DEFAULT ((0)),
 	[ysnInventoryCost] BIT NULL DEFAULT ((0)),
 	[ysnPrice] BIT NULL DEFAULT ((0)),
+	[dblAmountBilled] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+	[dblAmountPaid] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 	CONSTRAINT [PK_tblICInventoryReceiptChargePerItem] PRIMARY KEY ([intInventoryReceiptChargePerItemId]), 
 	CONSTRAINT [FK_tblICInventoryReceiptChargePerItem_tblICInventoryReceiptItem] FOREIGN KEY ([intInventoryReceiptItemId]) REFERENCES [tblICInventoryReceiptItem]([intInventoryReceiptItemId]) ON DELETE CASCADE, 
 	CONSTRAINT [FK_tblICInventoryReceiptChargePerItem_tblAPVendor] FOREIGN KEY ([intEntityVendorId]) REFERENCES [tblAPVendor]([intEntityVendorId]),

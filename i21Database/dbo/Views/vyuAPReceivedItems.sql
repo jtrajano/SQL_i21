@@ -188,7 +188,7 @@ FROM
 		,[dblQuantityBilled]						=	A.dblQuantityBilled
 		,[intLineNo]								=	A.intLineNo
 		,[intInventoryReceiptItemId]				=	A.intInventoryReceiptItemId
-		,[intInventoryReceiptItemAllocatedChargeId]	=	A.intInventoryReceiptItemAllocatedChargeId
+		,[intInventoryReceiptChargeId]				=	A.intInventoryReceiptChargeId
 		,[dblUnitCost]								=	A.dblUnitCost
 		,[dblTax]									=	A.dblTax
 		,[intAccountId]								=	A.intAccountId
