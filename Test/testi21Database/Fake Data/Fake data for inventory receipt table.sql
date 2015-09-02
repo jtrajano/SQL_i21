@@ -1436,10 +1436,10 @@ BEGIN
 			,[intChargeId]			= @OtherCharges
 			,[ysnInventoryCost]		= @INVENTORY_COST_No
 			,[strCostMethod]		= @COST_METHOD_Amount
-			,[dblRate]				= NULL 
+			,[dblRate]				= 25.00
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
 			,[intEntityVendorId]	= NULL 
-			,[dblAmount]			= 25.00
+			,[dblAmount]			= NULL 
 			,[strAllocateCostBy]	= 'Unit'
 			,[ysnAccrue] 			= 0 -- 'None'
 	END
@@ -1584,10 +1584,10 @@ BEGIN
 			,[intChargeId]			= @OtherCharges
 			,[ysnInventoryCost]		= @INVENTORY_COST_No
 			,[strCostMethod]		= @COST_METHOD_Amount
-			,[dblRate]				= NULL 
+			,[dblRate]				= 25.00
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
 			,[intEntityVendorId]	= 1 
-			,[dblAmount]			= 25.00
+			,[dblAmount]			= NULL 
 			,[strAllocateCostBy]	= 'Unit'
 			,[ysnAccrue] 			= 0 -- 'None'
 			,[intContractId]		= NULL
@@ -1747,10 +1747,10 @@ BEGIN
 			,[intChargeId]			= @OtherCharges
 			,[ysnInventoryCost]		= 0
 			,[strCostMethod]		= @COST_METHOD_Amount
-			,[dblRate]				= NULL 
+			,[dblRate]				= 25.00
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
 			,[intEntityVendorId]	= 1 
-			,[dblAmount]			= 25.00
+			,[dblAmount]			= NULL 
 			,[strAllocateCostBy]	= 'Unit'
 			,[ysnAccrue] 			= 0 -- 'None'
 			,[intContractId]		= NULL
@@ -1924,10 +1924,10 @@ BEGIN
 			,[intChargeId]			= @OtherCharges
 			,[ysnInventoryCost]		= @INVENTORY_COST_No
 			,[strCostMethod]		= @COST_METHOD_Amount
-			,[dblRate]				= NULL 
+			,[dblRate]				= 25.00
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
 			,[intEntityVendorId]	= 1 
-			,[dblAmount]			= 25.00
+			,[dblAmount]			= NULL 
 			,[strAllocateCostBy]	= 'Unit'
 			,[ysnAccrue] 			= 0 -- 'None'
 			,[intContractId]		= NULL

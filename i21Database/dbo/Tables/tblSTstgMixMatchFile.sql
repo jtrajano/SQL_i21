@@ -1,5 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblSTstgMixMatchFile]
 (
+	[intMixMatchFile] INT NOT NULL IDENTITY,
 	[StoreLocationID] INT NULL, 
     [VendorName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [VendorModelVersion] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -13,5 +14,6 @@
     [ItemListID] INT NULL, 
     [MixMatchUnits] INT NULL, 
     [MixMatchPrice] NUMERIC(18, 6) NULL, 
-    [MixMatchPriceCurrency] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+    [MixMatchPriceCurrency] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    CONSTRAINT [PK_tblSTstgMixMatchFile] PRIMARY KEY ([intMixMatchFile])
 )

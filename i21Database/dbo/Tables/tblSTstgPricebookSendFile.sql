@@ -1,13 +1,16 @@
 ﻿CREATE TABLE [dbo].[tblSTstgPricebookSendFile]
 (
+	[intPricebookSendFile] INT NOT NULL IDENTITY,
 	[StoreLocationID] INT NULL, 
     [VendorName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [VendorModelVersion] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [TableActionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [RecordActionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+    [ITTDetailRecordActionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [POSCodeFormat] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [POSCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [PosCodeModifierName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+    [PosCodeModifierValue] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [ActiveFlagValue] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
     [MerchandiseCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [RegularSellPrice] INT NULL DEFAULT 0, 
@@ -20,5 +23,6 @@
     [TaxStrategyID] INT NULL, 
     [ProhibitSaleLocationType] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
     [ProhibitSaleLocationValue] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL, 
-    [SalesRestrictionStrategyID] INT NULL  
+    [SalesRestrictionStrategyID] INT NULL, 
+    CONSTRAINT [PK_tblSTstgPricebookSendFile] PRIMARY KEY ([intPricebookSendFile])  
 )

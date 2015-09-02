@@ -97,10 +97,16 @@ BEGIN
 				
 				SET @dblReduceQty = ISNULL(@dblReduceQty, 0) 
 
+				-- Get the unit cost. 
+				SET @dblCost = dbo.fnCalculateUnitCost(@dblCost, @dblUOMQty)
+
 				-- Adjust the Unit Qty 
 				SELECT @dblUOMQty = dblUnitQty
 				FROM dbo.tblICItemUOM
 				WHERE intItemUOMId = @intItemUOMId
+
+				-- Adjust the cost to the new UOM
+				SET @dblCost = @dblCost * @dblUOMQty
 			END 
 		END 
 
@@ -188,14 +194,11 @@ BEGIN
 
 			IF EXISTS (
 				SELECT	TOP 1 1 
-				FROM	dbo.tblICInventoryLot CostingLot INNER JOIN dbo.tblICLot Lot
-							ON CostingLot.intLotId = Lot.intLotId
-				WHERE	CostingLot.intLotId = @intLotId
-						AND CostingLot.intItemUOMId = Lot.intWeightUOMId
-						AND CostingLot.intItemUOMId <> @intItemUOMId
+				FROM	tblICLot Lot
+				WHERE	Lot.intLotId = @intLotId
+						AND Lot.intItemUOMId = @intItemUOMId
+						AND Lot.intWeightUOMId <> @intItemUOMId
 						AND Lot.intWeightUOMId IS NOT NULL 
-						AND ISNULL(CostingLot.ysnIsUnposted, 0) = 0 
-						AND (ISNULL(CostingLot.dblStockIn, 0) - ISNULL(CostingLot.dblStockOut, 0)) > 0 
 			)			 
 			BEGIN 
 				-- Retrieve the correct UOM (Lot UOM or Weight UOM)

@@ -104,7 +104,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMGetConsumptionWithoutGasCheck.sql"
 :r "..\..\..\Integration\dbo\Views\vyuTMOriginDegreeOption.sql"
 :r "..\..\..\Integration\dbo\Functions\fnTMGetContractForCustomer.sql"
-:r "..\..\..\Integration\dbo\Views\vyuTMLeaseCode.sql"
+--:r "..\..\..\Integration\dbo\Views\vyuTMLeaseCode.sql"
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMAlterCobolWrite.sql"
 
 
@@ -183,6 +183,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\12_UpdateExistingInventoryTransactionForm.sql
 :r .\IC\13_MoveCommodityAttributes.sql
 :r .\IC\PatchFor_1510_to_1520.sql
+:r .\GL\InventoryCategoryFix.sql
 
 --Help Desk
 :R .\HD\DefaultData\1_StatusData.sql
@@ -224,6 +225,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\EM\012_DeleteOldTables.sql
 -- Quality Module
 :r .\QM\1_MasterTables.sql
+
+-- Store Module
+:r .\ST\1_FileFieldMapping_PricebookSale.sql
 
 
 print 'END POST DEPLOYMENT'

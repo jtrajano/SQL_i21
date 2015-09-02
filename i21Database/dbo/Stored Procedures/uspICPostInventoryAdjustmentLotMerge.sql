@@ -195,7 +195,7 @@ BEGIN
 			,intItemLocationId		= ISNULL(NewItemLocation.intItemLocationId, OriginalItemLocation.intItemLocationId) 
 			,intItemUOMId			= ISNULL(NewItemUOM.intItemUOMId, FromStock.intItemUOMId) 
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= -1 * FromStock.dblQty
+			,dblQty					= ISNULL(Detail.dblNewSplitLotQuantity, -1 * FromStock.dblQty) 
 			,dblUOMQty				= ISNULL(NewItemUOM.dblUnitQty, FromStock.dblUOMQty)
 			,dblCost				= ISNULL(Detail.dblNewCost, FromStock.dblCost) 
 			,dblValue				= 0

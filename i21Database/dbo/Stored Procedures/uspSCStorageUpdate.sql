@@ -505,7 +505,8 @@ BEGIN TRY
 	           ,[ysnPrinted]
 	           ,[dblCurrencyRate]
 			   ,[intCurrencyId]
-			   ,[intStorageTicketNumber])
+			   ,[intStorageTicketNumber]
+			   ,[intItemId])
 	SELECT 	[intConcurrencyId]		= 1
 			,[intEntityId]			= @intEntityId
 			,[intCommodityId]		= SC.intCommodityId
@@ -534,6 +535,7 @@ BEGIN TRY
 			,[dblCurrencyRate]= 1
 			,[intCurrencyId] = SC.intCurrencyId
 			,[intStorageTicketNumber] = SC.intTicketNumber
+			,SC.[intItemId]
 	FROM	dbo.tblSCTicket SC
 	WHERE	SC.intTicketId = @intTicketId
 
