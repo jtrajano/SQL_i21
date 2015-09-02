@@ -1,8 +1,10 @@
 ﻿CREATE VIEW [dbo].[vyuTMOpenCallEntry]  
 AS  
 	SELECT 
-		intSiteId = A.intSiteID
+		intSiteID = A.intSiteID
 		,strCustomerNumber = D.strEntityNo
+		,strCustomerName = D.strName
+		,strSiteDescription = B.strDescription
 		,strSiteNumber = RIGHT('000'+ CAST(B.intSiteNumber AS NVARCHAR(4)),4)
 		,strOrderNumber = A.strOrderNumber
 		,strProduct = COALESCE(F.strDescription,E.strDescription)
@@ -21,7 +23,7 @@ AS
 		,dtmDispatchedDate = A.dtmDispatchingDate
 		,intConcurrencyId = A.intConcurrencyId
 		,intDispatchId = A.intDispatchID
-		,intCustomerId = B.intCustomerID
+		,intCustomerID = B.intCustomerID
 	FROM tblTMDispatch A
 	INNER JOIN tblTMSite B
 		ON A.intSiteID = B.intSiteID
