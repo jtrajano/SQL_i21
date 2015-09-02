@@ -2,11 +2,11 @@ Ext.define('Inventory.view.StockDetailViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.icstockdetail',
 
-    setupContext : function(options){
-        var win = options.window;
-
+    setupContext : function(){
+        "use strict";
+        var win = this.getView();
         win.context = Ext.create('iRely.mvvm.Engine', {
-            window : win,
+            window: win,
             store: Ext.create('Inventory.store.ItemStockView'),
             singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
                 grid: win.down('grid'),
@@ -83,7 +83,7 @@ Ext.define('Inventory.view.StockDetailViewController', {
         return win.context;
     },
 
-    show : function(config) {
+    show : function() {
         "use strict";
         var me = this;
         me.getView().show();
