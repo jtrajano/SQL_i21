@@ -2274,6 +2274,7 @@
     <Build Include="dbo\Tables\tblSTRadiantItemTypeCode.sql" />
     <Build Include="dbo\Views\vyuARDepositAccount.sql" />
     <Build Include="dbo\Tables\tblICCommodityProductLine.sql" />
+    <Build Include="dbo\Views\vyuTRSupplyPointView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
