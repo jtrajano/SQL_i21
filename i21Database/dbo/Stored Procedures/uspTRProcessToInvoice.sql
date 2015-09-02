@@ -42,7 +42,8 @@ BEGIN TRY
 		,strPurchaseOrder	
 		,strDeliverPickup	 
 		,dblSurcharge
-		,ysnFreightInPrice	
+		,ysnFreightInPrice
+		,intTaxGroupId	
 	 )	 
 	 select     
        DH.intEntityCustomerId,     
@@ -77,7 +78,8 @@ BEGIN TRY
 	   DH.strPurchaseOrder,
 	   'Deliver',   
 	   DD.dblDistSurcharge,
-	   DD.ysnFreightInPrice
+	   DD.ysnFreightInPrice,
+	   DD.intTaxGroupId
 	   from tblTRTransportLoad TL
             JOIN tblTRTransportReceipt TR on TR.intTransportLoadId = TL.intTransportLoadId
 			JOIN tblTRDistributionHeader DH on DH.intTransportReceiptId = TR.intTransportReceiptId
