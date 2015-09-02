@@ -116,19 +116,20 @@ BEGIN
 			0 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDatePaid]), 0)
 
 		--This is currently doing by the uspGLBookEntries
+		--Add this temporarily as uspGLBookEntries validates the balance, however it throws an error, this should put in a result table
 		--NOT BALANCE
-		--INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
-		--SELECT 
-		--	'The debit and credit amounts are not balanced.',
-		--	'Payable',
-		--	A.strPaymentRecordNum,
-		--	A.intPaymentId
-		--FROM tblAPPayment A 
-		--WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments) AND 
-		--	(A.dblAmountPaid + A.dblWithheld 
-		--	+ (SELECT SUM(CASE WHEN dblAmountDue = (dblDiscount + dblPayment) THEN dblDiscount ELSE 0 END) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)) 
-		--	<> ((SELECT SUM(dblPayment) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId) 
-		--			+ (SELECT SUM(CASE WHEN dblAmountDue = (dblDiscount + dblPayment) THEN dblDiscount ELSE 0 END) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId))
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'The debit and credit amounts are not balanced.',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A 
+		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments) AND 
+			(A.dblAmountPaid + A.dblWithheld 
+			+ (SELECT SUM(CASE WHEN dblAmountDue = (dblDiscount + dblPayment) THEN dblDiscount ELSE 0 END) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)) 
+			<> ((SELECT SUM(dblPayment) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId) 
+					+ (SELECT SUM(CASE WHEN dblAmountDue = (dblDiscount + dblPayment) THEN dblDiscount ELSE 0 END) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId))
 		--include over payment
 
 		--ALREADY POSTED

@@ -189,9 +189,14 @@ IF (ISNULL(@recap, 0) = 0)
 BEGIN
 
 	--GROUP GL ENTRIES (NOTE: ASK THE DEVELOPER TO DO THIS ON uspGLBookEntries
+	BEGIN TRY
 	EXEC uspGLBookEntries @GLEntries, @post
-
-	IF @@ERROR <> 0	GOTO Post_Rollback;
+	END TRY
+	BEGIN CATCH
+		DECLARE @error NVARCHAR(200) = ERROR_MESSAGE()
+		RAISERROR(@error, 16, 1);
+		GOTO Post_Rollback
+	END CATCH
 
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
