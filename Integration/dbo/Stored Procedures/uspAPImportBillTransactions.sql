@@ -74,6 +74,17 @@ BEGIN
 		END
 		ELSE
 		BEGIN
+
+			--Validate GL Account
+			IF EXISTS(SELECT 1 FROM apcbkmst A
+			WHERE A.apcbk_gl_ap NOT IN (SELECT strExternalId FROM tblGLCOACrossReference)
+			UNION ALL
+			SELECT 1 FROM apeglmst A
+			WHERE A.apegl_gl_acct NOT IN (SELECT strExternalId FROM tblGLCOACrossReference))
+			BEGIN
+				RAISERROR(''Invalid GL Account found in origin table apeglmst. Please call iRely assistance.'', 16, 1);
+			END
+
 			EXEC uspAPImportBillsFromAPTRXMST @UserId,@DateFrom, @DateTo, @totalPostedImport OUTPUT
 			SET @Total = @totalPostedImport;
 		END
