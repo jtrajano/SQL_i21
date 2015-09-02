@@ -222,7 +222,6 @@ BEGIN
 				,intLotId 
 				,intSubLocationId
 				,intStorageLocationId
-				,strActualCostId
 		) 
 		SELECT	intItemId					= DetailItem.intItemId
 				,intItemLocationId			= dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId)
@@ -262,7 +261,6 @@ BEGIN
 				,intLotId                   = Lot.intLotId
 				,intSubLocationId           = Lot.intSubLocationId
 				,intStorageLocationId       = Lot.intStorageLocationId
-				,strActualCostId			= Header.strActualCostId
 		FROM    tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem DetailItem 
 					ON Header.intInventoryShipmentId = DetailItem.intInventoryShipmentId    
 				INNER JOIN tblICItemUOM ItemUOM 
