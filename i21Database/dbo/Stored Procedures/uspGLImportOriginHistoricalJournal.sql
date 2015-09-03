@@ -7,9 +7,10 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 
-
 EXECUTE [dbo].[uspGLImportOriginHistoricalJournalCLOSED] @intEntityId ,@result OUTPUT
-IF @result != '' AND  CHARINDEX('SUCCESS', @result,1)= 0 RETURN
+IF CHARINDEX('SUCCESS', @result,1)= 0 RETURN
+
+SELECT @result = REPLACE(@result , 'SUCCESS ','')
 
 
 BEGIN TRANSACTION
@@ -61,7 +62,8 @@ BEGIN TRANSACTION
 	INSERT INTO tblGLCOAImportLog (strEvent,strIrelySuiteVersion,intEntityId,dtmDate,strMachineName,strJournalType,intConcurrencyId)
 					VALUES('Import Origin Historical Journal',(SELECT TOP 1 strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC),@intEntityId,GETDATE(),'','',1)
 
-	DECLARE @intImportLogId INT = (SELECT intImportLogId FROM tblGLCOAImportLog WHERE strEvent = 'Import Origin Historical Journal' AND dtmDate = GETDATE())
+	DECLARE @intImportLogId INT
+	SELECT @intImportLogId  =SCOPE_IDENTITY()
 	
 	INSERT INTO tblGLCOAImportLogDetail (intImportLogId,strEventDescription,strPeriod,strSourceNumber,strSourceSystem,strJournalId,intConcurrencyId)
 		SELECT @intImportLogId,strDescription,dtmDate,strSourceId,strSourceType,strJournalId,1 FROM #iRelyImptblGLJournal
@@ -275,9 +277,13 @@ BEGIN TRANSACTION
                                         WHERE tblGLJournalDetail.intJournalId = tblGLJournal.intJournalId)
                                         						
 	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT	
-                                     
-	SET @result = 'SUCCESS ' + (Select (Select CAST(intJournalId AS NVARCHAR(MAX)) + ',' From (select intJournalId from tblGLJournal A left join #iRelyImptblGLJournal B on A.strJournalId = B.strJournalId COLLATE Latin1_General_CI_AS) X FOR XML PATH('')) as intJournalId)
-						
+
+    IF LEN(@result) > 0                                 
+		SET @result = @result + ',' + CAST(@intImportLogId AS NVARCHAR(40))  --'SUCCESS SELECT A.intJournalId FROM tblGLJournal A INNER JOIN tblGLCOAImportLogDetail B on A.strJournalId = B.strJournalId WHERE B.intImportLogId IN(' +  @result --(Select (Select CAST(intJournalId AS NVARCHAR(MAX)) + ',' From (select intJournalId from tblGLJournal A left join #iRelyImptblGLJournal B on A.strJournalId = B.strJournalId COLLATE Latin1_General_CI_AS) X FOR XML PATH('')) as intJournalId)
+	ELSE
+		SET @result = CAST(@intImportLogId AS NVARCHAR(40))				
+	
+	SET @result = 'SUCCESS ' + @result
 --=====================================================================================================================================
 -- 	FINALIZING STAGE
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -287,6 +293,7 @@ COMMIT_INSERT:
 	
 ROLLBACK_INSERT:
 	ROLLBACK TRANSACTION		            
+	SELECT @result =  'Importing Historical Journal error :' + ERROR_MESSAGE()
 	GOTO IMPORT_EXIT
 
 IMPORT_EXIT:
