@@ -187,6 +187,7 @@ BEGIN
 				,[dblMaintenanceAmount]
 				,[dblLicenseAmount]
 				,[dtmMaintenanceDate]
+				,[intTaxGroupId]
 				,[intConcurrencyId])
 			SELECT 	
 				 @InvoiceId					--[intInvoiceId]
@@ -211,6 +212,7 @@ BEGIN
 				,[dblMaintenanceAmount]		--[dblMaintenanceAmount]
 				,0							--[dblLicenseAmount]
 				,[dtmMaintenanceDate]		--[dtmMaintenanceDate]
+				,[intTaxGroupId]			--[intTaxGroupId]
 				,0							--[intConcurrencyId]
 			FROM
 				tblSOSalesOrderDetail
@@ -392,6 +394,7 @@ BEGIN
 				,[dblMaintenanceAmount]
 				,[dblLicenseAmount]
 				,[dtmMaintenanceDate]
+				,[intTaxGroupId]
 				,[intConcurrencyId])
 			SELECT 	
 				  @NewInvoiceId				--[intInvoiceId]
@@ -418,6 +421,7 @@ BEGIN
 				,0							--[dblMaintenanceAmount]
 				,[dblLicenseAmount]			--[dblLicenseAmount]
 				,[dtmMaintenanceDate]		--[dtmMaintenanceDate]
+				,[intTaxGroupId]			--[intTaxGroupId]
 				,0							--[intConcurrencyId]
 			FROM
 				tblSOSalesOrderDetail SOD
