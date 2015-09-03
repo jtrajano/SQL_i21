@@ -352,6 +352,7 @@ INSERT INTO [tblARInvoiceDetail]
 	,[intInventoryAccountId]
 	,[intContractHeaderId]
 	,[intContractDetailId]
+	,[intTaxGroupId] 
 	,[intConcurrencyId])
 SELECT
 	IV.[intInvoiceId]											--[intInvoiceId]
@@ -375,6 +376,7 @@ SELECT
 	,Acct.[intInventoryAccountId]								--[intInventoryAccountId]
 	,(select intContractHeaderId from vyuCTContractDetailView CT where CT.intContractDetailId = IE.intContractDetailId)   --[intContractHeaderId]
 	,IE.intContractDetailId                                     --[intContractDetailId]
+	,IE.[intTaxGroupId]											--[intTaxGroupId]
 	,1															--[intConcurrencyId]
 FROM
     @InvoiceEntries IE
