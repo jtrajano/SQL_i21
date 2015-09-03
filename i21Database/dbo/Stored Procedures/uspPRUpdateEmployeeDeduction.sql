@@ -22,21 +22,23 @@ BEGIN
 									FROM tblPREmployeeDeduction 
 									WHERE intTypeDeductionId = @intTypeDeductionId)
 
-	--Reinsert Deduction Taxes
-	INSERT INTO tblPREmployeeDeductionTax
-		(intEmployeeDeductionId
-		,intEmployeeTaxId
-		,intTypeTaxId
-		,intSort
-		,intConcurrencyId)
-	SELECT
-		(SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intTypeDeductionId = @intTypeDeductionId)
-		,(SELECT TOP 1 intEmployeeTaxId FROM tblPREmployeeTax WHERE intTypeTaxId = tblPRTypeDeductionTax.intTypeTaxId)
-		,intTypeTaxId
-		,intSort
-		,intConcurrencyId
-	FROM tblPRTypeDeductionTax
-	WHERE intTypeDeductionId = @intTypeDeductionId
-
+	IF EXISTS(SELECT intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intTypeDeductionId = @intTypeDeductionId)
+	BEGIN
+		--Reinsert Deduction Taxes
+		INSERT INTO tblPREmployeeDeductionTax
+			(intEmployeeDeductionId
+			,intEmployeeTaxId
+			,intTypeTaxId
+			,intSort
+			,intConcurrencyId)
+		SELECT
+			(SELECT TOP 1 intEmployeeDeductionId FROM tblPREmployeeDeduction WHERE intTypeDeductionId = @intTypeDeductionId)
+			,(SELECT TOP 1 intEmployeeTaxId FROM tblPREmployeeTax WHERE intTypeTaxId = tblPRTypeDeductionTax.intTypeTaxId)
+			,intTypeTaxId
+			,intSort
+			,intConcurrencyId
+		FROM tblPRTypeDeductionTax
+		WHERE intTypeDeductionId = @intTypeDeductionId
+	END
 END
 GO
