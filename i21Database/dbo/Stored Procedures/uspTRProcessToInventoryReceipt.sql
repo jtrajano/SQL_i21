@@ -115,7 +115,12 @@ BEGIN TRY
 			TR.intInventoryReceiptId,
 			TR.dblPurSurcharge,
 			TR.ysnFreightInPrice,
-			strActualCostId = NULL -- TODO: Pruthvi, kindly add the TR Transaction id here if Receipt is for Direct Shipment. 
+			(select strTransaction from tblTRTransportLoad TT
+                   join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
+			       join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
+                   where RR.strOrigin = 'Terminal' 
+			         and HH.strDestination = 'Customer' 
+			         and RR.intTransportReceiptId = TR.intTransportReceiptId ) as strActualCostId 
 	from	tblTRTransportLoad TL JOIN tblTRTransportReceipt TR 
 				ON TR.intTransportLoadId = TL.intTransportLoadId			
 			LEFT JOIN vyuCTContractDetailView CT 
