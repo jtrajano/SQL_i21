@@ -136,7 +136,7 @@ BEGIN TRY
 				51092
 				,11
 				,1
-				,@strLocationName
+				,@strLocationName,@strItemNo
 				)
 	END
 
@@ -470,7 +470,6 @@ BEGIN TRY
 		JOIN dbo.tblMFWorkOrderRecipeItem RI ON R.intRecipeId = RI.intRecipeId and R.intWorkOrderId=RI.intWorkOrderId 
 		WHERE R.intItemId = @intProductId
 			AND R.ysnActive = 1
-			AND R.intLocationId=@intLocationId 
 			AND intRecipeItemTypeId = 2
 			AND RI.intItemId = @intItemId
 

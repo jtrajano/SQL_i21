@@ -10,7 +10,8 @@
 	,dblPlannedQty NUMERIC(18, 6) NOT NULL
 	,intSequenceNo INT NOT NULL
 	,intCalendarDetailId INT NOT NULL
-	,CONSTRAINT PK_tblMFScheduleLineDetail_intScheduleLineDetailId PRIMARY KEY (intScheduleWorkOrderDetailId)
+	,intConcurrencyId INT NOT NULL, 
+    CONSTRAINT PK_tblMFScheduleLineDetail_intScheduleLineDetailId PRIMARY KEY (intScheduleWorkOrderDetailId)
 	,CONSTRAINT UQ_tblMFScheduleLineDetail_intScheduleLineId_intPlannedShiftId UNIQUE (
 		intScheduleWorkOrderId
 		,intPlannedShiftId

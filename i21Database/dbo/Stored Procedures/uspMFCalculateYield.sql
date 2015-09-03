@@ -212,7 +212,7 @@ BEGIN TRY
 			,@intStorageLocationId = I.intStorageLocationId
 		FROM tblMFProductionSummary F
 		JOIN @tblInputItem I ON I.intItemId = F.intItemId
-		WHERE F.intProductionSummaryId = @intProductionSummaryId and F.dblYieldQuantity<>0
+		WHERE F.intProductionSummaryId = @intProductionSummaryId 
 
 		IF @dblYieldQuantity > 0
 			AND NOT EXISTS (

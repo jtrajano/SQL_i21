@@ -2338,6 +2338,12 @@
     <Build Include="dbo\Tables\tblTFValidOriginDestinationState.sql" />
     <Build Include="dbo\Tables\tblTFValidLocalTax.sql" />
     <Build Include="dbo\Tables\tblTFValidAccountStatusCode.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetSchedule.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetYield.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFRescheduleWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSaveSchedule.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetManufacturingCellByPackType.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetManufacturingCellCountByPackType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

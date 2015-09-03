@@ -4,6 +4,7 @@
 	,intWorkOrderId INT NOT NULL
 	,intDuration INT NULL
 	,intExecutionOrder INT NOT NULL
+	,intStatusId int NULL
 	,intChangeoverDuration INT NULL
 	,intSetupDuration INT NULL
 	,dtmChangeoverStartDate DATETIME NULL
@@ -26,4 +27,5 @@
 	,CONSTRAINT [FK_tblMFScheduleWorkOrder_tblMFSchedule_intScheduleId] FOREIGN KEY (intScheduleId) REFERENCES [dbo].[tblMFSchedule](intScheduleId) ON DELETE CASCADE
 	,CONSTRAINT [FK_tblMFScheduleWorkOrder_tblMFWorkOrder_intWorkOrderId] FOREIGN KEY (intWorkOrderId) REFERENCES [dbo].[tblMFWorkOrder](intWorkOrderId)
 	,CONSTRAINT [FK_tblMFScheduleWorkOrder_tblMFShift_intShiftId] FOREIGN KEY (intPlannedShiftId) REFERENCES [dbo].[tblMFShift](intShiftId)
+	,CONSTRAINT [FK_tblMFScheduleWorkOrder_tblMFWorkOrderStatus_intStatusId] FOREIGN KEY ([intStatusId]) REFERENCES [tblMFWorkOrderStatus]([intStatusId]) 
 	)
