@@ -179,7 +179,8 @@ INSERT INTO [tblARInvoiceDetail]
 	,[intPerformerId]
 	,[intContractHeaderId]
     ,[intContractDetailId]
-    ,[intTicketId] 
+    ,[intTicketId]
+	,[intTaxGroupId]
 	,[intConcurrencyId])
            
 SELECT 
@@ -206,6 +207,7 @@ SELECT
 	,SOD.[intContractHeaderId]				--[intContractHeaderId]
     ,SOD.[intContractDetailId]				--[intContractDetailId]
     ,(CASE WHEN HD.[intSourceType] = 1 THEN SD.intSourceId ELSE NULL END) --[intTicketId]
+	,SOD.[intTaxGroupId]					--[intTaxGroupId]
 	,1		
 FROM
 	[tblICInventoryShipmentItem] SD
@@ -246,6 +248,7 @@ SELECT
 	,COD.[intContractHeaderId]				--[intContractHeaderId]
     ,COD.[intContractDetailId]				--[intContractDetailId]
     ,(CASE WHEN HD.[intSourceType] = 1 THEN SD.intSourceId ELSE NULL END) --[intTicketId]
+	,NULL									--[intTaxGroupId]
 	,1		
 FROM
 	[tblICInventoryShipmentItem] SD
@@ -290,6 +293,7 @@ SELECT
 	,NULL									--[intContractHeaderId]
     ,NULL									--[intContractDetailId]
     ,(CASE WHEN HD.[intSourceType] = 1 THEN SD.intSourceId ELSE NULL END) --[intTicketId]
+	,NULL									--[intTaxGroupId]
 	,1		
 FROM
 	[tblICInventoryShipmentItem] SD

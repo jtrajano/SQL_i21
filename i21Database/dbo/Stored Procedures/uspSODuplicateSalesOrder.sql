@@ -161,7 +161,8 @@ BEGIN
 	               ,[dblMaintenanceAmount]
 	               ,[dblLicenseAmount]
 				   ,[intContractHeaderId]
-				   ,[intContractDetailId]	
+				   ,[intContractDetailId]
+				   ,[intTaxGroupId] 	
 				)
 			SELECT 
 					@NewSalesOrderId
@@ -187,7 +188,8 @@ BEGIN
 	               ,[dblMaintenanceAmount]
 	               ,[dblLicenseAmount]
 				   ,[intContractHeaderId]
-				   ,[intContractDetailId]	
+				   ,[intContractDetailId]
+				   ,[intTaxGroupId] 	
 			FROM
 				[tblSOSalesOrderDetail]
 			WHERE

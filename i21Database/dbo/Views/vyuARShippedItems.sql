@@ -44,6 +44,7 @@ SELECT
 	,S.[strShipVia]						AS [strShipVia]
 	,SCT.[intTicketNumber]				AS [intTicketNumber]
 	,SCT.[intTicketId]					AS [intTicketId]
+	,SOD.[intTaxGroupId]				AS [intTaxGroupId]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -163,6 +164,7 @@ SELECT
 	,S.[strShipVia]						AS [strShipVia]
 	,NULL								AS [intTicketNumber]
 	,NULL								AS [intTicketId]
+	,SOD.[intTaxGroupId]				AS [intTaxGroupId]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -248,6 +250,7 @@ SELECT
 	,S.[strShipVia]						AS [strShipVia]
 	,NULL								AS [intTicketNumber]
 	,NULL								AS [intTicketId]
+	,SOD.[intTaxGroupId]				AS [intTaxGroupId]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -330,6 +333,7 @@ SELECT
 	,S.[strShipVia]						AS [strShipVia]
 	,SCT.[intTicketNumber]				AS [intTicketNumber]
 	,SCT.[intTicketId]					AS [intTicketId]
+	,NULL								AS [intTaxGroupId]
 	FROM
 		tblICInventoryShipmentItem ISI
 	INNER JOIN

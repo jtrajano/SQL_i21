@@ -166,7 +166,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 					FROM
 						@ItemTaxes
 					WHERE [Id] = @Id
-					
+									
 					
 					DECLARE @TaxableByOtherTaxes AS TABLE(
 						 Id						UNIQUEIDENTIFIER DEFAULT(NEWID())
@@ -198,7 +198,8 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 					FROM
 						@ItemTaxes
 					WHERE
-						[intInvoiceDetailId] = @InvoiceDetailId
+						Id <> @Id 
+						AND @TaxClassId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(strTaxableByOtherTaxes))						
 					
 					--Calculate Taxable Amount	
 					WHILE EXISTS(SELECT NULL FROM @TaxableByOtherTaxes)
@@ -227,24 +228,21 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 								
 							IF(@TaxTaxableByOtherTaxes IS NOT NULL AND RTRIM(LTRIM(@TaxTaxableByOtherTaxes)) <> '')
 							BEGIN
-								IF EXISTS(SELECT NULL FROM @TaxableByOtherTaxes WHERE [Id] = @TaxId AND [intTaxClassId] IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@TaxTaxableByOtherTaxes)))
+								IF(@TaxAdjustedTax = 1)
 								BEGIN
-									IF(@TaxAdjustedTax = 1)
-									BEGIN
-										SET @TaxableAmount = @TaxableAmount + @TaxAdjustedTax
-									END
-									ELSE
-										BEGIN
-											IF(@TaxCalculationMethod = 'Percentage')
-												BEGIN
-													SET @TaxableAmount = @TaxableAmount + ((@ItemPrice * @QtyShipped) * (@TaxRate/100.00))
-												END
-											ELSE
-												BEGIN
-													SET @TaxableAmount = @TaxableAmount + (@QtyShipped * @TaxRate)
-												END
-										END
+									SET @TaxableAmount = @TaxableAmount + @TaxAdjustedTax
 								END
+								ELSE
+									BEGIN
+										IF(@TaxCalculationMethod = 'Percentage')
+											BEGIN
+												SET @TaxableAmount = @TaxableAmount + ((@ItemPrice * @QtyShipped) * (@TaxRate/100.00))
+											END
+										ELSE
+											BEGIN
+												SET @TaxableAmount = (@ItemPrice * @QtyShipped) + (@QtyShipped * @TaxRate)
+											END
+									END
 							END 
 								
 							DELETE FROM @TaxableByOtherTaxes WHERE [Id] = @TaxId
@@ -260,29 +258,14 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 					IF(@CheckoffTax = 1)
 						SET @ItemTaxAmount = @ItemTaxAmount * -1;
 					
-					--IF(@Tax = @AdjustedTax AND @TaxAdjusted = 0)
-					--	BEGIN
-							UPDATE
-								@ItemTaxes
-							SET
-								 dblTax			= @ItemTaxAmount
-								,dblAdjustedTax = @ItemTaxAmount
-							WHERE
-								[Id] = @Id
-					--	END
-					--ELSE
-					--	BEGIN
-					--		UPDATE
-					--			@ItemTaxes
-					--		SET
-					--			 dblTax			= @ItemTaxAmount
-					--			,dblAdjustedTax = @AdjustedTax
-					--			,ysnTaxAdjusted	= 1
-					--		WHERE
-					--			[Id] = @Id
-					--	END
-					
-					
+					UPDATE
+						@ItemTaxes
+					SET
+						 dblTax			= @ItemTaxAmount
+						,dblAdjustedTax = @ItemTaxAmount
+					WHERE
+						[Id] = @Id
+									
 					SELECT
 						@TotalItemTax = @TotalItemTax + dblAdjustedTax
 					FROM

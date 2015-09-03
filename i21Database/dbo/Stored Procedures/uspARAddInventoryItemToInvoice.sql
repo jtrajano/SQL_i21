@@ -27,6 +27,7 @@
 	,@ItemSCInvoiceId				INT				= NULL
 	,@ItemSCInvoiceNumber			NVARCHAR(50)	= NULL
 	,@ItemServiceChargeAccountId	INT				= NULL
+	,@ItemTaxGroupId				INT				= NULL
 AS
 
 BEGIN
@@ -149,6 +150,7 @@ BEGIN TRY
 		,[intContractDetailId]
 		,[intTicketId]
 		,[ysnLeaseBilling]
+		,[intTaxGroupId] 
 		,[intConcurrencyId])
 	SELECT
 		 [intInvoiceId]						= @InvoiceId
@@ -188,6 +190,7 @@ BEGIN TRY
 		,[intContractDetailId]				= @ItemContractDetailId
 		,[intTicketId]						= @ItemTicketId
 		,[ysnLeaseBilling]					= @ItemLeaseBilling
+		,[intTaxGroupId]					= @ItemTaxGroupId
 		,1
 	FROM
 		tblICItem IC
