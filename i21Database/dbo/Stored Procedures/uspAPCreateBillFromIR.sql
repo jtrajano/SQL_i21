@@ -216,6 +216,7 @@ BEGIN
 		[dblQtyOrdered]				=	1,
 		[dblQtyReceived]			=	1,
 		[dblTax]					=	0,
+		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	A.intAccountId,
 		[dblTotal]					=	A.dblUnitCost,
 		[dblCost]					=	A.dblUnitCost,
