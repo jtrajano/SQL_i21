@@ -45,6 +45,7 @@ SELECT
 	,SCT.[intTicketNumber]				AS [intTicketNumber]
 	,SCT.[intTicketId]					AS [intTicketId]
 	,SOD.[intTaxGroupId]				AS [intTaxGroupId]
+	,TG.[strTaxGroup]					AS [strTaxGroup]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -71,6 +72,9 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	tblSMCompanyLocation CL
 		ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId] 
+LEFT OUTER JOIN
+	tblSMTaxGroup TG
+		ON SOD.[intTaxGroupId] = TG.intTaxGroupId 
 CROSS APPLY
 	(
 	SELECT 
@@ -165,6 +169,7 @@ SELECT
 	,NULL								AS [intTicketNumber]
 	,NULL								AS [intTicketId]
 	,SOD.[intTaxGroupId]				AS [intTaxGroupId]
+	,TG.[strTaxGroup]					AS [strTaxGroup]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -197,7 +202,10 @@ LEFT JOIN
 		ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
 LEFT OUTER JOIN
 	tblSMCompanyLocation CL
-		ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId]		
+		ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId]
+LEFT OUTER JOIN
+	tblSMTaxGroup TG
+		ON SOD.[intTaxGroupId] = TG.intTaxGroupId 				
 WHERE
 	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
 		FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
@@ -251,6 +259,7 @@ SELECT
 	,NULL								AS [intTicketNumber]
 	,NULL								AS [intTicketId]
 	,SOD.[intTaxGroupId]				AS [intTaxGroupId]
+	,TG.[strTaxGroup]					AS [strTaxGroup]
 FROM
 	tblSOSalesOrder SO
 INNER JOIN
@@ -281,7 +290,10 @@ LEFT JOIN
 		ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
 LEFT OUTER JOIN
 	tblSMCompanyLocation CL
-		ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId]		
+		ON SO.[intCompanyLocationId] = CL.[intCompanyLocationId]
+LEFT OUTER JOIN
+	tblSMTaxGroup TG
+		ON SOD.[intTaxGroupId] = TG.intTaxGroupId				
 WHERE
 	SOD.[intSalesOrderDetailId] NOT IN (SELECT ISNULL(tblARInvoiceDetail.[intSalesOrderDetailId],0) 
 		FROM tblARInvoiceDetail INNER JOIN tblARInvoice ON tblARInvoiceDetail.intInvoiceId = tblARInvoice.intInvoiceId 
@@ -334,6 +346,7 @@ SELECT
 	,SCT.[intTicketNumber]				AS [intTicketNumber]
 	,SCT.[intTicketId]					AS [intTicketId]
 	,NULL								AS [intTaxGroupId]
+	,NULL								AS [strTaxGroup]
 	FROM
 		tblICInventoryShipmentItem ISI
 	INNER JOIN
