@@ -2344,6 +2344,7 @@
     <Build Include="dbo\Stored Procedures\uspMFSaveSchedule.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetManufacturingCellByPackType.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetManufacturingCellCountByPackType.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPriceFixationSave.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

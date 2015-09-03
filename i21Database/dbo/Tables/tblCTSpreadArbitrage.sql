@@ -15,6 +15,7 @@
 	[dblSpreadAmount] NUMERIC(18,6) NOT NULL,
 	[intNoOfLots] INT NOT NULL,
 	[dblCommission] NUMERIC(18,6) NULL,
+	[dblTotalSpread] NUMERIC(18,6) NULL,
 	[strRemarks] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL ,
 	[dblCurrentBasis] NUMERIC(18,6) NOT NULL,
 	[dblExchangeBasedSpreadArbitrage] NUMERIC(18,6) NULL,
