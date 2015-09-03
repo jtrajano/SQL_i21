@@ -3,7 +3,7 @@ Ext.define('Inventory.view.LotDetailViewModel', {
     alias: 'viewmodel.iclotdetail',
 
     requires: [
-        'Inventory.store.BufferedUnitMeasure'
+        'Inventory.store.Lot'
     ],
 
     stores: {

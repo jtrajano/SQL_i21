@@ -2,62 +2,98 @@ Ext.define('Inventory.view.LotDetailViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.iclotdetail',
 
-    config: {
-        binding: {
-            grdLotDetail: {
-                colItemNo: 'strItemNo',
-                colDescription: 'strDescription',
-                colLocation: 'strLocationName',
-                colSubLocation: 'dblUnitOnHand',
-                colStorageLocation: 'dblUnitOnHand',
-                colLotNumber: 'dblUnitOnHand',
-                colQuantity: 'dblOrderCommitted',
-                colWeight: 'dblBackOrder',
-                cboUOM: 'dblLastCost',
-                colWeightPerQty: 'dblAverageCost',
-                colLastCost: 'dblBackOrder'
-            }
-        }
-    },
-
-    setupContext : function(options){
-        var me = this,
-            win = options.window,
-            store = Ext.create('Inventory.store.StorageUnitType', { pageSize: 1 });
-
+    setupContext : function(){
+        "use strict";
+        var win = this.getView();
         win.context = Ext.create('iRely.mvvm.Engine', {
-            window : win,
-            store  : store,
-            binding: me.config.binding
+            window: win,
+            store: Ext.create('Inventory.store.Lot'),
+            singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
+                grid: win.down('grid'),
+                title: 'View Lot Details',
+                columns: [
+                    {
+                        xtype: 'gridcolumn',
+                        itemId: 'colItemNo',
+                        dataIndex: 'strItemNo',
+                        text: 'Item No'
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        itemId: 'colDescription',
+                        dataIndex: 'strItemDescription',
+                        text: 'Description'
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        itemId: 'colLocation',
+                        dataIndex: 'strLocationName',
+                        text: 'Location Name'
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        itemId: 'colSubLocation',
+                        dataIndex: 'strSubLocationName',
+                        text: 'Sub Location'
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        itemId: 'colStorageLocation',
+                        dataIndex: 'strStorageLocation',
+                        text: 'Storage Location'
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        itemId: 'colLotNumber',
+                        dataIndex: 'strLotNumber',
+                        text: 'Lot Number'
+                    },
+                    {
+                        xtype: 'numbercolumn',
+                        summaryType: 'sum',
+                        itemId: 'colQuantity',
+                        dataIndex: 'dblQty',
+                        text: 'Quantity'
+                    },
+                    {
+                        xtype: 'numbercolumn',
+                        summaryType: 'sum',
+                        itemId: 'colWeight',
+                        dataIndex: 'dblWeight',
+                        text: 'Weight'
+                    },
+                    {
+                        xtype: 'gridcolumn',
+                        itemId: 'colUOM',
+                        dataIndex: 'strItemUOM',
+                        text: 'UOM'
+                    },
+                    {
+                        xtype: 'numbercolumn',
+                        summaryType: 'sum',
+                        itemId: 'colWeightPerQty',
+                        dataIndex: 'dblWeightPerQty',
+                        text: 'Weight Per Qty'
+                    },
+                    {
+                        xtype: 'numbercolumn',
+                        summaryType: 'sum',
+                        itemId: 'colLastCost',
+                        dataIndex: 'dblLastCost',
+                        text: 'Last Cost'
+                    }
+                ]
+            })
         });
 
         return win.context;
     },
 
-    show : function(config) {
+    show : function() {
         "use strict";
-
-        var me = this,
-            win = this.getView();
-
-        if (config) {
-            win.show();
-
-            var context = me.setupContext( {window : win} );
-
-            if (config.action === 'new') {
-                context.data.addRecord();
-            } else {
-                if (config.id) {
-                    config.filters = [{
-                        column: 'intStorageUnitTypeId',
-                        value: config.id
-                    }];
-                }
-                context.data.load({
-                    filters: config.filters
-                });
-            }
-        }
+        var me = this;
+        me.getView().show();
+        var context = me.setupContext();
+        context.data.load();
     }
 });
