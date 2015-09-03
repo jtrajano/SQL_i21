@@ -53,6 +53,7 @@ BEGIN TRY
 			,intInventoryReceiptId
 			,dblSurcharge
 			,ysnFreightInPrice
+			,intTaxGroupId
 	)	
 	select 
 			strReceiptType = CASE
@@ -113,7 +114,8 @@ BEGIN TRY
 			dblNet = TR.dblNet,
 			TR.intInventoryReceiptId,
 			TR.dblPurSurcharge,
-			TR.ysnFreightInPrice
+			TR.ysnFreightInPrice,			
+			TR.intTaxGroupId 
 	from	tblTRTransportLoad TL JOIN tblTRTransportReceipt TR 
 				ON TR.intTransportLoadId = TL.intTransportLoadId			
 			LEFT JOIN vyuCTContractDetailView CT 
