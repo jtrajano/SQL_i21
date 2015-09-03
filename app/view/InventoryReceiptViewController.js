@@ -1089,7 +1089,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 LocationId: masterRecord.get('intLocationId'),
                 TransactionDate: masterRecord.get('dtmReceiptDate'),
                 TransactionType: 'Purchase',
-                EntityId: masterRecord.get('intEntityVendorId')
+                EntityId: masterRecord.get('intEntityVendorId'),
+                TaxMasterId: detailRecord.get('intTaxGroupId')
             };
 
             if (reset)
@@ -1205,7 +1206,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         if(itemDetailTax.strCalculationMethod === 'Percentage'){
                             taxableAmount = (quantity * price) + ((quantity * price) * (itemDetailTax.dblRate/100));
                         }else{
-                            taxableAmount = (quantity * price) + itemDetailTax.dblRate;
+                            taxableAmount = (quantity * price) + (itemDetailTax.dblRate * quantity);
                         }
                     }
                 }
