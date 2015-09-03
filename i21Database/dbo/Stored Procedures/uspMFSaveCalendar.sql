@@ -1,8 +1,7 @@
-﻿CREATE PROCEDURE [dbo].uspMFSaveCalendar (@strXML NVARCHAR(MAX))
+﻿CREATE PROCEDURE [dbo].uspMFSaveCalendar (@strXML NVARCHAR(MAX),@intCalendarId INT OUTPUT,@intConcurrencyId INT OUTPUT)
 AS
-BEGIN TRY
-	DECLARE @intCalendarId INT
-		,@strCalendarName NVARCHAR(50)
+BEGIN Try
+	DECLARE @strCalendarName NVARCHAR(50)
 		,@intManufacturingCellId INT
 		,@dtmFromDate DATETIME
 		,@dtmToDate DATETIME
@@ -17,7 +16,6 @@ BEGIN TRY
 		,@dtmCurrentDate DATETIME
 		,@idoc INT
 		,@intLocationId INT
-		,@intConcurrencyId INT
 		,@ErrMsg NVARCHAR(MAX)
 		,@intCalendarDetailId INT
 		,@ysnHoliday BIT
