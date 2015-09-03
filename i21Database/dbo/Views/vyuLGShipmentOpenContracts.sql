@@ -3,23 +3,22 @@ AS
 	SELECT 	CD.intContractDetailId, 
 			CD.intContractHeaderId, 
 			CD.intContractSeq, 
-			CD.intItemId, 					IM.strDescription 			AS strItemDescription,
-			CD.dblQuantity												AS dblDetailQuantity,
-			CD.intUnitMeasureId, 			UM.strUnitMeasure,
-			CD.dblQuantity - IsNull((SELECT SUM (S.dblQuantity) from tblLGShipmentContractQty S Group By S.intContractDetailId Having CD.intContractDetailId = S.intContractDetailId), 0) AS dblUnShippedQuantity,
+			CD.intItemId, 					
+			CD.strItemDescription,
+			CD.dblDetailQuantity,
+			CD.intUnitMeasureId,
+			CD.strItemUOM as strUnitMeasure,
+			CD.dblDetailQuantity - IsNull((SELECT SUM (S.dblQuantity) from tblLGShipmentContractQty S Group By S.intContractDetailId Having CD.intContractDetailId = S.intContractDetailId), 0) AS dblUnShippedQuantity,
 			
-			CH.intContractTypeId intPurchaseSale,
-			CH.intEntityId,
-			CH.strContractNumber,
-			CH.dtmContractDate,
+			CD.intContractTypeId as intPurchaseSale,
+			CD.intEntityId,
+			CD.strContractNumber,
+			CD.dtmContractDate,
 			CD.intCompanyLocationId,
-			CH.intCommodityId,
-			CH.intPositionId,
-			CD.intItemUOMId
-	FROM 	tblCTContractDetail 		CD
-	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
-	JOIN	tblICItem				IM	ON	IM.intItemId				=	CD.intItemId
-	JOIN	tblICUnitMeasure		UM	ON	UM.intUnitMeasureId			=	CD.intUnitMeasureId
-
-	WHERE (CD.dblQuantity - IsNull((SELECT SUM (S.dblQuantity) from tblLGShipmentContractQty S Group By S.intContractDetailId Having CD.intContractDetailId = S.intContractDetailId), 0)) > 0 AND 
-			CH.intContractTypeId = 1
+			CD.intCommodityId,
+			CD.intPositionId,
+			CD.intItemUOMId,
+			CD.ysnAllowedToShow
+	FROM 	vyuCTContractDetailView 		CD
+	WHERE (CD.dblDetailQuantity - IsNull((SELECT SUM (S.dblQuantity) from tblLGShipmentContractQty S Group By S.intContractDetailId Having CD.intContractDetailId = S.intContractDetailId), 0)) > 0 AND 
+			CD.intContractTypeId = 1

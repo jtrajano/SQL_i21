@@ -3,18 +3,17 @@ AS
 	SELECT 	CD.intContractDetailId, 
 			CD.intContractHeaderId, 
 			CD.intContractSeq, 
-			CD.intItemId, 					IM.strDescription 			AS strItemDescription,
-			CD.dblQuantity												AS dblDetailQuantity,
-			CD.intUnitMeasureId, 			UM.strUnitMeasure,
-			CD.dblQuantity - IsNull((SELECT SUM (SI.dblQuantity) from tblLGShippingInstructionContractQty SI Group By SI.intContractDetailId Having CD.intContractDetailId = SI.intContractDetailId), 0) AS dblUnShippedQuantity,
+			CD.intItemId,
+			CD.strItemDescription,
+			CD.dblDetailQuantity,
+			CD.intUnitMeasureId,
+			CD.strItemUOM as strUnitMeasure,
+			CD.dblDetailQuantity - IsNull((SELECT SUM (SI.dblQuantity) from tblLGShippingInstructionContractQty SI Group By SI.intContractDetailId Having CD.intContractDetailId = SI.intContractDetailId), 0) AS dblUnShippedQuantity,
 			
-			CH.intContractTypeId intPurchaseSale,
-			CH.intEntityId,
-			CH.strContractNumber,
-			CH.dtmContractDate
-	FROM tblCTContractDetail 		CD
-	JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId
-	JOIN	tblICItem				IM	ON	IM.intItemId				=	CD.intItemId
-	JOIN	tblICUnitMeasure		UM	ON	UM.intUnitMeasureId			=	CD.intUnitMeasureId
-
-	WHERE (CD.dblQuantity - IsNull((select sum (SI.dblQuantity) from tblLGShippingInstructionContractQty SI Group By SI.intContractDetailId Having CD.intContractDetailId = SI.intContractDetailId), 0)) > 0	
+			CD.intContractTypeId AS intPurchaseSale,
+			CD.intEntityId,
+			CD.strContractNumber,
+			CD.dtmContractDate,
+			CD.ysnAllowedToShow
+	FROM vyuCTContractDetailView 		CD
+	WHERE (CD.dblDetailQuantity - IsNull((select sum (SI.dblQuantity) from tblLGShippingInstructionContractQty SI Group By SI.intContractDetailId Having CD.intContractDetailId = SI.intContractDetailId), 0)) > 0	
