@@ -25,6 +25,7 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'i21.store.UserListBuffered',
         'i21.store.CompanyLocationSubLocationBuffered',
         'i21.store.CountryBuffered',
+        'i21.store.TaxGroupBuffered',
         'ContractManagement.store.ContractDetailViewBuffered',
         'ContractManagement.store.ContractHeaderViewBuffered',
         'Logistics.store.BufferedShipmentReceiptContracts',
@@ -167,6 +168,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         itemUOM: {
             type: 'icbuffereditempricingview'
+        },
+        taxGroup: {
+            type: 'smtaxgroupbuffered'
         },
         packageType: {
             type: 'icbufferedpackeduom'
@@ -577,11 +581,11 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         },
         readOnlyAccrue: function (get) {
             switch (get('grdCharges.selection.ysnAccrue')) {
-                case false:
-                    return true;
+                case true:
+                    return false;
                     break;
                 default:
-                    return false;
+                    return true;
                     break;
             }
         },

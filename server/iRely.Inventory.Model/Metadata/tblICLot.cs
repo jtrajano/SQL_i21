@@ -65,7 +65,6 @@ namespace iRely.Inventory.Model
         public DateTime? dtmDateCreated { get; set; }
         public int? intCreatedUserId { get; set; }
 
-        public tblICInventoryReceiptItemLot tblICInventoryReceiptItemLot { get; set; }
         public ICollection<tblICInventoryShipmentItemLot> tblICInventoryShipmentItemLots { get; set; }
 
         public ICollection<tblICInventoryAdjustmentDetail> tblICInventoryAdjustmentDetails { get; set; }

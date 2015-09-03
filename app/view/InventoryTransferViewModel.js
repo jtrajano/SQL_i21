@@ -48,6 +48,10 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
                 {
                     intSourceType: 2,
                     strSourceType: 'Inbound Shipment'
+                },
+                {
+                    intSourceType: 3,
+                    strSourceType: 'Transports'
                 }
             ],
             fields: {

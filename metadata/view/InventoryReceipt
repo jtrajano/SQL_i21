@@ -2272,6 +2272,71 @@
                                                                     ]
                                                                 },
                                                                 {
+                                                                    "type": "Ext.grid.column.Column",
+                                                                    "reference": {
+                                                                        "name": "columns",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "dataIndex": "strTax",
+                                                                        "itemId": "colTaxGroup",
+                                                                        "text": "Tax Group",
+                                                                        "width": 85
+                                                                    },
+                                                                    "name": "MyColumn8",
+                                                                    "designerId": "e0c6b20f-eb82-471a-bc29-b0ed7a587103",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.ComboBox",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "columns": [
+                                                                                    "[",
+                                                                                    "{",
+                                                                                    "dataIndex: 'intTaxGroupId',",
+                                                                                    "dataType: 'numeric',",
+                                                                                    "hidden: true",
+                                                                                    "},",
+                                                                                    "{",
+                                                                                    "dataIndex: 'strTaxGroup',",
+                                                                                    "dataType: 'string',",
+                                                                                    "text: 'Tax Group',",
+                                                                                    "flex: 1",
+                                                                                    "},",
+                                                                                    "{",
+                                                                                    "dataIndex: 'strDescription',",
+                                                                                    "dataType: 'string',",
+                                                                                    "text: 'Description',",
+                                                                                    "flex: 1",
+                                                                                    "}",
+                                                                                    "]"
+                                                                                ],
+                                                                                "designer|createAlias": "gridcombobox",
+                                                                                "displayField": "strTaxGroup",
+                                                                                "itemId": "cboTaxGroup",
+                                                                                "valueField": "strTaxGroup"
+                                                                            },
+                                                                            "name": "MyComboBox11",
+                                                                            "configAlternates": {
+                                                                                "columns": "array"
+                                                                            },
+                                                                            "designerId": "f292e95d-3bd5-4e23-b4c1-7783681bea49",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "columns",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
                                                                     "type": "Ext.grid.column.Number",
                                                                     "reference": {
                                                                         "name": "columns",
