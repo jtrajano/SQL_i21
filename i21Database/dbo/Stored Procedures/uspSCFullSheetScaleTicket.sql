@@ -66,7 +66,7 @@ SET ANSI_WARNINGS OFF
 			ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +
 			ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')
 			AS	strA,
-			LTRIM(RTRIM(EY.strName)) + ', ' + CHAR(13)+CHAR(10) +
+			LTRIM(RTRIM(EY.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
 			ISNULL(LTRIM(RTRIM(EL.strAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
 			ISNULL(LTRIM(RTRIM(EL.strCity)),'') + 
 			ISNULL(', '+CASE WHEN LTRIM(RTRIM(EL.strState)) = '' THEN NULL ELSE LTRIM(RTRIM(EL.strState)) END,'') + 
@@ -96,7 +96,7 @@ SET ANSI_WARNINGS OFF
 			TIC.strTruckName AS Truck,
 			TIC.strCustomerReference AS CustomerReference,
 			TIC.strDriverName AS Driver,
-			EY.strNumber AS EntityNumber,
+			EY.strEntityNumber AS EntityNumber,
 			SP.strSplitNumber AS Split,
 			ITM.strItemNo AS Item,
 			TIC.strScaleOperatorUser AS Weigher,
