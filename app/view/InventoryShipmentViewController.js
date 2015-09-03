@@ -155,6 +155,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             btnRemoveItem: {
                 hidden: '{current.ysnPosted}'
             },
+            btnQuality: {
+                hidden: '{current.ysnPosted}'
+            },
             grdInventoryShipment: {
                 readOnly: '{current.ysnPosted}',
                 colOrderNumber: {
@@ -326,7 +329,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 colGrossWeight: 'dblGrossWeight',
                 colTareWeight: 'dblTareWeight',
                 colNetWeight: 'dblNetWeight',
-                colStorageLocation: 'strStorageLocation',
+                colLotStorageLocation: 'strStorageLocation',
                 colWarehouseCargoNumber: 'strWarehouseCargoNumber'
             },
 
@@ -340,7 +343,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 readOnly: '{current.ysnPosted}',
                 colContract: {
                     hidden: '{hideContractColumn}',
-                    dataIndex: 'intContractNumber',
+                    dataIndex: 'strContractNumber',
                     editor: {
                         origValueField: 'intContractHeaderId',
                         origUpdateField: 'intContractId',
@@ -388,29 +391,19 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     }
                 },
                 colChargeAmount: 'dblAmount',
-                colAllocateCostBy: {
-                    dataIndex: 'strAllocateCostBy',
-                    editor: {
-                        readOnly: '{checkInventoryCost}',
-                        store: '{allocateBy}'
-                    }
-                },
-                colPrice: 'ysnPrice',
-                colCostBilledBy: {
-                    dataIndex: 'strCostBilledBy',
-                    editor: {
-                        store: '{billedBy}'
-                    }
+                colAccrue: {
+                    dataIndex: 'ysnAccrue'
                 },
                 colCostVendor: {
                     dataIndex: 'strVendorId',
                     editor: {
-                        readOnly: '{readOnlyCostBilledBy}',
+                        readOnly: '{readOnlyAccrue}',
                         origValueField: 'intEntityVendorId',
                         origUpdateField: 'intEntityVendorId',
                         store: '{vendor}'
                     }
-                }
+                },
+                colPrice: 'ysnPrice'
             }
         }
     },
@@ -655,6 +648,11 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             current.set('strUnitType', records[0].get('strIssueUOMType'));
             current.set('intOwnershipType', 1);
             current.set('strOwnershipType', 'Own');
+
+            current.set('intSubLocationId', records[0].get('intSubLocationId'));
+            current.set('strSubLocationName', records[0].get('strSubLocationName'));
+            current.set('intStorageLocationId', records[0].get('intStorageLocationId'));
+            current.set('strStorageLocationName', records[0].get('strStorageLocationName'));
         }
     },
 
@@ -1006,7 +1004,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 matchFieldWidth: false,
                 columns: [
                     {
-                        dataIndex: 'intContractNumber',
+                        dataIndex: 'strContractNumber',
                         dataType: 'string',
                         text: 'Contract Number',
                         flex: 1
@@ -1120,8 +1118,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 ],
                 pickerWidth: 600,
                 itemId: 'cboOrderNumber',
-                displayField: 'intContractNumber',
-                valueField: 'intContractNumber',
+                displayField: 'strContractNumber',
+                valueField: 'strContractNumber',
                 store: win.viewModel.storeInfo.salesContract,
                 defaultFilters: [{
                     column: 'strContractType',
@@ -1468,16 +1466,25 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 current.set('strCostMethod', 'Percentage');
             }
         }
-        else if (combo.itemId === 'cboCostBilledBy') {
-            switch (record.get('strDescription')) {
-                case 'Third Party':
+    },
 
-                    break;
-                default:
-                    current.set('intEntityVendorId', null);
-                    current.set('strVendorId', null);
-                    break;
+    onQualityClick: function(button, e, eOpts) {
+        var grid = button.up('grid');
+
+        var selected = grid.getSelectionModel().getSelection();
+
+        if (selected) {
+            if (selected.length > 0){
+                var current = selected[0];
+                if (!current.dummy)
+                    iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', { strSourceType: 'Inventory Shipment', intTicketFileId: current.get('intInventoryShipmentItemId') });
             }
+            else {
+                iRely.Functions.showErrorDialog('Please select an Item to view.');
+            }
+        }
+        else {
+            iRely.Functions.showErrorDialog('Please select an Item to view.');
         }
     },
 
@@ -1528,8 +1535,8 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             "#cboOtherCharge": {
                 select: this.onChargeSelect
             },
-            "#cboCostBilledBy": {
-                select: this.onChargeSelect
+            "#btnQuality": {
+                click: this.onQualityClick
             }
         })
     }

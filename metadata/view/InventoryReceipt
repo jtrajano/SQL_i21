@@ -1492,6 +1492,42 @@
                                                                             "codeClass": null,
                                                                             "userConfig": {
                                                                                 "icon": null,
+                                                                                "iconCls": "small-view",
+                                                                                "itemId": "btnQuality",
+                                                                                "layout|flex": null,
+                                                                                "tabIndex": -1,
+                                                                                "text": "Quality"
+                                                                            },
+                                                                            "name": "MyButton42",
+                                                                            "designerId": "4a07c3e9-046f-47b0-acb7-863b7d4c1c51"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.button.Button",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "icon": null,
+                                                                                "iconCls": "small-view",
+                                                                                "itemId": "btnTaxDetails",
+                                                                                "layout|flex": null,
+                                                                                "tabIndex": -1,
+                                                                                "text": "Tax Details"
+                                                                            },
+                                                                            "name": "MyButton43",
+                                                                            "designerId": "0eb6f32a-a5ce-48e9-b10a-a8a8ee4900eb"
+                                                                        },
+                                                                        {
+                                                                            "type": "Ext.button.Button",
+                                                                            "reference": {
+                                                                                "name": "items",
+                                                                                "type": "array"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "icon": null,
                                                                                 "iconCls": "small-delete",
                                                                                 "itemId": "btnRemoveInventoryReceipt",
                                                                                 "layout|flex": null,
@@ -1871,13 +1907,11 @@
                                                                                     "{",
                                                                                     "dataIndex: 'intItemId',",
                                                                                     "dataType: 'numeric',",
-                                                                                    "text: 'Item Id',",
                                                                                     "hidden: true",
                                                                                     "},",
                                                                                     "{",
                                                                                     "dataIndex: 'intLocationId',",
                                                                                     "dataType: 'numeric',",
-                                                                                    "text: 'Location Id',",
                                                                                     "hidden: true",
                                                                                     "},",
                                                                                     "{",
@@ -1919,37 +1953,51 @@
                                                                                     "{",
                                                                                     "dataIndex: 'strReceiveUOM',",
                                                                                     "dataType: 'string',",
-                                                                                    "text: 'Receive UOM',",
                                                                                     "hidden: true",
                                                                                     "},",
                                                                                     "{",
                                                                                     "dataIndex: 'strStockUOM',",
                                                                                     "dataType: 'string',",
-                                                                                    "text: 'Stock UOM',",
                                                                                     "hidden: true",
                                                                                     "},",
                                                                                     "{",
                                                                                     "dataIndex: 'dblLastCost',",
                                                                                     "dataType: 'float',",
-                                                                                    "text: 'Last Cost',",
                                                                                     "hidden: true",
                                                                                     "},",
                                                                                     "{",
                                                                                     "dataIndex: 'dblReceiveUOMConvFactor',",
                                                                                     "dataType: 'float',",
-                                                                                    "text: 'Receive UOM Conversion Factor',",
                                                                                     "hidden: true",
                                                                                     "},",
                                                                                     "{",
                                                                                     "dataIndex: 'intReceiveUOMId',",
                                                                                     "dataType: 'numeric',",
-                                                                                    "text: 'Receive UOM Id',",
                                                                                     "hidden: true",
                                                                                     "},",
                                                                                     "{",
                                                                                     "dataIndex: 'intStockUOMId',",
                                                                                     "dataType: 'numeric',",
-                                                                                    "text: 'Stock UOM Id',",
+                                                                                    "hidden: true",
+                                                                                    "},",
+                                                                                    "{",
+                                                                                    "dataIndex: 'intSubLocationId',",
+                                                                                    "dataType: 'numeric',",
+                                                                                    "hidden: true",
+                                                                                    "},",
+                                                                                    "{",
+                                                                                    "dataIndex: 'strSubLocationName',",
+                                                                                    "dataType: 'string',",
+                                                                                    "hidden: true",
+                                                                                    "},",
+                                                                                    "{",
+                                                                                    "dataIndex: 'intStorageLocationId',",
+                                                                                    "dataType: 'numeric',",
+                                                                                    "hidden: true",
+                                                                                    "},",
+                                                                                    "{",
+                                                                                    "dataIndex: 'strStorageLocationName',",
+                                                                                    "dataType: 'string',",
                                                                                     "hidden: true",
                                                                                     "}",
                                                                                     "]"
@@ -2111,6 +2159,11 @@
                                                                                     "\t\tdataType: 'boolean',",
                                                                                     "\t\ttext: 'Stock Unit',",
                                                                                     "\t\tflex: 1",
+                                                                                    "\t},",
+                                                                                    "\t{",
+                                                                                    "\t\tdataIndex: 'dblLastCost',",
+                                                                                    "\t\tdataType: 'float',",
+                                                                                    "\t\thidden: true",
                                                                                     "\t}",
                                                                                     "]"
                                                                                 ],
@@ -2187,7 +2240,7 @@
                                                                         "align": null,
                                                                         "dataIndex": "dblUnitCost",
                                                                         "dataType": null,
-                                                                        "format": null,
+                                                                        "format": "0,000.00####",
                                                                         "itemId": "colUnitCost",
                                                                         "text": "Unit Cost",
                                                                         "width": 85
@@ -2215,6 +2268,71 @@
                                                                             },
                                                                             "name": "MyNumberField12",
                                                                             "designerId": "21443f4e-1088-4fc0-abfb-03d159b6eeb5"
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "type": "Ext.grid.column.Column",
+                                                                    "reference": {
+                                                                        "name": "columns",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "dataIndex": "strTax",
+                                                                        "itemId": "colTaxGroup",
+                                                                        "text": "Tax Group",
+                                                                        "width": 85
+                                                                    },
+                                                                    "name": "MyColumn8",
+                                                                    "designerId": "e0c6b20f-eb82-471a-bc29-b0ed7a587103",
+                                                                    "cn": [
+                                                                        {
+                                                                            "type": "Ext.form.field.ComboBox",
+                                                                            "reference": {
+                                                                                "name": "editor",
+                                                                                "type": "object"
+                                                                            },
+                                                                            "codeClass": null,
+                                                                            "userConfig": {
+                                                                                "columns": [
+                                                                                    "[",
+                                                                                    "{",
+                                                                                    "dataIndex: 'intTaxGroupId',",
+                                                                                    "dataType: 'numeric',",
+                                                                                    "hidden: true",
+                                                                                    "},",
+                                                                                    "{",
+                                                                                    "dataIndex: 'strTaxGroup',",
+                                                                                    "dataType: 'string',",
+                                                                                    "text: 'Tax Group',",
+                                                                                    "flex: 1",
+                                                                                    "},",
+                                                                                    "{",
+                                                                                    "dataIndex: 'strDescription',",
+                                                                                    "dataType: 'string',",
+                                                                                    "text: 'Description',",
+                                                                                    "flex: 1",
+                                                                                    "}",
+                                                                                    "]"
+                                                                                ],
+                                                                                "designer|createAlias": "gridcombobox",
+                                                                                "displayField": "strTaxGroup",
+                                                                                "itemId": "cboTaxGroup",
+                                                                                "valueField": "strTaxGroup"
+                                                                            },
+                                                                            "name": "MyComboBox11",
+                                                                            "configAlternates": {
+                                                                                "columns": "array"
+                                                                            },
+                                                                            "designerId": "f292e95d-3bd5-4e23-b4c1-7783681bea49",
+                                                                            "customConfigs": [
+                                                                                {
+                                                                                    "group": "(Custom Properties)",
+                                                                                    "name": "columns",
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ]
                                                                         }
                                                                     ]
                                                                 },
@@ -2524,7 +2642,7 @@
                                                                     },
                                                                     "codeClass": null,
                                                                     "userConfig": {
-                                                                        "dataIndex": "strDescription",
+                                                                        "dataIndex": "strStorageLocationName",
                                                                         "itemId": "colStorageLocation",
                                                                         "text": "Storage Location",
                                                                         "width": 120
@@ -2805,41 +2923,6 @@
                                                                     },
                                                                     "name": "MyColumn7",
                                                                     "designerId": "668bcfec-389d-4c2f-b424-0bea283da0f3"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.grid.column.Action",
-                                                                    "reference": {
-                                                                        "name": "columns",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "align": "center",
-                                                                        "altText": "View",
-                                                                        "itemId": "colTaxDetails",
-                                                                        "menuText": "Tax Details",
-                                                                        "text": "Tax Details"
-                                                                    },
-                                                                    "name": "MyActionColumn",
-                                                                    "designerId": "1f7a0973-7d01-4365-943f-27b56645467e",
-                                                                    "cn": [
-                                                                        {
-                                                                            "type": "actioncolumnitem",
-                                                                            "reference": {
-                                                                                "name": "items",
-                                                                                "type": "array"
-                                                                            },
-                                                                            "codeClass": null,
-                                                                            "userConfig": {
-                                                                                "altText": "View",
-                                                                                "designer|displayName": "btnViewTaxDetail",
-                                                                                "iconCls": "small-view",
-                                                                                "tooltip": "View Tax Details"
-                                                                            },
-                                                                            "name": "MyActionColumnItem1",
-                                                                            "designerId": "26125c47-1d73-4259-9d5f-602cbd039a48"
-                                                                        }
-                                                                    ]
                                                                 },
                                                                 {
                                                                     "type": "Ext.grid.plugin.CellEditing",
@@ -4405,6 +4488,24 @@
                                                             "designerId": "fb0f5848-4a90-43aa-ac34-d1edbf65c90c"
                                                         },
                                                         {
+                                                            "type": "Ext.button.Button",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "icon": null,
+                                                                "iconCls": "small-calculator",
+                                                                "itemId": "btnCalculateCharges",
+                                                                "layout|flex": null,
+                                                                "tabIndex": -1,
+                                                                "text": "Calculate"
+                                                            },
+                                                            "name": "MyButton8",
+                                                            "designerId": "51028879-90a1-4d8d-a1b8-fb85b197cb79"
+                                                        },
+                                                        {
                                                             "type": "Ext.toolbar.Separator",
                                                             "reference": {
                                                                 "name": "items",
@@ -4459,23 +4560,23 @@
                                                             "userConfig": {
                                                                 "columns": [
                                                                     "[",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'intContractNumber',",
-                                                                    "\t\tdataType: 'string',",
-                                                                    "\t\ttext: 'Contract Number',",
-                                                                    "\t\tflex: 1",
-                                                                    "\t},",
-                                                                    "\t{",
-                                                                    "\t\tdataIndex: 'intContractHeaderId',",
-                                                                    "\t\tdataType: 'numeric',",
-                                                                    "\t\thidden: true",
-                                                                    "\t},",
+                                                                    "{",
+                                                                    "dataIndex: 'strContractNumber',",
+                                                                    "dataType: 'string',",
+                                                                    "text: 'Contract Number',",
+                                                                    "flex: 1",
+                                                                    "},",
+                                                                    "{",
+                                                                    "dataIndex: 'intContractHeaderId',",
+                                                                    "dataType: 'numeric',",
+                                                                    "hidden: true",
+                                                                    "},",
                                                                     "]"
                                                                 ],
                                                                 "designer|createAlias": "gridcombobox",
-                                                                "displayField": "intContractNumber",
+                                                                "displayField": "strContractNumber",
                                                                 "itemId": "cboContract",
-                                                                "valueField": "intContractNumber"
+                                                                "valueField": "strContractNumber"
                                                             },
                                                             "name": "MyComboBox22",
                                                             "configAlternates": {
@@ -4500,7 +4601,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "flex": 1,
+                                                        "flex": 1.2,
                                                         "itemId": "colOtherCharge",
                                                         "text": "Other Charges"
                                                     },
@@ -4565,7 +4666,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "flex": 1,
+                                                        "flex": 1.2,
                                                         "itemId": "colInventoryCost",
                                                         "text": "Inventory Cost"
                                                     },
@@ -4792,7 +4893,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "flex": 1,
+                                                        "flex": 1.2,
                                                         "itemId": "colAllocateCostBy",
                                                         "text": "Allocate Cost By"
                                                     },
@@ -4812,7 +4913,7 @@
                                                                     "\t{",
                                                                     "        dataIndex: 'strDescription',",
                                                                     "        dataType: 'string',",
-                                                                    "        text: 'Allocate By',",
+                                                                    "        text: 'Allocate Cost By',",
                                                                     "        flex: 1",
                                                                     "    }",
                                                                     "]"
@@ -4838,57 +4939,19 @@
                                                     ]
                                                 },
                                                 {
-                                                    "type": "Ext.grid.column.Column",
+                                                    "type": "Ext.grid.column.Check",
                                                     "reference": {
                                                         "name": "columns",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "flex": 1,
-                                                        "itemId": "colCostBilledBy",
-                                                        "text": "Cost Billed By"
+                                                        "flex": 0.7,
+                                                        "itemId": "colAccrue",
+                                                        "text": "Accrue"
                                                     },
-                                                    "name": "MyColumn58",
-                                                    "designerId": "811ab515-1f3a-4953-9b04-a0354e778ab7",
-                                                    "cn": [
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "editor",
-                                                                "type": "object"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "columns": [
-                                                                    "[",
-                                                                    "\t{",
-                                                                    "        dataIndex: 'strDescription',",
-                                                                    "        dataType: 'string',",
-                                                                    "        text: 'Billed By',",
-                                                                    "        flex: 1",
-                                                                    "    }",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strDescription",
-                                                                "itemId": "cboCostBilledBy",
-                                                                "valueField": "strDescription"
-                                                            },
-                                                            "name": "MyComboBox85",
-                                                            "configAlternates": {
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "bf19cc5f-d25b-4cc9-a589-4a510b6bbeb0",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
-                                                        }
-                                                    ]
+                                                    "name": "MyCheck",
+                                                    "designerId": "811ab515-1f3a-4953-9b04-a0354e778ab7"
                                                 },
                                                 {
                                                     "type": "Ext.grid.column.Column",
@@ -4954,6 +5017,21 @@
                                                             ]
                                                         }
                                                     ]
+                                                },
+                                                {
+                                                    "type": "Ext.grid.column.Check",
+                                                    "reference": {
+                                                        "name": "columns",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "flex": 0.7,
+                                                        "itemId": "colPrice",
+                                                        "text": "Price"
+                                                    },
+                                                    "name": "MyCheck5",
+                                                    "designerId": "58de2b34-7d00-4617-a58d-2d6fdad77514"
                                                 },
                                                 {
                                                     "type": "Ext.grid.View",

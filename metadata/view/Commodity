@@ -1219,7 +1219,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter113",
+                                                            "name": "filter133",
                                                             "designerId": "cfe7d6a1-9373-4396-b427-061b4323a19b",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -2566,7 +2566,7 @@
                                                 "designer|createAlias": "advancefiltergrid",
                                                 "includeFullTextSearch": false,
                                                 "itemId": "grdProductLine",
-                                                "layout|flex": 1,
+                                                "layout|flex": 2,
                                                 "layout|margins": null,
                                                 "margin": "0 0 0 5",
                                                 "title": "Product Lines"
@@ -2698,6 +2698,65 @@
                                                     ]
                                                 },
                                                 {
+                                                    "type": "Ext.grid.column.Check",
+                                                    "reference": {
+                                                        "name": "columns",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "itemId": "colDeltaHedge",
+                                                        "text": "Delta Hedge"
+                                                    },
+                                                    "name": "MyCheck11",
+                                                    "designerId": "1cf4b359-6f09-4288-8362-9d0917132f81",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.Checkbox",
+                                                            "reference": {
+                                                                "name": "editor",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "itemId": "chkDeltaHedge"
+                                                            },
+                                                            "name": "MyCheckbox64",
+                                                            "designerId": "9a42d007-4a16-44a9-b78a-104d1b4a335e"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.grid.column.Number",
+                                                    "reference": {
+                                                        "name": "columns",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "itemId": "colDeltaPercent",
+                                                        "text": "Delta %"
+                                                    },
+                                                    "name": "MyNumberColumn57",
+                                                    "designerId": "e64b5845-cf2d-4fed-a9c9-aacfba40df94",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.Number",
+                                                            "reference": {
+                                                                "name": "editor",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "designer|createAlias": "numberfield",
+                                                                "formItemCls": "txtDeltaPercent"
+                                                            },
+                                                            "name": "MyNumberField70",
+                                                            "designerId": "eef8f92a-9a32-47de-85ab-85de9f51298c"
+                                                        }
+                                                    ]
+                                                },
+                                                {
                                                     "type": "Ext.grid.View",
                                                     "reference": {
                                                         "name": "viewConfig",
@@ -2736,22 +2795,6 @@
                                                     "designerId": "074668ee-5cc6-4a68-a786-0f8b8c64e656"
                                                 }
                                             ]
-                                        },
-                                        {
-                                            "type": "Ext.container.Container",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "designer|displayName": "container",
-                                                "layout|flex": 1,
-                                                "layout|margins": null,
-                                                "margin": "0 0 0 5"
-                                            },
-                                            "name": "MyContainer45",
-                                            "designerId": "64eca57d-d2de-4349-be63-c99a76e63096"
                                         }
                                     ]
                                 }
@@ -2856,7 +2899,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter114",
+                                                    "name": "filter134",
                                                     "designerId": "eba518f5-6e1c-4310-b412-16897ab2e39e",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3229,7 +3272,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter115",
+                                                    "name": "filter135",
                                                     "designerId": "e9ad3d80-e267-4067-aa45-29a3069f9395",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3518,7 +3561,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter116",
+                                                    "name": "filter136",
                                                     "designerId": "d3a363a5-85c8-4ee8-97e8-07576d381b52",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3800,7 +3843,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter117",
+                                                    "name": "filter137",
                                                     "designerId": "27709837-db86-47ab-a575-7586b5b5aef3",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4026,7 +4069,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging14",
+                    "name": "statusbarpaging15",
                     "designerId": "fca9ca25-ac5c-43f8-9dd2-ce604fae6ecb",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

@@ -29,7 +29,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
         'Ext.grid.Panel',
         'Ext.selection.CheckboxModel',
         'Ext.grid.column.Number',
-        'Ext.grid.column.Action',
         'Ext.grid.plugin.CellEditing',
         'Ext.grid.View',
         'Ext.grid.feature.Summary',
@@ -729,6 +728,20 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                     {
                                                                                         xtype: 'button',
                                                                                         tabIndex: -1,
+                                                                                        itemId: 'btnQuality',
+                                                                                        iconCls: 'small-view',
+                                                                                        text: 'Quality'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        tabIndex: -1,
+                                                                                        itemId: 'btnTaxDetails',
+                                                                                        iconCls: 'small-view',
+                                                                                        text: 'Tax Details'
+                                                                                    },
+                                                                                    {
+                                                                                        xtype: 'button',
+                                                                                        tabIndex: -1,
                                                                                         itemId: 'btnRemoveInventoryReceipt',
                                                                                         iconCls: 'small-delete',
                                                                                         text: 'Remove'
@@ -985,13 +998,11 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         {
                                                                                             dataIndex: 'intItemId',
                                                                                             dataType: 'numeric',
-                                                                                            text: 'Item Id',
                                                                                             hidden: true
                                                                                         },
                                                                                         {
                                                                                             dataIndex: 'intLocationId',
                                                                                             dataType: 'numeric',
-                                                                                            text: 'Location Id',
                                                                                             hidden: true
                                                                                         },
                                                                                         {
@@ -1033,37 +1044,51 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         {
                                                                                             dataIndex: 'strReceiveUOM',
                                                                                             dataType: 'string',
-                                                                                            text: 'Receive UOM',
                                                                                             hidden: true
                                                                                         },
                                                                                         {
                                                                                             dataIndex: 'strStockUOM',
                                                                                             dataType: 'string',
-                                                                                            text: 'Stock UOM',
                                                                                             hidden: true
                                                                                         },
                                                                                         {
                                                                                             dataIndex: 'dblLastCost',
                                                                                             dataType: 'float',
-                                                                                            text: 'Last Cost',
                                                                                             hidden: true
                                                                                         },
                                                                                         {
                                                                                             dataIndex: 'dblReceiveUOMConvFactor',
                                                                                             dataType: 'float',
-                                                                                            text: 'Receive UOM Conversion Factor',
                                                                                             hidden: true
                                                                                         },
                                                                                         {
                                                                                             dataIndex: 'intReceiveUOMId',
                                                                                             dataType: 'numeric',
-                                                                                            text: 'Receive UOM Id',
                                                                                             hidden: true
                                                                                         },
                                                                                         {
                                                                                             dataIndex: 'intStockUOMId',
                                                                                             dataType: 'numeric',
-                                                                                            text: 'Stock UOM Id',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intSubLocationId',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strSubLocationName',
+                                                                                            dataType: 'string',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'intStorageLocationId',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strStorageLocationName',
+                                                                                            dataType: 'string',
                                                                                             hidden: true
                                                                                         }
                                                                                     ],
@@ -1142,6 +1167,11 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                             dataType: 'boolean',
                                                                                             text: 'Stock Unit',
                                                                                             flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'dblLastCost',
+                                                                                            dataType: 'float',
+                                                                                            hidden: true
                                                                                         }
                                                                                     ],
                                                                                     itemId: 'cboItemUOM',
@@ -1170,10 +1200,43 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 width: 85,
                                                                                 dataIndex: 'dblUnitCost',
                                                                                 text: 'Unit Cost',
+                                                                                format: '0,000.00####',
                                                                                 editor: {
                                                                                     xtype: 'numberfield',
                                                                                     itemId: 'txtUnitCost',
                                                                                     minValue: 0
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                xtype: 'gridcolumn',
+                                                                                dataIndex: 'strTax',
+                                                                                itemId: 'colTaxGroup',
+                                                                                width: 85,
+                                                                                text: 'Tax Group',
+                                                                                editor: {
+                                                                                    xtype: 'gridcombobox',
+                                                                                    columns: [
+                                                                                        {
+                                                                                            dataIndex: 'intTaxGroupId',
+                                                                                            dataType: 'numeric',
+                                                                                            hidden: true
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strTaxGroup',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Tax Group',
+                                                                                            flex: 1
+                                                                                        },
+                                                                                        {
+                                                                                            dataIndex: 'strDescription',
+                                                                                            dataType: 'string',
+                                                                                            text: 'Description',
+                                                                                            flex: 1
+                                                                                        }
+                                                                                    ],
+                                                                                    itemId: 'cboTaxGroup',
+                                                                                    displayField: 'strTaxGroup',
+                                                                                    valueField: 'strTaxGroup'
                                                                                 }
                                                                             },
                                                                             {
@@ -1309,7 +1372,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 xtype: 'gridcolumn',
                                                                                 itemId: 'colStorageLocation',
                                                                                 width: 120,
-                                                                                dataIndex: 'strDescription',
+                                                                                dataIndex: 'strStorageLocationName',
                                                                                 text: 'Storage Location',
                                                                                 editor: {
                                                                                     xtype: 'gridcombobox',
@@ -1428,21 +1491,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 width: 100,
                                                                                 dataIndex: 'strDescription',
                                                                                 text: 'Lot Tracking'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'actioncolumn',
-                                                                                itemId: 'colTaxDetails',
-                                                                                align: 'center',
-                                                                                menuText: 'Tax Details',
-                                                                                text: 'Tax Details',
-                                                                                altText: 'View',
-                                                                                items: [
-                                                                                    {
-                                                                                        altText: 'View',
-                                                                                        iconCls: 'small-view',
-                                                                                        tooltip: 'View Tax Details'
-                                                                                    }
-                                                                                ]
                                                                             }
                                                                         ],
                                                                         plugins: [
@@ -2091,6 +2139,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         text: 'Remove'
                                                                     },
                                                                     {
+                                                                        xtype: 'button',
+                                                                        tabIndex: -1,
+                                                                        itemId: 'btnCalculateCharges',
+                                                                        iconCls: 'small-calculator',
+                                                                        text: 'Calculate'
+                                                                    },
+                                                                    {
                                                                         xtype: 'tbseparator'
                                                                     },
                                                                     {
@@ -2109,7 +2164,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     xtype: 'gridcombobox',
                                                                     columns: [
                                                                         {
-                                                                            dataIndex: 'intContractNumber',
+                                                                            dataIndex: 'strContractNumber',
                                                                             dataType: 'string',
                                                                             text: 'Contract Number',
                                                                             flex: 1
@@ -2122,15 +2177,15 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                         
                                                                     ],
                                                                     itemId: 'cboContract',
-                                                                    displayField: 'intContractNumber',
-                                                                    valueField: 'intContractNumber'
+                                                                    displayField: 'strContractNumber',
+                                                                    valueField: 'strContractNumber'
                                                                 }
                                                             },
                                                             {
                                                                 xtype: 'gridcolumn',
                                                                 itemId: 'colOtherCharge',
                                                                 text: 'Other Charges',
-                                                                flex: 1,
+                                                                flex: 1.2,
                                                                 editor: {
                                                                     xtype: 'gridcombobox',
                                                                     columns: [
@@ -2162,7 +2217,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 xtype: 'checkcolumn',
                                                                 itemId: 'colInventoryCost',
                                                                 text: 'Inventory Cost',
-                                                                flex: 1,
+                                                                flex: 1.2,
                                                                 editor: {
                                                                     xtype: 'checkboxfield'
                                                                 }
@@ -2254,14 +2309,14 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 xtype: 'gridcolumn',
                                                                 itemId: 'colAllocateCostBy',
                                                                 text: 'Allocate Cost By',
-                                                                flex: 1,
+                                                                flex: 1.2,
                                                                 editor: {
                                                                     xtype: 'gridcombobox',
                                                                     columns: [
                                                                         {
                                                                             dataIndex: 'strDescription',
                                                                             dataType: 'string',
-                                                                            text: 'Allocate By',
+                                                                            text: 'Allocate Cost By',
                                                                             flex: 1
                                                                         }
                                                                     ],
@@ -2271,24 +2326,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 }
                                                             },
                                                             {
-                                                                xtype: 'gridcolumn',
-                                                                itemId: 'colCostBilledBy',
-                                                                text: 'Cost Billed By',
-                                                                flex: 1,
-                                                                editor: {
-                                                                    xtype: 'gridcombobox',
-                                                                    columns: [
-                                                                        {
-                                                                            dataIndex: 'strDescription',
-                                                                            dataType: 'string',
-                                                                            text: 'Billed By',
-                                                                            flex: 1
-                                                                        }
-                                                                    ],
-                                                                    itemId: 'cboCostBilledBy',
-                                                                    displayField: 'strDescription',
-                                                                    valueField: 'strDescription'
-                                                                }
+                                                                xtype: 'checkcolumn',
+                                                                itemId: 'colAccrue',
+                                                                text: 'Accrue',
+                                                                flex: 0.7
                                                             },
                                                             {
                                                                 xtype: 'gridcolumn',
@@ -2321,6 +2362,12 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     displayField: 'strVendorId',
                                                                     valueField: 'strVendorId'
                                                                 }
+                                                            },
+                                                            {
+                                                                xtype: 'checkcolumn',
+                                                                itemId: 'colPrice',
+                                                                text: 'Price',
+                                                                flex: 0.7
                                                             }
                                                         ],
                                                         viewConfig: {

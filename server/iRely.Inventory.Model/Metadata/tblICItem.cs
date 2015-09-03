@@ -392,10 +392,18 @@ namespace iRely.Inventory.Model
         public decimal? dblStandardCost { get; set; }
         public decimal? dblAverageCost { get; set; }
         public decimal? dblEndMonthCost { get; set; }
-        public decimal? dblUnitOnHand { get; set; }
         public decimal? dblOnOrder { get; set; }
-        public decimal? dblOrderCommitted { get; set; }
+        public decimal? dblInTransitInbound { get; set; }
+        public decimal? dblUnitOnHand { get; set; }
+        public decimal? dblInTransitOutbound { get; set; }
         public decimal? dblBackOrder { get; set; }
+        public decimal? dblOrderCommitted { get; set; }
+        public decimal? dblUnitInCustody { get; set; }
+        public decimal? dblConsignedPurchase { get; set; }
+        public decimal? dblConsignedSale { get; set; }
+        public decimal? dblUnitReserved { get; set; }
+        public decimal? dblLastCountRetail { get; set; }
+        public decimal? dblAvailable { get; set; }
         public decimal? dblDefaultFull { get; set; }
         public bool? ysnAvailableTM { get; set; }
         public decimal? dblMaintenanceRate { get; set; }

@@ -45,7 +45,7 @@ Ext.define('Inventory.model.ReceiptCharge', {
         { name: 'strCostUOM', type: 'string' },
         { name: 'strUnitType', type: 'string' },
         { name: 'strVendorId', type: 'string' },
-        { name: 'intContractNumber', type: 'int', allowNull: true }
+        { name: 'strContractNumber', type: 'string' }
     ],
 
     validators: [
@@ -64,10 +64,20 @@ Ext.define('Inventory.model.ReceiptCharge', {
             }
         }
         if (this.get('dblRate') <= 0) {
-            errors.add({
-                field: 'dblRate',
-                message: 'Rate must be greater than zero.'
-            })
+            if (this.get('strCostMethod') !== 'Amount'){
+                errors.add({
+                    field: 'dblRate',
+                    message: 'Rate must be greater than zero.'
+                })
+            }
+        }
+        if (this.get('ysnInventoryCost')) {
+            if (iRely.Functions.isEmpty(this.get('strAllocateCostBy'))){
+                errors.add({
+                    field: 'strAllocateCostBy',
+                    message: 'Allocate Cost By cannot be blank when Inventory Cost is checked.'
+                })
+            }
         }
         return errors;
     }

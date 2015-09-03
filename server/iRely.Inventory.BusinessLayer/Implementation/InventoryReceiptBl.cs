@@ -171,6 +171,11 @@ namespace iRely.Inventory.BusinessLayer
                 }
                 catch (Exception ex)
                 {
+                    if (ex.Message.Contains("Please setup default AP Account"))
+                    {
+                        ex = new Exception("Please setup default AP Account.", ex.InnerException);
+                    }
+
                     saveResult.BaseException = ex;
                     saveResult.Exception = new ServerException(ex);
                     saveResult.HasError = true;
@@ -178,6 +183,31 @@ namespace iRely.Inventory.BusinessLayer
                 }
             }
             newBill = newBillId;
+            return saveResult;
+        }
+
+        public SaveResult CalculateCharges(int receiptId)
+        {
+            SaveResult saveResult = new SaveResult();
+
+            using (var transaction = _db.ContextManager.Database.BeginTransaction())
+            {
+                var connection = _db.ContextManager.Database.Connection;
+                try
+                {
+                    var idParameter = new SqlParameter("@intInventoryReceiptId", receiptId);
+                    _db.ContextManager.Database.ExecuteSqlCommand("uspICCalculateOtherCharges @intInventoryReceiptId", idParameter);
+                    saveResult = _db.Save(false);
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    saveResult.BaseException = ex;
+                    saveResult.Exception = new ServerException(ex);
+                    saveResult.HasError = true;
+                    transaction.Rollback();
+                }
+            }
             return saveResult;
         }
 

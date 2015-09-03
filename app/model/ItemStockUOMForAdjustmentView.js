@@ -5,8 +5,7 @@ Ext.define('Inventory.model.ItemStockUOMForAdjustmentView', {
         'Ext.data.Field'
     ],
 
-    //idProperty: 'intItemStockUOMId',
-    idProperty: null,
+    idProperty: 'intItemUOMId',
 
     fields: [
         { name: 'intItemStockUOMId', type: 'int' },

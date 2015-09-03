@@ -25,9 +25,11 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         'i21.store.UserListBuffered',
         'i21.store.CompanyLocationSubLocationBuffered',
         'i21.store.CountryBuffered',
+        'i21.store.TaxGroupBuffered',
         'ContractManagement.store.ContractDetailViewBuffered',
         'ContractManagement.store.ContractHeaderViewBuffered',
-        'Logistics.store.BufferedShipmentReceiptContracts'
+        'Logistics.store.BufferedShipmentReceiptContracts',
+        'AccountsPayable.common.extensions.GridExtension'
     ],
 
     stores: {
@@ -167,6 +169,9 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
         itemUOM: {
             type: 'icbuffereditempricingview'
         },
+        taxGroup: {
+            type: 'smtaxgroupbuffered'
+        },
         packageType: {
             type: 'icbufferedpackeduom'
         },
@@ -266,26 +271,6 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 }
             ]
         },
-        billedBy: {
-            autoLoad: true,
-            data: [
-                {
-                    strDescription: 'Vendor'
-                },
-                {
-                    strDescription: 'Third Party'
-                },
-                {
-                    strDescription: 'None'
-                }
-            ],
-            fields: [
-                {
-                    name: 'strDescription'
-                }
-            ]
-        },
-
 
         equipmentLength: {
             type: 'icbufferedequipmentlength'
@@ -503,6 +488,18 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     break;
             }
         },
+        readOnlyReceiptItemGrid: function (get) {
+            if (get('current.ysnPosted')) {
+                return true;
+            }
+            else if (iRely.Functions.isEmpty(get('current.intEntityVendorId')) || iRely.Functions.isEmpty(get('current.intLocationId'))) {
+                return true;
+            }
+            else {
+                return false;
+            }
+
+        },
         readOnlyItemDropdown: function (get) {
             var receiptType = get('current.strReceiptType');
             switch (receiptType) {
@@ -528,6 +525,22 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     break;
                 default:
                     if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strOrderNumber'))) {
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
+                    break;
+            };
+        },
+        readOnlySourceNumberDropdown: function (get) {
+            var receiptType = get('current.strReceiptType');
+            switch (receiptType) {
+                case 'Direct' :
+                    return true;
+                    break;
+                default:
+                    if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.strSourceNumber'))) {
                         return false;
                     }
                     else {
@@ -566,17 +579,32 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                     break;
             }
         },
-        readOnlyCostBilledBy: function (get) {
-            switch (get('grdCharges.selection.strCostBilledBy')) {
-                case 'Vendor':
-                    return true;
-                    break;
-                case 'Third Party':
+        readOnlyAccrue: function (get) {
+            switch (get('grdCharges.selection.ysnAccrue')) {
+                case true:
                     return false;
                     break;
                 default:
                     return true;
                     break;
+            }
+        },
+        readOnlyUnitCost: function (get) {
+            switch (get('current.strReceiptType')) {
+                case 'Purchase Contract':
+                    return true;
+                    break;
+                default:
+                    return false;
+                    break;
+            }
+        },
+        readOnlyNoGrossNetUOM: function (get) {
+            if (iRely.Functions.isEmpty(get('grdInventoryReceipt.selection.intWeightUOMId'))) {
+                return true;
+            }
+            else {
+                return false;
             }
         }
     }

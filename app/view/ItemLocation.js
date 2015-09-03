@@ -471,7 +471,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                             fieldLabel: 'Family',
                                                             labelWidth: 105,
                                                             displayField: 'strSubcategoryId',
-                                                            valueField: 'inSubcategoryId'
+                                                            valueField: 'intSubcategoryId'
                                                         },
                                                         {
                                                             xtype: 'gridcombobox',
@@ -764,18 +764,33 @@ Ext.define('Inventory.view.ItemLocation', {
                                                             labelWidth: 140
                                                         },
                                                         {
-                                                            xtype: 'combobox',
-                                                            disabled: true,
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intItemTypeCodeId',
+                                                                    dataType: 'numeric',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Status',
+                                                                    flex: 1
+                                                                }
+                                                            ],
                                                             itemId: 'cboItemTypeCode',
                                                             fieldLabel: 'Item Type Code',
-                                                            labelWidth: 140
+                                                            labelWidth: 140,
+                                                            displayField: 'strDescription',
+                                                            valueField: 'intItemTypeCodeId'
                                                         },
                                                         {
-                                                            xtype: 'textfield',
-                                                            disabled: true,
+                                                            xtype: 'numericfield',
                                                             itemId: 'txtItemTypeSubcode',
                                                             fieldLabel: 'Item Type Subcode',
-                                                            labelWidth: 140
+                                                            labelWidth: 140,
+                                                            allowDecimals: false,
+                                                            allowExponential: false
                                                         }
                                                     ]
                                                 }

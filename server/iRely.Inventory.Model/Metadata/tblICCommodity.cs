@@ -214,9 +214,15 @@ namespace iRely.Inventory.Model
         public tblICCommodity tblICCommodity { get; set; }
     }
 
-    public class tblICCommodityProductLine : tblICCommodityAttribute
+    public class tblICCommodityProductLine : BaseEntity
     {
+        public int intCommodityProductLineId { get; set; }
         public int intCommodityId { get; set; }
+        public string strDescription { get; set; }
+        public bool? ysnDeltaHedge { get; set; }
+        public decimal? dblDeltaPercent { get; set; }
+        public int? intSort { get; set; }
+
         public tblICCommodity tblICCommodity { get; set; }
     }
 

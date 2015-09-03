@@ -48,7 +48,8 @@ Ext.define('Inventory.model.Category', {
         { name: 'dblPercentage', type: 'float' },
         { name: 'strCostDistributionMethod', type: 'string' },
         { name: 'ysnSellable', type: 'boolean' },
-        { name: 'ysnYieldAdjustment', type: 'boolean' }
+        { name: 'ysnYieldAdjustment', type: 'boolean' },
+        { name: 'ysnWarehouseTracked', type: 'boolean' }
     ],
 
     validators: [

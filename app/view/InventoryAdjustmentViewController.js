@@ -612,7 +612,7 @@ Ext.define('Inventory.view.InventoryAdjustmentViewController', {
             current.set('intLotId', record.get('intLotId'));
             current.set('dblQuantity', record.get('dblQty'));
             current.set('dblWeight', record.get('dblWeight'));
-            current.set('dblCost', record.get('dblCost'));
+            current.set('dblCost', record.get('dblCost') * record.get('dblItemUOMUnitQty'));
             current.set('dblWeightPerQty', record.get('dblWeightPerQty'));
             current.set('intItemUOMId', record.get('intItemUOMId'));
             current.set('dblItemUOMUnitQty', record.get('dblItemUOMUnitQty'));

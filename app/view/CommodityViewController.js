@@ -159,7 +159,9 @@ Ext.define('Inventory.view.CommodityViewController', {
             },
 
             grdProductLine: {
-                colProductLine: 'strDescription'
+                colProductLine: 'strDescription',
+                colDeltaHedge: 'ysnDeltaHedge',
+                colDeltaPercent: 'dblDeltaPercent'
             }
         }
     },

@@ -193,6 +193,12 @@ Ext.define('Inventory.model.Item', {
 
     validate: function(options){
         var errors = this.callParent(arguments);
+        if (iRely.Functions.isEmpty(this.get('intCommodityId')) && iRely.Functions.isEmpty(this.get('intCategoryId'))) {
+            errors.add({
+                field: 'intCategoryId',
+                message: 'Category is required when there is no Commodity selected.'
+            })
+        }
         if (this.get('strType') === 'Raw Material' || this.get('strType') === 'Finished Good') {
             if (this.get('intLifeTime') <= 0) {
                 errors.add({

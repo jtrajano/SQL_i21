@@ -17,6 +17,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 {dataIndex: 'strStatus', text: 'Status', flex: 1, dataType: 'string', minWidth: 150},
                 {dataIndex: 'strTracking', text: 'Inv Valuation', flex: 1, dataType: 'string', minWidth: 150},
                 {dataIndex: 'strLotTracking', text: 'Lot Tracking', flex: 1, dataType: 'string', minWidth: 150},
+                {dataIndex: 'strCategory', text: 'Category', flex: 1, dataType: 'string', minWidth: 150},
+                {dataIndex: 'strCommodity', text: 'Commodity', flex: 1, dataType: 'string', minWidth: 150},
                 {dataIndex: 'strManufacturer', text: 'Manufacturer', flex: 1, dataType: 'string', minWidth: 150},
                 {dataIndex: 'strBrandCode', text: 'Brand', flex: 1, dataType: 'string', minWidth: 150},
                 {dataIndex: 'strModelNo', text: 'Model No', flex: 1, dataType: 'string', minWidth: 150}
@@ -137,7 +139,12 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colDetailShortUPC: 'strUpcCode',
-                colDetailUpcCode: 'strFullUPC',
+                colDetailUpcCode: {
+                    dataIndex: 'strLongUPCCode',
+                    editor: {
+                        readOnly: '{readOnlyLongUPC}'
+                    }
+                },
                 colStockUnit: 'ysnStockUnit',
                 colAllowSale: 'ysnAllowSale',
                 colAllowPurchase: 'ysnAllowPurchase',
@@ -903,6 +910,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colFactoryName: {
                     dataIndex: 'strLocationName',
                     editor: {
+                        origValueField: 'intCompanyLocationId',
+                        origUpdateField: 'intFactoryId',
                         store: '{factory}'
                     }
                 },
@@ -913,6 +922,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colCellName: {
                     dataIndex: 'strCellName',
                     editor: {
+                        origValueField: 'intManufacturingCellId',
+                        origUpdateField: 'intManufacturingCellId',
                         store: '{factoryManufacturingCell}'
                     }
                 },
@@ -924,6 +935,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colOwner: {
                     dataIndex: 'strCustomerNumber',
                     editor: {
+                        origValueField: 'intEntityCustomerId',
+                        origUpdateField: 'intOwnerId',
                         store: '{owner}'
                     }
                 },
@@ -1578,11 +1591,6 @@ Ext.define('Inventory.view.ItemViewController', {
 
     subscribeLocationEvents: function (grid, scope) {
         var me = scope;
-        var btnAddLocation = grid.down('#btnAddLocation');
-        if (btnAddLocation) btnAddLocation.on('click', me.onAddLocationClick);
-        var btnEditLocation = grid.down('#btnEditLocation');
-        if (btnEditLocation) btnEditLocation.on('click', me.onEditLocationClick);
-
         var colLocationCostingMethod = grid.columns[4];
         if (colLocationCostingMethod) colLocationCostingMethod.renderer = me.CostingMethodRenderer;
     },
@@ -1600,12 +1608,14 @@ Ext.define('Inventory.view.ItemViewController', {
         if (vm.data.current.phantom === true) {
             win.context.data.saveRecord({ successFn: function(batch, eOpts){
                 me.openItemLocationScreen('edit', win, record);
+                return;
             } });
         }
         else {
             win.context.data.validator.validateRecord({ window: win }, function(valid) {
                 if (valid) {
                     me.openItemLocationScreen('edit', win, record);
+                    return;
                 }
             });
         }
@@ -1619,12 +1629,14 @@ Ext.define('Inventory.view.ItemViewController', {
         if (vm.data.current.phantom === true) {
             win.context.data.saveRecord({ successFn: function(batch, eOpts){
                 me.openItemLocationScreen('new', win);
+                return;
             } });
         }
         else {
             win.context.data.validator.validateRecord({ window: win }, function(valid) {
                 if (valid) {
                     me.openItemLocationScreen('new', win);
+                    return;
                 }
             });
         }
@@ -1661,38 +1673,50 @@ Ext.define('Inventory.view.ItemViewController', {
         var me = win.controller;
         var screenName = 'Inventory.view.ItemLocation';
 
-        Ext.require([
-            screenName,
-                screenName + 'ViewModel',
-                screenName + 'ViewController'
-        ], function() {
-            var screen = 'ic' + screenName.substring(screenName.indexOf('view.') + 5, screenName.length);
-            var view = Ext.create(screenName, { controller: screen.toLowerCase(), viewModel: screen.toLowerCase() });
-            view.on('destroy', me.onDestroyItemLocationScreen, me, { window: win });
+        var current = win.getViewModel().data.current;
+        if (action === 'edit'){
+            iRely.Functions.openScreen(screenName, {
+                viewConfig: {
+                    listeners: {
+                        destroy: function() {
+                            var grdLocation = win.down('#grdLocationStore');
+                            var vm = win.getViewModel();
+                            var itemId = vm.data.current.get('intItemId');
+                            var filterItem = grdLocation.store.filters.items[0];
 
-            var controller = view.getController();
-            var current = win.getViewModel().data.current;
-            if (action === 'edit'){
-                controller.show({ itemId: current.get('intItemId'), locationId: record.get('intItemLocationId'), action: action });
-            }
-            else if (action === 'new') {
-                controller.show({ itemId: current.get('intItemId'), action: action });
-            }
-        });
-    },
+                            filterItem.setValue(itemId);
+                            filterItem.config.value = itemId;
+                            filterItem.initialConfig.value = itemId;
+                            grdLocation.store.load();
+                        }
+                    }
+                },
+                itemId: current.get('intItemId'),
+                locationId: record.get('intItemLocationId'),
+                action: action
+            });
+        }
+        else if (action === 'new') {
+            iRely.Functions.openScreen(screenName, {
+                viewConfig: {
+                    listeners: {
+                        destroy: function() {
+                            var grdLocation = win.down('#grdLocationStore');
+                            var vm = win.getViewModel();
+                            var itemId = vm.data.current.get('intItemId');
+                            var filterItem = grdLocation.store.filters.items[0];
 
-    onDestroyItemLocationScreen: function(win, eOpts) {
-        var me = eOpts.window.getController();
-        var win = eOpts.window;
-        var grdLocation = win.down('#grdLocationStore');
-        var vm = win.getViewModel();
-        var itemId = vm.data.current.get('intItemId');
-        var filterItem = grdLocation.store.filters.items[0];
-
-        filterItem.setValue(itemId);
-        filterItem.config.value = itemId;
-        filterItem.initialConfig.value = itemId;
-        grdLocation.store.load();
+                            filterItem.setValue(itemId);
+                            filterItem.config.value = itemId;
+                            filterItem.initialConfig.value = itemId;
+                            grdLocation.store.load();
+                        }
+                    }
+                },
+                itemId: current.get('intItemId'),
+                action: action
+            });
+        }
     },
 
     CostingMethodRenderer: function (value, metadata, record) {
@@ -2151,19 +2175,6 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // <editor-fold desc="Factory & Lines Tab Methods and Event Handlers">
 
-    onFactorySelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepFactory');
-        var current = plugin.getActiveRecord();
-
-        if (combo.column.itemId === 'colFactoryName'){
-            current.set('intFactoryId', records[0].get('intCompanyLocationId'));
-        }
-    },
-
     onManufacturingCellSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
             return;
@@ -2175,21 +2186,7 @@ Ext.define('Inventory.view.ItemViewController', {
         var current = plugin.getActiveRecord();
 
         if (combo.column.itemId === 'colCellName'){
-            current.set('intManufacturingCellId', records[0].get('intManufacturingCellId'));
             current.set('intPreference', controller.getNewPreferenceNo(grid.store));
-        }
-    },
-
-    onOwnerSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepOwner');
-        var current = plugin.getActiveRecord();
-
-        if (combo.column.itemId === 'colOwner'){
-            current.set('intOwnerId', records[0].get('intCustomerId'));
         }
     },
 
@@ -2311,6 +2308,17 @@ Ext.define('Inventory.view.ItemViewController', {
                 record.set('dblDiscountedPrice', discPrice);
             }
             else { record.set('dblDiscountedPrice', 0.00); }
+        }
+    },
+
+    onUpcChange: function(obj, newValue, oldValue, eOpts) {
+        var grid = obj.up('grid');
+        var plugin = grid.getPlugin('cepDetailUOM');
+        var record = plugin.getActiveRecord();
+
+        if (!iRely.Functions.isEmpty(record.get('strUpcCode')))
+        {
+            return record.set('strLongUPCCode', i21.ModuleMgr.Inventory.getFullUPCString(record.get('strUpcCode')))
         }
     },
 
@@ -2538,14 +2546,8 @@ Ext.define('Inventory.view.ItemViewController', {
             "#cboNoteLocation": {
                 select: this.onNoteSelect
             },
-            "#cboFactory": {
-                select: this.onFactorySelect
-            },
             "#cboManufacturingCell": {
                 select: this.onManufacturingCellSelect
-            },
-            "#cboOwner": {
-                select: this.onOwnerSelect
             },
             "#tabItem": {
                 tabchange: this.onItemTabChange
@@ -2571,6 +2573,9 @@ Ext.define('Inventory.view.ItemViewController', {
             "#txtSpecialPricingUnitPrice": {
                 change: this.onSpecialPricingDiscountChange
             },
+            "#txtShortUPCCode": {
+                change: this.onUpcChange
+            },
             "#btnDuplicate": {
                 click: this.onDuplicateClick
             },
@@ -2588,6 +2593,12 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboLotTracking" : {
                 select: this.onLotTrackingSelect
+            },
+            "#btnAddLocation": {
+                click: this.onAddLocationClick
+            },
+            "#btnEditLocation": {
+                click: this.onEditLocationClick
             }
         });
     }

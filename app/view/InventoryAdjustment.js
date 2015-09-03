@@ -550,6 +550,11 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                                     hidden: true
                                                                 },
                                                                 {
+                                                                    dataIndex: 'dblItemUOMUnitQty',
+                                                                    dataType: 'numeric',
+                                                                    hidden: true
+                                                                },
+                                                                {
                                                                     dataIndex: 'intItemUOMId',
                                                                     dataType: 'numeric',
                                                                     text: 'Item UOM Id',

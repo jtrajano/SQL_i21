@@ -35,10 +35,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICItemUOM> VolumeItemUOMs { get; set; }
 
         public ICollection<tblICCategoryUOM> tblICCategoryUOMs { get; set; }
-        public ICollection<tblICCategoryUOM> WeightCategoryUOMs { get; set; }
-        public ICollection<tblICCategoryUOM> DimensionCategoryUOMs { get; set; }
-        public ICollection<tblICCategoryUOM> VolumeCategoryUOMs { get; set; }
-
+        
         public ICollection<vyuICGetUOMConversion> vyuICGetUOMConversions { get; set; }
     }
 
