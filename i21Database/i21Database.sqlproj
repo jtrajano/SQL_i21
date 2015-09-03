@@ -2287,6 +2287,10 @@
     <Build Include="dbo\Stored Procedures\uspICUnpostActualCostOut.sql">
       <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="dbo\Stored Procedures\uspSCFullSheetScaleTicket.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCFullSheetDiscountDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCFullSheetDistributionDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCFullSheetFooterDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
