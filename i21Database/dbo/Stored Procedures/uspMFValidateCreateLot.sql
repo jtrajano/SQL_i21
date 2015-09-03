@@ -379,6 +379,7 @@ BEGIN TRY
 				WHERE R.intItemId = @intProductId
 					AND R.ysnActive = 1
 					AND intRecipeItemTypeId = 2
+					AND R.intLocationId=@intLocationId
 				)
 			RAISERROR (
 					51077
@@ -502,7 +503,7 @@ BEGIN TRY
 		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 			LEFT JOIN dbo.tblMFRecipeSubstituteItem SI ON SI.intRecipeItemId = ri.intRecipeItemId
 		AND SI.intRecipeId = r.intRecipeId
-		WHERE r.intItemId = @intProductId
+		WHERE r.intItemId = @intProductId AND r.ysnActive =1 and r.intLocationId=@intLocationId
 			AND ri.intRecipeItemTypeId = 1
 			AND (
 				(
