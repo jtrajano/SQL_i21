@@ -18,7 +18,8 @@ BEGIN
 		,strTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 		,strRelatedTransactionId NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL
 		,intRelatedTransactionId INT NULL 
-		,intTransactionTypeId INT NOT NULL 
+		,intTransactionTypeId INT NOT NULL
+		,dblQty NUMERIC(18,6) 
 	)
 END 
 
@@ -77,8 +78,24 @@ FROM	(
 					UPDATE 
 					SET		ysnIsUnposted = 1
 
-				OUTPUT $action, Inserted.intInventoryTransactionId, Inserted.intTransactionId, Inserted.strTransactionId, Inserted.intRelatedTransactionId, Inserted.strRelatedTransactionId, Inserted.intTransactionTypeId
-		) AS Changes (Action, intInventoryTransactionId, intTransactionId, strTransactionId, intRelatedTransactionId, strRelatedTransactionId, intTransactionTypeId)
+				OUTPUT	$action
+						, Inserted.intInventoryTransactionId
+						, Inserted.intTransactionId
+						, Inserted.strTransactionId
+						, Inserted.intRelatedTransactionId
+						, Inserted.strRelatedTransactionId
+						, Inserted.intTransactionTypeId
+						, Inserted.dblQty
+		) AS Changes (
+				Action
+				, intInventoryTransactionId
+				, intTransactionId
+				, strTransactionId
+				, intRelatedTransactionId
+				, strRelatedTransactionId
+				, intTransactionTypeId
+				, dblQty
+		)
 WHERE	Changes.Action = 'UPDATE'
 ;
 
@@ -91,7 +108,7 @@ FROM	dbo.tblICInventoryActualCost ActualCostBucket INNER JOIN (
 					,dblQty = SUM(ActualCostOut.dblQty)
 			FROM	dbo.tblICInventoryActualCostOut ActualCostOut INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
 						ON ActualCostOut.intInventoryTransactionId = Reversal.intInventoryTransactionId
-			WHERE	ActualCostOut.intRevalueActualCostId IS NOT NULL 	
+			WHERE	ActualCostOut.intRevalueActualCostId IS NOT NULL 
 			GROUP BY ActualCostOut.intRevalueActualCostId
 		) AS ActualCostOutGrouped
 			ON ActualCostOutGrouped.intRevalueActualCostId = ActualCostBucket.intInventoryActualCostId
@@ -142,5 +159,8 @@ SET		dblStockOut = dblStockIn
 FROM	dbo.tblICInventoryActualCost ActualCost INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
 			ON ActualCost.intTransactionId = Reversal.intTransactionId
 			AND ActualCost.strTransactionId = Reversal.strTransactionId
+		INNER JOIN dbo.tblICInventoryTransaction InTransactions
+			ON InTransactions.intInventoryTransactionId = Reversal.intInventoryTransactionId
+			AND ISNULL(InTransactions.dblQty, 0) > 0 
 WHERE	Reversal.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE) 
 ;

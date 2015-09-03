@@ -69,11 +69,15 @@ WHERE	Changes.Action = 'UPDATE'
 
 -- If ActualCostBucket was from a negative stock, let dblStockIn equal to dblStockOut. 
 UPDATE	ActualCostBucket
-SET		dblStockIn = dblStockOut
+SET		dblStockIn = ActualCostBucket.dblStockOut
 		,ysnIsUnposted = 1
-FROM	dbo.tblICInventoryActualCost ActualCostBucket 
-WHERE	intTransactionId = @intTransactionId
-		AND strTransactionId = @strTransactionId
+FROM	dbo.tblICInventoryActualCost ActualCostBucket INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
+			ON Reversal.intTransactionId = ActualCostBucket.intTransactionId
+			AND Reversal.strTransactionId = ActualCostBucket.strTransactionId
+			AND Reversal.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE)
+		INNER JOIN dbo.tblICInventoryTransaction OutTransactions
+			ON OutTransactions.intInventoryTransactionId = Reversal.intInventoryTransactionId
+			AND ISNULL(OutTransactions.dblQty, 0) < 0 
 ;
 
 -- If there are ActualCost out records, update the costing bucket. Return the out-qty back to the bucket where it came from. 
@@ -82,8 +86,8 @@ SET		ActualCostBucket.dblStockOut = ISNULL(ActualCostBucket.dblStockOut, 0) - Ac
 FROM	dbo.tblICInventoryActualCost ActualCostBucket INNER JOIN (
 			SELECT	ActualCostOut.intInventoryActualCostId
 					,dblQty = SUM(ActualCostOut.dblQty)
-			FROM	dbo.tblICInventoryActualCostOut ActualCostOut INNER JOIN #tmpInventoryTransactionStockToReverse InventoryToReverse
-						ON ActualCostOut.intInventoryTransactionId = InventoryToReverse.intInventoryTransactionId	
+			FROM	dbo.tblICInventoryActualCostOut ActualCostOut INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
+						ON ActualCostOut.intInventoryTransactionId = Reversal.intInventoryTransactionId	
 			GROUP BY ActualCostOut.intInventoryActualCostId
 		) AS ActualCostOutGrouped
 			ON ActualCostOutGrouped.intInventoryActualCostId = ActualCostBucket.intInventoryActualCostId
