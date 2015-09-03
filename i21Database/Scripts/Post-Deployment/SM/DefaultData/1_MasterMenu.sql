@@ -1541,6 +1541,18 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Stock Rep
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Stock Report' WHERE strMenuName = 'Stock Report' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'View Stock Details' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'View Stock Details', N'Inventory', @InventoryParentMenuId, N'View Stock Details', N'Maintenance', N'Screen', N'Inventory.view.StockDetail', N'small-menu-maintenance', 1, 1, 0, 1, 23, 0)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.StockDetail' WHERE strMenuName = 'View Stock Details' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'View Lot Details' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'View Lot Details', N'Inventory', @InventoryParentMenuId, N'View Lot Details', N'Maintenance', N'Screen', N'Inventory.view.LotDetail', N'small-menu-maintenance', 1, 1, 0, 1, 24, 0)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.LotDetail' WHERE strMenuName = 'View Lot Details' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryParentMenuId
+
 /* PAYROLL */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Payroll' AND strModuleName = 'Payroll' AND intParentMenuID = 0)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
