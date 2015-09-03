@@ -54,6 +54,7 @@ BEGIN TRY
 			,dblSurcharge
 			,ysnFreightInPrice
 			,strActualCostId
+			,intTaxGroupId
 	)	
 	select 
 			strReceiptType = CASE
@@ -120,7 +121,8 @@ BEGIN TRY
 			       join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
                    where RR.strOrigin = 'Terminal' 
 			         and HH.strDestination = 'Customer' 
-			         and RR.intTransportReceiptId = TR.intTransportReceiptId ) as strActualCostId 
+			         and RR.intTransportReceiptId = TR.intTransportReceiptId ) as strActualCostId,
+			TR.intTaxGroupId 
 	from	tblTRTransportLoad TL JOIN tblTRTransportReceipt TR 
 				ON TR.intTransportLoadId = TL.intTransportLoadId			
 			LEFT JOIN vyuCTContractDetailView CT 
