@@ -385,7 +385,7 @@ BEGIN
 		)
 		SELECT 
 				[intInventoryReceiptId]		= @InventoryReceiptId
-				,[intContractId]			= RawData.intContractDetailId
+				,[intContractId]			= RawData.intContractHeaderId
 				,[intChargeId]				= RawData.intChargeId
 				,[ysnInventoryCost]			= RawData.ysnInventoryCost
 				,[strCostMethod]			= RawData.strCostMethod
