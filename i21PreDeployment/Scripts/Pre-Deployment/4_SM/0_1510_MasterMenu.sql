@@ -2925,13 +2925,7 @@ BEGIN
 					SET strCommand = ''Store.view.RetailPriceAdjustment'', intSort = 0
 					WHERE strMenuName = ''Retail Price Adjustments'' AND strModuleName = ''Store'' AND intParentMenuID = @StoreMaintenanceId
 
-              IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = ''Radiant Item Type Code'' AND strModuleName = ''Store'' AND intParentMenuID = @StoreMaintenanceId)
-					INSERT INTO tblSMMasterMenu (strMenuName, strModuleName, intParentMenuID, strDescription, strType, strCommand, strIcon, ysnVisible, ysnExpanded, ysnIsLegacy, ysnLeaf, intSort, intConcurrencyId)
-					VALUES (''Radiant Item Type Code'', ''Store'', @StoreMaintenanceId, ''Radiant Item Type Code'', ''Screen'', ''Store.view.RadiantItemTypeCode'', ''small-screen'', 0, 0, 0, 1, 0, 1)
-				ELSE
-					UPDATE tblSMMasterMenu
-					SET strCommand = ''Store.view.RadiantItemTypeCode'', intSort = 0
-					WHERE strMenuName = ''Radiant Item Type Code'' AND strModuleName = ''Store'' AND intParentMenuID = @StoreMaintenanceId
+             
 
 			/* --------------------------------------------------- */
 			/* -- End of Create Store Module Menu -- */
