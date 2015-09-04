@@ -81,7 +81,12 @@ BEGIN TRY
 	   DD.dblDistSurcharge,
 	   DD.ysnFreightInPrice,
 	   DD.intTaxGroupId,
-	   strActualCostId = NULL -- TODO: Pruthvi, kindly add the TR transaction id if Invoice is for direct shipment. 
+	   (select strTransaction from tblTRTransportLoad TT
+                   join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
+			       join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
+                   where RR.strOrigin = 'Terminal' 
+			         and HH.strDestination = 'Customer' 
+			         and HH.intDistributionHeaderId = DH.intDistributionHeaderId ) as strActualCostId 
 	   from tblTRTransportLoad TL
             JOIN tblTRTransportReceipt TR on TR.intTransportLoadId = TL.intTransportLoadId
 			JOIN tblTRDistributionHeader DH on DH.intTransportReceiptId = TR.intTransportReceiptId
