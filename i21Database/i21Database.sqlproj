@@ -2276,6 +2276,7 @@
     <Build Include="dbo\Tables\tblICCommodityProductLine.sql" />
     <Build Include="dbo\Views\vyuTRSupplyPointView.sql" />
     <Build Include="dbo\Stored Procedures\uspCTContractSave.sql" />
+    <Build Include="dbo\Functions\fnAPFormatAddress.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
