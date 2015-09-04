@@ -320,6 +320,7 @@ BEGIN
 				,intOwnershipType
 				,dblGross
 				,dblNet
+				,intTaxGroupId
 		)
 		SELECT	intInventoryReceiptId	= @InventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -351,6 +352,7 @@ BEGIN
 										  END
 				,dblGross				= RawData.dblGross
 				,dblNet					= RawData.dblNet
+				,intTaxGroupId			= RawData.intTaxGroupId
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON RawHeaderData.Vendor = RawData.intEntityVendorId 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
