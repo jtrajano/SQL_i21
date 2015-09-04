@@ -420,6 +420,7 @@ BEGIN
 					,@EntityId			INT	
 					,@TaxMasterId		INT	
 					,@InventoryReceiptItemId INT
+					,@TaxGroupId		INT 
 
 			DECLARE @Taxes AS TABLE (
 				id						INT
@@ -448,6 +449,7 @@ BEGIN
 					,Receipt.dtmReceiptDate
 					,Receipt.intEntityId
 					,ReceiptItem.intInventoryReceiptItemId
+					,ReceiptItem.intTaxGroupId
 			FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 						ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
@@ -461,6 +463,7 @@ BEGIN
 				,@TransactionDate
 				,@EntityId
 				,@InventoryReceiptItemId
+				,@TaxGroupId
 
 			WHILE @@FETCH_STATUS = 0
 			BEGIN 
@@ -492,7 +495,7 @@ BEGIN
 					,@TransactionDate
 					,@TransactionType
 					,@EntityId
-					,@TaxMasterId
+					,@TaxGroupId
 
 				-- Insert the data from the table variable into Inventory Receipt Item tax table. 
 				INSERT INTO dbo.tblICInventoryReceiptItemTax (
@@ -608,6 +611,7 @@ BEGIN
 					,@TransactionDate
 					,@EntityId
 					,@InventoryReceiptItemId
+					,@TaxGroupId
 			END 
 
 			CLOSE loopReceiptItems;
