@@ -1,5 +1,5 @@
 ﻿CREATE VIEW [dbo].[vyuAPRptPurchase]
-WITH SCHEMABINDING
+
 AS 
 SELECT 
 	(SELECT TOP 1	strCompanyName FROM dbo.tblSMCompanySetup) AS strCompanyName
