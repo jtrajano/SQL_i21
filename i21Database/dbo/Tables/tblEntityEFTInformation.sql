@@ -13,6 +13,9 @@
     [ysnPullTaxSeparately]     BIT            NULL,
     [ysnRefundBudgetCredits]   BIT            NULL,
     [ysnPrenoteSent]           BIT            NULL,
+	[strDistributionType]	   NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
+	[dblAmount]				   NUMERIC(18, 6) NULL,
+	[intOrder]				   INT			  NULL, 
     [intConcurrencyId]         INT            NOT NULL,
     CONSTRAINT [PK_tblEntityEFTInformation] PRIMARY KEY CLUSTERED ([intEntityEFTInfoId] ASC)
 );

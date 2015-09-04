@@ -804,7 +804,7 @@ BEGIN
 								'''''''' + '','' + ''''''''
 								+ ''Between'' + '''''''' + '',''
 								+ ''substring(LTRIM(strAccountsUsed),15,'' + CONVERT(VARCHAR(10),(CONVERT(INT,@1_8size) + 1 + CONVERT(INT,@9_16size))) + ''),''
-								+ ''substring(LTRIM(strAccountsUsed),35,'' + CONVERT(VARCHAR(10),(CONVERT(INT,@1_8size) + 1 + CONVERT(INT,@9_16size))) + ''),''
+								+ ''substring(LTRIM(strAccountsUsed),15 + '' + CONVERT(VARCHAR(10),(CONVERT(INT,@1_8size) + 1 + CONVERT(INT,@9_16size))) + '' + 7,'' + CONVERT(VARCHAR(10),(CONVERT(INT,@1_8size) + 1 + CONVERT(INT,@9_16size))) + ''),''
 								+ '''''''' + '''''''' + '' ,
 								intRowDetailId
 							FROM tblFRRowDesign
@@ -1009,7 +1009,7 @@ END
 --DECLARE @res AS NVARCHAR(MAX)
 
 --EXEC [dbo].[uspFRDImportOriginDesign]
---			@originglfsf_no	 = '25',					-- ORIGIN ID
+--			@originglfsf_no	 = '1',					-- ORIGIN ID
 --			@result = @res OUTPUT					-- OUTPUT PARAMETER THAT RETURNS TOTAL NUMBER OF SUCCESSFUL RECORDS
 				
 --SELECT @res

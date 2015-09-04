@@ -27,5 +27,6 @@ CREATE TYPE [dbo].[ReceiptOtherChargesTableType] AS TABLE
     --,[strCostBilledBy] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT ('Vendor')	-- Determines if the computed charge is billed by the inventory receipt vendor, a third party vendor, or by no one. 
 	,[ysnAccrue] BIT NULL 
 	,[ysnPrice] BIT NULL 
-	,[intContractDetailId] INT NULL															-- Contract
+	,[intContractHeaderId] INT NULL															-- Contract Header
+	,[intContractDetailId] INT NULL															-- Contract Detail
 )

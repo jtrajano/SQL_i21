@@ -44,6 +44,8 @@ BEGIN TRY
 		,dblSurcharge
 		,ysnFreightInPrice
 		,intTaxGroupId	
+		,strActualCostId
+		,intShipToLocationId
 	 )	 
 	 select     
        DH.intEntityCustomerId,     
@@ -79,7 +81,14 @@ BEGIN TRY
 	   'Deliver',   
 	   DD.dblDistSurcharge,
 	   DD.ysnFreightInPrice,
-	   DD.intTaxGroupId
+	   DD.intTaxGroupId,
+	   (select strTransaction from tblTRTransportLoad TT
+                   join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
+			       join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
+                   where RR.strOrigin = 'Terminal' 
+			         and HH.strDestination = 'Customer' 
+			         and HH.intDistributionHeaderId = DH.intDistributionHeaderId ) as strActualCostId,
+		DH.intShipToLocationId 
 	   from tblTRTransportLoad TL
             JOIN tblTRTransportReceipt TR on TR.intTransportLoadId = TL.intTransportLoadId
 			JOIN tblTRDistributionHeader DH on DH.intTransportReceiptId = TR.intTransportReceiptId

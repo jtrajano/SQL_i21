@@ -273,6 +273,7 @@ BEGIN
 					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId            
 				INNER JOIN vyuICGetShipmentItemSource ItemSource 
 					ON ItemSource.intInventoryShipmentItemId = DetailItem.intInventoryShipmentItemId
+				
 		WHERE   Header.intInventoryShipmentId = @intTransactionId
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_OWN) = @OWNERSHIP_TYPE_OWN
 

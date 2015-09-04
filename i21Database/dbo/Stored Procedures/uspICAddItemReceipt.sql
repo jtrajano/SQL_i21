@@ -202,6 +202,7 @@ BEGIN
 				,intEntityId			= (SELECT TOP 1 intEntityId FROM dbo.tblSMUserSecurity WHERE intUserSecurityID = @intUserId)
 				,intCreatedUserId		= @intUserId
 				,ysnPosted				= 0
+				,strActualCostId		= IntegrationData.strActualCostId
 
 		WHEN NOT MATCHED THEN 
 			INSERT (
@@ -237,6 +238,7 @@ BEGIN
 				,intEntityId
 				,intCreatedUserId
 				,ysnPosted
+				,strActualCostId
 			)
 			VALUES (
 				/*strReceiptNumber*/			@ReceiptNumber
@@ -271,6 +273,7 @@ BEGIN
 				/*intEntityId*/					,(SELECT TOP 1 intEntityId FROM dbo.tblSMUserSecurity WHERE intUserSecurityID = @intUserId)
 				/*intCreatedUserId*/			,@intUserId
 				/*ysnPosted*/					,0
+				/*strActualCostId*/				,IntegrationData.strActualCostId
 			)
 		;
 				
@@ -317,6 +320,7 @@ BEGIN
 				,intOwnershipType
 				,dblGross
 				,dblNet
+				,intTaxGroupId
 		)
 		SELECT	intInventoryReceiptId	= @InventoryReceiptId
 				,intLineNo				= ISNULL(RawData.intContractDetailId, 0)
@@ -348,6 +352,7 @@ BEGIN
 										  END
 				,dblGross				= RawData.dblGross
 				,dblNet					= RawData.dblNet
+				,intTaxGroupId			= RawData.intTaxGroupId
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData 
 					ON RawHeaderData.Vendor = RawData.intEntityVendorId 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -380,7 +385,7 @@ BEGIN
 		)
 		SELECT 
 				[intInventoryReceiptId]		= @InventoryReceiptId
-				,[intContractId]			= RawData.intContractDetailId
+				,[intContractId]			= RawData.intContractHeaderId
 				,[intChargeId]				= RawData.intChargeId
 				,[ysnInventoryCost]			= RawData.ysnInventoryCost
 				,[strCostMethod]			= RawData.strCostMethod
@@ -415,6 +420,7 @@ BEGIN
 					,@EntityId			INT	
 					,@TaxMasterId		INT	
 					,@InventoryReceiptItemId INT
+					,@TaxGroupId		INT 
 
 			DECLARE @Taxes AS TABLE (
 				id						INT
@@ -443,6 +449,7 @@ BEGIN
 					,Receipt.dtmReceiptDate
 					,Receipt.intEntityId
 					,ReceiptItem.intInventoryReceiptItemId
+					,ReceiptItem.intTaxGroupId
 			FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 						ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
@@ -456,6 +463,7 @@ BEGIN
 				,@TransactionDate
 				,@EntityId
 				,@InventoryReceiptItemId
+				,@TaxGroupId
 
 			WHILE @@FETCH_STATUS = 0
 			BEGIN 
@@ -487,7 +495,7 @@ BEGIN
 					,@TransactionDate
 					,@TransactionType
 					,@EntityId
-					,@TaxMasterId
+					,@TaxGroupId
 
 				-- Insert the data from the table variable into Inventory Receipt Item tax table. 
 				INSERT INTO dbo.tblICInventoryReceiptItemTax (
@@ -603,6 +611,7 @@ BEGIN
 					,@TransactionDate
 					,@EntityId
 					,@InventoryReceiptItemId
+					,@TaxGroupId
 			END 
 
 			CLOSE loopReceiptItems;

@@ -280,6 +280,7 @@ BEGIN
 				,intLotId 
 				,intSubLocationId
 				,intStorageLocationId
+				,strActualCostId
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
@@ -356,7 +357,8 @@ BEGIN
 				,intTransactionTypeId = @INVENTORY_RECEIPT_TYPE  
 				,intLotId = DetailItemLot.intLotId 
 				,intSubLocationId = DetailItem.intSubLocationId
-				,intStorageLocationId = DetailItemLot.intStorageLocationId
+				,intStorageLocationId = DetailItemLot.intStorageLocationId				
+				,strActualCostId = Header.strActualCostId
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICItemLocation ItemLocation
 					ON Header.intLocationId = ItemLocation.intLocationId
 				INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
@@ -364,6 +366,7 @@ BEGIN
 					AND ItemLocation.intItemId = DetailItem.intItemId
 				LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
 					ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
+				
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
   

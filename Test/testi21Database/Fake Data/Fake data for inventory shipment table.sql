@@ -2,7 +2,10 @@
 AS
 -- Fake data
 BEGIN 
+
 	EXEC [testi21Database].[Fake inventory items];
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;	
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;	
 
 -- Declare the variables for grains (item)
 	DECLARE @WetGrains AS INT = 1

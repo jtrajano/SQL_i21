@@ -806,6 +806,33 @@
     <Build Include="testi21Database\Stored Procedures\test uspICAddItemReceipt to add a purchase contract type.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAddItemReceipt to add other charges.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAddItemReceipt to add a purchase contract type with no contract detail id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInActualCost for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInActualCost from negative to negative.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInActualCost from negative to positive with partial in.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInActualCost from negative to positive.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInActualCost from negative to zero.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInActualCost from positive to positive.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInActualCost from zero to positive.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInActualCost for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInActualCost from negative to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInActualCost from positive stock to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInActualCost from positive stock to positive stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInActualCost from positive stock to zero stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInActualCost from zero to negative stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostActualCostIn for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostActualCostIn for add 1-add 2-unpost add 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostActualCostIn for add-sell-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostActualCostIn for add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostActualCostIn for sell-add-unpost add.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostActualCostOut for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostActualCostOut for sell 1-sell 2-unpost sell 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostActualCostOut for sell 1-sell 2-add stock-unpost sell 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostActualCostOut for add-sell-unpost sell.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on Actual Cost for scenario 4, unpost sell stock.sql" />
+    <Build Include="testi21Database\Fake Data\Fake posted transactions using Actual Costing, scenario 4.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on Actual Costing for scenario 4, unpost sell stock, unpost add stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on Actual Costing for scenario 4, unpost add stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on Actual Costing for scenario 4, unpost add stock, unpost sell stock.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

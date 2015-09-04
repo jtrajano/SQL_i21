@@ -126,6 +126,19 @@ BEGIN
 		,@intTransactionId
 END
 
+-----------------------------------------------------------------------------------------------------------------------------
+-- Call the Actual Costing unpost stored procedures 
+-----------------------------------------------------------------------------------------------------------------------------
+BEGIN 
+	EXEC dbo.uspICUnpostActualCostIn
+		@strTransactionId
+		,@intTransactionId
+
+	EXEC dbo.uspICUnpostActualCostOut
+		@strTransactionId
+		,@intTransactionId
+END
+
 IF EXISTS (SELECT TOP 1 1 FROM #tmpInventoryTransactionStockToReverse) 
 BEGIN 
 	-------------------------------------------------

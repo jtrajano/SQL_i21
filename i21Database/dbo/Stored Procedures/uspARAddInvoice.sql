@@ -135,7 +135,9 @@ INSERT INTO
 		,[intDistributionHeaderId]
 		,[intConcurrencyId]
 		,[intEntityId]
-		,[strDeliverPickup])
+		,[strDeliverPickup]
+		,[strActualCostId]
+)
 SELECT
      TE.InvoiceNumber           -- invoice number
 	,IE.strSourceId				--[strInvoiceOriginId]
@@ -163,7 +165,7 @@ SELECT
 	,IE.dtmDate 				--[dtmPostDate] need to check
 	,0							--[ysnPosted]
 	,0							--[ysnPaid]
-	,ISNULL(min(AC.[intShipToId]), min(EL.[intEntityLocationId]))			--[intShipToLocationId] 
+	,ISNULL(min(IE.intShipToLocationId), min(EL.[intEntityLocationId]))			--[intShipToLocationId] 
 	,min(SL.[strLocationName])		--[strShipToLocationName]
 	,min(SL.[strAddress])			--[strShipToAddress]
 	,min(SL.[strCity])				--[strShipToCity]
@@ -181,6 +183,7 @@ SELECT
 	,1
 	,@EntityId
 	,IE.strDeliverPickup
+	,IE.strActualCostId
 FROM
 	@InvoiceEntries IE
 	Join @temp TE
@@ -213,13 +216,13 @@ LEFT OUTER JOIN
 					ON AC.[intEntityCustomerId] = EL.[intEntityId]
 LEFT OUTER JOIN
 	tblEntityLocation SL
-		ON AC.intShipToId = SL.intEntityLocationId
+		ON IE.[intShipToLocationId] = SL.intEntityLocationId
 LEFT OUTER JOIN
 	tblEntityLocation BL
 		ON AC.intShipToId = BL.intEntityLocationId	
 WHERE
 	IE.intInvoiceId IS NULL OR IE.intInvoiceId = 0
-group by TE.InvoiceNumber,IE.intEntityCustomerId,IE.intLocationId,IE.strSourceId,IE.dtmDate,IE.intCurrencyId,IE.intSalesPersonId,IE.intShipViaId,IE.strComments,EL.intTermsId,IE.strPurchaseOrder,IE.intSourceId,IE.strDeliverPickup;				
+group by TE.InvoiceNumber,IE.intEntityCustomerId,IE.intLocationId,IE.strSourceId,IE.dtmDate,IE.intCurrencyId,IE.intSalesPersonId,IE.intShipViaId,IE.strComments,EL.intTermsId,IE.strPurchaseOrder,IE.intSourceId,IE.strDeliverPickup,IE.strActualCostId;				
 
 
 ENABLE TRIGGER dbo.trgInvoiceNumber ON dbo.tblARInvoice;
@@ -251,7 +254,7 @@ SET
 	,[dtmPostDate]				= NULL
 	,[ysnPosted]				= 0
 	,[ysnPaid]					= 0
-	,[intShipToLocationId]		= ISNULL(AC.[intShipToId], EL.[intEntityLocationId]) 
+	,[intShipToLocationId]		= ISNULL(IE.[intShipToLocationId], EL.[intEntityLocationId]) 
 	,[strShipToLocationName]	= SL.[strLocationName]
 	,[strShipToAddress]			= SL.[strAddress]
 	,[strShipToCity]			= SL.[strCity]
@@ -268,7 +271,8 @@ SET
 	,[intDistributionHeaderId]	= IE.intSourceId
 	,[intConcurrencyId]			= I.[intConcurrencyId] + 1
 	,[intEntityId]				= @EntityId
-	,[strDeliverPickup]			= IE.strDeliverPickup     		
+	,[strDeliverPickup]			= IE.strDeliverPickup   
+	,[strActualCostId]  		= IE.strActualCostId
 FROM
 	[tblARInvoice] I
 INNER JOIN 
@@ -304,7 +308,7 @@ LEFT OUTER JOIN
 					ON AC.[intEntityCustomerId] = EL.[intEntityId]
 LEFT OUTER JOIN
 	tblEntityLocation SL
-		ON AC.intShipToId = SL.intEntityLocationId
+		ON IE.[intShipToLocationId] = SL.intEntityLocationId
 LEFT OUTER JOIN
 	tblEntityLocation BL
 		ON AC.intShipToId = BL.intEntityLocationId	
