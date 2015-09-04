@@ -2338,6 +2338,8 @@
     <Build Include="dbo\Tables\tblTFValidOriginDestinationState.sql" />
     <Build Include="dbo\Tables\tblTFValidLocalTax.sql" />
     <Build Include="dbo\Tables\tblTFValidAccountStatusCode.sql" />
+    <Build Include="dbo\Tables\tblEntityGroup.sql" />
+    <Build Include="dbo\Tables\tblEntityGroupDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
