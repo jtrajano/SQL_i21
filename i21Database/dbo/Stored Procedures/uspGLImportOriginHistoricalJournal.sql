@@ -123,8 +123,8 @@ BEGIN TRANSACTION
 			ELSE CASE WHEN glhst_dr_cr_ind = 'D' THEN (glhst_amt * -1) ELSE 0 END 
 			END AS Credit,		
 		0 AS CreditRate,		
-		0 AS DebitUnits,
-		0 AS CreditUnits, -- credit unit rate
+		glhst_units AS DebitUnits,
+		glhst_units AS CreditUnits, -- credit unit rate
 		glhst_ref AS strDescription,
 		NULL AS intCurrencyId,
 		0 AS dblUnitsInlbs,
@@ -148,7 +148,9 @@ BEGIN TRANSACTION
 		SUBSTRING(strCurrentExternalId,1,8) = glhst_acct1_8 AND SUBSTRING(strCurrentExternalId,10,8) = glhst_acct9_16 
 	 INNER JOIN tblGLAccount ON tblGLAccount.intAccountId = tblGLCOACrossReference.inti21Id
 	 
-
+	 --RESET DebitUnits/CreditUnits
+	 UPDATE #iRelyImptblGLJournalDetail SET DebitUnits = 0 ,CreditUnits = 0
+	 
 	 UPDATE 
 	A SET DebitUnits = 
 	case
