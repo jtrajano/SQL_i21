@@ -38,6 +38,7 @@ SELECT SO.intSalesOrderId
 	 , dblSalesOrderTotal = ISNULL(SO.dblSalesOrderTotal, 0)
 	 , I.strItemNo
 	 , SD.intSalesOrderDetailId
+	 , CH.strContractNumber
 	 , SD.strItemDescription
 	 , UOM.strUnitMeasure
 	 , dblQtyShipped = ISNULL(SD.dblQtyShipped, 0)
@@ -55,7 +56,8 @@ LEFT JOIN (tblSOSalesOrderDetail SD
 	LEFT JOIN tblICItem I ON SD.intItemId = I.intItemId 
 	LEFT JOIN tblSOSalesOrderDetailTax SDT ON SD.intSalesOrderDetailId = SDT.intSalesOrderDetailId
 	LEFT JOIN tblSMTaxCode SMT ON SDT.intTaxCodeId = SMT.intTaxCodeId
-	LEFT JOIN vyuARItemUOM UOM ON SD.intItemUOMId = UOM.intItemUOMId AND SD.intItemId = UOM.intItemId) ON SO.intSalesOrderId = SD.intSalesOrderId
+	LEFT JOIN vyuARItemUOM UOM ON SD.intItemUOMId = UOM.intItemUOMId AND SD.intItemId = UOM.intItemId
+	LEFT JOIN tblCTContractHeader CH ON SD.intContractHeaderId = CH.intContractHeaderId) ON SO.intSalesOrderId = SD.intSalesOrderId
 INNER JOIN (tblARCustomer C 
 	INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = SO.intEntityCustomerId
 INNER JOIN tblSMCompanyLocation L ON SO.intCompanyLocationId = L.intCompanyLocationId
