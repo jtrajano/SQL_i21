@@ -83,7 +83,7 @@ set @dblInvoiceSurchargeRate =0;
 	     select top 1 @dblCostRatePerUnit =TM.dblCostRatePerUnit,@dblInvoiceRatePerUnit = TM.dblInvoiceRatePerUnit from tblEntityTariff TA
 	                 join tblEntityTariffCategory TC on TA.intEntityTariffId = TC.intEntityTariffId					   
 	  			      left join tblEntityTariffMileage TM on TM.intEntityTariffId = TC.intEntityTariffId
-	  			      where (TM.intFromMiles >= @intMiles 
+	  			      where (@intMiles  >= TM.intFromMiles 
 				        and @intMiles  <= TM.intToMiles)
 	  			            and TA.intEntityId = @intEntityShipViaId
 	  					    and TC.intCategoryId = @intCategoryid
