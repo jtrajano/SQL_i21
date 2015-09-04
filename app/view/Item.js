@@ -1179,6 +1179,40 @@ Ext.define('Inventory.view.Item', {
                                                                         valueField: 'intPatronageCategoryId'
                                                                     },
                                                                     {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intFuelTaxClassId',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Tax Class Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strTaxClassCode',
+                                                                                dataType: 'string',
+                                                                                text: 'Tax Class',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strIRSTaxCode',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboTaxClass',
+                                                                        fieldLabel: 'Fuel Tax Class',
+                                                                        labelWidth: 116,
+                                                                        displayField: 'strTaxClassCode',
+                                                                        valueField: 'intFuelTaxClassId'
+                                                                    },
+                                                                    {
                                                                         xtype: 'checkboxfield',
                                                                         itemId: 'chkStockedItem',
                                                                         fieldLabel: 'Stocked Item',
@@ -3695,103 +3729,6 @@ Ext.define('Inventory.view.Item', {
                                                                     type: 'vbox',
                                                                     align: 'stretch'
                                                                 }
-                                                            }
-                                                        ]
-                                                    },
-                                                    {
-                                                        xtype: 'panel',
-                                                        itemId: 'pgeMotorFuelTax',
-                                                        layout: 'fit',
-                                                        title: 'Motor Fuel Tax',
-                                                        items: [
-                                                            {
-                                                                xtype: 'advancefiltergrid',
-                                                                itemId: 'grdMotorFuelTax',
-                                                                margin: -1,
-                                                                dockedItems: [
-                                                                    {
-                                                                        xtype: 'toolbar',
-                                                                        dock: 'top',
-                                                                        itemId: 'tlbGridOptions',
-                                                                        layout: {
-                                                                            type: 'hbox',
-                                                                            padding: '0 0 0 1'
-                                                                        },
-                                                                        items: [
-                                                                            {
-                                                                                xtype: 'button',
-                                                                                tabIndex: -1,
-                                                                                itemId: 'btnInsertMotorFuelTax',
-                                                                                iconCls: 'small-add',
-                                                                                text: 'Insert'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'button',
-                                                                                tabIndex: -1,
-                                                                                itemId: 'btnViewMotorFuelTax',
-                                                                                iconCls: 'small-view',
-                                                                                text: 'View'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'button',
-                                                                                tabIndex: -1,
-                                                                                itemId: 'btnRemoveMotorFuelTax',
-                                                                                iconCls: 'small-delete',
-                                                                                text: 'Remove'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'tbseparator'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'filter1'
-                                                                            }
-                                                                        ]
-                                                                    }
-                                                                ],
-                                                                columns: [
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colTaxAuthorityCode',
-                                                                        width: 114,
-                                                                        dataIndex: 'string',
-                                                                        text: 'Tax Authority Code'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colDescription',
-                                                                        dataIndex: 'string',
-                                                                        text: 'Description',
-                                                                        flex: 2
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colProductCode',
-                                                                        minWidth: 150,
-                                                                        width: 114,
-                                                                        dataIndex: 'string',
-                                                                        text: 'Product Code'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colProductCodeDescription',
-                                                                        dataIndex: 'string',
-                                                                        text: 'Product Code Description',
-                                                                        flex: 2
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcolumn',
-                                                                        itemId: 'colProductCodeGroup',
-                                                                        minWidth: 150,
-                                                                        dataIndex: 'string',
-                                                                        text: 'Product Code Group'
-                                                                    }
-                                                                ],
-                                                                viewConfig: {
-                                                                    itemId: 'grvMotorFuelTax'
-                                                                },
-                                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                                    selType: 'checkboxmodel'
-                                                                })
                                                             }
                                                         ]
                                                     }
