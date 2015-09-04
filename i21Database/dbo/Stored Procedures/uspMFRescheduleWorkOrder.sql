@@ -28,6 +28,9 @@ BEGIN TRY
 		,@dtmCurrentDate DATETIME
 		,@intUserId INT
 		,@intLocationId int
+		,@strWorkOrderNo nvarchar(50)
+		,@strCellName nvarchar(50)
+		,@strPackName nvarchar(50)
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -152,7 +155,7 @@ BEGIN TRY
 		,x.strAdditionalComments
 		,x.intNoOfSelectedMachine
 		,x.dtmEarliestStartDate
-		,x.intPackTypeId
+		,MC.intPackTypeId
 		,x.dblBalance * PTD.dblConversionFactor
 		,PTD.dblConversionFactor
 		,x.intScheduleWorkOrderId
@@ -178,13 +181,64 @@ BEGIN TRY
 			,intScheduleWorkOrderId INT
 			,ysnFrozen BIT
 			) x
-	JOIN dbo.tblMFManufacturingCellPackType MC ON MC.intManufacturingCellId = x.intManufacturingCellId
+	LEFT JOIN dbo.tblMFManufacturingCellPackType MC ON MC.intManufacturingCellId = x.intManufacturingCellId
 		AND MC.intPackTypeId = x.intPackTypeId
-	JOIN dbo.tblMFPackTypeDetail PTD ON PTD.intPackTypeId = x.intPackTypeId
+	LEFT JOIN dbo.tblMFPackTypeDetail PTD ON PTD.intPackTypeId = x.intPackTypeId
 		AND PTD.intTargetUnitMeasureId = x.intUnitMeasureId
 		AND PTD.intSourceUnitMeasureId = MC.intLineCapacityUnitMeasureId
-		Where intStatusId<>1 --and dblBalance>0
+		Where intStatusId<>1 
 	ORDER BY x.intExecutionOrder
+
+	IF EXISTS (
+		SELECT *
+		FROM @tblMFScheduleWorkOrder
+		WHERE intPackTypeId IS NULL and intStatusId<>1 and dblBalance>0
+		)
+	BEGIN
+		SELECT @intWorkOrderId =intWorkOrderId 
+		FROM @tblMFScheduleWorkOrder
+		WHERE intPackTypeId IS NULL and intStatusId<>1 and dblBalance>0
+
+		SELECT @strWorkOrderNo =strWorkOrderNo 
+		FROM tblMFWorkOrder
+		Where intWorkOrderId =@intWorkOrderId 
+
+		SELECT @strCellName=strCellName
+		FROM tblMFManufacturingCell 
+		WHERE intManufacturingCellId=@intManufacturingCellId
+
+		SELECT @intPackTypeId=intPackTypeId
+		FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
+			intWorkOrderId INT
+			,intPackTypeId INT
+			) x 
+		WHERE x.intWorkOrderId=@intWorkOrderId
+
+		SELECT @strPackName=strPackName
+		FROM tblMFPackType
+		WHERE intPackTypeId=@intPackTypeId
+
+		RAISERROR(51186,11,1,@strPackName,@strWorkOrderNo,@strCellName)
+		RETURN
+	END
+
+	IF EXISTS (
+		SELECT *
+		FROM @tblMFScheduleWorkOrder
+		WHERE dblConversionFactor IS NULL and intStatusId<>1 and dblBalance>0
+		)
+	BEGIN
+		SELECT @intWorkOrderId =intWorkOrderId 
+		FROM @tblMFScheduleWorkOrder
+		WHERE dblConversionFactor IS NULL and intStatusId<>1 and dblBalance>0
+
+		SELECT @strWorkOrderNo =strWorkOrderNo 
+		FROM tblMFWorkOrder
+		Where intWorkOrderId =@intWorkOrderId 
+
+		RAISERROR(51186,11,1,@strWorkOrderNo)
+		RETURN
+	END
 	
 	--Select *from @tblMFScheduleWorkOrder
 	--return
@@ -488,6 +542,24 @@ BEGIN TRY
 			FROM @tblMFScheduleWorkOrderCalendarDetail
 			WHERE intCalendarDetailId > @intCalendarDetailId
 		END
+	END
+
+	IF EXISTS (
+		SELECT *
+		FROM @tblMFScheduleWorkOrder
+		WHERE intNoOfUnit > 0
+		)
+	BEGIN
+		SELECT @intWorkOrderId =intWorkOrderId 
+		FROM @tblMFScheduleWorkOrder
+		WHERE intNoOfUnit > 0
+
+		Select @strWorkOrderNo =strWorkOrderNo 
+		From tblMFWorkOrder
+		Where intWorkOrderId =@intWorkOrderId 
+
+		RAISERROR(51185,11,1,@strWorkOrderNo)
+		RETURN
 	END
 
 	IF @intScheduleId>0
