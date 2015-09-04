@@ -45,6 +45,7 @@ BEGIN TRY
 		,ysnFreightInPrice
 		,intTaxGroupId	
 		,strActualCostId
+		,intShipToLocationId
 	 )	 
 	 select     
        DH.intEntityCustomerId,     
@@ -86,7 +87,8 @@ BEGIN TRY
 			       join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
                    where RR.strOrigin = 'Terminal' 
 			         and HH.strDestination = 'Customer' 
-			         and HH.intDistributionHeaderId = DH.intDistributionHeaderId ) as strActualCostId 
+			         and HH.intDistributionHeaderId = DH.intDistributionHeaderId ) as strActualCostId,
+		DH.intShipToLocationId 
 	   from tblTRTransportLoad TL
             JOIN tblTRTransportReceipt TR on TR.intTransportLoadId = TL.intTransportLoadId
 			JOIN tblTRDistributionHeader DH on DH.intTransportReceiptId = TR.intTransportReceiptId

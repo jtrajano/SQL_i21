@@ -27,4 +27,5 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[ysnFreightInPrice] bit NULL DEFAULT 0         --freight in price
 	,[intTaxGroupId] int null                       --Tax Group
 	,[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,[intShipToLocationId] INT NULL                            -- SalesPerson
 )
