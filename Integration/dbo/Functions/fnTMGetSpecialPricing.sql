@@ -300,7 +300,7 @@ BEGIN
 	
 	IF(@strBasisIndicator = ''S'')
 	BEGIN
-		SET @dblCurrentItemPrice = ((ISNULL(@dblFactor,0.0)/100) * @dblCurrentItemPrice) + @dblCurrentItemPrice
+		SET @dblCurrentItemPrice = @dblCurrentItemPrice - ((ISNULL(@dblFactor,0.0)/100) * @dblCurrentItemPrice) 
 	END
 	
 	IF(@strBasisIndicator = ''A'')
