@@ -101,10 +101,9 @@ SELECT C.intManufacturingCellId
 	,SL.intLastModifiedUserId
 	,WS.intSequenceNo 
 FROM dbo.tblMFWorkOrder W
-JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
-	AND W.intStatusId <> 13
-	AND intManufacturingCellId = @intManufacturingCellId
 JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId
+	AND W.intStatusId <> 13
+	AND W.intManufacturingCellId = @intManufacturingCellId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 LEFT JOIN dbo.tblMFPackType P ON P.intPackTypeId = I.intPackTypeId
 JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
@@ -115,6 +114,7 @@ LEFT JOIN dbo.tblMFSchedule S ON S.intScheduleId = @intScheduleId
 LEFT JOIN dbo.tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
 	AND S.intScheduleId = SL.intScheduleId
 LEFT JOIN dbo.tblMFShift SH ON SH.intShiftId = SL.intPlannedShiftId
+LEFT JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = IsNULL(SL.intStatusId,W.intStatusId)
 JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
 	AND R.intLocationId = C.intLocationId
 	AND R.ysnActive = 1

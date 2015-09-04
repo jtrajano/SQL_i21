@@ -100,6 +100,7 @@ BEGIN TRY
 	INSERT INTO dbo.tblMFScheduleWorkOrder (
 		intScheduleId
 		,intWorkOrderId
+		,intStatusId
 		,intDuration
 		,intExecutionOrder
 		,intChangeoverDuration
@@ -123,6 +124,7 @@ BEGIN TRY
 		)
 	SELECT @intScheduleId
 		,x.intWorkOrderId
+		,x.intStatusId
 		,x.intDuration
 		,ROW_NUMBER() OVER (ORDER BY x.intExecutionOrder) as intExecutionOrder
 		,x.intChangeoverDuration
