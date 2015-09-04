@@ -2352,6 +2352,9 @@
     <Build Include="dbo\Tables\tblPATEstateCorporation.sql" />
     <Build Include="dbo\Tables\tblPATPatronageCategory.sql" />
     <Build Include="dbo\Tables\tblPATStockClassification.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetCalendarShiftCount.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetCalendarMachineCountByManufacturingCell.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetManufacturingCellCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -7,6 +7,7 @@
 	,@intCalendarId INT
 	,@intLocationId INT
 	,@ysnpivot BIT
+	,@intCount int OUTPUT
 	)
 AS
 BEGIN
@@ -206,6 +207,8 @@ BEGIN
 		PIVOT(Count(DT.intMachineId) FOR strName IN (' + @strMachineName + ')) pvt'
 
 		EXEC (@SQL)
+
+		SELECT @intCount=@@ROWCOUNT 
 	END
 	ELSE
 	BEGIN
@@ -254,5 +257,7 @@ BEGIN
 			,dbo.tblMFShift S
 			,@tblMFMachine M
 		WHERE S.intShiftId = CD.intShiftId
+
+		SELECT @intCount=@@ROWCOUNT 
 	END
 END
