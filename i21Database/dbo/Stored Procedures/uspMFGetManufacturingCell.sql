@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE uspMFGetManufacturingCell (
 	@intCalendarId INT
 	,@intLocationId INT
+	,@strCellName NVARCHAR(50) = '%'
+	,@intManufacturingCellId int=0
 	)
 AS
 BEGIN
@@ -18,5 +20,7 @@ BEGIN
 	WHERE M.intLocationId = @intLocationId
 		AND M.ysnActive = 1
 		AND M.ysnIncludeSchedule = 1
+		AND M.strCellName LIKE @strCellName + '%'
+		AND M.intManufacturingCellId =(Case When @intManufacturingCellId>0 Then @intManufacturingCellId Else M.intManufacturingCellId End)
 	ORDER BY M.strCellName
 END
