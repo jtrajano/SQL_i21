@@ -18,6 +18,7 @@
 	[apegl_ivc_no] ASC,
 	[apegl_dist_no] ASC,
 	[apegl_alt_cbk_no] ASC,
-	[apegl_gl_acct] ASC
+	[apegl_gl_acct] ASC,
+	[intBillDetailId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY] 
 ) ON [PRIMARY]

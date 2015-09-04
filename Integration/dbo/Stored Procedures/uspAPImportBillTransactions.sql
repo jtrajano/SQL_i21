@@ -105,7 +105,7 @@ BEGIN
 			SET @ErrorMessage  = ERROR_MESSAGE()
 			SET @ErrorState    = ERROR_STATE()
 			SET @ErrorLine     = ERROR_LINE()
-			SET @ErrorMessage  = ''Failed to import bills from apivcmst.'' + CHAR(13) + 
+			SET @ErrorMessage  = ''Failed to import bills.'' + CHAR(13) + 
 					''SQL Server Error Message is: '' + CAST(@ErrorNumber AS VARCHAR(10)) + 
 					'' Line: '' + CAST(@ErrorLine AS VARCHAR(10)) + '' Error text: '' + @ErrorMessage
 			IF @transCount = 0 AND XACT_STATE() <> 0 ROLLBACK TRANSACTION
