@@ -2291,6 +2291,7 @@
     <Build Include="dbo\Stored Procedures\uspSCFullSheetDiscountDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSCFullSheetDistributionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSCFullSheetFooterDetail.sql" />
+    <Build Include="dbo\Functions\fnAPFormatAddress.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
