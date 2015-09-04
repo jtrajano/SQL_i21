@@ -8,7 +8,7 @@ BEGIN TRY
 	
 	DECLARE @ErrMsg					NVARCHAR(MAX),
 			@intContractDetailId	INT,
-			@dblCashPrice			NUMERIC(6,4),
+			@dblCashPrice			NUMERIC(9,4),
 			@intPricingTypeId		INT
 	
 	SELECT @intContractDetailId		=	MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
