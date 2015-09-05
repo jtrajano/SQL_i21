@@ -21,6 +21,7 @@ AS
 			AD.intPUnitMeasureId,
 			CDP.intDefaultLocationId as intPDefaultLocationId,
 			CDP.strEntityName as strVendor,
+			CDP.ysnUnlimitedQuantity as ysnPUnlimitedQuantity,
 
 			AD.intSContractDetailId,
 			CDS.strContractNumber as strSalesContractNumber,
@@ -32,6 +33,7 @@ AS
 			AD.intSUnitMeasureId,
 			CDS.intDefaultLocationId as intSDefaultLocationId,
 			CDS.strEntityName as strCustomer,
+			CDS.ysnUnlimitedQuantity as ysnSUnlimitedQuantity,
 
 			AD.dblPAllocatedQty,
 			AD.dblSAllocatedQty,
