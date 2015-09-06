@@ -1,24 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[uspGLGenerateAccountRange]
-AS
-	SET NOCOUNT ON;
-	--exits if already existing
-	
-	--REMOVE Sales & Cost of Goods Sold account type (GL-2084)
-	DECLARE @intRangeIdExpense INT
-	DECLARE @intRangeIdRevenue INT
-	SELECT @intRangeIdExpense = intAccountRangeId FROM tblGLAccountRange WHERE strAccountType = 'Expense'
-	SELECT @intRangeIdRevenue = intAccountRangeId FROM tblGLAccountRange WHERE strAccountType = 'Revenue'
-
-	UPDATE tblGLAccountGroup SET intAccountRangeId = @intRangeIdExpense,strAccountType ='Expense'
-	WHERE strAccountType = 'Cost of Goods Sold'
-
-	UPDATE tblGLAccountGroup SET intAccountRangeId = @intRangeIdRevenue,strAccountType ='Revenue'
-	WHERE strAccountType = 'Sales'
-
-	DELETE FROM tblGLAccountRange WHERE strAccountType IN ('Sales','Cost of Goods Sold')
-	
+﻿GO
 	IF EXISTS(SELECT TOP 1 1 FROM tblGLAccountRange) RETURN
-	
+	PRINT N'Begin Generating Account Range'
 	DECLARE @intLength INT
 	SELECT TOP 1 @intLength = intLength - 1  FROM tblGLAccountStructure WHERE strType = 'Primary'
 	SET IDENTITY_INSERT tblGLAccountRange ON
@@ -35,4 +17,6 @@ AS
 	UPDATE tblGLAccountRange SET intAccountGroupId = 0 WHERE strAccountType = 'All'
 	UPDATE A SET intAccountGroupId = B.intAccountGroupId FROM tblGLAccountRange A
 	INNER JOIN tblGLAccountGroup B ON B.strAccountType = A.strAccountType AND B.intParentGroupId = 0
-RETURN 0
+	
+	PRINT N'Finished Generating Account Range'
+GO
