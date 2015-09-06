@@ -4,10 +4,21 @@ AS
 	--exits if already existing
 	
 	--REMOVE Sales & Cost of Goods Sold account type (GL-2084)
-	DELETE FROM tblGLAccountRange WHERE strAccountType IN ('Sales','Cost of Goods Sold')
-	UPDATE tblGLAccountGroup SET strAccountType ='Expense' WHERE strAccountGroup = 'Sales'
-	UPDATE tblGLAccountGroup SET strAccountType ='Revenue' WHERE strAccountGroup = 'Cost of Goods Sold'
+	DECLARE @intRangeIdExpense INT
+	DECLARE @intRangeIdRevenue INT
+	SELECT @intRangeIdExpense = intAccountRangeId FROM tblGLAccountRange WHERE strAccountType = 'Expense'
+	SELECT @intRangeIdRevenue = intAccountRangeId FROM tblGLAccountRange WHERE strAccountType = 'Revenue'
 
+	UPDATE g SET intAccountRangeId = @intRangeIdExpense,strAccountType ='Expense' FROM tblGLAccountGroup g inner JOIN
+	tblGLAccountRange r ON r.intAccountRangeId = g.intAccountRangeId
+	and r.strAccountType = 'Sales'
+
+	UPDATE g SET intAccountRangeId = @intRangeIdRevenue,strAccountType ='Revenue' FROM tblGLAccountGroup g inner JOIN
+	tblGLAccountRange r ON r.intAccountRangeId = g.intAccountRangeId
+	and r.strAccountType = 'Cost of Goods Sold'
+
+	DELETE FROM tblGLAccountRange WHERE strAccountType IN ('Sales','Cost of Goods Sold')
+	
 	IF EXISTS(SELECT TOP 1 1 FROM tblGLAccountRange) RETURN
 	
 	DECLARE @intLength INT
