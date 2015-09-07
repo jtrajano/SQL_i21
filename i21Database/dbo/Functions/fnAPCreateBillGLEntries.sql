@@ -51,8 +51,8 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	A.intAccountId,
 		[dblDebit]						=	0,
-		[dblCredit]						=	(CASE WHEN A.intTransactionType IN (2, 3) AND A.dblTotal > 0 
-													THEN A.dblTotal * -1 ELSE A.dblTotal END) - ISNULL(Taxes.dblTotalICTax,0),
+		[dblCredit]						=	(CASE WHEN A.intTransactionType IN (2, 3) AND A.dblAmountDue > 0 
+													THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END) - ISNULL(Taxes.dblTotalICTax,0),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
 		[strDescription]				=	A.strReference,
@@ -97,6 +97,44 @@ BEGIN
 			--	SELECT * FROM #tmpGLUnits WHERE intAccountId = A.intAccountId
 			--) Units
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	--PREPAY, DEBIT MEMO ENTRIES
+	UNION ALL
+	SELECT
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, C.dtmDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	C.intAccountId,
+		[dblDebit]						=	0,
+		[dblCredit]						=	B.dblAmountApplied,
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
+		[strDescription]				=	C.strReference,
+		[strCode]						=	'AP',
+		[strReference]					=	D.strVendorId,
+		[intCurrencyId]					=	C.intCurrencyId,
+		[dblExchangeRate]				=	1,
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	NULL,
+		[strJournalLineDescription]		=	CASE WHEN C.intTransactionType = 2 THEN 'Applied Vendor Prepayment'
+												WHEN C.intTransactionType = 3 THEN 'Applied Debit Memo'
+											ELSE 'NONE' END,
+		[intJournalLineNo]				=	B.intTransactionId,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	CASE WHEN C.intTransactionType = 2 THEN 'Vendor Prepayment'
+												WHEN C.intTransactionType = 3 THEN 'Debit Memo'
+											ELSE 'NONE' END,
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[intConcurrencyId]				=	1
+	FROM tblAPBill A
+	INNER JOIN tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
+	INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
+	LEFT JOIN tblAPVendor D ON C.intEntityVendorId = D.intEntityVendorId
+	WHERE B.dblAmountApplied <> 0
+	AND A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	--DEBIT
 	UNION ALL 
 	SELECT	
