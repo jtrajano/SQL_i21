@@ -10,6 +10,20 @@ AS
 BEGIN
 	DECLARE @TaxGroupMasterId INT
 			,@TaxExempt BIT
+			,@VendorId INT
+			,@ItemCategoryId INT
+	
+	SELECT
+		@VendorId = ItemStock.intVendorId
+		,@ItemCategoryId = Item.intCategoryId
+	FROM tblICItem Item
+	INNER JOIN vyuICGetItemStock ItemStock ON Item.intItemId = ItemStock.intItemId
+	WHERE Item.intItemId = @ItemId AND ItemStock.intLocationId = @LocationId
+			
+	IF (@TransactionType = 'Sale')
+		SET @TaxExempt = ISNULL((SELECT ysnTaxExempt FROM tblARCustomer WHERE intEntityCustomerId = @EntityId AND @EntityId IS NOT NULL),0)
+	ELSE
+		SET @TaxExempt = 0
 			
 			
 		IF @TaxMasterId IS NOT NULL AND @TaxMasterId <> 0
@@ -48,7 +62,21 @@ BEGIN
 				,0 AS ysnSeparateOnInvoice 
 				,TaxCode.ysnCheckoffTax
 				,TaxCode.strTaxCode
-				,@TaxExempt AS ysnTaxExempt 				
+				,(CASE WHEN ISNULL(@TaxExempt,0) = 0
+					THEN (CASE WHEN @TransactionType = 'Sale'
+							THEN (ISNULL((	SELECT TOP 1 1 FROM
+												tblARCustomerTaxingTaxException
+											WHERE
+												(intCategoryId = @ItemCategoryId OR intItemId = @ItemId)
+												AND intEntityCustomerId = @EntityId
+												AND (intTaxClassId = TaxCode.[intTaxClassId] OR intTaxCodeId = TaxCode.[intTaxCodeId] OR (UPPER(LTRIM(RTRIM(ISNULL(strState,'')))) = UPPER(LTRIM(RTRIM(ISNULL(TaxCode.strState,'')))) AND LEN(UPPER(LTRIM(RTRIM(ISNULL(strState,''))))) > 0 ) )
+												AND	@TransactionDate BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate, @TransactionDate) AS DATE)
+											ORDER BY
+												dtmStartDate),0))
+							ELSE ISNULL(@TaxExempt,0)
+						END)
+					ELSE ISNULL(@TaxExempt,0)
+				END) AS [ysnTaxExempt] 				
 			FROM tblSMTaxCode TaxCode
 			INNER JOIN tblSMTaxGroupCode TaxGroupCode ON TaxCode.intTaxCodeId = TaxGroupCode.intTaxCodeId 
 			INNER JOIN tblSMTaxGroup TaxGroup ON TaxGroupCode.intTaxGroupId = TaxGroup.intTaxGroupId
@@ -72,8 +100,6 @@ BEGIN
 			, intItemId INT
 			, intCategoryId INT
 			, intTaxGroupMasterId INT)
-		DECLARE @VendorId INT
-			,@ItemCategoryId INT
 
 		INSERT INTO @EntitySpecialTax(
 			 intSpecialTaxId
@@ -92,14 +118,6 @@ BEGIN
 		INNER JOIN tblARCustomer Customer ON SpecialTax.intEntityCustomerId = Customer.intEntityCustomerId
 		WHERE Customer.intEntityCustomerId = @EntityId
 		
-		SELECT
-			@VendorId = ItemStock.intVendorId
-			,@ItemCategoryId = Item.intCategoryId
-		FROM tblICItem Item
-		INNER JOIN vyuICGetItemStock ItemStock ON Item.intItemId = ItemStock.intItemId
-		WHERE Item.intItemId = @ItemId AND ItemStock.intLocationId = @LocationId
-
-		SET @TaxExempt = ISNULL((SELECT ysnTaxExempt FROM tblARCustomer WHERE intEntityCustomerId = @EntityId AND @EntityId IS NOT NULL),0)
 
 		--Customer Special Tax
 		IF(EXISTS(SELECT TOP 1 NULL FROM @EntitySpecialTax))
@@ -139,10 +157,7 @@ BEGIN
 													
 		END
 	END
-	ELSE
-	BEGIN
-		SET @TaxExempt = 0
-	END
+
 
 	IF ISNULL(@TaxGroupMasterId, 0) = 0
 	BEGIN				
@@ -413,7 +428,21 @@ BEGIN
 				,tblSMTaxGroupMaster.ysnSeparateOnInvoice 
 				,TaxCode.ysnCheckoffTax
 				,TaxCode.strTaxCode
-				,@TaxExempt AS ysnTaxExempt 				
+				,(CASE WHEN ISNULL(@TaxExempt,0) = 0
+					THEN (CASE WHEN @TransactionType = 'Sale'
+							THEN (ISNULL((	SELECT TOP 1 1 FROM
+												tblARCustomerTaxingTaxException
+											WHERE
+												(intCategoryId = @ItemCategoryId OR intItemId = @ItemId)
+												AND intEntityCustomerId = @EntityId
+												AND (intTaxClassId = TaxCode.[intTaxClassId] OR intTaxCodeId = TaxCode.[intTaxCodeId] OR (UPPER(LTRIM(RTRIM(ISNULL(strState,'')))) = UPPER(LTRIM(RTRIM(ISNULL(TaxCode.strState,'')))) AND LEN(UPPER(LTRIM(RTRIM(ISNULL(strState,''))))) > 0 ) )
+												AND	@TransactionDate BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate, @TransactionDate) AS DATE)
+											ORDER BY
+												dtmStartDate),0))
+							ELSE ISNULL(@TaxExempt,0)
+						END)
+					ELSE ISNULL(@TaxExempt,0)
+				END) AS [ysnTaxExempt] 				
 			FROM tblSMTaxCode TaxCode
 			INNER JOIN tblSMTaxGroupCode TaxGroupCode ON TaxCode.intTaxCodeId = TaxGroupCode.intTaxCodeId 
 			INNER JOIN tblSMTaxGroup TaxGroup ON TaxGroupCode.intTaxGroupId = TaxGroup.intTaxGroupId

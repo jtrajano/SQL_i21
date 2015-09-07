@@ -47,7 +47,7 @@ AS
 				,0 [ysnSeparateOnInvoice] 
 				,TC.[ysnCheckoffTax]
 				,TC.[strTaxCode]
-				,(CASE WHEN @TaxExempt IS NULL OR @TaxExempt = 0
+				,(CASE WHEN ISNULL(@TaxExempt,0) = 0
 					THEN ISNULL((
 							SELECT TOP 1 1 FROM
 								tblARCustomerTaxingTaxException
@@ -399,7 +399,7 @@ AS
 				,TGM.[ysnSeparateOnInvoice] 
 				,TC.[ysnCheckoffTax]
 				,TC.[strTaxCode]
-				,(CASE WHEN @TaxExempt IS NULL OR @TaxExempt = 0
+				,(CASE WHEN ISNULL(@TaxExempt,0) = 0
 					THEN ISNULL((
 							SELECT TOP 1 1 FROM
 								tblARCustomerTaxingTaxException
