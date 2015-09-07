@@ -330,8 +330,7 @@ BEGIN
 			FROM 
 				@TaxCodes
 			WHERE 
-				[strCountry] = @Country
-				AND [strState] = @State 																			
+				[strState] = @State 																			
 				
 			SELECT @TaxGroupCount = COUNT(1) FROM @TaxGroups
 			SELECT @ValidTaxGroupCount = COUNT(1) FROM @ValidTaxGroups
@@ -350,9 +349,7 @@ BEGIN
 			FROM 
 				@TaxCodes
 			WHERE 
-				[strCountry] = @Country
-				AND [strState] = @State
-				AND [strCounty] = @County	
+				[strCounty] = @County	
 				
 			SELECT @TaxGroupCount = COUNT(1) FROM @TaxGroups
 			SELECT @ValidTaxGroupCount = COUNT(1) FROM @ValidTaxGroups
@@ -371,10 +368,7 @@ BEGIN
 			FROM 
 				@TaxCodes
 			WHERE 
-				[strCountry] = @Country
-				AND [strState] = @State
-				AND [strCounty] = @County
-				AND [strCity] = @City																					
+				[strCity] = @City																					
 				
 			SELECT @TaxGroupCount = COUNT(1) FROM @TaxGroups
 			SELECT @ValidTaxGroupCount = COUNT(1) FROM @ValidTaxGroups

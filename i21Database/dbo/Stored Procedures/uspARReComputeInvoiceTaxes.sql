@@ -145,6 +145,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 							,@Rate				DECIMAL(18,6)
 							,@CalculationMethod	NVARCHAR(30)
 							,@CheckoffTax		BIT
+							,@TaxExempt			BIT
 							
 					SELECT TOP 1 
 						 @Id			= [Id]
@@ -158,11 +159,13 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 					
 					SELECT 
 						 @TaxClassId		= [intTaxClassId]
-						,@TaxAdjusted		= [ysnTaxAdjusted]
+						,@TaxAdjusted		= ISNULL([ysnTaxAdjusted],0)
 						,@AdjustedTax		= [dblAdjustedTax]
 						,@Tax				= [dblTax]
 						,@Rate				= [numRate]
 						,@CalculationMethod	= [strCalculationMethod]
+						,@CheckoffTax		= ISNULL([ysnCheckoffTax],0)
+						,@TaxExempt			= ISNULL([ysnTaxExempt],0)
 					FROM
 						@ItemTaxes
 					WHERE [Id] = @Id
@@ -176,6 +179,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 						,numRate				DECIMAL(18,6)
 						,dblAdjustedTax			DECIMAL(18,6)
 						,ysnTaxAdjusted			BIT
+						,ysnTaxExempt			BIT
 						)
 						
 					INSERT INTO @TaxableByOtherTaxes (
@@ -186,6 +190,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 						,numRate
 						,dblAdjustedTax
 						,ysnTaxAdjusted	
+						,ysnTaxExempt	
 						)
 					SELECT
 						 Id
@@ -195,6 +200,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 						,numRate
 						,dblAdjustedTax
 						,ysnTaxAdjusted
+						,ysnTaxExempt
 					FROM
 						@ItemTaxes
 					WHERE
@@ -210,15 +216,17 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 									,@TaxAdjustedTax			DECIMAL(18,6)
 									,@TaxRate					DECIMAL(18,6)
 									,@TaxCalculationMethod		NVARCHAR(30)
+									,@TaxTaxExempt				BIT
 									
 							SELECT TOP 1 @TaxId	= [Id] FROM @TaxableByOtherTaxes
 										
 							SELECT TOP 1
 								 @TaxTaxableByOtherTaxes	= [strTaxableByOtherTaxes]
-								,@TaxTaxAdjusted			= [ysnTaxAdjusted]
+								,@TaxTaxAdjusted			= ISNULL([ysnTaxAdjusted],0)
 								,@TaxAdjustedTax			= [dblAdjustedTax]
 								,@TaxRate					= [numRate]
 								,@TaxCalculationMethod		= [strCalculationMethod]
+								,@TaxTaxExempt				= ISNULL([ysnTaxExempt],0)
 							FROM
 								@TaxableByOtherTaxes
 							WHERE
@@ -236,11 +244,11 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 									BEGIN
 										IF(@TaxCalculationMethod = 'Percentage')
 											BEGIN
-												SET @TaxableAmount = @TaxableAmount + ((@ItemPrice * @QtyShipped) * (@TaxRate/100.00))
+												SET @TaxableAmount = @TaxableAmount + ((CASE WHEN @TaxTaxExempt = 1 THEN 0.00 ELSE (@ItemPrice * @QtyShipped) * (@TaxRate/100.00) END))
 											END
 										ELSE
 											BEGIN
-												SET @TaxableAmount = (@ItemPrice * @QtyShipped) + (@QtyShipped * @TaxRate)
+												SET @TaxableAmount = (@ItemPrice * @QtyShipped) + ((CASE WHEN @TaxTaxExempt = 1 THEN 0.00 ELSE (@QtyShipped * @TaxRate) END))
 											END
 									END
 							END 
@@ -254,6 +262,9 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 						SET @ItemTaxAmount = (@TaxableAmount * (@Rate/100));
 					ELSE
 						SET @ItemTaxAmount = (@QtyShipped * @Rate);
+						
+					IF(@TaxExempt = 1)
+						SET @ItemTaxAmount = 0.00;
 						
 					IF(@CheckoffTax = 1)
 						SET @ItemTaxAmount = @ItemTaxAmount * -1;
@@ -290,6 +301,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
            ,[ysnTaxAdjusted]
            ,[ysnSeparateOnInvoice]
            ,[ysnCheckoffTax]
+           ,[ysnTaxExempt]
            ,[intConcurrencyId])
 		SELECT
 			[intInvoiceDetailId]
@@ -301,11 +313,12 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
            ,[strCalculationMethod]
            ,[numRate]
            ,[intSalesTaxAccountId]
-           ,[dblTax] * (CASE WHEN [ysnCheckoffTax] = 1 THEN -1 ELSE 1 END)
-           ,[dblAdjustedTax] * (CASE WHEN [ysnCheckoffTax] = 1 THEN -1 ELSE 1 END)
+           ,[dblTax]
+           ,[dblAdjustedTax]
            ,[ysnTaxAdjusted]
            ,[ysnSeparateOnInvoice]
            ,[ysnCheckoffTax]
+           ,[ysnTaxExempt]
            ,1
 		FROM
 			@ItemTaxes	
