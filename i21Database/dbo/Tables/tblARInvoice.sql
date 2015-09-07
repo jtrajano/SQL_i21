@@ -11,6 +11,7 @@
     [dtmShipDate]          DATETIME        NULL,
     [intShipViaId]         INT             NULL,
     [strPONumber]          NVARCHAR (25)    COLLATE Latin1_General_CI_AS NULL,
+	[strBOLNumber]		   NVARCHAR (50)	COLLATE Latin1_General_CI_AS NULL, 
     [intTermId]            INT             NOT NULL,
     [dblInvoiceSubtotal]   NUMERIC (18, 6) NULL,
     [dblShipping]          NUMERIC (18, 6) NULL,
@@ -86,22 +87,31 @@ ON dbo.tblARInvoice
 AFTER INSERT
 AS
 
-DECLARE @inserted TABLE(intInvoiceId INT)
+DECLARE @inserted TABLE(intInvoiceId INT, strTransactionType NVARCHAR(25))
 DECLARE @count INT = 0
 DECLARE @intInvoiceId INT
 DECLARE @InvoiceNumber NVARCHAR(50)
+DECLARE @TransactionType NVARCHAR(25)
 
 INSERT INTO @inserted
-SELECT intInvoiceId FROM INSERTED ORDER BY intInvoiceId
+SELECT intInvoiceId, strTransactionType FROM INSERTED ORDER BY intInvoiceId
 
 WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
 BEGIN
+	DECLARE @parameterINT AS INT
+	SET @parameterINT = 19
+	
+	SELECT TOP 1 @intInvoiceId = intInvoiceId, @TransactionType = strTransactionType FROM @inserted
+	
+	IF @TransactionType = 'Prepayment'
+		SET @parameterINT = 64
+		
+	IF @TransactionType = 'Overpayment'
+		SET @parameterINT = 65
 	
 	--EXEC uspARFixStartingNumbers 17
 	--IF(OBJECT_ID('tempdb..#tblTempAPByPassFixStartingNumber') IS NOT NULL) RETURN;
-	EXEC uspSMGetStartingNumber 19, @InvoiceNumber OUT
-
-	SELECT TOP 1 @intInvoiceId = intInvoiceId FROM @inserted
+	EXEC uspSMGetStartingNumber @parameterINT, @InvoiceNumber OUT	
 	
 	IF(@InvoiceNumber IS NOT NULL)
 	BEGIN

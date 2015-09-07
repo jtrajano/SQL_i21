@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblAPBillDetail] (
     [intBillDetailId] INT             IDENTITY (1, 1) NOT NULL,
     [intBillId]       INT             NOT NULL,
-    [strMiscDescription]  NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
+    [strMiscDescription]  NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
 	[strComment] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
     [intAccountId]    INT             NULL ,
 	[intItemId]    INT             NULL,

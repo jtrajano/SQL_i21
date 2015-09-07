@@ -29,8 +29,7 @@ ON adj1.intItemId = adj2.intItemId  AND adj2.intItemLocationId IS NOT NULL LEFT 
 ON adj2.intFamilyId = adj3.intSubcategoryId LEFT JOIN tblSTSubcategory adj4
 ON adj2.intClassId = adj4.intSubcategoryId LEFT JOIN tblSMCompanyLocation adj5
 ON adj2.intLocationId = adj5.intCompanyLocationId LEFT JOIN tblICItemUOM adj6
-ON adj1.intItemId = adj6.intItemId AND adj6.strUpcCode IS NOT NULL 
-AND adj6.strUpcCode <> '' LEFT JOIN tblICItem adj7
+ON adj1.intItemId = adj6.intItemId  LEFT JOIN tblICItem adj7
 ON adj1.intItemId = adj7.intItemId 
 LEFT JOIN tblICCategory adj8 ON adj7.intCategoryId = adj8.intCategoryId 
 LEFT JOIN tblAPVendor adj9 ON adj2.intVendorId = adj9.intEntityVendorId 

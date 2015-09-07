@@ -116,11 +116,14 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\DB\4_Create_Role_for_DashboardReports.sql
 
 -- General Ledger
-:r .\GL\DefaultData\AccountStructure.sql
-:r .\GL\DefaultData\AccountGroup.sql
-:r .\GL\DefaultData\AccountCategory.sql
-:r .\GL\DefaultData\AccountTemplate.sql
-:r .\GL\DefaultData\AccountSegmentTemplate.sql
+:r .\GL\DefaultData\1_AccountStructure.sql
+:r .\GL\DefaultData\2_AccountGroup.sql
+:r .\GL\DefaultData\2a_RemoveDuplicateCOGSales_AccountGroup.sql
+:r .\GL\DefaultData\3_AccountCategory.sql
+:r .\GL\DefaultData\4_AccountTemplate.sql
+:r .\GL\DefaultData\5_AccountSegmentTemplate.sql
+:r .\GL\DefaultData\6_AccountRange.sql
+:r .\GL\DefaultData\6a_RemoveCOGSales_AccountRange.sql
 :r .\GL\GLEntryDataFix.sql
 :r .\GL\ReportData\GeneralLedgerByAccountDetail.sql
 :r .\GL\ReportData\IncomeStatementStandard.sql
@@ -182,6 +185,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\11_RemoveOtherChargesAsset.sql
 :r .\IC\12_UpdateExistingInventoryTransactionForm.sql
 :r .\IC\13_MoveCommodityAttributes.sql
+:r .\IC\14_Fix_Blank_Costing_Method_In_tblICInventoryTransaction.sql
 :r .\IC\PatchFor_1510_to_1520.sql
 :r .\GL\InventoryCategoryFix.sql
 

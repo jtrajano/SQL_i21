@@ -23,6 +23,7 @@
 	,@strRelatedTransactionId NVARCHAR(40)
 	,@strTransactionForm NVARCHAR (255)
 	,@intUserId INT
+	,@intCostingMethod INT
 	,@InventoryTransactionIdentityId INT OUTPUT 
 AS
 
@@ -68,6 +69,7 @@ INSERT INTO dbo.tblICInventoryTransaction (
 		,[dtmCreated] 
 		,[intCreatedUserId] 
 		,[intConcurrencyId] 
+		,[intCostingMethod]
 )
 SELECT	[intItemId]							= @intItemId
 		,[intItemLocationId]				= @intItemLocationId
@@ -96,6 +98,7 @@ SELECT	[intItemId]							= @intItemId
 		,[dtmCreated]						= GETDATE()
 		,[intCreatedUserId]					= @intUserId
 		,[intConcurrencyId]					= 1
+		,[intCostingMethod]					= @intCostingMethod
 WHERE	@intItemId IS NOT NULL
 		AND @intItemLocationId IS NOT NULL
 		AND @intItemUOMId IS NOT NULL 

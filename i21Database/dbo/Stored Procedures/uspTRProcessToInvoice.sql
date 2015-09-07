@@ -46,6 +46,7 @@ BEGIN TRY
 		,intTaxGroupId	
 		,strActualCostId
 		,intShipToLocationId
+		,strBOLNumber
 	 )	 
 	 select     
        DH.intEntityCustomerId,     
@@ -88,7 +89,8 @@ BEGIN TRY
                    where RR.strOrigin = 'Terminal' 
 			         and HH.strDestination = 'Customer' 
 			         and HH.intDistributionHeaderId = DH.intDistributionHeaderId ) as strActualCostId,
-		DH.intShipToLocationId 
+		DH.intShipToLocationId,
+		TR.strBillOfLadding 
 	   from tblTRTransportLoad TL
             JOIN tblTRTransportReceipt TR on TR.intTransportLoadId = TL.intTransportLoadId
 			JOIN tblTRDistributionHeader DH on DH.intTransportReceiptId = TR.intTransportReceiptId

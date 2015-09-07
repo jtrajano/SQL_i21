@@ -33,7 +33,8 @@ DECLARE @AUTO_NEGATIVE AS INT = 1
 DECLARE @AVERAGECOST AS INT = 1
 		,@FIFO AS INT = 2
 		,@LIFO AS INT = 3
-		,@STANDARDCOST AS INT = 4
+		,@LOTCOST AS INT = 4
+		,@ACTUALCOST AS INT = 5
 
 DECLARE @ItemsToUnpost AS dbo.UnpostItemsTableType
 
@@ -413,16 +414,16 @@ BEGIN
 				,[intItemUOMId]							= ItemToUnpost.intItemUOMId
 				,[intSubLocationId]						= ItemToUnpost.intSubLocationId
 				,[intStorageLocationId]					= ItemToUnpost.intStorageLocationId
-				,[dtmDate]								= TransactionToReverse.dtmDate
+				,[dtmDate]								= InvTrans.dtmDate
 				,[dblQty]								= 0
 				,[dblUOMQty]							= 0
 				,[dblCost]								= 0
 				,[dblValue]								= (Stock.dblUnitOnHand * ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId)
 				,[dblSalesPrice]						= 0
-				,[intCurrencyId]						= TransactionToReverse.intCurrencyId
-				,[dblExchangeRate]						= TransactionToReverse.dblExchangeRate
-				,[intTransactionId]						= TransactionToReverse.intTransactionId
-				,[strTransactionId]						= TransactionToReverse.strTransactionId
+				,[intCurrencyId]						= InvTrans.intCurrencyId
+				,[dblExchangeRate]						= InvTrans.dblExchangeRate
+				,[intTransactionId]						= InvTrans.intTransactionId
+				,[strTransactionId]						= InvTrans.strTransactionId
 				,[strBatchId]							= @strBatchId
 				,[intTransactionTypeId]					= @AUTO_NEGATIVE
 				,[intLotId]								= ItemToUnpost.intLotId
@@ -430,7 +431,7 @@ BEGIN
 				,[intRelatedInventoryTransactionId]		= NULL 
 				,[intRelatedTransactionId]				= NULL 
 				,[strRelatedTransactionId]				= NULL 
-				,[strTransactionForm]					= TransactionToReverse.strTransactionForm
+				,[strTransactionForm]					= InvTrans.strTransactionForm
 				,[dtmCreated]							= GETDATE()
 				,[intCreatedUserId]						= @intUserId
 				,[intConcurrencyId]						= 1
@@ -441,19 +442,24 @@ BEGIN
 						ON Stock.intItemId = ItemToUnpost.intItemId
 						AND Stock.intItemLocationId = ItemToUnpost.intItemLocationId
 						AND dbo.fnGetCostingMethod(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId) = @AVERAGECOST
+				INNER JOIN (
+					SELECT	DISTINCT 
+							intItemId
+							,intItemLocationId
+					FROM	dbo.tblICInventoryTransaction
+					WHERE	intTransactionId = @intTransactionId
+							AND strTransactionId = @strTransactionId
+							-- AND intCostingMethod = @AVERAGECOST
+				) InvItemsToReverse
+					ON InvItemsToReverse.intItemId = ItemToUnpost.intItemId 
+					AND InvItemsToReverse.intItemLocationId = ItemToUnpost.intItemLocationId 
 				,(
-					SELECT TOP 1
-							ItemTransaction.dtmDate
-							,ItemTransaction.intCurrencyId
-							,ItemTransaction.dblExchangeRate
-							,ItemTransaction.intTransactionId
-							,ItemTransaction.strTransactionId
-							,ItemTransaction.strTransactionForm
-					FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ItemTransaction
-								ON ItemTransactionsToReverse.intInventoryTransactionId = ItemTransaction.intInventoryTransactionId
-					WHERE	ItemTransaction.intTransactionId = @intTransactionId
-							AND ItemTransaction.strTransactionId = @strTransactionId
-				) TransactionToReverse 
+					SELECT	TOP 1 
+							*
+					FROM	dbo.tblICInventoryTransaction InvTrans
+					WHERE	intTransactionId = @intTransactionId
+							AND strTransactionId = @strTransactionId
+				) InvTrans
 		WHERE	(Stock.dblUnitOnHand * ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(ItemToUnpost.intItemId, ItemToUnpost.intItemLocationId) <> 0
 	END
 END

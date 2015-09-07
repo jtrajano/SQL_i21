@@ -24,7 +24,10 @@ SELECT INV.intInvoiceId
 	 , strShipTo = [dbo].fnARFormatCustomerAddress(NULL, NULL, INV.strShipToLocationName, INV.strShipToAddress, INV.strShipToCity, INV.strShipToState, INV.strShipToZipCode, INV.strShipToCountry)
 	 , strSalespersonName = ESP.strName
 	 , INV.strPONumber
-	 , SO.strBOLNumber
+	 , (CASE WHEN INV.strBOLNumber IS NOT NULL AND LEN(RTRIM(LTRIM(ISNULL(INV.strBOLNumber,'')))) > 0
+			THEN INV.strBOLNumber
+			ELSE SO.strBOLNumber
+		END) AS strBOLNumber
 	 , SV.strShipVia
 	 , T.strTerm
 	 , INV.dtmShipDate
@@ -39,6 +42,7 @@ SELECT INV.intInvoiceId
 	 , dblAmountDue = ISNULL(INV.dblAmountDue, 0)
 	 , I.strItemNo
 	 , ID.intInvoiceDetailId
+	 , CH.strContractNumber
 	 , strItemDescription = ID.strItemDescription
 	 , UOM.strUnitMeasure
 	 , dblQtyShipped = ISNULL(ID.dblQtyShipped, 0)
@@ -60,7 +64,8 @@ LEFT JOIN (tblARInvoiceDetail ID
 	LEFT JOIN tblSOSalesOrderDetail SOD ON ID.intSalesOrderDetailId = SOD.intSalesOrderDetailId
 	LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId
 	LEFT JOIN tblARInvoiceDetailTax IDT ON ID.intInvoiceDetailId = IDT.intInvoiceDetailId
-	LEFT JOIN tblSMTaxCode SMT ON IDT.intTaxCodeId = SMT.intTaxCodeId) ON INV.intInvoiceId = ID.intInvoiceId
+	LEFT JOIN tblSMTaxCode SMT ON IDT.intTaxCodeId = SMT.intTaxCodeId
+	LEFT JOIN tblCTContractHeader CH ON ID.intContractHeaderId = CH.intContractHeaderId) ON INV.intInvoiceId = ID.intInvoiceId
 INNER JOIN (tblARCustomer C 
 	INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = INV.intEntityCustomerId
 INNER JOIN tblSMCompanyLocation L ON INV.intCompanyLocationId = L.intCompanyLocationId

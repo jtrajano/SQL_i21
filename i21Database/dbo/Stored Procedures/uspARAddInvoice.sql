@@ -137,6 +137,7 @@ INSERT INTO
 		,[intEntityId]
 		,[strDeliverPickup]
 		,[strActualCostId]
+		,[strBOLNumber]
 )
 SELECT
      TE.InvoiceNumber           -- invoice number
@@ -184,6 +185,7 @@ SELECT
 	,@EntityId
 	,IE.strDeliverPickup
 	,IE.strActualCostId
+	,IE.strBOLNumber
 FROM
 	@InvoiceEntries IE
 	Join @temp TE
@@ -222,7 +224,7 @@ LEFT OUTER JOIN
 		ON AC.intShipToId = BL.intEntityLocationId	
 WHERE
 	IE.intInvoiceId IS NULL OR IE.intInvoiceId = 0
-group by TE.InvoiceNumber,IE.intEntityCustomerId,IE.intLocationId,IE.strSourceId,IE.dtmDate,IE.intCurrencyId,IE.intSalesPersonId,IE.intShipViaId,IE.strComments,EL.intTermsId,IE.strPurchaseOrder,IE.intSourceId,IE.strDeliverPickup,IE.strActualCostId;				
+group by TE.InvoiceNumber,IE.intEntityCustomerId,IE.intLocationId,IE.strSourceId,IE.dtmDate,IE.intCurrencyId,IE.intSalesPersonId,IE.intShipViaId,IE.strComments,EL.intTermsId,IE.strPurchaseOrder,IE.intSourceId,IE.strDeliverPickup,IE.strActualCostId,IE.strBOLNumber;				
 
 
 ENABLE TRIGGER dbo.trgInvoiceNumber ON dbo.tblARInvoice;
@@ -273,6 +275,7 @@ SET
 	,[intEntityId]				= @EntityId
 	,[strDeliverPickup]			= IE.strDeliverPickup   
 	,[strActualCostId]  		= IE.strActualCostId
+	,[strBOLNumber]  			= IE.[strBOLNumber]
 FROM
 	[tblARInvoice] I
 INNER JOIN 
