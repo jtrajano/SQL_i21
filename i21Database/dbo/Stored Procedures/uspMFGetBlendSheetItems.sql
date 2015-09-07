@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFGetBlendSheetItems]
 	@intItemId int,
 	@intLocationId int,
-	@dblQtyToProduce decimal(18,6)
+	@dblQtyToProduce decimal(18,6),
+	@dtmDueDate DateTime
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -11,8 +12,25 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 Declare @intRecipeId int
+Declare @ysnRecipeItemValidityByDueDate bit=0
+Declare @intManufacturingProcessId int
+Declare @intDayOfYear INT
+Declare @dtmDate DATETIME
 
-Select @intRecipeId = intRecipeId from tblMFRecipe where intItemId=@intItemId and intLocationId=@intLocationId and ysnActive=1
+Select @intRecipeId = intRecipeId,@intManufacturingProcessId=intManufacturingProcessId 
+from tblMFRecipe where intItemId=@intItemId and intLocationId=@intLocationId and ysnActive=1
+
+Select @ysnRecipeItemValidityByDueDate=CASE When UPPER(pa.strAttributeValue) = 'TRUE' then 1 Else 0 End 
+From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
+Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
+and at.strAttributeName='Recipe Item Validity By Due Date'
+
+If @ysnRecipeItemValidityByDueDate=0
+	Set @dtmDate=Convert(date,GetDate())
+Else
+	Set @dtmDate=Convert(date,@dtmDueDate)
+
+SELECT @intDayOfYear = DATEPART(dy, @dtmDate)
 
 Declare @tblRequiredQty table
 (
@@ -46,7 +64,9 @@ From tblMFRecipeItem ri
 Join tblMFRecipe r on r.intRecipeId=ri.intRecipeId 
 Join tblICUnitMeasure u on ri.intUOMId=u.intUnitMeasureId
 Left Join tblICStorageLocation sl on ri.intStorageLocationId=sl.intStorageLocationId
-where r.intRecipeId=@intRecipeId and ri.intRecipeItemTypeId=1
+where r.intRecipeId=@intRecipeId and ri.intRecipeItemTypeId=1 and
+((ri.ysnYearValidationRequired = 1 AND @dtmDate BETWEEN ri.dtmValidFrom AND ri.dtmValidTo)
+OR (ri.ysnYearValidationRequired = 0 AND @intDayOfYear BETWEEN DATEPART(dy, ri.dtmValidFrom) AND DATEPART(dy, ri.dtmValidTo)))
 Union
 Select rs.intSubstituteItemId AS intItemId,(rs.dblQuantity * (@dblQtyToProduce/r.dblQuantity)) RequiredQty,1,rs.intItemId,0,rs.intRecipeSubstituteItemId,rs.intRecipeItemId,'',
 (rs.dblCalculatedLowerTolerance * (@dblQtyToProduce/r.dblQuantity)) AS dblLowerToleranceQty,
