@@ -304,7 +304,8 @@ BEGIN
 				@intTransactionId
 				,@strTransactionId
 				,@strBatchId
-				,@intUserId						
+				,@intUserId	
+				,@ysnRecap 				
 	END 
 END   
 

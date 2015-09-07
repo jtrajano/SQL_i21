@@ -12,6 +12,7 @@
 
 CREATE PROCEDURE [dbo].[uspICValidateCostingOnUnpost]
 	@ItemsToValidate UnpostItemsTableType READONLY
+	,@ysnRecap BIT = 0 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -29,12 +30,14 @@ CREATE TABLE #FoundErrors (
 
 -- Cross-check each items against the function that does the validation. 
 -- Store the result in a temporary table. 
+-- Do not do the validation if doing a recap. 
 INSERT INTO #FoundErrors
 SELECT	Errors.intItemId
 		,Errors.intItemLocationId
 		,Errors.strText
 		,Errors.intErrorCode
 FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnUnpostErrors(Item.intItemId, Item.intItemLocationId, Item.intItemUOMId, Item.intSubLocationId, Item.intStorageLocationId, Item.dblQty, Item.intLotId) Errors
+WHERE	ISNULL(@ysnRecap, 0) = 0
 
 -- If such error is found, raise the error to stop the costing and allow the caller code to do a rollback. 
 -- Check for negative stock qty 

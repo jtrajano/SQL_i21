@@ -128,6 +128,7 @@ INSERT INTO dbo.tblICInventoryActualCost (
 		,dtmCreated
 		,intCreatedUserId
 		,intConcurrencyId
+		,dtmDate
 )
 SELECT	strActualCostId = ActualCost.strActualCostId
 		,intItemId = OutTransactions.intItemId
@@ -141,6 +142,7 @@ SELECT	strActualCostId = ActualCost.strActualCostId
 		,dtmCreated = GETDATE()
 		,intCreatedUserId = OutTransactions.intCreatedUserId
 		,intConcurrencyId = 1
+		,dtmDate = ActualCost.dtmDate
 FROM	dbo.tblICInventoryActualCost ActualCost INNER JOIN dbo.tblICInventoryActualCostOut ActualCostOut
 			ON ActualCost.intInventoryActualCostId = ActualCostOut.intInventoryActualCostId
 		INNER JOIN dbo.tblICInventoryTransaction OutTransactions
