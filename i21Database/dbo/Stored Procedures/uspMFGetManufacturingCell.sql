@@ -1,8 +1,8 @@
 ﻿CREATE PROCEDURE uspMFGetManufacturingCell (
 	@intCalendarId INT
 	,@intLocationId INT
-	,@strCellName NVARCHAR(50) = '%'
 	,@intManufacturingCellId int=0
+	,@strCellName NVARCHAR(50) = '%'
 	)
 AS
 BEGIN

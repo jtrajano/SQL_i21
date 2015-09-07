@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspMFGetManufacturingCellCount (
 	@intCalendarId INT
 	,@intLocationId INT
+	,@intManufacturingCellId INT = 0
 	,@strCellName NVARCHAR(50) = '%'
 	)
 AS
@@ -11,4 +12,11 @@ BEGIN
 		AND M.ysnActive = 1
 		AND M.ysnIncludeSchedule = 1
 		AND M.strCellName LIKE @strCellName + '%'
+		AND M.intManufacturingCellId = (
+			CASE 
+				WHEN @intManufacturingCellId > 0
+					THEN @intManufacturingCellId
+				ELSE M.intManufacturingCellId
+				END
+			)
 END
