@@ -614,9 +614,9 @@
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleAPOverflow.sql" />
     <Build Include="dbo\Tables\tblRMSubreportCondition.sql" />
     <Build Include="dbo\Tables\tblRMSubreportFilter.sql" />
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountGroup.sql" />
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountSegmentTemplate.sql" />
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountStructure.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\2_AccountGroup.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\5_AccountSegmentTemplate.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1_AccountStructure.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreatePayment.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBankTransactionReversalOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReportCMChecks.sql" />
@@ -646,7 +646,7 @@
     <None Include="Scripts\Post-Deployment\AP\RestoreVendorId.sql" />
     <None Include="Scripts\Post-Deployment\FRD\FRDEntryDataFix.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\9_ZipCode.sql" />
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountTemplate.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\4_AccountTemplate.sql" />
     <None Include="Scripts\Post-Deployment\AP\FixEntitiesData.sql" />
     <Build Include="dbo\Tables\tblRMDefaultFilter.sql" />
     <Build Include="dbo\Tables\tblRMDefaultOption.sql" />
@@ -2291,6 +2291,10 @@
     <Build Include="dbo\Stored Procedures\uspSCFullSheetDiscountDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSCFullSheetDistributionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSCFullSheetFooterDetail.sql" />
+    <Build Include="dbo\Functions\fnAPFormatAddress.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRStorageDelete.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRStorageSave.sql" />
+    <None Include="Scripts\Post-Deployment\IC\14_Fix_Blank_Costing_Method_In_tblICInventoryTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2371,7 +2375,7 @@
     </ArtifactReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountCategory.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\3_AccountCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\12_ReminderList.sql" />
@@ -2381,5 +2385,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\15_Module.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\6_AccountRange.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\6a_RemoveCOGSales_AccountRange.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\2a_RemoveDuplicateCOGSales_AccountGroup.sql" />
   </ItemGroup>
 </Project>

@@ -1,15 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspGLGenerateAccountRange]
 AS
 	SET NOCOUNT ON;
-	--exits if already existing
-	
-	--REMOVE Sales & Cost of Goods Sold account type (GL-2084)
-	DELETE FROM tblGLAccountRange WHERE strAccountType IN ('Sales','Cost of Goods Sold')
-	UPDATE tblGLAccountGroup SET strAccountType ='Expense' WHERE strAccountGroup = 'Sales'
-	UPDATE tblGLAccountGroup SET strAccountType ='Revenue' WHERE strAccountGroup = 'Cost of Goods Sold'
-
 	IF EXISTS(SELECT TOP 1 1 FROM tblGLAccountRange) RETURN
-	
 	DECLARE @intLength INT
 	SELECT TOP 1 @intLength = intLength - 1  FROM tblGLAccountStructure WHERE strType = 'Primary'
 	SET IDENTITY_INSERT tblGLAccountRange ON

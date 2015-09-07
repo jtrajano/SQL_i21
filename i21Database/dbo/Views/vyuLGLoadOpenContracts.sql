@@ -21,5 +21,6 @@ AS
 			IsNull(CD.dblScheduleQty, 0) as dblScheduleQty,
 			CD.strItemNo,
 			CD.strCustomerContract,
-			IsNull(CD.dblBalance, 0) as dblBalance
+			IsNull(CD.dblBalance, 0) as dblBalance,
+			CD.ysnUnlimitedQuantity
 	FROM vyuCTContractDetailView 		CD

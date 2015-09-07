@@ -22,8 +22,8 @@ LG.intCounterPartyEntityLocationId as intShipToLocationId,
 (select top 1 intSalespersonId from tblARCustomer AR where AR.intEntityCustomerId = LG.intCounterPartyEntityId) as intEntitySalespersonId,
 (select strCustomerNumber from tblARCustomer AR where AR.intEntityCustomerId = LG.intCounterPartyEntityId) as strCustomerNumber,
 (select strLocationName from tblSMCompanyLocation SM where SM.intCompanyLocationId = LG.intCounterPartyCompanyLocationId) as strOutboundLocationName,
-(select top 1 strSalespersonId from tblARCustomer AR 
-                                    Left Join tblARSalesperson SP on AR.intSalespersonId = SP.intEntitySalespersonId
+(select top 1 SP.strEntityNo from tblARCustomer AR 
+                                    Left Join vyuEMEntity SP on AR.intSalespersonId = SP.intEntityId
 									 where AR.intEntityCustomerId = LG.intCounterPartyEntityId) as strOutboundSalespersonId,
 LG.strCounterPartyLocationName as strShipTo,
 LG.intCounterPartyItemId as intOutboundItemId,
@@ -90,7 +90,7 @@ LG.dblCashPrice as dblInboundPrice,
 NULL as strTerminalName,
 NULL as strSupplyPoint,
 LG.strLocationName,
-LG.strItemNo as strInboundItemNo,
+(select strItemNo from tblICItem IC where IC.intItemId = LG.intItemId) as strInboundItemNo,
 NULL as intInboundContractNumber,
 LG.intEntityId as intEntityCustomerId,
 LG.intCompanyLocationId as intOutboundCompanyLocationId, 
@@ -98,8 +98,8 @@ LG.intEntityLocationId as intShipToLocationId,
 (select top 1 intSalespersonId from tblARCustomer AR where AR.intEntityCustomerId = LG.intEntityId) as intEntitySalespersonId,
 (select strCustomerNumber from tblARCustomer AR where AR.intEntityCustomerId = LG.intEntityId) as strCustomerNumber,
 (select strLocationName from tblSMCompanyLocation SM where SM.intCompanyLocationId = LG.intCompanyLocationId) as strOutboundLocationName,
-(select top 1 strSalespersonId from tblARCustomer AR 
-                                    Left Join tblARSalesperson SP on AR.intSalespersonId = SP.intEntitySalespersonId
+(select top 1 SP.strEntityNo from tblARCustomer AR 
+                                    Left Join vyuEMEntity SP on AR.intSalespersonId = SP.intEntityId
 									 where AR.intEntityCustomerId = LG.intEntityId) as strOutboundSalespersonId,
 (select strLocationName from tblEntityLocation EML where EML.intEntityLocationId = LG.intEntityLocationId) as strShipTo,
 LG.intItemId as intOutboundItemId,

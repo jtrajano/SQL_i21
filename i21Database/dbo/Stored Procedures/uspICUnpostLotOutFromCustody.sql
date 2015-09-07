@@ -25,8 +25,8 @@ END
 DECLARE @AVERAGECOST AS INT = 1
 		,@FIFO AS INT = 2
 		,@LIFO AS INT = 3
-		,@STANDARDCOST AS INT = 4 	
-		,@LOT AS INT = 5
+		,@LOTCOST AS INT = 4 	
+		,@ACTUALCOST AS INT = 5
 
 -- Get all the inventory transaction related to the Unpost. 
 -- While at it, update the ysnIsUnposted to true. 
@@ -59,7 +59,7 @@ FROM	(
 					AND dbo.fnGetCostingMethod(
 							inventory_transaction_From_Custody.intItemId,
 							inventory_transaction_From_Custody.intItemLocationId
-						) IN (@LOT) 
+						) IN (@LOTCOST) 
 					AND 
 					(
 						-- Link to the main transaction

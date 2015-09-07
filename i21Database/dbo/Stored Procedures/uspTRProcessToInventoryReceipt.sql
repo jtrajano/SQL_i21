@@ -1,7 +1,6 @@
 CREATE PROCEDURE [dbo].[uspTRProcessToItemReceipt]
 	 @intTransportLoadId AS INT
 	,@intUserId AS INT	
-
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -21,10 +20,10 @@ DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
         @total as int,
 		@intSurchargeItemId as int,
 		@intFreightItemId as int;
-BEGIN TRY
 
+BEGIN TRY
 	-- Insert Entries to Stagging table that needs to processed to Transport Load
-     INSERT into @ReceiptStagingTable(
+	INSERT into @ReceiptStagingTable(
 			strReceiptType
 			,intEntityVendorId
 			,intShipFromId
@@ -56,7 +55,7 @@ BEGIN TRY
 			,strActualCostId
 			,intTaxGroupId
 	)	
-	select 
+	SELECT 
 			strReceiptType = CASE
 								WHEN TR.intContractDetailId IS NULL
 										THEN 'Direct'
@@ -88,15 +87,7 @@ BEGIN TRY
 										WHEN SP.strGrossOrNet = 'Net'
 										THEN TR.dblNet
 										END,
-			
-			dblUnitCost              = CASE
-										WHEN TR.ysnFreightInPrice = 0
-										THEN TR.dblUnitCost
-										WHEN TR.ysnFreightInPrice = 1 and TR.dblPurSurcharge !=0
-										THEN TR.dblUnitCost + TR.dblFreightRate + (TR.dblPurSurcharge / 100)
-                                        WHEN TR.ysnFreightInPrice = 1 
-										THEN TR.dblUnitCost + TR.dblFreightRate 
-										END,
+			TR.dblUnitCost,										
 			intCurrencyId = (SELECT	TOP 1 
 											CP.intDefaultCurrencyId		
 											FROM	dbo.tblSMCompanyPreference CP
@@ -117,140 +108,166 @@ BEGIN TRY
 			TR.dblPurSurcharge,
 			TR.ysnFreightInPrice,
 			(select strTransaction from tblTRTransportLoad TT
-                   join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
-			       join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
-                   where RR.strOrigin = 'Terminal' 
-			         and HH.strDestination = 'Customer' 
-			         and RR.intTransportReceiptId = TR.intTransportReceiptId ) as strActualCostId,
+					join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
+					join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
+					where RR.strOrigin = 'Terminal' 
+						and HH.strDestination = 'Customer' 
+						and RR.intTransportReceiptId = TR.intTransportReceiptId ) as strActualCostId,
 			TR.intTaxGroupId 
-	from	tblTRTransportLoad TL JOIN tblTRTransportReceipt TR 
+	FROM	tblTRTransportLoad TL JOIN tblTRTransportReceipt TR 
 				ON TR.intTransportLoadId = TL.intTransportLoadId			
 			LEFT JOIN vyuCTContractDetailView CT 
 				ON CT.intContractDetailId = TR.intContractDetailId
 			LEFT JOIN tblTRSupplyPoint SP 
 				ON SP.intSupplyPointId = TR.intSupplyPointId
-	where	TL.intTransportLoadId = @intTransportLoadId 
+	WHERE	TL.intTransportLoadId = @intTransportLoadId 
 			AND TR.strOrigin = 'Terminal';
-   select @intFreightItemId = intItemForFreightId from tblTRCompanyPreference
-   select top 1 @intSurchargeItemId = intItemId from vyuICGetOtherCharges where intOnCostTypeId = @intFreightItemId
---Fuel Freight
-   INSERT INTO @OtherCharges
-   (
-     [intEntityVendorId] 
-	,[strBillOfLadding] 
-	,[strReceiptType] 
-	,[intLocationId] 
-	,[intShipViaId] 
-	,[intShipFromId] 
-	,[intCurrencyId]  	
-	,[intChargeId] 
-    ,[ysnInventoryCost] 
-    ,[strCostMethod] 
-    ,[dblRate] 
-    ,[intCostUOMId] 
-    ,[intOtherChargeEntityVendorId] 
-    ,[dblAmount] 
-    ,[strAllocateCostBy] 
-	,[intContractDetailId] 
-	,[ysnAccrue]
-   ) 
-   select RE.intEntityVendorId,
-          RE.strBillOfLadding,
-		  RE.strReceiptType,
-		  RE.intLocationId,
-		  RE.intShipViaId,
-		  RE.intShipFromId,
-		  RE.intCurrencyId,
-		  @intFreightItemId,
-		  ysnInventoryCost   = CASE
-							       WHEN RE.ysnFreightInPrice = 0
-							       THEN 1
-							       WHEN RE.ysnFreightInPrice = 1
-							       THEN 0                                        
-							       END,		  
-		  'Per Unit',
-		  RE.dblFreightRate,
-		  (select top 1 intItemUOMId from tblICItemUOM where intItemId =  @intFreightItemId) as intItemUOMId,          
-		  intOtherChargeEntityVendorId      = CASE
-								                  WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor'
-								                  THEN RE.intEntityVendorId
-								                  WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Internal'
-								                  THEN null
-								                  WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Other'
-								                  THEN RE.intShipViaId
-								                  END,
-		  0,
-		  'Unit',		  		 
-		  RE.intContractDetailId,
-		  ysnAccure      = CASE
-								  WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor'
-								  THEN 1
-								  WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Internal'
-								  THEN 0
-								  WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Other'
-								  THEN 1
-								  END
-    from @ReceiptStagingTable RE where RE.dblFreightRate != 0 
 
---Fuel Surcharge
+   SELECT TOP 1 @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
+   SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
+
+	--Fuel Freight
 	INSERT INTO @OtherCharges
-   (
-     [intEntityVendorId] 
-	,[strBillOfLadding] 
-	,[strReceiptType] 
-	,[intLocationId] 
-	,[intShipViaId] 
-	,[intShipFromId] 
-	,[intCurrencyId]  	
-	,[intChargeId] 
-    ,[ysnInventoryCost] 
-    ,[strCostMethod] 
-    ,[dblRate] 
-    ,[intCostUOMId] 
-    ,[intOtherChargeEntityVendorId] 
-    ,[dblAmount] 
-    ,[strAllocateCostBy] 
-	,[intContractDetailId] 
-	,[ysnAccrue]
-   ) 
-   select RE.intEntityVendorId,
-          RE.strBillOfLadding,
-		  RE.strReceiptType,
-		  RE.intLocationId,
-		  RE.intShipViaId,
-		  RE.intShipFromId,
-		  RE.intCurrencyId,
-		  @intSurchargeItemId,
-		  ysnInventoryCost       = CASE
-										WHEN RE.ysnFreightInPrice = 0
-										THEN 1
-										WHEN RE.ysnFreightInPrice = 1
-										THEN 0                                        
-										END,	
-		  'Percentage',
-		  RE.dblSurcharge,
-		  (select top 1 intItemUOMId from tblICItemUOM where intItemId =  @intSurchargeItemId) as intItemUOMId,
-          intOtherChargeEntityVendorId      = CASE
-								                  WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor'
-								                  THEN RE.intEntityVendorId
-								                  WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Internal'
-								                  THEN null
-								                  WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Other'
-								                  THEN RE.intShipViaId
-								                  END,
-		  0,
-		  'Unit',		  
-		  RE.intContractDetailId,
-		  ysnAccure      = CASE
-								  WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor'
-								  THEN 1
-								  WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Internal'
-								  THEN 0
-								  WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Other'
-								  THEN 1
-								  END
-    from @ReceiptStagingTable RE where RE.dblSurcharge != 0 
-	--No Records to process so exit
+	(
+			[intEntityVendorId] 
+			,[strBillOfLadding] 
+			,[strReceiptType] 
+			,[intLocationId] 
+			,[intShipViaId] 
+			,[intShipFromId] 
+			,[intCurrencyId]  	
+			,[intChargeId] 
+			,[ysnInventoryCost] 
+			,[strCostMethod] 
+			,[dblRate] 
+			,[intCostUOMId] 
+			,[intOtherChargeEntityVendorId] 
+			,[dblAmount] 
+			,[strAllocateCostBy] 
+			,[intContractHeaderId]
+			,[intContractDetailId] 
+			,[ysnAccrue]
+	) 
+   SELECT	[intEntityVendorId]					= RE.intEntityVendorId
+			,[strBillOfLadding]					= RE.strBillOfLadding
+			,[strReceiptType]					= RE.strReceiptType
+			,[intLocationId]					= RE.intLocationId
+			,[intShipViaId]						= RE.intShipViaId
+			,[intShipFromId]					= RE.intShipFromId
+			,[intCurrencyId]  					= RE.intCurrencyId
+			,[intChargeId]						= @intFreightItemId
+			,[ysnInventoryCost]					= CASE	WHEN (select strTransaction from tblTRTransportLoad TT
+					                                                 join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
+					                                                 join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
+					                                                 where RR.strOrigin = 'Terminal' 
+					                                                 	and HH.strDestination = 'Customer' 
+					                                                 	and RR.intTransportReceiptId = RE.intSourceId ) = Null THEN 1
+												    	WHEN (select strTransaction from tblTRTransportLoad TT
+					                                                 join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
+					                                                 join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
+					                                                 where RR.strOrigin = 'Terminal' 
+					                                                 	and HH.strDestination = 'Customer' 
+					                                                 	and RR.intTransportReceiptId = RE.intSourceId) != Null THEN 0
+														                                   
+												END
+			,[strCostMethod]					= 'Per Unit'
+			,[dblRate]							= RE.dblFreightRate
+			,[intCostUOMId]						= (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId =  @intFreightItemId)
+			,[intOtherChargeEntityVendorId]		= CASE	WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor' THEN 
+															RE.intEntityVendorId
+														WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Internal' THEN 
+															NULL
+														WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Other' THEN 
+															RE.intShipViaId
+												END
+			,[dblAmount]						= 0
+			,[strAllocateCostBy]				=  CASE	WHEN (select strTransaction from tblTRTransportLoad TT
+					                                                 join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
+					                                                 join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
+					                                                 where RR.strOrigin = 'Terminal' 
+					                                                 	and HH.strDestination = 'Customer' 
+					                                                 	and RR.intTransportReceiptId = RE.intSourceId ) = Null THEN 'Unit'
+												    	WHEN (select strTransaction from tblTRTransportLoad TT
+					                                                 join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
+					                                                 join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
+					                                                 where RR.strOrigin = 'Terminal' 
+					                                                 	and HH.strDestination = 'Customer' 
+					                                                 	and RR.intTransportReceiptId = RE.intSourceId) != Null THEN Null
+														                                   
+											    	END
+			,[intContractHeaderId]				= RE.intContractHeaderId
+			,[intContractDetailId]				= RE.intContractDetailId
+			,[ysnAccrue]						= CASE	WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor' THEN 
+															1
+														WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Internal' THEN 
+															0
+														WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Other' THEN 
+															1
+												END
+    FROM	@ReceiptStagingTable RE 
+	WHERE	RE.dblFreightRate != 0 
+
+	--Fuel Surcharge
+	UNION ALL 
+	SELECT	[intEntityVendorId]					= RE.intEntityVendorId
+			,[strBillOfLadding]					= RE.strBillOfLadding
+			,[strReceiptType]					= RE.strReceiptType
+			,[intLocationId]					= RE.intLocationId
+			,[intShipViaId]						= RE.intShipViaId
+			,[intShipFromId]					= RE.intShipFromId
+			,[intCurrencyId]  					= RE.intCurrencyId
+			,[intChargeId]						= @intSurchargeItemId
+			,[ysnInventoryCost]					= CASE WHEN (select strTransaction from tblTRTransportLoad TT
+					                                                 join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
+					                                                 join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
+					                                                 where RR.strOrigin = 'Terminal' 
+					                                                 	and HH.strDestination = 'Customer' 
+					                                                 	and RR.intTransportReceiptId = RE.intSourceId ) = Null THEN 1
+												    	WHEN (select strTransaction from tblTRTransportLoad TT
+					                                                 join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
+					                                                 join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
+					                                                 where RR.strOrigin = 'Terminal' 
+					                                                 	and HH.strDestination = 'Customer' 
+					                                                 	and RR.intTransportReceiptId = RE.intSourceId) != Null THEN 0
+												END
+			,[strCostMethod]					= 'Percentage'
+			,[dblRate]							= RE.dblSurcharge
+			,[intCostUOMId]						= (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId =  @intSurchargeItemId)
+			,[intOtherChargeEntityVendorId]		= CASE	WHEN (SELECT strFreightBilledBy FROM tblSMShipVia SM WHERE SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor' THEN 
+															RE.intEntityVendorId
+														WHEN (SELECT strFreightBilledBy FROM tblSMShipVia SM WHERE SM.intEntityShipViaId = RE.intShipViaId) = 'Internal' THEN 
+															NULL
+														WHEN (SELECT strFreightBilledBy FROM tblSMShipVia SM WHERE SM.intEntityShipViaId = RE.intShipViaId) = 'Other' THEN 
+															RE.intShipViaId
+												END
+			,[dblAmount]						= 0
+			,[strAllocateCostBy]				= CASE	WHEN (select strTransaction from tblTRTransportLoad TT
+					                                                 join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
+					                                                 join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
+					                                                 where RR.strOrigin = 'Terminal' 
+					                                                 	and HH.strDestination = 'Customer' 
+					                                                 	and RR.intTransportReceiptId = RE.intSourceId ) = Null THEN 'Unit'
+												    	WHEN (select strTransaction from tblTRTransportLoad TT
+					                                                 join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
+					                                                 join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
+					                                                 where RR.strOrigin = 'Terminal' 
+					                                                 	and HH.strDestination = 'Customer' 
+					                                                 	and RR.intTransportReceiptId = RE.intSourceId) != Null THEN Null
+														                                   
+											    	END
+			,[intContractHeaderId]				= RE.intContractHeaderId
+			,[intContractDetailId]				= RE.intContractDetailId
+			,[ysnAccrue]						= CASE	WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Vendor' THEN 
+															1
+														WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Internal' THEN 
+															0
+														WHEN (select strFreightBilledBy from tblSMShipVia SM where SM.intEntityShipViaId = RE.intShipViaId) = 'Other' THEN 
+															1
+												END
+    FROM	@ReceiptStagingTable RE 
+	WHERE	RE.dblSurcharge != 0 
+
+	-- No Records to process so exit
     SELECT @total = COUNT(*) FROM @ReceiptStagingTable;
     IF (@total = 0)
 	   RETURN;

@@ -31,6 +31,7 @@ BEGIN
 				,@strTransactionForm AS NVARCHAR (255)
 				,@intUserId AS INT
 				,@InventoryTransactionIdentityId AS INT
+				,@intCostingMethod INT
 
 		-- Declare the variables for the Item UOM Ids
 		DECLARE @WetGrains_BushelUOMId AS INT = 1
@@ -65,6 +66,7 @@ BEGIN
 			,strRelatedTransactionId NVARCHAR(40)
 			,strTransactionForm NVARCHAR (255)
 			,intUserId INT
+			,intCostingMethod INT
 		)
 
 		CREATE TABLE actual (
@@ -93,6 +95,7 @@ BEGIN
 			,strRelatedTransactionId NVARCHAR(40)
 			,strTransactionForm NVARCHAR (255)
 			,intUserId INT
+			,intCostingMethod INT
 		)
 	END 
 	
@@ -124,6 +127,7 @@ BEGIN
 				,@strRelatedTransactionId
 				,@strTransactionForm
 				,@intUserId
+				,@intCostingMethod
 				,@InventoryTransactionIdentityId OUTPUT 
 	END 
 

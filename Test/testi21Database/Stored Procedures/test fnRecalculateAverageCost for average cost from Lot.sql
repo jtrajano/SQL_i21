@@ -32,8 +32,8 @@ BEGIN
 	DECLARE @AVERAGECOST AS INT = 1
 			,@FIFO AS INT = 2
 			,@LIFO AS INT = 3
-			,@STANDARDCOST AS INT = 4 	
-			,@LOTCOST AS INT = 5	
+			,@LOTCOST AS INT = 4 	
+			,@ACTUALCOST AS INT = 5	
 
 	-- Add fake data for the items
 	INSERT INTO dbo.tblICItem (intItemId) 
