@@ -5,9 +5,18 @@
 AS
 	DECLARE @idoc int,
 			@strMethod NVARCHAR(50),
-			@intValidDate INT
+			@intValidDate INT,
+			@ysnEnableParentLot bit=0,
+			@intProductTypeId int
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT,@strXml
+
+	Select TOP 1 @ysnEnableParentLot=ISNULL(ysnEnableParentLot,0) From tblMFCompanyPreference
+
+	If @ysnEnableParentLot=0
+		Set @intProductTypeId=6 --Lot
+	Else
+		Set @intProductTypeId=11 --Parent Lot
 
 	DECLARE @tblProductProperty AS TABLE
 	   (
@@ -103,9 +112,9 @@ AS
 			FROM @tblProductProperty PP
 			JOIN tblQMTestResult AS TR ON PP.intPropertyId = TR.intPropertyId AND ISNUMERIC(TR.strPropertyValue) = 1
 			JOIN @tblLot AS L ON L.intLotId = TR.intProductValueId
-				AND TR.intProductTypeId = 6
+				AND TR.intProductTypeId = @intProductTypeId
 				AND TR.intSampleId = (SELECT MAX(intSampleId) 
-				FROM tblQMTestResult tr WHERE tr.intProductValueId = L.intLotId AND tr.intProductTypeId = 6)
+				FROM tblQMTestResult tr WHERE tr.intProductValueId = L.intLotId AND tr.intProductTypeId = @intProductTypeId)
 			GROUP BY 
 				 PP.intPropertyId
 				,PP.strPropertyName
@@ -134,9 +143,9 @@ AS
 			FROM @tblProductProperty PP
 			JOIN tblQMTestResult AS TR ON PP.intPropertyId = TR.intPropertyId AND ISNUMERIC(TR.strPropertyValue) = 1
 			JOIN @tblLot AS L ON L.intLotId = TR.intProductValueId
-				AND TR.intProductTypeId = 6
+				AND TR.intProductTypeId = @intProductTypeId
 				AND TR.intSampleId = (SELECT MAX(intSampleId) 
-				FROM tblQMTestResult tr WHERE tr.intProductValueId = L.intLotId AND tr.intProductTypeId = 6)
+				FROM tblQMTestResult tr WHERE tr.intProductValueId = L.intLotId AND tr.intProductTypeId = @intProductTypeId)
 			GROUP BY 
 				 PP.intPropertyId
 				,PP.strPropertyName
