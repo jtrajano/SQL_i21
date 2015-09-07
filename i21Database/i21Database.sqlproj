@@ -2292,6 +2292,8 @@
     <Build Include="dbo\Stored Procedures\uspSCFullSheetDistributionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSCFullSheetFooterDetail.sql" />
     <Build Include="dbo\Functions\fnAPFormatAddress.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRStorageDelete.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRStorageSave.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
