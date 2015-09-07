@@ -81,7 +81,7 @@ BEGIN
 		,dblExchangeRate = 1
 		,intTransactionId = @intBatchId
 		,intTransactionDetailId = cl.intWorkOrderConsumedLotId
-		,strTransactionId = ISNULL(@strLotNumber,@strWorkOrderNo)
+		,strTransactionId = (Case When @strLotNumber is null or @strLotNumber='' Then @strWorkOrderNo else @strLotNumber End)
 		,intTransactionTypeId = @INVENTORY_CONSUME
 		,intLotId = l.intLotId
 		,intSubLocationId = l.intSubLocationId
@@ -238,7 +238,7 @@ BEGIN
 		,intCurrencyId = NULL
 		,dblExchangeRate = 1
 		,intTransactionId = @intBatchId
-		,strTransactionId = ISNULL(@strLotNumber,@strWorkOrderNo)
+		,strTransactionId = (Case When @strLotNumber is null or @strLotNumber='' Then @strWorkOrderNo else @strLotNumber End)
 		,intTransactionTypeId = @INVENTORY_PRODUCE
 		,intLotId = @intLotId
 		,intSubLocationId = @intSubLocationId
