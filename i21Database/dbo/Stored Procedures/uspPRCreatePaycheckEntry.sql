@@ -51,7 +51,7 @@ INSERT INTO [dbo].[tblPRPaycheck]
 	,[ysnPosted]
 	,[ysnPrinted]
 	,[ysnVoid]
-	,[intDistributionType]
+	,[ysnDirectDeposit]
 	,[dtmCreated]
 	,[intConcurrencyId])
 SELECT
@@ -74,7 +74,7 @@ SELECT
 	,0
 	,0
 	,0
-	,[intDistributionType]
+	,CASE WHEN EXISTS (SELECT TOP 1 1 FROM tblEntityEFTInformation WHERE ysnActive = 1 AND intEntityId = tblPREmployee.intEntityId) THEN 1 ELSE 0 END
 	,GETDATE()
 	,1
 FROM [dbo].[tblPREmployee]

@@ -19,7 +19,7 @@
 	[ysnPosted] [bit] NOT NULL,
 	[ysnPrinted] [bit] NOT NULL,
 	[ysnVoid] [bit] NOT NULL,
-	[intDistributionType] [int] NULL DEFAULT ((0)),
+	[ysnDirectDeposit] [bit] NOT NULL DEFAULT ((0)),
 	[dtmCreated] [datetime] NOT NULL,
 	[intConcurrencyId] [int] NULL,
  CONSTRAINT [PK_tblPRPaycheck] PRIMARY KEY CLUSTERED ([intPaycheckId]) WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY],
@@ -274,10 +274,10 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'dblTotalHours'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Direct Deposit Distribution Type',
+    @value = N'is Direct Deposit',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
     @level1type = N'TABLE',
     @level1name = N'tblPRPaycheck',
     @level2type = N'COLUMN',
-    @level2name = N'intDistributionType'
+    @level2name = N'ysnDirectDeposit'
