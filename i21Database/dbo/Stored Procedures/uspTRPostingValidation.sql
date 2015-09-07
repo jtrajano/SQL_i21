@@ -278,7 +278,10 @@ BEGIN
 	  END
   if (@dblUnitCost is null or @dblUnitCost = 0)
      BEGIN
+	   if(@strOrigin != 'Location')
+	   BEGIN
          RAISERROR('Unit Cost cannot be 0', 16, 1);
+       END
      END
   if(@GrossorNet = 'Gross')
       BEGIN
