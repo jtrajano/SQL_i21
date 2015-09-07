@@ -398,20 +398,20 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     labelWidth: 99
                                                 },
                                                 {
-                                                    xtype: 'textfield',
-                                                    itemId: 'txtIncludeOnHand',
+                                                    xtype: 'checkboxfield',
+                                                    itemId: 'chkIncludeOnHand',
                                                     fieldLabel: 'Include On Hand',
                                                     labelWidth: 99
                                                 },
                                                 {
-                                                    xtype: 'textfield',
-                                                    itemId: 'txtInventoryType',
+                                                    xtype: 'checkboxfield',
+                                                    itemId: 'chkInventoryType',
                                                     fieldLabel: 'Inventory Type',
                                                     labelWidth: 99
                                                 },
                                                 {
-                                                    xtype: 'textfield',
-                                                    itemId: 'txtCountCard',
+                                                    xtype: 'checkboxfield',
+                                                    itemId: 'chkCountCard',
                                                     fieldLabel: 'Count Card',
                                                     labelWidth: 99
                                                 }
@@ -433,20 +433,20 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     labelWidth: 125
                                                 },
                                                 {
-                                                    xtype: 'textfield',
-                                                    itemId: 'txtCountByLots',
+                                                    xtype: 'checkboxfield',
+                                                    itemId: 'chkCountByLots',
                                                     fieldLabel: 'Count by Lots',
                                                     labelWidth: 125
                                                 },
                                                 {
-                                                    xtype: 'textfield',
-                                                    itemId: 'txtRecountMismatch',
+                                                    xtype: 'checkboxfield',
+                                                    itemId: 'chkRecountMismatch',
                                                     fieldLabel: 'Recount Mismatch',
                                                     labelWidth: 125
                                                 },
                                                 {
-                                                    xtype: 'textfield',
-                                                    itemId: 'txtStatus',
+                                                    xtype: 'checkboxfield',
+                                                    itemId: 'chkStatus',
                                                     fieldLabel: 'Status',
                                                     labelWidth: 125
                                                 }

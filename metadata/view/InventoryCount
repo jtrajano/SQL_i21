@@ -943,91 +943,58 @@
                                                     ]
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Text",
+                                                    "type": "Ext.form.field.Checkbox",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "columns": null,
-                                                        "designer|createAlias": null,
+                                                        "boxLabel": null,
                                                         "fieldLabel": "Include On Hand",
-                                                        "itemId": "txtIncludeOnHand",
+                                                        "itemId": "chkIncludeOnHand",
                                                         "labelWidth": 99,
                                                         "layout|flex": null,
-                                                        "name": null
+                                                        "margin": null
                                                     },
-                                                    "name": "MyTextField21",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "ed2808b7-aee4-4aa5-9331-6891e950e19a",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
+                                                    "name": "MyCheckbox",
+                                                    "designerId": "e82dc63b-7380-4339-b868-4c5af44f7ea8"
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Text",
+                                                    "type": "Ext.form.field.Checkbox",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "columns": null,
-                                                        "designer|createAlias": null,
+                                                        "boxLabel": null,
                                                         "fieldLabel": "Inventory Type",
-                                                        "itemId": "txtInventoryType",
+                                                        "itemId": "chkInventoryType",
                                                         "labelWidth": 99,
                                                         "layout|flex": null,
-                                                        "name": null
+                                                        "margin": null
                                                     },
-                                                    "name": "MyTextField24",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "41e959b1-193a-41fa-8c85-d4446b3be69f",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
+                                                    "name": "MyCheckbox1",
+                                                    "designerId": "86bd86c3-a610-4317-ac6b-78499e9b7bd9"
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Text",
+                                                    "type": "Ext.form.field.Checkbox",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "columns": null,
-                                                        "designer|createAlias": null,
+                                                        "boxLabel": null,
                                                         "fieldLabel": "Count Card",
-                                                        "itemId": "txtCountCard",
+                                                        "itemId": "chkCountCard",
                                                         "labelWidth": 99,
                                                         "layout|flex": null,
-                                                        "name": null
+                                                        "margin": null
                                                     },
-                                                    "name": "MyTextField26",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "1719390e-2e2c-414f-945c-dafb63ab0da9",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
+                                                    "name": "MyCheckbox2",
+                                                    "designerId": "c441b3f3-4a2d-4335-85ff-216210979ac7"
                                                 }
                                             ]
                                         },
@@ -1079,91 +1046,58 @@
                                                     ]
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Text",
+                                                    "type": "Ext.form.field.Checkbox",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "columns": null,
-                                                        "designer|createAlias": null,
+                                                        "boxLabel": null,
                                                         "fieldLabel": "Count by Lots",
-                                                        "itemId": "txtCountByLots",
+                                                        "itemId": "chkCountByLots",
                                                         "labelWidth": 125,
                                                         "layout|flex": null,
-                                                        "name": null
+                                                        "margin": null
                                                     },
-                                                    "name": "MyTextField5",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "15fb171a-7eb6-4379-b959-981755e65a51",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
+                                                    "name": "MyCheckbox3",
+                                                    "designerId": "95e7474a-24dd-4d9f-9636-3bfa4416b93f"
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Text",
+                                                    "type": "Ext.form.field.Checkbox",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "columns": null,
-                                                        "designer|createAlias": null,
+                                                        "boxLabel": null,
                                                         "fieldLabel": "Recount Mismatch",
-                                                        "itemId": "txtRecountMismatch",
+                                                        "itemId": "chkRecountMismatch",
                                                         "labelWidth": 125,
                                                         "layout|flex": null,
-                                                        "name": null
+                                                        "margin": null
                                                     },
-                                                    "name": "MyTextField21",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "5828151e-a758-4822-8698-7360d84f2c05",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
+                                                    "name": "MyCheckbox7",
+                                                    "designerId": "19f734bb-9bfa-4370-ba2e-317d3f58fa21"
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Text",
+                                                    "type": "Ext.form.field.Checkbox",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "columns": null,
-                                                        "designer|createAlias": null,
+                                                        "boxLabel": null,
                                                         "fieldLabel": "Status",
-                                                        "itemId": "txtStatus",
+                                                        "itemId": "chkStatus",
                                                         "labelWidth": 125,
                                                         "layout|flex": null,
-                                                        "name": null
+                                                        "margin": null
                                                     },
-                                                    "name": "MyTextField24",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "19087afd-fd86-450d-bcba-513c0d56cad2",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
+                                                    "name": "MyCheckbox8",
+                                                    "designerId": "279b9ea9-5d33-4bb9-a94f-6549b7be21de"
                                                 }
                                             ]
                                         }
