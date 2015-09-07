@@ -26,7 +26,7 @@ BEGIN
 	AS
 	(
 		SELECT strJournalId COLLATE DATABASE_DEFAULT AS strTransactionId, strTransactionType COLLATE DATABASE_DEFAULT AS strTransactionType, dtmDate 
-			FROM tblGLJournal WHERE ysnPosted = 0 and strTransactionType = 'General Journal' OR strTransactionType = 'Audit Adjustment'-- GL
+			FROM tblGLJournal WHERE ysnPosted = 0 and (strTransactionType = 'General Journal' OR strTransactionType = 'Audit Adjustment')-- GL
 		UNION
 		SELECT glije_src_no as strTransactionId, 'Origin - ' + glije_src_sys as strTransactionType,	CAST(SUBSTRING(CAST(glije_date AS NVARCHAR(10)),1,4) + '-' + SUBSTRING(CAST(glije_date AS NVARCHAR(10)),5,2) + '-' + SUBSTRING(CAST(glije_date AS NVARCHAR(10)),7,2) AS DATE) as dtmDate 
 			FROM glijemst WHERE @blnLegacyIntegration  = 1 --ORIGIN JOURNAL
