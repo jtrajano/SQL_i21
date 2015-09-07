@@ -6,7 +6,11 @@
     },
     "codeClass": null,
     "userConfig": {
-        "name": "Inventory"
+        "name": "Inventory",
+        "views": [
+            "CardCount",
+            "InventoryCountName"
+        ]
     },
     "name": "Application",
     "designerId": "application"

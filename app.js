@@ -20,6 +20,10 @@ Ext.Loader.setConfig({
 
 
 Ext.application({
+    views: [
+        'CardCount',
+        'InventoryCountName'
+    ],
     name: 'Inventory',
 
     launch: function() {
