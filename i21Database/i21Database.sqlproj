@@ -2294,6 +2294,9 @@
     <Build Include="dbo\Functions\fnAPFormatAddress.sql" />
     <Build Include="dbo\Stored Procedures\uspGRStorageDelete.sql" />
     <Build Include="dbo\Stored Procedures\uspGRStorageSave.sql" />
+    <None Include="Scripts\Post-Deployment\IC\14_Fix_Blank_Costing_Method_In_tblICInventoryTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddInventoryTransfer.sql" />
+    <Build Include="dbo\User Defined Types\InventoryTransferStagingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
