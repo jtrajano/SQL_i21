@@ -17,6 +17,7 @@
 	[intEntityLocationId] INT			NULL,
 	[intRackLocationId] INT			NULL,
 	[intCustomerLocationId]			INT		NULL,
+	[strInvoiceType]    NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]  INT             NOT NULL,
     CONSTRAINT [PK_tblARCustomerSpecialPrice] PRIMARY KEY CLUSTERED ([intSpecialPriceId] ASC),
 	CONSTRAINT [FK_tblARCustomerSpecialPrice_tblEntityLocation] FOREIGN KEY ([intEntityLocationId]) REFERENCES [tblEntityLocation]([intEntityLocationId]),
