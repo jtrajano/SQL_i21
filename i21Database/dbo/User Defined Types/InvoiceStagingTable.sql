@@ -28,4 +28,5 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[intTaxGroupId] int null                       --Tax Group
 	,[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,[intShipToLocationId] INT NULL                            -- SalesPerson
+	,[strBOLNumber] NVARCHAR (50)	COLLATE Latin1_General_CI_AS NULL
 )

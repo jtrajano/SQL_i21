@@ -24,7 +24,10 @@ SELECT INV.intInvoiceId
 	 , strShipTo = [dbo].fnARFormatCustomerAddress(NULL, NULL, INV.strShipToLocationName, INV.strShipToAddress, INV.strShipToCity, INV.strShipToState, INV.strShipToZipCode, INV.strShipToCountry)
 	 , strSalespersonName = ESP.strName
 	 , INV.strPONumber
-	 , SO.strBOLNumber
+	 , (CASE WHEN INV.strBOLNumber IS NOT NULL AND LEN(RTRIM(LTRIM(ISNULL(INV.strBOLNumber,'')))) > 0
+			THEN INV.strBOLNumber
+			ELSE SO.strBOLNumber
+		END) AS strBOLNumber
 	 , SV.strShipVia
 	 , T.strTerm
 	 , INV.dtmShipDate
