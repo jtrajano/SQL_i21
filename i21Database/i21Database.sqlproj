@@ -2345,6 +2345,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetManufacturingCellByPackType.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetManufacturingCellCountByPackType.sql" />
     <Build Include="dbo\Stored Procedures\uspCTPriceFixationSave.sql" />
+    <Build Include="dbo\Tables\tblTMWorkOrderCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

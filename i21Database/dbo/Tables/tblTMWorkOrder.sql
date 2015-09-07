@@ -11,11 +11,13 @@
     [intCloseReasonID]    INT            NULL,
     [strComments]         NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [intSiteID]           INT            NOT NULL,
+	[intWorkOrderCategoryId] INT NULL, 
     [intConcurrencyId]    INT            DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblTMWork] PRIMARY KEY CLUSTERED ([intWorkOrderID] ASC),
     CONSTRAINT [FK_tblTMWork_tblTMSite] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID]),
     CONSTRAINT [FK_tblTMWork_tblTMWorkCloseReason] FOREIGN KEY ([intCloseReasonID]) REFERENCES [dbo].[tblTMWorkCloseReason] ([intCloseReasonID]),
-    CONSTRAINT [FK_tblTMWork_tblTMWorkStatus] FOREIGN KEY ([intWorkStatusTypeID]) REFERENCES [dbo].[tblTMWorkStatusType] ([intWorkStatusID])
+    CONSTRAINT [FK_tblTMWork_tblTMWorkStatus] FOREIGN KEY ([intWorkStatusTypeID]) REFERENCES [dbo].[tblTMWorkStatusType] ([intWorkStatusID]), 
+    CONSTRAINT [FK_tblTMWorkOrder_tblTMWorkOrderCategory] FOREIGN KEY ([intWorkOrderCategoryId]) REFERENCES [dbo].[tblTMWorkOrderCategory]([intWorkOrderCategoryId])
 );
 
 
@@ -136,3 +138,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMWorkOrder',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Work Order Category ID',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMWorkOrder',
+    @level2type = N'COLUMN',
+    @level2name = N'intWorkOrderCategoryId'
