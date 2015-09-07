@@ -49,7 +49,7 @@ SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompany
 --IF @APAccount IS NULL
 --	SET @APAccount = (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE intAccountCategoryId = 1)
 
-IF @APAccount IS NULL
+IF @APAccount IS NULL OR @APAccount <= 0
 BEGIN
 	RAISERROR('Please setup default AP Account', 16, 1);
 	GOTO DONE
