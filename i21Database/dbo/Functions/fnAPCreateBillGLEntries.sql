@@ -51,8 +51,8 @@ BEGIN
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	A.intAccountId,
 		[dblDebit]						=	0,
-		[dblCredit]						=	(CASE WHEN A.intTransactionType IN (2, 3) AND A.dblTotal > 0 
-													THEN A.dblTotal * -1 ELSE A.dblTotal END) - ISNULL(Taxes.dblTotalICTax,0),
+		[dblCredit]						=	(CASE WHEN A.intTransactionType IN (2, 3) AND A.dblAmountDue > 0 
+													THEN A.dblAmountDue * -1 ELSE A.dblAmountDue END),
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
 		[strDescription]				=	A.strReference,
@@ -82,28 +82,57 @@ BEGIN
 	FROM	[dbo].tblAPBill A
 			LEFT JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.intEntityVendorId
-			OUTER APPLY (
-			--Subtract the tax from IR because IC already entered the gl entries for taxes
-				SELECT 
-					SUM(D.dblTax) dblTotalICTax
-				FROM tblAPBillDetailTax D
-				WHERE D.intBillDetailId IN (SELECT intBillDetailId FROM tblAPBillDetail E
-											WHERE E.intBillId = A.intBillId
-											AND E.intInventoryReceiptItemId IS NOT NULL)
-				GROUP BY D.intBillDetailId
-			) Taxes
 			--CROSS APPLY
 			--(
 			--	SELECT * FROM #tmpGLUnits WHERE intAccountId = A.intAccountId
 			--) Units
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
+	--PREPAY, DEBIT MEMO ENTRIES
+	UNION ALL
+	SELECT
+		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, C.dtmDate), 0),
+		[strBatchID]					=	@batchId,
+		[intAccountId]					=	C.intAccountId,
+		[dblDebit]						=	0,
+		[dblCredit]						=	B.dblAmountApplied,
+		[dblDebitUnit]					=	0,
+		[dblCreditUnit]					=	0,--ISNULL(A.[dblTotal], 0)  * ISNULL(Units.dblLbsPerUnit, 0),
+		[strDescription]				=	C.strReference,
+		[strCode]						=	'AP',
+		[strReference]					=	D.strVendorId,
+		[intCurrencyId]					=	C.intCurrencyId,
+		[dblExchangeRate]				=	1,
+		[dtmDateEntered]				=	GETDATE(),
+		[dtmTransactionDate]			=	NULL,
+		[strJournalLineDescription]		=	CASE WHEN C.intTransactionType = 2 THEN 'Applied Vendor Prepayment'
+												WHEN C.intTransactionType = 3 THEN 'Applied Debit Memo'
+											ELSE 'NONE' END,
+		[intJournalLineNo]				=	B.intTransactionId,
+		[ysnIsUnposted]					=	0,
+		[intUserId]						=	@intUserId,
+		[intEntityId]					=	@intUserId,
+		[strTransactionId]				=	A.strBillId, 
+		[intTransactionId]				=	A.intBillId, 
+		[strTransactionType]			=	CASE WHEN C.intTransactionType = 2 THEN 'Vendor Prepayment'
+												WHEN C.intTransactionType = 3 THEN 'Debit Memo'
+											ELSE 'NONE' END,
+		[strTransactionForm]			=	@SCREEN_NAME,
+		[strModuleName]					=	@MODULE_NAME,
+		[intConcurrencyId]				=	1
+	FROM tblAPBill A
+	INNER JOIN tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
+	INNER JOIN tblAPBill C ON B.intTransactionId = C.intBillId
+	LEFT JOIN tblAPVendor D ON C.intEntityVendorId = D.intEntityVendorId
+	WHERE B.dblAmountApplied <> 0
+	AND A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	--DEBIT
 	UNION ALL 
 	SELECT	
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	B.intAccountId,
-		[dblDebit]						=	CASE WHEN A.intTransactionType IN (2, 3) AND A.dblTotal > 0  THEN B.dblTotal * (-1) ELSE B.dblTotal END, --Bill Detail
+		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (2, 3) AND A.dblTotal > 0  THEN B.dblTotal * (-1) ELSE B.dblTotal END) --Bill Detail
+											+ ISNULL(Taxes.dblTotalICTax, 0), --IC Tax
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -133,6 +162,16 @@ BEGIN
 				ON A.intBillId = B.intBillId
 			LEFT JOIN tblAPVendor C
 				ON A.intEntityVendorId = C.intEntityVendorId
+			OUTER APPLY (
+				--Add the tax from IR
+				SELECT 
+					SUM(D.dblTax) dblTotalICTax
+				FROM tblAPBillDetailTax D
+				WHERE D.intBillDetailId IN (SELECT intBillDetailId FROM tblAPBillDetail E
+											WHERE E.intBillId = A.intBillId
+											AND E.intInventoryReceiptItemId IS NOT NULL)
+				GROUP BY D.intBillDetailId
+			) Taxes
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	UNION ALL
 	--TAXES
