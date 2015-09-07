@@ -87,15 +87,7 @@ BEGIN TRY
 										WHEN SP.strGrossOrNet = 'Net'
 										THEN TR.dblNet
 										END,
-			
-			dblUnitCost              = CASE
-										WHEN TR.ysnFreightInPrice = 0
-										THEN TR.dblUnitCost
-										WHEN TR.ysnFreightInPrice = 1 and TR.dblPurSurcharge !=0
-										THEN TR.dblUnitCost + TR.dblFreightRate + (TR.dblPurSurcharge / 100)
-										WHEN TR.ysnFreightInPrice = 1 
-										THEN TR.dblUnitCost + TR.dblFreightRate 
-										END,
+			TR.dblUnitCost,										
 			intCurrencyId = (SELECT	TOP 1 
 											CP.intDefaultCurrencyId		
 											FROM	dbo.tblSMCompanyPreference CP
