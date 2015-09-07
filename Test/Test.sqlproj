@@ -833,6 +833,9 @@
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on Actual Costing for scenario 4, unpost sell stock, unpost add stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on Actual Costing for scenario 4, unpost add stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostCosting on Actual Costing for scenario 4, unpost add stock, unpost sell stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddInventoryTransfer for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddInventoryTransfer to add a transfers from transport.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddInventoryTransfer to add a transfers with no ship via.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

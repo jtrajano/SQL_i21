@@ -719,3 +719,10 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51179) EXEC sp_dropmessa
 SET @strmessage = 'Unable to calculate the tax for %s used in %s.'
 EXEC sp_addmessage 51179,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51180) EXEC sp_dropmessage 51180, 'us_english'	
+SET @strmessage = 'Data not found. Unable to create the Inventory Transfer.'
+EXEC sp_addmessage 51180,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51181) EXEC sp_dropmessage 51181, 'us_english'	
+SET @strmessage = 'Unable to generate the Inventory Transfer. An error stopped the creation of the inventory transfer.'
+EXEC sp_addmessage 51181,11,@strmessage,'us_english','False'
