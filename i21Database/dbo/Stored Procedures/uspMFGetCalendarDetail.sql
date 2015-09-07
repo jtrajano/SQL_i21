@@ -7,6 +7,7 @@
 	,@intCalendarId INT
 	,@intLocationId INT
 	,@ysnpivot BIT
+	,@intCount int OUTPUT
 	)
 AS
 BEGIN
@@ -171,20 +172,6 @@ BEGIN
 		SELECT @dtmFromDate = @dtmFromDate + 1
 	END
 
-	SELECT C.intCalendarId
-		,C.strName
-		,C.intManufacturingCellId
-		,MC.strCellName
-		,C.dtmFromDate
-		,C.dtmToDate
-		,C.ysnStandard
-		,C.intLocationId
-		,L.strLocationName
-	FROM dbo.tblMFScheduleCalendar C
-	JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = C.intManufacturingCellId
-	JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = C.intLocationId
-	WHERE C.intCalendarId = @intCalendarId
-
 	IF @ysnpivot = 1
 	BEGIN
 		SELECT @strMachineName = STUFF((
@@ -220,6 +207,8 @@ BEGIN
 		PIVOT(Count(DT.intMachineId) FOR strName IN (' + @strMachineName + ')) pvt'
 
 		EXEC (@SQL)
+
+		SELECT @intCount=@@ROWCOUNT 
 	END
 	ELSE
 	BEGIN
@@ -268,5 +257,7 @@ BEGIN
 			,dbo.tblMFShift S
 			,@tblMFMachine M
 		WHERE S.intShiftId = CD.intShiftId
+
+		SELECT @intCount=@@ROWCOUNT 
 	END
 END

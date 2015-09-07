@@ -39,8 +39,8 @@ Type the overview for the table here.
 		[intPatronageCategoryDirectId] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICCommodity] PRIMARY KEY ([intCommodityId]), 
-		CONSTRAINT [FK_tblICCommodity_tblICPatronageCategory] FOREIGN KEY ([intPatronageCategoryId]) REFERENCES [tblICPatronageCategory]([intPatronageCategoryId]),
-		CONSTRAINT [FK_tblICCommodity_tblICPatronageCategoryDirect] FOREIGN KEY ([intPatronageCategoryDirectId]) REFERENCES [tblICPatronageCategory]([intPatronageCategoryId]), 
+		CONSTRAINT [FK_tblICCommodity_tblICPatronageCategory] FOREIGN KEY ([intPatronageCategoryId]) REFERENCES [tblPATPatronageCategory]([intPatronageCategoryId]),
+		CONSTRAINT [FK_tblICCommodity_tblICPatronageCategoryDirect] FOREIGN KEY ([intPatronageCategoryDirectId]) REFERENCES [tblPATPatronageCategory]([intPatronageCategoryId]), 
 		CONSTRAINT [FK_tblICCommodity_tblRKFutureMarket] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]), 
 		CONSTRAINT [FK_tblICCommodity_tblGRDiscount] FOREIGN KEY ([intScheduleDiscountId]) REFERENCES [tblGRDiscountId]([intDiscountId]), 
 		CONSTRAINT [FK_tblICCommodity_tblGRStorageSchedule] FOREIGN KEY ([intScheduleStoreId]) REFERENCES [tblGRStorageScheduleRule]([intStorageScheduleRuleId]) 

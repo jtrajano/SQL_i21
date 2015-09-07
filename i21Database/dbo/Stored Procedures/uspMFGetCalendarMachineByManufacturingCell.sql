@@ -4,6 +4,7 @@
 	,@intCalendarId INT
 	,@intManufacturingCellId INT
 	,@intLocationId INT
+	,@strName NVARCHAR(50) = '%'
 	)
 AS
 BEGIN
@@ -27,5 +28,6 @@ BEGIN
 	JOIN tblMFManufacturingCellPackType LP ON LP.intPackTypeId = MP.intPackTypeId
 		AND LP.intManufacturingCellId = @intManufacturingCellId
 	WHERE M.intLocationId = @intLocationId
+	AND M.strName LIKE @strName + '%'
 	ORDER BY M.strName
 END

@@ -10,7 +10,7 @@ Type the overview for the table here.
 
 ## Source Code:
 */
-	CREATE TABLE [dbo].[tblICPatronageCategory]
+	CREATE TABLE [dbo].[tblPATPatronageCategory]
 	(
 		[intPatronageCategoryId] INT NOT NULL IDENTITY , 
 		[strCategoryCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
@@ -29,7 +29,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblICPatronageCategory',
+		@level1name = N'tblPATPatronageCategory',
 		@level2type = N'COLUMN',
 		@level2name = N'intPatronageCategoryId'
 	GO
@@ -38,7 +38,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblICPatronageCategory',
+		@level1name = N'tblPATPatronageCategory',
 		@level2type = N'COLUMN',
 		@level2name = N'strCategoryCode'
 	GO
@@ -47,7 +47,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblICPatronageCategory',
+		@level1name = N'tblPATPatronageCategory',
 		@level2type = N'COLUMN',
 		@level2name = N'strDescription'
 	GO
@@ -56,7 +56,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblICPatronageCategory',
+		@level1name = N'tblPATPatronageCategory',
 		@level2type = N'COLUMN',
 		@level2name = N'strPurchaseSale'
 	GO
@@ -65,7 +65,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblICPatronageCategory',
+		@level1name = N'tblPATPatronageCategory',
 		@level2type = N'COLUMN',
 		@level2name = N'strUnitAmount'
 	GO
@@ -74,7 +74,7 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblICPatronageCategory',
+		@level1name = N'tblPATPatronageCategory',
 		@level2type = N'COLUMN',
 		@level2name = N'intSort'
 	GO
@@ -83,6 +83,6 @@ Type the overview for the table here.
 		@level0type = N'SCHEMA',
 		@level0name = N'dbo',
 		@level1type = N'TABLE',
-		@level1name = N'tblICPatronageCategory',
+		@level1name = N'tblPATPatronageCategory',
 		@level2type = N'COLUMN',
 		@level2name = N'intConcurrencyId'

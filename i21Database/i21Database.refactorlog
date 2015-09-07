@@ -3948,4 +3948,11 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="uspMFGetCalendarMachineByManufacturingCell" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="da4cfd81-e6d9-4273-accd-a97e7fa515bb" ChangeDateTime="09/04/2015 08:13:57">
+    <Property Name="ElementName" Value="[dbo].[tblICPatronageCategory]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblPATPatronageCategory]" />
+  </Operation>
 </Operations>

@@ -22,5 +22,6 @@ AS
 			CD.strItemNo,
 			CD.strCustomerContract,
 			IsNull(CD.dblBalance, 0) as dblBalance,
-			CD.ysnAllowedToShow
+			CD.ysnAllowedToShow,
+			CD.ysnUnlimitedQuantity
 	FROM vyuCTContractDetailView 		CD

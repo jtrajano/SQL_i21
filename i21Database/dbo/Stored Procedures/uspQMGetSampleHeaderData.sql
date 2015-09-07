@@ -8,7 +8,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-IF @intProductTypeId = 2 -- Item
+IF @intProductTypeId = 2 -- Item  
 BEGIN
 	SELECT @intProductTypeId AS intProductTypeId
 		,@intProductValueId AS intProductValueId
@@ -18,7 +18,7 @@ BEGIN
 	WHERE I.strStatus = 'Active'
 		AND I.intItemId = @intProductValueId
 END
-ELSE IF @intProductTypeId = 8 -- Contract Line Item
+ELSE IF @intProductTypeId = 8 -- Contract Line Item  
 BEGIN
 	SELECT @intProductTypeId AS intProductTypeId
 		,@intProductValueId AS intProductValueId
@@ -33,7 +33,7 @@ BEGIN
 	FROM vyuCTContractDetailView C
 	WHERE C.intContractDetailId = @intProductValueId
 END
-ELSE IF @intProductTypeId = 9 -- Container Line Item
+ELSE IF @intProductTypeId = 9 -- Container Line Item  
 BEGIN
 	SELECT @intProductTypeId AS intProductTypeId
 		,@intProductValueId AS intProductValueId
@@ -53,7 +53,7 @@ BEGIN
 	JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intContractDetailId
 	WHERE S.intShipmentBLContainerContractId = @intProductValueId
 END
-ELSE IF @intProductTypeId = 10 -- Shipment Line Item
+ELSE IF @intProductTypeId = 10 -- Shipment Line Item  
 BEGIN
 	SELECT @intProductTypeId AS intProductTypeId
 		,@intProductValueId AS intProductValueId
@@ -71,7 +71,7 @@ BEGIN
 	JOIN vyuCTContractDetailView C ON C.intContractDetailId = S.intContractDetailId
 	WHERE S.intShipmentContractQtyId = @intProductValueId
 END
-ELSE IF @intProductTypeId = 6 -- Lot
+ELSE IF @intProductTypeId = 6 -- Lot  
 BEGIN
 	SELECT @intProductTypeId AS intProductTypeId
 		,@intProductValueId AS intProductValueId
@@ -79,14 +79,20 @@ BEGIN
 		,L.strLotNumber
 		,L.intItemId
 		,I.strDescription
-		,(CASE WHEN L.intWeightUOMId IS NOT NULL THEN L.dblWeight ELSE L.dblQty END) AS dblRepresentingQty
+		,(
+			CASE 
+				WHEN L.intWeightUOMId IS NOT NULL
+					THEN L.dblWeight
+				ELSE L.dblQty
+				END
+			) AS dblRepresentingQty
 		,IU.intUnitMeasureId AS intRepresentingUOMId
 	FROM tblICLot L
 	JOIN tblICItem I ON I.intItemId = L.intItemId
-	JOIN tblICItemUOM IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId,L.intItemUOMId)
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = ISNULL(L.intWeightUOMId, L.intItemUOMId)
 	WHERE L.intLotId = @intProductValueId
 END
-ELSE IF @intProductTypeId = 11 -- Parent Lot
+ELSE IF @intProductTypeId = 11 -- Parent Lot  
 BEGIN
 	SELECT @intProductTypeId AS intProductTypeId
 		,@intProductValueId AS intProductValueId
@@ -94,10 +100,16 @@ BEGIN
 		,PL.strParentLotNumber
 		,PL.intItemId
 		,I.strDescription
-		,(CASE WHEN PL.intWeightUOMId IS NOT NULL THEN PL.dblWeight ELSE PL.dblQty END) AS dblRepresentingQty
+		,(
+			CASE 
+				WHEN PL.intWeightUOMId IS NOT NULL
+					THEN PL.dblWeight
+				ELSE PL.dblQty
+				END
+			) AS dblRepresentingQty
 		,IU.intUnitMeasureId AS intRepresentingUOMId
 	FROM tblICParentLot PL
 	JOIN tblICItem I ON I.intItemId = PL.intItemId
-	JOIN tblICItemUOM IU ON IU.intItemUOMId = ISNULL(PL.intWeightUOMId,PL.intItemUOMId)
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = ISNULL(PL.intWeightUOMId, PL.intItemUOMId)
 	WHERE PL.intParentLotId = @intProductValueId
 END

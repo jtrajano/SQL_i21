@@ -3,6 +3,7 @@
 	,@dtmToDate DATETIME
 	,@intCalendarId INT
 	,@intLocationId INT
+	,@strShiftName NVARCHAR(50) = '%'
 	)
 AS
 BEGIN
@@ -22,5 +23,6 @@ BEGIN
 				END) AS ysnSelect
 	FROM dbo.tblMFShift S
 	WHERE S.intLocationId = @intLocationId
+	AND S.strShiftName LIKE @strShiftName + '%'
 	ORDER BY S.intShiftSequence
 END

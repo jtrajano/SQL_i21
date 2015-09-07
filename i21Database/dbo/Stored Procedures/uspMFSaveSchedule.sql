@@ -100,6 +100,7 @@ BEGIN TRY
 	INSERT INTO dbo.tblMFScheduleWorkOrder (
 		intScheduleId
 		,intWorkOrderId
+		,intStatusId
 		,intDuration
 		,intExecutionOrder
 		,intChangeoverDuration
@@ -123,6 +124,7 @@ BEGIN TRY
 		)
 	SELECT @intScheduleId
 		,x.intWorkOrderId
+		,x.intStatusId
 		,x.intDuration
 		,ROW_NUMBER() OVER (ORDER BY x.intExecutionOrder) as intExecutionOrder
 		,x.intChangeoverDuration
@@ -173,7 +175,7 @@ BEGIN TRY
 	IF @ysnStandard=1
 	BEGIN
 		UPDATE tblMFWorkOrder 
-		SET intStatusId =(CASE WHEN W.intManufacturingCellId =x.intManufacturingCellId THEN x.intStatusId ELSE 1 END)
+		SET intStatusId =(CASE WHEN @intManufacturingCellId =x.intManufacturingCellId THEN x.intStatusId ELSE 1 END)
 			,dblQuantity =x.dblQuantity
 			,intManufacturingCellId =x.intManufacturingCellId
 			,intPlannedShiftId =x.intPlannedShiftId
@@ -187,7 +189,6 @@ BEGIN TRY
 				,intPlannedShiftId int
 				,dtmPlannedDate datetime
 				,intExecutionOrder int) x 
-		JOIN tblMFWorkOrder W on W.intWorkOrderId =x.intWorkOrderId
 	END
 	
 	INSERT INTO tblMFScheduleWorkOrderDetail (

@@ -291,14 +291,13 @@ BEGIN TRY
 		,@intUserId intLastModifiedUserId
 		,WS.intSequenceNo
 	FROM tblMFWorkOrder W
-	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId AND W.intManufacturingCellId = @intManufacturingCellId
+	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId AND W.intManufacturingCellId = @intManufacturingCellId AND W.intStatusId <> 13
 	LEFT JOIN tblMFPackType P ON P.intPackTypeId = I.intPackTypeId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = W.intItemUOMId
 	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN dbo.tblMFWorkOrderProductionType PT ON PT.intProductionTypeId = W.intProductionTypeId
 	LEFT JOIN @tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
-		JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = SL.intStatusId
-		AND W.intStatusId <> 13
+	JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = SL.intStatusId
 	LEFT JOIN dbo.tblMFShift SH ON SH.intShiftId = SL.intPlannedShiftId
 	LEFT JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = SL.intManufacturingCellId 
 	JOIN dbo.tblMFRecipe R ON R.intItemId = W.intItemId
