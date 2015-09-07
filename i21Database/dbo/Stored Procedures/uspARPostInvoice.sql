@@ -1444,6 +1444,7 @@ IF @post = 0
 							,@strTransactionId
 							,@batchId
 							,@UserEntityID
+							,@recap 
 										
 					DELETE FROM @UnPostInvoiceData WHERE intInvoiceId = @intTransactionId AND strTransactionId = @strTransactionId 
 												

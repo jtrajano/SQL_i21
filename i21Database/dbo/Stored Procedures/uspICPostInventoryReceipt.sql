@@ -604,7 +604,8 @@ BEGIN
 				@intTransactionId
 				,@strTransactionId
 				,@strBatchId
-				,@intUserId		
+				,@intUserId
+				,@ysnRecap
 				
 		-- Unpost the Other Charges
 		BEGIN 

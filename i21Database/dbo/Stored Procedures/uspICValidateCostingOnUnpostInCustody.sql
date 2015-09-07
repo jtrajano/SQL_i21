@@ -12,6 +12,7 @@
 
 CREATE PROCEDURE [dbo].[uspICValidateCostingOnUnpostInCustody]
 	@ItemsToValidate UnpostItemsTableType READONLY
+	,@ysnRecap BIT = 0 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -35,6 +36,7 @@ SELECT	Errors.intItemId
 		,Errors.strText
 		,Errors.intErrorCode
 FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnUnpostCustodyErrors(Item.intItemId, Item.intItemLocationId, Item.intItemUOMId, Item.intSubLocationId, Item.intStorageLocationId, Item.dblQty, Item.intLotId) Errors
+WHERE	ISNULL(@ysnRecap, 0) = 0
 
 -- If such error is found, raise the error to stop the costing and allow the caller code to do a rollback. 
 -- Check for negative stock qty 

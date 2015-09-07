@@ -133,6 +133,7 @@ BEGIN TRY
 		,@strTransactionId
 		,@strBatchId
 		,@intUserId
+		,0
 
 	--EXEC dbo.uspGLBookEntries @GLEntries,0
 
