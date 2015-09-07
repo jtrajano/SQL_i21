@@ -179,7 +179,7 @@ BEGIN TRY
 			,dblQuantity =x.dblQuantity
 			,intManufacturingCellId =x.intManufacturingCellId
 			,intPlannedShiftId =x.intPlannedShiftId
-			,dtmPlannedDate =x.dtmPlannedDate
+			,dtmPlannedDate =x.dtmPlannedStartDate
 			,intExecutionOrder =x.intExecutionOrder 
 		FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 				intWorkOrderId INT
@@ -187,7 +187,7 @@ BEGIN TRY
 				,dblQuantity numeric(18,6)
 				,intManufacturingCellId int
 				,intPlannedShiftId int
-				,dtmPlannedDate datetime
+				,dtmPlannedStartDate datetime
 				,intExecutionOrder int) x 
 	END
 	
