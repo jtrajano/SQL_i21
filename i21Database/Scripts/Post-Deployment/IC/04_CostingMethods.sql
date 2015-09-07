@@ -8,34 +8,51 @@ GO
 
 SET IDENTITY_INSERT dbo.tblICCostingMethod ON;
 
-INSERT INTO dbo.[tblICCostingMethod] (
-	[intCostingMethodId],
-	[strCostingMethod]
-)
-SELECT 
-	[intCostingMethodId] = 1,
-	[strCostingMethod] = 'AVERAGE COST'
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblICCostingMethod] WHERE [intCostingMethodId] = 1)
-UNION ALL
-SELECT 
-	[intCostingMethodId] = 2,
-	[strCostingMethod] = 'FIFO'
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblICCostingMethod] WHERE [intCostingMethodId] = 2)
-UNION ALL
-SELECT 
-	[intCostingMethodId] = 3,
-	[strCostingMethod] = 'LIFO'
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblICCostingMethod] WHERE [intCostingMethodId] = 3)
-UNION ALL
-SELECT 
-	[intCostingMethodId] = 4,
-	[strCostingMethod] = 'STANDARD COST'
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblICCostingMethod] WHERE [intCostingMethodId] = 4)
-UNION ALL
-SELECT 
-	[intCostingMethodId] = 5,
-	[strCostingMethod] = 'LOT COST'
-WHERE NOT EXISTS (SELECT TOP 1 1 FROM dbo.[tblICCostingMethod] WHERE [intCostingMethodId] = 5)
+-- Use UPSERT to populate the inventory transaction types
+MERGE 
+INTO	dbo.[tblICCostingMethod]
+WITH	(HOLDLOCK) 
+AS		CostingMethods
+USING	(
+		SELECT 
+			[intCostingMethodId] = 1,
+			[strCostingMethod] = 'AVERAGE COST'
+		UNION ALL
+		SELECT 
+			[intCostingMethodId] = 2,
+			[strCostingMethod] = 'FIFO'
+		UNION ALL
+		SELECT 
+			[intCostingMethodId] = 3,
+			[strCostingMethod] = 'LIFO'
+		UNION ALL
+		SELECT 
+			[intCostingMethodId] = 4,
+			[strCostingMethod] = 'LOT COST'
+		UNION ALL
+		SELECT 
+			[intCostingMethodId] = 5,
+			[strCostingMethod] = 'ACTUAL COST'
+
+) AS HardCodedCostingMethods
+	ON  CostingMethods.intCostingMethodId = HardCodedCostingMethods.intCostingMethodId
+
+-- When id is matched, make sure the name and form are up-to-date.
+WHEN MATCHED THEN 
+	UPDATE 
+	SET 	strCostingMethod = HardCodedCostingMethods.strCostingMethod
+
+-- When id is missing, then do an insert. 
+WHEN NOT MATCHED THEN
+	INSERT (
+		intCostingMethodId
+		,strCostingMethod
+	)
+	VALUES (
+		HardCodedCostingMethods.intCostingMethodId
+		,HardCodedCostingMethods.strCostingMethod
+	)
+;
 
 SET IDENTITY_INSERT dbo.tblICCostingMethod OFF;
 

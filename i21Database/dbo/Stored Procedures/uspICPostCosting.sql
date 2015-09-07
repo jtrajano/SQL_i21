@@ -58,12 +58,12 @@ DECLARE @intId AS INT
 DECLARE @CostingMethod AS INT 
 		,@strTransactionForm AS NVARCHAR(255)
 
--- Create the CONSTANT variables for the costing methods
+-- Declare the costing methods
 DECLARE @AVERAGECOST AS INT = 1
 		,@FIFO AS INT = 2
 		,@LIFO AS INT = 3
-		,@STANDARDCOST AS INT = 4
-		,@LOTCOST AS INT = 5
+		,@LOTCOST AS INT = 4 	
+		,@ACTUALCOST AS INT = 5	
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Do the Validation
