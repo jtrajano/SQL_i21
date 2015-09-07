@@ -11,6 +11,7 @@
     [dtmShipDate]          DATETIME        NULL,
     [intShipViaId]         INT             NULL,
     [strPONumber]          NVARCHAR (25)    COLLATE Latin1_General_CI_AS NULL,
+	[strBOLNumber]		   NVARCHAR (50)	COLLATE Latin1_General_CI_AS NULL, 
     [intTermId]            INT             NOT NULL,
     [dblInvoiceSubtotal]   NUMERIC (18, 6) NULL,
     [dblShipping]          NUMERIC (18, 6) NULL,
