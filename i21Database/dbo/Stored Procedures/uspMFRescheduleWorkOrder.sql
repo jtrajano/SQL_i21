@@ -31,6 +31,8 @@ BEGIN TRY
 		,@strWorkOrderNo nvarchar(50)
 		,@strCellName nvarchar(50)
 		,@strPackName nvarchar(50)
+		,@intItemId int
+		,@strItemNo nvarchar(50)
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -117,6 +119,37 @@ BEGIN TRY
 			,intLocationId int
 			)
 
+	IF EXISTS (
+		SELECT *
+		FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
+			intPackTypeId INT
+			,intStatusId int
+			) x 
+		WHERE x.intPackTypeId IS NULL AND intStatusId<>1 
+		)
+	BEGIN
+		SELECT @intWorkOrderId=intWorkOrderId,@intItemId=intItemId
+		FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
+			intWorkOrderId int
+			,intItemId int
+			,intStatusId int
+			,intPackTypeId INT
+			
+			) x 
+		WHERE x.intPackTypeId IS NULL AND intStatusId<>1 
+
+		SELECT @strWorkOrderNo =strWorkOrderNo 
+		FROM dbo.tblMFWorkOrder
+		Where intWorkOrderId =@intWorkOrderId 
+
+		SELECT @strItemNo=strItemNo
+		FROM dbo.tblICItem 
+		WHERE intItemId=@intItemId
+
+		RAISERROR(51188,11,1,@strItemNo,@strWorkOrderNo)
+		RETURN
+	END
+
 	INSERT INTO @tblMFScheduleWorkOrder (
 		intManufacturingCellId
 		,intWorkOrderId
@@ -186,7 +219,7 @@ BEGIN TRY
 	LEFT JOIN dbo.tblMFPackTypeDetail PTD ON PTD.intPackTypeId = x.intPackTypeId
 		AND PTD.intTargetUnitMeasureId = x.intUnitMeasureId
 		AND PTD.intSourceUnitMeasureId = MC.intLineCapacityUnitMeasureId
-	Where intStatusId<>1 
+	WHERE intStatusId<>1 
 	ORDER BY x.intExecutionOrder
 
 	IF EXISTS (
