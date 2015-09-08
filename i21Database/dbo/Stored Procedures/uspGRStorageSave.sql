@@ -560,14 +560,14 @@ BEGIN TRY
 		END
 	END
 			--Edit Mode Yes
-	ELSE IF @intConcurrencyId > 0 AND @ysnUpdateHouseTotal = 1
+	ELSE IF @intConcurrencyId > 0 AND @ysnUpdateHouseTotal = 1 AND (@NewdblOpenBalance < > @OlddblOpenBalance)
 	BEGIN
 		UPDATE tblICItemStock
 		SET dblUnitInCustody = dblUnitInCustody + (@NewdblOpenBalance - @OlddblOpenBalance)
 		WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId
 	END
 			--Edit Mode No
-	ELSE IF @intConcurrencyId > 0 AND @ysnUpdateHouseTotal = 0
+	ELSE IF @intConcurrencyId > 0 AND @ysnUpdateHouseTotal = 0 AND (@NewdblOpenBalance < > @OlddblOpenBalance)
 	BEGIN
 		UPDATE tblICItemStock
 		SET dblUnitInCustody = dblUnitInCustody + (@NewdblOpenBalance - @OlddblOpenBalance)
