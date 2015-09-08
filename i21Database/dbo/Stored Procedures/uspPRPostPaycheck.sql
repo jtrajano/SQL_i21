@@ -32,8 +32,8 @@ WHERE strPaycheckId = @strPaycheckId
 DECLARE @PAYCHECK INT = 21,
 		@DIRECT_DEPOSIT INT = 23
 
-SELECT @intBankTransactionTypeId = CASE WHEN (ISNULL(PC.ysnDirectDeposit, 0) = 1) THEN @DIRECT_DEPOSIT ELSE @PAYCHECK END 
-FROM tblPRPaycheck WHERE PC.intPaycheckId = @intPaycheckId
+SELECT @intBankTransactionTypeId = CASE WHEN (ISNULL(ysnDirectDeposit, 0) = 1) THEN @DIRECT_DEPOSIT ELSE @PAYCHECK END 
+FROM tblPRPaycheck WHERE intPaycheckId = @intPaycheckId
 
 IF (@ysnPost = 1)
 BEGIN
