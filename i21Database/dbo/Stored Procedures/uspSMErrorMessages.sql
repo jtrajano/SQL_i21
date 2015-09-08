@@ -756,7 +756,7 @@ SET @strmessage = 'There is an already existing calendar for the date range %s t
 EXEC sp_addmessage 51184,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51185) EXEC sp_dropmessage 51185, 'us_english'	
-SET @strmessage = 'There is not enough shift time to be scheduled in the WO No %s in the selected calendar.'
+SET @strmessage = 'There is no enough shift time to schedule the Work Order No %s in the selected calendar.'
 EXEC sp_addmessage 51185,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51186) EXEC sp_dropmessage 51186, 'us_english'	
