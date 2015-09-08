@@ -2294,6 +2294,9 @@
     <Build Include="dbo\Functions\fnAPFormatAddress.sql" />
     <Build Include="dbo\Stored Procedures\uspGRStorageDelete.sql" />
     <Build Include="dbo\Stored Procedures\uspGRStorageSave.sql" />
+    <Build Include="dbo\Tables\tblARCommentMaintenance.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetDefaultComment.sql" />
+    <Build Include="dbo\Stored Procedures\uspARDuplicateComment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
