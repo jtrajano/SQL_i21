@@ -23,6 +23,7 @@
 	,@intLocationId int=NULL
 	,@intMachineId int =NULL
 	,@dtmProductionDate datetime=NULL
+	,@strVendorLotNo nvarchar(50)=NULL
 	)
 AS
 BEGIN
@@ -54,6 +55,7 @@ BEGIN
 			,@intBatchId
 			,@intLotId OUT
 			,@strLotAlias
+			,@strVendorLotNo
 	End
 	Else
 	Begin
@@ -70,6 +72,7 @@ BEGIN
 			,@intBatchId=@intBatchId
 			,@intLotId =@intLotId OUT
 			,@strLotAlias=@strLotAlias
+			,@strVendorLotNo=@strVendorLotNo
 	End
 
 	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCreated,@intLocationId) 

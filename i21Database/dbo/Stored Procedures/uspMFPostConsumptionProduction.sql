@@ -10,6 +10,7 @@
 	,@intBatchId int
 	,@intLotId INT OUTPUT
 	,@strLotAlias nvarchar(50)
+	,@strVendorLotNo nvarchar(50)= NULL
 AS
 BEGIN
 	SET QUOTED_IDENTIFIER OFF
@@ -194,7 +195,7 @@ BEGIN
 		,strMarkings = NULL
 		,strNotes = NULL
 		,intEntityVendorId = NULL
-		,strVendorLotNo = NULL
+		,strVendorLotNo = @strVendorLotNo
 		,intVendorLocationId = NULL
 		,intDetailId = @intWorkOrderId
 		,ysnProduced = 1
