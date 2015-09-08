@@ -219,7 +219,7 @@ BEGIN TRY
 	LEFT JOIN dbo.tblMFPackTypeDetail PTD ON PTD.intPackTypeId = x.intPackTypeId
 		AND PTD.intTargetUnitMeasureId = x.intUnitMeasureId
 		AND PTD.intSourceUnitMeasureId = MC.intLineCapacityUnitMeasureId
-	WHERE intStatusId<>1 
+	--WHERE intStatusId<>1 
 	ORDER BY x.intExecutionOrder
 
 	IF EXISTS (
@@ -333,7 +333,7 @@ BEGIN TRY
 
 		SELECT @intRecordId = Min(intRecordId)
 		FROM @tblMFScheduleWorkOrder S
-		WHERE S.intNoOfUnit > 0 AND intManufacturingCellId =@intManufacturingCellId 
+		WHERE S.intNoOfUnit > 0 AND intManufacturingCellId =@intManufacturingCellId AND S.intStatusId<>1 
 			AND NOT EXISTS (
 				SELECT *
 				FROM @tblMFScheduleWorkOrderDetail SD
@@ -536,7 +536,7 @@ BEGIN TRY
 
 			SELECT @intRecordId = Min(intRecordId)
 			FROM @tblMFScheduleWorkOrder S
-			WHERE S.intNoOfUnit > 0 AND intManufacturingCellId =@intManufacturingCellId 
+			WHERE S.intNoOfUnit > 0 AND intManufacturingCellId =@intManufacturingCellId AND S.intStatusId<>1 
 				AND NOT EXISTS (
 					SELECT *
 					FROM @tblMFScheduleWorkOrderDetail SD
@@ -554,7 +554,7 @@ BEGIN TRY
 		IF NOT EXISTS (
 				SELECT *
 				FROM @tblMFScheduleWorkOrder S
-				WHERE S.intNoOfUnit > 0
+				WHERE S.intNoOfUnit > 0 AND S.intStatusId<>1 
 				)
 			BREAK
 
@@ -566,8 +566,8 @@ BEGIN TRY
 				) >= @intDuration * @intNoOfMachine
 		OR NOT EXISTS (
 		SELECT *
-		FROM @tblMFScheduleWorkOrder
-		WHERE intNoOfUnit > 0
+		FROM @tblMFScheduleWorkOrder S
+		WHERE intNoOfUnit > 0 AND S.intStatusId<>1 
 			AND intWorkOrderId <> @intWorkOrderId
 		)
 		BEGIN
@@ -579,13 +579,13 @@ BEGIN TRY
 
 	IF EXISTS (
 		SELECT *
-		FROM @tblMFScheduleWorkOrder
-		WHERE intNoOfUnit > 0
+		FROM @tblMFScheduleWorkOrder S
+		WHERE intNoOfUnit > 0 AND S.intStatusId<>1 
 		)
 	BEGIN
 		SELECT @intWorkOrderId =intWorkOrderId 
-		FROM @tblMFScheduleWorkOrder
-		WHERE intNoOfUnit > 0
+		FROM @tblMFScheduleWorkOrder S
+		WHERE intNoOfUnit > 0 AND S.intStatusId<>1 
 
 		Select @strWorkOrderNo =strWorkOrderNo 
 		From tblMFWorkOrder
