@@ -12,8 +12,26 @@ BEGIN TRY
 		,@dtmCurrentDateTime DATETIME
 		,@intDayOfYear INT
 		,@intRecipeId INT
+		,@intAttributeId int
+		,@intManufacturingProcessId int
+		,@strAttributeValue nvarchar(50)
+		,@dtmExpectedDate DATETIME
 
-	SELECT @dtmCurrentDateTime = GETDATE()
+	SELECT @intManufacturingProcessId=intManufacturingProcessId
+		,@dtmExpectedDate=dtmExpectedDate
+	FROM tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
+
+	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Recipe Item Validity By Due Date'
+	
+	Select @strAttributeValue=strAttributeValue
+	From tblMFManufacturingProcessAttribute
+	Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId and intAttributeId=@intAttributeId
+
+	IF @strAttributeValue='False' OR @strAttributeValue IS NULL
+		SELECT @dtmCurrentDateTime = GETDATE()
+	Else 
+		SELECT @dtmCurrentDateTime = @dtmExpectedDate
 
 	SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
 
