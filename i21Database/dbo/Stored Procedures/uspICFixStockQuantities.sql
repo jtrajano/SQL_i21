@@ -90,6 +90,7 @@ WHEN NOT MATCHED THEN
 
 ----------------------------------------------------------
 -- Update the Item Stock UOM table for non lot items
+-- and non-stock unit UOMs. 
 ----------------------------------------------------------
 MERGE	
 INTO	dbo.tblICItemStockUOM 
@@ -101,37 +102,19 @@ USING (
 				,ItemTransactions.intItemLocationId
 				,ItemTransactions.intSubLocationId
 				,ItemTransactions.intStorageLocationId
-				,Qty = --SUM(ItemTransactions.dblQty)
-						SUM (
-							CASE	WHEN Lot.intLotId IS NOT NULL AND Lot.intItemUOMId <> Lot.intWeightUOMId THEN
-										CASE	WHEN Lot.intItemUOMId = ItemTransactions.intItemUOMId AND ISNULL(Lot.dblWeightPerQty, 0) <> 0 THEN 
-													-- Get the actual weight and convert it to stock unit  													
-													dbo.fnCalculateStockUnitQty(ItemTransactions.dblQty * Lot.dblWeightPerQty, WeightUOM.dblUnitQty) 
-												ELSE
-													-- the qty is already in weight, then convert the weight to stock unit. 
-													dbo.fnCalculateStockUnitQty(ItemTransactions.dblQty, WeightUOM.dblUnitQty) 
-										END 
-									ELSE
-										dbo.fnCalculateStockUnitQty(ItemTransactions.dblQty, ItemTransactions.dblUOMQty) 
-							END				
-						)
-
-
-		FROM	dbo.tblICInventoryTransaction ItemTransactions LEFT JOIN tblICLot Lot
-					ON ItemTransactions.intLotId = Lot.intLotId
-				LEFT JOIN tblICItemUOM LotItemUOM
-					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
-				LEFT JOIN tblICItemUOM WeightUOM
-					ON WeightUOM.intItemUOMId = Lot.intWeightUOMId
+				,Qty = SUM(ItemTransactions.dblQty)
+		FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN dbo.tblICItemUOM ItemUOM
+					ON ItemTransactions.intItemUOMId = ItemUOM.intItemUOMId
 		WHERE	ISNULL(ItemTransactions.ysnIsUnposted, 0) = 0
-				AND Lot.intLotId IS NULL 
+				AND ISNULL(ItemUOM.ysnStockUnit, 0) = 0 
+				AND ItemTransactions.intLotId IS NULL 
 		GROUP BY ItemTransactions.intItemId, ItemTransactions.intItemUOMId, ItemTransactions.intItemLocationId, ItemTransactions.intSubLocationId, ItemTransactions.intStorageLocationId
 ) AS RawStockData
 	ON ItemStockUOM.intItemId = RawStockData.intItemId
 	AND ItemStockUOM.intItemLocationId = RawStockData.intItemLocationId
 	AND ItemStockUOM.intItemUOMId = RawStockData.intItemUOMId
 	AND ISNULL(ItemStockUOM.intSubLocationId, 0) = ISNULL(RawStockData.intSubLocationId, 0)
-	AND ISNULL(ItemStockUOM.intStorageLocationId, 0) = ISNULL(RawStockData.intStorageLocationId, 0)
+	AND ISNULL(ItemStockUOM.intStorageLocationId, 0) = ISNULL(RawStockData.intStorageLocationId, 0)	
 
 -- If matched, update the unit on hand qty. 
 WHEN MATCHED THEN 
@@ -176,16 +159,11 @@ USING (
 				,ItemTransactions.intSubLocationId
 				,ItemTransactions.intStorageLocationId
 				,Qty = SUM(ItemTransactions.dblQty * ItemTransactions.dblUOMQty)
-		FROM	dbo.tblICInventoryTransaction ItemTransactions LEFT JOIN tblICLot Lot
-					ON ItemTransactions.intLotId = Lot.intLotId
-				LEFT JOIN tblICItemUOM LotItemUOM
-					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
-				LEFT JOIN tblICItemUOM WeightUOM
-					ON WeightUOM.intItemUOMId = Lot.intWeightUOMId
+		FROM	dbo.tblICInventoryTransaction ItemTransactions INNER JOIN dbo.tblICItemUOM ItemUOM
+					ON ItemTransactions.intItemUOMId = ItemUOM.intItemUOMId
 		WHERE	ISNULL(ItemTransactions.ysnIsUnposted, 0) = 0
-				AND Lot.intLotId IS NULL 
-				AND dbo.fnGetItemStockUOM(ItemTransactions.intItemId) IS NOT NULL 
-				AND dbo.fnGetItemStockUOM(ItemTransactions.intItemId) <> ItemTransactions.intItemUOMId
+				AND ISNULL(ItemUOM.ysnStockUnit, 0) = 1
+				AND ItemTransactions.intLotId IS NULL 
 		GROUP BY ItemTransactions.intItemId, dbo.fnGetItemStockUOM(ItemTransactions.intItemId), ItemTransactions.intItemLocationId, ItemTransactions.intSubLocationId, ItemTransactions.intStorageLocationId
 ) AS RawStockData
 	ON ItemStockUOM.intItemId = RawStockData.intItemId
@@ -193,6 +171,7 @@ USING (
 	AND ItemStockUOM.intItemUOMId = RawStockData.intItemUOMId
 	AND ISNULL(ItemStockUOM.intSubLocationId, 0) = ISNULL(RawStockData.intSubLocationId, 0)
 	AND ISNULL(ItemStockUOM.intStorageLocationId, 0) = ISNULL(RawStockData.intStorageLocationId, 0)
+	
 
 -- If matched, update the unit on hand qty. 
 WHEN MATCHED THEN 

@@ -125,6 +125,7 @@ BEGIN
 END   
 
 -- Do not allow unpost if Bill has been created for the inventory receipt
+IF @ysnPost = 0 AND @ysnRecap = 0 
 BEGIN 
 
 	SELECT	TOP 1 
