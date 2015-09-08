@@ -519,7 +519,7 @@ BEGIN TRY
 			,[dblTotalWeightShrink]= 0 
 			,[dblOriginalBalance]= @dblNetUnits 
 			,[dblOpenBalance]= @dblNetUnits
-			,[dtmDeliveryDate]= NULL
+			,[dtmDeliveryDate]= GETDATE()
 			,[dtmZeroBalanceDate]= NULL
 			,[strDPARecieptNumber]= NULL
 			,[dtmLastStorageAccrueDate]= NULL 
