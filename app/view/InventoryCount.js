@@ -427,8 +427,8 @@ Ext.define('Inventory.view.InventoryCount', {
                                             },
                                             items: [
                                                 {
-                                                    xtype: 'textfield',
-                                                    itemId: 'txtScannedCountEntry',
+                                                    xtype: 'checkboxfield',
+                                                    itemId: 'chkScannedCountEntry',
                                                     fieldLabel: 'Scanned Count Entry',
                                                     labelWidth: 125
                                                 },
@@ -445,8 +445,8 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     labelWidth: 125
                                                 },
                                                 {
-                                                    xtype: 'checkboxfield',
-                                                    itemId: 'chkStatus',
+                                                    xtype: 'textfield',
+                                                    itemId: 'txtStatus',
                                                     fieldLabel: 'Status',
                                                     labelWidth: 125
                                                 }

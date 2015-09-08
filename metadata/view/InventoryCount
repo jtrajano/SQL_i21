@@ -1017,33 +1017,22 @@
                                             "designerId": "298154f0-0c34-4ec3-9c3b-79f6b331d7ae",
                                             "cn": [
                                                 {
-                                                    "type": "Ext.form.field.Text",
+                                                    "type": "Ext.form.field.Checkbox",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "columns": null,
-                                                        "designer|createAlias": null,
+                                                        "boxLabel": null,
                                                         "fieldLabel": "Scanned Count Entry",
-                                                        "itemId": "txtScannedCountEntry",
+                                                        "itemId": "chkScannedCountEntry",
                                                         "labelWidth": 125,
                                                         "layout|flex": null,
-                                                        "name": null
+                                                        "margin": null
                                                     },
-                                                    "name": "MyTextField8",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "34c18c1d-6bcd-43ab-b70c-8203ec97371f",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
+                                                    "name": "MyCheckbox8",
+                                                    "designerId": "279b9ea9-5d33-4bb9-a94f-6549b7be21de"
                                                 },
                                                 {
                                                     "type": "Ext.form.field.Checkbox",
@@ -1082,22 +1071,33 @@
                                                     "designerId": "19f734bb-9bfa-4370-ba2e-317d3f58fa21"
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Checkbox",
+                                                    "type": "Ext.form.field.Text",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "boxLabel": null,
+                                                        "columns": null,
+                                                        "designer|createAlias": null,
                                                         "fieldLabel": "Status",
-                                                        "itemId": "chkStatus",
+                                                        "itemId": "txtStatus",
                                                         "labelWidth": 125,
                                                         "layout|flex": null,
-                                                        "margin": null
+                                                        "name": null
                                                     },
-                                                    "name": "MyCheckbox8",
-                                                    "designerId": "279b9ea9-5d33-4bb9-a94f-6549b7be21de"
+                                                    "name": "MyTextField8",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "34c18c1d-6bcd-43ab-b70c-8203ec97371f",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
                                                 }
                                             ]
                                         }
