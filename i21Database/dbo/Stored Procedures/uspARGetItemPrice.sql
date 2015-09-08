@@ -17,6 +17,7 @@
 	,@SupplyPointId			INT				= NULL
 	,@LastCost				NUMERIC(18,6)	= NULL
 	,@ShipToLocationId      INT				= NULL
+	,@VendorLocationId		INT				= NULL
 AS
 	--	DECLARE 	
 	--	@ItemId				INT
@@ -41,6 +42,8 @@ AS
 	--		,@Pricing AS NVARCHAR(250)
 	--SET @Price = NULL;
 	--SET @Pricing = '';
+	
+	SET @TransactionDate = ISNULL(@TransactionDate,GETDATE())
 	
 	IF @CustomerPricingOnly IS NULL
 		SET @CustomerPricingOnly = 0
@@ -91,7 +94,7 @@ AS
 			AND intItemUOMId = @ItemUOMId
 			AND intItemId = @ItemId
 			AND ((ISNULL(@OriginalQuantity,0.00) + (dblDetailQuantity - ISNULL(dblScheduleQty,0)) >= @Quantity) OR ysnUnlimitedQuantity = 1)
-			AND @TransactionDate BETWEEN dtmStartDate AND dtmEndDate
+			AND CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate,@TransactionDate) AS DATE)
 			AND intContractHeaderId = @ContractHeaderId
 			AND intContractDetailId = @ContractDetailId
 			AND ((ISNULL(@OriginalQuantity,0.00) + (dblDetailQuantity - ISNULL(dblScheduleQty,0)) > 0) OR ysnUnlimitedQuantity = 1)
@@ -126,7 +129,7 @@ AS
 			AND intItemUOMId = @ItemUOMId
 			AND intItemId = @ItemId
 			AND (((dblDetailQuantity - ISNULL(dblScheduleQty,0)) >= @Quantity) OR ysnUnlimitedQuantity = 1)
-			AND @TransactionDate BETWEEN dtmStartDate AND dtmEndDate
+			AND CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate,@TransactionDate) AS DATE)
 			AND (((dblDetailQuantity - ISNULL(dblScheduleQty,0)) > 0) OR ysnUnlimitedQuantity = 1)
 			AND (dblBalance > 0 OR ysnUnlimitedQuantity = 1)
 		ORDER BY
@@ -155,6 +158,7 @@ AS
 		,@SupplyPointId
 		,@LastCost
 		,@ShipToLocationId
+		,@VendorLocationId
 		
 	IF(@Price IS NOT NULL)
 	BEGIN		
@@ -179,7 +183,7 @@ AS
 								intItemId = @ItemId 
 								AND intItemLocationId = @ItemLocationId 
 								AND (@ItemUOMId IS NULL OR intItemUnitMeasureId = @ItemUOMId)
-								AND @TransactionDate BETWEEN dtmBeginDate AND dtmEndDate
+								AND CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmBeginDate AS DATE) AND CAST(ISNULL(dtmEndDate,@TransactionDate) AS DATE)
 								)
 		IF(@Price IS NOT NULL)
 			BEGIN
