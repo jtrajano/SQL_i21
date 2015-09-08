@@ -35,13 +35,13 @@ BEGIN TRY
 	FROM tblICItemLocation
 	WHERE intItemId = @intItemId AND intLocationId = @intCompanyLocationId
 
-	IF @ysnUpdateHouseTotal = 1
+	IF @ysnUpdateHouseTotal = 1 AND @dblOpenBalance>0
 	BEGIN
 		UPDATE tblICItemStock
 		SET dblUnitInCustody = dblUnitInCustody - @dblOpenBalance
 		WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId
 	END
-	ELSE
+	ELSE IF @ysnUpdateHouseTotal = 0 AND @dblOpenBalance>0
 	BEGIN
 		UPDATE tblICItemStock
 		SET dblUnitInCustody = dblUnitInCustody - @dblOpenBalance
