@@ -760,7 +760,7 @@ SET @strmessage = 'There is no enough shift time to schedule the Work Order No %
 EXEC sp_addmessage 51185,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51186) EXEC sp_dropmessage 51186, 'us_english'	
-SET @strmessage = 'Pack Type ''%s'' for WO# ''%s'' is not associated with the line ''%s''.'
+SET @strmessage = 'Pack Type ''%s'' for Work Order ''%s'' is not associated with the line ''%s''.'
 EXEC sp_addmessage 51186,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51187) EXEC sp_dropmessage 51187, 'us_english'	
