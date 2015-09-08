@@ -70,11 +70,15 @@ BEGIN TRY
 				Update tblMFBlendRequirement Set intStatusId=2 where intBlendRequirementId=@intBlendRequirementId
 
 			If @intStatusId=9
-				UPDATE tblMFWorkOrder
-				SET intExecutionOrder = intExecutionOrder - 1
-				WHERE dtmExpectedDate = convert(date,@dtmDueDate) 
-				AND intExecutionOrder > @intExecutionOrder
-				AND intManufacturingCellId = @intManufacturingCellId
+				Begin
+					UPDATE tblMFWorkOrder
+					SET intExecutionOrder = intExecutionOrder - 1
+					WHERE dtmExpectedDate = convert(date,@dtmDueDate) 
+					AND intExecutionOrder > @intExecutionOrder
+					AND intManufacturingCellId = @intManufacturingCellId
+
+					Exec [uspMFDeleteLotReservation] @intWorkOrderId=@intWorkOrderId
+				End
 		End
 							
 		Select @intRowCount=Min(intRowNo) from @tblWO where intRowNo>@intRowCount	

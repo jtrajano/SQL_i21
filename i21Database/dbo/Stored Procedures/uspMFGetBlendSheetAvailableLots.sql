@@ -42,19 +42,12 @@ Declare @tblReservedQty table
 	dblReservedQty numeric(18,6)
 )
 
---Insert into @tblReservedQty
---Select rd.intLotId,Sum(rd.dblQuantity) AS dblReservedQty 
---From tblICInventoryReservationDetail rd 
---where rd.intItemId=@intItemId
---group by rd.intLotId
-
-Insert into @tblReservedQty
-Select cl.intLotId,Sum(cl.dblQuantity) AS dblReservedQty 
-From tblMFWorkOrderConsumedLot cl 
-Join tblMFWorkOrder w on cl.intWorkOrderId=w.intWorkOrderId
-join tblICLot l on l.intLotId=cl.intLotId
-where l.intItemId=@intItemId and w.intStatusId<>13
-group by cl.intLotId
+If @ysnEnableParentLot=0
+	Insert into @tblReservedQty
+	Select sr.intLotId,Sum(sr.dblQty) AS dblReservedQty 
+	From tblICStockReservation sr 
+	where sr.intItemId=@intItemId
+	group by sr.intLotId
 
 --intPhysicalItemUOMId is 
 Select l.intLotId,l.strLotNumber,l.intItemId,i.strItemNo,i.strDescription,ISNULL(l.strLotAlias,'') AS strLotAlias,l.dblWeight AS dblPhysicalQty,

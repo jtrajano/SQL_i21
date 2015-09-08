@@ -111,30 +111,19 @@ Declare @tblReservedQty table
 	dblReservedQty numeric(18,6)
 )
 
---Insert into @tblReservedQty
---Select ri.intItemId,Sum(rd.dblQuantity) AS dblReservedQty 
---From tblICInventoryReservationDetail rd 
---Join tblMFRecipeItem ri on ri.intItemId=rd.intItemId 
---where ri.intRecipeId=@intRecipeId
---group by ri.intItemId
-
 Insert into @tblReservedQty
-Select ri.intItemId,Sum(cl.dblQuantity) AS dblReservedQty 
-From tblMFWorkOrderConsumedLot cl 
-Join tblMFWorkOrder w on cl.intWorkOrderId=w.intWorkOrderId
-join tblICLot l on l.intLotId=cl.intLotId
-Join tblMFRecipeItem ri on ri.intItemId=l.intItemId 
-where ri.intRecipeId=@intRecipeId and w.intStatusId<>13
+Select ri.intItemId,Sum(sr.dblQty) AS dblReservedQty 
+From tblICStockReservation sr 
+Join tblMFRecipeItem ri on ri.intItemId=sr.intItemId 
+where ri.intRecipeId=@intRecipeId and ri.intRecipeItemTypeId=1
 group by ri.intItemId
 
 --Substitute
 Insert into @tblReservedQty
-Select rs.intSubstituteItemId,Sum(cl.dblQuantity) AS dblReservedQty 
-From tblMFWorkOrderConsumedLot cl 
-Join tblMFWorkOrder w on cl.intWorkOrderId=w.intWorkOrderId
-join tblICLot l on l.intLotId=cl.intLotId
-Join tblMFRecipeSubstituteItem rs on rs.intItemId=l.intItemId 
-where rs.intRecipeId=@intRecipeId and w.intStatusId<>13
+Select rs.intSubstituteItemId,Sum(sr.dblQty) AS dblReservedQty 
+From tblICStockReservation sr 
+Join tblMFRecipeSubstituteItem rs on rs.intSubstituteItemId=sr.intItemId 
+where rs.intRecipeId=@intRecipeId
 group by rs.intSubstituteItemId
 
 Select i.intItemId,i.strItemNo,i.strDescription,a.dblRequiredQty,ISNULL(b.dblPhysicalQty,0) AS dblPhysicalQty,

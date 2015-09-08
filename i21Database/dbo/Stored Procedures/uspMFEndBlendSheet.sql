@@ -88,6 +88,8 @@ BEGIN TRY
 
 	Exec uspMFCompleteWorkOrder @strXML=@strConsumeXml,@strOutputLotNumber=@strOutputLotNumber OUT
 
+	Exec [uspMFDeleteLotReservation] @intWorkOrderId=@intWorkOrderId
+
 	Update tblMFWorkOrder Set intStatusId=12,dtmCompletedDate=@dtmCurrentDate,intLastModifiedUserId=@intUserId,dtmLastModified=@dtmCurrentDate 
 	Where intWorkOrderId=@intWorkOrderId
 

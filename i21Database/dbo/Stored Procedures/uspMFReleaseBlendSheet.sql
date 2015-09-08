@@ -322,6 +322,9 @@ Begin
 	--Create Quality Computations
 	Exec uspMFCreateBlendRecipeComputation @intWorkOrderId=@intWorkOrderId,@intTypeId=1,@strXml=@strXml
 
+	--Create Reservation
+	Exec [uspMFCreateLotReservation] @intWorkOrderId=@intWorkOrderId,@ysnReservationByParentLot=@ysnEnableParentLot
+
 	Delete from @tblBSLot
 
 	Select @dblQtyToProduce=@dblQtyToProduce-@PerBlendSheetQty

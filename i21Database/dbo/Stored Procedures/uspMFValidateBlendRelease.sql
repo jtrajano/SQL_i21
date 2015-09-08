@@ -255,13 +255,12 @@ From tblMFRecipeSubstituteItem rs
 Join tblMFRecipe r on r.intRecipeId=rs.intRecipeId 
 where rs.intRecipeId=@intRecipeId and rs.intRecipeItemTypeId=1
 
-Insert into @tblReservedQty
-Select cl.intLotId,Sum(cl.dblQuantity) AS dblReservedQty 
-From tblMFWorkOrderConsumedLot cl 
-Join tblMFWorkOrder w on cl.intWorkOrderId=w.intWorkOrderId
-join tblICLot l on l.intLotId=cl.intLotId
-where w.intStatusId<>13
-group by cl.intLotId
+If @ysnEnableParentLot=0
+	Insert into @tblReservedQty
+	Select tl.intLotId,Sum(sr.dblQty) AS dblReservedQty 
+	From tblICStockReservation sr 
+	Join @tblLot tl on sr.intLotId=tl.intLotId
+	group by tl.intLotId
 
 If @ysnEnableParentLot=0
 	Insert Into @tblAvailableQty(intLotId,intItemId,strLotNo,strLotAlias,strItemNo,dblAvailableQty,dblSelectedQty,dblOverCommitQty,dblWeightPerUnit,strUOM)
