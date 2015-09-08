@@ -54,7 +54,7 @@ AS
 							WHERE
 								intEntityCustomerId = @CustomerId								
 								AND ((intCategoryId = @ItemCategoryId OR intItemId = @ItemId) OR (intTaxClassId = TC.[intTaxClassId] OR intTaxCodeId = TC.[intTaxCodeId] OR (UPPER(LTRIM(RTRIM(ISNULL(strState,'')))) = UPPER(LTRIM(RTRIM(ISNULL(TC.strState,'')))) AND LEN(UPPER(LTRIM(RTRIM(ISNULL(strState,''))))) > 0 ) ))
-								AND	@TransactionDate BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate, @TransactionDate) AS DATE)
+								AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate, @TransactionDate) AS DATE)
 							ORDER BY
 								dtmStartDate
 							),0)
@@ -405,7 +405,7 @@ AS
 							WHERE
 								intEntityCustomerId = @CustomerId
 								AND ((intCategoryId = @ItemCategoryId OR intItemId = @ItemId) OR (intTaxClassId = TC.[intTaxClassId] OR intTaxCodeId = TC.[intTaxCodeId] OR (UPPER(LTRIM(RTRIM(ISNULL(strState,'')))) = UPPER(LTRIM(RTRIM(ISNULL(TC.strState,'')))) AND LEN(UPPER(LTRIM(RTRIM(ISNULL(strState,''))))) > 0 ) ))
-								AND	@TransactionDate BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate, @TransactionDate) AS DATE)
+								AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate, @TransactionDate) AS DATE)
 							ORDER BY
 								dtmStartDate
 							),0)
