@@ -497,7 +497,8 @@ BEGIN TRY
 			,@strLotAlias=@strLotAlias
 			,@intLocationId=@intLocationId
 			,@intMachineId =@intMachineId
-			,@dtmProductionDate=@dtmPlannedDate 
+			,@dtmProductionDate=@dtmPlannedDate
+			,@strVendorLotNo =@strVendorLotNo  
 	
 		IF @intLotStatusId IS NOT NULL
 		BEGIN
