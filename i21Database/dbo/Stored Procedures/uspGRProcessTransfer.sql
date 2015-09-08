@@ -41,6 +41,10 @@ BEGIN TRY
 	DECLARE @NewTicketMessage NVARCHAR(1000)
 	DECLARE @UnitsToReduce DECIMAL(18,6)
 	DECLARE @CurrentItemOpenBalance DECIMAL(24,10)
+	DECLARE @ysnUpdateHouseTotal INT
+	DECLARE @intItemId INT
+	DECLARE @intItemLocationId INT
+	DECLARE @intActionLocationId INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT,@strXml
 
@@ -67,6 +71,7 @@ BEGIN TRY
 	)
 
 	SELECT @UserKey = intCreatedUserId
+		,@ysnUpdateHouseTotal = ysnUpdateHouseTotal
 		,@ItemEntityid = intItemCustomerId
 		,@ItemCompanyLocationId = intItemLocation
 		,@ActionCompanyLocationId = intActionLocation
@@ -74,6 +79,7 @@ BEGIN TRY
 	FROM OPENXML(@idoc, 'root', 2) WITH 
 	(
 			 intCreatedUserId INT
+			,ysnUpdateHouseTotal INT
 			,intItemCustomerId INT
 			,intItemLocation INT
 			,intActionLocation INT
@@ -160,6 +166,9 @@ BEGIN TRY
 	SET @OldTicketMessage = NULL
 	SET @CurrentItemOpenBalance=NULL
 	SET @TicketNo=NULL
+	SET @intItemId=NULL
+	SET @intItemLocationId=NULL
+	SET @intActionLocationId=NULL
 	
 
 	
@@ -172,7 +181,7 @@ BEGIN TRY
 		FROM @ItemsToMove
 		WHERE intItemsToMoveKey = @ItemsToMoveKey
 		
-		SELECT @CurrentItemOpenBalance=dblOpenBalance,@TicketNo=intStorageTicketNumber FROM tblGRCustomerStorage Where intCustomerStorageId=@intCustomerStorageId
+		SELECT @CurrentItemOpenBalance=dblOpenBalance,@TicketNo=intStorageTicketNumber,@intItemId=intItemId FROM tblGRCustomerStorage Where intCustomerStorageId=@intCustomerStorageId
 
 		SELECT @ItemStorageTypeDescription = strStorageTypeDescription
 		FROM tblGRStorageType
@@ -303,6 +312,7 @@ BEGIN TRY
 					,[strStorageType]
 					,[intCurrencyId]
 					,[intStorageTicketNumber]
+					,[intItemId]
 					)
 				SELECT 1
 					,[intEntityId]
@@ -320,23 +330,24 @@ BEGIN TRY
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
 					,[dtmLastStorageAccrueDate]
-					,[dblStorageDue]
-					,[dblStoragePaid]
-					,[dblInsuranceRate]
+					,0--[dblStorageDue]
+					,0--[dblStoragePaid]
+					,0--[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
-					,[dblFeesDue]
-					,[dblFeesPaid]
+					,0--[dblFeesDue]
+					,0--[dblFeesPaid]
 					,[dblFreightDueRate]
 					,[ysnPrinted]
 					,[dblCurrencyRate]
 					,[strDiscountComment]
-					,[dblDiscountsDue]
-					,[dblDiscountsPaid]
+					,0--[dblDiscountsDue]
+					,0--[dblDiscountsPaid]
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
 					,[intStorageTicketNumber]
+					,intItemId
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
 
@@ -417,7 +428,7 @@ BEGIN TRY
 					,NULL
 					,'Transfer'
 					,@UserName
-					)
+					)			
 
 				--New Ticket
 				INSERT INTO [dbo].[tblGRCustomerStorage] (
@@ -454,6 +465,7 @@ BEGIN TRY
 					,[strStorageType]
 					,[intCurrencyId]
 					,[intStorageTicketNumber]
+					,[intItemId]
 					)
 				SELECT 1
 					,[intEntityId]
@@ -471,23 +483,24 @@ BEGIN TRY
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
 					,[dtmLastStorageAccrueDate]
-					,[dblStorageDue]
-					,[dblStoragePaid]
-					,[dblInsuranceRate]
+					,0--[dblStorageDue]
+					,0--[dblStoragePaid]
+					,0--[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
-					,[dblFeesDue]
-					,[dblFeesPaid]
+					,0--[dblFeesDue]
+					,0--[dblFeesPaid]
 					,[dblFreightDueRate]
 					,[ysnPrinted]
 					,[dblCurrencyRate]
 					,[strDiscountComment]
-					,[dblDiscountsDue]
-					,[dblDiscountsPaid]
+					,0--[dblDiscountsDue]
+					,0--[dblDiscountsPaid]
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
 					,[intStorageTicketNumber]
+					,[intItemId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
 
@@ -603,6 +616,7 @@ BEGIN TRY
 					,[strStorageType]
 					,[intCurrencyId]
 					,[intStorageTicketNumber]
+					,[intItemId]
 					)
 				SELECT 1
 					,[intEntityId]
@@ -620,23 +634,24 @@ BEGIN TRY
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
 					,[dtmLastStorageAccrueDate]
-					,[dblStorageDue]
-					,[dblStoragePaid]
-					,[dblInsuranceRate]
+					,0--[dblStorageDue]
+					,0--[dblStoragePaid]
+					,0--[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
-					,[dblFeesDue]
-					,[dblFeesPaid]
+					,0--[dblFeesDue]
+					,0--[dblFeesPaid]
 					,[dblFreightDueRate]
 					,[ysnPrinted]
 					,[dblCurrencyRate]
 					,[strDiscountComment]
-					,[dblDiscountsDue]
-					,[dblDiscountsPaid]
+					,0--[dblDiscountsDue]
+					,0--[dblDiscountsPaid]
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
 					,[intStorageTicketNumber]
+					,[intItemId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
 
@@ -753,6 +768,7 @@ BEGIN TRY
 					,[strStorageType]
 					,[intCurrencyId]
 					,[intStorageTicketNumber]
+					,[intItemId]
 					)
 				SELECT 1
 					,@ActionCustomer
@@ -770,23 +786,24 @@ BEGIN TRY
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
 					,[dtmLastStorageAccrueDate]
-					,[dblStorageDue]
-					,[dblStoragePaid]
-					,[dblInsuranceRate]
+					,0--[dblStorageDue]
+					,0--[dblStoragePaid]
+					,0--[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
-					,[dblFeesDue]
-					,[dblFeesPaid]
+					,0--[dblFeesDue]
+					,0--[dblFeesPaid]
 					,[dblFreightDueRate]
 					,[ysnPrinted]
 					,[dblCurrencyRate]
 					,[strDiscountComment]
-					,[dblDiscountsDue]
-					,[dblDiscountsPaid]
+					,0--[dblDiscountsDue]
+					,0--[dblDiscountsPaid]
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
 					,[intStorageTicketNumber]
+					,[intItemId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
 
@@ -904,6 +921,7 @@ BEGIN TRY
 					,[strStorageType]
 					,[intCurrencyId]
 					,[intStorageTicketNumber]
+					,[intItemId]
 					)
 				SELECT 1
 					,@ActionCustomer
@@ -921,23 +939,24 @@ BEGIN TRY
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
 					,[dtmLastStorageAccrueDate]
-					,[dblStorageDue]
-					,[dblStoragePaid]
-					,[dblInsuranceRate]
+					,0--[dblStorageDue]
+					,0--[dblStoragePaid]
+					,0--[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
-					,[dblFeesDue]
-					,[dblFeesPaid]
+					,0--[dblFeesDue]
+					,0--[dblFeesPaid]
 					,[dblFreightDueRate]
 					,[ysnPrinted]
 					,[dblCurrencyRate]
 					,[strDiscountComment]
-					,[dblDiscountsDue]
-					,[dblDiscountsPaid]
+					,0--[dblDiscountsDue]
+					,0--[dblDiscountsPaid]
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
 					,[intStorageTicketNumber]
+					,[intItemId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
 
@@ -1053,6 +1072,7 @@ BEGIN TRY
 					,[strStorageType]
 					,[intCurrencyId]
 					,[intStorageTicketNumber]
+					,[intItemId]
 					)
 				SELECT 1
 					,@ActionCustomer
@@ -1070,23 +1090,24 @@ BEGIN TRY
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
 					,[dtmLastStorageAccrueDate]
-					,[dblStorageDue]
-					,[dblStoragePaid]
-					,[dblInsuranceRate]
+					,0--[dblStorageDue]
+					,0--[dblStoragePaid]
+					,0--[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
-					,[dblFeesDue]
-					,[dblFeesPaid]
+					,0--[dblFeesDue]
+					,0--[dblFeesPaid]
 					,[dblFreightDueRate]
 					,[ysnPrinted]
 					,[dblCurrencyRate]
 					,[strDiscountComment]
-					,[dblDiscountsDue]
-					,[dblDiscountsPaid]
+					,0--[dblDiscountsDue]
+					,0--[dblDiscountsPaid]
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
 					,[intStorageTicketNumber]
+					,[intItemId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
 
@@ -1205,6 +1226,7 @@ BEGIN TRY
 					,[strStorageType]
 					,[intCurrencyId]
 					,[intStorageTicketNumber]
+					,[intItemId]
 					)
 				SELECT 1
 					,@ActionCustomer
@@ -1222,23 +1244,24 @@ BEGIN TRY
 					,[dtmZeroBalanceDate]
 					,[strDPARecieptNumber]
 					,[dtmLastStorageAccrueDate]
-					,[dblStorageDue]
-					,[dblStoragePaid]
-					,[dblInsuranceRate]
+					,0--[dblStorageDue]
+					,0--[dblStoragePaid]
+					,0--[dblInsuranceRate]
 					,[strOriginState]
 					,[strInsuranceState]
-					,[dblFeesDue]
-					,[dblFeesPaid]
+					,0--[dblFeesDue]
+					,0--[dblFeesPaid]
 					,[dblFreightDueRate]
 					,[ysnPrinted]
 					,[dblCurrencyRate]
 					,[strDiscountComment]
-					,[dblDiscountsDue]
-					,[dblDiscountsPaid]
+					,0--[dblDiscountsDue]
+					,0--[dblDiscountsPaid]
 					,[strCustomerReference]
 					,[strStorageType]
 					,[intCurrencyId]
 					,[intStorageTicketNumber]
+					,[intItemId]
 				FROM tblGRCustomerStorage
 				WHERE intCustomerStorageId = @intCustomerStorageId
 
@@ -1275,6 +1298,103 @@ BEGIN TRY
 					,@UserName
 					)				
 			END
+			
+			IF @ItemCompanyLocationId <> @ActionCompanyLocationId
+			BEGIN
+			
+			SELECT @intItemLocationId = intItemLocationId	FROM tblICItemLocation	
+			WHERE intItemId = @intItemId AND intLocationId = @ItemCompanyLocationId
+			
+				 IF @ysnUpdateHouseTotal = 1---Old Ticket Yes
+				 BEGIN
+					UPDATE tblICItemStock
+					SET dblUnitInCustody = dblUnitInCustody- @UnitsToReduce
+					WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId
+				 END
+				 ELSE IF @ysnUpdateHouseTotal = 0---Old Ticket No
+				 BEGIN
+					UPDATE tblICItemStock
+					SET dblUnitInCustody = dblUnitInCustody- @UnitsToReduce
+						,dblUnitOnHand = dblUnitOnHand-@UnitsToReduce
+					WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId
+				 END
+				 
+				 ---New Ticket Yes
+				 				 
+				 IF @ysnUpdateHouseTotal = 1
+				 BEGIN
+			
+					IF NOT EXISTS ( SELECT 1 FROM tblICItemLocation WHERE intItemId = @intItemId AND intLocationId = @ActionCompanyLocationId)
+					BEGIN
+					INSERT INTO tblICItemLocation(intItemId,intLocationId,intCostingMethod,intConcurrencyId)
+					SELECT @intItemId,@ActionCompanyLocationId,1,1
+					
+					SET @intActionLocationId= SCOPE_IDENTITY()
+					
+						INSERT INTO tblICItemStock 
+						(
+							 intItemId
+							,intItemLocationId
+							,dblUnitInCustody
+							,intConcurrencyId
+						)
+						SELECT @intItemId
+							,@intActionLocationId
+							,@UnitsToReduce
+							,1
+					END
+					ELSE
+					BEGIN
+						SELECT @intActionLocationId = intItemLocationId	FROM tblICItemLocation	
+						WHERE intItemId = @intItemId AND intLocationId = @ActionCompanyLocationId
+						
+						UPDATE tblICItemStock
+						SET dblUnitInCustody = dblUnitInCustody + @UnitsToReduce						
+						WHERE intItemId = @intItemId AND intItemLocationId = @intActionLocationId
+					
+					END
+					
+				 END
+				 
+				 --New Ticket No
+				 IF @ysnUpdateHouseTotal = 0
+				 BEGIN
+					IF NOT EXISTS ( SELECT 1 FROM tblICItemLocation WHERE intItemId = @intItemId AND intLocationId = @ActionCompanyLocationId)
+					BEGIN
+					INSERT INTO tblICItemLocation(intItemId,intLocationId,intCostingMethod,intConcurrencyId)
+					SELECT @intItemId,@ActionCompanyLocationId,1,1
+					
+					SET @intActionLocationId= SCOPE_IDENTITY()
+					
+						INSERT INTO tblICItemStock 
+						(
+							 intItemId
+							,intItemLocationId
+							,dblUnitInCustody
+							,dblUnitOnHand
+							,intConcurrencyId
+						)
+						SELECT @intItemId
+							,@intActionLocationId
+							,@UnitsToReduce
+							,-@UnitsToReduce
+							,1
+					END
+					ELSE
+					BEGIN
+						SELECT @intActionLocationId = intItemLocationId	FROM tblICItemLocation	
+						WHERE intItemId = @intItemId AND intLocationId = @ActionCompanyLocationId
+						
+						UPDATE tblICItemStock
+						SET dblUnitInCustody = dblUnitInCustody + @UnitsToReduce
+						,dblUnitOnHand = dblUnitOnHand - @UnitsToReduce
+						WHERE intItemId = @intItemId AND intItemLocationId = @intActionLocationId
+					
+					END
+				 END
+				 
+			END 
+			 
 		
 			SELECT @ActionKey = MIN(intActionKey)
 			FROM @Action
