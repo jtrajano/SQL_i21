@@ -16,6 +16,7 @@ DECLARE @intPaycheckId INT
 		,@intEmployeeId INT
 		,@dtmPayDate DATETIME
 		,@strTransactionId NVARCHAR(50) = ''
+		,@intBankTransactionTypeId INT = 21
 
 /* Get Paycheck Details */
 SELECT @intPaycheckId = intPaycheckId
@@ -28,6 +29,12 @@ WHERE strPaycheckId = @strPaycheckId
 /****************************************
 	CREATING BANK TRANSACTION RECORD
 *****************************************/
+DECLARE @PAYCHECK INT = 21,
+		@DIRECT_DEPOSIT INT = 23
+
+SELECT @intBankTransactionTypeId = CASE WHEN (ISNULL(PC.ysnDirectDeposit, 0) = 1) THEN @DIRECT_DEPOSIT ELSE @PAYCHECK END 
+FROM tblPRPaycheck WHERE PC.intPaycheckId = @intPaycheckId
+
 IF (@ysnPost = 1)
 BEGIN
 	IF NOT EXISTS (SELECT strTransactionId FROM tblCMBankTransaction WHERE strTransactionId = @strTransactionId)
@@ -70,7 +77,7 @@ BEGIN
 			,[intConcurrencyId])
 		SELECT		 
 			[strTransactionId]			= PC.strPaycheckId
-			,[intBankTransactionTypeId] = 21
+			,[intBankTransactionTypeId] = @intBankTransactionTypeId
 			,[intBankAccountId]			= PC.intBankAccountId
 			,[intCurrencyId]			= BA.intCurrencyId
 			,[dblExchangeRate]			= (SELECT TOP 1 dblDailyRate FROM tblSMCurrency WHERE intCurrencyID = BA.intCurrencyId)
@@ -364,8 +371,7 @@ CREATE TABLE #tmpGLDetail (
 -- Declare the variables 
 DECLARE 
 	-- Constant Variables. 
-	@BANK_TRANSACTION_TYPE_Id AS INT = 21			-- Paycheck type Id is 21 (See tblCMBankTransactionType). 
-	,@STARTING_NUM_TRANSACTION_TYPE_Id AS INT = 3	-- Starting number for GL Detail table. Ex: 'BATCH-1234',
+	@STARTING_NUM_TRANSACTION_TYPE_Id AS INT = 3	-- Starting number for GL Detail table. Ex: 'BATCH-1234',
 	,@GL_DETAIL_CODE AS NVARCHAR(10) = 'PCHK'		-- String code used in GL Detail table. 
 	,@MODULE_NAME AS NVARCHAR(100) = 'Payroll'		-- Module where this posting code belongs. 
 	,@TRANSACTION_FORM AS NVARCHAR(100) = 'Paychecks'
@@ -404,7 +410,7 @@ SELECT	TOP 1
 		,@intCreatedEntityId = intEntityId
 FROM	[dbo].tblCMBankTransaction 
 WHERE	strTransactionId = @strTransactionId 
-		AND intBankTransactionTypeId = @BANK_TRANSACTION_TYPE_Id
+		AND intBankTransactionTypeId = @intBankTransactionTypeId
 IF @@ERROR <> 0	GOTO Post_Rollback		
 		
 -- Read the detail table and populate the variables. 
