@@ -1504,10 +1504,12 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                     flex: 1
                                                                                 },
                                                                                 {
+                                                                                    xtype: 'numbercolumn',
                                                                                     dataIndex: 'dblAvailableQty',
                                                                                     dataType: 'float',
                                                                                     text: 'Quantity',
-                                                                                    flex: 1
+                                                                                    flex: 1,
+                                                                                    format: '0,000.##'
                                                                                 }
                                                                             ],
                                                                             itemId: 'cboLot',

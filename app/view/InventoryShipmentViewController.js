@@ -1129,6 +1129,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                     column: 'intEntityId',
                     value: win.viewModel.data.current.get('intEntityVendorId'),
                     conjunction: 'and'
+                },{
+                    column: 'ysnAllowedToShow',
+                    value: true,
+                    conjunction: 'and'
                 }]
             })
         });
