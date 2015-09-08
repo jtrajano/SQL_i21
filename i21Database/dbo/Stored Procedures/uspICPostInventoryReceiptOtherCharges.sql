@@ -512,8 +512,8 @@ BEGIN
 				ON GLAccount.intAccountId = ItemGLAccounts.intContraInventoryId -- AP Clearing 
 			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) Debit
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
-	WHERE	ForGLEntries_CTE.ysnAccrue = 0 
-			AND ForGLEntries_CTE.ysnInventoryCost = 1
+	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 0 
+			AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 1
 
 	UNION ALL 
 	SELECT	
@@ -549,8 +549,8 @@ BEGIN
 				ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeIncome
 			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) Debit
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
-	WHERE	ForGLEntries_CTE.ysnAccrue = 0 
-			AND ForGLEntries_CTE.ysnInventoryCost = 1
+	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 0 
+			AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 1
 
 	-------------------------------------------------------------------------------------------
 	-- Cost billed by: None
@@ -593,8 +593,8 @@ BEGIN
 				ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeExpense
 			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) Debit
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
-	WHERE	ForGLEntries_CTE.ysnAccrue = 0 -- @COST_BILLED_BY_None
-			AND ForGLEntries_CTE.ysnInventoryCost = 0
+	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 0 -- @COST_BILLED_BY_None 
+			AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 0
 
 	UNION ALL 
 	SELECT	
@@ -630,8 +630,9 @@ BEGIN
 				ON GLAccount.intAccountId = OtherChargesGLAccounts.intOtherChargeIncome
 			CROSS APPLY dbo.fnGetDebit(ForGLEntries_CTE.dblCost) Debit
 			CROSS APPLY dbo.fnGetCredit(ForGLEntries_CTE.dblCost) Credit
-	WHERE	ForGLEntries_CTE.ysnAccrue = 0 -- @COST_BILLED_BY_None
-			AND ForGLEntries_CTE.ysnInventoryCost = 0
+	WHERE	ISNULL(ForGLEntries_CTE.ysnAccrue, 0) = 0 -- @COST_BILLED_BY_None 
+			AND ISNULL(ForGLEntries_CTE.ysnInventoryCost, 0) = 0
+
 END
 
 -- Exit point
