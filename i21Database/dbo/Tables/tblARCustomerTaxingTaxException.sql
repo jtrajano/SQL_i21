@@ -9,8 +9,10 @@
     [strState]							NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
 	[strException]						NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
 	[dtmStartDate]						DATETIME		NULL,
-	[dtmEndDate]						DATETIME		NULL,
+	[dtmEndDate]						DATETIME		NULL,	
+	[intEntityCustomerLocationId]		INT				NULL,
     [intConcurrencyId]					INT			CONSTRAINT [DF_tblARCustomerTaxingTaxException_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARCustomerTaxingTaxException] PRIMARY KEY CLUSTERED ([intCustomerTaxingTaxExceptionId] ASC),
-	CONSTRAINT [FK_tblARCustomerTaxingTaxException_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId])
+	CONSTRAINT [FK_tblARCustomerTaxingTaxException_tblARCustomer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityCustomerId]),
+	CONSTRAINT FK_tblARCustomerTaxingTaxException_tblEntityLocation FOREIGN KEY ([intEntityCustomerLocationId]) REFERENCES [tblEntityLocation]([intEntityLocationId])
 )
