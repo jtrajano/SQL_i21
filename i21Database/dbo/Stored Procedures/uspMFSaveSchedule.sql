@@ -188,7 +188,7 @@ BEGIN TRY
 				,intManufacturingCellId int
 				,intPlannedShiftId int
 				,dtmPlannedStartDate datetime
-				,intExecutionOrder int) x 
+				,intExecutionOrder int) x Where x.intWorkOrderId=tblMFWorkOrder.intWorkOrderId
 	END
 	
 	INSERT INTO tblMFScheduleWorkOrderDetail (
