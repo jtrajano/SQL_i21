@@ -112,6 +112,7 @@ BEGIN TRY
 	--Set @strProduceXml=@strProduceXml + '<ysnSubLotAllowed>' + convert(varchar,@intWorkOrderId) + '</ysnSubLotAllowed>'
 	Set @strProduceXml=@strProduceXml + '<intProductionTypeId>' + convert(varchar,2) + '</intProductionTypeId>'
 	Set @strProduceXml=@strProduceXml + '<strLotAlias>' + convert(varchar,@strWONo) + '</strLotAlias>'
+	Set @strProduceXml=@strProduceXml + '<strVendorLotNo>' + convert(varchar,@strVesselNo) + '</strVendorLotNo>'
 	Set @strProduceXml=@strProduceXml + '<intLotStatusId>' + convert(varchar,@intLotStatusId) + '</intLotStatusId>'
 	Set @strProduceXml=@strProduceXml + '</root>'
 
