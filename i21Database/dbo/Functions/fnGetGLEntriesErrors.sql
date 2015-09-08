@@ -53,6 +53,13 @@ RETURN (
 				,strText = FORMATMESSAGE(50032)
 				,intErrorCode = 50032
 		WHERE	NOT EXISTS (SELECT TOP 1 1 FROM @GLEntriesToValidate)
+		--Cannot continue if Module status in fiscal year period is closed (CM,AR,INV,AP)
+		UNION ALL 
+		SELECT	strTransactionId
+				,strText = FORMATMESSAGE(50005)
+				,intErrorCode = 50005
+		FROM	(SELECT DISTINCT strTransactionId, dtmDate,strModuleName FROM @GLEntriesToValidate) GLEntries
+		WHERE	dbo.isOpenAccountingDateByModule(dtmDate,strModuleName) = 0
 
 	) AS Query		
 )

@@ -17,7 +17,7 @@ BEGIN TRY
 	IF @ysnPost = 1
 	BEGIN
 		UPDATE tblGLFiscalYear SET ysnStatus = 0 WHERE intFiscalYearId = @intFiscalYearId	
-		UPDATE tblGLFiscalYearPeriod SET ysnOpen = 0 where intFiscalYearId = @intFiscalYearId
+		UPDATE tblGLFiscalYearPeriod SET ysnOpen = 0,ysnAROpen = 0, ysnAPOpen = 0, ysnINVOpen = 0 where intFiscalYearId = @intFiscalYearId
 	END	
 	ELSE IF @ysnPost = 0 
 	BEGIN

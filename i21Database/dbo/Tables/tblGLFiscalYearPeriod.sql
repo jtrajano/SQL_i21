@@ -5,6 +5,10 @@
     [dtmStartDate]            DATETIME      DEFAULT (CONVERT([datetime],CONVERT([char](4),datepart(year,getdate()),(0))+'/01/01',(0))) NOT NULL,
     [dtmEndDate]              DATETIME      DEFAULT (CONVERT([datetime],CONVERT([char](4),datepart(year,getdate()),(0))+'/12/31',(0))) NOT NULL,
     [ysnOpen]                 BIT           DEFAULT 1 NOT NULL,
+	[ysnAPOpen]                 BIT           DEFAULT 1 NULL,
+	[ysnAROpen]                 BIT           DEFAULT 1 NULL,
+	[ysnINVOpen]                 BIT           DEFAULT 1 NULL,
+	[ysnCMOpen]                 BIT           DEFAULT 1 NULL,
     [intConcurrencyId]        INT           DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblGLPeriod] PRIMARY KEY CLUSTERED ([intGLFiscalYearPeriodId] ASC, [intFiscalYearId] ASC),
     CONSTRAINT [FK_tblGLPeriod_tblGLFiscalYearPeriod] FOREIGN KEY ([intFiscalYearId]) REFERENCES [dbo].[tblGLFiscalYear] ([intFiscalYearId]) ON DELETE CASCADE
