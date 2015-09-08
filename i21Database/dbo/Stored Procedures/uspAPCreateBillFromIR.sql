@@ -224,7 +224,9 @@ BEGIN
 		[intContractHeaderId]		=	NULL,
 		[intLineNo]					=	1
 	FROM [vyuAPChargesForBilling] A
-	WHERE A.intEntityVendorId = (SELECT intEntityVendorId FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId)
+	INNER JOIN tblICInventoryReceipt B ON A.intEntityVendorId = B.intEntityVendorId
+	AND A.intInventoryReceiptId = B.intInventoryReceiptId
+	WHERE A.intInventoryReceiptId = @receiptId
 
 	--CREATE TAXES FROM CREATED ITEM RECEIPT
 	DECLARE @intBillDetailId INT;
