@@ -186,7 +186,7 @@ BEGIN TRY
 	LEFT JOIN dbo.tblMFPackTypeDetail PTD ON PTD.intPackTypeId = x.intPackTypeId
 		AND PTD.intTargetUnitMeasureId = x.intUnitMeasureId
 		AND PTD.intSourceUnitMeasureId = MC.intLineCapacityUnitMeasureId
-		Where intStatusId<>1 
+	Where intStatusId<>1 
 	ORDER BY x.intExecutionOrder
 
 	IF EXISTS (
@@ -236,7 +236,7 @@ BEGIN TRY
 		FROM tblMFWorkOrder
 		Where intWorkOrderId =@intWorkOrderId 
 
-		RAISERROR(51186,11,1,@strWorkOrderNo)
+		RAISERROR(51187,11,1,@strWorkOrderNo)
 		RETURN
 	END
 	
