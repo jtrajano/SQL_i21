@@ -45,7 +45,7 @@ BEGIN TRY
 
 	--SELECT @str -- Property Names List  
 	SET @SQL = 'SELECT TOP ' + @strLimit + '   
-  intContractNumber  
+  strContractNumber  
   ,strName  
   ,strItemNo  
   ,strDescription  
@@ -57,7 +57,7 @@ BEGIN TRY
   ,' + @str + 
 		'FROM (  
   SELECT DENSE_RANK() OVER (ORDER BY S.intSampleId DESC) intRankNo  
-   ,CH.intContractNumber  
+   ,CH.strContractNumber  
    ,E.strName  
    ,I.strItemNo  
    ,I.strDescription  
