@@ -12,7 +12,7 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblGLSummary', @Identity = 1;	
-
+	
 	-- Item Ids
 	DECLARE @WetGrains AS INT = 1
 			,@StickyGrains AS INT = 2
@@ -312,7 +312,7 @@ BEGIN
 				,strTransferNo			= 'INVTRN-1'
 				,dtmTransferDate		= dbo.fnRemoveTimeOnDate(GETDATE()) 
 				,strTransferType		= @TRANSFER_TYPE_LOCATION_TO_LOCATION
-				,intTransferredById		= 1
+				,intTransferredById		= 10
 				,strDescription			= 'Transfer with no details'
 				,intFromLocationId		= @Default_Location
 				,intToLocationId		= @NewHaven
@@ -322,7 +322,7 @@ BEGIN
 				,intFreightUOMId		= NULL 
 				,ysnPosted				= 0
 				,intCreatedUserId		= 1
-				,intEntityId			= 1
+				,intEntityId			= 10
 				,intSort				= 1
 				,intConcurrencyId		= 1
 	END 
@@ -353,7 +353,7 @@ BEGIN
 				,strTransferNo			= 'INVTRN-2'
 				,dtmTransferDate		= dbo.fnRemoveTimeOnDate(GETDATE()) 
 				,strTransferType		= @TRANSFER_TYPE_LOCATION_TO_LOCATION
-				,intTransferredById		= 1
+				,intTransferredById		= 10
 				,strDescription			= 'Transfer with NO shipment required.'
 				,intFromLocationId		= @Default_Location
 				,intToLocationId		= @NewHaven
@@ -363,7 +363,7 @@ BEGIN
 				,intFreightUOMId		= NULL 
 				,ysnPosted				= 0
 				,intCreatedUserId		= 1
-				,intEntityId			= 1
+				,intEntityId			= 10
 				,intSort				= 1
 				,intConcurrencyId		= 1
 
@@ -438,7 +438,7 @@ BEGIN
 				,strTransferNo			= 'INVTRN-3'
 				,dtmTransferDate		= dbo.fnRemoveTimeOnDate(GETDATE()) 
 				,strTransferType		= @TRANSFER_TYPE_LOCATION_TO_LOCATION
-				,intTransferredById		= 1
+				,intTransferredById		= 10
 				,strDescription			= 'Transfer with shipment required.'
 				,intFromLocationId		= @Default_Location
 				,intToLocationId		= @NewHaven
@@ -448,7 +448,7 @@ BEGIN
 				,intFreightUOMId		= NULL 
 				,ysnPosted				= 0
 				,intCreatedUserId		= 1
-				,intEntityId			= 1
+				,intEntityId			= 10
 				,intSort				= 1
 				,intConcurrencyId		= 1
 

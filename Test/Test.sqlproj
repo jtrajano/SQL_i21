@@ -836,6 +836,7 @@
     <Build Include="testi21Database\Stored Procedures\test uspICAddInventoryTransfer for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAddInventoryTransfer to add a transfers from transport.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAddInventoryTransfer to add a transfers with no ship via.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddInventoryTransfer to add a transfers with user id.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">
