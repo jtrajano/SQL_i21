@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARGetItemPrice]
 	@ItemId					INT
 	,@CustomerId			INT	
-	,@LocationId			INT
+	,@LocationId			INT				= NULL
 	,@ItemUOMId				INT				= NULL
 	,@TransactionDate		DATETIME		= NULL
 	,@Quantity				NUMERIC(18,6)
@@ -18,30 +18,7 @@
 	,@LastCost				NUMERIC(18,6)	= NULL
 	,@ShipToLocationId      INT				= NULL
 	,@VendorLocationId		INT				= NULL
-AS
-	--	DECLARE 	
-	--	@ItemId				INT
-	--	,@CustomerId		INT	
-	--	,@LocationId		INT
-	--	,@ItemUOMId			INT
-	--	,@TransactionDate	DATETIME
-	--	,@Quantity			NUMERIC(18,6)
-	--	,@CustomerPricing	NVARCHAR(250)
-
-
-	--SET @ItemId = 5347
-	--SET @CustomerId = 457
-	--SET @LocationId = 1
-	--SET @ItemUOMId = 793
-	--SET @TransactionDate = '03/22/2015'
-	--SET @Quantity = 6
-
-
-
-	--DECLARE	@Price AS NUMERIC(18,6)
-	--		,@Pricing AS NVARCHAR(250)
-	--SET @Price = NULL;
-	--SET @Pricing = '';
+AS	
 	
 	SET @TransactionDate = ISNULL(@TransactionDate,GETDATE())
 	
@@ -55,11 +32,12 @@ AS
 			,@ItemCategory		NVARCHAR(100)
 			,@UOMQuantity		NUMERIC(18,6)
 
-	SELECT @ItemVendorId	= ISNULL(@VendorId, VI.intVendorId)
-		  ,@ItemLocationId	= intItemLocationId
-		  ,@ItemCategoryId	= I.intCategoryId
-		  ,@ItemCategory	= C.strCategoryCode
-		  ,@UOMQuantity		= CASE WHEN UOM.dblUnitQty = 0 OR UOM.dblUnitQty IS NULL THEN 1.00 ELSE UOM.dblUnitQty END
+	SELECT TOP 1 
+		 @ItemVendorId		= ISNULL(@VendorId, VI.intVendorId)
+		,@ItemLocationId	= intItemLocationId
+		,@ItemCategoryId	= I.intCategoryId
+		,@ItemCategory		= UPPER(LTRIM(RTRIM(ISNULL(C.strCategoryCode,''))))
+		,@UOMQuantity		= CASE WHEN UOM.dblUnitQty = 0 OR UOM.dblUnitQty IS NULL THEN 1.00 ELSE UOM.dblUnitQty END
 	FROM
 		tblICItem I
 	INNER JOIN
@@ -73,7 +51,7 @@ AS
 			ON I.intItemId = UOM.intItemId
 	WHERE
 		I.intItemId = @ItemId
-		AND VI.intLocationId = @LocationId 
+		AND (VI.intLocationId = @LocationId OR @LocationId IS NULL)
 		AND (UOM.intItemUOMId = @ItemUOMId OR @ItemUOMId IS NULL)
 		
 	IF @CustomerPricingOnly = 0

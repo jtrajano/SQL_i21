@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARGetCustomerSpecialPrice]
 	@ItemId				INT
 	,@CustomerId		INT	
-	,@LocationId		INT
+	,@LocationId		INT				= NULL
 	,@ItemUOMId			INT				= NULL
 	,@TransactionDate	DATETIME		= NULL
 	,@Quantity			NUMERIC(18,6)
@@ -22,11 +22,12 @@ AS
 			,@CustomerShipToLocationId	INT
 			,@VendorShipFromLocationId	INT
 
-	SELECT @ItemVendorId	= ISNULL(@VendorId, VI.intVendorId)
-		  ,@ItemLocationId	= intItemLocationId
-		  ,@ItemCategoryId	= I.intCategoryId
-		  ,@ItemCategory	= UPPER(LTRIM(RTRIM(ISNULL(C.strCategoryCode,''))))
-		  ,@UOMQuantity		= CASE WHEN UOM.dblUnitQty = 0 OR UOM.dblUnitQty IS NULL THEN 1.00 ELSE UOM.dblUnitQty END
+	SELECT TOP 1
+		@ItemVendorId		= ISNULL(@VendorId, VI.intVendorId)
+		,@ItemLocationId	= intItemLocationId
+		,@ItemCategoryId	= I.intCategoryId
+		,@ItemCategory		= UPPER(LTRIM(RTRIM(ISNULL(C.strCategoryCode,''))))
+		,@UOMQuantity		= CASE WHEN UOM.dblUnitQty = 0 OR UOM.dblUnitQty IS NULL THEN 1.00 ELSE UOM.dblUnitQty END
 	FROM
 		tblICItem I
 	INNER JOIN
@@ -40,7 +41,7 @@ AS
 			ON I.intItemId = UOM.intItemId
 	WHERE
 		I.intItemId = @ItemId
-		AND VI.intLocationId = @LocationId 
+		AND (VI.intLocationId = @LocationId OR @LocationId IS NULL)
 		AND (UOM.intItemUOMId = @ItemUOMId OR @ItemUOMId IS NULL)
 		
 	SELECT
@@ -150,6 +151,7 @@ AS
 	WHERE
 		C.intEntityCustomerId = @CustomerId
 		AND ((CAST(@TransactionDate AS DATE) BETWEEN CAST(SP.dtmBeginDate AS DATE) AND CAST(ISNULL(SP.dtmEndDate, GETDATE()) AS DATE)) OR (CAST(@TransactionDate AS DATE) >= CAST(SP.dtmBeginDate AS DATE) AND SP.dtmBeginDate IS NULL))
+		AND ((@LocationId IS NOT NULL) OR (@LocationId IS NULL AND SP.strPriceBasis IN ('F', 'R', 'L', 'O')))
 
 	--Customer Special Pricing
 	IF(EXISTS(SELECT TOP 1 NULL FROM @CustomerSpecialPricing))
@@ -324,6 +326,20 @@ AS
 									ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC) + dblDeviation
 		WHERE
 			strPriceBasis = 'R'
+			
+		UPDATE
+			@CustomerSpecialPricing
+		SET
+			strPricing = (SELECT TOP 1 'Customer Pricing of (R)Fixed Rack + Amount' 
+								FROM vyuTRRackPrice INNER JOIN tblTRSupplyPoint 
+									ON vyuTRRackPrice.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId 
+								WHERE tblTRSupplyPoint.intEntityLocationId = intEntityLocationId 
+									AND vyuTRRackPrice.intItemId = intRackItemId
+									AND vyuTRRackPrice.intSupplyPointId = @SupplyPointId 
+									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE)
+									ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC)
+		WHERE
+			strPriceBasis = 'R'			
 						
 		DECLARE @SpecialGroupPricing TABLE(
 			intSpecialPriceId INT
