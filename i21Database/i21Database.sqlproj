@@ -516,7 +516,6 @@
     <Build Include="dbo\Tables\tblSMCompanyLocation.sql" />
     <Build Include="dbo\Tables\tblARTerritoryDetail.sql" />
     <Build Include="dbo\Tables\tblARTerritory.sql" />
-    <Build Include="dbo\Tables\tblARStatementFooter.sql" />
     <Build Include="dbo\Tables\tblARServiceCharge.sql" />
     <Build Include="dbo\Tables\tblARSalespersonNote.sql" />
     <Build Include="dbo\Tables\tblARSalesperson.sql" />
