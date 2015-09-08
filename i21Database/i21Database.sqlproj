@@ -2357,6 +2357,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetCalendarMachineCountByManufacturingCell.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetManufacturingCellCount.sql" />
     <Build Include="dbo\Views\vyuTMOpenWorkOrder.sql" />
+    <Build Include="dbo\Functions\isOpenAccountingDateByModule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
