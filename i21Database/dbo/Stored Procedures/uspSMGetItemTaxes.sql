@@ -206,30 +206,30 @@ BEGIN
 					END
 					ELSE IF (@TransactionType = 'Purchase')
 					BEGIN
-						IF(@LocationId IS NULL OR @LocationId = 0)
-						BEGIN
-							SELECT
-							@Country = UPPER(RTRIM(LTRIM(ISNULL(ISNULL(ShipToLocation.strCountry, EntityLocation.strCountry),''))))
-							,@State = UPPER(RTRIM(LTRIM(ISNULL(ISNULL(ShipToLocation.strState, EntityLocation.strState),''))))
-							,@County = UPPER(RTRIM(LTRIM(ISNULL(TaxCode.strCounty,''))))
-							,@City = UPPER(RTRIM(LTRIM(ISNULL(ISNULL(ShipToLocation.strCity, EntityLocation.strCity),''))))
-							FROM tblAPVendor Vendor
-							LEFT OUTER JOIN
-								(	SELECT
-										intEntityLocationId
-										,intEntityId 
-										,strCountry
-										,strState
-										,strCity
-									FROM tblEntityLocation
-									WHERE ysnDefaultLocation = 1
-								) EntityLocation ON Vendor.intEntityVendorId = EntityLocation.intEntityId
-							LEFT OUTER JOIN tblEntityLocation ShipToLocation ON Vendor.intShipFromId = ShipToLocation.intEntityLocationId
-							LEFT OUTER JOIN tblSMTaxCode TaxCode ON Vendor.intTaxCodeId = TaxCode.intTaxCodeId 								
-							WHERE Vendor.intEntityVendorId = @EntityId
-						END
-						ELSE
-						BEGIN
+						--IF(@LocationId IS NULL OR @LocationId = 0)
+						--BEGIN
+						--	SELECT
+						--	@Country = UPPER(RTRIM(LTRIM(ISNULL(ISNULL(ShipToLocation.strCountry, EntityLocation.strCountry),''))))
+						--	,@State = UPPER(RTRIM(LTRIM(ISNULL(ISNULL(ShipToLocation.strState, EntityLocation.strState),''))))
+						--	,@County = UPPER(RTRIM(LTRIM(ISNULL(TaxCode.strCounty,''))))
+						--	,@City = UPPER(RTRIM(LTRIM(ISNULL(ISNULL(ShipToLocation.strCity, EntityLocation.strCity),''))))
+						--	FROM tblAPVendor Vendor
+						--	LEFT OUTER JOIN
+						--		(	SELECT
+						--				intEntityLocationId
+						--				,intEntityId 
+						--				,strCountry
+						--				,strState
+						--				,strCity
+						--			FROM tblEntityLocation
+						--			WHERE ysnDefaultLocation = 1
+						--		) EntityLocation ON Vendor.intEntityVendorId = EntityLocation.intEntityId
+						--	LEFT OUTER JOIN tblEntityLocation ShipToLocation ON Vendor.intShipFromId = ShipToLocation.intEntityLocationId
+						--	LEFT OUTER JOIN tblSMTaxCode TaxCode ON Vendor.intTaxCodeId = TaxCode.intTaxCodeId 								
+						--	WHERE Vendor.intEntityVendorId = @EntityId
+						--END
+						--ELSE
+						--BEGIN
 							SELECT
 								@Country = UPPER(RTRIM(LTRIM(ISNULL(Location.strCountry, ''))))
 								,@State = UPPER(RTRIM(LTRIM(ISNULL(Location.strStateProvince, ''))))
@@ -237,7 +237,7 @@ BEGIN
 								,@City = UPPER(RTRIM(LTRIM(ISNULL(Location.strCity, ''))))
 							FROM tblSMCompanyLocation Location
 							WHERE Location.intCompanyLocationId = @LocationId
-						END			
+						--END			
 					END
 				END
 			ELSE
