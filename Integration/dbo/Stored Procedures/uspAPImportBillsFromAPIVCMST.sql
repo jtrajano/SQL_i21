@@ -587,6 +587,8 @@ BEGIN
 				DELETE FROM #tmpBillsPayment WHERE id = @paymentKey
 			END
 
+			EXEC uspAPCreateMissingPaymentOfBills
+
 			--UPDATE strTransactionId from tblCMBankTransaction
 			UPDATE tblCMBankTransaction
 			SET strTransactionId = B.strPaymentRecordNum,
