@@ -21,14 +21,30 @@ GO
 	END
 GO
 	/* DELETE Container MENU'S DUPLICATE */
-	DECLARE @WarehouseParentMenuId INT
-	SELECT @WarehouseParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Warehouse' AND strModuleName = 'Warehouse' AND intParentMenuID = 0
-	IF EXISTS(SELECT strMenuName FROM tblSMMasterMenu WHERE strMenuName =  'Container' AND (SELECT COUNT(strMenuName) FROM tblSMMasterMenu WHERE strMenuName =  'Container') > 1)
+	DECLARE @CommonInfoParentMenuId INT
+	SELECT @CommonInfoParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Common Info' AND strModuleName = 'System Manager' AND intParentMenuID = 0
+
+	IF EXISTS(SELECT strMenuName FROM tblSMMasterMenu WHERE strMenuName =  'Announcement Types' AND (SELECT COUNT(strMenuName) FROM tblSMMasterMenu WHERE strMenuName =  'Announcement Types') > 1)
 	BEGIN
-		DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Container' AND strModuleName = 'Warehouse' AND intParentMenuID = @WarehouseParentMenuId AND intMenuID NOT IN
+		DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Announcement Types' AND strModuleName = 'Help Desk' AND intMenuID NOT IN
 		(
-			SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Container' AND strModuleName = 'Warehouse' AND intParentMenuID = @WarehouseParentMenuId
+			SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Announcement Types' AND strModuleName = 'Help Desk'
 		)
 	END
 
+	IF EXISTS(SELECT strMenuName FROM tblSMMasterMenu WHERE strMenuName =  'Maintenance' AND (SELECT COUNT(strMenuName) FROM tblSMMasterMenu WHERE strMenuName =  'Maintenance') > 1)
+	BEGIN
+		DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Help Desk' AND intMenuID NOT IN
+		(
+			SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Help Desk'
+		)
+	END
+
+	IF EXISTS(SELECT strMenuName FROM tblSMMasterMenu WHERE strMenuName =  'Announcements' AND (SELECT COUNT(strMenuName) FROM tblSMMasterMenu WHERE strMenuName =  'Announcements') > 1)
+	BEGIN
+		DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Announcements' AND strModuleName = 'Help Desk' AND intParentMenuID = @CommonInfoParentMenuId AND intMenuID NOT IN
+		(
+			SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Announcements' AND strModuleName = 'Help Desk' AND intParentMenuID = @CommonInfoParentMenuId
+		)
+	END
 GO

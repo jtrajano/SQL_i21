@@ -372,27 +372,6 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'i21 Updat
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'ServicePack.view.Patch' WHERE strMenuName = 'i21 Updates' AND strModuleName = 'Service Pack' AND intParentMenuID = @UtilitiesParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Announcements' AND strModuleName = 'Help Desk' AND intParentMenuID = @SystemManagerParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Announcements', N'Help Desk', @SystemManagerParentMenuId, N'Announcements', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 10, 2)
-ELSE
-	UPDATE tblSMMasterMenu SET strCommand = N'', intSort = 10 WHERE strMenuName = N'Utilities' AND strModuleName = N'System Manager' AND intParentMenuID = @SystemManagerParentMenuId
-
-DECLARE @AnnouncementsParentMenuId INT
-SELECT @AnnouncementsParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Announcements' AND strModuleName = 'Help Desk' AND intParentMenuID = @SystemManagerParentMenuId
-
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Announcement Types' AND strModuleName = 'Help Desk' AND intParentMenuID = @AnnouncementsParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Announcement Types', N'Help Desk', @AnnouncementsParentMenuId, N'Announcement Types', N'Maintenance', N'Screen', N'HelpDesk.view.AnnouncementType', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'HelpDesk.view.AnnouncementType' WHERE strMenuName = 'Announcement Types' AND strModuleName = 'Help Desk' AND intParentMenuID = @AnnouncementsParentMenuId
-
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Help Desk' AND intParentMenuID = @AnnouncementsParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Maintenance', N'Help Desk', @AnnouncementsParentMenuId, N'Announcement Maintenance', N'Maintenance', N'Screen', N'HelpDesk.view.Announcement', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'HelpDesk.view.Announcement' WHERE strMenuName = 'Maintenance' AND strModuleName = 'Help Desk' AND intParentMenuID = @AnnouncementsParentMenuId
-
 /* Start Delete */
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'i21 Updates' AND strModuleName = 'System Manager' AND intParentMenuID = @UtilitiesParentMenuId)
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'i21 Updates' AND strModuleName = 'System Manager' AND intParentMenuID = @UtilitiesParentMenuId
@@ -549,6 +528,27 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Approval 
 	VALUES (N'Approval List', N'System Manager', @CommonInfoParentMenuId, N'Approval List', N'Maintenance', N'Screen', N'i21.view.ApprovalList', N'small-menu-maintenance', 0, 0, 0, 1, 19, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = 'i21.view.ApprovalList' WHERE strMenuName = 'Approval List' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Announcements' AND strModuleName = 'Help Desk' AND intParentMenuID = @CommonInfoParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Announcements', N'Help Desk', @CommonInfoParentMenuId, N'Announcements', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 10, 2)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'', intSort = 10 WHERE strMenuName = N'Utilities' AND strModuleName = N'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
+
+DECLARE @AnnouncementsParentMenuId INT
+SELECT @AnnouncementsParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Announcements' AND strModuleName = 'Help Desk' AND intParentMenuID = @CommonInfoParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Announcement Types' AND strModuleName = 'Help Desk' AND intParentMenuID = @AnnouncementsParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Announcement Types', N'Help Desk', @AnnouncementsParentMenuId, N'Announcement Types', N'Maintenance', N'Screen', N'HelpDesk.view.AnnouncementType', N'small-menu-maintenance', 0, 0, 0, 1, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = 'HelpDesk.view.AnnouncementType' WHERE strMenuName = 'Announcement Types' AND strModuleName = 'Help Desk' AND intParentMenuID = @AnnouncementsParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Help Desk' AND intParentMenuID = @AnnouncementsParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Maintenance', N'Help Desk', @AnnouncementsParentMenuId, N'Announcement Maintenance', N'Maintenance', N'Screen', N'HelpDesk.view.Announcement', N'small-menu-maintenance', 0, 0, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = 'HelpDesk.view.Announcement' WHERE strMenuName = 'Maintenance' AND strModuleName = 'Help Desk' AND intParentMenuID = @AnnouncementsParentMenuId
 
 /* Start Delete */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Freight Terms' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
