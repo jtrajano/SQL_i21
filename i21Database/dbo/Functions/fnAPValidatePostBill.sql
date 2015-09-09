@@ -123,12 +123,13 @@ BEGIN
 				SELECT
 					D.strReceiptNumber
 					,F.strItemNo
+					,E.intItemId
 					,intInventoryReceiptItemId
 				FROM tblICInventoryReceipt D
 					INNER JOIN tblICInventoryReceiptItem E ON D.intInventoryReceiptId = E.intInventoryReceiptId
 					INNER JOIN tblICItem F ON E.intItemId = F.intItemId
 				WHERE E.dblOpenReceive = E.dblBillQty
-			) C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId]
+			) C ON C.intInventoryReceiptItemId = B.[intInventoryReceiptItemId] AND B.intItemId = C.intItemId
 			WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
 
 		--DO NOT ALLOW TO POST IF BILL ITEMS HAVE ASSOCIATED ITEM RECEIPT AND AND ITEM RECEIPT IS NOT POSTED
