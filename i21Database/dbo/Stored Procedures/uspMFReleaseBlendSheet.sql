@@ -29,6 +29,14 @@ Declare @strBlendItemStatus nVarchar(50)
 Declare @strInputItemNo nVarchar(50)
 Declare @strInputItemStatus nVarchar(50)
 Declare @ysnEnableParentLot bit=0
+Declare @intRecipeId int
+Declare @intManufacturingProcessId int
+Declare @dblBinSize numeric(18,6)
+Declare @intNoOfSheet int
+Declare @intNoOfSheetOriginal int
+Declare @dblRemainingQtyToProduce numeric(18,6)
+Declare @PerBlendSheetQty  numeric(18,6)
+Declare @ysnCalculateNoSheetUsingBinSize bit=0
 
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml  
 
@@ -115,9 +123,6 @@ INSERT INTO @tblBlendSheet(
 	intUserId int
 	)
 	
---Declare @dblQtyToProduce numeric(18,6),@intUserId int
---Select @intUserId=intUserId,@intLocationId=intLocationId from @tblBlendSheet
-
 INSERT INTO @tblLot(
  intLotId,intItemId,dblQty,dblIssuedQuantity,dblWeightPerUnit,intItemUOMId,intItemIssuedUOMId,intUserId,intRecipeItemId,intLocationId,intStorageLocationId,ysnParentLot)
  Select intLotId,intItemId,dblQty,dblIssuedQuantity,dblWeightPerUnit,intItemUOMId,intItemIssuedUOMId,intUserId,intRecipeItemId,intLocationId,intStorageLocationId,ysnParentLot
@@ -145,7 +150,10 @@ Update @tblLot Set intStorageLocationId=null where intStorageLocationId=0
 Select TOP 1 @ysnEnableParentLot=ISNULL(ysnEnableParentLot,0) From tblMFCompanyPreference
 
 Select @dblQtyToProduce=dblQtyToProduce,@intUserId=intUserId,@intLocationId=intLocationId,@dtmDueDate=dtmDueDate,
-@intBlendItemId=intItemId,@intCellId=intCellId from @tblBlendSheet
+@intBlendItemId=intItemId,@intCellId=intCellId,@intBlendRequirementId=intBlendRequirementId,@dblBinSize=dblBinSize,
+@intWorkOrderId=intWorkOrderId from @tblBlendSheet
+
+Select @strDemandNo=strDemandNo from tblMFBlendRequirement where intBlendRequirementId=@intBlendRequirementId
 
 Select @strBlendItemNo=strItemNo,@strBlendItemStatus=strStatus From tblICItem Where intItemId=@intBlendItemId
 
@@ -172,26 +180,27 @@ Else
 	Update a Set a.dblWeightPerUnit=b.dblWeightPerQty 
 	from @tblLot a join tblICParentLot b on a.intLotId=b.intParentLotId
 
-Declare @intNoOfSheet int
-Declare @intNoOfSheetOriginal int
-Declare @dblRemainingQtyToProduce numeric(18,6)
-Declare @PerBlendSheetQty  numeric(18,6)
-Select @intNoOfSheet=Ceiling(@dblQtyToProduce/dblBinSize),
-@PerBlendSheetQty=dblBinSize,
-@intWorkOrderId=intWorkOrderId,
-@intBlendRequirementId=intBlendRequirementId
-from @tblBlendSheet
-
-Set @intNoOfSheetOriginal=@intNoOfSheet
-
-Declare @intRecipeId int,@intDemandItemId int,@intManufacturingProcessId int
-
 Select @intRecipeId = intRecipeId ,@intManufacturingProcessId=a.intManufacturingProcessId 
 from tblMFRecipe a Join @tblBlendSheet b on a.intItemId=b.intItemId
  and a.intLocationId=b.intLocationId and ysnActive=1
 
-Select @strDemandNo=strDemandNo,@intDemandItemId=intItemId from tblMFBlendRequirement where intBlendRequirementId=@intBlendRequirementId
+Select @ysnCalculateNoSheetUsingBinSize=CASE When UPPER(pa.strAttributeValue) = 'TRUE' then 1 Else 0 End 
+From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
+Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
+and at.strAttributeName='Calculate No Of Blend Sheet Using Blend Bin Size'
 
+If @ysnCalculateNoSheetUsingBinSize=0
+	Begin
+		Set @intNoOfSheet=1
+		Set @PerBlendSheetQty=@dblQtyToProduce
+		Set @intNoOfSheetOriginal=@intNoOfSheet
+	End
+Else
+	Begin
+		Set @intNoOfSheet=Ceiling(@dblQtyToProduce/@dblBinSize)
+		Set @PerBlendSheetQty=@dblBinSize
+		Set @intNoOfSheetOriginal=@intNoOfSheet
+	End
 
 If Exists (Select 1 From tblMFWorkOrder where intWorkOrderId=@intWorkOrderId) 
 		Delete From tblMFWorkOrder where intWorkOrderId=@intWorkOrderId
@@ -314,7 +323,7 @@ Begin
 	Else
 		Update tblMFWorkOrder Set dblQuantity=(Select sum(dblQuantity) from tblMFWorkOrderInputParentLot where intWorkOrderId=@intWorkOrderId) where intWorkOrderId=@intWorkOrderId
 
-	EXEC dbo.uspMFCopyRecipe @intItemId = @intDemandItemId
+	EXEC dbo.uspMFCopyRecipe @intItemId = @intBlendItemId
 			,@intLocationId = @intLocationId
 			,@intUserId = @intUserId
 			,@intWorkOrderId = @intWorkOrderId
