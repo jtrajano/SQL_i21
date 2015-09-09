@@ -1670,7 +1670,6 @@ Ext.define('Inventory.view.ItemViewController', {
 
     openItemLocationScreen: function (action, window, record) {
         var win = window;
-        var me = win.controller;
         var screenName = 'Inventory.view.ItemLocation';
 
         var current = win.getViewModel().data.current;
@@ -1691,10 +1690,32 @@ Ext.define('Inventory.view.ItemViewController', {
                                 scope: win,
                                 callback: function(result) {
                                     if (result) {
-
-//                                        Ext.array.each(result, function () {
-//                                            var exists = win.getViewModel().data.current;
-//                                        });
+                                        var me = this;
+                                        Ext.Array.each(result, function (location) {
+                                            var prices = me.getViewModel().data.current.tblICItemPricings().data.items;
+                                            var exists = Ext.Array.findBy(prices, function (row) {
+                                                if (location.get('intItemLocationId') === row.get('intItemLocationId')) {
+                                                    return true;
+                                                }
+                                            });
+                                            if (!exists) {
+                                                var newPrice = Ext.create('Inventory.model.ItemPricing', {
+                                                    intItemId : location.get('intItemId'),
+                                                    intItemLocationId : location.get('intItemLocationId'),
+                                                    strLocationName : location.get('strLocationName'),
+                                                    dblAmountPercent : 0.00,
+                                                    dblSalePrice : 0.00,
+                                                    dblMSRPPrice : 0.00,
+                                                    strPricingMethod : 'None',
+                                                    dblLastCost : 0.00,
+                                                    dblStandardCost : 0.00,
+                                                    dblAverageCost : 0.00,
+                                                    dblEndMonthCost : 0.00,
+                                                    intSort : location.get('intSort')
+                                                });
+                                                me.getViewModel().data.current.tblICItemPricings().add(newPrice);
+                                            }
+                                        });
                                     }
                                 }
                             });
@@ -1719,7 +1740,39 @@ Ext.define('Inventory.view.ItemViewController', {
                             filterItem.setValue(itemId);
                             filterItem.config.value = itemId;
                             filterItem.initialConfig.value = itemId;
-                            grdLocation.store.load();
+                            grdLocation.store.load({
+                                scope: win,
+                                callback: function(result) {
+                                    if (result) {
+                                        var me = this;
+                                        Ext.Array.each(result, function (location) {
+                                            var prices = me.getViewModel().data.current.tblICItemPricings().data.items;
+                                            var exists = Ext.Array.findBy(prices, function (row) {
+                                                if (location.get('intItemLocationId') === row.get('intItemLocationId')) {
+                                                    return true;
+                                                }
+                                            });
+                                            if (!exists) {
+                                                var newPrice = Ext.create('Inventory.model.ItemPricing', {
+                                                    intItemId : location.get('intItemId'),
+                                                    intItemLocationId : location.get('intItemLocationId'),
+                                                    strLocationName : location.get('strLocationName'),
+                                                    dblAmountPercent : 0.00,
+                                                    dblSalePrice : 0.00,
+                                                    dblMSRPPrice : 0.00,
+                                                    strPricingMethod : 'None',
+                                                    dblLastCost : 0.00,
+                                                    dblStandardCost : 0.00,
+                                                    dblAverageCost : 0.00,
+                                                    dblEndMonthCost : 0.00,
+                                                    intSort : location.get('intSort')
+                                                });
+                                                me.getViewModel().data.current.tblICItemPricings().add(newPrice);
+                                            }
+                                        });
+                                    }
+                                }
+                            });
                         }
                     }
                 },
@@ -1728,6 +1781,8 @@ Ext.define('Inventory.view.ItemViewController', {
             });
         }
     },
+
+
 
     CostingMethodRenderer: function (value, metadata, record) {
         var intMethod = record.get('intCostingMethod');
