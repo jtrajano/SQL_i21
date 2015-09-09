@@ -1687,7 +1687,17 @@ Ext.define('Inventory.view.ItemViewController', {
                             filterItem.setValue(itemId);
                             filterItem.config.value = itemId;
                             filterItem.initialConfig.value = itemId;
-                            grdLocation.store.load();
+                            grdLocation.store.load({
+                                scope: win,
+                                callback: function(result) {
+                                    if (result) {
+
+//                                        Ext.array.each(result, function () {
+//                                            var exists = win.getViewModel().data.current;
+//                                        });
+                                    }
+                                }
+                            });
                         }
                     }
                 },
@@ -2316,9 +2326,9 @@ Ext.define('Inventory.view.ItemViewController', {
         var plugin = grid.getPlugin('cepDetailUOM');
         var record = plugin.getActiveRecord();
 
-        if (!iRely.Functions.isEmpty(record.get('strUpcCode')))
+        if (!iRely.Functions.isEmpty(newValue))
         {
-            return record.set('strLongUPCCode', i21.ModuleMgr.Inventory.getFullUPCString(record.get('strUpcCode')))
+            return record.set('strLongUPCCode', i21.ModuleMgr.Inventory.getFullUPCString(newValue))
         }
     },
 
