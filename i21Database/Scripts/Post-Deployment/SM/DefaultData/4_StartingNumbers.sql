@@ -605,6 +605,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Customer Overpayment')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 66
+			,[strTransactionType]	= N'Vendor Overpayment'
+			,[strPrefix]			= N'VOP-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Accounts Payable'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Vendor Overpayment')
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'
