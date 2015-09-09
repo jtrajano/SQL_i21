@@ -2365,6 +2365,7 @@
     <Build Include="dbo\Views\vyuTMSiteDevices.sql" />
     <Build Include="dbo\Views\vyuTMSiteDeliveryHistory.sql" />
     <Build Include="dbo\Views\vyuTMSiteEventHistory.sql" />
+    <Build Include="dbo\Views\vyuTMSiteCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

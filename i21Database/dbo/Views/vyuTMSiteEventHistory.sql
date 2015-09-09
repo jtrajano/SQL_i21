@@ -100,6 +100,7 @@ AS
 		,strEventUser = AB.strUserName
 		,strEventDescription = D.strDescription
 		,strEventLevel = D.strLevel
+		,strEventDeviceOwnership = D.strDeviceOwnership
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B	
 		ON A.intCustomerID = B.intCustomerID
