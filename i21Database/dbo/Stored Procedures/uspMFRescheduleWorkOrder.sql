@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspMFRescheduleWorkOrder (@strXML NVARCHAR(MAX))
 AS
 BEGIN TRY
+	SET NOCOUNT ON
 	DECLARE @idoc INT
 		,@ErrMsg NVARCHAR(MAX)
 		,@intManufacturingCellId INT
@@ -33,6 +34,8 @@ BEGIN TRY
 		,@strPackName nvarchar(50)
 		,@intItemId int
 		,@strItemNo nvarchar(50)
+		,@dtmEarliestStartDate datetime
+		,@intGapDuetoEarliestStartDate int
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -312,6 +315,7 @@ BEGIN TRY
 			,@intDuration = NULL
 			,@intShiftId = NULL
 			,@intNoOfMachine = NULL
+			,@intGapDuetoEarliestStartDate=0
 
 		SELECT @intCalendarDetailId = intCalendarDetailId
 			,@intCalendarId = intCalendarId
@@ -348,6 +352,7 @@ BEGIN TRY
 				,@intPackTypeId = NULL
 				,@dblBalance = NULL
 				,@dblConversionFactor = NULL
+				,@dtmEarliestStartDate=NULL
 
 			SELECT @intWorkOrderId = intWorkOrderId
 				,@intNoOfUnit = intNoOfUnit
@@ -355,8 +360,26 @@ BEGIN TRY
 				,@dblBalance = dblBalance
 				,@dblConversionFactor = dblConversionFactor
 				,@intNoOfSelectedMachine = intNoOfSelectedMachine
+				,@dtmEarliestStartDate=dtmEarliestStartDate
 			FROM @tblMFScheduleWorkOrder
 			WHERE intRecordId = @intRecordId
+
+			IF @dtmEarliestStartDate IS NOT NULL AND @dtmEarliestStartDate >= @dtmShiftEndTime
+			BEGIN
+				SELECT @intCalendarDetailId = Min(intCalendarDetailId)
+				FROM @tblMFScheduleWorkOrderCalendarDetail
+				WHERE intCalendarDetailId > @intCalendarDetailId
+				BREAK
+			END
+
+			IF @dtmEarliestStartDate IS NOT NULL AND @dtmEarliestStartDate >= @dtmShiftStartTime
+			BEGIN
+				SELECT @intGapDuetoEarliestStartDate = DateDiff(minute, @dtmShiftStartTime,@dtmEarliestStartDate)
+
+				SELECT @dtmShiftStartTime = @dtmEarliestStartDate
+
+				SELECT @intDuration = DateDiff(minute, @dtmEarliestStartDate, @dtmShiftEndTime)
+			END
 
 			SELECT @dblMachineCapacity = SUM(DT.dblMachineCapacity)
 			FROM (
@@ -569,7 +592,7 @@ BEGIN TRY
 		FROM @tblMFScheduleWorkOrder S
 		WHERE intNoOfUnit > 0 AND S.intStatusId<>1 
 			AND intWorkOrderId <> @intWorkOrderId
-		)
+		) Or @intGapDuetoEarliestStartDate>0
 		BEGIN
 			SELECT @intCalendarDetailId = Min(intCalendarDetailId)
 			FROM @tblMFScheduleWorkOrderCalendarDetail
