@@ -2368,6 +2368,7 @@
     <Build Include="dbo\Views\vyuTMSiteEventHistory.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurityCompanyLocationRolePermission.sql" />
     <Build Include="dbo\Tables\tblMigrationLog.sql" />
+    <Build Include="dbo\Views\vyuCTYetToPriceFix.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -67,7 +67,8 @@ AS
 			CH.intInvoiceTypeId,				CH.strInvoiceType,				CH.strInvoiceTypeDescription,
 			CH.dblTolerancePct,					CH.dblProvisionalInvoicePct,	CH.ysnPrepaid,
 			CH.ysnSubstituteItem,				CH.ysnUnlimitedQuantity,		CH.ysnMaxPrice,			
-			CH.intINCOLocationTypeId,			CH.intCountryId,				CH.strCountry
+			CH.intINCOLocationTypeId,			CH.intCountryId,				CH.strCountry,
+			CH.ysnMultiplePriceFixation
 			
 	FROM	tblCTContractDetail				CD
 	
