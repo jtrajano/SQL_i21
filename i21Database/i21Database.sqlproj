@@ -2359,6 +2359,10 @@
     <Build Include="dbo\Views\vyuTMOpenWorkOrder.sql" />
     <Build Include="dbo\Functions\isOpenAccountingDateByModule.sql" />
     <Build Include="dbo\Views\vyuTMConsumptionSiteSearch.sql" />
+    <Build Include="dbo\Views\vyuTMConsumptionSite.sql" />
+    <Build Include="dbo\Views\vyuTMSiteDevices.sql" />
+    <Build Include="dbo\Views\vyuTMSiteDeliveryHistory.sql" />
+    <Build Include="dbo\Views\vyuTMSiteEventHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
