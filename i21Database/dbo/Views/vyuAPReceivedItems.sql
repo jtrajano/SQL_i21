@@ -27,7 +27,7 @@ FROM
 		,[dblQuantityBilled]		=	tblReceived.dblQuantityBilled
 		,[intLineNo]				=	tblReceived.intLineNo
 		,[intInventoryReceiptItemId]=	tblReceived.intInventoryReceiptItemId
-		,[intInventoryReceiptChargeId]	= NULL
+		,[intInventoryReceiptItemAllocatedChargeId]	= NULL
 		,[dblUnitCost]				=	tblReceived.dblUnitCost
 		,[dblTax]					=	tblReceived.dblTax
 		,[intAccountId]				=	tblReceived.intAccountId
