@@ -2359,6 +2359,7 @@
     <Build Include="dbo\Views\vyuTMOpenWorkOrder.sql" />
     <Build Include="dbo\Functions\isOpenAccountingDateByModule.sql" />
     <Build Include="dbo\Views\vyuTMConsumptionSiteSearch.sql" />
+    <Build Include="dbo\Tables\tblARCustomerBudget.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateLotReservation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeleteLotReservation.sql" />
     <Build Include="dbo\Views\vyuTMConsumptionSite.sql" />
