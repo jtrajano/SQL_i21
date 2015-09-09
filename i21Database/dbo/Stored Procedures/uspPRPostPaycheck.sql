@@ -94,7 +94,7 @@ BEGIN
 			,[strMemo]					= ''
 			,[strReferenceNo]			= ''
 			,[dtmCheckPrinted]			= NULL
-			,[ysnCheckToBePrinted]		= 0
+			,[ysnCheckToBePrinted]		= CASE WHEN (@intBankTransactionTypeId = @DIRECT_DEPOSIT) THEN 1 ELSE 0 END
 			,[ysnCheckVoid]				= 0
 			,[ysnPosted]				= 0
 			,[strLink]					= ''
