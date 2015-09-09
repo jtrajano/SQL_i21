@@ -2298,6 +2298,7 @@
     <Build Include="dbo\Tables\tblARCommentMaintenance.sql" />
     <Build Include="dbo\Stored Procedures\uspARGetDefaultComment.sql" />
     <Build Include="dbo\Stored Procedures\uspARDuplicateComment.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRProcessToInventoryTransfer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
