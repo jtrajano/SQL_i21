@@ -33,6 +33,20 @@ BEGIN
 		DECLARE @userLocation INT;
 		DECLARE @transCount INT = @@TRANCOUNT;
 
+		--Payment variable
+		DECLARE @bankAccount INT,
+					@paymentMethod INT,
+					@intEntityVendorId INT,
+					@paymentInfo NVARCHAR(10),
+					@notes NVARCHAR(500),
+					@payment DECIMAL(18, 6) = NULL,
+					@datePaid DATETIME = NULL,
+					@post BIT = 0,
+					@discount DECIMAL(18,6) = 0,
+					@interest DECIMAL(18,6) = 0,
+					@withHeld DECIMAL(18,6) = 0,
+					@billIds NVARCHAR(MAX)
+
 		IF @transCount = 0 BEGIN TRANSACTION
 
 			--CREATE TEMPORARY TABLE TO TRACK INSERTED AND ORIGINAL RECORDS
