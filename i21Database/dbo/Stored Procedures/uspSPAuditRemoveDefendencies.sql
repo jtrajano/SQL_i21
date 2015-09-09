@@ -80,5 +80,30 @@ BEGIN
 	CLOSE Cursor_OwnConstraint
 	DEALLOCATE Cursor_OwnConstraint
 
+	--REMOVE INDEX
+	DECLARE @IndexName NVARCHAR(MAX)
+
+	DECLARE Cursor_OwnIndex CURSOR FOR
+		SELECT SysIndex.name As IndexName
+		From sys.indexes As SysIndex
+			Inner Join sys.index_columns As SysIndexCol On SysIndex.object_id = SysIndexCol.object_id And SysIndex.index_id = SysIndexCol.index_id 
+			Inner Join sys.columns As SysCols On SysIndexCol.column_id = SysCols.column_id And SysIndexCol.object_id = SysCols.object_id 
+		WHERE type <> 0 
+			And SysIndex.object_id in (Select systbl.object_id from sys.tables as systbl Where systbl.name = REPLACE(@Table,'dbo.',''))
+			AND SysCols.name = @Column
+
+	OPEN Cursor_OwnIndex FETCH NEXT FROM Cursor_OwnIndex into @IndexName
+	WHILE (@@FETCH_STATUS <> -1)
+	BEGIN
+		DECLARE @DropIndexScript NVARCHAR(MAX)
+		SET @DropIndexScript = 'DROP INDEX [' + @IndexName + '] ON ' + @Table
+		PRINT(@DropIndexScript)
+		EXEC sp_executesql @DropIndexScript
+		FETCH NEXT FROM Cursor_OwnIndex into @IndexName
+	END	
+
+	CLOSE Cursor_OwnIndex
+	DEALLOCATE Cursor_OwnIndex
+
 END
 
