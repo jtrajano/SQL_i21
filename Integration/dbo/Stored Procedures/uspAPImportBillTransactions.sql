@@ -40,12 +40,15 @@ BEGIN
 			END
 
 			--Check if there is check book that was not exists on tblCMBankAccount
-			IF EXISTS(SELECT 1 FROM apchkmst A 
+			DECLARE @missingCheckBook NVARCHAR(4), @error NVARCHAR(200);
+			SELECT TOP 1 @missingCheckBook = A.apchk_cbk_no FROM apchkmst A 
 						LEFT JOIN tblCMBankAccount B
 							ON A.apchk_cbk_no = B.strCbkNo COLLATE Latin1_General_CS_AS
-						WHERE B.strCbkNo IS NULL)
+						WHERE B.strCbkNo IS NULL
+			IF @missingCheckBook IS NOT NULL
 			BEGIN
-				RAISERROR(''There is a check book number that was not imported.'', 16, 1);
+				SET @error = ''Check book number '' + @missingCheckBook + '' was not imported.''
+				RAISERROR(@error, 16, 1);
 			END
 
 			--CREATE AP ACCOUNT CATEGORY
