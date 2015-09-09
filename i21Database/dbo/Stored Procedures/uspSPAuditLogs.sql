@@ -157,7 +157,7 @@ BEGIN
 								END
 							ELSE
 								BEGIN
-								SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' ' + @ret + ' ' +  CASE WHEN @ColumnChanges = 'False' THEN 'NULL' ELSE 'NOT NULL' END;
+								SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' ' + @ret + ' ' +  CASE WHEN @ColumnChanges = 'False' THEN 'NOT NULL' ELSE 'NULL' END;
 								END 
 							
 							EXEC sp_executesql @Sql;
