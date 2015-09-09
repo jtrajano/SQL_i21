@@ -80,7 +80,7 @@ BEGIN
 	IF @userLocation != @receiptLocation
 	BEGIN
 		SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = @receiptLocation)
-		IF @APAccount IS NULL
+		IF @APAccount IS NULL OR @APAccount <= 0
 		BEGIN
 			RAISERROR('Please setup default AP Account.', 16, 1);
 			GOTO DONE
