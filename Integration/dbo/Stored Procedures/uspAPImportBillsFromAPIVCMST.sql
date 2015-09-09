@@ -587,6 +587,21 @@ BEGIN
 				DELETE FROM #tmpBillsPayment WHERE id = @paymentKey
 			END
 
+			--UPDATE strTransactionId from tblCMBankTransaction
+			UPDATE tblCMBankTransaction
+			SET strTransactionId = B.strPaymentRecordNum,
+				intPayeeId = C.intEntityVendorId
+			FROM tblCMBankTransaction A
+			INNER JOIN tblAPPayment B
+				ON A.dblAmount = (CASE WHEN A.intBankTransactionTypeId = 11 THEN (B.dblAmountPaid) * -1 ELSE B.dblAmountPaid END)
+				AND A.dtmDate = B.dtmDatePaid
+				AND A.intBankAccountId = B.intBankAccountId
+				AND A.strReferenceNo = B.strPaymentInfo
+			INNER JOIN (tblAPVendor C INNER JOIN tblEntity D ON C.intEntityVendorId = D.intEntityId)
+				ON B.intEntityVendorId = C.intEntityVendorId 
+				--AND A.strPayee = D.strName
+			WHERE A.strSourceSystem = ''AP''
+
 			IF @transCount = 0 COMMIT TRANSACTION
 		END TRY
 		BEGIN CATCH
