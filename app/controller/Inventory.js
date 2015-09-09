@@ -121,51 +121,51 @@ Ext.define('Inventory.controller.Inventory', {
     getFullUPCString: function(shortUPC) {
         if (iRely.Functions.isEmpty(shortUPC)) return null;
         if (shortUPC.length < 6) return null;
-        var lastDigit = parseInt(shortUPC.substring(shortUPC.length - 1));
+        var lastDigit = parseInt(shortUPC.toString().substring(shortUPC.length - 1));
         var fullUPC = "";
         if (lastDigit < 0 || lastDigit === null || lastDigit === undefined) return null;
 
         switch (lastDigit) {
             case 0 :
                 fullUPC += "000";
-                fullUPC += shortUPC.substring(0, 2);
+                fullUPC += shortUPC.toString().substring(0, 2);
                 fullUPC += "00000";
-                fullUPC += shortUPC.substring(2, 5);
+                fullUPC += shortUPC.toString().substring(2, 5);
                 fullUPC += "0";
                 break;
             case 1 :
                 fullUPC += "000";
-                fullUPC += shortUPC.substring(0, 2);
+                fullUPC += shortUPC.toString().substring(0, 2);
                 fullUPC += "10000";
-                fullUPC += shortUPC.substring(2, 5);
+                fullUPC += shortUPC.toString().substring(2, 5);
                 fullUPC += "0";
                 break;
             case 2 :
                 fullUPC += "000";
-                fullUPC += shortUPC.substring(0, 2);
+                fullUPC += shortUPC.toString().substring(0, 2);
                 fullUPC += "20000";
-                fullUPC += shortUPC.substring(2, 5);
+                fullUPC += shortUPC.toString().substring(2, 5);
                 fullUPC += "0";
                 break;
             case 3 :
                 fullUPC += "000";
-                fullUPC += shortUPC.substring(0, 3);
+                fullUPC += shortUPC.toString().substring(0, 3);
                 fullUPC += "00000";
-                fullUPC += shortUPC.substring(3, 5);
+                fullUPC += shortUPC.toString().substring(3, 5);
                 fullUPC += "0";
                 break;
             case 4 :
                 fullUPC += "000";
-                fullUPC += shortUPC.substring(0, 4);
+                fullUPC += shortUPC.toString().substring(0, 4);
                 fullUPC += "00000";
-                fullUPC += shortUPC.substring(4, 5);
+                fullUPC += shortUPC.toString().substring(4, 5);
                 fullUPC += "0";
                 break;
             default :
                 fullUPC += "000";
-                fullUPC += shortUPC.substring(0, 5);
+                fullUPC += shortUPC.toString().substring(0, 5);
                 fullUPC += "0000";
-                fullUPC += shortUPC.substring(5, 6);
+                fullUPC += shortUPC.toString().substring(5, 6);
                 fullUPC += "0";
                 break;
         }
