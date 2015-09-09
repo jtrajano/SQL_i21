@@ -2,6 +2,7 @@
 	PRINT N'BEGIN INSERT DEFAULT USER ROLE'
 GO
 	ALTER TABLE tblSMUserSecurity NOCHECK CONSTRAINT FK_UserSecurity_UserRole
+	ALTER TABLE tblSMUserSecurityCompanyLocationRolePermission NOCHECK CONSTRAINT FK_tblSMUserSecurityCompanyLocationRolePermission_tblSMUserRole
 GO
 	DELETE FROM tblSMUserRole WHERE intUserRoleID IN (1, 2)
 GO
@@ -11,6 +12,7 @@ GO
 	SET IDENTITY_INSERT [dbo].[tblSMUserRole] OFF
 GO
 	ALTER TABLE tblSMUserSecurity CHECK CONSTRAINT FK_UserSecurity_UserRole
+	ALTER TABLE tblSMUserSecurityCompanyLocationRolePermission CHECK CONSTRAINT FK_tblSMUserSecurityCompanyLocationRolePermission_tblSMUserRole
 GO
 	PRINT N'END INSERT DEFAULT USER ROLE'
 GO

@@ -2365,6 +2365,8 @@
     <Build Include="dbo\Views\vyuTMSiteDevices.sql" />
     <Build Include="dbo\Views\vyuTMSiteDeliveryHistory.sql" />
     <Build Include="dbo\Views\vyuTMSiteEventHistory.sql" />
+    <Build Include="dbo\Tables\tblSMUserSecurityCompanyLocationRolePermission.sql" />
+    <Build Include="dbo\Tables\tblMigrationLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -140,3 +140,70 @@ GO
 	PRINT N'Updating strHelperUrlDomain in tblSMCompanyPreference'
 	UPDATE tblSMCompanyPreference SET strHelperUrlDomain = N'http://help.irelyserver.com'
 GO
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'User Roles per Company Location')
+	BEGIN
+		-- MIGRATE USER ROLE PER LOCATION AND PER USER
+		DECLARE @currentRow INT
+		DECLARE @totalRows INT
+
+		SET @currentRow = 1
+		SELECT @totalRows = Count(*) FROM [dbo].[tblSMUserSecurity]
+
+		WHILE (@currentRow <= @totalRows)
+		BEGIN
+
+		Declare @userId INT
+		Declare @entityId INT
+		Declare @roleId INT
+		SELECT @userId = intUserSecurityID, @entityId = intEntityId, @roleId = intUserRoleID FROM (  
+			SELECT ROW_NUMBER() OVER(ORDER BY intUserSecurityID ASC) AS 'ROWID', *
+			FROM [dbo].[tblSMUserSecurity]
+		) a
+		WHERE ROWID = @currentRow
+		------ DEFAULT LOCATION ------
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurity WHERE intUserSecurityID = @userId AND intCompanyLocationId IS NULL)
+		BEGIN
+			DECLARE @defaultLocation INT
+			SELECT TOP 1 @defaultLocation = intCompanyLocationId FROM tblSMCompanyLocation ORDER BY intCompanyLocationId
+			IF @defaultLocation IS NOT NULL
+			BEGIN
+				UPDATE tblSMUserSecurity SET intCompanyLocationId = @defaultLocation WHERE intUserSecurityID = @userId
+			END
+		END
+		------ DEFAULT LOCATION ------
+			--------------------------------C O M P A N Y  L O C A T I O N--------------------------------
+			DECLARE @currentRowLocation INT
+			DECLARE @totalRowsLocation INT
+
+			SET @currentRowLocation = 1
+			SELECT @totalRowsLocation = Count(*) FROM [dbo].[tblSMCompanyLocation]
+
+			WHILE (@currentRowLocation <= @totalRowsLocation)
+			BEGIN
+
+			Declare @companyLocationId INT
+			SELECT @companyLocationId = intCompanyLocationId FROM (  
+				SELECT ROW_NUMBER() OVER(ORDER BY intCompanyLocationId ASC) AS 'ROWID', *
+				FROM [dbo].[tblSMCompanyLocation]
+			) a
+			WHERE ROWID = @currentRowLocation
+
+			PRINT N'INSERTING RECORD PER COMPANY LOCATION'
+
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityCompanyLocationRolePermission WHERE intUserSecurityId = @userId AND intEntityId = @entityId AND intUserRoleId = @roleId AND intCompanyLocationId = @companyLocationId)
+			BEGIN
+				INSERT INTO tblSMUserSecurityCompanyLocationRolePermission ([intUserSecurityId], [intEntityId], [intUserRoleId], [intCompanyLocationId])
+				VALUES (@userId, @entityId, @roleId, @companyLocationId)
+			END
+
+			SET @currentRowLocation = @currentRowLocation + 1
+			END
+			--------------------------------C O M P A N Y  L O C A T I O N--------------------------------
+		SET @currentRow = @currentRow + 1
+		END
+		
+		PRINT N'ADD LOG TO tblMigrationLog'
+		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+		VALUES('System Manager', 'User Roles per Company Location', 'Migration of User Roles per Company Location', GETDATE())
+	END
+GO
