@@ -27,7 +27,7 @@ FROM
 		,[dblQuantityBilled]		=	tblReceived.dblQuantityBilled
 		,[intLineNo]				=	tblReceived.intLineNo
 		,[intInventoryReceiptItemId]=	tblReceived.intInventoryReceiptItemId
-		,[intInventoryReceiptItemAllocatedChargeId]	= NULL
+		,[intInventoryReceiptChargeId]	= NULL
 		,[dblUnitCost]				=	tblReceived.dblUnitCost
 		,[dblTax]					=	tblReceived.dblTax
 		,[intAccountId]				=	tblReceived.intAccountId
@@ -101,7 +101,7 @@ FROM
 	,[dblQuantityBilled]		=	B.dblQtyReceived
 	,[intLineNo]				=	B.intPurchaseDetailId
 	,[intInventoryReceiptItemId]=	NULL --this should be null as this has constraint from IR Receipt item
-	,[intInventoryReceiptItemAllocatedChargeId]	= NULL
+	,[intInventoryReceiptChargeId]	= NULL
 	,[dblUnitCost]				=	B.dblCost
 	,[dblTax]					=	B.dblTax
 	,[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Inventory')
@@ -143,7 +143,7 @@ FROM
 	,[dblQuantityBilled]		=	B.dblBillQty
 	,[intLineNo]				=	B.intInventoryReceiptItemId
 	,[intInventoryReceiptItemId]=	B.intInventoryReceiptItemId
-	,[intInventoryReceiptItemAllocatedChargeId]	= NULL
+	,[intInventoryReceiptChargeId]	= NULL
 	,[dblUnitCost]				=	B.dblUnitCost
 	,[dblTax]					=	B.dblTax
 	,[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'Inventory')
