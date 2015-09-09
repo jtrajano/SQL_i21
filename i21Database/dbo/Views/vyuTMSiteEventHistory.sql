@@ -105,7 +105,7 @@ AS
 		ON A.intCustomerID = B.intCustomerID
 	INNER JOIN tblEntity C
 		ON B.intCustomerNumber = C.intEntityId
-	INNER JOIN tblTMEvent D
+	LEFT JOIN tblTMEvent D
 		ON A.intSiteID = D.intSiteID
 	LEFT JOIN tblTMDevice E
 		ON D.intDeviceId = E.intDeviceId
