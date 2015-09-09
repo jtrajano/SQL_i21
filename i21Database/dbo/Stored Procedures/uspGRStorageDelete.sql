@@ -45,7 +45,7 @@ BEGIN TRY
 	BEGIN
 		UPDATE tblICItemStock
 		SET dblUnitInCustody = dblUnitInCustody - @dblOpenBalance
-			,dblUnitOnHand = dblUnitOnHand - @dblOpenBalance WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId
+			,dblUnitOnHand = dblUnitOnHand + @dblOpenBalance WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId
 	END
 
 	DELETE tblQMTicketDiscount
