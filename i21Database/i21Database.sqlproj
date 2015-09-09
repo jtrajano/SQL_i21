@@ -2300,6 +2300,8 @@
     <Build Include="dbo\Stored Procedures\uspARGetDefaultComment.sql" />
     <Build Include="dbo\Stored Procedures\uspARDuplicateComment.sql" />
     <Build Include="dbo\Stored Procedures\uspTRProcessToInventoryTransfer.sql" />
+    <Build Include="dbo\Functions\fnARGetItemPricingDetails.sql" />
+    <Build Include="dbo\Functions\fnARGetItemPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
