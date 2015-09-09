@@ -22,7 +22,8 @@ FROM
 		,[dblOrderQty]				=	tblReceived.dblOrderQty
 		,[dblPOOpenReceive]			=	tblReceived.dblPOOpenReceive --uom converted received quantity from po to IR
 		,[dblOpenReceive]			=	tblReceived.dblOpenReceive
-		,[dblQuantityToBill]		=	(tblReceived.dblPOOpenReceive - tblReceived.dblQuantityBilled)
+		--,[dblQuantityToBill]		=	(tblReceived.dblPOOpenReceive - tblReceived.dblQuantityBilled) --this will use if Bill will use UOM Of PO
+		,[dblQuantityToBill]		=	(tblReceived.dblOpenReceive - tblReceived.dblQuantityBilled)
 		,[dblQuantityBilled]		=	tblReceived.dblQuantityBilled
 		,[intLineNo]				=	tblReceived.intLineNo
 		,[intInventoryReceiptItemId]=	tblReceived.intInventoryReceiptItemId
