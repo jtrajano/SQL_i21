@@ -177,7 +177,7 @@
 	[strParentLotIdPattern] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[strPatternId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[ysnProductionFeedToERP] BIT NULL DEFAULT (0),
-	[dtmDefaultTimeForEarliestStartDate] DATETIME NULL DEFAULT (0),
+	[dtmDefaultTimeForEarliestStartDate] DATETIME NULL,
 	[intDemandNoMaxLength] INT NOT NULL,
 	[intDemandNoMinLength] INT NOT NULL,
 	[ysnEnableKittingProcess] BIT NULL DEFAULT (0), 
