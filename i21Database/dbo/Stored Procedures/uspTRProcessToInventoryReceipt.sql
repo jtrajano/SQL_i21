@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[uspTRProcessToItemReceipt]
+CREATE PROCEDURE [dbo].[uspTRProcessToInventoryReceipt]
 	 @intTransportLoadId AS INT
 	,@intUserId AS INT	
 AS
