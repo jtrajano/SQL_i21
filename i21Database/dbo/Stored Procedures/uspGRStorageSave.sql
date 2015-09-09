@@ -571,7 +571,7 @@ BEGIN TRY
 	BEGIN
 		UPDATE tblICItemStock
 		SET dblUnitInCustody = dblUnitInCustody + (@NewdblOpenBalance - @OlddblOpenBalance)
-			,dblUnitOnHand = dblUnitOnHand + (@NewdblOpenBalance - @OlddblOpenBalance)
+			,dblUnitOnHand = dblUnitOnHand - (@NewdblOpenBalance - @OlddblOpenBalance)
 		WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId
 	END
 
