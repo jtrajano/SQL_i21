@@ -88,8 +88,8 @@ BEGIN
 		From sys.indexes As SysIndex
 			Inner Join sys.index_columns As SysIndexCol On SysIndex.object_id = SysIndexCol.object_id And SysIndex.index_id = SysIndexCol.index_id 
 			Inner Join sys.columns As SysCols On SysIndexCol.column_id = SysCols.column_id And SysIndexCol.object_id = SysCols.object_id 
-		WHERE type <> 0 
-			And SysIndex.object_id in (Select systbl.object_id from sys.tables as systbl Where systbl.name = REPLACE(@Table,'dbo.',''))
+		WHERE type <> 0 AND type <> 1
+			AND SysIndex.object_id in (Select systbl.object_id from sys.tables as systbl Where systbl.name = REPLACE(@Table,'dbo.',''))
 			AND SysCols.name = @Column
 
 	OPEN Cursor_OwnIndex FETCH NEXT FROM Cursor_OwnIndex into @IndexName
