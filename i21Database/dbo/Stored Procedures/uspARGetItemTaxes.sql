@@ -12,6 +12,8 @@ AS
 			,@VendorId INT
 			,@ItemCategoryId INT
 	SET @TaxExempt = ISNULL((SELECT ysnTaxExempt FROM tblARCustomer WHERE intEntityCustomerId = @CustomerId AND @CustomerId IS NOT NULL),0)
+	IF(ISNULL(@TaxGroupId,0) = 0)
+		SET @TaxGroupId = ISNULL((SELECT tblEntityLocation.intTaxGroupId  FROM tblARCustomer INNER JOIN tblEntityLocation ON tblARCustomer.intEntityCustomerId = tblEntityLocation.intEntityId  AND tblEntityLocation.ysnDefaultLocation = 1 WHERE intEntityCustomerId = @CustomerId AND @CustomerId IS NOT NULL),0)
 	
 	SELECT
 		@VendorId = VI.intVendorId
@@ -59,7 +61,8 @@ AS
 								dtmStartDate
 							),0)
 					ELSE @TaxExempt
-				END) AS [ysnTaxExempt] 				
+				END) AS [ysnTaxExempt] 
+				,TG.[strTaxGroup] 				
 			FROM
 				tblSMTaxCode TC
 			INNER JOIN
@@ -410,7 +413,8 @@ AS
 								dtmStartDate
 							),0)
 					ELSE @TaxExempt
-				END) AS [ysnTaxExempt] 	 				
+				END) AS [ysnTaxExempt]
+				,TG.[strTaxGroup]  	 				
 			FROM
 				tblSMTaxCode TC
 			INNER JOIN
