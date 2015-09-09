@@ -12,9 +12,9 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 -- Create the variables for the internal transaction types used by costing. 
-DECLARE @AUTO_NEGATIVE AS INT = 1
-DECLARE @WRITE_OFF_SOLD AS INT = 2
-DECLARE @REVALUE_SOLD AS INT = 3
+DECLARE @InventoryTransactionTypeId_AutoNegative AS INT = 1;
+DECLARE @InventoryTransactionTypeId_WriteOffSold AS INT = 2;
+DECLARE @InventoryTransactionTypeId_RevalueSold AS INT = 3;
 
 --1	Inventory Auto Negative
 --2	Inventory Write-Off Sold
@@ -23,9 +23,9 @@ DECLARE @REVALUE_SOLD AS INT = 3
 --5	Inventory Shipment
 
 DECLARE @ModuleName AS NVARCHAR(50) = 'Inventory';
-DECLARE @AUTO_NEGATIVE_TransactionType AS NVARCHAR(50) = 'Inventory Auto Negative';
-DECLARE @WRITEOFF_SOLD_TransactionType AS NVARCHAR(50) = 'Inventory Write-Off Sold';
-DECLARE @REVALUE_SOLD_TransactionType AS NVARCHAR(50) = 'Inventory Revalue Sold';
+DECLARE @AUTO_NEGATIVE_TransactionType AS NVARCHAR(50) = 'Auto-Negative';
+DECLARE @WRITEOFF_SOLD_TransactionType AS NVARCHAR(50) = 'Write-Off Sold';
+DECLARE @REVALUE_SOLD_TransactionType AS NVARCHAR(50) = 'Revalue Sold';
 
 DECLARE @GLAccounts AS dbo.ItemGLAccount; 
 DECLARE @UseGLAccount_Inventory AS NVARCHAR(30) = 'Inventory';
@@ -53,6 +53,38 @@ BEGIN
 			OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @UseGLAccount_Inventory) Inventory
 			OUTER APPLY dbo.fnGetItemGLAccountAsTable (Query.intItemId, Query.intItemLocationId, @UseGLAccount_AutoNegative) AutoNegative;
 END 
+
+-- Check for missing Auto Negative Account Id
+DECLARE @strItemNo AS NVARCHAR(50)
+DECLARE @intItemId AS INT
+
+BEGIN 
+	SET @strItemNo = NULL
+	SET @intItemId = NULL
+
+	SELECT	TOP 1 
+			@intItemId = Item.intItemId 
+			,@strItemNo = Item.strItemNo
+	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
+				ON Item.intItemId = ItemGLAccount.intItemId
+	WHERE	ItemGLAccount.intAutoNegativeId IS NULL 
+			AND EXISTS (
+				SELECT	TOP 1 1 
+				FROM	dbo.tblICInventoryTransaction TRANS INNER JOIN dbo.tblICInventoryTransactionType TransType
+							ON TRANS.intTransactionTypeId = TransType.intTransactionTypeId
+				WHERE	TRANS.strBatchId = @strBatchId
+						AND TransType.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative 
+						AND TRANS.intItemId = Item.intItemId
+			)
+	
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		-- {Item} is missing a GL account setup for {Account Category} account category.
+		RAISERROR(51041, 11, 1, @strItemNo, @AUTO_NEGATIVE_TransactionType) 	
+		RETURN;
+	END 
+END 
+;
 
 BEGIN 
 	-------------------------------------------------------------------------------------------
@@ -98,7 +130,7 @@ BEGIN
 				)
 	WHERE	Reversal.strBatchId = @strBatchId
 			AND ISNULL(GLEntries.ysnIsUnposted, 0) = 0
-			AND Reversal.intTransactionTypeId <> @AUTO_NEGATIVE
+			AND Reversal.intTransactionTypeId <> @InventoryTransactionTypeId_AutoNegative
 			
 	-----------------------------------------------------------------------------------
 	-- Create the Auto-Negative G/L Entries
@@ -139,7 +171,7 @@ BEGIN
 			CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Debit
 			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
 	WHERE	ItemTransactions.strBatchId = @strBatchId
-			AND ItemTransactions.intTransactionTypeId = @AUTO_NEGATIVE
+			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative
 
 	UNION ALL 
 	SELECT	
@@ -177,7 +209,7 @@ BEGIN
 			CROSS APPLY dbo.fnGetDebit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Debit
 			CROSS APPLY dbo.fnGetCredit(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0)) Credit
 	WHERE	ItemTransactions.strBatchId = @strBatchId
-			AND ItemTransactions.intTransactionTypeId = @AUTO_NEGATIVE
+			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_AutoNegative
 END
 ;
 
