@@ -160,8 +160,8 @@ BEGIN
 			,strLotAlias			= ItemLot.strLotAlias
 			,intItemId				= ReceiptItem.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
-			,intSubLocationId		= ReceiptItem.intSubLocationId
-			,intStorageLocationId	= ISNULL(ItemLot.intStorageLocationId, ReceiptItem.intStorageLocationId)
+			,intSubLocationId		= ISNULL(ReceiptItem.intSubLocationId, StorageLocation.intSubLocationId) 										
+			,intStorageLocationId	= StorageLocation.intStorageLocationId
 			,dblQty					=	CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END 
 									 *	CASE	-- The item has no weight UOM. Receive it by converting the Qty to the Detail-Item UOM. 
 												WHEN ISNULL(ReceiptItem.intWeightUOMId, 0) = 0  THEN 												
@@ -205,6 +205,8 @@ BEGIN
 				AND Receipt.intLocationId = ItemLocation.intLocationId
 			INNER JOIN dbo.tblICInventoryReceiptItemLot ItemLot 			
 				ON ReceiptItem.intInventoryReceiptItemId = ItemLot.intInventoryReceiptItemId
+			LEFT JOIN dbo.tblICStorageLocation StorageLocation 
+				ON StorageLocation.intStorageLocationId = ISNULL(ItemLot.intStorageLocationId, ReceiptItem.intStorageLocationId)
 	WHERE	Receipt.strReceiptNumber = @strTransactionId
 
 END 
