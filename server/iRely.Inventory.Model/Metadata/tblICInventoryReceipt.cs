@@ -301,7 +301,7 @@ namespace iRely.Inventory.Model
             {
                 if (string.IsNullOrEmpty(_orderUOM))
                     if (vyuICGetInventoryReceiptItem != null)
-                        return vyuICGetInventoryReceiptItem.strUnitMeasure;
+                        return vyuICGetInventoryReceiptItem.strOrderUOM;
                     else
                         return null;
                 else
