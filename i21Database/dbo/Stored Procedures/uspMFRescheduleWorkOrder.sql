@@ -139,7 +139,7 @@ BEGIN TRY
 			,intPackTypeId INT
 			,intExecutionOrder INT
 			) x 
-		WHERE x.intPackTypeId IS NULL AND intStatusId<>1 Order by intExecutionOrder
+		WHERE x.intPackTypeId IS NULL AND intStatusId<>1 Order by intExecutionOrder Desc
 
 		SELECT @strWorkOrderNo =strWorkOrderNo 
 		FROM dbo.tblMFWorkOrder
@@ -233,7 +233,7 @@ BEGIN TRY
 	BEGIN
 		SELECT @intWorkOrderId =intWorkOrderId 
 		FROM @tblMFScheduleWorkOrder
-		WHERE intPackTypeId IS NULL and intStatusId<>1 and dblBalance>0 Order by intExecutionOrder
+		WHERE intPackTypeId IS NULL and intStatusId<>1 and dblBalance>0 Order by intExecutionOrder Desc
 
 		SELECT @strWorkOrderNo =strWorkOrderNo 
 		FROM tblMFWorkOrder
@@ -266,7 +266,7 @@ BEGIN TRY
 	BEGIN
 		SELECT @intWorkOrderId =intWorkOrderId 
 		FROM @tblMFScheduleWorkOrder
-		WHERE dblConversionFactor IS NULL and intStatusId<>1 and dblBalance>0 Order by intExecutionOrder
+		WHERE dblConversionFactor IS NULL and intStatusId<>1 and dblBalance>0 Order by intExecutionOrder Desc
 
 		SELECT @strWorkOrderNo =strWorkOrderNo 
 		FROM tblMFWorkOrder
@@ -608,7 +608,7 @@ BEGIN TRY
 	BEGIN
 		SELECT @intWorkOrderId =intWorkOrderId 
 		FROM @tblMFScheduleWorkOrder S
-		WHERE intNoOfUnit > 0 AND S.intStatusId<>1 
+		WHERE intNoOfUnit > 0 AND S.intStatusId<>1 Order by intExecutionOrder Desc
 
 		Select @strWorkOrderNo =strWorkOrderNo 
 		From tblMFWorkOrder
