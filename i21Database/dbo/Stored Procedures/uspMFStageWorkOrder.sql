@@ -471,7 +471,7 @@ BEGIN TRY
 					,@dblAdjustByQuantity = @dblAdjustByQuantity
 					,@dblNewSplitLotQuantity = 0
 					,@dblNewWeight = NULL
-					,@intNewItemUOMId = @intNewItemUOMId
+					,@intNewItemUOMId = NULL--New Item UOM Id should be NULL as per Feb
 					,@intNewWeightUOMId = NULL
 					,@dblNewUnitCost = NULL
 					-- Parameters used for linking or FK (foreign key) relationships
@@ -504,7 +504,7 @@ BEGIN TRY
 					,@dblAdjustByQuantity = @dblAdjustByQuantity
 					,@dblNewSplitLotQuantity = NULL
 					,@dblNewWeight = NULL
-					,@intNewItemUOMId = @intNewItemUOMId
+					,@intNewItemUOMId = NULL--New Item UOM Id should be NULL as per Feb
 					,@intNewWeightUOMId = NULL
 					,@dblNewUnitCost = NULL
 					-- Parameters used for linking or FK (foreign key) relationships
