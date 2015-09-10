@@ -41,7 +41,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[dblCashPrice] [numeric](9, 4) NULL,
 	[intCurrencyId] [int] NULL,
 	[intPriceItemUOMId]  INT NULL, 
-	[intNoOfLots] INT NULL,
+	[dblNoOfLots] NUMERIC(18, 6) NULL,
 		
 	[intMarketZoneId] [int] NULL,
 	[intDiscountTypeId] [int] NULL ,

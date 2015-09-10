@@ -48,7 +48,7 @@ SELECT
 	,PCT.strPriceUOM as strPPriceUOM
 	,PCT.strPricingType as strPPricingType
 	,PCT.strOriginDest as strPOriginDest
-	,PCT.intNoOfLots as intPNoOfLots
+	,PCT.dblNoOfLots as dblPNoOfLots
 
 -- Sales Contract Details
 	,ALD.intSContractDetailId
@@ -78,7 +78,7 @@ SELECT
 	,SCT.strPriceUOM as strSPriceUOM
 	,SCT.strPricingType as strSPricingType
 	,SCT.strOriginDest as strSOriginDest
-	,SCT.intNoOfLots as intSNoOfLots
+	,SCT.dblNoOfLots as dblSNoOfLots
 
 FROM tblLGAllocationDetail ALD
 JOIN tblLGAllocationHeader ALH ON ALH.intAllocationHeaderId = ALD.intAllocationHeaderId

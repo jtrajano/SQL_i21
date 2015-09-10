@@ -1,7 +1,7 @@
 ﻿CREATE VIEW vyuRKGetAssignPhysicalTransaction
 
 AS
-  SELECT *,intNoOfLots-intHedgedLots as intToBeHedgedLots FROM
+  SELECT *,dblNoOfLots-intHedgedLots as intToBeHedgedLots FROM
  (SELECT intContractDetailId,CH.intContractHeaderId,
  CH.dtmContractDate,CH.strContractType,CH.strContractNumber ,CD.intContractSeq,
  strEntityName as strCustomer,
@@ -10,7 +10,7 @@ AS
  isnull(CD.dblNetWeight,0.0) as dblWeights,
  m.strFutMarketName,
  mo.strFutureMonth,
- isnull(CD.intNoOfLots,0) intNoOfLots,
+ isnull(CD.dblNoOfLots,0) dblNoOfLots,
  IsNull((SELECT SUM(AD.intHedgedLots) FROM tblRKAssignFuturesToContractSummary AD Group By AD.intContractDetailId 
 		Having CD.intContractDetailId = AD.intContractDetailId), 0) as intHedgedLots,
   IsNull((SELECT SUM(AD.intAssignedLots) FROM tblRKAssignFuturesToContractSummary AD Group By AD.intContractDetailId 

@@ -3955,4 +3955,11 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="[tblPATPatronageCategory]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="cf126ad4-34af-42e4-898c-95a6697ef515" ChangeDateTime="09/09/2015 16:04:03">
+    <Property Name="ElementName" Value="[dbo].[tblCTContractDetail].[intNoOfLots]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTContractDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblNoOfLots" />
+  </Operation>
 </Operations>

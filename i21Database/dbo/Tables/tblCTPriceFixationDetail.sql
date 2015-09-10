@@ -21,7 +21,8 @@
 	[dblHedgePrice] NUMERIC(8, 4) NULL,
 	[intHedgeFutureMonthId] INT,
 	[intBrokerId] INT,
-	[intBrokerageAccountId] INT
+	[intBrokerageAccountId] INT,
+	[intFutOptTransactionId] INT,
 
 	CONSTRAINT [PK_tblCTPriceFixationDetail_intPriceFixationDetailId] PRIMARY KEY CLUSTERED ([intPriceFixationDetailId] ASC),
 	CONSTRAINT [UK_tblCTPackingDescriptionDetail_strTradeNo] UNIQUE ([strTradeNo]),
@@ -36,4 +37,5 @@
 
 	CONSTRAINT [FK_tblCTPriceFixationDetail_tblRKBroker_intBrokerId] FOREIGN KEY ([intBrokerId]) REFERENCES [tblRKBroker]([intBrokerId]),
 	CONSTRAINT [FK_tblCTPriceFixationDetail_tblRKBrokerageAccount_intBrokerageAccountId] FOREIGN KEY ([intBrokerageAccountId]) REFERENCES [tblRKBrokerageAccount]([intBrokerageAccountId]),
+	CONSTRAINT [FK_tblCTPriceFixationDetail_tblRKFutOptTransaction_intFutOptTransactionId] FOREIGN KEY ([intFutOptTransactionId]) REFERENCES [tblRKFutOptTransaction]([intFutOptTransactionId])
 )

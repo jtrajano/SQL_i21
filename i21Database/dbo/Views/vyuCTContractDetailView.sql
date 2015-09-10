@@ -17,7 +17,7 @@ AS
 			CD.intLoadingPortId,				CD.intDestinationPortId,		CD.strShippingTerm,
 			CD.intShippingLineId,				CD.strVessel,					CD.intDestinationCityId,
 			CD.intShipperId,					CD.strGarden,					CD.strVendorLotID,
-			CD.strInvoiceNo,					CD.intNoOfLots,					CD.intUnitsPerLayer,
+			CD.strInvoiceNo,					CD.dblNoOfLots,					CD.intUnitsPerLayer,
 			CD.intLayersPerPallet,				CD.dtmEventStartDate,			CD.dtmPlannedAvailabilityDate,
 			CD.dtmUpdatedAvailabilityDate,		CD.intBookId,					CD.intSubBookId,
 			CD.intContainerTypeId,				CD.intNumberOfContainers,		CD.intInvoiceCurrencyId,
