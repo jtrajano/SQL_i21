@@ -764,7 +764,7 @@ SET @strmessage = 'Pack Type ''%s'' for Work Order ''%s'' is not associated with
 EXEC sp_addmessage 51186,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51187) EXEC sp_dropmessage 51187, 'us_english'	
-SET @strmessage = 'There is no Pack Type conversion factor that matches the WO# ''%s''.'
+SET @strmessage = 'There is no Pack Type conversion factor that matches the Work Order ''%s''.'
 EXEC sp_addmessage 51187,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51188) EXEC sp_dropmessage 51188, 'us_english'	
