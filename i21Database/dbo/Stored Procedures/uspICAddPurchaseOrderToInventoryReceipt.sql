@@ -207,7 +207,11 @@ WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
 UPDATE	ReceiptItem 
 SET		dblTax = ISNULL(Taxes.dblTaxPerLineItem, 0)
 FROM	dbo.tblICInventoryReceiptItem ReceiptItem LEFT JOIN (
-			SELECT	dblTaxPerLineItem = SUM(ReceiptItemTax.dblTax) 
+			SELECT	dblTaxPerLineItem = SUM (
+						CASE WHEN ISNULL(ysnTaxAdjusted, 0) = 1 THEN ISNULL(ReceiptItemTax.dblAdjustedTax, 0)	
+								ELSE ISNULL(ReceiptItemTax.dblTax, 0)
+						END						
+					) 
 					,ReceiptItemTax.intInventoryReceiptItemId
 			FROM	dbo.tblICInventoryReceiptItemTax ReceiptItemTax INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 						ON ReceiptItemTax.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
