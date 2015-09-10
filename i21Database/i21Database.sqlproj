@@ -2369,6 +2369,8 @@
     <Build Include="dbo\Tables\tblSMUserSecurityCompanyLocationRolePermission.sql" />
     <Build Include="dbo\Tables\tblMigrationLog.sql" />
     <Build Include="dbo\Views\vyuCTYetToPriceFix.sql" />
+    <Build Include="dbo\Tables\tblHDTicketLinkType.sql" />
+    <Build Include="dbo\Tables\tblHDTicketLink.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
