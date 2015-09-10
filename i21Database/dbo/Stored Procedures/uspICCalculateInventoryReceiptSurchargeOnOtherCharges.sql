@@ -187,7 +187,7 @@ BEGIN
 
 	IF @surchargeId IS NOT NULL 
 	BEGIN 
-		-- 'Unable to compute the surcharge for %s.'
+		-- 'Unable to compute the surcharge for %s. The On Cost for the surcharge could be missing. Also, the Vendor for both the surcharge and On Cost must match.'
 		RAISERROR(51165, 11, 1, @surchargeName)  
 		GOTO _Exit
 	END 
