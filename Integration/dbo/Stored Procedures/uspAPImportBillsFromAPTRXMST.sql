@@ -176,15 +176,15 @@ BEGIN
 				SELECT TOP 100 PERCENT
 					[intBillId]				=	A.intBillId,
 					[strMiscDescription]	=	A.strReference,
-					[dblQtyOrdered]			=	1,
-					[dblQtyReceived]		=	1,
+					[dblQtyOrdered]			=	(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END),
+					[dblQtyReceived]		=	(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END),
 					[intAccountId]			=	ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.apegl_gl_acct AS NVARCHAR(MAX))), 0),
 					[dblTotal]				=	CASE WHEN C2.aptrx_trans_type IN (''C'',''A'') THEN
 														(CASE WHEN C.apegl_gl_amt < 0 THEN C.apegl_gl_amt * -1 ELSE C.apegl_gl_amt END)
 													ELSE C.apegl_gl_amt END,
-					[dblCost]				=	CASE WHEN C2.aptrx_trans_type IN (''C'',''A'') THEN
+					[dblCost]				=	(CASE WHEN C2.aptrx_trans_type IN (''C'',''A'') THEN
 														(CASE WHEN C.apegl_gl_amt < 0 THEN C.apegl_gl_amt * -1 ELSE C.apegl_gl_amt END)
-													ELSE C.apegl_gl_amt END,
+													ELSE C.apegl_gl_amt END) / (CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END),
 					[intLineNo]				=	C.apegl_dist_no,
 					[A4GLIdentity]			=	C.A4GLIdentity
 				FROM tblAPBill A
