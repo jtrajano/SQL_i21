@@ -36,6 +36,7 @@ BEGIN TRY
 		,@strItemNo nvarchar(50)
 		,@dtmEarliestStartDate datetime
 		,@intGapDuetoEarliestStartDate int
+		,@ysnStandard bit
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -113,6 +114,7 @@ BEGIN TRY
 		,@intConcurrencyId = intConcurrencyId
 		,@intUserId = intUserId
 		,@intLocationId=intLocationId
+		,@ysnStandard=ysnStandard
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intManufacturingCellId INT
 			,intCalendarId int
@@ -120,6 +122,7 @@ BEGIN TRY
 			,intConcurrencyId INT
 			,intUserId INT
 			,intLocationId int
+			,ysnStandard bit
 			)
 
 	IF EXISTS (
@@ -648,7 +651,7 @@ BEGIN TRY
 		,'' AS strName
 		,@intManufacturingCellId AS intManufacturingCellId
 		,'' AS strCellName
-		,CONVERT(bit,0) AS ysnStandard
+		,@ysnStandard AS ysnStandard
 		,@intLocationId AS intLocationId
 		,0 AS intConcurrencyId
 		,@dtmCurrentDate AS dtmCreated
