@@ -45,6 +45,7 @@ SELECT
 	,intEntityCustomerId = F.intEntityId
 	,intCompanyLocation = D.intLocationId
 	,strReason = O.strStatus
+	,intItemId = G.intItemId
 FROM tblTMSiteDevice A
 INNER JOIN tblTMDevice B
 	ON A.intDeviceId = B.intDeviceId
@@ -67,7 +68,7 @@ LEFT JOIN tblSMCompanyLocation K
 LEFT JOIN tblTMDeviceType L
 	ON B.intDeviceTypeId = L.intDeviceTypeId
 LEFT JOIN tblICItem M
-	ON D.intProduct = M.intItemId
+	ON G.intItemId = M.intItemId
 INNER JOIN tblTMCOBOLLeaseBilling O
 	ON O.intDeviceID =  B.intDeviceId
 GO
