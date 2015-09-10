@@ -61,7 +61,7 @@
 	CONSTRAINT [FK_tblSOSalesOrder_tblSMFreightTerm] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]),
 	CONSTRAINT [FK_tblSOSalesOrder_tblEntity_intOrderedById] FOREIGN KEY ([intOrderedById]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
 	CONSTRAINT [FK_tblSOSalesOrder_tblEntitySplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [dbo].[tblEntitySplit] ([intSplitId]),
-	CONSTRAINT [FK_tblSOSalesOrder_tblSMTerm_intTermId] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID])
+	CONSTRAINT [FK_tblSOSalesOrder_tblSMTerm_intTermId] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID])    
 );
 GO
 
@@ -74,7 +74,9 @@ DECLARE @inserted TABLE(intSalesOrderId INT, strTransactionType NVARCHAR(10))
 DECLARE @count INT = 0
 DECLARE @intSalesOrderId INT
 DECLARE @SalesOrderNumber NVARCHAR(50)
-DECLARE @strTransactionType NVARCHAR(10)
+DECLARE @strTransactionType NVARCHAR(25)
+DECLARE @intMaxCount INT = 0
+DECLARE @intStartingNumberId INT = 0
 
 INSERT INTO @inserted
 SELECT intSalesOrderId, strTransactionType FROM INSERTED ORDER BY intSalesOrderId
@@ -83,17 +85,22 @@ WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
 BEGIN
 	SELECT TOP 1 @intSalesOrderId = intSalesOrderId, @strTransactionType = strTransactionType FROM @inserted
 
-	IF(@strTransactionType IS NOT NULL AND @strTransactionType = 'Order')
-		BEGIN
-			EXEC uspSMGetStartingNumber 29, @SalesOrderNumber OUT
-		END
-	ELSE
-		BEGIN
-			EXEC uspSMGetStartingNumber 51, @SalesOrderNumber OUT
-		END
+	SET @intStartingNumberId = CASE WHEN @strTransactionType = 'Order' THEN 29 
+									WHEN @strTransactionType = 'Quote' THEN 51 END
+	
+	IF(@intStartingNumberId <> 0)
+		EXEC uspSMGetStartingNumber @intStartingNumberId, @SalesOrderNumber OUT
 	
 	IF(@SalesOrderNumber IS NOT NULL)
 	BEGIN
+		IF EXISTS (SELECT NULL FROM tblSOSalesOrder WHERE strSalesOrderNumber = @SalesOrderNumber)
+			BEGIN
+				SET @SalesOrderNumber = NULL
+				SELECT @intMaxCount = MAX(CONVERT(INT, SUBSTRING(strSalesOrderNumber, 4, 10))) FROM tblSOSalesOrder WHERE strTransactionType = @strTransactionType
+				UPDATE tblSMStartingNumber SET intNumber = @intMaxCount + 1 WHERE intStartingNumberId = @intStartingNumberId
+				EXEC uspSMGetStartingNumber @intStartingNumberId, @SalesOrderNumber OUT
+			END
+		
 		UPDATE tblSOSalesOrder
 			SET tblSOSalesOrder.strSalesOrderNumber = @SalesOrderNumber
 		FROM tblSOSalesOrder A
