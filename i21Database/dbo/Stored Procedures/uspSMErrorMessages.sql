@@ -660,7 +660,7 @@ SET @strmessage = 'Cyclic situation found. Unable to compute surcharge because %
 EXEC sp_addmessage 51164,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51165) EXEC sp_dropmessage 51165, 'us_english'	
-SET @strmessage = 'Unable to compute the surcharge for %s.'
+SET @strmessage = 'Unable to compute the surcharge for %s. The On Cost for the surcharge could be missing. Also, the Vendor for both the surcharge and On Cost must match.'
 EXEC sp_addmessage 51165,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51166) EXEC sp_dropmessage 51166, 'us_english'	
