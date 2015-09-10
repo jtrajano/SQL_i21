@@ -39,6 +39,8 @@ FROM
 		,[strContractNumber]		=	G1.strContractNumber
 		,[intContractHeaderId]		=	G1.intContractHeaderId
 		,[intContractDetailId]		=	G2.intContractDetailId
+		,[intScaleTicketId]			=	NULL
+		,[intScaleTicketNumber]		=	NULL
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		CROSS APPLY 
@@ -113,6 +115,8 @@ FROM
 	,[strContractNumber]		=	NULL
 	,[intContractHeaderId]		=	NULL
 	,[intContractDetailId]		=	NULL
+	,[intScaleTicketId]			=	NULL
+	,[intScaleTicketNumber]		=	NULL
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -155,6 +159,8 @@ FROM
 	,[strContractNumber]		=	F1.strContractNumber
 	,[intContractHeaderId]		=	F1.intContractHeaderId
 	,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
+	,[intScaleTicketId]			=	G.intTicketId
+	,[intScaleTicketNumber]		=	G.intTicketNumber
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -164,6 +170,7 @@ FROM
 	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.[intEntityShipViaId]
 	LEFT JOIN (tblCTContractHeader F1 INNER JOIN tblCTContractDetail F2 ON F1.intContractHeaderId = F2.intContractHeaderId) 
 		ON F1.intEntityId = A.intEntityVendorId AND B.intItemId = F2.intItemId AND B.intLineNo = F2.intContractDetailId
+	LEFT JOIN tblSCTicket G ON (CASE WHEN A.intSourceType = 1 THEN B.intSourceId ELSE 0 END) = G.intTicketId
 	WHERE A.strReceiptType IN ('Direct','Purchase Contract') AND A.ysnPosted = 1 AND B.dblBillQty != B.dblOpenReceive 
 	AND 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' THEN
 						CASE WHEN F1.intContractTypeId = 1 THEN 1 ELSE 0 END
@@ -200,6 +207,8 @@ FROM
 		,[strTerm]									=	NULL
 		,[strContractNumber]						=	NULL
 		,[intContractHeaderId]						=	NULL
+		,[intScaleTicketId]							=	NULL
+		,[intScaleTicketNumber]						=	NULL
 		,[intContractDetailId]						=	NULL
 	FROM [vyuAPChargesForBilling] A
 ) Items
