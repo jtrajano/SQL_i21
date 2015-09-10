@@ -78,6 +78,7 @@ BEGIN
 						,A4GLIdentity = CAST(A4GLIdentity   AS INT)
 						,strItemDescription =  ''''
 						,strCustomerName =  ''''
+						,strItemUnitDescription = ''''
 					FROM agcntmst
 				
 				')
@@ -119,6 +120,7 @@ BEGIN
 						,A4GLIdentity = CAST(A4GLIdentity   AS INT)
 						,strItemDescription =  ''''
 						,strCustomerName =  ''''
+						,strItemUnitDescription = ''''
 					FROM ptcntmst
 				
 				')
@@ -131,18 +133,18 @@ BEGIN
 			AS
 			SELECT
 				vwcnt_cus_no=C.strEntityNo 
-				,vwcnt_cnt_no= A.strCustomerContract
-				,vwcnt_line_no= 0
+				,vwcnt_cnt_no= A.strContractNumber
+				,vwcnt_line_no= B.intContractSeq
 				,vwcnt_alt_cus= ''''
 				,vwcnt_itm_or_cls= E.strItemNo
-				,vwcnt_loc_no= F.strLocationNumber
+				,vwcnt_loc_no= F.strLocationName
 				,vwcnt_alt_cnt_no=''''
-				,vwcnt_amt_orig= 0.0
-				,vwcnt_amt_bal= B.dblBalance
+				,vwcnt_amt_orig= ISNULL(B.dblCashPrice,0.0) * ISNULL(B.dblOriginalQty,0.0)
+				,vwcnt_amt_bal= ISNULL(B.dblBalance,0.0) * ISNULL(B.dblCashPrice,0.0)
 				,vwcnt_due_rev_dt= B.dtmEndDate
 				,vwcnt_hdr_comments=A.strContractComments
-				,vwcnt_un_orig=0.0
-				,vwcnt_un_bal=0.0
+				,vwcnt_un_orig=ISNULL(B.dblOriginalQty,0.0)
+				,vwcnt_un_bal= B.dblBalance
 				,vwcnt_lc1_yn=''''
 				,vwcnt_lc2_yn=''''
 				,vwcnt_lc3_yn=''''
@@ -151,8 +153,7 @@ BEGIN
 				,vwcnt_lc6_yn =''''
 				,vwcnt_ppd_yndm = (CASE 
 										WHEN A.ysnPrepaid = 1 THEN ''Y'' 
-										WHEN A.ysnPrepaid  = 0 THEN ''N''
-										ELSE ''D''
+										ELSE ''N''
 									END)
 						  	
 				,vwcnt_un_prc= ISNULL(B.dblCashPrice,0.0)
@@ -160,6 +161,7 @@ BEGIN
 				,A4GLIdentity = CAST(B.intContractDetailId  AS INT)
 				,strItemDescription =  E.strDescription
 				,strCustomerName = C.strName
+				,strItemUnitDescription = G.strUnitMeasure
 			FROM tblCTContractHeader A
 			INNER JOIN tblCTContractDetail B
 				ON A.intContractHeaderId = B.intContractHeaderId
@@ -169,6 +171,8 @@ BEGIN
 				ON B.intItemId = E.intItemId	
 			LEFT JOIN tblSMCompanyLocation F
 				ON B.intCompanyLocationId = F.intCompanyLocationId
+			LEFT JOIN tblICUnitMeasure G
+				ON B.intUnitMeasureId = G.intUnitMeasureId	
 	
 		')
 	END
