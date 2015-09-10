@@ -207,9 +207,7 @@ BEGIN
 					ON A.intEntityVendorId = B.intEntityVendorId
 				INNER JOIN (apivcmst C2 INNER JOIN aphglmst C 
 							ON C2.apivc_ivc_no = C.aphgl_ivc_no 
-							AND C2.apivc_vnd_no = C.aphgl_vnd_no
-							AND C2.apivc_cbk_no = C.aphgl_cbk_no
-							AND C2.apivc_trans_type = C.aphgl_trx_ind)
+							AND C2.apivc_vnd_no = C.aphgl_vnd_no)
 				ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.apivc_ivc_no
 					AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.apivc_vnd_no
 				WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
@@ -360,8 +358,6 @@ BEGIN
 				INNER JOIN apivcmst B 
 							ON B.apivc_ivc_no = A.aphgl_ivc_no 
 							AND B.apivc_vnd_no = A.aphgl_vnd_no
-							AND B.apivc_cbk_no = A.aphgl_cbk_no
-							AND B.apivc_trans_type = A.aphgl_trx_ind
 				INNER JOIN #InsertedPostedBillDetail C
 					ON A.[A4GLIdentity] = C.[A4GLIdentity]
 				WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
