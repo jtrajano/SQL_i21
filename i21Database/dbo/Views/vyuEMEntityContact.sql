@@ -23,7 +23,8 @@ SELECT
 	F.Terminal,  
 	F.ShippingLine,  
 	F.Trucker ,
-	D.strContactType
+	D.strContactType,
+	D.strEmailDistributionOption
 FROM dbo.tblEntity AS B 			
 	INNER JOIN dbo.tblEntityToContact AS C 
 			ON B.[intEntityId] = C.[intEntityId] 
