@@ -194,7 +194,12 @@ BEGIN
 			,intItemLocationId		= ISNULL(NewItemLocation.intItemLocationId, OriginalItemLocation.intItemLocationId) 
 			,intItemUOMId			= ISNULL(NewItemUOM.intItemUOMId, FromStock.intItemUOMId) 
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= -1 * FromStock.dblQty
+			,dblQty					=	CASE	WHEN Lot.intWeightUOMId IS NOT NULL AND ISNULL(Lot.dblWeightPerQty, 0) <> 0 THEN 
+													(-1 * FromStock.dblQty)
+													/ Lot.dblWeightPerQty
+												ELSE	
+													-1 * FromStock.dblQty
+										END
 			,dblUOMQty				= ISNULL(NewItemUOM.dblUnitQty, FromStock.dblUOMQty)
 			,dblCost				= ISNULL(Detail.dblNewCost, FromStock.dblCost) 
 			,dblValue				= 0
@@ -217,6 +222,8 @@ BEGIN
 			INNER JOIN dbo.tblICItemLocation OriginalItemLocation 
 				ON OriginalItemLocation.intLocationId = Header.intLocationId 
 				AND OriginalItemLocation.intItemId = Detail.intItemId
+			INNER JOIN dbo.tblICLot Lot
+				ON FromStock.intLotId = Lot.intLotId 
 			LEFT JOIN dbo.tblICItemLocation NewItemLocation 
 				ON NewItemLocation.intLocationId = Detail.intNewLocationId
 				AND NewItemLocation.intItemId = Detail.intItemId
