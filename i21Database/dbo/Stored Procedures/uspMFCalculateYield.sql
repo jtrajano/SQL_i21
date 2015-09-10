@@ -139,7 +139,7 @@ BEGIN TRY
 			CASE 
 				WHEN I.ysnScaled = 1
 					THEN ISNULL((
-							SELECT SUM(F.dblOpeningOutputQuantity / F.dblCalculatedQuantity)
+							SELECT SUM(F.dblOpeningOutputQuantity / (Case When F.dblCalculatedQuantity=0 Then 1 Else F.dblCalculatedQuantity End))
 							FROM tblMFProductionSummary F
 							WHERE F.dblOpeningOutputQuantity > 0 AND F.intWorkOrderId =@intWorkOrderId 
 							) * I.dblCalculatedQuantity,0)
@@ -150,7 +150,7 @@ BEGIN TRY
 			CASE 
 				WHEN I.ysnScaled = 1
 					THEN ISNULL((
-							SELECT SUM(F.dblOutputQuantity / F.dblCalculatedQuantity)
+							SELECT SUM(F.dblOutputQuantity /(Case When F.dblCalculatedQuantity=0 Then 1 Else F.dblCalculatedQuantity End))
 							FROM tblMFProductionSummary F
 							WHERE F.dblOutputQuantity > 0 AND F.intWorkOrderId =@intWorkOrderId
 							) * I.dblCalculatedQuantity,0)
@@ -161,7 +161,7 @@ BEGIN TRY
 			CASE 
 				WHEN I.ysnScaled = 1
 					THEN ISNULL((
-							SELECT SUM(F.dblCountOutputQuantity / F.dblCalculatedQuantity)
+							SELECT SUM(F.dblCountOutputQuantity /(Case When F.dblCalculatedQuantity=0 Then 1 Else F.dblCalculatedQuantity End))
 							FROM tblMFProductionSummary F
 							WHERE F.dblCountOutputQuantity > 0 AND F.intWorkOrderId =@intWorkOrderId
 							) * I.dblCalculatedQuantity,0)
