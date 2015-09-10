@@ -2372,6 +2372,7 @@
     <Build Include="dbo\Views\vyuTMSiteCustomer.sql" />
     <Build Include="dbo\Tables\tblHDTicketLink.sql" />
     <Build Include="dbo\Tables\tblHDTicketLinkType.sql" />
+    <Build Include="dbo\Views\vyuHDLinkToTicket.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
