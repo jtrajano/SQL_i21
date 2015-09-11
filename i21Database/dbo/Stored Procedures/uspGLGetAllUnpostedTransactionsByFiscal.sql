@@ -15,7 +15,7 @@ BEGIN
 		strTransactionType NVARCHAR(25),
 		dtmDate DATETIME
 	)
-	SELECT TOP 1 @blnLegacyIntegration = ISNULL(ysnLegacyIntegration,0) FROM tblSMCompanyPreference 
+	
 
 	;WITH FiscalYear(dtmDateFrom,dtmDateTo)
 	AS
@@ -28,12 +28,6 @@ BEGIN
 		SELECT strJournalId COLLATE DATABASE_DEFAULT AS strTransactionId, strTransactionType COLLATE DATABASE_DEFAULT AS strTransactionType, dtmDate 
 			FROM tblGLJournal WHERE ysnPosted = 0 and (strTransactionType = 'General Journal' OR strTransactionType = 'Audit Adjustment')-- GL
 		UNION
-		SELECT glije_src_no as strTransactionId, 'Origin - ' + glije_src_sys as strTransactionType,	CAST(SUBSTRING(CAST(glije_date AS NVARCHAR(10)),1,4) + '-' + SUBSTRING(CAST(glije_date AS NVARCHAR(10)),5,2) + '-' + SUBSTRING(CAST(glije_date AS NVARCHAR(10)),7,2) AS DATE) as dtmDate 
-			FROM glijemst WHERE @blnLegacyIntegration  = 1 --ORIGIN JOURNAL
-		UNION
-		SELECT aptrx_ivc_no as strTransactionId, 'Origin - AP' as strTransactionType, CAST(SUBSTRING(CAST(aptrx_gl_rev_dt AS NVARCHAR(10)),1,4) + '-' + SUBSTRING(CAST(aptrx_gl_rev_dt AS NVARCHAR(10)),5,2) + '-' + SUBSTRING(CAST(aptrx_gl_rev_dt AS NVARCHAR(10)),7,2) AS DATE) as dtmDate 
-			FROM aptrxmst WHERE @blnLegacyIntegration  = 1   GROUP BY aptrx_ivc_no, aptrx_gl_rev_dt --ORIGIN AP
-		UNION
 		SELECT strTransactionId, strTransactionType,dtmDate from [vyuICGetUnpostedTransactions] --IC
 		UNION
 		SELECT strTransactionId, strTransactionType,dtmDate from [vyuAPUnpostedTransaction] --AP
@@ -44,6 +38,22 @@ BEGIN
 	)
 	INSERT INTO @tblTransactions
 	SELECT strTransactionId,strTransactionType,dtmDate from Transactions,FiscalYear WHERE dtmDate >= FiscalYear.dtmDateFrom AND dtmDate <= FiscalYear.dtmDateTo
+	
+	SELECT TOP 1 @blnLegacyIntegration = ISNULL(ysnLegacyIntegration,0) FROM tblSMCompanyPreference 
+	IF @blnLegacyIntegration = 1
+	WITH Integration (strTransactionId,strTransactionType,dtmDate)AS
+	(
+	
+		SELECT glije_src_no as strTransactionId, 'Origin - ' + glije_src_sys as strTransactionType,	CAST(SUBSTRING(CAST(glije_date AS NVARCHAR(10)),1,4) + '-' + SUBSTRING(CAST(glije_date AS NVARCHAR(10)),5,2) + '-' + SUBSTRING(CAST(glije_date AS NVARCHAR(10)),7,2) AS DATE) as dtmDate 
+			FROM glijemst --ORIGIN JOURNAL
+		UNION
+		SELECT aptrx_ivc_no as strTransactionId, 'Origin - AP' as strTransactionType, CAST(SUBSTRING(CAST(aptrx_gl_rev_dt AS NVARCHAR(10)),1,4) + '-' + SUBSTRING(CAST(aptrx_gl_rev_dt AS NVARCHAR(10)),5,2) + '-' + SUBSTRING(CAST(aptrx_gl_rev_dt AS NVARCHAR(10)),7,2) AS DATE) as dtmDate 
+			FROM aptrxmst GROUP BY aptrx_ivc_no, aptrx_gl_rev_dt --ORIGIN AP
+		
+	)INSERT INTO @tblTransactions
+	SELECT strTransactionId,strTransactionType,dtmDate from Transactions,FiscalYear WHERE dtmDate >= FiscalYear.dtmDateFrom AND dtmDate <= FiscalYear.dtmDateTo
+	
+	
 	DECLARE @intCount INT
 	DECLARE @intAACount INT
 	
@@ -54,4 +64,3 @@ BEGIN
 	SELECT CASE WHEN @intCount >0 AND @intAACount = @intCount THEN 'AA' ELSE '' END AS message
 
 END
-GO
