@@ -968,17 +968,14 @@ DECLARE	 @Price		NUMERIC(18,6)
 								FROM
 									tblICItemPricingLevel PL
 								INNER JOIN
-									tblEntityLocation CL
-										ON PL.strPriceLevel = CL.strPricingLevel
-								INNER JOIN
 									tblARCustomer C									
-										ON CL.intEntityId = C.intEntityCustomerId
-										AND CL.ysnDefaultLocation = 1															
+										ON PL.strPriceLevel = C.strLevel																								
 								INNER JOIN vyuICGetItemStock VIS
 										ON PL.intItemId = VIS.intItemId
 										AND PL.intItemLocationId = VIS.intItemLocationId															
 								WHERE
 									C.intEntityCustomerId = @CustomerId
+									AND C.strPricing = 'Multi-Level Pricing'
 									AND PL.intItemId = @ItemId
 									AND PL.intItemLocationId = @ItemLocationId
 									AND PL.intItemUnitMeasureId = @ItemUOMId
