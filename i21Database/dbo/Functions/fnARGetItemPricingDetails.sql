@@ -141,20 +141,20 @@ DECLARE	 @Price		NUMERIC(18,6)
 	END			
 		
 	SELECT
-		@CustomerShipToLocationId = ISNULL(@ShipToLocationId,ISNULL(ShipToLocation.intEntityLocationId, EntityLocation.intEntityLocationId))
+		@CustomerShipToLocationId = ISNULL(@ShipToLocationId,ShipToLocation.intEntityLocationId)
 	FROM 
 		tblARCustomer Customer
-		LEFT OUTER JOIN
-			(	SELECT
-					intEntityLocationId
-					,intEntityId 
-					,strCountry
-					,strState
-					,strCity
-				FROM tblEntityLocation
-				WHERE ysnDefaultLocation = 1
-			) EntityLocation 
-			ON Customer.intEntityCustomerId = EntityLocation.intEntityId
+		--LEFT OUTER JOIN
+		--	(	SELECT
+		--			intEntityLocationId
+		--			,intEntityId 
+		--			,strCountry
+		--			,strState
+		--			,strCity
+		--		FROM tblEntityLocation
+		--		WHERE ysnDefaultLocation = 1
+		--	) EntityLocation 
+		--	ON Customer.intEntityCustomerId = EntityLocation.intEntityId
 	LEFT OUTER JOIN 
 		tblEntityLocation ShipToLocation 
 			ON Customer.intShipToId = ShipToLocation.intEntityLocationId
@@ -805,58 +805,58 @@ DECLARE	 @Price		NUMERIC(18,6)
 		--af. Customer - Invoice Type - Item Category
 		
 		--ag. Customer - Vendor - Vendor Location - Item (AR>Maintenance>Customers>Setup Tab>Pricing Tab>Special Pricing)
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialPricing WHERE intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND intItemId = @ItemId)
+		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND intItemId = @ItemId)
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND intItemId = @ItemId)
+				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND intItemId = @ItemId)
 				INSERT @returntable
 				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
 				RETURN
 			END
 				
 		--ah. Customer - Vendor - Item (AR>Maintenance>Customers>Setup Tab>Pricing Tab>Special Pricing)
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialPricing WHERE intVendorId = @ItemVendorId AND intItemId = @ItemId)
+		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND intItemId = @ItemId)
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE intVendorId = @ItemVendorId AND intItemId = @ItemId)
+				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND intItemId = @ItemId)
 				INSERT @returntable
 				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
 				RETURN
 			END		
 		--ai. Customer - Vendor - Vendor Location - Item Category (AR>Maintenance>Customers>Setup Tab>Pricing Tab>Special Pricing)
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialPricing WHERE intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
+		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
+				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 				INSERT @returntable
 				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
 				RETURN
 			END
 			
 		--aj. Customer - Vendor - Item Category (AR>Maintenance>Customers>Setup Tab>Pricing Tab>Special Pricing)
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialPricing WHERE intVendorId = @ItemVendorId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
+		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE intVendorId = @ItemVendorId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
+				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 				INSERT @returntable
 				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
 				RETURN
 			END
 			
 		--ak. Customer - Item (AR>Maintenance>Customers>Setup Tab>Pricing Tab>Special Pricing)
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialPricing WHERE intItemId = @ItemId)
+		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intItemId = @ItemId)
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE intItemId = @ItemId)
+				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intItemId = @ItemId)
 				INSERT @returntable
 				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
 				RETURN
 			END
 		--al. Customer - Item Category (AR>Maintenance>Customers>Setup Tab>Pricing Tab>Special Pricing)
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialPricing WHERE (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
+		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
+				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 				INSERT @returntable
 				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
 				RETURN
@@ -870,60 +870,60 @@ DECLARE	 @Price		NUMERIC(18,6)
 		--ar. Customer - Customer Group - Invoice Type - Item Category
 		
 		--as. Customer - Customer Group - Vendor - Vendor Location - Item (AR>Maintenance>Customers>Setup Tab>Pricing Tab>Special Pricing)
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialGroupPricing WHERE intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND intItemId = @ItemId)
+		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialGroupPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND intItemId = @ItemId)
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND intItemId = @ItemId)
+				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND intItemId = @ItemId)
 				INSERT @returntable
 				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
 				RETURN
 			END
 			
 		--at. Customer - Customer Group - Vendor - Item (AR>Maintenance>Customers>Setup Tab>Pricing Tab>Special Pricing)
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialGroupPricing WHERE intVendorId = @ItemVendorId AND intItemId = @ItemId)
+		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialGroupPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND intItemId = @ItemId)
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE intVendorId = @ItemVendorId AND intItemId = @ItemId)
+				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND intItemId = @ItemId)
 				INSERT @returntable
 				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
 				RETURN
 			END
 			 
 		--au. Customer - Customer Group - Vendor - Vendor Location - Item Category (AR>Maintenance>Customers>Setup Tab>Pricing Tab>Special Pricing)
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialGroupPricing WHERE intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
+		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialGroupPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
+				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 				INSERT @returntable
 				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
 				RETURN
 			END
 			
 		--av. Customer - Customer Group - Vendor - Item Category (AR>Maintenance>Customers>Setup Tab>Pricing Tab>Special Pricing)
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialGroupPricing WHERE intVendorId = @ItemVendorId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
+		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialGroupPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE intVendorId = @ItemVendorId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
+				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 				INSERT @returntable
 				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
 				RETURN
 			END
 			
 		--aw. Customer - Customer Group - Item (AR>Maintenance>Customers>Setup Tab>Pricing Tab>Special Pricing)
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialGroupPricing WHERE intItemId = @ItemId)
+		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialGroupPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intItemId = @ItemId)
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE intItemId = @ItemId)
+				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intItemId = @ItemId)
 				INSERT @returntable
 				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
 				RETURN
 			END
 			
 		--ax. Customer - Customer Group - Item Category (AR>Maintenance>Customers>Setup Tab>Pricing Tab>Special Pricing)									
-		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialGroupPricing WHERE (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
+		SET @Price = @UOMQuantity *	(SELECT TOP 1 dblCustomerPrice FROM @SpecialGroupPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 		IF(@Price IS NOT NULL)
 			BEGIN
-				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
+				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 				INSERT @returntable
 				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
 				RETURN
@@ -968,17 +968,14 @@ DECLARE	 @Price		NUMERIC(18,6)
 								FROM
 									tblICItemPricingLevel PL
 								INNER JOIN
-									tblEntityLocation CL
-										ON PL.strPriceLevel = CL.strPricingLevel
-								INNER JOIN
 									tblARCustomer C									
-										ON CL.intEntityId = C.intEntityCustomerId
-										AND CL.ysnDefaultLocation = 1															
+										ON PL.strPriceLevel = C.strLevel																								
 								INNER JOIN vyuICGetItemStock VIS
 										ON PL.intItemId = VIS.intItemId
 										AND PL.intItemLocationId = VIS.intItemLocationId															
 								WHERE
 									C.intEntityCustomerId = @CustomerId
+									AND C.strPricing = 'Multi-Level Pricing'
 									AND PL.intItemId = @ItemId
 									AND PL.intItemLocationId = @ItemLocationId
 									AND PL.intItemUnitMeasureId = @ItemUOMId

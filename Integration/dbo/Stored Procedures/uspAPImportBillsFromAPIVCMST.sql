@@ -191,15 +191,15 @@ BEGIN
 				SELECT TOP 100 PERCENT
 					[intBillId]				=	A.intBillId,
 					[strMiscDescription]	=	A.strReference,
-					[dblQtyOrdered]			=	1,
-					[dblQtyReceived]		=	1,
+					[dblQtyOrdered]			=	(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END),
+					[dblQtyReceived]		=	(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END),
 					[intAccountId]			=	ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.aphgl_gl_acct AS NVARCHAR(MAX))), 0),
 					[dblTotal]				=	CASE WHEN C2.apivc_trans_type IN (''C'',''A'') THEN 
 														(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END)
 													ELSE C.aphgl_gl_amt END,
-					[dblCost]				=	CASE WHEN C2.apivc_trans_type IN (''C'',''A'') THEN 
+					[dblCost]				=	(CASE WHEN C2.apivc_trans_type IN (''C'',''A'') THEN 
 														(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END)
-													ELSE C.aphgl_gl_amt END,
+													ELSE C.aphgl_gl_amt END) / (CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END),
 					[intLineNo]				=	C.aphgl_dist_no,
 					[A4GLIdentity]			=	C.[A4GLIdentity]
 				FROM tblAPBill A
@@ -207,9 +207,7 @@ BEGIN
 					ON A.intEntityVendorId = B.intEntityVendorId
 				INNER JOIN (apivcmst C2 INNER JOIN aphglmst C 
 							ON C2.apivc_ivc_no = C.aphgl_ivc_no 
-							AND C2.apivc_vnd_no = C.aphgl_vnd_no
-							AND C2.apivc_cbk_no = C.aphgl_cbk_no
-							AND C2.apivc_trans_type = C.aphgl_trx_ind)
+							AND C2.apivc_vnd_no = C.aphgl_vnd_no)
 				ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.apivc_ivc_no
 					AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.apivc_vnd_no
 				WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
@@ -360,8 +358,6 @@ BEGIN
 				INNER JOIN apivcmst B 
 							ON B.apivc_ivc_no = A.aphgl_ivc_no 
 							AND B.apivc_vnd_no = A.aphgl_vnd_no
-							AND B.apivc_cbk_no = A.aphgl_cbk_no
-							AND B.apivc_trans_type = A.aphgl_trx_ind
 				INNER JOIN #InsertedPostedBillDetail C
 					ON A.[A4GLIdentity] = C.[A4GLIdentity]
 				WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 

@@ -191,6 +191,7 @@ FROM tblAPBill A
 WHERE A.intTransactionType IN (2)
 AND ISNULL((SELECT TOP 1 intItemId FROM tblAPBillDetail WHERE intBillId = A.intBillId),0) <= 0
 AND intEntityVendorId = @vendorId
+AND A.dblAmountDue != 0
 
 ----PREPAYMENT
 --MERGE tblAPAppliedPrepaidAndDebit AS Target

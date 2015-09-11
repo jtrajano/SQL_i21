@@ -91,30 +91,40 @@ DECLARE @inserted TABLE(intInvoiceId INT, strTransactionType NVARCHAR(25))
 DECLARE @count INT = 0
 DECLARE @intInvoiceId INT
 DECLARE @InvoiceNumber NVARCHAR(50)
-DECLARE @TransactionType NVARCHAR(25)
+DECLARE @strTransactionType NVARCHAR(25)
+DECLARE @intMaxCount INT = 0
+DECLARE @intStartingNumberId INT = 0
 
 INSERT INTO @inserted
 SELECT intInvoiceId, strTransactionType FROM INSERTED ORDER BY intInvoiceId
 
 WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
 BEGIN
-	DECLARE @parameterINT AS INT
-	SET @parameterINT = 19
+	SET @intStartingNumberId = 19
 	
-	SELECT TOP 1 @intInvoiceId = intInvoiceId, @TransactionType = strTransactionType FROM @inserted
-	
-	IF @TransactionType = 'Prepayment'
-		SET @parameterINT = 64
+	SELECT TOP 1 @intInvoiceId = intInvoiceId, @strTransactionType = strTransactionType FROM @inserted
+
+	SET @intStartingNumberId = CASE WHEN @strTransactionType = 'Prepayment' THEN 64 
+									WHEN @strTransactionType = 'Overpayment' THEN 65
+									ELSE 19 END
 		
-	IF @TransactionType = 'Overpayment'
-		SET @parameterINT = 65
-	
-	--EXEC uspARFixStartingNumbers 17
-	--IF(OBJECT_ID('tempdb..#tblTempAPByPassFixStartingNumber') IS NOT NULL) RETURN;
-	EXEC uspSMGetStartingNumber @parameterINT, @InvoiceNumber OUT	
+	EXEC uspSMGetStartingNumber @intStartingNumberId, @InvoiceNumber OUT	
 	
 	IF(@InvoiceNumber IS NOT NULL)
 	BEGIN
+		IF EXISTS (SELECT NULL FROM tblARInvoice WHERE strInvoiceNumber = @InvoiceNumber)
+			BEGIN
+				SET @InvoiceNumber = NULL
+				DECLARE @intStartIndex INT = 4
+				IF @strTransactionType = 'Prepayment' OR @strTransactionType = 'Overpayment'
+					SET @intStartIndex = 5
+				
+				SELECT @intMaxCount = MAX(CONVERT(INT, SUBSTRING(strInvoiceNumber, @intStartIndex, 10))) FROM tblARInvoice WHERE strTransactionType = @strTransactionType
+
+				UPDATE tblSMStartingNumber SET intNumber = @intMaxCount + 1 WHERE intStartingNumberId = @intStartingNumberId
+				EXEC uspSMGetStartingNumber @intStartingNumberId, @InvoiceNumber OUT				
+			END
+
 		UPDATE tblARInvoice
 			SET tblARInvoice.strInvoiceNumber = @InvoiceNumber
 		FROM tblARInvoice A

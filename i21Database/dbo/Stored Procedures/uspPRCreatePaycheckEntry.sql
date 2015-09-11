@@ -153,7 +153,7 @@ dblAmount = CASE WHEN ([strCalculationType] IN ('Rate Factor', 'Overtime'))
 			END
 INTO #tmpEarnings FROM tblPREmployeeEarning 
 WHERE intEmployeeId = @intEmployee
-  AND ysnDefault = CASE WHEN @intPayGroup IS NULL THEN 1 ELSE ysnDefault END
+  AND ysnDefault = 1
   AND ISNULL(intPayGroupId, 0) = CASE WHEN @intPayGroup IS NULL THEN ISNULL(intPayGroupId, 0) ELSE @intPayGroup END
 
 /* Add Each Earning to Paycheck */

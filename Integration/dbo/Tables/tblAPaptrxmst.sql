@@ -32,7 +32,8 @@
     [A4GLIdentity]       NUMERIC (9)     IDENTITY (1, 1) NOT NULL,
 	[intBillId] INT
     CONSTRAINT [APk_aptrxmst] PRIMARY KEY NONCLUSTERED ([aptrx_vnd_no] ASC, [aptrx_ivc_no] ASC), 
-    [dtmDateImported] DATETIME NOT NULL DEFAULT GETDATE()
+    [dtmDateImported] DATETIME NOT NULL DEFAULT GETDATE(), 
+    [ysnInsertedToAPIVC] BIT NOT NULL DEFAULT 0
 );
 
 

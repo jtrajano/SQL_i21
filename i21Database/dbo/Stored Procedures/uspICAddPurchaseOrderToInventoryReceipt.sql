@@ -120,6 +120,7 @@ INSERT INTO dbo.tblICInventoryReceiptItem (
 	,intWeightUOMId
     ,dblUnitCost
 	,dblLineTotal
+	,intTaxGroupId
     ,intSort
     ,intConcurrencyId
 )
@@ -144,6 +145,7 @@ SELECT	intInventoryReceiptId	= @InventoryReceiptId
 									)
 		,dblUnitCost			= PODetail.dblCost
 		,dblLineTotal			= (ISNULL(PODetail.dblQtyOrdered, 0) - ISNULL(PODetail.dblQtyReceived, 0)) * PODetail.dblCost
+		,intTaxGroupId			= PODetail.intTaxGroupId
 		,intSort				= PODetail.intLineNo
 		,intConcurrencyId		= 1
 FROM	dbo.tblPOPurchaseDetail PODetail INNER JOIN dbo.tblICItemUOM ItemUOM			

@@ -7,6 +7,7 @@ SELECT
 	A.dblTotal,
 	A.ysnPosted,
 	A.ysnPaid,
+	A.ysnReadyForPayment,
 	A.dtmDate,
 	A.dtmBillDate,
 	A.strVendorOrderNumber,
