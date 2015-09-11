@@ -53,7 +53,8 @@ SELECT
 						THEN 1 ELSE 0 END) AS BIT),
 	B.intApprovalListId,
 	C.intFreightTermId,
-	H.strPaymentMethod
+	H.strPaymentMethod,
+	B.ysnOneBillPerPayment
 FROM
 		dbo.tblEntity A
 	INNER JOIN dbo.tblAPVendor B
