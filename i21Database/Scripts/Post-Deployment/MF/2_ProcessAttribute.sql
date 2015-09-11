@@ -194,7 +194,7 @@ BEGIN
 		,'Item Types Excluded From Cycle Count'
 		,5
 		,4
-		,'Select ''Inventory'' as ValueMember,''Inventory'' as DisplayMember UNION Select ''Finished Good'' as ValueMember,''Finished Good'' as DisplayMember'
+		,'Select ''None'' AS ValueMember,''None'' AS DisplayMember UNION SELECT ''Inventory'' as ValueMember,''Inventory'' as DisplayMember UNION Select ''Finished Good'' as ValueMember,''Finished Good'' as DisplayMember'
 END
 GO
 IF NOT EXISTS (
