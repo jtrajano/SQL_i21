@@ -85,7 +85,10 @@ DECLARE @TransferEntries AS InventoryTransferStagingTable,
 			JOIN tblTRDistributionDetail DD 
 				ON DH.intDistributionHeaderId = DD.intDistributionHeaderId				
     WHERE	TL.intTransportLoadId = @intTransportLoadId 
-			AND ((TR.strOrigin = 'Location' AND DH.strDestination = 'Location') or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' and TR.intCompanyLocationId != DH.intCompanyLocationId));
+			AND ((TR.strOrigin = 'Location' AND DH.strDestination = 'Location') 
+			or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' and TR.intCompanyLocationId != DH.intCompanyLocationId)
+			or (TR.strOrigin = 'Location' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId != DH.intCompanyLocationId)
+			or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId != DH.intCompanyLocationId));
 
 	--if No Records to Process exit
     SELECT @total = COUNT(*) FROM @TransferEntries;
