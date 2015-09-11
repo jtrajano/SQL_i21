@@ -65,7 +65,6 @@
     <Folder Include="Scripts\Pre-Deployment\4_SM" />
     <Folder Include="Scripts\Pre-Deployment\1_TM" />
     <Folder Include="Scripts\Pre-Deployment\2_CM" />
-    <Folder Include="Scripts\Pre-Deployment\3_DB" />
     <Folder Include="Scripts\Pre-Deployment\5_CM" />
     <Folder Include="Scripts\Pre-Deployment\UpdateValidation" />
     <Folder Include="Scripts\Pre-Deployment\6_GL" />
@@ -78,6 +77,7 @@
     <Folder Include="Scripts\Pre-Deployment\13_RK" />
     <Folder Include="Scripts\Pre-Deployment\14_CT" />
     <Folder Include="Scripts\Pre-Deployment\15_GR" />
+    <Folder Include="Scripts\Pre-Deployment\2_CM\3_DB" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1_DataCleanup.sql" />
@@ -138,9 +138,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\2_CM\1_CM.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Scripts\Pre-Deployment\3_DB\1_1340_to_1410.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\6_GL\1_1410_to_1420.sql" />
@@ -204,5 +201,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\11_IC\SourceType_Implementations.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\Fix_Location_on_Reservation_Table.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\2_CM\3_DB\1_1340_to_1410.sql" />
   </ItemGroup>
 </Project>

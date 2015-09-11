@@ -20,7 +20,9 @@ INSERT INTO @ItemsToReserveAggregrate (
 		,dblQty
 		,intTransactionId
 		,strTransactionId
-		,intTransactionTypeId	
+		,intTransactionTypeId
+		,intSubLocationId
+		,intStorageLocationId	
 )
 SELECT	intItemId
 		,intItemLocationId
@@ -29,9 +31,11 @@ SELECT	intItemId
 		,SUM(dblQty)
 		,intTransactionId
 		,strTransactionId
-		,intTransactionTypeId	 
+		,intTransactionTypeId
+		,intSubLocationId
+		,intStorageLocationId	 
 FROM	@ItemsToReserve
-GROUP  BY intItemId, intItemLocationId, intItemUOMId, intLotId, intTransactionId, strTransactionId, intTransactionTypeId
+GROUP  BY intItemId, intItemLocationId, intItemUOMId, intLotId, intTransactionId, strTransactionId, intTransactionTypeId, intSubLocationId, intStorageLocationId
 
 -- Clear the list (if it exists)
 DELETE	Reservations
@@ -42,6 +46,7 @@ WHERE	intTransactionId = @intTransactionId
 -- Add new reservations
 INSERT INTO dbo.tblICStockReservation (
 		intItemId
+		,intLocationId
 		,intItemLocationId
 		,intItemUOMId
 		,intLotId
@@ -51,8 +56,11 @@ INSERT INTO dbo.tblICStockReservation (
 		,intSort
 		,intInventoryTransactionType
 		,intConcurrencyId
+		,intSubLocationId
+		,intStorageLocationId
 )
 SELECT	intItemId						= Items.intItemId
+		,intLocationId					= ItemLocation.intLocationId
 		,intItemLocationId				= Items.intItemLocationId
 		,intItemUOMId					= Items.intItemUOMId
 		,intLotId						= Items.intLotId
@@ -62,4 +70,7 @@ SELECT	intItemId						= Items.intItemId
 		,intSort						= Items.intId
 		,intInventoryTransactionType	= Items.intTransactionTypeId
 		,intConcurrencyId				= 1
-FROM	@ItemsToReserveAggregrate Items
+		,intSubLocationId				= Items.intSubLocationId
+		,intStorageLocationId			= Items.intStorageLocationId
+FROM	@ItemsToReserveAggregrate Items INNER JOIN dbo.tblICItemLocation ItemLocation
+			ON Items.intItemLocationId = ItemLocation.intItemLocationId

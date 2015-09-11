@@ -2,6 +2,7 @@
 (
 	[intStockReservationId] INT NOT NULL IDENTITY 
     ,[intItemId] INT NOT NULL 
+	,[intLocationId] INT NOT NULL 
     ,[intItemLocationId] INT NOT NULL 
     ,[intItemUOMId] INT NOT NULL
 	,[intLotId] INT NULL
@@ -16,6 +17,7 @@
 	,[ysnPosted] BIT NULL DEFAULT((0))
     ,CONSTRAINT [PK_tblICStockReservation] PRIMARY KEY ([intStockReservationId])
     ,CONSTRAINT [FK_tblICStockReservation_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
+	,CONSTRAINT [FK_tblICStockReservation_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId])
     ,CONSTRAINT [FK_tblICStockReservation_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId])
     ,CONSTRAINT [FK_tblICStockReservation_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])
 )
