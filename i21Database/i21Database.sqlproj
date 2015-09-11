@@ -2302,6 +2302,8 @@
     <Build Include="dbo\Stored Procedures\uspTRProcessToInventoryTransfer.sql" />
     <Build Include="dbo\Functions\fnARGetItemPricingDetails.sql" />
     <Build Include="dbo\Functions\fnARGetItemPrice.sql" />
+    <Build Include="dbo\Functions\fnSplitStringWithTrim.sql" />
+    <Build Include="dbo\Functions\fnEMCheckEmailDistributionOption.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
