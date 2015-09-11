@@ -47,7 +47,7 @@ BEGIN
 			CREATE TABLE #InsertedUnpostedBillDetail(intBillDetailId INT PRIMARY KEY CLUSTERED, A4GLIdentity INT)
 			CREATE NONCLUSTERED INDEX [IX_tmpInsertedUnpostedBillDetail_intBillDetailId] ON #InsertedUnpostedBillDetail([intBillDetailId]);
 			CREATE TABLE #ReInsertedToaptrxmst(intA4GLIdentity INT)
-			CREATE TABLE #ReInsertedToapeglmst(intA4GLIdentity INT)
+			CREATE TABLE #ReInsertedToapeglmst(intA4GLIdentity INT, aptrx_ivc_no_header CHAR(50))
 
 			SELECT @userLocation = A.intCompanyLocationId FROM tblSMCompanyLocation A
 					INNER JOIN tblSMUserSecurity B ON A.intCompanyLocationId = B.intCompanyLocationId
@@ -271,7 +271,7 @@ BEGIN
 				[A4GLIdentity]				,
 				[intBillId]					
 			)
-			OUTPUT inserted.A4GLIdentity INTO #ReInsertedToaptrxmst
+			OUTPUT inserted.A4GLIdentity, inserted.aptrx_ivc_no INTO #ReInsertedToaptrxmst
 			SELECT
 				[aptrx_vnd_no]			=	A.[aptrx_vnd_no]		,
 				[aptrx_ivc_no]			=	CASE WHEN DuplicateDataBackup.aptrx_ivc_no IS NOT NULL THEN dbo.fnTrim(A.[aptrx_ivc_no]) + ''-DUP'' ELSE A.aptrx_ivc_no END,
@@ -335,12 +335,10 @@ BEGIN
 			INSERT INTO apivcmst(
 				[apivc_vnd_no]				,
 				[apivc_ivc_no]				,
-				[apivc_sys_rev_dt]   		,
-				[apivc_sys_time]     		,
 				[apivc_cbk_no]       		,
 				[apivc_chk_no]       		,
+				[apivc_status_ind]			,
 				[apivc_trans_type]   		,
-				[apivc_batch_no]     		,
 				[apivc_pur_ord_no]   		,
 				[apivc_po_rcpt_seq]  		,
 				[apivc_ivc_rev_dt]   		,
@@ -348,15 +346,11 @@ BEGIN
 				[apivc_due_rev_dt]   		,
 				[apivc_chk_rev_dt]   		,
 				[apivc_gl_rev_dt]    		,
-				[apivc_disc_pct]     		,
 				[apivc_orig_amt]     		,
-				[apivc_disc_amt]     		,
 				[apivc_wthhld_amt]   		,
 				[apivc_net_amt]      		,
 				[apivc_1099_amt]     		,
 				[apivc_comment]      		,
-				[apivc_orig_type]    		,
-				[apivc_name]         		,
 				[apivc_recur_yn]     		,
 				[apivc_currency]     		,
 				[apivc_currency_rt]  		,
@@ -366,13 +360,11 @@ BEGIN
 			)
 			SELECT
 				[apivc_vnd_no]			=	A.[aptrx_vnd_no]		,
-				[apivc_ivc_no]			=	A.[aptrx_ivc_no],
-				[apivc_sys_rev_dt]  	=	A.[aptrx_sys_rev_dt]	,
-				[apivc_sys_time]    	=	A.[aptrx_sys_time]		,
+				[apivc_ivc_no]			=	A.[aptrx_ivc_no]		,
 				[apivc_cbk_no]      	=	A.[aptrx_cbk_no]		,
 				[apivc_chk_no]      	=	A.[aptrx_chk_no]		,
+				[apivc_status_ind]		=	''R''					,
 				[apivc_trans_type]  	=	A.[aptrx_trans_type]	,
-				[apivc_batch_no]    	=	A.[aptrx_batch_no]		,
 				[apivc_pur_ord_no]  	=	A.[aptrx_pur_ord_no]	,
 				[apivc_po_rcpt_seq] 	=	A.[aptrx_po_rcpt_seq]	,
 				[apivc_ivc_rev_dt]  	=	A.[aptrx_ivc_rev_dt]	,
@@ -380,15 +372,11 @@ BEGIN
 				[apivc_due_rev_dt]  	=	A.[aptrx_due_rev_dt]	,
 				[apivc_chk_rev_dt]  	=	A.[aptrx_chk_rev_dt]	,
 				[apivc_gl_rev_dt]   	=	A.[aptrx_gl_rev_dt]		,
-				[apivc_disc_pct]    	=	A.[aptrx_disc_pct]		,
 				[apivc_orig_amt]    	=	A.[aptrx_orig_amt]		,
-				[apivc_disc_amt]    	=	A.[aptrx_disc_amt]		,
 				[apivc_wthhld_amt]  	=	A.[aptrx_wthhld_amt]	,
 				[apivc_net_amt]     	=	A.[aptrx_net_amt]		,
 				[apivc_1099_amt]    	=	A.[aptrx_1099_amt]		,
 				[apivc_comment]     	=	A.[aptrx_comment]		,
-				[apivc_orig_type]   	=	A.[aptrx_orig_type]		,
-				[apivc_name]        	=	A.[aptrx_name]			,
 				[apivc_recur_yn]    	=	A.[aptrx_recur_yn]		,
 				[apivc_currency]    	=	A.[aptrx_currency]		,
 				[apivc_currency_rt] 	=	A.[aptrx_currency_rt]	,
@@ -487,7 +475,7 @@ BEGIN
 			)
 			SELECT 
 				[apegl_cbk_no]		,
-				[apegl_trx_ind]		,
+				B.aptrx_ivc_no_header, --[apegl_trx_ind]		
 				[apegl_vnd_no]		,
 				[apegl_ivc_no]		,
 				[apegl_dist_no]		,
@@ -495,8 +483,8 @@ BEGIN
 				[apegl_gl_acct]		,
 				[apegl_gl_amt]		,
 				[apegl_gl_un]		
-			FROM apelgmst A
-			WHERE A.A4GLIdentity IN (SELECT intA4GLIdentity FROM #ReInsertedToapeglmst)
+			FROM apeglmst A
+			INNER JOIN #ReInsertedToapeglmst B ON A.A4GLIdentity = B.intA4GLIdentity
 
 			SET @totalReinsertedaphglmst = @@ROWCOUNT;
 
