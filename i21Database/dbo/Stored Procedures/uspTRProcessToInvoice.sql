@@ -74,8 +74,17 @@ BEGIN TRY
 												
 						), -- USD default from company Preference 
 	   1, -- Need to check this	  
-	   DD.dblFreightRate,
-	   DH.strComments,
+	   DD.dblFreightRate,	   
+	   strComments = CASE
+                            WHEN TR.intSupplyPointId is NULL and TL.intLoadId is NULL
+	                           THEN RTRIM(DH.strComments)
+							WHEN TR.intSupplyPointId is NOT NULL and TL.intLoadId is NULL 
+							   THEN	'Origin:' + RTRIM(SP.strSupplyPoint) + ' ' + RTRIM(DH.strComments)
+							WHEN TR.intSupplyPointId is NULL and TL.intLoadId is NOT NULL 
+							   THEN	'Load #:' + RTRIM(LG.strExternalLoadNumber) + ' ' + RTRIM(DH.strComments)
+							WHEN TR.intSupplyPointId is NOT NULL and TL.intLoadId is NOT NULL 
+							   THEN	'Origin:' + RTRIM(SP.strSupplyPoint) + ' Load #:' + RTRIM(LG.strExternalLoadNumber) + ' ' + RTRIM(DH.strComments)
+							   END, 
 	   TL.strTransaction,
 	   DH.intDistributionHeaderId,
 	   DH.strPurchaseOrder,
@@ -95,6 +104,8 @@ BEGIN TRY
             JOIN tblTRTransportReceipt TR on TR.intTransportLoadId = TL.intTransportLoadId
 			JOIN tblTRDistributionHeader DH on DH.intTransportReceiptId = TR.intTransportReceiptId
 			JOIN tblTRDistributionDetail DD on DD.intDistributionHeaderId = DH.intDistributionHeaderId
+			LEFT JOIN vyuTRSupplyPointView SP on SP.intSupplyPointId = TR.intSupplyPointId
+			LEFT JOIN vyuLGLoadView LG on LG.intLoadId = TL.intLoadId
             where TL.intTransportLoadId = @intTransportLoadId and DH.strDestination = 'Customer';
 
 --No Records to process so exit
