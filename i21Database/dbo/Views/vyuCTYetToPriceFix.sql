@@ -30,7 +30,12 @@ AS
 					dblBasis,
 					dblFutures,
 					dblCashPrice,
-					intPriceItemUOMId
+					intPriceItemUOMId,
+					intBookId,
+					intSubBookId,
+					intSalespersonId,
+					intCurrencyId,
+					intCompanyLocationId
 		
 		FROM		vyuCTContractDetailView 
 		WHERE		intPricingTypeId = 2 
@@ -64,7 +69,12 @@ AS
 					CAST (NULL AS NUMERIC(8,4)) AS	dblBasis,
 					CAST (NULL AS NUMERIC(8,4)) AS	dblFutures,
 					CAST (NULL AS NUMERIC(9,4)) AS	dblCashPrice,
-					CAST (NULL AS INT)			AS	intPriceItemUOMId
+					CAST (NULL AS INT)			AS	intPriceItemUOMId,
+					CAST (NULL AS INT)			AS	intBookId,
+					CAST (NULL AS INT)			AS	intSubBookId,
+					intSalespersonId,
+					MAX(intCurrencyId)			AS	intCurrencyId,
+					MAX(intCompanyLocationId)	AS	intCompanyLocationId
 		
 		FROM		vyuCTContractDetailView 
 		WHERE		ISNULL(ysnMultiplePriceFixation,0) = 1
@@ -79,5 +89,6 @@ AS
 					strCommodityDescription,
 					ysnMultiplePriceFixation,
 					dblHeaderQuantity,
-					strHeaderUnitMeasure
+					strHeaderUnitMeasure,
+					intSalespersonId
 	)t

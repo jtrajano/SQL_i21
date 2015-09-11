@@ -139,7 +139,7 @@ BEGIN
               @intCommodityId ,
               @intLocationId ,
               @intTraderId ,
-              @strinternalTradeNo ,
+              @strInternalTradeNo ,
               @strBrokerTradeNo ,
               @strBuySell ,
               @intNoOfContract ,

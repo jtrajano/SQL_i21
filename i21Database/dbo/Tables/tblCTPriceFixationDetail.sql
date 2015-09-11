@@ -35,7 +35,7 @@
 	CONSTRAINT [FK_tblCTPriceFixationDetail_tblRKFuturesMonth_intFutureMonthId] FOREIGN KEY ([intFutureMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId]),
 	CONSTRAINT [FK_tblCTPriceFixationDetail_tblRKFuturesMonth_intHedgeFutureMonthId_intFutureMonthId] FOREIGN KEY ([intHedgeFutureMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId]),
 
-	CONSTRAINT [FK_tblCTPriceFixationDetail_tblRKBroker_intBrokerId] FOREIGN KEY ([intBrokerId]) REFERENCES [tblRKBroker]([intBrokerId]),
+	CONSTRAINT [FK_tblCTPriceFixationDetail_tblEntity_intBrokerId_intEntityId] FOREIGN KEY ([intBrokerId]) REFERENCES [tblEntity]([intEntityId]),
 	CONSTRAINT [FK_tblCTPriceFixationDetail_tblRKBrokerageAccount_intBrokerageAccountId] FOREIGN KEY ([intBrokerageAccountId]) REFERENCES [tblRKBrokerageAccount]([intBrokerageAccountId]),
 	CONSTRAINT [FK_tblCTPriceFixationDetail_tblRKFutOptTransaction_intFutOptTransactionId] FOREIGN KEY ([intFutOptTransactionId]) REFERENCES [tblRKFutOptTransaction]([intFutOptTransactionId])
 )

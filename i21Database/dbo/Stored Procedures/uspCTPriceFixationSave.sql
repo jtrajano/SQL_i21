@@ -7,13 +7,15 @@ AS
 
 BEGIN TRY
 	
-	DECLARE @ErrMsg					NVARCHAR(MAX),
-			@intContractDetailId	INT,
-			@dblCashPrice			NUMERIC(6,4),
-			@intTypeRef				INT,
-			@intNewFutureMonthId	INT,
-			@intNewFutureMarketId	INT,
-			@intLotsUnfixed			INT
+	DECLARE @ErrMsg						NVARCHAR(MAX),
+			@intContractDetailId		INT,
+			@dblCashPrice				NUMERIC(6,4),
+			@intTypeRef					INT,
+			@intNewFutureMonthId		INT,
+			@intNewFutureMarketId		INT,
+			@intLotsUnfixed				INT,
+			@intPriceFixationDetailId	INT,
+			@intFutOptTransactionId		INT
 
 	SELECT	@intLotsUnfixed = ISNULL(intTotalLots,0) - ISNULL(intLotsFixed,0)
 	FROM	tblCTPriceFixation
@@ -36,6 +38,36 @@ BEGIN TRY
 				CD.intConcurrencyId		=	CD.intConcurrencyId + 1
 		FROM	tblCTContractDetail	CD
 		JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId
+
+		SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId) 
+		FROM	tblCTPriceFixationDetail 
+		WHERE	intPriceFixationId = @intPriceFixationId
+		
+
+		WHILE	ISNULL(@intPriceFixationDetailId,0) > 0
+		BEGIN
+			
+				SELECT @intFutOptTransactionId = NULL
+
+				SELECT	@intFutOptTransactionId  = intFutOptTransactionId
+				FROM	tblCTPriceFixationDetail 
+				WHERE	intPriceFixationDetailId = @intPriceFixationDetailId 
+
+				IF ISNULL(@intFutOptTransactionId,0) > 0
+				BEGIN
+					UPDATE	tblCTPriceFixationDetail
+					SET		intFutOptTransactionId = NULL
+					WHERE	intPriceFixationDetailId = @intPriceFixationDetailId
+
+					EXEC	uspRKDeleteAutoHedge @intFutOptTransactionId
+				END
+
+				SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId) 
+				FROM	tblCTPriceFixationDetail 
+				WHERE	intPriceFixationId = @intPriceFixationId
+				AND		intPriceFixationDetailId > @intPriceFixationDetailId
+				
+		END
 
 		RETURN
 	END
