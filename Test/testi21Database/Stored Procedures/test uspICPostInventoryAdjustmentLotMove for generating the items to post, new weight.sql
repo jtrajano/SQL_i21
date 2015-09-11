@@ -213,11 +213,12 @@ BEGIN
 		SELECT	
 				intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_25KgBagUOM
+				,intItemUOMId			= @ManualGrains_PoundUOM
 				,dtmDate				= '05/19/2015'
-				,dblQty					= 500.00
-				,dblUOMQty				= @25KgBagUnitQty
-				,dblCost				= 2.50 * @25KgBagUnitQty
+				,dblQty					= 27500.00
+				,dblUOMQty				= @PoundUnitQty
+				,dblCost				=	(500 * 2.5000 * @25KgBagUnitQty) -- Original stock value. 
+											/ (27500.00)					 -- New weight. 				
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 
@@ -295,4 +296,3 @@ BEGIN
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
 END 
-

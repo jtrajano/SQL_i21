@@ -192,11 +192,50 @@ BEGIN
 	)
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ISNULL(NewItemLocation.intItemLocationId, OriginalItemLocation.intItemLocationId) 
-			,intItemUOMId			= ISNULL(NewItemUOM.intItemUOMId, FromStock.intItemUOMId) 
+
+			,intItemUOMId			= 
+									-- Try to use the Lot Weight UOM. 
+									-- If not possible, use the new UOM Id or the source UOM Id. 
+									ISNULL(
+										NewLot.intWeightUOMId
+										,ISNULL(NewItemUOM.intItemUOMId, FromStock.intItemUOMId)
+									) 
+
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= -1 * FromStock.dblQty
-			,dblUOMQty				= ISNULL(NewItemUOM.dblUnitQty, FromStock.dblUOMQty)
-			,dblCost				= ISNULL(Detail.dblNewCost, FromStock.dblCost) 
+
+			,dblQty					= 
+									-- Try to convert the bag into Lot Weight
+									-- If not possible, use the new split lot qty. 
+									-- Or the source qty. 
+									CASE	WHEN NewLot.intWeightUOMId IS NOT NULL THEN 
+												ISNULL(Detail.dblNewSplitLotQuantity, -1 * FromStock.dblQty) 
+												* NewLot.dblWeightPerQty
+											ELSE 
+												ISNULL(Detail.dblNewSplitLotQuantity, -1 * FromStock.dblQty) 
+									END			
+
+			,dblUOMQty				= ISNULL(
+										LotWeightUOM.dblUnitQty 
+										,ISNULL(NewItemUOM.dblUnitQty, FromStock.dblUOMQty)
+									)
+
+			,dblCost				=	
+									-- Try to convert the cost to the cost per Lot Weight. 
+									-- Otherwise, use the new cost or the source cost. 
+									CASE	WHEN NewLot.intWeightUOMId IS NOT NULL THEN
+												(	
+													-1
+													* FromStock.dblQty
+													* ISNULL(Detail.dblNewCost, FromStock.dblCost) 
+												)												
+												/ 
+												(
+													ISNULL(Detail.dblNewSplitLotQuantity, -1 * FromStock.dblQty) 
+													* NewLot.dblWeightPerQty 													
+												)
+											ELSE
+												ISNULL(Detail.dblNewCost, FromStock.dblCost) 
+									END 
 			,dblValue				= 0
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
@@ -217,6 +256,8 @@ BEGIN
 			INNER JOIN dbo.tblICItemLocation OriginalItemLocation 
 				ON OriginalItemLocation.intLocationId = Header.intLocationId 
 				AND OriginalItemLocation.intItemId = Detail.intItemId
+			INNER JOIN dbo.tblICLot Lot
+				ON Lot.intLotId = FromStock.intLotId
 			LEFT JOIN dbo.tblICItemLocation NewItemLocation 
 				ON NewItemLocation.intLocationId = Detail.intNewLocationId
 				AND NewItemLocation.intItemId = Detail.intItemId
@@ -226,6 +267,10 @@ BEGIN
 			LEFT JOIN dbo.tblICItemUOM NewItemUOM
 				ON NewItemUOM.intItemUOMId = Detail.intNewItemUOMId
 				AND NewItemUOM.intItemId = Detail.intItemId
+			LEFT JOIN dbo.tblICItemUOM LotWeightUOM 
+				ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId
+			LEFT JOIN dbo.tblICLot NewLot
+				ON NewLot.intLotId = Detail.intNewLotId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 			AND ISNULL(FromStock.ysnIsUnposted, 0) = 0
 			AND FromStock.strBatchId = @strBatchId
