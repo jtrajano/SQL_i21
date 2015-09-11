@@ -269,9 +269,10 @@ BEGIN
 				[aptrx_user_id]      		,
 				[aptrx_user_rev_dt]			,
 				[A4GLIdentity]				,
-				[intBillId]					
+				[intBillId]					,
+				[ysnInsertedToAPIVC]
 			)
-			OUTPUT inserted.A4GLIdentity, inserted.aptrx_ivc_no INTO #ReInsertedToaptrxmst
+			OUTPUT inserted.A4GLIdentity INTO #ReInsertedToaptrxmst
 			SELECT
 				[aptrx_vnd_no]			=	A.[aptrx_vnd_no]		,
 				[aptrx_ivc_no]			=	CASE WHEN DuplicateDataBackup.aptrx_ivc_no IS NOT NULL THEN dbo.fnTrim(A.[aptrx_ivc_no]) + ''-DUP'' ELSE A.aptrx_ivc_no END,
@@ -304,7 +305,8 @@ BEGIN
 				[aptrx_user_id]     	=	A.[aptrx_user_id]		,
 				[aptrx_user_rev_dt]		=	A.[aptrx_user_rev_dt]	,	
 				[A4GLIdentity]			=	A.[A4GLIdentity]		,
-				[intBillId]				=	B.intBillId
+				[intBillId]				=	B.intBillId				,
+				[ysnInsertedToAPIVC]	=	0
 			FROM aptrxmst A
 			INNER JOIN #InsertedUnpostedBill B
 				ON A.A4GLIdentity = B.A4GLIdentity
@@ -413,7 +415,8 @@ BEGIN
 					[apegl_gl_amt]		=	A.[apegl_gl_amt]		,
 					[apegl_gl_un]		=	A.[apegl_gl_un]			,
 					[A4GLIdentity]		=	A.[A4GLIdentity]		,
-					[intBillDetailId]	=	C.intBillDetailId
+					[intBillDetailId]	=	C.intBillDetailId		,
+					[aptrx_ivc_no_header]	=	B.aptrx_ivc_no
 				FROM apeglmst A
 				INNER JOIN aptrxmst  B
 				ON B.aptrx_ivc_no = A.apegl_ivc_no 
@@ -455,7 +458,7 @@ BEGIN
 				[A4GLIdentity]		,
 				[intBillDetailId]	
 			)
-			OUTPUT inserted.A4GLIdentity INTO #ReInsertedToapeglmst;
+			OUTPUT inserted.A4GLIdentity, sourceData.aptrx_ivc_no_header INTO #ReInsertedToapeglmst;
 
 			SET @totalInsertedTBLAPEGLMST = @@ROWCOUNT;
 			SET IDENTITY_INSERT tblAPapeglmst OFF
