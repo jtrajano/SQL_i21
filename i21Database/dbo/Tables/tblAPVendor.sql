@@ -30,6 +30,7 @@
 	[ysnDeleted] BIT NULL DEFAULT 0,
 	[dtmDateDeleted] DATETIME NULL,
 	[ysnOneBillPerPayment]	BIT NULL DEFAULT 0,
+	[strFLOId]						  NVARCHAR (100)   COLLATE Latin1_General_CI_AS NULL,	
 	[intApprovalListId] INT NULL,
     CONSTRAINT [PK_dbo.tblAPVendor] PRIMARY KEY CLUSTERED ([intEntityVendorId] ASC),
     CONSTRAINT [FK_dbo.tblAPVendor_dbo.tblEntities_intEntityId] FOREIGN KEY ([intEntityVendorId]) REFERENCES [dbo].[tblEntity] ([intEntityId]) ON DELETE CASCADE,

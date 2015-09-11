@@ -78,6 +78,7 @@
 	[dblMonthlyBudget]                NUMERIC (18, 6) DEFAULT ((0)) NOT NULL,
 	[intNoOfPeriods]				  INT			  NULL,
 	[dtmBudgetBeginDate]			  DATETIME			NULL,
+	[strFLOId]						  NVARCHAR (100)   COLLATE Latin1_General_CI_AS NULL,	
     [intConcurrencyId]                INT             CONSTRAINT [DF_tblARCustomer_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     CONSTRAINT [PK_tblARCustomer] PRIMARY KEY CLUSTERED ([intEntityCustomerId] ASC),	
     CONSTRAINT [FK_tblARCustomer_tblARAccountStatus] FOREIGN KEY ([intAccountStatusId]) REFERENCES [dbo].[tblARAccountStatus] ([intAccountStatusId]),

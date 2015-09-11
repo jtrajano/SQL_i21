@@ -54,7 +54,8 @@ SELECT
 	B.intApprovalListId,
 	C.intFreightTermId,
 	H.strPaymentMethod,
-	B.ysnOneBillPerPayment
+	B.ysnOneBillPerPayment,
+	B.strFLOId
 FROM
 		dbo.tblEntity A
 	INNER JOIN dbo.tblAPVendor B

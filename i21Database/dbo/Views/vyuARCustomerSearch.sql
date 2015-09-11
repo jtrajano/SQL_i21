@@ -34,6 +34,7 @@ SELECT
 ,strSalespersonId =  case when ISNULL(S.strSalespersonId,'') = '' then T.strEntityNo else S.strSalespersonId end
 ,ysnPORequired
 ,Cus.strVatNumber
+,Cus.strFLOId
 FROM tblEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityCustomerId]
 LEFT JOIN tblEntityToContact as CusToCon ON Cus.intEntityCustomerId = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1
