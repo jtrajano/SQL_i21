@@ -46,6 +46,8 @@ BEGIN
 			CREATE NONCLUSTERED INDEX [IX_tmpInsertedUnpostedBill_intBillId] ON #InsertedUnpostedBill([intBillId]);
 			CREATE TABLE #InsertedUnpostedBillDetail(intBillDetailId INT PRIMARY KEY CLUSTERED, A4GLIdentity INT)
 			CREATE NONCLUSTERED INDEX [IX_tmpInsertedUnpostedBillDetail_intBillDetailId] ON #InsertedUnpostedBillDetail([intBillDetailId]);
+			CREATE TABLE #ReInsertedToaptrxmst(intA4GLIdentity INT)
+			CREATE TABLE #ReInsertedToapeglmst(intA4GLIdentity INT)
 
 			SELECT @userLocation = A.intCompanyLocationId FROM tblSMCompanyLocation A
 					INNER JOIN tblSMUserSecurity B ON A.intCompanyLocationId = B.intCompanyLocationId
@@ -233,7 +235,7 @@ BEGIN
 
 			SET @totalInsertedBillDetail = (SELECT COUNT(*) FROM #InsertedUnpostedBillDetail)
 
-			--BACK UP apivcmst
+			--BACK UP aptrxmst
 			SET IDENTITY_INSERT tblAPaptrxmst ON
 			INSERT INTO tblAPaptrxmst(
 				[aptrx_vnd_no]				,
@@ -269,6 +271,7 @@ BEGIN
 				[A4GLIdentity]				,
 				[intBillId]					
 			)
+			OUTPUT inserted.A4GLIdentity INTO #ReInsertedToaptrxmst
 			SELECT
 				[aptrx_vnd_no]			=	A.[aptrx_vnd_no]		,
 				[aptrx_ivc_no]			=	CASE WHEN DuplicateDataBackup.aptrx_ivc_no IS NOT NULL THEN dbo.fnTrim(A.[aptrx_ivc_no]) + ''-DUP'' ELSE A.aptrx_ivc_no END,
@@ -327,6 +330,86 @@ BEGIN
 			SET @totalInsertedTBLAPTRXMST = @@ROWCOUNT;
 			SET IDENTITY_INSERT tblAPaptrxmst OFF
 
+			--INSERT IMPORTED RECORDS TO apivcmst TO HANDLE DUPLICATE ON ORIGIN SIDE
+			DECLARE @totalInsertedapivcmst INT, @totalUpdatedysnInsertedToAPIVC INT;
+			INSERT INTO apivcmst(
+				[apivc_vnd_no]				,
+				[apivc_ivc_no]				,
+				[apivc_sys_rev_dt]   		,
+				[apivc_sys_time]     		,
+				[apivc_cbk_no]       		,
+				[apivc_chk_no]       		,
+				[apivc_trans_type]   		,
+				[apivc_batch_no]     		,
+				[apivc_pur_ord_no]   		,
+				[apivc_po_rcpt_seq]  		,
+				[apivc_ivc_rev_dt]   		,
+				[apivc_disc_rev_dt]  		,
+				[apivc_due_rev_dt]   		,
+				[apivc_chk_rev_dt]   		,
+				[apivc_gl_rev_dt]    		,
+				[apivc_disc_pct]     		,
+				[apivc_orig_amt]     		,
+				[apivc_disc_amt]     		,
+				[apivc_wthhld_amt]   		,
+				[apivc_net_amt]      		,
+				[apivc_1099_amt]     		,
+				[apivc_comment]      		,
+				[apivc_orig_type]    		,
+				[apivc_name]         		,
+				[apivc_recur_yn]     		,
+				[apivc_currency]     		,
+				[apivc_currency_rt]  		,
+				[apivc_currency_cnt] 		,
+				[apivc_user_id]      		,
+				[apivc_user_rev_dt]			
+			)
+			SELECT
+				[apivc_vnd_no]			=	A.[aptrx_vnd_no]		,
+				[apivc_ivc_no]			=	A.[aptrx_ivc_no],
+				[apivc_sys_rev_dt]  	=	A.[aptrx_sys_rev_dt]	,
+				[apivc_sys_time]    	=	A.[aptrx_sys_time]		,
+				[apivc_cbk_no]      	=	A.[aptrx_cbk_no]		,
+				[apivc_chk_no]      	=	A.[aptrx_chk_no]		,
+				[apivc_trans_type]  	=	A.[aptrx_trans_type]	,
+				[apivc_batch_no]    	=	A.[aptrx_batch_no]		,
+				[apivc_pur_ord_no]  	=	A.[aptrx_pur_ord_no]	,
+				[apivc_po_rcpt_seq] 	=	A.[aptrx_po_rcpt_seq]	,
+				[apivc_ivc_rev_dt]  	=	A.[aptrx_ivc_rev_dt]	,
+				[apivc_disc_rev_dt] 	=	A.[aptrx_disc_rev_dt]	,
+				[apivc_due_rev_dt]  	=	A.[aptrx_due_rev_dt]	,
+				[apivc_chk_rev_dt]  	=	A.[aptrx_chk_rev_dt]	,
+				[apivc_gl_rev_dt]   	=	A.[aptrx_gl_rev_dt]		,
+				[apivc_disc_pct]    	=	A.[aptrx_disc_pct]		,
+				[apivc_orig_amt]    	=	A.[aptrx_orig_amt]		,
+				[apivc_disc_amt]    	=	A.[aptrx_disc_amt]		,
+				[apivc_wthhld_amt]  	=	A.[aptrx_wthhld_amt]	,
+				[apivc_net_amt]     	=	A.[aptrx_net_amt]		,
+				[apivc_1099_amt]    	=	A.[aptrx_1099_amt]		,
+				[apivc_comment]     	=	A.[aptrx_comment]		,
+				[apivc_orig_type]   	=	A.[aptrx_orig_type]		,
+				[apivc_name]        	=	A.[aptrx_name]			,
+				[apivc_recur_yn]    	=	A.[aptrx_recur_yn]		,
+				[apivc_currency]    	=	A.[aptrx_currency]		,
+				[apivc_currency_rt] 	=	A.[aptrx_currency_rt]	,
+				[apivc_currency_cnt]	=	A.[aptrx_currency_cnt]	,
+				[apivc_user_id]     	=	A.[aptrx_user_id]		,
+				[apivc_user_rev_dt]		=	A.[aptrx_user_rev_dt]	
+			FROM tblAPaptrxmst A
+			WHERE A.A4GLIdentity IN (SELECT intA4GLIdentity FROM #ReInsertedToaptrxmst)
+
+			SET @totalInsertedapivcmst = @@ROWCOUNT;
+
+			UPDATE A
+				SET A.[ysnInsertedToAPIVC] = 1
+			FROM tblAPaptrxmst A
+			WHERE A.A4GLIdentity IN (SELECT intA4GLIdentity FROM #ReInsertedToaptrxmst)
+
+			SET @totalUpdatedysnInsertedToAPIVC = @@ROWCOUNT;
+
+			IF @totalInsertedTBLAPTRXMST != @totalInsertedapivcmst RAISERROR(''Unexpected number of records to re-insert in apivcmst'', 16, 1);
+			IF @totalInsertedTBLAPTRXMST != @totalUpdatedysnInsertedToAPIVC RAISERROR(''Unexpected number of records to update in tblAPaptrxmst'', 16, 1);
+
 			--BACK UP apeglmst
 			SET IDENTITY_INSERT tblAPapeglmst ON
 			MERGE INTO tblAPapeglmst AS destination
@@ -358,7 +441,7 @@ BEGIN
 			) AS sourceData
 			ON (1=0)
 			WHEN NOT MATCHED THEN
-			INSERT(
+			INSERT (
 				[apegl_cbk_no]		,
 				[apegl_trx_ind]		,
 				[apegl_vnd_no]		,
@@ -383,9 +466,41 @@ BEGIN
 				[apegl_gl_un]		,
 				[A4GLIdentity]		,
 				[intBillDetailId]	
-			);
+			)
+			OUTPUT inserted.A4GLIdentity INTO #ReInsertedToapeglmst;
+
 			SET @totalInsertedTBLAPEGLMST = @@ROWCOUNT;
 			SET IDENTITY_INSERT tblAPapeglmst OFF
+
+			--REINSERT RECORD FROM apeglmst to aphglmst FOR ORIGIN PURPOSE
+			DECLARE @totalReinsertedaphglmst INT;
+			INSERT INTO aphglmst(
+				[aphgl_cbk_no]		,
+				[aphgl_trx_ind]		,
+				[aphgl_vnd_no]		,
+				[aphgl_ivc_no]		,
+				[aphgl_dist_no]		,
+				[aphgl_alt_cbk_no]	,
+				[aphgl_gl_acct]		,
+				[aphgl_gl_amt]		,
+				[aphgl_gl_un]		
+			)
+			SELECT 
+				[apegl_cbk_no]		,
+				[apegl_trx_ind]		,
+				[apegl_vnd_no]		,
+				[apegl_ivc_no]		,
+				[apegl_dist_no]		,
+				[apegl_alt_cbk_no]	,
+				[apegl_gl_acct]		,
+				[apegl_gl_amt]		,
+				[apegl_gl_un]		
+			FROM apelgmst A
+			WHERE A.A4GLIdentity IN (SELECT intA4GLIdentity FROM #ReInsertedToapeglmst)
+
+			SET @totalReinsertedaphglmst = @@ROWCOUNT;
+
+			IF @totalReinsertedaphglmst != @totalInsertedTBLAPEGLMST RAISERROR(''Unexpected number of records inserted to aphglmst'',16, 1);
 
 			SET @totalImported = (SELECT COUNT(*) FROM #InsertedUnpostedBill)
 
