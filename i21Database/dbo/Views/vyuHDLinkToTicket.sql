@@ -7,6 +7,9 @@
 		,strLinkToTicketAssignee=tblEntity.strName
 		,strLinkToTicketStatus=tblHDTicketStatus.strStatus
 		,tblHDTicket.intCustomerId
+		,tblHDTicketStatus.strBackColor
+		,tblHDTicketStatus.strFontColor
+		,tblHDTicketStatus.strIcon
 	from
 		tblHDTicket
 		,tblEntity
