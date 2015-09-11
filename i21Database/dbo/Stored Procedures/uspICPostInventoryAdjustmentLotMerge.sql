@@ -198,18 +198,19 @@ BEGIN
 									-- Try to use the Lot Weight UOM. 
 									-- If not possible, use the new UOM Id or the source UOM Id. 
 									ISNULL(
-										Lot.intWeightUOMId
+										NewLot.intWeightUOMId
 										,ISNULL(NewItemUOM.intItemUOMId, FromStock.intItemUOMId)
 									) 
 
 			,dtmDate				= Header.dtmAdjustmentDate
+
 			,dblQty					= 
 									-- Try to convert the bag into Lot Weight
 									-- If not possible, use the new split lot qty. 
 									-- Or the source qty. 
-									CASE	WHEN Lot.intWeightUOMId IS NOT NULL THEN 
+									CASE	WHEN NewLot.intWeightUOMId IS NOT NULL THEN 
 												ISNULL(Detail.dblNewSplitLotQuantity, -1 * FromStock.dblQty) 
-												* Lot.dblWeightPerQty
+												* NewLot.dblWeightPerQty
 											ELSE 
 												ISNULL(Detail.dblNewSplitLotQuantity, -1 * FromStock.dblQty) 
 									END			
@@ -222,13 +223,16 @@ BEGIN
 			,dblCost				=	
 									-- Try to convert the cost to the cost per Lot Weight. 
 									-- Otherwise, use the new cost or the source cost. 
-									CASE WHEN Lot.intWeightUOMId IS NOT NULL THEN
-												dbo.fnCalculateUnitCost (
-													dbo.fnCalculateUnitCost (
-														ISNULL(Detail.dblNewCost, FromStock.dblCost) 
-														,FromStock.dblUOMQty
-													)
-													, LotWeightUOM.dblUnitQty
+									CASE	WHEN NewLot.intWeightUOMId IS NOT NULL THEN
+												(	
+													-1
+													* FromStock.dblQty
+													* ISNULL(Detail.dblNewCost, FromStock.dblCost) 
+												)												
+												/ 
+												(
+													ISNULL(Detail.dblNewSplitLotQuantity, -1 * FromStock.dblQty) 
+													* NewLot.dblWeightPerQty 													
 												)
 											ELSE
 												ISNULL(Detail.dblNewCost, FromStock.dblCost) 
@@ -266,6 +270,8 @@ BEGIN
 				AND NewItemUOM.intItemId = Detail.intItemId
 			LEFT JOIN dbo.tblICItemUOM LotWeightUOM 
 				ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId
+			LEFT JOIN dbo.tblICLot NewLot
+				ON NewLot.intLotId = Detail.intNewLotId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 			AND ISNULL(FromStock.ysnIsUnposted, 0) = 0
 			AND FromStock.strBatchId = @strBatchId
