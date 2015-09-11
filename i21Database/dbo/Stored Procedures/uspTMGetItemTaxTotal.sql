@@ -53,6 +53,7 @@ DECLARE @ItemTaxes AS TABLE(
 ,ysnCheckoffTax			BIT
 ,strTaxCode				NVARCHAR(30)
 ,ysnTaxExempt			BIT
+,strTaxGroup			NVARCHAR(100)
 )
 
 DECLARE @ZeroDecimal	DECIMAL(18,6)
@@ -75,7 +76,8 @@ INSERT INTO @ItemTaxes (
 	,[ysnSeparateOnInvoice]
 	,[ysnCheckoffTax]
 	,[strTaxCode]
-	,ysnTaxExempt	
+	,[ysnTaxExempt]
+	,[strTaxGroup]
 )
 
 EXEC dbo.[uspARGetItemTaxes]  
