@@ -2377,6 +2377,8 @@
     <None Include="Scripts\Post-Deployment\TM\2_DataTransferAndCorrection.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDeleteAutoHedge.sql" />
     <Build Include="dbo\Stored Procedures\uspRKAutoHedge.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetLotQuality.sql" />
+    <Build Include="dbo\Stored Procedures\uspQMGetLotQualityCount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
