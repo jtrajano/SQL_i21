@@ -22,6 +22,9 @@ AS
 			CD.strItemNo,
 			CD.strCustomerContract,
 			IsNull(CD.dblBalance, 0) as dblBalance,
-			CD.ysnAllowedToShow,
+			CASE WHEN (((IsNull(CD.dblBalance, 0) - IsNull(CD.dblScheduleQty, 0) > 0) Or (CD.ysnUnlimitedQuantity = 1)) or (CD.ysnAllowedToShow = 1))
+				THEN CAST(1 as Bit)
+				ELSE CAST (0 as Bit)
+				END as ysnAllowedToShow,
 			CD.ysnUnlimitedQuantity
 	FROM vyuCTContractDetailView 		CD
