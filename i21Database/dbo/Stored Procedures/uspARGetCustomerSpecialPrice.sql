@@ -29,6 +29,7 @@ AS
 			,NULL
 			,NULL
 			,NULL
+			,NULL
 			,0
 			,1
 			,@VendorId
