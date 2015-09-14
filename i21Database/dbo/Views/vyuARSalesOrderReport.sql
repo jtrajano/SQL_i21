@@ -31,7 +31,8 @@ SELECT SO.intSalesOrderId
 	 , SO.dtmDueDate
 	 , FT.strFreightTerm
 	 , strSplitName = ES.strDescription
-	 , SO.strComments
+	 , strSOHeaderComment = SO.strComments
+	 , strSOFooterComment = [dbo].fnARGetInvoiceFooterComment(SO.intCompanyLocationId, SO.intEntityCustomerId, 'Sales Order Footer', NULL)
 	 , dblSalesOrderSubtotal = ISNULL(SO.dblSalesOrderSubtotal, 0)
 	 , dblShipping = ISNULL(SO.dblShipping, 0)
 	 , dblTax = ISNULL(SO.dblTax, 0)

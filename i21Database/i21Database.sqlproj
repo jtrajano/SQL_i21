@@ -2304,6 +2304,8 @@
     <Build Include="dbo\Functions\fnARGetItemPrice.sql" />
     <Build Include="dbo\Functions\fnSplitStringWithTrim.sql" />
     <Build Include="dbo\Functions\fnEMCheckEmailDistributionOption.sql" />
+    <None Include="Scripts\Post-Deployment\AR\PrePaymentLinkToInvoiceFix.sql" />
+    <Build Include="dbo\Functions\fnARGetInvoiceFooterComment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
