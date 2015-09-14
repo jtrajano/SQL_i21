@@ -69,12 +69,12 @@ BEGIN
 		INSERT INTO tblICInventoryReceiptItem(intInventoryReceiptId, intItemId, dblOrderQty, dblOpenReceive, dblUnitCost, intUnitMeasureId, intOwnershipType) VALUES (1, @SerializedLotGrains,	30,	20,	13.50, @SerializedLotGrains_BushelUOMId, 1);
 
 		-- @ManualLotGrains: 1
-		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intLotId, strLotNumber, dblQuantity) VALUES (1, 1, 'ManualLot-0001', 3)
-		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intLotId, strLotNumber, dblQuantity) VALUES (1, 1, 'ManualLot-0002', 7)
+		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intItemUnitMeasureId, intLotId, strLotNumber, dblQuantity) VALUES (1, @ManualLotGrains_BushelUOMId, 1, 'ManualLot-0001', 3)
+		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intItemUnitMeasureId, intLotId, strLotNumber, dblQuantity) VALUES (1, @ManualLotGrains_BushelUOMId, 1, 'ManualLot-0002', 7)
 		
 		-- @SerializedLotGrains: 2
-		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intLotId, strLotNumber, dblQuantity) VALUES (2, 2, 'SerialLot-0001', 12)
-		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intLotId, strLotNumber, dblQuantity) VALUES (2, 3, 'SerialLot-0002', 8)
+		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intItemUnitMeasureId, intLotId, strLotNumber, dblQuantity) VALUES (2, @SerializedLotGrains_BushelUOMId, 2, 'SerialLot-0001', 12)
+		INSERT INTO tblICInventoryReceiptItemLot(intInventoryReceiptItemId, intItemUnitMeasureId, intLotId, strLotNumber, dblQuantity) VALUES (2, @SerializedLotGrains_BushelUOMId, 3, 'SerialLot-0002', 8)
 
 		-- Fake data for the lot numbers
 		INSERT INTO tblICLot (intItemLocationId, intItemUOMId, strLotNumber) VALUES (@ManualLotGrains_DefaultLocation, @ManualLotGrains_BushelUOMId, 'ManualLot-0001')
