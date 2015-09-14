@@ -357,6 +357,10 @@ BEGIN
 	   BEGIN
           RAISERROR('Ship To is Invalid', 16, 1); 
        END
+	   if(@dblPrice = 0)
+	   BEGIN
+          RAISERROR('Distribution Price cannot be 0', 16, 1); 
+       END
 	   
     END
 	if(@intCompanyLocationId is NULL)
@@ -375,10 +379,7 @@ BEGIN
 	BEGIN
        RAISERROR('Distribution Units cannot be 0', 16, 1); 
     END
-	if(@dblPrice = 0)
-	BEGIN
-       RAISERROR('Distribution Price cannot be 0', 16, 1); 
-    END
+	
 	
    SET @incDistDetailval = @incDistDetailval + 1;
 END
