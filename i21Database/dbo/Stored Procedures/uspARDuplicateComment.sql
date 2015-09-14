@@ -5,7 +5,6 @@ AS
 	INSERT INTO tblARCommentMaintenance
 		([intCompanyLocationId]
 		,[intEntityCustomerId]
-		,[strCommentCode]
 		,[strCommentDesc]
 		,[strCommentTitle]
 		,[strTransactionType]
@@ -13,7 +12,6 @@ AS
 	SELECT 
 		 [intCompanyLocationId]
 		,[intEntityCustomerId]
-		,[strCommentCode]
 		,[strCommentDesc]
 		,[strCommentTitle]
 		,[strTransactionType]
