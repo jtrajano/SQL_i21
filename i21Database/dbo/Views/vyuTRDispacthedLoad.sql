@@ -26,10 +26,15 @@ LG.intCounterPartyEntityLocationId as intShipToLocationId,
                                     Left Join vyuEMEntity SP on AR.intSalespersonId = SP.intEntityId
 									 where AR.intEntityCustomerId = LG.intCounterPartyEntityId) as strOutboundSalespersonId,
 LG.strCounterPartyLocationName as strShipTo,
-LG.intCounterPartyItemId as intOutboundItemId,
+intOutboundItemId = CASE
+						WHEN LG.intCounterPartyItemId is NULL							        
+						   THEN LG.intItemId
+						WHEN LG.intCounterPartyItemId is NOT NULL
+						   THEN LG.intCounterPartyItemId
+						END,
 LG.dblQuantity as dblOutboundQuantity,
 LG.dblCounterPartyCashPrice as dblOutboundPrice,
-(select strItemNo from tblICItem IC where IC.intItemId = LG.intCounterPartyItemId) as strOutboundItemNo,
+(select strItemNo from tblICItem IC where IC.intItemId = isNULL(LG.intCounterPartyItemId,LG.intItemId)) as strOutboundItemNo,
 LG.strCounterPartyContractNumber as strOutboundContractNumber,
 LG.dtmScheduledDate,
 LG.dtmDispatchedDate,
@@ -43,7 +48,12 @@ LG.strHauler as strShipVia,
                                join tblEntity EM on CP.intSellerId = EM.intEntityId) as strSeller,
 LG.strDriver as strSalespersonId,
 LG.intCounterPartyContractDetailId as intOutboundContractDetailId,
-LG.ysnDirectShip,
+ysnDirectShip = CASE
+						WHEN LG.intCounterPartyEntityId is NULL							        
+						   THEN cast(0 as bit)
+						WHEN LG.intCounterPartyEntityId is NOT NULL
+						   THEN LG.ysnDirectShip
+						END,
 LG.ysnInProgress,
 LG.intCounterPartyLoadId as intOutboundLoadId,
 LG.strExternalLoadNumber as strSupplierLoadNumber,
