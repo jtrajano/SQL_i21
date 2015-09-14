@@ -770,3 +770,7 @@ EXEC sp_addmessage 51187,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51188) EXEC sp_dropmessage 51188, 'us_english'	
 SET @strmessage = 'Pack Type is not configured for the Item ''%s'' for the Work Order ''%s''.'
 EXEC sp_addmessage 51188,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51189) EXEC sp_dropmessage 51189, 'us_english'	
+SET @strmessage = 'Unable to find an open fiscal year period for %s module to match the transaction date.'
+EXEC sp_addmessage 51189,11,@strmessage,'us_english','False'
