@@ -37,7 +37,7 @@ BEGIN TRY
 	
 	IF ISNULL(@strLotNumber,'') = ''
 	BEGIN
-		RAISERROR(51178,16,1)
+		RAISERROR(51192,16,1)
 	END
 	
 	IF @intLotStatusId = @intNewLotStatusId

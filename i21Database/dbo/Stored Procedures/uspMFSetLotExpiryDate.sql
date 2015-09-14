@@ -39,7 +39,7 @@ BEGIN TRY
 	
 	IF ISNULL(@strLotNumber,'') = ''
 	BEGIN
-		RAISERROR(51178,11,1)
+		RAISERROR(51192,11,1)
 	END
 	
 	IF @dtmLotExpiryDate = @dtmNewExpiryDate
@@ -49,7 +49,7 @@ BEGIN TRY
 	
 	IF @dtmLotCreateDate > @dtmNewExpiryDate
 	BEGIN
-		RAISError(51179,11,1)
+		RAISError(51193,11,1)
 	END
 	
 

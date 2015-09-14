@@ -43,17 +43,17 @@ BEGIN TRY
 	
 	IF ISNULL(@strLotNumber,'') = ''
 	BEGIN
-		RAISERROR(51178,11,1)
+		RAISERROR(51192,11,1)
 	END
 	
 	IF @dblLotQty = @dblNewLotQty
 	BEGIN
-		RAISERROR(51176,11,1)
+		RAISERROR(51190,11,1)
 	END
 	
 	IF @strReasonCode IS NULL OR @strReasonCode=''  
 	BEGIN                  
-		RAISERROR(51177,16,1)                           
+		RAISERROR(51191,16,1)                           
 	END  
 
 	EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId,

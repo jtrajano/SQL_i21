@@ -42,7 +42,7 @@ BEGIN TRY
 	
 	IF ISNULL(@strLotNumber,'') = ''
 	BEGIN
-		RAISERROR(51178,11,1)
+		RAISERROR(51192,11,1)
 	END
 	
 	IF @intNewStorageLocationId = @intStorageLocationId
