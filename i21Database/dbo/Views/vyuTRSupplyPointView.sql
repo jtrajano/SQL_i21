@@ -10,9 +10,11 @@ SELECT
    SP.intRackPriceSupplyPointId,
    SP.intEntityLocationId,
    SP.intEntityVendorId,
-   (select top 1 EZ.strZipCode from tblEntityLocation EZ where EZ.intEntityLocationId = SP.intEntityLocationId) as strZipCode
- 	
+   (select top 1 EZ.strZipCode from tblEntityLocation EZ where EZ.intEntityLocationId = SP.intEntityLocationId) as strZipCode,
+   SP.intTaxGroupId,
+   TX.strTaxGroup
+    	
 FROM
     dbo.tblTRSupplyPoint SP	
-
+	LEFT JOIN tblSMTaxGroup TX on SP.intTaxGroupId = TX.intTaxGroupId
 	

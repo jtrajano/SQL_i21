@@ -79,7 +79,15 @@ intOutboundIndexRackPriceSupplyPointId  = CASE
 								     THEN isNull((select top 1 intRackPriceSupplyPointId from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intCounterPartyContractDetailId ),(select top 1 intSupplyPointId from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intCounterPartyContractDetailId )) 
 								  WHEN isNull((select top 1 strIndexType from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intCounterPartyContractDetailId ),0) != 'Fixed' 
 								     THEN null
-								  END
+								  END,
+(select top 1 intTaxGroupId from dbo.tblTRSupplyPoint SP where SP.intEntityLocationId = LG.intEntityLocationId) as intInboundTaxGroupId ,
+(select top 1 TX.strTaxGroup from dbo.tblTRSupplyPoint SP 
+                                     LEFT JOIN tblSMTaxGroup TX on SP.intTaxGroupId = TX.intTaxGroupId
+									 where SP.intEntityLocationId = LG.intEntityLocationId) as strInboundTaxGroup,
+(select top 1 EM.intTaxGroupId from tblEntityLocation EM where EM.intEntityLocationId = LG.intCounterPartyEntityLocationId) as intOutboundTaxGroupId,
+(select top 1 strTaxGroup from tblEntityLocation EM
+                               LEFT JOIN tblSMTaxGroup TX on EM.intTaxGroupId = TX.intTaxGroupId 
+                               where EM.intEntityLocationId = LG.intCounterPartyEntityLocationId) as strOutboundTaxGroup
 from dbo.vyuLGLoadView LG
 where 
  (IsNull(LG.ysnDispatched,0)=1)  and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and
@@ -148,7 +156,14 @@ intOutboundIndexRackPriceSupplyPointId  = CASE
 								     THEN isNull((select top 1 intRackPriceSupplyPointId from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId ),(select top 1 intSupplyPointId from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId )) 
 								  WHEN isNull((select top 1 strIndexType from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId ),0) != 'Fixed' 
 								     THEN null
-								  END
+								  END,
+NULL as intInboundTaxGroupId ,
+NULL as strInboundTaxGroup,
+(select top 1 EM.intTaxGroupId from tblEntityLocation EM where EM.intEntityLocationId = LG.intEntityLocationId) as intOutboundTaxGroupId,
+(select top 1 strTaxGroup from tblEntityLocation EM
+                               LEFT JOIN tblSMTaxGroup TX on EM.intTaxGroupId = TX.intTaxGroupId 
+                               where EM.intEntityLocationId = LG.intEntityLocationId) as strOutboundTaxGroup
+
 from dbo.vyuLGLoadView LG
 where 
  (IsNull(LG.ysnDispatched,0)=1)  and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and
