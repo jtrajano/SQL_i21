@@ -95,6 +95,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			AND intContractDetailId = @ContractDetailId
 			AND ((ISNULL(@OriginalQuantity,0.00) + (dblDetailQuantity - ISNULL(dblScheduleQty,0)) > 0) OR ysnUnlimitedQuantity = 1)
 			AND (dblBalance > 0 OR ysnUnlimitedQuantity = 1)
+			AND strContractStatus NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
 		ORDER BY
 			 dtmStartDate
 			,intContractSeq
@@ -131,6 +132,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			AND CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate,@TransactionDate) AS DATE)
 			AND (((dblDetailQuantity - ISNULL(dblScheduleQty,0)) > 0) OR ysnUnlimitedQuantity = 1)
 			AND (dblBalance > 0 OR ysnUnlimitedQuantity = 1)
+			AND strContractStatus NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
 		ORDER BY
 			 dtmStartDate
 			,intContractSeq
