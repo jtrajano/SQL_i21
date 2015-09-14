@@ -10,6 +10,7 @@
 	,@ContractDetailId		INT
 	,@ContractNumber		NVARCHAR(50)
 	,@ContractSeq			INT
+	,@AvailableQuantity		NUMERIC(18,6)
 	,@OriginalQuantity		NUMERIC(18,6)
 	,@CustomerPricingOnly	BIT
 	,@VendorId				INT
@@ -26,6 +27,7 @@ RETURNS @returntable TABLE
 	,intContractDetailId	INT
 	,strContractNumber		NVARCHAR(50)
 	,intContractSeq			INT
+	,dblAvailableQty        NUMERIC(18,6)
 )
 AS
 BEGIN
@@ -79,6 +81,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			,@ContractDetailId	= intContractDetailId
 			,@ContractNumber	= strContractNumber
 			,@ContractSeq		= intContractSeq
+			,@AvailableQuantity = dblScheduleQty
 		FROM
 			vyuCTContractDetailView
 		WHERE
@@ -100,14 +103,15 @@ DECLARE	 @Price		NUMERIC(18,6)
 		BEGIN
 			SET @Pricing = 'Contracts - Customer Pricing'
 			INSERT @returntable
-			SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+			SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 			RETURN
 		END
 		
 		SET @ContractHeaderId	= NULL
 		SET @ContractDetailId	= NULL
 		SET @ContractNumber		= NULL
-		SET @ContractSeq		= NULL		
+		SET @ContractSeq		= NULL
+		SET @AvailableQuantity  = NULL
 				
 		SELECT TOP 1
 			 @Price				= dblCashPrice
@@ -115,6 +119,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			,@ContractDetailId	= intContractDetailId
 			,@ContractNumber	= strContractNumber
 			,@ContractSeq		= intContractSeq
+			,@AvailableQuantity = dblScheduleQty
 		FROM
 			vyuCTContractDetailView
 		WHERE
@@ -134,7 +139,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 		BEGIN
 			SET @Pricing = 'Contracts - Customer Pricing'
 			INSERT @returntable
-			SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+			SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 			RETURN
 		END	
 		
@@ -542,7 +547,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 SP.strPricing FROM @SpecialGroupPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND SP.intVendorLocationId = TR.intEntityLocationId  WHERE SP.intRackItemId = @ItemId AND SP.intRackVendorId = @ItemVendorId AND (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 
@@ -552,7 +557,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 SP.strPricing FROM @SpecialGroupPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND SP.intVendorLocationId = TR.intEntityLocationId  WHERE SP.intRackItemId = @ItemId AND (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 
@@ -562,7 +567,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 SP.strPricing FROM @SpecialGroupPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND SP.intVendorLocationId = TR.intEntityLocationId  WHERE SP.intRackVendorId = @ItemVendorId AND (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 			
@@ -637,7 +642,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 SP.strPricing FROM @SpecialPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND SP.intVendorLocationId = TR.intEntityLocationId  WHERE SP.intRackItemId = @ItemId AND SP.intRackVendorId = @ItemVendorId AND (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 
@@ -647,7 +652,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND SP.intVendorLocationId = TR.intEntityLocationId  WHERE SP.intRackVendorId = @ItemVendorId AND (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 
@@ -657,7 +662,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing SP INNER JOIN tblTRSupplyPoint TR ON SP.intRackVendorId = TR.intEntityVendorId AND SP.intVendorLocationId = TR.intEntityLocationId  WHERE SP.intRackItemId = @ItemId AND (TR.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL))
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 			
@@ -675,7 +680,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE intCustomerLocationId = @CustomerShipToLocationId AND intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND intItemId = @ItemId)
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END	
 			
@@ -685,7 +690,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE intCustomerLocationId = @CustomerShipToLocationId AND intVendorId = @ItemVendorId AND intItemId = @ItemId)
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 						
@@ -695,7 +700,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE intCustomerLocationId = @CustomerShipToLocationId AND intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 			
@@ -705,7 +710,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE intCustomerLocationId = @CustomerShipToLocationId AND intVendorId = @ItemVendorId  AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 			
@@ -715,7 +720,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE intCustomerLocationId = @CustomerShipToLocationId AND intItemId = @ItemId)
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 			
@@ -725,7 +730,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE intCustomerLocationId = @CustomerShipToLocationId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 			
@@ -742,7 +747,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE intCustomerLocationId = @CustomerShipToLocationId AND intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND intItemId = @ItemId)
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END	
 			
@@ -752,7 +757,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE intCustomerLocationId = @CustomerShipToLocationId AND intVendorId = @ItemVendorId AND intItemId = @ItemId)
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 			
@@ -762,7 +767,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE intCustomerLocationId = @CustomerShipToLocationId AND intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 			
@@ -772,7 +777,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE intCustomerLocationId = @CustomerShipToLocationId AND intVendorId = @ItemVendorId  AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 			
@@ -782,7 +787,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE intCustomerLocationId = @CustomerShipToLocationId AND intItemId = @ItemId)
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 			
@@ -792,7 +797,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE intCustomerLocationId = @CustomerShipToLocationId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 			
@@ -810,7 +815,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND intItemId = @ItemId)
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 				
@@ -820,7 +825,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND intItemId = @ItemId)
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END		
 		--ai. Customer - Vendor - Vendor Location - Item Category (AR>Maintenance>Customers>Setup Tab>Pricing Tab>Special Pricing)
@@ -829,7 +834,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 			
@@ -839,7 +844,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 			
@@ -849,7 +854,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intItemId = @ItemId)
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 		--al. Customer - Item Category (AR>Maintenance>Customers>Setup Tab>Pricing Tab>Special Pricing)
@@ -858,7 +863,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 			
@@ -875,7 +880,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND intItemId = @ItemId)
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 			
@@ -885,7 +890,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND intItemId = @ItemId)
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 			 
@@ -895,7 +900,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND intVendorLocationId = @VendorShipFromLocationId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 			
@@ -905,7 +910,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intVendorId = @ItemVendorId AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 			
@@ -915,7 +920,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND intItemId = @ItemId)
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END
 			
@@ -925,7 +930,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = (SELECT TOP 1 strPricing FROM @SpecialGroupPricing WHERE (ISNULL(intCustomerLocationId,0) = 0) AND (strClass = @ItemCategory AND LEN(@ItemCategory)>0 ))
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END			
 										
@@ -954,7 +959,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 		IF(@Price IS NOT NULL)
 			BEGIN
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END	
 
@@ -985,7 +990,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = 'Inventory - Pricing Level'
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END	
 
@@ -1005,11 +1010,11 @@ DECLARE	 @Price		NUMERIC(18,6)
 			BEGIN
 				SET @Pricing = 'Inventory - Standard Pricing'
 				INSERT @returntable
-				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 				RETURN
 			END							
 	END	
 	INSERT @returntable
-	SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq
+	SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity
 	RETURN				
 END
