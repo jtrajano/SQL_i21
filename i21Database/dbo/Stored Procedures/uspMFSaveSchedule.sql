@@ -78,6 +78,13 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
+
+		IF (SELECT intConcurrencyId FROM tblMFSchedule WHERE intScheduleId = @intScheduleId) <> @intConcurrencyId
+		BEGIN
+			RAISERROR(51194,11,1)
+			RETURN
+		END
+
 		IF @ysnStandard = 1
 		BEGIN
 			UPDATE tblMFSchedule
@@ -175,7 +182,7 @@ BEGIN TRY
 	IF @ysnStandard=1
 	BEGIN
 		UPDATE tblMFWorkOrder 
-		SET intStatusId =(CASE WHEN @intManufacturingCellId =x.intManufacturingCellId THEN x.intStatusId ELSE 1 END)
+		SET intStatusId =(CASE WHEN @intManufacturingCellId =x.intManufacturingCellId THEN (Case When tblMFWorkOrder.intStatusId in (10,11,13) Then tblMFWorkOrder.intStatusId Else x.intStatusId End) ELSE 1 END)
 			,dblQuantity =x.dblQuantity
 			,intManufacturingCellId =x.intManufacturingCellId
 			,intPlannedShiftId =x.intPlannedShiftId

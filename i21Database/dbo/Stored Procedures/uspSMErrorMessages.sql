@@ -775,3 +775,7 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51193) EXEC sp_dropmessa
 SET @strmessage = 'Expiry date cannot be earlier than the create date.'
 EXEC sp_addmessage 51193,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51194) EXEC sp_dropmessage 51194, 'us_english'	
+SET @strmessage = 'The data already updated by another user, Please refresh.'
+EXEC sp_addmessage 51194,11,@strmessage,'us_english','False'
+
