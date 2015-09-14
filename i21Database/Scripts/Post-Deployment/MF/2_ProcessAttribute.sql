@@ -196,6 +196,12 @@ BEGIN
 		,4
 		,'Select ''None'' AS ValueMember,''None'' AS DisplayMember UNION SELECT ''Inventory'' as ValueMember,''Inventory'' as DisplayMember UNION Select ''Finished Good'' as ValueMember,''Finished Good'' as DisplayMember'
 END
+Else
+Begin
+	Update tblMFAttribute
+	Set strSQL='Select ''None'' AS ValueMember,''None'' AS DisplayMember UNION SELECT ''Inventory'' as ValueMember,''Inventory'' as DisplayMember UNION Select ''Finished Good'' as ValueMember,''Finished Good'' as DisplayMember'
+	Where intAttributeId = 9
+End
 GO
 IF NOT EXISTS (
         SELECT *
