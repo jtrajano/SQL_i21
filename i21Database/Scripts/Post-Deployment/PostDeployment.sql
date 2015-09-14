@@ -146,6 +146,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 --Accounts Receivable
 :r .\AR\EntityTableDataFix.sql
+:r .\AR\PrePaymentLinkToInvoiceFix.sql
 :R .\AR\DefaultData\1_CustomerPortalMenu.sql
 :R .\AR\DefaultData\2_SalesOrderDetailDefault.sql
 :R .\AR\DefaultData\3_UpdateInvoiceOrderShipToAndBillTo.sql
