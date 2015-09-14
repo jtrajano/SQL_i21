@@ -719,22 +719,6 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51179) EXEC sp_dropmessa
 SET @strmessage = 'Unable to calculate the tax for %s used in %s.'
 EXEC sp_addmessage 51179,11,@strmessage,'us_english','False'
 
-IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51176) EXEC sp_dropmessage 51176, 'us_english'	
-SET @strmessage = 'Old and new lot qty cannot be same.'
-EXEC sp_addmessage 51176,11,@strmessage,'us_english','False'
-
-IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51177) EXEC sp_dropmessage 51177, 'us_english'	
-SET @strmessage = 'Reason code cannot be blank.'
-EXEC sp_addmessage 51177,11,@strmessage,'us_english','False'
-
-IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51178) EXEC sp_dropmessage 51178, 'us_english'	
-SET @strmessage = 'Supplied lot is not available.'
-EXEC sp_addmessage 51178,11,@strmessage,'us_english','False'
-
-IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51179) EXEC sp_dropmessage 51179, 'us_english'	
-SET @strmessage = 'Expiry date cannot be earlier than the create date.'
-EXEC sp_addmessage 51179,11,@strmessage,'us_english','False'
-
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51180) EXEC sp_dropmessage 51180, 'us_english'	
 SET @strmessage = 'Old and new expiry date cannot be same.'
 EXEC sp_addmessage 51180,11,@strmessage,'us_english','False'
@@ -774,3 +758,20 @@ EXEC sp_addmessage 51188,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51189) EXEC sp_dropmessage 51189, 'us_english'	
 SET @strmessage = 'Unable to find an open fiscal year period for %s module to match the transaction date.'
 EXEC sp_addmessage 51189,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51190) EXEC sp_dropmessage 51190, 'us_english'	
+SET @strmessage = 'Old and new lot qty cannot be same.'
+EXEC sp_addmessage 51190,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51191) EXEC sp_dropmessage 51191, 'us_english'	
+SET @strmessage = 'Reason code cannot be blank.'
+EXEC sp_addmessage 51191,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51192) EXEC sp_dropmessage 51192, 'us_english'	
+SET @strmessage = 'Supplied lot is not available.'
+EXEC sp_addmessage 51192,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51193) EXEC sp_dropmessage 51193, 'us_english'	
+SET @strmessage = 'Expiry date cannot be earlier than the create date.'
+EXEC sp_addmessage 51193,11,@strmessage,'us_english','False'
+
