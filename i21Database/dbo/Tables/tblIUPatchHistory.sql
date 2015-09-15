@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblIUPatchHistory]
 (
-	[intPatchHistoryId] INT NOT NULL PRIMARY KEY, 
+	[intPatchHistoryId] INT NOT NULL PRIMARY KEY IDENTITY, 
     [intVersionId] INT NOT NULL, 
     [strCommitId] NVARCHAR(11) NOT NULL, 
 	[strVersion] NVARCHAR(15) NOT NULL, 
