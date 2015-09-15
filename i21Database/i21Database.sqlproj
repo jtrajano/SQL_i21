@@ -2308,6 +2308,7 @@
     <Build Include="dbo\Stored Procedures\uspICIncreaseReservedQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseInTransitInBoundQty.sql" />
     <Build Include="dbo\User Defined Types\InTransitTableType.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceTaxDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
