@@ -61,6 +61,7 @@ SELECT Load.intLoadId
 		,Load.ysnDispatched
 		,Load.dtmDispatchedDate
 		,strDispatcher = US.strUserName 
+		,CDetail.strCustomerContract
         ,strCounterPartyName = (SELECT Entity1.strName From tblLGLoad L LEFT JOIN tblEntity Entity1 ON Entity1.intEntityId = L.intEntityId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
         ,strCounterPartyAddress = (SELECT EL1.strAddress From tblLGLoad L LEFT JOIN tblEntityLocation EL1 ON EL1.intEntityLocationId = L.intEntityLocationId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
         ,dtmCounterPartyScheduleDate = (SELECT L.dtmScheduledDate FROM tblLGLoad L WHERE L.intLoadNumber = Load.intLoadNumber and L.intPurchaseSale <> Load.intPurchaseSale)

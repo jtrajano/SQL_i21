@@ -79,6 +79,11 @@ BEGIN
 		(SELECT L1.strComments FROM tblLGLoad L1 where L1.intLoadId = @intPLoadId) as strInboundComments,
 		(SELECT L1.strComments FROM tblLGLoad L1 where L1.intLoadId = @intSLoadId)  as strOutboundComments,
 
+		(SELECT L1.strCustomerContract FROM vyuLGLoadView L1 where L1.intLoadId = @intPLoadId) as strPCustomerContract,
+		(SELECT L1.strCustomerContract FROM vyuLGLoadView L1 where L1.intLoadId = @intSLoadId) as strSCustomerContract,
+
+		(SELECT L1.strExternalLoadNumber FROM vyuLGLoadView L1 where L1.intLoadId = @intPLoadId) as strSupplierLoadNumber,
+
 		(SELECT E.strName FROM tblEntity E WHERE E.intEntityId = @intPEntityId) as strVendorName,
 		(SELECT E.strEntityNo FROM tblEntity E WHERE E.intEntityId = @intPEntityId) as strVendorNo,
 		(SELECT E.strEmail FROM tblEntity E WHERE E.intEntityId = @intPEntityId) as strVendorEmail,
@@ -86,6 +91,7 @@ BEGIN
 		(SELECT E.strMobile FROM tblEntity E WHERE E.intEntityId = @intPEntityId) as strVendorMobile,
 		(SELECT E.strPhone FROM tblEntity E WHERE E.intEntityId = @intPEntityId) as strVendorPhone,
 		
+		(SELECT EL.strLocationName FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intPEntityLocationId) as strVendorLocationName,
 		(SELECT EL.strAddress FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intPEntityLocationId) as strVendorAddress,
 		(SELECT EL.strCity  FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intPEntityLocationId) as strVendorCity,
 		(SELECT EL.strCountry  FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intPEntityLocationId) as strVendorCountry,
@@ -99,6 +105,7 @@ BEGIN
 		(SELECT E.strMobile FROM tblEntity E WHERE E.intEntityId = @intSEntityId) as strCustomerMobile,
 		(SELECT E.strPhone FROM tblEntity E WHERE E.intEntityId = @intSEntityId)as strCustomerPhone,
 
+		(SELECT EL.strLocationName FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intSEntityLocationId) as strCustomerLocationName,
 		(SELECT EL.strAddress FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intSEntityLocationId) as strCustomerAddress,
 		(SELECT EL.strCity FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intSEntityLocationId) as strCustomerCity,
 		(SELECT EL.strCountry FROM tblEntityLocation EL WHERE EL.intEntityLocationId = @intSEntityLocationId) as strCustomerCountry,
@@ -112,7 +119,17 @@ BEGIN
 		(SELECT EL.strCountry from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId) as strHaulerCountry,
 		(SELECT EL.strState from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId) as strHaulerState,
 		(SELECT EL.strZipCode from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId) as strHaulerZip,
-		(SELECT EL.strPhone from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId) as strHaulerPhone
+		(SELECT EL.strPhone from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId) as strHaulerPhone,
+
+		L.intDriverEntityId,
+		Driver.strName as strDriver,
+		L.dtmDispatchedDate,
+		L.intDispatcherId,
+		Dispatcher.strFullName as strDispatcher,
+		L.strTrailerNo1,
+		L.strTrailerNo2,
+		L.strTrailerNo3,
+		L.strTruckNo
 
 	FROM		tblLGLoad L
 	LEFT JOIN		tblSMCompanyLocation	CL ON				CL.intCompanyLocationId = L.intCompanyLocationId AND L.intLoadNumber = @intLoadNumber
@@ -121,5 +138,7 @@ BEGIN
 	LEFT JOIN		tblEntity				E	On				E.intEntityId = L.intEntityId
 	LEFT JOIN		tblEntityLocation		EL	On				EL.intEntityLocationId = L.intEntityLocationId
 	LEFT JOIN		tblEntity				Hauler	On			Hauler.intEntityId = L.intHaulerEntityId
+	LEFT JOIN		tblEntity				Driver	On			Driver.intEntityId = L.intDriverEntityId
 	LEFT JOIN	tblLGEquipmentType		Equipment On		Equipment.intEquipmentTypeId = L.intEquipmentTypeId
+	LEFT JOIN	tblSMUserSecurity	Dispatcher On					Dispatcher.intUserSecurityID = L.intDispatcherId
 END
