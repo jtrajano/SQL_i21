@@ -177,7 +177,7 @@ BEGIN
 				,intSourceType          = IntegrationData.intSourceType
 				,intBlanketRelease		= NULL
 				,intLocationId			= IntegrationData.intLocationId
-				,strVendorRefNo			= NULL
+				,strVendorRefNo			= IntegrationData.strVendorRefNo
 				,strBillOfLading		= IntegrationData.strBillOfLadding
 				,intShipViaId			= IntegrationData.intShipViaId
 				,intShipFromId			= IntegrationData.intShipFromId
@@ -248,7 +248,7 @@ BEGIN
 				/*intSourceType*/				,IntegrationData.intSourceType
 				/*intBlanketRelease*/			,NULL
 				/*intLocationId*/				,IntegrationData.intLocationId
-				/*strVendorRefNo*/				,NULL
+				/*strVendorRefNo*/				,IntegrationData.strVendorRefNo
 				/*strBillOfLading*/				,IntegrationData.strBillOfLadding
 				/*intShipViaId*/				,IntegrationData.intShipViaId
 				/*intShipFromId*/				,IntegrationData.intShipFromId
