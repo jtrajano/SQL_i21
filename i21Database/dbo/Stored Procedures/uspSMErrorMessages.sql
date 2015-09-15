@@ -772,7 +772,7 @@ SET @strmessage = 'Supplied lot is not available.'
 EXEC sp_addmessage 51192,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51193) EXEC sp_dropmessage 51193, 'us_english'	
-SET @strmessage = 'Expiry date cannot be earlier than the create date.'
+SET @strmessage = 'Expiry date should be later than the create date.'
 EXEC sp_addmessage 51193,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51194) EXEC sp_dropmessage 51194, 'us_english'	
