@@ -9,10 +9,11 @@ AS
 --1. Filter by Transaction, Location, Customer, Type
 SELECT TOP 1 @strDefaultComment = strCommentDesc
 	FROM tblARCommentMaintenance
-	WHERE ((@strTransactionType IS NULL OR @strTransactionType = '') OR strTransactionType = @strTransactionType)
-	AND ((@intCompanyLocationId IS NULL OR @intCompanyLocationId = 0) OR intCompanyLocationId = @intCompanyLocationId)
-	AND ((@intEntityCustomerId IS NULL OR @intEntityCustomerId = 0) OR intEntityCustomerId = @intEntityCustomerId)	
-	AND ((@strType IS NULL OR @strType = '') OR strType = @strType)
+	WHERE strTransactionType = @strTransactionType
+	AND intCompanyLocationId = @intCompanyLocationId
+	AND intEntityCustomerId = @intEntityCustomerId
+	AND strType = @strType
+	AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
 ORDER BY intCommentId DESC
 
 --2. Filter by Transaction, Location, Customer
@@ -20,9 +21,10 @@ IF @strDefaultComment IS NULL OR @strDefaultComment = ''
 	BEGIN
 		SELECT TOP 1 @strDefaultComment = strCommentDesc
 			FROM tblARCommentMaintenance
-			WHERE ((@strTransactionType IS NULL OR @strTransactionType = '') OR strTransactionType = @strTransactionType)
-			AND ((@intCompanyLocationId IS NULL OR @intCompanyLocationId = 0) OR intCompanyLocationId = @intCompanyLocationId)
-			AND ((@intEntityCustomerId IS NULL OR @intEntityCustomerId = 0) OR intEntityCustomerId = @intEntityCustomerId)	
+			WHERE strTransactionType = @strTransactionType
+			AND intCompanyLocationId = @intCompanyLocationId
+			AND intEntityCustomerId = @intEntityCustomerId
+			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
 		ORDER BY intCommentId DESC
 	END
 ELSE
@@ -33,129 +35,140 @@ IF @strDefaultComment IS NULL OR @strDefaultComment = ''
 	BEGIN
 		SELECT TOP 1 @strDefaultComment = strCommentDesc
 			FROM tblARCommentMaintenance
-			WHERE ((@strTransactionType IS NULL OR @strTransactionType = '') OR strTransactionType = @strTransactionType)
-			AND ((@intCompanyLocationId IS NULL OR @intCompanyLocationId = 0) OR intCompanyLocationId = @intCompanyLocationId)
-			AND ((@strType IS NULL OR @strType = '') OR strType = @strType)
+			WHERE strTransactionType = @strTransactionType
+			AND intCompanyLocationId = @intCompanyLocationId
+			AND strType = @strType
+			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
+		ORDER BY intCommentId DESC
+	END
+ELSE
+	RETURN
+
+--4. Filter by Transaction, Location
+IF @strDefaultComment IS NULL OR @strDefaultComment = ''
+	BEGIN
+		SELECT TOP 1 @strDefaultComment = strCommentDesc
+			FROM tblARCommentMaintenance
+			WHERE strTransactionType = @strTransactionType
+			AND intCompanyLocationId = @intCompanyLocationId
+			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
+		ORDER BY intCommentId DESC
+	END
+ELSE
+	RETURN
+
+--5. Filter by Transaction, Customer, Type
+IF @strDefaultComment IS NULL OR @strDefaultComment = ''
+	BEGIN
+		SELECT TOP 1 @strDefaultComment = strCommentDesc
+			FROM tblARCommentMaintenance
+			WHERE strTransactionType = @strTransactionType
+			AND intEntityCustomerId = @intEntityCustomerId
+			AND strType = @strType
+			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
+		ORDER BY intCommentId DESC
+	END
+ELSE
+	RETURN
+
+--6. Filter by Transaction, Customer
+IF @strDefaultComment IS NULL OR @strDefaultComment = ''
+	BEGIN
+		SELECT TOP 1 @strDefaultComment = strCommentDesc
+			FROM tblARCommentMaintenance
+			WHERE strTransactionType = @strTransactionType	
+			AND intEntityCustomerId = @intEntityCustomerId
+			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
+		ORDER BY intCommentId DESC
+	END
+ELSE
+	RETURN
+
+--7. Filter by Transaction, Type
+IF @strDefaultComment IS NULL OR @strDefaultComment = ''
+	BEGIN
+		SELECT TOP 1 @strDefaultComment = strCommentDesc
+			FROM tblARCommentMaintenance
+			WHERE strTransactionType = @strTransactionType		
+			AND strType = @strType
+			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
+		ORDER BY intCommentId DESC
+	END
+ELSE
+	RETURN
+
+--8. Filter by Transaction
+IF @strDefaultComment IS NULL OR @strDefaultComment = ''
+	BEGIN
+		SELECT TOP 1 @strDefaultComment = strCommentDesc
+			FROM tblARCommentMaintenance
+			WHERE strTransactionType = @strTransactionType
+			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
 		ORDER BY intCommentId DESC
 	END
 ELSE
 	RETURN
 	
---4. Filter by Transaction, Customer, Type
+--9. Filter by Location, Customer, Type
 IF @strDefaultComment IS NULL OR @strDefaultComment = ''
 	BEGIN
 		SELECT TOP 1 @strDefaultComment = strCommentDesc
 			FROM tblARCommentMaintenance
-			WHERE ((@strTransactionType IS NULL OR @strTransactionType = '') OR strTransactionType = @strTransactionType)			
-			AND ((@intEntityCustomerId IS NULL OR @intEntityCustomerId = 0) OR intEntityCustomerId = @intEntityCustomerId)	
-			AND ((@strType IS NULL OR @strType = '') OR strType = @strType)
+			WHERE intCompanyLocationId = @intCompanyLocationId
+			AND intEntityCustomerId = @intEntityCustomerId
+			AND strType = @strType
+			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
 		ORDER BY intCommentId DESC
 	END
 ELSE
 	RETURN
 	
---5. Filter by Location, Customer, Type
+--10. Filter by Location, Customer
 IF @strDefaultComment IS NULL OR @strDefaultComment = ''
 	BEGIN
 		SELECT TOP 1 @strDefaultComment = strCommentDesc
 			FROM tblARCommentMaintenance
-			WHERE ((@intCompanyLocationId IS NULL OR @intCompanyLocationId = 0) OR intCompanyLocationId = @intCompanyLocationId)
-			AND ((@intEntityCustomerId IS NULL OR @intEntityCustomerId = 0) OR intEntityCustomerId = @intEntityCustomerId)	
-			AND ((@strType IS NULL OR @strType = '') OR strType = @strType)
+			WHERE intCompanyLocationId = @intCompanyLocationId
+			AND intEntityCustomerId = @intEntityCustomerId
+			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
 		ORDER BY intCommentId DESC
 	END
 ELSE
 	RETURN
 
---6. Filter by Transaction, Location
+--11. Filter by Location, Type
 IF @strDefaultComment IS NULL OR @strDefaultComment = ''
 	BEGIN
 		SELECT TOP 1 @strDefaultComment = strCommentDesc
 			FROM tblARCommentMaintenance
-			WHERE ((@strTransactionType IS NULL OR @strTransactionType = '') OR strTransactionType = @strTransactionType)
-			AND ((@intCompanyLocationId IS NULL OR @intCompanyLocationId = 0) OR intCompanyLocationId = @intCompanyLocationId)			
+			WHERE intCompanyLocationId = @intCompanyLocationId
+			AND strType = @strType
+			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
 		ORDER BY intCommentId DESC
 	END
 ELSE
 	RETURN
 
---7. Filter by Transaction, Customer
+--12. Filter by Location
 IF @strDefaultComment IS NULL OR @strDefaultComment = ''
 	BEGIN
 		SELECT TOP 1 @strDefaultComment = strCommentDesc
 			FROM tblARCommentMaintenance
-			WHERE ((@strTransactionType IS NULL OR @strTransactionType = '') OR strTransactionType = @strTransactionType)			
-			AND ((@intEntityCustomerId IS NULL OR @intEntityCustomerId = 0) OR intEntityCustomerId = @intEntityCustomerId)	
+			WHERE intCompanyLocationId = @intCompanyLocationId
+			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
 		ORDER BY intCommentId DESC
 	END
 ELSE
 	RETURN
 
---8. Filter by Location, Customer
+--13. Filter by Customer, Type
 IF @strDefaultComment IS NULL OR @strDefaultComment = ''
 	BEGIN
 		SELECT TOP 1 @strDefaultComment = strCommentDesc
 			FROM tblARCommentMaintenance
-			WHERE ((@intCompanyLocationId IS NULL OR @intCompanyLocationId = 0) OR intCompanyLocationId = @intCompanyLocationId)
-			AND ((@intEntityCustomerId IS NULL OR @intEntityCustomerId = 0) OR intEntityCustomerId = @intEntityCustomerId)	
-		ORDER BY intCommentId DESC
-	END
-ELSE
-	RETURN
-
---9. Filter by Transaction, Type
-IF @strDefaultComment IS NULL OR @strDefaultComment = ''
-	BEGIN
-		SELECT TOP 1 @strDefaultComment = strCommentDesc
-			FROM tblARCommentMaintenance
-			WHERE ((@strTransactionType IS NULL OR @strTransactionType = '') OR strTransactionType = @strTransactionType)			
-			AND ((@strType IS NULL OR @strType = '') OR strType = @strType)
-		ORDER BY intCommentId DESC
-	END
-ELSE
-	RETURN
-
---10. Filter by Location, Type
-IF @strDefaultComment IS NULL OR @strDefaultComment = ''
-	BEGIN
-		SELECT TOP 1 @strDefaultComment = strCommentDesc
-			FROM tblARCommentMaintenance
-			WHERE ((@intCompanyLocationId IS NULL OR @intCompanyLocationId = 0) OR intCompanyLocationId = @intCompanyLocationId)
-			AND ((@strType IS NULL OR @strType = '') OR strType = @strType)
-		ORDER BY intCommentId DESC
-	END
-ELSE
-	RETURN
-
---11. Filter by Customer, Type
-IF @strDefaultComment IS NULL OR @strDefaultComment = ''
-	BEGIN
-		SELECT TOP 1 @strDefaultComment = strCommentDesc
-			FROM tblARCommentMaintenance
-			WHERE ((@intEntityCustomerId IS NULL OR @intEntityCustomerId = 0) OR intEntityCustomerId = @intEntityCustomerId)	
-			AND ((@strType IS NULL OR @strType = '') OR strType = @strType)
-		ORDER BY intCommentId DESC
-	END
-ELSE
-	RETURN
-
---12. Filter by Transaction
-IF @strDefaultComment IS NULL OR @strDefaultComment = ''
-	BEGIN
-		SELECT TOP 1 @strDefaultComment = strCommentDesc
-			FROM tblARCommentMaintenance
-			WHERE ((@strTransactionType IS NULL OR @strTransactionType = '') OR strTransactionType = @strTransactionType)			
-		ORDER BY intCommentId DESC
-	END
-ELSE
-	RETURN
-
---13. Filter by Location
-IF @strDefaultComment IS NULL OR @strDefaultComment = ''
-	BEGIN
-		SELECT TOP 1 @strDefaultComment = strCommentDesc
-			FROM tblARCommentMaintenance
-			WHERE ((@intCompanyLocationId IS NULL OR @intCompanyLocationId = 0) OR intCompanyLocationId = @intCompanyLocationId)
+			WHERE intEntityCustomerId = @intEntityCustomerId
+			AND strType = @strType
+			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
 		ORDER BY intCommentId DESC
 	END
 ELSE
@@ -166,7 +179,8 @@ IF @strDefaultComment IS NULL OR @strDefaultComment = ''
 	BEGIN
 		SELECT TOP 1 @strDefaultComment = strCommentDesc
 			FROM tblARCommentMaintenance
-			WHERE ((@intEntityCustomerId IS NULL OR @intEntityCustomerId = 0) OR intEntityCustomerId = @intEntityCustomerId)	
+			WHERE intEntityCustomerId = @intEntityCustomerId
+			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
 		ORDER BY intCommentId DESC
 	END
 ELSE
@@ -177,7 +191,8 @@ IF @strDefaultComment IS NULL OR @strDefaultComment = ''
 	BEGIN
 		SELECT TOP 1 @strDefaultComment = strCommentDesc
 			FROM tblARCommentMaintenance
-			WHERE ((@strType IS NULL OR @strType = '') OR strType = @strType)
+			WHERE strType = @strType
+			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
 		ORDER BY intCommentId DESC
 	END
 ELSE

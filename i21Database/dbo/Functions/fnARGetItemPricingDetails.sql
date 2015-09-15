@@ -81,7 +81,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			,@ContractDetailId	= intContractDetailId
 			,@ContractNumber	= strContractNumber
 			,@ContractSeq		= intContractSeq
-			,@AvailableQuantity = dblScheduleQty
+			,@AvailableQuantity = dblAvailableQty
 		FROM
 			vyuCTContractDetailView
 		WHERE
@@ -120,7 +120,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			,@ContractDetailId	= intContractDetailId
 			,@ContractNumber	= strContractNumber
 			,@ContractSeq		= intContractSeq
-			,@AvailableQuantity = dblScheduleQty
+			,@AvailableQuantity = dblAvailableQty
 		FROM
 			vyuCTContractDetailView
 		WHERE
@@ -204,6 +204,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 		,ysnConsignable BIT
 		,intRackVendorId INT
 		,intRackItemId INT
+		,intRackItemLocationId INT
 		,intVendorLocationId INT
 		,intCustomerLocationId INT
 		,dblCustomerPrice NUMERIC(18,6)
@@ -224,6 +225,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 		,ysnConsignable
 		,intRackVendorId
 		,intRackItemId
+		,intRackItemLocationId
 		,intVendorLocationId
 		,intCustomerLocationId
 		,dblCustomerPrice
@@ -242,6 +244,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 		,SP.ysnConsignable
 		,SP.intRackVendorId
 		,SP.intRackItemId
+		,SP.intRackLocationId 
 		,SP.intEntityLocationId
 		,SP.intCustomerLocationId
 		,NULL
@@ -424,7 +427,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 									ON vyuTRRackPrice.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId 
 								WHERE tblTRSupplyPoint.intEntityLocationId = intEntityLocationId 
 									AND vyuTRRackPrice.intItemId = intRackItemId
-									AND vyuTRRackPrice.intSupplyPointId = @SupplyPointId 
+									AND ((vyuTRRackPrice.intSupplyPointId = ISNULL(null,0) AND ISNULL(null,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intRackItemLocationId)
 									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE)
 									ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC) + dblDeviation
 		WHERE
@@ -438,7 +441,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 									ON vyuTRRackPrice.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId 
 								WHERE tblTRSupplyPoint.intEntityLocationId = intEntityLocationId 
 									AND vyuTRRackPrice.intItemId = intRackItemId
-									AND vyuTRRackPrice.intSupplyPointId = @SupplyPointId 
+									AND ((vyuTRRackPrice.intSupplyPointId = ISNULL(null,0) AND ISNULL(null,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intRackItemLocationId)
 									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE)
 									ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC)
 		WHERE
@@ -458,6 +461,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			,ysnConsignable BIT
 			,intRackVendorId INT
 			,intRackItemId INT
+			,intRackItemLocationId INT
 			,intVendorLocationId INT
 			,intCustomerLocationId INT
 			,dblCustomerPrice NUMERIC(18,6)
@@ -515,6 +519,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			,ysnConsignable
 			,intRackVendorId
 			,intRackItemId
+			,intRackItemLocationId
 			,intVendorLocationId
 			,intCustomerLocationId
 			,dblCustomerPrice
@@ -533,6 +538,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			,SP.ysnConsignable
 			,SP.intRackVendorId
 			,SP.intRackItemId
+			,SP.intRackItemLocationId
 			,SP.intVendorLocationId
 			,SP.intCustomerLocationId
 			,SP.dblCustomerPrice
@@ -586,6 +592,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			,strLineNote NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			,ysnConsignable BIT
 			,intRackVendorId INT
+			,intRackItemLocationId INT
 			,intRackItemId INT
 			,intVendorLocationId INT
 			,intCustomerLocationId INT
@@ -607,6 +614,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			,ysnConsignable
 			,intRackVendorId
 			,intRackItemId
+			,intRackItemLocationId
 			,intVendorLocationId
 			,intCustomerLocationId
 			,dblCustomerPrice
@@ -625,6 +633,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			,SP.ysnConsignable
 			,SP.intRackVendorId
 			,SP.intRackItemId
+			,SP.intRackItemLocationId 
 			,SP.intVendorLocationId
 			,SP.intCustomerLocationId
 			,SP.dblCustomerPrice
