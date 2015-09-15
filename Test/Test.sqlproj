@@ -848,6 +848,11 @@
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseInTransitInBoundQty for decrease qty.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseInTransitInBoundQty and Stock UOM for decrease qty.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseInTransitInBoundQty and Stock UOM for increase qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseInTransitOutBoundQty for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseInTransitOutBoundQty for increase qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseInTransitOutBoundQty for decrease qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseInTransitOutBoundQty and Stock UOM for increase qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseInTransitOutBoundQty and Stock UOM for decrease qty.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">
