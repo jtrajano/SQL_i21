@@ -115,11 +115,11 @@ BEGIN
 		(SELECT EL.strPhone from tblEntityLocation EL JOIN tblEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId) as strHaulerPhone
 
 	FROM		tblLGLoad L
-	JOIN		tblSMCompanyLocation	CL ON				CL.intCompanyLocationId = L.intCompanyLocationId AND L.intLoadNumber = @intLoadNumber
-	JOIN		tblICItem				Item ON				Item.intItemId = L.intItemId
-	JOIN		tblICUnitMeasure		UOM	ON				UOM.intUnitMeasureId = L.intUnitMeasureId
-	JOIN		tblEntity				E	On				E.intEntityId = L.intEntityId
-	JOIN		tblEntityLocation		EL	On				EL.intEntityLocationId = L.intEntityLocationId
-	JOIN		tblEntity				Hauler	On			Hauler.intEntityId = L.intHaulerEntityId
+	LEFT JOIN		tblSMCompanyLocation	CL ON				CL.intCompanyLocationId = L.intCompanyLocationId AND L.intLoadNumber = @intLoadNumber
+	LEFT JOIN		tblICItem				Item ON				Item.intItemId = L.intItemId
+	LEFT JOIN		tblICUnitMeasure		UOM	ON				UOM.intUnitMeasureId = L.intUnitMeasureId
+	LEFT JOIN		tblEntity				E	On				E.intEntityId = L.intEntityId
+	LEFT JOIN		tblEntityLocation		EL	On				EL.intEntityLocationId = L.intEntityLocationId
+	LEFT JOIN		tblEntity				Hauler	On			Hauler.intEntityId = L.intHaulerEntityId
 	LEFT JOIN	tblLGEquipmentType		Equipment On		Equipment.intEquipmentTypeId = L.intEquipmentTypeId
 END
