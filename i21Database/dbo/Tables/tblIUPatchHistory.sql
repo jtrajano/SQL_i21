@@ -8,5 +8,6 @@
 	[strChangeType] NVARCHAR(15) NULL,
     [strFilePath] NVARCHAR(2000) NULL, 
     [strFileName] NVARCHAR(500) NULL, 
+    [intConcurrencyId] INT NULL, 
     CONSTRAINT [FK_tblIUPatchHistory_tblSMBuildNumber] FOREIGN KEY ([intVersionId]) REFERENCES [tblSMBuildNumber]([intVersionID])
 )
