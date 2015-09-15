@@ -782,3 +782,7 @@ EXEC sp_addmessage 51194,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51195) EXEC sp_dropmessage 51195, 'us_english'	
 SET @strmessage = 'The status of the source and the destination lot differs, cannot merge'
 EXEC sp_addmessage 51195,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51196) EXEC sp_dropmessage 51196, 'us_english'	
+SET @strmessage = 'Weight per unit of the source and the destination lot differs, cannot merge'
+EXEC sp_addmessage 51196,11,@strmessage,'us_english','False'

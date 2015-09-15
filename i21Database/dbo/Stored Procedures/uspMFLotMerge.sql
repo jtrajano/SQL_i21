@@ -17,6 +17,7 @@ BEGIN TRY
 	DECLARE @intSourceId INT
 	DECLARE @intSourceTransactionTypeId INT
 	DECLARE @intLotStatusId INT
+	DECLARE @dblLotWeightPerUnit NUMERIC(16,8)
 		
 	DECLARE @intInventoryAdjustmentId INT
 	DECLARE @TransactionCount INT
@@ -27,6 +28,7 @@ BEGIN TRY
 	DECLARE @intNewStorageLocationId INT	
 	DECLARE @intNewItemUOMId INT
 	DECLARE @intNewLotStatusId INT
+	DECLARE @dblNewLotWeightPerUnit NUMERIC(16,8)
 	DECLARE @strNewLotNumber NVARCHAR(100)
 	DECLARE @dblAdjustByQuantity NUMERIC(16,8)
 	
@@ -36,7 +38,8 @@ BEGIN TRY
 		   @intStorageLocationId = intStorageLocationId, 
 		   @strLotNumber = strLotNumber,
 		   @intLotStatusId = intLotStatusId,
-		   @intNewLocationId = intLocationId
+		   @intNewLocationId = intLocationId,
+		   @dblLotWeightPerUnit = dblWeightPerQty
 	FROM tblICLot WHERE intLotId = @intLotId
 	
 	SELECT @dblAdjustByQuantity = - @dblMergeQty
@@ -46,7 +49,8 @@ BEGIN TRY
 		   @intNewStorageLocationId = intStorageLocationId,
 		   @intNewItemUOMId = intItemUOMId,
 		   @strNewLotNumber = strLotNumber,
-		   @intNewLotStatusId = intLotStatusId
+		   @intNewLotStatusId = intLotStatusId,
+		   @dblNewLotWeightPerUnit = dblWeightPerQty
 	FROM tblICLot WHERE intLotId = @intNewLotId
 		   
 	SELECT @dtmDate = GETDATE()
@@ -61,6 +65,11 @@ BEGIN TRY
 	IF @intNewLotStatusId <> @intLotStatusId
 	BEGIN
 		RAISERROR(51195,11,1)
+	END
+
+	IF @dblNewLotWeightPerUnit <> @dblLotWeightPerUnit
+	BEGIN
+		RAISERROR(51196,11,1)
 	END
 													 
 	EXEC uspICInventoryAdjustment_CreatePostLotMerge @intItemId	= @intItemId,
