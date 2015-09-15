@@ -2305,6 +2305,7 @@
     <Build Include="dbo\Functions\fnEMCheckEmailDistributionOption.sql" />
     <None Include="Scripts\Post-Deployment\AR\PrePaymentLinkToInvoiceFix.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceFooterComment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseReservedQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
