@@ -81,7 +81,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			,@ContractDetailId	= intContractDetailId
 			,@ContractNumber	= strContractNumber
 			,@ContractSeq		= intContractSeq
-			,@AvailableQuantity = dblScheduleQty
+			,@AvailableQuantity = dblAvailableQty
 		FROM
 			vyuCTContractDetailView
 		WHERE
@@ -120,7 +120,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 			,@ContractDetailId	= intContractDetailId
 			,@ContractNumber	= strContractNumber
 			,@ContractSeq		= intContractSeq
-			,@AvailableQuantity = dblScheduleQty
+			,@AvailableQuantity = dblAvailableQty
 		FROM
 			vyuCTContractDetailView
 		WHERE
