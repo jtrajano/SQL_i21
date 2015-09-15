@@ -96,7 +96,7 @@ WHEN NOT MATCHED THEN
 		,Source_Query.intItemUOMId
 		,Source_Query.intSubLocationId
 		,Source_Query.intStorageLocationId
-		,Source_Query.Aggregrate_ReserveQty --CASE WHEN Source_Query.Aggregrate_ReserveQty < 0 THEN 0 ELSE Source_Query.Aggregrate_ReserveQty END
+		,CASE WHEN Source_Query.Aggregrate_ReserveQty < 0 THEN 0 ELSE Source_Query.Aggregrate_ReserveQty END
 		,1	
 	)
 ;
