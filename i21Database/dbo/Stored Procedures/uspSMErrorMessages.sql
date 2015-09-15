@@ -779,3 +779,6 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51194) EXEC sp_dropmessa
 SET @strmessage = 'The data already updated by another user, Please refresh.'
 EXEC sp_addmessage 51194,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51195) EXEC sp_dropmessage 51195, 'us_english'	
+SET @strmessage = 'The status of the source and the destination lot differs, cannot merge'
+EXEC sp_addmessage 51195,11,@strmessage,'us_english','False'

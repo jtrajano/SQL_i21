@@ -26,6 +26,7 @@ BEGIN TRY
 	DECLARE @intNewSubLocationId INT
 	DECLARE @intNewStorageLocationId INT	
 	DECLARE @intNewItemUOMId INT
+	DECLARE @intNewLotStatusId INT
 	DECLARE @strNewLotNumber NVARCHAR(100)
 	DECLARE @dblAdjustByQuantity NUMERIC(16,8)
 	
@@ -44,7 +45,8 @@ BEGIN TRY
 		   @intNewSubLocationId = intSubLocationId ,	
 		   @intNewStorageLocationId = intStorageLocationId,
 		   @intNewItemUOMId = intItemUOMId,
-		   @strNewLotNumber = strLotNumber
+		   @strNewLotNumber = strLotNumber,
+		   @intNewLotStatusId = intLotStatusId
 	FROM tblICLot WHERE intLotId = @intNewLotId
 		   
 	SELECT @dtmDate = GETDATE()
@@ -54,6 +56,11 @@ BEGIN TRY
 	IF ISNULL(@strLotNumber,'') = ''
 	BEGIN
 		RAISERROR(51192,11,1)
+	END
+
+	IF @intNewLotStatusId <> @intLotStatusId
+	BEGIN
+		RAISERROR(51195,11,1)
 	END
 													 
 	EXEC uspICInventoryAdjustment_CreatePostLotMerge @intItemId	= @intItemId,
