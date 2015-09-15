@@ -35,7 +35,12 @@ AS
 			CD.intCompanyLocationId,
 			CASE WHEN CD.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END AS strPurchaseSale,
 			CD.strCommodityDescription as strCommodity,
-			CD.strLocationName
+			CD.strLocationName,
+			CD.strPricingType,
+			CD.dblCashPrice,
+			CD.dblAdjustment,
+			CD.dblScheduleQty,
+			CD.dblBalance
 	FROM 	vyuCTContractDetailView 		CD
 	LEFT JOIN tblICItem Item ON Item.intItemId = CD.intItemId
 	LEFT JOIN tblSMCountry Country ON Country.intCountryID = Item.intOriginId
@@ -80,7 +85,12 @@ AS
 			CD.intCompanyLocationId,
 			CASE WHEN CD.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END AS strPurchaseSale,
 			CD.strCommodityDescription as strCommodity,
-			CD.strLocationName
+			CD.strLocationName,
+			CD.strPricingType,
+			CD.dblCashPrice,
+			CD.dblAdjustment,
+			CD.dblScheduleQty,
+			CD.dblBalance
 	FROM 	vyuCTContractDetailView 		CD
 	LEFT JOIN tblICItem Item ON Item.intItemId = CD.intItemId
 	LEFT JOIN tblSMCountry Country ON Country.intCountryID = Item.intOriginId
