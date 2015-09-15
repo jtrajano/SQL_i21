@@ -2382,6 +2382,8 @@
     <Build Include="dbo\Stored Procedures\uspMFLotSplit.sql" />
     <Build Include="dbo\Tables\tblIUPatchHistory.sql" />
     <Build Include="dbo\Views\vyuIUPatchHistory.sql" />
+    <Build Include="dbo\Tables\tblAPVendorSpecialTax.sql" />
+    <Build Include="dbo\Tables\tblAPVendorTaxException.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
