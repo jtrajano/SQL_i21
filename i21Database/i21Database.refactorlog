@@ -3962,4 +3962,53 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="dblNoOfLots" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="a75bbe6a-2c8e-4aec-a0d4-509ee88a87ff" ChangeDateTime="09/15/2015 01:17:04">
+    <Property Name="ElementName" Value="[dbo].[tblIUPatchHistory].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblIUPatchHistory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intPatchHistoryId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="0bddc6ac-54c1-4158-af73-08bd44b9b4ed" ChangeDateTime="09/15/2015 01:28:27">
+    <Property Name="ElementName" Value="[dbo].[tblIUPatchHistory].[str]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblIUPatchHistory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strVersion" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b10a6b9a-4f27-43df-9612-d021047d7050" ChangeDateTime="09/15/2015 01:29:14">
+    <Property Name="ElementName" Value="[dbo].[tblIUPatchHistory].[strFilePath]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblIUPatchHistory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strFile" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="69cac0a1-b286-477f-917c-e6b7bf9e739a" ChangeDateTime="09/15/2015 01:29:38">
+    <Property Name="ElementName" Value="[dbo].[tblIUPatchHistory].[strFile]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblIUPatchHistory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strFilePath" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="44c28a9f-283a-4822-bbf9-223e44b0148f" ChangeDateTime="09/15/2015 01:36:04">
+    <Property Name="ElementName" Value="[dbo].[FK_tblIUPatchHistory_ToTable]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblIUPatchHistory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblIUPatchHistory_tblSMBuildNumber]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7ed09c91-5ded-4885-931e-4b58ccc9d833" ChangeDateTime="09/15/2015 02:30:59">
+    <Property Name="ElementName" Value="[dbo].[tblIUPatchHistory].[strVersion]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblIUPatchHistory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strStashVersion" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="9b798c9a-9f55-4b9c-8543-c2e60fb9982a" ChangeDateTime="09/15/2015 02:32:11">
+    <Property Name="ElementName" Value="[dbo].[tblIUPatchHistory].[strStashVersion]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblIUPatchHistory]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strVersion" />
+  </Operation>
 </Operations>
