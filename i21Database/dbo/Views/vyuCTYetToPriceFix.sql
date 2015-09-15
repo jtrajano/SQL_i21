@@ -14,7 +14,7 @@ AS
 					strContractType,
 					intEntityId,
 					strEntityName,
-					intCommodityId,
+					CD.intCommodityId,
 					strCommodityDescription,
 					ysnMultiplePriceFixation,
 					dblDetailQuantity AS dblQuantity,
@@ -40,9 +40,11 @@ AS
 					CAST(0 AS INT) AS intLotsFixed,
 					CAST(dblNoOfLots AS INT) AS intBalanceNoOfLots,
 					CAST(0 AS INT) AS intLotsHedged,
-					CAST(NULL AS NUMERIC(8,4)) AS dblFinalPrice
+					CAST(NULL AS NUMERIC(8,4)) AS dblFinalPrice,
+					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId
 
-		FROM		vyuCTContractDetailView 
+		FROM		vyuCTContractDetailView		CD
+		JOIN		tblICCommodityUnitMeasure	CU ON CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1
 		WHERE		intPricingTypeId = 2 
 		AND			ISNULL(ysnMultiplePriceFixation,0) = 0
 		AND			intContractDetailId NOT IN (SELECT intContractDetailId FROM tblCTPriceFixation)
@@ -58,7 +60,7 @@ AS
 					strContractType,
 					intEntityId,
 					strEntityName,
-					intCommodityId,
+					CD.intCommodityId,
 					strCommodityDescription,
 					ysnMultiplePriceFixation,
 					dblHeaderQuantity,
@@ -84,9 +86,11 @@ AS
 					CAST(0 AS INT) AS intLotsFixed,
 					CAST(ROUND(SUM(dblNoOfLots),0)AS INT) AS intBalanceNoOfLots,
 					CAST(0 AS INT) AS intLotsHedged,
-					CAST(NULL AS NUMERIC(8,4)) AS dblFinalPrice
+					CAST(NULL AS NUMERIC(8,4)) AS dblFinalPrice,
+					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId
 
-		FROM		vyuCTContractDetailView 
+		FROM		vyuCTContractDetailView		CD
+		JOIN		tblICCommodityUnitMeasure	CU ON CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1 
 		WHERE		ISNULL(ysnMultiplePriceFixation,0) = 1
 		AND			intContractHeaderId NOT IN (SELECT ISNULL(intContractHeaderId,0) FROM tblCTPriceFixation)
 		GROUP BY	intContractHeaderId,
@@ -95,12 +99,13 @@ AS
 					strContractType,
 					intEntityId,
 					strEntityName,
-					intCommodityId,
+					CD.intCommodityId,
 					strCommodityDescription,
 					ysnMultiplePriceFixation,
 					dblHeaderQuantity,
 					strHeaderUnitMeasure,
-					intSalespersonId
+					intSalespersonId,
+					CU.intCommodityUnitMeasureId
 
 		UNION ALL
 
@@ -113,7 +118,7 @@ AS
 					strContractType,
 					intEntityId,
 					strEntityName,
-					intCommodityId,
+					CD.intCommodityId,
 					strCommodityDescription,
 					ysnMultiplePriceFixation,
 					dblDetailQuantity AS dblQuantity,
@@ -143,10 +148,12 @@ AS
 					PF.intLotsFixed,
 					PF.intTotalLots-intLotsFixed AS intBalanceNoOfLots,
 					PF.intLotsHedged,
-					PF.dblFinalPrice
+					PF.dblFinalPrice,
+					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId
 
 		FROM		tblCTPriceFixation			PF
 		JOIN		vyuCTContractDetailView		CD	ON	CD.intContractDetailId = PF.intContractDetailId
+		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1 
 		WHERE		intPricingTypeId = 2 
 		AND			ISNULL(ysnMultiplePriceFixation,0) = 0
 
@@ -154,14 +161,14 @@ AS
 		
 		SELECT 		PF.intPriceFixationId,
 					CAST (NULL AS INT)			AS	intContractDetailId, 
-					CH.intContractHeaderId,
+					CD.intContractHeaderId,
 					strContractNumber,
 					CAST (NULL AS INT)			AS	intContractSeq,
 					intContractTypeId,
 					strContractType,
 					intEntityId,
 					strEntityName,
-					intCommodityId,
+					CD.intCommodityId,
 					strCommodityDescription,
 					ysnMultiplePriceFixation,
 					dblHeaderQuantity,
@@ -191,18 +198,20 @@ AS
 					PF.intLotsFixed,
 					PF.intTotalLots-PF.intLotsFixed AS intBalanceNoOfLots,
 					PF.intLotsHedged,
-					CAST(NULL AS NUMERIC(8,4)) AS dblFinalPrice
+					CAST(NULL AS NUMERIC(8,4)) AS dblFinalPrice,
+					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId
 		
 		FROM		tblCTPriceFixation			PF
-		JOIN		vyuCTContractDetailView		CH	ON	CH.intContractHeaderId = PF.intContractHeaderId
+		JOIN		vyuCTContractDetailView		CD	ON	CD.intContractHeaderId = PF.intContractHeaderId
+		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1 
 		WHERE		ISNULL(ysnMultiplePriceFixation,0) = 1
-		GROUP BY	CH.intContractHeaderId,
-					CH.strContractNumber,
+		GROUP BY	CD.intContractHeaderId,
+					CD.strContractNumber,
 					intContractTypeId,
 					strContractType,
 					intEntityId,
 					strEntityName,
-					intCommodityId,
+					CD.intCommodityId,
 					strCommodityDescription,
 					ysnMultiplePriceFixation,
 					dblHeaderQuantity,
@@ -211,5 +220,6 @@ AS
 					PF.intLotsFixed,
 					PF.intTotalLots,
 					PF.intLotsHedged,
-					PF.intPriceFixationId
+					PF.intPriceFixationId,
+					CU.intCommodityUnitMeasureId
 	)t

@@ -16,7 +16,7 @@
 	[dblPolRefPrice] NUMERIC(8, 4) NULL,
 	[dblPolPremium] NUMERIC(8, 4) NULL,
 	[dblCashPrice] NUMERIC(9, 4) NULL,
-	[intPriceItemUOMId] INT NOT NULL,
+	[intPricingUOMId] INT NOT NULL,
 	[ysnHedge] BIT,
 	[dblHedgePrice] NUMERIC(8, 4) NULL,
 	[intHedgeFutureMonthId] INT,
@@ -29,7 +29,7 @@
 	CONSTRAINT [FK_tblCTPriceFixationDetail_tblCTPriceFixation_intPriceFixationId] FOREIGN KEY ([intPriceFixationId]) REFERENCES [tblCTPriceFixation]([intPriceFixationId]) ON DELETE CASCADE,
 	
 	CONSTRAINT [FK_tblCTPriceFixationDetail_tblICItemUOM_intQtyItemUOMId_intItemUOMId] FOREIGN KEY ([intQtyItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
-	CONSTRAINT [FK_tblCTPriceFixationDetail_tblICItemUOM_intPriceItemUOMId_intItemUOMId] FOREIGN KEY ([intPriceItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
+	CONSTRAINT [FK_tblCTPriceFixationDetail_tblICCommodityUnitMeasure_intPricingUOMId_intCommodityUnitMeasureId] FOREIGN KEY ([intPricingUOMId]) REFERENCES [tblICCommodityUnitMeasure]([intCommodityUnitMeasureId]),
 	
 	CONSTRAINT [FK_tblCTPriceFixationDetail_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]),
 	CONSTRAINT [FK_tblCTPriceFixationDetail_tblRKFuturesMonth_intFutureMonthId] FOREIGN KEY ([intFutureMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId]),

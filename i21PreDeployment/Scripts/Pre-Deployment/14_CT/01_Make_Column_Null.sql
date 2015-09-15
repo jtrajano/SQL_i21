@@ -189,3 +189,25 @@ GO
 PRINT 'END Drop UQ_tblCTContractHeader_intPurchaseSale_intContractNumber'
 
 GO
+
+GO
+PRINT 'BEGIN Drop FK_tblCTPriceFixation_tblICItemUOM_intAgreedItemUOMId_intItemUOMId'
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE WHERE CONSTRAINT_NAME = 'FK_tblCTPriceFixation_tblICItemUOM_intAgreedItemUOMId_intItemUOMId')
+BEGIN
+	EXEC('
+		ALTER TABLE tblCTPriceFixation
+		DROP CONSTRAINT FK_tblCTPriceFixation_tblICItemUOM_intAgreedItemUOMId_intItemUOMId		
+	');
+END	
+Go
+
+GO
+PRINT 'BEGIN Drop FK_tblCTPriceFixationDetail_tblICItemUOM_intPriceItemUOMId_intItemUOMId'
+IF EXISTS(SELECT * FROM INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE WHERE CONSTRAINT_NAME = 'FK_tblCTPriceFixationDetail_tblICItemUOM_intPriceItemUOMId_intItemUOMId')
+BEGIN
+	EXEC('
+		ALTER TABLE tblCTPriceFixationDetail
+		DROP CONSTRAINT FK_tblCTPriceFixationDetail_tblICItemUOM_intPriceItemUOMId_intItemUOMId		
+	');
+END	
+Go

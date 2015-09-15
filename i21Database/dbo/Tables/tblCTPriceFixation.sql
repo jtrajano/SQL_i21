@@ -2,7 +2,7 @@
 (
 	[intPriceFixationId] INT IDENTITY(1,1) NOT NULL,
 	[intConcurrencyId] INT NOT NULL,
-	[intContractHeaderId] INT NULL, 
+	[intContractHeaderId] INT NOT NULL, 
 	[intContractDetailId] INT NULL,
 	[intOriginalFutureMarketId] INT NOT NULL,
 	[intOriginalFutureMonthId] INT NOT NULL,
@@ -22,9 +22,11 @@
 	[dblRollArb]  NUMERIC(8,4),
 	[dblAdditionalCost]  NUMERIC(8,4),
 	[dblFinalPrice]  NUMERIC(8,4),
+	[intFinalPriceUOMId] INT NOT NULL,
 
     CONSTRAINT [PK_tblCTPriceFixation_intPriceFixationId] PRIMARY KEY CLUSTERED ([intPriceFixationId] ASC),
 	CONSTRAINT [UK_tblCTPriceFixation_intContractDetailId] UNIQUE ([intContractDetailId]),
 	CONSTRAINT [FK_tblCTPriceFixation_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]),
-	CONSTRAINT [FK_tblCTPriceFixation_tblICItemUOM_intAgreedItemUOMId_intItemUOMId] FOREIGN KEY ([intAgreedItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])
+	CONSTRAINT [FK_tblCTPriceFixation_tblICCommodityUnitMeasure_intAgreedItemUOMId_intCommodityUnitMeasureId] FOREIGN KEY ([intAgreedItemUOMId]) REFERENCES [tblICCommodityUnitMeasure]([intCommodityUnitMeasureId]),
+	CONSTRAINT [FK_tblCTPriceFixation_tblICCommodityUnitMeasure_intFinalPriceUOMId_intCommodityUnitMeasureId] FOREIGN KEY ([intFinalPriceUOMId]) REFERENCES [tblICCommodityUnitMeasure]([intCommodityUnitMeasureId])
 )

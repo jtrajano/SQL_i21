@@ -13,6 +13,7 @@
 	[intOldFutureMonthId] INT,
 	[strBuySell] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL ,
 	[dblSpreadAmount] NUMERIC(18,6) NOT NULL,
+	[intSpreadUOMId] INT NOT NULL,
 	[intNoOfLots] INT NOT NULL,
 	[dblCommission] NUMERIC(18,6) NULL,
 	[dblTotalSpread] NUMERIC(18,6) NULL,
@@ -26,5 +27,7 @@
 	CONSTRAINT [FK_tblCTSpreadArbitrage_tblRKFutureMarket_intNewFutureMarketId_intFutureMarketId] FOREIGN KEY ([intNewFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]),
 	CONSTRAINT [FK_tblCTSpreadArbitrage_tblRKFuturesMonth_intNewFutureMonthId_intFutureMonthId] FOREIGN KEY ([intNewFutureMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId]),
 	CONSTRAINT [FK_tblCTSpreadArbitrage_tblRKFutureMarket_intOldFutureMarketId_intFutureMarketId] FOREIGN KEY ([intOldFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]),
-	CONSTRAINT [FK_tblCTSpreadArbitrage_tblRKFuturesMonth_intOldFutureMonthId_intFutureMonthId] FOREIGN KEY ([intOldFutureMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId])
+	CONSTRAINT [FK_tblCTSpreadArbitrage_tblRKFuturesMonth_intOldFutureMonthId_intFutureMonthId] FOREIGN KEY ([intOldFutureMonthId]) REFERENCES [tblRKFuturesMonth]([intFutureMonthId]),
+
+	CONSTRAINT [FK_tblCTSpreadArbitrage_tblICCommodityUnitMeasure_intSpreadUOMId_intCommodityUnitMeasureId] FOREIGN KEY ([intSpreadUOMId]) REFERENCES [tblICCommodityUnitMeasure]([intCommodityUnitMeasureId])
 )
