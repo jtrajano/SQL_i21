@@ -37,6 +37,7 @@ FROM
 		,[strShipVia]				=	E.strShipVia
 		,[strTerm]					=	F.strTerm
 		,[strContractNumber]		=	G1.strContractNumber
+		,[strBillOfLading]			=	tblReceived.strBillOfLading
 		,[intContractHeaderId]		=	G1.intContractHeaderId
 		,[intContractDetailId]		=	G2.intContractDetailId
 		,[intScaleTicketId]			=	NULL
@@ -47,6 +48,7 @@ FROM
 		(
 			SELECT
 				A1.strReceiptNumber
+				,A1.strBillOfLading
 				,B1.intInventoryReceiptItemId
 				,B1.intItemId
 				,B1.intLineNo
@@ -65,6 +67,7 @@ FROM
 			AND B.intPurchaseDetailId = B1.intLineNo
 			GROUP BY
 				A1.strReceiptNumber
+				,A1.strBillOfLading
 				,B1.intInventoryReceiptItemId
 				,B1.intItemId 
 				,B1.dblUnitCost
@@ -113,6 +116,7 @@ FROM
 	,[strShipVia]				=	E.strShipVia
 	,[strTerm]					=	F.strTerm
 	,[strContractNumber]		=	NULL
+	,[strBillOfLading]			=	NULL
 	,[intContractHeaderId]		=	NULL
 	,[intContractDetailId]		=	NULL
 	,[intScaleTicketId]			=	NULL
@@ -157,6 +161,7 @@ FROM
 	,[strShipVia]				=	E.strShipVia
 	,[strTerm]					=	NULL
 	,[strContractNumber]		=	F1.strContractNumber
+	,[strBillOfLading]			=	A.strBillOfLading
 	,[intContractHeaderId]		=	F1.intContractHeaderId
 	,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
 	,[intScaleTicketId]			=	G.intTicketId
@@ -206,6 +211,7 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[strContractNumber]						=	NULL
+		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	NULL
 		,[intScaleTicketId]							=	NULL
 		,[intScaleTicketNumber]						=	NULL
