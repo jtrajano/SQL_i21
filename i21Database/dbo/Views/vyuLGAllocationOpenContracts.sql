@@ -36,7 +36,12 @@ AS
 			CASE WHEN CD.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END AS strPurchaseSale,
 			CD.strCommodityDescription as strCommodity,
 			CD.strLocationName,
-			CAST(CASE WHEN CD.intContractStatusId IN (1,4,5) THEN 1 ELSE 0 END AS BIT) AS ysnAllowedToShow
+			CAST(CASE WHEN CD.intContractStatusId IN (1,4,5) THEN 1 ELSE 0 END AS BIT) AS ysnAllowedToShow,
+			CD.strPricingType,
+			CD.dblCashPrice,
+			CD.dblAdjustment,
+			CD.dblScheduleQty,
+			CD.dblBalance
 
 	FROM 	vyuCTContractDetailView 		CD
 	LEFT JOIN tblICItem Item ON Item.intItemId = CD.intItemId
@@ -83,7 +88,13 @@ AS
 			CASE WHEN CD.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END AS strPurchaseSale,
 			CD.strCommodityDescription as strCommodity,
 			CD.strLocationName,
-			CD.ysnAllowedToShow
+			CD.ysnAllowedToShow,
+			CD.strPricingType,
+			CD.dblCashPrice,
+			CD.dblAdjustment,
+			CD.dblScheduleQty,
+			CD.dblBalance
+
 	FROM 	vyuCTContractDetailView 		CD
 	LEFT JOIN tblICItem Item ON Item.intItemId = CD.intItemId
 	LEFT JOIN tblSMCountry Country ON Country.intCountryID = Item.intOriginId
