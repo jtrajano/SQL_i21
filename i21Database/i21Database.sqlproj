@@ -2301,7 +2301,6 @@
     <Build Include="dbo\Stored Procedures\uspARInsertTransactionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSOInsertTransactionDetail.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryValuation.sql" />
-	<Build Include="dbo\Stored Procedures\uspCTUpdateMultipleScheduleQuantity.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseOnStorageQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInFIFOStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInLIFOStorage.sql" />
