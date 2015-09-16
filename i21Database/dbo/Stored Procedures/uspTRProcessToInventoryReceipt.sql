@@ -54,6 +54,7 @@ BEGIN TRY
 			,ysnFreightInPrice
 			,strActualCostId
 			,intTaxGroupId
+			,strVendorRefNo
 	)	
 	SELECT 
 			strReceiptType = CASE
@@ -113,7 +114,8 @@ BEGIN TRY
 					where RR.strOrigin = 'Terminal' 
 						and HH.strDestination = 'Customer' 
 						and RR.intTransportReceiptId = TR.intTransportReceiptId ) as strActualCostId,
-			TR.intTaxGroupId 
+			TR.intTaxGroupId,
+			TR.strBillOfLadding
 	FROM	tblTRTransportLoad TL JOIN tblTRTransportReceipt TR 
 				ON TR.intTransportLoadId = TL.intTransportLoadId			
 			LEFT JOIN vyuCTContractDetailView CT 
