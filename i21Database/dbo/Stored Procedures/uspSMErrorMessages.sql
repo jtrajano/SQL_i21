@@ -792,3 +792,8 @@ EXEC sp_addmessage 51180,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51181) EXEC sp_dropmessage 51181, 'us_english'	
 SET @strmessage = 'Unable to generate the Inventory Transfer. An error stopped the creation of the inventory transfer.'
 EXEC sp_addmessage 51181,11,@strmessage,'us_english','False'
+
+------------------------------------------------------------------------------------------
+-- NOTE: Please stop adding error message on this sp. 
+-- See: http://inet.irelyserver.com/x/rQFhAg
+------------------------------------------------------------------------------------------
