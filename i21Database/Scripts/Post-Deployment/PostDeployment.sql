@@ -235,5 +235,7 @@ print 'BEGIN POST DEPLOYMENT'
 -- Store Module
 :r .\ST\1_FileFieldMapping_PricebookSale.sql
 
+-- Common
+:r .\Common\ErrorMessages.sql 
 
 print 'END POST DEPLOYMENT'
