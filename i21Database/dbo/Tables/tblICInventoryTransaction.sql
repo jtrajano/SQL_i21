@@ -48,6 +48,7 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 		[intRelatedTransactionId] INT NULL,
 		[strRelatedTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL,
 		[strTransactionForm] NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
+		[intCostingMethod] INT NULL, 
 		[dtmCreated] DATETIME NULL, 
 		[intCreatedUserId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 

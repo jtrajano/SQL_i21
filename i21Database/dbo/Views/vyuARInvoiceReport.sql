@@ -24,20 +24,26 @@ SELECT INV.intInvoiceId
 	 , strShipTo = [dbo].fnARFormatCustomerAddress(NULL, NULL, INV.strShipToLocationName, INV.strShipToAddress, INV.strShipToCity, INV.strShipToState, INV.strShipToZipCode, INV.strShipToCountry)
 	 , strSalespersonName = ESP.strName
 	 , INV.strPONumber
-	 , SO.strBOLNumber
+	 , (CASE WHEN INV.strBOLNumber IS NOT NULL AND LEN(RTRIM(LTRIM(ISNULL(INV.strBOLNumber,'')))) > 0
+			THEN INV.strBOLNumber
+			ELSE SO.strBOLNumber
+		END) AS strBOLNumber
 	 , SV.strShipVia
 	 , T.strTerm
 	 , INV.dtmShipDate
 	 , INV.dtmDueDate
 	 , FT.strFreightTerm
-	 , INV.strDeliverPickup
-	 , INV.strComments
+	 , INV.strDeliverPickup	 
+	 , strInvoiceHeaderComment = INV.strComments
+	 , strInvoiceFooterComment = [dbo].fnARGetInvoiceFooterComment(INV.intCompanyLocationId, INV.intEntityCustomerId, 'Invoice Footer', NULL)
 	 , dblInvoiceSubtotal = ISNULL(INV.dblInvoiceSubtotal, 0)
 	 , dblShipping = ISNULL(INV.dblShipping, 0)
 	 , dblTax = ISNULL(INV.dblTax, 0)
 	 , dblInvoiceTotal = ISNULL(INV.dblInvoiceTotal, 0)
 	 , dblAmountDue = ISNULL(INV.dblAmountDue, 0)
 	 , I.strItemNo
+	 , ID.intInvoiceDetailId
+	 , CH.strContractNumber
 	 , strItemDescription = ID.strItemDescription
 	 , UOM.strUnitMeasure
 	 , dblQtyShipped = ISNULL(ID.dblQtyShipped, 0)
@@ -48,12 +54,19 @@ SELECT INV.intInvoiceId
 	 , dblItemPrice = ISNULL(ID.dblTotal, 0)	 
 	 , strPaid = CASE WHEN ysnPaid = 1 THEN 'Yes' ELSE 'No' END
 	 , strPosted = CASE WHEN INV.ysnPosted = 1 THEN 'Yes' ELSE 'No' END
+	 , IDT.intTaxCodeId
+	 , strTaxCode = SMT.strTaxCode
+	 , dblTaxDetail = IDT.dblTax
+	 , intDetailCount = (SELECT COUNT(*) FROM tblARInvoiceDetail WHERE intInvoiceId = INV.intInvoiceId)
 FROM tblARInvoice INV
 LEFT JOIN (tblARInvoiceDetail ID 
 	LEFT JOIN tblICItem I ON ID.intItemId = I.intItemId 
 	LEFT JOIN vyuARItemUOM UOM ON ID.intItemUOMId = UOM.intItemUOMId AND ID.intItemId = UOM.intItemId
 	LEFT JOIN tblSOSalesOrderDetail SOD ON ID.intSalesOrderDetailId = SOD.intSalesOrderDetailId
-	LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId) ON INV.intInvoiceId = ID.intInvoiceId
+	LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId
+	LEFT JOIN tblARInvoiceDetailTax IDT ON ID.intInvoiceDetailId = IDT.intInvoiceDetailId
+	LEFT JOIN tblSMTaxCode SMT ON IDT.intTaxCodeId = SMT.intTaxCodeId
+	LEFT JOIN tblCTContractHeader CH ON ID.intContractHeaderId = CH.intContractHeaderId) ON INV.intInvoiceId = ID.intInvoiceId
 INNER JOIN (tblARCustomer C 
 	INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = INV.intEntityCustomerId
 INNER JOIN tblSMCompanyLocation L ON INV.intCompanyLocationId = L.intCompanyLocationId

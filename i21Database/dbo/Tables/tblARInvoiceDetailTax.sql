@@ -15,6 +15,7 @@
 	[ysnTaxAdjusted] BIT NULL DEFAULT ((0)), 
 	[ysnSeparateOnInvoice] BIT NULL DEFAULT ((0)), 
 	[ysnCheckoffTax] BIT NULL DEFAULT ((0)), 
+	[ysnTaxExempt] BIT NULL DEFAULT ((0)), 
     [intConcurrencyId] INT CONSTRAINT [DF_tblARInvoiceDetailTax_intConcurrencyId] DEFAULT ((0)) NOT NULL,
 	CONSTRAINT [PK_tblARInvoiceDetailTax_intInvoiceDetailTaxId] PRIMARY KEY CLUSTERED ([intInvoiceDetailTaxId] ASC),
 	CONSTRAINT [FK_tblARInvoiceDetailTax_tblARInvoiceDetail_intInvoiceDetailId] FOREIGN KEY ([intInvoiceDetailId]) REFERENCES [dbo].[tblARInvoiceDetail] ([intInvoiceDetailId]) ON DELETE CASCADE,

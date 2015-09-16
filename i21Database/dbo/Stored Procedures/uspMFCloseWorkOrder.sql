@@ -175,6 +175,7 @@ BEGIN TRY
 			,@strLotNumber
 			,@strBatchId
 			,@intUserId
+			,0
 
 		--EXEC dbo.uspGLBookEntries @GLEntries
 			--,0

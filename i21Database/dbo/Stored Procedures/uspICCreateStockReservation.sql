@@ -10,6 +10,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @ReservationToClear AS ItemReservationTableType
 DECLARE @ItemsToReserveAggregrate AS ItemReservationTableType
 
 INSERT INTO @ItemsToReserveAggregrate (
@@ -37,11 +38,52 @@ SELECT	intItemId
 FROM	@ItemsToReserve
 GROUP  BY intItemId, intItemLocationId, intItemUOMId, intLotId, intTransactionId, strTransactionId, intTransactionTypeId, intSubLocationId, intStorageLocationId
 
--- Clear the list (if it exists)
-DELETE	Reservations
-FROM	dbo.tblICStockReservation Reservations 
-WHERE	intTransactionId = @intTransactionId
-		AND @intTransactionTypeId = @intTransactionTypeId
+-- Clear the existing reserved records. 
+IF EXISTS (
+	SELECT TOP 1 1 
+	FROM	dbo.tblICStockReservation Reservations 
+	WHERE	intTransactionId = @intTransactionId
+			AND @intTransactionTypeId = @intTransactionTypeId	
+)
+BEGIN 
+	INSERT INTO @ReservationToClear (
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,dblQty
+			,intTransactionId
+			,strTransactionId
+			,intTransactionTypeId
+			,intSubLocationId
+			,intStorageLocationId		
+	)
+	SELECT 
+			intItemId
+			,intItemLocationId
+			,intItemUOMId
+			,intLotId
+			,dblQty * -1 -- Negate the qty to reduce the reserved qty. 
+			,intTransactionId
+			,strTransactionId
+			,intInventoryTransactionType
+			,intSubLocationId
+			,intStorageLocationId
+	FROM	dbo.tblICStockReservation Reservations 
+	WHERE	intTransactionId = @intTransactionId
+			AND @intTransactionTypeId = @intTransactionTypeId
+
+	-- Call this SP to decrease the reserved qty. 
+	EXEC dbo.uspICIncreaseReservedQty
+		@ReservationToClear
+		
+	-- Clear the list (if it exists)
+	DELETE	Reservations
+	FROM	dbo.tblICStockReservation Reservations 
+	WHERE	intTransactionId = @intTransactionId
+			AND @intTransactionTypeId = @intTransactionTypeId
+
+END 
 
 -- Add new reservations
 INSERT INTO dbo.tblICStockReservation (
@@ -55,6 +97,8 @@ INSERT INTO dbo.tblICStockReservation (
 		,strTransactionId
 		,intSort
 		,intInventoryTransactionType
+		,intSubLocationId
+		,intStorageLocationId
 		,intConcurrencyId
 		,intSubLocationId
 		,intStorageLocationId
@@ -69,8 +113,14 @@ SELECT	intItemId						= Items.intItemId
 		,strTransactionId				= Items.strTransactionId
 		,intSort						= Items.intId
 		,intInventoryTransactionType	= Items.intTransactionTypeId
+		,intSubLocationId				= Items.intSubLocationId
+		,intStorageLocationId			= Items.intStorageLocationId
 		,intConcurrencyId				= 1
 		,intSubLocationId				= Items.intSubLocationId
 		,intStorageLocationId			= Items.intStorageLocationId
 FROM	@ItemsToReserveAggregrate Items INNER JOIN dbo.tblICItemLocation ItemLocation
 			ON Items.intItemLocationId = ItemLocation.intItemLocationId
+
+-- Call this SP to increase the reserved qty. 
+EXEC dbo.uspICIncreaseReservedQty
+	@ItemsToReserveAggregrate

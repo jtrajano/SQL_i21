@@ -37,6 +37,7 @@ BEGIN
 	DECLARE @intBankAccountId INT = @bankAccount;
 	DECLARE @vendorWithhold BIT = 0;
 	DECLARE @intGLBankAccountId INT;
+	DECLARE @autoPay BIT = 0; --Automatically compute the payment
 	
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpBillsId')) DROP TABLE #tmpBillsId
 
@@ -103,11 +104,13 @@ BEGIN
 	--WHERE A.intBillId IN (SELECT intID FROM #tmpBillsId)
 
 	
-	--IF @amountPaid IS NULL
-	--BEGIN
-	--	SET @amountPaid = (SELECT SUM(dblAmountDue) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
-	--	SET @amountPaid = @amountPaid - (SELECT SUM(dblDiscount) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
-	--END
+	IF ((SELECT COUNT(*) FROM #tmpBillsId) = 1) SET @autoPay = 1
+
+	IF @autoPay = 1 AND @amountPaid IS NULL AND @isPost = 0
+	BEGIN
+		SET @amountPaid = (SELECT SUM(dblAmountDue) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
+		SET @amountPaid = @amountPaid - (SELECT SUM(dblDiscount) FROM tblAPBill WHERE intBillId IN (SELECT intID FROM #tmpBillsId)) 
+	END
 
 	--Compute Withheld Here
 	--Compute only if the payment that will create is posted
@@ -182,7 +185,7 @@ BEGIN
 		[dblDiscount]	= A.dblDiscount,
 		[dblWithheld]	= CASE WHEN @withholdPercent > 0 AND A.dblWithheld <= 0 THEN CAST(ROUND(A.dblTotal * (@withholdPercent / 100), 6) AS NUMERIC(18,6)) ELSE A.dblWithheld END,
 		[dblAmountDue]	= A.dblAmountDue, -- (A.dblTotal - A.dblDiscount - A.dblPayment),
-		[dblPayment]	= 0, --A.dblTotal - A.dblDiscount - A.dblPayment,
+		[dblPayment]	= (CASE WHEN ISNULL(@payment,0) = 0 THEN 0 ELSE (A.dblTotal - A.dblDiscount - A.dblPayment) END),
 		[dblInterest]	= 0, --TODO
 		[dblTotal]		= A.dblTotal
 	FROM tblAPBill A
@@ -217,9 +220,11 @@ BEGIN
 
 	EXEC sp_executesql @queryPaymentDetail, 
 	N'@paymentId INT,
-	@withholdPercent NUMERIC(18,6)',
+	@withholdPercent NUMERIC(18,6),
+	@payment NUMERIC(18,6)',
 	 @paymentId = @paymentId,
-	 @withholdPercent = @withholdPercent;
+	 @withholdPercent = @withholdPercent,
+	 @payment = @amountPaid;
 
 	 UPDATE A
 		SET A.dblWithheld = Withheld.dblWithheld

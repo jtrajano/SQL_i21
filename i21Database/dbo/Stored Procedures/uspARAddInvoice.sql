@@ -135,7 +135,10 @@ INSERT INTO
 		,[intDistributionHeaderId]
 		,[intConcurrencyId]
 		,[intEntityId]
-		,[strDeliverPickup])
+		,[strDeliverPickup]
+		,[strActualCostId]
+		,[strBOLNumber]
+)
 SELECT
      TE.InvoiceNumber           -- invoice number
 	,IE.strSourceId				--[strInvoiceOriginId]
@@ -163,7 +166,7 @@ SELECT
 	,IE.dtmDate 				--[dtmPostDate] need to check
 	,0							--[ysnPosted]
 	,0							--[ysnPaid]
-	,ISNULL(min(AC.[intShipToId]), min(EL.[intEntityLocationId]))			--[intShipToLocationId] 
+	,ISNULL(min(IE.intShipToLocationId), min(EL.[intEntityLocationId]))			--[intShipToLocationId] 
 	,min(SL.[strLocationName])		--[strShipToLocationName]
 	,min(SL.[strAddress])			--[strShipToAddress]
 	,min(SL.[strCity])				--[strShipToCity]
@@ -181,6 +184,8 @@ SELECT
 	,1
 	,@EntityId
 	,IE.strDeliverPickup
+	,IE.strActualCostId
+	,IE.strBOLNumber
 FROM
 	@InvoiceEntries IE
 	Join @temp TE
@@ -213,13 +218,13 @@ LEFT OUTER JOIN
 					ON AC.[intEntityCustomerId] = EL.[intEntityId]
 LEFT OUTER JOIN
 	tblEntityLocation SL
-		ON AC.intShipToId = SL.intEntityLocationId
+		ON IE.[intShipToLocationId] = SL.intEntityLocationId
 LEFT OUTER JOIN
 	tblEntityLocation BL
 		ON AC.intShipToId = BL.intEntityLocationId	
 WHERE
 	IE.intInvoiceId IS NULL OR IE.intInvoiceId = 0
-group by TE.InvoiceNumber,IE.intEntityCustomerId,IE.intLocationId,IE.strSourceId,IE.dtmDate,IE.intCurrencyId,IE.intSalesPersonId,IE.intShipViaId,IE.strComments,EL.intTermsId,IE.strPurchaseOrder,IE.intSourceId,IE.strDeliverPickup;				
+group by TE.InvoiceNumber,IE.intEntityCustomerId,IE.intLocationId,IE.strSourceId,IE.dtmDate,IE.intCurrencyId,IE.intSalesPersonId,IE.intShipViaId,IE.strComments,EL.intTermsId,IE.strPurchaseOrder,IE.intSourceId,IE.strDeliverPickup,IE.strActualCostId,IE.strBOLNumber;				
 
 
 ENABLE TRIGGER dbo.trgInvoiceNumber ON dbo.tblARInvoice;
@@ -251,7 +256,7 @@ SET
 	,[dtmPostDate]				= NULL
 	,[ysnPosted]				= 0
 	,[ysnPaid]					= 0
-	,[intShipToLocationId]		= ISNULL(AC.[intShipToId], EL.[intEntityLocationId]) 
+	,[intShipToLocationId]		= ISNULL(IE.[intShipToLocationId], EL.[intEntityLocationId]) 
 	,[strShipToLocationName]	= SL.[strLocationName]
 	,[strShipToAddress]			= SL.[strAddress]
 	,[strShipToCity]			= SL.[strCity]
@@ -268,7 +273,9 @@ SET
 	,[intDistributionHeaderId]	= IE.intSourceId
 	,[intConcurrencyId]			= I.[intConcurrencyId] + 1
 	,[intEntityId]				= @EntityId
-	,[strDeliverPickup]			= IE.strDeliverPickup     		
+	,[strDeliverPickup]			= IE.strDeliverPickup   
+	,[strActualCostId]  		= IE.strActualCostId
+	,[strBOLNumber]  			= IE.[strBOLNumber]
 FROM
 	[tblARInvoice] I
 INNER JOIN 
@@ -304,7 +311,7 @@ LEFT OUTER JOIN
 					ON AC.[intEntityCustomerId] = EL.[intEntityId]
 LEFT OUTER JOIN
 	tblEntityLocation SL
-		ON AC.intShipToId = SL.intEntityLocationId
+		ON IE.[intShipToLocationId] = SL.intEntityLocationId
 LEFT OUTER JOIN
 	tblEntityLocation BL
 		ON AC.intShipToId = BL.intEntityLocationId	
@@ -348,6 +355,7 @@ INSERT INTO [tblARInvoiceDetail]
 	,[intInventoryAccountId]
 	,[intContractHeaderId]
 	,[intContractDetailId]
+	,[intTaxGroupId] 
 	,[intConcurrencyId])
 SELECT
 	IV.[intInvoiceId]											--[intInvoiceId]
@@ -371,6 +379,7 @@ SELECT
 	,Acct.[intInventoryAccountId]								--[intInventoryAccountId]
 	,(select intContractHeaderId from vyuCTContractDetailView CT where CT.intContractDetailId = IE.intContractDetailId)   --[intContractHeaderId]
 	,IE.intContractDetailId                                     --[intContractDetailId]
+	,IE.[intTaxGroupId]											--[intTaxGroupId]
 	,1															--[intConcurrencyId]
 FROM
     @InvoiceEntries IE
@@ -413,6 +422,7 @@ INSERT INTO [tblARInvoiceDetail]
 	,[intInventoryAccountId]
 	,[intContractHeaderId]
 	,[intContractDetailId]
+	,[intTaxGroupId] 
 	,[intConcurrencyId])
 SELECT
 	IV.[intInvoiceId]											--[intInvoiceId]
@@ -436,6 +446,7 @@ SELECT
 	,Acct.[intInventoryAccountId]								--[intInventoryAccountId]
 	,null   --[intContractHeaderId]
 	,null                                    --[intContractDetailId]
+	,IE.[intTaxGroupId]											--[intTaxGroupId]
 	,1															--[intConcurrencyId]
 FROM
     @InvoiceEntries IE

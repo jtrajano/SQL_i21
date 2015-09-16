@@ -96,6 +96,7 @@ BEGIN
 	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLIFO', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLIFOOut', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryActualCost', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblGLDetail', @Identity = 1;

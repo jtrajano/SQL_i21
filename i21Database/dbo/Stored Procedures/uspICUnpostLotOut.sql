@@ -31,8 +31,8 @@ DECLARE @REVALUE_SOLD AS INT = 3
 DECLARE @AVERAGECOST AS INT = 1
 		,@FIFO AS INT = 2
 		,@LIFO AS INT = 3
-		,@STANDARDCOST AS INT = 4 	
-		,@LOT AS INT = 5
+		,@LOTCOST AS INT = 4 	
+		,@ACTUALCOST AS INT = 5
 
 -- Get all the inventory transaction related to the Unpost. 
 -- While at it, update the ysnIsUnposted to true. 
@@ -62,7 +62,7 @@ FROM	(
 							,intTransactionId = @intTransactionId
 				) AS Source_Query  
 					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0
-					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) IN (@LOT) 
+					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) IN (@LOTCOST) 
 					AND inventory_transaction.intTransactionTypeId <> @AUTO_NEGATIVE
 					AND 
 					(
@@ -93,10 +93,10 @@ WHERE	Data_Changes.Action = 'UPDATE'
 UPDATE	LotBucket
 SET		dblStockIn = dblStockOut
 		,ysnIsUnposted = 1
-FROM	dbo.tblICInventoryLot LotBucket INNER JOIN #tmpInventoryTransactionStockToReverse InventoryToReverse
-			ON LotBucket.intTransactionId = InventoryToReverse.intTransactionId
-			AND LotBucket.strTransactionId = InventoryToReverse.strTransactionId
-WHERE	InventoryToReverse.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE) 
+FROM	dbo.tblICInventoryLot LotBucket INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
+			ON LotBucket.intTransactionId = Reversal.intTransactionId
+			AND LotBucket.strTransactionId = Reversal.strTransactionId
+WHERE	Reversal.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE) 
 ;
 
 -- If LIFOBucket was from a negative stock, let dblStockIn equal to dblStockOut. 
@@ -106,10 +106,10 @@ SET		dblStockIn = dblStockOut
 FROM	dbo.tblICInventoryLot LotBucket 
 WHERE	EXISTS (
 			SELECT	TOP 1 1 
-			FROM	#tmpInventoryTransactionStockToReverse InventoryToReverse
-			WHERE	InventoryToReverse.intTransactionId = LotBucket.intTransactionId
-					AND InventoryToReverse.strTransactionId = LotBucket.strTransactionId
-					AND InventoryToReverse.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE) 
+			FROM	#tmpInventoryTransactionStockToReverse Reversal
+			WHERE	Reversal.intTransactionId = LotBucket.intTransactionId
+					AND Reversal.strTransactionId = LotBucket.strTransactionId
+					AND Reversal.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE) 
 		)
 ;
 
@@ -117,9 +117,10 @@ WHERE	EXISTS (
 UPDATE	LotBucket
 SET		LotBucket.dblStockOut = ISNULL(LotBucket.dblStockOut, 0) - LotOutGrouped.dblQty
 FROM	dbo.tblICInventoryLot LotBucket INNER JOIN (
-			SELECT	LotOut.intInventoryLotId, dblQty = SUM(LotOut.dblQty)
-			FROM	dbo.tblICInventoryLotOut LotOut INNER JOIN #tmpInventoryTransactionStockToReverse InventoryToReverse
-						ON LotOut.intInventoryTransactionId = InventoryToReverse.intInventoryTransactionId	
+			SELECT	LotOut.intInventoryLotId
+					, dblQty = SUM(LotOut.dblQty)
+			FROM	dbo.tblICInventoryLotOut LotOut INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
+						ON LotOut.intInventoryTransactionId = Reversal.intInventoryTransactionId	
 			GROUP BY LotOut.intInventoryLotId
 		) AS LotOutGrouped
 			ON LotOutGrouped.intInventoryLotId = LotBucket.intInventoryLotId

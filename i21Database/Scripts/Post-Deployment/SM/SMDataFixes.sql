@@ -48,3 +48,8 @@ GO
 		)
 	END
 GO
+
+	/* SET A DEFAULT VALUE FOR TAX CODE RATE */
+	UPDATE tblSMTaxCodeRate SET strCalculationMethod = 'Percentage' WHERE strCalculationMethod = ''
+
+GO

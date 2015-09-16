@@ -127,7 +127,7 @@ WHERE	intErrorCode = 51134
 IF @intItemId IS NOT NULL 
 BEGIN 
 	-- 'Item {Item Name} is missing a Stock Unit. Please check the Unit of Measure setup.'
-	RAISERROR(51134, 11, 1, @strItemNo)
+	RAISERROR(51160, 11, 1, @strItemNo)
 	GOTO _Exit
 END 
 

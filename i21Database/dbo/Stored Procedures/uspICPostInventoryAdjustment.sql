@@ -401,7 +401,8 @@ BEGIN
 				@intTransactionId
 				,@strTransactionId
 				,@strBatchId
-				,@intUserId						
+				,@intUserId
+				,@ysnRecap						
 	END 
 
 	IF @adjustmentType = @ADJUSTMENT_TYPE_LotStatusChange

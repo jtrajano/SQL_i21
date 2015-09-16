@@ -535,7 +535,7 @@ BEGIN
 			,[dblTotalWeightShrink]= 0 
 			,[dblOriginalBalance]= SC.dblNetUnits 
 			,[dblOpenBalance]= SC.dblNetUnits
-			,[dtmDeliveryDate]= NULL
+			,[dtmDeliveryDate]= GETDATE()
 			,[dtmZeroBalanceDate]= NULL
 			,[strDPARecieptNumber]= NULL
 			,[dtmLastStorageAccrueDate]= NULL 

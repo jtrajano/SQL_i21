@@ -49,7 +49,7 @@ SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompany
 --IF @APAccount IS NULL
 --	SET @APAccount = (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE intAccountCategoryId = 1)
 
-IF @APAccount IS NULL
+IF @APAccount IS NULL OR @APAccount <= 0
 BEGIN
 	RAISERROR('Please setup default AP Account', 16, 1);
 	GOTO DONE
@@ -80,7 +80,7 @@ BEGIN
 	IF @userLocation != @receiptLocation
 	BEGIN
 		SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = @receiptLocation)
-		IF @APAccount IS NULL
+		IF @APAccount IS NULL OR @APAccount <= 0
 		BEGIN
 			RAISERROR('Please setup default AP Account.', 16, 1);
 			GOTO DONE
@@ -154,10 +154,12 @@ BEGIN
 		[intBillId],
 		[intItemId],
 		[intInventoryReceiptItemId],
+		[intInventoryReceiptChargeId],
 		[intPurchaseDetailId],
 		[dblQtyOrdered],
 		[dblQtyReceived],
 		[dblTax],
+		[intTaxGroupId],
 		[intAccountId],
 		[dblTotal],
 		[dblCost],
@@ -170,10 +172,12 @@ BEGIN
 		[intBillId]					=	@generatedBillId,
 		[intItemId]					=	B.intItemId,
 		[intInventoryReceiptItemId]	=	B.intInventoryReceiptItemId,
-		[intPODetailId]				=	CASE WHEN B.intLineNo <= 0 THEN NULL ELSE B.intLineNo END,
+		[intInventoryReceiptChargeId] = NULL,
+		[intPODetailId]				=	CASE WHEN A.strReceiptType = 'Purchase Order' THEN (CASE WHEN B.intLineNo <= 0 THEN NULL ELSE B.intLineNo END) ELSE NULL END,
 		[dblQtyOrdered]				=	B.dblOpenReceive - B.dblBillQty,
 		[dblQtyReceived]			=	B.dblOpenReceive - B.dblBillQty,
 		[dblTax]					=	B.dblTax,
+		[intTaxGroupId]				=	B.intTaxGroupId,
 		[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, D.intItemLocationId, 'AP Clearing'),
 		--[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'AP Clearing'),
 		[dblTotal]					=	(B.dblOpenReceive - B.dblBillQty) * B.dblUnitCost,
@@ -210,10 +214,12 @@ BEGIN
 		[intBillId]					=	@generatedBillId,
 		[intItemId]					=	A.intItemId,
 		[intInventoryReceiptItemId]	=	A.intInventoryReceiptItemId,
+		[intInventoryReceiptChargeId]	=	A.[intInventoryReceiptChargeId],
 		[intPODetailId]				=	NULL,
 		[dblQtyOrdered]				=	1,
 		[dblQtyReceived]			=	1,
 		[dblTax]					=	0,
+		[intTaxGroupId]				=	NULL,
 		[intAccountId]				=	A.intAccountId,
 		[dblTotal]					=	A.dblUnitCost,
 		[dblCost]					=	A.dblUnitCost,
@@ -221,7 +227,9 @@ BEGIN
 		[intContractHeaderId]		=	NULL,
 		[intLineNo]					=	1
 	FROM [vyuAPChargesForBilling] A
-	WHERE A.intEntityVendorId = (SELECT intEntityVendorId FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId)
+	INNER JOIN tblICInventoryReceipt B ON A.intEntityVendorId = B.intEntityVendorId
+	AND A.intInventoryReceiptId = B.intInventoryReceiptId
+	WHERE A.intInventoryReceiptId = @receiptId
 
 	--CREATE TAXES FROM CREATED ITEM RECEIPT
 	DECLARE @intBillDetailId INT;

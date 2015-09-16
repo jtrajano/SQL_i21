@@ -8,17 +8,21 @@ CREATE FUNCTION [dbo].[fnRecalculateAverageCost]
 RETURNS NUMERIC(18,6)
 AS
 BEGIN
-	-- Create the CONSTANT variables for the costing methods
+	-- Declare the costing methods
 	DECLARE @AVERAGECOST AS INT = 1
-		,@FIFO AS INT = 2
-		,@LIFO AS INT = 3
-		,@STANDARDCOST AS INT = 4 	
-		,@LOTCOST AS INT = 5
+			,@FIFO AS INT = 2
+			,@LIFO AS INT = 3
+			,@LOTCOST AS INT = 4 	
+			,@ACTUALCOST AS INT = 5	
 
 	DECLARE @TotalQty AS NUMERIC(18,6)
 	DECLARE @TotalValue AS NUMERIC(18,6)
+
+	DECLARE @ActualCostQty AS NUMERIC(18,6)
+	DECLARE @ActualCostValue AS NUMERIC(18,6)
+
 	
-	IF EXISTS (SELECT 1 WHERE dbo.fnGetCostingMethod(@intItemId, @intItemLocationId) IN (@AVERAGECOST, @FIFO, @STANDARDCOST))
+	IF EXISTS (SELECT 1 WHERE dbo.fnGetCostingMethod(@intItemId, @intItemLocationId) IN (@AVERAGECOST, @FIFO))
 	BEGIN 
 		-- Recalculate the average cost from the fifo table 	
 		SELECT	@TotalQty = SUM (
@@ -38,6 +42,29 @@ BEGIN
 		WHERE	fifo.intItemId = @intItemId
 				AND fifo.intItemLocationId = @intItemLocationId
 				AND ISNULL(fifo.dblStockIn, 0) - ISNULL(fifo.dblStockOut, 0) > 0	
+
+		-- Recalculate the average cost from the actual cost table 	
+		SELECT	@ActualCostQty = SUM (
+					dbo.fnCalculateStockUnitQty(actualCost.dblStockIn, ItemUOM.dblUnitQty)
+					- dbo.fnCalculateStockUnitQty(actualCost.dblStockOut, ItemUOM.dblUnitQty)
+				)					
+				,@ActualCostValue = SUM (
+					(
+						dbo.fnCalculateStockUnitQty(actualCost.dblStockIn, ItemUOM.dblUnitQty)
+						- dbo.fnCalculateStockUnitQty(actualCost.dblStockOut, ItemUOM.dblUnitQty)
+					)
+					* dbo.fnCalculateUnitCost(actualCost.dblCost, ItemUOM.dblUnitQty)				
+				)
+
+		FROM	dbo.tblICInventoryActualCost actualCost INNER JOIN dbo.tblICItemUOM ItemUOM
+					ON actualCost.intItemUOMId = ItemUOM.intItemUOMId
+		WHERE	actualCost.intItemId = @intItemId
+				AND actualCost.intItemLocationId = @intItemLocationId
+				AND ISNULL(actualCost.dblStockIn, 0) - ISNULL(actualCost.dblStockOut, 0) > 0	
+
+		SET @TotalQty = ISNULL(@TotalQty, 0) + ISNULL(@ActualCostQty, 0)
+		SET @TotalValue = ISNULL(@TotalValue, 0) + ISNULL(@ActualCostValue, 0)
+
 	END 
 	ELSE IF EXISTS (SELECT 1 WHERE dbo.fnGetCostingMethod(@intItemId, @intItemLocationId) IN (@LIFO))
 	BEGIN 
@@ -60,6 +87,29 @@ BEGIN
 		WHERE	lifo.intItemId = @intItemId
 				AND lifo.intItemLocationId = @intItemLocationId
 				AND ISNULL(lifo.dblStockIn, 0) - ISNULL(lifo.dblStockOut, 0) > 0	
+
+		-- Recalculate the average cost from the actual cost table 	
+		SELECT	@ActualCostQty = SUM (
+					dbo.fnCalculateStockUnitQty(actualCost.dblStockIn, ItemUOM.dblUnitQty)
+					- dbo.fnCalculateStockUnitQty(actualCost.dblStockOut, ItemUOM.dblUnitQty)
+				)					
+				,@ActualCostValue = SUM (
+					(
+						dbo.fnCalculateStockUnitQty(actualCost.dblStockIn, ItemUOM.dblUnitQty)
+						- dbo.fnCalculateStockUnitQty(actualCost.dblStockOut, ItemUOM.dblUnitQty)
+					)
+					* dbo.fnCalculateUnitCost(actualCost.dblCost, ItemUOM.dblUnitQty)				
+				)
+
+		FROM	dbo.tblICInventoryActualCost actualCost INNER JOIN dbo.tblICItemUOM ItemUOM
+					ON actualCost.intItemUOMId = ItemUOM.intItemUOMId
+		WHERE	actualCost.intItemId = @intItemId
+				AND actualCost.intItemLocationId = @intItemLocationId
+				AND ISNULL(actualCost.dblStockIn, 0) - ISNULL(actualCost.dblStockOut, 0) > 0	
+
+		SET @TotalQty = ISNULL(@TotalQty, 0) + ISNULL(@ActualCostQty, 0)
+		SET @TotalValue = ISNULL(@TotalValue, 0) + ISNULL(@ActualCostValue, 0)
+
 	END 
 	ELSE 
 	BEGIN 

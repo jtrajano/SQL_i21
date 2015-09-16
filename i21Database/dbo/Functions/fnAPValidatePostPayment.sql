@@ -34,18 +34,33 @@ BEGIN
 		WHERE intCompanyLocationId = @userLocation
 	END
 
+	--Make sure that there is default location setup for user if
+	--1. It has discount
+	--2. It has overpayment
+	--3. It has withheld
+	--4. It has interest
+
 	IF @post = 1
 	BEGIN
 		
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
-		SELECT TOP 1
-			'User did not setup default location',
+		SELECT 
+			'Please setup user default location.',
 			'Payable',
 			A.strPaymentRecordNum,
 			A.intPaymentId
 		FROM tblAPPayment A 
 		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
 		AND @userLocation IS NULL
+		AND A.intPaymentId IN (SELECT A.intPaymentId FROM tblAPPayment A
+								INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+								INNER JOIN tblAPVendor C ON A.intEntityVendorId = C.intEntityVendorId
+								WHERE (A.dblUnapplied > 0 --Overpayment
+								OR C.ysnWithholding = 1 --Withhold
+								OR B.dblDiscount <> 0 --Discount
+								OR B.dblInterest <> 0) --Interest
+								AND A.intPaymentId IN (SELECT [intPaymentId] FROM @tmpPayments)
+							)
 
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT TOP 1
@@ -71,18 +86,18 @@ BEGIN
 		AND @WithholdAccount IS NULL
 		 AND B.ysnWithholding = 1
 
-		----Make sure it has setup for default withhold account if vendor is set for withholding
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
-		SELECT 
-			'The Cash Account setup is missing.',
-			'Payable',
-			A.strPaymentRecordNum,
-			A.intPaymentId
-		FROM tblAPPayment A 
-		INNER JOIN tblAPVendor B
-			ON A.intEntityVendorId = B.intEntityVendorId AND B.ysnWithholding = 1
-		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
-		AND @CashAccount IS NULL
+		 --Removed, cash account already setup in Payment table.
+		--INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		--SELECT 
+		--	'The Cash Account setup is missing.',
+		--	'Payable',
+		--	A.strPaymentRecordNum,
+		--	A.intPaymentId
+		--FROM tblAPPayment A 
+		--INNER JOIN tblAPVendor B
+		--	ON A.intEntityVendorId = B.intEntityVendorId AND B.ysnWithholding = 1
+		--WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments)
+		--AND @CashAccount IS NULL
 
 		--Make sure it ha setup for default discount account
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
@@ -166,20 +181,23 @@ BEGIN
 		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments) AND 
 			0 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDatePaid]), 0)
 
+		--This is currently doing by the uspGLBookEntries
+		--Add this temporarily as uspGLBookEntries validates the balance, however it throws an error, this should put in a result table
 		--NOT BALANCE
-		--INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
-		--SELECT 
-		--	'The debit and credit amounts are not balanced.',
-		--	'Payable',
-		--	A.strPaymentRecordNum,
-		--	A.intPaymentId
-		--FROM tblAPPayment A 
-		--WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments) AND 
-		--	(A.dblAmountPaid + A.dblWithheld 
-		--	+ (SELECT SUM(CASE WHEN dblAmountDue = (dblDiscount + dblPayment) THEN dblDiscount ELSE 0 END) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)) 
-		--	<> ((SELECT SUM(dblPayment) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId) 
-		--			+ (SELECT SUM(CASE WHEN dblAmountDue = (dblDiscount + dblPayment) THEN dblDiscount ELSE 0 END) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId))
-			--include over payment
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+		'The debit and credit amounts are not balanced.',
+		'Payable',
+		A.strPaymentRecordNum,
+		A.intPaymentId
+		FROM tblAPPayment A 
+		WHERE  A.[intPaymentId] IN (SELECT [intPaymentId] FROM @tmpPayments) AND 
+		((A.dblAmountPaid + A.dblWithheld - A.dblUnapplied) --deduct the overpayment
+		+ (SELECT SUM(CASE WHEN dblAmountDue = (dblDiscount + dblPayment) THEN dblDiscount ELSE 0 END) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId)) 
+		<> ((SELECT SUM(CASE WHEN B2.intTransactionType != 1 AND B1.dblPayment > 0 THEN B1.dblPayment * -1 ELSE B1.dblPayment END) FROM tblAPPaymentDetail B1 INNER JOIN tblAPBill B2 ON B1.intBillId = B2.intBillId
+			WHERE B1.intPaymentId = A.intPaymentId) 
+			+ (SELECT SUM(CASE WHEN dblAmountDue = (dblDiscount + dblPayment) THEN dblDiscount ELSE 0 END) FROM tblAPPaymentDetail WHERE intPaymentId = A.intPaymentId))
+		--include over payment
 
 		--ALREADY POSTED
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)

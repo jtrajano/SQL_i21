@@ -26,6 +26,7 @@ ALTER PROCEDURE [dbo].[uspICPostInventoryTransaction]
 	,@strRelatedTransactionId NVARCHAR(40)
 	,@strTransactionForm NVARCHAR (255)
 	,@intUserId INT
+	,@intCostingMethod INT
 	,@InventoryTransactionIdentityId INT OUTPUT 
 AS
 
@@ -287,6 +288,7 @@ ALTER PROCEDURE [dbo].[uspICPostInventoryTransaction]
 	,@strRelatedTransactionId NVARCHAR(40)
 	,@strTransactionForm NVARCHAR (255)
 	,@intUserId INT
+	,@intCostingMethod INT
 	,@InventoryTransactionIdentityId INT OUTPUT 
 AS
 
@@ -329,6 +331,7 @@ INSERT INTO dbo.tblICInventoryTransaction (
 		,[intStorageLocationId]
 		,[ysnIsUnposted]
 		,[intRelatedInventoryTransactionId]
+		,[intCostingMethod]
 		,[dtmCreated] 
 		,[intCreatedUserId] 
 		,[intConcurrencyId] 
@@ -357,6 +360,7 @@ SELECT	[intItemId]							= @intItemId
 		,[intStorageLocationId]				= @intStorageLocationId
 		,[ysnIsUnposted]					= 0 
 		,[intRelatedInventoryTransactionId] = @intRelatedInventoryTransactionId
+		,[intCostingMethod]					= @intCostingMethod
 		,[dtmCreated]						= GETDATE()
 		,[intCreatedUserId]					= @intUserId
 		,[intConcurrencyId]					= 1

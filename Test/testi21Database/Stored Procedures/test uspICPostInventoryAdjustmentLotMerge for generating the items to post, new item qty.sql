@@ -216,9 +216,9 @@ BEGIN
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
 				,intItemUOMId			= @ManualGrains_PoundUOM
 				,dtmDate				= '05/20/2015'
-				,dblQty					= 400.000000 * (@25KgBagUnitQty * 500.00 / 400.00)
+				,dblQty					= 400.000000 * (@25KgBagUnitQty * 500.00 / 400.00) -- 400 x New Weight Per Qty
 				,dblUOMQty				= @PoundUnitQty
-				,dblCost				= 2.500000 
+				,dblCost				= 2.500000 -- Cost used for Weight Per Qty. 
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 

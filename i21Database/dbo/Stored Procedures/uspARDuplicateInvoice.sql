@@ -149,6 +149,7 @@ BEGIN
 					,@ItemMaintenanceDate			DATETIME
 					,@ItemMaintenanceAmount			NUMERIC(18,6)
 					,@ItemLicenseAmount				NUMERIC(18,6)
+					,@ItemTaxGroupId				INT
 					
 			SELECT TOP 1 @InvoiceDetailId = [intInvoiceDetailId] FROM @InvoiceDetails ORDER BY [intInvoiceDetailId]
 
@@ -172,6 +173,7 @@ BEGIN
 				,@ItemMaintenanceDate			= [dtmMaintenanceDate]
 				,@ItemMaintenanceAmount			= [dblMaintenanceAmount]
 				,@ItemLicenseAmount				= [dblLicenseAmount]
+				,@ItemTaxGroupId				= [intTaxGroupId]
 			FROM
 				tblARInvoiceDetail
 			WHERE
@@ -201,7 +203,8 @@ BEGIN
 				,@ItemFrequency					= @ItemFrequency
 				,@ItemMaintenanceDate			= @ItemMaintenanceDate
 				,@ItemMaintenanceAmount			= @ItemMaintenanceAmount
-				,@ItemLicenseAmount				= @ItemLicenseAmount					
+				,@ItemLicenseAmount				= @ItemLicenseAmount
+				,@ItemTaxGroupId				= @ItemTaxGroupId					
 			
 				IF LEN(ISNULL(@ErrorMessage,'')) > 0
 					BEGIN

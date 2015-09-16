@@ -35,6 +35,7 @@ BEGIN
 				,@strTransactionForm AS NVARCHAR (255)		= '21'
 				,@intUserId AS INT							= 22
 				,@InventoryTransactionIdentityId AS INT		= 23
+				,@intCostingMethod AS INT					= 24
 
 		CREATE TABLE expected (
 			intInventoryTransactionId INT
@@ -62,6 +63,7 @@ BEGIN
 			,strRelatedTransactionId NVARCHAR(40)
 			,strTransactionForm NVARCHAR (255)
 			,intCreatedUserId INT
+			,intCostingMethod INT
 		)
 
 		CREATE TABLE actual (
@@ -90,6 +92,7 @@ BEGIN
 			,strRelatedTransactionId NVARCHAR(40)
 			,strTransactionForm NVARCHAR (255)
 			,intCreatedUserId INT
+			,intCostingMethod INT
 		)
 
 		INSERT INTO expected (
@@ -118,6 +121,7 @@ BEGIN
 			,strRelatedTransactionId
 			,strTransactionForm 
 			,intCreatedUserId
+			,intCostingMethod 
 		)
 		SELECT			
 			intInventoryTransactionId			= 1
@@ -145,6 +149,7 @@ BEGIN
 			,strRelatedTransactionId			= @strRelatedTransactionId
 			,strTransactionForm					= @strTransactionForm
 			,intCreatedUserId					= @intUserId
+			,intCostingMethod					= @intCostingMethod
 
 	END 
 	
@@ -176,6 +181,7 @@ BEGIN
 				,@strRelatedTransactionId
 				,@strTransactionForm
 				,@intUserId
+				,@intCostingMethod
 				,@InventoryTransactionIdentityId OUTPUT 
 	END 
 
@@ -206,7 +212,8 @@ BEGIN
 			,intRelatedTransactionId
 			,strRelatedTransactionId
 			,strTransactionForm 
-			,intCreatedUserId		
+			,intCreatedUserId
+			,intCostingMethod		
 		)
 		SELECT
 			intInventoryTransactionId
@@ -234,6 +241,7 @@ BEGIN
 			,strRelatedTransactionId
 			,strTransactionForm 
 			,intCreatedUserId
+			,intCostingMethod 
 		FROM dbo.tblICInventoryTransaction
 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';

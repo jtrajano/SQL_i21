@@ -78,10 +78,10 @@ IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
 --+++++++++++++++++++++++++++++++++
  -- INSERT IMPORT LOGS
  --+++++++++++++++++++++++++++++++++
-   
+ DECLARE @intImportLogId INT
  INSERT INTO tblGLCOAImportLog (strEvent,strIrelySuiteVersion,intEntityId,dtmDate,strMachineName,strJournalType,intConcurrencyId)
  VALUES(''Import Origin Historical Journal'',(SELECT TOP 1 strVersionNo FROM tblSMBuildNumber ORDER BY intVersionID DESC),@intEntityId,GETDATE(),'''','''',1)
-DECLARE @intImportLogId INT = (SELECT intImportLogId FROM tblGLCOAImportLog WHERE strEvent = ''Import Origin Historical Journal'' AND dtmDate = GETDATE())
+ SELECT @intImportLogId = SCOPE_IDENTITY()
    
  INSERT INTO tblGLCOAImportLogDetail (intImportLogId,strEventDescription,strPeriod,strSourceNumber,strSourceSystem,strJournalId,intConcurrencyId)
  SELECT @intImportLogId,strDescription,dtmDate,strSourceId,strSourceType,strJournalId,1 FROM #iRelyImptblGLJournal
@@ -131,8 +131,8 @@ SELECT
  CASE WHEN glarc_amt >= 0 THEN CASE WHEN (glarc_dr_cr_ind=''C'' OR glarc_dr_cr_ind IS NULL) THEN glarc_amt ELSE 0 END
  ELSE CASE WHEN glarc_dr_cr_ind = ''D'' THEN (glarc_amt * -1) ELSE 0 END END AS Credit,
  0 AS CreditRate, -- credit rate
- 0 AS DebitUnits,
- 0 AS CreditUnits,
+ glarc_units AS DebitUnits,
+ glarc_units AS CreditUnits,
  glarc_ref AS strDescription,
  NULL AS intCurrencyId,
  0 AS dblUnitsInlbs,
@@ -155,7 +155,10 @@ SELECT
  INNER JOIN tblGLCOACrossReference ON
  SUBSTRING(strCurrentExternalId,1,8) = glarc_acct1_8 AND SUBSTRING(strCurrentExternalId,10,8) = glarc_acct9_16
  INNER JOIN tblGLAccount ON tblGLAccount.intAccountId = tblGLCOACrossReference.inti21Id
-  
+ 
+--RESET DebitUnits/CreditUnits
+UPDATE #iRelyImptblGLJournalDetail SET DebitUnits = 0 ,CreditUnits = 0
+
 UPDATE 
 A SET DebitUnits = 
 case
@@ -262,8 +265,8 @@ INSERT tblGLJournalDetail (intLineNo,intJournalId,dtmDate,intAccountId,dblDebit,
  WHERE tblGLJournalDetail.intJournalId = tblGLJournal.intJournalId)
    
  IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
-   
- SET @result = ''SUCCESS '' + (Select (Select CAST(intJournalId AS NVARCHAR(MAX)) + '','' From (select intJournalId from tblGLJournal A left join #iRelyImptblGLJournal B on A.strJournalId = B.strJournalId COLLATE Latin1_General_CI_AS) X FOR XML PATH('''')) as intJournalId)
+    
+ SET @result = ''SUCCESS '' + CAST(@intImportLogId AS NVARCHAR(40))
    
 END
    

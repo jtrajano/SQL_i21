@@ -125,6 +125,7 @@ BEGIN
 END   
 
 -- Do not allow unpost if Bill has been created for the inventory receipt
+IF @ysnPost = 0 AND @ysnRecap = 0 
 BEGIN 
 
 	SELECT	TOP 1 
@@ -154,14 +155,12 @@ BEGIN
 	SELECT	TOP 1 
 			@strBillNumber = Bill.strBillId
 			,@strChargeItem = Item.strItemNo
-	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItemAllocatedCharge AllocatedCharges
-				ON Receipt.intInventoryReceiptId = AllocatedCharges.intInventoryReceiptId
-			INNER JOIN dbo.tblICInventoryReceiptCharge Charge
-				ON Charge.intInventoryReceiptChargeId = AllocatedCharges.intInventoryReceiptChargeId
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge Charge
+				ON Receipt.intInventoryReceiptId = Charge.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item
 				ON Item.intItemId = Charge.intChargeId				
 			LEFT JOIN dbo.tblAPBillDetail BillItems
-				ON BillItems.intInventoryReceiptItemAllocatedChargeId = Charge.intInventoryReceiptChargeId
+				ON BillItems.intInventoryReceiptChargeId = Charge.intInventoryReceiptChargeId
 			INNER JOIN dbo.tblAPBill Bill
 				ON Bill.intBillId = BillItems.intBillId
 	WHERE	Receipt.intInventoryReceiptId = @intTransactionId
@@ -282,26 +281,36 @@ BEGIN
 				,intLotId 
 				,intSubLocationId
 				,intStorageLocationId
+				,strActualCostId
 		)  
 		SELECT	intItemId = DetailItem.intItemId  
 				,intItemLocationId = ItemLocation.intItemLocationId
 				,intItemUOMId = 
-							-- Use weight UOM id if it is present. Otherwise, use the qty UOM. 
-							CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN DetailItem.intWeightUOMId 
-									ELSE DetailItem.intUnitMeasureId
+							-- Check if Lot 
+							-- If it is a Lot:
+							--		Use Weight UOM if there is a weight. 
+							--		Otherwise, use the Weight UOM. 
+							-- If not lot, user the Item UOM. 
+							CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0  THEN 
+										CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN DetailItem.intWeightUOMId 
+												ELSE DetailItemLot.intItemUnitMeasureId
+										END 
+									ELSE 
+										DetailItem.intUnitMeasureId
 							END
 				,dtmDate = Header.dtmReceiptDate  
 				,dblQty =						
+
 							-- Check if it is processing a lot item or not. 
 							-- If it is a lot, 
-							--		If there is no weight UOM, convert the Item-Lot-Qty to the UOM of the Detail-Item.
-							--		If there is a weight UOM, receive the qty in weights. 
+							--		If there is no weight UOM, receive it by Lot Qty.
+							--		If there is a weight UOM, receive it by Weights. 
 							-- Otherwise
 							--		Receive the qty from the detail item. 
 							CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0  THEN 
-										CASE	-- The item has no weight UOM. Receive it by converting the Qty to the Detail-Item UOM. 
+										CASE	-- The item has no weight UOM. Receive by the Lot Qty. 
 												WHEN ISNULL(DetailItem.intWeightUOMId, 0) = 0  THEN 												
-													dbo.fnCalculateQtyBetweenUOM(ISNULL(DetailItemLot.intItemUnitMeasureId, DetailItem.intUnitMeasureId), DetailItem.intUnitMeasureId, DetailItemLot.dblQuantity)
+													ISNULL(DetailItemLot.dblQuantity, 0)
 											
 												-- The item has a weight UOM. 
 												ELSE 
@@ -315,40 +324,108 @@ BEGIN
 										END 									
 									ELSE	
 										DetailItem.dblOpenReceive
-							END 				
-				,dblUOMQty = 
-							-- Get the unit qy of the Weight UOM (if used) or from the DetailItem.intUnitMeasureId
-							CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN 
-										(
-											SELECT	TOP 1 
-													dblUnitQty
-											FROM	dbo.tblICItemUOM
-											WHERE	intItemUOMId = DetailItem.intWeightUOMId									
-										)
-									ELSE 
-										(
-											SELECT	TOP 1 
-													dblUnitQty
-											FROM	dbo.tblICItemUOM
-											WHERE	intItemUOMId = DetailItem.intUnitMeasureId
-										)
 							END 
 
-				,dblCost =	-- If Weight is used, use the Cost per Weight. Otherwise, use the cost per qty. 
-							CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN 
-										dbo.fnCalculateCostPerWeight (
-											dbo.fnCalculateCostPerLot ( 
-												DetailItem.intUnitMeasureId
-												,DetailItem.intWeightUOMId
-												,DetailItemLot.intItemUnitMeasureId
-												,(DetailItem.dblUnitCost + dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId))
-											) * DetailItemLot.dblQuantity
-											,ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
-										) 
+							-- Check if it is processing a lot item or not. 
+							-- If it is a lot, 
+							--		If there is no weight UOM, convert the Item-Lot-Qty to the UOM of the Detail-Item.
+							--		If there is a weight UOM, receive the qty in weights. 
+							-- Otherwise
+							--		Receive the qty from the detail item. 
+							--CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0  THEN 
+							--			CASE	-- The item has no weight UOM. Receive it by converting the Qty to the Detail-Item UOM. 
+							--					WHEN ISNULL(DetailItem.intWeightUOMId, 0) = 0  THEN 												
+							--						dbo.fnCalculateQtyBetweenUOM(ISNULL(DetailItemLot.intItemUnitMeasureId, DetailItem.intUnitMeasureId), DetailItem.intUnitMeasureId, DetailItemLot.dblQuantity)
+											
+							--					-- The item has a weight UOM. 
+							--					ELSE 
+							--						-- If there is weight value (non-zero), use it. 
+							--						-- Otherwise, convert the Qty from Detail-Item-Lot-UOM to the Detail-Item-Weight-UOM. 
+							--						CASE	WHEN  ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0) = 0 THEN 
+							--									dbo.fnCalculateQtyBetweenUOM(DetailItemLot.intItemUnitMeasureId, DetailItem.intWeightUOMId, DetailItemLot.dblQuantity)
+							--								ELSE 
+							--									ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
+							--						END
+							--			END 									
+							--		ELSE	
+							--			DetailItem.dblOpenReceive
+							--END 				
+				
 
+
+				,dblUOMQty = 
+
+							CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0  THEN 
+										CASE	-- When the item has no weight UOM. Use the Unit Qty from Lot UOM. 
+												WHEN ISNULL(DetailItem.intWeightUOMId, 0) = 0  THEN 												
+													LotItemUOM.dblUnitQty
+											
+												-- If item has a weight UOMm then use the unit qty from Weight UOM. 
+												ELSE 
+													WeightUOM.dblUnitQty
+										END 									
+									ELSE	
+										ItemUOM.dblUnitQty
+							END 
+
+							-- Get the unit qy of the Weight UOM (if used) or from the DetailItem.intUnitMeasureId
+							--CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN 
+							--			(
+							--				SELECT	TOP 1 
+							--						dblUnitQty
+							--				FROM	dbo.tblICItemUOM
+							--				WHERE	intItemUOMId = DetailItem.intWeightUOMId									
+							--			)
+							--		ELSE 
+							--			(
+							--				SELECT	TOP 1 
+							--						dblUnitQty
+							--				FROM	dbo.tblICItemUOM
+							--				WHERE	intItemUOMId = DetailItem.intUnitMeasureId
+							--			)
+							--END 
+
+				,dblCost =	
+
+							-- If Item has a lot, then determine the cost either by weight or by Lot UOM. 
+							CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0  THEN 
+										CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN 
+													dbo.fnCalculateCostPerWeight (
+														dbo.fnCalculateCostPerLot ( 
+															DetailItem.intUnitMeasureId
+															,DetailItem.intWeightUOMId
+															,DetailItemLot.intItemUnitMeasureId
+															,(DetailItem.dblUnitCost + dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId))
+														) * DetailItemLot.dblQuantity
+														,ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
+													) 
+												ELSE 
+													(
+														DetailItem.dblUnitCost 
+														+ dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)														
+													)
+													* LotItemUOM.dblUnitQty
+													
+										END 
 									ELSE 
 										DetailItem.dblUnitCost + dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
 							END 
+				
+							---- If Weight is used, use the Cost per Weight. Otherwise, use the cost per qty. 
+							--CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN 
+							--			dbo.fnCalculateCostPerWeight (
+							--				dbo.fnCalculateCostPerLot ( 
+							--					DetailItem.intUnitMeasureId
+							--					,DetailItem.intWeightUOMId
+							--					,DetailItemLot.intItemUnitMeasureId
+							--					,(DetailItem.dblUnitCost + dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId))
+							--				) * DetailItemLot.dblQuantity
+							--				,ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
+							--			) 
+
+							--		ELSE 
+							--			DetailItem.dblUnitCost + dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
+							--END 
 				,dblSalesPrice = 0  
 				,intCurrencyId = Header.intCurrencyId  
 				,dblExchangeRate = 1  
@@ -358,7 +435,8 @@ BEGIN
 				,intTransactionTypeId = @INVENTORY_RECEIPT_TYPE  
 				,intLotId = DetailItemLot.intLotId 
 				,intSubLocationId = DetailItem.intSubLocationId
-				,intStorageLocationId = DetailItemLot.intStorageLocationId
+				,intStorageLocationId = DetailItemLot.intStorageLocationId				
+				,strActualCostId = Header.strActualCostId
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICItemLocation ItemLocation
 					ON Header.intLocationId = ItemLocation.intLocationId
 				INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
@@ -366,6 +444,15 @@ BEGIN
 					AND ItemLocation.intItemId = DetailItem.intItemId
 				LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
 					ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
+
+				LEFT JOIN dbo.tblICItemUOM ItemUOM 
+					ON ItemUOM.intItemUOMId = DetailItem.intUnitMeasureId
+				LEFT JOIN dbo.tblICItemUOM LotItemUOM
+					ON LotItemUOM.intItemUOMId = DetailItemLot.intItemUnitMeasureId
+				LEFT JOIN dbo.tblICItemUOM WeightUOM
+					ON WeightUOM.intItemUOMId = DetailItem.intWeightUOMId
+
+				
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
   
@@ -603,7 +690,8 @@ BEGIN
 				@intTransactionId
 				,@strTransactionId
 				,@strBatchId
-				,@intUserId		
+				,@intUserId
+				,@ysnRecap
 				
 		-- Unpost the Other Charges
 		BEGIN 

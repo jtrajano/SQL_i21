@@ -31,12 +31,15 @@ SELECT SO.intSalesOrderId
 	 , SO.dtmDueDate
 	 , FT.strFreightTerm
 	 , strSplitName = ES.strDescription
-	 , SO.strComments
+	 , strSOHeaderComment = SO.strComments
+	 , strSOFooterComment = [dbo].fnARGetInvoiceFooterComment(SO.intCompanyLocationId, SO.intEntityCustomerId, 'Sales Order Footer', NULL)
 	 , dblSalesOrderSubtotal = ISNULL(SO.dblSalesOrderSubtotal, 0)
 	 , dblShipping = ISNULL(SO.dblShipping, 0)
 	 , dblTax = ISNULL(SO.dblTax, 0)
 	 , dblSalesOrderTotal = ISNULL(SO.dblSalesOrderTotal, 0)
 	 , I.strItemNo
+	 , SD.intSalesOrderDetailId
+	 , CH.strContractNumber
 	 , SD.strItemDescription
 	 , UOM.strUnitMeasure
 	 , dblQtyShipped = ISNULL(SD.dblQtyShipped, 0)
@@ -45,10 +48,17 @@ SELECT SO.intSalesOrderId
 	 , dblTotalTax = ISNULL(SD.dblTotalTax, 0)
 	 , dblPrice = ISNULL(SD.dblPrice, 0)
 	 , dblItemPrice = ISNULL(SD.dblTotal, 0)
+	 , SDT.intTaxCodeId
+	 , strTaxCode = SMT.strTaxCode
+	 , dblTaxDetail = SDT.dblTax
+	 , intDetailCount = (SELECT COUNT(*) FROM tblSOSalesOrderDetail WHERE intSalesOrderId = SO.intSalesOrderId)
 FROM tblSOSalesOrder SO
 LEFT JOIN (tblSOSalesOrderDetail SD 
 	LEFT JOIN tblICItem I ON SD.intItemId = I.intItemId 
-	LEFT JOIN vyuARItemUOM UOM ON SD.intItemUOMId = UOM.intItemUOMId AND SD.intItemId = UOM.intItemId) ON SO.intSalesOrderId = SD.intSalesOrderId
+	LEFT JOIN tblSOSalesOrderDetailTax SDT ON SD.intSalesOrderDetailId = SDT.intSalesOrderDetailId
+	LEFT JOIN tblSMTaxCode SMT ON SDT.intTaxCodeId = SMT.intTaxCodeId
+	LEFT JOIN vyuARItemUOM UOM ON SD.intItemUOMId = UOM.intItemUOMId AND SD.intItemId = UOM.intItemId
+	LEFT JOIN tblCTContractHeader CH ON SD.intContractHeaderId = CH.intContractHeaderId) ON SO.intSalesOrderId = SD.intSalesOrderId
 INNER JOIN (tblARCustomer C 
 	INNER JOIN tblEntity E ON C.intEntityCustomerId = E.intEntityId) ON C.intEntityCustomerId = SO.intEntityCustomerId
 INNER JOIN tblSMCompanyLocation L ON SO.intCompanyLocationId = L.intCompanyLocationId

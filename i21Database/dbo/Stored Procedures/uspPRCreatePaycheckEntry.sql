@@ -51,7 +51,7 @@ INSERT INTO [dbo].[tblPRPaycheck]
 	,[ysnPosted]
 	,[ysnPrinted]
 	,[ysnVoid]
-	,[intDistributionType]
+	,[ysnDirectDeposit]
 	,[dtmCreated]
 	,[intConcurrencyId])
 SELECT
@@ -74,7 +74,7 @@ SELECT
 	,0
 	,0
 	,0
-	,[intDistributionType]
+	,CASE WHEN EXISTS (SELECT TOP 1 1 FROM tblEntityEFTInformation WHERE ysnActive = 1 AND intEntityId = tblPREmployee.intEntityId) THEN 1 ELSE 0 END
 	,GETDATE()
 	,1
 FROM [dbo].[tblPREmployee]
@@ -146,14 +146,17 @@ DECLARE @dblEarningAmount NUMERIC(18,6)
 /* Insert Earnings to Temp Table for iteration */
 SELECT 
 tblPREmployeeEarning.intEmployeeEarningId,
-dblAmount = CASE WHEN ([strCalculationType] IN ('Rate Factor', 'Overtime')) 
-				THEN [dblAmount] * ISNULL((SELECT B.dblAmount FROM tblPREmployeeEarning B WHERE B.intEmployeeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId), 1)
+dblAmount = CASE WHEN ([strCalculationType] IN ('Rate Factor', 'Overtime')) /* Get Earning Link if exists in Employee Earnings, if not, get from Type Earnings */
+				THEN [dblAmount] * ISNULL((SELECT TOP 1 B.dblAmount FROM tblPREmployeeEarning B 
+											WHERE B.intTypeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId AND intEmployeeId = @intEmployeeId),
+										  (SELECT TOP 1 C.dblAmount FROM tblPRTypeEarning C 
+											WHERE C.intTypeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId AND intEmployeeId = @intEmployeeId))
 			ELSE
 				[dblAmount]
 			END
 INTO #tmpEarnings FROM tblPREmployeeEarning 
 WHERE intEmployeeId = @intEmployee
-  AND ysnDefault = CASE WHEN @intPayGroup IS NULL THEN 1 ELSE ysnDefault END
+  AND ysnDefault = 1
   AND ISNULL(intPayGroupId, 0) = CASE WHEN @intPayGroup IS NULL THEN ISNULL(intPayGroupId, 0) ELSE @intPayGroup END
 
 /* Add Each Earning to Paycheck */
@@ -174,6 +177,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 			,[dblTotal]
 			,[strW2Code]
 			,[intEmployeeTimeOffId]
+			,[intEmployeeEarningLinkId]
 			,[intAccountId]
 			,[intSort]
 			,[intConcurrencyId])
@@ -235,6 +239,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 			 END
 			,[strW2Code]
 			,[intEmployeeTimeOffId]
+			,[intEmployeeEarningLinkId]
 			,[intAccountId]
 			,[intSort]
 			,1
@@ -245,7 +250,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 		/* Get the Created Paycheck Earning Id*/
 		SELECT @intPaycheckEarningId = @@IDENTITY
 
-		IF EXISTS(SELECT TOP 1 1 FROM tblPREmployeeEarning WHERE intEmployeeEarningId = @intEmployeeEarningId)
+		IF EXISTS(SELECT TOP 1 1 FROM tblPREmployeeEarning WHERE intEmployeeEarningId = @intEmployeeEarningId and ysnDefault = 1)
 			BEGIN
 				/* Insert Paycheck Earning Taxes */
 				INSERT INTO tblPRPaycheckEarningTax

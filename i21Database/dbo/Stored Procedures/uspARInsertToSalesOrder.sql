@@ -156,6 +156,7 @@ BEGIN
 	        ,[dblMaintenanceAmount]
 	        ,[dblLicenseAmount]
 			,[intContractHeaderId]
+			,[intTaxGroupId]
 			,[intContractDetailId])
 		SELECT 
 			@NewTransactionId
@@ -183,6 +184,7 @@ BEGIN
 	        ,[dblMaintenanceAmount]
 	        ,[dblLicenseAmount]
 			,NULL
+			,[intTaxGroupId]
 			,NULL
 		FROM tblSOSalesOrderDetail		
 		WHERE [intSalesOrderDetailId] = @SalesOrderDetailId

@@ -16,6 +16,8 @@
 	[dblPurSurcharge] DECIMAL(18, 6) NULL DEFAULT 0, 
 	[intInventoryReceiptId] int NULL,
 	[ysnFreightInPrice] BIT  DEFAULT ((0)) NOT NULL,
+	[intTaxGroupId] int NULL,
+	[intInventoryTransferId] int NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	CONSTRAINT [PK_tblTRTransportReceipt] PRIMARY KEY ([intTransportReceiptId]),
 	CONSTRAINT [FK_tblTRTransportReceipt_tblTRTranportLoad_intTransportLoadId] FOREIGN KEY ([intTransportLoadId]) REFERENCES [dbo].[tblTRTransportLoad] ([intTransportLoadId]) ON DELETE CASCADE,
@@ -24,5 +26,7 @@
 	CONSTRAINT [FK_tblTRTransportReceipt_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
 	CONSTRAINT [FK_tblTRTransportReceipt_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),
 	CONSTRAINT [FK_tblTRTransportReceipt_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]),
-	CONSTRAINT [FK_tblTRTransportReceipt_tblICInventoryReceipt_intInventoryReceiptId] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId])		
+	CONSTRAINT [FK_tblTRTransportReceipt_tblICInventoryReceipt_intInventoryReceiptId] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]),
+	CONSTRAINT [FK_tblTRTransportReceipt_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId]),
+	CONSTRAINT [FK_tblTRTransportReceipt_tblICInventoryTransfer_intInventoryTransferId] FOREIGN KEY ([intInventoryTransferId]) REFERENCES [tblICInventoryTransfer]([intInventoryTransferId])		
 )

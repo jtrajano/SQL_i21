@@ -13,6 +13,7 @@ BEGIN
 	SET ANSI_WARNINGS OFF
 
 	DECLARE @billCreatedPrimaryKey INT;
+	SET @userId = (SELECT TOP 1 intEntityId FROM dbo.tblSMUserSecurity WHERE intUserSecurityID = @userId)
 	EXEC uspAPDuplicateBill @billId, @userId, @billCreatedPrimaryKey OUTPUT
 
 	UPDATE A

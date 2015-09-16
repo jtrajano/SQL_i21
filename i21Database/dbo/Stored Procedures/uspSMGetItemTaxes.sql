@@ -10,6 +10,85 @@ AS
 BEGIN
 	DECLARE @TaxGroupMasterId INT
 			,@TaxExempt BIT
+			,@VendorId INT
+			,@ItemCategoryId INT
+	
+	SELECT
+		@VendorId = ItemStock.intVendorId
+		,@ItemCategoryId = Item.intCategoryId
+	FROM tblICItem Item
+	INNER JOIN vyuICGetItemStock ItemStock ON Item.intItemId = ItemStock.intItemId
+	WHERE Item.intItemId = @ItemId AND ItemStock.intLocationId = @LocationId
+			
+	IF (@TransactionType = 'Sale')
+		SET @TaxExempt = ISNULL((SELECT ysnTaxExempt FROM tblARCustomer WHERE intEntityCustomerId = @EntityId AND @EntityId IS NOT NULL),0)
+	ELSE
+		SET @TaxExempt = 0
+			
+			
+		IF @TaxMasterId IS NOT NULL AND @TaxMasterId <> 0
+		BEGIN				
+			SELECT
+				0
+				,0 AS intInvoiceDetailId
+				,NULL AS intTaxGroupMasterId 
+				,TaxGroup.intTaxGroupId 
+				,TaxCode.intTaxCodeId
+				,TaxCode.intTaxClassId				
+				,TaxCode.strTaxableByOtherTaxes
+				,ISNULL(
+						(SELECT TOP 1 tblSMTaxCodeRate.strCalculationMethod 
+							FROM tblSMTaxCodeRate 
+							WHERE tblSMTaxCodeRate.intTaxCodeId = TaxCode.intTaxCodeId 
+								AND CAST(tblSMTaxCodeRate.dtmEffectiveDate  AS DATE) <= CAST(@TransactionDate AS DATE)
+							ORDER BY tblSMTaxCodeRate.dtmEffectiveDate ASC
+								,tblSMTaxCodeRate.numRate DESC
+						), 'Unit'
+					) AS strCalculationMethod
+				,ISNULL(
+						(SELECT TOP 1 tblSMTaxCodeRate.numRate 
+							FROM tblSMTaxCodeRate 
+							WHERE tblSMTaxCodeRate.intTaxCodeId = TaxCode.intTaxCodeId 
+								AND CAST(tblSMTaxCodeRate.dtmEffectiveDate  AS DATE) <= CAST(@TransactionDate AS DATE)
+							ORDER BY tblSMTaxCodeRate.dtmEffectiveDate ASC
+								,tblSMTaxCodeRate.numRate DESC
+						), 0.00
+					) AS numRate
+				,0.00 AS dblTax
+				,0.00 AS dblAdjustedTax				
+				,intTaxAccountId = (CASE WHEN @TransactionType = 'Sale' THEN TaxCode.intSalesTaxAccountId
+										WHEN @TransactionType = 'Purchase' THEN TaxCode.intPurchaseTaxAccountId
+									END)
+				,0 AS ysnSeparateOnInvoice 
+				,TaxCode.ysnCheckoffTax
+				,TaxCode.strTaxCode
+				,(CASE WHEN ISNULL(@TaxExempt,0) = 0
+					THEN (CASE WHEN @TransactionType = 'Sale'
+							THEN (ISNULL((	SELECT TOP 1 1 FROM
+												tblARCustomerTaxingTaxException
+											WHERE
+												(intCategoryId = @ItemCategoryId OR intItemId = @ItemId)
+												AND intEntityCustomerId = @EntityId
+												AND (intTaxClassId = TaxCode.[intTaxClassId] OR intTaxCodeId = TaxCode.[intTaxCodeId] OR (UPPER(LTRIM(RTRIM(ISNULL(strState,'')))) = UPPER(LTRIM(RTRIM(ISNULL(TaxCode.strState,'')))) AND LEN(UPPER(LTRIM(RTRIM(ISNULL(strState,''))))) > 0 ) )
+												AND	@TransactionDate BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate, @TransactionDate) AS DATE)
+											ORDER BY
+												dtmStartDate),0))
+							ELSE ISNULL(@TaxExempt,0)
+						END)
+					ELSE ISNULL(@TaxExempt,0)
+				END) AS [ysnTaxExempt] 				
+			FROM tblSMTaxCode TaxCode
+			INNER JOIN tblSMTaxGroupCode TaxGroupCode ON TaxCode.intTaxCodeId = TaxGroupCode.intTaxCodeId 
+			INNER JOIN tblSMTaxGroup TaxGroup ON TaxGroupCode.intTaxGroupId = TaxGroup.intTaxGroupId
+			WHERE TaxGroup.intTaxGroupId = @TaxMasterId
+				AND (
+						((CASE WHEN @TransactionType = 'Sale' THEN ISNULL(TaxCode.intSalesTaxAccountId, 0) 
+							WHEN @TransactionType = 'Purchase' THEN ISNULL(TaxCode.intPurchaseTaxAccountId, 0) 
+							END) <> 0)
+					)				
+				
+			RETURN 1
+		END
 
 	IF (@TransactionType = 'Sale')
 	BEGIN
@@ -21,8 +100,6 @@ BEGIN
 			, intItemId INT
 			, intCategoryId INT
 			, intTaxGroupMasterId INT)
-		DECLARE @VendorId INT
-			,@ItemCategoryId INT
 
 		INSERT INTO @EntitySpecialTax(
 			 intSpecialTaxId
@@ -41,14 +118,6 @@ BEGIN
 		INNER JOIN tblARCustomer Customer ON SpecialTax.intEntityCustomerId = Customer.intEntityCustomerId
 		WHERE Customer.intEntityCustomerId = @EntityId
 		
-		SELECT
-			@VendorId = ItemStock.intVendorId
-			,@ItemCategoryId = Item.intCategoryId
-		FROM tblICItem Item
-		INNER JOIN vyuICGetItemStock ItemStock ON Item.intItemId = ItemStock.intItemId
-		WHERE Item.intItemId = @ItemId AND ItemStock.intLocationId = @LocationId
-
-		SET @TaxExempt = ISNULL((SELECT ysnTaxExempt FROM tblARCustomer WHERE intEntityCustomerId = @EntityId AND @EntityId IS NOT NULL),0)
 
 		--Customer Special Tax
 		IF(EXISTS(SELECT TOP 1 NULL FROM @EntitySpecialTax))
@@ -88,10 +157,7 @@ BEGIN
 													
 		END
 	END
-	ELSE
-	BEGIN
-		SET @TaxExempt = 0
-	END
+
 
 	IF ISNULL(@TaxGroupMasterId, 0) = 0
 	BEGIN				
@@ -119,10 +185,10 @@ BEGIN
 					IF (@TransactionType = 'Sale')
 					BEGIN
 						SELECT
-							@Country = ISNULL(ShipToLocation.strCountry, EntityLocation.strCountry)
-							,@State = ISNULL(ShipToLocation.strState, EntityLocation.strState)
-							,@County = TaxCode.strCounty 
-							,@City = ISNULL(ShipToLocation.strCity, EntityLocation.strCity)
+							@Country = UPPER(RTRIM(LTRIM(ISNULL(ISNULL(ShipToLocation.strCountry, EntityLocation.strCountry),''))))
+							,@State = UPPER(RTRIM(LTRIM(ISNULL(ISNULL(ShipToLocation.strState, EntityLocation.strState),''))))
+							,@County = UPPER(RTRIM(LTRIM(ISNULL(TaxCode.strCounty,'')))) 
+							,@City = UPPER(RTRIM(LTRIM(ISNULL(ISNULL(ShipToLocation.strCity, EntityLocation.strCity),''))))
 						FROM tblARCustomer Customer
 						LEFT OUTER JOIN
 							(	SELECT
@@ -140,134 +206,198 @@ BEGIN
 					END
 					ELSE IF (@TransactionType = 'Purchase')
 					BEGIN
-						--SELECT
-						--	@Country = ISNULL(ShipToLocation.strCountry, EntityLocation.strCountry)
-						--	,@State = ISNULL(ShipToLocation.strState, EntityLocation.strState)
-						--	,@County = TaxCode.strCounty 
-						--	,@City = ISNULL(ShipToLocation.strCity, EntityLocation.strCity)
-						--FROM tblAPVendor Vendor
-						--LEFT OUTER JOIN
-						--	(	SELECT
-						--			intEntityLocationId
-						--			,intEntityId 
-						--			,strCountry
-						--			,strState
-						--			,strCity
-						--		FROM tblEntityLocation
-						--		WHERE ysnDefaultLocation = 1
-						--	) EntityLocation ON Vendor.intEntityVendorId = EntityLocation.intEntityId
-						--LEFT OUTER JOIN tblEntityLocation ShipToLocation ON Vendor.intShipFromId = ShipToLocation.intEntityLocationId
-						--LEFT OUTER JOIN tblSMTaxCode TaxCode ON Vendor.intTaxCodeId = TaxCode.intTaxCodeId 								
-						--WHERE Vendor.intEntityVendorId = @EntityId
-
-						SELECT
-							@Country = ISNULL(Location.strCountry, '')
-							,@State = ISNULL(Location.strStateProvince, '')
-							,@County = '' 
-							,@City = ISNULL(Location.strCity, '')
-						FROM tblSMCompanyLocation Location
-						WHERE Location.intCompanyLocationId = @LocationId	
+						--IF(@LocationId IS NULL OR @LocationId = 0)
+						--BEGIN
+						--	SELECT
+						--	@Country = UPPER(RTRIM(LTRIM(ISNULL(ISNULL(ShipToLocation.strCountry, EntityLocation.strCountry),''))))
+						--	,@State = UPPER(RTRIM(LTRIM(ISNULL(ISNULL(ShipToLocation.strState, EntityLocation.strState),''))))
+						--	,@County = UPPER(RTRIM(LTRIM(ISNULL(TaxCode.strCounty,''))))
+						--	,@City = UPPER(RTRIM(LTRIM(ISNULL(ISNULL(ShipToLocation.strCity, EntityLocation.strCity),''))))
+						--	FROM tblAPVendor Vendor
+						--	LEFT OUTER JOIN
+						--		(	SELECT
+						--				intEntityLocationId
+						--				,intEntityId 
+						--				,strCountry
+						--				,strState
+						--				,strCity
+						--			FROM tblEntityLocation
+						--			WHERE ysnDefaultLocation = 1
+						--		) EntityLocation ON Vendor.intEntityVendorId = EntityLocation.intEntityId
+						--	LEFT OUTER JOIN tblEntityLocation ShipToLocation ON Vendor.intShipFromId = ShipToLocation.intEntityLocationId
+						--	LEFT OUTER JOIN tblSMTaxCode TaxCode ON Vendor.intTaxCodeId = TaxCode.intTaxCodeId 								
+						--	WHERE Vendor.intEntityVendorId = @EntityId
+						--END
+						--ELSE
+						--BEGIN
+							SELECT
+								@Country = UPPER(RTRIM(LTRIM(ISNULL(Location.strCountry, ''))))
+								,@State = UPPER(RTRIM(LTRIM(ISNULL(Location.strStateProvince, ''))))
+								,@County = '' 
+								,@City = UPPER(RTRIM(LTRIM(ISNULL(Location.strCity, ''))))
+							FROM tblSMCompanyLocation Location
+							WHERE Location.intCompanyLocationId = @LocationId
+						--END			
 					END
 				END
 			ELSE
 				BEGIN
 					SELECT
-						@Country = ISNULL(Location.strCountry, '')
-						,@State = ISNULL(Location.strStateProvince, '')
+						@Country = UPPER(RTRIM(LTRIM(ISNULL(Location.strCountry, ''))))
+						,@State = UPPER(RTRIM(LTRIM(ISNULL(Location.strStateProvince, ''))))
 						,@County = '' 
-						,@City = ISNULL(Location.strCity, '')
+						,@City = UPPER(RTRIM(LTRIM(ISNULL(Location.strCity, ''))))
 					FROM tblSMCompanyLocation Location
 					WHERE Location.intCompanyLocationId = @LocationId				
 				END
 				
 			DECLARE @TaxGroups TABLE(intTaxGroupId INT)				
+			DECLARE @ValidTaxGroups TABLE(intTaxGroupId INT)				
+			DECLARE @TaxCodes TABLE(
+				intTaxGroupMasterId INT
+				,intTaxGroupId INT
+				,intTaxCodeId INT
+				,strCountry NVARCHAR(500)
+				,strState NVARCHAR(500)
+				,strCounty NVARCHAR(500)
+				,strCity NVARCHAR(500))			
+			
+			INSERT INTO @TaxCodes
+			SELECT DISTINCT 
+				TGM.[intTaxGroupMasterId]
+				,TG.[intTaxGroupId]
+				,TC.[intTaxCodeId]
+				,UPPER(RTRIM(LTRIM(TC.[strCountry])))
+				,UPPER(RTRIM(LTRIM(TC.[strState])))
+				,UPPER(RTRIM(LTRIM(TC.[strCounty])))
+				,UPPER(RTRIM(LTRIM(TC.[strCity])))
+			FROM tblSMTaxCode TC	
+				INNER JOIN tblSMTaxGroupCode TGC ON TC.[intTaxCodeId] = TGC.[intTaxCodeId] 
+				INNER JOIN tblSMTaxGroup TG ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
+				INNER JOIN tblSMTaxGroupMasterGroup TGTM ON TG.[intTaxGroupId] = TGTM.[intTaxGroupId]
+				INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
+			WHERE 
+				TGM.[intTaxGroupMasterId] = @TaxGroupMasterId
+				AND TC.[intTaxCodeId] NOT IN
+					(
+						SELECT DISTINCT TC.intTaxCodeId
+						FROM tblSMTaxCode TC	
+							INNER JOIN tblSMTaxGroupCode TGC ON TC.[intTaxCodeId] = TGC.[intTaxCodeId] 
+							INNER JOIN tblSMTaxGroup TG ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
+							INNER JOIN tblSMTaxGroupMasterGroup TGTM ON TG.[intTaxGroupId] = TGTM.[intTaxGroupId]
+							INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
+						WHERE 
+							TGM.[intTaxGroupMasterId] = @TaxGroupMasterId
+						GROUP BY
+							TC.intTaxCodeId
+						HAVING COUNT(TC.intTaxCodeId) > 1
+					)
+					
+			IF (SELECT COUNT(1) FROM @TaxCodes) < 1
+				BEGIN
+					INSERT INTO @TaxCodes
+					SELECT DISTINCT 
+						TGM.[intTaxGroupMasterId]
+						,TG.[intTaxGroupId]
+						,TC.[intTaxCodeId]
+						,UPPER(RTRIM(LTRIM(TC.[strCountry])))
+						,UPPER(RTRIM(LTRIM(TC.[strState])))
+						,UPPER(RTRIM(LTRIM(TC.[strCounty])))
+						,UPPER(RTRIM(LTRIM(TC.[strCity])))
+					FROM tblSMTaxCode TC	
+						INNER JOIN tblSMTaxGroupCode TGC ON TC.[intTaxCodeId] = TGC.[intTaxCodeId] 
+						INNER JOIN tblSMTaxGroup TG ON TGC.[intTaxGroupId] = TG.[intTaxGroupId]
+						INNER JOIN tblSMTaxGroupMasterGroup TGTM ON TG.[intTaxGroupId] = TGTM.[intTaxGroupId]
+						INNER JOIN tblSMTaxGroupMaster TGM ON TGTM.[intTaxGroupMasterId] = TGM.[intTaxGroupMasterId]
+					WHERE 
+						TGM.[intTaxGroupMasterId] = @TaxGroupMasterId
+				END
+											
 			
 			INSERT INTO @TaxGroups
-			SELECT DISTINCT TaxGroup.intTaxGroupId
-			FROM tblSMTaxCode TaxCode	
-				INNER JOIN tblSMTaxGroupCode TaxGroupCode ON TaxCode.intTaxCodeId = TaxGroupCode.intTaxCodeId 
-				INNER JOIN tblSMTaxGroup TaxGroup ON TaxGroupCode.intTaxGroupId = TaxGroup.intTaxGroupId
-				INNER JOIN tblSMTaxGroupMasterGroup TaxGroupMasterGroup ON TaxGroup.intTaxGroupId = TaxGroupMasterGroup.intTaxGroupId
-				INNER JOIN tblSMTaxGroupMaster TaxGroupMaster ON TaxGroupMasterGroup.intTaxGroupMasterId = TaxGroupMaster.intTaxGroupMasterId
-			WHERE TaxGroupMaster.intTaxGroupMasterId = @TaxGroupMasterId
-				
-			--Country
-			IF (SELECT COUNT(1) FROM @TaxGroups) > 1
-				BEGIN
-					DELETE FROM @TaxGroups
-					WHERE
-						intTaxGroupId NOT IN
-						(
-							SELECT DISTINCT TaxGroup.intTaxGroupId 
-							FROM tblSMTaxCode TaxCode	
-								INNER JOIN tblSMTaxGroupCode TaxGroupCode ON TaxCode.intTaxCodeId = TaxGroupCode.intTaxCodeId 
-								INNER JOIN tblSMTaxGroup TaxGroup ON TaxGroupCode.intTaxGroupId = TaxGroup.intTaxGroupId
-								INNER JOIN tblSMTaxGroupMasterGroup TaxGroupMasterGroup ON TaxGroup.intTaxGroupId = TaxGroupMasterGroup.intTaxGroupId
-								INNER JOIN tblSMTaxGroupMaster TaxGroupMaster ON TaxGroupMasterGroup.intTaxGroupMasterId = TaxGroupMaster.intTaxGroupMasterId
-							WHERE TaxGroupMaster.intTaxGroupMasterId = @TaxGroupMasterId
-								AND TaxCode.strCountry = @Country 
-						)				
-				END
-				
-			--State
-			IF (SELECT COUNT(1) FROM @TaxGroups) > 1
-				BEGIN
-					DELETE FROM @TaxGroups
-					WHERE
-						intTaxGroupId NOT IN
-						(
-							SELECT DISTINCT TaxGroup.intTaxGroupId 
-							FROM tblSMTaxCode TaxCode	
-								INNER JOIN tblSMTaxGroupCode TaxGroupCode ON TaxCode.intTaxCodeId = TaxGroupCode.intTaxCodeId 
-								INNER JOIN tblSMTaxGroup TaxGroup ON TaxGroupCode.intTaxGroupId = TaxGroup.intTaxGroupId
-								INNER JOIN tblSMTaxGroupMasterGroup TaxGroupMasterGroup ON TaxGroup.intTaxGroupId = TaxGroupMasterGroup.intTaxGroupId
-								INNER JOIN tblSMTaxGroupMaster TaxGroupMaster ON TaxGroupMasterGroup.intTaxGroupMasterId = TaxGroupMaster.intTaxGroupMasterId
-							WHERE TaxGroupMaster.intTaxGroupMasterId = @TaxGroupMasterId
-								AND TaxCode.strCountry = @Country
-								AND TaxCode.strState = @State 
-						)				
-				END
-				
-			--County
-			IF (SELECT COUNT(1) FROM @TaxGroups) > 1
-				BEGIN
-					DELETE FROM @TaxGroups
-					WHERE
-						intTaxGroupId NOT IN
-						(
-							SELECT DISTINCT TaxGroup.intTaxGroupId 
-							FROM tblSMTaxCode TaxCode	
-								INNER JOIN tblSMTaxGroupCode TaxGroupCode ON TaxCode.intTaxCodeId = TaxGroupCode.intTaxCodeId 
-								INNER JOIN tblSMTaxGroup TaxGroup ON TaxGroupCode.intTaxGroupId = TaxGroup.intTaxGroupId
-								INNER JOIN tblSMTaxGroupMasterGroup TaxGroupMasterGroup ON TaxGroup.intTaxGroupId = TaxGroupMasterGroup.intTaxGroupId
-								INNER JOIN tblSMTaxGroupMaster TaxGroupMaster ON TaxGroupMasterGroup.intTaxGroupMasterId = TaxGroupMaster.intTaxGroupMasterId
-							WHERE TaxGroupMaster.intTaxGroupMasterId = @TaxGroupMasterId
-								AND TaxCode.strCountry = @Country
-								AND TaxCode.strState = @State 
-								AND TaxCode.strCounty = @County
-						)				
-				END	
+			SELECT DISTINCT [intTaxGroupId]
+			FROM @TaxCodes
+			
+			DECLARE @TaxGroupCount INT
+					,@ValidTaxGroupCount INT
+			
 
-			--City
-			IF (SELECT COUNT(1) FROM @TaxGroups) > 1
+
+			--Country
+			INSERT INTO @ValidTaxGroups
+			SELECT DISTINCT
+				[intTaxGroupId] 
+			FROM 
+				@TaxCodes
+			WHERE
+				[strCountry] = @Country
+				
+			SELECT @TaxGroupCount = COUNT(1) FROM @TaxGroups
+			SELECT @ValidTaxGroupCount = COUNT(1) FROM @ValidTaxGroups
+				
+			IF @TaxGroupCount >= 1 AND @ValidTaxGroupCount >= 1 AND (@TaxGroupCount - @ValidTaxGroupCount >= 1)
 				BEGIN
 					DELETE FROM @TaxGroups
-					WHERE
-						intTaxGroupId NOT IN
-						(
-							SELECT DISTINCT TaxGroup.intTaxGroupId 
-							FROM tblSMTaxCode TaxCode	
-								INNER JOIN tblSMTaxGroupCode TaxGroupCode ON TaxCode.intTaxCodeId = TaxGroupCode.intTaxCodeId 
-								INNER JOIN tblSMTaxGroup TaxGroup ON TaxGroupCode.intTaxGroupId = TaxGroup.intTaxGroupId
-								INNER JOIN tblSMTaxGroupMasterGroup TaxGroupMasterGroup ON TaxGroup.intTaxGroupId = TaxGroupMasterGroup.intTaxGroupId
-								INNER JOIN tblSMTaxGroupMaster TaxGroupMaster ON TaxGroupMasterGroup.intTaxGroupMasterId = TaxGroupMaster.intTaxGroupMasterId
-							WHERE TaxGroupMaster.intTaxGroupMasterId = @TaxGroupMasterId
-								AND TaxCode.strCountry = @Country
-								AND TaxCode.strState = @State 
-								AND TaxCode.strCounty = @County
-								AND TaxCode.strCity = @City
-						)				
-				END									
+					WHERE [intTaxGroupId] NOT IN (SELECT DISTINCT [intTaxGroupId] FROM @ValidTaxGroups)				
+				END
+				
+				
+			DELETE FROM @ValidTaxGroups				
+			--State
+			INSERT INTO @ValidTaxGroups
+			SELECT DISTINCT
+				[intTaxGroupId] 
+			FROM 
+				@TaxCodes
+			WHERE 
+				[strState] = @State 																			
+				
+			SELECT @TaxGroupCount = COUNT(1) FROM @TaxGroups
+			SELECT @ValidTaxGroupCount = COUNT(1) FROM @ValidTaxGroups
+				
+			IF @TaxGroupCount >= 1 AND @ValidTaxGroupCount >= 1 AND (@TaxGroupCount - @ValidTaxGroupCount >= 1)
+				BEGIN
+					DELETE FROM @TaxGroups
+					WHERE [intTaxGroupId] NOT IN (SELECT DISTINCT [intTaxGroupId] FROM @ValidTaxGroups)
+				END
+				
+			DELETE FROM @ValidTaxGroups				
+			--County
+			INSERT INTO @ValidTaxGroups
+			SELECT DISTINCT
+				[intTaxGroupId] 
+			FROM 
+				@TaxCodes
+			WHERE 
+				[strCounty] = @County	
+				
+			SELECT @TaxGroupCount = COUNT(1) FROM @TaxGroups
+			SELECT @ValidTaxGroupCount = COUNT(1) FROM @ValidTaxGroups
+				
+			IF @TaxGroupCount >= 1 AND @ValidTaxGroupCount >= 1 AND (@TaxGroupCount - @ValidTaxGroupCount >= 1)
+				BEGIN
+					DELETE FROM @TaxGroups
+					WHERE [intTaxGroupId] NOT IN (SELECT DISTINCT [intTaxGroupId] FROM @ValidTaxGroups)			
+				END	
+				
+			DELETE FROM @ValidTaxGroups				
+			--City
+			INSERT INTO @ValidTaxGroups
+			SELECT DISTINCT
+				[intTaxGroupId] 
+			FROM 
+				@TaxCodes
+			WHERE 
+				[strCity] = @City																					
+				
+			SELECT @TaxGroupCount = COUNT(1) FROM @TaxGroups
+			SELECT @ValidTaxGroupCount = COUNT(1) FROM @ValidTaxGroups
+				
+			IF @TaxGroupCount >= 1 AND @ValidTaxGroupCount >= 1 AND (@TaxGroupCount - @ValidTaxGroupCount >= 1)
+				BEGIN
+					DELETE FROM @TaxGroups
+					WHERE [intTaxGroupId] NOT IN (SELECT DISTINCT [intTaxGroupId] FROM @ValidTaxGroups)				
+				END										
 					
 			SELECT
 				0
@@ -303,7 +433,21 @@ BEGIN
 				,tblSMTaxGroupMaster.ysnSeparateOnInvoice 
 				,TaxCode.ysnCheckoffTax
 				,TaxCode.strTaxCode
-				,@TaxExempt AS ysnTaxExempt 				
+				,(CASE WHEN ISNULL(@TaxExempt,0) = 0
+					THEN (CASE WHEN @TransactionType = 'Sale'
+							THEN (ISNULL((	SELECT TOP 1 1 FROM
+												tblARCustomerTaxingTaxException
+											WHERE
+												(intCategoryId = @ItemCategoryId OR intItemId = @ItemId)
+												AND intEntityCustomerId = @EntityId
+												AND (intTaxClassId = TaxCode.[intTaxClassId] OR intTaxCodeId = TaxCode.[intTaxCodeId] OR (UPPER(LTRIM(RTRIM(ISNULL(strState,'')))) = UPPER(LTRIM(RTRIM(ISNULL(TaxCode.strState,'')))) AND LEN(UPPER(LTRIM(RTRIM(ISNULL(strState,''))))) > 0 ) )
+												AND	@TransactionDate BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate, @TransactionDate) AS DATE)
+											ORDER BY
+												dtmStartDate),0))
+							ELSE ISNULL(@TaxExempt,0)
+						END)
+					ELSE ISNULL(@TaxExempt,0)
+				END) AS [ysnTaxExempt] 				
 			FROM tblSMTaxCode TaxCode
 			INNER JOIN tblSMTaxGroupCode TaxGroupCode ON TaxCode.intTaxCodeId = TaxGroupCode.intTaxCodeId 
 			INNER JOIN tblSMTaxGroup TaxGroup ON TaxGroupCode.intTaxGroupId = TaxGroup.intTaxGroupId

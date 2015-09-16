@@ -21,8 +21,8 @@ BEGIN
 		DECLARE @AverageCost AS INT = 1
 				,@FIFO AS INT = 2
 				,@LIFO AS INT = 3
-				,@StandardCost AS INT = 4
-				,@LotCost AS INT = 5
+				,@LOTCOST AS INT = 4
+				,@ACTUALCOST AS INT = 5
 
 		CREATE TABLE expected(
 			CostingMethod INT NULL

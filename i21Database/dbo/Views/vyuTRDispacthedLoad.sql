@@ -22,14 +22,19 @@ LG.intCounterPartyEntityLocationId as intShipToLocationId,
 (select top 1 intSalespersonId from tblARCustomer AR where AR.intEntityCustomerId = LG.intCounterPartyEntityId) as intEntitySalespersonId,
 (select strCustomerNumber from tblARCustomer AR where AR.intEntityCustomerId = LG.intCounterPartyEntityId) as strCustomerNumber,
 (select strLocationName from tblSMCompanyLocation SM where SM.intCompanyLocationId = LG.intCounterPartyCompanyLocationId) as strOutboundLocationName,
-(select top 1 strSalespersonId from tblARCustomer AR 
-                                    Left Join tblARSalesperson SP on AR.intSalespersonId = SP.intEntitySalespersonId
+(select top 1 SP.strEntityNo from tblARCustomer AR 
+                                    Left Join vyuEMEntity SP on AR.intSalespersonId = SP.intEntityId
 									 where AR.intEntityCustomerId = LG.intCounterPartyEntityId) as strOutboundSalespersonId,
 LG.strCounterPartyLocationName as strShipTo,
-LG.intCounterPartyItemId as intOutboundItemId,
+intOutboundItemId = CASE
+						WHEN LG.intCounterPartyItemId is NULL							        
+						   THEN LG.intItemId
+						WHEN LG.intCounterPartyItemId is NOT NULL
+						   THEN LG.intCounterPartyItemId
+						END,
 LG.dblQuantity as dblOutboundQuantity,
 LG.dblCounterPartyCashPrice as dblOutboundPrice,
-(select strItemNo from tblICItem IC where IC.intItemId = LG.intCounterPartyItemId) as strOutboundItemNo,
+(select strItemNo from tblICItem IC where IC.intItemId = isNULL(LG.intCounterPartyItemId,LG.intItemId)) as strOutboundItemNo,
 LG.strCounterPartyContractNumber as strOutboundContractNumber,
 LG.dtmScheduledDate,
 LG.dtmDispatchedDate,
@@ -43,7 +48,12 @@ LG.strHauler as strShipVia,
                                join tblEntity EM on CP.intSellerId = EM.intEntityId) as strSeller,
 LG.strDriver as strSalespersonId,
 LG.intCounterPartyContractDetailId as intOutboundContractDetailId,
-LG.ysnDirectShip,
+ysnDirectShip = CASE
+						WHEN LG.intCounterPartyEntityId is NULL							        
+						   THEN cast(0 as bit)
+						WHEN LG.intCounterPartyEntityId is NOT NULL
+						   THEN LG.ysnDirectShip
+						END,
 LG.ysnInProgress,
 LG.intCounterPartyLoadId as intOutboundLoadId,
 LG.strExternalLoadNumber as strSupplierLoadNumber,
@@ -69,7 +79,15 @@ intOutboundIndexRackPriceSupplyPointId  = CASE
 								     THEN isNull((select top 1 intRackPriceSupplyPointId from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intCounterPartyContractDetailId ),(select top 1 intSupplyPointId from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intCounterPartyContractDetailId )) 
 								  WHEN isNull((select top 1 strIndexType from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intCounterPartyContractDetailId ),0) != 'Fixed' 
 								     THEN null
-								  END
+								  END,
+(select top 1 intTaxGroupId from dbo.tblTRSupplyPoint SP where SP.intEntityLocationId = LG.intEntityLocationId) as intInboundTaxGroupId ,
+(select top 1 TX.strTaxGroup from dbo.tblTRSupplyPoint SP 
+                                     LEFT JOIN tblSMTaxGroup TX on SP.intTaxGroupId = TX.intTaxGroupId
+									 where SP.intEntityLocationId = LG.intEntityLocationId) as strInboundTaxGroup,
+(select top 1 EM.intTaxGroupId from tblEntityLocation EM where EM.intEntityLocationId = LG.intCounterPartyEntityLocationId) as intOutboundTaxGroupId,
+(select top 1 strTaxGroup from tblEntityLocation EM
+                               LEFT JOIN tblSMTaxGroup TX on EM.intTaxGroupId = TX.intTaxGroupId 
+                               where EM.intEntityLocationId = LG.intCounterPartyEntityLocationId) as strOutboundTaxGroup
 from dbo.vyuLGLoadView LG
 where 
  (IsNull(LG.ysnDispatched,0)=1)  and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and
@@ -90,7 +108,7 @@ LG.dblCashPrice as dblInboundPrice,
 NULL as strTerminalName,
 NULL as strSupplyPoint,
 LG.strLocationName,
-LG.strItemNo as strInboundItemNo,
+(select strItemNo from tblICItem IC where IC.intItemId = LG.intItemId) as strInboundItemNo,
 NULL as intInboundContractNumber,
 LG.intEntityId as intEntityCustomerId,
 LG.intCompanyLocationId as intOutboundCompanyLocationId, 
@@ -98,8 +116,8 @@ LG.intEntityLocationId as intShipToLocationId,
 (select top 1 intSalespersonId from tblARCustomer AR where AR.intEntityCustomerId = LG.intEntityId) as intEntitySalespersonId,
 (select strCustomerNumber from tblARCustomer AR where AR.intEntityCustomerId = LG.intEntityId) as strCustomerNumber,
 (select strLocationName from tblSMCompanyLocation SM where SM.intCompanyLocationId = LG.intCompanyLocationId) as strOutboundLocationName,
-(select top 1 strSalespersonId from tblARCustomer AR 
-                                    Left Join tblARSalesperson SP on AR.intSalespersonId = SP.intEntitySalespersonId
+(select top 1 SP.strEntityNo from tblARCustomer AR 
+                                    Left Join vyuEMEntity SP on AR.intSalespersonId = SP.intEntityId
 									 where AR.intEntityCustomerId = LG.intEntityId) as strOutboundSalespersonId,
 (select strLocationName from tblEntityLocation EML where EML.intEntityLocationId = LG.intEntityLocationId) as strShipTo,
 LG.intItemId as intOutboundItemId,
@@ -138,7 +156,14 @@ intOutboundIndexRackPriceSupplyPointId  = CASE
 								     THEN isNull((select top 1 intRackPriceSupplyPointId from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId ),(select top 1 intSupplyPointId from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId )) 
 								  WHEN isNull((select top 1 strIndexType from vyuCTContractDetailView CT where CT.intContractDetailId = LG.intContractDetailId ),0) != 'Fixed' 
 								     THEN null
-								  END
+								  END,
+NULL as intInboundTaxGroupId ,
+NULL as strInboundTaxGroup,
+(select top 1 EM.intTaxGroupId from tblEntityLocation EM where EM.intEntityLocationId = LG.intEntityLocationId) as intOutboundTaxGroupId,
+(select top 1 strTaxGroup from tblEntityLocation EM
+                               LEFT JOIN tblSMTaxGroup TX on EM.intTaxGroupId = TX.intTaxGroupId 
+                               where EM.intEntityLocationId = LG.intEntityLocationId) as strOutboundTaxGroup
+
 from dbo.vyuLGLoadView LG
 where 
  (IsNull(LG.ysnDispatched,0)=1)  and (IsNull(LG.dblDeliveredQuantity,0) <= 0) and

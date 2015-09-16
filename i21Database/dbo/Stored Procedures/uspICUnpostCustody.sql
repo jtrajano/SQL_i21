@@ -6,6 +6,7 @@ CREATE PROCEDURE [dbo].[uspICUnpostCustody]
 	,@strTransactionId AS NVARCHAR(40)
 	,@strBatchId AS NVARCHAR(20)
 	,@intUserId AS INT
+	,@ysnRecap AS BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -35,7 +36,7 @@ DECLARE @AUTO_NEGATIVE AS INT = 1
 DECLARE @AVERAGECOST AS INT = 1
 		,@FIFO AS INT = 2
 		,@LIFO AS INT = 3
-		,@STANDARDCOST AS INT = 4
+		,@LOTCOST AS INT = 4
 
 DECLARE @ItemsToUnpost AS dbo.UnpostItemsTableType
 
@@ -74,7 +75,9 @@ END
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	EXEC dbo.uspICValidateCostingOnUnpostInCustody @ItemsToUnpost
+	EXEC dbo.uspICValidateCostingOnUnpostInCustody 
+		@ItemsToUnpost
+		,@ysnRecap 
 END 
 
 -----------------------------------------------------------------------------------------------------------------------------

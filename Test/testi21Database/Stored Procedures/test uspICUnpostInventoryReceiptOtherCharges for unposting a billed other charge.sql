@@ -270,7 +270,7 @@ BEGIN
 		
 		-- Simulate a billed other charge
 		BEGIN 
-			UPDATE	dbo.tblICInventoryReceiptItemAllocatedCharge
+			UPDATE	dbo.tblICInventoryReceiptChargePerItem
 			SET		dblAmountBilled = 10
 			WHERE	intInventoryReceiptId = @intInventoryReceiptId
 

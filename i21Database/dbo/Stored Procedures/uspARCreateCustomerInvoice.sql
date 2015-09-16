@@ -38,6 +38,7 @@
 	,@ItemSCInvoiceId				INT				= NULL
 	,@ItemSCInvoiceNumber			NVARCHAR(50)	= NULL
 	,@ItemServiceChargeAccountId	INT				= NULL
+	,@ItemTaxGroupId				INT				= NULL
 AS
 
 BEGIN
@@ -295,6 +296,7 @@ IF (@ItemId IS NOT NULL OR @ItemId <> 0)
 			,@ItemSCInvoiceId				= @ItemSCInvoiceId
 			,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
 			,@ItemServiceChargeAccountId	= @ItemServiceChargeAccountId
+			,@ItemTaxGroupId				= @ItemTaxGroupId
 			
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN

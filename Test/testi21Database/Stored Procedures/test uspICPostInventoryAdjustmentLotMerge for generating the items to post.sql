@@ -214,11 +214,11 @@ BEGIN
 		SELECT	
 				intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_25KgBagUOM
+				,intItemUOMId			= @ManualGrains_PoundUOM
 				,dtmDate				= '05/17/2015'
-				,dblQty					= 500.00 
-				,dblUOMQty				= @25KgBagUnitQty
-				,dblCost				= 2.50 * @25KgBagUnitQty
+				,dblQty					= 500.00 * @25KgBagUnitQty
+				,dblUOMQty				= @PoundUnitQty
+				,dblCost				= 2.50 
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 
@@ -295,4 +295,4 @@ BEGIN
 
 	IF OBJECT_ID('expected') IS NOT NULL 
 		DROP TABLE dbo.expected
-END 
+END

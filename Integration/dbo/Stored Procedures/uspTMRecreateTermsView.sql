@@ -78,11 +78,10 @@ BEGIN
 			CREATE VIEW [dbo].[vwtrmmst]
 			AS
 			SELECT 
-				vwtrm_key_n = CAST(strTermCode AS INT)
+				vwtrm_key_n = CAST(intTermID AS INT)
 				,vwtrm_desc = strTerm
-				,A4GLIdentity= CAsT(intTermID AS INT)
-			FROM
-			tblSMTerm
+				,A4GLIdentity= CAST(intTermID AS INT)
+			FROM tblSMTerm
 		')
 	END
 END

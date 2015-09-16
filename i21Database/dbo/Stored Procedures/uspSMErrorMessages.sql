@@ -660,7 +660,7 @@ SET @strmessage = 'Cyclic situation found. Unable to compute surcharge because %
 EXEC sp_addmessage 51164,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51165) EXEC sp_dropmessage 51165, 'us_english'	
-SET @strmessage = 'Unable to compute the surcharge for %s.'
+SET @strmessage = 'Unable to compute the surcharge for %s. The On Cost for the surcharge could be missing. Also, the Vendor for both the surcharge and On Cost must match.'
 EXEC sp_addmessage 51165,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51166) EXEC sp_dropmessage 51166, 'us_english'	
@@ -785,4 +785,10 @@ EXEC sp_addmessage 51195,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51196) EXEC sp_dropmessage 51196, 'us_english'	
 SET @strmessage = 'Weight per unit of the source and the destination lot differs, cannot merge'
-EXEC sp_addmessage 51196,11,@strmessage,'us_english','False'
+EXEC sp_addmessage 51196,11,@strmessage,'us_english','False'IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51180) EXEC sp_dropmessage 51180, 'us_english'	
+SET @strmessage = 'Data not found. Unable to create the Inventory Transfer.'
+EXEC sp_addmessage 51180,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51181) EXEC sp_dropmessage 51181, 'us_english'	
+SET @strmessage = 'Unable to generate the Inventory Transfer. An error stopped the creation of the inventory transfer.'
+EXEC sp_addmessage 51181,11,@strmessage,'us_english','False'

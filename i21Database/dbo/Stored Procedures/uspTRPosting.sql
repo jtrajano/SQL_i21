@@ -16,7 +16,8 @@ DECLARE @ErrorState INT;
 BEGIN TRY
 
 EXEC uspTRPostingValidation @intTransportLoadId
-EXEC uspTRProcessToItemReceipt @intTransportLoadId,@intUserId
+EXEC uspTRProcessToInventoryReceipt @intTransportLoadId,@intUserId
+EXEC uspTRProcessToInventoryTransfer @intTransportLoadId,@intUserId
 EXEC uspTRProcessToInvoice @intTransportLoadId,@intUserId
 EXEC uspTRProcessTransportLoad @intTransportLoadId
 

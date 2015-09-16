@@ -278,7 +278,10 @@ BEGIN
 	  END
   if (@dblUnitCost is null or @dblUnitCost = 0)
      BEGIN
+	   if(@strOrigin != 'Location')
+	   BEGIN
          RAISERROR('Unit Cost cannot be 0', 16, 1);
+       END
      END
   if(@GrossorNet = 'Gross')
       BEGIN
@@ -354,6 +357,10 @@ BEGIN
 	   BEGIN
           RAISERROR('Ship To is Invalid', 16, 1); 
        END
+	   if(@dblPrice = 0)
+	   BEGIN
+          RAISERROR('Distribution Price cannot be 0', 16, 1); 
+       END
 	   
     END
 	if(@intCompanyLocationId is NULL)
@@ -372,10 +379,7 @@ BEGIN
 	BEGIN
        RAISERROR('Distribution Units cannot be 0', 16, 1); 
     END
-	if(@dblPrice = 0)
-	BEGIN
-       RAISERROR('Distribution Price cannot be 0', 16, 1); 
-    END
+	
 	
    SET @incDistDetailval = @incDistDetailval + 1;
 END

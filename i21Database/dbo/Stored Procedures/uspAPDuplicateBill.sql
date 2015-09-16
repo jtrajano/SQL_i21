@@ -28,7 +28,7 @@ UPDATE A
 	SET ysnPosted = 0
 	,ysnPaid = 0
 	,dblPayment = 0
-	,dblAmountDue = 0
+	,dblAmountDue = A.dblTotal
 	,dblWithheld = 0
 	,strVendorOrderNumber = NULL
 	,strBillId = @generatedBillRecordId
@@ -132,11 +132,12 @@ ON 1 = 0
 			[intAccountId],
 			[intItemId],
 			[intInventoryReceiptItemId],
-			[intInventoryReceiptItemAllocatedChargeId],
+			[intInventoryReceiptChargeId],
 			[intPurchaseDetailId],
 			[intContractHeaderId],
 			[intContractDetailId],
 			[intPrepayTypeId],
+			[intTaxGroupId],
 			[dblTotal],
 			[intConcurrencyId], 
 			[dblQtyOrdered], 
@@ -161,11 +162,12 @@ ON 1 = 0
 			[intAccountId],
 			[intItemId],
 			[intInventoryReceiptItemId],
-			[intInventoryReceiptItemAllocatedChargeId],
+			[intInventoryReceiptChargeId],
 			[intPurchaseDetailId],
 			[intContractHeaderId],
 			[intContractDetailId],
 			[intPrepayTypeId],
+			[intTaxGroupId],
 			[dblTotal],
 			[intConcurrencyId], 
 			[dblQtyOrdered], 

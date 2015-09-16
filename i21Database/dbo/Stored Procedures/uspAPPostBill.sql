@@ -242,8 +242,8 @@ BEGIN
 		--UPDATE CHARGES
 		UPDATE A
 			SET A.dblAmountBilled = A.dblAmountBilled - B.dblTotal
-		FROM tblICInventoryReceiptItemAllocatedCharge A
-			INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptItemAllocatedChargeId] = A.intInventoryReceiptItemAllocatedChargeId
+		FROM tblICInventoryReceiptChargePerItem A
+			INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptChargeId] = A.intInventoryReceiptChargeId
 		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
 
 		--Insert Successfully unposted transactions.
@@ -293,8 +293,8 @@ BEGIN
 		--UPDATE CHARGES
 		UPDATE A
 			SET A.dblAmountBilled = A.dblAmountBilled + B.dblTotal
-		FROM tblICInventoryReceiptItemAllocatedCharge A
-			INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptItemId] = A.intInventoryReceiptItemAllocatedChargeId
+		FROM tblICInventoryReceiptChargePerItem A
+			INNER JOIN tblAPBillDetail B ON B.[intInventoryReceiptChargeId] = A.intInventoryReceiptChargeId
 		AND B.intBillId IN (SELECT [intBillId] FROM #tmpPostBillData)
 
 		--Insert Successfully posted transactions.

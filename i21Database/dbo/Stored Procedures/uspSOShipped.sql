@@ -31,6 +31,8 @@ BEGIN
 					ON SOD.intContractDetailId = CD.intContractDetailId AND SOD.intContractHeaderId = CD.intContractHeaderId 
 					WHERE SOD.intSalesOrderId = @intSalesOrderId)
 			BEGIN
+				SET @qtyToPost = CASE WHEN @ysnPost = 1 THEN @qtyToPost * 1 ELSE @qtyToPost * -1 END
+
 				UPDATE CD 
 				SET dblBalance = dblBalance - @qtyToPost
 				  , dblScheduleQty = dblScheduleQty - @qtyToPost 

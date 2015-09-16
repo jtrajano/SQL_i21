@@ -75,6 +75,8 @@
     [strFTPPath] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
     [strFTPUserName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [strFTPPassword] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL, 
+	[strArchivePath] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL, 
+	[intPurgeInterval] INT NULL,
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSTRegister] PRIMARY KEY CLUSTERED ([intRegisterId] ASC), 
     CONSTRAINT [AK_tblSTRegister_intStoreId_strRegisterName_strRegisterClass] UNIQUE NONCLUSTERED ([intStoreId],[strRegisterName],[strRegisterClass] ASC), 

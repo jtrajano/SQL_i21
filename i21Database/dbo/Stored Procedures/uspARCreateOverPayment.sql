@@ -68,6 +68,7 @@ INSERT INTO [tblARInvoice]
 	,[strBillToState]
 	,[strBillToZipCode]
 	,[strBillToCountry]
+	,[intPaymentId]
 	,[intConcurrencyId]
 	,[intEntityId])
 SELECT
@@ -108,6 +109,7 @@ SELECT
 	,[strBillToState]		= ISNULL(BL.[strState], EL.[strState])
 	,[strBillToZipCode]		= ISNULL(BL.[strZipCode], EL.[strZipCode])
 	,[strBillToCountry]		= ISNULL(BL.[strCountry], EL.[strCountry])
+	,[intPaymentId]			= A.intPaymentId		
 	,[intConcurrencyId]		= 1
 	,[intEntityId]			= 1
 FROM

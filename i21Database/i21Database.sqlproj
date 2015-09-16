@@ -516,7 +516,6 @@
     <Build Include="dbo\Tables\tblSMCompanyLocation.sql" />
     <Build Include="dbo\Tables\tblARTerritoryDetail.sql" />
     <Build Include="dbo\Tables\tblARTerritory.sql" />
-    <Build Include="dbo\Tables\tblARStatementFooter.sql" />
     <Build Include="dbo\Tables\tblARServiceCharge.sql" />
     <Build Include="dbo\Tables\tblARSalespersonNote.sql" />
     <Build Include="dbo\Tables\tblARSalesperson.sql" />
@@ -614,9 +613,9 @@
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleAPOverflow.sql" />
     <Build Include="dbo\Tables\tblRMSubreportCondition.sql" />
     <Build Include="dbo\Tables\tblRMSubreportFilter.sql" />
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountGroup.sql" />
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountSegmentTemplate.sql" />
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountStructure.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\2_AccountGroup.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\5_AccountSegmentTemplate.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1_AccountStructure.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreatePayment.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBankTransactionReversalOrigin.sql" />
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReportCMChecks.sql" />
@@ -646,7 +645,7 @@
     <None Include="Scripts\Post-Deployment\AP\RestoreVendorId.sql" />
     <None Include="Scripts\Post-Deployment\FRD\FRDEntryDataFix.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\9_ZipCode.sql" />
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountTemplate.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\4_AccountTemplate.sql" />
     <None Include="Scripts\Post-Deployment\AP\FixEntitiesData.sql" />
     <Build Include="dbo\Tables\tblRMDefaultFilter.sql" />
     <Build Include="dbo\Tables\tblRMDefaultOption.sql" />
@@ -2015,7 +2014,6 @@
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTax.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUpdateEmployeeTimeOff.sql" />
     <Build Include="dbo\Tables\tblPRCompanyPreference.sql" />
-    <Build Include="dbo\Tables\tblPREmployeeDirectDeposit.sql" />
     <Build Include="dbo\Views\vyuTRDispacthedLoad.sql" />
     <Build Include="dbo\Tables\tblTRCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspTRProcessLogisticsLoad.sql" />
@@ -2385,6 +2383,42 @@
     <Build Include="dbo\Tables\tblAPVendorSpecialTax.sql" />
     <Build Include="dbo\Tables\tblAPVendorTaxException.sql" />
     <Build Include="dbo\Views\vyuQMQualityExceptionList.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostActualCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReduceStockInActualCost.sql" />
+    <Build Include="dbo\Tables\tblICInventoryActualCost.sql" />
+    <Build Include="dbo\Tables\tblICInventoryActualCostOut.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseStockInActualCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostActualCostIn.sql">
+          <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspICUnpostActualCostOut.sql">
+          <SuppressTSqlWarnings>71005,71502</SuppressTSqlWarnings>
+    </Build>
+    <Build Include="dbo\Stored Procedures\uspSCFullSheetScaleTicket.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCFullSheetDiscountDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCFullSheetDistributionDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCFullSheetFooterDetail.sql" />
+    <Build Include="dbo\Functions\fnAPFormatAddress.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRStorageDelete.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRStorageSave.sql" />
+    <None Include="Scripts\Post-Deployment\IC\14_Fix_Blank_Costing_Method_In_tblICInventoryTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddInventoryTransfer.sql" />
+    <Build Include="dbo\User Defined Types\InventoryTransferStagingTable.sql" />
+    <Build Include="dbo\Tables\tblARCommentMaintenance.sql" />
+    <Build Include="dbo\Stored Procedures\uspARGetDefaultComment.sql" />
+    <Build Include="dbo\Stored Procedures\uspARDuplicateComment.sql" />
+    <Build Include="dbo\Stored Procedures\uspTRProcessToInventoryTransfer.sql" />
+    <Build Include="dbo\Functions\fnARGetItemPricingDetails.sql" />
+    <Build Include="dbo\Functions\fnARGetItemPrice.sql" />
+    <Build Include="dbo\Functions\fnSplitStringWithTrim.sql" />
+    <Build Include="dbo\Functions\fnEMCheckEmailDistributionOption.sql" />
+    <None Include="Scripts\Post-Deployment\AR\PrePaymentLinkToInvoiceFix.sql" />
+    <Build Include="dbo\Functions\fnARGetInvoiceFooterComment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseReservedQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseInTransitInBoundQty.sql" />
+    <Build Include="dbo\User Defined Types\InTransitTableType.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceTaxDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseInTransitOutBoundQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2465,7 +2499,7 @@
     </ArtifactReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\AccountCategory.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\3_AccountCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\12_ReminderList.sql" />
@@ -2475,5 +2509,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\SM\DefaultData\15_Module.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\6_AccountRange.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\6a_RemoveCOGSales_AccountRange.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\2a_RemoveDuplicateCOGSales_AccountGroup.sql" />
   </ItemGroup>
 </Project>

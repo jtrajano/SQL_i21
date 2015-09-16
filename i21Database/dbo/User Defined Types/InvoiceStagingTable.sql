@@ -25,4 +25,8 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[strDeliverPickup] nvarchar(50) COLLATE Latin1_General_CI_AS  NULL --Pickup or Deliver
 	,[dblSurcharge] DECIMAL(18, 6) NULL DEFAULT 0   --Fuel Surcharge
 	,[ysnFreightInPrice] bit NULL DEFAULT 0         --freight in price
+	,[intTaxGroupId] int null                       --Tax Group
+	,[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	,[intShipToLocationId] INT NULL                            -- SalesPerson
+	,[strBOLNumber] NVARCHAR (50)	COLLATE Latin1_General_CI_AS NULL
 )

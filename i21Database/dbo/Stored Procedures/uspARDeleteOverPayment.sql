@@ -22,7 +22,8 @@ WHILE EXISTS(
 				tblARInvoice I
 			INNER JOIN
 				tblARPayment P
-					ON I.strComments = P.strRecordNumber				
+					--ON I.strComments = P.strRecordNumber				
+					ON I.intPaymentId = P.intPaymentId
 			WHERE
 				I.strTransactionType = 'Overpayment'
 				AND P.intPaymentId = @PaymentId
@@ -37,7 +38,8 @@ WHILE EXISTS(
 			tblARInvoice I
 		INNER JOIN
 			tblARPayment P
-				ON I.strComments = P.strRecordNumber				
+				--ON I.strComments = P.strRecordNumber				
+				ON I.intPaymentId = P.intPaymentId
 		WHERE
 			I.strTransactionType = 'Overpayment'
 			AND P.intPaymentId = @PaymentId
