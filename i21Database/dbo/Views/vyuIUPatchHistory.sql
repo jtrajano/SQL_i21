@@ -3,12 +3,12 @@ WITH SCHEMABINDING
 AS 
 SELECT	A.intPatchHistoryId, 
 	A.intVersionId, 
-	B.strVersionNo, 
+	B.strVersionNo,
+	B.strUpdateType,
 	B.dtmLastUpdate, 
 	B.strStashCommitId, 
     A.strCommitId, 
 	A.strVersion, 
-	A.strUpdateType, 
 	A.strChangeType, 
 	A.strFilePath, 
 	A.strFileName
