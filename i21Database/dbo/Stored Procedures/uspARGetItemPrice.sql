@@ -12,6 +12,7 @@
 	,@ContractNumber		NVARCHAR(50)	= NULL OUTPUT
 	,@ContractSeq			INT				= NULL OUTPUT
 	,@AvailableQuantity     NUMERIC(18,6)   = NULL OUTPUT
+	,@UnlimitedQuantity     BIT             = 0    OUTPUT
 	,@OriginalQuantity		NUMERIC(18,6)	= NULL
 	,@CustomerPricingOnly	BIT				= 0
 	,@VendorId				INT				= NULL
@@ -29,6 +30,7 @@ AS
 		,@ContractNumber	= strContractNumber
 		,@ContractSeq		= intContractSeq
 		,@AvailableQuantity = dblAvailableQty
+		,@UnlimitedQuantity = ysnUnlimitedQty
 	FROM
 		[dbo].[fnARGetItemPricingDetails](
 			 @ItemId
@@ -42,6 +44,7 @@ AS
 			,@ContractNumber
 			,@ContractSeq
 			,@AvailableQuantity
+			,@UnlimitedQuantity
 			,@OriginalQuantity
 			,@CustomerPricingOnly
 			,@VendorId
