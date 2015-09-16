@@ -19,6 +19,7 @@ CREATE PROCEDURE [dbo].[uspFRDCreateRowDesign]
 	@intFontSize INT,
 	@strOverrideFormatMask NVARCHAR(200),
 	@ysnForceReversedExpense BIT,
+	@ysnOverrideFormula BIT,
 	@intSort INT
 	
 AS
@@ -49,6 +50,7 @@ BEGIN
 								intFontSize,
 								strOverrideFormatMask,
 								ysnForceReversedExpense,
+								ysnOverrideFormula,
 								intSort)
 
 				SELECT			@intRowId,
@@ -70,6 +72,7 @@ BEGIN
 								@intFontSize,
 								@strOverrideFormatMask,
 								@ysnForceReversedExpense,
+								@ysnOverrideFormula,
 								@intSort
 
 END

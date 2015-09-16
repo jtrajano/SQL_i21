@@ -38,12 +38,12 @@ CREATE TABLE #tmpRelatedRowsCashFlow (
 	[strAction] [nvarchar](10)
 );
 
-EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Line',	'',	'', '',	'',	0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort
+EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Line',	'',	'', '',	'',	0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 
 SET @intRefNo = @intRefNo + 1
 SET @intSort = @intSort + 1;
 
-EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Column Name',	'',	'', '',	'',	0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort
+EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Column Name',	'',	'', '',	'',	0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 
 SET @intRefNo = @intRefNo + 1
 SET @intSort = @intSort + 1;
@@ -67,7 +67,7 @@ BEGIN
 	SELECT TOP 1 @strAccountType = AccountType, @BalanceSide = BalanceSide FROM #TempDebit ORDER BY cntID
 	SELECT * INTO #TempGLAccountDebit FROM vyuGLAccountView where strAccountType = @strAccountType ORDER BY strAccountId
 	
-	EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, 'Debits:', 'Row Name - Left Align', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, @intSort
+	EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, 'Debits:', 'Row Name - Left Align', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, 0, @intSort
 	
 	SET @intRefNo = @intRefNo + 1
 	SET @intSort = @intSort + 1
@@ -85,7 +85,7 @@ BEGIN
 		SET @strRowDescription = '     ' + @strAccountId + ' - ' + REPLACE(@strAccountDescription,'''','')
 		SET @strRowFilter = '[ID] = ''' + @strAccountId + ''''
 
-		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strRowDescription, 'Filter Accounts', @BalanceSide, 'Column', '', @strRowFilter, 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort
+		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strRowDescription, 'Filter Accounts', @BalanceSide, 'Column', '', @strRowFilter, 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 		
 		SET @intRowDetailId = (SELECT MAX(intRowDetailId) FROM tblFRRowDesign WHERE intRowId =  @intRowId)
 
@@ -93,55 +93,41 @@ BEGIN
 				
 		DELETE #TempGLAccountDebit WHERE strAccountId = @strAccountId
 
-		IF (SELECT TOP 1 1 FROM #TempGLAccountDebit) = 1
+		IF @strRelatedRows = ''
 			BEGIN
-				INSERT INTO #tmpRelatedRows (intRefNo, strAction) VALUES (@intRefNo, '+')
-				SET @strRelatedRows =  @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25)) + ' + '			
+				SET @strRelatedRows = 'SUM(' + 'R' + CAST(@intRefNo as NVARCHAR(25)) + ':'
+				SET @intRefNo = @intRefNo + 1
+				SET @intSort = @intSort + 1
+			END
+		ELSE IF (SELECT TOP 1 1 FROM #TempGLAccountDebit) = 1
+			BEGIN
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1
 			END
 		ELSE
 			BEGIN
-				INSERT INTO #tmpRelatedRows (intRefNo, strAction) VALUES (@intRefNo, '+')
-
-				SET @strRelatedRows =  @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25))
+				SET @strRelatedRows =  @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25)) + ')'
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1
 
-				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Underscore', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort
+				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Underscore', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 								
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1			
 
-				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Row Calculation', '', '', @strRelatedRows, '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, @intSort	
+				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Row Calculation', '', '', @strRelatedRows, '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, 1, @intSort	
 				
 				SET @intRowDetailId = (SELECT MAX(intRowDetailId) FROM tblFRRowDesign WHERE intRowId =  @intRowId)
-
-				WHILE EXISTS(SELECT 1 FROM #tmpRelatedRows)
-				BEGIN
-					DECLARE @intSort_Calculation INT = 1
-					DECLARE @cntID INT
-					DECLARE @intRefNo_Calculation INT
-					DECLARE @strAction NVARCHAR(150) = ''
-					DECLARE @intRowDetailRefNo INT
-					
-					SELECT TOP 1 @cntID = cntID, @intRefNo_Calculation = intRefNo, @strAction = strAction FROM #tmpRelatedRows ORDER BY cntID
-					SELECT TOP 1 @intRowDetailRefNo = intRowDetailId FROM tblFRRowDesign WHERE intRowId = @intRowId AND intRefNo = @intRefNo_Calculation
-
-					EXEC [dbo].[uspFRDCreateRowCalculation] @intRowDetailId, @intRowDetailRefNo, @intRowId, @intRefNo, @intRefNo_Calculation, @strAction, @intSort_Calculation	
-
-					DELETE FROM #tmpRelatedRows WHERE cntID = @cntID
-				END
 
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1
 
-				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Double Underscore', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort
+				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Double Underscore', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1	
 
-				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'None', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort	
+				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'None', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort	
 								
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1	
@@ -179,7 +165,7 @@ BEGIN
 	
 	IF(@strAccountType = 'Liability')
 	BEGIN
-		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, 'Credits:', 'Row Name - Left Align', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, @intSort			
+		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, 'Credits:', 'Row Name - Left Align', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, 0, @intSort			
 	END
 
 	SET @intRefNo = @intRefNo + 1
@@ -198,7 +184,7 @@ BEGIN
 		SET @strRowDescription = '     ' + @strAccountId + ' - ' + REPLACE(@strAccountDescription,'''','')
 		SET @strRowFilter = '[ID] = ''' + @strAccountId + ''''
 
-		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strRowDescription, 'Filter Accounts', @BalanceSide, 'Column', '', @strRowFilter, 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort
+		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strRowDescription, 'Filter Accounts', @BalanceSide, 'Column', '', @strRowFilter, 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 		
 		SET @intRowDetailId = (SELECT MAX(intRowDetailId) FROM tblFRRowDesign WHERE intRowId =  @intRowId)
 
@@ -206,22 +192,23 @@ BEGIN
 				
 		DELETE #TempGLAccountCredit WHERE strAccountId = @strAccountId
 
-		IF (SELECT TOP 1 1 FROM #TempGLAccountCredit) = 1
+		IF @strRelatedRows = ''
 			BEGIN
-				INSERT INTO #tmpRelatedRows (intRefNo, strAction) VALUES (@intRefNo, '+')
-				SET @strRelatedRows =  @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25)) + ' + '			
+				SET @strRelatedRows = 'SUM(' + 'R' + CAST(@intRefNo as NVARCHAR(25)) + ':'
+				SET @intRefNo = @intRefNo + 1
+				SET @intSort = @intSort + 1
+			END
+		ELSE IF (SELECT TOP 1 1 FROM #TempGLAccountCredit) = 1
+			BEGIN
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1
 			END
 		ELSE IF(@strAccountType = 'Equity')
 			BEGIN
-				INSERT INTO #tmpRelatedRows (intRefNo, strAction) VALUES (@intRefNo, '+')
-
-				SET @strRelatedRows =  @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25)) + ' + '			
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1
 
-				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '     Current Year Earnings', 'Filter Accounts', 'Credit', 'Column', '', '[Type]  =  ''Revenue'' Or [Type]  =  ''Expense''', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort
+				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '     Current Year Earnings', 'Filter Accounts', 'Credit', 'Column', '', '[Type]  =  ''Revenue'' Or [Type]  =  ''Expense''', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 				SET @intRowDetailId = (SELECT MAX(intRowDetailId) FROM tblFRRowDesign WHERE intRowId =  @intRowId)
 				EXEC [dbo].[uspFRDCreateRowFilter] @intRowDetailId, @intRowId, @intRefNo, 'Type', '=', 'Revenue', '', 'Or'
 				EXEC [dbo].[uspFRDCreateRowFilter] @intRowDetailId, @intRowId, @intRefNo, 'Type', '=', 'Expense', '', 'Or'
@@ -229,40 +216,23 @@ BEGIN
 				SET @intRowDetailId_CY = @intRowDetailId
 				SET @intRefNo_CY = @intRefNo
 
-				INSERT INTO #tmpRelatedRows (intRefNo, strAction) VALUES (@intRefNo, '+')
-				SET @strRelatedRows =  @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25))
+				SET @strRelatedRows =  @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25)) + ')'
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1					
 
-				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Row Calculation', '', '', @strRelatedRows, '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, @intSort	
+				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Row Calculation', '', '', @strRelatedRows, '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, 1, @intSort	
 
 				SET @intRowDetailId = (SELECT MAX(intRowDetailId) FROM tblFRRowDesign WHERE intRowId =  @intRowId)
-
-				WHILE EXISTS(SELECT 1 FROM #tmpRelatedRows)
-				BEGIN
-					SET @intSort_Calculation = 1
-					SET @cntID = 0 
-					SET @intRefNo_Calculation = 0
-					SET @strAction = ''
-					SET @intRowDetailRefNo = 0
-					
-					SELECT TOP 1 @cntID = cntID, @intRefNo_Calculation = intRefNo, @strAction = strAction FROM #tmpRelatedRows ORDER BY cntID
-					SELECT TOP 1 @intRowDetailRefNo = intRowDetailId FROM tblFRRowDesign WHERE intRowId = @intRowId AND intRefNo = @intRefNo_Calculation
-
-					EXEC [dbo].[uspFRDCreateRowCalculation] @intRowDetailId, @intRowDetailRefNo, @intRowId, @intRefNo, @intRefNo_Calculation, @strAction, @intSort_Calculation	
-
-					DELETE FROM #tmpRelatedRows WHERE cntID = @cntID
-				END
 
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1
 
-				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Double Underscore', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort
+				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Double Underscore', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1	
 
-				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'None', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort	
+				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'None', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort	
 								
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1	
@@ -300,18 +270,18 @@ BEGIN
 	
 	IF(@strAccountType = 'Operations')
 	BEGIN
-		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, 'Cash Flow from Operating Activities:', 'Row Name - Left Align', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, @intSort
+		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, 'Cash Flow from Operating Activities:', 'Row Name - Left Align', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, 0, @intSort
 	
 		SET @intRefNo = @intRefNo + 1
 		SET @intSort = @intSort + 1
 
 		DECLARE @netFormula NVARCHAR(100) = 'R' + CAST(@intRefNo_CY as NVARCHAR(100))
 
-		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '     Net Income', 'Row Calculation', '', '', @netFormula, '', 1, 1, 0, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort	
-				
+		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '     Net Income', 'Row Calculation', '', '', @netFormula, '', 1, 1, 0, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort	
+		
 		SET @intRowDetailId = (SELECT MAX(intRowDetailId) FROM tblFRRowDesign WHERE intRowId =  @intRowId)
 
-		EXEC [dbo].[uspFRDCreateRowCalculation] @intRowDetailId, @intRowDetailId_CY, @intRowId, @intRefNo, @intRefNo_CY, @strAction, 1	
+		EXEC [dbo].[uspFRDCreateRowCalculation] @intRowDetailId, @intRowDetailId_CY, @intRowId, @intRefNo, @intRefNo_CY, '+', 1	
 
 		INSERT INTO #tmpRelatedRowsCashFlow (intRefNo, strAction) VALUES (@intRefNo, '+')
 		SET @strRelatedRows =  @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25)) + ' + '			
@@ -319,11 +289,11 @@ BEGIN
 	END
 	ELSE IF(@strAccountType = 'Investments')
 	BEGIN
-		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, 'Cash Flow from Investing Activities:', 'Row Name - Left Align', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, @intSort
+		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, 'Cash Flow from Investing Activities:', 'Row Name - Left Align', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, 0, @intSort
 	END
 	ELSE IF(@strAccountType = 'Finance')
 	BEGIN
-		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, 'Cash Flow from Financing Activities:', 'Row Name - Left Align', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, @intSort
+		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, 'Cash Flow from Financing Activities:', 'Row Name - Left Align', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, 0, @intSort
 	END		
 
 	SET @intRefNo = @intRefNo + 1
@@ -348,34 +318,35 @@ BEGIN
 			SET @BalanceSide = 'Debit'
 		END
 
-		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strRowDescription, 'Cash Flow Activity', @BalanceSide, 'Column', '', @strRowFilter, 1, 1, 0, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort
+		EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, @strRowDescription, 'Cash Flow Activity', @BalanceSide, 'Column', '', @strRowFilter, 1, 1, 0, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 		
 		SET @intRowDetailId = (SELECT MAX(intRowDetailId) FROM tblFRRowDesign WHERE intRowId =  @intRowId)
 
 		EXEC [dbo].[uspFRDCreateRowFilter] @intRowDetailId, @intRowId, @intRefNo, 'ID', '=', @strAccountId, '', 'Or'
 		
 		DELETE #TempGLAccountCashFlow WHERE strAccountId = @strAccountId
-
+		
+		IF @strRelatedRows = ''
+			BEGIN
+				SET @strRelatedRows = 'SUM(' + 'R' + CAST(@intRefNo as NVARCHAR(25)) + ':'
+				SET @intRefNo = @intRefNo + 1
+				SET @intSort = @intSort + 1
+			END
 		IF (SELECT TOP 1 1 FROM #TempGLAccountCashFlow) = 1
 			BEGIN
-				INSERT INTO #tmpRelatedRowsCashFlow (intRefNo, strAction) VALUES (@intRefNo, '+')
-				SET @strRelatedRows =  @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25)) + ' + '			
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1
 			END
 		ELSE
 			BEGIN
-				INSERT INTO #tmpRelatedRowsCashFlow (intRefNo, strAction) VALUES (@intRefNo, '')
-
-				SET @strRelatedRows =  @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25))
+				SET @strRelatedRows =  @strRelatedRows + 'R' + CAST(@intRefNo as NVARCHAR(25)) + ')'
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1
 								
-				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'None', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort	
+				EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'None', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort	
 								
 				SET @intRefNo = @intRefNo + 1
 				SET @intSort = @intSort + 1	
-				--SET @strRelatedRows = ''
 			END
 	END
 
@@ -390,7 +361,7 @@ DROP TABLE #TempCashFlow
 --++++++++++++++++++++++++++++++++++++++++++++++
 --				SUMMARY
 --++++++++++++++++++++++++++++++++++++++++++++++
-EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Underscore', '', '', '', '', 1, 1, 0, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort								
+EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Underscore', '', '', '', '', 1, 1, 0, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort								
 
 SET @intRefNo = @intRefNo + 1
 SET @intSort = @intSort + 1			
@@ -400,35 +371,19 @@ BEGIN
 	SET @strRelatedRows = SUBSTRING(@strRelatedRows,1,LEN(@strRelatedRows)-1)
 END
 
-EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Row Calculation', '', '', @strRelatedRows, '', 1, 1, 0, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, @intSort	
+EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Row Calculation', '', '', @strRelatedRows, '', 1, 1, 0, 0, 3.000000, 'Arial', 'Bold', 'Black', 9, '', 0, 1, @intSort	
 				
 SET @intRowDetailId = (SELECT MAX(intRowDetailId) FROM tblFRRowDesign WHERE intRowId =  @intRowId)
 
-WHILE EXISTS(SELECT 1 FROM #tmpRelatedRowsCashFlow)
-BEGIN
-	SET @intSort_Calculation = 1
-	SET @cntID = 1
-	SET @intRefNo_Calculation = 1
-	SET @strAction = ''
-	SET @intRowDetailRefNo = 1
-					
-	SELECT TOP 1 @cntID = cntID, @intRefNo_Calculation = intRefNo, @strAction = strAction FROM #tmpRelatedRowsCashFlow ORDER BY cntID
-	SELECT TOP 1 @intRowDetailRefNo = intRowDetailId FROM tblFRRowDesign WHERE intRowId = @intRowId AND intRefNo = @intRefNo_Calculation
+SET @intRefNo = @intRefNo + 1
+SET @intSort = @intSort + 1	
 
-	EXEC [dbo].[uspFRDCreateRowCalculation] @intRowDetailId, @intRowDetailRefNo, @intRowId, @intRefNo, @intRefNo_Calculation, @strAction, @intSort_Calculation	
-
-	DELETE FROM #tmpRelatedRowsCashFlow WHERE cntID = @cntID
-END
+EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Double Underscore', '', '', '', '', 1, 1, 0, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 
 SET @intRefNo = @intRefNo + 1
 SET @intSort = @intSort + 1	
 
-EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'Double Underscore', '', '', '', '', 1, 1, 0, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort
-
-SET @intRefNo = @intRefNo + 1
-SET @intSort = @intSort + 1	
-
-EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'None', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, @intSort
+EXEC [dbo].[uspFRDCreateRowDesign] @intRowId, @intRefNo, '', 'None', '', '', '', '', 0, 0, 1, 0, 3.000000, 'Arial', 'Normal', 'Black', 8, '', 0, 0, @intSort
 
 END
 
