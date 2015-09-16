@@ -8,8 +8,11 @@
 AS
 	DECLARE @dateNow		    DATE = CAST(GETDATE() AS DATE),			
 			@dblInvoiceTotal    NUMERIC(18,6) = 0,
-			@NewInvoiceId		INT
+			@NewInvoiceId		INT,
+			@newComment         NVARCHAR(MAX) = NULL
 	
+	EXEC [dbo].[uspARGetDefaultComment] @intCompanyLocationId, @intEntityCustomerId, 'Invoice', 'Service Charge', @newComment OUT
+
 	SELECT @dblInvoiceTotal    = SUM(dblTotalAmount)
 	FROM @tblTypeServiceCharge
 
@@ -53,7 +56,8 @@ AS
 		,[strBillToCity]
 		,[strBillToState]
 		,[strBillToZipCode]
-		,[strBillToCountry])
+		,[strBillToCountry]
+		,[strComments])
 	SELECT 
 		 @intEntityCustomerId
 		,NULL --[strInvoiceOriginId]
@@ -94,6 +98,7 @@ AS
 		,[strBillToState]
 		,[strBillToZipCode]
 		,[strBillToCountry]
+		,@newComment
 	FROM vyuARCustomerSearch
 		WHERE intEntityCustomerId = @intEntityCustomerId
 
