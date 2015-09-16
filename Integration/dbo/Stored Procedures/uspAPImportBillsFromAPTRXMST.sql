@@ -60,7 +60,7 @@ BEGIN
 			USING (
 				SELECT
 					[intEntityVendorId]			=	D.intEntityVendorId,
-					[strVendorOrderNumber] 		=	(CASE WHEN DuplicateData.aptrx_ivc_no IS NOT NULL THEN dbo.fnTrim(A.aptrx_ivc_no) + ''-DUP'' + CAST(A.A4GLIdentity AS NVARCHAR(MAX)) ELSE A.aptrx_ivc_no END),
+					[strVendorOrderNumber] 		=	(CASE WHEN DuplicateData.strVendorOrderNumber IS NOT NULL THEN dbo.fnTrim(A.aptrx_ivc_no) + ''-DUP'' + CAST(A.A4GLIdentity AS NVARCHAR(MAX)) ELSE A.aptrx_ivc_no END),
 					[strVendorOrderNumberOrig] 	=	A.aptrx_ivc_no,
 					[intTermsId] 				=	ISNULL((SELECT TOP 1 intTermsId FROM tblEntityLocation
 															WHERE intEntityId = (SELECT intEntityVendorId FROM tblAPVendor
@@ -97,15 +97,10 @@ BEGIN
 					LEFT JOIN tblEntityLocation loc
 						ON D.intEntityVendorId = loc.intEntityId AND loc.ysnDefaultLocation = 1
 					OUTER APPLY (
-						SELECT E.* FROM aptrxmst E
-						WHERE EXISTS(
-							SELECT 1 FROM tblAPBill F
-								INNER JOIN tblAPVendor G ON F.intEntityVendorId = G.intEntityVendorId
-							WHERE E.aptrx_ivc_no = F.strVendorOrderNumber COLLATE Latin1_General_CS_AS
-							AND E.aptrx_vnd_no = G.strVendorId COLLATE Latin1_General_CS_AS
-						)
-						AND A.aptrx_vnd_no = E.aptrx_vnd_no
-						AND A.aptrx_ivc_no = E.aptrx_ivc_no
+						SELECT strVendorOrderNumber, strVendorId FROM tblAPBill F --CHECK ONLY FOR DUPLICATE IF IT IS EXISTS IN i21 BILLS
+							INNER JOIN tblAPVendor G ON F.intEntityVendorId = G.intEntityVendorId
+						WHERE dbo.fnTrim(A.aptrx_ivc_no) = dbo.fnTrim(F.strVendorOrderNumber) COLLATE Latin1_General_CS_AS
+						AND dbo.fnTrim(A.aptrx_vnd_no) = dbo.fnTrim(G.strVendorId) COLLATE Latin1_General_CS_AS
 					) DuplicateData
 					WHERE A.aptrx_trans_type IN (''I'',''C'',''A'')
 					AND A.aptrx_orig_amt != 0
@@ -188,7 +183,8 @@ BEGIN
 														(CASE WHEN C.apegl_gl_amt < 0 THEN C.apegl_gl_amt * -1 ELSE C.apegl_gl_amt END)
 													ELSE C.apegl_gl_amt END) / (CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END),
 					[intLineNo]				=	C.apegl_dist_no,
-					[A4GLIdentity]			=	C.A4GLIdentity
+					[A4GLIdentity]			=	C.A4GLIdentity,
+					[strVendorOrderNumber]	=	A.strVendorOrderNumber
 				FROM tblAPBill A
 					INNER JOIN #InsertedUnpostedBill A2
 						ON A.intBillId  = A2.intBillId
@@ -275,7 +271,7 @@ BEGIN
 			OUTPUT inserted.A4GLIdentity INTO #ReInsertedToaptrxmst
 			SELECT
 				[aptrx_vnd_no]			=	A.[aptrx_vnd_no]		,
-				[aptrx_ivc_no]			=	CASE WHEN DuplicateDataBackup.aptrx_ivc_no IS NOT NULL THEN dbo.fnTrim(A.[aptrx_ivc_no]) + ''-DUP'' ELSE A.aptrx_ivc_no END,
+				[aptrx_ivc_no]			=	C.strVendorOrderNumber, --CASE WHEN DuplicateDataBackup.aptrx_ivc_no IS NOT NULL THEN dbo.fnTrim(A.[aptrx_ivc_no]) + ''-DUP'' ELSE A.aptrx_ivc_no END,
 				[aptrx_sys_rev_dt]  	=	A.[aptrx_sys_rev_dt]	,
 				[aptrx_sys_time]    	=	A.[aptrx_sys_time]		,
 				[aptrx_cbk_no]      	=	A.[aptrx_cbk_no]		,
@@ -378,7 +374,7 @@ BEGIN
 				[apivc_wthhld_amt]  	=	A.[aptrx_wthhld_amt]	,
 				[apivc_net_amt]     	=	A.[aptrx_net_amt]		,
 				[apivc_1099_amt]    	=	A.[aptrx_1099_amt]		,
-				[apivc_comment]     	=	A.[aptrx_comment]		,
+				[apivc_comment]     	=	''Imported Origin Bill - i21 Record''		,
 				[apivc_recur_yn]    	=	A.[aptrx_recur_yn]		,
 				[apivc_currency]    	=	A.[aptrx_currency]		,
 				[apivc_currency_rt] 	=	A.[aptrx_currency_rt]	,
@@ -408,7 +404,7 @@ BEGIN
 					[apegl_cbk_no]		=	A.[apegl_cbk_no]		,
 					[apegl_trx_ind]		=	A.[apegl_trx_ind]		,
 					[apegl_vnd_no]		=	A.[apegl_vnd_no]		,
-					[apegl_ivc_no]		=	B.[aptrx_ivc_no]		,
+					[apegl_ivc_no]		=	(SELECT TOP 1 strVendorOrderNumber FROM tblAPBill A INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId WHERE B.intBillDetailId = C.intBillDetailId),
 					[apegl_dist_no]		=	A.[apegl_dist_no]		,
 					[apegl_alt_cbk_no]	=	A.[apegl_alt_cbk_no]	,
 					[apegl_gl_acct]		=	A.[apegl_gl_acct]		,
@@ -458,7 +454,7 @@ BEGIN
 				[A4GLIdentity]		,
 				[intBillDetailId]	
 			)
-			OUTPUT inserted.A4GLIdentity, sourceData.aptrx_ivc_no_header INTO #ReInsertedToapeglmst;
+			OUTPUT inserted.A4GLIdentity, inserted.apegl_ivc_no INTO #ReInsertedToapeglmst;
 
 			SET @totalInsertedTBLAPEGLMST = @@ROWCOUNT;
 			SET IDENTITY_INSERT tblAPapeglmst OFF
@@ -478,7 +474,7 @@ BEGIN
 			)
 			SELECT 
 				[apegl_cbk_no]		,
-				B.aptrx_ivc_no_header, --[apegl_trx_ind]		
+				[apegl_trx_ind]		,
 				[apegl_vnd_no]		,
 				[apegl_ivc_no]		,
 				[apegl_dist_no]		,
@@ -486,7 +482,7 @@ BEGIN
 				[apegl_gl_acct]		,
 				[apegl_gl_amt]		,
 				[apegl_gl_un]		
-			FROM apeglmst A
+			FROM tblAPapeglmst A
 			INNER JOIN #ReInsertedToapeglmst B ON A.A4GLIdentity = B.intA4GLIdentity
 
 			SET @totalReinsertedaphglmst = @@ROWCOUNT;

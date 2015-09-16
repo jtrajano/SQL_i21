@@ -32,9 +32,7 @@ BEGIN
 				ON A.intEntityVendorId = B.intEntityVendorId
 			INNER JOIN (tblAPaptrxmst C2 INNER JOIN apeglmst C 
 						ON C2.aptrx_ivc_no = C.apegl_ivc_no 
-						AND C2.aptrx_vnd_no = C.apegl_vnd_no
-						AND C2.aptrx_cbk_no = C.apegl_cbk_no
-						AND C2.aptrx_trans_type = C.apegl_trx_ind)
+						AND C2.aptrx_vnd_no = C.apegl_vnd_no)
 			ON A.strVendorOrderNumber COLLATE Latin1_General_CS_AS = C2.aptrx_ivc_no
 				AND B.strVendorId COLLATE Latin1_General_CS_AS = C2.aptrx_vnd_no
 			WHERE A.ysnOrigin = 1 AND A.ysnPosted = 0
@@ -87,7 +85,8 @@ BEGIN
 		DECLARE @totalDeletedUnpostedBillDetail INT = @@ROWCOUNT;
 		IF @totalBackupedUnpostedBillDetails != @totalDeletedUnpostedBillDetail
 		BEGIN
-			RAISERROR('Unexpected number of rows deleted from apeglmst', 16, 1);
+			PRINT 'Unexpected number of rows deleted from apeglmst';
+			IF @transCount = 0 AND XACT_STATE() <> 0 ROLLBACK TRANSACTION
 		END
 
 		IF @transCount = 0 COMMIT TRANSACTION
