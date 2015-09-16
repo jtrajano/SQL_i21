@@ -23,17 +23,11 @@ EXEC uspTRProcessTransportLoad @intTransportLoadId
 
 END TRY
 BEGIN CATCH
-	SELECT 
-		@ErrorMessage = ERROR_MESSAGE(),
-		@ErrorSeverity = ERROR_SEVERITY(),
-		@ErrorState = ERROR_STATE();
+	IF XACT_STATE() != 0
+		AND @@TRANCOUNT > 0
+		ROLLBACK TRANSACTION
 
-	-- Use RAISERROR inside the CATCH block to return error
-	-- information about the original error that caused
-	-- execution to jump to the CATCH block.
-	RAISERROR (
-		@ErrorMessage, -- Message text.
-		@ErrorSeverity, -- Severity.
-		@ErrorState -- State.
-	);
+	SET @ErrorMessage = ERROR_MESSAGE()
+	RAISERROR (	@ErrorMessage,16,1,'WITH NOWAIT')
+
 END CATCH
