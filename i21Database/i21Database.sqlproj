@@ -2310,6 +2310,7 @@
     <Build Include="dbo\User Defined Types\InTransitTableType.sql" />
     <Build Include="dbo\Views\vyuARInvoiceTaxDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseInTransitOutBoundQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateMultipleScheduleQuantity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
