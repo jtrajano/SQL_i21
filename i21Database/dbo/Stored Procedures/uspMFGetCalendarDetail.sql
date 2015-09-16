@@ -7,7 +7,6 @@
 	,@intCalendarId INT
 	,@intLocationId INT
 	,@ysnpivot BIT
-	,@intCount int OUTPUT
 	)
 AS
 BEGIN
@@ -208,7 +207,6 @@ BEGIN
 
 		EXEC (@SQL)
 
-		SELECT @intCount=@@ROWCOUNT 
 	END
 	ELSE
 	BEGIN
@@ -258,6 +256,5 @@ BEGIN
 			,@tblMFMachine M
 		WHERE S.intShiftId = CD.intShiftId
 
-		SELECT @intCount=@@ROWCOUNT 
 	END
 END
