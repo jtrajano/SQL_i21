@@ -1,116 +1,60 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFGetItemPrice]    
 
-  @CFItemId				INT    
-
- ,@CFCustomerId			INT     
-
- ,@CFLocationId			INT    
-
- ,@CFItemUOMId			INT				= NULL    
-
- ,@CFTransactionDate	DATETIME		= NULL    
-
- ,@CFQuantity			NUMERIC(18,6)    
-
- ,@CFPriceOut			NUMERIC(18,6)	= NULL OUTPUT    
-
- ,@CFPricingOut			NVARCHAR(250)	= NULL OUTPUT    
-
- ,@CFStandardPrice		NUMERIC(18,6)	= 0.0
-
- ,@CFTransactionType	NVARCHAR(MAX)
-
- ,@CFNetworkId			INT
-
- ,@CFSiteId				INT
-
- ,@CFContractHeaderId	INT				= NULL OUTPUT
-
- ,@CFContractDetailId	INT				= NULL OUTPUT
-
- ,@CFContractNumber		INT				= NULL OUTPUT
-
- ,@CFContractSeq		INT				= NULL OUTPUT
-
-
+ @CFItemId				INT    
+,@CFCustomerId			INT     
+,@CFLocationId			INT    
+,@CFItemUOMId			INT				= NULL    
+,@CFTransactionDate	DATETIME		= NULL    
+,@CFQuantity			NUMERIC(18,6)    
+,@CFPriceOut			NUMERIC(18,6)	= NULL OUTPUT    
+,@CFPricingOut			NVARCHAR(250)	= NULL OUTPUT    
+,@CFStandardPrice		NUMERIC(18,6)	= 0.0
+,@CFTransactionType	NVARCHAR(MAX)
+,@CFNetworkId			INT
+,@CFSiteId				INT
+,@CFContractHeaderId	INT				= NULL OUTPUT
+,@CFContractDetailId	INT				= NULL OUTPUT
+,@CFContractNumber		INT				= NULL OUTPUT
+,@CFContractSeq		INT				= NULL OUTPUT
 
 AS
 
-
-
-
-
 ---***DEBUG PARAM***---
-
-
 
  --DECLARE      
-
- --  @CFItemId    INT    
-
+ --@CFItemId    INT    
  -- ,@CFCustomerId  INT     
-
  -- ,@CFLocationId  INT    
-
  -- ,@CFItemUOMId   INT    
-
  -- ,@CFTransactionDate DATETIME    
-
  -- ,@CFQuantity   NUMERIC(18,6)    
-
  -- ,@CFCustomerPricing NVARCHAR(250)    
-
-    
-
  --SET @CFItemId = 5347    
-
  --SET @CFCustomerId = 457    
-
  --SET @CFLocationId = 1    
-
  --SET @CFItemUOMId = 793    
-
  --SET @CFTransactionDate = '03/22/2015'    
-
  --SET @CFQuantity = 6    
-
-    
-
  --DECLARE @CFPriceOut AS NUMERIC(18,6)    
-
  --  ,@CFPricingOut AS NVARCHAR(250)   
-
-    
-
  --SET @CFPriceOut = NULL;    
-
  --SET @CFPricingOut = '';
 
-
-
 ---***DEBUG PARAM***---
-
-
-
-
-
 ---***SPECIAL PRICING***---
 
-
-
 --1. Customer Special Pricing ,
-
 --2. Item Special Pricing, 
-
 --3. Pricing Level, 
-
 --4. Standard Pricing
-
-
 
 EXEC [uspARGetItemPrice] 
 
-@ItemId = @CFItemId    
+@ItemUOMId = @CFItemUOMId
+
+,@TransactionDate = @CFTransactionDate
+
+,@ItemId = @CFItemId
 
 ,@CustomerId = @CFCustomerId    
 
@@ -130,11 +74,9 @@ EXEC [uspARGetItemPrice]
 
 ,@ContractSeq = @CFContractSeq OUTPUT  
 
-
 print @CFPriceOut 
+
 print  @CFPricingOut
-
-
 
 IF(@CFPriceOut IS NOT NULL) 
 
