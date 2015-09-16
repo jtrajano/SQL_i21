@@ -767,14 +767,20 @@ Ext.define('Inventory.view.ItemLocation', {
                                                             xtype: 'gridcombobox',
                                                             columns: [
                                                                 {
-                                                                    dataIndex: 'intItemTypeCodeId',
+                                                                    dataIndex: 'intRadiantItemTypeCodeId',
                                                                     dataType: 'numeric',
                                                                     hidden: true
                                                                 },
                                                                 {
+                                                                    dataIndex: 'intRadiantItemTypeCode',
+                                                                    dataType: 'numeric',
+                                                                    text: 'Item Type Code',
+                                                                    flex: 1
+                                                                },
+                                                                {
                                                                     dataIndex: 'strDescription',
                                                                     dataType: 'string',
-                                                                    text: 'Status',
+                                                                    text: 'Description',
                                                                     flex: 1
                                                                 }
                                                             ],
@@ -782,7 +788,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                             fieldLabel: 'Item Type Code',
                                                             labelWidth: 140,
                                                             displayField: 'strDescription',
-                                                            valueField: 'intItemTypeCodeId'
+                                                            valueField: 'intRadiantItemTypeCodeId'
                                                         },
                                                         {
                                                             xtype: 'numericfield',
