@@ -30,8 +30,8 @@
     [aptrx_user_id]      CHAR (16)       NULL,
     [aptrx_user_rev_dt]  INT             NULL,
     [A4GLIdentity]       NUMERIC (9)     IDENTITY (1, 1) NOT NULL,
-	[intBillId] INT
-    CONSTRAINT [APk_aptrxmst] PRIMARY KEY NONCLUSTERED ([aptrx_vnd_no] ASC, [aptrx_ivc_no] ASC), 
+	[intBillId] INT,
+    --CONSTRAINT [APk_aptrxmst] PRIMARY KEY NONCLUSTERED ([aptrx_vnd_no] ASC, [aptrx_ivc_no] ASC, [intBillId] ASC), 
     [dtmDateImported] DATETIME NOT NULL DEFAULT GETDATE(), 
     [ysnInsertedToAPIVC] BIT NOT NULL DEFAULT 0
 );
@@ -39,7 +39,7 @@
 
 GO
 CREATE UNIQUE CLUSTERED INDEX [APIaptrxmst0]
-    ON [dbo].[tblAPaptrxmst]([aptrx_vnd_no] ASC, [aptrx_ivc_no] ASC);
+    ON [dbo].[tblAPaptrxmst]([aptrx_vnd_no] ASC, [aptrx_ivc_no] ASC, [intBillId] ASC);
 
 
 GO
