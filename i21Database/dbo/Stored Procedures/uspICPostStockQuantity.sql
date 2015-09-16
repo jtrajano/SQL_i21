@@ -132,6 +132,7 @@ BEGIN
 								AND ysnStockUnit = 1
 					) StockUOM 						
 			WHERE	@intLotId IS NULL 
+					AND @intItemUOMId <> StockUOM.intItemUOMId
 				
 			-- If incoming Lot has a weight, convert the qty to the weight uom. 
 			UNION ALL 
