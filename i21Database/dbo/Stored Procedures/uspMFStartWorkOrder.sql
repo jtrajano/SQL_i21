@@ -69,6 +69,14 @@ BEGIN TRY
 	UPDATE tblMFWorkOrder
 	SET intStatusId = 10
 		,dtmStartedDate = @dtmCurrentDate
+		,intConcurrencyId=intConcurrencyId+1
+		,dtmLastModified = @dtmCurrentDate
+		,intLastModifiedUserId = @intUserId
+	WHERE intWorkOrderId = @intWorkOrderId
+
+	UPDATE tblMFScheduleWorkOrder
+	SET intStatusId = 10
+		,intConcurrencyId=intConcurrencyId+1
 		,dtmLastModified = @dtmCurrentDate
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderId = @intWorkOrderId

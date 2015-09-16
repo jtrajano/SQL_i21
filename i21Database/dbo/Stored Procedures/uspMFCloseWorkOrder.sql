@@ -211,6 +211,14 @@ BEGIN TRY
 	SET intStatusId = 13
 		,dtmCompletedDate = @dtmCurrentDate
 		,intExecutionOrder=0
+		,intConcurrencyId=intConcurrencyId+1
+		,dtmLastModified = @dtmCurrentDate
+		,intLastModifiedUserId = @intUserId
+	WHERE intWorkOrderId = @intWorkOrderId
+
+	UPDATE dbo.tblMFScheduleWorkOrder
+	SET intStatusId = 13
+		,intConcurrencyId=intConcurrencyId+1
 		,dtmLastModified = @dtmCurrentDate
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderId = @intWorkOrderId
