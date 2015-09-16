@@ -37,6 +37,7 @@ BEGIN TRY
 		,@dtmEarliestStartDate datetime
 		,@intGapDuetoEarliestStartDate int
 		,@ysnStandard bit
+		,@intShiftBreakTypeDuration int
 
 	SELECT @dtmCurrentDate = GetDate()
 
@@ -356,6 +357,7 @@ BEGIN TRY
 				,@dblBalance = NULL
 				,@dblConversionFactor = NULL
 				,@dtmEarliestStartDate=NULL
+				,@intShiftBreakTypeDuration=0
 
 			SELECT @intWorkOrderId = intWorkOrderId
 				,@intNoOfUnit = intNoOfUnit
@@ -432,6 +434,26 @@ BEGIN TRY
 			IF @intDuration > @intWODuration
 			BEGIN
 				SELECT @dtmPlannedEndDate = DATEADD(MINUTE, @intWODuration, @dtmShiftStartTime)
+
+				SELECT @intShiftBreakTypeDuration=SUM(intShiftBreakTypeDuration) 
+				FROM dbo.tblMFShiftDetail
+				WHERE intShiftId=@intShiftId 
+				AND @dtmCalendarDate+dtmShiftBreakTypeStartTime >= @dtmShiftStartTime
+				AND @dtmCalendarDate+dtmShiftBreakTypeEndTime <= @dtmPlannedEndDate
+
+				IF @intShiftBreakTypeDuration IS NULL
+				SELECT @intShiftBreakTypeDuration=0
+
+				SELECT @intShiftBreakTypeDuration=@intShiftBreakTypeDuration+DATEDIFF(MINUTE,@dtmCalendarDate+dtmShiftBreakTypeStartTime,@dtmPlannedEndDate)
+				FROM dbo.tblMFShiftDetail
+				WHERE intShiftId=@intShiftId 
+				AND @dtmPlannedEndDate BETWEEN @dtmCalendarDate+dtmShiftBreakTypeStartTime AND @dtmCalendarDate+dtmShiftBreakTypeEndTime 
+
+				IF @intShiftBreakTypeDuration IS NULL
+				SELECT @intShiftBreakTypeDuration=0
+				
+				If @intShiftBreakTypeDuration>0
+				SELECT @dtmPlannedEndDate = DATEADD(MINUTE, @intShiftBreakTypeDuration, @dtmPlannedEndDate)
 
 				IF EXISTS (
 						SELECT *

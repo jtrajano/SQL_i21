@@ -19,6 +19,7 @@ BEGIN Try
 		,@ErrMsg NVARCHAR(MAX)
 		,@intCalendarDetailId INT
 		,@ysnHoliday BIT
+		,@intShiftBreakTypeDuration int
 
 	SELECT @dtmCurrentDate = Getdate()
 
@@ -149,6 +150,14 @@ BEGIN Try
 
 	WHILE @intRecordId IS NOT NULL
 	BEGIN
+		SELECT @dtmCalendarDate = NULL
+			,@intShiftId = NULL
+			,@dtmShiftStartTime = NULL
+			,@dtmShiftEndTime = NULL
+			,@intNoOfMachine = NULL
+			,@ysnHoliday = NULL
+			,@intShiftBreakTypeDuration=NULL
+
 		SELECT @dtmCalendarDate = dtmCalendarDate
 			,@intShiftId = intShiftId
 			,@dtmShiftStartTime = dtmShiftStartTime
@@ -163,6 +172,13 @@ BEGIN Try
 		WHERE intCalendarId = @intCalendarId
 			AND dtmCalendarDate = @dtmCalendarDate
 			AND intShiftId = @intShiftId
+
+		SELECT @intShiftBreakTypeDuration=SUM(intShiftBreakTypeDuration) 
+		FROM dbo.tblMFShiftDetail
+		WHERE intShiftId=@intShiftId 
+
+		If @intShiftBreakTypeDuration is null
+		Select @intShiftBreakTypeDuration=0
 
 		IF @intCalendarDetailId IS NULL
 		BEGIN
@@ -185,7 +201,7 @@ BEGIN Try
 				,@dtmCalendarDate
 				,@dtmShiftStartTime
 				,@dtmShiftEndTime
-				,DateDiff(mi, @dtmShiftStartTime, @dtmShiftEndTime)
+				,DateDiff(mi, @dtmShiftStartTime, @dtmShiftEndTime)-@intShiftBreakTypeDuration
 				,@intShiftId
 				,@intNoOfMachine
 				,@ysnHoliday
@@ -202,7 +218,7 @@ BEGIN Try
 			UPDATE dbo.tblMFScheduleCalendarDetail
 			SET dtmShiftStartTime = @dtmShiftStartTime
 				,dtmShiftEndTime = @dtmShiftEndTime
-				,intDuration = DateDiff(mi, @dtmShiftStartTime, @dtmShiftEndTime)
+				,intDuration = DateDiff(mi, @dtmShiftStartTime, @dtmShiftEndTime)-@intShiftBreakTypeDuration
 				,intNoOfMachine = @intNoOfMachine
 				,ysnHoliday = @ysnHoliday
 				,dtmLastModified = @dtmCurrentDate
