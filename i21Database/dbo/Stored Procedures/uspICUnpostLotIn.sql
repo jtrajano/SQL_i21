@@ -31,8 +31,8 @@ DECLARE @REVALUE_SOLD AS INT = 3
 DECLARE @AVERAGECOST AS INT = 1
 		,@FIFO AS INT = 2
 		,@LIFO AS INT = 3
-		,@STANDARDCOST AS INT = 4 	
-		,@LOT AS INT = 5
+		,@LOTCOST AS INT = 4 	
+		,@ACTUALCOST AS INT = 5
 
 -- Get all the inventory transaction related to the Unpost. 
 -- While at it, update the ysnIsUnposted to true. 
@@ -62,7 +62,7 @@ FROM	(
 							,intTransactionId = @intTransactionId
 				) AS Source_Query  
 					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0					
-					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) IN (@LOT)
+					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) IN (@LOTCOST)
 					AND inventory_transaction.intTransactionTypeId <> @AUTO_NEGATIVE
 					AND 
 					(
@@ -95,7 +95,8 @@ WHERE	Changes.Action = 'UPDATE'
 UPDATE	LotBucket
 SET		LotBucket.dblStockIn = ISNULL(LotBucket.dblStockIn, 0) - LotOutGrouped.dblQty
 FROM	dbo.tblICInventoryLot LotBucket INNER JOIN (
-			SELECT	LotOut.intRevalueLotId, dblQty = SUM(LotOut.dblQty)
+			SELECT	LotOut.intRevalueLotId
+					, dblQty = SUM(LotOut.dblQty)
 			FROM	dbo.tblICInventoryLotOut LotOut INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
 						ON LotOut.intInventoryTransactionId = Reversal.intInventoryTransactionId
 			WHERE	LotOut.intRevalueLotId IS NOT NULL 	
@@ -140,9 +141,9 @@ FROM	dbo.tblICInventoryLot Lot INNER JOIN dbo.tblICInventoryLotOut LotOut
 		INNER JOIN dbo.tblICInventoryTransaction OutTransactions
 			ON OutTransactions.intInventoryTransactionId = LotOut.intInventoryTransactionId
 			AND ISNULL(OutTransactions.dblQty, 0) < 0 
-WHERE	Lot.intTransactionId IN (SELECT intTransactionId FROM #tmpInventoryTransactionStockToReverse)
-		AND Lot.strTransactionId IN (SELECT strTransactionId FROM #tmpInventoryTransactionStockToReverse)
-		AND ISNULL(OutTransactions.ysnIsUnposted, 0) = 0
+WHERE	ISNULL(OutTransactions.ysnIsUnposted, 0) = 0
+		AND Lot.intTransactionId = @intTransactionId
+		AND Lot.strTransactionId = @strTransactionId
 ;
 
 -- Plug the Out-qty so that it can't be used for future out-transactions. 

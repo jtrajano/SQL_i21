@@ -94,7 +94,7 @@ SELECT	intBankAccountId	= F.intBankAccountId
 		,intTransactionId	= F.intTransactionId
 		,strTransactionId	= F.strTransactionId
 		,strBatchId			= F.strLink
-		,strCheckNo			= F.strReferenceNo
+		,strCheckNo			= ISNULL(F.strReferenceNo,'')
 		,dtmPrintJobCreated	= GETDATE()
 		,dtmCheckPrinted	= NULL
 		,intCreatedUserId	= @intUserId
@@ -111,7 +111,7 @@ WHERE	F.intBankAccountId = @intBankAccountId
 		AND F.dtmCheckPrinted IS NULL
 		AND F.ysnCheckToBePrinted = 1
 		AND F.intBankTransactionTypeId = @intTransactionType
-		AND F.strReferenceNo NOT IN (@CASH_PAYMENT) 
+		AND ISNULL(F.strReferenceNo,'') != (@CASH_PAYMENT) 
 IF @@ERROR <> 0 GOTO _ROLLBACK		
 
 -- Check if there are transactions to queue a print job

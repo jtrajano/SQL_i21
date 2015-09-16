@@ -33,6 +33,8 @@ SELECT
 ,Loc.intFreightTermId
 ,strSalespersonId =  case when ISNULL(S.strSalespersonId,'') = '' then T.strEntityNo else S.strSalespersonId end
 ,ysnPORequired
+,intTaxGroupId = Loc.intTaxGroupId 
+,strTaxGroup = Tax.strTaxGroup
 FROM tblEntity as Entity
 INNER JOIN tblARCustomer as Cus ON Entity.intEntityId = Cus.[intEntityCustomerId]
 LEFT JOIN tblEntityToContact as CusToCon ON Cus.intEntityCustomerId = CusToCon.intEntityId and CusToCon.ysnDefaultContact = 1
@@ -43,3 +45,4 @@ LEFT JOIN tblEntityLocation as ShipToLoc ON Cus.intShipToId = ShipToLoc.intEntit
 LEFT JOIN tblEntityLocation as BillToLoc ON Cus.intBillToId = BillToLoc.intEntityLocationId
 LEFT JOIN tblARSalesperson S ON Cus.intSalespersonId = S.intEntitySalespersonId
 LEFT JOIN tblEntity T on S.intEntitySalespersonId = T.intEntityId
+LEFT JOIN tblSMTaxGroup Tax ON Loc.intTaxGroupId = Tax.intTaxGroupId

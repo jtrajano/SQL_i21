@@ -837,6 +837,22 @@
     <Build Include="testi21Database\Stored Procedures\test uspICAddInventoryTransfer to add a transfers from transport.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAddInventoryTransfer to add a transfers with no ship via.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICAddInventoryTransfer to add a transfers with user id.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICAddItemReceipt to add a vendor reference no.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseReservedQty for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseReservedQty for increase of reserved qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseReservedQty for decrease of reserved qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseReservedQty and Stock UOM for increase of reserved qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseReservedQty and Stock UOM for decrease of reserved qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseInTransitInBoundQty for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseInTransitInBoundQty for increase qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseInTransitInBoundQty for decrease qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseInTransitInBoundQty and Stock UOM for decrease qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseInTransitInBoundQty and Stock UOM for increase qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseInTransitOutBoundQty for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseInTransitOutBoundQty for increase qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseInTransitOutBoundQty for decrease qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseInTransitOutBoundQty and Stock UOM for increase qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseInTransitOutBoundQty and Stock UOM for decrease qty.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

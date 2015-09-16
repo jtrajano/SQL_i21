@@ -525,7 +525,7 @@ BEGIN
 			,strTransactionId = 'InvRcpt-00001'
 			,intTransactionId = 1		
 			,strActualCostId = 'ACTUAL COST ID'
-	
+
 	-- Do the act
 	INSERT INTO @GLDetail (
 		[dtmDate] 

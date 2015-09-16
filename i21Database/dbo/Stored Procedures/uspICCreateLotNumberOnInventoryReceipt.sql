@@ -163,24 +163,15 @@ BEGIN
 			,intSubLocationId		= ISNULL(ReceiptItem.intSubLocationId, StorageLocation.intSubLocationId) 										
 			,intStorageLocationId	= StorageLocation.intStorageLocationId
 			,dblQty					=	CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END 
-									 *	CASE	-- The item has no weight UOM. Receive it by converting the Qty to the Detail-Item UOM. 
-												WHEN ISNULL(ReceiptItem.intWeightUOMId, 0) = 0  THEN 												
-													dbo.fnCalculateQtyBetweenUOM(ISNULL(ItemLot.intItemUnitMeasureId, ReceiptItem.intUnitMeasureId), ReceiptItem.intUnitMeasureId, ItemLot.dblQuantity)
-											
-												-- The item has a weight UOM. 
+										* ItemLot.dblQuantity
+			,intItemUOMId			=	ItemLot.intItemUnitMeasureId
+			,dblWeight				=	CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END
+										* CASE	WHEN ISNULL(ReceiptItem.intWeightUOMId, 0) = 0	THEN 
+													ISNULL(ItemLot.dblGrossWeight, 0) - ISNULL(ItemLot.dblTareWeight, 0) 
 												ELSE 
-													ItemLot.dblQuantity
-										END 									
+													0
+										END 
 
-
-			,intItemUOMId			= -- ISNULL(ItemLot.intItemUnitMeasureId, ReceiptItem.intUnitMeasureId) 
-										CASE	WHEN ISNULL(ReceiptItem.intWeightUOMId, 0) = 0 THEN -- There is no Weight. 
-													ReceiptItem.intUnitMeasureId  -- then use the Receipt Item > Item UOM Id.
-												ELSE -- There is weight, then use the Lot > Item UOM Id. 
-													ItemLot.intItemUnitMeasureId
-										END										
-
-			,dblWeight				= ISNULL(ItemLot.dblGrossWeight, 0) - ISNULL(ItemLot.dblTareWeight, 0) * CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END
 			,intWeightUOMId			= ReceiptItem.intWeightUOMId
 			,dtmExpiryDate			= ItemLot.dtmExpiryDate
 			,dtmManufacturedDate	= ItemLot.dtmManufacturedDate

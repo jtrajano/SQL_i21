@@ -9,6 +9,7 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFO', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLIFO', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLot', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryActualCost', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICItemLocation';
 	EXEC tSQLt.FakeTable 'dbo.tblICItem';
 	EXEC tSQLt.FakeTable 'dbo.tblICUnitMeasure', @Identity = 1;

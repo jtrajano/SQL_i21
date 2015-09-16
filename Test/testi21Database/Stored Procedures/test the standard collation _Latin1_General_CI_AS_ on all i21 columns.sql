@@ -17,6 +17,9 @@ BEGIN
 				, 'tblTMCOBOLLeaseBilling'
 				, 'tblTMCOBOLPRICE'
 				, 'tblAPaptrxmst'
+				, 'tblAPapivcmst'
+				, 'tblAPapeglmst'
+				, 'tblAPaphglmst'
 			)
 			AND COLUMN_NAME NOT IN ('strPassword')
 			AND TABLE_NAME LIKE 'tbl%'

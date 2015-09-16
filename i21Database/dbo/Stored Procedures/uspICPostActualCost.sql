@@ -31,6 +31,12 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @AVERAGECOST AS INT = 1
+		,@FIFO AS INT = 2
+		,@LIFO AS INT = 3
+		,@LOTCOST AS INT = 4
+		,@ACTUALCOST AS INT = 5
+
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @Inventory_Auto_Negative AS INT = 1;
 DECLARE @Inventory_Write_Off_Sold AS INT = 2;
@@ -110,6 +116,7 @@ BEGIN
 					,@strRelatedTransactionId = NULL 
 					,@strTransactionForm = @strTransactionForm
 					,@intUserId = @intUserId
+					,@intCostingMethod = @ACTUALCOST
 					,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT
 
 			
@@ -165,6 +172,7 @@ BEGIN
 				,@strRelatedTransactionId = NULL 
 				,@strTransactionForm = @strTransactionForm
 				,@intUserId = @intUserId
+				,@intCostingMethod = @ACTUALCOST
 				,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 			
 
 		-- Repeat call on uspICIncreaseStockInActual until @dblAddQty is completely distributed to the negative cost Actual buckets or added as a new bucket. 
@@ -223,6 +231,7 @@ BEGIN
 						,@strRelatedTransactionId = @strRelatedTransactionId 
 						,@strTransactionForm = @strTransactionForm
 						,@intUserId = @intUserId
+						,@intCostingMethod = @ACTUALCOST
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 
 				-- Add Revalue sold
@@ -252,6 +261,7 @@ BEGIN
 						,@strRelatedTransactionId = @strRelatedTransactionId 
 						,@strTransactionForm = @strTransactionForm
 						,@intUserId = @intUserId
+						,@intCostingMethod = @ACTUALCOST
 						,@InventoryTransactionIdentityId = @InventoryTransactionIdentityId OUTPUT 
 			END
 			

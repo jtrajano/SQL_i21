@@ -145,6 +145,8 @@ BEGIN
 				,dblBudgetAmount = ISNULL(I.vwcus_budget_amt_due,0.0)
 				,dblCreditLimit = ISNULL(I.vwcus_cred_limit,0.0)
 				,intLocationId = A.intLocationId
+				,A.intCustomerID
+				,intClockLocation = A.intClockID
 			FROM tblTMSite A
 			INNER JOIN tblTMCustomer B
 				ON A.intCustomerID = B.intCustomerID

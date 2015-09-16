@@ -334,6 +334,7 @@ BEGIN
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
+				,intItemUnitMeasureId
 				,dblQuantity
 				,intSort
 				,intConcurrencyId
@@ -341,12 +342,14 @@ BEGIN
 		-- Manual Lot Grains
 		-- intInventoryReceiptItemLotId: 1
 		SELECT	intInventoryReceiptItemId	= 6
+				,intItemUnitMeasureId		= @ManualGrains_BushelUOM
 				,dblQuantity				= 7
 				,intSort					= 1
 				,intConcurrencyId			= 1
 		-- intInventoryReceiptItemLotId: 2
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 6
+				,intItemUnitMeasureId		= @ManualGrains_BushelUOM
 				,dblQuantity				= 3
 				,intSort					= 2
 				,intConcurrencyId			= 1
@@ -355,6 +358,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 3
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 7
+				,intItemUnitMeasureId		= @SerializedGrains_BushelUOM
 				,dblQuantity				= 2
 				,intSort					= 1
 				,intConcurrencyId			= 1
@@ -362,6 +366,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 4
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 7
+				,intItemUnitMeasureId		= @SerializedGrains_BushelUOM
 				,dblQuantity				= 8
 				,intSort					= 2
 				,intConcurrencyId			= 1
@@ -588,6 +593,7 @@ BEGIN
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
+				,intItemUnitMeasureId
 				,dblQuantity
 				,intSort
 				,intConcurrencyId
@@ -595,12 +601,14 @@ BEGIN
 		-- Manual Lot Grains
 		-- intInventoryReceiptItemLotId: 5
 		SELECT	intInventoryReceiptItemId	= 13
+				,intItemUnitMeasureId		= @ManualGrains_BushelUOM
 				,dblQuantity				= 7
 				,intSort					= 1
 				,intConcurrencyId			= 1
 		-- intInventoryReceiptItemLotId: 6
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 13
+				,intItemUnitMeasureId		= @ManualGrains_BushelUOM
 				,dblQuantity				= 3
 				,intSort					= 2
 				,intConcurrencyId			= 1
@@ -609,6 +617,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 7
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 14
+				,intItemUnitMeasureId		= @SerializedGrains_BushelUOM
 				,dblQuantity				= 2
 				,intSort					= 1
 				,intConcurrencyId			= 1
@@ -616,6 +625,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 8
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 14
+				,intItemUnitMeasureId		= @SerializedGrains_BushelUOM
 				,dblQuantity				= 8
 				,intSort					= 2
 				,intConcurrencyId			= 1
@@ -752,6 +762,7 @@ BEGIN
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
+				,intItemUnitMeasureId
 				,strLotNumber
 				,dblQuantity
 				,dblCost
@@ -761,6 +772,7 @@ BEGIN
 		-- Manual Lot Grains
 		-- intInventoryReceiptItemLotId: 9
 		SELECT	intInventoryReceiptItemId	= 15
+				,intItemUnitMeasureId		= @ManualGrains_BushelUOM
 				,strLotNumber				= 'MANUAL-22X-10000'
 				,dblQuantity				= 7
 				,dblCost					= 6.10
@@ -769,6 +781,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 10
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 16
+				,intItemUnitMeasureId		= @ManualGrains_PoundUOM
 				,strLotNumber				= 'LOT DE MANUAL X 113-133.108985'
 				,dblQuantity				= 20
 				,dblCost					= 7.00
@@ -777,6 +790,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 11
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 15
+				,intItemUnitMeasureId		= @ManualGrains_BushelUOM
 				,strLotNumber				= 'MANUAL-23X-10000'
 				,dblQuantity				= 3
 				,dblCost					= 5.90
@@ -871,6 +885,7 @@ BEGIN
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
+				,intItemUnitMeasureId
 				,dblQuantity
 				,dblCost
 				,intSort
@@ -879,6 +894,7 @@ BEGIN
 		-- Manual Lot Grains
 		-- intInventoryReceiptItemLotId: 12
 		SELECT	intInventoryReceiptItemId	= 17
+				,intItemUnitMeasureId		= @SerializedGrains_BushelUOM
 				,dblQuantity				= 7
 				,dblCost					= 6.10
 				,intSort					= 1
@@ -886,6 +902,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 13
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 17
+				,intItemUnitMeasureId		= @SerializedGrains_BushelUOM
 				,dblQuantity				= 3
 				,dblCost					= 5.90
 				,intSort					= 2
@@ -893,6 +910,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 14
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 18
+				,intItemUnitMeasureId		= @SerializedGrains_PoundUOM
 				,dblQuantity				= 20
 				,dblCost					= 7.00
 				,intSort					= 1
@@ -989,6 +1007,7 @@ BEGIN
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
+				,intItemUnitMeasureId
 				,strLotNumber
 				,dblQuantity
 				,dblCost
@@ -998,6 +1017,7 @@ BEGIN
 		-- Manual Lot Grains
 		-- intInventoryReceiptItemLotId: 15
 		SELECT	intInventoryReceiptItemId	= 19
+				,intItemUnitMeasureId		= @ManualGrains_BushelUOM
 				,strLotNumber				= 'MANUAL-LOT-00001'
 				,dblQuantity				= 7
 				,dblCost					= 6.10
@@ -1095,6 +1115,7 @@ BEGIN
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
+				,intItemUnitMeasureId
 				,strLotNumber
 				,dblQuantity
 				,dblCost
@@ -1104,6 +1125,7 @@ BEGIN
 		-- Manual Lot Grains
 		-- intInventoryReceiptItemLotId: 16
 		SELECT	intInventoryReceiptItemId	= 21
+				,intItemUnitMeasureId		= @ManualGrains_BushelUOM
 				,strLotNumber				= 'MANUAL-22X-10000'
 				,dblQuantity				= 7
 				,dblCost					= 6.10
@@ -1112,6 +1134,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 17
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 22
+				,intItemUnitMeasureId		= @ManualGrains_BushelUOM
 				,strLotNumber				= 'LOT DE MANUAL X 113-133.108985'
 				,dblQuantity				= 20
 				,dblCost					= 7.00
@@ -1120,6 +1143,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 18
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 21
+				,intItemUnitMeasureId		= @ManualGrains_BushelUOM
 				,strLotNumber				= 'MANUAL-23X-10000'
 				,dblQuantity				= 3
 				,dblCost					= 5.90
@@ -1241,6 +1265,7 @@ BEGIN
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
+				,intItemUnitMeasureId
 				,strLotNumber
 				,dblQuantity
 				,dblCost
@@ -1250,6 +1275,7 @@ BEGIN
 		-- Manual Lot Grains
 		-- intInventoryReceiptItemLotId: 19
 		SELECT	intInventoryReceiptItemId	= 23
+				,intItemUnitMeasureId		= @ManualGrains_BushelUOM
 				,strLotNumber				= 'MANUAL-22X-10000'
 				,dblQuantity				= 7
 				,dblCost					= 6.10
@@ -1258,6 +1284,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 20
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 24
+				,intItemUnitMeasureId		= @ManualGrains_PoundUOM
 				,strLotNumber				= 'LOT DE MANUAL X 113-133.108985'
 				,dblQuantity				= 20
 				,dblCost					= 7.00
@@ -1266,6 +1293,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 21
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 23
+				,intItemUnitMeasureId		= @ManualGrains_BushelUOM
 				,strLotNumber				= 'MANUAL-23X-10000'
 				,dblQuantity				= 3
 				,dblCost					= 5.90
@@ -1387,6 +1415,7 @@ BEGIN
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
+				,intItemUnitMeasureId
 				,strLotNumber
 				,dblQuantity
 				,dblCost
@@ -1396,6 +1425,7 @@ BEGIN
 		-- Manual Lot Grains
 		-- intInventoryReceiptItemLotId: 19
 		SELECT	intInventoryReceiptItemId	= 25
+				,intItemUnitMeasureId		= @ManualGrains_BushelUOM
 				,strLotNumber				= 'MANUAL-22X-10000'
 				,dblQuantity				= 7
 				,dblCost					= 6.10
@@ -1404,6 +1434,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 20
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 26
+				,intItemUnitMeasureId		= @ManualGrains_PoundUOM
 				,strLotNumber				= 'LOT DE MANUAL X 113-133.108985'
 				,dblQuantity				= 20
 				,dblCost					= 7.00
@@ -1412,6 +1443,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 21
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 25
+				,intItemUnitMeasureId		= @ManualGrains_BushelUOM
 				,strLotNumber				= 'MANUAL-23X-10000'
 				,dblQuantity				= 3
 				,dblCost					= 5.90
@@ -1534,6 +1566,7 @@ BEGIN
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
+				,intItemUnitMeasureId
 				,strLotNumber
 				,dblQuantity
 				,dblCost
@@ -1543,6 +1576,7 @@ BEGIN
 		-- Manual Lot Grains
 		-- intInventoryReceiptItemLotId: 22
 		SELECT	intInventoryReceiptItemId	= 27
+				,intItemUnitMeasureId		= @ManualGrains_BushelUOM
 				,strLotNumber				= 'MANUAL-22X-10000'
 				,dblQuantity				= 7
 				,dblCost					= 6.10
@@ -1551,6 +1585,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 23
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 28
+				,intItemUnitMeasureId		= @ManualGrains_PoundUOM
 				,strLotNumber				= 'LOT DE MANUAL X 113-133.108985'
 				,dblQuantity				= 20
 				,dblCost					= 7.00
@@ -1559,6 +1594,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 24
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 27
+				,intItemUnitMeasureId		= @ManualGrains_BushelUOM
 				,strLotNumber				= 'MANUAL-23X-10000'
 				,dblQuantity				= 3
 				,dblCost					= 5.90
@@ -1697,6 +1733,7 @@ BEGIN
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
+				,intItemUnitMeasureId
 				,strLotNumber
 				,dblQuantity
 				,dblCost
@@ -1706,6 +1743,7 @@ BEGIN
 		-- Manual Lot Grains
 		-- intInventoryReceiptItemLotId: 25
 		SELECT	intInventoryReceiptItemId	= 29
+				,intItemUnitMeasureId		= @ManualGrains_BushelUOM
 				,strLotNumber				= 'MANUAL-22X-10000'
 				,dblQuantity				= 7
 				,dblCost					= 6.10
@@ -1714,6 +1752,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 26
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 30
+				,intItemUnitMeasureId		= @ManualGrains_PoundUOM
 				,strLotNumber				= 'LOT DE MANUAL X 113-133.108985'
 				,dblQuantity				= 20
 				,dblCost					= 7.00
@@ -1722,6 +1761,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 27
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 29
+				,intItemUnitMeasureId		= @ManualGrains_BushelUOM
 				,strLotNumber				= 'MANUAL-23X-10000'
 				,dblQuantity				= 3
 				,dblCost					= 5.90
@@ -1874,6 +1914,7 @@ BEGIN
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
+				,intItemUnitMeasureId
 				,strLotNumber
 				,dblQuantity
 				,dblCost
@@ -1883,6 +1924,7 @@ BEGIN
 		-- Manual Lot Grains
 		-- intInventoryReceiptItemLotId: 28
 		SELECT	intInventoryReceiptItemId	= 31
+				,intItemUnitMeasureId		= @ManualGrains_BushelUOM
 				,strLotNumber				= 'MANUAL-22X-10000'
 				,dblQuantity				= 7
 				,dblCost					= 6.10
@@ -1891,6 +1933,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 29
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 32
+				,intItemUnitMeasureId		= @ManualGrains_PoundUOM
 				,strLotNumber				= 'LOT DE MANUAL X 113-133.108985'
 				,dblQuantity				= 20
 				,dblCost					= 7.00
@@ -1899,6 +1942,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 30
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 31
+				,intItemUnitMeasureId		= @ManualGrains_BushelUOM
 				,strLotNumber				= 'MANUAL-23X-10000'
 				,dblQuantity				= 3
 				,dblCost					= 5.90
@@ -2067,6 +2111,7 @@ BEGIN
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
+				,intItemUnitMeasureId
 				,strLotNumber
 				,dblQuantity
 				,dblCost
@@ -2076,6 +2121,7 @@ BEGIN
 		-- Manual Lot Grains
 		-- intInventoryReceiptItemLotId: 31
 		SELECT	intInventoryReceiptItemId	= 33
+				,intItemUnitMeasureId		= @ManualGrains_25KgBagUOM
 				,strLotNumber				= 'Manual Lot in 25 kg bags'
 				,dblQuantity				= 7
 				,dblCost					= 6.10
@@ -2084,6 +2130,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 32
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 34
+				,intItemUnitMeasureId		= @ManualGrains_PoundUOM
 				,strLotNumber				= 'Manual Lot in Pounds'
 				,dblQuantity				= 20
 				,dblCost					= 7.00
@@ -2092,6 +2139,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 33
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 33
+				,intItemUnitMeasureId		= @ManualGrains_25KgBagUOM
 				,strLotNumber				= 'Manual Lot in 25 kg bags'
 				,dblQuantity				= 3
 				,dblCost					= 5.90
@@ -2224,6 +2272,7 @@ BEGIN
 
 		INSERT INTO dbo.tblICInventoryReceiptItemLot (
 				intInventoryReceiptItemId
+				,intItemUnitMeasureId
 				,strLotNumber
 				,dblQuantity
 				,dblCost
@@ -2233,6 +2282,7 @@ BEGIN
 		-- Manual Lot Grains
 		-- intInventoryReceiptItemLotId: 34
 		SELECT	intInventoryReceiptItemId	= 35
+				,intItemUnitMeasureId		= @ManualGrains_25KgBagUOM
 				,strLotNumber				= 'Manual Lot in 25 kg bags'
 				,dblQuantity				= 7
 				,dblCost					= 6.10
@@ -2241,6 +2291,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 35
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 36
+				,intItemUnitMeasureId		= @ManualGrains_PoundUOM
 				,strLotNumber				= 'Manual Lot in Pounds'
 				,dblQuantity				= 20
 				,dblCost					= 7.00
@@ -2249,6 +2300,7 @@ BEGIN
 		-- intInventoryReceiptItemLotId: 36
 		UNION ALL 
 		SELECT	intInventoryReceiptItemId	= 35
+				,intItemUnitMeasureId		= @ManualGrains_25KgBagUOM
 				,strLotNumber				= 'Manual Lot in 25 kg bags'
 				,dblQuantity				= 3
 				,dblCost					= 5.90
