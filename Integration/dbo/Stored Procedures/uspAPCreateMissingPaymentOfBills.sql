@@ -173,7 +173,7 @@ BEGIN
 		SELECT 
 		A.intPaymentId 
 		,C.intBillId
-		,D.intBankAccountId
+		,C.intAccountId
 		,0
 		,0
 		,A.dblAmountPaid
