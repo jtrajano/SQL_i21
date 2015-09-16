@@ -64,6 +64,8 @@ SELECT	i21.intBankAccountId
 		,apcbk_laser_down_lines	= CAST(NULL AS INT)	-- INT
 		,apcbk_prtr_checks	= CAST(NULL AS NVARCHAR(80))	-- CHAR (80)
 		,apcbk_auto_assign_trx_yn	= CAST(NULL AS NVARCHAR(1))	-- Y/N
+		-- This is used to check if the bank account have a transaction
+		,ysnHasTransaction = CAST(ISNULL((select TOP 1 1 from  dbo.tblCMBankTransaction where intBankAccountId = i21.intBankAccountId),0) AS bit)
 FROM	dbo.tblCMBankAccount i21
 
 GO

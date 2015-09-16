@@ -73,6 +73,8 @@ BEGIN
 				,origin.apcbk_laser_down_lines		-- INT
 				,origin.apcbk_prtr_checks			-- CHAR (80)
 				,origin.apcbk_auto_assign_trx_yn	-- Y/N
+				-- This is used to check if the bank account have a transaction
+				,ysnHasTransaction = CAST(ISNULL((select TOP 1 1 from dbo.tblCMBankTransaction where intBankAccountId = i21.intBankAccountId),0) AS bit)
 		FROM	dbo.tblCMBankAccount i21 LEFT JOIN dbo.apcbkmst_origin origin
 					ON i21.strCbkNo = origin.apcbk_no COLLATE Latin1_General_CI_AS
 		')
