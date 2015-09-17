@@ -164,29 +164,6 @@
                             "designerId": "04bce380-fb5e-498d-916a-24678a80db47"
                         },
                         {
-                            "type": "Ext.button.Button",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": null,
-                                "height": 57,
-                                "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-refresh",
-                                "itemId": "btnRefresh",
-                                "layout|flex": null,
-                                "scale": "large",
-                                "tabIndex": -1,
-                                "text": "Refresh",
-                                "width": 55
-                            },
-                            "name": "MyButton4",
-                            "designerId": "b560440a-8b33-4c54-8c75-409ad8a08fb1"
-                        },
-                        {
                             "type": "Ext.toolbar.Separator",
                             "reference": {
                                 "name": "items",
@@ -246,29 +223,6 @@
                             },
                             "name": "MyButton42",
                             "designerId": "07eaf51d-0f97-4cad-844e-31c5660e7ae8"
-                        },
-                        {
-                            "type": "Ext.button.Button",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": null,
-                                "height": 57,
-                                "icon": null,
-                                "iconAlign": "top",
-                                "iconCls": "large-print-labels",
-                                "itemId": "btnPrintCountCards",
-                                "layout|flex": null,
-                                "scale": "large",
-                                "tabIndex": -1,
-                                "text": "Print Count Cards",
-                                "width": 100
-                            },
-                            "name": "MyButton43",
-                            "designerId": "76a7bce9-6c06-4b42-8cc4-ae676505f52a"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -351,16 +305,16 @@
                                 "height": 57,
                                 "icon": null,
                                 "iconAlign": "top",
-                                "iconCls": "large-test",
-                                "itemId": "btnQuality",
+                                "iconCls": "large-post",
+                                "itemId": "btnPost",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
-                                "text": "Quality",
+                                "text": "Post",
                                 "width": 60
                             },
-                            "name": "MyButton48",
-                            "designerId": "a7f4f280-ee55-4d3a-968d-3c921842d51c"
+                            "name": "MyButton47",
+                            "designerId": "054d3d0d-2301-41a6-87c6-7ef5850bfd64"
                         },
                         {
                             "type": "Ext.button.Button",
@@ -374,16 +328,39 @@
                                 "height": 57,
                                 "icon": null,
                                 "iconAlign": "top",
-                                "iconCls": "large-post",
-                                "itemId": "btnPost",
+                                "iconCls": "large-recap",
+                                "itemId": "btnRecap",
                                 "layout|flex": null,
                                 "scale": "large",
                                 "tabIndex": -1,
-                                "text": "Post",
+                                "text": "Recap",
                                 "width": 60
                             },
-                            "name": "MyButton47",
-                            "designerId": "054d3d0d-2301-41a6-87c6-7ef5850bfd64"
+                            "name": "MyButton4",
+                            "designerId": "9a797aa6-c35d-4d31-ac55-e7ffbb6a322a"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-starting-number",
+                                "itemId": "btnRecount",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Recount",
+                                "width": 60
+                            },
+                            "name": "MyButton3",
+                            "designerId": "5dfc67de-4665-4898-992b-7f22b7178f8a"
                         },
                         {
                             "type": "Ext.toolbar.Separator",
@@ -782,85 +759,34 @@
                                                     ]
                                                 },
                                                 {
-                                                    "type": "Ext.container.Container",
+                                                    "type": "Ext.form.field.Number",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "container|align": "stretch",
-                                                        "designer|displayName": "container",
-                                                        "layout": "hbox",
+                                                        "columns": null,
+                                                        "designer|createAlias": null,
+                                                        "fieldLabel": "Count No",
+                                                        "hideTrigger": true,
+                                                        "itemId": "txtCountNumber",
+                                                        "labelWidth": 85,
                                                         "layout|flex": 1,
-                                                        "layout|margins": null,
-                                                        "margin": "0 0 5 0"
+                                                        "margin": null,
+                                                        "minValue": null,
+                                                        "name": null
                                                     },
-                                                    "name": "MyContainer11",
-                                                    "designerId": "e579abe6-48cb-4dd5-a86a-c417bfcdca67",
-                                                    "cn": [
+                                                    "name": "MyNumberField54",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "d5b6066e-b69e-417b-a729-8f51946f0469",
+                                                    "customConfigs": [
                                                         {
-                                                            "type": "Ext.form.field.Number",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "columns": null,
-                                                                "designer|createAlias": null,
-                                                                "fieldLabel": "Count No",
-                                                                "hideTrigger": true,
-                                                                "itemId": "txtCountNumber",
-                                                                "labelWidth": 85,
-                                                                "layout|flex": 1,
-                                                                "margin": "0 5 0 0",
-                                                                "minValue": null,
-                                                                "name": null
-                                                            },
-                                                            "name": "MyNumberField54",
-                                                            "configAlternates": {
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "d5b6066e-b69e-417b-a729-8f51946f0469",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.Number",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "columns": null,
-                                                                "designer|createAlias": null,
-                                                                "fieldLabel": "Count Seq No",
-                                                                "hideTrigger": true,
-                                                                "itemId": "txtCountSeqNumber",
-                                                                "labelWidth": 85,
-                                                                "layout|flex": 1,
-                                                                "minValue": null,
-                                                                "name": null
-                                                            },
-                                                            "name": "MyNumberField68",
-                                                            "configAlternates": {
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "5e0faff4-160d-4056-bcd3-efbf8ae9b5d6",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
                                                         }
                                                     ]
                                                 },
@@ -906,42 +832,13 @@
                                                 "container|align": "stretch",
                                                 "designer|displayName": "container",
                                                 "layout": "vbox",
-                                                "layout|flex": 0.8,
+                                                "layout|flex": 0.5,
                                                 "layout|margins": null,
                                                 "margin": "0 0 0 5"
                                             },
                                             "name": "MyContainer",
                                             "designerId": "e3c7536e-e416-4809-8e7c-1c8fbc020d10",
                                             "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Text",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "columns": null,
-                                                        "designer|createAlias": null,
-                                                        "fieldLabel": "Count/Year",
-                                                        "itemId": "txtCountYear",
-                                                        "labelWidth": 99,
-                                                        "layout|flex": null,
-                                                        "name": null
-                                                    },
-                                                    "name": "MyTextField5",
-                                                    "configAlternates": {
-                                                        "columns": "array"
-                                                    },
-                                                    "designerId": "c9ae5b46-6653-499f-8487-ec5724d141fd",
-                                                    "customConfigs": [
-                                                        {
-                                                            "group": "(Custom Properties)",
-                                                            "name": "columns",
-                                                            "type": "string"
-                                                        }
-                                                    ]
-                                                },
                                                 {
                                                     "type": "Ext.form.field.Checkbox",
                                                     "reference": {

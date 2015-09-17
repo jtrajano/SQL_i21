@@ -114,17 +114,6 @@ Ext.define('Inventory.view.InventoryCount', {
                             text: 'Undo'
                         },
                         {
-                            xtype: 'button',
-                            tabIndex: -1,
-                            height: 57,
-                            itemId: 'btnRefresh',
-                            width: 55,
-                            iconAlign: 'top',
-                            iconCls: 'large-refresh',
-                            scale: 'large',
-                            text: 'Refresh'
-                        },
-                        {
                             xtype: 'tbseparator',
                             height: 30
                         },
@@ -149,17 +138,6 @@ Ext.define('Inventory.view.InventoryCount', {
                             iconCls: 'large-print',
                             scale: 'large',
                             text: 'Print Count Sheets'
-                        },
-                        {
-                            xtype: 'button',
-                            tabIndex: -1,
-                            height: 57,
-                            itemId: 'btnPrintCountCards',
-                            width: 100,
-                            iconAlign: 'top',
-                            iconCls: 'large-print-labels',
-                            scale: 'large',
-                            text: 'Print Count Cards'
                         },
                         {
                             xtype: 'button',
@@ -198,23 +176,34 @@ Ext.define('Inventory.view.InventoryCount', {
                             xtype: 'button',
                             tabIndex: -1,
                             height: 57,
-                            itemId: 'btnQuality',
-                            width: 60,
-                            iconAlign: 'top',
-                            iconCls: 'large-test',
-                            scale: 'large',
-                            text: 'Quality'
-                        },
-                        {
-                            xtype: 'button',
-                            tabIndex: -1,
-                            height: 57,
                             itemId: 'btnPost',
                             width: 60,
                             iconAlign: 'top',
                             iconCls: 'large-post',
                             scale: 'large',
                             text: 'Post'
+                        },
+                        {
+                            xtype: 'button',
+                            tabIndex: -1,
+                            height: 57,
+                            itemId: 'btnRecap',
+                            width: 60,
+                            iconAlign: 'top',
+                            iconCls: 'large-recap',
+                            scale: 'large',
+                            text: 'Recap'
+                        },
+                        {
+                            xtype: 'button',
+                            tabIndex: -1,
+                            height: 57,
+                            itemId: 'btnRecount',
+                            width: 60,
+                            iconAlign: 'top',
+                            iconCls: 'large-starting-number',
+                            scale: 'large',
+                            text: 'Recount'
                         },
                         {
                             xtype: 'tbseparator',
@@ -347,32 +336,12 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     labelWidth: 85
                                                 },
                                                 {
-                                                    xtype: 'container',
+                                                    xtype: 'numberfield',
                                                     flex: 1,
-                                                    margin: '0 0 5 0',
-                                                    layout: {
-                                                        type: 'hbox',
-                                                        align: 'stretch'
-                                                    },
-                                                    items: [
-                                                        {
-                                                            xtype: 'numberfield',
-                                                            flex: 1,
-                                                            itemId: 'txtCountNumber',
-                                                            margin: '0 5 0 0',
-                                                            fieldLabel: 'Count No',
-                                                            labelWidth: 85,
-                                                            hideTrigger: true
-                                                        },
-                                                        {
-                                                            xtype: 'numberfield',
-                                                            flex: 1,
-                                                            itemId: 'txtCountSeqNumber',
-                                                            fieldLabel: 'Count Seq No',
-                                                            labelWidth: 85,
-                                                            hideTrigger: true
-                                                        }
-                                                    ]
+                                                    itemId: 'txtCountNumber',
+                                                    fieldLabel: 'Count No',
+                                                    labelWidth: 85,
+                                                    hideTrigger: true
                                                 },
                                                 {
                                                     xtype: 'textfield',
@@ -384,19 +353,13 @@ Ext.define('Inventory.view.InventoryCount', {
                                         },
                                         {
                                             xtype: 'container',
-                                            flex: 0.8,
+                                            flex: 0.5,
                                             margin: '0 0 0 5',
                                             layout: {
                                                 type: 'vbox',
                                                 align: 'stretch'
                                             },
                                             items: [
-                                                {
-                                                    xtype: 'textfield',
-                                                    itemId: 'txtCountYear',
-                                                    fieldLabel: 'Count/Year',
-                                                    labelWidth: 99
-                                                },
                                                 {
                                                     xtype: 'checkboxfield',
                                                     itemId: 'chkIncludeOnHand',
