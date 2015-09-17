@@ -193,7 +193,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= CASE	WHEN B.[strJournalType] in ('Origin Journal','Adjusted Origin Journal') THEN B.[strSourceType]
+			,[strCode]				= CASE	WHEN B.[strJournalType] in ('Origin Journal','Adjusted Origin Journal') THEN REPLACE(B.[strSourceType],' ','')
 											ELSE 'GJ' END 
 								
 			,[strJournalLineDescription] = A.[strDescription]
@@ -279,7 +279,7 @@ ELSE
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= CASE	WHEN B.[strJournalType] in ('Origin Journal','Adjusted Origin Journal') THEN B.[strSourceType]
+			,[strCode]				= CASE	WHEN B.[strJournalType] in ('Origin Journal','Adjusted Origin Journal') THEN REPLACE(B.[strSourceType],' ','')
 											ELSE 'GJ' END 
 			
 			,[strTransactionType]	= B.[strJournalType]
