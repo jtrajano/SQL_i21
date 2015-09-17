@@ -43,7 +43,7 @@ BEGIN TRY
 			,intLotId
 			,intSubLocationId
 			,intStorageLocationId
-			,ysnIsCustody
+			,ysnIsStorage
 			,dblFreightRate
 			,intSourceId	
 			,intSourceType		 	
@@ -99,7 +99,7 @@ BEGIN TRY
 			NULL,--No LOTS from transport
 			NULL, -- No Sub Location from transport
 			NULL, -- No Storage Location from transport
-			0,-- No Custody from transports
+			0,-- No Storage from transports
 			TR.dblFreightRate,
 			TR.intTransportReceiptId,	  
 			3, -- Source type for transports is 3 

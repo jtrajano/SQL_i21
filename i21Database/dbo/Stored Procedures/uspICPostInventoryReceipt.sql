@@ -222,7 +222,7 @@ IF @ysnPost = 1
 BEGIN  
 	-- Get the items to post  
 	DECLARE @ItemsForPost AS ItemCostingTableType  
-	DECLARE @CustodyItemsForPost AS ItemCostingTableType  
+	DECLARE @StorageItemsForPost AS ItemCostingTableType  
 
 	-- Process the Other Charges
 	BEGIN 
@@ -495,9 +495,9 @@ BEGIN
 		END
 	END 
 
-	-- Process custody items 
+	-- Process Storage items 
 	BEGIN 
-		INSERT INTO @CustodyItemsForPost (  
+		INSERT INTO @StorageItemsForPost (  
 				intItemId  
 				,intItemLocationId 
 				,intItemUOMId  
@@ -604,10 +604,10 @@ BEGIN
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) <> @OWNERSHIP_TYPE_Own
   
 		-- Call the post routine 
-		IF EXISTS (SELECT TOP 1 1 FROM @CustodyItemsForPost) 
+		IF EXISTS (SELECT TOP 1 1 FROM @StorageItemsForPost) 
 		BEGIN 
-			EXEC	dbo.uspICPostCustody
-					@CustodyItemsForPost  
+			EXEC	dbo.uspICPostStorage
+					@StorageItemsForPost  
 					,@strBatchId  
 					,@intUserId
 		END

@@ -1308,7 +1308,7 @@ BEGIN TRY
 				 IF @ysnUpdateHouseTotal = 1---Old Ticket Yes
 				 BEGIN
 					UPDATE tblICItemStock
-					SET dblUnitInCustody = dblUnitInCustody- @UnitsToReduce
+					SET dblUnitStorage = dblUnitStorage- @UnitsToReduce
 					WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId
 				 END
 				 ELSE IF @ysnUpdateHouseTotal = 0---Old Ticket No
@@ -1334,7 +1334,7 @@ BEGIN TRY
 						(
 							 intItemId
 							,intItemLocationId
-							,dblUnitInCustody
+							,dblUnitStorage
 							,intConcurrencyId
 						)
 						SELECT @intItemId
@@ -1348,7 +1348,7 @@ BEGIN TRY
 						WHERE intItemId = @intItemId AND intLocationId = @ActionCompanyLocationId
 						
 						UPDATE tblICItemStock
-						SET dblUnitInCustody = dblUnitInCustody + @UnitsToReduce						
+						SET dblUnitStorage = dblUnitStorage + @UnitsToReduce						
 						WHERE intItemId = @intItemId AND intItemLocationId = @intActionLocationId
 					
 					END
