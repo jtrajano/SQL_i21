@@ -109,7 +109,7 @@ BEGIN
 			CREATE VIEW [dbo].[vwlclmst]
 			AS
 			SELECT
-				vwlcl_tax_state	=	strTaxGroupMaster,
+				vwlcl_tax_state	=	strTaxGroup,
 				vwlcl_tax_auth_id1	=	'''',
 				vwlcl_tax_auth_id2	=	'''',
 				vwlcl_auth_id1_desc	=	'''',
@@ -124,11 +124,11 @@ BEGIN
 				,vwlcl_lc6_ivc_desc	=	''''
 				,vwlcl_user_id	=	''''
 				,vwlcl_user_rev_dt	=	NULL
-				,A4GLIdentity	=	CAST(intTaxGroupMasterId AS INT)
+				,A4GLIdentity	=	CAST(intTaxGroupId AS INT)
 				,intConcurrencyId = 0 
-				,strTaxStateLocale = strTaxGroupMaster
+				,strTaxStateLocale = strTaxGroup
 				,strDescription = strDescription
-			FROM tblSMTaxGroupMaster
+			FROM tblSMTaxGroup
 		')
 	END
 END
