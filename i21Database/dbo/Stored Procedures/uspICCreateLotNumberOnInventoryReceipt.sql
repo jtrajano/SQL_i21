@@ -164,9 +164,9 @@ BEGIN
 			,intStorageLocationId	= StorageLocation.intStorageLocationId
 			,dblQty					=	CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END 
 										* ItemLot.dblQuantity
-			,intItemUOMId			=	ItemLot.intItemUnitMeasureId
-			,dblWeight				=	CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END
-										* CASE	WHEN ISNULL(ReceiptItem.intWeightUOMId, 0) = 0	THEN 
+			,intItemUOMId			= ItemLot.intItemUnitMeasureId
+			,dblWeight				= CASE WHEN @ysnPost = 0 THEN -1 ELSE 1 END
+										* CASE	WHEN ISNULL(ReceiptItem.intWeightUOMId, 0) <> 0	THEN 
 													ISNULL(ItemLot.dblGrossWeight, 0) - ISNULL(ItemLot.dblTareWeight, 0) 
 												ELSE 
 													0
