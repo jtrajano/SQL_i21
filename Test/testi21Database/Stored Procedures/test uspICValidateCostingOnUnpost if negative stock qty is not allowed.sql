@@ -60,7 +60,7 @@ BEGIN
 	-- Test case 1: 
 	BEGIN 
 		-- Assert the error expected
-		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 50029
+		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 80003
 
 		-- Act 
 		EXEC dbo.uspICValidateCostingOnUnpost @ItemsToValidate = @Items;

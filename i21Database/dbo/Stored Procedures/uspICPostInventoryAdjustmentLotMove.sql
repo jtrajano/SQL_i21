@@ -53,7 +53,7 @@ BEGIN
 		WHERE intItemId = @intItemId		
 
 		-- 'The UOM is missing on {Item}.'
-		RAISERROR(51136, 11, 1, @strItemNo);
+		RAISERROR(80039, 11, 1, @strItemNo);
 		GOTO Exit_With_Errors
 	END
 
@@ -77,7 +77,7 @@ BEGIN
 		WHERE intItemId = @intItemId		
 
 		-- 'Move Lot requires a negative Adjust Qty on %s as stock for the move.'
-		RAISERROR(51178, 11, 1, @strItemNo);
+		RAISERROR(80059, 11, 1, @strItemNo);
 		GOTO Exit_With_Errors
 	END
 END 

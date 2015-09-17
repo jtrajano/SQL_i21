@@ -67,7 +67,7 @@ IF NOT EXISTS (
 )
 BEGIN
 	-- 'Internal Error. The source transaction type provided is invalid or not supported.' 
-	RAISERROR(51124, 11, 1)  
+	RAISERROR(80032, 11, 1)  
 	GOTO _Exit;
 END 
 
@@ -75,7 +75,7 @@ END
 IF @intSourceId IS NULL 
 BEGIN
 	-- 'Internal Error. The source transaction id is invalid.'
-	RAISERROR(51125, 11, 1)  
+	RAISERROR(80033, 11, 1)  
 	GOTO _Exit;
 END 
 
@@ -83,7 +83,7 @@ END
 IF dbo.fnGetItemLotType(@intItemId) = 0 
 BEGIN 
 	-- Invalid Item.
-	RAISERROR(51077, 11, 1); 
+	RAISERROR(80021, 11, 1); 
 	GOTO _Exit;
 END 
 
@@ -91,7 +91,7 @@ END
 IF ISNULL(@strNewLotNumber, '') = '' 
 BEGIN 
 	-- 'Invalid Lot'
-	RAISERROR(51053, 11, 1)  
+	RAISERROR(80020, 11, 1)  
 	GOTO _Exit;
 END 
 
@@ -110,7 +110,7 @@ END
 IF @intLotId IS NULL 
 BEGIN 
 	-- Invalid Lot
-	RAISERROR(51053, 11, 1)  
+	RAISERROR(80020, 11, 1)  
 	GOTO _Exit
 END 
 
@@ -118,7 +118,7 @@ END
 IF ISNULL(@dblAdjustByQuantity, 0) > 0 
 BEGIN 
 	-- 'Internal Error. The Adjust By Quantity is required to be a negative value.'
-	RAISERROR(51127, 11, 1)  
+	RAISERROR(80035, 11, 1)  
 	GOTO _Exit
 END 
 
@@ -131,7 +131,7 @@ IF NOT EXISTS (
 ) AND @intNewSubLocationId IS NOT NULL 
 BEGIN 
 	-- 'Internal Error. The new sub-location is invalid.'
-	RAISERROR(51128, 11, 1)  
+	RAISERROR(80036, 11, 1)  
 	GOTO _Exit
 END 
 
@@ -144,7 +144,7 @@ IF NOT EXISTS (
 ) AND @intNewStorageLocationId IS NOT NULL 
 BEGIN 
 	-- 'Internal Error. The new storage location is invalid.'
-	RAISERROR(51129, 11, 1)  
+	RAISERROR(80037, 11, 1)  
 	GOTO _Exit
 END 
 

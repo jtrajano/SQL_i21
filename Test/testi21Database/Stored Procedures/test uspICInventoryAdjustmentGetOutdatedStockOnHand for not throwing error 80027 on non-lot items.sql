@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICInventoryAdjustmentGetOutdatedStockOnHand for not throwing error 51100 on non-lot items]
+﻿CREATE PROCEDURE [testi21Database].[test uspICInventoryAdjustmentGetOutdatedStockOnHand for not throwing error 80027 on non-lot items]
 AS
 BEGIN
 	-- Constant for Adjustment Types

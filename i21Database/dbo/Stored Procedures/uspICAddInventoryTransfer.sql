@@ -60,7 +60,7 @@ GROUP BY RawData.strTransferType
 IF NOT EXISTS (SELECT TOP 1 1 FROM @DataForInventoryTransferHeader)
 BEGIN 
 	-- 'Data not found. Unable to create the Inventory Transfer.'
-	RAISERROR(51180, 11, 1);	
+	RAISERROR(80060, 11, 1);	
 	GOTO _Exit;
 END 
 
@@ -194,7 +194,7 @@ BEGIN
 		IF @InventoryTransferId IS NULL 
 		BEGIN 
 			-- 'Unable to generate the Inventory Transfer. An error stopped the creation of the inventory transfer.'
-			RAISERROR(51181, 11, 1);
+			RAISERROR(80061, 11, 1);
 			RETURN;
 		END
 

@@ -130,7 +130,8 @@ BEGIN
 	IF EXISTS(SELECT TOP 1 1 FROM sys.tables WHERE object_id = object_id('tempValidateItemLocation')) 
 	DROP TABLE #tempValidateItemLocation
 	
-	RAISERROR(51099, 11, 1, @ItemId, @LocationId)  
+	-- Item %s is not available on location %s.
+	RAISERROR(80026, 11, 1, @ItemId, @LocationId)  
 	GOTO Post_Exit  
 END
 
@@ -434,7 +435,7 @@ BEGIN
 		COMMIT TRAN @TransactionName
 
 		-- 'Recap is not applicable when doing an inventory transfer for the same location.'
-		RAISERROR(51150, 11, 1)  
+		RAISERROR(80045, 11, 1)  
 		GOTO Post_Exit  
 	END 
 	ELSE 

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICCalculateInventoryReceiptOtherCharges for error 51163]
+﻿CREATE PROCEDURE [testi21Database].[test uspICCalculateInventoryReceiptOtherCharges for error 80050]
 AS
 BEGIN
 	-- Arrange 
@@ -111,7 +111,7 @@ BEGIN
 	BEGIN 
 		EXEC tSQLt.ExpectException
 			@ExpectedMessage = 'Unable to calculate the Other Charges per unit. Please check if UOM Pound is assigned to item MANUAL LOT GRAINS.'
-			,@ExpectedErrorNumber = 51163
+			,@ExpectedErrorNumber = 80050
 	END
 	
 	-- Act

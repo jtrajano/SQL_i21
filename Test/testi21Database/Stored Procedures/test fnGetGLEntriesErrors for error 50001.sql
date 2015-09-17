@@ -26,6 +26,7 @@ BEGIN
 			,intConcurrencyId
 			,intAccountId
 			,strTransactionId 
+			,strModuleName 
 		)
 		SELECT 
 			dtmDate = GETDATE()
@@ -35,6 +36,7 @@ BEGIN
 			,intConcurrencyId = 1
 			,intAccountId = NULL
 			,strTransactionId = 'DUMMY-00001'
+			,strModuleName = 'Inventory'
 
 		-- Insert the expected data 
 		INSERT INTO expected (

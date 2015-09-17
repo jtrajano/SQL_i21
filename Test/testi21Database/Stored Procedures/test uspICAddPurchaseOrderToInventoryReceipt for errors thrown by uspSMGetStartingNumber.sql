@@ -8,7 +8,7 @@ BEGIN
 		SET @errorCommand = 'RAISERROR(''Error raised inside uspSMGetStartingNumber'', 16, 1);';
 
 		EXEC tSQLt.SpyProcedure 'dbo.uspSMGetStartingNumber', @errorCommand;
-		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 50031 
+		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 80004 
 	END
 	
 	-- Act

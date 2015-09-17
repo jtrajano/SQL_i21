@@ -21,7 +21,7 @@ IF @PurchaseOrderId IS NULL
 BEGIN 
     -- Raise the error:
     -- Unable to generate the Inventory Receipt. An error stopped the process from Purchase Order to Inventory Receipt.
-    RAISERROR(50031, 11, 1);
+    RAISERROR(80004, 11, 1);
     GOTO _Exit
 END
 
@@ -103,7 +103,7 @@ SELECT @InventoryReceiptId = SCOPE_IDENTITY()
 --BEGIN 
 --	-- Raise the error:
 --	-- Unable to generate the Inventory Receipt. An error stopped the process from Purchase Order to Inventory Receipt.
---	RAISERROR(50031, 11, 1);
+--	RAISERROR(80004, 11, 1);
 --	GOTO _Exit
 --END
 

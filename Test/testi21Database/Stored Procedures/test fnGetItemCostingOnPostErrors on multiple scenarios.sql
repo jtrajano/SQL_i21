@@ -160,60 +160,60 @@ BEGIN
 		-- 2: Invalid item and valid location
 		SELECT	intItemId = -1
 				,intItemLocationId = @WetGrains_DefaultLocation
-				,strText = FORMATMESSAGE(50027)
-				,intErrorCode = 50027
+				,strText = FORMATMESSAGE(80001)
+				,intErrorCode = 80001
 
 		UNION ALL
 		SELECT	intItemId = -1
 				,intItemLocationId = @WetGrains_DefaultLocation
-				,strText = FORMATMESSAGE(51159)
-				,intErrorCode = 51159
+				,strText = FORMATMESSAGE(80048)
+				,intErrorCode = 80048
 
 		UNION ALL
 		SELECT	intItemId = -1
 				,intItemLocationId = @WetGrains_DefaultLocation
-				,strText = FORMATMESSAGE(51134)
-				,intErrorCode = 51134
+				,strText = FORMATMESSAGE(80049, NULL)
+				,intErrorCode = 80049
 
 		UNION ALL
 		SELECT	intItemId = -1
 				,intItemLocationId = @WetGrains_DefaultLocation
-				,strText = FORMATMESSAGE(50028)
-				,intErrorCode = 50028
+				,strText = FORMATMESSAGE(80002)
+				,intErrorCode = 80002
 
 		-- 3: Valid item and invalid location
 		UNION ALL 
 		SELECT	intItemId = @StickyGrains
 				,intItemLocationId = -1
-				,strText = FORMATMESSAGE(50028)
-				,intErrorCode = 50028
+				,strText = FORMATMESSAGE(80002)
+				,intErrorCode = 80002
 
 		-- 4: Invalid item and invalid location
 		UNION ALL		
 		SELECT	intItemId = -1
 				,intItemLocationId = -1
-				,strText = FORMATMESSAGE(50027)
-				,intErrorCode = 50027
+				,strText = FORMATMESSAGE(80001)
+				,intErrorCode = 80001
 
 		UNION ALL		
 		SELECT	intItemId = -1
 				,intItemLocationId = -1
-				,strText = FORMATMESSAGE(51134)
-				,intErrorCode = 51134
+				,strText = FORMATMESSAGE(80049)
+				,intErrorCode = 80049
 
 		-- 4: Invalid item and invalid location
 		UNION ALL		
 		SELECT	intItemId = -1
 				,intItemLocationId = -1
-				,strText = FORMATMESSAGE(50028)
-				,intErrorCode = 50028
+				,strText = FORMATMESSAGE(80002)
+				,intErrorCode = 80002
 
 		-- 6: Negative stock is not allowed 
 		UNION ALL
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @WetGrains_BetterHaven
-				,strText = FORMATMESSAGE(50029)
-				,intErrorCode = 50029		
+				,strText = FORMATMESSAGE(80003)
+				,intErrorCode = 80003		
 	END
 
 	-- Act

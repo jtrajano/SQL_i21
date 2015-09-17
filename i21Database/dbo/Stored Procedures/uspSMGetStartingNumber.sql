@@ -24,7 +24,7 @@ BEGIN
 	IF @intStartingNumberId = @STARTING_NUMBER_BATCH_LOT_NUMBER
 	BEGIN 
 		-- Unable to generate Lot Number. Please ask your local administrator to check the starting numbers setup.
-		RAISERROR(51119, 11, 1);
+		RAISERROR(80031, 11, 1);
 	END 
 	ELSE IF @intStartingNumberId = @STARTING_NUMBER_BATCH_ID
 	BEGIN 

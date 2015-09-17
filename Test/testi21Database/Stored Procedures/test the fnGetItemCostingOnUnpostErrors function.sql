@@ -89,8 +89,8 @@ BEGIN
 		-- 2: Negative stock is not allowed 
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @intItemLocationId_3
-				,strText = FORMATMESSAGE(50029)
-				,intErrorCode = 50029
+				,strText = FORMATMESSAGE(80003)
+				,intErrorCode = 80003
 	END
 
 	-- Act

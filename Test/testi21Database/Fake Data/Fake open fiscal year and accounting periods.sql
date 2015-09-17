@@ -61,12 +61,14 @@ BEGIN
 						,dtmStartDate
 						,dtmEndDate
 						,ysnOpen
+						,ysnINVOpen 
 						,intConcurrencyId
 				)
 				SELECT 	intFiscalYearId = @FY2014
 						,dtmStartDate = @dtmStartDate
 						,dtmEndDate = @dtmEndDate
 						,ysnOpen = 1
+						,ysnINVOpen = 1
 						,intConcurrencyId = 1 
 
 				SET @dtmStartDate = DATEADD(MONTH, 1, @dtmStartDate)
@@ -88,12 +90,14 @@ BEGIN
 						,dtmStartDate
 						,dtmEndDate
 						,ysnOpen
+						,ysnINVOpen 
 						,intConcurrencyId
 				)
 				SELECT 	intFiscalYearId = @FY2015
 						,dtmStartDate = @dtmStartDate
 						,dtmEndDate = @dtmEndDate
 						,ysnOpen = 1
+						,ysnINVOpen = 1
 						,intConcurrencyId = 1 
 
 				SET @dtmStartDate = DATEADD(MONTH, 1, @dtmStartDate)
@@ -108,11 +112,13 @@ BEGIN
 				,dtmStartDate
 				,dtmEndDate
 				,ysnOpen
+				,ysnINVOpen 
 				,intConcurrencyId
 		)
 		SELECT 	intFiscalYearId = @FYTODAY
-				,dtmStartDate = GETDATE()
-				,dtmEndDate = GETDATE()
+				,dtmStartDate = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME) 
+				,dtmEndDate = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME) 
 				,ysnOpen = 1
+				,ysnINVOpen = 1
 				,intConcurrencyId = 1 
 END

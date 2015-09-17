@@ -137,7 +137,7 @@ BEGIN
 	BEGIN 
 		EXEC tSQLt.ExpectException 
 			@ExpectedMessage = 'Internal Error. The source transaction id is invalid.'
-			,@ExpectedErrorNumber = 51125			
+			,@ExpectedErrorNumber = 80033			
 	END 
 
 	-- Act

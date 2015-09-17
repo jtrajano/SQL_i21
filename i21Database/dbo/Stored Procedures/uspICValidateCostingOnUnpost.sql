@@ -41,9 +41,9 @@ WHERE	ISNULL(@ysnRecap, 0) = 0
 
 -- If such error is found, raise the error to stop the costing and allow the caller code to do a rollback. 
 -- Check for negative stock qty 
-IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 50029)
+IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80003)
 BEGIN 
-	RAISERROR(50029, 11, 1)
+	RAISERROR(80003, 11, 1)
 	GOTO _Exit
 END 
 

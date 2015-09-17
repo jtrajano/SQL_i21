@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICCreateLotNumberOnInventoryReceipt to raise error 51038]
+﻿CREATE PROCEDURE [testi21Database].[test uspICCreateLotNumberOnInventoryReceipt to raise error 80006]
 AS
 BEGIN
 	-- Arrange 
@@ -86,7 +86,7 @@ BEGIN
 	-- Assert
 	BEGIN 
 		-- The lot Quantity(ies) on %s must match its Open Receive Quantity.
-		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 51038 
+		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 80006 
 	END
 
 	-- Act

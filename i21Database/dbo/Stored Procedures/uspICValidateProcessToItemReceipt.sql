@@ -38,16 +38,16 @@ FROM	@Items Item CROSS APPLY dbo.fnGetProcessToInventoryReceiptErrors(Item.intIt
 
 -- Check for invalid items in the temp table. 
 -- If such error is found, raise the error to stop the costing and allow the caller code to do a rollback. 
-IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 50027)
+IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80001)
 BEGIN 
-	RAISERROR(50027, 11, 1)
+	RAISERROR(80001, 11, 1)
 	GOTO _Exit
 END 
 
 ---- Check for invalid location in the item-location setup. 
---IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 50028)
+--IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80002)
 --BEGIN 
---	RAISERROR(50028, 11, 1)
+--	RAISERROR(80002, 11, 1)
 --	GOTO _Exit
 --END 
 

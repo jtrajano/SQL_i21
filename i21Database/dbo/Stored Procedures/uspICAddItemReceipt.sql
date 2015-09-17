@@ -105,7 +105,7 @@ GROUP BY RawData.intEntityVendorId
 IF NOT EXISTS (SELECT TOP 1 1 FROM @DataForReceiptHeader)
 BEGIN 
 	-- 'Data not found. Unable to create the Inventory Receipt.'
-	RAISERROR(51169, 11, 1);	
+	RAISERROR(80055, 11, 1);	
 	GOTO _Exit;
 END 
 
@@ -287,7 +287,7 @@ BEGIN
 		IF @InventoryReceiptId IS NULL 
 		BEGIN 
 			-- Unable to generate the Inventory Receipt. An error stopped the process from Purchase Order to Inventory Receipt.
-			RAISERROR(50031, 11, 1);
+			RAISERROR(80004, 11, 1);
 			RETURN;
 		END
 

@@ -27,7 +27,7 @@ BEGIN
 	BEGIN 
 		EXEC tSQLt.ExpectException
 			@ExpectedMessage = 'A consigned or custodial item is no longer available. Unable to continue and unpost the transaction.'
-			,@ExpectedErrorNumber = 51135
+			,@ExpectedErrorNumber = 80038
 	END 
 	
 	-- Act 

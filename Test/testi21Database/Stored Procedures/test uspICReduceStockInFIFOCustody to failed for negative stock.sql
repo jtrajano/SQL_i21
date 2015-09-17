@@ -251,7 +251,7 @@ BEGIN
 	BEGIN 
 		EXEC tSQLt.ExpectException
 			@ExpectedMessage = 'Negative stock quantity is not allowed.'
-			,@ExpectedErrorNumber = 50029
+			,@ExpectedErrorNumber = 80003
 	END
 
 	-- Act

@@ -57,7 +57,7 @@ BEGIN
 		WHERE intItemId = @intItemId		
 
 		-- 'The UOM is missing on {Item}.'
-		RAISERROR(51136, 11, 1, @strItemNo);
+		RAISERROR(80039, 11, 1, @strItemNo);
 		GOTO _Exit
 	END
 

@@ -12,8 +12,8 @@ BEGIN
 	--EXEC tSQLt.Fail 'Unique key strVendorId to tblAPVendor on tblAPVendor does not exists'
 	
 	--Unique key intVendorId to tblAPVendor
-	IF NOT EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_NAME='UK_intVendorId')
-	EXEC tSQLt.Fail 'Unique key intVendorId to tblAPVendor on tblAPVendor does not exists'
+	--IF NOT EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_NAME='UK_intVendorId')
+	--EXEC tSQLt.Fail 'Unique key intVendorId to tblAPVendor on tblAPVendor does not exists'
 	
 	--Foreign key to tblEntity
 	IF NOT EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_NAME='FK_dbo.tblAPVendor_dbo.tblEntities_intEntityId')

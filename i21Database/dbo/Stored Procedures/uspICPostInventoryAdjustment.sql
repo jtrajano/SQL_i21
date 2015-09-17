@@ -447,7 +447,7 @@ BEGIN
 		COMMIT TRAN @TransactionName
 
 		-- Recap is not applicable for this type of transaction.
-		RAISERROR(51098, 11, 1)  
+		RAISERROR(80025, 11, 1)  
 		GOTO Post_Exit  
 	END
 END 

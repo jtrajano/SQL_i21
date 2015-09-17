@@ -48,7 +48,7 @@ IF NOT EXISTS (
 )
 BEGIN
 	-- 'Internal Error. The source transaction type provided is invalid or not supported.' 
-	RAISERROR(51124, 11, 1)  
+	RAISERROR(80032, 11, 1)  
 	GOTO _Exit;
 END 
 
@@ -56,7 +56,7 @@ END
 IF @intSourceId IS NULL 
 BEGIN
 	-- 'Internal Error. The source transaction id is invalid.'
-	RAISERROR(51125, 11, 1)  
+	RAISERROR(80033, 11, 1)  
 	GOTO _Exit;
 END 
 
@@ -78,7 +78,7 @@ BEGIN
 	IF @intLotId IS NULL 
 	BEGIN 
 		-- Invalid Lot
-		RAISERROR(51053, 11, 1)  
+		RAISERROR(80020, 11, 1)  
 		GOTO _Exit
 	END 	
 END 
@@ -87,7 +87,7 @@ END
 IF ISNULL(@dblAdjustByQuantity, 0) = 0 
 BEGIN 
 	-- 'Internal Error. The Adjust By Quantity is required.'
-	RAISERROR(51127, 11, 1)  
+	RAISERROR(80035, 11, 1)  
 	GOTO _Exit
 END 
 

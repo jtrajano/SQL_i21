@@ -47,23 +47,23 @@ FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnPostCustodyErrors(I
 
 -- Check for invalid items in the temp table. 
 -- If such error is found, raise the error to stop the costing and allow the caller code to do a rollback. 
-IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 50027)
+IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80001)
 BEGIN 
-	RAISERROR(50027, 11, 1)
+	RAISERROR(80001, 11, 1)
 	GOTO _Exit
 END 
 
 -- Check for invalid location in the item-location setup. 
-IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 50028)
+IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80002)
 BEGIN 
-	RAISERROR(50028, 11, 1)
+	RAISERROR(80002, 11, 1)
 	GOTO _Exit
 END 
 
 -- Check for negative stock qty 
-IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 50029)
+IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80003)
 BEGIN 
-	RAISERROR(50029, 11, 1)
+	RAISERROR(80003, 11, 1)
 	GOTO _Exit
 END 
 
@@ -72,12 +72,12 @@ SELECT TOP 1
 		@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
 FROM	#FoundErrors Errors INNER JOIN tblICItem Item
 			ON Errors.intItemId = Item.intItemId
-WHERE	intErrorCode = 51091
+WHERE	intErrorCode = 80023
 
 IF @strItemNo IS NOT NULL 
 BEGIN 
 	-- 'Missing costing method setup for item {Item}.'
-	RAISERROR(51091, 11, 1, @strItemNo)
+	RAISERROR(80023, 11, 1, @strItemNo)
 	GOTO _Exit
 END 
 
@@ -86,12 +86,12 @@ SELECT TOP 1
 		@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
 FROM	#FoundErrors Errors INNER JOIN tblICItem Item
 			ON Errors.intItemId = Item.intItemId
-WHERE	intErrorCode = 51090
+WHERE	intErrorCode = 80022
 
 IF @strItemNo IS NOT NULL 
 BEGIN 
 	-- 'The status of {item} is Discontinued.'
-	RAISERROR(51090, 11, 1, @strItemNo)
+	RAISERROR(80022, 11, 1, @strItemNo)
 	GOTO _Exit
 END 
 

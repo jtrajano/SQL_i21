@@ -162,7 +162,7 @@ BEGIN
 	
 	-- Assert
 	BEGIN 
-		EXEC tSQLt.ExpectException 'There is not enough stocks for SERIALIZED LOT GRAINS. Reserved stocks is 0.00 while On Hand Qty is 0.00.';
+		EXEC tSQLt.ExpectException 'Not enough stocks for SERIALIZED LOT GRAINS. Reserved stocks is 0.00 while On Hand Qty is 0.00.';
 	END 
 	
 	-- Act

@@ -142,7 +142,7 @@ BEGIN
 	IF ISNULL(@strBillNumber, '') <> ''
 	BEGIN 
 		-- 'Unable to Unreceive. The inventory receipt is already billed in {Bill Id}.'
-		RAISERROR(51173, 11, 1, @strBillNumber)  
+		RAISERROR(80056, 11, 1, @strBillNumber)  
 		GOTO Post_Exit    
 	END 
 
