@@ -149,8 +149,8 @@ tblPREmployeeEarning.intEmployeeEarningId,
 dblAmount = CASE WHEN ([strCalculationType] IN ('Rate Factor', 'Overtime')) /* Get Earning Link if exists in Employee Earnings, if not, get from Type Earnings */
 				THEN [dblAmount] * ISNULL((SELECT TOP 1 B.dblAmount FROM tblPREmployeeEarning B 
 											WHERE B.intTypeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId AND intEmployeeId = @intEmployeeId),
-										  (SELECT TOP 1 C.dblAmount FROM tblPRTypeEarning C 
-											WHERE C.intTypeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId AND intEmployeeId = @intEmployeeId))
+										ISNULL((SELECT TOP 1 C.dblAmount FROM tblPRTypeEarning C 
+												WHERE C.intTypeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId AND intEmployeeId = @intEmployeeId), 0))
 			ELSE
 				[dblAmount]
 			END
