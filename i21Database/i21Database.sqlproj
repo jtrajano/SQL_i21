@@ -2316,6 +2316,7 @@
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInFIFOStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLIFOStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLotStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseConsignedPurchaseQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -50,6 +50,7 @@ It only tracks the qty of those non-'Stock UOM's.
 		[dblInTransitInbound] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[dblInTransitOutbound] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[dblUnitStorage] NUMERIC(18, 6) NULL DEFAULT ((0)),
+		[dblConsignedPurchase] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[intConcurrencyId] INT NULL DEFAULT ((1)), 
 		CONSTRAINT [PK_tblICItemStockUOM] PRIMARY KEY ([intItemStockUOMId]), 
 		CONSTRAINT [FK_tblICItemStockUOM_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])
