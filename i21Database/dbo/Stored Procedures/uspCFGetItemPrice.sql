@@ -4,18 +4,20 @@
 ,@CFCustomerId			INT     
 ,@CFLocationId			INT    
 ,@CFItemUOMId			INT				= NULL    
-,@CFTransactionDate	DATETIME		= NULL    
+,@CFTransactionDate		DATETIME		= NULL    
 ,@CFQuantity			NUMERIC(18,6)    
 ,@CFPriceOut			NUMERIC(18,6)	= NULL OUTPUT    
 ,@CFPricingOut			NVARCHAR(250)	= NULL OUTPUT    
 ,@CFStandardPrice		NUMERIC(18,6)	= 0.0
-,@CFTransactionType	NVARCHAR(MAX)
+,@CFTransactionType		NVARCHAR(MAX)
 ,@CFNetworkId			INT
 ,@CFSiteId				INT
 ,@CFContractHeaderId	INT				= NULL OUTPUT
 ,@CFContractDetailId	INT				= NULL OUTPUT
 ,@CFContractNumber		INT				= NULL OUTPUT
-,@CFContractSeq		INT				= NULL OUTPUT
+,@CFContractSeq			INT				= NULL OUTPUT
+,@CFAvailableQuantity	NUMERIC(18,6)   = NULL OUTPUT 
+
 
 AS
 
@@ -49,30 +51,19 @@ AS
 --4. Standard Pricing
 
 EXEC [uspARGetItemPrice] 
-
-@ItemUOMId = @CFItemUOMId
-
+ @ItemUOMId = @CFItemUOMId
 ,@TransactionDate = @CFTransactionDate
-
-,@ItemId = @CFItemId
-
+,@ItemId = @CFItemId    
 ,@CustomerId = @CFCustomerId    
-
 ,@LocationId = @CFLocationId    
-
 ,@Quantity = @CFQuantity    
-
 ,@Price = @CFPriceOut OUTPUT  
-
 ,@Pricing = @CFPricingOut OUTPUT
-
 ,@ContractHeaderId = @CFContractHeaderId OUTPUT
-
 ,@ContractDetailId = @CFContractDetailId OUTPUT
-
 ,@ContractNumber = @CFContractNumber OUTPUT
-
 ,@ContractSeq = @CFContractSeq OUTPUT  
+,@AvailableQuantity = @CFAvailableQuantity OUTPUT
 
 print @CFPriceOut 
 
