@@ -25,7 +25,7 @@ BEGIN
 			,intLocationId			= ItemLocation.intLocationId
 			,intItemUOMId			= ItemUOM.intItemUOMId
 			,dtmDate				= dbo.fnRemoveTimeOnDate(SO.dtmDate)
-			,dblQty					= SODetail.dblQtyOrdered
+			,dblQty					= SODetail.dblQtyOrdered - SODetail.dblQtyShipped
 			,dblUOMQty				= ItemUOM.dblUnitQty
 			,dblCost				= ISNULL(ItemPricing.dblLastCost, 0) -- Default to the last cost. 
 			,dblSalesPrice			= SODetail.dblPrice
@@ -50,5 +50,6 @@ BEGIN
 				ON ItemPricing.intItemId = SODetail.intItemId
 				AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
 	WHERE	SODetail.intSalesOrderId = @intSourceTransactionId
-			AND dbo.fnIsStockTrackingItem(SODetail.intItemId) = 1			
+			AND dbo.fnIsStockTrackingItem(SODetail.intItemId) = 1
+			AND (SODetail.dblQtyOrdered - SODetail.dblQtyShipped) > 0			
 END
