@@ -11,6 +11,7 @@
 	[intNoOfLots] INT NOT NULL,
 	[intFutureMarketId] INT NOT NULL,
 	[intFutureMonthId] INT NOT NULL,
+	[dblFixationPrice] NUMERIC(8, 4) NULL,
 	[dblFutures] NUMERIC(8, 4) NULL,
 	[dblBasis] NUMERIC(8, 4) NULL,
 	[dblPolRefPrice] NUMERIC(8, 4) NULL,
