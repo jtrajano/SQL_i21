@@ -158,9 +158,9 @@ BEGIN
 			,intSort				= 1
 			,intConcurrencyId		= 1
 			,intOwnershipType       = CASE
-									  WHEN LI.ysnIsCustody = 0
+									  WHEN LI.ysnIsStorage = 0
 									  THEN 1
-									  WHEN LI.ysnIsCustody = 1
+									  WHEN LI.ysnIsStorage = 1
 									  THEN 2
 									  END
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId INNER JOIN dbo.tblICItemUOM ItemUOM			

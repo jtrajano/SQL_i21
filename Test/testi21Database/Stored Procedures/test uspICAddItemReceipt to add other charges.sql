@@ -206,7 +206,7 @@ BEGIN
 				,intLotId
 				,intSubLocationId
 				,intStorageLocationId
-				,ysnIsCustody
+				,ysnIsStorage
 				,dblFreightRate
 				,intSourceId
 				,dblGross
@@ -231,7 +231,7 @@ BEGIN
 				,intLotId			= 15
 				,intSubLocationId		= 16
 				,intStorageLocationId	= 17
-				,ysnIsCustody			= 18
+				,ysnIsStorage			= 18
 				,dblFreightRate			= 19
 				,intSourceId			= 20
 				,dblGross				= 21

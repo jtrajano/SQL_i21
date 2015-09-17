@@ -76,7 +76,7 @@ SELECT
 	dblInTransitOutbound = ISNULL(ItemStock.dblInTransitOutbound, 0),
 	dblBackOrder = ISNULL(ItemStock.dblBackOrder, 0),
 	dblOrderCommitted = ISNULL(ItemStock.dblOrderCommitted, 0),
-	dblUnitInCustody = ISNULL(ItemStock.dblUnitInCustody, 0),
+	dblUnitStorage = ISNULL(ItemStock.dblUnitStorage, 0),
 	dblConsignedPurchase = ISNULL(ItemStock.dblConsignedPurchase, 0),
 	dblConsignedSale = ISNULL(ItemStock.dblConsignedSale, 0),
 	dblUnitReserved = ISNULL(ItemStock.dblUnitReserved, 0),
