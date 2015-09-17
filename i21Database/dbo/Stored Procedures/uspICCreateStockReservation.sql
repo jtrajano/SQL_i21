@@ -100,8 +100,6 @@ INSERT INTO dbo.tblICStockReservation (
 		,intSubLocationId
 		,intStorageLocationId
 		,intConcurrencyId
-		,intSubLocationId
-		,intStorageLocationId
 )
 SELECT	intItemId						= Items.intItemId
 		,intLocationId					= ItemLocation.intLocationId
@@ -116,8 +114,6 @@ SELECT	intItemId						= Items.intItemId
 		,intSubLocationId				= Items.intSubLocationId
 		,intStorageLocationId			= Items.intStorageLocationId
 		,intConcurrencyId				= 1
-		,intSubLocationId				= Items.intSubLocationId
-		,intStorageLocationId			= Items.intStorageLocationId
 FROM	@ItemsToReserveAggregrate Items INNER JOIN dbo.tblICItemLocation ItemLocation
 			ON Items.intItemLocationId = ItemLocation.intItemLocationId
 

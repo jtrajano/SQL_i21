@@ -401,7 +401,8 @@ EXEC sp_addmessage 51099,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51100) EXEC sp_dropmessage 51100, 'us_english'	
 SET @strmessage = 'The stock on hand is outdated for %s. Please review your quantity adjustments after the system reloads the latest stock on hand.'
-EXEC sp_addmessage 51100,11,@strmessage,'us_english','False' 
+EXEC sp_addmessage 
+51100,11,@strmessage,'us_english','False' 
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51101) EXEC sp_dropmessage 51101, 'us_english'	
 SET @strmessage = 'The lot expiry dates are outdated for %s. Please review your quantity adjustments after the system reloads the latest expiry dates.'
@@ -785,10 +786,9 @@ EXEC sp_addmessage 51195,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51196) EXEC sp_dropmessage 51196, 'us_english'	
 SET @strmessage = 'Weight per unit of the source and the destination lot differs, cannot merge'
-EXEC sp_addmessage 51196,11,@strmessage,'us_english','False'IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51180) EXEC sp_dropmessage 51180, 'us_english'	
-SET @strmessage = 'Data not found. Unable to create the Inventory Transfer.'
-EXEC sp_addmessage 51180,11,@strmessage,'us_english','False'
+EXEC sp_addmessage 51196,11,@strmessage,'us_english','False'
 
-IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51181) EXEC sp_dropmessage 51181, 'us_english'	
-SET @strmessage = 'Unable to generate the Inventory Transfer. An error stopped the creation of the inventory transfer.'
-EXEC sp_addmessage 51181,11,@strmessage,'us_english','False'
+------------------------------------------------------------------------------------------
+-- NOTE: Please stop adding error message on this sp. 
+-- See: http://inet.irelyserver.com/x/rQFhAg
+------------------------------------------------------------------------------------------

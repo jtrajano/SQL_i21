@@ -41,8 +41,8 @@ BEGIN
 		---- Valid item and invalid location
 		--SELECT	intItemId = @StickyGrains
 		--		,intItemLocationId = @InvalidLocation
-		--		,strText = FORMATMESSAGE(50028)
-		--		,intErrorCode = 50028
+		--		,strText = FORMATMESSAGE(80002)
+		--		,intErrorCode = 80002
 
 		-- Create the mock data 
 		EXEC testi21Database.[Fake inventory items];

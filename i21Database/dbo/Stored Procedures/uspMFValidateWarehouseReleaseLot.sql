@@ -16,7 +16,7 @@ BEGIN TRY
 		OR @strLotNumber IS NULL
 	BEGIN
 		RAISERROR (
-				51053
+				80020
 				,11
 				,1
 				)
@@ -34,7 +34,7 @@ BEGIN TRY
 	IF @intLotId IS NULL
 	BEGIN
 		RAISERROR (
-				51053
+				80020
 				,11
 				,1
 				)

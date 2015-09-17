@@ -7,11 +7,6 @@ WHERE ISNULL(strDashboardRole, '') = ''
 
 GO
 
-
--- Add the SQL Server custom messages
-EXEC dbo.uspSMErrorMessages
-GO
-
 -- Update User Role and User Security Menus
 DECLARE @currentRow INT
 DECLARE @totalRows INT

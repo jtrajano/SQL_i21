@@ -394,7 +394,7 @@ BEGIN TRY
 					AND RI.intRecipeItemTypeId = 2
 				)
 			RAISERROR (
-					51077
+					80021
 					,11
 					,1
 					)

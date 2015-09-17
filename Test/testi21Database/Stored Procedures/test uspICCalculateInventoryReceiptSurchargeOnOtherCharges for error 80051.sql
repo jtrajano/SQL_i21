@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICCalculateInventoryReceiptSurchargeOnOtherCharges for error 51164]
+﻿CREATE PROCEDURE [testi21Database].[test uspICCalculateInventoryReceiptSurchargeOnOtherCharges for error 80051]
 AS
 BEGIN
 	-- Arrange 
@@ -116,7 +116,7 @@ BEGIN
 	BEGIN 
 		EXEC tSQLt.ExpectException
 			@ExpectedMessage = 'Cyclic situation found. Unable to compute surcharge because Other Charges depends on Surcharge Other Charges and vice-versa.'
-			,@ExpectedErrorNumber = 51164
+			,@ExpectedErrorNumber = 80051
 	END
 	
 	-- Act

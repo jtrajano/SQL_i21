@@ -193,8 +193,8 @@ BEGIN
 		END 
 		ELSE 
 		BEGIN 
-			-- 'There is not enough stocks for {Item}. Reserved stocks is {Reserved Stock Qty} while On Hand Qty is {On Hand Qty}.'
-			RAISERROR(51040, 11, 1, @strInvalidItemNo, @FormattedReservedQty, @FormattedOnHandQty) 
+			-- 'Not enough stocks for {Item}. Reserved stocks is {Reserved Stock Qty} while On Hand Qty is {On Hand Qty}.'
+			RAISERROR(80007, 11, 1, @strInvalidItemNo, @FormattedReservedQty, @FormattedOnHandQty) 
 		END 
 
 		RETURN -1;

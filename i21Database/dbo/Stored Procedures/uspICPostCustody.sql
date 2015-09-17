@@ -213,7 +213,7 @@ BEGIN
 	--	WHERE	intItemId = @intItemId
 
 	--	-- Custody or storage for %s is not yet supported. It is currently limited to lot-tracked items.
-	--	RAISERROR(51144, 11, 1, @strItemNo)  
+	--	RAISERROR(80041, 11, 1, @strItemNo)  
 	--END 
 
 	-----------------------------------

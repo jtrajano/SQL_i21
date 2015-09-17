@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICInventoryAdjustmentGetOutdatedStockOnHand for error 51100 on lot items]
+﻿CREATE PROCEDURE [testi21Database].[test uspICInventoryAdjustmentGetOutdatedStockOnHand for error 80027 on non-lot items]
 AS
 BEGIN
 	-- Constant for Adjustment Types
@@ -9,21 +9,31 @@ BEGIN
 			,@ADJUSTMENT_TYPE_LOT_ID_CHANGE AS INT = 5
 			,@ADJUSTMENT_TYPE_EXPIRY_DATE_CHANGE AS INT = 6
 
+	DECLARE @WetGrains AS INT = 1
+	DECLARE @WetGrains_DefaultLocation AS INT = 1
+
 	-- Arrange 
 	BEGIN 
-		DECLARE @strTransactionId AS NVARCHAR(50) = 'ADJ-2'
+		DECLARE @strTransactionId AS NVARCHAR(50) = 'ADJ-5'
 		DECLARE @ysnPassed AS BIT
 
 		EXEC testi21Database.[Fake data for inventory adjustment table];
 
-		-- Intentionally change the qty of the lot table. 
-		UPDATE dbo.tblICLot
-		SET dblQty += 10		
+		-- Add a dummy stock on hand for the WetGrains
+		INSERT INTO dbo.tblICItemStock (
+			intItemId
+			,intItemLocationId
+			,dblUnitOnHand
+		)
+		SELECT	intItemId = @WetGrains
+				,intItemLocationId = @WetGrains_DefaultLocation
+				,dblUnitOnHand = 100 + 10 
+
 	END 
 
 	-- Assert 
 	BEGIN 
-		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 51100;
+		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 80027;
 	END
 	
 	-- Act

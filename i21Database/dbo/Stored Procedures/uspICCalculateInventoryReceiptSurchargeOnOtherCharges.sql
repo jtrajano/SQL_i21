@@ -63,7 +63,7 @@ BEGIN
 	IF @intOtherChargesItemId IS NOT NULL AND @intSurchargeItemId IS NOT NULL 
 	BEGIN 
 		-- 'Cyclic situation found. Unable to compute surcharge because {Item X} depends on {Item Y} and vice-versa.'
-		RAISERROR(51164, 11, 1, @strSurchargeItem, @strOtherChargesItem)  
+		RAISERROR(80051, 11, 1, @strSurchargeItem, @strOtherChargesItem)  
 		GOTO _Exit  
 	END 
 END 
@@ -188,7 +188,7 @@ BEGIN
 	IF @surchargeId IS NOT NULL 
 	BEGIN 
 		-- 'Unable to compute the surcharge for %s. The On Cost for the surcharge could be missing. Also, the Vendor for both the surcharge and On Cost must match.'
-		RAISERROR(51165, 11, 1, @surchargeName)  
+		RAISERROR(80052, 11, 1, @surchargeName)  
 		GOTO _Exit
 	END 
 END 

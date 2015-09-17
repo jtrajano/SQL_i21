@@ -43,7 +43,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- 'The lot expiry dates are outdated for {Adjustment id}. Please review your quantity adjustments after the system reloads the latest expiry dates.'
-		RAISERROR(51101, 11, 1, @strAdjustmentId);
+		RAISERROR(80028, 11, 1, @strAdjustmentId);
 		GOTO _ExitWithErrors
 	END 
 END 

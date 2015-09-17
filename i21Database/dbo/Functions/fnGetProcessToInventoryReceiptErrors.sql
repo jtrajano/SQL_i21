@@ -17,8 +17,8 @@ RETURN (
 		-- Check for any invalid item.
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = FORMATMESSAGE(50027)
-				,intErrorCode = 50027
+				,strText = FORMATMESSAGE(80001)
+				,intErrorCode = 80001
 		WHERE	NOT EXISTS (
 					SELECT TOP 1 1 
 					FROM	tblICItem 
@@ -29,8 +29,8 @@ RETURN (
 		--UNION ALL 
 		--SELECT	intItemId = @intItemId
 		--		,intLocationId = @intLocationId
-		--		,strText = FORMATMESSAGE(50028)
-		--		,intErrorCode = 50028
+		--		,strText = FORMATMESSAGE(80002)
+		--		,intErrorCode = 80002
 		--WHERE	NOT EXISTS (
 		--			SELECT TOP 1 1 
 		--			FROM	tblICItemStock Stock INNER JOIN tblICItemLocation Location

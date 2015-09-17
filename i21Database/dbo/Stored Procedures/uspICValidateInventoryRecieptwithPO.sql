@@ -52,7 +52,7 @@ BEGIN
 	WHERE	intItemUOMId = @intIR_UOMId 
 
 	-- 'Please correct the UOM. The UOM for {Item} in PO is {PO UOM}. It is now using {IR UOM} in the Inventory Receipt'
-	RAISERROR(51049, 11, 1, @strItemNo, @strPOUOMName, @strIRUOMName)  
+	RAISERROR(80016, 11, 1, @strItemNo, @strPOUOMName, @strIRUOMName)  
 
 	RETURN -1;
 END 

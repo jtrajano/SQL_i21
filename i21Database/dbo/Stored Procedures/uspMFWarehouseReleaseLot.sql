@@ -49,7 +49,7 @@ BEGIN TRY
 		OR @intLotId IS NULL
 	BEGIN
 		RAISERROR (
-				51053
+				80020
 				,11
 				,1
 				)

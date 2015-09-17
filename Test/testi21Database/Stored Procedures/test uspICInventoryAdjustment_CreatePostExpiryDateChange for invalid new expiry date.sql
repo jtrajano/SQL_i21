@@ -137,7 +137,7 @@ BEGIN
 	BEGIN 
 		EXEC tSQLt.ExpectException 
 			@ExpectedMessage = 'Internal Error. The new expiry date is invalid.'
-			,@ExpectedErrorNumber = 51126			
+			,@ExpectedErrorNumber = 80034			
 	END 
 
 	-- Act

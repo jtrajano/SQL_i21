@@ -68,7 +68,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- {Item} is missing a GL account setup for {Account Category} account category.
-		RAISERROR(51041, 11, 1, @strItemNo, @AccountCategory_Inventory) 	
+		RAISERROR(80008, 11, 1, @strItemNo, @AccountCategory_Inventory) 	
 		RETURN;
 	END 
 END 
@@ -95,7 +95,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- {Item} is missing a GL account setup for {Account Category} account category.
-		RAISERROR(51041, 11, 1, @strItemNo, @AccountCategory_ContraInventory) 	
+		RAISERROR(80008, 11, 1, @strItemNo, @AccountCategory_ContraInventory) 	
 		RETURN;
 	END 
 END 
@@ -124,7 +124,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- {Item} is missing a GL account setup for {Account Category} account category.
-		RAISERROR(51041, 11, 1, @strItemNo, @AccountCategory_WriteOffSold) 	
+		RAISERROR(80008, 11, 1, @strItemNo, @AccountCategory_WriteOffSold) 	
 		RETURN;
 	END 
 END 
@@ -153,7 +153,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- {Item} is missing a GL account setup for {Account Category} account category.
-		RAISERROR(51041, 11, 1, @strItemNo, @AccountCategory_RevalueSold) 	
+		RAISERROR(80008, 11, 1, @strItemNo, @AccountCategory_RevalueSold) 	
 		RETURN;
 	END 
 END 
@@ -182,7 +182,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- {Item} is missing a GL account setup for {Account Category} account category.
-		RAISERROR(51041, 11, 1, @strItemNo, @AccountCategory_AutoNegative) 	
+		RAISERROR(80008, 11, 1, @strItemNo, @AccountCategory_AutoNegative) 	
 		RETURN;
 	END 
 END 

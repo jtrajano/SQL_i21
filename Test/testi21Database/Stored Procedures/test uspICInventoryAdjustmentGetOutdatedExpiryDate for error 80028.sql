@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICInventoryAdjustmentGetOutdatedStockOnHand for not throwing error 51100 on lot items]
+﻿CREATE PROCEDURE [testi21Database].[test uspICInventoryAdjustmentGetOutdatedExpiryDate for error 80028]
 AS
 BEGIN
 	-- Constant for Adjustment Types
@@ -11,26 +11,30 @@ BEGIN
 
 	-- Arrange 
 	BEGIN 
-		DECLARE @strTransactionId AS NVARCHAR(50) = 'ADJ-2'
+		DECLARE @strTransactionId AS NVARCHAR(50) = 'ADJ-6'
 		DECLARE @ysnPassed AS BIT
 
 		EXEC testi21Database.[Fake data for inventory adjustment table];
+
+		-- Intentionally change the qty of the lot table. 
+		UPDATE dbo.tblICLot
+		SET dtmExpiryDate = '12/12/2018'
 	END 
 
 	-- Assert 
 	BEGIN 
-		EXEC tSQLt.ExpectNoException;
+		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 80028;
 	END
 	
 	-- Act
 	BEGIN 
-		EXEC dbo.uspICInventoryAdjustmentGetOutdatedStockOnHand 
+		EXEC dbo.uspICInventoryAdjustmentGetOutdatedExpiryDate 
 			@strTransactionId
 			,@ysnPassed OUTPUT 
 	END 
 
 	-- Assert
 	BEGIN 
-		EXEC tSQLt.AssertEquals 1, @ysnPassed, 'Output parameter @ysnPassed must return true (1).'; 
+		EXEC tSQLt.AssertEquals 0, @ysnPassed, 'Output parameter @ysnPassed must return false (0).'; 
 	END
 END 

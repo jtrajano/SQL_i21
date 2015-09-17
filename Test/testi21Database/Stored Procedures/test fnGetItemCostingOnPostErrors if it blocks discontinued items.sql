@@ -92,8 +92,8 @@ BEGIN
 		-- The status of %s is Discontinued.
 		SELECT	intItemId = @ManualLotGrains
 				,intItemLocationId = @ManualLotGrains_DefaultLocation
-				,strText = FORMATMESSAGE(51090)
-				,intErrorCode = 51090	
+				,strText = FORMATMESSAGE(80022)
+				,intErrorCode = 80022	
 				
 		DECLARE @SubLocation AS INT 
 		DECLARE @StorageLocation AS INT 

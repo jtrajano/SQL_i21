@@ -80,7 +80,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- {Item} is missing a GL account setup for {Account Category} account category.
-		RAISERROR(51041, 11, 1, @strItemNo, @AUTO_NEGATIVE_TransactionType) 	
+		RAISERROR(80008, 11, 1, @strItemNo, @AUTO_NEGATIVE_TransactionType) 	
 		RETURN;
 	END 
 END 

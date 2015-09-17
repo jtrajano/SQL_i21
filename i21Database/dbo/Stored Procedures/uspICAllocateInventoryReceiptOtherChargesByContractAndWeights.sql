@@ -79,7 +79,7 @@ BEGIN
 	IF @intInvalidItemId IS NOT NULL 
 	BEGIN 
 		-- Unable to continue. Cost allocation is by Weight but stock unit for {Item} is not a weight type.
-		RAISERROR(51166, 11, 1, @invalidItem) 
+		RAISERROR(80053, 11, 1, @invalidItem) 
 		GOTO _Exit 
 	END 
 END

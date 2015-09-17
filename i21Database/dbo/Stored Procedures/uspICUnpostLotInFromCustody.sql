@@ -104,7 +104,7 @@ WHERE	Changes.Action = 'UPDATE'
 --)
 --BEGIN 
 --	-- Negative stock quantity is not allowed.
---	RAISERROR(50029, 11, 1) 
+--	RAISERROR(80003, 11, 1) 
 --	GOTO _Exit;
 --END 
 

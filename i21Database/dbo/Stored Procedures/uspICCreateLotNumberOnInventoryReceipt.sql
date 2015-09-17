@@ -60,7 +60,7 @@ BEGIN
 				SET @strItemNo = 'an item with id ' + CAST(@intItemId AS NVARCHAR(50)) 
 
 			-- 'Please correct the unit qty in UOM {UOM} on {Item}.'
-			RAISERROR(51050, 11, 1, @strUnitMeasure, @strItemNo) 
+			RAISERROR(80017, 11, 1, @strUnitMeasure, @strItemNo) 
 			RETURN -1; 			 
 		END 
 	END 
@@ -121,7 +121,7 @@ BEGIN
 		SET @FormattedDifference =  CAST(ABS(@OpenReceiveQty - @LotQtyInItemUOM) AS NVARCHAR(50))
 
 		-- 'The Qty to Receive for {Item} is {Open Receive Qty}. Total Lot Quantity is {Total Lot Qty}. The difference is {Calculated difference}.'
-		RAISERROR(51038, 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty, @FormattedDifference)  
+		RAISERROR(80006, 11, 1, @strItemNo, @FormattedReceivedQty, @FormattedLotQty, @FormattedDifference)  
 		RETURN -1; 
 	END 
 END

@@ -7,7 +7,7 @@ BEGIN
 	-- Assert 
 	BEGIN 
 		-- Expect No errors
-		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 51117
+		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 80029
 	END
 	
 	-- Act

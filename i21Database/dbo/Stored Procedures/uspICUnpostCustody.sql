@@ -126,7 +126,7 @@ IF NOT EXISTS (
 )
 BEGIN 
 	-- 'A consigned or custodial item is no longer available. Unable to continue and unpost the transaction.'
-	RAISERROR(51135, 11, 1)
+	RAISERROR(80038, 11, 1)
 	GOTO _Exit
 END 
 

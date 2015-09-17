@@ -95,7 +95,7 @@ DECLARE @OwnerShipType_Own AS INT = 1
 --	IF ISNULL(@strReceiptNumber, '') <> ''
 --	BEGIN 
 --		-- 'The lot number {Lot Number} is already used in {Transaction Id}.'
---		RAISERROR(51051, 11, 1, @strLotNumber, @strReceiptNumber);
+--		RAISERROR(80018, 11, 1, @strLotNumber, @strReceiptNumber);
 --		RETURN -9
 --	END 
 --END			
@@ -117,7 +117,7 @@ BEGIN
 	IF ISNULL(@strReceiptNumber, '') <> '' AND ISNULL(@strLotNumber, '') <> '' AND ISNULL(@strItemNo, '') <> ''
 	BEGIN 
 		-- 'Please check for duplicate lot numbers. The lot number {Lot Number} is used more than once in item {Item No} on {Transaction Id}.'
-		RAISERROR(51052, 11, 1, @strLotNumber, @strItemNo, @strReceiptNumber);
+		RAISERROR(80019, 11, 1, @strLotNumber, @strItemNo, @strReceiptNumber);
 		RETURN -1
 	END
 END 
@@ -216,7 +216,7 @@ BEGIN
 		WHERE	Item.intItemId = @intItemId
 
 		--Please specify the lot numbers for {Item}.
-		RAISERROR(51037, 11, 1, @strItemNo);
+		RAISERROR(80005, 11, 1, @strItemNo);
 		RETURN -2;
 	END 	
 	
@@ -234,7 +234,7 @@ BEGIN
 		WHERE	Item.intItemId = @intItemId
 
 		--Unable to generate the serial lot number for {Item}.
-		RAISERROR(51042, 11, 1, @strItemNo);
+		RAISERROR(80009, 11, 1, @strItemNo);
 		RETURN -3;
 	END 	
 
@@ -251,7 +251,7 @@ BEGIN
 		END 
 
 		-- '{Item} with lot number {Lot Number} needs to have a weight.'
-		RAISERROR(51048, 11, 1, @strItemNo, @strLotNumber)  
+		RAISERROR(80015, 11, 1, @strItemNo, @strLotNumber)  
 		RETURN -4; 
 	END 
 
@@ -268,7 +268,7 @@ BEGIN
 	--	END 
 
 	--	-- Cannot have the same item and weight UOM. Please remove the weight UOM for {Item} with lot number {Lot Number}.
-	--	RAISERROR(51145, 11, 1, @strItemNo, @strLotNumber)  
+	--	RAISERROR(80042, 11, 1, @strItemNo, @strLotNumber)  
 	--	RETURN -5; 
 	--END 
 
@@ -574,7 +574,7 @@ BEGIN
 				AND ItemUOM.intItemUOMId = @intItemUOMId
 
 		--'The Quantity UOM for {Item} cannot be changed from {Item UOM} to {Item UOM} because a stock from it has been used from a different transaction.'
-		RAISERROR(51044, 11, 1, @strItemNo, @strUnitMeasureItemUOMFrom, @strUnitMeasureItemUOMTo);
+		RAISERROR(80011, 11, 1, @strItemNo, @strUnitMeasureItemUOMFrom, @strUnitMeasureItemUOMTo);
 		RETURN -6;
 	END 
 
@@ -589,7 +589,7 @@ BEGIN
 				AND ItemUOM.intItemUOMId = @intWeightUOMId
 
 		--'The Weight UOM for {Lot number} cannot be changed from {Weight UOM} to {Weight UOM} because a stock from it has been used from a different transaction.'
-		RAISERROR(51045, 11, 1, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo);
+		RAISERROR(80012, 11, 1, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo);
 		RETURN -7;
 	END 
 
@@ -602,7 +602,7 @@ BEGIN
 		WHERE	ISNULL(SubLocation.intCompanyLocationSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 
 		--'The Sub-Location for {Lot number} cannot be changed from {Sub Location} to {Sub Location} because a stock from it has been used from a different transaction.'
-		RAISERROR(51046, 11, 1, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo);
+		RAISERROR(80013, 11, 1, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo);
 		RETURN -8;
 	END 
 
@@ -615,7 +615,7 @@ BEGIN
 		WHERE	ISNULL(StorageLocation.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
 
 		--'The Storage Location for {Lot number} cannot be changed from {Storage Location} to {StorageLocation} because a stock from it has been used from a different transaction.'
-		RAISERROR(51047, 11, 1, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo);
+		RAISERROR(80014, 11, 1, @strLotNumber, @strUnitMeasureWeightUOMFrom, @strUnitMeasureWeightUOMTo);
 		RETURN -9;
 	END
 
@@ -628,7 +628,7 @@ BEGIN
 		WHERE	Item.intItemId = @intItemId
 
 		--Failed to process the lot number for {Item}. It may have been used on a different sub-location or storage location.'
-		RAISERROR(51043, 11, 1, @strItemNo);
+		RAISERROR(80010, 11, 1, @strItemNo);
 		RETURN -10;
 	END
 	

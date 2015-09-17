@@ -119,7 +119,7 @@ IF @InventoryShipmentId IS NULL
 BEGIN 
 	-- Raise the error:
 	-- Unable to generate the Inventory Shipment. An error stopped the process from Sales Order to Inventory Shipment.
-	RAISERROR(51117, 11, 1);
+	RAISERROR(80029, 11, 1);
 	RETURN;
 END
 

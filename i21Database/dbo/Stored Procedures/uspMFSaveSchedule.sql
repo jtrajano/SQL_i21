@@ -41,6 +41,13 @@ BEGIN TRY
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
 
+		IF @ysnStandard = 1
+		BEGIN
+			UPDATE tblMFSchedule
+			SET ysnStandard = 0
+			WHERE intManufacturingCellId = @intManufacturingCellId
+		END
+
 	IF @intScheduleId IS NULL
 	BEGIN
 		IF @strScheduleNo IS NULL
@@ -83,13 +90,6 @@ BEGIN TRY
 		BEGIN
 			RAISERROR(51194,11,1)
 			RETURN
-		END
-
-		IF @ysnStandard = 1
-		BEGIN
-			UPDATE tblMFSchedule
-			SET ysnStandard = 0
-			WHERE intManufacturingCellId = @intManufacturingCellId
 		END
 
 		UPDATE dbo.tblMFSchedule

@@ -53,7 +53,7 @@ WHERE	Lot_Custody.intItemId = @intItemId
 IF @intInventoryLotInCustodyId IS NULL 
 BEGIN 
 	-- Negative stock quantity is not allowed.
-	RAISERROR(50029, 11, 1) 
+	RAISERROR(80003, 11, 1) 
 	GOTO _Exit;
 END 
 

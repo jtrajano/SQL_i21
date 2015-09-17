@@ -1,7 +1,7 @@
 ﻿
 -- Note: This unit test is commented out but retained in file just in case we need it back. 
 
-CREATE PROCEDURE [testi21Database].[test uspICCreateUpdateLotNumber for throwing the error 51145]
+CREATE PROCEDURE [testi21Database].[test uspICCreateUpdateLotNumber for throwing the error 80042]
 AS
 --BEGIN
 --	-- Declare the variables for grains (item)
@@ -277,7 +277,7 @@ AS
 --	BEGIN 
 --		EXEC tSQLt.ExpectException
 --			@ExpectedMessage = 'Cannot have the same item and weight UOM. Please remove the weight UOM for SERIALIZED LOT GRAINS with lot number (To be generated).'
---			,@ExpectedErrorNumber = 51145
+--			,@ExpectedErrorNumber = 80042
 --	END 
 	
 --	-- Act
