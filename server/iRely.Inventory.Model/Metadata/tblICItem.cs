@@ -398,7 +398,7 @@ namespace iRely.Inventory.Model
         public decimal? dblInTransitOutbound { get; set; }
         public decimal? dblBackOrder { get; set; }
         public decimal? dblOrderCommitted { get; set; }
-        public decimal? dblUnitInCustody { get; set; }
+        public decimal? dblUnitStorage { get; set; }
         public decimal? dblConsignedPurchase { get; set; }
         public decimal? dblConsignedSale { get; set; }
         public decimal? dblUnitReserved { get; set; }
