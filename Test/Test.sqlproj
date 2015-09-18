@@ -861,6 +861,10 @@
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseConsignedPurchaseQty for increase in consigned purchase qty.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseConsignedPurchaseQty for decrease in consigned purchase qty.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseConsignedPurchaseQty for decrease in consigned purchase qty on multiple items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseConsignedSaleQty for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseConsignedSaleQty for increase in consigned sale qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseConsignedSaleQty for decrease in consigned sale qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseConsignedSaleQty for decrease in consigned sale qty on multiple items.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">
