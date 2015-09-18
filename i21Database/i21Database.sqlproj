@@ -2313,6 +2313,7 @@
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLIFOStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLotStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseConsignedPurchaseQty.sql" />
+    <Build Include="dbo\Functions\fnGetNumericValueFromString.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
