@@ -15,6 +15,7 @@ SELECT
 		SLEntity.strName as strShippingLine,
 		SI.strViaCity,
 		THEntity.strName as strThrough,
+		SI.strServiceContractNumber,
 		SI.strPackingDescription,
 		SI.intNumberOfContainers,
 		ContType.strContainerType,
