@@ -174,6 +174,22 @@ BEGIN
 	END
 	ELSE
 	BEGIN
+
+		--BILL WAS POSTED FROM ORIGIN
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'Modification not allowed. Transaction is from Origin System.',
+			'Bill',
+			A.strBillId,
+			A.intBillId
+		FROM tblAPBill A 
+		OUTER APPLY (
+			SELECT intGLDetailId FROM tblGLDetail B
+			WHERE B.strTransactionId = A.strBillId AND A.intBillId = B.intTransactionId AND B.strModuleName = 'Accounts Payable'
+		) GLEntries
+		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) 
+		AND GLEntries.intGLDetailId IS NULL
+
 		--ALREADY HAVE PAYMENTS
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT
