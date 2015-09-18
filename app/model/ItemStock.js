@@ -56,16 +56,25 @@ Ext.define('Inventory.model.ItemStock', {
             persist: false,
             convert: function(value, record){
                 var dblUnitOnHand = iRely.Functions.isEmpty(record.get('dblUnitOnHand')) ? 0 : record.get('dblUnitOnHand');
-                var dblBackOrder = iRely.Functions.isEmpty(record.get('dblBackOrder')) ? 0 : record.get('dblBackOrder');
                 var dblUnitReserved = iRely.Functions.isEmpty(record.get('dblUnitReserved')) ? 0 : record.get('dblUnitReserved');
                 var dblInTransitOutbound = iRely.Functions.isEmpty(record.get('dblInTransitOutbound')) ? 0 : record.get('dblInTransitOutbound');
                 var dblConsignedSale = iRely.Functions.isEmpty(record.get('dblConsignedSale')) ? 0 : record.get('dblConsignedSale');
-                var dblAvailable = (dblUnitOnHand - (dblBackOrder + dblUnitReserved + dblInTransitOutbound + dblConsignedSale));
+                var dblAvailable = (dblUnitOnHand - (dblUnitReserved + dblInTransitOutbound + dblConsignedSale));
                 return dblAvailable;
             },
-            depends: ['dblUnitOnHand', 'dblBackOrder', 'dblUnitReserved', 'dblInTransitOutbound', 'dblConsignedSale']
+            depends: ['dblUnitOnHand', 'dblUnitReserved', 'dblInTransitOutbound', 'dblConsignedSale']
         },
-        { name: 'intSort', type: 'int', allowNull: true }
+        { name: 'intSort', type: 'int', allowNull: true },
+        { name: 'dblCalculatedBackOrder', type: 'float',
+            persist: false,
+            convert: function(value, record){
+                var dblAvailable = iRely.Functions.isEmpty(record.get('dblAvailable')) ? 0 : record.get('dblAvailable');
+                var dblOrderCommitted = iRely.Functions.isEmpty(record.get('dblOrderCommitted')) ? 0 : record.get('dblOrderCommitted');
+                var dblBackOrder = dblOrderCommitted > dblAvailable && dblAvailable > 0 ? Math.abs(dblOrderCommitted - dblAvailable) : 0;
+                return dblBackOrder;
+            },
+            depends: ['dblAvailable', 'dblOrderCommitted']
+        }
 
     ],
 
