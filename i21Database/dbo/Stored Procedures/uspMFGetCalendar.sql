@@ -10,6 +10,7 @@ BEGIN
 		,C.ysnStandard
 		,C.intLocationId
 		,L.strLocationName
+		,C.intConcurrencyId
 	FROM dbo.tblMFScheduleCalendar C
 	JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = C.intManufacturingCellId
 	JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = C.intLocationId
