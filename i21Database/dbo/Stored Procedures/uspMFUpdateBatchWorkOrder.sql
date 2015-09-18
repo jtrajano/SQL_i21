@@ -16,14 +16,26 @@ BEGIN TRY
 
 	UPDATE tblMFWorkOrder
 	SET intStorageLocationId = x.intStorageLocationId
-		,strComment = x.strComment
+		,strComment = x.strWorkOrderComment
 		,dtmLastModified = GetDate()
 		,intLastModifiedUserId = x.intUserId
 		,intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intWorkOrderId INT
 			,intStorageLocationId INT
-			,strComment NVARCHAR(MAX)
+			,strWorkOrderComment NVARCHAR(MAX)
+			,intUserId INT
+			) x
+	WHERE x.intWorkOrderId = tblMFWorkOrder.intWorkOrderId
+
+	UPDATE tblMFScheduleWorkOrder
+	SET strComments = x.strScheduleComment
+		,dtmLastModified = GetDate()
+		,intLastModifiedUserId = x.intUserId
+		,intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
+	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
+			intWorkOrderId INT
+			,strScheduleComment NVARCHAR(MAX)
 			,intUserId INT
 			) x
 	WHERE x.intWorkOrderId = tblMFWorkOrder.intWorkOrderId
