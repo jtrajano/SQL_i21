@@ -1,51 +1,15 @@
 ﻿CREATE PROCEDURE [dbo].[uspLGGetShippingInstructionReport]
-		@xmlParam NVARCHAR(MAX) = NULL  
+		@intReferenceNumber INT  
 AS
 BEGIN
-	DECLARE @intReferenceNumber			INT,
-			@xmlDocumentId				INT 
-			
-	IF	LTRIM(RTRIM(@xmlParam)) = ''   
-		SET @xmlParam = NULL   
-      
-	DECLARE @temp_xml_table TABLE 
-	(  
-			[fieldname]		NVARCHAR(50),  
-			condition		NVARCHAR(20),        
-			[from]			NVARCHAR(50), 
-			[to]			NVARCHAR(50),  
-			[join]			NVARCHAR(10),  
-			[begingroup]	NVARCHAR(50),  
-			[endgroup]		NVARCHAR(50),  
-			[datatype]		NVARCHAR(50) 
-	)  
-  
-	EXEC sp_xml_preparedocument @xmlDocumentId output, @xmlParam  
-  
-	INSERT INTO @temp_xml_table  
-	SELECT	*  
-	FROM	OPENXML(@xmlDocumentId, 'xmlparam/filters/filter', 2)  
-	WITH (  
-				[fieldname]		NVARCHAR(50),  
-				condition		NVARCHAR(20),        
-				[from]			NVARCHAR(50), 
-				[to]			NVARCHAR(50),  
-				[join]			NVARCHAR(10),  
-				[begingroup]	NVARCHAR(50),  
-				[endgroup]		NVARCHAR(50),  
-				[datatype]		NVARCHAR(50)  
-	)  
-    
-	SELECT	@intReferenceNumber = [from]
-	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intReferenceNumber' 
-
 SELECT 
 		SI.intReferenceNumber,
 		SI.dtmSIDate,
 		SI.strBookingNumber,
 		SI.dtmBookingDate,
 		SI.dtmShipmentDate,
+		Vendor.strName as strVendor,
+		Customer.strName as strCustomer,
 		SI.strOriginPort,
 		SI.strDestinationPort,
 		SLEntity.strName as strShippingLine,
@@ -207,6 +171,8 @@ SELECT
 	SI.strDischargePerUnit
 
 FROM		tblLGShippingInstruction SI
+LEFT JOIN	tblEntity Vendor	ON Vendor.intEntityId = SI.intVendorEntityId
+LEFT JOIN	tblEntity Customer	ON Customer.intEntityId = SI.intCustomerEntityId
 LEFT JOIN	tblEntity SLEntity ON SLEntity.intEntityId = SI.intShippingLineEntityId
 LEFT JOIN	tblEntity THEntity ON THEntity.intEntityId = SI.intThroughShippingLineEntityId
 LEFT JOIN	tblLGContainerType ContType ON ContType.intContainerTypeId = SI.intContainerTypeId
