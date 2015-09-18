@@ -99,7 +99,8 @@ SELECT C.intManufacturingCellId
 	,SL.intCreatedUserId
 	,SL.dtmLastModified
 	,SL.intLastModifiedUserId
-	,WS.intSequenceNo 
+	,WS.intSequenceNo
+	,W.ysnIngredientAvailable 
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFManufacturingCell C ON C.intManufacturingCellId = W.intManufacturingCellId
 	AND W.intStatusId <> 13
