@@ -28,6 +28,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@VOID_CHECK AS INT = 19
 		,@AP_ECHECK AS INT = 20
 		,@PAYCHECK AS INT = 21
+		,@DIRECT_DEPOSIT AS INT = 23
 		
 DECLARE @openingBalance AS NUMERIC(18,6)		
 DECLARE @returnBalance AS NUMERIC(18,6)	
@@ -45,7 +46,7 @@ WHERE	ysnPosted = 1
 		AND dblAmount <> 0 
 		AND intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDate) AS FLOAT)) AS DATETIME)		
-		AND intBankTransactionTypeId IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK)
+		AND intBankTransactionTypeId IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @DIRECT_DEPOSIT)
 
 -- Get bank amounts from Bank Transactions 	
 -- Note: The computations are based on the detail table (tblCMBankTransactionDetail). 
@@ -65,7 +66,7 @@ WHERE	ysnPosted = 1
 		AND dblAmount <> 0 
 		AND intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate,dtmDate) AS FLOAT)) AS DATETIME)		
-		AND intBankTransactionTypeId NOT IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @BANK_TRANSACTION, @BANK_WITHDRAWAL, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK)
+		AND intBankTransactionTypeId NOT IN (@MISC_CHECKS, @BANK_TRANSFER_WD, @BANK_TRANSACTION, @BANK_WITHDRAWAL, @ORIGIN_CHECKS, @ORIGIN_EFT, @ORIGIN_WITHDRAWAL, @ORIGIN_WIRE, @AP_PAYMENT, @AP_ECHECK, @PAYCHECK, @DIRECT_DEPOSIT)
 
 -- Add the opening balance to the return balance. 
 SET @returnBalance = ISNULL(@openingBalance, 0) + @returnBalance

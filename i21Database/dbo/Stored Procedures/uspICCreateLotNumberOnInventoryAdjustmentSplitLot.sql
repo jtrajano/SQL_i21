@@ -138,6 +138,8 @@ BEGIN
 				AND ItemLocation.intLocationId = ISNULL(Detail.intNewLocationId, Header.intLocationId)
 			INNER JOIN dbo.tblICLot SourceLot
 				ON SourceLot.intLotId = Detail.intLotId
+			LEFT JOIN dbo.tblICItemUOM NewItemUOMId 
+				ON NewItemUOMId.intItemUOMId = Detail.intNewItemUOMId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 
 END 

@@ -50,6 +50,7 @@
 
 -- AR
 :r .\7_AR\1_1410_to_1420.sql
+:r .\7_AR\2_DropTableScript.sql
 :r .\7_AR\FixARTransactionsAccounts.sql
 
 -- AP
@@ -60,6 +61,7 @@
 :r .\8_AP\DropCK_PO_OrderStatus.sql
 :r .\8_AP\UpdateShipTo.sql
 :r .\8_AP\UpdateShipFrom.sql
+:r .\8_AP\FixPaymentEntityId.sql
 --:r .\8_AP\UpdateBillToReceiptAssociation.sql
 
 --:r .\8_AP\UpdateMissingPaymentInfo.sql
@@ -97,7 +99,7 @@
 :r .\8_AP\UpdateShipVia.sql
 :r .\12_EM\09_UpdateEntityLocationShipVia.sql
 :r .\12_EM\10_CheckAndFixSpecialPricingRackLocation.sql
-
+:r .\12_EM\11_AvoidCustomerTransportSupplierIdConflict.sql
 
 --RK
 :r .\13_RK\01_DropTableScript.sql

@@ -213,11 +213,27 @@ BEGIN
 		SELECT	
 				intItemId				= @ManualLotGrains
 				,intItemLocationId		= @ManualLotGrains_DefaultLocation
-				,intItemUOMId			= @ManualGrains_25KgBagUOM
+				,intItemUOMId			= @ManualGrains_KgUOM
 				,dtmDate				= '05/22/2015'
-				,dblQty					= 500.000000 
-				,dblUOMQty				= @25KgBagUnitQty
-				,dblCost				= 2.50 * @25KgBagUnitQty
+				,dblQty					=	-- Convert the weight from LB to KG. 
+											dbo.fnCalculateQtyBetweenUOM (
+												@ManualGrains_PoundUOM		-- Weight UOM
+												,@ManualGrains_KgUOM		-- New Weight UOM
+												,(500.00 * @25KgBagUnitQty) -- Weight 
+											)
+
+				,dblUOMQty				= @KgUnitQty
+				,dblCost				=	(	500 
+												* 2.500000 
+												* @25KgBagUnitQty
+											) 
+											/ (
+												dbo.fnCalculateQtyBetweenUOM (
+													@ManualGrains_PoundUOM		-- Weight UOM
+													,@ManualGrains_KgUOM		-- New Weight UOM
+													,(500.00 * @25KgBagUnitQty) -- Weight 
+												)
+											)
 				,dblValue				= 0
 				,dblSalesPrice			= 0
 				,intCurrencyId			= NULL 

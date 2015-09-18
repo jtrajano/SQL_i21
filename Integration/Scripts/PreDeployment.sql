@@ -92,6 +92,8 @@
 
 -- TANK MANAGEMENT
 :r ..\dbo\Views\vwclsmst.sql
+:r ..\dbo\Views\vwpyemst.sql
+:r ..\dbo\Views\vwticmst.sql
 --:r ..\dbo\Views\vyuTMOriginAccountStatus.sql
 :r "..\dbo\Stored Procedures\uspTMRecreateAccountStatusView.sql"
 --:r ..\dbo\Views\vwcmtmst.sql
@@ -111,8 +113,7 @@
 --:r ..\dbo\Views\vwlocmst.sql
 :r "..\dbo\Stored Procedures\uspTMRecreateLocationView.sql"
 :r ..\dbo\Views\vwprcmst.sql
-:r ..\dbo\Views\vwpyemst.sql
-:r ..\dbo\Views\vwticmst.sql
+
 --:r ..\dbo\Views\vwcusmst.sql
 :r "..\dbo\Stored Procedures\uspTMRecreateCustomerView.sql"
 --:r ..\dbo\Views\vwslsmst.sql

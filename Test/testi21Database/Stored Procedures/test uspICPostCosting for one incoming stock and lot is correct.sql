@@ -151,7 +151,7 @@ BEGIN
 				,[dtmManufacturedDate]		DATETIME
 				,[ysnReleasedToWarehouse]	BIT
 				,[ysnProduced]				BIT
-				,[ysnInCustody]				BIT
+				,[ysnStorage]				BIT
 				,[intOwnershipType]			INT
 				,[intGradeId]				INT
 				,[dtmDateCreated]			DATETIME

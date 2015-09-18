@@ -131,8 +131,10 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	B.intAccountId,
-		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (2, 3) AND A.dblTotal > 0  THEN B.dblTotal * (-1) ELSE B.dblTotal END) --Bill Detail
-											+ ISNULL(Taxes.dblTotalICTax, 0), --IC Tax
+		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (2, 3) AND B.dblTotal > 0  THEN B.dblTotal * (-1) 
+												ELSE (CASE WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
+														ELSE B.dblTotal + ISNULL(Taxes.dblTotalICTax, 0) END) --IC Tax
+												END), --Bill Detail
 		[dblCredit]						=	0, -- Bill
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
@@ -167,9 +169,7 @@ BEGIN
 				SELECT 
 					SUM(D.dblTax) dblTotalICTax
 				FROM tblAPBillDetailTax D
-				WHERE D.intBillDetailId IN (SELECT intBillDetailId FROM tblAPBillDetail E
-											WHERE E.intBillId = A.intBillId
-											AND E.intInventoryReceiptItemId IS NOT NULL)
+				WHERE D.intBillDetailId = B.intBillDetailId
 				GROUP BY D.intBillDetailId
 			) Taxes
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)

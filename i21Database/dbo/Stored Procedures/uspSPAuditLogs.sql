@@ -153,11 +153,11 @@ BEGIN
 							EXEC uspSPAuditRemoveDefendencies @Table, @Column
 							IF (LOWER(@ret) = 'nvarchar' OR LOWER(@ret) = 'varchar')
 								BEGIN
-								SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' ' + @ret + '(' + @retSize + ')' +' COLLATE Latin1_General_CI_AS ' +  CASE WHEN @ColumnChanges = 'False' THEN 'NULL' ELSE 'NOT NULL' END;
+								SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' ' + @ret + '(' + @retSize + ')' +' COLLATE Latin1_General_CI_AS ' +  CASE WHEN @ColumnChanges = 'False' THEN 'NOT NULL' ELSE 'NULL' END;
 								END
 							ELSE
 								BEGIN
-								SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' ' + @ret + ' ' +  CASE WHEN @ColumnChanges = 'False' THEN 'NULL' ELSE 'NOT NULL' END;
+								SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' ' + @ret + ' ' +  CASE WHEN @ColumnChanges = 'False' THEN 'NOT NULL' ELSE 'NULL' END;
 								END 
 							
 							EXEC sp_executesql @Sql;

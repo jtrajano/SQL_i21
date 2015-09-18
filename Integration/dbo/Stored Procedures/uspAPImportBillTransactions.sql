@@ -40,12 +40,15 @@ BEGIN
 			END
 
 			--Check if there is check book that was not exists on tblCMBankAccount
-			IF EXISTS(SELECT 1 FROM apchkmst A 
+			DECLARE @missingCheckBook NVARCHAR(4), @error NVARCHAR(200);
+			SELECT TOP 1 @missingCheckBook = A.apchk_cbk_no FROM apchkmst A 
 						LEFT JOIN tblCMBankAccount B
 							ON A.apchk_cbk_no = B.strCbkNo COLLATE Latin1_General_CS_AS
-						WHERE B.strCbkNo IS NULL)
+						WHERE B.strCbkNo IS NULL
+			IF @missingCheckBook IS NOT NULL
 			BEGIN
-				RAISERROR(''There is a check book number that was not imported.'', 16, 1);
+				SET @error = ''Check book number '' + @missingCheckBook + '' was not imported.''
+				RAISERROR(@error, 16, 1);
 			END
 
 			--CREATE AP ACCOUNT CATEGORY
@@ -74,6 +77,17 @@ BEGIN
 		END
 		ELSE
 		BEGIN
+
+			--Validate GL Account
+			IF EXISTS(SELECT 1 FROM apcbkmst A
+			WHERE A.apcbk_gl_ap NOT IN (SELECT strExternalId FROM tblGLCOACrossReference)
+			UNION ALL
+			SELECT 1 FROM apeglmst A
+			WHERE A.apegl_gl_acct NOT IN (SELECT strExternalId FROM tblGLCOACrossReference))
+			BEGIN
+				RAISERROR(''Invalid GL Account found in origin table apeglmst. Please call iRely assistance.'', 16, 1);
+			END
+
 			EXEC uspAPImportBillsFromAPTRXMST @UserId,@DateFrom, @DateTo, @totalPostedImport OUTPUT
 			SET @Total = @totalPostedImport;
 		END
@@ -94,7 +108,7 @@ BEGIN
 			SET @ErrorMessage  = ERROR_MESSAGE()
 			SET @ErrorState    = ERROR_STATE()
 			SET @ErrorLine     = ERROR_LINE()
-			SET @ErrorMessage  = ''Failed to import bills from apivcmst.'' + CHAR(13) + 
+			SET @ErrorMessage  = ''Failed to import bills.'' + CHAR(13) + 
 					''SQL Server Error Message is: '' + CAST(@ErrorNumber AS VARCHAR(10)) + 
 					'' Line: '' + CAST(@ErrorLine AS VARCHAR(10)) + '' Error text: '' + @ErrorMessage
 			IF @transCount = 0 AND XACT_STATE() <> 0 ROLLBACK TRANSACTION

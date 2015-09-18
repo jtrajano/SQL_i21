@@ -66,6 +66,8 @@ END
 
 -- Do a loop using a cursor. 
 BEGIN 
+	DECLARE @intEntityId AS INT;
+
 	DECLARE @intId INT
 	DECLARE loopDataForTransferHeader CURSOR LOCAL FAST_FORWARD 
 	FOR 
@@ -82,6 +84,7 @@ BEGIN
 	BEGIN 
 		SET @InventoryTransferNumber = NULL 
 		SET @InventoryTransferId = NULL 
+		SET @intEntityId = NULL 
 
 		-- Check if there is an existing Inventory Transfer 
 		SELECT	@InventoryTransferId = RawData.intInventoryTransferId
@@ -102,6 +105,12 @@ BEGIN
 			EXEC dbo.uspSMGetStartingNumber @StartingNumberId_InventoryTransfer, @InventoryTransferNumber OUTPUT 
 			IF @@ERROR <> 0 OR @InventoryTransferNumber IS NULL GOTO _BreakLoop;
 		END 
+
+		-- Get the entity id's 
+		SELECT	TOP 1 
+				@intEntityId = intEntityId
+		FROM	dbo.tblSMUserSecurity
+		WHERE	intUserSecurityID = @intUserId
 
 		MERGE	
 		INTO	dbo.tblICInventoryTransfer 
@@ -126,7 +135,7 @@ BEGIN
 				dtmTransferDate			= dbo.fnRemoveTimeOnDate(ISNULL(IntegrationData.dtmTransferDate, GETDATE()))
 				,strTransferType		= IntegrationData.strTransferType
 				,intSourceType			= IntegrationData.intSourceType
-				,intTransferredById		= @intUserId
+				,intTransferredById		= @intEntityId
 				,strDescription			= IntegrationData.strDescription
 				,intFromLocationId		= IntegrationData.intFromLocationId
 				,intToLocationId		= IntegrationData.intToLocationId
@@ -136,7 +145,7 @@ BEGIN
 				,intFreightUOMId		= IntegrationData.intFreightUOMId
 				,ysnPosted				= 0
 				,intCreatedUserId		= @intUserId
-				,intEntityId			= @intUserId
+				,intEntityId			= @intEntityId
 
 		WHEN NOT MATCHED THEN 
 			INSERT (
@@ -161,7 +170,7 @@ BEGIN
 				/*dtmTransferDate*/			,dbo.fnRemoveTimeOnDate(ISNULL(IntegrationData.dtmTransferDate, GETDATE())) 
 				/*strTransferType*/			,IntegrationData.strTransferType
 				/*intSourceType*/			,IntegrationData.intSourceType
-				/*intTransferredById*/		,@intUserId
+				/*intTransferredById*/		,@intEntityId
 				/*strDescription*/			,IntegrationData.strDescription
 				/*intFromLocationId*/		,IntegrationData.intFromLocationId
 				/*intToLocationId*/			,IntegrationData.intToLocationId
@@ -171,7 +180,7 @@ BEGIN
 				/*intFreightUOMId*/			,IntegrationData.intFreightUOMId
 				/*ysnPosted*/				,0
 				/*intCreatedUserId*/		,@intUserId
-				/*intEntityId*/				,@intUserId
+				/*intEntityId*/				,@intEntityId
 			)			
 		;
 				

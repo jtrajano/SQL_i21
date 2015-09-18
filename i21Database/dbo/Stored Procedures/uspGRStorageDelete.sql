@@ -35,17 +35,17 @@ BEGIN TRY
 	FROM tblICItemLocation
 	WHERE intItemId = @intItemId AND intLocationId = @intCompanyLocationId
 
-	IF @ysnUpdateHouseTotal = 1
+	IF @ysnUpdateHouseTotal = 1 AND @dblOpenBalance>0
 	BEGIN
 		UPDATE tblICItemStock
-		SET dblUnitInCustody = dblUnitInCustody - @dblOpenBalance
+		SET dblUnitStorage = dblUnitStorage - @dblOpenBalance
 		WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId
 	END
-	ELSE
+	ELSE IF @ysnUpdateHouseTotal = 0 AND @dblOpenBalance>0
 	BEGIN
 		UPDATE tblICItemStock
-		SET dblUnitInCustody = dblUnitInCustody - @dblOpenBalance
-			,dblUnitOnHand = dblUnitOnHand - @dblOpenBalance WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId
+		SET dblUnitStorage = dblUnitStorage - @dblOpenBalance
+			,dblUnitOnHand = dblUnitOnHand + @dblOpenBalance WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId
 	END
 
 	DELETE tblQMTicketDiscount

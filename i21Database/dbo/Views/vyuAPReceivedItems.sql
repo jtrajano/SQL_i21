@@ -22,7 +22,8 @@ FROM
 		,[dblOrderQty]				=	tblReceived.dblOrderQty
 		,[dblPOOpenReceive]			=	tblReceived.dblPOOpenReceive --uom converted received quantity from po to IR
 		,[dblOpenReceive]			=	tblReceived.dblOpenReceive
-		,[dblQuantityToBill]		=	(tblReceived.dblPOOpenReceive - tblReceived.dblQuantityBilled)
+		--,[dblQuantityToBill]		=	(tblReceived.dblPOOpenReceive - tblReceived.dblQuantityBilled) --this will use if Bill will use UOM Of PO
+		,[dblQuantityToBill]		=	(tblReceived.dblOpenReceive - tblReceived.dblQuantityBilled)
 		,[dblQuantityBilled]		=	tblReceived.dblQuantityBilled
 		,[intLineNo]				=	tblReceived.intLineNo
 		,[intInventoryReceiptItemId]=	tblReceived.intInventoryReceiptItemId
@@ -36,14 +37,18 @@ FROM
 		,[strShipVia]				=	E.strShipVia
 		,[strTerm]					=	F.strTerm
 		,[strContractNumber]		=	G1.strContractNumber
+		,[strBillOfLading]			=	tblReceived.strBillOfLading
 		,[intContractHeaderId]		=	G1.intContractHeaderId
 		,[intContractDetailId]		=	G2.intContractDetailId
+		,[intScaleTicketId]			=	NULL
+		,[intScaleTicketNumber]		=	NULL
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		CROSS APPLY 
 		(
 			SELECT
 				A1.strReceiptNumber
+				,A1.strBillOfLading
 				,B1.intInventoryReceiptItemId
 				,B1.intItemId
 				,B1.intLineNo
@@ -62,6 +67,7 @@ FROM
 			AND B.intPurchaseDetailId = B1.intLineNo
 			GROUP BY
 				A1.strReceiptNumber
+				,A1.strBillOfLading
 				,B1.intInventoryReceiptItemId
 				,B1.intItemId 
 				,B1.dblUnitCost
@@ -100,7 +106,7 @@ FROM
 	,[dblQuantityBilled]		=	B.dblQtyReceived
 	,[intLineNo]				=	B.intPurchaseDetailId
 	,[intInventoryReceiptItemId]=	NULL --this should be null as this has constraint from IR Receipt item
-	,[intInventoryReceiptItemAllocatedChargeId]	= NULL
+	,[intInventoryReceiptChargeId]	= NULL
 	,[dblUnitCost]				=	B.dblCost
 	,[dblTax]					=	B.dblTax
 	,[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Inventory')
@@ -110,8 +116,11 @@ FROM
 	,[strShipVia]				=	E.strShipVia
 	,[strTerm]					=	F.strTerm
 	,[strContractNumber]		=	NULL
+	,[strBillOfLading]			=	NULL
 	,[intContractHeaderId]		=	NULL
 	,[intContractDetailId]		=	NULL
+	,[intScaleTicketId]			=	NULL
+	,[intScaleTicketNumber]		=	NULL
 	FROM tblPOPurchase A
 		INNER JOIN tblPOPurchaseDetail B ON A.intPurchaseId = B.intPurchaseId
 		INNER JOIN tblICItem C ON B.intItemId = C.intItemId
@@ -142,7 +151,7 @@ FROM
 	,[dblQuantityBilled]		=	B.dblBillQty
 	,[intLineNo]				=	B.intInventoryReceiptItemId
 	,[intInventoryReceiptItemId]=	B.intInventoryReceiptItemId
-	,[intInventoryReceiptItemAllocatedChargeId]	= NULL
+	,[intInventoryReceiptChargeId]	= NULL
 	,[dblUnitCost]				=	B.dblUnitCost
 	,[dblTax]					=	B.dblTax
 	,[intAccountId]				=	[dbo].[fnGetItemGLAccount](B.intItemId, A.intLocationId, 'Inventory')
@@ -152,8 +161,11 @@ FROM
 	,[strShipVia]				=	E.strShipVia
 	,[strTerm]					=	NULL
 	,[strContractNumber]		=	F1.strContractNumber
+	,[strBillOfLading]			=	A.strBillOfLading
 	,[intContractHeaderId]		=	F1.intContractHeaderId
 	,[intContractDetailId]		=	CASE WHEN A.strReceiptType = 'Purchase Contract' THEN B.intLineNo ELSE NULL END
+	,[intScaleTicketId]			=	G.intTicketId
+	,[intScaleTicketNumber]		=	G.intTicketNumber
 	FROM tblICInventoryReceipt A
 	INNER JOIN tblICInventoryReceiptItem B
 		ON A.intInventoryReceiptId = B.intInventoryReceiptId
@@ -163,6 +175,7 @@ FROM
 	LEFT JOIN tblSMShipVia E ON A.intShipViaId = E.[intEntityShipViaId]
 	LEFT JOIN (tblCTContractHeader F1 INNER JOIN tblCTContractDetail F2 ON F1.intContractHeaderId = F2.intContractHeaderId) 
 		ON F1.intEntityId = A.intEntityVendorId AND B.intItemId = F2.intItemId AND B.intLineNo = F2.intContractDetailId
+	LEFT JOIN tblSCTicket G ON (CASE WHEN A.intSourceType = 1 THEN B.intSourceId ELSE 0 END) = G.intTicketId
 	WHERE A.strReceiptType IN ('Direct','Purchase Contract') AND A.ysnPosted = 1 AND B.dblBillQty != B.dblOpenReceive 
 	AND 1 = (CASE WHEN A.strReceiptType = 'Purchase Contract' THEN
 						CASE WHEN F1.intContractTypeId = 1 THEN 1 ELSE 0 END
@@ -198,7 +211,10 @@ FROM
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[strContractNumber]						=	NULL
+		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	NULL
+		,[intScaleTicketId]							=	NULL
+		,[intScaleTicketNumber]						=	NULL
 		,[intContractDetailId]						=	NULL
 	FROM [vyuAPChargesForBilling] A
 ) Items

@@ -42,7 +42,7 @@ BEGIN TRY
 	  	,intLotId
 	 	,intSubLocationId
 	 	,intStorageLocationId
-	 	,ysnIsCustody
+	 	,ysnIsStorage
 	 	,dblFreightRate
 		,intSourceId		 	
 	 )	

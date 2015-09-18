@@ -117,6 +117,9 @@
     <None Include="Scripts\Pre-Deployment\8_AP\UpdateBillToReceiptAssociation.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\UpdateMissingPaymentInfo.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\10_CheckAndFixSpecialPricingRackLocation.sql" />
+    <None Include="Scripts\Pre-Deployment\7_AR\2_DropTableScript.sql" />
+    <None Include="Scripts\Pre-Deployment\8_AP\FixPaymentEntityId.sql" />
+    <None Include="Scripts\Pre-Deployment\12_EM\11_AvoidCustomerTransportSupplierIdConflict.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />

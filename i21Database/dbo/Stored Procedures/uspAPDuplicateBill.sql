@@ -28,7 +28,7 @@ UPDATE A
 	SET ysnPosted = 0
 	,ysnPaid = 0
 	,dblPayment = 0
-	,dblAmountDue = 0
+	,dblAmountDue = A.dblTotal
 	,dblWithheld = 0
 	,strVendorOrderNumber = NULL
 	,strBillId = @generatedBillRecordId

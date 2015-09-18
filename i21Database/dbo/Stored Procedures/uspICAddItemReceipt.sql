@@ -177,7 +177,7 @@ BEGIN
 				,intSourceType          = IntegrationData.intSourceType
 				,intBlanketRelease		= NULL
 				,intLocationId			= IntegrationData.intLocationId
-				,strVendorRefNo			= NULL
+				,strVendorRefNo			= IntegrationData.strVendorRefNo
 				,strBillOfLading		= IntegrationData.strBillOfLadding
 				,intShipViaId			= IntegrationData.intShipViaId
 				,intShipFromId			= IntegrationData.intShipFromId
@@ -248,7 +248,7 @@ BEGIN
 				/*intSourceType*/				,IntegrationData.intSourceType
 				/*intBlanketRelease*/			,NULL
 				/*intLocationId*/				,IntegrationData.intLocationId
-				/*strVendorRefNo*/				,NULL
+				/*strVendorRefNo*/				,IntegrationData.strVendorRefNo
 				/*strBillOfLading*/				,IntegrationData.strBillOfLadding
 				/*intShipViaId*/				,IntegrationData.intShipViaId
 				/*intShipFromId*/				,IntegrationData.intShipFromId
@@ -346,8 +346,8 @@ BEGIN
 				--,dblLineTotal			= RawData.dblQty * RawData.dblCost
 				,intSort				= 1
 				,intConcurrencyId		= 1
-				,intOwnershipType       = CASE	WHEN RawData.ysnIsCustody = 0 THEN @OWNERSHIP_TYPE_Own
-												WHEN RawData.ysnIsCustody = 1 THEN @OWNERSHIP_TYPE_Storage
+				,intOwnershipType       = CASE	WHEN RawData.ysnIsStorage = 0 THEN @OWNERSHIP_TYPE_Own
+												WHEN RawData.ysnIsStorage = 1 THEN @OWNERSHIP_TYPE_Storage
 												ELSE @OWNERSHIP_TYPE_Own
 										  END
 				,dblGross				= RawData.dblGross

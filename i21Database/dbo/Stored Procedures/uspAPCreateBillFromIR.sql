@@ -80,7 +80,7 @@ BEGIN
 	IF @userLocation != @receiptLocation
 	BEGIN
 		SET @APAccount = (SELECT intAPAccount FROM tblSMCompanyLocation WHERE intCompanyLocationId = @receiptLocation)
-		IF @APAccount IS NULL
+		IF @APAccount IS NULL OR @APAccount <= 0
 		BEGIN
 			RAISERROR('Please setup default AP Account.', 16, 1);
 			GOTO DONE
@@ -154,6 +154,7 @@ BEGIN
 		[intBillId],
 		[intItemId],
 		[intInventoryReceiptItemId],
+		[intInventoryReceiptChargeId],
 		[intPurchaseDetailId],
 		[dblQtyOrdered],
 		[dblQtyReceived],
@@ -171,7 +172,8 @@ BEGIN
 		[intBillId]					=	@generatedBillId,
 		[intItemId]					=	B.intItemId,
 		[intInventoryReceiptItemId]	=	B.intInventoryReceiptItemId,
-		[intPODetailId]				=	CASE WHEN B.intLineNo <= 0 THEN NULL ELSE B.intLineNo END,
+		[intInventoryReceiptChargeId] = NULL,
+		[intPODetailId]				=	CASE WHEN A.strReceiptType = 'Purchase Order' THEN (CASE WHEN B.intLineNo <= 0 THEN NULL ELSE B.intLineNo END) ELSE NULL END,
 		[dblQtyOrdered]				=	B.dblOpenReceive - B.dblBillQty,
 		[dblQtyReceived]			=	B.dblOpenReceive - B.dblBillQty,
 		[dblTax]					=	B.dblTax,
@@ -212,6 +214,7 @@ BEGIN
 		[intBillId]					=	@generatedBillId,
 		[intItemId]					=	A.intItemId,
 		[intInventoryReceiptItemId]	=	A.intInventoryReceiptItemId,
+		[intInventoryReceiptChargeId]	=	A.[intInventoryReceiptChargeId],
 		[intPODetailId]				=	NULL,
 		[dblQtyOrdered]				=	1,
 		[dblQtyReceived]			=	1,
@@ -224,7 +227,9 @@ BEGIN
 		[intContractHeaderId]		=	NULL,
 		[intLineNo]					=	1
 	FROM [vyuAPChargesForBilling] A
-	WHERE A.intEntityVendorId = (SELECT intEntityVendorId FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @receiptId)
+	INNER JOIN tblICInventoryReceipt B ON A.intEntityVendorId = B.intEntityVendorId
+	AND A.intInventoryReceiptId = B.intInventoryReceiptId
+	WHERE A.intInventoryReceiptId = @receiptId
 
 	--CREATE TAXES FROM CREATED ITEM RECEIPT
 	DECLARE @intBillDetailId INT;

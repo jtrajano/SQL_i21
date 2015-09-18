@@ -668,7 +668,7 @@ BEGIN
 				,dtmAdjustmentDate  = '05/17/2015'
 				,intAdjustmentType	= @ADJUSTMENT_TYPE_SplitLot
 				,strAdjustmentNo    = 'ADJ-7'                              
-				,strDescription     = 'Split Lot. Split to the same Item UOM, Weight, and Cost.'
+				,strDescription     = 'Split Lot. Split to the same Item UOM, Weight, and Cost but assign it a new lot number.'
 				,intSort			= 1
 				,ysnPosted			= 0
 				,intEntityId		= 1

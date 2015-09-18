@@ -40,6 +40,8 @@ BEGIN
 	IF ((SELECT TOP 1 ysnUseOriginIntegration FROM tblTMPreferenceCompany) = 1
 		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'agcusmst') = 1 
 		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'aglocmst') = 1 
+		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwpyemst') = 1
+		AND (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = 'vwticmst') = 1
 	)
 	BEGIN
 	-- AG VIEW
@@ -126,6 +128,7 @@ BEGIN
 								WHERE ISNULL(aglcl_tax_state,'''') COLLATE Latin1_General_CI_AS = ISNULL(agcus_tax_state,'''') COLLATE Latin1_General_CI_AS
 									AND ISNULL(aglcl_tax_auth_id1,'''') COLLATE Latin1_General_CI_AS = ISNULL(agcus_tax_auth_id1,'''') COLLATE Latin1_General_CI_AS
 									AND ISNULL(aglcl_tax_auth_id2,'''') COLLATE Latin1_General_CI_AS = ISNULL(agcus_tax_auth_id2,'''') COLLATE Latin1_General_CI_AS) AS INT)
+				,ysnOriginIntegration = CAST(1 AS BIT)
 				FROM agcusmst A
 				LEFT JOIN aglocmst B
 					ON A.agcus_bus_loc_no = B.agloc_loc_no
@@ -240,6 +243,7 @@ BEGIN
 								WHERE ISNULL(ptlcl_state,'''') COLLATE Latin1_General_CI_AS = ISNULL(ptcus_state,'''') COLLATE Latin1_General_CI_AS
 									AND ISNULL(ptlcl_local1_id,'''') COLLATE Latin1_General_CI_AS = ISNULL(ptcus_local1,'''') COLLATE Latin1_General_CI_AS
 									AND ISNULL(ptlcl_local2_id,'''') COLLATE Latin1_General_CI_AS = ISNULL(ptcus_local2,'''') COLLATE Latin1_General_CI_AS) AS INT)
+				,ysnOriginIntegration = CAST(1 AS BIT)
 				FROM ptcusmst A
 				LEFT JOIN ptlocmst B
 					ON A.ptcus_bus_loc_no = B.ptloc_loc_no
@@ -309,7 +313,7 @@ BEGIN
 				,vwcus_avg_days_no_ivcs = 0
 				,vwcus_last_stmt_rev_dt = ISNULL(CAST((SELECT CAST(YEAR(CI.dtmLastStatementDate) AS NVARCHAR(4)) + RIGHT(''00'' + CAST(MONTH(CI.dtmLastStatementDate) AS NVARCHAR(2)),2)  + RIGHT(''00'' + CAST(DAY(CI.dtmLastStatementDate) AS NVARCHAR(2)),2)) AS INT),0) 
 				,vwcus_country = (CASE WHEN LEN(Loc.strCountry) = 3 THEN Loc.strCountry ELSE '''' END)  
-				,vwcus_termdescription = (SELECT strTermCode FROM tblSMTerm WHERE intTermID = Loc.intTermsId)
+				,vwcus_termdescription = (SELECT strTerm FROM tblSMTerm WHERE intTermID = Loc.intTermsId)
 				,vwcus_tax_ynp = CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN ''Y'' ELSE ''N'' END   
 				,vwcus_tax_state = ''''  
 				,A4GLIdentity = Ent.intEntityId
@@ -322,6 +326,7 @@ BEGIN
 				,intConcurrencyId = 0
 				,strFullLocation =  ISNULL(Loc.strLocationName ,'''')
 				,intTaxId = CAST(NULL AS INT)
+				,ysnOriginIntegration = CAST(0 AS BIT)
 			FROM tblEntity Ent
 			INNER JOIN tblARCustomer Cus 
 				ON Ent.intEntityId = Cus.intEntityCustomerId

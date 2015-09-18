@@ -576,7 +576,7 @@ SET @strmessage = 'Please specify the Adjust Qty By or New Quantity on %s.'
 EXEC sp_addmessage 51143,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51144) EXEC sp_dropmessage 51144, 'us_english'	
-SET @strmessage = 'Custody or storage for %s is not yet supported. It is currently limited to lot-tracked items.'
+SET @strmessage = 'Storage or storage for %s is not yet supported. It is currently limited to lot-tracked items.'
 EXEC sp_addmessage 51144,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51145) EXEC sp_dropmessage 51145, 'us_english'	
@@ -660,7 +660,7 @@ SET @strmessage = 'Cyclic situation found. Unable to compute surcharge because %
 EXEC sp_addmessage 51164,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51165) EXEC sp_dropmessage 51165, 'us_english'	
-SET @strmessage = 'Unable to compute the surcharge for %s.'
+SET @strmessage = 'Unable to compute the surcharge for %s. The On Cost for the surcharge could be missing. Also, the Vendor for both the surcharge and On Cost must match.'
 EXEC sp_addmessage 51165,11,@strmessage,'us_english','False'
 
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51166) EXEC sp_dropmessage 51166, 'us_english'	

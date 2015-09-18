@@ -1308,14 +1308,13 @@ BEGIN TRY
 				 IF @ysnUpdateHouseTotal = 1---Old Ticket Yes
 				 BEGIN
 					UPDATE tblICItemStock
-					SET dblUnitInCustody = dblUnitInCustody- @UnitsToReduce
+					SET dblUnitStorage = dblUnitStorage- @UnitsToReduce
 					WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId
 				 END
 				 ELSE IF @ysnUpdateHouseTotal = 0---Old Ticket No
 				 BEGIN
 					UPDATE tblICItemStock
-					SET dblUnitInCustody = dblUnitInCustody- @UnitsToReduce
-						,dblUnitOnHand = dblUnitOnHand-@UnitsToReduce
+					SET dblUnitOnHand = dblUnitOnHand+ @UnitsToReduce
 					WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId
 				 END
 				 
@@ -1335,7 +1334,7 @@ BEGIN TRY
 						(
 							 intItemId
 							,intItemLocationId
-							,dblUnitInCustody
+							,dblUnitStorage
 							,intConcurrencyId
 						)
 						SELECT @intItemId
@@ -1349,7 +1348,7 @@ BEGIN TRY
 						WHERE intItemId = @intItemId AND intLocationId = @ActionCompanyLocationId
 						
 						UPDATE tblICItemStock
-						SET dblUnitInCustody = dblUnitInCustody + @UnitsToReduce						
+						SET dblUnitStorage = dblUnitStorage + @UnitsToReduce						
 						WHERE intItemId = @intItemId AND intItemLocationId = @intActionLocationId
 					
 					END
@@ -1369,14 +1368,12 @@ BEGIN TRY
 						INSERT INTO tblICItemStock 
 						(
 							 intItemId
-							,intItemLocationId
-							,dblUnitInCustody
+							,intItemLocationId							
 							,dblUnitOnHand
 							,intConcurrencyId
 						)
 						SELECT @intItemId
-							,@intActionLocationId
-							,@UnitsToReduce
+							,@intActionLocationId							
 							,-@UnitsToReduce
 							,1
 					END
@@ -1386,8 +1383,7 @@ BEGIN TRY
 						WHERE intItemId = @intItemId AND intLocationId = @ActionCompanyLocationId
 						
 						UPDATE tblICItemStock
-						SET dblUnitInCustody = dblUnitInCustody + @UnitsToReduce
-						,dblUnitOnHand = dblUnitOnHand - @UnitsToReduce
+						SET dblUnitOnHand = dblUnitOnHand-@UnitsToReduce
 						WHERE intItemId = @intItemId AND intItemLocationId = @intActionLocationId
 					
 					END

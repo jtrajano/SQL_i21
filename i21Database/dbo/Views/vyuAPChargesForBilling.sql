@@ -1,7 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuAPChargesForBilling]
 AS
 SELECT
-	[intEntityVendorId]							=	E.intEntityVendorId
+	 [intInventoryReceiptId]					=	A.intInventoryReceiptId
+	,[intEntityVendorId]						=	E.intEntityVendorId
 	,[dtmDate]									=	D.dtmReceiptDate
 	,[strReference]								=	D.strVendorRefNo
 	,[strSourceNumber]							=	D.strReceiptNumber

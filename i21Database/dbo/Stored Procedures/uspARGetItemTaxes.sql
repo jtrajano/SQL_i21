@@ -12,6 +12,8 @@ AS
 			,@VendorId INT
 			,@ItemCategoryId INT
 	SET @TaxExempt = ISNULL((SELECT ysnTaxExempt FROM tblARCustomer WHERE intEntityCustomerId = @CustomerId AND @CustomerId IS NOT NULL),0)
+	IF(ISNULL(@TaxGroupId,0) = 0)
+		SET @TaxGroupId = ISNULL((SELECT tblEntityLocation.intTaxGroupId  FROM tblARCustomer INNER JOIN tblEntityLocation ON tblARCustomer.intEntityCustomerId = tblEntityLocation.intEntityId  AND tblEntityLocation.ysnDefaultLocation = 1 WHERE intEntityCustomerId = @CustomerId AND @CustomerId IS NOT NULL),0)
 	
 	SELECT
 		@VendorId = VI.intVendorId
@@ -52,15 +54,15 @@ AS
 							SELECT TOP 1 1 FROM
 								tblARCustomerTaxingTaxException
 							WHERE
-								(intCategoryId = @ItemCategoryId OR intItemId = @ItemId)
-								AND intEntityCustomerId = @CustomerId
-								AND (intTaxClassId = TC.[intTaxClassId] OR intTaxCodeId = TC.[intTaxCodeId] OR (UPPER(LTRIM(RTRIM(ISNULL(strState,'')))) = UPPER(LTRIM(RTRIM(ISNULL(TC.strState,'')))) AND LEN(UPPER(LTRIM(RTRIM(ISNULL(strState,''))))) > 0 ) )
-								AND	@TransactionDate BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate, @TransactionDate) AS DATE)
+								intEntityCustomerId = @CustomerId								
+								AND ((intCategoryId = @ItemCategoryId OR intItemId = @ItemId) OR (intTaxClassId = TC.[intTaxClassId] OR intTaxCodeId = TC.[intTaxCodeId] OR (UPPER(LTRIM(RTRIM(ISNULL(strState,'')))) = UPPER(LTRIM(RTRIM(ISNULL(TC.strState,'')))) AND LEN(UPPER(LTRIM(RTRIM(ISNULL(strState,''))))) > 0 ) ))
+								AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate, @TransactionDate) AS DATE)
 							ORDER BY
 								dtmStartDate
 							),0)
 					ELSE @TaxExempt
-				END) AS [ysnTaxExempt] 				
+				END) AS [ysnTaxExempt] 
+				,TG.[strTaxGroup] 				
 			FROM
 				tblSMTaxCode TC
 			INNER JOIN
@@ -404,15 +406,15 @@ AS
 							SELECT TOP 1 1 FROM
 								tblARCustomerTaxingTaxException
 							WHERE
-								(intCategoryId = @ItemCategoryId OR intItemId = @ItemId)
-								AND intEntityCustomerId = @CustomerId
-								AND (intTaxClassId = TC.[intTaxClassId] OR intTaxCodeId = TC.[intTaxCodeId] OR (UPPER(LTRIM(RTRIM(ISNULL(strState,'')))) = UPPER(LTRIM(RTRIM(ISNULL(TC.strState,'')))) AND LEN(UPPER(LTRIM(RTRIM(ISNULL(strState,''))))) > 0)  )
-								AND	@TransactionDate BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate, @TransactionDate) AS DATE)
+								intEntityCustomerId = @CustomerId
+								AND ((intCategoryId = @ItemCategoryId OR intItemId = @ItemId) OR (intTaxClassId = TC.[intTaxClassId] OR intTaxCodeId = TC.[intTaxCodeId] OR (UPPER(LTRIM(RTRIM(ISNULL(strState,'')))) = UPPER(LTRIM(RTRIM(ISNULL(TC.strState,'')))) AND LEN(UPPER(LTRIM(RTRIM(ISNULL(strState,''))))) > 0 ) ))
+								AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate, @TransactionDate) AS DATE)
 							ORDER BY
 								dtmStartDate
 							),0)
 					ELSE @TaxExempt
-				END) AS [ysnTaxExempt] 	 				
+				END) AS [ysnTaxExempt]
+				,TG.[strTaxGroup]  	 				
 			FROM
 				tblSMTaxCode TC
 			INNER JOIN

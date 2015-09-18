@@ -53,7 +53,7 @@ SELECT Lot.intLotId
 	, Lot.dtmManufacturedDate
 	, Lot.ysnReleasedToWarehouse
 	, Lot.ysnProduced
-	, Lot.ysnInCustody
+	, Lot.ysnStorage
 	, Lot.intGradeId
 	, strGrade = Grade.strDescription
 	, Lot.dtmDateCreated

@@ -45,7 +45,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				agcus_terms_cd = Loc.intTermsId, --(SELECT strTermCode FROM tblSMTerm WHERE intTermID = Loc.intTermsId),
 				--Contact
 				agcus_contact = SUBSTRING((Con.strName),1,20),
-				agcus_phone = (CASE WHEN CHARINDEX(''x'', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,15), 0, CHARINDEX(''x'',Con.strPhone)) ELSE SUBSTRING(Con.strPhone,1,15)END),
+				agcus_phone = ISNULL( (CASE WHEN CHARINDEX(''x'', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,15), 0, CHARINDEX(''x'',Con.strPhone)) ELSE SUBSTRING(Con.strPhone,1,15)END), '''' ),
 				agcus_phone_ext = (CASE WHEN CHARINDEX(''x'', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,30),CHARINDEX(''x'',Con.strPhone) + 1, LEN(Con.strPhone))END),
 				agcus_phone2 = (CASE WHEN CHARINDEX(''x'', Con.strPhone2) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone2,1,15), 0, CHARINDEX(''x'',Con.strPhone2)) ELSE SUBSTRING(Con.strPhone2,1,15)END),
 				agcus_phone2_ext = (CASE WHEN CHARINDEX(''x'', Con.strPhone2) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone2,1,30),CHARINDEX(''x'',Con.strPhone2) + 1, LEN(Con.strPhone2))END),
@@ -672,7 +672,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				ptcus_country = (CASE WHEN LEN(Loc.strCountry) = 10 THEN Loc.strCountry ELSE '''' END),
 				--Contact
 				ptcus_contact = SUBSTRING((Con.strName),1,20),
-				ptcus_phone = (CASE WHEN CHARINDEX(''x'', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,15), 0, CHARINDEX(''x'',Con.strPhone)) ELSE SUBSTRING(Con.strPhone,1,15)END),
+				ptcus_phone = ISNULL( (CASE WHEN CHARINDEX(''x'', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,15), 0, CHARINDEX(''x'',Con.strPhone)) ELSE SUBSTRING(Con.strPhone,1,15)END), ''''),
 				ptcus_phone_ext = (CASE WHEN CHARINDEX(''x'', Con.strPhone) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone,1,30),CHARINDEX(''x'',Con.strPhone) + 1, LEN(Con.strPhone))END),
 				ptcus_phone2 = (CASE WHEN CHARINDEX(''x'', Con.strPhone2) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone2,1,15), 0, CHARINDEX(''x'',Con.strPhone2)) ELSE SUBSTRING(Con.strPhone2,1,15)END),
 				ptcus_phone_ext2 = (CASE WHEN CHARINDEX(''x'', Con.strPhone2) > 0 THEN SUBSTRING(SUBSTRING(Con.strPhone2,1,30),CHARINDEX(''x'',Con.strPhone2) + 1, LEN(Con.strPhone2))END),

@@ -13,6 +13,7 @@ DECLARE @overpay NUMERIC(18,6);
 DECLARE @vendorId INT;
 DECLARE @billId INT;
 DECLARE @paymentRecord NVARCHAR(50);
+DECLARE @generatedBillRecordId NVARCHAR(50);
 
 SELECT 
 	@overpay = dblUnapplied,
@@ -85,11 +86,14 @@ BEGIN
 
 	SET @billId = SCOPE_IDENTITY();
 
+	EXEC uspSMGetStartingNumber 66, @generatedBillRecordId OUT
+
 	UPDATE A
 	SET dblTotal = @overpay,
 		dblAmountDue = @overpay,
 		intTransactionType = 8,
-		strReference = @paymentRecord
+		strReference = @paymentRecord,
+		strBillId = @generatedBillRecordId
 	FROM tblAPBill A
 	WHERE A.intBillId = @billId
 END

@@ -517,7 +517,7 @@ BEGIN TRY
 			(
 				intItemId
 				,intItemLocationId
-				,dblUnitInCustody
+				,dblUnitStorage
 				,intConcurrencyId
 			)
 			SELECT @intItemId
@@ -528,7 +528,7 @@ BEGIN TRY
 		ELSE
 		BEGIN
 			UPDATE tblICItemStock
-			SET dblUnitInCustody = dblUnitInCustody + @NewdblOpenBalance
+			SET dblUnitStorage = dblUnitStorage + @NewdblOpenBalance
 			WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId
 		END
 	END
@@ -541,7 +541,7 @@ BEGIN TRY
 			(
 				intItemId
 				,intItemLocationId
-				,dblUnitInCustody
+				,dblUnitStorage
 				,dblUnitOnHand
 				,intConcurrencyId
 			)
@@ -554,24 +554,24 @@ BEGIN TRY
 		ELSE
 		BEGIN
 			UPDATE tblICItemStock
-			SET dblUnitInCustody = dblUnitInCustody + @NewdblOpenBalance
+			SET dblUnitStorage = dblUnitStorage + @NewdblOpenBalance
 				,dblUnitOnHand = dblUnitOnHand - @NewdblOpenBalance
 			WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId
 		END
 	END
 			--Edit Mode Yes
-	ELSE IF @intConcurrencyId > 0 AND @ysnUpdateHouseTotal = 1
+	ELSE IF @intConcurrencyId > 0 AND @ysnUpdateHouseTotal = 1 AND (@NewdblOpenBalance < > @OlddblOpenBalance)
 	BEGIN
 		UPDATE tblICItemStock
-		SET dblUnitInCustody = dblUnitInCustody + (@NewdblOpenBalance - @OlddblOpenBalance)
+		SET dblUnitStorage = dblUnitStorage + (@NewdblOpenBalance - @OlddblOpenBalance)
 		WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId
 	END
 			--Edit Mode No
-	ELSE IF @intConcurrencyId > 0 AND @ysnUpdateHouseTotal = 0
+	ELSE IF @intConcurrencyId > 0 AND @ysnUpdateHouseTotal = 0 AND (@NewdblOpenBalance < > @OlddblOpenBalance)
 	BEGIN
 		UPDATE tblICItemStock
-		SET dblUnitInCustody = dblUnitInCustody + (@NewdblOpenBalance - @OlddblOpenBalance)
-			,dblUnitOnHand = dblUnitOnHand + (@NewdblOpenBalance - @OlddblOpenBalance)
+		SET dblUnitStorage = dblUnitStorage + (@NewdblOpenBalance - @OlddblOpenBalance)
+			,dblUnitOnHand = dblUnitOnHand - (@NewdblOpenBalance - @OlddblOpenBalance)
 		WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId
 	END
 

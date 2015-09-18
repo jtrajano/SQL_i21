@@ -20,6 +20,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
 	,[intSourceId] INT NULL                                 -- Source Id of the Originated Transaction
 	,[strActualCostId] nvarchar(50) COLLATE Latin1_General_CI_AS NULL -- Direct Cost Id
+	,[strVendorRefNo] nvarchar(50) COLLATE Latin1_General_CI_AS NULL -- Vendor Reference No. 
 
 	-- Detail 
 	,[intItemId] INT NOT NULL								-- The item. 
@@ -29,7 +30,7 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
     ,[dblCost] NUMERIC(18, 6) NOT NULL DEFAULT 0			-- The cost of purchasing a item per UOM. For example, $12 is the cost for a 12-piece box. This parameter should hold a $12 value and not $1 per pieces found in a 12-piece box. The cost is stored in base currency. 
 	,[intSubLocationId] INT NULL							-- Place holder field for lot numbers
 	,[intStorageLocationId] INT NULL						-- Place holder field for lot numbers
-	,[ysnIsCustody] BIT NULL								-- If Yes (value is 1), then the item is not owned by the company. The company is only the custodian of the item (like a consignor). Add or remove stock from Inventory-Lot-In-Custody table. 
+	,[ysnIsStorage] BIT NULL								-- If Yes (value is 1), then the item is not owned by the company. The company is only the custodian of the item (like a consignor). Add or remove stock from Inventory-Lot-In-Storage table. 
 	,[intTaxMasterId] INT NULL								-- Manually specify a tax master id. It overrides the 'Purchase Tax Code' for an item found in its item setup screen.
 	,[intTaxGroupId] INT NULL								-- Manually specify a tax group id. It overrides the 'Purchase Tax Code' for an item found in its item setup screen.
 	,[dblGross] NUMERIC(18,6) NULL 
