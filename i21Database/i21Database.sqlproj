@@ -2430,6 +2430,7 @@
     <None Include="Scripts\Post-Deployment\SM\CustomField.sql" />
     <None Include="Scripts\Post-Deployment\SM\SMDataFixes.sql" />
     <None Include="Scripts\Post-Deployment\SM\SMDataMigrations.sql" />
+    <Build Include="dbo\Views\vyuGLDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
