@@ -19,6 +19,7 @@ BEGIN
 		,@SQL NVARCHAR(MAX)
 		,@dtmHolidayFromDate DATETIME
 		,@dtmHolidayToDate DATETIME
+		,@strMachineName1 NVARCHAR(MAX)
 	DECLARE @tblMFHolidayCalendar TABLE (dtmHolidayDate DATETIME)
 	DECLARE @tblMFHoliday TABLE (
 		intHolidayId INT
@@ -97,6 +98,7 @@ BEGIN
 		,dtmShiftEndTime DATETIME
 		,intNoOfMachine INT
 		,ysnHoliday BIT
+		,intConcurrencyId INT
 		)
 
 	INSERT INTO #tblMFCalendarDetail (
@@ -107,6 +109,7 @@ BEGIN
 		,dtmShiftEndTime
 		,intNoOfMachine
 		,ysnHoliday
+		,intConcurrencyId
 		)
 	SELECT intCalendarDetailId
 		,dtmCalendarDate
@@ -115,6 +118,7 @@ BEGIN
 		,dtmShiftEndTime
 		,intNoOfMachine
 		,ysnHoliday
+		,intConcurrencyId
 	FROM dbo.tblMFScheduleCalendarDetail
 	WHERE intCalendarId = @intCalendarId
 		AND dtmCalendarDate BETWEEN @dtmFromDate
@@ -143,6 +147,7 @@ BEGIN
 			,dtmShiftEndTime
 			,intNoOfMachine
 			,ysnHoliday
+			,intConcurrencyId
 			)
 		SELECT NULL
 			,@dtmFromDate
@@ -161,6 +166,7 @@ BEGIN
 					ELSE 0
 					END
 				)
+			,0
 		FROM dbo.tblMFShift
 		WHERE intLocationId = @intLocationId
 			AND intShiftId IN (
@@ -173,21 +179,25 @@ BEGIN
 
 	IF @ysnpivot = 1
 	BEGIN
-		SELECT @strMachineName = STUFF((
-					SELECT '],[' + M.strName
-					FROM tblMFMachine M
-					JOIN tblMFMachinePackType MP ON MP.intMachineId = M.intMachineId
-					JOIN tblMFManufacturingCellPackType LP ON LP.intPackTypeId = MP.intPackTypeId
-						AND LP.intManufacturingCellId = @intManufacturingCellId
-						AND M.intMachineId IN (
-							SELECT Item
-							FROM dbo.fnSplitString(@strMachineId, ',')
-							)
-					ORDER BY '],[' + M.strName
-					FOR XML Path('')
-					), 1, 2, '') + ']'
+		SELECT @strMachineName = Isnull(@strMachineName, '') + '[' + M.strName + '],'
+			,@strMachineName1 = Isnull(@strMachineName1, '') + 'Convert(bit,[' + M.strName + ']) as [' + M.strName + '],'
+		FROM tblMFMachine M
+		JOIN tblMFMachinePackType MP ON MP.intMachineId = M.intMachineId
+		JOIN tblMFManufacturingCellPackType LP ON LP.intPackTypeId = MP.intPackTypeId
+			AND LP.intManufacturingCellId = @intManufacturingCellId
+			AND M.intMachineId IN (
+				SELECT Item
+				FROM dbo.fnSplitString(@strMachineId, ',')
+				)
+		ORDER BY M.strName
 
-		SELECT @SQL = 'SELECT *
+		IF Len(@strMachineName) > 0
+			SELECT @strMachineName = Left(@strMachineName, Len(@strMachineName) - 1)
+
+		IF Len(@strMachineName1) > 0
+			SELECT @strMachineName1 = Left(@strMachineName1, Len(@strMachineName1) - 1)
+
+		SELECT @SQL = 'SELECT dtmCalendarDate,Day,intShiftId,strShiftName,dtmShiftStartTime,dtmShiftEndTime,intNoOfMachine,ysnHoliday, DateDiff(hh,dtmShiftStartTime,dtmShiftEndTime) as intNoOfHours,intConcurrencyId,' + @strMachineName1 + '
 		FROM (
 			SELECT CD.dtmCalendarDate,DATENAME(dw,CD.dtmCalendarDate) AS Day
 				,CD.intShiftId
@@ -198,6 +208,7 @@ BEGIN
 				,CD.ysnHoliday
 				,M.intMachineId
 				,M.strName
+				,CD.intConcurrencyId
 			FROM #tblMFCalendarDetail CD
 			JOIN dbo.tblMFShift S ON S.intShiftId = CD.intShiftId
 			LEFT JOIN dbo.tblMFScheduleCalendarMachineDetail MD ON MD.intCalendarDetailId = CD.intCalendarDetailId
@@ -206,7 +217,6 @@ BEGIN
 		PIVOT(Count(DT.intMachineId) FOR strName IN (' + @strMachineName + ')) pvt'
 
 		EXEC (@SQL)
-
 	END
 	ELSE
 	BEGIN
@@ -239,6 +249,7 @@ BEGIN
 			,CD.dtmShiftEndTime
 			,CD.intNoOfMachine
 			,CD.ysnHoliday
+			,DateDiff(hh, CD.dtmShiftStartTime, CD.dtmShiftEndTime) AS intNoOfHours
 			,M.intMachineId
 			,M.strName
 			,CONVERT(BIT, CASE 
@@ -251,10 +262,10 @@ BEGIN
 						THEN 1
 					ELSE 0
 					END) AS ysnSelect
+			,CD.intConcurrencyId
 		FROM #tblMFCalendarDetail CD
 			,dbo.tblMFShift S
 			,@tblMFMachine M
 		WHERE S.intShiftId = CD.intShiftId
-
 	END
 END
