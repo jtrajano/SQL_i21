@@ -1295,7 +1295,7 @@ IF @recap = 0
 			UPDATE 
 				tblARInvoice
 			SET 
-				tblARInvoice.dblAmountDue = C.dblInvoiceTotal - (C.dblPayment + C.dblDiscount)
+				tblARInvoice.dblAmountDue = C.dblInvoiceTotal - C.dblPayment
 			FROM 
 				tblARPayment A
 			INNER JOIN tblARPaymentDetail B 
@@ -1529,7 +1529,7 @@ IF @recap = 0
 			UPDATE 
 				tblARInvoice
 			SET 
-				tblARInvoice.dblAmountDue = C.dblInvoiceTotal - (C.dblPayment + C.dblDiscount)
+				tblARInvoice.dblAmountDue = C.dblInvoiceTotal - C.dblPayment
 			FROM 
 				tblARPayment A
 			INNER JOIN tblARPaymentDetail B 
