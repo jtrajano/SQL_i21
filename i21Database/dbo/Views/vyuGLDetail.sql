@@ -2,6 +2,7 @@ CREATE VIEW dbo.vyuGLDetail
 AS
      SELECT 
 		  A.intGLDetailId,
+		  A.intAccountId,
 		  A.dtmDate,
             A.strBatchId,
             B.strAccountId,
