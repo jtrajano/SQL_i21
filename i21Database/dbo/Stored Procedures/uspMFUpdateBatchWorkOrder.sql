@@ -38,7 +38,7 @@ BEGIN TRY
 			,strScheduleComment NVARCHAR(MAX)
 			,intUserId INT
 			) x
-	WHERE x.intWorkOrderId = tblMFWorkOrder.intWorkOrderId
+	WHERE x.intWorkOrderId = tblMFScheduleWorkOrder.intWorkOrderId
 	
 	IF @intTransactionCount = 0
 	COMMIT TRANSACTION
