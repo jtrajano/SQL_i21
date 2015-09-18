@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblWHDefaultLocation]
 (
-	intEntityId INT,
+	intCompanyLocationId INT,
 	intDefaultInboundStagingLocationId INT,
 	intDefaultOutboundStagingLocationId INT,
 	intDefaultInboundDockDoorLocationId INT,

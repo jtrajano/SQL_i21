@@ -4011,4 +4011,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strVersion" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="4f9f714b-661f-4dc2-81b2-5e710387c205" ChangeDateTime="09/18/2015 11:45:41">
+    <Property Name="ElementName" Value="[dbo].[tblWHDefaultLocation].[intEntityId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblWHDefaultLocation]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intCompanyLocationId" />
+  </Operation>
 </Operations>
