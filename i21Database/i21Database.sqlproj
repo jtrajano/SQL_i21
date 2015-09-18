@@ -2432,6 +2432,7 @@
     <None Include="Scripts\Post-Deployment\SM\SMDataMigrations.sql" />
     <Build Include="dbo\Views\vyuGLDetail.sql" />
     <Build Include="dbo\Tables\tblSMCompanyGridLayout.sql" />
+    <Build Include="dbo\Tables\tblWHDefaultLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
