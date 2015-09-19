@@ -444,9 +444,9 @@ SELECT
 	,Acct.[intCOGSAccountId]									--[intCOGSAccountId]
 	,Acct.[intSalesAccountId]									--[intSalesAccountId]
 	,Acct.[intInventoryAccountId]								--[intInventoryAccountId]
-	,null   --[intContractHeaderId]
-	,null                                    --[intContractDetailId]
-	,IE.[intTaxGroupId]											--[intTaxGroupId]
+	,null														--[intContractHeaderId]
+	,null														--[intContractDetailId]
+	,NULL														--[intTaxGroupId]
 	,1															--[intConcurrencyId]
 FROM
     @InvoiceEntries IE
