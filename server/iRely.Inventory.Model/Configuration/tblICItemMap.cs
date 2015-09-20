@@ -584,4 +584,35 @@ namespace iRely.Inventory.Model
         }
     }
 
+    public class vyuICGetInventoryValuationMap : EntityTypeConfiguration<vyuICGetInventoryValuation>
+    {
+        public vyuICGetInventoryValuationMap()
+        {
+            // Primary Key
+            this.HasKey(p => p.intInventoryValuationKeyId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetInventoryValuation");
+            this.Property(t => t.intInventoryValuationKeyId).HasColumnName("intInventoryValuationKeyId");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
+            this.Property(t => t.intCategoryId).HasColumnName("intCategoryId");
+            this.Property(t => t.strCategroy).HasColumnName("strCategroy");
+            this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
+            this.Property(t => t.strLocationName).HasColumnName("strLocationName");
+            this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
+            this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
+            this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
+            this.Property(t => t.strStorageLocationName).HasColumnName("strStorageLocationName");
+            this.Property(t => t.dtmDate).HasColumnName("dtmDate");
+            this.Property(t => t.strTransactionForm).HasColumnName("strTransactionForm");
+            this.Property(t => t.strTransactionId).HasColumnName("strTransactionId");
+            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(18, 6);
+            this.Property(t => t.dblCost).HasColumnName("dblCost").HasPrecision(18, 6);
+            this.Property(t => t.dblValue).HasColumnName("dblValue").HasPrecision(18, 6);
+            this.Property(t => t.strBatchId).HasColumnName("strBatchId");
+        }
+    }
+
 }

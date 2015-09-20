@@ -343,6 +343,24 @@ namespace iRely.Inventory.BusinessLayer
         }
 
         /// <summary>
+        /// Return Inventory Valuation of Item and some of its details
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<SearchResult> GetInventoryValuation(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetInventoryValuation>()
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intInventoryValuationKeyId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+
+        /// <summary>
         /// Duplicate Item
         /// </summary>
         /// <param name="intItemId">Specify the Item Id of the Item to duplicate</param>

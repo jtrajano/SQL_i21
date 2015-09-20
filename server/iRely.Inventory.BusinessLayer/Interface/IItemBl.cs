@@ -17,6 +17,7 @@ namespace iRely.Inventory.BusinessLayer
         Task<SearchResult> GetItemStockDetails(GetParameter param);
         Task<SearchResult> GetAssemblyItems(GetParameter param);
         Task<SearchResult> GetItemUPCs(GetParameter param);
+        Task<SearchResult> GetInventoryValuation(GetParameter param);
         Task<SearchResult> GetOtherCharges(GetParameter param);
         Task<SearchResult> GetItemCommodities(GetParameter param);
         Task<SearchResult> GetStockTrackingItems(GetParameter param);       
