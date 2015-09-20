@@ -47,7 +47,7 @@ AS
 		JOIN		tblICCommodityUnitMeasure	CU ON CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1
 		WHERE		intPricingTypeId = 2 
 		AND			ISNULL(ysnMultiplePriceFixation,0) = 0
-		AND			intContractDetailId NOT IN (SELECT intContractDetailId FROM tblCTPriceFixation)
+		AND			intContractDetailId NOT IN (SELECT ISNULL(intContractDetailId,0) FROM tblCTPriceFixation)
 		
 		UNION ALL
 		
@@ -63,7 +63,7 @@ AS
 					CD.intCommodityId,
 					strCommodityDescription,
 					ysnMultiplePriceFixation,
-					dblHeaderQuantity,
+					CAST(NULL AS NUMERIC(12,4)) AS dblHeaderQuantity,
 					strHeaderUnitMeasure,
 					CAST(ROUND(SUM(dblNoOfLots),0)AS INT)	AS	intNoOfLots,
 					LTRIM(NULL)					AS	strLocationName,
@@ -131,9 +131,9 @@ AS
 					strFutMarketName,
 					intFutureMonthId,
 					strFutureMonth,
-					dblBasis,
-					dblFutures,
-					dblCashPrice,
+					CD.dblBasis,
+					CD.dblFutures,
+					CD.dblCashPrice,
 					intPriceItemUOMId,
 					intBookId,
 					intSubBookId,
@@ -154,7 +154,7 @@ AS
 		FROM		tblCTPriceFixation			PF
 		JOIN		vyuCTContractDetailView		CD	ON	CD.intContractDetailId = PF.intContractDetailId
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1 
-		WHERE		intPricingTypeId = 2 
+		--WHERE		intPricingTypeId = 2 
 		AND			ISNULL(ysnMultiplePriceFixation,0) = 0
 
 		UNION ALL
@@ -171,7 +171,7 @@ AS
 					CD.intCommodityId,
 					strCommodityDescription,
 					ysnMultiplePriceFixation,
-					dblHeaderQuantity,
+					CAST(NULL AS NUMERIC(12,4)) AS  dblHeaderQuantity,
 					strHeaderUnitMeasure,
 					PF.intTotalLots				AS	intNoOfLots,
 					LTRIM(NULL)					AS	strLocationName,
