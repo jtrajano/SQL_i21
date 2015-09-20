@@ -2321,6 +2321,7 @@
     <Build Include="dbo\Stored Procedures\uspARInsertTransactionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspSOInsertTransactionDetail.sql" />
     <Build Include="dbo\Tables\tblARTransactionDetail.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryValuation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
