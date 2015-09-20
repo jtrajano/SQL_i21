@@ -39,11 +39,12 @@ RETURN (
 		WHERE	SubQuery.dblDebit <> SubQuery.dblCredit
 
 		-- Unable to find an open fiscal year period to match the transaction date.
+		-- Allow audit adjustment transactions to be posted to a closed fiscal year period
 		UNION ALL 
 		SELECT	strTransactionId
 				,strText = FORMATMESSAGE(50005)
 				,intErrorCode = 50005
-		FROM	(SELECT DISTINCT strTransactionId, dtmDate, strModuleName FROM @GLEntriesToValidate) GLEntries
+		FROM	(SELECT DISTINCT strTransactionId, dtmDate, strModuleName FROM @GLEntriesToValidate WHERE strCode !='AA') GLEntries
 		WHERE	dbo.isOpenAccountingDate(dtmDate) = 0
 
 		UNION ALL 
