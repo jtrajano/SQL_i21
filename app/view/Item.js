@@ -1038,8 +1038,11 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'panel',
                                                         itemId: 'pgeLocation',
-                                                        layout: 'fit',
                                                         title: 'Location',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            align: 'stretch'
+                                                        },
                                                         tabConfig: {
                                                             xtype: 'tab',
                                                             itemId: 'cfgLocation'
@@ -1047,6 +1050,7 @@ Ext.define('Inventory.view.Item', {
                                                         items: [
                                                             {
                                                                 xtype: 'advancefiltergrid',
+                                                                flex: 1,
                                                                 itemId: 'grdLocationStore',
                                                                 margin: -1,
                                                                 dockedItems: [
@@ -1069,6 +1073,13 @@ Ext.define('Inventory.view.Item', {
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
+                                                                                itemId: 'btnAddMultipleLocation',
+                                                                                iconCls: 'small-add',
+                                                                                text: 'Add Multiple'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
                                                                                 itemId: 'btnEditLocation',
                                                                                 iconCls: 'small-view',
                                                                                 text: 'View'
@@ -1084,7 +1095,13 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'tbseparator'
                                                                             },
                                                                             {
-                                                                                xtype: 'filter1'
+                                                                                xtype: 'combobox',
+                                                                                itemId: 'cboCopyLocation',
+                                                                                margin: '0 0 0 5',
+                                                                                fieldLabel: 'Copy Location'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'tbseparator'
                                                                             }
                                                                         ]
                                                                     }

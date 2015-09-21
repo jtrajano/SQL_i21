@@ -708,9 +708,9 @@ Ext.define('Inventory.view.ItemViewController', {
                 colStockInTransitInbound: 'dblInTransitInbound',
                 colStockOnHand: 'dblUnitOnHand',
                 colStockInTransitOutbound: 'dblInTransitOutbound',
-                colStockBackOrder: 'dblBackOrder',
+                colStockBackOrder: 'dblCalculatedBackOrder', // formerly, this is: colStockBackOrder: 'dblBackOrder',
                 colStockCommitted: 'dblOrderCommitted',
-                colStockOnStorage: 'dblUnitInCustody',
+                colStockOnStorage: 'dblUnitStorage',
                 colStockConsignedPurchase: 'dblConsignedPurchase',
                 colStockConsignedSale: 'dblConsignedSale',
                 colStockReserved: 'dblUnitReserved',
@@ -1642,6 +1642,116 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    onAddMultipleLocationClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var me = win.controller;
+        var vm = win.getViewModel();
+        var defaultFilters = '';
+
+        Ext.Array.each(vm.data.current.tblICItemLocations().data.items, function(location) {
+            defaultFilters += '&intLocationId<>' + location.get('intLocationId');
+        });
+
+        var showAddScreen = function() {
+            var search = i21.ModuleMgr.Search;
+            search.scope = me;
+            search.url = '../i21/api/CompanyLocation/SearchCompanyLocations';
+            search.columns = [
+                { dataIndex : 'intCompanyLocationId', text: 'Location Id', dataType: 'numeric', defaultSort : true, hidden : true, key : true},
+                { dataIndex : 'strLocationName',text: 'Location Name', dataType: 'string', flex: 1 },
+                { dataIndex : 'strLocationType',text: 'Location Type', dataType: 'string', flex: 1 }
+            ];
+            search.title = "Add Item Locations";
+            search.showNew = false;
+            search.on({
+                scope: me,
+                openselectedclick: function(button, e, result) {
+                    var currentVM = this.getViewModel().data.current;
+                    Ext.each(result, function(location) {
+                        var exists = Ext.Array.findBy(currentVM.tblICItemLocations().data.items, function (row) {
+                            if (location.get('intCompanyLocationId') === row.get('intCompanyLocationId')) {
+                                return true;
+                            }
+                        });
+                        if (!exists) {
+                            var newRecord = {
+                                intItemId : location.data.intItemId,
+                                intLocationId : location.data.intLocationId,
+//                            intVendorId : location.data.intVendorId,
+//                            strDescription : location.data.strDescription,
+//                            intCostingMethod : location.data.intCostingMethod,
+//                            intAllowNegativeInventory : location.data.intAllowNegativeInventory,
+//                            intSubLocationId : location.data.intSubLocationId,
+//                            intStorageLocationId : location.data.intStorageLocationId,
+//                            intIssueUOMId : location.data.intIssueUOMId,
+//                            intReceiveUOMId : location.data.intReceiveUOMId,
+//                            intFamilyId : location.data.intFamilyId,
+//                            intClassId : location.data.intClassId,
+//                            intProductCodeId : location.data.intProductCodeId,
+//                            intFuelTankId : location.data.intFuelTankId,
+//                            strPassportFuelId1 : location.data.strPassportFuelId1,
+//                            strPassportFuelId2 : location.data.strPassportFuelId2,
+//                            strPassportFuelId3 : location.data.strPassportFuelId3,
+//                            ysnTaxFlag1 : location.data.ysnTaxFlag1,
+//                            ysnTaxFlag2 : location.data.ysnTaxFlag2,
+//                            ysnTaxFlag3 : location.data.ysnTaxFlag3,
+//                            ysnPromotionalItem : location.data.ysnPromotionalItem,
+//                            intMixMatchId : location.data.intMixMatchId,
+//                            ysnDepositRequired : location.data.ysnDepositRequired,
+//                            intDepositPLUId : location.data.intDepositPLUId,
+//                            intBottleDepositNo : location.data.intBottleDepositNo,
+//                            ysnQuantityRequired : location.data.ysnQuantityRequired,
+//                            ysnScaleItem : location.data.ysnScaleItem,
+//                            ysnFoodStampable : location.data.ysnFoodStampable,
+//                            ysnReturnable : location.data.ysnReturnable,
+//                            ysnPrePriced : location.data.ysnPrePriced,
+//                            ysnOpenPricePLU : location.data.ysnOpenPricePLU,
+//                            ysnLinkedItem : location.data.intItemLocationId,
+//                            strVendorCategory : location.data.strVendorCategory,
+//                            ysnCountBySINo : location.data.ysnCountBySINo,
+//                            strSerialNoBegin : location.data.strSerialNoBegin,
+//                            strSerialNoEnd : location.data.strSerialNoEnd,
+//                            ysnIdRequiredLiquor : location.data.ysnIdRequiredLiquor,
+//                            ysnIdRequiredCigarette : location.data.ysnIdRequiredCigarette,
+//                            intMinimumAge : location.data.intMinimumAge,
+//                            ysnApplyBlueLaw1 : location.data.ysnApplyBlueLaw1,
+//                            ysnApplyBlueLaw2 : location.data.ysnApplyBlueLaw2,
+//                            ysnCarWash : location.data.ysnCarWash,
+//                            intItemTypeCode  : location.data.intItemTypeCode,
+//                            intItemTypeSubCode : location.data.intItemTypeSubCode,
+//                            ysnAutoCalculateFreight : location.data.ysnAutoCalculateFreight,
+//                            intFreightMethodId : location.data.intFreightMethodId,
+//                            dblFreightRate : location.data.dblFreightRate,
+//                            intShipViaId : location.data.intShipViaId,
+//                            intNegativeInventory : location.data.intNegativeInventory,
+//                            dblReorderPoint : location.data.dblReorderPoint,
+//                            dblMinOrder : location.data.dblMinOrder,
+//                            dblSuggestedQty : location.data.intItemLocationId,
+//                            dblLeadTime : location.data.intItemLocationId,
+//                            strCounted : location.data.strCounted,
+//                            intCountGroupId : location.data.intCountGroupId,
+//                            ysnCountedDaily : location.data.ysnCountedDaily,
+//                            intSort : location.data.intSort,
+
+                                strLocationName : location.data.strLocationName
+//                            strVendorId : location.data.strVendorId,
+//                            strCategory : location.data.strCategory,
+//                            strUnitMeasure : location.data.strUnitMeasure
+                            };
+                            currentVM.tblICItemLocations().add(newRecord);
+                        }
+                    });
+                    search.close();
+                },
+                openallclick: function() {
+                    search.close();
+                }
+            });
+            search.show();
+        }
+        showAddScreen();
+    },
+
     onEditLocationClick: function(button, e, eOpts) {
         var win = button.up('window');
         var me = win.controller;
@@ -1782,7 +1892,76 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    onCopyLocationSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
 
+        var grid = combo.up('grid');
+        var selection = grid.getSelectionModel().getSelection();
+        var copyLocation = records[0];
+
+        Ext.Array.each(selection, function(location) {
+            if (location.get('intItemLocationId') !== copyLocation.get('intItemLocationId')) {
+                location.set('intVendorId', copyLocation.get('intVendorId'));
+                location.set('strDescription', copyLocation.get('strDescription'));
+                location.set('intCostingMethod', copyLocation.get('intCostingMethod'));
+                location.set('intAllowNegativeInventory', copyLocation.get('intAllowNegativeInventory'));
+                location.set('intSubLocationId', copyLocation.get('intSubLocationId'));
+                location.set('intStorageLocationId', copyLocation.get('intStorageLocationId'));
+                location.set('intIssueUOMId', copyLocation.get('intIssueUOMId'));
+                location.set('intReceiveUOMId', copyLocation.get('intReceiveUOMId'));
+                location.set('intFamilyId', copyLocation.get('intFamilyId'));
+                location.set('intClassId', copyLocation.get('intClassId'));
+                location.set('intProductCodeId', copyLocation.get('intProductCodeId'));
+                location.set('intFuelTankId', copyLocation.get('intFuelTankId'));
+                location.set('strPassportFuelId1', copyLocation.get('strPassportFuelId2'));
+                location.set('strPassportFuelId2', copyLocation.get('strPassportFuelId2'));
+                location.set('strPassportFuelId3', copyLocation.get('strPassportFuelId3'));
+                location.set('ysnTaxFlag1', copyLocation.get('ysnTaxFlag1'));
+                location.set('ysnTaxFlag2', copyLocation.get('ysnTaxFlag2'));
+                location.set('ysnTaxFlag3', copyLocation.get('ysnTaxFlag3'));
+                location.set('ysnPromotionalItem', copyLocation.get('ysnPromotionalItem'));
+                location.set('intMixMatchId', copyLocation.get('intMixMatchId'));
+                location.set('ysnDepositRequired', copyLocation.get('ysnDepositRequired'));
+                location.set('intDepositPLUId', copyLocation.get('intDepositPLUId'));
+                location.set('intBottleDepositNo', copyLocation.get('intBottleDepositNo'));
+                location.set('ysnQuantityRequired', copyLocation.get('ysnQuantityRequired'));
+                location.set('ysnScaleItem', copyLocation.get('ysnScaleItem'));
+                location.set('ysnFoodStampable', copyLocation.get('ysnFoodStampable'));
+                location.set('ysnReturnable', copyLocation.get('ysnReturnable'));
+                location.set('ysnPrePriced', copyLocation.get('ysnPrePriced'));
+                location.set('ysnOpenPricePLU', copyLocation.get('ysnOpenPricePLU'));
+                location.set('ysnLinkedItem', copyLocation.get('ysnLinkedItem'));
+                location.set('strVendorCategory', copyLocation.get('strVendorCategory'));
+                location.set('ysnCountBySINo', copyLocation.get('ysnCountBySINo'));
+                location.set('strSerialNoBegin', copyLocation.get('strSerialNoBegin'));
+                location.set('strSerialNoEnd', copyLocation.get('strSerialNoEnd'));
+                location.set('ysnIdRequiredLiquor', copyLocation.get('ysnIdRequiredLiquor'));
+                location.set('ysnIdRequiredCigarette', copyLocation.get('ysnIdRequiredCigarette'));
+                location.set('intMinimumAge', copyLocation.get('intMinimumAge'));
+                location.set('ysnApplyBlueLaw1', copyLocation.get('ysnApplyBlueLaw1'));
+                location.set('ysnApplyBlueLaw2', copyLocation.get('ysnApplyBlueLaw2'));
+                location.set('ysnCarWash', copyLocation.get('ysnCarWash'));
+                location.set('intItemTypeCode', copyLocation.get('intItemTypeCode'));
+                location.set('intItemTypeSubCode', copyLocation.get('intItemTypeSubCode'));
+                location.set('ysnAutoCalculateFreight', copyLocation.get('ysnAutoCalculateFreight'));
+                location.set('intFreightMethodId', copyLocation.get('intFreightMethodId'));
+                location.set('dblFreightRate', copyLocation.get('dblFreightRate'));
+                location.set('intShipViaId', copyLocation.get('intShipViaId'));
+                location.set('intNegativeInventory', copyLocation.get('intNegativeInventory'));
+                location.set('dblReorderPoint', copyLocation.get('dblReorderPoint'));
+                location.set('dblMinOrder', copyLocation.get('dblMinOrder'));
+                location.set('dblSuggestedQty', copyLocation.get('dblSuggestedQty'));
+                location.set('dblLeadTime', copyLocation.get('dblLeadTime'));
+                location.set('strCounted', copyLocation.get('strCounted'));
+                location.set('intCountGroupId', copyLocation.get('intCountGroupId'));
+                location.set('ysnCountedDaily', copyLocation.get('ysnCountedDaily'));
+                location.set('strVendorId', copyLocation.get('strVendorId'));
+                location.set('strCategory', copyLocation.get('strCategory'));
+                location.set('strUnitMeasure', copyLocation.get('strUnitMeasure'));
+            }
+        });
+    },
 
     CostingMethodRenderer: function (value, metadata, record) {
         var intMethod = record.get('intCostingMethod');
@@ -2659,8 +2838,14 @@ Ext.define('Inventory.view.ItemViewController', {
             "#cboLotTracking" : {
                 select: this.onLotTrackingSelect
             },
+            "#cboCopyLocation" : {
+                select: this.onCopyLocationSelect
+            },
             "#btnAddLocation": {
                 click: this.onAddLocationClick
+            },
+            "#btnAddMultipleLocation": {
+                click: this.onAddMultipleLocationClick
             },
             "#btnEditLocation": {
                 click: this.onEditLocationClick

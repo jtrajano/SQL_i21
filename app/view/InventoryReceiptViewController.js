@@ -1837,7 +1837,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     dblAmount : 0,
                                     strAllocateCostBy : '',
                                     ysnAccrue : cost.ysnAccrue,
-                                    ysnAccrue : cost.ysnPrice,
+                                    ysnPrice : cost.ysnPrice,
 
                                     strItemNo : cost.strItemNo,
                                     strCostUOM : cost.strUOM,
@@ -2850,6 +2850,26 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onAccrueCheckChange: function (obj, rowIndex, checked, eOpts) {
+        if (obj.dataIndex === 'ysnAccrue'){
+            var grid = obj.up('grid');
+            var win = obj.up('window');
+            var current = grid.view.getRecord(rowIndex);
+            var masterRecord = win.viewModel.data.current;
+            var cboVendor = win.down('#cboVendor');
+
+
+            if (checked === true){
+                current.set('intEntityVendorId', masterRecord.get('intEntityVendorId'));
+                current.set('strVendorId', cboVendor.getRawValue());
+            }
+            else {
+                current.set('intEntityVendorId', null);
+                current.set('strVendorId', null);
+            }
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboVendor": {
@@ -2963,6 +2983,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#colUnitCost": {
                 beforerender: this.onColumnBeforeRender
+            },
+            "#colAccrue": {
+                beforecheckchange: this.onAccrueCheckChange
             }
         })
     }
