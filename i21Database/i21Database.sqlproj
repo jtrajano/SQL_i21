@@ -2316,6 +2316,25 @@
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLIFOStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLotStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseConsignedPurchaseQty.sql" />
+    <Build Include="dbo\Functions\fnGetNumericValueFromString.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetAccountDetailReport.sql" />
+    <Build Include="dbo\Functions\fnConvertFilterTableToWhereExpression.sql" />
+    <Build Include="dbo\User Defined Types\FilterTableType.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseConsignedSaleQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertTransactionDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspSOInsertTransactionDetail.sql" />
+    <Build Include="dbo\Tables\tblARTransactionDetail.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryValuation.sql" />
+    <Build Include="dbo\Functions\fnGetNumericValueFromString.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetAccountDetailReport.sql" />
+    <Build Include="dbo\Functions\fnConvertFilterTableToWhereExpression.sql" />
+    <Build Include="dbo\User Defined Types\FilterTableType.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseConsignedSaleQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertTransactionDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspSOInsertTransactionDetail.sql" />
+    <Build Include="dbo\Tables\tblARTransactionDetail.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryValuation.sql" />
+    <Build Include="dbo\Functions\fnICGetRunningBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
