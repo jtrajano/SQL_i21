@@ -252,7 +252,7 @@ EXEC('CREATE PROCEDURE [dbo].[uspGLImportSubLedger]
 						  ,[strJournalId]
 						  ,[blnCorrection])
 					SELECT @importLogId,
-						''Unable to Post because account id in origin is not on iRely Suite Crossreference.'',
+						''Unable to Post because account id in origin is not on i21 Crossreference.'',
 						glije_period,
 						glije_src_no,
 						glije_src_sys,
