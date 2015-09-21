@@ -59,6 +59,9 @@
 [dtmISFReceivedDate] DATETIME NULL,
 [dtmISFFiledDate] DATETIME NULL,
 [strComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS NULL,
+[intCompanyLocationId] INT NULL, 
+[intCommodityId] INT NULL, 
+
 
 CONSTRAINT [PK_tblLGShippingInstruction_intShippingInstructionId] PRIMARY KEY ([intShippingInstructionId]), 
 
@@ -75,5 +78,7 @@ CONSTRAINT [FK_tblLGShippingInstruction_tblSMCurrency_intDespatchCurrencyId_intC
 CONSTRAINT [FK_tblLGShippingInstruction_tblICUnitMeasure_intLoadingUnitMeasureId_intUnitMeasureId] FOREIGN KEY ([intLoadingUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 CONSTRAINT [FK_tblLGShippingInstruction_tblICUnitMeasure_intDischargeUnitMeasureId_intUnitMeasureId] FOREIGN KEY ([intDischargeUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 
-CONSTRAINT [UK_tblLGShippingInstruction_intReferenceNumber] UNIQUE ([intReferenceNumber])
+CONSTRAINT [UK_tblLGShippingInstruction_intReferenceNumber] UNIQUE ([intReferenceNumber]),
+CONSTRAINT [FK_tblLGShippingInstruction_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
+CONSTRAINT [FK_tblLGShippingInstruction_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId])
 )

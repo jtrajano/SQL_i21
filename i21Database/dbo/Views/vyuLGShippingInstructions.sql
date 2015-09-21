@@ -13,6 +13,20 @@ SELECT
 	, CEN.strName as strCustomer
 	, IsNull(SH.intShipmentId, -1) as intShipmentId
 	, SH.intTrackingNumber
+	, SI.strPackingDescription
+	, SI.strOriginPort
+	, SI.strDestinationPort
+	, SI.intNumberOfContainers
+	, SI.intContainerTypeId
+	, SI.intShippingLineEntityId
+	, SI.strMarks
+	, SI.dtmETAPOL
+	, SI.dtmETAPOD
+	, SI.dtmETSPOL
+	, SI.intForwardingAgentEntityId
+	, SI.strVessel
+	, SI.strVoyageNumber
+
 FROM tblLGShippingInstruction SI
 LEFT JOIN tblLGShipment SH ON SH.intShippingInstructionId = SI.intShippingInstructionId
 LEFT JOIN tblEntity VEN ON VEN.intEntityId = SI.intVendorEntityId

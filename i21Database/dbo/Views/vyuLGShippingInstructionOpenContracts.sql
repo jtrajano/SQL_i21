@@ -14,6 +14,22 @@ AS
 			CD.intEntityId,
 			CD.strContractNumber,
 			CD.dtmContractDate,
-			CD.ysnAllowedToShow
+			CD.ysnAllowedToShow,
+			CD.intLoadingPortId,
+			CD.intDestinationPortId,
+			CD.intDestinationCityId,
+			LoadingPort.strCity as strOriginPort,
+			DestPort.strCity as strDestinationPort,
+			DestCity.strCity as strDestinationCity,
+			CD.strPackingDescription,
+			CD.intShippingLineId as intShippingLineEntityId,
+			CD.intNumberOfContainers,
+			CD.intContainerTypeId,
+			CD.strVessel
+
 	FROM vyuCTContractDetailView 		CD
+	LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
+	LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
+	LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId
 	WHERE (CD.dblDetailQuantity - IsNull((select sum (SI.dblQuantity) from tblLGShippingInstructionContractQty SI Group By SI.intContractDetailId Having CD.intContractDetailId = SI.intContractDetailId), 0)) > 0	
+
