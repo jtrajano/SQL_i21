@@ -19,6 +19,7 @@ Ext.define('Inventory.store.InventoryValuation', {
             batchActions: true,
             remoteFilter: true,
             remoteSort: true,
+            groupField: 'strItemNo',
             proxy: {
                 type: 'rest',
                 api: {

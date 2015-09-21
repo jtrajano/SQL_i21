@@ -527,6 +527,7 @@ namespace iRely.Inventory.Model
     public class vyuICGetInventoryValuation
     {
         public int intInventoryValuationKeyId { get; set; }
+        public int intInventoryTransactionId { get; set; }
         public int intItemId { get; set; }
         public string strItemNo { get; set; }
         public string strItemDescription { get; set; }
@@ -543,7 +544,9 @@ namespace iRely.Inventory.Model
         public string strTransactionId { get; set; }
         public decimal? dblQuantity { get; set; }
         public decimal? dblCost { get; set; }
+        public decimal? dblBeginningBalance { get; set; }
         public decimal? dblValue { get; set; }
+        public decimal? dblRunningBalance { get; set; }
         public string strBatchId { get; set; }
     }
 }

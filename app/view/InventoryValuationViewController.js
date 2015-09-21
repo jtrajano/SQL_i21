@@ -11,6 +11,7 @@ Ext.define('Inventory.view.InventoryValuationViewController', {
             singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
                 grid: win.down('grid'),
                 title: 'View Inventory Valuation',
+                position: 'none',
                 columns: [
                     {
                         xtype: 'gridcolumn',
@@ -84,9 +85,25 @@ Ext.define('Inventory.view.InventoryValuationViewController', {
                     {
                         xtype: 'numbercolumn',
                         summaryType: 'sum',
+                        itemId: 'colBeginningBalance',
+                        dataIndex: 'dblBeginningBalance',
+                        text: 'Beginning Balance',
+                        width: 150
+                    },
+                    {
+                        xtype: 'numbercolumn',
+                        summaryType: 'sum',
                         itemId: 'colValue',
                         dataIndex: 'dblValue',
                         text: 'Value'
+                    },
+                    {
+                        xtype: 'numbercolumn',
+                        summaryType: 'sum',
+                        itemId: 'colRunningBalance',
+                        dataIndex: 'dblRunningBalance',
+                        text: 'Running Balance',
+                        width: 150
                     },
                     {
                         xtype: 'gridcolumn',
@@ -109,8 +126,17 @@ Ext.define('Inventory.view.InventoryValuationViewController', {
     show : function() {
         "use strict";
         var me = this;
-        me.getView().show();
+        var win = me.getView();
+        var grid = win.down('grid');
+        win.show();
         var context = me.setupContext();
-        context.data.load();
+        var gridStore = context.data.store;
+        context.data.load({
+//            callback: function(records, operation, success){
+//                if (success){
+//                    gridStore.group("strItemNo");
+//                }
+//            }
+        });
     }
 });

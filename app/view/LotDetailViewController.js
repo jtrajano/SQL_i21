@@ -11,6 +11,7 @@ Ext.define('Inventory.view.LotDetailViewController', {
             singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
                 grid: win.down('grid'),
                 title: 'View Lot Details',
+                position: 'none',
                 columns: [
                     {
                         xtype: 'gridcolumn',

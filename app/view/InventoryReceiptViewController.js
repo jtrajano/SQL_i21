@@ -1861,7 +1861,24 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         current.set('intUnitMeasureId', po.get('intItemUOMId'));
                         current.set('strUnitMeasure', po.get('strItemUOM'));
                         current.set('strOrderUOM', po.get('strItemUOM'));
-                        current.set('dblUnitCost', po.get('dblCashPrice'));
+
+                        if(po.get('strPricingType') === 'Index'){
+                            CTFunctions.getIndexPrice(receipt.get('intEntityVendorId'),
+                                receipt.get('intShipFromId'),
+                                po.get('intRackPriceSupplyPointId'),
+                                po.get('intSupplyPointId'),
+                                po.get('strIndexType'),
+                                receipt.get('dtmDate'),
+                                po.get('dblAdjustment'),
+                                po.get('intItemId'),
+                                function(response){
+                                    contractPrice = response.data;
+                                    current.set('dblUnitCost', contractPrice);
+                                });
+                        }else {
+                            current.set('dblUnitCost', po.get('dblCashPrice'));
+                        }
+
                         current.set('dblLineTotal', po.get('dblTotal'));
                         current.set('strLotTracking', po.get('strLotTracking'));
                         current.set('intCommodityId', po.get('intCommodityId'));

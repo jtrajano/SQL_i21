@@ -59,7 +59,7 @@ namespace iRely.Inventory.Model
         public DateTime? dtmManufacturedDate { get; set; }
         public bool? ysnReleasedToWarehouse { get; set; }
         public bool? ysnProduced { get; set; }
-        public bool? ysnInCustody { get; set; }
+        public bool? ysnStorage { get; set; }
         public int? intGradeId { get; set; }
         public string strGrade { get; set; }
         public DateTime? dtmDateCreated { get; set; }
