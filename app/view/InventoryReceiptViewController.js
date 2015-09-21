@@ -2224,7 +2224,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         dataIndex: 'strStorageLocationName',
                         dataType: 'string',
                         hidden: true
-                    }
+                    },
+                    {
+                        dataIndex: 'strContractComments',
+                        dataType: 'string',
+                        text: 'Contract Comments',
+                        width: 150
+                    },
                 ],
                 itemId: 'cboOrderNumber',
                 displayField: 'strContractNumber',
