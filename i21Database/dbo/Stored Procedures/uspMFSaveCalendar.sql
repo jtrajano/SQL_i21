@@ -212,6 +212,20 @@ BEGIN Try
 				,@intConcurrencyId
 
 			SELECT @intCalendarDetailId = Scope_identity()
+
+			INSERT INTO dbo.tblMFScheduleCalendarMachineDetail (
+				intCalendarDetailId
+				,intMachineId
+				)
+			SELECT @intCalendarDetailId
+				,intMachineId
+			FROM OPENXML(@idoc, 'root/Calendars/Calendar/Machines/Machine', 2) WITH (
+					intMachineId INT
+					,intShiftId INT
+					,dtmCalendarDate DATETIME
+					)
+			WHERE dtmCalendarDate=@dtmCalendarDate AND intShiftId=@intShiftId
+
 		END
 		ELSE
 		BEGIN
@@ -226,21 +240,31 @@ BEGIN Try
 			WHERE intCalendarDetailId = @intCalendarDetailId
 
 			DELETE
-			FROM tblMFScheduleCalendarMachineDetail
+			FROM dbo.tblMFScheduleCalendarMachineDetail
 			WHERE intCalendarDetailId = @intCalendarDetailId
+			AND NOT EXISTS(SELECT *
+			FROM OPENXML(@idoc, 'root/Calendars/Calendar/Machines/Machine', 2) WITH (
+					intMachineId INT
+					,intShiftId INT
+					,dtmCalendarDate DATETIME
+					)
+			WHERE dtmCalendarDate=@dtmCalendarDate AND intShiftId=@intShiftId AND intMachineId=tblMFScheduleCalendarMachineDetail.intMachineId)
+
+			INSERT INTO dbo.tblMFScheduleCalendarMachineDetail (
+				intCalendarDetailId
+				,intMachineId
+				)
+			SELECT @intCalendarDetailId,intMachineId
+			FROM OPENXML(@idoc, 'root/Calendars/Calendar/Machines/Machine', 2) WITH (
+					intMachineId INT
+					,intShiftId INT
+					,dtmCalendarDate DATETIME
+					)
+			WHERE dtmCalendarDate=@dtmCalendarDate AND intShiftId=@intShiftId 
+			AND NOT EXISTS(SELECT *FROM tblMFScheduleCalendarMachineDetail MD WHERE MD.intCalendarDetailId=@intCalendarDetailId AND MD.intMachineId=intMachineId)
 		END
 
-		INSERT INTO tblMFScheduleCalendarMachineDetail (
-			intCalendarDetailId
-			,intMachineId
-			)
-		SELECT @intCalendarDetailId
-			,intMachineId
-		FROM OPENXML(@idoc, 'root/Calendars/Calendar/Machines/Machine', 2) WITH (
-				intMachineId INT
-				,intShiftId INT
-				,dtmCalendarDate DATETIME
-				)
+		
 
 		SELECT @intRecordId = Min(intRecordId)
 		FROM @tblScheduleCalendar
