@@ -2435,6 +2435,7 @@
     <Build Include="dbo\Tables\tblWHDefaultLocation.sql" />
     <Build Include="dbo\Tables\tblSMCommentWatcher.sql" />
     <Build Include="dbo\Tables\tblARCommissionPlan.sql" />
+    <Build Include="dbo\Views\vyuCTContractCostView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
