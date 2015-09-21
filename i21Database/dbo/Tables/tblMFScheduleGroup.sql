@@ -1,6 +1,6 @@
 ﻿
 CREATE TABLE tblMFScheduleGroup (
-	intScheduleGroupId INT NOT NULL
+	intScheduleGroupId INT NOT NULL identity(1, 1)
 	,strGroupName NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 	,strDescription NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 	,intScheduleRuleId INT NOT NULL

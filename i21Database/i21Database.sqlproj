@@ -2437,6 +2437,7 @@
     <Build Include="dbo\Tables\tblARCommissionPlan.sql" />
     <Build Include="dbo\Views\vyuCTContractCostView.sql" />
     <Build Include="dbo\Views\vyuCTContractDocumentView.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetScheduleDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
