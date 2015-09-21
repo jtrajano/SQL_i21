@@ -128,14 +128,14 @@ BEGIN
 			FROM dbo.fnSplitString(@strShiftId, ',')
 			)
 
-	IF EXISTS (
-			SELECT *
-			FROM #tblMFCalendarDetail
-			)
-	BEGIN
-		SELECT @dtmFromDate = MAX(dtmCalendarDate) + 1
-		FROM tblMFScheduleCalendarDetail
-	END
+	--IF EXISTS (
+	--		SELECT *
+	--		FROM #tblMFCalendarDetail
+	--		)
+	--BEGIN
+	--	SELECT @dtmFromDate = MAX(dtmCalendarDate) + 1
+	--	FROM tblMFScheduleCalendarDetail
+	--END
 
 	WHILE @dtmToDate > @dtmFromDate
 	BEGIN
@@ -167,12 +167,13 @@ BEGIN
 					END
 				)
 			,0
-		FROM dbo.tblMFShift
+		FROM dbo.tblMFShift S
 		WHERE intLocationId = @intLocationId
 			AND intShiftId IN (
 				SELECT Item
 				FROM dbo.fnSplitString(@strShiftId, ',')
 				)
+		AND NOT EXISTS (SELECT *FROM #tblMFCalendarDetail CD WHERE CD.dtmCalendarDate=@dtmFromDate AND CD.intShiftId=S.intShiftId)
 
 		SELECT @dtmFromDate = @dtmFromDate + 1
 	END
@@ -217,6 +218,7 @@ BEGIN
 		PIVOT(Count(DT.intMachineId) FOR strName IN (' + @strMachineName + ')) pvt'
 
 		EXEC (@SQL)
+		
 	END
 	ELSE
 	BEGIN
@@ -268,4 +270,24 @@ BEGIN
 			,@tblMFMachine M
 		WHERE S.intShiftId = CD.intShiftId
 	END
+
+	SELECT CD.dtmCalendarDate
+			,CD.intShiftId
+			,S.strShiftName
+			,M.intMachineId
+			,M.strName
+			,MC.intManufacturingCellId 
+			,MC.strCellName 
+		FROM tblMFScheduleCalendar C
+		JOIN tblMFScheduleCalendarDetail CD ON C.intCalendarId = CD.intCalendarId
+			AND C.intCalendarId  <> @intCalendarId
+		JOIN dbo.tblMFShift S ON S.intShiftId = CD.intShiftId
+		JOIN dbo.tblMFScheduleCalendarMachineDetail MD ON MD.intCalendarDetailId = CD.intCalendarDetailId
+		JOIN dbo.tblMFMachine M ON M.intMachineId = MD.intMachineId
+		JOIN dbo.tblMFManufacturingCell MC on MC.intManufacturingCellId =C.intManufacturingCellId 
+		WHERE CD.dtmCalendarDate BETWEEN @dtmFromDate AND @dtmToDate 
+		AND M.intMachineId IN (
+			SELECT Item
+			FROM dbo.fnSplitString(@strMachineId, ',')
+			)
 END
