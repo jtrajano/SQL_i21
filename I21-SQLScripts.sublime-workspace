@@ -1,0 +1,884 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"pro",
+				"prototype"
+			],
+			[
+				"i21",
+				"i21_systemmanager"
+			],
+			[
+				"win",
+				"WindowManager"
+			],
+			[
+				"window",
+				"WindowManager"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "README.md",
+			"settings":
+			{
+				"buffer_size": 59,
+				"line_ending": "Windows"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 321.0,
+		"last_filter": "git custom",
+		"selected_items":
+		[
+			[
+				"git custom",
+				"Git: Custom Command"
+			],
+			[
+				"git pull c",
+				"Git: Pull Current Branch"
+			],
+			[
+				"git pull",
+				"Git: Pull"
+			],
+			[
+				"git push c",
+				"Git: Push Current Branch"
+			],
+			[
+				"git pull u",
+				"Git: Pull Using Rebase"
+			],
+			[
+				"stash drop",
+				"Git: Stash Drop"
+			],
+			[
+				"git stash changes",
+				"Git: Stash Changes"
+			],
+			[
+				"pull",
+				"Git: Pull"
+			],
+			[
+				"git pull current",
+				"Git: Pull Current Branch"
+			],
+			[
+				"git change",
+				"Git: Change Branch"
+			],
+			[
+				"git push",
+				"Git: Push"
+			],
+			[
+				"git merge",
+				"Git: Merge Branch"
+			],
+			[
+				"git checkout",
+				"Git (SideBarGit): Checkout to…"
+			],
+			[
+				"git push current",
+				"Git: Push Current Branch"
+			],
+			[
+				"git quick",
+				"Git: Quick Commit"
+			],
+			[
+				"git log",
+				"Git: Log All"
+			],
+			[
+				"git status",
+				"Git (SideBarGit): Status"
+			],
+			[
+				"git commit",
+				"Git: Commit"
+			],
+			[
+				"git add",
+				"Git: Add..."
+			],
+			[
+				"git stash pop",
+				"Git: Stash Pop"
+			],
+			[
+				"git stash drop",
+				"Git: Stash Drop"
+			],
+			[
+				"git stash",
+				"Git: Stash Apply"
+			],
+			[
+				"git stash apply",
+				"Git: Stash Apply"
+			],
+			[
+				"git merge branch",
+				"Git: Merge Branch"
+			],
+			[
+				"gitgutter",
+				"GitGutter: Compare Against Branch"
+			],
+			[
+				"pcremove",
+				"Package Control: Remove Repository"
+			],
+			[
+				"pcadd",
+				"Package Control: Add Repository"
+			],
+			[
+				"git push curr",
+				"Git: Push Current Branch"
+			],
+			[
+				"git graph",
+				"Git: Graph All"
+			],
+			[
+				"git",
+				"Git: Push"
+			],
+			[
+				"git push current branch",
+				"Git: Push Current Branch"
+			],
+			[
+				"quick",
+				"Git: Quick Commit"
+			],
+			[
+				"git new branch",
+				"Git: New Branch"
+			],
+			[
+				"pcrem",
+				"Package Control: Remove Repository"
+			],
+			[
+				"git fet",
+				"Git: Fetch"
+			],
+			[
+				"git init",
+				"Git: Init"
+			],
+			[
+				"package control: remove",
+				"Package Control: Remove Repository"
+			],
+			[
+				"git fetch",
+				"Git: Fetch"
+			],
+			[
+				"package control: ",
+				"Package Control: Upgrade/Overwrite All Packages"
+			],
+			[
+				"package control: repo",
+				"Package Control: Remove Repository"
+			],
+			[
+				"pclist",
+				"Package Control: List Packages"
+			],
+			[
+				"pc",
+				"Package Control: Add Repository"
+			],
+			[
+				"pcinstall",
+				"Package Control: Install Package"
+			],
+			[
+				"themr",
+				"Themr: Add current theme to favorites"
+			],
+			[
+				"package control install",
+				"Package Control: Install Package"
+			],
+			[
+				"package control",
+				"Package Control: Add Repository"
+			],
+			[
+				"pcremove package",
+				"Package Control: Remove Package"
+			]
+		],
+		"width": 646.0
+	},
+	"console":
+	{
+		"height": 339.0,
+		"history":
+		[
+			"git",
+			"web.config",
+			"D:>",
+			"cd",
+			"ls",
+			"import urllib.request,os,hashlib; h = 'eb2297e1a458f27d836c04bb0cbaf282' + 'd0e7a3098092775ccb37ca9d6b2e4b7d'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/C/Users/IOcampo/Projects/i21/i21_sqlscripts"
+	],
+	"file_history":
+	[
+		"/C/Users/IOcampo/Projects/i21/i21_sqlscripts/.gitignore",
+		"/C/Users/IOcampo/Projects/i21/i21_sqlscripts/README.md",
+		"/C/inetpub/wwwroot/1520-258/resources/js/Offline.js",
+		"/C/inetpub/wwwroot/1520-258/i21/index.html",
+		"/C/inetpub/wwwroot/1520-258/resources/js/hubspot/offline-0.7.11.min.js",
+		"/C/inetpub/wwwroot/1520-258/resources/js/hubspot/offline-0.7.11.js",
+		"/C/Users/IOcampo/Projects/i21/i21_systemmanager/index.html",
+		"/C/inetpub/wwwroot/1520-258/GlobalComponentEngine/app.js",
+		"/C/Users/IOcampo/Projects/i21/i21_globalcomponentengine/app.js",
+		"/C/inetpub/wwwroot/1520-258/i21/package.json",
+		"/C/Users/IOcampo/Projects/i21/i21_systemmanager/karma.conf.js",
+		"/C/Users/IOcampo/Projects/i21/i21_systemmanager/package.json",
+		"/C/Users/IOcampo/Projects/i21/i21_systemmanager/app/view/CompanyPreferenceViewController.js",
+		"/C/inetpub/wwwroot/1520-258/i21/app.js",
+		"/C/Users/IOcampo/Projects/i21/i21_systemmanager/server/iRely.SystemManager/index.html",
+		"/C/Users/IOcampo/Projects/i21/i21_systemmanager/server/iRely.SystemManager/app.js",
+		"/C/Users/IOcampo/Projects/i21/i21_systemmanager/app.js",
+		"/C/Users/IOcampo/Projects/i21/node_modules/grunt/node_modules/grunt-legacy-util/test/index.js",
+		"/C/Users/IOcampo/Projects/i21/i21_generalledger/app/controller/AccountRange.js",
+		"/C/Users/IOcampo/Projects/i21/i21_globalcomponentengine/irely/Functions.js",
+		"/C/Users/IOcampo/Projects/i21/package.json",
+		"/C/Users/IOcampo/AppData/Roaming/Sublime Text 3/Packages/User/Default (Windows).sublime-keymap",
+		"/C/Users/IOcampo/AppData/Roaming/Sublime Text 3/Packages/Default/Default (Windows).sublime-keymap",
+		"/C/Users/IOcampo/AppData/Roaming/Sublime Text 3/Packages/Default/Preferences.sublime-settings",
+		"/C/Users/IOcampo/Projects/i21/node_modules/grunt-sync/tasks/sync.js",
+		"/C/Users/IOcampo/Projects/i21/test/Gruntfile.js",
+		"/C/Users/IOcampo/Projects/i21/i21.sublime-project",
+		"/C/Users/IOcampo/Projects/i21/test/sample",
+		"/C/Users/IOcampo/Projects/i21/test",
+		"/C/Users/IOcampo/Projects/i21/Gruntfile.js",
+		"/C/Users/IOcampo/Projects/i21/i21_systemmanager/app/controller/Router.js",
+		"/C/Users/IOcampo/Projects/i21/test/GlobalComponentEngine/irely/Functions.js",
+		"/C/Users/IOcampo/Projects/i21/test/i21/app/controller/Router.js",
+		"/C/Users/IOcampo/Projects/i21/i21_systemmanager/app/controller/MainViewPort.js",
+		"/C/Users/IOcampo/Projects/i21/test/i21/app/controller/MainViewPort.js",
+		"/C/Users/IOcampo/Projects/i21/test/i21app/controller/Router.js",
+		"/C/Users/IOcampo/Projects/i21/testi21app/controller/Router.js",
+		"/C/Users/IOcampo/Projects/i21/test/i21",
+		"/C/Users/IOcampo/Projects/i21/test/i21/i21_systemmanager/app/controller/Router.js",
+		"/C/Users/IOcampo/Projects/i21/i21_globalcomponentengine/override/Ext.window.Window.js",
+		"/C/inetpub/wwwroot/1520-231/web.config",
+		"/C/Users/IOcampo/Projects/i21/test/GlobalComponentEngine/override/Ext.window.Window.js",
+		"/C/inetpub/wwwroot/1520-228/i21/app.js",
+		"/C/Users/IOcampo/Projects/i21/test/app/controller/Router.js",
+		"/C/i21/i21_systemmanager/app/controller/Router.js",
+		"/C/inetpub/wwwroot/1520-228/i21/app/controller/Router.js",
+		"/C/inetpub/wwwroot/1520-228/i21/app/controller/Routing.js",
+		"/C/Users/IOcampo/Projects/i21/i21_systemmanager/.gitignore",
+		"/C/Users/IOcampo/Projects/i21/i21_systemmanager/.git/config",
+		"/C/Users/IOcampo/.bashrc",
+		"/C/Users/IOcampo/.gitconfig",
+		"/C/Users/IOcampo/Documents/Bitbucket/ian_ocampo/anothertest/readme.txt",
+		"/C/Users/IOcampo/Documents/Bitbucket/ian_ocampo/anothertest/index.html",
+		"/C/Users/IOcampo/Documents/Bitbucket/ian_ocampo/anothertest/readhim.txt",
+		"/C/Users/IOcampo/Documents/Bitbucket/ian_ocampo/anothertest/readher.txt",
+		"/C/Users/IOcampo/Documents/Bitbucket/ian_ocampo/anothertest/.git/config",
+		"/C/Users/IOcampo/Documents/Bitbucket/ian_ocampo/test/.git/config",
+		"/C/Users/IOcampo/.ssh/environment",
+		"/C/Users/IOcampo/.ssh/id_rsa",
+		"/C/Users/IOcampo/.ssh/known_hosts",
+		"/C/Users/IOcampo/AppData/Roaming/Sublime Text 3/Packages/User/Preferences.sublime-settings",
+		"/C/Users/IOcampo/AppData/Roaming/Sublime Text 3/Packages/User/Git.sublime-settings",
+		"/C/Users/IOcampo/AppData/Roaming/Sublime Text 3/Packages/Git/Git.sublime-settings",
+		"/C/Program Files/Sublime Text 3/sublime_text.exe",
+		"/C/Program Files (x86)/Git/cmd/git.exe",
+		"/C/Users/IOcampo/.ssh/id_rsa.pub",
+		"/C/Users/IOcampo/.ssh/config.CONFIG",
+		"/C/Users/IOcampo/.config/git/gitk",
+		"/C/Users/IOcampo/Documents/gitignore_global.txt",
+		"/C/Users/IOcampo/Documents/hgignore_global.txt",
+		"/C/Users/IOcampo/Documents/Bitbucket/ian_ocampo/test-project/test-project.sublime-workspace",
+		"/C/Users/IOcampo/Documents/Bitbucket/ian_ocampo/test-project/test-project.sublime-project",
+		"/C/Users/IOcampo/Documents/Bitbucket/ian_ocampo/test-project/fdsf",
+		"/C/inetpub/wwwroot/1520Build/GlobalComponentEngine/override/Ext.window.Window.js",
+		"/C/inetpub/wwwroot/1520Build/GlobalComponentEngine/irely/Functions.js",
+		"/C/inetpub/wwwroot/1520Build/i21/app/controller/Router.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/TicketViewController.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/test-ui/TestEngine.js",
+		"/C/inetpub/wwwroot/1520Build/EntityManagement/app/view/VendorViewController.js",
+		"/C/inetpub/wwwroot/1520Build/AccountsPayable/app/view/VendorViewController.js",
+		"/C/inetpub/wwwroot/1520Build/AccountsPayable/Scripts/jquery-ui-1.8.24.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/Ticket.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/TicketTypeViewController.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/TicketStatusViewController.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/TicketPriorityViewController.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/TicketListViewController.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/TicketJobCodeViewController.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/TicketGroupViewController.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/SendTestEmailViewController.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/SearchDetailsViewController.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/ProjectViewController.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/ProjectListViewController.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/ProductViewController.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/PrintReportSelectionViewController.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/MilestoneViewController.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/JIRAIssueViewController.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/JiraCreateIssueViewController.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/ExportHoursWorkedViewController.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/EditAnnouncementViewController.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/AssignTicketViewController.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/AnnouncementViewController.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/AnnouncementTypeViewController.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/controller/TicketsReported.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/controller/TicketAssigned.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/controller/Ticket.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/controller/OpenTicket.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/controller/CreateTicket.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/controller/CPTicketsReported.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/controller/CPTickets.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/controller/CPTicketAssigned.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/controller/CPOpenTicket.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/controller/Announcement.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/Scripts/jquery-ui-1.8.20.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/Scripts/jquery-1.7.1.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/HelpDeskEmailSetupViewController.js",
+		"/C/inetpub/wwwroot/1520Build/HelpDesk/app/view/HelpDeskSettingsViewController.js",
+		"/C/inetpub/wwwroot/1520Build/TankManagement/app/controller/HoldReason.js",
+		"/C/inetpub/wwwroot/1520Build/AccountsPayable/app/controller/PrintChecks.js",
+		"/C/inetpub/wwwroot/1520Build/GeneralLedger/app/controller/GLUtilities.js",
+		"/C/inetpub/wwwroot/1520Build/AccountsPayable/app/view/BillBatchViewController.js",
+		"/C/inetpub/wwwroot/1520Build/AccountsPayable/app/view/BillViewController.js",
+		"/C/inetpub/wwwroot/1520Build/AccountsPayable/app/view/ImportAPInvoiceViewController.js",
+		"/C/inetpub/wwwroot/1520Build/AccountsPayable/app/view/BatchPostingViewController.js",
+		"/C/inetpub/wwwroot/1520Build/AccountsPayable/app/view/BatchPostingResultViewController.js",
+		"/C/inetpub/wwwroot/1520Build/AccountsPayable/app/controller/VoidCheckOptions.js",
+		"/C/inetpub/wwwroot/1520Build/GlobalComponentEngine/app/controller/Routing.js",
+		"/C/inetpub/wwwroot/1520Build/CardFueling/app/common/methods/ScreenManager.js",
+		"/C/inetpub/wwwroot/1520Build/AccountsPayable/test-ui/TestEngine.js"
+	],
+	"find":
+	{
+		"height": 35.0
+	},
+	"find_in_files":
+	{
+		"height": 141.0,
+		"where_history":
+		[
+			"Message.js",
+			"",
+			"TicketViewController",
+			"ticket"
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"State",
+			"state",
+			"State",
+			"state",
+			"prototype.setStatus",
+			"test",
+			"i21ConState",
+			"status",
+			"state",
+			"i21ConState",
+			"state",
+			"status",
+			"testState",
+			"fn",
+			"status",
+			"undefined",
+			"status",
+			"undefined",
+			"i21ConState",
+			"('",
+			"(",
+			"status",
+			"Online",
+			"(",
+			"state",
+			"Person",
+			"i21ConState",
+			"Online",
+			"onLine",
+			"Online",
+			"online",
+			"Online",
+			"offline",
+			",",
+			"online",
+			"offline",
+			"(",
+			"status",
+			"state",
+			"        ",
+			"offline",
+			",",
+			"offline",
+			"(",
+			"online",
+			"=",
+			"()",
+			"offline",
+			"online",
+			"false",
+			"status",
+			"i21Status",
+			",",
+			"div",
+			"=",
+			".js",
+			"',",
+			",",
+			"i21",
+			"i21_systemmanager",
+			"js",
+			"i21_globalcomponentengine",
+			"GlobalComponentEngine",
+			"/",
+			"!=",
+			"=",
+			"select",
+			"src",
+			"'",
+			"/",
+			"src",
+			"dest",
+			"src",
+			"grunt.event.on('watch', function(action, filepath, target) {\n        var cfgkey = ['sync', target, 'files'];\n\n        grunt.config.set(cfgkey, grunt.config.get(cfgkey).map(function(file) {\n            file.src = filepath;\n\n            return file;\n        }));\n    })",
+			"i21",
+			"test",
+			"copy",
+			"cfgkey",
+			"        grunt.config.set(cfgkey, grunt.config.get(cfgkey).map(function(file) {\n            file.src = filepath;\n            // file.dest = config.dest + filepath.replace(/\\w+/, target).replace(/\\\\/g, '/');\n\n            return file;\n        }));",
+			"target",
+			"filepath",
+			"copy",
+			"devTmpl",
+			"copy",
+			"filepath",
+			"action",
+			"watch",
+			"main",
+			"sync",
+			"newDest",
+			"false",
+			"test",
+			"i21_systemmanager",
+			"development",
+			"copy",
+			"true",
+			"i21_systemmanager",
+			"false",
+			"sample",
+			"bin",
+			"'**',",
+			"i21_systemmanager",
+			"src",
+			"test",
+			"bin",
+			"'**',",
+			"filepath",
+			"action",
+			"i21_project",
+			"test",
+			"i21_project",
+			"' + target + '",
+			"src",
+			"newSrc",
+			"target",
+			"teln(",
+			"newSrc",
+			"newPath",
+			"Path",
+			"filepath",
+			"sync",
+			"src",
+			"i21_systemmanager",
+			"main",
+			"\\",
+			":\\",
+			"\\",
+			"app"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"showLogin"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "README.md",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 59,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								59,
+								59
+							]
+						],
+						"settings":
+						{
+							"BracketHighlighterBusy": false,
+							"auto_complete": false,
+							"bh_regions":
+							[
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content"
+							],
+							"syntax": "Packages/MarkdownEditing/Markdown.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 35.0
+	},
+	"input":
+	{
+		"height": 70.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": false,
+	"output.find_results":
+	{
+		"height": 184.0
+	},
+	"output.git":
+	{
+		"height": 665.0
+	},
+	"pinned_build_system": "",
+	"project": "I21-SQLScripts.sublime-project",
+	"replace":
+	{
+		"height": 66.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				".gitig",
+				".gitignore"
+			],
+			[
+				"readme.md",
+				"README.md"
+			],
+			[
+				"index.html",
+				"i21_systemmanager\\index.html"
+			],
+			[
+				"systemmanager/index.html",
+				"i21_systemmanager\\index.html"
+			],
+			[
+				"companypreferenceviewcont.js",
+				"i21_systemmanager\\app\\view\\CompanyPreferenceViewController.js"
+			],
+			[
+				"package",
+				"package.json"
+			],
+			[
+				"package.json",
+				"package.json"
+			],
+			[
+				"grunt",
+				"Gruntfile.js"
+			],
+			[
+				"functions.js",
+				"i21_globalcomponentengine\\irely\\Functions.js"
+			],
+			[
+				"mainviewport.js",
+				"i21_systemmanager\\app\\controller\\MainViewPort.js"
+			],
+			[
+				"router.js",
+				"i21_systemmanager\\app\\controller\\Router.js"
+			],
+			[
+				"globalcomponentengine/window.js",
+				"i21_globalcomponentengine\\override\\Ext.window.Window.js"
+			],
+			[
+				"test/window.js",
+				"test\\GlobalComponentEngine\\override\\Ext.window.Window.js"
+			],
+			[
+				"test/functions.js",
+				"test\\GlobalComponentEngine\\irely\\Functions.js"
+			],
+			[
+				"test/router.js",
+				"test\\i21\\app\\controller\\Router.js"
+			],
+			[
+				"router",
+				"app\\controller\\Router.js"
+			],
+			[
+				"readme",
+				"readme.txt"
+			],
+			[
+				"index",
+				"index.html"
+			],
+			[
+				"read",
+				"readme.txt"
+			],
+			[
+				"helpdesk/ticketviewcontroller.js",
+				"HelpDesk\\app\\view\\TicketViewController.js"
+			],
+			[
+				"helpdesk/ticket.js",
+				"HelpDesk\\app\\view\\Ticket.js"
+			],
+			[
+				"i21/router.js",
+				"i21\\app\\controller\\Router.js"
+			],
+			[
+				"globalcomponentengine/functions.js",
+				"GlobalComponentEngine\\irely\\Functions.js"
+			],
+			[
+				"globalcomponentengine.js",
+				"GlobalComponentEngine\\app\\controller\\GlobalComponentEngine.js"
+			],
+			[
+				"i21/router",
+				"i21\\app\\controller\\Router.js"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"last_filter": "wroot",
+		"selected_items":
+		[
+			[
+				"wroot",
+				"C:\\inetpub\\wwwroot\\wroot.sublime-project"
+			],
+			[
+				"global",
+				"C:\\Users\\IOcampo\\Projects\\i21\\i21_globalcomponentengine\\i21-GlobalComponentEngine.sublime-project"
+			],
+			[
+				"",
+				"C:\\Users\\IOcampo\\Projects\\i21\\i21_entity\\i21-Entity.sublime-project"
+			]
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 370.0,
+		"last_filter": "require",
+		"selected_items":
+		[
+			[
+				"require",
+				"require"
+			],
+			[
+				"requires",
+				"requires"
+			],
+			[
+				"show",
+				"show"
+			],
+			[
+				"showScreen",
+				"showScreen"
+			],
+			[
+				"openScreen",
+				"openScreen"
+			],
+			[
+				"",
+				"$openScreen"
+			],
+			[
+				"showLogin",
+				"showLogin"
+			],
+			[
+				"activate",
+				"activate"
+			]
+		],
+		"width": 806.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 311.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}
