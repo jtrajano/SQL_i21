@@ -49,7 +49,7 @@
 	[dtmLastUpdateOn] DATETIME,
 
 	CONSTRAINT [PK_tblWHOrderLineItem_intOrderLineItemId]  PRIMARY KEY ([intOrderLineItemId]),	
-	CONSTRAINT [FK_tblWHOrderLineItem_tblWHOrderHeader_intOrderHeaderId] FOREIGN KEY ([intOrderHeaderId]) REFERENCES [tblWHOrderHeader]([intOrderHeaderId]), 
+	CONSTRAINT [FK_tblWHOrderLineItem_tblWHOrderHeader_intOrderHeaderId] FOREIGN KEY ([intOrderHeaderId]) REFERENCES [tblWHOrderHeader]([intOrderHeaderId]) ON DELETE CASCADE, 
 	CONSTRAINT [FK_tblWHOrderLineItem_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]), 
 
 )

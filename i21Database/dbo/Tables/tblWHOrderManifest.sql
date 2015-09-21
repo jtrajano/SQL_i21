@@ -11,7 +11,7 @@
 	[dtmLastUpdateOn] DATETIME DEFAULT GETDATE(),
 
 	CONSTRAINT [PK_tblWHOrderManifest_intOrderManifestId]  PRIMARY KEY ([intOrderManifestId]),	
-	CONSTRAINT [FK_tblWHOrderManifest_tblWHOrderLineItem_intOrderLineItemId] FOREIGN KEY ([intOrderLineItemId]) REFERENCES [tblWHOrderLineItem]([intOrderLineItemId]),
+	CONSTRAINT [FK_tblWHOrderManifest_tblWHOrderLineItem_intOrderLineItemId] FOREIGN KEY ([intOrderLineItemId]) REFERENCES [tblWHOrderLineItem]([intOrderLineItemId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblWHOrderManifest_tblWHSKU_intSKUId] FOREIGN KEY ([intSKUId]) REFERENCES [tblWHSKU]([intSKUId]),
 
 )
