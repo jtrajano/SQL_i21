@@ -594,6 +594,7 @@ namespace iRely.Inventory.Model
             // Table & Column Mappings
             this.ToTable("vyuICGetInventoryValuation");
             this.Property(t => t.intInventoryValuationKeyId).HasColumnName("intInventoryValuationKeyId");
+            this.Property(t => t.intInventoryTransactionId).HasColumnName("intInventoryTransactionId");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
             this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
@@ -610,7 +611,9 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strTransactionId).HasColumnName("strTransactionId");
             this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(18, 6);
             this.Property(t => t.dblCost).HasColumnName("dblCost").HasPrecision(18, 6);
+            this.Property(t => t.dblBeginningBalance).HasColumnName("dblBeginningBalance").HasPrecision(18, 6);
             this.Property(t => t.dblValue).HasColumnName("dblValue").HasPrecision(18, 6);
+            this.Property(t => t.dblRunningBalance).HasColumnName("dblRunningBalance").HasPrecision(18, 6);
             this.Property(t => t.strBatchId).HasColumnName("strBatchId");
         }
     }

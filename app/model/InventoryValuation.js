@@ -12,7 +12,9 @@ Ext.define('Inventory.model.InventoryValuation', {
 
     fields: [
         { name: 'intInventoryValuationKeyId', type: 'int' },
+        { name: 'intInventoryTransactionId', type: 'int' },
         { name: 'intItemId', type: 'int' },
+        { name: 'strItemNo', type: 'string' },
         { name: 'strItemDescription', type: 'string' },
         { name: 'intCategoryId', type: 'int', allowNull: true },
         { name: 'strCategroy', type: 'string' },
@@ -27,7 +29,9 @@ Ext.define('Inventory.model.InventoryValuation', {
         { name: 'strTransactionId', type: 'string' },
         { name: 'dblQuantity', type: 'float' },
         { name: 'dblCost', type: 'float' },
+        { name: 'dblBeginningBalance', type: 'float' },
         { name: 'dblValue', type: 'float' },
-        { name: 'strBatchId', type: 'string' },
+        { name: 'dblRunningBalance', type: 'float' },
+        { name: 'strBatchId', type: 'string' }
     ]
 });
