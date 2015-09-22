@@ -2440,6 +2440,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetScheduleDetail.sql" />
     <Build Include="dbo\Tables\tblHDProjectAuditLog.sql" />
     <Build Include="dbo\Tables\tblIUPatchDetail.sql" />
+    <Build Include="dbo\Views\vyuHDProjectAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
