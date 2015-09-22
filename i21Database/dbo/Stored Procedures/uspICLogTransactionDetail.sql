@@ -12,7 +12,7 @@ BEGIN
 		IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @TransactionId)
 		BEGIN
 			INSERT INTO tblICTransactionDetailLog(
-				strTransactionType.
+				strTransactionType,
 				intTransactionId, 
 				intTransactionDetailId,
 				intOrderNumberId,
@@ -21,7 +21,7 @@ BEGIN
 				intItemId,
 				intItemUOMId,
 				dblQuantity)
-			SELECT 'Inventory Receipt'.
+			SELECT 'Inventory Receipt',
 				intInventoryReceiptId, 
 				intInventoryReceiptItemId,
 				intOrderId,
@@ -44,7 +44,7 @@ BEGIN
 		IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @TransactionId)
 		BEGIN
 			INSERT INTO tblICTransactionDetailLog(
-				strTransactionType.
+				strTransactionType,
 				intTransactionId, 
 				intTransactionDetailId,
 				intOrderNumberId,
@@ -53,7 +53,7 @@ BEGIN
 				intItemId,
 				intItemUOMId,
 				dblQuantity)
-			SELECT 'Inventory Shipment'.
+			SELECT 'Inventory Shipment',
 				intInventoryShipmentId, 
 				intInventoryShipmentItemId,
 				intOrderId,
