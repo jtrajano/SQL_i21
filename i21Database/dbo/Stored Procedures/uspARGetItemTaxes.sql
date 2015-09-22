@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARGetItemTaxes]
-	@ItemId				INT
+	@ItemId				INT			= NULL
 	,@LocationId		INT	
 	,@CustomerId		INT			= NULL	
 	,@TransactionDate	DATETIME
@@ -55,7 +55,7 @@ AS
 								tblARCustomerTaxingTaxException
 							WHERE
 								intEntityCustomerId = @CustomerId								
-								AND ((intCategoryId = @ItemCategoryId OR intItemId = @ItemId) OR (intTaxClassId = TC.[intTaxClassId] OR intTaxCodeId = TC.[intTaxCodeId] OR (UPPER(LTRIM(RTRIM(ISNULL(strState,'')))) = UPPER(LTRIM(RTRIM(ISNULL(TC.strState,'')))) AND LEN(UPPER(LTRIM(RTRIM(ISNULL(strState,''))))) > 0 ) ))
+								AND ((intCategoryId = @ItemCategoryId OR (intItemId = @ItemId OR ISNULL(@ItemId,0) = 0)) OR (intTaxClassId = TC.[intTaxClassId] OR intTaxCodeId = TC.[intTaxCodeId] OR (UPPER(LTRIM(RTRIM(ISNULL(strState,'')))) = UPPER(LTRIM(RTRIM(ISNULL(TC.strState,'')))) AND LEN(UPPER(LTRIM(RTRIM(ISNULL(strState,''))))) > 0 ) ))
 								AND	CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate, @TransactionDate) AS DATE)
 							ORDER BY
 								dtmStartDate

@@ -77,14 +77,12 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			,@ItemPrice				= tblARInvoiceDetail.[dblPrice]
 			,@QtyShipped			= tblARInvoiceDetail.[dblQtyShipped]
 			,@TaxGroupId			= tblARInvoiceDetail.[intTaxGroupId]
-			,@ItemType				= tblICItem.[strType] 
 		FROM
 			tblARInvoiceDetail
-		INNER JOIN
-			tblICItem
-				ON tblARInvoiceDetail.intItemId = tblICItem.intItemId 
 		WHERE
 			[intInvoiceDetailId] = @InvoiceDetailId
+			
+		SELECT @ItemType = [strType] FROM tblICItem WHERE intItemId = @ItemId
 			
 		IF @TaxGroupId = 0
 			SET @TaxGroupId = NULL
