@@ -2331,6 +2331,7 @@
     <Build Include="dbo\Tables\tblICTransactionDetailLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICLogTransactionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertPostResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddMiscItemToInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

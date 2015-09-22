@@ -311,6 +311,32 @@ IF (@ItemId IS NOT NULL OR @ItemId <> 0)
 			RETURN 0;
 		END CATCH
 	END
+ELSE IF(LEN(RTRIM(LTRIM(@ItemDescription))) > 0)
+	BEGIN
+		BEGIN TRY
+		EXEC [dbo].[uspARAddMiscItemToInvoice]
+			 @InvoiceId						= @NewId	
+			,@NewInvoiceDetailId			= @NewDetailId		OUTPUT 
+			,@ErrorMessage					= @AddDetailError	OUTPUT
+			,@ItemQtyShipped				= @ItemQtyShipped
+			,@ItemPrice						= @ItemPrice
+			,@ItemDescription				= @ItemDescription
+			,@TaxMasterId					= @TaxMasterId
+			,@ItemTaxGroupId				= @ItemTaxGroupId
+			
+			IF LEN(ISNULL(@AddDetailError,'')) > 0
+				BEGIN
+					ROLLBACK TRANSACTION
+					SET @ErrorMessage = @AddDetailError;
+					RETURN 0;
+				END
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRANSACTION
+			SET @ErrorMessage = ERROR_MESSAGE();
+			RETURN 0;
+		END CATCH	
+	END
 
 
 BEGIN TRY
