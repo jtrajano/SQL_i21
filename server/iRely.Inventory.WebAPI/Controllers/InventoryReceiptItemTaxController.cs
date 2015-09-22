@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using System.Threading.Tasks;
 
 using iRely.Inventory.Model;
 using iRely.Inventory.BusinessLayer;
@@ -21,5 +22,11 @@ namespace iRely.Inventory.WebApi
             _bl = bl;
         }
 
+        [HttpGet]
+        [ActionName("GetReceiptItemTaxView")]
+        public async Task<HttpResponseMessage> GetReceiptItemTaxView(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetReceiptItemTaxView(param));
+        }
     }
 }

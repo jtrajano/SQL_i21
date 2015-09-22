@@ -11,6 +11,6 @@ namespace iRely.Inventory.BusinessLayer
 {
     public interface IInventoryReceiptItemTaxBl : IBusinessLayer<tblICInventoryReceiptItemTax>
     {
-
+        Task<SearchResult> GetReceiptItemTaxView(GetParameter param);
     }
 }

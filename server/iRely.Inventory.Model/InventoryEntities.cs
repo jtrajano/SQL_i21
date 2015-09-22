@@ -296,6 +296,7 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetOtherChargesMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryShipmentItemMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptItemMap());
+            modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptItemTaxMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptItemLotMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryReceiptChargeMap());
             modelBuilder.Configurations.Add(new vyuICGetInventoryShipmentChargeMap());

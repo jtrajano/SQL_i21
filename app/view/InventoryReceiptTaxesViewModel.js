@@ -25,6 +25,17 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewModel', {
         taxGroupMaster: {
             type: 'smtaxgroupmasterbuffered'
         }
+    },
+
+    formulas: {
+        checkHiddenItemNo: function (get) {
+            if (this.intInventoryReceiptId) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
     }
 
 });
