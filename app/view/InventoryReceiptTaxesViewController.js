@@ -66,11 +66,11 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
         var me = this;
         me.getView().show();
         var context = me.setupContext();
-        if (config.id) {
-            me.intInventoryReceiptItemId = config.id;
+        if (config.param.id) {
+            me.intInventoryReceiptItemId = config.param.id;
             config.filters = [{
                 column: 'intInventoryReceiptItemId',
-                value: config.id
+                value: config.param.id
             }];
         }
         context.data.load({
