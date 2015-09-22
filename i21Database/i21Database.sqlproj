@@ -2328,6 +2328,7 @@
     <Build Include="dbo\Views\vyuICGetInventoryValuation.sql" />
     <Build Include="dbo\Functions\fnICGetRunningBalance.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertPostResult.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
