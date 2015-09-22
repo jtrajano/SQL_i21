@@ -2438,6 +2438,7 @@
     <Build Include="dbo\Views\vyuCTContractCostView.sql" />
     <Build Include="dbo\Views\vyuCTContractDocumentView.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetScheduleDetail.sql" />
+    <Build Include="dbo\Tables\tblHDProjectAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
