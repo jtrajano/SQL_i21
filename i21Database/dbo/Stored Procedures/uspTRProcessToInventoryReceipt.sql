@@ -1,6 +1,8 @@
 CREATE PROCEDURE [dbo].[uspTRProcessToInventoryReceipt]
 	 @intTransportLoadId AS INT
 	,@intUserId AS INT	
+	,@ysnRecap AS BIT
+	,@ysnPostOrUnPost AS BIT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -315,9 +317,10 @@ BEGIN TRY
 		SELECT	TOP 1 @intEntityId = intEntityId 
 		FROM	dbo.tblSMUserSecurity 
 		WHERE	intUserSecurityID = @intUserId
-
-		EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;			
-		
+		if @ysnRecap = 0
+		BEGIN
+		  EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;			
+		END
 		--EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
 
 		DELETE	FROM #tmpAddItemReceiptResult 
