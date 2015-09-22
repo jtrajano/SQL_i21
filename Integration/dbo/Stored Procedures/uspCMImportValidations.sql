@@ -18,6 +18,7 @@ BEGIN
 		CREATE PROCEDURE [dbo].[uspCMImportValidations]
 			@Invalid_UserId_Found AS BIT OUTPUT
 			,@Invalid_GL_Account_Id_Found AS BIT OUTPUT
+			,@Missing_GL_Account_Id AS BIT OUTPUT
 			,@Invalid_Currency_Id_Found AS BIT OUTPUT
 			,@Invalid_Bank_Account_Found AS BIT OUTPUT
 			,@Missing_Default_Currency AS BIT OUTPUT
@@ -56,6 +57,12 @@ BEGIN
 		WHERE	grp.strAccountGroup <> @CASH_ACCOUNT
 				OR grp.strAccountType <> @ASSET
 
+		-- Check for missing GL Account from tblGLCOACrossReference. (ERR)
+		SELECT @Missing_GL_Account_Id = 1
+		FROM apcbkmst
+		WHERE dbo.fnGetGLAccountIdFromOriginToi21(apcbk_gl_cash) IS NULL
+
+
 		-- Check for bank accounts assigned to multiple GL accounts. 
 		-- They must be moved to different Cash Accounts before import can be done. (ERR)
 		SELECT @Invalid_Bank_Account_Found = 1
@@ -76,6 +83,7 @@ BEGIN
 
 		SELECT	@Invalid_UserId_Found = ISNULL(@Invalid_UserId_Found, 0)
 				,@Invalid_GL_Account_Id_Found = ISNULL(@Invalid_GL_Account_Id_Found, 0)
+				,@Missing_GL_Account_Id = ISNULL(@Missing_GL_Account_Id,0)
 				,@Invalid_Currency_Id_Found = ISNULL(@Invalid_Currency_Id_Found,0)
 				,@Invalid_Bank_Account_Found = ISNULL(@Invalid_Bank_Account_Found, 0)
 				,@Missing_Default_Currency = ISNULL(@Missing_Default_Currency, 1)
