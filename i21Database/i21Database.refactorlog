@@ -4018,4 +4018,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intCompanyLocationId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="7f489012-ee70-4c40-b0d4-3ea8932e53c6" ChangeDateTime="09/22/2015 08:34:45">
+    <Property Name="ElementName" Value="[dbo].[tblPatchDetail].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPatchDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intPatchDetailId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="70426604-0ca4-48cb-8629-f2dd9a846656" ChangeDateTime="09/22/2015 08:36:28">
+    <Property Name="ElementName" Value="[dbo].[tblIUPatchDetail].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblIUPatchDetail]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intPatchDetailId" />
+  </Operation>
 </Operations>
