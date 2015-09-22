@@ -1,6 +1,8 @@
 CREATE PROCEDURE [dbo].[uspTRPosting]
 	 @intTransportLoadId AS INT
 	,@intUserId AS INT	
+	,@ysnRecap AS BIT
+	,@ysnPostOrUnPost AS BIT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -16,10 +18,13 @@ DECLARE @ErrorState INT;
 BEGIN TRY
 
 EXEC uspTRPostingValidation @intTransportLoadId
-EXEC uspTRProcessToInventoryReceipt @intTransportLoadId,@intUserId
-EXEC uspTRProcessToInventoryTransfer @intTransportLoadId,@intUserId
-EXEC uspTRProcessToInvoice @intTransportLoadId,@intUserId
-EXEC uspTRProcessTransportLoad @intTransportLoadId
+EXEC uspTRProcessToInventoryReceipt @intTransportLoadId,@intUserId,@ysnRecap,@ysnPostOrUnPost
+EXEC uspTRProcessToInventoryTransfer @intTransportLoadId,@intUserId,@ysnRecap,@ysnPostOrUnPost
+EXEC uspTRProcessToInvoice @intTransportLoadId,@intUserId,@ysnRecap,@ysnPostOrUnPost
+if @ysnRecap = 0
+BEGIN
+   EXEC uspTRProcessTransportLoad @intTransportLoadId
+END
 
 END TRY
 BEGIN CATCH
