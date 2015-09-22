@@ -8,6 +8,12 @@ AS
 Declare @dtmCurrentDate datetime
 Select @dtmCurrentDate=GETDATE()
 
+IF @dtmFromDate IS NULL
+BEGIN
+	SELECT @dtmFromDate=@dtmCurrentDate
+	SELECT @dtmToDate=@dtmFromDate+intDefaultGanttChartViewDuration from tblMFCompanyPreference
+END
+
 IF @intScheduleId >0
 BEGIN
 	SELECT S.intScheduleId
@@ -24,6 +30,8 @@ BEGIN
 		,S.intCreatedUserId
 		,S.dtmLastModified
 		,S.intLastModifiedUserId
+		,@dtmFromDate AS dtmFromDate
+		,@dtmToDate AS dtmToDate
 	FROM dbo.tblMFSchedule S
 	JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = S.intManufacturingCellId
 	JOIN dbo.tblMFScheduleCalendar SC ON SC.intCalendarId = S.intCalendarId
@@ -47,6 +55,8 @@ BEGIN
 		,0 AS intCreatedUserId
 		,@dtmCurrentDate AS dtmLastModified
 		,0 AS intLastModifiedUserId
+		,@dtmFromDate AS dtmFromDate
+		,@dtmToDate AS dtmToDate
 END
 
 SELECT C.intManufacturingCellId

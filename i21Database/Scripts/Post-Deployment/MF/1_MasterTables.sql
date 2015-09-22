@@ -1082,3 +1082,16 @@ UPDATE dbo.tblMFWorkOrderStatus
 SET strBackColorName = 'bc-gainsboro'
 WHERE  intStatusId = 4
 GO
+IF EXISTS (
+		SELECT *
+		FROM tblMFCompanyPreference
+		)
+BEGIN
+	UPDATE tblMFCompanyPreference
+	SET intDefaultGanttChartViewDuration = 7
+END
+ELSE
+BEGIN
+	INSERT INTO tblMFCompanyPreference (intDefaultGanttChartViewDuration)
+	SELECT 7
+END
