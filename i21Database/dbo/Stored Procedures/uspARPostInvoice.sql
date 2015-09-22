@@ -29,8 +29,9 @@ SET ANSI_WARNINGS OFF
 --------------------------------------------------------------------------------------------   
 -- Create a unique transaction name. 
 DECLARE @TransactionName AS VARCHAR(500) = 'Invoice Transaction' + CAST(NEWID() AS NVARCHAR(100));
-IF @raiseError = 0 OR @recap = 1
-	BEGIN TRAN @TransactionName
+IF @raiseError = 0
+	--BEGIN TRAN @TransactionName
+	BEGIN TRANSACTION
 DECLARE @totalRecords INT = 0
 DECLARE @totalInvalid INT = 0
  
@@ -153,9 +154,9 @@ SET @batchIdUsed = @batchId
 
 --------------------------------------------------------------------------------------------  
 -- Validations  
---------------------------------------------------------------------------------------------  
-IF @recap = 0
-	BEGIN
+----------------------------------------------------------------------------------------------  
+--IF @recap = 0
+--	BEGIN
 		--Posting
 		IF @post = 1
 			BEGIN
@@ -561,17 +562,19 @@ IF @recap = 0
 															
 				END TRY
 				BEGIN CATCH
-					SELECT @ErrorMerssage = ERROR_MESSAGE()
-					IF @raiseError = 0 OR @recap = 1
-						ROLLBACK TRAN @TransactionName
-					IF @raiseError = 0 OR @recap = 1
-						BEGIN TRANSACTION
-					INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-					SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-					IF @raiseError = 0 OR @recap = 1
-						COMMIT TRANSACTION
+					SELECT @ErrorMerssage = ERROR_MESSAGE()					
+					IF @raiseError = 0
+						BEGIN
+							ROLLBACK TRANSACTION							
+							BEGIN TRANSACTION
+							INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+							SELECT @ErrorMerssage, @transType, @param, @batchId, 0							
+							COMMIT TRANSACTION
+							--COMMIT TRAN @TransactionName
+						END						
 					IF @raiseError = 1
 						RAISERROR(@ErrorMerssage, 11, 1)
+						
 					GOTO Post_Exit
 				END CATCH
 
@@ -670,18 +673,19 @@ IF @recap = 0
 			
 		IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 			BEGIN
-				IF @raiseError = 0 OR @recap = 1
-					COMMIT TRAN @TransactionName
+				IF @raiseError = 0 
+					COMMIT TRANSACTION
+					--COMMIT TRAN @TransactionName
 				IF @raiseError = 1
 					BEGIN
 						SELECT TOP 1 @ErrorMerssage = strError FROM @InvalidInvoiceData
 						RAISERROR(@ErrorMerssage, 11, 1)							
 						GOTO Post_Exit
-					END	
+					END				
 				GOTO Post_Exit	
 			END
 
-	END
+	--END
 
 
 --------------------------------------------------------------------------------------------  
@@ -762,18 +766,8 @@ IF @post = 1
 			
 		END TRY
 		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0 OR @recap = 1
-				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0 OR @recap = 1
-				BEGIN TRANSACTION
-			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0 OR @recap = 1
-				COMMIT TRANSACTION
-			IF @raiseError = 1
-				RAISERROR(@ErrorMerssage, 11, 1)
-			GOTO Post_Exit
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
 		END CATCH
 	  
 		-- Call the post routine 
@@ -814,18 +808,8 @@ IF @post = 1
 
 		END TRY
 		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0 OR @recap = 1
-				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0 OR @recap = 1
-				BEGIN TRANSACTION
-			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0 OR @recap = 1
-				COMMIT TRANSACTION
-			IF @raiseError = 1
-				RAISERROR(@ErrorMerssage, 11, 1)
-			GOTO Post_Exit
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
 		END CATCH
 		
 		BEGIN TRY
@@ -1267,18 +1251,8 @@ IF @post = 1
 				AND IST.strType NOT IN ('Non-Inventory','Service','Other Charge','Software')		
 		END TRY
 		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0 OR @recap = 1
-				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0 OR @recap = 1
-				BEGIN TRANSACTION
-			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0 OR @recap = 1
-				COMMIT TRANSACTION
-			IF @raiseError = 1
-				RAISERROR(@ErrorMerssage, 11, 1)
-			GOTO Post_Exit
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
 		END CATCH
 	END   
 
@@ -1356,18 +1330,8 @@ IF @post = 0
 						
 		END TRY
 		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0 OR @recap = 1
-				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0 OR @recap = 1
-				BEGIN TRANSACTION
-			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0 OR @recap = 1
-				COMMIT TRANSACTION
-			IF @raiseError = 1
-				RAISERROR(@ErrorMerssage, 11, 1)
-			GOTO Post_Exit
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
 		END CATCH	  
 		
 		BEGIN TRY			
@@ -1452,18 +1416,8 @@ IF @post = 0
 																
 		END TRY
 		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0 OR @recap = 1
-				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0 OR @recap = 1
-				BEGIN TRANSACTION
-			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0 OR @recap = 1
-				COMMIT TRANSACTION
-			IF @raiseError = 1
-				RAISERROR(@ErrorMerssage, 11, 1)
-			GOTO Post_Exit
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
 		END CATCH										
 				
 	END   
@@ -1475,11 +1429,10 @@ IF @post = 0
 --
 -- 2.	Rollback the save point 
 --------------------------------------------------------------------------------------------  
-IF @recap = 1
-	
-	IF @raiseError = 0 OR @recap = 1
-		ROLLBACK TRAN @TransactionName
-	BEGIN 
+IF @recap = 1		
+	BEGIN
+		IF @raiseError = 0
+			ROLLBACK TRAN @TransactionName
 
 		DELETE tblGLDetailRecap  
 		FROM 
@@ -1489,79 +1442,77 @@ IF @recap = 1
 		   AND  A.strCode = @CODE  
 		   
 		   
-	BEGIN TRY
-		
-		INSERT INTO tblGLDetailRecap (  
-		  [dtmDate]  
-		  ,[strBatchId]  
-		  ,[intAccountId]  
-		  ,[dblDebit]  
-		  ,[dblCredit]  
-		  ,[dblDebitUnit]  
-		  ,[dblCreditUnit]  
-		  ,[strDescription]  
-		  ,[strCode]  
-		  ,[strReference]  
-		  ,[intCurrencyId]  
-		  ,[dblExchangeRate]  
-		  ,[dtmDateEntered]  
-		  ,[dtmTransactionDate]  
-		  ,[strJournalLineDescription]  
-		  ,[intJournalLineNo]  
-		  ,[ysnIsUnposted]  
-		  ,[intUserId]  
-		  ,[intEntityId]  
-		  ,[strTransactionId]  
-		  ,[intTransactionId]  
-		  ,[strTransactionType]  
-		  ,[strTransactionForm]  
-		  ,[strModuleName]  
-		  ,[intConcurrencyId]  
-		)  
-		-- RETRIEVE THE DATA FROM THE TABLE VARIABLE.   
-		SELECT [dtmDate]  
-		  ,[strBatchId]  
-		  ,[intAccountId]  
-		  ,[dblDebit]  
-		  ,[dblCredit]  
-		  ,[dblDebitUnit]  
-		  ,[dblCreditUnit]  
-		  ,[strDescription]  
-		  ,[strCode]  
-		  ,[strReference]  
-		  ,[intCurrencyId]  
-		  ,[dblExchangeRate]  
-		  ,[dtmDateEntered]  
-		  ,[dtmTransactionDate]  
-		  ,[strJournalLineDescription]  
-		  ,[intJournalLineNo]  
-		  ,[ysnIsUnposted]  
-		  ,[intUserId]  
-		  ,[intEntityId]  
-		  ,[strTransactionId]  
-		  ,[intTransactionId]  
-		  ,[strTransactionType]  
-		  ,[strTransactionForm]  
-		  ,[strModuleName]  
-		  ,[intConcurrencyId]  
-		FROM 
-			@GLEntries
-			
-	END TRY
-	BEGIN CATCH
-		SELECT @ErrorMerssage = ERROR_MESSAGE()
-		IF @raiseError = 0 OR @recap = 1
-			ROLLBACK TRAN @TransactionName
-		IF @raiseError = 0 OR @recap = 1
-			BEGIN TRANSACTION
-		INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-		SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-		IF @raiseError = 0 OR @recap = 1
-			COMMIT TRANSACTION
-		IF @raiseError = 1
-			RAISERROR(@ErrorMerssage, 11, 1)
-		GOTO Post_Exit
-	END CATCH
+		BEGIN TRY		
+			INSERT INTO tblGLDetailRecap (  
+			  [dtmDate]  
+			  ,[strBatchId]  
+			  ,[intAccountId]  
+			  ,[dblDebit]  
+			  ,[dblCredit]  
+			  ,[dblDebitUnit]  
+			  ,[dblCreditUnit]  
+			  ,[strDescription]  
+			  ,[strCode]  
+			  ,[strReference]  
+			  ,[intCurrencyId]  
+			  ,[dblExchangeRate]  
+			  ,[dtmDateEntered]  
+			  ,[dtmTransactionDate]  
+			  ,[strJournalLineDescription]  
+			  ,[intJournalLineNo]  
+			  ,[ysnIsUnposted]  
+			  ,[intUserId]  
+			  ,[intEntityId]  
+			  ,[strTransactionId]  
+			  ,[intTransactionId]  
+			  ,[strTransactionType]  
+			  ,[strTransactionForm]  
+			  ,[strModuleName]  
+			  ,[intConcurrencyId]  
+			)  
+			-- RETRIEVE THE DATA FROM THE TABLE VARIABLE.   
+			SELECT [dtmDate]  
+			  ,[strBatchId]  
+			  ,[intAccountId]  
+			  ,[dblDebit]  
+			  ,[dblCredit]  
+			  ,[dblDebitUnit]  
+			  ,[dblCreditUnit]  
+			  ,[strDescription]  
+			  ,[strCode]  
+			  ,[strReference]  
+			  ,[intCurrencyId]  
+			  ,[dblExchangeRate]  
+			  ,[dtmDateEntered]  
+			  ,[dtmTransactionDate]  
+			  ,[strJournalLineDescription]  
+			  ,[intJournalLineNo]  
+			  ,[ysnIsUnposted]  
+			  ,[intUserId]  
+			  ,[intEntityId]  
+			  ,[strTransactionId]  
+			  ,[intTransactionId]  
+			  ,[strTransactionType]  
+			  ,[strTransactionForm]  
+			  ,[strModuleName]  
+			  ,[intConcurrencyId]  
+			FROM 
+				@GLEntries
+				
+		END TRY
+		BEGIN CATCH
+			SELECT @ErrorMerssage = ERROR_MESSAGE()
+			IF @raiseError = 0
+				BEGIN
+					BEGIN TRANSACTION
+					INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+					SELECT @ErrorMerssage, @transType, @param, @batchId, 0
+					COMMIT TRANSACTION
+				END			
+			IF @raiseError = 1
+				RAISERROR(@ErrorMerssage, 11, 1)
+			GOTO Post_Exit
+		END CATCH
 	
 	END 	
 
@@ -1577,180 +1528,150 @@ IF @recap = 0
 			EXEC dbo.uspGLBookEntries @GLEntries, @post
 		END TRY
 		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0 OR @recap = 1
-				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0 OR @recap = 1
-				BEGIN TRANSACTION
-			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0 OR @recap = 1
-				COMMIT TRANSACTION
-			IF @raiseError = 1
-				RAISERROR(@ErrorMerssage, 11, 1)
-			GOTO Post_Exit
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
 		END CATCH
 		 
 		BEGIN TRY 
-		IF @post = 0
-			BEGIN
+			IF @post = 0
+				BEGIN
 
-				UPDATE 
-					tblARInvoice
-				SET
-					ysnPosted = 0
-					,ysnPaid = 0
-					,dblAmountDue = ISNULL(dblInvoiceTotal, 0.000000)
-					,dblDiscount = ISNULL(dblDiscount, 0.000000)
-					,dblPayment = 0.000000
-					,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
-				FROM
-					tblARInvoice 
-				WHERE 
-					intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
-
-				UPDATE
-					tblGLDetail
-				SET
-					ysnIsUnposted = 1
-				FROM
-					@PostInvoiceData P
-				WHERE
-					tblGLDetail.intTransactionId = P.intInvoiceId
-					AND tblGLDetail.strTransactionId = P.strTransactionId
-
-				--Insert Successfully unposted transactions.
-				INSERT INTO tblARPostResult(
-					strMessage
-					,strTransactionType
-					,strTransactionId
-					,strBatchNumber
-					,intTransactionId)
-				SELECT
-					@UnpostSuccessfulMsg
-					,A.strTransactionType
-					,A.strInvoiceNumber
-					,@batchId
-					,A.intInvoiceId
-				FROM
-					tblARInvoice A
-				WHERE
-					intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
-					
-				--Update tblHDTicketHoursWorked ysnBilled
-				UPDATE
-					tblHDTicketHoursWorked
-				SET
-					 ysnBilled = 0
-					,dtmBilled = NULL
-				WHERE
-					intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)			
-
-			END
-		ELSE
-			BEGIN
-
-				UPDATE 
-					tblARInvoice
-				SET
-					ysnPosted = 1
-					,dblInvoiceTotal = dblInvoiceTotal
-					,dblAmountDue = ISNULL(dblInvoiceTotal, 0.000000)
-					,dblDiscount = ISNULL(dblDiscount, 0.000000)
-					,dblPayment = 0.000000
-					,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
-				WHERE
-					tblARInvoice.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
-
-				--Insert Successfully posted transactions.
-				INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-				SELECT 
-					@PostSuccessfulMsg
-					,A.strTransactionType
-					,A.strInvoiceNumber
-					,@batchId
-					,A.intInvoiceId
-				FROM
-					tblARInvoice A
-				WHERE
-					intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
-				
-				--Update tblHDTicketHoursWorked ysnBilled					
-				UPDATE
-					tblHDTicketHoursWorked
-				SET
-					ysnBilled = 1
-					,dtmBilled = GETDATE()
-				WHERE
-					intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
-					
-				BEGIN TRY
-					DECLARE @TankDeliveryForSync TABLE (
-							intInvoiceId INT,
-							UNIQUE (intInvoiceId));
-							
-					INSERT INTO @TankDeliveryForSync					
-					SELECT DISTINCT
-						I.intInvoiceId
+					UPDATE 
+						tblARInvoice
+					SET
+						ysnPosted = 0
+						,ysnPaid = 0
+						,dblAmountDue = ISNULL(dblInvoiceTotal, 0.000000)
+						,dblDiscount = ISNULL(dblDiscount, 0.000000)
+						,dblPayment = 0.000000
+						,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 					FROM
-						tblARInvoice I
-					INNER JOIN
-						tblARInvoiceDetail D
-							ON I.intInvoiceId = D.intInvoiceId		
-					INNER JOIN
-						tblTMSite TMS
-							ON D.intSiteId = TMS.intSiteID 
-					INNER JOIN 
-						@PostInvoiceData B
-							ON I.intInvoiceId = B.intInvoiceId
-							
-					WHILE EXISTS(SELECT TOP 1 NULL FROM @TankDeliveryForSync ORDER BY intInvoiceId)
-						BEGIN
-						
-							DECLARE  @intInvoiceForSyncId INT
-									,@ResultLogForSync NVARCHAR(MAX)
-									
-							
-							SELECT TOP 1 @intInvoiceForSyncId = intInvoiceId FROM @TankDeliveryForSync ORDER BY intInvoiceId
+						tblARInvoice 
+					WHERE 
+						intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
 
-							EXEC dbo.uspTMSyncInvoiceToDeliveryHistory @intInvoiceForSyncId,@userId, @ResultLogForSync OUT
-											
-							DELETE FROM @TankDeliveryForSync WHERE intInvoiceId = @intInvoiceForSyncId
-																											
-						END 							
-							
-															
-				END TRY
-				BEGIN CATCH
-					SELECT @ErrorMerssage = ERROR_MESSAGE()
-					IF @raiseError = 0 OR @recap = 1
-						ROLLBACK TRAN @TransactionName
-					IF @raiseError = 0 OR @recap = 1
-						BEGIN TRANSACTION
+					UPDATE
+						tblGLDetail
+					SET
+						ysnIsUnposted = 1
+					FROM
+						@PostInvoiceData P
+					WHERE
+						tblGLDetail.intTransactionId = P.intInvoiceId
+						AND tblGLDetail.strTransactionId = P.strTransactionId
+
+					--Insert Successfully unposted transactions.
+					INSERT INTO tblARPostResult(
+						strMessage
+						,strTransactionType
+						,strTransactionId
+						,strBatchNumber
+						,intTransactionId)
+					SELECT
+						@UnpostSuccessfulMsg
+						,A.strTransactionType
+						,A.strInvoiceNumber
+						,@batchId
+						,A.intInvoiceId
+					FROM
+						tblARInvoice A
+					WHERE
+						intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
+						
+					--Update tblHDTicketHoursWorked ysnBilled
+					UPDATE
+						tblHDTicketHoursWorked
+					SET
+						 ysnBilled = 0
+						,dtmBilled = NULL
+					WHERE
+						intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)			
+
+				END
+			ELSE
+				BEGIN
+
+					UPDATE 
+						tblARInvoice
+					SET
+						ysnPosted = 1
+						,dblInvoiceTotal = dblInvoiceTotal
+						,dblAmountDue = ISNULL(dblInvoiceTotal, 0.000000)
+						,dblDiscount = ISNULL(dblDiscount, 0.000000)
+						,dblPayment = 0.000000
+						,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+					WHERE
+						tblARInvoice.intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
+
+					--Insert Successfully posted transactions.
 					INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-					SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-					IF @raiseError = 0 OR @recap = 1
-						COMMIT TRANSACTION
-					IF @raiseError = 1
-						RAISERROR(@ErrorMerssage, 11, 1)
-					GOTO Post_Exit
-				END CATCH
-				
-			END
+					SELECT 
+						@PostSuccessfulMsg
+						,A.strTransactionType
+						,A.strInvoiceNumber
+						,@batchId
+						,A.intInvoiceId
+					FROM
+						tblARInvoice A
+					WHERE
+						intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
+					
+					--Update tblHDTicketHoursWorked ysnBilled					
+					UPDATE
+						tblHDTicketHoursWorked
+					SET
+						ysnBilled = 1
+						,dtmBilled = GETDATE()
+					WHERE
+						intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
+						
+					BEGIN TRY
+						DECLARE @TankDeliveryForSync TABLE (
+								intInvoiceId INT,
+								UNIQUE (intInvoiceId));
+								
+						INSERT INTO @TankDeliveryForSync					
+						SELECT DISTINCT
+							I.intInvoiceId
+						FROM
+							tblARInvoice I
+						INNER JOIN
+							tblARInvoiceDetail D
+								ON I.intInvoiceId = D.intInvoiceId		
+						INNER JOIN
+							tblTMSite TMS
+								ON D.intSiteId = TMS.intSiteID 
+						INNER JOIN 
+							@PostInvoiceData B
+								ON I.intInvoiceId = B.intInvoiceId
+								
+						WHILE EXISTS(SELECT TOP 1 NULL FROM @TankDeliveryForSync ORDER BY intInvoiceId)
+							BEGIN
+							
+								DECLARE  @intInvoiceForSyncId INT
+										,@ResultLogForSync NVARCHAR(MAX)
+										
+								
+								SELECT TOP 1 @intInvoiceForSyncId = intInvoiceId FROM @TankDeliveryForSync ORDER BY intInvoiceId
+
+								EXEC dbo.uspTMSyncInvoiceToDeliveryHistory @intInvoiceForSyncId,@userId, @ResultLogForSync OUT
+												
+								DELETE FROM @TankDeliveryForSync WHERE intInvoiceId = @intInvoiceForSyncId
+																												
+							END 							
+								
+																
+					END TRY
+					BEGIN CATCH
+						SELECT @ErrorMerssage = ERROR_MESSAGE()										
+						GOTO Do_Rollback
+					END CATCH
+					
+				END
 		END TRY
 		BEGIN CATCH	
-			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0 OR @recap = 1
-				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0 OR @recap = 1
-				BEGIN TRANSACTION
-			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0 OR @recap = 1
-				COMMIT TRANSACTION
-			IF @raiseError = 1
-				RAISERROR(@ErrorMerssage, 11, 1)
-			GOTO Post_Exit
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
 		END CATCH
 			
 		BEGIN TRY			
@@ -1774,32 +1695,38 @@ IF @recap = 0
 																
 		END TRY
 		BEGIN CATCH	
-			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0 OR @recap = 1
-				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0 OR @recap = 1
-				BEGIN TRANSACTION
-			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0 OR @recap = 1
-				COMMIT TRANSACTION
-			IF @raiseError = 1
-				RAISERROR(@ErrorMerssage, 11, 1)
-			GOTO Post_Exit
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
 		END CATCH										
 			
 	END
 	
 SET @successfulCount = @totalRecords
 SET @invalidCount = @totalInvalid	
-IF @raiseError = 0 OR @recap = 1
-	COMMIT TRAN @TransactionName
-RETURN 1;	
+IF @raiseError = 0
+	COMMIT TRANSACTION
+RETURN 1;
+
+Do_Rollback:
+	IF @raiseError = 0
+		BEGIN
+		    IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION
+
+			--IF (XACT_STATE()) = 1
+		 --       COMMIT TRANSACTION;
+										
+			BEGIN TRANSACTION
+			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+			SELECT @ErrorMerssage, @transType, @param, @batchId, 0							
+			COMMIT TRANSACTION			
+		END
+	IF @raiseError = 1
+		RAISERROR(@ErrorMerssage, 11, 1)	
 	    
 -- This is our immediate exit in case of exceptions controlled by this stored procedure
 Post_Exit:
 	SET @successfulCount = 0	
 	SET @invalidCount = @totalInvalid + @totalRecords
 	SET @success = 0	
-	RETURN 0;
-	
+	RETURN 0;	
