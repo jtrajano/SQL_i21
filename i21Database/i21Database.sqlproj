@@ -2327,6 +2327,7 @@
     <Build Include="dbo\Tables\tblARTransactionDetail.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryValuation.sql" />
     <Build Include="dbo\Functions\fnICGetRunningBalance.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptItemTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
