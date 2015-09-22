@@ -11,6 +11,8 @@
             ,strGoLive = CONVERT(nvarchar(10),proj.dtmGoLive,101)
             ,proj.intPercentComplete
             ,proj.ysnCompleted
+            ,proj.strProjectStatus
+			,strProjectManager = (select top 1 e.strName from tblEntity e where e.intEntityId = proj.intInternalProjectManager)
         from
             tblHDProject proj,
             tblARCustomer cus,
