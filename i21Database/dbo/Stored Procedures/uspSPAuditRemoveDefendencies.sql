@@ -10,9 +10,10 @@ BEGIN
 		@ViewScript NVARCHAR(MAX)
 
 	DECLARE Cursor_View CURSOR FOR 
-		SELECT TABLE_NAME, VIEW_DEFINITION FROM  INFORMATION_SCHEMA.VIEWS 
-			where VIEW_DEFINITION like '%'+ @Table +'%'
-			and VIEW_DEFINITION like '%WITH SCHEMABINDING%'
+		SELECT TABLE_NAME, VIEW_DEFINITION FROM INFORMATION_SCHEMA.VIEWS A
+		INNER JOIN sys.dm_sql_referencing_entities (@Table, 'OBJECT') B
+		ON A.TABLE_NAME = B.referencing_entity_name
+			where VIEW_DEFINITION like '%WITH SCHEMABINDING%'
 			and VIEW_DEFINITION like '%' + @Column +'%'
 
 	OPEN Cursor_View FETCH NEXT FROM Cursor_View into @ViewName, @ViewScript
