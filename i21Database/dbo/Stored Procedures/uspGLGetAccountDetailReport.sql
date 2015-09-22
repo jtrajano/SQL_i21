@@ -3,7 +3,7 @@
 as
 BEGIN
 SET NOCOUNT ON;
-SET FMTONLY off;
+--SET FMTONLY off;
 DECLARE @idoc INT
 DECLARE @filterTable FilterTableType
 DECLARE @strAccountIdFrom NVARCHAR(50)
@@ -29,7 +29,9 @@ BEGIN
 		
 	SELECT TOP 1 @strAccountIdFrom= [from] , @strAccountIdTo = [to] from  @filterTable WHERE [fieldname] = 'strAccountId' 
 	SELECT TOP 1 @dtmDateFrom= [from] , @dtmDateTo = [to] from  @filterTable WHERE [fieldname] = 'dtmDate' 
-
+	update @filterTable SET [fieldname] = 'strCode',[from] = '' , [condition]= 'Not Equal To' WHERE fieldname = 'ysnIncludeAuditAdjustment' AND [from] = 'Yes'
+	update @filterTable SET [fieldname] = 'strCode',[from] = 'AA' , [condition]= 'Not Equal To' WHERE fieldname = 'ysnIncludeAuditAdjustment' AND [from] = 'No'
+	
 	IF EXISTS(
 	SELECT TOP 1 1 FROM @filterTable WHERE
 		(condition LIKE  '%Date'  or
@@ -49,7 +51,8 @@ END
 
 
 DECLARE @hasInactiveAccounts BIT = 0
-IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#tempTableReport')) DROP TABLE #tempTableReport
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#tempTableReport')) DROP TABLE tempTableReport
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#tempTableReport1')) DROP TABLE tempTableReport1
 IF @dtmDateFrom IS NOT NULL AND @strAccountIdFrom IS NULL
 	SELECT @hasInactiveAccounts = 1
 
@@ -65,12 +68,11 @@ AS
 GLAccountDetails
 AS
 (
---*SC*--
+
 SELECT B.strDescription  as strAccountDescription-- account description
 		,C.strAccountType
 		,C.strAccountGroup
-		,@dtmDateFrom as dtmDate1
-		,CAST(CAST(CASE WHEN  @hasInactiveAccounts = 1 THEN  ISNULL(A.dtmDate,@dtmDateFrom) ELSE A.dtmDate END AS DATE)AS datetime) as dtmDate
+		,CAST(CAST( A.dtmDate AS DATE)AS datetime) as dtmDate
 		,A.strBatchId
 		,ISNULL(A.dblDebit,0) as dblDebit
 		,ISNULL(A.dblCredit,0) as dblCredit
@@ -100,7 +102,7 @@ SELECT B.strDescription  as strAccountDescription-- account description
 		,isUnposted = CASE WHEN A.intAccountId IS NULL THEN 0 ELSE A.ysnIsUnposted END
 		,(SELECT [strUOMCode] FROM Units WHERE [intAccountId] = A.[intAccountId]) as strUOMCode
 from tblGLDetail  A
-RIGHT join tblGLAccount B on B.intAccountId = A.intAccountId
+LEFT join tblGLAccount B on B.intAccountId = A.intAccountId
 INNER join tblGLAccountGroup C on C.intAccountGroupId = B.intAccountGroupId
 INNER JOIN tblGLTempCOASegment D ON D.intAccountId = B.intAccountId
 OUTER APPLY(
@@ -109,8 +111,7 @@ OUTER APPLY(
 	 A.intJournalLineNo = B.intJournalDetailId AND
 	 C.intJournalId = A.intTransactionId AND C.strJournalId = A.strTransactionId
 )detail
---*SCSTART*--
---Special Case--
+
 )
 
 ,
@@ -153,7 +154,6 @@ SELECT DISTINCT
 ,(CASE WHEN A.strAccountType  is  NULL  then B.strAccountType else A.strAccountType END) as strAccountType
 ,(CASE WHEN A.strAccountGroup  is  NULL  then B.strAccountGroup else A.strAccountGroup END) as strAccountGroup
 ,A.dtmDate
-,A.dtmDate1
 ,(CASE WHEN A.strBatchId  is  NULL  then '' else A.strBatchId END) as strBatchId
 ,(CASE WHEN A.dblDebit  is  NULL  then 0.00 else A.dblDebit END) as dblDebit
 ,(CASE WHEN A.dblCredit  is  NULL  then 0.00 else A.dblCredit END) as dblCredit
@@ -192,7 +192,23 @@ IF @Where <> 'Where ' select @SqlQuery +=  @Where
 
 IF @hasInactiveAccounts =1 
 BEGIN
-	SELECT @SqlQuery += 'OR dtmDate1 = ''' + @dtmDateFrom + ''''
+	DECLARE @cols NVARCHAR (MAX) = 'AccountHeader, strAccountDescripion,strAccountType,strAccountGroup,dtmDate,strBatchId,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,strDetailDescription,strTransactionId, intTransactionId,strTransactionType,strTransactionForm,strModuleName,strReference,strReferenceDetail,strDocument,dblTotal,intAccountUnitId,strCode,intGLDetailId,ysnIsUnposted,strAccountId,[Primary Account],Location,strUOMCode,dblBeginBalance,dblBeginBalanceUnit'
+	DECLARE @cols1 NVARCHAR(MAX) = ''
+	;WITH cte AS
+	(
+	   SELECT *, ROW_NUMBER() OVER (PARTITION BY strAccountId ORDER BY dtmDate DESC) AS rn
+	   FROM #tempTableReport where dtmDate < @dtmDateFrom or dtmDate > ISNULL(@dtmDateTo,@dtmDateFrom)
+	)
+	SELECT * INTO #tempTableReport1	
+	FROM cte
+	WHERE rn = 1
+	SELECT @cols1 = REPLACE (@cols,'dtmDate','''' + @dtmDateFrom  + '''' + ' as dtmDate')
+	SELECT @cols1 = REPLACE (@cols1,'dblDebit,','0 as dblDebit,')
+	SELECT @cols1 = REPLACE (@cols1,'dblDebitUnit,','0 as dblDebitUnit,')
+	SELECT @cols1 = REPLACE (@cols1,'dblCredit,','0 as dblCredit,')
+	SELECT @cols1 = REPLACE (@cols1,'dblCreditUnit,','0 as dblCreditUnit,')
+	SELECT @cols1 = REPLACE (@cols1,'dblTotal,','0 as dblTotal,')
+	SELECT @SqlQuery = 'SELECT ' + @cols + ' FROM #tempTableReport ' + ISNULL(@Where,'') + ' UNION SELECT ' +  @cols1 + ' FROM #tempTableReport1'
 END
 
 EXEC (@SqlQuery)
