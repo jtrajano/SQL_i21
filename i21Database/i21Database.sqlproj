@@ -2334,6 +2334,7 @@
     <Build Include="dbo\Stored Procedures\uspICInventoryReceiptAfterSave.sql" />
     <Build Include="dbo\Tables\tblTRBulkPlantFreight.sql" />
     <Build Include="dbo\Functions\fnTRGetRackPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddMiscItemToInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
