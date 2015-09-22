@@ -11,6 +11,7 @@
 		,a.intProjectId
 		,intTicketId = a.intLinkId
 		,a.intProjectAuditLogId
+		,strLastUpdated = CONVERT(VARCHAR(10),a.dtmLastUpdated,101)
 	from
 		tblHDProjectAuditLog a
 		,tblEntity b
