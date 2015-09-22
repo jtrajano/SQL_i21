@@ -18,6 +18,7 @@ Ext.define('Inventory.view.InventoryUOMViewController', {
     alias: 'controller.icinventoryuom',
 
     config: {
+        helpURL: '/display/DOC/Inventory+UOM',
         searchConfig: {
             title:  'Search Inventory UOMs',
             type: 'Inventory.InventoryUOM',
