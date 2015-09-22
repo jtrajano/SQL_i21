@@ -18,6 +18,7 @@ Ext.define('Inventory.view.FactoryUnitTypeViewController', {
     alias: 'controller.icfactoryunittype',
 
     config: {
+        helpURL: '/display/DOC/Storage+Unit+Type',
         searchConfig: {
             title:  'Search Storage Unit Type',
             type: 'Inventory.FactoryUnitType',

@@ -32,6 +32,15 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
                 columns: [
                     {
                         xtype: 'gridcolumn',
+                        itemId: 'colItemNo',
+                        width: 85,
+                        sortable: false,
+                        dataIndex: 'strItemNo',
+                        text: 'Item No',
+                        flex: 1.25
+                    },
+                    {
+                        xtype: 'gridcolumn',
                         itemId: 'colTaxCode',
                         width: 85,
                         sortable: false,
@@ -66,11 +75,18 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
         var me = this;
         me.getView().show();
         var context = me.setupContext();
-        if (config.id) {
-            me.intInventoryReceiptItemId = config.id;
+        if (config.param.ReceiptId) {
+            me.intInventoryReceiptId = config.param.ReceiptId;
+            config.filters = [{
+                column: 'intInventoryReceiptId',
+                value: config.param.ReceiptId
+            }];
+        }
+        else if (config.param.id) {
+            me.intInventoryReceiptItemId = config.param.id;
             config.filters = [{
                 column: 'intInventoryReceiptItemId',
-                value: config.id
+                value: config.param.id
             }];
         }
         context.data.load({

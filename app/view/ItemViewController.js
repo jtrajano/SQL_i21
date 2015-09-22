@@ -3,6 +3,7 @@ Ext.define('Inventory.view.ItemViewController', {
     alias: 'controller.icitem',
 
     config: {
+        helpURL: '/display/DOC/Items',
         searchConfig: {
             title: 'Search Item',
             type: 'Inventory.Item',

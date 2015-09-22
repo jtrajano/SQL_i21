@@ -1,12 +1,10 @@
 ﻿using iRely.Common;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using iRely.Inventory.Model;
+using System.Collections.Generic;
+using System.Data.Entity;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace iRely.Inventory.BusinessLayer
 {
@@ -18,5 +16,18 @@ namespace iRely.Inventory.BusinessLayer
             _db = db;
         }
         #endregion
+
+        public async Task<SearchResult> GetReceiptItemTaxView(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetInventoryReceiptItemTax>()
+                .Filter(param, true);
+            var data = await query.ExecuteProjection(param, "intInventoryReceiptItemTaxId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
     }
 }

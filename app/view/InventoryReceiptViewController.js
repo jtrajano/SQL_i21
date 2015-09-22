@@ -3,6 +3,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     alias: 'controller.icinventoryreceipt',
 
     config: {
+        helpURL: '/display/DOC/Inventory+Receipts',
         searchConfig: {
             title: 'Search Inventory Receipt',
             type: 'Inventory.InventoryReceipt',
