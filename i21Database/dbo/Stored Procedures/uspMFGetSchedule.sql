@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE uspMFGetSchedule (
 	@intManufacturingCellId INT
 	,@intScheduleId INT
+	,@dtmFromDate datetime=NULL
+	,@dtmToDate datetime=NULL
 	)
 AS
 Declare @dtmCurrentDate datetime
@@ -158,3 +160,8 @@ SELECT C.intScheduleConstraintDetailId
 	,C.intConcurrencyId
 FROM dbo.tblMFScheduleConstraintDetail C
 WHERE C.intScheduleId = @intScheduleId
+
+EXEC dbo.uspMFGetScheduleDetail 
+	@intManufacturingCellId=@intManufacturingCellId
+	,@dtmPlannedStartDate=@dtmFromDate
+	,@dtmPlannedEndDate=@dtmToDate
