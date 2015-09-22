@@ -567,8 +567,9 @@ SET @batchIdUsed = @batchId
 						BEGIN
 							ROLLBACK TRANSACTION							
 							BEGIN TRANSACTION
-							INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-							SELECT @ErrorMerssage, @transType, @param, @batchId, 0							
+							--INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+							--SELECT @ErrorMerssage, @transType, @param, @batchId, 0							
+							EXEC uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param							
 							COMMIT TRANSACTION
 							--COMMIT TRAN @TransactionName
 						END						
@@ -1505,8 +1506,9 @@ IF @recap = 1
 			IF @raiseError = 0
 				BEGIN
 					BEGIN TRANSACTION
-					INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-					SELECT @ErrorMerssage, @transType, @param, @batchId, 0
+					EXEC uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param		
+					--INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+					--SELECT @ErrorMerssage, @transType, @param, @batchId, 0
 					COMMIT TRANSACTION
 				END			
 			IF @raiseError = 1
@@ -1717,8 +1719,9 @@ Do_Rollback:
 		 --       COMMIT TRANSACTION;
 										
 			BEGIN TRANSACTION
-			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT @ErrorMerssage, @transType, @param, @batchId, 0							
+			EXEC uspARInsertPostResult @batchId, 'Invoice', @ErrorMerssage, @param		
+			--INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+			--SELECT @ErrorMerssage, @transType, @param, @batchId, 0							
 			COMMIT TRANSACTION			
 		END
 	IF @raiseError = 1
