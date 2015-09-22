@@ -27,6 +27,8 @@
 	[dblCreditForeign]	 NUMERIC(18, 9) NULL, 
     [dblCreditReport]	 NUMERIC(18, 9) NULL, 
     [strOriginTable] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
+    [strSourceId] NVARCHAR(10)  COLLATE Latin1_General_CI_AS NULL,
+    [strSourceType] NVARCHAR(50)  COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblGLJournalDetail] PRIMARY KEY CLUSTERED ([intJournalDetailId] ASC),
     CONSTRAINT [FK_tblGLJournalDetail_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
     CONSTRAINT [FK_tblGLJournalDetail_tblGLJournal] FOREIGN KEY ([intJournalId]) REFERENCES [dbo].[tblGLJournal] ([intJournalId]) ON DELETE CASCADE
