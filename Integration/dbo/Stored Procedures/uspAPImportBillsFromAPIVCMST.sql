@@ -93,9 +93,10 @@ BEGIN
 					[intEntityId]			=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.apivc_user_id)),@UserId),
 					[ysnPosted]				=	1,
 					[ysnPaid]				=	CASE WHEN A.apivc_status_ind = ''P'' THEN 1 ELSE 0 END,
-					[intTransactionType]	=	CASE WHEN A.apivc_trans_type = ''I'' THEN 1
+					[intTransactionType]	=	CASE WHEN A.apivc_trans_type = ''I'' AND A.apivc_orig_amt > 0 THEN 1
+													 WHEN A.apivc_trans_type = ''O'' AND A.apivc_orig_amt > 0 THEN 1
 													WHEN A.apivc_trans_type = ''A'' THEN 2
-													WHEN A.apivc_trans_type = ''C'' THEN 3
+													WHEN A.apivc_trans_type = ''C'' OR A.apivc_orig_amt < 0 THEN 3
 													ELSE 0 END,
 					[dblDiscount]			=	A.apivc_disc_avail,
 					[dblWithheld]			=	A.apivc_wthhld_amt,
@@ -121,7 +122,7 @@ BEGIN
 						AND A.apivc_vnd_no = E.apivc_vnd_no
 						AND A.apivc_ivc_no = E.apivc_ivc_no
 					) DuplicateData
-					WHERE A.apivc_trans_type IN (''I'',''C'',''A'')
+					WHERE A.apivc_trans_type IN (''I'',''C'',''A'',''O'')
 					AND A.apivc_orig_amt != 0
 					AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 								THEN
@@ -191,14 +192,22 @@ BEGIN
 				SELECT TOP 100 PERCENT
 					[intBillId]				=	A.intBillId,
 					[strMiscDescription]	=	A.strReference,
-					[dblQtyOrdered]			=	(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END),
-					[dblQtyReceived]		=	(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END),
+					[dblQtyOrdered]			=	(CASE WHEN C2.apivc_trans_type IN (''C'',''A'') AND C.aphgl_gl_amt > 0 THEN
+													(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) * (-1) --make it negative if detail of debit memo is positive
+												ELSE 
+													(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) 
+												END,
+					[dblQtyReceived]		=	(CASE WHEN C2.apivc_trans_type IN (''C'',''A'') AND C.aphgl_gl_amt > 0 THEN
+													(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) * (-1)
+												ELSE 
+													(CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END) 
+												END,
 					[intAccountId]			=	ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.aphgl_gl_acct AS NVARCHAR(MAX))), 0),
-					[dblTotal]				=	CASE WHEN C2.apivc_trans_type IN (''C'',''A'') THEN 
-														(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END)
+					[dblTotal]				=	CASE WHEN C2.apivc_trans_type IN (''C'',''A'') THEN C.aphgl_gl_amt * -1
+														--(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END)
 													ELSE C.aphgl_gl_amt END,
-					[dblCost]				=	(CASE WHEN C2.apivc_trans_type IN (''C'',''A'') THEN 
-														(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END)
+					[dblCost]				=	(CASE WHEN C2.apivc_trans_type IN (''C'',''A'') THEN
+														(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END) --Cost should always positive
 													ELSE C.aphgl_gl_amt END) / (CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END),
 					[intLineNo]				=	C.aphgl_dist_no,
 					[A4GLIdentity]			=	C.[A4GLIdentity]
@@ -214,7 +223,7 @@ BEGIN
 								THEN
 									CASE WHEN CONVERT(DATE, CAST(C2.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 								ELSE 1 END)
-				AND C2.apivc_trans_type IN (''I'',''C'',''A'')
+				AND C2.apivc_trans_type IN (''I'',''C'',''A'',''O'')
 				AND C2.apivc_orig_amt != 0
 				ORDER BY C.aphgl_dist_no
 			) AS sourceData
@@ -332,7 +341,7 @@ BEGIN
 							THEN
 								CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 							ELSE 1 END)
-				AND A.apivc_trans_type IN (''I'',''C'',''A'')
+				AND A.apivc_trans_type IN (''I'',''C'',''A'',''O'')
 				AND A.apivc_orig_amt != 0
 		
 			SET @totalInsertedTBLAPIVCMST = @@ROWCOUNT;
@@ -364,7 +373,7 @@ BEGIN
 							THEN
 								CASE WHEN CONVERT(DATE, CAST(B.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 							ELSE 1 END)
-				AND B.apivc_trans_type IN (''I'',''C'',''A'')
+				AND B.apivc_trans_type IN (''I'',''C'',''A'',''O'')
 				AND B.apivc_orig_amt != 0
 			) AS sourceData
 			ON (1=0)
