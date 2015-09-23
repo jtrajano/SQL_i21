@@ -173,14 +173,22 @@ BEGIN
 				SELECT TOP 100 PERCENT
 					[intBillId]				=	A.intBillId,
 					[strMiscDescription]	=	A.strReference,
-					[dblQtyOrdered]			=	(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END),
-					[dblQtyReceived]		=	(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END),
+					[dblQtyOrdered]			=	(CASE WHEN C2.aptrx_trans_type IN (''C'',''A'') AND C.apegl_gl_amt > 0 THEN
+													(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END) * (-1) --make it negative if detail of debit memo is positive
+												ELSE 
+													(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END) 
+												END,
+					[dblQtyReceived]		=	(CASE WHEN C2.aptrx_trans_type IN (''C'',''A'') AND C.apegl_gl_amt > 0 THEN
+													(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END) * (-1)
+												ELSE 
+													(CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END) 
+												END,
 					[intAccountId]			=	ISNULL((SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(C.apegl_gl_acct AS NVARCHAR(MAX))), 0),
-					[dblTotal]				=	CASE WHEN C2.aptrx_trans_type IN (''C'',''A'') THEN
-														(CASE WHEN C.apegl_gl_amt < 0 THEN C.apegl_gl_amt * -1 ELSE C.apegl_gl_amt END)
+					[dblTotal]				=	CASE WHEN C2.aptrx_trans_type IN (''C'',''A'') THEN C.apegl_gl_amt * -1
+														--(CASE WHEN C.apegl_gl_amt < 0 THEN C.apegl_gl_amt * -1 ELSE C.apegl_gl_amt END)
 													ELSE C.apegl_gl_amt END,
 					[dblCost]				=	(CASE WHEN C2.aptrx_trans_type IN (''C'',''A'') THEN
-														(CASE WHEN C.apegl_gl_amt < 0 THEN C.apegl_gl_amt * -1 ELSE C.apegl_gl_amt END)
+														(CASE WHEN C.apegl_gl_amt < 0 THEN C.apegl_gl_amt * -1 ELSE C.apegl_gl_amt END) --Cost should always positive
 													ELSE C.apegl_gl_amt END) / (CASE WHEN ISNULL(C.apegl_gl_un,0) <= 0 THEN 1 ELSE C.apegl_gl_un END),
 					[intLineNo]				=	C.apegl_dist_no,
 					[A4GLIdentity]			=	C.A4GLIdentity,
