@@ -1,7 +1,7 @@
 ﻿CREATE PROC uspMFGetScheduleDetail (
 	@intManufacturingCellId int= NULL
-	,@dtmPlannedStartDate DATETIME
-	,@dtmPlannedEndDate DATETIME
+	,@dtmPlannedStartDate DATE
+	,@dtmPlannedEndDate DATE
 	)
 AS
 SELECT MC.intManufacturingCellId
@@ -34,7 +34,7 @@ SELECT MC.intManufacturingCellId
 	,SH.intShiftId
 	,SH.strShiftName
 	,0 AS OrderLineItemId
-	,0 AS ysnAlternateLine
+	,CONVERT(BIT,0) AS ysnAlternateLine
 	,GetDate() AS dtmbyWhichDate
 	,'' AS strCustOrderNo
 	,'' AS strChangeover

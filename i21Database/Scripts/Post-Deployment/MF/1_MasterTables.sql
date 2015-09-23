@@ -979,16 +979,20 @@ BEGIN
 	VALUES (
 		1
 		,'Pack Type Change'
-		,'vyuGetPackType'
+		,'vyuMFGetPackType'
 		,'strPackName'
 		)
+END
+ELSE
+BEGIN
+	UPDATE tblMFScheduleAttribute SET strTableName ='vyuMFGetPackType' WHERE  intScheduleAttributeId = 1
 END
 GO
 
 IF NOT EXISTS (
 		SELECT *
 		FROM tblMFScheduleAttribute
-		WHERE intScheduleAttributeId = 1
+		WHERE intScheduleAttributeId = 2
 		)
 BEGIN
 	INSERT INTO tblMFScheduleAttribute (
@@ -998,14 +1002,13 @@ BEGIN
 		,strColumnName
 		)
 	VALUES (
-		1
+		2
 		,'Blend Change'
 		,'vyuMFGetBlendItem'
 		,'strItemNo'
 		)
 END
-GO
-
+Go
 IF NOT EXISTS (
 		SELECT *
 		FROM tblMFHolidayType
