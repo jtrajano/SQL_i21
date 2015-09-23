@@ -1095,10 +1095,35 @@ Ext.define('Inventory.view.Item', {
                                                                                 xtype: 'tbseparator'
                                                                             },
                                                                             {
-                                                                                xtype: 'combobox',
+                                                                                xtype: 'gridcombobox',
+                                                                                columns: [
+                                                                                    {
+                                                                                        dataIndex: 'intItemLocationId',
+                                                                                        dataType: 'numeric',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'intItemId',
+                                                                                        dataType: 'numeric',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'intLocationId',
+                                                                                        dataType: 'numeric',
+                                                                                        hidden: true
+                                                                                    },
+                                                                                    {
+                                                                                        dataIndex: 'strLocationName',
+                                                                                        dataType: 'string',
+                                                                                        text: 'Location Name',
+                                                                                        flex: 1
+                                                                                    }
+                                                                                ],
                                                                                 itemId: 'cboCopyLocation',
                                                                                 margin: '0 0 0 5',
-                                                                                fieldLabel: 'Copy Location'
+                                                                                fieldLabel: 'Copy Location',
+                                                                                displayField: 'strLocationName',
+                                                                                valueField: 'intItemLocationId'
                                                                             },
                                                                             {
                                                                                 xtype: 'tbseparator'

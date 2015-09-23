@@ -202,6 +202,20 @@ Ext.define('Inventory.view.ItemViewModel', {
             type: 'glbufaccountid'
         },
 
+        copyLocation: {
+            type: 'icbuffereditemlocation',
+            proxy: {
+                type: 'rest',
+                api: {
+                    read: '../Inventory/api/ItemLocation/GetFullItemLocation'
+                },
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    messageProperty: 'message'
+                }
+            }
+        },
 
         patronage: {
             type: 'icbufferedpatronagecategory'

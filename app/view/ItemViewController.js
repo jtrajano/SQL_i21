@@ -191,6 +191,13 @@ Ext.define('Inventory.view.ItemViewController', {
             //------------------//
             //Location Store Tab//
             //------------------//
+            cboCopyLocation: {
+                store: '{copyLocation}',
+                defaultFilters: [{
+                    column: 'intItemId',
+                    value: '{current.intItemId}'
+                }]
+            },
             grdLocationStore: {
                 colLocationLocation: 'strLocationName',
                 colLocationPOSDescription: 'strDescription',
@@ -1906,6 +1913,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 location.set('intVendorId', copyLocation.get('intVendorId'));
                 location.set('strDescription', copyLocation.get('strDescription'));
                 location.set('intCostingMethod', copyLocation.get('intCostingMethod'));
+                location.set('strCostingMethod', copyLocation.get('strCostingMethod'));
                 location.set('intAllowNegativeInventory', copyLocation.get('intAllowNegativeInventory'));
                 location.set('intSubLocationId', copyLocation.get('intSubLocationId'));
                 location.set('intStorageLocationId', copyLocation.get('intStorageLocationId'));
@@ -2718,6 +2726,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboAccountCategory": {
                 select: this.onGLAccountSelect
+            },
+            "#cboCopyLocation": {
+                select: this.onCopyLocationSelect
             },
             "#cboPOSCategoryId": {
                 select: this.onPOSCategorySelect
