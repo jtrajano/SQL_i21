@@ -79,10 +79,11 @@ BEGIN
 					[intEntityId]				=	ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE strUserName COLLATE Latin1_General_CS_AS = RTRIM(A.aptrx_user_id)),@UserId),
 					[ysnPosted]					=	0,
 					[ysnPaid]					=	0,
-					[intTransactionType]		=	CASE WHEN A.aptrx_trans_type = ''I'' THEN 1
-														WHEN A.aptrx_trans_type = ''A'' THEN 2
-														WHEN A.aptrx_trans_type = ''C'' THEN 3
-														ELSE 0 END,
+					[intTransactionType]		=	CASE WHEN A.aptrx_trans_type = ''I'' AND A.aptrx_orig_amt > 0 THEN 1
+													 WHEN A.aptrx_trans_type = ''O'' AND A.aptrx_orig_amt > 0 THEN 1
+													WHEN A.aptrx_trans_type = ''A'' THEN 2
+													WHEN A.aptrx_trans_type = ''C'' OR A.aptrx_orig_amt < 0 THEN 3
+													ELSE 0 END,
 					[dblDiscount]				=	A.aptrx_disc_amt,
 					[dblWithheld]				=	A.aptrx_wthhld_amt,
 					[ysnOrigin]					=	1,
@@ -102,7 +103,7 @@ BEGIN
 						WHERE dbo.fnTrim(A.aptrx_ivc_no) = dbo.fnTrim(F.strVendorOrderNumber) COLLATE Latin1_General_CS_AS
 						AND dbo.fnTrim(A.aptrx_vnd_no) = dbo.fnTrim(G.strVendorId) COLLATE Latin1_General_CS_AS
 					) DuplicateData
-					WHERE A.aptrx_trans_type IN (''I'',''C'',''A'')
+					WHERE A.aptrx_trans_type IN (''I'',''C'',''A'',''O'')
 					AND A.aptrx_orig_amt != 0
 					AND 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 								THEN
@@ -207,7 +208,7 @@ BEGIN
 								THEN
 									CASE WHEN CONVERT(DATE, CAST(C2.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 								ELSE 1 END)
-				AND C2.aptrx_trans_type IN (''I'',''C'',''A'')
+				AND C2.aptrx_trans_type IN (''I'',''C'',''A'',''O'')
 				AND C2.aptrx_orig_amt != 0
 				ORDER BY C.apegl_dist_no
 			) AS sourceData
@@ -330,7 +331,7 @@ BEGIN
 							THEN
 								CASE WHEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 							ELSE 1 END)
-				AND A.aptrx_trans_type IN (''I'',''C'',''A'')
+				AND A.aptrx_trans_type IN (''I'',''C'',''A'',''O'')
 				AND A.aptrx_orig_amt != 0
 
 			SET @totalInsertedTBLAPTRXMST = @@ROWCOUNT;
@@ -431,7 +432,7 @@ BEGIN
 								THEN
 									CASE WHEN CONVERT(DATE, CAST(B.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
 								ELSE 1 END)
-				AND B.aptrx_trans_type IN (''I'',''C'',''A'')
+				AND B.aptrx_trans_type IN (''I'',''C'',''A'',''O'')
 				AND B.aptrx_orig_amt != 0
 			) AS sourceData
 			ON (1=0)
