@@ -171,7 +171,3 @@ SELECT C.intScheduleConstraintDetailId
 FROM dbo.tblMFScheduleConstraintDetail C
 WHERE C.intScheduleId = @intScheduleId
 
-EXEC dbo.uspMFGetScheduleDetail 
-	@intManufacturingCellId=@intManufacturingCellId
-	,@dtmPlannedStartDate=@dtmFromDate
-	,@dtmPlannedEndDate=@dtmToDate
