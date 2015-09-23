@@ -46,6 +46,7 @@ Ext.define('Inventory.model.StorageLocation', {
 
     validators: [
         {type: 'presence', field: 'strName'},
-        {type: 'presence', field: 'intLocationId'}
+        {type: 'presence', field: 'intLocationId'},
+        {type: 'presence', field: 'intSubLocationId'}
     ]
 });
