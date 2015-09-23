@@ -55,6 +55,22 @@ namespace iRely.Inventory.BusinessLayer
             };
         }
 
+        public async Task<SearchResult> GetFullItemLocation(GetParameter param)
+        {
+            var query = _db.GetQuery<tblICItemLocation>()
+                .Include(p => p.tblSMCompanyLocation)
+                .Include(p => p.vyuAPVendor)
+                .Include(p => p.tblSMCompanyLocationSubLocation)
+                .Filter(param, true);
+            var data = await query.ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+
         public override async Task<BusinessResult<tblICItemLocation>> SaveAsync(bool continueOnConflict)
         {
             var result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);

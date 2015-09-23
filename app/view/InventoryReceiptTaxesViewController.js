@@ -28,7 +28,7 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
             singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
                 grid: win.down('grid'),
                 position: 'none',
-                title: 'Inventory Receipt Taxes',
+                title: 'Tax Details',
                 columns: [
                     {
                         xtype: 'gridcolumn',

@@ -11,6 +11,6 @@ namespace iRely.Inventory.BusinessLayer
 {
     public interface IItemLocationBl : IBusinessLayer<tblICItemLocation>
     {
-
+        Task<SearchResult> GetFullItemLocation(GetParameter param);
     }
 }

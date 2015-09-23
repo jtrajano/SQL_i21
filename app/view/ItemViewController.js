@@ -191,6 +191,13 @@ Ext.define('Inventory.view.ItemViewController', {
             //------------------//
             //Location Store Tab//
             //------------------//
+            cboCopyLocation: {
+                store: '{copyLocation}',
+                defaultFilters: [{
+                    column: 'intItemId',
+                    value: '{current.intItemId}'
+                }]
+            },
             grdLocationStore: {
                 colLocationLocation: 'strLocationName',
                 colLocationPOSDescription: 'strDescription',
@@ -1678,66 +1685,7 @@ Ext.define('Inventory.view.ItemViewController', {
                             var newRecord = {
                                 intItemId : location.data.intItemId,
                                 intLocationId : location.data.intLocationId,
-//                            intVendorId : location.data.intVendorId,
-//                            strDescription : location.data.strDescription,
-//                            intCostingMethod : location.data.intCostingMethod,
-//                            intAllowNegativeInventory : location.data.intAllowNegativeInventory,
-//                            intSubLocationId : location.data.intSubLocationId,
-//                            intStorageLocationId : location.data.intStorageLocationId,
-//                            intIssueUOMId : location.data.intIssueUOMId,
-//                            intReceiveUOMId : location.data.intReceiveUOMId,
-//                            intFamilyId : location.data.intFamilyId,
-//                            intClassId : location.data.intClassId,
-//                            intProductCodeId : location.data.intProductCodeId,
-//                            intFuelTankId : location.data.intFuelTankId,
-//                            strPassportFuelId1 : location.data.strPassportFuelId1,
-//                            strPassportFuelId2 : location.data.strPassportFuelId2,
-//                            strPassportFuelId3 : location.data.strPassportFuelId3,
-//                            ysnTaxFlag1 : location.data.ysnTaxFlag1,
-//                            ysnTaxFlag2 : location.data.ysnTaxFlag2,
-//                            ysnTaxFlag3 : location.data.ysnTaxFlag3,
-//                            ysnPromotionalItem : location.data.ysnPromotionalItem,
-//                            intMixMatchId : location.data.intMixMatchId,
-//                            ysnDepositRequired : location.data.ysnDepositRequired,
-//                            intDepositPLUId : location.data.intDepositPLUId,
-//                            intBottleDepositNo : location.data.intBottleDepositNo,
-//                            ysnQuantityRequired : location.data.ysnQuantityRequired,
-//                            ysnScaleItem : location.data.ysnScaleItem,
-//                            ysnFoodStampable : location.data.ysnFoodStampable,
-//                            ysnReturnable : location.data.ysnReturnable,
-//                            ysnPrePriced : location.data.ysnPrePriced,
-//                            ysnOpenPricePLU : location.data.ysnOpenPricePLU,
-//                            ysnLinkedItem : location.data.intItemLocationId,
-//                            strVendorCategory : location.data.strVendorCategory,
-//                            ysnCountBySINo : location.data.ysnCountBySINo,
-//                            strSerialNoBegin : location.data.strSerialNoBegin,
-//                            strSerialNoEnd : location.data.strSerialNoEnd,
-//                            ysnIdRequiredLiquor : location.data.ysnIdRequiredLiquor,
-//                            ysnIdRequiredCigarette : location.data.ysnIdRequiredCigarette,
-//                            intMinimumAge : location.data.intMinimumAge,
-//                            ysnApplyBlueLaw1 : location.data.ysnApplyBlueLaw1,
-//                            ysnApplyBlueLaw2 : location.data.ysnApplyBlueLaw2,
-//                            ysnCarWash : location.data.ysnCarWash,
-//                            intItemTypeCode  : location.data.intItemTypeCode,
-//                            intItemTypeSubCode : location.data.intItemTypeSubCode,
-//                            ysnAutoCalculateFreight : location.data.ysnAutoCalculateFreight,
-//                            intFreightMethodId : location.data.intFreightMethodId,
-//                            dblFreightRate : location.data.dblFreightRate,
-//                            intShipViaId : location.data.intShipViaId,
-//                            intNegativeInventory : location.data.intNegativeInventory,
-//                            dblReorderPoint : location.data.dblReorderPoint,
-//                            dblMinOrder : location.data.dblMinOrder,
-//                            dblSuggestedQty : location.data.intItemLocationId,
-//                            dblLeadTime : location.data.intItemLocationId,
-//                            strCounted : location.data.strCounted,
-//                            intCountGroupId : location.data.intCountGroupId,
-//                            ysnCountedDaily : location.data.ysnCountedDaily,
-//                            intSort : location.data.intSort,
-
                                 strLocationName : location.data.strLocationName
-//                            strVendorId : location.data.strVendorId,
-//                            strCategory : location.data.strCategory,
-//                            strUnitMeasure : location.data.strUnitMeasure
                             };
                             currentVM.tblICItemLocations().add(newRecord);
                         }
@@ -1906,6 +1854,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 location.set('intVendorId', copyLocation.get('intVendorId'));
                 location.set('strDescription', copyLocation.get('strDescription'));
                 location.set('intCostingMethod', copyLocation.get('intCostingMethod'));
+                location.set('strCostingMethod', copyLocation.get('strCostingMethod'));
                 location.set('intAllowNegativeInventory', copyLocation.get('intAllowNegativeInventory'));
                 location.set('intSubLocationId', copyLocation.get('intSubLocationId'));
                 location.set('intStorageLocationId', copyLocation.get('intStorageLocationId'));
@@ -2002,6 +1951,73 @@ Ext.define('Inventory.view.ItemViewController', {
             current.set('intAccountId', null);
             current.set('strAccountId', null);
             current.set('strDescription', null);
+        }
+    },
+
+    onAddRequiredAccountClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var me = win.getController()
+        var current = win.getViewModel().data.current;
+        var accountCategoryList = win.getViewModel().storeInfo.accountCategoryList;
+
+        switch (current.get('strType')) {
+            case "Assembly/Blend":
+            case "Inventory":
+                me.addAccountCategory(current, 'AP Clearing', accountCategoryList);
+                me.addAccountCategory(current, 'Inventory', accountCategoryList);
+                me.addAccountCategory(current, 'Cost of Goods', accountCategoryList);
+                me.addAccountCategory(current, 'Sales Account', accountCategoryList);
+                me.addAccountCategory(current, 'Inventory In-Transit', accountCategoryList);
+                break;
+
+            case "Raw Material":
+                me.addAccountCategory(current, 'AP Clearing', accountCategoryList);
+                me.addAccountCategory(current, 'Inventory', accountCategoryList);
+                me.addAccountCategory(current, 'Cost of Goods', accountCategoryList);
+                me.addAccountCategory(current, 'Sales Account', accountCategoryList);
+                me.addAccountCategory(current, 'Inventory In-Transit', accountCategoryList);
+                me.addAccountCategory(current, 'Work In Progress', accountCategoryList);
+                break;
+
+            case "Finished Good":
+                me.addAccountCategory(current, 'Inventory', accountCategoryList);
+                me.addAccountCategory(current, 'Cost of Goods', accountCategoryList);
+                me.addAccountCategory(current, 'Sales Account', accountCategoryList);
+                me.addAccountCategory(current, 'Inventory In-Transit', accountCategoryList);
+                break;
+
+            case "Other Charge":
+                me.addAccountCategory(current, 'Other Charge Income', accountCategoryList);
+                me.addAccountCategory(current, 'Other Charge Expense', accountCategoryList);
+                break;
+
+            case "Non-Inventory":
+            case "Service":
+            case "Software":
+                me.addAccountCategory(current, 'General', accountCategoryList);
+                break;
+        }
+
+    },
+
+    addAccountCategory: function(current, category, categoryList) {
+        if (categoryList) {
+            var exists = Ext.Array.findBy(current.tblICItemAccounts().data.items, function (row) {
+                if (category === row.get('strAccountCategory')) {
+                    return true;
+                }
+            });
+            if (!exists) {
+                var category = categoryList.findRecord('strAccountCategory', category);
+                if(category) {
+                    var newItemAccount = Ext.create('Inventory.model.ItemAccount', {
+                        intItemId: current.get('intItemId'),
+                        intAccountCategoryId: category.get('intAccountCategoryId'),
+                        strAccountCategory: category.get('strAccountCategory')
+                    });
+                    current.tblICItemAccounts().add(newItemAccount);
+                }
+            }
         }
     },
 
@@ -2719,6 +2735,9 @@ Ext.define('Inventory.view.ItemViewController', {
             "#cboAccountCategory": {
                 select: this.onGLAccountSelect
             },
+            "#cboCopyLocation": {
+                select: this.onCopyLocationSelect
+            },
             "#cboPOSCategoryId": {
                 select: this.onPOSCategorySelect
             },
@@ -2850,6 +2869,9 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#btnEditLocation": {
                 click: this.onEditLocationClick
+            },
+            "#btnAddRequiredAccounts": {
+                click: this.onAddRequiredAccountClick
             }
         });
     }
