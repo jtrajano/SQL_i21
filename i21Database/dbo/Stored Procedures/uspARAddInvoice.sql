@@ -321,10 +321,10 @@ WHERE
 
 
 DELETE FROM tblARInvoiceDetailTax 
-WHERE intInvoiceDetailId IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId IN (SELECT DISTINCT intInvoiceId FROM @InvoiceEntries WHERE intInvoiceId IS NULL OR intInvoiceId = 0))
+WHERE intInvoiceDetailId IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId IN (SELECT DISTINCT intInvoiceId FROM @InvoiceEntries WHERE intInvoiceId IS NOT NULL))
 
 DELETE FROM tblARInvoiceDetail 
-WHERE intInvoiceId IN (SELECT DISTINCT intInvoiceId FROM @InvoiceEntries WHERE intInvoiceId IS NULL OR intInvoiceId = 0)
+WHERE intInvoiceId IN (SELECT DISTINCT intInvoiceId FROM @InvoiceEntries WHERE intInvoiceId IS NOT NULL )
 
 UPDATE @temp 
 SET 

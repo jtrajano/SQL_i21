@@ -1,7 +1,8 @@
 CREATE PROCEDURE [dbo].[uspTRProcessToInvoice]
 	 @intTransportLoadId AS INT
 	,@intUserId AS INT	
-
+	,@ysnRecap AS BIT
+	,@ysnPostOrUnPost AS BIT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -47,6 +48,7 @@ BEGIN TRY
 		,strActualCostId
 		,intShipToLocationId
 		,strBOLNumber
+		,intInvoiceId
 	 )	 
 	 select     
        DH.intEntityCustomerId,     
@@ -99,7 +101,8 @@ BEGIN TRY
 			         and HH.strDestination = 'Customer' 
 			         and HH.intDistributionHeaderId = DH.intDistributionHeaderId ) as strActualCostId,
 		DH.intShipToLocationId,
-		TR.strBillOfLadding 
+		TR.strBillOfLadding,
+		DH.intInvoiceId 
 	   from tblTRTransportLoad TL
             JOIN tblTRTransportReceipt TR on TR.intTransportLoadId = TL.intTransportLoadId
 			JOIN tblTRDistributionHeader DH on DH.intTransportReceiptId = TR.intTransportReceiptId
@@ -167,30 +170,31 @@ END;
 
 --Post the invoice that was created
 
-		
-EXEC	 [dbo].[uspARPostInvoice]
-     				@batchId = NULL,
-     				@post = 1,
-     				@recap = 0,
-     				@param = NULL,
-     				@userId = @intUserId,
-     				@beginDate = NULL,
-     				@endDate = NULL,
-     				@beginTransaction = @minId,
-     				@endTransaction = @maxId,
-     				@exclude = NULL,
-     				@successfulCount = @SuccessCount OUTPUT,
-     				@invalidCount = @InvCount OUTPUT,
-     				@success = @IsSuccess OUTPUT,
-     				@batchIdUsed = @batchId OUTPUT,
-     				@recapId = NULL,
-     				@transType = N'Invoice',
-                    @raiseError = 1
-     if @IsSuccess = 0
-     BEGIN
-        RAISERROR('Invoice did not Post', 16, 1);
-     END
-
+if @ysnRecap = 0
+BEGIN		
+     EXEC	 [dbo].[uspARPostInvoice]
+          				@batchId = NULL,
+          				@post = 1,
+          				@recap = 0,
+          				@param = NULL,
+          				@userId = @intUserId,
+          				@beginDate = NULL,
+          				@endDate = NULL,
+          				@beginTransaction = @minId,
+          				@endTransaction = @maxId,
+          				@exclude = NULL,
+          				@successfulCount = @SuccessCount OUTPUT,
+          				@invalidCount = @InvCount OUTPUT,
+          				@success = @IsSuccess OUTPUT,
+          				@batchIdUsed = @batchId OUTPUT,
+          				@recapId = NULL,
+          				@transType = N'Invoice',
+                         @raiseError = 1
+          if @IsSuccess = 0
+          BEGIN
+             RAISERROR('Invoice did not Post', 16, 1);
+          END
+END
 
 
 END TRY

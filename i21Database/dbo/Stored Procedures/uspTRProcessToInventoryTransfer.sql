@@ -1,6 +1,8 @@
 CREATE PROCEDURE [dbo].[uspTRProcessToInventoryTransfer]
 	 @intTransportLoadId AS INT
 	,@intUserId AS INT	
+	,@ysnRecap AS BIT
+	,@ysnPostOrUnPost AS BIT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -139,9 +141,10 @@ DECLARE @TransferEntries AS InventoryTransferStagingTable,
 		SELECT	TOP 1 @intEntityId = intEntityId 
 		FROM	dbo.tblSMUserSecurity 
 		WHERE	intUserSecurityID = @intUserId
-
-		EXEC dbo.uspICPostInventoryTransfer 1, 0, @strTransactionId, @intUserId, @intEntityId;			
-
+		if @ysnRecap = 0
+		BEGIN
+	    	EXEC dbo.uspICPostInventoryTransfer 1, 0, @strTransactionId, @intUserId, @intEntityId;			
+		END
 		DELETE	FROM #tmpAddInventoryTransferResult 
 		WHERE	intInventoryTransferId = @TransferId
 	END;

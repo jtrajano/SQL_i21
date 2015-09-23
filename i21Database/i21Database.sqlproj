@@ -2331,6 +2331,8 @@
     <Build Include="dbo\Tables\tblICTransactionDetailLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICLogTransactionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertPostResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddMiscItemToInvoice.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeEarningDistribution.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryReceiptAfterSave.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -2394,6 +2396,7 @@
     <Build Include="dbo\Stored Procedures\uspCMCheckPrint_GetCheckOverflow.sql" />
     <None Include="Scripts\Post-Deployment\ST\1_FileFieldMapping_PricebookSale.sql" />
     <None Include="Scripts\Post-Deployment\IC\13_MoveCommodityAttributes.sql" />
+    <None Include="Scripts\Post-Deployment\PR\DataFixes\AddDefaultEmployeeEarningDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
