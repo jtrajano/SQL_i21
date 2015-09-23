@@ -737,7 +737,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         tabIndex: -1,
                                                                                         itemId: 'btnTaxDetails',
                                                                                         iconCls: 'small-view',
-                                                                                        text: 'Tax Details'
+                                                                                        text: 'View Tax Details'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'button',
@@ -1209,9 +1209,9 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
-                                                                                dataIndex: 'strTax',
                                                                                 itemId: 'colTaxGroup',
                                                                                 width: 85,
+                                                                                dataIndex: 'strTax',
                                                                                 text: 'Tax Group',
                                                                                 editor: {
                                                                                     xtype: 'gridcombobox',
