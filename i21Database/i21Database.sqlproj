@@ -2443,6 +2443,7 @@
     <Build Include="dbo\Views\vyuHDProjectAuditLog.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\7_FiscalYearPeriod.sql" />
     <Build Include="dbo\Tables\tblGLForBatchPosting.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\8_AccountCurrency.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
