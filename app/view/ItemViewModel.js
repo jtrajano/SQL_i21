@@ -198,6 +198,10 @@ Ext.define('Inventory.view.ItemViewModel', {
         accountCategory: {
             type: 'glbufaccountcategorygroup'
         },
+        accountCategoryList: {
+            autoLoad: true,
+            type: 'glbufaccountcategorygroup'
+        },
         glAccountId: {
             type: 'glbufaccountid'
         },

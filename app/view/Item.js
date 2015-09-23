@@ -913,6 +913,13 @@ Ext.define('Inventory.view.Item', {
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
+                                                                                itemId: 'btnAddRequiredAccounts',
+                                                                                iconCls: 'small-add',
+                                                                                text: 'Add Required'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
                                                                                 itemId: 'btnInsertGlAccounts',
                                                                                 iconCls: 'small-add',
                                                                                 text: 'Insert'

@@ -1869,6 +1869,24 @@
                                                                     "userConfig": {
                                                                         "icon": null,
                                                                         "iconCls": "small-add",
+                                                                        "itemId": "btnAddRequiredAccounts",
+                                                                        "layout|flex": null,
+                                                                        "tabIndex": -1,
+                                                                        "text": "Add Required"
+                                                                    },
+                                                                    "name": "MyButton43",
+                                                                    "designerId": "d7d494a0-cd11-4719-9220-957d0900fe91"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.button.Button",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "icon": null,
+                                                                        "iconCls": "small-add",
                                                                         "itemId": "btnInsertGlAccounts",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
