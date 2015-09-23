@@ -2446,6 +2446,7 @@
     <None Include="Scripts\Post-Deployment\GL\DefaultData\8_AccountCurrency.sql" />
     <Build Include="dbo\Functions\fnCTConvertQuantityToTargetCommodityUOM.sql" />
     <Build Include="dbo\Views\vyuCTCostType.sql" />
+    <Build Include="dbo\Views\vyuRKGetContractBalanceLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -27,7 +27,9 @@
     [strReserveForFix] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intBookId] INT NULL, 
     [intSubBookId] INT NULL, 
-    [ysnOffset] BIT NULL
+    [ysnOffset] BIT NULL,
+	[intContractDetailId] INT NULL
+
     CONSTRAINT [PK_tblRKFutOptTransaction_intFutOptTransactionId] PRIMARY KEY (intFutOptTransactionId),	
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblRKFutOptTransactionHeader_intFutOptTransactionHeaderId] FOREIGN KEY ([intFutOptTransactionHeaderId]) REFERENCES [tblRKFutOptTransactionHeader]([intFutOptTransactionHeaderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [tblEntity]([intEntityId]),
@@ -39,6 +41,8 @@
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblCTBook_intBookId] FOREIGN KEY ([intBookId]) REFERENCES [tblCTBook]([intBookId]),
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblCTSubBook_intBookId] FOREIGN KEY ([intSubBookId]) REFERENCES [tblCTSubBook]([intSubBookId]), 
 	CONSTRAINT [FK_tblRKFutOptTransaction_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),
-	CONSTRAINT [FK_tblRKFutOptTransaction_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID])
+	CONSTRAINT [FK_tblRKFutOptTransaction_tblSMCurrency_intCurrencyId] FOREIGN KEY([intCurrencyId])REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
+	CONSTRAINT [FK_tblRKFutOptTransaction_tblCTContractDetail_intContractDetailId] FOREIGN KEY([intContractDetailId])REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId])
+
 )
 
