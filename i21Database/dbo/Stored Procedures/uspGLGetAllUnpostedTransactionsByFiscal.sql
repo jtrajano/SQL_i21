@@ -4,39 +4,67 @@
 -- Description:	Gets all unposted transaction (GL,CM,AP,IC,AR) 
 -- JIRA Key:	GL-1923
 -- =============================================
-CREATE PROCEDURE uspGLGetAllUnpostedTransactionsByFiscal --GL-1923
+CREATE PROCEDURE [dbo].[uspGLGetAllUnpostedTransactionsByFiscal] --GL-1923
  @intFiscalYearId INT
 AS
 BEGIN
 	SET NOCOUNT ON;
 	DECLARE @blnLegacyIntegration BIT = 0
-	DECLARE @tblTransactions TABLE(
-		strTransactionId NVARCHAR(50),
-		strTransactionType NVARCHAR(25),
+	DECLARE @tblOriginTransactions TABLE(
+		strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+		strTransactionType NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
 		dtmDate DATETIME
 	)
+	DECLARE @tblTransactions TABLE(
+		intTransactionId INT,
+		strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+		strTransactionType NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
+		dtmDate DATETIME,
+		strDescription NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
+		strUserName NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		intEntityId	INT
+	)
 	
-
+	DECLARE @guid UNIQUEIDENTIFIER
 	DECLARE @dtmDateFrom DATETIME
 	DECLARE @dtmDateTo DATETIME
 	SELECT TOP 1 @dtmDateFrom= dtmDateFrom,@dtmDateTo= dtmDateTo FROM tblGLFiscalYear WHERE intFiscalYearId = @intFiscalYearId
 
-	;WITH Transactions(strTransactionId,strTransactionType,dtmDate)
+	--INSERTS TO temporarytable
+	;WITH Transactions(intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate)
 	AS
 	(
-		SELECT strJournalId COLLATE DATABASE_DEFAULT AS strTransactionId, strTransactionType COLLATE DATABASE_DEFAULT AS strTransactionType, dtmDate 
-			FROM tblGLJournal WHERE ysnPosted = 0 and (strTransactionType = 'General Journal' OR strTransactionType = 'Audit Adjustment')-- GL
+		SELECT intJournalId,  strJournalId COLLATE DATABASE_DEFAULT AS strTransactionId,strDescription,  strTransactionType COLLATE DATABASE_DEFAULT AS strTransactionType,
+		strUserName = (select strName from tblEntity where intEntityId = j.intEntityId ),
+		intEntityId,
+		dtmDate
+		 dtmDate 
+			FROM tblGLJournal j
+			 WHERE ysnPosted = 0 and (strTransactionType = 'General Journal' OR strTransactionType = 'Audit Adjustment')-- GL
+		--UNION
+		--SELECT strTransactionId, strTransactionType,dtmDate from [vyuICGetUnpostedTransactions] --IC
+		--UNION
+		--SELECT strTransactionId, strTransactionType,dtmDate from [vyuAPUnpostedTransaction] --AP
 		UNION
-		SELECT strTransactionId, strTransactionType,dtmDate from [vyuICGetUnpostedTransactions] --IC
-		UNION
-		SELECT strTransactionId, strTransactionType,dtmDate from [vyuAPUnpostedTransaction] --AP
-		UNION
-		SELECT strTransactionId, strTransactionType,dtmDate from [vyuCMUnpostedTransaction] --CM
-		UNION
-		SELECT strTransactionId, strTransactionType,dtmDate from [vyuARUnpostedTransactions] --AR
+		SELECT intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate from [vyuCMUnpostedTransaction] --CM
+		--UNION
+		--SELECT strTransactionId, strTransactionType,dtmDate from [vyuARUnpostedTransactions] --AR
 	)
-	INSERT INTO @tblTransactions
-	SELECT strTransactionId,strTransactionType,dtmDate from Transactions WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
+	INSERT INTO @tblTransactions(intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate)
+	SELECT intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate from Transactions WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
+	
+	IF EXISTS (SELECT TOP 1 1 from @tblTransactions)
+	BEGIN
+		DELETE FROM tblGLForBatchPosting WHERE dtmDateEntered < DATEADD(day,-2, GETDATE())
+		SELECT @guid = NEWID()
+		
+		INSERT INTO 
+		tblGLForBatchPosting (intTransactionId, strTransactionId,strDescription, strTransactionType,strUserName, intEntityId, dtmDate,[guid])
+		SELECT intTransactionId, strTransactionId, strDescription, strTransactionType,strUserName,intEntityId, dtmDate,@guid FROM @tblTransactions
+	END
+
+		
+	
 	
 	SELECT TOP 1 @blnLegacyIntegration = ISNULL(ysnLegacyIntegration,0) FROM tblSMCompanyPreference 
 	
@@ -51,7 +79,7 @@ BEGIN
 		CAST(SUBSTRING(CAST(glije_date AS NVARCHAR(10)),1,4) + '-' + SUBSTRING(CAST(glije_date AS NVARCHAR(10)),5,2) + '-' + SUBSTRING(CAST(glije_date AS NVARCHAR(10)),7,2) AS DATE) as dtmDate 
 		FROM glijemst
 	)
-	INSERT INTO @tblTransactions
+	INSERT INTO @tblOriginTransactions
 	SELECT strTransactionId,strTransactionType,dtmDate FROM GLORIGIN
 	WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
 		
@@ -67,7 +95,7 @@ BEGIN
 			FROM aptrxmst 
 			GROUP BY aptrx_ivc_no, aptrx_gl_rev_dt
 		)
-		INSERT INTO @tblTransactions
+		INSERT INTO @tblOriginTransactions
 		SELECT strTransactionId,strTransactionType,dtmDate FROM APORIGIN
 		WHERE dtmDate >= @dtmDateFrom AND dtmDate <= @dtmDateTo
 	END
@@ -78,7 +106,8 @@ BEGIN
 	SELECT @intCount = COUNT(1) FROM @tblTransactions
 	SELECT @intAACount = COUNT(1) FROM @tblTransactions WHERE strTransactionType = 'Audit Adjustment'
 	
-	SELECT strTransactionId,strTransactionType,dtmDate FROM @tblTransactions
+	SELECT strTransactionId,strTransactionType,dtmDate FROM @tblOriginTransactions
 	SELECT CASE WHEN @intCount >0 AND @intAACount = @intCount THEN 'AA' ELSE '' END AS message
+	SELECT @guid as batchGUID
 
 END
