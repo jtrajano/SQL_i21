@@ -41,12 +41,15 @@ BEGIN
 		PRINT N'TRUNCATING tblSMCompanyPreference'
 		TRUNCATE TABLE tblSMCompanyPreference
 
+		DECLARE @companySetupId INT
+		SELECT TOP 1 @companySetupId = intCompanySetupID FROM tblSMCompanySetup ORDER BY intCompanySetupID ASC
+
 		PRINT N'INSERTING tblSMCompanyPreference from tblSMPreferences'
 		INSERT INTO tblSMCompanyPreference(intDefaultCurrencyId, intDefaultReportingCurrencyId, intDefaultCountryId, strEnvironmentType, ysnLegacyIntegration, 
 		strAccountingMethod, strSMTPHost, intSMTPPort, strSMTPUserName, strSMTPPassword, strSMTPFromEmail, strSMTPFromName, ysnSMTPAuthentication,
 		strSMTPSsl, intInterfaceSystemId, strQuotingSystemBatchUserID, strQuotingSystemBatchUserPassword, strInterfaceWebServicesURL, ysnAllowForContractPricing,
 		ysnInterfaceToTargetOrders, ysnAllowUseForClosingPrices, ysnAllowUseForEndOfMonth, ysnInterfaceToScales, intSaveHistoryEveryId, strIntervalStartTime,
-		strIntervalEndTime, strIntervalUpdatesMinutes, strQuotesDecimalsShown)
+		strIntervalEndTime, strIntervalUpdatesMinutes, strQuotesDecimalsShown, intCompanySetupId)
 		SELECT 
 		ISNULL(defaultCurrency, 0) AS intDefaultCurrencyId,
 		ISNULL(defaultReporting, 0) AS intDefaultReportingCurrencyId, 
@@ -75,7 +78,8 @@ BEGIN
 		ISNULL(IntervalStartTime, '') AS strIntervalStartTime,
 		ISNULL(IntervalEndTime, '') AS strIntervalEndTime,
 		ISNULL(IntervalUpdatesMinutes, '') AS strIntervalUpdatesMinutes,
-		ISNULL(QuotesDecimalsShown, '') AS strQuotesDecimalsShown
+		ISNULL(QuotesDecimalsShown, '') AS strQuotesDecimalsShown,
+		@companySetupId
 		FROM
 		(
 		  SELECT strValue, strPreference
