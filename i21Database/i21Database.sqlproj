@@ -2334,6 +2334,9 @@
     <Build Include="dbo\Stored Procedures\uspARAddMiscItemToInvoice.sql" />
     <Build Include="dbo\Tables\tblPREmployeeEarningDistribution.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryReceiptAfterSave.sql" />
+    <Build Include="dbo\Tables\tblARImportFile.sql" />
+    <Build Include="dbo\Tables\tblARImportLog.sql" />
+    <Build Include="dbo\Tables\tblARImportLogDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
