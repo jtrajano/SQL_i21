@@ -23,7 +23,11 @@ BEGIN TRY
 			@intNewFutureMarketId		INT,
 			@intLotsUnfixed				INT,
 			@intPriceFixationDetailId	INT,
-			@intFutOptTransactionId		INT
+			@intFutOptTransactionId		INT,
+			@ysnMultiplePriceFixation	BIT,
+			@intPricingTypeId			INT
+
+	SET		@ysnMultiplePriceFixation = 0
 
 	SELECT	@intLotsUnfixed			=	ISNULL(intTotalLots,0) - ISNULL(intLotsFixed,0),
 			@intContractDetailId	=	intContractDetailId,
@@ -34,10 +38,12 @@ BEGIN TRY
 
 	IF ISNULL(@intContractDetailId,0) > 0
 	BEGIN
+		ProcessContractDetail:
 
 		SELECT	@intCommodityId				=	intCommodityId,
 				@intPriceItemUOMId			=	intPriceItemUOMId,
-				@strCommodityDescription	=	strCommodityDescription
+				@strCommodityDescription	=	strCommodityDescription,
+				@intPricingTypeId			=	intPricingTypeId
 		FROM	vyuCTContractDetailView 
 		WHERE	intContractDetailId =	@intContractDetailId
 			
@@ -58,22 +64,21 @@ BEGIN TRY
 		WHERE	intCommodityId		=	@intCommodityId 
 		AND		intUnitMeasureId	=	@intUnitMeasureId
 
+		IF @intPricingTypeId = 2
+		BEGIN
+			UPDATE tblCTContractDetail SET dblOriginalBasis = dblBasis WHERE intContractDetailId = @intContractDetailId
+		END
+
 		IF @strAction = 'Delete'
 		BEGIN
 
 			UPDATE	CD
-			SET		CD.dblBasis				=	ISNULL(PF.dblOriginalBasis,0),
+			SET		CD.dblBasis				=	ISNULL(CD.dblOriginalBasis,0),
 					CD.intFutureMarketId	=	PF.intOriginalFutureMarketId,
 					CD.intFutureMonthId		=	PF.intOriginalFutureMonthId,
-					CD.intConcurrencyId		=	CD.intConcurrencyId + 1
-			FROM	tblCTContractDetail	CD
-			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId
-			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
-
-			UPDATE	CD
-			SET		CD.intPricingTypeId		=	2,
+					CD.intPricingTypeId		=	2,
 					CD.dblFutures			=	NULL,
-					CD.dblCashPrice			=	NULL,	
+					CD.dblCashPrice			=	NULL,
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1
 			FROM	tblCTContractDetail	CD
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId
@@ -109,7 +114,20 @@ BEGIN TRY
 				
 			END
 
-			RETURN
+			IF	@ysnMultiplePriceFixation = 1
+			BEGIN
+				SELECT	@intContractDetailId = MIN(intContractDetailId)
+				FROM	tblCTContractDetail 
+				WHERE	intContractHeaderId = @intContractHeaderId 
+				AND		intContractDetailId > @intContractDetailId
+
+				IF ISNULL(@intContractDetailId,0) = 0
+					SET @intContractDetailId = -1
+
+				GOTO NextDetail
+			END
+			ELSE
+				RETURN
 		END
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblCTSpreadArbitrage WHERE intPriceFixationId = @intPriceFixationId)
@@ -126,7 +144,7 @@ BEGIN TRY
 			AND		intTypeRef				=	@intTypeRef
 
 			UPDATE	CD
-			SET		CD.dblBasis				=	ISNULL(PF.dblOriginalBasis,0) + dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblRollArb,0)),
+			SET		CD.dblBasis				=	ISNULL(CD.dblOriginalBasis,ISNULL(CD.dblBasis,0)) + dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intFinalPriceUOMId,ISNULL(dblRollArb,0)),
 					CD.intFutureMarketId	=	@intNewFutureMarketId,
 					CD.intFutureMonthId		=	@intNewFutureMonthId,
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1
@@ -137,7 +155,7 @@ BEGIN TRY
 		ELSE
 		BEGIN
 			UPDATE	CD
-			SET		CD.dblBasis				=	ISNULL(PF.dblOriginalBasis,0) + ISNULL(dblRollArb,0),
+			SET		CD.dblBasis				=	ISNULL(CD.dblOriginalBasis,0) + ISNULL(dblRollArb,0),
 					CD.intFutureMarketId	=	PF.intOriginalFutureMarketId,
 					CD.intFutureMonthId		=	PF.intOriginalFutureMonthId,
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1
@@ -167,6 +185,48 @@ BEGIN TRY
 			FROM	tblCTContractDetail	CD
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
+		END
+
+		IF	@ysnMultiplePriceFixation = 1
+		BEGIN
+			SELECT	@intContractDetailId = MIN(intContractDetailId)
+			FROM	tblCTContractDetail 
+			WHERE	intContractHeaderId = @intContractHeaderId 
+			AND		intContractDetailId > @intContractDetailId
+
+			IF ISNULL(@intContractDetailId,0) = 0
+				SET @intContractDetailId = -1
+
+			GOTO NextDetail
+		END
+	END
+	ELSE
+	BEGIN
+		NextDetail:
+
+		SET		@ysnMultiplePriceFixation = 1
+
+		IF ISNULL(@intContractDetailId,0) = 0
+		BEGIN
+			SELECT	@intContractDetailId = MIN(intContractDetailId)
+			FROM	tblCTContractDetail 
+			WHERE	intContractHeaderId = @intContractHeaderId
+		END
+
+		IF ISNULL(@intContractDetailId,0) > 0
+		BEGIN
+			
+			UPDATE	tblCTPriceFixation 
+			SET		intContractDetailId = @intContractDetailId
+			WHERE	intPriceFixationId	=	@intPriceFixationId
+
+			GOTO ProcessContractDetail
+		END
+		ELSE
+		BEGIN
+			UPDATE	tblCTPriceFixation 
+			SET		intContractDetailId = NULL
+			WHERE	intPriceFixationId	=	@intPriceFixationId
 		END
 	END
 
