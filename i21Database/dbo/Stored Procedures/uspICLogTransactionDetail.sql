@@ -30,7 +30,7 @@ BEGIN
 	BEGIN
 		IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @TransactionId)
 		BEGIN
-			DELETE FROM tblICTransactionDetailLog WHERE strTransactionType = @TransactionType AND intTransactionId = @TransactionId
+			DELETE FROM tblICTransactionDetailLog WHERE strTransactionType = 'Inventory Receipt' AND intTransactionId = @TransactionId
 
 			INSERT INTO tblICTransactionDetailLog(
 				strTransactionType,
@@ -64,16 +64,13 @@ BEGIN
 				LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			WHERE ReceiptItem.intInventoryReceiptId = @TransactionId
 		END
-		ELSE
-		BEGIN
-			RAISERROR ('Specified Receipt transaction does not exist.',16,1)
-			RETURN
-		END
 	END
 	ELSE IF (@TransactionType = @TransactionType_Shipment)
 	BEGIN
 		IF EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipment WHERE intInventoryShipmentId = @TransactionId)
 		BEGIN
+			DELETE FROM tblICTransactionDetailLog WHERE strTransactionType = 'Inventory Shipment' AND intTransactionId = @TransactionId
+
 			INSERT INTO tblICTransactionDetailLog(
 				strTransactionType,
 				intTransactionId, 
@@ -100,11 +97,6 @@ BEGIN
 			FROM tblICInventoryShipmentItem ShipmentItem
 				LEFT JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 			WHERE ShipmentItem.intInventoryShipmentId = @TransactionId
-		END
-		ELSE
-		BEGIN
-			RAISERROR ('Specified Shipment transaction does not exist.',16,1)
-			RETURN
 		END
 	END
 
