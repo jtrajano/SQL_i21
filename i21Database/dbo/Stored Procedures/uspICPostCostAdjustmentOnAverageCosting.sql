@@ -28,11 +28,14 @@
 */
 
 CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnAverageCosting]
-	@intItemId AS INT
+	@dtmDate AS DATETIME
+	,@intItemId AS INT
 	,@intItemLocationId AS INT
-	,@intItemUOMId AS INT
-	,@dtmDate AS DATETIME
-	,@dblValue AS NUMERIC(38,20)
+	,@intSubLocationId AS INT
+	,@intStorageLocationId AS INT 
+	,@intItemUOMId AS INT	
+	,@dblQty AS NUMERIC(18,6)
+	,@dblNewCost AS NUMERIC(38,20)
 	,@intTransactionId AS INT
 	,@intTransactionDetailId AS INT
 	,@strTransactionId AS NVARCHAR(20)
@@ -60,15 +63,22 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@LOTCOST AS INT = 4 	
 		,@ACTUALCOST AS INT = 5	
 
+-- Get the UOM Qty 
+DECLARE @dblUOMQty AS NUMERIC(18,6)
+SELECT TOP 1 
+		@dblUOMQty = dblUnitQty
+FROM	dbo.tblICItemUOM 
+WHERE	intItemId = @intItemId
+		AND intItemUOMId = @intItemUOMId
+
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @INVENTORY_AUTO_NEGATIVE AS INT = 1;
 DECLARE @INVENTORY_WRITE_OFF_SOLD AS INT = 2;
 DECLARE @INVENTORY_REVALUE_SOLD AS INT = 3;
-DECLARE @INVENTORY_COST_VARIANCE AS INT = 22;
+DECLARE @INVENTORY_COST_ADJUSTMENT AS INT = 22;
 
-DECLARE @FIFOId AS INT
+DECLARE @CostBucketId AS INT
 		,@InventoryTransactionIdentityId AS INT
-		,@NewCost AS NUMERIC(38,20)
 		,@CurrentCost AS NUMERIC(38,20)
 
 DECLARE @TransactionId AS INT
@@ -90,18 +100,10 @@ SELECT	TOP 1
 FROM	dbo.tblICInventoryTransactionType
 WHERE	intTransactionTypeId = @intTransactionTypeId
 
--- Get the cost bucket and calculate the new cost. 
+-- Get the cost bucket and original cost. 
 BEGIN 
-	SELECT	@FIFOId				= intInventoryFIFOId
-			,@CurrentCost		= dblCost			
-			,@NewCost			= CASE	WHEN ISNULL(dblStockIn, 0) = 0 THEN 0 
-										ELSE (
-												ISNULL(dblStockIn, 0) 
-												* ISNULL(dblCost, 0) 
-												+ ISNULL(@dblValue, 0)
-											) 
-											/ dblStockIn
-								END 
+	SELECT	@CostBucketId	= intInventoryFIFOId
+			,@CurrentCost	= dblCost			
 	FROM	dbo.tblICInventoryFIFO
 	WHERE	intItemId = @intItemId
 			AND intItemLocationId = @intItemLocationId
@@ -117,7 +119,7 @@ END
 
 -- Validate the cost bucket
 BEGIN 
-	IF @FIFOId IS NULL
+	IF @CostBucketId IS NULL
 	BEGIN 
 		DECLARE @strItemNo AS NVARCHAR(50)
 
@@ -126,7 +128,7 @@ BEGIN
 		WHERE	intItemId = @intItemId
 
 		-- 'Cost adjustment cannot continue. Unable to find the cost bucket for {Item}.'
-		RAISERROR(50004, 11, 1, @strItemNo)  
+		RAISERROR(51182, 11, 1, @strItemNo)  
 		GOTO Post_Exit  
 	END
 END 
@@ -134,11 +136,12 @@ END
 -- Check if new cost is the same as the current cost
 BEGIN 
 	-- Exit and do nothing if the costs are the same. 
-	IF @NewCost = @CurrentCost GOTO Post_Exit
+	IF ISNULL(@dblNewCost, 0) = ISNULL(@CurrentCost, 0)
+		GOTO Post_Exit
 END 
 
 -----------------------------------------------------------------------------------------------------------------------------
--- Loop
+-- Begin loop for sold stocks
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
 	-- Get the FIFO Out records. 
@@ -162,7 +165,7 @@ BEGIN
 			,intRevalueFifoId
 			,dblQty
 	FROM	dbo.tblICInventoryFIFOOut FIFOOut
-	WHERE	FIFOOut.intInventoryFIFOId = @FIFOId
+	WHERE	FIFOOut.intInventoryFIFOId = @CostBucketId
 
 	OPEN loopFIFOOut;
 
@@ -210,38 +213,37 @@ BEGIN
 			IF @TransactionId IS NOT NULL 
 			BEGIN 
 				-- Create the Write-Off Sold
-				SET @TransactionValue = -1 * ISNULL(@TransactionQty, 0) * ISNULL(@TransactionCost, 0)
+				SET @TransactionValue = ISNULL(@FIFOOutQty, 0) * ISNULL(@CurrentCost, 0) + ISNULL(@TransactionValue, 0)
 				EXEC [dbo].[uspICPostInventoryTransaction]
-					@intItemId								= @intItemId
-					,@intItemLocationId						= @intItemLocationId
-					,@intItemUOMId							= @intItemUOMId
-					,@intSubLocationId						= @TransactionSubLocationId 
-					,@intStorageLocationId					= @TransactionStorageLocationId 
-					,@dtmDate								= @dtmDate
-					,@dblQty								= 0
-					,@dblUOMQty								= 0
-					,@dblCost								= 0
-					,@dblValue								= @TransactionValue
-					,@dblSalesPrice							= 0
-					,@intCurrencyId							= @TransactionCurrencyId
-					,@dblExchangeRate						= @TransactionExchangeRate
-					,@intTransactionId						= @intTransactionId
-					,@intTransactionDetailId				= @intTransactionDetailId
-					,@strTransactionId						= @strTransactionId
-					,@strBatchId							= @strBatchId
-					,@intTransactionTypeId					= @INVENTORY_WRITE_OFF_SOLD
-					,@intLotId								= NULL 
-					,@ysnIsUnposted							= 0
-					,@intRelatedInventoryTransactionId		= @FIFOOutInventoryTransactionId
-					,@intRelatedTransactionId				= @TransactionIntegerId 
-					,@strRelatedTransactionId				= @TransactionStringId 
-					,@strTransactionForm					= @TransactionTypeName
-					,@intUserId								= @intUserId
-					,@intCostingMethod						= @AVERAGECOST
-					,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
+					@intItemId							= @intItemId
+					,@intItemLocationId					= @intItemLocationId
+					,@intItemUOMId						= @intItemUOMId
+					,@intSubLocationId					= @TransactionSubLocationId 
+					,@intStorageLocationId				= @TransactionStorageLocationId 
+					,@dtmDate							= @dtmDate
+					,@dblQty							= 0
+					,@dblUOMQty							= 0
+					,@dblCost							= 0
+					,@dblValue							= @TransactionValue
+					,@dblSalesPrice						= 0
+					,@intCurrencyId						= @TransactionCurrencyId
+					,@dblExchangeRate					= @TransactionExchangeRate
+					,@intTransactionId					= @intTransactionId
+					,@intTransactionDetailId			= @intTransactionDetailId
+					,@strTransactionId					= @strTransactionId
+					,@strBatchId						= @strBatchId
+					,@intTransactionTypeId				= @INVENTORY_WRITE_OFF_SOLD
+					,@intLotId							= NULL 
+					,@intRelatedInventoryTransactionId	= @FIFOOutInventoryTransactionId
+					,@intRelatedTransactionId			= @TransactionIntegerId 
+					,@strRelatedTransactionId			= @TransactionStringId 
+					,@strTransactionForm				= @TransactionTypeName
+					,@intUserId							= @intUserId
+					,@intCostingMethod					= @AVERAGECOST
+					,@InventoryTransactionIdentityId	= @InventoryTransactionIdentityId OUTPUT
 
 				-- Create the Revalue sold 
-				SET @TransactionValue = ISNULL(@TransactionQty, 0) * ISNULL(@NewCost, 0) 
+				SET @TransactionValue = -1 * ISNULL(@FIFOOutQty, 0) * ISNULL(@dblNewCost, 0)
 
 				EXEC [dbo].[uspICPostInventoryTransaction]
 					@intItemId								= @intItemId
@@ -263,37 +265,6 @@ BEGIN
 					,@strBatchId							= @strBatchId
 					,@intTransactionTypeId					= @INVENTORY_REVALUE_SOLD
 					,@intLotId								= NULL 
-					,@ysnIsUnposted							= 0
-					,@intRelatedInventoryTransactionId		= @FIFOOutInventoryTransactionId
-					,@intRelatedTransactionId				= @TransactionIntegerId 
-					,@strRelatedTransactionId				= @TransactionStringId 
-					,@strTransactionForm					= @TransactionTypeName
-					,@intUserId								= @intUserId
-					,@intCostingMethod						= @AVERAGECOST
-					,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
-
-				-- Create the Cost Variance 
-				EXEC [dbo].[uspICPostInventoryTransaction]
-					@intItemId								= @intItemId
-					,@intItemLocationId						= @intItemLocationId
-					,@intItemUOMId							= @intItemUOMId
-					,@intSubLocationId						= @TransactionSubLocationId 
-					,@intStorageLocationId					= @TransactionStorageLocationId 
-					,@dtmDate								= @dtmDate
-					,@dblQty								= 0
-					,@dblUOMQty								= 0
-					,@dblCost								= 0
-					,@dblValue								= @dblValue
-					,@dblSalesPrice							= 0
-					,@intCurrencyId							= @TransactionCurrencyId
-					,@dblExchangeRate						= @TransactionExchangeRate
-					,@intTransactionId						= @intTransactionId
-					,@intTransactionDetailId				= @intTransactionDetailId
-					,@strTransactionId						= @strTransactionId
-					,@strBatchId							= @strBatchId
-					,@intTransactionTypeId					= @INVENTORY_COST_VARIANCE
-					,@intLotId								= NULL 
-					,@ysnIsUnposted							= 0
 					,@intRelatedInventoryTransactionId		= @FIFOOutInventoryTransactionId
 					,@intRelatedTransactionId				= @TransactionIntegerId 
 					,@strRelatedTransactionId				= @TransactionStringId 
@@ -312,6 +283,125 @@ BEGIN
 				,@FIFOOutQty 
 	END;
 END;
+
+-----------------------------------------------------------------------------------------------------------------------------
+-- End loop for sold stocks
+-----------------------------------------------------------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------------------------------------------------------
+-- Process the new cost
+-----------------------------------------------------------------------------------------------------------------------------
+BEGIN 
+	---- Initialize the variables
+	SELECT	@TransactionValue	= (@dblQty * @dblNewCost)
+
+	---- Get the data from the Out record
+	--SELECT	@TransactionValue = (dblStockIn - dblStockOut) * @dblNewCost
+	--FROM	dbo.tblICInventoryFIFO CostBucket
+	--WHERE	intInventoryFIFOId = @CostBucketId
+	--		AND (dblStockIn - dblStockOut) > 0 
+	--		AND ISNULL(ysnIsUnposted, 0) = 0 
+
+	-- Create the 'Cost Adjustment'
+	EXEC [dbo].[uspICPostInventoryTransaction]
+		@intItemId								= @intItemId
+		,@intItemLocationId						= @intItemLocationId
+		,@intItemUOMId							= @intItemUOMId
+		,@intSubLocationId						= @intSubLocationId
+		,@intStorageLocationId					= @intStorageLocationId
+		,@dtmDate								= @dtmDate
+		,@dblQty								= 0
+		,@dblUOMQty								= 0
+		,@dblCost								= 0
+		,@dblValue								= @TransactionValue
+		,@dblSalesPrice							= 0
+		,@intCurrencyId							= NULL 
+		,@dblExchangeRate						= 1
+		,@intTransactionId						= @intTransactionId
+		,@intTransactionDetailId				= @intTransactionDetailId
+		,@strTransactionId						= @strTransactionId
+		,@strBatchId							= @strBatchId
+		,@intTransactionTypeId					= @INVENTORY_COST_ADJUSTMENT
+		,@intLotId								= NULL 
+		,@intRelatedInventoryTransactionId		= NULL 
+		,@intRelatedTransactionId				= NULL 
+		,@strRelatedTransactionId				= NULL 
+		,@strTransactionForm					= @TransactionTypeName
+		,@intUserId								= @intUserId
+		,@intCostingMethod						= @AVERAGECOST
+		,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
+END 
+
+-----------------------------------------------------------------------------------------------------------------------------
+-- Update the cost at the cost bucket
+-----------------------------------------------------------------------------------------------------------------------------
+BEGIN 
+	UPDATE	CostBucket
+	SET		dblCost = @dblNewCost
+	FROM	dbo.tblICInventoryFIFO CostBucket
+	WHERE	intInventoryFIFOId = @CostBucketId
+			AND ISNULL(ysnIsUnposted, 0) = 0 
+END
+		
+-----------------------------------------------------------------------------------------------------------------------------
+-- Update the average cost 
+-----------------------------------------------------------------------------------------------------------------------------
+BEGIN 
+	DECLARE @CurrentStockQty AS NUMERIC(18,6)
+
+	SELECT TOP 1 
+			@CurrentStockQty = dblUnitOnHand
+	FROM	dbo.tblICItemStock
+	WHERE	intItemId = @intItemId
+			AND intItemLocationId = @intItemLocationId
+
+	MERGE	
+	INTO	dbo.tblICItemPricing 
+	WITH	(HOLDLOCK) 
+	AS		ItemPricing
+	USING (
+			SELECT	intItemId = @intItemId
+					,intItemLocationId = @intItemLocationId
+					,Qty = dbo.fnCalculateStockUnitQty(@dblQty, @dblUOMQty) 
+					,Cost = dbo.fnCalculateUnitCost(@dblNewCost, @dblUOMQty)
+	) AS StockToUpdate
+		ON ItemPricing.intItemId = StockToUpdate.intItemId
+		AND ItemPricing.intItemLocationId = StockToUpdate.intItemLocationId
+
+	-- If matched, update the average cost, last cost, and standard cost
+	WHEN MATCHED THEN 
+		UPDATE 
+		SET		dblAverageCost = dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, ItemPricing.dblAverageCost)
+				,dblLastCost = StockToUpdate.Cost
+				,dblStandardCost = 
+								CASE WHEN StockToUpdate.Qty > 0 THEN 
+										CASE WHEN ISNULL(ItemPricing.dblStandardCost, 0) = 0 THEN StockToUpdate.Cost ELSE ItemPricing.dblStandardCost END 
+									ELSE 
+										ItemPricing.dblStandardCost
+								END 
+
+	-- If none found, insert a new item pricing record
+	WHEN NOT MATCHED THEN 
+		INSERT (
+			intItemId
+			,intItemLocationId
+			,dblAverageCost 
+			,dblLastCost 
+			,dblStandardCost
+			,intConcurrencyId
+		)
+		VALUES (
+			StockToUpdate.intItemId
+			,StockToUpdate.intItemLocationId
+			,dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, 0)
+			,StockToUpdate.Cost
+			,StockToUpdate.Cost
+			,1
+		)
+	;
+
+END 
+
 
 -- Immediate exit
 Post_Exit: 

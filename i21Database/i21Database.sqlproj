@@ -2326,7 +2326,7 @@
     <Build Include="dbo\Tables\tblICInventoryFIFORevalueOutStock.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnAverageCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustment.sql" />
-    <Build Include="dbo\User Defined Types\NewItemCostTableType.sql" />
+    <Build Include="dbo\User Defined Types\ItemCostAdjustmentTableType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

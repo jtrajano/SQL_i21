@@ -17,7 +17,7 @@
 	@intUserId - The user who is initiating the post. 
 */
 CREATE PROCEDURE [dbo].[uspICPostCostAdjustment]
-	@ItemsToAdjust AS ItemCostingTableType READONLY
+	@ItemsToAdjust AS ItemCostAdjustmentTableType READONLY
 	,@strBatchId AS NVARCHAR(20)
 	,@strAccountToCounterInventory AS NVARCHAR(255) = 'Cost Adjustment'
 	,@intUserId AS INT
@@ -43,7 +43,8 @@ DECLARE @intId AS INT
 		,@intSubLocationId AS INT
 		,@intStorageLocationId AS INT 
 		,@dtmDate AS DATETIME
-		,@dblValue AS NUMERIC(38, 20)
+		,@dblQty AS NUMERIC(18,6)
+		,@dblNewCost AS NUMERIC(38, 20)
 		,@intTransactionId AS INT
 		,@intTransactionDetailId AS INT
 		,@strTransactionId AS NVARCHAR(40) 
@@ -70,12 +71,12 @@ FROM	dbo.tblICInventoryTransactionType
 WHERE	intTransactionTypeId = @intTransactionTypeId
 
 -----------------------------------------------------------------------------------------------------------------------------
--- Do the Validation
+-- TODO: Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
-BEGIN 
-	EXEC [dbo].[uspICValidateCostingOnPost] 
-		@ItemsToValidate = @ItemsToAdjust
-END
+--BEGIN 
+--	EXEC [dbo].[uspICValidateCostingOnPost] 
+--		@ItemsToValidate = @ItemsToAdjust
+--END
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Create the cursor
@@ -92,7 +93,8 @@ SELECT  intId
 		,intSubLocationId
 		,intStorageLocationId
 		,dtmDate
-		,dblValue
+		,dblQty 
+		,dblNewCost
 		,intTransactionId
 		,intTransactionDetailId
 		,strTransactionId
@@ -113,7 +115,8 @@ FETCH NEXT FROM loopItems INTO
 	,@intSubLocationId
 	,@intStorageLocationId
 	,@dtmDate
-	,@dblValue 
+	,@dblQty
+	,@dblNewCost
 	,@intTransactionId
 	,@intTransactionDetailId
 	,@strTransactionId
@@ -142,11 +145,14 @@ BEGIN
 	IF (@CostingMethod = @AVERAGECOST)
 	BEGIN 
 		EXEC dbo.uspICPostCostAdjustmentOnAverageCosting
-			@intItemId
+			@dtmDate
+			,@intItemId
 			,@intItemLocationId
+			,@intSubLocationId
+			,@intStorageLocationId
 			,@intItemUOMId
-			,@dtmDate
-			,@dblValue
+			,@dblQty			
+			,@dblNewCost 
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
@@ -166,7 +172,8 @@ BEGIN
 		,@intSubLocationId
 		,@intStorageLocationId
 		,@dtmDate
-		,@dblValue 
+		,@dblQty
+		,@dblNewCost
 		,@intTransactionId
 		,@intTransactionDetailId
 		,@strTransactionId
@@ -184,7 +191,7 @@ CLOSE loopItems;
 DEALLOCATE loopItems;
 
 -----------------------------------------------------------------------------------------------------------------------------
--- Adjust the average cost 
+-- Adjust the average cost regardless of costing method.
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 						
 	-- Update the Item Pricing table
@@ -233,7 +240,7 @@ BEGIN
 			,intSubLocationId
 			,intStorageLocationId
 			,dtmDate
-			,dblValue
+			,dblNewCost
 			,intTransactionId
 			,intTransactionDetailId
 			,strTransactionId
@@ -241,7 +248,7 @@ BEGIN
 			,intLotId 
 	FROM	@ItemsToAdjust
 
-	OPEN loopItems;
+	OPEN loopItemsForAutoNegative;
 
 	-- Initial fetch attempt
 	FETCH NEXT FROM loopItemsForAutoNegative INTO 
@@ -252,7 +259,7 @@ BEGIN
 		,@intSubLocationId
 		,@intStorageLocationId
 		,@dtmDate
-		,@dblValue 
+		,@dblNewCost
 		,@intTransactionId
 		,@intTransactionDetailId
 		,@strTransactionId
@@ -278,11 +285,11 @@ BEGIN
 		IF (@CostingMethod = @AVERAGECOST)
 		BEGIN 
 			SELECT	@AutoNegativeAmount = 
-						dbo.fnGetItemTotalValueFromTransactions(
+						(Stock.dblUnitOnHand * ItemPricing.dblAverageCost) 
+						- dbo.fnGetItemTotalValueFromTransactions(
 							Stock.intItemId, 
 							Stock.intItemLocationId
 						)
-						- (Stock.dblUnitOnHand * ItemPricing.dblAverageCost) 
 			FROM	dbo.tblICItemStock Stock INNER JOIN dbo.tblICItemPricing ItemPricing
 						ON	Stock.intItemId = ItemPricing.intItemId
 							AND Stock.intItemLocationId = ItemPricing.intItemLocationId
@@ -311,13 +318,13 @@ BEGIN
 						,@strBatchId							= @strBatchId
 						,@intTransactionTypeId					= @INVENTORY_AUTO_NEGATIVE
 						,@intLotId								= NULL
-						,@intRelatedInventoryTransactionId		= 0
+						,@intRelatedInventoryTransactionId		= NULL
 						,@intRelatedTransactionId				= NULL
-						,@strRelatedTransactionId				= NULL
+						,@strRelatedTransactionId				= NULL						
 						,@strTransactionForm					= @TransactionTypeName
 						,@intUserId								= @intUserId
 						,@intCostingMethod						= @AVERAGECOST
-						,@InventoryTransactionIdentityId 		= @InventoryTransactionIdentityId OUTPUT 
+						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT 
 			END 
 		END
 
@@ -329,7 +336,7 @@ BEGIN
 			,@intSubLocationId
 			,@intStorageLocationId
 			,@dtmDate
-			,@dblValue 
+			,@dblNewCost
 			,@intTransactionId
 			,@intTransactionDetailId
 			,@strTransactionId
