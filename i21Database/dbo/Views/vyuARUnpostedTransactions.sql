@@ -2,22 +2,36 @@
 AS
 
 SELECT 
-	strInvoiceNumber AS 'strTransactionId'
-	,strTransactionType AS 'strTransactionType'
-	,dtmDate AS 'dtmDate'
+	 I.strInvoiceNumber		AS 'strTransactionId'
+	,I.strTransactionType	AS 'strTransactionType'
+	,I.dtmDate				AS 'dtmDate'
+	,I.intInvoiceId			AS 'intTransactionId'
+	,E.strName				AS 'strUserName'
+	,I.strComments			AS 'strDescription'
+	,I.intEntityCustomerId	AS 'intEntityId' 
 FROM
-	tblARInvoice
+	tblARInvoice I
+INNER JOIN
+	tblEntity E 
+		ON I.intEntityId = E.intEntityId 
 WHERE
-	ysnPosted = 0 
-	AND strTransactionType IN ('Invoice','Credit Memo')
+	I.ysnPosted = 0 
+	AND I.strTransactionType IN ('Invoice','Credit Memo')
 	
 UNION ALL
 
 SELECT 
-	strRecordNumber  AS 'strTransactionId'
-	,'Receive Payments' AS 'strTransactionType'
-	,dtmDatePaid AS 'dtmDate'
+	 P.strRecordNumber		AS 'strTransactionId'
+	,'Receive Payments'		AS 'strTransactionType'
+	,P.dtmDatePaid			AS 'dtmDate'
+	,P.intPaymentId 		AS 'intTransactionId'
+	,E.strName				AS 'strUserName'
+	,P.strNotes 			AS 'strDescription'
+	,P.intEntityId			AS 'intEntityId' 
 FROM
-	tblARPayment
+	tblARPayment P
+INNER JOIN
+	tblEntity E 
+		ON P.intEntityId = E.intEntityId 	
 WHERE
-	ysnPosted = 0 
+	ysnPosted = 0
