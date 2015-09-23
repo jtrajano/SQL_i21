@@ -1296,10 +1296,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         else {
             win.context.data.validator.validateRecord({ window: win }, function(valid) {
                 if (valid) {
-                    iRely.Functions.openScreen(screenName, {
-                        id: ReceiptItemId
-                    });
-                    return;
+                    win.context.data.saveRecord({ successFn: function(batch, eOpts){
+                        iRely.Functions.openScreen(screenName, {
+                            id: ReceiptItemId
+                        });
+                        return;
+                    } });
                 }
             });
         }
