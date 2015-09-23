@@ -43,7 +43,7 @@ WHERE
 	
 IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId)
 	BEGIN
-		SET @ErrorMessage = 'The company location Id provided does not exists!'
+		SET @ErrorMessage = 'The company location from the target Invoice does not exists!'
 		RETURN 0;
 	END	
 	

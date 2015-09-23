@@ -5,10 +5,15 @@
 	,@EntityId						INT
 	,@NewInvoiceId					INT				= NULL			OUTPUT 
 	,@ErrorMessage					NVARCHAR(50)	= NULL			OUTPUT
+	,@TermId						INT				= NULL
+	,@EntitySalespersonId			INT				= NULL
+	,@DueDate						DATETIME		= NULL
 	,@ShipDate						DATETIME		= NULL
+	,@PostDate						DATETIME		= NULL
 	,@TransactionType				NVARCHAR(50)	= 'Invoice'
 	,@Type							NVARCHAR(200)	= 'Standard'
 	,@Comment						NVARCHAR(500)	= ''
+	,@PONumber						NVARCHAR(50)	= ''
 	,@DistributionHeaderId			INT				= NULL
 	,@PaymentMethodId				INT				= 0
 	,@FreightTermId					INT				= NULL
@@ -150,14 +155,14 @@ BEGIN TRY
 	SELECT			
 		 [intEntityCustomerId]			= C.[intEntityCustomerId]
 		,[dtmDate]						= CAST(@InvoiceDate AS DATE)
-		,[dtmDueDate]					= CAST(dbo.fnGetDueDateBasedOnTerm(@InvoiceDate, ISNULL(EL.[intTermsId],0)) AS DATE) 
+		,[dtmDueDate]					= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(@InvoiceDate, ISNULL(ISNULL(@TermId, EL.[intTermsId]),0)) AS DATE)))
 		,[intCurrencyId]				= ISNULL(C.[intCurrencyId], @Currency)
 		,[intCompanyLocationId]			= @CompanyLocationId
-		,[intEntitySalespersonId]		= C.[intSalespersonId]
+		,[intEntitySalespersonId]		= ISNULL(@EntitySalespersonId, C.[intSalespersonId])
 		,[dtmShipDate]					= @ShipDate
 		,[intShipViaId]					= EL.[intShipViaId]
-		,[strPONumber]					= NULL
-		,[intTermId]					= EL.[intTermsId]
+		,[strPONumber]					= @PONumber
+		,[intTermId]					= ISNULL(@TermId, EL.[intTermsId])
 		,[dblInvoiceSubtotal]			= @ZeroDecimal
 		,[dblShipping]					= @ZeroDecimal
 		,[dblTax]						= @ZeroDecimal
@@ -170,8 +175,8 @@ BEGIN TRY
 		,[intPaymentMethodId]			= @PaymentMethodId
 		,[strComments]					= @Comment
 		,[intAccountId]					= @ARAccountId
-		,[dtmPostDate]					= NULL
-		,[ysnPosted]					= 0
+		,[dtmPostDate]					= @PostDate
+		,[ysnPosted]					= (CASE WHEN @PostDate IS NULL THEN 0 ELSE 1 END)
 		,[ysnPaid]						= 0
 		,[ysnTemplate]					= 0
 		,[ysnForgiven]					= 0
@@ -234,10 +239,10 @@ END CATCH
 
 
 
-IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @EntityCustomerId AND [ysnPORequired] = 1)
+IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @EntityCustomerId AND [ysnPORequired] = 1 AND LEN(LTRIM(RTRIM(ISNULL(@PONumber,'')))) <= 0)
 	BEGIN
 		DECLARE  @ShipToId	INT
-				,@PONumber	NVARCHAR(200)
+				,@NewPONumber	NVARCHAR(200)
 		SET @ShipToId = (SELECT [intShipToLocationId] FROM tblARInvoice WHERE intInvoiceId = @NewId)
 		
 		BEGIN TRY
@@ -245,12 +250,12 @@ IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @EntityCu
 			 @ShipToId  
 			,@CompanyLocationId
 			,@InvoiceDate
-			,@PONumber OUT
+			,@NewPONumber OUT
 			
 		UPDATE
 			tblARInvoice
 		SET
-			[strPONumber] = @PONumber
+			[strPONumber] = @NewPONumber
 		WHERE
 			[intInvoiceId] = @NewId
 			
