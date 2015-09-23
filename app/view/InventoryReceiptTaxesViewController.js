@@ -73,7 +73,13 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
     show: function (config) {
         "use strict";
         var me = this;
-        me.getView().show();
+        var win = me.getView();
+        var btnSave = win.down('#btnSave');
+        var btnUndo = win.down('#btnUndo');
+        btnSave.setHidden(true);
+        btnUndo.setHidden(true);
+        win.show();
+
         var context = me.setupContext();
         if (config.param.ReceiptId) {
             me.intInventoryReceiptId = config.param.ReceiptId;
