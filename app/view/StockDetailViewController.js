@@ -2,93 +2,62 @@ Ext.define('Inventory.view.StockDetailViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.icstockdetail',
 
-    setupContext : function(){
-        "use strict";
-        var win = this.getView();
-        win.context = Ext.create('iRely.mvvm.Engine', {
-            window: win,
-            store: Ext.create('Inventory.store.ItemStockView'),
-            singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
-                grid: win.down('grid'),
-                title: 'View Stock Details',
-                position: 'none',
-                columns: [
-                    {
-                        xtype: 'gridcolumn',
-                        itemId: 'colItemNo',
-                        dataIndex: 'strItemNo',
-                        text: 'Item No'
-                    },
-                    {
-                        xtype: 'gridcolumn',
-                        itemId: 'colDescription',
-                        dataIndex: 'strDescription',
-                        text: 'Description'
-                    },
-                    {
-                        xtype: 'gridcolumn',
-                        itemId: 'colLocation',
-                        dataIndex: 'strLocationName',
-                        text: 'Location Name'
-                    },
-                    {
-                        xtype: 'numbercolumn',
-                        summaryType: 'sum',
-                        itemId: 'colOnHand',
-                        dataIndex: 'dblUnitOnHand',
-                        text: 'On Hand'
-                    },
-                    {
-                        xtype: 'numbercolumn',
-                        summaryType: 'sum',
-                        itemId: 'colCommitted',
-                        dataIndex: 'dblOrderCommitted',
-                        text: 'Committed'
-                    },
-                    {
-                        xtype: 'numbercolumn',
-                        summaryType: 'sum',
-                        itemId: 'colOnOrder',
-                        dataIndex: 'dblOnOrder',
-                        text: 'On Order'
-                    },
-                    {
-                        xtype: 'numbercolumn',
-                        summaryType: 'sum',
-                        itemId: 'colBackOrder',
-                        dataIndex: 'dblBackOrder',
-                        text: 'Back Order'
-                    },
-                    {
-                        xtype: 'numbercolumn',
-                        itemId: 'colLastCost',
-                        dataIndex: 'dblLastCost',
-                        text: 'Last Cost'
-                    },
-                    {
-                        xtype: 'numbercolumn',
-                        itemId: 'colAverageCost',
-                        dataIndex: 'dblAverageCost',
-                        text: 'Average Cost'
-                    },
-                    {
-                        xtype: 'numbercolumn',
-                        itemId: 'colStandardCost',
-                        dataIndex: 'dblStandardCost',
-                        text: 'Standard Cost'
-                    }
-                ]
-            })
-        });
-
-        return win.context;
+    config: {
+        searchConfig: {
+            title: 'Stock Details',
+            url: '../Inventory/api/Item/GetItemStocks',
+            columns: [
+                { dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', key: true },
+                { dataIndex: 'strDescription', text: 'Description', flex: 1, dataType: 'string' },
+                { dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string' },
+                { xtype: 'numbercolumn', summaryType: 'sum', dataIndex: 'dblUnitOnHand', text: 'On Hand', flex: 1, dataType: 'float' },
+                { xtype: 'numbercolumn', summaryType: 'sum', dataIndex: 'dblOrderCommitted', text: 'Committed', flex: 1, dataType: 'float' },
+                { xtype: 'numbercolumn', summaryType: 'sum', dataIndex: 'dblOnOrder', text: 'On Order', flex: 1, dataType: 'float' },
+                { xtype: 'numbercolumn', summaryType: 'sum', dataIndex: 'dblBackOrder', text: 'Back Order', flex: 1, dataType: 'float' },
+                { dataIndex: 'dblLastCost', text: 'Last Cost', flex: 1, dataType: 'float' },
+                { dataIndex: 'dblAverageCost', text: 'Average Cost', flex: 1, dataType: 'float' },
+                { dataIndex: 'dblStandardCost', text: 'Standard Cost', flex: 1, dataType: 'float' }
+            ],
+            showNew: false,
+            showOpenSelected: false,
+            enableDblClick: false
+        }
     },
 
-    show : function() {
-        "use strict";
-        var me = this;
-        me.getView().show();
-        var context = me.setupContext();
-        context.data.load();
+    show: function(config){
+        var me = this,
+            win = this.getView();
+
+        if (config && config.action) {
+            win.showNew = false;
+            win.modal = (!config.param || !config.param.modalMode) ? false : config.param.modalMode;
+            win.show();
+
+            var context = me.setupContext({ window: win});
+
+            switch(config.action) {
+                case 'view':
+                    context.data.load({
+                        filters: config.filters
+                    });
+                    break;
+            }
+        }
+    },
+
+    setupContext: function(options){
+        var me = this,
+            win = options.window;
+
+        var context =
+            Ext.create('iRely.mvvm.Engine', {
+                window : win,
+                store  : Ext.create('Inventory.store.BufferedItemStockView'),
+                binding: me.config.binding,
+                showNew: false
+            });
+
+        win.context = context;
+        return context;
     }
 });

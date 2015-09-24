@@ -2,99 +2,63 @@ Ext.define('Inventory.view.LotDetailViewController', {
     extend: 'Ext.app.ViewController',
     alias: 'controller.iclotdetail',
 
-    setupContext : function(){
-        "use strict";
-        var win = this.getView();
-        win.context = Ext.create('iRely.mvvm.Engine', {
-            window: win,
-            store: Ext.create('Inventory.store.Lot'),
-            singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
-                grid: win.down('grid'),
-                title: 'View Lot Details',
-                position: 'none',
-                columns: [
-                    {
-                        xtype: 'gridcolumn',
-                        itemId: 'colItemNo',
-                        dataIndex: 'strItemNo',
-                        text: 'Item No'
-                    },
-                    {
-                        xtype: 'gridcolumn',
-                        itemId: 'colDescription',
-                        dataIndex: 'strItemDescription',
-                        text: 'Description'
-                    },
-                    {
-                        xtype: 'gridcolumn',
-                        itemId: 'colLocation',
-                        dataIndex: 'strLocationName',
-                        text: 'Location Name'
-                    },
-                    {
-                        xtype: 'gridcolumn',
-                        itemId: 'colSubLocation',
-                        dataIndex: 'strSubLocationName',
-                        text: 'Sub Location'
-                    },
-                    {
-                        xtype: 'gridcolumn',
-                        itemId: 'colStorageLocation',
-                        dataIndex: 'strStorageLocation',
-                        text: 'Storage Location'
-                    },
-                    {
-                        xtype: 'gridcolumn',
-                        itemId: 'colLotNumber',
-                        dataIndex: 'strLotNumber',
-                        text: 'Lot Number'
-                    },
-                    {
-                        xtype: 'numbercolumn',
-                        summaryType: 'sum',
-                        itemId: 'colQuantity',
-                        dataIndex: 'dblQty',
-                        text: 'Quantity'
-                    },
-                    {
-                        xtype: 'numbercolumn',
-                        summaryType: 'sum',
-                        itemId: 'colWeight',
-                        dataIndex: 'dblWeight',
-                        text: 'Weight'
-                    },
-                    {
-                        xtype: 'gridcolumn',
-                        itemId: 'colUOM',
-                        dataIndex: 'strItemUOM',
-                        text: 'UOM'
-                    },
-                    {
-                        xtype: 'numbercolumn',
-                        summaryType: 'sum',
-                        itemId: 'colWeightPerQty',
-                        dataIndex: 'dblWeightPerQty',
-                        text: 'Weight Per Qty'
-                    },
-                    {
-                        xtype: 'numbercolumn',
-                        summaryType: 'sum',
-                        itemId: 'colLastCost',
-                        dataIndex: 'dblLastCost',
-                        text: 'Last Cost'
-                    }
-                ]
-            })
-        });
-
-        return win.context;
+    config: {
+        searchConfig: {
+            title: 'Lot Detail',
+            url: '../Inventory/api/Lot/Search',
+            columns: [
+                { dataIndex: 'strItemNo', text: 'Item No', flex: 1, dataType: 'string', key: true },
+                { dataIndex: 'strItemDescription', text: 'Description', flex: 1, dataType: 'string' },
+                { dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string' },
+                { dataIndex: 'strSubLocationName', text: 'Sub Location', flex: 1, dataType: 'string' },
+                { dataIndex: 'strStorageLocation', text: 'Storage Location', flex: 1, dataType: 'string' },
+                { dataIndex: 'strLotNumber', text: 'Lot Number', flex: 1, dataType: 'string' },
+                { xtype: 'numbercolumn', summaryType: 'sum', dataIndex: 'dblQty', text: 'Quantity', flex: 1, dataType: 'float' },
+                { xtype: 'numbercolumn', summaryType: 'sum', dataIndex: 'dblWeight', text: 'Weight', flex: 1, dataType: 'float' },
+                { dataIndex: 'strItemUOM', text: 'UOM', flex: 1, dataType: 'string' },
+                { xtype: 'numbercolumn', summaryType: 'sum', dataIndex: 'dblWeightPerQty', text: 'Weight Per Qty', flex: 1, dataType: 'float' },
+                { xtype: 'numbercolumn', summaryType: 'sum', dataIndex: 'dblLastCost', text: 'Last Cost', flex: 1, dataType: 'float' }
+            ],
+            showNew: false,
+            showOpenSelected: false,
+            enableDblClick: false
+        }
     },
 
-    show : function() {
-        "use strict";
-        var me = this;
-        me.getView().show();
-        var context = me.setupContext();
-        context.data.load();
+    show: function(config){
+        var me = this,
+            win = this.getView();
+
+        if (config && config.action) {
+            win.showNew = false;
+            win.modal = (!config.param || !config.param.modalMode) ? false : config.param.modalMode;
+            win.show();
+
+            var context = me.setupContext({ window: win});
+
+            switch(config.action) {
+                case 'view':
+                    context.data.load({
+                        filters: config.filters
+                    });
+                    break;
+            }
+        }
+    },
+
+    setupContext: function(options){
+        var me = this,
+            win = options.window;
+
+        var context =
+            Ext.create('iRely.mvvm.Engine', {
+                window : win,
+                store  : Ext.create('Inventory.store.BufferedLot', { pageSize: 1 }),
+                binding: me.config.binding,
+                showNew: false
+            });
+
+        win.context = context;
+        return context;
     }
 });
