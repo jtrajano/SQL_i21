@@ -17,8 +17,10 @@ BEGIN
 		BEGIN
 			INSERT INTO [tblTMPreferenceCompany] (strSummitIntegration) VALUES ('AG')
 		END
+		GOTO end_insert
 		Insert_default:
 		INSERT INTO tblTMPreferenceCompany(intConcurrencyId,ysnUseOriginIntegration)VALUES(0,0)
+		end_insert:
 	END
 
 END
