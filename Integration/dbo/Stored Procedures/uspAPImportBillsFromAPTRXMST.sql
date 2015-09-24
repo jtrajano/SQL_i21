@@ -280,7 +280,7 @@ BEGIN
 			OUTPUT inserted.A4GLIdentity INTO #ReInsertedToaptrxmst
 			SELECT
 				[aptrx_vnd_no]			=	A.[aptrx_vnd_no]		,
-				[aptrx_ivc_no]			=	C.strVendorOrderNumber, --CASE WHEN DuplicateDataBackup.aptrx_ivc_no IS NOT NULL THEN dbo.fnTrim(A.[aptrx_ivc_no]) + ''-DUP'' ELSE A.aptrx_ivc_no END,
+				[aptrx_ivc_no]			=	C.strVendorOrderNumber	, --CASE WHEN DuplicateDataBackup.aptrx_ivc_no IS NOT NULL THEN dbo.fnTrim(A.[aptrx_ivc_no]) + ''-DUP'' ELSE A.aptrx_ivc_no END,
 				[aptrx_sys_rev_dt]  	=	A.[aptrx_sys_rev_dt]	,
 				[aptrx_sys_time]    	=	A.[aptrx_sys_time]		,
 				[aptrx_cbk_no]      	=	A.[aptrx_cbk_no]		,
@@ -317,16 +317,16 @@ BEGIN
 				ON A.A4GLIdentity = B.A4GLIdentity
 			INNER JOIN tblAPBill C
 				ON B.intBillId = C.intBillId
-			OUTER APPLY (
-				SELECT E.* FROM aptrxmst E
-				WHERE EXISTS(
-					SELECT 1 FROM tblAPaptrxmst F
-					WHERE A.aptrx_ivc_no = F.aptrx_ivc_no
-					AND A.aptrx_vnd_no = F.aptrx_vnd_no
-				)
-				AND A.aptrx_vnd_no = E.aptrx_vnd_no
-				AND A.aptrx_ivc_no = E.aptrx_ivc_no
-			) DuplicateDataBackup
+			--OUTER APPLY (
+			--	SELECT E.* FROM aptrxmst E
+			--	WHERE EXISTS(
+			--		SELECT 1 FROM tblAPaptrxmst F
+			--		WHERE A.aptrx_ivc_no = F.aptrx_ivc_no
+			--		AND A.aptrx_vnd_no = F.aptrx_vnd_no
+			--	)
+			--	AND A.aptrx_vnd_no = E.aptrx_vnd_no
+			--	AND A.aptrx_ivc_no = E.aptrx_ivc_no
+			--) DuplicateDataBackup
 			WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 							THEN
 								CASE WHEN CONVERT(DATE, CAST(A.aptrx_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END

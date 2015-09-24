@@ -292,7 +292,7 @@ BEGIN
 			)
 			SELECT
 				[apivc_vnd_no]			=	A.[apivc_vnd_no]		,
-				[apivc_ivc_no]			=	CASE WHEN DuplicateDataBackup.apivc_ivc_no IS NOT NULL THEN dbo.fnTrim(A.[apivc_ivc_no]) + ''-DUP'' ELSE A.apivc_ivc_no END,
+				[apivc_ivc_no]			=	C.strVendorOrderNumber	,--CASE WHEN DuplicateDataBackup.apivc_ivc_no IS NOT NULL THEN dbo.fnTrim(A.[apivc_ivc_no]) + ''-DUP'' ELSE A.apivc_ivc_no END,
 				[apivc_status_ind]		=	A.[apivc_status_ind]	,
 				[apivc_cbk_no]			=	A.[apivc_cbk_no]		,
 				[apivc_chk_no]			=	A.[apivc_chk_no]		,
@@ -327,16 +327,16 @@ BEGIN
 				ON A.A4GLIdentity = B.A4GLIdentity
 			INNER JOIN tblAPBill C
 				ON B.intBillId = C.intBillId
-			OUTER APPLY (
-				SELECT E.* FROM apivcmst E
-				WHERE EXISTS(
-					SELECT 1 FROM tblAPapivcmst F
-					WHERE A.apivc_ivc_no = F.apivc_ivc_no
-					AND A.apivc_vnd_no = F.apivc_vnd_no
-				)
-				AND A.apivc_vnd_no = E.apivc_vnd_no
-				AND A.apivc_ivc_no = E.apivc_ivc_no
-			) DuplicateDataBackup
+			--OUTER APPLY (
+			--	SELECT E.* FROM apivcmst E
+			--	WHERE EXISTS(
+			--		SELECT 1 FROM tblAPapivcmst F
+			--		WHERE A.apivc_ivc_no = F.apivc_ivc_no
+			--		AND A.apivc_vnd_no = F.apivc_vnd_no
+			--	)
+			--	AND A.apivc_vnd_no = E.apivc_vnd_no
+			--	AND A.apivc_ivc_no = E.apivc_ivc_no
+			--) DuplicateDataBackup
 			WHERE 1 = (CASE WHEN @DateFrom IS NOT NULL AND @DateTo IS NOT NULL 
 							THEN
 								CASE WHEN CONVERT(DATE, CAST(A.apivc_gl_rev_dt AS CHAR(12)), 112) BETWEEN @DateFrom AND @DateTo THEN 1 ELSE 0 END
