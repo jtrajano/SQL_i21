@@ -3,6 +3,7 @@
 
 SELECT ReceiptItemTax.intInventoryReceiptItemTaxId,
 	ReceiptItemTax.intInventoryReceiptItemId,
+	ReceiptItem.intInventoryReceiptId,
 	ReceiptItem.intItemId,
 	Item.strItemNo,
 	strItemDescription = Item.strDescription,
