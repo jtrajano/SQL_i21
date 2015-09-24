@@ -1457,7 +1457,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 itemId: 'colContainer',
                                                                                 width: 90,
                                                                                 dataIndex: 'strDescription',
-                                                                                text: 'Container'
+                                                                                text: 'Container No.'
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
@@ -1840,7 +1840,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 itemId: 'colLotContainerNo',
                                                                                 width: 100,
                                                                                 dataIndex: 'string',
-                                                                                text: 'Container No',
+                                                                                text: 'Container No.',
                                                                                 editor: {
                                                                                     xtype: 'textfield'
                                                                                 }
