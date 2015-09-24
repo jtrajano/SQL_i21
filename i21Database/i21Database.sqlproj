@@ -2339,6 +2339,10 @@
     <Build Include="dbo\Tables\tblARImportLog.sql" />
     <Build Include="dbo\Tables\tblARImportLogDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportInvoiceCSV.sql" />
+    <Build Include="dbo\Functions\fnGetTaxGroupTaxCodesForCustomer.sql" />
+    <Build Include="dbo\Functions\fnGetTaxGroupTaxCodes.sql" />
+    <Build Include="dbo\Functions\fnGetTaxMasterIdForCustomer.sql" />
+    <Build Include="dbo\Functions\fnGetTaxGroupForLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
