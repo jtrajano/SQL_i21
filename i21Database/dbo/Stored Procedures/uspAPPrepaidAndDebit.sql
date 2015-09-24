@@ -156,8 +156,8 @@ SELECT
 	[intPrepayType]			=	NULL,
 	[dblTotal]				=	A.dblTotal,
 	[dblBillAmount]			=	(SELECT dblTotal FROM tblAPBill WHERE intBillId = @billId),
-	[dblBalance]			=	A.dblAmountDue - (CASE WHEN ISNULL(A.dblPayment,0) = 0 THEN A.dblAmountDue ELSE ISNULL(A.dblPayment,0) END),
-	[dblAmountApplied]		=	A.dblAmountDue,
+	[dblBalance]			=	A.dblAmountDue,
+	[dblAmountApplied]		=	0,
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
@@ -183,8 +183,8 @@ SELECT
 	[intPrepayType]			=	NULL,
 	[dblTotal]				=	A.dblTotal,
 	[dblBillAmount]			=	(SELECT dblTotal FROM tblAPBill WHERE intBillId = @billId),
-	[dblBalance]			=	A.dblAmountDue - (CASE WHEN ISNULL(A.dblPayment,0) = 0 THEN A.dblAmountDue ELSE ISNULL(A.dblPayment,0) END),
-	[dblAmountApplied]		=	A.dblAmountDue,
+	[dblBalance]			=	A.dblAmountDue,
+	[dblAmountApplied]		=	0,
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
