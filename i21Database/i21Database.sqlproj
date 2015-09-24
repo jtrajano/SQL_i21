@@ -2338,6 +2338,7 @@
     <Build Include="dbo\Tables\tblARImportFile.sql" />
     <Build Include="dbo\Tables\tblARImportLog.sql" />
     <Build Include="dbo\Tables\tblARImportLogDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportInvoiceCSV.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

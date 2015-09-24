@@ -4,7 +4,8 @@
 	,@CompanyLocationId				INT
 	,@EntityId						INT
 	,@NewInvoiceId					INT				= NULL			OUTPUT 
-	,@ErrorMessage					NVARCHAR(50)	= NULL			OUTPUT
+	,@ErrorMessage					NVARCHAR(50)	= NULL			OUTPUT	
+	,@CurrencyId					INT				= NULL
 	,@TermId						INT				= NULL
 	,@EntitySalespersonId			INT				= NULL
 	,@DueDate						DATETIME		= NULL
@@ -13,6 +14,7 @@
 	,@TransactionType				NVARCHAR(50)	= 'Invoice'
 	,@Type							NVARCHAR(200)	= 'Standard'
 	,@Comment						NVARCHAR(500)	= ''
+	,@InvoiceOriginId				NVARCHAR(16)	= NULL
 	,@PONumber						NVARCHAR(50)	= ''
 	,@DistributionHeaderId			INT				= NULL
 	,@PaymentMethodId				INT				= 0
@@ -57,12 +59,12 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @ZeroDecimal NUMERIC(18, 6)
 		,@DateOnly DATETIME
-		,@Currency INT
+		,@DefaultCurrency INT
 		,@ARAccountId INT
 		
 
 SET @ZeroDecimal = 0.000000	
-SET @Currency = ISNULL((SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0),0)
+SET @DefaultCurrency = ISNULL((SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0),0)
 SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
 
 IF @DeliverPickUp IS NULL OR LTRIM(RTRIM(@DeliverPickUp)) = ''
@@ -112,6 +114,7 @@ BEGIN TRY
 		,[intEntitySalespersonId]
 		,[dtmShipDate]
 		,[intShipViaId]
+		,[strInvoiceOriginId] 
 		,[strPONumber]
 		,[intTermId]
 		,[dblInvoiceSubtotal]
@@ -123,7 +126,7 @@ BEGIN TRY
 		,[dblPayment]
 		,[strTransactionType]
 		,[strType]
-		,[intPaymentMethodId]
+		,[intPaymentMethodId]		
 		,[strComments]
 		,[intAccountId]
 		,[dtmPostDate]
@@ -156,11 +159,12 @@ BEGIN TRY
 		 [intEntityCustomerId]			= C.[intEntityCustomerId]
 		,[dtmDate]						= CAST(@InvoiceDate AS DATE)
 		,[dtmDueDate]					= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(@InvoiceDate, ISNULL(ISNULL(@TermId, EL.[intTermsId]),0)) AS DATE)))
-		,[intCurrencyId]				= ISNULL(C.[intCurrencyId], @Currency)
+		,[intCurrencyId]				= ISNULL(@CurrencyId, ISNULL(C.[intCurrencyId], @DefaultCurrency))
 		,[intCompanyLocationId]			= @CompanyLocationId
 		,[intEntitySalespersonId]		= ISNULL(@EntitySalespersonId, C.[intSalespersonId])
 		,[dtmShipDate]					= @ShipDate
 		,[intShipViaId]					= EL.[intShipViaId]
+		,[strInvoiceOriginId]			= @InvoiceOriginId
 		,[strPONumber]					= @PONumber
 		,[intTermId]					= ISNULL(@TermId, EL.[intTermsId])
 		,[dblInvoiceSubtotal]			= @ZeroDecimal
