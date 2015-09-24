@@ -14,12 +14,18 @@ SELECT strRecordNumber
 	 , A.intEntitySalespersonId	 
 	 , A.strTransactionType
 	 , A.strType
+	 , A.dblQty
+	 , ICP.dblStandardCost			  AS dblCost
+	 , (ISNULL(A.dblPrice, 0) - ISNULL(ICP.dblStandardCost, 0)) * A.dblQty AS dblMargin
 	 , A.dblPrice
+	 , A.dblTax
 	 , A.dblTotal
 	 , C.strCustomerNumber
 	 , GA.strDescription			  AS strAccountName
 	 , L.strLocationName
 	 , IC.strItemNo					  AS strItemName
+	 , A.strItemDescription		      AS strItemDesc
+	 , UOM.strUnitMeasure			  AS strUOM
 	 , ICM.strManufacturer
 	 , ICB.strBrandName
 	 , ICC.strCommodityCode			  AS strCommodityName
@@ -34,12 +40,16 @@ FROM
 	  , I.intEntityCustomerId
 	  , I.intAccountId
 	  , ID.intItemId
+	  , ID.intItemUOMId
 	  , I.dtmDate
 	  , I.intCompanyLocationId	 
 	  , I.intEntitySalespersonId	 
 	  , I.strTransactionType
 	  , I.strType
+	  , ID.strItemDescription
+	  , ID.dblQtyShipped			  AS dblQty
 	  , ID.dblPrice
+	  , ID.dblTotalTax				  AS dblTax
 	  , I.dblInvoiceTotal			  AS dblTotal
 	  , I.strBillToLocationName
 	  , I.strShipToLocationName
@@ -52,13 +62,17 @@ SELECT SO.strSalesOrderNumber		  AS strRecordNumber
 	 , SO.intSalesOrderId			  AS intTransactionId
 	 , SO.intEntityCustomerId
 	 , SO.intAccountId
-	 , SOD.intItemId	 
+	 , SOD.intItemId
+	 , SOD.intItemUOMId
 	 , SO.dtmDate
 	 , SO.intCompanyLocationId
 	 , SO.intEntitySalespersonId	 
 	 , SO.strTransactionType
 	 , SO.strType
+	 , SOD.strItemDescription
+	 , SOD.dblQtyOrdered			  AS dblQty
 	 , SOD.dblPrice
+	 , SOD.dblTotalTax				  AS dblTax
 	 , SO.dblSalesOrderTotal		  AS dblTotal 
 	 , SO.strBillToLocationName
 	 , SO.strShipToLocationName
@@ -73,5 +87,9 @@ WHERE SO.ysnProcessed = 1) AS A
 	LEFT JOIN (tblICItem IC 
 		LEFT JOIN tblICManufacturer ICM ON IC.intManufacturerId = ICM.intManufacturerId
 		LEFT JOIN tblICCommodity ICC ON IC.intCommodityId = ICC.intCommodityId
-		LEFT JOIN tblICCategory CAT ON IC.intCategoryId = CAT.intCategoryId
+		LEFT JOIN tblICCategory CAT ON IC.intCategoryId = CAT.intCategoryId		
 		LEFT JOIN tblICBrand ICB ON IC.intBrandId = ICB.intBrandId) ON A.intItemId = IC.intItemId
+	LEFT JOIN vyuARItemUOM UOM ON A.intItemUOMId = UOM.intItemUOMId
+	LEFT JOIN (tblICItemLocation ICL 
+		INNER JOIN tblICItemPricing ICP ON ICL.intItemLocationId = ICP.intItemLocationId) ON A.intCompanyLocationId = ICL.intLocationId AND A.intItemId = ICL.intItemId AND A.intItemId = ICP.intItemId
+	
