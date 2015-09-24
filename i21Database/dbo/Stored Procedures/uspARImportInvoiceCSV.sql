@@ -54,7 +54,7 @@ BEGIN
 		,@CompanyLocationId				INT
 		,@EntityId						INT
 		,@NewInvoiceId					INT				= NULL		
-		,@ErrorMessage					NVARCHAR(50)	= NULL
+		,@ErrorMessage					NVARCHAR(250)	= NULL
 		,@TermId						INT				= NULL
 		,@EntitySalespersonId			INT				= NULL
 		,@DueDate						DATETIME		= NULL		

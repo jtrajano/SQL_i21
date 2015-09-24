@@ -4,7 +4,7 @@
 	,@CompanyLocationId				INT
 	,@EntityId						INT
 	,@NewInvoiceId					INT				= NULL			OUTPUT 
-	,@ErrorMessage					NVARCHAR(50)	= NULL			OUTPUT	
+	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT	
 	,@CurrencyId					INT				= NULL
 	,@TermId						INT				= NULL
 	,@EntitySalespersonId			INT				= NULL

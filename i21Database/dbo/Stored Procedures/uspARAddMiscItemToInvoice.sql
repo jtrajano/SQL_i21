@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARAddMiscItemToInvoice]
 	 @InvoiceId						INT	
 	,@NewInvoiceDetailId			INT				= NULL			OUTPUT 
-	,@ErrorMessage					NVARCHAR(50)	= NULL			OUTPUT
+	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000
 	,@ItemDescription				NVARCHAR(500)	= NULL
