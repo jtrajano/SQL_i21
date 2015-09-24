@@ -116,6 +116,14 @@ Ext.define('Inventory.view.InventoryTransferViewModel', {
     },
 
     formulas: {
+        checkTransportPosting: function(get) {
+            if (get('current.intSourceType') === 3) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        },
         hideOnLocationToLocation: function(get) {
             if (get('current.strTransferType') === 'Location to Location') {
                 return true;
