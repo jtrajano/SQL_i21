@@ -2329,7 +2329,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 xtype: 'checkcolumn',
                                                                 itemId: 'colAccrue',
                                                                 text: 'Accrue',
-                                                                flex: 0.7
+                                                                flex: 0.7,
+                                                                editor: {
+                                                                    xtype: 'checkboxfield'
+                                                                }
                                                             },
                                                             {
                                                                 xtype: 'gridcolumn',
@@ -2367,7 +2370,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 xtype: 'checkcolumn',
                                                                 itemId: 'colPrice',
                                                                 text: 'Price',
-                                                                flex: 0.7
+                                                                flex: 0.7,
+                                                                editor: {
+                                                                    xtype: 'checkboxfield'
+                                                                }
                                                             }
                                                         ],
                                                         viewConfig: {
