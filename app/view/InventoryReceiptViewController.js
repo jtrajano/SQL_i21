@@ -1876,7 +1876,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                 po.get('intRackPriceSupplyPointId'),
                                 po.get('intSupplyPointId'),
                                 po.get('strIndexType'),
-                                receipt.get('dtmDate'),
+                                receipt.get('dtmReceiptDate'),
                                 po.get('dblAdjustment'),
                                 po.get('intItemId'),
                                 function(response){
