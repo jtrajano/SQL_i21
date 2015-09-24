@@ -162,6 +162,7 @@ BEGIN Try
 			,@intNoOfMachine = NULL
 			,@ysnHoliday = NULL
 			,@intShiftBreakTypeDuration=NULL
+			,@intCalendarDetailId=NULL
 
 		SELECT @dtmCalendarDate = dtmCalendarDate
 			,@intShiftId = intShiftId
