@@ -34,9 +34,13 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             btnUndo: {
                 disabled: '{current.ysnPosted}'
             },
+            btnRecap: {
+                hidden: '{checkTransportPosting}'
+            },
             btnPost: {
                 text: '{getPostButtonText}',
-                iconCls: '{getPostButtonIcon}'
+                iconCls: '{getPostButtonIcon}',
+                hidden: '{checkTransportPosting}'
             },
 
             txtTransferNumber: '{current.strTransferNo}',
