@@ -8,7 +8,7 @@ SELECT TOP 100 PERCENT
 	strItemNo = Item.strItemNo,
 	strItemDescription = Item.strDescription,
 	Item.intCategoryId,
-	strCategroy = Category.strCategoryCode,
+	strCategory = Category.strCategoryCode,
 	[Transaction].intItemLocationId,
 	Location.strLocationName,
 	[Transaction].intSubLocationId,
