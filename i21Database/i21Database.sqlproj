@@ -2327,6 +2327,8 @@
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnAverageCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustment.sql" />
     <Build Include="dbo\User Defined Types\ItemCostAdjustmentTableType.sql" />
+    <Build Include="dbo\Tables\tblICInventoryCostAdjustmentType.sql" />
+    <None Include="Scripts\Post-Deployment\IC\15_InventoryCostAdjustmentTypes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

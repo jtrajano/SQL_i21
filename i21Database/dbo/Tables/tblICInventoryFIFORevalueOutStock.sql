@@ -21,7 +21,7 @@
 		CONSTRAINT [PK_tblICInventoryFIFORevalueOutStock] PRIMARY KEY CLUSTERED ([intInventoryFIFORevalueOutStockId]),
 		CONSTRAINT [FK_tblICInventoryFIFORevalueOutStock_tblICInventoryFIFO] FOREIGN KEY ([intInventoryFIFOId]) REFERENCES [tblICInventoryFIFO]([intInventoryFIFOId]),
 		CONSTRAINT [FK_tblICInventoryFIFORevalueOutStock_tblICInventoryTransaction] FOREIGN KEY ([intInventoryTransactionId]) REFERENCES [tblICInventoryTransaction]([intInventoryTransactionId]),
-		CONSTRAINT [FK_tblICInventoryFIFORevalueOutStock_tblICInventoryFIFOCostAdjustment] FOREIGN KEY ([intInventoryCostAdjustmentId]) REFERENCES [tblICInventoryFIFOCostAdjustment]([intInventoryCostAdjustmentId])
+		CONSTRAINT [FK_tblICInventoryFIFORevalueOutStock_tblICInventoryFIFOCostAdjustment] FOREIGN KEY ([intInventoryCostAdjustmentId]) REFERENCES [tblICInventoryFIFOCostAdjustment]([intId])
 	)
 	GO
 

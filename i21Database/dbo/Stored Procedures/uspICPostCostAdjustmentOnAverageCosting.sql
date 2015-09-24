@@ -63,6 +63,10 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@LOTCOST AS INT = 4 	
 		,@ACTUALCOST AS INT = 5	
 
+-- Declare the cost types
+DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
+		,@COST_ADJ_TYPE_New_Cost AS INT = 2
+
 -- Get the UOM Qty 
 DECLARE @dblUOMQty AS NUMERIC(18,6)
 SELECT TOP 1 
@@ -80,6 +84,7 @@ DECLARE @INVENTORY_COST_ADJUSTMENT AS INT = 22;
 DECLARE @CostBucketId AS INT
 		,@InventoryTransactionIdentityId AS INT
 		,@CurrentCost AS NUMERIC(38,20)
+		,@CostBucketStockInQty AS NUMERIC(18,6)
 
 DECLARE @TransactionId AS INT
 		,@TransactionQty AS NUMERIC(18,6)
@@ -104,6 +109,7 @@ WHERE	intTransactionTypeId = @intTransactionTypeId
 BEGIN 
 	SELECT	@CostBucketId	= intInventoryFIFOId
 			,@CurrentCost	= dblCost			
+			,@CostBucketStockInQty = dblStockIn
 	FROM	dbo.tblICInventoryFIFO
 	WHERE	intItemId = @intItemId
 			AND intItemLocationId = @intItemLocationId
@@ -140,6 +146,31 @@ BEGIN
 		GOTO Post_Exit
 END 
 
+-- Log original cost to tblICInventoryFIFOCostAdjustment
+BEGIN 
+	INSERT INTO tblICInventoryFIFOCostAdjustment (
+			[intInventoryFIFOId]
+			,[intInventoryCostAdjustmentTypeId]
+			,[dblQty]
+			,[dblCost]
+			,[dtmCreated]
+			,[intCreatedUserId]		
+	)
+	SELECT	[intInventoryFIFOId]				= @CostBucketId
+			,[intInventoryCostAdjustmentTypeId]	= @COST_ADJ_TYPE_Original_Cost
+			,[dblQty]							= @CostBucketStockInQty
+			,[dblCost]							= @CurrentCost
+			,[dtmCreated]						= GETDATE()
+			,[intCreatedUserId]					= @intUserId
+	WHERE NOT EXISTS (
+		SELECT	TOP 1 1 
+		FROM	dbo.tblICInventoryFIFOCostAdjustment
+		WHERE	intInventoryFIFOId = @CostBucketId
+				AND intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
+	)
+END 
+
+
 -----------------------------------------------------------------------------------------------------------------------------
 -- Begin loop for sold stocks
 -----------------------------------------------------------------------------------------------------------------------------
@@ -149,7 +180,7 @@ BEGIN
 			,@FIFOOutInventoryFIFOId AS INT 
 			,@FIFOOutInventoryTransactionId AS INT 
 			,@FIFOOutRevalueFifoId AS INT 
-			,@FIFOOutQty AS NUMERIC(18, 6) 
+			,@FIFOOutQty AS NUMERIC(18, 6)
 
 	-----------------------------------------------------------------------------------------------------------------------------
 	-- Create the cursor
@@ -243,7 +274,18 @@ BEGIN
 					,@InventoryTransactionIdentityId	= @InventoryTransactionIdentityId OUTPUT
 
 				-- Create the Revalue sold 
-				SET @TransactionValue = -1 * ISNULL(@FIFOOutQty, 0) * ISNULL(@dblNewCost, 0)
+				SELECT @TransactionValue =	-1 	
+											-- Do a retroactive calculation of the new cost. 
+											* (
+												(
+													(ISNULL(@CostBucketStockInQty, 0) * ISNULL(@CurrentCost, 0))
+													+ (ISNULL(@dblQty, 0) * ISNULL(@dblNewCost, 0))
+												) 
+												/ ISNULL(@CostBucketStockInQty, 0)
+											) 
+											-- and multiply it by the Cost bucket Out Qty. 
+											* ISNULL(@FIFOOutQty, 0)
+				WHERE ISNULL(@CostBucketStockInQty, 0) <> 0 
 
 				EXEC [dbo].[uspICPostInventoryTransaction]
 					@intItemId								= @intItemId
@@ -292,15 +334,8 @@ END;
 -- Process the new cost
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	---- Initialize the variables
-	SELECT	@TransactionValue	= (@dblQty * @dblNewCost)
-
-	---- Get the data from the Out record
-	--SELECT	@TransactionValue = (dblStockIn - dblStockOut) * @dblNewCost
-	--FROM	dbo.tblICInventoryFIFO CostBucket
-	--WHERE	intInventoryFIFOId = @CostBucketId
-	--		AND (dblStockIn - dblStockOut) > 0 
-	--		AND ISNULL(ysnIsUnposted, 0) = 0 
+	-- Initialize the variables
+	SELECT	@TransactionValue = (@dblQty * @dblNewCost)
 
 	-- Create the 'Cost Adjustment'
 	EXEC [dbo].[uspICPostInventoryTransaction]

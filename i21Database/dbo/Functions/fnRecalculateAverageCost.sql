@@ -35,17 +35,17 @@ BEGIN
 						- dbo.fnCalculateStockUnitQty(fifo.dblStockOut, ItemUOM.dblUnitQty)
 					)
 					* dbo.fnCalculateUnitCost(fifo.dblCost, ItemUOM.dblUnitQty)
-					+ ISNULL(TotalCostAdjustments.dblValue, 0)
+					-- + ISNULL(TotalCostAdjustments.dblValue, 0)
 				)
 		FROM	dbo.tblICInventoryFIFO fifo INNER JOIN dbo.tblICItemUOM ItemUOM
 					ON fifo.intItemUOMId = ItemUOM.intItemUOMId
-				LEFT JOIN (
-					SELECT	intInventoryFIFOId
-							,dblValue = SUM(ISNULL(CostAdjustment.dblValue, 0)) 
-					FROM	dbo.tblICInventoryFIFOCostAdjustment CostAdjustment
-					GROUP BY CostAdjustment.intInventoryFIFOId	
-				) TotalCostAdjustments
-					ON fifo.intInventoryFIFOId = TotalCostAdjustments.intInventoryFIFOId
+				--LEFT JOIN (
+				--	SELECT	intInventoryFIFOId
+				--			,dblValue = SUM(ISNULL(CostAdjustment.dblValue, 0)) 
+				--	FROM	dbo.tblICInventoryFIFOCostAdjustment CostAdjustment
+				--	GROUP BY CostAdjustment.intInventoryFIFOId	
+				--) TotalCostAdjustments
+				--	ON fifo.intInventoryFIFOId = TotalCostAdjustments.intInventoryFIFOId
 		WHERE	fifo.intItemId = @intItemId
 				AND fifo.intItemLocationId = @intItemLocationId
 				AND ISNULL(fifo.dblStockIn, 0) - ISNULL(fifo.dblStockOut, 0) > 0	

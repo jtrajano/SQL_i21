@@ -12,20 +12,20 @@
 */
 	CREATE TABLE [dbo].[tblICInventoryFIFOCostAdjustment]
 	(
-		[intInventoryCostAdjustmentId] INT NOT NULL IDENTITY, 
+		[intId] INT NOT NULL IDENTITY, 
 		[intInventoryFIFOId] INT NOT NULL, 
-		[dblValue] NUMERIC(38, 20) NOT NULL DEFAULT 0,
-		[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
-		[intTransactionId] INT NOT NULL,			
+		[intInventoryCostAdjustmentTypeId] INT NOT NULL, 
+		[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0,
+		[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0,
 		[dtmCreated] DATETIME NULL, 
 		[intCreatedUserId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
-		CONSTRAINT [PK_tblICInventoryFIFOCostAdjustment] PRIMARY KEY CLUSTERED ([intInventoryCostAdjustmentId]),
+		CONSTRAINT [PK_tblICInventoryFIFOCostAdjustment] PRIMARY KEY CLUSTERED ([intId]),
 		CONSTRAINT [FK_tblICInventoryFIFOCostAdjustment_tblICInventoryFIFO] FOREIGN KEY ([intInventoryFIFOId]) REFERENCES [tblICInventoryFIFO]([intInventoryFIFOId])
 	)
 	GO
 
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFOCostAdjustment_intInventoryFIFOId]
-		ON [dbo].[tblICInventoryFIFOCostAdjustment]([intInventoryCostAdjustmentId] ASC)
-		INCLUDE (strTransactionId, intTransactionId);
+		ON [dbo].[tblICInventoryFIFOCostAdjustment]([intId] ASC)
+		INCLUDE (dblQty, dblCost);
 	GO
