@@ -19,14 +19,14 @@ RETURN (
 				FROM tblGLJournal A 
 				WHERE A.intJournalId IN (SELECT [intJournalId] FROM @JournalIds) AND ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0) = 0  
 				UNION 
-				SELECT DISTINCT A.intJournalId,'Unable to post. The transaction includes restricted accounts.' AS strMessage
+				SELECT DISTINCT A.intJournalId,'Unable to post. Account ' + B.strAccountId + ' is in the ' + C.strAccountCategory + ' category. Please remove this account from transaction' AS strMessage
 					FROM tblGLJournalDetail A JOIN tblGLAccount B
 					ON A.intAccountId = B.intAccountId
 					JOIN tblGLAccountCategory C
 					ON B.intAccountCategoryId = C.intAccountCategoryId
 					WHERE A.intJournalId IN (SELECT [intJournalId] FROM @JournalIds)	
 					AND C.strAccountCategory <> 'General'  AND @strJournalType NOT IN('Origin Journal','Adjusted Origin Journal')
-					GROUP BY A.intJournalId	
+					GROUP BY A.intJournalId	,B.strAccountId,C.strAccountCategory
 				--REGION @ysnPost = 1
 				UNION
 				SELECT DISTINCT A.intJournalId,

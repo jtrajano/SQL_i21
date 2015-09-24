@@ -29,7 +29,7 @@ Type the overview for the table here.
 		[dtmLastModified] [datetime] NULL CONSTRAINT [DF_tblMFManufacturingCell_dtmLastModified] DEFAULT GetDate(),		 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblMFManufacturingCell] PRIMARY KEY ([intManufacturingCellId]), 
-		CONSTRAINT [UQ_tblMFManufacturingCell_strCellName] UNIQUE ([strCellName]), 
+		CONSTRAINT [UQ_tblMFManufacturingCell_strCellName] UNIQUE ([strCellName],[intLocationId]), 
 		CONSTRAINT [FK_tblMFManufacturingCell_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
 		CONSTRAINT [FK_tblMFManufacturingCell_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
 		CONSTRAINT [FK_tblMFManufacturingCell_StandardUnitMeasure] FOREIGN KEY ([intStdUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),

@@ -1,7 +1,7 @@
 ﻿CREATE PROC uspMFGetScheduleDetail (
-	@strCellName NVARCHAR(50) = NULL
-	,@dtmPlannedStartDate DATETIME
-	,@dtmPlannedEndDate DATETIME
+	@intManufacturingCellId int= NULL
+	,@dtmPlannedStartDate DATE
+	,@dtmPlannedEndDate DATE
 	)
 AS
 SELECT MC.intManufacturingCellId
@@ -34,7 +34,7 @@ SELECT MC.intManufacturingCellId
 	,SH.intShiftId
 	,SH.strShiftName
 	,0 AS OrderLineItemId
-	,0 AS ysnAlternateLine
+	,CONVERT(BIT,0) AS ysnAlternateLine
 	,GetDate() AS dtmbyWhichDate
 	,'' AS strCustOrderNo
 	,'' AS strChangeover
@@ -52,11 +52,11 @@ JOIN tblMFSchedule S ON S.intScheduleId = SL.intScheduleId
 	AND S.ysnStandard = 1
 JOIN dbo.tblMFShift SH ON SH.intShiftId = SL.intPlannedShiftId
 WHERE W.intLocationId = 1
-	AND MC.strCellName = (
+	AND MC.intManufacturingCellId = (
 		CASE 
-			WHEN @strCellName IS NULL
-				THEN MC.strCellName
-			ELSE @strCellName
+			WHEN @intManufacturingCellId IS NULL
+				THEN MC.intManufacturingCellId
+			ELSE @intManufacturingCellId
 			END
 		)
 	AND SL.dtmPlannedStartDate >= @dtmPlannedStartDate

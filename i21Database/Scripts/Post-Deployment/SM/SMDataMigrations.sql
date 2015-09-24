@@ -202,6 +202,3 @@ GO
 		VALUES('System Manager', 'User Roles per Company Location', 'Migration of User Roles per Company Location', GETDATE())
 	END
 GO
-	-- ADD Company Setup Id to tblSMCompanyPreference.intCompanySetupId
-	UPDATE tblSMCompanyPreference SET intCompanySetupId = (SELECT TOP 1 intCompanySetupID FROM tblSMCompanySetup ORDER BY intCompanySetupID ASC)
-GO

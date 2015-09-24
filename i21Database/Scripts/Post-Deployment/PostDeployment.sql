@@ -125,6 +125,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\5_AccountSegmentTemplate.sql
 :r .\GL\DefaultData\6_AccountRange.sql
 :r .\GL\DefaultData\6a_RemoveCOGSales_AccountRange.sql
+:r .\GL\DefaultData\7_FiscalYearPeriod.sql
+:r .\GL\DefaultData\8_AccountCurrency.sql
 :r .\GL\GLEntryDataFix.sql
 :r .\GL\ReportData\GeneralLedgerByAccountDetail.sql
 :r .\GL\ReportData\IncomeStatementStandard.sql

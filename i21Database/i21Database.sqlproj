@@ -2442,6 +2442,13 @@
     <Build Include="dbo\Tables\tblIUPatchDetail.sql" />
     <Build Include="dbo\Views\vyuHDProjectAuditLog.sql" />
     <Build Include="dbo\Tables\tblSMNotification.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\7_FiscalYearPeriod.sql" />
+    <Build Include="dbo\Tables\tblGLForBatchPosting.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\8_AccountCurrency.sql" />
+    <Build Include="dbo\Functions\fnCTConvertQuantityToTargetCommodityUOM.sql" />
+    <Build Include="dbo\Views\vyuCTCostType.sql" />
+    <Build Include="dbo\Views\vyuRKGetContractBalanceLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGenerateMissingOriginLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

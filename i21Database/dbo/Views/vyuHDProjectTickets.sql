@@ -20,6 +20,10 @@
 			,dblOverShort = (t.dblQuotedHours-t.dblActualHours)
 			,strMilestone = ms.strDescription
 			,ms.intPriority
+			,ts.strBackColor
+			,ts.strFontColor
+			,ts.strIcon
+			,ts.strStatus
 		from
 			tblHDTicket t
 			/*
@@ -30,3 +34,4 @@
 			left outer join tblHDModule m on m.intModuleId = t.intModuleId
 			left outer join tblEntity assEnt on assEnt.intEntityId = t.intAssignedToEntity
 			left outer join tblHDMilestone ms on ms.intMilestoneId = t.intMilestoneId
+			left outer join tblHDTicketStatus ts on ts.intTicketStatusId = t.intTicketStatusId
