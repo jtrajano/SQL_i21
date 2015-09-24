@@ -23,8 +23,8 @@ BEGIN
 					SELECT TOP 1 @footerComment = strCommentDesc
 					FROM tblARCommentMaintenance
 					WHERE strTransactionType = @strTransactionType
-					  AND ((@intCompanyLocationId IS NULL OR @intCompanyLocationId = 0) OR intCompanyLocationId = @intCompanyLocationId)
-					  AND ((@intEntityCustomerId IS NULL OR @intEntityCustomerId = 0) OR intEntityCustomerId = @intEntityCustomerId)
+					  AND intCompanyLocationId = @intCompanyLocationId
+					  AND intEntityCustomerId IS NULL
 					ORDER BY intCommentId DESC
 				END
 
@@ -33,15 +33,8 @@ BEGIN
 					SELECT TOP 1 @footerComment = strCommentDesc
 					FROM tblARCommentMaintenance
 					WHERE strTransactionType = @strTransactionType
-					  AND ((@intCompanyLocationId IS NULL OR @intCompanyLocationId = 0) OR intCompanyLocationId = @intCompanyLocationId)
-					ORDER BY intCommentId DESC
-				END
-
-			IF (@footerComment IS NULL)
-				BEGIN
-					SELECT TOP 1 @footerComment = strCommentDesc
-					FROM tblARCommentMaintenance
-					WHERE strTransactionType = @strTransactionType
+					  AND intCompanyLocationId IS NULL
+					  AND intEntityCustomerId IS NULL
 					ORDER BY intCommentId DESC
 				END
 		END
