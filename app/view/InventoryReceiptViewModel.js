@@ -320,6 +320,14 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
     },
 
     formulas: {
+        checkTransportPosting: function(get) {
+            if (get('current.intSourceType') === 3) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        },
         checkHiddenInInvoicePaid: function (get) {
             var isEnabled = false;
             if (get('current.ysnPosted')) {
