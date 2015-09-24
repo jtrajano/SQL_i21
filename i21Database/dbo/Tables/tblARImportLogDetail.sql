@@ -2,7 +2,7 @@
 (
 	[intImportLogDetailId]	INT NOT NULL IDENTITY, 
     [intImportLogId]		INT NOT NULL,
-	[strEventResult]		NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
+	[strEventResult]		NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
 	[strDivision]			NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
 	[strCustomerNumber]		NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
 	[strInvoiceNumber]		NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
@@ -26,6 +26,7 @@
 	[dblPaymentsToday]		NUMERIC(18,6) NULL,
 	[dblBalance]			NUMERIC(18,6) NULL,
 	[ysnSuccess]			BIT NULL,
+	[ysnImported]			BIT NULL,
     [intConcurrencyId]		INT NOT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblARImportLogDetail_intImportLogDetailId] PRIMARY KEY CLUSTERED ([intImportLogDetailId] ASC), 
     CONSTRAINT [FK_tblARImportLogDetail_tblARImportLog] FOREIGN KEY ([intImportLogId]) REFERENCES [dbo].[tblARImportLog]([intImportLogId]) ON DELETE CASCADE

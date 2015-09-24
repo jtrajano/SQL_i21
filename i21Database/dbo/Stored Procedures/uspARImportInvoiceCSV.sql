@@ -12,9 +12,15 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @ZeroDecimal NUMERIC(18, 6)
 		,@DateNow DATETIME
+		,@DefaultCompanyLocation INT
 
 SET @ZeroDecimal = 0.000000
 SET @DateNow = CAST(GETDATE() AS DATE)
+--For Delta
+SET @DefaultCompanyLocation = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1 AND strLocationType = 'Office' AND strLocationName LIKE 'AePEX%')
+
+IF ISNULL(@DefaultCompanyLocation,0) = 0
+	SET @DefaultCompanyLocation = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1)
 
 
 DECLARE @InvoicesForImport AS TABLE(intImportLogDetailId INT UNIQUE)
@@ -28,7 +34,8 @@ FROM
 WHERE
 	[intImportLogId] = @ImportLogId 
 	--AND LEN(LTRIM(RTRIM(ISNULL([strEventResult], '')))) <= 0
-	AND ISNULL([ysnSuccess],0) = 0
+	AND ISNULL([ysnSuccess],0) = 1
+	AND ISNULL(ysnImported,0) = 0
 ORDER BY
 	[intImportLogDetailId]
 	
@@ -94,7 +101,7 @@ BEGIN
 	SELECT 
 		 @EntityCustomerId				= (SELECT [intEntityId] FROM tblEntity WHERE [strEntityNo] = D.[strCustomerNumber])
 		,@InvoiceDate					= D.[dtmInvoiceDate] 					
-		,@CompanyLocationId				= (SELECT [intCompanyLocationId] FROM tblSMCompanyLocation WHERE strLocationName = D.[strDivision])
+		,@CompanyLocationId				= @DefaultCompanyLocation --(SELECT [intCompanyLocationId] FROM tblSMCompanyLocation WHERE strLocationName = D.[strDivision])
 		,@EntityId						= ISNULL(@UserEntityId, H.[intEntityId])
 		,@TermId						= (SELECT [intTermID] FROM tblSMTerm WHERE [strTermCode] = D.[strTermsCode])
 		,@EntitySalespersonId			= (SELECT [intEntityId] FROM tblEntity WHERE [strEntityNo] = D.[strSalespersonCode])
@@ -154,6 +161,12 @@ BEGIN
 		[intImportLogDetailId] = @ImportLogDetailId
 		
 	SELECT @ErrorMessage = 'Invoice:' + RTRIM(LTRIM(ISNULL(@InvoiceOriginId,''))) + ' was already imported! (' + strInvoiceNumber + ')' FROM [tblARInvoice] WHERE RTRIM(LTRIM(ISNULL([strInvoiceOriginId],''))) = RTRIM(LTRIM(ISNULL(@InvoiceOriginId,''))) AND LEN(RTRIM(LTRIM(ISNULL([strInvoiceOriginId],'')))) > 0
+
+	IF ISNULL(@EntityCustomerId, 0) = 0
+		SET @ErrorMessage = 'Customer Number does not exists!'
+
+	IF ISNULL(@TermId, 0) = 0 AND LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) < 1 AND @TransactionType IN ('Invoice', 'Credit Memo')
+		SET @ErrorMessage = 'Term is required! The Term Code provided does not exists.'
 
 	IF LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) < 1		
 		BEGIN TRY		
@@ -215,7 +228,7 @@ BEGIN
 			UPDATE
 				tblARImportLogDetail
 			SET
-				 [ysnSuccess]		= 0
+				 [ysnImported]		= 0
 				,[strEventResult]	= @ErrorMessage
 			WHERE
 				[intImportLogDetailId] = @ImportLogDetailId
@@ -225,7 +238,7 @@ BEGIN
 			UPDATE
 				tblARImportLogDetail
 			SET
-				 [ysnSuccess]		= 1
+				 [ysnImported]		= 1
 				,[strEventResult]	= (SELECT strTransactionType + ':' + strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @NewInvoiceId) + ' Imported.'
 			WHERE
 				[intImportLogDetailId] = @ImportLogDetailId
