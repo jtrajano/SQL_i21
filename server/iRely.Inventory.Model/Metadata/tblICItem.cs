@@ -532,7 +532,7 @@ namespace iRely.Inventory.Model
         public string strItemNo { get; set; }
         public string strItemDescription { get; set; }
         public int? intCategoryId { get; set; }
-        public string strCategroy { get; set; }
+        public string strCategory { get; set; }
         public int? intItemLocationId { get; set; }
         public string strLocationName { get; set; }
         public int? intSubLocationId { get; set; }
