@@ -529,7 +529,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         store: '{otherCharges}'
                     }
                 },
-                colInventoryCost: 'ysnInventoryCost',
+                colInventoryCost: {
+                    disabled: '{current.ysnPosted}',
+                    dataIndex: 'ysnInventoryCost'
+                },
                 colCostMethod: {
                     dataIndex: 'strCostMethod',
                     editor: {
@@ -572,9 +575,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colAccrue: {
+                    disabled: '{current.ysnPosted}',
                     dataIndex: 'ysnAccrue'
                 },
                 colPrice: {
+                    disabled: '{current.ysnPosted}',
                     dataIndex: 'ysnPrice'
                 }
             },
