@@ -2,7 +2,7 @@
 	 @InvoiceId						INT	
 	,@ItemId						INT
 	,@NewInvoiceDetailId			INT				= NULL			OUTPUT 
-	,@ErrorMessage					NVARCHAR(50)	= NULL			OUTPUT
+	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT
 	,@ItemUOMId						INT				= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000

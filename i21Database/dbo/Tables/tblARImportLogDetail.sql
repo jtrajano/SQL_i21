@@ -2,7 +2,7 @@
 (
 	[intImportLogDetailId]	INT NOT NULL IDENTITY, 
     [intImportLogId]		INT NOT NULL,
-	[strEventResult]		NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
+	[strEventResult]		NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL,
 	[strDivision]			NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
 	[strCustomerNumber]		NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
 	[strInvoiceNumber]		NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
