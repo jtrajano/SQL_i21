@@ -21,7 +21,7 @@ BEGIN Try
 		,@ysnHoliday BIT
 		,@intShiftBreakTypeDuration int
 
-	SELECT @dtmCurrentDate = Getdate()
+	SELECT @dtmCurrentDate = GETDATE()
 
 	DECLARE @tblScheduleCalendar TABLE (
 		intRecordId INT identity(1, 1)
@@ -90,9 +90,9 @@ BEGIN Try
 			,@intUserId
 			,@dtmCurrentDate
 			,@intUserId
-			,@intConcurrencyId
+			,1
 
-		SELECT @intCalendarId = Scope_identity()
+		SELECT @intCalendarId = SCOPE_IDENTITY()
 	END
 	ELSE
 	BEGIN
@@ -116,8 +116,13 @@ BEGIN Try
 				END
 			,dtmLastModified = @dtmCurrentDate
 			,intLastModifiedUserId = @intUserId
+			,intConcurrencyId=intConcurrencyId+1
 		WHERE intCalendarId = @intCalendarId
 	END
+
+	SELECT @intConcurrencyId=intConcurrencyId
+	FROM dbo.tblMFScheduleCalendar
+	WHERE intCalendarId = @intCalendarId
 
 	INSERT INTO @tblScheduleCalendar (
 		dtmCalendarDate
@@ -145,7 +150,7 @@ BEGIN Try
 			,intConcurrencyId INT
 			)
 
-	SELECT @intRecordId = Min(intRecordId)
+	SELECT @intRecordId = MIN(intRecordId)
 	FROM @tblScheduleCalendar
 
 	WHILE @intRecordId IS NOT NULL
@@ -177,8 +182,8 @@ BEGIN Try
 		FROM dbo.tblMFShiftDetail
 		WHERE intShiftId=@intShiftId 
 
-		If @intShiftBreakTypeDuration is null
-		Select @intShiftBreakTypeDuration=0
+		IF @intShiftBreakTypeDuration IS NULL
+		SELECT @intShiftBreakTypeDuration=0
 
 		IF @intCalendarDetailId IS NULL
 		BEGIN
@@ -201,7 +206,7 @@ BEGIN Try
 				,@dtmCalendarDate
 				,@dtmShiftStartTime
 				,@dtmShiftEndTime
-				,DateDiff(mi, @dtmShiftStartTime, @dtmShiftEndTime)-@intShiftBreakTypeDuration
+				,DATEDIFF(mi, @dtmShiftStartTime, @dtmShiftEndTime)-@intShiftBreakTypeDuration
 				,@intShiftId
 				,@intNoOfMachine
 				,@ysnHoliday
@@ -209,9 +214,9 @@ BEGIN Try
 				,@intUserId
 				,@dtmCurrentDate
 				,@intUserId
-				,@intConcurrencyId
+				,1
 
-			SELECT @intCalendarDetailId = Scope_identity()
+			SELECT @intCalendarDetailId = SCOPE_IDENTITY()
 
 			INSERT INTO dbo.tblMFScheduleCalendarMachineDetail (
 				intCalendarDetailId
@@ -232,11 +237,12 @@ BEGIN Try
 			UPDATE dbo.tblMFScheduleCalendarDetail
 			SET dtmShiftStartTime = @dtmShiftStartTime
 				,dtmShiftEndTime = @dtmShiftEndTime
-				,intDuration = DateDiff(mi, @dtmShiftStartTime, @dtmShiftEndTime)-@intShiftBreakTypeDuration
+				,intDuration = DATEDIFF(mi, @dtmShiftStartTime, @dtmShiftEndTime)-@intShiftBreakTypeDuration
 				,intNoOfMachine = @intNoOfMachine
 				,ysnHoliday = @ysnHoliday
 				,dtmLastModified = @dtmCurrentDate
 				,intLastModifiedUserId = @intUserId
+				,intConcurrencyId=intConcurrencyId+1
 			WHERE intCalendarDetailId = @intCalendarDetailId
 
 			DELETE
@@ -264,9 +270,7 @@ BEGIN Try
 			AND NOT EXISTS(SELECT *FROM tblMFScheduleCalendarMachineDetail MD WHERE MD.intCalendarDetailId=@intCalendarDetailId AND MD.intMachineId=intMachineId)
 		END
 
-		
-
-		SELECT @intRecordId = Min(intRecordId)
+		SELECT @intRecordId = MIN(intRecordId)
 		FROM @tblScheduleCalendar
 		WHERE intRecordId > @intRecordId
 	END
