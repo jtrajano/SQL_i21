@@ -59,9 +59,7 @@ BEGIN
 										THEN (F.intProjectedDegreeDay / A.dblBurnRate) - ISNULL(A.dblYTDGalsThisSeason,0.0)
 									ELSE 0
 									END) AS NUMERIC(18,6))
-		--,dblPrice = 
 		,dblCurrentARBalance = CAST((ISNULL(G.dbl10Days,0.0) + ISNULL(G.dbl30Days,0.0) + ISNULL(G.dbl60Days,0.0) + ISNULL(G.dbl90Days,0.0) + ISNULL(G.dbl91Days,0.0) + ISNULL(G.dblFuture,0.0) - ISNULL(G.dblUnappliedCredits,0.0)) AS NUMERIC(18,6))
-		--,dblEstimatedBudget = 
 		,intSiteID = A.intSiteID
 		,dblUnappliedCredits = ISNULL(G.dblUnappliedCredits,0.0)
 		,intEntityCustomerId = C.intEntityId
@@ -69,6 +67,9 @@ BEGIN
 		,intSiteItemId = A.intProduct
 		,ysnBudgetCustomers = CAST((CASE WHEN ISNULL(G.dblTotalDue,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
 		,A.intFillMethodId
+		--,dblPrice = 
+		--,dblEstimatedBudget = 
+		,intCustomerId = A.intCustomerID
 	INTO #tmpStage1
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B

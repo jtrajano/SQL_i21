@@ -13,3 +13,4 @@ AS
 	INNER JOIN tblEntity C
 		ON B.intCustomerNumber = C.intEntityId
 GO
+

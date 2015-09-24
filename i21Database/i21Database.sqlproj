@@ -2449,6 +2449,8 @@
     <Build Include="dbo\Tables\tblTMBudgetCalculation.sql" />
     <Build Include="dbo\Views\vyuTMBudgetCalculationSite.sql" />
     <Build Include="dbo\Stored Procedures\uspTMGetBudgetCalculationSite.sql" />
+    <Build Include="dbo\Views\vyuTMFillMethodUsedBySite.sql" />
+    <Build Include="dbo\Views\vyuTMCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
