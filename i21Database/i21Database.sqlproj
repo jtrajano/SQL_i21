@@ -2449,6 +2449,7 @@
     <Build Include="dbo\Views\vyuRKGetContractBalanceLot.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGenerateMissingOriginLocation.sql" />
     <Build Include="dbo\Tables\tblPATCompanyPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
