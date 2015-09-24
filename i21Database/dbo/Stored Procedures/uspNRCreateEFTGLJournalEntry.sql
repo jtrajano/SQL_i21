@@ -37,7 +37,7 @@ BEGIN
                   )
                   
 	--Get fee amount
-	SELECT @dblFee = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRFee'                  
+	SELECT @dblFee = dblFee FROM dbo.tblNRCompanyPreference                  
      
     -- Get Header Description , note type             
 	SELECT	@strHeaderDesc = strNoteNumber + ' - ' + D.strDescriptionName
@@ -90,7 +90,7 @@ BEGIN
 		SELECT @dblPrincipal = dblPrincipal, @dblInterest = dblInterest FROM dbo.tblNRScheduleTransaction Where intScheduleTransId = @SchdTransId
 		SET @strReference = 'GeneratedInvoice'
 		
-		SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
+		SELECT @intCreditAccountId = intNotesReceivableAccountId FROM dbo.tblNRCompanyPreference 
 		SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
 		
 		INSERT INTO [dbo].[tblGLJournalDetail]
@@ -119,7 +119,7 @@ BEGIN
 			   ,NULL ------------------------------------strWorkArea
 			   )
 		
-		SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLInterestIncomeAccount'
+		SELECT @intCreditAccountId = intInterestIncomeAccountId FROM dbo.tblNRCompanyPreference 
 		SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
 		
 		INSERT INTO [dbo].[tblGLJournalDetail]
@@ -148,7 +148,7 @@ BEGIN
 			   ,NULL ------------------------------------strWorkArea
 			   )
 		
-		SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
+		SELECT @intDebitAccountId = intScheduledInvoiceAccountId FROM dbo.tblNRCompanyPreference 
 		SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
 		SET @dblTransAmt = @dblPrincipal + @dblInterest
 		
@@ -185,7 +185,7 @@ BEGIN
 	
 		SET @strReference = 'Scheduled Late Fee'
 		
-		SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRScheduledInvoiceLateFeeAccount'
+		SELECT @intCreditAccountId = intScheduledInvoiceLateFeeAccountId FROM dbo.tblNRCompanyPreference 
 		SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
 		
 		INSERT INTO [dbo].[tblGLJournalDetail]
@@ -215,7 +215,7 @@ BEGIN
 			   )
 		
 		
-		SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
+		SELECT @intDebitAccountId = intScheduledInvoiceAccountId FROM dbo.tblNRCompanyPreference 
 		SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
 		SET @dblTransAmt = @dblPrincipal + @dblInterest
 		

@@ -41,7 +41,7 @@ BEGIN
                   )
                   
 	--Get fee amount
-	SELECT @dblFee = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRFee'                  
+	SELECT @dblFee = dblFee FROM dbo.tblNRCompanyPreference                 
      
     -- Get Header Description , note type             
 	SELECT	@strHeaderDesc = strNoteNumber + ' - ' + D.strDescriptionName
@@ -96,7 +96,7 @@ BEGIN
 -- Scheduled Invoice Credit entry	
 		IF @TransactionTypeId = 2
 		BEGIN		
-			SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLClearingAccount'
+			SELECT @intCreditAccountId = intClearingAccountId FROM dbo.tblNRCompanyPreference 
 			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
 			SET @strReference = 'Scheduled Invoice'
 		END
@@ -139,16 +139,16 @@ BEGIN
 			If @PayExtra = 1
 			BEGIN
 				SET @dblTransAmt = @dblTransAmt * (-1)
-				SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
+				SELECT @intCreditAccountId = intScheduledInvoiceAccountId FROM dbo.tblNRCompanyPreference
 			END	
 			ELSE
 			BEGIN
 				If @UseAdjustmentAcc = 'Notes Write-off'			
-					SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRNoteWriteOffAccount'
+					SELECT @intCreditAccountId = intNotesWriteOffAccountId FROM dbo.tblNRCompanyPreference 
 				Else If @UseAdjustmentAcc = 'Interest Income'
-					SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLInterestIncomeAccount'
+					SELECT @intCreditAccountId = intInterestIncomeAccountId FROM dbo.tblNRCompanyPreference 
 				Else If @UseAdjustmentAcc = 'Clearing Account'
-					SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLClearingAccount'
+					SELECT @intCreditAccountId = intClearingAccountId FROM dbo.tblNRCompanyPreference 
 			END				
 			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
 			SET @strReference = 'NR Adjustment Schd'
@@ -184,7 +184,7 @@ BEGIN
 -- Scheduled Invoice Debit Entry		
 		IF @TransactionTypeId = 2
 		BEGIN
-			SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
+			SELECT @intDebitAccountId = intNotesReceivableAccountId FROM dbo.tblNRCompanyPreference 
 			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
 			SET @strReference = 'Scheduled Invoice'
 		END
@@ -266,15 +266,15 @@ BEGIN
 			BEGIN
 				SET @dblTransAmt = @dblTransAmt * (-1)
 				If @UseAdjustmentAcc = 'Notes Write-off'			
-					SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRNoteWriteOffAccount'
+					SELECT @intDebitAccountId = intNotesWriteOffAccountId FROM dbo.tblNRCompanyPreference 
 				Else If @UseAdjustmentAcc = 'Interest Income'
-					SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLInterestIncomeAccount'
+					SELECT @intDebitAccountId = intInterestIncomeAccountId FROM dbo.tblNRCompanyPreference
 				Else If @UseAdjustmentAcc = 'Clearing Account'
-					SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLClearingAccount'
+					SELECT @intDebitAccountId = intClearingAccountId FROM dbo.tblNRCompanyPreference
 			END	
 			ELSE
 			BEGIN
-				SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
+				SELECT @intDebitAccountId = intScheduledInvoiceAccountId FROM dbo.tblNRCompanyPreference
 			END				
 			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
 			SET @strReference = 'NR Adjustment Schd'
@@ -315,7 +315,7 @@ BEGIN
 		BEGIN		
 			IF @dblFee > 0
 			BEGIN 		
-				SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLInterestIncomeAccount'
+				SELECT @intCreditAccountId = intInterestIncomeAccountId FROM dbo.tblNRCompanyPreference 
 				SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
 				SET @strReference = 'Fee for NR'
 			END
@@ -338,23 +338,23 @@ BEGIN
 			If @PayExtra = 1
 			BEGIN
 				SET @dblTransAmt = @dblTransAmt * (-1)
-				SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
+				SELECT @intCreditAccountId = intScheduledInvoiceAccountId FROM dbo.tblNRCompanyPreference 
 			END	
 			ELSE
 			BEGIN
 				If @UseAdjustmentAcc = 'Notes Write-off'			
-					SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRNoteWriteOffAccount'
+					SELECT @intCreditAccountId = intNotesWriteOffAccountId FROM dbo.tblNRCompanyPreference 
 				Else If @UseAdjustmentAcc = 'Interest Income'
-					SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLInterestIncomeAccount'
+					SELECT @intCreditAccountId = intInterestIncomeAccountId FROM dbo.tblNRCompanyPreference
 				Else If @UseAdjustmentAcc = 'Clearing Account'
-					SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLClearingAccount'
+					SELECT @intCreditAccountId = intClearingAccountId FROM dbo.tblNRCompanyPreference 
 			END				
 			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
 			SET @strReference = 'NR Adjustment'
 		END
 		If @TransactionTypeId = 3
 		BEGIN
-			SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLInterestIncomeAccount'
+			SELECT @intCreditAccountId = intInterestIncomeAccountId FROM dbo.tblNRCompanyPreference
 			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
 			SET @strReference = 'NR Interest'
 		END
@@ -393,7 +393,7 @@ BEGIN
 		BEGIN		
 			IF @dblFee > 0
 			BEGIN 		
-				SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
+				SELECT @intDebitAccountId = intNotesReceivableAccountId FROM dbo.tblNRCompanyPreference 
 				SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
 				SET @strReference = 'Fee for NR'
 			END
@@ -417,22 +417,22 @@ BEGIN
 			BEGIN
 				SET @dblTransAmt = @dblTransAmt * (-1)
 				If @UseAdjustmentAcc = 'Notes Write-off'			
-					SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRNoteWriteOffAccount'
+					SELECT @intDebitAccountId = intNotesWriteOffAccountId FROM dbo.tblNRCompanyPreference 
 				Else If @UseAdjustmentAcc = 'Interest Income'
-					SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLInterestIncomeAccount'
+					SELECT @intDebitAccountId = intInterestIncomeAccountId FROM dbo.tblNRCompanyPreference 
 				Else If @UseAdjustmentAcc = 'Clearing Account'
-					SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLClearingAccount'
+					SELECT @intDebitAccountId = intClearingAccountId FROM dbo.tblNRCompanyPreference 
 			END	
 			ELSE
 			BEGIN
-				SELECT @intDebitAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLScheduledInvoiceAccount'
+				SELECT @intDebitAccountId = intScheduledInvoiceAccountId FROM dbo.tblNRCompanyPreference 
 			END				
 			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intDebitAccountId
 			SET @strReference = 'NR Adjustment'
 		END
 		If @TransactionTypeId = 3
 		BEGIN
-			SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = 'NRGLNotesReceivableAccount'
+			SELECT @intCreditAccountId = intNotesReceivableAccountId FROM dbo.tblNRCompanyPreference 
 			SELECT @strDetailDesc = strDescription FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
 			SET @strReference = 'NR Interest'
 		END		

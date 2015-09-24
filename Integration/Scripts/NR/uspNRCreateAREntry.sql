@@ -36,11 +36,11 @@ BEGIN
 			, @strUserID = intLastModifiedUserId 
 			, @dblAmount = dblTransAmount
 			FROM dbo.tblNRNoteTransaction Where intNoteTransId = @intNoteTransId
-			SELECT @blnSwitchOrigini21 = strValue FROM dbo.tblSMPreferences WHERE strPreference = ''nrSwitchOrigini21''
-			SELECT @strOriginSystem = strValue FROM dbo.tblSMPreferences WHERE strPreference = ''nrOriginSystem''			
-			SELECT @strVersionNumber = strValue FROM dbo.tblSMPreferences WHERE strPreference = ''nrVersionNumber''						
+			SELECT @blnSwitchOrigini21 = ysnOriginCompatible FROM dbo.tblNRCompanyPreference 
+			SELECT @strOriginSystem = strOriginSystem FROM dbo.tblNRCompanyPreference 		
+			SELECT @strVersionNumber = strVersionNumber FROM dbo.tblNRCompanyPreference 					
 			SELECT @intCustomerId = intCustomerId, @strPaymentInfo = strNoteNumber FROM dbo.tblNRNote WHERE intNoteId = @intNoteId
-			SELECT @intCreditAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = ''NRGLNotesReceivableAccount''
+			SELECT @intCreditAccountId = intNotesReceivableAccountId FROM dbo.tblNRCompanyPreference 
 			SELECT @strAccountId = REPLACE(strAccountId, ''-'', ''.0000'') FROM dbo.tblGLAccount WHERE intAccountId = @intCreditAccountId
 			SELECT @strInvoiceLocationNo = ISNULL(strLocationNumber, strLocationName) FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = @strInvoiceLocation
 			SELECT @strLocation = strLocationNumber FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = @strLocation
@@ -156,7 +156,7 @@ BEGIN
                               THEN (SELECT TOP 1 strValue FROM tblSMPreferences WHERE strPreference = ''defaultCurrency'')
                                 ELSE (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE strCurrency = ''USD'') END)
                                 )                                
-				SELECT @intCashAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = ''NRCashAccount''
+				SELECT @intCashAccountId = intCashAccountId FROM dbo.tblNRCompanyPreference
 				
 				SET @intPaymentMethodId = CAST(@strPayType As Int) -- (Select top 1 intPaymentMethodID From dbo.tblSMPaymentMethod Order By 1 DESC) 
 				--******  To be changed when real payment method added  CAST(@strPayType As Int)

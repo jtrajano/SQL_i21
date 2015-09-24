@@ -21,9 +21,9 @@ BEGIN
 			
 			DECLARE @intCustomerId int, @blnSwitchOrigini21 bit, @strOriginSystem nvarchar(5), @strVersionNumber nvarchar(6)
 					, @strCustomerNumber nvarchar(50)
-			SELECT @blnSwitchOrigini21 = strValue FROM dbo.tblSMPreferences WHERE strPreference = ''nrSwitchOrigini21''
-			SELECT @strOriginSystem = strValue FROM dbo.tblSMPreferences WHERE strPreference = ''nrOriginSystem''			
-			SELECT @strVersionNumber = strValue FROM dbo.tblSMPreferences WHERE strPreference = ''nrVersionNumber''						
+			SELECT @blnSwitchOrigini21 = ysnOriginCompatible FROM dbo.tblNRCompanyPreference 
+			SELECT @strOriginSystem = strOriginSystem FROM dbo.tblNRCompanyPreference  
+			SELECT @strVersionNumber = strVersionNumber FROM dbo.tblNRCompanyPreference
 			SELECT @intCustomerId = intCustomerId FROM dbo.tblNRNote WHERE intNoteId = @intNoteId
 
 			IF @blnSwitchOrigini21 = 1
