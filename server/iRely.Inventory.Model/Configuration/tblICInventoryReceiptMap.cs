@@ -347,6 +347,7 @@ namespace iRely.Inventory.Model
             this.ToTable("vyuICGetInventoryReceiptItemTax");
             this.Property(t => t.intInventoryReceiptItemTaxId).HasColumnName("intInventoryReceiptItemTaxId");
             this.Property(t => t.intInventoryReceiptItemId).HasColumnName("intInventoryReceiptItemId");
+            this.Property(t => t.intInventoryReceiptId).HasColumnName("intInventoryReceiptId");
             this.Property(t => t.intItemId).HasColumnName("intItemId");
             this.Property(t => t.strItemNo).HasColumnName("strItemNo");
             this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
