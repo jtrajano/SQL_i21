@@ -47,12 +47,12 @@ IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId =
 		RETURN 0;
 	END	
 	
-SET @ServiceChargesAccountId = (SELECT TOP 1 intServiceChargeAccountId FROM tblARCompanyPreference WHERE intServiceChargeAccountId IS NOT NULL AND intServiceChargeAccountId <> 0)	
-IF ISNULL(@ServiceChargesAccountId,0) = 0
-	BEGIN
-		SET @ErrorMessage = 'The Service Charge account in the Company Preferences was not set.'
-		RETURN 0;
-	END	
+--SET @ServiceChargesAccountId = (SELECT TOP 1 intServiceChargeAccountId FROM tblARCompanyPreference WHERE intServiceChargeAccountId IS NOT NULL AND intServiceChargeAccountId <> 0)	
+--IF ISNULL(@ServiceChargesAccountId,0) = 0
+--	BEGIN
+--		SET @ErrorMessage = 'The Service Charge account in the Company Preferences was not set.'
+--		RETURN 0;
+--	END	
 		
 BEGIN TRANSACTION		
 

@@ -84,11 +84,23 @@ IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @Entity
 	BEGIN
 		SET @ErrorMessage = 'The customer Id provided does not exists!'
 		RETURN 0;
+	END
+
+IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @EntityCustomerId AND ysnActive = 1)
+	BEGIN
+		SET @ErrorMessage = 'The customer provided is not active!'
+		RETURN 0;
 	END	
 	
 IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId)
 	BEGIN
 		SET @ErrorMessage = 'The company location Id provided does not exists!'
+		RETURN 0;
+	END	
+
+IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId AND ysnLocationActive = 1)
+	BEGIN
+		SET @ErrorMessage = 'The company location provided is not active!'
 		RETURN 0;
 	END	
 	
