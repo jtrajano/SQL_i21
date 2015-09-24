@@ -2448,6 +2448,7 @@
     <Build Include="dbo\Views\vyuCTCostType.sql" />
     <Build Include="dbo\Views\vyuRKGetContractBalanceLot.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGenerateMissingOriginLocation.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\9_UpdateAccountSegmentWithNoMatchingCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
