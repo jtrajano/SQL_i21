@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblWHTruck]
 (
-		[intTruckId] INT NOT NULL PRIMARY KEY, 
+		[intTruckId] INT NOT NULL IDENTITY PRIMARY KEY, 
 		[intConcurrencyId] INT NOT NULL,
 		[strTruckNo] NVARCHAR(64) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[intTruckStatusId] INT NOT NULL, 
