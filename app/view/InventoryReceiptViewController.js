@@ -33,8 +33,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             btnUndo: {
                 disabled: '{current.ysnPosted}'
             },
+            btnRecap: {
+                hidden: '{checkTransportPosting}'
+            },
             btnReceive: {
-                text: '{getReceiveButtonText}'
+                text: '{getReceiveButtonText}',
+                hidden: '{checkTransportPosting}'
             },
 
             cboReceiptType: {
