@@ -15,6 +15,7 @@ WHERE	dbo.fnDateGreaterThanEquals(@dtmDate, dtmStartDate) = 1
 		WHEN @strModuleName = 'Accounts Payable' THEN ysnAPOpen
 		WHEN @strModuleName = 'Inventory' THEN ysnINVOpen
 		WHEN @strModuleName = 'Cash Management' THEN ysnCMOpen
+		WHEN @strModuleName = 'Payroll' THEN ysnPROpen
 		END, 0) = 1
 RETURN @isOpen
 

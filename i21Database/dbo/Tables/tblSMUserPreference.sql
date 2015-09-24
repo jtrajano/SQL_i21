@@ -8,6 +8,7 @@
     [ysnShowReminderList] BIT NULL DEFAULT 0, 
 	[imgMenuBackground] VARBINARY (MAX) NULL, 
 	[dblImageSizePercent] DECIMAL (18, 6) NULL DEFAULT 0,
+	[ysnPreviewAttachment] BIT NULL DEFAULT 1, 
     [intConcurrencyId] INT NOT NULL DEFAULT 1--, 
     --CONSTRAINT [FK_tblSMUserPreference_tblSMUserSecurity] FOREIGN KEY ([intUserSecurityId]) REFERENCES tblSMUserSecurity(intUserSecurityID) ON DELETE CASCADE
 )

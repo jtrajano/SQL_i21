@@ -1,5 +1,5 @@
 ﻿CREATE TABLE tblMFScheduleChangeoverFactorDetail (
-	intChangeoverFactorDetailId INT NOT NULL
+	intChangeoverFactorDetailId INT NOT NULL identity(1,1)
 	,intChangeoverFactorId INT NOT NULL
 	,intFromScheduleGroupId INT NOT NULL
 	,intToScheduleGroupId INT NOT NULL

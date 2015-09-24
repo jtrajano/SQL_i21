@@ -38,6 +38,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intFutureMonthId] INT NULL,
 	[dblFutures] [numeric](8, 4) NULL,
 	[dblBasis] [numeric](8, 4) NULL,	
+	[dblOriginalBasis] [numeric](8, 4) NULL,
 	[dblCashPrice] [numeric](9, 4) NULL,
 	[intCurrencyId] [int] NULL,
 	[intPriceItemUOMId]  INT NULL, 

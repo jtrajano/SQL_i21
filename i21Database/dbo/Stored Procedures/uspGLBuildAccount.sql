@@ -8,17 +8,18 @@
 	SET NOCOUNT ON
 
 	-- +++++ INSERT ACCOUNT Id +++++ --
-	INSERT INTO tblGLAccount ([strAccountId],[strDescription],[intAccountGroupId],[intAccountCategoryId], [intAccountUnitId],[ysnSystem],[ysnActive])
-	SELECT strAccountId, 
-			strDescription,
-			intAccountGroupId,
-			intAccountCategoryId,
-			intAccountUnitId,
-			ysnSystem,
-			ysnActive
-	FROM tblGLTempAccount
-	WHERE intUserId = @intUserId and strAccountId NOT IN (SELECT strAccountId FROM tblGLAccount)	
-	ORDER BY strAccountId
+	INSERT INTO tblGLAccount ([strAccountId],[strDescription],[intAccountGroupId],[intAccountCategoryId], [intAccountUnitId],[ysnSystem],[ysnActive],intCurrencyID)
+		SELECT strAccountId, 
+			   strDescription,
+			   intAccountGroupId,
+			   intAccountCategoryId,
+			   intAccountUnitId,
+			   ysnSystem,
+			   ysnActive,
+			   (select top 1 intDefaultCurrencyId FROM tblSMCompanyPreference )
+		FROM tblGLTempAccount
+		WHERE intUserId = @intUserId and strAccountId NOT IN (SELECT strAccountId FROM tblGLAccount)	
+		ORDER BY strAccountId
 
 	-- +++++ DELETE LEGACY COA TABLE AT 1st BUILD +++++ --
 	--IF NOT EXISTS(SELECT 1 FROM tblGLCOACrossReference)

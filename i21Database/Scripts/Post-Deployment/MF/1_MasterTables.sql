@@ -979,16 +979,20 @@ BEGIN
 	VALUES (
 		1
 		,'Pack Type Change'
-		,'vyuGetPackType'
+		,'vyuMFGetPackType'
 		,'strPackName'
 		)
+END
+ELSE
+BEGIN
+	UPDATE tblMFScheduleAttribute SET strTableName ='vyuMFGetPackType' WHERE  intScheduleAttributeId = 1
 END
 GO
 
 IF NOT EXISTS (
 		SELECT *
 		FROM tblMFScheduleAttribute
-		WHERE intScheduleAttributeId = 1
+		WHERE intScheduleAttributeId = 2
 		)
 BEGIN
 	INSERT INTO tblMFScheduleAttribute (
@@ -998,14 +1002,13 @@ BEGIN
 		,strColumnName
 		)
 	VALUES (
-		1
+		2
 		,'Blend Change'
 		,'vyuMFGetBlendItem'
 		,'strItemNo'
 		)
 END
-GO
-
+Go
 IF NOT EXISTS (
 		SELECT *
 		FROM tblMFHolidayType
@@ -1082,3 +1085,16 @@ UPDATE dbo.tblMFWorkOrderStatus
 SET strBackColorName = 'bc-gainsboro'
 WHERE  intStatusId = 4
 GO
+IF EXISTS (
+		SELECT *
+		FROM tblMFCompanyPreference
+		)
+BEGIN
+	UPDATE tblMFCompanyPreference
+	SET intDefaultGanttChartViewDuration = 7
+END
+ELSE
+BEGIN
+	INSERT INTO tblMFCompanyPreference (intDefaultGanttChartViewDuration)
+	SELECT 7
+END
