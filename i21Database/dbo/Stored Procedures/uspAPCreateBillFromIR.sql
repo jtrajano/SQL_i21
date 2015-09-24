@@ -12,6 +12,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @totalReceipts INT;
 DECLARE @counter INT = 0;
 DECLARE @receiptId INT;
+DECLARE @receiptItemId INT;
 DECLARE @generatedBillId INT;
 DECLARE @generatedBillRecordId NVARCHAR(50);
 DECLARE @APAccount INT;
@@ -232,10 +233,23 @@ BEGIN
 	WHERE A.intInventoryReceiptId = @receiptId
 
 	--CREATE TAXES FROM CREATED ITEM RECEIPT
+
+	--EXCLUDE CHARGES FOR TAXES
+	DELETE A
+	FROM #tmpCreatedBillDetail A
+	INNER JOIN tblAPBillDetail B ON A.intBillDetailId = B.intBillDetailId
+	WHERE B.intInventoryReceiptChargeId IS NOT NULL
+	 
 	DECLARE @intBillDetailId INT;
 	WHILE(EXISTS(SELECT 1 FROM #tmpCreatedBillDetail))
 	BEGIN
-		SET @intBillDetailId = (SELECT TOP 1 intBillDetailId FROM #tmpCreatedBillDetail)
+
+		SELECT TOP 1 
+			@intBillDetailId = A.intBillDetailId
+			,@receiptItemId = B.intInventoryReceiptItemId 
+		FROM #tmpCreatedBillDetail A 
+		INNER JOIN tblAPBillDetail B ON A.intBillDetailId = B.intBillDetailId
+
 		INSERT INTO tblAPBillDetailTax(
 			[intBillDetailId]		, 
 			[intTaxGroupMasterId]	, 
@@ -268,8 +282,7 @@ BEGIN
 			[ysnSeparateOnBill]		=	A.ysnSeparateOnInvoice, 
 			[ysnCheckOffTax]		=	A.ysnCheckoffTax
 		FROM tblICInventoryReceiptItemTax A
-		INNER JOIN tblAPBillDetail B ON B.intInventoryReceiptItemId = A.intInventoryReceiptItemId
-		WHERE B.intBillDetailId = @intBillDetailId
+		WHERE A.intInventoryReceiptItemId = @receiptItemId
 
 		DELETE FROM #tmpCreatedBillDetail WHERE intBillDetailId = @intBillDetailId
 	END
