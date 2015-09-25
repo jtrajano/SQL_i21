@@ -139,7 +139,13 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                             value: '0',
                             conjunction: 'and',
                             condition: 'gt'
-                        }]
+                        },{
+                            column: 'ysnStockUnit',
+                            value: true,
+                            conjunction: 'and',
+                            condition: 'eq'
+                        }
+                        ]
                     }
                 },
                 colFromStorage: {
