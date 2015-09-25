@@ -221,7 +221,7 @@ BEGIN
 	END 	
 	
 	-- Generate the next lot number - if it is blank AND it is a serial lot item. 
-	IF @intLotTypeId = @LotType_Serial
+	IF @intLotTypeId = @LotType_Serial AND @intLotId IS NULL 
 	BEGIN 		
 		EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strLotNumber OUTPUT 
 	END 
