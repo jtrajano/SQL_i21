@@ -46,9 +46,6 @@ Ext.define('Inventory.view.ItemViewModel', {
             autoLoad: true,
             data: [
                 {
-                    strType: 'Assembly/Blend'
-                },
-                {
                     strType: 'Bundle'
                 },
                 {
@@ -831,12 +828,13 @@ Ext.define('Inventory.view.ItemViewModel', {
             }
         },
         hideBuildAssembly: function (get) {
-            if (get('current.strLotTracking') === 'No' && get('current.strType') === 'Assembly/Blend') {
-                return false;
-            }
-            else {
-                return true;
-            }
+            return true;
+//            if (get('current.strLotTracking') === 'No' && get('current.strType') === 'Assembly/Blend') {
+//                return false;
+//            }
+//            else {
+//                return true;
+//            }
         },
         readOnlyCommodity: function (get) {
             switch (get('current.strType')) {
