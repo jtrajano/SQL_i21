@@ -111,7 +111,7 @@ BEGIN
 			,@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
 	FROM	@ItemsForLot LotFromTransaction INNER JOIN dbo.tblICItem Item
 				ON LotFromTransaction.intItemId = Item.intItemId
-	GROUP BY LotFromTransaction.strLotNumber, LotFromTransaction.strReceiptNumber, Item.strItemNo, Item.intItemId
+	GROUP BY LotFromTransaction.strLotNumber, LotFromTransaction.strReceiptNumber, Item.strItemNo, Item.intItemId, LotFromTransaction.intSubLocationId, LotFromTransaction.intStorageLocationId
 	HAVING COUNT(1) > 1
 
 	IF ISNULL(@strReceiptNumber, '') <> '' AND ISNULL(@strLotNumber, '') <> '' AND ISNULL(@strItemNo, '') <> ''
