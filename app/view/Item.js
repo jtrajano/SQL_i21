@@ -134,6 +134,7 @@ Ext.define('Inventory.view.Item', {
                     xtype: 'button',
                     tabIndex: -1,
                     height: 57,
+                    hidden: true,
                     itemId: 'btnBuildAssembly',
                     width: 90,
                     iconAlign: 'top',

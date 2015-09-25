@@ -208,6 +208,7 @@
                     "userConfig": {
                         "designer|displayName": null,
                         "height": 57,
+                        "hidden": true,
                         "icon": null,
                         "iconAlign": "top",
                         "iconCls": "large-build",
