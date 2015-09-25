@@ -2451,6 +2451,7 @@
     <Build Include="dbo\Tables\tblPATCompanyPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentReport.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\9_UpdateAccountSegmentWithNoMatchingCategory.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentContainerReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
