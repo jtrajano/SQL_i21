@@ -14,9 +14,9 @@ Ext.define('Inventory.view.StockDetailViewController', {
                 { xtype: 'numbercolumn', summaryType: 'sum', dataIndex: 'dblOrderCommitted', text: 'Committed', flex: 1, dataType: 'float' },
                 { xtype: 'numbercolumn', summaryType: 'sum', dataIndex: 'dblOnOrder', text: 'On Order', flex: 1, dataType: 'float' },
                 { xtype: 'numbercolumn', summaryType: 'sum', dataIndex: 'dblBackOrder', text: 'Back Order', flex: 1, dataType: 'float' },
-                { dataIndex: 'dblLastCost', text: 'Last Cost', flex: 1, dataType: 'float' },
-                { dataIndex: 'dblAverageCost', text: 'Average Cost', flex: 1, dataType: 'float' },
-                { dataIndex: 'dblStandardCost', text: 'Standard Cost', flex: 1, dataType: 'float' }
+                { xtype: 'numbercolumn', dataIndex: 'dblLastCost', text: 'Last Cost', flex: 1, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblAverageCost', text: 'Average Cost', flex: 1, dataType: 'float' },
+                { xtype: 'numbercolumn', dataIndex: 'dblStandardCost', text: 'Standard Cost', flex: 1, dataType: 'float' }
             ],
             showNew: false,
             showOpenSelected: false,
