@@ -1208,7 +1208,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter137",
+                                                    "name": "filter14",
                                                     "designerId": "4657730f-09d8-419c-b5af-f59d820ad534",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1711,6 +1711,22 @@
                                             ]
                                         },
                                         {
+                                            "type": "Ext.grid.column.Column",
+                                            "reference": {
+                                                "name": "columns",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "dataIndex": "strUOM",
+                                                "itemId": "colAvailableUOM",
+                                                "text": "UOM",
+                                                "width": 70
+                                            },
+                                            "name": "MyColumn46",
+                                            "designerId": "a040696e-e9e4-4a26-a6ee-6e15ebe90971"
+                                        },
+                                        {
                                             "type": "Ext.grid.column.Number",
                                             "reference": {
                                                 "name": "columns",
@@ -1735,22 +1751,6 @@
                                                     "type": "string"
                                                 }
                                             ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Column",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "dataIndex": "strUOM",
-                                                "itemId": "colAvailableUOM",
-                                                "text": "UOM",
-                                                "width": 70
-                                            },
-                                            "name": "MyColumn46",
-                                            "designerId": "a040696e-e9e4-4a26-a6ee-6e15ebe90971"
                                         },
                                         {
                                             "type": "Ext.grid.column.Column",
@@ -2402,7 +2402,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging14",
+                    "name": "statusbarpaging12",
                     "designerId": "71b35b2f-3855-4c55-bf9a-945d62a1c5b4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

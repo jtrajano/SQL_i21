@@ -872,6 +872,13 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         }
                                                     },
                                                     {
+                                                        xtype: 'gridcolumn',
+                                                        itemId: 'colAvailableUOM',
+                                                        width: 70,
+                                                        dataIndex: 'strUOM',
+                                                        text: 'UOM'
+                                                    },
+                                                    {
                                                         xtype: 'numbercolumn',
                                                         dataType: 'numeric',
                                                         itemId: 'colAvailableQty',
@@ -880,13 +887,6 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         dataIndex: 'dblQuantity',
                                                         text: 'Available Qty',
                                                         format: '0,000.##'
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colAvailableUOM',
-                                                        width: 70,
-                                                        dataIndex: 'strUOM',
-                                                        text: 'UOM'
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
