@@ -158,7 +158,7 @@ BEGIN
 			AND Header.intCompanyLocationId = IST.intLocationId 
 	WHERE 
 		TD.intTransactionId = @InvoiceId
-		AND TD.strTransactionType = 'Invoice'
+		AND Header.strTransactionType = 'Invoice'
 		AND (TD.intInventoryShipmentItemId IS NULL OR TD.intInventoryShipmentItemId = 0)
 		AND TD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @InvoiceId)
 		
