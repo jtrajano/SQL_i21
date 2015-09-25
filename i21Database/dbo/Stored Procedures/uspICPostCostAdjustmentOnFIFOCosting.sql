@@ -27,7 +27,7 @@
 	@intUserId - The user who initiated or called this stored procedure. 
 */
 
-CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnAverageCosting]
+CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnFIFOCosting]
 	@dtmDate AS DATETIME
 	,@intItemId AS INT
 	,@intItemLocationId AS INT
@@ -452,66 +452,6 @@ END;
 -----------------------------------------------------------------------------------------------------------------------------
 -- End loop for sold stocks
 -----------------------------------------------------------------------------------------------------------------------------
-	
--------------------------------------------------------------------------------------------------------------------------------
----- Update the average cost 
--------------------------------------------------------------------------------------------------------------------------------
---BEGIN 
---	DECLARE @CurrentStockQty AS NUMERIC(18,6)
-
---	SELECT TOP 1 
---			@CurrentStockQty = dblUnitOnHand
---	FROM	dbo.tblICItemStock
---	WHERE	intItemId = @intItemId
---			AND intItemLocationId = @intItemLocationId
-
---	MERGE	
---	INTO	dbo.tblICItemPricing 
---	WITH	(HOLDLOCK) 
---	AS		ItemPricing
---	USING (
---			SELECT	intItemId = @intItemId
---					,intItemLocationId = @intItemLocationId
---					,Qty = dbo.fnCalculateStockUnitQty(@dblQty, @dblUOMQty) 
---					,Cost = dbo.fnCalculateUnitCost(@dblNewCost, @dblUOMQty)
---	) AS StockToUpdate
---		ON ItemPricing.intItemId = StockToUpdate.intItemId
---		AND ItemPricing.intItemLocationId = StockToUpdate.intItemLocationId
-
---	-- If matched, update the average cost, last cost, and standard cost
---	WHEN MATCHED THEN 
---		UPDATE 
---		SET		dblAverageCost = dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, ItemPricing.dblAverageCost)
---				,dblLastCost = StockToUpdate.Cost
---				,dblStandardCost = 
---								CASE WHEN StockToUpdate.Qty > 0 THEN 
---										CASE WHEN ISNULL(ItemPricing.dblStandardCost, 0) = 0 THEN StockToUpdate.Cost ELSE ItemPricing.dblStandardCost END 
---									ELSE 
---										ItemPricing.dblStandardCost
---								END 
-
---	-- If none found, insert a new item pricing record
---	WHEN NOT MATCHED THEN 
---		INSERT (
---			intItemId
---			,intItemLocationId
---			,dblAverageCost 
---			,dblLastCost 
---			,dblStandardCost
---			,intConcurrencyId
---		)
---		VALUES (
---			StockToUpdate.intItemId
---			,StockToUpdate.intItemLocationId
---			,dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, 0)
---			,StockToUpdate.Cost
---			,StockToUpdate.Cost
---			,1
---		)
---	;
-
---END 
-
 
 -- Immediate exit
 Post_Exit: 
