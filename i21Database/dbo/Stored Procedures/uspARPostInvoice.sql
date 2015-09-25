@@ -1473,7 +1473,7 @@ IF @recap = 1
 			)  
 			-- RETRIEVE THE DATA FROM THE TABLE VARIABLE.   
 			SELECT [dtmDate]  
-			  ,[strBatchId]  
+			  ,@batchId  
 			  ,[intAccountId]  
 			  ,[dblDebit]  
 			  ,[dblCredit]  
