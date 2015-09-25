@@ -99,7 +99,7 @@ BEGIN
 		
 			
 	SELECT 
-		 @EntityCustomerId				= (SELECT [intEntityId] FROM tblEntity WHERE [strEntityNo] = D.[strCustomerNumber])
+		 @EntityCustomerId				= (SELECT TOP 1 [intEntityId] FROM tblEntity WHERE [strEntityNo] = D.[strCustomerNumber])
 		,@InvoiceDate					= D.[dtmInvoiceDate] 					
 		,@CompanyLocationId				= @DefaultCompanyLocation --(SELECT [intCompanyLocationId] FROM tblSMCompanyLocation WHERE strLocationName = D.[strDivision])
 		,@EntityId						= ISNULL(@UserEntityId, H.[intEntityId])
@@ -149,7 +149,7 @@ BEGIN
 		,@ItemSCInvoiceNumber			= NULL
 		,@ItemServiceChargeAccountId	= NULL
 		,@ItemTaxGroupId				= (CASE WHEN D.[dblSalesTaxAmount] <> 0 AND D.[dblBalance] > 0
-											THEN (SELECT [intTaxGroupId] FROM tblSMTaxGroup WHERE UPPER(LTRIM(RTRIM(ISNULL(strTaxGroup,'')))) = UPPER(LTRIM(RTRIM(ISNULL(D.[strTaxSchedule],''))))) 
+											THEN (SELECT TOP 1 [intTaxGroupId] FROM tblSMTaxGroup WHERE UPPER(LTRIM(RTRIM(ISNULL(strTaxGroup,'')))) = UPPER(LTRIM(RTRIM(ISNULL(D.[strTaxSchedule],''))))) 
 											ELSE NULL 
 										END)
 	FROM
@@ -229,9 +229,16 @@ BEGIN
 				tblARImportLogDetail
 			SET
 				 [ysnImported]		= 0
+				,[ysnSuccess]       = 0
 				,[strEventResult]	= @ErrorMessage
 			WHERE
 				[intImportLogDetailId] = @ImportLogDetailId
+
+			UPDATE 
+				tblARImportLog 
+			SET intSuccessCount = intSuccessCount - 1
+			  , intFailedCount = intFailedCount + 1
+			WHERE intImportLogId = @ImportLogId
 		END
 	ELSE IF(ISNULL(@NewInvoiceId,0) <> 0)
 		BEGIN
