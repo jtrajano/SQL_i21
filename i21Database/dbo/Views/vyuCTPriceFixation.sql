@@ -21,7 +21,8 @@ SELECT 				PF.intPriceFixationId,
 					intSalespersonId,
 					CD.intCompanyLocationId,
 					CD.intCurrencyId,
-					CD.ysnMultiplePriceFixation
+					CD.ysnMultiplePriceFixation,
+					CD.intDiscountScheduleCodeId
 
 		FROM		tblCTPriceFixation			PF
 		JOIN		vyuCTContractDetailView		CD	ON	CD.intContractDetailId = PF.intContractDetailId
@@ -49,7 +50,8 @@ SELECT 				PF.intPriceFixationId,
 					intSalespersonId,
 					MAX(CD.intCompanyLocationId)	AS	intCompanyLocationId,
 					MAX(CD.intCurrencyId)		AS	intCurrencyId,
-					CD.ysnMultiplePriceFixation
+					CD.ysnMultiplePriceFixation,
+					CAST (NULL AS INT)			AS	intDiscountScheduleCodeId
 		
 		FROM		tblCTPriceFixation			PF
 		JOIN		vyuCTContractDetailView		CD	ON	CD.intContractHeaderId = PF.intContractHeaderId

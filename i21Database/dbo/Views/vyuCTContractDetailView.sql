@@ -24,6 +24,7 @@ AS
 			CD.dtmFXValidFrom,					CD.dtmFXValidTo,				CD.strFXRemarks,
 			CD.dblAssumedFX,					CD.strFixationBy,				CD.intItemUOMId,
 			CD.intIndexId,						CD.dblAdjustment,				CD.intAdjItemUOMId,		
+			CD.intDiscountScheduleCodeId,
 
 			IM.strItemNo,						FT.strFreightTerm,				IM.strDescription				AS	strItemDescription,
 			SV.strShipVia,						PT.strPricingType,				U1.strUnitMeasure				AS	strItemUOM,
@@ -32,6 +33,7 @@ AS
 			RG.strRailGrade,					CL.strLocationName,				FR.strOrigin+' - '+FR.strDest	AS	strOriginDest,
 			IX.strIndexType,					
 			ISNULL(CD.dblBalance,0) -	ISNULL(CD.dblScheduleQty,0) AS dblAvailableQty,
+
 			--Required by other modules
 
 			SL.intStorageLocationId,			IM.strLotTracking,				SL.strName						AS	strStorageLocationName,

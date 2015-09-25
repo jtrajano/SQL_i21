@@ -41,7 +41,8 @@ AS
 					CAST(dblNoOfLots AS INT) AS intBalanceNoOfLots,
 					CAST(0 AS INT) AS intLotsHedged,
 					CAST(NULL AS NUMERIC(8,4)) AS dblFinalPrice,
-					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId
+					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
+					CD.intDiscountScheduleCodeId
 
 		FROM		vyuCTContractDetailView		CD
 		JOIN		tblICCommodityUnitMeasure	CU ON CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1
@@ -87,7 +88,8 @@ AS
 					CAST(ROUND(SUM(dblNoOfLots),0)AS INT) AS intBalanceNoOfLots,
 					CAST(0 AS INT) AS intLotsHedged,
 					CAST(NULL AS NUMERIC(8,4)) AS dblFinalPrice,
-					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId
+					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
+					CAST (NULL AS INT)			AS	intDiscountScheduleCodeId
 
 		FROM		vyuCTContractDetailView		CD
 		JOIN		tblICCommodityUnitMeasure	CU ON CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1 
@@ -149,7 +151,8 @@ AS
 					PF.intTotalLots-intLotsFixed AS intBalanceNoOfLots,
 					PF.intLotsHedged,
 					PF.dblFinalPrice,
-					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId
+					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
+					CD.intDiscountScheduleCodeId
 
 		FROM		tblCTPriceFixation			PF
 		JOIN		vyuCTContractDetailView		CD	ON	CD.intContractDetailId = PF.intContractDetailId
@@ -199,8 +202,9 @@ AS
 					PF.intTotalLots-PF.intLotsFixed AS intBalanceNoOfLots,
 					PF.intLotsHedged,
 					CAST(NULL AS NUMERIC(8,4)) AS dblFinalPrice,
-					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId
-		
+					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
+					CAST (NULL AS INT)			AS	intDiscountScheduleCodeId
+
 		FROM		tblCTPriceFixation			PF
 		JOIN		vyuCTContractDetailView		CD	ON	CD.intContractHeaderId = PF.intContractHeaderId
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1 
