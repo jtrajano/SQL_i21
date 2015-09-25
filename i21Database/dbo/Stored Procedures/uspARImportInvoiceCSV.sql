@@ -103,8 +103,8 @@ BEGIN
 		,@InvoiceDate					= D.[dtmInvoiceDate] 					
 		,@CompanyLocationId				= @DefaultCompanyLocation --(SELECT [intCompanyLocationId] FROM tblSMCompanyLocation WHERE strLocationName = D.[strDivision])
 		,@EntityId						= ISNULL(@UserEntityId, H.[intEntityId])
-		,@TermId						= (SELECT [intTermID] FROM tblSMTerm WHERE [strTermCode] = D.[strTermsCode])
-		,@EntitySalespersonId			= (SELECT [intEntityId] FROM tblEntity WHERE [strEntityNo] = D.[strSalespersonCode])
+		,@TermId						= (SELECT TOP 1 [intTermID] FROM tblSMTerm WHERE [strTermCode] = D.[strTermsCode])
+		,@EntitySalespersonId			= (SELECT TOP 1 [intEntityId] FROM tblEntity WHERE [strEntityNo] = D.[strSalespersonCode])
 		,@DueDate						= NULL		
 		,@ShipDate						= NULL
 		,@PostDate						= D.[dtmPostingDate] 
