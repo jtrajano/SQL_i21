@@ -14,9 +14,14 @@ SELECT strRecordNumber
 	 , A.intEntitySalespersonId	 
 	 , A.strTransactionType
 	 , A.strType
-	 , A.dblQty
+	 , A.dblQtyOrdered
+	 , A.dblQtyShipped
 	 , ICP.dblStandardCost			  AS dblCost
-	 , (ISNULL(A.dblPrice, 0) - ISNULL(ICP.dblStandardCost, 0)) * A.dblQty AS dblMargin
+	 , dblMargin = (ISNULL(A.dblPrice, 0) - ISNULL(ICP.dblStandardCost, 0)) * 
+						CASE WHEN A.strTransactionType IN ('Invoice', 'Credit Memo') 
+							THEN ISNULL(A.dblQtyShipped, 0) 
+							ELSE ISNULL(A.dblQtyOrdered, 0)
+						END
 	 , A.dblPrice
 	 , A.dblTax
 	 , A.dblTotal
@@ -47,7 +52,8 @@ FROM
 	  , I.strTransactionType
 	  , I.strType
 	  , ID.strItemDescription
-	  , ID.dblQtyShipped			  AS dblQty
+	  , ID.dblQtyOrdered
+	  , ID.dblQtyShipped
 	  , ID.dblPrice
 	  , ID.dblTotalTax				  AS dblTax
 	  , I.dblInvoiceTotal			  AS dblTotal
@@ -70,7 +76,8 @@ SELECT SO.strSalesOrderNumber		  AS strRecordNumber
 	 , SO.strTransactionType
 	 , SO.strType
 	 , SOD.strItemDescription
-	 , SOD.dblQtyOrdered			  AS dblQty
+	 , SOD.dblQtyOrdered
+	 , SOD.dblQtyShipped
 	 , SOD.dblPrice
 	 , SOD.dblTotalTax				  AS dblTax
 	 , SO.dblSalesOrderTotal		  AS dblTotal 
