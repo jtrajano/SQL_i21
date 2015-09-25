@@ -21,6 +21,18 @@ BEGIN
 
 	IF @post = 1
 	BEGIN
+
+		--Missing vendor order number
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'Unable to post. Vendor order number is missing.',
+			'Bill',
+			A.strBillId,
+			A.intBillId
+		FROM tblAPBill A 
+		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) AND 
+		ISNULL(A.strVendorOrderNumber,'') = ''
+
 		--Fiscal Year
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
