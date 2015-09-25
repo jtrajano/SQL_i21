@@ -76,8 +76,8 @@ BEGIN
 		(SELECT L1.dtmScheduledDate FROM tblLGLoad L1 where L1.intLoadId = @intSLoadId) as dtmDeliveryDate,
 		(SELECT L1.strCustomerReference FROM tblLGLoad L1 where L1.intLoadId = @intPLoadId) as strVendorReference,
 		(SELECT L1.strCustomerReference FROM tblLGLoad L1 where L1.intLoadId = @intSLoadId)  as strCustomerReference,
-		(SELECT L1.strComments FROM tblLGLoad L1 where L1.intLoadId = @intPLoadId) as strInboundComments,
-		(SELECT L1.strComments FROM tblLGLoad L1 where L1.intLoadId = @intSLoadId)  as strOutboundComments,
+		(SELECT L1.strComments FROM vyuLGLoadView L1 where L1.intLoadId = @intPLoadId) as strInboundComments,
+		(SELECT L1.strComments FROM vyuLGLoadView L1 where L1.intLoadId = @intSLoadId AND L1.ysnDirectShip = 0)  as strOutboundComments,
 
 		(SELECT L1.strCustomerContract FROM vyuLGLoadView L1 where L1.intLoadId = @intPLoadId) as strPCustomerContract,
 		(SELECT L1.strCustomerContract FROM vyuLGLoadView L1 where L1.intLoadId = @intSLoadId) as strSCustomerContract,
