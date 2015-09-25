@@ -124,7 +124,9 @@ SELECT
 		WH.strCity as strWarehouseCity,
 		WH.strClassification as strWarehouseClassification,
 		WH.strState as strWarehouseState,
-		WH.strZipCode as strWarehouseZipCode
+		WH.strZipCode as strWarehouseZipCode,
+
+		WI.intWarehouseInstructionHeaderId
 
 FROM		tblLGShipment SH
 LEFT JOIN	tblEntity SLEntity ON SLEntity.intEntityId = SH.intShippingLineEntityId
@@ -137,5 +139,6 @@ LEFT JOIN	tblEntity InsurEntity ON InsurEntity.intEntityId = SH.intInsurerEntity
 LEFT JOIN	tblEntityLocation InsurLocation ON InsurLocation.intEntityId = SH.intInsurerEntityId and InsurLocation.intEntityLocationId = InsurEntity.intDefaultLocationId
 LEFT JOIN	tblSMCompanyLocationSubLocation WH ON WH.intCompanyLocationSubLocationId = SH.intSubLocationId
 LEFT JOIN	tblSMCurrency InsuranceCur ON InsuranceCur.intCurrencyID = SH.intInsuranceCurrencyId
+LEFT JOIN	tblLGWarehouseInstructionHeader WI ON WI.intShipmentId = SH.intShipmentId
 WHERE SH.intTrackingNumber = @intTrackingNumber
 END
