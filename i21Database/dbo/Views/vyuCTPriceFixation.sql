@@ -7,7 +7,7 @@ SELECT 				PF.intPriceFixationId,
 					intContractTypeId,
 					strLocationName,
 					dblDetailQuantity AS dblQuantity,
-					intItemUOMId,
+					CD.intItemUOMId,
 					intFutureMarketId,
 					strFutMarketName,
 					intFutureMonthId,
@@ -22,11 +22,14 @@ SELECT 				PF.intPriceFixationId,
 					CD.intCompanyLocationId,
 					CD.intCurrencyId,
 					CD.ysnMultiplePriceFixation,
-					CD.intDiscountScheduleCodeId
+					CD.intDiscountScheduleCodeId,
+					PU.intCommodityUnitMeasureId AS intBasisCommodityUOMId
 
 		FROM		tblCTPriceFixation			PF
-		JOIN		vyuCTContractDetailView		CD	ON	CD.intContractDetailId = PF.intContractDetailId
-		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1 
+		JOIN		vyuCTContractDetailView		CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
+		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId		=	CD.intCommodityId	AND CU.ysnDefault = 1 
+		JOIN		tblICItemUOM				IM	ON	IM.intItemUOMId			=	CD.intPriceItemUOMId
+		JOIN		tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId		=	CD.intCommodityId	AND PU.intUnitMeasureId = IM.intUnitMeasureId
 		AND			PF.intContractDetailId IS NOT NULL
 
 		UNION ALL
@@ -51,8 +54,9 @@ SELECT 				PF.intPriceFixationId,
 					MAX(CD.intCompanyLocationId)	AS	intCompanyLocationId,
 					MAX(CD.intCurrencyId)		AS	intCurrencyId,
 					CD.ysnMultiplePriceFixation,
-					CAST (NULL AS INT)			AS	intDiscountScheduleCodeId
-		
+					CAST (NULL AS INT)			AS	intDiscountScheduleCodeId,
+					CAST (NULL AS INT)			AS	intBasisCommodityUOMId
+
 		FROM		tblCTPriceFixation			PF
 		JOIN		vyuCTContractDetailView		CD	ON	CD.intContractHeaderId = PF.intContractHeaderId
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1 
