@@ -9,7 +9,8 @@
         "name": "Inventory",
         "views": [
             "CardCount",
-            "InventoryCountName"
+            "InventoryCountName",
+            "StorageMeasurementReading"
         ]
     },
     "name": "Application",

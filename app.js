@@ -22,7 +22,8 @@ Ext.Loader.setConfig({
 Ext.application({
     views: [
         'CardCount',
-        'InventoryCountName'
+        'InventoryCountName',
+        'StorageMeasurementReading'
     ],
     name: 'Inventory',
 
