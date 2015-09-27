@@ -37,6 +37,10 @@ Declare @intNoOfSheetOriginal int
 Declare @dblRemainingQtyToProduce numeric(18,6)
 Declare @PerBlendSheetQty  numeric(18,6)
 Declare @ysnCalculateNoSheetUsingBinSize bit=0
+Declare @ysnKittingEnabled bit
+Declare @ysnRequireCustomerApproval bit
+Declare @intWorkOrderStatusId INT
+Declare @intKitStatusId INT=NULL
 
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml  
 
@@ -151,11 +155,26 @@ Select TOP 1 @ysnEnableParentLot=ISNULL(ysnEnableParentLot,0) From tblMFCompanyP
 
 Select @dblQtyToProduce=dblQtyToProduce,@intUserId=intUserId,@intLocationId=intLocationId,@dtmDueDate=dtmDueDate,
 @intBlendItemId=intItemId,@intCellId=intCellId,@intBlendRequirementId=intBlendRequirementId,@dblBinSize=dblBinSize,
-@intWorkOrderId=intWorkOrderId from @tblBlendSheet
+@intWorkOrderId=intWorkOrderId,@ysnKittingEnabled=ysnKittingEnabled from @tblBlendSheet
 
 Select @strDemandNo=strDemandNo from tblMFBlendRequirement where intBlendRequirementId=@intBlendRequirementId
 
-Select @strBlendItemNo=strItemNo,@strBlendItemStatus=strStatus From tblICItem Where intItemId=@intBlendItemId
+Select @strBlendItemNo=strItemNo,@strBlendItemStatus=strStatus,@ysnRequireCustomerApproval=ysnRequireCustomerApproval 
+From tblICItem Where intItemId=@intBlendItemId
+
+If @ysnKittingEnabled=1 And (@ysnEnableParentLot=0 OR (Select TOP 1 ysnParentLot From @tblLot) = 0 )
+	Begin
+		Set @ErrMsg='Please enable Parent Lot for Kitting.'
+		RaisError(@ErrMsg,16,1)
+	End
+
+If @ysnKittingEnabled=1
+	Set @intKitStatusId=6
+
+If @ysnRequireCustomerApproval = 1
+	Set @intWorkOrderStatusId=5 --Hold
+Else
+	Set @intWorkOrderStatusId=9 --Released
 
 If (@strBlendItemStatus <> 'Active')
 	Begin
@@ -286,10 +305,10 @@ Begin
 	Set @intExecutionOrder=@intExecutionOrder +1 
 
 	insert into tblMFWorkOrder(strWorkOrderNo,intItemId,dblQuantity,intItemUOMId,intStatusId,intManufacturingCellId,intMachineId,intLocationId,dblBinSize,dtmExpectedDate,intExecutionOrder,
-	intProductionTypeId,dblPlannedQuantity,intBlendRequirementId,ysnKittingEnabled,ysnUseTemplate,strComment,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,dtmReleasedDate,intManufacturingProcessId)
-	Select @strNextWONo ,intItemId,@PerBlendSheetQty,intItemUOMId,9,intCellId,intMachineId,intLocationId,dblBinSize,dtmDueDate,@intExecutionOrder,1,
+	intProductionTypeId,dblPlannedQuantity,intBlendRequirementId,ysnKittingEnabled,intKitStatusId,ysnUseTemplate,strComment,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,dtmReleasedDate,intManufacturingProcessId)
+	Select @strNextWONo ,intItemId,@PerBlendSheetQty,intItemUOMId,@intWorkOrderStatusId,intCellId,intMachineId,intLocationId,dblBinSize,dtmDueDate,@intExecutionOrder,1,
 	Case When @intNoOfSheetOriginal=1 then dblPlannedQuantity else @PerBlendSheetQty End,intBlendRequirementId,
-	ysnKittingEnabled,ysnUseTemplate,strComment,GetDate(),intUserId,GetDate(),intUserId,GetDate(),@intManufacturingProcessId
+	ysnKittingEnabled,@intKitStatusId,ysnUseTemplate,strComment,GetDate(),intUserId,GetDate(),intUserId,GetDate(),@intManufacturingProcessId
 	from @tblBlendSheet
 
 	Set @intWorkOrderId=SCOPE_IDENTITY()

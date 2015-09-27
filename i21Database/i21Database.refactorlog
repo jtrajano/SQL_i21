@@ -4032,4 +4032,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intPatchDetailId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="be430a54-680b-4872-83f3-0658cfdaab2c" ChangeDateTime="09/27/2015 16:52:36">
+    <Property Name="ElementName" Value="[dbo].[tblMFWorkOrder].[intPickId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFWorkOrder]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intPickListId]" />
+  </Operation>
 </Operations>

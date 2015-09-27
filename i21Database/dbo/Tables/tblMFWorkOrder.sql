@@ -32,8 +32,9 @@
     [intStagingLocationId] INT NULL,
 	[intParentWorkOrderId] INT NULL, 
     [intBlendRequirementId] INT NULL, 
-    [intPickId] INT NULL, 
+    [intPickListId] INT NULL, 
     [ysnKittingEnabled] BIT NOT NULL CONSTRAINT [DF_tblMFWorkOrder_ysnKittingEnabled] DEFAULT 0,
+	[intKitStatusId] INT NULL,
     [intProductOwnerId] INT NULL,  
     [intCustomerId] INT NULL, 
     [strSalesOrderNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -74,5 +75,6 @@
 	CONSTRAINT [FK_tblMFWorkOrder_tblMFManufacturingProcess_intManufacturingProcessId] FOREIGN KEY([intManufacturingProcessId]) REFERENCES dbo.tblMFManufacturingProcess (intManufacturingProcessId),
 	CONSTRAINT FK_tblMFWorkOrder_tblSMCompanyLocationSubLocation_intSubLocationId FOREIGN KEY(intSubLocationId) REFERENCES dbo.tblSMCompanyLocationSubLocation (intCompanyLocationSubLocationId),
 	CONSTRAINT [FK_tblMFWorkOrder_intCountStatusId_tblMFWorkOrderStatus_intStatusId] FOREIGN KEY ([intCountStatusId]) REFERENCES [tblMFWorkOrderStatus]([intStatusId]), 
-	CONSTRAINT [FK_tblMFWorkOrder_tblMFDepartment_intDepartmentId] FOREIGN KEY ([intDepartmentId]) REFERENCES [tblMFDepartment]([intDepartmentId])
+	CONSTRAINT [FK_tblMFWorkOrder_tblMFDepartment_intDepartmentId] FOREIGN KEY ([intDepartmentId]) REFERENCES [tblMFDepartment]([intDepartmentId]),
+	CONSTRAINT [FK_tblMFWorkOrder_tblMFWorkOrderStatus_intKitStatusId] FOREIGN KEY ([intKitStatusId]) REFERENCES [tblMFWorkOrderStatus]([intStatusId])
 )

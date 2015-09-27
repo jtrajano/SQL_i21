@@ -2454,6 +2454,16 @@
     <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentContainerReport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetWarehouseInstructionReport.sql" />
     <Build Include="dbo\Views\vyuCTSimultaneousFixation.sql" />
+    <Build Include="dbo\Tables\tblMFPickList.sql" />
+    <Build Include="dbo\Tables\tblMFPickListPreference.sql" />
+    <Build Include="dbo\Tables\tblMFPickListDetail.sql" />
+    <Build Include="dbo\Views\vyuMFGetKitDemand.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetPickListDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetPickList.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetKits.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreatePickList.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFSavePickList.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFDeletePickList.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
