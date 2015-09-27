@@ -19,6 +19,7 @@ DECLARE @index int
 DECLARE @id nvarchar(50)
 DECLARE @intAssignedToId int
 DECLARE @intConCurrencyId int
+DECLARE @strPickListNo nVarchar(50)
 
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml  
 
@@ -89,7 +90,7 @@ INSERT INTO @tblPickListDetail(
 	intUserId int
 	)
 
-Select TOP 1 @intPickListId=intPickListId,@strWorkOrderNos=strWorkOrderNo,@intAssignedToId=intAssignedToId From @tblPickList
+Select TOP 1 @intPickListId=intPickListId,@strWorkOrderNos=strWorkOrderNo,@intAssignedToId=intAssignedToId,@strPickListNo=strPickListNo From @tblPickList
 
 --Get the Comma Separated Work Order Nos into a table
 SET @index = CharIndex(',',@strWorkOrderNos)
@@ -110,6 +111,11 @@ If @intAssignedToId=0
 If (Select count(1) from @tblWorkOrder)=0
 	Raiserror('No Blend Sheet(s) are selected for picking.',16,1)
 
+If ISNULL(@strPickListNo,'') = ''
+	Begin
+		EXEC dbo.uspSMGetStartingNumber 68,@strPickListNo OUTPUT
+		Update @tblPickList Set strPickListNo=@strPickListNo
+	End
 Begin Tran
 
 If @intPickListId=0
@@ -119,7 +125,7 @@ Begin
 		RaisError('Blend Sheet(s) are already picked.',16,1)
 
 	Insert Into tblMFPickList(strPickListNo,strWorkOrderNo,intKitStatusId,intAssignedToId,intLocationId,dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intConcurrencyId)
-	Select strPickListNo,strWorkOrderNo,7,intAssignedToId,intLocationId,@dtmCurrentDate,intUserId,@dtmCurrentDate,intUserId,1 From @tblPickList
+	Select @strPickListNo,strWorkOrderNo,7,intAssignedToId,intLocationId,@dtmCurrentDate,intUserId,@dtmCurrentDate,intUserId,1 From @tblPickList
 
 	SET @intPickListId=SCOPE_IDENTITY()
 
