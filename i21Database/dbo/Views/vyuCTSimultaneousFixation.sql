@@ -5,7 +5,8 @@ AS
 SELECT	*,dblFutures+dblBasis+dblAdditionalCost AS dblFinalPrice
 FROM	
 (
-	SELECT	CD.intContractSeq,
+	SELECT	PF.intPriceFixationId,
+			CD.intContractSeq,
 			PF.intLotsFixed/dblHeaderQuantity * dbo.fnCTConvertQuantityToTargetCommodityUOM(CU.intCommodityUnitMeasureId,CD.intCommodityUnitMeasureId,CD.dblDetailQuantity) dblFixedLots,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,CU.intCommodityUnitMeasureId,CD.dblFutures) dblFutures,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,CU.intCommodityUnitMeasureId,CD.dblOriginalBasis) dblOriginalBasis,
