@@ -24,7 +24,7 @@ AS
 			CD.dtmFXValidFrom,					CD.dtmFXValidTo,				CD.strFXRemarks,
 			CD.dblAssumedFX,					CD.strFixationBy,				CD.intItemUOMId,
 			CD.intIndexId,						CD.dblAdjustment,				CD.intAdjItemUOMId,		
-			CD.intDiscountScheduleCodeId,
+			CD.intDiscountScheduleCodeId,		CD.dblOriginalBasis,
 
 			IM.strItemNo,						FT.strFreightTerm,				IM.strDescription				AS	strItemDescription,
 			SV.strShipVia,						PT.strPricingType,				U1.strUnitMeasure				AS	strItemUOM,

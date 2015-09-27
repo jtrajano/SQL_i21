@@ -2453,6 +2453,7 @@
     <None Include="Scripts\Post-Deployment\GL\DefaultData\9_UpdateAccountSegmentWithNoMatchingCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentContainerReport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetWarehouseInstructionReport.sql" />
+    <Build Include="dbo\Views\vyuCTSimultaneousFixation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
