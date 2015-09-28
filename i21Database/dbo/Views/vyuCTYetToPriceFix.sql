@@ -21,8 +21,8 @@ AS
 					strItemUOM AS strUOM,
 					CAST(dblNoOfLots AS INT) AS intNoOfLots,
 					strLocationName,
-					intItemId,
-					intItemUOMId,
+					CD.intItemId,
+					CD.intItemUOMId,
 					intFutureMarketId,
 					strFutMarketName,
 					intFutureMonthId,
@@ -41,10 +41,14 @@ AS
 					CAST(dblNoOfLots AS INT) AS intBalanceNoOfLots,
 					CAST(0 AS INT) AS intLotsHedged,
 					CAST(NULL AS NUMERIC(8,4)) AS dblFinalPrice,
-					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId
+					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
+					CD.intDiscountScheduleCodeId,
+					PU.intCommodityUnitMeasureId AS intBasisCommodityUOMId
 
 		FROM		vyuCTContractDetailView		CD
-		JOIN		tblICCommodityUnitMeasure	CU ON CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1
+		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId	=	CD.intCommodityId AND CU.ysnDefault = 1
+		JOIN		tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
+		JOIN		tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId	=	CD.intCommodityId AND PU.intUnitMeasureId = IM.intUnitMeasureId
 		WHERE		intPricingTypeId = 2 
 		AND			ISNULL(ysnMultiplePriceFixation,0) = 0
 		AND			intContractDetailId NOT IN (SELECT ISNULL(intContractDetailId,0) FROM tblCTPriceFixation)
@@ -87,7 +91,9 @@ AS
 					CAST(ROUND(SUM(dblNoOfLots),0)AS INT) AS intBalanceNoOfLots,
 					CAST(0 AS INT) AS intLotsHedged,
 					CAST(NULL AS NUMERIC(8,4)) AS dblFinalPrice,
-					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId
+					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
+					CAST (NULL AS INT)			AS	intDiscountScheduleCodeId,
+					CAST (NULL AS INT)			AS	intBasisCommodityUOMId
 
 		FROM		vyuCTContractDetailView		CD
 		JOIN		tblICCommodityUnitMeasure	CU ON CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1 
@@ -125,8 +131,8 @@ AS
 					strItemUOM AS strUOM,
 					PF.intTotalLots AS intNoOfLots,
 					strLocationName,
-					intItemId,
-					intItemUOMId,
+					CD.intItemId,
+					CD.intItemUOMId,
 					intFutureMarketId,
 					strFutMarketName,
 					intFutureMonthId,
@@ -149,11 +155,15 @@ AS
 					PF.intTotalLots-intLotsFixed AS intBalanceNoOfLots,
 					PF.intLotsHedged,
 					PF.dblFinalPrice,
-					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId
+					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
+					CD.intDiscountScheduleCodeId,
+					PU.intCommodityUnitMeasureId AS intBasisCommodityUOMId
 
 		FROM		tblCTPriceFixation			PF
 		JOIN		vyuCTContractDetailView		CD	ON	CD.intContractDetailId = PF.intContractDetailId
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1 
+		JOIN		tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
+		JOIN		tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId	=	CD.intCommodityId AND PU.intUnitMeasureId = IM.intUnitMeasureId
 		--WHERE		intPricingTypeId = 2 
 		AND			ISNULL(ysnMultiplePriceFixation,0) = 0
 
@@ -199,8 +209,10 @@ AS
 					PF.intTotalLots-PF.intLotsFixed AS intBalanceNoOfLots,
 					PF.intLotsHedged,
 					CAST(NULL AS NUMERIC(8,4)) AS dblFinalPrice,
-					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId
-		
+					CU.intCommodityUnitMeasureId AS intDefaultCommodityUOMId,
+					CAST (NULL AS INT)			AS	intDiscountScheduleCodeId,
+					CAST (NULL AS INT)			AS	intBasisCommodityUOMId
+
 		FROM		tblCTPriceFixation			PF
 		JOIN		vyuCTContractDetailView		CD	ON	CD.intContractHeaderId = PF.intContractHeaderId
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId = CD.intCommodityId AND CU.ysnDefault = 1 

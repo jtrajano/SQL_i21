@@ -47,6 +47,8 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	[intMarketZoneId] [int] NULL,
 	[intDiscountTypeId] [int] NULL ,
 	[intDiscountId] [int] NULL,
+	[intDiscountScheduleId] [int] NULL,
+	[intDiscountScheduleCodeId] [int] NULL,
 	[intContractOptHeaderId] [int] NULL,
 	[strBuyerSeller] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intBillTo] [int] NULL,
@@ -112,6 +114,8 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	CONSTRAINT [FK_tblCTContractDetail_tblRKFutureMarket_intFutureMarketId] FOREIGN KEY ([intFutureMarketId]) REFERENCES [tblRKFutureMarket]([intFutureMarketId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblAPVendor_intVendorId] FOREIGN KEY ([intBillTo]) REFERENCES [tblAPVendor]([intEntityVendorId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblGRDiscountId_intDiscountId] FOREIGN KEY ([intDiscountId]) REFERENCES [tblGRDiscountId]([intDiscountId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblGRDiscountSchedule_intDiscountScheduleId] FOREIGN KEY ([intDiscountScheduleId]) REFERENCES [tblGRDiscountSchedule]([intDiscountScheduleId]),
+	CONSTRAINT [FK_tblCTContractDetail_tblGRDiscountScheduleCode_intDiscountScheduleCodeId] FOREIGN KEY ([intDiscountScheduleCodeId]) REFERENCES [tblGRDiscountScheduleCode]([intDiscountScheduleCodeId]),
 	CONSTRAINT [FK_tblCTContractDetail_tblCTDiscount_intDiscountTypeId] FOREIGN KEY ([intDiscountTypeId]) REFERENCES [tblCTDiscountType]([intDiscountTypeId]),
 	
 	CONSTRAINT [FK_tblCTContractDetail_tblSMCity_intLoadingPortId_intCityId] FOREIGN KEY ([intLoadingPortId]) REFERENCES [tblSMCity]([intCityId]),

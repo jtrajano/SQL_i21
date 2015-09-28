@@ -1098,3 +1098,16 @@ BEGIN
 	INSERT INTO tblMFCompanyPreference (intDefaultGanttChartViewDuration)
 	SELECT 7
 END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFPickListPreference WHERE intPickListPreferenceId = 1)
+BEGIN
+    INSERT INTO tblMFPickListPreference(intPickListPreferenceId,strName)
+    VALUES(1,'Best Match')
+END
+GO
+IF NOT EXISTS(SELECT * FROM tblMFPickListPreference WHERE intPickListPreferenceId = 2)
+BEGIN
+    INSERT INTO tblMFPickListPreference(intPickListPreferenceId,strName)
+    VALUES(2,'Partial Match')
+END
+GO

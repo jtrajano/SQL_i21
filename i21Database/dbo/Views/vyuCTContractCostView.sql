@@ -22,8 +22,8 @@ AS
 
 	FROM	tblCTContractCost	CC
 	JOIN	tblCTContractDetail CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
-	JOIN	tblICItem			IM	ON	IM.intItemId			=	CC.intItemId
-	JOIN	tblICItemUOM		IU	ON	IU.intItemUOMId			=	CC.intItemUOMId
-	JOIN	tblICUnitMeasure	UM	ON	UM.intUnitMeasureId		=	IU.intUnitMeasureId	LEFT	
-	JOIN	vyuCTEntity			EY	ON	EY.intEntityId			=	CC.intVendorId		AND 
+	JOIN	tblICItem			IM	ON	IM.intItemId			=	CC.intItemId			LEFT
+	JOIN	tblICItemUOM		IU	ON	IU.intItemUOMId			=	CC.intItemUOMId			LEFT	
+	JOIN	tblICUnitMeasure	UM	ON	UM.intUnitMeasureId		=	IU.intUnitMeasureId		LEFT	
+	JOIN	vyuCTEntity			EY	ON	EY.intEntityId			=	CC.intVendorId			AND 
 										EY.strEntityType		=	'Vendor'

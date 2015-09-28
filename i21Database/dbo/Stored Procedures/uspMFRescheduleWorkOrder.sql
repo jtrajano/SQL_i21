@@ -665,6 +665,8 @@ BEGIN TRY
 			,S.intCreatedUserId
 			,S.dtmLastModified
 			,S.intLastModifiedUserId
+			,@dtmFromDate AS dtmFromDate
+			,@dtmToDate AS dtmToDate
 		FROM tblMFSchedule S
 		JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = S.intManufacturingCellId
 		JOIN dbo.tblMFScheduleCalendar SC ON SC.intCalendarId = S.intCalendarId
@@ -686,6 +688,8 @@ BEGIN TRY
 		,0 AS intCreatedUserId
 		,@dtmCurrentDate AS dtmLastModified
 		,0 AS intLastModifiedUserId
+		,@dtmFromDate AS dtmFromDate
+		,@dtmToDate AS dtmToDate
 	END
 
 
@@ -823,8 +827,8 @@ BEGIN TRY
 		,SH.intShiftId
 		,SH.strShiftName
 		,0 AS OrderLineItemId
-		,0 AS ysnAlternateLine
-		,GetDate() AS dtmbyWhichDate
+		,CONVERT(BIT,0) AS ysnAlternateLine
+		,0 AS intByWhichDate
 		,'' AS strCustOrderNo
 		,'' AS strChangeover
 		,0 AS intLeadTime
