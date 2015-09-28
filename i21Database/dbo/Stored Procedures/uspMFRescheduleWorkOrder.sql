@@ -197,7 +197,7 @@ BEGIN TRY
 		,x.ysnFrozen
 		,@intConcurrencyId
 		--,x.strWIPItemNo
-		,Case When ROW_NUMBER () Over(Order by intWorkOrderId)%2=0 then 'BLND01' else 'BLND01' end
+		,Case When ROW_NUMBER () Over(Order by intWorkOrderId)%2=0 then 'BLND01' else 'BLND02' end
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -437,124 +437,125 @@ BEGIN TRY
 
 				SELECT @intDuration = DateDiff(minute, @dtmShiftStartTime, @dtmShiftEndTime)
 			END
-
-			DECLARE @intScheduleRuleId INT
-				,@strColumnName NVARCHAR(50)
-				,@strColumnValue NVARCHAR(50)
-				,@strPreviousColumnValue NVARCHAR(50)
-				,@intChangeoverTime INT
-
-			SELECT @intScheduleRuleId = MIN(R.intScheduleRuleId)
-			FROM dbo.tblMFScheduleRule R
-			WHERE R.ysnActive = 1
-				AND R.intScheduleRuleTypeId = 1
-
-			WHILE @intScheduleRuleId IS NOT NULL
-			BEGIN
-				SELECT @strColumnName = NULL
-
-				SELECT @strColumnName = A.strColumnName
-				FROM dbo.tblMFScheduleRule R
-				JOIN dbo.tblMFScheduleAttribute A ON A.intScheduleAttributeId = R.intScheduleAttributeId
-				WHERE R.intScheduleRuleId = @intScheduleRuleId
-
-				SET @sqlCommand = 'SELECT @strColumnValue = ' + @strColumnName + '
-									FROM @t
-									WHERE intWorkOrderId = ' + ltrim(@intWorkOrderId)
-
-				EXECUTE sp_executesql @sqlCommand
-					,N'@t ScheduleTable READONLY,@strColumnValue nvarchar(50) OUTPUT'
-					,@strColumnValue = @strColumnValue OUTPUT
-
-				SET @sqlCommand = 'SELECT @strPreviousColumnValue = ' + @strColumnName + '
-									FROM @t
-									WHERE intWorkOrderId = ' + ltrim(@intPreviousWorkOrderId)
-
-				EXECUTE sp_executesql @sqlCommand
-					,N'@t ScheduleTable READONLY, @strPreviousColumnValue nvarchar(50) OUTPUT'
-					,@strPreviousColumnValue = @strPreviousColumnValue OUTPUT
-
-				IF @strColumnValue <> @strPreviousColumnValue
-				BEGIN
-					SELECT @intChangeoverTime = NULL
-
-					SELECT TOP 1 @intChangeoverTime = FD.dblChangeoverTime
-					FROM dbo.tblMFScheduleChangeoverFactorDetail(NOLOCK) FD
-					JOIN dbo.tblMFScheduleGroupDetail(NOLOCK) FG ON FD.intFromScheduleGroupId = FG.intScheduleGroupId
-					JOIN dbo.tblMFScheduleGroupDetail(NOLOCK) TG ON FD.intToScheduleGroupId = TG.intScheduleGroupId
-					JOIN dbo.tblMFScheduleChangeoverFactor(NOLOCK) F ON F.intChangeoverFactorId = FD.intChangeoverFactorId
-					WHERE F.intManufacturingCellId = @intManufacturingCellId
-						AND FG.strGroupValue = @strPreviousColumnValue
-						AND TG.strGroupValue = @strColumnValue
-
-					IF @intChangeoverTime IS NOT NULL
-					BEGIN
-						SELECT @dtmPlannedEndDate = DATEADD(MINUTE, @intChangeoverTime, @dtmShiftStartTime)
-
-						SELECT @intShiftBreakTypeDuration = NULL
-
-						SELECT @intShiftBreakTypeDuration = SUM(intShiftBreakTypeDuration)
-						FROM dbo.tblMFShiftDetail
-						WHERE intShiftId = @intShiftId
-							AND @dtmCalendarDate + dtmShiftBreakTypeStartTime >= @dtmShiftStartTime
-							AND @dtmCalendarDate + dtmShiftBreakTypeEndTime <= @dtmPlannedEndDate
-
-						SELECT @intShiftBreakTypeDuration = ISNULL(@intShiftBreakTypeDuration, 0) + DATEDIFF(MINUTE, @dtmCalendarDate + dtmShiftBreakTypeStartTime, @dtmPlannedEndDate)
-						FROM dbo.tblMFShiftDetail
-						WHERE intShiftId = @intShiftId
-							AND @dtmPlannedEndDate BETWEEN @dtmCalendarDate + dtmShiftBreakTypeStartTime
-								AND @dtmCalendarDate + dtmShiftBreakTypeEndTime
-
-						IF @intShiftBreakTypeDuration IS NOT NULL
-							SELECT @dtmPlannedEndDate = DATEADD(MINUTE, @intShiftBreakTypeDuration, @dtmPlannedEndDate)
-
-						INSERT INTO @tblMFScheduleConstraintDetail (
-							intWorkOrderId
-							,intScheduleRuleId
-							,dtmChangeoverStartDate
-							,dtmChangeoverEndDate
-							,intDuration
-							)
-						VALUES (
-							@intWorkOrderId
-							,@intScheduleRuleId
-							,@dtmShiftStartTime
-							,@dtmPlannedEndDate
-							,@intChangeoverTime
-							)
-
-						SELECT @dtmShiftStartTime = @dtmPlannedEndDate
-
-						SELECT @intDuration = DATEDIFF(MINUTE, @dtmShiftStartTime, @dtmShiftEndTime)
-					END
-				END
+			If not exists(Select *from @tblMFScheduleWorkOrderDetail Where intWorkOrderId =@intWorkOrderId )
+			Begin
+				DECLARE @intScheduleRuleId INT
+					,@strColumnName NVARCHAR(50)
+					,@strColumnValue NVARCHAR(50)
+					,@strPreviousColumnValue NVARCHAR(50)
+					,@intChangeoverTime INT
 
 				SELECT @intScheduleRuleId = MIN(R.intScheduleRuleId)
 				FROM dbo.tblMFScheduleRule R
 				WHERE R.ysnActive = 1
 					AND R.intScheduleRuleTypeId = 1
-					AND R.intScheduleRuleId > @intScheduleRuleId
-			END
 
-			IF EXISTS (
-					SELECT *
+				WHILE @intScheduleRuleId IS NOT NULL
+				BEGIN
+					SELECT @strColumnName = NULL
+
+					SELECT @strColumnName = A.strColumnName
+					FROM dbo.tblMFScheduleRule R
+					JOIN dbo.tblMFScheduleAttribute A ON A.intScheduleAttributeId = R.intScheduleAttributeId
+					WHERE R.intScheduleRuleId = @intScheduleRuleId
+
+					SET @sqlCommand = 'SELECT @strColumnValue = ' + @strColumnName + '
+										FROM @t
+										WHERE intWorkOrderId = ' + ltrim(@intWorkOrderId)
+
+					EXECUTE sp_executesql @sqlCommand
+						,N'@t ScheduleTable READONLY,@strColumnValue nvarchar(50) OUTPUT'
+						,@t=@tblMFScheduleWorkOrder,@strColumnValue = @strColumnValue OUTPUT
+
+					SET @sqlCommand = 'SELECT @strPreviousColumnValue = ' + @strColumnName + '
+										FROM @t
+										WHERE intWorkOrderId = ' + ltrim(@intPreviousWorkOrderId)
+
+					EXECUTE sp_executesql @sqlCommand
+						,N'@t ScheduleTable READONLY, @strPreviousColumnValue nvarchar(50) OUTPUT'
+						,@t=@tblMFScheduleWorkOrder,@strPreviousColumnValue = @strPreviousColumnValue OUTPUT
+
+					IF @strColumnValue <> @strPreviousColumnValue
+					BEGIN
+						SELECT @intChangeoverTime = NULL
+
+						SELECT TOP 1 @intChangeoverTime = FD.dblChangeoverTime
+						FROM dbo.tblMFScheduleChangeoverFactorDetail(NOLOCK) FD
+						JOIN dbo.tblMFScheduleGroupDetail(NOLOCK) FG ON FD.intFromScheduleGroupId = FG.intScheduleGroupId
+						JOIN dbo.tblMFScheduleGroupDetail(NOLOCK) TG ON FD.intToScheduleGroupId = TG.intScheduleGroupId
+						JOIN dbo.tblMFScheduleChangeoverFactor(NOLOCK) F ON F.intChangeoverFactorId = FD.intChangeoverFactorId
+						WHERE F.intManufacturingCellId = @intManufacturingCellId
+							AND FG.strGroupValue = @strPreviousColumnValue
+							AND TG.strGroupValue = @strColumnValue
+
+						IF @intChangeoverTime IS NOT NULL
+						BEGIN
+							SELECT @dtmPlannedEndDate = DATEADD(MINUTE, @intChangeoverTime, @dtmShiftStartTime)
+
+							SELECT @intShiftBreakTypeDuration = NULL
+
+							SELECT @intShiftBreakTypeDuration = SUM(intShiftBreakTypeDuration)
+							FROM dbo.tblMFShiftDetail
+							WHERE intShiftId = @intShiftId
+								AND @dtmCalendarDate + dtmShiftBreakTypeStartTime >= @dtmShiftStartTime
+								AND @dtmCalendarDate + dtmShiftBreakTypeEndTime <= @dtmPlannedEndDate
+
+							SELECT @intShiftBreakTypeDuration = ISNULL(@intShiftBreakTypeDuration, 0) + DATEDIFF(MINUTE, @dtmCalendarDate + dtmShiftBreakTypeStartTime, @dtmPlannedEndDate)
+							FROM dbo.tblMFShiftDetail
+							WHERE intShiftId = @intShiftId
+								AND @dtmPlannedEndDate BETWEEN @dtmCalendarDate + dtmShiftBreakTypeStartTime
+									AND @dtmCalendarDate + dtmShiftBreakTypeEndTime
+
+							IF @intShiftBreakTypeDuration IS NOT NULL
+								SELECT @dtmPlannedEndDate = DATEADD(MINUTE, @intShiftBreakTypeDuration, @dtmPlannedEndDate)
+
+							INSERT INTO @tblMFScheduleConstraintDetail (
+								intWorkOrderId
+								,intScheduleRuleId
+								,dtmChangeoverStartDate
+								,dtmChangeoverEndDate
+								,intDuration
+								)
+							VALUES (
+								@intWorkOrderId
+								,@intScheduleRuleId
+								,@dtmShiftStartTime
+								,@dtmPlannedEndDate
+								,@intChangeoverTime
+								)
+
+							SELECT @dtmShiftStartTime = @dtmPlannedEndDate
+
+							SELECT @intDuration = DATEDIFF(MINUTE, @dtmShiftStartTime, @dtmShiftEndTime)
+						END
+					END
+
+					SELECT @intScheduleRuleId = MIN(R.intScheduleRuleId)
+					FROM dbo.tblMFScheduleRule R
+					WHERE R.ysnActive = 1
+						AND R.intScheduleRuleTypeId = 1
+						AND R.intScheduleRuleId > @intScheduleRuleId
+				END
+
+				IF EXISTS (
+						SELECT *
+						FROM @tblMFScheduleConstraintDetail
+						WHERE intWorkOrderId = @intWorkOrderId
+						)
+				BEGIN
+					SELECT @intChangeoverDuration = SUM(intDuration)
+						,@dtmChangeoverStartDate = MIN(dtmChangeoverStartDate)
+						,@dtmChangeoverEndDate = MAX(dtmChangeoverEndDate)
 					FROM @tblMFScheduleConstraintDetail
 					WHERE intWorkOrderId = @intWorkOrderId
-					)
-			BEGIN
-				SELECT @intChangeoverDuration = SUM(intDuration)
-					,@dtmChangeoverStartDate = MIN(dtmChangeoverStartDate)
-					,@dtmChangeoverEndDate = MAX(dtmChangeoverEndDate)
-				FROM @tblMFScheduleConstraintDetail
-				WHERE intWorkOrderId = @intWorkOrderId
 
-				UPDATE @tblMFScheduleWorkOrder
-				SET dtmChangeoverStartDate = @dtmChangeoverStartDate
-					,dtmChangeoverEndDate = @dtmChangeoverEndDate
-					,intChangeoverDuration = @intChangeoverDuration
-				WHERE intWorkOrderId = @intWorkOrderId
+					UPDATE @tblMFScheduleWorkOrder
+					SET dtmChangeoverStartDate = @dtmChangeoverStartDate
+						,dtmChangeoverEndDate = @dtmChangeoverEndDate
+						,intChangeoverDuration = @intChangeoverDuration
+					WHERE intWorkOrderId = @intWorkOrderId
+				END
 			END
-
 			IF @intDuration > @intWODuration
 			BEGIN
 				SELECT @dtmPlannedEndDate = DATEADD(MINUTE, @intWODuration, @dtmShiftStartTime)
