@@ -58,9 +58,10 @@ BEGIN
 		,intCurrencyId =3
 		,strPaymentInfo = ''not found''
 		,strNotes  = A.strBillId
-		,dtmDatePaid = ((substring(convert(varchar(10),B.apivc_chk_rev_dt),5,2)  
-						+''/''+substring(convert(varchar(10),B.apivc_chk_rev_dt),7,2)
-						+''/''+substring(convert(varchar(10),B.apivc_chk_rev_dt),1,4))) 
+		,dtmDatePaid = CASE WHEN ISDATE(apivc_chk_rev_dt) = 1 THEN CONVERT(DATE, CAST(apivc_chk_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END
+						--((substring(convert(varchar(10),B.apivc_chk_rev_dt),5,2)  
+						--+''/''+substring(convert(varchar(10),B.apivc_chk_rev_dt),7,2)
+						--+''/''+substring(convert(varchar(10),B.apivc_chk_rev_dt),1,4))) 
 		,dblAmountPaid = A.dblTotal
 		,dblUnapplied = 0
 		,ysnPosted = 1
