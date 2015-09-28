@@ -46,6 +46,8 @@ SELECT
 	,intCompanyLocation = D.intLocationId
 	,intTaxGroupMasterId = D.intTaxStateID 
 	,intItemId = G.intItemId
+	,D.intSiteID
+	,E.intCustomerID
 FROM tblTMSiteDevice A
 INNER JOIN tblTMDevice B
 	ON A.intDeviceId = B.intDeviceId
