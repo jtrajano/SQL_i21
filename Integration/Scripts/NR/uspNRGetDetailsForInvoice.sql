@@ -32,7 +32,7 @@ BEGIN
 				
 				IF @strOriginSystem = ''PT''
 				BEGIN
-					IF @strVersionNumber = ''15.1''
+					IF @strVersionNumber = ''15.1'' OR @strVersionNumber = ''15.2'' OR @strVersionNumber = ''15.3'' OR @strVersionNumber = ''15.4''
 					BEGIN
 						SELECT * FROM 
 						(
@@ -66,7 +66,7 @@ BEGIN
 				
 				If @strOriginSystem = ''AG''
 				BEGIN
-					IF @strVersionNumber = ''15.1''
+					IF @strVersionNumber = ''15.1'' OR @strVersionNumber = ''15.2'' OR @strVersionNumber = ''15.3'' OR @strVersionNumber = ''15.4''
 					BEGIN
 						SELECT * FROM 
 						(

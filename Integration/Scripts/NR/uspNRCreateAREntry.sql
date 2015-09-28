@@ -57,7 +57,7 @@ BEGIN
 								
 				IF @strOriginSystem = ''PT''
 				BEGIN
-					IF @strVersionNumber = ''15.1''
+					IF @strVersionNumber = ''15.1'' OR @strVersionNumber = ''15.2'' OR @strVersionNumber = ''15.3'' OR @strVersionNumber = ''15.4''
 					BEGIN
 						SELECT @intSeqNo = MAX(ptpye_no)  FROM ptpyemst WHERE (ptpye_cus_no = @strCustomerNumber) 
 							AND (ptpye_inc_ref = @strInvoiceNumber) AND (ptpye_ivc_loc_no = @strInvoiceLocationNo)
@@ -101,7 +101,7 @@ BEGIN
 				END -- PT END
 				ELSE
 				BEGIN
-					IF @strVersionNumber = ''15.1''
+					IF @strVersionNumber = ''15.1'' OR @strVersionNumber = ''15.2'' OR @strVersionNumber = ''15.3'' OR @strVersionNumber = ''15.4''
 					BEGIN
 						SELECT @intSeqNo = MAX(agpye_pay_seq_no)  FROM [agpyemst] WHERE (agpye_cus_no = @strCustomerNumber) 
 							AND (agpye_inc_ref = @strInvoiceNumber) AND (agpye_ivc_loc_no = @strInvoiceLocationNo)
