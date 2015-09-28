@@ -549,16 +549,9 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnCategoryUOM',
+                                                                itemId: 'btnLoadUOM',
                                                                 iconCls: 'small-download',
-                                                                text: 'Category UOM'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnCommodityUOM',
-                                                                iconCls: 'small-download',
-                                                                text: 'Commodity UOM'
+                                                                text: 'Load UOM'
                                                             },
                                                             {
                                                                 xtype: 'tbseparator'
