@@ -20,6 +20,10 @@ BEGIN Try
 		,@intCalendarDetailId INT
 		,@ysnHoliday BIT
 		,@intShiftBreakTypeDuration int
+		,@intMachineId int
+		,@strCalendarDate nvarchar(50)
+		,@strShiftName nvarchar(50)
+		,@strName nvarchar(50)
 
 	SELECT @dtmCurrentDate = GETDATE()
 
@@ -245,6 +249,42 @@ BEGIN Try
 				,intLastModifiedUserId = @intUserId
 				,intConcurrencyId=intConcurrencyId+1
 			WHERE intCalendarDetailId = @intCalendarDetailId
+
+			If EXISTS(SELECT *FROM dbo.tblMFScheduleMachineDetail MD 
+			JOIN dbo.tblMFScheduleCalendarMachineDetail CMD on MD.intCalendarMachineId=CMD.intCalendarMachineId
+			WHERE MD.intCalendarDetailId = @intCalendarDetailId
+			AND NOT EXISTS(SELECT *
+			FROM OPENXML(@idoc, 'root/Calendars/Calendar/Machines/Machine', 2) WITH (
+					intMachineId INT
+					,intShiftId INT
+					,dtmCalendarDate DATETIME
+					)
+			WHERE dtmCalendarDate=@dtmCalendarDate AND intShiftId=@intShiftId AND intMachineId=CMD.intMachineId))
+			BEGIN
+				SELECT @intMachineId=intMachineId 
+				FROM dbo.tblMFScheduleMachineDetail MD
+				JOIN dbo.tblMFScheduleCalendarMachineDetail CMD on MD.intCalendarMachineId=CMD.intCalendarMachineId
+				WHERE MD.intCalendarDetailId = @intCalendarDetailId
+				AND NOT EXISTS(SELECT *
+				FROM OPENXML(@idoc, 'root/Calendars/Calendar/Machines/Machine', 2) WITH (
+						intMachineId INT
+						,intShiftId INT
+						,dtmCalendarDate DATETIME
+						)
+				WHERE dtmCalendarDate=@dtmCalendarDate AND intShiftId=@intShiftId AND intMachineId=CMD.intMachineId)
+
+				SELECT @strName=strName
+				FROM dbo.tblMFMachine
+				WHERE intMachineId=@intMachineId
+
+				SELECT @strCalendarDate=@dtmCalendarDate
+
+				SELECT @strShiftName=strShiftName
+				FROM dbo.tblMFShift
+				WHERE intShiftId=@intShiftId
+
+				RAISERROR(90001,14,1,@strName,@strCalendarDate,@strShiftName)
+			END
 
 			DELETE
 			FROM dbo.tblMFScheduleCalendarMachineDetail

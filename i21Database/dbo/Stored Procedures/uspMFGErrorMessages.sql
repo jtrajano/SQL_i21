@@ -17,3 +17,6 @@ CREATE PROCEDURE uspMFGErrorMessages
 AS
 
 DECLARE @strmessage AS NVARCHAR(MAX)
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90001) EXEC sp_dropmessage 90001, 'us_english'	
+SET @strmessage = 'Machine: %s is used in the schedule for %s and %s.'
+EXEC sp_addmessage 90001,11,@strmessage,'us_english','False'
