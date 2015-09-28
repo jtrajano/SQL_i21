@@ -2141,6 +2141,13 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                     {
                                                                         xtype: 'button',
                                                                         tabIndex: -1,
+                                                                        itemId: 'btnViewOtherCharge',
+                                                                        iconCls: 'small-view',
+                                                                        text: 'View Other Charge'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'button',
+                                                                        tabIndex: -1,
                                                                         itemId: 'btnCalculateCharges',
                                                                         iconCls: 'small-calculator',
                                                                         text: 'Calculate'

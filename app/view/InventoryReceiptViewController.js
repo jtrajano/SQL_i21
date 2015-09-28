@@ -1343,6 +1343,27 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onOtherChargeClick: function(button, e, eOpts) {
+        var win = button.up('window');
+        var grd = win.down('#grdCharges');
+
+        var selected = grd.getSelectionModel().getSelection();
+
+        if (selected) {
+            if (selected.length > 0){
+                var current = selected[0];
+                if (!current.dummy)
+                    iRely.Functions.openScreen('Inventory.view.Item', current.get('intChargeId'));
+            }
+            else {
+                iRely.Functions.showErrorDialog('Please select an Other Charge to view.');
+            }
+        }
+        else {
+            iRely.Functions.showErrorDialog('Please select an Other Charge to view.');
+        }
+    },
+
     onQualityClick: function(button, e, eOpts) {
         var win = button.up('window');
         var grd = win.down('#grdInventoryReceipt');
@@ -2952,6 +2973,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#btnViewItem": {
                 click: this.onInventoryClick
+            },
+            "#btnViewOtherCharge": {
+                click: this.onOtherChargeClick
             },
             "#btnQuality": {
                 click: this.onQualityClick
