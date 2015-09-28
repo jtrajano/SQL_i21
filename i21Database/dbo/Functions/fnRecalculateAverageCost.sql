@@ -42,7 +42,7 @@ BEGIN
 				--LEFT JOIN (
 				--	SELECT	intInventoryFIFOId
 				--			,dblValue = SUM(ISNULL(CostAdjustment.dblValue, 0)) 
-				--	FROM	dbo.tblICInventoryFIFOCostAdjustment CostAdjustment
+				--	FROM	dbo.tblICInventoryFIFOCostAdjustmentLog CostAdjustment
 				--	GROUP BY CostAdjustment.intInventoryFIFOId	
 				--) TotalCostAdjustments
 				--	ON fifo.intInventoryFIFOId = TotalCostAdjustments.intInventoryFIFOId

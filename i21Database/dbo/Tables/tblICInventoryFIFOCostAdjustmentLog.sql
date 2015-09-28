@@ -10,7 +10,7 @@
 
 ## Source Code:
 */
-	CREATE TABLE [dbo].[tblICInventoryFIFOCostAdjustment]
+	CREATE TABLE [dbo].[tblICInventoryFIFOCostAdjustmentLog]
 	(
 		[intId] INT NOT NULL IDENTITY, 
 		[intInventoryFIFOId] INT NOT NULL, 
@@ -20,12 +20,12 @@
 		[dtmCreated] DATETIME NULL, 
 		[intCreatedUserId] INT NULL, 
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 
-		CONSTRAINT [PK_tblICInventoryFIFOCostAdjustment] PRIMARY KEY CLUSTERED ([intId]),
-		CONSTRAINT [FK_tblICInventoryFIFOCostAdjustment_tblICInventoryFIFO] FOREIGN KEY ([intInventoryFIFOId]) REFERENCES [tblICInventoryFIFO]([intInventoryFIFOId])
+		CONSTRAINT [PK_tblICInventoryFIFOCostAdjustmentLog] PRIMARY KEY CLUSTERED ([intId]),
+		CONSTRAINT [FK_tblICInventoryFIFOCostAdjustmentLog_tblICInventoryFIFO] FOREIGN KEY ([intInventoryFIFOId]) REFERENCES [tblICInventoryFIFO]([intInventoryFIFOId])
 	)
 	GO
 
-	CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFOCostAdjustment_intInventoryFIFOId]
-		ON [dbo].[tblICInventoryFIFOCostAdjustment]([intId] ASC)
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryFIFOCostAdjustmentLog_intInventoryFIFOId]
+		ON [dbo].[tblICInventoryFIFOCostAdjustmentLog]([intId] ASC)
 		INCLUDE (dblQty, dblCost);
 	GO

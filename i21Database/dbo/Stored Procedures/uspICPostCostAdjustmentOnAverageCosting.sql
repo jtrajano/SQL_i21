@@ -67,14 +67,6 @@ DECLARE @AVERAGECOST AS INT = 1
 DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
 		,@COST_ADJ_TYPE_New_Cost AS INT = 2
 
--- Get the UOM Qty 
-DECLARE @dblUOMQty AS NUMERIC(18,6)
-SELECT TOP 1 
-		@dblUOMQty = dblUnitQty
-FROM	dbo.tblICItemUOM 
-WHERE	intItemId = @intItemId
-		AND intItemUOMId = @intItemUOMId
-
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @INVENTORY_AUTO_NEGATIVE AS INT = 1;
 DECLARE @INVENTORY_WRITE_OFF_SOLD AS INT = 2;
@@ -82,11 +74,13 @@ DECLARE @INVENTORY_REVALUE_SOLD AS INT = 3;
 DECLARE @INVENTORY_COST_ADJUSTMENT AS INT = 22;
 
 DECLARE @CostBucketId AS INT
-		,@InventoryTransactionIdentityId AS INT
-		,@OriginalCost AS NUMERIC(38,20)
-		,@CurrentCost AS NUMERIC(38,20)
+		,@CostBucketCost AS NUMERIC(38,20)
 		,@CostBucketStockInQty AS NUMERIC(18,6)
 		,@CostBucketStockOutQty AS NUMERIC(18,6)
+		,@CostBucketUOMQty AS NUMERIC(18,6)
+
+		,@InventoryTransactionIdentityId AS INT
+		,@OriginalCost AS NUMERIC(38,20)
 		,@dblNewCalculatedCost AS NUMERIC(38,20)
 
 DECLARE @TransactionId AS INT
@@ -104,6 +98,7 @@ DECLARE @TransactionId AS INT
 
 DECLARE	@OriginalTransactionValue AS NUMERIC(38,20)
 		,@NewTransactionValue AS NUMERIC(38,20)
+		,@CostAdjustmentValue AS NUMERIC(38,20)
 
 -- Initialize the transaction name. Use this as the transaction form name
 SELECT	TOP 1 
@@ -114,16 +109,18 @@ WHERE	intTransactionTypeId = @intTransactionTypeId
 -- Get the cost bucket and original cost. 
 BEGIN 
 	SELECT	@CostBucketId	= intInventoryFIFOId
-			,@CurrentCost	= dblCost			
+			,@CostBucketCost = dblCost			
 			,@CostBucketStockInQty = dblStockIn
 			,@CostBucketStockOutQty = dblStockOut
-	FROM	dbo.tblICInventoryFIFO
-	WHERE	intItemId = @intItemId
-			AND intItemLocationId = @intItemLocationId
-			AND intItemUOMId = @intItemUOMId
-			AND intTransactionId = @intSourceTransactionId
-			AND strTransactionId = @strSourceTransactionId
-			AND ISNULL(ysnIsUnposted, 0) = 0 
+			,@CostBucketUOMQty = tblICItemUOM.dblUnitQty
+	FROM	dbo.tblICInventoryFIFO LEFT JOIN dbo.tblICItemUOM 
+				ON tblICInventoryFIFO.intItemUOMId = tblICItemUOM.intItemUOMId
+	WHERE	tblICInventoryFIFO.intItemId = @intItemId
+			AND tblICInventoryFIFO.intItemLocationId = @intItemLocationId
+			AND tblICInventoryFIFO.intItemUOMId = @intItemUOMId
+			AND tblICInventoryFIFO.intTransactionId = @intSourceTransactionId
+			AND tblICInventoryFIFO.strTransactionId = @strSourceTransactionId
+			AND ISNULL(tblICInventoryFIFO.ysnIsUnposted, 0) = 0 
 END 
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -149,13 +146,13 @@ END
 -- Check if new cost is the same as the current cost
 BEGIN 
 	-- Exit and do nothing if the costs are the same. 
-	IF ISNULL(@dblNewCost, 0) = ISNULL(@CurrentCost, 0)
+	IF ISNULL(@dblNewCost, 0) = ISNULL(@CostBucketCost, 0)
 		GOTO Post_Exit
 END 
 
--- Log original cost to tblICInventoryFIFOCostAdjustment
+-- Log original cost to tblICInventoryFIFOCostAdjustmentLog
 BEGIN 
-	INSERT INTO tblICInventoryFIFOCostAdjustment (
+	INSERT INTO tblICInventoryFIFOCostAdjustmentLog (
 			[intInventoryFIFOId]
 			,[intInventoryCostAdjustmentTypeId]
 			,[dblQty]
@@ -166,23 +163,37 @@ BEGIN
 	SELECT	[intInventoryFIFOId]				= @CostBucketId
 			,[intInventoryCostAdjustmentTypeId]	= @COST_ADJ_TYPE_Original_Cost
 			,[dblQty]							= @CostBucketStockInQty
-			,[dblCost]							= @CurrentCost
+			,[dblCost]							= @CostBucketCost
 			,[dtmCreated]						= GETDATE()
 			,[intCreatedUserId]					= @intUserId
 	WHERE NOT EXISTS (
 		SELECT	TOP 1 1 
-		FROM	dbo.tblICInventoryFIFOCostAdjustment
+		FROM	dbo.tblICInventoryFIFOCostAdjustmentLog
 		WHERE	intInventoryFIFOId = @CostBucketId
 				AND intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
 	)
 END 
 
 -----------------------------------------------------------------------------------------------------------------------------
--- Post the new cost 
+-- Post the cost adjustment. 
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	-- Initialize the variables
+	-- Get the original cost from the FIFO cost adjustment log table. 
+	SELECT	@OriginalCost = dblCost
+	FROM	dbo.tblICInventoryFIFOCostAdjustmentLog
+	WHERE	intInventoryFIFOId = @CostBucketId
+			AND intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
+
+	-- Compute the new transaction value. 
 	SELECT	@NewTransactionValue = @dblQty * @dblNewCost
+
+	-- Compute the original transaction value. 
+	SELECT	@OriginalTransactionValue = @dblQty * @OriginalCost
+
+	SELECT @dblNewCalculatedCost =	@CostBucketCost 
+									+ ((@NewTransactionValue - @OriginalTransactionValue) / @CostBucketStockInQty)	
+
+	SELECT @CostAdjustmentValue = @dblQty * (@dblNewCost - @OriginalCost)
 
 	-- Create the 'Cost Adjustment'
 	EXEC [dbo].[uspICPostInventoryTransaction]
@@ -195,7 +206,7 @@ BEGIN
 		,@dblQty								= 0
 		,@dblUOMQty								= 0
 		,@dblCost								= 0
-		,@dblValue								= @NewTransactionValue
+		,@dblValue								= @CostAdjustmentValue
 		,@dblSalesPrice							= 0
 		,@intCurrencyId							= NULL 
 		,@dblExchangeRate						= 1
@@ -214,7 +225,7 @@ BEGIN
 		,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 
 	-- Log the new cost
-	INSERT INTO tblICInventoryFIFOCostAdjustment (
+	INSERT INTO tblICInventoryFIFOCostAdjustmentLog (
 			[intInventoryFIFOId]
 			,[intInventoryCostAdjustmentTypeId]
 			,[dblQty]
@@ -228,52 +239,7 @@ BEGIN
 			,[dblCost]							= @dblNewCost
 			,[dtmCreated]						= GETDATE()
 			,[intCreatedUserId]					= @intUserId
-END 
-
------------------------------------------------------------------------------------------------------------------------------
--- Write off the Original Cost 
------------------------------------------------------------------------------------------------------------------------------
-BEGIN 
-	SELECT	@OriginalCost = dblCost
-	FROM	dbo.tblICInventoryFIFOCostAdjustment
-	WHERE	intInventoryFIFOId = @CostBucketId
-			AND intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
-
-	-- Initialize the variables
-	SELECT	@OriginalTransactionValue = -1 * @dblQty * @OriginalCost
-
-	-- Create the 'Cost Adjustment'
-	EXEC [dbo].[uspICPostInventoryTransaction]
-		@intItemId								= @intItemId
-		,@intItemLocationId						= @intItemLocationId
-		,@intItemUOMId							= @intItemUOMId
-		,@intSubLocationId						= @intSubLocationId
-		,@intStorageLocationId					= @intStorageLocationId
-		,@dtmDate								= @dtmDate
-		,@dblQty								= 0
-		,@dblUOMQty								= 0
-		,@dblCost								= 0
-		,@dblValue								= @OriginalTransactionValue
-		,@dblSalesPrice							= 0
-		,@intCurrencyId							= NULL 
-		,@dblExchangeRate						= 1
-		,@intTransactionId						= @intTransactionId
-		,@intTransactionDetailId				= @intTransactionDetailId
-		,@strTransactionId						= @strTransactionId
-		,@strBatchId							= @strBatchId
-		,@intTransactionTypeId					= @INVENTORY_COST_ADJUSTMENT
-		,@intLotId								= NULL 
-		,@intRelatedInventoryTransactionId		= NULL 
-		,@intRelatedTransactionId				= NULL 
-		,@strRelatedTransactionId				= NULL 
-		,@strTransactionForm					= @TransactionTypeName
-		,@intUserId								= @intUserId
-		,@intCostingMethod						= @AVERAGECOST
-		,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
-
-	SELECT @dblNewCalculatedCost =	@CurrentCost 
-									+ ((@OriginalTransactionValue + @NewTransactionValue) / @CostBucketStockInQty)					
-
+			
 	-- Calculate the new cost
 	UPDATE	CostBucket
 	SET		dblCost = @dblNewCalculatedCost
@@ -358,53 +324,16 @@ BEGIN
 				FROM	dbo.tblICInventoryTransaction InvTransaction
 				WHERE	InvTransaction.intInventoryTransactionId = @FIFOOutInventoryTransactionId
 
+				-- Create the Revalue sold 
 				IF @TransactionId IS NOT NULL 
 				BEGIN 
-					-- Create the Write-Off Sold
-					SET @TransactionValue = 
-							CASE WHEN ISNULL(@FIFOOutQty, 0) > @RevaluedQty THEN 
-									@RevaluedQty
-								ELSE 
-									ISNULL(@FIFOOutQty, 0)
-							END 
-							* ISNULL(@TransactionCost, 0) 
-
-					EXEC [dbo].[uspICPostInventoryTransaction]
-						@intItemId							= @intItemId
-						,@intItemLocationId					= @intItemLocationId
-						,@intItemUOMId						= @intItemUOMId
-						,@intSubLocationId					= @TransactionSubLocationId 
-						,@intStorageLocationId				= @TransactionStorageLocationId 
-						,@dtmDate							= @dtmDate
-						,@dblQty							= 0
-						,@dblUOMQty							= 0
-						,@dblCost							= 0
-						,@dblValue							= @TransactionValue
-						,@dblSalesPrice						= 0
-						,@intCurrencyId						= @TransactionCurrencyId
-						,@dblExchangeRate					= @TransactionExchangeRate
-						,@intTransactionId					= @intTransactionId
-						,@intTransactionDetailId			= @intTransactionDetailId
-						,@strTransactionId					= @strTransactionId
-						,@strBatchId						= @strBatchId
-						,@intTransactionTypeId				= @INVENTORY_WRITE_OFF_SOLD
-						,@intLotId							= NULL 
-						,@intRelatedInventoryTransactionId	= @FIFOOutInventoryTransactionId
-						,@intRelatedTransactionId			= @TransactionIntegerId 
-						,@strRelatedTransactionId			= @TransactionStringId 
-						,@strTransactionForm				= @TransactionTypeName
-						,@intUserId							= @intUserId
-						,@intCostingMethod					= @AVERAGECOST
-						,@InventoryTransactionIdentityId	= @InventoryTransactionIdentityId OUTPUT
-				
-					-- Create the Revalue sold 
 					SELECT @TransactionValue =	-1 	
 												* CASE WHEN ISNULL(@FIFOOutQty, 0) > @RevaluedQty THEN 
 														@RevaluedQty
 													ELSE 
 														ISNULL(@FIFOOutQty, 0)
 												END 																								
-												* ISNULL(@dblNewCalculatedCost, 0) -- and multiply it by the new calculated cost 
+												* (@dblNewCost - @TransactionCost) 
 
 					EXEC [dbo].[uspICPostInventoryTransaction]
 						@intItemId								= @intItemId
@@ -436,8 +365,7 @@ BEGIN
 				END
 
 				SET @RevaluedQty = @RevaluedQty - @FIFOOutQty
-			END 
-					
+			END 					
 
 		-- Attempt to fetch the next row from cursor. 
 		FETCH NEXT FROM loopFIFOOut INTO 
@@ -453,65 +381,69 @@ END;
 -- End loop for sold stocks
 -----------------------------------------------------------------------------------------------------------------------------
 	
--------------------------------------------------------------------------------------------------------------------------------
----- Update the average cost 
--------------------------------------------------------------------------------------------------------------------------------
---BEGIN 
---	DECLARE @CurrentStockQty AS NUMERIC(18,6)
+-----------------------------------------------------------------------------------------------------------------------------
+-- Update the average cost 
+-----------------------------------------------------------------------------------------------------------------------------
+BEGIN 
+	DECLARE @CurrentStockQty AS NUMERIC(18,6)
+			,@CurrentAverageCost AS NUMERIC(38,20)
 
---	SELECT TOP 1 
---			@CurrentStockQty = dblUnitOnHand
---	FROM	dbo.tblICItemStock
---	WHERE	intItemId = @intItemId
---			AND intItemLocationId = @intItemLocationId
+	SELECT TOP 1 
+			@CurrentStockQty = dblUnitOnHand
+	FROM	dbo.tblICItemStock
+	WHERE	intItemId = @intItemId
+			AND intItemLocationId = @intItemLocationId
 
---	MERGE	
---	INTO	dbo.tblICItemPricing 
---	WITH	(HOLDLOCK) 
---	AS		ItemPricing
---	USING (
---			SELECT	intItemId = @intItemId
---					,intItemLocationId = @intItemLocationId
---					,Qty = dbo.fnCalculateStockUnitQty(@dblQty, @dblUOMQty) 
---					,Cost = dbo.fnCalculateUnitCost(@dblNewCost, @dblUOMQty)
---	) AS StockToUpdate
---		ON ItemPricing.intItemId = StockToUpdate.intItemId
---		AND ItemPricing.intItemLocationId = StockToUpdate.intItemLocationId
+	SELECT	TOP 1
+			@CurrentAverageCost = dblAverageCost
+	FROM	dbo.tblICItemPricing 
+	WHERE	intItemId = @intItemId
+			AND intItemLocationId = @intItemLocationId
 
---	-- If matched, update the average cost, last cost, and standard cost
---	WHEN MATCHED THEN 
---		UPDATE 
---		SET		dblAverageCost = dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, ItemPricing.dblAverageCost)
---				,dblLastCost = StockToUpdate.Cost
---				,dblStandardCost = 
---								CASE WHEN StockToUpdate.Qty > 0 THEN 
---										CASE WHEN ISNULL(ItemPricing.dblStandardCost, 0) = 0 THEN StockToUpdate.Cost ELSE ItemPricing.dblStandardCost END 
---									ELSE 
---										ItemPricing.dblStandardCost
---								END 
+	MERGE	
+	INTO	dbo.tblICItemPricing 
+	WITH	(HOLDLOCK) 
+	AS		ItemPricing
+	USING (
+			SELECT	intItemId = @intItemId
+					,intItemLocationId = @intItemLocationId
+					,[UnsoldQty] = dbo.fnCalculateStockUnitQty(@RevaluedQty, @CostBucketUOMQty)
+					,[CostDifference] = dbo.fnCalculateUnitCost(@dblNewCost, @CostBucketUOMQty) - dbo.fnCalculateUnitCost(@CostBucketCost, @CostBucketUOMQty)
+					,[CurrentStock] = @CurrentStockQty
+	) AS StockToUpdate
+		ON ItemPricing.intItemId = StockToUpdate.intItemId
+		AND ItemPricing.intItemLocationId = StockToUpdate.intItemLocationId
 
---	-- If none found, insert a new item pricing record
---	WHEN NOT MATCHED THEN 
---		INSERT (
---			intItemId
---			,intItemLocationId
---			,dblAverageCost 
---			,dblLastCost 
---			,dblStandardCost
---			,intConcurrencyId
---		)
---		VALUES (
---			StockToUpdate.intItemId
---			,StockToUpdate.intItemLocationId
---			,dbo.fnCalculateAverageCost(StockToUpdate.Qty, StockToUpdate.Cost, @CurrentStockQty, 0)
---			,StockToUpdate.Cost
---			,StockToUpdate.Cost
---			,1
---		)
---	;
+	-- If matched, update the average cost, last cost, and standard cost
+	WHEN MATCHED THEN 
+		UPDATE 
+		SET		dblAverageCost = dbo.fnCalculateAverageCostAfterCostAdj(
+					StockToUpdate.[UnsoldQty]
+					,StockToUpdate.[CostDifference]
+					,StockToUpdate.[CurrentStock]
+					,@CurrentAverageCost
+				)
 
---END 
-
+	-- If none found, insert a new item pricing record
+	WHEN NOT MATCHED THEN 
+		INSERT (
+			intItemId
+			,intItemLocationId
+			,dblAverageCost 
+			,dblLastCost 
+			,dblStandardCost
+			,intConcurrencyId
+		)
+		VALUES (
+			StockToUpdate.intItemId
+			,StockToUpdate.intItemLocationId
+			,@CurrentAverageCost
+			,0
+			,0
+			,1
+		)
+	;
+END 
 
 -- Immediate exit
 Post_Exit: 
