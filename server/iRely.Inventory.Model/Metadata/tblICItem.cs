@@ -398,7 +398,7 @@ namespace iRely.Inventory.Model
         public decimal? dblInTransitOutbound { get; set; }
         public decimal? dblBackOrder { get; set; }
         public decimal? dblOrderCommitted { get; set; }
-        public decimal? dblUnitInCustody { get; set; }
+        public decimal? dblUnitStorage { get; set; }
         public decimal? dblConsignedPurchase { get; set; }
         public decimal? dblConsignedSale { get; set; }
         public decimal? dblUnitReserved { get; set; }
@@ -522,5 +522,31 @@ namespace iRely.Inventory.Model
         public decimal? dblOnOrder { get; set; }
         public decimal? dblUnitQty { get; set; }
         public bool? ysnStockUnit { get; set; }
+    }
+
+    public class vyuICGetInventoryValuation
+    {
+        public int intInventoryValuationKeyId { get; set; }
+        public int intInventoryTransactionId { get; set; }
+        public int intItemId { get; set; }
+        public string strItemNo { get; set; }
+        public string strItemDescription { get; set; }
+        public int? intCategoryId { get; set; }
+        public string strCategory { get; set; }
+        public int? intItemLocationId { get; set; }
+        public string strLocationName { get; set; }
+        public int? intSubLocationId { get; set; }
+        public string strSubLocationName { get; set; }
+        public int? intStorageLocationId { get; set; }
+        public string strStorageLocationName { get; set; }
+        public DateTime? dtmDate { get; set; }
+        public string strTransactionForm { get; set; }
+        public string strTransactionId { get; set; }
+        public decimal? dblQuantity { get; set; }
+        public decimal? dblCost { get; set; }
+        public decimal? dblBeginningBalance { get; set; }
+        public decimal? dblValue { get; set; }
+        public decimal? dblRunningBalance { get; set; }
+        public string strBatchId { get; set; }
     }
 }

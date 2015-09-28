@@ -18,6 +18,7 @@ Ext.define('Inventory.view.ItemLocationViewController', {
     alias: 'controller.icitemlocation',
 
     config: {
+        helpURL: '/display/DOC/How+to+Setup+Item+Location',
         binding: {
             cboLocation: {
                 value: '{current.intLocationId}',

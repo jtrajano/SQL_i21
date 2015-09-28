@@ -65,6 +65,13 @@ namespace iRely.Inventory.WebApi
         }
 
         [HttpGet]
+        [ActionName("GetInventoryValuation")]
+        public async Task<HttpResponseMessage> GetInventoryValuation(GetParameter param)
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, await _bl.GetInventoryValuation(param));
+        }
+
+        [HttpGet]
         [ActionName("GetOtherCharges")]
         public async Task<HttpResponseMessage> GetOtherCharges(GetParameter param)
         {

@@ -14,5 +14,6 @@ namespace iRely.Inventory.BusinessLayer
         SaveResult ProcessBill(int receiptId, out int? newBill);
         SaveResult CalculateCharges(int receiptId);
         SaveResult PostTransaction(Common.Posting_RequestModel receipt, bool isRecap);
+        void SetUser(int UserId);
     }
 }

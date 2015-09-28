@@ -1514,7 +1514,7 @@
                                                                                 "itemId": "btnTaxDetails",
                                                                                 "layout|flex": null,
                                                                                 "tabIndex": -1,
-                                                                                "text": "Tax Details"
+                                                                                "text": "View Tax Details"
                                                                             },
                                                                             "name": "MyButton43",
                                                                             "designerId": "0eb6f32a-a5ce-48e9-b10a-a8a8ee4900eb"
@@ -1561,7 +1561,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter12",
+                                                                            "name": "filter127",
                                                                             "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -2843,7 +2843,7 @@
                                                                     "userConfig": {
                                                                         "dataIndex": "strDescription",
                                                                         "itemId": "colContainer",
-                                                                        "text": "Container",
+                                                                        "text": "Container No.",
                                                                         "width": 90
                                                                     },
                                                                     "name": "MyColumn10",
@@ -3110,7 +3110,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter13",
+                                                                            "name": "filter128",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3770,7 +3770,7 @@
                                                                     "userConfig": {
                                                                         "dataIndex": "string",
                                                                         "itemId": "colLotContainerNo",
-                                                                        "text": "Container No",
+                                                                        "text": "Container No.",
                                                                         "width": 100
                                                                     },
                                                                     "name": "MyColumn36",
@@ -4306,7 +4306,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter14",
+                                                    "name": "filter129",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4529,7 +4529,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter15",
+                                                            "name": "filter130",
                                                             "designerId": "862260b9-0de6-4b16-a64e-db1153706a1f",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -4951,7 +4951,19 @@
                                                         "text": "Accrue"
                                                     },
                                                     "name": "MyCheck",
-                                                    "designerId": "811ab515-1f3a-4953-9b04-a0354e778ab7"
+                                                    "designerId": "811ab515-1f3a-4953-9b04-a0354e778ab7",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.Checkbox",
+                                                            "reference": {
+                                                                "name": "editor",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "name": "MyCheckbox40",
+                                                            "designerId": "a5f086a9-b6da-494d-9cec-144ca0999d8c"
+                                                        }
+                                                    ]
                                                 },
                                                 {
                                                     "type": "Ext.grid.column.Column",
@@ -5031,7 +5043,19 @@
                                                         "text": "Price"
                                                     },
                                                     "name": "MyCheck5",
-                                                    "designerId": "58de2b34-7d00-4617-a58d-2d6fdad77514"
+                                                    "designerId": "58de2b34-7d00-4617-a58d-2d6fdad77514",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.form.field.Checkbox",
+                                                            "reference": {
+                                                                "name": "editor",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "name": "MyCheckbox41",
+                                                            "designerId": "e9588d15-d8e5-4963-ae13-302dd76eb483"
+                                                        }
+                                                    ]
                                                 },
                                                 {
                                                     "type": "Ext.grid.View",
@@ -5694,7 +5718,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter16",
+                                                    "name": "filter131",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -6181,7 +6205,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging13",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

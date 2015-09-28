@@ -178,7 +178,6 @@ Ext.define('Inventory.model.Item', {
             list: [
                 'Inventory',
                 'Non-Inventory',
-                'Assembly/Blend',
                 'Bundle',
                 'Kit',
                 'Finished Good',

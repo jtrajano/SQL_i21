@@ -46,9 +46,6 @@ Ext.define('Inventory.view.ItemViewModel', {
             autoLoad: true,
             data: [
                 {
-                    strType: 'Assembly/Blend'
-                },
-                {
                     strType: 'Bundle'
                 },
                 {
@@ -198,10 +195,28 @@ Ext.define('Inventory.view.ItemViewModel', {
         accountCategory: {
             type: 'glbufaccountcategorygroup'
         },
+        accountCategoryList: {
+            autoLoad: true,
+            type: 'glbufaccountcategorygroup'
+        },
         glAccountId: {
             type: 'glbufaccountid'
         },
 
+        copyLocation: {
+            type: 'icbuffereditemlocation',
+            proxy: {
+                type: 'rest',
+                api: {
+                    read: '../Inventory/api/ItemLocation/GetFullItemLocation'
+                },
+                reader: {
+                    type: 'json',
+                    rootProperty: 'data',
+                    messageProperty: 'message'
+                }
+            }
+        },
 
         patronage: {
             type: 'icbufferedpatronagecategory'
@@ -813,12 +828,13 @@ Ext.define('Inventory.view.ItemViewModel', {
             }
         },
         hideBuildAssembly: function (get) {
-            if (get('current.strLotTracking') === 'No' && get('current.strType') === 'Assembly/Blend') {
-                return false;
-            }
-            else {
-                return true;
-            }
+            return true;
+//            if (get('current.strLotTracking') === 'No' && get('current.strType') === 'Assembly/Blend') {
+//                return false;
+//            }
+//            else {
+//                return true;
+//            }
         },
         readOnlyCommodity: function (get) {
             switch (get('current.strType')) {

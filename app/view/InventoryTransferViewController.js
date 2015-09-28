@@ -34,9 +34,13 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             btnUndo: {
                 disabled: '{current.ysnPosted}'
             },
+            btnRecap: {
+                hidden: '{checkTransportPosting}'
+            },
             btnPost: {
                 text: '{getPostButtonText}',
-                iconCls: '{getPostButtonIcon}'
+                iconCls: '{getPostButtonIcon}',
+                hidden: '{checkTransportPosting}'
             },
 
             txtTransferNumber: '{current.strTransferNo}',
@@ -135,7 +139,13 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                             value: '0',
                             conjunction: 'and',
                             condition: 'gt'
-                        }]
+                        },{
+                            column: 'ysnStockUnit',
+                            value: true,
+                            conjunction: 'and',
+                            condition: 'eq'
+                        }
+                        ]
                     }
                 },
                 colFromStorage: {

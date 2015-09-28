@@ -28,8 +28,17 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
             singleGridMgr: Ext.create('iRely.mvvm.grid.Manager', {
                 grid: win.down('grid'),
                 position: 'none',
-                title: 'Inventory Receipt Taxes',
+                title: 'Tax Details',
                 columns: [
+                    {
+                        xtype: 'gridcolumn',
+                        itemId: 'colItemNo',
+                        width: 85,
+                        sortable: false,
+                        dataIndex: 'strItemNo',
+                        text: 'Item No',
+                        flex: 1.25
+                    },
                     {
                         xtype: 'gridcolumn',
                         itemId: 'colTaxCode',
@@ -64,13 +73,26 @@ Ext.define('Inventory.view.InventoryReceiptTaxesViewController', {
     show: function (config) {
         "use strict";
         var me = this;
-        me.getView().show();
+        var win = me.getView();
+        var btnSave = win.down('#btnSave');
+        var btnUndo = win.down('#btnUndo');
+        btnSave.setHidden(true);
+        btnUndo.setHidden(true);
+        win.show();
+
         var context = me.setupContext();
-        if (config.id) {
-            me.intInventoryReceiptItemId = config.id;
+        if (config.param.ReceiptId) {
+            me.intInventoryReceiptId = config.param.ReceiptId;
+            config.filters = [{
+                column: 'intInventoryReceiptId',
+                value: config.param.ReceiptId
+            }];
+        }
+        else if (config.param.id) {
+            me.intInventoryReceiptItemId = config.param.id;
             config.filters = [{
                 column: 'intInventoryReceiptItemId',
-                value: config.id
+                value: config.param.id
             }];
         }
         context.data.load({

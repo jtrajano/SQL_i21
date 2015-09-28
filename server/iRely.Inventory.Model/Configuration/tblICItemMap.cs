@@ -416,7 +416,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblInTransitOutbound).HasColumnName("dblInTransitOutbound").HasPrecision(18, 6);
             this.Property(t => t.dblBackOrder).HasColumnName("dblBackOrder").HasPrecision(18, 6);
             this.Property(t => t.dblOrderCommitted).HasColumnName("dblOrderCommitted").HasPrecision(18, 6);
-            this.Property(t => t.dblUnitInCustody).HasColumnName("dblUnitInCustody").HasPrecision(18, 6);
+            this.Property(t => t.dblUnitStorage).HasColumnName("dblUnitStorage").HasPrecision(18, 6);
             this.Property(t => t.dblConsignedPurchase).HasColumnName("dblConsignedPurchase").HasPrecision(18, 6);
             this.Property(t => t.dblConsignedSale).HasColumnName("dblConsignedSale").HasPrecision(18, 6);
             this.Property(t => t.dblUnitReserved).HasColumnName("dblUnitReserved").HasPrecision(18, 6);
@@ -581,6 +581,40 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblOnOrder).HasColumnName("dblOnOrder").HasPrecision(18, 6);
             this.Property(t => t.dblUnitQty).HasColumnName("dblUnitQty").HasPrecision(18, 6);
             this.Property(t => t.ysnStockUnit).HasColumnName("ysnStockUnit");
+        }
+    }
+
+    public class vyuICGetInventoryValuationMap : EntityTypeConfiguration<vyuICGetInventoryValuation>
+    {
+        public vyuICGetInventoryValuationMap()
+        {
+            // Primary Key
+            this.HasKey(p => p.intInventoryValuationKeyId);
+
+            // Table & Column Mappings
+            this.ToTable("vyuICGetInventoryValuation");
+            this.Property(t => t.intInventoryValuationKeyId).HasColumnName("intInventoryValuationKeyId");
+            this.Property(t => t.intInventoryTransactionId).HasColumnName("intInventoryTransactionId");
+            this.Property(t => t.intItemId).HasColumnName("intItemId");
+            this.Property(t => t.strItemNo).HasColumnName("strItemNo");
+            this.Property(t => t.strItemDescription).HasColumnName("strItemDescription");
+            this.Property(t => t.intCategoryId).HasColumnName("intCategoryId");
+            this.Property(t => t.strCategory).HasColumnName("strCategory");
+            this.Property(t => t.intItemLocationId).HasColumnName("intItemLocationId");
+            this.Property(t => t.strLocationName).HasColumnName("strLocationName");
+            this.Property(t => t.intSubLocationId).HasColumnName("intSubLocationId");
+            this.Property(t => t.strSubLocationName).HasColumnName("strSubLocationName");
+            this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
+            this.Property(t => t.strStorageLocationName).HasColumnName("strStorageLocationName");
+            this.Property(t => t.dtmDate).HasColumnName("dtmDate");
+            this.Property(t => t.strTransactionForm).HasColumnName("strTransactionForm");
+            this.Property(t => t.strTransactionId).HasColumnName("strTransactionId");
+            this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(18, 6);
+            this.Property(t => t.dblCost).HasColumnName("dblCost").HasPrecision(18, 6);
+            this.Property(t => t.dblBeginningBalance).HasColumnName("dblBeginningBalance").HasPrecision(18, 6);
+            this.Property(t => t.dblValue).HasColumnName("dblValue").HasPrecision(18, 6);
+            this.Property(t => t.dblRunningBalance).HasColumnName("dblRunningBalance").HasPrecision(18, 6);
+            this.Property(t => t.strBatchId).HasColumnName("strBatchId");
         }
     }
 

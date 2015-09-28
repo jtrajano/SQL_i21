@@ -18,6 +18,7 @@ Ext.define('Inventory.view.StorageUnitViewController', {
     alias: 'controller.icstorageunit',
 
     config: {
+        helpURL: '/display/DOC/Storage+Locations',
         searchConfig: {
             title:  'Search Storage Locations',
             type: 'Inventory.StorageLocation',

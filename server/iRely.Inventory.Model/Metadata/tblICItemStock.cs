@@ -20,7 +20,7 @@ namespace iRely.Inventory.Model
         public decimal? dblInTransitOutbound { get; set; }
         public decimal? dblBackOrder { get; set; }
         public decimal? dblOrderCommitted { get; set; }
-        public decimal? dblUnitInCustody { get; set; }
+        public decimal? dblUnitStorage { get; set; }
         public decimal? dblConsignedPurchase { get; set; }
         public decimal? dblConsignedSale { get; set; }
         public decimal? dblUnitReserved { get; set; }
@@ -58,7 +58,7 @@ namespace iRely.Inventory.Model
         public int? intItemLocationId { get; set; }
         public int? intSubLocationId { get; set; }
         public decimal? dblUnitOnHand { get; set; }
-        public decimal? dblUnitInCustody { get; set; }
+        public decimal? dblUnitStorage { get; set; }
         public decimal? dblUnitInConsigned { get; set; }
         public decimal? dblOrderCommitted { get; set; }
         public decimal? dblOnOrder { get; set; }

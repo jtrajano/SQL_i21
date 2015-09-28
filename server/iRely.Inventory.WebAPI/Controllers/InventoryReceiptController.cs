@@ -22,6 +22,24 @@ namespace iRely.Inventory.WebApi
             _bl = bl;
         }
 
+        public override System.Threading.Tasks.Task<HttpResponseMessage> Post(IEnumerable<tblICInventoryReceipt> entities, bool continueOnConflict = false)
+        {
+            _bl.SetUser(iRely.Common.Security.GetUserId());
+            return base.Post(entities, continueOnConflict);
+        }
+
+        public override System.Threading.Tasks.Task<HttpResponseMessage> Put(IEnumerable<tblICInventoryReceipt> entities, bool continueOnConflict = false)
+        {
+            _bl.SetUser(iRely.Common.Security.GetUserId());
+            return base.Put(entities, continueOnConflict);
+        }
+
+        public override System.Threading.Tasks.Task<HttpResponseMessage> Delete(IEnumerable<tblICInventoryReceipt> entities, bool continueOnConflict = false)
+        {
+            _bl.SetUser(iRely.Common.Security.GetUserId());
+            return base.Delete(entities, continueOnConflict);
+        }
+
         [HttpPost]
         [ActionName("Receive")]
         public HttpResponseMessage Receive(BusinessLayer.Common.Posting_RequestModel receipt)

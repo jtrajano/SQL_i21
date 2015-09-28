@@ -737,7 +737,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                         tabIndex: -1,
                                                                                         itemId: 'btnTaxDetails',
                                                                                         iconCls: 'small-view',
-                                                                                        text: 'Tax Details'
+                                                                                        text: 'View Tax Details'
                                                                                     },
                                                                                     {
                                                                                         xtype: 'button',
@@ -1457,7 +1457,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 itemId: 'colContainer',
                                                                                 width: 90,
                                                                                 dataIndex: 'strDescription',
-                                                                                text: 'Container'
+                                                                                text: 'Container No.'
                                                                             },
                                                                             {
                                                                                 xtype: 'gridcolumn',
@@ -1840,7 +1840,7 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                                 itemId: 'colLotContainerNo',
                                                                                 width: 100,
                                                                                 dataIndex: 'string',
-                                                                                text: 'Container No',
+                                                                                text: 'Container No.',
                                                                                 editor: {
                                                                                     xtype: 'textfield'
                                                                                 }
@@ -2329,7 +2329,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 xtype: 'checkcolumn',
                                                                 itemId: 'colAccrue',
                                                                 text: 'Accrue',
-                                                                flex: 0.7
+                                                                flex: 0.7,
+                                                                editor: {
+                                                                    xtype: 'checkboxfield'
+                                                                }
                                                             },
                                                             {
                                                                 xtype: 'gridcolumn',
@@ -2367,7 +2370,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 xtype: 'checkcolumn',
                                                                 itemId: 'colPrice',
                                                                 text: 'Price',
-                                                                flex: 0.7
+                                                                flex: 0.7,
+                                                                editor: {
+                                                                    xtype: 'checkboxfield'
+                                                                }
                                                             }
                                                         ],
                                                         viewConfig: {

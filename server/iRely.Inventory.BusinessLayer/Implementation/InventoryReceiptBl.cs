@@ -21,6 +21,12 @@ namespace iRely.Inventory.BusinessLayer
             _db = db;
         }
         #endregion
+        public static int DefaultUserId;
+
+        public void SetUser(int UserId)
+        {
+            DefaultUserId = UserId;
+        }
 
         public override async Task<SearchResult> Search(GetParameter param)
         {
@@ -90,8 +96,11 @@ namespace iRely.Inventory.BusinessLayer
                 var connection = _db.ContextManager.Database.Connection;
                 try
                 {
+                    int? ReceiptId = null;
+                    bool ysnDeleted = false;
                     foreach (var receipt in _db.ContextManager.Set<tblICInventoryReceipt>().Local)
                     {
+                        ReceiptId = receipt.intInventoryReceiptId;
                         if (receipt.strReceiptType == "Purchase Order")
                         {
                             var idParameter = new SqlParameter("intReceiptNo", receipt.intInventoryReceiptId);
@@ -102,6 +111,8 @@ namespace iRely.Inventory.BusinessLayer
                     var changedReceipts = _db.ContextManager.ChangeTracker.Entries<tblICInventoryReceipt>().Where(p => p.State == EntityState.Deleted).ToList();
                     foreach (var receipt in changedReceipts)
                     {
+                        ReceiptId = receipt.Entity.intInventoryReceiptId;
+                        ysnDeleted = true;
                         if (receipt.Entity.strReceiptType == "Purchase Order")
                         {
                             var idParameter = new SqlParameter("intReceiptNo", receipt.Entity.intInventoryReceiptId);
@@ -110,17 +121,23 @@ namespace iRely.Inventory.BusinessLayer
                         }
                     }
 
+                    _db.ContextManager.Database.ExecuteSqlCommand("uspICLogTransactionDetail @TransactionType, @TransactionId", new SqlParameter("TransactionType", 1), new SqlParameter("TransactionId", ReceiptId));
+
                     result = await _db.SaveAsync(continueOnConflict).ConfigureAwait(false);
 
                     foreach (var receipt in _db.ContextManager.Set<tblICInventoryReceipt>().Local)
                     {
+                        ReceiptId = receipt.intInventoryReceiptId;
                         if (receipt.strReceiptType == "Purchase Order")
                         {
                             var idParameter = new SqlParameter("intReceiptNo", receipt.intInventoryReceiptId);
                             _db.ContextManager.Database.ExecuteSqlCommand("uspICUpdatePOStatusOnReceiptSave @intReceiptNo", idParameter);
                         }
                     }
-                    
+
+                    var userId = DefaultUserId;
+                    _db.ContextManager.Database.ExecuteSqlCommand("uspICInventoryReceiptAfterSave @ReceiptId, @ForDelete, @UserId", new SqlParameter("ReceiptId", ReceiptId), new SqlParameter("ForDelete", ysnDeleted), new SqlParameter("UserId", userId));
+                                        
                     if (result.HasError)
                     {
                         throw result.BaseException;

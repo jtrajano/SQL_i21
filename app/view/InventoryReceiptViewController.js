@@ -3,6 +3,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     alias: 'controller.icinventoryreceipt',
 
     config: {
+        helpURL: '/display/DOC/Inventory+Receipts',
         searchConfig: {
             title: 'Search Inventory Receipt',
             type: 'Inventory.InventoryReceipt',
@@ -32,8 +33,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             btnUndo: {
                 disabled: '{current.ysnPosted}'
             },
+            btnRecap: {
+                hidden: '{checkTransportPosting}'
+            },
             btnReceive: {
-                text: '{getReceiveButtonText}'
+                text: '{getReceiveButtonText}',
+                hidden: '{checkTransportPosting}'
             },
 
             cboReceiptType: {
@@ -528,7 +533,10 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         store: '{otherCharges}'
                     }
                 },
-                colInventoryCost: 'ysnInventoryCost',
+                colInventoryCost: {
+                    disabled: '{current.ysnPosted}',
+                    dataIndex: 'ysnInventoryCost'
+                },
                 colCostMethod: {
                     dataIndex: 'strCostMethod',
                     editor: {
@@ -571,9 +579,11 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                     }
                 },
                 colAccrue: {
+                    disabled: '{current.ysnPosted}',
                     dataIndex: 'ysnAccrue'
                 },
                 colPrice: {
+                    disabled: '{current.ysnPosted}',
                     dataIndex: 'ysnPrice'
                 }
             },
@@ -1282,23 +1292,31 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     onViewTaxDetailsClick: function (ReceiptItemId) {
         var win = this.getView();
         var screenName = 'Inventory.view.InventoryReceiptTaxes';
+        var grd = win.down('#grdInventoryReceipt');
         var vm = win.getViewModel();
 
         if (vm.data.current.phantom === true) {
-            win.context.data.saveRecord({ successFn: function(batch, eOpts){
+            win.context.data.saveRecord({ callbackFn: function(batch, eOpts, success){
                 iRely.Functions.openScreen(screenName, {
-                    id: ReceiptItemId
+                    id: grd.getSelection()[0].data.intInventoryReceiptItemId
                 });
                 return;
             } });
         }
+        else if (win.context.data.hasChanges() !== true) {
+            iRely.Functions.openScreen(screenName, {
+                id: ReceiptItemId
+            });
+        }
         else {
             win.context.data.validator.validateRecord({ window: win }, function(valid) {
                 if (valid) {
-                    iRely.Functions.openScreen(screenName, {
-                        id: ReceiptItemId
-                    });
-                    return;
+                    win.context.data.saveRecord({ callbackFn: function(batch, eOpts, success){
+                        iRely.Functions.openScreen(screenName, {
+                            id: grd.getSelection()[0].data.intInventoryReceiptItemId
+                        });
+                        return;
+                    } });
                 }
             });
         }
@@ -1837,7 +1855,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                                     dblAmount : 0,
                                     strAllocateCostBy : '',
                                     ysnAccrue : cost.ysnAccrue,
-                                    ysnAccrue : cost.ysnPrice,
+                                    ysnPrice : cost.ysnPrice,
 
                                     strItemNo : cost.strItemNo,
                                     strCostUOM : cost.strUOM,
@@ -1861,7 +1879,24 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         current.set('intUnitMeasureId', po.get('intItemUOMId'));
                         current.set('strUnitMeasure', po.get('strItemUOM'));
                         current.set('strOrderUOM', po.get('strItemUOM'));
-                        current.set('dblUnitCost', po.get('dblCashPrice'));
+
+                        if(po.get('strPricingType') === 'Index'){
+                            CTFunctions.getIndexPrice(receipt.get('intEntityVendorId'),
+                                receipt.get('intShipFromId'),
+                                po.get('intRackPriceSupplyPointId'),
+                                po.get('intSupplyPointId'),
+                                po.get('strIndexType'),
+                                receipt.get('dtmReceiptDate'),
+                                po.get('dblAdjustment'),
+                                po.get('intItemId'),
+                                function(response){
+                                    contractPrice = response.data;
+                                    current.set('dblUnitCost', contractPrice);
+                                });
+                        }else {
+                            current.set('dblUnitCost', po.get('dblCashPrice'));
+                        }
+
                         current.set('dblLineTotal', po.get('dblTotal'));
                         current.set('strLotTracking', po.get('strLotTracking'));
                         current.set('intCommodityId', po.get('intCommodityId'));
@@ -2207,7 +2242,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         dataIndex: 'strStorageLocationName',
                         dataType: 'string',
                         hidden: true
-                    }
+                    },
+                    {
+                        dataIndex: 'strContractComments',
+                        dataType: 'string',
+                        text: 'Contract Comments',
+                        width: 150
+                    },
                 ],
                 itemId: 'cboOrderNumber',
                 displayField: 'strContractNumber',
@@ -2850,6 +2891,26 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
         }
     },
 
+    onAccrueCheckChange: function (obj, rowIndex, checked, eOpts) {
+        if (obj.dataIndex === 'ysnAccrue'){
+            var grid = obj.up('grid');
+            var win = obj.up('window');
+            var current = grid.view.getRecord(rowIndex);
+            var masterRecord = win.viewModel.data.current;
+            var cboVendor = win.down('#cboVendor');
+
+
+            if (checked === true){
+                current.set('intEntityVendorId', masterRecord.get('intEntityVendorId'));
+                current.set('strVendorId', cboVendor.getRawValue());
+            }
+            else {
+                current.set('intEntityVendorId', null);
+                current.set('strVendorId', null);
+            }
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboVendor": {
@@ -2963,6 +3024,9 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             "#colUnitCost": {
                 beforerender: this.onColumnBeforeRender
+            },
+            "#colAccrue": {
+                beforecheckchange: this.onAccrueCheckChange
             }
         })
     }
