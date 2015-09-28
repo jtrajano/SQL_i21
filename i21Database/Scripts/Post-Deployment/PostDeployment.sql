@@ -110,7 +110,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationItemPricingView.sql"
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteView.sql"
-:r "..\..\..\Integration\dbo\Stored Procedures\uspTMGetBudgetCalculationSite.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteSP.sql"
 
 
 
