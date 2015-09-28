@@ -1292,22 +1292,28 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
     onViewTaxDetailsClick: function (ReceiptItemId) {
         var win = this.getView();
         var screenName = 'Inventory.view.InventoryReceiptTaxes';
+        var grd = win.down('#grdInventoryReceipt');
         var vm = win.getViewModel();
 
         if (vm.data.current.phantom === true) {
-            win.context.data.saveRecord({ successFn: function(batch, eOpts){
+            win.context.data.saveRecord({ callbackFn: function(batch, eOpts, success){
                 iRely.Functions.openScreen(screenName, {
-                    id: ReceiptItemId
+                    id: grd.getSelection()[0].data.intInventoryReceiptItemId
                 });
                 return;
             } });
         }
+        else if (win.context.data.hasChanges() !== true) {
+            iRely.Functions.openScreen(screenName, {
+                id: ReceiptItemId
+            });
+        }
         else {
             win.context.data.validator.validateRecord({ window: win }, function(valid) {
                 if (valid) {
-                    win.context.data.saveRecord({ successFn: function(batch, eOpts){
+                    win.context.data.saveRecord({ callbackFn: function(batch, eOpts, success){
                         iRely.Functions.openScreen(screenName, {
-                            id: ReceiptItemId
+                            id: grd.getSelection()[0].data.intInventoryReceiptItemId
                         });
                         return;
                     } });
