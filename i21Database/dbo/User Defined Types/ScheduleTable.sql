@@ -1,4 +1,4 @@
-﻿CREATE TYPE [dbo].[ScheduleWorkOrderTable] AS TABLE
+﻿CREATE TYPE [dbo].[ScheduleTable] AS TABLE
 (
 	 intRecordId INT identity(1, 1)
 	,intManufacturingCellId INT
@@ -30,4 +30,6 @@
 	,dtmChangeoverEndDate DATETIME
 	,ysnFrozen BIT
 	,intConcurrencyId INT
+	,strWIPItemNo nvarchar(50)
+	,strPackName nvarchar(50)
 )

@@ -4046,4 +4046,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intFutOptAssignedId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="4e998bec-7f40-433b-92fb-f735e042fc56" ChangeDateTime="09/28/2015 21:08:21">
+    <Property Name="ElementName" Value="[dbo].[ScheduleWorkOrderTable]" />
+    <Property Name="ElementType" Value="SqlTableType" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[ScheduleTable]" />
+  </Operation>
 </Operations>

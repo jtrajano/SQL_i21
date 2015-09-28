@@ -45,7 +45,7 @@ BEGIN TRY
 		,@dtmChangeoverStartDate DATETIME
 		,@dtmChangeoverEndDate DATETIME
 		,@intChangeoverDuration INT
-		,@tblMFScheduleWorkOrder AS ScheduleWorkOrderTable
+		,@tblMFScheduleWorkOrder AS ScheduleTable
 		,@sqlCommand NVARCHAR(MAX)
 
 	SELECT @dtmCurrentDate = GetDate()
@@ -166,11 +166,13 @@ BEGIN TRY
 		,intNoOfSelectedMachine
 		,dtmEarliestStartDate
 		,intPackTypeId
+		,strPackName
 		,intNoOfUnit
 		,dblConversionFactor
 		,intScheduleWorkOrderId
 		,ysnFrozen
 		,intConcurrencyId
+		,strWIPItemNo
 		)
 	SELECT x.intManufacturingCellId
 		,x.intWorkOrderId
@@ -188,11 +190,14 @@ BEGIN TRY
 		,x.intNoOfSelectedMachine
 		,x.dtmEarliestStartDate
 		,MC.intPackTypeId
+		,P.strPackName
 		,x.dblBalance * PTD.dblConversionFactor
 		,PTD.dblConversionFactor
 		,x.intScheduleWorkOrderId
 		,x.ysnFrozen
 		,@intConcurrencyId
+		--,x.strWIPItemNo
+		,Case When ROW_NUMBER () Over(Order by intWorkOrderId)%2=0 then 'BLND01' else 'BLND01' end
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -212,9 +217,11 @@ BEGIN TRY
 			,intPackTypeId INT
 			,intScheduleWorkOrderId INT
 			,ysnFrozen BIT
+			,strWIPItemNo nvarchar(50)
 			) x
 	LEFT JOIN dbo.tblMFManufacturingCellPackType MC ON MC.intManufacturingCellId = x.intManufacturingCellId
 		AND MC.intPackTypeId = x.intPackTypeId
+	Left JOIN tblMFPackType P on P.intPackTypeId =x.intPackTypeId
 	LEFT JOIN dbo.tblMFPackTypeDetail PTD ON PTD.intPackTypeId = x.intPackTypeId
 		AND PTD.intTargetUnitMeasureId = x.intUnitMeasureId
 		AND PTD.intSourceUnitMeasureId = MC.intLineCapacityUnitMeasureId
@@ -452,19 +459,19 @@ BEGIN TRY
 				WHERE R.intScheduleRuleId = @intScheduleRuleId
 
 				SET @sqlCommand = 'SELECT @strColumnValue = ' + @strColumnName + '
-									FROM @tblMFScheduleWorkOrder
-									WHERE intWorkOrderId = ' + @intWorkOrderId
+									FROM @t
+									WHERE intWorkOrderId = ' + ltrim(@intWorkOrderId)
 
 				EXECUTE sp_executesql @sqlCommand
-					,N'@strColumnValue nvarchar(50) OUTPUT'
+					,N'@t ScheduleTable READONLY,@strColumnValue nvarchar(50) OUTPUT'
 					,@strColumnValue = @strColumnValue OUTPUT
 
 				SET @sqlCommand = 'SELECT @strPreviousColumnValue = ' + @strColumnName + '
-									FROM @tblMFScheduleWorkOrder
-									WHERE intWorkOrderId = ' + @intPreviousWorkOrderId
+									FROM @t
+									WHERE intWorkOrderId = ' + ltrim(@intPreviousWorkOrderId)
 
 				EXECUTE sp_executesql @sqlCommand
-					,N'@strColumnValue nvarchar(50) OUTPUT'
+					,N'@t ScheduleTable READONLY, @strPreviousColumnValue nvarchar(50) OUTPUT'
 					,@strPreviousColumnValue = @strPreviousColumnValue OUTPUT
 
 				IF @strColumnValue <> @strPreviousColumnValue

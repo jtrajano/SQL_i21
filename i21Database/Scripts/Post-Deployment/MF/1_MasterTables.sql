@@ -1005,9 +1005,13 @@ BEGIN
 		2
 		,'Blend Change'
 		,'vyuMFGetBlendItem'
-		,'strItemNo'
+		,'strWIPItemNo'
 		)
 END
+Else
+Begin
+	Update tblMFScheduleAttribute Set strColumnName='strWIPItemNo' Where intScheduleAttributeId=2
+End
 Go
 IF NOT EXISTS (
 		SELECT *
