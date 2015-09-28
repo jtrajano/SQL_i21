@@ -4039,4 +4039,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intPickListId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="b6561858-6b48-405d-9ac1-3aa3756f846d" ChangeDateTime="09/28/2015 13:54:02">
+    <Property Name="ElementName" Value="[dbo].[tblRKAssignFuturesToContractSummary].[intAssignedLots]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKAssignFuturesToContractSummary]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intFutOptAssignedId" />
+  </Operation>
 </Operations>

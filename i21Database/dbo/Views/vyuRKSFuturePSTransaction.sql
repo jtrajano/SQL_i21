@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuRKSFuturePSTransaction
 AS
-SELECT * FROM (
+SELECT TOP 100 PERCENT * FROM (
 SELECT strTotalLot-dblSelectedLot1 AS dblBalanceLot, 0.0 as dblSelectedLot ,* from  (
 SELECT 
       strInternalTradeNo AS strTransactionNo
@@ -22,7 +22,7 @@ SELECT
       ,ISNULL(ot.intSubBookId,0) as intSubBookId
       ,intFutOptTransactionId
       ,fm.dblContractSize
-      ,case when bc.intFuturesRateType= 2 then 0 else  isnull(bc.dblFutCommission,0) end as dblFutCommission
+      ,case when bc.intFuturesRateType= 2 then 0 else  isnull(bc.dblFutCommission,0) end as dblFutCommission,dtmFilledDate 
 FROM tblRKFutOptTransaction ot
 JOIN tblRKFutureMarket fm on fm.intFutureMarketId=ot.intFutureMarketId and ot.intInstrumentTypeId=1 and ot.strStatus='Filled'
 LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId 
@@ -30,5 +30,6 @@ JOIN tblRKBrokerageAccount ba on ot.intBrokerageAccountId=ba.intBrokerageAccount
 	AND ba.intEntityId = ot.intEntityId  AND ot.intInstrumentTypeId IN(1,3) AND ba.intBrokerageAccountId=ot.intBrokerageAccountId 
 LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId
 LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId)t )t1  where dblBalanceLot > 0 
+Order By dtmFilledDate 
 
 

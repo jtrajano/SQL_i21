@@ -10,6 +10,7 @@
     [intAssignedLots] INT NOT NULL, 
 	[intHedgedLots] INT NOT NULL,
 	[ysnIsHedged] Bit NULL,
+    [intFutOptAssignedId] INT NULL, 
     CONSTRAINT [PK_tblRKAssignFuturesToContractSummary] PRIMARY KEY (intAssignFuturesToContractSummaryId),
 	CONSTRAINT [FK_tblRKAssignFuturesToContractSummary_tblRKAssignFuturesToContractSummaryHeader_intAssignFuturesToContractHeaderId] FOREIGN KEY ([intAssignFuturesToContractHeaderId]) REFERENCES [tblRKAssignFuturesToContractSummaryHeader]([intAssignFuturesToContractHeaderId]),	 
 	CONSTRAINT [FK_tblRKAssignFuturesToContractSummary_tblCTContractHeader_intContractHeaderId] FOREIGN KEY ([intContractHeaderId]) REFERENCES [tblCTContractHeader]([intContractHeaderId]),	

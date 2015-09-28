@@ -2475,6 +2475,8 @@
     <Build Include="dbo\Stored Procedures\uspMFSavePickList.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeletePickList.sql" />
     <Build Include="dbo\Tables\tblPATRefundRate.sql" />
+    <Build Include="dbo\Views\vyuRKGetAssignedLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKFutOptAssignedSave.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
