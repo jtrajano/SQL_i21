@@ -70,6 +70,30 @@ SELECT
 		SH.intInsuranceCurrencyId,
 		InsuranceCur.strCurrency,
 
+  		Vendor.strName as strVendor,
+		Vendor.strEmail as strVendorEmail,
+		Vendor.strFax as strVendorFax,
+		Vendor.strPhone as strVendorPhone,
+		Vendor.strMobile as strVendorMobile,
+		Vendor.strWebsite as strVendorWebsite,
+		VLocation.strAddress as strVendorAddress,
+		VLocation.strCity as strVendorCity,
+		VLocation.strCountry as strVendorCountry,
+		VLocation.strState as strVendorState,
+		VLocation.strZipCode as strVendorZipCode,
+
+  		Customer.strName as strCustomer,
+		Customer.strEmail as strCustomerEmail,
+		Customer.strFax as strCustomerFax,
+		Customer.strPhone as strCustomerPhone,
+		Customer.strMobile as strCustomerMobile,
+		Customer.strWebsite as strCustomerWebsite,
+		CLocation.strAddress as strCustomerAddress,
+		CLocation.strCity as strCustomerCity,
+		CLocation.strCountry as strCustomerCountry,
+		CLocation.strState as strCustomerState,
+		CLocation.strZipCode as strCustomerZipCode,
+
   		SLEntity.strName as strShippingLine,
 		SLEntity.strEmail as strShippingLineEmail,
 		SLEntity.strFax as strShippingLineFax,
@@ -129,6 +153,10 @@ SELECT
 		WI.intWarehouseInstructionHeaderId
 
 FROM		tblLGShipment SH
+LEFT JOIN	tblEntity Vendor ON Vendor.intEntityId = SH.intVendorEntityId
+LEFT JOIN	tblEntityLocation VLocation ON VLocation.intEntityId = SH.intVendorEntityId and VLocation.intEntityLocationId = Vendor.intDefaultLocationId
+LEFT JOIN	tblEntity Customer ON Customer.intEntityId = SH.intCustomerEntityId
+LEFT JOIN	tblEntityLocation CLocation ON CLocation.intEntityId = SH.intCustomerEntityId and CLocation.intEntityLocationId = Customer.intDefaultLocationId
 LEFT JOIN	tblEntity SLEntity ON SLEntity.intEntityId = SH.intShippingLineEntityId
 LEFT JOIN	tblEntityLocation SLLocation ON SLLocation.intEntityId = SH.intShippingLineEntityId and SLLocation.intEntityLocationId = SLEntity.intDefaultLocationId
 LEFT JOIN	tblEntity TREntity ON TREntity.intEntityId = SH.intTruckerEntityId
