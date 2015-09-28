@@ -2464,6 +2464,7 @@
     <Build Include="dbo\Stored Procedures\uspMFCreatePickList.sql" />
     <Build Include="dbo\Stored Procedures\uspMFSavePickList.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDeletePickList.sql" />
+    <Build Include="dbo\Tables\tblPATRefundRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
