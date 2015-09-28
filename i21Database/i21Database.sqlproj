@@ -2453,10 +2453,10 @@
     <Build Include="dbo\Tables\tblTMBudgetCalculationProjection.sql" />
     <Build Include="dbo\Tables\tblTMBudgetCalculationItemPricing.sql" />
     <Build Include="dbo\Views\vyuTMBudgetCalculationProjection.sql" />
-    <Build Include="dbo\Views\vyuTMBudgetCalculationItemPricing.sql" />
+    <None Include="dbo\Views\vyuTMBudgetCalculationItemPricing.sql" />
     <Build Include="dbo\Tables\tblTMBudgetCalculation.sql" />
-    <Build Include="dbo\Views\vyuTMBudgetCalculationSite.sql" />
-    <Build Include="dbo\Stored Procedures\uspTMGetBudgetCalculationSite.sql" />
+    <None Include="dbo\Views\vyuTMBudgetCalculationSite.sql" />
+    <None Include="dbo\Stored Procedures\uspTMGetBudgetCalculationSite.sql" />
     <Build Include="dbo\Views\vyuTMFillMethodUsedBySite.sql" />
     <Build Include="dbo\Views\vyuTMCustomer.sql" />
   </ItemGroup>

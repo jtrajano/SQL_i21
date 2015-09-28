@@ -1,4 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[uspTMGetBudgetCalculationSite]  
+﻿----Check Recreate
+
+CREATE PROCEDURE [dbo].[uspTMGetBudgetCalculationSite]  
 	@ysnIncludeInvoices		BIT
 	,@ysnIncludeCredits		BIT	
 	,@ysnIncludeEstimatedTankInventory	BIT

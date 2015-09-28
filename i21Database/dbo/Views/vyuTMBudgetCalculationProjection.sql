@@ -1,4 +1,6 @@
-﻿CREATE VIEW [dbo].[vyuTMBudgetCalculationProjection]  
+﻿--///Check on recreate
+
+CREATE VIEW [dbo].[vyuTMBudgetCalculationProjection]  
 AS 
 
 SELECT
