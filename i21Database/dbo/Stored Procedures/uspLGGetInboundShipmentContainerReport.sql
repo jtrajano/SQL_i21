@@ -40,5 +40,13 @@ BEGIN
 	--FROM	@temp_xml_table   
 	--WHERE	[fieldname] = 'intReferenceNumber' 
 
-SELECT * FROM vyuLGInboundShipmentView SH WHERE SH.intTrackingNumber = @xmlParam	
+SELECT	SH.*,
+		CD.strCustomerContract,
+		CD.dtmContractDate,
+		CD.strContractBasis,
+		CD.strContractBasisDescription,
+		CD.strApprovalBasis
+FROM vyuLGInboundShipmentView SH 
+LEFT JOIN vyuCTContractDetailView CD ON CD.intContractDetailId = SH.intContractDetailId
+WHERE SH.intTrackingNumber = @xmlParam	
 END
