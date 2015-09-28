@@ -80,23 +80,6 @@ Ext.define('Inventory.view.InventoryReceiptViewModel', {
                 name: 'strSourceType'
             }
         },
-        allocateFreights: {
-            autoLoad: true,
-            data: [
-                {
-                    strDescription: 'Weight'
-                },
-                {
-                    strDescription: 'Cost'
-                },
-                {
-                    strDescription: 'No'
-                }
-            ],
-            fields: {
-                name: 'strDescription'
-            }
-        },
         calculationBasis: {
             autoLoad: true,
             data: [

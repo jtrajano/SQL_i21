@@ -374,37 +374,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                         labelWidth: 75
                                                     },
                                                     {
-                                                        xtype: 'gridcombobox',
-                                                        columns: [
-                                                            {
-                                                                dataIndex: 'intCurrencyID',
-                                                                dataType: 'numeric',
-                                                                text: 'Currency Id',
-                                                                hidden: true
-                                                            },
-                                                            {
-                                                                dataIndex: 'strCurrency',
-                                                                dataType: 'string',
-                                                                text: 'Currency',
-                                                                flex: 1
-                                                            },
-                                                            {
-                                                                dataIndex: 'strDescription',
-                                                                dataType: 'string',
-                                                                text: 'Description',
-                                                                flex: 1
-                                                            }
-                                                        ],
-                                                        itemId: 'cboCurrency',
-                                                        margin: '0 5 0 0',
-                                                        width: 60,
-                                                        fieldLabel: 'Currency',
-                                                        labelAlign: 'top',
-                                                        labelWidth: 105,
-                                                        displayField: 'strCurrency',
-                                                        valueField: 'intCurrencyID'
-                                                    },
-                                                    {
                                                         xtype: 'textfield',
                                                         itemId: 'txtReceiptNumber',
                                                         width: 100,
@@ -636,26 +605,38 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                                 },
                                                                 items: [
                                                                     {
+                                                                        xtype: 'gridcombobox',
+                                                                        columns: [
+                                                                            {
+                                                                                dataIndex: 'intCurrencyID',
+                                                                                dataType: 'numeric',
+                                                                                text: 'Currency Id',
+                                                                                hidden: true
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strCurrency',
+                                                                                dataType: 'string',
+                                                                                text: 'Currency',
+                                                                                flex: 1
+                                                                            },
+                                                                            {
+                                                                                dataIndex: 'strDescription',
+                                                                                dataType: 'string',
+                                                                                text: 'Description',
+                                                                                flex: 1
+                                                                            }
+                                                                        ],
+                                                                        itemId: 'cboCurrency',
+                                                                        fieldLabel: 'Currency',
+                                                                        labelWidth: 95,
+                                                                        displayField: 'strCurrency',
+                                                                        valueField: 'intCurrencyID'
+                                                                    },
+                                                                    {
                                                                         xtype: 'textfield',
                                                                         itemId: 'txtVessel',
                                                                         fieldLabel: 'Vessel',
                                                                         labelWidth: 95
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcombobox',
-                                                                        columns: [
-                                                                            {
-                                                                                dataIndex: 'strDescription',
-                                                                                dataType: 'string',
-                                                                                text: 'Allocate Freight',
-                                                                                flex: 1
-                                                                            }
-                                                                        ],
-                                                                        itemId: 'cboAllocateFreight',
-                                                                        fieldLabel: 'Allocate Freight',
-                                                                        labelWidth: 95,
-                                                                        displayField: 'strDescription',
-                                                                        valueField: 'strDescription'
                                                                     },
                                                                     {
                                                                         xtype: 'numberfield',

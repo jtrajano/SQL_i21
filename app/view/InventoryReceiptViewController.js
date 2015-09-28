@@ -135,11 +135,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 value: '{current.strFobPoint}',
                 readOnly: '{current.ysnPosted}'
             },
-            cboAllocateFreight: {
-                value: '{current.strAllocateFreight}',
-                store: '{allocateFreights}',
-                readOnly: '{current.ysnPosted}'
-            },
             txtShiftNumber: {
                 value: '{current.intShiftNumber}',
                 readOnly: '{current.ysnPosted}'

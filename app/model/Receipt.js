@@ -31,7 +31,6 @@ Ext.define('Inventory.model.Receipt', {
         { name: 'intReceiverId', type: 'int', allowNull: true },
         { name: 'strVessel', type: 'string' },
         { name: 'intFreightTermId', type: 'int', allowNull: true },
-        { name: 'strAllocateFreight', type: 'string' },
         { name: 'intShiftNumber', type: 'int' },
         { name: 'strCalculationBasis', type: 'string' },
         { name: 'dblUnitWeightMile', type: 'float' },

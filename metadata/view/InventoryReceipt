@@ -686,61 +686,6 @@
                                             "designerId": "5acaf3bf-e827-40ab-ba23-e53a81e1b537"
                                         },
                                         {
-                                            "type": "Ext.form.field.ComboBox",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "columns": [
-                                                    "[",
-                                                    "\t{",
-                                                    "\t\tdataIndex: 'intCurrencyID',",
-                                                    "\t\tdataType: 'numeric',",
-                                                    "\t\ttext: 'Currency Id',",
-                                                    "\t\thidden: true",
-                                                    "\t},",
-                                                    "\t{",
-                                                    "\t\tdataIndex: 'strCurrency',",
-                                                    "\t\tdataType: 'string',",
-                                                    "\t\ttext: 'Currency',",
-                                                    "\t\tflex: 1",
-                                                    "\t},",
-                                                    "\t{",
-                                                    "\t\tdataIndex: 'strDescription',",
-                                                    "\t\tdataType: 'string',",
-                                                    "\t\ttext: 'Description',",
-                                                    "\t\tflex: 1",
-                                                    "\t}",
-                                                    "]"
-                                                ],
-                                                "designer|createAlias": "gridcombobox",
-                                                "displayField": "strCurrency",
-                                                "fieldLabel": "Currency",
-                                                "itemId": "cboCurrency",
-                                                "labelAlign": "top",
-                                                "labelWidth": 105,
-                                                "layout|flex": null,
-                                                "margin": "0 5 0 0",
-                                                "name": null,
-                                                "valueField": "intCurrencyID",
-                                                "width": 60
-                                            },
-                                            "name": "MyComboBox9",
-                                            "configAlternates": {
-                                                "columns": "array"
-                                            },
-                                            "designerId": "b0b229da-0b8f-4aec-89bb-bc3143ac30b1",
-                                            "customConfigs": [
-                                                {
-                                                    "group": "(Custom Properties)",
-                                                    "name": "columns",
-                                                    "type": "string"
-                                                }
-                                            ]
-                                        },
-                                        {
                                             "type": "Ext.form.field.Text",
                                             "reference": {
                                                 "name": "items",
@@ -1257,6 +1202,58 @@
                                                     "designerId": "880c165c-0c37-4c61-9cf4-e2442b775ca2",
                                                     "cn": [
                                                         {
+                                                            "type": "Ext.form.field.ComboBox",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "columns": [
+                                                                    "[",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'intCurrencyID',",
+                                                                    "\t\tdataType: 'numeric',",
+                                                                    "\t\ttext: 'Currency Id',",
+                                                                    "\t\thidden: true",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strCurrency',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Currency',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t},",
+                                                                    "\t{",
+                                                                    "\t\tdataIndex: 'strDescription',",
+                                                                    "\t\tdataType: 'string',",
+                                                                    "\t\ttext: 'Description',",
+                                                                    "\t\tflex: 1",
+                                                                    "\t}",
+                                                                    "]"
+                                                                ],
+                                                                "designer|createAlias": "gridcombobox",
+                                                                "displayField": "strCurrency",
+                                                                "fieldLabel": "Currency",
+                                                                "itemId": "cboCurrency",
+                                                                "labelWidth": 95,
+                                                                "layout|flex": null,
+                                                                "name": null,
+                                                                "valueField": "intCurrencyID"
+                                                            },
+                                                            "name": "MyComboBox9",
+                                                            "configAlternates": {
+                                                                "columns": "array"
+                                                            },
+                                                            "designerId": "b0b229da-0b8f-4aec-89bb-bc3143ac30b1",
+                                                            "customConfigs": [
+                                                                {
+                                                                    "group": "(Custom Properties)",
+                                                                    "name": "columns",
+                                                                    "type": "string"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
                                                             "type": "Ext.form.field.Text",
                                                             "reference": {
                                                                 "name": "items",
@@ -1276,56 +1273,6 @@
                                                             },
                                                             "name": "MyTextField",
                                                             "designerId": "8b4e3ab3-d2d4-4bec-8f68-b34ede3d1d30"
-                                                        },
-                                                        {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "alwaysDisplayDecimals": null,
-                                                                "columns": [
-                                                                    "[",
-                                                                    "    {",
-                                                                    "        dataIndex: 'strDescription',",
-                                                                    "        dataType: 'string',",
-                                                                    "        text: 'Allocate Freight',",
-                                                                    "        flex: 1",
-                                                                    "    }",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strDescription",
-                                                                "fieldLabel": "Allocate Freight",
-                                                                "hideTrigger": null,
-                                                                "itemId": "cboAllocateFreight",
-                                                                "labelWidth": 95,
-                                                                "layout|flex": null,
-                                                                "layout|margins": null,
-                                                                "name": null,
-                                                                "valueField": "strDescription",
-                                                                "width": null
-                                                            },
-                                                            "name": "MyComboBox1",
-                                                            "configAlternates": {
-                                                                "alwaysDisplayDecimals": "boolean",
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "23317158-9497-4ac2-9e4b-a377d66b5fa9",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "alwaysDisplayDecimals",
-                                                                    "type": "string"
-                                                                },
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
                                                         },
                                                         {
                                                             "type": "Ext.form.field.Number",

@@ -36,7 +36,6 @@ namespace iRely.Inventory.Model
         public int? intReceiverId { get; set; }
         public string strVessel { get; set; }
         public int? intFreightTermId { get; set; }
-        public string strAllocateFreight { get; set; }
         public int? intShiftNumber { get; set; }
         public decimal? dblInvoiceAmount { get; set; }
         public bool? ysnPrepaid { get; set; }
