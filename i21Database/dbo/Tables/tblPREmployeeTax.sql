@@ -25,7 +25,7 @@
     CONSTRAINT [PK_tblPREmployeeTax] PRIMARY KEY CLUSTERED ([intEmployeeTaxId] ASC),
     CONSTRAINT [FK_tblPREmployeeTax_tblGLAccount_Expense] FOREIGN KEY ([intExpenseAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
     CONSTRAINT [FK_tblPREmployeeTax_tblGLAccount_Liability] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
-    CONSTRAINT [FK_tblPREmployeeTax_tblPREmployee] FOREIGN KEY ([intEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEmployeeId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblPREmployeeTax_tblPREmployee] FOREIGN KEY ([intEmployeeId]) REFERENCES [dbo].[tblPREmployee] ([intEntityEmployeeId]) ON DELETE CASCADE,
     CONSTRAINT [FK_tblPREmployeeTax_tblPRTypeTax] FOREIGN KEY ([intTypeTaxId]) REFERENCES [dbo].[tblPRTypeTax] ([intTypeTaxId])
 );
 
