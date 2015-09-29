@@ -20,7 +20,37 @@ DECLARE @ErrMsg                    NVARCHAR(MAX);
 DECLARE @InvoiceStagingTable AS InvoiceStagingTable,
         @total as int;
 
+DECLARE @InvoiceOutputTable TABLE
+    (
+	intId INT IDENTITY PRIMARY KEY CLUSTERED,
+    intSourceId int,
+	intInvoiceId int
+    )
+
 BEGIN TRY
+
+if @ysnPostOrUnPost = 0 and @ysnRecap = 0
+BEGIN
+   INSERT INTO @InvoiceOutputTable
+               select DH.intDistributionHeaderId,DH.intInvoiceId from 
+                        tblTRTransportLoad TL
+                        JOIN tblTRTransportReceipt TR on TR.intTransportLoadId = TL.intTransportLoadId
+	            		JOIN tblTRDistributionHeader DH on DH.intTransportReceiptId = TR.intTransportReceiptId
+	            		JOIN tblTRDistributionDetail DD on DD.intDistributionHeaderId = DH.intDistributionHeaderId
+	            		LEFT JOIN vyuTRSupplyPointView SP on SP.intSupplyPointId = TR.intSupplyPointId
+	            		LEFT JOIN vyuLGLoadView LG on LG.intLoadId = TL.intLoadId
+                        where TL.intTransportLoadId = @intTransportLoadId and DH.strDestination = 'Customer';
+   
+   SELECT @total = COUNT(*) FROM @InvoiceOutputTable;
+    IF (@total = 0)
+	   BEGIN
+	     RETURN;
+	   END
+	ELSE
+	    BEGIN
+        	GOTO _PostOrUnPost;
+		END
+END
 
 -- Insert Entries to Stagging table that needs to processed to Transport Load
      INSERT into @InvoiceStagingTable(    
@@ -116,18 +146,8 @@ BEGIN TRY
     if (@total = 0)
 	   return;
 
-DECLARE @InvoiceOutputTable TABLE
-    (
-	intId INT IDENTITY PRIMARY KEY CLUSTERED,
-    intSourceId int,
-	intInvoiceId int
-    )
+EXEC dbo.uspARAddInvoice @InvoiceStagingTable,@intUserId;
 
---INSERT into @InvoiceOutputTable(
---		 intSourceId	
---		,intInvoiceId		 	
---	 )	
-  EXEC dbo.uspARAddInvoice @InvoiceStagingTable,@intUserId;
 
 INSERT INTO @InvoiceOutputTable
 select IE.intSourceId,
@@ -136,6 +156,8 @@ FROM
     @InvoiceStagingTable IE  
     JOIN tblARInvoice IV
         on IE.intSourceId = IV.intDistributionHeaderId
+
+_PostOrUnPost:
 
 Declare @incval int,
         @SouceId int,
@@ -174,7 +196,7 @@ if @ysnRecap = 0
 BEGIN		
      EXEC	 [dbo].[uspARPostInvoice]
           				@batchId = NULL,
-          				@post = 1,
+          				@post = @ysnPostOrUnPost,
           				@recap = 0,
           				@param = NULL,
           				@userId = @intUserId,
@@ -192,7 +214,7 @@ BEGIN
                          @raiseError = 1
           if @IsSuccess = 0
           BEGIN
-             RAISERROR('Invoice did not Post', 16, 1);
+             RAISERROR('Invoice did not Post/UnPost', 16, 1);
           END
 END
 

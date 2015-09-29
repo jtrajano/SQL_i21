@@ -23,7 +23,38 @@ DECLARE @ReceiptStagingTable AS ReceiptStagingTable,
 		@intSurchargeItemId as int,
 		@intFreightItemId as int;
 
+IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
+BEGIN 
+	CREATE TABLE #tmpAddItemReceiptResult (
+		intSourceId INT
+		,intInventoryReceiptId INT
+	)
+END 
 BEGIN TRY
+if @ysnPostOrUnPost = 0 and @ysnRecap = 0
+BEGIN
+     INSERT  INTO #tmpAddItemReceiptResult
+     SELECT TR.intTransportReceiptId,TR.intInventoryReceiptId FROM	tblTRTransportLoad TL JOIN tblTRTransportReceipt TR 
+     				ON TR.intTransportLoadId = TL.intTransportLoadId			
+     			LEFT JOIN vyuCTContractDetailView CT 
+     				ON CT.intContractDetailId = TR.intContractDetailId
+     			LEFT JOIN tblTRSupplyPoint SP 
+     				ON SP.intSupplyPointId = TR.intSupplyPointId
+     	WHERE	TL.intTransportLoadId = @intTransportLoadId 
+     			AND TR.strOrigin = 'Terminal'
+     			AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0);
+	SELECT @total = COUNT(*) FROM #tmpAddItemReceiptResult;
+    IF (@total = 0)
+	   BEGIN
+	     RETURN;
+	   END
+	ELSE
+	    BEGIN
+        	GOTO _PostOrUnPost;
+		END
+
+END
+
 	-- Insert Entries to Stagging table that needs to processed to Transport Load
 	INSERT into @ReceiptStagingTable(
 			strReceiptType
@@ -278,13 +309,13 @@ BEGIN TRY
 	   RETURN;
 
 	-- Create the temp table if it does not exists. 
-	IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
-	BEGIN 
-		CREATE TABLE #tmpAddItemReceiptResult (
-			intSourceId INT
-			,intInventoryReceiptId INT
-		)
-	END 
+	--IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
+	--BEGIN 
+	--	CREATE TABLE #tmpAddItemReceiptResult (
+	--		intSourceId INT
+	--		,intInventoryReceiptId INT
+	--	)
+	--END 
 
     EXEC dbo.uspICAddItemReceipt 
 			@ReceiptStagingTable
@@ -297,6 +328,7 @@ BEGIN TRY
 	FROM	dbo.tblTRTransportReceipt TR INNER JOIN #tmpAddItemReceiptResult addResult
 				ON TR.intTransportReceiptId = addResult.intSourceId
 
+_PostOrUnPost:
 	-- Post the Inventory Receipts                                            
 	DECLARE @ReceiptId INT
 			,@intEntityId INT
@@ -319,9 +351,9 @@ BEGIN TRY
 		WHERE	intUserSecurityID = @intUserId
 		if @ysnRecap = 0
 		BEGIN
-		  EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;			
+		  EXEC dbo.uspICPostInventoryReceipt @ysnPostOrUnPost, 0, @strTransactionId, @intUserId, @intEntityId;			
 		END
-		--EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
+		
 
 		DELETE	FROM #tmpAddItemReceiptResult 
 		WHERE	intInventoryReceiptId = @ReceiptId
