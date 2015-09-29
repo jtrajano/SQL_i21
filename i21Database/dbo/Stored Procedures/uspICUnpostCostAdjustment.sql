@@ -61,9 +61,12 @@ FROM	(
 							,intTransactionId = @intTransactionId
 				) AS Source_Query  
 					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0					
-					AND inventory_transaction.strTransactionId = Source_Query.strTransactionId
-					AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
 					AND inventory_transaction.intTransactionTypeId IN (@COST_ADJUSTMENT, @REVALUE_SOLD)
+					AND 1 = 
+						CASE	WHEN inventory_transaction.strTransactionId = Source_Query.strTransactionId AND inventory_transaction.intTransactionId = Source_Query.intTransactionId THEN 1
+								WHEN inventory_transaction.strRelatedTransactionId = Source_Query.strTransactionId AND inventory_transaction.intRelatedTransactionId = Source_Query.intTransactionId THEN	1
+								ELSE 0
+						END 					
 
 				-- If matched, update the ysnIsUnposted and set it to true (1) 
 				WHEN MATCHED THEN 
@@ -95,6 +98,7 @@ BEGIN
 			,[intCurrencyId]
 			,[dblExchangeRate]
 			,[intTransactionId]
+			,[intTransactionDetailId]
 			,[strTransactionId]
 			,[strBatchId]
 			,[intTransactionTypeId]
@@ -107,6 +111,7 @@ BEGIN
 			,[dtmCreated]
 			,[intCreatedUserId]
 			,[intConcurrencyId]
+			,[intCostingMethod]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -123,6 +128,7 @@ BEGIN
 			,[intCurrencyId]						= ActualTransaction.intCurrencyId
 			,[dblExchangeRate]						= ActualTransaction.dblExchangeRate
 			,[intTransactionId]						= ActualTransaction.intTransactionId
+			,[intTransactionDetailId]				= ActualTransaction.intTransactionDetailId
 			,[strTransactionId]						= ActualTransaction.strTransactionId
 			,[strBatchId]							= @strBatchId
 			,[intTransactionTypeId]					= ActualTransaction.intTransactionTypeId
@@ -135,6 +141,7 @@ BEGIN
 			,[dtmCreated]							= GETDATE()
 			,[intCreatedUserId]						= @intUserId
 			,[intConcurrencyId]						= 1
+			,[intCostingMethod]						= ActualTransaction.intCostingMethod
 	FROM	#tmpInvCostAdjustmentToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON ItemTransactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 
@@ -227,9 +234,17 @@ BEGIN
 		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 					ON ItemPricing.intItemId = Stock.intItemId
 					AND ItemPricing.intItemLocationId = Stock.intItemLocationId		
-				INNER JOIN #tmpInvCostAdjustmentToReverse ItemToUnpost
-					ON Stock.intItemId = ItemToUnpost.intItemId
-					AND Stock.intItemLocationId = ItemToUnpost.intItemLocationId
+				INNER JOIN (
+					SELECT	ActualTransaction.intItemId
+							,ActualTransaction.intItemLocationId
+							,ActualTransaction.dblQty
+							,ActualTransaction.dblUOMQty
+					FROM	#tmpInvCostAdjustmentToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
+								ON ItemTransactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
+				) ItemToUnpost
+					ON ItemToUnpost.intItemId = Stock.intItemId
+					AND ItemToUnpost.intItemLocationId = Stock.intItemLocationId		
+
 	END
 END
 

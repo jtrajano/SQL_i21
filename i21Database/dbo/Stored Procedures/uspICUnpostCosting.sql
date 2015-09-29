@@ -163,6 +163,7 @@ BEGIN
 			,[intCurrencyId]
 			,[dblExchangeRate]
 			,[intTransactionId]
+			,[intTransactionDetailId]
 			,[strTransactionId]
 			,[strBatchId]
 			,[intTransactionTypeId]
@@ -175,6 +176,7 @@ BEGIN
 			,[dtmCreated]
 			,[intCreatedUserId]
 			,[intConcurrencyId]
+			,[intCostingMethod]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -191,6 +193,7 @@ BEGIN
 			,[intCurrencyId]						= ActualTransaction.intCurrencyId
 			,[dblExchangeRate]						= ActualTransaction.dblExchangeRate
 			,[intTransactionId]						= ActualTransaction.intTransactionId
+			,[intTransactionDetailId]				= ActualTransaction.intTransactionDetailId
 			,[strTransactionId]						= ActualTransaction.strTransactionId
 			,[strBatchId]							= @strBatchId
 			,[intTransactionTypeId]					= ActualTransaction.intTransactionTypeId
@@ -203,6 +206,7 @@ BEGIN
 			,[dtmCreated]							= GETDATE()
 			,[intCreatedUserId]						= @intUserId
 			,[intConcurrencyId]						= 1
+			,[intCostingMethod]						= ActualTransaction.intCostingMethod
 	FROM	#tmpInventoryTransactionStockToReverse ItemTransactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON ItemTransactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 	
