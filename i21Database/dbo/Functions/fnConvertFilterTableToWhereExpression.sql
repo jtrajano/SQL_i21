@@ -56,6 +56,7 @@ BEGIN
 				 @Condition like '%Period' or
 				 @Condition like '%Year' or
 				 @Condition like '%Quarter' or
+				 @Condition = 'Between' or
 				 @Condition = 'As Of' THEN 'Between'
 			END + ' '
 			
@@ -70,6 +71,7 @@ BEGIN
 				 @Condition like '%Year' or
 				 @Condition like '%Quarter' or
 				 @Condition = 'As Of' or
+				 @Condition = 'Between' or
 				 (@Condition = 'Custom' AND @From IS NOT NULL AND @To IS NOT NULL) 
 			THEN '''' + @From + '''' + ' AND ' + '''' + @To + ''''
 			WHEN @Condition = 'Starts With' THEN '''' + @From + '%' + ''''
@@ -85,3 +87,5 @@ BEGIN
 	RETURN 	'Where ' + @Result
 
 END
+GO
+

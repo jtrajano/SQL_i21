@@ -8,8 +8,14 @@ DECLARE @idoc INT
 DECLARE @filterTable FilterTableType
 DECLARE @strAccountIdFrom NVARCHAR(50)
 DECLARE @strAccountIdTo NVARCHAR(50)
+DECLARE @strPrimaryCodeFrom NVARCHAR(50)
+DECLARE @strPrimaryCodeTo NVARCHAR(50)
+DECLARE @strPrimaryCodeCondition NVARCHAR(50) = ''
+
 DECLARE @dtmDateFrom NVARCHAR(50)
 DECLARE @dtmDateTo NVARCHAR(50)
+DECLARE @strAccountIdCondition NVARCHAR(20)=''
+
 --set @xmlParam=N'<xmlparam><filters><filter><fieldname>intGLDetailId</fieldname><condition>Equal To</condition><from/><to/><join/><begingroup/><endgroup/><datatype/></filter></filters></xmlparam>'
 IF @xmlParam <> ''
 BEGIN
@@ -27,10 +33,14 @@ BEGIN
 						, [datatype] nvarchar(50))  
 		
 		
-	SELECT TOP 1 @strAccountIdFrom= [from] , @strAccountIdTo = [to] from  @filterTable WHERE [fieldname] = 'strAccountId' 
+	SELECT TOP 1 @strAccountIdFrom= [from] , @strAccountIdTo = [to] ,@strAccountIdCondition =[condition] from  @filterTable WHERE [fieldname] = 'strAccountId' 
+	SELECT TOP 1 @strPrimaryCodeFrom= [from] , @strPrimaryCodeTo = [to] ,@strPrimaryCodeCondition =[condition] from  @filterTable WHERE [fieldname] = 'Primary Code' 
 	SELECT TOP 1 @dtmDateFrom= [from] , @dtmDateTo = [to] from  @filterTable WHERE [fieldname] = 'dtmDate' 
+
 	update @filterTable SET [fieldname] = 'strCode',[from] = '' , [condition]= 'Not Equal To' WHERE fieldname = 'ysnIncludeAuditAdjustment' AND [from] = 'Yes'
 	update @filterTable SET [fieldname] = 'strCode',[from] = 'AA' , [condition]= 'Not Equal To' WHERE fieldname = 'ysnIncludeAuditAdjustment' AND [from] = 'No'
+	update @filterTable SET [fieldname] = '[Primary Account]' WHERE fieldname = 'Primary Account' 
+	delete FROM @filterTable WHERE [condition]= 'All Date'
 	
 	IF EXISTS(
 	SELECT TOP 1 1 FROM @filterTable WHERE
@@ -50,11 +60,17 @@ END
 
 
 
-DECLARE @hasInactiveAccounts BIT = 0
-IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#tempTableReport')) DROP TABLE tempTableReport
-IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#tempTableReport1')) DROP TABLE tempTableReport1
-IF @dtmDateFrom IS NOT NULL AND @strAccountIdFrom IS NULL
-	SELECT @hasInactiveAccounts = 1
+DECLARE @hasInactiveAccountsByDate BIT = 0
+DECLARE @hasInactiveAccountsByAccount BIT = 0
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#tempTableReport')) DROP TABLE #tempTableReport
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#tempTableReport1')) DROP TABLE #tempTableReport1
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#tempTableReport2')) DROP TABLE #tempTableReport2
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#tempTableReport3')) DROP TABLE #tempTableReport3
+IF @dtmDateFrom IS NOT NULL AND (
+	(@strAccountIdFrom IS NULL OR @strAccountIdCondition = 'Between') or
+	(@strPrimaryCodeFrom IS NULL OR @strPrimaryCodeCondition = 'Between')
+	)
+	SELECT @hasInactiveAccountsByDate = 1
 
 
 
@@ -190,27 +206,74 @@ DECLARE @Where NVARCHAR(MAX) = dbo.fnConvertFilterTableToWhereExpression (@filte
 select @SqlQuery = 'Select * from #tempTableReport ' 
 IF @Where <> 'Where ' select @SqlQuery +=  @Where
 
-IF @hasInactiveAccounts =1 
+IF @hasInactiveAccountsByDate =1 
 BEGIN
+	--SELECT @SqlQuery += 'OR dtmDate1 = ''' + @dtmDateFrom + ''''
 	DECLARE @cols NVARCHAR (MAX) = 'AccountHeader, strAccountDescripion,strAccountType,strAccountGroup,dtmDate,strBatchId,dblDebit,dblCredit,dblDebitUnit,dblCreditUnit,strDetailDescription,strTransactionId, intTransactionId,strTransactionType,strTransactionForm,strModuleName,strReference,strReferenceDetail,strDocument,dblTotal,intAccountUnitId,strCode,intGLDetailId,ysnIsUnposted,strAccountId,[Primary Account],Location,strUOMCode,dblBeginBalance,dblBeginBalanceUnit'
 	DECLARE @cols1 NVARCHAR(MAX) = ''
-	;WITH cte AS
-	(
-	   SELECT *, ROW_NUMBER() OVER (PARTITION BY strAccountId ORDER BY dtmDate DESC) AS rn
-	   FROM #tempTableReport where dtmDate < @dtmDateFrom or dtmDate > ISNULL(@dtmDateTo,@dtmDateFrom)
-	)
-	SELECT * INTO #tempTableReport1	
-	FROM cte
-	WHERE rn = 1
+	--DECLARE @beginBalanceUnitFormula NVARCHAR (100)=  'dbo.fnGetBeginBalanceUnit(strAccountId,' + @dtmDateFrom +','''') as dblBeginBalanceUnit'
+	IF @strAccountIdFrom IS NULL AND @strPrimaryCodeFrom IS NULL
+	BEGIN
+		;WITH cte AS
+		(
+	
+		   SELECT *, ROW_NUMBER() OVER (PARTITION BY strAccountId ORDER BY dtmDate DESC) AS rn
+		   FROM #tempTableReport where dtmDate < @dtmDateFrom or dtmDate > isnull(@dtmDateTo,@dtmDateFrom)
+
+		)
+		SELECT * INTO #tempTableReport1	
+		FROM cte
+		WHERE rn = 1
+		
+	END
+
+	IF @strAccountIdCondition = 'Between'
+	BEGIN
+		;WITH cte AS
+		(
+	
+		   SELECT *, ROW_NUMBER() OVER (PARTITION BY strAccountId ORDER BY dtmDate DESC) AS rn
+		   FROM #tempTableReport where dtmDate < @dtmDateFrom or dtmDate > isnull(@dtmDateTo,@dtmDateFrom)
+		   AND strAccountId BETWEEN @strAccountIdFrom AND @strAccountIdTo
+
+		)
+		SELECT * INTO #tempTableReport2
+		from cte
+		WHERE rn = 1
+		
+	END
+	IF @strPrimaryCodeCondition = 'Between'
+	BEGIN
+		;WITH cte AS
+		(
+	
+		   SELECT *, ROW_NUMBER() OVER (PARTITION BY strAccountId ORDER BY dtmDate DESC) AS rn
+		   FROM #tempTableReport where dtmDate < @dtmDateFrom or dtmDate > isnull(@dtmDateTo,@dtmDateFrom)
+		   AND strAccountId BETWEEN @strAccountIdFrom AND @strAccountIdTo
+
+		)
+		SELECT * INTO #tempTableReport3	
+		from cte
+		WHERE rn = 1
+		
+	END
+
+	
+
 	SELECT @cols1 = REPLACE (@cols,'dtmDate','''' + @dtmDateFrom  + '''' + ' as dtmDate')
 	SELECT @cols1 = REPLACE (@cols1,'dblDebit,','0 as dblDebit,')
 	SELECT @cols1 = REPLACE (@cols1,'dblDebitUnit,','0 as dblDebitUnit,')
 	SELECT @cols1 = REPLACE (@cols1,'dblCredit,','0 as dblCredit,')
 	SELECT @cols1 = REPLACE (@cols1,'dblCreditUnit,','0 as dblCreditUnit,')
 	SELECT @cols1 = REPLACE (@cols1,'dblTotal,','0 as dblTotal,')
-	SELECT @SqlQuery = 'SELECT ' + @cols + ' FROM #tempTableReport ' + ISNULL(@Where,'') + ' UNION SELECT ' +  @cols1 + ' FROM #tempTableReport1'
-END
 
+	SELECT @SqlQuery = 'SELECT ' + ISNULL(@cols,'') + ' FROM #tempTableReport ' + @Where 
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#tempTableReport1'))SELECT @SqlQuery +=' UNION ALL SELECT ' +  @cols1 + ' FROM #tempTableReport1'
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#tempTableReport2'))SELECT @SqlQuery +=' UNION ALL SELECT ' +  @cols1 + ' FROM #tempTableReport2'
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#tempTableReport3'))SELECT @SqlQuery +=' UNION ALL SELECT ' +  @cols1 + ' FROM #tempTableReport3'
+
+END
+--select @SqlQuery
 EXEC (@SqlQuery)
 
 END

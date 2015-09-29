@@ -14,5 +14,3 @@
 )WITH (IGNORE_DUP_KEY = OFF)
 )
 GO
-
-
