@@ -622,6 +622,7 @@ BEGIN
 				ON B.intEntityVendorId = C.intEntityVendorId 
 				--AND A.strPayee = D.strName
 			WHERE A.strSourceSystem IN (''AP'',''CW'')
+			AND A.strTransactionId <> B.strPaymentRecordNum
 
 			IF @transCount = 0 COMMIT TRANSACTION
 		END TRY
