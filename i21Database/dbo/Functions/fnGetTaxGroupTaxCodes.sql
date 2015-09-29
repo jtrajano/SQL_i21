@@ -35,7 +35,7 @@ BEGIN
 	SELECT
 		 0 AS [intTransactionDetailTaxId]
 		,0 AS [intTransactionDetailId]
-		,0 AS [intTaxGroupMasterId] 
+		,NULL AS [intTaxGroupMasterId] 
 		,TG.[intTaxGroupId] 
 		,TC.[intTaxCodeId]
 		,TC.[intTaxClassId]				
