@@ -1,8 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblPREmployeeEarningDistribution] (
-    [intEmployeeEarningDistributionId] INT IDENTITY (1, 1) NOT NULL,
+    [intEmployeeEarningDistributionId] INT NOT NULL IDENTITY,
     [intEmployeeEarningId]    INT NOT NULL,
-	[intExpenseSegmentId]			  INT NULL,
-	[intLocation]			  INT NULL,
+	[intAccountId]			  INT NULL,
     [dblPercentage]           NUMERIC(18,6) NULL,
     [intConcurrencyId]        INT NULL,
     CONSTRAINT [PK_tblPREmployeeEarningDistribution] PRIMARY KEY CLUSTERED ([intEmployeeEarningDistributionId] ASC),
@@ -28,24 +27,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intEmployeeEarningId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Account Segment Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployeeEarningDistribution',
-    @level2type = N'COLUMN',
-    @level2name = 'intExpenseSegmentId'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Location Segment',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployeeEarningDistribution',
-    @level2type = N'COLUMN',
-    @level2name = N'intLocation'
-GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Percentage',
     @level0type = N'SCHEMA',
     @level0name = N'dbo',
@@ -62,3 +43,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblPREmployeeEarningDistribution',
     @level2type = N'COLUMN',
     @level2name = N'intConcurrencyId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Expense Account',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblPREmployeeEarningDistribution',
+    @level2type = N'COLUMN',
+    @level2name = N'intAccountId'
