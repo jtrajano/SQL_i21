@@ -58,6 +58,15 @@ BEGIN
            
 END
 
+---Update intNextDeliveryDegreeDay Criteria
+IF EXISTS (SELECT TOP 1 1 FROM tblRMDefaultFilter WHERE intReportId = @intReportId AND strFieldName = 'intNextDeliveryDegreeDay')
+BEGIN
+	UPDATE tblRMDefaultFilter
+	SET strCondition = 'Less Than Or Equal'
+	WHERE strFieldName = 'intNextDeliveryDegreeDay'
+		AND intReportId = @intReportId
+END
+
 
 GO
 print N'END Update Delivery Fill Report Default Criteria'
