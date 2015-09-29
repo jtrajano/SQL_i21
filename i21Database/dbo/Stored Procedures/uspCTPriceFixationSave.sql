@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTPriceFixationSave]
 	
 	@intPriceFixationId INT,
-	@strAction			NVARCHAR(50)
+	@strAction			NVARCHAR(50),
+	@intUserId			INT
 	
 AS
 
@@ -25,7 +26,14 @@ BEGIN TRY
 			@intPriceFixationDetailId	INT,
 			@intFutOptTransactionId		INT,
 			@ysnMultiplePriceFixation	BIT,
-			@intPricingTypeId			INT
+			@intPricingTypeId			INT,
+			@ysnPartialPricing			BIT,
+			@dblQuantity				NUMERIC(18,6),
+			@dblPFDetailQuantity		NUMERIC(18,6),
+			@intNextSequence			INT,
+			@XML						NVARCHAR(MAX),
+			@dblNewQuantity				NUMERIC(18,6),
+			@intNewContractDetailId		INT
 
 	SET		@ysnMultiplePriceFixation = 0
 
@@ -36,6 +44,8 @@ BEGIN TRY
 	FROM	tblCTPriceFixation
 	WHERE	intPriceFixationId = @intPriceFixationId
 
+	SELECT	@ysnPartialPricing = ysnPartialPricing FROM tblCTCompanyPreference
+
 	IF ISNULL(@intContractDetailId,0) > 0
 	BEGIN
 		ProcessContractDetail:
@@ -43,7 +53,8 @@ BEGIN TRY
 		SELECT	@intCommodityId				=	intCommodityId,
 				@intPriceItemUOMId			=	intPriceItemUOMId,
 				@strCommodityDescription	=	strCommodityDescription,
-				@intPricingTypeId			=	intPricingTypeId
+				@intPricingTypeId			=	intPricingTypeId,
+				@dblQuantity				=	dblDetailQuantity
 		FROM	vyuCTContractDetailView 
 		WHERE	intContractDetailId =	@intContractDetailId
 			
@@ -128,6 +139,18 @@ BEGIN TRY
 			END
 			ELSE
 				RETURN
+		END
+
+		IF @ysnPartialPricing = 1 
+		BEGIN					
+			SELECT	@dblPFDetailQuantity	=	dblQuantity FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId
+			sELECT	@intNextSequence		=	MAX(intContractSeq) + 1 FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
+
+			SELECT @dblNewQuantity = @dblQuantity - @dblPFDetailQuantity
+			IF	@dblNewQuantity > 0
+			BEGIN
+				EXEC uspCTSplitSequence @intContractDetailId,@dblNewQuantity,@intUserId,@intPriceFixationId,'Price Contract'
+			END
 		END
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblCTSpreadArbitrage WHERE intPriceFixationId = @intPriceFixationId)

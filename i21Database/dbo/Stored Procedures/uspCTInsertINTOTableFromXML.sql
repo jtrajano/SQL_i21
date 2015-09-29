@@ -1,11 +1,14 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTInsertINTOTableFromXML]
 
 	@strTblName NVARCHAR(MAX),
-	@XML		NVARCHAR(MAX)
+	@XML		NVARCHAR(MAX),
+	@intId		INT = NULL OUTPUT
 	
 AS
 
 BEGIN TRY
+
+	SET NOCOUNT ON
 
 	DECLARE @strColumns		NVARCHAR(MAX),
 			@strXMLColumns	NVARCHAR(MAX),
@@ -59,9 +62,9 @@ BEGIN TRY
 	SET @strSQL  = ''
 	SET @strSQL  = ' INSERT INTO ' + @strTblName + '('+@strColumns+') '
 	SET @strSQL += ' SELECT ' + @strColumns + ' FROM OPENXML(@idoc, '''+@strTblName+'s/'+@strTblName+''',2) WITH('+@strXMLColumns+')'
-	SET @strSQL += ' SELECT CAST(SCOPE_IDENTITY() AS INT)'
+	SET @strSQL += ' SELECT @intId = CAST(SCOPE_IDENTITY() AS INT)'
 	
-	EXEC sp_executesql @strSQL,N'@idoc INT',@idoc = @idoc
+	EXEC sp_executesql @strSQL,N'@idoc INT,@intId INT OUTPUT',@idoc = @idoc,@intId = @intId OUTPUT
 
 END TRY
 
