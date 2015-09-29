@@ -3,7 +3,7 @@
 	@intEntityCustomerId	INT = NULL,
 	@strTransactionType     NVARCHAR(50) = NULL,
 	@strType                NVARCHAR(50) = NULL,
-	@strDefaultComment		NVARCHAR(250) = NULL OUTPUT
+	@strDefaultComment		NVARCHAR(500) = NULL OUTPUT
 AS
 
 IF (@strTransactionType = '' OR @strTransactionType IS  NULL)

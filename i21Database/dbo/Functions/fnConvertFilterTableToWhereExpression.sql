@@ -40,33 +40,39 @@ BEGIN
 		
 		select @Result += @FieldName + ' '
 		select @Result += 
-			CASE WHEN @Condition ='Equal To' THEN '='
-			WHEN @Condition ='Not Equal' THEN '<>'
+			CASE WHEN @Condition ='Equal To'  or
+			(@Condition = 'Custom' AND @From IS NOT NULL AND @To IS NULL) 
+			THEN '='
+			WHEN @Condition ='Not Equal To' THEN '<>'
 			WHEN @Condition in ('Starts With','Ends With') THEN 'Like'
 			WHEN @Condition in ('Like','Not Like','Between') THEN @Condition
 			WHEN @Condition ='Greater Than' THEN '>'
 			WHEN @Condition ='Greater Than Or Equal' THEN '>='
 			WHEN @Condition ='Less Than' THEN '<'
 			WHEN @Condition IN ('Less Than Or Equal','As Of') THEN '<='
-
-			WHEN @Condition like '%Date'  or
+			WHEN (@Condition = 'Custom' AND @From IS NOT NULL AND @To IS NOT NULL) or
+				 @Condition like '%Date'  or
 				 @Condition like '%Month' or
 				 @Condition like '%Period' or
 				 @Condition like '%Year' or
 				 @Condition like '%Quarter' or
+				 @Condition = 'Between' or
 				 @Condition = 'As Of' THEN 'Between'
 			END + ' '
 			
 		Select @Result +=
-			CASE WHEN @Condition IN('Equal To','Not Equal','Greater Than',
-			'Greater Than Or Equal','Less Than','Less Than Or Equal','As Of')
+ 			CASE WHEN @Condition IN('Equal To','Not Equal To','Greater Than',
+			'Greater Than Or Equal','Less Than','Less Than Or Equal','As Of') or
+			(@Condition = 'Custom' AND @From IS NOT NULL AND @To IS NULL) 
 			THEN '''' + @From + ''''
 			WHEN @Condition like '%Date'  or
 				 @Condition like '%Month' or
 				 @Condition like '%Period' or
 				 @Condition like '%Year' or
 				 @Condition like '%Quarter' or
-				 @Condition = 'As Of'
+				 @Condition = 'As Of' or
+				 @Condition = 'Between' or
+				 (@Condition = 'Custom' AND @From IS NOT NULL AND @To IS NOT NULL) 
 			THEN '''' + @From + '''' + ' AND ' + '''' + @To + ''''
 			WHEN @Condition = 'Starts With' THEN '''' + @From + '%' + ''''
 			WHEN @Condition = 'Ends With' THEN '''' + '%' + @From + ''''
@@ -81,3 +87,5 @@ BEGIN
 	RETURN 	'Where ' + @Result
 
 END
+GO
+

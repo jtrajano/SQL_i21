@@ -131,7 +131,7 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	B.intAccountId,
-		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (2, 3) AND B.dblTotal > 0  THEN B.dblTotal * (-1) 
+		[dblDebit]						=	(CASE WHEN A.intTransactionType IN (2, 3) THEN B.dblTotal * (-1) 
 												ELSE (CASE WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
 														ELSE B.dblTotal + ISNULL(Taxes.dblTotalICTax, 0) END) --IC Tax
 												END), --Bill Detail
@@ -210,6 +210,7 @@ BEGIN
 				ON B.intBillDetailId = D.intBillDetailId
 	WHERE	A.intBillId IN (SELECT intTransactionId FROM @tmpTransacions)
 	AND A.intTransactionType = 1
+	AND D.dblTax != 0
 	AND 1 = (
 		--create tax only from item receipt if it is adjusted
 		CASE WHEN B.intInventoryReceiptItemId IS NOT NULL AND D.ysnTaxAdjusted = 0 THEN 0 ELSE 1 END

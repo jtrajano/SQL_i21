@@ -1,6 +1,8 @@
 CREATE PROCEDURE [dbo].[uspTRProcessToInventoryTransfer]
 	 @intTransportLoadId AS INT
 	,@intUserId AS INT	
+	,@ysnRecap AS BIT
+	,@ysnPostOrUnPost AS BIT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -50,7 +52,7 @@ DECLARE @TransferEntries AS InventoryTransferStagingTable,
     SELECT      -- Header
                 [dtmTransferDate]           = TL.dtmLoadDateTime
                 ,[strTransferType]          = 'Location to Location'
-                ,[intSourceType]            = 0
+                ,[intSourceType]            = 3
                 ,[strDescription]           = (select top 1 strDescription from vyuICGetItemStock IC where TR.intItemId = IC.intItemId)
                 ,[intFromLocationId]        = TR.intCompanyLocationId
                 ,[intToLocationId]          = DH.intCompanyLocationId
@@ -88,7 +90,7 @@ DECLARE @TransferEntries AS InventoryTransferStagingTable,
 			AND ((TR.strOrigin = 'Location' AND DH.strDestination = 'Location') 
 			or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' and TR.intCompanyLocationId != DH.intCompanyLocationId)
 			or (TR.strOrigin = 'Location' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId != DH.intCompanyLocationId)
-			or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId != DH.intCompanyLocationId));
+			or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId != DH.intCompanyLocationId AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0)));
 
 	--if No Records to Process exit
     SELECT @total = COUNT(*) FROM @TransferEntries;
@@ -139,9 +141,10 @@ DECLARE @TransferEntries AS InventoryTransferStagingTable,
 		SELECT	TOP 1 @intEntityId = intEntityId 
 		FROM	dbo.tblSMUserSecurity 
 		WHERE	intUserSecurityID = @intUserId
-
-		EXEC dbo.uspICPostInventoryTransfer 1, 0, @strTransactionId, @intUserId, @intEntityId;			
-
+		if @ysnRecap = 0
+		BEGIN
+	    	EXEC dbo.uspICPostInventoryTransfer 1, 0, @strTransactionId, @intUserId, @intEntityId;			
+		END
 		DELETE	FROM #tmpAddInventoryTransferResult 
 		WHERE	intInventoryTransferId = @TransferId
 	END;

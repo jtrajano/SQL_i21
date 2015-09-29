@@ -434,8 +434,8 @@ BEGIN
 				,strTransactionId = Header.strReceiptNumber  
 				,intTransactionTypeId = @INVENTORY_RECEIPT_TYPE  
 				,intLotId = DetailItemLot.intLotId 
-				,intSubLocationId = DetailItem.intSubLocationId
-				,intStorageLocationId = DetailItemLot.intStorageLocationId				
+				,intSubLocationId = ISNULL(DetailItemLot.intSubLocationId, DetailItem.intSubLocationId) 
+				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
 				,strActualCostId = Header.strActualCostId
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICItemLocation ItemLocation
 					ON Header.intLocationId = ItemLocation.intLocationId
@@ -591,8 +591,8 @@ BEGIN
 				,strTransactionId = Header.strReceiptNumber  
 				,intTransactionTypeId = @INVENTORY_RECEIPT_TYPE  
 				,intLotId = DetailItemLot.intLotId 
-				,intSubLocationId = DetailItem.intSubLocationId
-				,intStorageLocationId = DetailItemLot.intStorageLocationId
+				,intSubLocationId = ISNULL(DetailItemLot.intSubLocationId, DetailItem.intSubLocationId) 
+				,intStorageLocationId = ISNULL(DetailItemLot.intStorageLocationId, DetailItem.intStorageLocationId)
 		FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICItemLocation ItemLocation
 					ON Header.intLocationId = ItemLocation.intLocationId
 				INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 

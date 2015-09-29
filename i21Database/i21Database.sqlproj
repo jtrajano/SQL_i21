@@ -2297,7 +2297,9 @@
     <Build Include="dbo\User Defined Types\InTransitTableType.sql" />
     <Build Include="dbo\Views\vyuARInvoiceTaxDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseInTransitOutBoundQty.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTUpdateMultipleScheduleQuantity.sql" />
+    <Build Include="dbo\Tables\tblARTransactionDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspSOInsertTransactionDetail.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryValuation.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseOnStorageQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInFIFOStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICReduceStockInLIFOStorage.sql" />
@@ -2313,15 +2315,8 @@
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLIFOStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseStockInLotStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseConsignedPurchaseQty.sql" />
-    <Build Include="dbo\Functions\fnGetNumericValueFromString.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLGetAccountDetailReport.sql" />
-    <Build Include="dbo\Functions\fnConvertFilterTableToWhereExpression.sql" />
-    <Build Include="dbo\User Defined Types\FilterTableType.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseConsignedSaleQty.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertTransactionDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspSOInsertTransactionDetail.sql" />
-    <Build Include="dbo\Tables\tblARTransactionDetail.sql" />
-    <Build Include="dbo\Views\vyuICGetInventoryValuation.sql" />
     <Build Include="dbo\Tables\tblICInventoryFIFOCostAdjustmentLog.sql" />
     <Build Include="dbo\Tables\tblICInventoryFIFORevalueOutStock.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnAverageCosting.sql" />
@@ -2331,6 +2326,32 @@
     <None Include="Scripts\Post-Deployment\IC\15_InventoryCostAdjustmentTypes.sql" />
     <Build Include="dbo\Functions\fnCalculateAverageCostAfterCostAdj.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustment.sql" />
+    <Build Include="dbo\Functions\fnICGetRunningBalance.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptItemTax.sql" />
+    <Build Include="dbo\Tables\tblICTransactionDetailLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLogTransactionDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInsertPostResult.sql" />
+    <Build Include="dbo\Stored Procedures\uspARAddMiscItemToInvoice.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeEarningDistribution.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryReceiptAfterSave.sql" />
+    <Build Include="dbo\Tables\tblARImportFile.sql" />
+    <Build Include="dbo\Tables\tblARImportLog.sql" />
+    <Build Include="dbo\Tables\tblARImportLogDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportInvoiceCSV.sql" />
+    <Build Include="dbo\Functions\fnGetTaxGroupTaxCodesForCustomer.sql" />
+    <Build Include="dbo\Functions\fnGetTaxGroupTaxCodes.sql" />
+    <Build Include="dbo\Functions\fnGetTaxMasterIdForCustomer.sql" />
+    <Build Include="dbo\Functions\fnGetTaxGroupForLocation.sql" />
+    <Build Include="dbo\Functions\fnGetItemTaxComputationForCustomer.sql" />
+    <Build Include="dbo\Functions\fnGetItemTaxComputationForVendor.sql" />
+    <Build Include="dbo\Functions\fnGetItemTotalTaxForVendor.sql" />
+    <Build Include="dbo\Functions\fnGetItemTotalTaxForCustomer.sql" />
+    <Build Include="dbo\Tables\tblTRBulkPlantFreight.sql" />
+    <Build Include="dbo\Functions\fnTRGetRackPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetAccountDetailReport.sql" />
+    <Build Include="dbo\User Defined Types\FilterTableType.sql" />
+    <Build Include="dbo\Functions\fnConvertFilterTableToWhereExpression.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentInfo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2393,6 +2414,7 @@
     <Build Include="dbo\Stored Procedures\uspCMCheckPrint_GetCheckOverflow.sql" />
     <None Include="Scripts\Post-Deployment\ST\1_FileFieldMapping_PricebookSale.sql" />
     <None Include="Scripts\Post-Deployment\IC\13_MoveCommodityAttributes.sql" />
+    <None Include="Scripts\Post-Deployment\PR\DataFixes\AddDefaultEmployeeEarningDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

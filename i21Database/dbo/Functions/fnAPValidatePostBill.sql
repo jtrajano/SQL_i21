@@ -21,6 +21,18 @@ BEGIN
 
 	IF @post = 1
 	BEGIN
+
+		--Missing vendor order number
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'Unable to post. Vendor order number is missing.',
+			'Bill',
+			A.strBillId,
+			A.intBillId
+		FROM tblAPBill A 
+		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) AND 
+		ISNULL(A.strVendorOrderNumber,'') = ''
+
 		--Fiscal Year
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
@@ -174,6 +186,22 @@ BEGIN
 	END
 	ELSE
 	BEGIN
+
+		--BILL WAS POSTED FROM ORIGIN
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'Modification not allowed. Transaction is from Origin System.',
+			'Bill',
+			A.strBillId,
+			A.intBillId
+		FROM tblAPBill A 
+		OUTER APPLY (
+			SELECT intGLDetailId FROM tblGLDetail B
+			WHERE B.strTransactionId = A.strBillId AND A.intBillId = B.intTransactionId AND B.strModuleName = 'Accounts Payable'
+		) GLEntries
+		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) 
+		AND GLEntries.intGLDetailId IS NULL
+
 		--ALREADY HAVE PAYMENTS
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT

@@ -101,7 +101,7 @@ AS
 			FROM	tblICItemUOM			IU	LEFT 
 			JOIN	tblICUnitMeasure		UM	ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId 
 			WHERE	ysnStockUnit = 1)		SU	ON	SU.intStockUOM				=	IU.intItemUOMId				LEFT
-	JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	=	CASE WHEN CH.strINCOLocationType = 'Warehouse' THEN CH.intINCOLocationTypeId ELSE 0 END		LEFT
+	JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	= IL.intSubLocationId 	LEFT
 	JOIN	tblTRSupplyPoint				SP	ON	SP.intEntityVendorId		=	IX.intVendorId	AND SP.intEntityLocationId = IX.intVendorLocationId
 	/*
 	JOIN	tblICItemPricing			IP	ON	IP.intItemId				=	IM.intItemId				AND

@@ -11,7 +11,7 @@ SELECT DISTINCT
 	, dblAmount	   = ISNULL(dblInvoiceTotal, 0) * -1
 	, dblUsed	   = ISNULL(dblPayment, 0) * -1
 	, dblRemaining = ISNULL(dblAmountDue, 0) * -1
-	, strContact = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry)
+	, strContact = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL)
 FROM tblARInvoice I
 	INNER JOIN (vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1) 
 		ON I.intEntityCustomerId = C.intEntityCustomerId

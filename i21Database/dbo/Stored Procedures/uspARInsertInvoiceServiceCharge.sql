@@ -9,7 +9,7 @@ AS
 	DECLARE @dateNow		    DATE = CAST(GETDATE() AS DATE),			
 			@dblInvoiceTotal    NUMERIC(18,6) = 0,
 			@NewInvoiceId		INT,
-			@newComment         NVARCHAR(MAX) = NULL
+			@newComment         NVARCHAR(500) = NULL
 	
 	EXEC [dbo].[uspARGetDefaultComment] @intCompanyLocationId, @intEntityCustomerId, 'Invoice', 'Service Charge', @newComment OUT
 

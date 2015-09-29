@@ -4,15 +4,23 @@
 	,@CompanyLocationId				INT
 	,@EntityId						INT
 	,@NewInvoiceId					INT				= NULL			OUTPUT 
-	,@ErrorMessage					NVARCHAR(50)	= NULL			OUTPUT
+	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT	
+	,@CurrencyId					INT				= NULL
+	,@TermId						INT				= NULL
+	,@EntitySalespersonId			INT				= NULL
+	,@DueDate						DATETIME		= NULL
 	,@ShipDate						DATETIME		= NULL
+	,@PostDate						DATETIME		= NULL
 	,@TransactionType				NVARCHAR(50)	= 'Invoice'
 	,@Type							NVARCHAR(200)	= 'Standard'
 	,@Comment						NVARCHAR(500)	= ''
+	,@InvoiceOriginId				NVARCHAR(16)	= NULL
+	,@PONumber						NVARCHAR(50)	= ''
 	,@DistributionHeaderId			INT				= NULL
 	,@PaymentMethodId				INT				= 0
 	,@FreightTermId					INT				= NULL
 	,@DeliverPickUp					NVARCHAR(100)	= NULL
+	,@DiscountAmount				NUMERIC(18,6)   = 0.000000
 	,@ItemId						INT				= NULL
 	,@ItemUOMId						INT				= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
@@ -24,6 +32,7 @@
 	,@ItemNewMeterReading			NUMERIC(18,6)	= 0.000000
 	,@ItemPreviousMeterReading		NUMERIC(18,6)	= 0.000000
 	,@ItemConversionFactor			NUMERIC(18,8)	= 0.00000000
+	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemPerformerId				INT				= NULL
 	,@ItemLeaseBilling				BIT				= 0
 	,@TaxMasterId					INT				= NULL
@@ -52,12 +61,12 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @ZeroDecimal NUMERIC(18, 6)
 		,@DateOnly DATETIME
-		,@Currency INT
+		,@DefaultCurrency INT
 		,@ARAccountId INT
 		
 
 SET @ZeroDecimal = 0.000000	
-SET @Currency = ISNULL((SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0),0)
+SET @DefaultCurrency = ISNULL((SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0),0)
 SET @ARAccountId = ISNULL((SELECT TOP 1 intARAccountId FROM tblARCompanyPreference WHERE intARAccountId IS NOT NULL AND intARAccountId <> 0),0)
 
 IF @DeliverPickUp IS NULL OR LTRIM(RTRIM(@DeliverPickUp)) = ''
@@ -77,11 +86,23 @@ IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @Entity
 	BEGIN
 		SET @ErrorMessage = 'The customer Id provided does not exists!'
 		RETURN 0;
+	END
+
+IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @EntityCustomerId AND ysnActive = 1)
+	BEGIN
+		SET @ErrorMessage = 'The customer provided is not active!'
+		RETURN 0;
 	END	
 	
 IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId)
 	BEGIN
 		SET @ErrorMessage = 'The company location Id provided does not exists!'
+		RETURN 0;
+	END	
+
+IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId AND ysnLocationActive = 1)
+	BEGIN
+		SET @ErrorMessage = 'The company location provided is not active!'
 		RETURN 0;
 	END	
 	
@@ -107,6 +128,7 @@ BEGIN TRY
 		,[intEntitySalespersonId]
 		,[dtmShipDate]
 		,[intShipViaId]
+		,[strInvoiceOriginId] 
 		,[strPONumber]
 		,[intTermId]
 		,[dblInvoiceSubtotal]
@@ -118,7 +140,7 @@ BEGIN TRY
 		,[dblPayment]
 		,[strTransactionType]
 		,[strType]
-		,[intPaymentMethodId]
+		,[intPaymentMethodId]		
 		,[strComments]
 		,[intAccountId]
 		,[dtmPostDate]
@@ -150,19 +172,20 @@ BEGIN TRY
 	SELECT			
 		 [intEntityCustomerId]			= C.[intEntityCustomerId]
 		,[dtmDate]						= CAST(@InvoiceDate AS DATE)
-		,[dtmDueDate]					= CAST(dbo.fnGetDueDateBasedOnTerm(@InvoiceDate, ISNULL(EL.[intTermsId],0)) AS DATE) 
-		,[intCurrencyId]				= ISNULL(C.[intCurrencyId], @Currency)
+		,[dtmDueDate]					= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(@InvoiceDate, ISNULL(ISNULL(@TermId, EL.[intTermsId]),0)) AS DATE)))
+		,[intCurrencyId]				= ISNULL(@CurrencyId, ISNULL(C.[intCurrencyId], @DefaultCurrency))
 		,[intCompanyLocationId]			= @CompanyLocationId
-		,[intEntitySalespersonId]		= C.[intSalespersonId]
+		,[intEntitySalespersonId]		= ISNULL(@EntitySalespersonId, C.[intSalespersonId])
 		,[dtmShipDate]					= @ShipDate
 		,[intShipViaId]					= EL.[intShipViaId]
-		,[strPONumber]					= NULL
-		,[intTermId]					= EL.[intTermsId]
+		,[strInvoiceOriginId]			= @InvoiceOriginId
+		,[strPONumber]					= @PONumber
+		,[intTermId]					= ISNULL(@TermId, EL.[intTermsId])
 		,[dblInvoiceSubtotal]			= @ZeroDecimal
 		,[dblShipping]					= @ZeroDecimal
 		,[dblTax]						= @ZeroDecimal
 		,[dblInvoiceTotal]				= @ZeroDecimal
-		,[dblDiscount]					= @ZeroDecimal
+		,[dblDiscount]					= @DiscountAmount
 		,[dblAmountDue]					= @ZeroDecimal
 		,[dblPayment]					= @ZeroDecimal
 		,[strTransactionType]			= @TransactionType
@@ -170,8 +193,8 @@ BEGIN TRY
 		,[intPaymentMethodId]			= @PaymentMethodId
 		,[strComments]					= @Comment
 		,[intAccountId]					= @ARAccountId
-		,[dtmPostDate]					= NULL
-		,[ysnPosted]					= 0
+		,[dtmPostDate]					= @PostDate
+		,[ysnPosted]					= (CASE WHEN @PostDate IS NULL THEN 0 ELSE 1 END)
 		,[ysnPaid]						= 0
 		,[ysnTemplate]					= 0
 		,[ysnForgiven]					= 0
@@ -234,10 +257,10 @@ END CATCH
 
 
 
-IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @EntityCustomerId AND [ysnPORequired] = 1)
+IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @EntityCustomerId AND [ysnPORequired] = 1 AND LEN(LTRIM(RTRIM(ISNULL(@PONumber,'')))) <= 0)
 	BEGIN
 		DECLARE  @ShipToId	INT
-				,@PONumber	NVARCHAR(200)
+				,@NewPONumber	NVARCHAR(200)
 		SET @ShipToId = (SELECT [intShipToLocationId] FROM tblARInvoice WHERE intInvoiceId = @NewId)
 		
 		BEGIN TRY
@@ -245,12 +268,12 @@ IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @EntityCu
 			 @ShipToId  
 			,@CompanyLocationId
 			,@InvoiceDate
-			,@PONumber OUT
+			,@NewPONumber OUT
 			
 		UPDATE
 			tblARInvoice
 		SET
-			[strPONumber] = @PONumber
+			[strPONumber] = @NewPONumber
 		WHERE
 			[intInvoiceId] = @NewId
 			
@@ -310,6 +333,33 @@ IF (@ItemId IS NOT NULL OR @ItemId <> 0)
 			SET @ErrorMessage = ERROR_MESSAGE();
 			RETURN 0;
 		END CATCH
+	END
+ELSE IF(LEN(RTRIM(LTRIM(@ItemDescription))) > 0)
+	BEGIN
+		BEGIN TRY
+		EXEC [dbo].[uspARAddMiscItemToInvoice]
+			 @InvoiceId						= @NewId	
+			,@NewInvoiceDetailId			= @NewDetailId		OUTPUT 
+			,@ErrorMessage					= @AddDetailError	OUTPUT
+			,@ItemQtyShipped				= @ItemQtyShipped
+			,@ItemPrice						= @ItemPrice
+			,@ItemDescription				= @ItemDescription
+			,@TaxMasterId					= @TaxMasterId
+			,@ItemTaxGroupId				= @ItemTaxGroupId
+			,@ItemDiscount					= @ItemDiscount
+			
+			IF LEN(ISNULL(@AddDetailError,'')) > 0
+				BEGIN
+					ROLLBACK TRANSACTION
+					SET @ErrorMessage = @AddDetailError;
+					RETURN 0;
+				END
+		END TRY
+		BEGIN CATCH
+			ROLLBACK TRANSACTION
+			SET @ErrorMessage = ERROR_MESSAGE();
+			RETURN 0;
+		END CATCH	
 	END
 
 

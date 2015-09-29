@@ -1,6 +1,8 @@
 CREATE PROCEDURE [dbo].[uspTRProcessToInventoryReceipt]
 	 @intTransportLoadId AS INT
 	,@intUserId AS INT	
+	,@ysnRecap AS BIT
+	,@ysnPostOrUnPost AS BIT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -123,7 +125,8 @@ BEGIN TRY
 			LEFT JOIN tblTRSupplyPoint SP 
 				ON SP.intSupplyPointId = TR.intSupplyPointId
 	WHERE	TL.intTransportLoadId = @intTransportLoadId 
-			AND TR.strOrigin = 'Terminal';
+			AND TR.strOrigin = 'Terminal'
+			AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0);
 
    SELECT TOP 1 @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
    SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
@@ -314,9 +317,10 @@ BEGIN TRY
 		SELECT	TOP 1 @intEntityId = intEntityId 
 		FROM	dbo.tblSMUserSecurity 
 		WHERE	intUserSecurityID = @intUserId
-
-		EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;			
-		
+		if @ysnRecap = 0
+		BEGIN
+		  EXEC dbo.uspICPostInventoryReceipt 1, 0, @strTransactionId, @intUserId, @intEntityId;			
+		END
 		--EXEC dbo.uspAPCreateBillFromIR @InventoryReceiptId, @intUserId;
 
 		DELETE	FROM #tmpAddItemReceiptResult 

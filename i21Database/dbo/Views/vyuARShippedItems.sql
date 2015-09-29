@@ -6,11 +6,11 @@ SELECT
 	,E.[strName]						AS [strCustomerName]
 	,SO.[intSalesOrderId]
 	,SO.[strSalesOrderNumber]
-	,SO.[dtmDate]						AS [dtmProcessDate]
+	,SHP.[dtmShipDate]					AS [dtmProcessDate]
 	,SHP.[intInventoryShipmentItemId]
 	,SHP.[strShipmentNumber] 
 	,SOD.[intSalesOrderDetailId]
-	,SO.[intCompanyLocationId]
+	,SHP.[intShipFromLocationId]		AS [intCompanyLocationId] 
 	,CL.[strLocationName] 
 	,SO.[intShipToLocationId]
 	,SO.[intFreightTermId]
@@ -89,6 +89,8 @@ CROSS APPLY
 		,ISI.[intSourceId]
 		,dbo.fnCalculateQtyBetweenUOM(ISI.[intItemUOMId], SOD.[intItemUOMId], SUM(ISNULL(ISI.[dblQuantity],0))) dblSOShipped
 		,SUM(ISNULL(ISI.dblQuantity,0)) dblShipped
+		,ISH.[intShipFromLocationId]
+		,ISH.[dtmShipDate] 
 	FROM
 		tblICInventoryShipmentItem ISI
 	INNER JOIN
@@ -115,6 +117,8 @@ CROSS APPLY
 		,ISI.[dblUnitPrice]
 		,U.[strUnitMeasure]
 		,ISI.[intSourceId]
+		,ISH.[intShipFromLocationId]
+		,ISH.[dtmShipDate] 
 	--HAVING
 	--	SUM(ISNULL(ISI.[dblQuantity],0)) != ISNULL(SOD.[dblQtyOrdered],0)
 	) SHP

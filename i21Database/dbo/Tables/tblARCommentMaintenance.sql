@@ -3,7 +3,7 @@
 	[intCommentId]			INT NOT NULL IDENTITY, 
     [strCommentCode]		NVARCHAR(10)  COLLATE Latin1_General_CI_AS NULL, 
     [strCommentTitle]		NVARCHAR(50)  COLLATE Latin1_General_CI_AS NOT NULL, 
-    [strCommentDesc]		NVARCHAR(250) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strCommentDesc]		NVARCHAR(500) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strTransactionType]	NVARCHAR(25)  COLLATE Latin1_General_CI_AS NULL,
 	[strType]			    NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [intEntityCustomerId]	INT NULL, 

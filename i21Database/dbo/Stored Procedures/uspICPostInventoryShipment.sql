@@ -259,8 +259,8 @@ BEGIN
 				,strTransactionId           = Header.strShipmentNumber
 				,intTransactionTypeId       = @INVENTORY_SHIPMENT_TYPE
 				,intLotId                   = Lot.intLotId
-				,intSubLocationId           = Lot.intSubLocationId
-				,intStorageLocationId       = Lot.intStorageLocationId
+				,intSubLocationId           = ISNULL(Lot.intSubLocationId, DetailItem.intSubLocationId)
+				,intStorageLocationId       = ISNULL(Lot.intStorageLocationId, DetailItem.intStorageLocationId) 
 		FROM    tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem DetailItem 
 					ON Header.intInventoryShipmentId = DetailItem.intInventoryShipmentId    
 				INNER JOIN tblICItemUOM ItemUOM 
@@ -375,8 +375,8 @@ BEGIN
 				,strTransactionId           = Header.strShipmentNumber
 				,intTransactionTypeId       = @INVENTORY_SHIPMENT_TYPE
 				,intLotId                   = Lot.intLotId
-				,intSubLocationId           = Lot.intSubLocationId
-				,intStorageLocationId       = Lot.intStorageLocationId
+				,intSubLocationId           = ISNULL(Lot.intSubLocationId, DetailItem.intSubLocationId)
+				,intStorageLocationId       = ISNULL(Lot.intStorageLocationId, DetailItem.intStorageLocationId) 
 		FROM    tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem DetailItem 
 					ON Header.intInventoryShipmentId = DetailItem.intInventoryShipmentId    
 				INNER JOIN tblICItemUOM ItemUOM 
