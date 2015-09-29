@@ -722,3 +722,25 @@ BEGIN
 	WHERE intAttributeId = 34
 END
 Go
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 35
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 35
+        ,'Pick List Preference'
+        ,5
+        ,2
+        ,0
+        ,'select CONVERT(VARCHAR,intPickListPreferenceId) AS ValueMember,strName AS DisplayMember from tblMFPickListPreference'
+END
+GO

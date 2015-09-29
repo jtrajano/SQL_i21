@@ -36,7 +36,7 @@ BEGIN
             --(Select intAccountGroupId from dbo.tblGLAccountGroup Where strAccountGroup = 'Cash Accounts')
             --)
             
-            Select @intBankAccountId = strValue From dbo.tblSMPreferences Where strPreference = 'nrBankAccount'
+            Select @intBankAccountId = intBankAccountId From dbo.tblNRCompanyPreference
                         
             
             --Get currency Id

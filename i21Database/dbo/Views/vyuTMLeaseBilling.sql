@@ -46,6 +46,8 @@ SELECT
 	,intCompanyLocation = D.intLocationId
 	,intTaxGroupMasterId = D.intTaxStateID 
 	,intItemId = G.intItemId
+	,D.intSiteID
+	,E.intCustomerID
 FROM tblTMSiteDevice A
 INNER JOIN tblTMDevice B
 	ON A.intDeviceId = B.intDeviceId
@@ -74,4 +76,16 @@ INNER JOIN tblARCustomer O
 WHERE O.ysnActive = 1
 	AND C.strLeaseStatus <> 'Inactive'
 	AND B.strOwnership <> 'Customer Owned'
+	AND (CASE WHEN C.strBillingType = 'Gallons' AND ISNULL((SELECT TOP 1 ysnEnableLeaseBillingAboveMinUse FROM tblTMPreferenceCompany),0) = 1 
+		THEN 
+			(CASE WHEN (SELECT COUNT(1) FROM tblTMLeaseMinimumUse Z WHERE D.dblTotalCapacity <= Z.dblSiteCapacity AND D.dblYTDGalsThisSeason > Z.dblMinimumUsage) > 0
+				THEN
+					0.0
+				ELSE
+					ISNULL(G.dblAmount,0.0)
+				END)
+		ELSE
+			ISNULL(G.dblAmount,0.0)
+		END) > 0
+
 GO

@@ -24,6 +24,7 @@ AS
 			CD.dtmFXValidFrom,					CD.dtmFXValidTo,				CD.strFXRemarks,
 			CD.dblAssumedFX,					CD.strFixationBy,				CD.intItemUOMId,
 			CD.intIndexId,						CD.dblAdjustment,				CD.intAdjItemUOMId,		
+			CD.intDiscountScheduleCodeId,		CD.dblOriginalBasis,
 
 			IM.strItemNo,						FT.strFreightTerm,				IM.strDescription				AS	strItemDescription,
 			SV.strShipVia,						PT.strPricingType,				U1.strUnitMeasure				AS	strItemUOM,
@@ -32,6 +33,7 @@ AS
 			RG.strRailGrade,					CL.strLocationName,				FR.strOrigin+' - '+FR.strDest	AS	strOriginDest,
 			IX.strIndexType,					
 			ISNULL(CD.dblBalance,0) -	ISNULL(CD.dblScheduleQty,0) AS dblAvailableQty,
+
 			--Required by other modules
 
 			SL.intStorageLocationId,			IM.strLotTracking,				SL.strName						AS	strStorageLocationName,
@@ -102,7 +104,7 @@ AS
 			FROM	tblICItemUOM			IU	LEFT 
 			JOIN	tblICUnitMeasure		UM	ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId 
 			WHERE	ysnStockUnit = 1)		SU	ON	SU.intStockUOM				=	IU.intItemUOMId				LEFT
-	JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	=	CASE WHEN CH.strINCOLocationType = 'Warehouse' THEN CH.intINCOLocationTypeId ELSE 0 END		LEFT
+	JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	= IL.intSubLocationId 	LEFT
 	JOIN	tblTRSupplyPoint				SP	ON	SP.intEntityVendorId		=	IX.intVendorId	AND SP.intEntityLocationId = IX.intVendorLocationId
 	/*
 	JOIN	tblICItemPricing			IP	ON	IP.intItemId				=	IM.intItemId				AND

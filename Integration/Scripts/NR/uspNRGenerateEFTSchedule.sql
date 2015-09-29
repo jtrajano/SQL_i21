@@ -38,7 +38,7 @@ BEGIN
 
 			DECLARE @PriorDaysNoteGenerated Int
 
-			SELECT @PriorDaysNoteGenerated = strValue FROM dbo.tblSMPreferences WHERE strPreference = ''NRNumberOfDaysPriorNoteBeGenerated''
+			SELECT @PriorDaysNoteGenerated = intNumberofDaysPriorNoteBeGenerated FROM dbo.tblNRCompanyPreference 
 
 			DECLARE @Cnt Int, @RowNum Int
 
@@ -203,7 +203,7 @@ BEGIN
 					
 					--EXEC dbo.uspNRCreateEFTGLJournalEntry @intNoteId, @intScheduleTransId,  @GenerateType, 0 
 					DECLARE @strCMTransactionId nvarchar(50), @intGLReceivableAccountId Int
-					SELECT @intGLReceivableAccountId = strValue FROM dbo.tblSMPreferences WHERE strPreference = ''NRGLScheduledInvoiceAccount''
+					SELECT @intGLReceivableAccountId = intScheduledInvoiceAccountId FROM dbo.tblNRCompanyPreference 
 					EXEC dbo.uspNRCreateCashEntry  @intNoteId, @intNoteTransId, @dblTransAmount, @intGLReceivableAccountId, ''A'', @strCMTransactionId OUTPUT 
 					
 					UPDATE dbo.tblNRNoteTransaction

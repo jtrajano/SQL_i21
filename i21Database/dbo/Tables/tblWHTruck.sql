@@ -1,9 +1,8 @@
 ﻿CREATE TABLE [dbo].[tblWHTruck]
 (
-		[intTruckId] INT NOT NULL PRIMARY KEY, 
+		[intTruckId] INT NOT NULL IDENTITY PRIMARY KEY, 
 		[intConcurrencyId] INT NOT NULL,
 		[strTruckNo] NVARCHAR(64) COLLATE Latin1_General_CI_AS NOT NULL, 
-		[intTruckStatusId] INT NOT NULL, 
 		[intAddressID] INT NOT NULL, 
 		[intDirectionId] INT NOT NULL, 
 		[strMasterBOLNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
@@ -25,7 +24,6 @@
 		[dtmLastModified] DATETIME NULL DEFAULT GetDate(),
 
 		CONSTRAINT [UQ_tblWHTruck_strTruckNo] UNIQUE ([strTruckNo]),
-		CONSTRAINT [FK_tblWHTruck_tblWHTruckStatus_intTruckStatusId] FOREIGN KEY ([intTruckStatusId]) REFERENCES [tblWHTruckStatus]([intTruckStatusId]), 
 		CONSTRAINT [FK_tblWHTruck_tblWHOrderDirection_intOrderDirectionId] FOREIGN KEY ([intDirectionId]) REFERENCES [tblWHOrderDirection]([intOrderDirectionId]),
 		CONSTRAINT [FK_tblWHTruck_tblICStorageLocation_intDockDoorLocationId] FOREIGN KEY ([intDockDoorLocationId]) REFERENCES [tblICStorageLocation]([intStorageLocationId]),
 

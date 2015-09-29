@@ -42,7 +42,7 @@ BEGIN TRY
 	
 	--Declare @Fee numeric(18,6)
 	Declare @Fee Float
-	SELECT @Fee = strValue FROM dbo.tblSMPreferences WHERE RTRIM(strPreference) = 'NRFee'
+	SELECT @Fee = dblFee FROM dbo.tblNRCompanyPreference 
 	
 	-- Fee transaction one time entry when note is created
 	INSERT into dbo.tblNRNoteTransaction

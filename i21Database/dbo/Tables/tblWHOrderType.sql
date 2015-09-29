@@ -6,6 +6,7 @@
 	[strOrderType] NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
 	[ysnDefault] BIT NULL,
 	[ysnLocked] BIT NULL,
+	[intOrderDirectionRef] INT,
 	[intLastUpdateId] INT NOT NULL,
 	[dtmLastUpdateOn] DATETIME NOT NULL,
 

@@ -3,6 +3,7 @@ WITH SCHEMABINDING
 	AS 
 
 SELECT	DISTINCT
+		APB.intBillId AS intTransactionId, 
 		APB.strBillId AS strTransactionId, 
 		CASE  WHEN APB.intTransactionType = 1	THEN 'Bill' 
 			  WHEN APB.intTransactionType = 2	THEN 'Vendor Prepayment' 
@@ -10,8 +11,12 @@ SELECT	DISTINCT
 			  WHEN APB.intTransactionType = 6	THEN 'Bill Template' 
 			  ELSE 'Not Bill Type'
 		END AS strTransactionType,
+		APB.intEntityId,
+		US.strUserName,
+		ISNULL(APB.strReference, '') AS strDescription,
 		APB.dtmDate
 FROM dbo.tblAPBill APB
+INNER JOIN dbo.tblSMUserSecurity US ON APB.intEntityId = US.intEntityId
 WHERE 
 	ISNULL(ysnPosted, 0) = 0 AND 
 	APB.intTransactionType != 6 AND							   --Will not show BillTemplate
@@ -21,10 +26,15 @@ WHERE
 UNION 
 
 SELECT DISTINCT 
-	  APP.strPaymentRecordNum AS strTransactionId, 
-	  'Payment' AS strTransactionType,
-	 APP.dtmDateCreated AS dtmDate
+		APP.intPaymentId AS intTransactionId,
+		APP.strPaymentRecordNum AS strTransactionId, 
+		'Payment' AS strTransactionType,
+		APP.intEntityId,
+		US.strUserName,
+		ISNULL(APP.strNotes, '') AS strDescription,
+		APP.dtmDateCreated AS dtmDate
 FROM dbo.tblAPPayment APP
 INNER JOIN dbo.tblAPPaymentDetail APD ON APP.intPaymentId = APD.intPaymentId
 INNER JOIN dbo.tblSMPaymentMethod SMP ON APP.intPaymentMethodId = SMP.intPaymentMethodID
+INNER JOIN dbo.tblSMUserSecurity US ON US.intEntityId = APP.intEntityId
 WHERE APP.ysnPosted = 0

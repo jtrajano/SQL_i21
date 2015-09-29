@@ -15,6 +15,7 @@
 	[ysnAAPrice] BIT,
 	[ysnSettlementPrice] BIT,
 	[ysnToBeAgreed] BIT,
+	[dblSettlementPrice] NUMERIC(18,6),
 	[dblAgreedAmount] NUMERIC(8,4),
 	[intAgreedItemUOMId] INT,
 	[dblPolPct] NUMERIC(5,2),

@@ -35,7 +35,7 @@ SELECT MC.intManufacturingCellId
 	,SH.strShiftName
 	,0 AS OrderLineItemId
 	,CONVERT(BIT,0) AS ysnAlternateLine
-	,GetDate() AS dtmbyWhichDate
+	,0 AS intByWhichDate
 	,'' AS strCustOrderNo
 	,'' AS strChangeover
 	,0 AS intLeadTime

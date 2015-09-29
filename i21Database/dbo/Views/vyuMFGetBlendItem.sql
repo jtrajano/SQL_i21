@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuMFGetBlendItem
 AS
-SELECT strItemNo
+SELECT strItemNo as strWIPItemNo
 	,strDescription
 FROM dbo.tblICItem
 WHERE strType = 'Blend'

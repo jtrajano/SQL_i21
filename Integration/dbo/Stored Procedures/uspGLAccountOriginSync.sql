@@ -122,6 +122,13 @@ BEGIN
 			END
 					
 			DELETE FROM #TempUpdateCrossReference WHERE inti21Id = @Id_update
+
+			UPDATE A
+				SET A.glact_desc = B.glact_desc
+			 FROM glactmst A
+				INNER JOIN ##glactmstbackup B ON A.glact_acct1_8 = B.glact_acct1_8
+				WHERE A.glact_acct9_16 = B.glact_acct9_16
+
 		END
 	')
 END 
