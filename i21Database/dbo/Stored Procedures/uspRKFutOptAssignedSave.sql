@@ -17,6 +17,14 @@ BEGIN
 SELECT @intContractHeaderId=intContractHeaderId FROM tblCTContractDetail where intContractDetailId=@intContractDetailId
 END
 
+declare @BalanceLot int
+SELECT @BalanceLot= isnull(dblAvailableLot,0)  FROM
+(SELECT cd.intContractDetailId,
+		isnull(SUM(cd.dblNoOfLots),0) as dblAvailableLot	 
+FROM vyuCTContractDetailView cd
+WHERE ysnAllowedToShow=1 AND cd.intFutureMarketId IS NOT NULL AND cd.intFutureMonthId IS NOT NULL AND cd.intContractDetailId=@intContractDetailId
+GROUP BY strContractNumber,cd.intContractDetailId,intContractSeq,cd.intFutureMarketId,cd.intFutureMonthId,cd.strContractType)t  
+
 BEGIN TRANSACTION     
 -- Header Save
 	INSERT INTO tblRKAssignFuturesToContractSummaryHeader (intConcurrencyId) VALUES (1)        
@@ -49,7 +57,7 @@ INSERT INTO tblRKAssignFuturesToContractSummary
 	@intContractDetailId,
 	@dtmMatchDate,
 	@intFutOptTransactionId,
-	@intAssignedLots,
+	@BalanceLot,
 	0,
 	0,
 	@intFutOptTransactionId  
