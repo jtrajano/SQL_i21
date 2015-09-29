@@ -17,7 +17,7 @@ DECLARE @ZeroDecimal NUMERIC(18, 6)
 SET @ZeroDecimal = 0.000000
 SET @DateNow = CAST(GETDATE() AS DATE)
 --For Delta
-SET @DefaultCompanyLocation = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1 AND strLocationType = 'Office' AND strLocationName LIKE 'AePEX%')
+SET @DefaultCompanyLocation = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1 AND strLocationType = 'Warehouse' AND strLocationName = 'APX Direct')
 
 IF ISNULL(@DefaultCompanyLocation,0) = 0
 	SET @DefaultCompanyLocation = (SELECT TOP 1 intCompanyLocationId FROM tblSMCompanyLocation WHERE ysnLocationActive = 1)
@@ -69,6 +69,7 @@ BEGIN
 		,@PaymentMethodId				INT				= 0
 		,@FreightTermId					INT				= NULL
 		,@DeliverPickUp					NVARCHAR(100)	= NULL
+		,@DiscountAmount				NUMERIC(18,6)   = @ZeroDecimal
 		,@ItemId						INT				= NULL
 		,@ItemUOMId						INT				= NULL
 		,@ItemQtyShipped				NUMERIC(18,6)	= @ZeroDecimal
@@ -80,6 +81,7 @@ BEGIN
 		,@ItemNewMeterReading			NUMERIC(18,6)	= @ZeroDecimal
 		,@ItemPreviousMeterReading		NUMERIC(18,6)	= @ZeroDecimal
 		,@ItemConversionFactor			NUMERIC(18,8)	= 0.00000000
+		,@ItemDiscount					NUMERIC(18,6)	= @ZeroDecimal
 		,@ItemPerformerId				INT				= NULL
 		,@ItemLeaseBilling				BIT				= 0
 		,@TaxMasterId					INT				= NULL
@@ -95,6 +97,9 @@ BEGIN
 		,@ItemSCInvoiceNumber			NVARCHAR(50)	= NULL
 		,@ItemServiceChargeAccountId	INT				= NULL
 		,@ItemTaxGroupId				INT				= NULL
+		,@ItemTaxSchedule				NVARCHAR(100)	= NULL
+		,@SalesTaxAmount				NUMERIC(18,6)	= @ZeroDecimal
+		,@Balance						NUMERIC(18,6)	= @ZeroDecimal
 		
 		
 			
@@ -123,6 +128,7 @@ BEGIN
 		,@PaymentMethodId				= 0
 		,@FreightTermId					= NULL
 		,@DeliverPickUp					= NULL
+		,@DiscountAmount				= ISNULL(D.[dblDiscount], @ZeroDecimal)
 		,@ItemId						= NULL
 		,@ItemUOMId						= NULL
 		,@ItemQtyShipped				= 1.000000
@@ -134,6 +140,10 @@ BEGIN
 		,@ItemNewMeterReading			= @ZeroDecimal
 		,@ItemPreviousMeterReading		= @ZeroDecimal
 		,@ItemConversionFactor			= 0.00000000
+		,@ItemDiscount					= (CASE WHEN ISNULL(D.[dblDiscount], @ZeroDecimal) > 0 
+											THEN (1 - ((ABS((CASE WHEN D.[dblSalesTaxAmount] <> 0 THEN D.[dblTaxableAmount] ELSE D.[dblNonTaxableAmount] END)) - ISNULL(D.[dblDiscount], @ZeroDecimal)) / ABS((CASE WHEN D.[dblSalesTaxAmount] <> 0 THEN D.[dblTaxableAmount] ELSE D.[dblNonTaxableAmount] END)))) * 100
+											ELSE @ZeroDecimal
+										END)
 		,@ItemPerformerId				= NULL
 		,@ItemLeaseBilling				= 0
 		,@TaxMasterId					= NULL
@@ -152,6 +162,9 @@ BEGIN
 											THEN (SELECT TOP 1 [intTaxGroupId] FROM tblSMTaxGroup WHERE UPPER(LTRIM(RTRIM(ISNULL(strTaxGroup,'')))) = UPPER(LTRIM(RTRIM(ISNULL(D.[strTaxSchedule],''))))) 
 											ELSE NULL 
 										END)
+		,@ItemTaxSchedule				= ISNULL(D.[strTaxSchedule],'')
+		,@SalesTaxAmount				= ISNULL(D.[dblSalesTaxAmount], @ZeroDecimal)
+		,@Balance						= ISNULL(D.[dblBalance], @ZeroDecimal)
 	FROM
 		[tblARImportLogDetail] D
 	INNER JOIN
@@ -162,13 +175,28 @@ BEGIN
 		
 	SELECT @ErrorMessage = 'Invoice:' + RTRIM(LTRIM(ISNULL(@InvoiceOriginId,''))) + ' was already imported! (' + strInvoiceNumber + ')' FROM [tblARInvoice] WHERE RTRIM(LTRIM(ISNULL([strInvoiceOriginId],''))) = RTRIM(LTRIM(ISNULL(@InvoiceOriginId,''))) AND LEN(RTRIM(LTRIM(ISNULL([strInvoiceOriginId],'')))) > 0
 
+	IF @ItemTaxSchedule <> ''
+		BEGIN			
+			IF @SalesTaxAmount = 0 OR @Balance < 0
+				SET @ErrorMessage = 'Sales Tax Amount and Balance should not be zero!'
+			ELSE IF @ItemTaxGroupId IS NULL
+				SET @ErrorMessage = 'Tax Schedule does not exists!'
+		END		
+
 	IF ISNULL(@EntityCustomerId, 0) = 0
 		SET @ErrorMessage = 'Customer Number does not exists!'
+
+	IF ISNULL(@EntitySalespersonId, 0) = 0
+		BEGIN
+			SELECT TOP 1 @EntitySalespersonId = intEntityId FROM tblEntity E 
+				INNER JOIN tblARSalesperson SP ON E.intEntityId = SP.intEntitySalespersonId
+				WHERE E.strName = 'Don Dockstader'
+		END
 
 	IF ISNULL(@TermId, 0) = 0 AND LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) < 1 AND @TransactionType IN ('Invoice', 'Credit Memo')
 		SET @ErrorMessage = 'Term is required! The Term Code provided does not exists.'
 
-	IF LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) < 1		
+	IF LEN(RTRIM(LTRIM(ISNULL(@ErrorMessage,'')))) < 1
 		BEGIN TRY		
 			EXEC [dbo].[uspARCreateCustomerInvoice]
 				 @EntityCustomerId				= @EntityCustomerId
@@ -191,6 +219,7 @@ BEGIN
 				,@PaymentMethodId				= @PaymentMethodId
 				,@FreightTermId					= @FreightTermId
 				,@DeliverPickUp					= @DeliverPickUp
+				,@DiscountAmount				= @DiscountAmount
 				,@ItemId						= @ItemId
 				,@ItemUOMId						= @ItemUOMId
 				,@ItemQtyShipped				= @ItemQtyShipped
@@ -202,6 +231,7 @@ BEGIN
 				,@ItemNewMeterReading			= @ItemNewMeterReading
 				,@ItemPreviousMeterReading		= @ItemPreviousMeterReading
 				,@ItemConversionFactor			= @ItemConversionFactor
+				,@ItemDiscount					= @ItemDiscount
 				,@ItemPerformerId				= @ItemPerformerId
 				,@ItemLeaseBilling				= @ItemLeaseBilling
 				,@TaxMasterId					= @TaxMasterId

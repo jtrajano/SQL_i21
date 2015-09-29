@@ -20,6 +20,7 @@
 	,@PaymentMethodId				INT				= 0
 	,@FreightTermId					INT				= NULL
 	,@DeliverPickUp					NVARCHAR(100)	= NULL
+	,@DiscountAmount				NUMERIC(18,6)   = 0.000000
 	,@ItemId						INT				= NULL
 	,@ItemUOMId						INT				= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
@@ -31,6 +32,7 @@
 	,@ItemNewMeterReading			NUMERIC(18,6)	= 0.000000
 	,@ItemPreviousMeterReading		NUMERIC(18,6)	= 0.000000
 	,@ItemConversionFactor			NUMERIC(18,8)	= 0.00000000
+	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemPerformerId				INT				= NULL
 	,@ItemLeaseBilling				BIT				= 0
 	,@TaxMasterId					INT				= NULL
@@ -183,7 +185,7 @@ BEGIN TRY
 		,[dblShipping]					= @ZeroDecimal
 		,[dblTax]						= @ZeroDecimal
 		,[dblInvoiceTotal]				= @ZeroDecimal
-		,[dblDiscount]					= @ZeroDecimal
+		,[dblDiscount]					= @DiscountAmount
 		,[dblAmountDue]					= @ZeroDecimal
 		,[dblPayment]					= @ZeroDecimal
 		,[strTransactionType]			= @TransactionType
@@ -344,6 +346,7 @@ ELSE IF(LEN(RTRIM(LTRIM(@ItemDescription))) > 0)
 			,@ItemDescription				= @ItemDescription
 			,@TaxMasterId					= @TaxMasterId
 			,@ItemTaxGroupId				= @ItemTaxGroupId
+			,@ItemDiscount					= @ItemDiscount
 			
 			IF LEN(ISNULL(@AddDetailError,'')) > 0
 				BEGIN
