@@ -50,7 +50,7 @@ DECLARE @TransferEntries AS InventoryTransferStagingTable,
     SELECT      -- Header
                 [dtmTransferDate]           = TL.dtmLoadDateTime
                 ,[strTransferType]          = 'Location to Location'
-                ,[intSourceType]            = 0
+                ,[intSourceType]            = 3
                 ,[strDescription]           = (select top 1 strDescription from vyuICGetItemStock IC where TR.intItemId = IC.intItemId)
                 ,[intFromLocationId]        = TR.intCompanyLocationId
                 ,[intToLocationId]          = DH.intCompanyLocationId
@@ -88,7 +88,7 @@ DECLARE @TransferEntries AS InventoryTransferStagingTable,
 			AND ((TR.strOrigin = 'Location' AND DH.strDestination = 'Location') 
 			or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Location' and TR.intCompanyLocationId != DH.intCompanyLocationId)
 			or (TR.strOrigin = 'Location' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId != DH.intCompanyLocationId)
-			or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId != DH.intCompanyLocationId));
+			or (TR.strOrigin = 'Terminal' AND DH.strDestination = 'Customer' and TR.intCompanyLocationId != DH.intCompanyLocationId AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0)));
 
 	--if No Records to Process exit
     SELECT @total = COUNT(*) FROM @TransferEntries;

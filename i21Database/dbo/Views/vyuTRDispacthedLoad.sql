@@ -10,18 +10,28 @@ LG.intEntityId as intEntityVendorId,
 LG.intCompanyLocationId as intInboundCompanyLocationId,
 LG.intContractDetailId as intInboundContractDetailId,
 LG.dblQuantity as dblInboundQuantiy,
-LG.dblCashPrice as dblInboundPrice,
+dblInboundPrice = CASE
+						WHEN LG.dblCashPrice is NOT NULL or LG.dblCashPrice != 0							        
+						   THEN LG.dblCashPrice
+						WHEN LG.dblCashPrice is NULL or LG.dblCashPrice = 0
+						   THEN [dbo].[fnTRGetRackPrice]
+                                (
+                                   LG.dtmScheduledDate 	
+	                               ,(select top 1 intSupplyPointId from dbo.tblTRSupplyPoint SP where SP.intEntityLocationId = LG.intEntityLocationId) 
+	                               ,LG.intItemId 
+                                  )  
+						END,
 LG.strCustomer as strTerminalName,
 (select strLocationName from tblEntityLocation EM where EM.intEntityLocationId = LG.intEntityLocationId) as strSupplyPoint,
 LG.strLocationName,
-LG.strItemNo as strInboundItemNo,
+IsNull(LG.strItemNo,(select strItemNo from tblICItem IC where IC.intItemId = LG.intItemId)) as strInboundItemNo,
 LG.strContractNumber as strInboundContractNumber,
 LG.intCounterPartyEntityId as intEntityCustomerId,
-LG.intCounterPartyCompanyLocationId as intOutboundCompanyLocationId, 
+IsNull(LG.intCounterPartyCompanyLocationId,LG.intCompanyLocationId) as intOutboundCompanyLocationId, 
 LG.intCounterPartyEntityLocationId as intShipToLocationId,
 (select top 1 intSalespersonId from tblARCustomer AR where AR.intEntityCustomerId = LG.intCounterPartyEntityId) as intEntitySalespersonId,
 (select strCustomerNumber from tblARCustomer AR where AR.intEntityCustomerId = LG.intCounterPartyEntityId) as strCustomerNumber,
-(select strLocationName from tblSMCompanyLocation SM where SM.intCompanyLocationId = LG.intCounterPartyCompanyLocationId) as strOutboundLocationName,
+(select strLocationName from tblSMCompanyLocation SM where SM.intCompanyLocationId = IsNull(LG.intCounterPartyCompanyLocationId,LG.intCompanyLocationId)) as strOutboundLocationName,
 (select top 1 SP.strEntityNo from tblARCustomer AR 
                                     Left Join vyuEMEntity SP on AR.intSalespersonId = SP.intEntityId
 									 where AR.intEntityCustomerId = LG.intCounterPartyEntityId) as strOutboundSalespersonId,
