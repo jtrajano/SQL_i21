@@ -142,6 +142,17 @@ BEGIN
 		SELECT * INTO  ##Tempi21APPaymentFROMBillOrigin 
 		FROM tblAPPayment WHERE intPaymentId  in (SELECT intPaymentId FROM  @createdPayment) 
 
+		--Update Record no.
+		UPDATE A set strPaymentRecordNum  =  ''PAY-'' + convert (NVARCHAR,B.intPaymentId)
+		FROM tblAPPayment A
+		INNER JOIN ##Tempi21APPaymentFROMBillOrigin B
+		on A.intPaymentId  = B.intPaymentId 
+
+		--Update the Starting Number + 1 to the last prefix id inserted.
+		UPDATE tblSMStartingNumber 
+		SET intNumber = (select top 1 intPaymentId from ##Tempi21APPaymentFROMBillOrigin order by intPaymentId DESC) + 1
+		where strPrefix =''PAY-''
+
 		--Insert PaymentDetail
 		INSERT INTO tblAPPaymentDetail 
 		(
