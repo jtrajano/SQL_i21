@@ -16,14 +16,22 @@ DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
 
 BEGIN TRY
-
-EXEC uspTRPostingValidation @intTransportLoadId
-EXEC uspTRProcessToInventoryReceipt @intTransportLoadId,@intUserId,@ysnRecap,@ysnPostOrUnPost
-EXEC uspTRProcessToInventoryTransfer @intTransportLoadId,@intUserId,@ysnRecap,@ysnPostOrUnPost
-EXEC uspTRProcessToInvoice @intTransportLoadId,@intUserId,@ysnRecap,@ysnPostOrUnPost
+if @ysnPostOrUnPost = 0 and @ysnRecap = 0
+    BEGIN
+        EXEC uspTRProcessToInvoice @intTransportLoadId,@intUserId,@ysnRecap,@ysnPostOrUnPost
+	    EXEC uspTRProcessToInventoryTransfer @intTransportLoadId,@intUserId,@ysnRecap,@ysnPostOrUnPost
+	    EXEC uspTRProcessToInventoryReceipt @intTransportLoadId,@intUserId,@ysnRecap,@ysnPostOrUnPost
+    END
+ELSE
+    BEGIN
+         EXEC uspTRPostingValidation @intTransportLoadId
+         EXEC uspTRProcessToInventoryReceipt @intTransportLoadId,@intUserId,@ysnRecap,@ysnPostOrUnPost
+         EXEC uspTRProcessToInventoryTransfer @intTransportLoadId,@intUserId,@ysnRecap,@ysnPostOrUnPost
+         EXEC uspTRProcessToInvoice @intTransportLoadId,@intUserId,@ysnRecap,@ysnPostOrUnPost
+    END
 if @ysnRecap = 0
 BEGIN
-   EXEC uspTRProcessTransportLoad @intTransportLoadId
+   EXEC uspTRProcessTransportLoad @intTransportLoadId,@ysnPostOrUnPost
 END
 
 END TRY
