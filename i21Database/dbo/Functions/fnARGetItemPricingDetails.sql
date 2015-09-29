@@ -222,7 +222,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 		,strCostToUse
 		,dblDeviation
 		,strLineNote
-		,ysnConsignable
+		--,ysnConsignable
 		,intRackVendorId
 		,intRackItemId
 		,intRackItemLocationId
@@ -241,7 +241,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 		,SP.strCostToUse
 		,SP.dblDeviation
 		,SP.strLineNote
-		,SP.ysnConsignable
+		--,SP.ysnConsignable
 		,SP.intRackVendorId
 		,SP.intRackItemId
 		,SP.intRackLocationId 

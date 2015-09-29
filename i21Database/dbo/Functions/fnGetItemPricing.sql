@@ -42,7 +42,7 @@ DECLARE @CustomerSpecialPricing TABLE(
 		,strCostToUse
 		,dblDeviation
 		,strLineNote
-		,ysnConsignable
+		--,ysnConsignable
 		,intRackVendorId
 		,intRackItemId
 		,dblCustomerPrice)
@@ -57,7 +57,7 @@ DECLARE @CustomerSpecialPricing TABLE(
 		,SP.strCostToUse
 		,SP.dblDeviation
 		,SP.strLineNote
-		,SP.ysnConsignable
+		--,SP.ysnConsignable
 		,SP.intRackVendorId
 		,SP.intRackItemId
 		,NULL
