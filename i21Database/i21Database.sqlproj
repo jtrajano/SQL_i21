@@ -2346,6 +2346,8 @@
     <Build Include="dbo\Functions\fnGetItemTaxComputationForVendor.sql" />
     <Build Include="dbo\Functions\fnGetItemTotalTaxForVendor.sql" />
     <Build Include="dbo\Functions\fnGetItemTotalTaxForCustomer.sql" />
+    <Build Include="dbo\Tables\tblTRBulkPlantFreight.sql" />
+    <Build Include="dbo\Functions\fnTRGetRackPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

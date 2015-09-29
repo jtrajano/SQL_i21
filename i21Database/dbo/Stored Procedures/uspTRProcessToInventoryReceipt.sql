@@ -125,7 +125,8 @@ BEGIN TRY
 			LEFT JOIN tblTRSupplyPoint SP 
 				ON SP.intSupplyPointId = TR.intSupplyPointId
 	WHERE	TL.intTransportLoadId = @intTransportLoadId 
-			AND TR.strOrigin = 'Terminal';
+			AND TR.strOrigin = 'Terminal'
+			AND (TR.dblUnitCost != 0 or TR.dblFreightRate != 0 or TR.dblPurSurcharge != 0);
 
    SELECT TOP 1 @intFreightItemId = intItemForFreightId FROM tblTRCompanyPreference
    SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
