@@ -2478,6 +2478,7 @@
     <Build Include="dbo\Views\vyuRKGetAssignedLots.sql" />
     <Build Include="dbo\Stored Procedures\uspRKFutOptAssignedSave.sql" />
     <Build Include="dbo\User Defined Types\ScheduleTable.sql" />
+    <Build Include="dbo\Tables\tblPATRefundRateDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
