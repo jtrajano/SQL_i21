@@ -58,7 +58,7 @@ SELECT Load.intLoadId
         ,Load.strTrailerNo2
         ,Load.strTrailerNo3
         ,Load.strComments
-		,Load.ysnDispatched
+        ,ysnDispatched = CASE WHEN Load.ysnDispatched = 1 THEN CAST(1 AS bit) ELSE CAST(0 AS Bit) END
 		,Load.dtmDispatchedDate
 		,strDispatcher = US.strUserName 
 		,CDetail.strCustomerContract
