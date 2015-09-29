@@ -55,7 +55,8 @@ BEGIN
 
 		IF OBJECT_ID(''tempdb..##TempAPCreatedPaymentFROMBills'') IS NOT NULL DROP TABLE ##TempAPCreatedPaymentFROMBills
 		--Create temp table that will be used for inserting payment.
-
+		DECLARE @createdPayment TABLE(intPaymentId INT);
+		
 		SELECT 
 		intAccountId = B.intGLAccountId
 		,intBankAccountId = B.intBankAccountId
@@ -112,7 +113,7 @@ BEGIN
 			,dtmDateDeleted
 			,dtmDateCreated
 			)
-
+		OUTPUT inserted.intPaymentId INTO @createdPayment
 		SELECT
 			intAccountId
 			,intBankAccountId
@@ -135,6 +136,11 @@ BEGIN
 			,dtmDateDeleted
 			,dtmDateCreated
 		FROM ##TempAPCreatedPaymentFROMBills 
+
+		IF OBJECT_ID(''tempdb..##Tempi21APPaymentFROMBillOrigin'') IS NOT NULL DROP TABLE ##Tempi21APPaymentFROMBillOrigin
+		--Find Payment Header without Payment detail.
+		SELECT * INTO  ##Tempi21APPaymentFROMBillOrigin 
+		FROM tblAPPayment WHERE intPaymentId  in (SELECT intPaymentId FROM  @createdPayment) 
 
 		--Insert PaymentDetail
 		INSERT INTO tblAPPaymentDetail 

@@ -566,10 +566,6 @@ BEGIN
 			FROM #tmpBillsPayment A
 				WHERE NOT EXISTS(SELECT * FROM tblSMPaymentMethod B WHERE B.strPaymentMethod = A.strPaymentMethod COLLATE Latin1_General_CS_AS)
 
-			--UPDATE PRIMARY KEY OF PAYMENT METHOD
-			UPDATE A
-			FROM tmpBillsPayment A
-	
 			DECLARE @paymentId INT, @paymentKey INT
 
 			WHILE EXISTS(SELECT 1 FROM #tmpBillsPayment)
@@ -625,7 +621,7 @@ BEGIN
 			INNER JOIN (tblAPVendor C INNER JOIN tblEntity D ON C.intEntityVendorId = D.intEntityId)
 				ON B.intEntityVendorId = C.intEntityVendorId 
 				--AND A.strPayee = D.strName
-			WHERE A.strSourceSystem = ''AP''
+			WHERE A.strSourceSystem IN (''AP'',''CW'')
 
 			IF @transCount = 0 COMMIT TRANSACTION
 		END TRY
