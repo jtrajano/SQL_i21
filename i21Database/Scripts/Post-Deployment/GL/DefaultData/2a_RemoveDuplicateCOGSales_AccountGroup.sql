@@ -12,7 +12,6 @@
 			UPDATE tblGLAccountSegment SET intAccountGroupId = @intAccountGroupId1 WHERE intAccountGroupId = @intAccountGroupId
 			UPDATE tblGLCOATemplateDetail SET intAccountGroupId = @intAccountGroupId1 WHERE intAccountGroupId = @intAccountGroupId
 			UPDATE tblGLCOAAdjustmentDetail SET intAccountGroupId = @intAccountGroupId1 WHERE intAccountGroupId = @intAccountGroupId
-			UPDATE tblGLAccountTemplateDetail SET intAccountGroupId = @intAccountGroupId1 WHERE intAccountGroupId = @intAccountGroupId
 			UPDATE tblGLAccountGroup SET intParentGroupId = (SELECT top 1 intAccountGroupId from tblGLAccountGroup WHERE strAccountGroup in ('Expense','Expenses') and intParentGroupId = 0)
 				WHERE intAccountGroupId = @intAccountGroupId1 
 			DELETE from tblGLAccountGroup where intAccountGroupId = @intAccountGroupId
@@ -38,7 +37,6 @@
 			UPDATE tblGLAccountSegment SET intAccountGroupId = @intAccountGroupId1 WHERE intAccountGroupId = @intAccountGroupId
 			UPDATE tblGLCOATemplateDetail SET intAccountGroupId = @intAccountGroupId1 WHERE intAccountGroupId = @intAccountGroupId
 			UPDATE tblGLCOAAdjustmentDetail SET intAccountGroupId = @intAccountGroupId1 WHERE intAccountGroupId = @intAccountGroupId
-			UPDATE tblGLAccountTemplateDetail SET intAccountGroupId = @intAccountGroupId1 WHERE intAccountGroupId = @intAccountGroupId
 			UPDATE tblGLAccountGroup SET intParentGroupId = (SELECT top 1 intAccountGroupId from tblGLAccountGroup WHERE strAccountGroup in ('Revenue') and intParentGroupId = 0)
 			WHERE intAccountGroupId = @intAccountGroupId1 
 			DELETE from tblGLAccountGroup WHERE intAccountGroupId = @intAccountGroupId
