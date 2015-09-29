@@ -439,6 +439,7 @@ BEGIN
 				,ysnCheckoffTax			BIT
 				,strTaxCode				NVARCHAR(50)
 				,ysnTaxExempt			BIT
+				,[strTaxGroup]			NVARCHAR(100)
 			)
 
 			-- Create the cursor
@@ -487,7 +488,8 @@ BEGIN
 					,ysnSeparateOnInvoice
 					,ysnCheckoffTax
 					,strTaxCode
-					,ysnTaxExempt				
+					,ysnTaxExempt
+					,strTaxGroup 			
 				)
 				EXEC dbo.uspSMGetItemTaxes 
 					@ItemId
