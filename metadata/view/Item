@@ -12010,71 +12010,7 @@
                                                 "width": 45
                                             },
                                             "name": "MyNumberColumn21",
-                                            "designerId": "14fa3b89-1f25-4172-9745-fd39c1321235",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldStyle": "text-align:right",
-                                                        "hideTrigger": true
-                                                    },
-                                                    "name": "MyNumberField35",
-                                                    "designerId": "da010284-f4d5-4a1d-802d-a499c5b9d43b"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "itemId": "colBundlePrice",
-                                                "text": "Price",
-                                                "width": 70
-                                            },
-                                            "name": "MyNumberColumn22",
-                                            "designerId": "cd86ffff-5409-4327-b312-50973afde677",
-                                            "cn": [
-                                                {
-                                                    "type": "Ext.form.field.Number",
-                                                    "reference": {
-                                                        "name": "editor",
-                                                        "type": "object"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "fieldStyle": "text-align:right",
-                                                        "hideTrigger": true
-                                                    },
-                                                    "name": "MyNumberField36",
-                                                    "designerId": "a056f5d3-f436-4a59-9467-da917f54ed70"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.grid.column.Number",
-                                            "reference": {
-                                                "name": "columns",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "align": "right",
-                                                "itemId": "colBundleSubtotal",
-                                                "text": "Subtotal",
-                                                "width": 70
-                                            },
-                                            "name": "MyNumberColumn23",
-                                            "designerId": "3a5b9472-9d24-466e-88ed-2411a12fa081"
+                                            "designerId": "14fa3b89-1f25-4172-9745-fd39c1321235"
                                         },
                                         {
                                             "type": "Ext.grid.View",

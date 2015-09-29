@@ -5443,31 +5443,7 @@ Ext.define('Inventory.view.Item', {
                                                         itemId: 'colBundleUnit',
                                                         width: 45,
                                                         align: 'right',
-                                                        text: 'Unit',
-                                                        editor: {
-                                                            xtype: 'numberfield',
-                                                            fieldStyle: 'text-align:right',
-                                                            hideTrigger: true
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colBundlePrice',
-                                                        width: 70,
-                                                        align: 'right',
-                                                        text: 'Price',
-                                                        editor: {
-                                                            xtype: 'numberfield',
-                                                            fieldStyle: 'text-align:right',
-                                                            hideTrigger: true
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'numbercolumn',
-                                                        itemId: 'colBundleSubtotal',
-                                                        width: 70,
-                                                        align: 'right',
-                                                        text: 'Subtotal'
+                                                        text: 'Unit'
                                                     }
                                                 ],
                                                 viewConfig: {

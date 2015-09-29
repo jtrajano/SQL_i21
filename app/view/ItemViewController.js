@@ -147,8 +147,13 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colStockUnit: 'ysnStockUnit',
-                colAllowSale: 'ysnAllowSale',
-                colAllowPurchase: 'ysnAllowPurchase',
+                colAllowSale: {
+                    dataIndex: 'ysnAllowSale'
+                },
+                colAllowPurchase: {
+                    dataIndex: 'ysnAllowPurchase',
+                    disabled: '{readOnlyBundle}'
+                },
                 colConvertToStock: 'dblConvertToStock',
                 colConvertFromStock: 'dblConvertFromStock',
                 colDetailLength: 'dblLength',
@@ -872,8 +877,7 @@ Ext.define('Inventory.view.ItemViewController', {
                         }]
                     }
                 },
-                colBundleUnit: 'dblUnit',
-                colBundlePrice: 'dblPrice'
+                colBundleUnit: 'dblUnit'
             },
 
             //---------------//
@@ -1502,13 +1506,21 @@ Ext.define('Inventory.view.ItemViewController', {
 
         var grid = combo.up('grid');
         var win = grid.up('window');
+        var currentItem = win.context.data.current;
         var plugin = grid.getPlugin('cepDetailUOM');
         var current = plugin.getActiveRecord();
         var uomConversion = win.viewModel.storeInfo.uomConversion;
 
         if (combo.column.itemId === 'colDetailUnitMeasure') {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
-            current.set('ysnAllowPurchase', true);
+
+            if (currentItem.get('strType') === 'Bundle') {
+                current.set('ysnAllowPurchase', false);
+            }
+            else {
+                current.set('ysnAllowPurchase', true);
+            }
+            
             current.set('ysnAllowSale', true);
             current.set('tblICUnitMeasure', records[0]);
 

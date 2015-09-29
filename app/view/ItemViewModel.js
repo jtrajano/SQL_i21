@@ -851,6 +851,16 @@ Ext.define('Inventory.view.ItemViewModel', {
                     break;
             };
         },
+        readOnlyBundle: function (get) {
+            switch (get('current.strType')) {
+                case 'Bundle':
+                    return true;
+                    break;
+                default:
+                    return false;
+                    break;
+            };
+        },
         checkStockTracking: function (get) {
             var isNotStockTracked = false;
 
