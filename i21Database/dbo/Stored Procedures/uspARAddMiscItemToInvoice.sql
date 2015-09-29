@@ -7,6 +7,7 @@
 	,@ItemDescription				NVARCHAR(500)	= NULL
 	,@TaxMasterId					INT				= NULL
 	,@ItemTaxGroupId				INT				= NULL
+	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 AS
 
 BEGIN
@@ -106,7 +107,7 @@ BEGIN TRY
 		,[intItemUOMId]						= NULL
 		,[dblQtyOrdered]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
 		,[dblQtyShipped]					= ISNULL(@ItemQtyShipped, @ZeroDecimal)
-		,[dblDiscount]						= @ZeroDecimal
+		,[dblDiscount]						= ISNULL(@ItemDiscount, @ZeroDecimal)
 		,[dblPrice]							= ISNULL(@ItemPrice, @ZeroDecimal)
 		,[dblTotalTax]						= @ZeroDecimal
 		,[dblTotal]							= @ZeroDecimal
