@@ -62,6 +62,7 @@
 :r .\8_AP\UpdateShipTo.sql
 :r .\8_AP\UpdateShipFrom.sql
 :r .\8_AP\FixPaymentEntityId.sql
+:r .\8_AP\UpdatePaymentMethod.sql
 --:r .\8_AP\UpdateBillToReceiptAssociation.sql
 
 --:r .\8_AP\UpdateMissingPaymentInfo.sql

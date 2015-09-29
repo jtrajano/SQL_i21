@@ -565,6 +565,10 @@ BEGIN
 				1
 			FROM #tmpBillsPayment A
 				WHERE NOT EXISTS(SELECT * FROM tblSMPaymentMethod B WHERE B.strPaymentMethod = A.strPaymentMethod COLLATE Latin1_General_CS_AS)
+
+			--UPDATE PRIMARY KEY OF PAYMENT METHOD
+			UPDATE A
+			FROM tmpBillsPayment A
 	
 			DECLARE @paymentId INT, @paymentKey INT
 
@@ -577,7 +581,7 @@ BEGIN
 					@paymentInfo = A.strCheckNo,
 					@payment = A.dblAmount,
 					@datePaid = A.dtmDate,
-					@paymentMethod = (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = A.strPaymentMethod COLLATE Latin1_General_CS_AS),
+					@paymentMethod = (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = LOWER(A.strPaymentMethod) COLLATE Latin1_General_CS_AS),
 					@billIds = A.strBills,
 					@paymentKey = A.id
 				FROM #tmpBillsPayment A
