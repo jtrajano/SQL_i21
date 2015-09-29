@@ -33,9 +33,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             btnUndo: {
                 disabled: '{current.ysnPosted}'
             },
-            btnRecap: {
-                hidden: '{checkTransportPosting}'
-            },
             btnReceive: {
                 text: '{getReceiveButtonText}',
                 hidden: '{checkTransportPosting}'
@@ -1536,8 +1533,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 strTransactionId: currentRecord.get('strReceiptNumber'),
                 ysnPosted: currentRecord.get('ysnPosted'),
                 scope: me,
-                success: function(){
+                success: function() {
                     // If data is generated, show the recap screen.
+                    var showPostButton = true;
+                    if (currentRecord.get('intSourceType') === 3){
+                        showPostButton = false;
+                    }
+
                     CashManagement.common.BusinessRules.showRecap({
                         strTransactionId: currentRecord.get('strReceiptNumber'),
                         ysnPosted: currentRecord.get('ysnPosted'),
@@ -1545,10 +1547,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         strCurrencyId: currency,
                         dblExchangeRate: 1,
                         scope: me,
-                        postCallback: function(){
+                        showPostButton: showPostButton,
+                        showUnpostButton: showPostButton,
+                        postCallback: function () {
                             me.onReceiveClick(recapButton);
                         },
-                        unpostCallback: function(){
+                        unpostCallback: function () {
                             me.onReceiveClick(recapButton);
                         }
                     });
