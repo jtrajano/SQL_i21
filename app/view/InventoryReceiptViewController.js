@@ -1904,6 +1904,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         current.set('strOwnershipType', 'Own');
                         current.set('intStorageLocationId', po.get('intStorageLocationId'));
                         current.set('strStorageLocationName', po.get('strStorageLocationName'));
+                        current.set('intSubLocationId', po.get('intCompanyLocationSubLocationId'));
+                        current.set('strSubLocationName', po.get('strSubLocationName'));
                         current.set('dblItemUOMConvFactor', po.get('dblItemUOMCF'));
                         current.set('dblOrderUOMConvFactor', po.get('dblItemUOMCF'));
                         current.set('strUnitType', po.get('strStockUOMType'));
@@ -2266,10 +2268,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 },{
                     column: 'ysnAllowedToShow',
                     value: true,
-                    conjunction: 'and'
-                },{
-                    column: 'intCompanyLocationId',
-                    value: win.viewModel.data.current.get('intLocationId'),
                     conjunction: 'and'
                 }]
             })
