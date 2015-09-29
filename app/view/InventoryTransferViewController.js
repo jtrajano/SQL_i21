@@ -34,9 +34,6 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
             btnUndo: {
                 disabled: '{current.ysnPosted}'
             },
-            btnRecap: {
-                hidden: '{checkTransportPosting}'
-            },
             btnPost: {
                 text: '{getPostButtonText}',
                 iconCls: '{getPostButtonIcon}',
@@ -542,6 +539,11 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                 scope: me,
                 success: function(){
                     // If data is generated, show the recap screen.
+                    var showPostButton = true;
+                    if (currentRecord.get('intSourceType') === 3){
+                        showPostButton = false;
+                    }
+
                     CashManagement.common.BusinessRules.showRecap({
                         strTransactionId: currentRecord.get('strTransferNo'),
                         ysnPosted: currentRecord.get('ysnPosted'),
@@ -549,6 +551,8 @@ Ext.define('Inventory.view.InventoryTransferViewController', {
                         strCurrencyId: null,
                         dblExchangeRate: 1,
                         scope: me,
+                        showPostButton: showPostButton,
+                        showUnpostButton: showPostButton,
                         postCallback: function(){
                             me.onPostClick(recapButton);
                         },
