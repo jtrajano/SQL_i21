@@ -42,22 +42,17 @@ SELECT
  intAssignFuturesToContractSummaryId INT,    
  [ysnDeleted] Bit    
  )    
-
-IF EXISTS(select * from @tblMatchedDelete)    
-BEGIN 
+ 
 	UPDATE tblRKFutOptTransaction set intContractDetailId = null WHERE intFutOptTransactionId in(SELECT intFutOptTransactionId FROM tblRKAssignFuturesToContractSummary    
 	WHERE intAssignFuturesToContractSummaryId in(SELECT intAssignFuturesToContractSummaryId from @tblMatchedDelete) )
-END    
-    
+       
 IF EXISTS(SELECT * FROM @tblMatchedDelete)    
 BEGIN    
 DELETE FROM tblRKAssignFuturesToContractSummary    
   WHERE intAssignFuturesToContractSummaryId in( SELECT intAssignFuturesToContractSummaryId from @tblMatchedDelete)    
 END    
   ----------------------- END Delete Matched ---------------------    
-     
- 
-     
+          
  ---------------Header Record Insert ----------------    
  INSERT INTO tblRKAssignFuturesToContractSummaryHeader     
   (    
