@@ -1,6 +1,6 @@
 ﻿
 /*
-	This is the stored procedure that handles the adjust to the item's cost. 
+	This is the stored procedure that handles the adjustment to the item cost. 
 	
 	It uses a cursor to iterate over the list of records found in @ItemsToAdjust, a table-valued parameter (variable). 
 

@@ -2330,6 +2330,7 @@
     <Build Include="dbo\Tables\tblICInventoryCostAdjustmentType.sql" />
     <None Include="Scripts\Post-Deployment\IC\15_InventoryCostAdjustmentTypes.sql" />
     <Build Include="dbo\Functions\fnCalculateAverageCostAfterCostAdj.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUnpostCostAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
