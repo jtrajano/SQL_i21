@@ -95,7 +95,6 @@
     <Compile Include="Configuration\tblICLotMap.cs" />
     <Compile Include="Configuration\tblICLotStatusMap.cs" />
     <Compile Include="Configuration\tblICManufacturerMap.cs" />
-    <Compile Include="Configuration\tblICPatronageCategoryMap.cs" />
     <Compile Include="Configuration\tblICRinFeedStockMap.cs" />
     <Compile Include="Configuration\tblICRinFeedStockUOMMap.cs" />
     <Compile Include="Configuration\tblICRinFuelCategoryMap.cs" />
@@ -152,7 +151,6 @@
     <Compile Include="Metadata\tblICLot.cs" />
     <Compile Include="Metadata\tblICLotStatus.cs" />
     <Compile Include="Metadata\tblICManufacturer.cs" />
-    <Compile Include="Metadata\tblICPatronageCategory.cs" />
     <Compile Include="Metadata\tblICRinFeedStock.cs" />
     <Compile Include="Metadata\tblICRinFeedStockUOM.cs" />
     <Compile Include="Metadata\tblICRinFuel.cs" />

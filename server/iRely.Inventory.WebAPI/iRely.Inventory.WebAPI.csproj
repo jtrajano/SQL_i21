@@ -229,7 +229,6 @@
     <Compile Include="Controllers\LotController.cs" />
     <Compile Include="Controllers\LotStatusController.cs" />
     <Compile Include="Controllers\ManufacturerController.cs" />
-    <Compile Include="Controllers\PatronageCategoryController.cs" />
     <Compile Include="Controllers\ProcessCodeController.cs" />
     <Compile Include="Controllers\StatusController.cs" />
     <Compile Include="Controllers\StockReservationController.cs" />

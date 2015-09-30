@@ -18,7 +18,6 @@ Ext.define('Inventory.view.CommodityViewModel', {
     alias: 'viewmodel.iccommodity',
 
     requires: [
-        'Inventory.store.BufferedPatronageCategory',
         'Inventory.store.BufferedUnitMeasure',
         'Inventory.store.BufferedStorageType',
         'GeneralLedger.store.BufAccountId',
@@ -27,7 +26,8 @@ Ext.define('Inventory.view.CommodityViewModel', {
         'RiskManagement.store.FutureMarketBuffered',
         'Grain.store.BufferedStorageSchedule',
         'Grain.store.BufferedDiscountId',
-        'Grain.store.BufferedDistributions'
+        'Grain.store.BufferedDistributions',
+        'Patronage.store.BufferedPatronageCategory'
     ],
 
     stores: {
@@ -101,10 +101,10 @@ Ext.define('Inventory.view.CommodityViewModel', {
             type: 'glbufaccountcategorygroup'
         },
         patronageCategory: {
-            type: 'icbufferedpatronagecategory'
+            type: 'patbufferedpatronagecategory'
         },
         directPatronageCategory: {
-            type: 'icbufferedpatronagecategory'
+            type: 'patbufferedpatronagecategory'
         },
         unitMeasure: {
             type: 'icbuffereduom'

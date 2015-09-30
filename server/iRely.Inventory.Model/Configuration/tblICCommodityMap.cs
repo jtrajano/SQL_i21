@@ -37,14 +37,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.dblMaxOver).HasColumnName("dblMaxOver").HasPrecision(18, 6);
             this.Property(t => t.intPatronageCategoryId).HasColumnName("intPatronageCategoryId");
             this.Property(t => t.intPatronageCategoryDirectId).HasColumnName("intPatronageCategoryDirectId");
-
-            this.HasOptional(p => p.PatronageCategory)
-                .WithMany(p => p.tblICCommodities)
-                .HasForeignKey(p => p.intPatronageCategoryId);
-            this.HasOptional(p => p.PatronageCategoryDirect)
-                .WithMany(p => p.tblICCommoditiesDirect)
-                .HasForeignKey(p => p.intPatronageCategoryDirectId);
-
+                        
             this.HasMany(p => p.tblICCommodityAccounts)
                 .WithRequired(p => p.tblICCommodity)
                 .HasForeignKey(p => p.intCommodityId);

@@ -6,7 +6,6 @@ Ext.define('Inventory.view.ItemViewModel', {
         'Inventory.store.BufferedCompactItem',
         'Inventory.store.BufferedManufacturer',
         'Inventory.store.BufferedCategory',
-        'Inventory.store.BufferedPatronageCategory',
         'Inventory.store.BufferedInventoryTag',
         'Inventory.store.BufferedItemUnitMeasure',
         'Inventory.store.BufferedOtherCharges',
@@ -38,7 +37,8 @@ Ext.define('Inventory.view.ItemViewModel', {
         'GeneralLedger.store.BufAccountId',
         'GeneralLedger.store.BufAccountCategoryGroup',
         'Manufacturing.store.BufferedManufacturingCell',
-        'Manufacturing.store.BufferedPackType'
+        'Manufacturing.store.BufferedPackType',
+        'Patronage.store.BufferedPatronageCategory'
     ],
 
     stores: {
@@ -219,7 +219,7 @@ Ext.define('Inventory.view.ItemViewModel', {
         },
 
         patronage: {
-            type: 'icbufferedpatronagecategory'
+            type: 'patbufferedpatronagecategory'
         },
         taxClass: {
             type: 'icbufferedfueltaxclass'
