@@ -88,7 +88,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			
 		DELETE FROM tblARInvoiceDetailTax WHERE [intInvoiceDetailId] = @InvoiceDetailId
 
-		IF ISNULL(@DistributionHeaderId,0) <> 0 AND ISNULL(@ItemType,'') = 'Other Charge'
+		IF (ISNULL(@DistributionHeaderId,0) <> 0 AND ISNULL(@ItemType,'') = 'Other Charge') OR (ISNULL(@DistributionHeaderId,0) <> 0 AND ISNULL(@ItemPrice,0) = 0)
 			BEGIN
 				UPDATE tblARInvoiceDetail SET dblTotalTax = @ZeroDecimal WHERE [intInvoiceDetailId] = @InvoiceDetailId					
 				DELETE FROM @InvoiceDetail WHERE [intInvoiceDetailId] = @InvoiceDetailId	
