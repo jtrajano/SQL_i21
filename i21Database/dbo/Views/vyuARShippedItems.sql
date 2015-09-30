@@ -11,7 +11,7 @@ SELECT
 	,SHP.[strShipmentNumber] 
 	,SOD.[intSalesOrderDetailId]
 	,SHP.[intShipFromLocationId]		AS [intCompanyLocationId] 
-	,CL.[strLocationName] 
+	,SHP.[strLocationName] 
 	,SO.[intShipToLocationId]
 	,SO.[intFreightTermId]
 	,SOD.[intItemId]	
@@ -90,7 +90,8 @@ CROSS APPLY
 		,dbo.fnCalculateQtyBetweenUOM(ISI.[intItemUOMId], SOD.[intItemUOMId], SUM(ISNULL(ISI.[dblQuantity],0))) dblSOShipped
 		,SUM(ISNULL(ISI.dblQuantity,0)) dblShipped
 		,ISH.[intShipFromLocationId]
-		,ISH.[dtmShipDate] 
+		,ISH.[dtmShipDate]
+		,CL.[strLocationName] 
 	FROM
 		tblICInventoryShipmentItem ISI
 	INNER JOIN
@@ -102,6 +103,9 @@ CROSS APPLY
 	LEFT JOIN
 		[tblICUnitMeasure] U
 			ON IU.[intUnitMeasureId] = U.[intUnitMeasureId]
+	LEFT OUTER JOIN
+		[tblSMCompanyLocation] CL
+			ON ISH.[intShipFromLocationId] = CL.[intCompanyLocationId] 
 	WHERE
 		ISH.[ysnPosted] = 1
 		AND ISI.[intLineNo] = SOD.[intSalesOrderDetailId]
@@ -118,7 +122,8 @@ CROSS APPLY
 		,U.[strUnitMeasure]
 		,ISI.[intSourceId]
 		,ISH.[intShipFromLocationId]
-		,ISH.[dtmShipDate] 
+		,ISH.[dtmShipDate]
+		,CL.[strLocationName]
 	--HAVING
 	--	SUM(ISNULL(ISI.[dblQuantity],0)) != ISNULL(SOD.[dblQtyOrdered],0)
 	) SHP
