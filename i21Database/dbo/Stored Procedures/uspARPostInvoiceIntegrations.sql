@@ -68,6 +68,8 @@ END
 
 EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @userId
 
+EXEC dbo.[uspARUpdateCommitted] @TransactionId, @post, @userId
+
 EXEC dbo.[uspARUpdateSOStatusFromInvoice] @TransactionId
 
 _Exit: 

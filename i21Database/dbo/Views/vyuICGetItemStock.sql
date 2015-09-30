@@ -74,14 +74,29 @@ SELECT
 	dblInTransitInbound = ISNULL(ItemStock.dblInTransitInbound, 0),
 	dblUnitOnHand = ISNULL(ItemStock.dblUnitOnHand, 0),
 	dblInTransitOutbound = ISNULL(ItemStock.dblInTransitOutbound, 0),
-	dblBackOrder = ISNULL(ItemStock.dblBackOrder, 0),
+	dblBackOrder =	CASE	-- Compute the back order qty when committed > available Qty. 
+							WHEN	ISNULL(ItemStock.dblOrderCommitted, 0) > ((ISNULL(ItemStock.dblUnitOnHand, 0) - (ISNULL(ItemStock.dblBackOrder, 0) + ISNULL(ItemStock.dblUnitReserved, 0) + ISNULL(ItemStock.dblInTransitOutbound, 0) + ISNULL(ItemStock.dblConsignedSale, 0))) )
+									AND ((ISNULL(ItemStock.dblUnitOnHand, 0) - (ISNULL(ItemStock.dblBackOrder, 0) + ISNULL(ItemStock.dblUnitReserved, 0) + ISNULL(ItemStock.dblInTransitOutbound, 0) + ISNULL(ItemStock.dblConsignedSale, 0))) ) > 0 THEN 
+										ABS(
+											ISNULL(ItemStock.dblOrderCommitted, 0)
+											- ((ISNULL(ItemStock.dblUnitOnHand, 0) - (ISNULL(ItemStock.dblBackOrder, 0) + ISNULL(ItemStock.dblUnitReserved, 0) + ISNULL(ItemStock.dblInTransitOutbound, 0) + ISNULL(ItemStock.dblConsignedSale, 0))) )										
+										)
+							ELSE 
+								0
+					END,
 	dblOrderCommitted = ISNULL(ItemStock.dblOrderCommitted, 0),
-	dblUnitInCustody = ISNULL(ItemStock.dblUnitInCustody, 0),
+	dblUnitStorage = ISNULL(ItemStock.dblUnitStorage, 0),
 	dblConsignedPurchase = ISNULL(ItemStock.dblConsignedPurchase, 0),
 	dblConsignedSale = ISNULL(ItemStock.dblConsignedSale, 0),
 	dblUnitReserved = ISNULL(ItemStock.dblUnitReserved, 0),
 	dblLastCountRetail = ISNULL(ItemStock.dblLastCountRetail, 0),
-	dblAvailable = (ISNULL(ItemStock.dblUnitOnHand, 0) - (ISNULL(ItemStock.dblBackOrder, 0) + ISNULL(ItemStock.dblUnitReserved, 0) + ISNULL(ItemStock.dblInTransitOutbound, 0) + ISNULL(ItemStock.dblConsignedSale, 0))),
+	dblAvailable = 
+				ISNULL(ItemStock.dblUnitOnHand, 0)  
+				- (
+						ISNULL(ItemStock.dblUnitReserved, 0) 
+						+ ISNULL(ItemStock.dblInTransitOutbound, 0) 
+						+ ISNULL(ItemStock.dblConsignedSale, 0)
+				),
 	
 	Item.dblDefaultFull,
 	Item.ysnAvailableTM,

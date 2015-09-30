@@ -28,7 +28,12 @@ BEGIN
 		IF OBJECT_ID(''tempdb..##OriginChecks'') IS NOT NULL DROP TABLE ##OriginChecks
 
 		--Join Origin Tables with the Bills
-		SELECT D.intBillId, D.strBillId, D.strVendorOrderNumber, A.apivc_ivc_no, E.intBankAccountId, E.intGLAccountId, A.apivc_trans_type, D.intTransactionType, D.dtmDate, D.dtmDueDate, A.apivc_due_rev_dt, A.apivc_chk_rev_dt 
+		SELECT D.intBillId, D.strBillId, D.strVendorOrderNumber
+		, A.apivc_ivc_no, E.intBankAccountId
+		, E.intGLAccountId, A.apivc_trans_type
+		, C.intEntityVendorId
+		, A.apivc_chk_no
+		, D.intTransactionType, D.dtmDate, D.dtmDueDate, A.apivc_due_rev_dt, A.apivc_chk_rev_dt 
 		INTO ##OriginChecks
 		FROM apivcmst A
 			LEFT JOIN apcbkmst B
@@ -50,21 +55,22 @@ BEGIN
 
 		IF OBJECT_ID(''tempdb..##TempAPCreatedPaymentFROMBills'') IS NOT NULL DROP TABLE ##TempAPCreatedPaymentFROMBills
 		--Create temp table that will be used for inserting payment.
-
+		DECLARE @createdPayment TABLE(intPaymentId INT);
+		
 		SELECT 
 		intAccountId = B.intGLAccountId
 		,intBankAccountId = B.intBankAccountId
-		,intPaymentMethodId = 3
-		,intCurrencyId =3
-		,strPaymentInfo = ''not found''
+		,intPaymentMethodId = (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = ''check'')
+		,intCurrencyId = (SELECT TOP 1 intCurrencyID FROM tblSMCurrency WHERE LOWER(strCurrency) = ''usd'')
+		,strPaymentInfo = dbo.fnTrim(B.apivc_chk_no)
 		,strNotes  = A.strBillId
-		,dtmDatePaid = ((substring(convert(varchar(10),B.apivc_chk_rev_dt),5,2)  
-						+''/''+substring(convert(varchar(10),B.apivc_chk_rev_dt),7,2)
-						+''/''+substring(convert(varchar(10),B.apivc_chk_rev_dt),1,4))) 
+		,dtmDatePaid = CASE WHEN ISDATE(apivc_chk_rev_dt) = 1 THEN CONVERT(DATE, CAST(apivc_chk_rev_dt AS CHAR(12)), 112) ELSE GETDATE() END
+						--((substring(convert(varchar(10),B.apivc_chk_rev_dt),5,2)  
+						--+''/''+substring(convert(varchar(10),B.apivc_chk_rev_dt),7,2)
+						--+''/''+substring(convert(varchar(10),B.apivc_chk_rev_dt),1,4))) 
 		,dblAmountPaid = A.dblTotal
 		,dblUnapplied = 0
 		,ysnPosted = 1
-		,strPaymentRecordNum = ''not found''
 		,dblWithheld = 0
 		,intUserId =  A.intEntityId
 		,intEntityId = A.intEntityId
@@ -96,7 +102,6 @@ BEGIN
 			,dblAmountPaid
 			,dblUnapplied
 			,ysnPosted
-			,strPaymentRecordNum
 			,dblWithheld
 			,intUserId
 			,intEntityId
@@ -108,7 +113,7 @@ BEGIN
 			,dtmDateDeleted
 			,dtmDateCreated
 			)
-
+		OUTPUT inserted.intPaymentId INTO @createdPayment
 		SELECT
 			intAccountId
 			,intBankAccountId
@@ -120,7 +125,6 @@ BEGIN
 			,dblAmountPaid
 			,dblUnapplied
 			,ysnPosted
-			,strPaymentRecordNum
 			,dblWithheld
 			,intUserId
 			,intEntityId
@@ -133,13 +137,10 @@ BEGIN
 			,dtmDateCreated
 		FROM ##TempAPCreatedPaymentFROMBills 
 
-
 		IF OBJECT_ID(''tempdb..##Tempi21APPaymentFROMBillOrigin'') IS NOT NULL DROP TABLE ##Tempi21APPaymentFROMBillOrigin
 		--Find Payment Header without Payment detail.
 		SELECT * INTO  ##Tempi21APPaymentFROMBillOrigin 
-		FROM tblAPPayment WHERE intPaymentId  in 
-			(SELECT intPaymentId FROM  tblAPPayment 
-			WHERE intPaymentId not in (SELECT intPaymentId FROM tblAPPaymentDetail) AND strPaymentInfo = ''not found'')
+		FROM tblAPPayment WHERE intPaymentId  in (SELECT intPaymentId FROM  @createdPayment) 
 
 		--Update Record no.
 		UPDATE A set strPaymentRecordNum  =  ''PAY-'' + convert (NVARCHAR,B.intPaymentId)
@@ -151,8 +152,6 @@ BEGIN
 		UPDATE tblSMStartingNumber 
 		SET intNumber = (select top 1 intPaymentId from ##Tempi21APPaymentFROMBillOrigin order by intPaymentId DESC) + 1
 		where strPrefix =''PAY-''
-
-
 
 		--Insert PaymentDetail
 		INSERT INTO tblAPPaymentDetail 
@@ -173,19 +172,20 @@ BEGIN
 		SELECT 
 		A.intPaymentId 
 		,C.intBillId
-		,D.intBankAccountId
-		,0
-		,0
-		,A.dblAmountPaid
+		,C.intAccountId
+		,C.dblDiscount
 		,0
 		,A.dblAmountPaid
 		,0
+		,A.dblAmountPaid
+		,C.dblWithheld
 		 FROM  ##Tempi21APPaymentFROMBillOrigin A
 		 INNER JOIN tblAPBill C
 		 on C.strBillId = A.strNotes
- 
-		 INNER JOIN ##OriginChecks D
-		 ON D.apivc_ivc_no = C.strVendorOrderNumber   COLLATE Latin1_General_CS_AS
+		
+		 --INNER JOIN ##OriginChecks D
+		 --ON D.apivc_ivc_no = C.strVendorOrderNumber   COLLATE Latin1_General_CS_AS
+		 --AND C.intEntityVendorId = D.intEntityVendorId
 
 		END
 	')

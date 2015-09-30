@@ -23,7 +23,7 @@
     [strTransactionType]		NVARCHAR (25)   COLLATE Latin1_General_CI_AS NOT NULL,
 	[strType]					NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL DEFAULT 'Standard' ,
     [intPaymentMethodId]		INT             NOT NULL,
-    [strComments]				NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
+    [strComments]				NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
     [intAccountId]				INT             NOT NULL,
 	[dtmPostDate]				DATETIME        NULL,
     [ysnPosted]					BIT             CONSTRAINT [DF_tblARInvoice_ysnPosted] DEFAULT ((0)) NOT NULL,
@@ -139,7 +139,7 @@ BEGIN
 END
 GO
 CREATE NONCLUSTERED INDEX [PIndex2]
-    ON [dbo].[tblARInvoice]([dblInvoiceSubtotal] ASC, [dblShipping] ASC, [dblTax] ASC, [dblInvoiceTotal] ASC, [dblDiscount] ASC, [dblAmountDue] ASC, [dblPayment] ASC, [strTransactionType] ASC, [intPaymentMethodId] ASC, [strComments] ASC, [intAccountId] ASC, [ysnPosted] ASC, [ysnPaid] ASC);
+    ON [dbo].[tblARInvoice]([dblInvoiceSubtotal] ASC, [dblShipping] ASC, [dblTax] ASC, [dblInvoiceTotal] ASC, [dblDiscount] ASC, [dblAmountDue] ASC, [dblPayment] ASC, [strTransactionType] ASC, [intPaymentMethodId] ASC, [intAccountId] ASC, [ysnPosted] ASC, [ysnPaid] ASC);
 
 
 GO

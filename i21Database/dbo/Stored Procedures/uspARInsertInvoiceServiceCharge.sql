@@ -8,7 +8,8 @@
 AS
 	DECLARE @dateNow		    DATE = CAST(GETDATE() AS DATE),			
 			@dblInvoiceTotal    NUMERIC(18,6) = 0,
-			@NewInvoiceId		INT
+			@NewInvoiceId		INT,
+			@newComment         NVARCHAR(500) = NULL
 	
 	SELECT @dblInvoiceTotal    = SUM(dblTotalAmount)
 	FROM @tblTypeServiceCharge

@@ -8,6 +8,31 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+-- Validate the item-location. 
+BEGIN 
+	DECLARE @intItemId AS INT 
+			,@strItemNo AS NVARCHAR(50)
+
+	SELECT	@intItemId = Item.intItemId 
+			,@strItemNo = Item.strItemNo
+	FROM	@ItemsToIncreaseOnOrder ItemsToValidate LEFT JOIN dbo.tblICItem Item
+				ON ItemsToValidate.intItemId = Item.intItemId
+	WHERE	NOT EXISTS (
+				SELECT TOP 1 1 
+				FROM	dbo.tblICItemLocation
+				WHERE	tblICItemLocation.intItemLocationId = ItemsToValidate.intItemLocationId
+						AND tblICItemLocation.intItemId = ItemsToValidate.intItemId
+			)
+			AND ItemsToValidate.intItemId IS NOT NULL 	
+			
+	-- 'Item-Location is invalid or missing for {Item}.'
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		RAISERROR(50028, 11, 1, @strItemNo)
+		GOTO _Exit
+	END 
+END 
+
 -- Do an upsert for the Item Stock table when updating the On Order Qty
 MERGE	
 INTO	dbo.tblICItemStock 
@@ -101,3 +126,5 @@ WHEN NOT MATCHED THEN
 		,1	
 	)
 ;
+
+_Exit:

@@ -7,9 +7,9 @@ SELECT SO.intSalesOrderId
 								(SELECT TOP 1 strCompanyName FROM tblSMCompanySetup)
 						END
 	 , strCompanyAddress = CASE WHEN L.strUseLocationAddress IS NULL OR L.strUseLocationAddress = 'No' OR L.strUseLocationAddress = '' OR L.strUseLocationAddress = 'Always'
-									THEN (SELECT TOP 1 [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry) FROM tblSMCompanySetup)
+									THEN (SELECT TOP 1 [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup)
 								WHEN L.strUseLocationAddress = 'Yes'
-									THEN [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, L.strAddress, L.strCity, L.strStateProvince, L.strZipPostalCode, L.strCountry)
+									THEN [dbo].fnARFormatCustomerAddress(NULL, NULL, NULL, L.strAddress, L.strCity, L.strStateProvince, L.strZipPostalCode, L.strCountry, NULL)
 								WHEN L.strUseLocationAddress = 'Letterhead'
 									THEN ''
 						   END 
@@ -21,8 +21,8 @@ SELECT SO.intSalesOrderId
 	 , SO.strBOLNumber
 	 , SO.strOrderStatus
 	 , SO.strSalesOrderNumber
-	 , strBillTo = [dbo].fnARFormatCustomerAddress(NULL, NULL, SO.strBillToLocationName, SO.strBillToAddress, SO.strBillToCity, SO.strBillToState, SO.strBillToZipCode, SO.strBillToCountry)
-	 , strShipTo = [dbo].fnARFormatCustomerAddress(NULL, NULL, SO.strShipToLocationName, SO.strShipToAddress, SO.strShipToCity, SO.strShipToState, SO.strShipToZipCode, SO.strShipToCountry)
+	 , strBillTo = [dbo].fnARFormatCustomerAddress(NULL, NULL, SO.strBillToLocationName, SO.strBillToAddress, SO.strBillToCity, SO.strBillToState, SO.strBillToZipCode, SO.strBillToCountry, E.strName)
+	 , strShipTo = [dbo].fnARFormatCustomerAddress(NULL, NULL, SO.strShipToLocationName, SO.strShipToAddress, SO.strShipToCity, SO.strShipToState, SO.strShipToZipCode, SO.strShipToCountry, NULL)
 	 , strSalespersonName = ESP.strName
 	 , SO.strPONumber
 	 , SV.strShipVia

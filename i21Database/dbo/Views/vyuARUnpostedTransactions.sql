@@ -17,6 +17,8 @@ INNER JOIN
 WHERE
 	I.ysnPosted = 0 
 	AND I.strTransactionType IN ('Invoice','Credit Memo')
+	AND ISNULL(I.intDistributionHeaderId, 0) = 0
+	AND I.ysnTemplate = 0
 	
 UNION ALL
 

@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateInvoiceIntegrations] 
-	 @InvoiceId	INT = NULL
+	 @InvoiceId		INT = NULL
 	,@ForDelete		BIT = 0    
 	,@UserId		INT = NULL     
 AS  
@@ -14,5 +14,7 @@ SET ANSI_WARNINGS OFF
 EXEC dbo.[uspARUpdateSOStatusFromInvoice] @InvoiceId
 EXEC dbo.[uspARUpdateCommitted] @InvoiceId, @ForDelete, @UserId
 EXEC dbo.[uspARUpdateContractOnInvoice] @InvoiceId, @ForDelete, @UserId
+
+DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @InvoiceId AND [strTransactionType] = 'Invoice'
 
 GO

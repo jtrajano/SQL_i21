@@ -27,7 +27,7 @@
     [ysnProcessed]          BIT             CONSTRAINT [DF_tblSOSalesOrder_ysnPosted] DEFAULT ((0)) NOT NULL,
 	[ysnRecurring]			BIT				NULL,
 	[ysnPreliminaryQuote]	BIT				NULL,
-    [strComments]           NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
+    [strComments]           NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
 	[intFreightTermId]		INT				NULL, 
 	[intShipToLocationId]   INT             NULL,
     [strShipToLocationName] NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,

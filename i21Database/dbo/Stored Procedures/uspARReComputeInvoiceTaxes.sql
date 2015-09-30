@@ -16,15 +16,19 @@ DECLARE @ZeroDecimal	DECIMAL(18,6)
 
 SET @ZeroDecimal = 0.000000	
 
-DECLARE @CustomerId			INT
-		,@LocationId		INT
-		,@TransactionDate	DATETIME
+DECLARE @CustomerId					INT
+		,@LocationId				INT
+		,@TransactionDate			DATETIME
+		,@DistributionHeaderId		INT
+
+		
 		
 		
 SELECT
-	@CustomerId			= [intEntityCustomerId]
-	,@LocationId		= [intCompanyLocationId]
-	,@TransactionDate	= [dtmDate]
+	@CustomerId				= [intEntityCustomerId]
+	,@LocationId			= [intCompanyLocationId]
+	,@TransactionDate		= [dtmDate]
+	,@DistributionHeaderId	= [intDistributionHeaderId]
 FROM
 	tblARInvoice
 WHERE
@@ -58,6 +62,7 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 				,@QtyShipped		DECIMAL(18,6) 
 				,@TotalItemTax		DECIMAL(18,6) 
 				,@TaxGroupId		INT
+				,@ItemType			NVARCHAR(100)
 				
 
 		SELECT TOP 1
@@ -68,12 +73,16 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			[intInvoiceDetailId]
 			
 		SELECT
-			 @ItemId				= [intItemId]
-			,@ItemPrice				= [dblPrice]
-			,@QtyShipped			= [dblQtyShipped]
-			,@TaxGroupId			= [intTaxGroupId]
+			 @ItemId				= tblARInvoiceDetail.[intItemId]
+			,@ItemPrice				= tblARInvoiceDetail.[dblPrice]
+			,@QtyShipped			= tblARInvoiceDetail.[dblQtyShipped]
+			,@TaxGroupId			= tblARInvoiceDetail.[intTaxGroupId]
+			,@ItemType				= tblICItem.[strType] 
 		FROM
 			tblARInvoiceDetail
+		INNER JOIN
+			tblICItem
+				ON tblARInvoiceDetail.intItemId = tblICItem.intItemId 
 		WHERE
 			[intInvoiceDetailId] = @InvoiceDetailId
 			
@@ -81,6 +90,13 @@ WHILE EXISTS(SELECT NULL FROM @InvoiceDetail)
 			SET @TaxGroupId = NULL
 			
 		DELETE FROM tblARInvoiceDetailTax WHERE [intInvoiceDetailId] = @InvoiceDetailId
+
+		IF ISNULL(@DistributionHeaderId,0) <> 0 AND ISNULL(@ItemType,'') = 'Other Charge'
+			BEGIN
+				UPDATE tblARInvoiceDetail SET dblTotalTax = @ZeroDecimal WHERE [intInvoiceDetailId] = @InvoiceDetailId					
+				DELETE FROM @InvoiceDetail WHERE [intInvoiceDetailId] = @InvoiceDetailId	
+				CONTINUE
+			END			
 			
 		DECLARE @ItemTaxes AS TABLE(
 			 Id						UNIQUEIDENTIFIER DEFAULT(NEWID())

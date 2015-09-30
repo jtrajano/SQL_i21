@@ -321,10 +321,10 @@ WHERE
 
 
 DELETE FROM tblARInvoiceDetailTax 
-WHERE intInvoiceDetailId IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId IN (SELECT DISTINCT intInvoiceId FROM @InvoiceEntries WHERE intInvoiceId IS NULL OR intInvoiceId = 0))
+WHERE intInvoiceDetailId IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId IN (SELECT DISTINCT intInvoiceId FROM @InvoiceEntries WHERE intInvoiceId IS NOT NULL))
 
 DELETE FROM tblARInvoiceDetail 
-WHERE intInvoiceId IN (SELECT DISTINCT intInvoiceId FROM @InvoiceEntries WHERE intInvoiceId IS NULL OR intInvoiceId = 0)
+WHERE intInvoiceId IN (SELECT DISTINCT intInvoiceId FROM @InvoiceEntries WHERE intInvoiceId IS NOT NULL )
 
 UPDATE @temp 
 SET 
@@ -444,9 +444,9 @@ SELECT
 	,Acct.[intCOGSAccountId]									--[intCOGSAccountId]
 	,Acct.[intSalesAccountId]									--[intSalesAccountId]
 	,Acct.[intInventoryAccountId]								--[intInventoryAccountId]
-	,null   --[intContractHeaderId]
-	,null                                    --[intContractDetailId]
-	,IE.[intTaxGroupId]											--[intTaxGroupId]
+	,null														--[intContractHeaderId]
+	,null														--[intContractDetailId]
+	,NULL														--[intTaxGroupId]
 	,1															--[intConcurrencyId]
 FROM
     @InvoiceEntries IE

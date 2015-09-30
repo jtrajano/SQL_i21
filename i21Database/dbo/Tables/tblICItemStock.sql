@@ -64,10 +64,11 @@ This table holds stock information like quantity on hand and etc.
 		[dblInTransitOutbound] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[dblBackOrder] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblOrderCommitted] NUMERIC(18, 6) NULL DEFAULT ((0)), 
-		[dblUnitInCustody] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblUnitStorage] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblConsignedPurchase] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[dblConsignedSale] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[dblUnitReserved] NUMERIC(18, 6) NULL DEFAULT ((0)),
+		--[dblOnStorage] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[dblLastCountRetail] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
@@ -183,7 +184,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblICItemStock',
     @level2type = N'COLUMN',
-    @level2name = N'dblUnitInCustody'
+    @level2name = N'dblUnitStorage'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'In Transit Inbound',

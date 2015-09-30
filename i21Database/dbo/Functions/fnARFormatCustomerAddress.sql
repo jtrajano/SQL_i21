@@ -1,18 +1,20 @@
 ﻿CREATE FUNCTION [dbo].[fnARFormatCustomerAddress]
 (
-	@strPhone NVARCHAR(25),
-	@strEmail NVARCHAR(75),	
-	@strLocationName NVARCHAR(50),
-	@strAddress NVARCHAR(100),
-	@strCity NVARCHAR(30),
-	@strState NVARCHAR(50),
-	@strZipCode NVARCHAR(12),
-	@strCountry NVARCHAR(25)
+	@strPhone		 NVARCHAR(25)  = NULL,
+	@strEmail		 NVARCHAR(75)  = NULL,	
+	@strLocationName NVARCHAR(50)  = NULL,
+	@strAddress		 NVARCHAR(100) = NULL,
+	@strCity		 NVARCHAR(30)  = NULL,
+	@strState		 NVARCHAR(50)  = NULL,
+	@strZipCode		 NVARCHAR(12)  = NULL,
+	@strCountry		 NVARCHAR(25)  = NULL,
+	@strBillToName   NVARCHAR(100) = NULL
 )
 RETURNS NVARCHAR(MAX) AS
 BEGIN
 	DECLARE @fullAddress NVARCHAR(MAX)
 	
+	SET @strBillToName = CASE WHEN @strBillToName = '' THEN NULL ELSE @strBillToName END
 	SET @strPhone = CASE WHEN @strPhone = '' THEN NULL ELSE @strPhone END
 	SET @strEmail = CASE WHEN @strEmail = '' THEN NULL ELSE @strEmail END	
 	SET @strLocationName = CASE WHEN @strLocationName = '' THEN NULL ELSE @strLocationName END
@@ -22,7 +24,8 @@ BEGIN
 	SET @strZipCode = CASE WHEN @strZipCode = '' THEN NULL ELSE @strZipCode END
 	SET @strCountry = CASE WHEN @strCountry = '' THEN NULL ELSE @strCountry END
 
-	SET @fullAddress = ISNULL(RTRIM(@strPhone) + CHAR(13) + char(10), '')
+	SET @fullAddress = ISNULL(RTRIM(@strBillToName) + CHAR(13) + char(10), '')
+				 + ISNULL(RTRIM(@strPhone) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(@strEmail) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(@strLocationName) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(@strAddress) + CHAR(13) + char(10), '')

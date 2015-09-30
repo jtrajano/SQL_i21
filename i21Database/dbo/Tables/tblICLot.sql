@@ -59,7 +59,7 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 		[dtmManufacturedDate]		DATETIME NULL,
 		[ysnReleasedToWarehouse]	BIT DEFAULT((0)),
 		[ysnProduced]				BIT DEFAULT((0)),
-		[ysnInCustody]				BIT DEFAULT((0)),
+		[ysnStorage]				BIT DEFAULT((0)),
 		[intOwnershipType]			INT NOT NULL DEFAULT ((1)),
 		[intGradeId]				INT NULL,
 		[dtmDateCreated]			DATETIME NULL,

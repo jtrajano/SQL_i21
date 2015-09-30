@@ -33,7 +33,7 @@ SELECT A.strCustomerName
 	 , dblPendingPayment = (SELECT ISNULL(SUM(ISNULL(dblAmountPaid ,0)), 0) FROM tblARPayment WHERE intEntityCustomerId = A.intEntityCustomerId AND ysnPosted = 0)
 	 , dblCreditLimit = (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
 	 , strTerm
-	 , strContact = (SELECT strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry)
+	 , strContact = (SELECT strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL)
 					 FROM vyuARCustomer C INNER JOIN vyuARCustomerContacts CC ON C.intEntityCustomerId = CC.intEntityCustomerId AND ysnDefaultContact = 1 WHERE C.intEntityCustomerId = A.intEntityCustomerId)	 
 FROM
 (SELECT I.dtmDate AS dtmDate

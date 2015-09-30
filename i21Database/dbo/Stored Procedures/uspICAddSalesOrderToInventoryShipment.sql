@@ -124,7 +124,7 @@ BEGIN
 			,intLineNo				= SODetail.intSalesOrderDetailId
 			,intItemId				= SODetail.intItemId
 			,intSubLocationId		= NULL
-			,dblQuantity			= SODetail.dblQtyOrdered
+			,dblQuantity			= SODetail.dblQtyOrdered - SODetail.dblQtyShipped
 			,intItemUOMId			= SODetail.intItemUOMId
 			,dblUnitPrice			= SODetail.dblPrice
 			,intTaxCodeId			= SODetail.intTaxId
@@ -139,4 +139,5 @@ BEGIN
 				ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 	WHERE	SODetail.intSalesOrderId = @SalesOrderId
 			AND dbo.fnIsStockTrackingItem(SODetail.intItemId) = 1
+			AND (SODetail.dblQtyOrdered - SODetail.dblQtyShipped) > 0
 END 

@@ -67,7 +67,6 @@ BEGIN TRY
 				@intToItemUOMId					INT,
 				@intUniqueId					INT,
 				@dblQty							NUMERIC(12,4),
-				@dblConvertedQty				NUMERIC(12,4),
 				@ErrMsg							NVARCHAR(MAX),
 				@dblSchQuantityToUpdate			NUMERIC(12,4)
 
@@ -86,20 +85,161 @@ BEGIN TRY
 		,[intContractDetailId]
 		,[intItemUOMId]
 		,[dblQty])
+
+	--Quantity/UOM Changed
 	SELECT
 		 I.[intInvoiceDetailId]
 		,D.[intContractDetailId]
 		,D.[intItemUOMId]
-		,D.[dblQtyShipped]
+		,dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], (CASE WHEN @ForDelete = 1 THEN D.[dblQtyShipped] ELSE (D.dblQtyShipped - TD.dblQtyShipped) END))
 	FROM
 		@ItemsFromInvoice I
 	INNER JOIN
 		tblARInvoiceDetail D
 			ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
+	INNER JOIN
+		tblARTransactionDetail TD
+			ON D.intInvoiceDetailId = TD.intTransactionDetailId 
+			AND D.intInvoiceId = TD.intTransactionId 
+			AND TD.strTransactionType = 'Invoice'
+	INNER JOIN
+		tblCTContractDetail CD
+			ON D.intContractDetailId = CD.intContractDetailId
 	WHERE
 		D.intContractDetailId IS NOT NULL
+		AND D.intContractDetailId = TD.intContractDetailId		
 		AND D.[intInventoryShipmentItemId] IS NULL
 		AND D.[intSalesOrderDetailId] IS NULL
+		AND D.intItemId = TD.intItemId		
+		AND (D.intItemUOMId <> TD.intItemUOMId OR D.dblQtyShipped <> TD.dblQtyShipped)
+		
+	UNION ALL
+
+	--New Contract Selected
+	SELECT
+		 I.[intInvoiceDetailId]
+		,D.[intContractDetailId]
+		,D.[intItemUOMId]
+		,dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], D.[dblQtyShipped])
+	FROM
+		@ItemsFromInvoice I
+	INNER JOIN
+		tblARInvoiceDetail D
+			ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
+	INNER JOIN
+		tblARTransactionDetail TD
+			ON D.intInvoiceDetailId = TD.intTransactionDetailId 
+			AND D.intInvoiceId = TD.intTransactionId 
+			AND TD.strTransactionType = 'Invoice'
+	INNER JOIN
+		tblCTContractDetail CD
+			ON D.intContractDetailId = CD.intContractDetailId
+	WHERE
+		D.intContractDetailId IS NOT NULL
+		AND D.intContractDetailId <> TD.intContractDetailId		
+		AND D.[intInventoryShipmentItemId] IS NULL
+		AND D.[intSalesOrderDetailId] IS NULL
+		AND D.intItemId = TD.intItemId		
+		
+	UNION ALL
+
+	--Replaced Contract
+	SELECT
+		 I.[intInvoiceDetailId]
+		,TD.[intContractDetailId]
+		,TD.[intItemUOMId]
+		,dbo.fnCalculateQtyBetweenUOM(TD.[intItemUOMId], CD.[intItemUOMId], (TD.[dblQtyShipped] * -1))
+	FROM
+		@ItemsFromInvoice I
+	INNER JOIN
+		tblARInvoiceDetail D
+			ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
+	INNER JOIN
+		tblARTransactionDetail TD
+			ON D.intInvoiceDetailId = TD.intTransactionDetailId 
+			AND D.intInvoiceId = TD.intTransactionId 
+			AND TD.strTransactionType = 'Invoice'
+	INNER JOIN
+		tblCTContractDetail CD
+			ON TD.intContractDetailId = CD.intContractDetailId
+	WHERE
+		D.intContractDetailId IS NOT NULL
+		AND D.intContractDetailId <> TD.intContractDetailId		
+		AND D.[intInventoryShipmentItemId] IS NULL
+		AND D.[intSalesOrderDetailId] IS NULL
+		AND D.intItemId = TD.intItemId
+		
+	UNION ALL
+		
+	--Removed Contract
+	SELECT
+		 I.[intInvoiceDetailId]
+		,TD.[intContractDetailId]
+		,TD.[intItemUOMId]
+		,dbo.fnCalculateQtyBetweenUOM(TD.[intItemUOMId], CD.[intItemUOMId], (TD.[dblQtyShipped] * -1))
+	FROM
+		@ItemsFromInvoice I
+	INNER JOIN
+		tblARInvoiceDetail D
+			ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
+	INNER JOIN
+		tblARTransactionDetail TD
+			ON D.intInvoiceDetailId = TD.intTransactionDetailId 
+			AND D.intInvoiceId = TD.intTransactionId 
+			AND TD.strTransactionType = 'Invoice'
+	INNER JOIN
+		tblCTContractDetail CD
+			ON TD.intContractDetailId = CD.intContractDetailId
+	WHERE
+		D.intContractDetailId IS NULL
+		AND TD.intContractDetailId IS NOT NULL
+		AND D.[intInventoryShipmentItemId] IS NULL
+		AND D.[intSalesOrderDetailId] IS NULL	
+		
+	UNION ALL	
+
+	--Deleted Item
+	SELECT
+		 TD.intTransactionDetailId
+		,TD.[intContractDetailId]
+		,TD.[intItemUOMId]
+		,dbo.fnCalculateQtyBetweenUOM(TD.[intItemUOMId], CD.[intItemUOMId], (TD.[dblQtyShipped] * -1))
+	FROM
+		tblARTransactionDetail TD
+	INNER JOIN
+		tblCTContractDetail CD
+			ON TD.intContractDetailId = CD.intContractDetailId
+	WHERE
+		TD.intTransactionId = @TransactionId 
+		AND TD.strTransactionType = 'Invoice'
+		AND TD.intContractDetailId IS NOT NULL
+		AND TD.[intInventoryShipmentItemId] IS NULL
+		AND TD.[intSalesOrderDetailId] IS NULL
+		AND TD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @TransactionId)
+		
+	UNION ALL
+		
+	--Added Item
+	SELECT
+		 Detail.intInvoiceDetailId
+		,Detail.[intContractDetailId]
+		,Detail.[intItemUOMId]
+		,dbo.fnCalculateQtyBetweenUOM(Detail.[intItemUOMId], CD.[intItemUOMId], Detail.[dblQtyShipped])
+	FROM
+		tblARInvoiceDetail Detail
+	INNER JOIN
+		tblARInvoice Header
+			ON Detail.intInvoiceId = Header.intInvoiceId 
+	INNER JOIN
+		tblCTContractDetail CD
+			ON Detail.intContractDetailId = CD.intContractDetailId
+	WHERE
+		Detail.intInvoiceId = @TransactionId 
+		AND Header.strTransactionType = 'Invoice'
+		AND Detail.intContractDetailId IS NOT NULL
+		AND Detail.[intInventoryShipmentItemId] IS NULL
+		AND Detail.[intSalesOrderDetailId] IS NULL
+		AND Detail.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @TransactionId)
 
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
@@ -113,7 +253,7 @@ BEGIN TRY
 
 		SELECT	@intContractDetailId			=	[intContractDetailId],
 				@intFromItemUOMId				=	[intItemUOMId],
-				@dblQty							=	[dblQty],
+				@dblQty							=	[dblQty] * (CASE WHEN @ForDelete = 1 THEN -1 ELSE 1 END),
 				@intInvoiceDetailId				=	[intInvoiceDetailId]
 		FROM	@tblToProcess 
 		WHERE	[intUniqueId]					=	 @intUniqueId
@@ -123,20 +263,14 @@ BEGIN TRY
 			RAISERROR('Contract does not exist.',16,1)
 		END
 
-		SELECT @intToItemUOMId	=	intItemUOMId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
-
-		SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblQty)
-		
-		SET @dblConvertedQty = @dblConvertedQty * (CASE WHEN @ForDelete = 1 THEN -1 ELSE 1 END)
-
-		IF ISNULL(@dblConvertedQty,0) = 0
+		IF ISNULL(@dblQty,0) = 0
 		BEGIN
 			RAISERROR('UOM does not exist.',16,1)
 		END
 					
 		EXEC	uspCTUpdateScheduleQuantity
 				@intContractDetailId	=	@intContractDetailId,
-				@dblQuantityToUpdate	=	@dblConvertedQty,
+				@dblQuantityToUpdate	=	@dblQty,
 				@intUserId				=	@UserId,
 				@intExternalId			=	@intInvoiceDetailId,
 				@strScreenName			=	'Invoice'
