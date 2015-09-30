@@ -176,6 +176,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 			,[dblAmount]
 			,[dblTotal]
 			,[strW2Code]
+			,[intEmployeeDepartmentId]
 			,[intEmployeeTimeOffId]
 			,[intEmployeeEarningLinkId]
 			,[intAccountId]
@@ -238,6 +239,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 				 @dblEarningAmount
 			 END
 			,[strW2Code]
+			,@intDepartmentId
 			,[intEmployeeTimeOffId]
 			,[intEmployeeEarningLinkId]
 			,[intAccountId]
