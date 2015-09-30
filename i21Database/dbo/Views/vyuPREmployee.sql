@@ -2,7 +2,7 @@
 AS
 SELECT
 Ent.intEntityId,
-Emp.intEmployeeId,
+Emp.[intEntityEmployeeId],
 Emp.strEmployeeId,
 Emp.strLastName,
 Emp.strFirstName,

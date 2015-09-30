@@ -78,7 +78,7 @@ SELECT
 	,GETDATE()
 	,1
 FROM [dbo].[tblPREmployee]
-WHERE [intEmployeeId] = @intEmployee
+WHERE [intEntityEmployeeId] = @intEmployee
 
 /* Get the Created Paycheck Id*/
 SELECT @intPaycheckId = @@IDENTITY
