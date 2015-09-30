@@ -1774,7 +1774,7 @@ IF @recap = 0
 				,[strName]					= (SELECT TOP 1 strName FROM tblEntity WHERE intEntityId = B.[intEntityCustomerId])
 				,[dblAmount]				= A.[dblAmountPaid] 
 				,[strSourceSystem]			= 'AR'
-				,[intBankDepositId]			= A.[intAccountId] 
+				,[intBankDepositId]			= NULL --A.[intAccountId] 
 				,[intCreatedUserId]			= @userId
 				,[dtmCreated]				= CAST(GETDATE() AS DATE)
 				,[intLastModifiedUserId]	= @userId
