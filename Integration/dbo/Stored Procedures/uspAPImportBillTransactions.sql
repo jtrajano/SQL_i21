@@ -30,6 +30,32 @@ BEGIN
 		IF @transCount = 0 --if this is greater than 1, someone already created the transaction and WE ARE COVERED BY THE TRANSACTION SO DON''T WORRY
 		BEGIN TRANSACTION
 
+		IF(@UserId <= 0)
+		BEGIN
+			RAISERROR(''You cannot import without user.'', 16, 1);
+		END
+
+		--MAKE SURE USER HAS DEFAULT LOCATION
+		DECLARE @userLocation INT;
+		SELECT @userLocation = A.intCompanyLocationId FROM tblSMCompanyLocation A
+				INNER JOIN tblSMUserSecurity B ON A.intCompanyLocationId = B.intCompanyLocationId
+		WHERE intEntityId = @UserId
+
+		IF(@userLocation IS NULL OR @userLocation <= 0)
+		BEGIN
+			RAISERROR(''Please setup default location on user screen.'', 16, 1);
+		END
+
+		--Validate GL Account
+		IF EXISTS(SELECT 1 FROM apcbkmst A
+		WHERE A.apcbk_gl_ap NOT IN (SELECT strExternalId FROM tblGLCOACrossReference)
+		UNION ALL
+		SELECT 1 FROM apeglmst A
+		WHERE A.apegl_gl_acct NOT IN (SELECT strExternalId FROM tblGLCOACrossReference))
+		BEGIN
+			RAISERROR(''Invalid GL Account found in origin table apeglmst. Please call iRely assistance.'', 16, 1);
+		END
+
 		IF @DateFrom IS NULL AND @DateTo IS NULl
 		BEGIN
 			--VALIDATE BEFORE IMPORTING
@@ -54,22 +80,6 @@ BEGIN
 			--CREATE AP ACCOUNT CATEGORY
 			EXEC uspGLUpdateAPAccountCategory
 
-			IF(@UserId <= 0)
-			BEGIN
-				RAISERROR(''You cannot import without user.'', 16, 1);
-			END
-
-			--MAKE SURE USER HAS DEFAULT LOCATION
-			DECLARE @userLocation INT;
-			SELECT @userLocation = A.intCompanyLocationId FROM tblSMCompanyLocation A
-					INNER JOIN tblSMUserSecurity B ON A.intCompanyLocationId = B.intCompanyLocationId
-			WHERE intEntityId = @UserId
-
-			IF(@userLocation IS NULL OR @userLocation <= 0)
-			BEGIN
-				RAISERROR(''Please setup default location on user screen.'', 16, 1);
-			END
-
 			EXEC uspAPImportBillsFromAPIVCMST @UserId, @DateFrom, @DateTo, @totalPostedImport OUTPUT
 			SET @Total = @totalPostedImport;
 			EXEC uspAPImportBillsFromAPTRXMST @UserId,@DateFrom, @DateTo, @totalPostedImport OUTPUT
@@ -77,17 +87,6 @@ BEGIN
 		END
 		ELSE
 		BEGIN
-
-			--Validate GL Account
-			IF EXISTS(SELECT 1 FROM apcbkmst A
-			WHERE A.apcbk_gl_ap NOT IN (SELECT strExternalId FROM tblGLCOACrossReference)
-			UNION ALL
-			SELECT 1 FROM apeglmst A
-			WHERE A.apegl_gl_acct NOT IN (SELECT strExternalId FROM tblGLCOACrossReference))
-			BEGIN
-				RAISERROR(''Invalid GL Account found in origin table apeglmst. Please call iRely assistance.'', 16, 1);
-			END
-
 			EXEC uspAPImportBillsFromAPTRXMST @UserId,@DateFrom, @DateTo, @totalPostedImport OUTPUT
 			SET @Total = @totalPostedImport;
 		END
