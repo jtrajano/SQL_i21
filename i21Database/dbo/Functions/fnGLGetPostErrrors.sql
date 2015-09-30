@@ -18,6 +18,7 @@ RETURN (
 					'Unable to find an open accounting period to match the transaction date.' AS strMessage
 				FROM tblGLJournal A 
 				WHERE A.intJournalId IN (SELECT [intJournalId] FROM @JournalIds) AND ISNULL([dbo].isOpenAccountingDate(A.dtmDate), 0) = 0  
+				AND A.strSourceType <> 'AA'
 				UNION 
 				SELECT DISTINCT A.intJournalId,'Unable to post. Account ' + B.strAccountId + ' is in the ' + C.strAccountCategory + ' category. Please remove this account from transaction' AS strMessage
 					FROM tblGLJournalDetail A JOIN tblGLAccount B
