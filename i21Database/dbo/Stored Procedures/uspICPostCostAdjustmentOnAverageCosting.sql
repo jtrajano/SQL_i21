@@ -108,7 +108,7 @@ WHERE	intTransactionTypeId = @intTransactionTypeId
 
 -- Get the cost bucket and original cost. 
 BEGIN 
-	SELECT	@CostBucketId	= intInventoryFIFOId
+	SELECT	@CostBucketId = intInventoryFIFOId
 			,@CostBucketCost = dblCost			
 			,@CostBucketStockInQty = dblStockIn
 			,@CostBucketStockOutQty = dblStockOut
