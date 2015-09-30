@@ -29,7 +29,6 @@ Type the overview for the table here.
 		[intReceiverId] [int] NULL,
 		[strVessel] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 		[intFreightTermId] [int] NULL,
-		[strAllocateFreight] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 		[intShiftNumber] [int] NULL,
 		[dblInvoiceAmount] [numeric](18, 6) NULL DEFAULT ((0)),
 		[ysnPrepaid] [bit] NULL DEFAULT ((0)),
@@ -197,14 +196,7 @@ Type the overview for the table here.
 		@level2type = N'COLUMN',
 		@level2name = N'intFreightTermId'
 	GO
-	EXEC sp_addextendedproperty @name = N'MS_Description',
-		@value = N'Delivery Point',
-		@level0type = N'SCHEMA',
-		@level0name = N'dbo',
-		@level1type = N'TABLE',
-		@level1name = N'tblICInventoryReceipt',
-		@level2type = N'COLUMN',
-		@level2name = N'strAllocateFreight'
+	
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Shift Number',

@@ -44,7 +44,6 @@ INSERT INTO dbo.tblICInventoryReceipt (
 		,intCurrencyId
 		,strVessel
 		,intFreightTermId
-		,strAllocateFreight
 		,intShiftNumber
 		,dblInvoiceAmount
 		,ysnInvoicePaid
@@ -78,7 +77,6 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,intCurrencyId			= NULL
 		,strVessel				= NULL
 		,intFreightTermId		= NULL
-		,strAllocateFreight		= 'No' -- Default is No
 		,intShiftNumber			= NULL 
 		,dblInvoiceAmount		= 0
 		,ysnInvoicePaid			= 0 

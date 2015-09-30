@@ -185,7 +185,6 @@ BEGIN
 				,intCurrencyId			= IntegrationData.intCurrencyId
 				,strVessel				= NULL
 				,intFreightTermId		= NULL
-				,strAllocateFreight		= 'No' -- Default is No
 				,intShiftNumber			= NULL 
 				,dblInvoiceAmount		= 0
 				,ysnInvoicePaid			= 0 
@@ -221,7 +220,6 @@ BEGIN
 				,intCurrencyId
 				,strVessel
 				,intFreightTermId
-				,strAllocateFreight
 				,intShiftNumber
 				,dblInvoiceAmount
 				,ysnInvoicePaid
@@ -256,7 +254,6 @@ BEGIN
 				/*intCurrencyId*/				,IntegrationData.intCurrencyId
 				/*strVessel*/					,NULL
 				/*intFreightTermId*/			,NULL
-				/*strAllocateFreight*/			,'No' -- Default is No
 				/*intShiftNumber*/				,NULL 
 				/*dblInvoiceAmount*/			,0
 				/*ysnInvoicePaid*/				,0 
