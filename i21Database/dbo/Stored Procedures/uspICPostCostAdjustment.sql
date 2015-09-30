@@ -51,6 +51,8 @@ DECLARE @intId AS INT
 		,@intSourceTransactionId AS INT
 		,@strSourceTransactionId AS NVARCHAR(40) 
 		,@intTransactionTypeId AS INT 
+		,@intCurrencyId AS INT 
+		,@dblExchangeRate AS NUMERIC(38,20)
 		,@intLotId AS INT 
 
 DECLARE @CostingMethod AS INT 
@@ -102,6 +104,8 @@ SELECT  intId
 		,strSourceTransactionId
 		,intTransactionTypeId
 		,intLotId 
+		,intCurrencyId
+		,dblExchangeRate
 FROM	@ItemsToAdjust
 
 OPEN loopItems;
@@ -124,6 +128,8 @@ FETCH NEXT FROM loopItems INTO
 	,@strSourceTransactionId
 	,@intTransactionTypeId
 	,@intLotId
+	,@intCurrencyId
+	,@dblExchangeRate
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -160,6 +166,8 @@ BEGIN
 			,@strSourceTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
+			,@intCurrencyId
+			,@dblExchangeRate			
 			,@intUserId
 	END
 
@@ -181,6 +189,8 @@ BEGIN
 		,@strSourceTransactionId
 		,@intTransactionTypeId
 		,@intLotId
+		,@intCurrencyId
+		,@dblExchangeRate
 	;
 END;
 -----------------------------------------------------------------------------------------------------------------------------

@@ -3,6 +3,12 @@ AS
 BEGIN	
 	-- Fake inventory items. 
 	BEGIN 
+		-- Create the CONSTANT variables for the costing methods
+		DECLARE @AVERAGECOST AS INT = 1
+				,@FIFO AS INT = 2
+				,@LIFO AS INT = 3
+				,@LOTCOST AS INT = 4 	
+				,@ACTUALCOST AS INT = 5	
 
 		-- Declare the variables for grains (item)
 		DECLARE @WetGrains AS INT = 1
@@ -144,6 +150,7 @@ BEGIN
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOOut', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransaction', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransaction', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOCostAdjustmentLog', @Identity = 1;
 
 	-- Re-create the index
 	CREATE CLUSTERED INDEX [IDX_tblICInventoryFIFO]
@@ -164,6 +171,8 @@ BEGIN
 				, dblStockOut
 				, dblCost
 				, intConcurrencyId
+				, intTransactionId
+				, strTransactionId
 		) 
 		SELECT	intItemId = @WetGrains
 				, intItemLocationId = @WetGrains_DefaultLocation
@@ -173,6 +182,8 @@ BEGIN
 				, dblStockOut = 0
 				, dblCost = 22.00
 				, intConcurrencyId = 1
+				, intTransactionId = 1
+				, strTransactionId = 'PURCHASE-100000'
 		UNION ALL 
 		SELECT	intItemId = @StickyGrains
 				, intItemLocationId = @StickyGrains_DefaultLocation
@@ -182,6 +193,8 @@ BEGIN
 				, dblStockOut = 0
 				, dblCost = 33.00
 				, intConcurrencyId = 1
+				, intTransactionId = 2
+				, strTransactionId = 'PURCHASE-200000'
 		UNION ALL 
 		SELECT	intItemId = @PremiumGrains
 				, intItemLocationId = @PremiumGrains_DefaultLocation
@@ -191,6 +204,8 @@ BEGIN
 				, dblStockOut = 0
 				, dblCost = 44.00
 				, intConcurrencyId = 1
+				, intTransactionId = 3
+				, strTransactionId = 'PURCHASE-300000'
 		UNION ALL 
 		SELECT	intItemId = @ColdGrains
 				, intItemLocationId = @ColdGrains_DefaultLocation
@@ -200,6 +215,8 @@ BEGIN
 				, dblStockOut = 0
 				, dblCost = 55.00
 				, intConcurrencyId = 1
+				, intTransactionId = 4
+				, strTransactionId = 'PURCHASE-400000'
 		UNION ALL 
 		SELECT	intItemId = @HotGrains
 				, intItemLocationId = @HotGrains_DefaultLocation
@@ -209,6 +226,9 @@ BEGIN
 				, dblStockOut = 0
 				, dblCost = 66.00
 				, intConcurrencyId = 1
+				, intTransactionId = 5
+				, strTransactionId = 'PURCHASE-500000'
+
 	END 
 
 	-- Fake data for item stock table
@@ -298,11 +318,13 @@ BEGIN
 				, intCurrencyId
 				, dblExchangeRate
 				, intTransactionId
+				, intTransactionDetailId
 				, strTransactionId
 				, strBatchId
 				, intTransactionTypeId
 				, intLotId
 				, intConcurrencyId
+				, intCostingMethod 
 		) 
 		SELECT	intItemId = @WetGrains
 				, intItemLocationId = @WetGrains_DefaultLocation
@@ -316,11 +338,13 @@ BEGIN
 				, intCurrencyId = 1
 				, dblExchangeRate = 1
 				, intTransactionId = 1
+				, intTransactionDetailId = 1
 				, strTransactionId = 'PURCHASE-100000'
 				, strBatchId = 'BATCH-100000'
 				, intTransactionTypeId = @PurchaseType
 				, intLotId = NULL
 				, intConcurrencyId = 1
+				, intCostingMethod = @AVERAGECOST
 		UNION ALL 
 		SELECT	intItemId = @StickyGrains
 				, intItemLocationId = @StickyGrains_DefaultLocation
@@ -334,11 +358,13 @@ BEGIN
 				, intCurrencyId = 1
 				, dblExchangeRate = 1
 				, intTransactionId = 2
+				, intTransactionDetailId = 2
 				, strTransactionId = 'PURCHASE-200000'
 				, strBatchId = 'BATCH-200000'
 				, intTransactionTypeId = @PurchaseType
 				, intLotId = NULL
 				, intConcurrencyId = 1
+				, intCostingMethod = @AVERAGECOST
 		UNION ALL 
 		SELECT	intItemId = @PremiumGrains
 				, intItemLocationId = @PremiumGrains_DefaultLocation
@@ -352,11 +378,13 @@ BEGIN
 				, intCurrencyId = 1
 				, dblExchangeRate = 1
 				, intTransactionId = 3
+				, intTransactionDetailId = 3
 				, strTransactionId = 'PURCHASE-300000'
 				, strBatchId = 'BATCH-300000'
 				, intTransactionTypeId = @PurchaseType
 				, intLotId = NULL
 				, intConcurrencyId = 1
+				, intCostingMethod = @AVERAGECOST
 		UNION ALL 
 		SELECT	intItemId = @ColdGrains
 				, intItemLocationId = @ColdGrains_DefaultLocation
@@ -370,11 +398,13 @@ BEGIN
 				, intCurrencyId = 1
 				, dblExchangeRate = 1
 				, intTransactionId = 3
+				, intTransactionDetailId = 4
 				, strTransactionId = 'PURCHASE-400000'
 				, strBatchId = 'BATCH-400000'
 				, intTransactionTypeId = @PurchaseType
 				, intLotId = NULL
 				, intConcurrencyId = 1
+				, intCostingMethod = @AVERAGECOST
 		UNION ALL 
 		SELECT	intItemId = @HotGrains
 				, intItemLocationId = @HotGrains_DefaultLocation
@@ -388,10 +418,12 @@ BEGIN
 				, intCurrencyId = 1
 				, dblExchangeRate = 1
 				, intTransactionId = 5
+				, intTransactionDetailId = 5
 				, strTransactionId = 'PURCHASE-500000'
 				, strBatchId = 'BATCH-500000'
 				, intTransactionTypeId = @PurchaseType
 				, intLotId = NULL
-				, intConcurrencyId = 1		
+				, intConcurrencyId = 1
+				, intCostingMethod = @AVERAGECOST
 	END 
 END

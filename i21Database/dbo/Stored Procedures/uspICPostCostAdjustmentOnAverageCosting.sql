@@ -43,6 +43,8 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnAverageCosting]
 	,@strSourceTransactionId AS NVARCHAR(20)
 	,@strBatchId AS NVARCHAR(20)
 	,@intTransactionTypeId AS INT
+	,@intCurrencyId AS INT 
+	,@dblExchangeRate AS NUMERIC(38,20)
 	,@intUserId AS INT
 AS
 
@@ -208,8 +210,8 @@ BEGIN
 		,@dblCost								= 0
 		,@dblValue								= @CostAdjustmentValue
 		,@dblSalesPrice							= 0
-		,@intCurrencyId							= NULL 
-		,@dblExchangeRate						= 1
+		,@intCurrencyId							= @intCurrencyId 
+		,@dblExchangeRate						= @dblExchangeRate
 		,@intTransactionId						= @intTransactionId
 		,@intTransactionDetailId				= @intTransactionDetailId
 		,@strTransactionId						= @strTransactionId

@@ -66,6 +66,8 @@ BEGIN
 				,@strSourceTransactionId AS NVARCHAR(20)
 				,@strBatchId AS NVARCHAR(20)
 				,@intTransactionTypeId AS INT
+				,@intCurrencyId AS INT
+				,@dblExchangeRate AS NUMERIC(38,20)
 				,@intUserId AS INT
 
 		CREATE TABLE expected (
@@ -167,6 +169,8 @@ BEGIN
 			,@strSourceTransactionId
 			,@strBatchId
 			,@intTransactionTypeId
+			,@intCurrencyId
+			,@dblExchangeRate
 			,@intUserId
 
 		INSERT INTO actual (
