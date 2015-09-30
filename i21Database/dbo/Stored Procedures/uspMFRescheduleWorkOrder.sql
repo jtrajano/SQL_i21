@@ -179,7 +179,7 @@ BEGIN TRY
 		,ysnFrozen
 		,intConcurrencyId
 		,strWIPItemNo
-		,intSetUpDuration
+		,intSetupDuration
 		)
 	SELECT x.intManufacturingCellId
 		,x.intWorkOrderId
@@ -204,7 +204,7 @@ BEGIN TRY
 		,x.ysnFrozen
 		,@intConcurrencyId
 		,x.strWIPItemNo
-		,x.intSetUpDuration
+		,x.intSetupDuration
 	FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (
 			intManufacturingCellId INT
 			,intWorkOrderId INT
@@ -225,7 +225,7 @@ BEGIN TRY
 			,intScheduleWorkOrderId INT
 			,ysnFrozen BIT
 			,strWIPItemNo NVARCHAR(50)
-			,intSetUpDuration INT
+			,intSetupDuration INT
 			) x
 	LEFT JOIN dbo.tblMFManufacturingCellPackType MC ON MC.intManufacturingCellId = x.intManufacturingCellId
 		AND MC.intPackTypeId = x.intPackTypeId
