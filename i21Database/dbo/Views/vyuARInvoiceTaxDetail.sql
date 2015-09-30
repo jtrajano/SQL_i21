@@ -21,7 +21,8 @@ SELECT
 	,ITX.ysnTaxExempt 
 	,ITX.dblTax 
 	,ITX.dblAdjustedTax 
-	,ITX.ysnTaxAdjusted 	
+	,ITX.ysnTaxAdjusted
+	,TG.strTaxGroup  	
 FROM
 	tblARInvoiceDetailTax ITX
 INNER JOIN
@@ -39,3 +40,6 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	tblSMTaxCode TC
 		ON ITX.intTaxCodeId = TC.intTaxCodeId
+LEFT OUTER JOIN
+	tblSMTaxGroup TG
+		ON ITX.intTaxGroupId = TG.intTaxGroupId 
