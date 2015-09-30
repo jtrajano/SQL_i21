@@ -34,6 +34,17 @@ BEGIN
 						+ CAST(v.aptrx_chk_no AS NVARCHAR(8))
 					) COLLATE Latin1_General_CI_AS
 
+		UNION SELECT
+		id = CAST(ROW_NUMBER() OVER (ORDER BY intUndepositedFundId) AS INT), 
+		intUndepositedFundId, 
+		intBankAccountId, 
+		intGLAccountId = (SELECT intAccountId FROM tblARPayment WHERE  intPaymentId = tblCMUndepositedFund.intSourceTransactionId),
+		strAccountDescription = (SELECT strDescription FROM tblGLAccount WHERE intAccountId = (SELECT intAccountId FROM tblARPayment WHERE  intPaymentId = tblCMUndepositedFund.intSourceTransactionId)),
+		dblAmount,
+		strName, 
+		dtmDate
+		FROM tblCMUndepositedFund
+
 	')
 END
 
