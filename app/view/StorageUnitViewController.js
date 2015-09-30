@@ -84,6 +84,7 @@ Ext.define('Inventory.view.StorageUnitViewController', {
                 store: '{commodity}'
             },
             txtPackFactor: '{current.dblPackFactor}',
+            txtEffectiveDepth: '{current.dblEffectiveDepth}',
             txtUnitsPerFoot: '{current.dblUnitPerFoot}',
             txtResidualUnits: '{current.dblResidualUnit}',
 

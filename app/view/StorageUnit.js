@@ -392,78 +392,6 @@ Ext.define('Inventory.view.StorageUnit', {
                                             labelWidth: 110,
                                             displayField: 'strUnitMeasure',
                                             valueField: 'intUnitMeasureId'
-                                        }
-                                    ]
-                                },
-                                {
-                                    xtype: 'container',
-                                    flex: 1,
-                                    margin: '0 0 0 10',
-                                    layout: {
-                                        type: 'vbox',
-                                        align: 'stretch'
-                                    },
-                                    items: [
-                                        {
-                                            xtype: 'panel',
-                                            itemId: 'pnlCapacity',
-                                            bodyPadding: 5,
-                                            title: 'Capacity',
-                                            layout: {
-                                                type: 'vbox',
-                                                align: 'stretch'
-                                            },
-                                            items: [
-                                                {
-                                                    xtype: 'gridcombobox',
-                                                    columns: [
-                                                        {
-                                                            dataIndex: 'intCommodityId',
-                                                            dataType: 'numeric',
-                                                            text: 'Commodity Id',
-                                                            hidden: true
-                                                        },
-                                                        {
-                                                            dataIndex: 'strCommodityCode',
-                                                            dataType: 'string',
-                                                            text: 'Commodity',
-                                                            flex: 1
-                                                        },
-                                                        {
-                                                            dataIndex: 'strDescription',
-                                                            dataType: 'string',
-                                                            text: 'Description',
-                                                            flex: 1
-                                                        }
-                                                    ],
-                                                    itemId: 'cboCommodity',
-                                                    fieldLabel: 'Commodity',
-                                                    labelWidth: 115,
-                                                    displayField: 'strCommodityCode',
-                                                    valueField: 'intCommodityId'
-                                                },
-                                                {
-                                                    xtype: 'numberfield',
-                                                    itemId: 'txtPackFactor',
-                                                    fieldLabel: 'Pack Factor',
-                                                    labelWidth: 115,
-                                                    hideTrigger: true
-                                                },
-                                                {
-                                                    xtype: 'numberfield',
-                                                    itemId: 'txtUnitsPerFoot',
-                                                    fieldLabel: 'Units Per Foot',
-                                                    labelWidth: 115,
-                                                    hideTrigger: true
-                                                },
-                                                {
-                                                    xtype: 'numberfield',
-                                                    itemId: 'txtResidualUnits',
-                                                    fieldLabel: 'Residual Units',
-                                                    labelWidth: 115,
-                                                    hideTrigger: true
-                                                }
-                                            ]
                                         },
                                         {
                                             xtype: 'panel',
@@ -550,6 +478,85 @@ Ext.define('Inventory.view.StorageUnit', {
                                                     ]
                                                 }
                                             ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'container',
+                                    flex: 1,
+                                    margin: '0 0 0 10',
+                                    layout: {
+                                        type: 'vbox',
+                                        align: 'stretch'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'panel',
+                                            itemId: 'pnlCapacity',
+                                            bodyPadding: 5,
+                                            title: 'Capacity',
+                                            layout: {
+                                                type: 'vbox',
+                                                align: 'stretch'
+                                            },
+                                            items: [
+                                                {
+                                                    xtype: 'gridcombobox',
+                                                    columns: [
+                                                        {
+                                                            dataIndex: 'intCommodityId',
+                                                            dataType: 'numeric',
+                                                            text: 'Commodity Id',
+                                                            hidden: true
+                                                        },
+                                                        {
+                                                            dataIndex: 'strCommodityCode',
+                                                            dataType: 'string',
+                                                            text: 'Commodity',
+                                                            flex: 1
+                                                        },
+                                                        {
+                                                            dataIndex: 'strDescription',
+                                                            dataType: 'string',
+                                                            text: 'Description',
+                                                            flex: 1
+                                                        }
+                                                    ],
+                                                    itemId: 'cboCommodity',
+                                                    fieldLabel: 'Commodity',
+                                                    labelWidth: 115,
+                                                    displayField: 'strCommodityCode',
+                                                    valueField: 'intCommodityId'
+                                                },
+                                                {
+                                                    xtype: 'numberfield',
+                                                    itemId: 'txtPackFactor',
+                                                    fieldLabel: 'Pack Factor',
+                                                    labelWidth: 115,
+                                                    hideTrigger: true
+                                                },
+                                                {
+                                                    xtype: 'numberfield',
+                                                    itemId: 'txtEffectiveDepth',
+                                                    fieldLabel: 'Effective Depth',
+                                                    labelWidth: 115,
+                                                    hideTrigger: true
+                                                },
+                                                {
+                                                    xtype: 'numberfield',
+                                                    itemId: 'txtUnitsPerFoot',
+                                                    fieldLabel: 'Units Per Foot',
+                                                    labelWidth: 115,
+                                                    hideTrigger: true
+                                                },
+                                                {
+                                                    xtype: 'numberfield',
+                                                    itemId: 'txtResidualUnits',
+                                                    fieldLabel: 'Residual Units',
+                                                    labelWidth: 115,
+                                                    hideTrigger: true
+                                                }
+                                            ]
                                         },
                                         {
                                             xtype: 'panel',
@@ -566,7 +573,8 @@ Ext.define('Inventory.view.StorageUnit', {
                                                     xtype: 'numberfield',
                                                     itemId: 'txtSequence',
                                                     fieldLabel: 'Sequence',
-                                                    hideTrigger: true
+                                                    hideTrigger: true,
+                                                    allowDecimals: false
                                                 },
                                                 {
                                                     xtype: 'checkboxfield',
@@ -577,19 +585,22 @@ Ext.define('Inventory.view.StorageUnit', {
                                                     xtype: 'numberfield',
                                                     itemId: 'txtXPosition',
                                                     fieldLabel: 'X Position',
-                                                    hideTrigger: true
+                                                    hideTrigger: true,
+                                                    allowDecimals: false
                                                 },
                                                 {
                                                     xtype: 'numberfield',
                                                     itemId: 'txtYPosition',
                                                     fieldLabel: 'Y Position',
-                                                    hideTrigger: true
+                                                    hideTrigger: true,
+                                                    allowDecimals: false
                                                 },
                                                 {
                                                     xtype: 'numberfield',
                                                     itemId: 'txtZPosition',
                                                     fieldLabel: 'Z Position',
-                                                    hideTrigger: true
+                                                    hideTrigger: true,
+                                                    allowDecimals: false
                                                 }
                                             ]
                                         }

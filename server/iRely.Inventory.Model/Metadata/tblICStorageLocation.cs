@@ -44,6 +44,7 @@ namespace iRely.Inventory.Model
         public int? intRelativeZ { get; set; }
         public int? intCommodityId { get; set; }
         public decimal? dblPackFactor { get; set; }
+        public decimal? dblEffectiveDepth { get; set; }
         public decimal? dblUnitPerFoot { get; set; }
         public decimal? dblResidualUnit { get; set; }
 
