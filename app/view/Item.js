@@ -68,8 +68,8 @@ Ext.define('Inventory.view.Item', {
                         dockedItems: [
                             {
                                 xtype: 'toolbar',
-                                dock: 'top',
                                 flex: 1,
+                                dock: 'top',
                                 layout: {
                                     type: 'hbox',
                                     padding: '0 0 0 1'
@@ -1312,39 +1312,6 @@ Ext.define('Inventory.view.Item', {
                                                                         itemId: 'chkFuelItem',
                                                                         fieldLabel: 'Fuel Item',
                                                                         labelWidth: 116
-                                                                    },
-                                                                    {
-                                                                        xtype: 'panel',
-                                                                        flex: 1,
-                                                                        itemId: 'pnlTankManagment',
-                                                                        title: 'Tank Management',
-                                                                        layout: {
-                                                                            type: 'vbox',
-                                                                            align: 'stretch',
-                                                                            padding: 5
-                                                                        },
-                                                                        items: [
-                                                                            {
-                                                                                xtype: 'checkboxfield',
-                                                                                itemId: 'chkTankRequired',
-                                                                                fieldLabel: 'Tank Required',
-                                                                                labelWidth: 110
-                                                                            },
-                                                                            {
-                                                                                xtype: 'checkboxfield',
-                                                                                itemId: 'chkAvailableForTm',
-                                                                                fieldLabel: 'Available for TM',
-                                                                                labelWidth: 110
-                                                                            },
-                                                                            {
-                                                                                xtype: 'numericfield',
-                                                                                itemId: 'txtDefaultPercentFull',
-                                                                                fieldLabel: 'Default % Full',
-                                                                                labelWidth: 110,
-                                                                                fieldStyle: 'text-align:right',
-                                                                                hideTrigger: true
-                                                                            }
-                                                                        ]
                                                                     }
                                                                 ]
                                                             },
@@ -3764,6 +3731,72 @@ Ext.define('Inventory.view.Item', {
                                                                         labelWidth: 105,
                                                                         displayField: 'strUnitMeasure',
                                                                         valueField: 'intItemUOMId'
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                xtype: 'container',
+                                                                flex: 1,
+                                                                layout: {
+                                                                    type: 'vbox',
+                                                                    align: 'stretch'
+                                                                }
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'panel',
+                                                        itemId: 'pgeOthers',
+                                                        bodyPadding: 7,
+                                                        title: 'Others',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            align: 'stretch'
+                                                        },
+                                                        tabConfig: {
+                                                            xtype: 'tab',
+                                                            itemId: 'cfgOthers'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'container',
+                                                                flex: 1,
+                                                                layout: {
+                                                                    type: 'vbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'panel',
+                                                                        itemId: 'pnlTankManagment',
+                                                                        title: 'Tank Management',
+                                                                        layout: {
+                                                                            type: 'vbox',
+                                                                            align: 'stretch',
+                                                                            padding: 5
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'checkboxfield',
+                                                                                itemId: 'chkTankRequired',
+                                                                                fieldLabel: 'Tank Required',
+                                                                                labelWidth: 110
+                                                                            },
+                                                                            {
+                                                                                xtype: 'checkboxfield',
+                                                                                itemId: 'chkAvailableForTm',
+                                                                                fieldLabel: 'Available for TM',
+                                                                                labelWidth: 110
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numericfield',
+                                                                                itemId: 'txtDefaultPercentFull',
+                                                                                fieldLabel: 'Default % Full',
+                                                                                labelWidth: 110,
+                                                                                fieldStyle: 'text-align:right',
+                                                                                hideTrigger: true
+                                                                            }
+                                                                        ]
                                                                     }
                                                                 ]
                                                             },

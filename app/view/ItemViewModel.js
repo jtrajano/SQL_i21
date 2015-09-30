@@ -1181,6 +1181,30 @@ Ext.define('Inventory.view.ItemViewModel', {
                     break;
             }
         },
+        pgeOthersHide: function(get) {
+            switch(get('current.strType')) {
+                case 'Bundle':
+                case 'Inventory Item':
+                case 'Inventory':
+                case 'Finished Good' :
+                case 'Non-Inventory':
+                case 'Other Charge':
+                case 'Service':
+                case 'Raw Material':
+                    return false;
+                    break;
+
+                case 'Assembly':
+                case 'Assembly/Blend':
+                case 'Assembly/Formula/Blend':
+                case 'Kit':
+                case 'Manufacturing Item':
+                case 'Manufacturing':
+                case 'Software':
+                    return true;
+                    break;
+            }
+        },
         readOnlyCostMethod: function (get) {
             if (iRely.Functions.isEmpty(get('current.intOnCostTypeId'))) {
                 return false;

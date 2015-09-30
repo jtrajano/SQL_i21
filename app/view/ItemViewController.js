@@ -112,6 +112,9 @@ Ext.define('Inventory.view.ItemViewController', {
             cfgCost: {
                 hidden: '{pgeCostHide}'
             },
+            cfgOthers: {
+                hidden: '{pgeOthersHide}'
+            },
 
             grdUnitOfMeasure: {
                 colDetailUnitMeasure: {
