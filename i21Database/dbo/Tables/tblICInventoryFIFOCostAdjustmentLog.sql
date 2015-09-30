@@ -14,6 +14,7 @@
 	(
 		[intId] INT NOT NULL IDENTITY, 
 		[intInventoryFIFOId] INT NOT NULL, 
+		[intInventoryTransactionId] INT NOT NULL, 
 		[intInventoryCostAdjustmentTypeId] INT NOT NULL, 
 		[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0,
 		[dblCost] NUMERIC(38, 20) NOT NULL DEFAULT 0,

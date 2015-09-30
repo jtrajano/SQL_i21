@@ -870,6 +870,8 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnAverageCosting for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostCostAdjustment for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnAverageCosting, Receive Stocks, Cost Adjust.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnAverageCosting. Receive Stocks. Repost Receive Stocks. Cost Adjust.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnAverageCosting. Receive Stocks. Cost Adjust. Unpost Receive Stocks.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

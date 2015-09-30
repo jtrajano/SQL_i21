@@ -2352,6 +2352,7 @@
     <Build Include="dbo\User Defined Types\FilterTableType.sql" />
     <Build Include="dbo\Functions\fnConvertFilterTableToWhereExpression.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentInfo.sql" />
+    <Build Include="dbo\Stored Procedures\uspICErrorMessages.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

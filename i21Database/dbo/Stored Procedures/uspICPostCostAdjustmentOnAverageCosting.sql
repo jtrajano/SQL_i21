@@ -80,6 +80,8 @@ DECLARE @CostBucketId AS INT
 		,@CostBucketStockInQty AS NUMERIC(18,6)
 		,@CostBucketStockOutQty AS NUMERIC(18,6)
 		,@CostBucketUOMQty AS NUMERIC(18,6)
+		,@CostBucketIntTransactionId AS INT
+		,@CostBucketStrTransactionId AS NVARCHAR(40)
 
 		,@InventoryTransactionIdentityId AS INT
 		,@OriginalCost AS NUMERIC(38,20)
@@ -115,6 +117,8 @@ BEGIN
 			,@CostBucketStockInQty = dblStockIn
 			,@CostBucketStockOutQty = dblStockOut
 			,@CostBucketUOMQty = tblICItemUOM.dblUnitQty
+			,@CostBucketIntTransactionId = intTransactionId
+			,@CostBucketStrTransactionId = strTransactionId
 	FROM	dbo.tblICInventoryFIFO LEFT JOIN dbo.tblICItemUOM 
 				ON tblICInventoryFIFO.intItemUOMId = tblICItemUOM.intItemUOMId
 	WHERE	tblICInventoryFIFO.intItemId = @intItemId
@@ -140,7 +144,7 @@ BEGIN
 		WHERE	intItemId = @intItemId
 
 		-- 'Cost adjustment cannot continue. Unable to find the cost bucket for {Item}.'
-		RAISERROR(51182, 11, 1, @strItemNo)  
+		RAISERROR(80062, 11, 1, @strItemNo)  
 		GOTO Post_Exit  
 	END
 END 
@@ -152,39 +156,21 @@ BEGIN
 		GOTO Post_Exit
 END 
 
--- Log original cost to tblICInventoryFIFOCostAdjustmentLog
-BEGIN 
-	INSERT INTO tblICInventoryFIFOCostAdjustmentLog (
-			[intInventoryFIFOId]
-			,[intInventoryCostAdjustmentTypeId]
-			,[dblQty]
-			,[dblCost]
-			,[dtmCreated]
-			,[intCreatedUserId]		
-	)
-	SELECT	[intInventoryFIFOId]				= @CostBucketId
-			,[intInventoryCostAdjustmentTypeId]	= @COST_ADJ_TYPE_Original_Cost
-			,[dblQty]							= @CostBucketStockInQty
-			,[dblCost]							= @CostBucketCost
-			,[dtmCreated]						= GETDATE()
-			,[intCreatedUserId]					= @intUserId
-	WHERE NOT EXISTS (
-		SELECT	TOP 1 1 
-		FROM	dbo.tblICInventoryFIFOCostAdjustmentLog
-		WHERE	intInventoryFIFOId = @CostBucketId
-				AND intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
-	)
-END 
-
 -----------------------------------------------------------------------------------------------------------------------------
 -- Post the cost adjustment. 
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	-- Get the original cost from the FIFO cost adjustment log table. 
-	SELECT	@OriginalCost = dblCost
-	FROM	dbo.tblICInventoryFIFOCostAdjustmentLog
-	WHERE	intInventoryFIFOId = @CostBucketId
-			AND intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
+	-- Get the original cost. 
+	BEGIN 
+		-- Get the original cost from the FIFO cost adjustment log table. 
+		SELECT	@OriginalCost = dblCost
+		FROM	dbo.tblICInventoryFIFOCostAdjustmentLog
+		WHERE	intInventoryFIFOId = @CostBucketId
+				AND intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
+		
+		-- If none found, the original cost is the cost bucket cost. 
+		SET @OriginalCost = ISNULL(@OriginalCost, @CostBucketCost) 
+	END 
 
 	-- Compute the new transaction value. 
 	SELECT	@NewTransactionValue = @dblQty * @dblNewCost
@@ -192,9 +178,11 @@ BEGIN
 	-- Compute the original transaction value. 
 	SELECT	@OriginalTransactionValue = @dblQty * @OriginalCost
 
+	-- Compute the new cost. 
 	SELECT @dblNewCalculatedCost =	@CostBucketCost 
 									+ ((@NewTransactionValue - @OriginalTransactionValue) / @CostBucketStockInQty)	
 
+	-- Compute value to adjust the item valuation. 
 	SELECT @CostAdjustmentValue = @dblQty * (@dblNewCost - @OriginalCost)
 
 	-- Create the 'Cost Adjustment'
@@ -219,28 +207,58 @@ BEGIN
 		,@intTransactionTypeId					= @INVENTORY_COST_ADJUSTMENT
 		,@intLotId								= NULL 
 		,@intRelatedInventoryTransactionId		= NULL 
-		,@intRelatedTransactionId				= NULL 
-		,@strRelatedTransactionId				= NULL 
+		,@intRelatedTransactionId				= @CostBucketIntTransactionId 
+		,@strRelatedTransactionId				= @CostBucketStrTransactionId
 		,@strTransactionForm					= @TransactionTypeName
 		,@intUserId								= @intUserId
 		,@intCostingMethod						= @AVERAGECOST
 		,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 
-	-- Log the new cost
-	INSERT INTO tblICInventoryFIFOCostAdjustmentLog (
-			[intInventoryFIFOId]
-			,[intInventoryCostAdjustmentTypeId]
-			,[dblQty]
-			,[dblCost]
-			,[dtmCreated]
-			,[intCreatedUserId]		
+	-- Log original cost to tblICInventoryFIFOCostAdjustmentLog
+	IF NOT EXISTS (
+			SELECT	TOP 1 1 
+			FROM	dbo.tblICInventoryFIFOCostAdjustmentLog
+			WHERE	intInventoryFIFOId = @CostBucketId
+					AND intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
 	)
-	SELECT	[intInventoryFIFOId]				= @CostBucketId
-			,[intInventoryCostAdjustmentTypeId]	= @COST_ADJ_TYPE_New_Cost
-			,[dblQty]							= @dblQty
-			,[dblCost]							= @dblNewCost
-			,[dtmCreated]						= GETDATE()
-			,[intCreatedUserId]					= @intUserId
+	BEGIN 
+		INSERT INTO tblICInventoryFIFOCostAdjustmentLog (
+				[intInventoryFIFOId]
+				,[intInventoryTransactionId]
+				,[intInventoryCostAdjustmentTypeId]
+				,[dblQty]
+				,[dblCost]
+				,[dtmCreated]
+				,[intCreatedUserId]		
+		)
+		SELECT	[intInventoryFIFOId]				= @CostBucketId
+				,[intInventoryTransactionId]		= @InventoryTransactionIdentityId
+				,[intInventoryCostAdjustmentTypeId]	= @COST_ADJ_TYPE_Original_Cost
+				,[dblQty]							= @CostBucketStockInQty
+				,[dblCost]							= @CostBucketCost
+				,[dtmCreated]						= GETDATE()
+				,[intCreatedUserId]					= @intUserId
+	END 
+
+	-- Log a new cost. 
+	BEGIN 
+		INSERT INTO tblICInventoryFIFOCostAdjustmentLog (
+				[intInventoryFIFOId]
+				,[intInventoryTransactionId]
+				,[intInventoryCostAdjustmentTypeId]
+				,[dblQty]
+				,[dblCost]
+				,[dtmCreated]
+				,[intCreatedUserId]		
+		)
+		SELECT	[intInventoryFIFOId]				= @CostBucketId
+				,[intInventoryTransactionId]		= @InventoryTransactionIdentityId
+				,[intInventoryCostAdjustmentTypeId]	= @COST_ADJ_TYPE_New_Cost
+				,[dblQty]							= @dblQty
+				,[dblCost]							= @dblNewCost
+				,[dtmCreated]						= GETDATE()
+				,[intCreatedUserId]					= @intUserId
+	END 
 			
 	-- Calculate the new cost
 	UPDATE	CostBucket
