@@ -14,22 +14,24 @@ SELECT strRecordNumber
 	 , A.intEntitySalespersonId	 
 	 , A.strTransactionType
 	 , A.strType
-	 , A.dblQtyOrdered
-	 , A.dblQtyShipped
-	 , ICP.dblStandardCost			  AS dblCost
+	 , ISNULL(A.dblQtyOrdered, 0)	  AS dblQtyOrdered
+	 , ISNULL(A.dblQtyShipped, 0)     AS dblQtyShipped
+	 , ISNULL(ICP.dblStandardCost, 0) AS dblCost
 	 , dblMargin = (ISNULL(A.dblPrice, 0) - ISNULL(ICP.dblStandardCost, 0)) * 
 						CASE WHEN A.strTransactionType IN ('Invoice', 'Credit Memo') 
 							THEN ISNULL(A.dblQtyShipped, 0) 
 							ELSE ISNULL(A.dblQtyOrdered, 0)
 						END
-	 , A.dblPrice
-	 , A.dblTax
-	 , A.dblTotal
+	 , ISNULL(A.dblPrice, 0)		  AS dblPrice
+	 , ISNULL(A.dblTax, 0)			  AS dblTax
+	 , ISNULL(A.dblLineTotal, 0)	  AS dblLineTotal
+	 , ISNULL(A.dblTotal, 0)		  AS dblTotal
 	 , C.strCustomerNumber
 	 , GA.strDescription			  AS strAccountName
 	 , L.strLocationName
 	 , IC.strItemNo					  AS strItemName
-	 , A.strItemDescription		      AS strItemDesc
+	 , IC.strDescription              AS strItemDesc
+	 , A.strItemDescription			  AS strLineDesc
 	 , UOM.strUnitMeasure			  AS strUOM
 	 , ICM.strManufacturer
 	 , ICB.strBrandName
@@ -56,11 +58,13 @@ FROM
 	  , ID.dblQtyShipped
 	  , ID.dblPrice
 	  , ID.dblTotalTax				  AS dblTax
+	  , ID.dblTotal					  AS dblLineTotal
 	  , I.dblInvoiceTotal			  AS dblTotal
 	  , I.strBillToLocationName
 	  , I.strShipToLocationName
 FROM tblARInvoice I INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceId = ID.intInvoiceId
-WHERE I.ysnPosted = 1
+WHERE I.ysnPosted = 1 
+  AND I.strTransactionType IN ('Invoice', 'Credit Memo')
 
 UNION ALL
 
@@ -80,6 +84,7 @@ SELECT SO.strSalesOrderNumber		  AS strRecordNumber
 	 , SOD.dblQtyShipped
 	 , SOD.dblPrice
 	 , SOD.dblTotalTax				  AS dblTax
+	 , SOD.dblTotal					  AS dblLineTotal
 	 , SO.dblSalesOrderTotal		  AS dblTotal 
 	 , SO.strBillToLocationName
 	 , SO.strShipToLocationName
