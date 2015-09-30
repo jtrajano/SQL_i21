@@ -33,7 +33,8 @@ BEGIN TRY
 			@intNextSequence			INT,
 			@XML						NVARCHAR(MAX),
 			@dblNewQuantity				NUMERIC(18,6),
-			@intNewContractDetailId		INT
+			@intNewContractDetailId		INT,
+			@intPFDetailNoOfLots		INT
 
 	SET		@ysnMultiplePriceFixation = 0
 
@@ -143,13 +144,20 @@ BEGIN TRY
 
 		IF @ysnPartialPricing = 1 
 		BEGIN					
-			SELECT	@dblPFDetailQuantity	=	dblQuantity FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId
+			SELECT	@dblPFDetailQuantity	=	dblQuantity,@intPFDetailNoOfLots = intNoOfLots FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId
 			sELECT	@intNextSequence		=	MAX(intContractSeq) + 1 FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
 
 			SELECT @dblNewQuantity = @dblQuantity - @dblPFDetailQuantity
 			IF	@dblNewQuantity > 0
 			BEGIN
 				EXEC uspCTSplitSequence @intContractDetailId,@dblNewQuantity,@intUserId,@intPriceFixationId,'Price Contract'
+			END
+
+			IF	@intLotsUnfixed > 0
+			BEGIN
+				UPDATE tblCTPriceFixation SET intTotalLots = @intPFDetailNoOfLots WHERE intPriceFixationId	= @intPriceFixationId
+				UPDATE tblCTContractDetail SET dblNoOfLots = @intPFDetailNoOfLots WHERE intContractHeaderId = @intContractHeaderId
+				SET @intLotsUnfixed = 0
 			END
 		END
 

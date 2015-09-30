@@ -2,7 +2,7 @@
 
 AS 
 
-SELECT	*,dblFutures+dblBasis+dblAdditionalCost AS dblFinalPrice
+SELECT	*,ISNULL(dblFutures,0)+ISNULL(dblBasis,0)+ISNULL(dblAdditionalCost,0) AS dblFinalPrice
 FROM	
 (
 	SELECT	PF.intPriceFixationId,
