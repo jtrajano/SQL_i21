@@ -17,8 +17,8 @@
         "iconCls": "small-icon-i21",
         "layout": "fit",
         "maximizable": true,
-        "minHeight": 510,
-        "minWidth": 860,
+        "minHeight": null,
+        "minWidth": null,
         "minimizable": null,
         "mixins": null,
         "title": "Inventory Receipt",
@@ -45,18 +45,18 @@
             "codeClass": null,
             "userConfig": {
                 "bodyBorder": null,
-                "bodyPadding": 5,
+                "bodyPadding": 3,
                 "dock": null,
                 "frame": null,
                 "header": null,
-                "height": 350,
+                "height": null,
                 "itemId": "frmInventoryReceipt",
                 "layout": "fit",
                 "margin": -1,
                 "title": null,
                 "trackResetOnLoad": null,
                 "url": null,
-                "width": 450
+                "width": null
             },
             "name": "MyForm3",
             "designerId": "531c5d9a-2b81-4cd5-bd09-0c76cb3fdbf5",
@@ -1508,7 +1508,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter128",
+                                                                            "name": "filter118",
                                                                             "designerId": "d0fccb51-da61-4d6d-ad4b-179a55fb770f",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -3057,7 +3057,7 @@
                                                                             "userConfig": {
                                                                                 "layout|flex": null
                                                                             },
-                                                                            "name": "filter129",
+                                                                            "name": "filter119",
                                                                             "designerId": "e8ef1885-7b5c-401d-abdc-835e79e283ee",
                                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                         }
@@ -4253,7 +4253,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter130",
+                                                    "name": "filter120",
                                                     "designerId": "0acd5079-0156-43fe-90e5-f730144b8d82",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4494,7 +4494,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter131",
+                                                            "name": "filter121",
                                                             "designerId": "862260b9-0de6-4b16-a64e-db1153706a1f",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -5683,7 +5683,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter132",
+                                                    "name": "filter122",
                                                     "designerId": "3e268e54-a4dd-4712-b132-3293d8ab699f",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -6170,7 +6170,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging14",
+                    "name": "statusbarpaging113",
                     "designerId": "9350e902-fb7d-44a6-907c-0f9e4f032b48",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

@@ -33,8 +33,6 @@ Ext.define('Inventory.view.FuelTank', {
 
     height: 621,
     hidden: false,
-    minHeight: 500,
-    minWidth: 530,
     width: 852,
     layout: 'fit',
     collapsible: true,
@@ -49,11 +47,9 @@ Ext.define('Inventory.view.FuelTank', {
                     {
                         xtype: 'form',
                         autoShow: true,
-                        height: 350,
                         itemId: 'frmFuelTank',
                         margin: -1,
-                        width: 450,
-                        bodyPadding: 5,
+                        bodyPadding: 3,
                         trackResetOnLoad: true,
                         layout: {
                             type: 'vbox',

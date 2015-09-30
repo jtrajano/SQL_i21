@@ -20,19 +20,18 @@ Ext.define('Inventory.view.InventoryCountName', {
     requires: [
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
-        'Ext.button.Button',
         'Ext.toolbar.Separator',
+        'Ext.tab.Panel',
+        'Ext.tab.Tab',
         'Ext.form.field.Number',
         'Ext.form.field.Checkbox',
         'Ext.form.field.ComboBox',
         'Ext.toolbar.Paging'
     ],
 
-    height: 355,
+    height: 384,
     hidden: false,
-    maxHeight: 355,
-    minHeight: 355,
-    width: 469,
+    width: 456,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
@@ -45,7 +44,7 @@ Ext.define('Inventory.view.InventoryCountName', {
             itemId: 'frmInventoryCountName',
             margin: -1,
             bodyBorder: false,
-            bodyPadding: 10,
+            bodyPadding: 3,
             header: false,
             trackResetOnLoad: true,
             layout: {
@@ -143,60 +142,80 @@ Ext.define('Inventory.view.InventoryCountName', {
             ],
             items: [
                 {
-                    xtype: 'container',
-                    layout: {
-                        type: 'vbox',
-                        align: 'stretch'
-                    },
+                    xtype: 'tabpanel',
+                    flex: 1,
+                    itemId: 'tabInventoryCountName',
+                    activeTab: 0,
+                    plain: true,
                     items: [
                         {
-                            xtype: 'textfield',
-                            itemId: 'txtCountName',
-                            fieldLabel: 'Count Name',
-                            labelWidth: 125
-                        },
-                        {
-                            xtype: 'numberfield',
-                            itemId: 'txtCountsPerYear',
-                            fieldLabel: 'Counts Per Year',
-                            labelWidth: 125,
-                            hideTrigger: true
-                        },
-                        {
-                            xtype: 'checkboxfield',
-                            itemId: 'chkIncludeOnHand',
-                            fieldLabel: 'Include On Hand',
-                            labelWidth: 125
-                        },
-                        {
-                            xtype: 'combobox',
-                            itemId: 'cboInventoryType',
-                            fieldLabel: 'Inventory Type',
-                            labelWidth: 125
-                        },
-                        {
-                            xtype: 'combobox',
-                            itemId: 'cboCountCard',
-                            fieldLabel: 'Count Card',
-                            labelWidth: 125
-                        },
-                        {
-                            xtype: 'checkboxfield',
-                            itemId: 'txtScannedCountEntry',
-                            fieldLabel: 'Scanned Count Entry',
-                            labelWidth: 125
-                        },
-                        {
-                            xtype: 'checkboxfield',
-                            itemId: 'txtCountByLots',
-                            fieldLabel: 'Count by Lots',
-                            labelWidth: 125
-                        },
-                        {
-                            xtype: 'checkboxfield',
-                            itemId: 'chkRecountMismatch',
-                            fieldLabel: 'Recount Mismatch',
-                            labelWidth: 125
+                            xtype: 'panel',
+                            bodyPadding: 5,
+                            title: 'Details',
+                            layout: {
+                                type: 'vbox',
+                                align: 'stretch'
+                            },
+                            items: [
+                                {
+                                    xtype: 'container',
+                                    layout: {
+                                        type: 'vbox',
+                                        align: 'stretch'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'textfield',
+                                            itemId: 'txtCountName',
+                                            fieldLabel: 'Count Name',
+                                            labelWidth: 125
+                                        },
+                                        {
+                                            xtype: 'numberfield',
+                                            itemId: 'txtCountsPerYear',
+                                            fieldLabel: 'Counts Per Year',
+                                            labelWidth: 125,
+                                            hideTrigger: true
+                                        },
+                                        {
+                                            xtype: 'checkboxfield',
+                                            itemId: 'chkIncludeOnHand',
+                                            fieldLabel: 'Include On Hand',
+                                            labelWidth: 125
+                                        },
+                                        {
+                                            xtype: 'combobox',
+                                            itemId: 'cboInventoryType',
+                                            fieldLabel: 'Inventory Type',
+                                            labelWidth: 125
+                                        },
+                                        {
+                                            xtype: 'combobox',
+                                            itemId: 'cboCountCard',
+                                            fieldLabel: 'Count Card',
+                                            labelWidth: 125
+                                        },
+                                        {
+                                            xtype: 'checkboxfield',
+                                            itemId: 'txtScannedCountEntry',
+                                            fieldLabel: 'Scanned Count Entry',
+                                            labelWidth: 125
+                                        },
+                                        {
+                                            xtype: 'checkboxfield',
+                                            itemId: 'txtCountByLots',
+                                            fieldLabel: 'Count by Lots',
+                                            labelWidth: 125
+                                        },
+                                        {
+                                            xtype: 'checkboxfield',
+                                            itemId: 'chkRecountMismatch',
+                                            fieldLabel: 'Recount Mismatch',
+                                            labelWidth: 125
+                                        }
+                                    ]
+                                }
+                            ]
                         }
                     ]
                 }

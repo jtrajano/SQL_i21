@@ -36,8 +36,6 @@ Ext.define('Inventory.view.InventoryCount', {
 
     height: 773,
     hidden: false,
-    minHeight: 625,
-    minWidth: 765,
     width: 1048,
     layout: 'fit',
     collapsible: true,
@@ -52,7 +50,7 @@ Ext.define('Inventory.view.InventoryCount', {
             itemId: 'frmInventoryCount',
             margin: -1,
             bodyBorder: false,
-            bodyPadding: 5,
+            bodyPadding: 3,
             header: false,
             trackResetOnLoad: true,
             layout: {

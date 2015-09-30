@@ -29,8 +29,6 @@ Ext.define('Inventory.view.InventoryTag', {
 
     height: 525,
     hidden: false,
-    minHeight: 525,
-    minWidth: 600,
     width: 600,
     layout: 'fit',
     collapsible: true,
@@ -42,10 +40,8 @@ Ext.define('Inventory.view.InventoryTag', {
         {
             xtype: 'form',
             autoShow: true,
-            height: 350,
             itemId: 'frmInventoryTag',
             margin: -1,
-            width: 450,
             bodyBorder: false,
             bodyPadding: 10,
             header: false,

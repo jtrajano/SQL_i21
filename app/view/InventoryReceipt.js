@@ -42,8 +42,6 @@ Ext.define('Inventory.view.InventoryReceipt', {
 
     height: 700,
     hidden: false,
-    minHeight: 510,
-    minWidth: 860,
     width: 1100,
     layout: 'fit',
     collapsible: true,
@@ -58,12 +56,10 @@ Ext.define('Inventory.view.InventoryReceipt', {
                 items: [
                     {
                         xtype: 'form',
-                        height: 350,
                         itemId: 'frmInventoryReceipt',
                         margin: -1,
-                        width: 450,
                         layout: 'fit',
-                        bodyPadding: 5,
+                        bodyPadding: 3,
                         dockedItems: [
                             {
                                 xtype: 'toolbar',

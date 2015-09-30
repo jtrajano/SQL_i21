@@ -10,18 +10,18 @@
         "defaultFocus": null,
         "designer|userAlias": "icmanufacturingcell",
         "designer|userClassName": "ManufacturingCell",
-        "height": 442,
+        "height": 419,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "layout": "fit",
         "maximizable": true,
-        "minHeight": 335,
-        "minWidth": 520,
+        "minHeight": null,
+        "minWidth": null,
         "minimizable": null,
         "reference": null,
         "title": "Manufacturing Cell",
-        "width": 772
+        "width": 760
     },
     "name": "ReasonCode1",
     "designerId": "fc1a597a-48be-45d3-9d1c-e325c5a5ce41",
@@ -38,19 +38,19 @@
             "userConfig": {
                 "autoShow": true,
                 "bodyBorder": false,
-                "bodyPadding": 5,
+                "bodyPadding": 3,
                 "container|align": "stretch",
                 "dock": null,
                 "frame": null,
                 "header": false,
-                "height": 350,
+                "height": null,
                 "itemId": "frmManufacturingCell",
                 "layout": "vbox",
                 "margin": -1,
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
-                "width": 450
+                "width": null
             },
             "name": "MyForm8",
             "designerId": "d5eb9a20-95ad-490e-9ab7-a1ec63c96c93",
@@ -749,7 +749,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter17",
+                                                    "name": "filter152",
                                                     "designerId": "c9ec8acc-5eda-44f2-b041-640223eb1297",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1106,7 +1106,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging14",
+                    "name": "statusbarpaging120",
                     "designerId": "b8c68781-2254-4e56-be5b-6f6e6ef770ac",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

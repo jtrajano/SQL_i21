@@ -21,8 +21,9 @@ Ext.define('Inventory.view.FuelTaxClass', {
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
-        'Ext.button.Button',
         'Ext.toolbar.Separator',
+        'Ext.tab.Panel',
+        'Ext.tab.Tab',
         'Ext.grid.Panel',
         'Ext.grid.column.Column',
         'Ext.form.field.ComboBox',
@@ -34,8 +35,6 @@ Ext.define('Inventory.view.FuelTaxClass', {
 
     height: 525,
     hidden: false,
-    minHeight: 525,
-    minWidth: 425,
     width: 425,
     layout: 'fit',
     collapsible: true,
@@ -50,12 +49,10 @@ Ext.define('Inventory.view.FuelTaxClass', {
                     {
                         xtype: 'form',
                         autoShow: true,
-                        height: 350,
                         itemId: 'frmFuelTaxClass',
                         margin: -1,
-                        width: 450,
                         bodyBorder: false,
-                        bodyPadding: 10,
+                        bodyPadding: 3,
                         header: false,
                         trackResetOnLoad: true,
                         layout: {
@@ -153,111 +150,129 @@ Ext.define('Inventory.view.FuelTaxClass', {
                         ],
                         items: [
                             {
-                                xtype: 'container',
-                                flex: 1.25,
-                                margin: '0 5 0 0',
-                                width: 1014,
-                                layout: {
-                                    type: 'vbox',
-                                    align: 'stretch'
-                                },
+                                xtype: 'tabpanel',
+                                flex: 1,
+                                itemId: 'tabFuelTaxClass',
+                                activeTab: 0,
+                                plain: true,
                                 items: [
                                     {
-                                        xtype: 'container',
-                                        margin: '0 0 5 0',
-                                        layout: 'hbox',
+                                        xtype: 'panel',
+                                        bodyPadding: 5,
+                                        title: 'Details',
+                                        layout: {
+                                            type: 'vbox',
+                                            align: 'stretch'
+                                        },
                                         items: [
                                             {
-                                                xtype: 'textfield',
+                                                xtype: 'container',
                                                 flex: 1,
-                                                itemId: 'txtTaxClassCode',
-                                                fieldLabel: 'Tax Class Code',
-                                                labelWidth: 90
-                                            },
-                                            {
-                                                xtype: 'textfield',
-                                                flex: 1,
-                                                itemId: 'txtIrsTaxCode',
-                                                margin: '0 0 0 5',
-                                                fieldLabel: 'IRS Tax Code',
-                                                labelWidth: 90
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        xtype: 'textfield',
-                                        itemId: 'txtDescription',
-                                        fieldLabel: 'Description',
-                                        labelWidth: 90
-                                    },
-                                    {
-                                        xtype: 'advancefiltergrid',
-                                        flex: 1,
-                                        itemId: 'grdProductCode',
-                                        title: 'Product Codes',
-                                        dockedItems: [
-                                            {
-                                                xtype: 'toolbar',
-                                                dock: 'top',
-                                                itemId: 'tlbGridOptions',
                                                 layout: {
-                                                    type: 'hbox',
-                                                    padding: '0 0 0 1'
+                                                    type: 'vbox',
+                                                    align: 'stretch'
                                                 },
                                                 items: [
                                                     {
-                                                        xtype: 'button',
-                                                        tabIndex: -1,
-                                                        itemId: 'btnDeleteProductCode',
-                                                        iconCls: 'small-delete',
-                                                        text: 'Remove'
+                                                        xtype: 'container',
+                                                        margin: '0 0 5 0',
+                                                        layout: 'hbox',
+                                                        items: [
+                                                            {
+                                                                xtype: 'textfield',
+                                                                flex: 1,
+                                                                itemId: 'txtTaxClassCode',
+                                                                fieldLabel: 'Tax Class Code',
+                                                                labelWidth: 90
+                                                            },
+                                                            {
+                                                                xtype: 'textfield',
+                                                                flex: 1,
+                                                                itemId: 'txtIrsTaxCode',
+                                                                margin: '0 0 0 5',
+                                                                fieldLabel: 'IRS Tax Code',
+                                                                labelWidth: 90
+                                                            }
+                                                        ]
                                                     },
                                                     {
-                                                        xtype: 'tbseparator'
+                                                        xtype: 'textfield',
+                                                        itemId: 'txtDescription',
+                                                        fieldLabel: 'Description',
+                                                        labelWidth: 90
                                                     },
                                                     {
-                                                        xtype: 'filter1'
+                                                        xtype: 'advancefiltergrid',
+                                                        flex: 1,
+                                                        itemId: 'grdProductCode',
+                                                        title: 'Product Codes',
+                                                        dockedItems: [
+                                                            {
+                                                                xtype: 'toolbar',
+                                                                dock: 'top',
+                                                                itemId: 'tlbGridOptions',
+                                                                layout: {
+                                                                    type: 'hbox',
+                                                                    padding: '0 0 0 1'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'button',
+                                                                        tabIndex: -1,
+                                                                        itemId: 'btnDeleteProductCode',
+                                                                        iconCls: 'small-delete',
+                                                                        text: 'Remove'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'tbseparator'
+                                                                    },
+                                                                    {
+                                                                        xtype: 'filter1'
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ],
+                                                        columns: [
+                                                            {
+                                                                xtype: 'gridcolumn',
+                                                                itemId: 'colState',
+                                                                width: 82,
+                                                                dataIndex: 'string',
+                                                                text: 'State',
+                                                                flex: 1,
+                                                                editor: {
+                                                                    xtype: 'combobox',
+                                                                    itemId: 'cboState',
+                                                                    displayField: 'strState',
+                                                                    valueField: 'strState'
+                                                                }
+                                                            },
+                                                            {
+                                                                xtype: 'gridcolumn',
+                                                                itemId: 'colProductCode',
+                                                                dataIndex: 'string',
+                                                                text: 'Product Code',
+                                                                flex: 1,
+                                                                editor: {
+                                                                    xtype: 'textfield'
+                                                                }
+                                                            }
+                                                        ],
+                                                        viewConfig: {
+                                                            itemId: 'grvProductCode'
+                                                        },
+                                                        selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                            selType: 'checkboxmodel'
+                                                        }),
+                                                        plugins: [
+                                                            {
+                                                                ptype: 'cellediting',
+                                                                pluginId: 'cepProductCode',
+                                                                clicksToEdit: 1
+                                                            }
+                                                        ]
                                                     }
                                                 ]
-                                            }
-                                        ],
-                                        columns: [
-                                            {
-                                                xtype: 'gridcolumn',
-                                                itemId: 'colState',
-                                                width: 82,
-                                                dataIndex: 'string',
-                                                text: 'State',
-                                                flex: 1,
-                                                editor: {
-                                                    xtype: 'combobox',
-                                                    itemId: 'cboState',
-                                                    displayField: 'strState',
-                                                    valueField: 'strState'
-                                                }
-                                            },
-                                            {
-                                                xtype: 'gridcolumn',
-                                                itemId: 'colProductCode',
-                                                dataIndex: 'string',
-                                                text: 'Product Code',
-                                                flex: 1,
-                                                editor: {
-                                                    xtype: 'textfield'
-                                                }
-                                            }
-                                        ],
-                                        viewConfig: {
-                                            itemId: 'grvProductCode'
-                                        },
-                                        selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                            selType: 'checkboxmodel'
-                                        }),
-                                        plugins: [
-                                            {
-                                                ptype: 'cellediting',
-                                                pluginId: 'cepProductCode',
-                                                clicksToEdit: 1
                                             }
                                         ]
                                     }

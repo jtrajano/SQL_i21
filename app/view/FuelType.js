@@ -20,20 +20,18 @@ Ext.define('Inventory.view.FuelType', {
     requires: [
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
-        'Ext.button.Button',
         'Ext.toolbar.Separator',
+        'Ext.tab.Panel',
+        'Ext.tab.Tab',
         'Ext.form.field.ComboBox',
         'Ext.form.field.Number',
         'Ext.form.field.Checkbox',
         'Ext.toolbar.Paging'
     ],
 
-    height: 465,
+    height: 492,
     hidden: false,
-    maxHeight: 465,
-    minHeight: 465,
-    minWidth: 455,
-    width: 455,
+    width: 459,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
@@ -44,12 +42,10 @@ Ext.define('Inventory.view.FuelType', {
         {
             xtype: 'form',
             autoShow: true,
-            height: 350,
             itemId: 'frmFuelType',
             margin: -1,
-            width: 450,
             bodyBorder: false,
-            bodyPadding: 10,
+            bodyPadding: 3,
             header: false,
             trackResetOnLoad: true,
             layout: {
@@ -147,222 +143,240 @@ Ext.define('Inventory.view.FuelType', {
             ],
             items: [
                 {
-                    xtype: 'container',
-                    flex: 1.25,
-                    margin: '0 5 0 0',
-                    width: 1014,
-                    layout: {
-                        type: 'vbox',
-                        align: 'stretch'
-                    },
+                    xtype: 'tabpanel',
+                    flex: 1,
+                    itemId: 'tabFuelType',
+                    activeTab: 0,
+                    plain: true,
                     items: [
                         {
-                            xtype: 'gridcombobox',
-                            columns: [
+                            xtype: 'panel',
+                            bodyPadding: 5,
+                            title: 'Details',
+                            layout: {
+                                type: 'vbox',
+                                align: 'stretch'
+                            },
+                            items: [
                                 {
-                                    dataIndex: 'intRinFuelCategoryId',
-                                    dataType: 'int',
-                                    text: 'Fuel Category Id',
-                                    hidden: true
-                                },
-                                {
-                                    dataIndex: 'strRinFuelCategoryCode',
-                                    dataType: 'string',
-                                    text: 'Fuel Category',
-                                    flex: 1
-                                },
-                                {
-                                    dataIndex: 'strDescription',
-                                    dataType: 'string',
-                                    text: 'Description',
-                                    flex: 1
-                                },
-                                {
-                                    dataIndex: 'strEquivalenceValue',
-                                    dataType: 'string',
-                                    text: 'Equivalence Value',
-                                    flex: 1
+                                    xtype: 'container',
+                                    flex: 1,
+                                    layout: {
+                                        type: 'vbox',
+                                        align: 'stretch'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'intRinFuelCategoryId',
+                                                    dataType: 'int',
+                                                    text: 'Fuel Category Id',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'strRinFuelCategoryCode',
+                                                    dataType: 'string',
+                                                    text: 'Fuel Category',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'strDescription',
+                                                    dataType: 'string',
+                                                    text: 'Description',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'strEquivalenceValue',
+                                                    dataType: 'string',
+                                                    text: 'Equivalence Value',
+                                                    flex: 1
+                                                }
+                                            ],
+                                            itemId: 'cboFuelCategory',
+                                            fieldLabel: 'Fuel Category',
+                                            labelWidth: 165,
+                                            displayField: 'strRinFuelCategoryCode',
+                                            valueField: 'intRinFuelCategoryId'
+                                        },
+                                        {
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'intRinFeedStockId',
+                                                    dataType: 'int',
+                                                    text: 'Feed Stock Id',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'strRinFeedStockCode',
+                                                    dataType: 'string',
+                                                    text: 'Code',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'strDescription',
+                                                    dataType: 'string',
+                                                    text: 'Description',
+                                                    flex: 1
+                                                }
+                                            ],
+                                            itemId: 'cboFeedStock',
+                                            fieldLabel: 'Feed Stock',
+                                            labelWidth: 165,
+                                            displayField: 'strRinFeedStockCode',
+                                            valueField: 'intRinFeedStockId'
+                                        },
+                                        {
+                                            xtype: 'numberfield',
+                                            itemId: 'txtBatchNo',
+                                            fieldLabel: 'Batch No',
+                                            labelWidth: 165,
+                                            fieldStyle: 'text-align:right',
+                                            hideTrigger: true,
+                                            allowDecimals: false
+                                        },
+                                        {
+                                            xtype: 'numberfield',
+                                            itemId: 'txtEndingRinGallonsForBatch',
+                                            fieldLabel: 'Ending RIN Gallons for Batch',
+                                            labelWidth: 165,
+                                            fieldStyle: 'text-align:right',
+                                            hideTrigger: true,
+                                            allowDecimals: false
+                                        },
+                                        {
+                                            xtype: 'textfield',
+                                            itemId: 'txtEquivalenceValue',
+                                            width: 170,
+                                            fieldLabel: 'Equivalence Value',
+                                            labelWidth: 165
+                                        },
+                                        {
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'intRinFuelId',
+                                                    dataType: 'int',
+                                                    text: 'Fuel Code Id',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'strRinFuelCode',
+                                                    dataType: 'string',
+                                                    text: 'Code',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'strDescription',
+                                                    dataType: 'string',
+                                                    text: 'Description',
+                                                    flex: 1
+                                                }
+                                            ],
+                                            itemId: 'cboFuelCode',
+                                            width: 170,
+                                            fieldLabel: 'Fuel Code',
+                                            labelWidth: 165,
+                                            displayField: 'strRinFuelCode',
+                                            valueField: 'intRinFuelId'
+                                        },
+                                        {
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'intRinProcessId',
+                                                    dataType: 'int',
+                                                    text: 'Process Id',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'strRinProcessCode',
+                                                    dataType: 'string',
+                                                    text: 'Code',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'strDescription',
+                                                    dataType: 'string',
+                                                    text: 'Description',
+                                                    flex: 1
+                                                }
+                                            ],
+                                            itemId: 'cboProductionProcess',
+                                            width: 170,
+                                            fieldLabel: 'Production Process',
+                                            labelWidth: 165,
+                                            displayField: 'strRinProcessCode',
+                                            valueField: 'intRinProcessId'
+                                        },
+                                        {
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'intRinFeedStockUOMId',
+                                                    dataType: 'int',
+                                                    text: 'Feed Stock UOM Id',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'intUnitMeasureId',
+                                                    dataType: 'int',
+                                                    text: 'UOM Id',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'strUnitMeasure',
+                                                    dataType: 'string',
+                                                    text: 'Unit Measure Id',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    dataIndex: 'strRinFeedStockUOMCode',
+                                                    dataType: 'string',
+                                                    text: 'UOM Code',
+                                                    flex: 1
+                                                }
+                                            ],
+                                            itemId: 'cboFeedStockUom',
+                                            width: 170,
+                                            fieldLabel: 'Feed Stock UOM',
+                                            labelWidth: 165,
+                                            displayField: 'strUnitMeasure',
+                                            valueField: 'intRinFeedStockUOMId'
+                                        },
+                                        {
+                                            xtype: 'numberfield',
+                                            itemId: 'txtFeedStockFactor',
+                                            fieldLabel: 'Feed Stock Factor',
+                                            labelWidth: 165,
+                                            fieldStyle: 'text-align:right',
+                                            hideTrigger: true
+                                        },
+                                        {
+                                            xtype: 'checkboxfield',
+                                            itemId: 'chkRenewableBiomass',
+                                            fieldLabel: 'Renewable Biomass',
+                                            labelWidth: 165
+                                        },
+                                        {
+                                            xtype: 'numberfield',
+                                            itemId: 'txtPercentOfDenaturant',
+                                            fieldLabel: 'Percent of Denaturant',
+                                            labelWidth: 165,
+                                            fieldStyle: 'text-align:right',
+                                            hideTrigger: true
+                                        },
+                                        {
+                                            xtype: 'checkboxfield',
+                                            itemId: 'chkDeductDenaturantFromRin',
+                                            fieldLabel: 'Deduct Denaturant from RIN',
+                                            labelWidth: 165
+                                        }
+                                    ]
                                 }
-                            ],
-                            itemId: 'cboFuelCategory',
-                            fieldLabel: 'Fuel Category',
-                            labelWidth: 165,
-                            displayField: 'strRinFuelCategoryCode',
-                            valueField: 'intRinFuelCategoryId'
-                        },
-                        {
-                            xtype: 'gridcombobox',
-                            columns: [
-                                {
-                                    dataIndex: 'intRinFeedStockId',
-                                    dataType: 'int',
-                                    text: 'Feed Stock Id',
-                                    hidden: true
-                                },
-                                {
-                                    dataIndex: 'strRinFeedStockCode',
-                                    dataType: 'string',
-                                    text: 'Code',
-                                    flex: 1
-                                },
-                                {
-                                    dataIndex: 'strDescription',
-                                    dataType: 'string',
-                                    text: 'Description',
-                                    flex: 1
-                                }
-                            ],
-                            itemId: 'cboFeedStock',
-                            fieldLabel: 'Feed Stock',
-                            labelWidth: 165,
-                            displayField: 'strRinFeedStockCode',
-                            valueField: 'intRinFeedStockId'
-                        },
-                        {
-                            xtype: 'numberfield',
-                            itemId: 'txtBatchNo',
-                            fieldLabel: 'Batch No',
-                            labelWidth: 165,
-                            fieldStyle: 'text-align:right',
-                            hideTrigger: true,
-                            allowDecimals: false
-                        },
-                        {
-                            xtype: 'numberfield',
-                            itemId: 'txtEndingRinGallonsForBatch',
-                            fieldLabel: 'Ending RIN Gallons for Batch',
-                            labelWidth: 165,
-                            fieldStyle: 'text-align:right',
-                            hideTrigger: true,
-                            allowDecimals: false
-                        },
-                        {
-                            xtype: 'textfield',
-                            itemId: 'txtEquivalenceValue',
-                            width: 170,
-                            fieldLabel: 'Equivalence Value',
-                            labelWidth: 165
-                        },
-                        {
-                            xtype: 'gridcombobox',
-                            columns: [
-                                {
-                                    dataIndex: 'intRinFuelId',
-                                    dataType: 'int',
-                                    text: 'Fuel Code Id',
-                                    hidden: true
-                                },
-                                {
-                                    dataIndex: 'strRinFuelCode',
-                                    dataType: 'string',
-                                    text: 'Code',
-                                    flex: 1
-                                },
-                                {
-                                    dataIndex: 'strDescription',
-                                    dataType: 'string',
-                                    text: 'Description',
-                                    flex: 1
-                                }
-                            ],
-                            itemId: 'cboFuelCode',
-                            width: 170,
-                            fieldLabel: 'Fuel Code',
-                            labelWidth: 165,
-                            displayField: 'strRinFuelCode',
-                            valueField: 'intRinFuelId'
-                        },
-                        {
-                            xtype: 'gridcombobox',
-                            columns: [
-                                {
-                                    dataIndex: 'intRinProcessId',
-                                    dataType: 'int',
-                                    text: 'Process Id',
-                                    hidden: true
-                                },
-                                {
-                                    dataIndex: 'strRinProcessCode',
-                                    dataType: 'string',
-                                    text: 'Code',
-                                    flex: 1
-                                },
-                                {
-                                    dataIndex: 'strDescription',
-                                    dataType: 'string',
-                                    text: 'Description',
-                                    flex: 1
-                                }
-                            ],
-                            itemId: 'cboProductionProcess',
-                            width: 170,
-                            fieldLabel: 'Production Process',
-                            labelWidth: 165,
-                            displayField: 'strRinProcessCode',
-                            valueField: 'intRinProcessId'
-                        },
-                        {
-                            xtype: 'gridcombobox',
-                            columns: [
-                                {
-                                    dataIndex: 'intRinFeedStockUOMId',
-                                    dataType: 'int',
-                                    text: 'Feed Stock UOM Id',
-                                    hidden: true
-                                },
-                                {
-                                    dataIndex: 'intUnitMeasureId',
-                                    dataType: 'int',
-                                    text: 'UOM Id',
-                                    hidden: true
-                                },
-                                {
-                                    dataIndex: 'strUnitMeasure',
-                                    dataType: 'string',
-                                    text: 'Unit Measure Id',
-                                    flex: 1
-                                },
-                                {
-                                    dataIndex: 'strRinFeedStockUOMCode',
-                                    dataType: 'string',
-                                    text: 'UOM Code',
-                                    flex: 1
-                                }
-                            ],
-                            itemId: 'cboFeedStockUom',
-                            width: 170,
-                            fieldLabel: 'Feed Stock UOM',
-                            labelWidth: 165,
-                            displayField: 'strUnitMeasure',
-                            valueField: 'intRinFeedStockUOMId'
-                        },
-                        {
-                            xtype: 'numberfield',
-                            itemId: 'txtFeedStockFactor',
-                            fieldLabel: 'Feed Stock Factor',
-                            labelWidth: 165,
-                            fieldStyle: 'text-align:right',
-                            hideTrigger: true
-                        },
-                        {
-                            xtype: 'checkboxfield',
-                            itemId: 'chkRenewableBiomass',
-                            fieldLabel: 'Renewable Biomass',
-                            labelWidth: 165
-                        },
-                        {
-                            xtype: 'numberfield',
-                            itemId: 'txtPercentOfDenaturant',
-                            fieldLabel: 'Percent of Denaturant',
-                            labelWidth: 165,
-                            fieldStyle: 'text-align:right',
-                            hideTrigger: true
-                        },
-                        {
-                            xtype: 'checkboxfield',
-                            itemId: 'chkDeductDenaturantFromRin',
-                            fieldLabel: 'Deduct Denaturant from RIN',
-                            labelWidth: 165
+                            ]
                         }
                     ]
                 }

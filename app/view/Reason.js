@@ -35,8 +35,6 @@ Ext.define('Inventory.view.Reason', {
 
     height: 335,
     hidden: false,
-    minHeight: 335,
-    minWidth: 520,
     width: 520,
     layout: 'fit',
     collapsible: true,
@@ -48,12 +46,10 @@ Ext.define('Inventory.view.Reason', {
         {
             xtype: 'form',
             autoShow: true,
-            height: 350,
             itemId: 'frmReason',
             margin: -1,
-            width: 450,
             bodyBorder: false,
-            bodyPadding: 5,
+            bodyPadding: 3,
             header: false,
             trackResetOnLoad: true,
             layout: {

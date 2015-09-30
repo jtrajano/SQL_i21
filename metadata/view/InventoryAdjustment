@@ -17,8 +17,8 @@
         "iconCls": "small-icon-i21",
         "layout": "fit",
         "maximizable": true,
-        "minHeight": 510,
-        "minWidth": 860,
+        "minHeight": null,
+        "minWidth": null,
         "minimizable": null,
         "mixins": null,
         "title": "Inventory Adjustment",
@@ -45,18 +45,18 @@
             "codeClass": null,
             "userConfig": {
                 "bodyBorder": null,
-                "bodyPadding": 5,
+                "bodyPadding": 3,
                 "dock": null,
                 "frame": null,
                 "header": null,
-                "height": 350,
+                "height": null,
                 "itemId": "frmInventoryAdjustment",
                 "layout": "fit",
                 "margin": -1,
                 "title": null,
                 "trackResetOnLoad": null,
                 "url": null,
-                "width": 450
+                "width": null
             },
             "name": "MyForm3",
             "designerId": "c5b1dacc-8fb3-47ca-b864-d1b677d5d6d4",
@@ -752,7 +752,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter11",
+                                                    "name": "filter116",
                                                     "designerId": "be0a06de-99ab-416d-ae5c-3a1068a87c05",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2395,7 +2395,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging110",
                     "designerId": "fc46f0de-7c8f-4d13-8dd6-f03119153f7d",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

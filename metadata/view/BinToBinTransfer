@@ -15,10 +15,10 @@
         "icon": null,
         "iconCls": "small-icon-i21",
         "layout": "fit",
-        "maxHeight": 275,
+        "maxHeight": null,
         "maximizable": null,
-        "minHeight": 250,
-        "minWidth": 400,
+        "minHeight": null,
+        "minWidth": null,
         "minimizable": null,
         "reference": null,
         "title": "Bin to Bin Transfer",
@@ -44,14 +44,14 @@
                 "dock": null,
                 "frame": null,
                 "header": false,
-                "height": 350,
+                "height": null,
                 "itemId": "frmBinToBinTransfer",
                 "layout": "vbox",
                 "margin": -1,
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
-                "width": 450
+                "width": null
             },
             "name": "MyForm7",
             "designerId": "50573bd0-ee5e-47a9-8117-83af30ebc243",
@@ -355,7 +355,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbar11",
+                    "name": "statusbar1",
                     "designerId": "8a515ac6-f8da-4d99-b3ca-21e39338cb04",
                     "masterInstanceId": "0afbe385-6a12-469e-9f51-96107236353a"
                 }

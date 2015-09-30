@@ -10,19 +10,19 @@
         "defaultFocus": null,
         "designer|userAlias": "iccategorylocation",
         "designer|userClassName": "CategoryLocation",
-        "height": 575,
+        "height": 597,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "layout": "fit",
-        "maxHeight": 575,
+        "maxHeight": null,
         "maximizable": true,
-        "minHeight": 575,
-        "minWidth": 870,
+        "minHeight": null,
+        "minWidth": null,
         "minimizable": null,
         "reference": null,
         "title": "Category Location",
-        "width": 870
+        "width": 880
     },
     "designerId": "b2711fe3-32fc-4d2e-bf3e-6e6c019c1fea",
     "viewControllerInstanceId": "fcc4865f-47cc-46bd-9977-14f56287b66b",
@@ -38,19 +38,19 @@
             "userConfig": {
                 "autoShow": true,
                 "bodyBorder": false,
-                "bodyPadding": 10,
+                "bodyPadding": 3,
                 "container|align": "stretch",
                 "dock": null,
                 "frame": null,
                 "header": false,
-                "height": 350,
+                "height": null,
                 "itemId": "frmCategoryLocation",
                 "layout": "vbox",
                 "margin": -1,
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
-                "width": 450
+                "width": null
             },
             "name": "MyForm5",
             "designerId": "6de1d308-1097-4d44-a4ea-db44ff3289d0",
@@ -228,802 +228,848 @@
                     ]
                 },
                 {
-                    "type": "Ext.container.Container",
+                    "type": "Ext.tab.Panel",
                     "reference": {
                         "name": "items",
                         "type": "array"
                     },
                     "codeClass": null,
                     "userConfig": {
-                        "container|align": "stretch",
-                        "designer|displayName": "container",
-                        "layout": "hbox",
-                        "layout|flex": null
+                        "activeTab": 0,
+                        "itemId": "tabCategoryLocation",
+                        "layout|flex": 1,
+                        "plain": true
                     },
-                    "name": "MyContainer49",
-                    "designerId": "3e070332-4bfe-47ff-9e81-a9dd1d4ea88b",
+                    "name": "MyTabPanel3",
+                    "designerId": "d0190661-0f80-4a61-a8c7-bedae6fcada3",
                     "cn": [
                         {
-                            "type": "Ext.container.Container",
+                            "type": "Ext.panel.Panel",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
                             },
                             "codeClass": null,
                             "userConfig": {
+                                "bodyPadding": 5,
                                 "container|align": "stretch",
-                                "designer|displayName": "container",
                                 "layout": "vbox",
-                                "layout|flex": 1.1,
-                                "layout|margins": null,
-                                "margin": "0 5 0 0 ",
-                                "width": 346
+                                "title": "Details"
                             },
-                            "name": "MyContainer50",
-                            "designerId": "019f064f-9a9a-4443-974c-b8783f9aba76",
+                            "name": "MyPanel1",
+                            "designerId": "83e1f88d-2f9f-4abf-82b8-9df8837015e5",
                             "cn": [
                                 {
-                                    "type": "Ext.form.field.ComboBox",
+                                    "type": "Ext.tab.Tab",
+                                    "reference": {
+                                        "name": "tabConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "TabConfig",
+                                    "designerId": "14339e33-c99d-4a57-81e1-5d8e0c09fad0"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
                                     "reference": {
                                         "name": "items",
                                         "type": "array"
                                     },
                                     "codeClass": null,
                                     "userConfig": {
-                                        "columns": [
-                                            "[",
-                                            "\t{",
-                                            "\t\tdataIndex: 'intCompanyLocationId',",
-                                            "\t\tdataType: 'numeric',",
-                                            "\t\ttext: 'Location Id',",
-                                            "\t\thidden: true",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'strLocationName',",
-                                            "\t\tdataType: 'string',",
-                                            "\t\ttext: 'Location Name',",
-                                            "\t\tflex: 1",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'strLocationType',",
-                                            "\t\tdataType: 'string',",
-                                            "\t\ttext: 'Location Type',",
-                                            "\t\tflex: 1",
-                                            "\t}",
-                                            "]"
-                                        ],
-                                        "designer|createAlias": "gridcombobox",
-                                        "displayField": "strLocationName",
-                                        "fieldLabel": "Location",
-                                        "itemId": "cboLocation",
-                                        "labelWidth": 165,
-                                        "layout|flex": null,
-                                        "maxWidth": null,
-                                        "valueField": "intCompanyLocationId"
+                                        "container|align": "stretch",
+                                        "designer|displayName": "container",
+                                        "layout": "hbox",
+                                        "layout|flex": null
                                     },
-                                    "name": "MyComboBox2",
-                                    "configAlternates": {
-                                        "columns": "array"
-                                    },
-                                    "designerId": "12a9be54-5117-450b-8e1c-b826d6648b11",
-                                    "customConfigs": [
+                                    "name": "MyContainer49",
+                                    "designerId": "3e070332-4bfe-47ff-9e81-a9dd1d4ea88b",
+                                    "cn": [
                                         {
-                                            "group": "(Custom Properties)",
-                                            "name": "columns",
-                                            "type": "string"
+                                            "type": "Ext.container.Container",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "container|align": "stretch",
+                                                "designer|displayName": "container",
+                                                "layout": "vbox",
+                                                "layout|flex": 1.1,
+                                                "layout|margins": null,
+                                                "margin": "0 5 0 0 ",
+                                                "width": 346
+                                            },
+                                            "name": "MyContainer50",
+                                            "designerId": "019f064f-9a9a-4443-974c-b8783f9aba76",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intCompanyLocationId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Location Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strLocationName',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Location Name',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strLocationType',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Location Type',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strLocationName",
+                                                        "fieldLabel": "Location",
+                                                        "itemId": "cboLocation",
+                                                        "labelWidth": 165,
+                                                        "layout|flex": null,
+                                                        "maxWidth": null,
+                                                        "valueField": "intCompanyLocationId"
+                                                    },
+                                                    "name": "MyComboBox2",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "12a9be54-5117-450b-8e1c-b826d6648b11",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Text",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Cash Register Department",
+                                                        "itemId": "txtCashRegisterDepartment",
+                                                        "labelWidth": 165,
+                                                        "layout|flex": null,
+                                                        "maxWidth": null
+                                                    },
+                                                    "name": "MyTextField64",
+                                                    "designerId": "4842972c-e5f4-47f8-bcdb-7262c3bb0a1e"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Update Prices on PB Imports",
+                                                        "itemId": "chkUpdatePricesOnPbImports",
+                                                        "labelWidth": 165,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyCheckbox56",
+                                                    "designerId": "0cc40fef-ecbf-4a6d-a267-046dd7df67c6"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Default Use Tax Flag 1",
+                                                        "itemId": "chkDefaultUseTaxFlag1",
+                                                        "labelWidth": 165,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null
+                                                    },
+                                                    "name": "MyCheckbox57",
+                                                    "designerId": "36263610-3ca4-411b-9d45-0cab7fb7ff02"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Default Use Tax Flag 2",
+                                                        "itemId": "chkDefaultUseTaxFlag2",
+                                                        "labelWidth": 165,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null
+                                                    },
+                                                    "name": "MyCheckbox58",
+                                                    "designerId": "b310aac9-8850-48d4-908b-b273403f0076"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Default Use Tax Flag 3",
+                                                        "itemId": "chkDefaultUseTaxFlag3",
+                                                        "labelWidth": 165,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null
+                                                    },
+                                                    "name": "MyCheckbox59",
+                                                    "designerId": "5ac4d646-2886-4c9d-9f84-58c30b975d25"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Default Use Tax Flag 4",
+                                                        "itemId": "chkDefaultUseTaxFlag4",
+                                                        "labelWidth": 165,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null
+                                                    },
+                                                    "name": "MyCheckbox60",
+                                                    "designerId": "bd242e7a-e597-46ef-b705-ccd9538ee6c6"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Default Blue Law 1",
+                                                        "itemId": "chkDefaultBlueLaw1",
+                                                        "labelWidth": 165,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null
+                                                    },
+                                                    "name": "MyCheckbox61",
+                                                    "designerId": "525fc6c5-08d0-413b-ab94-50f954bf9447"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Default Blue Law 2",
+                                                        "itemId": "chkDefaultBlueLaw2",
+                                                        "labelWidth": 165,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null
+                                                    },
+                                                    "name": "MyCheckbox62",
+                                                    "designerId": "feeedac1-3383-476d-8703-4099cabad1ea"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Default Nucleus Group ID",
+                                                        "hideTrigger": true,
+                                                        "itemId": "txtDefaultNucleusGroupId",
+                                                        "labelWidth": 165,
+                                                        "layout|flex": null,
+                                                        "maxWidth": null,
+                                                        "width": null
+                                                    },
+                                                    "name": "MyNumberField10",
+                                                    "designerId": "57ecfe13-b916-441a-ac76-37c64447ac6c"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Target Gross Profit %",
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true,
+                                                        "itemId": "txtTargetGrossProfitPercent",
+                                                        "labelWidth": 165,
+                                                        "layout|flex": null,
+                                                        "maxWidth": null,
+                                                        "width": null
+                                                    },
+                                                    "name": "MyNumberField11",
+                                                    "designerId": "1f54a388-5478-44a6-a4ef-c937c7360120"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Target Inventory at Cost",
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true,
+                                                        "itemId": "txtTargetInventoryAtCost",
+                                                        "labelWidth": 165,
+                                                        "layout|flex": null,
+                                                        "maxWidth": null,
+                                                        "width": null
+                                                    },
+                                                    "name": "MyNumberField12",
+                                                    "designerId": "e8411058-8f8b-4fd3-b08d-8de88a01a136"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Cost of Inventory at BOM",
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true,
+                                                        "itemId": "txtCostOfInventoryAtBom",
+                                                        "labelWidth": 165,
+                                                        "layout|flex": null,
+                                                        "maxWidth": null,
+                                                        "width": null
+                                                    },
+                                                    "name": "MyNumberField13",
+                                                    "designerId": "70aba54e-55c7-483b-aa66-77ebca15e0b1"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Low Gross Margin % Alert",
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true,
+                                                        "itemId": "txtLowGrossMarginPercentAlert",
+                                                        "labelWidth": 165,
+                                                        "layout|flex": null,
+                                                        "maxWidth": null,
+                                                        "width": null
+                                                    },
+                                                    "name": "MyNumberField15",
+                                                    "designerId": "764fb4dc-e4ca-4cbf-9266-f7ee0d463147"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "High Gross Margin % Alert",
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true,
+                                                        "itemId": "txtHighGrossMarginPercentAlert",
+                                                        "labelWidth": 165,
+                                                        "layout|flex": null,
+                                                        "maxWidth": null,
+                                                        "width": null
+                                                    },
+                                                    "name": "MyNumberField16",
+                                                    "designerId": "fb624edb-0dc2-4967-9c83-05e1c5f17602"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Date",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Last Inventory Level Entry",
+                                                        "itemId": "dtmLastInventoryLevelEntry",
+                                                        "labelWidth": 165,
+                                                        "layout|flex": null,
+                                                        "maxWidth": null
+                                                    },
+                                                    "name": "MyDateField2",
+                                                    "designerId": "b3011212-985e-49d2-9a8a-82d9a26cdaec"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.container.Container",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "container|align": "stretch",
+                                                "designer|displayName": "container",
+                                                "layout": "vbox",
+                                                "layout|flex": 1,
+                                                "layout|margins": null,
+                                                "margin": "0 1 0 5"
+                                            },
+                                            "name": "MyContainer48",
+                                            "designerId": "d18831be-8171-414c-ba37-ac7a0cc4e013",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Non Retail Use Department",
+                                                        "itemId": "chkNonRetailUseDepartment",
+                                                        "labelWidth": 175,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyCheckbox45",
+                                                    "designerId": "9ffb9089-fb54-4554-a3da-758b21754736"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Report in Net or Gross",
+                                                        "itemId": "chkReportInNetOrGross",
+                                                        "labelWidth": 175,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyCheckbox46",
+                                                    "designerId": "1cd13504-7064-4387-b706-55771339a091"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Department for Pumps",
+                                                        "itemId": "chkDepartmentForPumps",
+                                                        "labelWidth": 175,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyCheckbox47",
+                                                    "designerId": "6f3e05d2-ccb6-4377-8a3d-7ef114406bf0"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intPaidOutId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Paid Out Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strPaidOutId',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Paid Out',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strDescription',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Description',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strPaidOutId",
+                                                        "fieldLabel": "Convert to Paidout",
+                                                        "itemId": "cboConvertToPaidout",
+                                                        "labelWidth": 175,
+                                                        "layout|flex": 1,
+                                                        "layout|margins": null,
+                                                        "valueField": "intPaidOutId"
+                                                    },
+                                                    "name": "MyComboBox59",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "d91a876a-885f-44c1-9863-84827cabae45",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Delete from Register",
+                                                        "itemId": "chkDeleteFromRegister",
+                                                        "labelWidth": 175,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyCheckbox48",
+                                                    "designerId": "d4268969-4014-488f-b74e-9e281170afa3"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Department Key Taxed",
+                                                        "itemId": "chkDepartmentKeyTaxed",
+                                                        "labelWidth": 175,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyCheckbox49",
+                                                    "designerId": "59d4d7ff-ed76-449f-845b-ce907f7c47ac"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intRegProdId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\ttext: 'Product Id',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strRegProdCode',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Product',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strRegProdDesc',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Description',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strRegProdCode",
+                                                        "fieldLabel": "Default Product Code",
+                                                        "itemId": "cboDefaultProductCode",
+                                                        "labelWidth": 175,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null,
+                                                        "valueField": "intRegProdId"
+                                                    },
+                                                    "name": "MyComboBox60",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "c11e30ae-8aaa-451f-98e5-9b24f032b53f",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intSubcategoryId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strSubcategoryId',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Family',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strSubcategoryDesc',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Description',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]",
+                                                            ""
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strSubcategoryId",
+                                                        "fieldLabel": "Default Family",
+                                                        "itemId": "cboDefaultFamily",
+                                                        "labelWidth": 175,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null,
+                                                        "valueField": "inSubcategoryId"
+                                                    },
+                                                    "name": "MyComboBox61",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "57907fa0-2429-466b-9207-b5a9451863c7",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.ComboBox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "columns": [
+                                                            "[",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'intSubcategoryId',",
+                                                            "\t\tdataType: 'numeric',",
+                                                            "\t\thidden: true",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strSubcategoryId',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Family',",
+                                                            "\t\tflex: 1",
+                                                            "\t},",
+                                                            "\t{",
+                                                            "\t\tdataIndex: 'strSubcategoryDesc',",
+                                                            "\t\tdataType: 'string',",
+                                                            "\t\ttext: 'Description',",
+                                                            "\t\tflex: 1",
+                                                            "\t}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strSubcategoryId",
+                                                        "fieldLabel": "Default Class",
+                                                        "itemId": "cboDefaultClass",
+                                                        "labelWidth": 175,
+                                                        "layout|flex": null,
+                                                        "layout|margins": null,
+                                                        "valueField": "inSubcategoryId"
+                                                    },
+                                                    "name": "MyComboBox62",
+                                                    "configAlternates": {
+                                                        "columns": "array"
+                                                    },
+                                                    "designerId": "5fb1ad2d-612d-44d3-b945-55d42380dfcd",
+                                                    "customConfigs": [
+                                                        {
+                                                            "group": "(Custom Properties)",
+                                                            "name": "columns",
+                                                            "type": "string"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Default Food Stampable",
+                                                        "itemId": "chkDefaultFoodStampable",
+                                                        "labelWidth": 175,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyCheckbox50",
+                                                    "designerId": "e54d657e-c331-4ccd-9478-9183f3f0b029"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Default Returnable",
+                                                        "itemId": "chkDefaultReturnable",
+                                                        "labelWidth": 175,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyCheckbox51",
+                                                    "designerId": "315f0303-18ac-4c14-9378-eda317eb80ec"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Default Saleable",
+                                                        "itemId": "chkDefaultSaleable",
+                                                        "labelWidth": 175,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyCheckbox52",
+                                                    "designerId": "11f51868-1764-451d-a0fe-0ba54dfc61f3"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Default Pre-priced",
+                                                        "itemId": "chkDefaultPrepriced",
+                                                        "labelWidth": 175,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyCheckbox53",
+                                                    "designerId": "3993ad59-4030-4495-88b6-cc056ef96acd"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Default ID Required (liquor)",
+                                                        "itemId": "chkDefaultIdRequiredLiquor",
+                                                        "labelWidth": 175,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyCheckbox54",
+                                                    "designerId": "4416cdcb-aab4-4653-a6dc-9a197e1bf2e5"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Checkbox",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "boxLabel": null,
+                                                        "fieldLabel": "Default ID Required (cigarette)",
+                                                        "itemId": "chkDefaultIdRequiredCigarette",
+                                                        "labelWidth": 175,
+                                                        "layout|flex": null
+                                                    },
+                                                    "name": "MyCheckbox55",
+                                                    "designerId": "1f97fa6b-906b-4f3c-a8e8-5b5f4aafeaa5"
+                                                },
+                                                {
+                                                    "type": "Ext.form.field.Number",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "fieldLabel": "Default Minimum Age",
+                                                        "fieldStyle": "text-align:right",
+                                                        "hideTrigger": true,
+                                                        "itemId": "txtDefaultMinimumAge",
+                                                        "labelWidth": 175,
+                                                        "layout|flex": null,
+                                                        "maxWidth": 225
+                                                    },
+                                                    "name": "MyNumberField9",
+                                                    "designerId": "7459d47d-1bc4-42a3-aeb4-088fa4039e93"
+                                                }
+                                            ]
                                         }
                                     ]
-                                },
-                                {
-                                    "type": "Ext.form.field.Text",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "fieldLabel": "Cash Register Department",
-                                        "itemId": "txtCashRegisterDepartment",
-                                        "labelWidth": 165,
-                                        "layout|flex": null,
-                                        "maxWidth": null
-                                    },
-                                    "name": "MyTextField64",
-                                    "designerId": "4842972c-e5f4-47f8-bcdb-7262c3bb0a1e"
-                                },
-                                {
-                                    "type": "Ext.form.field.Checkbox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "boxLabel": null,
-                                        "fieldLabel": "Update Prices on PB Imports",
-                                        "itemId": "chkUpdatePricesOnPbImports",
-                                        "labelWidth": 165,
-                                        "layout|flex": null
-                                    },
-                                    "name": "MyCheckbox56",
-                                    "designerId": "0cc40fef-ecbf-4a6d-a267-046dd7df67c6"
-                                },
-                                {
-                                    "type": "Ext.form.field.Checkbox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "boxLabel": null,
-                                        "fieldLabel": "Default Use Tax Flag 1",
-                                        "itemId": "chkDefaultUseTaxFlag1",
-                                        "labelWidth": 165,
-                                        "layout|flex": null,
-                                        "layout|margins": null
-                                    },
-                                    "name": "MyCheckbox57",
-                                    "designerId": "36263610-3ca4-411b-9d45-0cab7fb7ff02"
-                                },
-                                {
-                                    "type": "Ext.form.field.Checkbox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "boxLabel": null,
-                                        "fieldLabel": "Default Use Tax Flag 2",
-                                        "itemId": "chkDefaultUseTaxFlag2",
-                                        "labelWidth": 165,
-                                        "layout|flex": null,
-                                        "layout|margins": null
-                                    },
-                                    "name": "MyCheckbox58",
-                                    "designerId": "b310aac9-8850-48d4-908b-b273403f0076"
-                                },
-                                {
-                                    "type": "Ext.form.field.Checkbox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "boxLabel": null,
-                                        "fieldLabel": "Default Use Tax Flag 3",
-                                        "itemId": "chkDefaultUseTaxFlag3",
-                                        "labelWidth": 165,
-                                        "layout|flex": null,
-                                        "layout|margins": null
-                                    },
-                                    "name": "MyCheckbox59",
-                                    "designerId": "5ac4d646-2886-4c9d-9f84-58c30b975d25"
-                                },
-                                {
-                                    "type": "Ext.form.field.Checkbox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "boxLabel": null,
-                                        "fieldLabel": "Default Use Tax Flag 4",
-                                        "itemId": "chkDefaultUseTaxFlag4",
-                                        "labelWidth": 165,
-                                        "layout|flex": null,
-                                        "layout|margins": null
-                                    },
-                                    "name": "MyCheckbox60",
-                                    "designerId": "bd242e7a-e597-46ef-b705-ccd9538ee6c6"
-                                },
-                                {
-                                    "type": "Ext.form.field.Checkbox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "boxLabel": null,
-                                        "fieldLabel": "Default Blue Law 1",
-                                        "itemId": "chkDefaultBlueLaw1",
-                                        "labelWidth": 165,
-                                        "layout|flex": null,
-                                        "layout|margins": null
-                                    },
-                                    "name": "MyCheckbox61",
-                                    "designerId": "525fc6c5-08d0-413b-ab94-50f954bf9447"
-                                },
-                                {
-                                    "type": "Ext.form.field.Checkbox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "boxLabel": null,
-                                        "fieldLabel": "Default Blue Law 2",
-                                        "itemId": "chkDefaultBlueLaw2",
-                                        "labelWidth": 165,
-                                        "layout|flex": null,
-                                        "layout|margins": null
-                                    },
-                                    "name": "MyCheckbox62",
-                                    "designerId": "feeedac1-3383-476d-8703-4099cabad1ea"
-                                },
-                                {
-                                    "type": "Ext.form.field.Number",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "fieldLabel": "Default Nucleus Group ID",
-                                        "hideTrigger": true,
-                                        "itemId": "txtDefaultNucleusGroupId",
-                                        "labelWidth": 165,
-                                        "layout|flex": null,
-                                        "maxWidth": null,
-                                        "width": null
-                                    },
-                                    "name": "MyNumberField10",
-                                    "designerId": "57ecfe13-b916-441a-ac76-37c64447ac6c"
-                                },
-                                {
-                                    "type": "Ext.form.field.Number",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "fieldLabel": "Target Gross Profit %",
-                                        "fieldStyle": "text-align:right",
-                                        "hideTrigger": true,
-                                        "itemId": "txtTargetGrossProfitPercent",
-                                        "labelWidth": 165,
-                                        "layout|flex": null,
-                                        "maxWidth": null,
-                                        "width": null
-                                    },
-                                    "name": "MyNumberField11",
-                                    "designerId": "1f54a388-5478-44a6-a4ef-c937c7360120"
-                                },
-                                {
-                                    "type": "Ext.form.field.Number",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "fieldLabel": "Target Inventory at Cost",
-                                        "fieldStyle": "text-align:right",
-                                        "hideTrigger": true,
-                                        "itemId": "txtTargetInventoryAtCost",
-                                        "labelWidth": 165,
-                                        "layout|flex": null,
-                                        "maxWidth": null,
-                                        "width": null
-                                    },
-                                    "name": "MyNumberField12",
-                                    "designerId": "e8411058-8f8b-4fd3-b08d-8de88a01a136"
-                                },
-                                {
-                                    "type": "Ext.form.field.Number",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "fieldLabel": "Cost of Inventory at BOM",
-                                        "fieldStyle": "text-align:right",
-                                        "hideTrigger": true,
-                                        "itemId": "txtCostOfInventoryAtBom",
-                                        "labelWidth": 165,
-                                        "layout|flex": null,
-                                        "maxWidth": null,
-                                        "width": null
-                                    },
-                                    "name": "MyNumberField13",
-                                    "designerId": "70aba54e-55c7-483b-aa66-77ebca15e0b1"
-                                },
-                                {
-                                    "type": "Ext.form.field.Number",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "fieldLabel": "Low Gross Margin % Alert",
-                                        "fieldStyle": "text-align:right",
-                                        "hideTrigger": true,
-                                        "itemId": "txtLowGrossMarginPercentAlert",
-                                        "labelWidth": 165,
-                                        "layout|flex": null,
-                                        "maxWidth": null,
-                                        "width": null
-                                    },
-                                    "name": "MyNumberField15",
-                                    "designerId": "764fb4dc-e4ca-4cbf-9266-f7ee0d463147"
-                                },
-                                {
-                                    "type": "Ext.form.field.Number",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "fieldLabel": "High Gross Margin % Alert",
-                                        "fieldStyle": "text-align:right",
-                                        "hideTrigger": true,
-                                        "itemId": "txtHighGrossMarginPercentAlert",
-                                        "labelWidth": 165,
-                                        "layout|flex": null,
-                                        "maxWidth": null,
-                                        "width": null
-                                    },
-                                    "name": "MyNumberField16",
-                                    "designerId": "fb624edb-0dc2-4967-9c83-05e1c5f17602"
-                                },
-                                {
-                                    "type": "Ext.form.field.Date",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "fieldLabel": "Last Inventory Level Entry",
-                                        "itemId": "dtmLastInventoryLevelEntry",
-                                        "labelWidth": 165,
-                                        "layout|flex": null,
-                                        "maxWidth": null
-                                    },
-                                    "name": "MyDateField2",
-                                    "designerId": "b3011212-985e-49d2-9a8a-82d9a26cdaec"
-                                }
-                            ]
-                        },
-                        {
-                            "type": "Ext.container.Container",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "container|align": "stretch",
-                                "designer|displayName": "container",
-                                "layout": "vbox",
-                                "layout|flex": 1,
-                                "layout|margins": null,
-                                "margin": "0 1 0 5"
-                            },
-                            "name": "MyContainer48",
-                            "designerId": "d18831be-8171-414c-ba37-ac7a0cc4e013",
-                            "cn": [
-                                {
-                                    "type": "Ext.form.field.Checkbox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "boxLabel": null,
-                                        "fieldLabel": "Non Retail Use Department",
-                                        "itemId": "chkNonRetailUseDepartment",
-                                        "labelWidth": 175,
-                                        "layout|flex": null
-                                    },
-                                    "name": "MyCheckbox45",
-                                    "designerId": "9ffb9089-fb54-4554-a3da-758b21754736"
-                                },
-                                {
-                                    "type": "Ext.form.field.Checkbox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "boxLabel": null,
-                                        "fieldLabel": "Report in Net or Gross",
-                                        "itemId": "chkReportInNetOrGross",
-                                        "labelWidth": 175,
-                                        "layout|flex": null
-                                    },
-                                    "name": "MyCheckbox46",
-                                    "designerId": "1cd13504-7064-4387-b706-55771339a091"
-                                },
-                                {
-                                    "type": "Ext.form.field.Checkbox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "boxLabel": null,
-                                        "fieldLabel": "Department for Pumps",
-                                        "itemId": "chkDepartmentForPumps",
-                                        "labelWidth": 175,
-                                        "layout|flex": null
-                                    },
-                                    "name": "MyCheckbox47",
-                                    "designerId": "6f3e05d2-ccb6-4377-8a3d-7ef114406bf0"
-                                },
-                                {
-                                    "type": "Ext.form.field.ComboBox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "columns": [
-                                            "[",
-                                            "\t{",
-                                            "\t\tdataIndex: 'intPaidOutId',",
-                                            "\t\tdataType: 'numeric',",
-                                            "\t\ttext: 'Paid Out Id',",
-                                            "\t\thidden: true",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'strPaidOutId',",
-                                            "\t\tdataType: 'string',",
-                                            "\t\ttext: 'Paid Out',",
-                                            "\t\tflex: 1",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'strDescription',",
-                                            "\t\tdataType: 'string',",
-                                            "\t\ttext: 'Description',",
-                                            "\t\tflex: 1",
-                                            "\t}",
-                                            "]"
-                                        ],
-                                        "designer|createAlias": "gridcombobox",
-                                        "displayField": "strPaidOutId",
-                                        "fieldLabel": "Convert to Paidout",
-                                        "itemId": "cboConvertToPaidout",
-                                        "labelWidth": 175,
-                                        "layout|flex": 1,
-                                        "layout|margins": null,
-                                        "valueField": "intPaidOutId"
-                                    },
-                                    "name": "MyComboBox59",
-                                    "configAlternates": {
-                                        "columns": "array"
-                                    },
-                                    "designerId": "d91a876a-885f-44c1-9863-84827cabae45",
-                                    "customConfigs": [
-                                        {
-                                            "group": "(Custom Properties)",
-                                            "name": "columns",
-                                            "type": "string"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "type": "Ext.form.field.Checkbox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "boxLabel": null,
-                                        "fieldLabel": "Delete from Register",
-                                        "itemId": "chkDeleteFromRegister",
-                                        "labelWidth": 175,
-                                        "layout|flex": null
-                                    },
-                                    "name": "MyCheckbox48",
-                                    "designerId": "d4268969-4014-488f-b74e-9e281170afa3"
-                                },
-                                {
-                                    "type": "Ext.form.field.Checkbox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "boxLabel": null,
-                                        "fieldLabel": "Department Key Taxed",
-                                        "itemId": "chkDepartmentKeyTaxed",
-                                        "labelWidth": 175,
-                                        "layout|flex": null
-                                    },
-                                    "name": "MyCheckbox49",
-                                    "designerId": "59d4d7ff-ed76-449f-845b-ce907f7c47ac"
-                                },
-                                {
-                                    "type": "Ext.form.field.ComboBox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "columns": [
-                                            "[",
-                                            "\t{",
-                                            "\t\tdataIndex: 'intRegProdId',",
-                                            "\t\tdataType: 'numeric',",
-                                            "\t\ttext: 'Product Id',",
-                                            "\t\thidden: true",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'strRegProdCode',",
-                                            "\t\tdataType: 'string',",
-                                            "\t\ttext: 'Product',",
-                                            "\t\tflex: 1",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'strRegProdDesc',",
-                                            "\t\tdataType: 'string',",
-                                            "\t\ttext: 'Description',",
-                                            "\t\tflex: 1",
-                                            "\t}",
-                                            "]"
-                                        ],
-                                        "designer|createAlias": "gridcombobox",
-                                        "displayField": "strRegProdCode",
-                                        "fieldLabel": "Default Product Code",
-                                        "itemId": "cboDefaultProductCode",
-                                        "labelWidth": 175,
-                                        "layout|flex": null,
-                                        "layout|margins": null,
-                                        "valueField": "intRegProdId"
-                                    },
-                                    "name": "MyComboBox60",
-                                    "configAlternates": {
-                                        "columns": "array"
-                                    },
-                                    "designerId": "c11e30ae-8aaa-451f-98e5-9b24f032b53f",
-                                    "customConfigs": [
-                                        {
-                                            "group": "(Custom Properties)",
-                                            "name": "columns",
-                                            "type": "string"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "type": "Ext.form.field.ComboBox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "columns": [
-                                            "[",
-                                            "\t{",
-                                            "\t\tdataIndex: 'intSubcategoryId',",
-                                            "\t\tdataType: 'numeric',",
-                                            "\t\thidden: true",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'strSubcategoryId',",
-                                            "\t\tdataType: 'string',",
-                                            "\t\ttext: 'Family',",
-                                            "\t\tflex: 1",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'strSubcategoryDesc',",
-                                            "\t\tdataType: 'string',",
-                                            "\t\ttext: 'Description',",
-                                            "\t\tflex: 1",
-                                            "\t}",
-                                            "]",
-                                            ""
-                                        ],
-                                        "designer|createAlias": "gridcombobox",
-                                        "displayField": "strSubcategoryId",
-                                        "fieldLabel": "Default Family",
-                                        "itemId": "cboDefaultFamily",
-                                        "labelWidth": 175,
-                                        "layout|flex": null,
-                                        "layout|margins": null,
-                                        "valueField": "inSubcategoryId"
-                                    },
-                                    "name": "MyComboBox61",
-                                    "configAlternates": {
-                                        "columns": "array"
-                                    },
-                                    "designerId": "57907fa0-2429-466b-9207-b5a9451863c7",
-                                    "customConfigs": [
-                                        {
-                                            "group": "(Custom Properties)",
-                                            "name": "columns",
-                                            "type": "string"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "type": "Ext.form.field.ComboBox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "columns": [
-                                            "[",
-                                            "\t{",
-                                            "\t\tdataIndex: 'intSubcategoryId',",
-                                            "\t\tdataType: 'numeric',",
-                                            "\t\thidden: true",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'strSubcategoryId',",
-                                            "\t\tdataType: 'string',",
-                                            "\t\ttext: 'Family',",
-                                            "\t\tflex: 1",
-                                            "\t},",
-                                            "\t{",
-                                            "\t\tdataIndex: 'strSubcategoryDesc',",
-                                            "\t\tdataType: 'string',",
-                                            "\t\ttext: 'Description',",
-                                            "\t\tflex: 1",
-                                            "\t}",
-                                            "]"
-                                        ],
-                                        "designer|createAlias": "gridcombobox",
-                                        "displayField": "strSubcategoryId",
-                                        "fieldLabel": "Default Class",
-                                        "itemId": "cboDefaultClass",
-                                        "labelWidth": 175,
-                                        "layout|flex": null,
-                                        "layout|margins": null,
-                                        "valueField": "inSubcategoryId"
-                                    },
-                                    "name": "MyComboBox62",
-                                    "configAlternates": {
-                                        "columns": "array"
-                                    },
-                                    "designerId": "5fb1ad2d-612d-44d3-b945-55d42380dfcd",
-                                    "customConfigs": [
-                                        {
-                                            "group": "(Custom Properties)",
-                                            "name": "columns",
-                                            "type": "string"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "type": "Ext.form.field.Checkbox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "boxLabel": null,
-                                        "fieldLabel": "Default Food Stampable",
-                                        "itemId": "chkDefaultFoodStampable",
-                                        "labelWidth": 175,
-                                        "layout|flex": null
-                                    },
-                                    "name": "MyCheckbox50",
-                                    "designerId": "e54d657e-c331-4ccd-9478-9183f3f0b029"
-                                },
-                                {
-                                    "type": "Ext.form.field.Checkbox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "boxLabel": null,
-                                        "fieldLabel": "Default Returnable",
-                                        "itemId": "chkDefaultReturnable",
-                                        "labelWidth": 175,
-                                        "layout|flex": null
-                                    },
-                                    "name": "MyCheckbox51",
-                                    "designerId": "315f0303-18ac-4c14-9378-eda317eb80ec"
-                                },
-                                {
-                                    "type": "Ext.form.field.Checkbox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "boxLabel": null,
-                                        "fieldLabel": "Default Saleable",
-                                        "itemId": "chkDefaultSaleable",
-                                        "labelWidth": 175,
-                                        "layout|flex": null
-                                    },
-                                    "name": "MyCheckbox52",
-                                    "designerId": "11f51868-1764-451d-a0fe-0ba54dfc61f3"
-                                },
-                                {
-                                    "type": "Ext.form.field.Checkbox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "boxLabel": null,
-                                        "fieldLabel": "Default Pre-priced",
-                                        "itemId": "chkDefaultPrepriced",
-                                        "labelWidth": 175,
-                                        "layout|flex": null
-                                    },
-                                    "name": "MyCheckbox53",
-                                    "designerId": "3993ad59-4030-4495-88b6-cc056ef96acd"
-                                },
-                                {
-                                    "type": "Ext.form.field.Checkbox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "boxLabel": null,
-                                        "fieldLabel": "Default ID Required (liquor)",
-                                        "itemId": "chkDefaultIdRequiredLiquor",
-                                        "labelWidth": 175,
-                                        "layout|flex": null
-                                    },
-                                    "name": "MyCheckbox54",
-                                    "designerId": "4416cdcb-aab4-4653-a6dc-9a197e1bf2e5"
-                                },
-                                {
-                                    "type": "Ext.form.field.Checkbox",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "boxLabel": null,
-                                        "fieldLabel": "Default ID Required (cigarette)",
-                                        "itemId": "chkDefaultIdRequiredCigarette",
-                                        "labelWidth": 175,
-                                        "layout|flex": null
-                                    },
-                                    "name": "MyCheckbox55",
-                                    "designerId": "1f97fa6b-906b-4f3c-a8e8-5b5f4aafeaa5"
-                                },
-                                {
-                                    "type": "Ext.form.field.Number",
-                                    "reference": {
-                                        "name": "items",
-                                        "type": "array"
-                                    },
-                                    "codeClass": null,
-                                    "userConfig": {
-                                        "fieldLabel": "Default Minimum Age",
-                                        "fieldStyle": "text-align:right",
-                                        "hideTrigger": true,
-                                        "itemId": "txtDefaultMinimumAge",
-                                        "labelWidth": 175,
-                                        "layout|flex": null,
-                                        "maxWidth": 225
-                                    },
-                                    "name": "MyNumberField9",
-                                    "designerId": "7459d47d-1bc4-42a3-aeb4-088fa4039e93"
                                 }
                             ]
                         }

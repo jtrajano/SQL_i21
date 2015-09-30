@@ -21,8 +21,9 @@ Ext.define('Inventory.view.ItemSubstitution', {
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
-        'Ext.button.Button',
         'Ext.toolbar.Separator',
+        'Ext.tab.Panel',
+        'Ext.tab.Tab',
         'Ext.form.field.ComboBox',
         'Ext.grid.Panel',
         'Ext.grid.column.Date',
@@ -34,8 +35,6 @@ Ext.define('Inventory.view.ItemSubstitution', {
 
     height: 629,
     hidden: false,
-    minHeight: 525,
-    minWidth: 425,
     width: 1050,
     layout: 'fit',
     collapsible: true,
@@ -47,12 +46,10 @@ Ext.define('Inventory.view.ItemSubstitution', {
         {
             xtype: 'form',
             autoShow: true,
-            height: 350,
             itemId: 'frmItemSubstitution',
             margin: -1,
-            width: 450,
             bodyBorder: false,
-            bodyPadding: 10,
+            bodyPadding: 3,
             header: false,
             trackResetOnLoad: true,
             layout: {
@@ -128,165 +125,185 @@ Ext.define('Inventory.view.ItemSubstitution', {
             ],
             items: [
                 {
-                    xtype: 'container',
-                    margin: '0 0 5 0',
-                    layout: 'hbox',
-                    items: [
-                        {
-                            xtype: 'textfield',
-                            flex: 1,
-                            itemId: 'txtMaterialName',
-                            fieldLabel: 'Material Name',
-                            labelWidth: 85
-                        },
-                        {
-                            xtype: 'textfield',
-                            flex: 2,
-                            itemId: 'txtDescription',
-                            margin: '0 5',
-                            fieldLabel: 'Description',
-                            labelWidth: 70
-                        },
-                        {
-                            xtype: 'textfield',
-                            flex: 1,
-                            itemId: 'txtMaterialType',
-                            fieldLabel: 'Material Type',
-                            labelWidth: 80
-                        },
-                        {
-                            xtype: 'combobox',
-                            flex: 1,
-                            itemId: 'cboModification',
-                            margin: '0 0 0 5',
-                            fieldLabel: 'Modification',
-                            labelWidth: 70
-                        }
-                    ]
-                },
-                {
-                    xtype: 'textfield',
-                    itemId: 'txtComment',
-                    fieldLabel: 'Comment',
-                    labelWidth: 85
-                },
-                {
-                    xtype: 'container',
+                    xtype: 'tabpanel',
                     flex: 1,
-                    layout: {
-                        type: 'hbox',
-                        align: 'stretch'
-                    },
+                    itemId: 'tabItemSubstitution',
+                    activeTab: 0,
+                    plain: true,
                     items: [
                         {
-                            xtype: 'gridpanel',
-                            flex: 2,
-                            itemId: 'grdSubstituteWith',
-                            title: 'Substitute With',
-                            dockedItems: [
+                            xtype: 'panel',
+                            bodyPadding: 5,
+                            title: 'Details',
+                            layout: {
+                                type: 'vbox',
+                                align: 'stretch'
+                            },
+                            items: [
                                 {
-                                    xtype: 'toolbar',
-                                    dock: 'top',
-                                    itemId: 'tlbGridOptions',
+                                    xtype: 'container',
+                                    margin: '0 0 5 0',
+                                    layout: 'hbox',
+                                    items: [
+                                        {
+                                            xtype: 'textfield',
+                                            flex: 1,
+                                            itemId: 'txtMaterialName',
+                                            fieldLabel: 'Material Name',
+                                            labelWidth: 85
+                                        },
+                                        {
+                                            xtype: 'textfield',
+                                            flex: 2,
+                                            itemId: 'txtDescription',
+                                            margin: '0 5',
+                                            fieldLabel: 'Description',
+                                            labelWidth: 70
+                                        },
+                                        {
+                                            xtype: 'textfield',
+                                            flex: 1,
+                                            itemId: 'txtMaterialType',
+                                            fieldLabel: 'Material Type',
+                                            labelWidth: 80
+                                        },
+                                        {
+                                            xtype: 'combobox',
+                                            flex: 1,
+                                            itemId: 'cboModification',
+                                            margin: '0 0 0 5',
+                                            fieldLabel: 'Modification',
+                                            labelWidth: 70
+                                        }
+                                    ]
+                                },
+                                {
+                                    xtype: 'textfield',
+                                    itemId: 'txtComment',
+                                    fieldLabel: 'Comment',
+                                    labelWidth: 85
+                                },
+                                {
+                                    xtype: 'container',
+                                    flex: 1,
                                     layout: {
                                         type: 'hbox',
-                                        padding: '0 0 0 1'
+                                        align: 'stretch'
                                     },
                                     items: [
                                         {
-                                            xtype: 'filter1'
-                                        }
-                                    ]
-                                }
-                            ],
-                            columns: [
-                                {
-                                    xtype: 'gridcolumn',
-                                    dataIndex: 'string',
-                                    text: 'Material Name',
-                                    flex: 1.2
-                                },
-                                {
-                                    xtype: 'gridcolumn',
-                                    dataIndex: 'string',
-                                    text: 'Description',
-                                    flex: 2
-                                },
-                                {
-                                    xtype: 'gridcolumn',
-                                    dataIndex: 'string',
-                                    text: 'MaterialType',
-                                    flex: 1.2
-                                },
-                                {
-                                    xtype: 'datecolumn',
-                                    width: 75,
-                                    text: 'Valid From'
-                                },
-                                {
-                                    xtype: 'datecolumn',
-                                    width: 75,
-                                    text: 'Valid To'
-                                },
-                                {
-                                    xtype: 'numbercolumn',
-                                    width: 60,
-                                    text: 'Percent'
-                                },
-                                {
-                                    xtype: 'checkcolumn',
-                                    width: 85,
-                                    text: 'Year Validation'
-                                }
-                            ],
-                            viewConfig: {
-                                itemId: 'grvSubstituteWith'
-                            }
-                        },
-                        {
-                            xtype: 'gridpanel',
-                            flex: 1,
-                            itemId: 'grdApplyToBOM',
-                            margin: '0 0 0 5',
-                            title: 'Apply to BOMs',
-                            dockedItems: [
-                                {
-                                    xtype: 'toolbar',
-                                    dock: 'top',
-                                    itemId: 'tlbGridOptions',
-                                    layout: {
-                                        type: 'hbox',
-                                        padding: '0 0 0 1'
-                                    },
-                                    items: [
+                                            xtype: 'gridpanel',
+                                            flex: 2,
+                                            itemId: 'grdSubstituteWith',
+                                            title: 'Substitute With',
+                                            dockedItems: [
+                                                {
+                                                    xtype: 'toolbar',
+                                                    dock: 'top',
+                                                    itemId: 'tlbGridOptions',
+                                                    layout: {
+                                                        type: 'hbox',
+                                                        padding: '0 0 0 1'
+                                                    },
+                                                    items: [
+                                                        {
+                                                            xtype: 'filter1'
+                                                        }
+                                                    ]
+                                                }
+                                            ],
+                                            columns: [
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    dataIndex: 'string',
+                                                    text: 'Material Name',
+                                                    flex: 1.2
+                                                },
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    dataIndex: 'string',
+                                                    text: 'Description',
+                                                    flex: 2
+                                                },
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    dataIndex: 'string',
+                                                    text: 'MaterialType',
+                                                    flex: 1.2
+                                                },
+                                                {
+                                                    xtype: 'datecolumn',
+                                                    width: 75,
+                                                    text: 'Valid From'
+                                                },
+                                                {
+                                                    xtype: 'datecolumn',
+                                                    width: 75,
+                                                    text: 'Valid To'
+                                                },
+                                                {
+                                                    xtype: 'numbercolumn',
+                                                    width: 60,
+                                                    text: 'Percent'
+                                                },
+                                                {
+                                                    xtype: 'checkcolumn',
+                                                    width: 85,
+                                                    text: 'Year Validation'
+                                                }
+                                            ],
+                                            viewConfig: {
+                                                itemId: 'grvSubstituteWith'
+                                            }
+                                        },
                                         {
-                                            xtype: 'filter1'
+                                            xtype: 'gridpanel',
+                                            flex: 1,
+                                            itemId: 'grdApplyToBOM',
+                                            margin: '0 0 0 5',
+                                            title: 'Apply to BOMs',
+                                            dockedItems: [
+                                                {
+                                                    xtype: 'toolbar',
+                                                    dock: 'top',
+                                                    itemId: 'tlbGridOptions',
+                                                    layout: {
+                                                        type: 'hbox',
+                                                        padding: '0 0 0 1'
+                                                    },
+                                                    items: [
+                                                        {
+                                                            xtype: 'filter1'
+                                                        }
+                                                    ]
+                                                }
+                                            ],
+                                            columns: [
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    dataIndex: 'string',
+                                                    text: 'Material Name',
+                                                    flex: 1.2
+                                                },
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    dataIndex: 'string',
+                                                    text: 'Description',
+                                                    flex: 2
+                                                },
+                                                {
+                                                    xtype: 'checkcolumn',
+                                                    width: 70,
+                                                    text: 'Select (Y/N)'
+                                                }
+                                            ],
+                                            viewConfig: {
+                                                itemId: 'grvApplyToBOM'
+                                            }
                                         }
                                     ]
                                 }
-                            ],
-                            columns: [
-                                {
-                                    xtype: 'gridcolumn',
-                                    dataIndex: 'string',
-                                    text: 'Material Name',
-                                    flex: 1.2
-                                },
-                                {
-                                    xtype: 'gridcolumn',
-                                    dataIndex: 'string',
-                                    text: 'Description',
-                                    flex: 2
-                                },
-                                {
-                                    xtype: 'checkcolumn',
-                                    width: 70,
-                                    text: 'Select (Y/N)'
-                                }
-                            ],
-                            viewConfig: {
-                                itemId: 'grvApplyToBOM'
-                            }
+                            ]
                         }
                     ]
                 }

@@ -10,19 +10,19 @@
         "defaultFocus": null,
         "designer|userAlias": "inventorycountname",
         "designer|userClassName": "InventoryCountName",
-        "height": 355,
+        "height": 384,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "layout": "fit",
-        "maxHeight": 355,
+        "maxHeight": null,
         "maximizable": null,
-        "minHeight": 355,
+        "minHeight": null,
         "minWidth": null,
         "minimizable": null,
         "reference": null,
         "title": "Inventory Count Name",
-        "width": 469
+        "width": 456
     },
     "name": "ContractDocument1",
     "designerId": "91b8f386-0350-4266-9ceb-f8c80198ac34",
@@ -39,7 +39,7 @@
             "userConfig": {
                 "autoShow": true,
                 "bodyBorder": false,
-                "bodyPadding": 10,
+                "bodyPadding": 3,
                 "container|align": "stretch",
                 "dock": null,
                 "frame": null,
@@ -229,224 +229,270 @@
                     ]
                 },
                 {
-                    "type": "Ext.container.Container",
+                    "type": "Ext.tab.Panel",
                     "reference": {
                         "name": "items",
                         "type": "array"
                     },
                     "codeClass": null,
                     "userConfig": {
-                        "container|align": "stretch",
-                        "designer|displayName": "container",
-                        "height": null,
-                        "layout": "vbox",
-                        "layout|flex": null,
-                        "layout|margins": null,
-                        "margin": null,
-                        "width": null
+                        "activeTab": 0,
+                        "itemId": "tabInventoryCountName",
+                        "layout|flex": 1,
+                        "plain": true
                     },
-                    "name": "MyContainer55",
-                    "designerId": "b34a26ae-b535-49de-87c7-c251391a5598",
+                    "name": "MyTabPanel9",
+                    "designerId": "02da4fc9-f90e-46a4-8736-3ecd0e000ed6",
                     "cn": [
                         {
-                            "type": "Ext.form.field.Text",
+                            "type": "Ext.panel.Panel",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "designer|displayName": null,
-                                "enforceMaxLength": null,
-                                "fieldCls": null,
-                                "fieldLabel": "Count Name",
-                                "itemId": "txtCountName",
-                                "labelPad": null,
-                                "labelSeparator": null,
-                                "labelWidth": 125,
-                                "layout|flex": null,
-                                "margin": null,
-                                "maxLength": null,
-                                "name": null,
-                                "readOnly": null,
-                                "tabIndex": null,
-                                "value": null,
-                                "width": null
+                                "bodyPadding": 5,
+                                "container|align": "stretch",
+                                "layout": "vbox",
+                                "title": "Details"
                             },
-                            "name": "MyTextField65",
-                            "designerId": "068d8e57-3f5e-4e6c-aa10-64156c8ba71d"
-                        },
-                        {
-                            "type": "Ext.form.field.Number",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": null,
-                                "enforceMaxLength": null,
-                                "fieldLabel": "Counts Per Year",
-                                "hideTrigger": true,
-                                "itemId": "txtCountsPerYear",
-                                "labelPad": null,
-                                "labelSeparator": null,
-                                "labelWidth": 125,
-                                "layout|flex": null,
-                                "margin": null,
-                                "maxLength": null,
-                                "name": null,
-                                "tabIndex": null,
-                                "width": null
-                            },
-                            "name": "MyNumberField4",
-                            "designerId": "93ed1e36-5c50-42cf-8d0c-ba95f8cae522"
-                        },
-                        {
-                            "type": "Ext.form.field.Checkbox",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "boxLabel": null,
-                                "fieldLabel": "Include On Hand",
-                                "itemId": "chkIncludeOnHand",
-                                "labelWidth": 125,
-                                "layout|flex": null
-                            },
-                            "name": "MyCheckbox64",
-                            "designerId": "39b24628-0392-4fb9-9a86-1e8628950428"
-                        },
-                        {
-                            "type": "Ext.form.field.ComboBox",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "columns": null,
-                                "designer|createAlias": null,
-                                "designer|displayName": null,
-                                "displayField": null,
-                                "enforceMaxLength": null,
-                                "fieldLabel": "Inventory Type",
-                                "itemId": "cboInventoryType",
-                                "labelPad": null,
-                                "labelSeparator": null,
-                                "labelWidth": 125,
-                                "layout|flex": null,
-                                "margin": null,
-                                "maxLength": null,
-                                "name": null,
-                                "tabIndex": null,
-                                "valueField": null,
-                                "width": null
-                            },
-                            "name": "MyComboBox66",
-                            "configAlternates": {
-                                "columns": "array"
-                            },
-                            "designerId": "f15ca56f-943c-457d-9bf0-d21f76b34d32",
-                            "customConfigs": [
+                            "name": "MyPanel1",
+                            "designerId": "df2bd1b4-28f9-42fd-9c0a-619a2df9324e",
+                            "cn": [
                                 {
-                                    "group": "(Custom Properties)",
-                                    "name": "columns",
-                                    "type": "string"
+                                    "type": "Ext.tab.Tab",
+                                    "reference": {
+                                        "name": "tabConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "TabConfig",
+                                    "designerId": "7fa82248-2884-4be0-9983-720214600b1b"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "stretch",
+                                        "designer|displayName": "container",
+                                        "height": null,
+                                        "layout": "vbox",
+                                        "layout|flex": null,
+                                        "layout|margins": null,
+                                        "margin": null,
+                                        "width": null
+                                    },
+                                    "name": "MyContainer55",
+                                    "designerId": "b34a26ae-b535-49de-87c7-c251391a5598",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.field.Text",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "designer|displayName": null,
+                                                "enforceMaxLength": null,
+                                                "fieldCls": null,
+                                                "fieldLabel": "Count Name",
+                                                "itemId": "txtCountName",
+                                                "labelPad": null,
+                                                "labelSeparator": null,
+                                                "labelWidth": 125,
+                                                "layout|flex": null,
+                                                "margin": null,
+                                                "maxLength": null,
+                                                "name": null,
+                                                "readOnly": null,
+                                                "tabIndex": null,
+                                                "value": null,
+                                                "width": null
+                                            },
+                                            "name": "MyTextField65",
+                                            "designerId": "068d8e57-3f5e-4e6c-aa10-64156c8ba71d"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.Number",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "designer|displayName": null,
+                                                "enforceMaxLength": null,
+                                                "fieldLabel": "Counts Per Year",
+                                                "hideTrigger": true,
+                                                "itemId": "txtCountsPerYear",
+                                                "labelPad": null,
+                                                "labelSeparator": null,
+                                                "labelWidth": 125,
+                                                "layout|flex": null,
+                                                "margin": null,
+                                                "maxLength": null,
+                                                "name": null,
+                                                "tabIndex": null,
+                                                "width": null
+                                            },
+                                            "name": "MyNumberField4",
+                                            "designerId": "93ed1e36-5c50-42cf-8d0c-ba95f8cae522"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.Checkbox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "boxLabel": null,
+                                                "fieldLabel": "Include On Hand",
+                                                "itemId": "chkIncludeOnHand",
+                                                "labelWidth": 125,
+                                                "layout|flex": null
+                                            },
+                                            "name": "MyCheckbox64",
+                                            "designerId": "39b24628-0392-4fb9-9a86-1e8628950428"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "columns": null,
+                                                "designer|createAlias": null,
+                                                "designer|displayName": null,
+                                                "displayField": null,
+                                                "enforceMaxLength": null,
+                                                "fieldLabel": "Inventory Type",
+                                                "itemId": "cboInventoryType",
+                                                "labelPad": null,
+                                                "labelSeparator": null,
+                                                "labelWidth": 125,
+                                                "layout|flex": null,
+                                                "margin": null,
+                                                "maxLength": null,
+                                                "name": null,
+                                                "tabIndex": null,
+                                                "valueField": null,
+                                                "width": null
+                                            },
+                                            "name": "MyComboBox66",
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "f15ca56f-943c-457d-9bf0-d21f76b34d32",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "columns": null,
+                                                "designer|createAlias": null,
+                                                "designer|displayName": null,
+                                                "displayField": null,
+                                                "enforceMaxLength": null,
+                                                "fieldLabel": "Count Card",
+                                                "itemId": "cboCountCard",
+                                                "labelPad": null,
+                                                "labelSeparator": null,
+                                                "labelWidth": 125,
+                                                "layout|flex": null,
+                                                "margin": null,
+                                                "maxLength": null,
+                                                "name": null,
+                                                "tabIndex": null,
+                                                "valueField": null,
+                                                "width": null
+                                            },
+                                            "name": "MyComboBox8",
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "c7778337-ecc9-4405-b415-85385a4354bc",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.form.field.Checkbox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "boxLabel": null,
+                                                "fieldLabel": "Scanned Count Entry",
+                                                "itemId": "txtScannedCountEntry",
+                                                "labelWidth": 125,
+                                                "layout|flex": null
+                                            },
+                                            "name": "MyCheckbox4",
+                                            "designerId": "d595a5b2-9dad-4f6f-bb7b-815b657689aa"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.Checkbox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "boxLabel": null,
+                                                "fieldLabel": "Count by Lots",
+                                                "itemId": "txtCountByLots",
+                                                "labelWidth": 125,
+                                                "layout|flex": null
+                                            },
+                                            "name": "MyCheckbox5",
+                                            "designerId": "9885f42c-5da3-4b37-9f62-107ef9305db2"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.Checkbox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "boxLabel": null,
+                                                "fieldLabel": "Recount Mismatch",
+                                                "itemId": "chkRecountMismatch",
+                                                "labelWidth": 125,
+                                                "layout|flex": null
+                                            },
+                                            "name": "MyCheckbox6",
+                                            "designerId": "888ac402-caea-4a78-816a-c18c03e3b079"
+                                        }
+                                    ]
                                 }
                             ]
-                        },
-                        {
-                            "type": "Ext.form.field.ComboBox",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "columns": null,
-                                "designer|createAlias": null,
-                                "designer|displayName": null,
-                                "displayField": null,
-                                "enforceMaxLength": null,
-                                "fieldLabel": "Count Card",
-                                "itemId": "cboCountCard",
-                                "labelPad": null,
-                                "labelSeparator": null,
-                                "labelWidth": 125,
-                                "layout|flex": null,
-                                "margin": null,
-                                "maxLength": null,
-                                "name": null,
-                                "tabIndex": null,
-                                "valueField": null,
-                                "width": null
-                            },
-                            "name": "MyComboBox8",
-                            "configAlternates": {
-                                "columns": "array"
-                            },
-                            "designerId": "c7778337-ecc9-4405-b415-85385a4354bc",
-                            "customConfigs": [
-                                {
-                                    "group": "(Custom Properties)",
-                                    "name": "columns",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        {
-                            "type": "Ext.form.field.Checkbox",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "boxLabel": null,
-                                "fieldLabel": "Scanned Count Entry",
-                                "itemId": "txtScannedCountEntry",
-                                "labelWidth": 125,
-                                "layout|flex": null
-                            },
-                            "name": "MyCheckbox4",
-                            "designerId": "d595a5b2-9dad-4f6f-bb7b-815b657689aa"
-                        },
-                        {
-                            "type": "Ext.form.field.Checkbox",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "boxLabel": null,
-                                "fieldLabel": "Count by Lots",
-                                "itemId": "txtCountByLots",
-                                "labelWidth": 125,
-                                "layout|flex": null
-                            },
-                            "name": "MyCheckbox5",
-                            "designerId": "9885f42c-5da3-4b37-9f62-107ef9305db2"
-                        },
-                        {
-                            "type": "Ext.form.field.Checkbox",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "boxLabel": null,
-                                "fieldLabel": "Recount Mismatch",
-                                "itemId": "chkRecountMismatch",
-                                "labelWidth": 125,
-                                "layout|flex": null
-                            },
-                            "name": "MyCheckbox6",
-                            "designerId": "888ac402-caea-4a78-816a-c18c03e3b079"
                         }
                     ]
                 },
@@ -466,7 +512,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging112",
                     "designerId": "5f645857-eb50-4702-8a6e-970a15d31272",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

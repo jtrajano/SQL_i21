@@ -20,17 +20,18 @@ Ext.define('Inventory.view.FactoryUnitType', {
     requires: [
         'Inventory.view.StatusbarPaging1',
         'Ext.form.Panel',
-        'Ext.button.Button',
         'Ext.toolbar.Separator',
+        'Ext.tab.Panel',
+        'Ext.tab.Tab',
         'Ext.form.field.ComboBox',
         'Ext.form.field.Number',
         'Ext.form.field.Checkbox',
         'Ext.toolbar.Paging'
     ],
 
-    height: 380,
+    height: 398,
     hidden: false,
-    width: 622,
+    width: 637,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
@@ -41,12 +42,10 @@ Ext.define('Inventory.view.FactoryUnitType', {
         {
             xtype: 'form',
             autoShow: true,
-            height: 350,
             itemId: 'frmFactoryUnitType',
             margin: -1,
-            width: 450,
             bodyBorder: false,
-            bodyPadding: 10,
+            bodyPadding: 3,
             header: false,
             trackResetOnLoad: true,
             layout: {
@@ -144,159 +143,179 @@ Ext.define('Inventory.view.FactoryUnitType', {
             ],
             items: [
                 {
-                    xtype: 'panel',
+                    xtype: 'tabpanel',
                     flex: 1,
-                    itemId: 'pnlDetail',
-                    margin: '0 5 0 0',
-                    bodyPadding: 10,
-                    title: 'Details',
-                    layout: {
-                        type: 'vbox',
-                        align: 'stretch'
-                    },
+                    itemId: 'tabFactoryUnitType',
+                    activeTab: 0,
+                    plain: true,
                     items: [
                         {
-                            xtype: 'textfield',
-                            itemId: 'txtName',
-                            fieldLabel: 'Name',
-                            labelWidth: 90
-                        },
-                        {
-                            xtype: 'textfield',
-                            itemId: 'txtDescription',
-                            fieldLabel: 'Description',
-                            labelWidth: 90
-                        },
-                        {
-                            xtype: 'combobox',
-                            itemId: 'cboInternalCode',
-                            fieldLabel: 'Internal Code',
-                            labelWidth: 90,
-                            displayField: 'strInternalCode',
-                            valueField: 'strInternalCode'
-                        },
-                        {
-                            xtype: 'gridcombobox',
-                            columns: [
+                            xtype: 'panel',
+                            bodyPadding: 5,
+                            title: 'Details',
+                            layout: {
+                                type: 'hbox',
+                                align: 'stretch'
+                            },
+                            items: [
                                 {
-                                    dataIndex: 'intUnitMeasureId',
-                                    dataType: 'numeric',
-                                    text: 'Unit Measure ID',
-                                    hidden: true
+                                    xtype: 'panel',
+                                    flex: 1,
+                                    itemId: 'pnlDetail',
+                                    margin: '0 5 0 0',
+                                    bodyPadding: 10,
+                                    title: 'Details',
+                                    layout: {
+                                        type: 'vbox',
+                                        align: 'stretch'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'textfield',
+                                            itemId: 'txtName',
+                                            fieldLabel: 'Name',
+                                            labelWidth: 90
+                                        },
+                                        {
+                                            xtype: 'textfield',
+                                            itemId: 'txtDescription',
+                                            fieldLabel: 'Description',
+                                            labelWidth: 90
+                                        },
+                                        {
+                                            xtype: 'combobox',
+                                            itemId: 'cboInternalCode',
+                                            fieldLabel: 'Internal Code',
+                                            labelWidth: 90,
+                                            displayField: 'strInternalCode',
+                                            valueField: 'strInternalCode'
+                                        },
+                                        {
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'intUnitMeasureId',
+                                                    dataType: 'numeric',
+                                                    text: 'Unit Measure ID',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'strUnitMeasure',
+                                                    dataType: 'string',
+                                                    text: 'Capacity',
+                                                    flex: 1
+                                                }
+                                            ],
+                                            itemId: 'cboCapacityUom',
+                                            fieldLabel: 'Capacity UOM',
+                                            labelWidth: 90,
+                                            displayField: 'strUnitMeasure',
+                                            valueField: 'intUnitMeasureId'
+                                        },
+                                        {
+                                            xtype: 'numberfield',
+                                            itemId: 'txtMaxWeight',
+                                            fieldLabel: 'Max. Weight',
+                                            labelWidth: 90,
+                                            fieldStyle: 'text-align:right',
+                                            hideTrigger: true
+                                        },
+                                        {
+                                            xtype: 'checkboxfield',
+                                            itemId: 'chkAllowsPicking',
+                                            fieldLabel: 'Allows Picking',
+                                            labelWidth: 90
+                                        }
+                                    ]
                                 },
                                 {
-                                    dataIndex: 'strUnitMeasure',
-                                    dataType: 'string',
-                                    text: 'Capacity',
-                                    flex: 1
+                                    xtype: 'panel',
+                                    flex: 1,
+                                    itemId: 'pnlDimension',
+                                    margin: '0 0 0 5',
+                                    bodyPadding: 10,
+                                    title: 'Dimensions',
+                                    layout: {
+                                        type: 'vbox',
+                                        align: 'stretch'
+                                    },
+                                    items: [
+                                        {
+                                            xtype: 'gridcombobox',
+                                            columns: [
+                                                {
+                                                    dataIndex: 'intUnitMeasureId',
+                                                    dataType: 'numeric',
+                                                    text: 'Unit Measure ID',
+                                                    hidden: true
+                                                },
+                                                {
+                                                    dataIndex: 'strUnitMeasure',
+                                                    dataType: 'string',
+                                                    text: 'Dimension',
+                                                    flex: 1
+                                                }
+                                            ],
+                                            itemId: 'cboDimensionUom',
+                                            fieldLabel: 'Dimension UOM',
+                                            labelWidth: 90,
+                                            displayField: 'strUnitMeasure',
+                                            valueField: 'intUnitMeasureId'
+                                        },
+                                        {
+                                            xtype: 'numberfield',
+                                            itemId: 'txtHeight',
+                                            fieldLabel: 'Height',
+                                            labelWidth: 90,
+                                            fieldStyle: 'text-align:right',
+                                            hideTrigger: true
+                                        },
+                                        {
+                                            xtype: 'numberfield',
+                                            itemId: 'txtDepth',
+                                            fieldLabel: 'Depth',
+                                            labelWidth: 90,
+                                            fieldStyle: 'text-align:right',
+                                            hideTrigger: true
+                                        },
+                                        {
+                                            xtype: 'numberfield',
+                                            itemId: 'txtWidth',
+                                            fieldLabel: 'Width',
+                                            labelWidth: 90,
+                                            fieldStyle: 'text-align:right',
+                                            hideTrigger: true
+                                        },
+                                        {
+                                            xtype: 'numberfield',
+                                            itemId: 'txtPalletStack',
+                                            fieldLabel: 'Pallet Stack',
+                                            labelWidth: 90,
+                                            fieldStyle: 'text-align:right',
+                                            hideTrigger: true,
+                                            allowDecimals: false
+                                        },
+                                        {
+                                            xtype: 'numberfield',
+                                            itemId: 'txtPalletColumns',
+                                            fieldLabel: 'Pallet Columns',
+                                            labelWidth: 90,
+                                            fieldStyle: 'text-align:right',
+                                            hideTrigger: true,
+                                            allowDecimals: false
+                                        },
+                                        {
+                                            xtype: 'numberfield',
+                                            itemId: 'txtPalletRows',
+                                            fieldLabel: 'Pallet Rows',
+                                            labelWidth: 90,
+                                            fieldStyle: 'text-align:right',
+                                            hideTrigger: true,
+                                            allowDecimals: false
+                                        }
+                                    ]
                                 }
-                            ],
-                            itemId: 'cboCapacityUom',
-                            fieldLabel: 'Capacity UOM',
-                            labelWidth: 90,
-                            displayField: 'strUnitMeasure',
-                            valueField: 'intUnitMeasureId'
-                        },
-                        {
-                            xtype: 'numberfield',
-                            itemId: 'txtMaxWeight',
-                            fieldLabel: 'Max. Weight',
-                            labelWidth: 90,
-                            fieldStyle: 'text-align:right',
-                            hideTrigger: true
-                        },
-                        {
-                            xtype: 'checkboxfield',
-                            itemId: 'chkAllowsPicking',
-                            fieldLabel: 'Allows Picking',
-                            labelWidth: 90
-                        }
-                    ]
-                },
-                {
-                    xtype: 'panel',
-                    flex: 1,
-                    itemId: 'pnlDimension',
-                    margin: '0 0 0 5',
-                    bodyPadding: 10,
-                    title: 'Dimensions',
-                    layout: {
-                        type: 'vbox',
-                        align: 'stretch'
-                    },
-                    items: [
-                        {
-                            xtype: 'gridcombobox',
-                            columns: [
-                                {
-                                    dataIndex: 'intUnitMeasureId',
-                                    dataType: 'numeric',
-                                    text: 'Unit Measure ID',
-                                    hidden: true
-                                },
-                                {
-                                    dataIndex: 'strUnitMeasure',
-                                    dataType: 'string',
-                                    text: 'Dimension',
-                                    flex: 1
-                                }
-                            ],
-                            itemId: 'cboDimensionUom',
-                            fieldLabel: 'Dimension UOM',
-                            labelWidth: 90,
-                            displayField: 'strUnitMeasure',
-                            valueField: 'intUnitMeasureId'
-                        },
-                        {
-                            xtype: 'numberfield',
-                            itemId: 'txtHeight',
-                            fieldLabel: 'Height',
-                            labelWidth: 90,
-                            fieldStyle: 'text-align:right',
-                            hideTrigger: true
-                        },
-                        {
-                            xtype: 'numberfield',
-                            itemId: 'txtDepth',
-                            fieldLabel: 'Depth',
-                            labelWidth: 90,
-                            fieldStyle: 'text-align:right',
-                            hideTrigger: true
-                        },
-                        {
-                            xtype: 'numberfield',
-                            itemId: 'txtWidth',
-                            fieldLabel: 'Width',
-                            labelWidth: 90,
-                            fieldStyle: 'text-align:right',
-                            hideTrigger: true
-                        },
-                        {
-                            xtype: 'numberfield',
-                            itemId: 'txtPalletStack',
-                            fieldLabel: 'Pallet Stack',
-                            labelWidth: 90,
-                            fieldStyle: 'text-align:right',
-                            hideTrigger: true,
-                            allowDecimals: false
-                        },
-                        {
-                            xtype: 'numberfield',
-                            itemId: 'txtPalletColumns',
-                            fieldLabel: 'Pallet Columns',
-                            labelWidth: 90,
-                            fieldStyle: 'text-align:right',
-                            hideTrigger: true,
-                            allowDecimals: false
-                        },
-                        {
-                            xtype: 'numberfield',
-                            itemId: 'txtPalletRows',
-                            fieldLabel: 'Pallet Rows',
-                            labelWidth: 90,
-                            fieldStyle: 'text-align:right',
-                            hideTrigger: true,
-                            allowDecimals: false
+                            ]
                         }
                     ]
                 }

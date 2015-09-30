@@ -16,8 +16,8 @@
         "iconCls": "small-icon-i21",
         "layout": "fit",
         "maximizable": true,
-        "minHeight": 500,
-        "minWidth": 530,
+        "minHeight": null,
+        "minWidth": null,
         "minimizable": null,
         "reference": null,
         "title": "Fuel Tank",
@@ -37,19 +37,19 @@
             "userConfig": {
                 "autoShow": true,
                 "bodyBorder": null,
-                "bodyPadding": 5,
+                "bodyPadding": 3,
                 "container|align": "stretch",
                 "dock": null,
                 "frame": null,
                 "header": null,
-                "height": 350,
+                "height": null,
                 "itemId": "frmFuelTank",
                 "layout": "vbox",
                 "margin": -1,
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
-                "width": 450
+                "width": null
             },
             "name": "MyForm16",
             "designerId": "7ac5f650-8198-4f3a-8f07-cdab29d4c0f5",
@@ -228,7 +228,7 @@
                                     "userConfig": {
                                         "layout|flex": null
                                     },
-                                    "name": "filter120",
+                                    "name": "filter114",
                                     "designerId": "2fae70be-eb75-4432-8b9e-f69f8ff60559",
                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                 }

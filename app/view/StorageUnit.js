@@ -37,8 +37,6 @@ Ext.define('Inventory.view.StorageUnit', {
 
     height: 620,
     hidden: false,
-    minHeight: 525,
-    minWidth: 425,
     width: 943,
     layout: 'fit',
     collapsible: true,
@@ -50,12 +48,10 @@ Ext.define('Inventory.view.StorageUnit', {
         {
             xtype: 'form',
             autoShow: true,
-            height: 350,
             itemId: 'frmStorageUnit',
             margin: -1,
-            width: 450,
             bodyBorder: false,
-            bodyPadding: 5,
+            bodyPadding: 3,
             header: false,
             trackResetOnLoad: true,
             layout: {

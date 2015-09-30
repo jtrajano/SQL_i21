@@ -35,11 +35,9 @@ Ext.define('Inventory.view.ManufacturingCell', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 442,
+    height: 419,
     hidden: false,
-    minHeight: 335,
-    minWidth: 520,
-    width: 772,
+    width: 760,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
@@ -50,12 +48,10 @@ Ext.define('Inventory.view.ManufacturingCell', {
         {
             xtype: 'form',
             autoShow: true,
-            height: 350,
             itemId: 'frmManufacturingCell',
             margin: -1,
-            width: 450,
             bodyBorder: false,
-            bodyPadding: 5,
+            bodyPadding: 3,
             header: false,
             trackResetOnLoad: true,
             layout: {

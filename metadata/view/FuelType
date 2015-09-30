@@ -10,19 +10,19 @@
         "defaultFocus": null,
         "designer|userAlias": "icfueltype",
         "designer|userClassName": "FuelType",
-        "height": 465,
+        "height": 492,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "layout": "fit",
-        "maxHeight": 465,
+        "maxHeight": null,
         "maximizable": true,
-        "minHeight": 465,
-        "minWidth": 455,
+        "minHeight": null,
+        "minWidth": null,
         "minimizable": null,
         "reference": null,
         "title": "Fuel Types",
-        "width": 455
+        "width": 459
     },
     "designerId": "db932a16-d560-435e-99db-9c598d10bbc3",
     "viewControllerInstanceId": "0427e452-7553-4ce5-bda7-4a08d04a7125",
@@ -38,19 +38,19 @@
             "userConfig": {
                 "autoShow": true,
                 "bodyBorder": false,
-                "bodyPadding": 10,
+                "bodyPadding": 3,
                 "container|align": "stretch",
                 "dock": null,
                 "frame": null,
                 "header": false,
-                "height": 350,
+                "height": null,
                 "itemId": "frmFuelType",
                 "layout": "vbox",
                 "margin": -1,
                 "title": null,
                 "trackResetOnLoad": true,
                 "url": null,
-                "width": 450
+                "width": null
             },
             "name": "MyForm7",
             "designerId": "3580b407-2aef-46f1-a34b-3cbbaa7c51c1",
@@ -228,508 +228,554 @@
                     ]
                 },
                 {
-                    "type": "Ext.container.Container",
+                    "type": "Ext.tab.Panel",
                     "reference": {
                         "name": "items",
                         "type": "array"
                     },
                     "codeClass": null,
                     "userConfig": {
-                        "container|align": "stretch",
-                        "designer|displayName": "container",
-                        "height": null,
-                        "layout": "vbox",
-                        "layout|flex": 1.25,
-                        "layout|margins": null,
-                        "margin": "0 5 0 0",
-                        "width": 1014
+                        "activeTab": 0,
+                        "itemId": "tabFuelType",
+                        "layout|flex": 1,
+                        "plain": true
                     },
-                    "name": "MyContainer55",
-                    "designerId": "07b54fe4-15a3-4d72-a1ad-7116677b9577",
+                    "name": "MyTabPanel8",
+                    "designerId": "0f5b4473-1441-4cc7-88dc-1e02992bfd40",
                     "cn": [
                         {
-                            "type": "Ext.form.field.ComboBox",
+                            "type": "Ext.panel.Panel",
                             "reference": {
                                 "name": "items",
                                 "type": "array"
                             },
                             "codeClass": null,
                             "userConfig": {
-                                "columns": [
-                                    "[",
-                                    "{",
-                                    "dataIndex: 'intRinFuelCategoryId',",
-                                    "dataType: 'int',",
-                                    "text: 'Fuel Category Id',",
-                                    "hidden: true",
-                                    "},",
-                                    "{",
-                                    "dataIndex: 'strRinFuelCategoryCode',",
-                                    "dataType: 'string',",
-                                    "text: 'Fuel Category',",
-                                    "flex: 1",
-                                    "},",
-                                    "{",
-                                    "dataIndex: 'strDescription',",
-                                    "dataType: 'string',",
-                                    "text: 'Description',",
-                                    "flex: 1",
-                                    "},",
-                                    "{",
-                                    "dataIndex: 'strEquivalenceValue',",
-                                    "dataType: 'string',",
-                                    "text: 'Equivalence Value',",
-                                    "flex: 1",
-                                    "}",
-                                    "]"
-                                ],
-                                "designer|createAlias": "gridcombobox",
-                                "designer|displayName": null,
-                                "displayField": "strRinFuelCategoryCode",
-                                "enforceMaxLength": null,
-                                "fieldLabel": "Fuel Category",
-                                "itemId": "cboFuelCategory",
-                                "labelPad": null,
-                                "labelSeparator": null,
-                                "labelWidth": 165,
-                                "layout|flex": null,
-                                "margin": null,
-                                "maxLength": null,
-                                "name": null,
-                                "tabIndex": null,
-                                "valueField": "intRinFuelCategoryId",
-                                "width": null
+                                "bodyPadding": 5,
+                                "container|align": "stretch",
+                                "layout": "vbox",
+                                "title": "Details"
                             },
-                            "name": "MyComboBox63",
-                            "configAlternates": {
-                                "columns": "array"
-                            },
-                            "designerId": "a5e5c5b5-8952-48dd-b15e-a4148ba0371a",
-                            "customConfigs": [
+                            "name": "MyPanel1",
+                            "designerId": "ea454266-dd01-4e5d-a0b6-f005f040d98d",
+                            "cn": [
                                 {
-                                    "group": "(Custom Properties)",
-                                    "name": "columns",
-                                    "type": "string"
+                                    "type": "Ext.tab.Tab",
+                                    "reference": {
+                                        "name": "tabConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "TabConfig",
+                                    "designerId": "517ec814-4036-484f-b3e9-ef14f6638fcd"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "container|align": "stretch",
+                                        "designer|displayName": "container",
+                                        "height": null,
+                                        "layout": "vbox",
+                                        "layout|flex": 1,
+                                        "layout|margins": null,
+                                        "margin": null,
+                                        "width": null
+                                    },
+                                    "name": "MyContainer55",
+                                    "designerId": "07b54fe4-15a3-4d72-a1ad-7116677b9577",
+                                    "cn": [
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "columns": [
+                                                    "[",
+                                                    "{",
+                                                    "dataIndex: 'intRinFuelCategoryId',",
+                                                    "dataType: 'int',",
+                                                    "text: 'Fuel Category Id',",
+                                                    "hidden: true",
+                                                    "},",
+                                                    "{",
+                                                    "dataIndex: 'strRinFuelCategoryCode',",
+                                                    "dataType: 'string',",
+                                                    "text: 'Fuel Category',",
+                                                    "flex: 1",
+                                                    "},",
+                                                    "{",
+                                                    "dataIndex: 'strDescription',",
+                                                    "dataType: 'string',",
+                                                    "text: 'Description',",
+                                                    "flex: 1",
+                                                    "},",
+                                                    "{",
+                                                    "dataIndex: 'strEquivalenceValue',",
+                                                    "dataType: 'string',",
+                                                    "text: 'Equivalence Value',",
+                                                    "flex: 1",
+                                                    "}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "designer|displayName": null,
+                                                "displayField": "strRinFuelCategoryCode",
+                                                "enforceMaxLength": null,
+                                                "fieldLabel": "Fuel Category",
+                                                "itemId": "cboFuelCategory",
+                                                "labelPad": null,
+                                                "labelSeparator": null,
+                                                "labelWidth": 165,
+                                                "layout|flex": null,
+                                                "margin": null,
+                                                "maxLength": null,
+                                                "name": null,
+                                                "tabIndex": null,
+                                                "valueField": "intRinFuelCategoryId",
+                                                "width": null
+                                            },
+                                            "name": "MyComboBox63",
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "a5e5c5b5-8952-48dd-b15e-a4148ba0371a",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "columns": [
+                                                    "[",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intRinFeedStockId',",
+                                                    "\t\tdataType: 'int',",
+                                                    "\t\ttext: 'Feed Stock Id',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strRinFeedStockCode',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Code',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strDescription',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Description',",
+                                                    "\t\tflex: 1",
+                                                    "\t}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "designer|displayName": null,
+                                                "displayField": "strRinFeedStockCode",
+                                                "enforceMaxLength": null,
+                                                "fieldLabel": "Feed Stock",
+                                                "itemId": "cboFeedStock",
+                                                "labelPad": null,
+                                                "labelSeparator": null,
+                                                "labelWidth": 165,
+                                                "layout|flex": null,
+                                                "margin": null,
+                                                "maxLength": null,
+                                                "name": null,
+                                                "tabIndex": null,
+                                                "valueField": "intRinFeedStockId",
+                                                "width": null
+                                            },
+                                            "name": "MyComboBox64",
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "158e82c0-7bdf-4061-b5e5-c9be997929e4",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.form.field.Number",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "allowDecimals": false,
+                                                "designer|displayName": null,
+                                                "enforceMaxLength": null,
+                                                "fieldCls": null,
+                                                "fieldLabel": "Batch No",
+                                                "fieldStyle": "text-align:right",
+                                                "hideTrigger": true,
+                                                "itemId": "txtBatchNo",
+                                                "labelPad": null,
+                                                "labelSeparator": null,
+                                                "labelWidth": 165,
+                                                "layout|flex": null,
+                                                "margin": null,
+                                                "maxLength": null,
+                                                "name": null,
+                                                "readOnly": null,
+                                                "tabIndex": null,
+                                                "value": null,
+                                                "width": null
+                                            },
+                                            "name": "MyNumberField14",
+                                            "designerId": "612b526d-7188-47bd-a31f-9cb9212ff0dc"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.Number",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "allowDecimals": false,
+                                                "designer|displayName": null,
+                                                "enforceMaxLength": null,
+                                                "fieldLabel": "Ending RIN Gallons for Batch",
+                                                "fieldStyle": "text-align:right",
+                                                "hideTrigger": true,
+                                                "itemId": "txtEndingRinGallonsForBatch",
+                                                "labelPad": null,
+                                                "labelSeparator": null,
+                                                "labelWidth": 165,
+                                                "layout|flex": null,
+                                                "margin": null,
+                                                "maxLength": null,
+                                                "name": null,
+                                                "tabIndex": null,
+                                                "width": null
+                                            },
+                                            "name": "MyNumberField15",
+                                            "designerId": "1b19e950-2f0f-4e8f-93a0-d9150376cc3a"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.Text",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "designer|displayName": null,
+                                                "enforceMaxLength": null,
+                                                "fieldLabel": "Equivalence Value",
+                                                "itemId": "txtEquivalenceValue",
+                                                "labelPad": null,
+                                                "labelSeparator": null,
+                                                "labelWidth": 165,
+                                                "layout|flex": null,
+                                                "margin": null,
+                                                "maxLength": null,
+                                                "name": null,
+                                                "tabIndex": null,
+                                                "width": 170
+                                            },
+                                            "name": "MyTextField",
+                                            "designerId": "cb947ddc-b53d-408a-828e-21ff31f0b23d"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "columns": [
+                                                    "[",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intRinFuelId',",
+                                                    "\t\tdataType: 'int',",
+                                                    "\t\ttext: 'Fuel Code Id',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strRinFuelCode',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Code',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strDescription',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Description',",
+                                                    "\t\tflex: 1",
+                                                    "\t}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "designer|displayName": null,
+                                                "displayField": "strRinFuelCode",
+                                                "enforceMaxLength": null,
+                                                "fieldLabel": "Fuel Code",
+                                                "itemId": "cboFuelCode",
+                                                "labelPad": null,
+                                                "labelSeparator": null,
+                                                "labelWidth": 165,
+                                                "layout|flex": null,
+                                                "margin": null,
+                                                "maxLength": null,
+                                                "name": null,
+                                                "tabIndex": null,
+                                                "valueField": "intRinFuelId",
+                                                "width": 170
+                                            },
+                                            "name": "MyComboBox66",
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "74f69a76-67b8-437d-aec2-c1f740ea3eda",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "columns": [
+                                                    "[",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intRinProcessId',",
+                                                    "\t\tdataType: 'int',",
+                                                    "\t\ttext: 'Process Id',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strRinProcessCode',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Code',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strDescription',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Description',",
+                                                    "\t\tflex: 1",
+                                                    "\t}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "designer|displayName": null,
+                                                "displayField": "strRinProcessCode",
+                                                "enforceMaxLength": null,
+                                                "fieldLabel": "Production Process",
+                                                "itemId": "cboProductionProcess",
+                                                "labelPad": null,
+                                                "labelSeparator": null,
+                                                "labelWidth": 165,
+                                                "layout|flex": null,
+                                                "margin": null,
+                                                "maxLength": null,
+                                                "name": null,
+                                                "tabIndex": null,
+                                                "valueField": "intRinProcessId",
+                                                "width": 170
+                                            },
+                                            "name": "MyComboBox67",
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "a67ee039-a375-44bc-9291-5cfcb0742753",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.form.field.ComboBox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "columns": [
+                                                    "[",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intRinFeedStockUOMId',",
+                                                    "\t\tdataType: 'int',",
+                                                    "\t\ttext: 'Feed Stock UOM Id',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "    {",
+                                                    "\t\tdataIndex: 'intUnitMeasureId',",
+                                                    "\t\tdataType: 'int',",
+                                                    "\t\ttext: 'UOM Id',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strUnitMeasure',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Unit Measure Id',",
+                                                    "\t\tflex: 1",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strRinFeedStockUOMCode',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'UOM Code',",
+                                                    "\t\tflex: 1",
+                                                    "\t}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
+                                                "designer|displayName": null,
+                                                "displayField": "strUnitMeasure",
+                                                "enforceMaxLength": null,
+                                                "fieldLabel": "Feed Stock UOM",
+                                                "itemId": "cboFeedStockUom",
+                                                "labelPad": null,
+                                                "labelSeparator": null,
+                                                "labelWidth": 165,
+                                                "layout|flex": null,
+                                                "margin": null,
+                                                "maxLength": null,
+                                                "name": null,
+                                                "tabIndex": null,
+                                                "valueField": "intRinFeedStockUOMId",
+                                                "width": 170
+                                            },
+                                            "name": "MyComboBox68",
+                                            "configAlternates": {
+                                                "columns": "array"
+                                            },
+                                            "designerId": "03dc79f4-15f4-4ce2-9001-988db48be2a6",
+                                            "customConfigs": [
+                                                {
+                                                    "group": "(Custom Properties)",
+                                                    "name": "columns",
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.form.field.Number",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "designer|displayName": null,
+                                                "enforceMaxLength": null,
+                                                "fieldLabel": "Feed Stock Factor",
+                                                "fieldStyle": "text-align:right",
+                                                "hideTrigger": true,
+                                                "itemId": "txtFeedStockFactor",
+                                                "labelPad": null,
+                                                "labelSeparator": null,
+                                                "labelWidth": 165,
+                                                "layout|flex": null,
+                                                "margin": null,
+                                                "maxLength": null,
+                                                "name": null,
+                                                "tabIndex": null,
+                                                "width": null
+                                            },
+                                            "name": "MyNumberField16",
+                                            "designerId": "6794b5f5-5d4f-40e7-8b9d-d3a86191072b"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.Checkbox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "boxLabel": null,
+                                                "fieldLabel": "Renewable Biomass",
+                                                "itemId": "chkRenewableBiomass",
+                                                "labelWidth": 165,
+                                                "layout|flex": null
+                                            },
+                                            "name": "MyCheckbox63",
+                                            "designerId": "5519542f-ed1d-4d6d-8ba8-98517576a584"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.Number",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "designer|displayName": null,
+                                                "enforceMaxLength": null,
+                                                "fieldLabel": "Percent of Denaturant",
+                                                "fieldStyle": "text-align:right",
+                                                "hideTrigger": true,
+                                                "itemId": "txtPercentOfDenaturant",
+                                                "labelPad": null,
+                                                "labelSeparator": null,
+                                                "labelWidth": 165,
+                                                "layout|flex": null,
+                                                "margin": null,
+                                                "maxLength": null,
+                                                "name": null,
+                                                "tabIndex": null,
+                                                "width": null
+                                            },
+                                            "name": "MyNumberField17",
+                                            "designerId": "f5644e27-75c6-46b3-85bf-659a24bbcb4b"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.Checkbox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "boxLabel": null,
+                                                "fieldLabel": "Deduct Denaturant from RIN",
+                                                "itemId": "chkDeductDenaturantFromRin",
+                                                "labelWidth": 165,
+                                                "layout|flex": null
+                                            },
+                                            "name": "MyCheckbox64",
+                                            "designerId": "70fc0d5d-47e2-4d04-aec9-c7a5648ab50c"
+                                        }
+                                    ]
                                 }
                             ]
-                        },
-                        {
-                            "type": "Ext.form.field.ComboBox",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "columns": [
-                                    "[",
-                                    "\t{",
-                                    "\t\tdataIndex: 'intRinFeedStockId',",
-                                    "\t\tdataType: 'int',",
-                                    "\t\ttext: 'Feed Stock Id',",
-                                    "\t\thidden: true",
-                                    "\t},",
-                                    "\t{",
-                                    "\t\tdataIndex: 'strRinFeedStockCode',",
-                                    "\t\tdataType: 'string',",
-                                    "\t\ttext: 'Code',",
-                                    "\t\tflex: 1",
-                                    "\t},",
-                                    "\t{",
-                                    "\t\tdataIndex: 'strDescription',",
-                                    "\t\tdataType: 'string',",
-                                    "\t\ttext: 'Description',",
-                                    "\t\tflex: 1",
-                                    "\t}",
-                                    "]"
-                                ],
-                                "designer|createAlias": "gridcombobox",
-                                "designer|displayName": null,
-                                "displayField": "strRinFeedStockCode",
-                                "enforceMaxLength": null,
-                                "fieldLabel": "Feed Stock",
-                                "itemId": "cboFeedStock",
-                                "labelPad": null,
-                                "labelSeparator": null,
-                                "labelWidth": 165,
-                                "layout|flex": null,
-                                "margin": null,
-                                "maxLength": null,
-                                "name": null,
-                                "tabIndex": null,
-                                "valueField": "intRinFeedStockId",
-                                "width": null
-                            },
-                            "name": "MyComboBox64",
-                            "configAlternates": {
-                                "columns": "array"
-                            },
-                            "designerId": "158e82c0-7bdf-4061-b5e5-c9be997929e4",
-                            "customConfigs": [
-                                {
-                                    "group": "(Custom Properties)",
-                                    "name": "columns",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        {
-                            "type": "Ext.form.field.Number",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "allowDecimals": false,
-                                "designer|displayName": null,
-                                "enforceMaxLength": null,
-                                "fieldCls": null,
-                                "fieldLabel": "Batch No",
-                                "fieldStyle": "text-align:right",
-                                "hideTrigger": true,
-                                "itemId": "txtBatchNo",
-                                "labelPad": null,
-                                "labelSeparator": null,
-                                "labelWidth": 165,
-                                "layout|flex": null,
-                                "margin": null,
-                                "maxLength": null,
-                                "name": null,
-                                "readOnly": null,
-                                "tabIndex": null,
-                                "value": null,
-                                "width": null
-                            },
-                            "name": "MyNumberField14",
-                            "designerId": "612b526d-7188-47bd-a31f-9cb9212ff0dc"
-                        },
-                        {
-                            "type": "Ext.form.field.Number",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "allowDecimals": false,
-                                "designer|displayName": null,
-                                "enforceMaxLength": null,
-                                "fieldLabel": "Ending RIN Gallons for Batch",
-                                "fieldStyle": "text-align:right",
-                                "hideTrigger": true,
-                                "itemId": "txtEndingRinGallonsForBatch",
-                                "labelPad": null,
-                                "labelSeparator": null,
-                                "labelWidth": 165,
-                                "layout|flex": null,
-                                "margin": null,
-                                "maxLength": null,
-                                "name": null,
-                                "tabIndex": null,
-                                "width": null
-                            },
-                            "name": "MyNumberField15",
-                            "designerId": "1b19e950-2f0f-4e8f-93a0-d9150376cc3a"
-                        },
-                        {
-                            "type": "Ext.form.field.Text",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": null,
-                                "enforceMaxLength": null,
-                                "fieldLabel": "Equivalence Value",
-                                "itemId": "txtEquivalenceValue",
-                                "labelPad": null,
-                                "labelSeparator": null,
-                                "labelWidth": 165,
-                                "layout|flex": null,
-                                "margin": null,
-                                "maxLength": null,
-                                "name": null,
-                                "tabIndex": null,
-                                "width": 170
-                            },
-                            "name": "MyTextField",
-                            "designerId": "cb947ddc-b53d-408a-828e-21ff31f0b23d"
-                        },
-                        {
-                            "type": "Ext.form.field.ComboBox",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "columns": [
-                                    "[",
-                                    "\t{",
-                                    "\t\tdataIndex: 'intRinFuelId',",
-                                    "\t\tdataType: 'int',",
-                                    "\t\ttext: 'Fuel Code Id',",
-                                    "\t\thidden: true",
-                                    "\t},",
-                                    "\t{",
-                                    "\t\tdataIndex: 'strRinFuelCode',",
-                                    "\t\tdataType: 'string',",
-                                    "\t\ttext: 'Code',",
-                                    "\t\tflex: 1",
-                                    "\t},",
-                                    "\t{",
-                                    "\t\tdataIndex: 'strDescription',",
-                                    "\t\tdataType: 'string',",
-                                    "\t\ttext: 'Description',",
-                                    "\t\tflex: 1",
-                                    "\t}",
-                                    "]"
-                                ],
-                                "designer|createAlias": "gridcombobox",
-                                "designer|displayName": null,
-                                "displayField": "strRinFuelCode",
-                                "enforceMaxLength": null,
-                                "fieldLabel": "Fuel Code",
-                                "itemId": "cboFuelCode",
-                                "labelPad": null,
-                                "labelSeparator": null,
-                                "labelWidth": 165,
-                                "layout|flex": null,
-                                "margin": null,
-                                "maxLength": null,
-                                "name": null,
-                                "tabIndex": null,
-                                "valueField": "intRinFuelId",
-                                "width": 170
-                            },
-                            "name": "MyComboBox66",
-                            "configAlternates": {
-                                "columns": "array"
-                            },
-                            "designerId": "74f69a76-67b8-437d-aec2-c1f740ea3eda",
-                            "customConfigs": [
-                                {
-                                    "group": "(Custom Properties)",
-                                    "name": "columns",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        {
-                            "type": "Ext.form.field.ComboBox",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "columns": [
-                                    "[",
-                                    "\t{",
-                                    "\t\tdataIndex: 'intRinProcessId',",
-                                    "\t\tdataType: 'int',",
-                                    "\t\ttext: 'Process Id',",
-                                    "\t\thidden: true",
-                                    "\t},",
-                                    "\t{",
-                                    "\t\tdataIndex: 'strRinProcessCode',",
-                                    "\t\tdataType: 'string',",
-                                    "\t\ttext: 'Code',",
-                                    "\t\tflex: 1",
-                                    "\t},",
-                                    "\t{",
-                                    "\t\tdataIndex: 'strDescription',",
-                                    "\t\tdataType: 'string',",
-                                    "\t\ttext: 'Description',",
-                                    "\t\tflex: 1",
-                                    "\t}",
-                                    "]"
-                                ],
-                                "designer|createAlias": "gridcombobox",
-                                "designer|displayName": null,
-                                "displayField": "strRinProcessCode",
-                                "enforceMaxLength": null,
-                                "fieldLabel": "Production Process",
-                                "itemId": "cboProductionProcess",
-                                "labelPad": null,
-                                "labelSeparator": null,
-                                "labelWidth": 165,
-                                "layout|flex": null,
-                                "margin": null,
-                                "maxLength": null,
-                                "name": null,
-                                "tabIndex": null,
-                                "valueField": "intRinProcessId",
-                                "width": 170
-                            },
-                            "name": "MyComboBox67",
-                            "configAlternates": {
-                                "columns": "array"
-                            },
-                            "designerId": "a67ee039-a375-44bc-9291-5cfcb0742753",
-                            "customConfigs": [
-                                {
-                                    "group": "(Custom Properties)",
-                                    "name": "columns",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        {
-                            "type": "Ext.form.field.ComboBox",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "columns": [
-                                    "[",
-                                    "\t{",
-                                    "\t\tdataIndex: 'intRinFeedStockUOMId',",
-                                    "\t\tdataType: 'int',",
-                                    "\t\ttext: 'Feed Stock UOM Id',",
-                                    "\t\thidden: true",
-                                    "\t},",
-                                    "    {",
-                                    "\t\tdataIndex: 'intUnitMeasureId',",
-                                    "\t\tdataType: 'int',",
-                                    "\t\ttext: 'UOM Id',",
-                                    "\t\thidden: true",
-                                    "\t},",
-                                    "\t{",
-                                    "\t\tdataIndex: 'strUnitMeasure',",
-                                    "\t\tdataType: 'string',",
-                                    "\t\ttext: 'Unit Measure Id',",
-                                    "\t\tflex: 1",
-                                    "\t},",
-                                    "\t{",
-                                    "\t\tdataIndex: 'strRinFeedStockUOMCode',",
-                                    "\t\tdataType: 'string',",
-                                    "\t\ttext: 'UOM Code',",
-                                    "\t\tflex: 1",
-                                    "\t}",
-                                    "]"
-                                ],
-                                "designer|createAlias": "gridcombobox",
-                                "designer|displayName": null,
-                                "displayField": "strUnitMeasure",
-                                "enforceMaxLength": null,
-                                "fieldLabel": "Feed Stock UOM",
-                                "itemId": "cboFeedStockUom",
-                                "labelPad": null,
-                                "labelSeparator": null,
-                                "labelWidth": 165,
-                                "layout|flex": null,
-                                "margin": null,
-                                "maxLength": null,
-                                "name": null,
-                                "tabIndex": null,
-                                "valueField": "intRinFeedStockUOMId",
-                                "width": 170
-                            },
-                            "name": "MyComboBox68",
-                            "configAlternates": {
-                                "columns": "array"
-                            },
-                            "designerId": "03dc79f4-15f4-4ce2-9001-988db48be2a6",
-                            "customConfigs": [
-                                {
-                                    "group": "(Custom Properties)",
-                                    "name": "columns",
-                                    "type": "string"
-                                }
-                            ]
-                        },
-                        {
-                            "type": "Ext.form.field.Number",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": null,
-                                "enforceMaxLength": null,
-                                "fieldLabel": "Feed Stock Factor",
-                                "fieldStyle": "text-align:right",
-                                "hideTrigger": true,
-                                "itemId": "txtFeedStockFactor",
-                                "labelPad": null,
-                                "labelSeparator": null,
-                                "labelWidth": 165,
-                                "layout|flex": null,
-                                "margin": null,
-                                "maxLength": null,
-                                "name": null,
-                                "tabIndex": null,
-                                "width": null
-                            },
-                            "name": "MyNumberField16",
-                            "designerId": "6794b5f5-5d4f-40e7-8b9d-d3a86191072b"
-                        },
-                        {
-                            "type": "Ext.form.field.Checkbox",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "boxLabel": null,
-                                "fieldLabel": "Renewable Biomass",
-                                "itemId": "chkRenewableBiomass",
-                                "labelWidth": 165,
-                                "layout|flex": null
-                            },
-                            "name": "MyCheckbox63",
-                            "designerId": "5519542f-ed1d-4d6d-8ba8-98517576a584"
-                        },
-                        {
-                            "type": "Ext.form.field.Number",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "designer|displayName": null,
-                                "enforceMaxLength": null,
-                                "fieldLabel": "Percent of Denaturant",
-                                "fieldStyle": "text-align:right",
-                                "hideTrigger": true,
-                                "itemId": "txtPercentOfDenaturant",
-                                "labelPad": null,
-                                "labelSeparator": null,
-                                "labelWidth": 165,
-                                "layout|flex": null,
-                                "margin": null,
-                                "maxLength": null,
-                                "name": null,
-                                "tabIndex": null,
-                                "width": null
-                            },
-                            "name": "MyNumberField17",
-                            "designerId": "f5644e27-75c6-46b3-85bf-659a24bbcb4b"
-                        },
-                        {
-                            "type": "Ext.form.field.Checkbox",
-                            "reference": {
-                                "name": "items",
-                                "type": "array"
-                            },
-                            "codeClass": null,
-                            "userConfig": {
-                                "boxLabel": null,
-                                "fieldLabel": "Deduct Denaturant from RIN",
-                                "itemId": "chkDeductDenaturantFromRin",
-                                "labelWidth": 165,
-                                "layout|flex": null
-                            },
-                            "name": "MyCheckbox64",
-                            "designerId": "70fc0d5d-47e2-4d04-aec9-c7a5648ab50c"
                         }
                     ]
                 },
@@ -749,7 +795,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging111",
+                    "name": "statusbarpaging19",
                     "designerId": "ef7cd9cb-b7a1-4f5a-a180-5e26b5c5119a",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

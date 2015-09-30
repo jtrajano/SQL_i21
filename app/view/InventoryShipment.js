@@ -39,8 +39,6 @@ Ext.define('Inventory.view.InventoryShipment', {
 
     height: 700,
     hidden: false,
-    minHeight: 510,
-    minWidth: 1100,
     width: 1100,
     layout: 'fit',
     collapsible: true,
@@ -55,12 +53,10 @@ Ext.define('Inventory.view.InventoryShipment', {
                 items: [
                     {
                         xtype: 'form',
-                        height: 350,
                         itemId: 'frmInventoryShipment',
                         margin: -1,
-                        width: 450,
                         layout: 'fit',
-                        bodyPadding: 5,
+                        bodyPadding: 3,
                         dockedItems: [
                             {
                                 xtype: 'toolbar',
@@ -411,7 +407,9 @@ Ext.define('Inventory.view.InventoryShipment', {
                                             {
                                                 xtype: 'tabpanel',
                                                 height: 110,
+                                                itemId: 'tabShipping',
                                                 activeTab: 0,
+                                                plain: true,
                                                 items: [
                                                     {
                                                         xtype: 'panel',

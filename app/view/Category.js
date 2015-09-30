@@ -20,8 +20,8 @@ Ext.define('Inventory.view.Category', {
     requires: [
         'Inventory.view.Filter1',
         'Inventory.view.StatusbarPaging1',
-        'Ext.toolbar.Separator',
         'Ext.form.Panel',
+        'Ext.toolbar.Separator',
         'Ext.tab.Panel',
         'Ext.tab.Tab',
         'Ext.form.field.ComboBox',
@@ -40,98 +40,12 @@ Ext.define('Inventory.view.Category', {
 
     height: 573,
     hidden: false,
-    minHeight: 560,
-    minWidth: 860,
     width: 860,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
     title: 'Category',
     maximizable: true,
-
-    dockedItems: [
-        {
-            xtype: 'toolbar',
-            dock: 'top',
-            width: 588,
-            layout: {
-                type: 'hbox',
-                padding: '0 0 0 1'
-            },
-            items: [
-                {
-                    xtype: 'button',
-                    tabIndex: -1,
-                    height: 57,
-                    itemId: 'btnNew',
-                    width: 45,
-                    iconAlign: 'top',
-                    iconCls: 'large-new',
-                    scale: 'large',
-                    text: 'New'
-                },
-                {
-                    xtype: 'button',
-                    tabIndex: -1,
-                    height: 57,
-                    itemId: 'btnSave',
-                    width: 45,
-                    iconAlign: 'top',
-                    iconCls: 'large-save',
-                    scale: 'large',
-                    text: 'Save'
-                },
-                {
-                    xtype: 'button',
-                    tabIndex: -1,
-                    height: 57,
-                    itemId: 'btnFind',
-                    width: 45,
-                    iconAlign: 'top',
-                    iconCls: 'large-search',
-                    scale: 'large',
-                    text: 'Search'
-                },
-                {
-                    xtype: 'button',
-                    tabIndex: -1,
-                    height: 57,
-                    itemId: 'btnDelete',
-                    width: 45,
-                    iconAlign: 'top',
-                    iconCls: 'large-delete',
-                    scale: 'large',
-                    text: 'Delete'
-                },
-                {
-                    xtype: 'button',
-                    tabIndex: -1,
-                    height: 57,
-                    itemId: 'btnUndo',
-                    width: 45,
-                    iconAlign: 'top',
-                    iconCls: 'large-undo',
-                    scale: 'large',
-                    text: 'Undo'
-                },
-                {
-                    xtype: 'tbseparator',
-                    height: 30
-                },
-                {
-                    xtype: 'button',
-                    tabIndex: -1,
-                    height: 57,
-                    itemId: 'btnClose',
-                    width: 45,
-                    iconAlign: 'top',
-                    iconCls: 'large-close',
-                    scale: 'large',
-                    text: 'Close'
-                }
-            ]
-        }
-    ],
 
     initConfig: function(instanceConfig) {
         var me = this,
@@ -140,17 +54,104 @@ Ext.define('Inventory.view.Category', {
                     {
                         xtype: 'form',
                         autoShow: true,
-                        height: 350,
                         itemId: 'frmCategory',
                         margin: -1,
-                        width: 450,
                         bodyBorder: false,
-                        bodyPadding: 5,
+                        bodyPadding: 3,
                         header: false,
                         layout: {
                             type: 'vbox',
                             align: 'stretch'
                         },
+                        dockedItems: [
+                            {
+                                xtype: 'toolbar',
+                                dock: 'top',
+                                width: 588,
+                                layout: {
+                                    type: 'hbox',
+                                    padding: '0 0 0 1'
+                                },
+                                items: [
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        height: 57,
+                                        itemId: 'btnNew',
+                                        width: 45,
+                                        iconAlign: 'top',
+                                        iconCls: 'large-new',
+                                        scale: 'large',
+                                        text: 'New'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        height: 57,
+                                        itemId: 'btnSave',
+                                        width: 45,
+                                        iconAlign: 'top',
+                                        iconCls: 'large-save',
+                                        scale: 'large',
+                                        text: 'Save'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        height: 57,
+                                        itemId: 'btnFind',
+                                        width: 45,
+                                        iconAlign: 'top',
+                                        iconCls: 'large-search',
+                                        scale: 'large',
+                                        text: 'Search'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        height: 57,
+                                        itemId: 'btnDelete',
+                                        width: 45,
+                                        iconAlign: 'top',
+                                        iconCls: 'large-delete',
+                                        scale: 'large',
+                                        text: 'Delete'
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        height: 57,
+                                        itemId: 'btnUndo',
+                                        width: 45,
+                                        iconAlign: 'top',
+                                        iconCls: 'large-undo',
+                                        scale: 'large',
+                                        text: 'Undo'
+                                    },
+                                    {
+                                        xtype: 'tbseparator',
+                                        height: 30
+                                    },
+                                    {
+                                        xtype: 'button',
+                                        tabIndex: -1,
+                                        height: 57,
+                                        itemId: 'btnClose',
+                                        width: 45,
+                                        iconAlign: 'top',
+                                        iconCls: 'large-close',
+                                        scale: 'large',
+                                        text: 'Close'
+                                    }
+                                ]
+                            },
+                            {
+                                xtype: 'ipagingstatusbar',
+                                itemId: 'tlbStatusbarPaging',
+                                flex: 1,
+                                dock: 'bottom'
+                            }
+                        ],
                         items: [
                             {
                                 xtype: 'tabpanel',
@@ -1317,14 +1318,6 @@ Ext.define('Inventory.view.Category', {
                                         ]
                                     }
                                 ]
-                            }
-                        ],
-                        dockedItems: [
-                            {
-                                xtype: 'ipagingstatusbar',
-                                itemId: 'tlbStatusbarPaging',
-                                flex: 1,
-                                dock: 'bottom'
                             }
                         ]
                     }

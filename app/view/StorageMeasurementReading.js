@@ -35,8 +35,6 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
 
     height: 550,
     hidden: false,
-    minHeight: 550,
-    minWidth: 500,
     width: 500,
     layout: 'fit',
     collapsible: true,

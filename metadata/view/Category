@@ -17,8 +17,8 @@
         "iconCls": "small-icon-i21",
         "layout": "fit",
         "maximizable": true,
-        "minHeight": 560,
-        "minWidth": 860,
+        "minHeight": null,
+        "minWidth": null,
         "minimizable": null,
         "mixins": null,
         "reference": null,
@@ -30,177 +30,6 @@
     "viewModelInstanceId": "5084c552-d2be-4362-ac94-8d9d5466e650",
     "cn": [
         {
-            "type": "Ext.toolbar.Toolbar",
-            "reference": {
-                "name": "dockedItems",
-                "type": "array"
-            },
-            "codeClass": null,
-            "userConfig": {
-                "container|padding": "0 0 0 1",
-                "designer|displayName": "toolbar",
-                "dock": "top",
-                "width": 588
-            },
-            "name": "MyToolbar28",
-            "designerId": "24e6d535-2f94-4d08-b98d-b438e2ad387a",
-            "cn": [
-                {
-                    "type": "Ext.button.Button",
-                    "reference": {
-                        "name": "items",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "designer|displayName": null,
-                        "height": 57,
-                        "icon": null,
-                        "iconAlign": "top",
-                        "iconCls": "large-new",
-                        "itemId": "btnNew",
-                        "layout|flex": null,
-                        "scale": "large",
-                        "tabIndex": -1,
-                        "text": "New",
-                        "width": 45
-                    },
-                    "name": "MyButton69",
-                    "designerId": "96290e57-e65a-4605-a809-d74b7505f127"
-                },
-                {
-                    "type": "Ext.button.Button",
-                    "reference": {
-                        "name": "items",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "designer|displayName": null,
-                        "height": 57,
-                        "icon": null,
-                        "iconAlign": "top",
-                        "iconCls": "large-save",
-                        "itemId": "btnSave",
-                        "layout|flex": null,
-                        "scale": "large",
-                        "tabIndex": -1,
-                        "text": "Save",
-                        "width": 45
-                    },
-                    "name": "MyButton70",
-                    "designerId": "4d64b834-c796-4cdf-b854-9e3ed88de27f"
-                },
-                {
-                    "type": "Ext.button.Button",
-                    "reference": {
-                        "name": "items",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "designer|displayName": null,
-                        "height": 57,
-                        "icon": null,
-                        "iconAlign": "top",
-                        "iconCls": "large-search",
-                        "itemId": "btnFind",
-                        "layout|flex": null,
-                        "scale": "large",
-                        "tabIndex": -1,
-                        "text": "Search",
-                        "width": 45
-                    },
-                    "name": "MyButton71",
-                    "designerId": "71548497-3b76-4bf4-bcf2-9c730d99c0ec"
-                },
-                {
-                    "type": "Ext.button.Button",
-                    "reference": {
-                        "name": "items",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "designer|displayName": null,
-                        "height": 57,
-                        "icon": null,
-                        "iconAlign": "top",
-                        "iconCls": "large-delete",
-                        "itemId": "btnDelete",
-                        "layout|flex": null,
-                        "scale": "large",
-                        "tabIndex": -1,
-                        "text": "Delete",
-                        "width": 45
-                    },
-                    "name": "MyButton72",
-                    "designerId": "e9649336-40a4-46ae-9c09-9e59aa22a516"
-                },
-                {
-                    "type": "Ext.button.Button",
-                    "reference": {
-                        "name": "items",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "designer|displayName": null,
-                        "height": 57,
-                        "icon": null,
-                        "iconAlign": "top",
-                        "iconCls": "large-undo",
-                        "itemId": "btnUndo",
-                        "layout|flex": null,
-                        "scale": "large",
-                        "tabIndex": -1,
-                        "text": "Undo",
-                        "width": 45
-                    },
-                    "name": "MyButton73",
-                    "designerId": "756960a3-a7ac-4945-964c-0240d7880d6e"
-                },
-                {
-                    "type": "Ext.toolbar.Separator",
-                    "reference": {
-                        "name": "items",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "designer|displayName": "separator",
-                        "height": 30,
-                        "layout|flex": null
-                    },
-                    "name": "MySeparator29",
-                    "designerId": "3a42ca62-9ab1-4fba-a522-bafb4f6ad48c"
-                },
-                {
-                    "type": "Ext.button.Button",
-                    "reference": {
-                        "name": "items",
-                        "type": "array"
-                    },
-                    "codeClass": null,
-                    "userConfig": {
-                        "designer|displayName": null,
-                        "height": 57,
-                        "icon": null,
-                        "iconAlign": "top",
-                        "iconCls": "large-close",
-                        "itemId": "btnClose",
-                        "layout|flex": null,
-                        "scale": "large",
-                        "tabIndex": -1,
-                        "text": "Close",
-                        "width": 45
-                    },
-                    "name": "MyButton74",
-                    "designerId": "02f892e0-8746-4871-8252-f4351adb1667"
-                }
-            ]
-        },
-        {
             "type": "Ext.form.Panel",
             "reference": {
                 "name": "items",
@@ -210,22 +39,193 @@
             "userConfig": {
                 "autoShow": true,
                 "bodyBorder": false,
-                "bodyPadding": 5,
+                "bodyPadding": 3,
                 "container|align": "stretch",
                 "dock": null,
                 "frame": null,
                 "header": false,
-                "height": 350,
+                "height": null,
                 "itemId": "frmCategory",
                 "layout": "vbox",
                 "margin": -1,
                 "title": null,
                 "url": null,
-                "width": 450
+                "width": null
             },
             "name": "MyForm4",
             "designerId": "abdbde4a-9217-482d-8761-f4f3676b5c8b",
             "cn": [
+                {
+                    "type": "Ext.toolbar.Toolbar",
+                    "reference": {
+                        "name": "dockedItems",
+                        "type": "array"
+                    },
+                    "codeClass": null,
+                    "userConfig": {
+                        "container|padding": "0 0 0 1",
+                        "designer|displayName": "toolbar",
+                        "dock": "top",
+                        "width": 588
+                    },
+                    "name": "MyToolbar28",
+                    "designerId": "24e6d535-2f94-4d08-b98d-b438e2ad387a",
+                    "cn": [
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-new",
+                                "itemId": "btnNew",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "New",
+                                "width": 45
+                            },
+                            "name": "MyButton69",
+                            "designerId": "96290e57-e65a-4605-a809-d74b7505f127"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-save",
+                                "itemId": "btnSave",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Save",
+                                "width": 45
+                            },
+                            "name": "MyButton70",
+                            "designerId": "4d64b834-c796-4cdf-b854-9e3ed88de27f"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-search",
+                                "itemId": "btnFind",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Search",
+                                "width": 45
+                            },
+                            "name": "MyButton71",
+                            "designerId": "71548497-3b76-4bf4-bcf2-9c730d99c0ec"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-delete",
+                                "itemId": "btnDelete",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Delete",
+                                "width": 45
+                            },
+                            "name": "MyButton72",
+                            "designerId": "e9649336-40a4-46ae-9c09-9e59aa22a516"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-undo",
+                                "itemId": "btnUndo",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Undo",
+                                "width": 45
+                            },
+                            "name": "MyButton73",
+                            "designerId": "756960a3-a7ac-4945-964c-0240d7880d6e"
+                        },
+                        {
+                            "type": "Ext.toolbar.Separator",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": "separator",
+                                "height": 30,
+                                "layout|flex": null
+                            },
+                            "name": "MySeparator29",
+                            "designerId": "3a42ca62-9ab1-4fba-a522-bafb4f6ad48c"
+                        },
+                        {
+                            "type": "Ext.button.Button",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "designer|displayName": null,
+                                "height": 57,
+                                "icon": null,
+                                "iconAlign": "top",
+                                "iconCls": "large-close",
+                                "itemId": "btnClose",
+                                "layout|flex": null,
+                                "scale": "large",
+                                "tabIndex": -1,
+                                "text": "Close",
+                                "width": 45
+                            },
+                            "name": "MyButton74",
+                            "designerId": "02f892e0-8746-4871-8252-f4351adb1667"
+                        }
+                    ]
+                },
                 {
                     "type": "Ext.tab.Panel",
                     "reference": {
@@ -803,7 +803,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter12",
+                                                            "name": "filter1",
                                                             "designerId": "53804780-f5bc-480e-aa2f-13d727814dbe",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -1152,7 +1152,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter13",
+                                                    "name": "filter11",
                                                     "designerId": "15a1d931-71e4-4cbc-8963-0531112b0fe0",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1367,7 +1367,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter14",
+                                                    "name": "filter12",
                                                     "designerId": "336cd22c-55d7-4f75-bd45-20820dfc01b5",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -1671,7 +1671,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter15",
+                                                    "name": "filter13",
                                                     "designerId": "1f016d2c-d6a9-4998-be84-a17777e4dd56",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -2921,7 +2921,7 @@
                         "itemId": "tlbStatusbarPaging",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging11",
+                    "name": "statusbarpaging1",
                     "designerId": "0ca3c6d6-785e-4ad8-ac4f-3eaa2d75593b",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
