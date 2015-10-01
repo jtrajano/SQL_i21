@@ -2523,6 +2523,8 @@
     <Build Include="dbo\Tables\tblICStorageMeasurementReading.sql" />
     <Build Include="dbo\Tables\tblICStorageMeasurementReadingConversion.sql" />
     <Build Include="dbo\Views\vyuICGetStorageMeasurementReadingConversion.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRDailyPositionByCommodityLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRDailyPositionByCommodity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -1,9 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKDPRInvDailyPositionDetail] 
+ 
 	 @intCommodityId INT
 	,@intLocationId INT = NULL
 AS
 IF ISNULL(@intLocationId, 0) <> 0
 BEGIN
+SELECT * INTO #temp FROM (
 	SELECT 1 AS intSeqId
 		,'In-House' AS [strType]
 		,ISNULL(invQty, 0) - ISNULL(ReserveQty, 0) + ISNULL(dblBalance, 0) AS dblTotal
@@ -323,9 +325,11 @@ BEGIN
 					WHERE dblAdjustmentAmount <> dblOriginalQuantity
 					), 0) AS CollateralPurchases
 		) t
+		)t1
 END
 ELSE
 BEGIN
+SELECT * INTO #temp1 FROM (
 	SELECT 1 AS intSeqId
 		,'In-House' AS [strType]
 		,ISNULL(invQty, 0) - ISNULL(ReserveQty, 0) + dblBalance AS dblTotal
@@ -604,4 +608,32 @@ BEGIN
 					WHERE dblAdjustmentAmount <> dblOriginalQuantity
 					), 0) AS CollateralPurchases
 		) t
+		) t1
 END
+
+DECLARE @intUnitMeasureId int
+DECLARE @intFromCommodityUnitMeasureId int
+DECLARE @intToCommodityUnitMeasureId int
+SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
+
+SELECT @intFromCommodityUnitMeasureId=cuc.intCommodityUnitMeasureId,@intToCommodityUnitMeasureId=cuc1.intCommodityUnitMeasureId 
+FROM tblICCommodity t
+JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 
+JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
+WHERE t.intCommodityId= @intCommodityId
+
+IF ISNULL(@intLocationId, 0) <> 0
+BEGIN
+SELECT intSeqId,strType, 
+		dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) dblTotal
+FROM #temp 
+
+END
+ELSE
+BEGIN
+	SELECT intSeqId,strType,
+		dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) dblTotal
+FROM #temp1
+END
+
+
