@@ -103,7 +103,7 @@ IF(@beginDate IS NOT NULL)
 	BEGIN
 		INSERT INTO @PostInvoiceData
 		SELECT intInvoiceId, strInvoiceNumber FROM tblARInvoice
-		WHERE DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) BETWEEN @beginDate AND @endDate AND ysnPosted = 0
+		WHERE DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) BETWEEN @beginDate AND @endDate
 		AND (strTransactionType = @transType OR @transType = 'all')
 	END
 
@@ -111,7 +111,7 @@ IF(@beginTransaction IS NOT NULL)
 	BEGIN
 		INSERT INTO @PostInvoiceData
 		SELECT intInvoiceId, strInvoiceNumber FROM tblARInvoice
-		WHERE intInvoiceId BETWEEN @beginTransaction AND @endTransaction AND ysnPosted = 0
+		WHERE intInvoiceId BETWEEN @beginTransaction AND @endTransaction
 		AND (strTransactionType = @transType OR @transType = 'all')
 	END
 
