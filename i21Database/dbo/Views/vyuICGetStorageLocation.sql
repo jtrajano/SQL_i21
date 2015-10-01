@@ -32,6 +32,7 @@ SELECT StorageLocation.intStorageLocationId
 	, StorageLocation.intRelativeZ
 	, StorageLocation.intCommodityId
 	, StorageLocation.dblPackFactor
+	, StorageLocation.dblEffectiveDepth
 	, StorageLocation.dblUnitPerFoot
 	, StorageLocation.dblResidualUnit
 FROM tblICStorageLocation StorageLocation
