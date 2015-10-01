@@ -2248,7 +2248,7 @@
                                                                         "itemId": "btnEditLocation",
                                                                         "layout|flex": null,
                                                                         "tabIndex": -1,
-                                                                        "text": "View"
+                                                                        "text": "Open"
                                                                     },
                                                                     "name": "MyButton11",
                                                                     "designerId": "043a564a-fb2d-4e0d-91c2-c84757d07af7"
