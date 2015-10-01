@@ -123,6 +123,7 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateTermsView.sql"
 :r ..\dbo\Views\vwDispatch.sql
 :r ..\dbo\Views\vyuTMtrprcmst.sql
+:r "..\dbo\Stored Procedures\uspTMUpdateCustomerBudgetOrigin.sql
 
 :r "..\dbo\Stored Procedures\TwoPartDeliveryFillReport.sql"
 :r "..\dbo\Stored Procedures\uspTMGetConsumptionWithGasCheck.sql"

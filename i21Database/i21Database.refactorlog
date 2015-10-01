@@ -4067,4 +4067,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intTransactionDetailLogId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="7de56c54-32a7-4389-9554-fb03de36a105" ChangeDateTime="10/01/2015 02:19:44">
+    <Property Name="ElementName" Value="[dbo].[tblICStorageMeasurementReading].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICStorageMeasurementReading]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStorageMeasurementReadingId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="fe9f0f0e-f07f-4f03-9dc3-b80cea876228" ChangeDateTime="10/01/2015 02:22:55">
+    <Property Name="ElementName" Value="[dbo].[tblICStorageMeasurementReadingConversion].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICStorageMeasurementReadingConversion]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStorageMeasurementReadingConversionId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8f7cec89-f467-4442-951c-f7e84c0030ce" ChangeDateTime="10/01/2015 02:24:20">
+    <Property Name="ElementName" Value="[dbo].[tblICStorageMeasurementReadingConversion].[intSubLocationId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICStorageMeasurementReadingConversion]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStorageLocationId" />
+  </Operation>
 </Operations>
