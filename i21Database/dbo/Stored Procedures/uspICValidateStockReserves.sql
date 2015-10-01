@@ -55,6 +55,8 @@ FROM	(
 			ON ValidateItems.intItemUOMId = StockUOM.intItemUOMId
 			AND ValidateItems.intItemId = StockUOM.intItemId
 			AND ValidateItems.intItemLocationId = StockUOM.intItemLocationId
+			AND ISNULL(ValidateItems.intSubLocationId, 0) = ISNULL(StockUOM.intSubLocationId, 0)
+			AND ISNULL(ValidateItems.intStorageLocationId, 0) = ISNULL(StockUOM.intStorageLocationId, 0)
 		LEFT JOIN (
 			SELECT	tblICStockReservation.intItemId
 					,tblICStockReservation.intItemLocationId
