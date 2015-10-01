@@ -153,10 +153,33 @@ Ext.define('Inventory.view.StorageMeasurementReadingViewController', {
         current.set('dblEffectiveDepth', records[0].get('dblEffectiveDepth'));
     },
 
+    onQualityClick: function(button, e, eOpts) {
+        var grd = button.up('grid');
+
+        var selected = grd.getSelectionModel().getSelection();
+
+        if (selected) {
+            if (selected.length > 0){
+                var current = selected[0];
+                if (!current.dummy)
+                    iRely.Functions.openScreen('Grain.view.QualityTicketDiscount', { strSourceType: 'Storage Measurement Reading', intTicketFileId: current.get('intStorageMeasurementReadingConversionId') });
+            }
+            else {
+                iRely.Functions.showErrorDialog('Please select an Item to view.');
+            }
+        }
+        else {
+            iRely.Functions.showErrorDialog('Please select an Item to view.');
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboStorageLocation": {
                 select: this.onStorageLocationSelect
+            },
+            "#btnQuality": {
+                click: this.onQualityClick
             }
         });
     }
