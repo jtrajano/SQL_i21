@@ -22,7 +22,7 @@ Type the overview for the table here.
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICPatronageCategory] PRIMARY KEY ([intPatronageCategoryId]), 
 		CONSTRAINT [AK_tblICPatronageCategory_strCategoryCode] UNIQUE ([strCategoryCode]), 
-    CONSTRAINT [FK_tblPATPatronageCategory_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]) 
+    --CONSTRAINT [FK_tblPATPatronageCategory_tblICUnitMeasure] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]) 
 	)
 
 	GO
