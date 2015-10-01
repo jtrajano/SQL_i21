@@ -2344,6 +2344,7 @@
     <Build Include="dbo\Functions\fnGetTaxMasterIdForCustomer.sql" />
     <Build Include="dbo\Functions\fnGetTaxGroupForLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentInfo.sql" />
+    <Build Include="dbo\Views\vyuARUndepositedPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

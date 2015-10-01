@@ -36,8 +36,8 @@ SELECT
 	,AG.strAccountGroup 
 	,GL.intAccountCategoryId 
 	,GL.ysnActive
-	,BA.intBankAccountId 
-	,BA.strBankAccountNo 
+	,NULL AS intBankAccountId 
+	,'' AS strBankAccountNo 
 FROM
 	tblGLAccount GL
 INNER JOIN 
@@ -45,11 +45,6 @@ INNER JOIN
 		ON GL.intAccountGroupId = AG.intAccountGroupId
 INNER JOIN 
 	tblGLAccountCategory AC
-		ON GL.intAccountCategoryId = AC.intAccountCategoryId			
-INNER JOIN
-	tblCMBankAccount BA
-		ON GL.intAccountId = BA.intGLAccountId 											 						
+		ON GL.intAccountCategoryId = AC.intAccountCategoryId													 						
 WHERE
 	AC.strAccountCategory = 'Undeposited Funds'
-	AND BA.intGLAccountId IS NOT NULL
-	AND BA.ysnActive = 1
