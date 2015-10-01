@@ -20,6 +20,8 @@ FROM
 	UNION ALL
 	SELECT 'Payable', intPaymentId, strPaymentRecordNum, intEntityId, dtmDatePaid, strNotes as strReference FROM tblAPPayment WHERE ysnPosted = 0
 	UNION ALL
+	SELECT 'Debit Memo', intBillId, strBillId, intEntityId, dtmDate, strComment as strReference FROM tblAPBill WHERE ysnPosted = 0 AND ysnForApproval = 0 AND intTransactionType = 3
+	UNION ALL
 	SELECT strTransactionType, intInvoiceId, strInvoiceNumber, intEntityId, dtmDate, strComments FROM tblARInvoice WHERE strTransactionType IN ('Invoice', 'Credit Memo')
 	AND ysnPosted = 0  AND ISNULL(intDistributionHeaderId, 0) = 0 AND ISNULL(ysnTemplate,0) = 0
 	UNION ALL
