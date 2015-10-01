@@ -53,6 +53,8 @@ FROM	(
 			ON ValidateItems.intItemId = Item.intItemId
 		LEFT JOIN dbo.tblICItemStockUOM StockUOM
 			ON ValidateItems.intItemUOMId = StockUOM.intItemUOMId
+			AND ValidateItems.intItemId = StockUOM.intItemId
+			AND ValidateItems.intItemLocationId = StockUOM.intItemLocationId
 		LEFT JOIN (
 			SELECT	tblICStockReservation.intItemId
 					,tblICStockReservation.intItemLocationId
