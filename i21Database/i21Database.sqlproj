@@ -2519,6 +2519,7 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentInfo.sql" />
     <Build Include="dbo\Views\vyuCTContractHeaderNotMapped.sql" />
     <Build Include="dbo\Views\vyuCTContractDetailNotMapped.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMUpdateCustomerBudget.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

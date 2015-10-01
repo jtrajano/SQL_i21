@@ -290,5 +290,6 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateBudgetCalculationItemPricingView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteSP.sql" />
+    <None Include="dbo\Stored Procedures\uspTMUpdateCustomerBudgetOrigin.sql" />
   </ItemGroup>
 </Project>
