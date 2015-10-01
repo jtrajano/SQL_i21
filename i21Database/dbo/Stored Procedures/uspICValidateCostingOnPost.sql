@@ -62,6 +62,7 @@ SELECT TOP 1
 FROM	#FoundErrors Errors INNER JOIN tblICItem Item
 			ON Errors.intItemId = Item.intItemId
 WHERE	intErrorCode = 50028
+
 IF @intItemId IS NOT NULL 
 BEGIN 
 	-- 'Item Location is invalid or missing for {Item}.'
