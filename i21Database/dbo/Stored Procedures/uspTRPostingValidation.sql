@@ -1,5 +1,6 @@
 CREATE PROCEDURE [dbo].[uspTRPostingValidation]
 	 @intTransportLoadId AS INT
+	 ,@ysnPostOrUnPost AS BIT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -20,6 +21,7 @@ DECLARE @dtmLoadDateTime DATETIME,
 		@ReceiptCount int,
 		@incReceiptval int,
 		@strOrigin nvarchar(50),
+		@strBOL nvarchar(50),
 		@intTerminal int,
 		@intSupplyPoint int,
 		@intCompanyLocation int,
@@ -52,6 +54,7 @@ DECLARE @ReceiptTable TABLE
 	intTransportLoadId INT NULL,
 	intTransportReceiptId int NULL,
     strOrigin nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
+	strBOL nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
 	intTerminalId int NULL,
 	intSupplyPointId int NULL,
 	intCompanyLocationId int NULL,
@@ -120,6 +123,7 @@ INSERT into @ReceiptTable
   intTransportLoadId,
   intTransportReceiptId,
   strOrigin,
+  strBOL,
   intTerminalId,
   intSupplyPointId,
   intCompanyLocationId,
@@ -131,6 +135,7 @@ INSERT into @ReceiptTable
 select TL.intTransportLoadId,
        TR.intTransportReceiptId,
        TR.strOrigin,
+	   TR.strBillOfLadding,
 	   TR.intTerminalId,
 	   TR.intSupplyPointId,
 	   TR.intCompanyLocationId,
@@ -207,6 +212,7 @@ BEGIN
 
   select @intTransportReceipt = RT.intTransportReceiptId,
          @strOrigin = RT.strOrigin,
+		 @strBOL = RT.strBOL,
          @intTerminal = RT.intTerminalId,
 		 @intSupplyPoint = RT.intSupplyPointId,
 		 @intCompanyLocation = RT.intCompanyLocationId,
@@ -218,6 +224,10 @@ BEGIN
   
   if(@strOrigin = 'Terminal')
       BEGIN
+	     if @ysnPostOrUnPost = 1 and (@strBOL is NULL or LTRIM(RTRIM(@strBOL)) = '')
+		    BEGIN
+			   RAISERROR('Bill Of Ladding is Required', 16, 1);
+			END
          if (@intTerminal is null  )
          BEGIN
              RAISERROR('Invalid Terminal', 16, 1);

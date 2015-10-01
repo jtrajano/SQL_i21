@@ -24,7 +24,7 @@ if @ysnPostOrUnPost = 0 and @ysnRecap = 0
     END
 ELSE
     BEGIN
-         EXEC uspTRPostingValidation @intTransportLoadId
+         EXEC uspTRPostingValidation @intTransportLoadId,@ysnPostOrUnPost
          EXEC uspTRProcessToInventoryReceipt @intTransportLoadId,@intUserId,@ysnRecap,@ysnPostOrUnPost
          EXEC uspTRProcessToInventoryTransfer @intTransportLoadId,@intUserId,@ysnRecap,@ysnPostOrUnPost
          EXEC uspTRProcessToInvoice @intTransportLoadId,@intUserId,@ysnRecap,@ysnPostOrUnPost
