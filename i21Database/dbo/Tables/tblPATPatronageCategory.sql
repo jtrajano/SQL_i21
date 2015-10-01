@@ -16,11 +16,12 @@ Type the overview for the table here.
 		[strCategoryCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 		[strPurchaseSale] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-		[strUnitAmount] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+		[strUnitAmount] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+		[intUnitMeasureId] INT NULL DEFAULT ((0)),
 		[intSort] INT NULL DEFAULT ((0)),
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
 		CONSTRAINT [PK_tblICPatronageCategory] PRIMARY KEY ([intPatronageCategoryId]), 
-		CONSTRAINT [AK_tblICPatronageCategory_strCategoryCode] UNIQUE ([strCategoryCode])
+		CONSTRAINT [AK_tblICPatronageCategory_strCategoryCode] UNIQUE ([strCategoryCode]) 
 	)
 
 	GO

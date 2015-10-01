@@ -31,19 +31,21 @@ BEGIN TRY
 	WHERE tblMFProcessCycleCount.intCycleCountId = x.intCycleCountId
 
 	UPDATE tblMFProductionSummary 
-	SET 	dblOpeningQuantity=CASE 
-			WHEN RI.intRecipeItemTypeId =1
-				THEN ISNULL(CC.dblSystemQty,0)
+	SET 	dblCountQuantity=CASE 
+			WHEN RI.intRecipeItemTypeId =1 OR RSI.intRecipeItemTypeId =1
+				THEN ISNULL(CC.dblQuantity,0)
 			ELSE 0
 			END
-			,dblOpeningOutputQuantity=CASE 
+			,dblCountOutputQuantity=CASE 
 			WHEN RI.intRecipeItemTypeId =2
-				THEN ISNULL(CC.dblSystemQty,0)
+				THEN ISNULL(CC.dblQuantity,0)
 			ELSE 0
 			END
-	FROM tblMFProcessCycleCount CC 
-	JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId =CC.intItemId AND RI.intWorkOrderId=@intWorkOrderId 
-	WHERE EXISTS (SELECT *FROM tblMFProductionSummary PS WHERE PS.intWorkOrderId=@intWorkOrderId AND PS.intItemId=CC.intItemId)
+	FROM dbo.tblMFProcessCycleCount CC 
+	JOIN dbo.tblMFProcessCycleCountSession CCS ON CCS.intCycleCountSessionId=CC.intCycleCountSessionId AND CCS.intWorkOrderId =@intWorkOrderId
+	LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId =CC.intItemId AND RI.intWorkOrderId=@intWorkOrderId 
+	LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RSI ON RSI.intSubstituteItemId =CC.intItemId AND RSI.intWorkOrderId=@intWorkOrderId 
+	JOIN dbo.tblMFProductionSummary PS ON PS.intItemId=CC.intItemId AND PS.intWorkOrderId=@intWorkOrderId 
 
 	INSERT INTO dbo.tblMFProductionSummary (
 		intWorkOrderId
@@ -62,23 +64,23 @@ BEGIN TRY
 		)
 	SELECT DISTINCT @intWorkOrderId
 		,CC.intItemId
+		,0
+		,0
+		,0
+		,0
+		,0
+		,0
+		,0
 		,CASE 
 			WHEN RI.intRecipeItemTypeId =1
-				THEN ISNULL(CC.dblSystemQty,0)
+				THEN ISNULL(CC.dblQuantity,0)
 			ELSE 0
 			END
 		,CASE 
 			WHEN RI.intRecipeItemTypeId =2
-				THEN ISNULL(CC.dblSystemQty,0)
+				THEN ISNULL(CC.dblQuantity,0)
 			ELSE 0
 			END
-		,0
-		,0
-		,0
-		,0
-		,0
-		,0
-		,0
 		,0
 		,0
 	FROM dbo.tblMFProcessCycleCount CC 
