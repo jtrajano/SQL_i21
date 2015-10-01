@@ -2520,6 +2520,8 @@
     <Build Include="dbo\Views\vyuCTContractHeaderNotMapped.sql" />
     <Build Include="dbo\Views\vyuCTContractDetailNotMapped.sql" />
     <Build Include="dbo\Stored Procedures\uspTMUpdateCustomerBudget.sql" />
+    <Build Include="dbo\Tables\tblICStorageMeasurementReading.sql" />
+    <Build Include="dbo\Tables\tblICStorageMeasurementReadingConversion.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
