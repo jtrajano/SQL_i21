@@ -301,7 +301,11 @@ namespace iRely.Inventory.Model
             modelBuilder.Configurations.Add(new vyuICGetPackedUOMMap());
             modelBuilder.Configurations.Add(new vyuICGetUOMConversionMap());
             modelBuilder.Configurations.Add(new vyuICGetStorageLocationMap());
-            modelBuilder.Configurations.Add(new vyuICGetPostedLotMap());	
+            modelBuilder.Configurations.Add(new vyuICGetPostedLotMap());
+
+            modelBuilder.Configurations.Add(new tblICStorageMeasurementReadingMap());
+            modelBuilder.Configurations.Add(new tblICStorageMeasurementReadingConversionMap());
+            modelBuilder.Configurations.Add(new vyuICGetStorageMeasurementReadingConversionMap());	
         }
     }
 }

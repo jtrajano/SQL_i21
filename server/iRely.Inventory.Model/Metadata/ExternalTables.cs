@@ -39,6 +39,8 @@ namespace iRely.Inventory.Model
         public ICollection<tblICInventoryTransfer> ToInventoryTransfers { get; set; }
 
         public ICollection<tblICInventoryAdjustmentDetail> InventoryAdjustmentNewLocations { get; set; }
+
+        public ICollection<tblICStorageMeasurementReading> tblICStorageMeasurementReadings { get; set; }
     }
 
     public class tblGLAccount

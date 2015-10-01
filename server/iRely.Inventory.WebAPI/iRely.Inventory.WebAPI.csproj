@@ -233,6 +233,7 @@
     <Compile Include="Controllers\StatusController.cs" />
     <Compile Include="Controllers\StockReservationController.cs" />
     <Compile Include="Controllers\StorageLocationController.cs" />
+    <Compile Include="Controllers\StorageMeasurementReadingController.cs" />
     <Compile Include="Controllers\StorageUnitTypeController.cs" />
     <Compile Include="Controllers\TagController.cs" />
     <Compile Include="Controllers\UnitMeasureController.cs" />

@@ -88,6 +88,7 @@
     <Compile Include="Implementation\FuelCodeBl.cs" />
     <Compile Include="Implementation\FuelTaxClassBl.cs" />
     <Compile Include="Implementation\FuelTypeBl.cs" />
+    <Compile Include="Implementation\StorageMeasurementReadingBl.cs" />
     <Compile Include="Implementation\InventoryAdjustmentBl.cs" />
     <Compile Include="Implementation\InventoryReceiptBl.cs" />
     <Compile Include="Implementation\InventoryReceiptItemTaxBl.cs" />
@@ -103,6 +104,7 @@
     <Compile Include="Implementation\StorageUnitTypeBl.cs" />
     <Compile Include="Implementation\TagBl.cs" />
     <Compile Include="Implementation\UnitMeasureBl.cs" />
+    <Compile Include="Interface\IStorageMeasurementReadingBl.cs" />
     <Compile Include="Interface\IBuildAssemblyBl.cs" />
     <Compile Include="Interface\ICompanyPreferenceBl.cs" />
     <Compile Include="Interface\IFeedStockCodeBl.cs" />
