@@ -34,31 +34,31 @@ BEGIN
 	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'xmlns:radiant')
 	BEGIN	
 		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	1,	'xmlns:radiant',	NULL,	NULL,	'http://www.radiantsystems.com/NAXML-Extension', 1	
+		SELECT @intImportFileColumnDetailId,	1,	'xmlns:radiant',	NULL,	NULL,	'http://www.radiantsystems.com/NAXML-Extension', 1,1
 	END
 	
 	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'xmlns:xsi')
 	BEGIN	
 		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	2,	'xmlns:xsi',	NULL,	NULL,	'http://www.w3.org/2001/XMLSchema-instance', 1	
+		SELECT @intImportFileColumnDetailId,	2,	'xmlns:xsi',	NULL,	NULL,	'http://www.w3.org/2001/XMLSchema-instance', 1,1	
 	END
 	
 	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'version')
 	BEGIN	
 		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	3,	'version',	NULL,	NULL,	'3.4', 1	
+		SELECT @intImportFileColumnDetailId,	3,	'version',	NULL,	NULL,	'3.4', 1,1	
 	END
 	
 	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'xsi:schemaLocation')
 	BEGIN	
 		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	4,	'xsi:schemaLocation',	NULL,	NULL,	'http://www.radiantsystems.com/NAXML-Extension NAXML-RadiantExtension34.xsd', 1	
+		SELECT @intImportFileColumnDetailId,	4,	'xsi:schemaLocation',	NULL,	NULL,	'http://www.radiantsystems.com/NAXML-Extension NAXML-RadiantExtension34.xsd', 1	,1
 	END
 	
 	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'xmlns')
 	BEGIN	
 		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	5,	'xmlns',	NULL,	NULL,	'http://www.naxml.org/POSBO/Vocabulary/2003-10-16', 1	
+		SELECT @intImportFileColumnDetailId,	5,	'xmlns',	NULL,	NULL,	'http://www.naxml.org/POSBO/Vocabulary/2003-10-16', 1	,1
 	END
 	
 	SET @intImportFileColumnDetailId = 0				   
@@ -184,7 +184,7 @@ BEGIN
 	IF NOT EXISTS (SELECT 1 FROM [dbo].[tblSMXMLTagAttribute] Where intImportFileColumnDetailId = @intImportFileColumnDetailId AND strTagAttribute = 'format')
 	BEGIN	
 		INSERT INTO [dbo].[tblSMXMLTagAttribute]
-		SELECT @intImportFileColumnDetailId,	1,	'format',	'tblSTstgPricebookSendFile',	'POSCodeFormat',	'', 1	
+		SELECT @intImportFileColumnDetailId,	1,	'format',	'tblSTstgPricebookSendFile',	'POSCodeFormat',	'', 1	,1
 	END
 	
 	SET @intImportFileColumnDetailId = 0
