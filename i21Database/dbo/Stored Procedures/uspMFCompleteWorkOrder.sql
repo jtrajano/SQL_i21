@@ -63,6 +63,7 @@ BEGIN TRY
 		,@intLotStatusId int
 		,@intAttributeId int
 		,@strYieldAdjustmentAllowed nvarchar(50)
+		,@strComment nvarchar(MAX)
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -109,6 +110,7 @@ BEGIN TRY
 		,@intDepartmentId=intDepartmentId
 		,@ysnExcessConsumptionAllowed=ysnExcessConsumptionAllowed
 		,@intLotStatusId=intLotStatusId
+		,@strComment=strComment
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,intManufacturingProcessId INT
@@ -144,6 +146,7 @@ BEGIN TRY
 			,intDepartmentId int
 			,ysnExcessConsumptionAllowed bit
 			,intLotStatusId int
+			,strComment nvarchar(MAX)
 			)
 
 	Select @intAttributeId=intAttributeId from tblMFAttribute Where strAttributeName='Is Yield Adjustment Allowed'
@@ -498,7 +501,8 @@ BEGIN TRY
 			,@intLocationId=@intLocationId
 			,@intMachineId =@intMachineId
 			,@dtmProductionDate=@dtmPlannedDate
-			,@strVendorLotNo =@strVendorLotNo  
+			,@strVendorLotNo =@strVendorLotNo
+			,@strComment=@strComment  
 	
 		IF @intLotStatusId IS NOT NULL
 		BEGIN

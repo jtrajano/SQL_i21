@@ -24,6 +24,7 @@
 	,@intMachineId int =NULL
 	,@dtmProductionDate datetime=NULL
 	,@strVendorLotNo nvarchar(50)=NULL
+	,@strComment nvarchar(MAX)=NULL
 	)
 AS
 BEGIN
@@ -107,6 +108,7 @@ BEGIN
 		,intCreatedUserId
 		,dtmLastModified
 		,intLastModifiedUserId
+		,strComment
 		)
 	SELECT @intWorkOrderId
 		,@intItemId
@@ -131,6 +133,7 @@ BEGIN
 		,@intUserId
 		,@dtmCreated
 		,@intUserId
+		,@strComment
 
 	UPDATE tblMFWorkOrder
 	SET intBatchID = @intWorkOrderId
