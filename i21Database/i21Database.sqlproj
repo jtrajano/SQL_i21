@@ -2445,7 +2445,7 @@
     <None Include="dbo\Views\vyuTMBudgetCalculationItemPricing.sql" />
     <Build Include="dbo\Tables\tblTMBudgetCalculation.sql" />
     <None Include="dbo\Views\vyuTMBudgetCalculationSite.sql" />
-    <None Include="dbo\Stored Procedures\uspTMGetBudgetCalculationSite.sql" />
+    <Build Include="dbo\Stored Procedures\uspTMGetBudgetCalculationSite.sql" />
     <Build Include="dbo\Views\vyuTMFillMethodUsedBySite.sql" />
     <Build Include="dbo\Views\vyuTMCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentContainerReport.sql" />
