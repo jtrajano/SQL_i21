@@ -35,6 +35,7 @@ IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
 INSERT INTO tblCMUndepositedFund (
 		intBankAccountId
 		,strSourceTransactionId
+		,intSourceTransactionId
 		,dtmDate
 		,dblAmount
 		,strName
@@ -51,6 +52,7 @@ SELECT	@intBankAccountId
 				+ CAST(v.aptrx_cbk_no AS NVARCHAR(2)) 
 				+ CAST(v.aptrx_chk_no AS NVARCHAR(8))
 			) COLLATE Latin1_General_CI_AS
+		,intSourceTransactionId = NULL
 		,dtmDate = dbo.fnConvertOriginDateToSQLDateTime(v.aptrx_chk_rev_dt) -- Use aptrx_chk_rev_dt because this is the deposit entry date. 
 		,dblAmount = ABS(v.aptrx_net_amt)
 		,strName = v.aptrx_name COLLATE Latin1_General_CI_AS
@@ -72,6 +74,24 @@ WHERE	b.intBankAccountId = @intBankAccountId
 							+ CAST(v.aptrx_chk_no AS NVARCHAR(8))
 						) COLLATE Latin1_General_CI_AS
 		)
+
+UNION SELECT 
+	@intBankAccountId,
+	strSourceTransactionId,
+	intSourceTransactionId,
+	dtmDate,
+	dblAmount,
+	strName,
+	strSourceSystem,
+	intCreatedUserId = @intUserId,
+	dtmCreated = GETDATE(),
+	intLastModifiedUserId = @intUserId,
+	dtmLastModified = GETDATE()
+FROM vyuARUndepositedPayment v
+WHERE	NOT EXISTS (
+			SELECT TOP 1 1
+			FROM	tblCMUndepositedFund f
+			WHERE	f.strSourceTransactionId = v.strSourceTransactionId)
 
 IF @@ERROR <> 0	GOTO uspCMRefreshUndepositedFundsFromOrigin_Rollback
 
