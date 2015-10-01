@@ -69,7 +69,7 @@ BEGIN
 		,intSiteItemId = A.intProduct
 		,ysnBudgetCustomers = CAST((CASE WHEN ISNULL(G.dblTotalDue,0.0) > 0 THEN 1 ELSE 0 END) AS BIT)
 		,A.intFillMethodId
-		--,dblPrice = 
+		,dblPrice = E.dblPrice
 		--,dblEstimatedBudget = 
 		,intCustomerId = A.intCustomerID
 	INTO #tmpStage1
@@ -78,6 +78,8 @@ BEGIN
 		ON A.intCustomerID = B.intCustomerID
 	INNER JOIN tblEntity C
 		ON B.intCustomerNumber = C.intEntityId
+	INNER JOIN tblTMBudgetCalculationItemPricing E
+		ON A.intProduct = E.intItemId
 	INNER JOIN tblTMBudgetCalculationProjection F
 		ON A.intClockID = F.intClockId
 	LEFT JOIN vyuARCustomerInquiryReport G
@@ -85,38 +87,38 @@ BEGIN
 	LEFT JOIN tblSMCompanyLocation D
 		ON A.intLocationId = D.intCompanyLocationId
 
-	IF OBJECT_ID('tempdb..#tmpStage2') IS NOT NULL 
-	BEGIN DROP TABLE #tmpStage2 END
+	--IF OBJECT_ID('tempdb..#tmpStage2') IS NOT NULL 
+	--BEGIN DROP TABLE #tmpStage2 END
 	
-	SELECT 
-		A.* 
-		,dblPrice = ISNULL((CASE WHEN B.intItemId IS NULL
-						THEN  dbo.fnARGetItemPrice(
-								 A.intSiteItemId --@ItemId 				
-								,A.intEntityCustomerId	--@CustomerId	
-								,A.intLocationId	--@LocationId		
-								,NULL	--@ItemUOMId		 
-								,DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)	 --@TransactionDate	
-								,A.dblRequiredQuantity	--@Quantity			
-								,NULL --@ContractHeaderId		
-								,NULL --@ContractDetailId		
-								,NULL --@ContractNumber		
-								,NULL --@ContractSeq			
-								,NULL --@OriginalQuantity		
-								,NULL --@CustomerPricingOnly	
-								,NULL --@VendorId			
-								,NULL --@SupplyPointId		
-								,NULL --@LastCost			
-								,NULL --@ShipToLocationId  
-								,NULL --@VendorLocationId
-								)
-						ELSE
-							B.dblPrice
-						END),0.0)
-	INTO #tmpStage2
-	FROM #tmpStage1 A
-	LEFT JOIN tblTMBudgetCalculationItemPricing B
-		ON A.intSiteItemId = B.intItemId
+	--SELECT 
+	--	A.* 
+	--	,dblPrice = ISNULL((CASE WHEN B.intItemId IS NULL
+	--					THEN  dbo.fnARGetItemPrice(
+	--							 A.intSiteItemId --@ItemId 				
+	--							,A.intEntityCustomerId	--@CustomerId	
+	--							,A.intLocationId	--@LocationId		
+	--							,NULL	--@ItemUOMId		 
+	--							,DATEADD(dd, DATEDIFF(dd, 0, GETDATE()), 0)	 --@TransactionDate	
+	--							,A.dblRequiredQuantity	--@Quantity			
+	--							,NULL --@ContractHeaderId		
+	--							,NULL --@ContractDetailId		
+	--							,NULL --@ContractNumber		
+	--							,NULL --@ContractSeq			
+	--							,NULL --@OriginalQuantity		
+	--							,NULL --@CustomerPricingOnly	
+	--							,NULL --@VendorId			
+	--							,NULL --@SupplyPointId		
+	--							,NULL --@LastCost			
+	--							,NULL --@ShipToLocationId  
+	--							,NULL --@VendorLocationId
+	--							)
+	--					ELSE
+	--						B.dblPrice
+	--					END),0.0)
+	--INTO #tmpStage2
+	--FROM #tmpStage1 A
+	--LEFT JOIN tblTMBudgetCalculationItemPricing B
+	--	ON A.intSiteItemId = B.intItemId
 
 
 	IF OBJECT_ID('tempdb..#tmpStage3') IS NOT NULL 
@@ -133,7 +135,7 @@ BEGIN
 										THEN ROUND((((dblRequiredQuantity * dblPrice) + dblCurrentARBalance + dblUnappliedCredits) / @intNumberOfMonthsInBudget),0)
 								END)
 	INTO #tmpStage3
-	FROM #tmpStage2
+	FROM #tmpStage1
 	
 	SELECT 
 		*

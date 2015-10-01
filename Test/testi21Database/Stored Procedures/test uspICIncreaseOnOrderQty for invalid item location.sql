@@ -86,7 +86,7 @@ BEGIN
 	
 	-- Assert 
 	BEGIN 
-		-- EXEC tSQLt.ExpectException @ExpectedErrorNumber = 50028
+		-- EXEC tSQLt.ExpectException @ExpectedErrorNumber = 80002
 		EXEC tSQLt.ExpectException @ExpectedMessage = 'Item Location is invalid or missing for WET GRAINS.'
 	END 
 

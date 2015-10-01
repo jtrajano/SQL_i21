@@ -6,6 +6,7 @@
     [strMachineName]    NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strUserName]       NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [intProcessID]      INT            NULL,
+	[dtmDate] DATETIME NOT NULL DEFAULT getDate(), 
     [intConcurrencyId]  INT            DEFAULT (1) NOT NULL,
     CONSTRAINT [PK_ActiveScreen] PRIMARY KEY CLUSTERED ([intActiveScreenID] ASC)
 );
@@ -85,3 +86,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2name = N'intConcurrencyId'
 
 GO
+
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Date when the session was logged or created',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMActiveScreen',
+    @level2type = N'COLUMN',
+    @level2name = N'dtmDate'

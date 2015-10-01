@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblICTransactionDetailLog]
 (
 	[intTransactionDetailLogId] INT NOT NULL IDENTITY, 
-    [strTransactionType] NVARCHAR(50) NOT NULL, 
+    [strTransactionType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intTransactionId] INT NOT NULL, 
     [intTransactionDetailId] INT NOT NULL, 
     [intOrderNumberId] INT NULL, 

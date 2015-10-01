@@ -12,6 +12,7 @@
 	[strDataType]   nvarchar(50) COLLATE Latin1_General_CI_AS NULL,
     [intLength]  INT NULL DEFAULT ((0)), 
 	[strDefaultValue]   nvarchar(max) COLLATE Latin1_General_CI_AS NULL,
+	[ysnActive] bit DEFAULT 1,
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
 	CONSTRAINT [PK_tblSMImportFileColumnDetail] PRIMARY KEY ([intImportFileColumnDetailId]),
 	CONSTRAINT [FK_tblSMImportFileColumnDetail_tblSMImportFileHeader_intImportFileHeaderId] FOREIGN KEY ([intImportFileHeaderId]) REFERENCES [dbo].[tblSMImportFileHeader] ([intImportFileHeaderId]) ON DELETE CASCADE,  
