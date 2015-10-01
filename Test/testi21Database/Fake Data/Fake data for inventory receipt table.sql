@@ -190,7 +190,6 @@ BEGIN
 				,intShipFromId
 				,intReceiverId
 				,intCurrencyId
-				,strAllocateFreight
 				,intConcurrencyId
 				,intEntityId
 				,intCreatedUserId
@@ -205,7 +204,6 @@ BEGIN
 				,intShipFromId			= @Default_Location
 				,intReceiverId			= @Default_Location
 				,intCurrencyId			= @BaseCurrencyId
-				,strAllocateFreight		= 'No' -- Default is No
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
 				,intCreatedUserId		= @intUserId
@@ -392,7 +390,6 @@ BEGIN
 				,intShipFromId
 				,intReceiverId
 				,intCurrencyId
-				,strAllocateFreight
 				,intConcurrencyId
 				,intEntityId
 				,intCreatedUserId
@@ -407,7 +404,6 @@ BEGIN
 				,intShipFromId			= @Default_Location
 				,intReceiverId			= @Default_Location
 				,intCurrencyId			= @BaseCurrencyId
-				,strAllocateFreight		= 'No' -- Default is No
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
 				,intCreatedUserId		= @intUserId
@@ -524,7 +520,6 @@ BEGIN
 				,intShipFromId
 				,intReceiverId
 				,intCurrencyId
-				,strAllocateFreight
 				,intConcurrencyId
 				,intEntityId
 				,intCreatedUserId
@@ -539,7 +534,6 @@ BEGIN
 				,intShipFromId			= @Default_Location
 				,intReceiverId			= @Default_Location
 				,intCurrencyId			= @BaseCurrencyId
-				,strAllocateFreight		= 'No' -- Default is No
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
 				,intCreatedUserId		= @intUserId
@@ -651,7 +645,6 @@ BEGIN
 				,intShipFromId
 				,intReceiverId
 				,intCurrencyId
-				,strAllocateFreight
 				,intConcurrencyId
 				,intEntityId
 				,intCreatedUserId
@@ -666,7 +659,6 @@ BEGIN
 				,intShipFromId			= @Default_Location
 				,intReceiverId			= @Default_Location
 				,intCurrencyId			= @BaseCurrencyId
-				,strAllocateFreight		= 'No' -- Default is No
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
 				,intCreatedUserId		= @intUserId
@@ -693,7 +685,6 @@ BEGIN
 				,intShipFromId
 				,intReceiverId
 				,intCurrencyId
-				,strAllocateFreight
 				,intConcurrencyId
 				,intEntityId
 				,intCreatedUserId
@@ -708,7 +699,6 @@ BEGIN
 				,intShipFromId			= @Default_Location
 				,intReceiverId			= @Default_Location
 				,intCurrencyId			= @BaseCurrencyId
-				,strAllocateFreight		= 'No' -- Default is No
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
 				,intCreatedUserId		= @intUserId
@@ -816,7 +806,6 @@ BEGIN
 				,intShipFromId
 				,intReceiverId
 				,intCurrencyId
-				,strAllocateFreight
 				,intConcurrencyId
 				,intEntityId
 				,intCreatedUserId
@@ -831,7 +820,6 @@ BEGIN
 				,intShipFromId			= @Default_Location
 				,intReceiverId			= @Default_Location
 				,intCurrencyId			= @BaseCurrencyId
-				,strAllocateFreight		= 'No' -- Default is No
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
 				,intCreatedUserId		= @intUserId
@@ -938,7 +926,6 @@ BEGIN
 				,intShipFromId
 				,intReceiverId
 				,intCurrencyId
-				,strAllocateFreight
 				,intConcurrencyId
 				,intEntityId
 				,intCreatedUserId
@@ -953,7 +940,6 @@ BEGIN
 				,intShipFromId			= @Default_Location
 				,intReceiverId			= @Default_Location
 				,intCurrencyId			= @BaseCurrencyId
-				,strAllocateFreight		= 'No' -- Default is No
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
 				,intCreatedUserId		= @intUserId
@@ -1046,7 +1032,6 @@ BEGIN
 				,intShipFromId
 				,intReceiverId
 				,intCurrencyId
-				,strAllocateFreight
 				,intConcurrencyId
 				,intEntityId
 				,intCreatedUserId
@@ -1061,7 +1046,6 @@ BEGIN
 				,intShipFromId			= @Default_Location
 				,intReceiverId			= @Default_Location
 				,intCurrencyId			= @BaseCurrencyId
-				,strAllocateFreight		= 'No' -- Default is No
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
 				,intCreatedUserId		= @intUserId
@@ -1196,7 +1180,6 @@ BEGIN
 				,intShipFromId
 				,intReceiverId
 				,intCurrencyId
-				,strAllocateFreight
 				,intConcurrencyId
 				,intEntityId
 				,intCreatedUserId
@@ -1211,7 +1194,6 @@ BEGIN
 				,intShipFromId			= @Default_Location
 				,intReceiverId			= @Default_Location
 				,intCurrencyId			= @BaseCurrencyId
-				,strAllocateFreight		= 'No' -- Default is No
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
 				,intCreatedUserId		= @intUserId
@@ -1346,7 +1328,6 @@ BEGIN
 				,intShipFromId
 				,intReceiverId
 				,intCurrencyId
-				,strAllocateFreight
 				,intConcurrencyId
 				,intEntityId
 				,intCreatedUserId
@@ -1361,7 +1342,6 @@ BEGIN
 				,intShipFromId			= @Default_Location
 				,intReceiverId			= @Default_Location
 				,intCurrencyId			= @BaseCurrencyId
-				,strAllocateFreight		= 'No' -- Default is No
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
 				,intCreatedUserId		= @intUserId
@@ -1497,7 +1477,6 @@ BEGIN
 				,intShipFromId
 				,intReceiverId
 				,intCurrencyId
-				,strAllocateFreight
 				,intConcurrencyId
 				,intEntityId
 				,intCreatedUserId
@@ -1512,7 +1491,6 @@ BEGIN
 				,intShipFromId			= @Default_Location
 				,intReceiverId			= @Default_Location
 				,intCurrencyId			= @BaseCurrencyId
-				,strAllocateFreight		= 'No' -- Default is No
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
 				,intCreatedUserId		= @intUserId
@@ -1664,7 +1642,6 @@ BEGIN
 				,intShipFromId
 				,intReceiverId
 				,intCurrencyId
-				,strAllocateFreight
 				,intConcurrencyId
 				,intEntityId
 				,intCreatedUserId
@@ -1679,7 +1656,6 @@ BEGIN
 				,intShipFromId			= @Default_Location
 				,intReceiverId			= @Default_Location
 				,intCurrencyId			= @BaseCurrencyId
-				,strAllocateFreight		= 'No' -- Default is No
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
 				,intCreatedUserId		= @intUserId
@@ -1845,7 +1821,6 @@ BEGIN
 				,intShipFromId
 				,intReceiverId
 				,intCurrencyId
-				,strAllocateFreight
 				,intConcurrencyId
 				,intEntityId
 				,intCreatedUserId
@@ -1859,8 +1834,7 @@ BEGIN
 				,intShipViaId			= @Default_Location
 				,intShipFromId			= @Default_Location
 				,intReceiverId			= @Default_Location
-				,intCurrencyId			= @BaseCurrencyId
-				,strAllocateFreight		= 'No' -- Default is No
+				,intCurrencyId			= @BaseCurrencyId				
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
 				,intCreatedUserId		= @intUserId
@@ -2042,7 +2016,6 @@ BEGIN
 				,intShipFromId
 				,intReceiverId
 				,intCurrencyId
-				,strAllocateFreight
 				,intConcurrencyId
 				,intEntityId
 				,intCreatedUserId
@@ -2057,7 +2030,6 @@ BEGIN
 				,intShipFromId			= @Default_Location
 				,intReceiverId			= @Default_Location
 				,intCurrencyId			= @BaseCurrencyId
-				,strAllocateFreight		= 'No' -- Default is No
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
 				,intCreatedUserId		= @intUserId
@@ -2200,7 +2172,6 @@ BEGIN
 				,intShipFromId
 				,intReceiverId
 				,intCurrencyId
-				,strAllocateFreight
 				,intConcurrencyId
 				,intEntityId
 				,intCreatedUserId
@@ -2215,7 +2186,6 @@ BEGIN
 				,intShipFromId			= @Default_Location
 				,intReceiverId			= @Default_Location
 				,intCurrencyId			= @BaseCurrencyId
-				,strAllocateFreight		= 'No' -- Default is No
 				,intConcurrencyId		= 1
 				,intEntityId			= @intEntityId
 				,intCreatedUserId		= @intUserId

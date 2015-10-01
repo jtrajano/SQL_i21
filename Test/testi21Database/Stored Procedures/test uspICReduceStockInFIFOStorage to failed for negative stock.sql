@@ -3,6 +3,8 @@ AS
 BEGIN
 	-- Arrange 
 	BEGIN 
+		EXEC [testi21Database].[Fake inventory items]
+
 		-- Fake the table 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOStorage', @Identity = 1;
 		
@@ -18,10 +20,49 @@ BEGIN
 				,@HotGrains AS INT = 5
 				,@InvalidItem AS INT = -1
 
-		-- Declare the variables for location
-		DECLARE @Default_Location AS INT = 1
-				,@NewHaven AS INT = 2
-				,@BetterHaven AS INT = 3
+		-- Declare Item-Locations
+		DECLARE @WetGrains_DefaultLocation AS INT = 1
+				,@StickyGrains_DefaultLocation AS INT = 2
+				,@PremiumGrains_DefaultLocation AS INT = 3
+				,@ColdGrains_DefaultLocation AS INT = 4
+				,@HotGrains_DefaultLocation AS INT = 5
+
+				,@WetGrains_NewHaven AS INT = 6
+				,@StickyGrains_NewHaven AS INT = 7
+				,@PremiumGrains_NewHaven AS INT = 8
+				,@ColdGrains_NewHaven AS INT = 9
+				,@HotGrains_NewHaven AS INT = 10
+
+				,@WetGrains_BetterHaven AS INT = 11
+				,@StickyGrains_BetterHaven AS INT = 12
+				,@PremiumGrains_BetterHaven AS INT = 13
+				,@ColdGrains_BetterHaven AS INT = 14
+				,@HotGrains_BetterHaven AS INT = 15
+
+				,@ManualLotGrains_DefaultLocation AS INT = 16
+				,@SerializedLotGrains_DefaultLocation AS INT = 17
+
+				,@CornCommodity_DefaultLocation AS INT = 18
+				,@CornCommodity_NewHaven AS INT = 19
+				,@CornCommodity_BetterHaven AS INT = 20
+
+				,@ManualLotGrains_NewHaven AS INT = 21
+				,@SerializedLotGrains_NewHaven AS INT = 22
+
+				,@OtherCharges_DefaultLocation AS INT = 23
+				,@SurchargeOtherCharges_DefaultLocation AS INT = 24
+				,@SurchargeOnSurcharge_DefaultLocation AS INT = 25
+				,@SurchargeOnSurchargeOnSurcharge_DefaultLocation AS INT = 26
+
+				,@OtherCharges_NewHaven AS INT = 27
+				,@SurchargeOtherCharges_NewHaven AS INT = 28
+				,@SurchargeOnSurcharge_NewHaven AS INT = 29
+				,@SurchargeOnSurchargeOnSurcharge_NewHaven AS INT = 30
+
+				,@OtherCharges_BetterHaven AS INT = 31
+				,@SurchargeOtherCharges_BetterHaven AS INT = 32
+				,@SurchargeOnSurcharge_BetterHaven AS INT = 33
+				,@SurchargeOnSurchargeOnSurcharge_BetterHaven AS INT = 34
 
 		-- Declare the variables for the Item UOM Ids
 		DECLARE @WetGrains_BushelUOMId AS INT = 1
@@ -55,7 +96,7 @@ BEGIN
 			,[intConcurrencyId]
 		)
 		SELECT	[intItemId] = @WetGrains
-				,[intItemLocationId] = @Default_Location
+				,[intItemLocationId] = @WetGrains_DefaultLocation
 				,[intItemUOMId] = @WetGrains_BushelUOMId
 				,[dtmDate] = 'January 15, 2014'
 				,[dblStockIn] = 100
@@ -66,7 +107,7 @@ BEGIN
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[intItemId] = @WetGrains
-				,[intItemLocationId] = @Default_Location
+				,[intItemLocationId] = @WetGrains_DefaultLocation
 				,[intItemUOMId] = @WetGrains_BushelUOMId
 				,[dtmDate] = 'January 14, 2014'
 				,[dblStockIn] = 100
@@ -77,7 +118,7 @@ BEGIN
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[intItemId] = @WetGrains
-				,[intItemLocationId] = @Default_Location
+				,[intItemLocationId] = @WetGrains_DefaultLocation
 				,[intItemUOMId] = @WetGrains_BushelUOMId
 				,[dtmDate] = 'January 13, 2014'
 				,[dblStockIn] = 100
@@ -88,7 +129,7 @@ BEGIN
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[intItemId] = @WetGrains
-				,[intItemLocationId] = @Default_Location
+				,[intItemLocationId] = @WetGrains_DefaultLocation
 				,[intItemUOMId] = @WetGrains_BushelUOMId
 				,[dtmDate] = 'January 12, 2014'
 				,[dblStockIn] = 100
@@ -99,7 +140,7 @@ BEGIN
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[intItemId] = @WetGrains
-				,[intItemLocationId] = @Default_Location
+				,[intItemLocationId] = @WetGrains_DefaultLocation
 				,[intItemUOMId] = @WetGrains_BushelUOMId
 				,[dtmDate] = 'January 11, 2014'
 				,[dblStockIn] = 100
@@ -110,7 +151,7 @@ BEGIN
 				,[intConcurrencyId] = 1
 		UNION ALL 
 		SELECT	[intItemId] = @WetGrains
-				,[intItemLocationId] = @Default_Location
+				,[intItemLocationId] = @WetGrains_DefaultLocation
 				,[intItemUOMId] = @WetGrains_BushelUOMId
 				,[dtmDate] = 'January 10, 2014'
 				,[dblStockIn] = 100
@@ -148,7 +189,7 @@ BEGIN
 
 		-- Create the variables 
 		DECLARE @intItemId AS INT							= @WetGrains
-				,@intItemLocationId AS INT					= @Default_Location
+				,@intItemLocationId AS INT					= @WetGrains_DefaultLocation 
 				,@intItemUOMId AS INT						= @WetGrains_BushelUOMId
 				,@dtmDate AS DATETIME						= 'January 17, 2014'
 				,@dblQty NUMERIC(18,6)						=  -650
@@ -175,7 +216,7 @@ BEGIN
 				,[intConcurrencyId]
 		)
 		SELECT	[intItemId] = @WetGrains
-				,[intItemLocationId] = @Default_Location
+				,[intItemLocationId] = @WetGrains_DefaultLocation
 				,[intItemUOMId] = @intItemUOMId
 				,[dtmDate] = 'January 10, 2014'
 				,[dblStockIn] = 100
@@ -185,7 +226,7 @@ BEGIN
 				,[intConcurrencyId] = 2
 		UNION ALL
 		SELECT	[intItemId] = @WetGrains
-				,[intItemLocationId] = @Default_Location
+				,[intItemLocationId] = @WetGrains_DefaultLocation
 				,[intItemUOMId] = @intItemUOMId
 				,[dtmDate] = 'January 11, 2014'
 				,[dblStockIn] = 100
@@ -195,7 +236,7 @@ BEGIN
 				,[intConcurrencyId] = 2
 		UNION ALL
 		SELECT	[intItemId] = @WetGrains
-				,[intItemLocationId] = @Default_Location
+				,[intItemLocationId] = @WetGrains_DefaultLocation
 				,[intItemUOMId] = @intItemUOMId
 				,[dtmDate] = 'January 12, 2014'
 				,[dblStockIn] = 100
@@ -205,7 +246,7 @@ BEGIN
 				,[intConcurrencyId] = 2
 		UNION ALL
 		SELECT	[intItemId] = @WetGrains
-				,[intItemLocationId] = @Default_Location
+				,[intItemLocationId] = @WetGrains_DefaultLocation
 				,[intItemUOMId] = @intItemUOMId
 				,[dtmDate] = 'January 13, 2014'
 				,[dblStockIn] = 100
@@ -215,7 +256,7 @@ BEGIN
 				,[intConcurrencyId] = 2
 		UNION ALL
 		SELECT	[intItemId] = @WetGrains
-				,[intItemLocationId] = @Default_Location
+				,[intItemLocationId] = @WetGrains_DefaultLocation
 				,[intItemUOMId] = @intItemUOMId
 				,[dtmDate] = 'January 14, 2014'
 				,[dblStockIn] = 100
@@ -225,7 +266,7 @@ BEGIN
 				,[intConcurrencyId] = 2
 		UNION ALL
 		SELECT	[intItemId] = @WetGrains
-				,[intItemLocationId] = @Default_Location
+				,[intItemLocationId] = @WetGrains_DefaultLocation
 				,[intItemUOMId] = @intItemUOMId
 				,[dtmDate] = 'January 15, 2014'
 				,[dblStockIn] = 100
@@ -250,7 +291,7 @@ BEGIN
 	-- Assert for an exception thrown towards the end of the process
 	BEGIN 
 		EXEC tSQLt.ExpectException
-			@ExpectedMessage = 'Negative stock quantity is not allowed.'
+			@ExpectedMessage = 'Negative stock quantity is not allowed for WET GRAINS in DEFAULT.'
 			,@ExpectedErrorNumber = 80003
 	END
 

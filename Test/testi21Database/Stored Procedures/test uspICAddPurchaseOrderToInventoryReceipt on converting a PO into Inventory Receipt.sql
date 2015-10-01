@@ -117,7 +117,6 @@ BEGIN
 				,intShipViaId
 				,intCurrencyId
 				,intFreightTermId
-				,strAllocateFreight
 				,dblInvoiceAmount
 				,ysnInvoicePaid
 				,intConcurrencyId
@@ -158,7 +157,6 @@ BEGIN
 				,intShipViaId = @ShipVia_UPS
 				,intCurrencyId = @Currency_USD
 				,intFreightTermId = @FreightTerm
-				,strAllocateFreight = N'No'
 				,dblInvoiceAmount = ((10 - 0) * 50.00)
 									+ ((5-0) * 100.00)
 									+ ((2-0) * 200.00)
@@ -243,7 +241,6 @@ BEGIN
 				,intShipViaId
 				,intCurrencyId
 				,intFreightTermId
-				,strAllocateFreight
 				,dblInvoiceAmount
 				,ysnInvoicePaid
 				,intConcurrencyId

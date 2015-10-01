@@ -21,6 +21,11 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @strItemNo AS NVARCHAR(50)
+		,@intItemId AS INT 
+		,@strLocationName AS NVARCHAR(50)
+		,@intItemLocationId AS INT 
+
 CREATE TABLE #FoundErrors (
 	intItemId INT
 	,intItemLocationId INT
@@ -42,7 +47,27 @@ WHERE	ISNULL(@ysnRecap, 0) = 0
 -- Check for negative stock qty 
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80003)
 BEGIN 
-	RAISERROR(80003, 11, 1)
+	SELECT	TOP 1 
+			@strItemNo = Item.strItemNo
+			,@intItemId = Item.intItemId
+	FROM	#FoundErrors Errors INNER JOIN tblICItem Item
+				ON Errors.intItemId = Item.intItemId
+	WHERE	intErrorCode = 80003
+
+	SELECT	TOP 1 
+			@strLocationName = CompanyLocation.strLocationName
+			,@intItemLocationId = ItemLocation.intItemLocationId
+	FROM	#FoundErrors Errors INNER JOIN dbo.tblICItemLocation ItemLocation
+				ON Errors.intItemLocationId = ItemLocation.intItemLocationId
+			INNER JOIN dbo.tblSMCompanyLocation CompanyLocation
+				ON ItemLocation.intLocationId = CompanyLocation.intCompanyLocationId
+	WHERE	Errors.intErrorCode = 80003
+			AND Errors.intItemId = @intItemId
+
+	SELECT	@strItemNo = ISNULL(@strItemNo, '(Item id: ' + ISNULL(CAST(@intItemId AS NVARCHAR(10)), 'Blank') + ')')
+			,@strLocationName = ISNULL(@strLocationName, '(Item Location id: ' + ISNULL(CAST(@intItemLocationId AS NVARCHAR(10)), 'Blank') + ')')
+			
+	RAISERROR(80003, 11, 1, @strItemNo, @strLocationName)
 	GOTO _Exit
 END 
 

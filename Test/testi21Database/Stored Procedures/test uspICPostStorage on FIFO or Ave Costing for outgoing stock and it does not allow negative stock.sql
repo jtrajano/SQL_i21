@@ -252,7 +252,7 @@ BEGIN
 	-- Assert
 	BEGIN 
 		EXEC tSQLt.ExpectException
-			@ExpectedMessage = 'Negative stock quantity is not allowed.'
+			@ExpectedMessage = 'Negative stock quantity is not allowed for WET GRAINS in NEW HAVEN.'
 			,@ExpectedErrorNumber = 80003
 	END 
 
