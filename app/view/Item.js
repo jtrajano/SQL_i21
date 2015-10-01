@@ -1085,7 +1085,7 @@ Ext.define('Inventory.view.Item', {
                                                                                 tabIndex: -1,
                                                                                 itemId: 'btnEditLocation',
                                                                                 iconCls: 'small-view',
-                                                                                text: 'View'
+                                                                                text: 'Open'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
@@ -1222,40 +1222,6 @@ Ext.define('Inventory.view.Item', {
                                                                         labelWidth: 116,
                                                                         displayField: 'strCategoryCode',
                                                                         valueField: 'intPatronageCategoryId'
-                                                                    },
-                                                                    {
-                                                                        xtype: 'gridcombobox',
-                                                                        columns: [
-                                                                            {
-                                                                                dataIndex: 'intFuelTaxClassId',
-                                                                                dataType: 'numeric',
-                                                                                text: 'Tax Class Id',
-                                                                                hidden: true
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strTaxClassCode',
-                                                                                dataType: 'string',
-                                                                                text: 'Tax Class',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strDescription',
-                                                                                dataType: 'string',
-                                                                                text: 'Description',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strIRSTaxCode',
-                                                                                dataType: 'string',
-                                                                                text: 'Description',
-                                                                                flex: 1
-                                                                            }
-                                                                        ],
-                                                                        itemId: 'cboTaxClass',
-                                                                        fieldLabel: 'Fuel Tax Class',
-                                                                        labelWidth: 116,
-                                                                        displayField: 'strTaxClassCode',
-                                                                        valueField: 'intFuelTaxClassId'
                                                                     },
                                                                     {
                                                                         xtype: 'checkboxfield',
@@ -3809,6 +3775,176 @@ Ext.define('Inventory.view.Item', {
                                                                 }
                                                             }
                                                         ]
+                                                    },
+                                                    {
+                                                        xtype: 'panel',
+                                                        itemId: 'pgeMFT',
+                                                        layout: 'fit',
+                                                        title: 'Motor Fuel Tax',
+                                                        items: [
+                                                            {
+                                                                xtype: 'advancefiltergrid',
+                                                                reference: 'grdMotorFuelTax',
+                                                                itemId: 'grdMotorFuelTax',
+                                                                margin: -1,
+                                                                forceFit: true,
+                                                                dockedItems: [
+                                                                    {
+                                                                        xtype: 'toolbar',
+                                                                        dock: 'top',
+                                                                        itemId: 'tlbGridOptions',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            padding: '0 0 0 1'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnInsertMFT',
+                                                                                iconCls: 'small-add',
+                                                                                text: 'Insert'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnViewMFT',
+                                                                                iconCls: 'small-add',
+                                                                                text: 'Insert'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnDeleteMFT',
+                                                                                iconCls: 'small-delete',
+                                                                                text: 'Remove'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'tbseparator'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'filter1'
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ],
+                                                                columns: [
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colMFTTaxAuthority',
+                                                                        dataIndex: 'string',
+                                                                        text: 'Tax Authority Code',
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intAccountCategoryId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Account Category Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strAccountCategory',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Account Category',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboTaxAuthority',
+                                                                            displayField: 'strAccountCategory',
+                                                                            valueField: 'strAccountCategory'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colMFTDescription',
+                                                                        text: 'Description',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colMFTProductCode',
+                                                                        dataIndex: 'string',
+                                                                        text: 'Product Code',
+                                                                        flex: 1,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intAccountId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Account Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strAccountId',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Account Id',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strDescription',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Description',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intAccountGroupId',
+                                                                                    dataType: 'numeric',
+                                                                                    text: 'Account Group Id',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strAccountGroup',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Account Group',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strAccountType',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Account Type',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboProductCode',
+                                                                            displayField: 'strAccountId',
+                                                                            valueField: 'strAccountId'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colMFTProductCodeDescription',
+                                                                        text: 'Product Code Description',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colMFTProductCodeGroup',
+                                                                        text: 'Product Code Group',
+                                                                        flex: 1
+                                                                    }
+                                                                ],
+                                                                viewConfig: {
+                                                                    itemId: 'gvwMotorFuelTax'
+                                                                },
+                                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                                    selType: 'checkboxmodel'
+                                                                }),
+                                                                plugins: [
+                                                                    {
+                                                                        ptype: 'cellediting',
+                                                                        pluginId: 'cepMotorFuelTax',
+                                                                        clicksToEdit: 1
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ],
+                                                        tabConfig: {
+                                                            xtype: 'tab',
+                                                            itemId: 'cfgMFT'
+                                                        }
                                                     }
                                                 ]
                                             }
