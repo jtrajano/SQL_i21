@@ -205,6 +205,7 @@ BEGIN
 				,S.strShiftName
 				,S.intStartOffset
 				,S.intEndOffset
+				,S.intShiftSequence
 				,CD.dtmShiftStartTime
 				,CD.dtmShiftEndTime
 				,CD.intNoOfMachine
@@ -217,7 +218,7 @@ BEGIN
 			LEFT JOIN dbo.tblMFScheduleCalendarMachineDetail MD ON MD.intCalendarDetailId = CD.intCalendarDetailId
 			LEFT JOIN dbo.tblMFMachine M ON M.intMachineId = MD.intMachineId
 			) AS DT
-		PIVOT(Count(DT.intMachineId) FOR strName IN (' + @strMachineName + ')) pvt'
+		PIVOT(Count(DT.intMachineId) FOR strName IN (' + @strMachineName + ')) pvt Order by dtmCalendarDate,intShiftSequence'
 
 		EXEC (@SQL)
 		
