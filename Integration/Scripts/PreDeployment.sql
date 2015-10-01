@@ -123,7 +123,7 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateTermsView.sql"
 :r ..\dbo\Views\vwDispatch.sql
 :r ..\dbo\Views\vyuTMtrprcmst.sql
-:r "..\dbo\Stored Procedures\uspTMUpdateCustomerBudgetOrigin.sql
+
 
 :r "..\dbo\Stored Procedures\TwoPartDeliveryFillReport.sql"
 :r "..\dbo\Stored Procedures\uspTMGetConsumptionWithGasCheck.sql"
@@ -145,6 +145,7 @@
 :r "..\dbo\Stored Procedures\uspTMRecreateBudgetCalculationItemPricingView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteSP.sql"
+:r "..\dbo\Stored Procedures\uspTMUpdateCustomerBudgetOrigin.sql"
 
 :r "..\dbo\Functions\fnGetVendorLastName.sql"
 :r "..\dbo\Stored Procedures\uspAPCreateMissingPaymentOfBills.sql"
