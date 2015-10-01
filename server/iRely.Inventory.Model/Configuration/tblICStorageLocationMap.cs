@@ -200,6 +200,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intRelativeZ).HasColumnName("intRelativeZ");
             this.Property(t => t.intCommodityId).HasColumnName("intCommodityId");
             this.Property(t => t.dblPackFactor).HasColumnName("dblPackFactor").HasPrecision(18, 6);
+            this.Property(t => t.dblEffectiveDepth).HasColumnName("dblEffectiveDepth").HasPrecision(18, 6);
             this.Property(t => t.dblUnitPerFoot).HasColumnName("dblUnitPerFoot").HasPrecision(18, 6);
             this.Property(t => t.dblResidualUnit).HasColumnName("dblResidualUnit").HasPrecision(18, 6);
         }

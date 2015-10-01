@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets34558509e07a87a9d5cc215080e6808749e02572e9c4b0675f0be157c3c950a6))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets5f2c629315ed2f0c9bb3dc35f366615cc1e4094959c6bb802694bd7a7b4a0e4f))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets34558509e07a87a9d5cc215080e6808749e02572e9c4b0675f0be157c3c950a6 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets5f2c629315ed2f0c9bb3dc35f366615cc1e4094959c6bb802694bd7a7b4a0e4f : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "34558509e07a87a9d5cc215080e6808749e02572e9c4b0675f0be157c3c950a6"; }
+            get { return "5f2c629315ed2f0c9bb3dc35f366615cc1e4094959c6bb802694bd7a7b4a0e4f"; }
         }
 
         /// <summary>
@@ -9355,7 +9355,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetStorageLocation
-        [CodeFirstDatabaseSchema.vyuICGetStorageLocation](T1.vyuICGetStorageLocation_intStorageLocationId, T1.vyuICGetStorageLocation_strName, T1.vyuICGetStorageLocation_strDescription, T1.vyuICGetStorageLocation_intStorageUnitTypeId, T1.vyuICGetStorageLocation_strStorageUnitType, T1.vyuICGetStorageLocation_intLocationId, T1.vyuICGetStorageLocation_strLocationName, T1.vyuICGetStorageLocation_intSubLocationId, T1.vyuICGetStorageLocation_strSubLocationName, T1.vyuICGetStorageLocation_intParentStorageLocationId, T1.vyuICGetStorageLocation_strParentStorageLocationName, T1.vyuICGetStorageLocation_ysnAllowConsume, T1.vyuICGetStorageLocation_ysnAllowMultipleItem, T1.vyuICGetStorageLocation_ysnAllowMultipleLot, T1.vyuICGetStorageLocation_ysnMergeOnMove, T1.vyuICGetStorageLocation_ysnCycleCounted, T1.vyuICGetStorageLocation_ysnDefaultWHStagingUnit, T1.vyuICGetStorageLocation_intRestrictionId, T1.vyuICGetStorageLocation_strRestrictionCode, T1.vyuICGetStorageLocation_strRestrictionDesc, T1.vyuICGetStorageLocation_strUnitGroup, T1.vyuICGetStorageLocation_dblMinBatchSize, T1.vyuICGetStorageLocation_dblBatchSize, T1.vyuICGetStorageLocation_intBatchSizeUOMId, T1.vyuICGetStorageLocation_intSequence, T1.vyuICGetStorageLocation_ysnActive, T1.vyuICGetStorageLocation_intRelativeX, T1.vyuICGetStorageLocation_intRelativeY, T1.vyuICGetStorageLocation_intRelativeZ, T1.vyuICGetStorageLocation_intCommodityId, T1.vyuICGetStorageLocation_dblPackFactor, T1.vyuICGetStorageLocation_dblUnitPerFoot, T1.vyuICGetStorageLocation_dblResidualUnit)
+        [CodeFirstDatabaseSchema.vyuICGetStorageLocation](T1.vyuICGetStorageLocation_intStorageLocationId, T1.vyuICGetStorageLocation_strName, T1.vyuICGetStorageLocation_strDescription, T1.vyuICGetStorageLocation_intStorageUnitTypeId, T1.vyuICGetStorageLocation_strStorageUnitType, T1.vyuICGetStorageLocation_intLocationId, T1.vyuICGetStorageLocation_strLocationName, T1.vyuICGetStorageLocation_intSubLocationId, T1.vyuICGetStorageLocation_strSubLocationName, T1.vyuICGetStorageLocation_intParentStorageLocationId, T1.vyuICGetStorageLocation_strParentStorageLocationName, T1.vyuICGetStorageLocation_ysnAllowConsume, T1.vyuICGetStorageLocation_ysnAllowMultipleItem, T1.vyuICGetStorageLocation_ysnAllowMultipleLot, T1.vyuICGetStorageLocation_ysnMergeOnMove, T1.vyuICGetStorageLocation_ysnCycleCounted, T1.vyuICGetStorageLocation_ysnDefaultWHStagingUnit, T1.vyuICGetStorageLocation_intRestrictionId, T1.vyuICGetStorageLocation_strRestrictionCode, T1.vyuICGetStorageLocation_strRestrictionDesc, T1.vyuICGetStorageLocation_strUnitGroup, T1.vyuICGetStorageLocation_dblMinBatchSize, T1.vyuICGetStorageLocation_dblBatchSize, T1.vyuICGetStorageLocation_intBatchSizeUOMId, T1.vyuICGetStorageLocation_intSequence, T1.vyuICGetStorageLocation_ysnActive, T1.vyuICGetStorageLocation_intRelativeX, T1.vyuICGetStorageLocation_intRelativeY, T1.vyuICGetStorageLocation_intRelativeZ, T1.vyuICGetStorageLocation_intCommodityId, T1.vyuICGetStorageLocation_dblPackFactor, T1.vyuICGetStorageLocation_dblEffectiveDepth, T1.vyuICGetStorageLocation_dblUnitPerFoot, T1.vyuICGetStorageLocation_dblResidualUnit)
     FROM (
         SELECT 
             T.intStorageLocationId AS vyuICGetStorageLocation_intStorageLocationId, 
@@ -9389,6 +9389,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intRelativeZ AS vyuICGetStorageLocation_intRelativeZ, 
             T.intCommodityId AS vyuICGetStorageLocation_intCommodityId, 
             T.dblPackFactor AS vyuICGetStorageLocation_dblPackFactor, 
+            T.dblEffectiveDepth AS vyuICGetStorageLocation_dblEffectiveDepth, 
             T.dblUnitPerFoot AS vyuICGetStorageLocation_dblUnitPerFoot, 
             T.dblResidualUnit AS vyuICGetStorageLocation_dblResidualUnit, 
             True AS _from0
@@ -9404,7 +9405,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing vyuICGetStorageLocations
-        [iRely.Inventory.Model.vyuICGetStorageLocation](T1.vyuICGetStorageLocation_intStorageLocationId, T1.vyuICGetStorageLocation_strName, T1.vyuICGetStorageLocation_strDescription, T1.vyuICGetStorageLocation_intStorageUnitTypeId, T1.vyuICGetStorageLocation_strStorageUnitType, T1.vyuICGetStorageLocation_intLocationId, T1.vyuICGetStorageLocation_strLocationName, T1.vyuICGetStorageLocation_intSubLocationId, T1.vyuICGetStorageLocation_strSubLocationName, T1.vyuICGetStorageLocation_intParentStorageLocationId, T1.vyuICGetStorageLocation_strParentStorageLocationName, T1.vyuICGetStorageLocation_ysnAllowConsume, T1.vyuICGetStorageLocation_ysnAllowMultipleItem, T1.vyuICGetStorageLocation_ysnAllowMultipleLot, T1.vyuICGetStorageLocation_ysnMergeOnMove, T1.vyuICGetStorageLocation_ysnCycleCounted, T1.vyuICGetStorageLocation_ysnDefaultWHStagingUnit, T1.vyuICGetStorageLocation_intRestrictionId, T1.vyuICGetStorageLocation_strRestrictionCode, T1.vyuICGetStorageLocation_strRestrictionDesc, T1.vyuICGetStorageLocation_strUnitGroup, T1.vyuICGetStorageLocation_dblMinBatchSize, T1.vyuICGetStorageLocation_dblBatchSize, T1.vyuICGetStorageLocation_intBatchSizeUOMId, T1.vyuICGetStorageLocation_intSequence, T1.vyuICGetStorageLocation_ysnActive, T1.vyuICGetStorageLocation_intRelativeX, T1.vyuICGetStorageLocation_intRelativeY, T1.vyuICGetStorageLocation_intRelativeZ, T1.vyuICGetStorageLocation_intCommodityId, T1.vyuICGetStorageLocation_dblPackFactor, T1.vyuICGetStorageLocation_dblUnitPerFoot, T1.vyuICGetStorageLocation_dblResidualUnit)
+        [iRely.Inventory.Model.vyuICGetStorageLocation](T1.vyuICGetStorageLocation_intStorageLocationId, T1.vyuICGetStorageLocation_strName, T1.vyuICGetStorageLocation_strDescription, T1.vyuICGetStorageLocation_intStorageUnitTypeId, T1.vyuICGetStorageLocation_strStorageUnitType, T1.vyuICGetStorageLocation_intLocationId, T1.vyuICGetStorageLocation_strLocationName, T1.vyuICGetStorageLocation_intSubLocationId, T1.vyuICGetStorageLocation_strSubLocationName, T1.vyuICGetStorageLocation_intParentStorageLocationId, T1.vyuICGetStorageLocation_strParentStorageLocationName, T1.vyuICGetStorageLocation_ysnAllowConsume, T1.vyuICGetStorageLocation_ysnAllowMultipleItem, T1.vyuICGetStorageLocation_ysnAllowMultipleLot, T1.vyuICGetStorageLocation_ysnMergeOnMove, T1.vyuICGetStorageLocation_ysnCycleCounted, T1.vyuICGetStorageLocation_ysnDefaultWHStagingUnit, T1.vyuICGetStorageLocation_intRestrictionId, T1.vyuICGetStorageLocation_strRestrictionCode, T1.vyuICGetStorageLocation_strRestrictionDesc, T1.vyuICGetStorageLocation_strUnitGroup, T1.vyuICGetStorageLocation_dblMinBatchSize, T1.vyuICGetStorageLocation_dblBatchSize, T1.vyuICGetStorageLocation_intBatchSizeUOMId, T1.vyuICGetStorageLocation_intSequence, T1.vyuICGetStorageLocation_ysnActive, T1.vyuICGetStorageLocation_intRelativeX, T1.vyuICGetStorageLocation_intRelativeY, T1.vyuICGetStorageLocation_intRelativeZ, T1.vyuICGetStorageLocation_intCommodityId, T1.vyuICGetStorageLocation_dblPackFactor, T1.vyuICGetStorageLocation_dblEffectiveDepth, T1.vyuICGetStorageLocation_dblUnitPerFoot, T1.vyuICGetStorageLocation_dblResidualUnit)
     FROM (
         SELECT 
             T.intStorageLocationId AS vyuICGetStorageLocation_intStorageLocationId, 
@@ -9438,6 +9439,7 @@ namespace Edm_EntityMappingGeneratedViews
             T.intRelativeZ AS vyuICGetStorageLocation_intRelativeZ, 
             T.intCommodityId AS vyuICGetStorageLocation_intCommodityId, 
             T.dblPackFactor AS vyuICGetStorageLocation_dblPackFactor, 
+            T.dblEffectiveDepth AS vyuICGetStorageLocation_dblEffectiveDepth, 
             T.dblUnitPerFoot AS vyuICGetStorageLocation_dblUnitPerFoot, 
             T.dblResidualUnit AS vyuICGetStorageLocation_dblResidualUnit, 
             True AS _from0

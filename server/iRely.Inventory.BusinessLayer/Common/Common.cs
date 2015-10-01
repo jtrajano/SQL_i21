@@ -21,7 +21,8 @@ namespace iRely.Inventory.BusinessLayer
             InventoryAdjustment = 30,
             InventoryShipment = 31,
             BuildAssembly = 35,
-            InventoryTransfer = 41
+            InventoryTransfer = 41,
+            StorageMeasurementReading = 69
         }
 
         public class Posting_RequestModel

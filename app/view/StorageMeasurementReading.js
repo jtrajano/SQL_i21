@@ -25,17 +25,18 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
         'Ext.tab.Tab',
         'Ext.form.field.ComboBox',
         'Ext.form.field.Date',
-        'Ext.form.field.Number',
         'Ext.grid.Panel',
-        'Ext.grid.column.Column',
+        'Ext.grid.column.Number',
+        'Ext.form.field.Number',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
+        'Ext.grid.plugin.CellEditing',
         'Ext.toolbar.Paging'
     ],
 
-    height: 550,
+    height: 441,
     hidden: false,
-    width: 500,
+    width: 839,
     layout: 'fit',
     collapsible: true,
     iconCls: 'small-icon-i21',
@@ -163,12 +164,6 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                         },
                                         items: [
                                             {
-                                                xtype: 'combobox',
-                                                itemId: 'cboLocation',
-                                                fieldLabel: 'Location',
-                                                labelWidth: 55
-                                            },
-                                            {
                                                 xtype: 'container',
                                                 margin: '0 0 5 0',
                                                 layout: {
@@ -177,25 +172,58 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                 },
                                                 items: [
                                                     {
-                                                        xtype: 'datefield',
+                                                        xtype: 'gridcombobox',
                                                         flex: 1,
+                                                        columns: [
+                                                            {
+                                                                dataIndex: 'intCompanyLocationId',
+                                                                dataType: 'numeric',
+                                                                hidden: true
+                                                            },
+                                                            {
+                                                                dataIndex: 'strLocationName',
+                                                                dataType: 'string',
+                                                                text: 'Location Name',
+                                                                flex: 1
+                                                            },
+                                                            {
+                                                                dataIndex: 'strLocationType',
+                                                                dataType: 'string',
+                                                                text: 'Location Type',
+                                                                flex: 1
+                                                            }
+                                                        ],
+                                                        itemId: 'cboLocation',
+                                                        margin: '0 5 0 0',
+                                                        fieldLabel: 'Location',
+                                                        labelWidth: 55,
+                                                        displayField: 'strLocationName',
+                                                        valueField: 'intCompanyLocationId'
+                                                    },
+                                                    {
+                                                        xtype: 'datefield',
+                                                        flex: 0.7,
                                                         itemId: 'dtmDate',
                                                         margin: '0 5 0 0',
                                                         fieldLabel: 'Date',
                                                         labelWidth: 55
                                                     },
                                                     {
-                                                        xtype: 'numberfield',
-                                                        flex: 1,
+                                                        xtype: 'textfield',
+                                                        flex: 0.7,
                                                         itemId: 'txtReadingNumber',
                                                         fieldLabel: 'Reading No',
-                                                        labelWidth: 80
+                                                        labelWidth: 80,
+                                                        readOnly: true,
+                                                        blankText: 'Created on Save',
+                                                        emptyText: 'Created on Save'
                                                     }
                                                 ]
                                             },
                                             {
                                                 xtype: 'advancefiltergrid',
                                                 flex: 1,
+                                                reference: 'grdStorageMeasurementReading',
                                                 itemId: 'grdStorageMeasurementReading',
                                                 title: 'Conversion',
                                                 dockedItems: [
@@ -235,32 +263,157 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                 columns: [
                                                     {
                                                         xtype: 'gridcolumn',
+                                                        itemId: 'colCommodity',
                                                         width: 75,
-                                                        text: 'Commodity'
+                                                        text: 'Commodity',
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intCommodityId',
+                                                                    dataType: 'numeric',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strCommodityCode',
+                                                                    dataType: 'string',
+                                                                    text: 'Commodity Code',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboCommodity',
+                                                            displayField: 'strCommodityCode',
+                                                            valueField: 'strCommodityCode'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        text: 'Item'
+                                                        itemId: 'colItem',
+                                                        text: 'Item',
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intItemId',
+                                                                    dataType: 'numeric',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strItemNo',
+                                                                    dataType: 'string',
+                                                                    text: 'Item Number',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strType',
+                                                                    dataType: 'string',
+                                                                    text: 'Item Type',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strLotTracking',
+                                                                    dataType: 'string',
+                                                                    hidden: true
+                                                                }
+                                                            ],
+                                                            itemId: 'cboItem',
+                                                            displayField: 'strItemNo',
+                                                            valueField: 'strItemNo'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        text: 'Storage Location'
+                                                        itemId: 'colStorageLocation',
+                                                        text: 'Storage Location',
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'gridcombobox',
+                                                            columns: [
+                                                                {
+                                                                    dataIndex: 'intStorageLocationId',
+                                                                    dataType: 'numeric',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strName',
+                                                                    dataType: 'string',
+                                                                    text: 'Storage Location',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'intSubLocationId',
+                                                                    dataType: 'numeric',
+                                                                    hidden: true
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strSubLocationName',
+                                                                    dataType: 'string',
+                                                                    text: 'Sub Location',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'strDescription',
+                                                                    dataType: 'string',
+                                                                    text: 'Description',
+                                                                    flex: 1
+                                                                },
+                                                                {
+                                                                    dataIndex: 'dblEffectiveDepth',
+                                                                    dataType: 'float',
+                                                                    text: 'Effective Depth',
+                                                                    flex: 1
+                                                                }
+                                                            ],
+                                                            itemId: 'cboStorageLocation',
+                                                            displayField: 'strName',
+                                                            valueField: 'strName'
+                                                        }
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        text: 'Sub Location'
+                                                        itemId: 'colSubLocation',
+                                                        text: 'Sub Location',
+                                                        flex: 1
                                                     },
                                                     {
                                                         xtype: 'gridcolumn',
-                                                        text: 'Effective Depth'
+                                                        itemId: 'colEffectiveDepth',
+                                                        text: 'Effective Depth',
+                                                        flex: 1
                                                     },
                                                     {
-                                                        xtype: 'gridcolumn',
-                                                        text: 'Air Space Reading'
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colAirSpaceReading',
+                                                        align: 'right',
+                                                        text: 'Air Space Reading',
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     },
                                                     {
-                                                        xtype: 'gridcolumn',
-                                                        text: 'Cash Price'
+                                                        xtype: 'numbercolumn',
+                                                        itemId: 'colCashPrice',
+                                                        align: 'right',
+                                                        text: 'Cash Price',
+                                                        flex: 1,
+                                                        editor: {
+                                                            xtype: 'numberfield'
+                                                        }
                                                     }
                                                 ],
                                                 viewConfig: {
@@ -268,7 +421,14 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
-                                                })
+                                                }),
+                                                plugins: [
+                                                    {
+                                                        ptype: 'cellediting',
+                                                        pluginId: 'cepStorageMeasurementReading',
+                                                        clicksToEdit: 1
+                                                    }
+                                                ]
                                             }
                                         ]
                                     }

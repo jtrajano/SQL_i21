@@ -138,6 +138,10 @@ namespace iRely.Inventory.Model
         public DbSet<tblGRStorageType> tblGRStorageTypes { get; set; }
 
         public DbSet<tblMFQAProperty> tblMFQAProperties { get; set; }
+
+        public DbSet<tblICStorageMeasurementReading> tblICStorageMeasurementReadings { get; set; }
+        public DbSet<tblICStorageMeasurementReadingConversion> tblICStorageMeasurementReadingConversions { get; set; }
+        public DbSet<vyuICGetStorageMeasurementReadingConversion> vyuICGetStorageMeasurementReadingConversions { get; set; }
         
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

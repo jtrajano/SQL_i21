@@ -11,6 +11,11 @@ namespace iRely.Inventory.Model
 {
     public class tblICStorageMeasurementReading : BaseEntity
     {
+        public tblICStorageMeasurementReading()
+        {
+            this.tblICStorageMeasurementReadingConversions = new List<tblICStorageMeasurementReadingConversion>();
+        }
+
         public int intStorageMeasurementReadingId { get; set; }
         public int? intLocationId { get; set; }
         public DateTime? dtmDate { get; set; }
@@ -24,7 +29,7 @@ namespace iRely.Inventory.Model
     public class StorageMeasurementReadingVM
     {
         public int intStorageMeasurementReadingId { get; set; }
-        public int intLocationId { get; set; }
+        public int? intLocationId { get; set; }
         public string strLocationName { get; set; }
         public DateTime? dtmDate { get; set; }
         public string strReadingNo { get; set; }
@@ -42,6 +47,99 @@ namespace iRely.Inventory.Model
         public decimal? dblAirSpaceReading { get; set; }
         public decimal? dblCashPrice { get; set; }
         public int? intSort { get; set; }
+
+        private string _commodity;
+        [NotMapped]
+        public string strCommodity
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_commodity))
+                    if (vyuICGetStorageMeasurementReadingConversion != null)
+                        return vyuICGetStorageMeasurementReadingConversion.strCommodity;
+                    else
+                        return null;
+                else
+                    return _commodity;
+            }
+            set
+            {
+                _commodity = value;
+            }
+        }
+        private string _itemNo;
+        [NotMapped]
+        public string strItemNo
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_itemNo))
+                    if (vyuICGetStorageMeasurementReadingConversion != null)
+                        return vyuICGetStorageMeasurementReadingConversion.strItemNo;
+                    else
+                        return null;
+                else
+                    return _itemNo;
+            }
+            set
+            {
+                _itemNo = value;
+            }
+        }
+        private string _storageLocation;
+        [NotMapped]
+        public string strStorageLocationName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_storageLocation))
+                    if (vyuICGetStorageMeasurementReadingConversion != null)
+                        return vyuICGetStorageMeasurementReadingConversion.strStorageLocationName;
+                    else
+                        return null;
+                else
+                    return _storageLocation;
+            }
+            set
+            {
+                _storageLocation = value;
+            }
+        }
+        private string _subLocation;
+        [NotMapped]
+        public string strSubLocationName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_subLocation))
+                    if (vyuICGetStorageMeasurementReadingConversion != null)
+                        return vyuICGetStorageMeasurementReadingConversion.strSubLocationName;
+                    else
+                        return null;
+                else
+                    return _subLocation;
+            }
+            set
+            {
+                _subLocation = value;
+            }
+        }
+        private decimal _effectiveDepth;
+        [NotMapped]
+        public decimal dblEffectiveDepth
+        {
+            get
+            {
+                if (vyuICGetStorageMeasurementReadingConversion != null)
+                    return vyuICGetStorageMeasurementReadingConversion.dblEffectiveDepth ?? 0;
+                else
+                    return _effectiveDepth;
+            }
+            set
+            {
+                _effectiveDepth = value;
+            }
+        }
 
         public tblICStorageMeasurementReading tblICStorageMeasurementReading { get; set; }
         public vyuICGetStorageMeasurementReadingConversion vyuICGetStorageMeasurementReadingConversion { get; set; }
