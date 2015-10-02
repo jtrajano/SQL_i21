@@ -2524,6 +2524,7 @@
     <Build Include="dbo\Stored Procedures\uspRKDPRDailyPositionByCommodityLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDPRDailyPositionByCommodity.sql" />
     <Build Include="dbo\Views\vyuMFGetHolidayCalendar.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntityEmployee.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -6,8 +6,8 @@
     [intSort] INT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT ((1)),
 	CONSTRAINT [PK_tblPREmployeeSupervisor] PRIMARY KEY ([intEmployeeSupervisorId]),
-	CONSTRAINT [FK_tblPREmployeeSupervisor_tblPREmployee] FOREIGN KEY ([intEmployeeId]) REFERENCES [tblPREmployee]([intEmployeeId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblPREmployeeSupervisor_tblPREmployee_Supervisor] FOREIGN KEY ([intSupervisorId]) REFERENCES [tblPREmployee]([intEmployeeId])
+	CONSTRAINT [FK_tblPREmployeeSupervisor_tblPREmployee] FOREIGN KEY ([intEmployeeId]) REFERENCES [tblPREmployee]([intEntityEmployeeId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblPREmployeeSupervisor_tblPREmployee_Supervisor] FOREIGN KEY ([intSupervisorId]) REFERENCES [tblPREmployee]([intEntityEmployeeId])
 )
 
 GO
