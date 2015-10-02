@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets5f2c629315ed2f0c9bb3dc35f366615cc1e4094959c6bb802694bd7a7b4a0e4f))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsc2d6646a9239948a5666465c91b247e91d432c25359e19647d8e83422bd28950))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets5f2c629315ed2f0c9bb3dc35f366615cc1e4094959c6bb802694bd7a7b4a0e4f : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySetsc2d6646a9239948a5666465c91b247e91d432c25359e19647d8e83422bd28950 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "5f2c629315ed2f0c9bb3dc35f366615cc1e4094959c6bb802694bd7a7b4a0e4f"; }
+            get { return "c2d6646a9239948a5666465c91b247e91d432c25359e19647d8e83422bd28950"; }
         }
 
         /// <summary>
@@ -4047,7 +4047,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICStorageMeasurementReadingConversion
-        [CodeFirstDatabaseSchema.tblICStorageMeasurementReadingConversion](T1.tblICStorageMeasurementReadingConversion_intStorageMeasurementReadingConversionId, T1.tblICStorageMeasurementReadingConversion_intStorageMeasurementReadingId, T1.tblICStorageMeasurementReadingConversion_intCommodityId, T1.tblICStorageMeasurementReadingConversion_intItemId, T1.tblICStorageMeasurementReadingConversion_intStorageLocationId, T1.tblICStorageMeasurementReadingConversion_intSubLocationId, T1.tblICStorageMeasurementReadingConversion_dblAirSpaceReading, T1.tblICStorageMeasurementReadingConversion_dblCashPrice, T1.tblICStorageMeasurementReadingConversion_intSort, T1.tblICStorageMeasurementReadingConversion_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICStorageMeasurementReadingConversion](T1.tblICStorageMeasurementReadingConversion_intStorageMeasurementReadingConversionId, T1.tblICStorageMeasurementReadingConversion_intStorageMeasurementReadingId, T1.tblICStorageMeasurementReadingConversion_intCommodityId, T1.tblICStorageMeasurementReadingConversion_intItemId, T1.tblICStorageMeasurementReadingConversion_intStorageLocationId, T1.tblICStorageMeasurementReadingConversion_dblAirSpaceReading, T1.tblICStorageMeasurementReadingConversion_dblCashPrice, T1.tblICStorageMeasurementReadingConversion_intSort, T1.tblICStorageMeasurementReadingConversion_intConcurrencyId)
     FROM (
         SELECT 
             T.intStorageMeasurementReadingConversionId AS tblICStorageMeasurementReadingConversion_intStorageMeasurementReadingConversionId, 
@@ -4055,7 +4055,6 @@ namespace Edm_EntityMappingGeneratedViews
             T.intCommodityId AS tblICStorageMeasurementReadingConversion_intCommodityId, 
             T.intItemId AS tblICStorageMeasurementReadingConversion_intItemId, 
             T.intStorageLocationId AS tblICStorageMeasurementReadingConversion_intStorageLocationId, 
-            T.intSubLocationId AS tblICStorageMeasurementReadingConversion_intSubLocationId, 
             T.dblAirSpaceReading AS tblICStorageMeasurementReadingConversion_dblAirSpaceReading, 
             T.dblCashPrice AS tblICStorageMeasurementReadingConversion_dblCashPrice, 
             T.intSort AS tblICStorageMeasurementReadingConversion_intSort, 
@@ -7174,7 +7173,7 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICStorageMeasurementReadingConversions
-        [iRely.Inventory.Model.tblICStorageMeasurementReadingConversion](T1.tblICStorageMeasurementReadingConversion_intStorageMeasurementReadingConversionId, T1.tblICStorageMeasurementReadingConversion_intStorageMeasurementReadingId, T1.tblICStorageMeasurementReadingConversion_intCommodityId, T1.tblICStorageMeasurementReadingConversion_intItemId, T1.tblICStorageMeasurementReadingConversion_intStorageLocationId, T1.tblICStorageMeasurementReadingConversion_intSubLocationId, T1.tblICStorageMeasurementReadingConversion_dblAirSpaceReading, T1.tblICStorageMeasurementReadingConversion_dblCashPrice, T1.tblICStorageMeasurementReadingConversion_intSort, T1.tblICStorageMeasurementReadingConversion_intConcurrencyId)
+        [iRely.Inventory.Model.tblICStorageMeasurementReadingConversion](T1.tblICStorageMeasurementReadingConversion_intStorageMeasurementReadingConversionId, T1.tblICStorageMeasurementReadingConversion_intStorageMeasurementReadingId, T1.tblICStorageMeasurementReadingConversion_intCommodityId, T1.tblICStorageMeasurementReadingConversion_intItemId, T1.tblICStorageMeasurementReadingConversion_intStorageLocationId, T1.tblICStorageMeasurementReadingConversion_dblAirSpaceReading, T1.tblICStorageMeasurementReadingConversion_dblCashPrice, T1.tblICStorageMeasurementReadingConversion_intSort, T1.tblICStorageMeasurementReadingConversion_intConcurrencyId)
     FROM (
         SELECT 
             T.intStorageMeasurementReadingConversionId AS tblICStorageMeasurementReadingConversion_intStorageMeasurementReadingConversionId, 
@@ -7182,7 +7181,6 @@ namespace Edm_EntityMappingGeneratedViews
             T.intCommodityId AS tblICStorageMeasurementReadingConversion_intCommodityId, 
             T.intItemId AS tblICStorageMeasurementReadingConversion_intItemId, 
             T.intStorageLocationId AS tblICStorageMeasurementReadingConversion_intStorageLocationId, 
-            T.intSubLocationId AS tblICStorageMeasurementReadingConversion_intSubLocationId, 
             T.dblAirSpaceReading AS tblICStorageMeasurementReadingConversion_dblAirSpaceReading, 
             T.dblCashPrice AS tblICStorageMeasurementReadingConversion_dblCashPrice, 
             T.intSort AS tblICStorageMeasurementReadingConversion_intSort, 

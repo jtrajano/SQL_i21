@@ -43,7 +43,6 @@ namespace iRely.Inventory.Model
         public int? intCommodityId { get; set; }
         public int? intItemId { get; set; }
         public int? intStorageLocationId { get; set; }
-        public int? intSubLocationId { get; set; }
         public decimal? dblAirSpaceReading { get; set; }
         public decimal? dblCashPrice { get; set; }
         public int? intSort { get; set; }
@@ -103,6 +102,22 @@ namespace iRely.Inventory.Model
             set
             {
                 _storageLocation = value;
+            }
+        }
+        private int? _subLocationId;
+        [NotMapped]
+        public int? intSubLocationId
+        {
+            get
+            {
+                if (vyuICGetStorageMeasurementReadingConversion != null)
+                    return vyuICGetStorageMeasurementReadingConversion.intSubLocationId;
+                else
+                    return null;
+            }
+            set
+            {
+                _subLocationId = value;
             }
         }
         private string _subLocation;
