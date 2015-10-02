@@ -25,7 +25,7 @@ BEGIN
 					,[numRate]
 					,[dblTax]
 					,[dblAdjustedTax]
-					,[intTaxAccountId] AS [intSalesTaxAccountId]
+					,[intTaxAccountId]				AS [intSalesTaxAccountId]
 					,[ysnSeparateOnInvoice]
 					,[ysnCheckoffTax]
 					,[strTaxCode]

@@ -28,6 +28,7 @@
 	CONSTRAINT [FK_tblAPPayment_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [tblGLAccount]([intAccountId]),
 	CONSTRAINT [FK_dbo.tblAPPayment_tblEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES tblEntity(intEntityId),
 	CONSTRAINT [FK_dbo.tblAPPayment_tblSMCurrency_intCurrencyId] FOREIGN KEY (intCurrencyId) REFERENCES tblSMCurrency(intCurrencyID),
+	CONSTRAINT [FK_dbo.tblAPPayment_tblSMPaymentMethod_intPaymentMethodId] FOREIGN KEY (intPaymentMethodId) REFERENCES tblSMPaymentMethod(intPaymentMethodID),
 	CONSTRAINT [FK_tblAPPayment_tblCMBankAccount] FOREIGN KEY ([intBankAccountId]) REFERENCES [tblCMBankAccount]([intBankAccountId])
 );
 GO

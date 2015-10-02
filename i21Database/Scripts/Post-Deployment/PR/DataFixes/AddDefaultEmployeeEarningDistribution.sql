@@ -9,29 +9,15 @@ BEGIN
 	EXEC ('
 	INSERT INTO tblPREmployeeEarningDistribution 
 	(intEmployeeEarningId
-	,intExpenseSegmentId
-	,intLocation
+	,intAccountId
 	,dblPercentage
 	,intConcurrencyId)
 	SELECT 
 	tblPREmployeeEarning.intEmployeeEarningId
-	,tblSegmentMapping.intSegmentPrimaryId
-	,tblSegmentMapping.intSegmentLocationId
+	,tblPREmployeeEarning.intAccountId
 	,100
 	,1
 	FROM tblPREmployeeEarning
-	INNER JOIN (
-		SELECT tblPrimary.intAccountId, intSegmentPrimaryId, intSegmentLocationId FROM
-			(SELECT intAccountId, intSegmentPrimaryId = A.intAccountSegmentId 
-				FROM tblGLAccountSegmentMapping A INNER JOIN tblGLAccountSegment B ON A.intAccountSegmentId = B.intAccountSegmentId 
-				WHERE intAccountStructureId = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strStructureName = ''Primary Account'' AND strType = ''Primary'')) tblPrimary
-			INNER JOIN
-			(SELECT intAccountId, intSegmentLocationId = A.intAccountSegmentId 
-				FROM tblGLAccountSegmentMapping A INNER JOIN tblGLAccountSegment B ON A.intAccountSegmentId = B.intAccountSegmentId 
-				WHERE intAccountStructureId = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strStructureName = ''Location'' AND strType = ''Segment'')) tblLocation
-		ON tblPrimary.intAccountId = tblLocation.intAccountId
-	) tblSegmentMapping
-	ON tblPREmployeeEarning.intAccountId = tblSegmentMapping.intAccountId
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblPREmployeeEarningDistribution WHERE intEmployeeEarningId = tblPREmployeeEarning.intEmployeeEarningId)
 	')
 END

@@ -565,7 +565,7 @@ BEGIN
 				1
 			FROM #tmpBillsPayment A
 				WHERE NOT EXISTS(SELECT * FROM tblSMPaymentMethod B WHERE B.strPaymentMethod = A.strPaymentMethod COLLATE Latin1_General_CS_AS)
-	
+
 			DECLARE @paymentId INT, @paymentKey INT
 
 			WHILE EXISTS(SELECT 1 FROM #tmpBillsPayment)
@@ -577,7 +577,7 @@ BEGIN
 					@paymentInfo = A.strCheckNo,
 					@payment = A.dblAmount,
 					@datePaid = A.dtmDate,
-					@paymentMethod = (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = A.strPaymentMethod COLLATE Latin1_General_CS_AS),
+					@paymentMethod = (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE LOWER(strPaymentMethod) = LOWER(A.strPaymentMethod) COLLATE Latin1_General_CS_AS),
 					@billIds = A.strBills,
 					@paymentKey = A.id
 				FROM #tmpBillsPayment A
@@ -614,14 +614,15 @@ BEGIN
 				intPayeeId = C.intEntityVendorId
 			FROM tblCMBankTransaction A
 			INNER JOIN tblAPPayment B
-				ON A.dblAmount = (CASE WHEN A.intBankTransactionTypeId = 11 THEN (B.dblAmountPaid) * -1 ELSE B.dblAmountPaid END)
+				ON A.dblAmount = dblAmountPaid--(CASE WHEN A.intBankTransactionTypeId = 11 THEN (B.dblAmountPaid) * -1 ELSE B.dblAmountPaid END)
 				AND A.dtmDate = B.dtmDatePaid
 				AND A.intBankAccountId = B.intBankAccountId
 				AND A.strReferenceNo = B.strPaymentInfo
 			INNER JOIN (tblAPVendor C INNER JOIN tblEntity D ON C.intEntityVendorId = D.intEntityId)
 				ON B.intEntityVendorId = C.intEntityVendorId 
 				--AND A.strPayee = D.strName
-			WHERE A.strSourceSystem = ''AP''
+			WHERE A.strSourceSystem IN (''AP'',''CW'')
+			AND A.strTransactionId <> B.strPaymentRecordNum
 
 			IF @transCount = 0 COMMIT TRANSACTION
 		END TRY

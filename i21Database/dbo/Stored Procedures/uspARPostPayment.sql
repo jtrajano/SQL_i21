@@ -363,12 +363,15 @@ IF @recap = 0
 						ON A.intAccountId = GL.intAccountId 
 				INNER JOIN 
 					tblGLAccountGroup AG
-						ON GL.intAccountGroupId = AG.intAccountGroupId 											 
+						ON GL.intAccountGroupId = AG.intAccountGroupId
+				INNER JOIN 
+					tblGLAccountCategory AC
+						ON GL.intAccountCategoryId = AC.intAccountCategoryId											 
 				LEFT OUTER JOIN
 					tblCMBankAccount BA
 						ON A.intAccountId = BA.intGLAccountId 						
 				WHERE
-					AG.strAccountGroup = 'Cash Accounts'
+					AC.strAccountCategory = 'Cash Account'
 					AND (BA.intGLAccountId IS NULL
 						 OR BA.ysnActive = 0)
 						 
@@ -543,10 +546,7 @@ IF @recap = 0
 						ON C.intInvoiceId = I.intInvoiceId 
 				WHERE
 					A.intPaymentId <> I.intPaymentId 
-			
-					
-				
-				
+																
 			END
 
 		--UNPOSTING VALIDATIONS
@@ -563,11 +563,38 @@ IF @recap = 0
 					,@batchId
 					,A.intPaymentId
 				FROM
-					tblARPayment A 
+					tblARPayment A
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId
 				INNER JOIN
 					tblCMBankTransaction B 
 						ON A.strRecordNumber = B.strTransactionId
 				WHERE B.ysnClr = 1
+				
+				--Payment with created Bank Deposit
+				INSERT INTO
+					@ARReceivableInvalidData
+				SELECT 
+					'You cannot unpost payment with created Bank Deposit.'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId
+				INNER JOIN
+					tblCMUndepositedFund B 
+						ON A.intPaymentId = B.intSourceTransactionId 
+						AND A.strRecordNumber = B.strSourceTransactionId
+				INNER JOIN
+					tblCMBankTransactionDetail TD
+						ON B.intUndepositedFundId = TD.intUndepositedFundId
+				WHERE 
+					B.strSourceSystem = 'AR'
 				
 				---overpayment
 				INSERT INTO
@@ -1434,6 +1461,30 @@ IF @recap = 0
 			OR (ISNULL(tblARPayment.strPaymentInfo,'') = '' AND tblSMPaymentMethod.strPaymentMethod = 'Check')
 			)
 			
+			--DELETE FROM tblCMUndepositedFund
+			--WHERE
+			--	intUndepositedFundId IN 
+			--	(
+			--	SELECT 
+			--		B.intUndepositedFundId
+			--	FROM
+			--		tblARPayment A
+			--	INNER JOIN
+			--		@ARReceivablePostData P
+			--			ON A.intPaymentId = P.intPaymentId
+			--	INNER JOIN
+			--		tblCMUndepositedFund B 
+			--			ON A.intPaymentId = B.intSourceTransactionId 
+			--			AND A.strRecordNumber = B.strSourceTransactionId
+			--	LEFT OUTER JOIN
+			--		tblCMBankTransactionDetail TD
+			--			ON B.intUndepositedFundId = TD.intUndepositedFundId
+			--	WHERE 
+			--		B.strSourceSystem = 'AR'
+			--		AND TD.intUndepositedFundId IS NULL
+			--	)
+				
+			
 			--VOID IF CHECK PAYMENT
 			UPDATE tblCMBankTransaction
 			SET ysnCheckVoid = 1,
@@ -1686,15 +1737,70 @@ IF @recap = 0
 						ON A.intAccountId = GL.intAccountId 
 				INNER JOIN 
 					tblGLAccountGroup AG
-						ON GL.intAccountGroupId = AG.intAccountGroupId 											 
+						ON GL.intAccountGroupId = AG.intAccountGroupId 		
+				INNER JOIN 
+					tblGLAccountCategory AC
+						ON GL.intAccountCategoryId = AC.intAccountCategoryId										 
 				INNER JOIN
 					tblCMBankAccount BA
 						ON A.intAccountId = BA.intGLAccountId 						
 				WHERE
-					AG.strAccountGroup = 'Cash Accounts'
+					AC.strAccountCategory = 'Cash Account'
 					AND BA.intGLAccountId IS NOT NULL
 					AND BA.ysnActive = 1
 					AND A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
+					
+			
+			--INSERT INTO [tblCMUndepositedFund](
+			--	 [intBankAccountId]
+			--	,[strSourceTransactionId]
+			--	,[intSourceTransactionId]
+			--	,[dtmDate]
+			--	,[strName]
+			--	,[dblAmount]
+			--	,[strSourceSystem]
+			--	,[intBankDepositId]
+			--	,[intCreatedUserId]
+			--	,[dtmCreated]
+			--	,[intLastModifiedUserId]
+			--	,[dtmLastModified]
+			--	,[intConcurrencyId]
+			--	)
+			--SELECT
+			--	 [intBankAccountId]			= BA.intBankAccountId 
+			--	,[strSourceTransactionId]	= A.[strRecordNumber]
+			--	,[intSourceTransactionId]	= A.[intPaymentId] 
+			--	,[dtmDate]					= A.[dtmDatePaid]
+			--	,[strName]					= (SELECT TOP 1 strName FROM tblEntity WHERE intEntityId = B.[intEntityCustomerId])
+			--	,[dblAmount]				= A.[dblAmountPaid] 
+			--	,[strSourceSystem]			= 'AR'
+			--	,[intBankDepositId]			= NULL --A.[intAccountId] 
+			--	,[intCreatedUserId]			= @userId
+			--	,[dtmCreated]				= CAST(GETDATE() AS DATE)
+			--	,[intLastModifiedUserId]	= @userId
+			--	,[dtmLastModified]			= CAST(GETDATE() AS DATE)
+			--	,[intConcurrencyId]			= 1		
+			--FROM 
+			--	tblARPayment A
+			--INNER JOIN tblARCustomer B
+			--		ON A.[intEntityCustomerId] = B.[intEntityCustomerId]
+			--INNER JOIN
+			--	tblGLAccount GL
+			--		ON A.intAccountId = GL.intAccountId 
+			--INNER JOIN 
+			--	tblGLAccountGroup AG
+			--		ON GL.intAccountGroupId = AG.intAccountGroupId 		
+			--INNER JOIN 
+			--	tblGLAccountCategory AC
+			--		ON GL.intAccountCategoryId = AC.intAccountCategoryId										 
+			--INNER JOIN
+			--	tblCMBankAccount BA
+			--		ON A.intAccountId = BA.intGLAccountId 						
+			--WHERE
+			--	AC.strAccountCategory = 'Undeposited Funds'
+			--	AND BA.intGLAccountId IS NOT NULL
+			--	AND BA.ysnActive = 1
+			--	AND A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
 					
 			-- Insert Zero Payments for updating
 			INSERT INTO @ARReceivablePostData

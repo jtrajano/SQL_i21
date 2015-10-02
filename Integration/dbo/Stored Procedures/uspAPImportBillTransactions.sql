@@ -30,6 +30,50 @@ BEGIN
 		IF @transCount = 0 --if this is greater than 1, someone already created the transaction and WE ARE COVERED BY THE TRANSACTION SO DON''T WORRY
 		BEGIN TRANSACTION
 
+		IF(@UserId <= 0)
+		BEGIN
+			RAISERROR(''You cannot import without user.'', 16, 1);
+		END
+
+		--MAKE SURE USER HAS DEFAULT LOCATION
+		DECLARE @userLocation INT;
+		SELECT @userLocation = A.intCompanyLocationId FROM tblSMCompanyLocation A
+				INNER JOIN tblSMUserSecurity B ON A.intCompanyLocationId = B.intCompanyLocationId
+		WHERE intEntityId = @UserId
+
+		IF(@userLocation IS NULL OR @userLocation <= 0)
+		BEGIN
+			RAISERROR(''Please setup default location on user screen.'', 16, 1);
+		END
+
+		--Validate GL Account
+		IF EXISTS(SELECT 1 FROM apcbkmst A
+		WHERE A.apcbk_gl_ap NOT IN (SELECT strExternalId FROM tblGLCOACrossReference)
+		UNION ALL
+		SELECT 1 FROM apeglmst A
+		WHERE A.apegl_gl_acct NOT IN (SELECT strExternalId FROM tblGLCOACrossReference))
+		BEGIN
+			RAISERROR(''Invalid GL Account found in origin table apeglmst. Please call iRely assistance.'', 16, 1);
+		END
+
+		--CHECK FOR MISSING VENDOR IN i21
+		DECLARE @missingVendor NVARCHAR(100), @missingVendorError NVARCHAR(200);
+		SELECT TOP 1 @missingVendor = dbo.fnTrim(aptrx_vnd_no) FROM (
+			SELECT aptrx_vnd_no FROM aptrxmst A
+					LEFT JOIN tblAPVendor B ON A.aptrx_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
+					WHERE B.strVendorId IS NULL
+					UNION ALL
+				SELECT apivc_vnd_no FROM apivcmst A
+					LEFT JOIN tblAPVendor B ON A.apivc_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
+					WHERE B.strVendorId IS NULL
+		) MissingVendors
+
+		IF @missingVendor IS NOT NULL
+		BEGIN
+			SET @missingVendorError = @missingVendor + '' is missing in i21. Please create the missing vendor in i21.'';
+			RAISERROR(@missingVendorError, 16, 1);
+		END
+
 		IF @DateFrom IS NULL AND @DateTo IS NULl
 		BEGIN
 			--VALIDATE BEFORE IMPORTING
@@ -54,22 +98,6 @@ BEGIN
 			--CREATE AP ACCOUNT CATEGORY
 			EXEC uspGLUpdateAPAccountCategory
 
-			IF(@UserId <= 0)
-			BEGIN
-				RAISERROR(''You cannot import without user.'', 16, 1);
-			END
-
-			--MAKE SURE USER HAS DEFAULT LOCATION
-			DECLARE @userLocation INT;
-			SELECT @userLocation = A.intCompanyLocationId FROM tblSMCompanyLocation A
-					INNER JOIN tblSMUserSecurity B ON A.intCompanyLocationId = B.intCompanyLocationId
-			WHERE intEntityId = @UserId
-
-			IF(@userLocation IS NULL OR @userLocation <= 0)
-			BEGIN
-				RAISERROR(''Please setup default location on user screen.'', 16, 1);
-			END
-
 			EXEC uspAPImportBillsFromAPIVCMST @UserId, @DateFrom, @DateTo, @totalPostedImport OUTPUT
 			SET @Total = @totalPostedImport;
 			EXEC uspAPImportBillsFromAPTRXMST @UserId,@DateFrom, @DateTo, @totalPostedImport OUTPUT
@@ -77,17 +105,6 @@ BEGIN
 		END
 		ELSE
 		BEGIN
-
-			--Validate GL Account
-			IF EXISTS(SELECT 1 FROM apcbkmst A
-			WHERE A.apcbk_gl_ap NOT IN (SELECT strExternalId FROM tblGLCOACrossReference)
-			UNION ALL
-			SELECT 1 FROM apeglmst A
-			WHERE A.apegl_gl_acct NOT IN (SELECT strExternalId FROM tblGLCOACrossReference))
-			BEGIN
-				RAISERROR(''Invalid GL Account found in origin table apeglmst. Please call iRely assistance.'', 16, 1);
-			END
-
 			EXEC uspAPImportBillsFromAPTRXMST @UserId,@DateFrom, @DateTo, @totalPostedImport OUTPUT
 			SET @Total = @totalPostedImport;
 		END

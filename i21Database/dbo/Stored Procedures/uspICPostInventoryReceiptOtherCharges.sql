@@ -18,18 +18,43 @@ END
 
 -- Validate 
 BEGIN 
-	-- Check for invalid location in the item-location setup.
+	-- Check for invalid location for the Other Charge item. 
+	SELECT TOP 1 
+			@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+			,@intItemId = Item.intItemId
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge OtherCharge
+				ON Receipt.intInventoryReceiptId = OtherCharge.intInventoryReceiptId	
+			INNER JOIN tblICItem Item
+				ON Item.intItemId = OtherCharge.intChargeId
+			LEFT JOIN dbo.tblICItemLocation ItemLocation
+				ON ItemLocation.intLocationId = Receipt.intLocationId
+				AND ItemLocation.intItemId = Item.intItemId
+	WHERE	ItemLocation.intItemLocationId IS NULL 
+			AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
+
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		-- 'Item Location is invalid or missing for {Item}.'
+		RAISERROR(50028, 11, 1, @strItemNo)
+		GOTO _Exit
+	END 
+END 
+
+-- Validate 
+BEGIN 
+	-- Check for invalid location for the Receipt Item. 
 	SELECT TOP 1 
 			@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
 			,@intItemId = Item.intItemId
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId	
 			INNER JOIN tblICItem Item
-				ON Item.intItemId = ReceiptItem.intItemId
+				ON Item.intItemId = ReceiptItem.intItemId 
 			LEFT JOIN dbo.tblICItemLocation ItemLocation
 				ON ItemLocation.intLocationId = Receipt.intLocationId
 				AND ItemLocation.intItemId = Item.intItemId
 	WHERE	ItemLocation.intItemLocationId IS NULL 
+			AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
 
 	IF @intItemId IS NOT NULL 
 	BEGIN 
