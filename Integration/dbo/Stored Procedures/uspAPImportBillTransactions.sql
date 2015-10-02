@@ -30,6 +30,22 @@ BEGIN
 		IF @transCount = 0 --if this is greater than 1, someone already created the transaction and WE ARE COVERED BY THE TRANSACTION SO DON''T WORRY
 		BEGIN TRANSACTION
 
+		--CHECK FOR MISSING VENDOR IN i21
+		DECLARE @missingVendor NVARCHAR(100), @missingVendorError NVARCHAR(200);
+		SELECT TOP 1 @missingVendor = dbo.fnTrim(aptrx_vnd_no) FROM (
+			SELECT aptrx_vnd_no FROM aptrxmst A
+					INNER JOIN tblAPVendor B ON A.aptrx_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
+					UNION ALL
+				SELECT apivc_vnd_no FROM apivcmst A
+					INNER JOIN tblAPVendor B ON A.apivc_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
+		) MissingVendors
+
+		IF @missingVendor IS NOT NULL
+		BEGIN
+			SET @missingVendorError = @missingVendor + '' is missing in i21. Please create the missing vendor in i21.'';
+			RAISERROR(@missingVendorError, 16, 1);
+		END
+
 		IF @DateFrom IS NULL AND @DateTo IS NULl
 		BEGIN
 			--VALIDATE BEFORE IMPORTING
