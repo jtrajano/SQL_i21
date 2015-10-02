@@ -2354,8 +2354,6 @@
     <Build Include="dbo\Stored Procedures\uspQMGetLotQuality.sql" />
     <Build Include="dbo\Stored Procedures\uspQMGetLotQualityCount.sql" />
     <Build Include="dbo\Stored Procedures\uspMFLotSplit.sql" />
-    <Build Include="dbo\Tables\tblIUPatchHistory.sql" />
-    <Build Include="dbo\Views\vyuIUPatchHistory.sql" />
     <Build Include="dbo\Tables\tblAPVendorSpecialTax.sql" />
     <Build Include="dbo\Tables\tblAPVendorTaxException.sql" />
     <Build Include="dbo\Views\vyuQMQualityExceptionList.sql" />
