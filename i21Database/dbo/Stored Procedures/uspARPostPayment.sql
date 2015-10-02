@@ -1461,28 +1461,28 @@ IF @recap = 0
 			OR (ISNULL(tblARPayment.strPaymentInfo,'') = '' AND tblSMPaymentMethod.strPaymentMethod = 'Check')
 			)
 			
-			--DELETE FROM tblCMUndepositedFund
-			--WHERE
-			--	intUndepositedFundId IN 
-			--	(
-			--	SELECT 
-			--		B.intUndepositedFundId
-			--	FROM
-			--		tblARPayment A
-			--	INNER JOIN
-			--		@ARReceivablePostData P
-			--			ON A.intPaymentId = P.intPaymentId
-			--	INNER JOIN
-			--		tblCMUndepositedFund B 
-			--			ON A.intPaymentId = B.intSourceTransactionId 
-			--			AND A.strRecordNumber = B.strSourceTransactionId
-			--	LEFT OUTER JOIN
-			--		tblCMBankTransactionDetail TD
-			--			ON B.intUndepositedFundId = TD.intUndepositedFundId
-			--	WHERE 
-			--		B.strSourceSystem = 'AR'
-			--		AND TD.intUndepositedFundId IS NULL
-			--	)
+			DELETE FROM tblCMUndepositedFund
+			WHERE
+				intUndepositedFundId IN 
+				(
+				SELECT 
+					B.intUndepositedFundId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId
+				INNER JOIN
+					tblCMUndepositedFund B 
+						ON A.intPaymentId = B.intSourceTransactionId 
+						AND A.strRecordNumber = B.strSourceTransactionId
+				LEFT OUTER JOIN
+					tblCMBankTransactionDetail TD
+						ON B.intUndepositedFundId = TD.intUndepositedFundId
+				WHERE 
+					B.strSourceSystem = 'AR'
+					AND TD.intUndepositedFundId IS NULL
+				)
 				
 			
 			--VOID IF CHECK PAYMENT
