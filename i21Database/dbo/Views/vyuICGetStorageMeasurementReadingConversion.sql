@@ -12,7 +12,7 @@ SELECT Detail.intStorageMeasurementReadingConversionId,
 	Detail.intStorageLocationId,
 	strStorageLocationName = StorageLocation.strName,
 	StorageLocation.dblEffectiveDepth,
-	Detail.intSubLocationId,
+	StorageLocation.intSubLocationId,
 	SubLocation.strSubLocationName,
 	Detail.dblAirSpaceReading,
 	Detail.dblCashPrice
@@ -21,4 +21,4 @@ LEFT JOIN tblICStorageMeasurementReading Header ON Header.intStorageMeasurementR
 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Detail.intCommodityId
 LEFT JOIN tblICItem Item ON Item.intItemId = Detail.intItemId
 LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = Detail.intStorageLocationId
-LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = Detail.intSubLocationId
+LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = StorageLocation.intSubLocationId

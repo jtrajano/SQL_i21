@@ -5,7 +5,6 @@
     [intCommodityId] INT NULL, 
     [intItemId] INT NOT NULL, 
     [intStorageLocationId] INT NOT NULL, 
-    [intSubLocationId] INT NULL, 
     [dblAirSpaceReading] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [dblCashPrice] NUMERIC(18, 6) NULL DEFAULT ((0)), 
     [intSort] INT NULL, 
@@ -63,14 +62,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'intStorageLocationId'
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Sub Location Id',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblICStorageMeasurementReadingConversion',
-    @level2type = N'COLUMN',
-    @level2name = N'intSubLocationId'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Air Space Reading',
