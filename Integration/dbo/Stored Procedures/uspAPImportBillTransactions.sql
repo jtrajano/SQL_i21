@@ -34,10 +34,12 @@ BEGIN
 		DECLARE @missingVendor NVARCHAR(100), @missingVendorError NVARCHAR(200);
 		SELECT TOP 1 @missingVendor = dbo.fnTrim(aptrx_vnd_no) FROM (
 			SELECT aptrx_vnd_no FROM aptrxmst A
-					INNER JOIN tblAPVendor B ON A.aptrx_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
+					LEFT JOIN tblAPVendor B ON A.aptrx_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
+					WHERE B.strVendorId IS NULL
 					UNION ALL
 				SELECT apivc_vnd_no FROM apivcmst A
-					INNER JOIN tblAPVendor B ON A.apivc_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
+					LEFT JOIN tblAPVendor B ON A.apivc_vnd_no = B.strVendorId COLLATE Latin1_General_CS_AS
+					WHERE B.strVendorId IS NULL
 		) MissingVendors
 
 		IF @missingVendor IS NOT NULL
