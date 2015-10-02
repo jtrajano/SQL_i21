@@ -537,6 +537,8 @@ IF @recap = 0
 						INNER JOIN
 							tblARInvoice I
 								ON PD.intInvoiceId = I.intInvoiceId
+						WHERE
+							PD.dblPayment <> 0
 						GROUP BY
 							PD.intInvoiceId 
 						HAVING
@@ -545,7 +547,8 @@ IF @recap = 0
 					) I
 						ON C.intInvoiceId = I.intInvoiceId 
 				WHERE
-					A.intPaymentId <> I.intPaymentId 
+					B.dblPayment <> 0
+					AND A.intPaymentId <> I.intPaymentId 
 																
 			END
 
