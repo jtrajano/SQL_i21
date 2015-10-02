@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[test uspICPostCostAdjustmentOnAverageCosting, Receive Stocks, Cost Adjust]
+﻿CREATE PROCEDURE [testi21Database].[test uspICPostCostAdjustmentOnAverageCosting. Receive Stocks. Cost Adjust. Unpost Cost Adjust]
 AS
 BEGIN
 	-- Create the fake data
@@ -179,6 +179,7 @@ BEGIN
 				,@intCurrencyId AS INT						= 1 
 				,@dblExchangeRate AS NUMERIC(38,20)			= 1
 				,@intUserId AS INT							= 1 
+				,@ysnRecap  AS BIT							= 0 
 
 		CREATE TABLE expected (
 			[intInventoryTransactionId] INT NOT NULL
@@ -263,6 +264,7 @@ BEGIN
 
 	-- Act 
 	BEGIN 
+		-- Do the cost adjustment
 		EXEC dbo.uspICPostCostAdjustmentOnAverageCosting
 			@dtmDate
 			,@intItemId
@@ -282,6 +284,14 @@ BEGIN
 			,@intCurrencyId
 			,@dblExchangeRate
 			,@intUserId
+
+		-- Do the unpost of the cost adjustment
+		EXEC [dbo].[uspICUnpostCostAdjustment]
+			@intTransactionId 
+			,@strTransactionId
+			,@strBatchId 
+			,@intUserId 
+			,@ysnRecap 
 	END 
 
 	-- Get the actual data 
@@ -305,6 +315,7 @@ BEGIN
 				,[intTransactionTypeId]
 				,[intLotId]
 				,[intCostingMethod]
+				,[ysnIsUnposted]
 		)
 		SELECT	[intInventoryTransactionId]
 				,[intItemId]
@@ -324,6 +335,7 @@ BEGIN
 				,[intTransactionTypeId]
 				,[intLotId]
 				,[intCostingMethod]
+				,[ysnIsUnposted]
 		FROM	tblICInventoryTransaction
 		WHERE	intItemId = @intItemId
 				AND intItemLocationId = @intItemLocationId
@@ -339,6 +351,12 @@ BEGIN
 				,[dblQty] 
 				,[dblCost]
 		FROM	dbo.tblICInventoryFIFOCostAdjustmentLog
+
+		-- Get the actual average cost
+		SELECT	@dblAverageCost_Actual = dblAverageCost
+		FROM	dbo.tblICItemPricing
+		WHERE	intItemId = @WetGrains
+				AND intItemLocationId = @WetGrains_DefaultLocation
 	END
 
 	-- Setup the expected data. 
@@ -362,6 +380,7 @@ BEGIN
 				,[intTransactionTypeId]
 				,[intLotId]
 				,[intCostingMethod] 
+				,[ysnIsUnposted]
 		)
 		SELECT	[intInventoryTransactionId] = 1
 				,[intItemId]				= @WetGrains
@@ -381,6 +400,7 @@ BEGIN
 				,[intTransactionTypeId]		= @PurchaseType
 				,[intLotId]					= NULL 
 				,[intCostingMethod]			= @AVERAGECOST
+				,[ysnIsUnposted]			= 0
 		UNION ALL 
 		SELECT	[intInventoryTransactionId] = 6
 				,[intItemId]				= @WetGrains
@@ -400,7 +420,27 @@ BEGIN
 				,[intTransactionTypeId]		= @CostAdjustmentType
 				,[intLotId]					= NULL 
 				,[intCostingMethod]			= @AVERAGECOST
-
+				,[ysnIsUnposted]			= 1
+		UNION ALL 
+		SELECT	[intInventoryTransactionId] = 7
+				,[intItemId]				= @WetGrains
+				,[intItemLocationId]		= @WetGrains_DefaultLocation
+				,[intItemUOMId]				= @WetGrains_BushelUOM
+				,[dtmDate]					= 'January 10, 2014'
+				,[dblQty]					= 0
+				,[dblCost]					= 0
+				,[dblValue]					= -1 * 40 * (37.261 - 22.00)
+				,[dblSalesPrice]			= 0 
+				,[intCurrencyId]			= 1
+				,[dblExchangeRate]			= 1
+				,[intTransactionId]			= 1
+				,[intTransactionDetailId]	= 1
+				,[strTransactionId]			= 'BILL-10001'
+				,[strBatchId]				= 'BATCH-10293'
+				,[intTransactionTypeId]		= @CostAdjustmentType
+				,[intLotId]					= NULL 
+				,[intCostingMethod]			= @AVERAGECOST
+				,[ysnIsUnposted]			= 1
 
 		INSERT INTO expectedInventoryFIFOCostAdjustmentLog (
 				[intInventoryFIFOId]
@@ -419,6 +459,9 @@ BEGIN
 				,[intInventoryCostAdjustmentTypeId] = @COST_ADJ_TYPE_New_Cost
 				,[dblQty] = 40.00
 				,[dblCost] = 37.261
+
+		-- Setup the expected average cost
+		SET @dblAverageCost_Expected = 22.00
 	END 
 
 	-- Assert
@@ -427,7 +470,10 @@ BEGIN
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';
 		
 		-- Assert the expected data for tblICInventoryFIFOCostAdjustmentLog is built correctly. 
-		EXEC tSQLt.AssertEqualsTable 'expectedInventoryFIFOCostAdjustmentLog', 'actualInventoryFIFOCostAdjustmentLog'
+		EXEC tSQLt.AssertEqualsTable 'expectedInventoryFIFOCostAdjustmentLog', 'actualInventoryFIFOCostAdjustmentLog', 'Adjustment Log '
+
+		-- Assert the average cost 
+		EXEC tSQLt.AssertEquals @dblAverageCost_Expected, @dblAverageCost_Actual, 'Average cost not computed correctly!'
 	END 
 
 	-- Clean-up: remove the tables used in the unit test

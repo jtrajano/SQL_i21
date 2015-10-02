@@ -325,6 +325,7 @@ BEGIN
 				, intLotId
 				, intConcurrencyId
 				, intCostingMethod 
+				, ysnIsUnposted
 		) 
 		SELECT	intItemId = @WetGrains
 				, intItemLocationId = @WetGrains_DefaultLocation
@@ -345,6 +346,7 @@ BEGIN
 				, intLotId = NULL
 				, intConcurrencyId = 1
 				, intCostingMethod = @AVERAGECOST
+				, ysnIsUnposted = 0
 		UNION ALL 
 		SELECT	intItemId = @StickyGrains
 				, intItemLocationId = @StickyGrains_DefaultLocation
@@ -365,6 +367,7 @@ BEGIN
 				, intLotId = NULL
 				, intConcurrencyId = 1
 				, intCostingMethod = @AVERAGECOST
+				, ysnIsUnposted = 0
 		UNION ALL 
 		SELECT	intItemId = @PremiumGrains
 				, intItemLocationId = @PremiumGrains_DefaultLocation
@@ -385,6 +388,7 @@ BEGIN
 				, intLotId = NULL
 				, intConcurrencyId = 1
 				, intCostingMethod = @AVERAGECOST
+				, ysnIsUnposted = 0
 		UNION ALL 
 		SELECT	intItemId = @ColdGrains
 				, intItemLocationId = @ColdGrains_DefaultLocation
@@ -405,6 +409,7 @@ BEGIN
 				, intLotId = NULL
 				, intConcurrencyId = 1
 				, intCostingMethod = @AVERAGECOST
+				, ysnIsUnposted = 0
 		UNION ALL 
 		SELECT	intItemId = @HotGrains
 				, intItemLocationId = @HotGrains_DefaultLocation
@@ -425,5 +430,6 @@ BEGIN
 				, intLotId = NULL
 				, intConcurrencyId = 1
 				, intCostingMethod = @AVERAGECOST
+				, ysnIsUnposted = 0
 	END 
 END
