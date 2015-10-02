@@ -30,9 +30,10 @@ SELECT TOP 1
 		,@strRelatedTransactionId = InvTrans.strTransactionId
 FROM	dbo.tblICInventoryTransaction InvTrans INNER JOIN dbo.tblICItem Item
 			ON InvTrans.intItemId = Item.intItemId
-WHERE	intRelatedTransactionId = @intTransactionId
-		AND strRelatedTransactionId = @strTransactionId
-		AND intTransactionTypeId = @INVENTORY_COST_ADJUSTMENT
+WHERE	InvTrans.intRelatedTransactionId = @intTransactionId
+		AND InvTrans.strRelatedTransactionId = @strTransactionId
+		AND InvTrans.intTransactionTypeId = @INVENTORY_COST_ADJUSTMENT
+		AND ISNULL(InvTrans.ysnIsUnposted, 0) = 0 
 
 IF @strRelatedTransactionId IS NOT NULL 
 BEGIN 
