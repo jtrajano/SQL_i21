@@ -343,12 +343,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 					WHEN strPriceBasis = '3'
 						THEN PL3.dblUnitPrice + dblDeviation
 					WHEN strPriceBasis = 'O'
-						THEN (CASE
-									WHEN strCostToUse = 'Vendor'
-										THEN RACK.dblVendorRack
-									WHEN strCostToUse = 'Jobber'
-										THEN RACK.dblJobberRack
-								END) + dblDeviation
+						THEN [dbo].fnTRGetRackPrice(@TransactionDate, @SupplyPointId, @ItemId) + dblDeviation
 					WHEN strPriceBasis = 'L'
 						THEN dblDeviation
 				END)
@@ -412,16 +407,13 @@ DECLARE	 @Price		NUMERIC(18,6)
 			tblICItemUOM UOM
 				ON VI.intItemId = UOM.intItemId
 				AND VI.intStockUOMId = UOM.intItemUOMId
-		LEFT OUTER JOIN
-			vyuTRRackPrice AS RACK
-				ON  VI.intItemId = RACK.intItemId
-				AND (RACK.intSupplyPointId = @SupplyPointId OR @SupplyPointId IS NULL)
-				AND CAST(@TransactionDate AS DATE) >= CAST(RACK.dtmEffectiveDateTime AS DATE)
 		WHERE 
 			VI.intItemId = @ItemId
 			AND VI.intLocationId = @LocationId 
 			AND (@ItemUOMId IS NULL OR UOM.intItemUOMId = @ItemUOMId)
 			
+
+		--(R)Fixed Rack			
 		UPDATE
 			@CustomerSpecialPricing
 		SET
@@ -438,19 +430,20 @@ DECLARE	 @Price		NUMERIC(18,6)
 		WHERE
 			strPriceBasis = 'R'
 			
-		UPDATE
-			@CustomerSpecialPricing
-		SET
-			strPricing = (SELECT TOP 1 'Customer Pricing of (R)Fixed Rack + Amount' 
-								FROM vyuTRRackPrice INNER JOIN tblTRSupplyPoint 
-									ON vyuTRRackPrice.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId 
-								WHERE tblTRSupplyPoint.intEntityLocationId = intEntityLocationId 
-									AND vyuTRRackPrice.intItemId = intRackItemId
-									AND ((vyuTRRackPrice.intSupplyPointId = ISNULL(null,0) AND ISNULL(null,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intRackItemLocationId)
-									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE)
-									ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC)
-		WHERE
-			strPriceBasis = 'R'			
+		--UPDATE
+		--	@CustomerSpecialPricing
+		--SET
+		--	strPricing = (SELECT TOP 1 'Customer Pricing of (R)Fixed Rack + Amount' 
+		--						FROM vyuTRRackPrice INNER JOIN tblTRSupplyPoint 
+		--							ON vyuTRRackPrice.intSupplyPointId = tblTRSupplyPoint.intSupplyPointId 
+		--						WHERE tblTRSupplyPoint.intEntityLocationId = intEntityLocationId 
+		--							AND vyuTRRackPrice.intItemId = intRackItemId
+		--							AND ((vyuTRRackPrice.intSupplyPointId = ISNULL(null,0) AND ISNULL(null,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intRackItemLocationId)
+		--							AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRRackPrice.dtmEffectiveDateTime AS DATE)
+		--							ORDER BY vyuTRRackPrice.dtmEffectiveDateTime DESC)
+		--WHERE
+		--	strPriceBasis = 'R'
+				
 						
 		DECLARE @SpecialGroupPricing TABLE(
 			intSpecialPriceId INT
