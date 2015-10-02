@@ -352,6 +352,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colPOSCategoryName: {
                     dataIndex: 'strCategoryCode',
                     editor: {
+                        origValueField: 'intCategoryId',
+                        origUpdateField: 'intCategoryId',
                         store: '{posCategory}'
                     }
                 }
@@ -454,6 +456,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colCustomerXrefLocation: {
                     dataIndex: 'strLocationName',
                     editor: {
+                        origValueField: 'intItemLocationId',
+                        origUpdateField: 'intItemLocationId',
                         store: '{custXrefLocation}',
                         defaultFilters: [{
                             column: 'intItemId',
@@ -464,6 +468,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colCustomerXrefCustomer: {
                     dataIndex: 'strCustomerNumber',
                     editor: {
+                        origValueField: 'intEntityCustomerId',
+                        origUpdateField: 'intCustomerId',
                         store: '{custXrefCustomer}'
                     }
                 },
@@ -476,6 +482,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colVendorXrefLocation: {
                     dataIndex: 'strLocationName',
                     editor: {
+                        origValueField: 'intItemLocationId',
+                        origUpdateField: 'intItemLocationId',
                         store: '{vendorXrefLocation}',
                         defaultFilters: [{
                             column: 'intItemId',
@@ -486,6 +494,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colVendorXrefVendor: {
                     dataIndex: 'strVendorId',
                     editor: {
+                        origValueField: 'intEntityVendorId',
+                        origUpdateField: 'intVendorId',
                         store: '{vendorXrefVendor}'
                     }
                 },
@@ -495,6 +505,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colVendorXrefUnitMeasure: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
+                        origValueField: 'intItemUOMId',
+                        origUpdateField: 'intItemUnitMeasureId',
                         store: '{vendorXrefUom}'
                     }
                 }
@@ -545,6 +557,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colContractLocation: {
                     dataIndex: 'strLocationName',
                     editor: {
+                        origValueField: 'intItemLocationId',
+                        origUpdateField: 'intItemLocationId',
                         store: '{contractLocation}',
                         defaultFilters: [{
                             column: 'intItemId',
@@ -556,6 +570,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colContractOrigin: {
                     dataIndex: 'strCountry',
                     editor: {
+                        origValueField: 'intCountryID',
+                        origUpdateField: 'intCountryId',
                         store: '{origin}'
                     }
                 },
@@ -571,6 +587,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colDocument:  {
                     dataIndex: 'strDocumentName',
                     editor: {
+                        origValueField: 'intDocumentId',
+                        origUpdateField: 'intDocumentId',
                         store: '{document}'
                     }
                 }
@@ -580,6 +598,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 colCertification:  {
                     dataIndex: 'strCertificationName',
                     editor: {
+                        origValueField: 'intCertificationId',
+                        origUpdateField: 'intCertificationId',
                         store: '{certification}'
                     }
                 }
@@ -2038,110 +2058,6 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // </editor-fold>
 
-    // <editor-fold desc="Point Of Sale Tab Methods and Event Handlers">
-
-    onPOSCategorySelect: function(combo, records, eOpts) {
-    if (records.length <= 0)
-        return;
-
-    var grid = combo.up('grid');
-    var plugin = grid.getPlugin('cepPOSCategory');
-    var current = plugin.getActiveRecord();
-
-    if (combo.column.itemId === 'colPOSCategoryName')
-    {
-        current.set('intCategoryId', records[0].get('intCategoryId'));
-    }
-},
-
-    // </editor-fold>
-
-    // <editor-fold desc="Cross Reference Tab Methods and Event Handlers">
-
-    onCustomerXrefSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepCustomerXref');
-        var current = plugin.getActiveRecord();
-
-        if (combo.column.itemId === 'colCustomerXrefLocation')
-        {
-            current.set('intItemLocationId', records[0].get('intItemLocationId'));
-        }
-        else if (combo.column.itemId === 'colCustomerXrefCustomer') {
-            current.set('intCustomerId', records[0].get('intCustomerId'));
-        }
-    },
-
-    onVendorXrefSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepVendorXref');
-        var current = plugin.getActiveRecord();
-
-        if (combo.column.itemId === 'colVendorXrefLocation'){
-            current.set('intItemLocationId', records[0].get('intItemLocationId'));
-        }
-        else if (combo.column.itemId === 'colVendorXrefVendor') {
-            current.set('intVendorId', records[0].get('intVendorId'));
-        }
-        else if (combo.column.itemId === 'colVendorXrefUnitMeasure') {
-            current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
-        }
-    },
-
-    // </editor-fold>
-
-    // <editor-fold desc="Contract Item Tab Methods and Event Handlers">
-
-    onContractItemSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepContractItem');
-        var current = plugin.getActiveRecord();
-
-        if (combo.column.itemId === 'colContractLocation'){
-            current.set('intItemLocationId', records[0].get('intItemLocationId'));
-        }
-        else if (combo.column.itemId === 'colContractOrigin') {
-            current.set('intCountryId', records[0].get('intCountryID'));
-        }
-    },
-
-    onDocumentSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepDocument');
-        var current = plugin.getActiveRecord();
-
-        if (combo.column.itemId === 'colDocument'){
-            current.set('intDocumentId', records[0].get('intDocumentId'));
-        }
-    },
-
-    onCertificationSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepCertification');
-        var current = plugin.getActiveRecord();
-
-        if (combo.column.itemId === 'colCertification'){
-            current.set('intCertificationId', records[0].get('intCertificationId'));
-        }
-    },
-
-    // </editor-fold>
-
     // <editor-fold desc="Pricing Tab Methods and Event Handlers">
 
     onPricingLocationSelect: function(combo, records, eOpts) {
@@ -2744,36 +2660,6 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboCopyLocation": {
                 select: this.onCopyLocationSelect
-            },
-            "#cboPOSCategoryId": {
-                select: this.onPOSCategorySelect
-            },
-            "#cboCustXrefLocation": {
-                select: this.onCustomerXrefSelect
-            },
-            "#cboCustXrefCustomer": {
-                select: this.onCustomerXrefSelect
-            },
-            "#cboVendorXrefLocation": {
-                select: this.onVendorXrefSelect
-            },
-            "#cboVendorXrefVendor": {
-                select: this.onVendorXrefSelect
-            },
-            "#cboVendorXrefUOM": {
-                select: this.onVendorXrefSelect
-            },
-            "#cboContractLocation": {
-                select: this.onContractItemSelect
-            },
-            "#cboContractOrigin": {
-                select: this.onContractItemSelect
-            },
-            "#cboDocumentId": {
-                select: this.onDocumentSelect
-            },
-            "#cboCertificationId": {
-                select: this.onCertificationSelect
             },
             "#cboPricingLocation": {
                 select: this.onPricingLocationSelect
