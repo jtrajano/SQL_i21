@@ -13,7 +13,7 @@ AS
  isnull(convert(int,CD.dblNoOfLots),0) intNoOfLots,
  IsNull((SELECT SUM(AD.intHedgedLots) FROM tblRKAssignFuturesToContractSummary AD Group By AD.intContractDetailId 
 		Having CD.intContractDetailId = AD.intContractDetailId), 0) as intHedgedLots,
-  IsNull((SELECT SUM(AD.intAssignedLots) FROM tblRKAssignFuturesToContractSummary AD Group By AD.intContractDetailId 
+  IsNull((SELECT SUM(AD.dblAssignedLots) FROM tblRKAssignFuturesToContractSummary AD Group By AD.intContractDetailId 
 		Having CD.intContractDetailId = AD.intContractDetailId), 0) as intAssignedLots,
  CH.strCommodityCode,
  CL.strLocationName,mo.ysnExpired,

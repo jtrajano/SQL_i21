@@ -73,7 +73,7 @@ SELECT @intAssignFuturesToContractHeaderId = SCOPE_IDENTITY();
 	intContractDetailId,
 	dtmMatchDate,
 	intFutOptTransactionId,
-	intAssignedLots,
+	dblAssignedLots,
 	intHedgedLots,
 	ysnIsHedged  
   )      
@@ -85,7 +85,7 @@ SELECT @intAssignFuturesToContractHeaderId = SCOPE_IDENTITY();
 	intContractDetailId,
 	dtmMatchDate,
 	intFutOptTransactionId,
-	intAssignedLots,
+	dblAssignedLots,
 	intHedgedLots,
 	ysnIsHedged  
        
@@ -96,7 +96,7 @@ SELECT @intAssignFuturesToContractHeaderId = SCOPE_IDENTITY();
 	intContractDetailId int,
 	dtmMatchDate datetime,
 	intFutOptTransactionId int,
-	intAssignedLots int,
+	dblAssignedLots int,
 	intHedgedLots int,
 	ysnIsHedged bit 
  )          

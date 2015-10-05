@@ -9,7 +9,7 @@ SELECT
 		,ot.dtmFilledDate as dtmFilledDate
 		,strBuySell as strBuySell      
 		,ot.intNoOfContract as intLots
-		,IsNull((SELECT SUM(AD.intAssignedLots)+SUM(AD.intHedgedLots) FROM tblRKAssignFuturesToContractSummary AD Group By AD.intFutOptTransactionId 
+		,IsNull((SELECT SUM(AD.dblAssignedLots)+SUM(convert(decimal,AD.intHedgedLots)) FROM tblRKAssignFuturesToContractSummary AD Group By AD.intFutOptTransactionId 
 		Having ot.intFutOptTransactionId = AD.intFutOptTransactionId), 0)  As intBalanceLots1
 		,fm.strFutMarketName
 		,fmh.strFutureMonth

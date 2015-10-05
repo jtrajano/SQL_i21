@@ -12,7 +12,7 @@ SELECT
 		b.strBook CTBook,
 		sb.strSubBook CTSubBook,
 		cs.dtmMatchDate,
-		cs.intAssignedLots,
+		cs.dblAssignedLots,
 		cs.intHedgedLots,
 		fot.strBuySell,
 		fot.strInternalTradeNo,

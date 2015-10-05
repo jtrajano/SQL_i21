@@ -44,7 +44,7 @@ INSERT INTO tblRKAssignFuturesToContractSummary
 	intContractDetailId,
 	dtmMatchDate,
 	intFutOptTransactionId,
-	intAssignedLots,
+	dblAssignedLots,
 	intHedgedLots,
 	ysnIsHedged,  
 	intFutOptAssignedId
