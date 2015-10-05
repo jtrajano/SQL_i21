@@ -1,7 +1,7 @@
 ﻿CREATE VIEW vyuRKGetAssignFutureTransaction
 
 AS
-SELECT * FROM(SELECT *,isnull(intLots,0)-intBalanceLots1 as intBalanceLots FROM(
+SELECT * FROM(SELECT *,intLots-(dblAssignedLots1+intHedgedLots1) as dblBalanceLots FROM(
 SELECT 
 		ot.intFutOptTransactionId,
 		ot.strInternalTradeNo AS strInternalTradeNo,
@@ -9,8 +9,10 @@ SELECT
 		,ot.dtmFilledDate as dtmFilledDate
 		,strBuySell as strBuySell      
 		,ot.intNoOfContract as intLots
-		,IsNull((SELECT SUM(AD.dblAssignedLots)+SUM(convert(decimal,AD.intHedgedLots)) FROM tblRKAssignFuturesToContractSummary AD Group By AD.intFutOptTransactionId 
-		Having ot.intFutOptTransactionId = AD.intFutOptTransactionId), 0)  As intBalanceLots1
+		,IsNull((SELECT SUM(AD.dblAssignedLots)	FROM tblRKAssignFuturesToContractSummary AD 
+				 WHERE  ot.intFutOptTransactionId = AD.intFutOptTransactionId), 0)  As dblAssignedLots1
+		 ,IsNull((SELECT SUM(AD.intHedgedLots)	FROM tblRKAssignFuturesToContractSummary AD 
+		 WHERE  ot.intFutOptTransactionId = AD.intFutOptTransactionId), 0)  As intHedgedLots1
 		,fm.strFutMarketName
 		,fmh.strFutureMonth
 		,ba.strAccountNumber
@@ -28,4 +30,4 @@ JOIN tblEntity e on ot.intEntityId=e.intEntityId
 JOIN tblICCommodity c on ot.intCommodityId=c.intCommodityId
 JOIN tblSMCompanyLocation scl on scl.intCompanyLocationId=ot.intLocationId
 LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId
-LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId) t) t1 where intBalanceLots >0
+LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId) t) t1 where dblBalanceLots >0
