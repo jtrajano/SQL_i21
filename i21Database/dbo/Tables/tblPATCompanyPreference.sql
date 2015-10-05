@@ -26,5 +26,10 @@
 	[intDividendsGLAccount] [int] NULL,
 	[intTreasuryGLAccount] [int] NULL,
 	[intConcurrencyId] [int] NULL, 
-    CONSTRAINT [PK_tblPATCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId])
+    CONSTRAINT [PK_tblPATCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]),
+	CONSTRAINT [FK_tblPATCompanyPreference_GrainDisc] FOREIGN KEY ([intGrainDiscountId]) REFERENCES [tblPATPatronageCategory]([intPatronageCategoryId]),
+	CONSTRAINT [FK_tblPATCompanyPreference_GrainStorage] FOREIGN KEY ([intGrainStorageId]) REFERENCES [tblPATPatronageCategory]([intPatronageCategoryId]),
+	CONSTRAINT [FK_tblPATCompanyPreference_ServiceCharge] FOREIGN KEY ([intServiceChargeId]) REFERENCES [tblPATPatronageCategory]([intPatronageCategoryId]),
+	CONSTRAINT [FK_tblPATCompanyPreference_DebitMemo] FOREIGN KEY ([intDebitMemoId]) REFERENCES [tblPATPatronageCategory]([intPatronageCategoryId]),
+	CONSTRAINT [FK_tblPATCompanyPreference_DiscGiven] FOREIGN KEY ([intDiscountGivenId]) REFERENCES [tblPATPatronageCategory]([intPatronageCategoryId])
 	)
