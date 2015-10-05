@@ -8,9 +8,9 @@
     "userConfig": {
         "collapsible": true,
         "defaultFocus": null,
-        "designer|userAlias": "inventorycountname",
-        "designer|userClassName": "InventoryCountName",
-        "height": 384,
+        "designer|userAlias": "inventorycountgroup",
+        "designer|userClassName": "InventoryCountGroup",
+        "height": 422,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
@@ -21,7 +21,7 @@
         "minWidth": null,
         "minimizable": null,
         "reference": null,
-        "title": "Inventory Count Name",
+        "title": "Inventory Count Group",
         "width": 456
     },
     "name": "ContractDocument1",
@@ -45,7 +45,7 @@
                 "frame": null,
                 "header": false,
                 "height": null,
-                "itemId": "frmInventoryCountName",
+                "itemId": "frmInventoryCountGroup",
                 "layout": "vbox",
                 "margin": -1,
                 "title": null,
@@ -237,7 +237,7 @@
                     "codeClass": null,
                     "userConfig": {
                         "activeTab": 0,
-                        "itemId": "tabInventoryCountName",
+                        "itemId": "tabInventoryCountGroup",
                         "layout|flex": 1,
                         "plain": true
                     },
@@ -301,8 +301,8 @@
                                                 "designer|displayName": null,
                                                 "enforceMaxLength": null,
                                                 "fieldCls": null,
-                                                "fieldLabel": "Count Name",
-                                                "itemId": "txtCountName",
+                                                "fieldLabel": "Count Group",
+                                                "itemId": "txtCountGroup",
                                                 "labelPad": null,
                                                 "labelSeparator": null,
                                                 "labelWidth": 125,
@@ -326,6 +326,8 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "allowDecimals": false,
+                                                "designer|createAlias": "numericfield",
                                                 "designer|displayName": null,
                                                 "enforceMaxLength": null,
                                                 "fieldLabel": "Counts Per Year",
@@ -369,10 +371,24 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "columns": null,
-                                                "designer|createAlias": null,
+                                                "columns": [
+                                                    "[",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'intInventoryType',",
+                                                    "\t\tdataType: 'numeric',",
+                                                    "\t\thidden: true",
+                                                    "\t},",
+                                                    "\t{",
+                                                    "\t\tdataIndex: 'strInventoryType',",
+                                                    "\t\tdataType: 'string',",
+                                                    "\t\ttext: 'Inventory Type',",
+                                                    "\t\tflex: 1",
+                                                    "\t}",
+                                                    "]"
+                                                ],
+                                                "designer|createAlias": "gridcombobox",
                                                 "designer|displayName": null,
-                                                "displayField": null,
+                                                "displayField": "strInventoryType",
                                                 "enforceMaxLength": null,
                                                 "fieldLabel": "Inventory Type",
                                                 "itemId": "cboInventoryType",
@@ -384,7 +400,7 @@
                                                 "maxLength": null,
                                                 "name": null,
                                                 "tabIndex": null,
-                                                "valueField": null,
+                                                "valueField": "intInventoryType",
                                                 "width": null
                                             },
                                             "name": "MyComboBox66",
@@ -392,45 +408,6 @@
                                                 "columns": "array"
                                             },
                                             "designerId": "f15ca56f-943c-457d-9bf0-d21f76b34d32",
-                                            "customConfigs": [
-                                                {
-                                                    "group": "(Custom Properties)",
-                                                    "name": "columns",
-                                                    "type": "string"
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "type": "Ext.form.field.ComboBox",
-                                            "reference": {
-                                                "name": "items",
-                                                "type": "array"
-                                            },
-                                            "codeClass": null,
-                                            "userConfig": {
-                                                "columns": null,
-                                                "designer|createAlias": null,
-                                                "designer|displayName": null,
-                                                "displayField": null,
-                                                "enforceMaxLength": null,
-                                                "fieldLabel": "Count Card",
-                                                "itemId": "cboCountCard",
-                                                "labelPad": null,
-                                                "labelSeparator": null,
-                                                "labelWidth": 125,
-                                                "layout|flex": null,
-                                                "margin": null,
-                                                "maxLength": null,
-                                                "name": null,
-                                                "tabIndex": null,
-                                                "valueField": null,
-                                                "width": null
-                                            },
-                                            "name": "MyComboBox8",
-                                            "configAlternates": {
-                                                "columns": "array"
-                                            },
-                                            "designerId": "c7778337-ecc9-4405-b415-85385a4354bc",
                                             "customConfigs": [
                                                 {
                                                     "group": "(Custom Properties)",
@@ -449,7 +426,7 @@
                                             "userConfig": {
                                                 "boxLabel": null,
                                                 "fieldLabel": "Scanned Count Entry",
-                                                "itemId": "txtScannedCountEntry",
+                                                "itemId": "chkScannedCountEntry",
                                                 "labelWidth": 125,
                                                 "layout|flex": null
                                             },
@@ -466,12 +443,29 @@
                                             "userConfig": {
                                                 "boxLabel": null,
                                                 "fieldLabel": "Count by Lots",
-                                                "itemId": "txtCountByLots",
+                                                "itemId": "chkCountByLots",
                                                 "labelWidth": 125,
                                                 "layout|flex": null
                                             },
                                             "name": "MyCheckbox5",
                                             "designerId": "9885f42c-5da3-4b37-9f62-107ef9305db2"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.Checkbox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "boxLabel": null,
+                                                "fieldLabel": "Count by Pallets",
+                                                "itemId": "chkCountByPallets",
+                                                "labelWidth": 125,
+                                                "layout|flex": null
+                                            },
+                                            "name": "MyCheckbox41",
+                                            "designerId": "5260eca4-246c-4853-ba2d-6e9ff81134d8"
                                         },
                                         {
                                             "type": "Ext.form.field.Checkbox",
@@ -489,6 +483,23 @@
                                             },
                                             "name": "MyCheckbox6",
                                             "designerId": "888ac402-caea-4a78-816a-c18c03e3b079"
+                                        },
+                                        {
+                                            "type": "Ext.form.field.Checkbox",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "boxLabel": null,
+                                                "fieldLabel": "External",
+                                                "itemId": "chkExternal",
+                                                "labelWidth": 125,
+                                                "layout|flex": null
+                                            },
+                                            "name": "MyCheckbox42",
+                                            "designerId": "5e5feca7-e439-44f8-aec8-e75f875bceb2"
                                         }
                                     ]
                                 }
@@ -512,7 +523,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging112",
+                    "name": "statusbarpaging13",
                     "designerId": "5f645857-eb50-4702-8a6e-970a15d31272",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

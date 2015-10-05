@@ -6,12 +6,7 @@
     },
     "codeClass": null,
     "userConfig": {
-        "name": "Inventory",
-        "views": [
-            "CardCount",
-            "InventoryCountName",
-            "StorageMeasurementReading"
-        ]
+        "name": "Inventory"
     },
     "name": "Application",
     "designerId": "application"

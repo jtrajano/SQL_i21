@@ -13,7 +13,15 @@ namespace iRely.Inventory.Model
     {
         public int intCountGroupId { get; set; }
         public string strCountGroup { get; set; }
-        public int intSort { get; set; }
+        public int? intCountsPerYear { get; set; }
+        public bool? ysnIncludeOnHand { get; set; }
+        public int? intInventoryType { get; set; }
+        public bool? ysnScannedCountEntry { get; set; }
+        public bool? ysnCountByLots { get; set; }
+        public bool? ysnCountByPallets { get; set; }
+        public bool? ysnRecountMismatch { get; set; }
+        public bool? ysnExternal { get; set; }
+        public int? intSort { get; set; }
 
         public ICollection<tblICItemLocation> tblICItemLocations { get; set; }
     }

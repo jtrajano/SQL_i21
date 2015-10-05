@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets993fdb6168de52a934092632c997951767b4075eb91d098524bbc4ec6f163915))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets6b408b6123a238d9fd561e7fd22b7b0dce7d913037b0eb329d0d806bb177f5cd))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets993fdb6168de52a934092632c997951767b4075eb91d098524bbc4ec6f163915 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets6b408b6123a238d9fd561e7fd22b7b0dce7d913037b0eb329d0d806bb177f5cd : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "993fdb6168de52a934092632c997951767b4075eb91d098524bbc4ec6f163915"; }
+            get { return "6b408b6123a238d9fd561e7fd22b7b0dce7d913037b0eb329d0d806bb177f5cd"; }
         }
 
         /// <summary>
@@ -3595,11 +3595,19 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCountGroup
-        [CodeFirstDatabaseSchema.tblICCountGroup](T1.tblICCountGroup_intCountGroupId, T1.tblICCountGroup_strCountGroup, T1.tblICCountGroup_intSort, T1.tblICCountGroup_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICCountGroup](T1.tblICCountGroup_intCountGroupId, T1.tblICCountGroup_strCountGroup, T1.tblICCountGroup_intCountsPerYear, T1.tblICCountGroup_ysnIncludeOnHand, T1.tblICCountGroup_intInventoryType, T1.tblICCountGroup_ysnScannedCountEntry, T1.tblICCountGroup_ysnCountByLots, T1.tblICCountGroup_ysnCountByPallets, T1.tblICCountGroup_ysnRecountMismatch, T1.tblICCountGroup_ysnExternal, T1.tblICCountGroup_intSort, T1.tblICCountGroup_intConcurrencyId)
     FROM (
         SELECT 
             T.intCountGroupId AS tblICCountGroup_intCountGroupId, 
             T.strCountGroup AS tblICCountGroup_strCountGroup, 
+            T.intCountsPerYear AS tblICCountGroup_intCountsPerYear, 
+            T.ysnIncludeOnHand AS tblICCountGroup_ysnIncludeOnHand, 
+            T.intInventoryType AS tblICCountGroup_intInventoryType, 
+            T.ysnScannedCountEntry AS tblICCountGroup_ysnScannedCountEntry, 
+            T.ysnCountByLots AS tblICCountGroup_ysnCountByLots, 
+            T.ysnCountByPallets AS tblICCountGroup_ysnCountByPallets, 
+            T.ysnRecountMismatch AS tblICCountGroup_ysnRecountMismatch, 
+            T.ysnExternal AS tblICCountGroup_ysnExternal, 
             T.intSort AS tblICCountGroup_intSort, 
             T.intConcurrencyId AS tblICCountGroup_intConcurrencyId, 
             True AS _from0
@@ -6768,11 +6776,19 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICCountGroups
-        [iRely.Inventory.Model.tblICCountGroup](T1.tblICCountGroup_intCountGroupId, T1.tblICCountGroup_strCountGroup, T1.tblICCountGroup_intSort, T1.tblICCountGroup_intConcurrencyId)
+        [iRely.Inventory.Model.tblICCountGroup](T1.tblICCountGroup_intCountGroupId, T1.tblICCountGroup_strCountGroup, T1.tblICCountGroup_intCountsPerYear, T1.tblICCountGroup_ysnIncludeOnHand, T1.tblICCountGroup_intInventoryType, T1.tblICCountGroup_ysnScannedCountEntry, T1.tblICCountGroup_ysnCountByLots, T1.tblICCountGroup_ysnCountByPallets, T1.tblICCountGroup_ysnRecountMismatch, T1.tblICCountGroup_ysnExternal, T1.tblICCountGroup_intSort, T1.tblICCountGroup_intConcurrencyId)
     FROM (
         SELECT 
             T.intCountGroupId AS tblICCountGroup_intCountGroupId, 
             T.strCountGroup AS tblICCountGroup_strCountGroup, 
+            T.intCountsPerYear AS tblICCountGroup_intCountsPerYear, 
+            T.ysnIncludeOnHand AS tblICCountGroup_ysnIncludeOnHand, 
+            T.intInventoryType AS tblICCountGroup_intInventoryType, 
+            T.ysnScannedCountEntry AS tblICCountGroup_ysnScannedCountEntry, 
+            T.ysnCountByLots AS tblICCountGroup_ysnCountByLots, 
+            T.ysnCountByPallets AS tblICCountGroup_ysnCountByPallets, 
+            T.ysnRecountMismatch AS tblICCountGroup_ysnRecountMismatch, 
+            T.ysnExternal AS tblICCountGroup_ysnExternal, 
             T.intSort AS tblICCountGroup_intSort, 
             T.intConcurrencyId AS tblICCountGroup_intConcurrencyId, 
             True AS _from0

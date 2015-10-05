@@ -20,11 +20,6 @@ Ext.Loader.setConfig({
 
 
 Ext.application({
-    views: [
-        'CardCount',
-        'InventoryCountName',
-        'StorageMeasurementReading'
-    ],
     name: 'Inventory',
 
     launch: function() {

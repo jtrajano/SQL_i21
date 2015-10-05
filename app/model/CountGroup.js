@@ -11,9 +11,17 @@ Ext.define('Inventory.model.CountGroup', {
     idProperty: 'intCountGroupId',
 
     fields: [
-        { name: 'intCountGroupId', type: 'int'},
-        { name: 'strCountGroup', type: 'string'},
-        { name: 'intSort', type: 'int'}
+        { name: 'intCountGroupId', type: 'int' },
+        { name: 'strCountGroup', type: 'string' },
+        { name: 'intCountsPerYear', type: 'int', allowNull: true },
+        { name: 'ysnIncludeOnHand', type: 'boolean' },
+        { name: 'intInventoryType', type: 'int', allowNull: true },
+        { name: 'ysnScannedCountEntry', type: 'boolean' },
+        { name: 'ysnCountByLots', type: 'boolean' },
+        { name: 'ysnCountByPallets', type: 'boolean' },
+        { name: 'ysnRecountMismatch', type: 'boolean' },
+        { name: 'ysnExternal', type: 'boolean' },
+        { name: 'intSort', type: 'int', allowNull: true }
     ],
 
     validators: [
