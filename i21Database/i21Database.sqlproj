@@ -2530,6 +2530,7 @@
     <Build Include="dbo\Views\vyuICGetItemMotorFuelTax.sql" />
     <Build Include="dbo\Views\vyuSMUserRoleMenuLocation.sql" />
     <Build Include="dbo\Views\vyuSMUserSecurityMenuFavorite.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetScheduleGroupDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
