@@ -289,5 +289,6 @@
     <Build Include="dbo\Functions\fnValidateBillsImport.sql" />
     <Build Include="dbo\Tables\tblAPImportBillError.sql" />
     <None Include="dbo\Stored Procedures\uspAPImportBillsFromAPTRXMST.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql" />
   </ItemGroup>
 </Project>

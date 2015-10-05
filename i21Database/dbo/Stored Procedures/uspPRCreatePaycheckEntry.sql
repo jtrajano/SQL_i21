@@ -4,7 +4,7 @@
 	,@dtmEndDate			DATETIME
 	,@dtmPayDate			DATETIME
 	,@intPayGroupId			INT = NULL
-	,@intDepartmentId		INT = NULL
+	,@strDepartmentIds		NVARCHAR(MAX) = ''
 	,@ysnUseStandardHours	BIT = 1
 	,@intPaycheckId			INT = NULL OUTPUT
 AS
@@ -17,6 +17,7 @@ DECLARE @intEmployee INT
 	   ,@dtmPay DATETIME
 	   ,@intPayGroup INT
 	   ,@ysnUseStandard BIT
+	   ,@xmlDepartments XML
 
 /* Localize Parameters for Optimal Performance */
 SELECT @intEmployee		= @intEmployeeId
@@ -25,6 +26,13 @@ SELECT @intEmployee		= @intEmployeeId
 	  ,@dtmPay			= @dtmPayDate
 	  ,@intPayGroup		= @intPayGroupId
 	  ,@ysnUseStandard	= @ysnUseStandardHours
+	  ,@xmlDepartments  = CAST('<A>'+ REPLACE(@strDepartmentIds, ',', '</A><A>')+ '</A>' AS XML) 
+
+--Parse the Departments Parameter to Temporary Table
+SELECT RTRIM(LTRIM(T.value('.', 'INT'))) AS intDepartmentId
+INTO #tmpDepartments
+FROM @xmlDepartments.nodes('/A') AS X(T) 
+WHERE RTRIM(LTRIM(T.value('.', 'INT'))) > 0
 
 /* Get Paycheck Starting Number */
 DECLARE @strPaycheckId NVARCHAR(50)
@@ -141,31 +149,42 @@ WHERE [intEmployeeId] = @intEmployee
 /* Create Paycheck Earnings and Taxes*/
 DECLARE @intPaycheckEarningId INT
 DECLARE @intEmployeeEarningId INT
+DECLARE @intEmployeeDepartmentId INT
 DECLARE @dblEarningAmount NUMERIC(18,6)
 
-/* Insert Earnings to Temp Table for iteration */
-SELECT 
-tblPREmployeeEarning.intEmployeeEarningId,
-dblAmount = CASE WHEN ([strCalculationType] IN ('Rate Factor', 'Overtime')) /* Get Earning Link if exists in Employee Earnings, if not, get from Type Earnings */
+/* Insert Earnings and Department to Temp Table for iteration */
+SELECT DISTINCT
+E.intEmployeeEarningId
+,dblAmount = CASE WHEN ([strCalculationType] IN ('Rate Factor', 'Overtime')) /* Get Earning Link if exists in Employee Earnings, if not, get from Type Earnings */
 				THEN [dblAmount] * ISNULL((SELECT TOP 1 B.dblAmount FROM tblPREmployeeEarning B 
-											WHERE B.intTypeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId AND intEmployeeId = @intEmployeeId),
+											WHERE B.intTypeEarningId = E.intEmployeeEarningLinkId AND E.intEmployeeId = @intEmployeeId),
 										ISNULL((SELECT TOP 1 C.dblAmount FROM tblPRTypeEarning C 
-												WHERE C.intTypeEarningId = tblPREmployeeEarning.intEmployeeEarningLinkId AND intEmployeeId = @intEmployeeId), 0))
-			ELSE
-				[dblAmount]
-			END
-INTO #tmpEarnings FROM tblPREmployeeEarning 
-WHERE intEmployeeId = @intEmployee
-  AND ysnDefault = 1
-  AND ISNULL(intPayGroupId, 0) = CASE WHEN @intPayGroup IS NULL THEN ISNULL(intPayGroupId, 0) ELSE @intPayGroup END
-
+												WHERE C.intTypeEarningId = E.intEmployeeEarningLinkId AND E.intEmployeeId = @intEmployeeId), 0))
+				ELSE
+					[dblAmount]
+				END
+,intEmployeeDepartmentId = ISNULL(T.intEmployeeDepartmentId, 0)
+INTO #tmpEarnings
+FROM tblPREmployeeEarning E
+LEFT JOIN 
+(SELECT intEmployeeEarningId, intEmployeeDepartmentId 
+ FROM tblPRTimecard
+ WHERE ysnApproved = 1 AND intPaycheckId IS NULL
+	AND intEmployeeDepartmentId IN (SELECT intDepartmentId FROM #tmpDepartments)
+	AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
+	AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
+) T ON E.intEmployeeEarningId = T.intEmployeeEarningId
+WHERE E.intEmployeeId = @intEmployee
+	AND E.ysnDefault = 1
+	AND ISNULL(intPayGroupId, 0) = CASE WHEN @intPayGroup IS NULL THEN ISNULL(intPayGroupId, 0) ELSE @intPayGroup END
+	
 /* Add Each Earning to Paycheck */
 WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 	BEGIN
 
 		/* Select Employee Earning to Add */
-		SELECT TOP 1 @intEmployeeEarningId = intEmployeeEarningId, @dblEarningAmount = dblAmount FROM #tmpEarnings
-	
+		SELECT TOP 1 @intEmployeeEarningId = intEmployeeEarningId, @intEmployeeDepartmentId = intEmployeeDepartmentId, @dblEarningAmount = dblAmount FROM #tmpEarnings
+
 		/* Insert Paycheck Earning */
 		INSERT INTO tblPRPaycheckEarning
 			([intPaycheckId]
@@ -203,7 +222,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 						FROM tblPRTimecard 
 						WHERE intEmployeeEarningId = (CASE WHEN [strCalculationType] IN ('Overtime') THEN intEmployeeEarningId ELSE @intEmployeeEarningId END)
 						AND ysnApproved = 1 AND intPaycheckId IS NULL
-						AND intEmployeeId = @intEmployee AND intEmployeeDepartmentId = ISNULL(@intDepartmentId, intEmployeeDepartmentId)
+						AND intEmployeeId = @intEmployee AND intEmployeeDepartmentId = @intEmployeeDepartmentId
 						AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
 						AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
 					), 0)
@@ -228,7 +247,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 							FROM tblPRTimecard 
 							WHERE intEmployeeEarningId = (CASE WHEN [strCalculationType] IN ('Overtime') THEN intEmployeeEarningId ELSE @intEmployeeEarningId END)
 							AND ysnApproved = 1 AND intPaycheckId IS NULL
-							AND intEmployeeId = @intEmployee AND intEmployeeDepartmentId = ISNULL(@intDepartmentId, intEmployeeDepartmentId)
+							AND intEmployeeId = @intEmployee AND intEmployeeDepartmentId = @intEmployeeDepartmentId
 							AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
 							AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
 						), 0)
@@ -239,7 +258,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 				 @dblEarningAmount
 			 END
 			,[strW2Code]
-			,@intDepartmentId
+			,CASE WHEN (@intEmployeeDepartmentId = 0) THEN NULL ELSE @intEmployeeDepartmentId END
 			,[intEmployeeTimeOffId]
 			,[intEmployeeEarningLinkId]
 			,[intAccountId]
@@ -269,7 +288,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 				WHERE intEmployeeEarningId = @intEmployeeEarningId
 			END
 
-		DELETE FROM #tmpEarnings WHERE intEmployeeEarningId = @intEmployeeEarningId
+		DELETE FROM #tmpEarnings WHERE intEmployeeEarningId = @intEmployeeEarningId AND intEmployeeDepartmentId = @intEmployeeDepartmentId
 	END
 
 /* Create Paycheck Deductions and Taxes*/
@@ -354,7 +373,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 		UPDATE tblPRTimecard 
 		SET intPaycheckId = @intPaycheckId
 		WHERE ysnApproved = 1 AND intPaycheckId IS NULL
-		AND intEmployeeId = @intEmployee AND intEmployeeDepartmentId = ISNULL(@intDepartmentId, intEmployeeDepartmentId)
+		AND intEmployeeId = @intEmployee AND intEmployeeDepartmentId IN (SELECT intDepartmentId FROM #tmpDepartments)
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
 

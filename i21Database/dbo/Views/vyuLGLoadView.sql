@@ -77,6 +77,8 @@ SELECT Load.intLoadId
 		,intCounterPartyItemId = (SELECT L.intItemId FROM tblLGLoad L WHERE L.intLoadNumber = Load.intLoadNumber and L.intPurchaseSale <> Load.intPurchaseSale)
 		,intCounterPartyLoadId = (SELECT L.intLoadId FROM tblLGLoad L WHERE L.intLoadNumber = Load.intLoadNumber and L.intPurchaseSale <> Load.intPurchaseSale)
 		,intCounterPartyCompanyLocationId = (SELECT L.intCompanyLocationId FROM tblLGLoad L WHERE L.intLoadNumber = Load.intLoadNumber and L.intPurchaseSale <> Load.intPurchaseSale)
+        ,strCounterPartyDriver = (SELECT Entity1.strName From tblLGLoad L LEFT JOIN tblEntity Entity1 ON Entity1.intEntityId = L.intDriverEntityId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
+        ,intCounterPartyDriverId = (SELECT Entity1.intEntityId From tblLGLoad L LEFT JOIN tblEntity Entity1 ON Entity1.intEntityId = L.intDriverEntityId WHERE L.intLoadNumber = Load.intLoadNumber AND L.intPurchaseSale <> Load.intPurchaseSale)
 
 FROM tblLGLoad Load
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = Load.intGenerateLoadId

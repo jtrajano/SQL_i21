@@ -106,6 +106,9 @@ print 'BEGIN POST DEPLOYMENT'
 :r "..\..\..\Integration\dbo\Functions\fnTMGetContractForCustomer.sql"
 --:r "..\..\..\Integration\dbo\Views\vyuTMLeaseCode.sql"
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMAlterCobolWrite.sql"
+:r "..\..\..\Integration\dbo\Functions\fnTMGetSpecialPricing.sql"
+:r "..\..\..\Integration\dbo\Functions\fnTMGetSpecialPricingPrice.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql"
 
 
 

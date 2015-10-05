@@ -30,8 +30,9 @@ BEGIN
 			A.strBillId,
 			A.intBillId
 		FROM tblAPBill A 
-		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) AND 
-		ISNULL(A.strVendorOrderNumber,'') = ''
+		WHERE  A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills)
+		AND A.intTransactionType = 1
+		AND ISNULL(A.strVendorOrderNumber,'') = ''
 
 		--Fiscal Year
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
