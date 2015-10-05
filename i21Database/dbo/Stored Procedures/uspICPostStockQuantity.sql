@@ -100,12 +100,14 @@ BEGIN
 	WITH	(HOLDLOCK) 
 	AS		ItemStockUOM	
 	USING (
+			-- Item is not a lot. 
 			SELECT	intItemId = @intItemId
 					,intItemLocationId = @intItemLocationId
 					,intItemUOMId = @intItemUOMId
 					,intSubLocationId = @intSubLocationId 
 					,intStorageLocationId = @intStorageLocationId
-					,Qty = ISNULL(@dblQty, 0)  
+					,Qty = ISNULL(@dblQty, 0) 
+			WHERE	@intLotId IS NULL 
 
 			-- If item is not a Lot, convert the Qty back to stock Unit. 
 			UNION ALL 

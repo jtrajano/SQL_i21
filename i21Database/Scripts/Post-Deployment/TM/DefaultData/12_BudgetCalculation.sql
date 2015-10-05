@@ -1,0 +1,20 @@
+﻿GO
+	PRINT N'BEGIN INSERT DEFAULT TM BUDGET CALCULATION'
+GO
+
+
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblTMBudgetCalculation]') AND type in (N'U')) 
+BEGIN
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM [dbo].[tblTMBudgetCalculation])
+	BEGIN
+		INSERT INTO tblTMBudgetCalculation(intConcurrencyId)VALUES(1)
+	END
+
+END
+
+
+
+GO
+	PRINT N'END INSERT DEFAULT TM BUDGET CALCULATION'
+GO

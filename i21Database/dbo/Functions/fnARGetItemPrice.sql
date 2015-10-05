@@ -38,6 +38,7 @@ BEGIN
 			,@ContractNumber
 			,@ContractSeq
 			,NULL
+			,NULL
 			,@OriginalQuantity
 			,@CustomerPricingOnly
 			,@VendorId

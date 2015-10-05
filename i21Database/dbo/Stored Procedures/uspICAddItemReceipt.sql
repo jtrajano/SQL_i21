@@ -185,7 +185,6 @@ BEGIN
 				,intCurrencyId			= IntegrationData.intCurrencyId
 				,strVessel				= NULL
 				,intFreightTermId		= NULL
-				,strAllocateFreight		= 'No' -- Default is No
 				,intShiftNumber			= NULL 
 				,dblInvoiceAmount		= 0
 				,ysnInvoicePaid			= 0 
@@ -221,7 +220,6 @@ BEGIN
 				,intCurrencyId
 				,strVessel
 				,intFreightTermId
-				,strAllocateFreight
 				,intShiftNumber
 				,dblInvoiceAmount
 				,ysnInvoicePaid
@@ -256,7 +254,6 @@ BEGIN
 				/*intCurrencyId*/				,IntegrationData.intCurrencyId
 				/*strVessel*/					,NULL
 				/*intFreightTermId*/			,NULL
-				/*strAllocateFreight*/			,'No' -- Default is No
 				/*intShiftNumber*/				,NULL 
 				/*dblInvoiceAmount*/			,0
 				/*ysnInvoicePaid*/				,0 
@@ -346,8 +343,8 @@ BEGIN
 				--,dblLineTotal			= RawData.dblQty * RawData.dblCost
 				,intSort				= 1
 				,intConcurrencyId		= 1
-				,intOwnershipType       = CASE	WHEN RawData.ysnIsCustody = 0 THEN @OWNERSHIP_TYPE_Own
-												WHEN RawData.ysnIsCustody = 1 THEN @OWNERSHIP_TYPE_Storage
+				,intOwnershipType       = CASE	WHEN RawData.ysnIsStorage = 0 THEN @OWNERSHIP_TYPE_Own
+												WHEN RawData.ysnIsStorage = 1 THEN @OWNERSHIP_TYPE_Storage
 												ELSE @OWNERSHIP_TYPE_Own
 										  END
 				,dblGross				= RawData.dblGross
@@ -407,8 +404,6 @@ BEGIN
 				LEFT JOIN dbo.tblICItemUOM ItemUOM			
 					ON ItemUOM.intItemId = RawData.intChargeId  
 					AND ItemUOM.intItemUOMId = RawData.intCostUOMId
-				INNER JOIN dbo.tblICUnitMeasure UOM
-					ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId	
 		WHERE RawHeaderData.intId = @intId
 
 		-- Add taxes into the receipt. 

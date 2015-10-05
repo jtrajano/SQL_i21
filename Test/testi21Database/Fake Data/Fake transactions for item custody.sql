@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [testi21Database].[Fake transactions for item custody]
+﻿CREATE PROCEDURE [testi21Database].[Fake transactions for item Storage]
 AS
 
 -- Fake data
@@ -187,22 +187,22 @@ BEGIN
 END 
 
 BEGIN	
-	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLIFOInCustody', @Identity = 1;
-	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOInCustody', @Identity = 1;
-	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotInCustody', @Identity = 1;
-	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransactionInCustody', @Identity = 1;
-	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransactionInCustody', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLIFOStorage', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryFIFOStorage', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotStorage', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryTransactionStorage', @Identity = 1;
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryLotTransactionStorage', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICItemStock', @Identity = 1;
 
 	-- Recreate the clustered indexes
-	CREATE CLUSTERED INDEX [IDX_tblICInventoryLIFOInCustody_Unit_Test]
-		ON [dbo].[tblICInventoryLIFOInCustody]([dtmDate] DESC, [intItemId] ASC, [intItemLocationId] ASC, [intInventoryLIFOInCustodyId] DESC);
+	CREATE CLUSTERED INDEX [IDX_tblICInventoryLIFOStorage_Unit_Test]
+		ON [dbo].[tblICInventoryLIFOStorage]([dtmDate] DESC, [intItemId] ASC, [intItemLocationId] ASC, [intInventoryLIFOStorageId] DESC);
 
-	CREATE CLUSTERED INDEX [IDX_tblICInventoryFIFOInCustody_Unit_Test]
-		ON [dbo].[tblICInventoryFIFOInCustody]([dtmDate] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intInventoryFIFOInCustodyId] ASC);
+	CREATE CLUSTERED INDEX [IDX_tblICInventoryFIFOStorage_Unit_Test]
+		ON [dbo].[tblICInventoryFIFOStorage]([dtmDate] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intInventoryFIFOStorageId] ASC);
 
-	CREATE CLUSTERED INDEX [IDX_tblICInventoryLotInCustody_Unit_Test]
-		ON [dbo].[tblICInventoryLotInCustody]([intInventoryLotInCustodyId] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intLotId] ASC, [intItemUOMId] ASC);
+	CREATE CLUSTERED INDEX [IDX_tblICInventoryLotStorage_Unit_Test]
+		ON [dbo].[tblICInventoryLotStorage]([intInventoryLotStorageId] ASC, [intItemId] ASC, [intItemLocationId] ASC, [intLotId] ASC, [intItemUOMId] ASC);
 
 	-- Declare fake lot ids
 	DECLARE @Lot_1 AS INT = 1
@@ -211,9 +211,9 @@ BEGIN
 			,@Lot_4 AS INT = 4
 			,@Lot_5 AS INT = 5
 
-	-- Fake data for tblICInventoryLotInCustody (the cost bucket for custody items)
+	-- Fake data for tblICInventoryLotStorage (the cost bucket for Storage items)
 	BEGIN
-		INSERT INTO dbo.tblICInventoryLotInCustody (
+		INSERT INTO dbo.tblICInventoryLotStorage (
 				intItemId
 				, intItemLocationId
 				, intItemUOMId
@@ -273,9 +273,9 @@ BEGIN
 
 	END
 
-	-- Fake data for tblICInventoryFIFOInCustody (the cost bucket for custody items)
+	-- Fake data for tblICInventoryFIFOStorage (the cost bucket for Storage items)
 	BEGIN 
-		INSERT INTO dbo.tblICInventoryFIFOInCustody (
+		INSERT INTO dbo.tblICInventoryFIFOStorage (
 				intItemId
 				, intItemLocationId
 				, intItemUOMId
@@ -328,9 +328,9 @@ BEGIN
 				, dblCost = 55.00				
 	END 
 
-	-- Fake data for tblICInventoryLIFOInCustody (the cost bucket for custody items)
+	-- Fake data for tblICInventoryLIFOStorage (the cost bucket for Storage items)
 	BEGIN 
-		INSERT INTO dbo.tblICInventoryLIFOInCustody (
+		INSERT INTO dbo.tblICInventoryLIFOStorage (
 				intItemId
 				, intItemLocationId
 				, intItemUOMId
@@ -390,71 +390,71 @@ BEGIN
 		INSERT INTO dbo.tblICItemStock (
 				intItemId
 				, intItemLocationId
-				, dblUnitInCustody
+				, dblUnitStorage
 		)		 
 		SELECT	intItemId			= @WetGrains
 				, intItemLocationId	= @WetGrains_DefaultLocation
-				, dblUnitInCustody	= 110
+				, dblUnitStorage	= 110
 		UNION ALL 
 		SELECT	intItemId			= @StickyGrains
 				, intItemLocationId	= @StickyGrains_DefaultLocation
-				, dblUnitInCustody	= 220
+				, dblUnitStorage	= 220
 		UNION ALL 
 		SELECT	intItemId			= @PremiumGrains
 				, intItemLocationId	= @PremiumGrains_DefaultLocation
-				, dblUnitInCustody	= 330
+				, dblUnitStorage	= 330
 		UNION ALL 
 		SELECT	intItemId			= @ColdGrains
 				, intItemLocationId	= @ColdGrains_DefaultLocation
-				, dblUnitInCustody	= 440
+				, dblUnitStorage	= 440
 		UNION ALL 
 		SELECT	intItemId			= @HotGrains
 				, intItemLocationId	= @HotGrains_DefaultLocation
-				, dblUnitInCustody	= 550
+				, dblUnitStorage	= 550
 
 		-- Add stock information for items under location 2 ('NEW HAVEN')
 		UNION ALL 
 		SELECT	intItemId			= @WetGrains
 				, intItemLocationId	= @WetGrains_NewHaven
-				, dblUnitInCustody	= 660
+				, dblUnitStorage	= 660
 		UNION ALL 
 		SELECT	intItemId			= @StickyGrains
 				, intItemLocationId	= @StickyGrains_NewHaven
-				, dblUnitInCustody	= 770
+				, dblUnitStorage	= 770
 		UNION ALL 
 		SELECT	intItemId			= @PremiumGrains
 				, intItemLocationId	= @PremiumGrains_NewHaven
-				, dblUnitInCustody	= 880
+				, dblUnitStorage	= 880
 		UNION ALL 
 		SELECT	intItemId			= @ColdGrains
 				, intItemLocationId	= @ColdGrains_NewHaven
-				, dblUnitInCustody	= 990
+				, dblUnitStorage	= 990
 		UNION ALL 
 		SELECT	intItemId			= @HotGrains
 				, intItemLocationId	= @HotGrains_NewHaven
-				, dblUnitInCustody	= 1100
+				, dblUnitStorage	= 1100
 
 		-- Add stock information for items under location 3 ('BETTER HAVEN')
 		UNION ALL 
 		SELECT	intItemId			= @WetGrains
 				, intItemLocationId	= @WetGrains_BetterHaven
-				, dblUnitInCustody	= 1200
+				, dblUnitStorage	= 1200
 		UNION ALL 
 		SELECT	intItemId			= @StickyGrains
 				, intItemLocationId	= @StickyGrains_BetterHaven
-				, dblUnitInCustody	= 1300
+				, dblUnitStorage	= 1300
 		UNION ALL 
 		SELECT	intItemId			= @PremiumGrains
 				, intItemLocationId	= @PremiumGrains_BetterHaven
-				, dblUnitInCustody	= 1400
+				, dblUnitStorage	= 1400
 		UNION ALL 
 		SELECT	intItemId			= @ColdGrains
 				, intItemLocationId	= @ColdGrains_BetterHaven
-				, dblUnitInCustody	= 1500
+				, dblUnitStorage	= 1500
 		UNION ALL 
 		SELECT	intItemId			= @HotGrains
 				, intItemLocationId	= @HotGrains_BetterHaven
-				, dblUnitInCustody	= 1600
+				, dblUnitStorage	= 1600
 	END
 
 	-- Fake data for item stock UOM table
@@ -464,89 +464,89 @@ BEGIN
 				intItemId
 				, intItemLocationId
 				, intItemUOMId
-				, dblInCustody		
+				, dblStorage		
 		) 
 		SELECT	intItemId			= @WetGrains
 				, intItemLocationId	= @WetGrains_DefaultLocation
 				, intItemUOMId		= @WetGrains_PoundUOM
-				, dblInCustody		= 110
+				, dblStorage		= 110
 		UNION ALL 
 		SELECT	intItemId			= @StickyGrains
 				, intItemLocationId	= @StickyGrains_DefaultLocation
 				, intItemUOMId		= @StickyGrains_PoundUOM
-				, dblInCustody		= 220
+				, dblStorage		= 220
 		UNION ALL 
 		SELECT	intItemId			= @PremiumGrains
 				, intItemLocationId	= @PremiumGrains_DefaultLocation
 				, intItemUOMId		= @PremiumGrains_PoundUOM
-				, dblInCustody		= 330
+				, dblStorage		= 330
 		UNION ALL 
 		SELECT	intItemId			= @ColdGrains
 				, intItemLocationId	= @ColdGrains_DefaultLocation
 				, intItemUOMId		= @ColdGrains_PoundUOM
-				, dblInCustody		= 440
+				, dblStorage		= 440
 		UNION ALL 
 		SELECT	intItemId			= @HotGrains
 				, intItemLocationId	= @HotGrains_DefaultLocation
 				, intItemUOMId		= @HotGrains_PoundUOM
-				, dblInCustody		= 550
+				, dblStorage		= 550
 
 		-- Add stock information for items under location 2 ('NEW HAVEN')
 		UNION ALL
 		SELECT	intItemId			= @WetGrains
 				, intItemLocationId	= @WetGrains_NewHaven
 				, intItemUOMId		= @WetGrains_PoundUOM
-				, dblInCustody		= 660
+				, dblStorage		= 660
 		UNION ALL 
 		SELECT	intItemId			= @StickyGrains
 				, intItemLocationId	= @StickyGrains_NewHaven
 				, intItemUOMId		= @StickyGrains_PoundUOM
-				, dblInCustody		= 770
+				, dblStorage		= 770
 		UNION ALL 
 		SELECT	intItemId			= @PremiumGrains
 				, intItemLocationId	= @PremiumGrains_NewHaven
 				, intItemUOMId		= @PremiumGrains_PoundUOM
-				, dblInCustody		= 880
+				, dblStorage		= 880
 		UNION ALL 
 		SELECT	intItemId			= @ColdGrains
 				, intItemLocationId	= @ColdGrains_NewHaven
 				, intItemUOMId		= @ColdGrains_PoundUOM
-				, dblInCustody		= 990
+				, dblStorage		= 990
 		UNION ALL 
 		SELECT	intItemId			= @HotGrains
 				, intItemLocationId	= @HotGrains_NewHaven
 				, intItemUOMId		= @HotGrains_PoundUOM
-				, dblInCustody		= 1100
+				, dblStorage		= 1100
 
 		-- Add stock information for items under location 3 ('BETTER HAVEN')
 		UNION ALL
 		SELECT	intItemId			= @WetGrains
 				, intItemLocationId	= @WetGrains_BetterHaven
 				, intItemUOMId		= @WetGrains_PoundUOM
-				, dblInCustody		= 1200
+				, dblStorage		= 1200
 		UNION ALL 
 		SELECT	intItemId			= @StickyGrains
 				, intItemLocationId	= @StickyGrains_BetterHaven
 				, intItemUOMId		= @StickyGrains_PoundUOM
-				, dblInCustody		= 1300
+				, dblStorage		= 1300
 		UNION ALL 
 		SELECT	intItemId			= @PremiumGrains
 				, intItemLocationId	= @PremiumGrains_BetterHaven
 				, intItemUOMId		= @PremiumGrains_PoundUOM
-				, dblInCustody		= 1400
+				, dblStorage		= 1400
 		UNION ALL 
 		SELECT	intItemId			= @ColdGrains
 				, intItemLocationId	= @ColdGrains_BetterHaven
 				, intItemUOMId		= @ColdGrains_PoundUOM
-				, dblInCustody		= 1500
+				, dblStorage		= 1500
 		UNION ALL 
 		SELECT	intItemId			= @HotGrains
 				, intItemLocationId	= @HotGrains_BetterHaven
 				, intItemUOMId		= @HotGrains_PoundUOM
-				, dblInCustody		= 1600
+				, dblStorage		= 1600
 	END
 
-	-- Fake data for tblICInventoryTransactionInCustody
+	-- Fake data for tblICInventoryTransactionStorage
 	BEGIN 
 		DECLARE @intTransactionTypeId AS INT
 		SELECT	TOP 1 
@@ -554,7 +554,7 @@ BEGIN
 		FROM dbo.tblICInventoryTransactionType
 		WHERE strName = 'Inventory Receipt'
 
-		INSERT INTO dbo.tblICInventoryTransactionInCustody (
+		INSERT INTO dbo.tblICInventoryTransactionStorage (
 				intItemId
 				, intItemLocationId
 				, intItemUOMId
@@ -853,14 +853,14 @@ BEGIN
 				, intConcurrencyId		= 1								
 	END 
 
-	-- Fake data for tblICInventoryLotTransactionInCustody
+	-- Fake data for tblICInventoryLotTransactionStorage
 	BEGIN 
 		SELECT	TOP 1 
 				@intTransactionTypeId = intTransactionTypeId
 		FROM dbo.tblICInventoryTransactionType
 		WHERE strName = 'Inventory Receipt'
 
-		INSERT INTO dbo.tblICInventoryLotTransactionInCustody (
+		INSERT INTO dbo.tblICInventoryLotTransactionStorage (
 				intItemId
 				, intItemLocationId
 				, intItemUOMId

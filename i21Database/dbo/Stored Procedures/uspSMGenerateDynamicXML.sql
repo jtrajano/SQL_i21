@@ -35,11 +35,11 @@ BEGIN
 			
 			SELECT @strWhereClause = LEFT(@strWhereClause,LEN(@strWhereClause)-3) 
 			
-			IF EXISTS(SELECT DISTINCT strTable FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND strTable <> @strMainTable)
+			IF EXISTS(SELECT DISTINCT strTable FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND strTable <> @strMainTable AND ysnActive = 1)
 			BEGIN
 				DECLARE  @tblTempTables TABLE(rownum int identity(1,1), strTempTable NVARCHAR(200)) 
 				INSERT INTO @tblTempTables
-				SELECT DISTINCT strTable FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND strTable <> @strMainTable
+				SELECT DISTINCT strTable FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND strTable <> @strMainTable AND ysnActive = 1
 				DECLARE @intTableCnt Int, @intMaxTableCnt Int
 				SELECT @intTableCnt = MIN(rownum), @intMaxTableCnt = MAX(rownum) FROM @tblTempTables
 				
@@ -109,9 +109,9 @@ BEGIN
 							, strTable nvarchar(200), strColumnName nvarchar(200), strDefaultValue nvarchar(200), strHeader nvarchar(50))
 	DECLARE @intParent Int, @intRootChild Int
 
-	SELECT @intRootChild = COUNT(intLevel) FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLength = 1
+	SELECT @intRootChild = COUNT(intLevel) FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLength = 1 AND ysnActive = 1
 	
-	Select @intParent = MAX(intLength) From dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId
+	Select @intParent = MAX(intLength) From dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND ysnActive = 1
 
 
 	WHILE (@intParent >= 1)
@@ -122,7 +122,7 @@ BEGIN
 		INSERT INTO @tblXML
 		SELECT intImportFileColumnDetailId, intLevel, intLength, intPosition, strXMLTag, strTable, strColumnName, strDefaultValue, strDataType 
 		FROM dbo.tblSMImportFileColumnDetail 
-		WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLength = @intParent Order By intPosition
+		WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLength = @intParent AND ysnActive = 1 Order By intPosition
 		
 	--SELECT * FROM @tblXML
 		
@@ -149,13 +149,13 @@ BEGIN
 			
 
 			SELECT @strParentTag = strXMLTag, @strParentTable = ISNULL(strTable,''), @intParentLevel = intLevel 
-			FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = @intParent
+			FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = @intParent AND ysnActive = 1
 	--SELECT @strParentTag '@strParentTag', @intParentLevel
 		
 			IF (CHARINDEX(':' ,@strParentTag) > 0	)		
 			SET @strParentTag = REPLACE(SUBSTRING(@strParentTag, CHARINDEX(':', @strParentTag), LEN(@strParentTag)), ':', '')
 			
-			SELECT @intParentChild = MAX(intLength) FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLength = @intParentLevel 
+			SELECT @intParentChild = MAX(intLength) FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLength = @intParentLevel AND ysnActive = 1 
 			
 			If @intParentLevel = 1 AND @intParentChild > 1 -- =========> Break if root level and has more than 1 child, else continue. <===============
 				BREAK;
@@ -212,7 +212,7 @@ BEGIN
 				BEGIN
 					
 										
-					IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLength = @intLevel)
+					IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLength = @intLevel AND ysnActive = 1)
 					BEGIN
 						print '@strTable, @strColumnName'
 					END
@@ -229,10 +229,10 @@ BEGIN
 				ELSE -- ==========> no table, column name and no attributes <======================
 				BEGIN
 					
-					IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLength = @intLevel)
+					IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLength = @intLevel AND ysnActive = 1)
 					BEGIN -- ==========> Has child <====================
 						DECLARE @intMinPos1 Int, @intMaxPos1 Int, @strCurrentTag1 nvarchar(200)
-						SELECT @intMinPos1 = MIN(intPosition), @intMaxPos1 = MAX(intPosition) FROM dbo.tblSMImportFileColumnDetail WHERE intLength = @intLevel AND intImportFileHeaderId = @intImportFileHeaderId
+						SELECT @intMinPos1 = MIN(intPosition), @intMaxPos1 = MAX(intPosition) FROM dbo.tblSMImportFileColumnDetail WHERE intLength = @intLevel AND intImportFileHeaderId = @intImportFileHeaderId AND ysnActive = 1
 					
 						WHILE (@intMinPos1 <= @intMaxPos1)
 						BEGIN
@@ -258,11 +258,11 @@ BEGIN
 			ELSE IF (ISNULL(@strTable, '') <> '' AND ISNULL(@strColumnName, '') = '')
 			BEGIN -- =========> Has table and  No column name <===============
 					
-				IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE	intImportFileHeaderId = @intImportFileHeaderId AND intLength = @intLevel)
+				IF EXISTS(SELECT 1 FROM dbo.tblSMImportFileColumnDetail WHERE	intImportFileHeaderId = @intImportFileHeaderId AND intLength = @intLevel AND ysnActive = 1)
 				BEGIN -- ===============> has child nodes <==========
 					
 					DECLARE @intMinPos Int, @intMaxPos Int, @strCurrentTag nvarchar(200)
-					SELECT @intMinPos = MIN(intPosition), @intMaxPos = MAX(intPosition) FROM dbo.tblSMImportFileColumnDetail WHERE intLength = @intLevel AND intImportFileHeaderId = @intImportFileHeaderId
+					SELECT @intMinPos = MIN(intPosition), @intMaxPos = MAX(intPosition) FROM dbo.tblSMImportFileColumnDetail WHERE intLength = @intLevel AND intImportFileHeaderId = @intImportFileHeaderId AND ysnActive = 1
 				
 					WHILE (@intMinPos <= @intMaxPos)
 					BEGIN
@@ -289,10 +289,10 @@ BEGIN
 					--END
 					
 					DECLARE @strParentParentTable nvarchar(200), @intParentParentLength Int, @intCurrentLength Int
-					SELECT @intCurrentLength = intLength FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = @intLevel
+					SELECT @intCurrentLength = intLength FROM dbo.tblSMImportFileColumnDetail WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = @intLevel AND ysnActive = 1
 					
 					SELECT @intParentParentLength = intLength, @strParentParentTable = strTable FROM dbo.tblSMImportFileColumnDetail 
-					WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = @intCurrentLength
+					WHERE intImportFileHeaderId = @intImportFileHeaderId AND intLevel = @intCurrentLength AND ysnActive = 1
 					
 					IF ((ISNULL(@strParentParentTable,'') <> '' ) AND @intParentParentLength = 1 AND ISNULL(@strHeader,'') = ''	) --OR (@intParentLevel = 1 AND @intParentChild = 1))
 					BEGIN
@@ -339,14 +339,14 @@ BEGIN
 			SET @intMinPosition = @intMinPosition + 1
 		END
 		-- ==========> Get next max parent key <==============
-		Select @intParent = MAX(intLength) From dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND intLength < @intParent
+		Select @intParent = MAX(intLength) From dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND intLength < @intParent AND ysnActive = 1
 		
 	END
 
 	-- ==========> Root level tags <==============
 	DECLARE @intMinPosFin Int, @intMaxPosFin Int, @strCurrentTagFin nvarchar(200), @strDataType nvarchar(100)
 	SELECT @intMinPosFin = MIN(intPosition), @intMaxPosFin = MAX(intPosition) 
-	FROM dbo.tblSMImportFileColumnDetail WHERE intLength = 1 AND intImportFileHeaderId = @intImportFileHeaderId
+	FROM dbo.tblSMImportFileColumnDetail WHERE intLength = 1 AND intImportFileHeaderId = @intImportFileHeaderId AND ysnActive = 1
 
 	SET @strMainSQL = @strMainSQL + ' DECLARE @strResult nvarchar(max)  SET @strResult = '''' '
 
@@ -357,10 +357,10 @@ BEGIN
 			
 			DECLARE @intStart Int, @intEnd Int
 			SELECT @intLevel = intLevel, @strParentTag = strXMLTag, @strTable = strTable, @strDataType = strDataType, @strColumnName = strColumnName 
-			FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND intLength = 1 AND intPosition = @intMinPosFin
+			FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND intLength = 1 AND intPosition = @intMinPosFin AND ysnActive = 1
 			
 			SELECT @intStart = MIN(intPosition), @intEnd = MAX(intPosition) FROM dbo.tblSMImportFileColumnDetail 
-			Where intImportFileHeaderId = @intImportFileHeaderId AND intLength = @intLevel 
+			Where intImportFileHeaderId = @intImportFileHeaderId AND intLength = @intLevel  AND ysnActive = 1
 			
 			IF (CHARINDEX(':' ,@strParentTag) > 0	)		
 			SET @strParentTag = REPLACE(SUBSTRING(@strParentTag, CHARINDEX(':', @strParentTag), LEN(@strParentTag)), ':', '')			
@@ -430,7 +430,7 @@ BEGIN
 	ELSE
 	BEGIN -- =================> root has 1 child <================
 		SELECT @intLevel = intLevel, @strParentTag = strXMLTag FROM dbo.tblSMImportFileColumnDetail 
-		Where intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 1 
+		Where intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 1  AND ysnActive = 1
 		
 		IF (CHARINDEX(':' ,@strParentTag) > 0	)		
 		SET @strParentTag = REPLACE(SUBSTRING(@strParentTag, CHARINDEX(':', @strParentTag), LEN(@strParentTag)), ':', '')
@@ -458,7 +458,7 @@ BEGIN
 	DECLARE @Result xml, @strXMLInitiater nvarchar(max)
 
 	SELECT @intImportFileColumnDetailId = intImportFileColumnDetailId, @intLevel = intLevel, @strParentTag = strXMLTag FROM dbo.tblSMImportFileColumnDetail 
-		Where intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 1 
+		Where intImportFileHeaderId = @intImportFileHeaderId AND intLevel = 1  AND ysnActive = 1
 		
 	IF EXISTS(SELECT 1 FROM dbo.tblSMXMLTagAttribute WHERE intImportFileColumnDetailId = @intImportFileColumnDetailId)
 	BEGIN
@@ -483,18 +483,18 @@ BEGIN
 SELECT @strGeneratedXML = @xmlResult --@Result  
 
 SELECT @strGeneratedXML = REPLACE(@strGeneratedXML, '<' + REPLACE(SUBSTRING(strXMLTag, CHARINDEX(':', strXMLTag), LEN(strXMLTag)), ':', '') + '>', '<' + strXMLTag + '>')
-FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND CHARINDEX(':', strXMLTag) > 0 AND intLevel > 1 
+FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND CHARINDEX(':', strXMLTag) > 0 AND intLevel > 1  AND ysnActive = 1
 
 
 SELECT @strGeneratedXML = REPLACE(@strGeneratedXML, '<' + REPLACE(SUBSTRING(strXMLTag, CHARINDEX(':', strXMLTag), LEN(strXMLTag)), ':', '') + ' ', '<' + strXMLTag + ' ')
-FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND CHARINDEX(':', strXMLTag) > 0 AND intLevel > 1 
+FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND CHARINDEX(':', strXMLTag) > 0 AND intLevel > 1  AND ysnActive = 1
 
 
 SELECT @strGeneratedXML = REPLACE(@strGeneratedXML, '</' + REPLACE(SUBSTRING(strXMLTag, CHARINDEX(':', strXMLTag), LEN(strXMLTag)), ':', '') + '>', '</' + strXMLTag + '>')
-FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND CHARINDEX(':', strXMLTag) > 0 AND intLevel > 1 
+FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND CHARINDEX(':', strXMLTag) > 0 AND intLevel > 1  AND ysnActive = 1
 
 
 SELECT @strGeneratedXML = REPLACE(@strGeneratedXML, '</' + REPLACE(SUBSTRING(strXMLTag, CHARINDEX(':', strXMLTag), LEN(strXMLTag)), ':', '') + ' ', '</' + strXMLTag + ' ')
-FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND CHARINDEX(':', strXMLTag) > 0 AND intLevel > 1 
+FROM dbo.tblSMImportFileColumnDetail Where intImportFileHeaderId = @intImportFileHeaderId AND CHARINDEX(':', strXMLTag) > 0 AND intLevel > 1  AND ysnActive = 1
 
 END

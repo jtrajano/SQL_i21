@@ -230,7 +230,7 @@ BEGIN TRY
 		,intLotId
 		,intSubLocationId
 		,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-		,ysnIsCustody 
+		,ysnIsStorage 
 	)
 	EXEC dbo.uspSCGetScaleItemForItemReceipt 
 		 @intTicketId

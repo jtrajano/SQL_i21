@@ -212,7 +212,7 @@ BEGIN
 		UNION ALL
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @WetGrains_BetterHaven
-				,strText = FORMATMESSAGE(80003)
+				,strText = 'Negative stock quantity is not allowed for WET GRAINS in BETTER HAVEN.'
 				,intErrorCode = 80003		
 	END
 

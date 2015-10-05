@@ -18,7 +18,7 @@ SELECT I.strInvoiceNumber AS strReferenceNumber
 	 , C.strName
 	 , I.intInvoiceId
 	 , I.intEntityCustomerId
-	 , strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry)
+	 , strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL)
 FROM tblARInvoice I
 	INNER JOIN (tblARInvoiceDetail ID 
 		LEFT JOIN tblICItem IC ON ID.intItemId = IC.intItemId) ON I.intInvoiceId = ID.intInvoiceId	

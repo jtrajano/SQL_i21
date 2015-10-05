@@ -77,6 +77,17 @@ BEGIN
 		END
 		ELSE
 		BEGIN
+
+			--Validate GL Account
+			IF EXISTS(SELECT 1 FROM apcbkmst A
+			WHERE A.apcbk_gl_ap NOT IN (SELECT strExternalId FROM tblGLCOACrossReference)
+			UNION ALL
+			SELECT 1 FROM apeglmst A
+			WHERE A.apegl_gl_acct NOT IN (SELECT strExternalId FROM tblGLCOACrossReference))
+			BEGIN
+				RAISERROR(''Invalid GL Account found in origin table apeglmst. Please call iRely assistance.'', 16, 1);
+			END
+
 			EXEC uspAPImportBillsFromAPTRXMST @UserId,@DateFrom, @DateTo, @totalPostedImport OUTPUT
 			SET @Total = @totalPostedImport;
 		END
@@ -97,7 +108,7 @@ BEGIN
 			SET @ErrorMessage  = ERROR_MESSAGE()
 			SET @ErrorState    = ERROR_STATE()
 			SET @ErrorLine     = ERROR_LINE()
-			SET @ErrorMessage  = ''Failed to import bills..'' + CHAR(13) + 
+			SET @ErrorMessage  = ''Failed to import bills.'' + CHAR(13) + 
 					''SQL Server Error Message is: '' + CAST(@ErrorNumber AS VARCHAR(10)) + 
 					'' Line: '' + CAST(@ErrorLine AS VARCHAR(10)) + '' Error text: '' + @ErrorMessage
 			IF @transCount = 0 AND XACT_STATE() <> 0 ROLLBACK TRANSACTION

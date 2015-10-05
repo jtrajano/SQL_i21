@@ -34,7 +34,7 @@ AS
 			l.dtmManufacturedDate,
 			l.ysnReleasedToWarehouse,
 			l.ysnProduced,
-			l.ysnInCustody,
+			l.ysnStorage,
 			l.intOwnershipType,
 			l.intGradeId,
 			l.intCreatedUserId,

@@ -2,7 +2,7 @@
 	 @InvoiceId						INT	
 	,@ItemId						INT
 	,@NewInvoiceDetailId			INT				= NULL			OUTPUT 
-	,@ErrorMessage					NVARCHAR(50)	= NULL			OUTPUT
+	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT
 	,@ItemUOMId						INT				= NULL
 	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
 	,@ItemPrice						NUMERIC(18,6)	= 0.000000
@@ -70,7 +70,7 @@ IF NOT EXISTS(SELECT NULL FROM tblICItem IC WHERE IC.[intItemId] = @ItemId)
 	
 IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId)
 	BEGIN
-		SET @ErrorMessage = 'The company location Id provided does not exists!'
+		SET @ErrorMessage = 'The company location from the target Invoice does not exists!'
 		RETURN 0;
 	END		
 	

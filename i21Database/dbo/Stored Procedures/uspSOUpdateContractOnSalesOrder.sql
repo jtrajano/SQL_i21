@@ -57,7 +57,6 @@ BEGIN TRY
 				@intToItemUOMId					INT,
 				@intUniqueId					INT,
 				@dblQty							NUMERIC(12,4),
-				@dblConvertedQty				NUMERIC(12,4),
 				@ErrMsg							NVARCHAR(MAX),
 				@dblSchQuantityToUpdate			NUMERIC(12,4)
 
@@ -76,18 +75,148 @@ BEGIN TRY
 		,[intContractDetailId]
 		,[intItemUOMId]
 		,[dblQty])
+	--Quantity/UOM Changed
 	SELECT
 		 I.[intSalesOrderDetailId]
 		,D.[intContractDetailId]
 		,D.[intItemUOMId]
-		,D.[dblQtyOrdered] 
+		,dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], (CASE WHEN @ForDelete = 1 THEN D.[dblQtyOrdered] ELSE (D.dblQtyOrdered - TD.dblQtyOrdered) END))
 	FROM
 		@ItemsFromSalesOrder I
 	INNER JOIN
 		tblSOSalesOrderDetail D
 			ON	I.[intSalesOrderDetailId] = D.[intSalesOrderDetailId]
+	INNER JOIN
+		tblARTransactionDetail TD
+			ON D.intSalesOrderDetailId = TD.intTransactionDetailId 
+			AND D.intSalesOrderId = TD.intTransactionId 
+			AND TD.strTransactionType = 'Order'
+	INNER JOIN
+		tblCTContractDetail CD
+			ON D.intContractDetailId = CD.intContractDetailId
 	WHERE
 		D.intContractDetailId IS NOT NULL
+		AND D.intContractDetailId = TD.intContractDetailId		
+		AND D.intItemId = TD.intItemId		
+		AND (D.intItemUOMId <> TD.intItemUOMId OR D.dblQtyOrdered <> TD.dblQtyOrdered)
+		
+	UNION ALL
+
+	--New Contract Selected
+	SELECT
+		 I.[intSalesOrderDetailId]
+		,D.[intContractDetailId]
+		,D.[intItemUOMId]
+		,dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], D.[dblQtyOrdered])
+	FROM
+		@ItemsFromSalesOrder I
+	INNER JOIN
+		tblSOSalesOrderDetail D
+			ON	I.[intSalesOrderDetailId] = D.[intSalesOrderDetailId]
+	INNER JOIN
+		tblARTransactionDetail TD
+			ON D.intSalesOrderDetailId = TD.intTransactionDetailId 
+			AND D.intSalesOrderId = TD.intTransactionId 
+			AND TD.strTransactionType = 'Order'
+	INNER JOIN
+		tblCTContractDetail CD
+			ON D.intContractDetailId = CD.intContractDetailId
+	WHERE
+		D.intContractDetailId IS NOT NULL
+		AND D.intContractDetailId <> TD.intContractDetailId		
+		AND D.intItemId = TD.intItemId		
+		
+	UNION ALL
+
+	--Replaced Contract
+	SELECT
+		 I.[intSalesOrderDetailId]
+		,TD.[intContractDetailId]
+		,TD.[intItemUOMId]
+		,dbo.fnCalculateQtyBetweenUOM(TD.[intItemUOMId], CD.[intItemUOMId], (TD.[dblQtyOrdered] * -1))
+	FROM
+		@ItemsFromSalesOrder I
+	INNER JOIN
+		tblSOSalesOrderDetail D
+			ON	I.[intSalesOrderDetailId] = D.[intSalesOrderDetailId]
+	INNER JOIN
+		tblARTransactionDetail TD
+			ON D.intSalesOrderDetailId = TD.intTransactionDetailId 
+			AND D.intSalesOrderId = TD.intTransactionId 
+			AND TD.strTransactionType = 'Order'
+	INNER JOIN
+		tblCTContractDetail CD
+			ON TD.intContractDetailId = CD.intContractDetailId
+	WHERE
+		D.intContractDetailId IS NOT NULL
+		AND D.intContractDetailId <> TD.intContractDetailId		
+		AND D.intItemId = TD.intItemId
+		
+	UNION ALL
+		
+	--Removed Contract
+	SELECT
+		 I.[intSalesOrderDetailId]
+		,TD.[intContractDetailId]
+		,TD.[intItemUOMId]
+		,dbo.fnCalculateQtyBetweenUOM(TD.[intItemUOMId], CD.[intItemUOMId], (TD.[dblQtyOrdered] * -1))
+	FROM
+		@ItemsFromSalesOrder I
+	INNER JOIN
+		tblSOSalesOrderDetail D
+			ON	I.[intSalesOrderDetailId] = D.[intSalesOrderDetailId]
+	INNER JOIN
+		tblARTransactionDetail TD
+			ON D.intSalesOrderDetailId = TD.intTransactionDetailId 
+			AND D.intSalesOrderId = TD.intTransactionId 
+			AND TD.strTransactionType = 'Order'
+	INNER JOIN
+		tblCTContractDetail CD
+			ON TD.intContractDetailId = CD.intContractDetailId
+	WHERE
+		D.intContractDetailId IS NULL
+		AND TD.intContractDetailId IS NOT NULL
+		
+	UNION ALL	
+
+	--Deleted Item
+	SELECT
+		 TD.intTransactionDetailId
+		,TD.[intContractDetailId]
+		,TD.[intItemUOMId]
+		,dbo.fnCalculateQtyBetweenUOM(TD.[intItemUOMId], CD.[intItemUOMId], (TD.[dblQtyOrdered] * -1))
+	FROM
+		tblARTransactionDetail TD
+	INNER JOIN
+		tblCTContractDetail CD
+			ON TD.intContractDetailId = CD.intContractDetailId
+	WHERE
+		TD.intTransactionId = @TransactionId 
+		AND TD.strTransactionType = 'Order'
+		AND TD.intContractDetailId IS NOT NULL
+		AND TD.intTransactionDetailId NOT IN (SELECT intSalesOrderDetailId FROM tblSOSalesOrderDetail WHERE intSalesOrderId = @TransactionId)
+		
+	UNION ALL
+		
+	--Added Item
+	SELECT
+		 Detail.intSalesOrderDetailId
+		,Detail.[intContractDetailId]
+		,Detail.[intItemUOMId]
+		,dbo.fnCalculateQtyBetweenUOM(Detail.[intItemUOMId], CD.[intItemUOMId], Detail.[dblQtyOrdered])
+	FROM
+		tblSOSalesOrderDetail Detail
+	INNER JOIN
+		tblSOSalesOrder Header
+			ON Detail.intSalesOrderId = Header.intSalesOrderId 
+	INNER JOIN
+		tblCTContractDetail CD
+			ON Detail.intContractDetailId = CD.intContractDetailId
+	WHERE
+		Detail.intSalesOrderId = @TransactionId 
+		AND Header.strTransactionType = 'Order'
+		AND Detail.intContractDetailId IS NOT NULL
+		AND Detail.intSalesOrderDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @TransactionId AND strTransactionType = 'Order')
 
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
@@ -101,7 +230,7 @@ BEGIN TRY
 
 		SELECT	@intContractDetailId			=	[intContractDetailId],
 				@intFromItemUOMId				=	[intItemUOMId],
-				@dblQty							=	[dblQty],
+				@dblQty							=	[dblQty] * (CASE WHEN @ForDelete = 1 THEN -1 ELSE 1 END),
 				@intSalesOrderDetailId			=	[intSalesOrderDetailId]
 		FROM	@tblToProcess 
 		WHERE	[intUniqueId]					=	 @intUniqueId
@@ -111,20 +240,14 @@ BEGIN TRY
 			RAISERROR('Contract does not exist.',16,1)
 		END
 
-		SELECT @intToItemUOMId	=	intItemUOMId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
-
-		SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblQty)
-		
-		SET @dblConvertedQty = @dblConvertedQty * (CASE WHEN @ForDelete = 1 THEN -1 ELSE 1 END)
-
-		IF ISNULL(@dblConvertedQty,0) = 0
+		IF ISNULL(@dblQty,0) = 0
 		BEGIN
 			RAISERROR('UOM does not exist.',16,1)
 		END
 					
 		EXEC	uspCTUpdateScheduleQuantity
 				@intContractDetailId	=	@intContractDetailId,
-				@dblQuantityToUpdate	=	@dblConvertedQty,
+				@dblQuantityToUpdate	=	@dblQty,
 				@intUserId				=	@UserId,
 				@intExternalId			=	@intSalesOrderDetailId,
 				@strScreenName			=	'Sales Order'

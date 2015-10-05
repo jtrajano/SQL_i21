@@ -37,6 +37,7 @@ Type the overview for the table here.
 		[intRelativeZ] INT NULL DEFAULT ((0)), 
 		[intCommodityId] INT NULL, 
 		[dblPackFactor] NUMERIC(18, 6) NULL DEFAULT ((0)), 
+		[dblEffectiveDepth] NUMERIC(18, 6) DEFAULT ((0)),
 		[dblUnitPerFoot] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[dblResidualUnit] NUMERIC(18, 6) NULL DEFAULT ((0)), 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 

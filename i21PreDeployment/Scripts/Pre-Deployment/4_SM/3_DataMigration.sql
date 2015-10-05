@@ -8,7 +8,8 @@ GO
 	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMUserSecurityMenuFavorite')
 	BEGIN
 		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMUserSecurityMenuFavorite' AND [COLUMN_NAME] = 'intUserRoleMenuId') 
-			EXEC('ALTER TABLE tblSMUserSecurityMenuFavorite ADD intUserRoleMenuId INT NOT NULL DEFAULT 0')
+			IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMUserSecurityMenuFavorite' AND [COLUMN_NAME] = 'intMenuId') 
+				EXEC('ALTER TABLE tblSMUserSecurityMenuFavorite ADD intUserRoleMenuId INT NOT NULL DEFAULT 0')
 	END
 GO
 
@@ -105,5 +106,40 @@ GO
 		--		VALUES(NULL, NULL, NULL, NULL, NULL, NULL, 1)
 		--	END
 		--END
+	END
+GO
+	-- DROP USER ROLE MENU RELATION IN PRE-DEPLOYMENT
+	-- REPLACE intUserRoleMenuId with intMenuId in PRE-DEPLOYMENT
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMUserSecurityMenuFavorite')
+	BEGIN
+		IF NOT EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMUserSecurityMenuFavorite' AND [COLUMN_NAME] = 'intMenuId') 
+		BEGIN
+			EXEC('ALTER TABLE tblSMUserSecurityMenuFavorite ADD intMenuId INT NOT NULL DEFAULT 0')	
+			IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = 'tblSMUserSecurityMenuFavorite')
+			BEGIN
+				EXEC
+				(
+					'PRINT N''Check if intUserRoleMenuId is existing''
+			
+					IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = ''tblSMUserSecurityMenuFavorite'' AND [COLUMN_NAME] = ''intUserRoleMenuId'')
+						BEGIN
+							IF EXISTS(SELECT TOP 1 1 FROM sys.objects where name = ''FK_tblSMUserSecurityMenuFavorite_tblSMUserRoleMenu'')
+							BEGIN
+								PRINT N''Drop FK_tblSMUserSecurityMenuFavorite_tblSMUserRoleMenu''
+								ALTER TABLE tblSMUserSecurityMenuFavorite DROP CONSTRAINT FK_tblSMUserSecurityMenuFavorite_tblSMUserRoleMenu;
+							END
+
+							PRINT N''UPDATE intUserRoleMenuId with intMenuId data''
+
+							EXEC (''UPDATE MenuFavorite SET MenuFavorite.intMenuId = MasterMenu.intMenuID
+							FROM tblSMMasterMenu MasterMenu
+							JOIN tblSMUserRoleMenu RoleMenu 
+								ON RoleMenu.intMenuId = MasterMenu.intMenuID
+							JOIN tblSMUserSecurityMenuFavorite MenuFavorite 
+								ON RoleMenu.intUserRoleMenuId = MenuFavorite.intUserRoleMenuId'')
+						END'
+				)
+			END
+		END
 	END
 GO

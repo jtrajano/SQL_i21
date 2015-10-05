@@ -10,7 +10,10 @@
 		dblAmountDue,
 		ysnPaid = Cast(ysnPaid as bit),
 		strEntityNo = strCustomerNumber COLLATE Latin1_General_CI_AS,
-		dtmDate = dtmDate	
+		dtmDate = dtmDate,
+		strPaymentInfo = null,
+		intPaymentId = null	,
+		intTransactionId = null
 	from vyuARCustomerHistory
 	union
 	select 
@@ -23,6 +26,9 @@
 		dblAmountDue,
 		ysnPaid = Cast(ysnPaid as bit),
 		strEntityNo = strVendorId COLLATE Latin1_General_CI_AS,
-		dtmDate = dtmDate
+		dtmDate = dtmDate,
+		strPaymentInfo = strPaymentInfo,
+		intPaymentId = intPaymentId,
+		intTransactionId = intTransactionId
 		--,* 
 	from vyuAPVendorHistory

@@ -17,6 +17,8 @@ SELECT
 	,A.ysnPaid
 	,A.dblAmountDue
 	,A.ysnPosted
+	,B1.strPaymentInfo
+	,B1.intPaymentId
 FROM dbo.tblAPBill A
 		LEFT JOIN (dbo.tblAPPayment B1 
 						INNER JOIN dbo.tblAPPaymentDetail B ON B1.intPaymentId = B.intPaymentId
@@ -43,5 +45,7 @@ GROUP BY A.intBillId,
 	A.strBillId,
 	A.ysnPaid,
 	A.dblAmountDue,
-    A.ysnPosted
+    A.ysnPosted,
+	B1.strPaymentInfo,
+	B1.intPaymentId
 

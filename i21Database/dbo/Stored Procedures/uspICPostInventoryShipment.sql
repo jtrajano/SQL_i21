@@ -200,7 +200,7 @@ IF @ysnPost = 1
 BEGIN  
 	-- Get the items to post  
 	DECLARE @ItemsForPost AS ItemCostingTableType  
-	DECLARE @CustodyItemsForPost AS ItemCostingTableType  
+	DECLARE @StorageItemsForPost AS ItemCostingTableType  
 
 	-- Get company owned items to post. 
 	BEGIN
@@ -259,8 +259,8 @@ BEGIN
 				,strTransactionId           = Header.strShipmentNumber
 				,intTransactionTypeId       = @INVENTORY_SHIPMENT_TYPE
 				,intLotId                   = Lot.intLotId
-				,intSubLocationId           = Lot.intSubLocationId
-				,intStorageLocationId       = Lot.intStorageLocationId
+				,intSubLocationId           = ISNULL(Lot.intSubLocationId, DetailItem.intSubLocationId)
+				,intStorageLocationId       = ISNULL(Lot.intStorageLocationId, DetailItem.intStorageLocationId) 
 		FROM    tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem DetailItem 
 					ON Header.intInventoryShipmentId = DetailItem.intInventoryShipmentId    
 				INNER JOIN tblICItemUOM ItemUOM 
@@ -318,9 +318,9 @@ BEGIN
 		END
 	END 
 
-	-- Process custody items
+	-- Process Storage items
 	BEGIN 
-		INSERT INTO @CustodyItemsForPost (  
+		INSERT INTO @StorageItemsForPost (  
 				intItemId  
 				,intItemLocationId 
 				,intItemUOMId  
@@ -375,8 +375,8 @@ BEGIN
 				,strTransactionId           = Header.strShipmentNumber
 				,intTransactionTypeId       = @INVENTORY_SHIPMENT_TYPE
 				,intLotId                   = Lot.intLotId
-				,intSubLocationId           = Lot.intSubLocationId
-				,intStorageLocationId       = Lot.intStorageLocationId
+				,intSubLocationId           = ISNULL(Lot.intSubLocationId, DetailItem.intSubLocationId)
+				,intStorageLocationId       = ISNULL(Lot.intStorageLocationId, DetailItem.intStorageLocationId) 
 		FROM    tblICInventoryShipment Header INNER JOIN  tblICInventoryShipmentItem DetailItem 
 					ON Header.intInventoryShipmentId = DetailItem.intInventoryShipmentId    
 				INNER JOIN tblICItemUOM ItemUOM 
@@ -393,10 +393,10 @@ BEGIN
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_OWN) <> @OWNERSHIP_TYPE_OWN
 
 		-- Call the post routine 
-		IF EXISTS (SELECT TOP 1 1 FROM @CustodyItemsForPost) 
+		IF EXISTS (SELECT TOP 1 1 FROM @StorageItemsForPost) 
 		BEGIN 
-			EXEC	dbo.uspICPostCustody
-					@CustodyItemsForPost  
+			EXEC	dbo.uspICPostStorage
+					@StorageItemsForPost  
 					,@strBatchId  
 					,@intUserId
 		END

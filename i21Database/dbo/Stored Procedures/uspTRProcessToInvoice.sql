@@ -1,7 +1,8 @@
 CREATE PROCEDURE [dbo].[uspTRProcessToInvoice]
 	 @intTransportLoadId AS INT
 	,@intUserId AS INT	
-
+	,@ysnRecap AS BIT
+	,@ysnPostOrUnPost AS BIT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -19,7 +20,37 @@ DECLARE @ErrMsg                    NVARCHAR(MAX);
 DECLARE @InvoiceStagingTable AS InvoiceStagingTable,
         @total as int;
 
+DECLARE @InvoiceOutputTable TABLE
+    (
+	intId INT IDENTITY PRIMARY KEY CLUSTERED,
+    intSourceId int,
+	intInvoiceId int
+    )
+
 BEGIN TRY
+
+if @ysnPostOrUnPost = 0 and @ysnRecap = 0
+BEGIN
+   INSERT INTO @InvoiceOutputTable
+               select DH.intDistributionHeaderId,DH.intInvoiceId from 
+                        tblTRTransportLoad TL
+                        JOIN tblTRTransportReceipt TR on TR.intTransportLoadId = TL.intTransportLoadId
+	            		JOIN tblTRDistributionHeader DH on DH.intTransportReceiptId = TR.intTransportReceiptId
+	            		JOIN tblTRDistributionDetail DD on DD.intDistributionHeaderId = DH.intDistributionHeaderId
+	            		LEFT JOIN vyuTRSupplyPointView SP on SP.intSupplyPointId = TR.intSupplyPointId
+	            		LEFT JOIN vyuLGLoadView LG on LG.intLoadId = TL.intLoadId
+                        where TL.intTransportLoadId = @intTransportLoadId and DH.strDestination = 'Customer';
+   
+   SELECT @total = COUNT(*) FROM @InvoiceOutputTable;
+    IF (@total = 0)
+	   BEGIN
+	     RETURN;
+	   END
+	ELSE
+	    BEGIN
+        	GOTO _PostOrUnPost;
+		END
+END
 
 -- Insert Entries to Stagging table that needs to processed to Transport Load
      INSERT into @InvoiceStagingTable(    
@@ -47,6 +78,7 @@ BEGIN TRY
 		,strActualCostId
 		,intShipToLocationId
 		,strBOLNumber
+		,intInvoiceId
 	 )	 
 	 select     
        DH.intEntityCustomerId,     
@@ -99,7 +131,8 @@ BEGIN TRY
 			         and HH.strDestination = 'Customer' 
 			         and HH.intDistributionHeaderId = DH.intDistributionHeaderId ) as strActualCostId,
 		DH.intShipToLocationId,
-		TR.strBillOfLadding 
+		TR.strBillOfLadding,
+		DH.intInvoiceId 
 	   from tblTRTransportLoad TL
             JOIN tblTRTransportReceipt TR on TR.intTransportLoadId = TL.intTransportLoadId
 			JOIN tblTRDistributionHeader DH on DH.intTransportReceiptId = TR.intTransportReceiptId
@@ -113,18 +146,8 @@ BEGIN TRY
     if (@total = 0)
 	   return;
 
-DECLARE @InvoiceOutputTable TABLE
-    (
-	intId INT IDENTITY PRIMARY KEY CLUSTERED,
-    intSourceId int,
-	intInvoiceId int
-    )
+EXEC dbo.uspARAddInvoice @InvoiceStagingTable,@intUserId;
 
---INSERT into @InvoiceOutputTable(
---		 intSourceId	
---		,intInvoiceId		 	
---	 )	
-  EXEC dbo.uspARAddInvoice @InvoiceStagingTable,@intUserId;
 
 INSERT INTO @InvoiceOutputTable
 select IE.intSourceId,
@@ -133,6 +156,8 @@ FROM
     @InvoiceStagingTable IE  
     JOIN tblARInvoice IV
         on IE.intSourceId = IV.intDistributionHeaderId
+
+_PostOrUnPost:
 
 Declare @incval int,
         @SouceId int,
@@ -167,30 +192,31 @@ END;
 
 --Post the invoice that was created
 
-		
-EXEC	 [dbo].[uspARPostInvoice]
-     				@batchId = NULL,
-     				@post = 1,
-     				@recap = 0,
-     				@param = NULL,
-     				@userId = @intUserId,
-     				@beginDate = NULL,
-     				@endDate = NULL,
-     				@beginTransaction = @minId,
-     				@endTransaction = @maxId,
-     				@exclude = NULL,
-     				@successfulCount = @SuccessCount OUTPUT,
-     				@invalidCount = @InvCount OUTPUT,
-     				@success = @IsSuccess OUTPUT,
-     				@batchIdUsed = @batchId OUTPUT,
-     				@recapId = NULL,
-     				@transType = N'Invoice',
-                    @raiseError = 1
-     if @IsSuccess = 0
-     BEGIN
-        RAISERROR('Invoice did not Post', 16, 1);
-     END
-
+if @ysnRecap = 0
+BEGIN		
+     EXEC	 [dbo].[uspARPostInvoice]
+          				@batchId = NULL,
+          				@post = @ysnPostOrUnPost,
+          				@recap = 0,
+          				@param = NULL,
+          				@userId = @intUserId,
+          				@beginDate = NULL,
+          				@endDate = NULL,
+          				@beginTransaction = @minId,
+          				@endTransaction = @maxId,
+          				@exclude = NULL,
+          				@successfulCount = @SuccessCount OUTPUT,
+          				@invalidCount = @InvCount OUTPUT,
+          				@success = @IsSuccess OUTPUT,
+          				@batchIdUsed = @batchId OUTPUT,
+          				@recapId = NULL,
+          				@transType = N'Invoice',
+                         @raiseError = 1
+          if @IsSuccess = 0
+          BEGIN
+             RAISERROR('Invoice did not Post/UnPost', 16, 1);
+          END
+END
 
 
 END TRY

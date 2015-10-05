@@ -1115,3 +1115,11 @@ BEGIN
     VALUES(2,'Partial Match')
 END
 GO
+UPDATE tblMFCompanyPreference
+SET ysnConsiderSumOfChangeoverTime = 0
+WHERE ysnConsiderSumOfChangeoverTime IS NULL
+GO
+UPDATE tblMFCompanyPreference
+SET intStandardSetUpDuration = 0
+WHERE intStandardSetUpDuration IS NULL
+GO

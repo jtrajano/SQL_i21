@@ -198,11 +198,14 @@ BEGIN
 		IF Len(@strMachineName1) > 0
 			SELECT @strMachineName1 = Left(@strMachineName1, Len(@strMachineName1) - 1)
 
-		SELECT @SQL = 'SELECT dtmCalendarDate,Day,intShiftId,strShiftName,dtmShiftStartTime,dtmShiftEndTime,intNoOfMachine,ysnHoliday, DateDiff(hh,dtmShiftStartTime,dtmShiftEndTime) as intNoOfHours,intConcurrencyId,' + @strMachineName1 + '
+		SELECT @SQL = 'SELECT dtmCalendarDate,Day,intShiftId,strShiftName,intStartOffset,intEndOffset,dtmShiftStartTime,dtmCalendarDate+CAST(dtmShiftEndTime - dtmShiftStartTime AS TIME) dtmDuration,dtmShiftEndTime,intNoOfMachine,ysnHoliday, intConcurrencyId,' + @strMachineName1 + '
 		FROM (
 			SELECT CD.dtmCalendarDate,DATENAME(dw,CD.dtmCalendarDate) AS Day
 				,CD.intShiftId
 				,S.strShiftName
+				,S.intStartOffset
+				,S.intEndOffset
+				,S.intShiftSequence
 				,CD.dtmShiftStartTime
 				,CD.dtmShiftEndTime
 				,CD.intNoOfMachine
@@ -215,7 +218,7 @@ BEGIN
 			LEFT JOIN dbo.tblMFScheduleCalendarMachineDetail MD ON MD.intCalendarDetailId = CD.intCalendarDetailId
 			LEFT JOIN dbo.tblMFMachine M ON M.intMachineId = MD.intMachineId
 			) AS DT
-		PIVOT(Count(DT.intMachineId) FOR strName IN (' + @strMachineName + ')) pvt'
+		PIVOT(Count(DT.intMachineId) FOR strName IN (' + @strMachineName + ')) pvt Order by dtmCalendarDate,intShiftSequence'
 
 		EXEC (@SQL)
 		
@@ -248,10 +251,10 @@ BEGIN
 			,CD.intShiftId
 			,S.strShiftName
 			,CD.dtmShiftStartTime
+			,CD.dtmCalendarDate+CAST(CD.dtmShiftEndTime - CD.dtmShiftStartTime AS TIME) dtmDuration
 			,CD.dtmShiftEndTime
 			,CD.intNoOfMachine
 			,CD.ysnHoliday
-			,DateDiff(hh, CD.dtmShiftStartTime, CD.dtmShiftEndTime) AS intNoOfHours
 			,M.intMachineId
 			,M.strName
 			,CONVERT(BIT, CASE 

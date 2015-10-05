@@ -68,7 +68,7 @@ BEGIN TRY
 						,intLotId = NULL 
 						,intSubLocationId = ScaleTicket.intSubLocationId
 						,intStorageLocationId = ScaleTicket.intStorageLocationId
-						,ysnIsCustody = 0
+						,ysnIsStorage = 0
 				FROM	@LineItems LI 
 				JOIN dbo.tblSCTicket ScaleTicket On ScaleTicket.intTicketId = LI.intTicketId
 				JOIN dbo.tblICItemUOM ItemUOM	ON ScaleTicket.intItemId = ItemUOM.intItemId AND @intTicketItemUOMId = ItemUOM.intItemUOMId
@@ -101,7 +101,7 @@ BEGIN TRY
 						,intLotId = NULL 
 						,intSubLocationId = ScaleTicket.intSubLocationId
 						,intStorageLocationId = ScaleTicket.intStorageLocationId
-						,ysnIsCustody = 0
+						,ysnIsStorage = 0
 				FROM	dbo.tblSCTicket ScaleTicket
 						INNER JOIN dbo.tblICItemUOM ItemUOM
 							ON ScaleTicket.intItemId = ItemUOM.intItemId

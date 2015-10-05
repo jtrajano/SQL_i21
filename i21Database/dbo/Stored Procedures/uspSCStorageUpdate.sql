@@ -156,7 +156,7 @@ BEGIN TRY
 							,intLotId
 							,intSubLocationId
 							,intStorageLocationId 
-							,ysnIsCustody
+							,ysnIsStorage
 						)
 						EXEC dbo.uspSCGetScaleItemForItemShipment
 							 @intTicketId
@@ -212,7 +212,7 @@ BEGIN TRY
 							,intLotId
 							,intSubLocationId
 							,intStorageLocationId 
-							,ysnIsCustody
+							,ysnIsStorage
 							)
 							SELECT	intItemId = ScaleTicket.intItemId
 									,intLocationId = ItemLocation.intItemLocationId 
@@ -230,7 +230,7 @@ BEGIN TRY
 									,intLotId = NULL 
 									,intSubLocationId = ScaleTicket.intSubLocationId
 									,intStorageLocationId = ScaleTicket.intStorageLocationId
-									,ysnIsCustody = 0
+									,ysnIsStorage = 0
 							FROM	dbo.tblSCTicket ScaleTicket
 									INNER JOIN dbo.tblICItemUOM ItemUOM
 										ON ScaleTicket.intItemId = ItemUOM.intItemId
@@ -296,7 +296,7 @@ BEGIN TRY
 				,intLotId
 				,intSubLocationId
 				,intStorageLocationId 
-				,ysnIsCustody
+				,ysnIsStorage
 				)
 				SELECT	intItemId = ScaleTicket.intItemId
 						,intLocationId = ItemLocation.intItemLocationId 
@@ -314,7 +314,7 @@ BEGIN TRY
 						,intLotId = NULL 
 						,intSubLocationId = ScaleTicket.intSubLocationId
 						,intStorageLocationId = ScaleTicket.intStorageLocationId
-						,ysnIsCustody = 1
+						,ysnIsStorage = 1
 				FROM	dbo.tblSCTicket ScaleTicket
 						INNER JOIN dbo.tblICItemUOM ItemUOM
 							ON ScaleTicket.intItemId = ItemUOM.intItemId
@@ -381,7 +381,7 @@ BEGIN TRY
 				,intLotId
 				,intSubLocationId
 				,intStorageLocationId 
-				,ysnIsCustody
+				,ysnIsStorage
 				)
 				SELECT	intItemId = ScaleTicket.intItemId
 						,intLocationId = ItemLocation.intItemLocationId 
@@ -399,7 +399,7 @@ BEGIN TRY
 						,intLotId = NULL 
 						,intSubLocationId = ScaleTicket.intSubLocationId
 						,intStorageLocationId = ScaleTicket.intStorageLocationId
-						,ysnIsCustody = 1
+						,ysnIsStorage = 1
 				FROM	dbo.tblSCTicket ScaleTicket
 						INNER JOIN dbo.tblICItemUOM ItemUOM
 							ON ScaleTicket.intItemId = ItemUOM.intItemId
@@ -646,7 +646,7 @@ BEGIN TRY
 				,intLotId
 				,intSubLocationId
 				,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-				,ysnIsCustody 
+				,ysnIsStorage 
 			)
 			SELECT intItemId = ScaleTicket.intItemId
 							,intLocationId = ItemLocation.intItemLocationId 
@@ -665,7 +665,7 @@ BEGIN TRY
 							,intLotId = NULL 
 							,intSubLocationId = ScaleTicket.intSubLocationId
 							,intStorageLocationId = ScaleTicket.intStorageLocationId
-							,ysnIsCustody = 1
+							,ysnIsStorage = 1
 					FROM	dbo.tblSCTicket ScaleTicket
 							INNER JOIN dbo.tblICItemUOM ItemUOM
 								ON ScaleTicket.intItemId = ItemUOM.intItemId

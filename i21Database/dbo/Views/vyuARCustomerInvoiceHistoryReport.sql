@@ -3,7 +3,7 @@ AS
 SELECT * FROM (
 SELECT DISTINCT
 	  C.strName
-	 , strContact = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry)
+	 , strContact = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL)
 	 , P.strRecordNumber
 	 , I.strInvoiceNumber
 	 , I.dtmDate

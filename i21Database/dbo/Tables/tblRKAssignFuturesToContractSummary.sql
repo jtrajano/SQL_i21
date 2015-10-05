@@ -7,7 +7,7 @@
 	[intContractDetailId] INT NOT NULL,	
 	[dtmMatchDate] DATETIME NOT NULL, 
 	[intFutOptTransactionId] INT NOT NULL,
-    [intAssignedLots] INT NOT NULL, 
+    [dblAssignedLots] NUMERIC(18, 6) NOT NULL, 
 	[intHedgedLots] INT NOT NULL,
 	[ysnIsHedged] Bit NULL,
     [intFutOptAssignedId] INT NULL, 

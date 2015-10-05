@@ -121,13 +121,18 @@ BEGIN
 				UPDATE tblGLCOACrossReference SET intLegacyReferenceId = (SELECT TOP 1 A4GLIdentity FROM glactmst ORDER BY A4GLIdentity DESC) WHERE inti21Id = @Id_update		
 			END
 					
-			DELETE FROM #TempUpdateCrossReference WHERE inti21Id = @Id_update
-
 			UPDATE A
 				SET A.glact_desc = B.glact_desc
-			 FROM glactmst A
-				INNER JOIN ##glactmstbackup B ON A.glact_acct1_8 = B.glact_acct1_8
-				WHERE A.glact_acct9_16 = B.glact_acct9_16
+			FROM glactmst A 
+				INNER JOIN glactmst_bak B ON A.glact_acct1_8 = B.glact_acct1_8
+				INNER JOIN tblGLCOACrossReference C ON  C.intLegacyReferenceId =  A.A4GLIdentity
+			WHERE A.glact_acct9_16 = B.glact_acct9_16
+			and C.inti21Id = @Id_update	
+
+			
+			DELETE FROM #TempUpdateCrossReference WHERE inti21Id = @Id_update
+
+			
 
 		END
 	')

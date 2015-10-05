@@ -4053,4 +4053,60 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="[ScheduleTable]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="e6ce08b2-fa6a-4c06-b0a1-7a4859723c03" ChangeDateTime="09/22/2015 06:50:45">
+    <Property Name="ElementName" Value="[dbo].[tblICTransactionDetailLog].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICTransactionDetailLog]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTransactionDetailId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="d16a80c2-209c-404a-8759-e1614485e02c" ChangeDateTime="09/22/2015 06:50:54">
+    <Property Name="ElementName" Value="[dbo].[tblICTransactionDetailLog].[intTransactionDetailId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICTransactionDetailLog]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intTransactionDetailLogId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7de56c54-32a7-4389-9554-fb03de36a105" ChangeDateTime="10/01/2015 02:19:44">
+    <Property Name="ElementName" Value="[dbo].[tblICStorageMeasurementReading].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICStorageMeasurementReading]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStorageMeasurementReadingId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="fe9f0f0e-f07f-4f03-9dc3-b80cea876228" ChangeDateTime="10/01/2015 02:22:55">
+    <Property Name="ElementName" Value="[dbo].[tblICStorageMeasurementReadingConversion].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICStorageMeasurementReadingConversion]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStorageMeasurementReadingConversionId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8f7cec89-f467-4442-951c-f7e84c0030ce" ChangeDateTime="10/01/2015 02:24:20">
+    <Property Name="ElementName" Value="[dbo].[tblICStorageMeasurementReadingConversion].[intSubLocationId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICStorageMeasurementReadingConversion]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intStorageLocationId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="df73488d-c8be-4360-82c7-02e3c27d8b52" ChangeDateTime="10/02/2015 01:36:20">
+    <Property Name="ElementName" Value="[dbo].[tblICItemMotorFuelTax].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemMotorFuelTax]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemMotorFuelTaxId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b995cbdd-2d1f-4b81-90eb-2183e6a945f2" ChangeDateTime="10/02/2015 01:36:34">
+    <Property Name="ElementName" Value="[dbo].[tblICItemMotorFuelTax].[intItemid]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemMotorFuelTax]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="638efb1f-7c95-4b6a-b9e8-3a1403d21e31" ChangeDateTime="10/05/2015 13:52:56">
+    <Property Name="ElementName" Value="[dbo].[tblRKAssignFuturesToContractSummary].[intAssignedLots]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKAssignFuturesToContractSummary]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dblAssignedLots" />
+  </Operation>
 </Operations>

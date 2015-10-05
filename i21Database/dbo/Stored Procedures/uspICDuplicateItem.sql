@@ -67,7 +67,6 @@ BEGIN
 		strMask2,
 		strMask3,
 		intPatronageCategoryId,
-		intFuelTaxClassId,
 		intSalesTaxGroupId,
 		intPurchaseTaxGroupId,
 		ysnStockedItem,
@@ -136,7 +135,8 @@ BEGIN
 		strCostMethod,
 		intOnCostTypeId,
 		dblAmount,
-		intCostUOMId)
+		intCostUOMId,
+		ysnHasMFTImplication)
 	SELECT @NewItemNo,
 		strType,
 		strDescription,
@@ -173,7 +173,6 @@ BEGIN
 		strMask2,
 		strMask3,
 		intPatronageCategoryId,
-		intFuelTaxClassId,
 		intSalesTaxGroupId,
 		intPurchaseTaxGroupId,
 		ysnStockedItem,
@@ -242,7 +241,8 @@ BEGIN
 		strCostMethod,
 		intOnCostTypeId,
 		dblAmount,
-		intCostUOMId
+		intCostUOMId,
+		ysnHasMFTImplication
 	FROM tblICItem
 	WHERE intItemId = @ItemId
 	------------------------------------------

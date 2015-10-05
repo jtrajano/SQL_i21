@@ -4,6 +4,7 @@
 AS
 IF ISNULL(@intLocationId, 0) <> 0
 BEGIN
+SELECT * INTO #temp FROM (
 	SELECT 1 AS intSeqId
 		,'Purchases Priced' [strType]
 		,isnull(Sum(CD.dblBalance), 0) AS dblTotal
@@ -620,9 +621,11 @@ BEGIN
 			WHERE c.intCommodityId = @intCommodityId
 			) t
 		) t1
+	)t2
 END
 ELSE
 BEGIN
+SELECT * INTO #temp1 FROM (
 	SELECT 1 AS intSeqId
 		,'Purchases Priced' [strType]
 		,isnull(Sum(CD.dblBalance), 0) AS dblTotal
@@ -1194,4 +1197,32 @@ BEGIN
 			WHERE c.intCommodityId = @intCommodityId
 			) t
 		) t1
+	)t2
+END
+
+DECLARE @intUnitMeasureId int
+DECLARE @intFromCommodityUnitMeasureId int
+DECLARE @intToCommodityUnitMeasureId int
+SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
+
+SELECT @intFromCommodityUnitMeasureId=cuc.intCommodityUnitMeasureId,@intToCommodityUnitMeasureId=cuc1.intCommodityUnitMeasureId 
+FROM tblICCommodity t
+JOIN tblICCommodityUnitMeasure cuc on t.intCommodityId=cuc.intCommodityId and cuc.ysnDefault=1 
+JOIN tblICCommodityUnitMeasure cuc1 on t.intCommodityId=cuc1.intCommodityId and @intUnitMeasureId=cuc1.intUnitMeasureId
+WHERE t.intCommodityId= @intCommodityId
+
+IF ISNULL(@intLocationId, 0) <> 0
+BEGIN
+SELECT intSeqId,strType, 
+		CASE WHEN strType = 'Net Payable' THEN dblTotal
+			 WHEN strType = 'Net Receivable' THEN dblTotal
+			 else dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) end dblTotal
+FROM #temp 
+
+END
+ELSE
+BEGIN
+	SELECT intSeqId,strType,
+		dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) dblTotal
+FROM #temp1
 END

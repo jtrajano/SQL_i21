@@ -202,3 +202,9 @@ GO
 		VALUES('System Manager', 'User Roles per Company Location', 'Migration of User Roles per Company Location', GETDATE())
 	END
 GO
+	-- Update intCompanyLocationId in tblSMUserSecurityMenuFavorite with user default location.
+	UPDATE tblSMUserSecurityMenuFavorite SET intCompanyLocationId = UserSecurity.intCompanyLocationId
+	FROM tblSMUserSecurityMenuFavorite Favorite
+	JOIN tblSMUserSecurity UserSecurity ON Favorite.intUserSecurityId = UserSecurity.intUserSecurityID
+	WHERE Favorite.intCompanyLocationId IS NULL
+GO

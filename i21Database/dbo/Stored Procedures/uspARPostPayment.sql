@@ -504,6 +504,48 @@ IF @recap = 0
 					B.dblPayment <> 0 
 					AND C.ysnPaid = 0 
 					AND C.dblAmountDue + C.dblDiscount < (B.dblPayment + B.dblDiscount)
+					
+				INSERT INTO
+					@ARReceivableInvalidData
+				SELECT 
+					'Payment on ' + C.strInvoiceNumber + ' is over the transaction''s amount due'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					tblARPaymentDetail B
+						ON A.intPaymentId = B.intPaymentId
+				INNER JOIN
+					tblARInvoice C
+						ON B.intInvoiceId = C.intInvoiceId
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId
+				INNER JOIN
+					(
+						SELECT 
+							 MIN(PD.intPaymentId) AS intPaymentId
+							,PD.intInvoiceId	
+						FROM
+							tblARPaymentDetail PD
+						INNER JOIN
+							tblARInvoice I
+								ON PD.intInvoiceId = I.intInvoiceId
+						GROUP BY
+							PD.intInvoiceId 
+						HAVING
+							COUNT(PD.intInvoiceId) > 1
+							AND MAX(I.dblAmountDue) < SUM(PD.dblPayment)
+					) I
+						ON C.intInvoiceId = I.intInvoiceId 
+				WHERE
+					A.intPaymentId <> I.intPaymentId 
+			
+					
+				
 				
 			END
 
@@ -1295,7 +1337,7 @@ IF @recap = 0
 			UPDATE 
 				tblARInvoice
 			SET 
-				tblARInvoice.dblAmountDue = C.dblInvoiceTotal - (C.dblPayment + C.dblDiscount)
+				tblARInvoice.dblAmountDue = C.dblInvoiceTotal - C.dblPayment
 			FROM 
 				tblARPayment A
 			INNER JOIN tblARPaymentDetail B 
@@ -1529,7 +1571,7 @@ IF @recap = 0
 			UPDATE 
 				tblARInvoice
 			SET 
-				tblARInvoice.dblAmountDue = C.dblInvoiceTotal - (C.dblPayment + C.dblDiscount)
+				tblARInvoice.dblAmountDue = C.dblInvoiceTotal - C.dblPayment
 			FROM 
 				tblARPayment A
 			INNER JOIN tblARPaymentDetail B 

@@ -1,7 +1,7 @@
 ﻿--Author		: Trajano, Jeffrey
 --Date			: 06-16-2015
 --Description	: Regenerate Names in Chart Of Accounts using a specific string delimiter
-CREATE PROCEDURE uspGLRegenerateAccountNames(@strDelimiter  NVARCHAR(1) = ' ')
+CREATE PROCEDURE [dbo].[uspGLRegenerateAccountNames](@strDelimiter  NVARCHAR(1) = ' ')
 AS
 BEGIN
 	IF @strDelimiter = '' SET @strDelimiter = ' '
@@ -19,5 +19,13 @@ BEGIN
 		, 1, 2, '' ) AS strDescription
     FROM tblGLAccount A1  
 	GROUP BY intAccountId)
-	UPDATE A SET A.strDescription = CTE.strDescription  FROM tblGLAccount A INNER JOIN CTE ON A.intAccountId = CTE.intAccountId
+	UPDATE A SET A.strDescription = CTE.strDescription 
+	 FROM tblGLAccount A INNER JOIN CTE ON A.intAccountId = CTE.intAccountId
+	 INNER JOIN tblGLAccountSegmentMapping M ON A.intAccountId = M.intAccountId
+	 INNER JOIN tblGLAccountSegment S ON M.intAccountSegmentId = S.intAccountSegmentId
+	 IF @strDelimiter <> ''
+	 BEGIN
+		UPDATE tblGLAccount SET strDescription = SUBSTRING(RTRIM(strDescription),0,LEN(strDescription)-1)
+		WHERE SUBSTRING(RTRIM(strDescription),LEN(strDescription),1) = @strDelimiter
+	 END
 END

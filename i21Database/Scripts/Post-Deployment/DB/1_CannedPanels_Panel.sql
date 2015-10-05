@@ -70,6 +70,14 @@ INSERT INTO #TempCannedPanels VALUES (4, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Sub
 INSERT INTO #TempCannedPanels VALUES (5, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Subpanel', N'iRely Petro - Inventory Overview Detail', N'Grid', N'', N'iRely Petro - Inventory Overview Detail', N'', N'', N'', N'i21 PT - Berry Oil ', N'None', N'', N'', N'', N'Select ptitmmst.ptitm_itm_no, ptitmmst.ptitm_desc, ptitmmst.ptitm_loc_no, ptitmmst.ptitm_class, ptitmmst.ptitm_unit, ptitmmst.ptitm_cost1, ptitmmst.ptitm_avg_cost, ptitmmst.ptitm_std_cost, ptitmmst.ptitm_on_hand, ptitmmst.ptitm_std_cost From ptitmmst Where ptitmmst.ptitm_phys_inv_yno = ''Y''', N'', N'', N'', N'', N'', N'iRely Petro - Inventory Overview Detail', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, NULL, 0, 0, NULL, NULL, N'14.1', NULL, 1, 63, NULL)
 INSERT INTO #TempCannedPanels VALUES (6, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Subpanel', N'iRely AG - Open Contracts Detail', N'Grid', N'', N'iRely AG - Open Contracts Detail', N'', N'', N'', N'FortBooks', N'None', N'', N'', N'', N'Select agcntmst.agcnt_cus_no, agcusmst.agcus_last_name, agcusmst.agcus_first_name, agcntmst.agcnt_loc_no, agcntmst.agcnt_cnt_no, agcntmst.agcnt_cnt_rev_dt, agcntmst.agcnt_due_rev_dt, agcntmst.agcnt_itm_or_cls, agcntmst.agcnt_prc_lvl, agcntmst.agcnt_ppd_yndm, agcntmst.agcnt_un_orig, agcntmst.agcnt_un_prc, agcntmst.agcnt_un_bal, agcntmst.agcnt_slsmn_id From agcntmst Left Join agcusmst ON agcntmst.agcnt_cus_no = agcusmst.agcus_key Where (agcntmst.agcnt_itm_or_cls <> ''*'' And agcntmst.agcnt_un_bal > 0.0)', N'', N'', N'', N'', N'', N'iRely AG - Open Contracts Detail', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, NULL, 0, 0, NULL, NULL, N'14.1', NULL, 1, 50, NULL)
 INSERT INTO #TempCannedPanels VALUES (8, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Subpanel', N'iRely AG - Inventory Available for Sale Detail', N'Grid', N'', N'iRely AG - Inventory Available for Sale Detail', N'', N'', N'', N'i21 AG - Demo Test', N'None', N'', N'', N'', N'Select agitmmst.agitm_no, agitmmst.agitm_loc_no, agitmmst.agitm_desc, agitmmst.agitm_class, agitmmst.agitm_un_desc, agitmmst.agitm_un_on_hand, agitmmst.agitm_un_pend_ivcs, agitmmst.agitm_un_on_order, agitmmst.agitm_un_mfg_in_prs, agitmmst.agitm_un_fert_committed, agitmmst.agitm_un_ord_committed, agitmmst.agitm_un_cnt_committed,  agitmmst.agitm_un_on_hand-agitmmst.agitm_un_pend_ivcs+agitmmst.agitm_un_on_order+agitmmst.agitm_un_mfg_in_prs-agitmmst.agitm_un_fert_committed-agitmmst.agitm_un_cnt_committed-agitmmst.agitm_un_ord_committed As [Available] From agitmmst', N'', N'', N'', N'', N'', N'iRely AG - Inventory Available for Sale Detail', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, NULL, 0, 0, NULL, NULL, N'14.2.2', NULL, 1, 53, NULL)
+INSERT INTO #TempCannedPanels VALUES (310, 0, 15, 100, 250, 0, 0, 0, 0, 0, 1, 0, N'Subpanel', N'i21 Data Dictionary - Column List', N'Grid', N'', N'i21 Data Dictionary - Column List', N'Bar', N'outside', N'Chameleon', N'i21', N'None', N'None', N'', N'', N'SELECT  sys.tables.name, C.name AS ''COLUMN NAME'',  P.name AS ''DATA TYPE'',
+	replace(cast(colDes.DESCRIPTION as nvarchar(max)), '','', ''|'') as ''DESCRIPTION''
+FROM sys.tables
+INNER JOIN sys.columns AS C ON sys.tables.object_id = C.object_id
+INNER JOIN sys.types AS P ON C.system_type_id = P.system_type_id
+left join vyuFRMColumnDescription colDes on sys.tables.name = colDes.TABLE_NAME and C.name = colDes.COLUMN_NAME 
+WHERE sys.tables.type_desc = ''USER_TABLE''
+ORDER BY sys.tables.name, C.column_id;', N'', N'', N'', NULL, NULL, NULL, NULL, N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.3.2', NULL, 2, 118, NULL)
 print('/*******************  END INSERTING drill down canned panels on temporary panel table  *******************/')
 
 print('/*******************  BEGIN INSERTING canned panels on temporary panel table  *******************/')
@@ -457,26 +465,6 @@ GROUP BY sthssmst.sthss_store_name, sthssmst.sthss_pmp_id, sthssmst.sthss_rec_ty
 HAVING (sthssmst.sthss_rec_type=''PMP'')', N'', N'@DATE@', N'', N'', N'Track your gallons sold of each fuel product for any timeframe.  
 -C-Store Module-', N'', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.2', NULL, 1, 96, NULL)
  
-INSERT INTO #TempCannedPanels VALUES (234, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'i21 Data Dictionary', N'Grid', N'', N'i21 Data Dictionary', N'', N'', N'', N'AG/Grain - Demo - i21', N'None', N'', N'', N'', N'SELECT col.TABLE_NAME
-	,col.COLUMN_NAME
-    ,col.DATA_TYPE
-    ,CASE col.DATA_TYPE
-		--WHEN ''int'' THEN ''('' + cast(col.NUMERIC_PRECISION as varchar(10)) + ''/'' + cast(col.NUMERIC_SCALE as varchar(10)) + '')''
-		WHEN ''int'' THEN cast(col.NUMERIC_PRECISION as varchar(10))
-        WHEN ''numeric'' THEN ''('' + cast(col.NUMERIC_PRECISION as varchar(10)) + ''/ '' + cast(col.NUMERIC_SCALE as varchar(10)) + '')''
-        WHEN ''date'' THEN ''N/A''
-        WHEN ''datetime'' THEN ''N/A''
-        WHEN ''bit'' THEN ''1''
-        WHEN ''varchar'' THEN  cast(col.CHARACTER_MAXIMUM_LENGTH as varchar(10)) 
-        WHEN ''nvarchar''  THEN  cast(col.CHARACTER_MAXIMUM_LENGTH as varchar(10))
-        WHEN ''char''  THEN cast(col.CHARACTER_MAXIMUM_LENGTH as varchar(10)) 
-        WHEN ''nchar''  THEN  cast(col.CHARACTER_MAXIMUM_LENGTH as varchar(10)) 
-     END as ''SIZE''
-    ,replace(cast(colDes.DESCRIPTION as nvarchar(max)), '','', ''|'') as ''DESCRIPTION''
-FROM INFORMATION_SCHEMA.COLUMNS col
-inner join vyuFRMColumnDescription colDes on col.TABLE_NAME = colDes.TABLE_NAME and col.COLUMN_NAME = colDes.COLUMN_NAME
-order by col.TABLE_NAME', N'', N'', N'', N'', N'', N'i21 Data Dictionary', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.3', NULL, 2, 87, NULL)
- 
 INSERT INTO #TempCannedPanels VALUES (235, 0, 5, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely Store - Gross Profit by Store', N'Grid', N'', N'iRely Store - Gross Profit by Store', N'', N'', N'', N'i21 Demo', N'Last Month', N'', N'sthssmst.sthss_rev_dt', N'', N'select sthss_store_name as ''Store Name'', 
 	sthss_key_deptno as ''Dept #'', 
 	sum((sthss_key_total_sales * sthss_key_gp_pct) / 100) as ''Gross Profit''
@@ -643,9 +631,7 @@ INSERT INTO #TempCannedPanels VALUES (248, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Ma
 	tblSMUserSecurity.strFullName
 From tblDBPanel
 Inner Join tblDBPanelUser on tblDBPanel.intPanelId = tblDBPanelUser.intPanelId
-Inner Join tblSMUserSecurity on tblDBPanelUser.intUserId = tblSMUserSecurity.intUserSecurityID
-order by tblDBPanel.strPanelName
-', N'', N'', N'', N'', N'Lists Users of all i21 Dashboard Active Panels, by Panel Name', N'i21 Dashboard - Active Panel Users', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.3', NULL, 2, 108, NULL)
+Inner Join tblSMUserSecurity on tblDBPanelUser.intUserId = tblSMUserSecurity.intUserSecurityID', N'', N'', N'', N'', N'Lists Users of all i21 Dashboard Active Panels, by Panel Name', N'i21 Dashboard - Active Panel Users', N'', N'', N'', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'14.3.7', NULL, 1, 108, NULL)
  
 INSERT INTO #TempCannedPanels VALUES (256, 0, 20, 0, 0, 0, 0, 0, 0, 0, 1, 0, N'Master', N'iRely AG - Customers Over Credit Limit', N'Grid', N'', N'iRely AG - Customers Over Credit Limit', N'', N'', N'', N'i21 AG - Demo Test', N'None', N'', N'', N'', N'Select agcusmst.agcus_key, agcusmst.agcus_last_name, agcusmst.agcus_first_name, agcusmst.agcus_cred_limit, 
 agcusmst.agcus_ar_future+agcusmst.agcus_ar_per1+agcusmst.agcus_ar_per3+agcusmst.agcus_ar_per2+agcusmst.agcus_ar_per4+agcusmst.agcus_ar_per5-agcusmst.agcus_cred_reg-agcusmst.agcus_cred_ppd As ''Total Balance'', agcusmst.agcus_cred_limit-(agcusmst.agcus_ar_future+agcusmst.agcus_ar_per1+agcusmst.agcus_ar_per3+agcusmst.agcus_ar_per2+agcusmst.agcus_ar_per4+agcusmst.agcus_ar_per5-agcusmst.agcus_cred_reg-agcusmst.agcus_cred_ppd) As ''Overage'' From agcusmst Where agcusmst.agcus_active_yn = ''Y'' And agcusmst.agcus_last_stmt_bal <> 0 And agcusmst.agcus_cred_limit-(agcusmst.agcus_ar_future+agcusmst.agcus_ar_per1+agcusmst.agcus_ar_per3+agcusmst.agcus_ar_per2+agcusmst.agcus_ar_per4+agcusmst.agcus_ar_per5-agcusmst.agcus_cred_reg-agcusmst.agcus_cred_ppd) < 0', N'', N'', N'', N'', N'', N'iRely AG - Customers Over Credit Limit', N'', N'', N'None', N'', N'', N'', N'', NULL, NULL, NULL, 0, 0, NULL, NULL, N'14.1.3', NULL, 1, 86, NULL)
@@ -737,13 +723,18 @@ left outer join tblTMDevice on tblTMLease.intLeaseId = tblTMDevice.intLeaseId
 left outer join tblTMLeaseCode on tblTMLease.intLeaseCodeId = tblTMLeaseCode.intLeaseCodeId
 left outer join vwcusmst on tblTMLease.intBillToCustomerId = vwcusmst.A4GLIdentity', N'', N'', N'', NULL, NULL, NULL, NULL, N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.2', NULL, 1, 116, NULL)
  
+INSERT INTO #TempCannedPanels VALUES (309, 0, 15, 100, 250, 0, 0, 0, 0, 0, 1, 310, N'Master', N'i21 Data Dictionary - Table List', N'Grid', N'', N'i21 Data Dictionary - Table List', N'Bar', N'outside', N'Chameleon', N'i21', N'None', N'None', N'', N'', N'SELECT sys.tables.name
+FROM sys.tables
+WHERE sys.tables.type_desc = ''USER_TABLE'' and sys.tables.name like ''tbl%''
+ORDER BY sys.tables.name', N'', N'', N'', NULL, NULL, NULL, NULL, N'', N'None', N'', N'', N'', N'', NULL, NULL, N'', 0, 0, NULL, NULL, N'15.3.3', NULL, 3, 117, NULL)
+ 
 
 print('/*******************  END INSERTING canned panels on temporary panel table  *******************/')
 
 
 print('/*******************  BEGIN DELETING deleted canned panels  on table Panel  *******************/')
 --This are panels that are deleted on  canned panel server.
-DELETE tblDBPanel WHERE intCannedPanelId in (1,2,3,4,5,6,7,8,9,10,11,12,13,14,49,110)
+DELETE tblDBPanel WHERE intCannedPanelId in (1,2,3,4,5,6,7,8,9,10,11,12,13,14,49,87,110)
 print('/*******************  END DELETING deleted canned panels on temporary panel table  *******************/')
 
 print('/*******************  BEGIN UPDATING canned panels on table Panel  *******************/')

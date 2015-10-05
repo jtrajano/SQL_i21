@@ -38,13 +38,13 @@ BEGIN TRY
 	IF @ysnUpdateHouseTotal = 1 AND @dblOpenBalance>0
 	BEGIN
 		UPDATE tblICItemStock
-		SET dblUnitInCustody = dblUnitInCustody - @dblOpenBalance
+		SET dblUnitStorage = dblUnitStorage - @dblOpenBalance
 		WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId
 	END
 	ELSE IF @ysnUpdateHouseTotal = 0 AND @dblOpenBalance>0
 	BEGIN
 		UPDATE tblICItemStock
-		SET dblUnitInCustody = dblUnitInCustody - @dblOpenBalance
+		SET dblUnitStorage = dblUnitStorage - @dblOpenBalance
 			,dblUnitOnHand = dblUnitOnHand + @dblOpenBalance WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId
 	END
 
