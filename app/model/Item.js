@@ -26,6 +26,7 @@ Ext.define('Inventory.model.Item', {
         'Inventory.model.ItemNote',
         'Inventory.model.ItemOwner',
         'Inventory.model.ItemFactory',
+        'Inventory.model.ItemMotorFuelTax',
         'Ext.data.Field'
     ],
 
@@ -70,7 +71,6 @@ Ext.define('Inventory.model.Item', {
         { name: 'strMask2', type: 'string' },
         { name: 'strMask3', type: 'string' },
         { name: 'intPatronageCategoryId', type: 'int', allowNull: true },
-        { name: 'intFuelTaxClassId', type: 'int', allowNull: true },
         { name: 'intSalesTaxGroupId', type: 'int', allowNull: true },
         { name: 'intPurchaseTaxGroupId', type: 'int', allowNull: true },
         { name: 'ysnStockedItem', type: 'boolean' },
@@ -164,7 +164,8 @@ Ext.define('Inventory.model.Item', {
         { name: 'strExternalGroup', type: 'string' },
         { name: 'ysnSellableItem', type: 'boolean' },
         { name: 'dblMinStockWeeks', type: 'float' },
-        { name: 'dblFullContainerSize', type: 'float' }
+        { name: 'dblFullContainerSize', type: 'float' },
+        { name: 'ysnHasMFTImplication', type: 'boolean' }
     ],
 
     validators: [

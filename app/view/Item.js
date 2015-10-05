@@ -3808,13 +3808,6 @@ Ext.define('Inventory.view.Item', {
                                                                             {
                                                                                 xtype: 'button',
                                                                                 tabIndex: -1,
-                                                                                itemId: 'btnViewMFT',
-                                                                                iconCls: 'small-add',
-                                                                                text: 'Insert'
-                                                                            },
-                                                                            {
-                                                                                xtype: 'button',
-                                                                                tabIndex: -1,
                                                                                 itemId: 'btnDeleteMFT',
                                                                                 iconCls: 'small-delete',
                                                                                 text: 'Remove'
@@ -3839,21 +3832,31 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
-                                                                                    dataIndex: 'intAccountCategoryId',
+                                                                                    dataIndex: 'intTaxAuthorityId',
                                                                                     dataType: 'numeric',
-                                                                                    text: 'Account Category Id',
                                                                                     hidden: true
                                                                                 },
                                                                                 {
-                                                                                    dataIndex: 'strAccountCategory',
+                                                                                    dataIndex: 'ysnFilingForThisTA',
+                                                                                    dataType: 'boolean',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strTaxAuthorityCode',
                                                                                     dataType: 'string',
-                                                                                    text: 'Account Category',
+                                                                                    text: 'Tax Authority Code',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strDescription',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Description',
                                                                                     flex: 1
                                                                                 }
                                                                             ],
                                                                             itemId: 'cboTaxAuthority',
-                                                                            displayField: 'strAccountCategory',
-                                                                            valueField: 'strAccountCategory'
+                                                                            displayField: 'strTaxAuthorityCode',
+                                                                            valueField: 'strTaxAuthorityCode'
                                                                         }
                                                                     },
                                                                     {
@@ -3872,15 +3875,14 @@ Ext.define('Inventory.view.Item', {
                                                                             xtype: 'gridcombobox',
                                                                             columns: [
                                                                                 {
-                                                                                    dataIndex: 'intAccountId',
+                                                                                    dataIndex: 'intProductCodeId',
                                                                                     dataType: 'numeric',
-                                                                                    text: 'Account Id',
                                                                                     hidden: true
                                                                                 },
                                                                                 {
-                                                                                    dataIndex: 'strAccountId',
+                                                                                    dataIndex: 'strProductCode',
                                                                                     dataType: 'string',
-                                                                                    text: 'Account Id',
+                                                                                    text: 'Product Code',
                                                                                     flex: 1
                                                                                 },
                                                                                 {
@@ -3890,27 +3892,20 @@ Ext.define('Inventory.view.Item', {
                                                                                     flex: 1
                                                                                 },
                                                                                 {
-                                                                                    dataIndex: 'intAccountGroupId',
+                                                                                    dataIndex: 'intTaxAuthorityId',
                                                                                     dataType: 'numeric',
-                                                                                    text: 'Account Group Id',
                                                                                     hidden: true
                                                                                 },
                                                                                 {
-                                                                                    dataIndex: 'strAccountGroup',
+                                                                                    dataIndex: 'strProductCodeGroup',
                                                                                     dataType: 'string',
-                                                                                    text: 'Account Group',
-                                                                                    flex: 1
-                                                                                },
-                                                                                {
-                                                                                    dataIndex: 'strAccountType',
-                                                                                    dataType: 'string',
-                                                                                    text: 'Account Type',
+                                                                                    text: 'Product Code Group',
                                                                                     flex: 1
                                                                                 }
                                                                             ],
                                                                             itemId: 'cboProductCode',
-                                                                            displayField: 'strAccountId',
-                                                                            valueField: 'strAccountId'
+                                                                            displayField: 'strProductCode',
+                                                                            valueField: 'strProductCode'
                                                                         }
                                                                     },
                                                                     {

@@ -52,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\tblICItemMotorFuelTaxMap.cs" />
     <Compile Include="Configuration\tblICStorageMeasurementReadingMap.cs" />
     <Compile Include="Configuration\tblICCompanyPreferenceMap.cs" />
     <Compile Include="Configuration\ExternalTablesMap.cs" />
@@ -109,6 +110,7 @@
     <Compile Include="Configuration\tblICUnitMeasureMap.cs" />
     <Compile Include="InventoryEntities.cs" />
     <Compile Include="InventoryEntities.Views.cs" />
+    <Compile Include="Metadata\tblICItemMotorFuelTax.cs" />
     <Compile Include="Metadata\tblICStorageMeasurementReading.cs" />
     <Compile Include="Metadata\tblICCompanyPreference.cs" />
     <Compile Include="Metadata\ExternalTables.cs" />

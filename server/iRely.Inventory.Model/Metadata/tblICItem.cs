@@ -50,7 +50,6 @@ namespace iRely.Inventory.Model
         public string strMask2 { get; set; }
         public string strMask3 { get; set; }
         public int? intPatronageCategoryId { get; set; }
-        public int? intFuelTaxClassId { get; set; }
         public int? intSalesTaxGroupId { get; set; }
         public int? intPurchaseTaxGroupId { get; set; }
         public bool? ysnStockedItem { get; set; }
@@ -146,6 +145,7 @@ namespace iRely.Inventory.Model
         public bool? ysnSellableItem { get; set; }
         public decimal? dblMinStockWeeks { get; set; }
         public decimal? dblFullContainerSize { get; set; }
+        public bool? ysnHasMFTImplication { get; set; }
 
         private string _manufacturer;
         [NotMapped]
@@ -240,6 +240,8 @@ namespace iRely.Inventory.Model
         public ICollection<tblICInventoryAdjustmentDetail> NewAdjustmentDetails { get; set; }
         public ICollection<tblICBuildAssembly> tblICBuildAssemblies { get; set; }
         public ICollection<tblICBuildAssemblyDetail> tblICBuildAssemblyDetails { get; set; }
+
+        public ICollection<tblICItemMotorFuelTax> tblICItemMotorFuelTaxes { get; set; }
                 
     }
 

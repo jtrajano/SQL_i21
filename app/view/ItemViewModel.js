@@ -38,7 +38,9 @@ Ext.define('Inventory.view.ItemViewModel', {
         'GeneralLedger.store.BufAccountCategoryGroup',
         'Manufacturing.store.BufferedManufacturingCell',
         'Manufacturing.store.BufferedPackType',
-        'Patronage.store.BufferedPatronageCategory'
+        'Patronage.store.BufferedPatronageCategory',
+        'TaxForm.store.BufferedTaxAuthority',
+        'TaxForm.store.BufferedProductCode'
     ],
 
     stores: {
@@ -505,6 +507,12 @@ Ext.define('Inventory.view.ItemViewModel', {
             type: 'icbuffereditemunitmeasure'
         },
 
+        taxAuthority: {
+            type: 'tfbufferedtaxauthority'
+        },
+        productCode: {
+            type: 'tfbufferedproductcode'
+        },
 
         contractLocation: {
             type: 'icbuffereditemlocation'

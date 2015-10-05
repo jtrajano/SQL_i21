@@ -550,6 +550,39 @@ Ext.define('Inventory.view.ItemViewController', {
                 }]
             },
 
+            //--------------//
+            //Motor Fuel Tax//
+            //--------------//
+            grdMotorFuelTax: {
+                colMFTTaxAuthority: {
+                    dataIndex: 'strTaxAuthorityCode',
+                    editor: {
+                        origValueField: 'intTaxAuthorityId',
+                        origUpdateField: 'intTaxAuthorityId',
+                        store: '{taxAuthority}',
+                        defaultFilters: [{
+                            column: 'ysnFilingForThisTA',
+                            value: true
+                        }]
+                    }
+                },
+                colMFTDescription: 'strTaxAuthorityDescription',
+                colMFTProductCode: {
+                    dataIndex: 'strProductCode',
+                    editor: {
+                        origValueField: 'intProductCodeId',
+                        origUpdateField: 'intProductCodeId',
+                        store: '{productCode}',
+                        defaultFilters: [{
+                            column: 'intTaxAuthorityId',
+                            value: '{grdMotorFuelTax.selection.intTaxAuthorityId}'
+                        }]
+                    }
+                },
+                colMFTProductCodeDescription: 'strProductDescription',
+                colMFTProductCodeGroup: 'strProductCodeGroup'
+            },
+
             //-----------------//
             //Contract Item Tab//
             //-----------------//
@@ -1022,6 +1055,7 @@ Ext.define('Inventory.view.ItemViewController', {
             grdFactory = win.down('#grdFactory'),
             grdManufacturingCellAssociation = win.down('#grdManufacturingCellAssociation'),
             grdOwner = win.down('#grdOwner'),
+            grdMotorFuelTax = win.down('#grdMotorFuelTax'),
 
             grdPricing = win.down('#grdPricing'),
             grdPricingLevel = win.down('#grdPricingLevel'),
@@ -1133,6 +1167,13 @@ Ext.define('Inventory.view.ItemViewController', {
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdCommodityCost,
                         deleteButton : grdCommodityCost.down('#btnDeleteCommodityCost')
+                    })
+                },
+                {
+                    key: 'tblICItemMotorFuelTaxes',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdMotorFuelTax,
+                        deleteButton : grdMotorFuelTax.down('#btnDeleteMFT')
                     })
                 },
                 {
@@ -1394,6 +1435,14 @@ Ext.define('Inventory.view.ItemViewController', {
                     grdCertification.store.load();
                 break;
 
+            case 'pgeMFT':
+                var pgeMFT = tabPanel.down('#pgeMFT');
+                var grdMotorFuelTax = pgeMFT.down('#grdMotorFuelTax');
+                if (grdMotorFuelTax.store.complete === true)
+                    grdMotorFuelTax.getView().refresh();
+                else
+                    grdMotorFuelTax.store.load();
+                break;
 
             case 'pgePricing':
                 var pgePricing = tabPanel.down('#pgePricing');
@@ -2058,6 +2107,28 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // </editor-fold>
 
+    // <editor-fold desc="Motor Fuel Tax Tab Methods and Event Handlers">
+
+    onMotorFuelTaxSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepMotorFuelTax');
+        var current = plugin.getActiveRecord();
+
+        if (combo.itemId === 'cboTaxAuthority'){
+            current.set('strTaxAuthorityDescription', records[0].get('strDescription'));
+        }
+        else if (combo.itemId === 'cboProductCode') {
+            current.set('strProductDescription', records[0].get('strDescription'));
+            current.set('strProductCodeGroup', records[0].get('strProductCodeGroup'));
+        }
+    },
+
+    // </editor-fold>
+
+
     // <editor-fold desc="Pricing Tab Methods and Event Handlers">
 
     onPricingLocationSelect: function(combo, records, eOpts) {
@@ -2660,6 +2731,12 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboCopyLocation": {
                 select: this.onCopyLocationSelect
+            },
+            "#cboTaxAuthority": {
+                select: this.onMotorFuelTaxSelect
+            },
+            "#cboProductCode": {
+                select: this.onMotorFuelTaxSelect
             },
             "#cboPricingLocation": {
                 select: this.onPricingLocationSelect

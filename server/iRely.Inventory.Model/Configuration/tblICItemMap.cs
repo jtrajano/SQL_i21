@@ -50,7 +50,6 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strMask2).HasColumnName("strMask2");
             this.Property(t => t.strMask3).HasColumnName("strMask3");
             this.Property(t => t.intPatronageCategoryId).HasColumnName("intPatronageCategoryId");
-            this.Property(t => t.intFuelTaxClassId).HasColumnName("intFuelTaxClassId");
             this.Property(t => t.intSalesTaxGroupId).HasColumnName("intSalesTaxGroupId");
             this.Property(t => t.intPurchaseTaxGroupId).HasColumnName("intPurchaseTaxGroupId");
             this.Property(t => t.ysnStockedItem).HasColumnName("ysnStockedItem");
@@ -146,6 +145,7 @@ namespace iRely.Inventory.Model
             this.Property(t => t.ysnSellableItem).HasColumnName("ysnSellableItem");
             this.Property(t => t.dblMinStockWeeks).HasColumnName("dblMinStockWeeks").HasPrecision(18, 6);
             this.Property(t => t.dblFullContainerSize).HasColumnName("dblFullContainerSize").HasPrecision(18, 6);
+            this.Property(t => t.ysnHasMFTImplication).HasColumnName("ysnHasMFTImplication");
 
             this.HasOptional(p => p.tblICBrand)
                 .WithMany(p => p.tblICItems)
@@ -226,6 +226,9 @@ namespace iRely.Inventory.Model
                 .WithRequired(p => p.tblICItem)
                 .HasForeignKey(p => p.intItemId);
             this.HasMany(p => p.tblICItemCommodityCosts)
+                .WithRequired(p => p.tblICItem)
+                .HasForeignKey(p => p.intItemId);
+            this.HasMany(p => p.tblICItemMotorFuelTaxes)
                 .WithRequired(p => p.tblICItem)
                 .HasForeignKey(p => p.intItemId);
         }
