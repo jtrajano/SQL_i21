@@ -1214,7 +1214,9 @@ WHERE t.intCommodityId= @intCommodityId
 IF ISNULL(@intLocationId, 0) <> 0
 BEGIN
 SELECT intSeqId,strType, 
-		dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) dblTotal
+		CASE WHEN strType = 'Net Payable' THEN dblTotal
+			 WHEN strType = 'Net Receivable' THEN dblTotal
+			 else dbo.fnCTConvertQuantityToTargetCommodityUOM(@intFromCommodityUnitMeasureId,@intToCommodityUnitMeasureId,dblTotal) end dblTotal
 FROM #temp 
 
 END
