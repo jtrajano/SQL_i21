@@ -1,12 +1,14 @@
 ﻿CREATE TABLE [dbo].[tblSMUserSecurityMenuFavorite]
 (
 	[intUserSecurityMenuFavoriteId] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [intUserRoleMenuId] INT NOT NULL, 
+    [intMenuId] INT NOT NULL, 
 	[intUserSecurityId] INT NOT NULL, 
+	[intCompanyLocationId] INT NULL, 
     [intSort] INT NULL DEFAULT (1), 
 	[intConcurrencyId] INT NOT NULL DEFAULT (1), 
-    CONSTRAINT [FK_tblSMUserSecurityMenuFavorite_tblSMUserRoleMenu] FOREIGN KEY ([intUserRoleMenuId]) REFERENCES [tblSMUserRoleMenu]([intUserRoleMenuId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblSMUserSecurityMenuFavorite_tblSMUserSecurity] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intUserSecurityID]) ON DELETE CASCADE
+    CONSTRAINT [FK_tblSMUserSecurityMenuFavorite_tblSMasterMenu] FOREIGN KEY ([intMenuId]) REFERENCES [tblSMMasterMenu]([intMenuID]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblSMUserSecurityMenuFavorite_tblSMUserSecurity] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intUserSecurityID]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblSMUserSecurityMenuFavorite_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]) ON DELETE CASCADE
 )
 
 GO
@@ -26,7 +28,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblSMUserSecurityMenuFavorite',
     @level2type = N'COLUMN',
-    @level2name = N'intUserRoleMenuId'
+    @level2name = N'intMenuId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'User Security Id',
@@ -36,6 +38,15 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblSMUserSecurityMenuFavorite',
     @level2type = N'COLUMN',
     @level2name = N'intUserSecurityId'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Company Location Id',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblSMUserSecurityMenuFavorite',
+    @level2type = N'COLUMN',
+    @level2name = N'intCompanyLocationId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Sort field',

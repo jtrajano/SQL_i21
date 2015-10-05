@@ -2528,6 +2528,8 @@
     <Build Include="dbo\Stored Procedures\uspCTReportContractDetail.sql" />
     <Build Include="dbo\Tables\tblICItemMotorFuelTax.sql" />
     <Build Include="dbo\Views\vyuICGetItemMotorFuelTax.sql" />
+    <Build Include="dbo\Views\vyuSMUserRoleMenuLocation.sql" />
+    <Build Include="dbo\Views\vyuSMUserSecurityMenuFavorite.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
