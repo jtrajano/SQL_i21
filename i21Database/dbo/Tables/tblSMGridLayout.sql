@@ -8,6 +8,8 @@
     [strGrid] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intUserId] INT NULL, 
     [ysnActive] BIT NULL, 
+	[ysnIsQuickFilter] BIT NULL,
+	[intTabIndex] INT NULL,
     [intConcurrencyId] INT NOT NULL, 
     CONSTRAINT [PK_tblSMGridLayout] PRIMARY KEY CLUSTERED ([intGridLayoutId] ASC) 
 )
