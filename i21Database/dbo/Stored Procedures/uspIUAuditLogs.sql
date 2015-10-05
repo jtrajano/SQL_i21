@@ -98,7 +98,7 @@ BEGIN
 						BEGIN TRAN
 							IF (@ColumnChanges < @retScale)
 							BEGIN
-							EXEC uspSPAuditRemoveDefendencies @Table, @Column
+							EXEC uspIUAuditRemoveDefendencies @Table, @Column
 							-- SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' DECIMAL(' + @ret + ',' + @ColumnChanges + ')';
 							 SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' ' + @retDataType + '(' + @retPrecision + ',' + @ColumnChanges + ')';
 							EXEC sp_executesql @Sql;
@@ -128,7 +128,7 @@ BEGIN
 						BEGIN TRAN
 							IF (@ColumnChanges < @retPrecision)
 							BEGIN
-							EXEC uspSPAuditRemoveDefendencies @Table, @Column
+							EXEC uspIUAuditRemoveDefendencies @Table, @Column
 							--SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' DECIMAL(' + @ColumnChanges + ',' + @ret + ')';
 							SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' ' +  @retDataType + '(' + @ColumnChanges + ',' + @retScale + ')';
 							EXEC sp_executesql @Sql;
@@ -150,7 +150,7 @@ BEGIN
 					SET @Sql = ''
 					BEGIN TRY
 						BEGIN TRAN
-							EXEC uspSPAuditRemoveDefendencies @Table, @Column
+							EXEC uspIUAuditRemoveDefendencies @Table, @Column
 							IF (LOWER(@ret) = 'nvarchar' OR LOWER(@ret) = 'varchar')
 								BEGIN
 								SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' ' + @ret + '(' + @retSize + ')' +' COLLATE Latin1_General_CI_AS ' +  CASE WHEN @ColumnChanges = 'False' THEN 'NOT NULL' ELSE 'NULL' END;
@@ -177,7 +177,7 @@ BEGIN
 					SET @Sql = ''
 					BEGIN TRY
 						BEGIN TRAN	
-							EXEC uspSPAuditRemoveDefendencies @Table, @Column
+							EXEC uspIUAuditRemoveDefendencies @Table, @Column
 							SET @Sql = 'ALTER TABLE ' + @Table + ' ALTER COLUMN ' + @Column + ' NVARCHAR(' + CASE WHEN @ColumnChanges = 0 THEN 'MAX' ELSE @ColumnChanges END + ') COLLATE Latin1_General_CI_AS ' + CASE WHEN @ret = 'NO' THEN 'NOT NULL' ELSE 'NULL' END;
 							EXEC sp_executesql @Sql	
 						ROLLBACK TRAN
