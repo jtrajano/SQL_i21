@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE [dbo].[uspSPAuditLogs]
+CREATE PROCEDURE [dbo].[uspIUAuditLogs]
 	@Result NVARCHAR(MAX) OUTPUT, 
 	@FilePath NVARCHAR(256) = null
 AS

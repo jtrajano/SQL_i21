@@ -1899,7 +1899,7 @@
     <Build Include="dbo\Functions\fnGetItemPricing.sql" />
     <Build Include="dbo\Tables\tblCTPriceFixation.sql" />
     <Build Include="dbo\Tables\tblCTPriceFixationDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspSPAuditLogs.sql" />
+    <Build Include="dbo\Stored Procedures\uspIUAuditLogs.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePrepayAndDebitMemo.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetBlendRequests.sql" />
     <Build Include="dbo\Tables\tblHDReminder.sql" />
@@ -2055,7 +2055,7 @@
     <Build Include="dbo\Stored Procedures\uspTRGetCustomerFreight.sql" />
     <Build Include="dbo\Stored Procedures\uspTRProcessContracts.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDProcessOriginImport.sql" />
-    <Build Include="dbo\Stored Procedures\uspSPAuditRemoveDefendencies.sql" />
+    <Build Include="dbo\Stored Procedures\uspIUAuditRemoveDefendencies.sql" />
     <Build Include="dbo\Tables\tblCFAccountSuccessImport.sql" />
     <Build Include="dbo\Tables\tblCFAccountFailedImport.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportAccount.sql" />

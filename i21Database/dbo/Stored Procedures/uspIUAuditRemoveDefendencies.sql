@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspSPAuditRemoveDefendencies]
+﻿CREATE PROCEDURE [dbo].[uspIUAuditRemoveDefendencies]
 	@Table NVARCHAR(150) = null,
 	@Column NVARCHAR(150) = null
 AS
