@@ -7,7 +7,7 @@ isnull(CashExposure,0) as dblCaseExposure,
 (isnull(CompanyTitled,0)+ (isnull(OpenPurchasesQty,0)-isnull(OpenSalesQty,0))) as dblBasisExposure ,             
 (isnull(CompanyTitled,0)+ (isnull(OpenPurchasesQty,0)-isnull(OpenSalesQty,0))) - isnull(ReceiptProductQty,0) as dblAvailForSale,  
   
-isnull(CompanyTitled,0) as dblInHouse  into #temp            
+isnull(InHouse,0) as dblInHouse  into #temp            
  FROM(              
 SELECT strLocationName,intCommodityId,strCommodityCode,strUnitMeasure,intUnitMeasureId,  
    (invQty)-Case when (select top 1 ysnIncludeInTransitInCompanyTitled from tblRKCompanyPreference)=1 then  isnull(ReserveQty,0) else 0 end +  
@@ -22,7 +22,9 @@ SELECT strLocationName,intCommodityId,strCommodityCode,strUnitMeasure,intUnitMea
    Case when (select top 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then DP else 0 end +   
    dblCollatralSales  + SlsBasisDeliveries           
             AS CashExposure,              
-   ReceiptProductQty,OpenPurchasesQty,OpenSalesQty,OpenPurQty              
+   ReceiptProductQty,OpenPurchasesQty,OpenSalesQty,OpenPurQty,
+   (invQty)- isnull(ReserveQty,0)  + dblGrainBalance 
+   AS InHouse              
                  
 FROM(  
 SELECT distinct c.intCommodityId, strLocationName,     
@@ -95,7 +97,7 @@ SELECT distinct c.intCommodityId, strLocationName,
   JOIN tblICItemLocation il on a.intItemLocationId=il.intItemLocationId   
   JOIN tblICItem i on a.intItemId=i.intItemId  
   JOIN tblSMCompanyLocation sl on sl.intCompanyLocationId=il.intLocationId    
- JOIN tblICStockReservation sr1 ON a.intItemId = sr1.intItemId     
+  JOIN tblICStockReservation sr1 ON a.intItemId = sr1.intItemId     
  WHERE   
  sl.intCompanyLocationId=cl.intCompanyLocationId and i.intCommodityId= c.intCommodityId ) as ReserveQty  
  , (SELECT isnull(SUM(dblOriginalQuantity),0) - isnull(sum(dblAdjustmentAmount),0) as dblCollatralSales  
@@ -123,7 +125,9 @@ SELECT distinct c.intCommodityId, strLocationName,
   ,(SELECT   
   isnull(SUM(Balance),0) DP  
   FROM vyuGRGetStorageDetail ch  
-  WHERE ch.intCommodityId = c.intCommodityId AND ysnDPOwnedType=1 and ch.intCompanyLocationId=cl.intCompanyLocationId) as DP  
+  WHERE ch.intCommodityId = c.intCommodityId AND ysnDPOwnedType=1 and ch.intCompanyLocationId=cl.intCompanyLocationId) as DP,
+  (	SELECT SUM(Balance)	FROM vyuGRGetStorageDetail
+				WHERE ysnCustomerStorage <> 1 AND intCommodityId = @intCommodityId AND intCompanyLocationId =cl.intCompanyLocationId) dblGrainBalance  
     
            
   FROM tblSMCompanyLocation cl  

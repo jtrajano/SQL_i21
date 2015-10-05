@@ -4,9 +4,8 @@ AS
 SELECT OpenPurchasesQty,OpenSalesQty,intCommodityId,strCommodityCode,strUnitMeasure,intUnitMeasureId,isnull(CompanyTitled,0) as dblCompanyTitled,  
 isnull(CashExposure,0) as dblCaseExposure,              
 (isnull(CompanyTitled,0)+ (isnull(OpenPurchasesQty,0)-isnull(OpenSalesQty,0))) as dblBasisExposure ,             
-(isnull(CompanyTitled,0)+ (isnull(OpenPurchasesQty,0)-isnull(OpenSalesQty,0))) - isnull(ReceiptProductQty,0) as dblAvailForSale,  
-  
-isnull(CompanyTitled,0) as dblInHouse,  OpenPurQty,    OpenSalQty   into #temp     
+(isnull(CompanyTitled,0)+ (isnull(OpenPurchasesQty,0)-isnull(OpenSalesQty,0))) - isnull(ReceiptProductQty,0) as dblAvailForSale,    
+isnull(InHouse,0) as dblInHouse,  OpenPurQty,    OpenSalQty   into #temp     
  FROM(              
 SELECT intCommodityId,strCommodityCode,strUnitMeasure,intUnitMeasureId,  
    (invQty)-Case when (select top 1 ysnIncludeInTransitInCompanyTitled from tblRKCompanyPreference)=1 then  isnull(ReserveQty,0) else 0 end +  
@@ -23,7 +22,8 @@ SELECT intCommodityId,strCommodityCode,strUnitMeasure,intUnitMeasureId,
    Case when (select top 1 ysnIncludeDPPurchasesInCompanyTitled from tblRKCompanyPreference)=1 then DP else 0 end +   
    dblCollatralSales  + SlsBasisDeliveries         
             AS CashExposure,              
-   ReceiptProductQty,OpenPurchasesQty,OpenSalesQty,OpenPurQty   
+   ReceiptProductQty,OpenPurchasesQty,OpenSalesQty,OpenPurQty,
+      (invQty)- isnull(ReserveQty,0)  + dblGrainBalance  AS InHouse     
 FROM(  
 SELECT DISTINCT c.intCommodityId,              
   strCommodityCode,              
@@ -120,7 +120,9 @@ WHERE intCommodityId=c.intCommodityId) FutMatchedQty
   AND cd.intPricingTypeId = 2  
   AND ri.intOrderId = 1  
  INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId  
- WHERE ch.intCommodityId = c.intCommodityId) as SlsBasisDeliveries  
+ WHERE ch.intCommodityId = c.intCommodityId) as SlsBasisDeliveries ,
+ 
+ (SELECT SUM(Balance)	FROM vyuGRGetStorageDetail WHERE ysnCustomerStorage <> 1 AND intCommodityId = c.intCommodityId ) dblGrainBalance   
            
 FROM tblICCommodity c              
 LEFT JOIN tblICCommodityUnitMeasure um on c.intCommodityId=um.intCommodityId              
