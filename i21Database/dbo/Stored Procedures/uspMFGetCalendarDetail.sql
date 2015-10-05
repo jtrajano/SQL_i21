@@ -198,7 +198,7 @@ BEGIN
 		IF Len(@strMachineName1) > 0
 			SELECT @strMachineName1 = Left(@strMachineName1, Len(@strMachineName1) - 1)
 
-		SELECT @SQL = 'SELECT dtmCalendarDate,Day,intShiftId,strShiftName,intStartOffset,intEndOffset,dtmShiftStartTime,dtmShiftEndTime,intNoOfMachine,ysnHoliday, DateDiff(hh,dtmShiftStartTime,dtmShiftEndTime) as intNoOfHours,CAST(dtmShiftEndTime - dtmShiftStartTime AS TIME) dtmDuration,intConcurrencyId,' + @strMachineName1 + '
+		SELECT @SQL = 'SELECT dtmCalendarDate,Day,intShiftId,strShiftName,intStartOffset,intEndOffset,dtmShiftStartTime,dtmCalendarDate+CAST(dtmShiftEndTime - dtmShiftStartTime AS TIME) dtmDuration,dtmShiftEndTime,intNoOfMachine,ysnHoliday, intConcurrencyId,' + @strMachineName1 + '
 		FROM (
 			SELECT CD.dtmCalendarDate,DATENAME(dw,CD.dtmCalendarDate) AS Day
 				,CD.intShiftId
@@ -251,10 +251,10 @@ BEGIN
 			,CD.intShiftId
 			,S.strShiftName
 			,CD.dtmShiftStartTime
+			,CD.dtmCalendarDate+CAST(CD.dtmShiftEndTime - CD.dtmShiftStartTime AS TIME) dtmDuration
 			,CD.dtmShiftEndTime
 			,CD.intNoOfMachine
 			,CD.ysnHoliday
-			,DateDiff(hh, CD.dtmShiftStartTime, CD.dtmShiftEndTime) AS intNoOfHours
 			,M.intMachineId
 			,M.strName
 			,CONVERT(BIT, CASE 
