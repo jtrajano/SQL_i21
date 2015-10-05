@@ -404,8 +404,6 @@ BEGIN
 				LEFT JOIN dbo.tblICItemUOM ItemUOM			
 					ON ItemUOM.intItemId = RawData.intChargeId  
 					AND ItemUOM.intItemUOMId = RawData.intCostUOMId
-				INNER JOIN dbo.tblICUnitMeasure UOM
-					ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId	
 		WHERE RawHeaderData.intId = @intId
 
 		-- Add taxes into the receipt. 

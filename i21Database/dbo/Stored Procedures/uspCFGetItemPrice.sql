@@ -12,12 +12,14 @@
 ,@CFTransactionType		NVARCHAR(MAX)
 ,@CFNetworkId			INT
 ,@CFSiteId				INT
+,@CFPriceBasis			NVARCHAR(250)	= NULL OUTPUT  
 ,@CFContractHeaderId	INT				= NULL OUTPUT
 ,@CFContractDetailId	INT				= NULL OUTPUT
 ,@CFContractNumber		INT				= NULL OUTPUT
 ,@CFContractSeq			INT				= NULL OUTPUT
 ,@CFAvailableQuantity	NUMERIC(18,6)   = NULL OUTPUT 
-
+,@CFTransferCost		NUMERIC(18,6)   = NULL OUTPUT
+,@CFOriginalPrice		NUMERIC(18,6)   = NULL OUTPUT
 
 AS
 
@@ -239,7 +241,7 @@ DECLARE @cfPriceProfile TABLE
 
 	intLocalPricingIndex	INT,
 
-	dblRate					INT,
+	dblRate					NUMERIC(18,6),
 
 	strBasis				NVARCHAR(MAX),
 
@@ -250,8 +252,6 @@ DECLARE @cfPriceProfile TABLE
 
 
 IF(@CFTransactionType = 'Local/Network')
-
-	
 
 	BEGIN
 
@@ -622,35 +622,127 @@ SET @ValidSiteItem = (SELECT TOP 1 intARItemId FROM @cfSiteItem)
 IF(@ValidSiteItem IS NOT NULL) 
 
 BEGIN
+	
+	
+	-------------------------------
+	-- Price Profile Computation --
+	-------------------------------
+	DECLARE @Rate NUMERIC(18,6)
+	DECLARE @SiteGroupId INT
+	DECLARE @PriceIndexId INT
+	
+	SET @CFPricingOut = 'Price Profile' 
+	SET @CFOriginalPrice = @CFStandardPrice
+	SET @Rate = (SELECT TOP 1 dblRate FROM @cfPriceProfile WHERE intCustomerId = @CFCustomerId AND intSiteId = @CFSiteId AND intItemId = @CFItemId) 
+	SET @CFPriceBasis = (SELECT TOP 1 strBasis FROM @cfPriceProfile WHERE intCustomerId = @CFCustomerId AND intSiteId = @CFSiteId AND intItemId = @CFItemId) 
+	
+	IF(@CFTransactionType = 'Local/Network')
+	BEGIN 
+		SET @CFTransferCost = 0;
+		IF(@CFPriceBasis = 'Pump Price Adjustment')
+			BEGIN
+				SET @CFPriceOut = @CFOriginalPrice + @Rate
+				RETURN 1;    
+			END
+		ELSE
+			BEGIN 
+				SET @SiteGroupId = (SELECT TOP 1 intSiteGroupId 
+									FROM @cfPriceProfile 
+									WHERE intCustomerId = @CFCustomerId 
+									AND intSiteId = @CFSiteId 
+									AND intItemId = @CFItemId) 
 
-	SET @CFPriceOut = (SELECT TOP 1 dblRate FROM @cfPriceProfile WHERE intCustomerId = @CFCustomerId AND intSiteId = @CFSiteId AND intItemId = @CFItemId) 
+				SET @PriceIndexId = (SELECT TOP 1 intLocalPricingIndex 
+									 FROM @cfPriceProfile 
+									 WHERE intCustomerId = @CFCustomerId 
+									 AND intSiteId = @CFSiteId 
+									 AND intItemId = @CFItemId) 
 
-	IF(@CFPriceOut IS NOT NULL)   
+				SET @CFOriginalPrice = (SELECT TOP 1 dblIndexPrice
+										FROM tblCFIndexPricingBySiteGroupHeader IPH
+										INNER JOIN tblCFIndexPricingBySiteGroup IPD
+										ON IPH.intIndexPricingBySiteGroupHeaderId = IPD.intIndexPricingBySiteGroupHeaderId
+										WHERE IPH.intPriceIndexId = @PriceIndexId 
+										AND IPH.intSiteGroupId = @SiteGroupId)
 
-	BEGIN
-
-		SET @CFPricingOut = 'Price Profile' 
-
-		RETURN 1;    
-
+				IF(@CFOriginalPrice IS NOT NULL)
+					BEGIN
+						SET @CFPriceOut = @CFOriginalPrice + @Rate
+						RETURN 1;    
+					END
+			END
 	END
+	ELSE IF (@CFTransactionType = 'Remote')
+	BEGIN
+		IF(@CFPriceBasis = 'Remote Pricing Index')
+			BEGIN
 
+				SET @SiteGroupId = (SELECT TOP 1 intSiteGroupId 
+									FROM @cfPriceProfile 
+									WHERE intCustomerId = @CFCustomerId 
+									AND intSiteId = @CFSiteId 
+									AND intItemId = @CFItemId) 
+
+				SET @PriceIndexId = (SELECT TOP 1 intLocalPricingIndex 
+									 FROM @cfPriceProfile 
+									 WHERE intCustomerId = @CFCustomerId 
+									 AND intSiteId = @CFSiteId 
+									 AND intItemId = @CFItemId) 
+
+				SET @CFOriginalPrice = (SELECT TOP 1 dblIndexPrice
+										FROM tblCFIndexPricingBySiteGroupHeader IPH
+										INNER JOIN tblCFIndexPricingBySiteGroup IPD
+										ON IPH.intIndexPricingBySiteGroupHeaderId = IPD.intIndexPricingBySiteGroupHeaderId
+										WHERE IPH.intPriceIndexId = @PriceIndexId 
+										AND IPH.intSiteGroupId = @SiteGroupId)
+
+				IF(@CFOriginalPrice IS NOT NULL)
+					BEGIN
+						SET @CFPriceOut = @CFOriginalPrice + @Rate
+						RETURN 1;    
+					END
+			END
+	END
+	ELSE IF (@CFTransactionType = 'Extended Remote')
+	BEGIN
+		SET @SiteGroupId = (SELECT TOP 1 intSiteGroupId 
+							FROM @cfPriceProfile 
+							WHERE intCustomerId = @CFCustomerId 
+							AND intSiteId = @CFSiteId 
+							AND intItemId = @CFItemId) 
+
+		SET @PriceIndexId = (SELECT TOP 1 intLocalPricingIndex 
+								FROM @cfPriceProfile 
+								WHERE intCustomerId = @CFCustomerId 
+								AND intSiteId = @CFSiteId 
+								AND intItemId = @CFItemId) 
+
+		SET @CFOriginalPrice = (SELECT TOP 1 dblIndexPrice
+								FROM tblCFIndexPricingBySiteGroupHeader IPH
+								INNER JOIN tblCFIndexPricingBySiteGroup IPD
+								ON IPH.intIndexPricingBySiteGroupHeaderId = IPD.intIndexPricingBySiteGroupHeaderId
+								WHERE IPH.intPriceIndexId = @PriceIndexId 
+								AND IPH.intSiteGroupId = @SiteGroupId)
+
+		IF(@CFOriginalPrice IS NOT NULL)
+			BEGIN
+				SET @CFPriceOut = @CFOriginalPrice + @Rate
+				RETURN 1;    
+			END
+	END
+	
 END
 
 ---***PRICE PROFILE***---
 
 
 
-
-
 ---***ITEM PRICING***---
-
+SET @CFPricingOut = 'Inventory - Standard Pricing' 
 SET @CFPriceOut = @CFStandardPrice;
 
 ---***ITEM PRICING***---
 
 RETURN 1
 
-
-
-select * from tblCTContractDetail
+GO

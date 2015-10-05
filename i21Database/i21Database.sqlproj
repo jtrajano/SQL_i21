@@ -2524,6 +2524,8 @@
     <Build Include="dbo\Stored Procedures\uspRKDPRDailyPositionByCommodityLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDPRDailyPositionByCommodity.sql" />
     <Build Include="dbo\Views\vyuMFGetHolidayCalendar.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractDetail.sql" />
     <Build Include="dbo\Tables\tblICItemMotorFuelTax.sql" />
     <Build Include="dbo\Views\vyuICGetItemMotorFuelTax.sql" />
   </ItemGroup>

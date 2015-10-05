@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblPATRefundRate](
 	[intRefundTypeId] [int] NOT NULL IDENTITY,
-	[strRefundType] [char](5) NOT NULL,
-	[strRefundDescription] [nvarchar](max) NOT NULL,
+	[strRefundType] [char](5) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strRefundDescription] [nvarchar](max) COLLATE Latin1_General_CI_AS NOT NULL,
 	[ysnQualified] [bit] NULL,
 	[intGeneralReserveId] [int] NOT NULL,
 	[intAllocatedReserveId] [int] NOT NULL,

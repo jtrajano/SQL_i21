@@ -3,6 +3,9 @@ GO
 PRINT 'START OF CREATING [uspTMUpdateCustomerBudgetOrigin] SP'
 GO
 
+IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspTMUpdateCustomerBudgetOrigin]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].uspTMUpdateCustomerBudgetOrigin
+GO
 
 CREATE PROCEDURE [dbo].[uspTMUpdateCustomerBudgetOrigin]
 AS
