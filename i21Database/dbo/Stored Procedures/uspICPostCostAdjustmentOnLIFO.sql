@@ -1,5 +1,5 @@
 ﻿/*
-	This is the stored procedure that handles the adjustment of the cost for an item on Average Costing. 
+	This is the stored procedure that handles the adjustment of the cost for an item on LIFO. 
 	
 	Parameters: 
 	@intItemId - The item to adjust
@@ -27,7 +27,7 @@
 	@intUserId - The user who initiated or called this stored procedure. 
 */
 
-CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnAverageCosting]
+CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnLIFO]
 	@dtmDate AS DATETIME
 	,@intItemId AS INT
 	,@intItemLocationId AS INT
@@ -112,21 +112,21 @@ WHERE	intTransactionTypeId = @intTransactionTypeId
 
 -- Get the cost bucket and original cost. 
 BEGIN 
-	SELECT	@CostBucketId = intInventoryFIFOId
+	SELECT	@CostBucketId = intInventoryLIFOId
 			,@CostBucketCost = dblCost			
 			,@CostBucketStockInQty = dblStockIn
 			,@CostBucketStockOutQty = dblStockOut
 			,@CostBucketUOMQty = tblICItemUOM.dblUnitQty
 			,@CostBucketIntTransactionId = intTransactionId
 			,@CostBucketStrTransactionId = strTransactionId
-	FROM	dbo.tblICInventoryFIFO LEFT JOIN dbo.tblICItemUOM 
-				ON tblICInventoryFIFO.intItemUOMId = tblICItemUOM.intItemUOMId
-	WHERE	tblICInventoryFIFO.intItemId = @intItemId
-			AND tblICInventoryFIFO.intItemLocationId = @intItemLocationId
-			AND tblICInventoryFIFO.intItemUOMId = @intItemUOMId
-			AND tblICInventoryFIFO.intTransactionId = @intSourceTransactionId
-			AND tblICInventoryFIFO.strTransactionId = @strSourceTransactionId
-			AND ISNULL(tblICInventoryFIFO.ysnIsUnposted, 0) = 0 
+	FROM	dbo.tblICInventoryLIFO LEFT JOIN dbo.tblICItemUOM 
+				ON tblICInventoryLIFO.intItemUOMId = tblICItemUOM.intItemUOMId
+	WHERE	tblICInventoryLIFO.intItemId = @intItemId
+			AND tblICInventoryLIFO.intItemLocationId = @intItemLocationId
+			AND tblICInventoryLIFO.intItemUOMId = @intItemUOMId
+			AND tblICInventoryLIFO.intTransactionId = @intSourceTransactionId
+			AND tblICInventoryLIFO.strTransactionId = @strSourceTransactionId
+			AND ISNULL(tblICInventoryLIFO.ysnIsUnposted, 0) = 0 
 END 
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -162,10 +162,10 @@ END
 BEGIN 
 	-- Get the original cost. 
 	BEGIN 
-		-- Get the original cost from the FIFO cost adjustment log table. 
+		-- Get the original cost from the LIFO cost adjustment log table. 
 		SELECT	@OriginalCost = dblCost
-		FROM	dbo.tblICInventoryFIFOCostAdjustmentLog
-		WHERE	intInventoryFIFOId = @CostBucketId
+		FROM	dbo.tblICInventoryLIFOCostAdjustmentLog
+		WHERE	intInventoryLIFOId = @CostBucketId
 				AND intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
 		
 		-- If none found, the original cost is the cost bucket cost. 
@@ -214,16 +214,16 @@ BEGIN
 		,@intCostingMethod						= @AVERAGECOST
 		,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 
-	-- Log original cost to tblICInventoryFIFOCostAdjustmentLog
+	-- Log original cost to tblICInventoryLIFOCostAdjustmentLog
 	IF NOT EXISTS (
 			SELECT	TOP 1 1 
-			FROM	dbo.tblICInventoryFIFOCostAdjustmentLog
-			WHERE	intInventoryFIFOId = @CostBucketId
+			FROM	dbo.tblICInventoryLIFOCostAdjustmentLog
+			WHERE	intInventoryLIFOId = @CostBucketId
 					AND intInventoryCostAdjustmentTypeId = @COST_ADJ_TYPE_Original_Cost
 	)
 	BEGIN 
-		INSERT INTO tblICInventoryFIFOCostAdjustmentLog (
-				[intInventoryFIFOId]
+		INSERT INTO tblICInventoryLIFOCostAdjustmentLog (
+				[intInventoryLIFOId]
 				,[intInventoryTransactionId]
 				,[intInventoryCostAdjustmentTypeId]
 				,[dblQty]
@@ -231,7 +231,7 @@ BEGIN
 				,[dtmCreated]
 				,[intCreatedUserId]		
 		)
-		SELECT	[intInventoryFIFOId]				= @CostBucketId
+		SELECT	[intInventoryLIFOId]				= @CostBucketId
 				,[intInventoryTransactionId]		= @InventoryTransactionIdentityId
 				,[intInventoryCostAdjustmentTypeId]	= @COST_ADJ_TYPE_Original_Cost
 				,[dblQty]							= @CostBucketStockInQty
@@ -242,8 +242,8 @@ BEGIN
 
 	-- Log a new cost. 
 	BEGIN 
-		INSERT INTO tblICInventoryFIFOCostAdjustmentLog (
-				[intInventoryFIFOId]
+		INSERT INTO tblICInventoryLIFOCostAdjustmentLog (
+				[intInventoryLIFOId]
 				,[intInventoryTransactionId]
 				,[intInventoryCostAdjustmentTypeId]
 				,[dblQty]
@@ -251,7 +251,7 @@ BEGIN
 				,[dtmCreated]
 				,[intCreatedUserId]		
 		)
-		SELECT	[intInventoryFIFOId]				= @CostBucketId
+		SELECT	[intInventoryLIFOId]				= @CostBucketId
 				,[intInventoryTransactionId]		= @InventoryTransactionIdentityId
 				,[intInventoryCostAdjustmentTypeId]	= @COST_ADJ_TYPE_New_Cost
 				,[dblQty]							= @dblQty
@@ -263,8 +263,8 @@ BEGIN
 	-- Calculate the new cost
 	UPDATE	CostBucket
 	SET		dblCost = @dblNewCalculatedCost
-	FROM	tblICInventoryFIFO CostBucket
-	WHERE	CostBucket.intInventoryFIFOId = @CostBucketId
+	FROM	tblICInventoryLIFO CostBucket
+	WHERE	CostBucket.intInventoryLIFOId = @CostBucketId
 			AND CostBucket.dblStockIn > 0 
 			AND ISNULL(ysnIsUnposted, 0) = 0 
 END 
@@ -274,12 +274,12 @@ END
 -----------------------------------------------------------------------------------------------------------------------------
 IF @dblNewCalculatedCost IS NOT NULL 
 BEGIN 
-	-- Get the FIFO Out records. 
-	DECLARE @FIFOOutIdd AS INT 
-			,@FIFOOutInventoryFIFOId AS INT 
-			,@FIFOOutInventoryTransactionId AS INT 
-			,@FIFOOutRevalueFifoId AS INT 
-			,@FIFOOutQty AS NUMERIC(18, 6)
+	-- Get the LIFO Out records. 
+	DECLARE @LIFOOutIdd AS INT 
+			,@LIFOOutInventoryLIFOId AS INT 
+			,@LIFOOutInventoryTransactionId AS INT 
+			,@LIFOOutRevalueLIFOId AS INT 
+			,@LIFOOutQty AS NUMERIC(18, 6)
 			,@RevaluedQty AS NUMERIC(18, 6) = @dblQty
 
 	-----------------------------------------------------------------------------------------------------------------------------
@@ -288,25 +288,25 @@ BEGIN
 	-- LOCAL >> It specifies that the scope of the cursor is local to the stored procedure where it was created. The cursor name is only valid within this scope. 
 	-- FAST_FORWARD >> It specifies a FORWARD_ONLY, READ_ONLY cursor with performance optimizations enabled. 
 	-----------------------------------------------------------------------------------------------------------------------------
-	DECLARE loopFIFOOut CURSOR LOCAL FAST_FORWARD
+	DECLARE loopLIFOOut CURSOR LOCAL FAST_FORWARD
 	FOR 
 	SELECT  intId
-			,intInventoryFIFOId
+			,intInventoryLIFOId
 			,intInventoryTransactionId
-			,intRevalueFifoId
+			,intRevalueLifoId
 			,dblQty
-	FROM	dbo.tblICInventoryFIFOOut FIFOOut
-	WHERE	FIFOOut.intInventoryFIFOId = @CostBucketId
+	FROM	dbo.tblICInventoryLIFOOut LIFOOut
+	WHERE	LIFOOut.intInventoryLIFOId = @CostBucketId
 
-	OPEN loopFIFOOut;
+	OPEN loopLIFOOut;
 
 	-- Initial fetch attempt
-	FETCH NEXT FROM loopFIFOOut INTO 
-			@FIFOOutIdd
-			,@FIFOOutInventoryFIFOId 
-			,@FIFOOutInventoryTransactionId 
-			,@FIFOOutRevalueFifoId 
-			,@FIFOOutQty 
+	FETCH NEXT FROM loopLIFOOut INTO 
+			@LIFOOutIdd
+			,@LIFOOutInventoryLIFOId 
+			,@LIFOOutInventoryTransactionId 
+			,@LIFOOutRevalueLIFOId 
+			,@LIFOOutQty 
 
 	-----------------------------------------------------------------------------------------------------------------------------
 	-- Start of the loop
@@ -342,16 +342,16 @@ BEGIN
 						,@TransactionIntegerId				= InvTransaction.intTransactionId
 						,@TransactionStringId				= InvTransaction.strTransactionId
 				FROM	dbo.tblICInventoryTransaction InvTransaction
-				WHERE	InvTransaction.intInventoryTransactionId = @FIFOOutInventoryTransactionId
+				WHERE	InvTransaction.intInventoryTransactionId = @LIFOOutInventoryTransactionId
 
 				-- Create the Revalue sold 
 				IF @TransactionId IS NOT NULL 
 				BEGIN 
 					SELECT @TransactionValue =	-1 	
-												* CASE WHEN ISNULL(@FIFOOutQty, 0) > @RevaluedQty THEN 
+												* CASE WHEN ISNULL(@LIFOOutQty, 0) > @RevaluedQty THEN 
 														@RevaluedQty
 													ELSE 
-														ISNULL(@FIFOOutQty, 0)
+														ISNULL(@LIFOOutQty, 0)
 												END 																								
 												* (@dblNewCost - @TransactionCost) 
 
@@ -375,7 +375,7 @@ BEGIN
 						,@strBatchId							= @strBatchId
 						,@intTransactionTypeId					= @INVENTORY_REVALUE_SOLD
 						,@intLotId								= NULL 
-						,@intRelatedInventoryTransactionId		= @FIFOOutInventoryTransactionId
+						,@intRelatedInventoryTransactionId		= @LIFOOutInventoryTransactionId
 						,@intRelatedTransactionId				= @TransactionIntegerId 
 						,@strRelatedTransactionId				= @TransactionStringId 
 						,@strTransactionForm					= @TransactionTypeName
@@ -384,21 +384,21 @@ BEGIN
 						,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 				END
 
-				SET @RevaluedQty = @RevaluedQty - @FIFOOutQty
+				SET @RevaluedQty = @RevaluedQty - @LIFOOutQty
 			END 					
 
 		-- Attempt to fetch the next row from cursor. 
-		FETCH NEXT FROM loopFIFOOut INTO 
-				@FIFOOutIdd
-				,@FIFOOutInventoryFIFOId 
-				,@FIFOOutInventoryTransactionId 
-				,@FIFOOutRevalueFifoId 
-				,@FIFOOutQty 
+		FETCH NEXT FROM loopLIFOOut INTO 
+				@LIFOOutIdd
+				,@LIFOOutInventoryLIFOId 
+				,@LIFOOutInventoryTransactionId 
+				,@LIFOOutRevalueLIFOId 
+				,@LIFOOutQty 
 	END;
 END;
 
-CLOSE loopFIFOOut;
-DEALLOCATE loopFIFOOut;
+CLOSE loopLIFOOut;
+DEALLOCATE loopLIFOOut;
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- End loop for sold stocks

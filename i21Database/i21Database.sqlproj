@@ -2354,6 +2354,10 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentInfo.sql" />
     <Build Include="dbo\Stored Procedures\uspICErrorMessages.sql" />
     <Build Include="dbo\Views\vyuARUndepositedPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRecalcAveCostOnCostAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnFIFO.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnLIFO.sql" />
+    <Build Include="dbo\Tables\tblICInventoryLIFOCostAdjustmentLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

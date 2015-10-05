@@ -1,5 +1,5 @@
 ﻿/*
-	This is the stored procedure that handles the adjustment of the cost for an item on Average Costing. 
+	This is the stored procedure that handles the adjustment of the cost for an item on FIFO. 
 	
 	Parameters: 
 	@intItemId - The item to adjust
@@ -27,7 +27,7 @@
 	@intUserId - The user who initiated or called this stored procedure. 
 */
 
-CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnAverageCosting]
+CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnFIFO]
 	@dtmDate AS DATETIME
 	,@intItemId AS INT
 	,@intItemLocationId AS INT
