@@ -98,6 +98,9 @@ BEGIN TRY
 		tblARInvoiceDetail D
 			ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
 	INNER JOIN
+		tblARInvoice H
+			ON	D.[intInvoiceId] = H.[intInvoiceId]			
+	INNER JOIN
 		tblARTransactionDetail TD
 			ON D.intInvoiceDetailId = TD.intTransactionDetailId 
 			AND D.intInvoiceId = TD.intTransactionId 
@@ -112,6 +115,7 @@ BEGIN TRY
 		AND D.[intSalesOrderDetailId] IS NULL
 		AND D.intItemId = TD.intItemId		
 		AND (D.intItemUOMId <> TD.intItemUOMId OR D.dblQtyShipped <> TD.dblQtyShipped)
+		AND ISNULL(H.intDistributionHeaderId, 0) = 0
 		
 	UNION ALL
 
@@ -127,6 +131,9 @@ BEGIN TRY
 		tblARInvoiceDetail D
 			ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
 	INNER JOIN
+		tblARInvoice H
+			ON	D.[intInvoiceId] = H.[intInvoiceId]				
+	INNER JOIN
 		tblARTransactionDetail TD
 			ON D.intInvoiceDetailId = TD.intTransactionDetailId 
 			AND D.intInvoiceId = TD.intTransactionId 
@@ -139,7 +146,8 @@ BEGIN TRY
 		AND D.intContractDetailId <> TD.intContractDetailId		
 		AND D.[intInventoryShipmentItemId] IS NULL
 		AND D.[intSalesOrderDetailId] IS NULL
-		AND D.intItemId = TD.intItemId		
+		AND D.intItemId = TD.intItemId
+		AND ISNULL(H.intDistributionHeaderId, 0) = 0	
 		
 	UNION ALL
 
@@ -155,6 +163,9 @@ BEGIN TRY
 		tblARInvoiceDetail D
 			ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
 	INNER JOIN
+		tblARInvoice H
+			ON	D.[intInvoiceId] = H.[intInvoiceId]				
+	INNER JOIN
 		tblARTransactionDetail TD
 			ON D.intInvoiceDetailId = TD.intTransactionDetailId 
 			AND D.intInvoiceId = TD.intTransactionId 
@@ -168,6 +179,7 @@ BEGIN TRY
 		AND D.[intInventoryShipmentItemId] IS NULL
 		AND D.[intSalesOrderDetailId] IS NULL
 		AND D.intItemId = TD.intItemId
+		AND ISNULL(H.intDistributionHeaderId, 0) = 0
 		
 	UNION ALL
 		
@@ -183,6 +195,9 @@ BEGIN TRY
 		tblARInvoiceDetail D
 			ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
 	INNER JOIN
+		tblARInvoice H
+			ON	D.[intInvoiceId] = H.[intInvoiceId]				
+	INNER JOIN
 		tblARTransactionDetail TD
 			ON D.intInvoiceDetailId = TD.intTransactionDetailId 
 			AND D.intInvoiceId = TD.intTransactionId 
@@ -194,7 +209,8 @@ BEGIN TRY
 		D.intContractDetailId IS NULL
 		AND TD.intContractDetailId IS NOT NULL
 		AND D.[intInventoryShipmentItemId] IS NULL
-		AND D.[intSalesOrderDetailId] IS NULL	
+		AND D.[intSalesOrderDetailId] IS NULL
+		AND ISNULL(H.intDistributionHeaderId, 0) = 0	
 		
 	UNION ALL	
 
@@ -207,6 +223,9 @@ BEGIN TRY
 	FROM
 		tblARTransactionDetail TD
 	INNER JOIN
+		tblARInvoice H
+			ON	TD.[intTransactionId] = H.[intInvoiceId]		
+	INNER JOIN
 		tblCTContractDetail CD
 			ON TD.intContractDetailId = CD.intContractDetailId
 	WHERE
@@ -216,6 +235,7 @@ BEGIN TRY
 		AND TD.[intInventoryShipmentItemId] IS NULL
 		AND TD.[intSalesOrderDetailId] IS NULL
 		AND TD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail WHERE intInvoiceId = @TransactionId)
+		AND ISNULL(H.intDistributionHeaderId, 0) = 0
 		
 	UNION ALL
 		
@@ -240,6 +260,7 @@ BEGIN TRY
 		AND Detail.[intInventoryShipmentItemId] IS NULL
 		AND Detail.[intSalesOrderDetailId] IS NULL
 		AND Detail.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @TransactionId)
+		AND ISNULL(Header.intDistributionHeaderId, 0) = 0
 
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
@@ -287,5 +308,3 @@ BEGIN CATCH
 	
 END CATCH
 GO
-
-
