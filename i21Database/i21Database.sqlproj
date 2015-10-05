@@ -2528,6 +2528,7 @@
     <Build Include="dbo\Stored Procedures\uspCTReportContractDetail.sql" />
     <Build Include="dbo\Tables\tblICItemMotorFuelTax.sql" />
     <Build Include="dbo\Views\vyuICGetItemMotorFuelTax.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntityEmployee.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -1,6 +1,5 @@
 ﻿CREATE TABLE [dbo].[tblPREmployee](
-	[intEntityId]	[int] NOT NULL,
-	[intEmployeeId] [int] NULL,
+	[intEntityEmployeeId]	[int] NOT NULL,
 	[strEmployeeId] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strType] [nvarchar](30) COLLATE Latin1_General_CI_AS NULL,
 	[strFirstName] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
@@ -38,8 +37,8 @@
 	[dtmDateEntered] [datetime] NOT NULL DEFAULT (getdate()),
 	[dtmLastModified] [datetime] NULL DEFAULT (getdate()),
 	[intConcurrencyId] [int] NULL DEFAULT ((1)), 
-	CONSTRAINT [PK_tblPREmployee] PRIMARY KEY ([intEntityId]),
-    CONSTRAINT [UK_tblPREmployee] UNIQUE ([intEmployeeId]),
+	CONSTRAINT [PK_tblPREmployee] PRIMARY KEY ([intEntityEmployeeId]),
+    CONSTRAINT [UK_tblPREmployee] UNIQUE ([intEntityEmployeeId]),
     CONSTRAINT [AK_tblPREmployee_strEmployeeId] UNIQUE ([strEmployeeId]),
 	CONSTRAINT [FK_tblPREmployee_tblPRPayGroup] FOREIGN KEY ([intPayGroupId]) REFERENCES [tblPRPayGroup]([intPayGroupId]),
 	CONSTRAINT [FK_tblPREmployee_tblPRWorkersCompensation] FOREIGN KEY ([intWorkersCompensationId]) REFERENCES [tblPRWorkersCompensation]([intWorkersCompensationId]),
@@ -50,14 +49,7 @@ GO
 CREATE UNIQUE NONCLUSTERED INDEX [IX_tblPREmployee_intUserId] ON [dbo].[tblPREmployee] ([intUserSecurityId]) WHERE [intUserSecurityId] IS NOT NULL
 GO
 
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Identity Field',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblPREmployee',
-    @level2type = N'COLUMN',
-    @level2name = N'intEmployeeId'
+
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Employee Id',
@@ -327,7 +319,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblPREmployee',
     @level2type = N'COLUMN',
-    @level2name = N'intEntityId'
+    @level2name = N'intEntityEmployeeId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Statutory Employee',
