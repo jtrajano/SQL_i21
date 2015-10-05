@@ -4,6 +4,6 @@ SELECT DISTINCT
 	intItemId
 	,strItemNo
 	,strDescription
+	,ysnAvailableTM = CAST(ISNULL(ysnAvailableTM,0) AS BIT)
 FROM tblICItem
-WHERE ysnAvailableTM = 1
-	AND EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intItemId = tblICItem.intItemId)
+WHERE EXISTS(SELECT TOP 1 1 FROM tblICItemLocation WHERE intItemId = tblICItem.intItemId)
