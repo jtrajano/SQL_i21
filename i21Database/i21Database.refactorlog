@@ -4088,4 +4088,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intStorageLocationId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="df73488d-c8be-4360-82c7-02e3c27d8b52" ChangeDateTime="10/02/2015 01:36:20">
+    <Property Name="ElementName" Value="[dbo].[tblICItemMotorFuelTax].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemMotorFuelTax]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemMotorFuelTaxId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="b995cbdd-2d1f-4b81-90eb-2183e6a945f2" ChangeDateTime="10/02/2015 01:36:34">
+    <Property Name="ElementName" Value="[dbo].[tblICItemMotorFuelTax].[intItemid]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICItemMotorFuelTax]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intItemId" />
+  </Operation>
 </Operations>
