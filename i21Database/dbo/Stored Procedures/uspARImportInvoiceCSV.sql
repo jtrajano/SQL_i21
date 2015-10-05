@@ -128,7 +128,7 @@ BEGIN
 		,@PaymentMethodId				= 0
 		,@FreightTermId					= NULL
 		,@DeliverPickUp					= NULL
-		,@DiscountAmount				= ISNULL(D.[dblDiscount], @ZeroDecimal)
+		,@DiscountAmount				= @ZeroDecimal
 		,@ItemId						= NULL
 		,@ItemUOMId						= NULL
 		,@ItemQtyShipped				= 1.000000
@@ -140,10 +140,7 @@ BEGIN
 		,@ItemNewMeterReading			= @ZeroDecimal
 		,@ItemPreviousMeterReading		= @ZeroDecimal
 		,@ItemConversionFactor			= 0.00000000
-		,@ItemDiscount					= (CASE WHEN ISNULL(D.[dblDiscount], @ZeroDecimal) > 0 
-											THEN (1 - ((ABS((CASE WHEN D.[dblSalesTaxAmount] <> 0 THEN D.[dblTaxableAmount] ELSE D.[dblNonTaxableAmount] END)) - ISNULL(D.[dblDiscount], @ZeroDecimal)) / ABS((CASE WHEN D.[dblSalesTaxAmount] <> 0 THEN D.[dblTaxableAmount] ELSE D.[dblNonTaxableAmount] END)))) * 100
-											ELSE @ZeroDecimal
-										END)
+		,@ItemDiscount					= @ZeroDecimal
 		,@ItemPerformerId				= NULL
 		,@ItemLeaseBilling				= 0
 		,@TaxMasterId					= NULL
@@ -175,13 +172,13 @@ BEGIN
 		
 	SELECT @ErrorMessage = 'Invoice:' + RTRIM(LTRIM(ISNULL(@InvoiceOriginId,''))) + ' was already imported! (' + strInvoiceNumber + ')' FROM [tblARInvoice] WHERE RTRIM(LTRIM(ISNULL([strInvoiceOriginId],''))) = RTRIM(LTRIM(ISNULL(@InvoiceOriginId,''))) AND LEN(RTRIM(LTRIM(ISNULL([strInvoiceOriginId],'')))) > 0
 
-	IF @ItemTaxSchedule <> ''
-		BEGIN			
-			IF @SalesTaxAmount = 0 OR @Balance < 0
-				SET @ErrorMessage = 'Sales Tax Amount and Balance should not be zero!'
-			ELSE IF @ItemTaxGroupId IS NULL
-				SET @ErrorMessage = 'Tax Schedule does not exists!'
-		END		
+	--IF @ItemTaxSchedule <> ''
+	--	BEGIN			
+	--		IF @SalesTaxAmount = 0 OR @Balance < 0
+	--			SET @ErrorMessage = 'Sales Tax Amount and Balance should not be zero!'
+	--		ELSE IF @ItemTaxGroupId IS NULL
+	--			SET @ErrorMessage = 'Tax Schedule does not exists!'
+	--	END		
 
 	IF ISNULL(@EntityCustomerId, 0) = 0
 		SET @ErrorMessage = 'Customer Number does not exists!'
