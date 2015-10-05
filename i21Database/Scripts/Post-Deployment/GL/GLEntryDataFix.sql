@@ -219,7 +219,6 @@ GO
 	UPDATE j SET intFiscalPeriodId = f.intGLFiscalYearPeriodId, intFiscalYearId = f.intFiscalYearId
 	FROM tblGLJournal j, tblGLFiscalYearPeriod f
 	WHERE j.dtmDate >= f.dtmStartDate and j.dtmDate <= f.dtmEndDate
-	AND j.ysnPosted = 1
 GO
 	PRINT N'End updating fiscalyear/period id in tblGLJournal'
 GO
