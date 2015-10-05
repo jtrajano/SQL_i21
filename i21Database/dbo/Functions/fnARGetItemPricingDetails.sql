@@ -383,6 +383,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 				INNER JOIN tblSMCompanyLocationPricingLevel CPL ON PL.strPriceLevel = CPL.strPricingLevelName 		
 				INNER JOIN tblICItemLocation ICL ON PL.intItemLocationId = ICL.intItemLocationId
 				WHERE CPL.intSort = 1
+					AND @Quantity BETWEEN PL.dblMin  AND PL.dblMax
 				ORDER BY PL.dblMax 
 			) AS PL1
 				ON VI.intItemId = PL1.intItemId AND VI.intLocationId = PL1.intLocationId AND VI.intStockUOMId = PL1.intItemUOM AND @Quantity BETWEEN PL1.dblMin AND PL1.dblMax
@@ -393,6 +394,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 				INNER JOIN tblSMCompanyLocationPricingLevel CPL ON PL.strPriceLevel = CPL.strPricingLevelName 		
 				INNER JOIN tblICItemLocation ICL ON PL.intItemLocationId = ICL.intItemLocationId
 				WHERE CPL.intSort = 2
+					AND @Quantity BETWEEN PL.dblMin  AND PL.dblMax
 				ORDER BY PL.dblMax
 			) AS PL2 
 				ON VI.intItemId = PL2.intItemId AND VI.intLocationId = PL2.intLocationId AND VI.intStockUOMId = PL2.intItemUOM AND @Quantity BETWEEN PL2.dblMin AND PL2.dblMax				
@@ -403,6 +405,7 @@ DECLARE	 @Price		NUMERIC(18,6)
 				INNER JOIN tblSMCompanyLocationPricingLevel CPL ON PL.strPriceLevel = CPL.strPricingLevelName 		
 				INNER JOIN tblICItemLocation ICL ON PL.intItemLocationId = ICL.intItemLocationId
 				WHERE CPL.intSort = 3
+					AND @Quantity BETWEEN PL.dblMin  AND PL.dblMax
 				ORDER BY PL.dblMax
 			) AS PL3 
 				ON VI.intItemId = PL3.intItemId AND VI.intLocationId = PL3.intLocationId AND VI.intStockUOMId = PL3.intItemUOM AND @Quantity BETWEEN PL3.dblMin AND PL3.dblMax				
