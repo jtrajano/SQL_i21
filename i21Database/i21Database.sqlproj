@@ -2531,6 +2531,7 @@
     <Build Include="dbo\Views\vyuSMUserRoleMenuLocation.sql" />
     <Build Include="dbo\Views\vyuSMUserSecurityMenuFavorite.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetScheduleGroupDetail.sql" />
+    <Build Include="dbo\Tables\tblSMTrustedComputer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
