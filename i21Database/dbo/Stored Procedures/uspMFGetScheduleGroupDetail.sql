@@ -20,3 +20,9 @@ SET @sqlCommand = 'SELECT TOP '+LTRIM(@intLimit)+' *,0 as intConcurrencyId FROM 
 						WHERE ' + @strColumnName + ' NOT IN (SELECT strGroupValue FROM dbo.tblMFScheduleGroupDetail) AND ' + @strColumnName + ' NOT IN (''' + @strFilterCriteria + ''')) AS DT WHERE intRowNumber > ' + LTRIM(@intStart) 
 
 EXECUTE sp_executesql @sqlCommand
+
+SET @sqlCommand = 'SELECT COUNT(*) as intGroupValueCount 
+						FROM ' + @strTableName + '
+						WHERE ' + @strColumnName + ' NOT IN (SELECT strGroupValue FROM dbo.tblMFScheduleGroupDetail) AND ' + @strColumnName + ' NOT IN (''' + @strFilterCriteria + ''')' 
+
+EXECUTE sp_executesql @sqlCommand
