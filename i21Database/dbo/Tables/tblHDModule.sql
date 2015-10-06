@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblHDModule]
 (
 	[intModuleId] [int] IDENTITY(1,1) NOT NULL,
+	[intSMModuleId] [int] NULL,
 	[intTicketProductId] [int] NOT NULL,
 	[intTicketGroupId] [int] NOT NULL,
 	[strModule] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
@@ -12,7 +13,8 @@
 	CONSTRAINT [PK_tblHDModule] PRIMARY KEY CLUSTERED ([intModuleId] ASC),
 	CONSTRAINT [UNQ_tblHDModule] UNIQUE ([intTicketProductId],[strModule]),
     CONSTRAINT [FK_Module_TicketProduct] FOREIGN KEY ([intTicketProductId]) REFERENCES [dbo].[tblHDTicketProduct] ([intTicketProductId]) on delete cascade,
-    CONSTRAINT [FK_Module_TicketGroup] FOREIGN KEY ([intTicketGroupId]) REFERENCES [dbo].[tblHDTicketGroup] ([intTicketGroupId])
+    CONSTRAINT [FK_Module_TicketGroup] FOREIGN KEY ([intTicketGroupId]) REFERENCES [dbo].[tblHDTicketGroup] ([intTicketGroupId]),
+	CONSTRAINT [FK_tblHDModule_tblSMModule_intSMModuleId] FOREIGN KEY ([intSMModuleId]) REFERENCES [dbo].[tblSMModule] ([intModuleId])
 )
 
 GO
