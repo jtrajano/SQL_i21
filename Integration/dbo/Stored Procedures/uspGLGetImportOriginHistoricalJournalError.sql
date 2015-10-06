@@ -9,8 +9,8 @@ IF EXISTS(select top 1 1 from sys.procedures where name = ''uspGLGetImportOrigin
 EXEC ('CREATE PROCEDURE [dbo].[uspGLGetImportOriginHistoricalJournalError](@uid UNIQUEIDENTIFIER,@category VARCHAR(50) OUT, @result INT = 0 OUT)
 AS
 BEGIN
-	SET NOCOUNT ON;
-	
+	SET NOCOUNT ON
+	SET ANSI_WARNINGS OFF
 	SELECT @result = COUNT(1) FROM tblGLFiscalYear
 	
 	IF (@result = 0)
@@ -46,18 +46,16 @@ BEGIN
 	SELECT convert(varchar(20),fld) + '' '' + CONVERT(VARCHAR(20),fld1),
 	''Account ID from Historical table does not exists at iRely Cross Reference. Kindly verify at Origin.''
 	FROM @temp	WHERE fld2 not in (SELECT fld FROM @temp1 )
-	
-	INSERT INTO @temp2(strTitle,strDescription)
-	SELECT convert(varchar(20),glhst_acct1_8) + '' '' + convert(varchar(20),glhst_acct9_16),
-	''Invalid Historical Transaction Details Date in the Origin - '' + CONVERT(VARCHAR(20), glhst_trans_dt)
-	 FROM glhstmst where LEN(glhst_trans_dt) <> 8
-	
-	INSERT INTO @temp2(strTitle,strDescription) 
+	UNION ALL
 	SELECT convert(varchar(20),glhst_acct1_8) + '' '' + convert(varchar(20),glhst_acct9_16),
 	''Invalid Historical Period in the Origin - '' + CONVERT(VARCHAR(20),glhst_period)
 	FROM glhstmst
 	WHERE  ISDATE(SUBSTRING(CONVERT(VARCHAR(20),glhst_period) ,5,2) + ''/01/'' + SUBSTRING(CONVERT(VARCHAR(20),glhst_period),1,4)) = 0
-
+	UNION ALL
+	SELECT convert(varchar(20),glhst_acct1_8) + '' '' + convert(varchar(20),glhst_acct9_16),
+	''Invalid Historical Transaction Details Date in the Origin - '' + CONVERT(VARCHAR(20),glhst_trans_dt)
+	FROM glhstmst
+	WHERE ISDATE(SUBSTRING(CONVERT(VARCHAR(20),glhst_trans_dt) ,1,4) + SUBSTRING(CONVERT(VARCHAR(20),glhst_trans_dt) ,5,2) + SUBSTRING(CONVERT(VARCHAR(20),glhst_trans_dt),7,2)) = 0
 
 	IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N''[dbo].[glarcmst]'') AND type IN (N''U'')) 
 	BEGIN
@@ -70,16 +68,16 @@ BEGIN
 		INSERT INTO @temp3(strTitle,strDescription)
 		SELECT convert(varchar(20),fld) + '' '' + CONVERT(VARCHAR(20),fld1),''Account ID in Archive Table does not exists at iRely Cross Reference. Kindly verify at Origin.''
 		FROM @temp	WHERE fld2 not in (SELECT fld FROM @temp1 )
-		
-		INSERT INTO @temp3(strTitle,strDescription)
-		SELECT convert(varchar(20),glarc_acct1_8) + '' '' + convert(varchar(20),glarc_acct9_16),	''Invalid Archived Historical Transaction Details Date in the Origin - '' + CONVERT(VARCHAR(20), glarc_trans_dt)
-		FROM glarcmst where LEN(glarc_trans_dt) <> 8
-		
-		INSERT INTO @temp3(strTitle,strDescription) 
+		UNION ALL
 		SELECT convert(varchar(20),glarc_acct1_8) + '' '' + convert(varchar(20),glarc_acct9_16),
 		''Invalid Archived Historical Period in the Origin - '' + CONVERT(VARCHAR(20),glarc_period)
 		FROM glarcmst
 		WHERE  ISDATE(SUBSTRING(CONVERT(VARCHAR(20),glarc_period) ,5,2) + ''/01/'' + SUBSTRING(CONVERT(VARCHAR(20),glarc_period),1,4)) = 0
+		UNION ALL
+		SELECT convert(varchar(20),glarc_acct1_8) + '' '' + convert(varchar(20),glarc_acct9_16),
+		''Invalid Archived Historical Transaction Details Date in the Origin - '' + CONVERT(VARCHAR(20),glarc_trans_dt)
+		FROM glarcmst
+		WHERE ISDATE(SUBSTRING(CONVERT(VARCHAR(20),glarc_trans_dt) ,1,4) + SUBSTRING(CONVERT(VARCHAR(20),glarc_trans_dt) ,5,2) + SUBSTRING(CONVERT(VARCHAR(20),glarc_trans_dt),7,2)) = 0
 	END
 	;WITH AllErrors(strTitle,strDescription)
 	AS(

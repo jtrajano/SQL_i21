@@ -1,11 +1,13 @@
 ﻿CREATE PROCEDURE  [dbo].[uspGLImportOriginHistoricalJournal]
-@intEntityId		INT,
-@result				NVARCHAR(MAX) = '' OUTPUT
+@intEntityId		INT
 AS
 
-SET QUOTED_IDENTIFIER OFF
-SET ANSI_NULLS ON
+
+SET ANSI_WARNINGS OFF
 SET NOCOUNT ON
+DECLARE @result NVARCHAR(MAX)
+DECLARE @invalidDatesUpdated VARCHAR(1)
+
 
 EXECUTE [dbo].[uspGLImportOriginHistoricalJournalCLOSED] @intEntityId ,@result OUTPUT
 IF CHARINDEX('SUCCESS', @result,1)= 0 RETURN
@@ -252,10 +254,19 @@ BEGIN TRANSACTION
 	SET ROWCOUNT 0
 
 	UPDATE #iRelyImptblGLJournalDetail
-	SET gooddate = CAST(substring(convert(varchar(10),glhst_trans_dt),5,2)
-					+'/'+substring(convert(varchar(10),glhst_trans_dt),7,2)
-					+'/'+substring(convert(varchar(10),glhst_trans_dt),1,4) AS DATETIME)
+	SET gooddate = CAST (substring(convert(varchar(10),glhst_trans_dt),1,4)
+					+substring(convert(varchar(10),glhst_trans_dt),5,2)
+					+substring(convert(varchar(10),glhst_trans_dt),7,2) AS DATETIME)
 	FROM #iRelyImptblGLJournalDetail
+	WHERE ISDATE(substring(convert(varchar(10),glhst_trans_dt),1,4) + substring(convert(varchar(10),glhst_trans_dt),5,2) + substring(convert(varchar(10),glhst_trans_dt),7,2) ) = 1
+
+	
+	UPDATE #iRelyImptblGLJournalDetail
+	SET gooddate = cast( substring(replace(convert(varchar(20),j.dtmDate,102),'.',''),1,6) + '01'  as datetime )
+	FROM #iRelyImptblGLJournalDetail a INNER JOIN
+	tblGLJournal j on a.intJournalId =j.intJournalId
+	WHERE ISDATE(substring(convert(varchar(10),glhst_trans_dt),1,4) + substring(convert(varchar(10),glhst_trans_dt),5,2) + substring(convert(varchar(10),glhst_trans_dt),7,2) ) = 0
+	SELECT @invalidDatesUpdated =  CASE WHEN @@ROWCOUNT > 0  THEN '1' ELSE '0' END
 
 	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
 
@@ -275,8 +286,8 @@ BEGIN TRANSACTION
 	--	UPDATE POST DATE JOURNAL [HEADER]
 	--+++++++++++++++++++++++++++++++++++++											
 						
-	UPDATE tblGLJournal SET dtmDate = (SELECT TOP 1 CAST(CAST(MONTH(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) +'/01/'+ CAST(YEAR(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) as DATETIME) as dtmNewDate FROM tblGLJournalDetail 
-                                        WHERE tblGLJournalDetail.intJournalId = tblGLJournal.intJournalId)
+	--UPDATE tblGLJournal SET dtmDate = (SELECT TOP 1 CAST(CAST(MONTH(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) +'/01/'+ CAST(YEAR(tblGLJournalDetail.dtmDate) as NVARCHAR(10)) as DATETIME) as dtmNewDate FROM tblGLJournalDetail 
+ --                                       WHERE tblGLJournalDetail.intJournalId = tblGLJournal.intJournalId)
                                         						
 	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT	
 
@@ -285,7 +296,9 @@ BEGIN TRANSACTION
 	ELSE
 		SET @result = CAST(@intImportLogId AS NVARCHAR(40))				
 	
-	SET @result = 'SUCCESS ' + @result
+	--SET @result = 'SUCCESS ' + @result
+	UPDATE tblSMPreferences set strValue = 'true' where strPreference = 'isHistoricalJournalImported'
+	SELECT 'SUCCESS:'+  @result +':' + @invalidDatesUpdated 
 --=====================================================================================================================================
 -- 	FINALIZING STAGE
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -295,11 +308,10 @@ COMMIT_INSERT:
 	
 ROLLBACK_INSERT:
 	ROLLBACK TRANSACTION		            
-	SELECT @result =  'Importing Historical Journal error :' + ERROR_MESSAGE()
+	SELECT 'Importing Historical Journal error :' + ERROR_MESSAGE()
 	GOTO IMPORT_EXIT
 
 IMPORT_EXIT:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#iRelyImptblGLJournal')) DROP TABLE #iRelyImptblGLJournal
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id('tempdb..#iRelyImptblGLJournalDetail')) DROP TABLE #iRelyImptblGLJournalDetail
 
-GO	

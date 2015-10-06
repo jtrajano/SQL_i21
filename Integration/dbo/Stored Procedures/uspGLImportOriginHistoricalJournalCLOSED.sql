@@ -240,11 +240,21 @@ IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
  -- UPDATE GOODDATE
  --++++++++++++++++++++++++++++
 SET ROWCOUNT 0
+
 UPDATE #iRelyImptblGLJournalDetail
- SET gooddate = CAST(substring(convert(varchar(10),glarc_trans_dt),5,2)
- +''/''+substring(convert(varchar(10),glarc_trans_dt),7,2)
- +''/''+substring(convert(varchar(10),glarc_trans_dt),1,4) AS DATETIME)
- FROM #iRelyImptblGLJournalDetail
+SET gooddate = CAST (substring(convert(varchar(10),glhst_trans_dt),1,4)
+				+substring(convert(varchar(10),glhst_trans_dt),5,2)
+				+substring(convert(varchar(10),glhst_trans_dt),7,2) AS DATETIME)
+FROM #iRelyImptblGLJournalDetail
+WHERE ISDATE(substring(convert(varchar(10),glhst_trans_dt),1,4) + substring(convert(varchar(10),glhst_trans_dt),5,2) + substring(convert(varchar(10),glhst_trans_dt),7,2) ) = 1
+
+UPDATE #iRelyImptblGLJournalDetail
+SET gooddate = CAST (substring(convert(varchar(10),glhst_trans_dt),1,4)
+				+substring(convert(varchar(10),glhst_trans_dt),5,2)
+				+ ''01'' AS DATETIME)
+FROM #iRelyImptblGLJournalDetail
+WHERE ISDATE(substring(convert(varchar(10),glhst_trans_dt),1,4) + substring(convert(varchar(10),glhst_trans_dt),5,2) + substring(convert(varchar(10),glhst_trans_dt),7,2) ) = 0
+
 IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
 --+++++++++++++++++++++++++++++++++
  -- INSERT JOURNAL [DETAIL]
