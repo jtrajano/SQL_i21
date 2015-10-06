@@ -34,6 +34,11 @@ INTO #tmpDepartments
 FROM @xmlDepartments.nodes('/A') AS X(T) 
 WHERE RTRIM(LTRIM(T.value('.', 'INT'))) > 0
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM #tmpDepartments) 
+BEGIN
+	INSERT INTO #tmpDepartments (intDepartmentId) SELECT intDepartmentId FROM tblPRDepartment
+END
+
 /* Get Paycheck Starting Number */
 DECLARE @strPaycheckId NVARCHAR(50)
 EXEC uspSMGetStartingNumber 32, @strPaycheckId OUT
@@ -268,7 +273,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 												 ELSE SUM(dblRegularHours) 
 											END
 						FROM tblPRTimecard 
-						WHERE intEmployeeEarningId = (CASE WHEN @strCalculationType IN ('Overtime') THEN intEmployeeEarningId ELSE @intEmployeeEarningId END)
+						WHERE intEmployeeEarningId = @intEmployeeEarningId
 						AND ysnApproved = 1 AND intPaycheckId IS NULL
 						AND intEmployeeId = @intEmployee AND intEmployeeDepartmentId = @intEmployeeDepartmentId
 						AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
@@ -293,7 +298,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpEarnings)
 													 ELSE SUM(dblRegularHours) 
 												END
 							FROM tblPRTimecard 
-							WHERE intEmployeeEarningId = (CASE WHEN @strCalculationType IN ('Overtime') THEN intEmployeeEarningId ELSE @intEmployeeEarningId END)
+							WHERE intEmployeeEarningId = @intEmployeeEarningId
 							AND ysnApproved = 1 AND intPaycheckId IS NULL
 							AND intEmployeeId = @intEmployee AND intEmployeeDepartmentId = @intEmployeeDepartmentId
 							AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
@@ -428,5 +433,7 @@ WHILE EXISTS(SELECT TOP 1 1 FROM #tmpDeductions)
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
 		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)	
 
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..##tmpDepartments')) DROP TABLE #tmpDepartments
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..##tmpEarnings')) DROP TABLE #tmpEarnings
 END
 GO
