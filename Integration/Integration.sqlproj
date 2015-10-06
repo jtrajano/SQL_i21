@@ -291,5 +291,6 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteSP.sql" />
     <None Include="dbo\Stored Procedures\uspTMUpdateCustomerBudgetOrigin.sql" />
+    <None Include="dbo\Views\vyuTMLeaseSearch.sql" />
   </ItemGroup>
 </Project>
