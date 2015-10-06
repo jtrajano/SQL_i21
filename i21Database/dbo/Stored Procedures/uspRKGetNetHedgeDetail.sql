@@ -52,7 +52,7 @@ END
 ELSE
 BEGIN
 Insert into @tblTemp (strLocationName,dtmFilledDate,strInternalTradeNo,strFutureMonth,strInstrumentType,strBroker,strAccountNumber, intFutOptTransactionId,
-						  strFutMarketName,intNoOfContract,dblMatchQty,dblContractSize,intFutureMarketId,BuySell,OpenLots,HedgedQty,IntCommodityId)
+						  strFutMarketName,intNoOfContract,dblMatchQty,dblContractSize,intFutureMarketId,BuySell,OpenLots,HedgedQty,intCommodityId)
 SELECT l.strLocationName,ft.dtmFilledDate,ft.strInternalTradeNo,fm.strFutureMonth,
 	CASE WHEN ft.intInstrumentTypeId=1 THEN 'Future' ELSE 'Option' END strInstrumentType,e.strName strBroker,ba.strAccountNumber, t.* FROM
 	(SELECT f.intFutOptTransactionId,m.strFutMarketName, isnull(intNoOfContract,0) intNoOfContract,ISNULL(dblMatchQty,0) dblMatchQty,m.dblContractSize,m.intFutureMarketId,'Buy' as [BuySell] ,
