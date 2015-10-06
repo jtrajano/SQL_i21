@@ -2534,6 +2534,7 @@
     <Build Include="dbo\Tables\tblSMTrustedComputer.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationDetail.sql" />
+    <Build Include="dbo\Views\vyuHDSMModuleMap.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
