@@ -10,6 +10,7 @@
     [intSort] INT NULL, 
     [intConcurrencyId] INT NULL DEFAULT 1, 
     CONSTRAINT [PK_tblPATStockClassification] PRIMARY KEY ([intStockId]), 
+	CONSTRAINT [AK_tblPATStockClassification_strStockName] UNIQUE ([strStockName]), 
     CONSTRAINT [FK_tblPATStockClassification_tblDividendGLAccount] FOREIGN KEY ([intDividendsGLAccount]) REFERENCES [tblGLAccount]([intAccountId]), 
-    CONSTRAINT [FK_tblPATStockClassification_tblTreasuryGLAccount] FOREIGN KEY ([intTreasuryGLAccount]) REFERENCES [tblGLAccount]([intAccountId])
+    CONSTRAINT [FK_tblPATStockClassification_tblTreasuryGLAccount] FOREIGN KEY ([intTreasuryGLAccount]) REFERENCES [tblGLAccount]([intAccountId]) 
 )
