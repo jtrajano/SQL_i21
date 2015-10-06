@@ -2,6 +2,10 @@
 	@ItemsFromInventoryReceipt ReceiptItemTableType READONLY 
 	,@intUserId INT 
 AS
+
+DECLARE @ItemsToIncreaseInTransitInBound AS InTransitTableType,
+        @total as int;
+
 BEGIN TRY
 
 SET QUOTED_IDENTIFIER OFF
@@ -16,9 +20,12 @@ SET ANSI_WARNINGS OFF
 				@intLotId						INT,
 				@intSourceId					INT,
 				@intContainerId					INT,
+				@intShipmentId					INT,
 				@dblQty							NUMERIC(18,6),
 				@dblContractQty					NUMERIC(18,6),
-				@dblContainerQty				NUMERIC(18,6)
+				@dblContainerQty				NUMERIC(18,6),
+				@ysnInventorize					BIT,
+				@ysnReverse						BIT = 0
 
 	SELECT @strReceiptType = strReceiptType, @intSourceType = intSourceType FROM @ItemsFromInventoryReceipt
 	IF (@strReceiptType <> 'Purchase Contract' AND @intSourceType <> 2)
@@ -70,9 +77,44 @@ SET ANSI_WARNINGS OFF
 		UPDATE tblLGShipmentContractQty 		SET dblReceivedQty = (@dblContractQty + @dblQty) WHERE intShipmentContractQtyId = @intSourceId
 		UPDATE tblLGShipmentBLContainerContract SET dblReceivedQty = (@dblContainerQty + @dblQty) WHERE intShipmentContractQtyId = @intSourceId AND intShipmentBLContainerId = @intContainerId
 		
+		SET @ysnReverse = CASE WHEN @dblQty < 0 THEN 1 ELSE 0 END
+
+		INSERT into @ItemsToIncreaseInTransitInBound(
+			[intItemId] 
+			,[intItemLocationId] 
+			,[intItemUOMId] 
+			,[intLotId] 
+			,[intSubLocationId] 
+			,[intStorageLocationId] 
+			,[dblQty] 
+			,[intTransactionId]
+			,[strTransactionId]
+			,[intTransactionTypeId] 		 	
+		)	
+		SELECT 
+			SC.intItemId,
+			intItemLocationId = (SELECT Top(1) intItemLocationId from tblICItemLocation where intItemId=SC.intItemId),
+			CT.intItemUOMId,
+			NULL,
+			SH.intSubLocationId,
+			NULL,
+			-@dblQty,
+			SH.intShipmentId,
+			CAST (SH.intTrackingNumber as VARCHAR(100)),
+			22
+			FROM tblLGShipmentContractQty SC
+			JOIN tblLGShipment SH ON SH.intShipmentId = SC.intShipmentId
+			JOIN vyuCTContractDetailView CT ON CT.intContractDetailId = SC.intContractDetailId
+			WHERE SC.intShipmentContractQtyId = @intSourceId;
+		EXEC dbo.uspICIncreaseInTransitInBoundQty @ItemsToIncreaseInTransitInBound;
 		SELECT @intLotId = MIN(intLotId) FROM @ItemsFromInventoryReceipt WHERE intLotId > @intLotId
 	END
-
+	SELECT TOP(1) @intShipmentId = intShipmentId FROM tblLGShipmentContractQty WHERE intShipmentContractQtyId = @intSourceId
+	SELECT @ysnInventorize = ysnInventorized FROM tblLGShipment WHERE intShipmentId = @intShipmentId
+	IF (@ysnReverse = 0) AND (@ysnInventorize != 1)
+	BEGIN
+		UPDATE tblLGShipment SET ysnInventorized = 1, dtmInventorizedDate=GETDATE() WHERE intShipmentId=@intShipmentId		
+	END
 END TRY
 
 BEGIN CATCH
