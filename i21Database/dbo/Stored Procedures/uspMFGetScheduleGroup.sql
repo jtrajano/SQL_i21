@@ -7,8 +7,12 @@ DECLARE @strTableName NVARCHAR(50)
 	,@sqlCommand NVARCHAR(MAX)
 	,@intScheduleRuleId INT
 
+SELECT *
+FROM dbo.tblMFScheduleGroup
+WHERE intScheduleGroupId = @intScheduleGroupId
+
 SELECT @intScheduleRuleId = intScheduleRuleId
-FROM tblMFScheduleGroup
+FROM dbo.tblMFScheduleGroup
 WHERE intScheduleGroupId = @intScheduleGroupId
 
 SELECT @strTableName = A.strTableName

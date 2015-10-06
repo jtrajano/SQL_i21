@@ -2536,7 +2536,7 @@
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationDetail.sql" />
     <Build Include="dbo\Views\vyuHDSMModuleMap.sql" />
-    <Build Include="uspMFGetScheduleGroup.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetScheduleGroup.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
