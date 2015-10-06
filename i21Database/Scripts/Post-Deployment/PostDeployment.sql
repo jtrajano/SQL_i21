@@ -113,9 +113,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r "..\..\..\Integration\dbo\Views\vyuTMLeaseSearch.sql"
 
 
-
-
-
 -- Canned Panels
 :r .\DB\1_CannedPanels_Panel.sql
 :r .\DB\2_CannedPanels_Column.sql

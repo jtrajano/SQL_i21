@@ -12,7 +12,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = '
 			,A.strLeaseNumber
 			,A.dtmStartDate
 			,strLeaseCode = B.strLeaseCode
-			,strBillToCustomerNumber = D.vwcus_key
+			,strBillToCustomerNumber = D.vwcus_key COLLATE Latin1_General_CI_AS 	
 			,strBillToCustomerName = (CASE WHEN D.vwcus_co_per_ind_cp = ''D''   
 											THEN  ISNULL(RTRIM(D.vwcus_last_name),'''') + ISNULL(RTRIM(D.vwcus_first_name),'''') + ISNULL(RTRIM(D.vwcus_mid_init),'''') + ISNULL(RTRIM(D.vwcus_name_suffix),'''')   
 											ELSE    
