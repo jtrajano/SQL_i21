@@ -130,38 +130,47 @@ BEGIN
 	INSERT INTO #tmpInvalidBillData 
 	SELECT * FROM fnAPValidatePostBill(@billIds, @post)
 
-	DECLARE @totalInvalid INT = 0
-	SELECT @totalInvalid = COUNT(*) FROM #tmpInvalidBillData
-
-	IF(@totalInvalid > 0)
-	BEGIN
-
-		--Insert Invalid Post transaction result
-		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-		SELECT strError, strTransactionType, strTransactionId, @batchId, intTransactionId FROM #tmpInvalidBillData
-
-		SET @invalidCount = @totalInvalid
-
-		--DELETE Invalid Transaction From temp table
-		DELETE #tmpPostBillData
-			FROM #tmpPostBillData A
-				INNER JOIN #tmpInvalidBillData
-					ON A.intBillId = #tmpInvalidBillData.intTransactionId
-
-	END
-
-	SELECT @totalRecords = COUNT(*) FROM #tmpPostBillData
-
-	COMMIT TRANSACTION --COMMIT inserted invalid transaction
-
-	IF(@totalRecords = 0 OR (@isBatch = 0 AND @totalInvalid > 0))  
-	BEGIN
-		SET @success = 0
-		GOTO Post_Exit
-	END
-
-	BEGIN TRANSACTION
 END
+ELSE
+BEGIN
+
+	--VALIDATIONS
+	INSERT INTO #tmpInvalidBillData 
+	SELECT * FROM fnAPValidateRecapBill(@billIds, @post)
+	
+END
+
+DECLARE @totalInvalid INT = 0
+SELECT @totalInvalid = COUNT(*) FROM #tmpInvalidBillData
+
+IF(@totalInvalid > 0)
+BEGIN
+
+	--Insert Invalid Post transaction result
+	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+	SELECT strError, strTransactionType, strTransactionId, @batchId, intTransactionId FROM #tmpInvalidBillData
+
+	SET @invalidCount = @totalInvalid
+
+	--DELETE Invalid Transaction From temp table
+	DELETE #tmpPostBillData
+		FROM #tmpPostBillData A
+			INNER JOIN #tmpInvalidBillData
+				ON A.intBillId = #tmpInvalidBillData.intTransactionId
+
+END
+
+SELECT @totalRecords = COUNT(*) FROM #tmpPostBillData
+
+COMMIT TRANSACTION --COMMIT inserted invalid transaction
+
+IF(@totalRecords = 0 OR (@isBatch = 0 AND @totalInvalid > 0))  
+BEGIN
+	SET @success = 0
+	GOTO Post_Exit
+END
+
+BEGIN TRANSACTION
 
 --CREATE TEMP GL ENTRIES
 SELECT @validBillIds = COALESCE(@validBillIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)

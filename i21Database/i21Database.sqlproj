@@ -2358,6 +2358,7 @@
     <Build Include="dbo\Stored Procedures\uspGRProcessSettleStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateInvReceiptBySettle.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetGLStatus.sql" />
+    <Build Include="dbo\Functions\fnAPValidateRecapBill.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
