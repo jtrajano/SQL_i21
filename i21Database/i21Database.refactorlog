@@ -4109,4 +4109,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="dblAssignedLots" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="7e999588-7c04-4d4f-9b0d-41b992a55cd7" ChangeDateTime="10/06/2015 04:03:48">
+    <Property Name="ElementName" Value="[dbo].[tblSMReminderList].[strDescription]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMReminderList]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strMessage" />
+  </Operation>
 </Operations>
