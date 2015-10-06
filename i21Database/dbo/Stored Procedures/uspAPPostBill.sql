@@ -292,6 +292,12 @@ BEGIN
 		--) AppliedPayments
 		EXEC uspAPUpdatePrepayAndDebitMemo @validBillIds, 1
 
+		--If Prepaid was made the bill fully paid, update the ysnPaid to 1
+		UPDATE A
+			SET A.ysnPaid = (CASE WHEN A.dblAmountDue = 0 THEN 1 ELSE 0 END)
+		FROM tblAPBill A
+		WHERE A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
+
 		--Update Inventory Item Receipt
 		UPDATE A
 			SET A.dblBillQty = A.dblBillQty + B.dblQtyReceived

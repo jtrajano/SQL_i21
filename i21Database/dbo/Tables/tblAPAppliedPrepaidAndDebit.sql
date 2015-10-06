@@ -19,5 +19,6 @@
     [ysnApplied] BIT NOT NULL DEFAULT 0,
 	[intConcurrencyId] INT NOT NULL DEFAULT 0,
 	CONSTRAINT [FK_tblAPAppliedPreapaidAndDebit_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblAPAppliedPreapaidAndDebit_intTransactionId] FOREIGN KEY ([intTransactionId]) REFERENCES [dbo].[tblAPBill] ([intBillId]) ON DELETE CASCADE,
 )
 GO

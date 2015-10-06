@@ -180,7 +180,7 @@ SELECT
 	[strItemNo]				=	NULL,
 	[intContractHeaderId]	=	NULL,	
 	[strContractNumber]		=	NULL,
-	[intPrepayType]			=	NULL,
+	[intPrepayType]			=	B.intPrepayTypeId,
 	[dblTotal]				=	A.dblTotal,
 	[dblBillAmount]			=	(SELECT dblTotal FROM tblAPBill WHERE intBillId = @billId),
 	[dblBalance]			=	A.dblAmountDue,
@@ -188,11 +188,19 @@ SELECT
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
+INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 WHERE A.intTransactionType IN (2)
-AND ISNULL((SELECT TOP 1 intItemId FROM tblAPBillDetail WHERE intBillId = A.intBillId),0) <= 0
+--AND ISNULL((SELECT TOP 1 intItemId FROM tblAPBillDetail WHERE intBillId = A.intBillId),0) <= 0
+AND ISNULL(B.intItemId,0) <= 0
 AND intEntityVendorId = @vendorId
 AND A.dblAmountDue != 0
-
+AND EXISTS
+(
+	--get prepayment record only if it has payment posted
+	SELECT 1 FROM tblAPPayment B INNER JOIN tblAPPaymentDetail C ON B.intPaymentId = C.intPaymentId
+	INNER JOIN tblCMBankTransaction D ON B.strPaymentRecordNum = D.strTransactionId
+	WHERE C.intBillId = A.intBillId AND B.ysnPosted = 1 AND D.ysnCheckVoid = 0
+)
 ----PREPAYMENT
 --MERGE tblAPAppliedPrepaidAndDebit AS Target
 --USING (
