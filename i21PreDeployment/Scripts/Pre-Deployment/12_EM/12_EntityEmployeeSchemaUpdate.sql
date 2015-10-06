@@ -114,20 +114,32 @@ BEGIN
 				values (@mName, '''')
 				set @mContactId = @@IDENTITY
 
-				insert into tblEntity(strName, strContactNumber, strContactType, strPhone, strPhone2, strNotes)
-				values(@cName, '''', ''Emergency'', @cPhone, @cPhone2, '')
-				set @cContactId = @@IDENTITY
-	
 				insert into tblEntityToContact(intEntityId, intEntityContactId, ysnDefaultContact, ysnPortalAccess)
 				values(@curInt, @mContactId, 1, 0)
+				
+				if(@cName is not null or @cName <> '''')
+				begin 
+					insert into tblEntity(strName, strContactNumber, strContactType, strPhone, strPhone2, strNotes)
+					values(@cName, '''', ''Emergency'', @cPhone, @cPhone2, '''')
+					set @cContactId = @@IDENTITY
 
-				insert into tblEntityToContact(intEntityId, intEntityContactId, ysnDefaultContact, ysnPortalAccess)
-				values(@curInt, @cContactId, 0, 0)		
+					insert into tblEntityToContact(intEntityId, intEntityContactId, ysnDefaultContact, ysnPortalAccess)
+					values(@curInt, @cContactId, 0, 0)		
+				end 
+
+				
 			end
 
 			delete from #tmp where intEmployeeId = @curInt
 	
 		end
+
+
+		INSERT INTO tblEntityType(intEntityId,strType, intConcurrencyId)
+	SELECT intEmployeeId,''Employee'', 0 FROM tblPREmployee 
+		where intEmployeeId not in (SELECT intEntityId FROM 
+										tblEntityType where strType = ''Employee'')
+
 	')
 END
 PRINT '*** END CHECKING ENTITY EMPLOYEE***'
