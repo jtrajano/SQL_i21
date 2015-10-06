@@ -217,6 +217,7 @@ LEFT JOIN
 	AND intEmployeeDepartmentId IN (SELECT intDepartmentId FROM #tmpDepartments)
 	AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) >= CAST(FLOOR(CAST(ISNULL(@dtmBegin,dtmDate) AS FLOAT)) AS DATETIME)
 	AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmEnd,dtmDate) AS FLOAT)) AS DATETIME)
+	AND @ysnUseStandard = 0
 ) T ON E.intEmployeeEarningId = T.intEmployeeEarningId
 	
 /* Add Each Earning to Paycheck */
