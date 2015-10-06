@@ -96,7 +96,7 @@ SELECT @intAssignFuturesToContractHeaderId = SCOPE_IDENTITY();
 	intContractDetailId int,
 	dtmMatchDate datetime,
 	intFutOptTransactionId int,
-	dblAssignedLots int,
+	dblAssignedLots numeric(16,10),
 	intHedgedLots int,
 	ysnIsHedged bit 
  )          

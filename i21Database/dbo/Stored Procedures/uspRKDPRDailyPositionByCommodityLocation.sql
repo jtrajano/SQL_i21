@@ -23,7 +23,7 @@ SELECT strLocationName,intCommodityId,strCommodityCode,strUnitMeasure,intUnitMea
    dblCollatralSales  + SlsBasisDeliveries           
             AS CashExposure,              
    ReceiptProductQty,OpenPurchasesQty,OpenSalesQty,OpenPurQty,
-   (invQty)- isnull(ReserveQty,0)  + dblGrainBalance 
+   (invQty)- isnull(ReserveQty,0)  + isnull(dblGrainBalance ,0)
    AS InHouse              
                  
 FROM(  
@@ -154,7 +154,7 @@ SELECT TOP 1 @intUnitMeasureId = intUnitMeasureId FROM tblRKCompanyPreference
 if isnull(@intUnitMeasureId,'')<> ''
 BEGIN
 SELECT @strUnitMeasure=strUnitMeasure FROM tblICUnitMeasure where intUnitMeasureId=@intUnitMeasureId
-SELECT distinct strLocationName, 
+SELECT distinct t.strLocationName, 
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,OpenPurchasesQty) OpenPurchasesQty,
 		dbo.fnCTConvertQuantityToTargetCommodityUOM(cuc.intCommodityUnitMeasureId,case when isnull(cuc1.intCommodityUnitMeasureId,0) = 0 then cuc.intCommodityUnitMeasureId else cuc1.intCommodityUnitMeasureId end,OpenSalesQty) OpenSalesQty,
 		t.intCommodityId,strCommodityCode,@strUnitMeasure as strUnitMeasure, 
@@ -172,5 +172,7 @@ END
 ELSE
 BEGIN
 SELECT strLocationName,OpenPurchasesQty,OpenSalesQty,intCommodityId,strCommodityCode,strUnitMeasure,dblCompanyTitled,dblCaseExposure,dblBasisExposure as OpenSalQty,
-		dblAvailForSale,dblInHouse,dblBasisExposure	from #temp Where t.intCommodityId=@intCommodityId
+		dblAvailForSale,dblInHouse,dblBasisExposure	from #temp Where intCommodityId=@intCommodityId
 END
+
+

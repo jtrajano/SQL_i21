@@ -23,7 +23,7 @@ SELECT intCommodityId,strCommodityCode,strUnitMeasure,intUnitMeasureId,
    dblCollatralSales  + SlsBasisDeliveries         
             AS CashExposure,              
    ReceiptProductQty,OpenPurchasesQty,OpenSalesQty,OpenPurQty,
-      (invQty)- isnull(ReserveQty,0)  + dblGrainBalance  AS InHouse     
+      (invQty)- isnull(ReserveQty,0)  + isnull(dblGrainBalance,0)  AS InHouse     
 FROM(  
 SELECT DISTINCT c.intCommodityId,              
   strCommodityCode,              

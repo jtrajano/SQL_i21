@@ -10,11 +10,11 @@ AS
  isnull(CD.dblNetWeight,0.0) as dblWeights,
  m.strFutMarketName,
  mo.strFutureMonth,
- isnull(convert(int,CD.dblNoOfLots),0) intNoOfLots,
- IsNull((SELECT SUM(AD.intHedgedLots) FROM tblRKAssignFuturesToContractSummary AD Group By AD.intContractDetailId 
-		Having CD.intContractDetailId = AD.intContractDetailId), 0) as intHedgedLots,
-  IsNull((SELECT SUM(AD.dblAssignedLots) FROM tblRKAssignFuturesToContractSummary AD Group By AD.intContractDetailId 
-		Having CD.intContractDetailId = AD.intContractDetailId), 0) as intAssignedLots,
+ ISNULL(convert(int,CD.dblNoOfLots),0) intNoOfLots,
+ ISNULL((SELECT SUM(AD.intHedgedLots) FROM tblRKAssignFuturesToContractSummary AD Group By AD.intContractDetailId 
+		HAVING CD.intContractDetailId = AD.intContractDetailId), 0) as intHedgedLots,
+ ISNULL((SELECT SUM(AD.dblAssignedLots) FROM tblRKAssignFuturesToContractSummary AD Group By AD.intContractDetailId 
+		HAVING CD.intContractDetailId = AD.intContractDetailId), 0) as dblAssignedLots,
  CH.strCommodityCode,
  CL.strLocationName,mo.ysnExpired,
  b.strBook,
@@ -26,4 +26,4 @@ AS
  JOIN tblSMCompanyLocation   CL ON CL.intCompanyLocationId  = CD.intCompanyLocationId  
  JOIN tblICUnitMeasure uc on CD.intUnitMeasureId=uc.intUnitMeasureId
  LEFT JOIN tblCTBook b on CD.intBookId=b.intBookId
- LEFT JOIN tblCTSubBook sb on CD.intSubBookId=sb.intSubBookId)t  
+  LEFT JOIN tblCTSubBook sb on CD.intSubBookId=sb.intSubBookId)t  

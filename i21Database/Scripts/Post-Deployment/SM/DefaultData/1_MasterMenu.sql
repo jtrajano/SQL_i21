@@ -518,11 +518,11 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'User Pref
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = 'i21.view.UserPreference' WHERE strMenuName = 'User Preferences' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reminder List' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Reminder List', N'System Manager', @CommonInfoParentMenuId, N'Reminder List', N'Maintenance', N'Screen', N'i21.view.ReminderList', N'small-menu-maintenance', 0, 0, 0, 1, 17, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET strCommand = 'i21.view.ReminderList' WHERE strMenuName = 'Reminder List' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
+--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reminder List' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId)
+--	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+--	VALUES (N'Reminder List', N'System Manager', @CommonInfoParentMenuId, N'Reminder List', N'Maintenance', N'Screen', N'i21.view.ReminderList', N'small-menu-maintenance', 0, 0, 0, 1, 17, 1)
+--ELSE
+--	UPDATE tblSMMasterMenu SET strCommand = 'i21.view.ReminderList' WHERE strMenuName = 'Reminder List' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Batch Posting' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -559,6 +559,7 @@ ELSE
 
 /* Start Delete */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Freight Terms' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Reminder List' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoParentMenuId
 /* End of Delete */
 
 /* DASHBOARD */
@@ -815,8 +816,8 @@ UPDATE tblSMMasterMenu SET strCommand = N'Delivery Fill Report' WHERE strMenuNam
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Two-Part Delivery Fill Report' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementParentMenuId)
 UPDATE tblSMMasterMenu SET strCommand = N'Two-Part Delivery Fill Report' WHERE strMenuName = N'Two-Part Delivery Fill Report' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementParentMenuId
 
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Lease Billing Report' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementParentMenuId)
-UPDATE tblSMMasterMenu SET strCommand = N'Lease Billing Report' WHERE strMenuName = N'Lease Billing Report' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementParentMenuId
+--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Lease Billing Report' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementParentMenuId)
+--UPDATE tblSMMasterMenu SET strCommand = N'Lease Billing Report' WHERE strMenuName = N'Lease Billing Report' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementParentMenuId
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Missed Julian Deliveries' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementParentMenuId)
 UPDATE tblSMMasterMenu SET strCommand = N'Missed Julian Deliveries' WHERE strMenuName = N'Missed Julian Deliveries' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementParentMenuId
@@ -876,6 +877,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Clock Rea
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'TankManagement.view.ClockReadingHistory' WHERE strMenuName = 'Clock Reading History' AND strModuleName = 'Tank Management' AND intParentMenuID = @TankManagementParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lease' AND strModuleName = 'Tank Management' AND intParentMenuID = @TankManagementParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Lease', N'Tank Management', @TankManagementParentMenuId, N'Lease', N'Maintenance', N'Screen', N'TankManagement.view.Lease', N'small-menu-maintenance', 0, 0, 0, 1, NULL, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'TankManagement.view.Lease' WHERE strMenuName = 'Lease' AND strModuleName = 'Tank Management' AND intParentMenuID = @TankManagementParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'On Hold Detail' AND strModuleName = 'Tank Management' AND intParentMenuID = @TankManagementParentMenuId)
 INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 VALUES (N'On Hold Detail', N'Tank Management', @TankManagementParentMenuId, N'On Hold Detail', N'Report', N'Report', N'On Hold Detail', N'small-menu-report', 0, 0, 0, 1, NULL, 1)
@@ -885,10 +892,9 @@ INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID
 VALUES (N'Device Lease Detail', N'Tank Management', @TankManagementParentMenuId, N'Device Lease Detail', N'Report', N'Report', N'Device Lease Detail', N'small-menu-report', 0, 0, 0, 1, 0, 1)
 
 /* Start of Delete */
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Open Call Entries' AND strModuleName = N'Tank Management' AND strType = 'Report' AND intParentMenuID = @TankManagementParentMenuId)
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Open Call Entries' AND strModuleName = N'Tank Management' AND strType = 'Report' AND intParentMenuID = @TankManagementParentMenuId
-IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Work Order Status' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementParentMenuId)
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Work Order Status' AND strModuleName = N'Tank Management' AND intParentMenuID = @TankManagementParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Lease Billing Report' AND strModuleName = N'Tank Management' AND strType = 'Report' AND intParentMenuID = @TankManagementParentMenuId
 /* End of Delete */
 
 

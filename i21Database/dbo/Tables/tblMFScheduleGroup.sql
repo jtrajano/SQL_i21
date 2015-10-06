@@ -9,7 +9,7 @@ CREATE TABLE tblMFScheduleGroup (
 	,intCreatedUserId INT NOT NULL
 	,dtmLastModified DATETIME NOT NULL
 	,intLastModifiedUserId INT NOT NULL
-	,intConcurrencyId INT
+	,intConcurrencyId INT CONSTRAINT [DF_tblMFScheduleGroup_intConcurrencyId] DEFAULT 0
 	,CONSTRAINT PK_tblMFScheduleGroup_intScheduleGroupId PRIMARY KEY (intScheduleGroupId)
 	,CONSTRAINT UQ_tblMFScheduleGroup_strGroupName_intLocationId UNIQUE (
 		strGroupName

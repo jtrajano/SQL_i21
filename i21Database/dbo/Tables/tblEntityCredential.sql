@@ -6,6 +6,8 @@
     [strApiKey]				NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS NULL, 
     [strApiSecret]			NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS NULL, 
     [ysnApiDisabled]		BIT NULL, 
+	[strTFASecretKey]		nvarchar(MAX)  COLLATE Latin1_General_CI_AS NULL, 
+	[ysnTFAEnabled]			BIT            DEFAULT ((0)) NULL, 
     [intConcurrencyId]      INT            DEFAULT ((1)) NOT NULL
     CONSTRAINT [PK_tblEntityCredential] PRIMARY KEY CLUSTERED ([intEntityCredentialId] ASC),
     CONSTRAINT [FK_tblEntityCredential_tblEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]) ON DELETE CASCADE,
