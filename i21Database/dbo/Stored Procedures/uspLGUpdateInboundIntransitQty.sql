@@ -1,6 +1,6 @@
 CREATE PROCEDURE [dbo].[uspLGUpdateInboundIntransitQty]
 	 @intShipmentId AS INT
-	,@intUserId AS INT
+	,@ysnInventorize AS BIT
 	,@ysnUnShip AS BIT	
 
 AS
@@ -58,12 +58,12 @@ BEGIN TRY
 
 	EXEC dbo.uspICIncreaseInTransitInBoundQty @ItemsToIncreaseInTransitInBound;
 
-	IF (@ysnUnShip = 1)
+	IF (@ysnInventorize = 1)
 	BEGIN
 			UPDATE tblLGShipment SET ysnInventorized = 1, dtmInventorizedDate=GETDATE() WHERE intShipmentId=@intShipmentId
 	END
 
-	IF (@ysnUnShip = 0)
+	IF (@ysnInventorize = 0)
 	BEGIN
 			UPDATE tblLGShipment SET ysnInventorized = 0, dtmInventorizedDate=NULL WHERE intShipmentId=@intShipmentId
 	END
