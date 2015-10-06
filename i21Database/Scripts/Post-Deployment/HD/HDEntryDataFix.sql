@@ -275,4 +275,26 @@ GO
 
 GO
 	PRINT N'End fixing Milestone data.'
+	PRINT N'Start updating HD modules with SM modules.'
+GO
+
+	Update
+		tblHDModule 
+	set
+		tblHDModule.intSMModuleId = (
+									 select top 1
+										tblSMModule.intModuleId 
+									 from
+										vyuHDSMModuleMap
+										,tblSMModule
+										,tblHDTicketProduct
+									 where
+										vyuHDSMModuleMap.strHDModulename = tblHDModule.strModule
+										and vyuHDSMModuleMap.intSMModuleId = tblSMModule.intModuleId
+										and vyuHDSMModuleMap.strApplicationName = tblHDTicketProduct.strProduct
+										and tblHDTicketProduct.intTicketProductId = tblHDModule.intTicketProductId
+									)
+
+GO
+	PRINT N'End updating HD modules with SM modules.'
 GO
