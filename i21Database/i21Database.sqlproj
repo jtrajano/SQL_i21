@@ -2535,12 +2535,6 @@
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationDetail.sql" />
     <Build Include="dbo\Views\vyuHDSMModuleMap.sql" />
-    <Build Include="dbo\Views\vyuARUndepositedPayment.sql" />
-    <Build Include="dbo\Views\vyuGRGetVendors.sql" />
-    <Build Include="dbo\Views\vyuGRGetSettleItem.sql" />
-    <Build Include="dbo\Stored Procedures\uspGRProcessSettleStorage.sql" />
-    <Build Include="dbo\Stored Procedures\uspGRCreateInvReceiptBySettle.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLGetGLStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
