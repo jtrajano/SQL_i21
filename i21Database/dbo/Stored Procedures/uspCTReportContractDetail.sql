@@ -18,7 +18,7 @@ BEGIN TRY
 	FROM	tblCTContractDetail CD															LEFT
 	JOIN	tblICItemUOM		QM	ON	QM.intItemUOMId			=	CD.intItemUOMId			LEFT
 	JOIN	tblICUnitMeasure	UM	ON	UM.intUnitMeasureId		=	QM.intUnitMeasureId		LEFT
-	JOIN	tblICItemUOM		PM	ON	PM.intItemUOMId			=	CD.intItemUOMId			LEFT
+	JOIN	tblICItemUOM		PM	ON	PM.intItemUOMId			=	CD.intPriceItemUOMId	LEFT
 	JOIN	tblICUnitMeasure	PU	ON	PU.intUnitMeasureId		=	PM.intUnitMeasureId		LEFT
 	JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID		=	CD.intCurrencyId		LEFT
 	JOIN	tblRKFuturesMonth	MO	ON	MO.intFutureMonthId		=	CD.intFutureMonthId		LEFT
