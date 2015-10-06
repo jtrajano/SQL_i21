@@ -2542,6 +2542,7 @@
     <Build Include="dbo\Stored Procedures\uspMFCreateWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetPreSanitizeLot.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetWorkOrderByLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetGLStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

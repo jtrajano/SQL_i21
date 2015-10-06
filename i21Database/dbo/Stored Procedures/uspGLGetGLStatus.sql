@@ -9,6 +9,7 @@ BEGIN
 	DECLARE @HasAccountBuilt BIT = 0
 	DECLARE @HasStructureBuilt BIT = 0
 	DECLARE @HasImportedHistorical BIT = 0
+	DECLARE @HasImportedFiscalYear BIT = 0
 	
 	SELECT TOP 1 @HasStructureBuilt =1 FROM tblGLAccountStructure
 	SELECT TOP 1 @HasAccountBuilt=1 FROM tblGLAccount
@@ -17,6 +18,7 @@ BEGIN
 	SELECT TOP 1 @HasUOMBuilt = 1 FROM tblGLAccountUnit
 	SELECT TOP 1 @HasImportedReallocation = 1 FROM tblGLReallocationTemp 
 	SELECT TOP 1 @HasImportedHistorical = 1 FROM tblSMPreferences WHERE strPreference = 'isHistoricalJournalImported' AND strValue = 'true'
+	SELECT TOP 1 @HasImportedFiscalYear = 1 FROM tblGLFiscalYear
 	SELECT
 		@HasStructureBuilt AS HasStructureBuilt,
 		@HasAccountBuilt AS HasAccountBuilt,
@@ -25,5 +27,6 @@ BEGIN
 		@HasUOMBuilt AS HasUOMBuilt,
 		@HasImportedReallocation AS HasImportedReallocation,
 		@HasImportedHistorical AS HasImportedHistorical,
-		@HasStructureBuilt AS HasStructureBuilt
+		@HasStructureBuilt AS HasStructureBuilt,
+		@HasImportedFiscalYear AS HasImportedFiscalYear
 END
