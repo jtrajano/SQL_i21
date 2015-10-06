@@ -2539,6 +2539,9 @@
     <Build Include="dbo\Stored Procedures\uspMFGetScheduleGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportSimultaneous.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportSimultaneousDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetPreSanitizeLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetWorkOrderByLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
