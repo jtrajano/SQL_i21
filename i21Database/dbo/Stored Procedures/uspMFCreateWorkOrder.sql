@@ -1,15 +1,13 @@
-﻿CREATE PROCEDURE [dbo].uspMFCreateWorkOrder (@strXML NVARCHAR(MAX))
+﻿CREATE PROCEDURE [dbo].uspMFCreateWorkOrder (@strXML NVARCHAR(MAX),@intWorkOrderId INT OUTPUT,@strWorkOrderNo NVARCHAR(50) OUTPUT)
 AS
 BEGIN TRY
 	DECLARE @idoc INT
 		,@ErrMsg NVARCHAR(MAX)
-		,@intWorkOrderId INT
 		,@dblQuantity NUMERIC(18, 6)
 		,@intUserId INT
 		,@intItemId INT
 		,@strLotNumber NVARCHAR(50)
 		,@strVendorLotNo NVARCHAR(50)
-		,@strWorkOrderNo NVARCHAR(50)
 		,@intItemUOMId INT
 		,@intManufacturingCellId INT
 		,@intLocationId INT
@@ -155,8 +153,6 @@ BEGIN TRY
 		,@dtmPlannedDate
 
 	SET @intWorkOrderId = SCOPE_IDENTITY()
-
-	SELECT @intWorkOrderId AS intWorkOrderId
 
 	INSERT INTO tblMFWorkOrderInputLot (
 		intWorkOrderId
