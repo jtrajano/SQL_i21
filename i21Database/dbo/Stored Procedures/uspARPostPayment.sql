@@ -543,7 +543,7 @@ IF @recap = 0
 							PD.intInvoiceId 
 						HAVING
 							COUNT(PD.intInvoiceId) > 1
-							AND MAX(I.dblAmountDue) < SUM(PD.dblPayment)
+							AND MAX(I.dblAmountDue) < (MAX(I.dblInvoiceTotal) - (SUM(PD.dblPayment) + SUM(PD.dblDiscount)))
 					) I
 						ON C.intInvoiceId = I.intInvoiceId 
 				WHERE
@@ -1322,22 +1322,6 @@ IF @recap = 0
 			SELECT Z.intPaymentId, Z.strTransactionId FROM @ZeroPayment Z
 			WHERE NOT EXISTS(SELECT NULL FROM @ARReceivablePostData WHERE intPaymentId = Z.intPaymentId)
 
-			--UPDATE tblARPaymentDetail
-			--SET dblDiscount = CASE WHEN tblARPaymentDetail.dblPayment + P.dblPayment + tblARPaymentDetail.dblDiscount = tblARPaymentDetail.dblInvoiceTotal
-			--					THEN tblARPaymentDetail.dblDiscount
-			--					ELSE 0.00
-			--				  END
-			--FROM (SELECT SUM(C.dblPayment) dblPayment
-			--		   , A.intInvoiceId 
-			--		FROM tblARPaymentDetail A
-			--		INNER JOIN tblARPayment B
-			--			ON A.intPaymentId = B.intPaymentId
-			--		INNER JOIN tblARInvoice C
-			--			ON A.intInvoiceId = C.intInvoiceId
-			--		WHERE A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-			--		GROUP BY A.intInvoiceId) P
-			--WHERE tblARPaymentDetail.intInvoiceId = P.intInvoiceId
-
 			UPDATE 
 				tblARInvoice
 			SET 
@@ -1367,7 +1351,7 @@ IF @recap = 0
 			UPDATE 
 				tblARInvoice
 			SET 
-				tblARInvoice.dblAmountDue = C.dblInvoiceTotal - C.dblPayment
+				tblARInvoice.dblAmountDue = C.dblInvoiceTotal - (C.dblPayment + C.dblDiscount)
 			FROM 
 				tblARPayment A
 			INNER JOIN tblARPaymentDetail B 
@@ -1580,22 +1564,6 @@ IF @recap = 0
 					--,intConcurrencyId += 1 
 			WHERE	intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
 
-			--UPDATE tblARPaymentDetail
-			--SET dblDiscount = CASE WHEN tblARPaymentDetail.dblPayment + P.dblPayment + tblARPaymentDetail.dblDiscount = tblARPaymentDetail.dblInvoiceTotal
-			--					THEN tblARPaymentDetail.dblDiscount
-			--					ELSE 0.00
-			--				  END
-			--FROM (SELECT SUM(C.dblPayment) dblPayment
-			--		   , A.intInvoiceId 
-			--		FROM tblARPaymentDetail A
-			--		INNER JOIN tblARPayment B
-			--			ON A.intPaymentId = B.intPaymentId
-			--		INNER JOIN tblARInvoice C
-			--			ON A.intInvoiceId = C.intInvoiceId
-			--		WHERE A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-			--		GROUP BY A.intInvoiceId) P
-			--WHERE tblARPaymentDetail.intInvoiceId = P.intInvoiceId
-
 			UPDATE 
 				tblARInvoice
 			SET 
@@ -1625,7 +1593,7 @@ IF @recap = 0
 			UPDATE 
 				tblARInvoice
 			SET 
-				tblARInvoice.dblAmountDue = C.dblInvoiceTotal - C.dblPayment
+				tblARInvoice.dblAmountDue = C.dblInvoiceTotal - (C.dblPayment + C.dblDiscount)
 			FROM 
 				tblARPayment A
 			INNER JOIN tblARPaymentDetail B 
@@ -1753,58 +1721,7 @@ IF @recap = 0
 					AND BA.ysnActive = 1
 					AND A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
 					
-			
-			--INSERT INTO [tblCMUndepositedFund](
-			--	 [intBankAccountId]
-			--	,[strSourceTransactionId]
-			--	,[intSourceTransactionId]
-			--	,[dtmDate]
-			--	,[strName]
-			--	,[dblAmount]
-			--	,[strSourceSystem]
-			--	,[intBankDepositId]
-			--	,[intCreatedUserId]
-			--	,[dtmCreated]
-			--	,[intLastModifiedUserId]
-			--	,[dtmLastModified]
-			--	,[intConcurrencyId]
-			--	)
-			--SELECT
-			--	 [intBankAccountId]			= BA.intBankAccountId 
-			--	,[strSourceTransactionId]	= A.[strRecordNumber]
-			--	,[intSourceTransactionId]	= A.[intPaymentId] 
-			--	,[dtmDate]					= A.[dtmDatePaid]
-			--	,[strName]					= (SELECT TOP 1 strName FROM tblEntity WHERE intEntityId = B.[intEntityCustomerId])
-			--	,[dblAmount]				= A.[dblAmountPaid] 
-			--	,[strSourceSystem]			= 'AR'
-			--	,[intBankDepositId]			= NULL --A.[intAccountId] 
-			--	,[intCreatedUserId]			= @userId
-			--	,[dtmCreated]				= CAST(GETDATE() AS DATE)
-			--	,[intLastModifiedUserId]	= @userId
-			--	,[dtmLastModified]			= CAST(GETDATE() AS DATE)
-			--	,[intConcurrencyId]			= 1		
-			--FROM 
-			--	tblARPayment A
-			--INNER JOIN tblARCustomer B
-			--		ON A.[intEntityCustomerId] = B.[intEntityCustomerId]
-			--INNER JOIN
-			--	tblGLAccount GL
-			--		ON A.intAccountId = GL.intAccountId 
-			--INNER JOIN 
-			--	tblGLAccountGroup AG
-			--		ON GL.intAccountGroupId = AG.intAccountGroupId 		
-			--INNER JOIN 
-			--	tblGLAccountCategory AC
-			--		ON GL.intAccountCategoryId = AC.intAccountCategoryId										 
-			--INNER JOIN
-			--	tblCMBankAccount BA
-			--		ON A.intAccountId = BA.intGLAccountId 						
-			--WHERE
-			--	AC.strAccountCategory = 'Undeposited Funds'
-			--	AND BA.intGLAccountId IS NOT NULL
-			--	AND BA.ysnActive = 1
-			--	AND A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-					
+											
 			-- Insert Zero Payments for updating
 			INSERT INTO @ARReceivablePostData
 			SELECT Z.intPaymentId, Z.strTransactionId FROM @ZeroPayment Z
