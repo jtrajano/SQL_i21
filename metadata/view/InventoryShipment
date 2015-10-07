@@ -1747,7 +1747,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter14",
+                                                                    "name": "filter133",
                                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2884,7 +2884,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter15",
+                                                                    "name": "filter134",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3391,7 +3391,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter16",
+                                                                    "name": "filter135",
                                                                     "designerId": "86706668-0ec9-4541-b78b-d162dd783738",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3665,7 +3665,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter17",
+                                                    "name": "filter136",
                                                     "designerId": "417a16e9-e65c-4b75-add0-9311f736b82e",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4279,6 +4279,47 @@
                                     ]
                                 }
                             ]
+                        },
+                        {
+                            "type": "Ext.panel.Panel",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "bodyPadding": null,
+                                "itemId": "pgeAuditLog",
+                                "layout": "fit",
+                                "title": "Audit Log"
+                            },
+                            "name": "MyPanel39",
+                            "designerId": "96f7f758-ae33-451d-bca0-be429cd90c24",
+                            "cn": [
+                                {
+                                    "type": "Ext.tab.Tab",
+                                    "reference": {
+                                        "name": "tabConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "TabConfig16",
+                                    "designerId": "ba0cc112-02e9-45d0-86b9-0df8b5bd3e71"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|createAlias": "auditlogtree"
+                                    },
+                                    "name": "MyContainer39",
+                                    "designerId": "47b3ab3b-ea36-47cd-914a-12aa4eeafaa5"
+                                }
+                            ]
                         }
                     ]
                 },
@@ -4293,7 +4334,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging12",
+                    "name": "statusbarpaging15",
                     "designerId": "50e4b10d-d851-464f-867c-a04204dccf1e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
