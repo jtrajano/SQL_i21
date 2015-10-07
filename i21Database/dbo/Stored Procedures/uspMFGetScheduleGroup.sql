@@ -21,11 +21,8 @@ FROM dbo.tblMFScheduleRule R
 JOIN dbo.tblMFScheduleAttribute A ON A.intScheduleAttributeId = R.intScheduleAttributeId
 WHERE R.intScheduleRuleId = @intScheduleRuleId
 
-SET @sqlCommand = 'SELECT GD.intScheduleGroupDetailId,
-							GD.intScheduleGroupId,
-							GD.strGroupValue,
+SET @sqlCommand = 'SELECT GD.*,
 						(SELECT Top 1 strDescription FROM ' + @strTableName + ' WHERE ' + @strColumnName + ' = GD.strGroupValue) AS strDescription 
-						,GD.intConcurrencyId 
 						FROM dbo.tblMFScheduleGroupDetail GD WHERE intScheduleGroupId=' + LTRIM(@intScheduleGroupId)
 
 EXECUTE sp_executesql @sqlCommand
