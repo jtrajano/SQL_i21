@@ -2548,6 +2548,7 @@
     <Build Include="dbo\Stored Procedures\uspGLInsertDebitCreditUnitEntry.sql" />
     <Build Include="dbo\Tables\tblPATIssueStock.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntityEmployee.sql" />
+    <Build Include="dbo\Tables\tblSMConnectedUser.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
