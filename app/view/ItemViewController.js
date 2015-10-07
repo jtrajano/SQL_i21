@@ -112,9 +112,6 @@ Ext.define('Inventory.view.ItemViewController', {
             cfgCost: {
                 hidden: '{pgeCostHide}'
             },
-            cfgOthers: {
-                hidden: '{pgeOthersHide}'
-            },
 
             grdUnitOfMeasure: {
                 colDetailUnitMeasure: {
@@ -150,13 +147,8 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colStockUnit: 'ysnStockUnit',
-                colAllowSale: {
-                    dataIndex: 'ysnAllowSale'
-                },
-                colAllowPurchase: {
-                    dataIndex: 'ysnAllowPurchase',
-                    disabled: '{readOnlyBundle}'
-                },
+                colAllowSale: 'ysnAllowSale',
+                colAllowPurchase: 'ysnAllowPurchase',
                 colConvertToStock: 'dblConvertToStock',
                 colConvertFromStock: 'dblConvertFromStock',
                 colDetailLength: 'dblLength',
@@ -352,8 +344,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 colPOSCategoryName: {
                     dataIndex: 'strCategoryCode',
                     editor: {
-                        origValueField: 'intCategoryId',
-                        origUpdateField: 'intCategoryId',
                         store: '{posCategory}'
                     }
                 }
@@ -456,8 +446,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 colCustomerXrefLocation: {
                     dataIndex: 'strLocationName',
                     editor: {
-                        origValueField: 'intItemLocationId',
-                        origUpdateField: 'intItemLocationId',
                         store: '{custXrefLocation}',
                         defaultFilters: [{
                             column: 'intItemId',
@@ -468,8 +456,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 colCustomerXrefCustomer: {
                     dataIndex: 'strCustomerNumber',
                     editor: {
-                        origValueField: 'intEntityCustomerId',
-                        origUpdateField: 'intCustomerId',
                         store: '{custXrefCustomer}'
                     }
                 },
@@ -482,8 +468,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 colVendorXrefLocation: {
                     dataIndex: 'strLocationName',
                     editor: {
-                        origValueField: 'intItemLocationId',
-                        origUpdateField: 'intItemLocationId',
                         store: '{vendorXrefLocation}',
                         defaultFilters: [{
                             column: 'intItemId',
@@ -494,8 +478,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 colVendorXrefVendor: {
                     dataIndex: 'strVendorId',
                     editor: {
-                        origValueField: 'intEntityVendorId',
-                        origUpdateField: 'intVendorId',
                         store: '{vendorXrefVendor}'
                     }
                 },
@@ -505,8 +487,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 colVendorXrefUnitMeasure: {
                     dataIndex: 'strUnitMeasure',
                     editor: {
-                        origValueField: 'intItemUOMId',
-                        origUpdateField: 'intItemUnitMeasureId',
                         store: '{vendorXrefUom}'
                     }
                 }
@@ -550,39 +530,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 }]
             },
 
-            //--------------//
-            //Motor Fuel Tax//
-            //--------------//
-            grdMotorFuelTax: {
-                colMFTTaxAuthority: {
-                    dataIndex: 'strTaxAuthorityCode',
-                    editor: {
-                        origValueField: 'intTaxAuthorityId',
-                        origUpdateField: 'intTaxAuthorityId',
-                        store: '{taxAuthority}',
-                        defaultFilters: [{
-                            column: 'ysnFilingForThisTA',
-                            value: true
-                        }]
-                    }
-                },
-                colMFTDescription: 'strTaxAuthorityDescription',
-                colMFTProductCode: {
-                    dataIndex: 'strProductCode',
-                    editor: {
-                        origValueField: 'intProductCodeId',
-                        origUpdateField: 'intProductCodeId',
-                        store: '{productCode}',
-                        defaultFilters: [{
-                            column: 'intTaxAuthorityId',
-                            value: '{grdMotorFuelTax.selection.intTaxAuthorityId}'
-                        }]
-                    }
-                },
-                colMFTProductCodeDescription: 'strProductDescription',
-                colMFTProductCodeGroup: 'strProductCodeGroup'
-            },
-
             //-----------------//
             //Contract Item Tab//
             //-----------------//
@@ -590,8 +537,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 colContractLocation: {
                     dataIndex: 'strLocationName',
                     editor: {
-                        origValueField: 'intItemLocationId',
-                        origUpdateField: 'intItemLocationId',
                         store: '{contractLocation}',
                         defaultFilters: [{
                             column: 'intItemId',
@@ -603,8 +548,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 colContractOrigin: {
                     dataIndex: 'strCountry',
                     editor: {
-                        origValueField: 'intCountryID',
-                        origUpdateField: 'intCountryId',
                         store: '{origin}'
                     }
                 },
@@ -620,8 +563,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 colDocument:  {
                     dataIndex: 'strDocumentName',
                     editor: {
-                        origValueField: 'intDocumentId',
-                        origUpdateField: 'intDocumentId',
                         store: '{document}'
                     }
                 }
@@ -631,8 +572,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 colCertification:  {
                     dataIndex: 'strCertificationName',
                     editor: {
-                        origValueField: 'intCertificationId',
-                        origUpdateField: 'intCertificationId',
                         store: '{certification}'
                     }
                 }
@@ -933,7 +872,8 @@ Ext.define('Inventory.view.ItemViewController', {
                         }]
                     }
                 },
-                colBundleUnit: 'dblUnit'
+                colBundleUnit: 'dblUnit',
+                colBundlePrice: 'dblPrice'
             },
 
             //---------------//
@@ -1009,29 +949,6 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colOwnerDefault: 'ysnActive'
-            },
-
-            //---------//
-            //Notes Tab//
-            //---------//
-            grdNotes: {
-                colNoteLocation: {
-                    dataIndex: 'strLocationName',
-                    editor: {
-                        store: '{noteLocation}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{current.intItemId}'
-                        }]
-                    }
-                },
-                colNoteCommentType: {
-                    dataIndex: 'strCommentType',
-                    editor: {
-                        store: '{commentTypes}'
-                    }
-                },
-                colNoteComment: 'strComments'
             }
 
         }
@@ -1055,7 +972,6 @@ Ext.define('Inventory.view.ItemViewController', {
             grdFactory = win.down('#grdFactory'),
             grdManufacturingCellAssociation = win.down('#grdManufacturingCellAssociation'),
             grdOwner = win.down('#grdOwner'),
-            grdMotorFuelTax = win.down('#grdMotorFuelTax'),
 
             grdPricing = win.down('#grdPricing'),
             grdPricingLevel = win.down('#grdPricingLevel'),
@@ -1066,9 +982,7 @@ Ext.define('Inventory.view.ItemViewController', {
             grdAssembly = win.down('#grdAssembly'),
             grdBundle = win.down('#grdBundle'),
             grdKit = win.down('#grdKit'),
-            grdKitDetails = win.down('#grdKitDetails'),
-
-            grdNotes = win.down('#grdNotes');
+            grdKitDetails = win.down('#grdKitDetails');
 
         win.context = Ext.create('iRely.mvvm.Engine', {
             window : win,
@@ -1077,6 +991,8 @@ Ext.define('Inventory.view.ItemViewController', {
             validateRecord : me.validateRecord,
             binding: me.config.binding,
             fieldTitle: 'strItemNo',
+            enableAudit: true,
+            enableComment: true,
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Item',
                 window: win
@@ -1167,20 +1083,6 @@ Ext.define('Inventory.view.ItemViewController', {
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdCommodityCost,
                         deleteButton : grdCommodityCost.down('#btnDeleteCommodityCost')
-                    })
-                },
-                {
-                    key: 'tblICItemMotorFuelTaxes',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
-                        grid: grdMotorFuelTax,
-                        deleteButton : grdMotorFuelTax.down('#btnDeleteMFT')
-                    })
-                },
-                {
-                    key: 'tblICItemNotes',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
-                        grid: grdNotes,
-                        deleteButton : grdNotes.down('#btnDeleteNotes')
                     })
                 },
                 {
@@ -1435,14 +1337,6 @@ Ext.define('Inventory.view.ItemViewController', {
                     grdCertification.store.load();
                 break;
 
-            case 'pgeMFT':
-                var pgeMFT = tabPanel.down('#pgeMFT');
-                var grdMotorFuelTax = pgeMFT.down('#grdMotorFuelTax');
-                if (grdMotorFuelTax.store.complete === true)
-                    grdMotorFuelTax.getView().refresh();
-                else
-                    grdMotorFuelTax.store.load();
-                break;
 
             case 'pgePricing':
                 var pgePricing = tabPanel.down('#pgePricing');
@@ -1530,14 +1424,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 
                 break;
 
-            case 'pgeNotes':
-                var pgeNotes = tabPanel.down('#pgeNotes');
-                var grdNotes = pgeNotes.down('#grdNotes');
-                if (grdNotes.store.complete === true)
-                    grdNotes.getView().refresh();
-                else
-                    grdNotes.store.load();
-                break;
         }
     },
 
@@ -1578,21 +1464,13 @@ Ext.define('Inventory.view.ItemViewController', {
 
         var grid = combo.up('grid');
         var win = grid.up('window');
-        var currentItem = win.context.data.current;
         var plugin = grid.getPlugin('cepDetailUOM');
         var current = plugin.getActiveRecord();
         var uomConversion = win.viewModel.storeInfo.uomConversion;
 
         if (combo.column.itemId === 'colDetailUnitMeasure') {
             current.set('intUnitMeasureId', records[0].get('intUnitMeasureId'));
-
-            if (currentItem.get('strType') === 'Bundle') {
-                current.set('ysnAllowPurchase', false);
-            }
-            else {
-                current.set('ysnAllowPurchase', true);
-            }
-            
+            current.set('ysnAllowPurchase', true);
             current.set('ysnAllowSale', true);
             current.set('tblICUnitMeasure', records[0]);
 
@@ -2107,27 +1985,109 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // </editor-fold>
 
-    // <editor-fold desc="Motor Fuel Tax Tab Methods and Event Handlers">
+    // <editor-fold desc="Point Of Sale Tab Methods and Event Handlers">
 
-    onMotorFuelTaxSelect: function(combo, records, eOpts) {
+    onPOSCategorySelect: function(combo, records, eOpts) {
+    if (records.length <= 0)
+        return;
+
+    var grid = combo.up('grid');
+    var plugin = grid.getPlugin('cepPOSCategory');
+    var current = plugin.getActiveRecord();
+
+    if (combo.column.itemId === 'colPOSCategoryName')
+    {
+        current.set('intCategoryId', records[0].get('intCategoryId'));
+    }
+},
+
+    // </editor-fold>
+
+    // <editor-fold desc="Cross Reference Tab Methods and Event Handlers">
+
+    onCustomerXrefSelect: function(combo, records, eOpts) {
         if (records.length <= 0)
             return;
 
         var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepMotorFuelTax');
+        var plugin = grid.getPlugin('cepCustomerXref');
         var current = plugin.getActiveRecord();
 
-        if (combo.itemId === 'cboTaxAuthority'){
-            current.set('strTaxAuthorityDescription', records[0].get('strDescription'));
+        if (combo.column.itemId === 'colCustomerXrefLocation')
+        {
+            current.set('intItemLocationId', records[0].get('intItemLocationId'));
         }
-        else if (combo.itemId === 'cboProductCode') {
-            current.set('strProductDescription', records[0].get('strDescription'));
-            current.set('strProductCodeGroup', records[0].get('strProductCodeGroup'));
+        else if (combo.column.itemId === 'colCustomerXrefCustomer') {
+            current.set('intCustomerId', records[0].get('intCustomerId'));
+        }
+    },
+
+    onVendorXrefSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepVendorXref');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colVendorXrefLocation'){
+            current.set('intItemLocationId', records[0].get('intItemLocationId'));
+        }
+        else if (combo.column.itemId === 'colVendorXrefVendor') {
+            current.set('intVendorId', records[0].get('intVendorId'));
+        }
+        else if (combo.column.itemId === 'colVendorXrefUnitMeasure') {
+            current.set('intItemUnitMeasureId', records[0].get('intItemUOMId'));
         }
     },
 
     // </editor-fold>
 
+    // <editor-fold desc="Contract Item Tab Methods and Event Handlers">
+
+    onContractItemSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepContractItem');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colContractLocation'){
+            current.set('intItemLocationId', records[0].get('intItemLocationId'));
+        }
+        else if (combo.column.itemId === 'colContractOrigin') {
+            current.set('intCountryId', records[0].get('intCountryID'));
+        }
+    },
+
+    onDocumentSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepDocument');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colDocument'){
+            current.set('intDocumentId', records[0].get('intDocumentId'));
+        }
+    },
+
+    onCertificationSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepCertification');
+        var current = plugin.getActiveRecord();
+
+        if (combo.column.itemId === 'colCertification'){
+            current.set('intCertificationId', records[0].get('intCertificationId'));
+        }
+    },
+
+    // </editor-fold>
 
     // <editor-fold desc="Pricing Tab Methods and Event Handlers">
 
@@ -2499,23 +2459,6 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // </editor-fold>
 
-    // <editor-fold desc="Note Tab Methods and Event Handlers">
-
-    onNoteSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepNote');
-        var current = plugin.getActiveRecord();
-
-        if (combo.column.itemId === 'colNoteLocation'){
-            current.set('intItemLocationId', records[0].get('intItemLocationId'));
-        }
-    },
-
-    // </editor-fold>
-
     onSpecialKeyTab: function(component, e, eOpts) {
         var win = component.up('window');
         if(win) {
@@ -2628,50 +2571,15 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
-    onLoadUOMClick: function(button) {
+    onCategoryUOMClick: function(button) {
         var win = button.up('window');
         var current = win.viewModel.data.current;
+        var cbo = win.down('#cboCategory');
+        var store = win.viewModel.storeInfo.categoryList;
 
         if (current) {
-            if (!iRely.Functions.isEmpty(current.get('intCommodityId'))) {
-                var store = win.viewModel.storeInfo.commodityList;
+            if (!iRely.Functions.isEmpty(current.get('intCategoryId'))) {
                 if (store) {
-                    var cbo = win.down('#cboCommodity');
-                    var commodity = store.findRecord(cbo.valueField, cbo.getValue());
-                    if (commodity) {
-                        var uoms = commodity.get('tblICCommodityUnitMeasures');
-                        if (uoms) {
-                            if (uoms.length > 0) {
-                                current.tblICItemUOMs().removeAll();
-                                uoms.forEach(function(uom){
-                                    var newItemUOM = Ext.create('Inventory.model.ItemUOM', {
-                                        intItemId : current.get('intItemId'),
-                                        strUnitMeasure: uom.strUnitMeasure,
-                                        intUnitMeasureId : uom.intUnitMeasureId,
-                                        dblUnitQty : uom.dblUnitQty,
-                                        ysnStockUnit : uom.ysnStockUnit,
-                                        ysnAllowPurchase : true,
-                                        ysnAllowSale : true,
-                                        dblLength : 0.00,
-                                        dblWidth : 0.00,
-                                        dblHeight : 0.00,
-                                        dblVolume : 0.00,
-                                        dblMaxQty : 0.00,
-                                        intSort : uom.intSort
-                                    });
-                                    current.tblICItemUOMs().add(newItemUOM);
-                                });
-                                var grid = win.down('#grdUnitOfMeasure');
-                                grid.gridMgr.newRow.add();
-                            }
-                        }
-                    }
-                }
-            }
-            else if (!iRely.Functions.isEmpty(current.get('intCategoryId'))) {
-                var store = win.viewModel.storeInfo.categoryList;
-                if (store) {
-                    var cbo = win.down('#cboCategory');
                     var category = store.findRecord(cbo.valueField, cbo.getValue());
                     if (category) {
                         var uoms = category.tblICCategoryUOMs().data.items;
@@ -2715,6 +2623,49 @@ Ext.define('Inventory.view.ItemViewController', {
         }
     },
 
+    onCommodityUOMClick: function(button) {
+        var win = button.up('window');
+        var current = win.viewModel.data.current;
+        var cbo = win.down('#cboCommodity');
+        var store = win.viewModel.storeInfo.commodityList;
+
+        if (current) {
+            if (!iRely.Functions.isEmpty(current.get('intCommodityId'))) {
+                if (store) {
+                    var commodity = store.findRecord(cbo.valueField, cbo.getValue());
+                    if (commodity) {
+                        var uoms = commodity.get('tblICCommodityUnitMeasures');
+                        if (uoms) {
+                            if (uoms.length > 0) {
+                                current.tblICItemUOMs().removeAll();
+                                uoms.forEach(function(uom){
+                                    var newItemUOM = Ext.create('Inventory.model.ItemUOM', {
+                                        intItemId : current.get('intItemId'),
+                                        strUnitMeasure: uom.strUnitMeasure,
+                                        intUnitMeasureId : uom.intUnitMeasureId,
+                                        dblUnitQty : uom.dblUnitQty,
+                                        ysnStockUnit : uom.ysnStockUnit,
+                                        ysnAllowPurchase : true,
+                                        ysnAllowSale : true,
+                                        dblLength : 0.00,
+                                        dblWidth : 0.00,
+                                        dblHeight : 0.00,
+                                        dblVolume : 0.00,
+                                        dblMaxQty : 0.00,
+                                        intSort : uom.intSort
+                                    });
+                                    current.tblICItemUOMs().add(newItemUOM);
+                                });
+                                var grid = win.down('#grdUnitOfMeasure');
+                                grid.gridMgr.newRow.add();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboType": {
@@ -2732,11 +2683,35 @@ Ext.define('Inventory.view.ItemViewController', {
             "#cboCopyLocation": {
                 select: this.onCopyLocationSelect
             },
-            "#cboTaxAuthority": {
-                select: this.onMotorFuelTaxSelect
+            "#cboPOSCategoryId": {
+                select: this.onPOSCategorySelect
             },
-            "#cboProductCode": {
-                select: this.onMotorFuelTaxSelect
+            "#cboCustXrefLocation": {
+                select: this.onCustomerXrefSelect
+            },
+            "#cboCustXrefCustomer": {
+                select: this.onCustomerXrefSelect
+            },
+            "#cboVendorXrefLocation": {
+                select: this.onVendorXrefSelect
+            },
+            "#cboVendorXrefVendor": {
+                select: this.onVendorXrefSelect
+            },
+            "#cboVendorXrefUOM": {
+                select: this.onVendorXrefSelect
+            },
+            "#cboContractLocation": {
+                select: this.onContractItemSelect
+            },
+            "#cboContractOrigin": {
+                select: this.onContractItemSelect
+            },
+            "#cboDocumentId": {
+                select: this.onDocumentSelect
+            },
+            "#cboCertificationId": {
+                select: this.onCertificationSelect
             },
             "#cboPricingLocation": {
                 select: this.onPricingLocationSelect
@@ -2777,9 +2752,6 @@ Ext.define('Inventory.view.ItemViewController', {
             "#cboKitDetailUOM": {
                 select: this.onKitSelect
             },
-            "#cboNoteLocation": {
-                select: this.onNoteSelect
-            },
             "#cboManufacturingCell": {
                 select: this.onManufacturingCellSelect
             },
@@ -2816,8 +2788,11 @@ Ext.define('Inventory.view.ItemViewController', {
             "#btnBuildAssembly": {
                 click: this.onBuildAssemblyClick
             },
-            "#btnLoadUOM": {
-                click: this.onLoadUOMClick
+            "#btnCategoryUOM": {
+                click: this.onCategoryUOMClick
+            },
+            "#btnCommodityUOM": {
+                click: this.onCommodityUOMClick
             },
             "#colPricingAmount": {
                 beforerender: this.onPricingGridColumnBeforeRender
