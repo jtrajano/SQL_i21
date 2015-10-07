@@ -2620,6 +2620,8 @@ ELSE
 
 /* Start of Delete */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Allocated Contracts List' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Unallocated Contracts List' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Shipments List' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsParentMenuId
 /* End of Delete */
 
 /* CARD FUELING */
