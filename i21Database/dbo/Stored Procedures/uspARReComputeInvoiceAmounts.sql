@@ -91,13 +91,13 @@ UPDATE
 SET
 	 [dblTax]				= T.[dblTotalTax]
 	,[dblInvoiceSubtotal]	= T.[dblTotal]
-	,[dblDiscount]			= T.[dblDiscount]
+	--,[dblDiscount]			= T.[dblDiscount]
 FROM
 	(
 		SELECT 
 			 SUM([dblTotalTax])		AS [dblTotalTax]
 			,SUM([dblTotal])		AS [dblTotal]
-			,SUM((([dblPrice] * [dblQtyShipped]) * (dblDiscount/100.00))) AS [dblDiscount]
+			--,SUM((([dblPrice] * [dblQtyShipped]) * (dblDiscount/100.00))) AS [dblDiscount]
 			,[intInvoiceId]
 		FROM
 			tblARInvoiceDetail
