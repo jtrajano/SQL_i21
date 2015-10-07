@@ -662,6 +662,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             validateRecord: me.validateRecord,
             binding: me.config.binding,
             enableComment: true,
+            enableAudit: true,
             include: 'tblICInventoryReceiptInspections,' +
                 'vyuAPVendor,' +
                 'tblSMFreightTerm,' +
