@@ -422,6 +422,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             window: win,
             store: store,
             enableComment: true,
+            enableAudit: true,
             include: 'ShipFromLocation, ' +
                 'tblARCustomer, ' +
                 'ShipToLocation, ' +

@@ -17,8 +17,8 @@
         "iconCls": "small-icon-i21",
         "layout": "fit",
         "maximizable": true,
-        "minHeight": null,
-        "minWidth": null,
+        "minHeight": 510,
+        "minWidth": 1100,
         "minimizable": null,
         "mixins": null,
         "title": "Inventory Shipment",
@@ -45,18 +45,18 @@
             "codeClass": null,
             "userConfig": {
                 "bodyBorder": null,
-                "bodyPadding": 3,
+                "bodyPadding": 5,
                 "dock": null,
                 "frame": null,
                 "header": null,
-                "height": null,
+                "height": 350,
                 "itemId": "frmInventoryShipment",
                 "layout": "fit",
                 "margin": -1,
                 "title": null,
                 "trackResetOnLoad": null,
                 "url": null,
-                "width": null
+                "width": 450
             },
             "name": "MyForm3",
             "designerId": "fd96d4fc-d948-4439-9f2e-895ec83a7901",
@@ -778,9 +778,7 @@
                                     "userConfig": {
                                         "activeTab": 0,
                                         "height": 110,
-                                        "itemId": "tabShipping",
-                                        "layout|flex": null,
-                                        "plain": true
+                                        "layout|flex": null
                                     },
                                     "name": "MyTabPanel3",
                                     "designerId": "460fca3f-7ee6-4b02-9667-c1ce855c535f",
@@ -1646,10 +1644,9 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "componentCls": "x-toolbar-default-grid",
                                                                 "container|padding": "0 0 0 1",
                                                                 "dock": "top",
-                                                                "itemId": "tlbGridOptions"
+                                                                "itemId": "tlbToolbarGrid"
                                                             },
                                                             "name": "MyToolbar6",
                                                             "designerId": "d1584ef5-c809-4fc4-97a4-2572d359d321",
@@ -1750,7 +1747,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter145",
+                                                                    "name": "filter133",
                                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2887,7 +2884,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter146",
+                                                                    "name": "filter134",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3345,10 +3342,9 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "componentCls": "x-toolbar-default-grid",
                                                                 "container|padding": "0 0 0 1",
                                                                 "dock": "top",
-                                                                "itemId": "tlbGridOptions"
+                                                                "itemId": "tlbToolbarGrid"
                                                             },
                                                             "name": "MyToolbar6",
                                                             "designerId": "cc8317c4-5c6d-449f-a5f4-adaa8634db18",
@@ -3395,7 +3391,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter147",
+                                                                    "name": "filter135",
                                                                     "designerId": "86706668-0ec9-4541-b78b-d162dd783738",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3602,7 +3598,6 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
-                                                "componentCls": "x-toolbar-default-grid",
                                                 "container|padding": "0 0 0 1",
                                                 "dock": "top",
                                                 "itemId": "tlbGridOptions"
@@ -3670,7 +3665,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter148",
+                                                    "name": "filter136",
                                                     "designerId": "417a16e9-e65c-4b75-add0-9311f736b82e",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -4284,6 +4279,47 @@
                                     ]
                                 }
                             ]
+                        },
+                        {
+                            "type": "Ext.panel.Panel",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "bodyPadding": null,
+                                "itemId": "pgeAuditLog",
+                                "layout": "fit",
+                                "title": "Audit Log"
+                            },
+                            "name": "MyPanel39",
+                            "designerId": "96f7f758-ae33-451d-bca0-be429cd90c24",
+                            "cn": [
+                                {
+                                    "type": "Ext.tab.Tab",
+                                    "reference": {
+                                        "name": "tabConfig",
+                                        "type": "object"
+                                    },
+                                    "codeClass": null,
+                                    "name": "TabConfig16",
+                                    "designerId": "ba0cc112-02e9-45d0-86b9-0df8b5bd3e71"
+                                },
+                                {
+                                    "type": "Ext.container.Container",
+                                    "reference": {
+                                        "name": "items",
+                                        "type": "array"
+                                    },
+                                    "codeClass": null,
+                                    "userConfig": {
+                                        "designer|createAlias": "auditlogtree"
+                                    },
+                                    "name": "MyContainer39",
+                                    "designerId": "47b3ab3b-ea36-47cd-914a-12aa4eeafaa5"
+                                }
+                            ]
                         }
                     ]
                 },
@@ -4298,7 +4334,7 @@
                         "designer|createAlias": "ipagingstatusbar",
                         "dock": "bottom"
                     },
-                    "name": "statusbarpaging114",
+                    "name": "statusbarpaging15",
                     "designerId": "50e4b10d-d851-464f-867c-a04204dccf1e",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

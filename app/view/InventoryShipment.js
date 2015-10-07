@@ -2021,6 +2021,17 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                 ]
                                             }
                                         ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        itemId: 'pgeAuditLog',
+                                        layout: 'fit',
+                                        title: 'Audit Log',
+                                        items: [
+                                            {
+                                                xtype: 'auditlogtree'
+                                            }
+                                        ]
                                     }
                                 ]
                             }
