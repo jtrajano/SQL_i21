@@ -6,6 +6,7 @@
     [dtmConnectDate] DATETIME NOT NULL, 
     [strMachine] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
     [strBrowser] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
+    [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSMConnectedUser] PRIMARY KEY ([intConnectedUserId]), 
     CONSTRAINT [FK_tblSMConnectedUser_tblEntity] FOREIGN KEY (intEntityId) REFERENCES [tblEntity]([intEntityId]) 
 )
