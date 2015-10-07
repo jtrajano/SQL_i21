@@ -15,13 +15,13 @@ FROM dbo.tblMFScheduleRule R
 JOIN dbo.tblMFScheduleAttribute A ON A.intScheduleAttributeId = R.intScheduleAttributeId
 WHERE R.intScheduleRuleId = @intScheduleRuleId
 
-SET @sqlCommand = 'SELECT TOP '+LTRIM(@intLimit)+' *,0 AS intConcurrencyId FROM (SELECT ' + @strColumnName + ' AS strName, strDescription, ROW_NUMBER() OVER (ORDER BY ' + @strColumnName + ') AS intRowNumber
+SET @sqlCommand = 'SELECT TOP '+LTRIM(@intLimit)+' *,0 AS intConcurrencyId FROM (SELECT ' + @strColumnName + ' AS strName, strDescription, ROW_NUMBER() OVER (ORDER BY ' + @strColumnName + ') AS intRow
 						FROM ' + @strTableName + '
-						WHERE ' + @strColumnName + ' NOT IN (SELECT strGroupValue FROM dbo.tblMFScheduleGroupDetail) AND ' + @strColumnName + ' NOT IN (''' + @strFilterCriteria + ''')) AS DT WHERE intRowNumber > ' + LTRIM(@intStart) 
+						WHERE ' + @strColumnName + ' NOT IN (SELECT strGroupValue FROM dbo.tblMFScheduleGroupDetail) AND ' + @strColumnName + ' NOT IN (''' + @strFilterCriteria + ''')) AS DT WHERE intRow > ' + LTRIM(@intStart) 
 
 EXECUTE sp_executesql @sqlCommand
 
-SET @sqlCommand = 'SELECT COUNT(*) as intGroupValueCount 
+SET @sqlCommand = 'SELECT COUNT(*) As intCount,0 AS intConcurrencyId
 						FROM ' + @strTableName + '
 						WHERE ' + @strColumnName + ' NOT IN (SELECT strGroupValue FROM dbo.tblMFScheduleGroupDetail) AND ' + @strColumnName + ' NOT IN (''' + @strFilterCriteria + ''')' 
 
