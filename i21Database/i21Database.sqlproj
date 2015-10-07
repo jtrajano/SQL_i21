@@ -2550,6 +2550,7 @@
     <Build Include="dbo\Tables\tblSMConnectedUser.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetScheduleGroupDetailDesc.sql" />
     <Build Include="dbo\Views\vyuMFGetChangeOverGroup.sql" />
+    <Build Include="dbo\Stored Procedures\uspARDuplicateCommissionPlan.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
