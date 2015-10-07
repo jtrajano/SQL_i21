@@ -15,6 +15,7 @@ Type the overview for the table here.
 		[intDocumentId] INT NOT NULL IDENTITY , 
 		[strDocumentName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 		[strDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 
+		[intDocumentType] INT NOT NULL DEFAULT ((0)),
 		[intCommodityId] INT NOT NULL, 
 		[ysnStandard] BIT NOT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
