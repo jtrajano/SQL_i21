@@ -30,7 +30,8 @@ SET ANSI_WARNINGS OFF
 -- Create a unique transaction name. 
 DECLARE @TransactionName AS VARCHAR(500) = 'Payment Transaction' + CAST(NEWID() AS NVARCHAR(100));
 IF @raiseError = 0
-	BEGIN TRAN @TransactionName
+	--BEGIN TRAN @TransactionName
+	BEGIN TRANSACTION
  
 DECLARE @ARReceivablePostData TABLE (
 	intPaymentId int PRIMARY KEY,
@@ -169,7 +170,7 @@ SET @batchIdUsed = @batchId
 --------------------------------------------------------------------------------------------  
 -- Validations  
 --------------------------------------------------------------------------------------------  
-IF @recap = 0
+--IF @recap = 0
 	BEGIN
 	
 		-- Zero Payment
@@ -693,97 +694,99 @@ IF @recap = 0
 		IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 			BEGIN
 				IF @raiseError = 0
-					COMMIT TRAN @TransactionName
+					COMMIT TRANSACTION
 				IF @raiseError = 1
-				BEGIN
-					SELECT TOP 1 @ErrorMerssage = strError FROM @ARReceivableInvalidData
-					RAISERROR(@ErrorMerssage, 11, 1)							
-					GOTO Post_Exit
-				END	
+					BEGIN
+						SELECT TOP 1 @ErrorMerssage = strError FROM @ARReceivableInvalidData
+						RAISERROR(@ErrorMerssage, 11, 1)							
+						GOTO Post_Exit
+					END	
 				GOTO Post_Exit
 			END			
 
 	END
+	
 
-IF @recap = 1
-BEGIN
-	IF @post = 1
-		BEGIN
-			--+overpayment
-			INSERT INTO
-				@AROverpayment
-			SELECT
-				A.intPaymentId
-			FROM
-				tblARPayment A 
-			INNER JOIN
-				@ARReceivablePostData P
-					ON A.intPaymentId = P.intPaymentId				
-			WHERE
-				(A.dblAmountPaid) > (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId)
-				AND EXISTS(SELECT NULL FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND dblPayment <> 0)
+--IF @recap = 1
+--BEGIN
+--	IF @post = 1
+--		BEGIN
+--			--+overpayment
+--			INSERT INTO
+--				@AROverpayment
+--			SELECT
+--				A.intPaymentId
+--			FROM
+--				tblARPayment A 
+--			INNER JOIN
+--				@ARReceivablePostData P
+--					ON A.intPaymentId = P.intPaymentId				
+--			WHERE
+--				(A.dblAmountPaid) > (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId)
+--				AND EXISTS(SELECT NULL FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND dblPayment <> 0)
 
 
-			--+prepayment
-			INSERT INTO
-				@ARPrepayment
-			SELECT
-				A.intPaymentId
-			FROM
-				tblARPayment A 
-			INNER JOIN
-				@ARReceivablePostData P
-					ON A.intPaymentId = P.intPaymentId				
-			WHERE
-				(A.dblAmountPaid) <> 0
-				AND ISNULL((SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId), 0) = 0
-				AND NOT EXISTS(SELECT NULL FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND dblPayment <> 0)
+--			--+prepayment
+--			INSERT INTO
+--				@ARPrepayment
+--			SELECT
+--				A.intPaymentId
+--			FROM
+--				tblARPayment A 
+--			INNER JOIN
+--				@ARReceivablePostData P
+--					ON A.intPaymentId = P.intPaymentId				
+--			WHERE
+--				(A.dblAmountPaid) <> 0
+--				AND ISNULL((SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId), 0) = 0
+--				AND NOT EXISTS(SELECT NULL FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND dblPayment <> 0)
 		
-		END
-	ELSE
-		BEGIN
+--		END
+--	ELSE
+--		BEGIN
 		
-			---overpayment
-			INSERT INTO
-				@AROverpayment
-			SELECT
-				A.intPaymentId
-			FROM
-				tblARPayment A 
-			INNER JOIN
-				@ARReceivablePostData P
-					ON A.intPaymentId = P.intPaymentId
-			INNER JOIN
-				tblARInvoice I
-					ON A.strRecordNumber = I.strComments 				
-			WHERE
-				I.strTransactionType = 'Overpayment'
+--			---overpayment
+--			INSERT INTO
+--				@AROverpayment
+--			SELECT
+--				A.intPaymentId
+--			FROM
+--				tblARPayment A 
+--			INNER JOIN
+--				@ARReceivablePostData P
+--					ON A.intPaymentId = P.intPaymentId
+--			INNER JOIN
+--				tblARInvoice I
+--					ON A.strRecordNumber = I.strComments 				
+--			WHERE
+--				I.strTransactionType = 'Overpayment'
 
-			---prepayment
-			INSERT INTO
-				@ARPrepayment
-			SELECT
-				A.intPaymentId
-			FROM
-				tblARPayment A 
-			INNER JOIN
-				@ARReceivablePostData P
-					ON A.intPaymentId = P.intPaymentId
-			INNER JOIN
-				tblARInvoice I
-					ON A.strRecordNumber = I.strComments 				
-			WHERE
-				I.strTransactionType = 'Prepayment'			
-		END
+--			---prepayment
+--			INSERT INTO
+--				@ARPrepayment
+--			SELECT
+--				A.intPaymentId
+--			FROM
+--				tblARPayment A 
+--			INNER JOIN
+--				@ARReceivablePostData P
+--					ON A.intPaymentId = P.intPaymentId
+--			INNER JOIN
+--				tblARInvoice I
+--					ON A.strRecordNumber = I.strComments 				
+--			WHERE
+--				I.strTransactionType = 'Prepayment'			
+--		END
 			
-END
+--END
 
 
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
 --------------------------------------------------------------------------------------------  
 --BEGIN TRAN @TransactionName
---SAVE TRAN @TransactionName
+if @recap = 1 AND @raiseError = 0
+	SAVE TRAN @TransactionName	
 
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
@@ -1090,18 +1093,8 @@ IF @post = 1
 			
 	END TRY
 	BEGIN CATCH	
-		SELECT @ErrorMerssage = ERROR_MESSAGE()
-		IF @raiseError = 0
-			ROLLBACK TRAN @TransactionName
-		IF @raiseError = 0
-			BEGIN TRANSACTION
-		INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-		SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-		IF @raiseError = 0
-			COMMIT TRANSACTION
-		IF @raiseError = 1
-			RAISERROR(@ErrorMerssage, 11, 1)
-		GOTO Post_Exit
+		SELECT @ErrorMerssage = ERROR_MESSAGE()										
+		GOTO Do_Rollback
 	END CATCH
 					
 			
@@ -1179,18 +1172,8 @@ IF @post = 0
 						
 		END TRY
 		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
-				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0
-				BEGIN TRANSACTION
-			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0
-				COMMIT TRANSACTION
-			IF @raiseError = 1
-				RAISERROR(@ErrorMerssage, 11, 1)
-			GOTO Post_Exit
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
 		END CATCH		
 	END   
 
@@ -1202,7 +1185,9 @@ IF @post = 0
 -- 2.	Rollback the save point 
 --------------------------------------------------------------------------------------------  
 IF @recap = 1
-	BEGIN 
+	BEGIN
+		IF @raiseError = 0
+			ROLLBACK TRAN @TransactionName 
 
 		DELETE tblGLDetailRecap  
 		FROM 
@@ -1274,13 +1259,11 @@ IF @recap = 1
 	BEGIN CATCH
 		SELECT @ErrorMerssage = ERROR_MESSAGE()
 		IF @raiseError = 0
-			ROLLBACK TRAN @TransactionName
-		IF @raiseError = 0
-			BEGIN TRANSACTION
-		INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-		SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-		IF @raiseError = 0
-			COMMIT TRANSACTION
+			BEGIN
+				BEGIN TRANSACTION
+				EXEC uspARInsertPostResult @batchId, 'Receive Payment', @ErrorMerssage, @param						
+				COMMIT TRANSACTION
+			END			
 		IF @raiseError = 1
 			RAISERROR(@ErrorMerssage, 11, 1)
 		GOTO Post_Exit
@@ -1299,18 +1282,8 @@ IF @recap = 0
 			EXEC dbo.uspGLBookEntries @GLEntries, @post
 		END TRY
 		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
-				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0
-				BEGIN TRANSACTION
-			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0
-				COMMIT TRANSACTION
-			IF @raiseError = 1
-				RAISERROR(@ErrorMerssage, 11, 1)
-			GOTO Post_Exit
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
 		END CATCH	
 		 
 		BEGIN TRY 
@@ -1796,18 +1769,8 @@ IF @recap = 0
 			
 		END TRY
 		BEGIN CATCH	
-			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
-				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0
-				BEGIN TRANSACTION
-			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0
-				COMMIT TRANSACTION
-			IF @raiseError = 1
-				RAISERROR(@ErrorMerssage, 11, 1)
-			GOTO Post_Exit
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
 		END CATCH
 					
 	END
@@ -1815,8 +1778,21 @@ IF @recap = 0
 SET @successfulCount = @totalRecords
 SET @invalidCount = @totalInvalid	
 IF @raiseError = 0
-	COMMIT TRAN @TransactionName
+	COMMIT TRANSACTION
 RETURN 1;
+
+Do_Rollback:
+	IF @raiseError = 0
+		BEGIN
+		    IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION
+										
+			BEGIN TRANSACTION
+			EXEC uspARInsertPostResult @batchId, 'Receive Payment', @ErrorMerssage, @param								
+			COMMIT TRANSACTION			
+		END
+	IF @raiseError = 1
+		RAISERROR(@ErrorMerssage, 11, 1)
 	    
 -- This is our immediate exit in case of exceptions controlled by this stored procedure
 Post_Exit:
