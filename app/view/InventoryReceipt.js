@@ -2773,6 +2773,17 @@ Ext.define('Inventory.view.InventoryReceipt', {
                                                 ]
                                             }
                                         ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        itemId: 'pgeAuditLog',
+                                        layout: 'fit',
+                                        title: 'Audit Log',
+                                        items: [
+                                            {
+                                                xtype: 'auditlogtree'
+                                            }
+                                        ]
                                     }
                                 ]
                             }
