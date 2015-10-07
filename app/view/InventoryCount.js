@@ -423,6 +423,7 @@ Ext.define('Inventory.view.InventoryCount', {
                                         {
                                             xtype: 'toolbar',
                                             dock: 'top',
+                                            componentCls: 'x-toolbar-default-grid',
                                             itemId: 'tlbGridOptions',
                                             layout: {
                                                 type: 'hbox',

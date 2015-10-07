@@ -367,6 +367,7 @@ Ext.define('Inventory.view.ManufacturingCell', {
                                         {
                                             xtype: 'toolbar',
                                             dock: 'top',
+                                            componentCls: 'x-toolbar-default-grid',
                                             itemId: 'tlbGridOptions',
                                             layout: {
                                                 type: 'hbox',

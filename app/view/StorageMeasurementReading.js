@@ -173,7 +173,6 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                 items: [
                                                     {
                                                         xtype: 'gridcombobox',
-                                                        flex: 1,
                                                         columns: [
                                                             {
                                                                 dataIndex: 'intCompanyLocationId',
@@ -193,6 +192,7 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                                 flex: 1
                                                             }
                                                         ],
+                                                        flex: 1,
                                                         itemId: 'cboLocation',
                                                         margin: '0 5 0 0',
                                                         fieldLabel: 'Location',
@@ -230,6 +230,7 @@ Ext.define('Inventory.view.StorageMeasurementReading', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
+                                                        componentCls: 'x-toolbar-default-grid',
                                                         itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',

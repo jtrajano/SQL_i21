@@ -1646,9 +1646,10 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "componentCls": "x-toolbar-default-grid",
                                                                 "container|padding": "0 0 0 1",
                                                                 "dock": "top",
-                                                                "itemId": "tlbToolbarGrid"
+                                                                "itemId": "tlbGridOptions"
                                                             },
                                                             "name": "MyToolbar6",
                                                             "designerId": "d1584ef5-c809-4fc4-97a4-2572d359d321",
@@ -1749,7 +1750,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter123",
+                                                                    "name": "filter145",
                                                                     "designerId": "d46f6558-ab33-4fcd-9dfe-80ff05b3e23b",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -2886,7 +2887,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter124",
+                                                                    "name": "filter146",
                                                                     "designerId": "bb7d4545-51b0-453a-a3f1-fcf7839510af",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3344,9 +3345,10 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
+                                                                "componentCls": "x-toolbar-default-grid",
                                                                 "container|padding": "0 0 0 1",
                                                                 "dock": "top",
-                                                                "itemId": "tlbToolbarGrid"
+                                                                "itemId": "tlbGridOptions"
                                                             },
                                                             "name": "MyToolbar6",
                                                             "designerId": "cc8317c4-5c6d-449f-a5f4-adaa8634db18",
@@ -3393,7 +3395,7 @@
                                                                     "userConfig": {
                                                                         "layout|flex": null
                                                                     },
-                                                                    "name": "filter125",
+                                                                    "name": "filter147",
                                                                     "designerId": "86706668-0ec9-4541-b78b-d162dd783738",
                                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                                 }
@@ -3600,6 +3602,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "componentCls": "x-toolbar-default-grid",
                                                 "container|padding": "0 0 0 1",
                                                 "dock": "top",
                                                 "itemId": "tlbGridOptions"
@@ -3667,7 +3670,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter126",
+                                                    "name": "filter148",
                                                     "designerId": "417a16e9-e65c-4b75-add0-9311f736b82e",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }

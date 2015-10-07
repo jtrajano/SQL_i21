@@ -528,6 +528,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
+                                                        componentCls: 'x-toolbar-default-grid',
                                                         itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
@@ -900,6 +901,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'toolbar',
                                                                         dock: 'top',
+                                                                        componentCls: 'x-toolbar-default-grid',
                                                                         itemId: 'tlbGridOptions',
                                                                         layout: {
                                                                             type: 'hbox',
@@ -1060,6 +1062,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'toolbar',
                                                                         dock: 'top',
+                                                                        componentCls: 'x-toolbar-default-grid',
                                                                         itemId: 'tlbGridOptions',
                                                                         layout: {
                                                                             type: 'hbox',
@@ -1800,6 +1803,7 @@ Ext.define('Inventory.view.Item', {
                                                                             {
                                                                                 xtype: 'toolbar',
                                                                                 dock: 'top',
+                                                                                componentCls: 'x-toolbar-default-grid',
                                                                                 itemId: 'tlbGridOptions',
                                                                                 layout: {
                                                                                     type: 'hbox',
@@ -1887,6 +1891,7 @@ Ext.define('Inventory.view.Item', {
                                                                             {
                                                                                 xtype: 'toolbar',
                                                                                 dock: 'top',
+                                                                                componentCls: 'x-toolbar-default-grid',
                                                                                 itemId: 'tlbGridOptions',
                                                                                 layout: {
                                                                                     type: 'hbox',
@@ -2676,6 +2681,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'toolbar',
                                                                         dock: 'top',
+                                                                        componentCls: 'x-toolbar-default-grid',
                                                                         itemId: 'tlbGridOptions',
                                                                         layout: {
                                                                             type: 'hbox',
@@ -2797,6 +2803,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'toolbar',
                                                                         dock: 'top',
+                                                                        componentCls: 'x-toolbar-default-grid',
                                                                         itemId: 'tlbGridOptions',
                                                                         layout: {
                                                                             type: 'hbox',
@@ -3008,6 +3015,7 @@ Ext.define('Inventory.view.Item', {
                                                                             {
                                                                                 xtype: 'toolbar',
                                                                                 dock: 'top',
+                                                                                componentCls: 'x-toolbar-default-grid',
                                                                                 itemId: 'tlbGridOptions',
                                                                                 layout: {
                                                                                     type: 'hbox',
@@ -3097,6 +3105,7 @@ Ext.define('Inventory.view.Item', {
                                                                             {
                                                                                 xtype: 'toolbar',
                                                                                 dock: 'top',
+                                                                                componentCls: 'x-toolbar-default-grid',
                                                                                 itemId: 'tlbGridOptions',
                                                                                 layout: {
                                                                                     type: 'hbox',
@@ -3197,6 +3206,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'toolbar',
                                                                         dock: 'top',
+                                                                        componentCls: 'x-toolbar-default-grid',
                                                                         itemId: 'tlbGridOptions',
                                                                         layout: {
                                                                             type: 'hbox',
@@ -3356,6 +3366,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'toolbar',
                                                                         dock: 'top',
+                                                                        componentCls: 'x-toolbar-default-grid',
                                                                         itemId: 'tlbGridOptions',
                                                                         layout: {
                                                                             type: 'hbox',
@@ -3792,6 +3803,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'toolbar',
                                                                         dock: 'top',
+                                                                        componentCls: 'x-toolbar-default-grid',
                                                                         itemId: 'tlbGridOptions',
                                                                         layout: {
                                                                             type: 'hbox',
@@ -3967,6 +3979,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
+                                                        componentCls: 'x-toolbar-default-grid',
                                                         itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
@@ -4160,6 +4173,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'toolbar',
                                                                         dock: 'top',
+                                                                        componentCls: 'x-toolbar-default-grid',
                                                                         itemId: 'tlbGridOptions',
                                                                         layout: {
                                                                             type: 'hbox',
@@ -4439,6 +4453,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'toolbar',
                                                                         dock: 'top',
+                                                                        componentCls: 'x-toolbar-default-grid',
                                                                         itemId: 'tlbGridOptions',
                                                                         layout: {
                                                                             type: 'hbox',
@@ -4743,6 +4758,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
+                                                        componentCls: 'x-toolbar-default-grid',
                                                         itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
@@ -5130,6 +5146,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'toolbar',
                                                                         dock: 'top',
+                                                                        componentCls: 'x-toolbar-default-grid',
                                                                         itemId: 'tlbGridOptions',
                                                                         layout: {
                                                                             type: 'hbox',
@@ -5281,6 +5298,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
+                                                        componentCls: 'x-toolbar-default-grid',
                                                         itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
@@ -5466,6 +5484,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
+                                                        componentCls: 'x-toolbar-default-grid',
                                                         itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
@@ -5652,6 +5671,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
+                                                        componentCls: 'x-toolbar-default-grid',
                                                         itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
@@ -5731,6 +5751,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
+                                                        componentCls: 'x-toolbar-default-grid',
                                                         itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
@@ -5938,6 +5959,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'toolbar',
                                                                         dock: 'top',
+                                                                        componentCls: 'x-toolbar-default-grid',
                                                                         itemId: 'tlbGridOptions',
                                                                         layout: {
                                                                             type: 'hbox',
@@ -6037,6 +6059,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'toolbar',
                                                                         dock: 'top',
+                                                                        componentCls: 'x-toolbar-default-grid',
                                                                         itemId: 'tlbGridOptions',
                                                                         layout: {
                                                                             type: 'hbox',
@@ -6149,6 +6172,7 @@ Ext.define('Inventory.view.Item', {
                                                                     {
                                                                         xtype: 'toolbar',
                                                                         dock: 'top',
+                                                                        componentCls: 'x-toolbar-default-grid',
                                                                         itemId: 'tlbGridOptions',
                                                                         layout: {
                                                                             type: 'hbox',
@@ -6251,6 +6275,7 @@ Ext.define('Inventory.view.Item', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
+                                                        componentCls: 'x-toolbar-default-grid',
                                                         itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',

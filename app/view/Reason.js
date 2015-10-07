@@ -245,6 +245,7 @@ Ext.define('Inventory.view.Reason', {
                                         {
                                             xtype: 'toolbar',
                                             dock: 'top',
+                                            componentCls: 'x-toolbar-default-grid',
                                             itemId: 'tlbGridOptions',
                                             layout: {
                                                 type: 'hbox',
@@ -263,7 +264,7 @@ Ext.define('Inventory.view.Reason', {
                                                     tabIndex: -1,
                                                     itemId: 'btnEditWorkCenterMapping',
                                                     iconCls: 'small-view',
-                                                    text: 'View'
+                                                    text: 'Open'
                                                 },
                                                 {
                                                     xtype: 'tbseparator'

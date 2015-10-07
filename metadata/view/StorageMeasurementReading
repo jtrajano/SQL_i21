@@ -401,6 +401,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "componentCls": "x-toolbar-default-grid",
                                                 "container|padding": "0 0 0 1",
                                                 "dock": "top",
                                                 "itemId": "tlbGridOptions"
@@ -833,7 +834,7 @@
                         "dock": "bottom",
                         "layout|flex": 1
                     },
-                    "name": "statusbarpaging15",
+                    "name": "statusbarpaging123",
                     "designerId": "ac3df6f4-409d-46ea-8bc7-e00669c50ed4",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }

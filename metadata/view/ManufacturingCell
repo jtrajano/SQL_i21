@@ -700,6 +700,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "componentCls": "x-toolbar-default-grid",
                                                 "container|padding": "0 0 0 1",
                                                 "dock": "top",
                                                 "itemId": "tlbGridOptions"

@@ -493,6 +493,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                         {
                                             xtype: 'panel',
                                             itemId: 'pnlCapacity',
+                                            margin: '0 0 5 0',
                                             bodyPadding: 5,
                                             title: 'Capacity',
                                             layout: {
@@ -621,6 +622,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                         {
                                             xtype: 'toolbar',
                                             dock: 'top',
+                                            componentCls: 'x-toolbar-default-grid',
                                             itemId: 'tlbGridOptions',
                                             layout: {
                                                 type: 'hbox',
@@ -743,6 +745,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                         {
                                             xtype: 'toolbar',
                                             dock: 'top',
+                                            componentCls: 'x-toolbar-default-grid',
                                             itemId: 'tlbGridOptions',
                                             layout: {
                                                 type: 'hbox',
@@ -829,6 +832,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                         {
                                             xtype: 'toolbar',
                                             dock: 'top',
+                                            componentCls: 'x-toolbar-default-grid',
                                             itemId: 'tlbGridOptions',
                                             layout: {
                                                 type: 'hbox',
@@ -907,6 +911,7 @@ Ext.define('Inventory.view.StorageUnit', {
                                         {
                                             xtype: 'toolbar',
                                             dock: 'top',
+                                            componentCls: 'x-toolbar-default-grid',
                                             itemId: 'tlbGridOptions',
                                             layout: {
                                                 type: 'hbox',

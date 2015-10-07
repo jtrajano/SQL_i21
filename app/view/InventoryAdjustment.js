@@ -304,7 +304,8 @@ Ext.define('Inventory.view.InventoryAdjustment', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
-                                                        itemId: 'tlbToolbarGrid',
+                                                        componentCls: 'x-toolbar-default-grid',
+                                                        itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
                                                             padding: '0 0 0 1'

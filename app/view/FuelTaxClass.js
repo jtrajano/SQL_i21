@@ -210,6 +210,7 @@ Ext.define('Inventory.view.FuelTaxClass', {
                                                             {
                                                                 xtype: 'toolbar',
                                                                 dock: 'top',
+                                                                componentCls: 'x-toolbar-default-grid',
                                                                 itemId: 'tlbGridOptions',
                                                                 layout: {
                                                                     type: 'hbox',

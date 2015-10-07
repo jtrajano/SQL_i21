@@ -119,6 +119,7 @@ Ext.define('Inventory.view.FuelTank', {
                                     {
                                         xtype: 'toolbar',
                                         dock: 'top',
+                                        componentCls: 'x-toolbar-default-grid',
                                         itemId: 'tlbGridOptions',
                                         layout: {
                                             type: 'hbox',

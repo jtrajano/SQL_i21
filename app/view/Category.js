@@ -413,6 +413,7 @@ Ext.define('Inventory.view.Category', {
                                                             {
                                                                 xtype: 'toolbar',
                                                                 dock: 'top',
+                                                                componentCls: 'x-toolbar-default-grid',
                                                                 itemId: 'tlbGridOptions',
                                                                 layout: {
                                                                     type: 'hbox',
@@ -545,6 +546,7 @@ Ext.define('Inventory.view.Category', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
+                                                        componentCls: 'x-toolbar-default-grid',
                                                         itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
@@ -563,7 +565,7 @@ Ext.define('Inventory.view.Category', {
                                                                 tabIndex: -1,
                                                                 itemId: 'btnEditLocation',
                                                                 iconCls: 'small-view',
-                                                                text: 'View'
+                                                                text: 'Open'
                                                             },
                                                             {
                                                                 xtype: 'button',
@@ -644,6 +646,7 @@ Ext.define('Inventory.view.Category', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
+                                                        componentCls: 'x-toolbar-default-grid',
                                                         itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
@@ -780,6 +783,7 @@ Ext.define('Inventory.view.Category', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
+                                                        componentCls: 'x-toolbar-default-grid',
                                                         itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',

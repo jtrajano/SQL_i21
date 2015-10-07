@@ -766,7 +766,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     {
                                                                         xtype: 'toolbar',
                                                                         dock: 'top',
-                                                                        itemId: 'tlbToolbarGrid',
+                                                                        componentCls: 'x-toolbar-default-grid',
+                                                                        itemId: 'tlbGridOptions',
                                                                         layout: {
                                                                             type: 'hbox',
                                                                             padding: '0 0 0 1'
@@ -1632,7 +1633,8 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     {
                                                                         xtype: 'toolbar',
                                                                         dock: 'top',
-                                                                        itemId: 'tlbToolbarGrid',
+                                                                        componentCls: 'x-toolbar-default-grid',
+                                                                        itemId: 'tlbGridOptions',
                                                                         layout: {
                                                                             type: 'hbox',
                                                                             padding: '0 0 0 1'
@@ -1739,6 +1741,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
+                                                        componentCls: 'x-toolbar-default-grid',
                                                         itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',

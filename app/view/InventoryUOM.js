@@ -204,6 +204,7 @@ Ext.define('Inventory.view.InventoryUOM', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
+                                                        componentCls: 'x-toolbar-default-grid',
                                                         itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',

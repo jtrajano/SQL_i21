@@ -416,7 +416,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                     },
                                                     {
                                                         xtype: 'container',
-                                                        margin: '0 0 0 5',
+                                                        margin: '0 0 5 5',
                                                         layout: {
                                                             type: 'vbox',
                                                             align: 'stretch'
@@ -424,6 +424,7 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                         items: [
                                                             {
                                                                 xtype: 'panel',
+                                                                flex: 1,
                                                                 itemId: 'pnlFreight',
                                                                 margin: '',
                                                                 bodyPadding: 5,
@@ -513,7 +514,8 @@ Ext.define('Inventory.view.InventoryTransfer', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
-                                                        itemId: 'tlbToolbarGrid',
+                                                        componentCls: 'x-toolbar-default-grid',
+                                                        itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',
                                                             padding: '0 0 0 1'

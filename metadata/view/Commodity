@@ -1170,6 +1170,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "componentCls": "x-toolbar-default-grid",
                                                         "container|padding": "0 0 0 1",
                                                         "dock": "top",
                                                         "itemId": "tlbGridOptions"
@@ -1219,7 +1220,7 @@
                                                             "userConfig": {
                                                                 "layout|flex": null
                                                             },
-                                                            "name": "filter19",
+                                                            "name": "filter131",
                                                             "designerId": "cfe7d6a1-9373-4396-b427-061b4323a19b",
                                                             "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                         }
@@ -1481,6 +1482,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "componentCls": "x-toolbar-default-grid",
                                                         "container|padding": "0 0 0 1",
                                                         "dock": "top",
                                                         "itemId": "tlbGridOptions"
@@ -1663,6 +1665,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "componentCls": "x-toolbar-default-grid",
                                                         "container|padding": "0 0 0 1",
                                                         "dock": "top",
                                                         "itemId": "tlbGridOptions"
@@ -1845,6 +1848,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "componentCls": "x-toolbar-default-grid",
                                                         "container|padding": "0 0 0 1",
                                                         "dock": "top",
                                                         "itemId": "tlbGridOptions"
@@ -2027,6 +2031,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "componentCls": "x-toolbar-default-grid",
                                                         "container|padding": "0 0 0 1",
                                                         "dock": "top",
                                                         "itemId": "tlbGridOptions"
@@ -2228,6 +2233,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "componentCls": "x-toolbar-default-grid",
                                                         "container|padding": "0 0 0 1",
                                                         "dock": "top",
                                                         "itemId": "tlbGridOptions"
@@ -2410,6 +2416,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "componentCls": "x-toolbar-default-grid",
                                                         "container|padding": "0 0 0 1",
                                                         "dock": "top",
                                                         "itemId": "tlbGridOptions"
@@ -2592,6 +2599,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
+                                                        "componentCls": "x-toolbar-default-grid",
                                                         "container|padding": "0 0 0 1",
                                                         "dock": "top",
                                                         "itemId": "tlbGridOptions"
@@ -2850,6 +2858,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "componentCls": "x-toolbar-default-grid",
                                                 "container|padding": "0 0 0 1",
                                                 "dock": "top",
                                                 "itemId": "tlbGridOptions"
@@ -2899,7 +2908,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter110",
+                                                    "name": "filter132",
                                                     "designerId": "eba518f5-6e1c-4310-b412-16897ab2e39e",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3223,6 +3232,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "componentCls": "x-toolbar-default-grid",
                                                 "container|padding": "0 0 0 1",
                                                 "dock": "top",
                                                 "itemId": "tlbGridOptions"
@@ -3272,7 +3282,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter111",
+                                                    "name": "filter133",
                                                     "designerId": "e9ad3d80-e267-4067-aa45-29a3069f9395",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3512,6 +3522,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "componentCls": "x-toolbar-default-grid",
                                                 "container|padding": "0 0 0 1",
                                                 "dock": "top",
                                                 "itemId": "tlbGridOptions"
@@ -3561,7 +3572,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter112",
+                                                    "name": "filter134",
                                                     "designerId": "d3a363a5-85c8-4ee8-97e8-07576d381b52",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
@@ -3794,6 +3805,7 @@
                                             },
                                             "codeClass": null,
                                             "userConfig": {
+                                                "componentCls": "x-toolbar-default-grid",
                                                 "container|padding": "0 0 0 1",
                                                 "dock": "top",
                                                 "itemId": "tlbGridOptions"
@@ -3843,7 +3855,7 @@
                                                     "userConfig": {
                                                         "layout|flex": null
                                                     },
-                                                    "name": "filter113",
+                                                    "name": "filter135",
                                                     "designerId": "27709837-db86-47ab-a575-7586b5b5aef3",
                                                     "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
                                                 }
