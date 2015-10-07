@@ -273,7 +273,43 @@ GO
 	END
 
 GO
-	EXEC dbo.uspGLConvertAccountTemplateGroupToCategory
-GO
+
 	PRINT N'END INSERT ACCOUNT TEMPLATE: Petrolac'
+	PRINT N'BEGIN INSERT ACCOUNT TEMPLATE: Inventory'
+GO
+
+DECLARE @GL_intAccountStructureId_Primary AS INT
+	SET @GL_intAccountStructureId_Primary = (SELECT TOP 1 intAccountStructureId FROM tblGLAccountStructure WHERE strType = N'Primary')
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Inventory' AND strType = N'Primary') 
+	BEGIN
+		INSERT [dbo].[tblGLCOATemplate] ([strAccountTemplateName], [strType], [intConcurrencyId]) VALUES (N'Inventory', N'Primary', 1)
+		
+		DECLARE @GL_intAccountTemplateId_Petrolac AS INT		
+		SET @GL_intAccountTemplateId_Petrolac = (SELECT TOP 1 intAccountTemplateId FROM tblGLCOATemplate WHERE strAccountTemplateName = N'Inventory' AND strType = N'Primary')
+										
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'18000', N'Inventory Adjustment', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Inventories' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1, (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Inventory Adjustment'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'18100', N'Inventory', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Inventories' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1, (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Inventory'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'18200', N'Inventory In-Transit', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Inventories' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Inventory In-Transit'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'18300', N'Work in Progress', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Inventories' AND strAccountType = N'Asset') , @GL_intAccountStructureId_Primary, 1,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Work in Progress'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'21000', N'AP Clearing', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Payables' AND strAccountType = N'Liability') , @GL_intAccountStructureId_Primary, 1,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'AP Clearing'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'40000', N'Sales', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Sales' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Sales Account'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'40100', N'Other Charge Income', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Income' AND strAccountType = N'Revenue') , @GL_intAccountStructureId_Primary, 1, (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Other Charge Income'))		
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'50100', N'Cost of Goods', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Cost of Goods Sold' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1, (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Cost of Goods'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'50200', N'Auto Negative', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Cost of Goods Sold' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1, (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Auto-Negative'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'50300', N'Write-off Sold ', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Cost of Goods Sold' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Write-off Sold'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'50400', N'Revalue Sold', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Cost of Goods Sold' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1, (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Revalue Sold'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'50500', N'Other Charge Expense', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'Other Charge Expense'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'50600', N'Service', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1, (SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'General'))
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'50700', N'Non Inventory', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'General'))		
+		INSERT [dbo].[tblGLCOATemplateDetail] ( [intAccountTemplateId], [strCode], [strDescription], [intAccountGroupId], [intAccountStructureId], [intConcurrencyId], [intAccountCategoryId]) VALUES ( @GL_intAccountTemplateId_Petrolac , N'50800', N'Software', (SELECT TOP 1 intAccountGroupId FROM tblGLAccountGroup WHERE strAccountGroup = N'Other Expenses' AND strAccountType = N'Expense') , @GL_intAccountStructureId_Primary, 1,(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = N'General'))
+	
+	END
+
+GO
+
+	PRINT N'END INSERT ACCOUNT TEMPLATE: Inventory'
+
+
+EXEC dbo.uspGLConvertAccountTemplateGroupToCategory
 GO
