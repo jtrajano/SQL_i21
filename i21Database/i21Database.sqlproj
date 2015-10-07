@@ -2345,6 +2345,8 @@
     <Build Include="dbo\Functions\fnGetTaxGroupForLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentInfo.sql" />
     <Build Include="dbo\Views\vyuARUndepositedPayment.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeEarningDistribution.sql" />
+    <None Include="Scripts\Post-Deployment\PR\DataFixes\AddDefaultEmployeeEarningDistribution.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
