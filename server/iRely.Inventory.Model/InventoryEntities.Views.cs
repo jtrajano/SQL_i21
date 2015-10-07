@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets6b408b6123a238d9fd561e7fd22b7b0dce7d913037b0eb329d0d806bb177f5cd))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets0bdbd9ad189cee6e17923191671ef321406831685095095436c5d56cf3db92f6))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySets6b408b6123a238d9fd561e7fd22b7b0dce7d913037b0eb329d0d806bb177f5cd : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets0bdbd9ad189cee6e17923191671ef321406831685095095436c5d56cf3db92f6 : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "6b408b6123a238d9fd561e7fd22b7b0dce7d913037b0eb329d0d806bb177f5cd"; }
+            get { return "0bdbd9ad189cee6e17923191671ef321406831685095095436c5d56cf3db92f6"; }
         }
 
         /// <summary>
@@ -3698,12 +3698,13 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICDocument
-        [CodeFirstDatabaseSchema.tblICDocument](T1.tblICDocument_intDocumentId, T1.tblICDocument_strDocumentName, T1.tblICDocument_strDescription, T1.tblICDocument_intCommodityId, T1.tblICDocument_ysnStandard, T1.tblICDocument_intConcurrencyId)
+        [CodeFirstDatabaseSchema.tblICDocument](T1.tblICDocument_intDocumentId, T1.tblICDocument_strDocumentName, T1.tblICDocument_strDescription, T1.tblICDocument_intDocumentType, T1.tblICDocument_intCommodityId, T1.tblICDocument_ysnStandard, T1.tblICDocument_intConcurrencyId)
     FROM (
         SELECT 
             T.intDocumentId AS tblICDocument_intDocumentId, 
             T.strDocumentName AS tblICDocument_strDocumentName, 
             T.strDescription AS tblICDocument_strDescription, 
+            T.intDocumentType AS tblICDocument_intDocumentType, 
             T.intCommodityId AS tblICDocument_intCommodityId, 
             T.ysnStandard AS tblICDocument_ysnStandard, 
             T.intConcurrencyId AS tblICDocument_intConcurrencyId, 
@@ -6879,12 +6880,13 @@ namespace Edm_EntityMappingGeneratedViews
         {
             return new DbMappingView(@"
     SELECT VALUE -- Constructing tblICDocuments
-        [iRely.Inventory.Model.tblICDocument](T1.tblICDocument_intDocumentId, T1.tblICDocument_strDocumentName, T1.tblICDocument_strDescription, T1.tblICDocument_intCommodityId, T1.tblICDocument_ysnStandard, T1.tblICDocument_intConcurrencyId)
+        [iRely.Inventory.Model.tblICDocument](T1.tblICDocument_intDocumentId, T1.tblICDocument_strDocumentName, T1.tblICDocument_strDescription, T1.tblICDocument_intDocumentType, T1.tblICDocument_intCommodityId, T1.tblICDocument_ysnStandard, T1.tblICDocument_intConcurrencyId)
     FROM (
         SELECT 
             T.intDocumentId AS tblICDocument_intDocumentId, 
             T.strDocumentName AS tblICDocument_strDocumentName, 
             T.strDescription AS tblICDocument_strDescription, 
+            T.intDocumentType AS tblICDocument_intDocumentType, 
             T.intCommodityId AS tblICDocument_intCommodityId, 
             T.ysnStandard AS tblICDocument_ysnStandard, 
             T.intConcurrencyId AS tblICDocument_intConcurrencyId, 

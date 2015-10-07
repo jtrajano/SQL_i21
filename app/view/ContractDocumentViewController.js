@@ -37,6 +37,10 @@ Ext.define('Inventory.view.ContractDocumentViewController', {
             },
             txtDocumentName: '{current.strDocumentName}',
             txtDescription: '{current.strDescription}',
+            cboDocumentType: {
+                value: '{current.intDocumentType}',
+                store: '{docType}'
+            },
             cboCommodity: {
                 value: '{current.intCommodityId}',
                 store: '{commodity}'

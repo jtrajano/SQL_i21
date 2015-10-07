@@ -24,6 +24,31 @@ Ext.define('Inventory.view.ContractDocumentViewModel', {
     stores: {
         commodity: {
             type: 'icbufferedcommodity'
+        },
+        docType: {
+            autoLoad: true,
+            data: [
+                {
+                    intDocumentType: 0,
+                    strDescription: ''
+                },
+                {
+                    intDocumentType: 1,
+                    strDescription: 'Contract'
+                },
+                {
+                    intDocumentType: 2,
+                    strDescription: 'Bill Of Lading'
+                },
+                {
+                    intDocumentType: 3,
+                    strDescription: 'Container'
+                }
+            ],
+            fields: {
+                name: 'intDocumentType',
+                name: 'strDescription'
+            }
         }
     }
 

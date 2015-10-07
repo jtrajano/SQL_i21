@@ -27,10 +27,10 @@ Ext.define('Inventory.view.ContractDocument', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 250,
+    height: 275,
     hidden: false,
-    maxHeight: 250,
-    minHeight: 250,
+    maxHeight: 275,
+    minHeight: 275,
     minWidth: 400,
     width: 400,
     layout: 'fit',
@@ -166,6 +166,28 @@ Ext.define('Inventory.view.ContractDocument', {
                             itemId: 'txtDescription',
                             fieldLabel: 'Description',
                             labelWidth: 105
+                        },
+                        {
+                            xtype: 'gridcombobox',
+                            columns: [
+                                {
+                                    dataIndex: 'intDocumentType',
+                                    dataType: 'numeric',
+                                    hidden: true
+                                },
+                                {
+                                    dataIndex: 'strDescription',
+                                    dataType: 'string',
+                                    text: 'Document Type',
+                                    flex: 1
+                                }
+                            ],
+                            itemId: 'cboDocumentType',
+                            width: 170,
+                            fieldLabel: 'Document Type',
+                            labelWidth: 105,
+                            displayField: 'strDescription',
+                            valueField: 'intDocumentType'
                         },
                         {
                             xtype: 'gridcombobox',

@@ -10,14 +10,14 @@
         "defaultFocus": null,
         "designer|userAlias": "iccontractdocument",
         "designer|userClassName": "ContractDocument",
-        "height": 250,
+        "height": 275,
         "hidden": false,
         "icon": null,
         "iconCls": "small-icon-i21",
         "layout": "fit",
-        "maxHeight": 250,
+        "maxHeight": 275,
         "maximizable": true,
-        "minHeight": 250,
+        "minHeight": 275,
         "minWidth": 400,
         "minimizable": null,
         "reference": null,
@@ -300,6 +300,59 @@
                             },
                             "name": "MyTextField66",
                             "designerId": "ca5110c0-0f94-4b71-823d-1644b216aec4"
+                        },
+                        {
+                            "type": "Ext.form.field.ComboBox",
+                            "reference": {
+                                "name": "items",
+                                "type": "array"
+                            },
+                            "codeClass": null,
+                            "userConfig": {
+                                "columns": [
+                                    "[",
+                                    "{",
+                                    "dataIndex: 'intDocumentType',",
+                                    "dataType: 'numeric',",
+                                    "hidden: true",
+                                    "},",
+                                    "{",
+                                    "dataIndex: 'strDescription',",
+                                    "dataType: 'string',",
+                                    "text: 'Document Type',",
+                                    "flex: 1",
+                                    "}",
+                                    "]"
+                                ],
+                                "designer|createAlias": "gridcombobox",
+                                "designer|displayName": null,
+                                "displayField": "strDescription",
+                                "enforceMaxLength": null,
+                                "fieldLabel": "Document Type",
+                                "itemId": "cboDocumentType",
+                                "labelPad": null,
+                                "labelSeparator": null,
+                                "labelWidth": 105,
+                                "layout|flex": null,
+                                "margin": null,
+                                "maxLength": null,
+                                "name": null,
+                                "tabIndex": null,
+                                "valueField": "intDocumentType",
+                                "width": 170
+                            },
+                            "name": "MyComboBox92",
+                            "configAlternates": {
+                                "columns": "array"
+                            },
+                            "designerId": "f4d03f4d-d6f1-4ea6-ae1a-0f64860084c7",
+                            "customConfigs": [
+                                {
+                                    "group": "(Custom Properties)",
+                                    "name": "columns",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         {
                             "type": "Ext.form.field.ComboBox",
