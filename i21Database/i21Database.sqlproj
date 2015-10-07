@@ -2546,6 +2546,7 @@
     <Build Include="dbo\Tables\tblPREmployeeEarningDistribution.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\AddDefaultEmployeeEarningDistribution.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertDebitCreditUnitEntry.sql" />
+    <Build Include="dbo\Tables\tblPATIssueStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
