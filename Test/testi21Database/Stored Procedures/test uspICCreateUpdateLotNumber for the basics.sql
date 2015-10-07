@@ -44,7 +44,8 @@ BEGIN
 			[ysnProduced]				BIT DEFAULT((0)),
 			[dtmDateCreated]			DATETIME NULL,
 			[intCreatedUserId]			INT NULL,
-			[intConcurrencyId]			INT NULL DEFAULT ((1)),		
+			[intConcurrencyId]			INT NULL DEFAULT ((1)),	
+			[dblGrossWeight]			NUMERIC(18,6) NULL,
 		)
 
 		SELECT * 

@@ -153,7 +153,8 @@ BEGIN
 			,strVendorLotNo
 			,intVendorLocationId
 			,intDetailId
-			,intOwnershipType		
+			,intOwnershipType
+			,dblGrossWeight	
 	)
 	SELECT	intLotId				= ItemLot.intLotId
 			,strLotNumber			= ItemLot.strLotNumber
@@ -187,6 +188,7 @@ BEGIN
 			,intVendorLocationId	= ItemLot.intVendorLocationId
 			,intDetailId			= ItemLot.intInventoryReceiptItemLotId
 			,intOwnershipType		= ReceiptItem.intOwnershipType
+			,dblGrossWeight			= ItemLot.dblGrossWeight
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item

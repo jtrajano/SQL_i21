@@ -134,6 +134,7 @@ BEGIN
 				,[intLotStatusId]		INT
 				,[intParentLotId]		INT
 				,[intSplitFromLotId]	INT
+				,[dblGrossWeight]		NUMERIC(18,6) NULL
 				,[dblWeight]			NUMERIC(18,6)
 				,[intWeightUOMId]		INT
 				,[dblWeightPerQty]		NUMERIC(38,20)
@@ -208,15 +209,15 @@ BEGIN
 				,intSubLocationId		= @SubLocation
 				,intStorageLocationId	= @StorageLocation
 
-			-- Setup the expected lot data
-			INSERT INTO expected 
-			SELECT	*
-			FROM	dbo.tblICLot
+		-- Setup the expected lot data
+		INSERT INTO expected 
+		SELECT	*
+		FROM	dbo.tblICLot
 
-			UPDATE	expected
-			SET		dblQty = dblQty + 20 -- + 20 bushels
-					,dblWeight = 250 + (20 * 2.500) -- + 50 pounds (20 bushel x 2.5 pound/bushel)
-					,dblLastCost = 12.20 / @BushelUnitQty -- $12.20 / bushel unit qty
+		UPDATE	expected
+		SET		dblQty = dblQty + 20 -- + 20 bushels
+				,dblWeight = 250 + (20 * 2.500) -- + 50 pounds (20 bushel x 2.5 pound/bushel)
+				,dblLastCost = 12.20 / @BushelUnitQty -- $12.20 / bushel unit qty
 	END 	
 	
 	-- Act

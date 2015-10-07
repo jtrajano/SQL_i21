@@ -75,6 +75,7 @@ DECLARE
 	,@ysnProduced				AS BIT 
 	,@intDetailId				AS INT 
 	,@intOwnershipType			AS INT
+	,@dblGrossWeight			AS NUMERIC(18,6)
 
 
 DECLARE @OwnerShipType_Own AS INT = 1
@@ -159,6 +160,7 @@ SELECT  intId
 		,ysnProduced
 		,intDetailId
 		,intOwnershipType
+		,dblGrossWeight
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -194,6 +196,7 @@ FETCH NEXT FROM loopLotItems INTO
 		,@ysnProduced
 		,@intDetailId
 		,@intOwnershipType
+		,@dblGrossWeight
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Start of the loop
@@ -437,6 +440,22 @@ BEGIN
 											) THEN ISNULL(LotMaster.intConcurrencyId, 0) + 1 ELSE ISNULL(LotMaster.intConcurrencyId, 0)
 											END 
 				,intOwnershipType		=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN ISNULL(@intOwnershipType, @OwnerShipType_Own) ELSE LotMaster.intOwnershipType END
+				,dblGrossWeight			=	CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN
+														@dblGrossWeight
+													-- Increase the gross weight on top of the existing gross weight. 													
+													WHEN (
+														LotMaster.intItemUOMId = LotToUpdate.intItemUOMId
+														AND ISNULL(LotMaster.intWeightUOMId, 0) = ISNULL(LotToUpdate.intWeightUOMId, 0)
+														AND ISNULL(LotMaster.intSubLocationId, 0) = ISNULL(LotToUpdate.intSubLocationId, 0)
+														AND ISNULL(LotMaster.intStorageLocationId, 0) = ISNULL(LotToUpdate.intStorageLocationId, 0)
+													) THEN 
+														ISNULL(LotMaster.dblGrossWeight, 0) + @dblGrossWeight 
+													ELSE 
+														LotMaster.dblGrossWeight 
+											END 
+															
+				
+				-- CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @dblGrossWeight ELSE LotMaster.dblGrossWeight END
 
 				-- The following field are returned from the lot master if:
 				-- 1. It is editing from the source transaction id
@@ -460,6 +479,9 @@ BEGIN
 													) THEN LotMaster.intLotId 
 													ELSE 0 
 											END
+
+
+				
 
 
 		-- If none found, insert a new lot record. 
@@ -497,6 +519,7 @@ BEGIN
 				,intCreatedUserId
 				,intConcurrencyId
 				,intOwnershipType
+				,dblGrossWeight
 			) VALUES (
 				@intItemId
 				,@intLocationId
@@ -534,6 +557,7 @@ BEGIN
 				,@intUserId
 				,1
 				,@intOwnershipType
+				,@dblGrossWeight
 			)
 		;
 	
@@ -662,7 +686,8 @@ BEGIN
 		,@ysnReleasedToWarehouse
 		,@ysnProduced
 		,@intDetailId
-		,@intOwnershipType;
+		,@intOwnershipType
+		,@dblGrossWeight;
 END
 
 CLOSE loopLotItems;

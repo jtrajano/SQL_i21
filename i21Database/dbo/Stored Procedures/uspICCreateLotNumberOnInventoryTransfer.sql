@@ -151,7 +151,7 @@ BEGIN
 			,intEntityVendorId
 			,strVendorLotNo
 			,intVendorLocationId
-			,intDetailId		
+			,intDetailId
 	)
 	SELECT	intLotId				= TransferItem.intNewLotId
 			,strLotNumber			= CASE WHEN ISNULL(TransferItem.strNewLotId, '') = '' THEN SourceLot.strLotNumber ELSE TransferItem.strNewLotId END 
