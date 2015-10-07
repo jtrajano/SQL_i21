@@ -6103,118 +6103,16 @@ Ext.define('Inventory.view.Item', {
                                     },
                                     {
                                         xtype: 'panel',
-                                        hidden: true,
                                         itemId: 'pgeNotes',
                                         layout: 'fit',
                                         title: 'Notes',
+                                        tabConfig: {
+                                            xtype: 'tab',
+                                            itemId: 'cfgNotes'
+                                        },
                                         items: [
                                             {
-                                                xtype: 'advancefiltergrid',
-                                                itemId: 'grdNotes',
-                                                margin: -1,
-                                                dockedItems: [
-                                                    {
-                                                        xtype: 'toolbar',
-                                                        dock: 'top',
-                                                        itemId: 'tlbGridOptions',
-                                                        layout: {
-                                                            type: 'hbox',
-                                                            padding: '0 0 0 1'
-                                                        },
-                                                        items: [
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnDeleteNotes',
-                                                                iconCls: 'small-delete',
-                                                                text: 'Remove'
-                                                            },
-                                                            {
-                                                                xtype: 'tbseparator'
-                                                            },
-                                                            {
-                                                                xtype: 'filter1'
-                                                            }
-                                                        ]
-                                                    }
-                                                ],
-                                                columns: [
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colNoteLocation',
-                                                        dataIndex: 'string',
-                                                        text: 'Location',
-                                                        flex: 1,
-                                                        editor: {
-                                                            xtype: 'gridcombobox',
-                                                            columns: [
-                                                                {
-                                                                    dataIndex: 'intItemLocationId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Item Location Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'intLocationId',
-                                                                    dataType: 'numeric',
-                                                                    text: 'Location Id',
-                                                                    hidden: true
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strLocationName',
-                                                                    dataType: 'string',
-                                                                    text: 'Location Name',
-                                                                    flex: 1
-                                                                },
-                                                                {
-                                                                    dataIndex: 'strLocationType',
-                                                                    dataType: 'string',
-                                                                    text: 'Location Type',
-                                                                    flex: 1
-                                                                }
-                                                            ],
-                                                            itemId: 'cboNoteLocation',
-                                                            displayField: 'strLocationName',
-                                                            valueField: 'strLocationName'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colNoteCommentType',
-                                                        dataIndex: 'string',
-                                                        text: 'Comment Type',
-                                                        flex: 1,
-                                                        editor: {
-                                                            xtype: 'combobox',
-                                                            itemId: 'cboNoteCommentType',
-                                                            displayField: 'strDescription',
-                                                            valueField: 'strDescription'
-                                                        }
-                                                    },
-                                                    {
-                                                        xtype: 'gridcolumn',
-                                                        itemId: 'colNoteComment',
-                                                        dataIndex: 'string',
-                                                        text: 'Comments',
-                                                        flex: 3,
-                                                        editor: {
-                                                            xtype: 'textfield'
-                                                        }
-                                                    }
-                                                ],
-                                                viewConfig: {
-                                                    itemId: 'grvNotes'
-                                                },
-                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
-                                                    selType: 'checkboxmodel'
-                                                }),
-                                                plugins: [
-                                                    {
-                                                        ptype: 'cellediting',
-                                                        pluginId: 'cepNote',
-                                                        clicksToEdit: 1
-                                                    }
-                                                ]
+                                                xtype: 'commentbox'
                                             }
                                         ]
                                     },
@@ -6239,6 +6137,17 @@ Ext.define('Inventory.view.Item', {
                                                 viewConfig: {
                                                     itemId: 'grvAttachment'
                                                 }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        xtype: 'panel',
+                                        itemId: 'pgeAuditLog',
+                                        layout: 'fit',
+                                        title: 'Audit Log',
+                                        items: [
+                                            {
+                                                xtype: 'auditlogtree'
                                             }
                                         ]
                                     }

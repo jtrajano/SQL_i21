@@ -949,29 +949,6 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 colOwnerDefault: 'ysnActive'
-            },
-
-            //---------//
-            //Notes Tab//
-            //---------//
-            grdNotes: {
-                colNoteLocation: {
-                    dataIndex: 'strLocationName',
-                    editor: {
-                        store: '{noteLocation}',
-                        defaultFilters: [{
-                            column: 'intItemId',
-                            value: '{current.intItemId}'
-                        }]
-                    }
-                },
-                colNoteCommentType: {
-                    dataIndex: 'strCommentType',
-                    editor: {
-                        store: '{commentTypes}'
-                    }
-                },
-                colNoteComment: 'strComments'
             }
 
         }
@@ -1005,9 +982,7 @@ Ext.define('Inventory.view.ItemViewController', {
             grdAssembly = win.down('#grdAssembly'),
             grdBundle = win.down('#grdBundle'),
             grdKit = win.down('#grdKit'),
-            grdKitDetails = win.down('#grdKitDetails'),
-
-            grdNotes = win.down('#grdNotes');
+            grdKitDetails = win.down('#grdKitDetails');
 
         win.context = Ext.create('iRely.mvvm.Engine', {
             window : win,
@@ -1016,6 +991,8 @@ Ext.define('Inventory.view.ItemViewController', {
             validateRecord : me.validateRecord,
             binding: me.config.binding,
             fieldTitle: 'strItemNo',
+            enableAudit: true,
+            enableComment: true,
             attachment: Ext.create('iRely.mvvm.attachment.Manager', {
                 type: 'Inventory.Item',
                 window: win
@@ -1106,13 +1083,6 @@ Ext.define('Inventory.view.ItemViewController', {
                     component: Ext.create('iRely.mvvm.grid.Manager', {
                         grid: grdCommodityCost,
                         deleteButton : grdCommodityCost.down('#btnDeleteCommodityCost')
-                    })
-                },
-                {
-                    key: 'tblICItemNotes',
-                    component: Ext.create('iRely.mvvm.grid.Manager', {
-                        grid: grdNotes,
-                        deleteButton : grdNotes.down('#btnDeleteNotes')
                     })
                 },
                 {
@@ -1454,14 +1424,6 @@ Ext.define('Inventory.view.ItemViewController', {
                 
                 break;
 
-            case 'pgeNotes':
-                var pgeNotes = tabPanel.down('#pgeNotes');
-                var grdNotes = pgeNotes.down('#grdNotes');
-                if (grdNotes.store.complete === true)
-                    grdNotes.getView().refresh();
-                else
-                    grdNotes.store.load();
-                break;
         }
     },
 
@@ -2497,23 +2459,6 @@ Ext.define('Inventory.view.ItemViewController', {
 
     // </editor-fold>
 
-    // <editor-fold desc="Note Tab Methods and Event Handlers">
-
-    onNoteSelect: function(combo, records, eOpts) {
-        if (records.length <= 0)
-            return;
-
-        var grid = combo.up('grid');
-        var plugin = grid.getPlugin('cepNote');
-        var current = plugin.getActiveRecord();
-
-        if (combo.column.itemId === 'colNoteLocation'){
-            current.set('intItemLocationId', records[0].get('intItemLocationId'));
-        }
-    },
-
-    // </editor-fold>
-
     onSpecialKeyTab: function(component, e, eOpts) {
         var win = component.up('window');
         if(win) {
@@ -2806,9 +2751,6 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#cboKitDetailUOM": {
                 select: this.onKitSelect
-            },
-            "#cboNoteLocation": {
-                select: this.onNoteSelect
             },
             "#cboManufacturingCell": {
                 select: this.onManufacturingCellSelect
