@@ -8,5 +8,6 @@
     [strBrowser] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSMConnectedUser] PRIMARY KEY ([intConnectedUserId]), 
-    CONSTRAINT [FK_tblSMConnectedUser_tblEntity] FOREIGN KEY (intEntityId) REFERENCES [tblEntity]([intEntityId]) 
+    CONSTRAINT [FK_tblSMConnectedUser_tblEntity] FOREIGN KEY (intEntityId) REFERENCES [tblEntity]([intEntityId]), 
+    CONSTRAINT [AK_tblSMConnectedUser_strContextId] UNIQUE ([strContextId]) 
 )
