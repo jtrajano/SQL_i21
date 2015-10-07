@@ -4,6 +4,7 @@
 	,@intStart INT = 0
 	,@intLimit INT = 1
 	,@strFilterCriteria NVARCHAR(MAX) = ''
+	,@strFilter NVARCHAR(MAX) = ''
 AS
 SET NOCOUNT ON
 
@@ -34,13 +35,13 @@ ELSE
 BEGIN
 	SET @sqlCommand = 'SELECT TOP ' + LTRIM(@intLimit) + ' *,0 AS intConcurrencyId FROM (SELECT ' + @strColumnName + ' AS strName, strDescription, ROW_NUMBER() OVER (ORDER BY ' + @strColumnName + ') AS intRow
 						FROM ' + @strTableName + '
-						WHERE ' + @strColumnName + ' NOT IN (SELECT strGroupValue FROM dbo.tblMFScheduleGroupDetail WHERE intScheduleGroupId <>' + LTRIM(@intScheduleGroupId) + ') AND ' + @strColumnName + ' NOT IN (''' + @strFilterCriteria + ''')) AS DT WHERE intRow > ' + LTRIM(@intStart)
+						WHERE ' + @strColumnName + ' NOT IN (SELECT strGroupValue FROM dbo.tblMFScheduleGroupDetail WHERE intScheduleGroupId <>' + LTRIM(@intScheduleGroupId) + ') AND ' + @strColumnName + ' NOT IN (''' + @strFilterCriteria + ''')) AS DT WHERE intRow > ' + LTRIM(@intStart) +' AND strName LIKE '''+@strFilter + '%'''
 
 	EXECUTE sp_executesql @sqlCommand
 
 	SET @sqlCommand = 'SELECT COUNT(*) As intCount,0 AS intConcurrencyId
 						FROM ' + @strTableName + '
-						WHERE ' + @strColumnName + ' NOT IN (SELECT strGroupValue FROM dbo.tblMFScheduleGroupDetail WHERE intScheduleGroupId <>' + LTRIM(@intScheduleGroupId) + ') AND ' + @strColumnName + ' NOT IN (''' + @strFilterCriteria + ''')'
+						WHERE ' + @strColumnName + ' NOT IN (SELECT strGroupValue FROM dbo.tblMFScheduleGroupDetail WHERE intScheduleGroupId <>' + LTRIM(@intScheduleGroupId) + ') AND ' + @strColumnName + ' NOT IN (''' + @strFilterCriteria + ''')'+' AND '+@strColumnName+' LIKE '''+@strFilter + '%'''
 
 	EXECUTE sp_executesql @sqlCommand
 END
