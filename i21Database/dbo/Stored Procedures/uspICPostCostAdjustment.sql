@@ -73,9 +73,6 @@ FROM	dbo.tblICInventoryTransactionType
 WHERE	intTransactionTypeId = @intTransactionTypeId
 
 -----------------------------------------------------------------------------------------------------------------------------
--- TODO: Do the Validation
------------------------------------------------------------------------------------------------------------------------------
---BEGIN 
 --	EXEC [dbo].[uspICValidateCostingOnPost] 
 --		@ItemsToValidate = @ItemsToAdjust
 --END
