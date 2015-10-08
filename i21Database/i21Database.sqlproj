@@ -2564,6 +2564,12 @@
     <Build Include="dbo\Stored Procedures\uspARDuplicateCommissionSchedule.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessCommissionSchedule.sql" />
     <Build Include="dbo\Views\vyuARCommissionPlanSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateLotReservationByPickList.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFDeleteLotReservationByPickList.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFTransferKit.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFStageKit.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateTransferKit.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetPickListAvailableLots.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

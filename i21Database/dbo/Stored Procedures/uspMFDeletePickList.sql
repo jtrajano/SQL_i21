@@ -5,6 +5,9 @@ BEGIN TRY
 
 Declare @ErrMsg nvarchar(max)
 
+If (Select intKitStatusId from tblMFPickList Where intPickListId = @intPickListId) not in (7,12)
+	RaisError('Pick List cannot be deleted as it is already transferred.',16,1)
+
 Begin Tran
 
 	Delete From tblMFPickListDetail Where intPickListId=@intPickListId
@@ -12,6 +15,8 @@ Begin Tran
 	Delete From tblMFPickList Where intPickListId=@intPickListId
 
 	Update tblMFWorkOrder Set intKitStatusId=6,intPickListId=NULL Where intPickListId=@intPickListId
+
+	Exec [uspMFDeleteLotReservationByPickList] @intPickListId
 
 Commit Tran
 
