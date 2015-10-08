@@ -41,7 +41,7 @@ glfyp_yr
 , ((substring(convert(varchar(10),glfyp_end_date_12),5,2) 
 +'/'+substring(convert(varchar(10),glfyp_end_date_12),7,2)
 +'/'+substring(convert(varchar(10),glfyp_end_date_12),1,4)))
-,1
+,(CASE WHEN glfyp_closed_yn ='N' THEN 1 ELSE 0 END)
 ,1
 from glfypmst
 IF OBJECT_ID('tempFiscalyearDetail') IS NOT NULL DROP TABLE tempFiscalyearDetail
@@ -74,7 +74,7 @@ B.intFiscalYearId
 ,((substring(convert(varchar(10),glfyp_end_date_1),5,2) 
 +'/'+substring(convert(varchar(10),glfyp_end_date_1),7,2)
 +'/'+substring(convert(varchar(10),glfyp_end_date_1),1,4)))
-,1
+,(CASE WHEN glfyp_closed_yn ='N' THEN 1 ELSE 0 END)
 ,1
  from
 glfypmst A
@@ -100,7 +100,7 @@ B.intFiscalYearId
 ,((substring(convert(varchar(10),glfyp_end_date_2),5,2) 
 +'/'+substring(convert(varchar(10),glfyp_end_date_2),7,2)
 +'/'+substring(convert(varchar(10),glfyp_end_date_2),1,4)))
-,1
+,(CASE WHEN glfyp_closed_yn ='N' THEN 1 ELSE 0 END)
 ,1
  from
 glfypmst A
@@ -126,7 +126,7 @@ B.intFiscalYearId
 ,((substring(convert(varchar(10),glfyp_end_date_3),5,2) 
 +'/'+substring(convert(varchar(10),glfyp_end_date_3),7,2)
 +'/'+substring(convert(varchar(10),glfyp_end_date_3),1,4)))
-,1
+,(CASE WHEN glfyp_closed_yn ='N' THEN 1 ELSE 0 END)
 ,1
  from
 glfypmst A
@@ -152,7 +152,7 @@ B.intFiscalYearId
 ,((substring(convert(varchar(10),glfyp_end_date_4),5,2) 
 +'/'+substring(convert(varchar(10),glfyp_end_date_4),7,2)
 +'/'+substring(convert(varchar(10),glfyp_end_date_4),1,4)))
-,1
+,(CASE WHEN glfyp_closed_yn ='N' THEN 1 ELSE 0 END)
 ,1
  from
 glfypmst A
@@ -178,7 +178,7 @@ B.intFiscalYearId
 ,((substring(convert(varchar(10),glfyp_end_date_5),5,2) 
 +'/'+substring(convert(varchar(10),glfyp_end_date_5),7,2)
 +'/'+substring(convert(varchar(10),glfyp_end_date_5),1,4)))
-,1
+,(CASE WHEN glfyp_closed_yn ='N' THEN 1 ELSE 0 END)
 ,1
  from
 glfypmst A
@@ -204,7 +204,7 @@ B.intFiscalYearId
 ,((substring(convert(varchar(10),glfyp_end_date_6),5,2) 
 +'/'+substring(convert(varchar(10),glfyp_end_date_6),7,2)
 +'/'+substring(convert(varchar(10),glfyp_end_date_6),1,4)))
-,1
+,(CASE WHEN glfyp_closed_yn ='N' THEN 1 ELSE 0 END)
 ,1
  from
 glfypmst A
@@ -230,7 +230,7 @@ B.intFiscalYearId
 ,((substring(convert(varchar(10),glfyp_end_date_7),5,2) 
 +'/'+substring(convert(varchar(10),glfyp_end_date_7),7,2)
 +'/'+substring(convert(varchar(10),glfyp_end_date_7),1,4)))
-,1
+,(CASE WHEN glfyp_closed_yn ='N' THEN 1 ELSE 0 END)
 ,1
  from
 glfypmst A
@@ -256,7 +256,7 @@ B.intFiscalYearId
 ,((substring(convert(varchar(10),glfyp_end_date_8),5,2) 
 +'/'+substring(convert(varchar(10),glfyp_end_date_8),7,2)
 +'/'+substring(convert(varchar(10),glfyp_end_date_8),1,4)))
-,1
+,(CASE WHEN glfyp_closed_yn ='N' THEN 1 ELSE 0 END)
 ,1
  from
 glfypmst A
@@ -282,7 +282,7 @@ B.intFiscalYearId
 ,((substring(convert(varchar(10),glfyp_end_date_9),5,2) 
 +'/'+substring(convert(varchar(10),glfyp_end_date_9),7,2)
 +'/'+substring(convert(varchar(10),glfyp_end_date_9),1,4)))
-,1
+,(CASE WHEN glfyp_closed_yn ='N' THEN 1 ELSE 0 END)
 ,1
  from
 glfypmst A
@@ -308,7 +308,7 @@ B.intFiscalYearId
 ,((substring(convert(varchar(10),glfyp_end_date_10),5,2) 
 +'/'+substring(convert(varchar(10),glfyp_end_date_10),7,2)
 +'/'+substring(convert(varchar(10),glfyp_end_date_10),1,4)))
-,1
+,(CASE WHEN glfyp_closed_yn ='N' THEN 1 ELSE 0 END)
 ,1
  from
 glfypmst A
@@ -334,7 +334,7 @@ B.intFiscalYearId
 ,((substring(convert(varchar(10),glfyp_end_date_11),5,2) 
 +'/'+substring(convert(varchar(10),glfyp_end_date_11),7,2)
 +'/'+substring(convert(varchar(10),glfyp_end_date_11),1,4)))
-,1
+,(CASE WHEN glfyp_closed_yn ='N' THEN 1 ELSE 0 END)
 ,1
  from
 glfypmst A
@@ -360,7 +360,7 @@ B.intFiscalYearId
 ,((substring(convert(varchar(10),glfyp_end_date_12),5,2) 
 +'/'+substring(convert(varchar(10),glfyp_end_date_12),7,2)
 +'/'+substring(convert(varchar(10),glfyp_end_date_12),1,4)))
-,1
+,(CASE WHEN glfyp_closed_yn ='N' THEN 1 ELSE 0 END)
 ,1
  from
 glfypmst A
