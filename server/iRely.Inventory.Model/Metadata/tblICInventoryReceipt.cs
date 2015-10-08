@@ -146,6 +146,7 @@ namespace iRely.Inventory.Model
         public string strReceiptType { get; set; }
         public string strVendorName { get; set; }
         public string strLocationName { get; set; }
+        public string strBillOfLading { get; set; }
         public bool ysnPosted { get; set; }
     }
 

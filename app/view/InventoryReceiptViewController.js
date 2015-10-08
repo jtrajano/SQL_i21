@@ -17,6 +17,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 {dataIndex: 'strReceiptType', text: 'Receipt Type', flex: 1, dataType: 'string'},
                 {dataIndex: 'strVendorName', text: 'Vendor Name', flex: 1, dataType: 'string'},
                 {dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string'},
+                {dataIndex: 'strBillOfLading', text: 'Bill Of Lading No', flex: 1, dataType: 'string'},
                 {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn'}
             ]
         },
