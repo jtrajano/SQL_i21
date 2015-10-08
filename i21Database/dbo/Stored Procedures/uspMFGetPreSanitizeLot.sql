@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE dbo.uspMFGetPreSanitizeLot (@intLocationId INT) 
+﻿CREATE PROCEDURE dbo.uspMFGetPreSanitizeLot (@intLocationId INT)
 AS
 BEGIN
 	SELECT L.intLotId
@@ -41,7 +41,7 @@ BEGIN
 				WHERE WI.intLotId = L.intLotId
 				), 0) AS dblInProcessQty
 		,L.dblQty - ISNULL((
-				SELECT SUM(dblQty)
+				SELECT SUM(dblQty) / L.dblWeightPerQty
 				FROM tblICStockReservation LR
 				WHERE LR.intLotId = L.intLotId
 				), 0) AS dblBalance
