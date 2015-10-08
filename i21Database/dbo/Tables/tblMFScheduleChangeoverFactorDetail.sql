@@ -16,7 +16,7 @@
 		,intFromScheduleGroupId
 		,intToScheduleGroupId
 		)
-	,CONSTRAINT FK_tblMFScheduleChangeoverFactorDetail_tblMFScheduleChangeoverFactor_intChangeoverFactorId FOREIGN KEY (intChangeoverFactorId) REFERENCES tblMFScheduleChangeoverFactor(intChangeoverFactorId)
+	,CONSTRAINT FK_tblMFScheduleChangeoverFactorDetail_tblMFScheduleChangeoverFactor_intChangeoverFactorId FOREIGN KEY (intChangeoverFactorId) REFERENCES tblMFScheduleChangeoverFactor(intChangeoverFactorId) ON DELETE CASCADE
 	,CONSTRAINT FK_tblMFScheduleChangeoverFactorDetail_tblMFScheduleGroup_intFromScheduleGroupId FOREIGN KEY (intFromScheduleGroupId) REFERENCES tblMFScheduleGroup(intScheduleGroupId)
 	,CONSTRAINT FK_tblMFScheduleChangeoverFactorDetail_tblMFScheduleGroup_intToScheduleGroupId FOREIGN KEY (intToScheduleGroupId) REFERENCES tblMFScheduleGroup(intScheduleGroupId)
 	)
