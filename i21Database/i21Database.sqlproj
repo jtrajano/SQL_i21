@@ -2553,6 +2553,7 @@
     <Build Include="dbo\Stored Procedures\uspARDuplicateCommissionPlan.sql" />
     <Build Include="dbo\Tables\tblGLOriginAccounts.sql" />
     <Build Include="dbo\Tables\tblPATEstateCorporationDetail.sql" />
+    <Build Include="dbo\Tables\tblPATCategoryVolume.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
