@@ -8,8 +8,11 @@ AS
 		A.strLabel,
 		A.strDefaultValue,
 		A.ysnRequired,
-		A.intUserRoleId, 
-		C.strNamespace
+		--A.intUserRoleId, 
+		C.strNamespace,
+		P.intCompanyLocationId,
+		P.intEntityId
 	FROM tblSMUserRoleControlPermission A 
 		INNER JOIN tblSMControl B ON A.intControlId = B.intControlId
-		INNER JOIN tblSMScreen C ON B.intScreenId = C.intScreenId 
+		INNER JOIN tblSMScreen C ON B.intScreenId = C.intScreenId
+		INNER JOIN tblSMUserSecurityCompanyLocationRolePermission P ON A.intUserRoleId = P.intUserRoleId
