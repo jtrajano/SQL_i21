@@ -2552,6 +2552,7 @@
     <Build Include="dbo\Views\vyuMFGetChangeOverGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspARDuplicateCommissionPlan.sql" />
     <Build Include="dbo\Tables\tblGLOriginAccounts.sql" />
+    <Build Include="dbo\Tables\tblPATEstateCorporationDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

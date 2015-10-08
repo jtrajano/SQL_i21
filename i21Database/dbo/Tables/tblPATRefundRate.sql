@@ -8,5 +8,6 @@
 	[intUndistributedEquityId] [int] NOT NULL,
 	[dblCashPayout] [numeric](18, 6) NOT NULL,
     [intConcurrencyId] INT NULL DEFAULT 0, 
-    CONSTRAINT [PK_tblPATRefundRate] PRIMARY KEY ([intRefundTypeId])
+    CONSTRAINT [PK_tblPATRefundRate] PRIMARY KEY ([intRefundTypeId]), 
+    CONSTRAINT [AK_tblPATRefundRate_strRefundType] UNIQUE ([strRefundType])
 )
