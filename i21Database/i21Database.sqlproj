@@ -2557,6 +2557,7 @@
     <Build Include="dbo\Tables\tblRKM2MBasis.sql" />
     <Build Include="dbo\Tables\tblRKM2MBasisDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetM2MBasis.sql" />
+    <Build Include="dbo\Tables\tblCTBagMark.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
