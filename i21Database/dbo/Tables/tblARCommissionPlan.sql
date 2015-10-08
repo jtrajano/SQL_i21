@@ -14,6 +14,7 @@
 	[dtmEndDate]			DATETIME NULL,
 	[ysnPaymentRequired]	BIT NULL,
 	[ysnActive]				BIT NULL,
+	[intCommissionAccountId] INT NULL,
 	[intConcurrencyId]		INT NOT NULL DEFAULT ((0)),
     CONSTRAINT [PK_tblARCommissionPlan_intCommissionId] PRIMARY KEY CLUSTERED ([intCommissionId] ASC),
 	CONSTRAINT [UK_tblARCommissionPlan_strCommissionPlanName] UNIQUE (strCommissionPlanName)
