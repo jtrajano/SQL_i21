@@ -351,6 +351,15 @@ namespace iRely.Inventory.BusinessLayer
         {
             var query = _db.GetQuery<vyuICGetInventoryValuation>()
                 .Filter(param, true);
+
+            var sorts = new List<SearchSort>();
+            sorts.Add(new SearchSort() { property = "intItemId" });
+            sorts.Add(new SearchSort() { property = "intItemLocationId" });
+            sorts.Add(new SearchSort() { property = "dtmDate", direction = "DESC" });
+            sorts.Add(new SearchSort() { property = "intInventoryTransactionId", direction = "DESC" });
+            sorts.AddRange(param.sort.ToList());
+            param.sort = sorts;
+            
             var data = await query.ExecuteProjection(param, "intInventoryValuationKeyId").ToListAsync();
 
             return new SearchResult()
