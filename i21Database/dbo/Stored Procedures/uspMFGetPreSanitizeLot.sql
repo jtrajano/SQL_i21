@@ -62,6 +62,6 @@ BEGIN
 	LEFT JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 	LEFT JOIN dbo.tblICStorageUnitType SLT ON SLT.intStorageUnitTypeId = SL.intStorageUnitTypeId
 	WHERE L.intLocationId = @intLocationId
-		AND L.intLotStatusId = 4
+		AND LS.strSecondaryStatus = 'Pre-Sanitized'
 	ORDER BY L.dtmDateCreated ASC
 END

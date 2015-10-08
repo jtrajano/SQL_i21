@@ -1123,3 +1123,21 @@ UPDATE tblMFCompanyPreference
 SET intStandardSetUpDuration = 0
 WHERE intStandardSetUpDuration IS NULL
 GO
+IF NOT EXISTS (
+		SELECT *
+		FROM dbo.tblICLotStatus
+		WHERE strSecondaryStatus = 'Pre-Sanitized'
+		)
+BEGIN
+	INSERT INTO dbo.tblICLotStatus (
+		strSecondaryStatus
+		,strDescription
+		,strPrimaryStatus
+		,intConcurrencyId
+		)
+	SELECT 'Pre-Sanitized'
+		,'Pre-Sanitized'
+		,'Quarantine'
+		,0
+END
+Go
