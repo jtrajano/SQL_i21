@@ -48,6 +48,7 @@ SELECT
 	,intItemId = G.intItemId
 	,D.intSiteID
 	,E.intCustomerID
+	,D.intLocationId
 FROM tblTMSiteDevice A
 INNER JOIN tblTMDevice B
 	ON A.intDeviceId = B.intDeviceId
