@@ -4,7 +4,6 @@ CREATE TABLE tblMFScheduleChangeoverFactor (
 	,strName NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL
 	,intManufacturingCellId INT
 	,intLocationId INT NOT NULL
-	,ysnApplicableWithinGroup BIT NULL
 	,dtmCreated DATETIME NOT NULL
 	,intCreatedUserId INT NOT NULL
 	,dtmLastModified DATETIME NOT NULL
