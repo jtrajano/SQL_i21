@@ -40,6 +40,7 @@ namespace iRely.Inventory.BusinessLayer
                     strReceiptType = p.strReceiptType,
                     strVendorName = p.vyuAPVendor.strName,
                     strLocationName = p.tblSMCompanyLocation.strLocationName,
+                    strBillOfLading = p.strBillOfLading,
                     dtmReceiptDate = p.dtmReceiptDate,
                     ysnPosted = p.ysnPosted ?? false
                 })

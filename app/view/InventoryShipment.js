@@ -1861,6 +1861,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                         itemId: 'colRate',
                                                         text: 'Rate',
                                                         flex: 1,
+                                                        format: '0,000.000000',
                                                         editor: {
                                                             xtype: 'numericfield'
                                                         }

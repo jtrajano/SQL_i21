@@ -17,6 +17,7 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 {dataIndex: 'strReceiptType', text: 'Receipt Type', flex: 1, dataType: 'string'},
                 {dataIndex: 'strVendorName', text: 'Vendor Name', flex: 1, dataType: 'string'},
                 {dataIndex: 'strLocationName', text: 'Location Name', flex: 1, dataType: 'string'},
+                {dataIndex: 'strBillOfLading', text: 'Bill Of Lading No', flex: 1, dataType: 'string'},
                 {dataIndex: 'ysnPosted', text: 'Posted', flex: 1, dataType: 'boolean', xtype: 'checkcolumn'}
             ]
         },
@@ -32,9 +33,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
             },
             btnUndo: {
                 disabled: '{current.ysnPosted}'
-            },
-            btnRecap: {
-                hidden: '{checkTransportPosting}'
             },
             btnReceive: {
                 text: '{getReceiveButtonText}',
@@ -1553,8 +1551,13 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 strTransactionId: currentRecord.get('strReceiptNumber'),
                 ysnPosted: currentRecord.get('ysnPosted'),
                 scope: me,
-                success: function(){
+                success: function() {
                     // If data is generated, show the recap screen.
+                    var showPostButton = true;
+                    if (currentRecord.get('intSourceType') === 3){
+                        showPostButton = false;
+                    }
+
                     CashManagement.common.BusinessRules.showRecap({
                         strTransactionId: currentRecord.get('strReceiptNumber'),
                         ysnPosted: currentRecord.get('ysnPosted'),
@@ -1562,10 +1565,12 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         strCurrencyId: currency,
                         dblExchangeRate: 1,
                         scope: me,
-                        postCallback: function(){
+                        showPostButton: showPostButton,
+                        showUnpostButton: showPostButton,
+                        postCallback: function () {
                             me.onReceiveClick(recapButton);
                         },
-                        unpostCallback: function(){
+                        unpostCallback: function () {
                             me.onReceiveClick(recapButton);
                         }
                     });
@@ -1921,6 +1926,8 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                         current.set('strOwnershipType', 'Own');
                         current.set('intStorageLocationId', po.get('intStorageLocationId'));
                         current.set('strStorageLocationName', po.get('strStorageLocationName'));
+                        current.set('intSubLocationId', po.get('intCompanyLocationSubLocationId'));
+                        current.set('strSubLocationName', po.get('strSubLocationName'));
                         current.set('dblItemUOMConvFactor', po.get('dblItemUOMCF'));
                         current.set('dblOrderUOMConvFactor', po.get('dblItemUOMCF'));
                         current.set('strUnitType', po.get('strStockUOMType'));
@@ -2283,10 +2290,6 @@ Ext.define('Inventory.view.InventoryReceiptViewController', {
                 },{
                     column: 'ysnAllowedToShow',
                     value: true,
-                    conjunction: 'and'
-                },{
-                    column: 'intCompanyLocationId',
-                    value: win.viewModel.data.current.get('intLocationId'),
                     conjunction: 'and'
                 }]
             })
