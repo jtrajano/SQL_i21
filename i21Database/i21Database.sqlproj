@@ -2536,7 +2536,6 @@
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationDetail.sql" />
     <Build Include="dbo\Views\vyuHDSMModuleMap.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFGetScheduleGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportSimultaneous.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportSimultaneousDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFCreateWorkOrder.sql" />
@@ -2549,6 +2548,9 @@
     <Build Include="dbo\Tables\tblPATIssueStock.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntityEmployee.sql" />
     <Build Include="dbo\Tables\tblSMConnectedUser.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetScheduleGroupDetailDesc.sql" />
+    <Build Include="dbo\Views\vyuMFGetChangeOverGroup.sql" />
+    <Build Include="dbo\Stored Procedures\uspARDuplicateCommissionPlan.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2609,6 +2611,7 @@
     <None Include="Scripts\Post-Deployment\ST\1_FileFieldMapping_PricebookSale.sql" />
     <None Include="Scripts\Post-Deployment\IC\13_MoveCommodityAttributes.sql" />
     <None Include="Scripts\Post-Deployment\Common\ErrorMessages.sql" />
+    <None Include="i21Database_1.publish.xml" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

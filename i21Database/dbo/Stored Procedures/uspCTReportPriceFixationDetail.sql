@@ -28,7 +28,7 @@ BEGIN TRY
 			MO.strFutureMonth,
 			PD.intNoOfLots,
 			LTRIM(PD.dblFutures) + ' ' + CY.strCurrency + ' per ' + CM.strUnitMeasure strPrice,
-			'' AS strNotes
+			PD.strNotes
 	
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTPriceFixationDetail	PD	ON	PD.intPriceFixationId			=	PF.intPriceFixationId

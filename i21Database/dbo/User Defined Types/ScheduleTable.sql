@@ -32,4 +32,5 @@
 	,intConcurrencyId INT
 	,strWIPItemNo nvarchar(50)
 	,strPackName nvarchar(50)
+	,ysnPicked bit
 )

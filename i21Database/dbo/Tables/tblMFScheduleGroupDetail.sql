@@ -8,5 +8,5 @@
 	,dtmLastModified datetime NULL CONSTRAINT DF_tblMFScheduleGroupDetail_dtmLastModified DEFAULT GetDate()
 	,intConcurrencyId	INT CONSTRAINT [DF_tblMFScheduleGroupDetail_intConcurrencyId] DEFAULT 0
 	,CONSTRAINT PK_tblMFScheduleGroupDetail_intScheduleGroupDetailId PRIMARY KEY (intScheduleGroupDetailId)
-	,CONSTRAINT FK_tblMFScheduleGroupDetail_tblMFScheduleGroup_intScheduleGroupId FOREIGN KEY (intScheduleGroupId) REFERENCES tblMFScheduleGroup(intScheduleGroupId)
+	,CONSTRAINT FK_tblMFScheduleGroupDetail_tblMFScheduleGroup_intScheduleGroupId FOREIGN KEY (intScheduleGroupId) REFERENCES tblMFScheduleGroup(intScheduleGroupId) ON DELETE CASCADE
 	)
