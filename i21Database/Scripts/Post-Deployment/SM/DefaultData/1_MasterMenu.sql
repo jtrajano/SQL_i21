@@ -3087,6 +3087,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Issue Sto
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Patronage.view.IssueStock' WHERE strMenuName = 'Issue Stock' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Estate/Corporation' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Estate/Corporation', N'Patronage', @PatronageParentMenuId, N'Estate/Corporation', N'Maintenance', N'Screen', N'Patronage.view.EstateCorporation', N'small-menu-maintenance', 0, 0, 0, 1, 4, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Patronage.view.EstateCorporation' WHERE strMenuName = 'Estate/Corporation' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageParentMenuId
+
 GO
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------- ADJUST uspSMSortOriginMenus' sorting -------------------------------------------------------
