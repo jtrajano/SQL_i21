@@ -20,8 +20,8 @@ Type the overview for the table here.
 		[intUnitMeasureId] INT NULL DEFAULT ((0)) ,
 		[intSort] INT NULL DEFAULT ((0)),
 		[intConcurrencyId] INT NULL DEFAULT ((0)), 
-		CONSTRAINT [PK_tblICPatronageCategory] PRIMARY KEY ([intPatronageCategoryId]), 
-		CONSTRAINT [AK_tblICPatronageCategory_strCategoryCode] UNIQUE ([strCategoryCode]) 
+		CONSTRAINT [PK_tblPATPatronageCategory] PRIMARY KEY ([intPatronageCategoryId]), 
+		CONSTRAINT [AK_tblPATPatronageCategory_strCategoryCode] UNIQUE ([strCategoryCode])
 	)
 
 	GO
