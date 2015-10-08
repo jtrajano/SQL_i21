@@ -2551,6 +2551,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetScheduleGroupDetailDesc.sql" />
     <Build Include="dbo\Views\vyuMFGetChangeOverGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspARDuplicateCommissionPlan.sql" />
+    <Build Include="dbo\Tables\tblGLOriginAccounts.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
