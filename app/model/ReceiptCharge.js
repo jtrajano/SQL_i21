@@ -107,11 +107,11 @@ Ext.define('Inventory.model.ReceiptCharge', {
             this.get('intEntityVendorId') !== ReceiptVendorId) {
             errors.add({
                 field: 'ysnAccrue',
-                message: this.get('strItemNo') + ' is shouldered by the receipt vendor and can\'t be added to the item cost.<br>Please correct accrue or inventory cost checkbox.'
+                message: this.get('strItemNo') + ' is shouldered by the receipt vendor and can\'t be added to the item cost.<br>Please correct price or inventory cost checkbox.'
             })
             errors.add({
                 field: 'ysnInventoryCost',
-                message: this.get('strItemNo') + ' is shouldered by the receipt vendor and can\'t be added to the item cost.<br>Please correct accrue or inventory cost checkbox.'
+                message: this.get('strItemNo') + ' is shouldered by the receipt vendor and can\'t be added to the item cost.<br>Please correct price or inventory cost checkbox.'
             })
         }
         if (this.get('ysnInventoryCost') === true &&
@@ -120,11 +120,11 @@ Ext.define('Inventory.model.ReceiptCharge', {
             iRely.Functions.isEmpty(this.get('intEntityVendorId')) === true) {
             errors.add({
                 field: 'ysnAccrue',
-                message: this.get('strItemNo') + ' is shouldered by the receipt vendor and can\'t be added to the item cost.<br>Please correct accrue or inventory cost checkbox.'
+                message: this.get('strItemNo') + ' is shouldered by the receipt vendor and can\'t be added to the item cost.<br>Please correct price or inventory cost checkbox.'
             })
             errors.add({
                 field: 'ysnInventoryCost',
-                message: this.get('strItemNo') + ' is shouldered by the receipt vendor and can\'t be added to the item cost.<br>Please correct accrue or inventory cost checkbox.'
+                message: this.get('strItemNo') + ' is shouldered by the receipt vendor and can\'t be added to the item cost.<br>Please correct price or inventory cost checkbox.'
             })
         }
 
