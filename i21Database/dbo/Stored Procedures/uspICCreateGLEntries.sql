@@ -75,6 +75,7 @@ END
 ;
 
 -- Check for missing Contra-Account Id
+IF @AccountCategory_ContraInventory IS NOT NULL 
 BEGIN 
 	SET @strItemNo = NULL
 	SET @intItemId = NULL
@@ -84,13 +85,10 @@ BEGIN
 			,@strItemNo = Item.strItemNo
 	FROM	dbo.tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
 				ON Item.intItemId = ItemGLAccount.intItemId
-			--INNER JOIN dbo.tblICInventoryTransactionType TransactionTypes
-			--	ON ItemGLAccount.intTransactionTypeId = TransactionTypes.intTransactionTypeId
 			LEFT JOIN dbo.tblICInventoryTransactionWithNoCounterAccountCategory ExemptedList
 				ON ItemGLAccount.intTransactionTypeId = ExemptedList.intTransactionTypeId
 	WHERE	ItemGLAccount.intContraInventoryId IS NULL 			
 			AND ExemptedList.intTransactionTypeId IS NULL 
-			--AND TransactionTypes.strName NOT IN ('Build Assembly','Consume','Produce') -- and it is not in the exempted list. 
 			
 	IF @intItemId IS NOT NULL 
 	BEGIN 
