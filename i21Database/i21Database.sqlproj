@@ -2347,6 +2347,14 @@
     <Build Include="dbo\Views\vyuARUndepositedPayment.sql" />
     <Build Include="dbo\Tables\tblPREmployeeEarningDistribution.sql" />
     <None Include="Scripts\Post-Deployment\PR\DataFixes\AddDefaultEmployeeEarningDistribution.sql" />
+    <Build Include="dbo\Views\vyuGRGetVendors.sql" />
+    <Build Include="dbo\Views\vyuGRGetSettleItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRProcessSettleStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCreateInvReceiptBySettle.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMCheckIfOriginVendor.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetGLStatus.sql" />
+    <Build Include="dbo\Functions\fnAPValidateRecapBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspICErrorMessages.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
