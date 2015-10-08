@@ -14,7 +14,7 @@ AS
 		I.intAccountId,
 		I.dtmDate,
 		I.dtmDueDate, 
-		I.dtmPostDate,
+		(CASE WHEN I.ysnPosted = 0 THEN NULL ELSE I.dtmPostDate END) AS dtmPostDate,
 		I.dtmShipDate,
 		I.ysnPosted, 
 		I.ysnPaid, 
