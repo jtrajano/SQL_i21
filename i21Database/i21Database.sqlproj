@@ -2360,6 +2360,7 @@
     <Build Include="dbo\Stored Procedures\uspEMCheckIfOriginVendor.sql" />
     <Build Include="dbo\Stored Procedures\uspGLGetGLStatus.sql" />
     <Build Include="dbo\Functions\fnAPValidateRecapBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspICErrorMessages.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

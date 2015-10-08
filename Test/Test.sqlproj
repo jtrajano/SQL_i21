@@ -866,6 +866,8 @@
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseConsignedSaleQty for decrease in consigned sale qty.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseConsignedSaleQty for decrease in consigned sale qty on multiple items.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseOnOrderQty for invalid item location.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptOtherCharges for ysnPrice scenario 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptOtherCharges for ysnPrice scenario 2.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">
