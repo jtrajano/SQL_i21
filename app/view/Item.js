@@ -37,7 +37,6 @@ Ext.define('Inventory.view.Item', {
         'Ext.form.field.Checkbox',
         'Ext.form.field.Date',
         'Ext.grid.column.Date',
-        'Ext.grid.feature.Summary',
         'Ext.toolbar.Paging'
     ],
 
@@ -550,16 +549,9 @@ Ext.define('Inventory.view.Item', {
                                                             {
                                                                 xtype: 'button',
                                                                 tabIndex: -1,
-                                                                itemId: 'btnCategoryUOM',
+                                                                itemId: 'btnLoadUOM',
                                                                 iconCls: 'small-download',
-                                                                text: 'Category UOM'
-                                                            },
-                                                            {
-                                                                xtype: 'button',
-                                                                tabIndex: -1,
-                                                                itemId: 'btnCommodityUOM',
-                                                                iconCls: 'small-download',
-                                                                text: 'Commodity UOM'
+                                                                text: 'Load UOM'
                                                             },
                                                             {
                                                                 xtype: 'tbseparator'
@@ -4618,7 +4610,6 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
-                                                        summaryType: 'sum',
                                                         itemId: 'colStockOnOrder',
                                                         width: 100,
                                                         align: 'right',
@@ -4626,7 +4617,6 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
-                                                        summaryType: 'sum',
                                                         itemId: 'colStockInTransitInbound',
                                                         width: 120,
                                                         align: 'right',
@@ -4634,7 +4624,6 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
-                                                        summaryType: 'sum',
                                                         itemId: 'colStockOnHand',
                                                         width: 100,
                                                         align: 'right',
@@ -4642,7 +4631,6 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
-                                                        summaryType: 'sum',
                                                         itemId: 'colStockInTransitOutbound',
                                                         width: 130,
                                                         align: 'right',
@@ -4650,7 +4638,6 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
-                                                        summaryType: 'sum',
                                                         itemId: 'colStockBackOrder',
                                                         width: 100,
                                                         align: 'right',
@@ -4658,7 +4645,6 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
-                                                        summaryType: 'sum',
                                                         itemId: 'colStockCommitted',
                                                         width: 100,
                                                         align: 'right',
@@ -4666,7 +4652,6 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
-                                                        summaryType: 'sum',
                                                         itemId: 'colStockOnStorage',
                                                         width: 100,
                                                         align: 'right',
@@ -4674,7 +4659,6 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
-                                                        summaryType: 'sum',
                                                         itemId: 'colStockConsignedPurchase',
                                                         width: 140,
                                                         align: 'right',
@@ -4682,7 +4666,6 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
-                                                        summaryType: 'sum',
                                                         itemId: 'colStockConsignedSale',
                                                         width: 130,
                                                         align: 'right',
@@ -4690,7 +4673,6 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
-                                                        summaryType: 'sum',
                                                         itemId: 'colStockReserved',
                                                         width: 100,
                                                         align: 'right',
@@ -4698,7 +4680,6 @@ Ext.define('Inventory.view.Item', {
                                                     },
                                                     {
                                                         xtype: 'numbercolumn',
-                                                        summaryType: 'sum',
                                                         itemId: 'colStockAvailable',
                                                         width: 100,
                                                         align: 'right',
@@ -4710,13 +4691,7 @@ Ext.define('Inventory.view.Item', {
                                                 },
                                                 selModel: Ext.create('Ext.selection.CheckboxModel', {
                                                     selType: 'checkboxmodel'
-                                                }),
-                                                features: [
-                                                    {
-                                                        ftype: 'summary',
-                                                        dock: 'bottom'
-                                                    }
-                                                ]
+                                                })
                                             }
                                         ]
                                     },
