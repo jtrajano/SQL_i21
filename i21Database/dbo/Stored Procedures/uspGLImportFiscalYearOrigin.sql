@@ -409,5 +409,14 @@ intGLFiscalYearPeriodId
 ,ysnOpen
 ,intConcurrencyId
 from tempFiscalyearDetail
+
+update tblGLFiscalYearPeriod
+set ysnAPOpen = 0
+,ysnAROpen  = 0
+,ysnINVOpen  = 0
+,ysnCMOpen = 0 
+,ysnPROpen = 0
+where intFiscalYearId in (select intFiscalYearId from tblGLFiscalYear where  ysnStatus = 0 )
+
 SET IDENTITY_INSERT tblGLFiscalYearPeriod OFF
 END
