@@ -76,50 +76,49 @@ BEGIN
 				DECLARE @primarylen INT
 				SELECT @primarylen  = max(len(glact_acct1_8))from glactmst 
 
-				DELETE FROM [tblGLOriginAccounts]
-				
-				INSERT INTO [dbo].[tblGLOriginAccounts]
-					   ([glact_acct1_8]
-					   ,[glact_acct9_16]
-					   ,[glact_desc]
-					   ,[glact_type]
-					   ,[glact_normal_value]
-					   ,[glact_saf_cat]
-					   ,[glact_flow_cat]
-					   ,[glact_uom]
-					   ,[glact_verify_flag]
-					   ,[glact_active_yn]
-					   ,[glact_sys_acct_yn]
-					   ,[glact_desc_lookup]
-					   ,[glact_user_fld_1]
-					   ,[glact_user_fld_2]
-					   ,[glact_user_id]
-					   ,[glact_user_rev_dt]
-					   ,[glact_acct1_8_new]
-					   ,A4GLIdentity
-					   )
-				SELECT [glact_acct1_8]
-					   ,[glact_acct9_16]
-					   ,[glact_desc]
-					   ,[glact_type]
-					   ,[glact_normal_value]
-					   ,[glact_saf_cat]
-					   ,[glact_flow_cat]
-					   ,[glact_uom]
-					   ,[glact_verify_flag]
-					   ,[glact_active_yn]
-					   ,[glact_sys_acct_yn]
-					   ,[glact_desc_lookup]
-					   ,[glact_user_fld_1]
-					   ,[glact_user_fld_2]
-					   ,[glact_user_id]
-					   ,[glact_user_rev_dt]
-					   ,0
-					   ,A4GLIdentity
-						FROM glactmst
-				
-
+					INSERT INTO [dbo].[tblGLOriginAccounts]
+						   ([glact_acct1_8]
+						   ,[glact_acct9_16]
+						   ,[glact_desc]
+						   ,[glact_type]
+						   ,[glact_normal_value]
+						   ,[glact_saf_cat]
+						   ,[glact_flow_cat]
+						   ,[glact_uom]
+						   ,[glact_verify_flag]
+						   ,[glact_active_yn]
+						   ,[glact_sys_acct_yn]
+						   ,[glact_desc_lookup]
+						   ,[glact_user_fld_1]
+						   ,[glact_user_fld_2]
+						   ,[glact_user_id]
+						   ,[glact_user_rev_dt]
+						   ,[glact_acct1_8_new]
+						   ,A4GLIdentity
+						   )
+					SELECT [glact_acct1_8]
+						   ,[glact_acct9_16]
+						   ,[glact_desc]
+						   ,[glact_type]
+						   ,[glact_normal_value]
+						   ,[glact_saf_cat]
+						   ,[glact_flow_cat]
+						   ,[glact_uom]
+						   ,[glact_verify_flag]
+						   ,[glact_active_yn]
+						   ,[glact_sys_acct_yn]
+						   ,[glact_desc_lookup]
+						   ,[glact_user_fld_1]
+						   ,[glact_user_fld_2]
+						   ,[glact_user_id]
+						   ,[glact_user_rev_dt]
+						   ,0
+						   ,A4GLIdentity
+							FROM glactmst
+						WHERE A4GLIdentity NOT IN (SELECT A4GLIdentity FROM [tblGLOriginAccounts])
 				UPDATE [tblGLOriginAccounts] set glact_acct1_8_new =  cast(glact_acct1_8  as varchar) + replicate(''0'',@primarylen-len( glact_acct1_8))
+
+				
 				IF ((SELECT COUNT(*) FROM (SELECT DISTINCT(LEN(glact_acct1_8)) AS SegmentCode FROM glactmst) tblSegment) > 1 and @ysnOverride = 0)
 				BEGIN
 					
@@ -132,7 +131,7 @@ BEGIN
 					WHERE a.glact_acct1_8_new <> a.glact_acct1_8
 					IF EXISTS(SELECT TOP 1 1 FROM @tbl)
 					BEGIN
-						SET @result = ''invalid-2''
+						SET @result = ''invalid-2,'' + cast(  @primarylen as varchar)
 						COMMIT TRANSACTION
 						RETURN
 					END
