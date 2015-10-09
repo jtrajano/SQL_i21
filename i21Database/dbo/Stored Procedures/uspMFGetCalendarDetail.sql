@@ -20,6 +20,10 @@ BEGIN
 		,@dtmHolidayFromDate DATETIME
 		,@dtmHolidayToDate DATETIME
 		,@strMachineName1 NVARCHAR(MAX)
+		,@dtmFromDate1 DATETIME
+
+		Select @dtmFromDate1=@dtmFromDate
+
 	DECLARE @tblMFHolidayCalendar TABLE (dtmHolidayDate DATETIME)
 	DECLARE @tblMFHoliday TABLE (
 		intHolidayId INT
@@ -288,7 +292,7 @@ BEGIN
 		JOIN dbo.tblMFScheduleCalendarMachineDetail MD ON MD.intCalendarDetailId = CD.intCalendarDetailId
 		JOIN dbo.tblMFMachine M ON M.intMachineId = MD.intMachineId
 		JOIN dbo.tblMFManufacturingCell MC on MC.intManufacturingCellId =C.intManufacturingCellId 
-		WHERE CD.dtmCalendarDate BETWEEN @dtmFromDate AND @dtmToDate 
+		WHERE CD.dtmCalendarDate BETWEEN @dtmFromDate1 AND @dtmToDate 
 		AND M.intMachineId IN (
 			SELECT Item
 			FROM dbo.fnSplitString(@strMachineId, ',')
