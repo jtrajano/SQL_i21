@@ -2361,6 +2361,7 @@
     <Build Include="dbo\Stored Procedures\uspGLGetGLStatus.sql" />
     <Build Include="dbo\Functions\fnAPValidateRecapBill.sql" />
     <Build Include="dbo\Stored Procedures\uspICErrorMessages.sql" />
+    <Build Include="dbo\Views\vyuTRTansportLoad.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
