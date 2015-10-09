@@ -2570,6 +2570,7 @@
     <Build Include="dbo\Stored Procedures\uspMFStageKit.sql" />
     <Build Include="dbo\Stored Procedures\uspMFValidateTransferKit.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetPickListAvailableLots.sql" />
+    <Build Include="dbo\Views\vyuGLAccountDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
