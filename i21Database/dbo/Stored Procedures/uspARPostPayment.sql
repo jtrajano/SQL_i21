@@ -509,48 +509,95 @@ SET @batchIdUsed = @batchId
 					AND C.ysnPaid = 0 
 					AND C.dblAmountDue + C.dblDiscount < (B.dblPayment + B.dblDiscount)
 					
-				INSERT INTO
-					@ARReceivableInvalidData
-				SELECT 
-					'Payment on ' + C.strInvoiceNumber + ' is over the transaction''s amount due'
-					,'Receivable'
-					,A.strRecordNumber
-					,@batchId
-					,A.intPaymentId
+				DECLARE @InvoiceIdsForChecking TABLE (
+						intInvoiceId int PRIMARY KEY,
+						UNIQUE (intInvoiceId)
+					);
+
+				INSERT INTO @InvoiceIdsForChecking(intInvoiceId)
+				SELECT DISTINCT
+					PD.intInvoiceId 
 				FROM
-					tblARPayment A
-				INNER JOIN
-					tblARPaymentDetail B
-						ON A.intPaymentId = B.intPaymentId
-				INNER JOIN
-					tblARInvoice C
-						ON B.intInvoiceId = C.intInvoiceId
+					tblARPaymentDetail PD 
 				INNER JOIN
 					@ARReceivablePostData P
-						ON A.intPaymentId = P.intPaymentId
-				INNER JOIN
-					(
-						SELECT 
-							 MIN(PD.intPaymentId) AS intPaymentId
-							,PD.intInvoiceId	
-						FROM
-							tblARPaymentDetail PD
-						INNER JOIN
-							tblARInvoice I
-								ON PD.intInvoiceId = I.intInvoiceId
-						WHERE
-							PD.dblPayment <> 0
-						GROUP BY
-							PD.intInvoiceId 
-						HAVING
-							COUNT(PD.intInvoiceId) > 1
-							AND MAX(I.dblAmountDue) < (MAX(I.dblInvoiceTotal) - (SUM(PD.dblPayment) + SUM(PD.dblDiscount)))
-					) I
-						ON C.intInvoiceId = I.intInvoiceId 
+						ON PD.intPaymentId = P.intPaymentId
 				WHERE
-					B.dblPayment <> 0
-					AND A.intPaymentId <> I.intPaymentId 
-																
+					PD.dblPayment <> 0
+				GROUP BY
+					PD.intInvoiceId
+				HAVING
+					COUNT(PD.intInvoiceId) > 1
+					
+				WHILE(EXISTS(SELECT TOP 1 NULL FROM @InvoiceIdsForChecking))
+				BEGIN
+					DECLARE @InvID INT			
+							,@InvoicePayment NUMERIC(18,6) = 0
+							
+					SELECT TOP 1 @InvID = intInvoiceId FROM @InvoiceIdsForChecking
+					
+					DECLARE @InvoicePaymentDetail TABLE(
+						intPaymentId INT,
+						intInvoiceId INT,
+						dblInvoiceTotal NUMERIC(18,6),
+						dblAmountDue NUMERIC(18,6),
+						dblPayment NUMERIC(18,6)
+					);
+					
+					INSERT INTO @InvoicePaymentDetail(intPaymentId, intInvoiceId, dblInvoiceTotal, dblAmountDue, dblPayment)
+					SELECT
+						 A.intPaymentId
+						,C.intInvoiceId
+						,C.dblInvoiceTotal
+						,C.dblAmountDue
+						,B.dblPayment 
+					FROM
+						tblARPayment A
+					INNER JOIN
+						tblARPaymentDetail B
+							ON A.intPaymentId = B.intPaymentId
+					INNER JOIN
+						tblARInvoice C
+							ON B.intInvoiceId = C.intInvoiceId
+					INNER JOIN
+						@ARReceivablePostData P
+							ON A.intPaymentId = P.intPaymentId
+							
+					WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicePaymentDetail)
+					BEGIN
+						DECLARE @PayID INT
+								,@AmountDue NUMERIC(18,6) = 0
+						SELECT TOP 1 @PayID = intPaymentId, @AmountDue = dblAmountDue, @InvoicePayment = @InvoicePayment + dblPayment FROM @InvoicePaymentDetail ORDER BY intPaymentId
+						
+						IF @AmountDue < @InvoicePayment
+						BEGIN
+							INSERT INTO
+									@ARReceivableInvalidData
+								SELECT 
+									'Payment on ' + C.strInvoiceNumber + ' is over the transaction''s amount due'
+									,'Receivable'
+									,A.strRecordNumber
+									,@batchId
+									,A.intPaymentId
+								FROM
+									tblARPayment A
+								INNER JOIN
+									tblARPaymentDetail B
+										ON A.intPaymentId = B.intPaymentId
+								INNER JOIN
+									tblARInvoice C
+										ON B.intInvoiceId = C.intInvoiceId
+								INNER JOIN
+									@ARReceivablePostData P
+										ON A.intPaymentId = P.intPaymentId
+								WHERE
+									C.intInvoiceId = @InvID
+									AND A.intPaymentId = @PayID
+						END									
+						DELETE FROM @InvoicePaymentDetail WHERE intPaymentId = @PayID	
+					END
+					DELETE FROM @InvoiceIdsForChecking WHERE intInvoiceId = @InvID							
+				END		 																
 			END
 
 		--UNPOSTING VALIDATIONS
