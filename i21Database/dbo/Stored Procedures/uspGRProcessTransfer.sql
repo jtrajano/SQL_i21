@@ -324,7 +324,7 @@ BEGIN TRY
 					,[intDiscountScheduleId]
 					,[dblTotalPriceShrink]
 					,[dblTotalWeightShrink]
-					,[dblOriginalBalance]
+					,@UnitsToReduce
 					,@UnitsToReduce
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
@@ -477,7 +477,7 @@ BEGIN TRY
 					,[intDiscountScheduleId]
 					,[dblTotalPriceShrink]
 					,[dblTotalWeightShrink]
-					,[dblOriginalBalance]
+					,@UnitsToReduce
 					,@UnitsToReduce
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
@@ -628,7 +628,7 @@ BEGIN TRY
 					,[intDiscountScheduleId]
 					,[dblTotalPriceShrink]
 					,[dblTotalWeightShrink]
-					,[dblOriginalBalance]
+					,@UnitsToReduce
 					,@UnitsToReduce
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
@@ -780,7 +780,7 @@ BEGIN TRY
 					,[intDiscountScheduleId]
 					,[dblTotalPriceShrink]
 					,[dblTotalWeightShrink]
-					,[dblOriginalBalance]
+					,@UnitsToReduce
 					,@UnitsToReduce
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
@@ -933,7 +933,7 @@ BEGIN TRY
 					,[intDiscountScheduleId]
 					,[dblTotalPriceShrink]
 					,[dblTotalWeightShrink]
-					,[dblOriginalBalance]
+					,@UnitsToReduce
 					,@UnitsToReduce
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
@@ -1084,7 +1084,7 @@ BEGIN TRY
 					,[intDiscountScheduleId]
 					,[dblTotalPriceShrink]
 					,[dblTotalWeightShrink]
-					,[dblOriginalBalance]
+					,@UnitsToReduce
 					,@UnitsToReduce
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
@@ -1238,7 +1238,7 @@ BEGIN TRY
 					,[intDiscountScheduleId]
 					,[dblTotalPriceShrink]
 					,[dblTotalWeightShrink]
-					,[dblOriginalBalance]
+					,@UnitsToReduce
 					,@UnitsToReduce
 					,[dtmDeliveryDate]
 					,[dtmZeroBalanceDate]
