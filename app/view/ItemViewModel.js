@@ -846,7 +846,6 @@ Ext.define('Inventory.view.ItemViewModel', {
         },
         readOnlyCommodity: function (get) {
             switch (get('current.strType')) {
-                case 'Bundle':
                 case 'Kit':
                 case 'Non-Inventory':
                 case 'Other Charge':
