@@ -150,7 +150,7 @@ ON 1 = 0
 			[dblWeight], 
 			[dblVolume], 
 			[dtmExpectedDate], 
-			[int1099Code], 
+			[int1099Form], 
 			[int1099Category], 
 			[intLineNo]
 		)
