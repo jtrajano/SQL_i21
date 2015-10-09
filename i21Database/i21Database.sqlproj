@@ -2574,6 +2574,7 @@
     <Build Include="dbo\Stored Procedures\uspPATBillToCategoryVolume.sql" />
     <Build Include="dbo\Stored Procedures\uspPATInvoiceToCategoryVolume.sql" />
     <Build Include="dbo\Views\vyuGRStorageSearchView.sql" />
+    <Build Include="dbo\Views\vyuRKGetM2MBasis.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
