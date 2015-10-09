@@ -146,6 +146,8 @@
 :r "..\dbo\Stored Procedures\uspTMUpdateCustomerBudgetOrigin.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateOpenCallEntryView.sql"
 :r "..\dbo\Stored Procedures\uspTMRecreateOpenWorkOrderView.sql"
+:r "..\dbo\Stored Procedures\uspTMRecreateConsumptionSiteSearchView.sql"
+
 
 :r "..\dbo\Functions\fnGetVendorLastName.sql"
 :r "..\dbo\Stored Procedures\uspAPCreateMissingPaymentOfBills.sql"
