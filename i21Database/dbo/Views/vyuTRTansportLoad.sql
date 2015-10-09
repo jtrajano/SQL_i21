@@ -23,7 +23,11 @@ SELECT
 	NULL as dblMargin,	
 	(select  top 1 AR.strName from vyuEMEntity AR where AR.intEntityId = TL.intDriverId) as strDriver,
 	TL.dtmLoadDateTime as dtmDateTime,
-	TL.ysnPosted
+	TL.ysnPosted,
+	(select top 1 IR.strReceiptNumber from tblICInventoryReceipt IR where IR.intInventoryReceiptId = TR.intInventoryReceiptId) as strInventoryReceiptNo,
+	(select top 1 IT.strTransferNo from tblICInventoryTransfer IT where IT.intInventoryTransferId = TR.intInventoryTransferId) as strInventoryTransferNo,
+	NULL as strInvoiceNo
+
 FROM
 	 dbo.tblTRTransportLoad TL
 	JOIN dbo.tblTRTransportReceipt TR
@@ -49,7 +53,10 @@ SELECT
 	(DD.dblPrice - TR.dblUnitCost) as dblMargin,
 	(select  top 1 AR.strName from vyuEMEntity AR where AR.intEntityId = TL.intDriverId) as strDriver,
 	DH.dtmInvoiceDateTime as dtmDateTime,
-	TL.ysnPosted
+	TL.ysnPosted,
+	(select top 1 IR.strReceiptNumber from tblICInventoryReceipt IR where IR.intInventoryReceiptId = TR.intInventoryReceiptId) as strInventoryReceiptNo,
+	(select top 1 IT.strTransferNo from tblICInventoryTransfer IT where IT.intInventoryTransferId = TR.intInventoryTransferId) as strInventoryTransferNo,
+	(select top 1 IV.strInvoiceNumber from tblARInvoice IV where IV.intInvoiceId = DH.intInvoiceId) as  strInvoiceNo
 FROM
 	 dbo.tblTRTransportLoad TL
 	JOIN dbo.tblTRTransportReceipt TR
