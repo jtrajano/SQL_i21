@@ -1565,6 +1565,27 @@ Ext.define('Inventory.view.ItemViewController', {
         if (colLocationCostingMethod) colLocationCostingMethod.renderer = me.CostingMethodRenderer;
     },
 
+    getDefaultUOM: function(win) {
+        var vm = win.getViewModel();
+        var cboCategory = win.down('#cboCategory');
+        var intCategoryId = cboCategory.getValue();
+
+        if (iRely.Functions.isEmpty(intCategoryId) === false){
+            var category = vm.storeInfo.categoryList.findRecord('intCategoryId', intCategoryId);
+            if (category) {
+                var defaultCategoryUOM = category.getDefaultUOM();
+                var defaultUOM = Ext.Array.findBy(vm.data.current.tblICItemUOMs().data.items, function (row) {
+                    if (defaultCategoryUOM.get('intUnitMeasureId') === row.get('intUnitMeasureId')) {
+                        return true;
+                    }
+                });
+                if (defaultUOM) {
+                    win.defaultUOM = defaultUOM;
+                }
+            }
+        }
+    },
+
     onLocationDoubleClick: function(view, record, item, index, e, eOpts){
         var win = view.up('window');
         var me = win.controller;
@@ -1596,6 +1617,8 @@ Ext.define('Inventory.view.ItemViewController', {
         var me = win.controller;
         var vm = win.getViewModel();
 
+        me.getDefaultUOM(win);
+
         if (vm.data.current.phantom === true) {
             win.context.data.saveRecord({ successFn: function(batch, eOpts){
                 me.openItemLocationScreen('new', win);
@@ -1622,6 +1645,8 @@ Ext.define('Inventory.view.ItemViewController', {
             defaultFilters += '&intLocationId<>' + location.get('intLocationId');
         });
 
+        me.getDefaultUOM(win);
+
         var showAddScreen = function() {
             var search = i21.ModuleMgr.Search;
             search.scope = me;
@@ -1646,7 +1671,9 @@ Ext.define('Inventory.view.ItemViewController', {
                         if (!exists) {
                             var newRecord = {
                                 intItemId : location.data.intItemId,
-                                intLocationId : location.data.intLocationId,
+                                intLocationId : location.data.intCompanyLocationId,
+                                intIssueUOMId : win.defaultUOM.get('intItemUOMId'),
+                                intReceiveUOMId : win.defaultUOM.get('intItemUOMId'),
                                 strLocationName : location.data.strLocationName
                             };
                             currentVM.tblICItemLocations().add(newRecord);
@@ -1798,6 +1825,7 @@ Ext.define('Inventory.view.ItemViewController', {
                     }
                 },
                 itemId: current.get('intItemId'),
+                defaultUOM: win.defaultUOM,
                 action: action
             });
         }

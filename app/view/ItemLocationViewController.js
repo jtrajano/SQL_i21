@@ -209,6 +209,7 @@ Ext.define('Inventory.view.ItemLocationViewController', {
 
             var context = me.setupContext( { window : win } );
             me.intItemId = config.param.itemId;
+            me.defaultUOM = config.param.defaultUOM;
             if (config.action === 'new') {
                 context.data.addRecord();
             } else {
@@ -237,6 +238,10 @@ Ext.define('Inventory.view.ItemLocationViewController', {
             record.set('intLocationId', app.DefaultLocation);
         record.set('intCostingMethod', 1);
         record.set('intAllowNegativeInventory', 3);
+        if (iRely.Functions.isEmpty(me.defaultUOM) === false) {
+            record.set('intIssueUOMId', me.defaultUOM.get('intItemUOMId'));
+            record.set('intReceiveUOMId', me.defaultUOM.get('intItemUOMId'));
+        }
         action(record);
     }
 

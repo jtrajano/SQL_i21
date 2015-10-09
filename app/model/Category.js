@@ -55,5 +55,18 @@ Ext.define('Inventory.model.Category', {
     validators: [
         {type: 'presence', field: 'strCategoryCode'},
         {type: 'presence', field: 'intCostingMethod'}
-    ]
+    ],
+
+    getDefaultUOM : function(){
+        //get default uom
+        var uom = Ext.Array.findBy(this.tblICCategoryUOMs().data.items, function(row){
+            return row.get('ysnDefault');
+        });
+
+        if(uom){
+            return uom;
+        }else{
+            return null;
+        }
+    }
 });

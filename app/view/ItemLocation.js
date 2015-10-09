@@ -162,7 +162,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                             itemId: 'pnlGeneral',
                                             margin: '0 0 5 0',
                                             bodyPadding: 5,
-                                            title: 'General',
+                                            title: 'General & Default',
                                             layout: {
                                                 type: 'hbox',
                                                 align: 'stretch'
@@ -286,7 +286,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                             ],
                                                             itemId: 'cboIssueUom',
                                                             margin: '0 5 5 0',
-                                                            fieldLabel: 'Issue UOM',
+                                                            fieldLabel: 'Sale UOM',
                                                             labelWidth: 105,
                                                             displayField: 'strUnitMeasure',
                                                             valueField: 'intItemUOMId'
@@ -416,7 +416,7 @@ Ext.define('Inventory.view.ItemLocation', {
                                                             ],
                                                             flex: 1,
                                                             itemId: 'cboReceiveUom',
-                                                            fieldLabel: 'Receive UOM',
+                                                            fieldLabel: 'Purchase UOM',
                                                             labelWidth: 90,
                                                             displayField: 'strUnitMeasure',
                                                             valueField: 'intItemUOMId'
