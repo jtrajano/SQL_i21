@@ -32,7 +32,7 @@ Join tblICItemUOM iu1 on l.intItemUOMId=iu1.intItemUOMId
 Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
 Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId
 Where l.dblQty>0 and ls.strPrimaryStatus='Active' 
-And l.intLocationId = @intLocationId And l.intParentLotId=@intParentLotId 
+And l.intLocationId = @intLocationId And l.intParentLotId=@intParentLotId And l.intLocationId=@intLocationId  And ISNULL(sl.ysnAllowConsume,0)=1 
 
 Insert into @tblReservedQty
 Select sr.intLotId,Sum(sr.dblQty) AS dblReservedQty 

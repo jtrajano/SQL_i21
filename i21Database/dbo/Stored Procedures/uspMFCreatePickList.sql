@@ -133,10 +133,12 @@ Begin
 
 	Delete From @tblChildLot
 	Insert Into @tblChildLot(intLotId,intStorageLocationId,dblQuantity,intItemUOMId,dblWeightPerUnit)
-	Select l.intLotId,intStorageLocationId,dblWeight,intWeightUOMId,
+	Select l.intLotId,l.intStorageLocationId,l.dblWeight,l.intWeightUOMId,
 	Case When ISNULL(dblWeightPerQty,0)=0 Then 1 Else dblWeightPerQty End
-	from tblICLot l Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId
-	Where l.intParentLotId=@intParentLotId And l.dblWeight > 0 And ls.strPrimaryStatus='Active'
+	from tblICLot l Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId 
+	Join tblICStorageLocation sl on l.intStorageLocationId=sl.intStorageLocationId
+	Where l.intParentLotId=@intParentLotId And l.intLocationId=@intLocationId And l.dblWeight > 0 
+	And ls.strPrimaryStatus='Active' And ISNULL(sl.ysnAllowConsume,0)=1
 
 	Delete From @tblReservedQty
 	Insert @tblReservedQty(intLotId,dblReservedQty)
