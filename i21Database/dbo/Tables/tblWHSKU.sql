@@ -8,6 +8,7 @@
 	[dblQty]	NUMERIC(18,6) NOT NULL,
 	[dtmReceiveDate]	DATETIME,
 	[dtmProductionDate]	DATETIME,
+	[dtmExpiryDate]	DATETIME,
 	[intItemId]	INT NOT NULL,
 	[intContainerId]	INT NOT NULL,
 	[intOwnerId]	INT NOT NULL,
