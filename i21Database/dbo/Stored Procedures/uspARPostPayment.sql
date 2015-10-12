@@ -603,6 +603,44 @@ SET @batchIdUsed = @batchId
 		--UNPOSTING VALIDATIONS
 		IF @post = 0
 			BEGIN
+			
+				--Invoice with Discount
+				INSERT INTO
+					@ARReceivableInvalidData
+				SELECT 
+					'Discount has been applied to Invoice: ' + I.strInvoiceNumber + '. Payment: ' + P1.strRecordNumber + ' must unposted first!'
+					,'Receivable'
+					,P.strRecordNumber
+					,@batchId
+					,P.intPaymentId
+				FROM
+					tblARPaymentDetail PD		
+				INNER JOIN
+					tblARPayment P
+						ON PD.intPaymentId = P.intPaymentId
+				INNER JOIN
+					@ARReceivablePostData P2
+						ON P.intPaymentId = P2.intPaymentId	
+				INNER JOIN
+					tblARInvoice I
+						ON PD.intInvoiceId = I.intInvoiceId
+				INNER JOIN
+					(
+					SELECT
+						I.intInvoiceId
+						,P.intPaymentId
+						,P.strRecordNumber
+					FROM
+						tblARPaymentDetail PD		
+					INNER JOIN	
+						tblARPayment P ON PD.intPaymentId = P.intPaymentId	
+					INNER JOIN	
+						tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
+					WHERE
+						PD.dblDiscount <> 0
+						AND I.dblAmountDue = 0
+					) AS P1
+						ON I.intInvoiceId = P1.intInvoiceId AND P.intPaymentId <> P1.intPaymentId 			
 
 				--Already cleared/reconciled
 				INSERT INTO
