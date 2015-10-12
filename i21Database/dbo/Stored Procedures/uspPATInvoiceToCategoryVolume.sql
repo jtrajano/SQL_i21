@@ -1,9 +1,19 @@
 ﻿CREATE PROCEDURE [dbo].[usp_PATInvoiceToCategoryVolume] 
 	@intEntityCustomerId INT,
 	@intInvoiceId INT,
-	@ysnPosted BIT = NULL
+	@ysnPosted BIT = NULL,
+	@successfulCount INT = 0 OUTPUT,
+	@invalidCount INT = 0 OUTPUT,
+	@success BIT = 0 OUTPUT
 AS
 BEGIN
+
+SET QUOTED_IDENTIFIER OFF
+SET ANSI_NULLS ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+SET ANSI_WARNINGS OFF
+
 	-- VARIABLES NEEDED 
 DECLARE @dtmMembershipDate DATETIME,
 		@intFiscalYear INT,
@@ -68,49 +78,129 @@ DECLARE @dtmMembershipDate DATETIME,
 							@intItemUOM INT,
 							@Ret INT,
 							@TotalUnit NUMERIC(38,6) = 0,
-							@dblUnitQty NUMERIC(38,6)
+							@dblUnitQty NUMERIC(38,6),
+							@ysnStockUnit BIT,
+							@unitMeasureId INT
 
 					SELECT * 
 					  INTO #tempUOM
 					  FROM tblICItemUOM 
 					 WHERE intItemId in (SELECT intItemId FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId)
-					   AND ysnStockUnit = 1
-					
-					DECLARE Cursor_Unit CURSOR FOR 	
-					 SELECT DISTINCT intItemId, intItemUOMId, dblUnitQty FROM #tempUOM
-					   OPEN Cursor_Unit
-					  FETCH NEXT FROM Cursor_Unit into @intItems, @intItemUOM, @dblUnitQty 
-					  WHILE (@@FETCH_STATUS <> -1)
-					  BEGIN
-						IF EXISTS(SELECT * FROM tblICItemUOM WHERE intItemId = @intItems AND intUnitMeasureId = @UOM)
+					   AND intUnitMeasureId = @UOM
+
+					IF EXISTS(SELECT * FROM #tempUOM)
+					BEGIN
+						DECLARE Cursor_Unit CURSOR FOR 	
+						 SELECT DISTINCT intItemId, intItemUOMId, dblUnitQty, ysnStockUnit, @unitMeasureId FROM #tempUOM
+						   OPEN Cursor_Unit
+						  FETCH NEXT FROM Cursor_Unit into @intItems, @intItemUOM, @dblUnitQty, @ysnStockUnit, @unitMeasureId
+						  WHILE (@@FETCH_STATUS <> -1)
+						  BEGIN
+								SET @TotalUnit = @TotalUnit + @dblUnitQty
+								FETCH NEXT FROM Cursor_Unit into @intItems, @intItemUOM, @dblUnitQty, @ysnStockUnit, @unitMeasureId
+						  END
+						CLOSE Cursor_Unit
+						DEALLOCATE Cursor_Unit
+
+						IF EXISTS(SELECT * FROM tblPATCategoryVolume WHERE intCustomerPatronId = @intEntityCustomerId AND intPatronageCategoryId = @intPatronageCategoryId)
 						BEGIN
-							SET @TotalUnit = @TotalUnit + @dblUnitQty
+
+							IF(@ysnPosted = 1)
+							BEGIN
+								UPDATE tblPATCategoryVolume
+								   SET dblVolume = dblVolume + @TotalUnit
+								 WHERE intCustomerPatronId = @intEntityCustomerId
+								   AND intPatronageCategoryId = @intPatronageCategoryId
+							END
+							ELSE
+							BEGIN
+								UPDATE tblPATCategoryVolume
+								   SET dblVolume = dblVolume - @TotalUnit
+								 WHERE intCustomerPatronId = @intEntityCustomerId
+								   AND intPatronageCategoryId = @intPatronageCategoryId
+							END
+						
 						END
 						ELSE
 						BEGIN
-							SET @TotalUnit = @TotalUnit + (SELECT dbo.fnCalculateQtyBetweenUOM(@intItemUOM, @UOM, @dblUnitQty))
+							INSERT INTO tblPATCategoryVolume
+								 VALUES (@intEntityCustomerId, @intPatronageCategoryId, @intFiscalYear, @TotalUnit, 1)
 						END
-							
-					  FETCH NEXT FROM Cursor_Unit into @intItems, @intItemUOM, @dblUnitQty
-					  END
 
-					  CLOSE Cursor_Unit
-				 DEALLOCATE Cursor_Unit
-					
-					IF EXISTS(SELECT * FROM tblPATCategoryVolume WHERE intCustomerPatronId = @intEntityCustomerId AND intPatronageCategoryId = @intPatronageCategoryId)
-					BEGIN
-						UPDATE tblPATCategoryVolume
-						   SET dblVolume = dblVolume + @TotalUnit
-						 WHERE intCustomerPatronId = @intEntityCustomerId
-						   AND intPatronageCategoryId = @intPatronageCategoryId
+						DROP TABLE #tempUOM
 					END
 					ELSE
 					BEGIN
-						INSERT INTO tblPATCategoryVolume
-							 VALUES (@intEntityCustomerId, @intPatronageCategoryId, @intFiscalYear, @TotalUnit, 1)
-					END
+						SELECT * 
+						  INTO #temp
+						  FROM tblICItemUOM 
+						 WHERE intItemId in (SELECT intItemId FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId)
+						   AND ysnStockUnit = 1 AND intUnitMeasureId <> @UOM
 
-					DROP TABLE #tempUOM
+						IF NOT EXISTS(SELECT * FROM #temp)
+						BEGIN
+							RAISERROR('Conversion factor has to be setup between Item UOM and Patronage Category UOM in Inventory UOM maintenance', 16, 1);
+							RETURN;
+						END
+						ELSE
+						BEGIN
+							DECLARE @tempCount INT,
+									@itemCount INT
+									
+								SET @tempCount = (SELECT COUNT(intItemId) FROM #temp)
+								SET @itemCount = (SELECT COUNT(intItemId) FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId)
+
+							IF(@tempCount <> @itemCount)
+							BEGIN
+								RAISERROR('Conversion factor has to be setup between Item UOM and Patronage Category UOM in Inventory UOM maintenance', 16, 1);
+								RETURN;
+							END
+							ELSE
+							BEGIN
+								DECLARE U_Cursor CURSOR FOR 	
+								 SELECT DISTINCT intItemId, intItemUOMId, dblUnitQty, ysnStockUnit, @unitMeasureId FROM #temp
+								   OPEN U_Cursor
+								  FETCH NEXT FROM U_Cursor into @intItems, @intItemUOM, @dblUnitQty, @ysnStockUnit, @unitMeasureId
+								  WHILE (@@FETCH_STATUS <> -1)
+								  BEGIN
+										SELECT DISTINCT intItemId FROM tblICItemUOM WHERE intItemId IN (SELECT intItemId FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId)
+									
+									
+										SET @TotalUnit = @TotalUnit + (SELECT dbo.fnCalculateQtyBetweenUOM(@intItemUOM, @UOM, @dblUnitQty))
+										FETCH NEXT FROM U_Cursor into @intItems, @intItemUOM, @dblUnitQty, @ysnStockUnit, @unitMeasureId
+								  END
+								CLOSE U_Cursor
+								DEALLOCATE U_Cursor
+
+								IF EXISTS(SELECT * FROM tblPATCategoryVolume WHERE intCustomerPatronId = @intEntityCustomerId AND intPatronageCategoryId = @intPatronageCategoryId)
+								BEGIN
+
+									IF(@ysnPosted = 1)
+									BEGIN
+										UPDATE tblPATCategoryVolume
+										   SET dblVolume = dblVolume + @TotalUnit
+										 WHERE intCustomerPatronId = @intEntityCustomerId
+										   AND intPatronageCategoryId = @intPatronageCategoryId
+									END
+									ELSE
+									BEGIN
+										UPDATE tblPATCategoryVolume
+										   SET dblVolume = dblVolume - @TotalUnit
+										 WHERE intCustomerPatronId = @intEntityCustomerId
+										   AND intPatronageCategoryId = @intPatronageCategoryId
+									END
+						
+								END
+								ELSE
+								BEGIN
+									INSERT INTO tblPATCategoryVolume
+										 VALUES (@intEntityCustomerId, @intPatronageCategoryId, @intFiscalYear, @TotalUnit, 1)
+								END
+							END
+
+							DROP TABLE #temp
+						END	
+					END
 				END
 				ELSE
 				BEGIN
@@ -119,10 +209,22 @@ DECLARE @dtmMembershipDate DATETIME,
 
 					IF EXISTS(SELECT * FROM tblPATCategoryVolume WHERE intCustomerPatronId = @intEntityCustomerId AND intPatronageCategoryId = @intPatronageCategoryId)
 					BEGIN
-						UPDATE tblPATCategoryVolume
-						   SET dblVolume = (dblVolume + @Total)
-						 WHERE intCustomerPatronId = @intEntityCustomerId
-						   AND intPatronageCategoryId = @intPatronageCategoryId
+						
+						IF(@ysnPosted = 1)
+						BEGIN
+							UPDATE tblPATCategoryVolume
+							   SET dblVolume = (dblVolume + @Total)
+							 WHERE intCustomerPatronId = @intEntityCustomerId
+							   AND intPatronageCategoryId = @intPatronageCategoryId
+						END
+						ELSE
+						BEGIN
+							UPDATE tblPATCategoryVolume
+							   SET dblVolume = (dblVolume - @Total)
+							 WHERE intCustomerPatronId = @intEntityCustomerId
+							   AND intPatronageCategoryId = @intPatronageCategoryId
+						END
+
 					END
 					ELSE
 						INSERT INTO tblPATCategoryVolume
@@ -132,6 +234,6 @@ DECLARE @dtmMembershipDate DATETIME,
 		END
 		DROP TABLE #tempTable
 END
-
-
 GO
+
+
