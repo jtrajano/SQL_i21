@@ -80,6 +80,7 @@
     <Folder Include="Scripts\Pre-Deployment\5_CM\6_GL" />
     <Folder Include="Scripts\Pre-Deployment\3_DB\" />
     <Folder Include="Scripts\Pre-Deployment\6_GL\" />
+    <Folder Include="Scripts\Pre-Deployment\16_HD" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\1_DataCleanup.sql" />
@@ -124,6 +125,7 @@
     <None Include="Scripts\Pre-Deployment\12_EM\11_AvoidCustomerTransportSupplierIdConflict.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\UpdatePaymentMethod.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\12_EntityEmployeeSchemaUpdate.sql" />
+    <None Include="Scripts\Pre-Deployment\16_HD\Drop_Constraint.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />
