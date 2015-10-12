@@ -3,7 +3,7 @@ AS
 	SELECT 
 	strKey = C.strEntityNo
 	,strCustomerName = C.strName
-	,strPhone = (CASE WHEN CHARINDEX('x', G.strPhone) > 0 THEN SUBSTRING(SUBSTRING(G.strPhone,1,15), 0, CHARINDEX('x',G.strPhone)) ELSE SUBSTRING(G.strPhone,1,15)END)
+	,strPhone = G.strPhone
 	,intCustomerID = B.intCustomerID 
 	,strDescription = A.strDescription
 	,strLocation = E.strLocationName
@@ -21,6 +21,7 @@ AS
 							AND RTRIM(ISNULL(strSerialNumber,''))<> ''
 						ORDER BY Z.intSiteDeviceID
 						FOR XML PATH ('')) + '#@$',', #@$','')
+	,A.intLocationId
 	FROM tblTMSite A
 	INNER JOIN tblTMCustomer B
 		ON A.intCustomerID = B.intCustomerID
