@@ -562,6 +562,8 @@ SET @batchIdUsed = @batchId
 					INNER JOIN
 						@ARReceivablePostData P
 							ON A.intPaymentId = P.intPaymentId
+					WHERE
+						C.intInvoiceId = @InvID
 							
 					WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicePaymentDetail)
 					BEGIN
@@ -697,7 +699,7 @@ SET @batchIdUsed = @batchId
 						ON A.intPaymentId = P.intPaymentId
 				INNER JOIN
 					tblARInvoice I
-						ON A.strRecordNumber = I.strComments 				
+						ON A.strRecordNumber = I.strComments OR A.intPaymentId = I.intPaymentId 				
 				WHERE
 					I.strTransactionType = 'Overpayment'
 					
@@ -713,7 +715,7 @@ SET @batchIdUsed = @batchId
 						ON A.intPaymentId = P.intPaymentId
 				INNER JOIN
 					tblARInvoice I
-						ON A.strRecordNumber = I.strComments 				
+						ON A.strRecordNumber = I.strComments OR A.intPaymentId = I.intPaymentId 				
 				WHERE
 					I.strTransactionType = 'Prepayment'					
 					
@@ -791,80 +793,104 @@ SET @batchIdUsed = @batchId
 
 	END
 	
+	IF (SELECT COUNT(1) FROM @ARReceivablePostData) > 1
+	BEGIN
+		DECLARE @DiscouuntedInvoices TABLE (
+				intInvoiceId int PRIMARY KEY,
+				UNIQUE (intInvoiceId)
+			);
 
---IF @recap = 1
---BEGIN
---	IF @post = 1
---		BEGIN
---			--+overpayment
---			INSERT INTO
---				@AROverpayment
---			SELECT
---				A.intPaymentId
---			FROM
---				tblARPayment A 
---			INNER JOIN
---				@ARReceivablePostData P
---					ON A.intPaymentId = P.intPaymentId				
---			WHERE
---				(A.dblAmountPaid) > (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId)
---				AND EXISTS(SELECT NULL FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND dblPayment <> 0)
-
-
---			--+prepayment
---			INSERT INTO
---				@ARPrepayment
---			SELECT
---				A.intPaymentId
---			FROM
---				tblARPayment A 
---			INNER JOIN
---				@ARReceivablePostData P
---					ON A.intPaymentId = P.intPaymentId				
---			WHERE
---				(A.dblAmountPaid) <> 0
---				AND ISNULL((SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId), 0) = 0
---				AND NOT EXISTS(SELECT NULL FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND dblPayment <> 0)
-		
---		END
---	ELSE
---		BEGIN
-		
---			---overpayment
---			INSERT INTO
---				@AROverpayment
---			SELECT
---				A.intPaymentId
---			FROM
---				tblARPayment A 
---			INNER JOIN
---				@ARReceivablePostData P
---					ON A.intPaymentId = P.intPaymentId
---			INNER JOIN
---				tblARInvoice I
---					ON A.strRecordNumber = I.strComments 				
---			WHERE
---				I.strTransactionType = 'Overpayment'
-
---			---prepayment
---			INSERT INTO
---				@ARPrepayment
---			SELECT
---				A.intPaymentId
---			FROM
---				tblARPayment A 
---			INNER JOIN
---				@ARReceivablePostData P
---					ON A.intPaymentId = P.intPaymentId
---			INNER JOIN
---				tblARInvoice I
---					ON A.strRecordNumber = I.strComments 				
---			WHERE
---				I.strTransactionType = 'Prepayment'			
---		END
+		INSERT INTO @DiscouuntedInvoices(intInvoiceId)
+		SELECT DISTINCT
+			PD.intInvoiceId 
+		FROM
+			tblARPaymentDetail PD 
+		INNER JOIN
+			@ARReceivablePostData P
+				ON PD.intPaymentId = P.intPaymentId
+		WHERE
+			PD.dblPayment <> 0
+			AND PD.dblDiscount <> 0
+		GROUP BY
+			PD.intInvoiceId
+		HAVING
+			COUNT(PD.intInvoiceId) > 1
 			
---END
-
+		WHILE(EXISTS(SELECT TOP 1 NULL FROM @DiscouuntedInvoices))
+		BEGIN
+			DECLARE @DiscountedInvID INT
+					,@InvoiceDiscount NUMERIC(18,6) = 0
+					,@DicountedInvoiceAmountDue NUMERIC(18,6) = 0
+					,@DicountedInvoicePayment NUMERIC(18,6) = 0	
+					
+			SELECT TOP 1 @DiscountedInvID = intInvoiceId FROM @DiscouuntedInvoices
+			
+			DECLARE @PaymentsWithDiscount TABLE(
+						intPaymentId INT,
+						intPaymentDetailId INT,
+						intInvoiceId INT,
+						dblInvoiceTotal NUMERIC(18,6),
+						dblAmountDue NUMERIC(18,6),
+						dblPayment NUMERIC(18,6),
+						dblDiscount  NUMERIC(18,6)
+					);
+					
+			INSERT INTO @PaymentsWithDiscount(intPaymentId, intPaymentDetailId, intInvoiceId, dblInvoiceTotal, dblAmountDue, dblPayment, dblDiscount)
+			SELECT
+				 A.intPaymentId
+				,B.intPaymentDetailId
+				,C.intInvoiceId
+				,C.dblInvoiceTotal
+				,C.dblAmountDue
+				,B.dblPayment
+				,B.dblDiscount
+			FROM
+				tblARPayment A
+			INNER JOIN
+				tblARPaymentDetail B
+					ON A.intPaymentId = B.intPaymentId
+			INNER JOIN
+				tblARInvoice C
+					ON B.intInvoiceId = C.intInvoiceId
+			INNER JOIN
+				@ARReceivablePostData P
+					ON A.intPaymentId = P.intPaymentId
+			WHERE
+				C.intInvoiceId = @DiscountedInvID
+			ORDER BY
+				P.intPaymentId
+				
+			WHILE EXISTS(SELECT TOP 1 NULL FROM @PaymentsWithDiscount)
+			BEGIN
+				DECLARE @DiscountepPaymetID INT
+						,@DiscountepPaymetDetailID INT
+				SELECT TOP 1 
+					@DiscountepPaymetID = intPaymentId
+					,@DiscountepPaymetDetailID = intPaymentDetailId
+					,@DicountedInvoiceAmountDue = dblAmountDue
+					,@InvoiceDiscount = @InvoiceDiscount + dblDiscount
+					,@DicountedInvoicePayment = @DicountedInvoicePayment + dblPayment 
+				FROM
+					@PaymentsWithDiscount
+				ORDER BY intPaymentId
+				
+				IF @DicountedInvoiceAmountDue <> @DicountedInvoicePayment + @InvoiceDiscount
+				BEGIN
+					UPDATE tblARPaymentDetail
+					SET
+						dblDiscount = 0.00
+					WHERE
+						intPaymentDetailId = @DiscountepPaymetDetailID
+						
+					SET @InvoiceDiscount = 0										
+				END									
+				SET @DicountedInvoiceAmountDue = @DicountedInvoiceAmountDue - (@DicountedInvoicePayment + @InvoiceDiscount)
+				DELETE FROM @PaymentsWithDiscount WHERE intPaymentId = @DiscountepPaymetID	
+			END 						
+			DELETE FROM @DiscouuntedInvoices WHERE intInvoiceId = @DiscountedInvID							
+		END
+	END
+		
 
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
