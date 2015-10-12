@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuARCustomerAgingReport]
 AS
 SELECT A.strCustomerName
+     , A.intEntityCustomerId
 	 , dblCreditLimit = (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
 	 , dblTotalAR = SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit)
 	 , dblFuture = 0
