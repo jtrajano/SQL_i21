@@ -16,7 +16,8 @@ BEGIN TRY
 	DECLARE @ItemStorageSchedule INT	
 	DECLARE @ItemBalance DECIMAL(24,10)
 	DECLARE @TicketNo Nvarchar(20)
-	
+	DECLARE @TransferTicketNumber Nvarchar(20)
+
 	DECLARE @ActionCustomer INT
 		,@Percent DECIMAL(24,10)
 		,@ActionOpenBalance DECIMAL(24,10)
@@ -40,8 +41,7 @@ BEGIN TRY
 	DECLARE @OldTicketMessage NVARCHAR(1000)
 	DECLARE @NewTicketMessage NVARCHAR(1000)
 	DECLARE @UnitsToReduce DECIMAL(18,6)
-	DECLARE @CurrentItemOpenBalance DECIMAL(24,10)
-	DECLARE @ysnUpdateHouseTotal INT
+	DECLARE @CurrentItemOpenBalance DECIMAL(24,10)	
 	DECLARE @intItemId INT
 	DECLARE @intItemLocationId INT
 	DECLARE @intActionLocationId INT
@@ -70,24 +70,24 @@ BEGIN TRY
 		,intCompanyLocationId INT
 	)
 
-	SELECT @UserKey = intCreatedUserId
-		,@ysnUpdateHouseTotal = ysnUpdateHouseTotal
+	SELECT @UserKey = intCreatedUserId		
 		,@ItemEntityid = intItemCustomerId
 		,@ItemCompanyLocationId = intItemLocation
 		,@ActionCompanyLocationId = intActionLocation
 		,@intCommodityId=intCommodityId
+		,@TransferTicketNumber=strTransferTicketNumber
 	FROM OPENXML(@idoc, 'root', 2) WITH 
 	(
-			 intCreatedUserId INT
-			,ysnUpdateHouseTotal INT
+			 intCreatedUserId INT			
 			,intItemCustomerId INT
 			,intItemLocation INT
 			,intActionLocation INT
 			,intCommodityId INT
+			,strTransferTicketNumber NVARCHAR(20)
 	)
 		
 	SELECT @InventoryStockUOM=
-		U1.strUnitMeasure 
+		U1.strSymbol 
 		FROM 
 		tblICCommodity C 
 		JOIN tblICCommodityUnitMeasure U ON U.intCommodityId=C.intCommodityId
@@ -238,7 +238,7 @@ BEGIN TRY
 			
 				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)
 				
-				SET @OldTicketMessage = 'Transferred ' +Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' to '+@ActionCustomerName +' '+@ActionLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ActionStorageTypeDescription
+				SET @OldTicketMessage = 'Transferred ' +Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' to '+@ActionCustomerName +' '+@ActionLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ActionStorageTypeDescription+' ticket '+@TransferTicketNumber
 				
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
@@ -378,7 +378,7 @@ BEGIN TRY
 					,@UnitsToReduce
 					,GETDATE()
 					,NULL 
-					,'Transferred '+Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' FROM '+@ItemLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ItemStorageTypeDescription+' '+@ItemCustomerName
+					,'Transferred '+Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' FROM '+@ItemLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ItemStorageTypeDescription+' '+@ItemCustomerName+' ticket '+@TransferTicketNumber
 					,NULL
 					,'Created by Transfer'
 					,@UserName
@@ -392,7 +392,7 @@ BEGIN TRY
 			
 				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)
 				
-				SET @OldTicketMessage = 'Transferred ' +Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' to '+@ActionCustomerName +' '+@ActionLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ActionStorageTypeDescription
+				SET @OldTicketMessage = 'Transferred ' +Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' to '+@ActionCustomerName +' '+@ActionLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ActionStorageTypeDescription+' ticket '+@TransferTicketNumber
 				
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
@@ -531,7 +531,7 @@ BEGIN TRY
 					,@UnitsToReduce
 					,GETDATE()
 					,NULL
-					,'Transferred '+Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' FROM '+@ItemLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ItemStorageTypeDescription+' '+@ItemCustomerName
+					,'Transferred '+Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' FROM '+@ItemLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ItemStorageTypeDescription+' '+@ItemCustomerName+' ticket '+@TransferTicketNumber
 					,NULL
 					,'Created by Transfer'
 					,@UserName
@@ -544,7 +544,7 @@ BEGIN TRY
 			
 				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)
 				
-				SET @OldTicketMessage = 'Transferred ' +Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' to '+@ActionCustomerName +' '+@ActionLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ActionStorageTypeDescription
+				SET @OldTicketMessage = 'Transferred ' +Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' to '+@ActionCustomerName +' '+@ActionLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ActionStorageTypeDescription+' ticket '+@TransferTicketNumber
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
 				SET dblOpenBalance = dblOpenBalance - @UnitsToReduce
@@ -682,7 +682,7 @@ BEGIN TRY
 					,@UnitsToReduce
 					,GETDATE()
 					,NULL
-					,'Transferred '+Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' FROM '+@ItemLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ItemStorageTypeDescription+' '+@ItemCustomerName
+					,'Transferred '+Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' FROM '+@ItemLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ItemStorageTypeDescription+' '+@ItemCustomerName+' ticket '+@TransferTicketNumber
 					,NULL
 					,'Created by Transfer'
 					,@UserName
@@ -695,7 +695,7 @@ BEGIN TRY
 			
 				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)
 				
-				SET @OldTicketMessage = 'Transferred ' +Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' to '+@ActionCustomerName +' '+@ActionLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ActionStorageTypeDescription
+				SET @OldTicketMessage = 'Transferred ' +Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' to '+@ActionCustomerName +' '+@ActionLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ActionStorageTypeDescription+' ticket '+@TransferTicketNumber
 				---Old Ticket
 				
 				UPDATE tblGRCustomerStorage
@@ -834,7 +834,7 @@ BEGIN TRY
 					,@UnitsToReduce
 					,GETDATE()
 					,NULL
-					,'Transferred '+Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' FROM '+@ItemLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ItemStorageTypeDescription+' '+@ItemCustomerName
+					,'Transferred '+Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' FROM '+@ItemLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ItemStorageTypeDescription+' '+@ItemCustomerName+' ticket '+@TransferTicketNumber
 					,NULL
 					,'Created by Transfer'
 					,@UserName
@@ -848,7 +848,7 @@ BEGIN TRY
 			
 				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)
 				
-				SET @OldTicketMessage = 'Transferred ' +Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' to '+@ActionCustomerName +' '+@ActionLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ActionStorageTypeDescription
+				SET @OldTicketMessage = 'Transferred ' +Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' to '+@ActionCustomerName +' '+@ActionLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ActionStorageTypeDescription+' ticket '+@TransferTicketNumber
 				
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
@@ -987,7 +987,7 @@ BEGIN TRY
 					,@UnitsToReduce
 					,GETDATE()
 					,NULL
-					,'Transferred '+Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' FROM '+@ItemLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ItemStorageTypeDescription+' '+@ItemCustomerName
+					,'Transferred '+Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' FROM '+@ItemLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ItemStorageTypeDescription+' '+@ItemCustomerName+' ticket '+@TransferTicketNumber
 					,NULL
 					,'Created by Transfer'
 					,@UserName
@@ -1000,7 +1000,7 @@ BEGIN TRY
 			
 				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)
 				
-				SET @OldTicketMessage = 'Transferred ' +Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' to '+@ActionCustomerName +' '+@ActionLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ActionStorageTypeDescription
+				SET @OldTicketMessage = 'Transferred ' +Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' to '+@ActionCustomerName +' '+@ActionLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ActionStorageTypeDescription+' ticket '+@TransferTicketNumber
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
 				SET dblOpenBalance = dblOpenBalance - @UnitsToReduce
@@ -1138,7 +1138,7 @@ BEGIN TRY
 					,@UnitsToReduce
 					,GETDATE()
 					,NULL
-					,'Transferred '+Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' FROM '+@ItemLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ItemStorageTypeDescription+' '+@ItemCustomerName
+					,'Transferred '+Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' FROM '+@ItemLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ItemStorageTypeDescription+' '+@ItemCustomerName+' ticket '+@TransferTicketNumber
 					,NULL
 					,'Created by Transfer'
 					,@UserName
@@ -1154,7 +1154,7 @@ BEGIN TRY
 				
 
 				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)
-				SET @OldTicketMessage = 'Transferred ' +Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' to '+@ActionCustomerName +' '+@ActionLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ActionStorageTypeDescription
+				SET @OldTicketMessage = 'Transferred ' +Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' to '+@ActionCustomerName +' '+@ActionLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ActionStorageTypeDescription+' ticket '+@TransferTicketNumber
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
 				SET dblOpenBalance = dblOpenBalance - @UnitsToReduce
@@ -1292,106 +1292,13 @@ BEGIN TRY
 					,@UnitsToReduce
 					,GETDATE()
 					,NULL
-					,'Transferred '+Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' FROM '+@ItemLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ItemStorageTypeDescription+' '+@ItemCustomerName
+					,'Transferred '+Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' FROM '+@ItemLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ItemStorageTypeDescription+' '+@ItemCustomerName+' ticket '+@TransferTicketNumber
 					,NULL
 					,'Created by Transfer'
 					,@UserName
 					)				
 			END
 			
-			IF @ItemCompanyLocationId <> @ActionCompanyLocationId
-			BEGIN
-			
-			SELECT @intItemLocationId = intItemLocationId	FROM tblICItemLocation	
-			WHERE intItemId = @intItemId AND intLocationId = @ItemCompanyLocationId
-			
-				 IF @ysnUpdateHouseTotal = 1---Old Ticket Yes
-				 BEGIN
-					UPDATE tblICItemStock
-					SET dblUnitStorage = dblUnitStorage- @UnitsToReduce
-					WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId
-				 END
-				 ELSE IF @ysnUpdateHouseTotal = 0---Old Ticket No
-				 BEGIN
-					UPDATE tblICItemStock
-					SET dblUnitOnHand = dblUnitOnHand+ @UnitsToReduce
-					WHERE intItemId = @intItemId AND intItemLocationId = @intItemLocationId
-				 END
-				 
-				 ---New Ticket Yes
-				 				 
-				 IF @ysnUpdateHouseTotal = 1
-				 BEGIN
-			
-					IF NOT EXISTS ( SELECT 1 FROM tblICItemLocation WHERE intItemId = @intItemId AND intLocationId = @ActionCompanyLocationId)
-					BEGIN
-					INSERT INTO tblICItemLocation(intItemId,intLocationId,intCostingMethod,intConcurrencyId)
-					SELECT @intItemId,@ActionCompanyLocationId,1,1
-					
-					SET @intActionLocationId= SCOPE_IDENTITY()
-					
-						INSERT INTO tblICItemStock 
-						(
-							 intItemId
-							,intItemLocationId
-							,dblUnitStorage
-							,intConcurrencyId
-						)
-						SELECT @intItemId
-							,@intActionLocationId
-							,@UnitsToReduce
-							,1
-					END
-					ELSE
-					BEGIN
-						SELECT @intActionLocationId = intItemLocationId	FROM tblICItemLocation	
-						WHERE intItemId = @intItemId AND intLocationId = @ActionCompanyLocationId
-						
-						UPDATE tblICItemStock
-						SET dblUnitStorage = dblUnitStorage + @UnitsToReduce						
-						WHERE intItemId = @intItemId AND intItemLocationId = @intActionLocationId
-					
-					END
-					
-				 END
-				 
-				 --New Ticket No
-				 IF @ysnUpdateHouseTotal = 0
-				 BEGIN
-					IF NOT EXISTS ( SELECT 1 FROM tblICItemLocation WHERE intItemId = @intItemId AND intLocationId = @ActionCompanyLocationId)
-					BEGIN
-					INSERT INTO tblICItemLocation(intItemId,intLocationId,intCostingMethod,intConcurrencyId)
-					SELECT @intItemId,@ActionCompanyLocationId,1,1
-					
-					SET @intActionLocationId= SCOPE_IDENTITY()
-					
-						INSERT INTO tblICItemStock 
-						(
-							 intItemId
-							,intItemLocationId							
-							,dblUnitOnHand
-							,intConcurrencyId
-						)
-						SELECT @intItemId
-							,@intActionLocationId							
-							,-@UnitsToReduce
-							,1
-					END
-					ELSE
-					BEGIN
-						SELECT @intActionLocationId = intItemLocationId	FROM tblICItemLocation	
-						WHERE intItemId = @intItemId AND intLocationId = @ActionCompanyLocationId
-						
-						UPDATE tblICItemStock
-						SET dblUnitOnHand = dblUnitOnHand-@UnitsToReduce
-						WHERE intItemId = @intItemId AND intItemLocationId = @intActionLocationId
-					
-					END
-				 END
-				 
-			END 
-			 
-		
 			SELECT @ActionKey = MIN(intActionKey)
 			FROM @Action
 			WHERE intActionKey > @ActionKey
