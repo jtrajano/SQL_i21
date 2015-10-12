@@ -29,6 +29,34 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+-- Create the temp table if it does not exists. 
+IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRevalueProducedItems')) 
+BEGIN 
+	CREATE TABLE #tmpRevalueProducedItems (
+		[intId] INT IDENTITY PRIMARY KEY CLUSTERED	
+		,[intItemId] INT NOT NULL								-- The item. 
+		,[intItemLocationId] INT NULL							-- The location where the item is stored.
+		,[intItemUOMId] INT NOT NULL							-- The UOM used for the item.
+		,[dtmDate] DATETIME NOT NULL							-- The date of the transaction
+		,[dblQty] NUMERIC(18, 6) NOT NULL DEFAULT 0				-- The quantity of an item in relation to its UOM. For example a box can have 12 pieces of an item. If you have 10 boxes, this parameter must be 10 and not 120 (10 boxes x 12 pieces per box). Positive unit qty means additional stock. Negative unit qty means reduction (selling) of the stock. 
+		,[dblUOMQty] NUMERIC(18, 6) NOT NULL DEFAULT 1			-- The quantity of an item per UOM. For example, a box can contain 12 individual pieces of an item. 
+		,[dblNewCost] NUMERIC(38, 20) NOT NULL DEFAULT 0		-- The cost of purchasing a item per UOM. For example, $12 is the cost for a 12-piece box. This parameter should hold a $12 value and not $1 per pieces found in a 12-piece box. The cost is stored in base currency. 
+		,[intCurrencyId] INT NULL								-- The currency id used in a transaction. 
+		,[dblExchangeRate] DECIMAL (38, 20) DEFAULT 1 NOT NULL	-- The exchange rate used in the transaction. It is used to convert the cost or sales price (both in base currency) to the foreign currency value.
+		,[intTransactionId] INT NOT NULL						-- The integer id of the source transaction (e.g. Sales Invoice, Inventory Adjustment id, etc. ). 
+		,[intTransactionDetailId] INT NULL						-- Link id to the transaction detail. 
+		,[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL -- The string id of the source transaction. 
+		,[intTransactionTypeId] INT NOT NULL					-- The transaction type. Source table for the types are found in tblICInventoryTransactionType
+		,[intLotId] INT NULL									-- Place holder field for lot numbers
+		,[intSubLocationId] INT NULL							-- Place holder field for lot numbers
+		,[intStorageLocationId] INT NULL						-- Place holder field for lot numbers
+		,[ysnIsStorage] BIT NULL								-- If Yes (value is 1), then the item is not owned by the company. The company is only the custodian of the item (like a consignor). Add or remove stock from Inventory-Lot-In-Storage table. 
+		,[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL -- If there is a value, this means the item is used in Actual Costing. 
+		,[intSourceTransactionId] INT NULL						-- The integer id for the cost bucket (Ex. INVRCT-10001). 
+		,[strSourceTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NULL -- The string id for the cost bucket (Ex. INVRCT-10001). 
+	)
+END 
+
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @INVENTORY_AUTO_NEGATIVE AS INT = 1;
 DECLARE @INVENTORY_WRITE_OFF_SOLD AS INT = 2;
@@ -77,13 +105,65 @@ WHERE	intTransactionTypeId = @intTransactionTypeId
 --		@ItemsToValidate = @ItemsToAdjust
 --END
 
+
+BEGIN 
+	DECLARE @Internal_ItemsToAdjust AS ItemCostAdjustmentTableType 
+
+	INSERT INTO @Internal_ItemsToAdjust (
+			[intItemId] 
+			,[intItemLocationId] 
+			,[intItemUOMId] 
+			,[dtmDate] 
+			,[dblQty] 
+			,[dblUOMQty] 
+			,[dblNewCost] 
+			,[intCurrencyId] 
+			,[dblExchangeRate] 
+			,[intTransactionId]
+			,[intTransactionDetailId] 
+			,[strTransactionId] 
+			,[intTransactionTypeId] 
+			,[intLotId] 
+			,[intSubLocationId] 
+			,[intStorageLocationId] 
+			,[ysnIsStorage] 
+			,[strActualCostId] 
+			,[intSourceTransactionId] 
+			,[strSourceTransactionId] 	
+	)
+	SELECT 
+			[intItemId] 
+			,[intItemLocationId] 
+			,[intItemUOMId] 
+			,[dtmDate] 
+			,[dblQty] 
+			,[dblUOMQty] 
+			,[dblNewCost] 
+			,[intCurrencyId] 
+			,[dblExchangeRate] 
+			,[intTransactionId]
+			,[intTransactionDetailId] 
+			,[strTransactionId] 
+			,[intTransactionTypeId] 
+			,[intLotId] 
+			,[intSubLocationId] 
+			,[intStorageLocationId] 
+			,[ysnIsStorage] 
+			,[strActualCostId] 
+			,[intSourceTransactionId] 
+			,[strSourceTransactionId] 	 
+	FROM	@ItemsToAdjust
+END 
+
+START_LOOP:
+
 -----------------------------------------------------------------------------------------------------------------------------
 -- Create the cursor
 -- Make sure the following options are used: 
 -- LOCAL >> It specifies that the scope of the cursor is local to the stored procedure where it was created. The cursor name is only valid within this scope. 
 -- FAST_FORWARD >> It specifies a FORWARD_ONLY, READ_ONLY cursor with performance optimizations enabled. 
 -----------------------------------------------------------------------------------------------------------------------------
-DECLARE loopItems CURSOR LOCAL FAST_FORWARD
+DECLARE loopItemsToAdjust CURSOR LOCAL FAST_FORWARD
 FOR 
 SELECT  intId
 		,intItemId
@@ -103,12 +183,12 @@ SELECT  intId
 		,intLotId 
 		,intCurrencyId
 		,dblExchangeRate
-FROM	@ItemsToAdjust
+FROM	@Internal_ItemsToAdjust
 
-OPEN loopItems;
+OPEN loopItemsToAdjust;
 
 -- Initial fetch attempt
-FETCH NEXT FROM loopItems INTO 
+FETCH NEXT FROM loopItemsToAdjust INTO 
 	@intId
 	,@intItemId
 	,@intItemLocationId
@@ -169,7 +249,7 @@ BEGIN
 	END
 
 	-- Attempt to fetch the next row from cursor. 
-	FETCH NEXT FROM loopItems INTO 
+	FETCH NEXT FROM loopItemsToAdjust INTO 
 		@intId
 		,@intItemId
 		,@intItemLocationId
@@ -194,8 +274,8 @@ END;
 -- End of the loop
 -----------------------------------------------------------------------------------------------------------------------------
 
-CLOSE loopItems;
-DEALLOCATE loopItems;
+CLOSE loopItemsToAdjust;
+DEALLOCATE loopItemsToAdjust;
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Adjust the average cost regardless of costing method.
@@ -210,7 +290,7 @@ BEGIN
 			SELECT	tblICItemStock.intItemId
 					,tblICItemStock.intItemLocationId
 					,tblICItemStock.dblUnitOnHand
-			FROM	dbo.tblICItemStock INNER JOIN @ItemsToAdjust ItemsToAdjust
+			FROM	dbo.tblICItemStock INNER JOIN @Internal_ItemsToAdjust ItemsToAdjust
 						ON tblICItemStock.intItemId = ItemsToAdjust.intItemId
 						AND tblICItemStock.intItemLocationId = ItemsToAdjust.intItemLocationId
 	) AS Stock
@@ -238,7 +318,7 @@ BEGIN
 	-----------------------------------------------------------------------------------------------------------------------------
 	-- Begin of the loop
 	-----------------------------------------------------------------------------------------------------------------------------
-	DECLARE loopItemsForAutoNegative CURSOR LOCAL FAST_FORWARD
+	DECLARE loopItemsToAdjustForAutoNegative CURSOR LOCAL FAST_FORWARD
 	FOR 
 	SELECT  intId
 			,intItemId
@@ -253,12 +333,12 @@ BEGIN
 			,strTransactionId
 			,intTransactionTypeId
 			,intLotId 
-	FROM	@ItemsToAdjust
+	FROM	@Internal_ItemsToAdjust
 
-	OPEN loopItemsForAutoNegative;
+	OPEN loopItemsToAdjustForAutoNegative;
 
 	-- Initial fetch attempt
-	FETCH NEXT FROM loopItemsForAutoNegative INTO 
+	FETCH NEXT FROM loopItemsToAdjustForAutoNegative INTO 
 		@intId
 		,@intItemId
 		,@intItemLocationId
@@ -335,7 +415,7 @@ BEGIN
 			END 
 		END
 
-		FETCH NEXT FROM loopItemsForAutoNegative INTO 
+		FETCH NEXT FROM loopItemsToAdjustForAutoNegative INTO 
 			@intId
 			,@intItemId
 			,@intItemLocationId
@@ -355,8 +435,70 @@ BEGIN
 	-----------------------------------------------------------------------------------------------------------------------------
 	-- End of the loop
 	-----------------------------------------------------------------------------------------------------------------------------
-	CLOSE loopItemsForAutoNegative;
-	DEALLOCATE loopItemsForAutoNegative;
+	CLOSE loopItemsToAdjustForAutoNegative;
+	DEALLOCATE loopItemsToAdjustForAutoNegative;
+END 
+
+
+--------------------------------------------------------
+-- Repeat Loop if there are 'Produced' items to process
+--------------------------------------------------------
+IF EXISTS (SELECT TOP 1 1 FROM #tmpRevalueProducedItems) 
+BEGIN 
+	-- Clear the contents of the @Internal_ItemsToAdjust table variable. 
+	DELETE FROM @Internal_ItemsToAdjust
+
+	-- Transfer the data from the temp table into @Internal_ItemsToAdjust. These are the 'Produced' items inserted into #tmpRevalueProducedItems by the costing SP's above. (ex: uspICPostCostAdjustmentOnAverageCosting)
+	INSERT INTO @Internal_ItemsToAdjust (
+			[intItemId] 
+			,[intItemLocationId] 
+			,[intItemUOMId] 
+			,[dtmDate] 
+			,[dblQty] 
+			,[dblUOMQty] 
+			,[dblNewCost] 
+			,[intCurrencyId] 
+			,[dblExchangeRate] 
+			,[intTransactionId]
+			,[intTransactionDetailId] 
+			,[strTransactionId] 
+			,[intTransactionTypeId] 
+			,[intLotId] 
+			,[intSubLocationId] 
+			,[intStorageLocationId] 
+			,[ysnIsStorage] 
+			,[strActualCostId] 
+			,[intSourceTransactionId] 
+			,[strSourceTransactionId] 		
+	)
+	SELECT 
+			[intItemId] 
+			,[intItemLocationId] 
+			,[intItemUOMId] 
+			,[dtmDate] 
+			,[dblQty] 
+			,[dblUOMQty] 
+			,[dblNewCost] 
+			,[intCurrencyId] 
+			,[dblExchangeRate] 
+			,[intTransactionId]
+			,[intTransactionDetailId] 
+			,[strTransactionId] 
+			,[intTransactionTypeId] 
+			,[intLotId] 
+			,[intSubLocationId] 
+			,[intStorageLocationId] 
+			,[ysnIsStorage] 
+			,[strActualCostId] 
+			,[intSourceTransactionId] 
+			,[strSourceTransactionId] 	
+	FROM	#tmpRevalueProducedItems
+
+	-- Clear the contents of the temp table.
+	DELETE FROM #tmpRevalueProducedItems
+
+	-- Do the loop. 
+	GOTO START_LOOP
 END 
 
 -----------------------------------------
@@ -366,3 +508,7 @@ EXEC dbo.uspICCreateGLEntries
 	@strBatchId
 	,@strAccountToCounterInventory
 	,@intUserId
+
+-- Clean-up for the temp table. 
+IF EXISTS(SELECT * FROM tempdb.dbo.sysobjects WHERE ID = OBJECT_ID(N'tempdb..#tmpRevalueProducedItems')) 
+	DROP TABLE #tmpRevalueProducedItems  
