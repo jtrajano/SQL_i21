@@ -21,5 +21,5 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90001) EXEC sp_dropmessa
 SET @strmessage = 'Machine: %s is used in the schedule for %s and %s.'
 EXEC sp_addmessage 90001,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90002) EXEC sp_dropmessage 90002, 'us_english'	
-SET @strmessage = 'Calendar name ''%s'' already exists'
+SET @strmessage = 'Calendar name ''%s'' already exists.'
 EXEC sp_addmessage 90002,11,@strmessage,'us_english','False'
