@@ -101,7 +101,7 @@ SET @innerQuery = 'SELECT
 
 IF @dateFrom IS NOT NULL
 BEGIN
-	SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + @dateFrom + ''' AND '''  + @dateTo + ''''
+	SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
 END
 
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
