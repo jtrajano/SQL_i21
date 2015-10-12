@@ -108,7 +108,8 @@ BEGIN Try
 		END
 
 		UPDATE tblMFScheduleCalendar
-		SET dtmToDate = CASE 
+		SET strName=@strCalendarName
+			,dtmToDate = CASE 
 				WHEN @dtmToDate IS NOT NULL
 					THEN @dtmToDate
 				ELSE dtmToDate
