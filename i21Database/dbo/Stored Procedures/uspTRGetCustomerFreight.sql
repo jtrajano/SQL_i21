@@ -138,13 +138,15 @@ BEGIN
 	set @dblReceiptSurchargeRate = 0;
 END
 
-if (@dblInvoiceFreightRate is null)
+if (@dblInvoiceFreightRate is null or @dblInvoiceFreightRate = 0)
 BEGIN
     set @dblInvoiceFreightRate = 0;
+	set @dblInvoiceSurchargeRate = 0;
 END
-if (@dblReceiptFreightRate is null)
+if (@dblReceiptFreightRate is null or @dblReceiptFreightRate = 0)
 BEGIN
     set @dblReceiptFreightRate = 0;
+    set @dblReceiptSurchargeRate = 0;
 END
 if (@dblReceiptSurchargeRate is null)
 BEGIN

@@ -330,3 +330,11 @@ EXEC sp_addmessage 80062,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80063) EXEC sp_dropmessage 80063, 'us_english'	
 SET @strmessage = 'Unable to unpost because %s has a cost adjustment from %s.'
 EXEC sp_addmessage 80063,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80064) EXEC sp_dropmessage 80064, 'us_english'	
+SET @strmessage = 'The %s is both a payable and deductible to the bill of the same vendor. Please correct the Accrue or Price checkbox.'
+EXEC sp_addmessage 80064,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80065) EXEC sp_dropmessage 80065, 'us_english'	
+SET @strmessage = 'The %s is shouldered by the receipt vendor and can''t be added to the item cost. Please correct the Price or Inventory Cost checkbox.'
+EXEC sp_addmessage 80065,11,@strmessage,'us_english','False'

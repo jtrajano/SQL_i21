@@ -145,6 +145,7 @@
     <None Include="Scripts\AP\FixImportedVendorOriginFlag.sql" />
     <None Include="Scripts\AP\BackupImportedPostedBillDetails.sql" />
     <None Include="Scripts\AP\BackupImportedUnpostedBillDetail.sql" />
+    <None Include="dbo\Stored Procedures\uspEMRecreateCheckIfOriginVendor.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />

@@ -2358,6 +2358,14 @@
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnFIFO.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentOnLIFO.sql" />
     <Build Include="dbo\Tables\tblICInventoryLIFOCostAdjustmentLog.sql" />
+    <Build Include="dbo\Views\vyuGRGetVendors.sql" />
+    <Build Include="dbo\Views\vyuGRGetSettleItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRProcessSettleStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCreateInvReceiptBySettle.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMCheckIfOriginVendor.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetGLStatus.sql" />
+    <Build Include="dbo\Functions\fnAPValidateRecapBill.sql" />
+    <Build Include="dbo\Views\vyuTRTansportLoad.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

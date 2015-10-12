@@ -82,6 +82,7 @@ BEGIN
 
 		EXEC tSQLt.FakeTable 'dbo.tblPOPurchase';
 		EXEC tSQLt.FakeTable 'dbo.tblPOPurchaseDetail', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblPOPurchaseDetailTax', @Identity = 1;
 
 		DECLARE @ShipTo_DefaultLocation AS INT = 1
 		DECLARE @ShipTo_NewHaven AS INT = 2
@@ -106,6 +107,8 @@ BEGIN
 
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceipt', @Identity = 1;
 		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptItem', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptCharge', @Identity = 1;
+		EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptItemTax', @Identity = 1;
 		
 		-- Assert table for tblICInventoryReceipt
 		SELECT	strReceiptNumber
