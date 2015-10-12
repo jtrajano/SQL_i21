@@ -2559,6 +2559,8 @@
     <Build Include="dbo\Stored Procedures\uspRKGetM2MBasis.sql" />
     <Build Include="dbo\Tables\tblCTBagMark.sql" />
     <Build Include="dbo\Views\vyuARUndepositedPayment.sql" />
+    <Build Include="dbo\Functions\fnAPRemoveSpecialChars.sql" />
+    <Build Include="dbo\Views\vyuAP1099MISC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
