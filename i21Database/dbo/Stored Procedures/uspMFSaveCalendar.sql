@@ -62,6 +62,16 @@ BEGIN Try
 			,intConcurrencyId INT
 			)
 
+	IF EXISTS(SELECT *FROM dbo.tblMFScheduleCalendar WHERE strName=@strCalendarName AND intManufacturingCellId=@intManufacturingCellId AND intLocationId=@intLocationId and intCalendarId<>isNULL(@intCalendarId,0))
+	BEGIN
+		RAISERROR (
+				90002
+				,11
+				,1
+				,@strCalendarName
+				)	
+	END
+
 	DECLARE @TRANSACTION_COUNT INT
 
 	SET @TRANSACTION_COUNT = @@TRANCOUNT

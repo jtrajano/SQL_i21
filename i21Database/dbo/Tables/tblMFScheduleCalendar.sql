@@ -12,8 +12,9 @@
 	,intLastModifiedUserId INT NOT NULL
 	,intConcurrencyId INT
 	,CONSTRAINT PK_tblMFScheduleCalendar_intCalendarId PRIMARY KEY (intCalendarId)
-	,CONSTRAINT UQ_tblMFScheduleCalendar_strName_intLocationId UNIQUE (
+	,CONSTRAINT UQ_tblMFScheduleCalendar_strName_intManufacturingCellId_intLocationId UNIQUE (
 		strName
+		,intManufacturingCellId
 		,intLocationId
 		)
 	,CONSTRAINT [FK_tblMFScheduleCalendar_tblSMCompanyLocation_intLocationId] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId])
