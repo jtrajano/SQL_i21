@@ -102,7 +102,7 @@
 :r .\12_EM\09_UpdateEntityLocationShipVia.sql
 :r .\12_EM\10_CheckAndFixSpecialPricingRackLocation.sql
 :r .\12_EM\11_AvoidCustomerTransportSupplierIdConflict.sql
-
+:r .\12_EM\12_EntityEmployeeSchemaUpdate.sql
 --RK
 :r .\13_RK\01_DropTableScript.sql
 

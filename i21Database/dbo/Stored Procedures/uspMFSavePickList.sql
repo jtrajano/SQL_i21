@@ -20,6 +20,15 @@ DECLARE @id nvarchar(50)
 DECLARE @intAssignedToId int
 DECLARE @intConCurrencyId int
 DECLARE @strPickListNo nVarchar(50)
+DECLARE @intMinPickDetail int
+DECLARE @strLotNumber nvarchar(50)
+DECLARE @strParentLotNumber nvarchar(50)
+DECLARE @intLotId int
+DECLARE @intParentLotId int
+DECLARE @dblReqQtySum numeric(18,6)
+DECLARE @dblPickQtySum numeric(18,6)
+DECLARE @dblPickQty numeric(18,6)
+DECLARE @dblAvailableUnit numeric(18,6)
 
 EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml  
 
@@ -40,6 +49,7 @@ Declare @tblPickList table
 
 Declare @tblPickListDetail table
 (
+	intRowNo int IDENTITY(1,1),
 	intPickListId int,
 	intPickListDetailId int,
 	intLotId int,
@@ -111,6 +121,48 @@ If @intAssignedToId=0
 If (Select count(1) from @tblWorkOrder)=0
 	Raiserror('No Blend Sheet(s) are selected for picking.',16,1)
 
+Select @intMinPickDetail=Min(intRowNo) from @tblPickListDetail
+While(@intMinPickDetail is not null) --Pick List Detail Loop
+Begin
+	Select @intParentLotId = pld.intParentLotId, @strParentLotNumber=pl.strParentLotNumber,@dblPickQty=dblPickQuantity 
+	From @tblPickListDetail pld Join tblICParentLot pl on pld.intParentLotId=pl.intParentLotId 
+	where intRowNo=@intMinPickDetail
+
+	Select @intLotId=pld.intLotId From @tblPickListDetail pld where intRowNo=@intMinPickDetail
+
+	If ISNULL(@intLotId,0) = 0
+		Begin
+			Set @ErrMsg='Lot Number cannot be empty for parent lot number ' + @strParentLotNumber + '.'
+			RaisError(@ErrMsg,16,1)
+		End
+
+	Select @strLotNumber=strLotNumber,
+	@dblAvailableUnit=(l.dblWeight - (Select ISNULL(SUM(ISNULL(sr.dblQty,0)),0) From tblICStockReservation sr Where sr.intLotId=@intLotId)) / 
+	(CASE WHEN ISNULL(l.dblWeightPerQty,0)=0 THEN 1 ELSE l.dblWeightPerQty END)
+	From tblICLot l Where intLotId=@intLotId
+
+	If ISNULL(@dblPickQty,0) = 0
+		Begin
+			Set @ErrMsg='Pick Quantity cannot be 0 for lot number ' + @strLotNumber + '.'
+			RaisError(@ErrMsg,16,1)
+		End
+	
+	If @dblPickQty > @dblAvailableUnit
+		Begin
+			Set @ErrMsg='Pick Quantity cannot be greater than the available quantity for lot number ' + @strLotNumber + '.'
+			RaisError(@ErrMsg,16,1)
+		End
+
+	Select @dblReqQtySum=SUM(dblIssuedQuantity),@dblPickQtySum=Sum(dblPickQuantity) From @tblPickListDetail Where intParentLotId=@intParentLotId
+	If @dblPickQtySum < @dblReqQtySum
+		Begin
+			Set @ErrMsg='Sum of pick quantity should be greater than or equal to required quantity for the parent lot number ' + @strParentLotNumber + '.'
+			RaisError(@ErrMsg,16,1)
+		End
+
+	Select @intMinPickDetail=Min(intRowNo) from @tblPickListDetail where intRowNo>@intMinPickDetail
+End
+
 If ISNULL(@strPickListNo,'') = ''
 	Begin
 		EXEC dbo.uspSMGetStartingNumber 68,@strPickListNo OUTPUT
@@ -133,7 +185,7 @@ Begin
 	dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,dblPickQuantity,intPickUOMId,intStageLotId,
 	dtmCreated,intCreatedUserId,dtmLastModified,intLastModifiedUserId,intConcurrencyId)
 	Select @intPickListId,intLotId,intParentLotId,intItemId,intStorageLocationId,
-	dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,dblPickQuantity,intPickUOMId,NULL,
+	dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,dblPickQuantity,intPickUOMId,intLotId,
 	@dtmCurrentDate,intUserId,@dtmCurrentDate,intUserId,1
 	from @tblPickListDetail
 
@@ -156,6 +208,9 @@ Begin
 End
 
 SET @intPickListIdOut=@intPickListId
+
+--Reserve Lots
+Exec [uspMFCreateLotReservationByPickList] @intPickListId
 
 Commit Tran
 

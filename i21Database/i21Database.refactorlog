@@ -4088,6 +4088,13 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intStorageLocationId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="1e2f5698-00a4-4c4c-aa7f-a6e0f03f06bf" ChangeDateTime="10/02/2015 08:26:09">
+    <Property Name="ElementName" Value="[dbo].[tblPREmployee].[intEntityId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblPREmployee]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityEmployeeId]" />
+  </Operation>
   <Operation Name="Rename Refactor" Key="df73488d-c8be-4360-82c7-02e3c27d8b52" ChangeDateTime="10/02/2015 01:36:20">
     <Property Name="ElementName" Value="[dbo].[tblICItemMotorFuelTax].[Id]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />
@@ -4115,5 +4122,26 @@
     <Property Name="ParentElementName" Value="[dbo].[tblSMReminderList]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strMessage" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ef09f2a0-85f9-4bfb-af64-5f8475917af0" ChangeDateTime="10/07/2015 06:08:06">
+    <Property Name="ElementName" Value="[dbo].[tblSMConnectedUser].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMConnectedUser]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intConnectedUserId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="ce6460d9-7cb0-4aec-a53f-26ac2953969c" ChangeDateTime="10/07/2015 06:09:54">
+    <Property Name="ElementName" Value="[dbo].[tblSMConnectedUser].[intContextId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMConnectedUser]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strContextId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="f44e018b-903b-4afc-83ef-eca57aca600b" ChangeDateTime="10/07/2015 06:10:02">
+    <Property Name="ElementName" Value="[dbo].[tblSMConnectedUser].[int]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMConnectedUser]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intEntityId" />
   </Operation>
 </Operations>

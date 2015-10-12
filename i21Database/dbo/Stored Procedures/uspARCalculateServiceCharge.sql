@@ -37,22 +37,18 @@ AS
 		BEGIN
 			DECLARE @name NVARCHAR(255),
 					@pos INT
-
+			
+			SELECT @customers = @customers + ', '
 			WHILE CHARINDEX(',', @customers) > 0
 			BEGIN
 				SELECT @pos  = CHARINDEX(',', @customers)  
 				SELECT @name = SUBSTRING(@customers, 1, @pos-1)
 
 				INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId) 
-				SELECT @name, 0
+				SELECT intEntityCustomerId, intServiceChargeId FROM tblARCustomer WHERE strCustomerNumber LIKE (LTRIM(RTRIM(@name))+'%') AND intServiceChargeId IS NOT NULL AND intServiceChargeId > 0
 
 				SELECT @customers = SUBSTRING(@customers, @pos + 1, LEN(@customers) - @pos)
-			END
-
-			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId)
-			SELECT @customers, 0
-
-			UPDATE #tmpCustomers SET intServiceChargeId = ISNULL((SELECT intServiceChargeId FROM tblARCustomer WHERE intEntityCustomerId = #tmpCustomers.intEntityId), 0)
+			END			
 		END
 
 	--PROCESS EACH CUSTOMER

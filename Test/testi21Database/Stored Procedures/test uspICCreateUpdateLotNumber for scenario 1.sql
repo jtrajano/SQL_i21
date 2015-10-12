@@ -60,6 +60,7 @@ BEGIN
 				,@ysnReleasedToWarehouse	AS BIT
 				,@ysnProduced				AS BIT 
 				,@intDetailId				AS INT 
+				,@dblGrossWeight			AS NUMERIC(18,6)
 
 		CREATE TABLE expected (
 			[intLotId]					INT 
@@ -97,6 +98,7 @@ BEGIN
 			,[ysnProduced]				BIT 
 			,[dtmDateCreated]			DATETIME 
 			,[intCreatedUserId]			INT 
+			,[dblGrossWeight]			NUMERIC(18,6)
 		)
 
 		SELECT * 
@@ -131,6 +133,7 @@ BEGIN
 				,@ysnReleasedToWarehouse	= 0
 				,@ysnProduced				= 0
 				,@intDetailId				= 12
+				,@dblGrossWeight			= 300
 
 
 		-- Setup the transaction data. 
@@ -158,7 +161,8 @@ BEGIN
 			,intEntityVendorId
 			,strVendorLotNo
 			,intVendorLocationId
-			,intDetailId		
+			,intDetailId
+			,dblGrossWeight			
 	)
 	SELECT	intLotId				= @intLotId
 			,strLotNumber			= @strLotNumber
@@ -184,7 +188,7 @@ BEGIN
 			,strVendorLotNo			= @strVendorLotNo
 			,intVendorLocationId	= @intVendorLocationId
 			,intDetailId			= @intDetailId
-
+			,dblGrossWeight			= @dblGrossWeight
 
 		-- Setup the expected data
 		INSERT INTO expected (
@@ -212,6 +216,7 @@ BEGIN
 				,intEntityVendorId
 				,strVendorLotNo
 				,intVendorLocationId
+				,dblGrossWeight
 		)
 		SELECT	intLotId				= 1
 				,strLotNumber			= @strLotNumber
@@ -237,6 +242,7 @@ BEGIN
 				,intEntityVendorId			= @intEntityVendorId
 				,strVendorLotNo			= @strVendorLotNo
 				,intVendorLocationId	= @intVendorLocationId
+				,dblGrossWeight			= @dblGrossWeight
 	END 
 
 	-- Act
@@ -273,7 +279,8 @@ BEGIN
 				,strNotes
 				,intEntityVendorId
 				,strVendorLotNo
-				,intVendorLocationId				
+				,intVendorLocationId
+				,dblGrossWeight
 		)
 		SELECT	intLotId				
 				,strLotNumber			
@@ -298,7 +305,8 @@ BEGIN
 				,strNotes				
 				,intEntityVendorId			
 				,strVendorLotNo			
-				,intVendorLocationId					
+				,intVendorLocationId
+				,dblGrossWeight
 		FROM dbo.tblICLot 
 
 		EXEC tSQLt.AssertEqualsTable 'expected', 'actual';

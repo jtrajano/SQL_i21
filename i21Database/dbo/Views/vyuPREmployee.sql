@@ -2,7 +2,7 @@
 AS
 SELECT
 Ent.intEntityId,
-Emp.intEmployeeId,
+intEmployeeId = Emp.intEntityEmployeeId,
 Emp.strEmployeeId,
 Emp.strLastName,
 Emp.strFirstName,
@@ -20,6 +20,6 @@ Loc.strCountry,
 Emp.ysnActive,
 Emp.strPayPeriod
 FROM dbo.tblPREmployee AS Emp
-INNER JOIN dbo.tblEntity AS Ent ON Ent.intEntityId = Emp.intEntityId
-LEFT JOIN dbo.tblEntity AS Con ON Con.[intEntityId] = Emp.intEntityId
-LEFT JOIN dbo.tblEntityLocation AS Loc ON Loc.intEntityId = Emp.intEntityId
+INNER JOIN dbo.tblEntity AS Ent ON Ent.intEntityId = Emp.[intEntityEmployeeId]
+LEFT JOIN dbo.tblEntity AS Con ON Con.[intEntityId] = Emp.[intEntityEmployeeId]
+LEFT JOIN dbo.tblEntityLocation AS Loc ON Loc.intEntityId = Emp.[intEntityEmployeeId]

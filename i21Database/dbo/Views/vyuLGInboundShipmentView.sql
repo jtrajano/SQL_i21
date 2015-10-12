@@ -19,8 +19,9 @@ SELECT
 		Customer.strName as strCustomer,
 		intWeightUOMId = S.intWeightUnitMeasureId,
 		WTUOM.strUnitMeasure as strWeightUOM,
-		CASE WHEN S.ysnDirectShipment = 1 THEN 'Yes' ELSE 'No' END AS strDropShip,
+		CASE WHEN S.ysnDirectShipment = 1 THEN CAST (1 as Bit) ELSE CAST (0 as Bit) END AS ysnDirectShipment,
 		S.intShippingInstructionId,
+		CASE WHEN (IsNull((SELECT SUM (S1.dblReceivedQty) from tblLGShipmentContractQty S1 Group By S1.intShipmentId Having S1.intShipmentId = SCQ.intShipmentId), 0) > 0) THEN CAST (1 as Bit) ELSE CAST (0 as Bit) END AS ysnReceived,
 
 -- Shipment details
 		S.strOriginPort,
@@ -46,7 +47,7 @@ SELECT
 		InsCur.strCurrency,
 		S.dtmDocsToBroker,
 		S.dtmShipmentDate,
-		CASE WHEN S.ysnInventorized = 1 THEN 'Yes' ELSE 'No' END AS strInventorized,
+		CASE WHEN S.ysnInventorized = 1 THEN CAST (1 as Bit) ELSE CAST (0 as Bit) END AS ysnInventorized,
 		S.dtmInventorizedDate,
 		S.dtmDocsReceivedDate,
 		S.dtmETAPOL,

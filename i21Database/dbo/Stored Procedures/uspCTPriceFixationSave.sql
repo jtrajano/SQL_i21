@@ -142,7 +142,7 @@ BEGIN TRY
 				RETURN
 		END
 
-		IF @ysnPartialPricing = 1 
+		IF ISNULL(@ysnPartialPricing,0) = 0
 		BEGIN					
 			SELECT	@dblPFDetailQuantity	=	dblQuantity,@intPFDetailNoOfLots = intNoOfLots FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId
 			sELECT	@intNextSequence		=	MAX(intContractSeq) + 1 FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId

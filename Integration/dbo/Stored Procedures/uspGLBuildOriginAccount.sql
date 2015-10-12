@@ -53,6 +53,8 @@ BEGIN
 		LEFT JOIN tblGLAccountStructure c
 		ON a.intAccountStructureId = c.intAccountStructureId
 		WHERE x.intUserId = @intUserId and c.strType = ''Primary''
+		--select * from #PrimaryAccounts
+		--return
 
 		CREATE TABLE #ConstructAccount
 		(
@@ -98,6 +100,7 @@ BEGIN
 		ON a.intAccountStructureId = c.intAccountStructureId
 		WHERE x.intUserId = @intUserId and c.strType = ''Segment''
 		ORDER BY a.strCode
+
 
 		DECLARE @iStructureType INT
 		DECLARE @strType		NVARCHAR(20)
@@ -208,10 +211,11 @@ BEGIN
 			   @intUserId AS intUserId,	   
 			   getDate() AS dtmCreated
 		FROM #ConstructAccount
-		INNER JOIN glactmst ON (CAST(CAST(strPrimary AS INT) AS NVARCHAR(50)) + ''-'' + CAST(CAST(strSegment AS INT) AS NVARCHAR(50))) = (CAST(CAST(glact_acct1_8 AS INT) AS NVARCHAR(50)) + ''-'' + CAST(CAST(glact_acct9_16 AS INT) AS NVARCHAR(50)))
+		INNER JOIN tblGLOriginAccounts ON (CAST(CAST(strPrimary AS INT) AS NVARCHAR(50)) + ''-'' + CAST(CAST(strSegment AS INT) AS NVARCHAR(50))) = 
+		(CAST(CAST(glact_acct1_8_new AS INT) AS NVARCHAR(50)) + ''-'' + CAST(CAST(glact_acct9_16 AS INT) AS NVARCHAR(50)))
 		WHERE strCode NOT IN (SELECT strAccountId FROM tblGLAccount)
 		ORDER BY strCode		
-
+		
 		DROP TABLE #TempResults
 		DROP TABLE #PrimaryAccounts
 		DROP TABLE #Structure	
@@ -219,7 +223,5 @@ BEGIN
 		DROP TABLE #ConstructAccount
 
 		DELETE tblGLTempAccountToBuild WHERE intUserId = @intUserId
-
-		END
-	')
+		END')
 END 

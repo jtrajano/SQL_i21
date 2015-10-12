@@ -24,8 +24,10 @@
     [ysnAllowPartialPricingOfAContractSequence] BIT NULL, 
     [strPricingQty] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [ysnEnablePolarizationAdjustments] BIT NULL,
-    [strPeriodType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-	
+    [strPeriodType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[ysnValueBasisAndDPDeliveries] BIT NULL, 
+    [strEvaluationBy] NVARCHAR(50) NULL, 
+    [strEvaluationByZone] NVARCHAR(50) NULL, 
 	CONSTRAINT [PK_tblRKCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]), 
-	CONSTRAINT [FK_tblRKCompanyPreference_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId]),
+    CONSTRAINT [FK_tblRKCompanyPreference_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY([intUnitMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId])
 )

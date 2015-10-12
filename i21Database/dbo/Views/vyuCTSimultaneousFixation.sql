@@ -6,6 +6,7 @@ SELECT	*,ISNULL(dblFutures,0)+ISNULL(dblBasis,0)+ISNULL(dblAdditionalCost,0) AS 
 FROM	
 (
 	SELECT	PF.intPriceFixationId,
+			CD.intContractDetailId,
 			CD.intContractSeq,
 			PF.intLotsFixed/dblHeaderQuantity * dbo.fnCTConvertQuantityToTargetCommodityUOM(CU.intCommodityUnitMeasureId,CD.intCommodityUnitMeasureId,CD.dblDetailQuantity) dblFixedLots,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,CU.intCommodityUnitMeasureId,CD.dblFutures) dblFutures,
@@ -32,7 +33,9 @@ FROM
 				JOIN	tblICCommodityUnitMeasure	CM	ON	CM.intCommodityId		=	CD.intCommodityId		AND 
 															CM.intUnitMeasureId		=	IU.intUnitMeasureId
 				WHERE CC.intContractDetailId = CD.intContractDetailId
-			) dblAdditionalCost
+			) dblAdditionalCost,
+			PF.intFinalPriceUOMId
+			
 	FROM	tblCTPriceFixationDetail	FD
 	JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId	=	FD.intPriceFixationId
 	JOIN	vyuCTContractDetailView		CD	ON	CD.intContractHeaderId	=	PF.intContractHeaderId

@@ -69,6 +69,13 @@ BEGIN Try
 	IF @TRANSACTION_COUNT = 0
 		BEGIN TRANSACTION
 
+	IF @ysnStandardCalendar = 1
+	BEGIN
+		UPDATE tblMFScheduleCalendar
+		SET ysnStandard = 0
+		WHERE intManufacturingCellId = @intManufacturingCellId
+	END
+
 	IF @intCalendarId IS NULL
 	BEGIN
 		INSERT INTO dbo.tblMFScheduleCalendar (
@@ -100,15 +107,9 @@ BEGIN Try
 	END
 	ELSE
 	BEGIN
-		IF @ysnStandardCalendar = 1
-		BEGIN
-			UPDATE tblMFScheduleCalendar
-			SET ysnStandard = 0
-			WHERE intManufacturingCellId = @intManufacturingCellId
-		END
-
 		UPDATE tblMFScheduleCalendar
-		SET dtmToDate = CASE 
+		SET strName=@strCalendarName
+			,dtmToDate = CASE 
 				WHEN @dtmToDate IS NOT NULL
 					THEN @dtmToDate
 				ELSE dtmToDate

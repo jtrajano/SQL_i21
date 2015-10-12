@@ -125,6 +125,93 @@ END
 
 IF (@ysnPost = 1)
 BEGIN
+
+	--Insert Earning Distribution to Temporary Table
+	CREATE TABLE #tmpEarning (
+		intPaycheckId			INT
+		,intEmployeeEarningId	INT
+		,intTypeEarningId		INT
+		,intAccountId			INT
+		,dblAmount				NUMERIC (18, 6)
+		,intDepartmentId		INT
+		,strDepartment			NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,intProfitCenter		INT
+	)
+
+	INSERT INTO #tmpEarning 
+	(
+		intPaycheckId
+		,intEmployeeEarningId
+		,intTypeEarningId
+		,intAccountId
+		,dblAmount
+		,intDepartmentId
+		,strDepartment
+		,intProfitCenter
+	)
+	SELECT 
+		A.intPaycheckId
+		,A.intEmployeeEarningId
+		,A.intTypeEarningId
+		,B.intAccountId
+		,dblAmount = A.dblTotal * (B.dblPercentage / 100)
+		,C.intDepartmentId
+		,C.strDepartment
+		,C.intProfitCenter 
+	FROM (
+		SELECT intPaycheckId, intEmployeeEarningId, intTypeEarningId, intEmployeeDepartmentId, dblTotal FROM tblPRPaycheckEarning) A 
+		LEFT JOIN tblPREmployeeEarningDistribution B
+				ON A.intEmployeeEarningId = B.intEmployeeEarningId
+		LEFT JOIN tblPRDepartment C 
+	ON A.intEmployeeDepartmentId = C.intDepartmentId
+	WHERE A.dblTotal > 0
+	AND intPaycheckId = @intPaycheckId
+		
+	--Get Invalid Account Combinations
+	DECLARE @strMsg NVARCHAR(MAX) = ''
+
+	SELECT 
+	TOP 1 
+	@strMsg = 'One or more accounts for ''' + (SELECT strEarning FROM tblPRTypeEarning WHERE intTypeEarningId = 1) + ''''
+	+ ' Earning GL Distribution does not have a corresponding account for Department ''' + strDepartment + '''.'
+	+ ' Make sure all accounts for this Earning GL Distribution and Department exists.'
+	FROM 
+	#tmpEarning X
+	WHERE NOT EXISTS (
+		SELECT intAccountId, intAccountSegmentId FROM tblGLAccountSegmentMapping 
+		WHERE intAccountId IN (
+			SELECT intAccountId FROM tblGLAccountSegmentMapping 
+			WHERE intAccountSegmentId = (
+				SELECT TOP 1 intSegmentPrimaryId = A.intAccountSegmentId 
+				FROM tblGLAccountSegmentMapping A INNER JOIN tblGLAccountSegment B ON A.intAccountSegmentId = B.intAccountSegmentId 
+				WHERE intAccountStructureId = (
+					SELECT TOP 1 intAccountStructureId 
+					FROM tblGLAccountStructure WHERE strStructureName = 'Primary Account' AND strType = 'Primary')
+					AND intAccountId = X.intAccountId))
+		AND intAccountSegmentId = X.intProfitCenter)
+
+	IF (LEN(@strMsg) > 0) 
+	BEGIN 
+		RAISERROR(@strMsg, 11, 1)
+		SET @isSuccessful = 0
+		GOTO Post_Exit
+	END
+
+	--Update Earnings Account using the account with corresponding Department Location
+	UPDATE #tmpEarning 
+	SET intAccountId = ISNULL((
+		SELECT intAccountId FROM tblGLAccountSegmentMapping 
+		WHERE intAccountSegmentId = #tmpEarning.intProfitCenter  
+		AND intAccountId IN (
+			SELECT intAccountId FROM tblGLAccountSegmentMapping 
+			WHERE intAccountSegmentId = (
+				SELECT TOP 1 intSegmentPrimaryId = A.intAccountSegmentId 
+				FROM tblGLAccountSegmentMapping A INNER JOIN tblGLAccountSegment B ON A.intAccountSegmentId = B.intAccountSegmentId 
+				WHERE intAccountStructureId = (
+					SELECT TOP 1 intAccountStructureId 
+					FROM tblGLAccountStructure WHERE strStructureName = 'Primary Account' AND strType = 'Primary')
+					AND intAccountId = #tmpEarning.intAccountId))), intAccountId)
+	 
 	--PRINT 'Insert Earnings into tblCMBankTransactionDetail'
 	INSERT INTO [dbo].[tblCMBankTransactionDetail]
 		([intTransactionId]
@@ -145,7 +232,7 @@ BEGIN
 		,[dtmDate]					= @dtmPayDate
 		,[intGLAccountId]			= E.intAccountId
 		,[strDescription]			= (SELECT TOP 1 strDescription FROM tblGLAccount WHERE intAccountId = E.intAccountId)
-		,[dblDebit]					= E.dblTotal
+		,[dblDebit]					= E.dblAmount
 		,[dblCredit]				= 0
 		,[intUndepositedFundId]		= NULL
 		,[intEntityId]				= NULL
@@ -154,9 +241,7 @@ BEGIN
 		,[intLastModifiedUserId]	= @intUserId
 		,[dtmLastModified]			= GETDATE()
 		,[intConcurrencyId]			= 1
-	FROM tblPRPaycheckEarning E
-	WHERE E.dblTotal > 0
-		AND E.intPaycheckId = @intPaycheckId
+	FROM #tmpEarning E
 
 	--PRINT 'Insert Employee Paid Deductions into tblCMBankTransactionDetail'
 	INSERT INTO [dbo].[tblCMBankTransactionDetail]
@@ -763,6 +848,7 @@ Recap_Rollback:
 -- Delete all temporary tables used during the post transaction. 
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpGLDetail')) DROP TABLE #tmpGLDetail
+	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpEarning')) DROP TABLE #tmpEarning
 
 
 /****************************************

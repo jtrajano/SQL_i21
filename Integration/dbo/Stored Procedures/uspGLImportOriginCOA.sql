@@ -21,8 +21,10 @@ BEGIN
 
 		SET QUOTED_IDENTIFIER OFF
 		SET ANSI_NULLS ON
+		SET XACT_ABORT ON
 		SET NOCOUNT ON
 		BEGIN TRY
+		
 		BEGIN TRANSACTION
 		IF NOT EXISTS(SELECT * FROM glactmst)
 		BEGIN
@@ -33,10 +35,7 @@ BEGIN
 		BEGIN
 			SET @result = ''invalid-1''
 		END
-		ELSE IF ((SELECT COUNT(*) FROM (SELECT DISTINCT(LEN(glact_acct1_8)) AS SegmentCode FROM glactmst) tblSegment) > 1 and @ysnOverride = 0)
-		BEGIN
-			SET @result = ''invalid-2''
-		END
+		
 		ELSE IF (EXISTS(SELECT TOP 1 1 FROM glactmst WHERE glact_acct9_16 NOT IN (SELECT glprc_sub_acct FROM glprcmst)) and @ysnOverride = 0)
 		BEGIN	
 			SET @result = ''invalid-3''
@@ -51,8 +50,8 @@ BEGIN
 		
 				SET @PrimaryLength = (SELECT MAX(LEN(glact_acct1_8)) glact_acct1_8 FROM glactmst)
 				SET @SegmentLength = (SELECT MAX(LEN(glact_acct9_16)) glact_acct9_16 FROM glactmst)	
-		
-				SELECT * INTO ##glactmstbackup from glactmst
+				
+				
 				DELETE tblGLCOATemplateDetail
 				DELETE tblGLCOATemplate
 				DELETE tblGLAccountSegment
@@ -74,6 +73,69 @@ BEGIN
 					RAISERROR (N''Account Group table is empty'',11,1);
 				END
 
+				DECLARE @primarylen INT
+				SELECT @primarylen  = max(len(glact_acct1_8))from glactmst 
+
+					INSERT INTO [dbo].[tblGLOriginAccounts]
+						   ([glact_acct1_8]
+						   ,[glact_acct9_16]
+						   ,[glact_desc]
+						   ,[glact_type]
+						   ,[glact_normal_value]
+						   ,[glact_saf_cat]
+						   ,[glact_flow_cat]
+						   ,[glact_uom]
+						   ,[glact_verify_flag]
+						   ,[glact_active_yn]
+						   ,[glact_sys_acct_yn]
+						   ,[glact_desc_lookup]
+						   ,[glact_user_fld_1]
+						   ,[glact_user_fld_2]
+						   ,[glact_user_id]
+						   ,[glact_user_rev_dt]
+						   ,[glact_acct1_8_new]
+						   ,A4GLIdentity
+						   )
+					SELECT [glact_acct1_8]
+						   ,[glact_acct9_16]
+						   ,[glact_desc]
+						   ,[glact_type]
+						   ,[glact_normal_value]
+						   ,[glact_saf_cat]
+						   ,[glact_flow_cat]
+						   ,[glact_uom]
+						   ,[glact_verify_flag]
+						   ,[glact_active_yn]
+						   ,[glact_sys_acct_yn]
+						   ,[glact_desc_lookup]
+						   ,[glact_user_fld_1]
+						   ,[glact_user_fld_2]
+						   ,[glact_user_id]
+						   ,[glact_user_rev_dt]
+						   ,0
+						   ,A4GLIdentity
+							FROM glactmst
+						WHERE A4GLIdentity NOT IN (SELECT A4GLIdentity FROM [tblGLOriginAccounts])
+				UPDATE [tblGLOriginAccounts] set glact_acct1_8_new =  cast(glact_acct1_8  as varchar) + replicate(''0'',@primarylen-len( glact_acct1_8))
+
+				
+				IF ((SELECT COUNT(*) FROM (SELECT DISTINCT(LEN(glact_acct1_8)) AS SegmentCode FROM glactmst) tblSegment) > 1 and @ysnOverride = 0)
+				BEGIN
+					
+					DECLARE @tbl TABLE (glact_acct1_8 INT)
+					;WITH cte (glact_acct1_8_new,glact_acct9_16 , cnt) as (
+						SELECT glact_acct1_8_new,glact_acct9_16 , count(*)  FROM [tblGLOriginAccounts] GROUP BY glact_acct1_8_new,glact_acct9_16 HAVING  count(*) > 1
+					)
+					INSERT into @tbl
+					SELECT a.glact_acct1_8 from cte b inner join [tblGLOriginAccounts] a on a.glact_acct1_8_new = b.glact_acct1_8_new
+					WHERE a.glact_acct1_8_new <> a.glact_acct1_8
+					IF EXISTS(SELECT TOP 1 1 FROM @tbl)
+					BEGIN
+						SET @result = ''invalid-2,'' + cast(  @primarylen as varchar)
+						COMMIT TRANSACTION
+						RETURN
+					END
+				END
 				DECLARE	@Length		INT
 						,@query		VARCHAR(500)	
 						,@generalCategoryId INT
@@ -81,8 +143,8 @@ BEGIN
 				SELECT TOP 1 @PrimaryStructureId = intAccountStructureId FROM tblGLAccountStructure WHERE strType = ''Primary''
 				SELECT @generalCategoryId=intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = ''General''
 				SET @Length = ISNULL((SELECT intLength FROM tblGLAccountStructure WHERE strType = ''Primary''),0)
-				SET @query = ''SELECT glact_acct1_8 AS SegmentCode,max(glact_desc) AS CodeDescription,glact_type FROM glactmst WHERE LEN(glact_acct1_8) = '' + CAST(@Length AS NVARCHAR(10)) + '' GROUP BY glact_acct1_8,glact_type''		
-		
+				SET @query = ''SELECT glact_acct1_8_new AS SegmentCode,max(glact_desc) AS CodeDescription,glact_type FROM [tblGLOriginAccounts] WHERE LEN(glact_acct1_8_new) = '' + CAST(@Length AS NVARCHAR(10)) + '' GROUP BY glact_acct1_8_new,glact_type''		
+				
 				DECLARE @tblQuery TABLE
 				(
 					 SegmentCode			NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL
@@ -92,7 +154,7 @@ BEGIN
 		
 				IF @ysnOverride = 1
 				BEGIN
-					SET @query = ''SELECT glact_acct1_8 AS SegmentCode,max(glact_desc) AS CodeDescription,glact_type = (SELECT TOP 1 glact_type FROM glactmst AS tempType WHERE tempType.glact_acct1_8 = tempCode.glact_acct1_8 GROUP BY glact_type) FROM glactmst AS tempCode WHERE LEN(glact_acct1_8) = '' + CAST(@Length AS NVARCHAR(10)) + '' GROUP BY glact_acct1_8''
+					SET @query = ''SELECT glact_acct1_8_new AS SegmentCode,max(glact_desc) AS CodeDescription,glact_type = (SELECT TOP 1 glact_type FROM [tblGLOriginAccounts] AS tempType WHERE tempType.glact_acct1_8_new = tempCode.glact_acct1_8_new GROUP BY glact_type) FROM [tblGLOriginAccounts] AS tempCode WHERE LEN(glact_acct1_8_new) = '' + CAST(@Length AS NVARCHAR(10)) + '' GROUP BY glact_acct1_8_new''
 				END
 
 				INSERT INTO @tblQuery EXEC (@query)			
@@ -212,21 +274,21 @@ BEGIN
 					,0
 					,dtmCreated = getDate()
 				FROM
-				tblGLAccountSegment				
+				tblGLAccountSegment			
+				
+				--select * from tblGLTempAccountToBuild	
 		
 				EXEC uspGLBuildOriginAccount  0
 				EXEC uspGLBuildAccount 0			
 				EXEC uspGLConvertAccountGroupToCategory				
 			END	
 			SET @result = ''SUCCESSFULLY IMPORTED''
+			
 		END
 		END TRY
 		BEGIN CATCH
     		SELECT @result = ERROR_MESSAGE()
 			IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
 		END CATCH
-		IF @@TRANCOUNT > 0 COMMIT TRANSACTION;
-		
-	
-	')
+		IF @@TRANCOUNT > 0 COMMIT TRANSACTION;')
 END 

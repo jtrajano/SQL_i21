@@ -2536,7 +2536,46 @@
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationDetail.sql" />
     <Build Include="dbo\Views\vyuHDSMModuleMap.sql" />
-    <Build Include="uspMFGetScheduleGroup.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportSimultaneous.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportSimultaneousDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetPreSanitizeLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetWorkOrderByLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetGLStatus.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeEarningDistribution.sql" />
+    <None Include="Scripts\Post-Deployment\PR\DataFixes\AddDefaultEmployeeEarningDistribution.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLInsertDebitCreditUnitEntry.sql" />
+    <Build Include="dbo\Tables\tblPATIssueStock.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntityEmployee.sql" />
+    <Build Include="dbo\Tables\tblSMConnectedUser.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetScheduleGroupDetailDesc.sql" />
+    <Build Include="dbo\Views\vyuMFGetChangeOverGroup.sql" />
+    <Build Include="dbo\Stored Procedures\uspARDuplicateCommissionPlan.sql" />
+    <Build Include="dbo\Tables\tblGLOriginAccounts.sql" />
+    <Build Include="dbo\Tables\tblPATEstateCorporationDetail.sql" />
+    <Build Include="dbo\Tables\tblPATCategoryVolume.sql" />
+    <Build Include="dbo\Tables\tblRKM2MBasis.sql" />
+    <Build Include="dbo\Tables\tblRKM2MBasisDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKGetM2MBasis.sql" />
+    <Build Include="dbo\Tables\tblCTBagMark.sql" />
+    <Build Include="dbo\Views\vyuARUndepositedPayment.sql" />
+    <Build Include="dbo\Tables\tblARCommissionSchedule.sql" />
+    <Build Include="dbo\Tables\tblARCommissionScheduleDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARDuplicateCommissionSchedule.sql" />
+    <Build Include="dbo\Stored Procedures\uspARProcessCommissionSchedule.sql" />
+    <Build Include="dbo\Views\vyuARCommissionPlanSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateLotReservationByPickList.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFDeleteLotReservationByPickList.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFTransferKit.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFStageKit.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateTransferKit.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetPickListAvailableLots.sql" />
+    <Build Include="dbo\Views\vyuGLAccountDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATBillToCategoryVolume.sql" />
+    <Build Include="dbo\Stored Procedures\uspPATInvoiceToCategoryVolume.sql" />
+    <Build Include="dbo\Views\vyuGRStorageSearchView.sql" />
+    <Build Include="dbo\Views\vyuRKGetM2MBasis.sql" />
+    <Build Include="dbo\Views\vyuMFGetMultipleChangeOverFactor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2597,6 +2636,7 @@
     <None Include="Scripts\Post-Deployment\ST\1_FileFieldMapping_PricebookSale.sql" />
     <None Include="Scripts\Post-Deployment\IC\13_MoveCommodityAttributes.sql" />
     <None Include="Scripts\Post-Deployment\Common\ErrorMessages.sql" />
+    <None Include="i21Database_1.publish.xml" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

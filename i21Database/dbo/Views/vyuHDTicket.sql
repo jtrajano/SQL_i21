@@ -14,7 +14,7 @@ AS
 		,strPriorityFontColor = pri.strFontColor
 		,strPriorityBackColor = pri.strBackColor
 		,pro.strProduct
-		,mo.strModule
+		,smmo.strModule
 		,ver.strVersionNo
 		,strCreateBy = (select top 1 strName from tblEntity where intEntityId = tic.intCreatedUserEntityId)
 		,tic.dtmCreated
@@ -40,5 +40,6 @@ AS
 		left outer join tblHDTicketPriority pri on pri.intTicketPriorityId = tic.intTicketPriorityId
 		left outer join tblHDTicketProduct pro on pro.intTicketProductId = tic.intTicketProductId
 		left outer join tblHDModule mo on mo.intModuleId = tic.intModuleId
+		left outer join tblSMModule smmo on smmo.intModuleId = mo.intSMModuleId
 		left outer join tblHDVersion ver on ver.intVersionId = tic.intVersionId  
 		left outer join tblHDProject proj on proj.intProjectId = (select top 1 projt.intProjectId from tblHDProjectTask projt where projt.intTicketId = tic.intTicketId)

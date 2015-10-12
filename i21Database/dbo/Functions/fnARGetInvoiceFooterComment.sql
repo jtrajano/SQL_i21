@@ -34,6 +34,16 @@ BEGIN
 					FROM tblARCommentMaintenance
 					WHERE strTransactionType = @strTransactionType
 					  AND intCompanyLocationId IS NULL
+					  AND intEntityCustomerId = @intEntityCustomerId
+					ORDER BY intCommentId DESC
+				END
+
+			IF (@footerComment IS NULL)
+				BEGIN
+					SELECT TOP 1 @footerComment = strCommentDesc
+					FROM tblARCommentMaintenance
+					WHERE strTransactionType = @strTransactionType
+					  AND intCompanyLocationId IS NULL
 					  AND intEntityCustomerId IS NULL
 					ORDER BY intCommentId DESC
 				END

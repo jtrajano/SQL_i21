@@ -53,7 +53,7 @@ ELSE
 
 PROCESS_SHIPMENT:
 IF EXISTS(SELECT 1 FROM tblSOSalesOrderDetail A INNER JOIN tblICItem B ON A.intItemId = B.intItemId 
-                WHERE intSalesOrderId = @SalesOrderId AND strType = 'Inventory' AND intItemUOMId IS NOT NULL)
+                WHERE intSalesOrderId = @SalesOrderId AND dbo.fnIsStockTrackingItem(A.intItemId) = 1 AND intItemUOMId IS NOT NULL)
 	BEGIN		
         EXEC dbo.uspICProcessToInventoryShipment
 		 @intSourceTransactionId = @SalesOrderId

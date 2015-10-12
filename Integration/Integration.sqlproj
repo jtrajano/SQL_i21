@@ -294,5 +294,6 @@
     <None Include="dbo\Views\vyuTMLeaseSearch.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateOpenCallEntryView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateOpenWorkOrderView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateConsumptionSiteSearchView.sql" />
   </ItemGroup>
 </Project>

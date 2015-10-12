@@ -30,7 +30,8 @@ SET ANSI_WARNINGS OFF
 -- Create a unique transaction name. 
 DECLARE @TransactionName AS VARCHAR(500) = 'Payment Transaction' + CAST(NEWID() AS NVARCHAR(100));
 IF @raiseError = 0
-	BEGIN TRAN @TransactionName
+	--BEGIN TRAN @TransactionName
+	BEGIN TRANSACTION
  
 DECLARE @ARReceivablePostData TABLE (
 	intPaymentId int PRIMARY KEY,
@@ -169,7 +170,7 @@ SET @batchIdUsed = @batchId
 --------------------------------------------------------------------------------------------  
 -- Validations  
 --------------------------------------------------------------------------------------------  
-IF @recap = 0
+--IF @recap = 0
 	BEGIN
 	
 		-- Zero Payment
@@ -363,12 +364,15 @@ IF @recap = 0
 						ON A.intAccountId = GL.intAccountId 
 				INNER JOIN 
 					tblGLAccountGroup AG
-						ON GL.intAccountGroupId = AG.intAccountGroupId 											 
+						ON GL.intAccountGroupId = AG.intAccountGroupId
+				INNER JOIN 
+					tblGLAccountCategory AC
+						ON GL.intAccountCategoryId = AC.intAccountCategoryId											 
 				LEFT OUTER JOIN
 					tblCMBankAccount BA
 						ON A.intAccountId = BA.intGLAccountId 						
 				WHERE
-					AG.strAccountGroup = 'Cash Accounts'
+					AC.strAccountCategory = 'Cash Account'
 					AND (BA.intGLAccountId IS NULL
 						 OR BA.ysnActive = 0)
 						 
@@ -534,19 +538,19 @@ IF @recap = 0
 						INNER JOIN
 							tblARInvoice I
 								ON PD.intInvoiceId = I.intInvoiceId
+						WHERE
+							PD.dblPayment <> 0
 						GROUP BY
 							PD.intInvoiceId 
 						HAVING
 							COUNT(PD.intInvoiceId) > 1
-							AND MAX(I.dblAmountDue) < SUM(PD.dblPayment)
+							AND MAX(I.dblAmountDue) < (MAX(I.dblInvoiceTotal) - (SUM(PD.dblPayment) + SUM(PD.dblDiscount)))
 					) I
 						ON C.intInvoiceId = I.intInvoiceId 
 				WHERE
-					A.intPaymentId <> I.intPaymentId 
-			
-					
-				
-				
+					B.dblPayment <> 0
+					AND A.intPaymentId <> I.intPaymentId 
+																
 			END
 
 		--UNPOSTING VALIDATIONS
@@ -563,11 +567,38 @@ IF @recap = 0
 					,@batchId
 					,A.intPaymentId
 				FROM
-					tblARPayment A 
+					tblARPayment A
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId
 				INNER JOIN
 					tblCMBankTransaction B 
 						ON A.strRecordNumber = B.strTransactionId
 				WHERE B.ysnClr = 1
+				
+				--Payment with created Bank Deposit
+				INSERT INTO
+					@ARReceivableInvalidData
+				SELECT 
+					'You cannot unpost payment with created Bank Deposit.'
+					,'Receivable'
+					,A.strRecordNumber
+					,@batchId
+					,A.intPaymentId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId
+				INNER JOIN
+					tblCMUndepositedFund B 
+						ON A.intPaymentId = B.intSourceTransactionId 
+						AND A.strRecordNumber = B.strSourceTransactionId
+				INNER JOIN
+					tblCMBankTransactionDetail TD
+						ON B.intUndepositedFundId = TD.intUndepositedFundId
+				WHERE 
+					B.strSourceSystem = 'AR'
 				
 				---overpayment
 				INSERT INTO
@@ -663,97 +694,99 @@ IF @recap = 0
 		IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 			BEGIN
 				IF @raiseError = 0
-					COMMIT TRAN @TransactionName
+					COMMIT TRANSACTION
 				IF @raiseError = 1
-				BEGIN
-					SELECT TOP 1 @ErrorMerssage = strError FROM @ARReceivableInvalidData
-					RAISERROR(@ErrorMerssage, 11, 1)							
-					GOTO Post_Exit
-				END	
+					BEGIN
+						SELECT TOP 1 @ErrorMerssage = strError FROM @ARReceivableInvalidData
+						RAISERROR(@ErrorMerssage, 11, 1)							
+						GOTO Post_Exit
+					END	
 				GOTO Post_Exit
 			END			
 
 	END
+	
 
-IF @recap = 1
-BEGIN
-	IF @post = 1
-		BEGIN
-			--+overpayment
-			INSERT INTO
-				@AROverpayment
-			SELECT
-				A.intPaymentId
-			FROM
-				tblARPayment A 
-			INNER JOIN
-				@ARReceivablePostData P
-					ON A.intPaymentId = P.intPaymentId				
-			WHERE
-				(A.dblAmountPaid) > (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId)
-				AND EXISTS(SELECT NULL FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND dblPayment <> 0)
+--IF @recap = 1
+--BEGIN
+--	IF @post = 1
+--		BEGIN
+--			--+overpayment
+--			INSERT INTO
+--				@AROverpayment
+--			SELECT
+--				A.intPaymentId
+--			FROM
+--				tblARPayment A 
+--			INNER JOIN
+--				@ARReceivablePostData P
+--					ON A.intPaymentId = P.intPaymentId				
+--			WHERE
+--				(A.dblAmountPaid) > (SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId)
+--				AND EXISTS(SELECT NULL FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND dblPayment <> 0)
 
 
-			--+prepayment
-			INSERT INTO
-				@ARPrepayment
-			SELECT
-				A.intPaymentId
-			FROM
-				tblARPayment A 
-			INNER JOIN
-				@ARReceivablePostData P
-					ON A.intPaymentId = P.intPaymentId				
-			WHERE
-				(A.dblAmountPaid) <> 0
-				AND ISNULL((SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId), 0) = 0
-				AND NOT EXISTS(SELECT NULL FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND dblPayment <> 0)
+--			--+prepayment
+--			INSERT INTO
+--				@ARPrepayment
+--			SELECT
+--				A.intPaymentId
+--			FROM
+--				tblARPayment A 
+--			INNER JOIN
+--				@ARReceivablePostData P
+--					ON A.intPaymentId = P.intPaymentId				
+--			WHERE
+--				(A.dblAmountPaid) <> 0
+--				AND ISNULL((SELECT SUM(dblPayment) FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId), 0) = 0
+--				AND NOT EXISTS(SELECT NULL FROM tblARPaymentDetail WHERE intPaymentId = A.intPaymentId AND dblPayment <> 0)
 		
-		END
-	ELSE
-		BEGIN
+--		END
+--	ELSE
+--		BEGIN
 		
-			---overpayment
-			INSERT INTO
-				@AROverpayment
-			SELECT
-				A.intPaymentId
-			FROM
-				tblARPayment A 
-			INNER JOIN
-				@ARReceivablePostData P
-					ON A.intPaymentId = P.intPaymentId
-			INNER JOIN
-				tblARInvoice I
-					ON A.strRecordNumber = I.strComments 				
-			WHERE
-				I.strTransactionType = 'Overpayment'
+--			---overpayment
+--			INSERT INTO
+--				@AROverpayment
+--			SELECT
+--				A.intPaymentId
+--			FROM
+--				tblARPayment A 
+--			INNER JOIN
+--				@ARReceivablePostData P
+--					ON A.intPaymentId = P.intPaymentId
+--			INNER JOIN
+--				tblARInvoice I
+--					ON A.strRecordNumber = I.strComments 				
+--			WHERE
+--				I.strTransactionType = 'Overpayment'
 
-			---prepayment
-			INSERT INTO
-				@ARPrepayment
-			SELECT
-				A.intPaymentId
-			FROM
-				tblARPayment A 
-			INNER JOIN
-				@ARReceivablePostData P
-					ON A.intPaymentId = P.intPaymentId
-			INNER JOIN
-				tblARInvoice I
-					ON A.strRecordNumber = I.strComments 				
-			WHERE
-				I.strTransactionType = 'Prepayment'			
-		END
+--			---prepayment
+--			INSERT INTO
+--				@ARPrepayment
+--			SELECT
+--				A.intPaymentId
+--			FROM
+--				tblARPayment A 
+--			INNER JOIN
+--				@ARReceivablePostData P
+--					ON A.intPaymentId = P.intPaymentId
+--			INNER JOIN
+--				tblARInvoice I
+--					ON A.strRecordNumber = I.strComments 				
+--			WHERE
+--				I.strTransactionType = 'Prepayment'			
+--		END
 			
-END
+--END
 
 
 --------------------------------------------------------------------------------------------  
 -- Begin a transaction and immediately create a save point 
 --------------------------------------------------------------------------------------------  
 --BEGIN TRAN @TransactionName
---SAVE TRAN @TransactionName
+if @recap = 1 AND @raiseError = 0
+	SAVE TRAN @TransactionName	
 
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
@@ -1060,18 +1093,8 @@ IF @post = 1
 			
 	END TRY
 	BEGIN CATCH	
-		SELECT @ErrorMerssage = ERROR_MESSAGE()
-		IF @raiseError = 0
-			ROLLBACK TRAN @TransactionName
-		IF @raiseError = 0
-			BEGIN TRANSACTION
-		INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-		SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-		IF @raiseError = 0
-			COMMIT TRANSACTION
-		IF @raiseError = 1
-			RAISERROR(@ErrorMerssage, 11, 1)
-		GOTO Post_Exit
+		SELECT @ErrorMerssage = ERROR_MESSAGE()										
+		GOTO Do_Rollback
 	END CATCH
 					
 			
@@ -1149,18 +1172,8 @@ IF @post = 0
 						
 		END TRY
 		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
-				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0
-				BEGIN TRANSACTION
-			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0
-				COMMIT TRANSACTION
-			IF @raiseError = 1
-				RAISERROR(@ErrorMerssage, 11, 1)
-			GOTO Post_Exit
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
 		END CATCH		
 	END   
 
@@ -1172,7 +1185,9 @@ IF @post = 0
 -- 2.	Rollback the save point 
 --------------------------------------------------------------------------------------------  
 IF @recap = 1
-	BEGIN 
+	BEGIN
+		IF @raiseError = 0
+			ROLLBACK TRAN @TransactionName 
 
 		DELETE tblGLDetailRecap  
 		FROM 
@@ -1244,13 +1259,11 @@ IF @recap = 1
 	BEGIN CATCH
 		SELECT @ErrorMerssage = ERROR_MESSAGE()
 		IF @raiseError = 0
-			ROLLBACK TRAN @TransactionName
-		IF @raiseError = 0
-			BEGIN TRANSACTION
-		INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-		SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-		IF @raiseError = 0
-			COMMIT TRANSACTION
+			BEGIN
+				BEGIN TRANSACTION
+				EXEC uspARInsertPostResult @batchId, 'Receive Payment', @ErrorMerssage, @param						
+				COMMIT TRANSACTION
+			END			
 		IF @raiseError = 1
 			RAISERROR(@ErrorMerssage, 11, 1)
 		GOTO Post_Exit
@@ -1269,18 +1282,8 @@ IF @recap = 0
 			EXEC dbo.uspGLBookEntries @GLEntries, @post
 		END TRY
 		BEGIN CATCH
-			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
-				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0
-				BEGIN TRANSACTION
-			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0
-				COMMIT TRANSACTION
-			IF @raiseError = 1
-				RAISERROR(@ErrorMerssage, 11, 1)
-			GOTO Post_Exit
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
 		END CATCH	
 		 
 		BEGIN TRY 
@@ -1291,22 +1294,6 @@ IF @recap = 0
 			INSERT INTO @ARReceivablePostData
 			SELECT Z.intPaymentId, Z.strTransactionId FROM @ZeroPayment Z
 			WHERE NOT EXISTS(SELECT NULL FROM @ARReceivablePostData WHERE intPaymentId = Z.intPaymentId)
-
-			--UPDATE tblARPaymentDetail
-			--SET dblDiscount = CASE WHEN tblARPaymentDetail.dblPayment + P.dblPayment + tblARPaymentDetail.dblDiscount = tblARPaymentDetail.dblInvoiceTotal
-			--					THEN tblARPaymentDetail.dblDiscount
-			--					ELSE 0.00
-			--				  END
-			--FROM (SELECT SUM(C.dblPayment) dblPayment
-			--		   , A.intInvoiceId 
-			--		FROM tblARPaymentDetail A
-			--		INNER JOIN tblARPayment B
-			--			ON A.intPaymentId = B.intPaymentId
-			--		INNER JOIN tblARInvoice C
-			--			ON A.intInvoiceId = C.intInvoiceId
-			--		WHERE A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-			--		GROUP BY A.intInvoiceId) P
-			--WHERE tblARPaymentDetail.intInvoiceId = P.intInvoiceId
 
 			UPDATE 
 				tblARInvoice
@@ -1337,7 +1324,7 @@ IF @recap = 0
 			UPDATE 
 				tblARInvoice
 			SET 
-				tblARInvoice.dblAmountDue = C.dblInvoiceTotal - C.dblPayment
+				tblARInvoice.dblAmountDue = C.dblInvoiceTotal - (C.dblPayment + C.dblDiscount)
 			FROM 
 				tblARPayment A
 			INNER JOIN tblARPaymentDetail B 
@@ -1434,6 +1421,30 @@ IF @recap = 0
 			OR (ISNULL(tblARPayment.strPaymentInfo,'') = '' AND tblSMPaymentMethod.strPaymentMethod = 'Check')
 			)
 			
+			DELETE FROM tblCMUndepositedFund
+			WHERE
+				intUndepositedFundId IN 
+				(
+				SELECT 
+					B.intUndepositedFundId
+				FROM
+					tblARPayment A
+				INNER JOIN
+					@ARReceivablePostData P
+						ON A.intPaymentId = P.intPaymentId
+				INNER JOIN
+					tblCMUndepositedFund B 
+						ON A.intPaymentId = B.intSourceTransactionId 
+						AND A.strRecordNumber = B.strSourceTransactionId
+				LEFT OUTER JOIN
+					tblCMBankTransactionDetail TD
+						ON B.intUndepositedFundId = TD.intUndepositedFundId
+				WHERE 
+					B.strSourceSystem = 'AR'
+					AND TD.intUndepositedFundId IS NULL
+				)
+				
+			
 			--VOID IF CHECK PAYMENT
 			UPDATE tblCMBankTransaction
 			SET ysnCheckVoid = 1,
@@ -1526,22 +1537,6 @@ IF @recap = 0
 					--,intConcurrencyId += 1 
 			WHERE	intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
 
-			--UPDATE tblARPaymentDetail
-			--SET dblDiscount = CASE WHEN tblARPaymentDetail.dblPayment + P.dblPayment + tblARPaymentDetail.dblDiscount = tblARPaymentDetail.dblInvoiceTotal
-			--					THEN tblARPaymentDetail.dblDiscount
-			--					ELSE 0.00
-			--				  END
-			--FROM (SELECT SUM(C.dblPayment) dblPayment
-			--		   , A.intInvoiceId 
-			--		FROM tblARPaymentDetail A
-			--		INNER JOIN tblARPayment B
-			--			ON A.intPaymentId = B.intPaymentId
-			--		INNER JOIN tblARInvoice C
-			--			ON A.intInvoiceId = C.intInvoiceId
-			--		WHERE A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
-			--		GROUP BY A.intInvoiceId) P
-			--WHERE tblARPaymentDetail.intInvoiceId = P.intInvoiceId
-
 			UPDATE 
 				tblARInvoice
 			SET 
@@ -1571,7 +1566,7 @@ IF @recap = 0
 			UPDATE 
 				tblARInvoice
 			SET 
-				tblARInvoice.dblAmountDue = C.dblInvoiceTotal - C.dblPayment
+				tblARInvoice.dblAmountDue = C.dblInvoiceTotal - (C.dblPayment + C.dblDiscount)
 			FROM 
 				tblARPayment A
 			INNER JOIN tblARPaymentDetail B 
@@ -1686,16 +1681,20 @@ IF @recap = 0
 						ON A.intAccountId = GL.intAccountId 
 				INNER JOIN 
 					tblGLAccountGroup AG
-						ON GL.intAccountGroupId = AG.intAccountGroupId 											 
+						ON GL.intAccountGroupId = AG.intAccountGroupId 		
+				INNER JOIN 
+					tblGLAccountCategory AC
+						ON GL.intAccountCategoryId = AC.intAccountCategoryId										 
 				INNER JOIN
 					tblCMBankAccount BA
 						ON A.intAccountId = BA.intGLAccountId 						
 				WHERE
-					AG.strAccountGroup = 'Cash Accounts'
+					AC.strAccountCategory = 'Cash Account'
 					AND BA.intGLAccountId IS NOT NULL
 					AND BA.ysnActive = 1
 					AND A.intPaymentId IN (SELECT intPaymentId FROM @ARReceivablePostData)
 					
+											
 			-- Insert Zero Payments for updating
 			INSERT INTO @ARReceivablePostData
 			SELECT Z.intPaymentId, Z.strTransactionId FROM @ZeroPayment Z
@@ -1770,18 +1769,8 @@ IF @recap = 0
 			
 		END TRY
 		BEGIN CATCH	
-			SELECT @ErrorMerssage = ERROR_MESSAGE()
-			IF @raiseError = 0
-				ROLLBACK TRAN @TransactionName
-			IF @raiseError = 0
-				BEGIN TRANSACTION
-			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT @ErrorMerssage, @transType, @param, @batchId, 0
-			IF @raiseError = 0
-				COMMIT TRANSACTION
-			IF @raiseError = 1
-				RAISERROR(@ErrorMerssage, 11, 1)
-			GOTO Post_Exit
+			SELECT @ErrorMerssage = ERROR_MESSAGE()										
+			GOTO Do_Rollback
 		END CATCH
 					
 	END
@@ -1789,8 +1778,21 @@ IF @recap = 0
 SET @successfulCount = @totalRecords
 SET @invalidCount = @totalInvalid	
 IF @raiseError = 0
-	COMMIT TRAN @TransactionName
+	COMMIT TRANSACTION
 RETURN 1;
+
+Do_Rollback:
+	IF @raiseError = 0
+		BEGIN
+		    IF (XACT_STATE()) = -1
+				ROLLBACK TRANSACTION
+										
+			BEGIN TRANSACTION
+			EXEC uspARInsertPostResult @batchId, 'Receive Payment', @ErrorMerssage, @param								
+			COMMIT TRANSACTION			
+		END
+	IF @raiseError = 1
+		RAISERROR(@ErrorMerssage, 11, 1)
 	    
 -- This is our immediate exit in case of exceptions controlled by this stored procedure
 Post_Exit:

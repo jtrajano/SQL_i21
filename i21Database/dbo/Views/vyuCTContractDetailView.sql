@@ -42,8 +42,11 @@ AS
 			CU.strCurrency,						CS.strContractStatus,			ISNULL(SU.dblStockUOMCF,0)		AS	dblStockUOMCF,	
 			IX.strIndex,						VR.strVendorId,					CD.strReference,
 			IM.intPurchaseTaxGroupId,			SP.intSupplyPointId,			SP.intEntityVendorId			AS	intTerminalId,
-			SP.intRackPriceSupplyPointId,
-
+			SP.intRackPriceSupplyPointId,		IM.intOriginId,
+			RV.dblReservedQuantity,				
+			CD.dblQuantity - RV.dblReservedQuantity AS dblUnReservedQuantity,
+			PA.dblAllocatedQty + SA.dblAllocatedQty AS dblAllocatedQty,
+			CD.dblQuantity - PA.dblAllocatedQty + SA.dblAllocatedQty AS dblUnAllocatedQty,
 			CAST(CASE WHEN CD.intContractStatusId IN (1,4) THEN 1 ELSE 0 END AS BIT) AS ysnAllowedToShow,
 
 			--Header Detail
@@ -105,8 +108,20 @@ AS
 			JOIN	tblICUnitMeasure		UM	ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId 
 			WHERE	ysnStockUnit = 1)		SU	ON	SU.intStockUOM				=	IU.intItemUOMId				LEFT
 	JOIN	tblSMCompanyLocationSubLocation	SB	ON	SB.intCompanyLocationSubLocationId	= IL.intSubLocationId 	LEFT
-	JOIN	tblTRSupplyPoint				SP	ON	SP.intEntityVendorId		=	IX.intVendorId	AND SP.intEntityLocationId = IX.intVendorLocationId
-	/*
-	JOIN	tblICItemPricing			IP	ON	IP.intItemId				=	IM.intItemId				AND
-												IP.intItemLocationId		=	IL.intItemLocationId		LEFT
-	*/
+	JOIN	tblTRSupplyPoint				SP	ON	SP.intEntityVendorId		=	IX.intVendorId	AND 
+													SP.intEntityLocationId = IX.intVendorLocationId				LEFT
+	JOIN	(
+				SELECT		intContractDetailId,ISNULL(SUM(dblReservedQuantity),0) AS dblReservedQuantity 
+				FROM		tblLGReservation 
+				Group By	intContractDetailId
+			)								RV	ON	RV.intContractDetailId		=	CD.intContractDetailId		LEFT	
+	JOIN	(
+				SELECT		intPContractDetailId,ISNULL(SUM(dblPAllocatedQty),0)  AS dblAllocatedQty
+				FROM		tblLGAllocationDetail 
+				Group By	intPContractDetailId
+			)								PA	ON	PA.intPContractDetailId		=	CD.intContractDetailId		LEFT	
+	JOIN	(
+				SELECT		intSContractDetailId,ISNULL(SUM(dblSAllocatedQty),0)  AS dblAllocatedQty
+				FROM		tblLGAllocationDetail 
+				Group By	intSContractDetailId
+			)								SA	ON	SA.intSContractDetailId		=	CD.intContractDetailId	

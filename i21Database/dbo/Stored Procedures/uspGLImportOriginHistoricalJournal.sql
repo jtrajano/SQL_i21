@@ -304,6 +304,7 @@ BEGIN TRANSACTION
 ---------------------------------------------------------------------------------------------------------------------------------------
 COMMIT_INSERT:
 	COMMIT TRANSACTION
+	EXEC dbo.uspGLInsertDebitCreditUnitEntry @result
 	GOTO IMPORT_EXIT
 	
 ROLLBACK_INSERT:

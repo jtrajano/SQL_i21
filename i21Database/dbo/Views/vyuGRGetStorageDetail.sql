@@ -21,7 +21,7 @@ SELECT
 	,b.ysnReceiptedStorage
 	,b.ysnDPOwnedType
 	,b.ysnGrainBankType
-	,b.ysnCustomerStorage 
+	,b.ysnActive ysnCustomerStorage 
 	,a.strCustomerReference  
  	,a.dtmLastStorageAccrueDate  
  	,c1.strScheduleId

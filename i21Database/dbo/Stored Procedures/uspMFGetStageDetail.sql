@@ -2,7 +2,8 @@
 AS
 BEGIN
 	SELECT W.intWorkOrderInputLotId,
-		L.strLotNumber
+		L.intLotId 
+		,L.strLotNumber
 		,I.strItemNo
 		,I.strDescription
 		,W.dblQuantity
