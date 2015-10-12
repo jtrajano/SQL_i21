@@ -2576,6 +2576,7 @@
     <Build Include="dbo\Views\vyuGRStorageSearchView.sql" />
     <Build Include="dbo\Views\vyuRKGetM2MBasis.sql" />
     <Build Include="dbo\Views\vyuMFGetMultipleChangeOverFactor.sql" />
+    <Build Include="dbo\fnGetEntityNumberByEntityIds.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
