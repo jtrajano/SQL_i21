@@ -111,3 +111,6 @@
 
 --GR
 :r .\15_GR\1_ConstraintDropQuery.sql
+
+--HD
+:r .\16_HD\Drop_Constraint.sql
