@@ -2362,6 +2362,11 @@
     <Build Include="dbo\Functions\fnAPValidateRecapBill.sql" />
     <Build Include="dbo\Stored Procedures\uspICErrorMessages.sql" />
     <Build Include="dbo\Views\vyuTRTansportLoad.sql" />
+    <Build Include="dbo\Functions\fnARGetContractPricingDetails.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerPricingDetails.sql" />
+    <Build Include="dbo\Functions\fnARGetInventoryItemPricingDetails.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerItemSpecialPrice.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerItemSpecialPriceId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
