@@ -32,7 +32,7 @@ FROM
 	 dbo.tblTRTransportLoad TL
 	JOIN dbo.tblTRTransportReceipt TR
 		ON TL.intTransportLoadId = TR.intTransportLoadId 
-    JOIN dbo.vyuTRSupplyPointView SP
+    LEFT JOIN dbo.vyuTRSupplyPointView SP
 	     ON SP.intSupplyPointId = TR.intSupplyPointId
 UNION ALL
 SELECT    
@@ -61,7 +61,7 @@ FROM
 	 dbo.tblTRTransportLoad TL
 	JOIN dbo.tblTRTransportReceipt TR
 		ON TL.intTransportLoadId = TR.intTransportLoadId 
-    JOIN dbo.vyuTRSupplyPointView SP
+    LEFT JOIN dbo.vyuTRSupplyPointView SP
 	     ON SP.intSupplyPointId = TR.intSupplyPointId
     JOIN dbo.tblTRDistributionHeader DH
 	    ON DH.intTransportReceiptId = TR.intTransportReceiptId
