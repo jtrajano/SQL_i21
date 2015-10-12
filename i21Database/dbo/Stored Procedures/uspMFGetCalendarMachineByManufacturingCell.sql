@@ -27,7 +27,7 @@ BEGIN
 	JOIN tblMFMachinePackType MP ON MP.intMachineId = M.intMachineId
 	JOIN tblMFManufacturingCellPackType LP ON LP.intPackTypeId = MP.intPackTypeId
 		AND LP.intManufacturingCellId = @intManufacturingCellId
-	WHERE M.intLocationId = @intLocationId
+	WHERE M.intParentMachineId IS NOT NULL AND M.intLocationId = @intLocationId
 	AND M.strName LIKE @strName + '%'
 	ORDER BY M.strName
 END
