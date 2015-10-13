@@ -131,7 +131,7 @@ BEGIN
 	BEGIN 
 		EXEC tSQLt.ExpectException 
 			@ExpectedMessage = 'Internal Error. The source transaction type provided is invalid or not supported.'
-			,@ExpectedErrorNumber = 51124
+			,@ExpectedErrorNumber = 80032
 	END 
 
 	-- Act
