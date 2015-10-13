@@ -2577,6 +2577,7 @@
     <Build Include="dbo\Views\vyuRKGetM2MBasis.sql" />
     <Build Include="dbo\Views\vyuMFGetMultipleChangeOverFactor.sql" />
     <Build Include="dbo\fnGetEntityNumberByEntityIds.sql" />
+    <Build Include="dbo\uspARProcessSplitInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

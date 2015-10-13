@@ -115,6 +115,38 @@ IF(@beginTransaction IS NOT NULL)
 		AND (strTransactionType = @transType OR @transType = 'all')
 	END
 
+--Process Split Invoice
+DECLARE @SplitInvoiceData TABLE(intInvoiceId INT)
+
+INSERT INTO @SplitInvoiceData
+SELECT intInvoiceId FROM tblARInvoice 
+WHERE ysnSplitted = 0 
+  AND ISNULL(intSplitId, 0) > 0
+  AND intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
+
+IF(SELECT COUNT(*) FROM @SplitInvoiceData) > 0
+	BEGIN
+		WHILE EXISTS(SELECT NULL FROM @SplitInvoiceData)
+			BEGIN
+				DECLARE @invoicesToAdd NVARCHAR(MAX) = NULL, @intSplitInvoiceId INT
+
+				SELECT TOP 1 @intSplitInvoiceId = intInvoiceId FROM @SplitInvoiceData ORDER BY intInvoiceId
+
+				EXEC dbo.uspARProcessSplitInvoice @intSplitInvoiceId, @userId, @invoicesToAdd OUT
+
+				DELETE FROM @PostInvoiceData WHERE intInvoiceId = @intSplitInvoiceId
+
+				IF (ISNULL(@invoicesToAdd, '') <> '')
+					BEGIN
+						INSERT INTO @PostInvoiceData 
+						SELECT intInvoiceId, strInvoiceNumber FROM tblARInvoice 
+						WHERE ysnPosted = 0 
+						  AND intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@invoicesToAdd))
+					END
+
+				DELETE FROM @SplitInvoiceData WHERE intInvoiceId = @intSplitInvoiceId
+			END
+	END
 --Removed excluded Invoices to post/unpost
 IF(@exclude IS NOT NULL)
 	BEGIN
