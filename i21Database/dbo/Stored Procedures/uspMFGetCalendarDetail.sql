@@ -6,7 +6,6 @@
 	,@intManufacturingCellId INT
 	,@intCalendarId INT
 	,@intLocationId INT
-	,@ysnpivot BIT
 	,@dtmMachineConfiguredAsOn DATETIME = NULL
 	)
 AS
@@ -270,8 +269,7 @@ BEGIN
 				)
 	END
 
-	IF @ysnpivot = 1
-	BEGIN
+
 		SELECT @strMachineName = Isnull(@strMachineName, '') + '[' + M.strName + '],'
 			,@strMachineName1 = Isnull(@strMachineName1, '') + 'Convert(bit,[' + M.strName + ']) as [' + M.strName + '],'
 		FROM dbo.tblMFMachine M
@@ -314,58 +312,7 @@ BEGIN
 			')) pvt Order by dtmCalendarDate,intShiftSequence'
 
 		EXEC (@SQL)
-	END
-	ELSE
-	BEGIN
-		DECLARE @tblMFMachine TABLE (
-			intMachineId INT
-			,strName NVARCHAR(50)
-			)
-
-		INSERT INTO @tblMFMachine (
-			intMachineId
-			,strName
-			)
-		SELECT M.intMachineId
-			,M.strName
-		FROM dbo.tblMFMachine M
-		JOIN dbo.tblMFMachinePackType MP ON MP.intMachineId = M.intMachineId
-		JOIN dbo.tblMFManufacturingCellPackType LP ON LP.intPackTypeId = MP.intPackTypeId
-			AND LP.intManufacturingCellId = @intManufacturingCellId
-			AND M.intMachineId IN (
-				SELECT Item
-				FROM dbo.fnSplitString(@strMachineId, ',')
-				)
-		ORDER BY M.strName
-
-		SELECT CD.dtmCalendarDate
-			,DATENAME(dw, CD.dtmCalendarDate) AS Day
-			,CD.intShiftId
-			,S.strShiftName
-			,CD.dtmShiftStartTime
-			,CD.dtmCalendarDate + CAST(CD.dtmShiftEndTime - CD.dtmShiftStartTime AS TIME) dtmDuration
-			,CD.dtmShiftEndTime
-			,CD.intNoOfMachine
-			,CD.ysnHoliday
-			,M.intMachineId
-			,M.strName
-			,CONVERT(BIT, CASE 
-					WHEN EXISTS (
-							SELECT *
-							FROM tblMFScheduleCalendarMachineDetail MD
-							WHERE MD.intCalendarDetailId = CD.intCalendarDetailId
-								AND MD.intMachineId = M.intMachineId
-							)
-						THEN 1
-					ELSE 0
-					END) AS ysnSelect
-			,CD.intConcurrencyId
-		FROM #tblMFCalendarDetail CD
-			,dbo.tblMFShift S
-			,@tblMFMachine M
-		WHERE S.intShiftId = CD.intShiftId
-	END
-
+	
 	SELECT CD.dtmCalendarDate
 		,CD.intShiftId
 		,S.strShiftName
