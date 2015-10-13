@@ -147,6 +147,8 @@ BEGIN TRY
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderInputLotId = @intWorkOrderId
 	
+	UPDATE tblMFProductionSummary SET dblInputQuantity=dblInputQuantity-@dblNewWeight WHERE intWorkOrderId=@intWorkOrderId AND intItemId=@intInputItemId
+
 	IF @intTransactionCount = 0
 	COMMIT TRANSACTION
 
