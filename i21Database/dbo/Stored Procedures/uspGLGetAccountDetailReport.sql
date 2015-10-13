@@ -3,6 +3,41 @@
 as
 BEGIN
 SET NOCOUNT ON;
+IF (ISNULL(@xmlParam,'')  = '')
+BEGIN
+	SELECT DISTINCT
+	'' as AccountHeader,
+	'' as strAccountDescripion,
+	'' as strAccountType,
+	'' as strAccountGroup,
+	getdate() as dtmDate,
+	'' as strBatchId,
+	0.0  as dblDebit,
+	0.0 as dblCredit,
+	0.0 as dblDebitUnit,
+	0.0 as dblCreditUnit,
+	'' as strDetailDescription,
+	'' as strTransactionId,
+	0 as intTransactionId,
+	'' as strTransactionType,
+	'' as strTransactionForm ,
+	'' as strModuleName,
+	'' as strReference,
+	'' as strReferenceDetail,
+	'' as strDocument,
+	0.0 as dblTotal,
+	0 as intAccountUnitId,
+	'' as strCode,
+	0 as intGLDetailId,
+	0 as ysnIsUnposted,
+	'' as strAccountId,
+	'' as [Primary Account],
+	'' as Location,
+	'' as strUOMCode,
+	0.0 dblBeginBalance,
+	0.0 as dblBeginBalanceUnit
+	RETURN;
+END
 --SET FMTONLY off;
 DECLARE @idoc INT
 DECLARE @filterTable FilterTableType
@@ -115,7 +150,6 @@ SELECT B.strDescription  as strAccountDescription-- account description
 		,A.intGLDetailId
 		,D.*
 		,A.ysnIsUnposted
-		,isUnposted = CASE WHEN A.intAccountId IS NULL THEN 0 ELSE A.ysnIsUnposted END
 		,(SELECT [strUOMCode] FROM Units WHERE [intAccountId] = A.[intAccountId]) as strUOMCode
 from tblGLDetail  A
 LEFT join tblGLAccount B on B.intAccountId = A.intAccountId
@@ -188,7 +222,7 @@ SELECT DISTINCT
 ,(CASE WHEN A.intAccountUnitId  is  NULL  then '' else A.intAccountUnitId END) as intAccountUnitId
 ,(CASE WHEN A.strCode  is  NULL  then '' else A.strCode END) as strCode
 ,(CASE WHEN A.intGLDetailId  is  NULL  then '' else A.intGLDetailId END) as intGLDetailId
-,(CASE WHEN A.ysnIsUnposted  is  NULL  then '' else A.ysnIsUnposted END) as ysnIsUnposted
+,(CASE WHEN A.ysnIsUnposted  is  NULL  then 0 else A.ysnIsUnposted END) as ysnIsUnposted
 ,(CASE WHEN A.strAccountId  is  NULL  then B.strAccountId else A.strAccountId END) as strAccountId
 ,B.[Primary Account]
 ,B.Location
@@ -198,7 +232,7 @@ SELECT DISTINCT
 					ELSE CAST(ISNULL(ISNULL(B.dblBeginBalanceUnit, 0) / ISNULL((SELECT [dblLbsPerUnit] FROM Units WHERE [intAccountId] = A.[intAccountId]), 0),0) AS NUMERIC(18, 6)) END	
 FROM GLAccountBalance B
 RIGHT JOIN GLAccountDetails A ON B.intAccountId = A.intAccountId and B.intGLDetailId = A.intGLDetailId
-WHERE A.isUnposted = 0 or A.isUnposted IS NULL)
+WHERE ISNULL(A.ysnIsUnposted ,0) = 0)
 SELECT * INTO #tempTableReport  from RAWREPORT
 
 DECLARE @SqlQuery NVARCHAR(MAX)
