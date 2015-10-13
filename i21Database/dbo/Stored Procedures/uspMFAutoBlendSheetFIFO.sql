@@ -109,7 +109,8 @@ BEGIN TRY
         dblIssuedQuantity		NUMERIC(18,6),
         intItemIssuedUOMId      INT,
         intRecipeItemId			INT,
-		intStorageLocationId	INT
+		intStorageLocationId	INT,
+		dblWeightPerQty			NUMERIC(38,20)
 	)
 
 	IF OBJECT_ID('tempdb..#tblBlendSheetLotFinal') IS NOT NULL  
@@ -124,7 +125,8 @@ BEGIN TRY
         dblIssuedQuantity		NUMERIC(18,6),
         intItemIssuedUOMId      INT,
         intRecipeItemId			INT,
-		intStorageLocationId	INT
+		intStorageLocationId	INT,
+		dblWeightPerQty			NUMERIC(38,20)
 	)
 
 	--Get Recipe Input Items
@@ -231,7 +233,9 @@ BEGIN TRY
 						dblUnitCost				NUMERIC(18,6),
 						dblWeightPerQty			NUMERIC(38,20),
 						strCreatedBy			NVARCHAR(50) COLLATE Latin1_General_CI_AS,
-						intParentLotId			INT
+						intParentLotId			INT,
+						intItemUOMId			INT,
+						intItemIssuedUOMId      INT
 					)
 					
 					IF OBJECT_ID('tempdb..#tblParentLot') IS NOT NULL  
@@ -251,6 +255,8 @@ BEGIN TRY
 						dblUnitCost				NUMERIC(18,6),
 						dblWeightPerQty			NUMERIC(38,20),
 						strCreatedBy			NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+						intItemUOMId			INT,
+						intItemIssuedUOMId      INT
 					)
 
 					IF OBJECT_ID('tempdb..#tblAvailableInputLot') IS NOT NULL  
@@ -266,6 +272,8 @@ BEGIN TRY
 						dtmCreateDate			datetime,
 						dtmExpiryDate			datetime,
 						dblUnitCost				NUMERIC(18,6),
+						intItemUOMId			INT,
+						intItemIssuedUOMId      INT
 					)
 
 					IF OBJECT_ID('tempdb..#tblInputLot') IS NOT NULL  
@@ -277,12 +285,14 @@ BEGIN TRY
 						intItemId				INT,
 						dblAvailableQty			NUMERIC(18,6),
 						intStorageLocationId	INT,
-						dblWeightPerQty			NUMERIC(38,20)
+						dblWeightPerQty			NUMERIC(38,20),
+						intItemUOMId			INT,
+						intItemIssuedUOMId      INT
 					)
 											
 					--Get the Lots
 					INSERT INTO #tblLot(intLotId,strLotNumber,intItemId,dblQty,intLocationId,intSubLocationId,intStorageLocationId,
-						dtmCreateDate,dtmExpiryDate,dblUnitCost,dblWeightPerQty,strCreatedBy,intParentLotId)
+						dtmCreateDate,dtmExpiryDate,dblUnitCost,dblWeightPerQty,strCreatedBy,intParentLotId,intItemUOMId,intItemIssuedUOMId)
 					SELECT L.intLotId,
 						L.strLotNumber,
 						L.intItemId,
@@ -295,7 +305,9 @@ BEGIN TRY
 						L.dblLastCost,
 						L.dblWeightPerQty,
 						US.strUserName,
-						L.intParentLotId
+						L.intParentLotId,
+						L.intWeightUOMId,
+						L.intItemUOMId
 						FROM tblICLot L 
 						JOIN tblSMUserSecurity US ON L.intCreatedUserId=US.intUserSecurityID
 						JOIN tblICLotStatus LS ON L.intLotStatusId=LS.intLotStatusId
@@ -307,9 +319,9 @@ BEGIN TRY
 					If @ysnEnableParentLot = 0
 						Begin
 							Insert Into #tblParentLot(intParentLotId,strParentLotNumber,intItemId,dblQty,intLocationId,intSubLocationId,intStorageLocationId,
-								dtmCreateDate,dtmExpiryDate,dblUnitCost,dblWeightPerQty,strCreatedBy)
+								dtmCreateDate,dtmExpiryDate,dblUnitCost,dblWeightPerQty,strCreatedBy,intItemUOMId,intItemIssuedUOMId)
 								Select TL.intLotId,TL.strLotNumber,TL.intItemId,TL.dblQty,TL.intLocationId,TL.intSubLocationId,TL.intStorageLocationId,
-								TL.dtmCreateDate,TL.dtmExpiryDate,TL.dblUnitCost,TL.dblWeightPerQty,TL.strCreatedBy
+								TL.dtmCreateDate,TL.dtmExpiryDate,TL.dblUnitCost,TL.dblWeightPerQty,TL.strCreatedBy,TL.intItemUOMId,TL.intItemIssuedUOMId
 								From #tblLot TL
 						End
 					Else 
@@ -317,22 +329,22 @@ BEGIN TRY
 							If @ysnShowAvailableLotsByStorageLocation=1
 								Begin
 									Insert Into #tblParentLot(intParentLotId,strParentLotNumber,intItemId,dblQty,intLocationId,intSubLocationId,intStorageLocationId,
-									dtmCreateDate,dtmExpiryDate,dblUnitCost,dblWeightPerQty,strCreatedBy)
+									dtmCreateDate,dtmExpiryDate,dblUnitCost,dblWeightPerQty,strCreatedBy,intItemUOMId,intItemIssuedUOMId)
 									Select TL.intParentLotId,PL.strParentLotNumber,TL.intItemId,SUM(TL.dblQty) AS dblQty,TL.intLocationId,TL.intSubLocationId,TL.intStorageLocationId,
-									TL.dtmCreateDate,MAX(TL.dtmExpiryDate) AS dtmExpiryDate,TL.dblUnitCost,TL.dblWeightPerQty,TL.strCreatedBy 
+									TL.dtmCreateDate,MAX(TL.dtmExpiryDate) AS dtmExpiryDate,TL.dblUnitCost,TL.dblWeightPerQty,TL.strCreatedBy,TL.intItemUOMId,TL.intItemIssuedUOMId 
 									From #tblLot TL JOIN tblICParentLot PL ON TL.intParentLotId=PL.intParentLotId
 									GROUP BY TL.intParentLotId,PL.strParentLotNumber,TL.intItemId,TL.intLocationId,TL.intSubLocationId,TL.intStorageLocationId,
-									TL.dtmCreateDate,TL.dblUnitCost,TL.dblWeightPerQty,TL.strCreatedBy
+									TL.dtmCreateDate,TL.dblUnitCost,TL.dblWeightPerQty,TL.strCreatedBy,TL.intItemUOMId,TL.intItemIssuedUOMId
 								End
 							Else
 								Begin
 									Insert Into #tblParentLot(intParentLotId,strParentLotNumber,intItemId,dblQty,intLocationId,intSubLocationId,intStorageLocationId,
-									dtmCreateDate,dtmExpiryDate,dblUnitCost,dblWeightPerQty,strCreatedBy)
+									dtmCreateDate,dtmExpiryDate,dblUnitCost,dblWeightPerQty,strCreatedBy,intItemUOMId,intItemIssuedUOMId)
 									Select TL.intParentLotId,PL.strParentLotNumber,TL.intItemId,SUM(TL.dblQty) AS dblQty,TL.intLocationId,NULL AS intSubLocationId,NULL AS intStorageLocationId,
-									TL.dtmCreateDate,MAX(TL.dtmExpiryDate) AS dtmExpiryDate,TL.dblUnitCost,TL.dblWeightPerQty,TL.strCreatedBy 
+									TL.dtmCreateDate,MAX(TL.dtmExpiryDate) AS dtmExpiryDate,TL.dblUnitCost,TL.dblWeightPerQty,TL.strCreatedBy,TL.intItemUOMId,TL.intItemIssuedUOMId 
 									From #tblLot TL JOIN tblICParentLot PL ON TL.intParentLotId=PL.intParentLotId 
 									GROUP BY TL.intParentLotId,PL.strParentLotNumber,TL.intItemId,TL.intLocationId,
-									TL.dtmCreateDate,TL.dblUnitCost,TL.dblWeightPerQty,TL.strCreatedBy
+									TL.dtmCreateDate,TL.dblUnitCost,TL.dblWeightPerQty,TL.strCreatedBy,TL.intItemUOMId,TL.intItemIssuedUOMId
 								End
 						End
  
@@ -340,7 +352,7 @@ BEGIN TRY
 					--Available Qty = Physical Qty - (Resrved Qty + Sum of Qty Added to Previous Blend Sheet in cuttent Session)
 					If @ysnEnableParentLot = 1 AND @ysnShowAvailableLotsByStorageLocation=1
 					Begin
-						INSERT INTO #tblAvailableInputLot(intParentLotId,intItemId,dblAvailableQty,intStorageLocationId,dblWeightPerQty,dtmCreateDate,dtmExpiryDate,dblUnitCost)
+						INSERT INTO #tblAvailableInputLot(intParentLotId,intItemId,dblAvailableQty,intStorageLocationId,dblWeightPerQty,dtmCreateDate,dtmExpiryDate,dblUnitCost,intItemUOMId,intItemIssuedUOMId)
 						SELECT PL.intParentLotId,PL.intItemId,
 								(
 									PL.dblQty - (
@@ -353,13 +365,14 @@ BEGIN TRY
 								) AS dblAvailableQty,
 								PL.intStorageLocationId,
 								PL.dblWeightPerQty,
-								PL.dtmCreateDate,PL.dtmExpiryDate,PL.dblUnitCost
+								PL.dtmCreateDate,PL.dtmExpiryDate,PL.dblUnitCost,
+								PL.intItemUOMId,PL.intItemIssuedUOMId
 						FROM #tblParentLot AS PL
 						WHERE PL.intItemId = @intRawItemId
 					End
 					Else
 					Begin
-						INSERT INTO #tblAvailableInputLot(intParentLotId,intItemId,dblAvailableQty,intStorageLocationId,dblWeightPerQty,dtmCreateDate,dtmExpiryDate,dblUnitCost)
+						INSERT INTO #tblAvailableInputLot(intParentLotId,intItemId,dblAvailableQty,intStorageLocationId,dblWeightPerQty,dtmCreateDate,dtmExpiryDate,dblUnitCost,intItemUOMId,intItemIssuedUOMId)
 						SELECT PL.intParentLotId,PL.intItemId,
 								(
 									PL.dblQty - (
@@ -371,14 +384,15 @@ BEGIN TRY
 								) AS dblAvailableQty,
 								PL.intStorageLocationId,
 								PL.dblWeightPerQty,
-								PL.dtmCreateDate,PL.dtmExpiryDate,PL.dblUnitCost
+								PL.dtmCreateDate,PL.dtmExpiryDate,PL.dblUnitCost,
+								PL.intItemUOMId,PL.intItemIssuedUOMId
 						FROM #tblParentLot AS PL
 						WHERE PL.intItemId = @intRawItemId
 					End
 
 					--Apply Business Rules
-					SET @strSQL = 'INSERT INTO #tblInputLot(intParentLotId,intItemId,dblAvailableQty,intStorageLocationId,dblWeightPerQty) 
-								   SELECT PL.intParentLotId,PL.intItemId,PL.dblAvailableQty,PL.intStorageLocationId,PL.dblWeightPerQty 
+					SET @strSQL = 'INSERT INTO #tblInputLot(intParentLotId,intItemId,dblAvailableQty,intStorageLocationId,dblWeightPerQty,intItemUOMId,intItemIssuedUOMId) 
+								   SELECT PL.intParentLotId,PL.intItemId,PL.dblAvailableQty,PL.intStorageLocationId,PL.dblWeightPerQty,PL.intItemUOMId,PL.intItemIssuedUOMId 
 								   FROM #tblAvailableInputLot PL WHERE PL.dblAvailableQty > 0 ORDER BY ' + @strOrderByFinal
 
 					EXEC(@strSQL)
@@ -402,7 +416,7 @@ BEGIN TRY
 							BEGIN			
 									If @ysnEnableParentLot=0
 										INSERT INTO #tblBlendSheetLot(intParentLotId,intItemId,dblQuantity,intItemUOMId,
-										dblIssuedQuantity,intItemIssuedUOMId,intRecipeItemId,intStorageLocationId) 
+										dblIssuedQuantity,intItemIssuedUOMId,intRecipeItemId,intStorageLocationId,dblWeightPerQty) 
 										Select
 										L.intLotId,  
 										L.intItemId,
@@ -417,29 +431,31 @@ BEGIN TRY
 										ELSE L.intWeightUOMId 
 										END AS intItemIssuedUOMId,
 										@intRecipeItemId AS intRecipeItemId,
-										@intStorageLocationId AS intStorageLocationId										  
+										@intStorageLocationId AS intStorageLocationId,
+										L.dblWeightPerQty										  
 										from tblICLot L
 										WHERE L.intLotId=@intParentLotId AND L.dblWeight > 0
 									Else
 										INSERT INTO #tblBlendSheetLot(intParentLotId,intItemId,dblQuantity,intItemUOMId,
-										dblIssuedQuantity,intItemIssuedUOMId,intRecipeItemId,intStorageLocationId) 
+										dblIssuedQuantity,intItemIssuedUOMId,intRecipeItemId,intStorageLocationId,dblWeightPerQty) 
 										Select
 										L.intParentLotId,  
 										L.intItemId,
 										CASE WHEN @intIssuedUOMTypeId =2 THEN ((CASE WHEN ROUND(@dblRequiredQty/L.dblWeightPerQty,0) = 0 THEN 1 ELSE ROUND(@dblRequiredQty/L.dblWeightPerQty,0) END) * L.dblWeightPerQty)
 										ELSE ROUND(@dblRequiredQty,3) 
 										END AS dblQuantity,       
-										L.intWeightUOMId AS intItemUOMId,
+										L.intItemUOMId,
 										CASE WHEN @intIssuedUOMTypeId =2 THEN ( CASE WHEN ROUND(@dblRequiredQty/L.dblWeightPerQty,0) = 0 THEN 1 ELSE ROUND(@dblRequiredQty/L.dblWeightPerQty,0) END )
 										ELSE ROUND(@dblRequiredQty,3) 
 										END AS dblIssuedQuantity,
-										CASE WHEN @intIssuedUOMTypeId =2 THEN L.intItemUOMId
-										ELSE L.intWeightUOMId 
+										CASE WHEN @intIssuedUOMTypeId =2 THEN L.intItemIssuedUOMId
+										ELSE L.intItemUOMId 
 										END AS intItemIssuedUOMId,
 										@intRecipeItemId AS intRecipeItemId,
-										CASE When @ysnShowAvailableLotsByStorageLocation = 1 THEN @intStorageLocationId Else 0 END AS intStorageLocationId										  
-										from tblICParentLot L
-										WHERE L.intParentLotId=@intParentLotId AND L.dblWeight > 0
+										CASE When @ysnShowAvailableLotsByStorageLocation = 1 THEN @intStorageLocationId Else 0 END AS intStorageLocationId,
+										L.dblWeightPerQty										  
+										from #tblParentLot L
+										WHERE L.intParentLotId=@intParentLotId --AND L.dblWeight > 0
 
 																			                                          										   
 									SET @dblRequiredQty=0
@@ -450,7 +466,7 @@ BEGIN TRY
 							BEGIN
 									If @ysnEnableParentLot=0
 										INSERT INTO #tblBlendSheetLot(intParentLotId,intItemId,dblQuantity,intItemUOMId,
-										dblIssuedQuantity,intItemIssuedUOMId,intRecipeItemId,intStorageLocationId) 
+										dblIssuedQuantity,intItemIssuedUOMId,intRecipeItemId,intStorageLocationId,dblWeightPerQty) 
 										Select
 										L.intLotId,  
 										L.intItemId,
@@ -465,29 +481,31 @@ BEGIN TRY
 										ELSE L.intWeightUOMId 
 										END AS intItemIssuedUOMId,
 										@intRecipeItemId AS intRecipeItemId,
-										@intStorageLocationId AS intStorageLocationId										  
+										@intStorageLocationId AS intStorageLocationId,
+										L.dblWeightPerQty										  
 										from tblICLot L
 										WHERE L.intLotId=@intParentLotId AND L.dblWeight > 0
 									Else
 										INSERT INTO #tblBlendSheetLot(intParentLotId,intItemId,dblQuantity,intItemUOMId,
-										dblIssuedQuantity,intItemIssuedUOMId,intRecipeItemId,intStorageLocationId) 
+										dblIssuedQuantity,intItemIssuedUOMId,intRecipeItemId,intStorageLocationId,dblWeightPerQty) 
 										Select
 										L.intParentLotId,  
 										L.intItemId,
 										CASE WHEN @intIssuedUOMTypeId =2 THEN ((CASE WHEN ROUND(@dblAvailableQty/L.dblWeightPerQty,0)=0 THEN 1 ELSE ROUND(@dblAvailableQty/L.dblWeightPerQty,0) END) * L.dblWeightPerQty)
 										ELSE ROUND(@dblAvailableQty,3) 
 										END AS dblQuantity,       
-										L.intWeightUOMId AS intItemUOMId,
+										L.intItemUOMId,
 										CASE WHEN @intIssuedUOMTypeId =2 THEN ( CASE WHEN ROUND(@dblAvailableQty/L.dblWeightPerQty,0) = 0 THEN 1 ELSE ROUND(@dblAvailableQty/L.dblWeightPerQty,0) END )
 										ELSE ROUND(@dblAvailableQty,3) 
 										END AS dblIssuedQuantity,
-										CASE WHEN @intIssuedUOMTypeId =2 THEN L.intItemUOMId
-										ELSE L.intWeightUOMId 
+										CASE WHEN @intIssuedUOMTypeId =2 THEN L.intItemIssuedUOMId
+										ELSE L.intItemUOMId
 										END AS intItemIssuedUOMId,
 										@intRecipeItemId AS intRecipeItemId,
-										CASE When @ysnShowAvailableLotsByStorageLocation =1 THEN @intStorageLocationId Else 0 END AS intStorageLocationId										  
-										from tblICParentLot L
-										WHERE L.intParentLotId=@intParentLotId AND L.dblWeight > 0
+										CASE When @ysnShowAvailableLotsByStorageLocation =1 THEN @intStorageLocationId Else 0 END AS intStorageLocationId,
+										L.dblWeightPerQty										  
+										from #tblParentLot L
+										WHERE L.intParentLotId=@intParentLotId --AND L.dblWeight > 0
 
 									SET @dblRequiredQty=@dblRequiredQty-@dblAvailableQty
 							END
@@ -511,9 +529,9 @@ BEGIN TRY
 
 	--Final table after summing the Qty for all individual blend sheet
 	INSERT INTO #tblBlendSheetLotFinal(intParentLotId,intItemId,dblQuantity,intItemUOMId,
-	dblIssuedQuantity,intItemIssuedUOMId,intRecipeItemId,intStorageLocationId)
+	dblIssuedQuantity,intItemIssuedUOMId,intRecipeItemId,intStorageLocationId,dblWeightPerQty)
 	SELECT  intParentLotId,intItemId,SUM(dblQuantity) AS dblQuantity,intItemUOMId,
-	SUM(dblIssuedQuantity) AS dblIssuedQuantity,intItemIssuedUOMId,intRecipeItemId,intStorageLocationId from #tblBlendSheetLot
+	SUM(dblIssuedQuantity) AS dblIssuedQuantity,intItemIssuedUOMId,intRecipeItemId,intStorageLocationId,AVG(dblWeightPerQty) from #tblBlendSheetLot
 	group by intParentLotId,intItemId,intItemUOMId,intItemIssuedUOMId,intRecipeItemId,intStorageLocationId
 
 
@@ -608,7 +626,7 @@ BEGIN TRY
 		--	) AS 'Density' --To Review
 		,CAST(0 AS decimal) AS dblDensity
 		,(BS.dblQuantity / @intEstNoOfSheets) AS dblRequiredQtyPerSheet
-		,PL.dblWeightPerQty AS dblWeightPerUnit
+		,BS.dblWeightPerQty AS dblWeightPerUnit
 		,ISNULL(I.dblRiskScore,0) AS dblRiskScore
 		,BS.intStorageLocationId
 		,CL.strLocationName
@@ -616,7 +634,7 @@ BEGIN TRY
 		,CAST(1 AS BIT) ysnParentLot
 		,'Added' AS strRowState
 		FROM #tblBlendSheetLotFinal BS
-		INNER JOIN tblICParentLot PL ON BS.intParentLotId = PL.intParentLotId	AND PL.dblWeight > 0
+		INNER JOIN tblICParentLot PL ON BS.intParentLotId = PL.intParentLotId	--AND PL.dblWeight > 0
 		INNER JOIN tblICItem I ON I.intItemId = PL.intItemId
 		INNER JOIN tblICItemUOM IU1 ON IU1.intItemUOMId = BS.intItemUOMId
 		INNER JOIN tblICUnitMeasure UM1 ON IU1.intUnitMeasureId=UM1.intUnitMeasureId
