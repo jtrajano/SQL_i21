@@ -68,7 +68,8 @@ SELECT W.intWorkOrderId,
 	,L.strLotAlias 
 	,S.intShiftId 
 	,S.strShiftName 
-	,WI.dtmProductionDate 
+	,WI.dtmProductionDate
+	,1 as intSequenceNo 
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -89,7 +90,6 @@ JOIN dbo.tblMFMachine M ON M.intMachineId = WI.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WI.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
 JOIN dbo.tblSMUserSecurity US ON US.intUserSecurityID = WI.intLastModifiedUserId
-WHERE WI.ysnConsumptionReversed = 0
 
 UNION
 SELECT W.intWorkOrderId,
@@ -135,7 +135,7 @@ SELECT W.intWorkOrderId,
 	,WI.dtmLastModified
 	,US.intUserSecurityID
 	,US.strUserName
-	,'REVERSAL' AS strTransactionName
+	,'CONSUME REVERSAL' AS strTransactionName
 	,NULL as dblReadingQty
 	,NULL as dblTotalizerStartReading
 	,NULL as dblTotalizerEndReading
@@ -155,12 +155,13 @@ SELECT W.intWorkOrderId,
 	,NULL as dblMinColor
 	,NULL as dblColor
 	,NULL as dblMaxColor
-		,L.intLotId 
+	,L.intLotId 
 	,L.strLotNumber 
 	,L.strLotAlias
 	,S.intShiftId 
 	,S.strShiftName 
 	,WI.dtmProductionDate 
+	,2 as intSequenceNo
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderInputLot WI ON WI.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -253,6 +254,7 @@ SELECT W.intWorkOrderId,
 	,S.intShiftId 
 	,S.strShiftName 
 	,WP.dtmProductionDate 
+	,3 as intSequenceNo
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
@@ -273,7 +275,6 @@ JOIN dbo.tblMFMachine M ON M.intMachineId = WP.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WP.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
 JOIN dbo.tblSMUserSecurity US ON US.intUserSecurityID = WP.intLastModifiedUserId
-WHERE WP.ysnProductionReversed = 0
 UNION
 SELECT W.intWorkOrderId,
 	W.strWorkOrderNo
@@ -318,7 +319,7 @@ SELECT W.intWorkOrderId,
 	,WP.dtmLastModified
 	,US.intUserSecurityID
 	,US.strUserName
-	,'REVERSAL' AS TransactionName
+	,'PRODUCE REVERSAL' AS TransactionName
 	,NULL as dblReadingQty
 	,NULL as dblTotalizerStartReading
 	,NULL as dblTotalizerEndReading
@@ -338,12 +339,13 @@ SELECT W.intWorkOrderId,
 	,NULL as dblMinColor
 	,NULL as dblColor
 	,NULL as dblMaxColor
-		,L.intLotId 
+	,L.intLotId 
 	,L.strLotNumber 
 	,L.strLotAlias
-		,S.intShiftId 
+	,S.intShiftId 
 	,S.strShiftName 
 	,WP.dtmProductionDate 
+	,4 as intSequenceNo
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderProducedLot WP ON WP.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
