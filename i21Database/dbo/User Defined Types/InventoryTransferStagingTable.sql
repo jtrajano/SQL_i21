@@ -31,4 +31,7 @@ CREATE TYPE [dbo].[InventoryTransferStagingTable] AS TABLE
 	-- Integration Field
 	,[intInventoryTransferId] INT NULL											-- Existing id of an Inventory Transfer
 	,[intSourceId] INT NOT NULL													-- PK id of the source transaction. Ex. Transport Load id. 
+	,[strSourceId] NVARCHAR(50) NULL											-- String Id of the source transaction. 
+	,[strSourceScreenName] NVARCHAR(50) NULL									-- Name of the screen name where the transaction is coming from.
+
 )

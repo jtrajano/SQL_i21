@@ -11,7 +11,10 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @StartingNumberId_InventoryTransfer AS INT = 41;
 DECLARE @InventoryTransferNumber AS NVARCHAR(50);
-DECLARE @InventoryTransferId AS INT;
+DECLARE @InventoryTransferId AS INT
+		,@strSourceId AS NVARCHAR(50)
+		,@strSourceScreenName AS NVARCHAR(50)
+		,@strTransferId AS NVARCHAR(50)		
 
 -- Create the temp table if it does not exists. 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddInventoryTransferResult')) 
@@ -88,6 +91,8 @@ BEGIN
 
 		-- Check if there is an existing Inventory Transfer 
 		SELECT	@InventoryTransferId = RawData.intInventoryTransferId
+				,@strSourceScreenName = RawData.strSourceScreenName
+				,@strSourceId = RawData.strSourceId
 		FROM	@TransferEntries RawData INNER JOIN @DataForInventoryTransferHeader RawHeaderData
 					ON RawHeaderData.TransferType = RawData.strTransferType
 					AND RawHeaderData.SourceType = RawData.intSourceType
@@ -277,6 +282,25 @@ BEGIN
 		FROM	dbo.tblICInventoryTransfer InvTransfer INNER JOIN dbo.tblICInventoryTransferDetail InvDetail
 					ON InvTransfer.intInventoryTransferId = InvDetail.intInventoryTransferId
 		WHERE	InvTransfer.intInventoryTransferId = @InventoryTransferId
+
+		-- Create an Audit Log
+		BEGIN 
+			DECLARE @strDescription AS NVARCHAR(100) = @strSourceScreenName + ' to Inventory Receipt'
+			
+			SELECT	@strTransferId = strTransferNo
+			FROM	dbo.tblICInventoryTransfer 
+			WHERE	intInventoryTransferId = @InventoryTransferId
+			
+			EXEC	dbo.uspSMAuditLog 
+					@keyValue = @InventoryTransferId						-- Primary Key Value of the Inventory Receipt. 
+					,@screenName = 'Inventory.view.InventoryTransfer'        -- Screen Namespace
+					,@entityId = @intEntityId                               -- Entity Id.
+					,@actionType = 'Processed'                              -- Action Type
+					,@changeDescription = @strDescription					-- Description
+					,@fromValue = @strSourceId                              -- Previous Value
+					,@toValue = @strTransferId								-- New Value
+		END
+
 
 		-- Fetch the next row from cursor. 
 		FETCH NEXT FROM loopDataForTransferHeader INTO @intId;

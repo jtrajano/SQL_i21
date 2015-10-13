@@ -485,5 +485,23 @@ BEGIN
 	COMMIT TRAN @TransactionName
 END
 
+-- Create an Audit Log
+IF @ysnRecap = 0 
+BEGIN 
+	DECLARE @strDescription AS NVARCHAR(100) 
+			,@actionType AS NVARCHAR(50)
+
+	SELECT @actionType = CASE WHEN @ysnPost = 1 THEN 'Posted'  ELSE 'Unposted' END 
+			
+	EXEC	dbo.uspSMAuditLog 
+			@keyValue = @intTransactionId							-- Primary Key Value of the Inventory Adjustment. 
+			,@screenName = 'Inventory.view.InventoryAdjustment'     -- Screen Namespace
+			,@entityId = @intEntityId                               -- Entity Id.
+			,@actionType = @actionType                              -- Action Type
+			,@changeDescription = @strDescription					-- Description
+			,@fromValue = ''										-- Previous Value
+			,@toValue = ''											-- New Value
+END
+
 -- This is our immediate exit in case of exceptions controlled by this stored procedure
 Post_Exit:
