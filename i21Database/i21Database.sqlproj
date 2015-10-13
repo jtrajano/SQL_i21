@@ -2578,6 +2578,9 @@
     <Build Include="dbo\Views\vyuMFGetMultipleChangeOverFactor.sql" />
     <Build Include="dbo\fnGetEntityNumberByEntityIds.sql" />
     <Build Include="dbo\Stored Procedures\uspMFTransferBlendSheet.sql" />
+    <Build Include="dbo\Tables\tblRKM2MInquiry.sql" />
+    <Build Include="dbo\Tables\tblRKM2MInquiryTransaction.sql" />
+    <Build Include="dbo\Tables\tblRKM2MInquirySummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

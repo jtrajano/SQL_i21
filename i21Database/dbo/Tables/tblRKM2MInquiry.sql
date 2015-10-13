@@ -1,0 +1,25 @@
+﻿CREATE TABLE [dbo].[tblRKM2MInquiry]
+(
+	[intM2MInquiryId] INT IDENTITY(1,1) NOT NULL,	
+	[intConcurrencyId] INT NOT NULL, 
+	[strRecordName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL,
+    [dtmBasisEntryAsOf] DATETIME NOT NULL, 
+    [dtmFuturesClosingAsOf] DATETIME NOT NULL, 
+    [intQuantityUOM] INT NOT NULL, 
+    [intPriceItemUOMId] INT NOT NULL, 
+    [intCurrencyId] INT NOT NULL, 
+    [dtmContractDateUpTo] DATETIME NULL, 
+    [dtmAllocationDateUpTo] DATETIME NULL, 
+    [dtmPricedDateUpTo] DATETIME NULL, 
+    [strRateType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [intCommodityId] INT NULL, 
+    [intCompanyLocationId] INT NULL, 
+    [intMarketZoneId] INT NULL, 
+    CONSTRAINT [PK_tblRKM2MInquiry_intM2MInquiryId] PRIMARY KEY (intM2MInquiryId),   
+	CONSTRAINT [UK_tblRKM2MInquiry_dtmM2MBasisDate] UNIQUE ([strRecordName]),
+	CONSTRAINT [FK_tblRKM2MInquiry_tblRKM2MBasis_dtmBasisEntryAsOf] FOREIGN KEY(dtmBasisEntryAsOf)REFERENCES [dbo].[tblRKM2MBasis] (dtmM2MBasisDate),
+	CONSTRAINT [FK_tblRKM2MInquiry_tblSMCurrency_intCurrencyId] FOREIGN KEY(intCurrencyId)REFERENCES [dbo].[tblSMCurrency] (intCurrencyID),
+	CONSTRAINT [FK_tblRKM2MInquiry_tblICCommodity_intCommodityId] FOREIGN KEY([intCommodityId])REFERENCES [dbo].[tblICCommodity] ([intCommodityId]), 
+	CONSTRAINT [FK_tblRKM2MInquiry_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY(intCompanyLocationId)REFERENCES [dbo].[tblSMCompanyLocation] (intCompanyLocationId),
+	CONSTRAINT [FK_tblRKM2MInquiry_tblARMarketZone_intMarketZoneId] FOREIGN KEY(intMarketZoneId)REFERENCES [dbo].[tblARMarketZone] (intMarketZoneId)
+)

@@ -44,7 +44,7 @@ AS
 				,c.strCountry strOriginDest
 				,cd.strFutMarketName
 				,strFutureMonth
-				,RIGHT(CONVERT(VARCHAR(11),UPPER(dtmEndDate),106),8) AS strPeriodTo
+				,Null AS strPeriodTo
 				,strLocationName
 				,strMarketZoneCode
 				,CASE WHEN ISNULL(muc.strCurrency,'') = '' THEN cd.strCurrency ELSE muc.strCurrency END strCurrency
