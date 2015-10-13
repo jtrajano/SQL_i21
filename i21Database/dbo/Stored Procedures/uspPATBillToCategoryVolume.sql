@@ -1,5 +1,5 @@
 ﻿
-CREATE PROCEDURE [dbo].[usp_PATBillToCategoryVolume] 
+CREATE PROCEDURE [dbo].[uspPATBillToCategoryVolume] 
 	@intEntityCustomerId INT,
 	@intBillId INT,
 	@ysnPosted BIT = NULL,

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[usp_PATInvoiceToCategoryVolume] 
+﻿CREATE PROCEDURE [dbo].[uspPATInvoiceToCategoryVolume] 
 	@intEntityCustomerId INT,
 	@intInvoiceId INT,
 	@ysnPosted BIT = NULL,
