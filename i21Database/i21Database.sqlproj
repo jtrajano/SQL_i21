@@ -2581,6 +2581,11 @@
     <Build Include="dbo\Tables\tblRKM2MInquiry.sql" />
     <Build Include="dbo\Tables\tblRKM2MInquiryTransaction.sql" />
     <Build Include="dbo\Tables\tblRKM2MInquirySummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHGeneratePickTask.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHStageTask.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHLoadTask.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHCreateSplitAndPickTask.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHCreatePickTask.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
