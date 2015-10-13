@@ -617,6 +617,21 @@ BEGIN
 			CLOSE loopReceiptItems;
 			DEALLOCATE loopReceiptItems;
 		END 
+		
+		-- Calculate the other charges
+		BEGIN 			
+			-- Calculate the other charges. 
+			EXEC dbo.uspICCalculateInventoryReceiptOtherCharges
+				@InventoryReceiptId			
+
+			-- Calculate the surcharges
+			EXEC dbo.uspICCalculateInventoryReceiptSurchargeOnOtherCharges
+				@InventoryReceiptId
+			
+			-- Allocate the other charges and surcharges. 
+			EXEC dbo.uspICAllocateInventoryReceiptOtherCharges 
+				@InventoryReceiptId			
+		END 
 
 		-- Calculate the tax per line item 
 		UPDATE	ReceiptItem 
