@@ -2587,6 +2587,7 @@
     <Build Include="dbo\Stored Procedures\uspWHCreateSplitAndPickTask.sql" />
     <Build Include="dbo\Stored Procedures\uspWHCreatePickTask.sql" />
     <Build Include="dbo\uspARProcessSplitInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFCreateUpdateParentLotNumber.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
