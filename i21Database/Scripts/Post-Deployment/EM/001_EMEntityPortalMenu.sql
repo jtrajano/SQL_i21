@@ -154,7 +154,7 @@ IF exists(select 1 from tblEntityPortalMenu where strPortalMenuName = 'Tickets' 
 BEGIN
 	EXEC( '
 	UPDATE tblEntityPortalMenu 
-		set strCommand = ''''HelpDesk.view.Ticket:searchConfigAll'' 
+		set strCommand = ''HelpDesk.view.Ticket:searchConfigAll'' 
 	where strPortalMenuName = ''Tickets'' 
 		and strType = ''Screen'' 
 		and strCommand = ''HelpDesk.controller.CPTickets'' ')
