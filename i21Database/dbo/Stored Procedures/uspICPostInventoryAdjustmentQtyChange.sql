@@ -57,7 +57,7 @@ BEGIN
 		WHERE intItemId = @intItemId		
 
 		-- 'The UOM is missing on {Item}.'
-		RAISERROR(51136, 11, 1, @strItemNo);
+		RAISERROR(80039, 11, 1, @strItemNo);
 		GOTO _Exit
 	END
 
@@ -72,8 +72,8 @@ BEGIN
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
-			AND ISNULL(Detail.dblQuantity, 0) = 0
-			AND ISNULL(Detail.dblNewQuantity, 0) = 0
+			AND ISNULL(Detail.dblAdjustByQuantity, 0) = 0
+			--OR ISNULL(Detail.dblNewQuantity, 0) = 0
 	
 	IF @intItemId IS NOT NULL 
 	BEGIN
@@ -82,7 +82,7 @@ BEGIN
 		WHERE intItemId = @intItemId		
 
 		-- 'Please specify the Adjust By Quantity or New Quantity on {Item}.'
-		RAISERROR(51131, 11, 1, @strItemNo);
+		RAISERROR(80040, 11, 1, @strItemNo);
 		GOTO _Exit
 	END
 END 
