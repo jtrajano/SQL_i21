@@ -118,31 +118,27 @@ BEGIN
 		,ysnHoliday
 		,intConcurrencyId
 		)
-	SELECT intCalendarDetailId
-		,dtmCalendarDate
-		,intShiftId
-		,dtmShiftStartTime
+	SELECT CD.intCalendarDetailId
+		,CD.dtmCalendarDate
+		,CD.intShiftId
+		,CD.dtmShiftStartTime
 		,dtmShiftEndTime
-		,intNoOfMachine
-		,ysnHoliday
-		,intConcurrencyId
-	FROM dbo.tblMFScheduleCalendarDetail
-	WHERE intCalendarId = @intCalendarId
-		AND dtmCalendarDate BETWEEN @dtmFromDate
+		,ISNULL((
+		SELECT COUNT(*)
+		FROM dbo.tblMFScheduleCalendarMachineDetail MD
+		JOIN dbo.fnSplitString(@strMachineId, ',') M on M.Item=MD.intMachineId
+		WHERE MD.intCalendarDetailId = CD.intCalendarDetailId
+		),0) AS intNoOfMachine
+		,CD.ysnHoliday
+		,CD.intConcurrencyId
+	FROM dbo.tblMFScheduleCalendarDetail CD
+	WHERE CD.intCalendarId = @intCalendarId
+		AND CD.dtmCalendarDate BETWEEN @dtmFromDate
 			AND @dtmToDate
-		AND intShiftId IN (
+		AND CD.intShiftId IN (
 			SELECT Item
 			FROM dbo.fnSplitString(@strShiftId, ',')
 			)
-
-	--IF EXISTS (
-	--		SELECT *
-	--		FROM #tblMFCalendarDetail
-	--		)
-	--BEGIN
-	--	SELECT @dtmFromDate = MAX(dtmCalendarDate) + 1
-	--	FROM tblMFScheduleCalendarDetail
-	--END
 
 	WHILE @dtmToDate >= @dtmFromDate
 	BEGIN
