@@ -71,7 +71,8 @@ BEGIN TRY
 		intItemId INT,
 		dblQty NUMERIC(18,6),
 		dblRemainingSKUQty NUMERIC(18,6),
-		dtmProductionDate DATETIME
+		dtmProductionDate DATETIME,
+		intGroupId INT
 		)
 		
 		IF EXISTS (SELECT * FROM tblWHTask WHERE intOrderHeaderId = @intOrderHeaderId AND ISNULL(intAssigneeId, 0) = 0 AND ( intTaskTypeId IN ( 2 ,7 ,13 )))
@@ -93,17 +94,25 @@ BEGIN TRY
 			dblRequiredQty,
 			ysnStrictTracking
 			)
-		SELECT DISTINCT oh.intOrderHeaderId, 
-						oli.intOrderLineItemId, 
-						i.intItemId, 
-						oli.dblQty - SUM(ISNULL(t.dblQty,0)) dblRemainingLineItemQty,
-						i.ysnStrictFIFO
-		FROM tblWHOrderHeader oh
-		JOIN tblWHOrderLineItem oli ON oh.intOrderHeaderId = oli.intOrderHeaderId
-		JOIN tblICItem i ON i.intItemId = oli.intItemId
-		LEFT JOIN tblWHTask t ON t.intOrderHeaderId = oh.intOrderHeaderId AND t.intItemId = oli.intItemId
-		WHERE oh.intOrderHeaderId = @intOrderHeaderId
-		GROUP BY  oli.intOrderLineItemId,i.intItemId,oh.intOrderHeaderId, oli.dblQty, i.ysnStrictFIFO
+			SELECT DISTINCT oh.intOrderHeaderId, 
+							oli.intOrderLineItemId, 
+							i.intItemId, 
+							oli.dblQty - ISNULL((
+										 SELECT SUM(CASE 
+													WHEN t.intTaskTypeId = 13
+														THEN s.dblQty - t.dblQty
+													ELSE t.dblQty
+													END)
+										 FROM tblWHTask t
+										 JOIN tblWHSKU s ON s.intSKUId = t.intSKUId
+										 WHERE t.intOrderHeaderId = oh.intOrderHeaderId
+											AND t.intItemId = oli.intItemId
+										), 0) dblRemainingLineItemQty, 
+							i.ysnStrictFIFO
+			FROM tblWHOrderHeader oh
+			JOIN tblWHOrderLineItem oli ON oh.intOrderHeaderId = oli.intOrderHeaderId
+			JOIN tblICItem i ON i.intItemId = oli.intItemId
+			WHERE oh.intOrderHeaderId = @intOrderHeaderId
 		
 		SELECT @intItemRecordId = MIN(intItemRecordId)
 		FROM @tblLineItem
@@ -131,12 +140,13 @@ BEGIN TRY
 								 intItemId, 
 								 dblQty, 
 								 dblRemainingSKUQty, 
-								 dtmProductionDate)
+								 dtmProductionDate,
+								 intGroupId)
 			SELECT s.intSKUId, 
 				   s.intItemId, 
 				   s.dblQty, 
 				   s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0))) AS dblRemainingSKUQty, 
-				   s.dtmProductionDate
+				   s.dtmProductionDate,1
 			FROM tblWHSKU s
 			LEFT JOIN tblWHTask t ON t.intSKUId = s.intSKUId
 			WHERE s.intItemId = @intItemId
@@ -154,6 +164,27 @@ BEGIN TRY
 			GROUP BY s.intSKUId, s.intItemId, s.dblQty, s.dtmProductionDate
 			HAVING s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0))) > 0
 			ORDER BY ABS((s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0)))) - @dblRequiredQty), s.dtmProductionDate ASC
+
+			INSERT INTO @tblSKU (intSKUId, 
+									intItemId, 
+									dblQty, 
+									dblRemainingSKUQty, 
+									dtmProductionDate,
+									intGroupId)
+			SELECT s.intSKUId, 
+					s.intItemId, 
+					s.dblQty, 
+					s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0))) AS dblRemainingSKUQty, 
+					s.dtmProductionDate,2
+			FROM tblWHSKU s
+			LEFT JOIN tblWHTask t ON t.intSKUId = s.intSKUId
+			WHERE s.intItemId = @intItemId
+					AND s.intSKUStatusId = 1
+					AND NOT EXISTS (SELECT * FROM @tblSKU WHERE intSKUId = s.intSKUId)
+			GROUP BY s.intSKUId, s.intItemId, s.dblQty, s.dtmProductionDate
+			HAVING s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0))) > 0
+			ORDER BY ABS((s.dblQty - (SUM(ISNULL(CASE WHEN t.intTaskTypeId = 13 THEN s.dblQty-t.dblQty ELSE  t.dblQty END,0)))) - @dblRequiredQty), s.dtmProductionDate ASC
+
 
 			SELECT @intSKURecordId = MIN(intSKURecordId) 
 			FROM @tblSKU 
@@ -207,10 +238,19 @@ BEGIN TRY
 							BREAK;
 						END
 					END
+					DELETE FROM @tblSKU WHERE intSKUId = @intSKUId
+					SET @intSKURecordId = NULL
 					
-					
-					SELECT @intSKURecordId = MIN(intSKURecordId) 
-					FROM @tblSKU WHERE intSKURecordId > @intSKURecordId
+					SELECT TOP 1 @intSKURecordId = intSKURecordId
+					FROM @tblSKU s WHERE intGroupId = 1
+					ORDER BY ABS(s.dblQty - @dblRequiredQty) ASC
+
+					IF @intSKURecordId IS NULL
+					BEGIN 
+						SELECT TOP 1 @intSKURecordId = intSKURecordId
+						FROM @tblSKU s WHERE intGroupId = 2
+						ORDER BY ABS(s.dblQty - @dblRequiredQty) ASC
+					END
 			END
 			
 			SELECT @intItemRecordId = MIN(intItemRecordId)
@@ -221,32 +261,7 @@ BEGIN TRY
 
 	
 	IF @intTransactionCount = 0
-	COMMIT TRANSACTION	
-	
-	IF EXISTS (
-				SELECT DISTINCT oli.dblQty - SUM(ISNULL(CASE 
-								WHEN t.intTaskTypeId = 13
-									THEN (s.dblQty - t.dblQty)
-								ELSE t.dblQty
-								END, 0)) dblRemainingLineItemQty
-				FROM tblWHOrderHeader oh
-				JOIN tblWHOrderLineItem oli ON oh.intOrderHeaderId = oli.intOrderHeaderId
-				LEFT JOIN tblWHTask t ON t.intOrderHeaderId = oh.intOrderHeaderId
-					AND t.intItemId = oli.intItemId
-				LEFT JOIN tblWHSKU s ON s.intSKUId = t.intSKUId
-				WHERE oh.intOrderHeaderId = @intOrderHeaderId
-				GROUP BY oli.intOrderLineItemId, oli.dblQty
-				HAVING oli.dblQty - SUM(ISNULL(CASE 
-								WHEN t.intTaskTypeId = 13
-									THEN (s.dblQty - t.dblQty)
-								ELSE t.dblQty
-								END, 0)) > 0
-			  )
-	BEGIN
-		RAISERROR ('PICK TASKs WERE NOT GENERATED FOR ALL THE LINE ITEMS.', 11, 1)
-	END
-	
-	
+	COMMIT TRANSACTION		
 END TRY
 
 BEGIN CATCH
