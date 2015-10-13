@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[usp_PATBillToCategoryVolume] 
+﻿
+CREATE PROCEDURE [dbo].[usp_PATBillToCategoryVolume] 
 	@intEntityCustomerId INT,
 	@intBillId INT,
 	@ysnPosted BIT = NULL,
@@ -115,10 +116,19 @@ DECLARE @dtmMembershipDate DATETIME,
 							END
 							ELSE
 							BEGIN
-								UPDATE tblPATCategoryVolume
-								   SET dblVolume = dblVolume - @TotalUnit
-								 WHERE intCustomerPatronId = @intEntityCustomerId
-								   AND intPatronageCategoryId = @intPatronageCategoryId
+								IF((SELECT dblVolume FROM tblPATCategoryVolume WHERE intCustomerPatronId = @intEntityCustomerId AND intPatronageCategoryId = @intPatronageCategoryId) = @TotalUnit)
+								BEGIN
+									DELETE FROM tblPATCategoryVolume 
+									 WHERE intCustomerPatronId = @intEntityCustomerId
+									   AND intPatronageCategoryId = @intPatronageCategoryId
+								END
+								ELSE
+								BEGIN
+									UPDATE tblPATCategoryVolume
+									   SET dblVolume = dblVolume - @TotalUnit
+									 WHERE intCustomerPatronId = @intEntityCustomerId
+									   AND intPatronageCategoryId = @intPatronageCategoryId
+								END
 							END
 						
 						END
@@ -185,10 +195,19 @@ DECLARE @dtmMembershipDate DATETIME,
 									END
 									ELSE
 									BEGIN
-										UPDATE tblPATCategoryVolume
-										   SET dblVolume = dblVolume - @TotalUnit
-										 WHERE intCustomerPatronId = @intEntityCustomerId
-										   AND intPatronageCategoryId = @intPatronageCategoryId
+										IF((SELECT dblVolume FROM tblPATCategoryVolume WHERE intCustomerPatronId = @intEntityCustomerId AND intPatronageCategoryId = @intPatronageCategoryId) = @TotalUnit)
+										BEGIN
+											DELETE FROM tblPATCategoryVolume 
+											 WHERE intCustomerPatronId = @intEntityCustomerId
+											   AND intPatronageCategoryId = @intPatronageCategoryId
+										END
+										ELSE
+										BEGIN
+											UPDATE tblPATCategoryVolume
+											   SET dblVolume = dblVolume - @TotalUnit
+											 WHERE intCustomerPatronId = @intEntityCustomerId
+											   AND intPatronageCategoryId = @intPatronageCategoryId
+										END
 									END
 						
 								END
@@ -219,10 +238,19 @@ DECLARE @dtmMembershipDate DATETIME,
 						END
 						ELSE
 						BEGIN
-							UPDATE tblPATCategoryVolume
-							   SET dblVolume = (dblVolume - @Total)
-							 WHERE intCustomerPatronId = @intEntityCustomerId
-							   AND intPatronageCategoryId = @intPatronageCategoryId
+							IF((SELECT dblVolume FROM tblPATCategoryVolume WHERE intCustomerPatronId = @intEntityCustomerId AND intPatronageCategoryId = @intPatronageCategoryId) = @TotalUnit)
+							BEGIN
+								DELETE FROM tblPATCategoryVolume 
+									WHERE intCustomerPatronId = @intEntityCustomerId
+									AND intPatronageCategoryId = @intPatronageCategoryId
+							END
+							ELSE
+							BEGIN
+								UPDATE tblPATCategoryVolume
+									SET dblVolume = dblVolume - @Total
+									WHERE intCustomerPatronId = @intEntityCustomerId
+									AND intPatronageCategoryId = @intPatronageCategoryId
+							END
 						END
 					END
 					ELSE
@@ -233,6 +261,5 @@ DECLARE @dtmMembershipDate DATETIME,
 		END
 		DROP TABLE #tempTable
 END
-
-
 GO
+
