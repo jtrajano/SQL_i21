@@ -132,7 +132,7 @@ BEGIN TRY
 		,@dblAdjustByQuantity = @dblAdjustByQuantity
 		,@dblNewSplitLotQuantity = 0
 		,@dblNewWeight = NULL
-		,@intNewItemUOMId = @intNewItemUOMId
+		,@intNewItemUOMId = NULL
 		,@intNewWeightUOMId = NULL
 		,@dblNewUnitCost = NULL
 		-- Parameters used for linking or FK (foreign key) relationships
