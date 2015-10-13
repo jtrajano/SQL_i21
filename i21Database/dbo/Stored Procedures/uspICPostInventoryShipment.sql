@@ -238,11 +238,21 @@ BEGIN
 														LotItemUOM.dblUnitQty
 											END
 
-			,dblCost					= CASE	WHEN Lot.dblLastCost IS NULL THEN 
-													(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = Detail.intItemId AND intItemLocationId = dbo.fnICGetItemLocation(Detail.intItemId, Header.intShipFromLocationId))
-												ELSE 
-													Lot.dblLastCost 
+			,dblCost					=	CASE	WHEN Lot.dblLastCost IS NULL THEN 
+														(	
+															SELECT	TOP 1 dblLastCost 
+															FROM	tblICItemPricing 
+															WHERE	intItemId = Detail.intItemId 
+																	AND intItemLocationId = dbo.fnICGetItemLocation(Detail.intItemId, Header.intShipFromLocationId)
+														)
+													ELSE 
+														Lot.dblLastCost 
 											END									
+											* CASE	WHEN  Lot.intLotId IS NULL THEN 
+														ItemUOM.dblUnitQty
+													ELSE
+														LotItemUOM.dblUnitQty
+											END
 			,dblSalesPrice				= 0.00
 			,intCurrencyId				= NULL 
 			,dblExchangeRate			= 1
@@ -265,8 +275,8 @@ BEGIN
 				ON LotItemUOM.intItemUOMId = Lot.intItemUOMId
 			LEFT JOIN tblICItemUOM WeightUOM 
 				ON WeightUOM.intItemUOMId = Lot.intWeightUOMId
-			INNER JOIN vyuICGetShipmentItemSource ItemSource 
-				ON ItemSource.intInventoryShipmentItemId = Detail.intInventoryShipmentItemId
+			--INNER JOIN vyuICGetShipmentItemSource ItemSource 
+			--	ON ItemSource.intInventoryShipmentItemId = Detail.intInventoryShipmentItemId
 	WHERE	Header.intInventoryShipmentId = @intTransactionId
   
 	-- Call the post routine 
