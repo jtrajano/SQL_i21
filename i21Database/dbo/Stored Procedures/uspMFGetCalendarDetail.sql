@@ -21,8 +21,11 @@ BEGIN
 		,@dtmHolidayToDate DATETIME
 		,@strMachineName1 NVARCHAR(MAX)
 		,@dtmFromDate1 DATETIME
+		,@dtmCurrentDate DATETIME
 
-		Select @dtmFromDate1=@dtmFromDate
+	SELECT @dtmFromDate1=@dtmFromDate
+
+	SELECT @dtmCurrentDate=GETDATE()
 
 	DECLARE @tblMFHolidayCalendar TABLE (dtmHolidayDate DATETIME)
 	DECLARE @tblMFHoliday TABLE (
@@ -53,7 +56,7 @@ BEGIN
 				THEN @dtmToDate
 			ELSE dtmToDate
 			END dtmToDate
-	FROM tblMFHolidayCalendar
+	FROM dbo.tblMFHolidayCalendar
 	WHERE intLocationId = @intLocationId
 
 	SELECT @intHolidayId = MIN(intHolidayId)
@@ -141,7 +144,7 @@ BEGIN
 	--	FROM tblMFScheduleCalendarDetail
 	--END
 
-	WHILE @dtmToDate > @dtmFromDate
+	WHILE @dtmToDate >= @dtmFromDate
 	BEGIN
 		INSERT INTO #tblMFCalendarDetail (
 			intCalendarDetailId
@@ -182,13 +185,15 @@ BEGIN
 		SELECT @dtmFromDate = @dtmFromDate + 1
 	END
 
+	DELETE FROM #tblMFCalendarDetail WHERE @dtmCurrentDate>dtmShiftEndTime
+
 	IF @ysnpivot = 1
 	BEGIN
 		SELECT @strMachineName = Isnull(@strMachineName, '') + '[' + M.strName + '],'
 			,@strMachineName1 = Isnull(@strMachineName1, '') + 'Convert(bit,[' + M.strName + ']) as [' + M.strName + '],'
-		FROM tblMFMachine M
-		JOIN tblMFMachinePackType MP ON MP.intMachineId = M.intMachineId
-		JOIN tblMFManufacturingCellPackType LP ON LP.intPackTypeId = MP.intPackTypeId
+		FROM dbo.tblMFMachine M
+		JOIN dbo.tblMFMachinePackType MP ON MP.intMachineId = M.intMachineId
+		JOIN dbo.tblMFManufacturingCellPackType LP ON LP.intPackTypeId = MP.intPackTypeId
 			AND LP.intManufacturingCellId = @intManufacturingCellId
 			AND M.intMachineId IN (
 				SELECT Item
@@ -240,9 +245,9 @@ BEGIN
 			)
 		SELECT M.intMachineId
 			,M.strName
-		FROM tblMFMachine M
-		JOIN tblMFMachinePackType MP ON MP.intMachineId = M.intMachineId
-		JOIN tblMFManufacturingCellPackType LP ON LP.intPackTypeId = MP.intPackTypeId
+		FROM dbo.tblMFMachine M
+		JOIN dbo.tblMFMachinePackType MP ON MP.intMachineId = M.intMachineId
+		JOIN dbo.tblMFManufacturingCellPackType LP ON LP.intPackTypeId = MP.intPackTypeId
 			AND LP.intManufacturingCellId = @intManufacturingCellId
 			AND M.intMachineId IN (
 				SELECT Item
@@ -285,8 +290,8 @@ BEGIN
 			,M.strName
 			,MC.intManufacturingCellId 
 			,MC.strCellName 
-		FROM tblMFScheduleCalendar C
-		JOIN tblMFScheduleCalendarDetail CD ON C.intCalendarId = CD.intCalendarId
+		FROM dbo.tblMFScheduleCalendar C
+		JOIN dbo.tblMFScheduleCalendarDetail CD ON C.intCalendarId = CD.intCalendarId
 			AND C.intCalendarId  <> @intCalendarId
 		JOIN dbo.tblMFShift S ON S.intShiftId = CD.intShiftId
 		JOIN dbo.tblMFScheduleCalendarMachineDetail MD ON MD.intCalendarDetailId = CD.intCalendarDetailId
