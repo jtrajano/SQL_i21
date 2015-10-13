@@ -7,6 +7,7 @@
 	,@intCalendarId INT
 	,@intLocationId INT
 	,@ysnpivot BIT
+	,@dtmMachineConfiguredAsOn DATETIME = NULL
 	)
 AS
 BEGIN
@@ -23,9 +24,9 @@ BEGIN
 		,@dtmFromDate1 DATETIME
 		,@dtmCurrentDate DATETIME
 
-	SELECT @dtmFromDate1=@dtmFromDate
+	SELECT @dtmFromDate1 = @dtmFromDate
 
-	SELECT @dtmCurrentDate=GETDATE()
+	SELECT @dtmCurrentDate = GETDATE()
 
 	DECLARE @tblMFHolidayCalendar TABLE (dtmHolidayDate DATETIME)
 	DECLARE @tblMFHoliday TABLE (
@@ -108,6 +109,12 @@ BEGIN
 		,intConcurrencyId INT
 		)
 
+	CREATE TABLE #tblMFScheduleCalendarMachineDetail (
+		dtmCalendarDate DATETIME
+		,intShiftId INT
+		,intMachineId INT
+		)
+
 	INSERT INTO #tblMFCalendarDetail (
 		intCalendarDetailId
 		,dtmCalendarDate
@@ -124,14 +131,32 @@ BEGIN
 		,CD.dtmShiftStartTime
 		,dtmShiftEndTime
 		,ISNULL((
-		SELECT COUNT(*)
-		FROM dbo.tblMFScheduleCalendarMachineDetail MD
-		JOIN dbo.fnSplitString(@strMachineId, ',') M on M.Item=MD.intMachineId
-		WHERE MD.intCalendarDetailId = CD.intCalendarDetailId
-		),0) AS intNoOfMachine
+				SELECT COUNT(*)
+				FROM dbo.tblMFScheduleCalendarMachineDetail MD
+				JOIN dbo.fnSplitString(@strMachineId, ',') M ON M.Item = MD.intMachineId
+				WHERE MD.intCalendarDetailId = CD.intCalendarDetailId
+				), 0) AS intNoOfMachine
 		,CD.ysnHoliday
 		,CD.intConcurrencyId
 	FROM dbo.tblMFScheduleCalendarDetail CD
+	WHERE CD.intCalendarId = @intCalendarId
+		AND CD.dtmCalendarDate BETWEEN @dtmFromDate
+			AND @dtmToDate
+		AND CD.intShiftId IN (
+			SELECT Item
+			FROM dbo.fnSplitString(@strShiftId, ',')
+			)
+
+	INSERT INTO #tblMFScheduleCalendarMachineDetail (
+		dtmCalendarDate
+		,intShiftId
+		,intMachineId
+		)
+	SELECT CD.dtmCalendarDate
+		,CD.intShiftId
+		,MD.intMachineId
+	FROM dbo.tblMFScheduleCalendarDetail CD
+	JOIN dbo.tblMFScheduleCalendarMachineDetail MD ON MD.intCalendarDetailId = CD.intCalendarDetailId
 	WHERE CD.intCalendarId = @intCalendarId
 		AND CD.dtmCalendarDate BETWEEN @dtmFromDate
 			AND @dtmToDate
@@ -176,12 +201,74 @@ BEGIN
 				SELECT Item
 				FROM dbo.fnSplitString(@strShiftId, ',')
 				)
-		AND NOT EXISTS (SELECT *FROM #tblMFCalendarDetail CD WHERE CD.dtmCalendarDate=@dtmFromDate AND CD.intShiftId=S.intShiftId)
+			AND NOT EXISTS (
+				SELECT *
+				FROM #tblMFCalendarDetail CD
+				WHERE CD.dtmCalendarDate = @dtmFromDate
+					AND CD.intShiftId = S.intShiftId
+				)
 
 		SELECT @dtmFromDate = @dtmFromDate + 1
 	END
 
-	DELETE FROM #tblMFCalendarDetail WHERE @dtmCurrentDate>dtmShiftEndTime
+	DELETE
+	FROM #tblMFCalendarDetail
+	WHERE @dtmCurrentDate > dtmShiftEndTime
+
+	IF @dtmMachineConfiguredAsOn IS NULL
+	BEGIN
+		INSERT INTO #tblMFScheduleCalendarMachineDetail (
+			dtmCalendarDate
+			,intShiftId
+			,intMachineId
+			)
+		SELECT CD.dtmCalendarDate
+			,CD.intShiftId
+			,MD.Item
+		FROM dbo.#tblMFCalendarDetail CD
+			,dbo.fnSplitString(@strMachineId, ',') MD
+		WHERE CD.intCalendarDetailId IS NULL
+			AND CD.ysnHoliday = 0
+			AND NOT EXISTS (
+				SELECT *
+				FROM dbo.tblMFScheduleCalendarDetail CD1
+				JOIN dbo.tblMFScheduleCalendarMachineDetail MD1 ON MD1.intCalendarDetailId = CD1.intCalendarDetailId
+				WHERE CD1.dtmCalendarDate = CD.dtmCalendarDate
+					AND CD1.intShiftId = CD.intShiftId
+					AND MD1.intMachineId = MD.Item
+				)
+	END
+	ELSE
+	BEGIN
+		INSERT INTO #tblMFScheduleCalendarMachineDetail (
+			dtmCalendarDate
+			,intShiftId
+			,intMachineId
+			)
+		SELECT CD.dtmCalendarDate
+			,CD.intShiftId
+			,MD.Item
+		FROM dbo.#tblMFCalendarDetail CD
+			,dbo.fnSplitString(@strMachineId, ',') MD
+		WHERE CD.intCalendarDetailId IS NULL
+			AND CD.ysnHoliday = 0
+			AND NOT EXISTS (
+				SELECT *
+				FROM dbo.tblMFScheduleCalendarDetail CD1
+				JOIN dbo.tblMFScheduleCalendarMachineDetail MD1 ON MD1.intCalendarDetailId = CD1.intCalendarDetailId
+				WHERE CD1.dtmCalendarDate = CD.dtmCalendarDate
+					AND CD1.intShiftId = CD.intShiftId
+					AND MD1.intMachineId = MD.Item
+				)
+			AND EXISTS (
+				SELECT *
+				FROM dbo.tblMFScheduleCalendarDetail CD2
+				JOIN dbo.tblMFScheduleCalendarMachineDetail MD2 ON MD2.intCalendarDetailId = CD2.intCalendarDetailId
+				WHERE CD2.dtmCalendarDate = @dtmMachineConfiguredAsOn
+					AND CD2.intShiftId = CD.intShiftId
+					AND MD2.intMachineId = MD.Item
+				)
+	END
 
 	IF @ysnpivot = 1
 	BEGIN
@@ -220,13 +307,13 @@ BEGIN
 				,CD.intConcurrencyId
 			FROM #tblMFCalendarDetail CD
 			JOIN dbo.tblMFShift S ON S.intShiftId = CD.intShiftId
-			LEFT JOIN dbo.tblMFScheduleCalendarMachineDetail MD ON MD.intCalendarDetailId = CD.intCalendarDetailId
-			LEFT JOIN dbo.tblMFMachine M ON M.intMachineId = MD.intMachineId
+			LEFT JOIN #tblMFScheduleCalendarMachineDetail MD on MD.dtmCalendarDate=CD.dtmCalendarDate and MD.intShiftId=CD.intShiftId
+			LEFT JOIN dbo.tblMFMachine M on M.intMachineId=MD.intMachineId
 			) AS DT
-		PIVOT(Count(DT.intMachineId) FOR strName IN (' + @strMachineName + ')) pvt Order by dtmCalendarDate,intShiftSequence'
+		PIVOT(Count(DT.intMachineId) FOR strName IN (' + @strMachineName + 
+			')) pvt Order by dtmCalendarDate,intShiftSequence'
 
 		EXEC (@SQL)
-		
 	END
 	ELSE
 	BEGIN
@@ -256,7 +343,7 @@ BEGIN
 			,CD.intShiftId
 			,S.strShiftName
 			,CD.dtmShiftStartTime
-			,CD.dtmCalendarDate+CAST(CD.dtmShiftEndTime - CD.dtmShiftStartTime AS TIME) dtmDuration
+			,CD.dtmCalendarDate + CAST(CD.dtmShiftEndTime - CD.dtmShiftStartTime AS TIME) dtmDuration
 			,CD.dtmShiftEndTime
 			,CD.intNoOfMachine
 			,CD.ysnHoliday
@@ -280,20 +367,21 @@ BEGIN
 	END
 
 	SELECT CD.dtmCalendarDate
-			,CD.intShiftId
-			,S.strShiftName
-			,M.intMachineId
-			,M.strName
-			,MC.intManufacturingCellId 
-			,MC.strCellName 
-		FROM dbo.tblMFScheduleCalendar C
-		JOIN dbo.tblMFScheduleCalendarDetail CD ON C.intCalendarId = CD.intCalendarId
-			AND C.intCalendarId  <> @intCalendarId
-		JOIN dbo.tblMFShift S ON S.intShiftId = CD.intShiftId
-		JOIN dbo.tblMFScheduleCalendarMachineDetail MD ON MD.intCalendarDetailId = CD.intCalendarDetailId
-		JOIN dbo.tblMFMachine M ON M.intMachineId = MD.intMachineId
-		JOIN dbo.tblMFManufacturingCell MC on MC.intManufacturingCellId =C.intManufacturingCellId 
-		WHERE CD.dtmCalendarDate BETWEEN @dtmFromDate1 AND @dtmToDate 
+		,CD.intShiftId
+		,S.strShiftName
+		,M.intMachineId
+		,M.strName
+		,MC.intManufacturingCellId
+		,MC.strCellName
+	FROM dbo.tblMFScheduleCalendar C
+	JOIN dbo.tblMFScheduleCalendarDetail CD ON C.intCalendarId = CD.intCalendarId
+		AND C.intCalendarId <> @intCalendarId
+	JOIN dbo.tblMFShift S ON S.intShiftId = CD.intShiftId
+	JOIN dbo.tblMFScheduleCalendarMachineDetail MD ON MD.intCalendarDetailId = CD.intCalendarDetailId
+	JOIN dbo.tblMFMachine M ON M.intMachineId = MD.intMachineId
+	JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = C.intManufacturingCellId
+	WHERE CD.dtmCalendarDate BETWEEN @dtmFromDate1
+			AND @dtmToDate
 		AND M.intMachineId IN (
 			SELECT Item
 			FROM dbo.fnSplitString(@strMachineId, ',')
