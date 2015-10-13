@@ -2586,6 +2586,7 @@
     <Build Include="dbo\Stored Procedures\uspWHLoadTask.sql" />
     <Build Include="dbo\Stored Procedures\uspWHCreateSplitAndPickTask.sql" />
     <Build Include="dbo\Stored Procedures\uspWHCreatePickTask.sql" />
+    <Build Include="dbo\uspARProcessSplitInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -31,6 +31,7 @@
 	[ysnTemplate]				BIT             CONSTRAINT [DF_tblARInvoice_ysnTemplate] DEFAULT ((0)) NOT NULL,
 	[ysnForgiven]				BIT				CONSTRAINT [DF_tblARInvoice_ysnForgiven] DEFAULT ((0)) NOT NULL,
 	[ysnCalculated]				BIT				CONSTRAINT [DF_tblARInvoice_ysnCalculated] DEFAULT ((0)) NOT NULL,
+	[ysnSplitted]				BIT				CONSTRAINT [DF_tblARInvoice_ysnSplitted] DEFAULT ((0)) NOT NULL,
 	[intFreightTermId]			INT				NULL, 
 	[strDeliverPickup]			NVARCHAR (100)	COLLATE Latin1_General_CI_AS NULL,
 	[intShipToLocationId]		INT				NULL,
@@ -48,6 +49,7 @@
     [strBillToZipCode]			NVARCHAR (12)	COLLATE Latin1_General_CI_AS NULL,
     [strBillToCountry]			NVARCHAR (25)	COLLATE Latin1_General_CI_AS NULL,	
 	[intPaymentId]				INT				NULL,
+	[intSplitId]				INT				NULL,
 	[intDistributionHeaderId]	INT				NULL,
     [intConcurrencyId]			INT				CONSTRAINT [DF_tblARInvoice_intConcurrencyId] DEFAULT ((0)) NOT NULL,
     [intEntityId]				INT				NOT NULL DEFAULT ((0)), 
@@ -61,6 +63,7 @@
 	CONSTRAINT [FK_tblARInvoice_tblSMFreightTerm] FOREIGN KEY ([intFreightTermId]) REFERENCES [tblSMFreightTerms]([intFreightTermId]),
 	CONSTRAINT [FK_tblARInvoice_tblSMTerm_intTermId] FOREIGN KEY ([intTermId]) REFERENCES [tblSMTerm]([intTermID]),
 	CONSTRAINT [FK_tblARInvoice_tblARPayment_intPaymentId] FOREIGN KEY ([intPaymentId]) REFERENCES [tblARPayment]([intPaymentId]),
+	CONSTRAINT [FK_tblARInvoice_tblEntitySplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [tblEntitySplit]([intSplitId]),
 	CONSTRAINT [FK_tblARInvoice_tblTRDistributionHeader_intDistributionHeaderId] FOREIGN KEY ([intDistributionHeaderId]) REFERENCES [tblTRDistributionHeader]([intDistributionHeaderId]),
 );
 
