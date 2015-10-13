@@ -2561,6 +2561,8 @@
     <Build Include="dbo\Views\vyuARUndepositedPayment.sql" />
     <Build Include="dbo\Functions\fnAPRemoveSpecialChars.sql" />
     <Build Include="dbo\Views\vyuAP1099MISC.sql" />
+    <Build Include="dbo\Tables\tblAP1099Threshold.sql" />
+    <Build Include="dbo\Tables\tblAP1099History.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

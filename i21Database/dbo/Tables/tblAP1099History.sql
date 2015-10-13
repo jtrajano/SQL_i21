@@ -1,0 +1,4 @@
+﻿CREATE TABLE [dbo].[tblAP1099History]
+(
+	[int1099HistoryId] INT NOT NULL PRIMARY KEY IDENTITY
+)
