@@ -346,9 +346,9 @@ _PostOrUnPost:
 		FROM	tblICInventoryReceipt 
 		WHERE	intInventoryReceiptId = @ReceiptId
 
-		SELECT	TOP 1 @intEntityId = intEntityId 
+		SELECT	TOP 1 @intEntityId = [intEntityUserSecurityId] 
 		FROM	dbo.tblSMUserSecurity 
-		WHERE	intUserSecurityID = @intUserId
+		WHERE	[intEntityUserSecurityId] = @intUserId
 		if @ysnRecap = 0
 		BEGIN
 		  EXEC dbo.uspICPostInventoryReceipt @ysnPostOrUnPost, 0, @strTransactionId, @intUserId, @intEntityId;			

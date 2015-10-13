@@ -24,7 +24,7 @@ BEGIN
 	JOIN tblICItem i ON i.intItemId = wopl.intItemId
 	JOIN tblICItemUOM iu ON iu.intItemUOMId = wopl.intItemUOMId
 	JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
-	JOIN tblSMUserSecurity us ON us.intUserSecurityID = wopl.intCreatedUserId
+	JOIN tblSMUserSecurity us ON us.[intEntityUserSecurityId] = wopl.intCreatedUserId
 	JOIN tblICLot l ON l.intLotId = wopl.intLotId
 	WHERE wopl.intLotId = @intLotId
 	
@@ -46,7 +46,7 @@ BEGIN
 	JOIN tblICItem i ON i.intItemId = wocl.intItemId
 	JOIN tblICItemUOM iu ON iu.intItemUOMId = wocl.intItemUOMId
 	JOIN tblICUnitMeasure um ON um.intUnitMeasureId = iu.intUnitMeasureId
-	JOIN tblSMUserSecurity us ON us.intUserSecurityID = wocl.intCreatedUserId
+	JOIN tblSMUserSecurity us ON us.[intEntityUserSecurityId] = wocl.intCreatedUserId
 	JOIN tblICLot l ON l.intLotId = wocl.intLotId
 	WHERE wocl.intBatchId = @intBatchId
 END

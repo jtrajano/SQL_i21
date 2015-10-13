@@ -2,14 +2,14 @@
 	AS
 	select
 		strName = ec.strUserName,
-		intId = us.intUserSecurityID,
+		intId = us.[intEntityUserSecurityId],
 		strFullName = en.strName,
 		strEmail = en.strEmail,
-		intEntityId = us.intEntityId,
+		intEntityId = us.[intEntityUserSecurityId],
 		ysnDisabled = us.ysnDisabled
 	from
 		tblSMUserSecurity us, tblEntity en, tblEntityCredential ec
 	where
-		us.intEntityId is not null
-		and en.intEntityId = us.intEntityId
-		and ec.intEntityId = us.intEntityId
+		us.[intEntityUserSecurityId] is not null
+		and en.intEntityId = us.[intEntityUserSecurityId]
+		and ec.intEntityId = us.[intEntityUserSecurityId]

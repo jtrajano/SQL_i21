@@ -65,7 +65,7 @@ BEGIN
 			LEFT JOIN vwslsmst G
 				ON A.intDriverID = G.A4GLIdentity
 			LEFT JOIN tblSMUserSecurity H
-				ON A.intUserID = H.intUserSecurityID
+				ON A.intUserID = H.intEntityUserSecurityId
 		')
 	END
 	ELSE
@@ -111,7 +111,7 @@ BEGIN
 			LEFT JOIN tblEntity G
 				ON A.intDriverID = G.intEntityId
 			LEFT JOIN tblSMUserSecurity H
-				ON A.intUserID = H.intUserSecurityID
+				ON A.intUserID = H.intEntityUserSecurityId
 		')
 	END
 END

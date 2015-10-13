@@ -22,11 +22,11 @@ DECLARE @UserId INT
 		,@ResponsibleUser NVARCHAR(100)
 SELECT
 	@ResponsibleUser = strFullName
-	,@UserId = intUserSecurityID 
+	,@UserId = [intEntityUserSecurityId] 
 FROM
 	tblSMUserSecurity
 WHERE
-	intEntityId = @EntityId
+	[intEntityUserSecurityId] = @EntityId
 
 
 SET QUOTED_IDENTIFIER OFF

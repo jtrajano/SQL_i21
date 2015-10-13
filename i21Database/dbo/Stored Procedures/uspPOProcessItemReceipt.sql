@@ -39,7 +39,7 @@ END
   
 -- Call inventory stored procedure to process your transaction into "Item Receipt"
 
-DECLARE @icUserId INT = (SELECT TOP 1 intUserSecurityID FROM tblSMUserSecurity WHERE intEntityId = @userId);
+DECLARE @icUserId INT = (SELECT TOP 1 [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId);
 
 EXEC dbo.uspICProcessToItemReceipt
 	@intSourceTransactionId = @poId

@@ -5,5 +5,5 @@
     [intUserSecurityId] INT NOT NULL, 
 	[intSort] INT NOT NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT 1, 
-    CONSTRAINT [FK_tblSMApprovalListUserSecurity_tblSMUserSecurity] FOREIGN KEY (intUserSecurityId) REFERENCES tblSMUserSecurity(intUserSecurityID)
+    CONSTRAINT [FK_tblSMApprovalListUserSecurity_tblSMUserSecurity] FOREIGN KEY (intUserSecurityId) REFERENCES tblSMUserSecurity([intEntityUserSecurityId])
 )

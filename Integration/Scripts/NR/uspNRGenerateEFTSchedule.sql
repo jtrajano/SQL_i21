@@ -123,7 +123,7 @@ BEGIN
 					SELECT @strEftrxRefNo = apcbk_next_eft_no from apcbkmst Where apcbk_no = @strCbkno
 					SELECT @CusNo = strCustomerNumber From dbo.tblARCustomer WHere intEntityCustomerId = @intCustmerId
 					
-					SELECT @strLocNo = CL.strLocationNumber, @intLocationId = CL.intCompanyLocationId, @intEntityId = intEntityId 
+					SELECT @strLocNo = CL.strLocationNumber, @intLocationId = CL.intCompanyLocationId, @intEntityId = intEntityUserSecurityId 
 					FROM dbo.tblSMCompanyLocation CL
 					JOIN dbo.tblSMUserSecurity US ON US.intCompanyLocationId = CL.intCompanyLocationId
 					WHERE US.strUserName = ''SSIADMIN''

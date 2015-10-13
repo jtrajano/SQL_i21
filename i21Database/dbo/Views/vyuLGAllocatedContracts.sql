@@ -85,6 +85,6 @@ JOIN tblLGAllocationHeader ALH ON ALH.intAllocationHeaderId = ALD.intAllocationH
 LEFT JOIN tblICCommodity Comm ON Comm.intCommodityId = ALH.intCommodityId
 LEFT JOIN tblSMCompanyLocation CompLoc ON CompLoc.intCompanyLocationId = ALH.intCompanyLocationId
 LEFT JOIN tblICUnitMeasure WTUOM ON WTUOM.intUnitMeasureId = ALH.intWeightUnitMeasureId
-LEFT JOIN tblSMUserSecurity UserId ON UserId.intUserSecurityID = ALD.intUserSecurityId
+LEFT JOIN tblSMUserSecurity UserId ON UserId.[intEntityUserSecurityId] = ALD.intUserSecurityId
 LEFT JOIN vyuCTContractDetailView PCT ON PCT.intContractDetailId = ALD.intPContractDetailId
 LEFT JOIN vyuCTContractDetailView SCT ON SCT.intContractDetailId = ALD.intSContractDetailId

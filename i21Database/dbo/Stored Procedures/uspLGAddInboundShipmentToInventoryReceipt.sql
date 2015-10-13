@@ -88,7 +88,7 @@ SELECT 	strReceiptNumber		= @ReceiptNumber
 		,dteReceiveTime			= NULL 
 		,dblActualTempReading	= NULL 
 		,intConcurrencyId		= 1
-		,intEntityId			= (SELECT TOP 1 intEntityId FROM dbo.tblSMUserSecurity WHERE intUserSecurityID = @intUserId)
+		,intEntityId			= (SELECT TOP 1 [intEntityUserSecurityId] FROM dbo.tblSMUserSecurity WHERE [intEntityUserSecurityId] = @intUserId)
 		,intCreatedUserId		= @intUserId
 		,ysnPosted				= 0
 FROM	dbo.tblLGShipment Shipment

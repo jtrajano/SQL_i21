@@ -15,7 +15,7 @@ DECLARE	 @ShipmentId INT
 		,@InvoiceId  INT = 0
 		,@HasSoftwareItems BIT = 0
 		,@HasNonSoftwareItems BIT = 0
-	    ,@icUserId INT = (SELECT TOP 1 intUserSecurityID FROM tblSMUserSecurity WHERE intEntityId = @UserId)
+	    ,@icUserId INT = (SELECT TOP 1 [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserId)
 
 IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrderId AND [strOrderStatus] = 'Closed') 
 	BEGIN

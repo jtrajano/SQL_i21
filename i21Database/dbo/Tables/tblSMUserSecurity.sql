@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblSMUserSecurity] (
-    [intUserSecurityID] INT            IDENTITY (1, 1) NOT NULL,
-	[intEntityId]		INT            NULL,
-    [intUserRoleID]     INT            NOT NULL,
+    --[intEntityUserSecurityId] INT            IDENTITY (1, 1) NOT NULL,
+	[intEntityUserSecurityId]		INT            NOT NULL,
+    [intUserRoleID]     INT            NULL,
 	[intCompanyLocationId]     INT     NULL,
     [strUserName]       NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
 	[strJIRAUserName]       NVARCHAR (50)  COLLATE Latin1_General_CI_AS DEFAULT ('') NOT NULL,
@@ -23,23 +23,25 @@
     [ysnDisabled]       BIT            DEFAULT ((0)) NOT NULL,
     [ysnAdmin]          BIT            DEFAULT ((0)) NOT NULL,
     [intConcurrencyId]  INT            DEFAULT (1) NOT NULL,
-    CONSTRAINT [PK_User] PRIMARY KEY CLUSTERED ([intUserSecurityID] ASC),
+	[intEntityIdOld]		INT NULL,
+	[intUserSecurityIdOld]	INT NULL,
+    CONSTRAINT [PK_User] PRIMARY KEY CLUSTERED ([intEntityUserSecurityId] ASC),
     CONSTRAINT [FK_UserSecurity_UserRole] FOREIGN KEY ([intUserRoleID]) REFERENCES [dbo].[tblSMUserRole] ([intUserRoleID]),
-	CONSTRAINT [FK_UserSecurity_Entity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
+	CONSTRAINT [FK_UserSecurity_Entity] FOREIGN KEY ([intEntityUserSecurityId]) REFERENCES [dbo].[tblEntity] ([intEntityId]),
 	CONSTRAINT [FK_UserSecurity_CompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]), 
     CONSTRAINT [AK_tblSMUserSecurity_strUserName] UNIQUE ([strUserName])
 );
 
 
 GO
-EXEC sp_addextendedproperty @name = N'MS_Description',
-    @value = N'Identity field',
-    @level0type = N'SCHEMA',
-    @level0name = N'dbo',
-    @level1type = N'TABLE',
-    @level1name = N'tblSMUserSecurity',
-    @level2type = N'COLUMN',
-    @level2name = N'intUserSecurityID'
+--EXEC sp_addextendedproperty @name = N'MS_Description',
+--    @value = N'Identity field',
+--    @level0type = N'SCHEMA',
+--    @level0name = N'dbo',
+--    @level1type = N'TABLE',
+--    @level1name = N'tblSMUserSecurity',
+--    @level2type = N'COLUMN',
+--    @level2name = N'intEntityUserSecurityId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Entity Id',
@@ -48,7 +50,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblSMUserSecurity',
     @level2type = N'COLUMN',
-    @level2name = N'intEntityId'
+    @level2name = N'intEntityUserSecurityId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'User Role Id',
@@ -257,7 +259,7 @@ CREATE TRIGGER [dbo].[Trigger_tblSMUserSecurity]
         SET NoCount ON
 		DECLARE @intUserSecurityId INT
 
-		SELECT @intUserSecurityId = intUserSecurityID FROM INSERTED;
+		SELECT @intUserSecurityId = [intEntityUserSecurityId] FROM INSERTED;
 
 		EXEC uspSMUpdateUserPreferenceEntry @intUserSecurityId
     END

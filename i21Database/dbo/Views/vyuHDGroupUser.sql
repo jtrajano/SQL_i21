@@ -3,8 +3,8 @@
 		select
 			intId = ROW_NUMBER() over (order by g.intTicketGroupId)
 			,intTicketGroupId = g.intTicketGroupId
-			,intUserSecurityId = u.intUserSecurityID
-			,intEntityId = u.intEntityId
+			,intUserSecurityId = u.[intEntityUserSecurityId]
+			,intEntityId = u.[intEntityUserSecurityId]
 			,strUserName = c.strUserName
 			,strFullName = e.strName
 			,strEmail = e.strEmail
@@ -19,6 +19,6 @@
 			,tblEntityCredential c
 		where
 			gc.intTicketGroupId = g.intTicketGroupId
-			and u.intUserSecurityID = gc.intUserSecurityId
-			and e.intEntityId = u.intEntityId
-			and c.intEntityId = u.intEntityId
+			and u.[intEntityUserSecurityId] = gc.intUserSecurityId
+			and e.intEntityId = u.[intEntityUserSecurityId]
+			and c.intEntityId = u.[intEntityUserSecurityId]

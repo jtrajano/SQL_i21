@@ -71,7 +71,7 @@ BEGIN
 	IF @intBankAccountId IS NULL
 	BEGIN
 		SELECT @intGLBankAccountId = B.intCashAccount FROM tblSMUserSecurity A INNER JOIN tblSMCompanyLocation B ON A.intCompanyLocationId = B.intCompanyLocationId
-		WHERE A.intEntityId = @userId
+		WHERE A.[intEntityUserSecurityId] = @userId
 		SELECT TOP 1 @intBankAccountId = intBankAccountId FROM tblCMBankAccount WHERE intGLAccountId = @intGLBankAccountId
 
 		IF @intBankAccountId IS NULL

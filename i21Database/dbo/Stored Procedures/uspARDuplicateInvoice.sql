@@ -9,7 +9,7 @@ BEGIN
 
 	DECLARE @EntityId int
 
-	SET @EntityId = ISNULL((SELECT TOP 1 intEntityId FROM tblSMUserSecurity WHERE intUserSecurityID = @UserId), 0)
+	SET @EntityId = ISNULL((SELECT TOP 1 [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserId), 0)
 
 	INSERT INTO tblARInvoice(
 		strInvoiceOriginId

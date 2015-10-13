@@ -4,7 +4,7 @@ SELECT
 intUserSecurityMenuFavoriteId,
 Favorite.intMenuId,
 intUserSecurityId,
-UserSecurity.intEntityId,
+UserSecurity.[intEntityUserSecurityId],
 UserRoleMenuLocation.intCompanyLocationId,
 Favorite.intSort,
 UserRoleMenuLocation.strMenuName,
@@ -15,6 +15,6 @@ UserRoleMenuLocation.strCommand,
 UserRoleMenuLocation.strIcon,
 UserRoleMenuLocation.ysnIsLegacy
 FROM tblSMUserSecurityMenuFavorite Favorite
-INNER JOIN tblSMUserSecurity UserSecurity ON Favorite.intUserSecurityId = UserSecurity.intUserSecurityID
-INNER JOIN vyuSMUserRoleMenuLocation UserRoleMenuLocation ON Favorite.intMenuId = UserRoleMenuLocation.intMenuId AND Favorite.intCompanyLocationId = UserRoleMenuLocation.intCompanyLocationId AND UserSecurity.intEntityId = UserRoleMenuLocation.intEntityId
+INNER JOIN tblSMUserSecurity UserSecurity ON Favorite.intUserSecurityId = UserSecurity.[intEntityUserSecurityId]
+INNER JOIN vyuSMUserRoleMenuLocation UserRoleMenuLocation ON Favorite.intMenuId = UserRoleMenuLocation.intMenuId AND Favorite.intCompanyLocationId = UserRoleMenuLocation.intCompanyLocationId AND UserSecurity.[intEntityUserSecurityId] = UserRoleMenuLocation.intEntityId
 WHERE UserRoleMenuLocation.ysnVisible = 1

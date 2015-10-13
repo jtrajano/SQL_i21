@@ -25,5 +25,5 @@
 			left outer join tblEntity e on e.intEntityId = c.[intEntityCustomerId]
 			left outer join tblEntity ec on ec.intEntityId = t.intCustomerContactId
 			left outer join tblHDJobCode jc on jc.intJobCodeId = hw.intJobCodeId
-			left outer join tblSMUserSecurity us on us.intUserSecurityID = hw.intAgentId
+			left outer join tblSMUserSecurity us on us.[intEntityUserSecurityId] = hw.intAgentId
 		where (case when hw.ysnBilled is null then 0 else hw.ysnBilled end) <> 1

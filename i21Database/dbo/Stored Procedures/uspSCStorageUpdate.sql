@@ -67,7 +67,7 @@ DECLARE @ErrMsg                    NVARCHAR(MAX),
 BEGIN TRY
 
 	SELECT @strUserName = US.strUserName FROM tblSMUserSecurity US
-	WHERE US.intUserSecurityID = @intUserId
+	WHERE US.[intEntityUserSecurityId] = @intUserId
 
 	SELECT @intDefaultStorageSchedule = TIC.intStorageScheduleId, @intCommodityId = TIC.intCommodityId FROM tblSCTicket TIC
 	WHERE TIC.intTicketId = @intTicketId

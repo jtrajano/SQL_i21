@@ -117,8 +117,8 @@ WHILE (@currentRow <= @totalRows)
 BEGIN
 
 Declare @userId INT
-SELECT @userId = intUserSecurityID FROM (  
-	SELECT ROW_NUMBER() OVER(ORDER BY intUserSecurityID ASC) AS 'ROWID', *
+SELECT @userId = [intEntityUserSecurityId] FROM (  
+	SELECT ROW_NUMBER() OVER(ORDER BY [intEntityUserSecurityId] ASC) AS 'ROWID', *
 	FROM [dbo].[tblSMUserSecurity]
 ) a
 WHERE ROWID = @currentRow
@@ -150,19 +150,19 @@ GO
 		Declare @userId INT
 		Declare @entityId INT
 		Declare @roleId INT
-		SELECT @userId = intUserSecurityID, @entityId = intEntityId, @roleId = intUserRoleID FROM (  
-			SELECT ROW_NUMBER() OVER(ORDER BY intUserSecurityID ASC) AS 'ROWID', *
+		SELECT @userId = [intEntityUserSecurityId], @entityId = [intEntityUserSecurityId], @roleId = intUserRoleID FROM (  
+			SELECT ROW_NUMBER() OVER(ORDER BY [intEntityUserSecurityId] ASC) AS 'ROWID', *
 			FROM [dbo].[tblSMUserSecurity]
 		) a
 		WHERE ROWID = @currentRow
 		------ DEFAULT LOCATION ------
-		IF EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurity WHERE intUserSecurityID = @userId AND intCompanyLocationId IS NULL)
+		IF EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId AND intCompanyLocationId IS NULL)
 		BEGIN
 			DECLARE @defaultLocation INT
 			SELECT TOP 1 @defaultLocation = intCompanyLocationId FROM tblSMCompanyLocation ORDER BY intCompanyLocationId
 			IF @defaultLocation IS NOT NULL
 			BEGIN
-				UPDATE tblSMUserSecurity SET intCompanyLocationId = @defaultLocation WHERE intUserSecurityID = @userId
+				UPDATE tblSMUserSecurity SET intCompanyLocationId = @defaultLocation WHERE [intEntityUserSecurityId] = @userId
 			END
 		END
 		------ DEFAULT LOCATION ------
@@ -205,6 +205,6 @@ GO
 	-- Update intCompanyLocationId in tblSMUserSecurityMenuFavorite with user default location.
 	UPDATE tblSMUserSecurityMenuFavorite SET intCompanyLocationId = UserSecurity.intCompanyLocationId
 	FROM tblSMUserSecurityMenuFavorite Favorite
-	JOIN tblSMUserSecurity UserSecurity ON Favorite.intUserSecurityId = UserSecurity.intUserSecurityID
+	JOIN tblSMUserSecurity UserSecurity ON Favorite.intUserSecurityId = UserSecurity.[intEntityUserSecurityId]
 	WHERE Favorite.intCompanyLocationId IS NULL
 GO

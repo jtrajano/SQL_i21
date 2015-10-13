@@ -16,7 +16,7 @@ BEGIN
 	DECLARE @dateNow DATE = CONVERT(DATE, GETDATE(),101)
 	BEGIN TRY
 		BEGIN TRANSACTION
-			SELECT TOP 1 @entityid =intEntityId FROM tblSMUserSecurity WHERE intUserSecurityID = @userId
+			SELECT TOP 1 @entityid =[intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId
 			SELECT  @intNumber = intNumber, @strPrefix = strPrefix FROM tblSMStartingNumber WHERE intStartingNumberId = 2
 			SET @smID = @strPrefix + CONVERT(VARCHAR(5),@intNumber)
 			UPDATE tblSMStartingNumber SET intNumber = @intNumber + 1 WHERE intStartingNumberId = 2

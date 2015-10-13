@@ -178,7 +178,7 @@ GO
 
 	update tblHDGroupUserConfig
 		set tblHDGroupUserConfig.intUserSecurityEntityId = 
-			(select tblSMUserSecurity.intEntityId from tblSMUserSecurity where tblSMUserSecurity.intUserSecurityID = tblHDGroupUserConfig.intUserSecurityId)
+			(select tblSMUserSecurity.[intEntityUserSecurityId] from tblSMUserSecurity where tblSMUserSecurity.[intEntityUserSecurityId] = tblHDGroupUserConfig.intUserSecurityId)
 
 GO
 	PRINT N'End normalize Help Desk Group and User Configuration.'

@@ -22,5 +22,5 @@
 	CONSTRAINT [FK_tblLGWarehouseRateMatrixHeader_tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId] FOREIGN KEY ([intCompanyLocationSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
 	CONSTRAINT [FK_tblLGWarehouseRateMatrixHeader_tblEntity_intVendorEntityId_intEntityId] FOREIGN KEY ([intVendorEntityId]) REFERENCES [tblEntity]([intEntityId]),
 	CONSTRAINT [FK_tblLGWarehouseRateMatrixHeader_tblSMCurrency_intCurrencyID] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
-    CONSTRAINT [FK_tblLGWarehouseRateMatrixHeader_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intUserSecurityID])
+    CONSTRAINT [FK_tblLGWarehouseRateMatrixHeader_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId])
 )

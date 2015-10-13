@@ -105,9 +105,9 @@ SET @dtmDate = ISNULL(@dtmDate, GETDATE());
 ------------------------------------------------------------------------------------------------------------------------------------
 -- Retrieve the entity id of the user id
 ------------------------------------------------------------------------------------------------------------------------------------
-SELECT	@intEntityId = intEntityId
+SELECT	@intEntityId = [intEntityUserSecurityId]
 FROM	dbo.tblSMUserSecurity
-WHERE	intUserSecurityID = @intUserId
+WHERE	[intEntityUserSecurityId] = @intUserId
 
 ------------------------------------------------------------------------------------------------------------------------------------
 -- Create the header record

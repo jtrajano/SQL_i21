@@ -41,7 +41,7 @@ SELECT W.intWorkOrderId,
 	,CT.intContainerTypeId
 	,CT.strDisplayMember AS strContainerType
 	,WI.dtmLastModified
-	,US.intUserSecurityID
+	,US.[intEntityUserSecurityId]
 	,US.strUserName
 	,'CONSUME' AS strTransactionName
 	,NULL as dblReadingQty
@@ -88,7 +88,7 @@ JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = WI.intStorageLocat
 JOIN dbo.tblMFMachine M ON M.intMachineId = WI.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WI.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
-JOIN dbo.tblSMUserSecurity US ON US.intUserSecurityID = WI.intLastModifiedUserId
+JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WI.intLastModifiedUserId
 WHERE WI.ysnConsumptionReversed = 0
 
 UNION
@@ -133,7 +133,7 @@ SELECT W.intWorkOrderId,
 	,CT.intContainerTypeId
 	,CT.strDisplayMember AS strContainerType
 	,WI.dtmLastModified
-	,US.intUserSecurityID
+	,US.[intEntityUserSecurityId]
 	,US.strUserName
 	,'REVERSAL' AS strTransactionName
 	,NULL as dblReadingQty
@@ -180,7 +180,7 @@ JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = WI.intStorageLocat
 JOIN dbo.tblMFMachine M ON M.intMachineId = WI.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WI.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
-JOIN dbo.tblSMUserSecurity US ON US.intUserSecurityID = WI.intLastModifiedUserId
+JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WI.intLastModifiedUserId
 WHERE WI.ysnConsumptionReversed = 1
 
 UNION
@@ -225,7 +225,7 @@ SELECT W.intWorkOrderId,
 	,CT.intContainerTypeId
 	,CT.strDisplayMember AS strContainerType
 	,WP.dtmLastModified
-	,US.intUserSecurityID
+	,US.[intEntityUserSecurityId]
 	,US.strUserName
 	,'PRODUCE' AS strTransactionName
 	,NULL as dblReadingQty
@@ -272,7 +272,7 @@ JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = WP.intStorageLocat
 JOIN dbo.tblMFMachine M ON M.intMachineId = WP.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WP.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
-JOIN dbo.tblSMUserSecurity US ON US.intUserSecurityID = WP.intLastModifiedUserId
+JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WP.intLastModifiedUserId
 WHERE WP.ysnProductionReversed = 0
 UNION
 SELECT W.intWorkOrderId,
@@ -316,7 +316,7 @@ SELECT W.intWorkOrderId,
 	,CT.intContainerTypeId
 	,CT.strDisplayMember AS strContainerType
 	,WP.dtmLastModified
-	,US.intUserSecurityID
+	,US.[intEntityUserSecurityId]
 	,US.strUserName
 	,'REVERSAL' AS TransactionName
 	,NULL as dblReadingQty
@@ -363,6 +363,6 @@ JOIN dbo.tblICStorageLocation SL ON SL.intStorageLocationId = WP.intStorageLocat
 JOIN dbo.tblMFMachine M ON M.intMachineId = WP.intMachineId
 LEFT JOIN dbo.tblICContainer C ON C.intContainerId = WP.intContainerId
 LEFT JOIN dbo.tblICContainerType CT ON CT.intContainerTypeId = C.intContainerTypeId
-JOIN dbo.tblSMUserSecurity US ON US.intUserSecurityID = WP.intLastModifiedUserId
+JOIN dbo.tblSMUserSecurity US ON US.[intEntityUserSecurityId] = WP.intLastModifiedUserId
 WHERE WP.ysnProductionReversed = 1
 

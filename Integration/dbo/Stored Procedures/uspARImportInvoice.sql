@@ -22,7 +22,7 @@ BEGIN
 		END			
 	
 	DECLARE @EntityId int
-	SET @EntityId = ISNULL((SELECT  intEntityId FROM tblSMUserSecurity WHERE intUserSecurityID = @UserId),@UserId)
+	SET @EntityId = ISNULL((SELECT  intEntityUserSecurityId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @UserId),@UserId)
 	
 	DECLARE @ARAccount VARCHAR(250)
 	--AR Account

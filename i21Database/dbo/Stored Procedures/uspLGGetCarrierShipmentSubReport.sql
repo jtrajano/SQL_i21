@@ -140,5 +140,5 @@ BEGIN
 	LEFT JOIN		tblEntity				Hauler	On			Hauler.intEntityId = L.intHaulerEntityId
 	LEFT JOIN		tblEntity				Driver	On			Driver.intEntityId = L.intDriverEntityId
 	LEFT JOIN	tblLGEquipmentType		Equipment On		Equipment.intEquipmentTypeId = L.intEquipmentTypeId
-	LEFT JOIN	tblSMUserSecurity	Dispatcher On					Dispatcher.intUserSecurityID = L.intDispatcherId
+	LEFT JOIN	tblSMUserSecurity	Dispatcher On					Dispatcher.[intEntityUserSecurityId] = L.intDispatcherId
 END

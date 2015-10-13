@@ -38,5 +38,5 @@ AS
 	LEFT JOIN tblEntity G
 		ON A.intDriverID = G.intEntityId
 	LEFT JOIN tblSMUserSecurity H
-		ON A.intUserID = H.intUserSecurityID
+		ON A.intUserID = H.[intEntityUserSecurityId]
 GO

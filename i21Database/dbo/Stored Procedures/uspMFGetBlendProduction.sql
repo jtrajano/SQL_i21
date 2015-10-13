@@ -24,7 +24,7 @@ Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId
 Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 Join tblMFBlendRequirement br on w.intBlendRequirementId=br.intBlendRequirementId
 Join tblMFWorkOrderStatus ws on w.intStatusId=ws.intStatusId
-Left Join tblSMUserSecurity us on w.intCreatedUserId=us.intUserSecurityID
+Left Join tblSMUserSecurity us on w.intCreatedUserId=us.[intEntityUserSecurityId]
 Left Join tblICStorageLocation sl on w.intStorageLocationId=sl.intStorageLocationId
 Where w.intWorkOrderId=@intWorkOrderId AND w.intStatusId in (9,10,11,12) 
 Order By w.dtmExpectedDate,w.intExecutionOrder

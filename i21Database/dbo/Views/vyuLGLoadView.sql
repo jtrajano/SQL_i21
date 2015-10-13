@@ -92,4 +92,4 @@ LEFT JOIN vyuCTContractDetailView CDetail ON CDetail.intContractDetailId = Load.
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = Load.intTicketId
 LEFT JOIN tblTRTransportLoad TL ON TL.intTransportLoadId = Load.intTransportLoadId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = Load.intEquipmentTypeId
-LEFT JOIN tblSMUserSecurity US ON US.intUserSecurityID	= Load.intDispatcherId
+LEFT JOIN tblSMUserSecurity US ON US.[intEntityUserSecurityId]	= Load.intDispatcherId

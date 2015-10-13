@@ -2578,6 +2578,7 @@
     <Build Include="dbo\Views\vyuMFGetMultipleChangeOverFactor.sql" />
     <Build Include="dbo\fnGetEntityNumberByEntityIds.sql" />
     <Build Include="dbo\Stored Procedures\uspMFTransferBlendSheet.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntityUserSecurity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

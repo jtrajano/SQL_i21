@@ -100,7 +100,7 @@ DECLARE @bill TABLE
 	SELECT TOP 1 
 		@userLocation = intCompanyLocationId ,
 		@shipTo = intCompanyLocationId
-	FROM tblSMUserSecurity WHERE intEntityId = @userId
+	FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId
 
 	SELECT 
 		@term = B.intTermsId,

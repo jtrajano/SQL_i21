@@ -26,5 +26,5 @@ LEFT JOIN dbo.tblICItemContract IC ON IC.intItemContractId = S.intItemContractId
 LEFT JOIN dbo.tblICItem I ON I.intItemId = S.intItemId
 LEFT JOIN dbo.tblLGShipmentBLContainer C ON C.intShipmentBLContainerId = S.intShipmentBLContainerId
 LEFT JOIN dbo.tblLGShipment SH ON SH.intShipmentId = S.intShipmentId
-LEFT JOIN dbo.tblSMUserSecurity U ON U.intUserSecurityID = S.intTestedById
+LEFT JOIN dbo.tblSMUserSecurity U ON U.[intEntityUserSecurityId] = S.intTestedById
 LEFT JOIN dbo.tblEntity E ON E.intEntityId = S.intEntityId

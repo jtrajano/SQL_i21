@@ -117,7 +117,7 @@ BEGIN TRY
 			,intCurrencyId INT
 	 )
 
-	SELECT @UserName = strUserName	FROM tblSMUserSecurity	WHERE intUserSecurityID = @UserKey
+	SELECT @UserName = strUserName	FROM tblSMUserSecurity	WHERE [intEntityUserSecurityId] = @UserKey
 
 	IF @intConcurrencyId = 0 AND @intCustomerStorageId = 0
 	BEGIN

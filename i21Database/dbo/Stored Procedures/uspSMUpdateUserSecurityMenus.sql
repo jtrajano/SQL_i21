@@ -14,7 +14,7 @@ BEGIN TRANSACTION
 
 	DECLARE @UserRoleID INT
 	SELECT @UserRoleID = intUserRoleID FROM tblSMUserSecurity 
-	WHERE intUserSecurityID = @UserSecurityID
+	WHERE [intEntityUserSecurityId] = @UserSecurityID
 	
 	DECLARE @IsAdmin BIT
 	-- Get whether User Role has administrative rights
