@@ -285,14 +285,14 @@ BEGIN
 
 		-- Create an Audit Log
 		BEGIN 
-			DECLARE @strDescription AS NVARCHAR(100) = @strSourceScreenName + ' to Inventory Receipt'
+			DECLARE @strDescription AS NVARCHAR(100) = @strSourceScreenName + ' to Inventory Transfer'
 			
 			SELECT	@strTransferId = strTransferNo
 			FROM	dbo.tblICInventoryTransfer 
 			WHERE	intInventoryTransferId = @InventoryTransferId
 			
 			EXEC	dbo.uspSMAuditLog 
-					@keyValue = @InventoryTransferId						-- Primary Key Value of the Inventory Receipt. 
+					@keyValue = @InventoryTransferId						-- Primary Key Value of the Inventory Transfer. 
 					,@screenName = 'Inventory.view.InventoryTransfer'        -- Screen Namespace
 					,@entityId = @intEntityId                               -- Entity Id.
 					,@actionType = 'Processed'                              -- Action Type
