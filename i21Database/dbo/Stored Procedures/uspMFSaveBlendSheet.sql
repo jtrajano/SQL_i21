@@ -115,7 +115,7 @@ If @ysnEnableParentLot=0
 	Update a Set a.dblWeightPerUnit=b.dblWeightPerQty 
 	from @tblLot a join tblICLot b on a.intLotId=b.intLotId
 Else
-	Update a Set a.dblWeightPerUnit=b.dblWeightPerQty 
+	Update a Set a.dblWeightPerUnit=(Select TOP 1 dblWeightPerQty From tblICLot Where intParentLotId=b.intParentLotId) 
 	from @tblLot a join tblICParentLot b on a.intLotId=b.intParentLotId
 
 Declare	@intBlendRequirementId int,
