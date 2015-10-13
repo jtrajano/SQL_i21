@@ -435,6 +435,10 @@ BEGIN
 
 		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
+
+	--UPDATE 1099 Information
+	EXEC [uspAPUpdateBill1099] @param
+
 END
 ELSE
 	BEGIN
