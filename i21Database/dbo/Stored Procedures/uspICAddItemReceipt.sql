@@ -10,9 +10,19 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @intEntityId AS INT
 DECLARE @StartingNumberId_InventoryReceipt AS INT = 23;
 DECLARE @ReceiptNumber AS NVARCHAR(50);
-DECLARE @InventoryReceiptId AS INT;
+
+DECLARE @InventoryReceiptId AS INT
+		,@strSourceId AS NVARCHAR(50)
+		,@strSourceScreenName AS NVARCHAR(50)
+		,@strReceiptNumber AS NVARCHAR(50)
+		
+-- Get the entity id
+SELECT	@intEntityId = intEntityId
+FROM	dbo.tblSMUserSecurity 
+WHERE	intUserSecurityID = @intUserId
 
 -- Create the temp table if it does not exists. 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
@@ -131,6 +141,8 @@ BEGIN
 
 		-- Check if there is an existing Inventory receipt 
 		SELECT	@InventoryReceiptId = RawData.intInventoryReceiptId
+				,@strSourceScreenName = RawData.strSourceScreenName
+				,@strSourceId = RawData.strSourceId
 		FROM	@ReceiptEntries RawData INNER JOIN @DataForReceiptHeader RawHeaderData
 					ON RawHeaderData.Vendor = RawData.intEntityVendorId 
 					AND ISNULL(RawHeaderData.BillOfLadding,0) = ISNULL(RawData.strBillOfLadding,0) 
@@ -676,6 +688,24 @@ BEGIN
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 		WHERE	Receipt.intInventoryReceiptId = @InventoryReceiptId
+		
+		-- Create an Audit Log
+		BEGIN 
+			DECLARE @strDescription AS NVARCHAR(100) = @strSourceScreenName + ' to Inventory Receipt'
+			
+			SELECT	@strReceiptNumber = strReceiptNumber
+			FROM	dbo.tblICInventoryReceipt 
+			WHERE	intInventoryReceiptId = @InventoryReceiptId
+			
+			EXEC	dbo.uspSMAuditLog 
+					@keyValue = @InventoryReceiptId							-- Primary Key Value of the Inventory Receipt. 
+					,@screenName = 'Inventory.view.InventoryReceipt'        -- Screen Namespace
+					,@entityId = @intEntityId                               -- Entity Id.
+					,@actionType = 'Processed'                              -- Action Type
+					,@changeDescription = @strDescription					-- Description
+					,@fromValue = @strSourceId                              -- Previous Value
+					,@toValue = @strReceiptNumber                           -- New Value
+		END
 
 		-- Fetch the next row from cursor. 
 		FETCH NEXT FROM loopDataForReceiptHeader INTO @intId;

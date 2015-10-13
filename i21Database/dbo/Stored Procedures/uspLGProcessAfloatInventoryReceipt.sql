@@ -44,30 +44,35 @@ BEGIN TRY
 	 	,intStorageLocationId
 	 	,ysnIsStorage
 	 	,dblFreightRate
-		,intSourceId		 	
+		,intSourceId
+		,strSourceId
+		,strSourceScreenName	
 	 )	
-      SELECT strReceiptType = 'Purchase Contract',
-       CH.intEntityId,
-       EN.intDefaultLocationId,
-	   CT.intCompanyLocationId,
-       CT.intItemId,
-	   CT.intCompanyLocationId,
-	   CT.intItemUOMId,
-	   NULL,
-	   CT.intContractHeaderId,
-	   SC.intContractDetailId,
-	   GETDATE(),
-	   NULL,	  
-	   SC.dblNetWt,
-	   CT.dblCashPrice,
-	   CT.intCurrencyId,
-	   1,
-	   NULL,
-	   SH.intSubLocationId,
-	   NULL,
-	   0,
-	   NULL,
-	   SC.intShipmentContractQtyId	   
+      SELECT 
+	     strReceiptType			= 'Purchase Contract'
+	 	,intEntityVendorId		= CH.intEntityId
+	 	,intShipFromId			= EN.intDefaultLocationId
+	 	,intLocationId			= CT.intCompanyLocationId
+	 	,intItemId				= CT.intItemId
+	 	,intItemLocationId		= CT.intCompanyLocationId
+	 	,intItemUOMId			= CT.intItemUOMId
+	 	,strBillOfLadding		= NULL
+		,intContractHeaderId	= CT.intContractHeaderId
+	 	,intContractDetailId	= SC.intContractDetailId
+	 	,dtmDate				= GETDATE()
+	 	,intShipViaId			= NULL
+	    ,dblQty					= SC.dblNetWt
+	    ,dblCost				= CT.dblCashPrice
+	  	,intCurrencyId			= CT.intCurrencyId
+	 	,dblExchangeRate		= 1
+	  	,intLotId				= NULL
+	 	,intSubLocationId		= SH.intSubLocationId
+	 	,intStorageLocationId	= NULL
+	 	,ysnIsStorage			= 0
+	 	,dblFreightRate			= NULL
+		,intSourceId			= SC.intShipmentContractQtyId
+		,strSourceId			= 'LG Id: ' + CAST (intShipmentContractQtyId AS NVARCHAR(20)) 
+		,strSourceScreenName	= 'LG Shipment Contract'
 	   FROM tblLGShipmentContractQty SC
 	   JOIN tblLGShipment SH ON SH.intShipmentId = SC.intShipmentId
 	   JOIN tblCTContractDetail CT ON CT.intContractDetailId = SC.intContractDetailId
