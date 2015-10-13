@@ -342,7 +342,7 @@ BEGIN
 			,[dtmTransactionDate]		= '2014-01-23'
 			,[strJournalLineDescription] = ''
 			,[intJournalLineNo]			= 35
-			,[ysnIsUnposted]			= 0
+			,[ysnIsUnposted]			= 1
 			,[intUserId]				= 1
 			,[intEntityId]				= 1 
 			,[strTransactionId]			= 'INVRCPT-XXXX15'
@@ -369,7 +369,7 @@ BEGIN
 			,[dtmTransactionDate]		= '2014-01-23'
 			,[strJournalLineDescription] = ''
 			,[intJournalLineNo]			= 35
-			,[ysnIsUnposted]			= 0
+			,[ysnIsUnposted]			= 1
 			,[intUserId]				= 1
 			,[intEntityId]				= 1 
 			,[strTransactionId]			= 'INVRCPT-XXXX15'
@@ -396,7 +396,7 @@ BEGIN
 			,[dtmTransactionDate]		= '2014-01-23'
 			,[strJournalLineDescription] = ''
 			,[intJournalLineNo]			= 36
-			,[ysnIsUnposted]			= 0
+			,[ysnIsUnposted]			= 1
 			,[intUserId]				= 1
 			,[intEntityId]				= 1 
 			,[strTransactionId]			= 'INVRCPT-XXXX15'
@@ -423,7 +423,7 @@ BEGIN
 			,[dtmTransactionDate]		= '2014-01-23'
 			,[strJournalLineDescription] = ''
 			,[intJournalLineNo]			= 36
-			,[ysnIsUnposted]			= 0
+			,[ysnIsUnposted]			= 1
 			,[intUserId]				= 1
 			,[intEntityId]				= 1 
 			,[strTransactionId]			= 'INVRCPT-XXXX15'

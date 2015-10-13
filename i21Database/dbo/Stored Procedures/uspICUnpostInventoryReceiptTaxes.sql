@@ -142,7 +142,7 @@ BEGIN
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intReceiptItemTaxId
-			,ysnIsUnposted				= 0
+			,ysnIsUnposted				= 1
 			,intUserId					= @intUserId 
 			,intEntityId				= @intUserId 
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId
@@ -173,7 +173,7 @@ BEGIN
 			,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
 			,strJournalLineDescription  = '' 
 			,intJournalLineNo			= ForGLEntries_CTE.intReceiptItemTaxId
-			,ysnIsUnposted				= 0
+			,ysnIsUnposted				= 1
 			,intUserId					= @intUserId 
 			,intEntityId				= @intUserId 
 			,strTransactionId			= ForGLEntries_CTE.strTransactionId

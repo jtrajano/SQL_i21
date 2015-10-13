@@ -430,7 +430,7 @@ BEGIN
 				,[strBatchId]							= @strBatchId
 				,[intTransactionTypeId]					= @AUTO_NEGATIVE
 				,[intLotId]								= ItemToUnpost.intLotId
-				,[ysnIsUnposted]						= 0
+				,[ysnIsUnposted]						= 1
 				,[intRelatedInventoryTransactionId]		= NULL 
 				,[intRelatedTransactionId]				= NULL 
 				,[strRelatedTransactionId]				= NULL 
