@@ -2590,8 +2590,9 @@
     <Build Include="dbo\Stored Procedures\uspMFCreateUpdateParentLotNumber.sql" />
     <Build Include="dbo\Tables\tblLGShipmentCertificates.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateOnStoreInventory.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFGetOnHoldBlendSheets.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceAgingReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFApproveBlendSheets.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetOnHoldBlendSheets.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
