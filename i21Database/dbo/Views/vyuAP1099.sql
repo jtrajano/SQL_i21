@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuAP1099MISC]
+﻿CREATE VIEW [dbo].[vyuAP1099]
 AS
 SELECT
       strEmployerAddress = (SELECT [dbo].[fnAPFormatAddress](NULL,(SELECT TOP 1 E.strCompanyName
