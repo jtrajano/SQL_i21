@@ -92,8 +92,8 @@ BEGIN
 		-- Negative stock is not allowed 
 		SELECT	intItemId = @ManualLotGrains
 				,intItemLocationId = @ManualLotGrains_DefaultLocation
-				,strText = FORMATMESSAGE(50029)
-				,intErrorCode = 50029	
+				,strText = FORMATMESSAGE(80003)
+				,intErrorCode = 80003	
 				
 		DECLARE @SubLocation AS INT 
 		DECLARE @StorageLocation AS INT 

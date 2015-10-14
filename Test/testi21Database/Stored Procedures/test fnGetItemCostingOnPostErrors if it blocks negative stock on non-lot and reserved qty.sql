@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE testi21Database.[test fnGetItemCostingOnPostErrors if it blocks discontinued items]
+﻿CREATE PROCEDURE testi21Database.[test fnGetItemCostingOnPostErrors if it blocks negative stock on non-lot and reserved qty.sql]
 AS 
 BEGIN
 	-- Arrange
@@ -6,12 +6,9 @@ BEGIN
 		-- Create the mock data 
 		EXEC testi21Database.[Fake data for item stock table]
 
-		-- Flag all items as discontinued
+		-- Flag all items as phased out
 		UPDATE dbo.tblICItem
-		SET strStatus = 'Discontinued'
-		
-		-- Delete the records from the Stock UOM table. 
-		DELETE FROM dbo.tblICItemStockUOM
+		SET strStatus = 'Phased Out'
 
 		CREATE TABLE expected (
 			intItemId INT
@@ -89,30 +86,55 @@ BEGIN
 				,strText
 				,intErrorCode
 		)
-		-- The status of %s is Discontinued.
-		SELECT	intItemId = @ManualLotGrains
-				,intItemLocationId = @ManualLotGrains_DefaultLocation
-				,strText = FORMATMESSAGE(80022)
-				,intErrorCode = 80022	
+		-- Negative stock is not allowed 
+		SELECT	intItemId = @WetGrains
+				,intItemLocationId = @WetGrains_DefaultLocation
+				,strText = FORMATMESSAGE(80003)
+				,intErrorCode = 80003	
 				
 		DECLARE @SubLocation AS INT 
 		DECLARE @StorageLocation AS INT 
-		DECLARE @LotId AS INT = 1234
-		DECLARE @dblQty AS NUMERIC(18,6) = 20
+		DECLARE @LotId AS INT
+		DECLARE @dblQty AS NUMERIC(18,6) = -100
 	END
+
+	-- Setup reservation data
+	BEGIN 
+		INSERT INTO dbo.tblICStockReservation (
+				[intItemId] 
+				,[intItemLocationId] 
+				,[intItemUOMId] 
+				,[intLotId] 
+				,[intSubLocationId] 
+				,[intStorageLocationId] 
+				,[dblQty] 
+				,[intTransactionId] 
+				,[strTransactionId] 
+				,[intSort] 
+				,[intInventoryTransactionType] 
+				,[intConcurrencyId] 
+				,[ysnPosted] 
+		)
+		SELECT 
+				[intItemId]						= @WetGrains
+				,[intItemLocationId]			= @WetGrains_DefaultLocation
+				,[intItemUOMId]					= @WetGrains_BushelUOMId
+				,[intLotId]						= NULL 
+				,[intSubLocationId]				= @SubLocation
+				,[intStorageLocationId]			= @StorageLocation
+				,[dblQty]						= 100
+				,[intTransactionId]				= 1
+				,[strTransactionId]				= 'DUMMY TRANSACTION'
+				,[intSort]						= 1
+				,[intInventoryTransactionType]	= 1
+				,[intConcurrencyId]				= 1
+				,[ysnPosted]					= 0
+	END 
 
 	-- Act
 	BEGIN 
 		INSERT INTO actual	
-		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(
-			@ManualLotGrains, 
-			@ManualLotGrains_DefaultLocation, 
-			@ManualLotGrains_BushelUOMId, 
-			@SubLocation, 
-			@StorageLocation, 
-			@dblQty, 
-			@LotId
-		)
+		SELECT * FROM dbo.fnGetItemCostingOnPostErrors(@WetGrains, @WetGrains_DefaultLocation, @WetGrains_BushelUOMId, @SubLocation, @StorageLocation, @dblQty, @LotId)
 	END
 
 	-- Assert
