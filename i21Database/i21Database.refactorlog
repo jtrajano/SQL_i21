@@ -4144,4 +4144,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intEntityId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="991090df-4fe2-4539-8d99-b9ff3ceb507a" ChangeDateTime="10/14/2015 05:41:15">
+    <Property Name="ElementName" Value="[dbo].[tblSMCompanySetup].[strEIN]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMCompanySetup]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strEin" />
+  </Operation>
 </Operations>
