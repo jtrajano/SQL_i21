@@ -145,7 +145,7 @@ BEGIN TRY
 	SET ysnConsumptionReversed = 1
 		,dtmLastModified = @dtmCurrentDateTime
 		,intLastModifiedUserId = @intUserId
-	WHERE intWorkOrderInputLotId = @intWorkOrderId
+	WHERE intWorkOrderInputLotId = @intWorkOrderInputLotId
 	
 	UPDATE tblMFProductionSummary SET dblInputQuantity=dblInputQuantity-@dblNewWeight WHERE intWorkOrderId=@intWorkOrderId AND intItemId=@intInputItemId
 
