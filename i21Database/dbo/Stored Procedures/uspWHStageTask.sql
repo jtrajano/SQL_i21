@@ -213,8 +213,8 @@ BEGIN TRY
 					WHERE intSKUId = @intSKUId
 
 					--Create a Manifest record                                                
-					INSERT INTO tblWHOrderManifest (intConcurrencyId,intOrderLineItemId, strManifestItemNote, intSKUId, intLastUpdateId, dtmLastUpdateOn, strSSCCNo)
-					SELECT 0,i.intOrderLineItemId, '' ManifestItemNote, s.intSKUId, 1 intLastModifiedUserId, GETDATE() dtmLastModified, 1
+					INSERT INTO tblWHOrderManifest (intConcurrencyId,intOrderLineItemId,intOrderHeaderId, strManifestItemNote, intSKUId, intLastUpdateId, dtmLastUpdateOn, strSSCCNo)
+					SELECT 0,i.intOrderLineItemId, h.intOrderHeaderId ,'' ManifestItemNote, s.intSKUId, @intUserSecurityId, GETDATE() dtmLastModified, 1
 					FROM tblWHOrderHeader h
 					INNER JOIN tblWHOrderLineItem i ON i.intOrderHeaderId = h.intOrderHeaderId
 					INNER JOIN tblWHSKU s ON s.intItemId = i.intItemId
