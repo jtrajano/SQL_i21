@@ -12,11 +12,21 @@ Declare @intStageLotId int
 Declare @intStorageLocationId int
 Declare @dblPickQuantity numeric(18,6)
 Declare @intNewSubLocationId int
+Declare @strPickListNo nvarchar(50)
 
-Select @intKitStatusId=intKitStatusId from tblMFPickList Where intPickListId = @intPickListId
+Select @intKitStatusId=intKitStatusId,@strPickListNo=strPickListNo from tblMFPickList Where intPickListId = @intPickListId
 
 If @intKitStatusId not in (7,12)
 	RaisError('Pick List cannot be deleted as it is already transferred.',16,1)
+
+If @intKitStatusId = 12 
+Begin
+	If Exists (Select 1 From tblMFWorkOrder Where intPickListId=@intPickListId AND intKitStatusId=8)
+		Begin
+			Set @ErrMsg='One or more blend sheets are already transferred for the selected pick no ' + @strPickListNo + '. This pick cannot be deleted.'
+			RaisError(@ErrMsg,16,1)
+		End
+End
 
 	Declare @tblPickListDetail table
 	(
