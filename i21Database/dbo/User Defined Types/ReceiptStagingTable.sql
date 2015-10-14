@@ -35,6 +35,8 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 	,[intTaxGroupId] INT NULL								-- Manually specify a tax group id. It overrides the 'Purchase Tax Code' for an item found in its item setup screen.
 	,[dblGross] NUMERIC(18,6) NULL 
 	,[dblNet] NUMERIC(18,6) NULL 
+	,[dblSurcharge] DECIMAL(18, 6) NULL DEFAULT 0       -- Fuel Surcharge	
+	,[ysnFreightInPrice] BIT NULL DEFAULT 0				-- Freight should be included In Price
 
 	-- Detail Lot
 	,[intLotId] INT NULL									-- Place holder field for lot numbers	
@@ -43,6 +45,6 @@ CREATE TYPE [dbo].[ReceiptStagingTable] AS TABLE
 
 	-- Integration Field
 	,[intInventoryReceiptId] INT NULL                   -- Existing id of an Inventory Receipt. 
-	,[dblSurcharge] DECIMAL(18, 6) NULL DEFAULT 0       -- Fuel Surcharge	
-	,[ysnFreightInPrice] BIT NULL DEFAULT 0				-- Freight should be included In Price
+	,[strSourceId] NVARCHAR(50) NULL					-- String Id of the source transaction. 
+	,[strSourceScreenName] NVARCHAR(50) NULL			-- Name of the screen name where the transaction is coming from.
 )

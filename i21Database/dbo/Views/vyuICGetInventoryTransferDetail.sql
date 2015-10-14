@@ -43,5 +43,5 @@ FROM tblICInventoryTransferDetail TransferDetail
 	LEFT JOIN vyuICGetItemStockUOM StockFrom ON StockFrom.intItemId = TransferDetail.intItemId
 		AND StockFrom.intLocationId = Transfer.intFromLocationId
 		AND StockFrom.intItemUOMId = TransferDetail.intItemUOMId
-		AND StockFrom.intSubLocationId = TransferDetail.intFromSubLocationId
-		AND StockFrom.intStorageLocationId = TransferDetail.intFromStorageLocationId
+		AND ISNULL(StockFrom.intSubLocationId, 0) = ISNULL(TransferDetail.intFromSubLocationId, 0)
+		AND ISNULL(StockFrom.intStorageLocationId, 0) = ISNULL(TransferDetail.intFromStorageLocationId, 0)

@@ -16,8 +16,8 @@ RETURN (
 	FROM (
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = FORMATMESSAGE(50029)
-				,intErrorCode = 50029
+				,strText = FORMATMESSAGE(80003)
+				,intErrorCode = 80003
 		WHERE	EXISTS (
 					SELECT	TOP 1 1
 					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation Location
@@ -36,8 +36,8 @@ RETURN (
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = FORMATMESSAGE(50029)
-				,intErrorCode = 50029
+				,strText = FORMATMESSAGE(80003)
+				,intErrorCode = 80003
 		WHERE	EXISTS (
 					SELECT	TOP 1 1
 					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation Location

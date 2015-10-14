@@ -41,8 +41,8 @@ BEGIN
 		-- Invalid item and invalid location
 		SELECT	intItemId = @InvalidItem
 				,intItemLocationId = @InvalidLocation
-				,strText = FORMATMESSAGE(50027)
-				,intErrorCode = 50027
+				,strText = FORMATMESSAGE(80001)
+				,intErrorCode = 80001
 
 		-- Create the mock data 
 		EXEC testi21Database.[Fake inventory items];

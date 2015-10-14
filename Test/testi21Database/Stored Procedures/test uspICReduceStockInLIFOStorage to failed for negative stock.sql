@@ -249,8 +249,8 @@ BEGIN
 	-- Assert for an exception thrown towards the end of the process
 	BEGIN 
 		EXEC tSQLt.ExpectException
-			@ExpectedMessage = 'Negative stock quantity is not allowed.'
-			,@ExpectedErrorNumber = 50029
+			--@ExpectedMessage = 'Negative stock quantity is not allowed.'
+			@ExpectedErrorNumber = 80003
 	END
 
 	-- Act

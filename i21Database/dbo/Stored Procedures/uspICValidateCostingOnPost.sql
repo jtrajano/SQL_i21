@@ -28,7 +28,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @strItemNo AS NVARCHAR(50)
-	,@intItemId AS INT 
+		,@intItemId AS INT 
 
 CREATE TABLE #FoundErrors (
 	intItemId INT
@@ -48,9 +48,9 @@ FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnPostErrors(Item.int
 
 -- Check for invalid items in the temp table. 
 -- If such error is found, raise the error to stop the costing and allow the caller code to do a rollback. 
-IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 50027)
+IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80001)
 BEGIN 
-	RAISERROR(50027, 11, 1)
+	RAISERROR(80001, 11, 1)
 	GOTO _Exit
 END 
 
@@ -61,26 +61,34 @@ SELECT TOP 1
 		,@intItemId = Item.intItemId
 FROM	#FoundErrors Errors INNER JOIN tblICItem Item
 			ON Errors.intItemId = Item.intItemId
-WHERE	intErrorCode = 50028
+WHERE	intErrorCode = 80002
 
 IF @intItemId IS NOT NULL 
 BEGIN 
 	-- 'Item Location is invalid or missing for {Item}.'
-	RAISERROR(50028, 11, 1, @strItemNo)
+	RAISERROR(80002, 11, 1, @strItemNo)
 	GOTO _Exit
 END 
 
 -- Check for invalid item UOM 
-IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 51159)
+IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80048)
 BEGIN 
-	RAISERROR(51159, 11, 1)
+	RAISERROR(80048, 11, 1)
 	GOTO _Exit
 END 
 
 -- Check for negative stock qty 
-IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 50029)
+IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80003)
 BEGIN 
-	RAISERROR(50029, 11, 1)
+	SELECT @strItemNo = NULL, @intItemId = NULL 
+	SELECT TOP 1 
+			@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+			,@intItemId = Item.intItemId
+	FROM	#FoundErrors Errors INNER JOIN tblICItem Item
+				ON Errors.intItemId = Item.intItemId
+	WHERE	intErrorCode = 80003
+
+	RAISERROR(80003, 11, 1, @strItemNo)
 	GOTO _Exit
 END 
 
@@ -91,12 +99,12 @@ SELECT TOP 1
 		,@intItemId = Item.intItemId
 FROM	#FoundErrors Errors INNER JOIN tblICItem Item
 			ON Errors.intItemId = Item.intItemId
-WHERE	intErrorCode = 51091
+WHERE	intErrorCode = 80023
 
 IF @intItemId IS NOT NULL 
 BEGIN 
 	-- 'Missing costing method setup for item {Item}.'
-	RAISERROR(51091, 11, 1, @strItemNo)
+	RAISERROR(80023, 11, 1, @strItemNo)
 	GOTO _Exit
 END 
 
@@ -107,12 +115,12 @@ SELECT TOP 1
 		,@intItemId = Item.intItemId
 FROM	#FoundErrors Errors INNER JOIN tblICItem Item
 			ON Errors.intItemId = Item.intItemId
-WHERE	intErrorCode = 51090
+WHERE	intErrorCode = 80022
 
 IF @intItemId IS NOT NULL 
 BEGIN 
 	-- 'The status of {item} is Discontinued.'
-	RAISERROR(51090, 11, 1, @strItemNo)
+	RAISERROR(80022, 11, 1, @strItemNo)
 	GOTO _Exit
 END 
 
@@ -123,12 +131,12 @@ SELECT TOP 1
 		,@intItemId = Item.intItemId
 FROM	#FoundErrors Errors INNER JOIN tblICItem Item
 			ON Errors.intItemId = Item.intItemId
-WHERE	intErrorCode = 51134
+WHERE	intErrorCode = 80049
 
 IF @intItemId IS NOT NULL 
 BEGIN 
 	-- 'Item {Item Name} is missing a Stock Unit. Please check the Unit of Measure setup.'
-	RAISERROR(51160, 11, 1, @strItemNo)
+	RAISERROR(80049, 11, 1, @strItemNo)
 	GOTO _Exit
 END 
 

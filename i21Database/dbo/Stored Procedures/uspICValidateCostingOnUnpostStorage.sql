@@ -21,6 +21,9 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @strItemNo AS NVARCHAR(50)
+		,@intItemId AS INT 
+
 CREATE TABLE #FoundErrors (
 	intItemId INT
 	,intItemLocationId INT
@@ -40,9 +43,17 @@ WHERE	ISNULL(@ysnRecap, 0) = 0
 
 -- If such error is found, raise the error to stop the costing and allow the caller code to do a rollback. 
 -- Check for negative stock qty 
-IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 50029)
+IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80003)
 BEGIN 
-	RAISERROR(50029, 11, 1)
+	SELECT @strItemNo = NULL, @intItemId = NULL 
+	SELECT TOP 1 
+			@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+			,@intItemId = Item.intItemId
+	FROM	#FoundErrors Errors INNER JOIN tblICItem Item
+				ON Errors.intItemId = Item.intItemId
+	WHERE	intErrorCode = 80003
+
+	RAISERROR(80003, 11, 1, @strItemNo)
 	GOTO _Exit
 END 
 

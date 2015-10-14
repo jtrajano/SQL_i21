@@ -80,7 +80,9 @@ END
                 ,[intToStorageLocationId]
                 -- Integration Field
                 ,[intInventoryTransferId]
-                ,[intSourceId]     
+                ,[intSourceId]   
+				,[strSourceId]  
+				,[strSourceScreenName]
     )
     SELECT      -- Header
                 [dtmTransferDate]           = TL.dtmLoadDateTime
@@ -112,6 +114,9 @@ END
                 -- Integration Field
                 ,[intInventoryTransferId]   = TR.intInventoryTransferId
                 ,[intSourceId]              = TR.intTransportReceiptId
+				,[strSourceId]				= TL.strTransaction
+				,[strSourceScreenName]		= 'Transport Load'
+
     FROM	tblTRTransportLoad TL 
 	        JOIN tblTRTransportReceipt TR 
 				ON TR.intTransportLoadId = TL.intTransportLoadId	

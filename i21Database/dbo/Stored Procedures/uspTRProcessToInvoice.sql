@@ -79,6 +79,7 @@ END
 		,intShipToLocationId
 		,strBOLNumber
 		,intInvoiceId
+		,strSourceScreenName
 	 )	 
 	 select     
        DH.intEntityCustomerId,     
@@ -132,7 +133,8 @@ END
 			         and HH.intDistributionHeaderId = DH.intDistributionHeaderId ) as strActualCostId,
 		DH.intShipToLocationId,
 		TR.strBillOfLadding,
-		DH.intInvoiceId 
+		DH.intInvoiceId,
+		'Transport Load' 
 	   from tblTRTransportLoad TL
             JOIN tblTRTransportReceipt TR on TR.intTransportLoadId = TL.intTransportLoadId
 			JOIN tblTRDistributionHeader DH on DH.intTransportReceiptId = TR.intTransportReceiptId

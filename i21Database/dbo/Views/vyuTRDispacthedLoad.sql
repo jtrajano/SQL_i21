@@ -35,7 +35,7 @@ LG.intCounterPartyEntityLocationId as intShipToLocationId,
 (select top 1 SP.strEntityNo from tblARCustomer AR 
                                     Left Join vyuEMEntity SP on AR.intSalespersonId = SP.intEntityId
 									 where AR.intEntityCustomerId = LG.intCounterPartyEntityId) as strOutboundSalespersonId,
-LG.strCounterPartyLocationName as strShipTo,
+LG.strCounterPartyShipFromTo as strShipTo,
 intOutboundItemId = CASE
 						WHEN LG.intCounterPartyItemId is NULL							        
 						   THEN LG.intItemId

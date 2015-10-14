@@ -2366,6 +2366,13 @@
     <Build Include="dbo\Stored Procedures\uspGLGetGLStatus.sql" />
     <Build Include="dbo\Functions\fnAPValidateRecapBill.sql" />
     <Build Include="dbo\Views\vyuTRTansportLoad.sql" />
+    <Build Include="dbo\Functions\fnARGetContractPricingDetails.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerPricingDetails.sql" />
+    <Build Include="dbo\Functions\fnARGetInventoryItemPricingDetails.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerItemSpecialPrice.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerItemSpecialPriceId.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMAuditLog.sql" />
+    <Build Include="dbo\Functions\fnARGetLocationItemVendorDetailsForPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

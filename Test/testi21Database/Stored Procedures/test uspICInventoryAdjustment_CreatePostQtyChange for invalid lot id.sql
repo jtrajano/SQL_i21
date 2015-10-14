@@ -135,7 +135,7 @@ BEGIN
 
 	-- Assert 
 	BEGIN 
-		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 51053			
+		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 80020			
 	END 
 
 	-- Act
@@ -169,4 +169,4 @@ BEGIN
 
 	IF OBJECT_ID('actual_tblICInventoryAdjustmentDetail') IS NOT NULL 
 		DROP TABLE dbo.actual_tblICInventoryAdjustmentDetail
-END 
+END  

@@ -41,8 +41,8 @@ BEGIN
 		-- Invalid item and valid location
 		SELECT	intItemId = @InvalidItem
 				,intItemLocationId = @Default_Location
-				,strText = FORMATMESSAGE(50027)
-				,intErrorCode = 50027
+				,strText = FORMATMESSAGE(80001)
+				,intErrorCode = 80001
 		--UNION ALL
 		--SELECT	intItemId = @InvalidItem
 		--		,intItemLocationId = @Default_Location

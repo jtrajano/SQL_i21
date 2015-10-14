@@ -247,10 +247,21 @@ BEGIN
 
 				,dblCost					=  ISNULL(
 												CASE	WHEN Lot.dblLastCost IS NULL THEN 
-														(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = DetailItem.intItemId AND intItemLocationId = dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId))
-													ELSE 
-														Lot.dblLastCost 
+															(
+																SELECT	TOP 1 dblLastCost 
+																FROM	tblICItemPricing 
+																WHERE	intItemId = DetailItem.intItemId 
+																		AND intItemLocationId = dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId)
+															)
+														ELSE 
+															Lot.dblLastCost 
 												END, 0)
+												* CASE	WHEN  Lot.intLotId IS NULL THEN 
+														ItemUOM.dblUnitQty
+													ELSE
+														LotItemUOM.dblUnitQty
+												END
+
 				,dblSalesPrice              = 0.00
 				,intCurrencyId              = NULL 
 				,dblExchangeRate            = 1
@@ -271,8 +282,8 @@ BEGIN
 					ON Lot.intLotId = DetailLot.intLotId            
 				LEFT JOIN tblICItemUOM LotItemUOM
 					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId            
-				INNER JOIN vyuICGetShipmentItemSource ItemSource 
-					ON ItemSource.intInventoryShipmentItemId = DetailItem.intInventoryShipmentItemId
+				--INNER JOIN vyuICGetShipmentItemSource ItemSource 
+				--	ON ItemSource.intInventoryShipmentItemId = DetailItem.intInventoryShipmentItemId
 				
 		WHERE   Header.intInventoryShipmentId = @intTransactionId
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_OWN) = @OWNERSHIP_TYPE_OWN
@@ -494,6 +505,24 @@ BEGIN
 
 	COMMIT TRAN @TransactionName
 END 
+
+-- Create an Audit Log
+IF @ysnRecap = 0 
+BEGIN 
+	DECLARE @strDescription AS NVARCHAR(100) 
+			,@actionType AS NVARCHAR(50)
+
+	SELECT @actionType = CASE WHEN @ysnPost = 1 THEN 'Posted'  ELSE 'Unposted' END 
+			
+	EXEC	dbo.uspSMAuditLog 
+			@keyValue = @intTransactionId							-- Primary Key Value of the Inventory Shipment. 
+			,@screenName = 'Inventory.view.InventoryShipment'       -- Screen Namespace
+			,@entityId = @intEntityId                               -- Entity Id.
+			,@actionType = @actionType                              -- Action Type
+			,@changeDescription = @strDescription					-- Description
+			,@fromValue = ''										-- Previous Value
+			,@toValue = ''											-- New Value
+END
     
 -- This is our immediate exit in case of exceptions controlled by this stored procedure
 Post_Exit:

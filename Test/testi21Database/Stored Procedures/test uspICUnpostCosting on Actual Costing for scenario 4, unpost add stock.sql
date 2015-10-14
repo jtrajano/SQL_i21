@@ -232,7 +232,7 @@ BEGIN
 						WHEN  InventoryAccountSetup.intItemId = @ColdGrains THEN 39
 						WHEN  InventoryAccountSetup.intItemId = @HotGrains THEN 40
 				END 
-			,ysnIsUnposted = 0
+			,ysnIsUnposted = 1
 			,strTransactionId = 'InvRcpt-00001'
 			,intTransactionId = 1
 			,strModuleName = 'Inventory'
@@ -264,7 +264,7 @@ BEGIN
 						WHEN  InventoryAccountSetup.intItemId = @ColdGrains THEN 39
 						WHEN  InventoryAccountSetup.intItemId = @HotGrains THEN 40
 				END 
-			,ysnIsUnposted = 0
+			,ysnIsUnposted = 1
 			,strTransactionId = 'InvRcpt-00001'
 			,intTransactionId = 1
 			,strModuleName = 'Inventory'
@@ -374,7 +374,7 @@ BEGIN
 			,strTransactionId = @strTransactionId
 			,strBatchId = @strBatchId
 			,intTransactionTypeId = @AUTO_NEGATIVE
-			,ysnIsUnposted = 0
+			,ysnIsUnposted = 1
 			,intRelatedInventoryTransactionId = NULL
 			,intRelatedTransactionId = NULL
 			,strRelatedTransactionId = NULL

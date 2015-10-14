@@ -64,7 +64,7 @@ BEGIN
 	
 	-- Act and Assert
 	BEGIN 
-		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 50027
+		EXEC tSQLt.ExpectException @ExpectedErrorNumber = 80001
 		EXEC dbo.uspICValidateProcessToInventoryShipment @Items;
 	END 
 END 
