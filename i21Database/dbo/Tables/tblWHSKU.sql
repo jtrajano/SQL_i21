@@ -24,6 +24,8 @@
 	[intLayersPerPallet]	INT NOT NULL,
 	[ysnIsSanitized]	BIT,
 	[strBatchNo]	NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+    [intLastModifiedUserId] INT NULL, 
+    [dtmLastModified] DATETIME NULL, 
 
     CONSTRAINT [PK_tblWHSKU_intSKUId]  PRIMARY KEY ([intSKUId]),	
 	CONSTRAINT [UQ_tblWHSKU_strSKUNo] UNIQUE ([strSKUNo]),
