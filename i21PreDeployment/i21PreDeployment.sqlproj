@@ -121,6 +121,7 @@
     <None Include="Scripts\Pre-Deployment\8_AP\FixPaymentEntityId.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\11_AvoidCustomerTransportSupplierIdConflict.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\UpdatePaymentMethod.sql" />
+    <None Include="Scripts\Pre-Deployment\12_EM\12_UpdateCustomerFreightNullLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />

@@ -485,17 +485,37 @@ WHILE EXISTS(SELECT NULL FROM @Invoices)
 BEGIN
 	SELECT TOP 1 @InvoiceId = [intInvoiceID] FROM @Invoices
 	EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceId
-	--this is added because the reCompute invoice Taxes does not update the totals correctly
-	-- need to review this
- --   UPDATE
-	--	tblARInvoiceDetail
-	--	SET [dblTotal]		= ROUND(((isNull([dblPrice],0) )* isNull(([dblQtyShipped]),0) ),2)
-	--	where intInvoiceId = @InvoiceId
-	
-	--UPDATE
-	--	tblARInvoice
-	--	SET [dblInvoiceTotal]		= isNull((select SUM(dblTotal) from tblARInvoiceDetail where intInvoiceId = @InvoiceId),0)
-	--	where intInvoiceId = @InvoiceId
+
+    -- Create an Audit Log
+    DECLARE @strDescription AS NVARCHAR(100) --= @strSourceScreenName + ' to Invoice'
+			,@strSourceId AS NVARCHAR(250)
+			,@strInvoiceNumber AS NVARCHAR(250)
+			,@intNewInvoiceId AS INT
+    SELECT TOP 1
+		@intNewInvoiceId = I.intInvoiceId 
+		,@strInvoiceNumber = I.strInvoiceNumber 
+		,@strSourceId = RTRIM(LTRIM(IE.strSourceId))
+		,@strDescription = RTRIM(LTRIM(IE.strSourceScreenName)) + + ' to Invoice'
+	FROM
+		@InvoiceEntries IE
+	INNER JOIN
+		tblARInvoice I
+			ON IE.intSourceId = I.intDistributionHeaderId
+	WHERE
+		ISNULL(IE.intInvoiceId,0) = 0
+		AND I.intInvoiceId = @InvoiceId
+		
+	IF ISNULL(@intNewInvoiceId,0) <> 0	
+    BEGIN                                
+        EXEC dbo.uspSMAuditLog 
+			 @keyValue			= @intNewInvoiceId                  -- Primary Key Value of the Invoice. 
+			,@screenName		= 'AccountsReceivable.view.Invoice' -- Screen Namespace
+			,@entityId			= @EntityId                         -- Entity Id.
+			,@actionType		= 'Processed'                       -- Action Type
+			,@changeDescription	= @strDescription					-- Description
+			,@fromValue			= @strSourceId                      -- Previous Value
+			,@toValue			= @strInvoiceNumber                 -- New Value
+    END
 
 	DELETE FROM @Invoices WHERE [intInvoiceID] = @InvoiceId
 END

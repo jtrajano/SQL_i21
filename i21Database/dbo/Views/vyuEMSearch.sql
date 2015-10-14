@@ -2,8 +2,8 @@
 as 
 SELECT 
 		a.intEntityId,   
-		a.strEntityNo, 
-		a.Name as strName,  
+		b.strEntityNo, 
+		b.strName,
 		g.strPhone,  
 		e.strAddress,  
 		e.strCity,  
@@ -22,7 +22,7 @@ SELECT
 		ShipVia,
 		VendorOrCustomer =  Vendor + Customer
 	FROM 		
-			(SELECT	intEntityId, Name, strEntityNo,
+			(SELECT	intEntityId,
 								CASE WHEN [Customer] IS NOT NULL THEN 1 ELSE 0 END Customer, 		
 								CASE WHEN [Vendor] IS NOT NULL THEN 1 ELSE 0 END Vendor, 		
 								CASE WHEN [Employee] IS NOT NULL THEN 1 ELSE 0 END Employee, 		
@@ -36,7 +36,7 @@ SELECT
 								CASE WHEN [Ship Via] IS NOT NULL THEN 1 ELSE 0 END AS  ShipVia
 			FROM
 			(
-				select A.intEntityId,  A.strName Name, strType, A.strEntityNo 
+				select A.intEntityId, strType
 					from tblEntity A
 						JOIN tblEntityType B
 							on A.intEntityId = B.intEntityId		
@@ -59,9 +59,11 @@ SELECT
 					)
 			) AS PivotTable
 		) a
+		join tblEntity b
+			on a.intEntityId = b.intEntityId
 		left join tblEntityLocation e  
 			on ( ysnDefaultLocation = 1 )AND a.intEntityId = e.intEntityId
 		left join tblEntityToContact f  
 			on f.intEntityId = a.intEntityId and f.ysnDefaultContact = 1  
 		left join tblEntity g  
-			on f.intEntityContactId = g.intEntityId  
+			on f.intEntityContactId = g.intEntityId

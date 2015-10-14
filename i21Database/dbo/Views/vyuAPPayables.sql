@@ -24,7 +24,7 @@ UNION ALL
 SELECT A.dtmDatePaid AS dtmDate,   
 	 B.intBillId,   
 	 C.strBillId ,
-	 B.dblPayment AS dblAmountPaid,     
+	 CASE WHEN C.intTransactionType != 1 AND B.dblPayment > 0 THEN B.dblPayment * -1 ELSE B.dblPayment END AS dblAmountPaid,     
 	 dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld

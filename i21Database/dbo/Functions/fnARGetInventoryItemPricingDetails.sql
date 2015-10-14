@@ -50,7 +50,7 @@ BEGIN
 		);													
 					
 	--Item Special Pricing
-	SELECT 
+	SELECT TOP 1 
 		@Price			= @UOMQuantity *
 							(CASE
 								WHEN strDiscountBy = 'Amount'
@@ -74,6 +74,8 @@ BEGIN
 		AND intItemLocationId = @ItemLocationId 
 		AND (@ItemUOMId IS NULL OR intItemUnitMeasureId = @ItemUOMId)
 		AND CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmBeginDate AS DATE) AND CAST(ISNULL(dtmEndDate,@TransactionDate) AS DATE)
+	ORDER BY
+		intItemSpecialPricingId 
 	
 	IF(ISNULL(@Price,0) <> 0)
 		BEGIN
@@ -83,7 +85,7 @@ BEGIN
 		END
 	
 	--Item Pricing Level
-	SELECT 
+	SELECT TOP 1 
 		@Price			= @UOMQuantity * PL.dblUnitPrice
 		,@PriceBasis	= PL.dblUnitPrice		
 		,@Deviation		= 0.00		
@@ -102,10 +104,37 @@ BEGIN
 		AND PL.intItemId = @ItemId
 		AND PL.intItemLocationId = @ItemLocationId
 		AND PL.intItemUnitMeasureId = @ItemUOMId
-		AND @Quantity BETWEEN PL.dblMin AND PL.dblMax		
+		AND @Quantity BETWEEN PL.dblMin AND PL.dblMax
+	ORDER BY
+		PL.intItemPricingLevelId
+		
+	IF(ISNULL(@Price,0) <> 0)
+		BEGIN
+			INSERT @returntable(dblPrice, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity)
+			SELECT @Price, @Pricing, @PriceBasis, @Deviation, @UOMQuantity
+			RETURN;
+		END		
+		
+	SELECT TOP 1 
+		@Price			= @UOMQuantity * PL.dblUnitPrice
+		,@PriceBasis	= PL.dblUnitPrice		
+		,@Deviation		= 0.00		
+		,@Pricing		= 'Inventory - Pricing Level'		
+	FROM
+		tblICItemPricingLevel PL																								
+	INNER JOIN vyuICGetItemStock VIS
+			ON PL.intItemId = VIS.intItemId
+			AND PL.intItemLocationId = VIS.intItemLocationId															
+	WHERE
+		PL.intItemId = @ItemId
+		AND PL.intItemLocationId = @ItemLocationId
+		AND PL.intItemUnitMeasureId = @ItemUOMId
+		AND @Quantity BETWEEN PL.dblMin AND PL.dblMax
+	ORDER BY
+		PL.intItemPricingLevelId
 
 
-		IF(ISNULL(@Price,0) <> 0)
+	IF(ISNULL(@Price,0) <> 0)
 		BEGIN
 			INSERT @returntable(dblPrice, strPricing, dblPriceBasis, dblDeviation, dblUOMQuantity)
 			SELECT @Price, @Pricing, @PriceBasis, @Deviation, @UOMQuantity
