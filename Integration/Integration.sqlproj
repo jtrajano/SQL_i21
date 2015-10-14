@@ -145,6 +145,7 @@
     <None Include="Scripts\AP\FixImportedVendorOriginFlag.sql" />
     <None Include="Scripts\AP\BackupImportedPostedBillDetails.sql" />
     <None Include="Scripts\AP\BackupImportedUnpostedBillDetail.sql" />
+    <None Include="Scripts\AP\UpdateImportedBills1099.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
