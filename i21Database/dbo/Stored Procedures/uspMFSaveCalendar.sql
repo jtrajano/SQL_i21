@@ -83,7 +83,7 @@ BEGIN Try
 		BEGIN TRANSACTION
 
 	DELETE FROM dbo.tblMFScheduleCalendarDetail 
-	WHERE dtmCalendarDate BETWEEN @dtmFromDate AND @dtmToDate 
+	WHERE dtmCalendarDate BETWEEN @dtmFromDate AND @dtmToDate AND intCalendarId = @intCalendarId
 	AND NOT EXISTS(SELECT *FROM dbo.fnSplitString(@strShiftId, ',') S WHERE S.Item =tblMFScheduleCalendarDetail.intShiftId)
 
 	IF @ysnStandardCalendar = 1
