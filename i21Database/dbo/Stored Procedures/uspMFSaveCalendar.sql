@@ -24,6 +24,7 @@ BEGIN Try
 		,@strCalendarDate nvarchar(50)
 		,@strShiftName nvarchar(50)
 		,@strName nvarchar(50)
+		,@strShiftId nvarchar(50)
 
 	SELECT @dtmCurrentDate = GETDATE()
 
@@ -50,6 +51,7 @@ BEGIN Try
 		,@intUserId = intUserId
 		,@intLocationId = intLocationId
 		,@intConcurrencyId = intConcurrencyId
+		,@strShiftId=strShiftIds
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intCalendarId INT
 			,strCalendarName NVARCHAR(50)
@@ -60,7 +62,18 @@ BEGIN Try
 			,intUserId INT
 			,intLocationId INT
 			,intConcurrencyId INT
+			,strShiftIds NVARCHAR(50)
 			)
+
+	IF EXISTS(SELECT *FROM dbo.tblMFScheduleCalendar WHERE strName=@strCalendarName AND intManufacturingCellId=@intManufacturingCellId AND intLocationId=@intLocationId and intCalendarId<>isNULL(@intCalendarId,0))
+	BEGIN
+		RAISERROR (
+				90002
+				,11
+				,1
+				,@strCalendarName
+				)	
+	END
 
 	DECLARE @TRANSACTION_COUNT INT
 
@@ -69,9 +82,13 @@ BEGIN Try
 	IF @TRANSACTION_COUNT = 0
 		BEGIN TRANSACTION
 
+	DELETE FROM dbo.tblMFScheduleCalendarDetail 
+	WHERE dtmCalendarDate BETWEEN @dtmFromDate AND @dtmToDate 
+	AND NOT EXISTS(SELECT *FROM dbo.fnSplitString(@strShiftId, ',') S WHERE S.Item =tblMFScheduleCalendarDetail.intShiftId)
+
 	IF @ysnStandardCalendar = 1
 	BEGIN
-		UPDATE tblMFScheduleCalendar
+		UPDATE dbo.tblMFScheduleCalendar
 		SET ysnStandard = 0
 		WHERE intManufacturingCellId = @intManufacturingCellId
 	END
@@ -107,7 +124,7 @@ BEGIN Try
 	END
 	ELSE
 	BEGIN
-		UPDATE tblMFScheduleCalendar
+		UPDATE dbo.tblMFScheduleCalendar
 		SET strName=@strCalendarName
 			,dtmToDate = CASE 
 				WHEN @dtmToDate IS NOT NULL
@@ -179,7 +196,7 @@ BEGIN Try
 		WHERE intRecordId = @intRecordId
 
 		SELECT @intCalendarDetailId = intCalendarDetailId
-		FROM tblMFScheduleCalendarDetail
+		FROM dbo.tblMFScheduleCalendarDetail
 		WHERE intCalendarId = @intCalendarId
 			AND dtmCalendarDate = @dtmCalendarDate
 			AND intShiftId = @intShiftId
@@ -193,7 +210,7 @@ BEGIN Try
 
 		IF @intCalendarDetailId IS NULL
 		BEGIN
-			INSERT INTO tblMFScheduleCalendarDetail (
+			INSERT INTO dbo.tblMFScheduleCalendarDetail (
 				intCalendarId
 				,dtmCalendarDate
 				,dtmShiftStartTime

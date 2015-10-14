@@ -1,4 +1,5 @@
 ﻿CREATE PROC uspRKGetM2MBasis 
+
 		@strCopyData nvarchar(50)= null 
 AS
 IF ISNULL(@strCopyData,'')<>''
@@ -55,11 +56,9 @@ FROM tblRKCompanyPreference
 	,intConcurrencyId int
 	 )
 
-IF (@strEvaluationBy='Commodity' AND @strEvaluationByZone='Zone')
+IF (@strEvaluationBy='Commodity')
 BEGIN
-	IF @ysnEnterForwardCurveForMarketBasisDifferential= 0
-	BEGIN
-			IF (@ysnIncludeInventoryM2M = 0)
+	IF (@ysnIncludeInventoryM2M = 0)
 			BEGIN
 					DELETE FROM @tempBasis
 					INSERT INTO @tempBasis
@@ -68,13 +67,13 @@ BEGIN
 										,'' strOriginDest
 										,strFutMarketName
 										,'' strFutureMonth
-										,NULL strPeriodTo
-										,'' strLocationName
-										,strMarketZoneCode
+										,CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential=1 THEN strPeriodTo else NULL end as strPeriodTo
+										,CASE WHEN @strEvaluationByZone='Location' THEN strLocationName else NULL end as strLocationName
+										,CASE WHEN @strEvaluationByZone='Zone' THEN strMarketZoneCode else NULL end as strMarketZoneCode
 										,strCurrency
 										,'' strPricingType
 										,strContractInventory
-										,'' strContractType
+										,CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell=1 THEN strContractType else NULL end as strContractType
 										,dblCashOrFuture
 										,dblBasisOrDiscount
 										,strUnitMeasure
@@ -83,31 +82,31 @@ BEGIN
 										,NULL intOriginId
 										,intFutureMarketId
 										,NULL intFutureMonthId
-										,NULL intCompanyLocationId
-										,intMarketZoneId
+										,CASE WHEN @strEvaluationByZone='Location' THEN intCompanyLocationId else NULL end as intCompanyLocationId
+										,CASE WHEN @strEvaluationByZone='Zone' THEN intMarketZoneId else NULL end as intMarketZoneId
 										,intCurrencyId
 										,NULL intPricingTypeId
-										,NULL intContractTypeId
+											,CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell=1 THEN intContractTypeId else NULL end as intContractTypeId
 										,intUnitMeasureId
 										,intConcurrencyId										
-						FROM vyuRKGetM2MBasis 
+						FROM vyuRKGetM2MBasis WHERE strContractInventory <>'Inventory'
 			END
 			ELSE IF (@ysnIncludeInventoryM2M = 1)
 			BEGIN
 					DELETE FROM @tempBasis
 					INSERT INTO @tempBasis
-						SELECT DISTINCT strCommodityCode
+							SELECT DISTINCT strCommodityCode
 										,'' strItemNo
 										,'' strOriginDest
 										,strFutMarketName
 										,'' strFutureMonth
-										,NULL strPeriodTo
-										,'' strLocationName
-										,strMarketZoneCode
+										,CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential=1 THEN strPeriodTo else NULL end as strPeriodTo
+										,CASE WHEN @strEvaluationByZone='Location' THEN strLocationName else NULL end as strLocationName
+										,CASE WHEN @strEvaluationByZone='Zone' THEN strMarketZoneCode else NULL end as strMarketZoneCode
 										,strCurrency
 										,'' strPricingType
 										,strContractInventory
-										,'' strContractType
+										,CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell=1 THEN strContractType else NULL end as strContractType
 										,dblCashOrFuture
 										,dblBasisOrDiscount
 										,strUnitMeasure
@@ -116,150 +115,16 @@ BEGIN
 										,NULL intOriginId
 										,intFutureMarketId
 										,NULL intFutureMonthId
-										,NULL intCompanyLocationId
-										,intMarketZoneId
+										,CASE WHEN @strEvaluationByZone='Location' THEN intCompanyLocationId else NULL end as intCompanyLocationId
+										,CASE WHEN @strEvaluationByZone='Zone' THEN intMarketZoneId else NULL end as intMarketZoneId
 										,intCurrencyId
 										,NULL intPricingTypeId
-										,NULL intContractTypeId
+											,CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell=1 THEN intContractTypeId else NULL end as intContractTypeId
 										,intUnitMeasureId
-										,intConcurrencyId										
-						FROM vyuRKGetM2MBasis 
-						UNION
-						SELECT DISTINCT strCommodityCode
-										,'' strItemNo
-										,'' strOriginDest
-										,strFutMarketName
-										,'' strFutureMonth
-										,NULL strPeriodTo
-										,'' strLocationName
-										,strMarketZoneCode
-										,strCurrency
-										,'' strPricingType
-										,'Inventory' as strContractInventory
-										,'' strContractType
-										,dblCashOrFuture
-										,dblBasisOrDiscount
-										,strUnitMeasure
-										,intCommodityId  
-										,NULL intItemId
-										,NULL intOriginId
-										,intFutureMarketId
-										,NULL intFutureMonthId
-										,NULL intCompanyLocationId
-										,intMarketZoneId
-										,intCurrencyId
-										,NULL intPricingTypeId
-										,NULL intContractTypeId
-										,intUnitMeasureId
-										,intConcurrencyId
-										
-						FROM vyuRKGetM2MBasis 
+										,intConcurrencyId											
+						FROM vyuRKGetM2MBasis 									
 			END
-			
-			
-	END
-	ELSE IF @ysnEnterForwardCurveForMarketBasisDifferential= 1
-	BEGIN
-		IF (@ysnIncludeInventoryM2M = 0)
-			BEGIN
-					DELETE FROM @tempBasis
-					INSERT INTO @tempBasis
-						SELECT DISTINCT strCommodityCode
-										,'' strItemNo
-										,'' strOriginDest
-										,strFutMarketName
-										,'' strFutureMonth
-										,NULL strPeriodTo
-										,'' strLocationName
-										,strMarketZoneCode
-										,strCurrency
-										,'' strPricingType
-										,strContractInventory
-										,'' strContractType
-										,dblCashOrFuture
-										,dblBasisOrDiscount
-										,strUnitMeasure
-										,intCommodityId  
-										,NULL intItemId
-										,NULL intOriginId
-										,intFutureMarketId
-										,NULL intFutureMonthId
-										,NULL intCompanyLocationId
-										,intMarketZoneId
-										,intCurrencyId
-										,NULL intPricingTypeId
-										,NULL intContractTypeId
-										,intUnitMeasureId
-										,intConcurrencyId
-										
-						FROM vyuRKGetM2MBasis 
-			END
-			ELSE IF (@ysnIncludeInventoryM2M = 1)
-			BEGIN
-					DELETE FROM @tempBasis
-					INSERT INTO @tempBasis
-						SELECT DISTINCT strCommodityCode
-										,'' strItemNo
-										,'' strOriginDest
-										,strFutMarketName
-										,'' strFutureMonth
-										,NULL strPeriodTo
-										,'' strLocationName
-										,strMarketZoneCode
-										,strCurrency
-										,'' strPricingType
-										,strContractInventory
-										,'' strContractType
-										,dblCashOrFuture
-										,dblBasisOrDiscount
-										,strUnitMeasure
-										,intCommodityId  
-										,NULL intItemId
-										,NULL intOriginId
-										,intFutureMarketId
-										,NULL intFutureMonthId
-										,NULL intCompanyLocationId
-										,intMarketZoneId
-										,intCurrencyId
-										,NULL intPricingTypeId
-										,NULL intContractTypeId
-										,intUnitMeasureId
-										,intConcurrencyId
-										
-						FROM vyuRKGetM2MBasis 
-						UNION
-						SELECT DISTINCT strCommodityCode
-										,'' strItemNo
-										,'' strOriginDest
-										,strFutMarketName
-										,'' strFutureMonth
-										,NULL strPeriodTo
-										,'' strLocationName
-										,strMarketZoneCode
-										,strCurrency
-										,'' strPricingType
-										,'Inventory' as strContractInventory
-										,'' strContractType
-										,dblCashOrFuture
-										,dblBasisOrDiscount
-										,strUnitMeasure
-										,intCommodityId  
-										,NULL intItemId
-										,NULL intOriginId
-										,intFutureMarketId
-										,NULL intFutureMonthId
-										,NULL intCompanyLocationId
-										,intMarketZoneId
-										,intCurrencyId
-										,NULL intPricingTypeId
-										,NULL intContractTypeId
-										,intUnitMeasureId
-										,intConcurrencyId
-										
-						FROM vyuRKGetM2MBasis 
-			END
-	END
-	
+		
 	IF ISNULL(@strCopyData,'')<>'' and @intM2MBasisId is not null
 		BEGIN
 			UPDATE a 
@@ -272,1133 +137,86 @@ BEGIN
 		END
 END
 
-ELSE IF (@strEvaluationBy='Commodity' AND @strEvaluationByZone='Location')
+ELSE IF(@strEvaluationBy='Item')
 BEGIN
-	IF @ysnEnterForwardCurveForMarketBasisDifferential= 0
-	BEGIN
-		IF (@ysnIncludeInventoryM2M = 0)
-		BEGIN
-		DELETE FROM @tempBasis
-		INSERT INTO @tempBasis
-		SELECT DISTINCT strCommodityCode   
-				,'' strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,NULL intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-				
-			FROM vyuRKGetM2MBasis 
-		END
-		ELSE IF (@ysnIncludeInventoryM2M = 1)
-		BEGIN
-		DELETE FROM @tempBasis
-		INSERT INTO @tempBasis
-		SELECT DISTINCT strCommodityCode   
-				,'' strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,NULL intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-				
-			FROM vyuRKGetM2MBasis 
-			UNION
-			SELECT DISTINCT strCommodityCode   
-				,'' strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,'Inventory' strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,NULL intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-			
-			FROM vyuRKGetM2MBasis 
-		END
-	END
-	ELSE IF	@ysnEnterForwardCurveForMarketBasisDifferential= 1
-	BEGIN
-		IF (@ysnIncludeInventoryM2M = 0)
-		BEGIN
-		DELETE FROM @tempBasis
-		INSERT INTO @tempBasis
-		SELECT DISTINCT strCommodityCode   
-				,'' strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,NULL intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-				
-			FROM vyuRKGetM2MBasis 
-		END
-		ELSE IF (@ysnIncludeInventoryM2M = 1)
-		BEGIN
-		DELETE FROM @tempBasis
-		INSERT INTO @tempBasis
-		SELECT DISTINCT strCommodityCode   
-				,'' strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,NULL intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-				
-			FROM vyuRKGetM2MBasis 
-			UNION
-			SELECT DISTINCT strCommodityCode   
-				,'' strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,'Inventory' strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,NULL intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-				
-			FROM vyuRKGetM2MBasis 
-		END
-	END
-	
-	IF ISNULL(@strCopyData,'')<>'' and @intM2MBasisId is not null
-		BEGIN
-			UPDATE a 
-			SET  a.dblCashOrFuture =b.dblCashOrFuture,a.dblBasisOrDiscount =b.dblBasisOrDiscount
-			FROM @tempBasis a 
-			JOIN tblRKM2MBasisDetail b ON a.intCommodityId=b.intCommodityId and isnull(a.intCompanyLocationId,0)=isnull(b.intCompanyLocationId,0)
-			 AND isnull(a.intFutureMarketId,0)=isnull(b.intFutureMarketId,0)
-			AND isnull(a.intCurrencyId,0)=isnull(b.intCurrencyId,0) and isnull(a.intUnitMeasureId,0)=isnull(b.intUnitMeasureId,0)
-			WHERE b.intM2MBasisId=@intM2MBasisId			 
-		END
-	
-END
-
-ELSE IF (@strEvaluationBy='Commodity' AND @strEvaluationByZone='Company')
-BEGIN	
-	IF	@ysnEnterForwardCurveForMarketBasisDifferential= 0
-	BEGIN
-		IF (@ysnIncludeInventoryM2M = 0)
-		BEGIN
-		DELETE FROM @tempBasis
-		INSERT INTO @tempBasis
-		SELECT DISTINCT strCommodityCode   
-				,'' strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,'' strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,NULL intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,NULL intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-				
-		FROM vyuRKGetM2MBasis 
-		END
-		ELSE IF (@ysnIncludeInventoryM2M = 1)
-		BEGIN
-		DELETE FROM @tempBasis
-		INSERT INTO @tempBasis
-		SELECT DISTINCT strCommodityCode   
-				,'' strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,'' strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,NULL intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,NULL intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-			
-		FROM vyuRKGetM2MBasis 
-		UNION
-		SELECT DISTINCT strCommodityCode   
-				,'' strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,'' strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,'Inventory' strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,NULL intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,NULL intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-				
-		FROM vyuRKGetM2MBasis 
-		END
-	END
-	ELSE IF	@ysnEnterForwardCurveForMarketBasisDifferential= 1
-	BEGIN
-		IF (@ysnIncludeInventoryM2M = 0)
-		BEGIN
-		DELETE FROM @tempBasis
-		INSERT INTO @tempBasis
-		SELECT DISTINCT strCommodityCode   
-				,'' strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,'' strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,NULL intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,NULL intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-			
-		FROM vyuRKGetM2MBasis 
-		END
-		ELSE IF (@ysnIncludeInventoryM2M = 1)
-		BEGIN
-		DELETE FROM @tempBasis
-		INSERT INTO @tempBasis
-		SELECT DISTINCT strCommodityCode   
-				,'' strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,'' strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,NULL intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,NULL intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-				
-		FROM vyuRKGetM2MBasis 
-		UNION
-		SELECT DISTINCT strCommodityCode   
-				,'' strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,'' strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,'Inventory' strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,NULL intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,NULL intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-				
-		FROM vyuRKGetM2MBasis 
-		END
-	END
-	
-	IF ISNULL(@strCopyData,'')<>'' and @intM2MBasisId is not null
-		BEGIN
-			UPDATE a 
-			SET  a.dblCashOrFuture =b.dblCashOrFuture,a.dblBasisOrDiscount =b.dblBasisOrDiscount
-			FROM @tempBasis a 
-			JOIN tblRKM2MBasisDetail b ON a.intCommodityId=b.intCommodityId 
-			 AND isnull(a.intFutureMarketId,0)=isnull(b.intFutureMarketId,0)
-			AND isnull(a.intCurrencyId,0)=isnull(b.intCurrencyId,0) and isnull(a.intUnitMeasureId,0)=isnull(b.intUnitMeasureId,0)
-			WHERE b.intM2MBasisId=@intM2MBasisId			 
-		END
-	
-END
-
-ELSE IF (@strEvaluationBy='Item' AND @strEvaluationByZone='Zone')
-BEGIN
-
-	IF	@ysnEnterForwardCurveForMarketBasisDifferential= 0
-	BEGIN
-		IF (@ysnIncludeInventoryM2M = 0)
-		BEGIN
-		DELETE FROM @tempBasis
-		INSERT INTO @tempBasis
-		SELECT DISTINCT strCommodityCode
-						,strItemNo
-						,'' strOriginDest
-						,strFutMarketName
-						,'' strFutureMonth
-						,NULL strPeriodTo
-						,'' strLocationName
-						,strMarketZoneCode
-						,strCurrency
-						,'' strPricingType
-						,strContractInventory
-						,'' strContractType
-						,dblCashOrFuture
-						,dblBasisOrDiscount
-						,strUnitMeasure
-						,intCommodityId  
-						,intItemId
-						,NULL intOriginId
-						,intFutureMarketId
-						,NULL intFutureMonthId
-						,NULL intCompanyLocationId
-						,intMarketZoneId
-						,intCurrencyId
-						,NULL intPricingTypeId
-						,NULL intContractTypeId
-						,intUnitMeasureId
-						,intConcurrencyId
-						
-		FROM vyuRKGetM2MBasis 
-		END
-		ELSE IF (@ysnIncludeInventoryM2M = 1)
-		BEGIN
-		DELETE FROM @tempBasis
-		INSERT INTO @tempBasis
-		SELECT DISTINCT strCommodityCode
-						,strItemNo
-						,'' strOriginDest
-						,strFutMarketName
-						,'' strFutureMonth
-						,NULL strPeriodTo
-						,'' strLocationName
-						,strMarketZoneCode
-						,strCurrency
-						,'' strPricingType
-						,strContractInventory
-						,'' strContractType
-						,dblCashOrFuture
-						,dblBasisOrDiscount
-						,strUnitMeasure
-						,intCommodityId  
-						,intItemId
-						,NULL intOriginId
-						,intFutureMarketId
-						,NULL intFutureMonthId
-						,NULL intCompanyLocationId
-						,intMarketZoneId
-						,intCurrencyId
-						,NULL intPricingTypeId
-						,NULL intContractTypeId
-						,intUnitMeasureId
-						,intConcurrencyId
-						
-		FROM vyuRKGetM2MBasis 
-		UNION
-		SELECT DISTINCT strCommodityCode
-						,strItemNo
-						,'' strOriginDest
-						,strFutMarketName
-						,'' strFutureMonth
-						,NULL strPeriodTo
-						,'' strLocationName
-						,strMarketZoneCode
-						,strCurrency
-						,'' strPricingType
-						,'Inventory' strContractInventory
-						,'' strContractType
-						,dblCashOrFuture
-						,dblBasisOrDiscount
-						,strUnitMeasure
-						,intCommodityId  
-						,intItemId
-						,NULL intOriginId
-						,intFutureMarketId
-						,NULL intFutureMonthId
-						,NULL intCompanyLocationId
-						,intMarketZoneId
-						,intCurrencyId
-						,NULL intPricingTypeId
-						,NULL intContractTypeId
-						,intUnitMeasureId
-						,intConcurrencyId
-						
-		FROM vyuRKGetM2MBasis 
-		END
-	END
-	ELSE IF	@ysnEnterForwardCurveForMarketBasisDifferential= 1
-	BEGIN
 	IF (@ysnIncludeInventoryM2M = 0)
-		BEGIN
-		DELETE FROM @tempBasis
-		INSERT INTO @tempBasis
-		SELECT DISTINCT strCommodityCode
-						,strItemNo
-						,'' strOriginDest
-						,strFutMarketName
-						,'' strFutureMonth
-						,NULL strPeriodTo
-						,'' strLocationName
-						,strMarketZoneCode
-						,strCurrency
-						,'' strPricingType
-						,strContractInventory
-						,'' strContractType
-						,dblCashOrFuture
-						,dblBasisOrDiscount
-						,strUnitMeasure
-						,intCommodityId  
-						,intItemId
-						,NULL intOriginId
-						,intFutureMarketId
-						,NULL intFutureMonthId
-						,NULL intCompanyLocationId
-						,intMarketZoneId
-						,intCurrencyId
-						,NULL intPricingTypeId
-						,NULL intContractTypeId
-						,intUnitMeasureId
-						,intConcurrencyId
-						
-		FROM vyuRKGetM2MBasis 
-		END
-		ELSE IF (@ysnIncludeInventoryM2M = 1)
-		BEGIN
-		DELETE FROM @tempBasis
-		INSERT INTO @tempBasis
-		SELECT DISTINCT strCommodityCode
-						,strItemNo
-						,'' strOriginDest
-						,strFutMarketName
-						,'' strFutureMonth
-						,NULL strPeriodTo
-						,'' strLocationName
-						,strMarketZoneCode
-						,strCurrency
-						,'' strPricingType
-						,strContractInventory
-						,'' strContractType
-						,dblCashOrFuture
-						,dblBasisOrDiscount
-						,strUnitMeasure
-						,intCommodityId  
-						,intItemId
-						,NULL intOriginId
-						,intFutureMarketId
-						,NULL intFutureMonthId
-						,NULL intCompanyLocationId
-						,intMarketZoneId
-						,intCurrencyId
-						,NULL intPricingTypeId
-						,NULL intContractTypeId
-						,intUnitMeasureId
-						,intConcurrencyId
-					
-		FROM vyuRKGetM2MBasis 
-		UNION
-		SELECT DISTINCT strCommodityCode
-						,strItemNo
-						,'' strOriginDest
-						,strFutMarketName
-						,'' strFutureMonth
-						,NULL strPeriodTo
-						,'' strLocationName
-						,strMarketZoneCode
-						,strCurrency
-						,'' strPricingType
-						,'Inventory' strContractInventory
-						,'' strContractType
-						,dblCashOrFuture
-						,dblBasisOrDiscount
-						,strUnitMeasure
-						,intCommodityId  
-						,intItemId
-						,NULL intOriginId
-						,intFutureMarketId
-						,NULL intFutureMonthId
-						,NULL intCompanyLocationId
-						,intMarketZoneId
-						,intCurrencyId
-						,NULL intPricingTypeId
-						,NULL intContractTypeId
-						,intUnitMeasureId
-						,intConcurrencyId
-						
-		FROM vyuRKGetM2MBasis 
-		END
-	END
-	IF ISNULL(@strCopyData,'')<>'' and @intM2MBasisId is not null
-		BEGIN
-			UPDATE a 
-			SET  a.dblCashOrFuture =b.dblCashOrFuture,a.dblBasisOrDiscount =b.dblBasisOrDiscount
-			FROM @tempBasis a 
-			JOIN tblRKM2MBasisDetail b ON a.intCommodityId=b.intCommodityId and isnull(a.intItemId,0)=isnull(b.intItemId,0)
-			 AND isnull(a.intFutureMarketId,0)=isnull(b.intFutureMarketId,0) and isnull(a.intMarketZoneId,0)=isnull(b.intMarketZoneId,0)
-			AND isnull(a.intCurrencyId,0)=isnull(b.intCurrencyId,0) and isnull(a.intUnitMeasureId,0)=isnull(b.intUnitMeasureId,0)
-			WHERE b.intM2MBasisId=@intM2MBasisId			 
-		END
-	
-END
-
-ELSE IF (@strEvaluationBy='Item' AND @strEvaluationByZone='Location')
-BEGIN
-	
-	IF	@ysnEnterForwardCurveForMarketBasisDifferential= 0
-	BEGIN
-
-		IF (@ysnIncludeInventoryM2M = 0)
-		BEGIN
-		DELETE FROM @tempBasis
-		INSERT INTO @tempBasis
-		SELECT DISTINCT strCommodityCode   
-				,strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-			
-			FROM vyuRKGetM2MBasis 
-		END
-		ELSE IF (@ysnIncludeInventoryM2M = 1)
-		BEGIN
-		DELETE FROM @tempBasis
-		INSERT INTO @tempBasis
-		SELECT DISTINCT strCommodityCode   
-				,strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-			
-			FROM vyuRKGetM2MBasis 
-			UNION
-			SELECT DISTINCT strCommodityCode   
-				,strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,'Inventory' strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-			
-			FROM vyuRKGetM2MBasis 
-		END
-	END
-	ELSE IF	@ysnEnterForwardCurveForMarketBasisDifferential= 1
-	BEGIN
-
-	IF (@ysnIncludeInventoryM2M = 0)
-	
-		BEGIN 
-		DELETE FROM @tempBasis
-		INSERT INTO @tempBasis
-		SELECT DISTINCT strCommodityCode   
-				,strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-			
-			FROM vyuRKGetM2MBasis 
-		END
-		ELSE IF (@ysnIncludeInventoryM2M = 1)
-		BEGIN
+			BEGIN
+					DELETE FROM @tempBasis
+					INSERT INTO @tempBasis
+						SELECT DISTINCT strCommodityCode
+										,strItemNo
+										,strOriginDest
+										,strFutMarketName
+										,'' strFutureMonth
+										,CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential=1 THEN strPeriodTo else NULL end as strPeriodTo
+										,CASE WHEN @strEvaluationByZone='Location' THEN strLocationName else NULL end as strLocationName
+										,CASE WHEN @strEvaluationByZone='Zone' THEN strMarketZoneCode else NULL end as strMarketZoneCode
+										,strCurrency
+										,'' strPricingType
+										,strContractInventory
+										,CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell=1 THEN strContractType else NULL end as strContractType
+										,dblCashOrFuture
+										,dblBasisOrDiscount
+										,strUnitMeasure
+										,intCommodityId  
+										,intItemId
+										,intOriginId
+										,intFutureMarketId
+										,NULL intFutureMonthId
+										,CASE WHEN @strEvaluationByZone='Location' THEN intCompanyLocationId else NULL end as intCompanyLocationId
+										,CASE WHEN @strEvaluationByZone='Zone' THEN intMarketZoneId else NULL end as intMarketZoneId
+										,intCurrencyId
+										,NULL intPricingTypeId
+										,CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell=1 THEN intContractTypeId else NULL end as intContractTypeId
+										,intUnitMeasureId
+										,intConcurrencyId										
+						FROM vyuRKGetM2MBasis WHERE strContractInventory <>'Inventory'
+			END
+			ELSE IF (@ysnIncludeInventoryM2M = 1)
+			BEGIN
+					DELETE FROM @tempBasis
+					INSERT INTO @tempBasis
+							SELECT DISTINCT strCommodityCode
+										,strItemNo
+										,strOriginDest
+										,strFutMarketName
+										,'' strFutureMonth
+										,CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential=1 THEN strPeriodTo else NULL end as strPeriodTo
+										,CASE WHEN @strEvaluationByZone='Location' THEN strLocationName else NULL end as strLocationName
+										,CASE WHEN @strEvaluationByZone='Zone' THEN strMarketZoneCode else NULL end as strMarketZoneCode
+										,strCurrency
+										,'' strPricingType
+										,strContractInventory
+										,CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell=1 THEN strContractType else NULL end as strContractType
+										,dblCashOrFuture
+										,dblBasisOrDiscount
+										,strUnitMeasure
+										,intCommodityId  
+										,intItemId
+										,intOriginId
+										,intFutureMarketId
+										,NULL intFutureMonthId
+										,CASE WHEN @strEvaluationByZone='Location' THEN intCompanyLocationId else NULL end as intCompanyLocationId
+										,CASE WHEN @strEvaluationByZone='Zone' THEN intMarketZoneId else NULL end as intMarketZoneId
+										,intCurrencyId
+										,NULL intPricingTypeId
+										,CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell=1 THEN intContractTypeId else NULL end as intContractTypeId
+										,intUnitMeasureId
+										,intConcurrencyId											
+						FROM vyuRKGetM2MBasis 									
+			END
 		
-		DELETE FROM @tempBasis
-		INSERT INTO @tempBasis
-		SELECT DISTINCT strCommodityCode   
-				,strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-			
-			FROM vyuRKGetM2MBasis 
-			UNION
-			SELECT DISTINCT strCommodityCode   
-				,strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,'Inventory' strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-				
-			FROM vyuRKGetM2MBasis 
-		END
-	END
-
-		IF ISNULL(@strCopyData,'')<>'' and @intM2MBasisId is not null
-		BEGIN
-		UPDATE a 
-			SET  a.dblCashOrFuture =b.dblCashOrFuture,a.dblBasisOrDiscount =b.dblBasisOrDiscount
-			FROM @tempBasis a 
-			JOIN tblRKM2MBasisDetail b ON a.intCommodityId=b.intCommodityId AND isnull(a.intItemId,0)=isnull(b.intItemId,0) 
-			and isnull(a.intCompanyLocationId,0)=isnull(b.intCompanyLocationId,0)
-			 AND isnull(a.intFutureMarketId,0)=isnull(b.intFutureMarketId,0)
-			AND isnull(a.intCurrencyId,0)=isnull(b.intCurrencyId,0) and isnull(a.intUnitMeasureId,0)=isnull(b.intUnitMeasureId,0)
-			WHERE b.intM2MBasisId=@intM2MBasisId			 
-		END
-END
-
-ELSE IF (@strEvaluationBy='Item' AND @strEvaluationByZone='Company')
-BEGIN
-IF	@ysnEnterForwardCurveForMarketBasisDifferential= 0
-	BEGIN
-		IF (@ysnIncludeInventoryM2M = 0)
-		BEGIN
-		DELETE FROM @tempBasis
-		INSERT INTO @tempBasis
-		SELECT DISTINCT strCommodityCode   
-				,strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,'' strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,NULL intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-			
-		FROM vyuRKGetM2MBasis 
-		END
-		ELSE IF (@ysnIncludeInventoryM2M = 1)
-		BEGIN
-		DELETE FROM @tempBasis
-		INSERT INTO @tempBasis
-		SELECT DISTINCT strCommodityCode   
-				,strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,'' strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,NULL intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-			
-		FROM vyuRKGetM2MBasis 
-		UNION
-		SELECT DISTINCT strCommodityCode   
-				,strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,'' strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,'Inventory' strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,NULL intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-				
-		FROM vyuRKGetM2MBasis 
-		END
-	END
-	ELSE IF @ysnEnterForwardCurveForMarketBasisDifferential= 1
-	BEGIN
-	IF (@ysnIncludeInventoryM2M = 0)
-		BEGIN
-		DELETE FROM @tempBasis
-		INSERT INTO @tempBasis
-		SELECT DISTINCT strCommodityCode   
-				,strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,'' strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,NULL intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-			
-		FROM vyuRKGetM2MBasis 
-		END
-		ELSE IF (@ysnIncludeInventoryM2M = 1)
-		BEGIN
-		DELETE FROM @tempBasis
-		INSERT INTO @tempBasis
-		SELECT DISTINCT strCommodityCode   
-				,strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,'' strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,NULL intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-				
-		FROM vyuRKGetM2MBasis 
-		UNION
-		SELECT DISTINCT strCommodityCode   
-				,strItemNo
-				,'' strOriginDest
-				,strFutMarketName
-				,'' strFutureMonth
-				,NULL strPeriodTo
-				,'' strLocationName
-				,'' strMarketZoneCode
-				,strCurrency
-				,'' strPricingType
-				,'Inventory' strContractInventory
-				,'' strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,intItemId
-				,NULL intOriginId
-				,intFutureMarketId
-				,NULL intFutureMonthId
-				,NULL intCompanyLocationId
-				,NULL intMarketZoneId
-				,intCurrencyId
-				,NULL intPricingTypeId
-				,NULL intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId
-			
-		FROM vyuRKGetM2MBasis 
-		END
-	END
-		IF ISNULL(@strCopyData,'')<>'' and @intM2MBasisId is not null
+	IF ISNULL(@strCopyData,'')<>'' and @intM2MBasisId is not null
 		BEGIN
 			UPDATE a 
 			SET  a.dblCashOrFuture =b.dblCashOrFuture,a.dblBasisOrDiscount =b.dblBasisOrDiscount
 			FROM @tempBasis a 
-			JOIN tblRKM2MBasisDetail b ON a.intCommodityId=b.intCommodityId AND isnull(a.intItemId,0)=isnull(b.intItemId,0)
-			 AND isnull(a.intFutureMarketId,0)=isnull(b.intFutureMarketId,0)
+			JOIN tblRKM2MBasisDetail b ON a.intCommodityId=b.intCommodityId
+			AND isnull(a.intFutureMarketId,0)=isnull(b.intFutureMarketId,0) and isnull(a.intMarketZoneId,0)=isnull(b.intMarketZoneId,0)
 			AND isnull(a.intCurrencyId,0)=isnull(b.intCurrencyId,0) and isnull(a.intUnitMeasureId,0)=isnull(b.intUnitMeasureId,0)
 			WHERE b.intM2MBasisId=@intM2MBasisId			 
-		END		
+		END
 END
-
-IF @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1 
-BEGIN
---select * from @tempBasis where strItemNo='Q-Corn'
-	UPDATE @tempBasis set intContractTypeId=1,strContractType='Purchase' WHERE strContractInventory='Contract'
-	INSERT INTO @tempBasis
-	SELECT DISTINCT strCommodityCode   
-				,strItemNo
-				,strOriginDest
-				,strFutMarketName
-				,strFutureMonth
-				,NULL strPeriodTo
-				,strLocationName
-				,strMarketZoneCode
-				,strCurrency
-				,strPricingType
-				,strContractInventory
-				,'Sale' as strContractType
-				,dblCashOrFuture
-				,dblBasisOrDiscount
-				,strUnitMeasure
-				,intCommodityId  
-				,intItemId
-				,intOriginId
-				,intFutureMarketId
-				,intFutureMonthId
-				,intCompanyLocationId
-				,intMarketZoneId
-				,intCurrencyId
-				,intPricingTypeId
-				,2 intContractTypeId
-				,intUnitMeasureId
-				,intConcurrencyId FROM @tempBasis WHERE strContractInventory='Contract'
-END
-
 
 SELECT convert(int,ROW_NUMBER() over (ORDER BY strItemNo)) AS intRowNumber,* from @tempBasis order by 
 				intCommodityId  

@@ -48,12 +48,12 @@ Else
 Begin
 	Select wi.intWorkOrderInputParentLotId AS intWorkOrderInputLotId,wi.intWorkOrderId,wi.intParentLotId AS intLotId,wi.dblQuantity,
 	wi.intItemUOMId,wi.dblIssuedQuantity,wi.intItemIssuedUOMId,
-	pl.dblWeightPerQty AS dblWeightPerUnit,wi.intSequenceNo,wi.dtmCreated,wi.intCreatedUserId,
+	wi.dblWeightPerUnit,wi.intSequenceNo,wi.dtmCreated,wi.intCreatedUserId,
 	wi.dtmLastModified,wi.intLastModifiedUserId,cast(1 as bit) AS ysnParentLot,
 	pl.strParentLotNumber AS strLotNumber,i.intItemId,i.strItemNo,i.strDescription,um.strUnitMeasure AS strUOM,
 	um1.strUnitMeasure AS strIssuedUOM,wi.intRecipeItemId,CAST(0 AS numeric(18,6)) AS dblUnitCost,
 	ISNULL(pl.strParentLotAlias,'') AS strLotAlias,
-	'' AS strGarden,pl.intLocationId,
+	'' AS strGarden,wi.intLocationId,
 	cl.strLocationName AS strLocationName,
 	sbl.strSubLocationName,
 	sl.strName AS strStorageLocationName,
@@ -71,14 +71,14 @@ Begin
 	Join tblICItem i on pl.intItemId=i.intItemId
 	Join tblICItemUOM iu1 on wi.intItemIssuedUOMId=iu1.intItemUOMId
 	Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
-	Join tblSMCompanyLocation cl on cl.intCompanyLocationId=pl.intLocationId
+	Join tblSMCompanyLocation cl on cl.intCompanyLocationId=wi.intLocationId
 	Left Join tblICStorageLocation sl on sl.intStorageLocationId=wi.intStorageLocationId
 	Left Join tblSMCompanyLocationSubLocation sbl on sbl.intCompanyLocationSubLocationId=sl.intSubLocationId
 	Left Join vyuQMGetLotQuality q on pl.intParentLotId=q.intLotId
 	Left Join tblMFRecipeItem ri on wi.intRecipeItemId=ri.intRecipeItemId
 	Where wi.intWorkOrderId=@intWorkOrderId
 
-	Update wi Set wi.dblUnitCost=l.dblLastCost,wi.strGarden=l.strVendorLocation,wi.strRemarks=l.strNotes
+	Update wi Set wi.dblUnitCost=l.dblLastCost,wi.strGarden=ISNULL(l.strVendorLocation,''),wi.strRemarks=l.strNotes
 	From #tblWorkOrderInputParent wi Join tblICLot l on wi.intLotId=l.intParentLotId
 
 	Select * from #tblWorkOrderInputParent

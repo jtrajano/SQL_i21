@@ -20,14 +20,25 @@ Declare @dtmCurrentDateTime DateTime=GETDATE()
 Declare @dblPhysicalQty numeric(18,6)
 Declare @dblWeightPerQty numeric(18,6)
 Declare @strUOM nvarchar(50)
+Declare @intKitStatusId int
 
-Select @intManufacturingProcessId=intManufacturingProcessId From tblMFWorkOrder Where intPickListId=@intPickListId
+Select @intManufacturingProcessId=intManufacturingProcessId,@intKitStatusId=intKitStatusId 
+From tblMFWorkOrder Where intPickListId=@intPickListId
 Select @intLocationId=intLocationId from tblMFPickList Where intPickListId=@intPickListId
 
 Select @intKitStagingLocationId=pa.strAttributeValue 
 From tblMFManufacturingProcessAttribute pa Join tblMFAttribute at on pa.intAttributeId=at.intAttributeId
 Where intManufacturingProcessId=@intManufacturingProcessId and intLocationId=@intLocationId 
 and at.strAttributeName='Kit Staging Location'
+
+If @intKitStatusId = 12 
+	RaisError('Kit is already staged.',16,1)
+
+If @intKitStatusId = 8 
+	RaisError('Kit is already transferred.',16,1)
+
+If @intKitStatusId <> 7
+	RaisError('Kit is not picked.',16,1)
 
 If ISNULL(@intKitStagingLocationId ,0)=0
 	RaisError('Kit Staging Location is not defined.',16,1)
@@ -65,6 +76,8 @@ Select @intMinLot=Min(intRowNo) from @tblPickListDetail
 
 While(@intMinLot is not null)
 Begin
+	Set @intNewLotId=NULL
+
 	Select @intLotId=intLotId,@strLotNumber=strLotNumber,@dblMoveQty=dblPickQuantity,@intItemId=intItemId,
 	@intPickListDetailId=intPickListDetailId,@dblPhysicalQty=dblPhysicalQty,@dblWeightPerQty=dblWeightPerQty 
 	From @tblPickListDetail Where intRowNo=@intMinLot

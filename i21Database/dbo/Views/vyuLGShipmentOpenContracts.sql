@@ -38,9 +38,11 @@ AS
 			CD.intNumberOfContainers,
 			CD.intContainerTypeId,
 			CD.strVessel,
-			CD.intContractTypeId
+			CD.intContractTypeId,
+			Item.strType as strItemType
 
 	FROM 	vyuCTContractDetailView 		CD
+	LEFT JOIN tblICItem Item ON Item.intItemId = CD.intItemId
 	LEFT JOIN tblSMCity LoadingPort ON LoadingPort.intCityId = CD.intLoadingPortId
 	LEFT JOIN tblSMCity DestPort ON DestPort.intCityId = CD.intDestinationPortId
 	LEFT JOIN tblSMCity DestCity ON DestCity.intCityId = CD.intDestinationCityId) t1

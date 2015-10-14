@@ -16,7 +16,7 @@ Declare @dblAvailableQty numeric(18,6)
 Declare @intPickListPreferenceId int
 Declare @intManufacturingProcessId int
 Declare @intItemUOMId int
-Declare @dblWeightPerUnit numeric(18,6)
+Declare @dblWeightPerUnit numeric(38,20)
 
 Declare @tblWorkOrder AS table
 (
@@ -31,7 +31,8 @@ Declare @tblParentLot AS table
 	dblQuantity numeric(18,6),
 	intItemUOMId int,
 	dblIssuedQuantity numeric(18,6),
-	intItemIssuedUOMId int
+	intItemIssuedUOMId int,
+	dblWeightPerUnit numeric(38,20)
 )
 
 Declare @tblChildLot AS table
@@ -40,7 +41,7 @@ Declare @tblChildLot AS table
 	intStorageLocationId int,
 	dblQuantity numeric(18,6),
 	intItemUOMId int,
-	dblWeightPerUnit numeric(18,6)
+	dblWeightPerUnit numeric(38,20)
 )
 
 Declare @tblAvailableLot AS table
@@ -53,7 +54,7 @@ Declare @tblAvailableLot AS table
 	intItemIssuedUOMId int,
 	dblReservedQty numeric(18,6),
 	dblDiffQty numeric(18,6),
-	dblWeightPerUnit numeric(18,6)
+	dblWeightPerUnit numeric(38,20)
 )
 
 Declare @tblAvailableLot1 AS table
@@ -66,7 +67,7 @@ Declare @tblAvailableLot1 AS table
 	dblAvailableIssuedQty numeric(18,6),
 	intItemIssuedUOMId int,
 	dblReservedQty numeric(18,6),
-	dblWeightPerUnit numeric(18,6)
+	dblWeightPerUnit numeric(38,20)
 )
 
 Declare @tblPickedLot AS table
@@ -82,7 +83,8 @@ Declare @tblPickedLot AS table
 	intPickUOMId int,
 	dblAvailableQty numeric(18,6),
 	dblAvailableIssuedQty numeric(18,6),
-	dblReservedQty numeric(18,6)
+	dblReservedQty numeric(18,6),
+	dblWeightPerUnit numeric(38,20)
 )
 
 Declare @tblReservedQty table
@@ -116,27 +118,29 @@ If ISNULL(@intPickListPreferenceId,0)=0
 	Set @intPickListPreferenceId=1
 
 --Get Parent Lots from the supplied work orders
-Insert Into @tblParentLot(intParentLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId)
+Insert Into @tblParentLot(intParentLotId,intItemId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,dblWeightPerUnit)
 Select wi.intParentLotId,wi.intItemId,sum(wi.dblQuantity) AS dblQuantity,wi.intItemUOMId,
-sum(wi.dblIssuedQuantity) AS dblIssuedQuantity,wi.intItemIssuedUOMId 
+sum(wi.dblIssuedQuantity) AS dblIssuedQuantity,wi.intItemIssuedUOMId,wi.dblWeightPerUnit 
 from tblMFWorkOrderInputParentLot wi 
 Where intWorkOrderId in (Select intWorkOrderId From @tblWorkOrder) 
-Group by wi.intParentLotId,wi.intItemId,wi.intItemUOMId,wi.intItemIssuedUOMId
+Group by wi.intParentLotId,wi.intItemId,wi.intItemUOMId,wi.intItemIssuedUOMId,wi.dblWeightPerUnit 
 
 Select @intMinParentLot=Min(intRowNo) from @tblParentLot
 
 While(@intMinParentLot is not null) --Parent Lot Loop
 Begin
 	Select @intParentLotId=tpl.intParentLotId,@dblReqQty=tpl.dblQuantity,@intItemUOMId=tpl.intItemUOMId,@intItemIssuedUOMId=tpl.intItemIssuedUOMId,
-	@dblWeightPerUnit=pl.dblWeightPerQty 
-	from @tblParentLot tpl Join tblICParentLot pl on tpl.intParentLotId=pl.intParentLotId where intRowNo=@intMinParentLot
+	@dblWeightPerUnit=CASE WHEN ISNULL(tpl.dblWeightPerUnit,0)=0 THEN 1 ELSE tpl.dblWeightPerUnit END 
+	from @tblParentLot tpl where intRowNo=@intMinParentLot
 
 	Delete From @tblChildLot
 	Insert Into @tblChildLot(intLotId,intStorageLocationId,dblQuantity,intItemUOMId,dblWeightPerUnit)
-	Select l.intLotId,intStorageLocationId,dblWeight,intWeightUOMId,
+	Select l.intLotId,l.intStorageLocationId,l.dblWeight,l.intWeightUOMId,
 	Case When ISNULL(dblWeightPerQty,0)=0 Then 1 Else dblWeightPerQty End
-	from tblICLot l Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId
-	Where l.intParentLotId=@intParentLotId And l.dblWeight > 0 And ls.strPrimaryStatus='Active'
+	from tblICLot l Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId 
+	Join tblICStorageLocation sl on l.intStorageLocationId=sl.intStorageLocationId
+	Where l.intParentLotId=@intParentLotId And l.intLocationId=@intLocationId And l.dblWeight > 0 
+	And ls.strPrimaryStatus='Active' And ISNULL(sl.ysnAllowConsume,0)=1
 
 	Delete From @tblReservedQty
 	Insert @tblReservedQty(intLotId,dblReservedQty)
@@ -178,9 +182,9 @@ Begin
 		If @dblAvailableQty >= @dblReqQty
 		Begin
 			Insert Into @tblPickedLot(intParentLotId,intLotId,intStorageLocationId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,
-			dblPickQuantity,intPickUOMId,dblAvailableQty,dblAvailableIssuedQty,dblReservedQty)
+			dblPickQuantity,intPickUOMId,dblAvailableQty,dblAvailableIssuedQty,dblReservedQty,dblWeightPerUnit)
 			Select @intParentLotId,intLotId,intStorageLocationId,@dblReqQty,intItemUOMId,@dblReqQty / dblWeightPerUnit,@intItemIssuedUOMId,
-			@dblReqQty / dblWeightPerUnit,@intItemIssuedUOMId,@dblAvailableQty,dblAvailableIssuedQty,dblReservedQty 
+			@dblReqQty / dblWeightPerUnit,@intItemIssuedUOMId,@dblAvailableQty,dblAvailableIssuedQty,dblReservedQty,dblWeightPerUnit 
 			From @tblAvailableLot1 where intRowNo=@intMinChildLot
 
 			GOTO NextParentLot
@@ -188,9 +192,9 @@ Begin
 		Else
 		Begin
 			Insert Into @tblPickedLot(intParentLotId,intLotId,intStorageLocationId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,
-			dblPickQuantity,intPickUOMId,dblAvailableQty,dblAvailableIssuedQty,dblReservedQty)
+			dblPickQuantity,intPickUOMId,dblAvailableQty,dblAvailableIssuedQty,dblReservedQty,dblWeightPerUnit)
 			Select @intParentLotId,intLotId,intStorageLocationId,@dblAvailableQty,intItemUOMId,dblAvailableIssuedQty,@intItemIssuedUOMId,
-			dblAvailableIssuedQty,@intItemIssuedUOMId,@dblAvailableQty,dblAvailableIssuedQty,dblReservedQty 
+			dblAvailableIssuedQty,@intItemIssuedUOMId,@dblAvailableQty,dblAvailableIssuedQty,dblReservedQty,dblWeightPerUnit 
 			From @tblAvailableLot1 where intRowNo=@intMinChildLot
 
 			Update @tblAvailableLot1 set dblAvailableQty=0 where intRowNo=@intMinChildLot
@@ -204,9 +208,9 @@ Begin
 	If (Select count(1) From @tblChildLot) = 0
 		Begin
 			Insert Into @tblPickedLot(intParentLotId,intLotId,intStorageLocationId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,
-			dblPickQuantity,intPickUOMId,dblAvailableQty,dblAvailableIssuedQty,dblReservedQty)
+			dblPickQuantity,intPickUOMId,dblAvailableQty,dblAvailableIssuedQty,dblReservedQty,dblWeightPerUnit)
 			Select @intParentLotId,0 AS intLotId,0 AS intStorageLocationId,@dblReqQty AS dblQuantity,@intItemUOMId,(@dblReqQty / @dblWeightPerUnit) AS dblIssuedQuantity,@intItemIssuedUOMId,
-			(@dblReqQty / @dblWeightPerUnit) AS dblPickQuantity,@intItemIssuedUOMId,0 AS dblAvailableQty,0 AS dblAvailableIssuedQty,0 AS dblReservedQty
+			(@dblReqQty / @dblWeightPerUnit) AS dblPickQuantity,@intItemIssuedUOMId,0 AS dblAvailableQty,0 AS dblAvailableIssuedQty,0 AS dblReservedQty,@dblWeightPerUnit
 	
 			GOTO NextParentLot
 		End
@@ -214,9 +218,9 @@ Begin
 	--If no lots are available for remaining required qty, add empty row
 	If @dblReqQty > 0
 		Insert Into @tblPickedLot(intParentLotId,intLotId,intStorageLocationId,dblQuantity,intItemUOMId,dblIssuedQuantity,intItemIssuedUOMId,
-		dblPickQuantity,intPickUOMId,dblAvailableQty,dblAvailableIssuedQty,dblReservedQty)
+		dblPickQuantity,intPickUOMId,dblAvailableQty,dblAvailableIssuedQty,dblReservedQty,dblWeightPerUnit)
 		Select @intParentLotId,0 AS intLotId,0 AS intStorageLocationId,@dblReqQty AS dblQuantity,@intItemUOMId,(@dblReqQty / @dblWeightPerUnit) AS dblIssuedQuantity,@intItemIssuedUOMId,
-		(@dblReqQty / @dblWeightPerUnit) AS dblPickQuantity,@intItemIssuedUOMId,0 AS dblAvailableQty,0 AS dblAvailableIssuedQty,0 AS dblReservedQty
+		(@dblReqQty / @dblWeightPerUnit) AS dblPickQuantity,@intItemIssuedUOMId,0 AS dblAvailableQty,0 AS dblAvailableIssuedQty,0 AS dblReservedQty,@dblWeightPerUnit
 
 	NextParentLot:
 	Select @intMinParentLot=Min(intRowNo) from @tblParentLot where intRowNo>@intMinParentLot
@@ -244,8 +248,8 @@ pl.intParentLotId,pl.strParentLotNumber,pl.intItemId,i.strItemNo,i.strDescriptio
 0 AS intStorageLocationId,'' AS strStorageLocationName,
 tpl.dblQuantity,tpl.intItemUOMId,um.strUnitMeasure AS strUOM,tpl.dblIssuedQuantity,tpl.intItemIssuedUOMId,um1.strUnitMeasure AS strIssuedUOM,
 tpl.dblAvailableQty,tpl.dblReservedQty,tpl.dblAvailableIssuedQty AS dblAvailableUnit,um1.strUnitMeasure AS strAvailableUnitUOM,
-tpl.dblPickQuantity,tpl.intPickUOMId,um1.strUnitMeasure AS strPickUOM,pl.dblWeightPerQty AS dblWeightPerUnit,
-pl.intLocationId
+tpl.dblPickQuantity,tpl.intPickUOMId,um1.strUnitMeasure AS strPickUOM,tpl.dblWeightPerUnit,
+@intLocationId AS intLocationId
 From @tblPickedLot tpl join tblICParentLot pl on tpl.intParentLotId=pl.intParentLotId 
 Join tblICItem i on pl.intItemId=i.intItemId
 Join tblICItemUOM iu on iu.intItemUOMId=tpl.intItemUOMId

@@ -1001,7 +1001,7 @@ BEGIN TRY
 			,SC.strName
 			,S.intManufacturingCellId
 			,MC.strCellName
-			,S.ysnStandard
+			,@ysnStandard As ysnStandard
 			,S.intLocationId
 			,S.intConcurrencyId
 			,S.dtmCreated

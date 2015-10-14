@@ -11,6 +11,7 @@ BEGIN
 		,C.intLocationId
 		,L.strLocationName
 		,C.intConcurrencyId
+		,'' AS strShiftIds
 	FROM dbo.tblMFScheduleCalendar C
 	JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = C.intManufacturingCellId
 	JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = C.intLocationId

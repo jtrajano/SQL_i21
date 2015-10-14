@@ -671,6 +671,36 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'TransferTicketNumber')
 
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 73
+			,[strTransactionType]	= N'WarehouseSKUNumber'
+			,[strPrefix]			= N'SKU-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Warehouse'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'WarehouseSKUNumber')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 74
+			,[strTransactionType]	= N'WarehouseContainerNumber'
+			,[strPrefix]			= N'CON-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Warehouse'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'WarehouseContainerNumber')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 75
+			,[strTransactionType]	= N'WarehouseBOLNo'
+			,[strPrefix]			= N'BOL-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Warehouse'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'WarehouseBOLNo')
+
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
 	PRINT N'END INSERT DEFAULT STARTING NUMBERS'

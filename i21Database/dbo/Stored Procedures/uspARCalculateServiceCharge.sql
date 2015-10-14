@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCalculateServiceCharge]
-	@customers			NVARCHAR(MAX) = '',
+	@customerIds		NVARCHAR(MAX) = '',
+	@statusIds	        NVARCHAR(MAX) = '',
 	@calculation        NVARCHAR(25) = '',
 	@asOfDate			DATE,
 	@isIncludeBudget	BIT = 0,
@@ -8,7 +9,7 @@
 	@currencyId			INT = 0,
 	@locationId			INT = 0
 AS
-	CREATE TABLE #tmpCustomers (intEntityId INT, intServiceChargeId INT)
+	CREATE TABLE #tmpCustomers (intEntityId INT, intServiceChargeId INT)	
 	
 	--VALIDATION
 	IF (@arAccountId = 0 OR @arAccountId IS NULL)
@@ -24,31 +25,50 @@ AS
 		END
 
 	--GET SELECTED CUSTOMERS
-	IF (@customers = '')
+	IF (@customerIds = '')
 		BEGIN
 			INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId) 
 			SELECT E.intEntityCustomerId, C.intServiceChargeId FROM vyuARCustomerSearch E
 				INNER JOIN tblARCustomer C ON E.intEntityCustomerId = C.intEntityCustomerId
 				WHERE E.ysnActive = 1
 				  AND (C.intServiceChargeId <> 0
-				  OR C.intServiceChargeId <> NULL)
+				  OR C.intServiceChargeId IS NOT NULL)
 		END
 	ELSE
 		BEGIN
-			DECLARE @name NVARCHAR(255),
+			DECLARE @customerId INT,
 					@pos INT
 			
-			SELECT @customers = @customers + ', '
-			WHILE CHARINDEX(',', @customers) > 0
+			SELECT @customerIds = @customerIds + ','
+			WHILE CHARINDEX(',', @customerIds) > 0
 			BEGIN
-				SELECT @pos  = CHARINDEX(',', @customers)  
-				SELECT @name = SUBSTRING(@customers, 1, @pos-1)
+				SELECT @pos  = CHARINDEX(',', @customerIds)  
+				SELECT @customerId = SUBSTRING(@customerIds, 1, @pos-1)
 
 				INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId) 
-				SELECT intEntityCustomerId, intServiceChargeId FROM tblARCustomer WHERE strCustomerNumber LIKE (LTRIM(RTRIM(@name))+'%') AND intServiceChargeId IS NOT NULL AND intServiceChargeId > 0
+				SELECT intEntityCustomerId, intServiceChargeId FROM tblARCustomer WHERE intEntityCustomerId = @customerId AND (intServiceChargeId <> 0 OR intServiceChargeId IS NOT NULL)
 
-				SELECT @customers = SUBSTRING(@customers, @pos + 1, LEN(@customers) - @pos)
+				SELECT @customerIds = SUBSTRING(@customerIds, @pos + 1, LEN(@customerIds) - @pos)
 			END			
+		END
+
+	--GET SELECTED STATUS CODES
+	IF (@statusIds <> '')
+		BEGIN
+			DECLARE @statusId INT,
+					@pos2 INT
+			
+			SELECT @statusIds = @statusIds + ','
+			WHILE CHARINDEX(',', @statusIds) > 0
+			BEGIN
+				SELECT @pos2  = CHARINDEX(',', @statusIds)  				
+				SELECT @statusId = CONVERT(INT, SUBSTRING(@statusIds, 1, @pos2-1))
+
+				INSERT INTO #tmpCustomers (intEntityId, intServiceChargeId) 
+				SELECT intEntityCustomerId, intServiceChargeId FROM tblARCustomer WHERE intAccountStatusId = @statusId AND (intServiceChargeId <> 0 OR intServiceChargeId IS NOT NULL)
+
+				SELECT @statusIds = SUBSTRING(@statusIds, @pos2 + 1, LEN(@statusIds) - @pos2)
+			END
 		END
 
 	--PROCESS EACH CUSTOMER

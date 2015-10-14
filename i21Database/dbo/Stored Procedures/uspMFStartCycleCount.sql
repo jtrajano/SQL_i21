@@ -511,7 +511,7 @@ BEGIN TRY
 	SELECT DISTINCT @intWorkOrderId
 		,CC.intItemId
 		,CASE 
-			WHEN RI.intRecipeItemTypeId =1
+			WHEN RI.intRecipeItemTypeId =1 OR RI.intRecipeItemTypeId IS NULL
 				THEN ISNULL(CC.dblSystemQty,0)
 			ELSE 0
 			END
@@ -530,7 +530,8 @@ BEGIN TRY
 		,0
 		,0
 	FROM dbo.tblMFProcessCycleCount CC 
-	JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId =CC.intItemId AND RI.intWorkOrderId=@intWorkOrderId 
+	JOIN dbo.tblMFProcessCycleCountSession S ON S.intCycleCountSessionId = CC.intCycleCountSessionId AND S.intWorkOrderId = @intWorkOrderId
+	LEFT JOIN dbo.tblMFWorkOrderRecipeItem RI ON RI.intItemId =CC.intItemId AND RI.intWorkOrderId=@intWorkOrderId 
 	WHERE NOT EXISTS (SELECT *FROM dbo.tblMFProductionSummary PS WHERE PS.intWorkOrderId=@intWorkOrderId AND PS.intItemId=CC.intItemId)
 	
 	--COMMIT TRANSACTION

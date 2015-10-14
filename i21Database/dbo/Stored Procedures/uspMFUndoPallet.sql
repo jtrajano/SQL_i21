@@ -154,6 +154,8 @@ BEGIN TRY
 	UPDATE tblMFWorkOrder
 	SET dblProducedQuantity = isnull(dblProducedQuantity, 0) - (Case When intItemId=@intItemId Then (Case When intItemUOMId=@intItemUOMId Then @dblQuantity Else @dblPhysicalCount End) Else 0 End)
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	UPDATE tblMFProductionSummary SET dblOutputQuantity=dblOutputQuantity-@dblQuantity WHERE intWorkOrderId=@intWorkOrderId AND intItemId=@intItemId
 	
 	IF @intTransactionCount = 0
 	COMMIT TRANSACTION

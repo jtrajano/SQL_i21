@@ -94,22 +94,28 @@ BEGIN
 END
 ELSE IF @intProductTypeId = 11 -- Parent Lot  
 BEGIN
+	DECLARE @dblRepresentingQty NUMERIC(18,6)
+	DECLARE @intRepresentingUOMId INT
+
+	SELECT @dblRepresentingQty = (CASE 
+				WHEN MAX(L.intWeightUOMId) IS NOT NULL
+					THEN SUM(L.dblWeight)
+				ELSE SUM(L.dblQty)
+				END),
+				@intRepresentingUOMId = ISNULL(MAX(L.intWeightUOMId), MAX(L.intItemUOMId))
+	FROM tblICLot L
+	WHERE L.intParentLotId = @intProductValueId
+
 	SELECT @intProductTypeId AS intProductTypeId
 		,@intProductValueId AS intProductValueId
 		,PL.intLotStatusId
 		,PL.strParentLotNumber
 		,PL.intItemId
 		,I.strDescription
-		,(
-			CASE 
-				WHEN PL.intWeightUOMId IS NOT NULL
-					THEN PL.dblWeight
-				ELSE PL.dblQty
-				END
-			) AS dblRepresentingQty
+		,@dblRepresentingQty AS dblRepresentingQty
 		,IU.intUnitMeasureId AS intRepresentingUOMId
 	FROM tblICParentLot PL
 	JOIN tblICItem I ON I.intItemId = PL.intItemId
-	JOIN tblICItemUOM IU ON IU.intItemUOMId = ISNULL(PL.intWeightUOMId, PL.intItemUOMId)
+	JOIN tblICItemUOM IU ON IU.intItemUOMId = @intRepresentingUOMId
 	WHERE PL.intParentLotId = @intProductValueId
 END
