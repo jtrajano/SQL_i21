@@ -2565,6 +2565,7 @@
     <Build Include="dbo\Tables\tblAP1099History.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateBill1099.sql" />
     <Build Include="dbo\Views\vyuAP1099MISC.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreate1099MISCFile.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

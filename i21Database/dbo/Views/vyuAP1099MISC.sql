@@ -10,9 +10,10 @@ SELECT
 									, B.strZip
 									, B.strCountry
 									, B.strPhone)
+	, B.strCompanyName
 	, strEIN = B.strFederalTaxID
 	, A.strAddress
-	, A.strCompanyName
+	, A.strVendorCompanyName
 	, A.strVendorId
 	, A.strZip
 	, A.strFederalTaxId
@@ -38,7 +39,7 @@ GROUP BY intYear, intEntityVendorId
 ,C.dbl1099MISCMedical, C.dbl1099MISCNonemployee, C.dbl1099MISCOtherIncome, C.dbl1099MISCExcessGolden, C.dbl1099MISCRent
 ,C.dbl1099MISCRoyalties, C.dbl1099MISCSubstitute
 , A.strAddress
-, A.strCompanyName
+, A.strVendorCompanyName
 , A.strVendorId
 , A.strZip
 , A.strFederalTaxId
