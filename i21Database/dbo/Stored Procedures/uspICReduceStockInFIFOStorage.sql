@@ -25,6 +25,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @strItemNo AS NVARCHAR(50)
+
 -- Ensure the qty is a positive number
 SET @dblQty = ABS(@dblQty)
 
@@ -63,8 +65,12 @@ WHERE	fifo_bucket_Storage.intItemId = @intItemId
 
 IF @SourceInventoryFIFOStorageId IS NULL 
 BEGIN 
+	SELECT	@strItemNo = strItemNo
+	FROM	dbo.tblICItem
+	WHERE	intItemId = @intItemId
+
 	-- Negative stock quantity is not allowed.
-	RAISERROR(50029, 11, 1) 
+	RAISERROR(80003, 11, 1, @strItemNo) 
 	GOTO _Exit;
 END 
 

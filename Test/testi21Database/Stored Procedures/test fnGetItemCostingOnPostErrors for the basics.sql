@@ -91,8 +91,8 @@ BEGIN
 		-- Item id is invalid or missing.
 		SELECT	intItemId = NULL
 				,intItemLocationId = NULL
-				,strText = FORMATMESSAGE(50027)
-				,intErrorCode = 50027
+				,strText = FORMATMESSAGE(80001)
+				,intErrorCode = 80001
 	END
 
 	-- Act

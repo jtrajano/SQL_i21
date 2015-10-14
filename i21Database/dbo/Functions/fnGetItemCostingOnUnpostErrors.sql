@@ -16,8 +16,8 @@ RETURN (
 	FROM (
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = FORMATMESSAGE(50029)
-				,intErrorCode = 50029
+				,strText = FORMATMESSAGE(80003)
+				,intErrorCode = 80003
 		WHERE	EXISTS (
 					SELECT	TOP 1 1
 					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation Location
@@ -29,7 +29,27 @@ RETURN (
 								AND StockUOM.intItemLocationId = Location.intItemLocationId
 								AND ISNULL(StockUOM.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 								AND ISNULL(StockUOM.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
-					WHERE	ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0)  < 0
+							LEFT JOIN (
+									SELECT	intItemId
+											,intItemLocationId
+											,intItemUOMId
+											,intSubLocationId
+											,intStorageLocationId
+											,dblTotalQty = SUM(dblQty)
+									FROM	tblICStockReservation
+									WHERE	intItemId = @intItemId
+											AND intItemLocationId = @intItemLocationId
+											AND ISNULL(intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
+											AND ISNULL(intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)	
+									GROUP BY intItemId
+											,intItemLocationId
+											,intItemUOMId
+											,intSubLocationId
+											,intStorageLocationId
+							) Reserve
+								ON Reserve.intItemId = Item.intItemId
+								AND Reserve.intItemLocationId = Location.intItemLocationId
+					WHERE	ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0) + ISNULL(Reserve.dblTotalQty, 0) < 0
 							AND Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 													
 				)
 
@@ -37,8 +57,8 @@ RETURN (
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = FORMATMESSAGE(50029)
-				,intErrorCode = 50029
+				,strText = FORMATMESSAGE(80003)
+				,intErrorCode = 80003
 		WHERE	EXISTS (
 					SELECT	TOP 1 1
 					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation Location

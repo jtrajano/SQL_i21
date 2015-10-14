@@ -17,8 +17,8 @@ RETURN (
 		-- Check for any invalid item.
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = FORMATMESSAGE(50027)
-				,intErrorCode = 50027
+				,strText = FORMATMESSAGE(80001)
+				,intErrorCode = 80001
 		WHERE	NOT EXISTS (
 					SELECT TOP 1 1 
 					FROM	tblICItem 
@@ -29,8 +29,8 @@ RETURN (
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = FORMATMESSAGE(50028)
-				,intErrorCode = 50028
+				,strText = FORMATMESSAGE(80002)
+				,intErrorCode = 80002
 		WHERE	NOT EXISTS (
 					SELECT TOP 1 1 
 					FROM	dbo.tblICItemLocation
@@ -43,8 +43,8 @@ RETURN (
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = FORMATMESSAGE(51159)
-				,intErrorCode = 51159
+				,strText = FORMATMESSAGE(80048)
+				,intErrorCode = 80048
 		WHERE	NOT EXISTS (
 					SELECT TOP 1 1 
 					FROM	dbo.tblICItemUOM 
@@ -58,8 +58,8 @@ RETURN (
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = FORMATMESSAGE(51091)
-				,intErrorCode = 51091
+				,strText = FORMATMESSAGE(80023)
+				,intErrorCode = 80023
 		FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation ItemLocation 
 					ON Item.intItemId = ItemLocation.intItemLocationId
 		WHERE	ISNULL(dbo.fnGetCostingMethod(ItemLocation.intItemId, ItemLocation.intItemLocationId), 0) = 0 
@@ -70,8 +70,8 @@ RETURN (
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = FORMATMESSAGE(51090)
-				,intErrorCode = 51090
+				,strText = FORMATMESSAGE(80022)
+				,intErrorCode = 80022
 		FROM	tblICItem Item
 		WHERE	Item.intItemId = @intItemId
 				AND Item.strStatus = 'Discontinued'
@@ -80,8 +80,8 @@ RETURN (
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = FORMATMESSAGE(51090)
-				,intErrorCode = 51090
+				,strText = FORMATMESSAGE(80022)
+				,intErrorCode = 80022
 		FROM	tblICItem Item
 		WHERE	Item.intItemId = @intItemId
 				AND Item.strStatus = 'Discontinued'
@@ -91,8 +91,8 @@ RETURN (
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = FORMATMESSAGE(50029)
-				,intErrorCode = 50029
+				,strText = FORMATMESSAGE(80003)
+				,intErrorCode = 80003
 		WHERE	EXISTS (
 					SELECT	TOP 1 1
 					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation Location
@@ -104,7 +104,27 @@ RETURN (
 								AND StockUOM.intItemLocationId = Location.intItemLocationId
 								AND ISNULL(StockUOM.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 								AND ISNULL(StockUOM.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
-					WHERE	ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0)  < 0
+							LEFT JOIN (
+									SELECT	intItemId
+											,intItemLocationId
+											,intItemUOMId
+											,intSubLocationId
+											,intStorageLocationId
+											,dblTotalQty = SUM(dblQty)
+									FROM	tblICStockReservation
+									WHERE	intItemId = @intItemId
+											AND intItemLocationId = @intItemLocationId
+											AND ISNULL(intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
+											AND ISNULL(intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)	
+									GROUP BY intItemId
+											,intItemLocationId
+											,intItemUOMId
+											,intSubLocationId
+											,intStorageLocationId
+							) Reserve
+								ON Reserve.intItemId = Item.intItemId
+								AND Reserve.intItemLocationId = Location.intItemLocationId
+					WHERE	ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0) + ISNULL(Reserve.dblTotalQty, 0) < 0
 							AND (							
 								Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 
 								OR Item.strStatus = 'Phased Out'
@@ -116,8 +136,8 @@ RETURN (
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = FORMATMESSAGE(50029)
-				,intErrorCode = 50029
+				,strText = FORMATMESSAGE(80003)
+				,intErrorCode = 80003
 		WHERE	EXISTS (
 					SELECT	TOP 1 1
 					FROM	dbo.tblICItem Item INNER JOIN dbo.tblICItemLocation Location
@@ -140,8 +160,8 @@ RETURN (
 		UNION ALL 
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
-				,strText = FORMATMESSAGE(51134)
-				,intErrorCode = 51134
+				,strText = FORMATMESSAGE(80049)
+				,intErrorCode = 80049
 		WHERE	dbo.fnGetItemStockUOM(@intItemId) IS NULL 
 				AND @intItemId IS NOT NULL 
 

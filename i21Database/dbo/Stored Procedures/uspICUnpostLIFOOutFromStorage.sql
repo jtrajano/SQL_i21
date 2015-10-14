@@ -90,20 +90,6 @@ FROM	(
 WHERE	Changes.Action = 'UPDATE'
 ;
 
---IF NOT EXISTS (
---	SELECT TOP 1 1 
---	FROM	dbo.tblICInventoryLIFOStorage LIFOBucket INNER JOIN #tmpInventoryTransactionStockToReverse Reversal
---				ON LIFOBucket.intTransactionId = Reversal.intTransactionId
---				AND LIFOBucket.strTransactionId = Reversal.strTransactionId
---				AND LIFOBucket.intInventoryLIFOStorageId = Reversal.intInventoryCostBucketStorageId
---	WHERE	ISNULL(LIFOBucket.ysnIsUnposted, 0) = 0
---)
---BEGIN 
---	-- Negative stock quantity is not allowed.
---	RAISERROR(50029, 11, 1) 
---	GOTO _Exit;
---END 
-
 -- If there are LIFO out records, update the costing bucket. Return the out-qty back to the bucket where it came from. 
 UPDATE	LIFOBucket
 SET		LIFOBucket.dblStockOut = ISNULL(LIFOBucket.dblStockOut, 0) - Reversal.dblQty

@@ -30,7 +30,7 @@ EXEC sp_addmessage 80002,11,@strmessage,'us_english','False'
 
 -- was 50029
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80003) EXEC sp_dropmessage 80003, 'us_english'	
-SET @strmessage = 'Negative stock quantity is not allowed.'
+SET @strmessage = 'Negative stock quantity is not allowed for %s'
 EXEC sp_addmessage 80003,11,@strmessage,'us_english','False'
 
 -- was 50031
@@ -258,7 +258,7 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80048) EXEC sp_dropmessa
 SET @strmessage = 'Item UOM is invalid or missing.'
 EXEC sp_addmessage 80048,11,@strmessage,'us_english','False'
 
--- was 51160
+-- was 51160 or 51134
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80049) EXEC sp_dropmessage 80049, 'us_english'	
 SET @strmessage = 'Item %s is missing a Stock Unit. Please check the Unit of Measure setup.'
 EXEC sp_addmessage 80049,11,@strmessage,'us_english','False'
