@@ -20,7 +20,7 @@ If @intKitStatusId = -1 and @intWorkOrderId = -1
 	Join tblMFManufacturingCell mc on w.intManufacturingCellId=mc.intManufacturingCellId
 	Left Join tblMFPickList pl on w.intPickListId=pl.intPickListId
 	Where w.intBlendRequirementId=@intBlendRequirementId 
-	And w.ysnKittingEnabled=1 And w.intKitStatusId is not null
+	And w.ysnKittingEnabled=1 And w.intKitStatusId is not null And w.intStatusId in (9,10,12)
 
 If @intKitStatusId = -1 and @intWorkOrderId > 0
 	Select w.intWorkOrderId,w.strWorkOrderNo,i.intItemId,i.strItemNo,i.strDescription,
@@ -38,7 +38,7 @@ If @intKitStatusId = -1 and @intWorkOrderId > 0
 	Join tblMFManufacturingCell mc on w.intManufacturingCellId=mc.intManufacturingCellId
 	Left Join tblMFPickList pl on w.intPickListId=pl.intPickListId
 	Where w.intBlendRequirementId=@intBlendRequirementId And w.intWorkOrderId=@intWorkOrderId 
-	And w.ysnKittingEnabled=1 And w.intKitStatusId is not null
+	And w.ysnKittingEnabled=1 And w.intKitStatusId is not null And w.intStatusId in (9,10,12)
 
 If @intKitStatusId > 0 and @intWorkOrderId = -1
 	Select w.intWorkOrderId,w.strWorkOrderNo,i.intItemId,i.strItemNo,i.strDescription,
@@ -56,4 +56,4 @@ If @intKitStatusId > 0 and @intWorkOrderId = -1
 	Join tblMFManufacturingCell mc on w.intManufacturingCellId=mc.intManufacturingCellId
 	Left Join tblMFPickList pl on w.intPickListId=pl.intPickListId
 	Where w.intBlendRequirementId=@intBlendRequirementId And w.intKitStatusId=@intKitStatusId 
-	And w.ysnKittingEnabled=1 And w.intKitStatusId is not null
+	And w.ysnKittingEnabled=1 And w.intKitStatusId is not null And w.intStatusId in (9,10,12)
