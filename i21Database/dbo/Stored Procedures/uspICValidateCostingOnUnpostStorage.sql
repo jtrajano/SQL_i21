@@ -24,6 +24,9 @@ SET ANSI_WARNINGS OFF
 DECLARE @strItemNo AS NVARCHAR(50)
 		,@intItemId AS INT 
 
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors')) 
+	DROP TABLE #FoundErrors
+
 CREATE TABLE #FoundErrors (
 	intItemId INT
 	,intItemLocationId INT
@@ -54,11 +57,7 @@ BEGIN
 	WHERE	intErrorCode = 80003
 
 	RAISERROR(80003, 11, 1, @strItemNo)
-	GOTO _Exit
+	RETURN -1
 END 
-
-_Exit: 
-IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors')) 
-	DROP TABLE #FoundErrors
 
 GO

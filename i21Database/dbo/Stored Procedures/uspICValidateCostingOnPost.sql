@@ -30,6 +30,9 @@ SET ANSI_WARNINGS OFF
 DECLARE @strItemNo AS NVARCHAR(50)
 		,@intItemId AS INT 
 
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors')) 
+	DROP TABLE #FoundErrors
+
 CREATE TABLE #FoundErrors (
 	intItemId INT
 	,intItemLocationId INT
@@ -51,7 +54,7 @@ FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnPostErrors(Item.int
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80001)
 BEGIN 
 	RAISERROR(80001, 11, 1)
-	GOTO _Exit
+	RETURN -1
 END 
 
 -- Check for invalid location in the item-location setup.
@@ -67,14 +70,14 @@ IF @intItemId IS NOT NULL
 BEGIN 
 	-- 'Item Location is invalid or missing for {Item}.'
 	RAISERROR(80002, 11, 1, @strItemNo)
-	GOTO _Exit
+	RETURN -1
 END 
 
 -- Check for invalid item UOM 
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80048)
 BEGIN 
 	RAISERROR(80048, 11, 1)
-	GOTO _Exit
+	RETURN -1
 END 
 
 -- Check for negative stock qty 
@@ -89,7 +92,7 @@ BEGIN
 	WHERE	intErrorCode = 80003
 
 	RAISERROR(80003, 11, 1, @strItemNo)
-	GOTO _Exit
+	RETURN -1
 END 
 
 -- Check for Missing Costing Method
@@ -105,7 +108,7 @@ IF @intItemId IS NOT NULL
 BEGIN 
 	-- 'Missing costing method setup for item {Item}.'
 	RAISERROR(80023, 11, 1, @strItemNo)
-	GOTO _Exit
+	RETURN -1
 END 
 
 -- Check for "Discontinued" status
@@ -121,7 +124,7 @@ IF @intItemId IS NOT NULL
 BEGIN 
 	-- 'The status of {item} is Discontinued.'
 	RAISERROR(80022, 11, 1, @strItemNo)
-	GOTO _Exit
+	RETURN -1
 END 
 
 -- Check for the missing Stock Unit UOM 
@@ -137,11 +140,6 @@ IF @intItemId IS NOT NULL
 BEGIN 
 	-- 'Item {Item Name} is missing a Stock Unit. Please check the Unit of Measure setup.'
 	RAISERROR(80049, 11, 1, @strItemNo)
-	GOTO _Exit
+	RETURN -1
 END 
-
-_Exit: 
-IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors')) 
-	DROP TABLE #FoundErrors
-
 GO

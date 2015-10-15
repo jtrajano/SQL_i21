@@ -30,6 +30,9 @@ SET ANSI_WARNINGS OFF
 DECLARE @strItemNo AS NVARCHAR(50)
 		,@intItemId AS INT 
 
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors')) 
+	DROP TABLE #FoundErrors
+
 CREATE TABLE #FoundErrors (
 	intItemId INT
 	,intItemLocationId INT
@@ -51,14 +54,14 @@ FROM	@ItemsToValidate Item CROSS APPLY dbo.fnGetItemCostingOnPostStorageErrors(I
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80001)
 BEGIN 
 	RAISERROR(80001, 11, 1)
-	GOTO _Exit
+	RETURN -1
 END 
 
 -- Check for invalid location in the item-location setup. 
 IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80002)
 BEGIN 
 	RAISERROR(80002, 11, 1)
-	GOTO _Exit
+	RETURN -1
 END 
 
 -- Check for negative stock qty 
@@ -73,7 +76,7 @@ BEGIN
 	WHERE	intErrorCode = 80003
 
 	RAISERROR(80003, 11, 1, @strItemNo)
-	GOTO _Exit
+	RETURN -1
 END 
 
 -- Check for Missing Costing Method
@@ -87,7 +90,7 @@ IF @strItemNo IS NOT NULL
 BEGIN 
 	-- 'Missing costing method setup for item {Item}.'
 	RAISERROR(80023, 11, 1, @strItemNo)
-	GOTO _Exit
+	RETURN -1
 END 
 
 -- Check for "Discontinued" status
@@ -101,11 +104,6 @@ IF @strItemNo IS NOT NULL
 BEGIN 
 	-- 'The status of {item} is Discontinued.'
 	RAISERROR(80022, 11, 1, @strItemNo)
-	GOTO _Exit
+	RETURN -1
 END 
-
-_Exit: 
-IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#FoundErrors')) 
-	DROP TABLE #FoundErrors
-
 GO
