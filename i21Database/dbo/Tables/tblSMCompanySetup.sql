@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblSMCompanySetup] (
     [intCompanySetupID] INT            IDENTITY (1, 1) NOT NULL,
-	[strEin]			NVARCHAR (30)  COLLATE Latin1_General_CI_AS NOT NULL,
+	[strEin]			NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strCompanyName]    NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL,
     [strContactName]    NVARCHAR (50)  COLLATE Latin1_General_CI_AS NULL,
     [strAddress]        NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
