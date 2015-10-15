@@ -277,16 +277,25 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                     break;
             }
         },
-        readOnlyItemGrid: function (get) {
-            var sourceType = get('current.intSourceType');
-            switch (sourceType) {
-                case 3:
-                    return true;
-                    break;
-                default:
-                    return false;
-                    break;
-            };
+        readOnlyOnPickLots: function (get) {
+            if (get('current.ysnPosted')) {
+                return true;
+            }
+            else {
+                var sourceType = get('current.intSourceType');
+                var win = this.getView();
+                var grid = win.down('#grdInventoryShipment');
+                switch (sourceType) {
+                    case 3:
+                        grid.gridMgr.newRow.disable();
+                        return true;
+                        break;
+                    default:
+                        grid.gridMgr.newRow.enable();
+                        return false;
+                        break;
+                };
+            }
         }
     }
 

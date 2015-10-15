@@ -150,7 +150,10 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             txtReceivedBy: '{current.strReceivedBy}',
 
             btnInsertItem: {
-                hidden: '{current.ysnPosted}'
+                hidden: '{readOnlyOnPickLots}'
+            },
+            btnPickLots: {
+                hidden: '{!readOnlyOnPickLots}'
             },
             btnRemoveItem: {
                 hidden: '{current.ysnPosted}'
@@ -159,7 +162,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
                 hidden: '{current.ysnPosted}'
             },
             grdInventoryShipment: {
-                readOnly: '{current.ysnPosted}',
+                readOnly: '{readOnlyOnPickLots}',
                 colOrderNumber: {
                     hidden: '{checkHideOrderNo}',
                     dataIndex: 'strOrderNumber',
@@ -286,7 +289,7 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
 
             grdLotTracking: {
-                readOnly: '{current.ysnPosted}',
+                readOnly: '{readOnlyOnPickLots}',
                 colLotID: {
                     dataIndex: 'strLotId',
                     editor: {
