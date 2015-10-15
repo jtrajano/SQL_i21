@@ -26,7 +26,6 @@
 
 	@intUserId - The user who initiated or called this stored procedure. 
 */
-
 CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnAverageCosting]
 	@dtmDate AS DATETIME
 	,@intItemId AS INT
@@ -103,10 +102,14 @@ DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
 		,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
 		,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 22
 		,@INV_TRANS_TYPE_Revalue_WIP AS INT = 24
+		,@INV_TRANS_TYPE_Revalue_Produced AS INT = 25
+		,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 26
+		,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 27
 
 		,@INV_TRANS_TYPE_Consume AS INT = 8
 		,@INV_TRANS_TYPE_Produce AS INT = 9
 		,@INV_TRANS_TYPE_Build_Assembly AS INT = 11
+		,@INV_TRANS_Inventory_Transfer AS INT = 12
 
 DECLARE @CostBucketId AS INT
 		,@CostBucketCost AS NUMERIC(38,20)
@@ -138,6 +141,9 @@ DECLARE @InvTranId AS INT
 DECLARE	@OriginalTransactionValue AS NUMERIC(38,20)
 		,@NewTransactionValue AS NUMERIC(38,20)
 		,@CostAdjustmentValue AS NUMERIC(38,20)
+
+DECLARE @LoopTransactionTypeId AS INT 
+		,@CostAdjustmentTransactionType AS INT = @intTransactionTypeId
 
 -- Initialize the transaction name. Use this as the transaction form name
 SELECT	TOP 1 
@@ -182,7 +188,7 @@ BEGIN
 
 		-- 'Cost adjustment cannot continue. Unable to find the cost bucket for {Item}.'
 		RAISERROR(80062, 11, 1, @strItemNo)  
-		GOTO Post_Exit  
+		RETURN -1 
 	END
 END 
 
@@ -224,6 +230,19 @@ BEGIN
 	-- Compute value to adjust the item valuation. 
 	SELECT @CostAdjustmentValue = @dblQty * (@dblNewCost - @OriginalCost)
 
+	-- Determine the transaction type to use. 
+	SELECT @CostAdjustmentTransactionType =		
+			CASE	WHEN @intTransactionTypeId NOT IN (
+							@INV_TRANS_TYPE_Revalue_WIP
+							, @INV_TRANS_TYPE_Revalue_Produced
+							, @INV_TRANS_TYPE_Revalue_Transfer
+							, @INV_TRANS_TYPE_Revalue_Build_Assembly
+					) THEN 
+						@INV_TRANS_TYPE_Cost_Adjustment
+					ELSE 
+						@intTransactionTypeId
+			END
+
 	-- Create the 'Cost Adjustment'
 	EXEC [dbo].[uspICPostInventoryTransaction]
 		@intItemId								= @intItemId
@@ -243,7 +262,7 @@ BEGIN
 		,@intTransactionDetailId				= @intTransactionDetailId
 		,@strTransactionId						= @strTransactionId
 		,@strBatchId							= @strBatchId
-		,@intTransactionTypeId					= @INV_TRANS_TYPE_Cost_Adjustment
+		,@intTransactionTypeId					= @CostAdjustmentTransactionType -- @INV_TRANS_TYPE_Cost_Adjustment
 		,@intLotId								= NULL 
 		,@intRelatedInventoryTransactionId		= NULL 
 		,@intRelatedTransactionId				= @CostBucketIntTransactionId 
@@ -411,7 +430,7 @@ BEGIN
 			----------------------------------------------------------
 			-- 7. If stock was sold, then do the "Revalue Sold". 
 			----------------------------------------------------------
-			IF @InvTranTypeId NOT IN (@INV_TRANS_TYPE_Consume, @INV_TRANS_TYPE_Build_Assembly)
+			IF @InvTranTypeId NOT IN (@INV_TRANS_TYPE_Consume, @INV_TRANS_TYPE_Build_Assembly, @INV_TRANS_Inventory_Transfer)
 			BEGIN 
 				EXEC [dbo].[uspICPostInventoryTransaction]
 					@intItemId								= @intItemId
@@ -443,10 +462,20 @@ BEGIN
 			END 	
 
 			---------------------------------------------------------------
-			-- 8. If stock was used as raw material, then do "Revalue WIP" 
+			-- 8. If stock was consumed in a production or transfer
 			---------------------------------------------------------------
-			ELSE IF @InvTranTypeId IN (@INV_TRANS_TYPE_Consume, @INV_TRANS_TYPE_Build_Assembly)
+			ELSE IF @InvTranTypeId IN (@INV_TRANS_TYPE_Consume, @INV_TRANS_TYPE_Build_Assembly, @INV_TRANS_Inventory_Transfer)
 			BEGIN 
+				SELECT	@CostAdjustmentTransactionType 
+							= CASE	WHEN @InvTranTypeId = @INV_TRANS_Inventory_Transfer		THEN @INV_TRANS_TYPE_Revalue_Transfer
+									WHEN @InvTranTypeId = @INV_TRANS_TYPE_Consume			THEN @INV_TRANS_TYPE_Revalue_WIP
+									WHEN @InvTranTypeId = @INV_TRANS_TYPE_Build_Assembly	THEN @INV_TRANS_TYPE_Revalue_Build_Assembly
+							END
+						,@LoopTransactionTypeId
+							= CASE	WHEN @InvTranTypeId = @INV_TRANS_Inventory_Transfer		THEN @INV_TRANS_TYPE_Revalue_Transfer
+									WHEN @InvTranTypeId = @INV_TRANS_TYPE_Consume			THEN @INV_TRANS_TYPE_Revalue_Produced
+									WHEN @InvTranTypeId = @INV_TRANS_TYPE_Build_Assembly	THEN @INV_TRANS_TYPE_Revalue_Build_Assembly
+							END
 
 				EXEC [dbo].[uspICPostInventoryTransaction]
 					@intItemId								= @intItemId
@@ -466,7 +495,7 @@ BEGIN
 					,@intTransactionDetailId				= @intTransactionDetailId
 					,@strTransactionId						= @strTransactionId
 					,@strBatchId							= @strBatchId
-					,@intTransactionTypeId					= @INV_TRANS_TYPE_Revalue_WIP
+					,@intTransactionTypeId					= @CostAdjustmentTransactionType
 					,@intLotId								= NULL 
 					,@intRelatedInventoryTransactionId		= @FIFOOutInventoryTransactionId
 					,@intRelatedTransactionId				= @InvTranIntTransactionId 
@@ -476,9 +505,9 @@ BEGIN
 					,@intCostingMethod						= @AVERAGECOST
 					,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
 					
-				-----------------------------------------------------------------------------------
-				-- 9. Get the 'produce item'. Insert it in a temporary table for later processing. 
-				-----------------------------------------------------------------------------------
+				----------------------------------------------------------------------------------------------------
+				-- 9. Get the 'produced/transferred item'. Insert it in a temporary table for later processing. 
+				----------------------------------------------------------------------------------------------------
 				INSERT INTO #tmpRevalueProducedItems (
 						[intItemId] 
 						,[intItemLocationId] 
@@ -514,7 +543,7 @@ BEGIN
 						,[intTransactionId]				= @intTransactionId
 						,[intTransactionDetailId]		= @intTransactionDetailId
 						,[strTransactionId]				= @strTransactionId
-						,[intTransactionTypeId]			= @intTransactionTypeId
+						,[intTransactionTypeId]			= @LoopTransactionTypeId -- @intTransactionTypeId
 						,[intLotId]						= InvTran.intLotId
 						,[intSubLocationId]				= InvTran.intSubLocationId
 						,[intStorageLocationId]			= InvTran.intStorageLocationId
@@ -528,7 +557,7 @@ BEGIN
 						AND InvTran.strTransactionId = @InvTranStringTransactionId
 						AND ISNULL(InvTran.ysnIsUnposted, 0) = 0
 						AND ISNULL(InvTran.dblQty, 0) > 0 
-						AND InvTran.intTransactionTypeId IN (@INV_TRANS_TYPE_Produce, @INV_TRANS_TYPE_Build_Assembly)
+						AND InvTran.intTransactionTypeId IN (@INV_TRANS_TYPE_Produce, @INV_TRANS_TYPE_Build_Assembly, @INV_TRANS_Inventory_Transfer)
 			END 
 
 			-- Compute the remaining Revalued Qty. 

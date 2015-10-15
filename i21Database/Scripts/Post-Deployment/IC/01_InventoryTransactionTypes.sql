@@ -106,6 +106,18 @@ USING	(
 		SELECT	id = 24
 				,name = 'Revalue WIP'
 				,form = null
+		UNION ALL 
+		SELECT	id = 25
+				,name = 'Revalue Produced'
+				,form = null
+		UNION ALL 
+		SELECT	id = 26
+				,name = 'Revalue Transfer'
+				,form = null
+		UNION ALL 
+		SELECT	id = 27
+				,name = 'Revalue Build Assembly'
+				,form = null
 
 
 ) AS InventoryTransactionTypeHardValues

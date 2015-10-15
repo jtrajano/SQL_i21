@@ -19,7 +19,7 @@
 CREATE PROCEDURE [dbo].[uspICPostCostAdjustment]
 	@ItemsToAdjust AS ItemCostAdjustmentTableType READONLY
 	,@strBatchId AS NVARCHAR(20)
-	,@strAccountToCounterInventory AS NVARCHAR(255) = 'Cost Adjustment'
+	--,@strAccountToCounterInventory AS NVARCHAR(255) = 'Cost Adjustment'
 	,@intUserId AS INT
 AS
 
@@ -29,8 +29,13 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @returnValue AS INT 
+
+-- Clean-up for the temp table. 
+IF EXISTS(SELECT * FROM tempdb.dbo.sysobjects WHERE ID = OBJECT_ID(N'tempdb..#tmpRevalueProducedItems')) 
+	DROP TABLE #tmpRevalueProducedItems  
+
 -- Create the temp table if it does not exists. 
-IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpRevalueProducedItems')) 
 BEGIN 
 	CREATE TABLE #tmpRevalueProducedItems (
 		[intId] INT IDENTITY PRIMARY KEY CLUSTERED	
@@ -227,7 +232,7 @@ BEGIN
 	-- Average Cost
 	IF (@CostingMethod = @AVERAGECOST)
 	BEGIN 
-		EXEC dbo.uspICPostCostAdjustmentOnAverageCosting
+		EXEC @returnValue = dbo.uspICPostCostAdjustmentOnAverageCosting
 			@dtmDate
 			,@intItemId
 			,@intItemLocationId
@@ -246,6 +251,8 @@ BEGIN
 			,@intCurrencyId
 			,@dblExchangeRate			
 			,@intUserId
+
+		IF @returnValue < 0 RETURN -1;
 	END
 
 	-- Attempt to fetch the next row from cursor. 
@@ -440,9 +447,9 @@ BEGIN
 END 
 
 
---------------------------------------------------------
--- Repeat Loop if there are 'Produced' items to process
---------------------------------------------------------
+-------------------------------------------------------------------------------------------
+-- Repeat the cost adjustment process if there are 'Produced/Transferred' stocks affected. 
+-------------------------------------------------------------------------------------------
 IF EXISTS (SELECT TOP 1 1 FROM #tmpRevalueProducedItems) 
 BEGIN 
 	-- Clear the contents of the @Internal_ItemsToAdjust table variable. 
@@ -504,11 +511,6 @@ END
 -----------------------------------------
 -- Generate the g/l entries
 -----------------------------------------
-EXEC dbo.uspICCreateGLEntries 
+EXEC dbo.uspICCreateGLEntriesForCostAdj 
 	@strBatchId
-	,@strAccountToCounterInventory
 	,@intUserId
-
--- Clean-up for the temp table. 
-IF EXISTS(SELECT * FROM tempdb.dbo.sysobjects WHERE ID = OBJECT_ID(N'tempdb..#tmpRevalueProducedItems')) 
-	DROP TABLE #tmpRevalueProducedItems  
