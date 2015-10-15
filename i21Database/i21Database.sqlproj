@@ -2617,6 +2617,9 @@
     <Build Include="dbo\Stored Procedures\uspSMAuditLog.sql" />
     <Build Include="dbo\Functions\fnARGetLocationItemVendorDetailsForPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCalendarDetailException.sql" />
+    <Build Include="dbo\Tables\tblPATRefund.sql" />
+    <Build Include="dbo\Tables\tblPATRefundCategory.sql" />
+    <Build Include="dbo\Tables\tblPATRefundCustomer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
