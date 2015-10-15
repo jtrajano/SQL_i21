@@ -54,7 +54,7 @@ BEGIN
 
 		-- 'The UOM is missing on {Item}.'
 		RAISERROR(51136, 11, 1, @strItemNo);
-		GOTO Exit_With_Errors
+		RETURN -1
 	END
 
 END
@@ -78,7 +78,7 @@ BEGIN
 
 		-- 'Merge Lot requires a negative Adjust Qty on %s as stock for the merge.'
 		RAISERROR(51177, 11, 1, @strItemNo);
-		GOTO Exit_With_Errors
+		RETURN -1
 	END
 END 
 
@@ -161,10 +161,8 @@ BEGIN
 			@intTransactionId
 			,@intUserId
 
-	IF @intCreateUpdateLotError <> 0
-	BEGIN 
-		GOTO Exit_With_Errors;
-	END
+	IF @intCreateUpdateLotError <> 0 RETURN -1
+	
 END
 
 --------------------------------------------------------------------------------
@@ -285,11 +283,3 @@ BEGIN
 			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
 			,@intUserId
 END
-
-Exit_Successfully:
-GOTO _Exit
-
-Exit_With_Errors:
-RETURN -1;
-
-_Exit: 

@@ -29,27 +29,7 @@ RETURN (
 								AND StockUOM.intItemLocationId = Location.intItemLocationId
 								AND ISNULL(StockUOM.intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
 								AND ISNULL(StockUOM.intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)
-							LEFT JOIN (
-									SELECT	intItemId
-											,intItemLocationId
-											,intItemUOMId
-											,intSubLocationId
-											,intStorageLocationId
-											,dblTotalQty = SUM(dblQty)
-									FROM	tblICStockReservation
-									WHERE	intItemId = @intItemId
-											AND intItemLocationId = @intItemLocationId
-											AND ISNULL(intSubLocationId, 0) = ISNULL(@intSubLocationId, 0)
-											AND ISNULL(intStorageLocationId, 0) = ISNULL(@intStorageLocationId, 0)	
-									GROUP BY intItemId
-											,intItemLocationId
-											,intItemUOMId
-											,intSubLocationId
-											,intStorageLocationId
-							) Reserve
-								ON Reserve.intItemId = Item.intItemId
-								AND Reserve.intItemLocationId = Location.intItemLocationId
-					WHERE	ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0) + ISNULL(Reserve.dblTotalQty, 0) < 0
+					WHERE	ISNULL(@dblQty, 0) + ISNULL(StockUOM.dblOnHand, 0) + ISNULL(StockUOM.dblUnitReserved, 0) < 0
 							AND Location.intAllowNegativeInventory = 3 -- Value 3 means "NO", Negative stock is NOT allowed. 													
 				)
 

@@ -145,7 +145,7 @@ BEGIN
 	BEGIN 
 		EXEC tSQLt.ExpectException 
 			@ExpectedMessagePattern = 'STICKY GRAINS is missing a GL account setup for Revalue Sold account category.'
-			,@ExpectedErrorNumber = 51041 
+			,@ExpectedErrorNumber = 80008 
 	END
 
 	-- Act

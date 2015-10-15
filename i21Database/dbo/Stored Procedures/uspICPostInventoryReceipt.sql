@@ -41,7 +41,9 @@ SET @ysnPost = ISNULL(@ysnPost, 0)
  
 -- Create the type of lot numbers
 DECLARE @LotType_Manual AS INT = 1
-	,@LotType_Serial AS INT = 2
+		,@LotType_Serial AS INT = 2
+
+DECLARE @intReturnValue AS INT 
 
 -- Read the transaction info   
 BEGIN   
@@ -175,18 +177,6 @@ BEGIN
 
 END 
 
--- Check the UOM
---IF @ysnPost = 1 
---BEGIN 
---	DECLARE @intUOMError AS INT
-
---	EXEC @intUOMError = dbo.uspICValidateInventoryRecieptwithPO
---		@strTransactionId
-
---	IF @intUOMError <> 0 
---		GOTO Post_Exit    
---END 
-
 -- Get the next batch number
 EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT  
 IF @@ERROR <> 0 GOTO Post_Exit;
@@ -253,11 +243,13 @@ BEGIN
 			,[strModuleName]
 			,[intConcurrencyId]
 		)	
-		EXEC dbo.uspICPostInventoryReceiptOtherCharges 
+		EXEC @intReturnValue = dbo.uspICPostInventoryReceiptOtherCharges 
 			@intTransactionId
 			,@strBatchId
 			,@intUserId
 			,@INVENTORY_RECEIPT_TYPE
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 			
 	END 
 
@@ -385,15 +377,12 @@ BEGIN
 					AND ItemLocation.intItemId = DetailItem.intItemId
 				LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
 					ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
-
 				LEFT JOIN dbo.tblICItemUOM ItemUOM 
 					ON ItemUOM.intItemUOMId = DetailItem.intUnitMeasureId
 				LEFT JOIN dbo.tblICItemUOM LotItemUOM
 					ON LotItemUOM.intItemUOMId = DetailItemLot.intItemUnitMeasureId
 				LEFT JOIN dbo.tblICItemUOM WeightUOM
 					ON WeightUOM.intItemUOMId = DetailItem.intWeightUOMId
-
-				
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
   
@@ -428,11 +417,13 @@ BEGIN
 					,[strModuleName]
 					,[intConcurrencyId]
 			)
-			EXEC	dbo.uspICPostCosting  
+			EXEC	@intReturnValue = dbo.uspICPostCosting  
 					@ItemsForPost  
 					,@strBatchId  
 					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 					,@intUserId
+
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
 	END 
 
@@ -547,10 +538,12 @@ BEGIN
 		-- Call the post routine 
 		IF EXISTS (SELECT TOP 1 1 FROM @StorageItemsForPost) 
 		BEGIN 
-			EXEC	dbo.uspICPostStorage
+			EXEC	@intReturnValue = dbo.uspICPostStorage
 					@StorageItemsForPost  
 					,@strBatchId  
 					,@intUserId
+
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
 	END
 
@@ -599,6 +592,7 @@ IF @ysnPost = 0
 BEGIN   
 	-- Call the unpost routine 
 	BEGIN 
+
 		-- Call the post routine 
 		INSERT INTO @GLEntries (
 				[dtmDate] 
@@ -627,12 +621,14 @@ BEGIN
 				,[strModuleName]
 				,[intConcurrencyId]
 		)
-		EXEC	dbo.uspICUnpostCosting
+		EXEC	@intReturnValue = dbo.uspICUnpostCosting
 				@intTransactionId
 				,@strTransactionId
 				,@strBatchId
 				,@intUserId
 				,@ysnRecap
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 				
 		-- Unpost the Other Charges
 		BEGIN 
@@ -663,11 +659,13 @@ BEGIN
 				,[strModuleName]
 				,[intConcurrencyId]
 			)	
-			EXEC dbo.uspICUnpostInventoryReceiptOtherCharges 
+			EXEC @intReturnValue = dbo.uspICUnpostInventoryReceiptOtherCharges 
 				@intTransactionId
 				,@strBatchId
 				,@intUserId
-				,@INVENTORY_RECEIPT_TYPE			
+				,@INVENTORY_RECEIPT_TYPE	
+				
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
 
 		-- Unpost the Receipt Taxes
@@ -699,11 +697,13 @@ BEGIN
 				,[strModuleName]
 				,[intConcurrencyId]
 			)	
-			EXEC dbo.uspICUnpostInventoryReceiptTaxes 
+			EXEC @intReturnValue = dbo.uspICUnpostInventoryReceiptTaxes 
 				@intTransactionId
 				,@strBatchId
 				,@intUserId
-				,@INVENTORY_RECEIPT_TYPE			
+				,@INVENTORY_RECEIPT_TYPE	
+						
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
 	END 
 END   
@@ -749,7 +749,7 @@ BEGIN
 	BEGIN 
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 	END 
-	
+		
 	UPDATE	dbo.tblICInventoryReceipt  
 	SET		ysnPosted = @ysnPost
 			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
@@ -782,5 +782,15 @@ BEGIN
 			,@toValue = ''											-- New Value
 END
 
+GOTO Post_Exit
+
 -- This is our immediate exit in case of exceptions controlled by this stored procedure
+With_Rollback_Exit:
+IF @@TRANCOUNT > 1 
+BEGIN 
+	ROLLBACK TRAN @TransactionName
+	COMMIT TRAN @TransactionName
+END
+
 Post_Exit:
+
