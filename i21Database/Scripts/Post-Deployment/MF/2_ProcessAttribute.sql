@@ -778,14 +778,14 @@ BEGIN
         ,strAttributeName
         ,intAttributeDataTypeId
         ,intAttributeTypeId
-        ,ysnMultiSelect
-        ,strSQL
         )
     SELECT 37
         ,'Delay Between Creating Pallets'
-        ,5
+        ,2
         ,1
-        ,0
-        ,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+ELSE
+BEGIN
+	UPDATE tblMFAttribute SET intAttributeDataTypeId=2,ysnMultiSelect=NULL,strSQL=NULL WHERE intAttributeId = 37
 END
 GO
