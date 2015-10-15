@@ -94,6 +94,7 @@ BEGIN TRY
 	SELECT @intExecutionOrder = Max(intExecutionOrder) + 1
 	FROM dbo.tblMFWorkOrder
 	WHERE dtmPlannedDate = @dtmPlannedDate
+	AND intManufacturingCellId =@intManufacturingCellId 
 
 	INSERT INTO dbo.tblMFWorkOrder (
 		strWorkOrderNo

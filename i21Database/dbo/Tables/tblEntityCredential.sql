@@ -6,7 +6,8 @@
     [strApiKey]				NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS NULL, 
     [strApiSecret]			NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS NULL, 
     [ysnApiDisabled]		BIT NULL, 
-	[strTFASecretKey]		nvarchar(MAX)  COLLATE Latin1_General_CI_AS NULL, 
+	[strTFASecretKey]		NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS NULL, 
+	[strTFACurrentCode]     NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS NULL, 
 	[ysnTFAEnabled]			BIT            DEFAULT ((0)) NULL, 
     [intConcurrencyId]      INT            DEFAULT ((1)) NOT NULL
     CONSTRAINT [PK_tblEntityCredential] PRIMARY KEY CLUSTERED ([intEntityCredentialId] ASC),
