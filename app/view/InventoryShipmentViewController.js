@@ -1493,6 +1493,12 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
         }
     },
 
+    onPickLotsClick: function(button, e, eOpts) {
+        var grid = button.up('grid');
+
+        iRely.Functions.openScreen('Inventory.view.PickLot', { intCustomerId: null , intShipFromId: null });
+    },
+
     init: function(application) {
         this.control({
             "#cboShipFromAddress": {
@@ -1542,6 +1548,9 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
             },
             "#btnQuality": {
                 click: this.onQualityClick
+            },
+            "#btnPickLots": {
+                click: this.onPickLotsClick
             }
         })
     }

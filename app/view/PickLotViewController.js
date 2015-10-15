@@ -63,51 +63,61 @@ Ext.define('Inventory.view.PickLotViewController', {
                     {
                         xtype: 'gridcolumn',
                         itemId: 'colPickLotNo',
+                        dataIndex: 'intReferenceNumber',
                         text: 'Pick Lot No'
                     },
                     {
                         xtype: 'datecolumn',
                         itemId: 'colPickDate',
+                        dataIndex: 'dtmPickDate',
                         text: 'Pick Date'
                     },
-                    {
-                        xtype: 'gridcolumn',
-                        itemId: 'colSalesContractNo',
-                        text: 'Sales Contract No'
-                    },
-                    {
-                        xtype: 'gridcolumn',
-                        itemId: 'colItemNo',
-                        text: 'Item No'
-                    },
-                    {
-                        xtype: 'gridcolumn',
-                        itemId: 'colItemDescription',
-                        text: 'Description'
-                    },
-                    {
-                        xtype: 'numbercolumn',
-                        itemId: 'colOrderQty',
-                        text: 'Order Qty'
-                    },
-                    {
-                        xtype: 'gridcolumn',
-                        itemId: 'colUOM',
-                        text: 'UOM'
-                    },
-                    {
-                        xtype: 'numbercolumn',
-                        itemId: 'colPickedQty',
-                        text: 'Picked Qty'
-                    },
-                    {
-                        xtype: 'gridcolumn',
-                        itemId: 'colPickedUOM',
-                        text: 'Picked UOM'
-                    },
+//                    {
+//                        xtype: 'gridcolumn',
+//                        itemId: 'colSalesContractNo',
+//                        dataIndex: 'intReferenceNumber',
+//                        text: 'Sales Contract No'
+//                    },
+//                    {
+//                        xtype: 'gridcolumn',
+//                        itemId: 'colItemNo',
+//                        dataIndex: 'intReferenceNumber',
+//                        text: 'Item No'
+//                    },
+//                    {
+//                        xtype: 'gridcolumn',
+//                        itemId: 'colItemDescription',
+//                        dataIndex: 'intReferenceNumber',
+//                        text: 'Description'
+//                    },
+//                    {
+//                        xtype: 'numbercolumn',
+//                        itemId: 'colOrderQty',
+//                        dataIndex: 'intReferenceNumber',
+//                        text: 'Order Qty'
+//                    },
+//                    {
+//                        xtype: 'gridcolumn',
+//                        itemId: 'colUOM',
+//                        dataIndex: 'intReferenceNumber',
+//                        text: 'UOM'
+//                    },
+//                    {
+//                        xtype: 'numbercolumn',
+//                        itemId: 'colPickedQty',
+//                        dataIndex: 'intReferenceNumber',
+//                        text: 'Picked Qty'
+//                    },
+//                    {
+//                        xtype: 'gridcolumn',
+//                        itemId: 'colPickedUOM',
+//                        dataIndex: 'intReferenceNumber',
+//                        text: 'Picked UOM'
+//                    },
                     {
                         xtype: 'gridcolumn',
                         itemId: 'colSubLocation',
+                        dataIndex: 'strLocationName',
                         text: 'Sub Location'
                     }
                 ]
@@ -122,5 +132,29 @@ Ext.define('Inventory.view.PickLotViewController', {
         me.getView().show();
         var context = me.setupContext();
         context.data.load();
+    },
+
+    onAddClick: function(button) {
+        var win = button.up('window');
+        var grid = win.down('#grdPickLots');
+
+        var selection = grid.getSelectionModel().getSelection();
+        if (selection) {
+            if (selection.length > 0) {
+                win.AddPickLots = selection;
+                win.close();
+                return;
+            }
+        }
+
+        iRely.Functions.showErrorDialog('Please select a pick lot to add.');
+    },
+
+    init: function(application) {
+        this.control({
+            "#btnAdd": {
+                click: this.onAddClick
+            }
+        });
     }
 });

@@ -39,6 +39,8 @@ Ext.define('Inventory.view.InventoryShipment', {
 
     height: 700,
     hidden: false,
+    minHeight: 510,
+    minWidth: 1100,
     width: 1100,
     layout: 'fit',
     collapsible: true,
@@ -53,10 +55,12 @@ Ext.define('Inventory.view.InventoryShipment', {
                 items: [
                     {
                         xtype: 'form',
+                        height: 350,
                         itemId: 'frmInventoryShipment',
                         margin: -1,
+                        width: 450,
                         layout: 'fit',
-                        bodyPadding: 3,
+                        bodyPadding: 5,
                         dockedItems: [
                             {
                                 xtype: 'toolbar',
@@ -407,9 +411,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                             {
                                                 xtype: 'tabpanel',
                                                 height: 110,
-                                                itemId: 'tabShipping',
                                                 activeTab: 0,
-                                                plain: true,
                                                 items: [
                                                     {
                                                         xtype: 'panel',
@@ -766,8 +768,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     {
                                                                         xtype: 'toolbar',
                                                                         dock: 'top',
-                                                                        componentCls: 'x-toolbar-default-grid',
-                                                                        itemId: 'tlbGridOptions',
+                                                                        itemId: 'tlbToolbarGrid',
                                                                         layout: {
                                                                             type: 'hbox',
                                                                             padding: '0 0 0 1'
@@ -779,6 +780,13 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                                 itemId: 'btnInsertItem',
                                                                                 iconCls: 'small-add',
                                                                                 text: 'Insert'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnPickLots',
+                                                                                iconCls: 'small-add',
+                                                                                text: 'Pick Lots'
                                                                             },
                                                                             {
                                                                                 xtype: 'button',
@@ -1633,8 +1641,7 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                                     {
                                                                         xtype: 'toolbar',
                                                                         dock: 'top',
-                                                                        componentCls: 'x-toolbar-default-grid',
-                                                                        itemId: 'tlbGridOptions',
+                                                                        itemId: 'tlbToolbarGrid',
                                                                         layout: {
                                                                             type: 'hbox',
                                                                             padding: '0 0 0 1'
@@ -1741,7 +1748,6 @@ Ext.define('Inventory.view.InventoryShipment', {
                                                     {
                                                         xtype: 'toolbar',
                                                         dock: 'top',
-                                                        componentCls: 'x-toolbar-default-grid',
                                                         itemId: 'tlbGridOptions',
                                                         layout: {
                                                             type: 'hbox',

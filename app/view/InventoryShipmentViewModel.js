@@ -59,6 +59,10 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                 {
                     intSourceType: 2,
                     strSourceType: 'Inbound Shipment'
+                },
+                {
+                    intSourceType: 3,
+                    strSourceType: 'Pick Lot'
                 }
             ],
             fields: {
@@ -272,6 +276,17 @@ Ext.define('Inventory.view.InventoryShipmentViewModel', {
                     return false;
                     break;
             }
+        },
+        readOnlyItemGrid: function (get) {
+            var sourceType = get('current.intSourceType');
+            switch (sourceType) {
+                case 3:
+                    return true;
+                    break;
+                default:
+                    return false;
+                    break;
+            };
         }
     }
 
