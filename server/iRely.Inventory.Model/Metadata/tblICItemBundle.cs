@@ -64,4 +64,24 @@ namespace iRely.Inventory.Model
         public tblICItem BundleItem { get; set; }
         public tblICItemUOM tblICItemUOM { get; set; }
     }
+
+    public class vyuICGetBundleItem
+    {
+        public int intItemBundleId { get; set; }
+        public int intItemId { get; set; }
+        public string strItemNo { get; set; }
+        public string strItemDescription { get; set; }
+        public int? intBundleItemId { get; set; }
+        public string strComponent { get; set; }
+        public string strComponentDescription { get; set; }
+        public string strDescription { get; set; }
+        public decimal? dblQuantity { get; set; }
+        public int? intItemUnitMeasureId { get; set; }
+        public decimal? dblConversionFactor { get; set; }
+        public string strUnitMeasure { get; set; }
+        public decimal? dblUnit { get; set; }
+        public decimal? dblPrice { get; set; }
+        public int? intSort { get; set; }
+    }
+
 }

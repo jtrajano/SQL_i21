@@ -11,7 +11,7 @@ using System.Data.Entity.Infrastructure.MappingViews;
 
 [assembly: DbMappingViewCacheTypeAttribute(
     typeof(iRely.Inventory.Model.InventoryEntities),
-    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySetsed3dc065732d7304a02e1444958db3c07ac77dc55dd28fbc3198b958ef9b0d16))]
+    typeof(Edm_EntityMappingGeneratedViews.ViewsForBaseEntitySets2e0bbfd19fd3238946c925cf70fa94e98fdc61024d5bd0397d288cb0cf6277de))]
 
 namespace Edm_EntityMappingGeneratedViews
 {
@@ -23,14 +23,14 @@ namespace Edm_EntityMappingGeneratedViews
     /// Implements a mapping view cache.
     /// </summary>
     [GeneratedCode("Entity Framework Power Tools", "0.9.0.0")]
-    internal sealed class ViewsForBaseEntitySetsed3dc065732d7304a02e1444958db3c07ac77dc55dd28fbc3198b958ef9b0d16 : DbMappingViewCache
+    internal sealed class ViewsForBaseEntitySets2e0bbfd19fd3238946c925cf70fa94e98fdc61024d5bd0397d288cb0cf6277de : DbMappingViewCache
     {
         /// <summary>
         /// Gets a hash value computed over the mapping closure.
         /// </summary>
         public override string MappingHashValue
         {
-            get { return "ed3dc065732d7304a02e1444958db3c07ac77dc55dd28fbc3198b958ef9b0d16"; }
+            get { return "2e0bbfd19fd3238946c925cf70fa94e98fdc61024d5bd0397d288cb0cf6277de"; }
         }
 
         /// <summary>
@@ -1435,6 +1435,16 @@ namespace Edm_EntityMappingGeneratedViews
             if (extentName == "InventoryEntities.vyuICGetInventoryReceiptItemTaxes")
             {
                 return GetView277();
+            }
+
+            if (extentName == "CodeFirstDatabase.vyuICGetBundleItem")
+            {
+                return GetView278();
+            }
+
+            if (extentName == "InventoryEntities.vyuICGetBundleItems")
+            {
+                return GetView279();
             }
 
             return null;
@@ -10004,6 +10014,68 @@ namespace Edm_EntityMappingGeneratedViews
             T.intSort AS vyuICGetInventoryReceiptItemTax_intSort, 
             True AS _from0
         FROM CodeFirstDatabase.vyuICGetInventoryReceiptItemTax AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for CodeFirstDatabase.vyuICGetBundleItem.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView278()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetBundleItem
+        [CodeFirstDatabaseSchema.vyuICGetBundleItem](T1.vyuICGetBundleItem_intItemBundleId, T1.vyuICGetBundleItem_intItemId, T1.vyuICGetBundleItem_strItemNo, T1.vyuICGetBundleItem_strItemDescription, T1.vyuICGetBundleItem_intBundleItemId, T1.vyuICGetBundleItem_strComponent, T1.vyuICGetBundleItem_strComponentDescription, T1.vyuICGetBundleItem_strDescription, T1.vyuICGetBundleItem_dblQuantity, T1.vyuICGetBundleItem_intItemUnitMeasureId, T1.vyuICGetBundleItem_dblConversionFactor, T1.vyuICGetBundleItem_strUnitMeasure, T1.vyuICGetBundleItem_dblUnit, T1.vyuICGetBundleItem_dblPrice, T1.vyuICGetBundleItem_intSort)
+    FROM (
+        SELECT 
+            T.intItemBundleId AS vyuICGetBundleItem_intItemBundleId, 
+            T.intItemId AS vyuICGetBundleItem_intItemId, 
+            T.strItemNo AS vyuICGetBundleItem_strItemNo, 
+            T.strItemDescription AS vyuICGetBundleItem_strItemDescription, 
+            T.intBundleItemId AS vyuICGetBundleItem_intBundleItemId, 
+            T.strComponent AS vyuICGetBundleItem_strComponent, 
+            T.strComponentDescription AS vyuICGetBundleItem_strComponentDescription, 
+            T.strDescription AS vyuICGetBundleItem_strDescription, 
+            T.dblQuantity AS vyuICGetBundleItem_dblQuantity, 
+            T.intItemUnitMeasureId AS vyuICGetBundleItem_intItemUnitMeasureId, 
+            T.dblConversionFactor AS vyuICGetBundleItem_dblConversionFactor, 
+            T.strUnitMeasure AS vyuICGetBundleItem_strUnitMeasure, 
+            T.dblUnit AS vyuICGetBundleItem_dblUnit, 
+            T.dblPrice AS vyuICGetBundleItem_dblPrice, 
+            T.intSort AS vyuICGetBundleItem_intSort, 
+            True AS _from0
+        FROM InventoryEntities.vyuICGetBundleItems AS T
+    ) AS T1");
+        }
+
+        /// <summary>
+        /// Gets the view for InventoryEntities.vyuICGetBundleItems.
+        /// </summary>
+        /// <returns>The mapping view.</returns>
+        private static DbMappingView GetView279()
+        {
+            return new DbMappingView(@"
+    SELECT VALUE -- Constructing vyuICGetBundleItems
+        [iRely.Inventory.Model.vyuICGetBundleItem](T1.vyuICGetBundleItem_intItemBundleId, T1.vyuICGetBundleItem_intItemId, T1.vyuICGetBundleItem_strItemNo, T1.vyuICGetBundleItem_strItemDescription, T1.vyuICGetBundleItem_intBundleItemId, T1.vyuICGetBundleItem_strComponent, T1.vyuICGetBundleItem_strComponentDescription, T1.vyuICGetBundleItem_strDescription, T1.vyuICGetBundleItem_dblQuantity, T1.vyuICGetBundleItem_intItemUnitMeasureId, T1.vyuICGetBundleItem_dblConversionFactor, T1.vyuICGetBundleItem_strUnitMeasure, T1.vyuICGetBundleItem_dblUnit, T1.vyuICGetBundleItem_dblPrice, T1.vyuICGetBundleItem_intSort)
+    FROM (
+        SELECT 
+            T.intItemBundleId AS vyuICGetBundleItem_intItemBundleId, 
+            T.intItemId AS vyuICGetBundleItem_intItemId, 
+            T.strItemNo AS vyuICGetBundleItem_strItemNo, 
+            T.strItemDescription AS vyuICGetBundleItem_strItemDescription, 
+            T.intBundleItemId AS vyuICGetBundleItem_intBundleItemId, 
+            T.strComponent AS vyuICGetBundleItem_strComponent, 
+            T.strComponentDescription AS vyuICGetBundleItem_strComponentDescription, 
+            T.strDescription AS vyuICGetBundleItem_strDescription, 
+            T.dblQuantity AS vyuICGetBundleItem_dblQuantity, 
+            T.intItemUnitMeasureId AS vyuICGetBundleItem_intItemUnitMeasureId, 
+            T.dblConversionFactor AS vyuICGetBundleItem_dblConversionFactor, 
+            T.strUnitMeasure AS vyuICGetBundleItem_strUnitMeasure, 
+            T.dblUnit AS vyuICGetBundleItem_dblUnit, 
+            T.dblPrice AS vyuICGetBundleItem_dblPrice, 
+            T.intSort AS vyuICGetBundleItem_intSort, 
+            True AS _from0
+        FROM CodeFirstDatabase.vyuICGetBundleItem AS T
     ) AS T1");
         }
     }

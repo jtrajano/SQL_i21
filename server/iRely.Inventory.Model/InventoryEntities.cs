@@ -313,6 +313,8 @@ namespace iRely.Inventory.Model
 
             modelBuilder.Configurations.Add(new tblICItemMotorFuelTaxMap());
             modelBuilder.Configurations.Add(new vyuICGetItemMotorFuelTaxMap());
+
+            modelBuilder.Configurations.Add(new vyuICGetBundleItemMap());
         }
     }
 }

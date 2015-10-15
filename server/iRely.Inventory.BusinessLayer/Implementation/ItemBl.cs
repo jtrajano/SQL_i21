@@ -287,6 +287,24 @@ namespace iRely.Inventory.BusinessLayer
         }
 
         /// <summary>
+        /// Get Bundle Items
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public async Task<SearchResult> GetBundleComponents(GetParameter param)
+        {
+            var query = _db.GetQuery<vyuICGetBundleItem>()
+                    .Filter(param, true);
+            var data = await query.Execute(param, "intItemBundleId").ToListAsync();
+
+            return new SearchResult()
+            {
+                data = data.AsQueryable(),
+                total = await query.CountAsync()
+            };
+        }
+
+        /// <summary>
         /// Get Assembly Items
         /// </summary>
         /// <param name="param"></param>
