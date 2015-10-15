@@ -2613,6 +2613,7 @@
     <Build Include="dbo\Functions\fnARGetCustomerItemSpecialPriceId.sql" />
     <Build Include="dbo\Stored Procedures\uspSMAuditLog.sql" />
     <Build Include="dbo\Functions\fnARGetLocationItemVendorDetailsForPricing.sql" />
+    <Build Include="dbo\Functions\fnGetNumericValueFromString.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetCalendarDetailException.sql" />
     <Build Include="dbo\Tables\tblPATRefund.sql" />
     <Build Include="dbo\Tables\tblPATRefundCategory.sql" />
@@ -2625,7 +2626,7 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateBill1099.sql" />
     <Build Include="dbo\Views\vyuAP1099MISC.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreate1099MISCFile.sql" />
-    <Build Include="dbo\Stored Procedures\uspCFInsertTransactionRecord.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertTransactionRecord.sql" />    
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
