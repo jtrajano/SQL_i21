@@ -84,7 +84,10 @@ BEGIN
 					[intAccountId] 			=	(SELECT TOP 1 inti21Id FROM tblGLCOACrossReference WHERE strExternalId = CAST(B.apcbk_gl_ap AS NVARCHAR(MAX))),
 					[strReference] 			=	A.apivc_comment,
 					[strPONumber]			=	A.apivc_pur_ord_no,
+					[dbl1099]				=	A.apivc_1099_amt,
 					[dblTotal] 				=	CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt
+													ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END,
+					[dblPayment]			=	CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt
 													ELSE (CASE WHEN A.apivc_orig_amt < 0 THEN A.apivc_orig_amt * -1 ELSE A.apivc_orig_amt END) END,
 					[dblAmountDue]			=	CASE WHEN A.apivc_status_ind = ''P'' THEN 0 ELSE 
 														CASE WHEN A.apivc_trans_type = ''C'' OR A.apivc_trans_type = ''A'' THEN A.apivc_orig_amt
@@ -143,6 +146,8 @@ BEGIN
 				[strReference], 
 				[strPONumber],
 				[dblTotal], 
+				[dbl1099],
+				[dblPayment], 
 				[dblAmountDue],
 				[intEntityId],
 				[ysnPosted],
@@ -166,6 +171,8 @@ BEGIN
 				[strReference], 
 				[strPONumber],
 				[dblTotal], 
+				[dbl1099],
+				[dblPayment],
 				[dblAmountDue],
 				[intEntityId],
 				[ysnPosted],
@@ -209,6 +216,19 @@ BEGIN
 					[dblCost]				=	(CASE WHEN C2.apivc_trans_type IN (''C'',''A'') THEN
 														(CASE WHEN C.aphgl_gl_amt < 0 THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END) --Cost should always positive
 													ELSE C.aphgl_gl_amt END) / (CASE WHEN ISNULL(C.aphgl_gl_un,0) <= 0 THEN 1 ELSE C.aphgl_gl_un END),
+					[dbl1099]				=	(CASE WHEN (A.dblTotal) > 0 
+												THEN 
+													(
+														((CASE WHEN C2.apivc_trans_type IN (''C'',''A'') THEN C.aphgl_gl_amt * -1 ELSE C.aphgl_gl_amt END)
+															/
+															(A.dblTotal)
+														)
+														*
+														A.dblTotal
+													)
+												ELSE 0 END), --COMPUTE WITHHELD ONLY IF TOTAL IS POSITIVE
+					[int1099Form]			=	1,
+					[int1099Category]		=	8,
 					[intLineNo]				=	C.aphgl_dist_no,
 					[A4GLIdentity]			=	C.[A4GLIdentity]
 				FROM tblAPBill A
@@ -237,6 +257,9 @@ BEGIN
 				[intAccountId],
 				[dblTotal],
 				[dblCost],
+				[dbl1099],
+				[int1099Form],
+				[int1099Category],
 				[intLineNo]
 			)
 			VALUES(
@@ -247,6 +270,9 @@ BEGIN
 				[intAccountId],
 				[dblTotal],
 				[dblCost],
+				[dbl1099],
+				[int1099Form],
+				[int1099Category],
 				[intLineNo]
 			)
 			OUTPUT inserted.intBillDetailId

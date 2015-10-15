@@ -11,6 +11,7 @@
 	[strApprovalNotes]     NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
 	[strComment]			NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
     [dblTotal]             DECIMAL (18, 6) NOT NULL DEFAULT 0,
+	[dbl1099]             DECIMAL (18, 6) NOT NULL DEFAULT 0,
 	[dblSubtotal]          DECIMAL (18, 6) NOT NULL DEFAULT 0,
     [ysnPosted]            BIT             NOT NULL DEFAULT 0,
     [ysnPaid]              BIT             NOT NULL DEFAULT 0,

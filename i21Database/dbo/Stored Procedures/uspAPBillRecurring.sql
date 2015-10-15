@@ -124,7 +124,7 @@ BEGIN
 		[dblWeight], 
 		[dblVolume], 
 		[dtmExpectedDate], 
-		[int1099Code], 
+		[int1099Form], 
 		[int1099Category], 
 		[intLineNo]
 	)
@@ -143,7 +143,7 @@ BEGIN
 		[dblWeight], 
 		[dblVolume], 
 		[dtmExpectedDate], 
-		[int1099Code], 
+		[int1099Form], 
 		[int1099Category], 
 		[intLineNo]
 	FROM tblAPBillDetail
