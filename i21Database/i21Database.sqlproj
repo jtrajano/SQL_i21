@@ -2369,6 +2369,7 @@
     <Build Include="dbo\Functions\fnARGetCustomerItemSpecialPriceId.sql" />
     <Build Include="dbo\Stored Procedures\uspSMAuditLog.sql" />
     <Build Include="dbo\Functions\fnARGetLocationItemVendorDetailsForPricing.sql" />
+    <Build Include="dbo\Functions\fnGetNumericValueFromString.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
