@@ -67,7 +67,7 @@ BEGIN
 		,strCostToUse NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,dblDeviation NUMERIC(18,6)
 		,strLineNote NVARCHAR(200) COLLATE Latin1_General_CI_AS
-		,ysnConsignable BIT
+		--,ysnConsignable BIT
 		,intRackVendorId INT
 		,intRackItemId INT
 		,intRackItemLocationId INT
@@ -89,7 +89,7 @@ BEGIN
 		,strCostToUse
 		,dblDeviation
 		,strLineNote
-		,ysnConsignable
+		--,ysnConsignable
 		,intRackVendorId
 		,intRackItemId
 		,intRackItemLocationId
@@ -381,7 +381,7 @@ BEGIN
 			,strCostToUse NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			,dblDeviation NUMERIC(18,6)
 			,strLineNote NVARCHAR(200) COLLATE Latin1_General_CI_AS
-			,ysnConsignable BIT
+			--,ysnConsignable BIT
 			,intRackVendorId INT
 			,intRackItemId INT
 			,intRackItemLocationId INT
@@ -440,7 +440,7 @@ BEGIN
 			,strCostToUse
 			,dblDeviation
 			,strLineNote
-			,ysnConsignable
+			--,ysnConsignable
 			,intRackVendorId
 			,intRackItemId
 			,intRackItemLocationId
@@ -460,7 +460,7 @@ BEGIN
 			,SP.strCostToUse
 			,SP.dblDeviation
 			,SP.strLineNote
-			,SP.ysnConsignable
+			--,SP.ysnConsignable
 			,SP.intRackVendorId
 			,SP.intRackItemId
 			,SP.intRackItemLocationId
@@ -546,7 +546,7 @@ BEGIN
 			,strCostToUse NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			,dblDeviation NUMERIC(18,6)
 			,strLineNote NVARCHAR(200) COLLATE Latin1_General_CI_AS
-			,ysnConsignable BIT
+			--,ysnConsignable BIT
 			,intRackVendorId INT
 			,intRackItemLocationId INT
 			,intRackItemId INT
@@ -568,7 +568,7 @@ BEGIN
 			,strCostToUse
 			,dblDeviation
 			,strLineNote
-			,ysnConsignable
+			--,ysnConsignable
 			,intRackVendorId
 			,intRackItemId
 			,intRackItemLocationId
@@ -588,7 +588,7 @@ BEGIN
 			,SP.strCostToUse
 			,SP.dblDeviation
 			,SP.strLineNote
-			,SP.ysnConsignable
+			--,SP.ysnConsignable
 			,SP.intRackVendorId
 			,SP.intRackItemId
 			,SP.intRackItemLocationId 
