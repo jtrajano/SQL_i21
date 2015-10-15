@@ -1,4 +1,5 @@
-﻿CREATE TABLE [dbo].[tblRKM2MInquiryTransaction]
+﻿
+CREATE TABLE [dbo].[tblRKM2MInquiryTransaction]
 (
 	[intM2MInquiryTransactionId] INT IDENTITY(1,1) NOT NULL,	
     [intConcurrencyId] INT NOT NULL, 
@@ -14,8 +15,9 @@
     [intOriginId] INT NULL,
     [strPosition] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
     [strPeriod] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+    [strPriOrNotPriOrParPriced] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
     [strPricingType] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
-    [strContractBasis] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL,
+    [dblContractBasis] NUMERIC(18, 6) NULL,
     [dblFutureWtAverage] NUMERIC(18, 6) NULL,
     [dblCashPrice] NUMERIC(18, 6) NULL,
     [dblContractWtAverage] NUMERIC(18, 6) NULL,
