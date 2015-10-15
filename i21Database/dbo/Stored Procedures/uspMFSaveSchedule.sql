@@ -41,12 +41,12 @@ BEGIN TRY
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
 
-		IF @ysnStandard = 1
-		BEGIN
-			UPDATE tblMFSchedule
-			SET ysnStandard = 0
-			WHERE intManufacturingCellId = @intManufacturingCellId
-		END
+	IF @ysnStandard = 1
+	BEGIN
+		UPDATE dbo.tblMFSchedule
+		SET ysnStandard = 0
+		WHERE intManufacturingCellId = @intManufacturingCellId
+	END
 
 	IF @intScheduleId IS NULL
 	BEGIN
@@ -86,7 +86,7 @@ BEGIN TRY
 	ELSE
 	BEGIN
 
-		IF (SELECT intConcurrencyId FROM tblMFSchedule WHERE intScheduleId = @intScheduleId) <> @intConcurrencyId
+		IF (SELECT intConcurrencyId FROM dbo.tblMFSchedule WHERE intScheduleId = @intScheduleId) <> @intConcurrencyId
 		BEGIN
 			RAISERROR(51194,11,1)
 			RETURN
@@ -100,7 +100,7 @@ BEGIN TRY
 		WHERE intScheduleId = @intScheduleId
 	END
 
-	SELECT @intConcurrencyId=intConcurrencyId from tblMFSchedule Where intScheduleId = @intScheduleId
+	SELECT @intConcurrencyId=intConcurrencyId from dbo.tblMFSchedule Where intScheduleId = @intScheduleId
 
 	DELETE FROM dbo.tblMFScheduleWorkOrder WHERE intScheduleId =@intScheduleId 
 
@@ -181,7 +181,7 @@ BEGIN TRY
 
 	IF @ysnStandard=1
 	BEGIN
-		UPDATE tblMFWorkOrder 
+		UPDATE dbo.tblMFWorkOrder 
 		SET intStatusId =(CASE WHEN @intManufacturingCellId =x.intManufacturingCellId THEN (Case When tblMFWorkOrder.intStatusId in (10,11,13) Then tblMFWorkOrder.intStatusId Else x.intStatusId End) ELSE 1 END)
 			,dblQuantity =x.dblQuantity
 			,intManufacturingCellId =x.intManufacturingCellId
@@ -198,7 +198,7 @@ BEGIN TRY
 				,intExecutionOrder int) x Where x.intWorkOrderId=tblMFWorkOrder.intWorkOrderId
 	END
 	
-	INSERT INTO tblMFScheduleWorkOrderDetail (
+	INSERT INTO dbo.tblMFScheduleWorkOrderDetail (
 		intScheduleWorkOrderId
 		,intWorkOrderId
 		,intScheduleId
@@ -213,7 +213,7 @@ BEGIN TRY
 		)
 	SELECT (
 			SELECT intScheduleWorkOrderId
-			FROM tblMFScheduleWorkOrder W
+			FROM dbo.tblMFScheduleWorkOrder W
 			WHERE W.intWorkOrderId = x.intWorkOrderId
 				AND W.intScheduleId = @intScheduleId
 			)
@@ -237,10 +237,10 @@ BEGIN TRY
 			,intSequenceNo INT
 			,intCalendarDetailId INT
 			) x 
-	JOIN tblMFScheduleWorkOrder W on x.intWorkOrderId=W.intWorkOrderId 
+	JOIN dbo.tblMFScheduleWorkOrder W on x.intWorkOrderId=W.intWorkOrderId 
 	WHERE W.intScheduleId = @intScheduleId
 
-	INSERT INTO tblMFScheduleMachineDetail (
+	INSERT INTO dbo.tblMFScheduleMachineDetail (
 		intScheduleWorkOrderDetailId
 		,intWorkOrderId
 		,intScheduleId
@@ -250,8 +250,8 @@ BEGIN TRY
 		)
 	SELECT (
 			SELECT intScheduleWorkOrderDetailId
-			FROM tblMFScheduleWorkOrderDetail WD
-			JOIN tblMFScheduleWorkOrder W ON W.intScheduleWorkOrderId = WD.intScheduleWorkOrderId
+			FROM dbo.tblMFScheduleWorkOrderDetail WD
+			JOIN dbo.tblMFScheduleWorkOrder W ON W.intScheduleWorkOrderId = WD.intScheduleWorkOrderId
 			WHERE W.intWorkOrderId = x.intWorkOrderId
 				AND W.intScheduleId = @intScheduleId
 				AND WD.intCalendarDetailId = x.intCalendarDetailId
@@ -266,10 +266,10 @@ BEGIN TRY
 			,intCalendarMachineId INT
 			,intCalendarDetailId INT
 			) x 
-	JOIN tblMFScheduleWorkOrder W on x.intWorkOrderId=W.intWorkOrderId
+	JOIN dbo.tblMFScheduleWorkOrder W on x.intWorkOrderId=W.intWorkOrderId
 	WHERE W.intScheduleId = @intScheduleId
 
-	INSERT INTO tblMFScheduleConstraintDetail (
+	INSERT INTO dbo.tblMFScheduleConstraintDetail (
 		intScheduleWorkOrderId
 		,intWorkOrderId
 		,intScheduleId
@@ -281,7 +281,7 @@ BEGIN TRY
 		)
 	SELECT (
 			SELECT intScheduleWorkOrderId
-			FROM tblMFScheduleWorkOrder W
+			FROM dbo.tblMFScheduleWorkOrder W
 			WHERE W.intWorkOrderId = x.intWorkOrderId
 				AND W.intScheduleId = @intScheduleId
 			)
@@ -299,7 +299,7 @@ BEGIN TRY
 			,dtmChangeoverEndDate DATETIME
 			,intDuration INT
 			) x 
-	JOIN tblMFScheduleWorkOrder W on x.intWorkOrderId=W.intWorkOrderId
+	JOIN dbo.tblMFScheduleWorkOrder W on x.intWorkOrderId=W.intWorkOrderId
 	WHERE W.intScheduleId = @intScheduleId
 
 	IF @intTransactionCount = 0
