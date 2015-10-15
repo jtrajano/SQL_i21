@@ -18,6 +18,10 @@ namespace iRely.Inventory.Model
             this.Property(t => t.strDocumentName).HasColumnName("strDocumentName");
             this.Property(t => t.intDocumentType).HasColumnName("intDocumentType");
             this.Property(t => t.ysnStandard).HasColumnName("ysnStandard");
+
+            this.HasOptional(p => p.tblICCommodity)
+                .WithMany(p => p.tblICDocuments)
+                .HasForeignKey(p => p.intCommodityId);
         }
     }
 }

@@ -66,6 +66,7 @@ namespace iRely.Inventory.Model
         public ICollection<tblICCommoditySeason> tblICCommoditySeasons { get; set; }
 
         public ICollection<tblICCertificationCommodity> tblICCertificationCommodities { get; set; }
+        public ICollection<tblICDocument> tblICDocuments { get; set; }
 
     }
 

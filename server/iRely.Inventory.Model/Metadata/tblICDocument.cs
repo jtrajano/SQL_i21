@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,7 +18,21 @@ namespace iRely.Inventory.Model
         public int? intDocumentType { get; set; }
         public int? intCommodityId { get; set; }
         public bool ysnStandard { get; set; }
-
+        
         public ICollection<tblICItemContractDocument> tblICItemContractDocuments { get; set; }
+        public tblICCommodity tblICCommodity { get; set; }
     }
+
+    public class DocumentVM
+    {
+        public int intDocumentId { get; set; }
+        public string strDocumentName { get; set; }
+        public string strDescription { get; set; }
+        public int? intDocumentType { get; set; }
+        public int? intCommodityId { get; set; }
+        public string strCommodity { get; set; }
+        public bool ysnStandard { get; set; }
+        public string strDocumentType { get; set; }
+    }
+
 }
