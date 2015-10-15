@@ -45,7 +45,7 @@ INSERT INTO dbo.tblICInventoryReceipt
 	,intCurrencyId
 	,strVessel
 	,intFreightTermId
-	,strAllocateFreight
+	--,strAllocateFreight
 	,intShiftNumber
 	,dblInvoiceAmount
 	,ysnInvoicePaid
@@ -79,7 +79,7 @@ SELECT
 	,intCurrencyId
 	,NULL--strVessel = SC.strTruckName
 	, NULL
-	,'No' -- Default is No
+	--,'No' -- Default is No
 	,NULL
 	,0
 	,0

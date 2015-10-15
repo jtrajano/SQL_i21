@@ -109,7 +109,7 @@ BEGIN
 		,SP.strCostToUse
 		,SP.dblDeviation
 		,SP.strLineNote
-		,SP.ysnConsignable
+		--,SP.ysnConsignable
 		,SP.intRackVendorId
 		,SP.intRackItemId
 		,SP.intRackLocationId 
