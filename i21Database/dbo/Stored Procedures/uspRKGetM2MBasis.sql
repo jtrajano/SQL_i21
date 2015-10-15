@@ -1,6 +1,6 @@
 ﻿CREATE PROC uspRKGetM2MBasis 
-
-		@strCopyData nvarchar(50)= null 
+ 
+		@strCopyData nvarchar(50)= NULL
 AS
 IF ISNULL(@strCopyData,'')<>''
 BEGIN
@@ -32,7 +32,7 @@ FROM tblRKCompanyPreference
 	,strOriginDest nvarchar(50)
 	,strFutMarketName nvarchar(50)
 	,strFutureMonth nvarchar(50)
-	,strPeriodTo nvarchar(50)
+	,strPeriodTo nvarchar(50) COLLATE Latin1_General_CI_AS
 	,strLocationName nvarchar(50)
 	,strMarketZoneCode nvarchar(50)
 	,strCurrency nvarchar(50)
@@ -124,15 +124,19 @@ BEGIN
 										,intConcurrencyId											
 						FROM vyuRKGetM2MBasis 									
 			END
-		
+	
 	IF ISNULL(@strCopyData,'')<>'' and @intM2MBasisId is not null
 		BEGIN
 			UPDATE a 
 			SET  a.dblCashOrFuture =b.dblCashOrFuture,a.dblBasisOrDiscount =b.dblBasisOrDiscount
 			FROM @tempBasis a 
-			JOIN tblRKM2MBasisDetail b ON a.intCommodityId=b.intCommodityId
-			 AND isnull(a.intFutureMarketId,0)=isnull(b.intFutureMarketId,0) and isnull(a.intMarketZoneId,0)=isnull(b.intMarketZoneId,0)
-			AND isnull(a.intCurrencyId,0)=isnull(b.intCurrencyId,0) and isnull(a.intUnitMeasureId,0)=isnull(b.intUnitMeasureId,0)
+			 JOIN tblRKM2MBasisDetail b ON a.intCommodityId=b.intCommodityId
+			 AND isnull(a.intFutureMarketId,0)=isnull(b.intFutureMarketId,0) 
+			 and isnull(a.intMarketZoneId,0)=isnull(b.intMarketZoneId,0)
+			 AND isnull(a.intCurrencyId,0)=isnull(b.intCurrencyId,0) 
+			 and isnull(a.intUnitMeasureId,0)=isnull(b.intUnitMeasureId,0)
+			 and isnull(a.strPeriodTo,0)=isnull(b.strPeriodTo,0)
+			  and isnull(a.intContractTypeId,0)=isnull(b.intContractTypeId,0)
 			WHERE b.intM2MBasisId=@intM2MBasisId			 
 		END
 END
@@ -205,30 +209,22 @@ BEGIN
 										,intConcurrencyId											
 						FROM vyuRKGetM2MBasis 									
 			END
-		
-	IF ISNULL(@strCopyData,'')<>'' and @intM2MBasisId is not null
-		BEGIN
-			UPDATE a 
-			SET  a.dblCashOrFuture =b.dblCashOrFuture,a.dblBasisOrDiscount =b.dblBasisOrDiscount
-			FROM @tempBasis a 
-			JOIN tblRKM2MBasisDetail b ON a.intCommodityId=b.intCommodityId
-			AND isnull(a.intFutureMarketId,0)=isnull(b.intFutureMarketId,0) and isnull(a.intMarketZoneId,0)=isnull(b.intMarketZoneId,0)
-			AND isnull(a.intCurrencyId,0)=isnull(b.intCurrencyId,0) and isnull(a.intUnitMeasureId,0)=isnull(b.intUnitMeasureId,0)
-			WHERE b.intM2MBasisId=@intM2MBasisId			 
-		END
+
+				IF ISNULL(@strCopyData,'')<>'' and @intM2MBasisId is not null
+					BEGIN
+						UPDATE a 
+						SET  a.dblCashOrFuture =b.dblCashOrFuture,a.dblBasisOrDiscount =b.dblBasisOrDiscount
+						FROM @tempBasis a 
+						JOIN tblRKM2MBasisDetail b ON a.intCommodityId=b.intCommodityId
+						AND isnull(a.intFutureMarketId,0)=isnull(b.intFutureMarketId,0) 
+						and isnull(a.intMarketZoneId,0)=isnull(b.intMarketZoneId,0)
+						AND isnull(a.intCurrencyId,0)=isnull(b.intCurrencyId,0) 
+						and isnull(a.intUnitMeasureId,0)=isnull(b.intUnitMeasureId,0)
+						and isnull(a.strPeriodTo,0)=isnull(b.strPeriodTo,0)
+						and isnull(a.intContractTypeId,0)=isnull(b.intContractTypeId,0)
+						WHERE b.intM2MBasisId=@intM2MBasisId			 
+					END
 END
 
 SELECT convert(int,ROW_NUMBER() over (ORDER BY strItemNo)) AS intRowNumber,* from @tempBasis order by 
-				intCommodityId  
-				,intItemId
-				,intOriginId
-				,intFutureMarketId,
-				intFutureMonthId,
-				intCompanyLocationId			
-				,intMarketZoneId
-				,intCurrencyId
-				,intPricingTypeId
-				,intContractTypeId				
-				,intUnitMeasureId
-				
-
+				strFutMarketName,strCommodityCode,strItemNo,strLocationName, convert(datetime,'01 '+strPeriodTo)
