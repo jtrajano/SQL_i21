@@ -766,3 +766,26 @@ BEGIN
         ,'select CONVERT(VARCHAR,intStorageLocationId) AS ValueMember,strName AS DisplayMember from tblICStorageLocation'
 END
 GO
+
+IF NOT EXISTS (
+        SELECT *
+        FROM dbo.tblMFAttribute
+        WHERE intAttributeId = 37
+        )
+BEGIN
+    INSERT INTO tblMFAttribute (
+        intAttributeId
+        ,strAttributeName
+        ,intAttributeDataTypeId
+        ,intAttributeTypeId
+        ,ysnMultiSelect
+        ,strSQL
+        )
+    SELECT 37
+        ,'Delay Between Creating Pallets'
+        ,5
+        ,1
+        ,0
+        ,'Select ''False'' as ValueMember,''False'' as DisplayMember UNION Select ''True'' as ValueMember,''True'' as DisplayMember'
+END
+GO
