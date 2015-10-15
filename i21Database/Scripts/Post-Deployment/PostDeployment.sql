@@ -114,6 +114,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r "..\..\..\Integration\dbo\Functions\fnTMGetSpecialPricing.sql"
 :r "..\..\..\Integration\dbo\Functions\fnTMGetSpecialPricingPrice.sql"
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql"
+":r .\TM\3_PopulateLocatioinIdOnSiteForOriginIntegrated.sql"
 
 
 -- Canned Panels
