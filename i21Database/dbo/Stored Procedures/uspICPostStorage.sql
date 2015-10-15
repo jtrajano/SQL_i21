@@ -60,8 +60,12 @@ DECLARE @AVERAGECOST AS INT = 1
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	EXEC dbo.uspICValidateCostingOnPostStorage
+	DECLARE @returnValue AS INT 
+
+	EXEC @returnValue = dbo.uspICValidateCostingOnPostStorage
 		@ItemsToValidate = @ItemsStorage
+
+	IF @returnValue < 0 RETURN -1
 END
 
 -----------------------------------------------------------------------------------------------------------------------------

@@ -633,7 +633,7 @@
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotOutFromStorage for add-sell it-unpost sell.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotOutFromStorage for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostStorage for the basics.sql" />
-    <Build Include="testi21Database\Fake Data\Fake transactions for item custody.sql" />
+    <Build Include="testi21Database\Fake Data\Fake transactions for item Storage.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostStorage on Lot Costing for one incoming stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLotStorage by not allowing negative stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLotStorage for the basics.sql" />

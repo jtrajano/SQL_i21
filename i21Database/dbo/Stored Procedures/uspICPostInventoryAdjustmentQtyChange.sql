@@ -58,7 +58,7 @@ BEGIN
 
 		-- 'The UOM is missing on {Item}.'
 		RAISERROR(80039, 11, 1, @strItemNo);
-		GOTO _Exit
+		RETURN -1
 	END
 
 END
@@ -83,7 +83,7 @@ BEGIN
 
 		-- 'Please specify the Adjust By Quantity or New Quantity on {Item}.'
 		RAISERROR(80040, 11, 1, @strItemNo);
-		GOTO _Exit
+		RETURN -1
 	END
 END 
 
@@ -144,7 +144,6 @@ BEGIN
 
 END
 
-
 -- Return the result back to uspICPostInventoryAdjustment for further processing. 
 SELECT	intItemId			
 		,intItemLocationId	
@@ -165,5 +164,3 @@ SELECT	intItemId
 		,intSubLocationId
 		,intStorageLocationId
 FROM	@ItemsForQtyChange
-
-_Exit:

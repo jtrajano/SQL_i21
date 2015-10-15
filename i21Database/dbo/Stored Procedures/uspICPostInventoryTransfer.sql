@@ -32,6 +32,7 @@ DECLARE @strBatchId AS NVARCHAR(40)
 -- Create the gl entries variable 
 DECLARE		@GLEntries AS RecapTableType 
 			,@ysnGLEntriesRequired AS BIT = 0
+			,@intReturnValue AS INT
 
 -- Ensure ysnPost is not NULL  
 SET @ysnPost = ISNULL(@ysnPost, 0)  
@@ -254,11 +255,13 @@ BEGIN
 		-------------------------------------------
 		-- Call the costing SP	
 		-------------------------------------------
-		EXEC	dbo.uspICPostCosting  
+		EXEC	@intReturnValue = dbo.uspICPostCosting  
 				@ItemsForRemovalPost  
 				,@strBatchId  
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
 				,@intUserId
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END
 
 	-- Process the "To" Stock 
@@ -319,11 +322,13 @@ BEGIN
 		-------------------------------------------
 		-- Call the costing SP
 		-------------------------------------------
-		EXEC	dbo.uspICPostCosting  
+		EXEC	@intReturnValue = dbo.uspICPostCosting  
 				@ItemsForTransferPost  
 				,@strBatchId  
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
 				,@intUserId
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END
 
 	-- Check if From and To locations are the same. If not, then generate the GL entries. 
@@ -361,11 +366,13 @@ BEGIN
 				,[strModuleName]
 				,[intConcurrencyId]
 		)
-		EXEC dbo.uspICCreateGLEntries 
+		EXEC @intReturnValue = dbo.uspICCreateGLEntries 
 			@strBatchId
 			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 			,@intUserId
 			,@strGLDescription
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END 
 END   	
 
@@ -410,12 +417,14 @@ BEGIN
 				,[strModuleName]
 				,[intConcurrencyId]
 		)
-		EXEC	dbo.uspICUnpostCosting
+		EXEC	@intReturnValue = dbo.uspICUnpostCosting
 				@intTransactionId
 				,@strTransactionId
 				,@strBatchId
 				,@intUserId
 				,@ysnRecap 		
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END 
 END   
 
@@ -484,6 +493,15 @@ BEGIN
 			,@fromValue = ''										-- Previous Value
 			,@toValue = ''											-- New Value
 END
+
+GOTO Post_Exit
     
 -- This is our immediate exit in case of exceptions controlled by this stored procedure
+With_Rollback_Exit:
+IF @@TRANCOUNT > 1 
+BEGIN 
+	ROLLBACK TRAN @TransactionName
+	COMMIT TRAN @TransactionName
+END
+
 Post_Exit:

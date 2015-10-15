@@ -29,6 +29,7 @@ DECLARE @strItemNo AS NVARCHAR(50)
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType 
 		,@adjustmentTypeRequiresGLEntries AS BIT 
+		,@intReturnValue AS INT
 
 -- Ensure ysnPost is not NULL  
 SET @ysnPost = ISNULL(@ysnPost, 0)  
@@ -246,9 +247,11 @@ BEGIN
 	-----------------------------------
 	IF @adjustmentType = @ADJUSTMENT_TYPE_LotStatusChange
 	BEGIN 
-		EXEC dbo.uspICPostInventoryAdjustmentLotStatusChange
+		EXEC @intReturnValue = dbo.uspICPostInventoryAdjustmentLotStatusChange
 				@intTransactionId
 				,@ysnPost
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END 
 
 	-----------------------------------
@@ -256,12 +259,14 @@ BEGIN
 	-----------------------------------
 	IF @adjustmentType = @ADJUSTMENT_TYPE_SplitLot
 	BEGIN 	
-		EXEC dbo.uspICPostInventoryAdjustmentSplitLotChange
+		EXEC @intReturnValue = dbo.uspICPostInventoryAdjustmentSplitLotChange
 				@intTransactionId
 				,@strBatchId  
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 				,@intUserId
 				,@strAdjustmentDescription	
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END 
 
 	-----------------------------------
@@ -269,12 +274,14 @@ BEGIN
 	-----------------------------------
 	IF @adjustmentType = @ADJUSTMENT_TYPE_LotMerge
 	BEGIN 
-		EXEC dbo.uspICPostInventoryAdjustmentLotMerge
+		EXEC @intReturnValue = dbo.uspICPostInventoryAdjustmentLotMerge
 				@intTransactionId
 				,@strBatchId  
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 				,@intUserId
 				,@strAdjustmentDescription
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END 
 
 	-----------------------------------
@@ -282,12 +289,14 @@ BEGIN
 	-----------------------------------
 	IF @adjustmentType = @ADJUSTMENT_TYPE_LotMove
 	BEGIN 
-		EXEC dbo.uspICPostInventoryAdjustmentLotMove
+		EXEC @intReturnValue = dbo.uspICPostInventoryAdjustmentLotMove
 				@intTransactionId
 				,@strBatchId  
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 				,@intUserId
 				,@strAdjustmentDescription
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END 
 
 	-----------------------------------
@@ -295,9 +304,11 @@ BEGIN
 	-----------------------------------
 	IF @adjustmentType = @ADJUSTMENT_TYPE_ExpiryDateChange
 	BEGIN 
-		EXEC dbo.uspICPostInventoryAdjustmentExpiryLotChange
+		EXEC @intReturnValue = dbo.uspICPostInventoryAdjustmentExpiryLotChange
 				@intTransactionId
 				,@ysnPost
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END 
 	
 	-----------------------------------
@@ -310,12 +321,14 @@ BEGIN
 		-----------------------------------------
 		IF EXISTS (SELECT TOP 1 1 FROM @ItemsForAdjust)
 		BEGIN 
-			EXEC	dbo.uspICPostCosting  
+			EXEC	@intReturnValue = dbo.uspICPostCosting  
 					@ItemsForAdjust  
 					,@strBatchId  
 					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 					,@intUserId
 					,@strAdjustmentDescription
+
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END				
 				
 		-----------------------------------------
@@ -348,11 +361,13 @@ BEGIN
 				,[strModuleName]
 				,[intConcurrencyId]
 		)
-		EXEC dbo.uspICCreateGLEntries 
+		EXEC @intReturnValue = dbo.uspICCreateGLEntries 
 			@strBatchId
 			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 			,@intUserId
 			,@strAdjustmentDescription
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END 
 END   
 
@@ -397,12 +412,14 @@ BEGIN
 				,[strModuleName]
 				,[intConcurrencyId]
 		)
-		EXEC	dbo.uspICUnpostCosting
+		EXEC	@intReturnValue = dbo.uspICUnpostCosting
 				@intTransactionId
 				,@strTransactionId
 				,@strBatchId
 				,@intUserId
-				,@ysnRecap						
+				,@ysnRecap
+		
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit				
 	END 
 
 	IF @adjustmentType = @ADJUSTMENT_TYPE_LotStatusChange
@@ -477,14 +494,6 @@ BEGIN
 	COMMIT TRAN @TransactionName
 END 
 
-GOTO Post_Exit
-
--- This is an exit if stock is outdated. 
-OutdatedStockOnHand_Exit: 
-BEGIN 
-	COMMIT TRAN @TransactionName
-END
-
 -- Create an Audit Log
 IF @ysnRecap = 0 
 BEGIN 
@@ -503,5 +512,14 @@ BEGIN
 			,@toValue = ''											-- New Value
 END
 
+GOTO Post_Exit
+
 -- This is our immediate exit in case of exceptions controlled by this stored procedure
+With_Rollback_Exit:
+IF @@TRANCOUNT > 1 
+BEGIN 
+	ROLLBACK TRAN @TransactionName
+	COMMIT TRAN @TransactionName
+END
+
 Post_Exit:
