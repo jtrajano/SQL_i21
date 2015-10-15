@@ -2635,6 +2635,7 @@
     <Build Include="dbo\Tables\tblCTCleanCost.sql" />
     <Build Include="dbo\Tables\tblCTCleanCostBillExpense.sql" />
     <Build Include="dbo\Tables\tblCTCleanCostOtherExpense.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreate1099History.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
