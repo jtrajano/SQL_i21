@@ -30,6 +30,7 @@
 	[dblStagedQty] NUMERIC(18, 6) NULL, 
     [intMachineId] INT NULL, 
     [intStagingLocationId] INT NULL,
+	[dtmStagedDate] DATETIME NULL,
 	[intParentWorkOrderId] INT NULL, 
     [intBlendRequirementId] INT NULL, 
     [intPickListId] INT NULL, 

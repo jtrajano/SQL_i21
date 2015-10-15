@@ -571,8 +571,8 @@ BEGIN
       ,[agloc_pic_prtr_name] = CL.[strDefaultTicketPrinter]  
       ,[agloc_ivc_prtr_name] = CL.[strDefaultInvoicePrinter]  
       ,[agloc_cnt_prtr_name] = [agloc_cnt_prtr_name]  
-      ,[agloc_last_ivc_no] = CL.[strLastInvoiceNumber]  
-      ,[agloc_last_ord_no] = CL.[strLastOrderNumber]  
+      ,[agloc_last_ivc_no] = dbo.fnGetNumericValueFromString(CL.[strLastInvoiceNumber])
+      ,[agloc_last_ord_no] = dbo.fnGetNumericValueFromString(CL.[strLastOrderNumber])
       ,[agloc_ord_for_ivc_yn] =   
         (CASE CL.[ysnUseOrderNumberforInvoiceNumber]  
          WHEN 1 THEN ''Y''  

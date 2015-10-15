@@ -6,13 +6,14 @@
 CREATE VIEW [dbo].[vyuCMOriginUndepositedFund]
 AS
 
-SELECT	id = CAST(NULL AS INT) 
-		,intUndepositedFundId = CAST(NULL AS INT)
-		,intBankAccountId = CAST(NULL AS INT)
-		,intGLAccountId = CAST(NULL AS INT)
-		,strAccountDescription = CAST(NULL AS NVARCHAR(255))
-		,dblAmount = CAST(NULL AS NUMERIC(18,6))
-		,strName = CAST(NULL AS NVARCHAR(200)) 
-		,dtmDate = CAST(NULL AS DATETIME)
-WHERE 1 = 0
+SELECT
+id = CAST(ROW_NUMBER() OVER (ORDER BY intUndepositedFundId) AS INT), 
+intUndepositedFundId, 
+intBankAccountId, 
+intGLAccountId = (SELECT intAccountId FROM tblARPayment WHERE  intPaymentId = tblCMUndepositedFund.intSourceTransactionId),
+strAccountDescription = (SELECT strDescription FROM tblGLAccount WHERE intAccountId = (SELECT intAccountId FROM tblARPayment WHERE  intPaymentId = tblCMUndepositedFund.intSourceTransactionId)),
+dblAmount,
+strName, 
+dtmDate
+FROM tblCMUndepositedFund
 

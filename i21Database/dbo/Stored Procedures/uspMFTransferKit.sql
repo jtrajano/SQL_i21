@@ -201,7 +201,8 @@ Begin
 	--Create Reservation
 	Exec [uspMFCreateLotReservation] @intWorkOrderId=@intWorkOrderId,@ysnReservationByParentLot=0
 
-	Update tblMFWorkOrder Set intKitStatusId=8,intLastModifiedUserId=@intUserId,dtmLastModified=@dtmCurrentDateTime Where intWorkOrderId=@intWorkOrderId
+	Update tblMFWorkOrder Set intKitStatusId=8,intLastModifiedUserId=@intUserId,dtmLastModified=@dtmCurrentDateTime,
+	intStagingLocationId=@intBlendStagingLocationId,dtmStagedDate=@dtmCurrentDateTime Where intWorkOrderId=@intWorkOrderId
 
 	--All the WOs for the pick list are transfered No
 	If Exists (Select 1 From tblMFWorkOrder Where intPickListId=@intPickListId And intKitStatusId <> 8)

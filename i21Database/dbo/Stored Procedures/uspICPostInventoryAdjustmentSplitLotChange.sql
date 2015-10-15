@@ -54,7 +54,7 @@ BEGIN
 
 		-- 'The UOM is missing on {Item}.'
 		RAISERROR(80039, 11, 1, @strItemNo);
-		GOTO Exit_With_Errors
+		RETURN -1
 	END
 
 END
@@ -78,7 +78,7 @@ BEGIN
 
 		-- 'Split Lot requires a negative Adjust Qty on {Item} to split stocks from it.'
 		RAISERROR(80057, 11, 1, @strItemNo);
-		GOTO Exit_With_Errors
+		RETURN -1
 	END
 END 
 
@@ -160,10 +160,7 @@ BEGIN
 			@intTransactionId
 			,@intUserId
 
-	IF @intCreateUpdateLotError <> 0
-	BEGIN 
-		GOTO Exit_With_Errors;
-	END
+	IF @intCreateUpdateLotError <> 0 RETURN -1
 END
 
 --------------------------------------------------------------------------------
@@ -284,11 +281,3 @@ BEGIN
 			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
 			,@intUserId
 END
-
-Exit_Successfully:
-GOTO _Exit
-
-Exit_With_Errors:
-RETURN -1;
-
-_Exit: 

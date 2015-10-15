@@ -22,6 +22,7 @@ A.intBillId
 ,Payments.intPaymentId
 ,Payments.dtmDatePaid
 ,Payments.ysnCleared
+,Payments.dtmDateReconciled
 FROM dbo.tblAPBill A
 	INNER JOIN 
 	(
@@ -39,11 +40,12 @@ FROM dbo.tblAPBill A
 			,ISNULL(H.ysnCheckVoid,0) AS ysnVoid
 			,ISNULL(H.ysnClr,0) AS ysnCleared
 			,B.dtmDatePaid
+			,H.dtmDateReconciled
 		FROM dbo.tblAPPayment B 
 			LEFT JOIN dbo.tblAPPaymentDetail C ON B.intPaymentId = C.intPaymentId
 		INNER JOIN dbo.tblCMBankAccount G ON B.intAccountId = G.intGLAccountId
-		INNER JOIN dbo.tblCMBankTransaction H ON B.strPaymentRecordNum = H.strTransactionId
+		LEFT JOIN dbo.tblCMBankTransaction H ON B.strPaymentRecordNum = H.strTransactionId
 		--WHERE B.ysnPosted = 1
-		GROUP BY [intEntityVendorId], intBillId, H.dtmCheckPrinted, H.ysnCheckVoid, H.ysnClr, G.strBankAccountNo, B.strPaymentInfo, B.intPaymentId, B.dtmDatePaid
+		GROUP BY [intEntityVendorId], intBillId, H.dtmCheckPrinted, H.ysnCheckVoid, H.ysnClr, G.strBankAccountNo, B.strPaymentInfo, B.intPaymentId, B.dtmDatePaid, H.dtmDateReconciled
 	) Payments
 	ON A.intBillId = Payments.intBillId

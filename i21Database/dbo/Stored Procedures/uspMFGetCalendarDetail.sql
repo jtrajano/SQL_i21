@@ -230,7 +230,8 @@ BEGIN
 			AND CD.ysnHoliday = 0
 			AND NOT EXISTS (
 				SELECT *
-				FROM dbo.tblMFScheduleCalendarDetail CD1
+				FROM dbo.tblMFScheduleCalendar C 
+				JOIN dbo.tblMFScheduleCalendarDetail CD1 ON C.intCalendarId =CD1.intCalendarId AND C.intManufacturingCellId <> @intManufacturingCellId 
 				JOIN dbo.tblMFScheduleCalendarMachineDetail MD1 ON MD1.intCalendarDetailId = CD1.intCalendarDetailId
 				WHERE CD1.dtmCalendarDate = CD.dtmCalendarDate
 					AND CD1.intShiftId = CD.intShiftId
@@ -253,7 +254,8 @@ BEGIN
 			AND CD.ysnHoliday = 0
 			AND NOT EXISTS (
 				SELECT *
-				FROM dbo.tblMFScheduleCalendarDetail CD1
+				FROM dbo.tblMFScheduleCalendar C 
+				JOIN dbo.tblMFScheduleCalendarDetail CD1 ON C.intCalendarId =CD1.intCalendarId AND C.intManufacturingCellId <> @intManufacturingCellId 
 				JOIN dbo.tblMFScheduleCalendarMachineDetail MD1 ON MD1.intCalendarDetailId = CD1.intCalendarDetailId
 				WHERE CD1.dtmCalendarDate = CD.dtmCalendarDate
 					AND CD1.intShiftId = CD.intShiftId
@@ -262,7 +264,7 @@ BEGIN
 			AND EXISTS (
 				SELECT *
 				FROM dbo.tblMFScheduleCalendarDetail CD2
-				JOIN dbo.tblMFScheduleCalendarMachineDetail MD2 ON MD2.intCalendarDetailId = CD2.intCalendarDetailId
+				JOIN dbo.tblMFScheduleCalendarMachineDetail MD2 ON MD2.intCalendarDetailId = CD2.intCalendarDetailId AND CD2.intCalendarId =@intCalendarId 
 				WHERE CD2.dtmCalendarDate = @dtmMachineConfiguredAsOn
 					AND CD2.intShiftId = CD.intShiftId
 					AND MD2.intMachineId = MD.Item
@@ -312,25 +314,4 @@ BEGIN
 			')) pvt Order by dtmCalendarDate,intShiftSequence'
 
 		EXEC (@SQL)
-	
-	SELECT CD.dtmCalendarDate
-		,CD.intShiftId
-		,S.strShiftName
-		,M.intMachineId
-		,M.strName
-		,MC.intManufacturingCellId
-		,MC.strCellName
-	FROM dbo.tblMFScheduleCalendar C
-	JOIN dbo.tblMFScheduleCalendarDetail CD ON C.intCalendarId = CD.intCalendarId
-		AND C.intCalendarId <> @intCalendarId
-	JOIN dbo.tblMFShift S ON S.intShiftId = CD.intShiftId
-	JOIN dbo.tblMFScheduleCalendarMachineDetail MD ON MD.intCalendarDetailId = CD.intCalendarDetailId
-	JOIN dbo.tblMFMachine M ON M.intMachineId = MD.intMachineId
-	JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = C.intManufacturingCellId
-	WHERE CD.dtmCalendarDate BETWEEN @dtmFromDate1
-			AND @dtmToDate
-		AND M.intMachineId IN (
-			SELECT Item
-			FROM dbo.fnSplitString(@strMachineId, ',')
-			)
 END

@@ -2,7 +2,7 @@
 (
 	[intTicketId] INT NOT NULL IDENTITY, 
     [strTicketStatus] NVARCHAR COLLATE Latin1_General_CI_AS NOT NULL, 
-    [intTicketNumber] INT NOT NULL, 
+    [intTicketNumber] BIGINT NOT NULL, 
     [intScaleSetupId] INT NOT NULL, 
 	[intTicketPoolId] INT NOT NULL,
     [intTicketLocationId] INT NOT NULL, 

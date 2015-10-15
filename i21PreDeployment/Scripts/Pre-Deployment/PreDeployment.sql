@@ -63,6 +63,7 @@
 :r .\8_AP\UpdateShipFrom.sql
 :r .\8_AP\FixPaymentEntityId.sql
 :r .\8_AP\UpdatePaymentMethod.sql
+:r .\8_AP\Update1099BillDetailData.sql
 --:r .\8_AP\UpdateBillToReceiptAssociation.sql
 
 --:r .\8_AP\UpdateMissingPaymentInfo.sql
@@ -103,6 +104,7 @@
 :r .\12_EM\10_CheckAndFixSpecialPricingRackLocation.sql
 :r .\12_EM\11_AvoidCustomerTransportSupplierIdConflict.sql
 :r .\12_EM\12_EntityEmployeeSchemaUpdate.sql
+:r .\12_EM\12_UpdateCustomerFreightNullLocation.sql
 --RK
 :r .\13_RK\01_DropTableScript.sql
 

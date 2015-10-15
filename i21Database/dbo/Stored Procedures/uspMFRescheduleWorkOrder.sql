@@ -30,6 +30,7 @@ BEGIN TRY
 		,@intNoOfSelectedMachine INT
 		,@intScheduleId INT
 		,@intConcurrencyId INT
+		,@dtmCurrentDateTime DATETIME
 		,@dtmCurrentDate DATETIME
 		,@intUserId INT
 		,@intLocationId INT
@@ -57,7 +58,8 @@ BEGIN TRY
 
 	SELECT @intAllottedNoOfMachine = 0
 
-	SELECT @dtmCurrentDate = GETDATE()
+	SELECT @dtmCurrentDateTime = GETDATE()
+	SELECT @dtmCurrentDate = CONVERT(DATETIME, CONVERT(CHAR, @dtmCurrentDateTime, 101))
 
 	SELECT @ysnConsiderSumOfChangeoverTime = ysnConsiderSumOfChangeoverTime
 	FROM dbo.tblMFCompanyPreference
@@ -200,7 +202,7 @@ BEGIN TRY
 		,x.intStatusId
 		,x.intExecutionOrder
 		,x.strComments
-		,x.strNote
+		,CASE WHEN @dtmCurrentDate>x.dtmExpectedDate THEN 'Past Expected Date' END strNote
 		,x.strAdditionalComments
 		,x.intNoOfSelectedMachine
 		,x.dtmEarliestStartDate
@@ -345,7 +347,7 @@ BEGIN TRY
 	JOIN dbo.tblMFScheduleCalendarDetail CD ON C.intCalendarId = CD.intCalendarId
 	WHERE C.intManufacturingCellId = @intManufacturingCellId
 		AND C.intCalendarId = @intCalendarId
-		AND CD.dtmShiftEndTime > @dtmCurrentDate
+		AND CD.dtmShiftEndTime > @dtmCurrentDateTime
 
 	SELECT @intCalendarDetailId = MIN(intCalendarDetailId)
 	FROM @tblMFScheduleWorkOrderCalendarDetail
@@ -428,11 +430,11 @@ BEGIN TRY
 				SELECT @intNoOfSelectedMachine = @intNoOfMachine - @intAllottedNoOfMachine
 			END
 
-			IF @dtmCurrentDate > @dtmShiftStartTime
+			IF @dtmCurrentDateTime > @dtmShiftStartTime
 			BEGIN
-				Select @intDuration=@intDuration-(DATEDIFF(MINUTE, @dtmShiftStartTime, @dtmCurrentDate)*@intNoOfSelectedMachine)
+				Select @intDuration=@intDuration-(DATEDIFF(MINUTE, @dtmShiftStartTime, @dtmCurrentDateTime)*@intNoOfSelectedMachine)
 
-				SELECT @dtmPlannedStartDate = @dtmCurrentDate
+				SELECT @dtmPlannedStartDate = @dtmCurrentDateTime
 
 				SELECT @intRemainingDuration = DATEDIFF(MINUTE, @dtmPlannedStartDate, @dtmShiftEndTime)
 			END
@@ -444,7 +446,7 @@ BEGIN TRY
 			IF @dtmEarliestStartDate IS NOT NULL
 				AND @dtmEarliestStartDate >= @dtmPlannedStartDate
 			BEGIN
-				SELECT @intDuration=@intDuration-(DATEDIFF(MINUTE, @dtmShiftStartTime, @dtmCurrentDate)*@intNoOfSelectedMachine)
+				SELECT @intDuration=@intDuration-(DATEDIFF(MINUTE, @dtmShiftStartTime, @dtmCurrentDateTime)*@intNoOfSelectedMachine)
 
 				SELECT @intGapDuetoEarliestStartDate = DateDiff(minute, @dtmPlannedStartDate, @dtmEarliestStartDate)
 
@@ -1019,7 +1021,7 @@ BEGIN TRY
 	BEGIN
 		SELECT 0 AS intScheduleId
 			,'' AS strScheduleNo
-			,@dtmCurrentDate AS dtmScheduleDate
+			,@dtmCurrentDateTime AS dtmScheduleDate
 			,@intCalendarId AS intCalendarId
 			,'' AS strName
 			,@intManufacturingCellId AS intManufacturingCellId
@@ -1027,9 +1029,9 @@ BEGIN TRY
 			,@ysnStandard AS ysnStandard
 			,@intLocationId AS intLocationId
 			,0 AS intConcurrencyId
-			,@dtmCurrentDate AS dtmCreated
+			,@dtmCurrentDateTime AS dtmCreated
 			,0 AS intCreatedUserId
-			,@dtmCurrentDate AS dtmLastModified
+			,@dtmCurrentDateTime AS dtmLastModified
 			,0 AS intLastModifiedUserId
 			,@dtmFromDate AS dtmFromDate
 			,@dtmToDate AS dtmToDate
@@ -1083,9 +1085,9 @@ BEGIN TRY
 		,P.intPackTypeId
 		,P.strPackName
 		,Isnull(SL.intConcurrencyId, 0) AS intConcurrencyId
-		,@dtmCurrentDate dtmCreated
+		,@dtmCurrentDateTime dtmCreated
 		,@intUserId intCreatedUserId
-		,@dtmCurrentDate dtmLastModified
+		,@dtmCurrentDateTime dtmLastModified
 		,@intUserId intLastModifiedUserId
 		,WS.intSequenceNo
 		,W.ysnIngredientAvailable

@@ -32,6 +32,8 @@ BEGIN
 			,intTransactionId
 			,strTransactionId
 			,intTransactionTypeId
+			,intSubLocationId
+			,intStorageLocationId
 	)
 	SELECT	intItemId = ShipmentItems.intItemId
 			,intItemLocationId = ItemLocation.intItemLocationId
@@ -41,6 +43,8 @@ BEGIN
 			,intTransactionId = Shipment.intInventoryShipmentId
 			,strTransactionId = Shipment.strShipmentNumber
 			,intTransactionTypeId = @intInventoryTransactionType
+			,intSubLocationId = ISNULL(ShipmentItems.intSubLocationId, StorageLocation.intSubLocationId) 
+			,intStorageLocationId = ShipmentItems.intStorageLocationId
 	FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItems
 				ON Shipment.intInventoryShipmentId = ShipmentItems.intInventoryShipmentId
 			INNER JOIN dbo.tblICItemLocation ItemLocation
@@ -52,6 +56,9 @@ BEGIN
 				ON ShipmentItems.intInventoryShipmentItemId = ShipmentItemLots.intInventoryShipmentItemId
 			LEFT JOIN dbo.tblICLot Lot
 				ON Lot.intLotId = ShipmentItemLots.intLotId
+			LEFT JOIN dbo.tblICStorageLocation StorageLocation 
+				ON StorageLocation.intStorageLocationId = ShipmentItems.intStorageLocationId
+
 	WHERE	Shipment.intInventoryShipmentId = @intTransactionId
 END
 
@@ -71,5 +78,5 @@ BEGIN
 			,@intTransactionId
 			,@intInventoryTransactionType
 	END 
-END 
+END
 

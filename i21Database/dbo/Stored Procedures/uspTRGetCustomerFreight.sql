@@ -83,6 +83,10 @@ set @dblInvoiceSurchargeRate =0;
 	     RAISERROR('Gallons less than Minimum Freight Units' , 16, 1);
 	 END
 	 
+	  IF isNull(@strFreightType,0) = '0'
+	  BEGIN
+	     GOTO _Exit
+      END
 	 IF isNull(@strFreightType,0) = 'Rate'
 	 BEGIN
 	     set @dblInvoiceFreightRate = isNull(@dblRate,0)
@@ -93,23 +97,23 @@ set @dblInvoiceSurchargeRate =0;
 	 END
      IF isNull(@strFreightType,0) = 'Miles'
 	 BEGIN
-	     IF (isNull(@intEntityShipViaId,0) != @intShipViaId )
-         BEGIN
-	        RAISERROR('ShipVia is not found in Terminal To Customer Freight' , 16, 1);
-	     END
+	     --IF (isNull(@intEntityShipViaId,0) != @intShipViaId )
+      --   BEGIN
+	     --   RAISERROR('ShipVia is not found in Terminal To Customer Freight' , 16, 1);
+	     --END
 	 
 	     select top 1 @dblCostRatePerUnit =TM.dblCostRatePerUnit,@dblInvoiceRatePerUnit = TM.dblInvoiceRatePerUnit from tblEntityTariff TA
 	                 join tblEntityTariffCategory TC on TA.intEntityTariffId = TC.intEntityTariffId					   
 	  			      left join tblEntityTariffMileage TM on TM.intEntityTariffId = TC.intEntityTariffId
 	  			      where (@intMiles  >= TM.intFromMiles 
 				        and @intMiles  <= TM.intToMiles)
-	  			            and TA.intEntityId = @intEntityShipViaId
+	  			            and TA.intEntityId = isNull(@intEntityShipViaId,@intShipViaId)
 	  					    and TC.intCategoryId = @intCategoryid
 	 
 	     select Top 1 @dblInvoiceSurchargeRate=FS.dblFuelSurcharge from tblEntityTariff TA
 	                 join tblEntityTariffCategory TC on TA.intEntityTariffId = TC.intEntityTariffId
 	  			      left join tblEntityTariffFuelSurcharge FS on FS.intEntityTariffId = TC.intEntityTariffId				   
-	  			      where TA.intEntityId = @intEntityShipViaId
+	  			      where TA.intEntityId = isNull(@intEntityShipViaId,@intShipViaId)
 	  				    	 and TC.intCategoryId = @intCategoryid
 	  				    	 and FS.dtmEffectiveDate <= @dtmInvoiceDate
 	  			      order by FS.dtmEffectiveDate DESC	  
@@ -117,7 +121,7 @@ set @dblInvoiceSurchargeRate =0;
 		  select Top 1 @dblReceiptSurchargeRate=FS.dblFuelSurcharge from tblEntityTariff TA
 	                 join tblEntityTariffCategory TC on TA.intEntityTariffId = TC.intEntityTariffId
 	  			      left join tblEntityTariffFuelSurcharge FS on FS.intEntityTariffId = TC.intEntityTariffId				   
-	  			      where TA.intEntityId = @intEntityShipViaId
+	  			      where TA.intEntityId = isNull(@intEntityShipViaId,@intShipViaId)
 	  				    	 and TC.intCategoryId = @intCategoryid
 	  				    	 and FS.dtmEffectiveDate <= @dtmReceiptDate
 	  			      order by FS.dtmEffectiveDate DESC	
@@ -126,20 +130,23 @@ set @dblInvoiceSurchargeRate =0;
 		 set @dblReceiptFreightRate = @dblCostRatePerUnit;
 	  -- return;
 	 END
-       
+     
+_Exit:	   
 if @ysnFreightOnly = 1
 BEGIN
     set @dblReceiptFreightRate = 0;
 	set @dblReceiptSurchargeRate = 0;
 END
 
-if (@dblInvoiceFreightRate is null)
+if (@dblInvoiceFreightRate is null or @dblInvoiceFreightRate = 0)
 BEGIN
     set @dblInvoiceFreightRate = 0;
+	set @dblInvoiceSurchargeRate = 0;
 END
-if (@dblReceiptFreightRate is null)
+if (@dblReceiptFreightRate is null or @dblReceiptFreightRate = 0)
 BEGIN
     set @dblReceiptFreightRate = 0;
+    set @dblReceiptSurchargeRate = 0;
 END
 if (@dblReceiptSurchargeRate is null)
 BEGIN

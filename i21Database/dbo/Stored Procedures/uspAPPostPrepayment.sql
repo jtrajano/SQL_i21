@@ -88,6 +88,13 @@ BEGIN
 		FROM tblAPPayment A 
 		WHERE intPaymentId IN (@prepaymentId)
 
+		--UPDATE POSTED PREPAYMENT
+		UPDATE A
+			SET A.ysnPosted = 0
+		FROM tblAPBill A
+		INNER JOIN tblAPPaymentDetail B ON A.intBillId = B.intBillId
+		WHERE B.intPaymentId IN (@prepaymentId)
+
 		--Insert Successfully unposted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT 
@@ -110,6 +117,13 @@ BEGIN
 		SET		ysnPosted = 1
 				--,intConcurrencyId += 1 
 		WHERE	intPaymentId IN (@prepaymentId)
+
+		--UPDATE POSTED PREPAYMENT
+		UPDATE A
+			SET A.ysnPosted = 1
+		FROM tblAPBill A
+		INNER JOIN tblAPPaymentDetail B ON A.intBillId = B.intBillId
+		WHERE B.intPaymentId IN (@prepaymentId)
 		
 		--Insert to bank transaction
 		INSERT INTO tblCMBankTransaction(

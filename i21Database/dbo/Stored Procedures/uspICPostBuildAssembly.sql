@@ -28,6 +28,7 @@ DECLARE @strItemNo AS NVARCHAR(50)
 
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType 
+		,@intReturnValue AS INT
 
 -- Ensure ysnPost is not NULL  
 SET @ysnPost = ISNULL(@ysnPost, 0)  
@@ -170,11 +171,13 @@ BEGIN
 
 	-- Call the post routine 
 	BEGIN 
-		EXEC	dbo.uspICPostCosting  
+		EXEC	@intReturnValue = dbo.uspICPostCosting  
 				@ItemsForPost  
 				,@strBatchId  
 				,NULL
 				,@intUserId
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END
 
 	-- Get the assembly item to post  
@@ -221,11 +224,13 @@ BEGIN
 
 	-- Call the post routine 
 	BEGIN 
-		EXEC	dbo.uspICPostCosting  
+		EXEC	@intReturnValue = dbo.uspICPostCosting  
 				@AssemblyItemForPost  
 				,@strBatchId  
 				,NULL
 				,@intUserId
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END
 
 	-----------------------------------------
@@ -258,11 +263,13 @@ BEGIN
 			,[strModuleName]
 			,[intConcurrencyId]
 	)
-	EXEC dbo.uspICCreateGLEntries 
-		@strBatchId
-		,NULL
-		,@intUserId
-		,NULL
+	EXEC @intReturnValue = dbo.uspICCreateGLEntries 
+			@strBatchId
+			,NULL
+			,@intUserId
+			,NULL
+
+	IF @intReturnValue < 0 GOTO With_Rollback_Exit
 END   
 
 --------------------------------------------------------------------------------------------  
@@ -300,12 +307,14 @@ BEGIN
 				,[strModuleName]
 				,[intConcurrencyId]
 		)
-		EXEC	dbo.uspICUnpostCosting
+		EXEC	@intReturnValue = dbo.uspICUnpostCosting
 				@intTransactionId
 				,@strTransactionId
 				,@strBatchId
 				,@intUserId	
-				,@ysnRecap 				
+				,@ysnRecap 
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END 
 END   
 
@@ -342,5 +351,14 @@ BEGIN
 	COMMIT TRAN @TransactionName
 END 
     
+GOTO Post_Exit
+
 -- This is our immediate exit in case of exceptions controlled by this stored procedure
+With_Rollback_Exit:
+IF @@TRANCOUNT > 1 
+BEGIN 
+	ROLLBACK TRAN @TransactionName
+	COMMIT TRAN @TransactionName
+END
+
 Post_Exit:

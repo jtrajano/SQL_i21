@@ -329,7 +329,7 @@ BEGIN TRY
 		,intItemUOMId
 		,1
 		,@dtmPlannedDate
-		,@intShiftId
+		,@intPlannedShiftId
 		,@intStorageLocationId
 		,@intMachineId
 		,0

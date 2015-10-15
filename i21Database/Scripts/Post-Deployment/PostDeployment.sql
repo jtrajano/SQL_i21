@@ -111,6 +111,10 @@ print 'BEGIN POST DEPLOYMENT'
 :r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteView.sql"
 --:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateBudgetCalculationSiteSP.sql"
 :r "..\..\..\Integration\dbo\Views\vyuTMLeaseSearch.sql"
+:r "..\..\..\Integration\dbo\Functions\fnTMGetSpecialPricing.sql"
+:r "..\..\..\Integration\dbo\Functions\fnTMGetSpecialPricingPrice.sql"
+:r "..\..\..\Integration\dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql"
+:r ".\TM\3_PopulateLocatioinIdOnSiteForOriginIntegrated.sql"
 
 
 -- Canned Panels

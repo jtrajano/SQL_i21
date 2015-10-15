@@ -41,7 +41,9 @@ SET @ysnPost = ISNULL(@ysnPost, 0)
  
 -- Create the type of lot numbers
 DECLARE @LotType_Manual AS INT = 1
-	,@LotType_Serial AS INT = 2
+		,@LotType_Serial AS INT = 2
+
+DECLARE @intReturnValue AS INT 
 
 -- Read the transaction info   
 BEGIN   
@@ -175,18 +177,6 @@ BEGIN
 
 END 
 
--- Check the UOM
---IF @ysnPost = 1 
---BEGIN 
---	DECLARE @intUOMError AS INT
-
---	EXEC @intUOMError = dbo.uspICValidateInventoryRecieptwithPO
---		@strTransactionId
-
---	IF @intUOMError <> 0 
---		GOTO Post_Exit    
---END 
-
 -- Get the next batch number
 EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT  
 IF @@ERROR <> 0 GOTO Post_Exit;
@@ -253,11 +243,13 @@ BEGIN
 			,[strModuleName]
 			,[intConcurrencyId]
 		)	
-		EXEC dbo.uspICPostInventoryReceiptOtherCharges 
+		EXEC @intReturnValue = dbo.uspICPostInventoryReceiptOtherCharges 
 			@intTransactionId
 			,@strBatchId
 			,@intUserId
 			,@INVENTORY_RECEIPT_TYPE
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 			
 	END 
 
@@ -291,7 +283,7 @@ BEGIN
 							--		Use Weight UOM if there is a weight. 
 							--		Otherwise, use the Weight UOM. 
 							-- If not lot, user the Item UOM. 
-							CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0  THEN 
+							CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) <> 0 THEN 
 										CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN DetailItem.intWeightUOMId 
 												ELSE DetailItemLot.intItemUnitMeasureId
 										END 
@@ -307,7 +299,7 @@ BEGIN
 							--		If there is a weight UOM, receive it by Weights. 
 							-- Otherwise
 							--		Receive the qty from the detail item. 
-							CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0  THEN 
+							CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) <> 0 THEN 
 										CASE	-- The item has no weight UOM. Receive by the Lot Qty. 
 												WHEN ISNULL(DetailItem.intWeightUOMId, 0) = 0  THEN 												
 													ISNULL(DetailItemLot.dblQuantity, 0)
@@ -326,36 +318,9 @@ BEGIN
 										DetailItem.dblOpenReceive
 							END 
 
-							-- Check if it is processing a lot item or not. 
-							-- If it is a lot, 
-							--		If there is no weight UOM, convert the Item-Lot-Qty to the UOM of the Detail-Item.
-							--		If there is a weight UOM, receive the qty in weights. 
-							-- Otherwise
-							--		Receive the qty from the detail item. 
-							--CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0  THEN 
-							--			CASE	-- The item has no weight UOM. Receive it by converting the Qty to the Detail-Item UOM. 
-							--					WHEN ISNULL(DetailItem.intWeightUOMId, 0) = 0  THEN 												
-							--						dbo.fnCalculateQtyBetweenUOM(ISNULL(DetailItemLot.intItemUnitMeasureId, DetailItem.intUnitMeasureId), DetailItem.intUnitMeasureId, DetailItemLot.dblQuantity)
-											
-							--					-- The item has a weight UOM. 
-							--					ELSE 
-							--						-- If there is weight value (non-zero), use it. 
-							--						-- Otherwise, convert the Qty from Detail-Item-Lot-UOM to the Detail-Item-Weight-UOM. 
-							--						CASE	WHEN  ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0) = 0 THEN 
-							--									dbo.fnCalculateQtyBetweenUOM(DetailItemLot.intItemUnitMeasureId, DetailItem.intWeightUOMId, DetailItemLot.dblQuantity)
-							--								ELSE 
-							--									ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
-							--						END
-							--			END 									
-							--		ELSE	
-							--			DetailItem.dblOpenReceive
-							--END 				
-				
-
-
 				,dblUOMQty = 
 
-							CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0  THEN 
+							CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) <> 0 THEN 
 										CASE	-- When the item has no weight UOM. Use the Unit Qty from Lot UOM. 
 												WHEN ISNULL(DetailItem.intWeightUOMId, 0) = 0  THEN 												
 													LotItemUOM.dblUnitQty
@@ -367,28 +332,11 @@ BEGIN
 									ELSE	
 										ItemUOM.dblUnitQty
 							END 
-
-							-- Get the unit qy of the Weight UOM (if used) or from the DetailItem.intUnitMeasureId
-							--CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN 
-							--			(
-							--				SELECT	TOP 1 
-							--						dblUnitQty
-							--				FROM	dbo.tblICItemUOM
-							--				WHERE	intItemUOMId = DetailItem.intWeightUOMId									
-							--			)
-							--		ELSE 
-							--			(
-							--				SELECT	TOP 1 
-							--						dblUnitQty
-							--				FROM	dbo.tblICItemUOM
-							--				WHERE	intItemUOMId = DetailItem.intUnitMeasureId
-							--			)
-							--END 
-
+							
 				,dblCost =	
 
 							-- If Item has a lot, then determine the cost either by weight or by Lot UOM. 
-							CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0  THEN 
+							CASE	WHEN ISNULL(DetailItemLot.intLotId, 0) <> 0 AND dbo.fnGetItemLotType(DetailItem.intItemId) <> 0 THEN 
 										CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN 
 													dbo.fnCalculateCostPerWeight (
 														dbo.fnCalculateCostPerLot ( 
@@ -409,23 +357,8 @@ BEGIN
 										END 
 									ELSE 
 										DetailItem.dblUnitCost + dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
-							END 
-				
-							---- If Weight is used, use the Cost per Weight. Otherwise, use the cost per qty. 
-							--CASE	WHEN ISNULL(DetailItem.intWeightUOMId, 0) <> 0 THEN 
-							--			dbo.fnCalculateCostPerWeight (
-							--				dbo.fnCalculateCostPerLot ( 
-							--					DetailItem.intUnitMeasureId
-							--					,DetailItem.intWeightUOMId
-							--					,DetailItemLot.intItemUnitMeasureId
-							--					,(DetailItem.dblUnitCost + dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId))
-							--				) * DetailItemLot.dblQuantity
-							--				,ISNULL(DetailItemLot.dblGrossWeight, 0) - ISNULL(DetailItemLot.dblTareWeight, 0)
-							--			) 
+							END 		
 
-							--		ELSE 
-							--			DetailItem.dblUnitCost + dbo.fnGetOtherChargesFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
-							--END 
 				,dblSalesPrice = 0  
 				,intCurrencyId = Header.intCurrencyId  
 				,dblExchangeRate = 1  
@@ -444,15 +377,12 @@ BEGIN
 					AND ItemLocation.intItemId = DetailItem.intItemId
 				LEFT JOIN dbo.tblICInventoryReceiptItemLot DetailItemLot
 					ON DetailItem.intInventoryReceiptItemId = DetailItemLot.intInventoryReceiptItemId
-
 				LEFT JOIN dbo.tblICItemUOM ItemUOM 
 					ON ItemUOM.intItemUOMId = DetailItem.intUnitMeasureId
 				LEFT JOIN dbo.tblICItemUOM LotItemUOM
 					ON LotItemUOM.intItemUOMId = DetailItemLot.intItemUnitMeasureId
 				LEFT JOIN dbo.tblICItemUOM WeightUOM
 					ON WeightUOM.intItemUOMId = DetailItem.intWeightUOMId
-
-				
 		WHERE	Header.intInventoryReceiptId = @intTransactionId   
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
   
@@ -487,11 +417,13 @@ BEGIN
 					,[strModuleName]
 					,[intConcurrencyId]
 			)
-			EXEC	dbo.uspICPostCosting  
+			EXEC	@intReturnValue = dbo.uspICPostCosting  
 					@ItemsForPost  
 					,@strBatchId  
 					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 					,@intUserId
+
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
 	END 
 
@@ -606,10 +538,12 @@ BEGIN
 		-- Call the post routine 
 		IF EXISTS (SELECT TOP 1 1 FROM @StorageItemsForPost) 
 		BEGIN 
-			EXEC	dbo.uspICPostStorage
+			EXEC	@intReturnValue = dbo.uspICPostStorage
 					@StorageItemsForPost  
 					,@strBatchId  
 					,@intUserId
+
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
 	END
 
@@ -658,6 +592,7 @@ IF @ysnPost = 0
 BEGIN   
 	-- Call the unpost routine 
 	BEGIN 
+
 		-- Call the post routine 
 		INSERT INTO @GLEntries (
 				[dtmDate] 
@@ -686,12 +621,14 @@ BEGIN
 				,[strModuleName]
 				,[intConcurrencyId]
 		)
-		EXEC	dbo.uspICUnpostCosting
+		EXEC	@intReturnValue = dbo.uspICUnpostCosting
 				@intTransactionId
 				,@strTransactionId
 				,@strBatchId
 				,@intUserId
 				,@ysnRecap
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 				
 		-- Unpost the Other Charges
 		BEGIN 
@@ -722,11 +659,13 @@ BEGIN
 				,[strModuleName]
 				,[intConcurrencyId]
 			)	
-			EXEC dbo.uspICUnpostInventoryReceiptOtherCharges 
+			EXEC @intReturnValue = dbo.uspICUnpostInventoryReceiptOtherCharges 
 				@intTransactionId
 				,@strBatchId
 				,@intUserId
-				,@INVENTORY_RECEIPT_TYPE			
+				,@INVENTORY_RECEIPT_TYPE	
+				
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
 
 		-- Unpost the Receipt Taxes
@@ -758,11 +697,13 @@ BEGIN
 				,[strModuleName]
 				,[intConcurrencyId]
 			)	
-			EXEC dbo.uspICUnpostInventoryReceiptTaxes 
+			EXEC @intReturnValue = dbo.uspICUnpostInventoryReceiptTaxes 
 				@intTransactionId
 				,@strBatchId
 				,@intUserId
-				,@INVENTORY_RECEIPT_TYPE			
+				,@INVENTORY_RECEIPT_TYPE	
+						
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
 	END 
 END   
@@ -808,7 +749,7 @@ BEGIN
 	BEGIN 
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 	END 
-	
+		
 	UPDATE	dbo.tblICInventoryReceipt  
 	SET		ysnPosted = @ysnPost
 			,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
@@ -823,5 +764,33 @@ BEGIN
 	COMMIT TRAN @TransactionName
 END 
     
+-- Create an Audit Log
+IF @ysnRecap = 0 
+BEGIN 
+	DECLARE @strDescription AS NVARCHAR(100) 
+			,@actionType AS NVARCHAR(50)
+
+	SELECT @actionType = CASE WHEN @ysnPost = 1 THEN 'Posted'  ELSE 'Unposted' END 
+			
+	EXEC	dbo.uspSMAuditLog 
+			@keyValue = @intTransactionId							-- Primary Key Value of the Inventory Receipt. 
+			,@screenName = 'Inventory.view.InventoryReceipt'        -- Screen Namespace
+			,@entityId = @intEntityId                               -- Entity Id.
+			,@actionType = @actionType                              -- Action Type
+			,@changeDescription = @strDescription					-- Description
+			,@fromValue = ''										-- Previous Value
+			,@toValue = ''											-- New Value
+END
+
+GOTO Post_Exit
+
 -- This is our immediate exit in case of exceptions controlled by this stored procedure
+With_Rollback_Exit:
+IF @@TRANCOUNT > 1 
+BEGIN 
+	ROLLBACK TRAN @TransactionName
+	COMMIT TRAN @TransactionName
+END
+
 Post_Exit:
+

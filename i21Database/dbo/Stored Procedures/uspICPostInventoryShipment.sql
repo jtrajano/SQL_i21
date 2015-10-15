@@ -38,6 +38,7 @@ DECLARE @LotType_Manual AS INT = 1
 
 -- Create the gl entries variable 
 DECLARE @GLEntries AS RecapTableType 
+		,@intReturnValue AS INT
 
 -- Ensure ysnPost is not NULL  
 SET @ysnPost = ISNULL(@ysnPost, 0)  
@@ -247,10 +248,21 @@ BEGIN
 
 				,dblCost					=  ISNULL(
 												CASE	WHEN Lot.dblLastCost IS NULL THEN 
-														(SELECT TOP 1 dblLastCost FROM tblICItemPricing WHERE intItemId = DetailItem.intItemId AND intItemLocationId = dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId))
-													ELSE 
-														Lot.dblLastCost 
+															(
+																SELECT	TOP 1 dblLastCost 
+																FROM	tblICItemPricing 
+																WHERE	intItemId = DetailItem.intItemId 
+																		AND intItemLocationId = dbo.fnICGetItemLocation(DetailItem.intItemId, Header.intShipFromLocationId)
+															)
+														ELSE 
+															Lot.dblLastCost 
 												END, 0)
+												* CASE	WHEN  Lot.intLotId IS NULL THEN 
+														ItemUOM.dblUnitQty
+													ELSE
+														LotItemUOM.dblUnitQty
+												END
+
 				,dblSalesPrice              = 0.00
 				,intCurrencyId              = NULL 
 				,dblExchangeRate            = 1
@@ -270,10 +282,7 @@ BEGIN
 				LEFT JOIN tblICLot Lot 
 					ON Lot.intLotId = DetailLot.intLotId            
 				LEFT JOIN tblICItemUOM LotItemUOM
-					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId            
-				INNER JOIN vyuICGetShipmentItemSource ItemSource 
-					ON ItemSource.intInventoryShipmentItemId = DetailItem.intInventoryShipmentItemId
-				
+					ON LotItemUOM.intItemUOMId = Lot.intItemUOMId            			
 		WHERE   Header.intInventoryShipmentId = @intTransactionId
 				AND ISNULL(DetailItem.intOwnershipType, @OWNERSHIP_TYPE_OWN) = @OWNERSHIP_TYPE_OWN
 
@@ -310,11 +319,13 @@ BEGIN
 					,[strModuleName]
 					,[intConcurrencyId]
 			)
-			EXEC	dbo.uspICPostCosting  
+			EXEC	@intReturnValue = dbo.uspICPostCosting  
 					@ItemsForPost  
 					,@strBatchId  
 					,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 					,@intUserId
+
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
 	END 
 
@@ -395,10 +406,12 @@ BEGIN
 		-- Call the post routine 
 		IF EXISTS (SELECT TOP 1 1 FROM @StorageItemsForPost) 
 		BEGIN 
-			EXEC	dbo.uspICPostStorage
+			EXEC	@intReturnValue = dbo.uspICPostStorage
 					@StorageItemsForPost  
 					,@strBatchId  
 					,@intUserId
+
+			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
 	END 
 END   
@@ -438,12 +451,14 @@ BEGIN
 				,[strModuleName]
 				,[intConcurrencyId]
 		)
-		EXEC	dbo.uspICUnpostCosting
+		EXEC	@intReturnValue = dbo.uspICUnpostCosting
 				@intTransactionId
 				,@strTransactionId
 				,@strBatchId
 				,@intUserId	
-				,@ysnRecap					
+				,@ysnRecap
+
+		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END 
 END   
 
@@ -494,6 +509,33 @@ BEGIN
 
 	COMMIT TRAN @TransactionName
 END 
+
+-- Create an Audit Log
+IF @ysnRecap = 0 
+BEGIN 
+	DECLARE @strDescription AS NVARCHAR(100) 
+			,@actionType AS NVARCHAR(50)
+
+	SELECT @actionType = CASE WHEN @ysnPost = 1 THEN 'Posted'  ELSE 'Unposted' END 
+			
+	EXEC	dbo.uspSMAuditLog 
+			@keyValue = @intTransactionId							-- Primary Key Value of the Inventory Shipment. 
+			,@screenName = 'Inventory.view.InventoryShipment'       -- Screen Namespace
+			,@entityId = @intEntityId                               -- Entity Id.
+			,@actionType = @actionType                              -- Action Type
+			,@changeDescription = @strDescription					-- Description
+			,@fromValue = ''										-- Previous Value
+			,@toValue = ''											-- New Value
+END
+
+GOTO Post_Exit
     
 -- This is our immediate exit in case of exceptions controlled by this stored procedure
+With_Rollback_Exit:
+IF @@TRANCOUNT > 1 
+BEGIN 
+	ROLLBACK TRAN @TransactionName
+	COMMIT TRAN @TransactionName
+END
+
 Post_Exit:

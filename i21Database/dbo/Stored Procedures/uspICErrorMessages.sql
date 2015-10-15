@@ -30,7 +30,7 @@ EXEC sp_addmessage 80002,11,@strmessage,'us_english','False'
 
 -- was 50029
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80003) EXEC sp_dropmessage 80003, 'us_english'	
-SET @strmessage = 'Negative stock quantity is not allowed for %s in %s.'
+SET @strmessage = 'Negative stock quantity is not allowed for %s'
 EXEC sp_addmessage 80003,11,@strmessage,'us_english','False'
 
 -- was 50031
@@ -258,7 +258,7 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80048) EXEC sp_dropmessa
 SET @strmessage = 'Item UOM is invalid or missing.'
 EXEC sp_addmessage 80048,11,@strmessage,'us_english','False'
 
--- was 51160
+-- was 51160 or 51134
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80049) EXEC sp_dropmessage 80049, 'us_english'	
 SET @strmessage = 'Item %s is missing a Stock Unit. Please check the Unit of Measure setup.'
 EXEC sp_addmessage 80049,11,@strmessage,'us_english','False'
@@ -322,3 +322,19 @@ EXEC sp_addmessage 80060,11,@strmessage,'us_english','False'
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80061) EXEC sp_dropmessage 80061, 'us_english'	
 SET @strmessage = 'Unable to generate the Inventory Transfer. An error stopped the creation of the inventory transfer.'
 EXEC sp_addmessage 80061,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80062) EXEC sp_dropmessage 80062, 'us_english'	
+SET @strmessage = 'Cost adjustment cannot continue. Unable to find the cost bucket for %s.'
+EXEC sp_addmessage 80062,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80063) EXEC sp_dropmessage 80063, 'us_english'	
+SET @strmessage = 'Unable to unpost because %s has a cost adjustment from %s.'
+EXEC sp_addmessage 80063,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80064) EXEC sp_dropmessage 80064, 'us_english'	
+SET @strmessage = 'The %s is both a payable and deductible to the bill of the same vendor. Please correct the Accrue or Price checkbox.'
+EXEC sp_addmessage 80064,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 80065) EXEC sp_dropmessage 80065, 'us_english'	
+SET @strmessage = 'The %s is shouldered by the receipt vendor and can''t be added to the item cost. Please correct the Price or Inventory Cost checkbox.'
+EXEC sp_addmessage 80065,11,@strmessage,'us_english','False'

@@ -56,14 +56,36 @@
 	CONSTRAINT [FK_tblARInvoiceDetail_tblSMTaxGroup_intTaxGroupId] FOREIGN KEY ([intTaxGroupId]) REFERENCES [dbo].[tblSMTaxGroup] ([intTaxGroupId])
 );
 
-
-
-
-
-
-
-
 GO
 CREATE NONCLUSTERED INDEX [PIndex]
     ON [dbo].[tblARInvoiceDetail]([intInvoiceId] ASC, [intItemId] ASC, [strItemDescription] ASC, [dblQtyOrdered] ASC, [dblQtyShipped] ASC, [dblPrice] ASC, [dblTotal] ASC);
 
+GO
+CREATE TRIGGER [dbo].[trgUpdateOrderStatus]
+    ON [dbo].[tblARInvoiceDetail]
+    FOR DELETE
+    AS
+    BEGIN
+        DECLARE @deleted TABLE(intInvoiceDetailId INT, intSalesOrderDetailId INT)
+
+		INSERT INTO @deleted
+		SELECT intInvoiceDetailId, intSalesOrderDetailId FROM DELETED ORDER BY intInvoiceDetailId
+
+		WHILE EXISTS(SELECT NULL FROM @deleted)
+			BEGIN
+				DECLARE @invoiceDetailId INT,
+						@orderDetailId INT,
+						@orderId INT
+
+				SELECT TOP 1 @invoiceDetailId = intInvoiceDetailId
+				           , @orderDetailId = intSalesOrderDetailId FROM @deleted
+
+				IF ISNULL(@orderDetailId, 0) > 0
+					BEGIN
+						SELECT TOP 1 @orderId = intSalesOrderId FROM tblSOSalesOrderDetail WHERE intSalesOrderDetailId = @orderDetailId
+						EXEC uspSOUpdateOrderShipmentStatus @orderId
+					END				
+
+				DELETE FROM @deleted WHERE intInvoiceDetailId = @invoiceDetailId
+			END
+    END

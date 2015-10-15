@@ -1022,6 +1022,12 @@ ELSE
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Vouchers from Origin' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
 UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.ImportAPInvoice', intSort = 10 WHERE strMenuName = 'Import Vouchers from Origin' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = '1099' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'1099', N'Accounts Payable', @AccountsPayableParentMenuId, N'1099', N'Activity', N'Screen', N'AccountsPayable.view.Process1099', N'small-menu-activity', 1, 0, 0, 1, 11, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = 'AccountsPayable.view.Process1099', intSort = 11 WHERE strMenuName = '1099' AND strModuleName = 'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
+
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Vendors' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId)
 UPDATE tblSMMasterMenu SET strCommand = N'EntityManagement.view.Entity:searchEntityVendor' WHERE strMenuName = N'Vendors' AND strModuleName = N'Accounts Payable' AND intParentMenuID = @AccountsPayableParentMenuId
 
@@ -2109,6 +2115,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage T
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Grain.view.TransferStorage' WHERE strMenuName = 'Storage Transfer' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage Settle' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Storage Settle', N'Grain', @GrainParentMenuId, N'Storage Settle', N'Activity', N'Screen', N'Grain.view.SettleStorage', N'small-menu-activity', 0, 0, 0, 1, 7, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Grain.view.SettleStorage' WHERE strMenuName = 'Storage Settle' AND strModuleName = 'Grain' AND intParentMenuID = @GrainParentMenuId
+
 /* MANUFACTURING */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Manufacturing' AND strModuleName = 'Manufacturing' AND intParentMenuID = 0)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -2162,6 +2174,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Kit Manag
 	VALUES (N'Kit Manager', N'Manufacturing', @ManufacturingParentMenuId, N'Kit Manager', N'Activity', N'Screen', N'Manufacturing.view.KitManager', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.KitManager' WHERE strMenuName = 'Kit Manager' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Sheet Approval' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Blend Sheet Approval', N'Manufacturing', @ManufacturingParentMenuId, N'Blend Sheet Approval', N'Activity', N'Screen', N'Manufacturing.view.BlendSheetApproval', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.BlendSheetApproval' WHERE strMenuName = 'Blend Sheet Approval' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Work Order Schedule' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -2247,17 +2265,29 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Holiday C
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.HolidayCalendar' WHERE strMenuName = 'Holiday Calendar' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Change Over Group' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Change Over Group', N'Manufacturing', @ManufacturingParentMenuId, N'Change Over Group', N'Maintenance', N'Screen', N'Manufacturing.view.ChangeOverGroup', N'small-menu-maintenance', 0, 0, 0, 1, 9, 1)
-ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.ChangeOverGroup' WHERE strMenuName = 'Change Over Group' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Change Over Group' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
+	DELETE tblSMMasterMenu WHERE strMenuName = 'Change Over Group' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Multiple Change Over Factors' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Changeover Group' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Multiple Change Over Factors', N'Manufacturing', @ManufacturingParentMenuId, N'Multiple Change Over Factors', N'Maintenance', N'Screen', N'Manufacturing.view.MultipleChangeOverFactors', N'small-menu-maintenance', 0, 0, 0, 1, 10, 1)
+	VALUES (N'Changeover Group', N'Manufacturing', @ManufacturingParentMenuId, N'Changeover Group', N'Maintenance', N'Screen', N'Manufacturing.view.ChangeOverGroup', N'small-menu-maintenance', 0, 0, 0, 1, 9, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.MultipleChangeOverFactors' WHERE strMenuName = 'Multiple Change Over Factors' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.ChangeOverGroup' WHERE strMenuName = 'Changeover Group' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
+
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Multiple Change Over Factors' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
+	DELETE tblSMMasterMenu WHERE strMenuName = 'Multiple Change Over Factors' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Multiple Changeover Factors' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Multiple Changeover Factors', N'Manufacturing', @ManufacturingParentMenuId, N'Multiple Changeover Factors', N'Maintenance', N'Screen', N'Manufacturing.view.MultipleChangeOverFactors', N'small-menu-maintenance', 0, 0, 0, 1, 10, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.MultipleChangeOverFactors' WHERE strMenuName = 'Multiple Changeover Factors' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Production Schedule Rules' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Production Schedule Rules', N'Manufacturing', @ManufacturingParentMenuId, N'Production Schedule Rules', N'Maintenance', N'Screen', N'Manufacturing.view.ProductionScheduleRules', N'small-menu-maintenance', 0, 0, 0, 1, 11, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Manufacturing.view.ProductionScheduleRules' WHERE strMenuName = 'Production Schedule Rules' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingParentMenuId
 
 
 /* STORE */

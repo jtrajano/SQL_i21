@@ -26,6 +26,8 @@ Declare @dblQuantity numeric(18,6)
 Declare @dtmCurrentDateTime DateTime=GETDATE()
 Declare @index int
 Declare @id int
+Declare @strWorkOrderNo nvarchar(50)
+Declare @intStatusId int
 
 Declare @tblWorkOrder table
 (
@@ -63,12 +65,19 @@ While(@intMinWorkOrder is not null) --Loop WorkOrders
 Begin
 	Begin Try
 
-	Select @intWorkOrderId=w.intWorkOrderId,@intSourceLocationId=w.intLocationId,@intBlendItemId=w.intItemId,@strBlendItemNo=i.strItemNo 
+	Select @intWorkOrderId=w.intWorkOrderId,@strWorkOrderNo=w.strWorkOrderNo,@intStatusId=w.intStatusId,@intSourceLocationId=w.intLocationId,
+	@intBlendItemId=w.intItemId,@strBlendItemNo=i.strItemNo 
 	From @tblWorkOrder tw Join tblMFWorkOrder w on tw.intWorkOrderId=w.intWorkOrderId 
 	Join tblICItem i on w.intItemId=i.intItemId
 	Where intRowNo=@intMinWorkOrder
 
 	--Validate Transfer
+	If @intStatusId <> 9 
+		BEGIN
+			SET @ErrMsg='Blend sheet '''+ @strWorkOrderNo +''' transfer cannot be performed, since it is already started.'
+			RAISERROR(@ErrMsg,16,1)
+		END
+
 	IF EXISTS(SELECT 1 FROM tblMFRecipe r 
 			JOIN tblMFRecipeItem ri ON r.intRecipeId=ri.intRecipeId
 			AND r.ysnActive=1
@@ -128,6 +137,9 @@ Begin
 
 	Update tblMFWorkOrderConsumedLot Set intLotId=@intNewLotId,dtmLastModified=@dtmCurrentDateTime,intLastModifiedUserId=@intUserId 
 	Where intWorkOrderConsumedLotId=@intWorkOrderConsumedLotId
+
+	Update tblMFWorkOrder Set intLastModifiedUserId=@intUserId,dtmLastModified=@dtmCurrentDateTime,
+	intStagingLocationId=@intDestinationStagingLocationId,dtmStagedDate=@dtmCurrentDateTime Where intWorkOrderId=@intWorkOrderId
 
 	--Update Reservation
 	Update tblICStockReservation Set intLotId=@intNewLotId 

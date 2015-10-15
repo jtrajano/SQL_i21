@@ -28,6 +28,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @strItemNo AS NVARCHAR(50)
+
 -- Ensure the qty is a positive number
 SET @dblQty = ABS(@dblQty)
 
@@ -52,8 +54,7 @@ WHERE	Lot_Storage.intItemId = @intItemId
 
 IF @intInventoryLotStorageId IS NULL 
 BEGIN 
-	DECLARE @strItemNo AS NVARCHAR(50)
-			,@strLocationName AS NVARCHAR(50)
+	DECLARE @strLocationName AS NVARCHAR(50)
 
 	SELECT @strItemNo = strItemNo
 	FROM dbo.tblICItem

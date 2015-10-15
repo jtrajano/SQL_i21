@@ -159,6 +159,7 @@
 :r "..\dbo\Stored Procedures\uspAPPostOriginPayment.sql"
 :r "..\Scripts\AP\FixPaymentCMRecords.sql"
 :r "..\Scripts\AP\FixBillData.sql"
+:r "..\Scripts\AP\UpdateImportedBills1099.sql"
 --:r "..\Scripts\AP\UpdateBillPONumber.sql"
 :r "..\dbo\Stored Procedures\uspAPImportVendorContact.sql"
 
@@ -183,7 +184,5 @@
 -- C-Store
 :r "..\dbo\Views\vyustpbkmst.sql"
 
-
-
-
-
+--Entity
+:r "..\dbo\Stored Procedures\uspEMRecreateCheckIfOriginVendor.sql"

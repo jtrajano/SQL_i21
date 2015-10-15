@@ -9,6 +9,7 @@ BEGIN TRY
 		,@intItemId INT
 		,@intLocationId INT
 		,@strItemNo NVARCHAR(MAX)
+		,@intScheduleId int
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXML
@@ -66,7 +67,7 @@ BEGIN TRY
 				)
 	END
 
-	UPDATE tblMFWorkOrder
+	UPDATE dbo.tblMFWorkOrder
 	SET intStatusId = 10
 		,dtmStartedDate = @dtmCurrentDate
 		,intConcurrencyId=intConcurrencyId+1
@@ -74,12 +75,23 @@ BEGIN TRY
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderId = @intWorkOrderId
 
-	UPDATE tblMFScheduleWorkOrder
+	UPDATE dbo.tblMFScheduleWorkOrder
 	SET intStatusId = 10
 		,intConcurrencyId=intConcurrencyId+1
 		,dtmLastModified = @dtmCurrentDate
 		,intLastModifiedUserId = @intUserId
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	SELECT @intScheduleId=W.intScheduleId 
+	FROM dbo.tblMFScheduleWorkOrder W 
+	JOIN dbo.tblMFSchedule S ON S.intScheduleId =W.intScheduleId  AND ysnStandard =1
+	WHERE intWorkOrderId = @intWorkOrderId
+
+	UPDATE tblMFSchedule 
+	SET intConcurrencyId=intConcurrencyId+1
+		,dtmLastModified = @dtmCurrentDate
+		,intLastModifiedUserId = @intUserId
+	WHERE intScheduleId = @intScheduleId
 
 	EXEC dbo.uspMFCopyRecipe @intItemId = @intItemId
 			,@intLocationId = @intLocationId

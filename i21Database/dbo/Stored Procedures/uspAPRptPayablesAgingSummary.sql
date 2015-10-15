@@ -101,7 +101,7 @@ SET @innerQuery = 'SELECT
 
 IF @dateFrom IS NOT NULL
 BEGIN
-	SET @innerQuery = @innerQuery + ' WHERE dtmDate BETWEEN ''' + CONVERT(VARCHAR(10),@dateFrom,110) + ''' AND '''  + CONVERT(VARCHAR(10),@dateTo,110) + ''''
+	SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
 END
 
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
@@ -201,7 +201,7 @@ SET @query = '
 			FROM (' 
 					+ @innerQuery +
 				') tmpAPPayables
-			WHERE dblAmountDue <> 0
+			--WHERE dblAmountDue <> 0
 			GROUP BY intBillId
 		) AS tmpAgingSummaryTotal
 		LEFT JOIN dbo.tblAPBill A

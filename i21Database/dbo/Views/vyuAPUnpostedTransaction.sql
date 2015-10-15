@@ -9,6 +9,7 @@ SELECT	DISTINCT
 			  WHEN APB.intTransactionType = 2	THEN 'Vendor Prepayment' 
 			  WHEN APB.intTransactionType = 3	THEN 'Debit Memo' 
 			  WHEN APB.intTransactionType = 6	THEN 'Bill Template' 
+			  WHEN APB.intTransactionType = 8	THEN 'Vendor Overpayment' 
 			  ELSE 'Not Bill Type'
 		END AS strTransactionType,
 		APB.intEntityId,

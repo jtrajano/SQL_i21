@@ -75,9 +75,13 @@ END
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	EXEC dbo.uspICValidateCostingOnUnpostStorage 
+	DECLARE @returnValue AS INT 
+
+	EXEC @returnValue = dbo.uspICValidateCostingOnUnpostStorage 
 		@ItemsToUnpost
 		,@ysnRecap 
+
+	IF @returnValue < 0 RETURN -1
 END 
 
 -----------------------------------------------------------------------------------------------------------------------------

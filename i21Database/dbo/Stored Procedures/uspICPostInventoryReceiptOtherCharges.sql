@@ -35,7 +35,7 @@ BEGIN
 	IF @intItemId IS NOT NULL 
 	BEGIN 
 		-- 'Item Location is invalid or missing for {Item}.'
-		RAISERROR(80002, 11, 1, @strItemNo)
+		RAISERROR(50028, 11, 1, @strItemNo)
 		GOTO _Exit
 	END 
 END 
@@ -64,6 +64,57 @@ BEGIN
 	END 
 END 
 	
+-- Validate 
+BEGIN 
+	-- Price cannot be checked if Accrue is checked for Receipt vendor.
+	SELECT TOP 1 
+			@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+			,@intItemId = Item.intItemId
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge OtherCharge
+				ON Receipt.intInventoryReceiptId = OtherCharge.intInventoryReceiptId	
+			INNER JOIN tblICItem Item
+				ON Item.intItemId = OtherCharge.intChargeId
+	WHERE	OtherCharge.ysnAccrue = 1
+			AND OtherCharge.ysnPrice = 1
+			AND OtherCharge.ysnInventoryCost = 1
+			AND ISNULL(OtherCharge.intEntityVendorId, Receipt.intEntityVendorId) = Receipt.intEntityVendorId
+			AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
+
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		-- The {Other Charge} is both a payable and deductible to the bill of the same vendor. Please correct the Accrue or Price checkbox.
+		RAISERROR(80064, 11, 1, @strItemNo)
+		GOTO _Exit
+	END 
+END 
+
+-- Validate 
+BEGIN 
+	-- Price cannot be checked if Accrue is checked for Receipt vendor.
+	SELECT TOP 1 
+			@strItemNo = CASE WHEN ISNULL(Item.strItemNo, '') = '' THEN '(Item id: ' + CAST(Item.intItemId AS NVARCHAR(10)) + ')' ELSE Item.strItemNo END 
+			,@intItemId = Item.intItemId
+	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge OtherCharge
+				ON Receipt.intInventoryReceiptId = OtherCharge.intInventoryReceiptId	
+			INNER JOIN tblICItem Item
+				ON Item.intItemId = OtherCharge.intChargeId
+	WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
+			AND (
+				-- Do not allow if third party or receipt vendor is going to pay the other charge and cost is passed-on to the item cost. 
+				(
+					OtherCharge.ysnPrice = 1
+					AND OtherCharge.ysnInventoryCost = 1
+				)
+			)			
+			
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		-- The {Other Charge} is shouldered by the receipt vendor and can''t be added to the item cost. Please correct the Price or Inventory Cost checkbox.
+		RAISERROR(80065, 11, 1, @strItemNo)
+		GOTO _Exit
+	END 
+END 
+
 -- Calculate the other charges. 
 BEGIN 
 	-- Calculate the other charges. 
