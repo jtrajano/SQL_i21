@@ -2503,10 +2503,9 @@
     <Build Include="dbo\Tables\tblICTransactionDetailLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICLogTransactionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertPostResult.sql" />
-    <Build Include="dbo\Stored Procedures\uspICInventoryReceiptAfterSave.sql" />
-    <Build Include="dbo\Tables\tblTRBulkPlantFreight.sql" />
-    <Build Include="dbo\Functions\fnTRGetRackPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspARAddMiscItemToInvoice.sql" />
+    <Build Include="dbo\Tables\tblPREmployeeEarningDistribution.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryReceiptAfterSave.sql" />
     <Build Include="dbo\Tables\tblARImportFile.sql" />
     <Build Include="dbo\Tables\tblARImportLog.sql" />
     <Build Include="dbo\Tables\tblARImportLogDetail.sql" />
@@ -2515,6 +2514,15 @@
     <Build Include="dbo\Functions\fnGetTaxGroupTaxCodes.sql" />
     <Build Include="dbo\Functions\fnGetTaxMasterIdForCustomer.sql" />
     <Build Include="dbo\Functions\fnGetTaxGroupForLocation.sql" />
+    <Build Include="dbo\Functions\fnGetItemTaxComputationForCustomer.sql" />
+    <Build Include="dbo\Functions\fnGetItemTaxComputationForVendor.sql" />
+    <Build Include="dbo\Functions\fnGetItemTotalTaxForVendor.sql" />
+    <Build Include="dbo\Functions\fnGetItemTotalTaxForCustomer.sql" />
+    <Build Include="dbo\Tables\tblTRBulkPlantFreight.sql" />
+    <Build Include="dbo\Functions\fnTRGetRackPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLGetAccountDetailReport.sql" />
+    <Build Include="dbo\User Defined Types\FilterTableType.sql" />
+    <Build Include="dbo\Functions\fnConvertFilterTableToWhereExpression.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdatePaymentInfo.sql" />
     <Build Include="dbo\Views\vyuCTContractHeaderNotMapped.sql" />
     <Build Include="dbo\Views\vyuCTContractDetailNotMapped.sql" />
@@ -2593,6 +2601,21 @@
     <Build Include="dbo\Views\vyuARInvoiceAgingReport.sql" />
     <Build Include="dbo\Stored Procedures\uspMFApproveBlendSheets.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetOnHoldBlendSheets.sql" />
+    <Build Include="dbo\Views\vyuGRGetVendors.sql" />
+    <Build Include="dbo\Views\vyuGRGetSettleItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRProcessSettleStorage.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCreateInvReceiptBySettle.sql" />
+    <Build Include="dbo\Stored Procedures\uspEMCheckIfOriginVendor.sql" />
+    <Build Include="dbo\Functions\fnAPValidateRecapBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspICErrorMessages.sql" />
+    <Build Include="dbo\Views\vyuTRTansportLoad.sql" />
+    <Build Include="dbo\Functions\fnARGetContractPricingDetails.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerPricingDetails.sql" />
+    <Build Include="dbo\Functions\fnARGetInventoryItemPricingDetails.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerItemSpecialPrice.sql" />
+    <Build Include="dbo\Functions\fnARGetCustomerItemSpecialPriceId.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMAuditLog.sql" />
+    <Build Include="dbo\Functions\fnARGetLocationItemVendorDetailsForPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

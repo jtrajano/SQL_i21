@@ -21,14 +21,14 @@ UPDATE tblRMDatasource
 SET strQuery = '
 SELECT DISTINCT  
 A.intCustomerID
-,COALESCE(F.dblPrice,dbo.[fnTMGetSpecialPricingPrice](
-		B.vwcus_key
-		,G.vwitm_no
-		,CAST(C.strLocation AS NVARCHAR(5))
-		,G.vwitm_class
-		,(CASE WHEN F.dtmCallInDate IS NULL THEN GETDATE() ELSE F.dtmCallInDate END)
-		,(CASE WHEN F.dblMinimumQuantity IS NULL THEN COALESCE(F.dblQuantity,1.00) ELSE F.dblMinimumQuantity END)
-		,NULL)) AS dblProductCost
+--,COALESCE(F.dblPrice,dbo.[fnTMGetSpecialPricingPrice](
+--		B.vwcus_key
+--		,G.vwitm_no
+--		,CAST(C.strLocation AS NVARCHAR(5))
+--		,G.vwitm_class
+--		,(CASE WHEN F.dtmCallInDate IS NULL THEN GETDATE() ELSE F.dtmCallInDate END)
+--		,(CASE WHEN F.dblMinimumQuantity IS NULL THEN COALESCE(F.dblQuantity,1.00) ELSE F.dblMinimumQuantity END)
+--		,NULL)) AS dblProductCost
 , rtrim(ltrim(B.vwcus_last_name)) as agcus_last_name
 , rtrim(ltrim(B.vwcus_first_name)) as agcus_first_name
 ,(Case WHEN B.vwcus_first_name IS NULL OR B.vwcus_first_name = ''''  THEN

@@ -116,6 +116,7 @@ BEGIN
 	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceipt', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptItem', @Identity = 1;	
+	EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptItemTax', @Identity = 1;
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptItemLot', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptCharge', @Identity = 1;	
 	EXEC tSQLt.FakeTable 'dbo.tblICInventoryReceiptChargePerItem', @Identity = 1;	
@@ -135,6 +136,10 @@ BEGIN
 			,@intEntityId AS INT = 1
 			,@intUserId AS INT = 1
 			,@intContractId AS INT
+
+			,@intEntityVendorId_ReceiptVendor AS INT = 1
+			,@intEntityVendorId_ThirdPartyVendor AS INT = 2
+
 
 	-- Create mock data for the starting number 
 	EXEC tSQLt.FakeTable 'dbo.tblSMStartingNumber';	
@@ -2020,6 +2025,7 @@ BEGIN
 				,intEntityId
 				,intCreatedUserId
 				,ysnPosted
+				,intEntityVendorId
 		)
 		SELECT 	strReceiptNumber		= @strReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
@@ -2034,6 +2040,7 @@ BEGIN
 				,intEntityId			= @intEntityId
 				,intCreatedUserId		= @intUserId
 				,ysnPosted				= 0
+				,intEntityVendorId		= @intEntityVendorId_ReceiptVendor
 		SET @intReceiptNumber = SCOPE_IDENTITY();
 
 		INSERT INTO dbo.tblICInventoryReceiptItem (
@@ -2138,7 +2145,7 @@ BEGIN
 			,[strCostMethod]		= @COST_METHOD_PER_Unit
 			,[dblRate]				= 5.00
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
-			,[intEntityVendorId]	= NULL 
+			,[intEntityVendorId]	= NULL -- @intEntityVendorId_ReceiptVendor 
 			,[dblAmount]			= NULL 
 			,[strAllocateCostBy]	= @ALLOCATE_COST_BY_Cost
 			,[ysnAccrue] 			= 0 -- @COST_BILLED_BY_None
@@ -2176,6 +2183,7 @@ BEGIN
 				,intEntityId
 				,intCreatedUserId
 				,ysnPosted
+				,intEntityVendorId
 		)
 		SELECT 	strReceiptNumber		= @strReceiptNumber
 				,dtmReceiptDate			= dbo.fnRemoveTimeOnDate(@dtmDate)
@@ -2190,6 +2198,7 @@ BEGIN
 				,intEntityId			= @intEntityId
 				,intCreatedUserId		= @intUserId
 				,ysnPosted				= 0
+				,intEntityVendorId		= @intEntityVendorId_ReceiptVendor
 		SET @intReceiptNumber = SCOPE_IDENTITY();
 
 		INSERT INTO dbo.tblICInventoryReceiptItem (
@@ -2278,7 +2287,7 @@ BEGIN
 				,intConcurrencyId			= 1
 
 		-- Fake other charges data
-		INSERT INTO tblICInventoryReceiptCharge (
+		INSERT INTO tblICInventoryReceiptCharge ( 
 			[intInventoryReceiptId] 
 			,[intChargeId] 
 			,[ysnInventoryCost] 
@@ -2298,10 +2307,10 @@ BEGIN
 			,[strCostMethod]		= @COST_METHOD_PER_Unit
 			,[dblRate]				= 5.00
 			,[intCostUOMId]			= @OtherCharges_PoundUOM
-			,[intEntityVendorId]	= NULL 
+			,[intEntityVendorId]	= NULL -- @intEntityVendorId_ThirdPartyVendor 
 			,[dblAmount]			= NULL 
 			,[strAllocateCostBy]	= @ALLOCATE_COST_BY_Cost
 			,[ysnAccrue] 			= 0 -- @COST_BILLED_BY_None
-			,[@intContractId]		= @intContractId
+			,[intContractId]		= @intContractId
 	END
 END

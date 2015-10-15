@@ -169,4 +169,4 @@ BEGIN
 
 	IF OBJECT_ID('actual_tblICInventoryAdjustmentDetail') IS NOT NULL 
 		DROP TABLE dbo.actual_tblICInventoryAdjustmentDetail
-END 
+END  

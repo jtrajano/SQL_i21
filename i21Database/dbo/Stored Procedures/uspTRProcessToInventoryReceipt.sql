@@ -88,67 +88,68 @@ END
 			,strActualCostId
 			,intTaxGroupId
 			,strVendorRefNo
+			,strSourceId
+			,strSourceScreenName
 	)	
 	SELECT 
-			strReceiptType = CASE
-								WHEN TR.intContractDetailId IS NULL
-										THEN 'Direct'
-								WHEN TR.intContractDetailId IS NOT NULL
-										THEN 'Purchase Contract'
-								END,
-			TR.intTerminalId,
-			SP.intEntityLocationId,
-			TR.intCompanyLocationId,
-			TR.intItemId,
-			TR.intCompanyLocationId,
-			intItemUOMId =CASE
-								WHEN TR.intContractDetailId is NULL  
-									THEN (SELECT	TOP 1 
-											IU.intItemUOMId											
-											FROM dbo.tblICItemUOM IU 
-											WHERE	IU.intItemId = TR.intItemId and IU.ysnStockUnit = 1)
-								WHEN TR.intContractDetailId is NOT NULL 
-									THEN	(select intItemUOMId from vyuCTContractDetailView CT where CT.intContractDetailId = TR.intContractDetailId)
-									END,-- Need to add the Gallons UOM from Company Preference	   
-			TR.strBillOfLadding,
-			CT.intContractHeaderId,
-			TR.intContractDetailId,
-			TL.dtmLoadDateTime,
-			TL.intShipViaId,	  
-			dblGallons              = CASE
-										WHEN SP.strGrossOrNet = 'Gross'
-										THEN TR.dblGross
-										WHEN SP.strGrossOrNet = 'Net'
-										THEN TR.dblNet
-										END,
-			TR.dblUnitCost,										
-			intCurrencyId = (SELECT	TOP 1 
-											CP.intDefaultCurrencyId		
+			strReceiptType				=	CASE	WHEN TR.intContractDetailId IS NULL THEN 'Direct'
+													WHEN TR.intContractDetailId IS NOT NULL THEN 'Purchase Contract'
+											END
+			,intEntityVendorId			= TR.intTerminalId
+			,intShipFromId				= SP.intEntityLocationId
+			,intLocationId				= TR.intCompanyLocationId
+			,intItemId					= TR.intItemId
+			,intItemLocationId			= TR.intCompanyLocationId
+			,intItemUOMId				=	CASE	
+												WHEN TR.intContractDetailId is NULL  
+													THEN (SELECT	TOP 1 
+															IU.intItemUOMId											
+															FROM dbo.tblICItemUOM IU 
+															WHERE	IU.intItemId = TR.intItemId and IU.ysnStockUnit = 1)
+												WHEN TR.intContractDetailId is NOT NULL 
+													THEN	(select intItemUOMId from vyuCTContractDetailView CT where CT.intContractDetailId = TR.intContractDetailId)
+											END-- Need to add the Gallons UOM from Company Preference	   
+			,strBillOfLadding			= TR.strBillOfLadding
+			,intContractHeaderId		= CT.intContractHeaderId
+			,intContractDetailId		= TR.intContractDetailId
+			,dtmDate					= TL.dtmLoadDateTime
+			,intShipViaId				= TL.intShipViaId
+			,dblQty						=	CASE	WHEN SP.strGrossOrNet = 'Gross' THEN TR.dblGross
+													WHEN SP.strGrossOrNet = 'Net' THEN TR.dblNet
+											END
+			,dblCost					= TR.dblUnitCost
+			,intCurrencyId				= (
+											SELECT	TOP 1 
+													CP.intDefaultCurrencyId		
 											FROM	dbo.tblSMCompanyPreference CP
-											WHERE	CP.intCompanyPreferenceId = 1 
-												
-							), -- USD default from company Preference 
-			1, -- Need to check this
-			NULL,--No LOTS from transport
-			NULL, -- No Sub Location from transport
-			NULL, -- No Storage Location from transport
-			0,-- No Storage from transports
-			TR.dblFreightRate,
-			TR.intTransportReceiptId,	  
-			3, -- Source type for transports is 3 
-			dblGross = TR.dblGross,
-			dblNet = TR.dblNet,
-			TR.intInventoryReceiptId,
-			TR.dblPurSurcharge,
-			TR.ysnFreightInPrice,
-			(select strTransaction from tblTRTransportLoad TT
-					join tblTRTransportReceipt RR on TT.intTransportLoadId = RR.intTransportLoadId
-					join tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
-					where RR.strOrigin = 'Terminal' 
-						and HH.strDestination = 'Customer' 
-						and RR.intTransportReceiptId = TR.intTransportReceiptId ) as strActualCostId,
-			TR.intTaxGroupId,
-			TR.strBillOfLadding
+											WHERE	CP.intCompanyPreferenceId = 1 												
+										) -- USD default from company Preference 
+			,dblExchangeRate			= 1 -- Need to check this
+			,intLotId					= NULL --No LOTS from transport
+			,intSubLocationId			= NULL -- No Sub Location from transport
+			,intStorageLocationId		= NULL -- No Storage Location from transport
+			,ysnIsStorage				= 0 -- No Storage from transports
+			,dblFreightRate				= TR.dblFreightRate
+			,intSourceId				= TR.intTransportReceiptId
+			,intSourceType		 		= 3 -- Source type for transports is 3 
+			,dblGross					= TR.dblGross
+			,dblNet						= TR.dblNet
+			,intInventoryReceiptId		= TR.intInventoryReceiptId
+			,dblSurcharge				= TR.dblPurSurcharge
+			,ysnFreightInPrice			= TR.ysnFreightInPrice
+			,strActualCostId			= (
+											SELECT	strTransaction 
+											FROM	tblTRTransportLoad TT JOIN tblTRTransportReceipt RR 
+														ON TT.intTransportLoadId = RR.intTransportLoadId
+													JOIN tblTRDistributionHeader HH on HH.intTransportReceiptId = RR.intTransportReceiptId 
+											WHERE	RR.strOrigin = 'Terminal' 
+													AND HH.strDestination = 'Customer' 
+													AND RR.intTransportReceiptId = TR.intTransportReceiptId 
+										)
+			,intTaxGroupId				= TR.intTaxGroupId
+			,strVendorRefNo				= TR.strBillOfLadding
+			,strSourceId				= TL.strTransaction
+			,strSourceScreenName		= 'Transport Load'
 	FROM	tblTRTransportLoad TL JOIN tblTRTransportReceipt TR 
 				ON TR.intTransportLoadId = TL.intTransportLoadId			
 			LEFT JOIN vyuCTContractDetailView CT 

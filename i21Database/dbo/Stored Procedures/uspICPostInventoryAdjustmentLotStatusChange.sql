@@ -37,8 +37,8 @@ FROM	(
 IF @ysnPost = 1 AND (@strItemNo IS NOT NULL AND @strLotNumber IS NOT NULL)
 BEGIN   
 	-- 'Lot status for {Lot Number} for item {Item No} is going to be updated more than once. Please remove the duplicate.'
-	RAISERROR(80024, 11, 1, @strLotNumber, @strItemNo)  
-	GOTO Post_Exit  
+	RAISERROR(51097, 11, 1, @strLotNumber, @strItemNo)  
+	RETURN -1
 END   
 
 -----------------------------------------------------------------------------------------------
@@ -51,5 +51,3 @@ FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustment
 		INNER JOIN dbo.tblICLot LotMaster 
 			ON LotMaster.intLotId = Detail.intLotId
 WHERE	Header.intInventoryAdjustmentId = @intTransactionId
-
-Post_Exit: 

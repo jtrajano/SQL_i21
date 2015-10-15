@@ -30,12 +30,12 @@ LG.intCounterPartyEntityId as intEntityCustomerId,
 IsNull(LG.intCounterPartyCompanyLocationId,LG.intCompanyLocationId) as intOutboundCompanyLocationId, 
 LG.intCounterPartyEntityLocationId as intShipToLocationId,
 (select top 1 intSalespersonId from tblARCustomer AR where AR.intEntityCustomerId = LG.intCounterPartyEntityId) as intEntitySalespersonId,
-(select strCustomerNumber from tblARCustomer AR where AR.intEntityCustomerId = LG.intCounterPartyEntityId) as strCustomerNumber,
+(select strName from vyuARCustomer AR where AR.intEntityCustomerId = LG.intCounterPartyEntityId) as strCustomerNumber,
 (select strLocationName from tblSMCompanyLocation SM where SM.intCompanyLocationId = IsNull(LG.intCounterPartyCompanyLocationId,LG.intCompanyLocationId)) as strOutboundLocationName,
 (select top 1 SP.strEntityNo from tblARCustomer AR 
                                     Left Join vyuEMEntity SP on AR.intSalespersonId = SP.intEntityId
 									 where AR.intEntityCustomerId = LG.intCounterPartyEntityId) as strOutboundSalespersonId,
-LG.strCounterPartyLocationName as strShipTo,
+LG.strCounterPartyShipFromTo as strShipTo,
 intOutboundItemId = CASE
 						WHEN LG.intCounterPartyItemId is NULL							        
 						   THEN LG.intItemId

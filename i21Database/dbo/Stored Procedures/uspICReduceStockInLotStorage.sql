@@ -28,6 +28,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @strItemNo AS NVARCHAR(50)
+
 -- Ensure the qty is a positive number
 SET @dblQty = ABS(@dblQty)
 

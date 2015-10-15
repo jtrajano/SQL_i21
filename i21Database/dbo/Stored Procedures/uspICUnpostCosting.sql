@@ -15,6 +15,9 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStockToReverse')) 
+	DROP TABLE #tmpInventoryTransactionStockToReverse
+
 -- Create the temp table 
 CREATE TABLE #tmpInventoryTransactionStockToReverse (
 	intInventoryTransactionId INT NOT NULL 
@@ -77,18 +80,14 @@ END
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	EXEC dbo.uspICValidateCostingOnUnpost 
+	DECLARE @returnValue AS INT 
+
+	EXEC @returnValue = dbo.uspICValidateCostingOnUnpost 
 		@ItemsToUnpost
 		,@ysnRecap
-END 
 
----- Get the transaction type 
---DECLARE @TransactionType AS INT 
---SELECT TOP 1 
---		@TransactionType = intTransactionTypeId
---FROM	dbo.tblICInventoryTransaction
---WHERE	intTransactionId = @intTransactionId
---		AND strTransactionId = @strTransactionId
+	IF @returnValue < 0 RETURN -1;
+END 
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Call the FIFO unpost stored procedures. This is also used in Average Costing.
@@ -430,7 +429,7 @@ BEGIN
 				,[strBatchId]							= @strBatchId
 				,[intTransactionTypeId]					= @AUTO_NEGATIVE
 				,[intLotId]								= ItemToUnpost.intLotId
-				,[ysnIsUnposted]						= 0
+				,[ysnIsUnposted]						= 1
 				,[intRelatedInventoryTransactionId]		= NULL 
 				,[intRelatedTransactionId]				= NULL 
 				,[strRelatedTransactionId]				= NULL 
@@ -476,6 +475,3 @@ EXEC dbo.uspICCreateReversalGLEntries
 	,@strTransactionId
 	,@intUserId
 ;
-
-IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStockToReverse')) 
-	DROP TABLE #tmpInventoryTransactionStockToReverse

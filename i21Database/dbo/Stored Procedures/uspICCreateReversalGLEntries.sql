@@ -153,7 +153,7 @@ BEGIN
 			,dtmTransactionDate			= ItemTransactions.dtmDate
 			,strJournalLineDescription	= '' 
 			,intJournalLineNo			= ItemTransactions.intInventoryTransactionId
-			,ysnIsUnposted				= 0
+			,ysnIsUnposted				= 1
 			,intUserId					= @intUserId 
 			,intEntityId				= @intUserId 
 			,strTransactionId			= ItemTransactions.strTransactionId
@@ -191,7 +191,7 @@ BEGIN
 			,dtmTransactionDate			= ItemTransactions.dtmDate
 			,strJournalLineDescription	= '' 
 			,intJournalLineNo			= ItemTransactions.intInventoryTransactionId
-			,ysnIsUnposted				= 0
+			,ysnIsUnposted				= 1
 			,intUserId					= @intUserId 
 			,intEntityId				= @intUserId 
 			,strTransactionId			= ItemTransactions.strTransactionId

@@ -57,6 +57,8 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level2type = N'COLUMN',
     @level2name = N'ysnClosed'
 GO
+
+
 CREATE TRIGGER [dbo].[trgAfterDeleteHDProjectTask]
     ON [dbo].[tblHDProjectTask]
     AFTER DELETE

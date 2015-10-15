@@ -5,7 +5,7 @@ CREATE PROCEDURE [dbo].[uspTMGetItemTaxTotal]
 	,@TransactionDate	DATETIME
 	,@ItemPrice			NUMERIC(18,6)
 	,@Quantity			NUMERIC(18,6)
-	,@TaxMasterId		INT	
+	,@TaxGroupId		INT	
 	,@TotalItemTax	NUMERIC(18,6) = 0.00 OUTPUT	
 	
 AS
@@ -85,7 +85,8 @@ EXEC dbo.[uspARGetItemTaxes]
 		,@LocationId  
 		,NULL
 		,@TransactionDate
-		,@TaxMasterId
+		,NULL
+		,@TaxGroupId
 		
 --EXEC dbo.[uspARGetItemTaxes]  4 ,3,NULL,'2015-07-09 00:00:00.000',1
  			

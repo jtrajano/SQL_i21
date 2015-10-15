@@ -50,6 +50,15 @@ BEGIN
 	WHERE intReportId = @intReportId AND strFieldName = 'ysnPending'
 END
 
+IF EXISTS (SELECT TOP 1 1 FROM tblRMCriteriaField WHERE intReportId = @intReportId AND strFieldName = 'intNextDeliveryDegreeDay')
+BEGIN
+	UPDATE tblRMCriteriaField
+	SET strConditions = 'Less Than Or Equal, Between'
+		,ysnEditCondition = 1
+	WHERE strFieldName = 'intNextDeliveryDegreeDay'
+		AND intReportId = @intReportId
+END
+
 GO
 print N'END Update Delivery Fill Report Field Selection'
 GO

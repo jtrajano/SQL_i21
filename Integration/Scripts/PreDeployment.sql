@@ -183,7 +183,5 @@
 -- C-Store
 :r "..\dbo\Views\vyustpbkmst.sql"
 
-
-
-
-
+--Entity
+:r "..\dbo\Stored Procedures\uspEMRecreateCheckIfOriginVendor.sql"

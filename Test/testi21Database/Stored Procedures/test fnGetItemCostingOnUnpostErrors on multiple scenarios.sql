@@ -160,7 +160,7 @@ BEGIN
 		-- Negative stock is not allowed 	
 		SELECT	intItemId = @WetGrains
 				,intItemLocationId = @WetGrains_BetterHaven
-				,strText = 'Negative stock quantity is not allowed for WET GRAINS in BETTER HAVEN.'
+				,strText = FORMATMESSAGE(80003)
 				,intErrorCode = 80003		
 	END
 

@@ -29,4 +29,6 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 	,[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,[intShipToLocationId] INT NULL                            -- SalesPerson
 	,[strBOLNumber] NVARCHAR (50)	COLLATE Latin1_General_CI_AS NULL
+    ,[strSourceScreenName] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL                -- Name of the screen name where the transaction is coming from.
+
 )

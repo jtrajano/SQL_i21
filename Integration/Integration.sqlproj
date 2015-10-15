@@ -145,6 +145,7 @@
     <None Include="Scripts\AP\FixImportedVendorOriginFlag.sql" />
     <None Include="Scripts\AP\BackupImportedPostedBillDetails.sql" />
     <None Include="Scripts\AP\BackupImportedUnpostedBillDetail.sql" />
+    <None Include="dbo\Stored Procedures\uspEMRecreateCheckIfOriginVendor.sql" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="Scripts\PreDeployment.sql" />
@@ -295,5 +296,6 @@
     <None Include="dbo\Stored Procedures\uspTMRecreateOpenCallEntryView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateOpenWorkOrderView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateConsumptionSiteSearchView.sql" />
+    <None Include="dbo\Stored Procedures\uspTMRecreateGetSpecialPricingPriceTableFn.sql" />
   </ItemGroup>
 </Project>

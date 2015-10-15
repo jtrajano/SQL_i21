@@ -633,7 +633,7 @@
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotOutFromStorage for add-sell it-unpost sell.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICUnpostLotOutFromStorage for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostStorage for the basics.sql" />
-    <Build Include="testi21Database\Fake Data\Fake transactions for item custody.sql" />
+    <Build Include="testi21Database\Fake Data\Fake transactions for item Storage.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostStorage on Lot Costing for one incoming stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLotStorage by not allowing negative stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseStockInLotStorage for the basics.sql" />
@@ -822,6 +822,10 @@
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseConsignedPurchaseQty for increase in consigned purchase qty.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseConsignedPurchaseQty for decrease in consigned purchase qty.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseConsignedPurchaseQty for decrease in consigned purchase qty on multiple items.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseConsignedSaleQty for the basics.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseConsignedSaleQty for increase in consigned sale qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseConsignedSaleQty for decrease in consigned sale qty.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICIncreaseConsignedSaleQty for decrease in consigned sale qty on multiple items.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICIncreaseOnOrderQty for invalid item location.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFOStorage for the basics.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICReduceStockInFIFOStorage is successful up to zero stock.sql" />
@@ -862,6 +866,9 @@
     <Build Include="testi21Database\Stored Procedures\test uspICPostStorage on LIFO Costing for one incoming stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostStorage on LIFO Costing for outgoing stock and it does not allow negative stock.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostStorage on LIFO Costing for two incoming stock.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptOtherCharges for ysnPrice scenario 1.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostInventoryReceiptOtherCharges for ysnPrice scenario 2.sql" />
+    <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnPostErrors if it blocks negative stock on non-lot and reserved qty.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

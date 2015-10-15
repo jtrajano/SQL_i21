@@ -11,6 +11,8 @@ AS
 			@NewInvoiceId		INT,
 			@newComment         NVARCHAR(500) = NULL
 	
+	EXEC [dbo].[uspARGetDefaultComment] @intCompanyLocationId, @intEntityCustomerId, 'Invoice', 'Service Charge', @newComment OUT
+
 	SELECT @dblInvoiceTotal    = SUM(dblTotalAmount)
 	FROM @tblTypeServiceCharge
 
@@ -54,7 +56,8 @@ AS
 		,[strBillToCity]
 		,[strBillToState]
 		,[strBillToZipCode]
-		,[strBillToCountry])
+		,[strBillToCountry]
+		,[strComments])
 	SELECT 
 		 @intEntityCustomerId
 		,NULL --[strInvoiceOriginId]
@@ -95,6 +98,7 @@ AS
 		,[strBillToState]
 		,[strBillToZipCode]
 		,[strBillToCountry]
+		,@newComment
 	FROM vyuARCustomerSearch
 		WHERE intEntityCustomerId = @intEntityCustomerId
 
