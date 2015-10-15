@@ -18,7 +18,6 @@
     [strBusinessType]   NVARCHAR (15)  COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]  INT            DEFAULT 1 NOT NULL,
     [ysnScreenControlListingUpdated] BIT NULL, 
-    CONSTRAINT [PK_tblSMCompanySetup] PRIMARY KEY ([intCompanySetupID]), 
-    CONSTRAINT [AK_tblSMCompanySetup_strEIN] UNIQUE ([strEin]) 
+    CONSTRAINT [PK_tblSMCompanySetup] PRIMARY KEY ([intCompanySetupID]) 
 );
 
