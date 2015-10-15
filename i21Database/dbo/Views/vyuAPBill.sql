@@ -21,6 +21,7 @@ SELECT
 	Payment.strPaymentInfo,
 	Payment.strBankAccountNo,
 	Payment.ysnCleared,
+	Payment.dtmDateReconciled,
 	F.strUserName AS strUserId,
 	Payment.ysnPrinted,
 	Payment.ysnVoid,
@@ -53,6 +54,7 @@ FROM
 			,D.ysnPrinted
 			,D.ysnVoid
 			,D.ysnCleared
+			,D.dtmDateReconciled
 		FROM dbo.vyuAPBillPayment D
 		WHERE A.intBillId = D.intBillId
 		ORDER BY D.intPaymentId DESC --get only the latest payment
