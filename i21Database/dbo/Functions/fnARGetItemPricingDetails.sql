@@ -40,67 +40,112 @@ DECLARE	 @Price		NUMERIC(18,6)
 	SET @TransactionDate = ISNULL(@TransactionDate,GETDATE())
 	
 	IF @CustomerPricingOnly IS NULL
-		SET @CustomerPricingOnly = 0			
+		SET @CustomerPricingOnly = 0
+	
+	
+	DECLARE @ItemVendorId		INT
+			,@ItemLocationId	INT
+			,@ItemCategoryId	INT
+			,@ItemCategory		NVARCHAR(100)
+			,@UOMQuantity		NUMERIC(18,6)
+			,@CustomerShipToLocationId	INT
+			,@VendorShipFromLocationId	INT
+
+	SELECT TOP 1 
+		 @ItemVendorId		= ISNULL(@VendorId, VI.intVendorId)
+		,@ItemLocationId	= intItemLocationId
+		,@ItemCategoryId	= I.intCategoryId
+		,@ItemCategory		= UPPER(LTRIM(RTRIM(ISNULL(C.strCategoryCode,''))))
+		,@UOMQuantity		= CASE WHEN UOM.dblUnitQty = 0 OR UOM.dblUnitQty IS NULL THEN 1.00 ELSE UOM.dblUnitQty END
+	FROM
+		tblICItem I
+	INNER JOIN
+		vyuICGetItemStock VI
+			ON I.intItemId = VI.intItemId
+	LEFT OUTER JOIN
+		tblICCategory C
+			ON I.intCategoryId = C.intCategoryId
+	LEFT OUTER JOIN
+		tblICItemUOM UOM
+			ON I.intItemId = UOM.intItemId
+	WHERE
+		I.intItemId = @ItemId
+		AND (VI.intLocationId = @LocationId OR @LocationId IS NULL)
+		AND (UOM.intItemUOMId = @ItemUOMId OR @ItemUOMId IS NULL)
 		
 	IF @CustomerPricingOnly = 0
 	BEGIN
-		--Customer Contract Price		
+		--Customer Contract Price
+		
 		SELECT TOP 1
-			 @Price				= dblPrice
-			,@Pricing			= strPricing
+			 @Price				= dblCashPrice
 			,@ContractHeaderId	= intContractHeaderId
 			,@ContractDetailId	= intContractDetailId
 			,@ContractNumber	= strContractNumber
 			,@ContractSeq		= intContractSeq
 			,@AvailableQuantity = dblAvailableQty
-			,@UnlimitedQuantity = ysnUnlimitedQty
+			,@UnlimitedQuantity = ysnUnlimitedQuantity
 		FROM
-			[dbo].[fnARGetContractPricingDetails](
-				 @ItemId
-				,@CustomerId
-				,@LocationId
-				,@ItemUOMId
-				,@TransactionDate
-				,@Quantity
-				,@ContractHeaderId
-				,@ContractDetailId
-				,@OriginalQuantity
-			);
-			
+			vyuCTContractDetailView
+		WHERE
+			intEntityId = @CustomerId
+			AND intCompanyLocationId = @LocationId
+			AND intItemUOMId = @ItemUOMId
+			AND intItemId = @ItemId
+			AND ((ISNULL(@OriginalQuantity,0.00) + dblAvailableQty >= @Quantity) OR ysnUnlimitedQuantity = 1)
+			AND CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate,@TransactionDate) AS DATE)
+			AND intContractHeaderId = @ContractHeaderId
+			AND intContractDetailId = @ContractDetailId
+			AND ((ISNULL(@OriginalQuantity,0.00) + dblAvailableQty > 0) OR ysnUnlimitedQuantity = 1)
+			AND (dblBalance > 0 OR ysnUnlimitedQuantity = 1)
+			AND strContractStatus NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
+		ORDER BY
+			 dtmStartDate
+			,intContractSeq
 			
 		IF(@Price IS NOT NULL)
 		BEGIN
-			INSERT @returntable(dblPrice, strPricing, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty)
+			SET @Pricing = 'Contracts - Customer Pricing'
+			INSERT @returntable
 			SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity
 			RETURN
-		END	
+		END
 		
-	END			
-								
-	BEGIN
-		--Customer Special Pricing		
+		SET @ContractHeaderId	= NULL
+		SET @ContractDetailId	= NULL
+		SET @ContractNumber		= NULL
+		SET @ContractSeq		= NULL
+		SET @AvailableQuantity  = NULL
+		SET @UnlimitedQuantity  = NULL
+				
 		SELECT TOP 1
-			 @Price		= dblPrice
-			,@Pricing	= strPricing
+			 @Price				= dblCashPrice
+			,@ContractHeaderId	= intContractHeaderId
+			,@ContractDetailId	= intContractDetailId
+			,@ContractNumber	= strContractNumber
+			,@ContractSeq		= intContractSeq
+			,@AvailableQuantity = dblAvailableQty
+			,@UnlimitedQuantity = ysnUnlimitedQuantity
 		FROM
-			[dbo].[fnARGetCustomerPricingDetails](
-				 @ItemId
-				,@CustomerId
-				,@LocationId
-				,@ItemUOMId
-				,@TransactionDate
-				,@Quantity
-				,@VendorId
-				,@SupplyPointId
-				,@LastCost
-				,@ShipToLocationId
-				,@VendorLocationId
-			);
-			
+			vyuCTContractDetailView
+		WHERE
+			intEntityId = @CustomerId
+			AND intCompanyLocationId = @LocationId
+			AND intItemUOMId = @ItemUOMId
+			AND intItemId = @ItemId
+			AND (((dblAvailableQty) >= @Quantity) OR ysnUnlimitedQuantity = 1)
+			AND CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmStartDate AS DATE) AND CAST(ISNULL(dtmEndDate,@TransactionDate) AS DATE)
+			AND (((dblAvailableQty) > 0) OR ysnUnlimitedQuantity = 1)
+			AND (dblBalance > 0 OR ysnUnlimitedQuantity = 1)
+			AND strContractStatus NOT IN ('Cancelled', 'Unconfirmed', 'Complete')
+		ORDER BY
+			 dtmStartDate
+			,intContractSeq
 			
 		IF(@Price IS NOT NULL)
 		BEGIN
-			INSERT @returntable(dblPrice, strPricing, intContractHeaderId, intContractDetailId, strContractNumber, intContractSeq, dblAvailableQty, ysnUnlimitedQty)
+			SET @Pricing = 'Contracts - Customer Pricing'
+			INSERT @returntable
 			SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity
 			RETURN
 		END	
@@ -892,48 +937,84 @@ DECLARE	 @Price		NUMERIC(18,6)
 										
 	END
 	
-	DECLARE @ItemVendorId				INT
-			,@ItemLocationId			INT
-			,@ItemCategoryId			INT
-			,@ItemCategory				NVARCHAR(100)
-			,@UOMQuantity				NUMERIC(18,6)
-
-	SELECT TOP 1 
-		 @ItemVendorId				= intItemVendorId
-		,@ItemLocationId			= intItemLocationId
-		,@ItemCategoryId			= intItemCategoryId
-		,@ItemCategory				= strItemCategory
-		,@UOMQuantity				= dblUOMQuantity
-	FROM
-		[dbo].[fnARGetLocationItemVendorDetailsForPricing](
-			 @ItemId
-			,@CustomerId
-			,@LocationId
-			,@ItemUOMId
-			,@VendorId
-			,NULL
-			,NULL
-		);		
-	
-	--Item Standard Pricing
-	SET @Price = @UOMQuantity *	
-						( 
-							SELECT
-								P.dblSalePrice
+	IF @CustomerPricingOnly = 0
+	BEGIN
+		--Item Special Pricing
+		SET @Price = @UOMQuantity *	
+						(	SELECT 
+								--dblUnitAfterDiscount
+								(CASE
+									WHEN strDiscountBy = 'Amount'
+										THEN dblUnitAfterDiscount - ISNULL(dblDiscount, 0.00)
+									ELSE	
+										dblUnitAfterDiscount - (dblUnitAfterDiscount * (ISNULL(dblDiscount, 0.00)/100.00) )
+								END)
 							FROM
-								tblICItemPricing P
+								tblICItemSpecialPricing 
 							WHERE
-								P.intItemId = @ItemId
-								AND P.intItemLocationId = @ItemLocationId
-							)
-	IF(@Price IS NOT NULL)
-		BEGIN
-			SET @Pricing = 'Inventory - Standard Pricing'
-			INSERT @returntable
-			SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity
-			RETURN
-		END	
-			
+								intItemId = @ItemId 
+								AND intItemLocationId = @ItemLocationId 
+								AND (@ItemUOMId IS NULL OR intItemUnitMeasureId = @ItemUOMId)
+								AND CAST(@TransactionDate AS DATE) BETWEEN CAST(dtmBeginDate AS DATE) AND CAST(ISNULL(dtmEndDate,@TransactionDate) AS DATE)
+								)
+		IF(@Price IS NOT NULL)
+			BEGIN
+				INSERT @returntable
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity
+				RETURN
+			END	
+
+
+		--Item Pricing Level
+		DECLARE @PricingLevel NVARCHAR(100)
+		SET @Price = @UOMQuantity *	
+							( 
+								SELECT
+									PL.dblUnitPrice
+								FROM
+									tblICItemPricingLevel PL
+								INNER JOIN
+									tblARCustomer C									
+										ON PL.strPriceLevel = C.strLevel																								
+								INNER JOIN vyuICGetItemStock VIS
+										ON PL.intItemId = VIS.intItemId
+										AND PL.intItemLocationId = VIS.intItemLocationId															
+								WHERE
+									C.intEntityCustomerId = @CustomerId
+									AND C.strPricing = 'Multi-Level Pricing'
+									AND PL.intItemId = @ItemId
+									AND PL.intItemLocationId = @ItemLocationId
+									AND PL.intItemUnitMeasureId = @ItemUOMId
+									AND @Quantity BETWEEN PL.dblMin AND PL.dblMax
+								)
+		IF(@Price IS NOT NULL)
+			BEGIN
+				SET @Pricing = 'Inventory - Pricing Level'
+				INSERT @returntable
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity
+				RETURN
+			END	
+
+
+		--Item Standard Pricing
+		SET @Price = @UOMQuantity *	
+							( 
+								SELECT
+									P.dblSalePrice
+								FROM
+									tblICItemPricing P
+								WHERE
+									P.intItemId = @ItemId
+									AND P.intItemLocationId = @ItemLocationId
+								)
+		IF(@Price IS NOT NULL)
+			BEGIN
+				SET @Pricing = 'Inventory - Standard Pricing'
+				INSERT @returntable
+				SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity
+				RETURN
+			END							
+	END	
 	INSERT @returntable
 	SELECT @Price, @Pricing, @ContractHeaderId, @ContractDetailId, @ContractNumber, @ContractSeq, @AvailableQuantity, @UnlimitedQuantity
 	RETURN				

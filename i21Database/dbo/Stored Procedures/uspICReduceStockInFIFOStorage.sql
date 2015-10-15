@@ -65,8 +65,7 @@ WHERE	fifo_bucket_Storage.intItemId = @intItemId
 
 IF @SourceInventoryFIFOStorageId IS NULL 
 BEGIN 
-	DECLARE @strItemNo AS NVARCHAR(50)
-			,@strLocationName AS NVARCHAR(50)
+	DECLARE @strLocationName AS NVARCHAR(50)
 
 	SELECT @strItemNo = strItemNo
 	FROM dbo.tblICItem
