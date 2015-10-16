@@ -2630,14 +2630,11 @@
     <Build Include="dbo\Stored Procedures\uspCFInsertTransactionRecord.sql" />
     <Build Include="dbo\Views\vyuICGetBundleItem.sql" />
     <Build Include="dbo\Stored Procedures\uspWHSplitSKUForOrder.sql" />
-<<<<<<< HEAD
     <Build Include="dbo\Views\vyuEMSearchEntityProducer.sql" />
-=======
     <Build Include="dbo\Tables\tblCTCleanCostExpenseType.sql" />
     <Build Include="dbo\Tables\tblCTCleanCost.sql" />
     <Build Include="dbo\Tables\tblCTCleanCostBillExpense.sql" />
     <Build Include="dbo\Tables\tblCTCleanCostOtherExpense.sql" />
->>>>>>> CT-402
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
