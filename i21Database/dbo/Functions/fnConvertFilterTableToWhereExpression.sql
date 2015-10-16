@@ -19,10 +19,13 @@ BEGIN
 	DECLARE @DataType NVARCHAR(50)
 	DECLARE @tempTable TABLE (ID INT)
 	DECLARE @Id INT
-	DECLARE @Count INT = (SELECT COUNT(1) FROM @filterTable)
+	DECLARE @Count INT
+
 	DECLARE @Counter SMALLINT = 0
 	-- Add the T-SQL statements to compute the return value here
-	INSERT INTO @tempTable SELECT filterId FROM @filterTable
+	INSERT INTO @tempTable SELECT filterId FROM @filterTable  WHERE [from] <> ''
+	SELECT @Count = COUNT(1) FROM @tempTable
+
 	WHILE EXISTS(SELECT TOP 1 1 FROM @tempTable)
 	BEGIN
 		SELECT top 1 @Id = ID from @tempTable
