@@ -1626,13 +1626,15 @@ Ext.define('Inventory.view.ItemViewController', {
             var category = vm.storeInfo.categoryList.findRecord('intCategoryId', intCategoryId);
             if (category) {
                 var defaultCategoryUOM = category.getDefaultUOM();
-                var defaultUOM = Ext.Array.findBy(vm.data.current.tblICItemUOMs().data.items, function (row) {
-                    if (defaultCategoryUOM.get('intUnitMeasureId') === row.get('intUnitMeasureId')) {
-                        return true;
+                if (defaultCategoryUOM) {
+                    var defaultUOM = Ext.Array.findBy(vm.data.current.tblICItemUOMs().data.items, function (row) {
+                        if (defaultCategoryUOM.get('intUnitMeasureId') === row.get('intUnitMeasureId')) {
+                            return true;
+                        }
+                    });
+                    if (defaultUOM) {
+                        win.defaultUOM = defaultUOM;
                     }
-                });
-                if (defaultUOM) {
-                    win.defaultUOM = defaultUOM;
                 }
             }
         }
@@ -1714,6 +1716,8 @@ Ext.define('Inventory.view.ItemViewController', {
                 scope: me,
                 openselectedclick: function(button, e, result) {
                     var currentVM = this.getViewModel().data.current;
+                    var win = this.getView();
+
                     Ext.each(result, function(location) {
                         var exists = Ext.Array.findBy(currentVM.tblICItemLocations().data.items, function (row) {
                             if (location.get('intCompanyLocationId') === row.get('intCompanyLocationId')) {
@@ -1732,6 +1736,11 @@ Ext.define('Inventory.view.ItemViewController', {
                         }
                     });
                     search.close();
+                    win.setLoading('Saving...');
+                    win.context.data.saveRecord({ callbackFn: function(batch, eOpts){
+                        win.setLoading(false);
+                        return;
+                    } });
                 },
                 openallclick: function() {
                     search.close();

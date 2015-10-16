@@ -29,8 +29,9 @@ Ext.define('Inventory.view.ItemLocation', {
         'Ext.toolbar.Paging'
     ],
 
-    height: 719,
+    height: 725,
     hidden: false,
+    minHeight: 725,
     width: 1012,
     layout: 'fit',
     collapsible: true,
