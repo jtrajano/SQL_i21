@@ -15,6 +15,7 @@ DECLARE @ErrorMessage NVARCHAR(4000);
 DECLARE @ErrorSeverity INT;
 DECLARE @ErrorState INT;
 DECLARE @ErrMsg NVARCHAR(MAX);
+DECLARE @ysnDirectShip BIT;
 
 DECLARE @ItemsToIncreaseInTransitInBound AS InTransitTableType,
         @total as int;
@@ -56,7 +57,11 @@ BEGIN TRY
 		RETURN;
 	END
 
-	EXEC dbo.uspICIncreaseInTransitInBoundQty @ItemsToIncreaseInTransitInBound;
+	SELECT @ysnDirectShip = S.ysnDirectShipment from tblLGShipment S WHERE intShipmentId=@intShipmentId
+	if (@ysnDirectShip <> 1)
+	BEGIN
+		EXEC dbo.uspICIncreaseInTransitInBoundQty @ItemsToIncreaseInTransitInBound;
+	END
 
 	IF (@ysnInventorize = 1)
 	BEGIN
