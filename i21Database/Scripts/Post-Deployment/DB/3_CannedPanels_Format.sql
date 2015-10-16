@@ -60,8 +60,8 @@ BEGIN
 	SET @intCurrentPanelId = (SELECT TOP 1 intPanelId FROM tblDBPanel WHERE intCannedPanelId = @intCannedPanelId)
 		
 	INSERT INTO [dbo].[tblDBPanelFormat] 
-		([strColumn], [strCondition], [strValue1], [strValue2], [intBackColor], [strFontStyle], [intFontColor], [strApplyTo], [intPanelId], [intUserId], [intSort], [strType], [ysnVisible], [intConcurrencyId], [intCannedPanelId])
-	SELECT [strColumn], [strCondition], [strValue1], [strValue2], [intBackColor], [strFontStyle], [intFontColor], [strApplyTo], @intCurrentPanelId, [intUserId], [intSort], [strType], [ysnVisible], [intConcurrencyId], [intCannedPanelId]
+		([strColumn], [strCondition], [strValue1], [strValue2], [strBackColor], [strFontStyle], [strFontColor], [strApplyTo], [intPanelId], [intUserId], [intSort], [strType], [ysnVisible], [intConcurrencyId], [intCannedPanelId])
+	SELECT [strColumn], [strCondition], [strValue1], [strValue2], [strBackColor], [strFontStyle], [strFontColor], [strApplyTo], @intCurrentPanelId, [intUserId], [intSort], [strType], [ysnVisible], [intConcurrencyId], [intCannedPanelId]
 	FROM #TempCannedPanelFormat 
 	WHERE intPanelFormatId = @intPanelFormatId
 
