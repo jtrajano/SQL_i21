@@ -2625,6 +2625,7 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateBill1099.sql" />
     <Build Include="dbo\Views\vyuAP1099MISC.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreate1099MISCFile.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInsertTransactionRecord.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
