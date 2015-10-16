@@ -2630,6 +2630,7 @@
     <Build Include="dbo\Stored Procedures\uspCFInsertTransactionRecord.sql" />
     <Build Include="dbo\Views\vyuICGetBundleItem.sql" />
     <Build Include="dbo\Stored Procedures\uspWHSplitSKUForOrder.sql" />
+    <Build Include="dbo\Views\vyuEMSearchEntityProducer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
