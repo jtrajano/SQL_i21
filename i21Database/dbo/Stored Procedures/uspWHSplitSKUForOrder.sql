@@ -136,8 +136,7 @@ IF @intLocalTran= 1 BEGIN TRANSACTION
 	SELECT @intTaskId = t.intTaskId, @intTaskTypeId = t.intTaskTypeId, @intAssigneeId = t.intAssigneeId, @dblTaskdblQty = t.dblQty, @strTaskType = tt.strTaskType
 	FROM tblWHTask t
 	LEFT JOIN tblWHTaskType tt ON tt.intTaskTypeId = t.intTaskTypeId
-	WHERE t.intAddressId = @intAddressId
-		AND t.intSKUId = @intSKUId
+	WHERE t.intSKUId = @intSKUId
 		AND t.strTaskNo = @strBOLNo -- Order wise update (Sep 11 - Pick Task)
 		AND t.intFromContainerId = @intSourceContainerId
 		AND (t.intTaskTypeId = 2 OR t.intTaskTypeId = 7 OR t.intTaskTypeId = 13) --PICK or SPLIT or PUT_BACK

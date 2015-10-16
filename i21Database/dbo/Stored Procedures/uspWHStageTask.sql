@@ -117,8 +117,7 @@ BEGIN TRY
 			SELECT @intDockDoorLocationId = ISNULL(t.intDockDoorLocationId, 0), 
 				   @intStagingLocationId = ISNULL(h.intStagingLocationId, 0)
 			FROM tblWHOrderHeader h
-			LEFT JOIN tblWHTruckOrder ot ON ot.intOrderHeaderId = h.intOrderHeaderId
-			LEFT JOIN tblWHTruck t ON t.intTruckId = ot.intTruckId
+			LEFT JOIN tblWHTruck t ON t.intTruckId = h.intTruckId
 			WHERE h.intOrderHeaderId = @intOrderHeaderId
 			
 		 --Check that the StorageLocation exists        	
