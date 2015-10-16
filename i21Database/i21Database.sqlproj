@@ -2537,6 +2537,7 @@
     <Build Include="dbo\Views\vyuICGetItemMotorFuelTax.sql" />
     <Build Include="dbo\Views\vyuSMUserRoleMenuLocation.sql" />
     <Build Include="dbo\Views\vyuSMUserSecurityMenuFavorite.sql" />
+    <Build Include="dbo\Tables\tblSMRecentlyViewed.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetScheduleGroupDetail.sql" />
     <Build Include="dbo\Tables\tblSMTrustedComputer.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixation.sql" />
