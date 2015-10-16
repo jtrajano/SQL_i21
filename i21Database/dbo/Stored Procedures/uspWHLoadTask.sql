@@ -151,6 +151,18 @@ BEGIN TRY
 						intFromStorageLocationId = @intStorageLocationId, 
 						intToStorageLocationId = @intDockDoorLocationId
 					WHERE intTaskId = @intTaskId
+
+					
+					UPDATE c 
+					SET intStorageLocationId = t.intFromStorageLocationId,
+						intLastModifiedUserId = @intUserSecurityId,                        
+						dtmLastModified = GETDATE()     
+					FROM tblWHContainer c
+					JOIN tblWHTask t ON t.intFromContainerId = c.intContainerId
+					JOIN tblICStorageLocation l ON l.intStorageLocationId = t.intFromStorageLocationId 
+					JOIN tblICStorageLocation l1 ON l1.intStorageLocationId = c.intStorageLocationId 
+					WHERE intTaskId = @intTaskId
+
 				END
 
 				-- If the destination tblSMCompanyLocationSubLocation is the dock door tblSMCompanyLocationSubLocation then set the state to "COMPLETED" and change the type to "SHIP"                                                
@@ -164,6 +176,17 @@ BEGIN TRY
 						intLastModifiedUserId = @intUserSecurityId, 
 						dtmLastModified = GETDATE()
 					WHERE intTaskId = @intTaskId
+					
+					UPDATE c 
+					SET intStorageLocationId = t.intFromStorageLocationId,
+						intLastModifiedUserId = @intUserSecurityId,                        
+						dtmLastModified = GETDATE()     
+					FROM tblWHContainer c
+					JOIN tblWHTask t ON t.intFromContainerId = c.intContainerId
+					JOIN tblICStorageLocation l ON l.intStorageLocationId = t.intFromStorageLocationId 
+					JOIN tblICStorageLocation l1 ON l1.intStorageLocationId = c.intStorageLocationId 
+					WHERE intTaskId = @intTaskId
+
 				END
 
 				SELECT @intTaskStateId = intTaskStateId
