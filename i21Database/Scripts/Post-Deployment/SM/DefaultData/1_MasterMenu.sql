@@ -3153,6 +3153,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Estate/Co
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Patronage.view.EstateCorporation' WHERE strMenuName = 'Estate/Corporation' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Refund Calculation Worksheet' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Refund Calculation Worksheet', N'Patronage', @PatronageParentMenuId, N'Refund Calculation Worksheet', N'Maintenance', N'Screen', N'Patronage.view.RefundCalculationWorksheet', N'small-menu-maintenance', 0, 0, 0, 1, 5, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Patronage.view.RefundCalculationWorksheet' WHERE strMenuName = 'Refund Calculation Worksheet' AND strModuleName = 'Patronage' AND intParentMenuID = @PatronageParentMenuId
+
 GO
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------- ADJUST uspSMSortOriginMenus' sorting -------------------------------------------------------
