@@ -32,6 +32,7 @@
 
 -- DB
 :r .\3_DB\1_1340_to_1410.sql
+:r .\3_DB\2_1530_to_1540.sql
 
 -- SM
 :r .\4_SM\0_1510_MasterMenu.sql
