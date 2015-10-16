@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPCreate1099History]
-	@vendorFrom NVARCHAR(100),
-	@vendorTo NVARCHAR(100),
+	@vendorFrom NVARCHAR(100) = NULL,
+	@vendorTo NVARCHAR(100) = NULL,
 	@year INT,
 	@form1099 INT
 AS
@@ -38,7 +38,8 @@ BEGIN
 	WHERE 
 	--A.intEntityVendorId BETWEEN (CASE WHEN @vendorTo < @vendorFrom THEN @vendorTo ELSE @vendorFrom END) 
 	--				AND (CASE WHEN @vendorTo < @vendorFrom THEN @vendorFrom ELSE @vendorTo END)
-	A.strVendorId BETWEEN @vendorFrom AND @vendorTo
+	1 = (CASE WHEN ISNULL(@vendorFrom,'') = '' THEN 1
+				WHEN ISNULL(@vendorFrom,'') <> '' AND A.strVendorId BETWEEN @vendorFrom AND @vendorTo THEN 1 ELSE 0 END)
 			AND A.intYear = @year
 
 END
