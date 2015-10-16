@@ -3,7 +3,7 @@ AS
 SELECT
 intUserSecurityMenuFavoriteId,
 Favorite.intMenuId,
-intUserSecurityId,
+Favorite.intUserSecurityId,
 UserSecurity.intEntityId,
 UserRoleMenuLocation.intCompanyLocationId,
 Favorite.intSort,
