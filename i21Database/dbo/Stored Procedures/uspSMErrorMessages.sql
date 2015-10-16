@@ -788,6 +788,34 @@ IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51196) EXEC sp_dropmessa
 SET @strmessage = 'Weight per unit of the source and the destination lot differs, cannot merge'
 EXEC sp_addmessage 51196,11,@strmessage,'us_english','False'
 
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51197) EXEC sp_dropmessage 51197, 'us_english'	
+SET @strmessage = 'The destination container no must be at least 3 characters.'
+EXEC sp_addmessage 51197,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51198) EXEC sp_dropmessage 51198, 'us_english'	
+SET @strmessage = 'The source Container no is invalid.'
+EXEC sp_addmessage 51198,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51199) EXEC sp_dropmessage 51199, 'us_english'	
+SET @strmessage = 'The source container does not contain the expected SKU.'
+EXEC sp_addmessage 51199,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51200) EXEC sp_dropmessage 51200, 'us_english'	
+SET @strmessage = 'The split quantity is invalid because it is greater than the SKU quantity.'
+EXEC sp_addmessage 51200,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51201) EXEC sp_dropmessage 51201, 'us_english'	
+SET @strmessage = 'The split quantity is invalid because it is greater than the Cases per pallet.'
+EXEC sp_addmessage 51201,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51202) EXEC sp_dropmessage 51202, 'us_english'	
+SET @strmessage = 'Split is not allowed when the SKU is associated with load/ship task.'
+EXEC sp_addmessage 51202,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 51203) EXEC sp_dropmessage 51203, 'us_english'	
+SET @strmessage = 'Split/Put back is not allowed because destination container already has an SKU. Please scan a new destination container.'
+EXEC sp_addmessage 51203,11,@strmessage,'us_english','False'
+
 ------------------------------------------------------------------------------------------
 -- NOTE: Please stop adding error message on this sp. 
 -- See: http://inet.irelyserver.com/x/rQFhAg
