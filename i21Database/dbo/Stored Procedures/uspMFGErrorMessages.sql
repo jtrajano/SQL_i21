@@ -20,6 +20,15 @@ DECLARE @strmessage AS NVARCHAR(MAX)
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90001) EXEC sp_dropmessage 90001, 'us_english'	
 SET @strmessage = 'Machine: %s is used in the schedule for %s and %s.'
 EXEC sp_addmessage 90001,11,@strmessage,'us_english','False'
+
 IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90002) EXEC sp_dropmessage 90002, 'us_english'	
 SET @strmessage = 'Calendar name ''%s'' already exists.'
 EXEC sp_addmessage 90002,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90003) EXEC sp_dropmessage 90003, 'us_english'	
+SET @strmessage = 'Weight per unit does not match with the existing lot, cannot proceed.'
+EXEC sp_addmessage 90003,11,@strmessage,'us_english','False'
+
+IF EXISTS(SELECT 1 FROM sys.messages WHERE message_id = 90004) EXEC sp_dropmessage 90004, 'us_english'	
+SET @strmessage = 'The quantity you are trying to produce ( %s %s ) is less than the quantity allowed ( %s %s ) for the lot %s.'
+EXEC sp_addmessage 90004,11,@strmessage,'us_english','False'

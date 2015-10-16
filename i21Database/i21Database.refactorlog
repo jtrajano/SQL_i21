@@ -4151,6 +4151,13 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strEin" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="1ae35012-b8fe-46b7-907b-db16cc35b6de" ChangeDateTime="10/12/2015 14:18:42">
+    <Property Name="ElementName" Value="[dbo].[tblMFCompanyPreference].[DefaultStatusForSanitizedLot]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strDefaultStatusForSanitizedLot" />
+  </Operation>
   <Operation Name="Rename Refactor" Key="0441fb3f-ee3f-48c7-9467-391e07097cc8" ChangeDateTime="10/09/2015 13:04:21">
     <Property Name="ElementName" Value="[dbo].[tblAPBillDetail].[int1099Code]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />
@@ -4171,5 +4178,12 @@
     <Property Name="ParentElementName" Value="[dbo].[tblDBPanelFormat]" />
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strFontColor" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="404b940b-bab4-4473-80cd-eca50a004c74" ChangeDateTime="10/15/2015 16:55:59">
+    <Property Name="ElementName" Value="[dbo].[tblMFCompanyPreference].[SanitizationStagingLocation]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblMFCompanyPreference]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[strSanitizationStagingLocation]" />
   </Operation>
 </Operations>

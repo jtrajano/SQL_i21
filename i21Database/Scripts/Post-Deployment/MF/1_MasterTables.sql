@@ -1141,3 +1141,7 @@ BEGIN
 		,0
 END
 Go
+UPDATE dbo.tblMFCompanyPreference
+SET strDefaultStatusForSanitizedLot ='SANITIZED'
+WHERE strDefaultStatusForSanitizedLot IS NULL
+Go
