@@ -2641,6 +2641,7 @@
     <Build Include="dbo\Stored Procedures\uspMFCloseSanitizationWorkOrder.sql" />
     <Build Include="dbo\Tables\tblMFWorkOrderConsumedSKU.sql" />
     <Build Include="dbo\Stored Procedures\uspMFProduceSanitizedOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspWHCreateSKUByLot.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

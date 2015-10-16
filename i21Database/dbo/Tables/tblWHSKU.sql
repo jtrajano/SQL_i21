@@ -17,7 +17,7 @@
 	[strReasonCode]	NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[strComment]	NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
 	[intParentSKUId]	INT,
-	[strParentSKUNo]	NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+	[strParentSKUNo]	NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 	[dblWeightPerUnit]	NUMERIC(18,6) NOT NULL,
 	[intWeightPerUnitUOMId]	INT NOT NULL,
 	[intUnitsPerLayer]	INT NOT NULL,
