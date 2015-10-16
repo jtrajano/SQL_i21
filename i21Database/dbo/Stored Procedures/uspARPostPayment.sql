@@ -603,7 +603,7 @@ SET @batchIdUsed = @batchId
 			END
 
 		--UNPOSTING VALIDATIONS
-		IF @post = 0
+		IF @post = 0 And @recap = 0
 			BEGIN
 			
 				--Invoice with Discount

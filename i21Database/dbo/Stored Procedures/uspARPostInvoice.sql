@@ -583,7 +583,7 @@ SET @batchIdUsed = @batchId
 			END 
 
 		--unposting
-		IF @post = 0
+		IF @post = 0 And @recap = 0
 			BEGIN
 				--ALREADY HAVE PAYMENTS
 				INSERT INTO @InvalidInvoiceData(strError, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
