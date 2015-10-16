@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPCreate1099History]
-	@vendorTo INT,
 	@vendorFrom INT,
+	@vendorTo INT,
 	@year INT,
 	@form1099 INT
 AS
@@ -41,4 +41,5 @@ BEGIN
 
 END
 
+EXEC [uspAPUpdateBill1099Status] @vedor
 SELECT  * FROM tblAP1099History WHERE int1099HistoryId IN (SELECT id FROM #tmpCreated)
