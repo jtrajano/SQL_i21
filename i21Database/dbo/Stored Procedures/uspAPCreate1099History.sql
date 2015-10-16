@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPCreate1099History]
-	@vendorFrom INT,
-	@vendorTo INT,
+	@vendorFrom NVARCHAR(100),
+	@vendorTo NVARCHAR(100),
 	@year INT,
 	@form1099 INT
 AS
@@ -35,11 +35,13 @@ BEGIN
 		[dtmDatePrinted]	=	GETDATE(), 
 		[dtmDateFiled]		=	NULL
 	FROM vyuAP1099MISC A
-	WHERE A.intEntityVendorId BETWEEN (CASE WHEN @vendorTo < @vendorFrom THEN @vendorTo ELSE @vendorFrom END) 
-					AND (CASE WHEN @vendorTo < @vendorFrom THEN @vendorFrom ELSE @vendorTo END)
+	WHERE 
+	--A.intEntityVendorId BETWEEN (CASE WHEN @vendorTo < @vendorFrom THEN @vendorTo ELSE @vendorFrom END) 
+	--				AND (CASE WHEN @vendorTo < @vendorFrom THEN @vendorFrom ELSE @vendorTo END)
+	A.strVendorId BETWEEN @vendorFrom AND @vendorTo
 			AND A.intYear = @year
 
 END
 
-EXEC [uspAPUpdateBill1099Status] @vedor
+EXEC [uspAPUpdateBill1099Status] @vendorFrom, @vendorTo, @year, @form1099
 SELECT  * FROM tblAP1099History WHERE int1099HistoryId IN (SELECT id FROM #tmpCreated)
