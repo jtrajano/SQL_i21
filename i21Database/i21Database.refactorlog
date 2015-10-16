@@ -4158,4 +4158,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[int1099Form]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="fca7ac1e-cb1f-449d-8c45-532ce663c114" ChangeDateTime="10/16/2015 05:26:47">
+    <Property Name="ElementName" Value="[dbo].[tblDBPanelFormat].[intBackColor]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblDBPanelFormat]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strBackColor" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="78bf2e30-99c6-40bd-9070-5d11a39c30fe" ChangeDateTime="10/16/2015 05:26:56">
+    <Property Name="ElementName" Value="[dbo].[tblDBPanelFormat].[intFontColor]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblDBPanelFormat]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="strFontColor" />
+  </Operation>
 </Operations>
