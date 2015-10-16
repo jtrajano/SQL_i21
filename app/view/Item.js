@@ -1222,40 +1222,6 @@ Ext.define('Inventory.view.Item', {
                                                                         valueField: 'intPatronageCategoryId'
                                                                     },
                                                                     {
-                                                                        xtype: 'gridcombobox',
-                                                                        columns: [
-                                                                            {
-                                                                                dataIndex: 'intFuelTaxClassId',
-                                                                                dataType: 'numeric',
-                                                                                text: 'Tax Class Id',
-                                                                                hidden: true
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strTaxClassCode',
-                                                                                dataType: 'string',
-                                                                                text: 'Tax Class',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strDescription',
-                                                                                dataType: 'string',
-                                                                                text: 'Description',
-                                                                                flex: 1
-                                                                            },
-                                                                            {
-                                                                                dataIndex: 'strIRSTaxCode',
-                                                                                dataType: 'string',
-                                                                                text: 'Description',
-                                                                                flex: 1
-                                                                            }
-                                                                        ],
-                                                                        itemId: 'cboTaxClass',
-                                                                        fieldLabel: 'Fuel Tax Class',
-                                                                        labelWidth: 116,
-                                                                        displayField: 'strTaxClassCode',
-                                                                        valueField: 'intFuelTaxClassId'
-                                                                    },
-                                                                    {
                                                                         xtype: 'checkboxfield',
                                                                         itemId: 'chkStockedItem',
                                                                         fieldLabel: 'Stocked Item',
@@ -1311,50 +1277,6 @@ Ext.define('Inventory.view.Item', {
                                                                         fieldLabel: 'Fuel Item',
                                                                         labelWidth: 116
                                                                     },
-                                                                    {
-                                                                        xtype: 'panel',
-                                                                        flex: 1,
-                                                                        itemId: 'pnlTankManagment',
-                                                                        title: 'Tank Management',
-                                                                        layout: {
-                                                                            type: 'vbox',
-                                                                            align: 'stretch',
-                                                                            padding: 5
-                                                                        },
-                                                                        items: [
-                                                                            {
-                                                                                xtype: 'checkboxfield',
-                                                                                itemId: 'chkTankRequired',
-                                                                                fieldLabel: 'Tank Required',
-                                                                                labelWidth: 110
-                                                                            },
-                                                                            {
-                                                                                xtype: 'checkboxfield',
-                                                                                itemId: 'chkAvailableForTm',
-                                                                                fieldLabel: 'Available for TM',
-                                                                                labelWidth: 110
-                                                                            },
-                                                                            {
-                                                                                xtype: 'numericfield',
-                                                                                itemId: 'txtDefaultPercentFull',
-                                                                                fieldLabel: 'Default % Full',
-                                                                                labelWidth: 110,
-                                                                                fieldStyle: 'text-align:right',
-                                                                                hideTrigger: true
-                                                                            }
-                                                                        ]
-                                                                    }
-                                                                ]
-                                                            },
-                                                            {
-                                                                xtype: 'container',
-                                                                flex: 1,
-                                                                margin: '0 7',
-                                                                layout: {
-                                                                    type: 'vbox',
-                                                                    align: 'stretch'
-                                                                },
-                                                                items: [
                                                                     {
                                                                         xtype: 'panel',
                                                                         itemId: 'pnlRins',
@@ -1418,12 +1340,21 @@ Ext.define('Inventory.view.Item', {
                                                                                 hideTrigger: true
                                                                             }
                                                                         ]
-                                                                    },
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                xtype: 'container',
+                                                                flex: 1,
+                                                                margin: '0 7',
+                                                                layout: {
+                                                                    type: 'vbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
                                                                     {
                                                                         xtype: 'panel',
-                                                                        flex: 1,
                                                                         itemId: 'pnlFeed',
-                                                                        margin: '5 0 0 0',
                                                                         bodyPadding: 5,
                                                                         title: 'Feed',
                                                                         layout: {
@@ -3762,6 +3693,246 @@ Ext.define('Inventory.view.Item', {
                                                                         labelWidth: 105,
                                                                         displayField: 'strUnitMeasure',
                                                                         valueField: 'intItemUOMId'
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                xtype: 'container',
+                                                                flex: 1,
+                                                                layout: {
+                                                                    type: 'vbox',
+                                                                    align: 'stretch'
+                                                                }
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'panel',
+                                                        itemId: 'pgeMotorFuelTax',
+                                                        title: 'Motor Fuel Tax',
+                                                        layout: {
+                                                            type: 'vbox',
+                                                            align: 'stretch'
+                                                        },
+                                                        tabConfig: {
+                                                            xtype: 'tab',
+                                                            itemId: 'cfgMotorFuelTax'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'advancefiltergrid',
+                                                                flex: 1,
+                                                                itemId: 'grdMotorFuelTax',
+                                                                margin: '-1 -1 4 -1',
+                                                                header: false,
+                                                                title: 'Customer Item Cross Reference Grid',
+                                                                dockedItems: [
+                                                                    {
+                                                                        xtype: 'toolbar',
+                                                                        dock: 'top',
+                                                                        itemId: 'tlbGridOptions',
+                                                                        layout: {
+                                                                            type: 'hbox',
+                                                                            padding: '0 0 0 1'
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnInsertMFT',
+                                                                                iconCls: 'small-add',
+                                                                                text: 'Insert'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'button',
+                                                                                tabIndex: -1,
+                                                                                itemId: 'btnDeleteMFT',
+                                                                                iconCls: 'small-delete',
+                                                                                text: 'Remove'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'tbseparator'
+                                                                            },
+                                                                            {
+                                                                                xtype: 'filter1'
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ],
+                                                                columns: [
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colMFTTaxAuthorityCode',
+                                                                        width: 215,
+                                                                        dataIndex: 'string',
+                                                                        text: 'Tax Authority Code',
+                                                                        flex: 1.5,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intTaxAuthorityId',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'ysnFilingForThisTA',
+                                                                                    dataType: 'boolean',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strTaxAuthorityCode',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Tax Authority Code',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strDescription',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Description',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboTaxAuthorityCode',
+                                                                            displayField: 'strTaxAuthorityCode',
+                                                                            valueField: 'strTaxAuthorityCode'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        dataIndex: 'string',
+                                                                        itemId: 'colMFTTaxDescription',
+                                                                        text: 'Description',
+                                                                        flex: 1
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        itemId: 'colMFTProductCode',
+                                                                        width: 215,
+                                                                        dataIndex: 'string',
+                                                                        text: 'Product Code',
+                                                                        flex: 1.5,
+                                                                        editor: {
+                                                                            xtype: 'gridcombobox',
+                                                                            columns: [
+                                                                                {
+                                                                                    dataIndex: 'intProductCodeId',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strProductCode',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Product Code',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strDescription',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Description',
+                                                                                    flex: 1
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'intTaxAuthorityId',
+                                                                                    dataType: 'numeric',
+                                                                                    hidden: true
+                                                                                },
+                                                                                {
+                                                                                    dataIndex: 'strProductCodeGroup',
+                                                                                    dataType: 'string',
+                                                                                    text: 'Product Code Group',
+                                                                                    flex: 1
+                                                                                }
+                                                                            ],
+                                                                            itemId: 'cboProductCode',
+                                                                            displayField: 'strProductCode',
+                                                                            valueField: 'strProductCode'
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        dataIndex: 'string',
+                                                                        itemId: 'colMFTProductCodeDescription',
+                                                                        text: 'Product Code Description',
+                                                                        flex: 2
+                                                                    },
+                                                                    {
+                                                                        xtype: 'gridcolumn',
+                                                                        dataIndex: 'string',
+                                                                        itemId: 'colMFTProductCodeGroup',
+                                                                        text: 'Product Code Group',
+                                                                        flex: 2
+                                                                    }
+                                                                ],
+                                                                viewConfig: {
+                                                                    itemId: 'grvCustomerXref'
+                                                                },
+                                                                selModel: Ext.create('Ext.selection.CheckboxModel', {
+                                                                    selType: 'checkboxmodel'
+                                                                }),
+                                                                plugins: [
+                                                                    {
+                                                                        ptype: 'cellediting',
+                                                                        pluginId: 'cepMotorFuelTax',
+                                                                        clicksToEdit: 1
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        xtype: 'panel',
+                                                        itemId: 'pgeOthers',
+                                                        bodyPadding: 7,
+                                                        title: 'Others',
+                                                        layout: {
+                                                            type: 'hbox',
+                                                            align: 'stretch'
+                                                        },
+                                                        tabConfig: {
+                                                            xtype: 'tab',
+                                                            itemId: 'cfgOthers'
+                                                        },
+                                                        items: [
+                                                            {
+                                                                xtype: 'container',
+                                                                flex: 1,
+                                                                layout: {
+                                                                    type: 'vbox',
+                                                                    align: 'stretch'
+                                                                },
+                                                                items: [
+                                                                    {
+                                                                        xtype: 'panel',
+                                                                        itemId: 'pnlTankManagment',
+                                                                        title: 'Tank Management',
+                                                                        layout: {
+                                                                            type: 'vbox',
+                                                                            align: 'stretch',
+                                                                            padding: 5
+                                                                        },
+                                                                        items: [
+                                                                            {
+                                                                                xtype: 'checkboxfield',
+                                                                                itemId: 'chkTankRequired',
+                                                                                fieldLabel: 'Tank Required',
+                                                                                labelWidth: 110
+                                                                            },
+                                                                            {
+                                                                                xtype: 'checkboxfield',
+                                                                                itemId: 'chkAvailableForTm',
+                                                                                fieldLabel: 'Available for TM',
+                                                                                labelWidth: 110
+                                                                            },
+                                                                            {
+                                                                                xtype: 'numericfield',
+                                                                                itemId: 'txtDefaultPercentFull',
+                                                                                fieldLabel: 'Default % Full',
+                                                                                labelWidth: 110,
+                                                                                fieldStyle: 'text-align:right',
+                                                                                hideTrigger: true
+                                                                            }
+                                                                        ]
                                                                     }
                                                                 ]
                                                             },

@@ -2545,63 +2545,6 @@
                                                             ]
                                                         },
                                                         {
-                                                            "type": "Ext.form.field.ComboBox",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
-                                                                "columns": [
-                                                                    "[",
-                                                                    "{",
-                                                                    "dataIndex: 'intFuelTaxClassId',",
-                                                                    "dataType: 'numeric',",
-                                                                    "text: 'Tax Class Id',",
-                                                                    "hidden: true",
-                                                                    "},",
-                                                                    "{",
-                                                                    "dataIndex: 'strTaxClassCode',",
-                                                                    "dataType: 'string',",
-                                                                    "text: 'Tax Class',",
-                                                                    "flex: 1",
-                                                                    "},",
-                                                                    "{",
-                                                                    "dataIndex: 'strDescription',",
-                                                                    "dataType: 'string',",
-                                                                    "text: 'Description',",
-                                                                    "flex: 1",
-                                                                    "},",
-                                                                    "{",
-                                                                    "dataIndex: 'strIRSTaxCode',",
-                                                                    "dataType: 'string',",
-                                                                    "text: 'Description',",
-                                                                    "flex: 1",
-                                                                    "}",
-                                                                    "]"
-                                                                ],
-                                                                "designer|createAlias": "gridcombobox",
-                                                                "displayField": "strTaxClassCode",
-                                                                "fieldLabel": "Fuel Tax Class",
-                                                                "itemId": "cboTaxClass",
-                                                                "labelWidth": 116,
-                                                                "layout|flex": null,
-                                                                "valueField": "intFuelTaxClassId"
-                                                            },
-                                                            "name": "MyComboBox9",
-                                                            "configAlternates": {
-                                                                "columns": "array"
-                                                            },
-                                                            "designerId": "383ec3e6-0a59-4430-9a95-db8790b1a65a",
-                                                            "customConfigs": [
-                                                                {
-                                                                    "group": "(Custom Properties)",
-                                                                    "name": "columns",
-                                                                    "type": "string"
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
                                                             "type": "Ext.form.field.Checkbox",
                                                             "reference": {
                                                                 "name": "items",
@@ -2762,99 +2705,6 @@
                                                             },
                                                             "codeClass": null,
                                                             "userConfig": {
-                                                                "container|align": "stretch",
-                                                                "container|padding": 5,
-                                                                "itemId": "pnlTankManagment",
-                                                                "layout": "vbox",
-                                                                "layout|flex": 1,
-                                                                "title": "Tank Management"
-                                                            },
-                                                            "name": "MyPanel3",
-                                                            "designerId": "2261aa75-5267-49f7-b2e8-14652c0dd456",
-                                                            "cn": [
-                                                                {
-                                                                    "type": "Ext.form.field.Checkbox",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "boxLabel": null,
-                                                                        "fieldLabel": "Tank Required",
-                                                                        "itemId": "chkTankRequired",
-                                                                        "labelWidth": 110,
-                                                                        "layout|flex": null
-                                                                    },
-                                                                    "name": "MyCheckbox6",
-                                                                    "designerId": "3a9d5e7a-a7ba-47d1-8165-50be51c5b6c5"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.form.field.Checkbox",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "boxLabel": null,
-                                                                        "fieldLabel": "Available for TM",
-                                                                        "itemId": "chkAvailableForTm",
-                                                                        "labelWidth": 110,
-                                                                        "layout|flex": null
-                                                                    },
-                                                                    "name": "MyCheckbox7",
-                                                                    "designerId": "0258b273-bd2c-4db7-8869-9da3d1cf826d"
-                                                                },
-                                                                {
-                                                                    "type": "Ext.form.field.Number",
-                                                                    "reference": {
-                                                                        "name": "items",
-                                                                        "type": "array"
-                                                                    },
-                                                                    "codeClass": null,
-                                                                    "userConfig": {
-                                                                        "designer|createAlias": "numericfield",
-                                                                        "fieldLabel": "Default % Full",
-                                                                        "fieldStyle": "text-align:right",
-                                                                        "hideTrigger": true,
-                                                                        "itemId": "txtDefaultPercentFull",
-                                                                        "labelWidth": 110,
-                                                                        "layout|flex": null
-                                                                    },
-                                                                    "name": "MyNumberField12",
-                                                                    "designerId": "b256e5c4-0313-42e2-9da1-160a1c127369"
-                                                                }
-                                                            ]
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "type": "Ext.container.Container",
-                                                    "reference": {
-                                                        "name": "items",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "container|align": "stretch",
-                                                        "designer|displayName": "container",
-                                                        "layout": "vbox",
-                                                        "layout|flex": 1,
-                                                        "layout|margins": null,
-                                                        "margin": "0 7"
-                                                    },
-                                                    "name": "MyContainer7",
-                                                    "designerId": "1fb2f92b-be7d-4cc5-932d-c1e8d4676eef",
-                                                    "cn": [
-                                                        {
-                                                            "type": "Ext.panel.Panel",
-                                                            "reference": {
-                                                                "name": "items",
-                                                                "type": "array"
-                                                            },
-                                                            "codeClass": null,
-                                                            "userConfig": {
                                                                 "bodyPadding": 5,
                                                                 "container|align": "stretch",
                                                                 "itemId": "pnlRins",
@@ -2972,7 +2822,27 @@
                                                                     "designerId": "8b01a6c8-6079-4fbc-b1f0-53bbd5886971"
                                                                 }
                                                             ]
-                                                        },
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.container.Container",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "container|align": "stretch",
+                                                        "designer|displayName": "container",
+                                                        "layout": "vbox",
+                                                        "layout|flex": 1,
+                                                        "layout|margins": null,
+                                                        "margin": "0 7"
+                                                    },
+                                                    "name": "MyContainer7",
+                                                    "designerId": "1fb2f92b-be7d-4cc5-932d-c1e8d4676eef",
+                                                    "cn": [
                                                         {
                                                             "type": "Ext.panel.Panel",
                                                             "reference": {
@@ -2985,9 +2855,8 @@
                                                                 "container|align": "stretch",
                                                                 "itemId": "pnlFeed",
                                                                 "layout": "vbox",
-                                                                "layout|flex": 1,
+                                                                "layout|flex": null,
                                                                 "layout|margins": null,
-                                                                "margin": "5 0 0 0",
                                                                 "title": "Feed"
                                                             },
                                                             "name": "MyPanel5",
@@ -8213,6 +8082,512 @@
                                                     },
                                                     "name": "MyContainer30",
                                                     "designerId": "294b3bf0-1279-48c6-89f8-fa6dcbf1d5e4"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.panel.Panel",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "container|align": "stretch",
+                                                "itemId": "pgeMotorFuelTax",
+                                                "layout": "vbox",
+                                                "title": "Motor Fuel Tax"
+                                            },
+                                            "name": "MyPanel20",
+                                            "designerId": "520be6d1-96ce-47b8-9ee6-c5f535397274",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.tab.Tab",
+                                                    "reference": {
+                                                        "name": "tabConfig",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "itemId": "cfgMotorFuelTax"
+                                                    },
+                                                    "name": "TabConfig7",
+                                                    "designerId": "a1b91bc4-87d9-40e1-9953-19b1358b5939"
+                                                },
+                                                {
+                                                    "type": "Ext.grid.Panel",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "designer|createAlias": "advancefiltergrid",
+                                                        "header": false,
+                                                        "itemId": "grdMotorFuelTax",
+                                                        "layout|flex": 1,
+                                                        "layout|margins": null,
+                                                        "margin": "-1 -1 4 -1",
+                                                        "title": "Customer Item Cross Reference Grid"
+                                                    },
+                                                    "name": "MyGridPanel4",
+                                                    "designerId": "f1e2bddc-9a66-4b05-825d-50ba22f63cce",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.toolbar.Toolbar",
+                                                            "reference": {
+                                                                "name": "dockedItems",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "container|padding": "0 0 0 1",
+                                                                "dock": "top",
+                                                                "itemId": "tlbGridOptions"
+                                                            },
+                                                            "name": "MyToolbar4",
+                                                            "designerId": "2429c2b9-1993-4cef-a754-049ae8c4b32a",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.button.Button",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "icon": null,
+                                                                        "iconCls": "small-add",
+                                                                        "itemId": "btnInsertMFT",
+                                                                        "layout|flex": null,
+                                                                        "tabIndex": -1,
+                                                                        "text": "Insert"
+                                                                    },
+                                                                    "name": "MyButton39",
+                                                                    "designerId": "887e54e6-423c-4395-9e1b-7310211647d4"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.button.Button",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "icon": null,
+                                                                        "iconCls": "small-delete",
+                                                                        "itemId": "btnDeleteMFT",
+                                                                        "layout|flex": null,
+                                                                        "tabIndex": -1,
+                                                                        "text": "Remove"
+                                                                    },
+                                                                    "name": "MyButton14",
+                                                                    "designerId": "20ebad68-9049-4cf2-9a10-a148c9475f72"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.toolbar.Separator",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "designer|displayName": "separator",
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "MySeparator5",
+                                                                    "designerId": "30b03faf-72a8-4147-b448-6b66f70bfabc"
+                                                                },
+                                                                {
+                                                                    "type": "linkedinstance",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "filter122",
+                                                                    "designerId": "49c3fb54-0e26-4ccf-ade0-359ab372f04f",
+                                                                    "masterInstanceId": "9b6ce090-c1f1-4ea9-8ac8-d6b59470c0f4"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "string",
+                                                                "flex": 1.5,
+                                                                "itemId": "colMFTTaxAuthorityCode",
+                                                                "text": "Tax Authority Code",
+                                                                "width": 215
+                                                            },
+                                                            "name": "MyColumn12",
+                                                            "designerId": "1f159940-faf0-4850-a47a-d338c31ddcfd",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intTaxAuthorityId',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'ysnFilingForThisTA',",
+                                                                            "\t\tdataType: 'boolean',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strTaxAuthorityCode',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Tax Authority Code',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strDescription',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Description',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t}",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strTaxAuthorityCode",
+                                                                        "itemId": "cboTaxAuthorityCode",
+                                                                        "valueField": "strTaxAuthorityCode"
+                                                                    },
+                                                                    "name": "MyComboBox47",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "2667370f-07c0-435e-ad90-227339560209",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "string",
+                                                                "flex": 1,
+                                                                "itemId": "colMFTTaxDescription",
+                                                                "text": "Description"
+                                                            },
+                                                            "name": "MyColumn13",
+                                                            "designerId": "75b8a9d2-c38d-4a2b-ab33-45239bf36c63"
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "string",
+                                                                "flex": 1.5,
+                                                                "itemId": "colMFTProductCode",
+                                                                "text": "Product Code",
+                                                                "width": 215
+                                                            },
+                                                            "name": "MyColumn71",
+                                                            "designerId": "17134a23-4174-4830-ac66-033a801940f6",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.ComboBox",
+                                                                    "reference": {
+                                                                        "name": "editor",
+                                                                        "type": "object"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "columns": [
+                                                                            "[",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intProductCodeId',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strProductCode',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Product Code',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strDescription',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Description',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'intTaxAuthorityId',",
+                                                                            "\t\tdataType: 'numeric',",
+                                                                            "\t\thidden: true",
+                                                                            "\t},",
+                                                                            "\t{",
+                                                                            "\t\tdataIndex: 'strProductCodeGroup',",
+                                                                            "\t\tdataType: 'string',",
+                                                                            "\t\ttext: 'Product Code Group',",
+                                                                            "\t\tflex: 1",
+                                                                            "\t}",
+                                                                            "]"
+                                                                        ],
+                                                                        "designer|createAlias": "gridcombobox",
+                                                                        "displayField": "strProductCode",
+                                                                        "itemId": "cboProductCode",
+                                                                        "valueField": "strProductCode"
+                                                                    },
+                                                                    "name": "MyComboBox48",
+                                                                    "configAlternates": {
+                                                                        "columns": "array"
+                                                                    },
+                                                                    "designerId": "41041c99-4385-45b6-b95c-68d402eb5e60",
+                                                                    "customConfigs": [
+                                                                        {
+                                                                            "group": "(Custom Properties)",
+                                                                            "name": "columns",
+                                                                            "type": "string"
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "string",
+                                                                "flex": 2,
+                                                                "itemId": "colMFTProductCodeDescription",
+                                                                "text": "Product Code Description"
+                                                            },
+                                                            "name": "MyColumn14",
+                                                            "designerId": "7af435c5-e4b6-4eaf-9d7c-73cf7a21aebe"
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.column.Column",
+                                                            "reference": {
+                                                                "name": "columns",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "dataIndex": "string",
+                                                                "flex": 2,
+                                                                "itemId": "colMFTProductCodeGroup",
+                                                                "text": "Product Code Group"
+                                                            },
+                                                            "name": "MyColumn15",
+                                                            "designerId": "c0521ec4-22d6-4118-b501-e397660c0c33"
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.View",
+                                                            "reference": {
+                                                                "name": "viewConfig",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "itemId": "grvCustomerXref"
+                                                            },
+                                                            "name": "MyGridView4",
+                                                            "designerId": "08a48bd5-86b3-4f41-bd88-263dd1f0a002"
+                                                        },
+                                                        {
+                                                            "type": "Ext.selection.CheckboxModel",
+                                                            "reference": {
+                                                                "name": "selModel",
+                                                                "type": "object"
+                                                            },
+                                                            "codeClass": "Ext.selection.CheckboxModel",
+                                                            "name": "MyCheckboxSelectionModel2",
+                                                            "designerId": "663b15ba-87b6-4391-a773-314e7fd0ff0b"
+                                                        },
+                                                        {
+                                                            "type": "Ext.grid.plugin.CellEditing",
+                                                            "reference": {
+                                                                "name": "plugins",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "clicksToEdit": 1,
+                                                                "designer|displayName": "cepMotorFuelTax",
+                                                                "pluginId": "cepMotorFuelTax"
+                                                            },
+                                                            "name": "MyCellEditingPlugin7",
+                                                            "designerId": "0aa66669-6d3a-4bdf-be21-3567eccbe5d3"
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "type": "Ext.panel.Panel",
+                                            "reference": {
+                                                "name": "items",
+                                                "type": "array"
+                                            },
+                                            "codeClass": null,
+                                            "userConfig": {
+                                                "bodyPadding": 7,
+                                                "container|align": "stretch",
+                                                "itemId": "pgeOthers",
+                                                "layout": "hbox",
+                                                "title": "Others"
+                                            },
+                                            "name": "MyPanel10",
+                                            "designerId": "60f38216-64c0-42ee-9e49-30047c23d83a",
+                                            "cn": [
+                                                {
+                                                    "type": "Ext.tab.Tab",
+                                                    "reference": {
+                                                        "name": "tabConfig",
+                                                        "type": "object"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "itemId": "cfgOthers"
+                                                    },
+                                                    "name": "TabConfig12",
+                                                    "designerId": "1db6f670-b476-4f9f-8e47-f549d93769c3"
+                                                },
+                                                {
+                                                    "type": "Ext.container.Container",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "container|align": "stretch",
+                                                        "designer|displayName": "container",
+                                                        "layout": "vbox",
+                                                        "layout|flex": 1
+                                                    },
+                                                    "name": "MyContainer27",
+                                                    "designerId": "ec20827f-687c-42c1-8af5-391cab615cc9",
+                                                    "cn": [
+                                                        {
+                                                            "type": "Ext.panel.Panel",
+                                                            "reference": {
+                                                                "name": "items",
+                                                                "type": "array"
+                                                            },
+                                                            "codeClass": null,
+                                                            "userConfig": {
+                                                                "container|align": "stretch",
+                                                                "container|padding": 5,
+                                                                "itemId": "pnlTankManagment",
+                                                                "layout": "vbox",
+                                                                "layout|flex": null,
+                                                                "title": "Tank Management"
+                                                            },
+                                                            "name": "MyPanel3",
+                                                            "designerId": "2261aa75-5267-49f7-b2e8-14652c0dd456",
+                                                            "cn": [
+                                                                {
+                                                                    "type": "Ext.form.field.Checkbox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "boxLabel": null,
+                                                                        "fieldLabel": "Tank Required",
+                                                                        "itemId": "chkTankRequired",
+                                                                        "labelWidth": 110,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "MyCheckbox6",
+                                                                    "designerId": "3a9d5e7a-a7ba-47d1-8165-50be51c5b6c5"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Checkbox",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "boxLabel": null,
+                                                                        "fieldLabel": "Available for TM",
+                                                                        "itemId": "chkAvailableForTm",
+                                                                        "labelWidth": 110,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "MyCheckbox7",
+                                                                    "designerId": "0258b273-bd2c-4db7-8869-9da3d1cf826d"
+                                                                },
+                                                                {
+                                                                    "type": "Ext.form.field.Number",
+                                                                    "reference": {
+                                                                        "name": "items",
+                                                                        "type": "array"
+                                                                    },
+                                                                    "codeClass": null,
+                                                                    "userConfig": {
+                                                                        "designer|createAlias": "numericfield",
+                                                                        "fieldLabel": "Default % Full",
+                                                                        "fieldStyle": "text-align:right",
+                                                                        "hideTrigger": true,
+                                                                        "itemId": "txtDefaultPercentFull",
+                                                                        "labelWidth": 110,
+                                                                        "layout|flex": null
+                                                                    },
+                                                                    "name": "MyNumberField12",
+                                                                    "designerId": "b256e5c4-0313-42e2-9da1-160a1c127369"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "type": "Ext.container.Container",
+                                                    "reference": {
+                                                        "name": "items",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "container|align": "stretch",
+                                                        "designer|displayName": "container",
+                                                        "layout": "vbox",
+                                                        "layout|flex": 1
+                                                    },
+                                                    "name": "MyContainer30",
+                                                    "designerId": "56a2072a-e43d-46a4-95a1-a6f5a66c90ac"
                                                 }
                                             ]
                                         }

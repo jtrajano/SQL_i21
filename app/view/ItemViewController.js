@@ -112,6 +112,9 @@ Ext.define('Inventory.view.ItemViewController', {
             cfgCost: {
                 hidden: '{pgeCostHide}'
             },
+            cfgOthers: {
+                hidden: '{pgeOthersHide}'
+            },
 
             grdUnitOfMeasure: {
                 colDetailUnitMeasure: {
@@ -528,6 +531,39 @@ Ext.define('Inventory.view.ItemViewController', {
                     value: '{current.intItemId}',
                     conjunction: 'and'
                 }]
+            },
+
+            //--------------//
+            //Motor Fuel Tax//
+            //--------------//
+            grdMotorFuelTax: {
+                colMFTTaxAuthorityCode: {
+                    dataIndex: 'strTaxAuthorityCode',
+                    editor: {
+                        origValueField: 'intTaxAuthorityId',
+                        origUpdateField: 'intTaxAuthorityId',
+                        store: '{taxAuthority}',
+                        defaultFilters: [{
+                            column: 'ysnFilingForThisTA',
+                            value: true
+                        }]
+                    }
+                },
+                colMFTTaxDescription: 'strTaxAuthorityDescription',
+                colMFTProductCode: {
+                    dataIndex: 'strProductCode',
+                    editor: {
+                        origValueField: 'intProductCodeId',
+                        origUpdateField: 'intProductCodeId',
+                        store: '{productCode}',
+                        defaultFilters: [{
+                            column: 'intTaxAuthorityId',
+                            value: '{grdMotorFuelTax.selection.intTaxAuthorityId}'
+                        }]
+                    }
+                },
+                colMFTProductCodeDescription: 'strProductDescription',
+                colMFTProductCodeGroup: 'strProductCodeGroup'
             },
 
             //-----------------//
@@ -972,6 +1008,7 @@ Ext.define('Inventory.view.ItemViewController', {
             grdFactory = win.down('#grdFactory'),
             grdManufacturingCellAssociation = win.down('#grdManufacturingCellAssociation'),
             grdOwner = win.down('#grdOwner'),
+            grdMotorFuelTax = win.down('#grdMotorFuelTax'),
 
             grdPricing = win.down('#grdPricing'),
             grdPricingLevel = win.down('#grdPricingLevel'),
@@ -1042,6 +1079,13 @@ Ext.define('Inventory.view.ItemViewController', {
                             })
                         }
                     ]
+                },
+                {
+                    key: 'tblICItemMotorFuelTaxes',
+                    component: Ext.create('iRely.mvvm.grid.Manager', {
+                        grid: grdMotorFuelTax,
+                        deleteButton: grdMotorFuelTax.down('#btnDeleteMFT')
+                    })
                 },
                 {
                     key: 'tblICItemCertifications',
@@ -1260,7 +1304,7 @@ Ext.define('Inventory.view.ItemViewController', {
     // <editor-fold desc="Details Tab Methods and Event Handlers">
 
     onItemTabChange: function(tabPanel, newCard, oldCard, eOpts) {
-        switch(newCard.itemId){
+        switch (newCard.itemId) {
             case 'pgeDetails':
                 var pgeDetails = tabPanel.down('#pgeDetails');
                 var grdUnitOfMeasure = pgeDetails.down('#grdUnitOfMeasure');
@@ -1337,6 +1381,14 @@ Ext.define('Inventory.view.ItemViewController', {
                     grdCertification.store.load();
                 break;
 
+            case 'pgeMFT':
+                var pgeMFT = tabPanel.down('#pgeMFT');
+                var grdMotorFuelTax = pgeMFT.down('#grdMotorFuelTax');
+                if (grdMotorFuelTax.store.complete === true)
+                    grdMotorFuelTax.getView().refresh();
+                else
+                    grdMotorFuelTax.store.load();
+                break;
 
             case 'pgePricing':
                 var pgePricing = tabPanel.down('#pgePricing');
@@ -1421,7 +1473,7 @@ Ext.define('Inventory.view.ItemViewController', {
                 if (grdFactory) {
                     grdFactory.getSelectionModel().select(0);
                 }
-                
+
                 break;
 
         }
@@ -2112,6 +2164,28 @@ Ext.define('Inventory.view.ItemViewController', {
 
         if (combo.column.itemId === 'colCertification'){
             current.set('intCertificationId', records[0].get('intCertificationId'));
+        }
+    },
+
+    // </editor-fold>
+
+    // <editor-fold desc="Motor Fuel Tax Tab Methods and Event Handlers">
+
+    onMotorFuelTaxSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var grid = combo.up('grid');
+        var plugin = grid.getPlugin('cepMotorFuelTax');
+        var current = plugin.getActiveRecord();
+
+        if (combo.itemId === 'cboTaxAuthorityCode'){
+            current.set('strTaxAuthorityDescription', records[0].get('strDescription'));
+        }
+
+        else if (combo.itemId === 'cboProductCode') {
+            current.set('strProductDescription', records[0].get('strDescription'));
+            current.set('strProductCodeGroup', records[0].get('strProductCodeGroup'));
         }
     },
 
@@ -2814,10 +2888,10 @@ Ext.define('Inventory.view.ItemViewController', {
             "#colPricingAmount": {
                 beforerender: this.onPricingGridColumnBeforeRender
             },
-            "#cboLotTracking" : {
+            "#cboLotTracking": {
                 select: this.onLotTrackingSelect
             },
-            "#cboCopyLocation" : {
+            "#cboCopyLocation": {
                 select: this.onCopyLocationSelect
             },
             "#btnAddLocation": {
@@ -2831,6 +2905,12 @@ Ext.define('Inventory.view.ItemViewController', {
             },
             "#btnAddRequiredAccounts": {
                 click: this.onAddRequiredAccountClick
+            },
+            "#cboTaxAuthorityCode": {
+                select: this.onMotorFuelTaxSelect
+            },
+            "#cboProductCode": {
+                select: this.onMotorFuelTaxSelect
             }
         });
     }
