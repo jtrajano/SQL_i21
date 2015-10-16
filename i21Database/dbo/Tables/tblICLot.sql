@@ -42,7 +42,7 @@ Lot numbers are unique per item, lot number, location, sub location, and storage
 		[intLotStatusId]			INT NOT NULL DEFAULT ((1)),
 		[intParentLotId]			INT NULL,
 		[intSplitFromLotId]			INT NULL,
-		[dblGrossWeight]			NUMERIC(18,6) NULL,
+		[dblGrossWeight]			NUMERIC(18,6) NULL, -- Accumulated gross weight of the lot whenever posted or unposted in Inventory Receipt screen. 
 		[dblWeight]					NUMERIC(18,6) NULL DEFAULT ((0)),
 		[intWeightUOMId]			INT NULL,
 		[dblWeightPerQty]			NUMERIC(38,20) NULL DEFAULT ((0)),

@@ -705,6 +705,18 @@ BEGIN
 						
 			IF @intReturnValue < 0 GOTO With_Rollback_Exit
 		END
+
+		-- Reduce the Gross weight for the lots when unposting the receipt. 
+		UPDATE dbo.tblICLot
+		SET		dblGrossWeight = Lot.dblGrossWeight - ItemLot.dblGrossWeight
+		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem 
+					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+				INNER JOIN dbo.tblICInventoryReceiptItemLot ItemLot
+					ON ItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+				INNER JOIN dbo.tblICLot Lot 
+					ON Lot.intLotId = ItemLot.intLotId
+		WHERE	Receipt.intInventoryReceiptId = @intTransactionId
+				AND Receipt.strReceiptNumber = @strTransactionId				
 	END 
 END   
 
