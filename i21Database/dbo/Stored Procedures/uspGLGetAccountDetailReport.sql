@@ -108,6 +108,7 @@ IF @dtmDateFrom IS NOT NULL AND (
 	SELECT @hasInactiveAccountsByDate = 1
 
 
+EXEC [dbo].[uspGLSummaryRecalculate]
 
 ;WITH Units 
 AS 
