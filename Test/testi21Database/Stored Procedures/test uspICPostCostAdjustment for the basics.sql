@@ -47,7 +47,6 @@ BEGIN
 		-- Declare the variables used by uspICPostCostAdjustment
 		DECLARE @ItemsToAdjust AS ItemCostAdjustmentTableType;
 		DECLARE @strBatchId AS NVARCHAR(20);
-		DECLARE @strAccountToCounterInventory AS NVARCHAR(255) = 'Cost Adjustment';
 		DECLARE @intUserId AS INT = 1;
 
 		-- Setup the items to post
@@ -61,7 +60,6 @@ BEGIN
 		EXEC dbo.uspICPostCostAdjustment
 			@ItemsToAdjust
 			,@strBatchId 
-			,@strAccountToCounterInventory
 			,@intUserId
 
 		-- Remove the column dtmDateEntered. We don't need to assert it. 
