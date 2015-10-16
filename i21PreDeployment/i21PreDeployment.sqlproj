@@ -127,7 +127,6 @@
     <None Include="Scripts\Pre-Deployment\12_EM\12_UpdateCustomerFreightNullLocation.sql" />
     <None Include="Scripts\Pre-Deployment\12_EM\12_EntityEmployeeSchemaUpdate.sql" />
     <None Include="Scripts\Pre-Deployment\16_HD\Drop_Constraint.sql" />
-    
     <None Include="Scripts\Pre-Deployment\8_AP\Update1099BillDetailData.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -227,5 +226,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\2_CM\3_DB\1_1340_to_1410.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\3_DB\2_1530_to_1540.sql" />
   </ItemGroup>
 </Project>
