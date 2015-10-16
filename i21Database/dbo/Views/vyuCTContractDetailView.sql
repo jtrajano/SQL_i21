@@ -44,9 +44,9 @@ AS
 			IM.intPurchaseTaxGroupId,			SP.intSupplyPointId,			SP.intEntityVendorId			AS	intTerminalId,
 			SP.intRackPriceSupplyPointId,		IM.intOriginId,
 			RV.dblReservedQuantity,				
-			CD.dblQuantity - RV.dblReservedQuantity AS dblUnReservedQuantity,
-			PA.dblAllocatedQty + SA.dblAllocatedQty AS dblAllocatedQty,
-			CD.dblQuantity - PA.dblAllocatedQty + SA.dblAllocatedQty AS dblUnAllocatedQty,
+			ISNULL(CD.dblQuantity,0) - ISNULL(RV.dblReservedQuantity,0) AS dblUnReservedQuantity,
+			ISNULL(PA.dblAllocatedQty,0) + ISNULL(SA.dblAllocatedQty,0) AS dblAllocatedQty,
+			ISNULL(CD.dblQuantity,0) - ISNULL(PA.dblAllocatedQty,0) + ISNULL(SA.dblAllocatedQty,0) AS dblUnAllocatedQty,
 			CAST(CASE WHEN CD.intContractStatusId IN (1,4) THEN 1 ELSE 0 END AS BIT) AS ysnAllowedToShow,
 
 			--Header Detail

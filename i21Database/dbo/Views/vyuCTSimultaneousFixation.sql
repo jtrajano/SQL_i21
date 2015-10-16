@@ -8,7 +8,7 @@ FROM
 	SELECT	PF.intPriceFixationId,
 			CD.intContractDetailId,
 			CD.intContractSeq,
-			PF.intLotsFixed/dblHeaderQuantity * dbo.fnCTConvertQuantityToTargetCommodityUOM(CU.intCommodityUnitMeasureId,CD.intCommodityUnitMeasureId,CD.dblDetailQuantity) dblFixedLots,
+			PF.intLotsFixed/dblHeaderQuantity * dbo.fnCTConvertQuantityToTargetCommodityUOM(QM.intCommodityUnitMeasureId,CD.intCommodityUnitMeasureId,CD.dblDetailQuantity) dblFixedLots,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,CU.intCommodityUnitMeasureId,CD.dblFutures) dblFutures,
 			dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,CU.intCommodityUnitMeasureId,CD.dblOriginalBasis) dblOriginalBasis,
 			PF.dblRollArb,
@@ -39,9 +39,12 @@ FROM
 	FROM	tblCTPriceFixationDetail	FD
 	JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId	=	FD.intPriceFixationId
 	JOIN	vyuCTContractDetailView		CD	ON	CD.intContractHeaderId	=	PF.intContractHeaderId
-	JOIN	tblICItemUOM				IM	ON	IM.intItemUOMId			=	CD.intItemUOMId
-	JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId		=	CD.intCommodityId AND 
+	JOIN	tblICItemUOM				IM	ON	IM.intItemUOMId			=	CD.intPriceItemUOMId
+	JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId		=	CD.intCommodityId		AND 
 												CU.intUnitMeasureId		=	IM.intUnitMeasureId
+	JOIN  tblICItemUOM                  TU  ON  TU.intItemUOMId			=   CD.intItemUOMId
+    JOIN  tblICCommodityUnitMeasure     QM  ON  QM.intCommodityId       =   QM.intCommodityId       AND 
+												QM.intUnitMeasureId     =   TU.intUnitMeasureId     
 	WHERE	PF.intContractDetailId IS NULL
 )t
 

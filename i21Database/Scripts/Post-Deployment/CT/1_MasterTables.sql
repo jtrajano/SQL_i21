@@ -319,3 +319,16 @@ BEGIN
 	SELECT 5,'Complete',1	
 END
 GO
+
+GO
+IF NOT EXISTS(SELECT * FROM tblCTCleanCostExpenseType)
+BEGIN
+	INSERT INTO tblCTCleanCostExpenseType(intConcurrencyId,strExpenseName,strExpenseDescription,ysnQuantityEnable)
+	SELECT 1,'Profit/Loss','Profit/Loss',0 UNION ALL
+	SELECT 1,'Margin Calls','Margin Calls',0 UNION ALL
+	SELECT 1,'Credit/Debit Fixations','Credit/Debit Fixations',0 UNION ALL
+	SELECT 1,'Franchise/ Reweights','Franchise/ Reweights',1 UNION ALL
+	SELECT 1,'Debit Quality','Debit Quality',0 UNION ALL
+	SELECT 1,'Refund Insurance (Damage)','Refund Insurance (Damage)',1 
+END
+GO
