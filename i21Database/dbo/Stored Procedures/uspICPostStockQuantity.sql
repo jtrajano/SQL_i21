@@ -144,6 +144,10 @@ BEGIN
 			-- Item is a Lot and with Weight. 
 			-------------------------------------------
 
+			-------------------------------------------
+			-- Item is a Lot and with Weight. 
+			-------------------------------------------
+
 			-- Get the Pack Qty (intItemUOMId) 
 			UNION ALL 
 			SELECT	intItemId = @intItemId
@@ -162,7 +166,27 @@ BEGIN
 					AND Lot.intWeightUOMId IS NOT NULL 
 					AND ISNULL(Lot.dblWeightPerQty, 0) <> 0
 
-			-- Convert the pack or weight UOM to stock unit. 
+			-- Get the Weight Qty
+			UNION ALL 
+			SELECT	intItemId = @intItemId
+					,intItemLocationId = @intItemLocationId
+					,intItemUOMId =	CASE	WHEN (@intItemUOMId = Lot.intItemUOMId) THEN Lot.intWeightUOMId -- Stock is in packs, then get the weight uom id.
+											ELSE @intItemUOMId
+									END 
+					,intSubLocationId = @intSubLocationId 
+					,intStorageLocationId = @intStorageLocationId
+					,Qty =	CASE	WHEN (@intItemUOMId = Lot.intItemUOMId) THEN @dblQty * Lot.dblWeightPerQty -- Stock is in packs, then convert it to weight
+									ELSE @dblQty
+							END 
+			FROM	dbo.tblICLot Lot LEFT JOIN dbo.tblICItemUOM LotWeightUOM 
+						ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId
+			WHERE	Lot.intItemLocationId = @intItemLocationId
+					AND Lot.intLotId = @intLotId
+					AND Lot.intWeightUOMId IS NOT NULL 
+					AND Lot.intItemUOMId <> Lot.intWeightUOMId
+					AND ISNULL(Lot.dblWeightPerQty, 0) <> 0
+					
+			-- Convert the weight UOM to stock unit. 
 			UNION ALL 
 			SELECT	intItemId = @intItemId
 					,intItemLocationId = @intItemLocationId
@@ -175,7 +199,6 @@ BEGIN
 								END 
 								,LotWeightUOM.dblUnitQty								
 							) 
-
 			FROM	dbo.tblICLot Lot LEFT JOIN dbo.tblICItemUOM LotWeightUOM 
 						ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId
 					LEFT JOIN dbo.tblICItemUOM LotStockUOM 
@@ -185,6 +208,7 @@ BEGIN
 					AND Lot.intLotId = @intLotId
 					AND Lot.intWeightUOMId IS NOT NULL 
 					AND Lot.intWeightUOMId <> LotStockUOM.intItemUOMId
+					AND Lot.intItemUOMId <> LotStockUOM.intItemUOMId
 					AND ISNULL(Lot.dblWeightPerQty, 0) <> 0
 
 			---------------------------------------------
