@@ -2,6 +2,12 @@ CREATE VIEW vyuLGDeliveryOpenPickLotDetails
 AS
 SELECT PL.intPickLotDetailId,
   PL.intPickLotHeaderId,
+  PLH.strCustomer,
+  PLH.intReferenceNumber,
+  PLH.dtmPickDate,
+  PLH.strCommodity,
+  PLH.strLocationName,
+  PLH.strWeightUnitMeasure,
   PL.intAllocationDetailId,
   PL.intLotId,
   PL.dblSalePickedQty,
@@ -24,19 +30,22 @@ SELECT PL.intPickLotDetailId,
   SubLocation.strSubLocationName,
   Lot.intStorageLocationId,
   Lot.strStorageLocation,
-  CD.dblCashPrice,
-  CD.strContractNumber as strSContractNumber,
-  CD.intContractSeq as intSContractSeq,
+  PCD.strContractNumber as strPContractNumber,
+  PCD.intContractSeq as intPContractSeq,
+  SCD.dblCashPrice,
+  SCD.strContractNumber as strSContractNumber,
+  SCD.intContractSeq as intSContractSeq,
   UM.strUnitMeasure as strLotUnitMeasure,
   UM.strUnitType as strLotUnitType,
   SaleUOM.strUnitMeasure as strSaleUnitMeasure,
   SaleUOM.strUnitType as strSaleUnitType
 FROM tblLGPickLotDetail  PL
-JOIN tblLGPickLotHeader  PLH ON PLH.intPickLotHeaderId  = PL.intPickLotHeaderId
+JOIN vyuLGDeliveryOpenPickLots PLH ON PLH.intPickLotHeaderId  = PL.intPickLotHeaderId
 LEFT JOIN vyuICGetLot    Lot ON Lot.intLotId    = PL.intLotId
 LEFT JOIN tblICItem    IM ON IM.intItemId    = Lot.intItemId
 JOIN tblLGAllocationDetail AD ON AD.intAllocationDetailId = PL.intAllocationDetailId
-LEFT JOIN vyuCTContractDetailView CD ON CD.intContractDetailId  = AD.intSContractDetailId
+LEFT JOIN vyuCTContractDetailView PCD ON PCD.intContractDetailId  = AD.intPContractDetailId
+LEFT JOIN vyuCTContractDetailView SCD ON SCD.intContractDetailId  = AD.intSContractDetailId
 JOIN tblICUnitMeasure  UM ON UM.intUnitMeasureId   = PL.intLotUnitMeasureId
 JOIN tblICUnitMeasure SaleUOM ON SaleUOM.intUnitMeasureId = PL.intSaleUnitMeasureId
 JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = PLH.intSubLocationId
