@@ -17,7 +17,7 @@ AS
 	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	UH.intContractDetailId
 	JOIN	tblICInventoryReceiptItem	RI	ON	RI.intInventoryReceiptItemId	=	UH.intExternalId 
 	JOIN	tblICInventoryReceipt		IR	ON	IR.intInventoryReceiptId		=	RI.intInventoryReceiptId
-	JOIN	tblSMUserSecurity			US	ON	US.intUserSecurityID			=	UH.intUserId
+	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]			=	UH.intUserId
 	WHERE	UH.strScreenName	=	'Inventory Receipt'
 
 	UNION ALL
@@ -38,7 +38,7 @@ AS
 	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	UH.intContractDetailId
 	JOIN	tblARInvoiceDetail			DL	ON	DL.intInvoiceDetailId			=	UH.intExternalId 
 	JOIN	tblARInvoice				HR	ON	HR.intInvoiceId					=	DL.intInvoiceId
-	JOIN	tblSMUserSecurity			US	ON	US.intUserSecurityID			=	UH.intUserId
+	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]			=	UH.intUserId
 	WHERE	UH.strScreenName	=	'Invoice'
 
 	UNION ALL
@@ -58,7 +58,7 @@ AS
 	FROM	tblCTSequenceUsageHistory	UH
 	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	UH.intContractDetailId
 	JOIN	tblLGLoad					DL	ON	DL.intLoadId					=	UH.intExternalId 
-	JOIN	tblSMUserSecurity			US	ON	US.intUserSecurityID			=	UH.intUserId
+	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]			=	UH.intUserId
 	WHERE	UH.strScreenName	=	'Load Schedule'
 
 	UNION ALL
@@ -79,7 +79,7 @@ AS
 	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	UH.intContractDetailId
 	JOIN	tblTRTransportReceipt		DL	ON	DL.intTransportReceiptId		=	UH.intExternalId 
 	JOIN	tblTRTransportLoad			HR	ON	HR.intTransportLoadId			=	DL.intTransportLoadId
-	JOIN	tblSMUserSecurity			US	ON	US.intUserSecurityID			=	UH.intUserId
+	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]			=	UH.intUserId
 	WHERE	UH.strScreenName	=	'Transport Purchase'
 	
 	UNION ALL
@@ -101,7 +101,7 @@ AS
 	JOIN	tblTRDistributionHeader		DL	ON	DL.intDistributionHeaderId		=	UH.intExternalId 
 	JOIN	tblTRTransportReceipt		TR	ON	TR.intTransportReceiptId		=	DL.intTransportReceiptId 	
 	JOIN	tblTRTransportLoad			HR	ON	HR.intTransportLoadId			=	TR.intTransportLoadId
-	JOIN	tblSMUserSecurity			US	ON	US.intUserSecurityID			=	UH.intUserId
+	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]			=	UH.intUserId
 	WHERE	UH.strScreenName	=	'Transport Sale'
 
 	UNION ALL
@@ -121,7 +121,7 @@ AS
 	FROM	tblCTSequenceUsageHistory	UH
 	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId		=	UH.intContractDetailId
 	JOIN	tblSCTicket					DL	ON	DL.intTicketId				=	UH.intExternalId 
-	JOIN	tblSMUserSecurity			US	ON	US.intUserSecurityID		=	UH.intUserId
+	JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]		=	UH.intUserId
 	WHERE	UH.strScreenName	=	'Scale'
 
 	UNION ALL
@@ -142,5 +142,5 @@ AS
 	 JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId		=	UH.intContractDetailId
 	 JOIN	tblPOPurchaseDetail			DL	ON	DL.intPurchaseDetailId		=	UH.intExternalId 
 	 JOIN	tblPOPurchase				HR	ON	HR.intPurchaseId			=	DL.intPurchaseId
-	 JOIN	tblSMUserSecurity			US	ON	US.intUserSecurityID		=	UH.intUserId
+	 JOIN	tblSMUserSecurity			US	ON	US.[intEntityUserSecurityId]		=	UH.intUserId
 	 WHERE	UH.strScreenName	=	'Purchase Order'

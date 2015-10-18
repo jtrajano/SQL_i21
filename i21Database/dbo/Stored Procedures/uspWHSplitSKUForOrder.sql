@@ -64,7 +64,7 @@ IF @intLocalTran= 1 BEGIN TRANSACTION
 	SET @intRestrictionId = 0
 	SET @intUserId = 0
 
-	SELECT @intUserId = intUserSecurityID FROM tblSMUserSecurity WHERE strUserName = @strUserName
+	SELECT @intUserId = intEntityUserSecurityId FROM tblSMUserSecurity WHERE strUserName = @strUserName--this is a hiccup
 	--Check the destination tblWHContainer code is at least 5 digits              
 	IF LEN(@strDestContainerNo) > 0
 	BEGIN

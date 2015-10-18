@@ -121,7 +121,7 @@ AS
 	LEFT JOIN tblSMTerm I
 		ON D.intWillCallDeliveryTermId = I.strTerm
 	LEFT JOIN tblSMUserSecurity J
-		ON D.intUserID = J.intUserSecurityID
+		ON D.intUserID = J.[intEntityUserSecurityId]
 	----Start Getting will call Driver	
 	LEFT JOIN tblEntity L
 		ON A.intDriverID = L.intEntityId	

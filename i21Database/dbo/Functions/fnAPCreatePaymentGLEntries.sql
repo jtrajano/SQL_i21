@@ -41,7 +41,7 @@ BEGIN
 	DECLARE @userLocation INT;
 	DECLARE @applyWithHold BIT = 0, @applyDiscount INT = 0, @applyInterest INT = 0;
 
-	SET @userLocation = (SELECT TOP 1 intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityId = @intUserId);
+	SET @userLocation = (SELECT TOP 1 intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @intUserId);
 	IF (@userLocation IS NOT NULL AND @userLocation > 0)
 	BEGIN
 		SELECT TOP 1

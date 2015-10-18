@@ -17,9 +17,9 @@ DECLARE @ErrorState INT;
 DECLARE @intEntityId int;
 BEGIN TRY
 
-SELECT	@intEntityId = intEntityId
+SELECT	@intEntityId = intEntityUserSecurityId --this is a hiccup
 FROM	dbo.tblSMUserSecurity 
-WHERE	intUserSecurityID = @intUserId
+WHERE	intEntityUserSecurityId = @intUserId --this also
 
 if @ysnPostOrUnPost = 0 and @ysnRecap = 0
     BEGIN

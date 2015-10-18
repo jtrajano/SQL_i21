@@ -88,7 +88,7 @@ SET @WriteOffAccount = (SELECT TOP 1 intWriteOffAccountId FROM tblARCompanyPrefe
 		
 
 DECLARE @UserEntityID int
-SET @UserEntityID = ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE intUserSecurityID = @userId),@userId)
+SET @UserEntityID = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId),@userId)
 
 SET @recapId = '1'
 SET @success = 1

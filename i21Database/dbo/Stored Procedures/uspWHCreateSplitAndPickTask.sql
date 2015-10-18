@@ -31,7 +31,7 @@ BEGIN
 	FROM tblWHOrderHeader
 	WHERE intOrderHeaderId = @intOrderHeaderId
 
-	SELECT @intUserSecurityId = intUserSecurityID
+	SELECT @intUserSecurityId = intEntityUserSecurityId --this is a hiccup
 	FROM tblSMUserSecurity
 	WHERE strUserName = @strUserName
 

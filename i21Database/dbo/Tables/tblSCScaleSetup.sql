@@ -75,7 +75,7 @@
     CONSTRAINT [FK_tblSCScaleSetup_tblGRStorageType_intGrainBankStorageTypeId] FOREIGN KEY ([intGrainBankStorageTypeId]) REFERENCES [tblGRStorageType]([intStorageScheduleTypeId]), 
     CONSTRAINT [UK_tblSCScaleSetup_strStationShortDescription] UNIQUE ([strStationShortDescription]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblSMCompanyLocation_intLocationId] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]),
-	CONSTRAINT [FK_tblSCScaleSetup_tblSMUserSecurity_intLastPurgeUserId] FOREIGN KEY ([intLastPurgeUserId]) REFERENCES [tblSMUserSecurity]([intUserSecurityID]),
+	CONSTRAINT [FK_tblSCScaleSetup_tblSMUserSecurity_intLastPurgeUserId] FOREIGN KEY ([intLastPurgeUserId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblICItem_intDefaultFeeItemId] FOREIGN KEY ([intDefaultFeeItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblSCScaleSetup_tblICItem_intFreightItemId] FOREIGN KEY ([intFreightItemId]) REFERENCES [tblICItem]([intItemId])
 	)

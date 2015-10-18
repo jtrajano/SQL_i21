@@ -20,9 +20,10 @@ DECLARE @InventoryReceiptId AS INT
 		,@strReceiptNumber AS NVARCHAR(50)
 		
 -- Get the entity id
-SELECT	@intEntityId = intEntityId
+--this is a hiccup
+SELECT	@intEntityId = intEntityUserSecurityId
 FROM	dbo.tblSMUserSecurity 
-WHERE	intUserSecurityID = @intUserId
+WHERE	intEntityUserSecurityId = @intUserId
 
 -- Create the temp table if it does not exists. 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
@@ -210,7 +211,7 @@ BEGIN
 				,dtmReceiveTime			= NULL 
 				,dblActualTempReading	= NULL 
 				,intConcurrencyId		= 1
-				,intEntityId			= (SELECT TOP 1 intEntityId FROM dbo.tblSMUserSecurity WHERE intUserSecurityID = @intUserId)
+				,intEntityId			= (SELECT TOP 1 [intEntityUserSecurityId] FROM dbo.tblSMUserSecurity WHERE [intEntityUserSecurityId] = @intUserId)
 				,intCreatedUserId		= @intUserId
 				,ysnPosted				= 0
 				,strActualCostId		= IntegrationData.strActualCostId
@@ -279,7 +280,7 @@ BEGIN
 				/*dtmReceiveTime*/				,NULL 
 				/*dblActualTempReading*/		,NULL 
 				/*intConcurrencyId*/			,1
-				/*intEntityId*/					,(SELECT TOP 1 intEntityId FROM dbo.tblSMUserSecurity WHERE intUserSecurityID = @intUserId)
+				/*intEntityId*/					,(SELECT TOP 1 [intEntityUserSecurityId] FROM dbo.tblSMUserSecurity WHERE [intEntityUserSecurityId] = @intUserId)
 				/*intCreatedUserId*/			,@intUserId
 				/*ysnPosted*/					,0
 				/*strActualCostId*/				,IntegrationData.strActualCostId

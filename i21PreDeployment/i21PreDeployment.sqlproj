@@ -128,6 +128,7 @@
     <None Include="Scripts\Pre-Deployment\12_EM\12_EntityEmployeeSchemaUpdate.sql" />
     <None Include="Scripts\Pre-Deployment\16_HD\Drop_Constraint.sql" />
     <None Include="Scripts\Pre-Deployment\8_AP\Update1099BillDetailData.sql" />
+    <None Include="Scripts\Pre-Deployment\12_EM\13_EntityUserSecuritySchemaUpdate.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\DeleteScripts.sql" />

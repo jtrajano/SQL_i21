@@ -24,5 +24,5 @@
 	CONSTRAINT [FK_tblLGDeliveryHeader_tblSMCompanyLocationSubLocation_intCompanyLocationSubLocationId_intSubLocationId] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
 	CONSTRAINT [FK_tblLGDeliveryHeader_tblEntity_intTruckerEntityId] FOREIGN KEY ([intTruckerEntityId]) REFERENCES [tblEntity]([intEntityId]),
 	CONSTRAINT [FK_tblLGDeliveryHeader_tblICUnitMeasure_intWeightUnitMeasureId] FOREIGN KEY ([intWeightUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
-    CONSTRAINT [FK_tblLGDeliveryHeader_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intUserSecurityID])
+    CONSTRAINT [FK_tblLGDeliveryHeader_tblSMUserSecurity_intUserSecurityId] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId])
 )

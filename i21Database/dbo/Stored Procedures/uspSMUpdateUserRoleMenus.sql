@@ -16,7 +16,7 @@ DECLARE @IsAdmin BIT
 BEGIN TRANSACTION
 
 -- Transfer affected User Securities to temporary list
-SELECT intUserSecurityID
+SELECT [intEntityUserSecurityId]
 INTO #tmpUserSecurities
 FROM tblSMUserSecurity
 WHERE intUserRoleID = @UserRoleID

@@ -13,20 +13,20 @@ DECLARE @userId INT
 BEGIN TRANSACTION  
 
 -- Get all users in the role specified
-SELECT intUserSecurityID INTO #tmpUserSecurities  
+SELECT [intEntityUserSecurityId] INTO #tmpUserSecurities  
 FROM tblSMUserSecurity WHERE intUserRoleID = @userRoleId  
 
 -- Clear out control permissions of all users in the role specified.
 DELETE tblSMUserSecurityControlPermission 
-WHERE intUserSecurityId IN (SELECT intUserSecurityID FROM #tmpUserSecurities)
+WHERE intUserSecurityId IN (SELECT [intEntityUserSecurityId] FROM #tmpUserSecurities)
 
 -- Clear out screen permissions of all users in the role specified. 
 DELETE tblSMUserSecurityScreenPermission 
-WHERE intUserSecurityId IN (SELECT intUserSecurityID FROM #tmpUserSecurities)
+WHERE intUserSecurityId IN (SELECT [intEntityUserSecurityId] FROM #tmpUserSecurities)
 
 WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUserSecurities)  
 BEGIN  
-	SELECT TOP 1 @userId = intUserSecurityID FROM #tmpUserSecurities  
+	SELECT TOP 1 @userId = [intEntityUserSecurityId] FROM #tmpUserSecurities  
 
 	-- Cascade role control permissions to user control permissions.
 	INSERT INTO tblSMUserSecurityControlPermission (intUserSecurityId, intControlId, strPermission, strLabel, strDefaultValue, ysnRequired, intConcurrencyId)
@@ -36,7 +36,7 @@ BEGIN
 	INSERT INTO tblSMUserSecurityScreenPermission (intUserSecurityId, intScreenId, strPermission, intConcurrencyId)
 	SELECT @userId, intScreenId, strPermission, 1 FROM tblSMUserRoleScreenPermission WHERE intUserRoleId = @userRoleId
 	    
-	DELETE FROM #tmpUserSecurities WHERE intUserSecurityID = @userId  
+	DELETE FROM #tmpUserSecurities WHERE [intEntityUserSecurityId] = @userId  
 END  
  
 COMMIT TRANSACTION

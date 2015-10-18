@@ -26,17 +26,17 @@ FROM (
 		,A.strApprovalNotes
 		,CASE WHEN ISNULL(B.strVendorId,'') = '' THEN C.strEntityNo ELSE B.strVendorId END AS strVendorId
 		,C.strName
-		,intEntityApproverId = Approver.intEntityId
+		,intEntityApproverId = Approver.[intEntityUserSecurityId]
 	FROM dbo.tblAPBill A
 		INNER JOIN (dbo.tblAPVendor B INNER JOIN dbo.tblEntity C ON B.intEntityVendorId = C.intEntityId)
 		ON A.intEntityVendorId = B.intEntityVendorId
 		OUTER APPLY
 		(
 			SELECT
-				F.intEntityId
+				F.[intEntityUserSecurityId]
 			FROM dbo.tblSMApprovalList D
 			INNER JOIN dbo.tblSMApprovalListUserSecurity E ON D.intApprovalListId = E.intApprovalListId
-			LEFT JOIN dbo.tblSMUserSecurity F ON E.intUserSecurityId = F.intUserSecurityID
+			LEFT JOIN dbo.tblSMUserSecurity F ON E.intUserSecurityId = F.[intEntityUserSecurityId]
 			WHERE D.intApprovalListId = B.intApprovalListId
 		) Approver
 		WHERE A.ysnForApproval = 1 AND B.intApprovalListId IS NOT NULL AND A.dtmApprovalDate IS NULL

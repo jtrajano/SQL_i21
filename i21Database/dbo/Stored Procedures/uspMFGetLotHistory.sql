@@ -37,7 +37,7 @@ BEGIN
 		JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = l.intSubLocationId
 		JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
 		JOIN tblICUnitMeasure um ON um.intUnitMeasureId = ilt.intItemUOMId
-		JOIN tblSMUserSecurity us ON us.intUserSecurityID = ilt.intCreatedUserId
+		JOIN tblSMUserSecurity us ON us.[intEntityUserSecurityId] = ilt.intCreatedUserId
 		WHERE l.intLotId = @intLotId
 		
 		UNION

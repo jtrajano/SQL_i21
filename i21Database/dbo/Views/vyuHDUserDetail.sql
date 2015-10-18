@@ -11,18 +11,18 @@
 			,strLocation = us.strLocation
 			,strSLAPlan = ''
 			,strReplyDue = ''
-			,intUserId = us.intUserSecurityID
-			,intEntityId = us.intEntityId
+			,intUserId = us.[intEntityUserSecurityId]
+			,intEntityId = us.[intEntityUserSecurityId]
 			,ur.strName
 			,us.strUserName
 			,us.strFirstName
 			,us.strMiddleName
 			,us.strLastName
-			,strEmail = (select (case when strEmail IS null then us.strEmail else strEmail end) from tblEntity where intEntityId = us.intEntityId)
+			,strEmail = (select (case when strEmail IS null then us.strEmail else strEmail end) from tblEntity where intEntityId = us.[intEntityUserSecurityId])
 			,ysni21User = 1
-			,imgPhoto = (select top 1 imgPhoto from tblEntity where intEntityId = us.intEntityId)
+			,imgPhoto = (select top 1 imgPhoto from tblEntity where intEntityId = us.[intEntityUserSecurityId])
 			,intConcurrencyId = 1
-			,strFullName2 = (select top 1 strName from tblEntity where intEntityId = us.intEntityId)
+			,strFullName2 = (select top 1 strName from tblEntity where intEntityId = us.[intEntityUserSecurityId])
 		from
 			tblSMUserSecurity us,
 			tblSMUserRole ur

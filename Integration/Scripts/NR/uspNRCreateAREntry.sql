@@ -162,7 +162,7 @@ BEGIN
 				--******  To be changed when real payment method added  CAST(@strPayType As Int)
 				SET @intLocationId = CAST(@strInvoiceLocation As Int)
 								
-				Select @intEntityId = intEntityId from dbo.tblSMUserSecurity Where intUserSecurityID = CAST(@strUserID As Int)
+				Select @intEntityId = intEntityUserSecurityId from dbo.tblSMUserSecurity Where intEntityUserSecurityId = CAST(@strUserID As Int)
 				
 				Select @intInvoiceId = intInvoiceId, @intTermId = intTermId, @intAccountId = intAccountId, @dblDiscount = dblDiscount
 				, @dblPayment = dblInvoiceTotal 

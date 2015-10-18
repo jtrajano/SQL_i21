@@ -100,7 +100,7 @@ BEGIN TRY
 
 	SELECT @ActionLocationName = strLocationName FROM tblSMCompanyLocation	WHERE intCompanyLocationId = @ActionCompanyLocationId
 
-	SELECT @UserName = strUserName	FROM tblSMUserSecurity	WHERE intUserSecurityID = @UserKey
+	SELECT @UserName = strUserName	FROM tblSMUserSecurity	WHERE [intEntityUserSecurityId] = @UserKey
 
 	INSERT INTO @ItemsToMove 
 	(

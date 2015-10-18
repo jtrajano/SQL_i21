@@ -309,7 +309,7 @@ BEGIN TRY
 						L.intWeightUOMId,
 						L.intItemUOMId
 						FROM tblICLot L 
-						JOIN tblSMUserSecurity US ON L.intCreatedUserId=US.intUserSecurityID
+						JOIN tblSMUserSecurity US ON L.intCreatedUserId=US.[intEntityUserSecurityId]
 						JOIN tblICLotStatus LS ON L.intLotStatusId=LS.intLotStatusId
 						WHERE L.intItemId=@intRawItemId AND L.intLocationId=@intLocationId 
 						AND LS.strPrimaryStatus IN ('Active','Quarantine')

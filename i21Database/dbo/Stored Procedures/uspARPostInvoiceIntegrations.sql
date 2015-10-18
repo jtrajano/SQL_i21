@@ -13,8 +13,8 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @UserEntityID INT
 		,@actionType AS NVARCHAR(50)
-		
-SET @UserEntityID = ISNULL((SELECT intEntityId FROM tblSMUserSecurity WHERE intUserSecurityID = @userId),@userId) 
+--THIS IS A HICCUP		
+SET @UserEntityID = ISNULL((SELECT intEntityUserSecurityId FROM tblSMUserSecurity WHERE intEntityUserSecurityId = @userId),@userId) 
 SELECT @actionType = CASE WHEN @post = 1 THEN 'Posted'  ELSE 'Unposted' END 
 
 

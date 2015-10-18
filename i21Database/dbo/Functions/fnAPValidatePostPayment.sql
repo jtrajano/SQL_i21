@@ -21,7 +21,7 @@ BEGIN
 	);
 	INSERT INTO @tmpPayments SELECT * FROM [dbo].fnGetRowsFromDelimitedValues(@paymentIds)
 
-	SELECT TOP 1 @userLocation = intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityId = @userId;
+	SELECT TOP 1 @userLocation = intCompanyLocationId FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @userId;
 	IF (@userLocation IS NOT NULL AND @userLocation > 0)
 	BEGIN
 		SELECT TOP 1

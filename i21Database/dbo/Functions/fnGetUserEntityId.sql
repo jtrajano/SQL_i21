@@ -7,9 +7,9 @@ AS
 BEGIN 
 	DECLARE @intEntityId AS INT
 	
-	SELECT	@intEntityId = intEntityId
+	SELECT	@intEntityId = [intEntityUserSecurityId]
 	FROM	dbo.tblSMUserSecurity
-	WHERE	intUserSecurityID = @intUserId
+	WHERE	[intEntityUserSecurityId] = @intUserId
 
 	RETURN @intEntityId
 END 

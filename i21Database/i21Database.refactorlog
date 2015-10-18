@@ -4186,4 +4186,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[strSanitizationStagingLocation]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="21072851-c50f-4057-8d8f-8596ecb0586c" ChangeDateTime="10/13/2015 05:45:49">
+    <Property Name="ElementName" Value="[dbo].[tblSMUserSecurity].[intUserSecurityID]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMUserSecurity]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityUserSecurityId]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c64b214f-c1a5-47e3-a4ff-c74b6306a4b7" ChangeDateTime="10/13/2015 05:48:06">
+    <Property Name="ElementName" Value="[dbo].[tblSMUserSecurity].[intEntityId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblSMUserSecurity]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[intEntityUserSecurityId]" />
+  </Operation>
 </Operations>

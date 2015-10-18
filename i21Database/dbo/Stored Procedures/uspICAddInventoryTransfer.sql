@@ -113,9 +113,9 @@ BEGIN
 
 		-- Get the entity id's 
 		SELECT	TOP 1 
-				@intEntityId = intEntityId
+				@intEntityId = [intEntityUserSecurityId]
 		FROM	dbo.tblSMUserSecurity
-		WHERE	intUserSecurityID = @intUserId
+		WHERE	[intEntityUserSecurityId] = @intUserId
 
 		MERGE	
 		INTO	dbo.tblICInventoryTransfer 

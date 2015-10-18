@@ -27,5 +27,5 @@ FROM
 	UNION ALL
 	SELECT 'Payment', intPaymentId, strRecordNumber, intEntityId, dtmDatePaid, strNotes FROM tblARPayment WHERE ysnPosted = 0
 ) BatchPosting
-INNER JOIN tblSMUserSecurity UserSecurity ON BatchPosting.intEntityId = UserSecurity.intEntityId
+INNER JOIN tblSMUserSecurity UserSecurity ON BatchPosting.intEntityId = UserSecurity.[intEntityUserSecurityId]
 GO

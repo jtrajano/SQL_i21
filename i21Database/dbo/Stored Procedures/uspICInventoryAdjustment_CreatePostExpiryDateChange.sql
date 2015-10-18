@@ -68,9 +68,9 @@ IF @@ERROR <> 0 GOTO _Exit
 -- Set the transaction date and expiration date
 SET @dtmDate = ISNULL(@dtmDate, GETDATE());
 
-SELECT	@intEntityId = intEntityId
+SELECT	@intEntityId = [intEntityUserSecurityId]
 FROM	dbo.tblSMUserSecurity
-WHERE	intUserSecurityID = @intUserId
+WHERE	[intEntityUserSecurityId] = @intUserId
 
 -- Create the header record
 BEGIN 

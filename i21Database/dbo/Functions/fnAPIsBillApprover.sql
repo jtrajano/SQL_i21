@@ -11,8 +11,8 @@ BEGIN
 
 	IF EXISTS(SELECT 1 FROM tblAPBill A INNER JOIN tblAPVendor B ON A.intEntityVendorId = B.intEntityVendorId
 						INNER JOIN tblSMApprovalListUserSecurity C ON B.intApprovalListId = C.intApprovalListId
-						INNER JOIN tblSMUserSecurity D ON C.intUserSecurityId = D.intUserSecurityID
-						WHERE A.intBillId = @billId AND D.intEntityId = @entityId)
+						INNER JOIN tblSMUserSecurity D ON C.intUserSecurityId = D.[intEntityUserSecurityId]
+						WHERE A.intBillId = @billId AND D.[intEntityUserSecurityId] = @entityId)
 	BEGIN
 		SET @isApprover = 1;
 	END

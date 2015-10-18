@@ -13,8 +13,11 @@ BEGIN
 		  , @dblSplitPercent  NUMERIC(18,6)
 		  , @ZeroDecimal      NUMERIC(18,6)
 
-	SET @EntityId = ISNULL((SELECT TOP 1 intEntityId FROM tblSMUserSecurity WHERE intUserSecurityID = @UserId), 0)
+--THIS IS THE ORIGINAL BEFORE THE MERGE KINDLY CHECK
+	--SET @EntityId = ISNULL((SELECT TOP 1 intEntityId FROM tblSMUserSecurity WHERE intUserSecurityID = @UserId), 0)
+	
 	SET @ZeroDecimal = 0.000000
+	SET @EntityId = ISNULL((SELECT TOP 1 [intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @UserId), 0)
 
 	IF ISNULL(@SplitDetailId, 0) > 0 
 		BEGIN

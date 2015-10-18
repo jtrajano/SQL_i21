@@ -146,7 +146,7 @@ BEGIN TRY
 
 	SELECT @UserName = strUserName
 	FROM tblSMUserSecurity
-	WHERE intUserSecurityID = @UserKey
+	WHERE intEntityUserSecurityId = @UserKey --Another Hiccup
 
 	INSERT INTO #SettleStorage
 		(

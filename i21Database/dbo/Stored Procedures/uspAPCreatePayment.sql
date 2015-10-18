@@ -66,7 +66,7 @@ BEGIN
 	BEGIN
 		SELECT @intGLBankAccountId = B.intCashAccount FROM tblSMUserSecurity A 
 					INNER JOIN tblSMCompanyLocation B ON A.intCompanyLocationId = B.intCompanyLocationId
-					WHERE A.intEntityId = @userId
+					WHERE A.[intEntityUserSecurityId] = @userId
 		SELECT TOP 1 @intBankAccountId = intBankAccountId FROM tblCMBankAccount WHERE intGLAccountId = @intGLBankAccountId
 
 		IF @intBankAccountId IS NULL
@@ -121,7 +121,7 @@ BEGIN
 			,@withholdPercent = B.dblWithholdPercent
 		 FROM tblSMUserSecurity A 
 		INNER JOIN tblSMCompanyLocation B ON A.intCompanyLocationId = B.intCompanyLocationId
-				WHERE A.intEntityId = @userId
+				WHERE A.[intEntityUserSecurityId] = @userId
 		IF (@withHoldAccount IS NULL)
 		BEGIN
 			RAISERROR('This vendor enables withholding but there is no setup of withhold account.',16,1);

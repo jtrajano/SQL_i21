@@ -86,7 +86,7 @@ BEGIN
    --SET @incval = @incval + 1;
 END;	
 
-SELECT @EntityId =intEntityId FROM tblSMUserSecurity WHERE intUserSecurityID = @intUserId;
+SELECT @EntityId =[intEntityUserSecurityId] FROM tblSMUserSecurity WHERE [intEntityUserSecurityId] = @intUserId;
 
 DISABLE TRIGGER dbo.trgInvoiceNumber ON dbo.tblARInvoice;
 

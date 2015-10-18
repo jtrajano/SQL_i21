@@ -17,7 +17,7 @@
 	union all
 	select
 		strId = NEWID()
-		,intEntityCustomerId = us.intEntityId
+		,intEntityCustomerId = us.[intEntityUserSecurityId]
 		,strCustomerNumber = 'INTERNALUSER'
 		,intEntityContactId = con.intEntityId
 		,con.strName
@@ -25,5 +25,5 @@
 		,con.imgPhoto
 	from
 		tblSMUserSecurity us
-		left outer join tblEntity con on con.intEntityId = us.intEntityId
+		left outer join tblEntity con on con.intEntityId = us.[intEntityUserSecurityId]
 	where us.ysnDisabled <> 1
