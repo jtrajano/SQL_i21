@@ -318,7 +318,7 @@ WHERE	F.intBankTransactionTypeId IN (@AP_PAYMENT, @AR_PAYMENT, @AP_ECHECK)
 			F.strReferenceNo IN (@CASH_PAYMENT)
 			-- Condition #2: 
 			OR (
-				F.strReferenceNo NOT IN (@CASH_PAYMENT)
+				F.strReferenceNo NOT IN (@CASH_PAYMENT) OR F.strReferenceNo IS NULL
 				AND F.dtmCheckPrinted IS NULL 		
 			)
 		)
