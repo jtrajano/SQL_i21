@@ -21,7 +21,7 @@ RETURN (
 				AND A.strSourceType <> 'AA'
 				UNION 
 				SELECT DISTINCT A.intJournalId,'Unable to post. Account id:' + B.strAccountId + ' is under the ' + C.strAccountCategory + ' category. Please remove it from the transaction detail.' AS strMessage
-					FROM tblGLJournalDetail A JOIN tblGLAccount B
+					FROM tblGLJournalDetail A JOIN vyuGLAccountDetail B
 					ON A.intAccountId = B.intAccountId
 					JOIN tblGLAccountCategory C
 					ON B.intAccountCategoryId = C.intAccountCategoryId
