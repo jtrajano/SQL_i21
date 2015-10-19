@@ -67,7 +67,7 @@ SELECT	@intEntitySalespersonId = [from]
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'intSalespersonId'
 
-SELECT	@dtmAsOfDate = CAST([from] AS DATETIME)
+SELECT	@dtmAsOfDate = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE GETDATE() END AS DATETIME)
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'dtmAsOfDate'
 		
@@ -87,7 +87,10 @@ DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmAsOfDate', 'intSalesperson
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
 BEGIN
 	SELECT @id = id, @fieldname = [fieldname], @condition = [condition], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table
-	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)
+	IF ISNULL(@from, '') <> ''
+	BEGIN
+		SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)
+	END
 	DELETE FROM @temp_xml_table WHERE id = @id
 	IF EXISTS(SELECT 1 FROM @temp_xml_table)
 	BEGIN
@@ -139,6 +142,7 @@ FROM tblARInvoice I
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId    
 WHERE I.ysnPosted = 1
 	AND I.strTransactionType = ''Invoice''
+	AND I.dtmDueDate <= '+ @strAsOfDate +'
 	'+ @innerQuery +'
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -172,6 +176,7 @@ FROM tblARInvoice I
 WHERE I.ysnPosted = 1
 	AND I.ysnPaid = 0
 	AND I.strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Credit'', ''Prepayment'')
+	AND I.dtmDueDate <= '+ @strAsOfDate +'
 	'+ @innerQuery +'
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -206,6 +211,7 @@ FROM tblARInvoice I
 WHERE ISNULL(I.ysnPosted, 1) = 1
 	AND I.ysnPosted  = 1
 	AND I.strTransactionType = ''Invoice''
+	AND I.dtmDueDate <= '+ @strAsOfDate +'
 	'+ @innerQuery +'
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -243,6 +249,7 @@ FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
 WHERE I.ysnPosted = 1
 	AND I.strTransactionType = ''Invoice''
+	AND I.dtmDueDate <= '+ @strAsOfDate +'
 	'+ @innerQuery +'
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -263,6 +270,7 @@ FROM tblARInvoice I
 WHERE I.ysnPosted = 1
 	AND I.ysnPaid = 0
 	AND I.strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Credit'', ''Prepayment'')
+	AND I.dtmDueDate <= '+ @strAsOfDate +'
 	'+ @innerQuery +'
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 						INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
@@ -284,6 +292,7 @@ FROM tblARInvoice I
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId	
 WHERE I.ysnPosted  = 1
 	AND I.strTransactionType = ''Invoice''
+	AND I.dtmDueDate <= '+ @strAsOfDate +'
 	'+ @innerQuery +'
 	AND I.intAccountId IN (SELECT intAccountId FROM tblGLAccount A
 										INNER JOIN tblGLAccountGroup AG ON A.intAccountGroupId = AG.intAccountGroupId
