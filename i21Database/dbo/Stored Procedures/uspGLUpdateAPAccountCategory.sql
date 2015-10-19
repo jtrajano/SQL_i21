@@ -31,14 +31,6 @@ BEGIN
 	FROM tblGLAccountSegment A INNER JOIN @tblAP B ON A.strCode = B.strCOde 
 	INNER JOIN tblGLAccountStructure C ON A.intAccountStructureId = C.intAccountStructureId AND C.intAccountStructureId = @intPrimary
 	WHERE A.intAccountGroupId = @intLiabilityGroup
-	
-	UPDATE A SET intAccountCategoryId = @intPayablesCategory , intAccountGroupId = @intPayablesGroup
-	FROM tblGLAccount A 
-	INNER JOIN tblGLAccountSegmentMapping B ON A.intAccountId = B.intAccountId
-	INNER JOIN tblGLAccountSegment C ON B.intAccountSegmentId = C.intAccountSegmentId
-	INNER JOIN @tblAP D ON C.strCode = D.strCOde
-	INNER JOIN tblGLAccountStructure E ON C.intAccountStructureId = E.intAccountStructureId AND E.intAccountStructureId = @intPrimary
-	WHERE A.intAccountGroupId = @intLiabilityGroup
 END
 
 
