@@ -78,10 +78,10 @@ BEGIN
 	DELETE FROM @tmpTbl1 WHERE intAccountGroupId = @x
 
 	--update tblGLAccount account category
-	UPDATE s SET intAccountCategoryId = @intAccountCategoryId
-	FROM tblGLAccount s join @tmpTbl1 b
-	on s.intAccountGroupId = b.intAccountGroupId
-	AND s.intAccountCategoryId IS NULL
+	--UPDATE s SET intAccountCategoryId = @intAccountCategoryId
+	--FROM tblGLAccount s join @tmpTbl1 b
+	--on s.intAccountGroupId = b.intAccountGroupId
+	--AND s.intAccountCategoryId IS NULL
 
 	;WITH GLAccount(intAccountId)AS
 	(
@@ -112,6 +112,6 @@ SELECT @generalCategoryId = intAccountCategoryId FROM tblGLAccountCategory WHERE
 UPDATE s SET intAccountCategoryId = @generalCategoryId  FROM tblGLAccountSegment s 
 	JOIN tblGLAccountStructure  t ON t.intAccountStructureId = s.intAccountStructureId
 	WHERE intAccountCategoryId  IS NULL AND t.strType = 'Primary'
-UPDATE tblGLAccount SET intAccountCategoryId = @generalCategoryId WHERE intAccountCategoryId  IS NULL
+UPDATE tblGLAccountSegment SET intAccountCategoryId = @generalCategoryId WHERE intAccountCategoryId  IS NULL
 	
 
