@@ -2643,6 +2643,7 @@
     <Build Include="dbo\Views\vyuAP1099INT.sql" />
     <Build Include="dbo\Views\vyuAP1099B.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntityUserSecurity.sql" />
+    <Build Include="dbo\Tables\tblWHPickPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
