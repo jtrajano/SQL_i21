@@ -1680,6 +1680,7 @@
     <Build Include="dbo\Views\vyuARTaxReport.sql" />
     <Build Include="dbo\Views\vyuARGetLostQuoteReasons.sql" />
     <Build Include="dbo\Views\vyuARGetLostQuoteCompetitors.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLUpdateSegmentCategory.sql" />
     <Build Include="dbo\Views\vyuARUnappliedCreditsRegister.sql" />
     <Build Include="dbo\Stored Procedures\uspARReComputeInvoiceTaxes.sql" />
     <Build Include="dbo\Stored Procedures\uspARReComputeInvoiceAmounts.sql" />
@@ -1695,6 +1696,7 @@
     <Build Include="dbo\Views\vyuICGetInventoryReceiptCharge.sql" />
     <Build Include="dbo\Views\vyuICGetOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspSMGenerateDynamicXML.sql" />
+    <Build Include="dbo\Views\vyuGLChartOfAccounts.sql" />
     <Build Include="dbo\Tables\tblMFBlendRequirementRule.sql" />
     <Build Include="dbo\Tables\tblMFBlendSheetRuleValue.sql" />
     <Build Include="dbo\Tables\tblMFBlendSheetRule.sql" />
@@ -2643,8 +2645,7 @@
     <Build Include="dbo\Views\vyuAP1099INT.sql" />
     <Build Include="dbo\Views\vyuAP1099B.sql" />
     <Build Include="dbo\Views\vyuEMSearchEntityUserSecurity.sql" />
-    <Build Include="dbo\Tables\tblWHPickPreference.sql" />
-    <Build Include="dbo\Stored Procedures\uspWHCreateOrderLineItem.sql" />
+    <Build Include="dbo\Tables\tblSMLetter.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
