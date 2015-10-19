@@ -1,7 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuGLAccountDetail]
-	AS SELECT        dbo.tblGLAccount.intAccountId, dbo.tblGLAccount.strAccountId, dbo.tblGLAccountCategory.strAccountCategory, dbo.tblGLAccount.strDescription, dbo.tblGLAccountGroup.strAccountGroup, 
+AS
+	SELECT        dbo.tblGLAccount.intAccountId, dbo.tblGLAccount.strAccountId, dbo.tblGLAccountCategory.strAccountCategory, dbo.tblGLAccount.strDescription, dbo.tblGLAccountGroup.strAccountGroup, 
                          dbo.tblGLAccount.ysnActive, dbo.tblGLAccount.strCashFlow, dbo.tblGLAccount.intCurrencyID, dbo.tblGLAccount.intCurrencyExchangeRateTypeId, dbo.tblGLAccount.strNote, dbo.tblGLAccount.strComments, 
-                         dbo.tblSMCurrency.strCurrency, dbo.tblGLAccount.intAccountCategoryId, dbo.tblGLAccount.intAccountGroupId, dbo.tblGLAccountGroup.strAccountType
+                         dbo.tblSMCurrency.strCurrency, dbo.tblGLAccount.intAccountGroupId, dbo.tblGLAccountGroup.strAccountType, dbo.tblGLAccountSegment.intAccountCategoryId
 FROM            dbo.tblGLAccount INNER JOIN
                          dbo.tblGLAccountSegmentMapping ON dbo.tblGLAccount.intAccountId = dbo.tblGLAccountSegmentMapping.intAccountId INNER JOIN
                          dbo.tblGLAccountSegment ON dbo.tblGLAccountSegmentMapping.intAccountSegmentId = dbo.tblGLAccountSegment.intAccountSegmentId INNER JOIN
@@ -10,4 +11,5 @@ FROM            dbo.tblGLAccount INNER JOIN
                          dbo.tblSMCurrency ON dbo.tblGLAccount.intCurrencyID = dbo.tblSMCurrency.intCurrencyID LEFT OUTER JOIN
                          dbo.tblGLAccountUnit ON dbo.tblGLAccount.intAccountUnitId = dbo.tblGLAccountUnit.intAccountUnitId LEFT OUTER JOIN
                          dbo.tblGLAccountGroup ON dbo.tblGLAccount.intAccountGroupId = dbo.tblGLAccountGroup.intAccountGroupId
-WHERE dbo.tblGLAccountStructure.strType='Primary'
+WHERE        (dbo.tblGLAccountStructure.strType = 'Primary')
+
