@@ -48,6 +48,16 @@ AS
 			ISNULL(PA.dblAllocatedQty,0) + ISNULL(SA.dblAllocatedQty,0) AS dblAllocatedQty,
 			ISNULL(CD.dblQuantity,0) - ISNULL(PA.dblAllocatedQty,0) + ISNULL(SA.dblAllocatedQty,0) AS dblUnAllocatedQty,
 			CAST(CASE WHEN CD.intContractStatusId IN (1,4) THEN 1 ELSE 0 END AS BIT) AS ysnAllowedToShow,
+			CASE	WHEN	ISNULL(PF.intTotalLots,0) = 0 
+							THEN	'Unpriced'
+					ELSE
+							CASE	WHEN ISNULL(PF.intTotalLots,0)-ISNULL(intLotsFixed,0) = 0
+										THEN 'Fully Priced' 
+									WHEN ISNULL(intLotsFixed,0) = 0 
+										THEN 'Unpriced'
+									ELSE 'Partially Priced' 
+							END
+			END		AS strPricingStatus,
 
 			--Header Detail
 
@@ -102,6 +112,7 @@ AS
 	JOIN	tblICItemLocation				IL	ON	IL.intItemId				=	IM.intItemId				AND
 													IL.intLocationId			=	CD.intCompanyLocationId		LEFT
 	JOIN	tblICStorageLocation			SL	ON	SL.intStorageLocationId		=	IL.intStorageLocationId		LEFT
+	JOIN	tblCTPriceFixation				PF	ON	PF.intContractDetailId		=	CD.intContractDetailId		LEFT
 	JOIN(
 			SELECT  intItemUOMId AS intStockUOM,strUnitMeasure AS strStockUOM,strUnitType AS strStockUOMType,dblUnitQty AS dblStockUOMCF 
 			FROM	tblICItemUOM			IU	LEFT 
