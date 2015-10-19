@@ -43,8 +43,9 @@ CREATE PROCEDURE [dbo].[uspICPostCostAdjustmentOnAverageCosting]
 	,@strBatchId AS NVARCHAR(20)
 	,@intTransactionTypeId AS INT
 	,@intCurrencyId AS INT 
-	,@dblExchangeRate AS NUMERIC(38,20)
+	,@dblExchangeRate AS NUMERIC(38,20)	
 	,@intUserId AS INT
+	,@strTransactionForm AS NVARCHAR(50) = 'Bill'
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -144,12 +145,6 @@ DECLARE	@OriginalTransactionValue AS NUMERIC(38,20)
 
 DECLARE @LoopTransactionTypeId AS INT 
 		,@CostAdjustmentTransactionType AS INT = @intTransactionTypeId
-
--- Initialize the transaction name. Use this as the transaction form name
-SELECT	TOP 1 
-		@InvTranTypeName = strName
-FROM	dbo.tblICInventoryTransactionType
-WHERE	intTransactionTypeId = @intTransactionTypeId
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- 1. Get the cost bucket and original cost. 
@@ -267,7 +262,7 @@ BEGIN
 		,@intRelatedInventoryTransactionId		= NULL 
 		,@intRelatedTransactionId				= @CostBucketIntTransactionId 
 		,@strRelatedTransactionId				= @CostBucketStrTransactionId
-		,@strTransactionForm					= @InvTranTypeName
+		,@strTransactionForm					= @strTransactionForm
 		,@intUserId								= @intUserId
 		,@intCostingMethod						= @AVERAGECOST
 		,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
@@ -455,7 +450,7 @@ BEGIN
 					,@intRelatedInventoryTransactionId		= @FIFOOutInventoryTransactionId
 					,@intRelatedTransactionId				= @InvTranIntTransactionId 
 					,@strRelatedTransactionId				= @InvTranStringTransactionId 
-					,@strTransactionForm					= @InvTranTypeName
+					,@strTransactionForm					= @strTransactionForm
 					,@intUserId								= @intUserId
 					,@intCostingMethod						= @AVERAGECOST
 					,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
@@ -500,7 +495,7 @@ BEGIN
 					,@intRelatedInventoryTransactionId		= @FIFOOutInventoryTransactionId
 					,@intRelatedTransactionId				= @InvTranIntTransactionId 
 					,@strRelatedTransactionId				= @InvTranStringTransactionId 
-					,@strTransactionForm					= @InvTranTypeName
+					,@strTransactionForm					= @strTransactionForm
 					,@intUserId								= @intUserId
 					,@intCostingMethod						= @AVERAGECOST
 					,@InventoryTransactionIdentityId		= @InventoryTransactionIdentityId OUTPUT
@@ -557,7 +552,11 @@ BEGIN
 						AND InvTran.strTransactionId = @InvTranStringTransactionId
 						AND ISNULL(InvTran.ysnIsUnposted, 0) = 0
 						AND ISNULL(InvTran.dblQty, 0) > 0 
-						AND InvTran.intTransactionTypeId IN (@INV_TRANS_TYPE_Produce, @INV_TRANS_TYPE_Build_Assembly, @INV_TRANS_Inventory_Transfer)
+						AND InvTran.intTransactionTypeId IN (
+							@INV_TRANS_TYPE_Produce
+							, @INV_TRANS_TYPE_Build_Assembly
+							, @INV_TRANS_Inventory_Transfer
+						)
 			END 
 
 			-- Compute the remaining Revalued Qty. 

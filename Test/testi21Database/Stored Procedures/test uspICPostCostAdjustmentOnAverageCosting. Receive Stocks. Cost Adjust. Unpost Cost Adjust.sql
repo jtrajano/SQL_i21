@@ -134,7 +134,7 @@ BEGIN
 				,@UNIT_TYPE_Packed AS NVARCHAR(50) = 'Packed'
 
 		-- Create the fake data
-		EXEC testi21Database.[Fake transactions for item costing]
+		EXEC [testi21Database].[Fake data for cost adjustment]
 	END 
 
 	-- Arrange 

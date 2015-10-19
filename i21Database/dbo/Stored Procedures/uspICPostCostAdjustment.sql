@@ -285,39 +285,6 @@ CLOSE loopItemsToAdjust;
 DEALLOCATE loopItemsToAdjust;
 
 -----------------------------------------------------------------------------------------------------------------------------
--- Adjust the average cost regardless of costing method.
------------------------------------------------------------------------------------------------------------------------------
-BEGIN 						
-	-- Update the Item Pricing table
-	MERGE	
-	INTO	dbo.tblICItemPricing 
-	WITH	(HOLDLOCK) 
-	AS		ItemPricing
-	USING (
-			SELECT	tblICItemStock.intItemId
-					,tblICItemStock.intItemLocationId
-					,tblICItemStock.dblUnitOnHand
-			FROM	dbo.tblICItemStock INNER JOIN @Internal_ItemsToAdjust ItemsToAdjust
-						ON tblICItemStock.intItemId = ItemsToAdjust.intItemId
-						AND tblICItemStock.intItemLocationId = ItemsToAdjust.intItemLocationId
-	) AS Stock
-		ON ItemPricing.intItemId = Stock.intItemId
-		AND ItemPricing.intItemLocationId = Stock.intItemLocationId
-
-	-- If matched, update the average cost, last cost, and standard cost
-	WHEN MATCHED THEN 
-		UPDATE 
-		SET		dblAverageCost =	CASE	WHEN ISNULL(Stock.dblUnitOnHand, 0) > 0 THEN 
-												-- Recalculate the average cost
-												dbo.fnRecalculateAverageCost(Stock.intItemId, Stock.intItemLocationId, ItemPricing.dblAverageCost) 
-											ELSE 
-												-- Use the same average cost. 
-												ItemPricing.dblAverageCost
-									END
-	;
-END 
-
------------------------------------------------------------------------------------------------------------------------------
 -- Create the Auto Negative
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
@@ -445,7 +412,6 @@ BEGIN
 	CLOSE loopItemsToAdjustForAutoNegative;
 	DEALLOCATE loopItemsToAdjustForAutoNegative;
 END 
-
 
 -------------------------------------------------------------------------------------------
 -- Repeat the cost adjustment process if there are 'Produced/Transferred' stocks affected. 

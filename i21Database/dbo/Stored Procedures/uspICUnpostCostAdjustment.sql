@@ -20,9 +20,21 @@ SET ANSI_WARNINGS OFF
 DECLARE @COST_ADJ_TYPE_Original_Cost AS INT = 1
 		,@COST_ADJ_TYPE_New_Cost AS INT = 2
 
--- Create the variables for the internal transaction types used by costing. 
-DECLARE @REVALUE_SOLD AS INT = 3
-		,@COST_ADJUSTMENT AS INT = 22
+-- Create the variables for transaction types used by costing. 
+DECLARE @INV_TRANS_TYPE_Auto_Negative AS INT = 1
+		,@INV_TRANS_TYPE_Write_Off_Sold AS INT = 2
+		,@INV_TRANS_TYPE_Revalue_Sold AS INT = 3
+		,@INV_TRANS_TYPE_Cost_Adjustment AS INT = 22
+		,@INV_TRANS_TYPE_Revalue_WIP AS INT = 24
+		,@INV_TRANS_TYPE_Revalue_Produced AS INT = 25
+		,@INV_TRANS_TYPE_Revalue_Transfer AS INT = 26
+		,@INV_TRANS_TYPE_Revalue_Build_Assembly AS INT = 27
+
+		,@INV_TRANS_TYPE_Consume AS INT = 8
+		,@INV_TRANS_TYPE_Produce AS INT = 9
+		,@INV_TRANS_TYPE_Build_Assembly AS INT = 11
+		,@INV_TRANS_Inventory_Transfer AS INT = 12
+
 
 -- Create the temp table if it does not exists. 
 IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInvCostAdjustmentToReverse')) 
@@ -65,11 +77,23 @@ FROM	(
 							,intTransactionId = @intTransactionId
 				) AS Source_Query  
 					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0					
-					AND inventory_transaction.intTransactionTypeId IN (@COST_ADJUSTMENT, @REVALUE_SOLD)
+					AND inventory_transaction.intTransactionTypeId IN (
+							@INV_TRANS_TYPE_Cost_Adjustment
+							, @INV_TRANS_TYPE_Revalue_Sold
+							, @INV_TRANS_TYPE_Revalue_WIP
+							, @INV_TRANS_TYPE_Revalue_Produced
+							, @INV_TRANS_TYPE_Revalue_Transfer
+							, @INV_TRANS_TYPE_Revalue_Build_Assembly
+					)
 					AND 1 = 
-						CASE	WHEN inventory_transaction.strTransactionId = Source_Query.strTransactionId AND inventory_transaction.intTransactionId = Source_Query.intTransactionId THEN 1
-								WHEN inventory_transaction.strRelatedTransactionId = Source_Query.strTransactionId AND inventory_transaction.intRelatedTransactionId = Source_Query.intTransactionId THEN	1
-								ELSE 0
+						CASE	WHEN	inventory_transaction.strTransactionId = Source_Query.strTransactionId 
+										AND inventory_transaction.intTransactionId = Source_Query.intTransactionId THEN 
+											1
+								WHEN	inventory_transaction.strRelatedTransactionId = Source_Query.strTransactionId 
+										AND inventory_transaction.intRelatedTransactionId = Source_Query.intTransactionId THEN	
+											1
+								ELSE 
+											0
 						END 					
 
 				-- If matched, update the ysnIsUnposted and set it to true (1) 
@@ -77,8 +101,22 @@ FROM	(
 					UPDATE 
 					SET		ysnIsUnposted = 1
 
-				OUTPUT $action, Inserted.intInventoryTransactionId, Inserted.intTransactionId, Inserted.strTransactionId, Inserted.intRelatedTransactionId, Inserted.strRelatedTransactionId, Inserted.intTransactionTypeId
-		) AS Changes (Action, intInventoryTransactionId, intTransactionId, strTransactionId, intRelatedTransactionId, strRelatedTransactionId, intTransactionTypeId)
+				OUTPUT	$action
+						, Inserted.intInventoryTransactionId
+						, Inserted.intTransactionId
+						, Inserted.strTransactionId
+						, Inserted.intRelatedTransactionId
+						, Inserted.strRelatedTransactionId
+						, Inserted.intTransactionTypeId
+		) AS Changes (
+			Action
+			, intInventoryTransactionId
+			, intTransactionId
+			, strTransactionId
+			, intRelatedTransactionId
+			, strRelatedTransactionId
+			, intTransactionTypeId
+		)
 WHERE	Changes.Action = 'UPDATE'
 ;
 
