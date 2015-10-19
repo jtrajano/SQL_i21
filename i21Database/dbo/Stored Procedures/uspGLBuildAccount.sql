@@ -1,6 +1,7 @@
 ﻿
 	CREATE PROCEDURE  [dbo].[uspGLBuildAccount]
-	@intUserId nvarchar(50)
+		@intUserId INT,
+		@intCurrencyId INT
 	AS
 
 	SET QUOTED_IDENTIFIER OFF
@@ -16,7 +17,7 @@
 			   intAccountUnitId,
 			   ysnSystem,
 			   ysnActive,
-			   (select top 1 intDefaultCurrencyId FROM tblSMCompanyPreference )
+			   @intCurrencyId
 		FROM tblGLTempAccount
 		WHERE intUserId = @intUserId and strAccountId NOT IN (SELECT strAccountId FROM tblGLAccount)	
 		ORDER BY strAccountId
