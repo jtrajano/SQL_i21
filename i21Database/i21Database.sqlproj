@@ -2385,7 +2385,7 @@
     <Build Include="dbo\Functions\fnSplitStringWithTrim.sql" />
     <Build Include="dbo\Functions\fnEMCheckEmailDistributionOption.sql" />
     <None Include="Scripts\Post-Deployment\AR\PrePaymentLinkToInvoiceFix.sql" />
-    <Build Include="dbo\Functions\fnARGetInvoiceFooterComment.sql" />
+    <Build Include="dbo\Functions\fnARGetFooterComment.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseReservedQty.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseInTransitInBoundQty.sql" />
     <Build Include="dbo\User Defined Types\InTransitTableType.sql" />

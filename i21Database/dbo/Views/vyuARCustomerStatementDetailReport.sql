@@ -19,6 +19,7 @@ SELECT I.strInvoiceNumber AS strReferenceNumber
 	 , I.intInvoiceId
 	 , I.intEntityCustomerId
 	 , strFullAddress = [dbo].fnARFormatCustomerAddress(CC.strPhone, CC.strEmail, C.strBillToLocationName, C.strBillToAddress, C.strBillToCity, C.strBillToState, C.strBillToZipCode, C.strBillToCountry, NULL)
+	 , strStatementFooterComment = [dbo].fnARGetFooterComment(I.intCompanyLocationId, I.intEntityCustomerId, 'Statement Footer')
 FROM tblARInvoice I
 	INNER JOIN (tblARInvoiceDetail ID 
 		LEFT JOIN tblICItem IC ON ID.intItemId = IC.intItemId) ON I.intInvoiceId = ID.intInvoiceId	

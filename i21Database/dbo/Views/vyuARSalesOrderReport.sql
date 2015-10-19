@@ -32,7 +32,7 @@ SELECT SO.intSalesOrderId
 	 , FT.strFreightTerm
 	 , strSplitName = ES.strDescription
 	 , strSOHeaderComment = SO.strComments
-	 , strSOFooterComment = [dbo].fnARGetInvoiceFooterComment(SO.intCompanyLocationId, SO.intEntityCustomerId, 'Sales Order Footer', NULL)
+	 , strSOFooterComment = [dbo].fnARGetFooterComment(SO.intCompanyLocationId, SO.intEntityCustomerId, 'Sales Order Footer')
 	 , dblSalesOrderSubtotal = ISNULL(SO.dblSalesOrderSubtotal, 0)
 	 , dblShipping = ISNULL(SO.dblShipping, 0)
 	 , dblTax = ISNULL(SO.dblTax, 0)

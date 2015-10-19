@@ -18,7 +18,7 @@ SELECT TOP 1 @strDefaultComment = strCommentDesc
 	AND intCompanyLocationId = @intCompanyLocationId
 	AND intEntityCustomerId = @intEntityCustomerId
 	AND strType = @strType
-	AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
+	AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer', 'Statement Footer')
 ORDER BY intCommentId DESC
 
 --2. Filter by Transaction, Location, Customer
@@ -29,7 +29,7 @@ IF @strDefaultComment IS NULL
 			WHERE strTransactionType = @strTransactionType
 			AND intCompanyLocationId = @intCompanyLocationId
 			AND intEntityCustomerId = @intEntityCustomerId
-			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
+			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer', 'Statement Footer')
 		ORDER BY intCommentId DESC
 	END
 ELSE
@@ -43,7 +43,7 @@ IF @strDefaultComment IS NULL
 			WHERE strTransactionType = @strTransactionType
 			AND intCompanyLocationId = @intCompanyLocationId
 			AND strType = @strType
-			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
+			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer', 'Statement Footer')
 		ORDER BY intCommentId DESC
 	END
 ELSE
@@ -56,7 +56,7 @@ IF @strDefaultComment IS NULL
 			FROM tblARCommentMaintenance
 			WHERE strTransactionType = @strTransactionType
 			AND intCompanyLocationId = @intCompanyLocationId
-			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
+			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer', 'Statement Footer')
 		ORDER BY intCommentId DESC
 	END
 ELSE
@@ -70,7 +70,7 @@ IF @strDefaultComment IS NULL
 			WHERE strTransactionType = @strTransactionType
 			AND intEntityCustomerId = @intEntityCustomerId
 			AND strType = @strType
-			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
+			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer', 'Statement Footer')
 		ORDER BY intCommentId DESC
 	END
 ELSE
@@ -83,7 +83,7 @@ IF @strDefaultComment IS NULL
 			FROM tblARCommentMaintenance
 			WHERE strTransactionType = @strTransactionType	
 			AND intEntityCustomerId = @intEntityCustomerId
-			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
+			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer', 'Statement Footer')
 		ORDER BY intCommentId DESC
 	END
 ELSE
@@ -96,7 +96,7 @@ IF @strDefaultComment IS NULL
 			FROM tblARCommentMaintenance
 			WHERE strTransactionType = @strTransactionType		
 			AND strType = @strType
-			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
+			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer', 'Statement Footer')
 		ORDER BY intCommentId DESC
 	END
 ELSE
@@ -108,7 +108,7 @@ IF @strDefaultComment IS NULL
 		SELECT TOP 1 @strDefaultComment = strCommentDesc
 			FROM tblARCommentMaintenance
 			WHERE strTransactionType = @strTransactionType
-			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer')
+			AND strTransactionType NOT IN ('Invoice Footer', 'Sales Order Footer', 'Statement Footer')
 		ORDER BY intCommentId DESC
 	END
 ELSE

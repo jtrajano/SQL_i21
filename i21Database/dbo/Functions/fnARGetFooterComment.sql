@@ -1,9 +1,8 @@
-﻿CREATE FUNCTION [dbo].[fnARGetInvoiceFooterComment]
+﻿CREATE FUNCTION [dbo].[fnARGetFooterComment]
 (
 	@intCompanyLocationId	INT = NULL,
 	@intEntityCustomerId	INT = NULL,
-	@strTransactionType     NVARCHAR(50) = NULL,
-	@strType                NVARCHAR(50) = NULL
+	@strTransactionType     NVARCHAR(50) = NULL
 )
 RETURNS NVARCHAR(MAX) AS
 BEGIN
