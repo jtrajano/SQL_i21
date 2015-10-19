@@ -104,7 +104,7 @@ IF @@ERROR <> 0	GOTO Post_Rollback
 SELECT	@ysnAllowUserSelfPost = 1
 FROM	dbo.tblSMUserPreference 
 WHERE	ysnAllowUserSelfPost = 1 
-		AND intUserSecurityId = @intUserId
+		AND [intEntityUserSecurityId] = @intUserId
 IF @@ERROR <> 0	GOTO Post_Rollback			
 		
 --=====================================================================================================================================

@@ -1,17 +1,17 @@
 ﻿CREATE TABLE [dbo].[tblSMUserSecurityScreenPermission]
 (
 	[intUserSecurityScreenPermissionId] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [intUserSecurityId] INT NOT NULL, 
+    [intEntityUserSecurityId] INT NOT NULL, 
     [intScreenId] INT NOT NULL, 
 	[strPermission] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
-    CONSTRAINT [FK_tblSMUserSecurityScreenPermission_tblSMUserSecurity] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]) ON DELETE CASCADE, 
+    CONSTRAINT [FK_tblSMUserSecurityScreenPermission_tblSMUserSecurity] FOREIGN KEY ([intEntityUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblSMUserSecurityScreenPermission_tblSMScreen] FOREIGN KEY ([intScreenId]) REFERENCES [tblSMScreen]([intScreenId]) ON DELETE CASCADE
 )
 
 GO
 
-CREATE INDEX [IX_tblSMUserSecurityScreenPermission_intUserSecurityId] ON [dbo].[tblSMUserSecurityScreenPermission] ([intUserSecurityId])
+CREATE INDEX [IX_tblSMUserSecurityScreenPermission_intUserSecurityId] ON [dbo].[tblSMUserSecurityScreenPermission] ([intEntityUserSecurityId])
 
 GO
 
@@ -34,7 +34,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblSMUserSecurityScreenPermission',
     @level2type = N'COLUMN',
-    @level2name = N'intUserSecurityId'
+    @level2name = N'intEntityUserSecurityId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Screen Id',

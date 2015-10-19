@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspSMUpdateUserPreferenceEntry]
-	@intUserSecurityId int
+	@intEntityUserSecurityId int
 AS
 BEGIN
 
@@ -23,11 +23,11 @@ BEGIN
 	) b
 	WHERE ROWID = @currentRow
 
-	SET @sql = 'IF NOT EXISTS(SELECT TOP 1 1 FROM ' + @tableName + ' WHERE intUserSecurityId = @intUserSecurityId)
+	SET @sql = 'IF NOT EXISTS(SELECT TOP 1 1 FROM ' + @tableName + ' WHERE intEntityUserSecurityId = @intEntityUserSecurityId)
 				BEGIN
-					INSERT INTO ' + @tableName + ' (intUserSecurityId) VALUES (@intUserSecurityId)
+					INSERT INTO ' + @tableName + ' (intEntityUserSecurityId) VALUES (@intEntityUserSecurityId)
 				END'
-	EXEC sp_executesql @sql, N'@intUserSecurityId INT', @intUserSecurityId = @intUserSecurityId
+	EXEC sp_executesql @sql, N'@intEntityUserSecurityId INT', @intEntityUserSecurityId = @intEntityUserSecurityId
 
 	SET @currentRow = @currentRow + 1
 	END

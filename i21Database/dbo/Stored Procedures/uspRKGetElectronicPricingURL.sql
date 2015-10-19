@@ -229,15 +229,15 @@ BEGIN TRY
 
 	SELECT @URL = strInterfaceWebServicesURL FROM tblSMCompanyPreference
 
-	SELECT @strUserName = strProviderUserId FROM tblGRUserPreference Where intUserSecurityId= @intUserId  
+	SELECT @strUserName = strProviderUserId FROM tblGRUserPreference Where [intEntityUserSecurityId]= @intUserId  
 
-	 IF NOT EXISTS (SELECT 1 FROM tblGRUserPreference Where strQuoteProvider='DTN/Agricharts' AND intUserSecurityId=@intUserId) OR (@strUserName = '')  
+	 IF NOT EXISTS (SELECT 1 FROM tblGRUserPreference Where strQuoteProvider='DTN/Agricharts' AND [intEntityUserSecurityId]=@intUserId) OR (@strUserName = '')  
 	 BEGIN
 	  RAISERROR ('The User cannot access Electronic Pricing',16,1)  
 	 END
 
 
-	SELECT @strPassword = strProviderPassword FROM tblGRUserPreference Where intUserSecurityId=@intUserId  
+	SELECT @strPassword = strProviderPassword FROM tblGRUserPreference Where [intEntityUserSecurityId]=@intUserId  
 
 	SELECT @IntinterfaceSystem = intInterfaceSystemId FROM   tblSMCompanyPreference
 

@@ -257,9 +257,9 @@ CREATE TRIGGER [dbo].[Trigger_tblSMUserSecurity]
     AS
     BEGIN
         SET NoCount ON
-		DECLARE @intUserSecurityId INT
+		DECLARE @intEntityUserSecurityId INT
 
-		SELECT @intUserSecurityId = [intEntityUserSecurityId] FROM INSERTED;
+		SELECT @intEntityUserSecurityId = [intEntityUserSecurityId] FROM INSERTED;
 
-		EXEC uspSMUpdateUserPreferenceEntry @intUserSecurityId
+		EXEC uspSMUpdateUserPreferenceEntry @intEntityUserSecurityId
     END

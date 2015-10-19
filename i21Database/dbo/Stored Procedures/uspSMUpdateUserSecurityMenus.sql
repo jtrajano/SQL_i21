@@ -22,22 +22,22 @@ BEGIN TRANSACTION
 	
 	-- Delete non existing User Security Menus for affected users
 	DELETE FROM tblSMUserSecurityMenu
-	WHERE intUserSecurityId = @UserSecurityID
+	WHERE [intEntityUserSecurityId] = @UserSecurityID
 		AND intMenuId NOT IN (SELECT intMenuId FROM tblSMUserRoleMenu
 								WHERE ysnVisible = 1 AND intUserRoleId = @UserRoleID)
 	
 	-- Apply User Role Menus into User Menus
-	INSERT INTO tblSMUserSecurityMenu(intUserSecurityId, intMenuId, ysnVisible, intSort)
+	INSERT INTO tblSMUserSecurityMenu([intEntityUserSecurityId], intMenuId, ysnVisible, intSort)
 	SELECT @UserSecurityID, intMenuId, @IsAdmin, intSort = intMenuId FROM tblSMUserRoleMenu
 	WHERE ysnVisible = 1 
 		AND intMenuId NOT IN (SELECT intMenuId FROM tblSMUserSecurityMenu 
-								WHERE intUserSecurityId = @UserSecurityID)
+								WHERE [intEntityUserSecurityId] = @UserSecurityID)
 		AND intUserRoleId = @UserRoleID
 	
 	IF (@IsAdmin = 0)
 	BEGIN
 		DELETE FROM tblSMUserSecurityMenu
-		WHERE intUserSecurityId = @UserSecurityID
+		WHERE [intEntityUserSecurityId] = @UserSecurityID
 		AND intMenuId IN (SELECT intMenuID FROM tblSMMasterMenu
 							WHERE ((strMenuName = 'System Manager' 
 									AND strCommand = 'i21' 
@@ -50,33 +50,33 @@ BEGIN TRANSACTION
 	FROM (
 		SELECT 
 			UserMenu.intUserSecurityMenuId,
-			intUserParentID = ISNULL((SELECT ISNULL(intUserSecurityMenuId, 0) FROM tblSMUserSecurityMenu tmpA WHERE tmpA.intMenuId = Menu.intParentMenuID AND tmpA.intUserSecurityId = @UserSecurityID), 0)
+			intUserParentID = ISNULL((SELECT ISNULL(intUserSecurityMenuId, 0) FROM tblSMUserSecurityMenu tmpA WHERE tmpA.intMenuId = Menu.intParentMenuID AND tmpA.[intEntityUserSecurityId] = @UserSecurityID), 0)
 		FROM tblSMUserSecurityMenu UserMenu
 		LEFT JOIN tblSMMasterMenu Menu ON Menu.intMenuID = UserMenu.intMenuId
-		WHERE UserMenu.intUserSecurityId = @UserSecurityID
+		WHERE UserMenu.[intEntityUserSecurityId] = @UserSecurityID
 		)tblPatch 
 	WHERE tblPatch.intUserSecurityMenuId = tblSMUserSecurityMenu.intUserSecurityMenuId
-	AND tblSMUserSecurityMenu.intUserSecurityId = @UserSecurityID
+	AND tblSMUserSecurityMenu.[intEntityUserSecurityId] = @UserSecurityID
 
 	UPDATE tblSMUserSecurityMenu
 	SET ysnVisible = tblPatch.ysnVisible
 	FROM (
 		SELECT 
 			UserMenu.intUserSecurityMenuId,
-			ysnVisible = (CASE WHEN EXISTS((SELECT TOP 1 1 FROM tblSMUserSecurityMenu tmpA WHERE tmpA.intParentMenuId = UserMenu.intUserSecurityMenuId AND tmpA.intUserSecurityId = @UserSecurityID AND ysnVisible = 1)) THEN 1 
+			ysnVisible = (CASE WHEN EXISTS((SELECT TOP 1 1 FROM tblSMUserSecurityMenu tmpA WHERE tmpA.intParentMenuId = UserMenu.intUserSecurityMenuId AND tmpA.[intEntityUserSecurityId] = @UserSecurityID AND ysnVisible = 1)) THEN 1 
 								WHEN Menu.ysnLeaf = 1 THEN UserMenu.ysnVisible
 								ELSE 0 END)
 		FROM tblSMUserSecurityMenu UserMenu
 		LEFT JOIN tblSMMasterMenu Menu ON Menu.intMenuID = UserMenu.intMenuId
-		WHERE UserMenu.intUserSecurityId = @UserSecurityID
+		WHERE UserMenu.[intEntityUserSecurityId] = @UserSecurityID
 		)tblPatch 
 	WHERE tblPatch.intUserSecurityMenuId = tblSMUserSecurityMenu.intUserSecurityMenuId
-	AND tblSMUserSecurityMenu.intUserSecurityId = @UserSecurityID
+	AND tblSMUserSecurityMenu.[intEntityUserSecurityId] = @UserSecurityID
 	
 	IF (@ForceVisibility = 1)
 		UPDATE tblSMUserSecurityMenu
 		SET ysnVisible = 1
-		WHERE intUserSecurityId = @UserSecurityID
+		WHERE [intEntityUserSecurityId] = @UserSecurityID
 	
 	-- Commit changes
 	GOTO uspSMUpdateUserSecurityMenus_Commit

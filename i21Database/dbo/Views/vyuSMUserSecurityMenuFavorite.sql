@@ -3,8 +3,8 @@ AS
 SELECT
 intUserSecurityMenuFavoriteId,
 Favorite.intMenuId,
-intUserSecurityId,
-UserSecurity.[intEntityUserSecurityId],
+--Favorite.intEntityUserSecurityId,
+UserSecurity.intEntityUserSecurityId,
 --THIS IS THE ORIGINAL BEFORE THE MERGE PLEASE CHECK
 --Favorite.intUserSecurityId,
 --UserSecurity.intEntityId,
@@ -18,6 +18,6 @@ UserRoleMenuLocation.strCommand,
 UserRoleMenuLocation.strIcon,
 UserRoleMenuLocation.ysnIsLegacy
 FROM tblSMUserSecurityMenuFavorite Favorite
-INNER JOIN tblSMUserSecurity UserSecurity ON Favorite.intUserSecurityId = UserSecurity.[intEntityUserSecurityId]
-INNER JOIN vyuSMUserRoleMenuLocation UserRoleMenuLocation ON Favorite.intMenuId = UserRoleMenuLocation.intMenuId AND Favorite.intCompanyLocationId = UserRoleMenuLocation.intCompanyLocationId AND UserSecurity.[intEntityUserSecurityId] = UserRoleMenuLocation.intEntityId
+INNER JOIN tblSMUserSecurity UserSecurity ON Favorite.intEntityUserSecurityId = UserSecurity.intEntityUserSecurityId
+INNER JOIN vyuSMUserRoleMenuLocation UserRoleMenuLocation ON Favorite.intMenuId = UserRoleMenuLocation.intMenuId AND Favorite.intCompanyLocationId = UserRoleMenuLocation.intCompanyLocationId AND UserSecurity.intEntityUserSecurityId = UserRoleMenuLocation.intEntityId
 WHERE UserRoleMenuLocation.ysnVisible = 1

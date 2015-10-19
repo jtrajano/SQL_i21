@@ -191,9 +191,9 @@ GO
 
 			PRINT N'INSERTING RECORD PER COMPANY LOCATION'
 
-			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityCompanyLocationRolePermission WHERE intUserSecurityId = @userId AND intEntityId = @entityId AND intUserRoleId = @roleId AND intCompanyLocationId = @companyLocationId)
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityCompanyLocationRolePermission WHERE [intEntityUserSecurityId] = @userId AND intEntityId = @entityId AND intUserRoleId = @roleId AND intCompanyLocationId = @companyLocationId)
 			BEGIN
-				INSERT INTO tblSMUserSecurityCompanyLocationRolePermission ([intUserSecurityId], [intEntityId], [intUserRoleId], [intCompanyLocationId])
+				INSERT INTO tblSMUserSecurityCompanyLocationRolePermission ([intEntityUserSecurityId], [intEntityId], [intUserRoleId], [intCompanyLocationId])
 				VALUES (@userId, @entityId, @roleId, @companyLocationId)
 			END
 
@@ -211,6 +211,6 @@ GO
 	-- Update intCompanyLocationId in tblSMUserSecurityMenuFavorite with user default location.
 	UPDATE tblSMUserSecurityMenuFavorite SET intCompanyLocationId = UserSecurity.intCompanyLocationId
 	FROM tblSMUserSecurityMenuFavorite Favorite
-	JOIN tblSMUserSecurity UserSecurity ON Favorite.intUserSecurityId = UserSecurity.[intEntityUserSecurityId]
+	JOIN tblSMUserSecurity UserSecurity ON Favorite.[intEntityUserSecurityId] = UserSecurity.[intEntityUserSecurityId]
 	WHERE Favorite.intCompanyLocationId IS NULL
 GO

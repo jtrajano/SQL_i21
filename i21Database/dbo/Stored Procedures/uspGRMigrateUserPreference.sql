@@ -9,7 +9,7 @@ BEGIN
 
 		PRINT 'Start Insert'
 		INSERT INTO [dbo].[tblGRUserPreference]
-				   ([intUserSecurityId]
+				   ([intEntityUserSecurityId]
 				   ,[strQuoteProvider]
 				   ,[strProviderUserId]
 				   ,[strProviderPassword]
@@ -35,7 +35,7 @@ BEGIN
 		)AS pivotTable
 
 		DELETE FROM dbo.tblSMPreferences
-		WHERE intUserID IN (SELECT intUserSecurityId from dbo.tblGRUserPreference)
+		WHERE intUserID IN (SELECT [intEntityUserSecurityId] from dbo.tblGRUserPreference)
 		AND strPreference IN ('DecimalDisplayOption', 'QuoteProvider', 'ProviderUserId', 'ProviderPassword', 'ProviderAccessType', 'DisplayOrder')
 
 		PRINT 'End Insert'	

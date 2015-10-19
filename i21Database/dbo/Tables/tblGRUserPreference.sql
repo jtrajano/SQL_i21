@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblGRUserPreference]
 (
 	[intUserPreferenceId] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [intUserSecurityId] INT NOT NULL, 
+    [intEntityUserSecurityId] INT NOT NULL, 
     [strQuoteProvider] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL DEFAULT (''), 
     [strProviderUserId] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL DEFAULT (''), 
     [strProviderPassword] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL DEFAULT (''), 

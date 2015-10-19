@@ -9,21 +9,20 @@ BEGIN
 
 		PRINT 'Start Insert'
 		INSERT INTO [dbo].[tblSMUserPreference]
-				   ([intUserSecurityId]
+				   ([intEntityUserSecurityId]
 				   ,[intOriginScreensLimit]
 				   ,[ysnAllowUserSelfPost]
 				   ,[ysnShowReminderList])
-		SELECT userId
+		SELECT entityId
 				--, intEntityId
 				, CAST(ISNULL(OriginScreensLimit, 0) AS INT) AS intOriginScreensLimit
 				, CAST(AllowUserSelfPost AS BIT) AS ysnAllowUserSelfPost
 				, CAST(ISNULL(isShowReminderList, 0) AS BIT) AS ysnisShowReminderList
-		FROM (SELECT pref.intUserID userId
-				--, sec.intEntityId
+		FROM (SELECT sec.intEntityUserSecurityId entityId--pref.intUserID userId
 				, pref.strPreference colName
 				, pref.strValue colVal
 				FROM tblSMPreferences pref
-				--INNER JOIN dbo.tblSMUserSecurity sec ON pref.intUserID = sec.intUserSecurityID
+				INNER JOIN dbo.tblSMUserSecurity sec ON pref.intUserID = sec.intUserSecurityIdOld
 				WHERE pref.intUserID not in (-1, 0)
 				and pref.strPreference in ('OriginScreensLimit', 'AllowUserSelfPost', 'isShowReminderList')
 		) AS s
@@ -33,7 +32,13 @@ BEGIN
 		)AS pivotTable
 
 		DELETE FROM dbo.tblSMPreferences
-		WHERE intUserID IN (SELECT intUserSecurityId from dbo.tblSMUserPreference)
+		WHERE intUserID IN 
+		(
+			SELECT intUserSecurityIdOld
+			FROM dbo.tblSMUserPreference Preference
+			INNER JOIN dbo.tblSMUserSecurity UserSecurity 
+			ON Preference.intEntityUserSecurityId = UserSecurity.intEntityUserSecurityId
+		)
 		AND strPreference IN ('OriginScreensLimit', 'AllowUserSelfPost', 'isShowReminderList')
 
 		PRINT 'End Insert'

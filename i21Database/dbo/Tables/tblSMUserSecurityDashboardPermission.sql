@@ -1,11 +1,11 @@
 ﻿CREATE TABLE [dbo].[tblSMUserSecurityDashboardPermission]
 (
 	[intUserSecurityDashboardPermissionId] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [intUserSecurityId] INT NOT NULL, 
+    [intEntityUserSecurityId] INT NOT NULL, 
     [intPanelId] INT NOT NULL, 
     [strPermission] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
-    CONSTRAINT [FK_tblSMUserSecurityDashboardPermission_tblSMUserSecurity] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]) ON DELETE CASCADE, 
+    CONSTRAINT [FK_tblSMUserSecurityDashboardPermission_tblSMUserSecurity] FOREIGN KEY ([intEntityUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblSMUserSecurityDashboardPermission_tblDBPanel] FOREIGN KEY ([intPanelId]) REFERENCES [tblDBPanel]([intPanelId]) ON DELETE CASCADE
 )
 
@@ -15,7 +15,7 @@ CREATE INDEX [IX_tblSMUserSecurityDashboardPermission_intPanelId] ON [dbo].[tblS
 
 GO
 
-CREATE INDEX [IX_tblSMUserSecurityDashboardPermission_intUserSecurityId] ON [dbo].[tblSMUserSecurityDashboardPermission] ([intUserSecurityId])
+CREATE INDEX [IX_tblSMUserSecurityDashboardPermission_intUserSecurityId] ON [dbo].[tblSMUserSecurityDashboardPermission] ([intEntityUserSecurityId])
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
@@ -34,7 +34,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblSMUserSecurityDashboardPermission',
     @level2type = N'COLUMN',
-    @level2name = N'intUserSecurityId'
+    @level2name = N'intEntityUserSecurityId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Panel Id',

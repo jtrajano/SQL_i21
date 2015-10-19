@@ -3,7 +3,7 @@ AS
 
 SELECT 
 intUserSecurityMenuId,
-intUserSecurityId,
+[intEntityUserSecurityId],
 UserMenu.intMenuId,
 UserMenu.intParentMenuId,
 UserMenu.ysnVisible,

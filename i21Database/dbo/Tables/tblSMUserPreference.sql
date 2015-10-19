@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblSMUserPreference]
 (
 	[intUserPreferenceId] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [intUserSecurityId] INT NOT NULL, 
+    [intEntityUserSecurityId] INT NOT NULL, 
     --[intEntityId] INT NOT NULL, 
     [intOriginScreensLimit] INT NULL DEFAULT 3, 
     [ysnAllowUserSelfPost] BIT NULL DEFAULT 1, 

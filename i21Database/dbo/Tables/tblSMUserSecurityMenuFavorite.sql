@@ -2,12 +2,12 @@
 (
 	[intUserSecurityMenuFavoriteId] INT NOT NULL PRIMARY KEY IDENTITY, 
     [intMenuId] INT NOT NULL, 
-	[intUserSecurityId] INT NOT NULL, 
+	[intEntityUserSecurityId] INT NOT NULL, 
 	[intCompanyLocationId] INT NULL, 
     [intSort] INT NULL DEFAULT (1), 
 	[intConcurrencyId] INT NOT NULL DEFAULT (1), 
     CONSTRAINT [FK_tblSMUserSecurityMenuFavorite_tblSMasterMenu] FOREIGN KEY ([intMenuId]) REFERENCES [tblSMMasterMenu]([intMenuID]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblSMUserSecurityMenuFavorite_tblSMUserSecurity] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblSMUserSecurityMenuFavorite_tblSMUserSecurity] FOREIGN KEY ([intEntityUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblSMUserSecurityMenuFavorite_tblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]) ON DELETE CASCADE
 )
 
@@ -37,7 +37,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblSMUserSecurityMenuFavorite',
     @level2type = N'COLUMN',
-    @level2name = N'intUserSecurityId'
+    @level2name = N'intEntityUserSecurityId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Company Location Id',

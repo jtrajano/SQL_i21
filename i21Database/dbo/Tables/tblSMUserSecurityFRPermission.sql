@@ -1,18 +1,18 @@
 ﻿CREATE TABLE [dbo].[tblSMUserSecurityFRPermission]
 (
 	[intUserSecurityFRPermissionId] INT NOT NULL PRIMARY KEY IDENTITY, 
-    [intUserSecurityId] INT NOT NULL, 
+    [intEntityUserSecurityId] INT NOT NULL, 
     [intReportId] INT NOT NULL, 
     [strPermission] NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intConcurrencyId] INT NOT NULL DEFAULT (1), 
-    CONSTRAINT [FK_tblSMUserSecurityFRPermission_tblSMUserSecurity] FOREIGN KEY ([intUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]) ON DELETE CASCADE,
+    CONSTRAINT [FK_tblSMUserSecurityFRPermission_tblSMUserSecurity] FOREIGN KEY ([intEntityUserSecurityId]) REFERENCES [tblSMUserSecurity]([intEntityUserSecurityId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblSMUserSecurityFRPermission_tblFRReport] FOREIGN KEY ([intReportId]) REFERENCES [tblFRReport]([intReportId]) ON DELETE CASCADE
 )
 
 GO
 
 
-CREATE INDEX [IX_tblSMUserSecurityFRPermission_intUserSecurityId] ON [dbo].[tblSMUserSecurityFRPermission] ([intUserSecurityId])
+CREATE INDEX [IX_tblSMUserSecurityFRPermission_intUserSecurityId] ON [dbo].[tblSMUserSecurityFRPermission] ([intEntityUserSecurityId])
 
 GO
 
@@ -35,7 +35,7 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1type = N'TABLE',
     @level1name = N'tblSMUserSecurityFRPermission',
     @level2type = N'COLUMN',
-    @level2name = N'intUserSecurityId'
+    @level2name = N'intEntityUserSecurityId'
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Report Id',

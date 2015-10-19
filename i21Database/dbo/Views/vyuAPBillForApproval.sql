@@ -36,7 +36,7 @@ FROM (
 				F.[intEntityUserSecurityId]
 			FROM dbo.tblSMApprovalList D
 			INNER JOIN dbo.tblSMApprovalListUserSecurity E ON D.intApprovalListId = E.intApprovalListId
-			LEFT JOIN dbo.tblSMUserSecurity F ON E.intUserSecurityId = F.[intEntityUserSecurityId]
+			LEFT JOIN dbo.tblSMUserSecurity F ON E.[intEntityUserSecurityId] = F.[intEntityUserSecurityId]
 			WHERE D.intApprovalListId = B.intApprovalListId
 		) Approver
 		WHERE A.ysnForApproval = 1 AND B.intApprovalListId IS NOT NULL AND A.dtmApprovalDate IS NULL
