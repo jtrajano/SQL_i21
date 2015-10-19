@@ -3,6 +3,7 @@
 	[intRefundCustomerId] INT NOT NULL IDENTITY, 
     [intRefundId] INT NOT NULL, 
     [intCustomerId] INT NULL, 
+	[strStockStatus] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
     [ysnEligibleRefund] BIT NULL, 
     [intRefundTypeId] NCHAR(10) NULL, 
     [dblCashPayout] NUMERIC(18, 6) NULL, 

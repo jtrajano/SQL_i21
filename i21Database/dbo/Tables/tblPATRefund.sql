@@ -1,5 +1,5 @@
 ﻿CREATE TABLE [dbo].[tblPATRefund](
-		[intRefundId] [int] NOT NULL,
+		[intRefundId] [int] NOT NULL IDENTITY,
 		[intFiscalYearId] [int] NULL,
 		[dtmRefundDate] [datetime] NULL,
 		[strRefund] [char](1) NULL,

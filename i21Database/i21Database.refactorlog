@@ -4200,4 +4200,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[intEntityUserSecurityId]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="86c379c1-6c9b-4515-b508-d1e32bc8a518" ChangeDateTime="10/19/2015 02:48:10">
+    <Property Name="ElementName" Value="[dbo].[tblPATCategoryVolume]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblPATCustomerVolume]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="982a5fe6-6a6a-455f-abfa-0e3e1e0b63e9" ChangeDateTime="10/19/2015 02:49:06">
+    <Property Name="ElementName" Value="[dbo].[uspPATBillToCategoryVolume]" />
+    <Property Name="ElementType" Value="SqlProcedure" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[uspPATBillToCustomerVolume]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="54c8de50-4a55-4d32-8e0f-16cd9f2b4979" ChangeDateTime="10/19/2015 02:49:50">
+    <Property Name="ElementName" Value="[dbo].[uspPATInvoiceToCategoryVolume]" />
+    <Property Name="ElementType" Value="SqlProcedure" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[uspPATInvoiceToCustomerVolume]" />
+  </Operation>
 </Operations>

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspPATInvoiceToCategoryVolume] 
+﻿CREATE PROCEDURE [dbo].[uspPATInvoiceToCustomerVolume] 
 	@intEntityCustomerId INT,
 	@intInvoiceId INT,
 	@ysnPosted BIT = NULL,
@@ -102,27 +102,27 @@ DECLARE @dtmMembershipDate DATETIME,
 						CLOSE Cursor_Unit
 						DEALLOCATE Cursor_Unit
 
-						IF EXISTS(SELECT * FROM tblPATCategoryVolume WHERE intCustomerPatronId = @intEntityCustomerId AND intPatronageCategoryId = @intPatronageCategoryId)
+						IF EXISTS(SELECT * FROM [tblPATCustomerVolume] WHERE intCustomerPatronId = @intEntityCustomerId AND intPatronageCategoryId = @intPatronageCategoryId)
 						BEGIN
 
 							IF(@ysnPosted = 1)
 							BEGIN
-								UPDATE tblPATCategoryVolume
+								UPDATE [tblPATCustomerVolume]
 								   SET dblVolume = dblVolume + @TotalUnit
 								 WHERE intCustomerPatronId = @intEntityCustomerId
 								   AND intPatronageCategoryId = @intPatronageCategoryId
 							END
 							ELSE
 							BEGIN
-								IF((SELECT dblVolume FROM tblPATCategoryVolume WHERE intCustomerPatronId = @intEntityCustomerId AND intPatronageCategoryId = @intPatronageCategoryId) = @TotalUnit)
+								IF((SELECT dblVolume FROM [tblPATCustomerVolume] WHERE intCustomerPatronId = @intEntityCustomerId AND intPatronageCategoryId = @intPatronageCategoryId) = @TotalUnit)
 								BEGIN
-									DELETE FROM tblPATCategoryVolume 
+									DELETE FROM [tblPATCustomerVolume] 
 									 WHERE intCustomerPatronId = @intEntityCustomerId
 									   AND intPatronageCategoryId = @intPatronageCategoryId
 								END
 								ELSE
 								BEGIN
-									UPDATE tblPATCategoryVolume
+									UPDATE [tblPATCustomerVolume]
 									   SET dblVolume = dblVolume - @TotalUnit
 									 WHERE intCustomerPatronId = @intEntityCustomerId
 									   AND intPatronageCategoryId = @intPatronageCategoryId
@@ -132,7 +132,7 @@ DECLARE @dtmMembershipDate DATETIME,
 						END
 						ELSE
 						BEGIN
-							INSERT INTO tblPATCategoryVolume
+							INSERT INTO [tblPATCustomerVolume]
 								 VALUES (@intEntityCustomerId, @intPatronageCategoryId, @intFiscalYear, @TotalUnit, 1)
 						END
 
@@ -181,18 +181,18 @@ DECLARE @dtmMembershipDate DATETIME,
 								CLOSE U_Cursor
 								DEALLOCATE U_Cursor
 
-								IF EXISTS(SELECT * FROM tblPATCategoryVolume WHERE intCustomerPatronId = @intEntityCustomerId AND intPatronageCategoryId = @intPatronageCategoryId)
+								IF EXISTS(SELECT * FROM [tblPATCustomerVolume] WHERE intCustomerPatronId = @intEntityCustomerId AND intPatronageCategoryId = @intPatronageCategoryId)
 								BEGIN
 
-									IF((SELECT dblVolume FROM tblPATCategoryVolume WHERE intCustomerPatronId = @intEntityCustomerId AND intPatronageCategoryId = @intPatronageCategoryId) = @TotalUnit)
+									IF((SELECT dblVolume FROM [tblPATCustomerVolume] WHERE intCustomerPatronId = @intEntityCustomerId AND intPatronageCategoryId = @intPatronageCategoryId) = @TotalUnit)
 									BEGIN
-										DELETE FROM tblPATCategoryVolume 
+										DELETE FROM [tblPATCustomerVolume] 
 										 WHERE intCustomerPatronId = @intEntityCustomerId
 										   AND intPatronageCategoryId = @intPatronageCategoryId
 									END
 									ELSE
 									BEGIN
-										UPDATE tblPATCategoryVolume
+										UPDATE [tblPATCustomerVolume]
 										   SET dblVolume = dblVolume - @TotalUnit
 										 WHERE intCustomerPatronId = @intEntityCustomerId
 										   AND intPatronageCategoryId = @intPatronageCategoryId
@@ -201,7 +201,7 @@ DECLARE @dtmMembershipDate DATETIME,
 								END
 								ELSE
 								BEGIN
-									INSERT INTO tblPATCategoryVolume
+									INSERT INTO [tblPATCustomerVolume]
 										 VALUES (@intEntityCustomerId, @intPatronageCategoryId, @intFiscalYear, @TotalUnit, 1)
 								END
 							END
@@ -215,27 +215,27 @@ DECLARE @dtmMembershipDate DATETIME,
 
 					SET @Total = (SELECT dblInvoiceTotal FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
 
-					IF EXISTS(SELECT * FROM tblPATCategoryVolume WHERE intCustomerPatronId = @intEntityCustomerId AND intPatronageCategoryId = @intPatronageCategoryId)
+					IF EXISTS(SELECT * FROM [tblPATCustomerVolume] WHERE intCustomerPatronId = @intEntityCustomerId AND intPatronageCategoryId = @intPatronageCategoryId)
 					BEGIN
 						
 						IF(@ysnPosted = 1)
 						BEGIN
-							UPDATE tblPATCategoryVolume
+							UPDATE [tblPATCustomerVolume]
 							   SET dblVolume = (dblVolume + @Total)
 							 WHERE intCustomerPatronId = @intEntityCustomerId
 							   AND intPatronageCategoryId = @intPatronageCategoryId
 						END
 						ELSE
 						BEGIN
-							IF((SELECT dblVolume FROM tblPATCategoryVolume WHERE intCustomerPatronId = @intEntityCustomerId AND intPatronageCategoryId = @intPatronageCategoryId) = @TotalUnit)
+							IF((SELECT dblVolume FROM [tblPATCustomerVolume] WHERE intCustomerPatronId = @intEntityCustomerId AND intPatronageCategoryId = @intPatronageCategoryId) = @TotalUnit)
 							BEGIN
-								DELETE FROM tblPATCategoryVolume 
+								DELETE FROM [tblPATCustomerVolume] 
 									WHERE intCustomerPatronId = @intEntityCustomerId
 									AND intPatronageCategoryId = @intPatronageCategoryId
 							END
 							ELSE
 							BEGIN
-								UPDATE tblPATCategoryVolume
+								UPDATE [tblPATCustomerVolume]
 									SET dblVolume = dblVolume - @Total
 									WHERE intCustomerPatronId = @intEntityCustomerId
 									AND intPatronageCategoryId = @intPatronageCategoryId
@@ -244,7 +244,7 @@ DECLARE @dtmMembershipDate DATETIME,
 
 					END
 					ELSE
-						INSERT INTO tblPATCategoryVolume
+						INSERT INTO [tblPATCustomerVolume]
 							 VALUES (@intEntityCustomerId, @intPatronageCategoryId, @intFiscalYear, @Total, 1)
 					END
 			END

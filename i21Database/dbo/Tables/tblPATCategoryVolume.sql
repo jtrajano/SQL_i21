@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblPATCategoryVolume]
+﻿CREATE TABLE [dbo].[tblPATCustomerVolume]
 (
 	[intCategoryVolumeId] INT NOT NULL IDENTITY, 
     [intCustomerPatronId] INT NULL, 
