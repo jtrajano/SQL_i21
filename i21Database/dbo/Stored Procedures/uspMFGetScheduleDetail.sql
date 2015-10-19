@@ -2,6 +2,7 @@
 	@intManufacturingCellId int= NULL
 	,@dtmPlannedStartDate DATE
 	,@dtmPlannedEndDate DATE
+	,@intLocationId int
 	)
 AS
 SELECT MC.intManufacturingCellId
@@ -51,7 +52,7 @@ JOIN dbo.tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
 --JOIN tblMFSchedule S ON S.intScheduleId = SL.intScheduleId
 --	AND S.ysnStandard = 1
 JOIN dbo.tblMFShift SH ON SH.intShiftId = SL.intPlannedShiftId
-WHERE W.intLocationId = 1
+WHERE W.intLocationId = @intLocationId
 	AND MC.intManufacturingCellId = (
 		CASE 
 			WHEN @intManufacturingCellId IS NULL

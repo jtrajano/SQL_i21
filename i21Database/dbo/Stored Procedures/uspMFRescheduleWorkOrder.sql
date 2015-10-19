@@ -1188,7 +1188,7 @@ BEGIN TRY
 	JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
 	JOIN @tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
 	JOIN dbo.tblMFShift SH ON SH.intShiftId = SL.intPlannedShiftId
-	WHERE W.intLocationId = 1
+	WHERE W.intLocationId = @intLocationId
 		AND MC.intManufacturingCellId = @intManufacturingCellId
 		AND SL.dtmPlannedStartDate >= @dtmFromDate
 		AND SL.dtmPlannedEndDate <= @dtmToDate
