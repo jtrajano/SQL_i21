@@ -8,4 +8,4 @@ SELECT Distinct
  ,Cm.strDescription  
 FROM tblGRCustomerStorage Cs
 JOIN tblICCommodity Cm ON Cm.intCommodityId=Cs.intCommodityId
-Where Cs.dblOpenBalance >0 
+Where Cs.dblOpenBalance >0 AND ISNULL(Cs.strStorageType,'') <> 'ITR'

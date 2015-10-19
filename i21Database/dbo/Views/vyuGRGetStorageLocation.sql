@@ -6,5 +6,5 @@ SELECT Distinct
   ,Loc.strLocationName  
 FROM tblGRCustomerStorage Cs
 JOIN tblSMCompanyLocation Loc ON Loc.intCompanyLocationId =Cs.intCompanyLocationId 
-Where Cs.dblOpenBalance >0 
+Where Cs.dblOpenBalance >0 AND ISNULL(Cs.strStorageType,'') <> 'ITR'
 
