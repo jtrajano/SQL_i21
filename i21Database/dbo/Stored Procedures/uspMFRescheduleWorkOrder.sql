@@ -1180,13 +1180,13 @@ BEGIN TRY
 		,0 AS intLeadTime
 		,'' AS strCustomer
 	FROM dbo.tblMFWorkOrder W
-	JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
 	JOIN dbo.tblICItem I ON I.intItemId = W.intItemId
 	JOIN dbo.tblICItemUOM IU ON IU.intItemId = I.intItemId
 		AND IU.ysnStockUnit = 1
 	JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 	JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
 	JOIN @tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
+	JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = SL.intStatusId
 	JOIN dbo.tblMFShift SH ON SH.intShiftId = SL.intPlannedShiftId
 	WHERE W.intLocationId = @intLocationId
 		AND MC.intManufacturingCellId = @intManufacturingCellId
