@@ -4220,6 +4220,7 @@
     <Property Name="ParentElementName" Value="[dbo]" />
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="[uspPATInvoiceToCustomerVolume]" />
+  </Operation>
   <Operation Name="Rename Refactor" Key="4510facd-b070-492a-aac0-08c4abdd31fd" ChangeDateTime="10/19/2015 03:43:36">
     <Property Name="ElementName" Value="[dbo].[tblSMLicenseAcceptance].[intUserSecurityId]" />
     <Property Name="ElementType" Value="SqlSimpleColumn" />
