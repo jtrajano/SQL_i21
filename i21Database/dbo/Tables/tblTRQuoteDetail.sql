@@ -15,11 +15,13 @@
 	[dblExtProfit] DECIMAL(18, 6) NULL DEFAULT 0, 
 	[dblTax] DECIMAL(18, 6) NULL DEFAULT 0, 	
 	[intShipToLocationId]     [int] NULL,
+	[intSpecialPriceId]      [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	CONSTRAINT [PK_tblTRQuoteDetail] PRIMARY KEY ([intQuoteDetailId]),	
 	CONSTRAINT [FK_tblTRQuoteDetail_tblTRQuoteHeader_intQuoteHeaderId] FOREIGN KEY ([intQuoteHeaderId]) REFERENCES [dbo].[tblTRQuoteHeader] ([intQuoteHeaderId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblTRQuoteDetail_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [dbo].[tblICItem] ([intItemId]),
 	CONSTRAINT [FK_tblTRQuoteDetail_tblAPVendor_intTerminalId] FOREIGN KEY ([intTerminalId]) REFERENCES [dbo].[tblAPVendor] ([intEntityVendorId]),
     CONSTRAINT [FK_tblTRQuoteDetail_tblTRSupplyPoint_intSupplyPointId] FOREIGN KEY ([intSupplyPointId]) REFERENCES [dbo].[tblTRSupplyPoint] ([intSupplyPointId]),
-	CONSTRAINT [FK_tblTRQuoteDetail_tblEntityLocation_intShipToLocationId] FOREIGN KEY ([intShipToLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId])
+	CONSTRAINT [FK_tblTRQuoteDetail_tblEntityLocation_intShipToLocationId] FOREIGN KEY ([intShipToLocationId]) REFERENCES [dbo].[tblEntityLocation] ([intEntityLocationId]),
+	CONSTRAINT [FK_tblTRQuoteDetail_tblARCustomerSpecialPrice_intSpecialPriceId] FOREIGN KEY ([intSpecialPriceId]) REFERENCES [dbo].[tblARCustomerSpecialPrice] ([intSpecialPriceId])
 )
