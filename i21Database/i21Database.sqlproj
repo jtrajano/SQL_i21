@@ -2560,7 +2560,7 @@
     <Build Include="dbo\Stored Procedures\uspARDuplicateCommissionPlan.sql" />
     <Build Include="dbo\Tables\tblGLOriginAccounts.sql" />
     <Build Include="dbo\Tables\tblPATEstateCorporationDetail.sql" />
-    <Build Include="dbo\Tables\tblPATCategoryVolume.sql" />
+    <Build Include="dbo\Tables\tblPATCustomerVolume.sql" />
     <Build Include="dbo\Tables\tblRKM2MBasis.sql" />
     <Build Include="dbo\Tables\tblRKM2MBasisDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetM2MBasis.sql" />
