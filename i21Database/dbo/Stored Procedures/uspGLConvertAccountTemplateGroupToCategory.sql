@@ -94,6 +94,6 @@ SELECT @generalCategoryId = intAccountCategoryId FROM tblGLAccountCategory WHERE
 UPDATE s SET intAccountCategoryId = @generalCategoryId  FROM tblGLCOATemplateDetail s 
 	JOIN tblGLAccountStructure  t ON t.intAccountStructureId = s.intAccountStructureId
 	WHERE intAccountCategoryId  IS NULL AND t.strType = 'Primary'
-UPDATE tblGLAccount SET intAccountCategoryId = @generalCategoryId WHERE intAccountCategoryId  IS NULL
+UPDATE tblGLAccountSegment SET intAccountCategoryId = @generalCategoryId WHERE intAccountCategoryId  IS NULL
 	
 
