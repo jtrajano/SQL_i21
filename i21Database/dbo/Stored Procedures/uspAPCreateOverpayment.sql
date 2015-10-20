@@ -36,7 +36,6 @@ BEGIN
 		[dblSubtotal]			,
 		[ysnPosted]				,
 		[ysnPaid]				,
-		[strBillId]				,
 		[dblAmountDue]			,
 		[dtmDatePaid]			,
 		[dtmApprovalDate]       ,
@@ -82,7 +81,7 @@ BEGIN
 		[dtmDateDeleted]		,
 		[dtmDateCreated]		
 	)
-	EXEC uspAPCreateBillData  @userId, @vendorId
+	SELECT * FROM dbo.fnAPCreateBillData(@vendorId, @userId, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT)
 
 	SET @billId = SCOPE_IDENTITY();
 
