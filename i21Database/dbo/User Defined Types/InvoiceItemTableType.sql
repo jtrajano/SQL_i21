@@ -29,7 +29,8 @@ CREATE TYPE [dbo].[InvoiceItemTableType] AS TABLE
 		,[dblTotal]						NUMERIC (18, 6) NULL		
 		,[intServiceChargeAccountId]	INT				NULL
 		,[intInventoryShipmentItemId]	INT				NULL		
-		,[intSalesOrderDetailId]		INT				NULL		
+		,[intSalesOrderDetailId]		INT				NULL
+		,[intShipmentPurchaseSalesContractId]	INT		NULL				
 		,[intSiteId]					INT				NULL
 		,[strBillingBy]                 NVARCHAR(100)   COLLATE Latin1_General_CI_AS NULL
 		,[dblPercentFull]				NUMERIC (18, 6) NULL
