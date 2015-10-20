@@ -2650,6 +2650,7 @@
     <Build Include="dbo\Stored Procedures\uspARAddItemToInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessInvoices.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessShipmentToInvoice.sql" />
+    <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\CallEntryPrintOut.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
