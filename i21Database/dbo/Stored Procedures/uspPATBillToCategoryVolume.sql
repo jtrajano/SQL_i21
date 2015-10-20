@@ -132,7 +132,7 @@ DECLARE @dtmMembershipDate DATETIME,
 						END
 						ELSE
 						BEGIN
-							INSERT INTO [tblPATCustomerVolume]
+							INSERT INTO [tblPATCustomerVolume] (intCustomerPatronId, intPatronageCategoryId, intFiscalYear, dtmLastActivityDate, dblVolume, intConcurrencyId)
 								 VALUES (@intEntityCustomerId, @intPatronageCategoryId, @intFiscalYear, GETDATE(), @TotalUnit, 1)
 						END
 
@@ -211,7 +211,7 @@ DECLARE @dtmMembershipDate DATETIME,
 								END
 								ELSE
 								BEGIN
-									INSERT INTO [tblPATCustomerVolume]
+									INSERT INTO [tblPATCustomerVolume] (intCustomerPatronId, intPatronageCategoryId, intFiscalYear, dtmLastActivityDate, dblVolume, intConcurrencyId)
 										 VALUES (@intEntityCustomerId, @intPatronageCategoryId, @intFiscalYear, GETDATE(), @TotalUnit, 1)
 								END
 							END
@@ -252,7 +252,7 @@ DECLARE @dtmMembershipDate DATETIME,
 						END
 					END
 					ELSE
-						INSERT INTO [tblPATCustomerVolume]
+						INSERT INTO [tblPATCustomerVolume] (intCustomerPatronId, intPatronageCategoryId, intFiscalYear, dtmLastActivityDate, dblVolume, intConcurrencyId)
 							 VALUES (@intEntityCustomerId, @intPatronageCategoryId, @intFiscalYear,  GETDATE(), @Total, 1)
 					END
 			END
