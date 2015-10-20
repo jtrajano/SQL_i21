@@ -185,9 +185,8 @@ BEGIN
 	END
 
 	-----------------------------------------------------------------------------------------------------------------------------------------
-
-	---- Update tblTMEvent
-	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = ''tblTMEvent'' and [COLUMN_NAME] = ''intUserID'')
+	EXEC(''
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = ''''tblTMEvent'''' and [COLUMN_NAME] = ''''intUserID'''')
 	BEGIN
 		UPDATE tblTMEvent SET intUserID = A.intEntityUserSecurityId
 		FROM tblSMUserSecurity A
@@ -195,7 +194,7 @@ BEGIN
 	END
 
 	---- Update tblTMDeliveryHistory
-	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = ''tblTMDeliveryHistory'' and [COLUMN_NAME] = ''intUserID'')
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = ''''tblTMDeliveryHistory'''' and [COLUMN_NAME] = ''''intUserID'''')
 	BEGIN
 		UPDATE tblTMDeliveryHistory SET intUserID = A.intEntityUserSecurityId
 		FROM tblSMUserSecurity A
@@ -204,7 +203,7 @@ BEGIN
 	END
 
 	---- Update tblTMWorkOrder
-	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = ''tblTMWorkOrder'' and [COLUMN_NAME] = ''intEnteredByID'')
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = ''''tblTMWorkOrder'''' and [COLUMN_NAME] = ''''intEnteredByID'''')
 	BEGIN
 		UPDATE tblTMWorkOrder SET intEnteredByID = A.intEntityUserSecurityId
 		FROM tblSMUserSecurity A
@@ -213,7 +212,7 @@ BEGIN
 	END
 
 	---- Update tblTMSite
-	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = ''tblTMSite'' and [COLUMN_NAME] = ''intUserID'')
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = ''''tblTMSite'''' and [COLUMN_NAME] = ''''intUserID'''')
 	BEGIN
 		UPDATE tblTMSite SET intUserID = A.intEntityUserSecurityId
 		FROM tblSMUserSecurity A
@@ -222,13 +221,14 @@ BEGIN
 	END
 
 	---- Update tblTMDispatch
-	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = ''tblTMDispatch'' and [COLUMN_NAME] = ''intUserID'')
+	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = ''''tblTMDispatch'''' and [COLUMN_NAME] = ''''intUserID'''')
 	BEGIN
 		UPDATE tblTMDispatch SET intUserID = A.intEntityUserSecurityId
 		FROM tblSMUserSecurity A
 		WHERE tblTMDispatch.intUserID = A.intUserSecurityIdOld
 		AND A.intUserSecurityIdOld IS NOT NULL
 	END
+	'')
 
 	')
 	
