@@ -1312,8 +1312,6 @@
     <Build Include="dbo\Tables\tblCFAccount.sql" />
     <Build Include="dbo\Tables\tblLGGenerateLoad.sql" />
     <Build Include="dbo\Stored Procedures\uspSMDuplicateTaxGroupMaster.sql" />
-    <Build Include="dbo\Tables\tblSMTaxGroupMaster.sql" />
-    <Build Include="dbo\Tables\tblSMTaxGroupMasterGroup.sql" />
     <Build Include="dbo\Views\vyuEMEntityContact.sql" />
     <Build Include="dbo\Views\vyuCFCustomerEntity.sql" />
     <Build Include="dbo\Tables\tblRKMatchFuturesPSHeader.sql" />
