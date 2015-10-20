@@ -206,7 +206,7 @@ BEGIN
 		 @intPrcContractSeq			as intPrcContractSeq		,
 		 @strPrcPriceBasis			as strPrcPriceBasis		
 
-		 
+		set @dblPrcOriginalPrice = @dblOriginalGrossPrice
 		select dblQuantity,dblScheduleQty,dblBalance from tblCTContractDetail where intContractDetailId = 43
 
 	
@@ -501,10 +501,10 @@ BEGIN
 			 @intLoopTaxGroupID = intTaxGroupId
 			,@intLoopTaxCodeID = intTaxCodeId
 			,@intLoopTaxClassID = intTaxClassId
-			,@QxT = @dblQuantity * numRate
-			,@QxOP = @QxOP - (@dblQuantity * numRate)
-			,@dblOPTotalTax = @dblOPTotalTax + (@dblQuantity * numRate)
-			,@dblCPTotalTax = @dblCPTotalTax +  numRate
+			,@QxT = ROUND (@dblQuantity * numRate,6)
+			,@QxOP = ROUND (@QxOP - (@dblQuantity * numRate),6)
+			,@dblOPTotalTax = ROUND (@dblOPTotalTax + (@dblQuantity * numRate),6)
+			,@dblCPTotalTax = ROUND (@dblCPTotalTax +  numRate,6)
 			,@strLoopTaxCode = strTaxCode
 			FROM @tblTaxUnitTable
 
@@ -532,16 +532,19 @@ BEGIN
 
 		END
 
+
 		WHILE (EXISTS(SELECT TOP 1 * FROM @tblTaxRateTable))
 		BEGIN
+
+
 			SELECT TOP 1 
 			 @intLoopTaxGroupID = intTaxGroupId
 			,@intLoopTaxCodeID = intTaxCodeId
 			,@intLoopTaxClassID = intTaxClassId
-			,@OPTax = (@QxOP / (numRate/100 + 1))* (numRate/100) -- (Qty * OriginalPrice) * (rate/100)
-			,@CPTax = @QxCP * (numRate/100) --calc price * (rate/100)
-			,@dblOPTotalTax = @dblOPTotalTax +  (@QxOP / (numRate/100 + 1))* (numRate/100)
-			,@dblCPTotalTax = @dblCPTotalTax +  (@dblPrcPriceOut * (numRate/100))
+			,@OPTax = ROUND (((@QxOP / (numRate/100 +1 )) * (numRate/100)),6)
+			,@CPTax = ROUND (@QxCP * (numRate/100),6)
+			,@dblOPTotalTax = ROUND (@dblOPTotalTax +  ((@QxOP / (numRate/100 +1 )) * (numRate/100)),6)
+			,@dblCPTotalTax = ROUND (@dblCPTotalTax +  (@dblPrcPriceOut * (numRate/100)),6)
 			,@strLoopTaxCode = strTaxCode
 			FROM @tblTaxRateTable
 
