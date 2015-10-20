@@ -1,53 +1,75 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCreateCustomerInvoice]
 	 @EntityCustomerId				INT
-	,@InvoiceDate					DATETIME
 	,@CompanyLocationId				INT
-	,@EntityId						INT
-	,@NewInvoiceId					INT				= NULL			OUTPUT 
-	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT	
 	,@CurrencyId					INT				= NULL
 	,@TermId						INT				= NULL
-	,@EntitySalespersonId			INT				= NULL
+	,@EntityId						INT
+	,@InvoiceDate					DATETIME	
 	,@DueDate						DATETIME		= NULL
-	,@ShipDate						DATETIME		= NULL
+	,@ShipDate						DATETIME		= NULL	
 	,@PostDate						DATETIME		= NULL
 	,@TransactionType				NVARCHAR(50)	= 'Invoice'
 	,@Type							NVARCHAR(200)	= 'Standard'
-	,@Comment						NVARCHAR(500)	= ''
+	,@NewInvoiceId					INT				= NULL			OUTPUT 
+	,@ErrorMessage					NVARCHAR(250)	= NULL			OUTPUT
+	,@RaiseError					BIT				= 0			
+	,@EntitySalespersonId			INT				= NULL				
+	,@FreightTermId					INT				= NULL
+	,@ShipViaId						INT				= NULL
+	,@PaymentMethodId				INT				= NULL
 	,@InvoiceOriginId				NVARCHAR(16)	= NULL
 	,@PONumber						NVARCHAR(50)	= ''
-	,@DistributionHeaderId			INT				= NULL
-	,@PaymentMethodId				INT				= 0
-	,@FreightTermId					INT				= NULL
+	,@BOLNumber						NVARCHAR(50)	= ''
 	,@DeliverPickUp					NVARCHAR(100)	= NULL
-	,@DiscountAmount				NUMERIC(18,6)   = 0.000000
+	,@Comment						NVARCHAR(500)	= ''			
+	,@ShipToLocationId				INT				= NULL
+	,@BillToLocationId				INT				= NULL
+	,@Template						BIT				= 0			
+	,@Forgiven						BIT				= 0			
+	,@Calculated					BIT				= 0			
+	,@Splitted						BIT				= 0			
+	,@PaymentId						INT				= NULL
+	,@SplitId						INT				= NULL
+	,@DistributionHeaderId			INT				= NULL
+	,@ActualCostId					NVARCHAR(50)	= ''			
+	,@ShipmentId					INT				= NULL
+		
 	,@ItemId						INT				= NULL
-	,@ItemUOMId						INT				= NULL
-	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
-	,@ItemPrice						NUMERIC(18,6)	= 0.000000
+	,@ItemIsInventory				BIT				= 0
 	,@ItemDescription				NVARCHAR(500)	= NULL
+	,@ItemUOMId						INT				= NULL
+	,@ItemQtyOrdered				NUMERIC(18,6)	= 0.000000
+	,@ItemQtyShipped				NUMERIC(18,6)	= 0.000000
+	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
+	,@ItemPrice						NUMERIC(18,6)	= 0.000000	
+	,@RefreshPrice					BIT				= 0
+	,@ItemMaintenanceType			NVARCHAR(50)	= NULL
+	,@ItemFrequency					NVARCHAR(50)	= NULL
+	,@ItemMaintenanceDate			DATETIME		= NULL
+	,@ItemMaintenanceAmount			NUMERIC(18,6)	= 0.000000
+	,@ItemLicenseAmount				NUMERIC(18,6)	= 0.000000
+	,@ItemTaxGroupId				INT				= NULL
+	,@RecomputeTax					BIT				= 0
+	,@ItemSCInvoiceId				INT				= NULL
+	,@ItemSCInvoiceNumber			NVARCHAR(50)	= NULL
+	,@ItemInventoryShipmentItemId	INT				= NULL
+	,@ItemShipmentNumber			NVARCHAR(50)	= NULL
+	,@ItemSalesOrderDetailId		INT				= NULL												
+	,@ItemSalesOrderNumber			NVARCHAR(50)	= NULL
+	,@ItemContractHeaderId			INT				= NULL
+	,@ItemContractDetailId			INT				= NULL			
+	,@ItemShipmentPurchaseSalesContractId	INT		= NULL			
+	,@ItemTicketId					INT				= NULL		
+	,@ItemTicketHoursWorkedId		INT				= NULL		
 	,@ItemSiteId					INT				= NULL												
 	,@ItemBillingBy					NVARCHAR(200)	= NULL
 	,@ItemPercentFull				NUMERIC(18,6)	= 0.000000
 	,@ItemNewMeterReading			NUMERIC(18,6)	= 0.000000
 	,@ItemPreviousMeterReading		NUMERIC(18,6)	= 0.000000
 	,@ItemConversionFactor			NUMERIC(18,8)	= 0.00000000
-	,@ItemDiscount					NUMERIC(18,6)	= 0.000000
 	,@ItemPerformerId				INT				= NULL
 	,@ItemLeaseBilling				BIT				= 0
-	,@TaxMasterId					INT				= NULL
-	,@ItemContractHeaderId			INT				= NULL
-	,@ItemContractDetailId			INT				= NULL
-	,@ItemMaintenanceType			NVARCHAR(50)	= NULL
-	,@ItemFrequency					NVARCHAR(50)	= NULL
-	,@ItemMaintenanceDate			DATETIME		= NULL
-	,@ItemMaintenanceAmount			NUMERIC(18,6)	= 0.000000
-	,@ItemLicenseAmount				NUMERIC(18,6)	= 0.000000		
-	,@ItemTicketId					INT				= NULL		
-	,@ItemSCInvoiceId				INT				= NULL
-	,@ItemSCInvoiceNumber			NVARCHAR(50)	= NULL
-	,@ItemServiceChargeAccountId	INT				= NULL
-	,@ItemTaxGroupId				INT				= NULL
+	,@ItemVirtualMeterReading		BIT				= 0
 AS
 
 BEGIN
@@ -79,40 +101,53 @@ IF @Comment IS NULL OR LTRIM(RTRIM(@Comment)) = ''
 IF(@ARAccountId IS NULL OR @ARAccountId = 0)
 	BEGIN
 		SET @ErrorMessage = 'There is no setup for AR Account in the Company Preference.';
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;
 	END
 	
 IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @EntityCustomerId)
 	BEGIN
 		SET @ErrorMessage = 'The customer Id provided does not exists!'
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;
 	END
 
 IF NOT EXISTS(SELECT NULL FROM tblARCustomer WHERE intEntityCustomerId = @EntityCustomerId AND ysnActive = 1)
 	BEGIN
 		SET @ErrorMessage = 'The customer provided is not active!'
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
 		RETURN 0;
 	END	
 	
 IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId)
 	BEGIN
 		SET @ErrorMessage = 'The company location Id provided does not exists!'
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);		
 		RETURN 0;
 	END	
 
 IF NOT EXISTS(SELECT NULL FROM tblSMCompanyLocation WHERE intCompanyLocationId = @CompanyLocationId AND ysnLocationActive = 1)
 	BEGIN
 		SET @ErrorMessage = 'The company location provided is not active!'
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);		
 		RETURN 0;
 	END	
 	
 IF NOT EXISTS(SELECT NULL FROM tblEntity WHERE intEntityId = @EntityId)
 	BEGIN
 		SET @ErrorMessage = 'The entity Id provided does not exists!'
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);		
 		RETURN 0;
 	END
 	
-BEGIN TRANSACTION
+IF ISNULL(@RaiseError,0) = 0	
+	BEGIN TRANSACTION
 
 DECLARE  @NewId INT
 		,@NewDetailId INT
@@ -120,17 +155,17 @@ DECLARE  @NewId INT
 
 BEGIN TRY
 	INSERT INTO [tblARInvoice]
-		([intEntityCustomerId]
+		([strTransactionType]
+		,[strType]
+		,[intEntityCustomerId]
+		,[intCompanyLocationId]
+		,[intAccountId]
+		,[intCurrencyId]
+		,[intTermId]
 		,[dtmDate]
 		,[dtmDueDate]
-		,[intCurrencyId]
-		,[intCompanyLocationId]
-		,[intEntitySalespersonId]
 		,[dtmShipDate]
-		,[intShipViaId]
-		,[strInvoiceOriginId] 
-		,[strPONumber]
-		,[intTermId]
+		,[dtmPostDate]
 		,[dblInvoiceSubtotal]
 		,[dblShipping]
 		,[dblTax]
@@ -138,19 +173,15 @@ BEGIN TRY
 		,[dblDiscount]
 		,[dblAmountDue]
 		,[dblPayment]
-		,[strTransactionType]
-		,[strType]
-		,[intPaymentMethodId]		
-		,[strComments]
-		,[intAccountId]
-		,[dtmPostDate]
-		,[ysnPosted]
-		,[ysnPaid]
-		,[ysnTemplate]
-		,[ysnForgiven]
-		,[ysnCalculated]
+		,[intEntitySalespersonId]
 		,[intFreightTermId]
+		,[intShipViaId]
+		,[intPaymentMethodId]
+		,[strInvoiceOriginId]
+		,[strPONumber]
+		,[strBOLNumber]
 		,[strDeliverPickup]
+		,[strComments]
 		,[intShipToLocationId]
 		,[strShipToLocationName]
 		,[strShipToAddress]
@@ -165,59 +196,74 @@ BEGIN TRY
 		,[strBillToState]
 		,[strBillToZipCode]
 		,[strBillToCountry]
+		,[ysnPosted]
+		,[ysnPaid]
+		,[ysnTemplate]
+		,[ysnForgiven]
+		,[ysnCalculated]
+		,[ysnSplitted]
+		,[intPaymentId]
+		,[intSplitId]
 		,[intDistributionHeaderId]
-		,[intConcurrencyId]
-		,[intEntityId])
-
-	SELECT			
-		 [intEntityCustomerId]			= C.[intEntityCustomerId]
+		,[strActualCostId]
+		,[intShipmentId]
+		,[intEntityId]
+		,[intConcurrencyId])
+	SELECT
+		 [strTransactionType]			= @TransactionType
+		,[strType]						= @Type 
+		,[intEntityCustomerId]			= C.[intEntityCustomerId]
+		,[intCompanyLocationId]			= @CompanyLocationId
+		,[intAccountId]					= @ARAccountId
+		,[intCurrencyId]				= ISNULL(@CurrencyId, ISNULL(C.[intCurrencyId], @DefaultCurrency))	
+		,[intTermId]					= ISNULL(@TermId, EL.[intTermsId])
 		,[dtmDate]						= CAST(@InvoiceDate AS DATE)
 		,[dtmDueDate]					= ISNULL(@DueDate, (CAST(dbo.fnGetDueDateBasedOnTerm(@InvoiceDate, ISNULL(ISNULL(@TermId, EL.[intTermsId]),0)) AS DATE)))
-		,[intCurrencyId]				= ISNULL(@CurrencyId, ISNULL(C.[intCurrencyId], @DefaultCurrency))
-		,[intCompanyLocationId]			= @CompanyLocationId
-		,[intEntitySalespersonId]		= ISNULL(@EntitySalespersonId, C.[intSalespersonId])
 		,[dtmShipDate]					= @ShipDate
-		,[intShipViaId]					= EL.[intShipViaId]
-		,[strInvoiceOriginId]			= @InvoiceOriginId
-		,[strPONumber]					= @PONumber
-		,[intTermId]					= ISNULL(@TermId, EL.[intTermsId])
+		,[dtmPostDate]					= @PostDate
 		,[dblInvoiceSubtotal]			= @ZeroDecimal
 		,[dblShipping]					= @ZeroDecimal
 		,[dblTax]						= @ZeroDecimal
 		,[dblInvoiceTotal]				= @ZeroDecimal
-		,[dblDiscount]					= @DiscountAmount
+		,[dblDiscount]					= @ZeroDecimal
 		,[dblAmountDue]					= @ZeroDecimal
 		,[dblPayment]					= @ZeroDecimal
-		,[strTransactionType]			= @TransactionType
-		,[strType]						= @Type 
+		,[intEntitySalespersonId]		= ISNULL(@EntitySalespersonId, C.[intSalespersonId])
+		,[intFreightTermId]				= @FreightTermId
+		,[intShipViaId]					= ISNULL(@ShipViaId, EL.[intShipViaId])
 		,[intPaymentMethodId]			= @PaymentMethodId
+		,[strInvoiceOriginId]			= @InvoiceOriginId
+		,[strPONumber]					= @PONumber
+		,[strBOLNumber]					= @BOLNumber
+		,[strDeliverPickup]				= @DeliverPickUp
 		,[strComments]					= @Comment
-		,[intAccountId]					= @ARAccountId
-		,[dtmPostDate]					= @PostDate
+		,[intShipToLocationId]			= ISNULL(@ShipToLocationId, ISNULL(SL1.[intEntityLocationId], EL.[intEntityLocationId]))
+		,[strShipToLocationName]		= ISNULL(SL.[strLocationName], ISNULL(SL1.[strLocationName], EL.[strLocationName]))
+		,[strShipToAddress]				= ISNULL(SL.[strAddress], ISNULL(SL1.[strAddress], EL.[strAddress]))
+		,[strShipToCity]				= ISNULL(SL.[strCity], ISNULL(SL1.[strCity], EL.[strCity]))
+		,[strShipToState]				= ISNULL(SL.[strState], ISNULL(SL1.[strState], EL.[strState]))
+		,[strShipToZipCode]				= ISNULL(SL.[strZipCode], ISNULL(SL1.[strZipCode], EL.[strZipCode]))
+		,[strShipToCountry]				= ISNULL(SL.[strCountry], ISNULL(SL1.[strCountry], EL.[strCountry]))
+		,[intBillToLocationId]			= ISNULL(@BillToLocationId, ISNULL(BL1.[intEntityLocationId], EL.[intEntityLocationId]))
+		,[strBillToLocationName]		= ISNULL(BL.[strLocationName], ISNULL(BL1.[strLocationName], EL.[strLocationName]))
+		,[strBillToAddress]				= ISNULL(BL.[strAddress], ISNULL(BL1.[strAddress], EL.[strAddress]))
+		,[strBillToCity]				= ISNULL(BL.[strCity], ISNULL(BL1.[strCity], EL.[strCity]))
+		,[strBillToState]				= ISNULL(BL.[strState], ISNULL(BL1.[strState], EL.[strState]))
+		,[strBillToZipCode]				= ISNULL(BL.[strZipCode], ISNULL(BL1.[strZipCode], EL.[strZipCode]))
+		,[strBillToCountry]				= ISNULL(BL.[strCountry], ISNULL(BL1.[strCountry], EL.[strCountry]))
 		,[ysnPosted]					= (CASE WHEN @PostDate IS NULL THEN 0 ELSE 1 END)
 		,[ysnPaid]						= 0
-		,[ysnTemplate]					= 0
-		,[ysnForgiven]					= 0
-		,[ysnCalculated]				= 0
-		,[intFreightTermId]				= @FreightTermId
-		,[strDeliverPickup]				= @DeliverPickUp
-		,[intShipToLocationId]			= ISNULL(SL.[intEntityLocationId], EL.[intEntityLocationId])
-		,[strShipToLocationName]		= ISNULL(SL.[strLocationName], EL.[strLocationName])
-		,[strShipToAddress]				= ISNULL(SL.[strAddress], EL.[strAddress])
-		,[strShipToCity]				= ISNULL(SL.[strCity], EL.[strCity])
-		,[strShipToState]				= ISNULL(SL.[strState], EL.[strState])
-		,[strShipToZipCode]				= ISNULL(SL.[strZipCode], EL.[strZipCode])
-		,[strShipToCountry]				= ISNULL(SL.[strCountry], EL.[strCountry])
-		,[intBillToLocationId]			= ISNULL(BL.[intEntityLocationId], EL.[intEntityLocationId])
-		,[strBillToLocationName]		= ISNULL(BL.[strLocationName], EL.[strLocationName])
-		,[strBillToAddress]				= ISNULL(BL.[strAddress], EL.[strAddress])
-		,[strBillToCity]				= ISNULL(BL.[strCity], EL.[strCity])
-		,[strBillToState]				= ISNULL(BL.[strState], EL.[strState])
-		,[strBillToZipCode]				= ISNULL(BL.[strZipCode], EL.[strZipCode])
-		,[strBillToCountry]				= ISNULL(BL.[strCountry], EL.[strCountry])
-		,[intDistributionHeaderId]		= @DistributionHeaderId
-		,[intConcurrencyId]				= 1
-		,[intEntityId]					= @EntityId
+		,[ysnTemplate]					= ISNULL(@Template,0)
+		,[ysnForgiven]					= ISNULL(@Forgiven,0) 
+		,[ysnCalculated]				= ISNULL(@Calculated,0)
+		,[ysnSplitted]					= ISNULL(@Splitted,0)		
+		,[intPaymentId]					= @PaymentId 
+		,[intSplitId]					= @SplitId 
+		,[intDistributionHeaderId]		= @DistributionHeaderId 
+		,[strActualCostId]				= @ActualCostId 
+		,[intShipmentId]				= @ShipmentId 
+		,[intEntityId]					= @EntityId 
+		,[intConcurrencyId]				= 0
 	FROM	
 		tblARCustomer C
 	LEFT OUTER JOIN
@@ -240,141 +286,145 @@ BEGIN TRY
 						ON C.[intEntityCustomerId] = EL.[intEntityId]
 	LEFT OUTER JOIN
 		tblEntityLocation SL
-			ON C.intShipToId = SL.intEntityLocationId
+			ON ISNULL(@ShipToLocationId, 0) <> 0
+			AND @ShipToLocationId = SL.intEntityLocationId
+	LEFT OUTER JOIN
+		tblEntityLocation SL1
+			ON C.intShipToId = SL1.intEntityLocationId
 	LEFT OUTER JOIN
 		tblEntityLocation BL
-			ON C.intShipToId = BL.intEntityLocationId
+			ON ISNULL(@BillToLocationId, 0) <> 0
+			AND @BillToLocationId = BL.intEntityLocationId		
+	LEFT OUTER JOIN
+		tblEntityLocation BL1
+			ON C.intShipToId = BL1.intEntityLocationId
 	WHERE C.[intEntityCustomerId] = @EntityCustomerId
 	
 	SET @NewId = SCOPE_IDENTITY()
 	
 END TRY
 BEGIN CATCH
-	ROLLBACK TRANSACTION
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
 	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
 	RETURN 0;
 END CATCH
 
 
 
-IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @EntityCustomerId AND [ysnPORequired] = 1 AND LEN(LTRIM(RTRIM(ISNULL(@PONumber,'')))) <= 0)
-	BEGIN
-		DECLARE  @ShipToId	INT
-				,@NewPONumber	NVARCHAR(200)
-		SET @ShipToId = (SELECT [intShipToLocationId] FROM tblARInvoice WHERE intInvoiceId = @NewId)
+--IF EXISTS(SELECT NULL FROM tblARCustomer WHERE [intEntityCustomerId] = @EntityCustomerId AND [ysnPORequired] = 1 AND LEN(LTRIM(RTRIM(ISNULL(@PONumber,'')))) <= 0)
+--	BEGIN
+--		DECLARE  @ShipToId	INT
+--				,@NewPONumber	NVARCHAR(200)
+--		SET @ShipToId = (SELECT [intShipToLocationId] FROM tblARInvoice WHERE intInvoiceId = @NewId)
 		
-		BEGIN TRY
-		EXEC dbo.[uspARGetPONumber]  
-			 @ShipToId  
-			,@CompanyLocationId
-			,@InvoiceDate
-			,@NewPONumber OUT
+--		BEGIN TRY
+--		EXEC dbo.[uspARGetPONumber]  
+--			 @ShipToId  
+--			,@CompanyLocationId
+--			,@InvoiceDate
+--			,@NewPONumber OUT
 			
-		UPDATE
-			tblARInvoice
-		SET
-			[strPONumber] = @NewPONumber
-		WHERE
-			[intInvoiceId] = @NewId
+--		UPDATE
+--			tblARInvoice
+--		SET
+--			[strPONumber] = @NewPONumber
+--		WHERE
+--			[intInvoiceId] = @NewId
 			
-		END TRY
-		BEGIN CATCH
-			ROLLBACK TRANSACTION
-			SET @ErrorMessage = ERROR_MESSAGE();
-			RETURN 0;
-		END CATCH
+--		END TRY
+--		BEGIN CATCH
+--			IF ISNULL(@RaiseError,0) = 0
+--				ROLLBACK TRANSACTION
+--			SET @ErrorMessage = ERROR_MESSAGE();
+--			IF ISNULL(@RaiseError,0) = 1
+--				RAISERROR(@ErrorMessage, 16, 1);
+--			RETURN 0;
+--		END CATCH
 				
-	END
+--	END
+
+BEGIN TRY
+	EXEC [dbo].[uspARAddItemToInvoice]
+		 @InvoiceId						= @NewId	
+		,@ItemId						= @ItemId
+		,@ItemIsInventory				= @ItemIsInventory
+		,@NewInvoiceDetailId			= @NewDetailId		OUTPUT 
+		,@ErrorMessage					= @AddDetailError	OUTPUT
+		,@RaiseError					= @RaiseError
+		,@ItemDescription				= @ItemDescription
+		,@ItemUOMId						= @ItemUOMId
+		,@ItemQtyOrdered				= @ItemQtyShipped
+		,@ItemQtyShipped				= @ItemQtyShipped
+		,@ItemDiscount					= @ItemDiscount
+		,@ItemPrice						= @ItemPrice
+		,@RefreshPrice					= @RefreshPrice
+		,@ItemMaintenanceType			= @ItemMaintenanceType
+		,@ItemFrequency					= @ItemFrequency
+		,@ItemMaintenanceDate			= @ItemMaintenanceDate
+		,@ItemMaintenanceAmount			= @ItemMaintenanceAmount
+		,@ItemLicenseAmount				= @ItemLicenseAmount
+		,@ItemTaxGroupId				= @ItemTaxGroupId
+		,@RecomputeTax					= @RecomputeTax
+		,@ItemSCInvoiceId				= @ItemSCInvoiceId
+		,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
+		,@ItemInventoryShipmentItemId	= @ItemInventoryShipmentItemId
+		,@ItemShipmentNumber			= @ItemShipmentNumber
+		,@ItemSalesOrderDetailId		= @ItemSalesOrderDetailId
+		,@ItemSalesOrderNumber			= @ItemSalesOrderNumber
+		,@ItemContractHeaderId			= @ItemContractHeaderId
+		,@ItemContractDetailId			= @ItemContractDetailId
+		,@ItemShipmentId				= @ShipmentId
+		,@ItemShipmentPurchaseSalesContractId	= @ItemShipmentPurchaseSalesContractId
+		,@ItemTicketId					= @ItemTicketId
+		,@ItemTicketHoursWorkedId		= @ItemTicketHoursWorkedId
+		,@ItemSiteId					= @ItemSiteId
+		,@ItemBillingBy					= @ItemBillingBy
+		,@ItemPercentFull				= @ItemPercentFull
+		,@ItemNewMeterReading			= @ItemNewMeterReading
+		,@ItemPreviousMeterReading		= @ItemPreviousMeterReading
+		,@ItemConversionFactor			= @ItemConversionFactor
+		,@ItemPerformerId				= @ItemPerformerId
+		,@ItemLeaseBilling				= @ItemLeaseBilling
+		,@ItemVirtualMeterReading		= @ItemVirtualMeterReading
+
+		IF LEN(ISNULL(@AddDetailError,'')) > 0
+			BEGIN
+				IF ISNULL(@RaiseError,0) = 0
+					ROLLBACK TRANSACTION
+				SET @ErrorMessage = @AddDetailError;
+				IF ISNULL(@RaiseError,0) = 1
+					RAISERROR(@ErrorMessage, 16, 1);
+				RETURN 0;
+			END
+END TRY
+BEGIN CATCH
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
+	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
+	RETURN 0;
+END CATCH
 	
-
-IF (@ItemId IS NOT NULL OR @ItemId <> 0)
-	BEGIN
-		BEGIN TRY
-		EXEC [dbo].[uspARAddInventoryItemToInvoice]
-			 @InvoiceId						= @NewId	
-			,@ItemId						= @ItemId
-			,@NewInvoiceDetailId			= @NewDetailId	OUTPUT 
-			,@ErrorMessage					= @AddDetailError	OUTPUT
-			,@ItemUOMId						= @ItemUOMId
-			,@ItemQtyShipped				= @ItemQtyShipped
-			,@ItemPrice						= @ItemPrice
-			,@ItemDescription				= @ItemDescription
-			,@ItemSiteId					= @ItemSiteId											
-			,@ItemBillingBy					= @ItemBillingBy
-			,@ItemPercentFull				= @ItemPercentFull
-			,@ItemNewMeterReading			= @ItemNewMeterReading
-			,@ItemPreviousMeterReading		= @ItemPreviousMeterReading
-			,@ItemConversionFactor			= @ItemConversionFactor
-			,@ItemPerformerId				= @ItemPerformerId
-			,@ItemLeaseBilling				= @ItemLeaseBilling
-			,@TaxMasterId					= @TaxMasterId
-			,@ItemContractHeaderId			= @ItemContractHeaderId
-			,@ItemContractDetailId			= @ItemContractDetailId
-			,@ItemMaintenanceType			= @ItemMaintenanceType
-			,@ItemFrequency					= @ItemFrequency
-			,@ItemMaintenanceDate			= @ItemMaintenanceDate
-			,@ItemMaintenanceAmount			= @ItemMaintenanceAmount
-			,@ItemLicenseAmount				= @ItemLicenseAmount	
-			,@ItemTicketId					= @ItemTicketId	
-			,@ItemSCInvoiceId				= @ItemSCInvoiceId
-			,@ItemSCInvoiceNumber			= @ItemSCInvoiceNumber
-			,@ItemServiceChargeAccountId	= @ItemServiceChargeAccountId
-			,@ItemTaxGroupId				= @ItemTaxGroupId
-			
-			IF LEN(ISNULL(@AddDetailError,'')) > 0
-				BEGIN
-					ROLLBACK TRANSACTION
-					SET @ErrorMessage = @AddDetailError;
-					RETURN 0;
-				END
-		END TRY
-		BEGIN CATCH
-			ROLLBACK TRANSACTION
-			SET @ErrorMessage = ERROR_MESSAGE();
-			RETURN 0;
-		END CATCH
-	END
-ELSE IF(LEN(RTRIM(LTRIM(@ItemDescription))) > 0)
-	BEGIN
-		BEGIN TRY
-		EXEC [dbo].[uspARAddMiscItemToInvoice]
-			 @InvoiceId						= @NewId	
-			,@NewInvoiceDetailId			= @NewDetailId		OUTPUT 
-			,@ErrorMessage					= @AddDetailError	OUTPUT
-			,@ItemQtyShipped				= @ItemQtyShipped
-			,@ItemPrice						= @ItemPrice
-			,@ItemDescription				= @ItemDescription
-			,@TaxMasterId					= @TaxMasterId
-			,@ItemTaxGroupId				= @ItemTaxGroupId
-			,@ItemDiscount					= @ItemDiscount
-			
-			IF LEN(ISNULL(@AddDetailError,'')) > 0
-				BEGIN
-					ROLLBACK TRANSACTION
-					SET @ErrorMessage = @AddDetailError;
-					RETURN 0;
-				END
-		END TRY
-		BEGIN CATCH
-			ROLLBACK TRANSACTION
-			SET @ErrorMessage = ERROR_MESSAGE();
-			RETURN 0;
-		END CATCH	
-	END
-
-
 BEGIN TRY
 	EXEC [dbo].[uspARReComputeInvoiceAmounts] @NewId
 END TRY
 BEGIN CATCH
-	ROLLBACK TRANSACTION
+	IF ISNULL(@RaiseError,0) = 0
+		ROLLBACK TRANSACTION
 	SET @ErrorMessage = ERROR_MESSAGE();
+	IF ISNULL(@RaiseError,0) = 1
+		RAISERROR(@ErrorMessage, 16, 1);
 	RETURN 0;
 END CATCH
 
 SET @NewInvoiceId = @NewId
 
-COMMIT TRANSACTION
+IF ISNULL(@RaiseError,0) = 0
+	COMMIT TRANSACTION
 SET @ErrorMessage = NULL;
 RETURN 1;
 	
