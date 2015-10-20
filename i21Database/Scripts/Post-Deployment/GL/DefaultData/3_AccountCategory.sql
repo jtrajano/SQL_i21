@@ -2,120 +2,158 @@
 	PRINT 'Start generating default account categories'
 GO
 
-BEGIN -- ACCOUNT CATEGORY DEFAULTS
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory ='AP Account')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],strAccountGroupFilter, [intConcurrencyId]) VALUES ( N'AP Account', 'Payables', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'AR Account')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],strAccountGroupFilter, [intConcurrencyId]) VALUES (N'AR Account', 'Receivables', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Begin Inventory')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Begin Inventory', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Broker Expense')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Broker Expense',  1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Cash Account')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Cash Account','CashAccounts', 2)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Cash Over/Short')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Cash Over/Short','Expense&Revenue', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Contract Equity')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Contract Equity', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Contract Purchase Gain/Loss')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Contract Purchase Gain/Loss',  1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Contract Sales Gain/Loss')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Contract Sales Gain/Loss',  1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Cost of Goods')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Cost of Goods','CostOfGoodsSold', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Credit Card Fee')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Credit Card Fee', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Currency Equity')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Currency Equity', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Currency Purchase Gain/Loss')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Currency Purchase Gain/Loss', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Currency Sales Gain/Loss')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Currency Sales Gain/Loss', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Deposit Account')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Deposit Account','CashAccounts', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Discount Receivable')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Discount Receivable', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'DP Income')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'DP Income', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'DP Liability')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'DP Liability', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'End Inventory')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'End Inventory', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Fee Expense')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Fee Expense', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Fee Income')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Fee Income', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Freight AP Account')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Freight AP Account',  1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Freight Expenses')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Freight Expenses',1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Freight Income')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Freight Income', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Interest Expense')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Interest Expense',1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Interest Income')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Interest Income', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Inventory')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Inventory','Inventories', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Options Expense')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Options Expense', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Options Income')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Options Income', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Purchase Account')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Purchase Account', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Purchase Adv Account')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Purchase Adv Account', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Rail Freight')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Rail Freight', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Sales Account')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Sales Account', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Sales Adv Account')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Sales Adv Account', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Sales Discount')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Sales Discount', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Service Charges')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Service Charges', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Storage Expense')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Storage Expense', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Storage Income')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Storage Income', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Storage Receivable')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Storage Receivable', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Variance Account')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Variance Account', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Write Off')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Write Off', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Write-Off Sold')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Write-Off Sold', 'Expense', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Revalue Sold')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Revalue Sold',  'Expense',1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Auto-Negative')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Auto-Negative','Expense', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'AP Clearing')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],strAccountGroupFilter, [intConcurrencyId]) VALUES (N'AP Clearing', 'Payables',1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Inventory In-Transit')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Inventory In-Transit', 'Inventories', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'General')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],  [intConcurrencyId]) VALUES (N'General', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Sales Tax Account')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],  strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Sales Tax Account', 'SalesTax',1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Purchase Tax Account')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],  strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Purchase Tax Account', 'PurchaseTax',1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Undeposited Funds')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],  strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Undeposited Funds', 'Undeposited Funds',1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Inventory Adjustment')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],  strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Inventory Adjustment', 'Expense',1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Work In Progress')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Work In Progress', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Vendor Prepayments')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Vendor Prepayments', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Customer Prepayments')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory], [intConcurrencyId]) VALUES (N'Customer Prepayments', 1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Other Charge Expense')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Other Charge Expense',  'Expense',1)
-	IF NOT EXISTS(SELECT TOP 1 1  FROM dbo.tblGLAccountCategory WHERE strAccountCategory = 'Other Charge Income')
-		INSERT [dbo].[tblGLAccountCategory] ([strAccountCategory],strAccountGroupFilter, [intConcurrencyId]) VALUES (N'Other Charge Income',  'Revenue',1)
-END
+BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
+	BEGIN TRANSACTION
+	DECLARE @tblSegment TABLE(intAccountSegmentId INT, strAccountCategory VARCHAR(100))
+	DECLARE @tblCategoryGroup TABLE(intAccountCategoryGroupId INT, strAccountCategory VARCHAR(100))
+	DECLARE @tblCTCostType TABLE(intCostTypeId INT, strAccountCategory VARCHAR(100))
+	DECLARE @tblAccountGroup TABLE(intAccountGroupId INT, strAccountCategory VARCHAR(100))
+	DECLARE @tblCOATemplateDetail TABLE (intAccontTemplateDetailId INT, strAccountCategory VARCHAR(100))
+	DECLARE @tblICCategory TABLE (intCategoryAccountId INT, strAccountCategory VARCHAR(100))
+	DECLARE @tblICItemAccount TABLE (intItemAccountId INT, strAccountCategory VARCHAR(100))
+	INSERT INTO @tblSegment(intAccountSegmentId,strAccountCategory)SELECT B.intAccountSegmentId, strAccountCategory FROM tblGLAccountCategory A, tblGLAccountSegment B
+	WHERE A.intAccountCategoryId = B.intAccountCategoryId
+	INSERT INTO @tblCategoryGroup(intAccountCategoryGroupId,strAccountCategory)SELECT B.intAccountCategoryGroupId, strAccountCategory FROM tblGLAccountCategory A, tblGLAccountCategoryGroup B
+	WHERE A.intAccountCategoryId = B.intAccountCategoryId
+	INSERT INTO @tblCTCostType(intCostTypeId,strAccountCategory)SELECT B.intCostTypeId, strAccountCategory FROM tblGLAccountCategory A, tblCTCostType B
+	WHERE A.intAccountCategoryId = B.intAccountCategoryId
+	INSERT INTO @tblAccountGroup(intAccountGroupId,strAccountCategory)SELECT B.intAccountGroupId, strAccountCategory FROM tblGLAccountCategory A, tblGLAccountGroup B
+	WHERE A.intAccountCategoryId = B.intAccountCategoryId
+	INSERT INTO @tblCOATemplateDetail(intAccontTemplateDetailId,strAccountCategory)SELECT B.intAccountTemplateDetailId, strAccountCategory FROM tblGLAccountCategory A, tblGLCOATemplateDetail B
+	WHERE A.intAccountCategoryId = B.intAccountCategoryId
+	INSERT INTO @tblICCategory(intCategoryAccountId,strAccountCategory)SELECT B.intCategoryAccountId, strAccountCategory FROM tblGLAccountCategory A, tblICCategoryAccount B
+	WHERE A.intAccountCategoryId = B.intAccountCategoryId
+	INSERT INTO @tblICItemAccount(intItemAccountId,strAccountCategory)SELECT B.intItemAccountId, strAccountCategory FROM tblGLAccountCategory A, tblICItemAccount B
+	WHERE A.intAccountCategoryId = B.intAccountCategoryId
+
+	SET  IDENTITY_INSERT tblGLAccountCategory ON
+	MERGE 
+	INTO	dbo.tblGLAccountCategory
+	WITH	(HOLDLOCK) 
+	AS		CategoryTable
+	USING	(
+			SELECT id = 1,name = 'AP Account'UNION ALL 
+			SELECT id = 2,name = 'AR Account'UNION ALL 
+			SELECT id = 3,name = 'Begin Inventory'UNION ALL 
+			SELECT id = 4,name = 'Broker Expense'UNION ALL 
+			SELECT id = 5,name = 'Cash Account'UNION ALL 
+			SELECT id = 6,name = 'Cash Over/Short'UNION ALL 
+			SELECT id = 7,name = 'Contract Equity'UNION ALL 
+			SELECT id = 8,name = 'Contract Purchase Gain/Loss'UNION ALL 
+			SELECT id = 9,name = 'Contract Sales Gain/Loss'UNION ALL 
+			SELECT id = 10,name = 'Cost of Goods'UNION ALL 
+			SELECT id = 11,name = 'Credit Card Fee'UNION ALL 
+			SELECT id = 12,name = 'Currency Equity'UNION ALL 
+			SELECT id = 13,name = 'Currency Purchase Gain/Loss'UNION ALL 
+			SELECT id = 14,name = 'Currency Sales Gain/Loss'UNION ALL 
+			SELECT id = 15,name = 'Deposit Account'UNION ALL 
+			SELECT id = 16,name = 'Discount Receivable'UNION ALL 
+			SELECT id = 17,name = 'DP Income'UNION ALL 
+			SELECT id = 18,name = 'DP Liability'UNION ALL 
+			SELECT id = 19,name = 'End Inventory'UNION ALL 
+			SELECT id = 20,name = 'Fee Expense'UNION ALL 
+			SELECT id = 21,name = 'Fee Income'UNION ALL 
+			SELECT id = 22,name = 'Freight AP Account'UNION ALL 
+			SELECT id = 23,name = 'Freight Expenses'UNION ALL 
+			SELECT id = 24,name = 'Freight Income'UNION ALL 
+			SELECT id = 25,name = 'Interest Expense'UNION ALL 
+			SELECT id = 26,name = 'Interest Income'UNION ALL 
+			SELECT id = 27,name = 'Inventory' UNION ALL 
+			SELECT id = 28,name ='Options Expense'UNION ALL 
+			SELECT id = 29,name = 'Options Income'UNION ALL 
+			SELECT id = 30,name = 'Purchase Account'UNION ALL 
+			SELECT id = 31,name = 'Purchase Adv Account'UNION ALL 
+			SELECT id = 32,name = 'Rail Freight'UNION ALL 
+			SELECT id = 33,name = 'Sales Account'UNION ALL 
+			SELECT id = 34,name = 'Sales Adv Account'UNION ALL 
+			SELECT id = 35,name = 'Sales Discount'UNION ALL 
+			SELECT id = 36,name = 'Service Charges'UNION ALL 
+			SELECT id = 37,name = 'Storage Expense'UNION ALL 
+			SELECT id = 38,name = 'Storage Income'UNION ALL 
+			SELECT id = 39,name = 'Storage Receivable'UNION ALL 
+			SELECT id = 40,name = 'Variance Account'UNION ALL 
+			SELECT id = 41,name = 'Write Off'UNION ALL 
+			SELECT id = 42,name = 'Write-Off Sold'UNION ALL 
+			SELECT id = 43,name = 'Revalue Sold'UNION ALL 
+			SELECT id = 44,name = 'Auto-Negative'UNION ALL 
+			SELECT id = 45,name = 'AP Clearing'UNION ALL 
+			SELECT id = 46,name = 'Inventory In-Transit'UNION ALL 
+			SELECT id = 47,name = 'General'UNION ALL 
+			SELECT id = 48,name = 'Sales Tax Account'UNION ALL 
+			SELECT id = 49,name = 'Purchase Tax Account'UNION ALL 
+			SELECT id = 50,name = 'Undeposited Funds'UNION ALL 
+			SELECT id = 51,name = 'Inventory Adjustment'UNION ALL 
+			SELECT id = 52,name = 'Work In Progress'UNION ALL 
+			SELECT id = 53,name = 'Vendor Prepayments'UNION ALL 
+			SELECT id = 54,name = 'Customer Prepayments'UNION ALL 
+			SELECT id = 55,name = 'Other Charge Expense'UNION ALL 
+			SELECT id = 56,name = 'Other Charge Income'
+	) AS CategoryHardCodedValues
+		ON  CategoryTable.intAccountCategoryId = CategoryHardCodedValues.id
+
+	-- When id is matched, make sure the name and form are up-to-date.
+	WHEN MATCHED THEN 
+		UPDATE 
+		SET 	CategoryTable.strAccountCategory = CategoryHardCodedValues.name
+	-- When id is missing, then do an insert. 
+	WHEN NOT MATCHED THEN
+		INSERT (
+			intAccountCategoryId
+			,strAccountCategory
+			,intConcurrencyId
+		)
+		VALUES (
+			CategoryHardCodedValues.id
+			,CategoryHardCodedValues.name
+			,1
+		);
+	SET  IDENTITY_INSERT tblGLAccountCategory OFF
+
+	--UPDATE RELATED TABLES
+	UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
+	FROM tblGLAccountSegment A 
+	JOIN @tblSegment t ON  A.intAccountSegmentId = t.intAccountSegmentId 
+	JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
+
+	UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
+	FROM tblGLAccountCategoryGroup A 
+	JOIN @tblCategoryGroup t ON  A.intAccountCategoryGroupId = t.intAccountCategoryGroupId 
+	JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
+
+	UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
+	FROM tblGLAccountGroup A 
+	JOIN @tblAccountGroup t ON  A.intAccountGroupId = t.intAccountGroupId 
+	JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
+	
+	UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
+	FROM tblGLCOATemplateDetail A 
+	JOIN @tblCOATemplateDetail t ON  A.intAccountTemplateDetailId = t.intAccontTemplateDetailId
+	JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
+
+	UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
+	FROM tblCTCostType A 
+	JOIN @tblCTCostType t ON  A.intCostTypeId = t.intCostTypeId 
+	JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
+
+	UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
+	FROM tblICCategoryAccount A 
+	JOIN @tblICCategory t ON  A.intCategoryAccountId = t.intCategoryAccountId 
+	JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
+
+	UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
+	FROM tblICItemAccount A 
+	JOIN @tblICItemAccount t ON  A.intItemAccountId = t.intItemAccountId 
+	JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
+
+	--REMOVE EXCESS
+	DELETE FROM tblGLAccountCategory WHERE intAccountCategoryId > 56
+	COMMIT TRANSACTION
+END TRY
+BEGIN CATCH
+	PRINT 'Error in Generating Account Categories: ' + @@ERROR
+	ROLLBACK TRANSACTION
+END CATCH
+
 GO
 
 	IF EXISTS (SELECT TOP 1 1 FROM tblGLAccountCategory WHERE strAccountCategory IN ('AR Adjustments','Finance Charges','Customer Discounts','Bad Debts','NSF Checks','Cash in Bank','Petty Cash','Pending AP'))
