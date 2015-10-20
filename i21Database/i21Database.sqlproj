@@ -2651,6 +2651,7 @@
     <Build Include="dbo\Stored Procedures\uspARProcessInvoices.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessShipmentToInvoice.sql" />
     <None Include="Scripts\Post-Deployment\TM\Reports\DataSource\CallEntryPrintOut.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRReverseTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

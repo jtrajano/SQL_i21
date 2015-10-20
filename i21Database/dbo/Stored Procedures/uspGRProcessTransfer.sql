@@ -38,8 +38,6 @@ BEGIN TRY
 	DECLARE @ActionLocationName NVARCHAR(100)
 	DECLARE @ActionStorageTypeDescription NVARCHAR(50)
 	DECLARE @ActionCustomerName NVARCHAR(200)
-	DECLARE @OldTicketMessage NVARCHAR(1000)
-	DECLARE @NewTicketMessage NVARCHAR(1000)
 	DECLARE @UnitsToReduce DECIMAL(18,6)
 	DECLARE @CurrentItemOpenBalance DECIMAL(24,10)	
 	DECLARE @intItemId INT
@@ -162,8 +160,7 @@ BEGIN TRY
 	SET @ItemStorageSchedule=NULL
 	SET @ItemBalance = NULL
 	SET @ItemStorageTypeDescription = NULL
-	SET @ItemStorageScheduleId=NULL
-	SET @OldTicketMessage = NULL
+	SET @ItemStorageScheduleId=NULL	
 	SET @CurrentItemOpenBalance=NULL
 	SET @TicketNo=NULL
 	SET @intItemId=NULL
@@ -197,8 +194,7 @@ BEGIN TRY
 		SET @Percent = NULL
 		SET @ActionOpenBalance = NULL
 		SET @ActionStorageTypeId = NULL
-		SET @ActionStorageScheduleId = NULL		
-		SET @NewTicketMessage = NULL
+		SET @ActionStorageScheduleId = NULL
 		SET @ActionStorageTypeDescription = NULL
 		SET @ActionCustomerName = NULL
 		SET @NewCustomerStorageId=NULL
@@ -238,8 +234,6 @@ BEGIN TRY
 			
 				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)
 				
-				SET @OldTicketMessage = 'Transferred ' +Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' to '+@ActionCustomerName +' '+@ActionLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ActionStorageTypeDescription+' ticket '+@TransferTicketNumber
-				
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
 				SET dblOpenBalance = dblOpenBalance - @UnitsToReduce
@@ -259,6 +253,9 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intTransactionTypeId]
+					,[intEntityId]
+					,[intCompanyLocationId]					
 					)
 				VALUES (
 					1
@@ -270,10 +267,13 @@ BEGIN TRY
 					,- @UnitsToReduce
 					,GETDATE()
 					,NULL
-					,@OldTicketMessage
+					,NULL
 					,NULL
 					,'Transfer'
 					,@UserName
+					,3
+					,@ActionCustomer
+					,@ActionCompanyLocationId
 					)
 
 				--New Ticket		
@@ -367,21 +367,29 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intTransactionTypeId]
+					,[intEntityId]
+					,[intCompanyLocationId]
+					,[strTransferTicket]	
 					)
 				VALUES (
 					1
 					,@NewCustomerStorageId
-					,NULL
+					,@intCustomerStorageId
 					,NULL
 					,NULL
 					,NULL
 					,@UnitsToReduce
 					,GETDATE()
 					,NULL 
-					,'Transferred '+Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' FROM '+@ItemLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ItemStorageTypeDescription+' '+@ItemCustomerName+' ticket '+@TransferTicketNumber
 					,NULL
-					,'Created by Transfer'
+					,NULL
+					,'From Transfer'
 					,@UserName
+					,3
+					,@ItemEntityid
+					,@ItemCompanyLocationId
+					,@TransferTicketNumber
 					)
 			END
 			
@@ -391,8 +399,6 @@ BEGIN TRY
 			BEGIN
 			
 				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)
-				
-				SET @OldTicketMessage = 'Transferred ' +Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' to '+@ActionCustomerName +' '+@ActionLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ActionStorageTypeDescription+' ticket '+@TransferTicketNumber
 				
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
@@ -413,6 +419,9 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intTransactionTypeId]
+					,[intEntityId]
+					,[intCompanyLocationId]		
 					)
 				VALUES (
 					1
@@ -424,10 +433,13 @@ BEGIN TRY
 					,- @UnitsToReduce
 					,GETDATE()
 					,NULL
-					,@OldTicketMessage
+					,NULL
 					,NULL
 					,'Transfer'
 					,@UserName
+					,3
+					,@ActionCustomer
+					,@ActionCompanyLocationId
 					)			
 
 				--New Ticket
@@ -520,21 +532,29 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intTransactionTypeId]
+					,[intEntityId]
+					,[intCompanyLocationId]
+					,[strTransferTicket]	
 					)
 				VALUES (
 					1
 					,@NewCustomerStorageId
-					,NULL
+					,@intCustomerStorageId
 					,NULL
 					,NULL
 					,NULL
 					,@UnitsToReduce
 					,GETDATE()
 					,NULL
-					,'Transferred '+Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' FROM '+@ItemLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ItemStorageTypeDescription+' '+@ItemCustomerName+' ticket '+@TransferTicketNumber
 					,NULL
-					,'Created by Transfer'
+					,NULL
+					,'From Transfer'
 					,@UserName
+					,3
+					,@ItemEntityid
+					,@ItemCompanyLocationId
+					,@TransferTicketNumber
 					)
 			END
 			
@@ -542,9 +562,8 @@ BEGIN TRY
 			IF @ItemEntityid = @ActionCustomer AND @ItemCompanyLocationId <> @ActionCompanyLocationId AND @ItemStorageType <> @ActionStorageTypeId
 			BEGIN
 			
-				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)
+				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)			
 				
-				SET @OldTicketMessage = 'Transferred ' +Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' to '+@ActionCustomerName +' '+@ActionLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ActionStorageTypeDescription+' ticket '+@TransferTicketNumber
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
 				SET dblOpenBalance = dblOpenBalance - @UnitsToReduce
@@ -564,6 +583,9 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intTransactionTypeId]
+					,[intEntityId]
+					,[intCompanyLocationId]	
 					)
 				VALUES (
 					1
@@ -575,10 +597,13 @@ BEGIN TRY
 					,- @UnitsToReduce
 					,GETDATE()
 					,NULL
-					,@OldTicketMessage
+					,NULL
 					,NULL
 					,'Transfer'
 					,@UserName
+					,3
+					,@ActionCustomer
+					,@ActionCompanyLocationId
 					)
 
 				--New Ticket
@@ -671,21 +696,29 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intTransactionTypeId]
+					,[intEntityId]
+					,[intCompanyLocationId]
+					,[strTransferTicket]		
 					)
 				VALUES (
 					1
 					,@NewCustomerStorageId
-					,NULL
+					,@intCustomerStorageId
 					,NULL
 					,NULL
 					,NULL
 					,@UnitsToReduce
 					,GETDATE()
 					,NULL
-					,'Transferred '+Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' FROM '+@ItemLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ItemStorageTypeDescription+' '+@ItemCustomerName+' ticket '+@TransferTicketNumber
 					,NULL
-					,'Created by Transfer'
+					,NULL
+					,'From Transfer'
 					,@UserName
+					,3
+					,@ItemEntityid
+					,@ItemCompanyLocationId
+					,@TransferTicketNumber
 					)
 			END
 			
@@ -693,9 +726,8 @@ BEGIN TRY
 			IF @ItemEntityid <> @ActionCustomer AND @ItemCompanyLocationId = @ActionCompanyLocationId AND @ItemStorageType = @ActionStorageTypeId
 			BEGIN
 			
-				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)
+				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)			
 				
-				SET @OldTicketMessage = 'Transferred ' +Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' to '+@ActionCustomerName +' '+@ActionLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ActionStorageTypeDescription+' ticket '+@TransferTicketNumber
 				---Old Ticket
 				
 				UPDATE tblGRCustomerStorage
@@ -716,6 +748,9 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intTransactionTypeId]
+					,[intEntityId]
+					,[intCompanyLocationId]	
 					)
 				VALUES (
 					1
@@ -727,10 +762,13 @@ BEGIN TRY
 					,- @UnitsToReduce
 					,GETDATE()
 					,NULL
-					,@OldTicketMessage
+					,NULL
 					,NULL
 					,'Transfer'
 					,@UserName
+					,3
+					,@ActionCustomer
+					,@ActionCompanyLocationId
 					)
 
 				--New Ticket
@@ -823,21 +861,29 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intTransactionTypeId]
+					,[intEntityId]
+					,[intCompanyLocationId]
+					,[strTransferTicket]	
 					)
 				VALUES (
 					1
 					,@NewCustomerStorageId
-					,NULL
+					,@intCustomerStorageId
 					,NULL
 					,NULL
 					,NULL
 					,@UnitsToReduce
 					,GETDATE()
 					,NULL
-					,'Transferred '+Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' FROM '+@ItemLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ItemStorageTypeDescription+' '+@ItemCustomerName+' ticket '+@TransferTicketNumber
 					,NULL
-					,'Created by Transfer'
+					,NULL
+					,'From Transfer'
 					,@UserName
+					,3
+					,@ItemEntityid
+					,@ItemCompanyLocationId
+					,@TransferTicketNumber
 					)
 			END
 			
@@ -848,8 +894,6 @@ BEGIN TRY
 			
 				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)
 				
-				SET @OldTicketMessage = 'Transferred ' +Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' to '+@ActionCustomerName +' '+@ActionLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ActionStorageTypeDescription+' ticket '+@TransferTicketNumber
-				
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
 				SET dblOpenBalance = dblOpenBalance - @UnitsToReduce
@@ -869,6 +913,9 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intTransactionTypeId]
+					,[intEntityId]
+					,[intCompanyLocationId]	
 					)
 				VALUES (
 					1
@@ -880,10 +927,13 @@ BEGIN TRY
 					,- @UnitsToReduce
 					,GETDATE()
 					,NULL
-					,@OldTicketMessage
+					,NULL
 					,NULL
 					,'Transfer'
 					,@UserName
+					,3
+					,@ActionCustomer
+					,@ActionCompanyLocationId
 					)
 
 				--New Ticket
@@ -976,21 +1026,29 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intTransactionTypeId]
+					,[intEntityId]
+					,[intCompanyLocationId]
+					,[strTransferTicket]	
 					)
 				VALUES (
 					1
 					,@NewCustomerStorageId
-					,NULL
+					,@intCustomerStorageId
 					,NULL
 					,NULL
 					,NULL
 					,@UnitsToReduce
 					,GETDATE()
 					,NULL
-					,'Transferred '+Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' FROM '+@ItemLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ItemStorageTypeDescription+' '+@ItemCustomerName+' ticket '+@TransferTicketNumber
 					,NULL
-					,'Created by Transfer'
+					,NULL
+					,'From Transfer'
 					,@UserName
+					,3
+					,@ItemEntityid
+					,@ItemCompanyLocationId
+					,@TransferTicketNumber
 					)
 			END
 			
@@ -998,9 +1056,8 @@ BEGIN TRY
 			IF @ItemEntityid <> @ActionCustomer AND @ItemCompanyLocationId <> @ActionCompanyLocationId AND @ItemStorageType = @ActionStorageTypeId
 			BEGIN
 			
-				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)
+				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)		
 				
-				SET @OldTicketMessage = 'Transferred ' +Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' to '+@ActionCustomerName +' '+@ActionLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ActionStorageTypeDescription+' ticket '+@TransferTicketNumber
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
 				SET dblOpenBalance = dblOpenBalance - @UnitsToReduce
@@ -1020,6 +1077,9 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intTransactionTypeId]
+					,[intEntityId]
+					,[intCompanyLocationId]
 					)
 				VALUES (
 					1
@@ -1031,10 +1091,13 @@ BEGIN TRY
 					,- @UnitsToReduce
 					,GETDATE()
 					,NULL
-					,@OldTicketMessage
+					,NULL
 					,NULL
 					,'Transfer'
 					,@UserName
+					,3
+					,@ActionCustomer
+					,@ActionCompanyLocationId
 					)
 
 				--New Ticket
@@ -1127,21 +1190,29 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intTransactionTypeId]
+					,[intEntityId]
+					,[intCompanyLocationId]
+					,[strTransferTicket]		
 					)
 				VALUES (
 					1
 					,@NewCustomerStorageId
-					,NULL
+					,@intCustomerStorageId
 					,NULL
 					,NULL
 					,NULL
 					,@UnitsToReduce
 					,GETDATE()
 					,NULL
-					,'Transferred '+Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' FROM '+@ItemLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ItemStorageTypeDescription+' '+@ItemCustomerName+' ticket '+@TransferTicketNumber
 					,NULL
-					,'Created by Transfer'
+					,NULL
+					,'From Transfer'
 					,@UserName
+					,3
+					,@ItemEntityid
+					,@ItemCompanyLocationId
+					,@TransferTicketNumber
 					)
 
 			
@@ -1153,8 +1224,7 @@ BEGIN TRY
 			
 				
 
-				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)
-				SET @OldTicketMessage = 'Transferred ' +Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' to '+@ActionCustomerName +' '+@ActionLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ActionStorageTypeDescription+' ticket '+@TransferTicketNumber
+				SELECT @UnitsToReduce = @ItemBalance * (@Percent / 100)				
 				---Old Ticket
 				UPDATE tblGRCustomerStorage
 				SET dblOpenBalance = dblOpenBalance - @UnitsToReduce
@@ -1174,6 +1244,9 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intTransactionTypeId]
+					,[intEntityId]
+					,[intCompanyLocationId]	
 					)
 				VALUES (
 					1
@@ -1185,10 +1258,13 @@ BEGIN TRY
 					,- @UnitsToReduce
 					,GETDATE()
 					,NULL
-					,@OldTicketMessage
+					,NULL
 					,NULL
 					,'Transfer'
 					,@UserName
+					,3
+					,@ActionCustomer
+					,@ActionCompanyLocationId
 					)
 
 				--New Ticket
@@ -1281,21 +1357,29 @@ BEGIN TRY
 					,[dblCurrencyRate]
 					,[strType]
 					,[strUserName]
+					,[intTransactionTypeId]
+					,[intEntityId]
+					,[intCompanyLocationId]
+					,[strTransferTicket]		
 					)
 				VALUES (
 					1
 					,@NewCustomerStorageId
-					,NULL
+					,@intCustomerStorageId
 					,NULL
 					,NULL
 					,NULL
 					,@UnitsToReduce
 					,GETDATE()
 					,NULL
-					,'Transferred '+Convert(Nvarchar,CAST(@UnitsToReduce AS FLOAT))+@InventoryStockUOM+' FROM '+@ItemLocationName+' '+Convert(Nvarchar,@TicketNo)+' '+@ItemStorageTypeDescription+' '+@ItemCustomerName+' ticket '+@TransferTicketNumber
 					,NULL
-					,'Created by Transfer'
+					,NULL
+					,'From Transfer'
 					,@UserName
+					,3
+					,@ItemEntityid
+					,@ItemCompanyLocationId
+					,@TransferTicketNumber
 					)				
 			END
 			

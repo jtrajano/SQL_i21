@@ -562,7 +562,8 @@ BEGIN TRY
 		   ,[strPaidDescription]
 		   ,[dblCurrencyRate]
 		   ,[strType]
-		   ,[strUserName])
+		   ,[strUserName]
+		   ,[intTransactionTypeId])
 	VALUES
 		   (1
 		   ,@intCustomerStorageId
@@ -575,8 +576,9 @@ BEGIN TRY
 		   ,0
 		   ,'Generated From Scale'
 		   ,1
-		   ,'New'
-		   ,@strUserName)
+		   ,'From Scale'
+		   ,@strUserName
+		   ,1)
 	
 	BEGIN
 		SET @intHoldCustomerStorageId = NULL
