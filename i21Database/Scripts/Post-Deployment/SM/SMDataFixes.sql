@@ -53,3 +53,13 @@ GO
 	UPDATE tblSMTaxCodeRate SET strCalculationMethod = 'Percentage' WHERE strCalculationMethod = ''
 
 GO
+	/* DELETE TAXABLE BY OTHER TAXES */
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblMigrationLog WHERE strModule = 'System Manager' AND strEvent = 'Delete Taxable By Other Taxes - Tax Class')
+	BEGIN
+		UPDATE tblSMTaxCode SET strTaxableByOtherTaxes = NULL
+		
+		PRINT N'ADD LOG TO tblMigrationLog'
+		INSERT INTO tblMigrationLog([strModule], [strEvent], [strDescription], [dtmMigrated]) 
+		VALUES('System Manager', 'Delete Taxable By Other Taxes - Tax Class', 'Delete Taxable By Other Taxes - Tax Class', GETDATE())
+	END
+GO
