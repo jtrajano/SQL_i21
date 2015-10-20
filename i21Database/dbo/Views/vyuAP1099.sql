@@ -3,9 +3,12 @@ AS
 SELECT
       C.strVendorId
 	, C.intEntityVendorId
-    , strVendorCompanyName = dbo.fnAPRemoveSpecialChars(REPLACE(C2.strName, '&', 'and'))         
+    , strVendorCompanyName = dbo.fnAPRemoveSpecialChars(REPLACE(C2.strName, '&', 'and'))      
     , strAddress = REPLACE(REPLACE(D.strAddress, CHAR(10), ' ') , CHAR(13), ' ')         
-    , strZip = (CASE WHEN LEN(D.strCity) <> 0 THEN D.strCity ELSE '' END +               
+	, ISNULL(strCity, '') strCity
+	, ISNULL(strState, '') strState
+	, ISNULL(strZipCode, '') strZip
+    , strZipState = (CASE WHEN LEN(D.strCity) <> 0 THEN D.strCity ELSE '' END +               
        CASE WHEN LEN(D.strState) <> 0 THEN ', ' + D.strState ELSE '' END +               
        CASE WHEN LEN(D.strZipCode) <> 0 THEN ', ' + D.strZipCode ELSE '' END)              
     , C2.strFederalTaxId

@@ -10,6 +10,9 @@ WITH MISC1099 (
 	,strVendorCompanyName
 	,strVendorId
 	,strZip
+	,strCity
+	,strState
+	,strZipSate
 	,intYear
 	,dblBoatsProceeds
 	,dblCropInsurance
@@ -29,7 +32,8 @@ WITH MISC1099 (
 AS
 (
 	SELECT
-		  strEmployerAddress = [dbo].[fnAPFormatAddress](NULL,B.strCompanyName
+		  strEmployerAddress = [dbo].[fnAPFormatAddress](NULL
+										, NULL
 										, NULL
 										, B.strAddress
 										, B.strCity
@@ -39,11 +43,14 @@ AS
 										, B.strPhone)
 		, B.strCompanyName
 		, strEIN = B.strFederalTaxID
+		, A.strFederalTaxId
 		, A.strAddress
 		, A.strVendorCompanyName
 		, A.strVendorId
 		, A.strZip
-		, A.strFederalTaxId
+		, A.strCity
+		, A.strState
+		, A.strZipState
 		, A.intYear
 		, CASE WHEN SUM(A.dblBoatsProceeds) >= C.dbl1099MISCFishing THEN SUM(dblBoatsProceeds) ELSE 0 END AS dblBoatsProceeds
 		, CASE WHEN SUM(A.dblCropInsurance) >= C.dbl1099MISCCrop THEN SUM(dblCropInsurance) ELSE 0 END AS dblCropInsurance
@@ -73,6 +80,9 @@ AS
 	, A.strVendorId
 	, A.strZip
 	, A.strFederalTaxId
+	, A.strCity
+	, A.strState
+	, A.strZipState
 )
 
 SELECT
@@ -99,6 +109,9 @@ GROUP BY intEntityVendorId
 	,strVendorCompanyName
 	,strVendorId
 	,strZip
+	,strCity
+	,strState
+	,strZipSate
 	,intYear
 	,dblBoatsProceeds
 	,dblCropInsurance
