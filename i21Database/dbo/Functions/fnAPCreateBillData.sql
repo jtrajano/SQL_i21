@@ -58,7 +58,7 @@ RETURNS @returntable TABLE
     [intStoreLocationId]	INT NULL , 
     [intContactId]			INT NULL , 
     [intOrderById]			INT NULL , 
-    [intCurrencyId]			INT NOT NULL DEFAULT 0,
+    [intCurrencyId]			INT NOT NULL,
 	[ysnApproved]			BIT NOT NULL DEFAULT 0,
 	[ysnForApproval]		BIT NOT NULL DEFAULT 0,
     [ysnOrigin]				BIT NOT NULL DEFAULT 0,
