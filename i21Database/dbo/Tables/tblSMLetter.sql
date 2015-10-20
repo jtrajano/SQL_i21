@@ -5,5 +5,6 @@
     [strDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [blbMessage] VARBINARY(MAX) NULL, 
     [intConcurrencyId] INT NOT NULL, 
-    CONSTRAINT [PK_tblSMLetter] PRIMARY KEY ([intLetterId]) 
+    CONSTRAINT [PK_tblSMLetter] PRIMARY KEY ([intLetterId]), 
+    CONSTRAINT [UQ_tblSMLetter_strName] UNIQUE ([strName]) 
 )
