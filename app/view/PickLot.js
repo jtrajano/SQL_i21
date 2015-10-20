@@ -25,9 +25,9 @@ Ext.define('Inventory.view.PickLot', {
         'Ext.tab.Tab',
         'Ext.grid.Panel',
         'Ext.grid.column.Date',
-        'Ext.grid.column.Number',
         'Ext.grid.View',
         'Ext.selection.CheckboxModel',
+        'Ext.grid.column.Number',
         'Ext.toolbar.Paging'
     ],
 
@@ -137,53 +137,21 @@ Ext.define('Inventory.view.PickLot', {
                                                     xtype: 'gridcolumn',
                                                     itemId: 'colPickLotNo',
                                                     dataIndex: 'string',
-                                                    text: 'Pick Lot No'
+                                                    text: 'Pick Lot No',
+                                                    flex: 1
                                                 },
                                                 {
                                                     xtype: 'datecolumn',
                                                     itemId: 'colPickDate',
                                                     dataIndex: 'date',
-                                                    text: 'Pick Date'
-                                                },
-                                                {
-                                                    xtype: 'gridcolumn',
-                                                    itemId: 'colSalesContractNo',
-                                                    text: 'Sales Contract No'
-                                                },
-                                                {
-                                                    xtype: 'gridcolumn',
-                                                    itemId: 'colItemNo',
-                                                    text: 'Item No'
-                                                },
-                                                {
-                                                    xtype: 'gridcolumn',
-                                                    itemId: 'colItemDescription',
-                                                    text: 'Description'
-                                                },
-                                                {
-                                                    xtype: 'numbercolumn',
-                                                    itemId: 'colOrderQty',
-                                                    text: 'Order Qty'
-                                                },
-                                                {
-                                                    xtype: 'gridcolumn',
-                                                    itemId: 'colUOM',
-                                                    text: 'UOM'
-                                                },
-                                                {
-                                                    xtype: 'numbercolumn',
-                                                    itemId: 'colPickedQty',
-                                                    text: 'Picked Qty'
-                                                },
-                                                {
-                                                    xtype: 'gridcolumn',
-                                                    itemId: 'colPickedUOM',
-                                                    text: 'Picked UOM'
+                                                    text: 'Pick Date',
+                                                    flex: 1
                                                 },
                                                 {
                                                     xtype: 'gridcolumn',
                                                     itemId: 'colSubLocation',
-                                                    text: 'Sub Location'
+                                                    text: 'Sub Location',
+                                                    flex: 1
                                                 }
                                             ],
                                             viewConfig: {
@@ -215,14 +183,26 @@ Ext.define('Inventory.view.PickLot', {
                                             columns: [
                                                 {
                                                     xtype: 'gridcolumn',
-                                                    itemId: 'colLotNo',
-                                                    text: 'Lot No',
+                                                    itemId: 'colSalesContractNo',
+                                                    text: 'Sales Contract No',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    itemId: 'colItemNo',
+                                                    text: 'Item No',
+                                                    flex: 1
+                                                },
+                                                {
+                                                    xtype: 'gridcolumn',
+                                                    itemId: 'colDescription',
+                                                    text: 'Description',
                                                     flex: 1
                                                 },
                                                 {
                                                     xtype: 'numbercolumn',
-                                                    itemId: 'colLotPickedQty',
-                                                    text: 'Picked Qty',
+                                                    itemId: 'colOrderQty',
+                                                    text: 'Order Qty',
                                                     flex: 1
                                                 },
                                                 {
@@ -233,20 +213,14 @@ Ext.define('Inventory.view.PickLot', {
                                                 },
                                                 {
                                                     xtype: 'numbercolumn',
-                                                    itemId: 'colLotWeight',
-                                                    text: 'Weight',
+                                                    itemId: 'colPickedQty',
+                                                    text: 'Picked Qty',
                                                     flex: 1
                                                 },
                                                 {
                                                     xtype: 'gridcolumn',
-                                                    itemId: 'colLotWeightUOM',
-                                                    text: 'Weight UOM',
-                                                    flex: 1
-                                                },
-                                                {
-                                                    xtype: 'gridcolumn',
-                                                    itemId: 'colLotStorageLocation',
-                                                    text: 'Storage Location',
+                                                    itemId: 'colPickedUOM',
+                                                    text: 'Picked UOM',
                                                     flex: 1
                                                 }
                                             ]

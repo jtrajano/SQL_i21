@@ -1498,8 +1498,88 @@ Ext.define('Inventory.view.InventoryShipmentViewController', {
 
     onPickLotsClick: function(button, e, eOpts) {
         var grid = button.up('grid');
+        var shipmentWin = button.up('window');
+        var vm = shipmentWin.getViewModel();
+        var current = vm.data.current;
 
-        iRely.Functions.openScreen('Inventory.view.PickLot', { intCustomerId: null , intShipFromId: null });
+        iRely.Functions.openScreen('Inventory.view.PickLot', {
+            viewConfig: {
+                modal: true,
+                listeners: {
+                    close: function(win) {
+                        if (win) {
+                            if (win.AddPickLots) {
+                                if (current) {
+                                    Ext.Array.each(win.AddPickLots, function (pickLot) {
+                                        if (pickLot.vyuLGDeliveryOpenPickLotDetails) {
+                                            Ext.Array.each(pickLot.vyuLGDeliveryOpenPickLotDetails().data.items, function (lot) {
+                                                var exists = Ext.Array.findBy(current.tblICInventoryShipmentItems().data.items, function (row) {
+                                                    if (lot.get('intSContractHeaderId') === row.get('intOrderId') &&
+                                                        lot.get('intPickLotHeaderId') === row.get('intSourceId')) {
+                                                        return true;
+                                                    }
+                                                });
+                                                if (!exists) {
+                                                    var newItem = Ext.create('Inventory.model.ShipmentItem', {
+                                                        intOrderId: lot.get('intSContractHeaderId'),
+                                                        strOrderNumber: lot.get('strSContractNumber'),
+                                                        intSourceId: lot.get('intPickLotHeaderId'),
+                                                        strSourceNumber: lot.get('intReferenceNumber'),
+                                                        intLineNo: lot.get('intPickLotDetailId'),
+                                                        intItemId: lot.get('intItemId'),
+                                                        strItemNo: lot.get('strItemNo'),
+                                                        strItemDescription: lot.get('strItemDescription'),
+                                                        strLotTracking: lot.get('strLotTracking'),
+                                                        intCommodityId: lot.get('intCommodityId'),
+                                                        intItemUOMId: lot.get('intSaleUnitMeasureId'),
+                                                        strUnitMeasure: lot.get('strSaleUnitMeasure'),
+                                                        dblQuantity: lot.get('dblSalePickedQty'),
+                                                        strOrderUOM: lot.get('strSaleUnitMeasure'),
+                                                        dblQtyOrdered: lot.get('dblSalesOrderedQty'),
+                                                        dblUnitPrice: lot.get('dblCashPrice'),
+                                                        intOwnershipType: lot.get('intOwnershipType'),
+                                                        strOwnershipType: lot.get('strOwnershipType'),
+                                                        intSubLocationId: lot.get('intSubLocationId'),
+                                                        intStorageLocationId: lot.get('intStorageLocationId'),
+                                                        strSubLocationName: lot.get('strSubLocationName'),
+                                                        strStorageLocationName: lot.get('strStorageLocation')
+                                                    });
+
+                                                    Ext.Array.each(pickLot.vyuLGDeliveryOpenPickLotDetails().data.items, function (lotDetails) {
+                                                        if (lotDetails.get('intSContractHeaderId') === lot.get('intSContractHeaderId') &&
+                                                            lotDetails.get('intPickLotHeaderId') === lot.get('intPickLotHeaderId')) {
+                                                            var newItemLot = Ext.create('Inventory.model.ShipmentItemLot', {
+                                                                intLotId: lotDetails.get('intLotId'),
+                                                                strLotId: lotDetails.get('strLotNumber'),
+                                                                dblAvailableQty: lotDetails.get('dblAvailableQty'),
+                                                                dblQuantityShipped: lotDetails.get('dblLotPickedQty'),
+                                                                strUnitMeasure: lotDetails.get('strLotUnitMeasure'),
+                                                                strWeightUOM: lotDetails.get('strWeightUnitMeasure'),
+                                                                dblGrossWeight: lotDetails.get('dblGrossWt'),
+                                                                dblTareWeight: lotDetails.get('dblTareWt'),
+                                                                dblNetWeight: lotDetails.get('dblNetWt'),
+                                                                strStorageLocation: lotDetails.get('strStorageLocation')
+                                                            });
+                                                            newItem.tblICInventoryShipmentItemLots().add(newItemLot);
+                                                        }
+                                                    });
+
+                                                    current.tblICInventoryShipmentItems().add(newItem);
+                                                }
+                                            });
+                                        }
+
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            intCustomerId: current.get('intEntityCustomerId'),
+            intShipFromId: current.get('intShipFromLocationId')
+        });
+
     },
 
     init: function(application) {

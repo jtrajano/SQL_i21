@@ -222,6 +222,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "dataIndex": "string",
+                                                        "flex": 1,
                                                         "itemId": "colPickLotNo",
                                                         "text": "Pick Lot No"
                                                     },
@@ -237,6 +238,7 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "dataIndex": "date",
+                                                        "flex": 1,
                                                         "itemId": "colPickDate",
                                                         "text": "Pick Date"
                                                     },
@@ -251,104 +253,7 @@
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "itemId": "colSalesContractNo",
-                                                        "text": "Sales Contract No"
-                                                    },
-                                                    "name": "MyColumn42",
-                                                    "designerId": "8face145-48ff-4deb-ae57-185c990c2211"
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Column",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "itemId": "colItemNo",
-                                                        "text": "Item No"
-                                                    },
-                                                    "name": "MyColumn44",
-                                                    "designerId": "c8196a7c-9dbe-4dfe-bfe1-40fef3bb7e04"
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Column",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "itemId": "colItemDescription",
-                                                        "text": "Description"
-                                                    },
-                                                    "name": "MyColumn51",
-                                                    "designerId": "eb6f89ec-1145-4e61-9289-265772f16737"
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Number",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "itemId": "colOrderQty",
-                                                        "text": "Order Qty"
-                                                    },
-                                                    "name": "MyNumberColumn46",
-                                                    "designerId": "9359c5f8-26b5-499a-98fc-5e55b3e64c29"
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Column",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "itemId": "colUOM",
-                                                        "text": "UOM"
-                                                    },
-                                                    "name": "MyColumn54",
-                                                    "designerId": "36498624-905a-4ae4-8005-d2edae3744fb"
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Number",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "itemId": "colPickedQty",
-                                                        "text": "Picked Qty"
-                                                    },
-                                                    "name": "MyNumberColumn49",
-                                                    "designerId": "b87949ca-a7fa-4709-8e16-1080b72ce3c5"
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Column",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "itemId": "colPickedUOM",
-                                                        "text": "Picked UOM"
-                                                    },
-                                                    "name": "MyColumn56",
-                                                    "designerId": "6cabfacb-6b3c-4bbd-a342-813790bab702"
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Column",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
+                                                        "flex": 1,
                                                         "itemId": "colSubLocation",
                                                         "text": "Sub Location"
                                                     },
@@ -438,11 +343,41 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "flex": 1,
-                                                        "itemId": "colLotNo",
-                                                        "text": "Lot No"
+                                                        "itemId": "colSalesContractNo",
+                                                        "text": "Sales Contract No"
                                                     },
                                                     "name": "MyColumn58",
                                                     "designerId": "315d1750-6e80-4f50-ab71-81283db022ab"
+                                                },
+                                                {
+                                                    "type": "Ext.grid.column.Column",
+                                                    "reference": {
+                                                        "name": "columns",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "flex": 1,
+                                                        "itemId": "colItemNo",
+                                                        "text": "Item No"
+                                                    },
+                                                    "name": "MyColumn2",
+                                                    "designerId": "57c61426-7123-44c7-ae63-18901fa09827"
+                                                },
+                                                {
+                                                    "type": "Ext.grid.column.Column",
+                                                    "reference": {
+                                                        "name": "columns",
+                                                        "type": "array"
+                                                    },
+                                                    "codeClass": null,
+                                                    "userConfig": {
+                                                        "flex": 1,
+                                                        "itemId": "colDescription",
+                                                        "text": "Description"
+                                                    },
+                                                    "name": "MyColumn6",
+                                                    "designerId": "52ed2222-049f-428d-bf1b-a85d2f590794"
                                                 },
                                                 {
                                                     "type": "Ext.grid.column.Number",
@@ -453,8 +388,8 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "flex": 1,
-                                                        "itemId": "colLotPickedQty",
-                                                        "text": "Picked Qty"
+                                                        "itemId": "colOrderQty",
+                                                        "text": "Order Qty"
                                                     },
                                                     "name": "MyNumberColumn45",
                                                     "designerId": "6b371f8f-f111-48fd-a4cc-6b083f5b6b82"
@@ -483,8 +418,8 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "flex": 1,
-                                                        "itemId": "colLotWeight",
-                                                        "text": "Weight"
+                                                        "itemId": "colPickedQty",
+                                                        "text": "Picked Qty"
                                                     },
                                                     "name": "MyNumberColumn50",
                                                     "designerId": "b4efe040-2abc-4fc7-ba88-98493f48d094"
@@ -498,26 +433,11 @@
                                                     "codeClass": null,
                                                     "userConfig": {
                                                         "flex": 1,
-                                                        "itemId": "colLotWeightUOM",
-                                                        "text": "Weight UOM"
+                                                        "itemId": "colPickedUOM",
+                                                        "text": "Picked UOM"
                                                     },
                                                     "name": "MyColumn62",
                                                     "designerId": "896a4fbc-013e-41a1-a21f-3841418dedcd"
-                                                },
-                                                {
-                                                    "type": "Ext.grid.column.Column",
-                                                    "reference": {
-                                                        "name": "columns",
-                                                        "type": "array"
-                                                    },
-                                                    "codeClass": null,
-                                                    "userConfig": {
-                                                        "flex": 1,
-                                                        "itemId": "colLotStorageLocation",
-                                                        "text": "Storage Location"
-                                                    },
-                                                    "name": "MyColumn64",
-                                                    "designerId": "d5af1e38-5765-46a3-a22d-b787574d5926"
                                                 }
                                             ]
                                         }
@@ -543,7 +463,7 @@
                         "layout|flex": 1,
                         "store": null
                     },
-                    "name": "statusbarpaging121",
+                    "name": "statusbarpaging13",
                     "designerId": "6044e841-1435-447f-b1e6-641568ee7e11",
                     "masterInstanceId": "6e9d32bd-1b77-41b2-9662-434eced19679"
                 }
