@@ -13,9 +13,9 @@ BEGIN TRY
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 
-UPDATE A
-	SET A.dblTax = 0
-FROM @voucherDetail A
+--UPDATE A
+--	SET A.dblTax = 0
+--FROM @voucherDetail A
 
 IF @transCount = 0 COMMIT TRANSACTION
 

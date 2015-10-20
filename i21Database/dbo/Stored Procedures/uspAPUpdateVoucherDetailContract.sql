@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPUpdateVoucherDetailContract]
-	@voucherDetail AS VoucherDetailData
+	@voucherDetail AS VoucherDetailData READONLY
 AS
 
 SET QUOTED_IDENTIFIER OFF
