@@ -1619,7 +1619,49 @@ IF @recap = 0
 						 ysnBilled = 0
 						,dtmBilled = NULL
 					WHERE
-						intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)			
+						intInvoiceId IN (SELECT intInvoiceId FROM @PostInvoiceData)
+						
+					BEGIN TRY
+						DECLARE @TankDeliveryForUnSync TABLE (
+								intInvoiceId INT,
+								UNIQUE (intInvoiceId));
+								
+						INSERT INTO @TankDeliveryForUnSync					
+						SELECT DISTINCT
+							I.intInvoiceId
+						FROM
+							tblARInvoice I
+						INNER JOIN
+							tblARInvoiceDetail D
+								ON I.intInvoiceId = D.intInvoiceId		
+						INNER JOIN
+							tblTMSite TMS
+								ON D.intSiteId = TMS.intSiteID 
+						INNER JOIN 
+							@PostInvoiceData B
+								ON I.intInvoiceId = B.intInvoiceId
+								
+						WHILE EXISTS(SELECT TOP 1 NULL FROM @TankDeliveryForUnSync ORDER BY intInvoiceId)
+							BEGIN
+							
+								DECLARE  @intInvoiceForUnSyncId INT
+										,@ResultLogForUnSync NVARCHAR(MAX)
+										
+								
+								SELECT TOP 1 @intInvoiceForUnSyncId = intInvoiceId FROM @TankDeliveryForUnSync ORDER BY intInvoiceId
+
+								EXEC dbo.uspTMUnSyncInvoiceFromDeliveryHistory  @intInvoiceForUnSyncId, @ResultLogForUnSync OUT
+												
+								DELETE FROM @TankDeliveryForUnSync WHERE intInvoiceId = @intInvoiceForUnSyncId
+																												
+							END 							
+								
+																
+					END TRY
+					BEGIN CATCH
+						SELECT @ErrorMerssage = ERROR_MESSAGE()										
+						GOTO Do_Rollback
+					END CATCH	
 
 				END
 			ELSE
@@ -1688,7 +1730,7 @@ IF @recap = 0
 								
 								SELECT TOP 1 @intInvoiceForSyncId = intInvoiceId FROM @TankDeliveryForSync ORDER BY intInvoiceId
 
-								EXEC dbo.uspTMSyncInvoiceToDeliveryHistory @intInvoiceForSyncId,@userId, @ResultLogForSync OUT
+								EXEC dbo.uspTMSyncInvoiceToDeliveryHistory @intInvoiceForSyncId, @userId, @ResultLogForSync OUT
 												
 								DELETE FROM @TankDeliveryForSync WHERE intInvoiceId = @intInvoiceForSyncId
 																												
