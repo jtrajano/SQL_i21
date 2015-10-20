@@ -2372,6 +2372,7 @@
     <Build Include="dbo\Functions\fnGetNumericValueFromString.sql" />
     <Build Include="dbo\Stored Procedures\uspTRGenerateQuotes.sql" />
     <Build Include="dbo\Views\vyuTRQuoteSelection.sql" />
+    <Build Include="dbo\Views\vyuTRQuoteView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
