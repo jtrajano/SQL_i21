@@ -20,10 +20,10 @@ BEGIN
 	RAISERROR('There are voucher details associated on posted bills. Make sure bills were unposted.', 16, 1);
 END
 
-UPDATE A
-	SET A.dblQtyContract = B.dblBalance, A.dblContractCost = B.dblCashPrice
-FROM @voucherDetail A
-INNER JOIN tblCTContractDetail B ON A.intContractDetailId = B.intContractDetailId
+--UPDATE A
+--	SET A.dblQtyContract = B.dblBalance, A.dblContractCost = B.dblCashPrice
+--FROM @voucherDetail A
+--INNER JOIN tblCTContractDetail B ON A.intContractDetailId = B.intContractDetailId
 
 IF @transCount = 0 COMMIT TRANSACTION
 
