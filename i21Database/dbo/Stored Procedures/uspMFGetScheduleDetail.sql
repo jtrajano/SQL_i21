@@ -1,5 +1,5 @@
 ﻿CREATE PROC uspMFGetScheduleDetail (
-	@intManufacturingCellId int= NULL
+	@intManufacturingCellId int= 0
 	,@dtmPlannedStartDate DATE
 	,@dtmPlannedEndDate DATE
 	,@intLocationId int
@@ -49,13 +49,11 @@ JOIN dbo.tblICUnitMeasure U ON U.intUnitMeasureId = IU.intUnitMeasureId
 JOIN dbo.tblMFManufacturingCell MC ON MC.intManufacturingCellId = W.intManufacturingCellId
 JOIN dbo.tblMFScheduleWorkOrder SL ON SL.intWorkOrderId = W.intWorkOrderId
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = SL.intStatusId
---JOIN tblMFSchedule S ON S.intScheduleId = SL.intScheduleId
---	AND S.ysnStandard = 1
 JOIN dbo.tblMFShift SH ON SH.intShiftId = SL.intPlannedShiftId
 WHERE W.intLocationId = @intLocationId
 	AND MC.intManufacturingCellId = (
 		CASE 
-			WHEN @intManufacturingCellId IS NULL
+			WHEN @intManufacturingCellId =0
 				THEN MC.intManufacturingCellId
 			ELSE @intManufacturingCellId
 			END
