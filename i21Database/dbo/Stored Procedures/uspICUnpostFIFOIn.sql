@@ -39,7 +39,7 @@ IF @strRelatedTransactionId IS NOT NULL
 BEGIN 
 	-- 'Unable to unpost because {Item} has a cost adjustment from {Transaction Id}.'
 	RAISERROR(80063, 11, 1, @strItemNo, @strRelatedTransactionId)  
-	GOTO _Exit  
+	RETURN -1
 END 
 
 -- Get all the inventory transaction related to the Unpost. 
@@ -158,5 +158,3 @@ FROM	dbo.tblICInventoryFIFO fifoBucket INNER JOIN #tmpInventoryTransactionStockT
 			AND fifoBucket.strTransactionId = Reversal.strTransactionId
 WHERE	Reversal.intTransactionTypeId NOT IN (@WRITE_OFF_SOLD, @REVALUE_SOLD, @AUTO_NEGATIVE) 
 ;
-
-_Exit: 

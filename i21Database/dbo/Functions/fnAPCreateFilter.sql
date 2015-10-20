@@ -23,8 +23,8 @@ BEGIN
 				WHEN 'String'
 					THEN
 						CASE @condition
-						WHEN 'Like' THEN ' LIKE ''' + @from + ''''
-						WHEN 'Not Like' THEN ' NOT LIKE ''' + @from + ''''
+						WHEN 'Like' THEN ' LIKE ''%' + @from + '%'''
+						WHEN 'Not Like' THEN ' NOT LIKE ''%' + @from + '%'''
 						WHEN 'Between' THEN ' BETWEEN ''' + @from + ''' AND ''' + @to + ''''
 						WHEN 'Starts With' THEN ' LIKE ''' + @from + '%'''
 						WHEN 'Ends With' THEN ' LIKE ''%' + @from + '%'''

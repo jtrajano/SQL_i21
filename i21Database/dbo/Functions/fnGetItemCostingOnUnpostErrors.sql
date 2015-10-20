@@ -51,6 +51,5 @@ RETURN (
 					WHERE	ISNULL(@dblQty, 0) + ISNULL(Lot.dblQty, 0) < 0
 							AND Location.intAllowNegativeInventory = 3													
 				)
-
 	) AS Query		
 )

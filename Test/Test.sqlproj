@@ -879,6 +879,9 @@
     <Build Include="testi21Database\Stored Procedures\test fnGetItemCostingOnPostErrors if it blocks negative stock on non-lot and reserved qty.sql" />
     <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnAverageCosting, Receive Stocks, Transfer Stocks, Cost Adjust.sql" />
     <Build Include="testi21Database\Fake Data\Fake data for cost adjustment.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnAverageCosting, Receive Stocks, Transfer Stocks, Cost Adjust, Unpost Cost Adjust.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnAverageCosting, Receive Stocks, Transfer Stocks, Cost Adjust, Unpost Transfer.sql" />
+    <Build Include="testi21Database\Stored Procedures\test uspICPostCostAdjustmentOnAverageCosting, Receive Stocks, Transfer Stocks, Cost Adjust, Unpost Receive Stocks.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\i21Database\i21Database.sqlproj">

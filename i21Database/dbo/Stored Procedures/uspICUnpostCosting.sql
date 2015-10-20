@@ -15,6 +15,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @returnValue AS INT 
+
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInventoryTransactionStockToReverse')) 
 	DROP TABLE #tmpInventoryTransactionStockToReverse
 
@@ -79,12 +81,12 @@ END
 -----------------------------------------------------------------------------------------------------------------------------
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------
-BEGIN 
-	DECLARE @returnValue AS INT 
-
+BEGIN 	
 	EXEC @returnValue = dbo.uspICValidateCostingOnUnpost 
 		@ItemsToUnpost
 		,@ysnRecap
+		,@intTransactionId
+		,@strTransactionId
 
 	IF @returnValue < 0 RETURN -1;
 END 
@@ -93,26 +95,34 @@ END
 -- Call the FIFO unpost stored procedures. This is also used in Average Costing.
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	EXEC dbo.uspICUnpostFIFOIn 
+	EXEC @returnValue = dbo.uspICUnpostFIFOIn 
 		@strTransactionId
 		,@intTransactionId
 
-	EXEC dbo.uspICUnpostFIFOOut
+	IF @returnValue < 0 RETURN -1;
+
+	EXEC @returnValue = dbo.uspICUnpostFIFOOut
 		@strTransactionId
 		,@intTransactionId
+
+	IF @returnValue < 0 RETURN -1;
 END
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Call the LIFO unpost stored procedures 
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	EXEC dbo.uspICUnpostLIFOIn 
+	EXEC @returnValue = dbo.uspICUnpostLIFOIn 
 		@strTransactionId
 		,@intTransactionId
 
-	EXEC dbo.uspICUnpostLIFOOut
+	IF @returnValue < 0 RETURN -1;
+
+	EXEC @returnValue = dbo.uspICUnpostLIFOOut
 		@strTransactionId
 		,@intTransactionId
+
+	IF @returnValue < 0 RETURN -1;
 END
 
 
@@ -120,26 +130,34 @@ END
 -- Call the LOT unpost stored procedures 
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	EXEC dbo.uspICUnpostLotIn 
+	EXEC @returnValue = dbo.uspICUnpostLotIn 
 		@strTransactionId
 		,@intTransactionId
 
-	EXEC dbo.uspICUnpostLotOut
+	IF @returnValue < 0 RETURN -1;
+
+	EXEC @returnValue = dbo.uspICUnpostLotOut
 		@strTransactionId
 		,@intTransactionId
+
+	IF @returnValue < 0 RETURN -1;
 END
 
 -----------------------------------------------------------------------------------------------------------------------------
 -- Call the Actual Costing unpost stored procedures 
 -----------------------------------------------------------------------------------------------------------------------------
 BEGIN 
-	EXEC dbo.uspICUnpostActualCostIn
+	EXEC @returnValue = dbo.uspICUnpostActualCostIn
 		@strTransactionId
 		,@intTransactionId
 
-	EXEC dbo.uspICUnpostActualCostOut
+	IF @returnValue < 0 RETURN -1;
+
+	EXEC @returnValue = dbo.uspICUnpostActualCostOut
 		@strTransactionId
 		,@intTransactionId
+
+	IF @returnValue < 0 RETURN -1;
 END
 
 IF EXISTS (SELECT TOP 1 1 FROM #tmpInventoryTransactionStockToReverse) 

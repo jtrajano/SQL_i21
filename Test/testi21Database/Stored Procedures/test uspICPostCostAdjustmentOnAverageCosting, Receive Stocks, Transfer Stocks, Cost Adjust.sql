@@ -238,27 +238,7 @@ BEGIN
 			,[intConcurrencyId] INT NOT NULL DEFAULT 1 
 		)
 
-	END 
-	
-	-- Declare the variables used in uspICPostCostAdjustmentOnAverageCosting
-	DECLARE @dtmDate AS DATETIME						= 'February 10, 2014'
-			,@intItemId AS INT							= @WetGrains
-			,@intItemLocationId AS INT					= @WetGrains_DefaultLocation
-			,@intSubLocationId AS INT					= NULL 
-			,@intStorageLocationId AS INT				= NULL 
-			,@intItemUOMId AS INT						= @WetGrains_BushelUOM
-			,@dblQty AS NUMERIC(18,6)					= 40
-			,@dblNewCost AS NUMERIC(38,20)				= 37.261
-			,@intTransactionId AS INT					= 1
-			,@intTransactionDetailId AS INT				= 1
-			,@strTransactionId AS NVARCHAR(20)			= 'BILL-10001'
-			,@intSourceTransactionId AS INT				= 1
-			,@strSourceTransactionId AS NVARCHAR(20)	= 'PURCHASE-100000'
-			,@strBatchId AS NVARCHAR(20)				= 'BATCH-10293'
-			,@intTransactionTypeId AS INT				= @CostAdjustmentType
-			,@intCurrencyId AS INT						= 1 
-			,@dblExchangeRate AS NUMERIC(38,20)			= 1
-			,@intUserId AS INT							= 1 
+	END 	
 
 	-- Act 1: Create an Inventory transfer and post it. 
 	-- Move stock to a new sub location. 
@@ -368,6 +348,26 @@ BEGIN
 
 	-- Act 2: Post the Cost Adjustment. 
 	BEGIN 
+		-- Declare the variables used in uspICPostCostAdjustmentOnAverageCosting
+		DECLARE @dtmDate AS DATETIME						= 'February 10, 2014'
+				,@intItemId AS INT							= @WetGrains
+				,@intItemLocationId AS INT					= @WetGrains_DefaultLocation
+				,@intSubLocationId AS INT					= NULL 
+				,@intStorageLocationId AS INT				= NULL 
+				,@intItemUOMId AS INT						= @WetGrains_BushelUOM
+				,@dblQty AS NUMERIC(18,6)					= 40
+				,@dblNewCost AS NUMERIC(38,20)				= 37.261
+				,@intTransactionId AS INT					= 1
+				,@intTransactionDetailId AS INT				= 1
+				,@strTransactionId AS NVARCHAR(20)			= 'BILL-10001'
+				,@intSourceTransactionId AS INT				= 1
+				,@strSourceTransactionId AS NVARCHAR(20)	= 'PURCHASE-100000'
+				,@strBatchId AS NVARCHAR(20)				= 'BATCH-10293'
+				,@intTransactionTypeId AS INT				= @CostAdjustmentType
+				,@intCurrencyId AS INT						= 1 
+				,@dblExchangeRate AS NUMERIC(38,20)			= 1
+				,@intUserId AS INT							= 1 
+
 		DECLARE @ItemsToAdjust AS ItemCostAdjustmentTableType
 		INSERT INTO @ItemsToAdjust  (
 			dtmDate
@@ -434,6 +434,7 @@ BEGIN
 				,[intTransactionTypeId]
 				,[intLotId]
 				,[intCostingMethod]
+				,[ysnIsUnposted]
 		)
 		SELECT	[intInventoryTransactionId]
 				,[intItemId]
@@ -455,6 +456,7 @@ BEGIN
 				,[intTransactionTypeId]
 				,[intLotId]
 				,[intCostingMethod]
+				,[ysnIsUnposted]
 		FROM	tblICInventoryTransaction
 		WHERE	intItemId = @intItemId
 				AND intItemLocationId = @intItemLocationId
@@ -495,6 +497,7 @@ BEGIN
 				,[intTransactionTypeId]
 				,[intLotId]
 				,[intCostingMethod] 
+				,[ysnIsUnposted]
 		)
 		SELECT	[intInventoryTransactionId] = 1
 				,[intItemId]				= @WetGrains
@@ -516,6 +519,7 @@ BEGIN
 				,[intTransactionTypeId]		= @PurchaseType
 				,[intLotId]					= NULL 
 				,[intCostingMethod]			= @AVERAGECOST
+				,[ysnIsUnposted]			= 0
 		-- Inventory Transfer transactions
 		UNION ALL 
 		SELECT	[intInventoryTransactionId] = 6
@@ -538,6 +542,7 @@ BEGIN
 				,[intTransactionTypeId]		= (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Transfer')
 				,[intLotId]					= NULL 
 				,[intCostingMethod]			= @AVERAGECOST
+				,[ysnIsUnposted]			= 0
 		UNION ALL 
 		SELECT	[intInventoryTransactionId] = 7
 				,[intItemId]				= @WetGrains
@@ -559,6 +564,7 @@ BEGIN
 				,[intTransactionTypeId]		= (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Inventory Transfer')
 				,[intLotId]					= NULL 
 				,[intCostingMethod]			= @AVERAGECOST
+				,[ysnIsUnposted]			= 0
 		-- Cost Adustment transactions 
 		UNION ALL 
 		SELECT	[intInventoryTransactionId] = 8
@@ -581,6 +587,7 @@ BEGIN
 				,[intTransactionTypeId]		= @CostAdjustmentType
 				,[intLotId]					= NULL 
 				,[intCostingMethod]			= @AVERAGECOST
+				,[ysnIsUnposted]			= 0
 		UNION ALL 
 		SELECT	[intInventoryTransactionId] = 9
 				,[intItemId]				= @WetGrains
@@ -602,6 +609,7 @@ BEGIN
 				,[intTransactionTypeId]		= (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Revalue Transfer')
 				,[intLotId]					= NULL 
 				,[intCostingMethod]			= @AVERAGECOST
+				,[ysnIsUnposted]			= 0
 		UNION ALL 
 		SELECT	[intInventoryTransactionId] = 10
 				,[intItemId]				= @WetGrains
@@ -623,6 +631,7 @@ BEGIN
 				,[intTransactionTypeId]		= (SELECT TOP 1 ICType.intTransactionTypeId FROM tblICInventoryTransactionType ICType WHERE ICType.strName = 'Revalue Transfer')
 				,[intLotId]					= NULL 
 				,[intCostingMethod]			= @AVERAGECOST
+				,[ysnIsUnposted]			= 0
 
 		INSERT INTO expectedInventoryFIFOCostAdjustmentLog (
 				[intInventoryFIFOId]
