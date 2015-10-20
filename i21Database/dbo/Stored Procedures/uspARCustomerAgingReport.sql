@@ -13,13 +13,12 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 	SET @xmlParam = NULL 
 
 -- Declare the variables.
-DECLARE  @intEntitySalespersonId	AS INT = 0
-		,@dtmAsOfDate				AS DATETIME
+DECLARE  @dtmAsOfDate				AS DATETIME
 		,@strAsOfDate				AS NVARCHAR(50)
-		,@strSalespersonId			AS NVARCHAR(20)
 		,@xmlDocumentId				AS INT
 		,@query						AS NVARCHAR(MAX)
 		,@innerQuery				AS NVARCHAR(MAX) = ''
+		,@joinQuery                 AS NVARCHAR(MAX) = ''
 		,@filter					AS NVARCHAR(MAX) = ''
 		,@fieldname					AS NVARCHAR(50)
 		,@condition					AS NVARCHAR(20)
@@ -63,18 +62,25 @@ WITH (
 )
 
 -- Gather the variables values from the xml table.
-SELECT	@intEntitySalespersonId = [from]
-FROM	@temp_xml_table 
-WHERE	[fieldname] = 'intSalespersonId'
+SELECT  @condition = [condition]
+	  , @from = [from]
+	  , @to = [to]
+	  , @join = [join]
+	  , @datatype = [datatype]
+FROM	@temp_xml_table
+WHERE	[fieldname] = 'strSalespersonName'
+
+IF ISNULL(@from, '') <> ''
+	BEGIN
+		SET @innerQuery = 'AND ES.' + dbo.fnAPCreateFilter('strName', @condition, @from, @to, @join, null, null, @datatype)
+		SET @joinQuery = 'LEFT JOIN (tblARSalesperson SP INNER JOIN tblEntity ES ON SP.intEntitySalespersonId = ES.intEntityId) ON I.intEntitySalespersonId = SP.intEntitySalespersonId'
+	END
 
 SELECT	@dtmAsOfDate = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] ELSE GETDATE() END AS DATETIME)
 FROM	@temp_xml_table 
 WHERE	[fieldname] = 'dtmAsOfDate'
 		
 -- SANITIZE THE DATE AND REMOVE THE TIME.
-SET @strSalespersonId = CONVERT(NVARCHAR(20),@intEntitySalespersonId)
-SET @innerQuery = CASE WHEN ISNULL(@strSalespersonId, '') <> '' AND @intEntitySalespersonId > 0 THEN 'AND I.intEntitySalespersonId = '+ @strSalespersonId ELSE '' END
-
 IF @dtmAsOfDate IS NOT NULL
 	SET @dtmAsOfDate = CAST(FLOOR(CAST(@dtmAsOfDate AS FLOAT)) AS DATETIME)
 ELSE 			  
@@ -82,7 +88,9 @@ ELSE
 
 SET @strAsOfDate = ''''+ CONVERT(NVARCHAR(50),@dtmAsOfDate, 110) + ''''
 
-DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmAsOfDate', 'intSalespersonId')
+DELETE FROM @temp_xml_table WHERE [fieldname] IN ('dtmAsOfDate', 'strSalespersonName')
+
+SELECT @condition = '', @from = '', @to = '', @join = '', @datatype = ''
 
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
 BEGIN
@@ -114,7 +122,7 @@ SELECT A.strCustomerName
 	 , dblCredits = SUM(B.dblAvailableCredit)
 	 , dblPrepaids = 0
 	 , '+ @strAsOfDate +' AS dtmAsOfDate
-	 , '+ @strSalespersonId +' AS intSalespersonId
+	 , ''strSalespersonName'' AS strSalespersonName
 FROM
 
 (SELECT I.dtmDate AS dtmDate
@@ -139,7 +147,8 @@ FROM
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 	INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId
-	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId    
+	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId 
+	'+ @joinQuery +'
 WHERE I.ysnPosted = 1
 	AND I.strTransactionType = ''Invoice''
 	AND I.dtmDueDate <= '+ @strAsOfDate +'
@@ -173,6 +182,7 @@ FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
 	INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId
 	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
+	'+ @joinQuery +'
 WHERE I.ysnPosted = 1
 	AND I.ysnPaid = 0
 	AND I.strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Credit'', ''Prepayment'')
@@ -208,6 +218,7 @@ FROM tblARInvoice I
 		INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId 
 		INNER JOIN tblEntity E ON E.intEntityId = C.intEntityCustomerId    
 		INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
+		'+ @joinQuery +'
 WHERE ISNULL(I.ysnPosted, 1) = 1
 	AND I.ysnPosted  = 1
 	AND I.strTransactionType = ''Invoice''
@@ -246,7 +257,8 @@ FROM
 		, I.intEntityCustomerId
 		, dblAvailableCredit = 0
 FROM tblARInvoice I
-	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
+	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
+	'+ @joinQuery +'
 WHERE I.ysnPosted = 1
 	AND I.strTransactionType = ''Invoice''
 	AND I.dtmDueDate <= '+ @strAsOfDate +'
@@ -267,6 +279,7 @@ SELECT I.strInvoiceNumber
 		, dblAvailableCredit = ISNULL(I.dblAmountDue,0)
 FROM tblARInvoice I
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId
+	'+ @joinQuery +'
 WHERE I.ysnPosted = 1
 	AND I.ysnPaid = 0
 	AND I.strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Credit'', ''Prepayment'')
@@ -289,7 +302,8 @@ SELECT DISTINCT
 	, dblAvailableCredit = 0
 FROM tblARInvoice I 
 	INNER JOIN tblARCustomer C ON C.intEntityCustomerId = I.intEntityCustomerId    
-	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId	
+	INNER JOIN tblSMTerm T ON T.intTermID = I.intTermId
+	'+ @joinQuery +'	
 WHERE I.ysnPosted  = 1
 	AND I.strTransactionType = ''Invoice''
 	AND I.dtmDueDate <= '+ @strAsOfDate +'
