@@ -21,7 +21,10 @@ SELECT Lot.intLotId
 	, Lot.intStorageLocationId
 	, strStorageLocation = StorageLocation.strName
 	, Lot.dblQty
-	, Lot.dblQty - IsNull((SELECT SUM (SR.dblQty) from tblICStockReservation SR Group By SR.intLotId Having Lot.intLotId = SR.intLotId), 0) AS dblUnPickedQty 
+	, CASE WHEN Lot.dblQty > 0.0 THEN 
+				Lot.dblQty - IsNull((SELECT SUM (SR.dblQty) from tblICStockReservation SR Group By SR.intLotId Having Lot.intLotId = SR.intLotId), 0) 
+			ELSE 
+				0.0 END AS dblUnPickedQty
 	, Lot.dblLastCost
 	, Lot.dtmExpiryDate
 	, Lot.strLotAlias
@@ -30,8 +33,11 @@ SELECT Lot.intLotId
 	, strLotStatusType = LotStatus.strPrimaryStatus
 	, Lot.intParentLotId
 	, Lot.intSplitFromLotId
-	, ReceiptLot.dblGrossWeight
-	, ReceiptLot.dblTareWeight
+	, Lot.dblGrossWeight
+	, CASE WHEN Lot.dblWeight > 0.0 THEN 
+					Lot.dblGrossWeight - Lot.dblWeight 
+				ELSE
+					0.0 END as dblTareWeight
 	, Lot.dblWeight as dblNetWeight
 	, Lot.intWeightUOMId as intItemWeightUOMId
 	, strWeightUOM = WeightUOM.strUnitMeasure
