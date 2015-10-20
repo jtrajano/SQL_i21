@@ -26,8 +26,7 @@ DECLARE @dtmMembershipDate DATETIME,
 	
 		IF(ISNULL(@dtmMembershipDate, 0) = 0)
 		BEGIN -- NOT ELIGIBLE FOR PATRONAGE
-			DROP TABLE #tempTable
-			RETURN
+			RETURN;
 		END
 		ELSE
 		BEGIN
@@ -133,7 +132,7 @@ DECLARE @dtmMembershipDate DATETIME,
 						ELSE
 						BEGIN
 							INSERT INTO [tblPATCustomerVolume]
-								 VALUES (@intEntityCustomerId, @intPatronageCategoryId, @intFiscalYear, @TotalUnit, 1)
+								 VALUES (@intEntityCustomerId, @intPatronageCategoryId, @intFiscalYear, GETDATE(), @TotalUnit, 1)
 						END
 
 						DROP TABLE #tempUOM
@@ -202,7 +201,7 @@ DECLARE @dtmMembershipDate DATETIME,
 								ELSE
 								BEGIN
 									INSERT INTO [tblPATCustomerVolume]
-										 VALUES (@intEntityCustomerId, @intPatronageCategoryId, @intFiscalYear, @TotalUnit, 1)
+										 VALUES (@intEntityCustomerId, @intPatronageCategoryId, @intFiscalYear, GETDATE(), @TotalUnit, 1)
 								END
 							END
 
@@ -245,12 +244,10 @@ DECLARE @dtmMembershipDate DATETIME,
 					END
 					ELSE
 						INSERT INTO [tblPATCustomerVolume]
-							 VALUES (@intEntityCustomerId, @intPatronageCategoryId, @intFiscalYear, @Total, 1)
+							 VALUES (@intEntityCustomerId, @intPatronageCategoryId, @intFiscalYear, GETDATE(),  @Total, 1)
 					END
 			END
 		END
 		DROP TABLE #tempTable
 END
-
 GO
-
