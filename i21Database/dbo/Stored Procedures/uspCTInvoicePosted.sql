@@ -50,6 +50,7 @@ BEGIN TRY
 	WHERE
 		I.intContractDetailId IS NOT NULL
 		AND I.[intInventoryShipmentItemId] IS NULL
+		AND I.[intShipmentPurchaseSalesContractId] IS NULL
 
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
