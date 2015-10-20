@@ -62,6 +62,28 @@ BEGIN
 
 	EXEC( '
 
+		DECLARE @EmployeeConstraint TABLE(
+			Stement		NVARCHAR(MAX)
+		)		
+		DECLARE @CurStatement NVARCHAR(MAX)
+		INSERT INTO @EmployeeConstraint
+		SELECT
+			''ALTER TABLE '' + R.TABLE_NAME + '' DROP CONSTRAINT ['' + R.CONSTRAINT_NAME + '']''
+			+ '' ; UPDATE B SET B.'' + R.COLUMN_NAME + '' = A.intUserSecurityId FROM tblPREmployee A JOIN '' + R.TABLE_NAME + '' B ON A.intEmployeeId = B.'' + R.COLUMN_NAME   + 
+			'' where A.intUserSecurityId is not null'' Stement
+		FROM INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE U
+		INNER JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS FK
+			ON U.CONSTRAINT_CATALOG = FK.UNIQUE_CONSTRAINT_CATALOG
+			AND U.CONSTRAINT_SCHEMA = FK.UNIQUE_CONSTRAINT_SCHEMA
+			AND U.CONSTRAINT_NAME = FK.UNIQUE_CONSTRAINT_NAME
+		INNER JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE R
+			ON R.CONSTRAINT_CATALOG = FK.CONSTRAINT_CATALOG
+			AND R.CONSTRAINT_SCHEMA = FK.CONSTRAINT_SCHEMA
+			AND R.CONSTRAINT_NAME = FK.CONSTRAINT_NAME
+		WHERE U.TABLE_NAME = ''tblPREmployee'' 
+
+
+
 		UPDATE a set a.strEntityNo = b.strEmployeeId from tblEntity a
 		join tblPREmployee b
 			on a.intEntityId = b.intEmployeeId
@@ -141,11 +163,24 @@ BEGIN
 	
 		end
 
+		WHILE EXISTS(SELECT TOP 1 1 FROM @EmployeeConstraint)
+		BEGIN
+			SET @CurStatement = ''''
+			SELECT TOP 1 @CurStatement = Stement  FROM @EmployeeConstraint
+
+			EXEC (@CurStatement)
+
+			DELETE FROM @EmployeeConstraint WHERE Stement = @CurStatement
+		END
+
+		EXEC(''update tblPREmployee set intEmployeeId = intUserSecurityId, intEntityId = intUserSecurityId where intUserSecurityId is not null'')
 
 		INSERT INTO tblEntityType(intEntityId,strType, intConcurrencyId)
 	SELECT intEmployeeId,''Employee'', 0 FROM tblPREmployee 
 		where intEmployeeId not in (SELECT intEntityId FROM 
 										tblEntityType where strType = ''Employee'')
+
+
 
 	')
 END
