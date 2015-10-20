@@ -137,6 +137,13 @@ SET @currentRow = @currentRow + 1
 END
 
 GO
+	-- INSERT DEFAULT LOCATION
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMCompanyLocation)
+	BEGIN
+		INSERT INTO tblSMCompanyLocation([strLocationName], [strLocationNumber], [strLocationType], [strUseLocationAddress], [intAllowablePickDayRange], [intNoOfCopiesToPrintforPalletSlip], [intDemandNoMaxLength], [intDemandNoMinLength])
+		VALUES ('01', '', 'Office', 'No', 0, 0, 0, 0)
+	END
+GO
 	-- FLAG IN COMPANY PREFERENCE MIGRATION
 	PRINT N'Updating strHelperUrlDomain in tblSMCompanyPreference'
 	UPDATE tblSMCompanyPreference SET strHelperUrlDomain = N'http://help.irelyserver.com'
