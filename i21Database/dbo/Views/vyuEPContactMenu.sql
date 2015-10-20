@@ -2,7 +2,7 @@
 AS
 SELECT DISTINCT
 intUserSecurityMenuId = Permission.intEntityPortalPermissionId,
-intUserSecurityId = Contact.[intEntityId],    
+intEntityUserSecurityId = Contact.[intEntityId],    
 intMenuId = Menu.intEntityPortalMenuId,    
 intParentMenuId = ISNULL((CASE WHEN Menu.intPortalParentMenuId = 0 THEN 0 ELSE (  
      SELECT intEntityPortalPermissionId  
