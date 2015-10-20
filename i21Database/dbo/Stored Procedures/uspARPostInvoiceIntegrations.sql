@@ -82,6 +82,22 @@ EXEC dbo.[uspARUpdateCommitted] @TransactionId, @post, @userId
 --Sales Order Status
 EXEC dbo.[uspARUpdateSOStatusFromInvoice] @TransactionId
 
+--Patronage
+DECLARE	@EntityCustomerId INT
+		,@successfulCount INT
+		,@invalidCount INT
+		,@success BIT
+		
+SELECT TOP 1 @EntityCustomerId = intEntityCustomerId FROM tblARInvoice WHERE intInvoiceId = @TransactionId
+
+EXEC [dbo].[uspPATInvoiceToCustomerVolume]
+	 @intEntityCustomerId	= @EntityCustomerId
+	,@intInvoiceId			= @TransactionId
+	,@ysnPosted				= @post
+	,@successfulCount		= @successfulCount OUTPUT
+	,@invalidCount			= @invalidCount OUTPUT
+	,@success				= @success OUTPUT
+
 --Audit Log          
 EXEC dbo.uspSMAuditLog 
 	 @keyValue			= @TransactionId					-- Primary Key Value of the Invoice. 
