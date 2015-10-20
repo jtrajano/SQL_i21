@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspCFInsertTransactionRecord
+﻿CREATE PROCEDURE [dbo].[uspCFInsertTransactionRecord]
 	 @strSiteId						NVARCHAR(MAX)
 	,@strCardId						NVARCHAR(MAX)
 	,@strVehicleId					NVARCHAR(MAX)
@@ -37,6 +37,74 @@ BEGIN
 	DECLARE @intProductId			INT	= 0
 	DECLARE @intARItemId			INT	= 0
 	DECLARE @intARItemLocationId	INT	= 0
+	
+	DECLARE @intTaxGroupId			INT = 0
+	DECLARE @intTaxMasterId			INT = 0
+	DECLARE @strCountry				NVARCHAR(MAX)
+	DECLARE @strCounty				NVARCHAR(MAX)
+	DECLARE @strCity				NVARCHAR(MAX)
+	DECLARE @strState				NVARCHAR(MAX)
+	DECLARE @intCustomerId			INT = 0
+	DECLARE @tblTaxTable			TABLE
+	(
+		 [intTransactionDetailTaxId]	INT
+		,[intTransactionDetailId]		INT
+		,[intTaxGroupMasterId]			INT
+		,[intTaxGroupId]				INT
+		,[intTaxCodeId]					INT
+		,[intTaxClassId]				INT
+		,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
+		,[strCalculationMethod]			NVARCHAR(30)
+		,[numRate]						NUMERIC(18,6)
+		,[dblTax]						NUMERIC(18,6)
+		,[dblAdjustedTax]				NUMERIC(18,6)
+		,[intTaxAccountId]				INT
+		,[ysnSeparateOnInvoice]			BIT
+		,[ysnCheckoffTax]				BIT
+		,[strTaxCode]					NVARCHAR(100)						
+		,[ysnTaxExempt]					BIT
+		,[strTaxGroup]					NVARCHAR(100)
+	)
+	DECLARE @tblTaxRateTable		TABLE
+	(
+		 [intTransactionDetailTaxId]	INT
+		,[intTransactionDetailId]		INT
+		,[intTaxGroupMasterId]			INT
+		,[intTaxGroupId]				INT
+		,[intTaxCodeId]					INT
+		,[intTaxClassId]				INT
+		,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
+		,[strCalculationMethod]			NVARCHAR(30)
+		,[numRate]						NUMERIC(18,6)
+		,[dblTax]						NUMERIC(18,6)
+		,[dblAdjustedTax]				NUMERIC(18,6)
+		,[intTaxAccountId]				INT
+		,[ysnSeparateOnInvoice]			BIT
+		,[ysnCheckoffTax]				BIT
+		,[strTaxCode]					NVARCHAR(100)						
+		,[ysnTaxExempt]					BIT
+		,[strTaxGroup]					NVARCHAR(100)
+	)
+	DECLARE @tblTaxUnitTable		TABLE
+	(
+		 [intTransactionDetailTaxId]	INT
+		,[intTransactionDetailId]		INT
+		,[intTaxGroupMasterId]			INT
+		,[intTaxGroupId]				INT
+		,[intTaxCodeId]					INT
+		,[intTaxClassId]				INT
+		,[strTaxableByOtherTaxes]		NVARCHAR(MAX)
+		,[strCalculationMethod]			NVARCHAR(30)
+		,[numRate]						NUMERIC(18,6)
+		,[dblTax]						NUMERIC(18,6)
+		,[dblAdjustedTax]				NUMERIC(18,6)
+		,[intTaxAccountId]				INT
+		,[ysnSeparateOnInvoice]			BIT
+		,[ysnCheckoffTax]				BIT
+		,[strTaxCode]					NVARCHAR(100)						
+		,[ysnTaxExempt]					BIT
+		,[strTaxGroup]					NVARCHAR(100)
+	)
 
 	IF(@intSiteId = 0)
 		BEGIN
@@ -52,26 +120,35 @@ BEGIN
 								WHERE strNetwork = @strNetworkId)
 		END
 
-	SET @intCardId =(SELECT TOP 1 intCardId	
-					FROM tblCFCard
-					WHERE strCardNumber	= @strCardId)
+	
+	---------------------------------------
+	-- SET intCard && intCustomerId value--
+	SELECT TOP 1 
+		 @intCardId = C.intCardId
+		,@intCustomerId = A.intCustomerId
+	FROM tblCFCard C
+	INNER JOIN tblCFAccount A
+	ON C.intAccountId = A.intAccountId
+	WHERE C.strCardNumber = @strCardId
+	---------------------------------------
 
-	SET @intVehicleId =(SELECT TOP 1 intVehicleId
-						FROM tblCFVehicle
-						WHERE strVehicleNumber	= @strVehicleId)
-
-	SET @intProductId = (SELECT TOP 1 intItemId 
-						FROM tblCFItem 
-						WHERE strProductNumber = @strProductId)
-
-	SET @intARItemId = (SELECT TOP 1 intARItemId 
-						FROM tblCFItem 
-						WHERE strProductNumber = @strProductId)
+	-------------------------------------------------------
+	-- SET intItemId && intProductId && intARItemId value--
+	 SELECT TOP 1 
+		 @intProductId = intItemId
+		,@intARItemId = intARItemId
+		,@intTaxMasterId = intTaxGroupMaster
+	FROM tblCFItem 
+	WHERE strProductNumber = @strProductId
+	-------------------------------------------------------
 
 	SET @intARItemLocationId = (SELECT TOP 1 intARLocationId
 								FROM tblCFSite 
 								WHERE strSiteNumber = @strSiteId)
-
+	SET @intVehicleId =(SELECT TOP 1 intVehicleId
+						FROM tblCFVehicle
+						WHERE strVehicleNumber	= @strVehicleId)
+								
 	---------------------------
 	--   PRICE COMPUTATION   --
 	---------------------------
@@ -206,10 +283,10 @@ BEGIN
 					SET @dblTransferCost = 0
 					SET @strPriceMethod = 'Contract Pricing'
 					
-					print 's'
-					print @intPrcAvailableQuantity
-					print @dblQuantity
-					print @dblCalcOverfillQuantity
+					--print 's'
+					--print @intPrcAvailableQuantity
+					--print @dblQuantity
+					--print @dblCalcOverfillQuantity
 
 					IF(@intPrcAvailableQuantity < @dblQuantity)
 						BEGIN
@@ -229,7 +306,87 @@ BEGIN
 					print @dblQuantity
 					print @dblCalcOverfillQuantity
 		END
+
+
+		---------------------------
+		--	  GET TAX RECORDS    --
+		---------------------------
 	
+		SELECT  
+		@strCountry = strCountry 
+		,@strCity = strCity
+		,@strState = strStateProvince
+		FROM tblSMCompanyLocation 
+		WHERE intCompanyLocationId = @intARItemLocationId
+
+		SELECT @intTaxGroupId = [dbo].[fnGetTaxGroupForLocation]
+		(@intTaxMasterId, @strCountry, @strCounty, @strCity, @strState)
+
+		INSERT INTO @tblTaxTable
+		SELECT
+		[intTransactionDetailTaxId]
+		,[intTransactionDetailId]  AS [intInvoiceDetailId]
+		,[intTaxGroupMasterId]
+		,[intTaxGroupId]
+		,[intTaxCodeId]
+		,[intTaxClassId]
+		,[strTaxableByOtherTaxes]
+		,[strCalculationMethod]
+		,[numRate]
+		,[dblTax]
+		,[dblAdjustedTax]
+		,[intTaxAccountId]    AS [intSalesTaxAccountId]
+		,[ysnSeparateOnInvoice]
+		,[ysnCheckoffTax]
+		,[strTaxCode]
+		,[ysnTaxExempt]
+		,[strTaxGroup]
+		FROM
+		[dbo].[fnGetTaxGroupTaxCodesForCustomer]
+		(@intTaxGroupId, @intCustomerId, @dtmTransactionDate, @intARItemId)
+		INSERT INTO @tblTaxRateTable
+		SELECT 
+		 [intTransactionDetailTaxId]
+		,[intTransactionDetailId]  AS [intInvoiceDetailId]
+		,[intTaxGroupMasterId]
+		,[intTaxGroupId]
+		,[intTaxCodeId]
+		,[intTaxClassId]
+		,[strTaxableByOtherTaxes]
+		,[strCalculationMethod]
+		,[numRate]
+		,[dblTax]
+		,[dblAdjustedTax]
+		,[intTaxAccountId]    AS [intSalesTaxAccountId]
+		,[ysnSeparateOnInvoice]
+		,[ysnCheckoffTax]
+		,[strTaxCode]
+		,[ysnTaxExempt]
+		,[strTaxGroup]
+		FROM @tblTaxTable
+		WHERE LOWER(strCalculationMethod) = 'percentage'
+		INSERT INTO @tblTaxUnitTable
+		SELECT 
+		 [intTransactionDetailTaxId]
+		,[intTransactionDetailId]  AS [intInvoiceDetailId]
+		,[intTaxGroupMasterId]
+		,[intTaxGroupId]
+		,[intTaxCodeId]
+		,[intTaxClassId]
+		,[strTaxableByOtherTaxes]
+		,[strCalculationMethod]
+		,[numRate]
+		,[dblTax]
+		,[dblAdjustedTax]
+		,[intTaxAccountId]    AS [intSalesTaxAccountId]
+		,[ysnSeparateOnInvoice]
+		,[ysnCheckoffTax]
+		,[strTaxCode]
+		,[ysnTaxExempt]
+		,[strTaxGroup]
+		FROM @tblTaxTable
+		WHERE LOWER(strCalculationMethod) = 'unit'
+
 		INSERT INTO tblCFTransaction(
 			 [intSiteId]					
 			,[intCardId]					
@@ -315,6 +472,102 @@ BEGIN
 			,@strScreenName = 'Card Fueling Transaction Screen'
 		END
 
+
+		--------------------
+		-- CALCULATE TAX  --
+		--------------------
+
+		DECLARE @dblOPTotalTax		NUMERIC(18,6) = 0
+		DECLARE @dblCPTotalTax		NUMERIC(18,6) = 0
+		DECLARE @intLoopTaxGroupID	INT
+		DECLARE @intLoopTaxCodeID	INT
+		DECLARE @intLoopTaxClassID	INT
+		DECLARE	@strLoopTaxCode		NVARCHAR(MAX)
+		DECLARE @QxOP				NUMERIC(18,6) = 0
+		DECLARE @QxCP				NUMERIC(18,6) = 0
+		DECLARE @QxT				NUMERIC(18,6) = 0
+		DECLARE @OPTax				NUMERIC(18,6) = 0		
+		DECLARE @CPTax				NUMERIC(18,6) = 0		
+
+		
+		SET @QxOP = @dblQuantity * @dblPrcOriginalPrice
+		SET @QxCP = @dblQuantity * @dblPrcPriceOut
+		
+
+		SELECT @dblPrcOriginalPrice as 'dblPrcOriginalPrice'
+		WHILE (EXISTS(SELECT TOP 1 * FROM @tblTaxUnitTable))
+		BEGIN
+			SELECT TOP 1 
+			 @intLoopTaxGroupID = intTaxGroupId
+			,@intLoopTaxCodeID = intTaxCodeId
+			,@intLoopTaxClassID = intTaxClassId
+			,@QxT = @dblQuantity * numRate
+			,@QxOP = @QxOP - (@dblQuantity * numRate)
+			,@dblOPTotalTax = @dblOPTotalTax + (@dblQuantity * numRate)
+			,@dblCPTotalTax = @dblCPTotalTax +  numRate
+			,@strLoopTaxCode = strTaxCode
+			FROM @tblTaxUnitTable
+
+			INSERT INTO tblCFTransactionTax(
+				 [intTransactionId]
+				,[strTransactionTaxId]
+				,[dblTaxOriginalAmount]
+				,[dblTaxCalculatedAmount]
+			)
+			VALUES(
+				@Pk
+				,@strLoopTaxCode
+				,(CASE WHEN(@dblPrcOriginalPrice = 0 OR @dblPrcOriginalPrice IS NULL) 
+					THEN 0 
+					ELSE @QxT END)
+				,(CASE WHEN(@dblPrcPriceOut = 0 OR @dblPrcPriceOut IS NULL) 
+					THEN 0 
+					ELSE @QxT END)
+			)
+
+			DELETE FROM @tblTaxUnitTable 
+			WHERE intTaxGroupId = @intLoopTaxGroupID
+			AND intTaxClassId = @intLoopTaxClassID
+			AND intTaxCodeId = @intLoopTaxCodeID
+
+		END
+
+		WHILE (EXISTS(SELECT TOP 1 * FROM @tblTaxRateTable))
+		BEGIN
+			SELECT TOP 1 
+			 @intLoopTaxGroupID = intTaxGroupId
+			,@intLoopTaxCodeID = intTaxCodeId
+			,@intLoopTaxClassID = intTaxClassId
+			,@OPTax = (@QxOP / (numRate/100 + 1))* (numRate/100) -- (Qty * OriginalPrice) * (rate/100)
+			,@CPTax = @QxCP * (numRate/100) --calc price * (rate/100)
+			,@dblOPTotalTax = @dblOPTotalTax +  (@QxOP / (numRate/100 + 1))* (numRate/100)
+			,@dblCPTotalTax = @dblCPTotalTax +  (@dblPrcPriceOut * (numRate/100))
+			,@strLoopTaxCode = strTaxCode
+			FROM @tblTaxRateTable
+
+			INSERT INTO tblCFTransactionTax(
+				 [intTransactionId]
+				,[strTransactionTaxId]
+				,[dblTaxOriginalAmount]
+				,[dblTaxCalculatedAmount]
+			)
+			VALUES(
+				@Pk
+				,@strLoopTaxCode
+				,@OPTax
+				,@CPTax
+			)
+
+			DELETE FROM @tblTaxRateTable 
+			WHERE intTaxGroupId = @intLoopTaxGroupID
+			AND intTaxClassId = @intLoopTaxClassID
+			AND intTaxCodeId = @intLoopTaxCodeID
+
+		END
+
+		-------------------------------
+		-- INSERT TRANSACTION PRICE  --
+		-------------------------------
 		INSERT INTO tblCFTransactionPrice(
 			 [intTransactionId]
 			,[strTransactionPriceId]
@@ -325,20 +578,20 @@ BEGIN
 		(
 			@Pk
 			,'Gross Price'
-			,@dblPrcOriginalPrice -- +TAX
-			,@dblPrcPriceOut	  -- +TAX
+			,@dblPrcOriginalPrice	-- +TAX
+			,@dblPrcPriceOut	  + @dblCPTotalTax-- +TAX
 		),
 		(
 			@Pk
 			,'Net Price'
-			,@dblPrcOriginalPrice 
+			,(((@dblPrcOriginalPrice * @dblQuantity) - @dblOPTotalTax) / @dblQuantity)
 			,@dblPrcPriceOut	 
 		),
 		(
 			@Pk
 			,'Total Amount'
 			,@dblPrcOriginalPrice * @dblQuantity
-			,@dblPrcPriceOut      * @dblQuantity
+			,(@dblPrcPriceOut + @dblCPTotalTax) * @dblQuantity
 		)
 		END
 
