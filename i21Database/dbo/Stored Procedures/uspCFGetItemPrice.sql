@@ -51,7 +51,8 @@ AS
 --2. Item Special Pricing, 
 --3. Pricing Level, 
 --4. Standard Pricing
-
+print 'op'
+print @CFOriginalPrice
 EXEC [uspARGetItemPrice] 
  @ItemUOMId = @CFItemUOMId
 ,@TransactionDate = @CFTransactionDate
@@ -1058,11 +1059,12 @@ BEGIN
 	-------------------------------
 	-- Price Profile Computation --
 	-------------------------------
+
+	select dblOriginalGrossPrice from tblCFTransaction
 	
 
 	
 	SET @CFPricingOut = 'Price Profile' 
-	SET @CFOriginalPrice = @CFStandardPrice
 	SET @Rate = (SELECT TOP 1 dblRate FROM @cfMatchPriceProfile) 
 	print 'rate'
 	print @Rate
@@ -1072,7 +1074,7 @@ BEGIN
 	BEGIN 
 		IF(@CFPriceBasis = 'Pump Price Adjustment')
 			BEGIN
-				SET @CFPriceOut = @CFOriginalPrice + @Rate
+				SET @CFPriceOut = @CFStandardPrice + @Rate
 				RETURN 1;    
 			END
 		ELSE
@@ -1089,16 +1091,16 @@ BEGIN
 									 AND intSiteId = @CFSiteId 
 									 AND intItemId = @CFItemId) 
 
-				SET @CFOriginalPrice = (SELECT TOP 1 dblIndexPrice
+				SET @CFStandardPrice = (SELECT TOP 1 dblIndexPrice
 										FROM tblCFIndexPricingBySiteGroupHeader IPH
 										INNER JOIN tblCFIndexPricingBySiteGroup IPD
 										ON IPH.intIndexPricingBySiteGroupHeaderId = IPD.intIndexPricingBySiteGroupHeaderId
 										WHERE IPH.intPriceIndexId = @PriceIndexId 
 										AND IPH.intSiteGroupId = @SiteGroupId)
 
-				IF(@CFOriginalPrice IS NOT NULL)
+				IF(@CFStandardPrice IS NOT NULL)
 					BEGIN
-						SET @CFPriceOut = @CFOriginalPrice + @Rate
+						SET @CFPriceOut = @CFStandardPrice + @Rate
 						RETURN 1;    
 					END
 			END
@@ -1120,16 +1122,16 @@ BEGIN
 									 AND intSiteId = @CFSiteId 
 									 AND intItemId = @CFItemId) 
 
-				SET @CFOriginalPrice = (SELECT TOP 1 dblIndexPrice
+				SET @CFStandardPrice = (SELECT TOP 1 dblIndexPrice
 										FROM tblCFIndexPricingBySiteGroupHeader IPH
 										INNER JOIN tblCFIndexPricingBySiteGroup IPD
 										ON IPH.intIndexPricingBySiteGroupHeaderId = IPD.intIndexPricingBySiteGroupHeaderId
 										WHERE IPH.intPriceIndexId = @PriceIndexId 
 										AND IPH.intSiteGroupId = @SiteGroupId)
 
-				IF(@CFOriginalPrice IS NOT NULL)
+				IF(@CFStandardPrice IS NOT NULL)
 					BEGIN
-						SET @CFPriceOut = @CFOriginalPrice + @Rate
+						SET @CFPriceOut = @CFStandardPrice + @Rate
 						RETURN 1;    
 					END
 			END
@@ -1166,16 +1168,16 @@ BEGIN
 										AND intSiteId = @CFSiteId 
 										AND intItemId = @CFItemId) 
 
-				SET @CFOriginalPrice = (SELECT TOP 1 dblIndexPrice
+				SET @CFStandardPrice = (SELECT TOP 1 dblIndexPrice
 										FROM tblCFIndexPricingBySiteGroupHeader IPH
 										INNER JOIN tblCFIndexPricingBySiteGroup IPD
 										ON IPH.intIndexPricingBySiteGroupHeaderId = IPD.intIndexPricingBySiteGroupHeaderId
 										WHERE IPH.intPriceIndexId = @PriceIndexId 
 										AND IPH.intSiteGroupId = @SiteGroupId)
 
-				IF(@CFOriginalPrice IS NOT NULL)
+				IF(@CFStandardPrice IS NOT NULL)
 					BEGIN
-						SET @CFPriceOut = @CFOriginalPrice + @Rate
+						SET @CFPriceOut = @CFStandardPrice + @Rate
 						RETURN 1;    
 					END
 			END
@@ -1196,4 +1198,3 @@ SET @CFPriceOut = @CFStandardPrice;
 
 RETURN 1
 
-GO
