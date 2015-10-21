@@ -2666,6 +2666,7 @@
     <Build Include="dbo\Views\vyuICGetInventoryCountDetail.sql" />
     <Build Include="dbo\Functions\fnICConvertUOMtoStockUnit.sql" />
     <Build Include="dbo\Tables\tblMFWorkOrderProducedSKU.sql" />
+    <Build Include="dbo\Views\vyuMFGetSanitizationWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
