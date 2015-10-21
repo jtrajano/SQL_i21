@@ -1,5 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspAPUpdateVoucherDetailTax]
-	@voucherDetail AS VoucherDetailData READONLY
+﻿CREATE PROCEDURE [dbo].[uspAPUpdateVoucherTax]
+	@billId INT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -13,9 +13,7 @@ BEGIN TRY
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 
---UPDATE A
---	SET A.dblTax = 0
---FROM @voucherDetail A
+
 
 IF @transCount = 0 COMMIT TRANSACTION
 

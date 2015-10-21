@@ -86,6 +86,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	IF EXISTS(SELECT 1 FROM @voucherDetails)
 	BEGIN
 		EXEC uspAPCreateVoucherDetail @billId, @voucherDetails
+		EXEC uspAPUpdateVoucherTax @billId
 	END
 
 	IF @transCount = 0 COMMIT TRANSACTION
