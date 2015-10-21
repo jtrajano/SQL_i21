@@ -4067,4 +4067,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intTransactionDetailLogId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="799724da-c490-4f89-b9ad-43e576eab840" ChangeDateTime="10/21/2015 03:44:23">
+    <Property Name="ElementName" Value="[dbo].[tblICInventoryCount].[dtmCountDate ]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblICInventoryCount]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="dtmCountDate" />
+  </Operation>
 </Operations>

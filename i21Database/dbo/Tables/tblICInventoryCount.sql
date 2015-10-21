@@ -5,7 +5,7 @@
     [intCategoryId] INT NULL, 
     [intCommodityId] INT NULL, 
     [intCountGroupId] INT NULL, 
-    [dtmCountDate ] DATETIME NULL, 
+    [dtmCountDate] DATETIME NULL, 
     [strCountNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intSubLocationId] INT NULL, 
     [intStorageLocationId] INT NULL, 
