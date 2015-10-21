@@ -7,6 +7,9 @@ AS
 			IR.strReceiptNumber,
 			IR.strReceiptType,
 			IR.intSourceType,
-			RI.intSourceId intShipmentId
+			CQ.intShipmentId,
+			CQ.intContractDetailId
 	FROM	tblICInventoryReceiptItem	RI
 	JOIN	tblICInventoryReceipt		IR ON RI.intInventoryReceiptId = IR.intInventoryReceiptId
+	JOIN	tblLGShipmentContractQty CQ ON CQ.intShipmentContractQtyId = RI.intSourceId
+	WHERE	IR.strReceiptType = 'Purchase Contract' AND IR.intSourceType = 2

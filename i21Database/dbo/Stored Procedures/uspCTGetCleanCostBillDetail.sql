@@ -8,11 +8,16 @@ BEGIN TRY
 			@intBillId					INT,
 			@intCleanCostUOMId			INT,
 			@intCleanCostCurrencyId		INT,
+			@intSourceId				INT,
 			@ErrMsg						NVARCHAR(MAX)
 			
+	SELECT	@intSourceId = intShipmentContractQtyId
+	FROM	tblLGShipmentContractQty
+	WHERE	intContractDetailId = @intContractDetailId AND intShipmentId = @intShipmentId
+
 	SELECT	@intInventoryReceiptItemId	=	intInventoryReceiptItemId 
 	FROM	tblICInventoryReceiptItem 
-	WHERE	intSourceId					=	@intShipmentId 
+	WHERE	intSourceId					=	@intSourceId 
 	AND		intInventoryReceiptId		=	@intInventoryReceiptId
 
 	SELECT 	@intCleanCostUOMId		= intCleanCostUOMId , 
@@ -24,6 +29,7 @@ BEGIN TRY
 	WHERE	intInventoryReceiptItemId = @intInventoryReceiptItemId
 
 	SELECT	BD.intBillDetailId AS intExpenseId,
+			BD.intItemId,
 			CASE	WHEN BL.intCurrencyId = @intCleanCostCurrencyId THEN BD.dblCost
 					ELSE CAST(NULL AS NUMERIC(18,0)) 
 			END		AS dblValueInCCCurrency,
@@ -37,8 +43,8 @@ BEGIN TRY
 					ELSE	BL.intCurrencyId 
 			END		AS		intOtherCurrencyId,
 			CAST(NULL AS NUMERIC(18,0))  AS dblFX,
-			CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(1 AS BIT)
-					ELSE	CAST(0 AS BIT)
+			CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(0 AS BIT)
+					ELSE	CAST(1 AS BIT)
 			END		AS		ysnValueEnable,
 			CAST(0 AS BIT)	AS ysnQuantityEnable,
 			CASE	WHEN	BL.intCurrencyId = @intCleanCostCurrencyId THEN CAST(1 AS BIT)
