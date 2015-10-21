@@ -21,8 +21,8 @@ DECLARE @INVENTORY_ADJUSTMENT_QuantityChange AS INT = 10
 		,@INVENTORY_ADJUSTMENT_LotMerge AS INT = 19
 		,@INVENTORY_ADJUSTMENT_LotMove AS INT = 20
 
-DECLARE @LotMoveSource AS ItemCostingTableType
-		,@LotMoveTarget AS ItemCostingTableType
+DECLARE @MergeLotSource AS ItemCostingTableType
+		,@MergeToTargetLot AS ItemCostingTableType
 
 --------------------------------------------------------------------------------
 -- VALIDATIONS
@@ -76,17 +76,18 @@ BEGIN
 		FROM dbo.tblICItem Item 
 		WHERE intItemId = @intItemId		
 
-		-- 'Move Lot requires a negative Adjust Qty on %s as stock for the move.'
-		RAISERROR(51178, 11, 1, @strItemNo);
+		-- 'Merge Lot requires a negative Adjust Qty on %s as stock for the merge.'
+		RAISERROR(51177, 11, 1, @strItemNo);
 		RETURN -1
 	END
 END 
+
 
 --------------------------------------------------------------------------------
 -- REDUCE THE SOURCE LOT NUMBER
 --------------------------------------------------------------------------------
 BEGIN 
-	INSERT INTO @LotMoveSource (
+	INSERT INTO @MergeLotSource (
 			intItemId			
 			,intItemLocationId	
 			,intItemUOMId		
@@ -111,7 +112,7 @@ BEGIN
 			,dtmDate				= Header.dtmAdjustmentDate
 			,dblQty					= ISNULL(Detail.dblNewQuantity, 0) - ISNULL(Detail.dblQuantity, 0)	
 			,dblUOMQty				= ItemUOM.dblUnitQty
-			,dblCost				= Detail.dblCost -- Cost saved in Adj is expected come from the cost bucket. 
+			,dblCost				= Detail.dblCost --* ItemUOM.dblUnitQty-- Cost saved in Adj is expected come from the cost bucket. 
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
 			,dblExchangeRate		= 1
@@ -144,9 +145,9 @@ BEGIN
 	-- Call the costing SP	
 	-------------------------------------------
 	EXEC	dbo.uspICPostCosting  
-			@LotMoveSource  
+			@MergeLotSource  
 			,@strBatchId  
-			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
+			,NULL -- @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
 			,@intUserId
 END
 
@@ -161,13 +162,14 @@ BEGIN
 			,@intUserId
 
 	IF @intCreateUpdateLotError <> 0 RETURN -1
+	
 END
 
 --------------------------------------------------------------------------------
--- INCREASE THE STOCK ON THE SPLIT LOT NUMBER 
+-- INCREASE THE STOCK ON MERGE
 --------------------------------------------------------------------------------
 BEGIN 
-	INSERT INTO @LotMoveTarget (
+	INSERT INTO @MergeToTargetLot (
 			intItemId			
 			,intItemLocationId	
 			,intItemUOMId		
@@ -188,51 +190,151 @@ BEGIN
 			,intStorageLocationId
 	)
 	SELECT 	intItemId				= Detail.intItemId
-			,intItemLocationId		= ISNULL(NewItemLocation.intItemLocationId, OriginalItemLocation.intItemLocationId) 
+			,intItemLocationId		= ISNULL(NewLotItemLocation.intItemLocationId, SourceLotItemLocation.intItemLocationId) 
 
 			,intItemUOMId			= 
-									-- Try to use the Lot Weight UOM. 
-									-- If not possible, use the new UOM Id or the source UOM Id. 
-									ISNULL(
-										NewLot.intWeightUOMId
-										,ISNULL(NewItemUOM.intItemUOMId, FromStock.intItemUOMId)
-									) 
+									-- Try to use the new-lot's weight UOM id. 
+									-- Otherwise, use the new-lot's item uom id. 
+									CASE	WHEN NewLot.intWeightUOMId IS NOT NULL AND SourceLot.intWeightUOMId IS NOT NULL THEN 
+												NewLot.intWeightUOMId
+											ELSE 
+												NewLot.intItemUOMId												
+									END 
 
 			,dtmDate				= Header.dtmAdjustmentDate
 
 			,dblQty					= 
-									-- Try to convert the bag into Lot Weight
-									-- If not possible, use the new split lot qty. 
-									-- Or the source qty. 
-									CASE	WHEN NewLot.intWeightUOMId IS NOT NULL THEN 
-												ISNULL(Detail.dblNewSplitLotQuantity, -1 * FromStock.dblQty) 
-												* NewLot.dblWeightPerQty
-											ELSE 
-												ISNULL(Detail.dblNewSplitLotQuantity, -1 * FromStock.dblQty) 
-									END			
+											-- Try to use the Weight UOM Qty. 
+									CASE	WHEN SourceLot.intWeightUOMId IS NOT NULL AND NewLot.intWeightUOMId IS NOT NULL THEN -- There is a new weight UOM Id. 
+												CASE	-- New Lot has the same weight UOM Id. 	
+														WHEN NewLot.intWeightUOMId = SourceLot.intWeightUOMId AND SourceLot.intWeightUOMId = FromStock.intItemUOMId THEN															
+															-1 * FromStock.dblQty
+														
+														-- New Lot has the same weight UOM Id but Source Lot is reduced by bags. 
+														WHEN NewLot.intWeightUOMId = SourceLot.intWeightUOMId AND SourceLot.intWeightUOMId <> FromStock.intItemUOMId THEN
+															ISNULL(Detail.dblNewSplitLotQuantity, -1 * FromStock.dblQty) 
+															* NewLot.dblWeightPerQty
 
-			,dblUOMQty				= ISNULL(
-										LotWeightUOM.dblUnitQty 
-										,ISNULL(NewItemUOM.dblUnitQty, FromStock.dblUOMQty)
-									)
+														--New Lot has a different weight UOM Id. 
+														WHEN NewLot.intWeightUOMId <> SourceLot.intWeightUOMId AND SourceLot.intWeightUOMId = FromStock.intItemUOMId THEN 
+															-- Convert the source weight into the new lot weight. 
+															dbo.fnCalculateQtyBetweenUOM(
+																	SourceLot.intWeightUOMId
+																	, NewLot.intWeightUOMId
+																	, (-1 * FromStock.dblQty)
+															)
+														--New Lot has a different weight UOM Id but source lot was reduced by bags. 
+														WHEN NewLot.intWeightUOMId <> SourceLot.intWeightUOMId AND SourceLot.intWeightUOMId <> FromStock.intItemUOMId THEN 
+															-- Convert the source weight into the new lot weight. 
+															dbo.fnCalculateQtyBetweenUOM(
+																	SourceLot.intWeightUOMId
+																	, NewLot.intWeightUOMId
+																	, (-1 * FromStock.dblQty * SourceLot.dblWeightPerQty)
+															)
+												END 
+											-- Else, use the Item UOM Qty
+											ELSE 
+												ISNULL(
+													Detail.dblNewSplitLotQuantity 
+													,CASE	WHEN SourceLot.intWeightUOMId = FromStock.intItemUOMId AND ISNULL(SourceLot.dblWeightPerQty, 0) <> 0 THEN 
+																-- From stock is in source-lot's weight UOM Id. 
+																-- Convert it to source-lot's item UOM Id. 
+																-- and then convert it to the new-lot's item UOM Id. 
+																dbo.fnCalculateQtyBetweenUOM (
+																	SourceLot.intItemUOMId
+																	, NewLot.intItemUOMId
+																	, (-1 * FromStock.dblQty / SourceLot.dblWeightPerQty)
+																)
+															ELSE 
+																-- 
+																dbo.fnCalculateQtyBetweenUOM (
+																	SourceLot.intItemUOMId
+																	, NewLot.intItemUOMId
+																	, (-1 * FromStock.dblQty)
+																)
+													END 
+												) 
+									END
+
+			,dblUOMQty				=	CASE	WHEN NewLot.intWeightUOMId IS NOT NULL AND SourceLot.intWeightUOMId IS NOT NULL THEN 
+													NewLotWeightUOM.dblUnitQty
+												ELSE 
+													NewLotItemUOM.dblUnitQty
+										END 
 
 			,dblCost				=	
-									-- Try to convert the cost to the cost per Lot Weight. 
-									-- Otherwise, use the new cost or the source cost. 
-									CASE	WHEN NewLot.intWeightUOMId IS NOT NULL THEN
-												(	
-													-1
-													* FromStock.dblQty
-													* ISNULL(Detail.dblNewCost, FromStock.dblCost) 
-												)												
-												/ 
-												(
-													ISNULL(Detail.dblNewSplitLotQuantity, -1 * FromStock.dblQty) 
-													* NewLot.dblWeightPerQty 													
-												)
-											ELSE
-												ISNULL(Detail.dblNewCost, FromStock.dblCost) 
-									END 
+											-- Try to get the cost in terms of Weight UOM. 
+									CASE	WHEN SourceLot.intWeightUOMId IS NOT NULL AND NewLot.intWeightUOMId IS NOT NULL THEN -- There is a new weight UOM Id. 
+												CASE	-- New Lot has the same weight UOM Id. 	
+														WHEN NewLot.intWeightUOMId = SourceLot.intWeightUOMId AND SourceLot.intWeightUOMId = FromStock.intItemUOMId THEN															
+															 ISNULL(
+																(Detail.dblNewCost / NewLotItemUOM.dblUnitQty)
+																, FromStock.dblCost
+															 ) 
+														
+														-- New Lot has the same weight UOM Id but Source Lot is reduced by bags. 
+														WHEN NewLot.intWeightUOMId = SourceLot.intWeightUOMId AND SourceLot.intWeightUOMId <> FromStock.intItemUOMId THEN
+															-- Convert the cost in terms of weight UOM. 
+															ISNULL(
+																(Detail.dblNewCost / NewLotItemUOM.dblUnitQty)
+																,(FromStock.dblCost/ FromStock.dblUOMQty)
+															) 
+
+														--New Lot has a different weight UOM Id. 
+														WHEN NewLot.intWeightUOMId <> SourceLot.intWeightUOMId AND SourceLot.intWeightUOMId = FromStock.intItemUOMId THEN 
+															-- Convert the source weight into the new lot weight. 
+															-1 
+															* FromStock.dblQty
+															* ISNULL((Detail.dblNewCost / NewLotItemUOM.dblUnitQty), FromStock.dblCost) 
+															/ dbo.fnCalculateQtyBetweenUOM (
+																	SourceLot.intWeightUOMId
+																	, NewLot.intWeightUOMId
+																	, (-1 * FromStock.dblQty)
+															)
+														--New Lot has a different weight UOM Id but source lot was reduced by bags. 
+														WHEN NewLot.intWeightUOMId <> SourceLot.intWeightUOMId AND SourceLot.intWeightUOMId <> FromStock.intItemUOMId THEN 
+															-- Convert the source weight into the new lot weight. 
+															-1 
+															* FromStock.dblQty
+															* ISNULL((Detail.dblNewCost / NewLotItemUOM.dblUnitQty), FromStock.dblCost) 
+															/ dbo.fnCalculateQtyBetweenUOM (
+																	SourceLot.intWeightUOMId
+																	, NewLot.intWeightUOMId
+																	, (-1 * FromStock.dblQty * SourceLot.dblWeightPerQty)
+															)
+												END 
+											-- Else, use the cost in termns of Item UOM. 
+											ELSE 
+												ISNULL(
+													Detail.dblNewCost
+													,CASE	WHEN SourceLot.intWeightUOMId = FromStock.intItemUOMId AND ISNULL(SourceLot.dblWeightPerQty, 0) <> 0 THEN 
+																-- From-stock is in source-lot's weight UOM Id. 
+																-- Convert it to source-lot's item UOM Id. 
+																-- and then convert it to the new-lot's item UOM Id. 
+																(	
+																	-1 
+																	* FromStock.dblQty
+																	* ISNULL((Detail.dblNewCost / NewLotItemUOM.dblUnitQty), FromStock.dblCost) 																
+																)
+																/ dbo.fnCalculateQtyBetweenUOM (
+																	SourceLot.intItemUOMId
+																	, NewLot.intItemUOMId
+																	, (-1 * FromStock.dblQty / SourceLot.dblWeightPerQty)
+																)
+															ELSE 
+																(
+																	-1 
+																	* FromStock.dblQty
+																	* ISNULL(Detail.dblNewCost, FromStock.dblCost) 																
+																)																
+																/ dbo.fnCalculateQtyBetweenUOM (
+																	SourceLot.intItemUOMId
+																	, NewLot.intItemUOMId
+																	, (-1 * FromStock.dblQty)
+																)
+													END 
+												) 
+									END
 			,dblValue				= 0
 			,dblSalesPrice			= 0
 			,intCurrencyId			= NULL 
@@ -250,34 +352,42 @@ BEGIN
 				ON Detail.intInventoryAdjustmentDetailId = FromStock.intTransactionDetailId
 				AND Detail.intInventoryAdjustmentId = FromStock.intTransactionId
 				AND FromStock.intItemId = Detail.intItemId
-			INNER JOIN dbo.tblICItemLocation OriginalItemLocation 
-				ON OriginalItemLocation.intLocationId = Header.intLocationId 
-				AND OriginalItemLocation.intItemId = Detail.intItemId
-			INNER JOIN dbo.tblICLot Lot
-				ON Lot.intLotId = FromStock.intLotId
-			LEFT JOIN dbo.tblICItemLocation NewItemLocation 
-				ON NewItemLocation.intLocationId = Detail.intNewLocationId
-				AND NewItemLocation.intItemId = Detail.intItemId
-			LEFT JOIN dbo.tblICItemUOM OriginalItemUOM
-				ON OriginalItemUOM.intItemUOMId = Detail.intItemUOMId
-				AND OriginalItemUOM.intItemId = Detail.intItemId
-			LEFT JOIN dbo.tblICItemUOM NewItemUOM
-				ON NewItemUOM.intItemUOMId = Detail.intNewItemUOMId
-				AND NewItemUOM.intItemId = Detail.intItemId
-			LEFT JOIN dbo.tblICItemUOM LotWeightUOM 
-				ON LotWeightUOM.intItemUOMId = Lot.intWeightUOMId
+			INNER JOIN dbo.tblICLot SourceLot
+				ON SourceLot.intLotId = FromStock.intLotId
+			INNER JOIN dbo.tblICItemLocation SourceLotItemLocation 
+				ON SourceLotItemLocation.intLocationId = Header.intLocationId 
+				AND SourceLotItemLocation.intItemId = SourceLot.intItemId
+
+			LEFT JOIN dbo.tblICItemUOM SourceLotItemUOM
+				ON SourceLotItemUOM.intItemUOMId = SourceLot.intItemUOMId
+				AND SourceLotItemUOM.intItemId = SourceLot.intItemId
+			LEFT JOIN dbo.tblICItemUOM SourceLotWeightUOM 
+				ON SourceLotWeightUOM.intItemUOMId = SourceLot.intItemUOMId
+				AND SourceLotWeightUOM.intItemId = SourceLot.intItemId
+
 			LEFT JOIN dbo.tblICLot NewLot
 				ON NewLot.intLotId = Detail.intNewLotId
+			LEFT JOIN dbo.tblICItemLocation NewLotItemLocation 
+				ON NewLotItemLocation.intLocationId = Detail.intNewLocationId
+				AND NewLotItemLocation.intItemId = NewLot.intItemId
+			LEFT JOIN dbo.tblICItemUOM NewLotItemUOM
+				ON NewLotItemUOM.intItemUOMId = NewLot.intItemUOMId
+				AND NewLotItemUOM.intItemId = NewLot.intItemId
+			LEFT JOIN dbo.tblICItemUOM NewLotWeightUOM
+				ON NewLotWeightUOM.intItemUOMId = NewLot.intWeightUOMId
+				AND NewLotWeightUOM.intItemId = NewLot.intItemId
+
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 			AND ISNULL(FromStock.ysnIsUnposted, 0) = 0
 			AND FromStock.strBatchId = @strBatchId
+			AND NewLot.intLotId IS NOT NULL 
 
 	-------------------------------------------
 	-- Call the costing SP	
 	-------------------------------------------
 	EXEC	dbo.uspICPostCosting  
-			@LotMoveTarget  
+			@MergeToTargetLot  
 			,@strBatchId  
-			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
+			,NULL -- @ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY 
 			,@intUserId
 END

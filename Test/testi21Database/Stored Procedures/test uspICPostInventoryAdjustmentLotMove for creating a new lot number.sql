@@ -229,7 +229,7 @@ BEGIN
 
 	-- Act
 	BEGIN 
-		EXEC dbo.uspICPostInventoryAdjustmentSplitLotChange
+		EXEC dbo.uspICPostInventoryAdjustmentLotMove
 				@intTransactionId
 				,@strBatchId
 				,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
