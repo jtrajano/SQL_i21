@@ -2655,7 +2655,7 @@
     <Build Include="dbo\Views\vyuLGInventoryView.sql" />
     <Build Include="dbo\User Defined Types\VoucherDetailData.sql" />
     <Build Include="dbo\Functions\fnAPCreateVoucherDetailData.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherDetailTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherlTax.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherDetailContract.sql" />
     <Build Include="dbo\Functions\fnAPCreateBillData.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetail.sql" />
