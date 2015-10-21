@@ -11,6 +11,7 @@
 	,@intLotId INT OUTPUT
 	,@strLotAlias nvarchar(50)
 	,@strVendorLotNo nvarchar(50)= NULL
+	,@strParentLotNumber nvarchar(50)
 AS
 BEGIN
 	SET QUOTED_IDENTIFIER OFF
@@ -39,6 +40,7 @@ BEGIN
 		,@dtmPlannedDate datetime
 		,@intItemStockUOMId int
 		,@strWorkOrderNo NVARCHAR(50)
+		,@dtmDate datetime
 
 	SELECT TOP 1 @intLocationId = intLocationId
 		,@intSubLocationId = intSubLocationId
@@ -51,7 +53,7 @@ BEGIN
 	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH
 		,@strBatchId OUTPUT
 
-		INSERT INTO @ItemsForPost (
+	INSERT INTO @ItemsForPost (
 		intItemId
 		,intItemLocationId
 		,intItemUOMId
@@ -206,6 +208,17 @@ BEGIN
 	SELECT TOP 1 @intLotId = intLotId
 	FROM #GeneratedLotItems
 	WHERE intDetailId = @intWorkOrderId
+
+	SELECT @dtmDate=GETDATE()
+
+	EXEC dbo.uspMFCreateUpdateParentLotNumber @strParentLotNumber=@strParentLotNumber,
+											@strParentLotAlias='',
+											@intItemId=@intItemId,
+											@dtmExpiryDate=@dtmExpiryDate,
+											@intLotStatusId=1,
+											@intUserId=@intUserId,
+											@dtmDate=@dtmDate,
+											@intLotId=@intLotId
 
 	DELETE
 	FROM @ItemsForPost

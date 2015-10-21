@@ -58,6 +58,7 @@ BEGIN
 			,@intLotId OUT
 			,@strLotAlias
 			,@strVendorLotNo
+			,@strParentLotNumber
 	End
 	Else
 	Begin
@@ -75,6 +76,7 @@ BEGIN
 			,@intLotId =@intLotId OUT
 			,@strLotAlias=@strLotAlias
 			,@strVendorLotNo=@strVendorLotNo
+			,@strParentLotNumber=@strParentLotNumber
 	End
 
 	SELECT @dtmBusinessDate = dbo.fnGetBusinessDate(@dtmCreated,@intLocationId) 
