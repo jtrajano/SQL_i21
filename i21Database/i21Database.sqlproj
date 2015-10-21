@@ -2659,7 +2659,9 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherDetailContract.sql" />
     <Build Include="dbo\Functions\fnAPCreateBillData.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetail.sql" />
-  </ItemGroup>
+    <Build Include="dbo\Tables\tblICInventoryCount.sql" />
+    <Build Include="dbo\Tables\tblICInventoryCountDetail.sql" />  
+</ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>
