@@ -8,14 +8,13 @@ SET NOCOUNT ON
 DECLARE @result NVARCHAR(MAX)
 DECLARE @invalidDatesUpdated VARCHAR(1)
 
-
-EXECUTE [dbo].[uspGLImportOriginHistoricalJournalCLOSED] @intEntityId ,@result OUTPUT
-IF CHARINDEX('SUCCESS', @result,1)= 0 RETURN
-
-SELECT @result = REPLACE(@result , 'SUCCESS ','')
-
-
 BEGIN TRANSACTION
+	EXECUTE [dbo].[uspGLImportOriginHistoricalJournalCLOSED] @intEntityId ,@result OUTPUT
+	
+	IF @@ERROR <> 0	GOTO ROLLBACK_INSERT
+
+	IF CHARINDEX('SUCCESS', @result,1)= 0 RETURN
+	SELECT @result = REPLACE(@result , 'SUCCESS ','')
 
 	--+++++++++++++++++++++++++++++++++
 	--		CLEAN-UP TEMP TABLES
