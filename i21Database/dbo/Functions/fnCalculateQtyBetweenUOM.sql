@@ -42,7 +42,7 @@ BEGIN
 	-- Validate if unit qty's are non-zero
 	SET @dblUnitQtyFrom = ISNULL(@dblUnitQtyFrom, 0)
 	SET @dblUnitQtyTo = ISNULL(@dblUnitQtyTo, 0)
-	SET @dblQty = ISNULL(@dblQty, 0)
+	--SET @dblQty = ISNULL(@dblQty, 0)
 
 	IF @dblUnitQtyFrom = 0 OR @dblUnitQtyTo = 0 
 	BEGIN 
