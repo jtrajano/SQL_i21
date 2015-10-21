@@ -220,6 +220,7 @@ BEGIN
 			,dblQuantity
 			,dblAdjustByQuantity
 			,dblNewQuantity
+			,dblNewSplitLotQuantity
 			,intWeightUOMId
 			,intNewWeightUOMId
 			,dblWeight
@@ -246,6 +247,7 @@ BEGIN
 			,dblQuantity				= Lot.dblQty
 			,dblAdjustByQuantity		= @dblAdjustByQuantity
 			,dblNewQuantity				= Lot.dblQty + @dblAdjustByQuantity
+			,dblNewSplitLotQuantity		= @dblNewSplitLotQuantity
 			,intWeightUOMId				= Lot.intWeightUOMId
 			,intNewWeightUOMId			= @intNewWeightUOMId
 			,dblWeight					= Lot.dblWeight
