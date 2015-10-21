@@ -2661,9 +2661,9 @@
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetail.sql" />
     <Build Include="dbo\Tables\tblICInventoryCount.sql" />
     <Build Include="dbo\Tables\tblICInventoryCountDetail.sql" />  
-</ItemGroup>
     <Build Include="dbo\Views\vyuGRGetStorageItem.sql" />
-  </ItemGroup>
+</ItemGroup>
+
   <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>
