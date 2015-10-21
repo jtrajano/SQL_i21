@@ -26,8 +26,7 @@ BEGIN TRY
 		,@ActionCompanyLocationId INT
 		
 	DECLARE @UserKey INT
-	DECLARE @UserName NVARCHAR(100)
-	DECLARE @intCommodityId INT
+	DECLARE @UserName NVARCHAR(100)	
 	DECLARE @InventoryStockUOM Nvarchar(50)
 	DECLARE @ItemsToMoveKey INT
 	DECLARE @ActionKey INT
@@ -71,8 +70,7 @@ BEGIN TRY
 	SELECT @UserKey = intCreatedUserId		
 		,@ItemEntityid = intItemCustomerId
 		,@ItemCompanyLocationId = intItemLocation
-		,@ActionCompanyLocationId = intActionLocation
-		,@intCommodityId=intCommodityId
+		,@ActionCompanyLocationId = intActionLocation	
 		,@TransferTicketNumber=strTransferTicketNumber
 	FROM OPENXML(@idoc, 'root', 2) WITH 
 	(
@@ -80,17 +78,8 @@ BEGIN TRY
 			,intItemCustomerId INT
 			,intItemLocation INT
 			,intActionLocation INT
-			,intCommodityId INT
 			,strTransferTicketNumber NVARCHAR(20)
-	)
-		
-	SELECT @InventoryStockUOM=
-		U1.strSymbol 
-		FROM 
-		tblICCommodity C 
-		JOIN tblICCommodityUnitMeasure U ON U.intCommodityId=C.intCommodityId
-		JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId=U.intUnitMeasureId
-		Where U.ysnStockUnit=1 AND C.intCommodityId=@intCommodityId
+	)	
 												
 	SELECT @ItemCustomerName = strName	FROM tblEntity	WHERE intEntityId = @ItemEntityid
 
