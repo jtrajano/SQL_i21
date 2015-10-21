@@ -33,6 +33,8 @@ DECLARE @BANK_DEPOSIT INT = 1
 		,@VOID_CHECK AS INT = 19
 		,@AP_ECHECK AS INT = 20
 		,@PAYCHECK AS INT = 21
+		,@ACH AS INT = 22
+		,@DIRECT_DEPOSIT AS INT = 23
 
 		-- Constant variables for payment methods
 		,@CASH_PAYMENT AS NVARCHAR(20) = 'Cash'
@@ -42,10 +44,10 @@ UPDATE	[dbo].[tblCMBankTransaction]
 SET		ysnCheckToBePrinted = @ysnCheckToBePrinted
 		,intConcurrencyId = intConcurrencyId + 1
 WHERE	intBankAccountId = @intBankAccountId
-		AND intBankTransactionTypeId IN (@MISC_CHECKS, @AP_PAYMENT)
+		AND intBankTransactionTypeId IN (@MISC_CHECKS, @AP_PAYMENT, @PAYCHECK, @ACH, @DIRECT_DEPOSIT)
 		AND strTransactionId = ISNULL(@strTransactionId, strTransactionId)
 		AND strLink = ISNULL(@strBatchId, strLink)
 		AND ysnPosted = 1
-		AND ysnClr = 0
+		--AND ysnClr = 0
 		AND dblAmount <> 0
 		AND strReferenceNo NOT IN (@CASH_PAYMENT) -- Do not include AP Payments that is paid thru a "Cash" payment method. 
