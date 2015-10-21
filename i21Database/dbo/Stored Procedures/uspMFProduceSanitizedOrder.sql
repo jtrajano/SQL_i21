@@ -29,6 +29,19 @@ BEGIN TRY
 		,@dblInputWeightPerQty NUMERIC(18, 6)
 		,@strDefaultStatusForSanitizedLot NVARCHAR(50)
 		,@intLotStatusId INT
+		,@intCasesPerPallet INT
+		,@SKUQuantity NUMERIC(18, 6)
+		,@intUnitMeasureId INT
+		,@ysnGeneratePickTask INT
+		,@intOwnerId INT
+		,@intOrderTermsId INT
+		,@strUserName NVARCHAR(50)
+		,@strBOLNo NVARCHAR(50)
+		,@intEntityId INT
+		,@strWorkOrderNo NVARCHAR(50)
+		,@strLotAlias NVARCHAR(50)
+		,@intWorkOrderProducedLotId INT
+		,@intOrderLineItemId INT
 
 	--SELECT @strDefaultStatusForSanitizedLot = strDefaultStatusForSanitizedLot
 	--FROM dbo.tblMFCompanyPreference
@@ -116,6 +129,7 @@ BEGIN TRY
 
 		SELECT @intOutputLotId = intLotId
 			,@intLotStatusId = intLotStatusId
+			,@strLotAlias = strLotAlias
 		FROM tblICLot
 		WHERE strLotNumber = @strOutputLotNumber
 			AND intStorageLocationId = @intStorageLocationId
@@ -146,6 +160,10 @@ BEGIN TRY
 			,@intNewLotId = @intOutputLotId
 			,@dblMergeQty = @dblQty
 			,@intUserId = @intUserId
+
+		SELECT @strLotAlias = strLotAlias
+		FROM tblICLot
+		WHERE intLotId = @intOutputLotId
 	END
 
 	INSERT INTO dbo.tblMFWorkOrderProducedLot (
@@ -187,6 +205,8 @@ BEGIN TRY
 		,@dtmCreated
 		,@intUserId
 
+	SELECT @intWorkOrderProducedLotId = SCOPE_IDENTITY()
+
 	DECLARE @intOrderHeaderId INT
 		,@strSanitizationStagingLocation NVARCHAR(50)
 		,@intStagingLocationId INT
@@ -199,18 +219,28 @@ BEGIN TRY
 		,@dblSplitQty NUMERIC(18, 6)
 		,@strDestinationContainerNo NVARCHAR(50)
 		,@intNewSKUId INT
+		,@ysnSanitizationInboundPutaway BIT
+		,@intItemUnitMeasureId INT
+		,@intWeightUnitMeasureId INT
+		,@intUOMId INT
+		,@dblWeightperUnit NUMERIC(18, 6)
 
 	SELECT @intOrderHeaderId = intOrderHeaderId
 	FROM dbo.tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
+	SELECT @strSanitizationStagingLocation = strSanitizationStagingLocation
+		,@ysnSanitizationInboundPutaway = ysnSanitizationInboundPutaway
+	FROM dbo.tblMFCompanyPreference
+
+	SELECT @strUserName = strUserName
+	FROM dbo.tblSMUserSecurity
+	WHERE intEntityUserSecurityId = @intUserId
+
 	IF @intOrderHeaderId > 0
 	BEGIN
-		SELECT @strSanitizationStagingLocation = strSanitizationStagingLocation
-		FROM dbo.tblMFCompanyPreference
-
 		SELECT @intStagingLocationId = intStorageLocationId
-		FROM tblICStorageLocation
+		FROM dbo.tblICStorageLocation
 		WHERE strName = @strSanitizationStagingLocation
 			AND intLocationId = @intLocationId
 
@@ -220,11 +250,14 @@ BEGIN TRY
 			,intLotId INT
 			,intSKUId INT
 			,intContainerId INT
+			,intUOMId INT
 			,dblQuantity NUMERIC(16, 8)
 			,intItemUOMId INT
+			,intItemUnitMeasureId INT
 			,dblWeightperUnit NUMERIC(16, 8)
 			,dblWeight NUMERIC(16, 8)
 			,intWeightUOMId INT
+			,intWeightUnitMeasureId INT
 			)
 
 		INSERT INTO @tblWHSKU (
@@ -232,21 +265,27 @@ BEGIN TRY
 			,intLotId
 			,intSKUId
 			,intContainerId
+			,intUOMId
 			,dblQuantity
 			,intItemUOMId
+			,intItemUnitMeasureId
 			,dblWeightperUnit
 			,dblWeight
 			,intWeightUOMId
+			,intWeightUnitMeasureId
 			)
 		SELECT S.intItemId
 			,S.intLotId
 			,S.intSKUId
+			,S.intUOMId
 			,C.intContainerId
 			,S.dblQuantity
 			,L.intItemUOMId
+			,I.intUnitMeasureId
 			,S.dblWeightPerUnit
 			,S.dblQuantity * S.dblWeightPerUnit
 			,L.intWeightUOMId
+			,W.intUnitMeasureId
 		FROM dbo.tblWHSKU S
 		JOIN dbo.tblWHContainer C ON C.intContainerId = S.intContainerId
 		JOIN dbo.tblICLot L ON L.intLotId = S.intLotId
@@ -269,7 +308,11 @@ BEGIN TRY
 				,@dblWeight = NULL
 
 			SELECT @intSKUId = intSKUId
+				,@intUOMId = intUOMId
 				,@dblWeight = dblWeight
+				,@intItemUnitMeasureId = intItemUnitMeasureId
+				,@intWeightUnitMeasureId = intWeightUnitMeasureId
+				,@dblWeightperUnit = dblWeightperUnit
 			FROM @tblWHSKU
 			WHERE intRecordId = @intRecordId
 
@@ -281,7 +324,7 @@ BEGIN TRY
 
 				PRINT 'Call Delete SKU'
 
-				INSERT INTO tblMFWorkOrderConsumedSKU (
+				INSERT INTO dbo.tblMFWorkOrderConsumedSKU (
 					intWorkOrderId
 					,intItemId
 					,intLotId
@@ -323,26 +366,30 @@ BEGIN TRY
 				WHERE intContainerId = @intContainerId
 
 				DELETE
-				FROM tblWHTASK
+				FROM dbo.tblWHTASK
 				WHERE intFromContainerId = @intContainerId
 
 				SELECT @intDestinationContainerId = NULL
 					,@dblSplitQty = NULL
 
-				--SELECT @dblSplitQty = dbo.fn_ConvertFloatToDecimal(CASE 
-				--			WHEN @ProcessedUOMKey = UOMKey
-				--				THEN @RequiredQty
-				--			ELSE (
-				--					CASE 
-				--						WHEN M.StandardUOMKey <> @ProcessedUOMKey
-				--							THEN @RequiredQty * s.WeightPerUnit
-				--						ELSE @RequiredQty / @SKUWeightperUnit
-				--						END
-				--					)
-				--			END)
-				--FROM dbo.tblWHSKU S
-				--JOIN dbo.Material M ON M.MaterialKey = S.MaterialKey
-				--WHERE S.intSKUId = @intSKUId
+				IF ISNULL(@intWeightUnitMeasureId, @intItemUnitMeasureId) = @intUOMId
+				BEGIN
+					SELECT @dblSplitQty = @dblRequiredWeight
+				END
+				ELSE
+				BEGIN
+					SELECT @dblSplitQty = @dblRequiredWeight / @dblWeightperUnit
+				END
+
+				EXEC [dbo].uspWHSplitSKUForOrder @strUserName = @strUserName
+					,@intAddressId = @intLocationId
+					,@strSourceContainerNo = @strSourceContainerNo
+					,@dblSplitQty = dblSplitQty
+					,@strSKUNo = ''
+					,@intOrderHeaderId = 0
+					,@ysnGeneratePickTask = @ysnGeneratePickTask OUT
+					,@strDestContainerNo = @strDestinationContainerNo OUT
+
 				PRINT 'Call Split SKU proc'
 
 				SELECT @intDestinationContainerId = NULL
@@ -357,13 +404,13 @@ BEGIN TRY
 				FROM dbo.tblWHSKU
 				WHERE intContainerId = @intDestinationContainerId
 
-				UPDATE tblWHSKU
+				UPDATE dbo.tblWHSKU
 				SET intSKUStatusId = 5
 				WHERE intSKUId = @intNewSKUId
 
 				PRINT 'Call Delete SKU proc'
 
-				INSERT INTO tblMFWorkOrderConsumedSKU (
+				INSERT INTO dbo.tblMFWorkOrderConsumedSKU (
 					intWorkOrderId
 					,intItemId
 					,intLotId
@@ -401,6 +448,259 @@ BEGIN TRY
 			FROM @tblWHSKU
 			WHERE intRecordId > @intRecordId
 		END
+	END
+
+	IF @ysnSanitizationInboundPutaway = 1
+	BEGIN
+		IF EXISTS (
+				SELECT *
+				FROM dbo.tblMFWorkOrder
+				WHERE intInboundOrderHeaderId IS NULL
+				)
+		BEGIN
+			SELECT @intOwnerId = IO.intOwnerId
+			FROM dbo.tblICItemOwner IO
+			WHERE intItemId = @intItemId
+
+			SELECT @intEntityId = E.intEntityId
+			FROM dbo.tblEntity E
+			JOIN dbo.tblEntityType ET ON E.intEntityId = ET.intEntityId
+			WHERE ET.strType = 'Warehouse'
+				AND E.strName = 'Production'
+
+			SELECT @intOrderTermsId = intOrderTermsId
+			FROM dbo.tblWHOrderTerms
+			WHERE ysnDefault = 1
+
+			SELECT @strWorkOrderNo = strWorkOrderNo
+			FROM dbo.tblMFWorkOrder
+			WHERE intWorkOrderId = @intWorkOrderId
+
+			EXEC dbo.uspSMGetStartingNumber 75
+				,@strBOLNo OUTPUT
+
+			DECLARE @tblWHOrderHeader TABLE (intOrderHeaderId INT)
+
+			SELECT @strXML = '<root>'
+
+			SELECT @strXML += '<intOrderStatusId>8</intOrderStatusId>'
+
+			SELECT @strXML += '<intOrderTypeId>9</intOrderTypeId>'
+
+			SELECT @strXML += '<intOrderDirectionId>1</intOrderDirectionId>'
+
+			SELECT @strXML += '<strBOLNo>' + @strBOLNo + '</strBOLNo>'
+
+			SELECT @strXML += '<strReferenceNo>' + @strWorkOrderNo + '</strReferenceNo>'
+
+			SELECT @strXML += '<dtmRAD>' + LTRIM(@dtmCreated) + '</dtmRAD>'
+
+			SELECT @strXML += '<intOwnerAddressId>' + LTRIM(@intOwnerId) + '</intOwnerAddressId>'
+
+			SELECT @strXML += '<intStagingLocationId>' + LTRIM(@intStagingLocationId) + '</intStagingLocationId>'
+
+			SELECT @strXML += '<intFreightTermId>' + LTRIM(@intOrderTermsId) + '</intFreightTermId>'
+
+			SELECT @strXML += '<intShipFromAddressId>' + LTRIM(@intEntityId) + '</intShipFromAddressId>'
+
+			SELECT @strXML += '<intShipToAddressId>' + LTRIM(@intLocationId) + '</intShipToAddressId>'
+
+			SELECT @strXML += '<strLastUpdateBy>' + LTRIM(@strUserName) + ' </strLastUpdateBy>'
+
+			SELECT @strXML += '</root>'
+
+			INSERT INTO @tblWHOrderHeader
+			EXEC dbo.uspWHOutboundOrderCreate @strXML = @strXML
+
+			SELECT @intOrderHeaderId = intOrderHeaderId
+			FROM @tblWHOrderHeader
+
+			UPDATE dbo.tblMFWorkOrder
+			SET intInboundOrderHeaderId = @intOrderHeaderId
+				,strInboundBOLNo = @strBOLNo
+			WHERE intWorkOrderId = @intWorkOrderId
+
+			PRINT 'Call line item insert procedure'
+		END
+		ELSE
+		BEGIN
+			PRINT 'Call line item Update procedure'
+		END
+
+		IF NOT EXISTS (
+				SELECT *
+				FROM dbo.tblWHOrderLineItem
+				WHERE intOrderHeaderId = @intOrderHeaderId
+					AND intItemId = @intItemId
+					AND strLotAlias = @strLotAlias
+				)
+		BEGIN
+			INSERT INTO tblWHOrderLineItem (
+				intOrderHeaderId
+				,intItemId
+				,dblQty
+				,intReceiptQtyUOMId
+				,intLastUpdateId
+				,dtmLastUpdateOn
+				,intPreferenceId
+				,dblRequiredQty
+				,intUnitsPerLayer
+				,intLayersPerPallet
+				,intNoOfBags
+				,intLineNo
+				,dblPhysicalCount
+				,intPhysicalCountUOMId
+				,dblWeightPerUnit
+				,intWeightPerUnitUOMId
+				,dtmProductionDate
+				,strLotAlias
+				)
+			SELECT @intOrderHeaderId
+				,@intItemId
+				,PL.dblPhysicalCount
+				,PL.intPhysicalItemUOMId
+				,PL.intCreatedUserId
+				,PL.dtmCreated
+				,(
+					SELECT TOP 1 intPreferenceId
+					FROM dbo.tblWHPickPreference
+					WHERE ysnDefault = 1
+					)
+				,PL.dblPhysicalCount
+				,PL.intUnitPerLayer
+				,PL.intLayerPerPallet
+				,@intNoOfPallet
+				,(
+					SELECT ISNULL(MAX(LI.intLineNo), 0) + 1
+					FROM dbo.tblWHOrderLineItem LI
+					WHERE LI.intOrderHeaderId = @intOrderHeaderId
+					)
+				,PL.dblPhysicalCount
+				,PL.intPhysicalItemUOMId
+				,PL.dblWeightPerUnit
+				,IU.intUnitMeasureId
+				,@dtmCreated
+				,@strLotAlias
+			FROM dbo.tblMFWorkOrderProducedLot PL
+			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = PL.intItemUOMId
+			WHERE PL.intWorkOrderProducedLotId = @intWorkOrderProducedLotId
+
+			SELECT @intOrderLineItemId = SCOPE_IDENTITY()
+		END
+		ELSE
+		BEGIN
+			UPDATE tblWHOrderLineItem
+			SET dblQty = dblQty + @dblQty
+				,intLastUpdateId = @intUserId
+				,dtmLastUpdateOn = @dtmCreated
+				,dblRequiredQty = dblRequiredQty + @dblQty
+				,intUnitsPerLayer = @intUnitPerLayer
+				,intLayersPerPallet = @intLayerPerPallet
+				,intNoOfBags = @intNoOfPallet
+			WHERE intOrderHeaderId = @intOrderHeaderId
+				AND intItemId = @intItemId
+				AND strLotAlias = @strLotAlias
+		END
+	END
+
+	SELECT @intCasesPerPallet = @intUnitPerLayer * @intLayerPerPallet
+
+	SELECT @strUserName = strUserName
+	FROM tblSMUserSecurity
+	WHERE intEntityUserSecurityId = @intUserId
+
+	WHILE @intNoOfPallet > 0
+	BEGIN
+		IF @dblQty - @intCasesPerPallet > 0
+		BEGIN
+			SELECT @SKUQuantity = @intCasesPerPallet
+		END
+		ELSE
+		BEGIN
+			SELECT @SKUQuantity = @dblQty
+		END
+
+		SELECT @dblQty = @dblQty - @SKUQuantity
+
+		SELECT @intSKUId = NULL
+
+		SELECT @intUnitMeasureId = intUnitMeasureId
+		FROM dbo.tblICItemUOM
+		WHERE intItemUOMId = @intItemUOMId
+
+		EXEC dbo.uspWHCreateSKUByLot @strUserName = @strUserName
+			,@intCompanyLocationSubLocationId = @intLocationId
+			,@intDefaultStagingLocationId = @intStagingLocationId
+			,@intItemId = @intItemId
+			,@dblQty = @SKUQuantity
+			,@intLotId = @intOutputLotId
+			,@dtmProductionDate = @dtmCreated
+			,@intOwnerAddressId = @intOwnerId
+			,@ysnStatus = 0
+			,@strPalletLotCode = @strOutputLotNumber
+			,@ysnUseContainerPattern = 1
+			,@intUOMId = @intUnitMeasureId
+			,@intUnitPerLayer = @intUnitPerLayer
+			,@intLayersPerPallet = @intLayerPerPallet
+			,@ysnForced = 1
+			,@ysnSanitized = 0
+			,@strBatchNo = @intBatchId
+			,@intSKUId = @intSKUId OUTPUT
+
+		INSERT INTO dbo.tblMFWorkOrderProducedSKU (
+			intWorkOrderId
+			,intItemId
+			,intLotId
+			,intSKUId
+			,intContainerId
+			,dblQuantity
+			,intItemUOMId
+			,dblIssuedQuantity
+			,intItemIssuedUOMId
+			,intBatchId
+			,intShiftId
+			,dtmCreated
+			,intCreatedUserId
+			)
+		SELECT @intWorkOrderId
+			,intItemId
+			,intLotId
+			,intSKUId
+			,intContainerId
+			,dblQty * dblWeightPerUnit
+			,@intWeightUOMId
+			,dblQty
+			,@intItemUOMId
+			,@intBatchId
+			,@intBusinessShiftId
+			,@dtmCreated
+			,@intUserId
+		FROM dbo.tblWHSKU
+		WHERE intSKUId = @intSKUId
+
+		IF @ysnSanitizationInboundPutaway = 1
+		BEGIN
+			INSERT INTO dbo.tblWHOrderManifest (
+				intOrderLineItemId
+				,intSKUId
+				,strManifestItemNote
+				,intLastUpdateId
+				,dtmLastUpdateOn
+				)
+			SELECT (
+					SELECT intOrderLineItemId
+					FROM dbo.tblWHOrderLineItem
+					WHERE intOrderHeaderId = @intOrderHeaderId
+						AND intItemId = @intItemId
+						AND strLotAlias = @strLotAlias
+					)
+				,@intSKUId
+				,NULL
+				,@intUserId
+				,@dtmCreated
+		END
+
+		SELECT @intNoOfPallet = @intNoOfPallet - 1
 	END
 END TRY
 

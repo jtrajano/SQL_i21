@@ -2660,11 +2660,12 @@
     <Build Include="dbo\Functions\fnAPCreateBillData.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetail.sql" />
     <Build Include="dbo\Tables\tblICInventoryCount.sql" />
-    <Build Include="dbo\Tables\tblICInventoryCountDetail.sql" />  
+    <Build Include="dbo\Tables\tblICInventoryCountDetail.sql" />
     <Build Include="dbo\Views\vyuGRGetStorageItem.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryCount.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryCountDetail.sql" />
     <Build Include="dbo\Functions\fnICConvertUOMtoStockUnit.sql" />
+    <Build Include="dbo\Tables\tblMFWorkOrderProducedSKU.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
