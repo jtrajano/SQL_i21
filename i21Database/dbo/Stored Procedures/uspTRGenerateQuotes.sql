@@ -2,7 +2,11 @@ CREATE PROCEDURE [dbo].[uspTRGenerateQuotes]
 	 @intCustomerGroupId AS INT,
 	 @intCustomerId AS INT,
 	 @dtmQuoteDate AS DATETIME,
-	 @dtmEffectiveDate AS DATETIME
+	 @dtmEffectiveDate AS DATETIME,
+	 @ysnConfirm as bit,
+	 @ysnVoid as bit,
+	 @intBegQuoteId int OUTPUT,
+	 @intEndQuoteId int OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -27,8 +31,56 @@ DECLARE @DataForReceiptHeader TABLE(
 INSERT INTO @DataForReceiptHeader
             (intCustomerId
 			,strQuoteNumber)
-select intEntityCustomerId,NULL from vyuTRQuoteSelection where (isNull(@intCustomerId ,0 ) = 0 or isNull(@intCustomerId ,0 ) = intEntityCustomerId) 
-                                                              or  (isNull(@intCustomerGroupId ,0 ) = 0 or isNull(@intCustomerGroupId ,0 ) = intEntityCustomerId) 
+select intEntityCustomerId,NULL from tblARCustomerGroup CG
+          join tblARCustomerGroupDetail CD on CG.intCustomerGroupId = CD.intCustomerGroupId
+		  right join vyuTRQuoteSelection QS on QS.intEntityCustomerId = CD.intEntityId
+		   where CD.ysnQuote = 1
+		         and QS.ysnQuote = 1
+		         and (isNull(@intCustomerId ,0 ) = 0 or isNull(@intCustomerId ,0 ) = QS.intEntityCustomerId) 
+                                                              or  (isNull(@intCustomerGroupId ,0 ) = 0 or isNull(@intCustomerGroupId ,0 ) = CG.intCustomerGroupId) 
+          group by QS.intEntityCustomerId
+
+
+
+
+select @total = count(*) from @DataForQuote;
+set @incval = 1 
+WHILE @incval <=@total 
+BEGIN
+   
+   if @ysnConfirm = 1
+      BEGIN
+         update tblTRQuoteHeader
+	     set strQuoteStatus = 'Confirmed'
+	     where intEntityCustomerId = (select top 1 intEntityCustomerId from @DataForQuote where intId = @incval) and strQuoteStatus = 'UnConfirmed'      
+      END
+   else
+       BEGIN
+            if @ysnVoid = 1
+               BEGIN
+                  update tblTRQuoteHeader
+                 set strQuoteStatus = 'Void'
+                 where intEntityCustomerId = (select top 1 intEntityCustomerId from @DataForQuote where intId = @incval) and strQuoteStatus = 'Confirmed'      
+               END
+            else
+                BEGIN
+                    EXEC dbo.uspSMGetStartingNumber 56, @QuoteNumber OUTPUT 
+                     update @DataForQuote 
+                     set strQuoteNumber = @QuoteNumber
+                       where @incval = intId 
+               END
+	   END
+   SET @incval = @incval + 1;
+
+END;
+
+if @ysnConfirm = 1 or @ysnVoid = 1
+   BEGIN
+       set @intBegQuoteId = 0;
+       set @intEndQuoteId = 0;
+       RETURN;
+   END
+
 
 INSERT INTO [dbo].[tblTRQuoteHeader]
            ([strQuoteNumber]
