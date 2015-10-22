@@ -95,11 +95,10 @@ SELECT @condition = '', @from = '', @to = '', @join = '', @datatype = ''
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
 BEGIN
 	SELECT @id = id, @fieldname = [fieldname], @condition = [condition], @from = [from], @to = [to], @join = [join], @datatype = [datatype] FROM @temp_xml_table
-	IF ISNULL(@from, '') <> ''
-	BEGIN
-		SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)
-	END
+	SET @filter = @filter + ' ' + dbo.fnAPCreateFilter(@fieldname, @condition, @from, @to, @join, null, null, @datatype)
+	
 	DELETE FROM @temp_xml_table WHERE id = @id
+
 	IF EXISTS(SELECT 1 FROM @temp_xml_table)
 	BEGIN
 		SET @filter = @filter + ' AND '
@@ -108,6 +107,7 @@ END
 
 SET @query = 'SELECT * FROM (
 SELECT A.strCustomerName
+     , A.strEntityNo
 	 , A.intEntityCustomerId
 	 , dblCreditLimit = (SELECT dblCreditLimit FROM tblARCustomer WHERE intEntityCustomerId = A.intEntityCustomerId)
 	 , dblTotalAR = SUM(B.dblTotalDue) - SUM(B.dblAvailableCredit)
@@ -136,7 +136,8 @@ FROM
 		, I.dtmDueDate    
 		, I.intTermId
 		, T.intBalanceDue    
-		, E.strName AS strCustomerName	 
+		, E.strName AS strCustomerName
+		, E.strEntityNo	 
 		, strAge = CASE WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, '+ @strAsOfDate +')<=10 THEN ''0 - 10 Days''
 						WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, '+ @strAsOfDate +')>10 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, '+ @strAsOfDate +')<=30 THEN ''11 - 30 Days''
 						WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, '+ @strAsOfDate +')>30 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, '+ @strAsOfDate +')<=60 THEN ''31 - 60 Days''
@@ -171,6 +172,7 @@ SELECT I.dtmPostDate
 		, I.intTermId
 		, T.intBalanceDue
 		, E.strName AS strCustomerName
+		, E.strEntityNo
 		, strAge = CASE WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate, '+ @strAsOfDate +')<=10 THEN ''0 - 10 Days''
 						WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate, '+ @strAsOfDate +')>10 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate, '+ @strAsOfDate +')<=30 THEN ''11 - 30 Days''
 						WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate, '+ @strAsOfDate +')>30 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate, '+ @strAsOfDate +')<=60 THEN ''31 - 60 Days''   
@@ -205,7 +207,8 @@ SELECT I.dtmPostDate
 		, ISNULL(I.dtmDueDate, GETDATE())    
 		, ISNULL(T.intTermID, '''')
 		, ISNULL(T.intBalanceDue, 0)    
-		, ISNULL(E.strName, '''') AS strCustomerName	 
+		, ISNULL(E.strName, '''') AS strCustomerName
+		, ISNULL(E.strEntityNo, '''') AS strEntityNo	 
 		, strAge = CASE WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate, '+ @strAsOfDate +')<=10 THEN ''0 - 10 Days''
 						WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate, '+ @strAsOfDate +')>10 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate, '+ @strAsOfDate +')<=30 THEN ''11 - 30 Days''
 						WHEN DATEDIFF(DAYOFYEAR,I.dtmDueDate, '+ @strAsOfDate +')>30 AND DATEDIFF(DAYOFYEAR,I.dtmDueDate, '+ @strAsOfDate +')<=60 THEN ''31 - 60 Days''
@@ -318,7 +321,7 @@ AND A.strInvoiceNumber = B.strInvoiceNumber
 AND A.dblInvoiceTotal = B.dblInvoiceTotal
 AND A.dblAmountPaid =B.dblAmountPaid
 AND A.dblAvailableCredit = B.dblAvailableCredit
-GROUP BY A.strCustomerName, A.intEntityCustomerId
+GROUP BY A.strCustomerName, A.intEntityCustomerId, A.strEntityNo
 ) MainQuery'
 
 IF ISNULL(@filter,'') != ''
