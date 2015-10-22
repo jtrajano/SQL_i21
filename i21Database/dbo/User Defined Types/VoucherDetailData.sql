@@ -1,6 +1,7 @@
 ﻿CREATE TYPE [dbo].[VoucherDetailData] AS TABLE
 (
 	[intBillId]						INT             NULL,
+	[intTransactionCode]			INT				NOT NULL,
     [strMiscDescription]			NVARCHAR (500)  COLLATE Latin1_General_CI_AS NULL,
 	[strComment]					NVARCHAR(200)	COLLATE Latin1_General_CI_AS NULL, 
     [intAccountId]					INT             NULL,

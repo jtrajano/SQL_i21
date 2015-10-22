@@ -42,3 +42,5 @@
 	CONSTRAINT [FK_tblAPBillDetail_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [dbo].[tblCTContractDetail] ([intContractDetailId])
 ) ON [PRIMARY];
 
+
+GO

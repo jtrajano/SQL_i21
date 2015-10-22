@@ -11,9 +11,127 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 
 DECLARE @transCount INT = @@TRANCOUNT;
+DECLARE @posted BIT;
+DECLARE @shipToId INT;
+
 IF @transCount = 0 BEGIN TRANSACTION
 
+	IF (SELECT ysnPosted FROM tblAPBill WHERE intBillId = @billId) = 1
+	BEGIN
+		RAISERROR('Voucher was already posted.', 16, 1);
+	END
 
+	--DELETE EXISTING TAXES
+	DELETE A
+	FROM tblAPBillDetailTax A
+	INNER JOIN tblAPBillDetail B ON A.intBillDetailId = B.intBillDetailId
+	WHERE B.intBillId = @billId
+
+	--CREATE TAXES FOR ITEM WHICH DON'T HAVE TAXES
+	INSERT INTO tblAPBillDetailTax(
+		[intBillDetailId]		, 
+		[intTaxGroupMasterId]	, 
+		[intTaxGroupId]			, 
+		[intTaxCodeId]			, 
+		[intTaxClassId]			, 
+		[strTaxableByOtherTaxes], 
+		[strCalculationMethod]	, 
+		[dblRate]				, 
+		[intAccountId]			, 
+		[dblTax]				, 
+		[dblAdjustedTax]		, 
+		[ysnTaxAdjusted]		, 
+		[ysnSeparateOnBill]		, 
+		[ysnCheckOffTax]
+	)
+	SELECT 
+		[intBillDetailId]		=	B.intBillDetailId, 
+		[intTaxGroupMasterId]	=	Taxes.intTaxGroupMasterId, 
+		[intTaxGroupId]			=	Taxes.intTaxGroupId, 
+		[intTaxCodeId]			=	Taxes.intTaxCodeId, 
+		[intTaxClassId]			=	Taxes.intTaxClassId, 
+		[strTaxableByOtherTaxes]=	Taxes.strTaxableByOtherTaxes, 
+		[strCalculationMethod]	=	Taxes.strCalculationMethod, 
+		[dblRate]				=	Taxes.numRate, 
+		[intAccountId]			=	Taxes.intTaxAccountId, 
+		[dblTax]				=	Taxes.dblTax, 
+		[dblAdjustedTax]		=	Taxes.dblAdjustedTax, 
+		[ysnTaxAdjusted]		=	Taxes.ysnTaxAdjusted, 
+		[ysnSeparateOnBill]		=	Taxes.ysnSeparateOnInvoice, 
+		[ysnCheckOffTax]		=	Taxes.ysnCheckoffTax
+	FROM tblAPBill A
+	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+	CROSS APPLY (
+		SELECT * FROM fnGetItemTaxComputationForVendor(B.intItemId, A.dtmDate, B.dblCost, B.dblQtyReceived, B.intTaxGroupId, A.intShipToId)
+	) Taxes
+	WHERE (intInventoryReceiptItemId IS NULL AND intInventoryReceiptChargeId IS NULL)
+	OR NOT EXISTS(
+		--EXCLUDE ITEM WITH INVENTORY RECEIPT ITEM AND WITH TAX, WE WILL GET THOSE TAX BELOW
+		SELECT 1 FROM tblICInventoryReceiptItem C
+		WHERE C.intInventoryReceiptItemId = B.intInventoryReceiptItemId AND C.dblTax > 0
+	)
+
+	--GET TAXES FOR THOSE FROM INVENTORY RECEIPT
+	INSERT INTO tblAPBillDetailTax(
+		[intBillDetailId]		, 
+		[intTaxGroupMasterId]	, 
+		[intTaxGroupId]			, 
+		[intTaxCodeId]			, 
+		[intTaxClassId]			, 
+		[strTaxableByOtherTaxes], 
+		[strCalculationMethod]	, 
+		[dblRate]				, 
+		[intAccountId]			, 
+		[dblTax]				, 
+		[dblAdjustedTax]		, 
+		[ysnTaxAdjusted]		, 
+		[ysnSeparateOnBill]		, 
+		[ysnCheckOffTax]
+	)
+	SELECT 
+		[intBillDetailId]		=	B.intBillDetailId			,
+		[intTaxGroupMasterId]	=	D.intTaxGroupMasterId		,
+		[intTaxGroupId]			=	D.[intTaxGroupId]			,		
+		[intTaxCodeId]			=	D.[intTaxCodeId]			,
+		[intTaxClassId]			=	D.[intTaxClassId]			,
+		[strTaxableByOtherTaxes]=	D.[strTaxableByOtherTaxes]	,
+		[strCalculationMethod]	=	D.[strCalculationMethod]	,
+		[dblRate]				=	D.[dblRate]					,
+		[intAccountId]			=	D.[intAccountId]			,
+		[dblTax]				=	D.[dblTax]					,
+		[dblAdjustedTax]		=	D.[dblAdjustedTax]			,
+		[ysnTaxAdjusted]		=	D.[ysnTaxAdjusted]			,
+		[ysnSeparateOnBill]		=	D.[ysnSeparateOnBill]		,
+		[ysnCheckOffTax]		=	D.[ysnCheckOffTax]			
+	FROM tblAPBill A
+	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+	INNER JOIN tblICInventoryReceitpItem C ON B.intInventoryReceiptItemId = C.intInventoryReceiptItemId
+	INNER JOIN tblICInventoryReceitpItemTax D ON C.intInventoryReceiptItemId = D.intInventoryReceiptItemId
+	WHERE C.dblTax > 0
+
+	--GET TAXES FOR MISCELLANEOUS ITEM OF PO WITH TAX
+
+	UPDATE A
+		SET A.dblTax = TaxAmount.dblTax
+	FROM tblAPBillDetail A
+	CROSS APPLY (
+		SELECT 
+			SUM(CASE WHEN B.ysnTaxAdjusted = 1 THEN B.dblAdjustedTax ELSE B.dblTax END) dblTax
+		FROM tblAPBillDetailTax B WHERE B.intBillDetailId = A.intBillDetailId
+	) TaxAmount
+	WHERE A.intBillId = @billId
+
+	UPDATE A
+		SET A.dblTax = TaxAmount.dblTax
+	FROM tblAPBill A
+	CROSS APPLY (
+		SELECT 
+			SUM(dblTax) AS dblTax, SUM(dblTotal) dblTotal 
+		FROM tblAPBillDetail WHERE intBillId = A.intBillId
+	) TaxAmount
+	WHERE intBillId = @billId
+
+	EXEC uspAPUpdateVoucherTotal @billId
 
 IF @transCount = 0 COMMIT TRANSACTION
 

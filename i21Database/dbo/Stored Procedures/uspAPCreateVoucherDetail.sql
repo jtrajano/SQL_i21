@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPCreateVoucherDetail]
 	@billId INT,
-	@voucherDetails AS VoucherDetailData READONLY
+	@voucherPODetails AS VoucherPODetail READONLY
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -19,63 +19,52 @@ CREATE TABLE #tmpCreatedBillDetail (
 DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION
 
-	INSERT INTO tblAPBillDetail(
-		[intBillId]						,
-		[strMiscDescription]			,
-		[strComment]					,
-		[intAccountId]					,
-		[intItemId]						,
-		[intInventoryReceiptItemId]		,
-		[intInventoryReceiptChargeId]   ,
-		[intPurchaseDetailId]			,
-		[intContractHeaderId]			,
-		[intContractDetailId]			,
-		[intPrepayTypeId]				,
-		[dblTotal]						,
-		[dblQtyContract]				,
-		[dblContractCost]				,
-		[dblQtyOrdered]					,
-		[dblQtyReceived]				,
-		[dblDiscount]					,
-		[dblCost]						,
-		[dblTax]						,
-		[dblPrepayPercentage]			,
-		[int1099Form]					,
-		[int1099Category]				,
-		[ysn1099Printed]				,
-		[intLineNo]						,
-		[intTaxGroupId]					
-	)
-	OUTPUT inserted.intBillDetailId INTO #tmpCreatedBillDetail
-	SELECT
-		[intBillId]						=	@billId						,
-		[strMiscDescription]			=	A.[strMiscDescription]			,
-		[strComment]					=	A.[strComment]					,
-		[intAccountId]					=	A.[intAccountId]					,
-		[intItemId]						=	A.[intItemId]						,
-		[intInventoryReceiptItemId]		=	A.[intInventoryReceiptItemId]		,
-		[intInventoryReceiptChargeId]   =	A.[intInventoryReceiptChargeId]   ,
-		[intPurchaseDetailId]			=	A.[intPurchaseDetailId]			,
-		[intContractHeaderId]			=	A.[intContractHeaderId]			,
-		[intContractDetailId]			=	A.[intContractDetailId]			,
-		[intPrepayTypeId]				=	A.[intPrepayTypeId]				,
-		[dblTotal]						=	A.[dblTotal]						,
-		[dblQtyContract]				=	A.[dblQtyContract]				,
-		[dblContractCost]				=	A.[dblContractCost]				,
-		[dblQtyOrdered]					=	A.[dblQtyOrdered]					,
-		[dblQtyReceived]				=	A.[dblQtyReceived]				,
-		[dblDiscount]					=	A.[dblDiscount]					,
-		[dblCost]						=	A.[dblCost]						,
-		[dblTax]						=	A.[dblTax]						,
-		[dblPrepayPercentage]			=	A.[dblPrepayPercentage]			,
-		[int1099Form]					=	A.[int1099Form]					,
-		[int1099Category]				=	A.[int1099Category]				,
-		[ysn1099Printed]				=	A.[ysn1099Printed]				,
-		[intLineNo]						=	A.[intLineNo]						,
-		[intTaxGroupId]					=	A.[intTaxGroupId]					
-	FROM dbo.fnAPCreateVoucherDetailData(@voucherDetails) A
-
-	
+	IF EXISTS(SELECT 1 FROM @voucherPODetails)
+	BEGIN
+		INSERT INTO tblAPBillDetail(
+			[intBillId]						,
+			[strMiscDescription]			,
+			[strComment]					,
+			[intAccountId]					,
+			[intItemId]						,
+			[intInventoryReceiptItemId]		,
+			[intInventoryReceiptChargeId]   ,
+			[intPurchaseDetailId]			,
+			[intContractHeaderId]			,
+			[intContractDetailId]			,
+			[intPrepayTypeId]				,
+			[dblTotal]						,
+			[dblQtyContract]				,
+			[dblContractCost]				,
+			[dblQtyOrdered]					,
+			[dblQtyReceived]				,
+			[dblDiscount]					,
+			[dblCost]						,
+			[dblTax]						,
+			[dblPrepayPercentage]			,
+			[int1099Form]					,
+			[int1099Category]				,
+			[ysn1099Printed]				,
+			[intLineNo]						,
+			[intTaxGroupId]					
+		)
+		OUTPUT inserted.intBillDetailId INTO #tmpCreatedBillDetail
+		SELECT
+			[intBillId]						=	@billId							,
+			[strMiscDescription]			=	A.[strMiscDescription]			,
+			[strComment]					=	A.[strComment]					,
+			[intAccountId]					=	ISNULL(A.[intAccountId], [dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'Inventory')),
+			[intItemId]						=	A.[intItemId]					,
+			[intPurchaseDetailId]			=	A.[intPurchaseDetailId]			,
+			[dblTotal]						=	(A.dblCost * A.dblQtyReceived) - ((A.dblCost * A.dblQtyReceived) * (A.dblDiscount / 100)),
+			[dblQtyOrdered]					=	A.[dblQtyReceived]				,
+			[dblQtyReceived]				=	A.[dblQtyReceived]				,
+			[dblDiscount]					=	A.[dblDiscount]					,
+			[dblCost]						=	A.[dblCost]						,
+			[intLineNo]						=	A.[intLineNo]					,
+			[intTaxGroupId]					=	A.[intTaxGroupId]					
+		FROM @voucherPODetails A
+	END
 
 IF @transCount = 0 COMMIT TRANSACTION
 

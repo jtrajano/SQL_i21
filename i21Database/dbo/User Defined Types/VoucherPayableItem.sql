@@ -1,0 +1,25 @@
+﻿CREATE TYPE [dbo].[VoucherPayableItem] AS TABLE
+(
+	[intEntityVendorId]								INT NOT NULL,
+	[dtmDate]										DATETIME NOT NULL,
+	[strReference]									NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[intPurchaseDetailId]							INT NOT NULL,
+	[intItemId]										INT NOT NULL,
+	[intPurchaseTaxGroupId]							INT NOT NULL,
+	[dblOrderQty]									DECIMAL(18, 6) DEFAULT 0,
+	[dblPOOpenReceive]								DECIMAL(18, 6) DEFAULT 0,
+	[dblOpenReceive]								DECIMAL(18, 6) DEFAULT 0,
+	[dblQuantityToBill]								DECIMAL(18, 6) DEFAULT 0,
+	[dblQuantityBilled]								DECIMAL(18, 6) DEFAULT 0,
+	[intLineNo]										INT NOT NULL,
+	[intInventoryReceiptItemId]						INT NOT NULL,
+	[intInventoryReceiptItemAllocatedChargeId]		INT NOT NULL,
+	[dblUnitCost]									DECIMAL(18, 6) DEFAULT 0,
+	[dblTax]										DECIMAL(18, 6) DEFAULT 0,
+	[intAccountId]									INT NOT NULL,
+	[strBillOfLading]								NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[intContractHeaderId]							INT NOT NULL,
+	[intContractDetailId]							INT NOT NULL,
+	[intScaleTicketId]								INT NOT NULL,
+	[intScaleTicketNumber]							INT NOT NULL
+)

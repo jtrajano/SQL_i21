@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPCreateBillData]
 	@userId INT,
 	@vendorId INT,
-	@voucherDetails AS VoucherDetailData READONLY,
+	@voucherPODetails AS VoucherPODetail READONLY,
 	@billId INT OUTPUT
 AS
 BEGIN
@@ -83,11 +83,9 @@ IF @transCount = 0 BEGIN TRANSACTION
 	SET @billId = SCOPE_IDENTITY()
 
 	--Add details
-	IF EXISTS(SELECT 1 FROM @voucherDetails)
-	BEGIN
-		EXEC uspAPCreateVoucherDetail @billId, @voucherDetails
-		EXEC uspAPUpdateVoucherTax @billId
-	END
+	EXEC uspAPCreateVoucherDetail @billId, @voucherPODetails
+	EXEC uspAPUpdateVoucherTax @billId
+	EXEC uspAPUpdateVoucherContract @billId
 
 	IF @transCount = 0 COMMIT TRANSACTION
 

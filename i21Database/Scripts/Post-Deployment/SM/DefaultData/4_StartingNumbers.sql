@@ -699,7 +699,17 @@ GO
 			,[strModule]			= 'Warehouse'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'WarehouseBOLNo')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Adjustment1099')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 76
+			,[strTransactionType]	= N'Adjustment1099'
+			,[strPrefix]			= N'ADJ1099-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Accounts Payable'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Adjustment1099')
 
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 76

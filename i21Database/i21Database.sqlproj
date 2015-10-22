@@ -2655,7 +2655,7 @@
     <Build Include="dbo\User Defined Types\VoucherDetailData.sql" />
     <Build Include="dbo\Functions\fnAPCreateVoucherDetailData.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherTax.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherDetailContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherContract.sql" />
     <Build Include="dbo\Functions\fnAPCreateBillData.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetail.sql" />
     <Build Include="dbo\Tables\tblICInventoryCount.sql" />
@@ -2697,6 +2697,14 @@
     <Build Include="dbo\Views\vyuCTFuturesMonth.sql" />
     <Build Include="dbo\Stored Procedures\uspICLockInventoryCount.sql" />
     <Build Include="dbo\Views\vyuEMEmployeeEarningLink.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherTotal.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPAddVoucherPayable.sql" />
+    <Build Include="dbo\User Defined Types\VoucherPayableItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPVoucherPayablePO.sql" />
+    <Build Include="dbo\Tables\tblAPVoucherPayable.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherPayable.sql" />
+    <Build Include="dbo\User Defined Types\VoucherPODetail.sql" />
+    <Build Include="dbo\User Defined Types\VoucherDetailTax.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -2759,6 +2767,7 @@
     <None Include="Scripts\Post-Deployment\Common\ErrorMessages.sql" />
     <None Include="i21Database_1.publish.xml" />
     <None Include="Scripts\Post-Deployment\EM\013_SetDefaultLocationToActive.sql" />
+    <None Include="Scripts\Post-Deployment\AP\CreateVoucherPayable.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

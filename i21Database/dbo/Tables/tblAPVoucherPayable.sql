@@ -1,0 +1,26 @@
+﻿CREATE TABLE [dbo].[tblAPVoucherPayable]
+(
+	[intVoucherPayableId]					INT NOT NULL PRIMARY KEY IDENTITY, 
+    [intEntityVendorId]						INT NOT NULL, 
+    [strReference]							NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
+    [strSourceNumber]						NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+	[strBillOfLading]						NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
+    [intPurchaseDetailId]					INT NULL, 
+    [intInventoryReceiptItemId]				INT NULL, 
+    [intInventoryReceiptChargeId]			INT NULL, 
+	[intScaleTicketNumber]					INT NULL, 
+	[intAccountId]							INT NULL, 
+	[intItemId]								INT NULL, 
+	[intShipViaId]							INT NULL, 
+	[intTermId]								INT NULL, 
+	[intContractDetailId]					INT NULL, 
+	[intContractHeaderId]					INT NULL, 
+	[intTransactionCode]					INT NULL, 
+    [dblReceivedQty]						DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+    [dblInvoicedQty]						DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+    [dblToInvoiceQty]						DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+	[dblTax]								DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+    [dblUniCost]							DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+	[ysnComplete]							BIT DEFAULT 0,
+    [intConcurrencyId]						INT NOT NULL DEFAULT 0
+)
