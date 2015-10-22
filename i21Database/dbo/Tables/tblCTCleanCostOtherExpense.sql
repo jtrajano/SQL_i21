@@ -17,6 +17,6 @@
 	CONSTRAINT [FK_tblCTCleanCostOtherExpense_tblCTCleanCostExpenseType_intExpenseTypeId] FOREIGN KEY ([intExpenseTypeId]) REFERENCES [tblCTCleanCostExpenseType]([intExpenseTypeId]),
 	CONSTRAINT [FK_tblCTCleanCostOtherExpense_tblSMCurrency_intCCCurrencyId] FOREIGN KEY ([intCCCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblCTCleanCostOtherExpense_tblSMCurrency_intOtherCurrencyId] FOREIGN KEY ([intOtherCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
-	CONSTRAINT [FK_tblCTCleanCostOtherExpense_tblICItemUOM_intQuantityUOMId] FOREIGN KEY ([intQuantityUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
+	CONSTRAINT [FK_tblCTCleanCostOtherExpense_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intQuantityUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
 
 )

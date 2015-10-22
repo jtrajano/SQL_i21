@@ -24,6 +24,11 @@ BEGIN TRY
 			@intCleanCostCurrencyId = intCleanCostCurrencyId 
 	FROM	tblCTCompanyPreference
 	
+	IF @intCleanCostUOMId IS NULL OR @intCleanCostCurrencyId IS NULL
+	BEGIN 
+		RAISERROR('Clean cost configuration is missing under Company Configuration.',16,1)
+	END
+
 	SELECT	@intBillId = intBillId 
 	FROM	tblAPBillDetail
 	WHERE	intInventoryReceiptItemId = @intInventoryReceiptItemId

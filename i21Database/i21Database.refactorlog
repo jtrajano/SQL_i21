@@ -4081,4 +4081,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intLetterUploadId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="ae528005-4d79-4f45-b3f8-66c0980e9888" ChangeDateTime="10/22/2015 10:40:42">
+    <Property Name="ElementName" Value="[dbo].[FK_tblCTCleanCostOtherExpense_tblICItemUOM_intQuantityUOMId]" />
+    <Property Name="ElementType" Value="SqlForeignKeyConstraint" />
+    <Property Name="ParentElementName" Value="[dbo].[tblCTCleanCostOtherExpense]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[FK_tblCTCleanCostOtherExpense_tblICUnitMeasure_intUnitMeasureId]" />
+  </Operation>
 </Operations>
