@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuLGInventoryView
 	AS 
-SELECT Top 100 percent ROW_NUMBER() OVER (ORDER BY strStatus) as intKeyColumn,*  FROM (
+SELECT Top 100 percent Convert(int, ROW_NUMBER() OVER (ORDER BY strStatus)) as intKeyColumn,*  FROM (
 SELECT
 	'Afloat' as strStatus
 	,Shipment.strContractNumber
