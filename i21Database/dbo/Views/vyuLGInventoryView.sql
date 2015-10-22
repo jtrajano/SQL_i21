@@ -1,6 +1,7 @@
 ﻿CREATE VIEW vyuLGInventoryView
 	AS 
-SELECT 
+SELECT Top 100 percent ROW_NUMBER() OVER (ORDER BY strStatus) as intKeyColumn,*  FROM (
+SELECT
 	'Afloat' as strStatus
 	,Shipment.strContractNumber
 	,Shipment.intContractSeq
@@ -47,3 +48,4 @@ SELECT
 
 FROM vyuLGPickOpenInventoryLots Spot
 WHERE Spot.dblQty > 0.0
+) t1
