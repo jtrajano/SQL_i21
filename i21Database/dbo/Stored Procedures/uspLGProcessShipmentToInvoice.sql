@@ -24,7 +24,80 @@ SET @UserEntityId = ISNULL((SELECT [intEntityUserSecurityId] FROM tblSMUserSecur
 DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 
 
-INSERT INTO @EntriesForInvoice
+INSERT INTO @EntriesForInvoice(
+	 [strSourceTransaction]
+	,[intSourceId]
+	,[strSourceId]
+	,[intInvoiceId]
+	,[intEntityCustomerId]
+	,[intCompanyLocationId]
+	,[intCurrencyId]
+	,[intTermId]
+	,[dtmDate]
+	,[dtmDueDate]
+	,[dtmShipDate]
+	,[intEntitySalespersonId]
+	,[intFreightTermId]
+	,[intShipViaId]
+	,[intPaymentMethodId]
+	,[strInvoiceOriginId]
+	,[strPONumber]
+	,[strBOLNumber]
+	,[strDeliverPickup]
+	,[strComments]
+	,[intShipToLocationId]
+	,[intBillToLocationId]
+	,[ysnTemplate]
+	,[ysnForgiven]
+	,[ysnCalculated]
+	,[ysnSplitted]
+	,[intPaymentId]
+	,[intSplitId]
+	,[intDistributionHeaderId]
+	,[strActualCostId]
+	,[intShipmentId]
+	,[intTransactionId]
+	,[intEntityId]
+	,[ysnResetDetails]
+	,[ysnPost]
+	,[intInvoiceDetailId]
+	,[intItemId]
+	,[ysnInventory]
+	,[strItemDescription]
+	,[intItemUOMId]
+	,[dblQtyOrdered]
+	,[dblQtyShipped]
+	,[dblDiscount]
+	,[dblPrice]
+	,[ysnRefreshPrice]
+	,[strMaintenanceType]
+	,[strFrequency]
+	,[dtmMaintenanceDate]
+	,[dblMaintenanceAmount]
+	,[dblLicenseAmount]
+	,[intTaxGroupId]
+	,[ysnRecomputeTax]
+	,[intSCInvoiceId]
+	,[strSCInvoiceNumber]
+	,[intInventoryShipmentItemId]
+	,[strShipmentNumber]
+	,[intSalesOrderDetailId]
+	,[strSalesOrderNumber]
+	,[intContractHeaderId]
+	,[intContractDetailId]
+	,[intShipmentPurchaseSalesContractId]
+	,[intTicketId]
+	,[intTicketHoursWorkedId]
+	,[intSiteId]
+	,[strBillingBy]
+	,[dblPercentFull]
+	,[dblNewMeterReading]
+	,[dblPreviousMeterReading]
+	,[dblConversionFactor]
+	,[intPerformerId]
+	,[ysnLeaseBilling]
+	,[ysnVirtualMeterReading]
+)
 SELECT
 	 [strSourceTransaction]				= 'Inbound Shipment'
 	,[intSourceId]						= D.intShipmentId 
@@ -57,6 +130,7 @@ SELECT
 	,[intDistributionHeaderId]			= NULL
 	,[strActualCostId]					= NULL
 	,[intShipmentId]					= D.intShipmentId
+	,[intTransactionId]					= NULL
 	,[intEntityId]						= @UserEntityId
 	,[ysnResetDetails]					= 1
 	,[ysnPost]							= @Post
@@ -155,7 +229,7 @@ DECLARE	@ErrorMessage NVARCHAR(250)
 EXEC [dbo].[uspARProcessInvoices]
 	 @InvoiceEntries	= @EntriesForInvoice
 	,@UserId			= @UserId
-	,@GroupingOption	= 0
+	,@GroupingOption	= 11
 	,@RaiseError		= 1
 	,@ErrorMessage		= @ErrorMessage OUTPUT
 	,@CreatedIvoices	= @CreatedIvoices OUTPUT

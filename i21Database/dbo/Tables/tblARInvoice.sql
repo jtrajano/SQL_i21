@@ -53,6 +53,7 @@
 	[intDistributionHeaderId]	INT												NULL,
 	[strActualCostId]			NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL,
 	[intShipmentId]				INT												NULL,        	
+	[intTransactionId]			INT												NULL,        	
 	[intEntityId]				INT												NOT NULL	DEFAULT ((0)), 
 	[intConcurrencyId]			INT												NOT NULL	CONSTRAINT [DF_tblARInvoice_intConcurrencyId] DEFAULT ((0)),
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
@@ -67,6 +68,7 @@
 	CONSTRAINT [FK_tblARInvoice_tblEntitySplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [tblEntitySplit]([intSplitId]),
 	CONSTRAINT [FK_tblARInvoice_tblTRDistributionHeader_intDistributionHeaderId] FOREIGN KEY ([intDistributionHeaderId]) REFERENCES [tblTRDistributionHeader]([intDistributionHeaderId]),
 	CONSTRAINT [FK_tblARInvoice_tblLGShipment_intShipmentId] FOREIGN KEY ([intShipmentId]) REFERENCES [tblLGShipment]([intShipmentId]),
+	CONSTRAINT [FK_tblARInvoice_tblCFTransaction_intTransactionId] FOREIGN KEY ([intTransactionId]) REFERENCES [tblCFTransaction]([intTransactionId]),
 );
 
 

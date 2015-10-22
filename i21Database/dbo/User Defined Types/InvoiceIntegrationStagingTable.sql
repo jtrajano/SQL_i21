@@ -5,7 +5,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 (
 	 [intId]								INT				IDENTITY PRIMARY KEY CLUSTERED                        
 	 --Header
-	,[strSourceTransaction]					NVARCHAR(250)									NOT NULL	-- Valid values "Invoice", "Transport Load" and "Inbound Shipment"
+	,[strSourceTransaction]					NVARCHAR(250)									NOT NULL	-- Valid values "Invoice", "Transport Load", "Inbound Shipment" AND "Card Fueling Transaction"
 	,[intSourceId]							INT												NOT NULL	-- Id of the source transaction
 	,[strSourceId]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	-- Transaction number source transaction
 	,[intInvoiceId]							INT												NULL		-- Invoice Id(Insert new Invoice if NULL, else Update existing) 
@@ -36,6 +36,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[intDistributionHeaderId]				INT												NULL		-- Key Value from tblTRDistributionHeader (Transport Load) 
 	,[strActualCostId]						NVARCHAR(50)	COLLATE Latin1_General_CI_AS	NULL		-- Used by Transport Load for Costing
 	,[intShipmentId]						INT												NULL		-- Key Value from tblLGShipment (Inbound Shipment) 	
+	,[intTransactionId]						INT												NULL		-- Key Value from tblCFTransaction (Card Fueling  Transaction) 	
 	,[intEntityId]							INT												NOT NULL	-- Key Value from tblEntity			
 	,[ysnResetDetails]						BIT												NULL		-- Indicate whether detail records will be deleted and recreated
 	,[ysnPost]								BIT												NULL		-- If [ysnPost] = 1 > New and Existing unposted Invoices will be posted

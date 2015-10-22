@@ -8,11 +8,11 @@
 											-- 4  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId]
 											-- 5  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate]
 											-- 6  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId]
-											-- 7  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [strComments]
-											-- 8  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [strComments], [intShipViaId]
-											-- 9  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [strComments], [intShipViaId], [intEntitySalespersonId]
-											-- 10 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [strComments], [intShipViaId], [intEntitySalespersonId], [strPONumber]
-											-- 11 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [strComments], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber]
+											-- 7  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId]
+											-- 8  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId]
+											-- 9  = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber]
+											-- 10 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber]
+											-- 11 = [intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments]
 	,@RaiseError		BIT				= 0
 	,@ErrorMessage		NVARCHAR(250)	= NULL			OUTPUT
 	,@CreatedIvoices	NVARCHAR(MAX)	= NULL			OUTPUT
@@ -30,7 +30,10 @@ SET ANSI_WARNINGS OFF
 DECLARE @CurrentErrorMessage NVARCHAR(250)
 		,@ZeroDecimal NUMERIC(18, 6)
 		
-SET @ZeroDecimal = 0.000000		
+SET @ZeroDecimal = 0.000000
+
+DECLARE @SourceColumn AS NVARCHAR (500)
+		,@SourceTable AS NVARCHAR (500)	
 		
 IF ISNULL(@RaiseError,0) = 0
 	BEGIN TRANSACTION
@@ -75,17 +78,17 @@ BEGIN TRY
 						WHEN @GroupingOption = 4 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId]'
 						WHEN @GroupingOption = 5 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate]'
 						WHEN @GroupingOption = 6 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId]'
-						WHEN @GroupingOption = 7 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [strComments]'
-						WHEN @GroupingOption = 8 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [strComments], [intShipViaId]'
-						WHEN @GroupingOption = 9 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [strComments], [intShipViaId], [intEntitySalespersonId]'
-						WHEN @GroupingOption =10 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [strComments], [intShipViaId], [intEntitySalespersonId], [strPONumber]'
-						WHEN @GroupingOption =11 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [strComments], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber]'
+						WHEN @GroupingOption = 7 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId]'
+						WHEN @GroupingOption = 8 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId]'
+						WHEN @GroupingOption = 9 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber]'
+						WHEN @GroupingOption =10 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber]'
+						WHEN @GroupingOption =11 THEN '[intEntityCustomerId], [intSourceId], [intCompanyLocationId], [intCurrencyId], [dtmDate], [intTermId], [intShipViaId], [intEntitySalespersonId], [strPONumber], [strBOLNumber], [strComments]'
 					END)
 					
-	SET @QueryString = 'INSERT INTO #EntriesForProcessing(' + @Columns + ', [ysnForInsert]) SELECT DISTINCT ' + @Columns + ', 1 FROM #TempInvoiceEntries WHERE ISNULL([intInvoiceId],0) = 0 GROUP BY ' + @Columns
+	SET @QueryString = 'INSERT INTO #EntriesForProcessing([intId], ' + @Columns + ', [ysnForInsert]) SELECT DISTINCT MIN([intId]), ' + @Columns + ', 1 FROM #TempInvoiceEntries WHERE ISNULL([intInvoiceId],0) = 0 GROUP BY ' + @Columns
 	EXECUTE(@QueryString);
 
-	SET @QueryString = 'INSERT INTO #EntriesForProcessing([intInvoiceId], [intInvoiceDetailId],' + @Columns + ', [ysnForUpdate]) SELECT DISTINCT [intInvoiceId], [intInvoiceDetailId],' + @Columns + ', 1 FROM #TempInvoiceEntries WHERE ISNULL([intInvoiceId],0) <> 0 GROUP BY [intInvoiceId], [intInvoiceDetailId],' + @Columns
+	SET @QueryString = 'INSERT INTO #EntriesForProcessing([intId], [intInvoiceId], [intInvoiceDetailId], ' + @Columns + ', [ysnForUpdate]) SELECT DISTINCT [intId], [intInvoiceId], [intInvoiceDetailId], ' + @Columns + ', 1 FROM #TempInvoiceEntries WHERE ISNULL([intInvoiceId],0) <> 0 GROUP BY [intId], [intInvoiceId], [intInvoiceDetailId],' + @Columns
 	EXECUTE(@QueryString);
 
 	IF OBJECT_ID('tempdb..#TempInvoiceEntries') IS NOT NULL DROP TABLE #TempInvoiceEntries	
@@ -132,6 +135,7 @@ DECLARE  @Id									INT
 		,@DistributionHeaderId					INT
 		,@ActualCostId							NVARCHAR(50)
 		,@ShipmentId							INT
+		,@TransactionId							INT
 		,@EntityId								INT
 		,@ResetDetails							BIT
 		,@Post									BIT
@@ -230,9 +234,10 @@ BEGIN
 		,@Splitted						= [ysnSplitted]
 		,@PaymentId						= [intPaymentId]
 		,@SplitId						= [intSplitId]
-		,@DistributionHeaderId			= [intDistributionHeaderId]
-		,@ActualCostId					= [strActualCostId]
-		,@ShipmentId					= [intShipmentId]
+		,@DistributionHeaderId			= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN ISNULL([intDistributionHeaderId], [intSourceId]) ELSE NULL END)
+		,@ActualCostId					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN [strActualCostId] ELSE NULL END)
+		,@ShipmentId					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Inbound Shipment' THEN ISNULL([intShipmentId], [intSourceId]) ELSE NULL END)
+		,@TransactionId 				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Card Fueling Transaction' THEN ISNULL([intTransactionId], [intSourceId]) ELSE NULL END)
 		,@EntityId						= [intEntityId]
 		,@ResetDetails					= [ysnResetDetails]
 		,@Post							= [ysnPost]
@@ -283,14 +288,46 @@ BEGIN
 		AND ([intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
 		AND ([intCurrencyId] = @CurrencyId OR (@CurrencyId IS NULL AND @GroupingOption < 4))
 		AND ([dtmDate] = @Date OR (@Date IS NULL AND @GroupingOption < 5))
-		AND ([intTermId] = @TermId OR (@TermId IS NULL AND @GroupingOption < 6))
-		AND ([strComments] = @Comment OR (@Comment IS NULL AND @GroupingOption < 7))
-		AND ([intShipViaId] = @ShipViaId OR (@ShipViaId IS NULL AND @GroupingOption < 8))
-		AND ([intEntitySalespersonId] = @EntitySalespersonId OR (@EntitySalespersonId IS NULL AND @GroupingOption < 9))
-		AND ([strPONumber] = @PONumber OR (@PONumber IS NULL AND @GroupingOption < 10))			
-		AND ([strBOLNumber] = @BOLNumber OR (@BOLNumber IS NULL AND @GroupingOption < 11))
+		AND ([intTermId] = @TermId OR (@TermId IS NULL AND @GroupingOption < 6))		
+		AND ([intShipViaId] = @ShipViaId OR (@ShipViaId IS NULL AND @GroupingOption < 7))
+		AND ([intEntitySalespersonId] = @EntitySalespersonId OR (@EntitySalespersonId IS NULL AND @GroupingOption < 8))
+		AND (ISNULL([strPONumber],'') = ISNULL(@PONumber,'') OR (@PONumber IS NULL AND @GroupingOption < 9))			
+		AND (ISNULL([strBOLNumber],'') = ISNULL(@BOLNumber,'') OR (@BOLNumber IS NULL AND @GroupingOption < 10))
+		AND (ISNULL([strComments],'') = ISNULL(@Comment,'') OR (@Comment IS NULL AND @GroupingOption < 11))
 	ORDER BY
 		[intId]
+
+
+	BEGIN TRY
+		IF ISNULL(@SourceTransaction,'') = 'Transport Load'
+			BEGIN
+				SET @SourceColumn = 'intDistributionHeaderId'
+				SET @SourceTable = 'tblTRDistributionHeader'
+			END
+		IF ISNULL(@SourceTransaction,'') = 'Inbound Shipment'
+			BEGIN
+				SET @SourceColumn = 'intShipmentId'
+				SET @SourceTable = 'tblLGShipment'
+			END
+		IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction'
+			BEGIN
+				SET @SourceColumn = 'intTransactionId'
+				SET @SourceTable = 'tblCFTransaction'
+			END
+
+		IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction')
+			BEGIN
+				EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
+			END
+	END TRY
+	BEGIN CATCH
+		IF ISNULL(@RaiseError,0) = 0
+			ROLLBACK TRANSACTION
+		SET @ErrorMessage = ERROR_MESSAGE();
+		IF ISNULL(@RaiseError,0) = 1
+			RAISERROR(@ErrorMessage, 16, 1);
+		RETURN 0;
+	END CATCH
 		
 	DECLARE @NewInvoiceId INT
 	
@@ -330,6 +367,7 @@ BEGIN
 			,@DistributionHeaderId			= @DistributionHeaderId
 			,@ActualCostId					= @ActualCostId
 			,@ShipmentId					= @ShipmentId
+			,@TransactionId 				= @TransactionId
 
 			,@ItemId						= @ItemId
 			,@ItemIsInventory				= @Inventory
@@ -416,12 +454,12 @@ BEGIN
 		AND (I.[intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
 		AND (I.[intCurrencyId] = @CurrencyId OR (@CurrencyId IS NULL AND @GroupingOption < 4))
 		AND (I.[dtmDate] = @Date OR (@Date IS NULL AND @GroupingOption < 5))
-		AND (I.[intTermId] = @TermId OR (@TermId IS NULL AND @GroupingOption < 6))
-		AND (I.[strComments] = @Comment OR (@Comment IS NULL AND @GroupingOption < 7))
-		AND (I.[intShipViaId] = @ShipViaId OR (@ShipViaId IS NULL AND @GroupingOption < 8))
-		AND (I.[intEntitySalespersonId] = @EntitySalespersonId OR (@EntitySalespersonId IS NULL AND @GroupingOption < 9))
-		AND (I.[strPONumber] = @PONumber OR (@PONumber IS NULL AND @GroupingOption < 10))			
-		AND (I.[strBOLNumber] = @BOLNumber OR (@BOLNumber IS NULL AND @GroupingOption < 11))	
+		AND (I.[intTermId] = @TermId OR (@TermId IS NULL AND @GroupingOption < 6))		
+		AND (I.[intShipViaId] = @ShipViaId OR (@ShipViaId IS NULL AND @GroupingOption < 7))
+		AND (I.[intEntitySalespersonId] = @EntitySalespersonId OR (@EntitySalespersonId IS NULL AND @GroupingOption < 8))
+		AND (ISNULL(I.[strPONumber],'') = ISNULL(@PONumber,'') OR (@PONumber IS NULL AND @GroupingOption < 9))			
+		AND (ISNULL(I.[strBOLNumber],'') = ISNULL(@BOLNumber,'') OR (@BOLNumber IS NULL AND @GroupingOption < 10))
+		AND (ISNULL(I.[strComments],'') = ISNULL(@Comment,'') OR (@Comment IS NULL AND @GroupingOption < 11))
 		AND I.[intId] = #EntriesForProcessing.[intId]
 		AND ISNULL(#EntriesForProcessing.[ysnForInsert],0) = 1
 		
@@ -434,7 +472,7 @@ BEGIN
 			SELECT TOP 1 @ForDetailId = [intId] FROM #EntriesForProcessing WHERE ISNULL([ysnForInsert],0) = 1 AND ISNULL([ysnProcessed],0) = 0 AND [intInvoiceId] = @NewInvoiceId ORDER BY [intId]
 			
 				SELECT TOP 1
-					 @ShipmentId					= [intShipmentId]		 	
+					 @ShipmentId					=  [intShipmentId]		 	
 					,@ItemId						=  [intItemId]
 					,@Inventory						=  [ysnInventory]
 					,@ItemDescription				=  [strItemDescription]
@@ -565,12 +603,12 @@ BEGIN
 		AND (I.[intCompanyLocationId] = @CompanyLocationId OR (@CompanyLocationId IS NULL AND @GroupingOption < 3))
 		AND (I.[intCurrencyId] = @CurrencyId OR (@CurrencyId IS NULL AND @GroupingOption < 4))
 		AND (I.[dtmDate] = @Date OR (@Date IS NULL AND @GroupingOption < 5))
-		AND (I.[intTermId] = @TermId OR (@TermId IS NULL AND @GroupingOption < 6))
-		AND (I.[strComments] = @Comment OR (@Comment IS NULL AND @GroupingOption < 7))
-		AND (I.[intShipViaId] = @ShipViaId OR (@ShipViaId IS NULL AND @GroupingOption < 8))
-		AND (I.[intEntitySalespersonId] = @EntitySalespersonId OR (@EntitySalespersonId IS NULL AND @GroupingOption < 9))
-		AND (I.[strPONumber] = @PONumber OR (@PONumber IS NULL AND @GroupingOption < 10))			
-		AND (I.[strBOLNumber] = @BOLNumber OR (@BOLNumber IS NULL AND @GroupingOption < 11))
+		AND (I.[intTermId] = @TermId OR (@TermId IS NULL AND @GroupingOption < 6))		
+		AND (I.[intShipViaId] = @ShipViaId OR (@ShipViaId IS NULL AND @GroupingOption < 7))
+		AND (I.[intEntitySalespersonId] = @EntitySalespersonId OR (@EntitySalespersonId IS NULL AND @GroupingOption < 8))
+		AND (ISNULL(I.[strPONumber],'') = ISNULL(@PONumber,'') OR (@PONumber IS NULL AND @GroupingOption < 9))			
+		AND (ISNULL(I.[strBOLNumber],'') = ISNULL(@BOLNumber,'') OR (@BOLNumber IS NULL AND @GroupingOption < 10))
+		AND (ISNULL(I.[strComments],'') = ISNULL(@Comment,'') OR (@Comment IS NULL AND @GroupingOption < 11))
 		AND I.[intId] = #EntriesForProcessing.[intId]
 		AND ISNULL(#EntriesForProcessing.[ysnForInsert],0) = 1
 END
@@ -671,9 +709,10 @@ BEGIN TRY
 			,@Splitted						= [ysnSplitted]
 			,@PaymentId						= [intPaymentId]
 			,@SplitId						= [intSplitId]
-			,@DistributionHeaderId			= [intDistributionHeaderId]
-			,@ActualCostId					= [strActualCostId]
-			,@ShipmentId					= [intShipmentId]
+			,@DistributionHeaderId			= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN ISNULL([intDistributionHeaderId], [intSourceId]) ELSE NULL END)
+			,@ActualCostId					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Transport Load' THEN [strActualCostId] ELSE NULL END)
+			,@ShipmentId					= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Inbound Shipment' THEN ISNULL([intShipmentId], [intSourceId]) ELSE NULL END)
+			,@TransactionId 				= (CASE WHEN ISNULL([strSourceTransaction],'') = 'Card Fueling Transaction' THEN ISNULL([intTransactionId], [intSourceId]) ELSE NULL END)
 			,@EntityId						= [intEntityId]
 			,@ResetDetails					= [ysnResetDetails]
 			,@Post							= [ysnPost]
@@ -683,6 +722,37 @@ BEGIN TRY
 			ISNULL([intInvoiceId],0) = @ExistingInvoiceId
 		ORDER BY
 			[intId]
+
+		BEGIN TRY
+			IF ISNULL(@SourceTransaction,'') = 'Transport Load'
+				BEGIN
+					SET @SourceColumn = 'intDistributionHeaderId'
+					SET @SourceTable = 'tblTRDistributionHeader'
+				END
+			IF ISNULL(@SourceTransaction,'') = 'Inbound Shipment'
+				BEGIN
+					SET @SourceColumn = 'intShipmentId'
+					SET @SourceTable = 'tblLGShipment'
+				END
+			IF ISNULL(@SourceTransaction,'') = 'Card Fueling Transaction'
+				BEGIN
+					SET @SourceColumn = 'intTransactionId'
+					SET @SourceTable = 'tblCFTransaction'
+				END
+
+			IF ISNULL(@SourceTransaction,'') IN ('Transport Load', 'Inbound Shipment', 'Card Fueling Transaction')
+				BEGIN
+					EXECUTE('IF NOT EXISTS(SELECT NULL FROM ' + @SourceTable + ' WHERE ' + @SourceColumn + ' = ' + @SourceId + ') RAISERROR(''' + @SourceTransaction + ' does not exists!'', 16, 1);');
+				END
+		END TRY
+		BEGIN CATCH
+			IF ISNULL(@RaiseError,0) = 0
+				ROLLBACK TRANSACTION
+			SET @ErrorMessage = ERROR_MESSAGE();
+			IF ISNULL(@RaiseError,0) = 1
+				RAISERROR(@ErrorMessage, 16, 1);
+			RETURN 0;
+		END CATCH
 			
 		UPDATE
 			[tblARInvoice]
@@ -733,6 +803,7 @@ BEGIN TRY
 			,[intDistributionHeaderId]	= @DistributionHeaderId
 			,[strActualCostId]			= @ActualCostId
 			,[intShipmentId]			= @ShipmentId
+			,[intTransactionId]			= @TransactionId 
 			,[intEntityId]				= @EntityId
 			,[intConcurrencyId]			= [tblARInvoice].[intConcurrencyId] + 1
 		FROM

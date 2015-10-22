@@ -33,6 +33,7 @@
 	,@DistributionHeaderId			INT				= NULL
 	,@ActualCostId					NVARCHAR(50)	= ''			
 	,@ShipmentId					INT				= NULL
+	,@TransactionId					INT				= NULL
 		
 	,@ItemId						INT				= NULL
 	,@ItemIsInventory				BIT				= 0
@@ -207,6 +208,7 @@ BEGIN TRY
 		,[intDistributionHeaderId]
 		,[strActualCostId]
 		,[intShipmentId]
+		,[intTransactionId]
 		,[intEntityId]
 		,[intConcurrencyId])
 	SELECT
@@ -262,6 +264,7 @@ BEGIN TRY
 		,[intDistributionHeaderId]		= @DistributionHeaderId 
 		,[strActualCostId]				= @ActualCostId 
 		,[intShipmentId]				= @ShipmentId 
+		,[intTransactionId]				= @TransactionId 
 		,[intEntityId]					= @EntityId 
 		,[intConcurrencyId]				= 0
 	FROM	

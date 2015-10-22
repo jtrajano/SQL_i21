@@ -48,6 +48,7 @@ BEGIN
 		,[intServiceChargeAccountId]
 		,[intInventoryShipmentItemId]
 		,[intSalesOrderDetailId]
+		,[intShipmentPurchaseSalesContractId]	
 		,[intSiteId]
 		,[strBillingBy]
 		,[dblPercentFull]
@@ -64,6 +65,7 @@ BEGIN
 		,[intContractDetailId]
 		,[intTicketId]
 		,[ysnLeaseBilling]
+
 	)
 	EXEC dbo.[uspARGetItemsFromInvoice]
 			@intInvoiceId = @TransactionId
