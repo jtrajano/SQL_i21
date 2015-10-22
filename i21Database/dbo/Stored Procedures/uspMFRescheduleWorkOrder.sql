@@ -611,6 +611,9 @@ BEGIN TRY
 
 						IF @intChangeoverTime IS NOT NULL
 						BEGIN
+							IF @intMaxChangeoverTime IS NULL
+								SELECT @intMaxChangeoverTime = 0
+
 							IF @intChangeoverTime > @intMaxChangeoverTime
 							BEGIN
 								SELECT @intMaxChangeoverTime = @intChangeoverTime
