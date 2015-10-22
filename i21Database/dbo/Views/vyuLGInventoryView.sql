@@ -21,7 +21,7 @@ SELECT
 	,'' as strCondition
 
 FROM vyuLGInboundShipmentView Shipment
-WHERE (Shipment.dblContainerContractQty - Shipment.dblContainerContractReceivedQty) > 0.0 
+WHERE (Shipment.dblContainerContractQty - Shipment.dblContainerContractReceivedQty) > 0.0 AND Shipment.ysnInventorized = 1
 
 UNION ALL
 
