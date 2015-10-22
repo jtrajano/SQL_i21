@@ -16,9 +16,12 @@ SELECT TOP 100 PERCENT
 	[Transaction].intStorageLocationId,
 	strStorageLocationName = StorageLocation.strName,
 	[Transaction].dtmDate,
+	strTransactionType = TransactionType.strTransactionForm,
 	[Transaction].strTransactionForm,
 	[Transaction].strTransactionId,
+	dblBeginningQtyBalance = dbo.fnICGetRunningQuantity([Transaction].intInventoryTransactionId) - ([Transaction].dblQty * [Transaction].dblUOMQty),
 	dblQuantity = [Transaction].dblQty * [Transaction].dblUOMQty,
+	dblRunningQtyBalance = dbo.fnICGetRunningQuantity([Transaction].intInventoryTransactionId),
 	dblCost = [Transaction].dblCost,
 	dblBeginningBalance = dbo.fnICGetRunningBalance([Transaction].intInventoryTransactionId) - ([Transaction].dblQty * [Transaction].dblUOMQty * [Transaction].dblCost),
 	dblValue = [Transaction].dblQty * [Transaction].dblUOMQty * [Transaction].dblCost,
@@ -31,4 +34,5 @@ LEFT JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = [Tr
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = ItemLocation.intLocationId
 LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = [Transaction].intSubLocationId
 LEFT JOIN tblICStorageLocation StorageLocation ON StorageLocation.intStorageLocationId = [Transaction].intStorageLocationId
+LEFT JOIN tblICInventoryTransactionType TransactionType ON TransactionType.intTransactionTypeId = [Transaction].intTransactionTypeId
 ORDER BY [Transaction].intItemId, [Transaction].intItemLocationId, [Transaction].dtmDate DESC, [Transaction].intInventoryTransactionId DESC
