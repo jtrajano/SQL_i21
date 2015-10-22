@@ -1,146 +1,72 @@
-Ext.define('Inventory.view.CategoryViewModel', {
+Ext.define('Inventory.view.InventoryCountViewModel', {
     extend: 'Ext.app.ViewModel',
-    alias: 'viewmodel.iccategory',
+    alias: 'viewmodel.icinventorycount',
 
     requires: [
-        'Inventory.store.BufferedUnitMeasure',
-        'Inventory.store.BufferedCompactItem',
-        'Inventory.store.BufferedLineOfBusiness',
-        'Inventory.store.BufferedCategoryLocation',
-        'Inventory.store.BufferedCategoryUOM',
-        'GeneralLedger.store.BufAccountId',
-        'EntityManagement.store.VendorBuffered',
+        'Inventory.store.BufferedCategory',
+        'Inventory.store.BufferedCommodity',
+        'Inventory.store.BufferedCountGroup',
+        'Inventory.store.BufferedStorageLocation',
+        'Inventory.store.BufferedItemUnitMeasure',
         'i21.store.CompanyLocationBuffered',
-        'Store.store.SubCategoryBuffered',
-        'GeneralLedger.store.BufAccountCategoryGroup'
+        'i21.store.CompanyLocationSubLocationBuffered'
     ],
 
     stores: {
-        linesOfBusiness: {
-            type: 'icbufferedlineofbusiness'
-        },
-        costingMethods: {
-            autoLoad: true,
-            data: [
-                {
-                    intCostingMethodId: '1',
-                    strDescription: 'AVG'
-                },
-                {
-                    intCostingMethodId: '2',
-                    strDescription: 'FIFO'
-                },
-                {
-                    intCostingMethodId: '3',
-                    strDescription: 'LIFO'
-                }
-            ],
-            fields: [
-                {
-                    name: 'intCostingMethodId',
-                    type: 'int'
-                },
-                {
-                    name: 'strDescription'
-                }
-            ]
-        },
-        materialFees: {
-            autoLoad: true,
-            data: [
-                {
-                    strDescription: 'No'
-                },{
-                    strDescription: 'Yes'
-                },{
-                    strDescription: 'Unit'
-                }
-            ],
-            fields: {
-                name: 'strDescription'
-            }
-        },
-
-        inventoryTrackings: {
-            autoLoad: true,
-            data: [
-                {
-                    strDescription: 'Item Level'
-                },
-                {
-                    strDescription: 'Category Level'
-                },
-                {
-                    strDescription: 'Lot Level'
-                }
-            ],
-            fields: [
-                {
-                    name: 'strDescription'
-                }
-            ]
-        },
-        standardUOM: {
-            type: 'icbufferedcategoryuom'
-        },
-        uomUnitMeasure:{
-            type: 'icbuffereduom'
-        },
-        uomConversion: {
-            autoLoad: true,
-            type: 'icbuffereduom'
-        },
-        unitMeasures:{
-            type: 'icbuffereduom'
-        },
-        materialItem:{
-            type: 'icbufferedcompactitem'
-        },
-        freightItem:{
-            type: 'icbufferedcompactitem'
-        },
-        accountCategory: {
-            type: 'glbufaccountcategorygroup'
-        },
-        glAccount: {
-            type: 'glbufaccountid'
-        },
         location: {
-            type: 'icbufferedcategorylocation'
+            type: 'companylocationbuffered'
         },
-        vendorSellClass: {
-            type: 'stsubcategorybuffered'
+        category: {
+            type: 'icbufferedcategory'
         },
-        vendorOrderClass: {
-            type: 'stsubcategorybuffered'
+        commodity: {
+            type: 'icbufferedcommodity'
         },
-        vendorFamily: {
-            type: 'stsubcategorybuffered'
+        countGroup: {
+            type: 'icbufferedcountgroup'
         },
-        vendor: {
-            type: 'emvendorbuffered'
+        subLocation: {
+            type: 'smcompanylocationsublocationbuffered'
+        },
+        storageLocation: {
+            type: 'icbufferedstoragelocation'
+        },
+        itemUOM: {
+            type: 'icbuffereditemunitmeasure'
+        },
+        status: {
+            autoLoad: true,
+            data: [
+                {
+                    strStatus: 'Open',
+                    intStatus: 1
+                },
+                {
+                    strStatus: 'Count Sheet Printed',
+                    intStatus: 2
+                },
+                {
+                    strStatus: 'Inventory Locked',
+                    intStatus: 3
+                },
+                {
+                    strStatus: 'Closed',
+                    intStatus: 4
+                }
+            ],
+            fields: [
+                {
+                    name: 'strStatus'
+                },
+                {
+                    name: 'intStatus'
+                }
+            ]
         }
     },
 
     formulas: {
-        checkMaterialFee: function(get){
-            if (iRely.Functions.isEmpty(get('current.strMaterialFee')) || get('current.strMaterialFee') === 'No'){
-                this.data.current.set('intMaterialItemId', null);
-                return true;
-            }
-            else{
-                return false;
-            }
-        },
-        checkAutoCalculateFreight: function(get){
-            if (!get('current.ysnAutoCalculateFreight')){
-                this.data.current.set('intFreightItemId', null);
-                return true;
-            }
-            else{
-                return false;
-            }
-        }
+
     }
 
 });
