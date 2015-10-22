@@ -67,6 +67,7 @@
     [dblSiteLastGalsInTank] NUMERIC(18, 6) NULL, 
     [dblSiteEstimatedPercentLeft] NUMERIC(18, 6) NULL, 
     [dtmSiteLastReadingUpdate] DATETIME NULL, 
+    [ysnMeterReading] BIT NOT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblTMDeliveryHistory] PRIMARY KEY CLUSTERED ([intDeliveryHistoryID] ASC),
     CONSTRAINT [FK_tblTMDeliveryHistory_tblTMSite] FOREIGN KEY ([intSiteID]) REFERENCES [dbo].[tblTMSite] ([intSiteID])
 );
@@ -687,3 +688,12 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblTMDeliveryHistory',
     @level2type = N'COLUMN',
     @level2name = N'dtmSiteLastReadingUpdate'
+GO
+EXEC sp_addextendedproperty @name = N'MS_Description',
+    @value = N'Indicator if record is a Delivery or Virtual Meter Reading',
+    @level0type = N'SCHEMA',
+    @level0name = N'dbo',
+    @level1type = N'TABLE',
+    @level1name = N'tblTMDeliveryHistory',
+    @level2type = N'COLUMN',
+    @level2name = 'ysnMeterReading'

@@ -68,8 +68,9 @@ BEGIN
 	FROM tblSMCompanyLocation
 	WHERE intCompanyLocationId = @intInvoiceCompanyLocationId
 
-	IF OBJECT_ID('tempdb..#tmpInvoiceDetail') IS NOT NULL DROP TABLE #tmpInvoiceDetail
 
+	---Get Invoice detail for Deliveries
+	IF OBJECT_ID('tempdb..#tmpInvoiceDetail') IS NOT NULL DROP TABLE #tmpInvoiceDetail
 	SELECT *
 		,ysnTMProcessed = 0
 	INTO #tmpInvoiceDetail
@@ -77,8 +78,9 @@ BEGIN
 	WHERE intInvoiceId = @InvoiceId
 		AND intSiteId IS NOT NULL
 		AND ISNULL(ysnLeaseBilling,0) <> 1
+		AND ISNULL(ysnVirtualMeterReading,0) <> 1
 	
-	
+	-- Process Delivery
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpInvoiceDetail)
 	BEGIN
 		SET @intPerformerId = NULL
@@ -226,7 +228,7 @@ BEGIN
 					PRINT 'Same date as the last delivery'
 					
 					-----Get the previous delivery record
-					SELECT TOP 1 @intNewDeliveryHistoryId = intDeliveryHistoryID FROM tblTMDeliveryHistory WHERE intSiteID = @intSiteId AND dtmInvoiceDate = @dtmInvoiceDate
+					SELECT TOP 1 @intNewDeliveryHistoryId = intDeliveryHistoryID FROM tblTMDeliveryHistory WHERE intSiteID = @intSiteId AND dtmInvoiceDate = @dtmInvoiceDate AND ysnMeterReading <> 1
 					
 					---Add to detail of the delivery history
 					INSERT INTO tblTMDeliveryHistoryDetail(
@@ -356,12 +358,12 @@ BEGIN
 				ELSE
 				BEGIN
 					PRINT 'Previous Dates'
-					IF EXISTS(SELECT TOP 1 1 FROM tblTMDeliveryHistory WHERE intSiteID = @intSiteId AND dtmInvoiceDate = @dtmInvoiceDate)
+					IF EXISTS(SELECT TOP 1 1 FROM tblTMDeliveryHistory WHERE intSiteID = @intSiteId AND dtmInvoiceDate = @dtmInvoiceDate AND ysnMeterReading <> 1)
 					BEGIN
 						PRINT 'Has previous entry'
 						
 						-----Get the previous delivery record
-						SELECT TOP 1 @intNewDeliveryHistoryId = intDeliveryHistoryID FROM tblTMDeliveryHistory WHERE intSiteID = @intSiteId AND dtmInvoiceDate = @dtmInvoiceDate
+						SELECT TOP 1 @intNewDeliveryHistoryId = intDeliveryHistoryID FROM tblTMDeliveryHistory WHERE intSiteID = @intSiteId AND dtmInvoiceDate = @dtmInvoiceDate AND ysnMeterReading <> 1
 						
 						---Add to detail of the delivery history
 						INSERT INTO tblTMDeliveryHistoryDetail(
@@ -811,6 +813,153 @@ BEGIN
 		CONTINUELOOP:
 		DELETE FROM #tmpInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId
 		PRINT 'DONE'
+	END
+
+	---Get Invoice detail for Virtual meter reading
+	IF OBJECT_ID('tempdb..#tmpVirtualMeterInvoiceDetail') IS NOT NULL DROP TABLE #tmpVirtualMeterInvoiceDetail
+	SELECT *
+		,ysnTMProcessed = 0
+	INTO #tmpVirtualMeterInvoiceDetail
+	FROM tblARInvoiceDetail
+	WHERE intInvoiceId = 68
+		AND intSiteId IS NOT NULL
+		AND ISNULL(ysnLeaseBilling,0) <> 1
+		AND ISNULL(ysnVirtualMeterReading,0) = 1
+	
+	---Process Virtual Meter Reading
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpVirtualMeterInvoiceDetail)
+	BEGIN
+		SET @intPerformerId = NULL
+		SELECT TOP 1 
+			@intSiteId = intSiteId 
+			,@intItemId = intItemId
+			,@intInvoiceDetailId = intInvoiceDetailId
+			,@intPerformerId = intPerformerId
+			,@dblPercentAfterDelivery = dblPercentFull
+			,@dblQuantityShipped = dblQtyShipped
+			,@dblTotalTax = dblTotalTax
+			,@dblItemTotal = dblTotal
+		FROM #tmpVirtualMeterInvoiceDetail
+
+		--- INsert to delivery History
+		INSERT INTO tblTMDeliveryHistory(
+			strInvoiceNumber
+			,strBulkPlantNumber
+			,dtmInvoiceDate
+			,strProductDelivered
+			,dblQuantityDelivered
+			,intDegreeDayOnDeliveryDate
+			,intDegreeDayOnLastDeliveryDate
+			,dblBurnRateAfterDelivery
+			,dblCalculatedBurnRate
+			,ysnAdjustBurnRate
+			,intElapsedDegreeDaysBetweenDeliveries
+			,intElapsedDaysBetweenDeliveries
+			,strSeason
+			,dblWinterDailyUsageBetweenDeliveries
+			,dblSummerDailyUsageBetweenDeliveries
+			,dblGallonsInTankbeforeDelivery
+			,dblGallonsInTankAfterDelivery
+			,dblEstimatedPercentBeforeDelivery
+			,dblActualPercentAfterDelivery
+			,dblMeterReading
+			,dblLastMeterReading
+			,intUserID
+			,dtmLastUpdated
+			,intSiteID
+			,strSalesPersonID
+			,dblExtendedAmount
+			,ysnForReview
+			,dtmMarkForReviewDate
+			,dblWillCallCalculatedQuantity
+			,dblWillCallDesiredQuantity
+			,intWillCallDriverId
+			,intWillCallProductId
+			,intWillCallSubstituteProductId
+			,dblWillCallPrice
+			,intWillCallDeliveryTermId
+			,dtmWillCallRequestedDate
+			,intWillCallPriority
+			,dblWillCallTotal
+			,strWillCallComments
+			,dtmWillCallCallInDate
+			,intWillCallUserId
+			,ysnWillCallPrinted
+			,dtmWillCallDispatch
+			,strWillCallOrderNumber
+			,intWillCallContractId
+			,ysnMeterReading
+			,intInvoiceId
+			,intInvoiceDetailId
+		)
+		SELECT TOP 1
+			strInvoiceNumber = C.strInvoiceNumber
+			,strBulkPlantNumber = D.strLocationName
+			,dtmInvoiceDate = C.dtmDate
+			,strProductDelivered = E.strItemNo
+			,dblQuantityDelivered = ISNULL(B.dblQtyShipped,0.0)
+			,intDegreeDayOnDeliveryDate = NULL
+			,intDegreeDayOnLastDeliveryDate = NULL
+			,dblBurnRateAfterDelivery = A.dblBurnRate
+			,dblCalculatedBurnRate = A.dblBurnRate
+			,ysnAdjustBurnRate = 0
+			,intElapsedDegreeDaysBetweenDeliveries = 0
+			,intElapsedDaysBetweenDeliveries = 0
+			,strSeason = H.strCurrentSeason
+			,dblWinterDailyUsageBetweenDeliveries = A.dblWinterDailyUse
+			,dblSummerDailyUsageBetweenDeliveries = A.dblSummerDailyUse
+			,dblGallonsInTankbeforeDelivery = A.dblEstimatedGallonsLeft
+			,dblGallonsInTankAfterDelivery = A.dblTotalCapacity * (ISNULL(B.dblPercentFull,0)/100)
+			,dblEstimatedPercentBeforeDelivery = A.dblEstimatedPercentLeft
+			,dblActualPercentAfterDelivery = B.dblPercentFull
+			,dblMeterReading = B.dblNewMeterReading
+			,dblLastMeterReading = B.dblPreviousMeterReading
+			,intUserID = @intUserId
+			,dtmLastUpdated = DATEADD(DAY, DATEDIFF(DAY, 0, GETDATE()), 0)
+			,intSiteID = A.intSiteID
+			,strSalesPersonID = I.strSalespersonId
+			,dblExtendedAmount = ISNULL(B.dblTotal,0.0)
+			,ysnForReview = 1
+			,dtmMarkForReviewDate = NULL
+			,dblWillCallCalculatedQuantity  = NULL
+			,dblWillCallDesiredQuantity = NULL
+			,intWillCallDriverId = NULL
+			,intWillCallProductId = NULL
+			,intWillCallSubstituteProductId = NULL
+			,dblWillCallPrice = NULL
+			,intWillCallDeliveryTermId = NULL
+			,dtmWillCallRequestedDate = NULL
+			,intWillCallPriority = NULL
+			,dblWillCallTotal = NULL
+			,strWillCallComments = NULL
+			,dtmWillCallCallInDate = NULL
+			,intWillCallUserId = NULL
+			,ysnWillCallPrinted = NULL
+			,dtmWillCallDispatch = NULL
+			,strWillCallOrderNumber = NULL
+			,intWillCallContractId = NULL
+			,ysnMeterReading = 1
+			,intInvoiceId = C.intInvoiceId
+			,intInvoiceDetailId = B.intInvoiceDetailId
+		FROM tblTMSite A
+		INNER JOIN tblARInvoiceDetail B
+			ON A.intSiteID = B.intSiteId
+		INNER JOIN #tmpVirtualMeterInvoiceDetail J
+			ON B.intInvoiceDetailId = J.intInvoiceDetailId
+		INNER JOIN tblARInvoice C
+			ON B.intInvoiceId = C.intInvoiceId
+		INNER JOIN tblSMCompanyLocation D
+			ON C.intCompanyLocationId = D.intCompanyLocationId
+		INNER JOIN tblICItem E
+			ON B.intItemId = E.intItemId
+		LEFT JOIN tblTMDispatch G
+			ON A.intSiteID = G.intSiteID
+		INNER JOIN tblTMClock H
+			ON A.intClockID = H.intClockID
+		LEFT JOIN tblARSalesperson I
+			ON I.intEntitySalespersonId = C.intEntitySalespersonId
+		
+		DELETE FROM #tmpVirtualMeterInvoiceDetail WHERE intInvoiceDetailId = @intInvoiceDetailId
 	END
 		
 DONESYNCHING:

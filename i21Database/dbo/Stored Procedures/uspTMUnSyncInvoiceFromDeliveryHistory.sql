@@ -29,6 +29,10 @@ BEGIN
 		,@strTransactionType = strTransactionType
 	FROM tblARInvoice
 	WHERE intInvoiceId = @InvoiceId 
+
+	---Delete from delivery history Virtual Meter Entry
+	DELETE FROM tblTMDeliveryHistory WHERE intInvoiceId = @InvoiceId AND ysnMeterReading = 1
+
 	
 	IF OBJECT_ID('tempdb..#tmpInvoiceDetail') IS NOT NULL DROP TABLE #tmpInvoiceDetail
 
