@@ -9,6 +9,7 @@
 	[strDescription] [nvarchar](500) COLLATE Latin1_General_CI_AS NULL,
 	[dtmDate] [datetime] NULL,
 	[dtmDateEntered] [datetime] NULL CONSTRAINT [DF_tblGLForBatchPosting_dtmDateEntered]  DEFAULT (getdate()), 
+	[ysnSelected] BIT NULL DEFAULT 0,
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblGLForBatchPosting] PRIMARY KEY ([intBatchPostingId])
 ) ON [PRIMARY]
