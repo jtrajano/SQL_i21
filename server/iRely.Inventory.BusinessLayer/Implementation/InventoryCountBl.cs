@@ -35,5 +35,11 @@ namespace iRely.Inventory.BusinessLayer
                 total = await query.CountAsync()
             };
         }
+
+        public override void Add(tblICInventoryCount entity)
+        {
+            entity.strCountNo = Common.GetStartingNumber(Common.StartingNumber.InventoryCount);
+            base.Add(entity);
+        }
     }
 }

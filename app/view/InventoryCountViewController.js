@@ -46,11 +46,29 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             txtCountNumber: '{current.strCountNo}',
             cboSubLocation: {
                 value: '{current.intSubLocationId}',
-                store: '{subLocation}'
+                store: '{subLocation}',
+                defaultFilters: [{
+                    column: 'intCompanyLocationId',
+                    value: '{current.intLocationId}',
+                    conjunction: 'and'
+                },{
+                    column: 'strClassification',
+                    value: 'Inventory',
+                    conjunction: 'and'
+                }]
             },
             cboStorageLocation: {
                 value: '{current.intStorageLocationId}',
-                store: '{storageLocation}'
+                store: '{storageLocation}',
+                defaultFilters: [{
+                    column: 'intLocationId',
+                    value: '{current.intLocationId}',
+                    conjunction: 'and'
+                },{
+                    column: 'intSubLocationId',
+                    value: '{current.intSubLocationId}',
+                    conjunction: 'and'
+                }]
             },
             txtDescription: '{current.strDescription}',
 
@@ -64,7 +82,10 @@ Ext.define('Inventory.view.InventoryCountViewController', {
             chkRecount: '{current.ysnRecount}',
 
             txtReferenceCountNo: '{current.intRecountReferenceId}',
-            txtStatus: '{current.strStatus}',
+            cboStatus: {
+                value: '{current.intStatus}',
+                store: '{status}'
+            },
 
             grdPhysicalCount: {
                 colItem: 'strItemNo',
@@ -143,10 +164,43 @@ Ext.define('Inventory.view.InventoryCountViewController', {
         }
     },
 
+    createRecord: function(config, action) {
+        var today = new Date();
+        var record = Ext.create('Inventory.model.InventoryCount');
+
+        record.set('dtmCountDate', today);
+        record.set('intStatus', 1);
+        if (app.DefaultLocation > 0)
+            record.set('intLocationId', app.DefaultLocation);
+
+        action(record);
+    },
+
+    onCountGroupSelect: function(combo, records, eOpts) {
+        if (records.length <= 0)
+            return;
+
+        var win = combo.up('window');
+        var current = win.viewModel.data.current;
+
+        if (current) {
+//            current.set('ysnIncludeZeroOnHand', records[0].get('ysnIncludeZeroOnHand'));
+            current.set('ysnIncludeOnHand', records[0].get('ysnIncludeOnHand'));
+            current.set('ysnScannedCountEntry', records[0].get('ysnScannedCountEntry'));
+            current.set('ysnCountByLots', records[0].get('ysnCountByLots'));
+            current.set('ysnCountByPallets', records[0].get('ysnCountByPallets'));
+            current.set('ysnRecountMismatch', records[0].get('ysnRecountMismatch'));
+            current.set('ysnExternal', records[0].get('ysnExternal'));
+        }
+    },
+
     init: function(application) {
         this.control({
             "#cboUOM": {
-                select: this.onUOMUnitMeasureSelect
+                select: this.onUOMSelect
+            },
+            "#cboCountGroup": {
+                select: this.onCountGroupSelect
             }
         });
     }

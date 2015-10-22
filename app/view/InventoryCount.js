@@ -541,11 +541,26 @@ Ext.define('Inventory.view.InventoryCount', {
                                                     readOnly: true
                                                 },
                                                 {
-                                                    xtype: 'textfield',
-                                                    itemId: 'txtStatus',
+                                                    xtype: 'gridcombobox',
+                                                    columns: [
+                                                        {
+                                                            dataIndex: 'intStatus',
+                                                            dataType: 'numeric',
+                                                            hidden: true
+                                                        },
+                                                        {
+                                                            dataIndex: 'strStatus',
+                                                            dataType: 'string',
+                                                            text: 'Status',
+                                                            flex: 1
+                                                        }
+                                                    ],
+                                                    itemId: 'cboStatus',
                                                     fieldLabel: 'Status',
                                                     labelWidth: 125,
-                                                    readOnly: true
+                                                    readOnly: true,
+                                                    displayField: 'strStatus',
+                                                    valueField: 'intStatus'
                                                 }
                                             ]
                                         }

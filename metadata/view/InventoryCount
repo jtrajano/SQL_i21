@@ -1077,23 +1077,39 @@
                                                     ]
                                                 },
                                                 {
-                                                    "type": "Ext.form.field.Text",
+                                                    "type": "Ext.form.field.ComboBox",
                                                     "reference": {
                                                         "name": "items",
                                                         "type": "array"
                                                     },
                                                     "codeClass": null,
                                                     "userConfig": {
-                                                        "columns": null,
-                                                        "designer|createAlias": null,
+                                                        "columns": [
+                                                            "[",
+                                                            "{",
+                                                            "dataIndex: 'intStatus',",
+                                                            "dataType: 'numeric',",
+                                                            "hidden: true",
+                                                            "},",
+                                                            "{",
+                                                            "dataIndex: 'strStatus',",
+                                                            "dataType: 'string',",
+                                                            "text: 'Status',",
+                                                            "flex: 1",
+                                                            "}",
+                                                            "]"
+                                                        ],
+                                                        "designer|createAlias": "gridcombobox",
+                                                        "displayField": "strStatus",
                                                         "fieldLabel": "Status",
-                                                        "itemId": "txtStatus",
+                                                        "itemId": "cboStatus",
                                                         "labelWidth": 125,
                                                         "layout|flex": null,
                                                         "name": null,
-                                                        "readOnly": true
+                                                        "readOnly": true,
+                                                        "valueField": "intStatus"
                                                     },
-                                                    "name": "MyTextField",
+                                                    "name": "MyComboBox2",
                                                     "configAlternates": {
                                                         "columns": "array"
                                                     },
