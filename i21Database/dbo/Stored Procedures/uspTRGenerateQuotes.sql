@@ -4,6 +4,7 @@ CREATE PROCEDURE [dbo].[uspTRGenerateQuotes]
 	 @dtmQuoteDate AS DATETIME,
 	 @dtmEffectiveDate AS DATETIME,
 	 @ysnConfirm as bit,
+	 @ysnVoid as bit,
 	 @intBegQuoteId int OUTPUT,
 	 @intEndQuoteId int OUTPUT
 AS
@@ -69,16 +70,25 @@ BEGIN
       END
    else
        BEGIN
-	        EXEC dbo.uspSMGetStartingNumber 56, @QuoteNumber OUTPUT 
-            update @DataForQuote 
-            set strQuoteNumber = @QuoteNumber
-              where @incval = intId 
+            if @ysnVoid = 1
+               BEGIN
+                  update tblTRQuoteHeader
+                 set strQuoteStatus = 'Void'
+                 where intEntityCustomerId = (select top 1 intEntityCustomerId from @DataForQuote where intId = @incval) and strQuoteStatus = 'Confirmed'      
+               END
+            else
+                BEGIN
+                    EXEC dbo.uspSMGetStartingNumber 56, @QuoteNumber OUTPUT 
+                     update @DataForQuote 
+                     set strQuoteNumber = @QuoteNumber
+                       where @incval = intId 
+               END
 	   END
    SET @incval = @incval + 1;
 
 END;
 
-if @ysnConfirm = 1
+if @ysnConfirm = 1 or @ysnVoid = 1
    BEGIN
        set @intBegQuoteId = 0;
        set @intEndQuoteId = 0;
