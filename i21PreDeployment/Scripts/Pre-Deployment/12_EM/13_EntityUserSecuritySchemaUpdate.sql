@@ -95,6 +95,30 @@ BEGIN
 	PRINT '*** UPDATING ENTITY User Security***'
 	EXEC('delete tblSMUserSecurity where strUserName not in (select strUserName from tblEntityCredential) ') 
 
+	print ('*** checking security with no entity ***')
+	exec('
+		if (object_id(''tempdb..#tmpNullSecurity'')) is not null
+			drop table #tmpNullSecurity
+
+		select intUserSecurityID,strFullName into #tmpNullSecurity from tblSMUserSecurity where intEntityId is null
+		DECLARE @intNullId int
+		declare @Name nvarchar(50)
+		declare @newId int
+		while exists(select top 1 1 from #tmpNullSecurity)
+		begin
+			select top 1 @intNullId = intUserSecurityID, @name = strFullName 
+			from #tmpNullSecurity
+
+			insert into tblEntity(strName, strContactNumber)
+			select @Name, ''''
+
+			set @newId = @@IDENTITY
+			update tblSMUserSecurity set intEntityId = @newId where intUserSecurityID = @intNullId and intEntityId is null
+
+			delete from #tmpNullSecurity where intUserSecurityID = @intNullId
+		end
+	')
+	print 'routine starteed'
 	EXEC( '	
 	CREATE TABLE ##UserSecurityConstraint (
 		Stement		NVARCHAR(MAX)
