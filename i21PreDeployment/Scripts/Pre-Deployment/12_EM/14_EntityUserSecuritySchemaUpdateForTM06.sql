@@ -73,10 +73,83 @@ END
 
 GO
 
+-- type 1 - 1
 IF OBJECT_ID('tempdb..##XXEntityForTM') IS NOT NULL  	
 BEGIN
 	DECLARE @CurStatementTM1 NVARCHAR(MAX)
-	PRINT ' executing collected update commands  0001'
+	PRINT ' executing collected update commands  0001-0001'
+	DECLARE @FlavorFour INT 
+	SET @FlavorFour = 0
+	WHILE EXISTS(SELECT TOP 1 1 FROM ##XXEntityForTM where xtype = 1) and @FlavorFour < 10
+	BEGIN
+		SET @CurStatementTM1 = ''
+		SELECT TOP 1 @CurStatementTM1 = cmd  FROM ##XXEntityForTM where xtype = 1			 
+		--PRINT (@CurStatementTM1)
+
+		set @CurStatementTM1 = @CurStatementTM1
+		EXEC(@CurStatementTM1)
+
+		DELETE FROM ##XXEntityForTM WHERE cmd = @CurStatementTM1 and xtype = 1
+		set @FlavorFour = @FlavorFour + 1
+	END	
+END
+
+GO
+
+-- type 1 - 2
+IF OBJECT_ID('tempdb..##XXEntityForTM') IS NOT NULL  	
+BEGIN
+	DECLARE @CurStatementTM1 NVARCHAR(MAX)
+	PRINT ' executing collected update commands  0001-0002'
+	DECLARE @FlavorFour INT 
+	SET @FlavorFour = 0
+	WHILE EXISTS(SELECT TOP 1 1 FROM ##XXEntityForTM where xtype = 1) and @FlavorFour < 10
+	BEGIN
+		SET @CurStatementTM1 = ''
+		SELECT TOP 1 @CurStatementTM1 = cmd  FROM ##XXEntityForTM where xtype = 1			 
+		--PRINT (@CurStatementTM1)
+
+		set @CurStatementTM1 = @CurStatementTM1
+		EXEC(@CurStatementTM1)
+
+		DELETE FROM ##XXEntityForTM WHERE cmd = @CurStatementTM1 and xtype = 1
+		set @FlavorFour = @FlavorFour + 1
+	END	
+END
+
+GO
+
+
+-- type 1 - 3
+IF OBJECT_ID('tempdb..##XXEntityForTM') IS NOT NULL  	
+BEGIN
+	DECLARE @CurStatementTM1 NVARCHAR(MAX)
+	PRINT ' executing collected update commands  0001-0003'
+	DECLARE @FlavorFour INT 
+	SET @FlavorFour = 0
+	WHILE EXISTS(SELECT TOP 1 1 FROM ##XXEntityForTM where xtype = 1) and @FlavorFour < 10
+	BEGIN
+		SET @CurStatementTM1 = ''
+		SELECT TOP 1 @CurStatementTM1 = cmd  FROM ##XXEntityForTM where xtype = 1			 
+		--PRINT (@CurStatementTM1)
+
+		set @CurStatementTM1 = @CurStatementTM1
+		EXEC(@CurStatementTM1)
+
+		DELETE FROM ##XXEntityForTM WHERE cmd = @CurStatementTM1 and xtype = 1
+		set @FlavorFour = @FlavorFour + 1
+	END	
+END
+
+GO
+
+-- type 1 - 4
+IF OBJECT_ID('tempdb..##XXEntityForTM') IS NOT NULL  	
+BEGIN
+	DECLARE @CurStatementTM1 NVARCHAR(MAX)
+	PRINT ' executing collected update commands  0001-0004'
+	DECLARE @FlavorFour INT 
+	SET @FlavorFour = 0
 	WHILE EXISTS(SELECT TOP 1 1 FROM ##XXEntityForTM where xtype = 1)
 	BEGIN
 		SET @CurStatementTM1 = ''
@@ -87,20 +160,21 @@ BEGIN
 		EXEC(@CurStatementTM1)
 
 		DELETE FROM ##XXEntityForTM WHERE cmd = @CurStatementTM1 and xtype = 1
-	END
-
-	
+		set @FlavorFour = @FlavorFour + 1
+	END	
 END
 
 GO
 
 
-
+--type 2 - 1
 IF OBJECT_ID('tempdb..##XXEntityForTM') IS NOT NULL  	
 BEGIN
 	DECLARE @CurStatementTM1 NVARCHAR(MAX)
-	PRINT ' executing collected update commands 0002'
-	WHILE EXISTS(SELECT TOP 1 1 FROM ##XXEntityForTM where xtype = 2)
+	PRINT ' executing collected update commands 0002-0001'
+	DECLARE @FlavorFour INT 
+	SET @FlavorFour = 0
+	WHILE EXISTS(SELECT TOP 1 1 FROM ##XXEntityForTM where xtype = 2) and @FlavorFour < 10
 	BEGIN
 		SET @CurStatementTM1 = ''
 		SELECT TOP 1 @CurStatementTM1 = cmd  FROM ##XXEntityForTM where xtype = 2			 
@@ -110,15 +184,156 @@ BEGIN
 		EXEC(@CurStatementTM1)		
 
 		DELETE FROM ##XXEntityForTM WHERE cmd = @CurStatementTM1 and xtype = 2
+		set @FlavorFour = @FlavorFour + 1
+	END
+END
+GO
+--type 2 - 2
+IF OBJECT_ID('tempdb..##XXEntityForTM') IS NOT NULL  	
+BEGIN
+	DECLARE @CurStatementTM1 NVARCHAR(MAX)
+	PRINT ' executing collected update commands 0002-0002'
+	DECLARE @FlavorFour INT 
+	SET @FlavorFour = 0
+	WHILE EXISTS(SELECT TOP 1 1 FROM ##XXEntityForTM where xtype = 2) and @FlavorFour < 10
+	BEGIN
+		SET @CurStatementTM1 = ''
+		SELECT TOP 1 @CurStatementTM1 = cmd  FROM ##XXEntityForTM where xtype = 2			 
+		--PRINT (@CurStatementTM1)
+
+		set @CurStatementTM1 = @CurStatementTM1
+		EXEC(@CurStatementTM1)		
+
+		DELETE FROM ##XXEntityForTM WHERE cmd = @CurStatementTM1 and xtype = 2
+		set @FlavorFour = @FlavorFour + 1
+	END
+END
+GO
+
+--type 2 - 3
+IF OBJECT_ID('tempdb..##XXEntityForTM') IS NOT NULL  	
+BEGIN
+	DECLARE @CurStatementTM1 NVARCHAR(MAX)
+	PRINT ' executing collected update commands 0002-0003'
+	DECLARE @FlavorFour INT 
+	SET @FlavorFour = 0
+	WHILE EXISTS(SELECT TOP 1 1 FROM ##XXEntityForTM where xtype = 2) and @FlavorFour < 10
+	BEGIN
+		SET @CurStatementTM1 = ''
+		SELECT TOP 1 @CurStatementTM1 = cmd  FROM ##XXEntityForTM where xtype = 2			 
+		--PRINT (@CurStatementTM1)
+
+		set @CurStatementTM1 = @CurStatementTM1
+		EXEC(@CurStatementTM1)		
+
+		DELETE FROM ##XXEntityForTM WHERE cmd = @CurStatementTM1 and xtype = 2
+		set @FlavorFour = @FlavorFour + 1
+	END
+END
+GO
+--type 2 - 4
+IF OBJECT_ID('tempdb..##XXEntityForTM') IS NOT NULL  	
+BEGIN
+	DECLARE @CurStatementTM1 NVARCHAR(MAX)
+	PRINT ' executing collected update commands 0002-0004'
+	DECLARE @FlavorFour INT 
+	SET @FlavorFour = 0
+	WHILE EXISTS(SELECT TOP 1 1 FROM ##XXEntityForTM where xtype = 2) 
+	BEGIN
+		SET @CurStatementTM1 = ''
+		SELECT TOP 1 @CurStatementTM1 = cmd  FROM ##XXEntityForTM where xtype = 2			 
+		--PRINT (@CurStatementTM1)
+
+		set @CurStatementTM1 = @CurStatementTM1
+		EXEC(@CurStatementTM1)		
+
+		DELETE FROM ##XXEntityForTM WHERE cmd = @CurStatementTM1 and xtype = 2
+		set @FlavorFour = @FlavorFour + 1
 	END
 END
 
 GO
-
+--type 3 - 1
 IF OBJECT_ID('tempdb..##XXEntityForTM') IS NOT NULL  	
 BEGIN
 	DECLARE @CurStatementTM1 NVARCHAR(MAX)
-	PRINT ' executing collected update commands 0003'
+	PRINT ' executing collected update commands 0003-0001'
+	DECLARE @FlavorFour INT 
+	SET @FlavorFour = 0
+	WHILE EXISTS(SELECT TOP 1 1 FROM ##XXEntityForTM where xtype = 3) and @FlavorFour < 10
+	BEGIN
+		SET @CurStatementTM1 = ''
+		SELECT TOP 1 @CurStatementTM1 = cmd  FROM ##XXEntityForTM where xtype = 3			 
+		--PRINT (@CurStatementTM1)
+
+		set @CurStatementTM1 = @CurStatementTM1
+		EXEC(@CurStatementTM1)
+
+		DELETE FROM ##XXEntityForTM WHERE cmd = @CurStatementTM1 and xtype = 3
+		set @FlavorFour = @FlavorFour + 1
+	END
+	
+END
+
+GO
+
+--type 3 - 2
+IF OBJECT_ID('tempdb..##XXEntityForTM') IS NOT NULL  	
+BEGIN
+	DECLARE @CurStatementTM1 NVARCHAR(MAX)
+	PRINT ' executing collected update commands 0003-0002'
+	DECLARE @FlavorFour INT 
+	SET @FlavorFour = 0
+	WHILE EXISTS(SELECT TOP 1 1 FROM ##XXEntityForTM where xtype = 3) and @FlavorFour < 10
+	BEGIN
+		SET @CurStatementTM1 = ''
+		SELECT TOP 1 @CurStatementTM1 = cmd  FROM ##XXEntityForTM where xtype = 3			 
+		--PRINT (@CurStatementTM1)
+
+		set @CurStatementTM1 = @CurStatementTM1
+		EXEC(@CurStatementTM1)
+
+		DELETE FROM ##XXEntityForTM WHERE cmd = @CurStatementTM1 and xtype = 3
+		set @FlavorFour = @FlavorFour + 1
+	END
+	
+END
+
+GO
+
+
+--type 3 - 3
+IF OBJECT_ID('tempdb..##XXEntityForTM') IS NOT NULL  	
+BEGIN
+	DECLARE @CurStatementTM1 NVARCHAR(MAX)
+	PRINT ' executing collected update commands 0003-0003'
+	DECLARE @FlavorFour INT 
+	SET @FlavorFour = 0
+	WHILE EXISTS(SELECT TOP 1 1 FROM ##XXEntityForTM where xtype = 3) and @FlavorFour < 10
+	BEGIN
+		SET @CurStatementTM1 = ''
+		SELECT TOP 1 @CurStatementTM1 = cmd  FROM ##XXEntityForTM where xtype = 3			 
+		--PRINT (@CurStatementTM1)
+
+		set @CurStatementTM1 = @CurStatementTM1
+		EXEC(@CurStatementTM1)
+
+		DELETE FROM ##XXEntityForTM WHERE cmd = @CurStatementTM1 and xtype = 3
+		set @FlavorFour = @FlavorFour + 1
+	END
+	
+END
+
+GO
+
+
+--type 3 - 4
+IF OBJECT_ID('tempdb..##XXEntityForTM') IS NOT NULL  	
+BEGIN
+	DECLARE @CurStatementTM1 NVARCHAR(MAX)
+	PRINT ' executing collected update commands 0003-0004'
+	DECLARE @FlavorFour INT 
+	SET @FlavorFour = 0
 	WHILE EXISTS(SELECT TOP 1 1 FROM ##XXEntityForTM where xtype = 3)
 	BEGIN
 		SET @CurStatementTM1 = ''
@@ -129,16 +344,89 @@ BEGIN
 		EXEC(@CurStatementTM1)
 
 		DELETE FROM ##XXEntityForTM WHERE cmd = @CurStatementTM1 and xtype = 3
+		set @FlavorFour = @FlavorFour + 1
 	END
 	
 END
 
 GO
 
+--type 4 - 1
 IF OBJECT_ID('tempdb..##XXEntityForTM') IS NOT NULL  	
 BEGIN
 	DECLARE @CurStatementTM1 NVARCHAR(MAX)
-	PRINT ' executing collected update commands 0004'
+	PRINT ' executing collected update commands 0004-0001'
+	DECLARE @FlavorFour INT 
+	SET @FlavorFour = 0
+	WHILE EXISTS(SELECT TOP 1 1 FROM ##XXEntityForTM where xtype = 4) and @FlavorFour < 10
+	BEGIN
+		SET @CurStatementTM1 = ''
+		SELECT TOP 1 @CurStatementTM1 = cmd  FROM ##XXEntityForTM where xtype = 4			 
+		--PRINT (@CurStatementTM1)
+
+		set @CurStatementTM1 = @CurStatementTM1
+		EXEC(@CurStatementTM1)
+
+		DELETE FROM ##XXEntityForTM WHERE cmd = @CurStatementTM1 and xtype = 4
+		set @FlavorFour = @FlavorFour + 1
+	END
+END
+
+GO
+
+--type 4 - 2
+IF OBJECT_ID('tempdb..##XXEntityForTM') IS NOT NULL  	
+BEGIN
+	DECLARE @CurStatementTM1 NVARCHAR(MAX)
+	PRINT ' executing collected update commands 0004-0002'
+	DECLARE @FlavorFour INT 
+	SET @FlavorFour = 0
+	WHILE EXISTS(SELECT TOP 1 1 FROM ##XXEntityForTM where xtype = 4) and @FlavorFour < 10
+	BEGIN
+		SET @CurStatementTM1 = ''
+		SELECT TOP 1 @CurStatementTM1 = cmd  FROM ##XXEntityForTM where xtype = 4			 
+		--PRINT (@CurStatementTM1)
+
+		set @CurStatementTM1 = @CurStatementTM1
+		EXEC(@CurStatementTM1)
+
+		DELETE FROM ##XXEntityForTM WHERE cmd = @CurStatementTM1 and xtype = 4
+		set @FlavorFour = @FlavorFour + 1
+	END
+END
+
+GO
+
+--type 4 - 3
+IF OBJECT_ID('tempdb..##XXEntityForTM') IS NOT NULL  	
+BEGIN
+	DECLARE @CurStatementTM1 NVARCHAR(MAX)
+	PRINT ' executing collected update commands 0004-0003'
+	DECLARE @FlavorFour INT 
+	SET @FlavorFour = 0
+	WHILE EXISTS(SELECT TOP 1 1 FROM ##XXEntityForTM where xtype = 4) and @FlavorFour < 10
+	BEGIN
+		SET @CurStatementTM1 = ''
+		SELECT TOP 1 @CurStatementTM1 = cmd  FROM ##XXEntityForTM where xtype = 4			 
+		--PRINT (@CurStatementTM1)
+
+		set @CurStatementTM1 = @CurStatementTM1
+		EXEC(@CurStatementTM1)
+
+		DELETE FROM ##XXEntityForTM WHERE cmd = @CurStatementTM1 and xtype = 4
+		set @FlavorFour = @FlavorFour + 1
+	END
+END
+
+GO
+
+--type 4 - 4
+IF OBJECT_ID('tempdb..##XXEntityForTM') IS NOT NULL  	
+BEGIN
+	DECLARE @CurStatementTM1 NVARCHAR(MAX)
+	PRINT ' executing collected update commands 0004-0004'
+	DECLARE @FlavorFour INT 
+	SET @FlavorFour = 0
 	WHILE EXISTS(SELECT TOP 1 1 FROM ##XXEntityForTM where xtype = 4)
 	BEGIN
 		SET @CurStatementTM1 = ''
@@ -148,18 +436,21 @@ BEGIN
 		set @CurStatementTM1 = @CurStatementTM1
 		EXEC(@CurStatementTM1)
 
-
 		DELETE FROM ##XXEntityForTM WHERE cmd = @CurStatementTM1 and xtype = 4
+		set @FlavorFour = @FlavorFour + 1
 	END
 END
 
 GO
 
+--type 5 - 1
 IF OBJECT_ID('tempdb..##XXEntityForTM') IS NOT NULL  	
 BEGIN
 	DECLARE @CurStatementTM1 NVARCHAR(MAX)
-	PRINT ' executing collected update commands 0005'
-	WHILE EXISTS(SELECT TOP 1 1 FROM ##XXEntityForTM where xtype = 5)
+	PRINT ' executing collected update commands 0005-0001'
+	DECLARE @FlavorFour INT 
+	SET @FlavorFour = 0
+	WHILE EXISTS(SELECT TOP 1 1 FROM ##XXEntityForTM where xtype = 5) and @FlavorFour < 10
 	BEGIN
 		SET @CurStatementTM1 = ''
 		SELECT TOP 1 @CurStatementTM1 = cmd  FROM ##XXEntityForTM where xtype = 5			 
@@ -169,6 +460,77 @@ BEGIN
 		EXEC(@CurStatementTM1)		
 
 		DELETE FROM ##XXEntityForTM WHERE cmd = @CurStatementTM1 and xtype = 5
+		set @FlavorFour = @FlavorFour + 1
+	END
+
+END
+
+GO
+
+--type 5 - 2
+IF OBJECT_ID('tempdb..##XXEntityForTM') IS NOT NULL  	
+BEGIN
+	DECLARE @CurStatementTM1 NVARCHAR(MAX)
+	PRINT ' executing collected update commands 0005-0002'
+	DECLARE @FlavorFour INT 
+	SET @FlavorFour = 0
+	WHILE EXISTS(SELECT TOP 1 1 FROM ##XXEntityForTM where xtype = 5) and @FlavorFour < 10
+	BEGIN
+		SET @CurStatementTM1 = ''
+		SELECT TOP 1 @CurStatementTM1 = cmd  FROM ##XXEntityForTM where xtype = 5			 
+		--PRINT (@CurStatementTM1)
+
+		set @CurStatementTM1 = @CurStatementTM1
+		EXEC(@CurStatementTM1)		
+
+		DELETE FROM ##XXEntityForTM WHERE cmd = @CurStatementTM1 and xtype = 5
+		set @FlavorFour = @FlavorFour + 1
+	END
+END
+
+GO
+
+--type 5 - 3
+IF OBJECT_ID('tempdb..##XXEntityForTM') IS NOT NULL  	
+BEGIN
+	DECLARE @CurStatementTM1 NVARCHAR(MAX)
+	PRINT ' executing collected update commands 0005-0003'
+	DECLARE @FlavorFour INT 
+	SET @FlavorFour = 0
+	WHILE EXISTS(SELECT TOP 1 1 FROM ##XXEntityForTM where xtype = 5) and @FlavorFour < 10
+	BEGIN
+		SET @CurStatementTM1 = ''
+		SELECT TOP 1 @CurStatementTM1 = cmd  FROM ##XXEntityForTM where xtype = 5			 
+		--PRINT (@CurStatementTM1)
+
+		set @CurStatementTM1 = @CurStatementTM1
+		EXEC(@CurStatementTM1)		
+
+		DELETE FROM ##XXEntityForTM WHERE cmd = @CurStatementTM1 and xtype = 5
+		set @FlavorFour = @FlavorFour + 1
+	END
+END
+
+GO
+
+--type 5 - 1
+IF OBJECT_ID('tempdb..##XXEntityForTM') IS NOT NULL  	
+BEGIN
+	DECLARE @CurStatementTM1 NVARCHAR(MAX)
+	PRINT ' executing collected update commands 0005-0004'
+	DECLARE @FlavorFour INT 
+	SET @FlavorFour = 0
+	WHILE EXISTS(SELECT TOP 1 1 FROM ##XXEntityForTM where xtype = 5) 
+	BEGIN
+		SET @CurStatementTM1 = ''
+		SELECT TOP 1 @CurStatementTM1 = cmd  FROM ##XXEntityForTM where xtype = 5			 
+		--PRINT (@CurStatementTM1)
+
+		set @CurStatementTM1 = @CurStatementTM1
+		EXEC(@CurStatementTM1)		
+
+		DELETE FROM ##XXEntityForTM WHERE cmd = @CurStatementTM1 and xtype = 5
+		set @FlavorFour = @FlavorFour + 1
 	END
 
 	DROP TABLE ##XXEntityForTM	
