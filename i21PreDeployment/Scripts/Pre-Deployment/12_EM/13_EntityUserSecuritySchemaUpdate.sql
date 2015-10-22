@@ -54,7 +54,10 @@ BEGIN
 		PRINT '*** CHECKING FOR OLD ID PLACE HOLDER ***'
 		EXEC('ALTER TABLE tblSMUserSecurity ADD intUserSecurityIdOld int null')
 
-		EXEC(' UPDATE tblSMUserSecurity set intUserSecurityIdOld = intUserSecurityID ')
+		EXEC(' UPDATE tblSMUserSecurity set intUserSecurityIdOld = intUserSecurityID 
+			CREATE NONCLUSTERED INDEX IX_tblSMUserSecurity_intUserSecurityIdOld ON tblSMUserSecurity (intUserSecurityIdOld); 
+		
+		')
 
 		PRINT '** DUPLICATING Id To Old Id ***'
 	END
@@ -90,14 +93,14 @@ AND EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = '
  
 BEGIN
 	PRINT '*** UPDATING ENTITY User Security***'
+	EXEC('delete tblSMUserSecurity where strUserName not in (select strUserName from tblEntityCredential) ') 
 
-	EXEC( '
-
-	DECLARE @UserSecurityConstraint TABLE(
+	EXEC( '	
+	CREATE TABLE ##UserSecurityConstraint (
 		Stement		NVARCHAR(MAX)
 	)		
 	DECLARE @CurStatement NVARCHAR(MAX)
-	INSERT INTO @UserSecurityConstraint
+	INSERT INTO ##UserSecurityConstraint
 	SELECT
 			''ALTER TABLE '' + R.TABLE_NAME + '' DROP CONSTRAINT ['' + R.CONSTRAINT_NAME + '']''
 			+ '' ; UPDATE B SET B.'' + R.COLUMN_NAME + '' = A.intEntityId FROM tblSMUserSecurity A JOIN '' + R.TABLE_NAME + '' B ON A.intUserSecurityID = B.'' + R.COLUMN_NAME   Stement
@@ -121,7 +124,7 @@ BEGIN
 
 	EXEC(''UPDATE tblSMUserSecurity SET intEntityUserSecurityId = intEntityId'')
 	
-	--SELECT * FROM @UserSecurityConstraint
+	--SELECT * FROM ##UserSecurityConstraint
 	DECLARE @CurUserSecurityId	INT	
 	DECLARE @CurEntityId		INT
 
@@ -170,65 +173,34 @@ BEGIN
 		VALUES(@EntityId, @EntityContactId, 1 ,0 ) 		
 
 		DELETE FROM #tmpUserSecurity where intEntityId = @CurEntityId
-	END	
+	END		
 
-	WHILE EXISTS(SELECT TOP 1 1 FROM @UserSecurityConstraint)
+	
+
+	')	
+
+	PRINT 'CHECKING FOR SECURITY DROP CONSTRAINT'
+	IF OBJECT_ID('tempdb..##UserSecurityConstraint') IS NOT NULL  	
 	BEGIN
-		SET @CurStatement = ''''
-		SELECT TOP 1 @CurStatement = Stement  FROM @UserSecurityConstraint
+		PRINT 'SECURITY DROP CONSTRAINT'
+		
+		DECLARE @CurStatement NVARCHAR(MAX)
 
-		EXEC (@CurStatement)
+		WHILE EXISTS(SELECT TOP 1 1 FROM ##UserSecurityConstraint)
+		BEGIN
+			SET @CurStatement = ''
+			SELECT TOP 1 @CurStatement = Stement  FROM ##UserSecurityConstraint
+			
+			
+			EXEC (@CurStatement)		
 
-		DELETE FROM @UserSecurityConstraint WHERE Stement = @CurStatement
+			DELETE FROM ##UserSecurityConstraint WHERE Stement = @CurStatement
+		END
+		DROP TABLE ##UserSecurityConstraint
 	END
 
-	-----------------------------------------------------------------------------------------------------------------------------------------
-	EXEC(''
-	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = ''''tblTMEvent'''' and [COLUMN_NAME] = ''''intUserID'''')
-	BEGIN
-		UPDATE tblTMEvent SET intUserID = A.intEntityUserSecurityId
-		FROM tblSMUserSecurity A
-		WHERE tblTMEvent.intUserID = A.intUserSecurityIdOld
-	END
-
-	---- Update tblTMDeliveryHistory
-	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = ''''tblTMDeliveryHistory'''' and [COLUMN_NAME] = ''''intUserID'''')
-	BEGIN
-		UPDATE tblTMDeliveryHistory SET intUserID = A.intEntityUserSecurityId
-		FROM tblSMUserSecurity A
-		WHERE tblTMDeliveryHistory.intUserID = A.intUserSecurityIdOld
-		AND A.intUserSecurityIdOld IS NOT NULL
-	END
-
-	---- Update tblTMWorkOrder
-	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = ''''tblTMWorkOrder'''' and [COLUMN_NAME] = ''''intEnteredByID'''')
-	BEGIN
-		UPDATE tblTMWorkOrder SET intEnteredByID = A.intEntityUserSecurityId
-		FROM tblSMUserSecurity A
-		WHERE tblTMWorkOrder.intEnteredByID = A.intUserSecurityIdOld
-		AND A.intUserSecurityIdOld IS NOT NULL
-	END
-
-	---- Update tblTMSite
-	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = ''''tblTMSite'''' and [COLUMN_NAME] = ''''intUserID'''')
-	BEGIN
-		UPDATE tblTMSite SET intUserID = A.intEntityUserSecurityId
-		FROM tblSMUserSecurity A
-		WHERE tblTMSite.intUserID = A.intUserSecurityIdOld
-		AND A.intUserSecurityIdOld IS NOT NULL
-	END
-
-	---- Update tblTMDispatch
-	IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE [TABLE_NAME] = ''''tblTMDispatch'''' and [COLUMN_NAME] = ''''intUserID'''')
-	BEGIN
-		UPDATE tblTMDispatch SET intUserID = A.intEntityUserSecurityId
-		FROM tblSMUserSecurity A
-		WHERE tblTMDispatch.intUserID = A.intUserSecurityIdOld
-		AND A.intUserSecurityIdOld IS NOT NULL
-	END
-	'')
-
-	')
+	create table ##XXEntityForTM(id int identity(1,1))
+	
 	
 END
 PRINT '*** END CHECKING ENTITY User Security***'

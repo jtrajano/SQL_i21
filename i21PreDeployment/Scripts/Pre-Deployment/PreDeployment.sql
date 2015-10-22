@@ -106,6 +106,12 @@
 :r .\12_EM\10_CheckAndFixSpecialPricingRackLocation.sql
 :r .\12_EM\11_AvoidCustomerTransportSupplierIdConflict.sql
 :r .\12_EM\13_EntityUserSecuritySchemaUpdate.sql
+:r .\12_EM\14_EntityUserSecuritySchemaUpdateForTM01.sql -- this should always be under entity security schema change 
+:r .\12_EM\14_EntityUserSecuritySchemaUpdateForTM02.sql -- this should always be under entity security schema change 
+:r .\12_EM\14_EntityUserSecuritySchemaUpdateForTM03.sql -- this should always be under entity security schema change 
+:r .\12_EM\14_EntityUserSecuritySchemaUpdateForTM04.sql -- this should always be under entity security schema change 
+:r .\12_EM\14_EntityUserSecuritySchemaUpdateForTM05.sql -- this should always be under entity security schema change 
+:r .\12_EM\14_EntityUserSecuritySchemaUpdateForTM06.sql -- this should always be under entity security schema change 
 :r .\12_EM\12_EntityEmployeeSchemaUpdate.sql
 :r .\12_EM\12_UpdateCustomerFreightNullLocation.sql
 --RK
