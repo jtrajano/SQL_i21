@@ -108,6 +108,6 @@ BEGIN
 	
 	SELECT strTransactionId,strTransactionType,dtmDate FROM @tblOriginTransactions
 	SELECT CASE WHEN @intCount >0 AND @intAACount = @intCount THEN 'AA' ELSE '' END AS message
-	SELECT @guid as batchGUID, @intFiscalYearId as fiscalyearID
+	SELECT @guid as batchGUID
 
 END
