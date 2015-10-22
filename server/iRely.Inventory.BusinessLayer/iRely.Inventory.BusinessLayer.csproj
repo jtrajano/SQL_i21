@@ -81,6 +81,7 @@
     <Compile Include="Implementation\CommodityUOMBl.cs" />
     <Compile Include="Implementation\CompanyPreferenceBl.cs" />
     <Compile Include="Implementation\ItemMotorFuelTaxBl.cs" />
+    <Compile Include="Implementation\InventoryCountBl.cs" />
     <Compile Include="Implementation\CountGroupBl.cs" />
     <Compile Include="Implementation\DocumentBl.cs" />
     <Compile Include="Implementation\FeedStockCodeBl.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="Implementation\StorageUnitTypeBl.cs" />
     <Compile Include="Implementation\TagBl.cs" />
     <Compile Include="Implementation\UnitMeasureBl.cs" />
+    <Compile Include="Interface\IInventoryCountBl.cs" />
     <Compile Include="Interface\IItemMotorFuelTaxBl.cs" />
     <Compile Include="Interface\IStorageMeasurementReadingBl.cs" />
     <Compile Include="Interface\IBuildAssemblyBl.cs" />

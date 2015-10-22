@@ -610,9 +610,12 @@ namespace iRely.Inventory.Model
             this.Property(t => t.intStorageLocationId).HasColumnName("intStorageLocationId");
             this.Property(t => t.strStorageLocationName).HasColumnName("strStorageLocationName");
             this.Property(t => t.dtmDate).HasColumnName("dtmDate");
+            this.Property(t => t.strTransactionType).HasColumnName("strTransactionType");
             this.Property(t => t.strTransactionForm).HasColumnName("strTransactionForm");
             this.Property(t => t.strTransactionId).HasColumnName("strTransactionId");
+            this.Property(t => t.dblBeginningQtyBalance).HasColumnName("dblBeginningQtyBalance").HasPrecision(18, 6);
             this.Property(t => t.dblQuantity).HasColumnName("dblQuantity").HasPrecision(18, 6);
+            this.Property(t => t.dblRunningQtyBalance).HasColumnName("dblRunningQtyBalance").HasPrecision(18, 6);
             this.Property(t => t.dblCost).HasColumnName("dblCost").HasPrecision(18, 6);
             this.Property(t => t.dblBeginningBalance).HasColumnName("dblBeginningBalance").HasPrecision(18, 6);
             this.Property(t => t.dblValue).HasColumnName("dblValue").HasPrecision(18, 6);

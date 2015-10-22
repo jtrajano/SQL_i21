@@ -542,9 +542,12 @@ namespace iRely.Inventory.Model
         public int? intStorageLocationId { get; set; }
         public string strStorageLocationName { get; set; }
         public DateTime? dtmDate { get; set; }
+        public string strTransactionType { get; set; }
         public string strTransactionForm { get; set; }
         public string strTransactionId { get; set; }
+        public decimal? dblBeginningQtyBalance { get; set; }
         public decimal? dblQuantity { get; set; }
+        public decimal? dblRunningQtyBalance { get; set; }
         public decimal? dblCost { get; set; }
         public decimal? dblBeginningBalance { get; set; }
         public decimal? dblValue { get; set; }

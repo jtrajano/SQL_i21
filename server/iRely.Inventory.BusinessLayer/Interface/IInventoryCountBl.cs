@@ -1,5 +1,4 @@
 ﻿using iRely.Common;
-using iRely.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +9,7 @@ using iRely.Inventory.Model;
 
 namespace iRely.Inventory.BusinessLayer
 {
-    public interface IBrandBl : IBusinessLayer<tblICBrand>
+    public interface IInventoryCountBl : IBusinessLayer<tblICInventoryCount>
     {
 
     }

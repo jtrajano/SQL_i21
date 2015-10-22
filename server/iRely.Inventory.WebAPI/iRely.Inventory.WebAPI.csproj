@@ -197,6 +197,7 @@
     <Compile Include="Controllers\CommodityUOMController.cs" />
     <Compile Include="Controllers\CompanyPreferenceController.cs" />
     <Compile Include="Controllers\ItemMotorFuelTaxController.cs" />
+    <Compile Include="Controllers\InventoryCountController.cs" />
     <Compile Include="Controllers\FeedStockController.cs" />
     <Compile Include="Controllers\FeedStockUOMController.cs" />
     <Compile Include="Controllers\FuelCategoryController.cs" />
