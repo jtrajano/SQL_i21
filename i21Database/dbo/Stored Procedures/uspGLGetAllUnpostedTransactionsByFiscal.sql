@@ -55,7 +55,7 @@ BEGIN
 	
 	IF EXISTS (SELECT TOP 1 1 from @tblTransactions)
 	BEGIN
-		DELETE FROM tblGLForBatchPosting WHERE dtmDateEntered < DATEADD(day,-2, GETDATE())
+		DELETE FROM tblGLForBatchPosting 
 		SELECT @guid = NEWID()
 		
 		INSERT INTO 
@@ -108,6 +108,6 @@ BEGIN
 	
 	SELECT strTransactionId,strTransactionType,dtmDate FROM @tblOriginTransactions
 	SELECT CASE WHEN @intCount >0 AND @intAACount = @intCount THEN 'AA' ELSE '' END AS message
-	SELECT @guid as batchGUID
+	SELECT @guid as batchGUID, @intFiscalYearId as fiscalyearID
 
 END
