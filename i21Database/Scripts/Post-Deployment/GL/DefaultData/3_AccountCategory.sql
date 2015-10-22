@@ -2,6 +2,8 @@
 	PRINT 'Start generating default account categories'
 GO
 
+--DO NOT CHANGE THE ID NAME COMBINATION AS OTHER MODULES ARE USING ID AS REFERENCE
+--TOTAL COUNT IS 56 AS OF 10-22-2015
 BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 	BEGIN TRANSACTION
 	DECLARE @tblSegment TABLE(intAccountSegmentId INT, strAccountCategory VARCHAR(100))
@@ -11,21 +13,32 @@ BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 	DECLARE @tblCOATemplateDetail TABLE (intAccontTemplateDetailId INT, strAccountCategory VARCHAR(100))
 	DECLARE @tblICCategory TABLE (intCategoryAccountId INT, strAccountCategory VARCHAR(100))
 	DECLARE @tblICItemAccount TABLE (intItemAccountId INT, strAccountCategory VARCHAR(100))
-	INSERT INTO @tblSegment(intAccountSegmentId,strAccountCategory)SELECT B.intAccountSegmentId, strAccountCategory FROM tblGLAccountCategory A, tblGLAccountSegment B
-	WHERE A.intAccountCategoryId = B.intAccountCategoryId
-	INSERT INTO @tblCategoryGroup(intAccountCategoryGroupId,strAccountCategory)SELECT B.intAccountCategoryGroupId, strAccountCategory FROM tblGLAccountCategory A, tblGLAccountCategoryGroup B
-	WHERE A.intAccountCategoryId = B.intAccountCategoryId
-	INSERT INTO @tblCTCostType(intCostTypeId,strAccountCategory)SELECT B.intCostTypeId, strAccountCategory FROM tblGLAccountCategory A, tblCTCostType B
-	WHERE A.intAccountCategoryId = B.intAccountCategoryId
-	INSERT INTO @tblAccountGroup(intAccountGroupId,strAccountCategory)SELECT B.intAccountGroupId, strAccountCategory FROM tblGLAccountCategory A, tblGLAccountGroup B
-	WHERE A.intAccountCategoryId = B.intAccountCategoryId
-	INSERT INTO @tblCOATemplateDetail(intAccontTemplateDetailId,strAccountCategory)SELECT B.intAccountTemplateDetailId, strAccountCategory FROM tblGLAccountCategory A, tblGLCOATemplateDetail B
-	WHERE A.intAccountCategoryId = B.intAccountCategoryId
-	INSERT INTO @tblICCategory(intCategoryAccountId,strAccountCategory)SELECT B.intCategoryAccountId, strAccountCategory FROM tblGLAccountCategory A, tblICCategoryAccount B
-	WHERE A.intAccountCategoryId = B.intAccountCategoryId
-	INSERT INTO @tblICItemAccount(intItemAccountId,strAccountCategory)SELECT B.intItemAccountId, strAccountCategory FROM tblGLAccountCategory A, tblICItemAccount B
-	WHERE A.intAccountCategoryId = B.intAccountCategoryId
 
+	DECLARE @categoryCount INT, @categoryTopId INT,@needFix BIT  =  0
+	
+	SELECT @categoryCount= COUNT(1) FROM tblGLAccountCategory
+	SELECT TOP 1 @categoryTopId = intAccountCategoryId FROM tblGLAccountCategory ORDER BY intAccountCategoryId DESC
+	IF @categoryCount <> @categoryTopId and @categoryCount > 0 SET @needFix = 1
+
+	IF @needFix =1
+	BEGIN
+		INSERT INTO @tblSegment(intAccountSegmentId,strAccountCategory)SELECT B.intAccountSegmentId, strAccountCategory FROM tblGLAccountCategory A, tblGLAccountSegment B
+		WHERE A.intAccountCategoryId = B.intAccountCategoryId
+		INSERT INTO @tblCategoryGroup(intAccountCategoryGroupId,strAccountCategory)SELECT B.intAccountCategoryGroupId, strAccountCategory FROM tblGLAccountCategory A, tblGLAccountCategoryGroup B
+		WHERE A.intAccountCategoryId = B.intAccountCategoryId
+		INSERT INTO @tblCTCostType(intCostTypeId,strAccountCategory)SELECT B.intCostTypeId, strAccountCategory FROM tblGLAccountCategory A, tblCTCostType B
+		WHERE A.intAccountCategoryId = B.intAccountCategoryId
+		INSERT INTO @tblAccountGroup(intAccountGroupId,strAccountCategory)SELECT B.intAccountGroupId, strAccountCategory FROM tblGLAccountCategory A, tblGLAccountGroup B
+		WHERE A.intAccountCategoryId = B.intAccountCategoryId
+		INSERT INTO @tblCOATemplateDetail(intAccontTemplateDetailId,strAccountCategory)SELECT B.intAccountTemplateDetailId, strAccountCategory FROM tblGLAccountCategory A, tblGLCOATemplateDetail B
+		WHERE A.intAccountCategoryId = B.intAccountCategoryId
+		INSERT INTO @tblICCategory(intCategoryAccountId,strAccountCategory)SELECT B.intCategoryAccountId, strAccountCategory FROM tblGLAccountCategory A, tblICCategoryAccount B
+		WHERE A.intAccountCategoryId = B.intAccountCategoryId
+		INSERT INTO @tblICItemAccount(intItemAccountId,strAccountCategory)SELECT B.intItemAccountId, strAccountCategory FROM tblGLAccountCategory A, tblICItemAccount B
+		WHERE A.intAccountCategoryId = B.intAccountCategoryId
+	END
+	
+	
 	SET  IDENTITY_INSERT tblGLAccountCategory ON
 	MERGE 
 	INTO	dbo.tblGLAccountCategory
@@ -59,7 +72,7 @@ BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 			SELECT id = 25,name = 'Interest Expense'UNION ALL 
 			SELECT id = 26,name = 'Interest Income'UNION ALL 
 			SELECT id = 27,name = 'Inventory' UNION ALL 
-			SELECT id = 28,name ='Options Expense'UNION ALL 
+			SELECT id = 28,name = 'Options Expense'UNION ALL 
 			SELECT id = 29,name = 'Options Income'UNION ALL 
 			SELECT id = 30,name = 'Purchase Account'UNION ALL 
 			SELECT id = 31,name = 'Purchase Adv Account'UNION ALL 
@@ -108,49 +121,53 @@ BEGIN TRY --ACCOUNT CATEGORY DEFAULTS
 			,1
 		);
 	SET  IDENTITY_INSERT tblGLAccountCategory OFF
+	
 
 	--UPDATE RELATED TABLES
-	UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
-	FROM tblGLAccountSegment A 
-	JOIN @tblSegment t ON  A.intAccountSegmentId = t.intAccountSegmentId 
-	JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
+	IF @needFix = 1
+	BEGIN
+		UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
+		FROM tblGLAccountSegment A 
+		JOIN @tblSegment t ON  A.intAccountSegmentId = t.intAccountSegmentId 
+		JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
 
-	UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
-	FROM tblGLAccountCategoryGroup A 
-	JOIN @tblCategoryGroup t ON  A.intAccountCategoryGroupId = t.intAccountCategoryGroupId 
-	JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
+		UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
+		FROM tblGLAccountCategoryGroup A 
+		JOIN @tblCategoryGroup t ON  A.intAccountCategoryGroupId = t.intAccountCategoryGroupId 
+		JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
 
-	UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
-	FROM tblGLAccountGroup A 
-	JOIN @tblAccountGroup t ON  A.intAccountGroupId = t.intAccountGroupId 
-	JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
+		UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
+		FROM tblGLAccountGroup A 
+		JOIN @tblAccountGroup t ON  A.intAccountGroupId = t.intAccountGroupId 
+		JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
 	
-	UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
-	FROM tblGLCOATemplateDetail A 
-	JOIN @tblCOATemplateDetail t ON  A.intAccountTemplateDetailId = t.intAccontTemplateDetailId
-	JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
+		UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
+		FROM tblGLCOATemplateDetail A 
+		JOIN @tblCOATemplateDetail t ON  A.intAccountTemplateDetailId = t.intAccontTemplateDetailId
+		JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
 
-	UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
-	FROM tblCTCostType A 
-	JOIN @tblCTCostType t ON  A.intCostTypeId = t.intCostTypeId 
-	JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
+		UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
+		FROM tblCTCostType A 
+		JOIN @tblCTCostType t ON  A.intCostTypeId = t.intCostTypeId 
+		JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
 
-	UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
-	FROM tblICCategoryAccount A 
-	JOIN @tblICCategory t ON  A.intCategoryAccountId = t.intCategoryAccountId 
-	JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
+		UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
+		FROM tblICCategoryAccount A 
+		JOIN @tblICCategory t ON  A.intCategoryAccountId = t.intCategoryAccountId 
+		JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
 
-	UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
-	FROM tblICItemAccount A 
-	JOIN @tblICItemAccount t ON  A.intItemAccountId = t.intItemAccountId 
-	JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
+		UPDATE A SET intAccountCategoryId=C.intAccountCategoryId
+		FROM tblICItemAccount A 
+		JOIN @tblICItemAccount t ON  A.intItemAccountId = t.intItemAccountId 
+		JOIN tblGLAccountCategory C ON C.strAccountCategory COLLATE Latin1_General_CI_AS = t.strAccountCategory COLLATE Latin1_General_CI_AS
 
-	--REMOVE EXCESS
-	DELETE FROM tblGLAccountCategory WHERE intAccountCategoryId > 56
+		--REMOVE EXCESS
+		DELETE FROM tblGLAccountCategory WHERE intAccountCategoryId > 56
+	END
 	COMMIT TRANSACTION
 END TRY
 BEGIN CATCH
-	PRINT 'Error in Generating Account Categories: ' +  CAST(@@ERROR AS VARCHAR(20))
+	PRINT 'Error in Generating Account Categories: ' +  ERROR_MESSAGE()
 	ROLLBACK TRANSACTION
 END CATCH
 
