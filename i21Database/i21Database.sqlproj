@@ -2373,7 +2373,6 @@
     <Build Include="dbo\Stored Procedures\uspTRGenerateQuotes.sql" />
     <Build Include="dbo\Views\vyuTRQuoteSelection.sql" />
     <Build Include="dbo\Views\vyuTRQuoteView.sql" />
-    <Build Include="dbo\Functions\fnTMGetSpecialPricingPriceTable.sql" />
     <Build Include="dbo\Functions\fnICGetRunningQuantity.sql" />
   </ItemGroup>
   <ItemGroup>
